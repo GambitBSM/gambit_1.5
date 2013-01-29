@@ -25,6 +25,8 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <fstream>
+#include <boost/graph/graphviz.hpp>
 
 using namespace boost::assign;
 using namespace boost;
@@ -205,7 +207,6 @@ int main() {
   queue<pair<string, VertexID> > wishlist;
   multimap<string, VertexID> variableMap;
   list<int> topo_order;
-
   omega_vertex = initialize_vertices();
   list_vertices();
   fill_wishlist(&wishlist, omega_vertex);
@@ -214,4 +215,8 @@ int main() {
   initialize_edges(wishlist, variableMap);
   topo_order = run_topological_sort();
   execute_functions(topo_order);
+  ofstream outf("out.gv");
+  write_graphviz(outf, masterGraph,
+      make_label_writer(get(&Vertex::function, masterGraph)),
+      make_label_writer(get(&Edge::variable, masterGraph)));
 }
