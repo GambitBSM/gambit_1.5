@@ -56,7 +56,8 @@ cd tmp_so
 ar x ../libdarksusy.a
 ar x  ../libFH.a
 ar x  ../libHB.a
-gcc -shared -Wl,-soname,libdarksusy.so -o ../libdarksusy.so *.o
+# gcc -shared -Wl,-soname,libdarksusy.so -o ../libdarksusy.so *.o
+gfortran -shared -Wl,-soname,libdarksusy.so -o ../libdarksusy.so *.o
 cd ../
 rm -rf tmp_so
 exit
