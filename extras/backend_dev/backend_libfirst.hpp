@@ -7,9 +7,6 @@
  * 
  */
 
-#ifndef __BACKEND_LIBFIRST_HPP__
-#define __BACKEND_LIBFIRST_HPP__
-
 #include "backend_general.hpp"
 
 
@@ -20,8 +17,11 @@
 
 // Define some macros needed by backend_general.hpp
 #define LIBPATH      "./libfirst.so"
-#define BACKENDNAME LibFirst
-
+#ifdef BACKENDRENAME
+  #define BACKENDNAME BACKENDRENAME
+#else
+  #define BACKENDNAME LibFirst
+#endif
 
 // The following macro loads the library in LIBPATH 
 // when this header file is included somewhere.
@@ -104,4 +104,3 @@ namespace GAMBIT
 #undef LIBPATH 
 #undef BACKENDNAME
 
-#endif /* __BACKEND_LIBFIRST_HPP__ */
