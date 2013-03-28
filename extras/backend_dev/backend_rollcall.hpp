@@ -13,5 +13,6 @@
 #define BACKENDRENAME LibFirstCopy
   #include "backend_libfirst.hpp"
 #undef BACKENDRENAME
+#include "backend_libfortrancode.hpp"
 
 #endif /* __BACKEND_ROLLCALL_HPP__ */
