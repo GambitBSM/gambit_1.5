@@ -9,6 +9,21 @@
 
 #include "backend_general.hpp"
 
+//Start stuff inside include braces; this may need to go in another separate header
+#ifndef __BACKEND_LIBFORTRANCODE_HPP__
+#define __BACKEND_LIBFORTRANCODE_HPP__
+
+/* Struct to be used as type for a specific common block
+ * in the Fortran library */
+struct commonBlock_type
+{
+  double dummyDouble;
+  int dummyArray[3];
+};
+
+#endif //end stuff in include braces
+
+
 //
 // ------ Specific backend code ----------
 //
@@ -21,18 +36,8 @@
   #define BACKENDNAME LibFortranCode
 #endif
 
-
 /* Load library */
 LOAD_LIBRARY
-
-
-/* Struct to be used as type for a specific common block
- * in the Fortran library */
-struct commonBlock_type
-{
-  double dummyDouble;
-  int dummyArray[3];
-};
 
 /* Creating pointers to variables, functions and subroutines 
  * (treated as void functions) in the Fortran library.

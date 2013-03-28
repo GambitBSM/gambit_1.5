@@ -10,9 +10,14 @@
 #define __BACKEND_ROLLCALL_HPP__
 
 #include "backend_libfirst.hpp"
+#include "backend_libfortrancode.hpp"
+
 #define BACKENDRENAME LibFirstCopy
   #include "backend_libfirst.hpp"
 #undef BACKENDRENAME
-#include "backend_libfortrancode.hpp"
+
+#define BACKENDRENAME LibFortranCodeCopy
+  #include "backend_libfortrancode.hpp"
+#undef BACKENDRENAME
 
 #endif /* __BACKEND_ROLLCALL_HPP__ */
