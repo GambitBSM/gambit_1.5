@@ -1,1 +1,0 @@
-./configure F77=gfortran FFLAGS="-fPIC -m64" CFLAGS="-fPIC -m64" FOPT="-O -ffixed-line-length-none -m64 -fPIC" CC=gcc
