@@ -5,7 +5,8 @@
  * 
  * \author Anders Kvellestad
  * \date 2013-03-26
- * 
+ *  
+ * Modified: 2013-04-05
  */
 
 #ifndef __BACKEND_GENERAL_HPP__
@@ -35,6 +36,8 @@ namespace GAMBIT
 //
 #define CAT(X,Y) X##Y
 #define TYPENAME(X) CAT(X,_type)
+#define STRINGIFY(X) STRINGIFY2(X)
+#define STRINGIFY2(X) #X
 
 
 
@@ -44,96 +47,108 @@ namespace GAMBIT
 #define LOAD_LIBRARY                                                        \
 namespace GAMBIT                                                          \
 {                                                                           \
-  namespace Backend                                                       \
+  namespace Backend                                                        \
   {                                                                         \
-    namespace BACKENDNAME                                                 \
-    {                                                                        \
+    namespace BACKENDNAME                                                  \
+    {                                                                       \
+                                                                            \
       void * pHandle;                                                      \
       void * pSym;                                                         \
-                                                                             \
-      void loadLibrary()                                                    \
-      {                                                                      \
-        pHandle = dlmopen(LM_ID_NEWLM, LIBPATH, RTLD_LAZY);                  \
-        /* pHandle = dlopen(LIBPATH, RTLD_LAZY); */                          \
-                                                                             \
-        if(not pHandle) { std::cout << dlerror() << std::endl; }             \
-      }                                                                        \
-                                                                               \
-      /*The code within the void function 'loadLibrary' is executed             \  
-        when we create the following instance of the 'ini_code' struct. */     \
-      namespace ini                                                           \
-      {                                                                        \
-        ini_code BACKENDNAME(&loadLibrary);                                  \
-      }                                                                        \
-                                                                                \
-    } /* end namespace BACKENDNAME */                                          \
-  } /* end namespace Backend */                                                \
-} /* end namespace GAMBIT */                                                   \
+                                                                            \
+      void loadLibrary()                                                   \
+      {                                                                     \
+        pHandle = dlmopen(LM_ID_NEWLM, LIBPATH, RTLD_LAZY);                 \
+        if(not pHandle) { std::cout << dlerror() << std::endl; }           \
+      }                                                                     \
+                                                                            \
+      /*The code within the void function 'loadLibrary' is executed         \  
+        when we create the following instance of the 'ini_code' struct. */  \
+      namespace ini                                                        \
+      {                                                                     \
+        ini_code BACKENDNAME(&loadLibrary);                                \
+      }                                                                     \
+                                                                            \
+    } /* end namespace BACKENDNAME */                                       \
+  } /* end namespace Backend */                                             \
+} /* end namespace GAMBIT */                                                \
 
 
 
 //
 // Macro for constructing pointers to library variables
+// and defining simple 'get/set' functions
 //
-#define BE_VARIABLE(NAME, TYPE, SYMBOLNAME, POINTERNAME)                    \
+#define BE_VARIABLE(NAME, TYPE, SYMBOLNAME, POINTERNAME)                     \
 namespace GAMBIT                                                           \
 {                                                                            \
-  namespace Backend                                                        \
+  namespace Backend                                                         \
   {                                                                          \
-    namespace BACKENDNAME                                                  \
+    namespace BACKENDNAME                                                   \
     {                                                                        \
-      TYPE * POINTERNAME;                                                     \
                                                                              \
-      void CAT(constructVarPointer_,NAME)()                                   \
-      {                                                                       \
-        pSym = dlsym(pHandle, SYMBOLNAME);                                    \
-        POINTERNAME = (TYPE*) pSym;                                            \
-      }                                                                        \
-                                                                               \
-      /* The code within the void function 'constructVarPointer'              \
-         is executed when we create the following instance of                 \
-         the 'ini_code' struct. */                                            \
-      namespace ini                                                          \
-      {                                                                        \
-        ini_code NAME(&CAT(constructVarPointer_,NAME));                        \
-      }                                                                        \
-                                                                               \
-    } /* end namespace BACKENDNAME */                                          \
-  } /* end namespace Backend */                                                \
-} /* end namespace GAMBIT */                                                   \
+      TYPE * POINTERNAME;                                                    \
+                                                                             \
+      void CAT(constructVarPointer_,NAME)()                                 \
+      {                                                                      \
+        pSym = dlsym(pHandle, SYMBOLNAME);                                   \
+        POINTERNAME = (TYPE*) pSym;                                          \
+      }                                                                      \
+                                                                             \
+      /* The code within the void function 'constructVarPointer_NAME'        \
+         is executed when we create the following instance of                \
+         the 'ini_code' struct. */                                           \
+      namespace ini                                                         \
+      {                                                                      \
+        ini_code NAME(&CAT(constructVarPointer_,NAME));                     \
+      }                                                                      \
+                                                                             \
+      /* Construct 'get' function */                                         \
+      TYPE CAT(get,NAME)() { return *POINTERNAME; }                         \
+                                                                             \
+      /* Construct 'set' function */                                         \
+      void CAT(set,NAME)(TYPE a) { *POINTERNAME = a; }                      \
+                                                                             \
+    } /* end namespace BACKENDNAME */                                        \
+  } /* end namespace Backend */                                              \
+} /* end namespace GAMBIT */                                                 \
 
 
 
 //
 // Macro for constructing pointers to library functions
 //
-#define BE_FUNCTION(NAME, TYPE, ARGTYPES, SYMBOLNAME, POINTERNAME)           \
-namespace GAMBIT                                                           \
-{                                                                            \
-  namespace Backend                                                        \
-  {                                                                          \
+#define BE_FUNCTION(NAME, TYPE, ARGTYPES, SYMBOLNAME)                         \
+namespace GAMBIT                                                            \
+{                                                                             \
+  namespace Backend                                                         \
+  {                                                                           \
     namespace BACKENDNAME                                                  \
-    {                                                                        \
-      typedef TYPE (*TYPENAME(NAME))ARGTYPES;                              \
-      TYPENAME(NAME) POINTERNAME;                                             \
-                                                                             \
-      void CAT(constructFuncPointer_,NAME)()                                   \
+    {                                                                         \
+                                                                              \
+      /* Define a type NAME_type to be a suitable function pointer. */        \
+      typedef TYPE (*TYPENAME(NAME))ARGTYPES;                                \
+      /* Declare a pointer NAME of type NAME_type */                          \
+      TYPENAME(NAME) NAME;                                                    \
+                                                                              \
+      void CAT(constructFuncPointer_,NAME)()                                 \
       {                                                                       \
+        /* Obtain a void pointer (pSym) to the library symbol. */             \
         pSym = dlsym(pHandle, SYMBOLNAME);                                    \
-        POINTERNAME = (TYPENAME(NAME)) pSym;                                  \
+        /* Convert it to type (NAME_type) and assign it to pointer NAME. */  \
+        NAME = (TYPENAME(NAME)) pSym;                                         \
       }                                                                       \
-                                                                               \
+                                                                              \
       /* The code within the void function 'constructVarPointer_NAME'         \
          is executed when we create the following instance of                 \
-         the 'ini_code' struct. */                                             \
+         the 'ini_code' struct. */                                            \
       namespace ini                                                          \
-      {                                                                        \
-        ini_code NAME(&CAT(constructFuncPointer_,NAME));                        \
-      }                                                                        \
-                                                                               \
-    } /* end namespace BACKENDNAME */                                          \
-  } /* end namespace Backend */                                                \
-} /* end namespace GAMBIT */                                                   \
+      {                                                                       \
+        ini_code NAME(&CAT(constructFuncPointer_,NAME));                     \
+      }                                                                       \
+                                                                              \
+    } /* end namespace BACKENDNAME */                                         \
+  } /* end namespace Backend */                                               \
+} /* end namespace GAMBIT */                                                  \
 
 
 #endif // __BACKEND_GENERAL_HPP__
