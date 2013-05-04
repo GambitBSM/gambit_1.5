@@ -34,6 +34,10 @@ using namespace std;
 
 // Information associated with vertices and edges of boost graph:
 struct Vertex {
+  Vertex()
+  {
+    function = "nothing";
+  }
   vector<string> in; // list of input variables
   vector<string> out; // list of output variables
   string module; // module name
@@ -203,11 +207,15 @@ void execute_functions(list<int> topo_order) {
 }
 
 int main() {
+  Vertex my_vertex;
   VertexID omega_vertex;
   queue<pair<string, VertexID> > wishlist;
   multimap<string, VertexID> variableMap;
   list<int> topo_order;
   omega_vertex = initialize_vertices();
+  omega_vertex = add_vertex(my_vertex, masterGraph);
+  std::cout << masterGraph[omega_vertex].function << std::endl;
+  return 0;
   list_vertices();
   fill_wishlist(&wishlist, omega_vertex);
   variableMap = initialize_variableMap();
