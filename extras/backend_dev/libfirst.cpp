@@ -54,6 +54,7 @@ void someFunction()
 // return 'result'
 double returnResult()
 {
+  std::cout << "I'm returnResult() from libfirst.so, and I'm feeling well." << std::endl;
   return someDouble;
 }
 
