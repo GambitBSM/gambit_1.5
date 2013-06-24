@@ -1,0 +1,96 @@
+# GAMBIT Initialization file (in YAML)
+#
+# Christoph Weniger (c.weniger@uva.nl)
+# June 21 2013
+#
+# YAML Example II
+#
+# VERBOSE (equivalent to gambit.ini)
+
+###############################
+--- # Input parameters
+###############################
+#
+- parameter: m0
+  range:     [1, 3.5]
+
+- parameter: m1
+  range:     [-2.0, 2.0]
+
+
+###############################
+--- # Observables of interest
+###############################
+#
+- obsType:      Observable
+  capability:   omega_DM
+  name:         ""
+  ???:          ""
+  backend:      TinyDarkBit
+  version:      ""
+  options:      someOptions
+  backends:
+  - capability:   rdomega
+    ???:          ""
+    name:         dsrdomega
+    backend:      DarkSUSY
+    version:      5.0.5
+    options:      someOptions
+  dependencies:
+  - capability:   Weff
+    ???:          ""
+    name:         ""
+    backend:      TinyDarkBit
+    version:      ""
+    options:      someOptions
+  - capability:   Wstruct
+    ???:          ""
+    name:         ""
+    backend:      TinyDarkBit
+    version:      ""
+    options:      someOptions
+
+- obsType:      Observable
+  capability:   Weff
+  name:         ""
+  ???:          ""
+  backend:      TinyDarkBit
+  version:      ""
+  options:      someOptions
+  backends:
+  - capability:   w_eff
+    ???:          ""
+    name:         ""
+    backend:      MicrOmegas
+    version:      ""
+    options:      someOptions
+  dependencies:
+  - capability:   SLHA
+    ???:          ""
+    name:         ""
+    backend:      TinyDarkBit
+    version:      ""
+    options:      someOptions
+
+- obsType:      Observable
+  capability:   SLHA
+  name:         ""
+  ???:          ""
+  backend:      TinyDarkBit
+  version:      ""
+  options:      someOptions
+  dependencies:
+  - capability:   CMSSM_def
+    ???:          ""
+    name:         ""
+    backend:      TinyDarkBit
+    version:      ""
+    options:      someOptions
+
+
+
+###############################
+--- # Name/Value Section
+###############################
+
+key: value
