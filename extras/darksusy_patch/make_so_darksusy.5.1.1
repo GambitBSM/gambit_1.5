@@ -1,0 +1,52 @@
+#!/bin/bash 
+#####################################################################
+# Author: Christoph Weniger <christoph.weniger@gmail.com>
+# Date: 25 Nov 2012
+# Brief: Quick and dirty patch to turn DarkSUSY into a shared object
+#
+# Edited by Jonathan Cornell on 25 June 2013 for DarkSUSY 5.1.1
+#
+# Usage:
+#  copy make_so_darksusy into darksusy root folder
+#  run ./configure (or ./conf.gfortran etc)
+#  run ./make_so_darksusy (runs make)
+#
+# Note: 
+#  - After make_so_darksusy libdarksusy.so can be found under lib
+#  - The patch works for me with GCC 4.7.2 and DarkSUSY 5.1.1
+#####################################################################
+
+# We are in darksusy root
+DS_ROOT=$PWD
+
+cd $DS_ROOT
+
+# Make darksusy
+rm -f $DS_ROOT/lib/*.so # make does not like *.so files under lib
+make
+
+# And finally ...drum roll... generate libdarksusy.so
+echo "Generating libdarksusy.so..."
+cd $DS_ROOT/lib
+mkdir tmp_libdarksusy
+mkdir tmp_libFH
+mkdir tmp_libHB
+
+cd tmp_libdarksusy
+ar x ../libdarksusy.a
+cd ..
+cd tmp_libFH
+ar x  ../libFH.a
+cd ..
+cd tmp_libHB
+ar x  ../libHB.a
+cd ..
+
+gfortran -shared -Wl,-soname,libdarksusy.so -o libdarksusy.so tmp_libdarksusy/*.o tmp_libFH/*.o tmp_libHB/*.o
+
+rm -rf tmp_libdarksusy
+rm -rf tmp_libFH
+rm -rf tmp_libHB
+echo "Success!"
+exit
+
