@@ -18,16 +18,18 @@
 --- # Observables of interest
 ###############################
 
-- {obsType: Likelihood, capability: nevents_like}
+- obsType:      Likelihood
+  capability:   nevents_like
 
-- {obsType: Likelihood, capability: omega_DM}
+- obsType:      Likelihood
+  capability:   omega_DM
 
 
 #########################
 --- # Auxiliary entries
 #########################
 
-- capability: omega_DM
+- capability:   omega_DM
   dependencies:
   - {capability: Weff, function: Weff}
 

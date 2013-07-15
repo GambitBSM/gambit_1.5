@@ -23,22 +23,22 @@
 --- # Observables of interest
 ###############################
 #
-- entry: {obsType: Observable, capability: omega_DM, backend: TinyDarkBit, options: someOptions}
+- entry: {obsType: Observable, capability: omega_DM, module: TinyDarkBit, options: someOptions}
+  dependencies:
+  - {capability: Weff, module: TinyDarkBit, options: someOptions}
+  - {capability: Wstruct, module: TinyDarkBit, options: someOptions}
   backends:
   - {capability: rdomega, name: dsrdomega, backend: DarkSUSY, version: 5.0.5, options: someOptions}
-  dependencies:
-  - {capability: Weff, backend: TinyDarkBit, options: someOptions}
-  - {capability: Wstruct, backend: TinyDarkBit, options: someOptions}
 
-- entry: {obsType: Observable, capability: Weff, backend: TinyDarkBit, options: someOptions}
+- entry: {obsType: Observable, capability: Weff, module: TinyDarkBit, options: someOptions}
+  dependencies:
+  - {capability: SLHA, module: TinyDarkBit, options: someOptions}
   backends:
   - {capability: w_eff, backend: MicrOmegas, options:someOptions}
-  dependencies:
-  - {capability: SLHA, backend: TinyDarkBit, options: someOptions}
 
-- entry: {obsType: Observable, capability: SLHA, backend: TinyDarkBit, options: someOptions}
+- entry: {obsType: Observable, capability: SLHA, module: TinyDarkBit, options: someOptions}
   dependencies:
-  - {capability: CMSSM_def, backend: TinyDarkBit, options: someOptions}
+  - {capability: CMSSM_def, module: TinyDarkBit, options: someOptions}
 
 ###############################
 --- # Name/Value Section

@@ -18,24 +18,35 @@
 --- # Observables of interest
 ###############################
 
-- {obsType: Likelihood, capability: nevents_like}
+- obsType:      Likelihood
+  capability:   nevents_like
+  type:         ""
+  function:     ""
+  module:       ""
 
-- {obsType: Likelihood, capability: omega_DM}
+- obsType:      Likelihood
+  capability:   omega_DM
+  type:         ""
+  function:     ""
+  module:       ""
 
 
 #########################
 --- # Auxiliary entries
 #########################
 
-- capability: omega_DM
+- capability:   "omega_DM"
+  type:         ""
+  function:     ""
+  module:       ""
   dependencies:
-  - {capability: Weff, function: Weff}
+  - {capability: "Weff", type: "", function: "Weff", module: ""}
+  backends:
+  - {capability: "", function: "", backend: "", version: ""}
 
 
 ##########################
 --- # Name/Value Section
 ##########################
 
-m1: 22.0
-m2: 23.0
-m3: 34.0
+key: param
