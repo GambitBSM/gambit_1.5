@@ -24,10 +24,14 @@ LOAD_LIBRARY
 //typedef void (*SubroutineType)(const int&);
 //typedef float (*FunctionType)(const int&);
 
-BE_FUNCTION(runMe, void, ( float (*)(const int&), const int&), "runme_", "runMe")
-BE_FUNCTION(externalFunction, float, (const int&), "externalfunction_", "externalFunction")
+BE_FUNCTION(runMe, void, ( double (*)(int&), const int&), "runme_", "runMe")
+BE_FUNCTION(externalFunction, double, (int&), "externalfunction_", "externalFunction")
 
-
+//Notes: fortran arguments must always be TYPE& for passing by reference , const TYPE& for 
+//passing by value, except for function pointers, which go directly by value.  The arguments
+//of the functions to which pointers are being sent must be passed by reference in order 
+//for fortran to be able to use them.  It apparently makes no difference whether they are
+//passed as const or not.
 
 
 
