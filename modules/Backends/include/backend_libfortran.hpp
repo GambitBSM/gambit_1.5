@@ -9,7 +9,7 @@
 
 #include <backend_macros.hpp>
 
-#define LIBPATH      "./lib_fortran.so"
+#define LIBPATH      "Backends/lib/libfortran.so"
 #ifdef BACKENDRENAME
   #define BACKENDNAME BACKENDRENAME
 #else
@@ -24,7 +24,7 @@ LOAD_LIBRARY
 //typedef void (*SubroutineType)(const int&);
 //typedef float (*FunctionType)(const int&);
 
-BE_FUNCTION(runMe, void, ( double (*)(int&), const int&), "runme_", "runMe")
+BE_FUNCTION(runMe, void, ( double (*)(int&), int&), "runme_", "runMe")
 BE_FUNCTION(externalFunction, double, (int&), "externalfunction_", "externalFunction")
 
 //Notes: fortran arguments must always be TYPE& for passing by reference , const TYPE& for 

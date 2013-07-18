@@ -21,7 +21,6 @@ subroutine runMe(f, i)
   f_res = f(10)
   write(*,*) "This is runMe. Got literal result:",f_res
   
-  !call f(i)
 end subroutine runMe
 
 
