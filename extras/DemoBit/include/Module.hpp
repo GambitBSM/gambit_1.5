@@ -9,8 +9,8 @@
 #ifndef GlobalFits_Module_hpp
 #define GlobalFits_Module_hpp
 
-/// All declarations in the gambit namespace
-namespace gambit {
+/// All declarations in the Gambit namespace
+namespace Gambit {
 	
 	/** \note The concept of a module as employed here is somewhat abstract. It may be associated with a
 	 * single concrete class, or it may simply describe an aggregate of interacting class methods or
@@ -68,7 +68,7 @@ namespace gambit {
 /// Always define macros ouside of namespace scope
 
 #define DECLARE_MODULE(MODULETAG) \
-namespace gambit {\
+namespace Gambit {\
 	namespace tags { \
 		namespace modules {\
 			struct MODULETAG{};\
@@ -77,7 +77,7 @@ namespace gambit {\
 }\
 
 #define DECLARE_ACTOR(ACTORTAG)\
-namespace gambit {\
+namespace Gambit {\
 	namespace tags {\
 		namespace actors {\
 			struct ACTORTAG{};\
@@ -86,7 +86,7 @@ namespace gambit {\
 }\
 
 #define DECLARE_MODULE_ACTOR_TYPE(MODULETAG, ACTORTAG, ACTORTYPE)\
-namespace gambit {\
+namespace Gambit {\
 	template<>\
 	moduleActorType<tags::modules::MODULETAG, tags::actors::ACTORTAG> {\
 		\
@@ -96,7 +96,7 @@ namespace gambit {\
 }
 
 #define DECLARE_MODULE_ACTOR_ACTION(MODULETAG, ACTORTAG, ACTIONTAG, ACTION, OVERLOAD)\
-namespace gambit {\
+namespace Gambit {\
 	namespace tags {\
 		namespace actions {\
 			struct ACTIONTAG{};\
