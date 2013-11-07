@@ -21,15 +21,15 @@ rm -f $SI_ROOT/src/*.so # make does not like *.so files under src
 make
 cd $SI_ROOT/src/
 make distclean
-sed -i 's/CFLAGS =/CFLAGS = -fPIC/g' FlagsForMake
+sed -i 's/CFLAGS =/CFLAGS = -lm -fPIC/g' FlagsForMake
 make
-sed -i 's/CFLAGS = -fPIC/CFLAGS =/g' FlagsForMake
+sed -i 's/CFLAGS = -lm -fPIC/CFLAGS =/g' FlagsForMake
 
 # And finally ...drum roll... generate libsuperiso.so 
 mkdir tmp_so
 cd tmp_so
 ar x ../libisospin.a
-gcc -shared -Wl,-soname,libsuperiso.so -o ../libsuperiso.so *.o
+gcc -shared -Wl,-soname,libsuperiso.so -o ../libsuperiso.so *.o -lm
 cd ../
 rm -rf tmp_so
 exit
