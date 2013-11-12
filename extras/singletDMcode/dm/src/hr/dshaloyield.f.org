@@ -1,0 +1,93 @@
+*****************************************************************************
+***   function dshaloyield gives the total yield of positrons, cont. gammas
+***   or neutrinos coming from neutralino annihilation in the halo
+***   the yields are given as number / annihilation. the energy egev
+***   is the threshold for integrated yields and the energy for
+***   differential yields. the yields are
+***     yieldk =  51: integrated positron yields
+***     yieldk =  52: integrated cont. gammas
+***     yieldk =  53: integrated muon neutrinos
+***     yieldk =  54: integrated antiproton yields
+***     yieldk =  71: integrated neutrino yields (same as 53)
+***     yieldk =  72: integrated muon yields at creation
+***     yieldk =  73: integrated muon yields in ice
+***     yieldk = above+100: differential in energy
+*** the annihilation branching ratios and
+*** higgs parameters are extracted from susy.h and by calling dsandwdcosnn
+*** if istat=1 upon return,
+*** some inaccesible parts the differential muon spectra has been wanted,
+*** and the returned yield should then be treated as a lower bound.
+*** if istat=2 energetically forbidden annihilation channels have been
+*** wanted. if istat=3 both of these things has happened.
+*** author: joakim edsjo  edsjo@physics.berkeley.edu
+*** date: 98-01-29
+*** modified: 98-04-15
+*****************************************************************************
+
+      real*8 function dshaloyield(egev,yieldk,istat)
+      implicit none
+      include 'dssusy.h'
+      include 'dshacom.h'
+      include 'dshrcom.h'
+      include 'dsidtag.h'
+      include 'dsprep.h'
+
+
+c------------------------ functions ------------------------------------
+
+      real*8 dshayield
+
+c------------------------ variables ------------------------------------
+
+      real*8 egev,yield,sv,dssigmav
+      integer ch,istat,yieldk
+
+c----------------------------------------------- set-up common variables
+
+      if (.not.dsprepcalled) then
+        write(*,*) 'error in dshaloyield: dsprep must be called',
+     &    ' before any rate calculation'
+        write(*,*) 'begins for every new model. program stopping.'
+      endif
+
+c...make sure we computed the branching ratios
+      sv=dssigmav(0)
+
+c...loop through different channels and calculate the yield above threshold
+c...for each channel.
+
+c      write(*,*)
+c      write(*,*) 'model: ',idtag,'  eth = ',egev
+      haistat=0
+      yield=0.0d0
+      do 100 ch=1,14
+        if (abr(ch).gt.0.0d0) then
+          yield=yield+abr(ch)*dshayield(mx,egev,
+     &      ch,yieldk,istat,mass(kt))
+          haistat=or(haistat,istat)
+        endif
+  100 continue
+      dshaloyield=yield
+      hristat=or(hristat,haistat)
+      istat=haistat
+
+      end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

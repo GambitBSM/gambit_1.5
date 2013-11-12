@@ -1,0 +1,162 @@
+      subroutine dminit
+      implicit none
+      integer i
+      include 'dssusy.h'
+      include 'dsidtag.h'
+!      include 'dsandwcom.h'
+!      include 'dsrncom.h'
+!      include 'dsaccom.h'
+!      include 'dsprep.h'
+!      include 'dsascom.h'
+      include 'dmversion.h'  ! set DarkSUSY version
+      include 'dmdir.h'      ! set DarkSUSY root directory
+!      include 'dspbcom.h'
+      real*8 dsmqpole1loop
+      integer kk,ii
+c
+c... internal fixed-for-ever values go here
+c
+c  knu=(nue,numu,nutau)   kl=(e,mu,tau)    kqu=(u,c,t)    kqd=(d,s,b)
+c  ksqu=(~u1,~c1,~t1,~u2,~c2,~t2)    ksqd=(~d1,~s1,~b1,~d2,~s2,~b2)
+      data kse,       ksmu,         kstau /
+     &     kse1,kse2, ksmu1,ksmu2,  kstau1,kstau2 /
+      data ksu,       ksd,       ksc       /
+     &     ksu1,ksu2, ksd1,ksd2, ksc1,ksc2 /
+      data kss,       kst,       ksb   /
+     &     kss1,kss2, kst1,kst2, ksb1,ksb2 /
+      data kn,              kcha/
+     &     kn1,kn2,kn3,kn4, kcha1,kcha2/
+      data knu,               kl,          kqu,      kqd      /
+     &     knue,knumu,knutau, ke,kmu,ktau, ku,kc,kt, kd,ks,kb /
+      data ksnu                       /
+     &     ksnue,ksnumu,ksnutau,0,0,0 /
+      data ksl                                 /
+     &     kse1,ksmu1,kstau1,kse2,ksmu2,kstau2 /
+      data ksqu                          /
+     &     ksu1,ksc1,kst1,ksu2,ksc2,kst2 /
+      data ksqd              /
+     &     ksd1,kss1,ksb1,ksd2,kss2,ksb2 /
+      data pname/'error','nu_e','e','nu_mu','mu','nu_tau','tau','u',
+     & 'd','c','s','t','b','gamma','w','z','gluon','h1','h2','a','h+',
+     & 's-nu_1','s-l_1','s-l_2','s-nu_2','s-l_3','s-l_4','s-nu_3',
+     & 's-l_5','s-l_6','s-qu_1','s-qu_2','s-qd_1','s-qd_2','s-qu_3',
+     & 's-qu_4','s-qd_3','s-qd_4','s-qu_5','s-qu_6','s-qd_5','s-qd_6',
+     & 'x0_1','x0_2','x0_3','x0_4','x+_1','x+_2','gluino','goldst0',
+     & 'goldst+'/
+c      data roption/'norun'/
+c      data roption/'isasu'/
+      data roption/'1loop'/
+
+c...Startup
+c      write(*,*) 
+c     &  '*********************************************************'
+c      write(*,*) 
+c     &  '*** Welcome to DarkSUSY version                       ***'
+c      write(*,*) '*** ',dsversion,'***'
+c      write(*,*) 
+c     &  '*********************************************************'
+c      write(*,*) ' '
+c      write(*,*) 'Initializing DarkSUSY...'      
+
+
+
+c... mathematical constants
+      pi=3.141592653589793238d0
+      gev2cm3s = 0.38937966d-27*3.d10     ! to convert GeV^-2 to cm^3 s^-1
+c... standard model charges
+      wiso3(knue)   =+0.5d0
+      wiso3(ke)     =-0.5d0
+      wiso3(knumu)  =+0.5d0
+      wiso3(kmu)    =-0.5d0
+      wiso3(knutau) =+0.5d0
+      wiso3(ktau)   =-0.5d0
+      wiso3(ku)     =+0.5d0
+      wiso3(kd)     =-0.5d0
+      wiso3(kc)     =+0.5d0
+      wiso3(ks)     =-0.5d0
+      wiso3(kt)     =+0.5d0
+      wiso3(kb)     =-0.5d0
+      echarg(knue)  =0.d0
+      echarg(ke)    =-1.d0
+      echarg(knumu) =0.d0
+      echarg(kmu)   =-1.d0
+      echarg(knutau)=0.d0
+      echarg(ktau)  =-1.d0
+      echarg(ku)    =+2.d0/3.d0
+      echarg(kd)    =-1.d0/3.d0
+      echarg(kc)    =+2.d0/3.d0
+      echarg(ks)    =-1.d0/3.d0
+      echarg(kt)    =+2.d0/3.d0
+      echarg(kb)    =-1.d0/3.d0
+      ncolor(knue)  =1.d0
+      ncolor(ke)    =1.d0
+      ncolor(knumu) =1.d0
+      ncolor(kmu)   =1.d0
+      ncolor(knutau)=1.d0
+      ncolor(ktau)  =1.d0
+      ncolor(ku)    =3.d0
+      ncolor(kd)    =3.d0
+      ncolor(kc)    =3.d0
+      ncolor(ks)    =3.d0
+      ncolor(kt)    =3.d0
+      ncolor(kb)    =3.d0
+c
+c... default values go here
+c
+c... gauge coupling constants at the z scale
+c....alphaem and alph3mz are nuisance parameters in mcmc
+
+c... standard model masses 
+      mass(kgamma) =  0.0d0
+      mass(kgluon) =  0.0d0
+      mass(kz)     =  91.1876d0
+      mass(kw)     =  80.392d0
+      mass(knue)   =  0.0d0
+      mass(knumu)  =  0.0d0
+      mass(knutau) =  0.0d0
+
+          
+
+
+c use 1-loop expressions to set mt(mt)
+c      call dsfindmtmt 
+c and the c pole mass 
+c      mass(kc)=dsmqpole1loop(mcmc)
+
+c... program switches
+c... the next 4 flags are related with original spectrum + bsg 
+c... computation. Now they are useless....
+      prtlevel = 0
+c
+c      incglue = .true.
+c      incgaga = .true.
+c      incgaz = .true.
+      idtag = ' '
+      luout = 6  ! unit where messages go
+
+c... set-up defaults for modules
+c... only parts on are init (ie ID stuff off)
+      call dmhasetup  
+      call dmibset('default')
+
+
+c...default for new model checks
+c      dsprepcalled=.false.
+
+c...Initialize Bessel routine zeros
+c      do kk=0,nbesselk
+c        do ii=1,nzerojk
+c          storage(kk,ii,1)=0.0d0
+c        enddo
+c      enddo
+
+c...Warnings init.
+ 
+      suwar = 0
+
+      if (Debug) write(*,*) 'Initialization of DM complete.'
+
+      return
+      end
+
+

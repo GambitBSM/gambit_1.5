@@ -1,0 +1,27 @@
+# Makefile for ha directory
+# Author: Joakim Edsjo, edsjo@physto.se
+# This file is automatically created by makemf.pl on Feb 09, 2008.
+
+# Define fortran compiler and options (set when ./configure is run
+# in the DarkSUSY root directory
+FF=@F77@
+FOPT=@FOPT@
+
+# Dependencies and libraries
+DINC=../../include
+
+INC_DEP = dsio.h dsidtag.h dshrcom.h dshacom.h dssusy.h
+
+vpath %.h $(DINC)
+
+ha = dshacom.f dshadec.f dshadydth.f dshadys.f dshaemean.f dshaib.f \
+dshaifind.f dshainit.f dshaloyield.f dshapbyieldf.f dshawspec.f \
+dshayield.f dshayield_int.f dshayielddec.f dshayieldf.f dshayieldfth.f \
+dshayieldget.f dshayields.f dshayields2.f dshayields3.f dshayields4.f
+
+all : dsha.o
+
+dsha.o : $(ha) $(INC_DEP) makefile
+	cat $(ha) > dsha.f
+	$(FF) $(FOPT) -c -I$(DINC) -o dsha.o dsha.f
+	rm dsha.f
