@@ -1,0 +1,273 @@
+1234567890123456789012
+======================value
+Title                = conventional/2D 4 kpc upgraded to agree with local electrons
+n_spatial_dimensions = 2 
+r_min                =00.0    min r 
+r_max                =20.00   max r 
+dr                   = 1.0    delta r
+z_min                =-4.0   min z 
+z_max                =+4.0   max z 
+dz                   = 0.2   delta z
+
+x_min                =  0.0   min x 
+x_max                =+15.0   max x 
+dx                   =  0.2   delta x
+y_min                =  0.0   min y 
+y_max                =+15.0   max y 
+dy                   =  0.2   delta y
+
+p_min                =1000    min momentum (MV)
+p_max                =4000    max momentum  
+p_factor             =1.50        momentum factor
+
+Ekin_min             =1.0e0  min kinetic energy per nucleon (MeV)
+Ekin_max             =1.0e9  max kinetic energy per nucleon
+Ekin_factor          =1.12201845430196334  kinetic energy per nucleon factor
+
+p_Ekin_grid          = Ekin         p||Ekin alignment 
+
+E_gamma_min          = 1.e0   min gamma-ray energy (MeV)
+E_gamma_max          = 1.e8    max gamma-ray energy (MeV)
+E_gamma_factor       = 2.0     gamma-ray energy factor
+integration_mode     = 1       integr.over part.spec.: =1-old E*logE; 0=1-PL analyt.
+
+nu_synch_min         = 1.0e6   min synchrotron frequency (Hz)
+nu_synch_max         = 1.0e10  max synchrotron frequency (Hz)
+nu_synch_factor      = 2.0         synchrotron frequency factor
+
+long_min             =  0.50   gamma-ray intensity skymap longitude minimum (deg)
+long_max             =359.50   gamma-ray intensity skymap longitude maximum (deg)
+lat_min              =-89.50   gamma-ray intensity skymap latitude  minimum (deg)
+lat_max              =+89.50   gamma-ray intensity skymap latitude  maximum (deg)
+d_long               =  5.00   gamma-ray intensity skymap longitude binsize (deg)
+d_lat                =  5.00   gamma-ray intensity skymap latitude  binsize (deg)
+
+D0_xx                =6.60e28  diffusion coefficient at reference rigidity
+D_rigid_br           =4.0e3    reference rigidity for diffusion coefficient in MV
+D_g_1                = 0.33    diffusion coefficient index below reference rigidity
+D_g_2                = 0.33    diffusion coefficient index above reference rigidity
+diff_reacc           =1        1=include diffusive reacceleration
+v_Alfven             =20.      Alfven speed in km s-1
+
+convection           =0        1=include convection
+v0_conv              =0.       km s-1        v_conv=v0_conv+dvdz_conv*dz   
+dvdz_conv            =10.      km s-1 kpc-1  v_conv=v0_conv+dvdz_conv*dz
+
+nuc_rigid_br         =9.0e3   reference rigidity for nucleus injection index in MV
+nuc_g_1              =1.98     nucleus injection index below reference rigidity
+nuc_g_2              =2.42     nucleus injection index index above reference rigidity
+
+inj_spectrum_type    = rigidity     rigidity||beta_rig||Etot nucleon injection spectrum type 
+
+electron_g_0         =1.60     electron injection index below electron_rigid_br0
+electron_rigid_br0   =4.0e3      reference rigidity0 for electron injection index in MV
+electron_g_1         =2.54     electron injection index below reference rigidity
+electron_rigid_br    =1.0e9   reference rigidity for electron injection index in MV
+electron_g_2         =5.0     electron injection index index above reference rigidity
+
+He_H_ratio           =0.11     He/H of ISM, by number
+X_CO                 =1.9E20   conversion factor from CO integrated temperature to H2 column density
+fragmentation        =1        1=include fragmentation
+momentum_losses      =1        1=include momentum losses
+radioactive_decay    =1        1=include radioactive decay
+K_capture            =1        1=include K-capture
+
+start_timestep       =1.0e7 
+  end_timestep       =1.0e2
+timestep_factor      =0.25         
+timestep_repeat      =20   number of repeats per timestep in  timetep_mode=1
+timestep_repeat2     =0    number of timesteps in timetep_mode=2
+timestep_print       =10000  number of timesteps between printings
+timestep_diagnostics =10000  number of timesteps between diagnostics
+control_diagnostics  =0      control detail of diagnostics
+
+network_iterations   = 1      number of iterations of entire network
+
+prop_r               = 1  1=propagate in r (2D)
+prop_x               = 1  1=propagate in x (2D,3D)
+prop_y               = 1  1=propagate in y (3D)
+prop_z               = 1  1=propagate in z (3D)
+prop_p               = 1  1=propagate in momentum
+
+use_symmetry         = 0  0=no symmetry, 1=optimized symmetry, 2=xyz symmetry by copying(3D)
+
+vectorized           = 0  0=unvectorized code, 1=vectorized code
+
+source_specification = 0  2D::1:r,z=0 2:z=0  3D::1:x,y,z=0 2:z=0 3:x=0 4:y=0
+source_model         = 1  0=zero 1=parameterized  2=Case&B 3=pulsars 4= 5=S&Mattox 6=S&Mattox with cutoff
+source_parameters_1  = 0.5    model 1:alpha
+source_parameters_2  = 1.0    model 1:beta
+source_parameters_3  = 20.0   model 1:rmax
+
+
+n_cr_sources         = 0     number of pointlike cosmic-ray sources   3D only!
+cr_source_x_01       = 10.0  x position of cosmic-ray source 1 (kpc)
+cr_source_y_01       = 10.0  y position of cosmic-ray source 1
+cr_source_z_01       = 0.1   z position of cosmic-ray source 1
+cr_source_w_01       = 0.1 sigma width  of cosmic-ray source 1
+cr_source_L_01       = 1.0   luminosity of cosmic-ray source 1
+cr_source_x_02       = 3.0   x position of cosmic-ray source 2
+cr_source_y_02       = 4.0   y position of cosmic-ray source 2
+cr_source_z_02       = 0.2   z position of cosmic-ray source 2
+cr_source_w_02       = 2.4 sigma width  of cosmic-ray source 2
+cr_source_L_02       = 2.0   luminosity of cosmic-ray source 2
+
+
+SNR_events           = 0    handle stochastic SNR events
+SNR_interval         = 1.0e4 time interval in years between SNR in 1 kpc^-3 volume
+SNR_livetime         = 1.0e4 CR-producing live-time in years of an SNR
+SNR_electron_sdg     = 0.00      delta electron source index Gaussian sigma
+SNR_nuc_sdg          = 0.00      delta nucleus  source index Gaussian sigma
+SNR_electron_dgpivot = 5.0e3     delta electron source index pivot rigidity (MeV)
+SNR_nuc_dgpivot      = 5.0e3     delta nucleus  source index pivot rigidity (MeV)
+
+B_field_model        = 050100020   bbbrrrzzz    bbb=10*B(0)  rrr=10*rscale zzz=10*zscale
+
+proton_norm_Ekin     = 1.00e+5 proton kinetic energy for normalization (MeV)
+proton_norm_flux     = 5.00e-9 flux of protons at normalization energy (cm^-2 sr^-1 s^-1 MeV^-1)
+
+electron_norm_Ekin   = 34.5e3  electron kinetic energy for normalization (MeV)
+electron_norm_flux   = .40e-9  flux of electrons at normalization energy (cm^-2 sr^-1 s^-1 MeV^-1)
+ 
+max_Z                = 2     maximum number of nucleus Z listed
+use_Z_1              = 1
+use_Z_2              = 1
+use_Z_3              = 1
+use_Z_4              = 1
+use_Z_5              = 1
+use_Z_6              = 1
+use_Z_7              = 1
+use_Z_8              = 1
+use_Z_9              = 1
+use_Z_10             = 1 
+use_Z_11             = 1
+use_Z_12             = 1
+use_Z_13             = 1
+use_Z_14             = 1
+use_Z_15             = 1
+use_Z_16             = 1
+use_Z_17             = 1
+use_Z_18             = 1
+use_Z_19             = 1
+use_Z_20             = 1 
+use_Z_21             = 1
+use_Z_22             = 1
+use_Z_23             = 1
+use_Z_24             = 1
+use_Z_25             = 1
+use_Z_26             = 1
+use_Z_27             = 1
+use_Z_28             = 1
+use_Z_29             = 0
+use_Z_30             = 0 
+
+
+iso_abundance_01_001 = 1.060e6        H  Source ELEM.abund.: Meyer,Drury,Ellison 1998,SSRv 86,179 /Tbl 1
+iso_abundance_02_004 = 0.720e5        He   was 0.069e6   // Solar system relative isotope abund.:
+iso_abundance_03_007 =    0.          Li
+iso_abundance_04_009 =    0.          Be
+iso_abundance_05_010 =    0.          B
+iso_abundance_06_012 = 2620.  (2573)  C =3000                                           12- 0.955
+iso_abundance_06_013 =    0.                                                            13- 0.045
+iso_abundance_07_014 =  150.          N  =137.
+iso_abundance_08_016 = 3700.          O
+iso_abundance_09_019 =    0.          F
+iso_abundance_10_020 =  340.   (403)  Ne =???                                           20- 0.88
+iso_abundance_10_022 =   93.             22/20 =0.3 in source (DuVernois et al 1996)    22- 0.12
+iso_abundance_11_023 =   21.          Na 
+iso_abundance_12_024 =  620.          Mg =734 *1.1                                      24- 0.78
+iso_abundance_12_025 =   80.7                                                           25- 0.10
+iso_abundance_12_026 =  100.5                                                           26- 0.12
+iso_abundance_13_027 =   54.          Al
+iso_abundance_14_028 =  710.   (760)  Si =707        Source ab.: Hesse et a. 1996    28/28- 1.00
+iso_abundance_14_029 =   60.                                                         29/28- 0.09
+iso_abundance_14_030 =   20.                                                         30/28- 0.03
+iso_abundance_15_031 =    8.          P  =4.92
+iso_abundance_16_032 =   85.0  (105)  S  =92.4       Source ab.: Thayer 1997         32/32- 1.00
+iso_abundance_16_033 =    2.1                                                        33/32- 0.026
+iso_abundance_16_034 =    6.3                                                        34/32- 0.062
+iso_abundance_17_035 =    0.9         Cl
+iso_abundance_17_037 =    3.2
+iso_abundance_18_036 =   16.0         Ar =15.2
+iso_abundance_18_038 =    4.0            -introduced by imos
+iso_abundance_19_039 =    5.          K  -introduced by imos
+iso_abundance_20_040 =   38.0         Ca =42.
+iso_abundance_20_041 =    1.0
+iso_abundance_21_045 =    0.          Sc
+iso_abundance_22_046 =    0.          Ti -introduced by imos
+iso_abundance_22_047 =    2.5
+iso_abundance_22_048 =   10.
+iso_abundance_22_049 =    0.
+iso_abundance_22_050 =    1.8
+iso_abundance_23_051 =    0.          V
+iso_abundance_24_050 =    2.2         Cr -introduced by imos
+iso_abundance_24_051 =    0.
+iso_abundance_24_052 =    9.5
+iso_abundance_24_053 =    4.67
+iso_abundance_24_054 =    1.4
+iso_abundance_25_053 =    3.9         Mn -introduced by imos
+iso_abundance_25_055 =   10.0
+iso_abundance_26_054 =   72.1  (882)  Fe =713  Source abund.: Connell & Simpson 1997 54/56= 9.3%
+iso_abundance_26_055 =   12.1                                                        55/56= 1.6%
+iso_abundance_26_056 =  590.1                                                        56/56= 100%
+iso_abundance_26_057 =   28.8                                                        57/56= 3.7%
+iso_abundance_26_058 =    1.41                                                       58/56= 0.18%
+iso_abundance_27_059 =    1.05        Co =1.28
+iso_abundance_28_058 =   27.61 (44.3) Ni =40.2 Source ab.: Connell & Simpson 1997    58/58= 100%
+iso_abundance_28_059 =    0.81                                                       59/58= 2.6% =0.69
+iso_abundance_28_060 =   13.17                                                       60/58=43.2%
+iso_abundance_28_061 =    0.35                                                       61/58 <1.2%
+iso_abundance_28_062 =    1.62                                                       62.58= 5.4%
+
+total_cross_section  = 0   total cross section option: 0=L83 1=WA96 2=BP01
+cross_section_option = 010    100*i+j  i=1: use Heinbach-Simon C,O->B j=kopt j=11=Webber, 21=ST
+
+t_half_limit         = 1.0e4 year - lower limit on radioactive half-life for explicit inclusion
+
+
+primary_electrons    = 0    1=compute primary electrons
+secondary_positrons  = 0    1=compute secondary positrons
+secondary_electrons  = 0    1=compute secondary electrons
+secondary_antiproton = 0           0 1 2 =compute sec. pbars 
+tertiary_antiproton  = 0    1=compute tertiary antiprotons 
+secondary_protons    = 0    1=compute secondary protons
+
+gamma_rays           = 0    1=compute gamma rays
+IC_anisotropic       = 0    1=compute anisotropic IC
+synchrotron          = 0    1=compute synchrotron
+
+bremss               =no    yes/no
+
+output_gcr_full      = 0  output full galactic cosmic ray array
+warm_start           = 0  read in nuclei file and continue run
+
+verbose              = 0    verbosity: 0=min,10=max <0: selected debugs
+test_suite           = 0  run test suite instead of normal run
+
+comment              = the dark matter (DM) switches and user-defined parameters
+DM_positrons         = 1   1=compute DM positrons
+DM_electrons         = 1   1=compute DM electrons
+DM_antiprotons       = 1   1=compute DM antiprotons
+DM_gammas            = 1   1=compute DM gammas  
+
+DM_double0           = 2.8    core radius, kpc
+DM_double1           = 0.43   local DM mass density, GeV cm-3
+DM_double2           = 1.e4   neutralino mass, GeV
+DM_double3           = 40.    positron width distribution, GeV
+DM_double4           = 40.    positron branching
+DM_double5           = 40.    electron width distribution, GeV
+DM_double6           = 30.    electron branching
+DM_double7           = 50.    pbar width distribution, GeV
+DM_double8           = 40.    pbar branching
+DM_double9           =3.e-25  <cross_sec*V>-thermally overaged, cm3 s-1
+
+DM_int0              = 9    DarkSUSY defined profile
+DM_int1              = 9    Green's functions
+DM_int2              = 1
+DM_int3              = 1
+DM_int4              = 1
+DM_int5              = 1
+DM_int6              = 1
+DM_int7              = 1
+DM_int7              = 1
+DM_int9              = 1

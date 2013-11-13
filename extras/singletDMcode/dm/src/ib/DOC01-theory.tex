@@ -1,0 +1,183 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Internal Bremsstrahlung (IB) -- theory}
+
+Whenever WIMPs annihilate into pairs of charged particles $X\bar X$, this process 
+will inevitably be accompanied by internal 
+bremsstrahlung (IB), i.e. the emission of an additional photon in the final state 
+(note that in contrast to ordinary, or external, bremsstrahlung no external 
+electromagnetic field is required for the emission of the photon). In many cases, 
+IB photons completely dominate the annihilation spectrum at the highest accessible 
+energies. The resulting, characteristic sharp step at an energy corresponding to 
+the dark matter particle's mass, often accompanied by a bump-like feature at slightly smaller energies, is a spectral signature that is hard to mimic by 
+astrophysical sources and in that respect similar to monochromatic photons. 
+In fact, being an $\mathcal{O}(\alpha_\mathrm{em})$ correction to the tree-level 
+annihilation rate, one would generically expect IB photons to be more copiously 
+produced than the loop-suppressed [i.e.~$\mathcal{O}(\alpha_\mathrm{em}^2)$] 
+monochromatic photons; this has been confirmed in \cite{ib_susy} for a large part 
+of the supersymmetric parameter space, not the least due to the appearance of 
+efficient enhancement mechanisms. 
+
+
+
+\subsection{General considerations}
+
+
+For didactic purposes, one may follow \cite{ib_susy} and distinguish between 
+photons directly radiated off the external legs (\emph{final state radiation}, FSR) 
+and photons radiated from virtual charged particles (\emph{virtual internal 
+bremsstrahlung}, VIB). The IB photons are thus  the total contribution from both 
+FSR and VIB photons.
+
+For relativistic charged final states, FSR diagrams are always dominated by photons 
+emitted \emph{collinearly} with $X$ or $\bar X$.  This is a purely kinematical 
+effect and related to the fact that the propagator of the corresponding outgoing 
+particle,
+\begin{equation}
+  D(p)\propto\left((k+p)^2-m_X^2\right)^{-1},
+\end{equation}
+diverges in this situation. Here, $k$ and $p$ denote the momenta of the photon and 
+the outgoing particle, respectively. The resulting photon spectrum turns out to be 
+of a universal form, almost independent of the underlying particle physics model 
+(see, e.g., \cite{birkedal}):
+\begin{equation}
+  \label{fsr}
+  \frac{dN^{X\bar X}_{\gamma,\mathrm{FSR}}}{dx}\approx\frac{\alpha 
+Q_X^2}{\pi}\mathcal{F}_X(x)\log \left(\frac{s(1-x)}{m_X^2}\right)\,.
+\end{equation}
+Here, $Q_X$ and $m_X$ are the electric charge and mass of $X$; the splitting 
+function $\mathcal{F}(x)$ depends only on the spin of the final state particles and 
+takes the form
+\begin{equation}
+  \mathcal{F}_\mathrm{fermion}(x)=\frac{1+(1-x)^2}{x}
+\end{equation}
+for fermions and
+\begin{equation}
+  \mathcal{F}_\mathrm{boson}(x)=\frac{1-x}{x}
+\end{equation}
+for bosons. Due to the logarithmic enhancement that becomes apparent in 
+Eq.~(\ref{fsr}), FSR photons are often the main source for IB.
+A prominent example where FSR in this universal form not only dominates IB but in 
+fact the total gamma-ray spectrum from WIMP annihilations, is the case of 
+Kaluza-Klein dark matter \cite{Bergstrom:2004cy}.
+
+In general, one can single out two situations where photons emitted from virtual 
+charged particles may give an even more important contribution to the total IB 
+spectrum than FSR: i) the three-body final state $X\bar X\gamma$ satisfies a 
+symmetry of the initial state that cannot be satisfied by the two-body final state 
+$X\bar X$ or ii) $X$ is a boson and the annihilation into $X\bar X$ is dominated by 
+$t$-channel diagrams, with the $t$-channel particle almost degenerate in mass with 
+the annihilating WIMP. In contrast to FSR, the contribution from VIB photons can 
+not be given in a model-independent way but is very sensitive to the underlying 
+short-distance physics. For more details, see \cite{ib_susy}. 
+
+
+
+
+\subsection{IB from neutralino annihilations}
+
+For supersymmetric dark matter annhilations,  the relevant final states for IB are 
+$W^+W^-$, $W^\pm H^\mp$, $H^+H^-$ and $f\bar f$; both of the situations just 
+mentioned above can arise, and \emph{VIB} contributions become important in 
+considerable regions of the parameter space.
+
+Let us first note that for neutralino annihilations, in contrast to the situation 
+for, e.g.,  Kaluza-Klein dark matter, we cannot in general expect very large 
+\emph{FSR} contributions. This is because the lightest charged final states, for 
+which the logarithmic enhancement shown in Eq.~(\ref{fsr}) would be most effective, 
+are fermionic and therefore strongly helicity suppressed. Fermion final states 
+containing an additional photon, however, are not subject to such a suppression 
+\cite{lbe89}. In the limit of vanishing fermion mass, and assuming that both 
+corresponding sfermions have the same mass, the photon multiplicity is given by 
+\cite{ib_susy}
+
+\begin{eqnarray}
+  &&\frac{\mathrm{d}N^{f^+f^-}} {\mathrm{d}x}= 
+\alpha_\mathrm{em}Q^2_f\frac{\left|\tilde g_R\right|^4+\left|\tilde 
+g_L\right|^4}{64\pi^2} \Big(m_\chi^2 \langle\sigma v\rangle_{\chi\chi\rightarrow 
+f\bar f}\Big)^{-1}\\
+ &&\times(1-x)\left\{\frac{4x}{(1+\mu)(1+\mu-2x)}-\frac{2x}{(1+\mu-x)^2}
+  -\frac{(1+\mu)(1+\mu-2x)}{(1+\mu-x)^3}\log\frac{1+\mu}{1+\mu-2x}\right\}\,,\nonumber
+\end{eqnarray}
+where $\mu\equiv m_{{\tilde f}_R}^2/m_\chi^2=m_{{\tilde f}_L}^2/m_\chi^2$ and 
+$\tilde g_RP_L$ ($\tilde g_LP_R$) denotes the coupling between neutralino, fermion 
+and right-handed (left-handed) sfermion. In the above expression, a large factor 
+$m_\chi^2/m_f^2$ due to the lifted helicity suppression (from ${\langle\sigma 
+v\rangle}_{\chi\chi\rightarrow f\bar f}\propto m_f^2m\chi^{-4}$) appears, and 
+another enhancement at high photon energies for sfermions degenerate with the 
+neutralino.
+
+For large neutralino masses $m_\chi\gg m_W$ and charginos almost degenerate with 
+the neutralino, $W^+W^-$ and $W^\pm H^\mp$ final states are affected by the second 
+of the mechanisms for VIB enhancement that were discussed in the previous 
+subsection. Of these two channels, IB from $W^+W^-$ nearly always dominates; for 
+pure Higgsinos (or Winos), the resulting photon multiplicity in this limit is well 
+approximated by \cite{ib_susy,ib_higgsinos}:
+\begin{equation}
+ \frac{\mathrm{d}N^{W^+W^-}} {\mathrm{d}x} \approx
+  \frac{\alpha_\mathrm{em}}{\pi}\frac{4(1-x+x^2)^2}{(1-x+\epsilon/2)x}\left[\log\left(2\frac{1-x+\epsilon/2}{\epsilon}\right)-1/2+x-x^3\right]\,,
+\end{equation}
+where $\epsilon \equiv m_W/m_\chi$. 
+
+Charged Higgs pairs $H^+H^-$, finally, provide yet another interesting example 
+where the two-body final state is not allowed due to symmetry restrictions; in this 
+case, in the limit $v\rightarrow0$, enforced by  $CP$ conservation. The 
+annihilation into $H^+H^-\gamma$, on the other hand, \emph{is} possible. However, 
+since charged Higgs bosons in most models have considerably larger masses than 
+gauge bosons, they are expected to give negligible IB contributions compared to the 
+latter.
+
+\subsection{The implementation in \ds}
+
+Let us now briefly describe how  IB is implemented in \ds. The total gamma-ray 
+spectrum  from WIMP annihilations is given by
+\begin{equation}
+  \frac{dN_{\gamma,\mathrm{tot}}}{dx}=\sum_f 
+B_f\left(\frac{dN^f_{\gamma,\mathrm{sec}}}{dx}+\frac{dN^f_{\gamma,\mathrm{IB}}}{dx} 
++ \frac{dN^f_{\gamma,\mathrm{line}}}{dx}\right)\,,
+\end{equation}
+where $B_f$ denotes the branching ratio into the annihilation channel $f$. The 
+first term encodes the contribution from secondary photons, mainly produced through 
+the decay of neutral pions, as described in Section \ref{section_hr}.
+ We recall here that these contributions are included by using the Monte Carlo code 
+{\sf Pythia} \cite{pythia} to simulate the decay of a hypothetical particle with 
+mass 
+$2m\chi$ and user-specified branching ratios $B_f$.  In this way, also FSR 
+associated to this decay  is automatically included in 
+${dN^f_{\gamma,\mathrm{sec}}}/{dx}$ (the main contribution here comes from photons 
+directly radiated off the external legs, but also photons radiated from other 
+particles in the decay cascade are taken into account). 
+
+Of course, IB from the decay of such a hypothetical particle cannot in general be 
+expected  to show the same characteristics as IB from the actual annihilation of 
+two WIMPs and for this reason an additional term ${dN^f_{\gamma,\mathrm{IB}}}/{dx}$ 
+is included that accounts for the difference between the full IB contribution and 
+the FSR part already taken into account for by {\sf Pythia}. For details regarding 
+the 
+implemented procedure of separating these two contributions in a consistent way, 
+see \cite{ib_susy}.
+The contributions ${dN^f_{\gamma,\mathrm{IB}}}/{dx}$, in contrast to 
+${dN^f_{\gamma,\mathrm{sec}}}/{dx}$, are generically highly model-dependent. At the 
+moment, they are fully implemented only for neutralino annihilations and included 
+by default. However, one may easily switch to a user-defined contribution, choose 
+to neglect IB completely or, for comparison, to only include the FSR part (for 
+details, see 
+\ftb{dshaib}). 
+
+For the supersymmetric case, the 
+full expressions for all relevant three-body final states are implemented, i.e.~not 
+just the 
+approximations given in the last subsection, which only apply to the limits 
+described there.
+For performance reasons, IB is only included when virtual $t$-channel particles 
+are sufficiently degenerate in mass that large IB contributions to the total 
+spectrum can be expected. With a call to  \ftb{dsIBset}, this 
+default
+behaviour can be 
+customized.
+Finally, radiative corrections to the annihilation into charged particles $X\bar X$ 
+of course also change the number of $X\bar X$ pairs per annihilation and thus the 
+corresponding yield of particles in the further decay of the annihilation products. 
+At the moment, apart from the photon yield, only the IB positron yield is 
+implemented in \ds. By default, only the annihilation into the dominating channel $e^+e^-\gamma$ is taken into account in this case; again, this behaviour can be modified by a call to \ftb{dsIBset}.
+
+

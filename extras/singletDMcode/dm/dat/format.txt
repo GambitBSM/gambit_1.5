@@ -1,0 +1,20 @@
+10-Jul-2003:
+-------------------
+
+                                                                                                      
+gould_supress.txt   Suppression factor som funktion av massan i GeV enligt Gould                      
+conserv.eps         En bild med de två kurvorna (conservativ/ultra..) enligt filen                    
+                                                                                                      
+tot.txt             totala densiteten från körning med Venus-Jorden, låsta Jupiterbanor 
+ultraconserv.txt    densiteten från fria banor endast
+conserv.txt         densiteten från fria banor och jupiterkorsande banor
+                                                                                                                                    
+results.eps         En bild med de tre kurvorna ovan (log10 på yaxeln)
+
+format.txt          Denna fil      
+------------------------------------------------------------------
+
+hastigheter i m/s, densiteten ska integreras F(u) du , och                                            
+multipliceras med värdet för rho/M ute i halon.    
+värdena är som de ser ut i jordens referenssystem, men i oändligheten med                             
+avseende på jordens potential.                                           
