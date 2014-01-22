@@ -1,6 +1,6 @@
 namespace LHABit{
 
-#include "LHABit.hh"
+#include "LHABit.hpp"
 
 LHABlock::LHABlock& operator= (const LHABlock & other)
 {
