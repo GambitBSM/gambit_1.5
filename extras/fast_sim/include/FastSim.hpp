@@ -130,6 +130,7 @@ namespace fast_sim {
       int    _calo_neta; // number of eta channels in the calorimeter
       int    _calo_nphi; // number of phi channels in the calorimeter
 
+      double _et_min; // the minimum energy of a cell
       double _et_seedmin; // the minimum transverse energy a cell can have to be a seed for a cluster
       double _cluster_rcone;
       double _cluster_etmin; // the minimum energy that a cluster can have otherwise discarded
@@ -147,6 +148,8 @@ namespace fast_sim {
       double _min_tauhad_pt;
       double _min_dr;
 
+      double _min_track_pt; //GeV
+
       double _max_jet_eta;
       double _max_lep_eta;
 
@@ -163,12 +166,12 @@ namespace fast_sim {
       std::vector<HEP_Simple_Lib::Particle*> _stable_electrons;
       std::vector<HEP_Simple_Lib::Particle*> _stable_muons;
       std::vector<HEP_Simple_Lib::Particle*> _stable_photons;
-      std::vector<HEP_Simple_Lib::Particle*> _iso_electrons;
-      std::vector<HEP_Simple_Lib::Particle*> _iso_muons;
-      std::vector<HEP_Simple_Lib::Particle*> _iso_photons;
-      std::vector<HEP_Simple_Lib::Particle*> _noniso_electrons;
-      std::vector<HEP_Simple_Lib::Particle*> _noniso_muons;
-      std::vector<HEP_Simple_Lib::Particle*> _noniso_photons;
+      //std::vector<HEP_Simple_Lib::Particle*> _iso_electrons;
+      //std::vector<HEP_Simple_Lib::Particle*> _iso_muons;
+      //std::vector<HEP_Simple_Lib::Particle*> _iso_photons;
+      //std::vector<HEP_Simple_Lib::Particle*> _noniso_electrons;
+      //std::vector<HEP_Simple_Lib::Particle*> _noniso_muons;
+      //std::vector<HEP_Simple_Lib::Particle*> _noniso_photons;
       std::vector<HEP_Simple_Lib::Particle*> _weakly_interacting;
       std::vector<HEP_Simple_Lib::Particle*> _bquarks;
       std::vector<HEP_Simple_Lib::Particle*> _tauhads;
