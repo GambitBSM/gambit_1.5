@@ -1,17 +1,98 @@
-// Definition options
 {
-    // Default encoding for text
-    "detector" : "Nominal",
-    
-    [ { "type":"electron", "level":"medium","min_pt":20,"min_eta":-2.47,"max_eta":2.47,"iso":2,
-        "acceptance_pt": [0.0,0.5,0.8,0.9,0.9,0.9,0.8,0.5,0,0.0]},
+    "detector": { "name": "Nominal",
+                  "calo_eta_max": 5.0,
+                  "calo_dphi": 0.01,
+                  "calo_deta": 0.01,
+                  "calo_transition": 3.2,
+                  "et_min": 0.2,
+                  "et_seed_min": 1.5,
+                  "cluster_rcone": 0.4,
+                  "cluster_etmin": 5.0 },
 
-      { "type":"electron", "level":"tight","min_pt":25,"min_eta":-2.47,"max_eta":2.47,"iso":3,
-        "acceptance_pt": [0.0,0.5,0.8,0.85,0.88,0.85,0.8,0.5,0,0.0]},
-
-      { "type":"muon", "level":"medium","min_pt":20,"min_eta":-2.5,"max_eta":2.5,"iso":2,
-        "acceptance_pt": [0.0,0.5,0.8,0.9,0.9,0.9,0.8,0.5,0,0.0]},
-
-      { "type":"muon", "level":"tight","min_pt":20,"min_eta":-2.5,"max_eta":2.5,"iso":3,
-        "acceptance_pt": [0.0,0.5,0.8,0.85,0.88,0.85,0.8,0.5,0,0.0]},
+    "Performance": [
+        {
+            "type": "electron",
+            "level": "medium",
+            "min_pt": 20,
+            "min_eta": -2.47,
+            "max_eta": 2.47,
+            "iso": 2,
+            "acceptance_pt": [
+                0,
+                0.5,
+                0.8,
+                0.9,
+                0.9,
+                0.9,
+                0.8,
+                0.5,
+                0,
+                0
+            ]
+        },
+        {
+            "type": "electron",
+            "level": "tight",
+            "min_pt": 25,
+            "min_eta": -2.47,
+            "max_eta": 2.47,
+            "iso": 3,
+            "acceptance_pt": [
+                0,
+                0.5,
+                0.8,
+                0.85,
+                0.88,
+                0.85,
+                0.8,
+                0.5,
+                0,
+                0
+            ]
+        },
+        {
+            "type": "muon",
+            "level": "medium",
+            "min_pt": 20,
+            "min_eta": -2.5,
+            "max_eta": 2.5,
+            "iso": 2,
+            "acceptance_pt": [
+                0,
+                0.5,
+                0.8,
+                0.9,
+                0.9,
+                0.9,
+                0.8,
+                0.5,
+                0,
+                0
+            ]
+        },
+        {
+            "type": "muon",
+            "level": "tight",
+            "min_pt": 20,
+            "min_eta": -2.5,
+            "max_eta": 2.5,
+            "iso": 3,
+            "acceptance_pt": [
+                0,
+                0.5,
+                0.8,
+                0.85,
+                0.88,
+                0.85,
+                0.8,
+                0.5,
+                0,
+                0
+            ]
+        },
+        {
+          "type":"hadrons",
+          "min_pt":0.4
+        }
+    ]
 }

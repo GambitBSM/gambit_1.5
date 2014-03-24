@@ -18,7 +18,7 @@ int FastSim_Init(int which)
   switch(which) {
     default:
     case 0:_my_fast_sim.init(fast_sim::NOMINAL);break;
-    case 1:_my_fast_sim.init(fast_sim::ACERDET);break;
+    case 1:_my_fast_sim.init(fast_sim::ATLAS);break;
   }
 
   return 0;
