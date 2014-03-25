@@ -30,7 +30,7 @@
 
 namespace fast_sim {
 
-  enum DetectorType { NOMINAL,ACERDET,FASTATLAS, FASTCMS, ATLAS2011, CMS2011};
+  enum DetectorType { NOMINAL,ATLAS, CMS, EXPERIMENTAL};
   // NOMINAL the energy response is smeared and the calorimeter parameters are the same as the ACERDET
   // ACERDET the energy of the different particles is smeared by the respective functions as used in the ACERDET paper and the calorimeter parameters are
   //         the same as the ACERDET paper
@@ -66,6 +66,9 @@ namespace fast_sim {
       ~FastSim();
 
       void init(DetectorType which);
+      void init(std::string filename);
+
+      int FastSim_Reader(std::string filename);
 
       void doDetectorResponse();
       void FindCells();
@@ -151,7 +154,17 @@ namespace fast_sim {
       double _min_track_pt; //GeV
 
       double _max_jet_eta;
-      double _max_lep_eta;
+      double _max_bjet_eta;
+      double _max_ele_eta;
+      double _max_muon_eta;
+      double _max_photon_eta;
+      double _max_tauhad_eta;
+      double _min_jet_eta;
+      double _min_bjet_eta;
+      double _min_ele_eta;
+      double _min_muon_eta;
+      double _min_photon_eta;
+      double _min_tauhad_eta;
 
       // the isolation
       double _minEt_isol_muon; 
