@@ -75,10 +75,9 @@ namespace fast_sim {
   void FastSim::init(DetectorType which) {
     _simtype = which;
     switch(which) {
-      case ACERDET:
       case NOMINAL:
-        // initialise the cuts and calorimeter limits and granularity for  the NOMINAL and ACERDET
-        cout << "AcerDET sim" << endl;
+        // initialise the cuts and calorimeter limits and granularity for  the NOMINAL
+        cout << "Nominal sim" << endl;
 
         _min_muon_pt = 20.0;  // GeV
         _min_ele_pt  = 25.0;  // GeV
@@ -87,14 +86,21 @@ namespace fast_sim {
         _min_photon_pt = 10; //GeV
         _min_track_pt = 0.4; //GeV
 
-        _max_jet_eta = 3.4; //the upper limit of psuedo rapidity for jets
-
         _minEt_isol_muon = 4.0;
         _minEt_isol_electron = 4.0;
         _minEt_isol_photon = 4.0; // GeV
 
+        _max_jet_eta = 4.0;
+        _max_ele_eta = 2.5;
+        _max_muon_eta = 2.5;
+        _max_photon_eta = 3.2;
+        _max_tauhad_eta = 2.5;
+        _min_jet_eta = -4.0;
+        _min_ele_eta = -2.5;
+        _min_muon_eta = -2.5;
+        _min_photon_eta = -3.2;
+        _min_tauhad_eta = -2.5;
 
-        _max_lep_eta = 2.5; // the eta acceptance of the leptons
 
         _calo_etamax = 5.0;  //GeV
         _calo_dphi =  0.01;
@@ -119,6 +125,18 @@ namespace fast_sim {
         ;
     }
   }
+
+  void FastSim::init(std::string init_filename) {
+
+    // this constructor uses the json datacard to initialise the properties of the detector
+    // and the physics object whose response will be simulated
+     
+    if (FastSim_Reader(init_filename) < 0) {
+      cerr << "Error reading the FastSim param_card" << endl;
+    }
+
+  }
+
 
   void FastSim::clear() {
 
@@ -203,7 +221,7 @@ namespace fast_sim {
         cerr << "Warning: PID " << particles[i]->pid() << " found in the electron particle list" << endl;
         continue;
       }
-      if (fabs(particles[i]->eta()) > _max_lep_eta) continue;
+      if ((particles[i]->eta() < _min_ele_eta) or (particles[i]->eta() > _max_ele_eta)) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
@@ -222,7 +240,8 @@ namespace fast_sim {
         cerr << "Warning: PID " << particles[i]->pid() << " found in the muon particle list" << endl;
         continue;
       }
-      if (fabs(particles[i]->eta()) > _max_lep_eta) continue; //< @todo Should be muon etamax?
+
+      if ((particles[i]->eta() < _min_muon_eta) or (particles[i]->eta() > _max_muon_eta)) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
@@ -241,7 +260,8 @@ namespace fast_sim {
         cerr << "Warning: PID " << particles[i]->pid() << " found in the photon particle list" << endl;
         continue;
       }
-      if (fabs(particles[i]->eta()) > _calo_etamax) continue;
+
+      if ((particles[i]->eta() < _min_photon_eta) or (particles[i]->eta() > _max_photon_eta)) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen); //< @todo Build later?
@@ -264,7 +284,8 @@ namespace fast_sim {
         cerr << "Warning: PID " << particles[i]->pid() << " found in the b-quark particle list" << endl;
         continue;
       }
-      if (fabs(particles[i]->eta()) > _calo_etamax) continue; //< @todo Or ~ tracker eta for tagging?
+
+      if ((particles[i]->eta() < _min_bjet_eta) or (particles[i]->eta() > _max_bjet_eta)) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen); //< @todo Build later?
@@ -283,7 +304,7 @@ namespace fast_sim {
         continue;
       }
 
-      if (fabs(particles[i]->eta()) > _max_lep_eta) continue;
+      if ((particles[i]->eta() < _min_tauhad_eta) or (particles[i]->eta() > _max_tauhad_eta)) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen); //< @todo Build later?
@@ -423,7 +444,6 @@ namespace fast_sim {
     // now for the jets, only clustering for now, fast jet will be incorporated soon
     switch(_simtype)
     {
-      case ACERDET:
       case NOMINAL:
         if (_fastjet) {
           //cout << " doing jet " << endl;
@@ -506,7 +526,7 @@ namespace fast_sim {
           // Clustering();
           break;
 
-        case ACERDET:
+        case ATLAS:
           _atlas_simple_response.MuonResponse(*_stable_muons[j]);
           //      _stable_muons.erase(std::remove(_stable_muons[j],_stable_muons[j],1);
           //      if not _atlas_simple_response.muonEfficiency(*_stable_muon[j]) {
@@ -535,7 +555,7 @@ namespace fast_sim {
           // Clustering();
           break;
 
-        case ACERDET:
+        case ATLAS:
           _atlas_simple_response.ElectronResponse(*_stable_electrons[j]);
           break;
 
@@ -557,7 +577,7 @@ namespace fast_sim {
           // Clustering();
           break;
 
-        case ACERDET:
+        case ATLAS:
           _atlas_simple_response.PhotonResponse(*_stable_photons[j]);
           break;
 
