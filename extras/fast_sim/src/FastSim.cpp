@@ -20,8 +20,9 @@
 //
 //
 
-#include "fastjet/ClusterSequence.hh"
 #include "FastSim.hpp"
+#include "fastjet/ClusterSequence.hh"
+#include "MCUtils/MathUtils.h"
 #include <algorithm>
 #include <iostream>
 using namespace std;
@@ -130,7 +131,7 @@ namespace fast_sim {
 
     // this constructor uses the json datacard to initialise the properties of the detector
     // and the physics object whose response will be simulated
-     
+
     if (FastSim_Reader(init_filename) < 0) {
       cerr << "Error reading the FastSim param_card" << endl;
     }
@@ -148,7 +149,7 @@ namespace fast_sim {
 
     _stable_electrons.clear();
     _stable_muons.clear();
-    _stable_photons.clear();     
+    _stable_photons.clear();
     _jets.clear();
     _tauhads.clear();
     _bjets.clear();
@@ -205,7 +206,7 @@ namespace fast_sim {
     setElectrons(electrons);
     setMuons(muons);
     setPhotons(photons);
-    
+
     setBQuarks(bquarks);
     setChargedHadrons(charged_hadrons);
     //setNonPromptChargedParticles(charged_hadrons);
@@ -350,7 +351,7 @@ namespace fast_sim {
 
   void FastSim::setWeaklyInteracting(vector<Particle*> particles) {
 
-    Particle* chosen; 
+    Particle* chosen;
     for (size_t i = 0; i < particles.size(); ++i) {
       /// @todo Use HepPID to check for weak interactions
       //
@@ -360,7 +361,7 @@ namespace fast_sim {
         case 14:
         case 16:
         case 1000022:
-         
+
           chosen = new Particle(particles[i]);
           _weakly_interacting.push_back(chosen);
           break;
@@ -519,7 +520,7 @@ namespace fast_sim {
     std::vector<Particle*>::iterator newEnd;
     //cout << " the number of muons is " << _stable_muons.size() << endl;
     for (size_t j = 0; j < _stable_muons.size(); j++) {
-      switch(_simtype) 
+      switch(_simtype)
       {
         case NOMINAL:
           _nodetector.MuonResponse(*_stable_muons[j]);
@@ -612,11 +613,11 @@ namespace fast_sim {
       pz = _cellmom[i]*sinh(_celleta[i]);
       E = sqrt(_cellmom[i]*_cellmom[i] + pz*pz);
 
-      //if (E > 10.0) 
+      //if (E > 10.0)
       //  cout << "calo cell " << i << " pt " <<  _cellmom[i] << " E " << E << " phi " << _cellphi[i] << " eta " << _celleta[i] << " hits " << _cellhits[i] << endl;
 
       // an event with three particles:   px    py  pz      E
-      calo_cells.push_back( fastjet::PseudoJet(px,py,pz,E)); 
+      calo_cells.push_back( fastjet::PseudoJet(px,py,pz,E));
 
       //cout << " calo cell size " << calo_cells.size() << endl;
     }
@@ -647,7 +648,7 @@ namespace fast_sim {
       //    printf(" jet %d: %.2f %.2f %.2f n %d\n",i,(float)jets[i].perp(),(float)jets[i].eta(),(float)jets[i].phi(),(int)constituents.size());
       //    printf(" _jet %d: %.2f %.2f %.2f\n",i,(float)_jets[i]->pT(),(float)_jets[i]->eta(),(float)_jets[i]->phi());
 
-      //    cout << "jet " << i << ": "<< jets[i].perp() << " " 
+      //    cout << "jet " << i << ": "<< jets[i].perp() << " "
       //                   << jets[i].eta() << " " << jets[i].phi() << endl;
       //    vector<PseudoJet> constituents = jets[i].constituents();
       //    for (unsigned j = 0; j < constituents.size(); j++) {
@@ -682,7 +683,7 @@ namespace fast_sim {
 
     double eta,phi,pt;
 
-    //  printf(" filling the calorimeter:\n"); 
+    //  printf(" filling the calorimeter:\n");
     for (size_t i = 0; i < _stable_interacting_particles.size();i++) {
 
       //    if (_stable_interacting_particles[i]->pid() == 13)
@@ -765,7 +766,7 @@ namespace fast_sim {
       */
     }
 
-    
+
     // muon
     for (size_t mu=0;mu<_stable_muons.size();mu++) {
 
@@ -815,8 +816,8 @@ namespace fast_sim {
       }
       */
     }
-    
-    
+
+
 
     // electrons and jets
     /*
@@ -998,7 +999,7 @@ namespace fast_sim {
               phic  = _cellphi[i];
               etac  = _celleta[i];
               etad = etac-temp_cluseta;
-              phid = delta_phi(phic, temp_clusphi);
+              phid = MCUtils::deltaphi(phic, temp_clusphi);
 
               dr = sqrt(pow(etad,2)+ pow(phid,2));
 
@@ -1108,7 +1109,7 @@ namespace fast_sim {
       phi = _cellphi[i];
 
 
-      dphi = delta_phi(or_phi,phi);
+      dphi = MCUtils::deltaphi(or_phi,phi);
       deta = fabs(or_eta - eta);
       dR = sqrt(dphi*dphi + deta*deta);
 
