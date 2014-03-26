@@ -5,16 +5,17 @@
 // Stand-alone code with usage examples of base function objects.  
 //
 // Compile with:
-//      g++ BaseFunction_examples.cpp -I../../Utils/include -o BaseFunction_example
+//      g++ examples.cpp -I../../modules/Utils/include -Wall -std=c++11 -lgsl -lgslcblas
 //
 //
 // Christoph Weniger, 2014-03-15, c.weniger@uva.nl
 //
 
-#include "DarkBit_BaseFunctions.hpp"
+#include "BaseFunctions.hpp"
 #include <iostream>
 #include <fstream>
-using namespace Gambit::DarkBit;
+using namespace Gambit::BF;
+using namespace Gambit;
 
 int main()
 {
@@ -121,7 +122,7 @@ int main()
 
     // B) Constrution of new function objects using the C++11 lambda
     // expressions.  This is neat.
-    BFptr fromLambda(new BFfromPlainFunction( [](double r, double l)  {return 1/(0.0001+r) * l * 2;} ));
+    BFptr fromLambda(new BFfromPlainFunction<double (double, double)>( [](double r, double l)  {return 1/(0.0001+r) * l * 2;} ));
     std::cout << "Value from fromLambda: " << (*fromLambda)(129.6, 1) << std::endl;
 
 
@@ -136,11 +137,11 @@ int main()
 
     // D) Tabularizing analytical functions
     xgrid = linspace(1, 100, 100);
-    BFptr tabularized = integrated->tabularize(xgrid);
+    BFptr tabulate = integrated->tabulate(xgrid);
 
 
     // E) Write to file
-    BFptr fromLambdaSin(new BFfromPlainFunction( [](double x)  {return sin(x);} ));
+    BFptr fromLambdaSin(new BFfromPlainFunction<double (double)>( [](double x)  {return sin(x);} ));
     std::ofstream os;
     os.open("test.dat");
     fromLambdaSin->writeToFile(linspace(-20, 20, 1000), os);
@@ -148,10 +149,11 @@ int main()
 
 
     // F) Complicated integrants
-    BFptr withPole(new BFfromPlainFunction( [](double x)  {return sin(x)/(x+0.000001);} ));
+    BFptr withPole(new BFfromPlainFunction<double (double)>( [](double x)  {return sin(x)/(x+0.000001);} ));
     std::cout << "Result from complicated integral: " << (*withPole->integrate(0, -1., 1.))() << std::endl;
 
-    // THE USE OF PLAIN FUNCTIONS:
+
+    // G) THE USE OF PLAIN FUNCTIONS:
     // ---------------------------
     //
     // External (C, F77, ...) codes will in general not know what a base
@@ -170,4 +172,11 @@ int main()
     // implements it.  Example:
 
     std::cout << BFplainFunction(1, 2, 2, &profile3D) << std::endl;
+
+
+    // H) Complicated integration
+    // --------------------------
+
+    BFptr newLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return x*x;} ));
+    std::cout << " Final integral: " << (*newLambda->integrate(0, 0., 1.)->set_epsrel(1e-3)->set_epsrel(1e-2))() << std::endl;
 }
