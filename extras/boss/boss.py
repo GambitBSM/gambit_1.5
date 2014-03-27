@@ -363,23 +363,26 @@ def main():
 
 
         boss_backup_exists = False
-        try:
-            f = open(src_file_name + '.boss', 'a+')
-            boss_backup_exists = True
-        except IOError, e:
-            if e.errno != 2:
-                raise e
-            f = open(src_file_name, 'a+')
+        if os.path.isfile(src_file_name):
+            try:
+                f = open(src_file_name + '.boss', 'r')
+                boss_backup_exists = True
+            except IOError, e:
+                if e.errno != 2:
+                    raise e
+                f = open(src_file_name, 'r')
 
-        f.seek(0)
-        file_content = f.read()
-        f.close()
-        if options.backup_sources_flag and not boss_backup_exists:
-            f = open(src_file_name + '.boss', 'w')
-            f.write(file_content)
+            f.seek(0)
+            file_content = f.read()
             f.close()
+            new_file_content = file_content
+        else:
+            new_file_content = ''
 
-        new_file_content = file_content
+        if options.backup_sources_flag and not boss_backup_exists and new_file_content:
+            f = open(src_file_name + '.boss', 'w')
+            f.write(new_file_content)
+            f.close()
 
         for pos,code in code_tuples:
             if pos == -1:
