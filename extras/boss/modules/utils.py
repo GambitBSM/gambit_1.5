@@ -518,6 +518,7 @@ def getNamespaces(xml_el):
 # ====== END: getNamespaces ========
 
 
+
 # ====== isAcceptedType ========
 
 def isAcceptedType(input_type, byname=False):
@@ -566,13 +567,32 @@ def constrForwardDecls():
     import modules.classutils as classutils
 
     code = ''
+    current_namespaces = []
 
     for class_name_full, class_el in cfg.class_dict.items():
 
-        class_name_short       = class_name_full.split('<',1)[0]
-        abstr_class_name       = classutils.getAbstractClassName(class_name_full)
-        abstr_class_name_short = abstr_class_name.split('<',1)[0]
+        # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
+        namespaces    = getNamespaces(class_el)
+        has_namespace = bool(len(namespaces))
+        namespace_str = '::'.join(namespaces) + '::'*has_namespace
 
+        class_name_short                  = class_name_full.replace(namespace_str,'',1)
+        class_name_short_notemplate       = class_name_short.split('<',1)[0]
+        abstr_class_name_short            = classutils.getAbstractClassName(class_name_full, short=True)
+        abstr_class_name_short_notemplate = abstr_class_name_short.split('<',1)[0]
+
+        if namespaces != current_namespaces:
+            # close current namespace
+            code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
+            # open new namespace
+            code += constrNamespace(namespaces, 'open', indent=cfg.indent)
+            # update current namespace
+            current_namespaces = namespaces
+
+        # Add forward decls
+        n_indents   = len(namespaces)
+        full_indent = ' '*n_indents*cfg.indent
+        
         if '<' in class_name_full:
             is_template = True
         else:
@@ -582,17 +602,20 @@ def constrForwardDecls():
             template_bracket = utils.getTemplateBracket(class_el)[0]
 
         if is_template:
-            code += 'template ' + template_bracket + '\n'
-            code += 'class ' + abstr_class_name_short + ';\n'
+            code += full_indent + 'template ' + template_bracket + '\n'
+            code += full_indent + 'class ' + abstr_class_name_short_notemplate + ';\n'
             
-            code += 'template ' + template_bracket + '\n'
-            code += 'class ' + class_name_short + ';\n'
+            code += full_indent + 'template ' + template_bracket + '\n'
+            code += full_indent + 'class ' + class_name_short_notemplate + ';\n'
             
-            code += 'class ' + abstr_class_name + ';\n'
-            code += 'class ' + class_name_full + ';\n'
+            code += full_indent + 'class ' + abstr_class_name_short + ';\n'
+            code += full_indent + 'class ' + class_name_short + ';\n'
         else:
-            code += 'class ' + abstr_class_name + ';\n'
-            code += 'class ' + class_name_full + ';\n'
+            code += full_indent + 'class ' + abstr_class_name_short + ';\n'
+            code += full_indent + 'class ' + class_name_short + ';\n'
+    
+    # Close current namespace
+    code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
     code += '\n'
 
     return code
@@ -644,3 +667,34 @@ def getMemberElements(el, include_artificial=False):
     return member_elements
 
 # ====== END: getMemberElements ========
+
+
+
+# ====== constrNamespace ========
+
+def constrNamespace(namespaces, open_or_close, indent=cfg.indent):
+
+    code = ''
+
+    if open_or_close == 'open':
+        n_indents = 0
+        for ns in namespaces:
+            code += ' '*n_indents*indent + 'namespace ' + ns + '\n'
+            code += ' '*n_indents*indent + '{' + '\n'
+            n_indents += 1
+
+    elif open_or_close == 'close':
+        n_indents = len(namespaces)
+        for ns in namespaces:
+            n_indents -= 1
+            code += ' '*n_indents*indent + '}' + '\n'
+
+    else:
+        raise ValueError("Second argument must be either 'open' or 'close'.")
+
+    return code
+
+# ====== END: constrNamespace ========
+
+
+

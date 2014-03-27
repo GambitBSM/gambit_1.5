@@ -144,9 +144,10 @@ def run():
         short_class_name       = class_el.get('name').split('<',1)[0]
         short_abstr_class_name = classutils.getAbstractClassName(class_name, prefix=cfg.abstr_class_prefix, short=True)
 
-        src_file_el   = cfg.id_dict[class_el.get('file')]
-        src_file_name = src_file_el.get('name')
-        src_dir       = os.path.split(src_file_name)[0]
+        src_file_el        = cfg.id_dict[class_el.get('file')]
+        src_file_name      = src_file_el.get('name')
+        src_dir            = os.path.split(src_file_name)[0]
+        new_src_file_name  = os.path.join(cfg.extra_output_dir, os.path.basename(src_file_name))
 
         short_abstr_class_fname = cfg.abstr_header_prefix + short_class_name + cfg.header_extension
         abstr_class_fname       = os.path.join(cfg.extra_output_dir, short_abstr_class_fname)
@@ -158,10 +159,10 @@ def run():
         # Prepare entries in return_code_dict and src_includes
         if abstr_class_fname not in return_code_dict.keys():
             return_code_dict[abstr_class_fname] = []
-        if src_file_name not in return_code_dict.keys():
-            return_code_dict[src_file_name] = []
-        if src_file_name not in src_includes.keys():
-            src_includes[src_file_name] = []
+        if new_src_file_name not in return_code_dict.keys():
+            return_code_dict[new_src_file_name] = []
+        if new_src_file_name not in src_includes.keys():
+            src_includes[new_src_file_name] = []
 
 
         # Register an include statement for this header file, to go in the file cfg.all_headers_fname
@@ -243,7 +244,7 @@ def run():
         line_number = int(class_el.get('line'))
 
         # Get file content, but replace all comments with whitespace
-        f = open(src_file_name, 'r+')
+        f = open(src_file_name, 'r')
         file_content = f.read()
         f.close()
         file_content_nocomments = utils.removeComments(file_content, insert_blanks=True)
@@ -321,9 +322,9 @@ def run():
             add_code += ','
 
         # - Register new code
-        if src_file_name not in return_code_dict.keys():
-            return_code_dict[src_file_name] = []
-        return_code_dict[src_file_name].append( (insert_pos, add_code) )
+        if new_src_file_name not in return_code_dict.keys():
+            return_code_dict[new_src_file_name] = []
+        return_code_dict[new_src_file_name].append( (insert_pos, add_code) )
 
         # - Update added_parent dict
         added_parent.append(class_name_full)
@@ -331,7 +332,7 @@ def run():
 
         # Generate code for #include statement in orginal header/source file 
         src_include_line = '#include "' + os.path.join(cfg.add_path_to_includes, short_abstr_class_fname) + '"'
-        if src_include_line in src_includes[src_file_name]:
+        if src_include_line in src_includes[new_src_file_name]:
             pass
         else:
             # - Find position
@@ -363,10 +364,10 @@ def run():
             include_code += '\n'*has_namespace
 
             # - Register code
-            return_code_dict[src_file_name].append( (insert_pos, include_code) )
+            return_code_dict[new_src_file_name].append( (insert_pos, include_code) )
 
             # - Register include line
-            src_includes[src_file_name].append(src_include_line)
+            src_includes[new_src_file_name].append(src_include_line)
 
 
         # # Generate converter functions ('upcast', 'abstractify') for the original class
@@ -424,7 +425,7 @@ def run():
             # wrapper_code += ' '*(len(namespaces)+2)*cfg.indent + 'WRAPPER CODE FOR ' + mem_el.get('name') + ' GOES HERE!\n'
 
         # - Register code
-        return_code_dict[src_file_name].append( (insert_pos, wrapper_code) )            
+        return_code_dict[new_src_file_name].append( (insert_pos, wrapper_code) )            
 
 
         # Generate info for factory 
