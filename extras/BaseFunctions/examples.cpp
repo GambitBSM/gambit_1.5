@@ -84,7 +84,7 @@ int main()
 
     BFargVec rVector;
     rVector.push_back(1.);
-    std::cout << "Value of profile1D: " << (*profile1D)(rVector) << std::endl;  // with a vector argument
+    std::cout << "Value of profile1D: " << (*profile1D).value(rVector) << std::endl;  // with a vector argument
 
 
     // THIRD RULE:
