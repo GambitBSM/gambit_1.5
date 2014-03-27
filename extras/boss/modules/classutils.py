@@ -123,7 +123,9 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     # Construct the abstract class declaration
     #
     
-    class_decl = ''
+    class_decl = '#pragma GCC diagnostic push\n'
+    class_decl += '#pragma GCC diagnostic ignored "-Wunused-parameter"\n'
+    class_decl += '#pragma GCC diagnostic ignored "-Wreturn-type"\n'
 
 
     # - Construct the name of the abstract class, including full namespace
@@ -320,6 +322,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     #     class_decl += ' '*n_indents*indent + '}' + '\n'
 
 
+    class_decl += '#pragma GCC diagnostic pop\n'
     return class_decl
 
 # ====== END: constructAbstractClassDecl ========

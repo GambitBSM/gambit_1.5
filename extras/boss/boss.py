@@ -159,7 +159,7 @@ def main():
             print 'Choose "y" for the classes you want:'
         for el in root.findall('Class'):
             demangled_class_name = el.get('demangled').replace(' ','')
-            if options.choose_classes_flag and raw_input(' - ' + demangled_class_name + '  (y/n)? ').startswith('y')
+            if options.choose_classes_flag and raw_input(' - ' + demangled_class_name + '  (y/n)? ').startswith('y'):
                 cfg.accepted_classes.append(demangled_class_name)
             if demangled_class_name in cfg.accepted_classes:
                 cfg.class_dict[demangled_class_name] = el
