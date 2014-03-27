@@ -127,22 +127,24 @@ def run():
             return_code_dict[source_file_name] = []
 
         # Define code string
-        n_indents = 0
+        n_indents = len(namespaces)
         add_code  = 2*'\n'
 
         # Construct the beginning of the namespaces
-        for ns in namespaces:
-            add_code += ' '*n_indents*cfg.indent + 'namespace ' + ns + '\n'
-            add_code += ' '*n_indents*cfg.indent + '{' + '\n'
-            n_indents += 1
+        add_code += utils.constrNamespace(namespaces, 'open')
+        # for ns in namespaces:
+        #     add_code += ' '*n_indents*cfg.indent + 'namespace ' + ns + '\n'
+        #     add_code += ' '*n_indents*cfg.indent + '{' + '\n'
+        #     n_indents += 1
 
         add_code += utils.addIndentation(w_func_line, n_indents*cfg.indent) + '\n'
         add_code += utils.addIndentation(w_func_body, n_indents*cfg.indent) + '\n'
 
         # - Construct the closing of the namespaces
-        for ns in namespaces:
-            n_indents -= 1
-            add_code += ' '*n_indents*cfg.indent + '}' + '\n'
+        add_code += utils.constrNamespace(namespaces, 'close')
+        # for ns in namespaces:
+        #     n_indents -= 1
+        #     add_code += ' '*n_indents*cfg.indent + '}' + '\n'
         
         add_code += '\n'
 

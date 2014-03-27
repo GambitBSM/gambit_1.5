@@ -42,10 +42,8 @@ def main():
     try:
       os.mkdir(cfg.extra_output_dir)
     except OSError, e:
-      if e.errno == 17:
-        pass
-      else:
-        raise
+      if e.errno != 17:
+        raise e
 
     # Parse command line arguments and options
     parser = OptionParser(usage="usage: %prog [options] xmlfiles",
@@ -54,7 +52,22 @@ def main():
                       action="store_true",
                       dest="list_classes_flag",
                       default=False,
-                      help="output a list of the available classes and functions")
+                      help="Output a list of the available classes and functions.")
+    parser.add_option("-c", "--choose-classes",
+                      action="store_true",
+                      dest="choose_classes_flag",
+                      default=False,
+                      help="Choose from a list of the available classes at runtime.")
+    parser.add_option("-p", "--set-path-id",
+                      action="store_true",
+                      dest="set_path_ids_flag",
+                      default=False,
+                      help="Set the path IDs used to consider a class or function part of a package.")
+    parser.add_option("-b", "--backup-sorces",
+                      action="store_true",
+                      dest="backup_sources_flag",
+                      default=False,
+                      help="Create backup source files (blah.cpp.boss) before BOSS mangles them.")
     parser.add_option("-d", "--debug-mode",
                       action="store_true",
                       dest="debug_mode_flag",
@@ -67,6 +80,27 @@ def main():
 
     # Get the xml file names from command line input
     xml_files = args
+
+    # Set up a few more things before the file loop
+    if options.choose_classes_flag:
+        print 'Overwriting any values in cfg.accepted_classes...'
+        cfg.accepted_classes.clear()
+    if options.set_path_ids_flag:
+        print 'Overwriting any values in cfg.accepted_paths...'
+        cfg.accepted_paths.clear()
+        print 'Path ID example: "pythia" can ID any file within \n'
+        print '    "/anywhere/pythiaxxxx/..." as being part of pythia.\n'
+        print 'Enter all the path IDs to use:' 
+        while(True):
+            # Also allows for comma separated lists
+            paths = raw_input('(blank to stop)\n').partition(',')
+            if all([path.strip() == '' for path in paths]):
+                break
+            while(not paths[2].strip() == ''):
+                cfg.accepted_paths.append(paths[0].strip())
+                paths = paths[2].partition(',')
+            else:
+                cfg.accepted_paths.append(paths[0].strip())
 
 
     #
@@ -119,6 +153,20 @@ def main():
         #         cfg.std_types_dict[el.get('name')] = el
 
 
+        # Update global dict: class name --> class xml element
+        # Classes before typedefs, so the user can choose the classes they want
+        if options.choose_classes_flag:
+            print 'Choose "y" for the classes you want:'
+        for el in root.findall('Class'):
+            demangled_class_name = el.get('demangled').replace(' ','')
+            if options.choose_classes_flag and raw_input(' - ' + demangled_class_name + '  (y/n)? ').startswith('y'):
+                cfg.accepted_classes.append(demangled_class_name)
+            if demangled_class_name in cfg.accepted_classes:
+                cfg.class_dict[demangled_class_name] = el
+            elif (options.list_classes_flag) and (utils.isNative(el)):
+                cfg.class_dict[demangled_class_name] = el
+
+
         # Update global dict: typedef name --> typedef xml element
         cfg.typedef_dict = OrderedDict() 
         for el in root.findall('Typedef'):
@@ -161,13 +209,6 @@ def main():
         # print '****'
         # print
 
-        # Update global dict: class name --> class xml element
-        for el in root.findall('Class'):
-            demangled_class_name = el.get('demangled').replace(' ','')
-            if demangled_class_name in cfg.accepted_classes:
-                cfg.class_dict[demangled_class_name] = el
-            elif (options.list_classes_flag) and (utils.isNative(el)):
-                cfg.class_dict[demangled_class_name] = el
 
 
         # Update global dict: function name --> function xml element
@@ -197,15 +238,16 @@ def main():
 
         if options.list_classes_flag:
 
-            print 'Classes:'
-            print '--------'
-            for demangled_class_name, class_el in cfg.class_dict.items():
-                print ' - ' + demangled_class_name
-            print
+            if not options.choose_classes_flag:
+                print 'Classes:'
+                print '--------'
+                for demangled_class_name in cfg.class_dict:
+                    print ' - ' + demangled_class_name
+                print
 
             print 'Functions:'
             print '----------'
-            for func_name_full, func_el in cfg.func_dict.items():
+            for func_el in cfg.func_dict.values():
                 extended_name = func_el.get('demangled').replace(' ','')
                 print ' - ' + extended_name
             print
@@ -219,8 +261,8 @@ def main():
 
         temp_new_code = classparse.run()
 
-        for src_file_name in temp_new_code.keys():
-            if src_file_name not in new_code.keys():
+        for src_file_name in temp_new_code:
+            if src_file_name not in new_code:
                 new_code[src_file_name] = []
             for code_tuple in temp_new_code[src_file_name]:
                 new_code[src_file_name].append(code_tuple)
@@ -231,8 +273,8 @@ def main():
 
         temp_new_code = funcparse.run()
 
-        for src_file_name in temp_new_code.keys():
-            if src_file_name not in new_code.keys():
+        for src_file_name in temp_new_code:
+            if src_file_name not in new_code:
                 new_code[src_file_name] = []
             for code_tuple in temp_new_code[src_file_name]:
                 new_code[src_file_name].append(code_tuple)
@@ -307,32 +349,42 @@ def main():
     # (Write new code to source files)
     #
 
-    for src_file_name in new_code.keys():
+    for src_file_name, code_tuples in new_code.iteritems():
 
-        code_tuples = new_code[src_file_name]
         code_tuples.sort( key=lambda x : x[0], reverse=True )
+
+        new_src_file_name  = os.path.join(cfg.extra_output_dir, os.path.basename(src_file_name))
 
         if code_tuples == []:
             continue
 
         print 
         print
-        print 'FILE : ',src_file_name
+        print 'FILE : ', new_src_file_name
         print '========================================='
 
 
+        boss_backup_exists = False
         if os.path.isfile(src_file_name):
-            if options.debug_mode_flag == True:
-                f = open(src_file_name, 'a+')
-            else:
+            try:
+                f = open(src_file_name + '.boss', 'r')
+                boss_backup_exists = True
+            except IOError, e:
+                if e.errno != 2:
+                    raise e
                 f = open(src_file_name, 'r')
+
             f.seek(0)
             file_content = f.read()
             f.close()
             new_file_content = file_content
-
         else:
             new_file_content = ''
+
+        if options.backup_sources_flag and not boss_backup_exists and new_file_content:
+            f = open(src_file_name + '.boss', 'w')
+            f.write(new_file_content)
+            f.close()
 
         for pos,code in code_tuples:
             if pos == -1:
@@ -344,7 +396,7 @@ def main():
         if options.debug_mode_flag == True:
             pass
         else:
-            f = open(src_file_name, 'w')
+            f = open(new_src_file_name, 'w')
             f.write(new_file_content)
             f.close()
 
