@@ -312,12 +312,14 @@ def main():
         code_tuples = new_code[src_file_name]
         code_tuples.sort( key=lambda x : x[0], reverse=True )
 
+        new_src_file_name  = os.path.join(cfg.extra_output_dir, os.path.basename(src_file_name))
+
         if code_tuples == []:
             continue
 
         print 
         print
-        print 'FILE : ',src_file_name
+        print 'FILE : ', new_src_file_name
         print '========================================='
 
 
@@ -344,7 +346,7 @@ def main():
         if options.debug_mode_flag == True:
             pass
         else:
-            f = open(src_file_name, 'w')
+            f = open(new_src_file_name, 'w')
             f.write(new_file_content)
             f.close()
 
