@@ -321,11 +321,18 @@ def main():
         print '========================================='
 
 
-        f = open(src_file_name, 'a+')
-        f.seek(0)
-        file_content = f.read()
-        f.close()
-        new_file_content = file_content
+        if os.path.isfile(src_file_name):
+            if options.debug_mode_flag == True:
+                f = open(src_file_name, 'a+')
+            else:
+                f = open(src_file_name, 'r')
+            f.seek(0)
+            file_content = f.read()
+            f.close()
+            new_file_content = file_content
+
+        else:
+            new_file_content = ''
 
         for pos,code in code_tuples:
             if pos == -1:
