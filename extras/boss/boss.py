@@ -159,7 +159,7 @@ def main():
             print 'Choose "y" for the classes you want:'
         for el in root.findall('Class'):
             demangled_class_name = el.get('demangled').replace(' ','')
-            if options.choose_classes_flag and raw_input(' - ' + demangled_class_name + '  (y/n)? ').startswith('y')
+            if options.choose_classes_flag and raw_input(' - ' + demangled_class_name + '  (y/n)? ').startswith('y'):
                 cfg.accepted_classes.append(demangled_class_name)
             if demangled_class_name in cfg.accepted_classes:
                 cfg.class_dict[demangled_class_name] = el
@@ -353,12 +353,14 @@ def main():
 
         code_tuples.sort( key=lambda x : x[0], reverse=True )
 
+        new_src_file_name  = os.path.join(cfg.extra_output_dir, os.path.basename(src_file_name))
+
         if code_tuples == []:
             continue
 
         print 
         print
-        print 'FILE : ',src_file_name
+        print 'FILE : ', new_src_file_name
         print '========================================='
 
 
@@ -394,7 +396,7 @@ def main():
         if options.debug_mode_flag == True:
             pass
         else:
-            f = open(src_file_name, 'w')
+            f = open(new_src_file_name, 'w')
             f.write(new_file_content)
             f.close()
 
