@@ -144,9 +144,9 @@ def run():
         short_class_name       = class_el.get('name').split('<',1)[0]
         short_abstr_class_name = classutils.getAbstractClassName(class_name, prefix=cfg.abstr_class_prefix, short=True)
 
-        src_file_el   = cfg.id_dict[class_el.get('file')]
-        src_file_name = src_file_el.get('name')
-        src_dir       = os.path.split(src_file_name)[0]
+        src_file_el        = cfg.id_dict[class_el.get('file')]
+        src_file_name      = src_file_el.get('name')
+        src_dir            = os.path.split(src_file_name)[0]
 
         short_abstr_class_fname = cfg.abstr_header_prefix + short_class_name + cfg.header_extension
         abstr_class_fname       = os.path.join(cfg.extra_output_dir, short_abstr_class_fname)
@@ -243,7 +243,7 @@ def run():
         line_number = int(class_el.get('line'))
 
         # Get file content, but replace all comments with whitespace
-        f = open(src_file_name, 'r+')
+        f = open(src_file_name, 'r')
         file_content = f.read()
         f.close()
         file_content_nocomments = utils.removeComments(file_content, insert_blanks=True)
@@ -263,6 +263,10 @@ def run():
                 search_limit = pos
 
         class_name_pos = pos
+
+        print "CLASS: ", class_name_full
+        print "AT CLASS NAME POS: ", [file_content_nocomments[class_name_pos:class_name_pos+10]]
+
 
         # Special preparations for template classes:
         if is_template:
@@ -295,6 +299,8 @@ def run():
             insert_pos = class_name_pos + len(short_class_name)
             if is_template and src_is_specialization:
                 insert_pos += len(add_template_bracket)
+
+            print "AT INSERT POS: ", [file_content_nocomments[insert_pos:insert_pos+10]]
 
             # - Generate code
             add_code = ' : public virtual ' + short_abstr_class_name

@@ -27,7 +27,7 @@ std_types_used     = []
 all_types_in_class = []
 
 
-accepted_paths     = ['pythia8185']  
+accepted_paths     = ['pythia8185']
 
 std_include_paths  = ['/usr/include/']
 
@@ -40,7 +40,7 @@ accepted_classes   = ['Pythia8::ParticleData', 'Pythia8::RotBstMatrix',
 
 accepted_functions = []
 
-extra_output_dir      = 'extra_output'
+extra_output_dir      = 'extra_output_pythia'
 code_suffix           = '_GAMBIT'
 abstr_header_prefix   = 'abstract_'
 factory_file_prefix   = 'factory_'
