@@ -1,0 +1,184 @@
+
+
+STUFF TO DO:
+------------
+
+
+- Only write _GAMBIT type wrappers for member functions using native types.
+  For functions with only known types, do a simple virtual function in Abstract__X and leave class X unchanged.
+
+
+- For public member variables, produce default getters/setters (or a single by-ref function)
+
+
+- Friend classes and functions?
+
+
+- Catch default argument values and propagate them to the wrapper functions and Abstract class members
+
+
+- Automate writing of SomeBackend_types.hpp and backend_SomeBackend.hpp for use with GAMBIT
+
+
+- Inheritance and classes from standard libraries (std::string, std::complex, ...):
+
+  -- Alt 1) Move inheritance from class X to Abtract__X
+  -- Alt 2) ?
+
+  More generally, different cases of inheritance:
+
+    1. Native class, parsed for classloading
+    
+    2. Native class, not parsed
+    
+    3. External class, probably not parsed for classloading 
+       (A class used via compile-time linking, e.g. a ROOT class used in Delphes.)
+    
+    4. Class from C++ standard library, not parsed
+
+    How to deal with the different cases? Case #1 is the default case, 
+    while case #4 can be solved my moving the inheritance from class X to 
+    class Abstract__X. 
+    Are there other alternatives than this?
+
+
+- When creating cfg.std_types_dict, must check template arguments before accepting template specializations.
+  Must *first* check all non-template types, *then* decide if template specializations are acceptable. 
+  (All template spec. types must be known.)
+
+
+- For functions that use return-by-value of native classes, let wrapper use return-by-pointer instead (polymorphism)
+  (Already in place for class member functions.)
+
+
+- At the moment there's no way to deal with function pointers as return/argument type...
+
+
+- Fix template functions
+  
+  - If first specialization, write an empty, general template function:
+
+      template <typename T, typename U>
+      void tempFunc_GAMBIT(T t, U u) {}
+
+  - Write wrapper for the given specialization:
+
+      template<>
+      void tempFunc_GAMBIT<int, double>(int i, double d) {}
+
+  - When writing new source code, write the empty template function before
+    any of the specializations (how?)
+
+...........................................................................
+
+
+DONE! -- When writing forward declarations, put them in the correct namespace!
+
+
+DONE! -- Add forward declaration when needed in abstract_SomeClass.hpp
+
+
+DONE! -- Make sure files in 'extra_output' folder are not overwritten when -d flag is set
+
+
+DONE! -- Redirect all files edited to the 'extra_output' folder
+
+
+DONE! -- When wrapper function take argument by ref, make sure it is converted correct:
+
+
+DONE! -- When writing wrapper functions in the abstract class, make sure that reinterpret cast maintains qualifiers.
+
+
+DONE! -- Fix namespace + '~' combo for destructors
+
+
+DONE! -- Write a list of all types used
+
+
+DONE! -- Move code for creating all_typedefs.hpp out of boss.py (to utils.py?)
+
+
+DONE! -- Leave out wrappers that are currently not needed (currently: 'abstractify' and 'upcast' are not used)
+
+
+DONE! -- Fix double namespaces in factory function arguments
+
+
+DONE! -- Only write native typedefs (so we don't copy typedefs from the standard headers etc.)
+
+
+- How to best deal with typedefs? Simply replace them by actual type? Create a header with all the typedefs?
+    DONE! -- Run through all typedefs in xml file, keep those that have an accepted or fundamental type
+    DONE! -- Create a list/dict of accepted_types. (Use 'id' as key? Make sure it corresponds to findType!)
+    DONE! -- In abstract classes and wrapper functions, use the original typenames (if in accepted_types).
+    DONE! -- Create a header "all_typedefs.hpp" with the following content:
+             (Forward declarations for all accepted classes. Typedefs for all accepted/fundamental types.)
+
+             // Forward declarations:
+             class Abstract__X;
+             class X;
+             ...
+
+             // Typedefs:
+             typedef int Int_t;
+             typedef Abstract__X* myAbsXptr_t; 
+
+
+  DONE! -- Command line option: Print all available (native) classes and functions
+
+  DONE! -- IMPORTANT: Make factories return abstract class pointer! (Otherwise, polymorphism doesn't happen!)
+
+- Internal class variables: If native type, we must use the abstract type, e.g.:  X x;  -->  Abstract__X x;
+  WRONG! As member variables cannot be made polymorphic, they should not be accessed directly anyway.
+         Construct getters/setters for all variables that needs accessing. Otherwise, leave them out. 
+
+  DONE! -- For any member function with return-by-value, let the wrapper return a pointer instead, created on the 'heap' with the 'new' keyword.
+           (Due to polymorphism only working on pointers/references.)
+
+  DONE! -- Fix template classes (don't confuse a new specialization as a new class.)
+
+  DONE! ---- Make sure that specializations in the orginal source also get Abstract__CLASS<special> (and not Abstract__CLASS<T>) added to its inheritance list.
+
+  DONE! ---- Connected to above? : Fix the question of number of parents already added in the case of template specializations
+
+  DONE! ---- Make sure that when specializations appear in the original source, the abstract header is not included once more
+
+  
+  DONE!-- Construct the various converter member functions for classes
+
+            In class 'Abstract__A':
+
+              A* downcast() 
+              { 
+                  return reinterpret_cast<A*>(this); 
+              }
+
+
+- Construct the _GAMBIT wrapper functions for class member functions (just like for functions)
+
+  Example: a member function takes an instance of the class as input 
+
+  - In original class 'A':   void printA(A a);
+
+        void printA(A a);
+
+        void printA_GAMBIT(A * a) 
+        { 
+            a->printA(*a); 
+        }
+
+  - In abstract parent class 'Abstract__A':
+
+        virtual void printA_GAMBIT(A * a) {}; 
+
+        void printA(Abstract__A a_abs)
+        {
+            printA_GAMBIT( a_abs.downcast() );
+        }
+
+
+
+
+
+
