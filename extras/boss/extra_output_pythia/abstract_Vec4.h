@@ -15,6 +15,7 @@ namespace Pythia8
     class Pythia;
 }
 
+
 namespace Pythia8
 {
     class Abstract__Vec4
