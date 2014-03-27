@@ -186,4 +186,10 @@ int main()
 
     BFptr moreLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
     std::cout << "adding/removing parameters: " << (*moreLambda->addPar(0)->fixPar(1, 3.))(2.) << std::endl;
+
+    
+    // J) Check range
+    // --------------
+
+    (*moreLambda->validRange(0, 1, 2))(2.5);
 }
