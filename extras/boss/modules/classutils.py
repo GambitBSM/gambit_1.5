@@ -29,16 +29,6 @@ def getAbstractClassName(input_name, prefix=cfg.abstr_class_prefix, short=False)
     else:
         return abstract_class_name
 
-
-    # short_class_name    = input_name.rsplit('::',1)[-1]
-    # class_pos           = input_name.rfind(short_class_name)
-    # abstract_class_name = input_name[:class_pos] + prefix + short_class_name
-
-    # if short == True:
-    #     return abstract_class_name.rsplit('::',1)[-1]
-    # else:
-    #     return abstract_class_name
-
 # ====== END: getAbstractClassName ========
 
 
@@ -46,22 +36,24 @@ def getAbstractClassName(input_name, prefix=cfg.abstr_class_prefix, short=False)
 
 def constructEmptyTemplClassDecl(short_abstract_class_name, namespaces, template_bracket, indent=4):
 
-    n_indents  = 0
+    n_indents  = len(namespaces)
     class_decl = ''
 
     # - Construct the beginning of the namespaces
-    for ns in namespaces:
-        class_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
-        class_decl += ' '*n_indents*indent + '{' + '\n'
-        n_indents += 1
+    class_decl += utils.constrNamespace(namespaces, 'open')
+    # for ns in namespaces:
+    #     class_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
+    #     class_decl += ' '*n_indents*indent + '{' + '\n'
+    #     n_indents += 1
 
     class_decl += ' '*n_indents*indent + 'template ' + template_bracket + '\n'
     class_decl += ' '*n_indents*indent + 'class ' + short_abstract_class_name + ' {};\n'
 
     # - Construct the closing of the namespaces
-    for ns in namespaces:
-        n_indents -= 1
-        class_decl += ' '*n_indents*indent + '}' + '\n'
+    class_decl += utils.constrNamespace(namespaces, 'close')
+    # for ns in namespaces:
+    #     n_indents -= 1
+    #     class_decl += ' '*n_indents*indent + '}' + '\n'
     
     class_decl += '\n'
 
@@ -75,22 +67,24 @@ def constructEmptyTemplClassDecl(short_abstract_class_name, namespaces, template
 
 def constructTemplForwDecl(short_class_name, namespaces, template_bracket, indent=4):
 
-    n_indents  = 0
+    n_indents = len(namespaces)
     forw_decl = ''
 
     # - Construct the beginning of the namespaces
-    for ns in namespaces:
-        forw_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
-        forw_decl += ' '*n_indents*indent + '{' + '\n'
-        n_indents += 1
+    class_decl += utils.constrNamespace(namespaces, 'open')
+    # for ns in namespaces:
+    #     forw_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
+    #     forw_decl += ' '*n_indents*indent + '{' + '\n'
+    #     n_indents += 1
 
     forw_decl += ' '*n_indents*indent + 'template ' + template_bracket + '\n'
     forw_decl += ' '*n_indents*indent + 'class ' + short_class_name + ';\n'
 
     # - Construct the closing of the namespaces
-    for ns in namespaces:
-        n_indents -= 1
-        forw_decl += ' '*n_indents*indent + '}' + '\n'
+    class_decl += utils.constrNamespace(namespaces, 'close')
+    # for ns in namespaces:
+    #     n_indents -= 1
+    #     forw_decl += ' '*n_indents*indent + '}' + '\n'
     
     forw_decl += '\n'
 
@@ -105,7 +99,7 @@ def constructTemplForwDecl(short_class_name, namespaces, template_bracket, inden
 # def constructAbstractClassDecl(class_el, indent=4, template_bracket=''):
 def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[]):
 
-    n_indents = 0
+    n_indents = len(namespaces)
 
     # Check template_types argument:
     if len(template_types) > 0:
@@ -129,7 +123,9 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     # Construct the abstract class declaration
     #
     
-    class_decl = ''
+    class_decl = '#pragma GCC diagnostic push\n'
+    class_decl += '#pragma GCC diagnostic ignored "-Wunused-parameter"\n'
+    class_decl += '#pragma GCC diagnostic ignored "-Wreturn-type"\n'
 
 
     # - Construct the name of the abstract class, including full namespace
@@ -140,10 +136,11 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     # namespaces = abstract_class_name.split('::')[:-1]
 
     # - Construct the beginning of the namespaces
-    for ns in namespaces:
-        class_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
-        class_decl += ' '*n_indents*indent + '{' + '\n'
-        n_indents += 1
+    class_decl += utils.constrNamespace(namespaces, 'open')
+    # for ns in namespaces:
+    #     class_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
+    #     class_decl += ' '*n_indents*indent + '{' + '\n'
+    #     n_indents += 1
 
     # # - Forward declare the child class (so that it can be used for input arguments)
     # #   (for template classes this is already taken care of)
@@ -319,11 +316,13 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     class_decl += ' '*n_indents*indent + '};' + '\n'
 
     # - Construct the closing of the namespaces
-    for ns in namespaces:
-        n_indents -= 1
-        class_decl += ' '*n_indents*indent + '}' + '\n'
+    class_decl += utils.constrNamespace(namespaces, 'close')
+    # for ns in namespaces:
+    #     n_indents -= 1
+    #     class_decl += ' '*n_indents*indent + '}' + '\n'
 
 
+    class_decl += '#pragma GCC diagnostic pop\n'
     return class_decl
 
 # ====== END: constructAbstractClassDecl ========

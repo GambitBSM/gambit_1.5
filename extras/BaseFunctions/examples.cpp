@@ -179,4 +179,11 @@ int main()
 
     BFptr newLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return x*x;} ));
     std::cout << " Final integral: " << (*newLambda->integrate(0, 0., 1.)->set_epsrel(1e-3)->set_epsrel(1e-2))() << std::endl;
+
+
+    // I) Adding and removing parameters
+    // ---------------------------------
+
+    BFptr moreLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    std::cout << "adding/removing parameters: " << (*moreLambda->addPar(0)->fixPar(1, 3.))(2.) << std::endl;
 }
