@@ -137,7 +137,7 @@ def main():
                 pass
             if is_std_type:
                 if 'demangled' in el.keys():
-                    std_type_name = el.get('demangled')    
+                    std_type_name = el.get('demangled').replace(' ','')    
                 else:
                     std_type_name = el.get('name')
 
@@ -230,6 +230,12 @@ def main():
         # Update global list: accepted types
         fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
         cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.accepted_classes + cfg.typedef_dict.keys()
+        print
+        for std_type in cfg.std_types_dict.keys():
+            print 'STD TYPES DICT: ', std_type
+        print 
+
+
 
 
         #

@@ -141,7 +141,7 @@ def constrWrapperArgs(args):
                 # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
                 arg_dict['type'] = classutils.getAbstractClassName(arg_dict['type'])
             else:
-                arg_dict['type'] = cfg.abstr_class_prefix + type_name
+                arg_dict['type'] = cfg.abstr_class_prefix + arg_dict['type']
 
     return w_args
 
@@ -166,7 +166,7 @@ def constrDeclLine(return_type, func_name, args_bracket, keywords=[]):
 
 # ======== constrWrapperBody ========
 
-def constrWrapperBody(return_type, func_name, args, return_is_native):
+def constrWrapperBody(return_type, func_name, args, return_is_native, keywords=[]):
 
     #
     # Input:
@@ -224,6 +224,7 @@ def constrWrapperBody(return_type, func_name, args, return_is_native):
     return_type_base  = return_type.replace('*','').replace('&','')
     n_pointers_return = return_type.count('*')   
     is_ref            = bool(return_type.count('&'))
+    kw_str            = ' '.join(keywords) + ' '*bool(len(keywords))
     
     # if return_is_native:
     #     w_return_type = cfg.abstr_class_prefix + return_type
@@ -238,9 +239,9 @@ def constrWrapperBody(return_type, func_name, args, return_is_native):
     else:
         if n_pointers_return == 0:
             if is_ref:
-                w_func_body += ' '*cfg.indent + return_type_base + '* temp_p = new ' + return_type_base + '(' + orig_func_call + ');\n'
-                w_func_body += ' '*cfg.indent + return_type_base + '*& temp_pr = temp_p;\n'
-                w_func_body += ' '*cfg.indent + 'return temp_pr;\n'
+                w_func_body += ' '*cfg.indent + kw_str + return_type_base + '* _temp_p = new ' + return_type_base + '(' + orig_func_call + ');\n'
+                w_func_body += ' '*cfg.indent + kw_str + return_type_base + '*& _temp_pr = _temp_p;\n'
+                w_func_body += ' '*cfg.indent + 'return _temp_pr;\n'
 
                 # Pythia8::Particle*  temp_p   = new Pythia8::Particle(front());
                 # Pythia8::Particle*& temp_pr  = temp_p;
@@ -278,13 +279,14 @@ def ignoreFunction(func_el):
 
     # Check function return type
     if not utils.isAcceptedType(func_el):
-        print 'non-accepted return type: ', func_el.get('returns')
+        return_type, return_kw, return_id = utils.findType(func_el)
+        print 'non-accepted return type: ' + return_type
         return_type_accepted = False
 
     # Check argument types
     args = getArgs(func_el)
     for arg_dict in args:
-        arg_type_name = arg_dict['type']
+        arg_type_name = arg_dict['type'].replace(' ','')
         if not utils.isAcceptedType(arg_type_name, byname=True):
             print 'non-accepted argument type: ', arg_type_name
             arg_types_accepted = False
@@ -297,3 +299,24 @@ def ignoreFunction(func_el):
         return False 
 
 # ======== END: ignoreFunction ========
+
+
+
+# ======== usesNativeType ========
+
+def usesNativeType(func_el):
+
+    uses_native_type = False
+
+    return_type_name, return_kw, return_id = utils.findType(func_el)
+    return_is_native = utils.isNative( cfg.id_dict[return_id] )
+
+    args = getArgs(func_el)
+    is_arg_native = [arg_dict['native'] for arg_dict in args]
+
+    if (return_is_native) or (True in is_arg_native):
+        uses_native_type = True
+
+    return uses_native_type
+
+# ======== END: usesNativeType ========
