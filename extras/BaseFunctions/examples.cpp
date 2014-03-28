@@ -84,7 +84,7 @@ int main()
 
     BFargVec rVector;
     rVector.push_back(1.);
-    std::cout << "Value of profile1D: " << (*profile1D)(rVector) << std::endl;  // with a vector argument
+    std::cout << "Value of profile1D: " << (*profile1D).value(rVector) << std::endl;  // with a vector argument
 
 
     // THIRD RULE:
@@ -179,4 +179,17 @@ int main()
 
     BFptr newLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return x*x;} ));
     std::cout << " Final integral: " << (*newLambda->integrate(0, 0., 1.)->set_epsrel(1e-3)->set_epsrel(1e-2))() << std::endl;
+
+
+    // I) Adding and removing parameters
+    // ---------------------------------
+
+    BFptr moreLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    std::cout << "adding/removing parameters: " << (*moreLambda->addPar(0)->fixPar(1, 3.))(2.) << std::endl;
+
+    
+    // J) Check range
+    // --------------
+
+    (*moreLambda->validRange(0, 1, 2))(2.5);
 }
