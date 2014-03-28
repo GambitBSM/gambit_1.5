@@ -27,11 +27,7 @@ namespace Pythia8
         public:
             // UNKNOWN: OperatorMethod
 
-            virtual void rot_GAMBIT(double arg_1, double arg_2) {};
-            void rot(double arg_1, double arg_2)
-            {
-                rot_GAMBIT( arg_1,  arg_2);
-            }
+            virtual void rot(double arg_1, double arg_2) {};
 
             virtual void rot_GAMBIT(const Pythia8::Abstract__Vec4& p) {};
             void rot(const Pythia8::Abstract__Vec4& p)
@@ -39,11 +35,7 @@ namespace Pythia8
                 rot_GAMBIT( p);
             }
 
-            virtual void bst_GAMBIT(double arg_1, double arg_2, double arg_3) {};
-            void bst(double arg_1, double arg_2, double arg_3)
-            {
-                bst_GAMBIT( arg_1,  arg_2,  arg_3);
-            }
+            virtual void bst(double arg_1, double arg_2, double arg_3) {};
 
             virtual void bst_GAMBIT(const Pythia8::Abstract__Vec4& arg_1) {};
             void bst(const Pythia8::Abstract__Vec4& arg_1)
@@ -81,23 +73,11 @@ namespace Pythia8
                 rotbst_GAMBIT( arg_1);
             }
 
-            virtual void invert_GAMBIT() {};
-            void invert()
-            {
-                invert_GAMBIT();
-            }
+            virtual void invert() {};
 
-            virtual void reset_GAMBIT() {};
-            void reset()
-            {
-                reset_GAMBIT();
-            }
+            virtual void reset() {};
 
-            virtual double* deviation_GAMBIT() {};
-            double* deviation()
-            {
-                return deviation_GAMBIT();
-            }
+            virtual double deviation() {};
 
         public:
             RotBstMatrix* downcast()

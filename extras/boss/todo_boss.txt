@@ -4,20 +4,34 @@ STUFF TO DO:
 ------------
 
 
-- Only write _GAMBIT type wrappers for member functions using native types.
-  For functions with only known types, do a simple virtual function in Abstract__X and leave class X unchanged.
-
-
 - For public member variables, produce default getters/setters (or a single by-ref function)
 
 
 - Friend classes and functions?
 
 
+- At the moment there's no way to deal with function pointers as return/argument type...
+  
+  -- To identify function pointers, use the XML element.tag: First look for tag 'PointerType' and then for 'FunctionType'.
+
+
 - Catch default argument values and propagate them to the wrapper functions and Abstract class members
 
 
-- Automate writing of SomeBackend_types.hpp and backend_SomeBackend.hpp for use with GAMBIT
+- Generate headers for GAMBIT: SomeCode_backend.hpp, SomeCode_types.hpp
+
+
+- Add nice typedefs to SomeCode_types.hpp  (e.g.: typedef GAMBIT_ClassX Abstract__ClassX; )
+
+
+- Code cleanup: In most of decode we use .replace(' ','') to remove blanks from the class/function/type names given by
+                the "demangled" value of XML elements. Should we force this everywhere? Atm we don't do it for the typenames 
+                returned by utils.findType or utils.getArgs. (The blanks *are* needed to write acceptable C++ code).
+
+
+- When creating cfg.std_types_dict, must check template arguments before accepting template specializations.
+  Must *first* check all non-template types, *then* decide if template specializations are acceptable. 
+  (All template spec. types must be known.)
 
 
 - Inheritance and classes from standard libraries (std::string, std::complex, ...):
@@ -42,16 +56,8 @@ STUFF TO DO:
     Are there other alternatives than this?
 
 
-- When creating cfg.std_types_dict, must check template arguments before accepting template specializations.
-  Must *first* check all non-template types, *then* decide if template specializations are acceptable. 
-  (All template spec. types must be known.)
-
-
-- For functions that use return-by-value of native classes, let wrapper use return-by-pointer instead (polymorphism)
+- For (global) functions that use return-by-value of native classes, let wrapper use return-by-pointer instead (polymorphism)
   (Already in place for class member functions.)
-
-
-- At the moment there's no way to deal with function pointers as return/argument type...
 
 
 - Fix template functions
@@ -70,6 +76,10 @@ STUFF TO DO:
     any of the specializations (how?)
 
 ...........................................................................
+
+
+DONE! -- Only write _GAMBIT type wrappers for member functions using native types.
+         For functions with only known types, do a simple virtual function in Abstract__X and leave class X unchanged.
 
 
 DONE! -- When writing forward declarations, put them in the correct namespace!
