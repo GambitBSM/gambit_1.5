@@ -16,6 +16,9 @@ namespace Pythia8
 }
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wreturn-type"
 namespace Pythia8
 {
     class Abstract__Particle
@@ -805,4 +808,5 @@ namespace Pythia8
             }
     };
 }
+#pragma GCC diagnostic pop
 

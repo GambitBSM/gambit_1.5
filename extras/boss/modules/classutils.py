@@ -22,7 +22,7 @@ def getAbstractClassName(input_name, prefix=cfg.abstr_class_prefix, short=False)
         namespaces, short_class_name = input_name.rsplit('::',1)
         abstract_class_name = namespaces + '::' + cfg.abstr_class_prefix + short_class_name
     else:
-        abstract_class_name = cfg.abstr_class_prefix + short_class_name
+        abstract_class_name = cfg.abstr_class_prefix + input_name
 
     if short == True:
         return abstract_class_name.rsplit('::',1)[-1]
@@ -96,7 +96,6 @@ def constructTemplForwDecl(short_class_name, namespaces, template_bracket, inden
 
 # ====== constructAbstractClassDecl ========
 
-# def constructAbstractClassDecl(class_el, indent=4, template_bracket=''):
 def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[]):
 
     n_indents = len(namespaces)
@@ -239,58 +238,57 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
             w_func_name = el.get('name') + cfg.code_suffix
             
 
-            # Construct the virtual member function that is overridden, e.g.:  
             #
-            #   virtual X* getX_GAMBIT(arguments) {}
+            # If the method makes use of a native type, construct a pair of wrapper methods.
             #
-            class_decl += '\n'
-            class_decl += ' '*(n_indents+2)*indent
-            class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket + ' {};' + '\n'
+            if funcutils.usesNativeType(el):
+
+                # Construct the virtual member function that is overridden, e.g.:  
+                #
+                #   virtual X* getX_GAMBIT(arguments) {}
+                #
+                class_decl += '\n'
+                class_decl += ' '*(n_indents+2)*indent
+                class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket + ' {};' + '\n'
 
 
-            # Construct the member function with the original name, wrapping the overridden one, e.g.: 
-            #
-            #   Abstract__X* getX(arguments)
-            #   {
-            #     return reinterpret_cast<Abstract__X*>(getX_GAMBIT(arguments));
-            #   }
-            #
-            if return_is_native:
-                # w2_return_type = cfg.abstr_class_prefix + w_return_type
-                w2_return_type = getAbstractClassName(w_return_type)
-            else:
-                w2_return_type = w_return_type
-
-            w2_func_name = el.get('name')
-            w2_args_bracket = w_args_bracket
-
-            class_decl += ' '*(n_indents+2)*indent 
-            class_decl += return_kw_str + w2_return_type + ' ' + w2_func_name + w2_args_bracket +'\n'
-            class_decl += ' '*(n_indents+2)*indent + '{\n'
-            if (return_type == 'void'):
-                class_decl += ' '*(n_indents+3)*indent + w_func_name + w_args_bracket_notypes + ';\n'
-            else:
+                # Construct the member function with the original name, wrapping the overridden one, e.g.: 
+                #
+                #   Abstract__X* getX(arguments)
+                #   {
+                #     return reinterpret_cast<Abstract__X*>(getX_GAMBIT(arguments));
+                #   }
+                #
                 if return_is_native:
-                    class_decl += ' '*(n_indents+3)*indent + 'return reinterpret_cast<' + return_kw_str + w2_return_type + '>(' + w_func_name + w_args_bracket_notypes + ');\n'
+                    # w2_return_type = cfg.abstr_class_prefix + w_return_type
+                    w2_return_type = getAbstractClassName(w_return_type)
                 else:
-                    class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
-            class_decl += ' '*(n_indents+2)*indent + '}\n'
+                    w2_return_type = w_return_type
+
+                w2_func_name = el.get('name')
+                w2_args_bracket = w_args_bracket
+
+                class_decl += ' '*(n_indents+2)*indent 
+                class_decl += return_kw_str + w2_return_type + ' ' + w2_func_name + w2_args_bracket +'\n'
+                class_decl += ' '*(n_indents+2)*indent + '{\n'
+                if (return_type == 'void'):
+                    class_decl += ' '*(n_indents+3)*indent + w_func_name + w_args_bracket_notypes + ';\n'
+                else:
+                    if return_is_native:
+                        class_decl += ' '*(n_indents+3)*indent + 'return reinterpret_cast<' + return_kw_str + w2_return_type + '>(' + w_func_name + w_args_bracket_notypes + ');\n'
+                    else:
+                        class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
+                class_decl += ' '*(n_indents+2)*indent + '}\n'
+
+            #
+            # If the method makes only makes use of fundamental/standard types, construct a single virtual method
+            #
+            else:
+                class_decl += '\n'
+                class_decl += ' '*(n_indents+2)*indent
+                class_decl += 'virtual ' + return_kw_str + return_type + ' ' + el.get('name') + w_args_bracket + ' {};' + '\n'
 
 
-            # if type_id == class_el.get('id'):
-            #     class_decl += ' '*(n_indents+2)*indent
-            #     class_decl += '// IGNORED: Self-return method: ' + el.get('name') + '\n'
-            # else:
-            #     class_decl += ' '*(n_indents+2)*indent
-            #     class_decl += 'virtual '
-            #     # typename, add_kw, type_id = utils.findType( cfg.id_dict[el.get('returns')] )
-            #     for kw in add_kw: 
-            #         class_decl += kw + ' '
-            #     # function_name = el.get('demangled').replace(' ','').split(short_class_name + '::')[1]
-            #     # function_name = el.get('demangled').replace(' ','').rsplit('::',1)[-1]
-            #     # function_name = el.get('demangled').rsplit('::',1)[-1]
-            #     function_name = el.get('demangled').replace(short_class_name+'::','',1)
-            #     class_decl += typename + ' ' + function_name + ' {};' + '\n'
 
         elif el.tag in ('Field', 'Variable'):
 
@@ -534,7 +532,7 @@ def constructWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     w_func_line = funcutils.constrDeclLine(w_return_type, w_func_name, w_args_bracket, keywords=return_kw)
 
     # Construct function body for wrapper function
-    w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_native)
+    w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_native, keywords=return_kw)
 
     # Combine code and add indentation
     wrapper_code  = ''
