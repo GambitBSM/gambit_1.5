@@ -84,10 +84,10 @@ def main():
     # Set up a few more things before the file loop
     if options.choose_classes_flag:
         print 'Overwriting any values in cfg.accepted_classes...'
-        cfg.accepted_classes.clear()
+        cfg.accepted_classes = []
     if options.set_path_ids_flag:
         print 'Overwriting any values in cfg.accepted_paths...'
-        cfg.accepted_paths.clear()
+        cfg.accepted_paths = []
         print 'Path ID example: "pythia" can ID any file within \n'
         print '    "/anywhere/pythiaxxxx/..." as being part of pythia.\n'
         print 'Enter all the path IDs to use:' 
@@ -96,11 +96,9 @@ def main():
             paths = raw_input('(blank to stop)\n').partition(',')
             if all([path.strip() == '' for path in paths]):
                 break
-            while(not paths[2].strip() == ''):
+            while(paths[0].strip()):
                 cfg.accepted_paths.append(paths[0].strip())
                 paths = paths[2].partition(',')
-            else:
-                cfg.accepted_paths.append(paths[0].strip())
 
 
     #
@@ -137,7 +135,7 @@ def main():
                 pass
             if is_std_type:
                 if 'demangled' in el.keys():
-                    std_type_name = el.get('demangled')    
+                    std_type_name = el.get('demangled').replace(' ','')    
                 else:
                     std_type_name = el.get('name')
 
@@ -156,14 +154,48 @@ def main():
         # Update global dict: class name --> class xml element
         # Classes before typedefs, so the user can choose the classes they want
         if options.choose_classes_flag:
-            print 'Choose "y" for the classes you want:'
+            # ultimately:   terminal_size = (rows - 8, columns - 8)
+            terminal_size = os.popen('stty size', 'r').read().split()
+            terminal_size = (int(terminal_size[0]) - 8, int(terminal_size[1]) - 8)
+            qtr = terminal_size[1] / 4
+            coords = [0, 0]
+            count = 0
+            mini_class_dict = {}
+            for el in root.findall('Class'):
+                demangled_class_name = el.get('demangled').replace(' ','')
+                if coords[0] == 0:
+                    # then, new screen of classes to choose from
+                    coords[0] += 1
+                    count = 0
+                    mini_class_dict.clear()
+                    print '\n\n Choose what classes you need from this list: \n\n   ',
+                if utils.isNative(el):
+                    count += 1
+                    mini_class_dict[str(count)] = demangled_class_name
+                    item = str(count) + '. ' + demangled_class_name
+                    item += ' '*(qtr - (len(item)+1)%qtr)
+                    if coords[1] and len(item) + coords[1] + 1 >= terminal_size[1]:
+                        coords[0] += 1
+                        coords[1] = 0
+                        print '\n   ',
+                    coords[1] += len(item) + 1
+                    print item,
+                    if coords[0] >= terminal_size[0]:
+                        coords[0] = 0
+                        choices = raw_input('\n\n Input a comma separated list of the numbers indicating the classes you want:\n').partition(',')
+                        while(choices[0].strip()):
+                            cfg.accepted_classes.append(mini_class_dict[choices[0].strip()])
+                            choices = choices[2].partition(',')
+            else:
+                choices = raw_input('\n\n Input a comma separated list of the numbers indicating the classes you want:\n').partition(',')
+                while(choices[0].strip()):
+                    cfg.accepted_classes.append(mini_class_dict[choices[0].strip()])
+                    choices = choices[2].partition(',')
         for el in root.findall('Class'):
             demangled_class_name = el.get('demangled').replace(' ','')
-            if options.choose_classes_flag and raw_input(' - ' + demangled_class_name + '  (y/n)? ').startswith('y'):
-                cfg.accepted_classes.append(demangled_class_name)
             if demangled_class_name in cfg.accepted_classes:
                 cfg.class_dict[demangled_class_name] = el
-            elif (options.list_classes_flag) and (utils.isNative(el)):
+            elif options.list_classes_flag and utils.isNative(el):
                 cfg.class_dict[demangled_class_name] = el
 
 
@@ -230,6 +262,12 @@ def main():
         # Update global list: accepted types
         fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
         cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.accepted_classes + cfg.typedef_dict.keys()
+        print
+        for std_type in cfg.std_types_dict.keys():
+            print 'STD TYPES DICT: ', std_type
+        print 
+
+
 
 
         #

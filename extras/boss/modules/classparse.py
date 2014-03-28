@@ -400,12 +400,7 @@ def run():
         # return_code_dict[src_file_name].append( (insert_pos, converter_code) )
 
 
-        # Generate wrappers for all member functions
-
-        # - Determine insert position
-        rel_pos_start, rel_pos_end = utils.getBracketPositions(file_content_nocomments[class_name_pos:], delims=['{','}'])
-        class_body_start = class_name_pos + rel_pos_start
-        class_body_end   = class_name_pos + rel_pos_end
+        # Generate wrappers for all member functions that make use of native types
 
         # - Create list of all 'non-artificial' members of the class
         member_methods = []
@@ -413,9 +408,21 @@ def run():
             for mem_id in class_el.get('members').split():
                 el = cfg.id_dict[mem_id]
                 if (el.tag == 'Method') and (not 'artificial' in el.keys()) and (not funcutils.ignoreFunction(el)):
-                    member_methods.append(el)
+                    if funcutils.usesNativeType(el):
+                        member_methods.append(el)
+
+                    # append_method = False
+                    # return_type_name, return_kw, return_id = utils.findType(el)
+                    # return_is_native = utils.isNative( cfg.id_dict[return_id] )
+                    # args = funcutils.getArgs(el)
+                    # is_arg_native = [arg_dict['native'] for arg_dict in args]
+                    # if return_is_native or True in is_arg_native:
+                    #     member_methods.append(el)
 
         # - Determine insert position
+        rel_pos_start, rel_pos_end = utils.getBracketPositions(file_content_nocomments[class_name_pos:], delims=['{','}'])
+        class_body_start = class_name_pos + rel_pos_start
+        class_body_end   = class_name_pos + rel_pos_end
         insert_pos = class_body_end
 
         # - Generate code for each member
