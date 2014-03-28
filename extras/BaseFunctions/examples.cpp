@@ -192,4 +192,20 @@ int main()
     // --------------
 
     (*moreLambda->validRange(0, 1, 2))(2.5);
+    
+    // H) Let's input a vector and hope for the best.
+    // ----------------------------------------------
+    
+    BFptr someCrap(new BFfromPlainFunction<double (double, double, double)>( [](double x, double y, double z) {return x+y+z;} ));
+    std::vector<double> a = {1.0, 2.0, 3.0};
+    std::vector<double> b = {2.0, 3.0};
+    double c = 5.0;
+    std::vector<double> d = (*someCrap)(a, b, c);
+    
+    std::cout << "vector output is:  [";
+    for (auto &in : d)
+    {
+            std::cout << " " << in;
+    }
+    std::cout << " ]" << std::endl;
 }
