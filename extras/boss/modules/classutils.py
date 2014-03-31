@@ -156,7 +156,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
         inheritance_line = ''
         for base_el in base_el_list:
             base_id            = base_el.get('type')
-            base_name          = cfg.id_dict[base_id].get('demangled').replace(' ','')
+            base_name          = cfg.id_dict[base_id].get('demangled')
 
             if base_name in cfg.accepted_classes:
                 abstract_base_name = getAbstractClassName(base_name, prefix=cfg.abstr_class_prefix)
@@ -348,7 +348,7 @@ def constructFactoryFunction(class_el, full_class_name, indent=4, template_types
     for el in constructor_elements:
 
         # Useful variables
-        # full_class_name  = el.get('demangled').replace(' ','').rsplit('::',1)[0]
+        # full_class_name  = el.get('demangled').rsplit('::',1)[0]
         short_class_name = full_class_name.split('::')[-1].split('<')[0]
         factory_name = 'Factory_' + short_class_name
         if len(template_types) > 0:

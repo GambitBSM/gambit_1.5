@@ -264,9 +264,6 @@ def run():
 
         class_name_pos = pos
 
-        print "CLASS: ", class_name_full
-        print "AT CLASS NAME POS: ", [file_content_nocomments[class_name_pos:class_name_pos+10]]
-
 
         # Special preparations for template classes:
         if is_template:
@@ -299,8 +296,6 @@ def run():
             insert_pos = class_name_pos + len(short_class_name)
             if is_template and src_is_specialization:
                 insert_pos += len(add_template_bracket)
-
-            print "AT INSERT POS: ", [file_content_nocomments[insert_pos:insert_pos+10]]
 
             # - Generate code
             add_code = ' : public virtual ' + short_abstr_class_name

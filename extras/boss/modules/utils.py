@@ -509,7 +509,7 @@ def getNamespaces(xml_el):
 
     if 'demangled' in xml_el.keys():
         full_name = xml_el.get('demangled')
-        modified_name = full_name.replace(' ','').split('<')[0]
+        modified_name = full_name.split('<')[0]
 
         namespaces = modified_name.split('::')[:-1]
 
@@ -541,7 +541,7 @@ def isAcceptedType(input_type, byname=False):
         type_el = cfg.id_dict[type_id]
 
         if type_el.tag in ['Class', 'Struct']:
-            demangled_name = type_el.get('demangled').replace(' ','')
+            demangled_name = type_el.get('demangled')
             if demangled_name in cfg.accepted_types:
                 is_accepted_type = True
 
