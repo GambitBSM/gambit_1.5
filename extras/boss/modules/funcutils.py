@@ -44,7 +44,7 @@ def getArgs(func_el):
 
             arg_dict['accepted_class'] = False
             if arg_type_el.tag == 'Class':
-                demangled_name = arg_type_el.get('demangled').replace(' ','')
+                demangled_name = arg_type_el.get('demangled')
                 if demangled_name in cfg.accepted_classes:
                     arg_dict['accepted_class'] = True
 
@@ -286,7 +286,7 @@ def ignoreFunction(func_el):
     # Check argument types
     args = getArgs(func_el)
     for arg_dict in args:
-        arg_type_name = arg_dict['type'].replace(' ','')
+        arg_type_name = arg_dict['type']
         if not utils.isAcceptedType(arg_type_name, byname=True):
             print 'non-accepted argument type: ', arg_type_name
             arg_types_accepted = False

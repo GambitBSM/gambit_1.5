@@ -1,17 +1,64 @@
+- Ideas after discussion with Lars:
+ 
+  -- For every member variable (Type t;) in the original class, create a reference variable in the abstract class
+     (Abstract__Type& t;) and initialize it in the constructor of the abstract class. For this initialization, 
+     use generated accessor functions that we put into the original class (e.g. Type& t_accessor() {return t;} )
+
+  -- Can we construct wrapper classes on the GAMBIT side that "happen to" have the same name as
+     the original backend classes, and that will provide nearly the exact same user-interface as when 
+     using the original class?
+
 
 
 STUFF TO DO:
 ------------
 
 
+
+
 - For public member variables, produce default getters/setters (or a single by-ref function)
+
+  member variable:
+
+    SomeType somevar
+
+  alternatives:
+
+    1)  
+        SomeType somevar_()              <-- Get method, by value
+        void somevar_(SomeType input)    <-- Set method, by value
+
+    2)  
+        SomeType& somevar_()             <-- Get method, by ref
+        void somevar_(SomeType& input)   <-- Set method, by ref
+
+    3)
+        SomeType& somevar_()             <-- Get & set method, by ref
+
+
+  Go for alternative #3. Implement as follows:
+
+    - In the original source file, create one method:
+
+        SomeType& somevar_GAMBIT()
+
+    - In the abstract class header, create two methods:
+
+        virtual SomeType& somevar_GAMBIT()
+
+        SomeType& somevar()
+        {
+          return 
+        }
+
+        ...NOT CORRECT. FIXME.
+
 
 
 - Friend classes and functions?
 
 
 - At the moment there's no way to deal with function pointers as return/argument type...
-  
   -- To identify function pointers, use the XML element.tag: First look for tag 'PointerType' and then for 'FunctionType'.
 
 
@@ -22,11 +69,6 @@ STUFF TO DO:
 
 
 - Add nice typedefs to SomeCode_types.hpp  (e.g.: typedef GAMBIT_ClassX Abstract__ClassX; )
-
-
-- Code cleanup: In most of decode we use .replace(' ','') to remove blanks from the class/function/type names given by
-                the "demangled" value of XML elements. Should we force this everywhere? Atm we don't do it for the typenames 
-                returned by utils.findType or utils.getArgs. (The blanks *are* needed to write acceptable C++ code).
 
 
 - When creating cfg.std_types_dict, must check template arguments before accepting template specializations.
@@ -76,6 +118,13 @@ STUFF TO DO:
     any of the specializations (how?)
 
 ...........................................................................
+
+
+DONE! -- Code cleanup: In most of decode we use .replace(' ','') to remove blanks from the class/function/type names given by
+                       the "demangled" value of XML elements. Should we force this everywhere? Atm we don't do it for the typenames 
+                       returned by utils.findType or utils.getArgs. (The blanks *are* needed to write acceptable C++ code).
+
+                       Will try to remove all the .replace(' ','')
 
 
 DONE! -- Only write _GAMBIT type wrappers for member functions using native types.

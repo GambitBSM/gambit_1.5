@@ -135,13 +135,12 @@ def main():
                 pass
             if is_std_type:
                 if 'demangled' in el.keys():
-                    std_type_name = el.get('demangled').replace(' ','')    
+                    std_type_name = el.get('demangled')    
                 else:
                     std_type_name = el.get('name')
 
                 cfg.std_types_dict[std_type_name] = el
                 
-                # print 'GOT STD TYPE: ', el.get('name')
 
         # for el in root.findall('Class'):
         #     if utils.isStdType(el):
@@ -162,7 +161,7 @@ def main():
             count = 0
             mini_class_dict = {}
             for el in root.findall('Class'):
-                demangled_class_name = el.get('demangled').replace(' ','')
+                demangled_class_name = el.get('demangled')
                 if coords[0] == 0:
                     # then, new screen of classes to choose from
                     coords[0] += 1
@@ -192,7 +191,7 @@ def main():
                     cfg.accepted_classes.append(mini_class_dict[choices[0].strip()])
                     choices = choices[2].partition(',')
         for el in root.findall('Class'):
-            demangled_class_name = el.get('demangled').replace(' ','')
+            demangled_class_name = el.get('demangled')
             if demangled_class_name in cfg.accepted_classes:
                 cfg.class_dict[demangled_class_name] = el
             elif options.list_classes_flag and utils.isNative(el):
@@ -223,7 +222,7 @@ def main():
                 # If underlying type is a class/struct, check if it's acceptable
                 elif type_el.tag in ['Class', 'Struct']:
                     if 'demangled' in type_el.keys():
-                        complete_type_name = type_el.get('demangled').replace(' ','')
+                        complete_type_name = type_el.get('demangled')
                     else:
                         complete_type_name = type_el.get('name')
                     
@@ -252,7 +251,7 @@ def main():
                     func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
                 else:
                     func_name_full = demangled_name.split('(',1)[0]
-                func_name_full = func_name_full.replace(' ','')
+                func_name_full = func_name_full
                 if func_name_full in cfg.accepted_functions:
                     cfg.func_dict[func_name_full] = el
                 elif (options.list_classes_flag) and (utils.isNative(el)):
@@ -262,11 +261,6 @@ def main():
         # Update global list: accepted types
         fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
         cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.accepted_classes + cfg.typedef_dict.keys()
-        print
-        for std_type in cfg.std_types_dict.keys():
-            print 'STD TYPES DICT: ', std_type
-        print 
-
 
 
 
@@ -286,7 +280,7 @@ def main():
             print 'Functions:'
             print '----------'
             for func_el in cfg.func_dict.values():
-                extended_name = func_el.get('demangled').replace(' ','')
+                extended_name = func_el.get('demangled')
                 print ' - ' + extended_name
             print
 
