@@ -68,7 +68,7 @@ int main()
     // instantiated as follows
 
     int n = 1;  // For now, we just generate a 1-dim function
-    BFptr(DMradialProfile) profile1D(new DMradialProfile("NFW", n, pVector));
+    BFptr profile1D(new DMradialProfile("NFW", n, pVector));
     // Notes: The constructor of DMradialProfile needs informatino about the
     // profile we are interested in, the dimensionality (reasonable values are
     // here 1 or 3), and a vector with the profile parameters (depends on the
@@ -116,13 +116,13 @@ int main()
     // A) Generating functions from tables
     BFargVec xgrid; xgrid.push_back(1.); xgrid.push_back(2.); xgrid.push_back(3.); xgrid.push_back(4.);
     BFargVec ygrid; ygrid.push_back(4.); ygrid.push_back(3.); ygrid.push_back(2.); ygrid.push_back(1.);
-    BFptr(BFinterpolation) interpolated1D(new BFinterpolation(xgrid, ygrid, 1));
+    BFptr interpolated1D(new BFinterpolation(xgrid, ygrid, 1));
     std::cout << "Value of interpolated1D: " << (*interpolated1D)(2.5) << std::endl;
 
 
     // B) Constrution of new function objects using the C++11 lambda
     // expressions.  This is neat.
-    BFptr(BFfromPlainFunction<double (double, double)>) fromLambda(new BFfromPlainFunction<double (double, double)>( [](double r, double l)  {return 1/(0.0001+r) * l * 2;} ));
+    BFptr fromLambda(new BFfromPlainFunction<double (double, double)>( [](double r, double l)  {return 1/(0.0001+r) * l * 2;} ));
     std::cout << "Value from fromLambda: " << (*fromLambda)(129.6, 1.0) << std::endl;
 
 
@@ -141,7 +141,7 @@ int main()
 
 
     // E) Write to file
-    BFptr(BFfromPlainFunction<double (double)>) fromLambdaSin(new BFfromPlainFunction<double (double)>( [](double x)  {return sin(x);} ));
+    BFptr fromLambdaSin(new BFfromPlainFunction<double (double)>( [](double x)  {return sin(x);} ));
     std::ofstream os;
     os.open("test.dat");
     fromLambdaSin->writeToFile(linspace(-20, 20, 1000), os);
@@ -149,7 +149,7 @@ int main()
 
 
     // F) Complicated integrants
-    BFptr(BFfromPlainFunction<double (double)>) withPole(new BFfromPlainFunction<double (double)>( [](double x)  {return sin(x)/(x+0.000001);} ));
+    BFptr withPole(new BFfromPlainFunction<double (double)>( [](double x)  {return sin(x)/(x+0.000001);} ));
     std::cout << "Result from complicated integral: " << (*withPole->integrate(0, -1., 1.))() << std::endl;
 
 
@@ -177,14 +177,14 @@ int main()
     // H) Complicated integration
     // --------------------------
 
-    BFptr(BFfromPlainFunction<double (double)>) newLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return x*x;} ));
+    BFptr newLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return x*x;} ));
     std::cout << " Final integral: " << (*newLambda->integrate(0, 0., 1.)->set_epsrel(1e-3)->set_epsrel(1e-2))() << std::endl;
 
 
     // I) Adding and removing parameters
     // ---------------------------------
 
-    BFptr(BFfromPlainFunction<double (double)>) moreLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    BFptr moreLambda(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
     std::cout << "adding/removing parameters: " << (*moreLambda->addPar(0)->fixPar(1, 3.))(2.) << std::endl;
 
     
@@ -196,7 +196,8 @@ int main()
     // H) Let's input a vector and hope for the best.
     // ----------------------------------------------
     
-    BFptr(BFfromPlainFunction<double (double, double, double)>) someCrap(new BFfromPlainFunction<double (double, double, double)>( [](double x, double y, double z) {return x+y+z;} ));
+    //BF_temp_ptr(BFfromPlainFunction<double (double, double, double)>) 
+    BFptr someCrap(new BFfromPlainFunction<double (double, double, double)>( [](double x, double y, double z) {return x+y+z;} ));
     std::vector<double> a = {1.0, 2.0, 3.0};
     std::vector<double> b = {2.0, 3.0};
     double c = 5.0;
@@ -208,4 +209,13 @@ int main()
             std::cout << " " << in;
     }
     std::cout << " ]" << std::endl;
+    
+    BFptr moreLambda1(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    //BF_temp_ptr(BFfromPlainFunction2<double (double)>) 
+    BFptr moreLambda2(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    BFptr moreLambda3;
+    BFptr DiffYield3Body(new BFconstant(0., 1));
+    moreLambda3 = moreLambda1 + moreLambda2;
+    BFptr temp = moreLambda3;
+    BFptr temp2 = temp;
 }
