@@ -82,9 +82,9 @@ int main()
 
     std::cout << "Value of profile1D: " << (*profile1D)(1) << std::endl;  // with a single double argument
 
-    BFargVec rVector;
-    rVector.push_back(1.);
-    std::cout << "Value of profile1D: " << (*profile1D).value(rVector) << std::endl;  // with a vector argument
+    //BFargVec rVector;
+    //rVector.push_back(1.);
+    //std::cout << "Value of profile1D: " << (*profile1D).value(rVector) << std::endl;  // with a vector argument
 
 
     // THIRD RULE:
@@ -96,14 +96,14 @@ int main()
     // new n dimensional base function object that is rotationally symmetric.
     // Its radial depdence is described by profile1D.
  
-    BFptr profile3D = profile1D->rotSym(3);
+    auto profile3D = profile1D->rotSym(3);
     // Note: an alternative syntax is
     //   BFptr profile(new RotSym(profile1D, 3));
 
     // Example 2: with fixPar(i, x_i), we can fix the i-th parameter to x_i,
     // and generate in that way a new n-1 dimensional function
 
-    BFptr slice2D = profile3D->fixPar(1, 2.3);
+    auto slice2D = profile3D->fixPar(1, 2.3);
 
     // Evaluating these functions gives the expected results
     std::cout << "Value of profile1D: " << (*profile3D)(1,2,3) << std::endl;
@@ -123,21 +123,21 @@ int main()
     // B) Constrution of new function objects using the C++11 lambda
     // expressions.  This is neat.
     BFptr fromLambda(new BFfromPlainFunction<double (double, double)>( [](double r, double l)  {return 1/(0.0001+r) * l * 2;} ));
-    std::cout << "Value from fromLambda: " << (*fromLambda)(129.6, 1) << std::endl;
+    std::cout << "Value from fromLambda: " << (*fromLambda)(129.6, 1.0) << std::endl;
 
 
     // C) Performing integrations over functions
-    BFptr integrated = fromLambda->integrate(0, 0., 10.);  // Integration over r = 0...10
+    auto integrated = fromLambda->integrate(0, 0., 10.);  // Integration over r = 0...10
     std::cout << "Integrated: " << (*integrated)(1) << std::endl;  // l = 1
     std::cout << "Integrated: " << (*integrated)(2) << std::endl;  // l = 2
     // Integrals can be chained to get integrals over e.g. 2-dim space:
-    BFptr integratedCompletely = integrated->integrate(0, 0., 10.);  // Integration over r,l = 0...10
+    auto integratedCompletely = integrated->integrate(0, 0., 10.);  // Integration over r,l = 0...10
     std::cout << "Complete integration: " << (*integratedCompletely)() << std::endl;
 
 
     // D) Tabularizing analytical functions
     xgrid = linspace(1, 100, 100);
-    BFptr tabulate = integrated->tabulate(xgrid);
+    auto tabulate = integrated->tabulate(xgrid);
 
 
     // E) Write to file
@@ -171,7 +171,7 @@ int main()
     // which takes as void pointer a pointer to the base function object that
     // implements it.  Example:
 
-    std::cout << BFplainFunction(1, 2, 2, &profile3D) << std::endl;
+    std::cout << BFplainFunction(1, 2, 2, profile3D) << std::endl;
 
 
     // H) Complicated integration
@@ -196,6 +196,7 @@ int main()
     // H) Let's input a vector and hope for the best.
     // ----------------------------------------------
     
+    //BF_temp_ptr(BFfromPlainFunction<double (double, double, double)>) 
     BFptr someCrap(new BFfromPlainFunction<double (double, double, double)>( [](double x, double y, double z) {return x+y+z;} ));
     std::vector<double> a = {1.0, 2.0, 3.0};
     std::vector<double> b = {2.0, 3.0};
@@ -208,4 +209,13 @@ int main()
             std::cout << " " << in;
     }
     std::cout << " ]" << std::endl;
+    
+    BFptr moreLambda1(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    //BF_temp_ptr(BFfromPlainFunction2<double (double)>) 
+    BFptr moreLambda2(new BFfromPlainFunction<double (double)>( [](double x)  {return 1./x/x;} ));
+    BFptr moreLambda3;
+    BFptr DiffYield3Body(new BFconstant(0., 1));
+    moreLambda3 = moreLambda1 + moreLambda2;
+    BFptr temp = moreLambda3;
+    BFptr temp2 = temp;
 }
