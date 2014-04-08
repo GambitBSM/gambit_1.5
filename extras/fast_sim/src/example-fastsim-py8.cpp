@@ -261,7 +261,6 @@ void MyAnalysis::analyze(Pythia8::Event& event) {
   HEP_Simple_Lib::Event reco_event;
   _sim.setParticles(_electrons, _muons, _photons, _chargedhads, _bjets, _tauhads, _weakly_interacting);
 
-  //cout << " do detector response " << std::endl;
   _sim.doDetectorResponse();
   _sim.getRecoEvent(reco_event);
   FillHistograms(reco_event);
