@@ -1,7 +1,7 @@
 #pragma once
 
-#include "simple_hep_lib/Particle.hpp"
-#include "simple_hep_lib/Jet.hpp"
+#include "simple_hep_lib/TheParticle.hpp"
+#include "simple_hep_lib/TheJet.hpp"
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 #include <algorithm>

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <boost/serialization/access.hpp>
-#include "simple_hep_lib/MathUtils.hpp"
-#include "simple_hep_lib/Vectors.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
+#include "simple_hep_lib/TheVectors.hpp"
 
 namespace hep_simple_lib {
 

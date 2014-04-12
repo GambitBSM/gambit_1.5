@@ -166,28 +166,56 @@ namespace fast_sim {
 
   int FastSim::FastSim_ObjectReader(const Json::Value phys_objects,PProperties &particle_props) {
 
-     
-    particle_props._pid = phys_objects.get("type","13").asInt();
-    particle_props._level = phys_objects.get("level","loose").asString();
-    particle_props._min_pt = phys_objects.get("min_pt","0.0").asDouble();
-    particle_props._min_eta = phys_objects.get("min_eta","-20000.0").asDouble();
-    particle_props._max_eta = phys_objects.get("max_eta","20000.0").asDouble();
-    particle_props._iso = phys_objects.get("iso","20000").asDouble();
+    // need to add warnings if the fields are missing, when we get the logger
+     std::cout << "type " << std::endl;
 
+    if (not phys_objects["type"].empty()) 
+      particle_props._pid = phys_objects.get("type","13").asInt();
+
+     std::cout << "level " << std::endl;
+    if (not phys_objects["level"].empty()) 
+      particle_props._level = phys_objects.get("level","loose").asString();
+
+    if (not phys_objects["min_pt"].empty()) 
+      particle_props._min_pt = phys_objects.get("min_pt","0.0").asDouble();
+    std::cout << "min_pt " << std::endl;
+    if (not phys_objects["min_eta"].empty()) 
+      particle_props._min_eta = phys_objects.get("min_eta","-20000.0").asDouble();
+    std::cout << "min_eta " << std::endl;
+    if (not phys_objects["max_eta"].empty()) 
+      particle_props._max_eta = phys_objects.get("max_eta","20000.0").asDouble();
+    if (not phys_objects["iso"].empty()) 
+      particle_props._iso = phys_objects.get("iso","20000").asDouble();
+    std::cout << "iso " << std::endl;
+
+    std::cout << phys_objects["acceptance_reco"].empty() << std::endl;
     if (not phys_objects["acceptance_reco"].empty()) {
       const Json::Value accept_objects = phys_objects["acceptance_reco"];
 
       particle_props._test_acceptance = true; 
       for (Json::ValueIterator itr = accept_objects.begin(); itr != accept_objects.end(); itr++) {
 
-        if ("eta" == (*itr).get("name","eta").asString()) 
+        if (((*itr)["name"].empty()) || ((*itr)["info"].empty())) {
+          std::cout << " name or the histogram of acceptance is missing " << std::endl;
+          continue;
+        }
+          
+        std::cout << "reading the acceptance " << std::endl;
+        if ("eta" == (*itr).get("name","eta").asString()) {
+
+          std::cout << "eta " << (*itr).get("name","eta").asString() << std::endl;
           FastSim_AcceptanceItemReader(*itr,particle_props._eta);
+        }
         else
+        {
+          std::cout << "not eta " <<  (*itr).get("name","eta").asString() << std::endl;
           FastSim_AcceptanceItemReader(*itr,particle_props._pt);
+        }
 
       }
     }
     else {// the acceptance was null was it should be perfect
+        std::cout << "acceptance was null" << std::endl;
 
      particle_props._test_acceptance = false;
     }
@@ -211,13 +239,19 @@ namespace fast_sim {
   int FastSim::FastSim_InfoReader(const Json::Value histo_object, int &ndim, int &nbinsx, int &nbinsy,
       std::vector<double> &bin_edgesx, std::vector<double> &bin_edgesy, std::vector<double> &histo_values) {
 
+    if ((histo_object["ndim"].empty()) || (histo_object["nbinx"].empty()) || (histo_object["axisx"].empty())) {
+      std::cout << " missing info fields " << std::endl;
+      return -1;
+    }
+
     ndim = histo_object.get("ndim","1").asInt();
     nbinsx = histo_object.get("nbinx","50").asInt();
 
     // now get the bin edges
     const Json::Value axisx  = histo_object["axisx"];
     FastSim_ArrayReader(axisx,bin_edgesx);
-    if ((int)bin_edgesx.size() != nbinsx+1) {
+    std::cout << " counted " << bin_edgesx.size() << " nbinsx " << nbinsx << std::endl;
+    if ((int)bin_edgesx.size() != (nbinsx+1)) {
       std::cout << "error number of x bins and the number of y bin edges are wrong: " << bin_edgesx.size() << " " << nbinsx << std::endl;
       return -1;
     }

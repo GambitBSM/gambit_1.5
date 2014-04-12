@@ -22,9 +22,9 @@
 #ifndef __FASTSIM_HPP__
 #define __FASTSIM_HPP__
 
-#include "Particle.hpp"
-#include "Jet.hpp"
-#include "Event.hpp"                 // Gambit's event interface
+#include "simple_hep_lib/Particle.hpp"
+#include "simple_hep_lib/Jet.hpp"
+#include "simple_hep_lib/Event.hpp"                 // Gambit's event interface
 #include "DetectorResponse.hpp"
 #include "json/json.h"
 #include <vector>
@@ -43,15 +43,15 @@ namespace fast_sim {
 
   typedef struct {
 
-    std::vector<HEP_Simple_Lib::Jet*> _jets;
-    std::vector<HEP_Simple_Lib::Jet*> _bjets;
+    std::vector<hep_simple_lib::Jet*> _jets;
+    std::vector<hep_simple_lib::Jet*> _bjets;
 
-    std::vector<HEP_Simple_Lib::Particle*> _iso_electrons;
-    std::vector<HEP_Simple_Lib::Particle*> _iso_muons;
-    std::vector<HEP_Simple_Lib::Particle*> _iso_photons;
-    std::vector<HEP_Simple_Lib::Particle*> _noniso_electrons;
-    std::vector<HEP_Simple_Lib::Particle*> _noniso_muons;
-    std::vector<HEP_Simple_Lib::Particle*> _noniso_photons;
+    std::vector<hep_simple_lib::Particle*> _iso_electrons;
+    std::vector<hep_simple_lib::Particle*> _iso_muons;
+    std::vector<hep_simple_lib::Particle*> _iso_photons;
+    std::vector<hep_simple_lib::Particle*> _noniso_electrons;
+    std::vector<hep_simple_lib::Particle*> _noniso_muons;
+    std::vector<hep_simple_lib::Particle*> _noniso_photons;
 
     double _MET;
     double _METPhi;
@@ -110,17 +110,17 @@ namespace fast_sim {
       void FindCells();
 
       // this functions set the particle list for each type
-      void setParticles(std::vector<HEP_Simple_Lib::Particle*> electrons, std::vector<HEP_Simple_Lib::Particle*> muons,
-          std::vector<HEP_Simple_Lib::Particle*> photons,std::vector<HEP_Simple_Lib::Particle*>charged_hadrons,
-          std::vector<HEP_Simple_Lib::Particle*> bjets, std::vector<HEP_Simple_Lib::Particle*> tauhads, std::vector<HEP_Simple_Lib::Particle*> weaklyint );
-      void setBQuarks(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setElectrons(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setMuons(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setPhotons(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setTauHads(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setChargedHadrons(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setNonPromptChargedParticles(std::vector<HEP_Simple_Lib::Particle*> particles);
-      void setWeaklyInteracting(std::vector<HEP_Simple_Lib::Particle*> particles);
+      void setParticles(std::vector<hep_simple_lib::Particle*> electrons, std::vector<hep_simple_lib::Particle*> muons,
+          std::vector<hep_simple_lib::Particle*> photons,std::vector<hep_simple_lib::Particle*>charged_hadrons,
+          std::vector<hep_simple_lib::Particle*> bjets, std::vector<hep_simple_lib::Particle*> tauhads, std::vector<hep_simple_lib::Particle*> weaklyint );
+      void setBQuarks(std::vector<hep_simple_lib::Particle*> particles);
+      void setElectrons(std::vector<hep_simple_lib::Particle*> particles);
+      void setMuons(std::vector<hep_simple_lib::Particle*> particles);
+      void setPhotons(std::vector<hep_simple_lib::Particle*> particles);
+      void setTauHads(std::vector<hep_simple_lib::Particle*> particles);
+      void setChargedHadrons(std::vector<hep_simple_lib::Particle*> particles);
+      void setNonPromptChargedParticles(std::vector<hep_simple_lib::Particle*> particles);
+      void setWeaklyInteracting(std::vector<hep_simple_lib::Particle*> particles);
 
       void clear();
 
@@ -135,7 +135,7 @@ namespace fast_sim {
 
       double calcIsoEt(double or_eta, double or_phi);
 
-      bool CheckOverlap(HEP_Simple_Lib::Particle *p1, HEP_Simple_Lib::Particle *p2);
+      bool CheckOverlap(hep_simple_lib::Particle *p1, hep_simple_lib::Particle *p2);
 
       void calcMET();
       double MET();
@@ -155,7 +155,7 @@ namespace fast_sim {
       int NMuons(){ return _stable_muons.size(); }
 
 
-      void getRecoEvent(HEP_Simple_Lib::Event &event);
+      void getRecoEvent(hep_simple_lib::Event &event);
 
     private:
 
@@ -221,22 +221,22 @@ namespace fast_sim {
       PProperties* _rest;
 
       // the particles
-      std::vector<HEP_Simple_Lib::Particle*> _chargedhads;
-      std::vector<HEP_Simple_Lib::Particle*> _stable_interacting_particles;
-      std::vector<HEP_Simple_Lib::Particle*> _stable_electrons;
-      std::vector<HEP_Simple_Lib::Particle*> _stable_muons;
-      std::vector<HEP_Simple_Lib::Particle*> _stable_photons;
-      //std::vector<HEP_Simple_Lib::Particle*> _iso_electrons;
-      //std::vector<HEP_Simple_Lib::Particle*> _iso_muons;
-      //std::vector<HEP_Simple_Lib::Particle*> _iso_photons;
-      //std::vector<HEP_Simple_Lib::Particle*> _noniso_electrons;
-      //std::vector<HEP_Simple_Lib::Particle*> _noniso_muons;
-      //std::vector<HEP_Simple_Lib::Particle*> _noniso_photons;
-      std::vector<HEP_Simple_Lib::Particle*> _weakly_interacting;
-      std::vector<HEP_Simple_Lib::Particle*> _bquarks;
-      std::vector<HEP_Simple_Lib::Particle*> _tauhads;
-      std::vector<HEP_Simple_Lib::Jet*> _jets;
-      std::vector<HEP_Simple_Lib::Jet*> _bjets;
+      std::vector<hep_simple_lib::Particle*> _chargedhads;
+      std::vector<hep_simple_lib::Particle*> _stable_interacting_particles;
+      std::vector<hep_simple_lib::Particle*> _stable_electrons;
+      std::vector<hep_simple_lib::Particle*> _stable_muons;
+      std::vector<hep_simple_lib::Particle*> _stable_photons;
+      //std::vector<hep_simple_lib::Particle*> _iso_electrons;
+      //std::vector<hep_simple_lib::Particle*> _iso_muons;
+      //std::vector<hep_simple_lib::Particle*> _iso_photons;
+      //std::vector<hep_simple_lib::Particle*> _noniso_electrons;
+      //std::vector<hep_simple_lib::Particle*> _noniso_muons;
+      //std::vector<hep_simple_lib::Particle*> _noniso_photons;
+      std::vector<hep_simple_lib::Particle*> _weakly_interacting;
+      std::vector<hep_simple_lib::Particle*> _bquarks;
+      std::vector<hep_simple_lib::Particle*> _tauhads;
+      std::vector<hep_simple_lib::Jet*> _jets;
+      std::vector<hep_simple_lib::Jet*> _bjets;
       // measurements
       double _metx;
       double _mety;
