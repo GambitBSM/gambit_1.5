@@ -22,7 +22,8 @@
 
 #include "FastSim.hpp"
 #include "fastjet/ClusterSequence.hh"
-#include "MCUtils/MathUtils.h"
+#include "MathUtils.hpp"
+#include "MCUtils.hpp"
 #include <algorithm>
 #include <iostream>
 using namespace std;
@@ -36,13 +37,159 @@ namespace fast_sim {
     _metx = -1.0;
     _mety = -1.0;
 
+    _electron = NULL;
+    _muon = NULL;
+    _tau = NULL;
+    _photon = NULL;
+    _bjet = NULL;
+    _jet = NULL;
+    _rest = NULL;
+
     init(fast_sim::NOMINAL);
+  }
+
+  void FastSim::Baseline_Response() {
+    // this function has the baseline response 
+    //
+
+    // if the baseline was not defined in the json file then we need to specified default ones
+    PProperties *new_pprop;
+    if (_electron == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 11;
+      new_pprop->_min_pt = 25.0; // 25.0 GeV
+      new_pprop->_min_eta = -2.5;
+      new_pprop->_max_eta = 2.5;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _electron = new_pprop;
+    }
+    if (_muon == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 13;
+      new_pprop->_min_pt = 20.0; // 20.0 GeV
+      new_pprop->_min_eta = -2.5;
+      new_pprop->_max_eta = 2.5;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _muon = new_pprop;
+    }
+    if (_photon == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 22;
+      new_pprop->_min_pt = 20.0; // 20.0 GeV
+      new_pprop->_min_eta = -3.2;
+      new_pprop->_max_eta = 3.2;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _photon = new_pprop;
+    }
+    if (_bjet == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 5;
+      new_pprop->_min_pt = 10.0; // 20.0 GeV
+      new_pprop->_min_eta = -2.5;
+      new_pprop->_max_eta = 2.5;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _bjet = new_pprop;
+    }
+    if (_jet == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 0;
+      new_pprop->_min_pt = 10.0; // 20.0 GeV
+      new_pprop->_min_eta = -4.0;
+      new_pprop->_max_eta = 4.0;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _jet = new_pprop;
+    }
+    if (_rest == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 1;
+      new_pprop->_min_pt = 0.4; // 400 MeV
+      new_pprop->_min_eta = -4.0;
+      new_pprop->_max_eta = 4.0;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _rest = new_pprop;
+    }
+    if (_tau == NULL) {
+      new_pprop = new PProperties;
+      new_pprop->_pid = 15;
+      new_pprop->_min_pt = 20.0; // 25.0 GeV
+      new_pprop->_min_eta = -2.5;
+      new_pprop->_max_eta = 2.5;
+      new_pprop->_iso = 20000;
+      new_pprop->_test_acceptance = false;
+
+      _tau = new_pprop;
+    }
+
   }
 
 
   FastSim::~FastSim() {
 
     clear();
+
+   for (size_t i = 0; i < _detector_perf.size(); i++) {
+
+     if (_electron == _detector_perf[i])
+       _electron = NULL;
+
+     if (_muon == _detector_perf[i])
+       _muon = NULL;
+
+     if (_photon == _detector_perf[i])
+       _photon = NULL;
+
+     if (_tau == _detector_perf[i])
+       _tau = NULL;
+
+     if (_bjet == _detector_perf[i])
+       _bjet = NULL;
+
+     if (_jet == _detector_perf[i])
+       _jet = NULL;
+
+     if (_rest == _detector_perf[i])
+       _rest = NULL;
+
+     delete _detector_perf[i];
+   }
+
+   _detector_perf.clear();
+
+   if (_electron != NULL)
+     delete _electron;
+
+   if (_muon != NULL)
+     delete _muon;
+
+   if (_tau != NULL)
+     delete _tau;
+
+   if (_jet != NULL)
+     delete _jet;
+
+   if (_bjet != NULL)
+     delete _bjet;
+
+   if (_rest != NULL)
+     delete _rest;
+
+   if (_photon != NULL)
+     delete _photon;
+
+
+
     /*
     // for (size_t i = 0; i < _stable_electrons.size();i++) delete _stable_electrons[i];
     // _stable_electrons.clear();
@@ -80,6 +227,7 @@ namespace fast_sim {
         // initialise the cuts and calorimeter limits and granularity for  the NOMINAL
         cout << "Nominal sim" << endl;
 
+        /*
         _min_muon_pt = 20.0;  // GeV
         _min_ele_pt  = 25.0;  // GeV
         _min_jet_pt  = 10.0;  //GeV
@@ -91,6 +239,7 @@ namespace fast_sim {
         _minEt_isol_electron = 4.0;
         _minEt_isol_photon = 4.0; // GeV
 
+
         _max_jet_eta = 4.0;
         _max_ele_eta = 2.5;
         _max_muon_eta = 2.5;
@@ -101,7 +250,7 @@ namespace fast_sim {
         _min_muon_eta = -2.5;
         _min_photon_eta = -3.2;
         _min_tauhad_eta = -2.5;
-
+        */
 
         _calo_etamax = 5.0;  //GeV
         _calo_dphi =  0.01;
@@ -119,6 +268,8 @@ namespace fast_sim {
 
         _fastjet = true; // use fastjet antikt or cones (clustering)
         _count = 0;
+
+        Baseline_Response(); 
         break;
 
       default:
@@ -136,6 +287,25 @@ namespace fast_sim {
       cerr << "Error reading the FastSim param_card" << endl;
     }
 
+    for (std::vector<PProperties*>::iterator it = _detector_perf.begin();it != _detector_perf.end(); it++) {
+
+      if ((*it)->_level == "baseline") {
+
+        switch ((*it)->_pid) {
+        
+          case 11: _electron = (*it); break;
+          case 13: _muon =  (*it);break;
+          case 15: _tau =  (*it);break;
+          case 0: _jet =  (*it);break;
+          case 5: _bjet =  (*it);break;
+          case 22: _photon =  (*it);break;
+          case 1: _rest =  (*it);break;
+          default: ;
+        }
+      }
+    }
+
+    Baseline_Response(); 
   }
 
 
@@ -222,12 +392,18 @@ namespace fast_sim {
         cerr << "Warning: PID " << particles[i]->pid() << " found in the electron particle list" << endl;
         continue;
       }
-      if ((particles[i]->eta() < _min_ele_eta) or (particles[i]->eta() > _max_ele_eta)) continue;
+
+      if (_rest == NULL)
+        std::cout << "_rest is NULL" << std::endl;
+      if ((particles[i]->eta() < _rest->_min_eta) or (particles[i]->eta() > _rest->_max_eta)) continue;
+      if (particles[i]->pT() < _rest->_min_pt) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
 
-      if (particles[i]->pT() < _min_ele_pt) continue;
+      if ((particles[i]->eta() < _electron->_min_eta) or (particles[i]->eta() > _electron->_max_eta)) continue;
+
+      if (particles[i]->pT() < _electron->_min_pt) continue;
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
       _stable_electrons.push_back(chosen);
@@ -242,12 +418,16 @@ namespace fast_sim {
         continue;
       }
 
-      if ((particles[i]->eta() < _min_muon_eta) or (particles[i]->eta() > _max_muon_eta)) continue;
+      if ((particles[i]->eta() < _rest->_min_eta) or (particles[i]->eta() > _rest->_max_eta)) continue;
+      if (particles[i]->pT() < _rest->_min_pt) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
 
-      if (particles[i]->pT() < _min_muon_pt) continue;
+
+      if ((particles[i]->eta() < _muon->_min_eta) or (particles[i]->eta() > _muon->_max_eta)) continue;
+
+      if (particles[i]->pT() < _muon->_min_pt) continue;
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
       _stable_muons.push_back(chosen);
@@ -262,12 +442,15 @@ namespace fast_sim {
         continue;
       }
 
-      if ((particles[i]->eta() < _min_photon_eta) or (particles[i]->eta() > _max_photon_eta)) continue;
+      if ((particles[i]->eta() < _rest->_min_eta) or (particles[i]->eta() > _rest->_max_eta)) continue;
+      if (particles[i]->pT() < _rest->_min_pt) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen); //< @todo Build later?
 
-      if (particles[i]->pT() < _min_photon_pt) continue;
+      if ((particles[i]->eta() < _photon->_min_eta) or (particles[i]->eta() > _photon->_max_eta)) continue;
+
+      if (particles[i]->pT() < _photon->_min_pt) continue;
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
       _stable_photons.push_back(chosen);
@@ -286,11 +469,15 @@ namespace fast_sim {
         continue;
       }
 
-      if ((particles[i]->eta() < _min_bjet_eta) or (particles[i]->eta() > _max_bjet_eta)) continue;
+      //if ((particles[i]->eta() < _rest->_min_eta) or (particles[i]->eta() > _rest->_max_eta)) continue;
+      //if (particles[i]->pT() < _rest->_min_pt) continue;
 
-      Particle* chosen = new Particle(particles[i]);
-      _stable_interacting_particles.push_back(chosen); //< @todo Build later?
-      if (particles[i]->pT() < _min_bjet_pt) continue;
+      //Particle* chosen = new Particle(particles[i]);
+      //_stable_interacting_particles.push_back(chosen); //< @todo Build later?
+
+
+      if ((particles[i]->eta() < _bjet->_min_eta) or (particles[i]->eta() > _bjet->_max_eta)) continue;
+      if (particles[i]->pT() < _bjet->_min_pt) continue;
 
       //chosen = new Particle(particles[i]);
       //_bquarks.push_back(chosen);
@@ -305,11 +492,13 @@ namespace fast_sim {
         continue;
       }
 
-      if ((particles[i]->eta() < _min_tauhad_eta) or (particles[i]->eta() > _max_tauhad_eta)) continue;
+      //if ((particles[i]->eta() < _min_tauhad_eta) or (particles[i]->eta() > _max_tauhad_eta)) continue;
 
-      Particle* chosen = new Particle(particles[i]);
-      _stable_interacting_particles.push_back(chosen); //< @todo Build later?
-      if (particles[i]->pT() < _min_tauhad_pt) continue;
+      //Particle* chosen = new Particle(particles[i]);
+      //_stable_interacting_particles.push_back(chosen); //< @todo Build later?
+
+      if ((particles[i]->eta() < _tau->_min_eta) or (particles[i]->eta() > _tau->_max_eta)) continue;
+      if (particles[i]->pT() < _tau->_min_pt) continue;
 
       //chosen = new Particle(particles[i]);
       //_tauhads.push_back(chosen);
@@ -324,8 +513,8 @@ namespace fast_sim {
         continue;
       }
 
-      if (fabs(particles[i]->eta()) > _calo_etamax) continue;
-      if (particles[i]->pT() < _min_track_pt) continue;
+      if ((particles[i]->eta() < _rest->_min_eta) or (particles[i]->eta() > _rest->_max_eta)) continue;
+      if (particles[i]->pT() < _rest->_min_pt) continue;
 
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
@@ -335,6 +524,7 @@ namespace fast_sim {
 
   void FastSim::setNonPromptChargedParticles(vector<Particle*> particles) {
     // this needs work
+    /*
     for (size_t i = 0; i < particles.size(); ++i) {
       //    if (abs(particles[i]->pid()) == 11 || abs(particles[i]->pid()) == 13) {
       //      cerr << "Warning: PID " << particles[i]->pid() << " found in the charged hadron particle list" << endl;
@@ -345,6 +535,7 @@ namespace fast_sim {
       _chargedhads.push_back(chosen);
       _stable_interacting_particles.push_back(chosen);
     }
+    */
   }
 
 
@@ -630,10 +821,10 @@ namespace fast_sim {
 
     // run the clustering, extract the jets
     fastjet::ClusterSequence cs(calo_cells, jet_def);
-    vector<fastjet::PseudoJet> alljets = sorted_by_pt(cs.inclusive_jets(_min_jet_pt));
+    vector<fastjet::PseudoJet> alljets = sorted_by_pt(cs.inclusive_jets(_jet->_min_pt));
 
 
-    fastjet::Selector sel = fastjet::SelectorEtaRange(-_max_jet_eta,_max_jet_eta);
+    fastjet::Selector sel = fastjet::SelectorEtaRange(-_jet->_max_eta,_jet->_max_eta);
     vector<fastjet::PseudoJet> jets = sel(alljets);
 
     //cout << " size of jets " << jets.size() << " all jets " << alljets.size() << endl;
@@ -999,7 +1190,7 @@ namespace fast_sim {
               phic  = _cellphi[i];
               etac  = _celleta[i];
               etad = etac-temp_cluseta;
-              phid = MCUtils::deltaphi(phic, temp_clusphi);
+              phid = HEP_Simple_Lib::delta_phi(phic, temp_clusphi);
 
               dr = sqrt(pow(etad,2)+ pow(phid,2));
 
@@ -1077,10 +1268,10 @@ namespace fast_sim {
     for (size_t i = 0; i <_clusmom.size();i++) {
 
       // if the jet pt is less than the minimum discarded
-      if  (_clusmom[i] <= _min_jet_pt)
+      if  (_clusmom[i] <= _jet->_min_pt)
         continue;
 
-      if  (fabs(_clusweta[i]) <= _max_jet_eta)
+      if  (fabs(_clusweta[i]) <= _jet->_max_eta)
         continue;
 
       px = _clusmom[i]*cos(_cluswphi[i]);
@@ -1109,7 +1300,7 @@ namespace fast_sim {
       phi = _cellphi[i];
 
 
-      dphi = MCUtils::deltaphi(or_phi,phi);
+      dphi = HEP_Simple_Lib::delta_phi(or_phi,phi);
       deta = fabs(or_eta - eta);
       dR = sqrt(dphi*dphi + deta*deta);
 

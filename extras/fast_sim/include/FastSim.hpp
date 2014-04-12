@@ -26,6 +26,7 @@
 #include "Jet.hpp"
 #include "Event.hpp"                 // Gambit's event interface
 #include "DetectorResponse.hpp"
+#include "json/json.h"
 #include <vector>
 
 namespace fast_sim {
@@ -57,7 +58,30 @@ namespace fast_sim {
 
   } FastSimEvent;
 
+  struct Acceptance {
 
+    std::string _name;
+    int _nbinsx;
+    int _nbinsy;
+    int _ndim;
+    std::vector<double> _bin_edges_x;
+    std::vector<double> _binvals;
+  };
+
+
+
+  struct PProperties {
+
+    int _pid;
+    std::string _level;
+    double _min_pt;
+    double _min_eta;
+    double _max_eta;
+    double _iso;
+    bool _test_acceptance; // determines whether the particle has an acceptance or not
+    Acceptance _pt;
+    Acceptance _eta;
+  };
 
 
   class FastSim {
@@ -68,7 +92,19 @@ namespace fast_sim {
       void init(DetectorType which);
       void init(std::string filename);
 
+
+      void Baseline_Response();
+
       int FastSim_Reader(std::string filename);
+      int FastSim_ObjectReader(Json::Value phys_object, PProperties &particle_props);
+
+
+      int FastSim_AcceptanceItemReader(const Json::Value reco_object, Acceptance &efficiency);
+      int FastSim_InfoReader(const Json::Value histo_object, int &ndim, int &nbinsx, int &nbinsy,
+      std::vector<double> &bin_edgesx, std::vector<double> &bin_edgesy, std::vector<double> &histo_values);
+      int FastSim_ArrayReader(const Json::Value array, std::vector<double> &values );
+
+
 
       void doDetectorResponse();
       void FindCells();
@@ -137,12 +173,13 @@ namespace fast_sim {
       double _et_seedmin; // the minimum transverse energy a cell can have to be a seed for a cluster
       double _cluster_rcone;
       double _cluster_etmin; // the minimum energy that a cluster can have otherwise discarded
+      double _min_dr;
 
       bool _fastjet;
       int _count;
 
       // the particles
-      //
+      /*
       double _min_muon_pt;
       double _min_ele_pt;
       double _min_photon_pt;
@@ -164,14 +201,24 @@ namespace fast_sim {
       double _min_ele_eta;
       double _min_muon_eta;
       double _min_photon_eta;
-      double _min_tauhad_eta;
+      double _min_tauhad_eta; 
 
       // the isolation
       double _minEt_isol_muon; 
       double _minEt_isol_electron; 
-      double _minEt_isol_photon;
+      double _minEt_isol_photon; */
 
 
+      std::vector<PProperties*> _detector_perf;
+
+      // the loose properties, the baseline cuts
+      PProperties* _electron;
+      PProperties* _muon;
+      PProperties* _tau;
+      PProperties* _photon;
+      PProperties* _jet;
+      PProperties* _bjet;
+      PProperties* _rest;
 
       // the particles
       std::vector<HEP_Simple_Lib::Particle*> _chargedhads;

@@ -1,0 +1,34 @@
+CC = g++ 
+FC = gfortran
+CCEXTRA= -pipe -pg -Wextra -g 
+LNFLAGS += -g
+
+PY8_CXXFLAGS := $(shell pythia8-config --cxxflags)
+PY8_LDFLAGS := $(shell pythia8-config --libs)
+
+ROOT_CXXFLAGS := $(shell root-config --cflags)
+ROOT_LDFLAGS := $(shell root-config --libs)
+
+FJ_CXXFLAGS := $(shell fastjet-config --cxxflags)
+CFLAGS += -O3 -Wall -Werror=uninitialized -g -fPIC -pedantic -fopenmp
+
+BACKENDDIR = ../../../modules/Backends
+FASTSIMDIR = /import/sydpp2/atlas/Aldos_Data/gambit/hepforge2/extras/fast_sim
+
+$(FASTSIMDIR)/src/%.o : $(FASTSIMDIR)/src/%.cpp
+	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -I$(FASTSIMDIR)/include/simple_hep_lib -fPIC $< -o $@
+$(FASTSIMDIR)/src/%.o : $(FASTSIMDIR)/src/%.cc
+	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -I$(FASTSIMDIR)/include/simple_hep_lib -fPIC $< -o $@
+
+FJ_DIR := $(shell fastjet-config --prefix)
+
+#$(BACKENDDIR)/lib/libfastsim.so: $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/fastsim_interface.o $(FASTSIMDIR)/src/jsoncpp.o
+libfastsim.so: $(FASTSIMDIR)/src/FastSim_Reader.o $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/fastsim_interface.o $(FASTSIMDIR)/src/jsoncpp.o
+# Intention is to pull symbols from FastJet into the fastsim backend (same should happen for direct pythia event filling... and any analyses that use jet structure)
+# Currently breaks formost symbols because symbols can't be copied unless libfastjet.a was unusually built with the -fPIC flag
+	$(CC) -shared -L$(FJ_DIR)/lib -o $@ $^ -Wl,-Bstatic -lfastjettools -Wl,-Bstatic -lfastjet -Wl,-Bdynamic
+#	$(CC) -shared -o $@ $^ $(FJ_LDFLAGS)
+
+fastsim_example: $(FASTSIMDIR)/src/libfastsim.so
+	$(CC) $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -I$(FASTSIMDIR)/include/simple_hep_lib $(PY8_CXXFLAGS) $(ROOT_CXXFLAGS) -fPIC $(PY8_LDFLAGS) $(ROOT_LDFLAGS) -L./ -lfastsim example-fastsim-py8.cpp -o $@
+
