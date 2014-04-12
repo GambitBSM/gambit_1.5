@@ -3,10 +3,10 @@
 /// @file Utility functions for querying PDG ID codes, including HepPID wrapping
 /// @author Andy Buckley <andy.buckley@cern.ch>
 
-#include "PIDCodes.hpp"
-#include "MathUtils.hpp"
+#include "simple_hep_lib/ThePIDCodes.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
   namespace PID {
 
 

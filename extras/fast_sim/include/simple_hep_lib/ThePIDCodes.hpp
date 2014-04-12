@@ -3,7 +3,7 @@
 /// @file Convenience names for PDG ID codes, for cleaner code
 /// @author Andy Buckley <andy.buckley@cern.ch>
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
     namespace PID {
 
 

@@ -1,15 +1,15 @@
 #pragma once
 
 // Just convenience includes
-#include "MathUtils.hpp"
-#include "Vectors.hpp"
-#include "Event.hpp"
-#include "Particle.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
+#include "simple_hep_lib/TheVectors.hpp"
+#include "simple_hep_lib/TheEvent.hpp"
+#include "simple_hep_lib/TheParticle.hpp"
 //#include "FastJetUtils.hpp"
 //#include "Py8Utils.hpp"
 
 
-namespace HEP_Simple_lib {
+namespace hep_simple_lib {
 
 
     /// @name PID stuff

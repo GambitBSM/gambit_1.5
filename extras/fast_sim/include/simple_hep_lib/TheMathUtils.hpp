@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <vector>
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
 
 
     /// @name Numerical helpers

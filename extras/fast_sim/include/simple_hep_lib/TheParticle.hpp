@@ -1,10 +1,10 @@
 #pragma once
 
 #include <boost/serialization/access.hpp>
-#include "MathUtils.hpp"
-#include "Vectors.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
+#include "simple_hep_lib/TheVectors.hpp"
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
 
 
     /// Simple particle class, encapsulating a momentum 4-vector and adding some extra ID info

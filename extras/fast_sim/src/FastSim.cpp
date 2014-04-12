@@ -22,14 +22,14 @@
 
 #include "FastSim.hpp"
 #include "fastjet/ClusterSequence.hh"
-#include "MathUtils.hpp"
-#include "MCUtils.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
+#include "simple_hep_lib/TheMCUtils.hpp"
 #include <algorithm>
 #include <iostream>
 using namespace std;
 //using namespace fastjet;
 
-using namespace HEP_Simple_Lib;
+using namespace hep_simple_lib;
 
 namespace fast_sim {
 
@@ -1190,7 +1190,7 @@ namespace fast_sim {
               phic  = _cellphi[i];
               etac  = _celleta[i];
               etad = etac-temp_cluseta;
-              phid = HEP_Simple_Lib::delta_phi(phic, temp_clusphi);
+              phid = hep_simple_lib::delta_phi(phic, temp_clusphi);
 
               dr = sqrt(pow(etad,2)+ pow(phid,2));
 
@@ -1300,7 +1300,7 @@ namespace fast_sim {
       phi = _cellphi[i];
 
 
-      dphi = HEP_Simple_Lib::delta_phi(or_phi,phi);
+      dphi = hep_simple_lib::delta_phi(or_phi,phi);
       deta = fabs(or_eta - eta);
       dR = sqrt(dphi*dphi + deta*deta);
 

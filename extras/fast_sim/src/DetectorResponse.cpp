@@ -2,7 +2,7 @@
 
 namespace fast_sim {
 
-  using namespace HEP_Simple_Lib;
+  using namespace hep_simple_lib;
 
 DetectorResponse::DetectorResponse() {
 

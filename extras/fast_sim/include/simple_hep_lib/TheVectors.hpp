@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MathUtils.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
 #include <boost/serialization/access.hpp>
 #include <sstream>
 #include <iostream>
@@ -11,7 +11,7 @@
 //  for setPE, added a mass check the difference between E^2 - p^2 < 0 or == -0 , the mass is set to 0.
 //  setPE is only used for massless particles, setPM is used for particles with rest mass.  Aldo Saavedra
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
 
 
     // /// Use fastjet implicitly

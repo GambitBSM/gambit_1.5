@@ -1,12 +1,12 @@
 #pragma once
 
-#include "MathUtils.hpp"
-#include "Vectors.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
+#include "simple_hep_lib/TheVectors.hpp"
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
 
     /// @name Converters to/from the Gambit 4-vector
     //@{

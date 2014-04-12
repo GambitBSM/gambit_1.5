@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Particle.hpp"
-#include "Jet.hpp"
+#include "simple_hep_lib/TheParticle.hpp"
+#include "simple_hep_lib/TheJet.hpp"
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>
 #include <algorithm>
 
-namespace HEP_Simple_Lib {
+namespace hep_simple_lib {
 
 
     /// Simple event class, separating into various classes of particle

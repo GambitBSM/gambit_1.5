@@ -13,12 +13,13 @@ FJ_CXXFLAGS := $(shell fastjet-config --cxxflags)
 CFLAGS += -O3 -Wall -Werror=uninitialized -g -fPIC -pedantic -fopenmp
 
 BACKENDDIR = ../../../modules/Backends
-FASTSIMDIR = /import/sydpp2/atlas/Aldos_Data/gambit/hepforge2/extras/fast_sim
+#FASTSIMDIR = /import/sydpp2/atlas/Aldos_Data/gambit/hepforge2/extras/fast_sim
+FASTSIMDIR = ../../fast_sim
 
 $(FASTSIMDIR)/src/%.o : $(FASTSIMDIR)/src/%.cpp
-	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -I$(FASTSIMDIR)/include/simple_hep_lib -fPIC $< -o $@
+	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -fPIC $< -o $@
 $(FASTSIMDIR)/src/%.o : $(FASTSIMDIR)/src/%.cc
-	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -I$(FASTSIMDIR)/include/simple_hep_lib -fPIC $< -o $@
+	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -fPIC $< -o $@
 
 FJ_DIR := $(shell fastjet-config --prefix)
 
@@ -30,5 +31,5 @@ libfastsim.so: $(FASTSIMDIR)/src/FastSim_Reader.o $(FASTSIMDIR)/src/FastSim.o $(
 #	$(CC) -shared -o $@ $^ $(FJ_LDFLAGS)
 
 fastsim_example: $(FASTSIMDIR)/src/libfastsim.so
-	$(CC) $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include -I$(FASTSIMDIR)/include/simple_hep_lib $(PY8_CXXFLAGS) $(ROOT_CXXFLAGS) -fPIC $(PY8_LDFLAGS) $(ROOT_LDFLAGS) -L./ -lfastsim example-fastsim-py8.cpp -o $@
+	$(CC) $(CFLAGS) $(FJ_CXXFLAGS) -I$(FASTSIMDIR)/include $(PY8_CXXFLAGS) $(ROOT_CXXFLAGS) -fPIC $(PY8_LDFLAGS) $(ROOT_LDFLAGS) -L./ -lfastsim example-fastsim-py8.cpp -o $@
 

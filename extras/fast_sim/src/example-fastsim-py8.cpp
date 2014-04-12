@@ -7,7 +7,7 @@
 #include "TApplication.h"
 #include "TFile.h"
 
-#include "Particle.hpp"
+//#include "Particle.hpp"
 #include "FastSim.hpp"
 
 
@@ -31,7 +31,7 @@ public:
   // Analysis of each new event.
   void analyze(Pythia8::Event& event);
 
-  void FillHistograms(HEP_Simple_Lib::Event &fastevent);
+  void FillHistograms(hep_simple_lib::Event &fastevent);
   // Show final results.
   void finish();
 
@@ -39,7 +39,7 @@ public:
 
   void SelectParticles(Pythia8::Event& event);
 
-  void PrintParticles( vector<HEP_Simple_Lib::Particle*> list);
+  void PrintParticles( vector<hep_simple_lib::Particle*> list);
 
 private:
 
@@ -49,13 +49,13 @@ private:
   fast_sim::FastSim _sim;
 
   // the list of particles that are input to the detector response
-  vector<HEP_Simple_Lib::Particle*> _electrons;
-  vector<HEP_Simple_Lib::Particle*> _muons;
-  vector<HEP_Simple_Lib::Particle*> _photons;
-  vector<HEP_Simple_Lib::Particle*> _bjets;
-  vector<HEP_Simple_Lib::Particle*> _tauhads;
-  vector<HEP_Simple_Lib::Particle*> _chargedhads;
-  vector<HEP_Simple_Lib::Particle*> _weakly_interacting; // stdm neutrinos, susy neutralinos
+  vector<hep_simple_lib::Particle*> _electrons;
+  vector<hep_simple_lib::Particle*> _muons;
+  vector<hep_simple_lib::Particle*> _photons;
+  vector<hep_simple_lib::Particle*> _bjets;
+  vector<hep_simple_lib::Particle*> _tauhads;
+  vector<hep_simple_lib::Particle*> _chargedhads;
+  vector<hep_simple_lib::Particle*> _weakly_interacting; // stdm neutrinos, susy neutralinos
 
   
   TH1F *_hBosonPt, *_hBosoneta, *_hBosonphi, *_hBosonMass_truth,*_hBosonMass_reco;
@@ -145,7 +145,8 @@ void MyAnalysis::init() {
   _hmet_truth = new TH1F( "METTruth","MET (Truth);GeV",100, 0, 200);
 
 
-  _sim.init(fast_sim::NOMINAL);
+  //_sim.init(fast_sim::NOMINAL);
+  _sim.init("fastsim.json");
   //_sim.init(fast_sim::ACERDET);
 
 }
@@ -157,7 +158,7 @@ void MyAnalysis::init() {
 void MyAnalysis::SelectParticles(Pythia8::Event& event) {
   // this method selects and categorizes the particles into the respective vectors
   //
-  HEP_Simple_Lib::Particle* chosen;
+  hep_simple_lib::Particle* chosen;
 
   // iterate through each of the particles, select and sort them into the different vectors
   for (int i = 0; i < event.size(); ++i) {
@@ -168,15 +169,15 @@ void MyAnalysis::SelectParticles(Pythia8::Event& event) {
         switch (int(fabs(event[i].id()))) {
           /// @todo This needs to change, it should be only prompt leptons.. not just any lepton
           case 11: // electron
-            chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
+            chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
             _electrons.push_back(chosen);
             break;
           case 13: // muon
-            chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
+            chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
             _muons.push_back(chosen);
             break;
           default: // every other hadronic charged particle - for the jets
-            chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
+            chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
             _chargedhads.push_back(chosen);
 //           printf("charged final particle missed %d\n",event[i].id());
         }
@@ -192,13 +193,13 @@ void MyAnalysis::SelectParticles(Pythia8::Event& event) {
 //            printf("** P2 %f E %f\n",(float)P2,(float)(event[i].e()*event[i].e()));
 
 
-            chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].id());
+            chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].id());
             _photons.push_back(chosen);
             break;
           case 12: // electron neutrinos
           case 14: // muon neutrinos
           case 16: // tau neutrinos
-            chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].id());
+            chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].id());
             _weakly_interacting.push_back(chosen);
 //            printf("neutrinos %d\n",event[i].id());
 
@@ -206,7 +207,7 @@ void MyAnalysis::SelectParticles(Pythia8::Event& event) {
           case -2112:
           case 2112: // neutrons
           case 130: // neutral kaon - not sure what to do
-            chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
+            chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
             _chargedhads.push_back(chosen);
             break;
           default: printf("neutral final particle missed %d\n",event[i].id());
@@ -216,7 +217,7 @@ void MyAnalysis::SelectParticles(Pythia8::Event& event) {
 
     if ((event[i].isQuark()) && (fabs(event[i].id()) == 6)) {
 
-      chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
+      chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
       _bjets.push_back(chosen);
     }
 
@@ -233,7 +234,7 @@ void MyAnalysis::SelectParticles(Pythia8::Event& event) {
       }
 
       // we need to remove the leptonically decaying taus - perhaps do an overlap removal with electrons
-      chosen = new HEP_Simple_Lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
+      chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].e(), event[i].id());
       _tauhads.push_back(chosen);
     }
 
@@ -250,7 +251,7 @@ void MyAnalysis::analyze(Pythia8::Event& event) {
  
   //PrintParticles(_electrons);
 
-  HEP_Simple_Lib::P4 z_p = _electrons[0]->mom()+_electrons[1]->mom();
+  hep_simple_lib::P4 z_p = _electrons[0]->mom()+_electrons[1]->mom();
   _hBosonMass_truth->Fill(z_p.m());
   //cout << " The mass is " << z_p.m() << std::endl;
 
@@ -258,7 +259,7 @@ void MyAnalysis::analyze(Pythia8::Event& event) {
   //sim.init(fast_sim::ACERDET);
   //
 
-  HEP_Simple_Lib::Event reco_event;
+  hep_simple_lib::Event reco_event;
   _sim.setParticles(_electrons, _muons, _photons, _chargedhads, _bjets, _tauhads, _weakly_interacting);
 
   _sim.doDetectorResponse();
@@ -320,7 +321,7 @@ void MyAnalysis::analyze(Pythia8::Event& event) {
 */
 
 
-void MyAnalysis::PrintParticles( vector<HEP_Simple_Lib::Particle*> list)
+void MyAnalysis::PrintParticles( vector<hep_simple_lib::Particle*> list)
 {
   for (int j=0;j<(int)list.size();j++) {
     cout << "Particle " << j << " "<< list[j]->pid() << " P: "<< list[j]->mom().px() << " " << list[j]->mom().py() << " " << list[j]->mom().pz() << " " << list[j]->mom().E()
@@ -329,7 +330,7 @@ void MyAnalysis::PrintParticles( vector<HEP_Simple_Lib::Particle*> list)
 
 }
 
-void MyAnalysis::FillHistograms(HEP_Simple_Lib::Event &fastevent) {
+void MyAnalysis::FillHistograms(hep_simple_lib::Event &fastevent) {
   // this function fills the histograms
 
   _hNelec->Fill(fastevent.electrons().size());
@@ -338,7 +339,7 @@ void MyAnalysis::FillHistograms(HEP_Simple_Lib::Event &fastevent) {
 
   //cout << " the size of electrons " << fastevent.electrons().size() << endl;
   if ((int)fastevent.electrons().size() == 2) {
-    HEP_Simple_Lib::P4 temp;
+    hep_simple_lib::P4 temp;
     temp = fastevent.electrons()[0]->mom() + fastevent.electrons()[1]->mom();
     _hBosonMass_reco->Fill(temp.m());
 
