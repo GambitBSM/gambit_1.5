@@ -1,4 +1,4 @@
-#include "simple_hep_lib/Particle.hpp"
+#include "simple_hep_lib/TheParticle.hpp"
 
 #include <stdlib.h>  /*srand, rand */
 #include <time.h>

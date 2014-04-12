@@ -26,19 +26,19 @@ int FastSim_Init(int which)
 
 int FastSim_ReadEvents( int &events) {
 
-  vector<HEP_Simple_Lib::Particle*> _electrons;
-  vector<HEP_Simple_Lib::Particle*> _muons;
-  vector<HEP_Simple_Lib::Particle*> _photons;
-  vector<HEP_Simple_Lib::Particle*> _bjets;
-  vector<HEP_Simple_Lib::Particle*> _tauhads;
-  vector<HEP_Simple_Lib::Particle*> _chargedhads;
-  vector<HEP_Simple_Lib::Particle*> _weakly_interacting; // stdm neutrinos, susy neutralinos
+  vector<hep_simple_lib::Particle*> _electrons;
+  vector<hep_simple_lib::Particle*> _muons;
+  vector<hep_simple_lib::Particle*> _photons;
+  vector<hep_simple_lib::Particle*> _bjets;
+  vector<hep_simple_lib::Particle*> _tauhads;
+  vector<hep_simple_lib::Particle*> _chargedhads;
+  vector<hep_simple_lib::Particle*> _weakly_interacting; // stdm neutrinos, susy neutralinos
 
-  HEP_Simple_Lib::Particle *chosen;
-  chosen = new HEP_Simple_Lib::Particle(40.5, -32.6, 0.5, 51.992884131, 13);
+  hep_simple_lib::Particle *chosen;
+  chosen = new hep_simple_lib::Particle(40.5, -32.6, 0.5, 51.992884131, 13);
   _electrons.push_back(chosen);
  
-  HEP_Simple_Lib::Event reco_event;
+  hep_simple_lib::Event reco_event;
   _my_fast_sim.setParticles(_electrons, _muons, _photons, _chargedhads, _bjets, _tauhads, _weakly_interacting);
 
   //cout << " do detector response " << std::endl;

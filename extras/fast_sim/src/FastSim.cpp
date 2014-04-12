@@ -22,8 +22,8 @@
 
 #include "FastSim.hpp"
 #include "fastjet/ClusterSequence.hh"
-#include "simple_hep_lib/MathUtils.hpp"
-#include "simple_hep_lib/MCUtils.hpp"
+#include "simple_hep_lib/TheMathUtils.hpp"
+#include "simple_hep_lib/TheMCUtils.hpp"
 #include <algorithm>
 #include <iostream>
 using namespace std;
