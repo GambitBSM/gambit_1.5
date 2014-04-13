@@ -1,10 +1,10 @@
 #pragma once
 
 // Just convenience includes
-#include "simple_hep_lib/TheMathUtils.hpp"
-#include "simple_hep_lib/TheVectors.hpp"
-#include "simple_hep_lib/TheEvent.hpp"
-#include "simple_hep_lib/TheParticle.hpp"
+#include "simple_hep_lib/MathUtils.hpp"
+#include "simple_hep_lib/Vectors.hpp"
+#include "simple_hep_lib/Event.hpp"
+#include "simple_hep_lib/Particle.hpp"
 //#include "FastJetUtils.hpp"
 //#include "Py8Utils.hpp"
 
