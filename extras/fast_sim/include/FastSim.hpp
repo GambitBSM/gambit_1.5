@@ -22,9 +22,9 @@
 #ifndef __FASTSIM_HPP__
 #define __FASTSIM_HPP__
 
-#include "simple_hep_lib/TheParticle.hpp"
-#include "simple_hep_lib/TheJet.hpp"
-#include "simple_hep_lib/TheEvent.hpp"                 // Gambit's event interface
+#include "simple_hep_lib/Particle.hpp"
+#include "simple_hep_lib/Jet.hpp"
+#include "simple_hep_lib/Event.hpp"                 // Gambit's event interface
 #include "DetectorResponse.hpp"
 #include "json/json.h"
 #include <vector>
