@@ -27,7 +27,7 @@ FJ_DIR := $(shell fastjet-config --prefix)
 libfastsim.so: $(FASTSIMDIR)/src/FastSim_Reader.o $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/fastsim_interface.o $(FASTSIMDIR)/src/jsoncpp.o
 # Intention is to pull symbols from FastJet into the fastsim backend (same should happen for direct pythia event filling... and any analyses that use jet structure)
 # Currently breaks formost symbols because symbols can't be copied unless libfastjet.a was unusually built with the -fPIC flag
-	$(CC) -shared -L$(FJ_DIR)/lib -o $@ $^ -Wl,-Bstatic -lfastjettools -Wl,-Bstatic -lfastjet -Wl,-Bdynamic
+	$(CC) -shared -L$(FJ_DIR)/lib -o $@ $^ -lgsl -lgslcblas -Wl,-Bstatic -lfastjettools -Wl,-Bstatic -lfastjet -Wl,-Bdynamic
 #	$(CC) -shared -o $@ $^ $(FJ_LDFLAGS)
 
 fastsim_example: $(FASTSIMDIR)/src/libfastsim.so

@@ -28,6 +28,7 @@
 #include "DetectorResponse.hpp"
 #include "json/json.h"
 #include <vector>
+#include <gsl/gsl_rng.h>
 
 namespace fast_sim {
 
@@ -122,6 +123,10 @@ namespace fast_sim {
       void setNonPromptChargedParticles(std::vector<hep_simple_lib::Particle*> particles);
       void setWeaklyInteracting(std::vector<hep_simple_lib::Particle*> particles);
 
+      // acceptance methods
+      void selectParticles(std::vector<hep_simple_lib::Particle*> stable_particles, PProperties *cuts, std::vector<hep_simple_lib::Particle*> &chosen_particles);
+      bool isParticleMeasured(Acceptance acceptance, double test_value);
+
       void clear();
 
       void Clustering();
@@ -156,6 +161,7 @@ namespace fast_sim {
 
 
       void getRecoEvent(hep_simple_lib::Event &event);
+      void getRecoEvent(hep_simple_lib::Event &event, std::string electron_category, float electron_isolation);
 
     private:
 
@@ -261,6 +267,8 @@ namespace fast_sim {
       std::vector<double> _cellietph,_cellmom,_cellhits,_celleta,_cellphi,_cellswitch;
       std::vector<double> _clusncell,_clusnhits,_clusswitch,_cluseta,_clusphi,_clusweta,_cluswphi,_clusmom;
 
+      // for the random numbers using the gnu scientific library
+      gsl_rng *_random_num;
 
   };
 

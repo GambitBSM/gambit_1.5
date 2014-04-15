@@ -1,6 +1,6 @@
 #include "simple_hep_lib/Particle.hpp"
 
-#include <stdlib.h>  /*srand, rand */
+#include <gsl/gsl_rng.h>
 #include <time.h>
 
 
@@ -18,8 +18,11 @@ class DetectorResponse
     double _jet_resolution;
 
 
+    gsl_rng *_random_num;
+
   public:
     DetectorResponse();
+    ~DetectorResponse();
     virtual void MuonResponse(hep_simple_lib::Particle& muon) { };
     virtual void PhotonResponse(hep_simple_lib::Particle& ph) {};
     virtual void ElectronResponse(hep_simple_lib::Particle& ele) {};
