@@ -210,6 +210,8 @@ namespace fast_sim {
         {
           std::cout << "not eta " <<  (*itr).get("name","eta").asString() << std::endl;
           FastSim_AcceptanceItemReader(*itr,particle_props._pt);
+
+          std::cout << "acceptance" << particle_props._pt._name << std::endl;
         }
 
       }
@@ -233,6 +235,23 @@ namespace fast_sim {
     efficiency._name = reco_object.get("name","eta").asString();
     FastSim_InfoReader(reco_object["info"],ndim,nbinsx,nbinsy, bin_edgesx,bin_edgesy,histo_values);
 
+    efficiency._ndim = ndim;
+    efficiency._nbinsx = nbinsx;
+    efficiency._nbinsy = nbinsy;
+
+    for (size_t kk=0;kk<bin_edgesx.size();kk++)
+      efficiency._bin_edges_x.push_back(bin_edgesx[kk]);
+
+//    for (size_t kk=0;kk<bin_edgesy.size();kk++)
+//      efficiency._bin_edges_y.push_back(bin_edgey[kk]);
+
+    for (size_t kk=0;kk<histo_values.size();kk++)
+      efficiency._binvals.push_back(histo_values[kk]);
+
+    std::cout << "Acceptance name " << efficiency._name << std::endl;
+    for (size_t kk=0;kk<histo_values.size();kk++)
+      std::cout << " bin edges " << efficiency._bin_edges_x[kk] << std::endl;;
+
     return 0;
   }
 
@@ -245,6 +264,7 @@ namespace fast_sim {
     }
 
     ndim = histo_object.get("ndim","1").asInt();
+    std::cout << " ndim " << ndim << std::endl;
     nbinsx = histo_object.get("nbinx","50").asInt();
 
     // now get the bin edges

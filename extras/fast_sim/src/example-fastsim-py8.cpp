@@ -24,7 +24,7 @@ public:
   ~MyAnalysis();
 
   // Initialization actions.
-  void init();
+  void init(std::string fastsim_init, std::string output_rootfilename);
 
   // clears the vectors, should be used after each event
   void clear();
@@ -46,6 +46,8 @@ private:
   // Declare variables and objects that span init - analyze - finish.
   int  nEvt;
 
+  std::string _outroot_filename;
+  std::string _fastsim_initfilename;
   fast_sim::FastSim _sim;
 
   // the list of particles that are input to the detector response
@@ -99,13 +101,13 @@ void MyAnalysis::clear() {
 }
 
 
-void MyAnalysis::init() {
+void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootfilename) {
 
   // Initialize counter for number of events.
   nEvt = 0;
 
 
-  m_ROOToutFile= new TFile("FastSim_Pythia8_output.root","RECREATE");
+  m_ROOToutFile= new TFile(output_rootfilename.c_str(),"RECREATE");
 
   // Book histograms.
   _hBosonPt = new TH1F("BosonPt"," Boson Generated Pt;GeV;",100, 0., 200.);
@@ -146,7 +148,7 @@ void MyAnalysis::init() {
 
 
   //_sim.init(fast_sim::NOMINAL);
-  _sim.init("fastsim.json");
+  _sim.init(fastsim_initfilename.c_str());
   //_sim.init(fast_sim::ACERDET);
 
 }
@@ -263,7 +265,7 @@ void MyAnalysis::analyze(Pythia8::Event& event) {
   _sim.setParticles(_electrons, _muons, _photons, _chargedhads, _bjets, _tauhads, _weakly_interacting);
 
   _sim.doDetectorResponse();
-  _sim.getRecoEvent(reco_event);
+  _sim.getRecoEvent(reco_event,"medium",0.0);
   FillHistograms(reco_event);
 
   //sim.printElectrons();
@@ -409,26 +411,40 @@ void MyAnalysis::finish() {
 int main(int argc, char* argv[]) {
 
   // Check that correct number of command-line arguments
-  if (argc != 2) {
+  if (argc != 4) {
     cerr << " Unexpected number of command-line arguments. \n"
-         << " You are expected to provide a file name and nothing else. \n"
+         << " ./fastsim_example pythia_file fastsim_file rootfile_output \n"
          << " Program stopped! " << endl;
     return 1;
   }
 
   // Check that the provided file name corresponds to an existing file.
-  ifstream is(argv[1]);
-  if (!is) {
+  ifstream is1(argv[1]);
+  if (!is1) {
     cerr << " Command-line file " << argv[1] << " was not found. \n"
          << " Program stopped! " << endl;
     return 1;
   }
 
-  // Confirm that external file will be used for settings..
-  cout << " PYTHIA settings will be read from file " << argv[1] << endl;
+  ifstream is2(argv[2]);
+  if (!is2) {
+    cerr << " fastsim init file " << argv[2] << " was not found. \n"
+         << " Program stopped! " << endl;
+    return 1;
+  }
 
-//  TApplication theApp("hist", &argc, argv);
+  //ifstream is3(argv[3]);
+  //if (!is3) {
+  //  cerr << " root file " << argv[3] << " was not found. \n"
+  //       << " Program stopped! " << endl;
+  //  return 1;
+  //}
+
+  // Confirm to the user what the inputs are
   cout << " PYTHIA settings will be read from file " << argv[1] << endl;
+  cout << " FastSim settings will be read from file " << argv[2] << endl;
+  cout << " ROOT histograms will be saved to file " << argv[3] << endl;
+
 
   // Declare generator. Read in commands from external file.
   Pythia8::Pythia pythia;
@@ -440,7 +456,7 @@ int main(int argc, char* argv[]) {
 
   // Declare user analysis class. Do initialization part of it.
   MyAnalysis myAnalysis;
-  myAnalysis.init();
+  myAnalysis.init(argv[2],argv[3]);
 
   // Read in number of event and maximal number of aborts.
   int nEvent = pythia.mode("Main:numberOfEvents");

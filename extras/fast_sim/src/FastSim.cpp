@@ -26,6 +26,9 @@
 #include "simple_hep_lib/MCUtils.hpp"
 #include <algorithm>
 #include <iostream>
+#include <gsl/gsl_randist.h>
+
+
 using namespace std;
 //using namespace fastjet;
 
@@ -44,6 +47,10 @@ namespace fast_sim {
     _bjet = NULL;
     _jet = NULL;
     _rest = NULL;
+
+    _random_num = gsl_rng_alloc(gsl_rng_mt19937);
+    //srand(1);
+    // srand(time(NULL));
 
     init(fast_sim::NOMINAL);
   }
@@ -189,6 +196,8 @@ namespace fast_sim {
      delete _photon;
 
 
+  gsl_rng_free(_random_num);
+
 
     /*
     // for (size_t i = 0; i < _stable_electrons.size();i++) delete _stable_electrons[i];
@@ -303,6 +312,7 @@ namespace fast_sim {
           default: ;
         }
       }
+
     }
 
     Baseline_Response(); 
@@ -401,6 +411,7 @@ namespace fast_sim {
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
 
+      // _electron represents the baseline reconstruction
       if ((particles[i]->eta() < _electron->_min_eta) or (particles[i]->eta() > _electron->_max_eta)) continue;
 
       if (particles[i]->pT() < _electron->_min_pt) continue;
@@ -664,6 +675,81 @@ namespace fast_sim {
 
   }
 
+  void FastSim::selectParticles(vector<Particle*> stable_particles, PProperties *cuts, vector<Particle*> &chosen_particles) {
+    // this function will select the particles according to the specified cuts
+    // assume that particles have passed the baseline cuts
+
+    if (not cuts->_test_acceptance) {
+      // there is no acceptance information so it is assume it is perfect, return all the particles
+
+//      std::cout << " no acceptance found " << std::endl;
+      for (size_t i=0;i<stable_particles.size();i++) {
+        Particle *temp_p = new Particle(stable_particles[i]);
+        chosen_particles.push_back(temp_p);
+      }
+      return;
+    }
+
+    for (size_t i=0;i<stable_particles.size();i++) {
+
+      //std::cout << " eta " << cuts->_eta._ndim << " pt " <<  cuts->_pt._ndim << std::endl;
+      if (isParticleMeasured(cuts->_eta,stable_particles[i]->eta()) && (isParticleMeasured(cuts->_pt,stable_particles[i]->pT()))) {
+        Particle *temp_p = new Particle(stable_particles[i]);
+        chosen_particles.push_back(temp_p);
+      }
+    }
+    return;
+  }
+
+  bool FastSim::isParticleMeasured(Acceptance acceptance, double test_value) {
+    // this function determines whether the particle passes the cut
+
+    if (acceptance._ndim != 1) {
+      std::cout << "error the number of dimensions of the acceptance should be 1 " << std::endl;
+      return false; // the number of dimensions should be equal to 1
+    }
+
+    int chosen_bin=-1;
+    double dice_roll;
+
+    //std::cout << " name of acceptance " << acceptance._name << " test val " << test_value << std::endl;
+    // check if the value of the test_value is greater than the highest x-limit
+    if (test_value >= acceptance._bin_edges_x.back()) {
+
+        chosen_bin = (int)acceptance._bin_edges_x.size()-2; // bins are counted from 0
+//        std::cout << " pass the limit  " << acceptance._name << " test val " << test_value << " chosen bin " << chosen_bin << " " << acceptance._binvals.back()<< std::endl;
+    }
+    else {
+
+      for (size_t k=0; k<acceptance._bin_edges_x.size()-1;k++) {
+
+        if ((test_value >= acceptance._bin_edges_x[k]) && (test_value < acceptance._bin_edges_x[k+1])) {
+//          std::cout << " value is located in bin " << k << " between " << acceptance._bin_edges_x[k] << " " << acceptance._bin_edges_x[k+1]<<  " bin val " << acceptance._binvals[k] <<  std::endl;
+          // we found the bin that our test_value corresponds to
+          chosen_bin = (int)k;
+          break;
+        }
+      }
+    }
+
+    if (chosen_bin == -1) {// particle was not measured - return false
+      //std::cout << " failed " << chosen_bin << std::endl;
+      return false;
+    }
+
+    //dice_roll =  hep_simple_lib::closed_interval_rand(0.0,1.0);
+    dice_roll = gsl_rng_uniform(_random_num);
+    if (dice_roll >= acceptance._binvals[chosen_bin]) {
+      //std::cout << dice_roll << " failed " << acceptance._binvals[chosen_bin] << std::endl;
+      return false; // particle not measured
+    }
+    else {
+      //std::cout << dice_roll << " passed " << acceptance._binvals[chosen_bin] << std::endl;
+      return true; // particle measured
+    }
+
+  }
+
   void FastSim::getRecoEvent(Event &event) {
     // this function fills the gambit event interface with the reconstructed particles
 
@@ -704,6 +790,74 @@ namespace fast_sim {
 
 
   }
+
+  void FastSim::getRecoEvent(Event &event, std::string electron_category, float electron_isolation) {
+    // this function fills the gambit event interface with the reconstructed particles
+
+    // we will copy the prompt particles only - the isolated ones
+
+    //cout << " the size of physics electrons " << _stable_electrons.size() << endl;
+    //printElectrons();
+
+    std::vector<Particle*> selected_electrons;
+
+    // search for the 
+
+
+    for (std::vector<PProperties*>::iterator it = _detector_perf.begin();it != _detector_perf.end(); it++) {
+
+      switch ((*it)->_pid) {
+
+        case 11: // the electron
+                 if ((*it)->_level == electron_category) {
+                   // an acceptance with a matching level has been found
+                   selectParticles(_stable_electrons,(*it),selected_electrons);
+                 }
+                 break;
+        default: ;
+      }
+    }
+
+    //std::cout << " size of selected electrons is " << selected_electrons.size() << std::endl;
+    event.add_particles(selected_electrons);
+    event.add_particles(_stable_muons);
+    event.add_particles(_stable_photons);
+
+    //  for (size_t i=0;i<_iso_electrons.size();i++)
+    //    event.addParticle(_iso_electrons[i]);
+
+    //  for (size_t i=0;i<_iso_muons.size();i++)
+    //    event.addParticle(_iso_muons[i]);
+
+    //  for (size_t i=0;i<_iso_photons.size();i++)
+    //    event.addParticle(_iso_photons[i]);
+
+    // the MET
+    event.set_missingmom(P4::mkXYZM(METx(), METy(), 0., 0.));
+
+    for (size_t i=0;i<_jets.size();i++)
+      event.addJet(_jets[i]);
+
+
+
+    /* still need to add the jets, bjets and the taus
+       if(candidate->BTag)
+       recoJet = new Jet(momentum.Px(), momentum.Py(), momentum.Pz(),
+       momentum.E(), true);
+       else
+       recoJet = new Jet(momentum.Px(), momentum.Py(), momentum.Pz(),
+       momentum.E(), false);
+       event.addJet(recoJet);
+       */
+
+
+  }
+
+
+
+
+
+
 
   /// @todo Rename
   void FastSim::MuonResponse() {
