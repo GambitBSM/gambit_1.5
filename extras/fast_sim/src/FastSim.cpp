@@ -714,16 +714,21 @@ namespace fast_sim {
 
     //std::cout << " name of acceptance " << acceptance._name << " test val " << test_value << std::endl;
     // check if the value of the test_value is greater than the highest x-limit
-    if (test_value >= (*acceptance._bin_edges_x.end()))
-        chosen_bin = (int)acceptance._bin_edges_x.size()-1;
+    if (test_value >= acceptance._bin_edges_x.back()) {
 
-    for (size_t k=0; k<acceptance._bin_edges_x.size()-1;k++) {
+        chosen_bin = (int)acceptance._bin_edges_x.size()-2; // bins are counted from 0
+//        std::cout << " pass the limit  " << acceptance._name << " test val " << test_value << " chosen bin " << chosen_bin << " " << acceptance._binvals.back()<< std::endl;
+    }
+    else {
 
-      if ((test_value >= acceptance._bin_edges_x[k]) && (test_value < acceptance._bin_edges_x[k+1])) {
-        //std::cout << " value is located in bin " << k << " between " << acceptance._bin_edges_x[k] << " " << acceptance._bin_edges_x[k+1]<< std::endl;
-        // we found the bin that our test_value corresponds to
-        chosen_bin = (int)k;
-        break;
+      for (size_t k=0; k<acceptance._bin_edges_x.size()-1;k++) {
+
+        if ((test_value >= acceptance._bin_edges_x[k]) && (test_value < acceptance._bin_edges_x[k+1])) {
+//          std::cout << " value is located in bin " << k << " between " << acceptance._bin_edges_x[k] << " " << acceptance._bin_edges_x[k+1]<<  " bin val " << acceptance._binvals[k] <<  std::endl;
+          // we found the bin that our test_value corresponds to
+          chosen_bin = (int)k;
+          break;
+        }
       }
     }
 
