@@ -234,7 +234,7 @@ namespace fast_sim {
     switch(which) {
       case NOMINAL:
         // initialise the cuts and calorimeter limits and granularity for  the NOMINAL
-        cout << "Nominal sim" << endl;
+        cout << "FastSim library loaded and initialised with nominal sim." << endl;
 
         /*
         _min_muon_pt = 20.0;  // GeV
