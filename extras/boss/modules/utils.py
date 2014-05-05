@@ -217,9 +217,9 @@ def getSpecTemplateTypes(el):
 
     # Classes and functions must be treated differently
     if el.tag == 'Class':
-        spec_types = el.get('name').split('<',1)[1].rsplit('>',1)[0]
+        spec_types = el.get('name').split('<',1)[1].rsplit('>',1)[0].strip()
     elif el.tag == 'Function':
-        spec_types = el.get('demangled').split('<',1)[1].rsplit('>',1)[0]
+        spec_types = el.get('demangled').split('<',1)[1].rsplit('>',1)[0].strip()
     else:
         raise Exception("Don't know how to get template types from XML element with tag: %s" % el.tag)
 
@@ -352,12 +352,14 @@ def removeComments(content, insert_blanks=False):
 
 # ====== findType ========
 
-def findType(el):
+def findType(el_input):
 
     check_keywords = ['static', 'const']
     additional_keywords = []
     refs_and_pointers = ''
 
+    el = el_input
+    
     if el.tag in ['FundamentalType', 'Class', 'Struct']:
         type_id = el.get('id')
     else:
@@ -599,7 +601,7 @@ def constrForwardDecls():
             is_template = False
 
         if is_template:
-            template_bracket = utils.getTemplateBracket(class_el)[0]
+            template_bracket = getTemplateBracket(class_el)[0]
 
         if is_template:
             code += full_indent + 'template ' + template_bracket + '\n'

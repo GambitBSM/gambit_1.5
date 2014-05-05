@@ -63,7 +63,7 @@ def main():
                       dest="set_path_ids_flag",
                       default=False,
                       help="Set the path IDs used to consider a class or function part of a package.")
-    parser.add_option("-b", "--backup-sorces",
+    parser.add_option("-b", "--backup-sources",
                       action="store_true",
                       dest="backup_sources_flag",
                       default=False,
@@ -141,6 +141,9 @@ def main():
 
                 cfg.std_types_dict[std_type_name] = el
                 
+        # for std_type in cfg.std_types_dict.keys():
+        #     print [std_type]
+
 
         # for el in root.findall('Class'):
         #     if utils.isStdType(el):

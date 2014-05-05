@@ -71,7 +71,7 @@ def constructTemplForwDecl(short_class_name, namespaces, template_bracket, inden
     forw_decl = ''
 
     # - Construct the beginning of the namespaces
-    class_decl += utils.constrNamespace(namespaces, 'open')
+    forw_decl += utils.constrNamespace(namespaces, 'open')
     # for ns in namespaces:
     #     forw_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
     #     forw_decl += ' '*n_indents*indent + '{' + '\n'
@@ -81,7 +81,7 @@ def constructTemplForwDecl(short_class_name, namespaces, template_bracket, inden
     forw_decl += ' '*n_indents*indent + 'class ' + short_class_name + ';\n'
 
     # - Construct the closing of the namespaces
-    class_decl += utils.constrNamespace(namespaces, 'close')
+    forw_decl += utils.constrNamespace(namespaces, 'close')
     # for ns in namespaces:
     #     n_indents -= 1
     #     forw_decl += ' '*n_indents*indent + '}' + '\n'
@@ -96,7 +96,8 @@ def constructTemplForwDecl(short_class_name, namespaces, template_bracket, inden
 
 # ====== constructAbstractClassDecl ========
 
-def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[]):
+def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[], 
+                               has_copy_constructor=True,  has_assignment_operator=True):
 
     n_indents = len(namespaces)
 
@@ -289,17 +290,28 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
                 class_decl += 'virtual ' + return_kw_str + return_type + ' ' + el.get('name') + w_args_bracket + ' {};' + '\n'
 
 
+        #
+        # If element is a public member variable, construct virtual method that returns a reference to this variable
+        #
+        elif (el.tag in ('Field', 'Variable')) and (el.get('access') == 'public'):
 
-        elif el.tag in ('Field', 'Variable'):
-
-            pass
-            # FIXME: Should generate getter/setter functions
+            class_decl += '\n' 
+            class_decl += constructVariableRefFunction(el, virtual=True, indent=indent, n_indents=n_indents+2)
 
         else:
             class_decl += ' '*(n_indents+2)*indent
             class_decl += '// UNKNOWN: ' + el.tag + '\n'
 
     
+    # - Construct 'pointerAssign' and 'pointerCopy' functions
+    if has_copy_constructor or has_assignment_operator:
+        class_decl += '\n'
+        class_decl += ' '*(n_indents+1)*indent + 'public:\n'
+        if has_assignment_operator:
+            class_decl += constructPtrAssignFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
+        if has_copy_constructor:
+            class_decl += constructPtrCopyFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
+
     # - Construct the 'downcast' converter function
     class_decl += '\n'
     # class_decl += ' '*(n_indents+1)*indent + 'NEW CODE HERE!\n'
@@ -543,3 +555,135 @@ def constructWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     return wrapper_code
 
 # ====== END: constructWrapperFunction ========
+
+
+
+# ====== constructVariableRefFunction ========
+
+def constructVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=0):
+
+    func_code = ''
+
+    var_name = var_el.get('name')
+    ref_method_name = var_name + '_ref' + cfg.code_suffix
+
+    var_type, var_kw, var_id = utils.findType( cfg.id_dict[var_el.get('type')] )
+    var_type_base = var_type.replace('*','').replace('&','')
+    
+    var_kw_str = ' '.join(var_kw)        
+    var_kw_str += ' '*bool(len(var_kw))
+
+    var_el = cfg.id_dict[var_id]
+    var_is_native = utils.isNative(var_el)
+    if var_is_native:
+        return_type = getAbstractClassName(var_type_base, prefix=cfg.abstr_class_prefix, short=True)
+    else:
+        return_type = var_type_base
+
+    func_code += ' '*n_indents*indent
+    if virtual:
+        func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() {};\n'
+    else:
+        func_code += var_kw_str + return_type + '& ' + ref_method_name + '() { return ' + var_name  +'; }\n'
+
+    return func_code
+
+# ====== END: constructVariableRefFunction ========
+
+
+
+# ====== constructPtrCopyFunc ========
+
+def constructPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
+
+    ptr_code = ''
+    ptr_code += ' '*cfg.indent*n_indents
+    
+    if virtual:
+        ptr_code += 'virtual '+ short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '();\n'   
+    else:
+        ptr_code += short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '()'
+        ptr_code += ' ' + '{ return new ' + short_class_name + '(*this); }\n'
+
+    return ptr_code
+
+# ====== END: constructPtrCopyFunc ========
+
+
+
+# ====== constructPtrAssignFunc ========
+
+def constructPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
+
+    ptr_code = ''
+    ptr_code += ' '*cfg.indent*n_indents
+    
+    if virtual:
+        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in);\n'
+    else:
+        ptr_code += 'void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in)'
+        ptr_code += ' ' + '{ *this = *dynamic_cast<' + short_class_name + '*>(in); }\n'        
+
+    return ptr_code
+
+# ====== END: constructPtrAssignFunc ========
+
+
+
+# ====== checkAssignmentOperator ========
+
+def checkAssignmentOperator(class_el):
+
+    found_assignment_operator = False
+
+    # Get list of all class members
+    class_members = utils.getMemberElements(class_el, include_artificial=True)
+
+    # Look for assignment operator
+    for mem_el in class_members:
+        if (mem_el.tag == 'OperatorMethod') and (mem_el.get('name') == '='):
+
+            # Check that return type is either void or the class type itself (possibly as a reference)
+            return_type, return_type_kw, return_type_id = utils.findType(mem_el)
+            if (return_type == 'void') or (return_type_id == class_el.get('id')):
+
+                # Check that the only argument is another class instance
+                args = funcutils.getArgs(mem_el)
+                if (len(args) == 1) and (args[0]['id'] == class_el.get('id')):
+
+                    found_assignment_operator = True
+                    print 'FOUND ASSIGNMENT OPERATOR:', mem_el.get('name'), return_type, args
+    
+    return found_assignment_operator
+
+# ====== END: checkAssignmentOperator ========
+
+
+
+# ====== checkCopyConstructor ========
+
+def checkCopyConstructor(class_el):
+
+    found_copy_constructor = False
+
+    # Get list of all class members
+    class_members = utils.getMemberElements(class_el, include_artificial=True)
+
+    # Look for copy constructor
+    for mem_el in class_members:
+        if (mem_el.tag == 'Constructor'):
+
+            # # Check that return type is the class type itself
+            # return_type, return_type_kw, return_type_id = utils.findType(mem_el)
+            # if return_type_id == class_el.get('id'):
+
+            # Check that the only argument is another class instance
+            args = funcutils.getArgs(mem_el)
+            if (len(args) == 1) and (args[0]['id'] == class_el.get('id')):
+
+                found_copy_constructor = True
+                print 'FOUND COPY CONSTRUCTOR:', mem_el.get('name'), args
+    
+    return found_copy_constructor
+
+# ====== END: checkCopyConstructor ========

@@ -36,6 +36,10 @@ abstr_class_fname       = None
 namespaces    = None
 has_namespace = None
 
+has_copy_constructor = None
+has_assignment_operator = None
+
+
 
 #
 # Main function for parsing classes
@@ -154,6 +158,9 @@ def run():
         namespaces    = class_name.split('::')[:-1]
         has_namespace = bool(len(namespaces))
 
+        has_copy_constructor    = classutils.checkCopyConstructor(class_el)
+        has_assignment_operator = classutils.checkAssignmentOperator(class_el)
+
 
         # Prepare entries in return_code_dict and src_includes
         if abstr_class_fname not in return_code_dict.keys():
@@ -190,7 +197,7 @@ def run():
         if is_template and class_name_full not in templ_spec_done:
             spec_template_types = utils.getSpecTemplateTypes(class_el)
             for template_type in spec_template_types:
-                if template_type not in cfg.accepted_types:
+                if (template_type not in cfg.accepted_types):
                     raise Exception("The template specialization type '" + template_type + "' for class " + class_name_full + " is not among accepted types.")
 
 
@@ -221,10 +228,13 @@ def run():
         if (is_template == True) and (class_name_full in templ_spec_done):
             pass
         elif (is_template == True) and (class_name_full not in templ_spec_done):
-            class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent, template_types=spec_template_types)
+            class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, 
+                                                                indent=cfg.indent, template_types=spec_template_types, 
+                                                                has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
             class_decl += '\n'
         else:
-            class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent)
+            class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent, 
+                                                                has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
             class_decl += '\n'
 
         return_code_dict[abstr_class_fname].append( (-1, class_decl) )
@@ -370,41 +380,20 @@ def run():
             src_includes[src_file_name].append(src_include_line)
 
 
-        # # Generate converter functions ('upcast', 'abstractify') for the original class
-
-        # # - Determine insert position  -- DUPLICATED BELOW
-        # rel_pos_start, rel_pos_end = utils.getBracketPositions(file_content_nocomments[class_name_pos:], delims=['{','}'])
-        # class_body_start = class_name_pos + rel_pos_start
-        # class_body_end   = class_name_pos + rel_pos_end
-
-        # # - Generate code
-        # converter_code  = '\n'
-        # converter_code += ' '*cfg.indent*(len(namespaces)+1) + 'public:\n'
-        # if is_template:
-        #     converter_code += classutils.constructUpcastFunction(short_abstr_class_name, indent=cfg.indent, n_indents=len(namespaces)+2, template_bracket=add_template_bracket)
-        #     converter_code += '\n'
-        #     converter_code += classutils.constructAbstractifyFunction(short_abstr_class_name, indent=cfg.indent, n_indents=len(namespaces)+2, template_bracket=add_template_bracket)
-        # else:
-        #     converter_code += classutils.constructUpcastFunction(short_abstr_class_name, indent=cfg.indent, n_indents=len(namespaces)+2)
-        #     converter_code += '\n'
-        #     converter_code += classutils.constructAbstractifyFunction(short_abstr_class_name, indent=cfg.indent, n_indents=len(namespaces)+2)
-        # converter_code += ' '*cfg.indent*len(namespaces)
-
-        # # - Register code
-        # insert_pos = class_body_end
-        # return_code_dict[src_file_name].append( (insert_pos, converter_code) )
-
-
         # Generate wrappers for all member functions that make use of native types
 
-        # - Create list of all 'non-artificial' members of the class
-        member_methods = []
+        # - Create lists of all 'non-artificial' members of the class
+        member_methods   = []
+        member_variables = []
         if 'members' in class_el.keys():
             for mem_id in class_el.get('members').split():
                 el = cfg.id_dict[mem_id]
-                if (el.tag == 'Method') and (not 'artificial' in el.keys()) and (not funcutils.ignoreFunction(el)):
-                    if funcutils.usesNativeType(el):
-                        member_methods.append(el)
+                if not 'artificial' in el.keys():
+                    if (el.tag == 'Method') and (not funcutils.ignoreFunction(el)):
+                        if funcutils.usesNativeType(el):
+                            member_methods.append(el)
+                    elif (el.tag in ('Field', 'Variable')) and (el.get('access') == 'public'):
+                            member_variables.append(el)
 
                     # append_method = False
                     # return_type_name, return_kw, return_id = utils.findType(el)
@@ -420,7 +409,7 @@ def run():
         class_body_end   = class_name_pos + rel_pos_end
         insert_pos = class_body_end
 
-        # - Generate code for each member
+        # - Generate code for each member method
         wrapper_code  = '\n'
         current_access = None
         for method_el in member_methods:
@@ -433,6 +422,30 @@ def run():
 
         # - Register code
         return_code_dict[src_file_name].append( (insert_pos, wrapper_code) )            
+
+        # - Generate a reference-returning method for each (public) member variable:
+        if len(member_variables) > 0:
+            n_indents = len(namespaces)
+            ref_func_code = '\n'
+            ref_func_code += ' '*cfg.indent*(n_indents+1) + 'public:\n'
+            for var_el in member_variables:
+                ref_func_code += classutils.constructVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+                ref_func_code += '\n'
+
+        # - Register code
+        return_code_dict[src_file_name].append( (insert_pos, ref_func_code) )            
+
+
+        # Generate pointer-based copy and assignment functions
+        n_indents = len(namespaces)
+        ptr_code  = '\n'
+        ptr_code += ' '*cfg.indent*(n_indents+1) + 'public:\n'
+
+        ptr_code += classutils.constructPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+        ptr_code += classutils.constructPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+        
+        # - Register code
+        return_code_dict[src_file_name].append( (insert_pos, ptr_code) )
 
 
         # Generate info for factory 
