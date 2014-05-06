@@ -1,6 +1,6 @@
-#include "Particle.hpp"
+#include "simple_hep_lib/Particle.hpp"
 
-#include <stdlib.h>  /*srand, rand */
+#include <gsl/gsl_rng.h>
 #include <time.h>
 
 
@@ -18,12 +18,15 @@ class DetectorResponse
     double _jet_resolution;
 
 
+    gsl_rng *_random_num;
+
   public:
     DetectorResponse();
-    virtual void MuonResponse(HEP_Simple_Lib::Particle& muon) { };
-    virtual void PhotonResponse(HEP_Simple_Lib::Particle& ph) {};
-    virtual void ElectronResponse(HEP_Simple_Lib::Particle& ele) {};
-    virtual void JetResponse(HEP_Simple_Lib::Particle& jet) {};
+    ~DetectorResponse();
+    virtual void MuonResponse(hep_simple_lib::Particle& muon) { };
+    virtual void PhotonResponse(hep_simple_lib::Particle& ph) {};
+    virtual void ElectronResponse(hep_simple_lib::Particle& ele) {};
+    virtual void JetResponse(hep_simple_lib::Particle& jet) {};
 };
 
 class ATLAS_Simple_Response: public DetectorResponse
@@ -31,10 +34,10 @@ class ATLAS_Simple_Response: public DetectorResponse
 
   public:
     ATLAS_Simple_Response();
-    void MuonResponse(HEP_Simple_Lib::Particle& muon);
-    void PhotonResponse(HEP_Simple_Lib::Particle& ph);
-    void ElectronResponse(HEP_Simple_Lib::Particle& ele);
-    void JetResponse(HEP_Simple_Lib::Particle& jet);
+    void MuonResponse(hep_simple_lib::Particle& muon);
+    void PhotonResponse(hep_simple_lib::Particle& ph);
+    void ElectronResponse(hep_simple_lib::Particle& ele);
+    void JetResponse(hep_simple_lib::Particle& jet);
 };
 
 

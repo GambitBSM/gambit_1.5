@@ -1,8 +1,11 @@
 #include "DetectorResponse.hpp"
 
+#include <gsl/gsl_randist.h>
+
+
 namespace fast_sim {
 
-  using namespace HEP_Simple_Lib;
+  using namespace hep_simple_lib;
 
 DetectorResponse::DetectorResponse() {
 
@@ -11,9 +14,15 @@ DetectorResponse::DetectorResponse() {
   _photon_resolution = 1.0;
   _jet_resolution = 1.0;
 
-  srand(time(NULL));
+  _random_num = gsl_rng_alloc(gsl_rng_mt19937);
 }
 
+
+DetectorResponse::~DetectorResponse() {
+
+  gsl_rng_free(_random_num);
+
+}
 
 ATLAS_Simple_Response::ATLAS_Simple_Response(){
 
@@ -30,8 +39,7 @@ void ATLAS_Simple_Response::MuonResponse(Particle& muon){
 
   double newpx,newpy,newpz,newe; //,newpt;
 
-  //double distr = _rndm.Gaus(0,1);
-  double distr = rand();
+  double distr = gsl_ran_gaussian(_random_num,1);
   double sigma = distr*_muon_resolution*muon.mom().rho();
 
   newpx = muon.mom().px()/(1+sigma);
@@ -58,7 +66,7 @@ void ATLAS_Simple_Response::PhotonResponse(Particle& photon){
   if (photon.mom().E() <= 0)
     return ;
 
-  double distr = rand();
+  double distr = gsl_ran_gaussian(_random_num,1);
   double sigma = distr*_photon_resolution/sqrt(photon.mom().E());
 
   newpx = photon.mom().px()/(1+sigma);
@@ -93,7 +101,7 @@ void ATLAS_Simple_Response::ElectronResponse(Particle& electron){
   if (electron.mom().E() <= 0)
     return;
 
-  double distr = rand();
+  double distr = gsl_ran_gaussian(_random_num,1);
   double sigma = distr*_electron_resolution*1.0/sqrt(electron.mom().E());
 
   newpx = electron.mom().px()/(1+sigma);
