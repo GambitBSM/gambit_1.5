@@ -562,6 +562,29 @@ def isAcceptedType(input_type, byname=False):
 
 
 
+# ====== isParsedClass ========
+
+def isParsedClass(input_type, byname=False):
+
+    type_name = input_type
+    is_parsed_class = False
+
+    # Remove '*' and '&'
+    type_name = type_name.replace('*','').replace('&','')
+
+    # Remove template bracket
+    type_name = type_name.split('<')[0]
+
+    # Check against cfg.accepted_classes
+    if type_name in cfg.accepted_classes:
+        is_parsed_class = True
+
+    return is_parsed_class
+
+# ====== END: isParsedClass ========
+
+
+
 # ====== constrForwardDecls ========
 
 def constrForwardDecls():

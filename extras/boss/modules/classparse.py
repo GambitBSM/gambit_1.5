@@ -7,6 +7,7 @@
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
 import os
+import warnings
 
 import modules.cfg as cfg
 import modules.utils as utils
@@ -17,29 +18,11 @@ import modules.funcutils as funcutils
 # Module-level globals
 #
 
-classes_done    = []
-template_done   = []
-templ_spec_done = []
-added_parent    = []
-
-class_name             = None
-short_class_name       = None
-short_abstr_class_name = None
-
-src_file_el   = None
-src_file_name = None
-src_dir       = None
-
-short_abstr_class_fname = None
-abstr_class_fname       = None
-
-namespaces    = None
-has_namespace = None
-
-has_copy_constructor = None
-has_assignment_operator = None
-
-
+classes_done          = []
+template_done         = []
+templ_spec_done       = []
+added_parent          = []
+#wrapper_class_headers = {}
 
 #
 # Main function for parsing classes
@@ -95,6 +78,8 @@ def run():
         # Make list of all types in use in this class
         # Also, make a separate list of all std types
         check_member_elements = utils.getMemberElements(class_el)
+        cfg.all_types_in_class = {};
+        cfg.std_types_in_class = {};
 
         class_id = class_el.get('id')
         for mem_el in check_member_elements:
@@ -106,27 +91,27 @@ def run():
 
                     arg_type = arg_dict['type']
 
-                    if arg_type not in cfg.all_types_in_class:
-                        cfg.all_types_in_class.append(arg_type)
+                    if arg_type not in cfg.all_types_in_class.keys():
+                        cfg.all_types_in_class[arg_type] = arg_type_el
 
                         if utils.isStdType(arg_type_el):
-                            cfg.std_types_used.append(arg_type) 
+                            cfg.std_types_in_class[arg_type] = arg_type_el
 
 
             if ('type' in mem_el.keys()) or ('returns' in mem_el.keys()):
                 mem_type, mem_type_kw, mem_type_id = utils.findType(mem_el)
                 type_el = cfg.id_dict[mem_type_id]
 
-                if mem_type not in cfg.all_types_in_class:
-                    cfg.all_types_in_class.append(mem_type)
+                if mem_type not in cfg.all_types_in_class.keys():
+                    cfg.all_types_in_class[mem_type] = type_el
 
                     if utils.isStdType(type_el):
-                        cfg.std_types_used.append(mem_type) 
+                        cfg.std_types_in_class[mem_type] = type_el
 
 
                 # if utils.isStdType(type_el):
-                #     if mem_type not in cfg.std_types_used:
-                #         cfg.std_types_used.append(mem_type)
+                #     if mem_type not in cfg.std_types_in_class:
+                #         cfg.std_types_in_class.append(mem_type)
 
         # while len(check_member_elements)>0:
         #     print 'lenght: ', len(check_member_elements)
@@ -143,7 +128,7 @@ def run():
 
 
         
-        # Set the global module-level variables 
+        # Set a bunch of generally useful variables 
         class_name             = class_name_full.split('<',1)[0]
         short_class_name       = class_el.get('name').split('<',1)[0]
         short_abstr_class_name = classutils.getAbstractClassName(class_name, prefix=cfg.abstr_class_prefix, short=True)
@@ -172,7 +157,7 @@ def run():
 
 
         # Register an include statement for this header file, to go in the file cfg.all_headers_fname
-        include_line = '#include "' + short_abstr_class_fname.lower() + '"\n' 
+        include_line = '#include "' + short_abstr_class_fname + '"\n' 
         all_headers_file_path = os.path.join(cfg.extra_output_dir, cfg.all_headers_fname)
 
         if all_headers_file_path not in return_code_dict.keys():
@@ -493,7 +478,26 @@ def run():
         return_code_dict[factory_file_name].append( (-1, factory_file_content) )
 
 
+        #
+        # Generate a header containing the GAMBIT wrapper class
+        #
+        short_wrapper_class_fname = cfg.wrapper_header_prefix + short_class_name + cfg.header_extension
+        wrapper_class_fname = os.path.join(cfg.extra_output_dir, short_wrapper_class_fname)
+        
+        wrapper_class_file_content = generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, short_abstr_class_fname)
+
+        # - Update dict of wrapper class header files
+        #wrapper_class_headers[short_class_name] = wrapper_class_fname
+
+        # - Register code
+        if wrapper_class_fname not in return_code_dict.keys():
+            return_code_dict[wrapper_class_fname] = []
+        return_code_dict[wrapper_class_fname].append( (0, wrapper_class_file_content) )
+
+
+        #
         # Keep track of classes done
+        #
         classes_done.append(class_name_full)
         if is_template: 
             if class_name not in template_done:
@@ -509,12 +513,12 @@ def run():
     # END: Loop over all classes in cfg.class_dict
     #    
 
-
     print
     print 'CLASSES DONE:    ', classes_done
     print 'TEMPLATE DONE:   ', template_done
     print 'TEMPL_SPEC DONE: ', templ_spec_done
     print
+
 
     #
     # Return result
@@ -522,39 +526,208 @@ def run():
 
     return return_code_dict
 
+#
+# END: run()
+#
 
 
 
+#
+# Function for generating a header file with a GAMBIT wrapper class
+#
+def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, short_abstr_class_fname):
+
+    # Useful variables
+    abstr_class_name = '::'.join(namespaces) + '::'*bool(len(namespaces)) + short_abstr_class_name
+    indent           = ' '*cfg.indent
+
+    # Useful lists
+    class_variables    = []
+    class_functions    = []
+    class_members      = utils.getMemberElements(class_el, include_artificial=False)
+    class_members_full = utils.getMemberElements(class_el, include_artificial=True)
+    for mem_el in class_members:
+        if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
+            if funcutils.ignoreFunction(mem_el):
+                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type "%s" and will be ignored.' % (mem_el.get('name'), short_class_name))
+            else:
+                class_functions.append(mem_el)
+
+        elif (mem_el.tag in ('Field', 'Variable')) and (mem_el.get('access') == 'public'):
+            if utils.isAcceptedType(mem_el):
+                class_variables.append(mem_el)
+            else:
+                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+
+    #
+    # Start code generation
+    #
+
+    code = ''
+
+    # FOR DEBUG: print all types used in this class
+    code += '// FOR DEBUG:\n'
+    code += '// Types originally used in this class:\n'
+    for type_name in cfg.all_types_in_class.keys():
+        code += '// - ' + type_name + '\n'
+
+    # # Add include statement for abstract class header
+    # code += '\n'
+    # code += '#include "' + short_abstr_class_fname + '"\n'
+
+    # # Figure out what types can be used and generate the necessary include statements
+    # ignore_types = []
+    # for type_name, type_el in cfg.all_types_in_class.items():
+    #     basic_type_name = type_name.replace('*','').replace('&','')
+
+    #     if utils.isFundamental(type_el):
+    #         continue
+
+    #     elif utils.isNative(type_el):
+    #         if basic_type_name in cfg.accepted_classes:
+    #             basic_type_name_short = basic_type_name.split('::')[-1]
+    #             wrapper_header = cfg.wrapper_header_prefix + basic_type_name_short + cfg.header_extension
+    #             code += '#include "' + wrapper_header + '"\n'            
+    #         else:
+    #             warnings.warn('The type "%s" is indetified as native to the source code, yet it is not registred as an accepted type. All class members using this type will be ignored.' % (basic_type_name))
+    #             ignore_types.append(type_el)
+
+    #     elif utils.isStdType(type_el):
+    #             warnings.warn('The type "%s" is indetified as a std type. We need to identify the correct header to inlcude...' % (basic_type_name))
+
+    #     else:
+    #             warnings.warn('The type "%s" is unknown. All class members using this type will be ignored.' % (basic_type_name))
+    #             ignore_types.append(type_el)
 
 
+    # Create one factory function pointer for each constructor.
+    # Initialize pointers to NULL - they will later be filled by dynamic loading
+    temp_code = ''
+    for mem_el in class_members_full:
+        if (mem_el.tag == 'Constructor') and (mem_el.get('access') == 'public'):
 
-# #
-# # Function for parsing template classes
-# #
+            # Identify arguments
+            args = funcutils.getArgs(mem_el)
+            args_bracket = funcutils.constrArgsBracket(args, include_arg_name=False, include_arg_type=True)
 
-# def runTemplate(class_el):
+            # Construct factory pointer code
+            temp_code += abstr_class_name + '* (*Factory_' + short_class_name + ')' + args_bracket + ' = NULL;\n'
 
-#     # Figure out template variables
-#     if class_name not in template_done:
-#         template_bracket, template_types = utils.getTemplateBracket(class_el)
-#     spec_template_types = utils.getSpecTemplateTypes(class_el)
-#     print ' --> template bracket, types, spec. types: ', template_bracket, template_types, spec_template_types
-
-
-#     # Add class_name to list of registred template classes
-#     if class_name not in template_done:
-#         template_done.append(class_name)
-
-
-
-#     # Return result
-#     return return_code_dict
+    if temp_code != '':
+        code += '\n'
+        code += "// Factory function pointers to be filled by dynamic loading\n"
+        code += temp_code
 
 
+    #
+    # Generate code for wrapper class
+    #
+
+    # Class declaration line
+    code += '\n'
+    code += 'class ' + short_class_name + cfg.code_suffix + '\n'
+
+    # Class body
+    code += '{\n'
+
+    # Start private block
+    code += indent + 'private:\n'
+    
+    # Private variable: bool member_element
+    code += 2*indent + 'bool member_variable;\n'
+
+    # Start public block
+    code += indent + 'public:\n'
+
+    # Variables:
+    code += 2*indent + '// Member variables: \n'
+
+    # Public variable: pointer to abstract class: Abstract_ClassX* BEptr
+    code += 2*indent + abstr_class_name + '* BEptr;\n'
+
+    # Add references to all public variables
+    for var_el in class_variables:
+
+        # Variable name
+        var_name = var_el.get('name')
+
+        # Determine variable type
+        var_type, var_type_kw, var_type_id = utils.findType(var_el)
+        var_type_el = cfg.id_dict[var_type_id]
+
+        if utils.isParsedClass(var_type):
+            use_var_type = classutils.toWrapperType(var_type)
+        else:
+            use_var_type = var_type
+
+        # Remove '&' from use_var_type if it exists
+        use_var_type = use_var_type.replace('&','')
+
+        # Write line
+        # FIXME: Should we include keywords here (const, static, ...)?
+        code += 2*indent + use_var_type + '& ' + var_name + ';\n'
 
 
+    # Functions:
+    code += '\n'
+    code += 2*indent + '// Member functions: \n'
+
+    # Add wrappers for all member functions
+    for func_el in class_functions:
+
+        # Function name
+        func_name = func_el.get('name')
+
+        # Determine return type
+        return_type, return_type_kw, return_type_id = utils.findType(func_el)
+        return_type_el = cfg.id_dict[return_type_id]
+
+        # Return keywords
+        return_kw_str = ' '.join(return_type_kw)        
+        return_kw_str += ' '*bool(len(return_type_kw))
+
+        # Arguments
+        args = funcutils.getArgs(func_el)
+        args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
+
+        # Convert return type if parsed class
+        if utils.isParsedClass(return_type):
+            use_return_type = classutils.toWrapperType(return_type)
+        else:
+            use_return_type = return_type
+
+        # Write declaration line
+        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + ' {};\n'
+
+        # Write function body
+        
+        code += 2*indent + '{\n'
+
+        if return_type == 'void':
+            code += 3*indent
+        else:
+            code += 3*indent + 'return '
+
+        args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
+        code += 'BEptr->' + func_name + args_bracket_notypes + ';\n'
+
+        code += 2*indent + '}\n'
+
+    # Close class body
+    code += '};\n'
 
 
+    # Add include guards
+    guard_var = '__' + cfg.wrapper_header_prefix + short_class_name + '_' + cfg.header_extension.replace('.','') + '__'
+    guard_var = guard_var.upper()
+    guard_code_top = '#ifndef ' + guard_var + '\n' + '#define ' + guard_var + '\n'
+    guard_code_bottom = '#endif /* ' + guard_var + ' */\n'
+    
+    code = guard_code_top + '\n' + code + '\n' + guard_code_bottom
 
+    # Return code
+    return code
 
-
+#
+# END: generateWrapperHeader
+#   

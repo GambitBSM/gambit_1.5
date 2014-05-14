@@ -61,11 +61,13 @@ def getArgs(func_el):
 
 # ======== constrArgsBracket ========
 
-def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False): #invent_arg_names=False):
+def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False, use_wrapper_class=False, wrapper_to_pointer=False): #invent_arg_names=False):
 
     #
     # Requires a list of dicts as input, as returned by 'getArgs' or 'constrWrapperArgs'.
     #
+
+    import modules.classutils as classutils
 
     # Construct bracket with input arguments
     args_seq = ''
@@ -74,15 +76,27 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
 
         if include_arg_type:
             args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
-            if include_namespace:
-                namespaces = arg_dict['type_namespaces']
-                if len(namespaces)>0:
-                    args_seq += '::'.join(namespaces) + '::'
-            args_seq += arg_dict['type']
+
+            if use_wrapper_class and arg_dict['accepted_class'] == True:
+                args_seq += classutils.toWrapperType(arg_dict['type'])
+
+            else:
+                if include_namespace:
+                    namespaces = arg_dict['type_namespaces']
+
+                    if len(namespaces)>0:
+                        args_seq += '::'.join(namespaces) + '::'
+
+                args_seq += arg_dict['type']
+
         if include_arg_name:
-            args_seq += ' ' + arg_dict['name']
+            if wrapper_to_pointer:
+                args_seq += ' ' + '*BEptr.' + arg_dict['name']
+            else:
+                args_seq += ' ' + arg_dict['name']
 
         args_seq += ', '
+
     args_seq = args_seq.rstrip(', ')
     args_bracket = '(' + args_seq + ')'
 
@@ -280,7 +294,7 @@ def ignoreFunction(func_el):
     # Check function return type
     if not utils.isAcceptedType(func_el):
         return_type, return_kw, return_id = utils.findType(func_el)
-        print 'non-accepted return type: ' + return_type
+        warnings.warn('The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type))
         return_type_accepted = False
 
     # Check argument types
@@ -288,7 +302,7 @@ def ignoreFunction(func_el):
     for arg_dict in args:
         arg_type_name = arg_dict['type']
         if not utils.isAcceptedType(arg_type_name, byname=True):
-            print 'non-accepted argument type: ', arg_type_name
+            warnings.warn('The function "%s" makes use of a non-accepted argument type "%s" and will be ignored.' % (func_el.get('name'), arg_type_name))
             arg_types_accepted = False
             break
 

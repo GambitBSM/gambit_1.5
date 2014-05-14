@@ -439,19 +439,6 @@ def main():
         print
 
 
-    print 'STANDARD TYPES USED:'
-    print '===================='
-    for std_type in cfg.std_types_used:
-        print std_type
-    print
-
-    print 'ALL TYPES USED:'
-    print '==============='
-    for type_name in cfg.all_types_in_class:
-        print type_name
-    print
-
-
 # ====== END: main ========
 
 if  __name__ =='__main__':main()

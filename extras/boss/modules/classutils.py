@@ -687,3 +687,38 @@ def checkCopyConstructor(class_el):
     return found_copy_constructor
 
 # ====== END: checkCopyConstructor ========
+
+
+
+# ====== toWrapperType ========
+
+def toWrapperType(input_type_name, include_namespace=False):
+
+    # input_type_name  = NameSpace::SomeType<int>**&
+    # output_type_name = SomeType_GAMBIT<int>**&
+
+    type_name = input_type_name
+
+    # Search for '*' and '&'
+    n_pointers = type_name.count('*')
+    is_ref     = bool('&' in type_name)
+
+    # Remove '*' and '&'
+    type_name = type_name.replace('*','').replace('&','')
+
+    # Remove template bracket
+    type_name = type_name.split('<',1)[0]
+
+    # Remove namespace
+    type_name = type_name.split('::')[-1]
+
+    # Add wrapper class suffix
+    type_name = type_name + cfg.code_suffix
+
+    # Add '*' and '&'
+    type_name = type_name + '*'*n_pointers + '&'*is_ref
+
+    # Return result
+    return type_name
+
+# ====== END: toWrapperType ========

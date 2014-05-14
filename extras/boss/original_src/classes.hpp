@@ -2,6 +2,7 @@
 #define __CLASSES_HPP__
 
 #include <iostream>
+#include <vector>
 
 class T
 {
@@ -54,5 +55,27 @@ class Container
         }
 };
 
+
+
+namespace FirstNameSpace
+{
+    namespace SecondNameSpace
+    {
+        class X2 : public X
+        {
+            public:
+                T** t_ptr_ptr;
+                X& x_ref;
+        };
+    }
+}
+
+
+class X3
+{
+    public:
+        FirstNameSpace::SecondNameSpace::X2 x2;
+        std::vector<int> vec;
+};
 
 #endif  /* __CLASSES_HPP__ */
