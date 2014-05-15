@@ -2,10 +2,7 @@
 #define __ABSTRACT_T_HPP__
 #include <iostream>
 
-// MOVED TO: abstract_classes_extra.hpp
-// class T;
 
-// FORWARD DECLARED IN: abstract_classes_extra.hpp
 class Abstract_T
 {
     public:

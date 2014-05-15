@@ -2,8 +2,11 @@
 #define __GAMBIT_WRAPPER_CLASSES_HPP__
 
 
-#include "../after_BOSS/abstract_classes.hpp"
+#include "../after_BOSS/abstract_Container.hpp"
+#include "../after_BOSS/abstract_T.hpp"
+#include "../after_BOSS/abstract_X.hpp"
 #include <iostream> // for testing
+
 
 // Factory function pointers to be filled by dynamic loading
 Abstract_T* (*Factory_T)() = NULL;

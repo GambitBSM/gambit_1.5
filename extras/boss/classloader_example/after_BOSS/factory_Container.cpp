@@ -1,15 +1,5 @@
 #include "classes.hpp"
 
-Abstract_T* Factory_T()
-{
-    return new T();
-}
-
-Abstract_X* Factory_X()
-{
-    return new X();
-}
-
 Abstract_Container<Abstract_X>* Factory_Container_X()
 {
 	return new Container<X>();

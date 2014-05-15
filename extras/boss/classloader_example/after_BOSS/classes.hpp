@@ -3,9 +3,9 @@
 #define __CLASSES_HPP__
 
 #include <iostream>
-#include "abstract_classes.hpp"
-#include "abstract_classes_extra.hpp"
 
+
+#include "abstract_T.hpp"
 class T : public virtual Abstract_T
 {
     public:
@@ -48,6 +48,7 @@ class T : public virtual Abstract_T
 
 
 
+#include "abstract_X.hpp"
 class X : public virtual Abstract_X
 {
     public:
@@ -60,7 +61,7 @@ class X : public virtual Abstract_X
         // Class methods
         T getT();
 
-        void setT(T& t_in);
+        void setT(T t_in);
 
         //
         // Generated members:
@@ -94,6 +95,9 @@ class X : public virtual Abstract_X
 };
 
 
+
+#include "abstract_Container.hpp"
+#include "abstract_Container_extra.hpp"
 template <typename Type>
 class Container : public virtual Abstract_Container<Type>
 {
