@@ -27,16 +27,14 @@ std_types_in_class = {}
 all_types_in_class = {}
 
 
-accepted_paths     = ['original_src']
+accepted_paths     = ['classloader_example/original']
 
 std_include_paths  = ['/usr/include/']
 
-accepted_classes = ['T', 'X', 'FirstNameSpace::SecondNameSpace::X2', 'X3']
-#accepted_classes = ['T', 'X', 'X3']
+accepted_classes = ['T', 'X']
 accepted_functions = []
 
 extra_output_dir      = 'test_output'
-# extra_output_dir      = 'extra_output_softsusy'
 code_suffix           = '_GAMBIT'
 abstr_header_prefix   = 'abstract_'
 factory_file_prefix   = 'factory_'
