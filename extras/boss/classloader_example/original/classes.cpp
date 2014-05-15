@@ -35,5 +35,5 @@ void X::setT(T t_in)
 //
 
 Container<T> dummy_container_T;
-// Container<X> dummy_container_X;
-// Container<int> dummy_container_int;
+Container<X> dummy_container_X;
+Container<int> dummy_container_int;

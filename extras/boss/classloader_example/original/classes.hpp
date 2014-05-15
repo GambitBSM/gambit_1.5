@@ -31,7 +31,7 @@ class X
         // Class methods
         T getT();
 
-        void setT(T& t_in);
+        void setT(T t_in);
 };
 
 
