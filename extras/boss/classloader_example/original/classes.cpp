@@ -31,9 +31,9 @@ void X::setT(T t_in)
 
 
 //
-// Create some dummy instances of Container<Type> to make sure these classes are compiled
+// Create some dummy instances to make sure these classes are compiled
 //
 
 Container<T> dummy_container_T;
-// Container<X> dummy_container_X;
-// Container<int> dummy_container_int;
+Container<X> dummy_container_X;
+Container<int> dummy_container_int;

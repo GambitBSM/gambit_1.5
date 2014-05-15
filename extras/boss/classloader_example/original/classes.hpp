@@ -32,8 +32,8 @@ class X
         T getT();
 
         void setT(T& t_in);
-};
 
+};
 
 
 template <typename Type>
@@ -46,13 +46,15 @@ class Container
         // Constructor
         Container() {}
 
+        Container(Type in) : var(in) {}
+
         void printMsg()
         {
             std::cout << std::endl;
             std::cout << "A message from class 'Container'." << std::endl;
             std::cout << std::endl;
         }
-};
 
+};
 
 #endif  /* __CLASSES_HPP__ */

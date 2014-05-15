@@ -30,8 +30,6 @@ void X::setT(T t_in)
 }
 
 
-
-
 //
 // Create some dummy instances to make sure these classes are compiled
 //

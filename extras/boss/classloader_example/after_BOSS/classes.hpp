@@ -59,7 +59,7 @@ class X : public virtual Abstract_X
         // Class methods
         T getT();
 
-        void setT(T t_in);
+        void setT(T& t_in);
 
         //
         // Generated members:
@@ -97,9 +97,10 @@ template <typename Type>
 class Container : public virtual Abstract_Container<Type>
 {
     public:
-
+        // Member variables
         Type var;
 
+        // Constructor
         Container() {}
 
         Container(Type in) : var(in) {}
@@ -129,6 +130,7 @@ class Container : public virtual Abstract_Container<Type>
         {
             return var;
         }
+
 };
 
 
