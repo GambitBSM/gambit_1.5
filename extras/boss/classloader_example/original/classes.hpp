@@ -32,11 +32,6 @@ class X
         T getT();
 
         void setT(T& t_in);
-
-        void setT2(T** t_in)
-        {
-            t = **t_in;
-        }
 };
 
 

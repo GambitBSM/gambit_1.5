@@ -24,7 +24,7 @@ T X::getT()
 }
 
 
-void X::setT(T& t_in)
+void X::setT(T t_in)
 {
     t = t_in;
 }

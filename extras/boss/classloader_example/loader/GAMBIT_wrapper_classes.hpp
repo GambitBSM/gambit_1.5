@@ -24,7 +24,6 @@ class T_gambit
         bool member_variable;
     public:
         Abstract_T *BEptr;  
-        Abstract_T **BEptr2;  
 
         int &i;
         double &d;
@@ -45,9 +44,8 @@ class T_gambit
 
 T_gambit::T_gambit() : 
     BEptr(Factory_T()),
-    BEptr2(&BEptr),
-    i(BEptr->iRef()), 
-    d(BEptr->dRef()), 
+    i(BEptr->i_ref_GAMBIT()), 
+    d(BEptr->d_ref_GAMBIT()), 
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -55,19 +53,17 @@ T_gambit::T_gambit() :
 
 T_gambit::T_gambit(Abstract_T *in) : 
     BEptr(in),
-    BEptr2(&BEptr),
-    i(BEptr->iRef()), 
-    d(BEptr->dRef()),
+    i(BEptr->i_ref_GAMBIT()), 
+    d(BEptr->d_ref_GAMBIT()),
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
     }
 
 T_gambit::T_gambit(const T_gambit &in) : 
-    BEptr(in.BEptr->ptr_copy()),
-    BEptr2(&BEptr), 
-    i(BEptr->iRef()), 
-    d(BEptr->dRef()),
+    BEptr(in.BEptr->pointerCopy_GAMBIT()),
+    i(BEptr->i_ref_GAMBIT()), 
+    d(BEptr->d_ref_GAMBIT()),
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -77,8 +73,7 @@ T_gambit& T_gambit::operator=( const T_gambit& in )
 {
     if (this != &in)
     {
-        BEptr->ptr_assign(in.BEptr);
-        // BEptr2 = &BEptr;
+        BEptr->pointerAssign_GAMBIT(in.BEptr);
     }
     return *this;
 }   
@@ -87,8 +82,6 @@ T_gambit::~T_gambit()
 {
     if(member_variable==false)
     {
-        // delete BEptr2;
-        std::cout << "delete pointer to address: " << BEptr << std::endl;
         delete BEptr;
     }
 }
@@ -110,24 +103,6 @@ class X_gambit
 
         T_gambit getT(){return T_gambit(BEptr->getT());}
         void setT(T_gambit& t_in){BEptr->setT(*t_in.BEptr);}
-
-        void setT2(T_gambit **t_in, T_gambit **t_in2)
-        {
-            BEptr->setT2( (**t_in).BEptr2, (**t_in2).BEptr2 );
-        }
-
-        // // Test
-        // void setT2(T_gambit** t_in)
-        // {
-        //     Abstract_X* tmp;
-        //     Abstract_X** tmp2;
-
-        //     tmp = (**t_in).BEptr;  // Abstract_X*
-        //     tmp2 = &tmp;           // Abstract_X**
-
-        //     BEptr->setT2( tmp2 )
-        // }
-
                
         X_gambit();
         X_gambit(Abstract_X*);
@@ -142,7 +117,7 @@ class X_gambit
 // X_gambit class functions
 X_gambit::X_gambit() : 
     BEptr(Factory_X()), 
-    t(&(BEptr->tRef())),
+    t(&(BEptr->t_ref_GAMBIT())),
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -151,7 +126,7 @@ X_gambit::X_gambit() :
 
 X_gambit::X_gambit(Abstract_X *in) : 
     BEptr(in), 
-    t(&(BEptr->tRef())),
+    t(&(BEptr->t_ref_GAMBIT())),
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -159,8 +134,8 @@ X_gambit::X_gambit(Abstract_X *in) :
     }
 
 X_gambit::X_gambit(const X_gambit &in) : 
-    BEptr(in.BEptr->ptr_copy()), 
-    t(&(BEptr->tRef())),
+    BEptr(in.BEptr->pointerCopy_GAMBIT()), 
+    t(&(BEptr->t_ref_GAMBIT())),
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -171,7 +146,7 @@ X_gambit& X_gambit::operator=( const X_gambit& in )
 {
     if (this != &in)
     {
-        BEptr->ptr_assign(in.BEptr);
+        BEptr->pointerAssign_GAMBIT(in.BEptr);
     }
     return *this;
 }           
@@ -220,7 +195,7 @@ class Container_gambit<int>
 
 Container_gambit<int>::Container_gambit(): 
     BEptr(Factory_Container_int()),
-    var(BEptr->varRef()), 
+    var(BEptr->var_ref_GAMBIT()), 
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -228,15 +203,15 @@ Container_gambit<int>::Container_gambit():
 
 Container_gambit<int>::Container_gambit(Abstract_Container<int> *in) : 
     BEptr(in),
-    var(BEptr->varRef()), 
+    var(BEptr->var_ref_GAMBIT()), 
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
     }
 
 Container_gambit<int>::Container_gambit(const Container_gambit<int> &in) :
-    BEptr(in.BEptr->ptr_copy()), 
-    var(BEptr->varRef()), 
+    BEptr(in.BEptr->pointerCopy_GAMBIT()), 
+    var(BEptr->var_ref_GAMBIT()), 
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -246,7 +221,7 @@ Container_gambit<int>& Container_gambit<int>::operator=( const Container_gambit<
 {
     if (this != &in)
     {
-        BEptr->ptr_assign(in.BEptr);
+        BEptr->pointerAssign_GAMBIT(in.BEptr);
     }
     return *this;
 }   
@@ -287,7 +262,7 @@ class Container_gambit<X_gambit>
 
 Container_gambit<X_gambit>::Container_gambit(): 
     BEptr(Factory_Container_X()),
-    var(&(BEptr->varRef())), 
+    var(&(BEptr->var_ref_GAMBIT())), 
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -296,7 +271,7 @@ Container_gambit<X_gambit>::Container_gambit():
 
 Container_gambit<X_gambit>::Container_gambit(Abstract_Container<Abstract_X> *in) : 
     BEptr(in),
-    var(&(BEptr->varRef())), 
+    var(&(BEptr->var_ref_GAMBIT())), 
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -304,8 +279,8 @@ Container_gambit<X_gambit>::Container_gambit(Abstract_Container<Abstract_X> *in)
     }
 
 Container_gambit<X_gambit>::Container_gambit(const Container_gambit<X_gambit> &in) : 
-    BEptr(in.BEptr->ptr_copy()), 
-    var(&(BEptr->varRef())), 
+    BEptr(in.BEptr->pointerCopy_GAMBIT()), 
+    var(&(BEptr->var_ref_GAMBIT())), 
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -316,7 +291,7 @@ Container_gambit<X_gambit>& Container_gambit<X_gambit>::operator=( const Contain
 {
     if (this != &in)
     {
-        BEptr->ptr_assign(in.BEptr);
+        BEptr->pointerAssign_GAMBIT(in.BEptr);
     }
     return *this;
 }   
@@ -357,7 +332,7 @@ class Container_gambit<T_gambit>
 
 Container_gambit<T_gambit>::Container_gambit(): 
     BEptr(Factory_Container_T()),
-    var(&(BEptr->varRef())), 
+    var(&(BEptr->var_ref_GAMBIT())), 
     member_variable(false)
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -367,7 +342,7 @@ Container_gambit<T_gambit>::Container_gambit():
 
 Container_gambit<T_gambit>::Container_gambit(Abstract_Container<Abstract_T> *in) : 
     BEptr(in),
-    var(&(BEptr->varRef())), 
+    var(&(BEptr->var_ref_GAMBIT())), 
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -375,8 +350,8 @@ Container_gambit<T_gambit>::Container_gambit(Abstract_Container<Abstract_T> *in)
     }
 
 Container_gambit<T_gambit>::Container_gambit(const Container_gambit<T_gambit> &in) : 
-    BEptr(in.BEptr->ptr_copy()), 
-    var(&(BEptr->varRef())), 
+    BEptr(in.BEptr->pointerCopy_GAMBIT()), 
+    var(&(BEptr->var_ref_GAMBIT())), 
     member_variable(false) 
     {
         // run _set_member(true) on any member variables that are themselves wrapped classes
@@ -387,7 +362,7 @@ Container_gambit<T_gambit>& Container_gambit<T_gambit>::operator=( const Contain
 {
     if (this != &in)
     {
-        BEptr->ptr_assign(in.BEptr);
+        BEptr->pointerAssign_GAMBIT(in.BEptr);
     }
     return *this;
 }   

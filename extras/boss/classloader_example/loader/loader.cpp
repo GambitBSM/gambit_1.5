@@ -66,13 +66,13 @@ int main(int argc, char * argv[])
 
   
   // printT function
-  printT_WRAPPER = reinterpret_cast<void (*)(Abstract_T&)>( dlsym(pHandle, "_Z14printT_WRAPPERR10Abstract_T") );
+  printT_GAMBIT = reinterpret_cast<void (*)(Abstract_T&)>( dlsym(pHandle, "_Z13printT_GAMBITR10Abstract_T") );
 
   // doubleT function
-  doubleT_WRAPPER = reinterpret_cast<void (*)(Abstract_T&)>( dlsym(pHandle, "_Z15doubleT_WRAPPERR10Abstract_T") );
+  doubleT_GAMBIT = reinterpret_cast<void (*)(Abstract_T&)>( dlsym(pHandle, "_Z14doubleT_GAMBITR10Abstract_T") );
   
   // doubleX_byVal function
-  doubleX_byVal_WRAPPER = reinterpret_cast<Abstract_X* (*)(Abstract_X&)>( dlsym(pHandle, "_Z21doubleX_byVal_WRAPPERR10Abstract_X") );
+  doubleX_byVal_GAMBIT = reinterpret_cast<Abstract_X* (*)(Abstract_X&)>( dlsym(pHandle, "_Z20doubleX_byVal_GAMBITR10Abstract_X") );
 
 
   //
@@ -153,45 +153,9 @@ int main(int argc, char * argv[])
   cout << "=======================" << endl;
   cout << endl;
 
-  
-  // Testing convertion of multiple pointers
-
-  T_gambit t1;
-  T_gambit t2;
-
-  t1.i = 10;
-  t1.d = 1.11;
-  t2.i = 20;
-  t2.d = 2.22;
-
-  T_gambit *t1_ptr;
-  T_gambit **t1_ptr2;
-
-  t1_ptr  = &t1;
-  t1_ptr2 = &t1_ptr;
-
-  T_gambit *t2_ptr;
-  T_gambit **t2_ptr2;
-
-  t2_ptr  = &t2;
-  t2_ptr2 = &t2_ptr;
-
-
-  (*t1_ptr).printMe();
-  (*t2_ptr).printMe();
-  cout << "passing in pointers: " << t1_ptr << "  -  " << t2_ptr << endl;
-  // test_x.t.printMe();
-  test_x.setT2(t1_ptr2, t2_ptr2);
-  // test_x.t.printMe();
-  cout << "returned pointers  : " << t1_ptr << "  -  " << t2_ptr << endl;
-  (*t1_ptr).printMe();
-  (*t2_ptr).printMe();
-
-
   //
   // Done
   // 
 
-  cout << endl;
   return 0;
 }

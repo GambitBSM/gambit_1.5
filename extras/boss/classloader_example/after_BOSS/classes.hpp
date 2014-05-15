@@ -23,19 +23,26 @@ class T : public virtual Abstract_T
         // Generated members:
         //
 
-        Abstract_T* ptr_copy()
+        Abstract_T* pointerCopy_GAMBIT()
         {
             return new T(*this);
         }
 
-        void ptr_assign(Abstract_T *in)
+        void pointerAssign_GAMBIT(Abstract_T *in)
         {
             *this = *dynamic_cast<T*>(in);
         }        
 
-        int& iRef();
+        int& i_ref_GAMBIT()
+        {
+            return i;
+        }
 
-        double& dRef();
+        double& d_ref_GAMBIT()
+        {
+            return d;
+        }
+
 };
 
 
@@ -54,69 +61,33 @@ class X : public virtual Abstract_X
 
         void setT(T t_in);
 
-        void setT2(T** t_in, T** t_in2)
-        {
-            std::cout << " --- passing in pointers: " << *t_in << "  -  " << *t_in2 << std::endl;
-            *t_in = *t_in2;
-            std::cout << " --- returning pointers : " << *t_in << "  -  " << *t_in2 << std::endl;
-            // std::cout << "This is setT2" << std::endl;
-            // std::cout << "got pointer: " << t_in << std::endl;
-            // t = **t_in;
-        }
-
         //
         // Generated members:
         //
 
-        Abstract_X* ptr_copy()
+        Abstract_X* pointerCopy_GAMBIT()
         {
             return new X(*this);
         }
 
-        void ptr_assign(Abstract_X *in)
+        void pointerAssign_GAMBIT(Abstract_X *in)
         {
             *this = *dynamic_cast<X*>(in);
         }             
 
-        Abstract_T& tRef()
+        Abstract_T& t_ref_GAMBIT()
         {
             return t;
         }
-        // T& tRef()
-        // {
-        //     return t;
-        // }
-        // Abstract_T& tRef_wrapper()
-        // {
-        //     return tRef();
-        // }
 
-        Abstract_T* getT_wrapper()
+        Abstract_T* getT_GAMBIT()
         {
             return new T(getT());
         }
     
-        void setT_wrapper(Abstract_T& t_in)
+        void setT_GAMBIT(Abstract_T& t_in)
         {
             setT( dynamic_cast<T&>(t_in) );
-        }
-
-        void setT2_wrapper(Abstract_T** t_in, Abstract_T** t_in2)
-        {
-            // setT2( dynamic_cast<T**>(t_in) );
-            // setT2( dynamic_cast<T**>( &dynamic_cast<T*>(*t_in) );
-            // setT2( t_in );
-            std::cout << "This is setT2_wrapper" << std::endl;
-            
-            // T* t_in_tmp = dynamic_cast<T*>(*t_in);
-            // T** t_in_tmp2 = &t_in_tmp;
-
-            // T* t_in2_tmp = dynamic_cast<T*>(*t_in2);
-            // T** t_in2_tmp2 = &t_in2_tmp;
-
-            // setT2(t_in_tmp2, t_in2_tmp2);
-
-            setT2( reinterpret_cast<T**>(t_in), reinterpret_cast<T**>(t_in2) );
         }
 
 };
@@ -144,17 +115,17 @@ class Container : public virtual Abstract_Container<Type>
         // Generated members:
         //
 
-        Abstract_Container<Type>* ptr_copy()
+        Abstract_Container<Type>* pointerCopy_GAMBIT()
         {
             return new Container(*this);
         }
 
-        void ptr_assign(Abstract_Container<Type> *in)
+        void pointerAssign_GAMBIT(Abstract_Container<Type> *in)
         {
             *this = *dynamic_cast<Container*>(in);
         }             
 
-        Type& varRef()
+        Type& var_ref_GAMBIT()
         {
             return var;
         }

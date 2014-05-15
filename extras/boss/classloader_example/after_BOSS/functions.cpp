@@ -41,19 +41,19 @@ X doubleX_byVal(X x_in)
 //
 // Generated wrapper functions
 //
-void printT_WRAPPER(Abstract_T& abs_t_in)
+void printT_GAMBIT(Abstract_T& abs_t_in)
 {
 	printT( dynamic_cast<T&>(abs_t_in));
 }
 
 
-void doubleT_WRAPPER(Abstract_T& abs_t_in)
+void doubleT_GAMBIT(Abstract_T& abs_t_in)
 {
 	doubleT( dynamic_cast<T&>(abs_t_in));
 }
 
 
-Abstract_X* doubleX_byVal_WRAPPER(Abstract_X& abs_x_in)
+Abstract_X* doubleX_byVal_GAMBIT(Abstract_X& abs_x_in)
 {
 	X temp_x = doubleX_byVal( dynamic_cast<X&>(abs_x_in) );
 	Abstract_X* abs_x_new = new X(temp_x);

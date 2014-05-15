@@ -14,19 +14,6 @@ void T::printMe()
 }
 
 
-int& T::iRef()
-{
-    return i;
-}
-
-
-double& T::dRef()
-{
-    return d;
-}
-
-
-
 //
 // Class X member methods 
 //
