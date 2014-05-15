@@ -1,3 +1,4 @@
+// BOSS modifies this file in place.
 #ifndef __CLASSES_HPP__
 #define __CLASSES_HPP__
 
