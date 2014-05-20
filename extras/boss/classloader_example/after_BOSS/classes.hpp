@@ -63,6 +63,17 @@ class X : public virtual Abstract_X
 
         void setT(T t_in);
 
+        void refTest(T& t_in, int& i_in)
+        {
+            T new_t;
+            new_t.i = 123;
+            new_t.d = 1.23;
+            t_in = new_t;
+
+            int new_i = 987;
+            i_in = new_i;
+        }
+
         //
         // Generated members:
         //
@@ -90,6 +101,11 @@ class X : public virtual Abstract_X
         void setT_GAMBIT(Abstract_T& t_in)
         {
             setT( dynamic_cast<T&>(t_in) );
+        }
+
+        void refTest_GAMBIT(Abstract_T& t_in, int& i_in)
+        {
+            refTest( dynamic_cast<T&>(t_in), i_in );
         }
 
 };

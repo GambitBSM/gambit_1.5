@@ -250,7 +250,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
                 #
                 class_decl += '\n'
                 class_decl += ' '*(n_indents+2)*indent
-                class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket + ' {};' + '\n'
+                class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
 
 
                 # Construct the member function with the original name, wrapping the overridden one, e.g.: 
@@ -287,7 +287,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
             else:
                 class_decl += '\n'
                 class_decl += ' '*(n_indents+2)*indent
-                class_decl += 'virtual ' + return_kw_str + return_type + ' ' + el.get('name') + w_args_bracket + ' {};' + '\n'
+                class_decl += 'virtual ' + return_kw_str + return_type + ' ' + el.get('name') + w_args_bracket + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
 
 
         #
@@ -582,7 +582,7 @@ def constructVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_ind
 
     func_code += ' '*n_indents*indent
     if virtual:
-        func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() {};\n'
+        func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() {std::cout << "Called virtual function" << std::endl;};\n'
     else:
         func_code += var_kw_str + return_type + '& ' + ref_method_name + '() { return ' + var_name  +'; }\n'
 
@@ -600,7 +600,7 @@ def constructPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        ptr_code += 'virtual '+ short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '();\n'   
+        ptr_code += 'virtual '+ short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '() {std::cout << "Called virtual function" << std::endl;};\n'   
     else:
         ptr_code += short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '()'
         ptr_code += ' ' + '{ return new ' + short_class_name + '(*this); }\n'
@@ -619,7 +619,7 @@ def constructPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=Fal
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in);\n'
+        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in) {std::cout << "Called virtual function" << std::endl;};\n'
     else:
         ptr_code += 'void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in)'
         ptr_code += ' ' + '{ *this = *dynamic_cast<' + short_class_name + '*>(in); }\n'        

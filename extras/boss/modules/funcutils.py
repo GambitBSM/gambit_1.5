@@ -89,15 +89,24 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
 
                 args_seq += arg_dict['type']
 
+        if include_arg_type and include_arg_name:
+            args_seq += ' '
+
         if include_arg_name:
-            if wrapper_to_pointer:
-                args_seq += ' ' + '*BEptr.' + arg_dict['name']
+            if utils.isParsedClass(arg_dict['type']) and wrapper_to_pointer:
+                if arg_dict['type'].count('*') == 0:
+                    args_seq += '*' + arg_dict['name'] + '.BEptr'
+                elif arg_dict['type'].count('*') == 1:
+                    args_seq += arg_dict['name'] + '.BEptr'
+                else:
+                    raise Exception('funcutils.constrArgsBracket cannot presently deal with arguments of type pointer-to-pointer for wrapper classes.')
             else:
-                args_seq += ' ' + arg_dict['name']
+                args_seq += arg_dict['name']
 
         args_seq += ', '
 
     args_seq = args_seq.rstrip(', ')
+    args_seq = args_seq.strip()
     args_bracket = '(' + args_seq + ')'
 
     return args_bracket
@@ -286,7 +295,7 @@ def constrWrapperBody(return_type, func_name, args, return_is_native, keywords=[
 
 # ======== ignoreFunction ========
 
-def ignoreFunction(func_el):
+def ignoreFunction(func_el, limit_pointerness=False):
 
     return_type_accepted = True
     arg_types_accepted   = True
@@ -305,6 +314,12 @@ def ignoreFunction(func_el):
             warnings.warn('The function "%s" makes use of a non-accepted argument type "%s" and will be ignored.' % (func_el.get('name'), arg_type_name))
             arg_types_accepted = False
             break
+        if limit_pointerness == True:
+            if utils.isParsedClass(arg_type_name):
+                if ('**' in arg_type_name) or ('*&' in arg_type_name):
+                    warnings.warn('The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a parsed class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name))
+                    arg_types_accepted = False
+                    break
 
     # Return result
     if (not return_type_accepted) or (not arg_types_accepted):

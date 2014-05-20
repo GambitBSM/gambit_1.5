@@ -33,6 +33,16 @@ class X
 
         void setT(T t_in);
 
+        void refTest(T& t_in, int& i_in)
+        {
+            T new_t;
+            new_t.i = 123;
+            new_t.d = 1.23;
+            t_in = new_t;
+
+            int new_i = 987;
+            i_in = new_i;
+        }
 };
 
 

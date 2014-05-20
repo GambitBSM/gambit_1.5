@@ -190,6 +190,11 @@ def run():
 
         class_decl = ''
 
+        # - DEBUG: For debug purposes, include <iostream> in all abstract header files
+        #          (To allow virtual member functions to print a warning if they are executed.)
+        class_decl += '#include <iostream>  // FOR DEBUG: Allow virtual member functions to print a warning if executed.\n'
+        class_decl += '\n'
+
         # - Add forward declarations at the top of the header file  
         #
         #   FIXME: For now, this includes forward declarations of *all* accepted native classes.
@@ -200,16 +205,6 @@ def run():
 
 
         # - Add the the code for the abstract class
-        #
-        # if (is_template == True) and (class_name_full in templ_spec_done):
-        #     pass
-        # elif (is_template == True) and (class_name_full not in templ_spec_done):
-        #     class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent, template_bracket=add_template_bracket)
-        #     class_decl += '\n'
-        # else:
-        #     class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent)
-        #     class_decl += '\n'
-
         if (is_template == True) and (class_name_full in templ_spec_done):
             pass
         elif (is_template == True) and (class_name_full not in templ_spec_done):
@@ -226,14 +221,6 @@ def run():
 
 
         # Add abstract class to inheritance list of original class
-
-        # if (is_template == True) and (class_name_full in templ_spec_done):
-        #     pass
-        #     print
-        #     print 'IT DID HAPPEN!'
-        #     print '---> THIS IS A TEMPLATE SPECIALIZATION THAT HAS BEEN DONE: ', class_name_full
-        #     print
-        # else:
 
         line_number = int(class_el.get('line'))
 
@@ -548,8 +535,8 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     class_members_full = utils.getMemberElements(class_el, include_artificial=True)
     for mem_el in class_members:
         if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
-            if funcutils.ignoreFunction(mem_el):
-                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type "%s" and will be ignored.' % (mem_el.get('name'), short_class_name))
+            if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
+                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
             else:
                 class_functions.append(mem_el)
 
@@ -697,10 +684,9 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
             use_return_type = return_type
 
         # Write declaration line
-        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + ' {};\n'
+        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + '\n'
 
         # Write function body
-        
         code += 2*indent + '{\n'
 
         if return_type == 'void':

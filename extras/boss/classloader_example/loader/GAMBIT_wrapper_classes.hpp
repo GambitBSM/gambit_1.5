@@ -106,6 +106,11 @@ class X_gambit
 
         T_gambit getT(){return T_gambit(BEptr->getT());}
         void setT(T_gambit& t_in){BEptr->setT(*t_in.BEptr);}
+
+        void refTest(T_gambit& t_in, int& i_in)
+        {
+            BEptr->refTest(*t_in.BEptr, i_in);
+        }
                
         X_gambit();
         X_gambit(Abstract_X*);

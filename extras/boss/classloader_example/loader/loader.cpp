@@ -153,6 +153,23 @@ int main(int argc, char * argv[])
   cout << "=======================" << endl;
   cout << endl;
 
+
+  // Testing refTest function:
+  int a = 555;
+
+  cout << " a = " << a << endl;
+  test_t.printMe();
+  cout << endl;
+  
+  test_x.refTest(test_t, a);
+
+  cout << " a = " << a << endl;
+  test_t.printMe();
+  
+  cout << endl;
+  cout << "=======================" << endl;
+  cout << endl;
+
   //
   // Done
   // 

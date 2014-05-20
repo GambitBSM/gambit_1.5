@@ -16,7 +16,7 @@ class Abstract_X
 
         virtual Abstract_X* pointerCopy_GAMBIT() {std::cout << "Called virtual function" << std::endl;};
 
-        virtual void pointerAssign_GAMBIT(Abstract_X *in){std::cout << "Called virtual function" << std::endl;}  
+        virtual void pointerAssign_GAMBIT(Abstract_X *in) {std::cout << "Called virtual function" << std::endl;}  
 
         Abstract_T* getT()
         {
@@ -28,6 +28,13 @@ class Abstract_X
         {
             setT_GAMBIT(t_in);
         }
+
+        virtual void refTest_GAMBIT(Abstract_T& t_in, int& i_in) {std::cout << "Called virtual function" << std::endl;};
+        void refTest(Abstract_T& t_in, int& i_in)
+        {
+            refTest_GAMBIT(t_in, i_in);
+        }
+
 };
 
 #endif  /* __ABSTRACT_X_HPP__ */

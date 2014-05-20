@@ -81,6 +81,70 @@ accepting a template specialization as a standard type.
 
 
 
+Small things to fix:
+--------------------
+
+- For a wrapper function in an original class, do the type cast (Abstract_SomeClass -> SomeClass)
+  directly in the argument list when calling the original function. (That is, do not create a bunch
+  of temporary variables.)
+
+
+
+
+
+Known issues (not yet on the todo list):
+----------------------------------------
+
+(a)
+UPDATE:
+If we allow the BEptr within a wrapper class to change target, we can no longer
+guarantee that the memory of the original class instance (created with the 'new' operator)
+will be deleted. (Also, if the user has two pointers to a single wrapper class instance, and
+then tries to modify one of them using some wrapped function, the other pointer will also be
+affected indirectly, since the pointer manipulation would happen at the level of the common 
+BEptr.)
+
+Thus, we should not allow BEptr to change target. This has the consequence that
+any original function that may change the destination of a pointer-to-original-class has to be ignored
+by the wrapper system that BOSS constructs. (That is, functions that take pointer-to-pointer or 
+reference-to-pointer as input.)
+
+One possible way around this is to let the user work directly with the abstract classes in cases like this.
+Another option is to generate wrapper code also for functions that take pointer-to-pointer or reference-to-pointer,
+but inform the user of the potential risks...
+
+
+OLD:
+Working with double pointers (pointer-to-pointer) to classes seem to require that
+we add another variable 'BEptr2' to the wrapper classes:
+
+ Abstract_SomeClass* BEptr;    // Initialized by the Factory_SomeClass function.
+ Abstract_SomeClass** BEptr2;  // Initialized to point to BEptr.
+
+This allows us to do (**SomeClass_GAMBIT).BEptr2 to convert from double-pointer-to-wrapper-class 
+to double-pointer-to-abstract-class, which can further be cast to double-pointer-to-original-class
+inside the BOSSed external code.
+
+However, if the BEptr variable of two wrapper class instances end up pointing to the *same* 
+original class instance, we'll get a terrible memory crash when the wrapper class destructor is run 
+("double free or corruption"). A dummy example of such a scenario would be if the original code 
+contained a function like this:
+
+  void pointToTheSame(SomeClass** scpp1, SomeClass** scpp2)
+  {
+    *scpp1 = *scpp2;
+  }
+
+Can we protect ourselves from this somehow? This might be a fundamental problem with the classloading system,
+since it is based on using the 'new' operator to create pointers (on the heap) to instances of the original class.
+These pointers must be deleted somewhere in order to avoid a memory leak, and if two point to the same object we get a
+crash. Could this perhaps be solved by some clever use of 'smart pointers'?
+
+
+
+
+
+
 
 
 
