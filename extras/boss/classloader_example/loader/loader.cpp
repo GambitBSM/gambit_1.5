@@ -53,26 +53,48 @@ int main(int argc, char * argv[])
   // function pointers declared in GAMBIT_wrapper_*.hpp
   //
 
+  void * temp_ptr;
+
   // T factory
-  Factory_T = reinterpret_cast<Abstract_T* (*)()>( dlsym(pHandle, "_Z9Factory_Tv") );
+  temp_ptr = dlsym(pHandle, "_Z9Factory_Tv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_T = reinterpret_cast<Abstract_T* (*)()>( temp_ptr );
 
   // X factory
-  Factory_X = reinterpret_cast<Abstract_X* (*)()>( dlsym(pHandle, "_Z9Factory_Xv") );
+  temp_ptr = dlsym(pHandle, "_Z9Factory_Xv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_X = reinterpret_cast<Abstract_X* (*)()>( temp_ptr );
 
   // Container factories
-  Factory_Container_int = reinterpret_cast<Abstract_Container<int>* (*)()>( dlsym(pHandle, "_Z21Factory_Container_intv") );
-  Factory_Container_T   = reinterpret_cast<Abstract_Container<Abstract_T>* (*)()>( dlsym(pHandle, "_Z19Factory_Container_Tv") );
-  Factory_Container_X   = reinterpret_cast<Abstract_Container<Abstract_X>* (*)()>( dlsym(pHandle, "_Z19Factory_Container_Xv") );
+  temp_ptr = dlsym(pHandle, "_Z21Factory_Container_intv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Container_int = reinterpret_cast<Abstract_Container<int>* (*)()>( temp_ptr );
+
+  temp_ptr = dlsym(pHandle, "_Z19Factory_Container_Tv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Container_T   = reinterpret_cast<Abstract_Container<Abstract_T>* (*)()>( temp_ptr );
+
+  temp_ptr = dlsym(pHandle, "_Z19Factory_Container_Xv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Container_X   = reinterpret_cast<Abstract_Container<Abstract_X>* (*)()>( temp_ptr );
 
   
   // printT function
-  printT_GAMBIT = reinterpret_cast<void (*)(Abstract_T&)>( dlsym(pHandle, "_Z13printT_GAMBITR10Abstract_T") );
+  temp_ptr = dlsym(pHandle, "_Z13printT_GAMBITR10Abstract_T");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  printT_GAMBIT = reinterpret_cast<void (*)(Abstract_T&)>( temp_ptr );
 
   // doubleT function
-  doubleT_GAMBIT = reinterpret_cast<void (*)(Abstract_T&)>( dlsym(pHandle, "_Z14doubleT_GAMBITR10Abstract_T") );
+  temp_ptr = dlsym(pHandle, "_Z14doubleT_GAMBITR10Abstract_T");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  doubleT_GAMBIT = reinterpret_cast<void (*)(Abstract_T&)>( temp_ptr );
   
   // doubleX_byVal function
-  doubleX_byVal_GAMBIT = reinterpret_cast<Abstract_X* (*)(Abstract_X&)>( dlsym(pHandle, "_Z20doubleX_byVal_GAMBITR10Abstract_X") );
+  temp_ptr = dlsym(pHandle, "_Z20doubleX_byVal_GAMBITR10Abstract_X");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  doubleX_byVal_GAMBIT = reinterpret_cast<Abstract_X* (*)(Abstract_X&)>( temp_ptr );
+
+
 
 
   //
@@ -128,7 +150,9 @@ int main(int argc, char * argv[])
   Container_gambit<int> ci;
   ci.printMsg();
   
+  // cout << "\nHI!\n" << endl;
   Container_gambit<X_gambit> cx;
+  cout << "\nHI2!\n" << endl;
   cx.printMsg();
   
   cx.var.t.printMe();
