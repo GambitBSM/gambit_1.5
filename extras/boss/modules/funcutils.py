@@ -301,10 +301,11 @@ def ignoreFunction(func_el, limit_pointerness=False):
     arg_types_accepted   = True
 
     # Check function return type
-    if not utils.isAcceptedType(func_el):
-        return_type, return_kw, return_id = utils.findType(func_el)
-        warnings.warn('The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type))
-        return_type_accepted = False
+    if 'returns' in func_el.keys():
+        if not utils.isAcceptedType(func_el):
+            return_type, return_kw, return_id = utils.findType(func_el)
+            warnings.warn('The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type))
+            return_type_accepted = False
 
     # Check argument types
     args = getArgs(func_el)

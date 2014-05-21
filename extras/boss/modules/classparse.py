@@ -471,7 +471,8 @@ def run():
         short_wrapper_class_fname = cfg.wrapper_header_prefix + short_class_name + cfg.header_extension
         wrapper_class_fname = os.path.join(cfg.extra_output_dir, short_wrapper_class_fname)
         
-        wrapper_class_file_content = generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, short_abstr_class_fname)
+        wrapper_class_file_content = generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, 
+                                                           short_abstr_class_fname, has_copy_constructor, has_assignment_operator)
 
         # - Update dict of wrapper class header files
         #wrapper_class_headers[short_class_name] = wrapper_class_fname
@@ -522,7 +523,8 @@ def run():
 #
 # Function for generating a header file with a GAMBIT wrapper class
 #
-def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, short_abstr_class_fname):
+def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, 
+                          short_abstr_class_fname, has_copy_constructor, has_assignment_operator):
 
     # Useful variables
     abstr_class_name = '::'.join(namespaces) + '::'*bool(len(namespaces)) + short_abstr_class_name
@@ -531,6 +533,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     # Useful lists
     class_variables    = []
     class_functions    = []
+    class_constructors = []
     class_members      = utils.getMemberElements(class_el, include_artificial=False)
     class_members_full = utils.getMemberElements(class_el, include_artificial=True)
     for mem_el in class_members:
@@ -545,6 +548,15 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
                 class_variables.append(mem_el)
             else:
                 warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+        else:
+            pass
+    for mem_el in class_members_full:
+        if (mem_el.tag == 'Constructor') and (mem_el.get('access') == 'public'):
+            if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
+                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+            else:
+                class_constructors.append(mem_el)
+
 
     #
     # Start code generation
@@ -590,15 +602,14 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     # Create one factory function pointer for each constructor.
     # Initialize pointers to NULL - they will later be filled by dynamic loading
     temp_code = ''
-    for mem_el in class_members_full:
-        if (mem_el.tag == 'Constructor') and (mem_el.get('access') == 'public'):
+    for constr_el in class_constructors:
 
-            # Identify arguments
-            args = funcutils.getArgs(mem_el)
-            args_bracket = funcutils.constrArgsBracket(args, include_arg_name=False, include_arg_type=True)
+        # Identify arguments
+        args = funcutils.getArgs(constr_el)
+        args_bracket = funcutils.constrArgsBracket(args, include_arg_name=False, include_arg_type=True)
 
-            # Construct factory pointer code
-            temp_code += abstr_class_name + '* (*Factory_' + short_class_name + ')' + args_bracket + ' = NULL;\n'
+        # Construct factory pointer code
+        temp_code += abstr_class_name + '* (*Factory_' + short_class_name + ')' + args_bracket + ' = NULL;\n'
 
     if temp_code != '':
         code += '\n'
@@ -610,9 +621,11 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     # Generate code for wrapper class
     #
 
+    short_wrapper_class_name = short_class_name + cfg.code_suffix
+
     # Class declaration line
     code += '\n'
-    code += 'class ' + short_class_name + cfg.code_suffix + '\n'
+    code += 'class ' + short_wrapper_class_name + '\n'
 
     # Class body
     code += '{\n'
@@ -699,9 +712,114 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
         code += 2*indent + '}\n'
 
+
+    # Add special member function: _set_member(bool) - set the variable 'member_variable' to true/false
+    code += '\n'
+    code += 2*indent + '// Special member function to set member_variable: \n'
+    code += 2*indent + 'void _set_member_variable(bool in) { member_variable = in; }\n'    
+
+
+    #
+    # Add all constructors here...
+    #
+
+    # First generate some code common to all constructors
+    common_init_list_code = ''
+    for var_el in class_variables:
+        var_name = var_el.get('name')
+        var_type, var_type_kw, var_type_id = utils.findType(var_el)
+        if utils.isParsedClass(var_type):
+            common_init_list_code += 3*indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
+        else:
+            common_init_list_code += 3*indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
+        common_init_list_code += 3*indent + 'member_variable(false)\n'
+
+    common_constructor_body = ''
+    common_constructor_body += 2*indent + '{\n'
+    for var_el in class_variables:
+        var_name = var_el.get('name')
+        var_type, var_type_kw, var_type_id = utils.findType(var_el)
+        if utils.isParsedClass(var_type):
+            common_constructor_body += 3*indent + var_name + '._set_member_variable(true);\n'
+    common_constructor_body += 2*indent + '}\n'
+
+
+    # Add wrappers for all original constructors except the copy constructor
+    temp_code = ''
+    for constr_el in class_constructors:
+
+        # Identify arguments
+        args = funcutils.getArgs(constr_el)
+
+        # Skip if this is a copy constructor. (Another copy constructor is added below.)
+        if (len(args) == 1) and (args[0]['id'] == class_el.get('id')):
+            continue
+
+        args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
+        args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
+
+        temp_code += 2*indent + short_wrapper_class_name + args_bracket + ' :\n'
+        temp_code += 3*indent + 'BEptr( Factory_' + short_class_name + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
+        temp_code += common_init_list_code
+        temp_code += common_constructor_body
+
+        temp_code += '\n'
+
+    # X_gambit::X_gambit() : 
+    #   BEptr(Factory_X()), 
+    #   t(&(BEptr->t_ref_GAMBIT())),
+    #   member_variable(false)
+    # {
+    #     // run _set_member(true) on any member variables that are themselves wrapped classes
+    #     t._set_member(true);        
+    # }
+
+    if temp_code != '':
+        code += '\n'
+        code += 2*indent + '// Wrappers for original constructors: \n'    
+        code += temp_code
+
+
+    # Add special constructor based on abstract pointer (This is needed to allow return-by-value with the wrapper classes.)
+    code += 2*indent + '// Special pointer-based constructor: \n'
+    code += 2*indent + short_wrapper_class_name + '(' + abstr_class_name +'* in) :\n'
+    code += 3*indent + 'BEptr(in),\n'
+    code += common_init_list_code
+    code += common_constructor_body
+
+
+    # Add copy constructor
+    if has_copy_constructor:
+        code += '\n'
+        code += 2*indent + '// Copy constructor: \n'
+        code += 2*indent + short_wrapper_class_name + '(const ' + short_wrapper_class_name +'& in) :\n'
+        code += 3*indent + 'BEptr(in.BEptr->pointerCopy' + cfg.code_suffix + '()),\n'
+        code += common_init_list_code
+        code += common_constructor_body
+
+    #
+    # Add assignment operator
+    #
+    if has_assignment_operator:
+        code += '\n'
+        code += 2*indent + '// Assignment operator: \n'
+        code += 2*indent + short_wrapper_class_name + '& ' + short_wrapper_class_name + '::operator=(const ' + short_wrapper_class_name +'& in)\n'
+        code += 2*indent + '{\n'
+        code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr); }\n'
+        code += 2*indent + '}\n'
+
+    #
+    # Add destructor
+    #
+    code += '\n'
+    code += 2*indent + '// Destructor: \n'
+    code += 2*indent + '~' + short_wrapper_class_name + '()\n'
+    code += 2*indent + '{\n'
+    code += 3*indent + 'if(member_variable==false) { delete BEptr; }\n'
+    code += 2*indent + '}\n'
+
     # Close class body
     code += '};\n'
-
 
     # Add include guards
     guard_var = '__' + cfg.wrapper_header_prefix + short_class_name + '_' + cfg.header_extension.replace('.','') + '__'
