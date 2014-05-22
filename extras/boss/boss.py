@@ -422,15 +422,18 @@ def main():
             f.close()
 
         for pos,code in code_tuples:
-            if pos == -1:
-                new_file_content = new_file_content + code    
-            else:
+            if pos == -1: 
+                if not code in new_file_content:
+                    new_file_content = new_file_content + code    
+                else:
+                    raise UserWarning('Ignored duplicate code\n' + code + '\n\n')
+            elif new_file_content[pos:].find(code) != 0:
                 new_file_content = new_file_content[:pos] + code + new_file_content[pos:]
+            else:
+                raise UserWarning('Ignored duplicate code\n' + code + '\n\n')
 
         # Do the writing!
-        if options.debug_mode_flag == True:
-            pass
-        else:
+        if not options.debug_mode_flag:
             f = open(new_src_file_name, 'w')
             f.write(new_file_content)
             f.close()
