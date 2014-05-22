@@ -10,7 +10,9 @@
 
 // Factory function pointers to be filled by dynamic loading
 Abstract_T* (*Factory_T)() = NULL;
+Abstract_T* (*Factory_T_2)(int, double) = NULL;
 Abstract_X* (*Factory_X)() = NULL;
+Abstract_X* (*Factory_X_2)(Abstract_T&) = NULL;
 Abstract_Container<int>* (*Factory_Container_int)() = NULL;
 Abstract_Container<Abstract_X>* (*Factory_Container_X)() = NULL;
 Abstract_Container<Abstract_T>* (*Factory_Container_T)() = NULL;
@@ -33,6 +35,7 @@ class T_gambit
         void printMe(){BEptr->printMe();};  
 
         T_gambit();
+        T_gambit(int, double);
         T_gambit(Abstract_T*);        
         T_gambit(const T_gambit&);
         T_gambit& operator=(const T_gambit&);           
@@ -47,6 +50,15 @@ class T_gambit
 
 T_gambit::T_gambit() : 
     BEptr(Factory_T()),
+    i(BEptr->i_ref_GAMBIT()), 
+    d(BEptr->d_ref_GAMBIT()), 
+    member_variable(false)
+    {
+        // run _set_member(true) on any member variables that are themselves wrapped classes
+    }
+
+T_gambit::T_gambit(int i, double d) : 
+    BEptr(Factory_T_2(i,d)),
     i(BEptr->i_ref_GAMBIT()), 
     d(BEptr->d_ref_GAMBIT()), 
     member_variable(false)
@@ -113,6 +125,7 @@ class X_gambit
         }
                
         X_gambit();
+        X_gambit(T_gambit); 
         X_gambit(Abstract_X*);
         X_gambit(const X_gambit&);
         X_gambit& operator=( const X_gambit& in );
@@ -125,6 +138,15 @@ class X_gambit
 // X_gambit class functions
 X_gambit::X_gambit() : 
     BEptr(Factory_X()), 
+    t(&(BEptr->t_ref_GAMBIT())),
+    member_variable(false)
+    {
+        // run _set_member(true) on any member variables that are themselves wrapped classes
+        t._set_member(true);        
+    }
+
+X_gambit::X_gambit(T_gambit t_in) : 
+    BEptr(Factory_X_2(*t_in.BEptr)), 
     t(&(BEptr->t_ref_GAMBIT())),
     member_variable(false)
     {

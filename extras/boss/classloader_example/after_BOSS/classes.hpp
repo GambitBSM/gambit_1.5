@@ -15,6 +15,7 @@ class T : public virtual Abstract_T
 
         // Constructor
         T() : i(1), d(3.14) {}
+        T(int i_in, double d_in) : i(i_in), d(d_in) {}
 
         // Class methods
         void printMe();
@@ -57,7 +58,8 @@ class X : public virtual Abstract_X
 
         // Constructor
         X() {}
-
+        X(T t_in) : t(t_in) {}
+        
         // Class methods
         T getT();
 

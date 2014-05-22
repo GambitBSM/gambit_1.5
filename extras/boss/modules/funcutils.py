@@ -22,7 +22,7 @@ def getArgs(func_el):
     # Returns a list with one dict per argument.
     # Each dict contains the following keywords:
     # 
-    #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'namespaces', 'accepted_class'
+    #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'parsed', 'namespaces', 'accepted_class', 'type_namespaces'
     #
 
     args = []
@@ -158,6 +158,7 @@ def constrWrapperArgs(args):
 
     w_args = copy.deepcopy(args) 
     for arg_dict in w_args:
+        # if utils.isParsedClass(arg_dict['name']) == True:
         if arg_dict['native'] == True:
             if len(arg_dict['type_namespaces']) > 0:
                 # namespaces, type_name = arg_dict['type'].rsplit('::',1)

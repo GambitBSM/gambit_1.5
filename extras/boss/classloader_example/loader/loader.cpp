@@ -60,10 +60,20 @@ int main(int argc, char * argv[])
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_T = reinterpret_cast<Abstract_T* (*)()>( temp_ptr );
 
+  // T factory 2
+  temp_ptr = dlsym(pHandle, "_Z9Factory_Tid");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_T_2 = reinterpret_cast<Abstract_T* (*)(int,double)>( temp_ptr );
+
   // X factory
   temp_ptr = dlsym(pHandle, "_Z9Factory_Xv");
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_X = reinterpret_cast<Abstract_X* (*)()>( temp_ptr );
+
+  // X factory 2
+  temp_ptr = dlsym(pHandle, "_Z9Factory_XR10Abstract_T");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_X_2 = reinterpret_cast<Abstract_X* (*)(Abstract_T&)>( temp_ptr );
 
   // Container factories
   temp_ptr = dlsym(pHandle, "_Z21Factory_Container_intv");
@@ -189,6 +199,20 @@ int main(int argc, char * argv[])
 
   cout << " a = " << a << endl;
   test_t.printMe();
+  
+  cout << endl;
+  cout << "=======================" << endl;
+  cout << endl;
+
+
+  // Testing new constructors
+  T_gambit test_t2(99,9.9);
+  test_t2.printMe();
+  cout << endl;
+
+  X_gambit test_x3(test_t2);
+
+  test_x3.t.printMe();
   
   cout << endl;
   cout << "=======================" << endl;

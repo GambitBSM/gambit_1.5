@@ -343,7 +343,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
 
 def constructFactoryFunction(class_el, full_class_name, indent=4, template_types=[]):
 
-    # Create list of all (explicit) constructors of the class
+    # Create list of all constructors of the class
     constructor_elements = []
 
     # Replace '*' and '&' in list of template types

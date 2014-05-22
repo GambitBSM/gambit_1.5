@@ -82,6 +82,10 @@ accepting a template specialization as a standard type.
 Make sure that all abstract headers include any other abstract headers needed. 
 
 
+(12)
+BOSS needs to tackle structs as well as classes.
+
+
 
 
 Small things to fix:

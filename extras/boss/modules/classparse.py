@@ -765,15 +765,6 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
         temp_code += '\n'
 
-    # X_gambit::X_gambit() : 
-    #   BEptr(Factory_X()), 
-    #   t(&(BEptr->t_ref_GAMBIT())),
-    #   member_variable(false)
-    # {
-    #     // run _set_member(true) on any member variables that are themselves wrapped classes
-    #     t._set_member(true);        
-    # }
-
     if temp_code != '':
         code += '\n'
         code += 2*indent + '// Wrappers for original constructors: \n'    
