@@ -566,18 +566,29 @@ def isAcceptedType(input_type, byname=False):
 
 def isParsedClass(input_type, byname=False):
 
-    type_name = input_type
     is_parsed_class = False
 
-    # Remove '*' and '&'
-    type_name = type_name.replace('*','').replace('&','')
+    if byname:
+        type_name = input_type
 
-    # Remove template bracket
-    type_name = type_name.split('<')[0]
+        # Remove '*' and '&'
+        type_name = type_name.replace('*','').replace('&','')
 
-    # Check against cfg.accepted_classes
-    if type_name in cfg.accepted_classes:
-        is_parsed_class = True
+        # Remove template bracket
+        type_name = type_name.split('<')[0]
+
+        # Check against cfg.accepted_classes
+        if type_name in cfg.accepted_classes:
+            is_parsed_class = True
+
+    else:
+        type_name, type_kw, type_id = findType(input_type)
+        type_el = cfg.id_dict[type_id]
+
+        if type_el.tag in ['Class', 'Struct']:
+            demangled_name = type_el.get('demangled')
+            if demangled_name in cfg.accepted_types:
+                is_parsed_class = True
 
     return is_parsed_class
 

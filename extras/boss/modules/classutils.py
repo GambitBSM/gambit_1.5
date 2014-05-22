@@ -32,9 +32,9 @@ def getAbstractClassName(input_name, prefix=cfg.abstr_class_prefix, short=False)
 # ====== END: getAbstractClassName ========
 
 
-# ====== constructEmptyTemplClassDecl ========
+# ====== constrEmptyTemplClassDecl ========
 
-def constructEmptyTemplClassDecl(short_abstract_class_name, namespaces, template_bracket, indent=4):
+def constrEmptyTemplClassDecl(short_abstract_class_name, namespaces, template_bracket, indent=4):
 
     n_indents  = len(namespaces)
     class_decl = ''
@@ -59,13 +59,13 @@ def constructEmptyTemplClassDecl(short_abstract_class_name, namespaces, template
 
     return class_decl
 
-# ====== END: constructEmptyTemplClassDecl ========
+# ====== END: constrEmptyTemplClassDecl ========
 
 
 
-# ====== constructTemplForwDecl ========
+# ====== constrTemplForwDecl ========
 
-def constructTemplForwDecl(short_class_name, namespaces, template_bracket, indent=4):
+def constrTemplForwDecl(short_class_name, namespaces, template_bracket, indent=4):
 
     n_indents = len(namespaces)
     forw_decl = ''
@@ -90,14 +90,14 @@ def constructTemplForwDecl(short_class_name, namespaces, template_bracket, inden
 
     return forw_decl
 
-# ====== END: constructTemplForwDecl ========
+# ====== END: constrTemplForwDecl ========
 
 
 
-# ====== constructAbstractClassDecl ========
+# ====== constrAbstractClassDecl ========
 
-def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[], 
-                               has_copy_constructor=True,  has_assignment_operator=True):
+def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[], 
+                            has_copy_constructor=True,  has_assignment_operator=True):
 
     n_indents = len(namespaces)
 
@@ -296,7 +296,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
         elif (el.tag in ('Field', 'Variable')) and (el.get('access') == 'public'):
 
             class_decl += '\n' 
-            class_decl += constructVariableRefFunction(el, virtual=True, indent=indent, n_indents=n_indents+2)
+            class_decl += constrVariableRefFunction(el, virtual=True, indent=indent, n_indents=n_indents+2)
 
         else:
             class_decl += ' '*(n_indents+2)*indent
@@ -308,9 +308,9 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
         class_decl += '\n'
         class_decl += ' '*(n_indents+1)*indent + 'public:\n'
         if has_assignment_operator:
-            class_decl += constructPtrAssignFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
+            class_decl += constrPtrAssignFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
         if has_copy_constructor:
-            class_decl += constructPtrCopyFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
+            class_decl += constrPtrCopyFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
 
     # - Construct the 'downcast' converter function
     class_decl += '\n'
@@ -320,7 +320,7 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     else:
         template_bracket = ''
     class_decl += ' '*(n_indents+1)*indent + 'public:\n'
-    class_decl += constructDowncastFunction(short_class_name, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
+    class_decl += constrDowncastFunction(short_class_name, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
 
     # - Close the class body
     class_decl += ' '*n_indents*indent + '};' + '\n'
@@ -335,13 +335,13 @@ def constructAbstractClassDecl(class_el, short_class_name, short_abstract_class_
     class_decl += '#pragma GCC diagnostic pop\n'
     return class_decl
 
-# ====== END: constructAbstractClassDecl ========
+# ====== END: constrAbstractClassDecl ========
 
 
 
-# ====== constructFactoryFunction ========
+# ====== constrFactoryFunction ========
 
-def constructFactoryFunction(class_el, full_class_name, indent=4, template_types=[]):
+def constrFactoryFunction(class_el, full_class_name, indent=4, template_types=[]):
 
     # Create list of all constructors of the class
     constructor_elements = []
@@ -368,17 +368,9 @@ def constructFactoryFunction(class_el, full_class_name, indent=4, template_types
 
         # Identify arguments
         args = funcutils.getArgs(el)
-        # args = OrderedDict()
-        # argc = 0
-        # for sub_el in el.getchildren():
-        #     if sub_el.tag == 'Argument':
-        #         argc += 1
-        #         if 'name' in sub_el.keys():
-        #             arg_name = sub_el.get('name')
-        #         else:
-        #             arg_name = 'arg' + str(argc)
-        #         arg_type, add_kw, type_id = utils.findType(sub_el)
-        #         args[arg_name] = {'type': arg_type, 'kw': add_kw}
+
+        # Translate argument type of parsed classes
+        w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
         # Invent argument names if missing
         argc = 1
@@ -388,18 +380,9 @@ def constructFactoryFunction(class_el, full_class_name, indent=4, template_types
                 argc += 1
 
         # Construct bracket with input arguments
-        args_bracket = funcutils.constrArgsBracket(args, include_namespace=False)
-        args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_type=False)
-        # args_seq = ''
-        # for arg_name, arg_info in args.items():
-        #     #args_seq += ''.join(arg_info['kw'])
-        #     args_seq += ''.join([ kw+' ' for kw in arg_info['kw'] ])
-        #     args_seq += arg_info['type'] + ' '
-        #     args_seq += arg_name
-        #     args_seq += ', '
-        # args_seq = args_seq.rstrip(', ')
-        # args_bracket = '(' + args_seq + ')'
-
+        args_bracket = funcutils.constrArgsBracket(w_args, include_namespace=False)
+        args_bracket_notypes = funcutils.constrArgsBracket_TEST(args, include_arg_type=False, cast_to_original=True)
+        
         # Generate declaration line:
         return_type = getAbstractClassName(full_class_name, prefix=cfg.abstr_class_prefix)
         func_def += return_type + '* ' + factory_name + args_bracket + '\n'
@@ -410,13 +393,13 @@ def constructFactoryFunction(class_el, full_class_name, indent=4, template_types
 
     return func_def
 
-# ====== END: constructFactoryFunction ========
+# ====== END: constrFactoryFunction ========
 
 
 
-# ====== constructDowncastFunction ========
+# ====== constrDowncastFunction ========
 
-def constructDowncastFunction(cast_to_class, indent=4, n_indents=0, template_bracket=''):
+def constrDowncastFunction(cast_to_class, indent=4, n_indents=0, template_bracket=''):
 
     # Example of output C++ code:
     #
@@ -437,13 +420,13 @@ def constructDowncastFunction(cast_to_class, indent=4, n_indents=0, template_bra
 
     return func_def
 
-# ====== END: constructDowncastFunction ========
+# ====== END: constrDowncastFunction ========
 
 
 
-# ====== constructUpcastFunction ========
+# ====== constrUpcastFunction ========
 
-# def constructUpcastFunction(cast_to_class, indent=4, n_indents=0, template_bracket=''):
+# def constrUpcastFunction(cast_to_class, indent=4, n_indents=0, template_bracket=''):
 
 #     # Example of output C++ code:
 #     #
@@ -464,13 +447,13 @@ def constructDowncastFunction(cast_to_class, indent=4, n_indents=0, template_bra
 
 #     return func_def
 
-# ====== END: constructUpcastFunction ========
+# ====== END: constrUpcastFunction ========
 
 
 
-# ====== constructAbstractifyFunction ========
+# ====== constrAbstractifyFunction ========
 
-# def constructAbstractifyFunction(cast_to_class, indent=4, n_indents=0, template_bracket=''):
+# def constrAbstractifyFunction(cast_to_class, indent=4, n_indents=0, template_bracket=''):
 
 #     # Example of output C++ code:
 #     #
@@ -493,13 +476,13 @@ def constructDowncastFunction(cast_to_class, indent=4, n_indents=0, template_bra
 
 #     return func_def
 
-# ====== END: constructAbstractifyFunction ========
+# ====== END: constrAbstractifyFunction ========
 
 
 
-# ====== constructWrapperFunction ========
+# ====== constrWrapperFunction ========
 
-def constructWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
+def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
 
     # Function name
     func_name = method_el.get('name')
@@ -554,13 +537,13 @@ def constructWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     # Return result
     return wrapper_code
 
-# ====== END: constructWrapperFunction ========
+# ====== END: constrWrapperFunction ========
 
 
 
-# ====== constructVariableRefFunction ========
+# ====== constrVariableRefFunction ========
 
-def constructVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=0):
+def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=0):
 
     func_code = ''
 
@@ -588,13 +571,13 @@ def constructVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_ind
 
     return func_code
 
-# ====== END: constructVariableRefFunction ========
+# ====== END: constrVariableRefFunction ========
 
 
 
-# ====== constructPtrCopyFunc ========
+# ====== constrPtrCopyFunc ========
 
-def constructPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
+def constrPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
 
     ptr_code = ''
     ptr_code += ' '*cfg.indent*n_indents
@@ -607,13 +590,13 @@ def constructPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False
 
     return ptr_code
 
-# ====== END: constructPtrCopyFunc ========
+# ====== END: constrPtrCopyFunc ========
 
 
 
-# ====== constructPtrAssignFunc ========
+# ====== constrPtrAssignFunc ========
 
-def constructPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
+def constrPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
 
     ptr_code = ''
     ptr_code += ' '*cfg.indent*n_indents
@@ -626,7 +609,7 @@ def constructPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=Fal
 
     return ptr_code
 
-# ====== END: constructPtrAssignFunc ========
+# ====== END: constrPtrAssignFunc ========
 
 
 

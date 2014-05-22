@@ -71,7 +71,8 @@ int main(int argc, char * argv[])
   Factory_X = reinterpret_cast<Abstract_X* (*)()>( temp_ptr );
 
   // X factory 2
-  temp_ptr = dlsym(pHandle, "_Z9Factory_XR10Abstract_T");
+  // temp_ptr = dlsym(pHandle, "_Z9Factory_XR10Abstract_T");
+  temp_ptr = dlsym(pHandle, "_Z9Factory_X10Abstract_T");
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_X_2 = reinterpret_cast<Abstract_X* (*)(Abstract_T&)>( temp_ptr );
 

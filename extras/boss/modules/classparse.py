@@ -171,8 +171,8 @@ def run():
             template_bracket, template_types = utils.getTemplateBracket(class_el)
             
             empty_templ_class_decl = ''
-            empty_templ_class_decl += classutils.constructEmptyTemplClassDecl(short_abstr_class_name, namespaces, template_bracket, indent=cfg.indent)
-            empty_templ_class_decl += classutils.constructTemplForwDecl(short_class_name, namespaces, template_bracket, indent=cfg.indent)
+            empty_templ_class_decl += classutils.constrEmptyTemplClassDecl(short_abstr_class_name, namespaces, template_bracket, indent=cfg.indent)
+            empty_templ_class_decl += classutils.constrTemplForwDecl(short_class_name, namespaces, template_bracket, indent=cfg.indent)
 
             return_code_dict[abstr_class_fname].append( (0, empty_templ_class_decl) )
 
@@ -208,12 +208,12 @@ def run():
         if (is_template == True) and (class_name_full in templ_spec_done):
             pass
         elif (is_template == True) and (class_name_full not in templ_spec_done):
-            class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, 
+            class_decl += classutils.constrAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, 
                                                                 indent=cfg.indent, template_types=spec_template_types, 
                                                                 has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
             class_decl += '\n'
         else:
-            class_decl += classutils.constructAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent, 
+            class_decl += classutils.constrAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent, 
                                                                 has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
             class_decl += '\n'
 
@@ -389,7 +389,7 @@ def run():
             if method_access != current_access:
                 wrapper_code += ' '*(len(namespaces)+1)*cfg.indent + method_access +':\n'
                 current_access = method_access
-            wrapper_code += classutils.constructWrapperFunction(method_el, indent=cfg.indent, n_indents=len(namespaces)+2)
+            wrapper_code += classutils.constrWrapperFunction(method_el, indent=cfg.indent, n_indents=len(namespaces)+2)
             # wrapper_code += ' '*(len(namespaces)+2)*cfg.indent + 'WRAPPER CODE FOR ' + mem_el.get('name') + ' GOES HERE!\n'
 
         # - Register code
@@ -401,7 +401,7 @@ def run():
             ref_func_code = '\n'
             ref_func_code += ' '*cfg.indent*(n_indents+1) + 'public:\n'
             for var_el in member_variables:
-                ref_func_code += classutils.constructVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+                ref_func_code += classutils.constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
                 ref_func_code += '\n'
 
         # - Register code
@@ -413,8 +413,8 @@ def run():
         ptr_code  = '\n'
         ptr_code += ' '*cfg.indent*(n_indents+1) + 'public:\n'
 
-        ptr_code += classutils.constructPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
-        ptr_code += classutils.constructPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+        ptr_code += classutils.constrPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+        ptr_code += classutils.constrPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
         
         # - Register code
         return_code_dict[src_file_name].append( (insert_pos, ptr_code) )
@@ -424,7 +424,7 @@ def run():
         
         # fact_subdict = {}
         # fact_subdict['include']  = '#include "' + os.path.basename(class_file_name) + '"\n'
-        # fact_subdict['func_def'] = constructFactoryFunction(class_el, indent=cfg.indent)
+        # fact_subdict['func_def'] = constrFactoryFunction(class_el, indent=cfg.indent)
         # factories_dict[short_class_name] = fact_subdict
 
         factory_file_content  = ''
@@ -435,9 +435,9 @@ def run():
             factory_file_content += '#include "' + os.path.join(cfg.add_path_to_includes, src_file_name_base) + '"\n'
             factory_file_content += '\n'
         if is_template:
-            factory_file_content += classutils.constructFactoryFunction(class_el, class_name_full, indent=cfg.indent, template_types=spec_template_types)
+            factory_file_content += classutils.constrFactoryFunction(class_el, class_name_full, indent=cfg.indent, template_types=spec_template_types)
         else:
-            factory_file_content += classutils.constructFactoryFunction(class_el, class_name_full, indent=cfg.indent)
+            factory_file_content += classutils.constrFactoryFunction(class_el, class_name_full, indent=cfg.indent)
         factory_file_content += '\n'
 
         # # Add include statements
@@ -601,15 +601,19 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
     # Create one factory function pointer for each constructor.
     # Initialize pointers to NULL - they will later be filled by dynamic loading
+    # We append a number (e.g. '_1') to the function pointer name to make sure each overload of a constructor
+    # gets a unique.
     temp_code = ''
-    for constr_el in class_constructors:
+    for i, constr_el in enumerate(class_constructors):
 
-        # Identify arguments
+        # Identify arguments, translate argument type of parsed classes
+        # and construct the argument bracket
         args = funcutils.getArgs(constr_el)
-        args_bracket = funcutils.constrArgsBracket(args, include_arg_name=False, include_arg_type=True)
+        w_args = funcutils.constrWrapperArgs(args, add_ref=True)
+        args_bracket = funcutils.constrArgsBracket(w_args, include_arg_name=False, include_arg_type=True)
 
         # Construct factory pointer code
-        temp_code += abstr_class_name + '* (*Factory_' + short_class_name + ')' + args_bracket + ' = NULL;\n'
+        temp_code += abstr_class_name + '* (*Factory_' + short_class_name + '_' + str(i) + ')' + args_bracket + ' = NULL;\n'
 
     if temp_code != '':
         code += '\n'
@@ -653,9 +657,8 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
         # Determine variable type
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        var_type_el = cfg.id_dict[var_type_id]
 
-        if utils.isParsedClass(var_type):
+        if utils.isParsedClass(var_type, byname=True):
             use_var_type = classutils.toWrapperType(var_type)
         else:
             use_var_type = var_type
@@ -691,7 +694,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
         args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
 
         # Convert return type if parsed class
-        if utils.isParsedClass(return_type):
+        if utils.isParsedClass(return_type, byname=True):
             use_return_type = classutils.toWrapperType(return_type)
         else:
             use_return_type = return_type
@@ -728,7 +731,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     for var_el in class_variables:
         var_name = var_el.get('name')
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        if utils.isParsedClass(var_type):
+        if utils.isParsedClass(var_type, byname=True):
             common_init_list_code += 3*indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
         else:
             common_init_list_code += 3*indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
@@ -739,14 +742,14 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     for var_el in class_variables:
         var_name = var_el.get('name')
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        if utils.isParsedClass(var_type):
+        if utils.isParsedClass(var_type, byname=True):
             common_constructor_body += 3*indent + var_name + '._set_member_variable(true);\n'
     common_constructor_body += 2*indent + '}\n'
 
 
     # Add wrappers for all original constructors except the copy constructor
     temp_code = ''
-    for constr_el in class_constructors:
+    for i, constr_el in enumerate(class_constructors):
 
         # Identify arguments
         args = funcutils.getArgs(constr_el)
@@ -759,7 +762,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
         args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
 
         temp_code += 2*indent + short_wrapper_class_name + args_bracket + ' :\n'
-        temp_code += 3*indent + 'BEptr( Factory_' + short_class_name + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
+        temp_code += 3*indent + 'BEptr( Factory_' + short_class_name + '_' + str(i) + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
         temp_code += common_init_list_code
         temp_code += common_constructor_body
 
