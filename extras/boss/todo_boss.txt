@@ -82,6 +82,15 @@ accepting a template specialization as a standard type.
 Make sure that all abstract headers include any other abstract headers needed. 
 
 
+(12)
+At the moment, if BOSS runs on more than one xml file all based upon related c++ code, the 
+code that BOSS generates sounds like a broken record (repeats itself).
+
+  example:
+    cd classloader_example/original
+    python ../../boss.py classes.xml
+    python ../../boss.py functions.xml
+    [see the resulting, repetitive output from boss]
 
 
 Small things to fix:
