@@ -22,7 +22,7 @@ def getArgs(func_el):
     # Returns a list with one dict per argument.
     # Each dict contains the following keywords:
     # 
-    #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'namespaces', 'accepted_class', 'type_namespaces'
+    #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'namespaces', 'loaded_class', 'type_namespaces'
     #
 
     args = []
@@ -41,7 +41,7 @@ def getArgs(func_el):
             arg_type_el = cfg.id_dict[arg_dict['id']]
             arg_dict['native']      = utils.isNative(arg_type_el)
             arg_dict['fundamental'] = utils.isFundamental(arg_type_el)
-            arg_dict['accepted_class'] = utils.isParsedClass(arg_type_el)
+            arg_dict['loaded_class'] = utils.isLoadedClass(arg_type_el)
 
             type_el = cfg.id_dict[arg_dict['id']]
             arg_dict['type_namespaces'] = utils.getNamespaces(type_el)
@@ -72,7 +72,7 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
         if include_arg_type:
             args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
 
-            if use_wrapper_class and arg_dict['accepted_class'] == True:
+            if use_wrapper_class and arg_dict['loaded_class'] == True:
                 args_seq += classutils.toWrapperType(arg_dict['type'])
 
             else:
@@ -88,7 +88,7 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
             args_seq += ' '
 
         if include_arg_name:
-            if utils.isParsedClass(arg_dict['type'], byname=True) and wrapper_to_pointer:
+            if utils.isLoadedClass(arg_dict['type'], byname=True) and wrapper_to_pointer:
                 if arg_dict['type'].count('*') == 0:
                     args_seq += '*' + arg_dict['name'] + '.BEptr'
                 elif arg_dict['type'].count('*') == 1:
@@ -128,7 +128,7 @@ def constrArgsBracket_TEST(args, include_arg_name=True, include_arg_type=True, i
 
         if include_arg_name and cast_to_original:
 
-            if arg_dict['accepted_class']:
+            if arg_dict['loaded_class']:
 
                 # We assume that arg_dict['type'] *is* the original type!
                 cast_to_type = arg_dict['type']
@@ -154,7 +154,7 @@ def constrArgsBracket_TEST(args, include_arg_name=True, include_arg_type=True, i
             if include_arg_type:
                 args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
 
-                if use_wrapper_class and arg_dict['accepted_class'] == True:
+                if use_wrapper_class and arg_dict['loaded_class'] == True:
                     args_seq += classutils.toWrapperType(arg_dict['type'])
 
                 else:
@@ -170,7 +170,7 @@ def constrArgsBracket_TEST(args, include_arg_name=True, include_arg_type=True, i
                 args_seq += ' '
 
             if include_arg_name:
-                if utils.isParsedClass(arg_dict['type'], byname=True) and wrapper_to_pointer:
+                if utils.isLoadedClass(arg_dict['type'], byname=True) and wrapper_to_pointer:
                     if arg_dict['type'].count('*') == 0:
                         args_seq += '*' + arg_dict['name'] + '.BEptr'
                     elif arg_dict['type'].count('*') == 1:
@@ -243,7 +243,7 @@ def constrWrapperArgs(args, add_ref=False):
 
     for arg_dict in w_args:
         if arg_dict['native'] == True:
-            if arg_dict['accepted_class']:
+            if arg_dict['loaded_class']:
                 if len(arg_dict['type_namespaces']) > 0:
                     # namespaces, type_name = arg_dict['type'].rsplit('::',1)
                     # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
@@ -442,9 +442,9 @@ def ignoreFunction(func_el, limit_pointerness=False):
             arg_types_accepted = False
             break
         if limit_pointerness == True:
-            if utils.isParsedClass(arg_type_name, byname=True):
+            if utils.isLoadedClass(arg_type_name, byname=True):
                 if ('**' in arg_type_name) or ('*&' in arg_type_name):
-                    warnings.warn('The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a parsed class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name))
+                    warnings.warn('The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a loaded class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name))
                     arg_types_accepted = False
                     break
 

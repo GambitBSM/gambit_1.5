@@ -159,7 +159,7 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
             base_id            = base_el.get('type')
             base_name          = cfg.id_dict[base_id].get('demangled')
 
-            if base_name in cfg.accepted_classes:
+            if base_name in cfg.loaded_classes:
                 abstract_base_name = getAbstractClassName(base_name, prefix=cfg.abstr_class_prefix)
                 base_access        = base_el.get('access')
                 inheritance_line  += base_access + ' ' + 'virtual' + ' ' + abstract_base_name + ', '
@@ -213,7 +213,7 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
 
         elif el.tag == 'Method':
 
-            # Check if this member function should be ignored based on unparsed types.
+            # Check if this member function should be ignored based on unloaded types.
             if funcutils.ignoreFunction(el):
                 print 'INFO: Class ' + class_el.get('demangled') + ' : Member function ' + el.get('name') + ' ignored due to non-accepted type(s).'
                 continue
@@ -369,7 +369,7 @@ def constrFactoryFunction(class_el, full_class_name, indent=4, template_types=[]
         # Identify arguments
         args = funcutils.getArgs(el)
 
-        # Translate argument type of parsed classes
+        # Translate argument type of loaded classes
         w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
         # Invent argument names if missing

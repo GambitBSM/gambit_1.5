@@ -562,11 +562,11 @@ def isAcceptedType(input_type, byname=False):
 
 
 
-# ====== isParsedClass ========
+# ====== isLoadedClass ========
 
-def isParsedClass(input_type, byname=False):
+def isLoadedClass(input_type, byname=False):
 
-    is_parsed_class = False
+    is_loaded_class = False
 
     if byname:
         type_name = input_type
@@ -577,9 +577,9 @@ def isParsedClass(input_type, byname=False):
         # Remove template bracket
         type_name = type_name.split('<')[0]
 
-        # Check against cfg.accepted_classes
-        if type_name in cfg.accepted_classes:
-            is_parsed_class = True
+        # Check against cfg.loaded_classes
+        if type_name in cfg.loaded_classes:
+            is_loaded_class = True
 
     else:
         type_name, type_kw, type_id = findType(input_type)
@@ -588,11 +588,11 @@ def isParsedClass(input_type, byname=False):
         if type_el.tag in ['Class', 'Struct']:
             demangled_name = type_el.get('demangled')
             if demangled_name in cfg.accepted_types:
-                is_parsed_class = True
+                is_loaded_class = True
 
-    return is_parsed_class
+    return is_loaded_class
 
-# ====== END: isParsedClass ========
+# ====== END: isLoadedClass ========
 
 
 

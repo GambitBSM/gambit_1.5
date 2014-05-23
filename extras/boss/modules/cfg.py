@@ -31,8 +31,8 @@ accepted_paths     = ['classloader_example/original']
 
 std_include_paths  = ['/usr/include/']
 
-accepted_classes = ['T', 'X']
-accepted_functions = []
+loaded_classes = ['T', 'X']
+loaded_functions = []
 
 extra_output_dir      = 'test_output'
 code_suffix           = '_GAMBIT'

@@ -197,7 +197,7 @@ def run():
 
         # - Add forward declarations at the top of the header file  
         #
-        #   FIXME: For now, this includes forward declarations of *all* accepted native classes.
+        #   FIXME: For now, this includes forward declarations of *all* loaded native classes.
         #          Should limit this to only the forward declarations needed for the given abstract class.
         class_decl += '// Forward declarations:\n'
         class_decl += utils.constrForwardDecls()
@@ -583,7 +583,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     #         continue
 
     #     elif utils.isNative(type_el):
-    #         if basic_type_name in cfg.accepted_classes:
+    #         if basic_type_name in cfg.loaded_classes:
     #             basic_type_name_short = basic_type_name.split('::')[-1]
     #             wrapper_header = cfg.wrapper_header_prefix + basic_type_name_short + cfg.header_extension
     #             code += '#include "' + wrapper_header + '"\n'            
@@ -606,7 +606,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     temp_code = ''
     for i, constr_el in enumerate(class_constructors):
 
-        # Identify arguments, translate argument type of parsed classes
+        # Identify arguments, translate argument type of loaded classes
         # and construct the argument bracket
         args = funcutils.getArgs(constr_el)
         w_args = funcutils.constrWrapperArgs(args, add_ref=True)
@@ -658,7 +658,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
         # Determine variable type
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
 
-        if utils.isParsedClass(var_type, byname=True):
+        if utils.isLoadedClass(var_type, byname=True):
             use_var_type = classutils.toWrapperType(var_type)
         else:
             use_var_type = var_type
@@ -693,8 +693,8 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
         args = funcutils.getArgs(func_el)
         args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
 
-        # Convert return type if parsed class
-        if utils.isParsedClass(return_type, byname=True):
+        # Convert return type if loaded class
+        if utils.isLoadedClass(return_type, byname=True):
             use_return_type = classutils.toWrapperType(return_type)
         else:
             use_return_type = return_type
@@ -731,7 +731,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     for var_el in class_variables:
         var_name = var_el.get('name')
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        if utils.isParsedClass(var_type, byname=True):
+        if utils.isLoadedClass(var_type, byname=True):
             common_init_list_code += 3*indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
         else:
             common_init_list_code += 3*indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
@@ -742,7 +742,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     for var_el in class_variables:
         var_name = var_el.get('name')
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        if utils.isParsedClass(var_type, byname=True):
+        if utils.isLoadedClass(var_type, byname=True):
             common_constructor_body += 3*indent + var_name + '._set_member_variable(true);\n'
     common_constructor_body += 2*indent + '}\n'
 

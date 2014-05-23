@@ -83,8 +83,8 @@ def main():
 
     # Set up a few more things before the file loop
     if options.choose_classes_flag:
-        print 'Overwriting any values in cfg.accepted_classes...'
-        cfg.accepted_classes = []
+        print 'Overwriting any values in cfg.loaded_classes...'
+        cfg.loaded_classes = []
     if options.set_path_ids_flag:
         print 'Overwriting any values in cfg.accepted_paths...'
         cfg.accepted_paths = []
@@ -186,16 +186,16 @@ def main():
                         coords[0] = 0
                         choices = raw_input('\n\n Input a comma separated list of the numbers indicating the classes you want:\n').partition(',')
                         while(choices[0].strip()):
-                            cfg.accepted_classes.append(mini_class_dict[choices[0].strip()])
+                            cfg.loaded_classes.append(mini_class_dict[choices[0].strip()])
                             choices = choices[2].partition(',')
             else:
                 choices = raw_input('\n\n Input a comma separated list of the numbers indicating the classes you want:\n').partition(',')
                 while(choices[0].strip()):
-                    cfg.accepted_classes.append(mini_class_dict[choices[0].strip()])
+                    cfg.loaded_classes.append(mini_class_dict[choices[0].strip()])
                     choices = choices[2].partition(',')
         for el in root.findall('Class'):
             demangled_class_name = el.get('demangled')
-            if demangled_class_name in cfg.accepted_classes:
+            if demangled_class_name in cfg.loaded_classes:
                 cfg.class_dict[demangled_class_name] = el
             elif options.list_classes_flag and utils.isNative(el):
                 cfg.class_dict[demangled_class_name] = el
@@ -229,7 +229,7 @@ def main():
                     else:
                         complete_type_name = type_el.get('name')
                     
-                    if complete_type_name in cfg.accepted_classes:
+                    if complete_type_name in cfg.loaded_classes:
                         cfg.typedef_dict[typedef_name] = el
                 
                 # If neither fundamental or class/struct, ignore it.
@@ -255,7 +255,7 @@ def main():
                 else:
                     func_name_full = demangled_name.split('(',1)[0]
                 func_name_full = func_name_full
-                if func_name_full in cfg.accepted_functions:
+                if func_name_full in cfg.loaded_functions:
                     cfg.func_dict[func_name_full] = el
                 elif (options.list_classes_flag) and (utils.isNative(el)):
                     cfg.func_dict[func_name_full] = el
@@ -263,7 +263,7 @@ def main():
 
         # Update global list: accepted types
         fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
-        cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.accepted_classes + cfg.typedef_dict.keys()
+        cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.loaded_classes + cfg.typedef_dict.keys()
 
 
 
