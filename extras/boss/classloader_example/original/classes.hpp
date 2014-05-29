@@ -45,6 +45,12 @@ class X
             int new_i = 987;
             i_in = new_i;
         }
+
+        int**& testFunc(T* t1, T t2, int**& ipp, double d)
+        {
+            **ipp += 1;
+            return ipp;
+        }
 };
 
 

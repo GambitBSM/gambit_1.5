@@ -54,66 +54,66 @@ def getArgs(func_el):
 
 
 
+# # ======== constrArgsBracket ========
+
+# def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False, use_wrapper_class=False, wrapper_to_pointer=False): #invent_arg_names=False):
+
+#     #
+#     # Requires a list of dicts as input, as returned by 'getArgs' or 'constrWrapperArgs'.
+#     #
+
+#     import modules.classutils as classutils
+
+#     # Construct bracket with input arguments
+#     args_seq = ''
+#     argc = 1
+#     for arg_dict in args:
+
+#         if include_arg_type:
+#             args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
+
+#             if use_wrapper_class and arg_dict['loaded_class'] == True:
+#                 args_seq += classutils.toWrapperType(arg_dict['type'])
+
+#             else:
+#                 if include_namespace:
+#                     namespaces = arg_dict['type_namespaces']
+
+#                     if len(namespaces)>0:
+#                         args_seq += '::'.join(namespaces) + '::'
+
+#                 args_seq += arg_dict['type']
+
+#         if include_arg_type and include_arg_name:
+#             args_seq += ' '
+
+#         if include_arg_name:
+#             if utils.isLoadedClass(arg_dict['type'], byname=True) and wrapper_to_pointer:
+#                 if arg_dict['type'].count('*') == 0:
+#                     args_seq += '*' + arg_dict['name'] + '.BEptr'
+#                 elif arg_dict['type'].count('*') == 1:
+#                     args_seq += arg_dict['name'] + '.BEptr'
+#                 else:
+#                     raise Exception('funcutils.constrArgsBracket cannot presently deal with arguments of type pointer-to-pointer for wrapper classes.')
+#             else:
+#                 args_seq += arg_dict['name']
+
+#         args_seq += ', '
+
+#     args_seq = args_seq.rstrip(', ')
+#     args_seq = args_seq.strip()
+#     args_bracket = '(' + args_seq + ')'
+
+#     return args_bracket
+
+# # ======== END: constrArgsBracket ========
+
+
+
 # ======== constrArgsBracket ========
 
-def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False, use_wrapper_class=False, wrapper_to_pointer=False): #invent_arg_names=False):
-
-    #
-    # Requires a list of dicts as input, as returned by 'getArgs' or 'constrWrapperArgs'.
-    #
-
-    import modules.classutils as classutils
-
-    # Construct bracket with input arguments
-    args_seq = ''
-    argc = 1
-    for arg_dict in args:
-
-        if include_arg_type:
-            args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
-
-            if use_wrapper_class and arg_dict['loaded_class'] == True:
-                args_seq += classutils.toWrapperType(arg_dict['type'])
-
-            else:
-                if include_namespace:
-                    namespaces = arg_dict['type_namespaces']
-
-                    if len(namespaces)>0:
-                        args_seq += '::'.join(namespaces) + '::'
-
-                args_seq += arg_dict['type']
-
-        if include_arg_type and include_arg_name:
-            args_seq += ' '
-
-        if include_arg_name:
-            if utils.isLoadedClass(arg_dict['type'], byname=True) and wrapper_to_pointer:
-                if arg_dict['type'].count('*') == 0:
-                    args_seq += '*' + arg_dict['name'] + '.BEptr'
-                elif arg_dict['type'].count('*') == 1:
-                    args_seq += arg_dict['name'] + '.BEptr'
-                else:
-                    raise Exception('funcutils.constrArgsBracket cannot presently deal with arguments of type pointer-to-pointer for wrapper classes.')
-            else:
-                args_seq += arg_dict['name']
-
-        args_seq += ', '
-
-    args_seq = args_seq.rstrip(', ')
-    args_seq = args_seq.strip()
-    args_bracket = '(' + args_seq + ')'
-
-    return args_bracket
-
-# ======== END: constrArgsBracket ========
-
-
-
-# ======== constrArgsBracket_TEST ========
-
-def constrArgsBracket_TEST(args, include_arg_name=True, include_arg_type=True, include_namespace=False,
-                           cast_to_original=False, use_wrapper_class=False, wrapper_to_pointer=False):
+def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False,
+                      cast_to_original=False, use_wrapper_class=False, wrapper_to_pointer=False):
 
     #
     # Requires a list of dicts as input, as returned by 'getArgs' or 'constrWrapperArgs'.
@@ -174,7 +174,7 @@ def constrArgsBracket_TEST(args, include_arg_name=True, include_arg_type=True, i
                     if arg_dict['type'].count('*') == 0:
                         args_seq += '*' + arg_dict['name'] + '.BEptr'
                     elif arg_dict['type'].count('*') == 1:
-                        args_seq += arg_dict['name'] + '.BEptr'
+                        args_seq += '(*' + arg_dict['name'] + ')' + '.BEptr'
                     else:
                         raise Exception('funcutils.constrArgsBracket cannot presently deal with arguments of type pointer-to-pointer for wrapper classes.')
                 else:
@@ -188,7 +188,7 @@ def constrArgsBracket_TEST(args, include_arg_name=True, include_arg_type=True, i
 
     return args_bracket
 
-# ======== END: constrArgsBracket_TEST ========
+# ======== END: constrArgsBracket ========
 
 
 
@@ -387,7 +387,7 @@ def constrDeclLine(return_type, func_name, args_bracket, keywords=[]):
 
 # ======== constrWrapperBody ========
 
-def constrWrapperBody(return_type, func_name, args, return_is_native, keywords=[]):
+def constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keywords=[]):
 
     #
     # Input:
@@ -397,21 +397,36 @@ def constrWrapperBody(return_type, func_name, args, return_is_native, keywords=[
     #   - Name of original function
     #   - Boolean stating whether the orignal return type is native
 
-    args_bracket_notypes = constrArgsBracket_TEST(args, include_arg_type=False, cast_to_original=True)
+    # Pointer and reference check
+    pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
+
+    # Generate bracket for calling original function
+    args_bracket_notypes = constrArgsBracket(args, include_arg_type=False, cast_to_original=True)
 
     w_func_body = ''
-
     w_func_body += '{\n'
 
     w_func_body += ' '*cfg.indent
-    if return_type != 'void':
+    
+    if return_type == 'void':
+        w_func_body += func_name + args_bracket_notypes + ';\n'
+
+    else:
         w_func_body += 'return '
 
-    w_func_body += func_name + args_bracket_notypes + ';\n'
+        use_return_type = return_type
+        if is_ref:
+            use_return_type = return_type.rstrip('&')
+
+        # The 'new SomeType'-statement should have one less '*' than the return type
+        use_return_type.rstrip('*')
+
+        if return_is_loaded_class:
+            w_func_body += 'new ' + use_return_type + '(' + func_name + args_bracket_notypes + ');\n'
+        else:
+            w_func_body += func_name + args_bracket_notypes + ';\n'
 
     w_func_body += '}'
-
-    # refTest( dynamic_cast<T&>(t_in), i_in );
 
     return w_func_body
 

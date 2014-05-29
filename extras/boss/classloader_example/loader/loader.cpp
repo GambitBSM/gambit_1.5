@@ -219,6 +219,20 @@ int main(int argc, char * argv[])
   cout << "=======================" << endl;
   cout << endl;
 
+
+  // Testing handling of input and return types
+  int i = 10;
+  int* ip = &i;
+  int** ipp = &ip;
+  double d = 8.8;
+  cout << " i = " << **ipp << endl;
+  test_x3.testFunc(&test_t, test_t2, ipp, d);
+  cout << " i = " << **ipp << endl;
+
+  cout << endl;
+  cout << "=======================" << endl;
+  cout << endl;
+
   //
   // Done
   // 

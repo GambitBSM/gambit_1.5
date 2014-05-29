@@ -76,6 +76,13 @@ class X : public virtual Abstract_X
             i_in = new_i;
         }
 
+        int**& testFunc(T* t1, T t2, int**& ipp, double d)
+        {
+            **ipp += 1;
+            return ipp;
+        }
+
+
         //
         // Generated members:
         //
@@ -108,6 +115,11 @@ class X : public virtual Abstract_X
         void refTest_GAMBIT(Abstract_T& t_in, int& i_in)
         {
             refTest( dynamic_cast<T&>(t_in), i_in );
+        }
+
+        int**& testFunc_GAMBIT(Abstract_T* t1, Abstract_T& t2, int**& ipp, double d)
+        {
+            return testFunc( dynamic_cast<T*>(t1), dynamic_cast<T&>(t2), ipp, d );
         }
 
 };

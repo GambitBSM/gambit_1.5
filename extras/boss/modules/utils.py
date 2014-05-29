@@ -734,3 +734,32 @@ def constrNamespace(namespaces, open_or_close, indent=cfg.indent):
 
 
 
+# ====== pointerAndRefCheck ========
+
+def pointerAndRefCheck(input_type, byname=False):
+
+    #
+    # Input type should either be an XML element (byname=False)
+    # or a string (byname=True)
+    #
+
+    if byname:
+        type_name = input_type
+    else:
+        type_name, type_kw, type_id = findType(input_type)
+
+    # Remove template bracket
+    if '<' in type_name:
+        type_name = type_name.split('<',1)[0] + type_name.rsplit('>',1)[-1]
+
+    print 'Type name:', type_name
+
+    # Check pointerness
+    pointerness = type_name.count('*')
+
+    # Check reference
+    is_reference = bool('&' in type_name)
+
+    return pointerness, is_reference
+
+# ====== END: pointerAndRefCheck ========

@@ -657,8 +657,9 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
         # Determine variable type
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
+        var_is_loaded_class = utils.isLoadedClass(var_type, byname=True)
 
-        if utils.isLoadedClass(var_type, byname=True):
+        if var_is_loaded_class:
             use_var_type = classutils.toWrapperType(var_type)
         else:
             use_var_type = var_type
@@ -668,7 +669,10 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
         # Write line
         # FIXME: Should we include keywords here (const, static, ...)?
-        code += 2*indent + use_var_type + '& ' + var_name + ';\n'
+        if var_is_loaded_class:
+            code += 2*indent + use_var_type + ' ' + var_name + ';\n'
+        else:
+            code += 2*indent + use_var_type + '& ' + var_name + ';\n'
 
 
     # Functions:
@@ -735,7 +739,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
             common_init_list_code += 3*indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
         else:
             common_init_list_code += 3*indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
-        common_init_list_code += 3*indent + 'member_variable(false)\n'
+    common_init_list_code += 3*indent + 'member_variable(false)\n'
 
     common_constructor_body = ''
     common_constructor_body += 2*indent + '{\n'

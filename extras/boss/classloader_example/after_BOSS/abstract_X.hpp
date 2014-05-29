@@ -35,6 +35,13 @@ class Abstract_X
             refTest_GAMBIT(t_in, i_in);
         }
 
+        virtual int**& testFunc_GAMBIT(Abstract_T* t1, Abstract_T& t2, int**& ipp, double d) {std::cout << "Called virtual function" << std::endl;};
+        int**& testFunc(Abstract_T* t1, Abstract_T& t2, int**& ipp, double d)
+        {
+            return testFunc_GAMBIT(t1, t2, ipp, d);
+        }
+
+
 };
 
 #endif  /* __ABSTRACT_X_HPP__ */

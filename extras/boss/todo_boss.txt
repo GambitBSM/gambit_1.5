@@ -101,10 +101,6 @@ BOSS needs to tackle structs as well as classes.
 Small things to fix:
 --------------------
 
-- For a wrapper function in an original class, do the type cast (Abstract_SomeClass -> SomeClass)
-  directly in the argument list when calling the original function. (That is, do not create a bunch
-  of temporary variables.)
-
 
 
 

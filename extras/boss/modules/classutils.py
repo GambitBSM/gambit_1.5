@@ -381,7 +381,7 @@ def constrFactoryFunction(class_el, full_class_name, indent=4, template_types=[]
 
         # Construct bracket with input arguments
         args_bracket = funcutils.constrArgsBracket(w_args, include_namespace=False)
-        args_bracket_notypes = funcutils.constrArgsBracket_TEST(args, include_arg_type=False, cast_to_original=True)
+        args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_type=False, cast_to_original=True)
         
         # Generate declaration line:
         return_type = getAbstractClassName(full_class_name, prefix=cfg.abstr_class_prefix)
@@ -490,7 +490,9 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     # Function return type
     return_type, return_kw, return_id = utils.findType( cfg.id_dict[method_el.get('returns')] )
     return_el = cfg.id_dict[return_id]
-    return_is_native = utils.isNative(return_el)
+
+    return_is_loaded_class = utils.isLoadedClass(return_el)
+    pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
 
     # Function arguments (get list of dicts with argument info)
     args = funcutils.getArgs(method_el)
@@ -498,19 +500,29 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     print '------------'
     print 'FUNC NAME: ', func_name
     print 'TYPE: ', return_type
+    print 'POINTER:', pointerness
     print 'KW  : ', return_kw
     print 'ID  : ', return_id
-
+    print 'LOADED:', return_is_loaded_class
 
     # Construct wrapper function name
     w_func_name = funcutils.constrWrapperName(method_el)
 
     # Choose wrapper return type
-    return_type_base = return_type.replace('*','').replace('&','')
-    if (return_type == 'void') or (return_type.count('*') > 0):
-        w_return_type = return_type
+    if return_is_loaded_class:
+        if pointerness == 0:
+            w_return_type = toAbstractType(return_type, include_namespace=True, add_pointer=True)
+        else:
+            w_return_type = toAbstractType(return_type, include_namespace=True)
     else:
-        w_return_type = return_type.replace(return_type_base, return_type_base+'*')
+        w_return_type = return_type
+
+
+    # return_type_base = return_type.replace('*','').replace('&','')
+    # if (return_type == 'void') or (return_type.count('*') > 0):
+    #     w_return_type = return_type
+    # else:
+    #     w_return_type = return_type.replace(return_type_base, return_type_base+'*')
 
     # if return_is_native:
     #     w_return_type = cfg.abstr_class_prefix + return_type
@@ -518,7 +530,7 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     #     w_return_type = return_type
 
     # Construct list of arguments for wrapper function
-    w_args = funcutils.constrWrapperArgs(args)
+    w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
     # Construct bracket with input arguments for wrapper function
     w_args_bracket = funcutils.constrArgsBracket(w_args)
@@ -527,7 +539,7 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     w_func_line = funcutils.constrDeclLine(w_return_type, w_func_name, w_args_bracket, keywords=return_kw)
 
     # Construct function body for wrapper function
-    w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_native, keywords=return_kw)
+    w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keywords=return_kw)
 
     # Combine code and add indentation
     wrapper_code  = ''
@@ -675,7 +687,7 @@ def checkCopyConstructor(class_el):
 
 # ====== toWrapperType ========
 
-def toWrapperType(input_type_name, include_namespace=False):
+def toWrapperType(input_type_name):
 
     # input_type_name  = NameSpace::SomeType<int>**&
     # output_type_name = SomeType_GAMBIT<int>**&
@@ -689,14 +701,15 @@ def toWrapperType(input_type_name, include_namespace=False):
     # Remove '*' and '&'
     type_name = type_name.replace('*','').replace('&','')
 
-    # Remove template bracket
-    type_name = type_name.split('<',1)[0]
-
     # Remove namespace
     type_name = type_name.split('::')[-1]
 
-    # Add wrapper class suffix
-    type_name = type_name + cfg.code_suffix
+    # Insert wrapper class suffix
+    if '<' in type_name:
+        type_name_part_one, type_name_part_two = type_name.split('<',1)[0]
+        type_name = type_name_part_one + cfg.code_suffix + '<' + type_name_part_two
+    else:
+        type_name = type_name + cfg.code_suffix
 
     # Add '*' and '&'
     type_name = type_name + '*'*n_pointers + '&'*is_ref
@@ -705,3 +718,47 @@ def toWrapperType(input_type_name, include_namespace=False):
     return type_name
 
 # ====== END: toWrapperType ========
+
+
+
+# ====== toAbstractType ========
+
+def toAbstractType(input_type_name, include_namespace=True, add_pointer=False):
+
+    # input_type_name  = NameSpace::SomeType<int>**&
+    # output_type_name = NameSpace::Abstract__SomeType_GAMBIT<int>**&
+
+    # FIXME:
+    # Should this function also translate template argument types?
+    # Example: TypeA<TypeB>  -->  Abstract__TypeA<Abstract__TypeB>
+
+    type_name = input_type_name
+
+    # Search for '*' and '&'
+    n_pointers = type_name.count('*')
+    is_ref     = bool('&' in type_name)
+
+    # Get namespace
+    type_name_notemplate = type_name.split('<',1)[0]
+    if '::' in type_name_notemplate:
+        namespace = type_name.split('<',1)[0].rsplit('::',1)[0]
+    else:
+        namespace = ''
+
+    # Add abstract class prefix
+    if namespace == '':
+        type_name = cfg.abstr_class_prefix + type_name
+    else:
+        type_name_short = type_name.lstrip(namespace)
+        type_name = (namespace+'::')*include_namespace  + cfg.abstr_class_prefix + type_name_short
+
+    if add_pointer:
+        if is_ref:
+            type_name = type_name.rstrip('&') + '*&'
+        else:
+            type_name = type_name + '*'
+
+    # Return result
+    return type_name
+
+# ====== END: toAbstractType ========
