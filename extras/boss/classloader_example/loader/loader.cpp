@@ -4,7 +4,9 @@
 #include <stdlib.h>
 
 
-#include "GAMBIT_wrapper_classes.hpp"
+#include "GAMBIT_wrapper_U.hpp"
+#include "GAMBIT_wrapper_T.hpp"
+#include "GAMBIT_wrapper_X.hpp"
 #include "GAMBIT_wrapper_functions.hpp"
 
 using std::string;
@@ -19,6 +21,7 @@ using std::endl;
 int main(int argc, char * argv[])
 {
   
+
   cout << endl;
 
   //
@@ -27,7 +30,7 @@ int main(int argc, char * argv[])
   
   string libName = "../after_BOSS/lib.so";
   
-
+  
   //
   // Load library
   //
@@ -55,20 +58,25 @@ int main(int argc, char * argv[])
 
   void * temp_ptr;
 
-  // T factory
+  // U factory 1
+  temp_ptr = dlsym(pHandle, "_Z9Factory_Uv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_U_1 = reinterpret_cast<Abstract_U* (*)()>( temp_ptr );
+
+  // T factory 1
   temp_ptr = dlsym(pHandle, "_Z9Factory_Tv");
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  Factory_T = reinterpret_cast<Abstract_T* (*)()>( temp_ptr );
+  Factory_T_1 = reinterpret_cast<Abstract_T* (*)()>( temp_ptr );
 
   // T factory 2
   temp_ptr = dlsym(pHandle, "_Z9Factory_Tid");
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_T_2 = reinterpret_cast<Abstract_T* (*)(int,double)>( temp_ptr );
 
-  // X factory
+  // X factory 1
   temp_ptr = dlsym(pHandle, "_Z9Factory_Xv");
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  Factory_X = reinterpret_cast<Abstract_X* (*)()>( temp_ptr );
+  Factory_X_1 = reinterpret_cast<Abstract_X* (*)()>( temp_ptr );
 
   // X factory 2
   // temp_ptr = dlsym(pHandle, "_Z9Factory_XR10Abstract_T");
@@ -76,18 +84,18 @@ int main(int argc, char * argv[])
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_X_2 = reinterpret_cast<Abstract_X* (*)(Abstract_T&)>( temp_ptr );
 
-  // Container factories
-  temp_ptr = dlsym(pHandle, "_Z21Factory_Container_intv");
-  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  Factory_Container_int = reinterpret_cast<Abstract_Container<int>* (*)()>( temp_ptr );
+  // // Container factories
+  // temp_ptr = dlsym(pHandle, "_Z21Factory_Container_intv");
+  // if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  // Factory_Container_int = reinterpret_cast<Abstract_Container<int>* (*)()>( temp_ptr );
 
-  temp_ptr = dlsym(pHandle, "_Z19Factory_Container_Tv");
-  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  Factory_Container_T   = reinterpret_cast<Abstract_Container<Abstract_T>* (*)()>( temp_ptr );
+  // temp_ptr = dlsym(pHandle, "_Z19Factory_Container_Tv");
+  // if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  // Factory_Container_T   = reinterpret_cast<Abstract_Container<Abstract_T>* (*)()>( temp_ptr );
 
-  temp_ptr = dlsym(pHandle, "_Z19Factory_Container_Xv");
-  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  Factory_Container_X   = reinterpret_cast<Abstract_Container<Abstract_X>* (*)()>( temp_ptr );
+  // temp_ptr = dlsym(pHandle, "_Z19Factory_Container_Xv");
+  // if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  // Factory_Container_X   = reinterpret_cast<Abstract_Container<Abstract_X>* (*)()>( temp_ptr );
 
   
   // printT function
@@ -107,99 +115,99 @@ int main(int argc, char * argv[])
 
 
 
-
-  //
+  // ------------
   // Test library
-  //
-
-  cout << endl;
-  cout << "=======================" << endl;
-  cout << endl;
-  
-  // Testing various ways of assigning values to class variables
-
-  T_gambit test_t;
-  test_t.printMe();
-
-  test_t.i = 99;
-  test_t.d = 1.11;
-  test_t.printMe();
-  
-  X_gambit test_x;
-  test_x.t.printMe();
-
-  test_x.setT(test_t);
-  test_x.t.printMe();
-
-  test_t.i = 1000;
-  test_x.t = test_t;
-  test_x.t.printMe();
-
-  cout << endl;
-  cout << "=======================" << endl;
-  cout << endl;
-
-
-  // Testing global library functions 
-
-  printT(test_t);
-  printT(test_x.t);
-
-  doubleT(test_x.t);
-  test_x.t.printMe();
-
-  X_gambit test_x2 = doubleX_byVal(test_x);
-  test_x2.t.printMe();
-
-  cout << endl;
-  cout << "=======================" << endl;
-  cout << endl;
-
-
-  // Testing template class 'Container'
-
-  Container_gambit<int> ci;
-  ci.printMsg();
-  
-  // cout << "\nHI!\n" << endl;
-  Container_gambit<X_gambit> cx;
-  cout << "\nHI2!\n" << endl;
-  cx.printMsg();
-  
-  cx.var.t.printMe();
-  cx.var.t = test_t;
-  cx.var.t.printMe();
-  
-  cout << endl;
-  cout << "=======================" << endl;
-  cout << endl;
-
-
-  // Testing member_variable system
-
-
-  cx.var._print_member();
-  cx._print_member();
-  test_x.t._print_member();
-  test_x._print_member();
+  // ------------
 
 
   cout << endl;
   cout << "=======================" << endl;
   cout << endl;
+
+  T_gambit t;
+  X_gambit x;
+
+  // // Testing various ways of assigning values to class variables
+
+  // t.printMe();
+
+  // t.i = 99;
+  // t.d = 1.11;
+  // t.printMe();
+  
+  // x.t.printMe();
+
+  // x.setT(t);
+  // x.t.printMe();
+
+  // t.i = 1000;
+  // x.t = t;
+  // x.t.printMe();
+
+  // cout << endl;
+  // cout << "=======================" << endl;
+  // cout << endl;
+
+
+  // // Testing global library functions 
+  // printT(t);
+  // printT(x.t);
+
+  // doubleT(x.t);
+  // x.t.printMe();
+
+  // X_gambit x2 = doubleX_byVal(x);
+  // x2.t.printMe();
+
+  // cout << endl;
+  // cout << "=======================" << endl;
+  // cout << endl;
+
+
+  // // Testing template class 'Container'
+
+  // Container_gambit<int> ci;
+  // ci.printMsg();
+  
+  // // cout << "\nHI!\n" << endl;
+  // Container_gambit<X_gambit> cx;
+  // cout << "\nHI2!\n" << endl;
+  // cx.printMsg();
+  
+  // cx.var.t.printMe();
+  // cx.var.t = t;
+  // cx.var.t.printMe();
+  
+  // cout << endl;
+  // cout << "=======================" << endl;
+  // cout << endl;
+
+
+  // // Testing member_variable system
+
+
+  // cx.var._print_member();
+  // cx._print_member();
+  // x.t._print_member();
+  // x._print_member();
+
+
+  // cout << endl;
+  // cout << "=======================" << endl;
+  // cout << endl;
 
 
   // Testing refTest function:
   int a = 555;
 
   cout << " a = " << a << endl;
-  test_t.printMe();
+  t.printMe();
   cout << endl;
   
-  test_x.refTest(test_t, a);
+  x.refTest(t, a);
 
   cout << " a = " << a << endl;
-  test_t.printMe();
+  t.printMe();
   
   cout << endl;
   cout << "=======================" << endl;
@@ -207,13 +215,13 @@ int main(int argc, char * argv[])
 
 
   // Testing new constructors
-  T_gambit test_t2(99,9.9);
-  test_t2.printMe();
+  T_gambit t2(99,9.9);
+  t2.printMe();
   cout << endl;
 
-  X_gambit test_x3(test_t2);
+  X_gambit x3(t2);
 
-  test_x3.t.printMe();
+  x3.t.printMe();
   
   cout << endl;
   cout << "=======================" << endl;
@@ -226,8 +234,19 @@ int main(int argc, char * argv[])
   int** ipp = &ip;
   double d = 8.8;
   cout << " i = " << **ipp << endl;
-  test_x3.testFunc(&test_t, test_t2, ipp, d);
+  x3.testFunc(&t, t2, ipp, d);
   cout << " i = " << **ipp << endl;
+
+  cout << endl;
+  cout << "=======================" << endl;
+  cout << endl;
+
+
+  // Testing inheritance
+  cout << endl;
+  (*t.BEptr).memberFunc();
+  t.memberFunc();
+  cout << endl;
 
   cout << endl;
   cout << "=======================" << endl;
@@ -236,6 +255,8 @@ int main(int argc, char * argv[])
   //
   // Done
   // 
+
+  // dlclose(pHandle);
 
   return 0;
 }

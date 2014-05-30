@@ -1,7 +1,9 @@
 #ifndef __GAMBIT_WRAPPER_FUNCTIONS_HPP__
 #define __GAMBIT_WRAPPER_FUNCTIONS_HPP__
 
-#include "GAMBIT_wrapper_classes.hpp"
+#include "GAMBIT_wrapper_U.hpp"
+#include "GAMBIT_wrapper_T.hpp"
+#include "GAMBIT_wrapper_X.hpp"
 
 
 // Function pointers to be filled by dynamic loading

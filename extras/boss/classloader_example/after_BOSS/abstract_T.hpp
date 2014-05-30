@@ -2,8 +2,9 @@
 #define __ABSTRACT_T_HPP__
 #include <iostream>
 
+#include "abstract_U.hpp"
 
-class Abstract_T
+class Abstract_T : public virtual Abstract_U
 {
     public:
 
@@ -17,6 +18,12 @@ class Abstract_T
         virtual void pointerAssign_GAMBIT(Abstract_T *in){std::cout << "Called virtual function" << std::endl;}     
 
         virtual double& d_ref_GAMBIT() {std::cout << "Called virtual function" << std::endl;};
+
+        virtual ~Abstract_T()
+        {
+        	std::cout << "(Destructor of Abstract_T)" << std::endl;
+        }
+
 };
 
 #endif  /* __ABSTRACT_T_HPP__ */

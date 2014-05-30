@@ -31,7 +31,7 @@ accepted_paths     = ['classloader_example/original']
 
 std_include_paths  = ['/usr/include/']
 
-loaded_classes = ['T', 'X']
+loaded_classes = ['U', 'T', 'X']
 loaded_functions = []
 
 extra_output_dir      = 'test_output'

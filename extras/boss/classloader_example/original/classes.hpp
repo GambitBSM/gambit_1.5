@@ -3,7 +3,30 @@
 
 #include <iostream>
 
-class T
+
+class U
+{
+    public:
+
+        U()
+        {
+            std::cout << "(Constructor of U)" << std::endl;
+        }
+
+        ~U()
+        {
+            std::cout << "(Destructor of U)" << std::endl;
+        }
+
+        void memberFunc()
+        {
+            std::cout << "This is memberFunc from class U" << std::endl;
+        }
+};
+
+
+
+class T : public U
 {
     public:
         // Member variables
@@ -11,8 +34,21 @@ class T
         double d;
 
         // Constructor
-        T() : i(1), d(3.14) {}
-        T(int i_in, double d_in) : i(i_in), d(d_in) {}
+        T() : i(1), d(3.14)
+        {
+            std::cout << "(Constructor of T)" << std::endl;
+        }
+        
+        T(int i_in, double d_in) : i(i_in), d(d_in) 
+        {
+            std::cout << "(Constructor of T)" << std::endl;
+        }
+
+        // Destructor
+        ~T()
+        {
+            std::cout << "(Destructor of T)" << std::endl;
+        }
 
         // Class methods
         void printMe();
@@ -27,8 +63,21 @@ class X
         T t;
 
         // Constructor
-        X() {}
-        X(T t_in) : t(t_in) {}
+        X()
+        {
+            std::cout << "(Constructor of X)" << std::endl;
+        }
+
+        X(T t_in) : t(t_in)
+        {
+            std::cout << "(Constructor of X)" << std::endl;
+        }
+
+        // Destructor
+        ~X()
+        {
+            std::cout << "(Destructor of X)" << std::endl;
+        }
 
         // Class methods
         T getT();

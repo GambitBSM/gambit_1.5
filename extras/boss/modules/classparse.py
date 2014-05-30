@@ -396,16 +396,18 @@ def run():
         return_code_dict[src_file_name].append( (insert_pos, wrapper_code) )            
 
         # - Generate a reference-returning method for each (public) member variable:
+        ref_func_code = ''
         if len(member_variables) > 0:
             n_indents = len(namespaces)
-            ref_func_code = '\n'
+            ref_func_code += '\n'
             ref_func_code += ' '*cfg.indent*(n_indents+1) + 'public:\n'
             for var_el in member_variables:
                 ref_func_code += classutils.constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
                 ref_func_code += '\n'
 
         # - Register code
-        return_code_dict[src_file_name].append( (insert_pos, ref_func_code) )            
+        if ref_func_code != '':
+            return_code_dict[src_file_name].append( (insert_pos, ref_func_code) )            
 
 
         # Generate pointer-based copy and assignment functions

@@ -5,8 +5,43 @@
 #include <iostream>
 
 
+#include "abstract_U.hpp"
+class U : public virtual Abstract_U
+{
+    public:
+        U()
+        {
+            std::cout << "(Constructor of U)" << std::endl;
+        }
+
+        ~U()
+        {
+            std::cout << "(Destructor of U)" << std::endl;
+        }
+
+        void memberFunc()
+        {
+            std::cout << "This is memberFunc from class U" << std::endl;
+        }
+
+    public:
+        Abstract_U* pointerCopy_GAMBIT()
+        { 
+            std::cout << "(pointerCopy_GAMBIT in class U)" << std::endl;
+            return new U(*this); 
+        }
+        
+        void pointerAssign_GAMBIT(Abstract_U* in)
+        { 
+            std::cout << "(pointerAssign_GAMBIT in class U)" << std::endl;
+            *this = *dynamic_cast<U*>(in); 
+        }
+
+};
+
+
 #include "abstract_T.hpp"
-class T : public virtual Abstract_T
+class T : public virtual Abstract_T, public U
 {
     public:
         // Member variables
@@ -14,12 +49,24 @@ class T : public virtual Abstract_T
         double d;
 
         // Constructor
-        T() : i(1), d(3.14) {}
-        T(int i_in, double d_in) : i(i_in), d(d_in) {}
+        T() : i(1), d(3.14)
+        {
+            std::cout << "(Constructor of T)" << std::endl;
+        }
+        
+        T(int i_in, double d_in) : i(i_in), d(d_in) 
+        {
+            std::cout << "(Constructor of T)" << std::endl;
+        }
+
+        // Destructor
+        ~T()
+        {
+            std::cout << "(Destructor of T)" << std::endl;
+        }
 
         // Class methods
         void printMe();
-
 
         //
         // Generated members:
@@ -27,11 +74,13 @@ class T : public virtual Abstract_T
 
         Abstract_T* pointerCopy_GAMBIT()
         {
+            std::cout << "(pointerCopy_GAMBIT in class T)" << std::endl;
             return new T(*this);
         }
 
         void pointerAssign_GAMBIT(Abstract_T *in)
         {
+            std::cout << "(pointerAssign_GAMBIT in class T)" << std::endl;
             *this = *dynamic_cast<T*>(in);
         }        
 
@@ -57,9 +106,23 @@ class X : public virtual Abstract_X
         T t;
 
         // Constructor
-        X() {}
-        X(T t_in) : t(t_in) {}
-        
+        X()
+        {
+            std::cout << "(Constructor of X)" << std::endl;
+        }
+
+        X(T t_in) : t(t_in)
+        {
+            std::cout << "(Constructor of X)" << std::endl;
+        }
+
+        // Destructor
+        ~X()
+        {
+            std::cout << "(Destructor of X)" << std::endl;
+        }
+
+
         // Class methods
         T getT();
 

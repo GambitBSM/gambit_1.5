@@ -41,6 +41,10 @@ class Abstract_X
             return testFunc_GAMBIT(t1, t2, ipp, d);
         }
 
+        virtual ~Abstract_X()
+        {
+            std::cout << "(Destructor of Abstract_X)" << std::endl;
+        }
 
 };
 
