@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from operator import itemgetter
 import os
+import warnings
 
 import modules.cfg as cfg
 
@@ -685,6 +686,37 @@ def constrTypedefHeader():
 
 
 
+# ====== getParentClasses ========
+
+def getParentClasses(class_el, only_native_classes=True, only_loaded_classes=False):
+
+    parent_classes = []
+
+    temp_class_list = [class_el]
+    while len(temp_class_list) > 0:
+        current_class = temp_class_list.pop()
+        if 'bases' in current_class.keys():
+            for parent_class_id in current_class.get('bases').split():
+
+                # Remove accessor info from id, e.g. "private:_123" --> "_123"
+                parent_class_id = parent_class_id.split(':')[-1]
+
+                parent_class_el = cfg.id_dict[parent_class_id]
+
+                if only_loaded_classes and not isLoadedClass(parent_class_el):
+                    continue
+                elif only_native_classes and not isNative(parent_class_el):
+                    continue
+                else:
+                    parent_classes.append(parent_class_el)
+                    temp_class_list.append(parent_class_el)
+
+    return parent_classes
+
+# ====== END: getParentClasses ========
+
+
+
 # ====== getMemberElements ========
 
 def getMemberElements(el, include_artificial=False):
@@ -703,6 +735,53 @@ def getMemberElements(el, include_artificial=False):
     return member_elements
 
 # ====== END: getMemberElements ========
+
+
+
+# ====== getMemberFunctions ========
+
+def getMemberFunctions(class_el, include_artificial=False, include_inherited=False, only_accepted=True, limit_pointerness=True):
+
+    import modules.funcutils as funcutils
+
+    all_classes   = [class_el]
+    all_members   = []
+    all_functions = []
+
+    # If include_inherited=True, append all (native) parent classes 
+    # the list 'all_classes'
+    if include_inherited:
+        parent_classes = getParentClasses(class_el, only_loaded_classes=True)
+        all_classes = all_classes + parent_classes
+
+        # temp_class_list = list(all_classes)
+        # while len(temp_class_list) > 0:
+        #     current_class = temp_class_list.pop()
+        #     if 'bases' in current_class.keys():
+        #         for parent_class_id in current_class.get('bases').split():
+        #             parent_class_el = cfg.id_dict[parent_class_id]
+        #             if isLoadedClass(parent_class_el):
+        #                 all_classes.append(parent_class_el)
+        #                 temp_class_list.append(parent_class_el)
+
+    # Get all member elements
+    for el in all_classes:
+        class_members = getMemberElements(el, include_artificial=include_artificial)
+        all_members = all_members + class_members
+
+    # Extract only regular member functions (no variables, constructors, destructors, ...)
+    for mem_el in all_members:
+        if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
+            if only_accepted and funcutils.ignoreFunction(mem_el, limit_pointerness=limit_pointerness):
+                warnings.warn('The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_el.get('name')))
+                continue
+            else:
+                all_functions.append(mem_el)
+
+    return all_functions
+
+# ====== END: getMemberFunctions ========
+
 
 
 

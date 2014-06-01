@@ -534,18 +534,19 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
     # Useful lists
     class_variables    = []
-    class_functions    = []
+    class_functions    = utils.getMemberFunctions(class_el, include_artificial=False, include_inherited=cfg.wrap_inherited_members, 
+                                                            only_accepted=True, limit_pointerness=True)
     class_constructors = []
     class_members      = utils.getMemberElements(class_el, include_artificial=False)
     class_members_full = utils.getMemberElements(class_el, include_artificial=True)
     for mem_el in class_members:
-        if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
-            if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
-                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
-            else:
-                class_functions.append(mem_el)
+        # if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
+        #     if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
+        #         warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+        #     else:
+        #         class_functions.append(mem_el)
 
-        elif (mem_el.tag in ('Field', 'Variable')) and (mem_el.get('access') == 'public'):
+        if (mem_el.tag in ('Field', 'Variable')) and (mem_el.get('access') == 'public'):
             if utils.isAcceptedType(mem_el):
                 class_variables.append(mem_el)
             else:
@@ -629,9 +630,29 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
     short_wrapper_class_name = short_class_name + cfg.code_suffix
 
+    # Construct line declaring inheritance of other wrapper classes
+    inheritance_line = ''
+    if cfg.wrapper_class_tree:
+
+        for sub_el in class_el.getchildren():
+            if sub_el.tag == 'Base':
+
+                base_id      = sub_el.get('type')
+                base_access  = sub_el.get('access')
+                base_virtual = bool( int( sub_el.get('virtual') ) )
+
+                base_el   = cfg.id_dict[base_id]
+                base_name = base_el.get('demangled')
+
+                if utils.isLoadedClass(base_el):
+                    base_wrapper_name = classutils.toWrapperType(base_name)
+                    inheritance_line += 'virtual '*base_virtual + base_access + ' ' + base_wrapper_name + ', '
+        if inheritance_line != '':
+            inheritance_line = ' : ' + inheritance_line.rstrip(', ')
+
     # Class declaration line
     code += '\n'
-    code += 'class ' + short_wrapper_class_name + '\n'
+    code += 'class ' + short_wrapper_class_name + inheritance_line + '\n'
 
     # Class body
     code += '{\n'
@@ -720,7 +741,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
         code += 'BEptr->' + func_name + args_bracket_notypes + ';\n'
 
         code += 2*indent + '}\n'
-
+        code += '\n'
 
     # Add special member function: _set_member(bool) - set the variable 'member_variable' to true/false
     code += '\n'

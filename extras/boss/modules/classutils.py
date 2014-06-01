@@ -194,22 +194,8 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
         #
         # Add code based on what element type this is
         #
-        if el.tag == 'Constructor':
-            pass
-
-        elif el.tag == 'Destructor':
-            class_decl += ' '*(n_indents+2)*indent
-            class_decl += 'virtual '
-            # function_name = el.get('demangled').replace(' ','').split(short_class_name + '::')[1]
-            # function_name = el.get('demangled').replace(' ','').rsplit('::',1)[-1]
-            # function_name = el.get('demangled').rsplit('::',1)[-1]
-            
-            # function_name = el.get('demangled').replace(short_class_name+'::','',1)
-            # function_name = function_name.replace('~', '~'+cfg.abstr_class_prefix)
-
-            function_name = el.get('demangled').rsplit('::~',1)[-1]
-            function_name = '~' + cfg.abstr_class_prefix + function_name
-            class_decl += function_name + ' {};' + '\n'
+        if el.tag in ['Constructor', 'Destructor']:
+            pass   # (An empty virtual destructor will be added later)
 
         elif el.tag == 'Method':
 
@@ -312,15 +298,19 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
         if has_copy_constructor:
             class_decl += constrPtrCopyFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
 
-    # - Construct the 'downcast' converter function
-    class_decl += '\n'
-    # class_decl += ' '*(n_indents+1)*indent + 'NEW CODE HERE!\n'
-    if is_template:
-        template_bracket = '<' + ','.join(template_types) + '>'
-    else:
-        template_bracket = ''
-    class_decl += ' '*(n_indents+1)*indent + 'public:\n'
-    class_decl += constrDowncastFunction(short_class_name, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
+    # # - Construct the 'downcast' converter function
+    # class_decl += '\n'
+    # # class_decl += ' '*(n_indents+1)*indent + 'NEW CODE HERE!\n'
+    # if is_template:
+    #     template_bracket = '<' + ','.join(template_types) + '>'
+    # else:
+    #     template_bracket = ''
+    # class_decl += ' '*(n_indents+1)*indent + 'public:\n'
+    # class_decl += constrDowncastFunction(short_class_name, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
+
+    # - Construct an empty virtual destructor
+    class_decl += ' '*(n_indents+2)*indent
+    class_decl += 'virtual ~' + short_abstract_class_name + '() {};\n'
 
     # - Close the class body
     class_decl += ' '*n_indents*indent + '};' + '\n'

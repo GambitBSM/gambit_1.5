@@ -31,8 +31,12 @@ accepted_paths     = ['classloader_example/original']
 
 std_include_paths  = ['/usr/include/']
 
-loaded_classes = ['U', 'T', 'X']
-loaded_functions = []
+loaded_classes       = ['T', 'X']
+loaded_functions     = []
+
+wrapper_class_tree     = True
+load_parent_classes    = True
+wrap_inherited_members = False
 
 extra_output_dir      = 'test_output'
 code_suffix           = '_GAMBIT'
@@ -46,9 +50,6 @@ header_extension      = '.hpp'
 source_extension      = '.cpp'
 add_path_to_includes  = ''
 
-# header_extension      = '.h'
-# source_extension      = '.cpp'
-# add_path_to_includes  = ''
 
 indent = 4
 

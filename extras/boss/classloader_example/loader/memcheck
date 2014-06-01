@@ -1,0 +1,45 @@
+==16836== Memcheck, a memory error detector
+==16836== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==16836== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
+==16836== Command: ./a.out
+==16836== 
+
+Trying to load library from:
+../after_BOSS/lib.so
+Succeeded in loading library!
+
+
+=======================
+
+==16836== Jump to the invalid address stated on the next line
+==16836==    at 0x60288B8: ???
+==16836==    by 0x401034: T_gambit::T_gambit() (GAMBIT_wrapper_classes.hpp:130)
+==16836==    by 0x4021D5: main (loader.cpp:134)
+==16836==  Address 0x60288b8 is not stack'd, malloc'd or (recently) free'd
+==16836== 
+==16836== 
+==16836== Process terminating with default action of signal 11 (SIGSEGV)
+==16836==  Access not within mapped region at address 0x60288B8
+==16836==    at 0x60288B8: ???
+==16836==    by 0x401034: T_gambit::T_gambit() (GAMBIT_wrapper_classes.hpp:130)
+==16836==    by 0x4021D5: main (loader.cpp:134)
+==16836==  If you believe this happened as a result of a stack
+==16836==  overflow in your program's main thread (unlikely but
+==16836==  possible), you can try to increase the size of the
+==16836==  main thread stack using the --main-stacksize= flag.
+==16836==  The main thread stack size used in this run was 8388608.
+==16836== 
+==16836== HEAP SUMMARY:
+==16836==     in use at exit: 45 bytes in 1 blocks
+==16836==   total heap usage: 6 allocs, 5 frees, 1,652 bytes allocated
+==16836== 
+==16836== LEAK SUMMARY:
+==16836==    definitely lost: 0 bytes in 0 blocks
+==16836==    indirectly lost: 0 bytes in 0 blocks
+==16836==      possibly lost: 45 bytes in 1 blocks
+==16836==    still reachable: 0 bytes in 0 blocks
+==16836==         suppressed: 0 bytes in 0 blocks
+==16836== Rerun with --leak-check=full to see details of leaked memory
+==16836== 
+==16836== For counts of detected and suppressed errors, rerun with: -v
+==16836== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

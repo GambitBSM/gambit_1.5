@@ -236,14 +236,6 @@ def main():
                 else:
                     pass
 
-        # print
-        # print '****'
-        # for td in cfg.typedef_dict.keys():
-        #     print td
-        # print '****'
-        # print
-
-
 
         # Update global dict: function name --> function xml element
         for el in root.findall('Function'):
@@ -259,6 +251,26 @@ def main():
                     cfg.func_dict[func_name_full] = el
                 elif (options.list_classes_flag) and (utils.isNative(el)):
                     cfg.func_dict[func_name_full] = el
+
+
+        # If requested, append any (native) parent classes to the cfg.loaded_classes list
+        if cfg.load_parent_classes:
+
+            for class_name in cfg.loaded_classes:
+                class_el = cfg.class_dict[class_name]
+                parents_el_list = utils.getParentClasses(class_el, only_native_classes=True)
+
+                for el in parents_el_list:
+                    if 'demangled' in el.keys():
+                        demangled_name = el.get('demangled')
+                        
+                        # - Update cfg.loaded_classes
+                        if demangled_name not in cfg.loaded_classes:
+                            cfg.loaded_classes.append(demangled_name)
+                        
+                        # - Update cfg.class_dict
+                        if demangled_name not in cfg.class_dict.keys():
+                            cfg.class_dict[demangled_name] = el
 
 
         # Update global list: accepted types

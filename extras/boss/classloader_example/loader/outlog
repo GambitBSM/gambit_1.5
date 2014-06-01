@@ -1,0 +1,108 @@
+
+Trying to load library from:
+../after_BOSS/lib.so
+Succeeded in loading library!
+
+
+=======================
+
+(Constructor of U)
+(Constructor of T)
+(Default constructor of T_gambit)
+(Constructor of U)
+(Constructor of T)
+(Constructor of X)
+(Default (pointer-based) constructor of T_gambit)
+(Default constructor of X_gambit)
+ a = 555
+This is printMe from class T: 
+  i = 1
+  d = 3.14
+
+(Constructor of U)
+(Constructor of T)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+ a = 987
+This is printMe from class T: 
+  i = 123
+  d = 1.23
+
+=======================
+
+(Constructor of U)
+(Constructor of T)
+(Constructor (int,double) of T_gambit)
+This is printMe from class T: 
+  i = 99
+  d = 9.9
+
+(pointerCopy_GAMBIT in class T)
+(Copy constructor of T_gambit)
+(Constructor of X)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+(Default (pointer-based) constructor of T_gambit)
+(Constructor (T_gambit) of X_gambit)
+(Destructor of T_gambit)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+This is printMe from class T: 
+  i = 99
+  d = 9.9
+
+=======================
+
+ i = 10
+(pointerCopy_GAMBIT in class T)
+(Copy constructor of T_gambit)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+(Destructor of T_gambit)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+ i = 11
+
+=======================
+
+
+This is memberFunc from class U
+This is memberFunc from class U
+
+
+=======================
+
+(Destructor of T_gambit)
+(Destructor of X)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+(Destructor of Abstract_X)
+(Destructor of T_gambit)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+(Destructor of T_gambit)
+(Destructor of X)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)
+(Destructor of Abstract_X)
+(Destructor of T_gambit)
+(Destructor of T)
+(Destructor of U)
+(Destructor of Abstract_T)
+(Destructor of Abstract_U)

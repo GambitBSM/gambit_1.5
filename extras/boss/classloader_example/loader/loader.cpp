@@ -197,45 +197,45 @@ int main(int argc, char * argv[])
   // cout << endl;
 
 
-  // Testing refTest function:
-  int a = 555;
+  // // Testing refTest function:
+  // int a = 555;
 
-  cout << " a = " << a << endl;
-  t.printMe();
-  cout << endl;
+  // cout << " a = " << a << endl;
+  // t.printMe();
+  // cout << endl;
   
-  x.refTest(t, a);
+  // x.refTest(t, a);
 
-  cout << " a = " << a << endl;
-  t.printMe();
+  // cout << " a = " << a << endl;
+  // t.printMe();
   
-  cout << endl;
-  cout << "=======================" << endl;
-  cout << endl;
+  // cout << endl;
+  // cout << "=======================" << endl;
+  // cout << endl;
 
 
-  // Testing new constructors
-  T_gambit t2(99,9.9);
-  t2.printMe();
-  cout << endl;
+  // // Testing new constructors
+  // T_gambit t2(99,9.9);
+  // t2.printMe();
+  // cout << endl;
 
-  X_gambit x3(t2);
+  // X_gambit x3(t2);
 
-  x3.t.printMe();
+  // x3.t.printMe();
   
-  cout << endl;
-  cout << "=======================" << endl;
-  cout << endl;
+  // cout << endl;
+  // cout << "=======================" << endl;
+  // cout << endl;
 
 
-  // Testing handling of input and return types
-  int i = 10;
-  int* ip = &i;
-  int** ipp = &ip;
-  double d = 8.8;
-  cout << " i = " << **ipp << endl;
-  x3.testFunc(&t, t2, ipp, d);
-  cout << " i = " << **ipp << endl;
+  // // Testing handling of input and return types
+  // int i = 10;
+  // int* ip = &i;
+  // int** ipp = &ip;
+  // double d = 8.8;
+  // cout << " i = " << **ipp << endl;
+  // x3.testFunc(&t, t2, ipp, d);
+  // cout << " i = " << **ipp << endl;
 
   cout << endl;
   cout << "=======================" << endl;
@@ -251,6 +251,7 @@ int main(int argc, char * argv[])
   cout << endl;
   cout << "=======================" << endl;
   cout << endl;
+
 
   //
   // Done

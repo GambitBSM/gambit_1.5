@@ -13,8 +13,7 @@ Abstract_T* (*Factory_T_2)(int, double) = NULL;
 // Class T
 //
 
-class T_gambit
-// class T_gambit : public U_gambit
+class T_gambit : public U_gambit
 {
     private:
         bool member_variable;
@@ -30,11 +29,11 @@ class T_gambit
             BEptr->printMe();
         }
         
-        // -- Inherited: from class U
-        void memberFunc()
-        {
-            BEptr->memberFunc();
-        } 
+        // // -- Inherited: from class U
+        // void memberFunc()
+        // {
+        //     BEptr->memberFunc();
+        // } 
         
         // Special member function to set member_variable: 
         void _set_member_variable(bool in) 

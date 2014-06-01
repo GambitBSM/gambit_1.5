@@ -87,25 +87,27 @@ BOSS needs to tackle structs as well as classes.
 
 
 (13)
-There are two options for how the wrapper classes should handle inheritance:
-  1) Create wrapper classes *only* for classes listed by the user, and then 
-     add extra member functions in the wrapper class for any inherited
-     member functions in the original class. This way there will be no 
-     relations between the wrapper classes
-  2) Create wrapper classes for the classes listed by the user *and* any
-     base classes that they inherit from. This way we don't have to add
-     extra member functions in any wrapper classes, but rather let the
-     wrapper classes inherit from each other, just like the original class
-     tree.
-Which is the better option? Should we allow both?
+Make sure that all wrapper headers inlcude any other wrapper headers needed.
+
+
+(14)
+Implement the use of cfg.class_header_dict to include the correct header files for 
+various standard types
 
 
 
 Small things to fix:
 --------------------
 
-- All abstract classes need an empty virtual destructor!
-  (Otherwise we get memory leaks when instances of loaded classes are destructed.)
+- Rewrite utils.getParentClasses such that is works in a way similar to getArgs.
+  
+  Currently it simply returns a list of the XML elements for *all* parent classes, 
+  not just the first inheritance level. This should probably be changed, or at least
+  a flag should be added to control how far up the inheritance tree it should go.
+
+  When this is done we can make use of it in generateWrapperHeader when constructing
+  the line declaring inheritance for the wrapper classes.
+
 
 
 
