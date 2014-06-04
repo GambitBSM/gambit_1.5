@@ -1,7 +1,7 @@
 echo
 echo "Compiling..."
 echo 
-g++ -c classes.cpp functions.cpp factory_U.cpp factory_T.cpp factory_X.cpp factory_Container.cpp -fPIC
+g++ -c -pedantic classes.cpp functions.cpp factory_U.cpp factory_T.cpp factory_X.cpp factory_Container.cpp -fPIC
 echo "...done."
 echo
 

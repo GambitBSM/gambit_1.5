@@ -144,30 +144,10 @@ def getTemplateBracket(el):
 
     newline_pos = index
 
-    print
-    print 'AT END OF LINE: ', file_content_nocomments[prev_pos:newline_pos]
-    print
-    # # HACK
-    # # Then, find position of class name
-    # short_class_name = el.get('name').rsplit('::')[-1]
-    # print 'short class name: ', short_class_name
-    # search_limit = newline_pos
-    # while search_limit > -1:
-    #     pos = file_content_nocomments[:search_limit].rfind(short_class_name)
-    #     pre_char  = file_content_nocomments[pos-1]
-    #     post_char = file_content_nocomments[pos+len(short_class_name)]
-    #     if (pre_char in [' ','\n','\t']) and (post_char in [' ', ':', '\n', '<', '{']):
-    #         break
-    #     else:
-    #         search_limit = pos
-
-    # class_name_pos = pos
-
 
     # Find the template parameter bracket, e.g. <typename A, typename B>
     search_content = file_content_nocomments[:newline_pos]
-    # search_content = file_content_nocomments[:class_name_pos]
-    # HACK END
+
     start_pos = 0
     end_pos = search_content.rfind('>')
     if end_pos != -1:
@@ -588,7 +568,7 @@ def isLoadedClass(input_type, byname=False):
 
         if type_el.tag in ['Class', 'Struct']:
             demangled_name = type_el.get('demangled')
-            if demangled_name in cfg.accepted_types:
+            if demangled_name in cfg.loaded_classes:
                 is_loaded_class = True
 
     return is_loaded_class
@@ -606,17 +586,15 @@ def constrForwardDecls():
     code = ''
     current_namespaces = []
 
-    for class_name_full, class_el in cfg.class_dict.items():
+    for class_name_long, class_el in cfg.class_dict.items():
 
         # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
         namespaces    = getNamespaces(class_el)
         has_namespace = bool(len(namespaces))
         namespace_str = '::'.join(namespaces) + '::'*has_namespace
 
-        class_name_short                  = class_name_full.replace(namespace_str,'',1)
-        class_name_short_notemplate       = class_name_short.split('<',1)[0]
-        abstr_class_name_short            = classutils.getAbstractClassName(class_name_full, short=True)
-        abstr_class_name_short_notemplate = abstr_class_name_short.split('<',1)[0]
+        class_name       = classutils.getClassNameDict(class_el)
+        abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
 
         if namespaces != current_namespaces:
             # close current namespace
@@ -630,7 +608,7 @@ def constrForwardDecls():
         n_indents   = len(namespaces)
         full_indent = ' '*n_indents*cfg.indent
         
-        if '<' in class_name_full:
+        if '<' in class_name['long_templ']:
             is_template = True
         else:
             is_template = False
@@ -640,16 +618,16 @@ def constrForwardDecls():
 
         if is_template:
             code += full_indent + 'template ' + template_bracket + '\n'
-            code += full_indent + 'class ' + abstr_class_name_short_notemplate + ';\n'
+            code += full_indent + 'class ' + abstr_class_name['short'] + ';\n'
             
             code += full_indent + 'template ' + template_bracket + '\n'
-            code += full_indent + 'class ' + class_name_short_notemplate + ';\n'
+            code += full_indent + 'class ' + class_name['short'] + ';\n'
             
-            code += full_indent + 'class ' + abstr_class_name_short + ';\n'
-            code += full_indent + 'class ' + class_name_short + ';\n'
+            code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
+            code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
         else:
-            code += full_indent + 'class ' + abstr_class_name_short + ';\n'
-            code += full_indent + 'class ' + class_name_short + ';\n'
+            code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
+            code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
     
     # Close current namespace
     code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
@@ -688,7 +666,61 @@ def constrTypedefHeader():
 
 # ====== getParentClasses ========
 
-def getParentClasses(class_el, only_native_classes=True, only_loaded_classes=False):
+def getParentClasses(class_el, only_native_classes=False, only_loaded_classes=False):
+
+    import modules.classutils as classutils
+
+    parent_classes = []
+
+    sub_el_list = class_el.findall('Base')
+    for sub_el in sub_el_list:
+
+        base_id = sub_el.get('type')
+        base_el = cfg.id_dict[base_id]
+
+        if (only_loaded_classes) and (not isLoadedClass(base_el)):
+            continue
+        elif (only_native_classes) and (not isNative(base_el)):
+            continue
+        else:
+            base_access    = sub_el.get('access')
+            base_virtual   = bool( int( sub_el.get('virtual') ) )
+            
+            base_name_dict       = classutils.getClassNameDict(base_el)
+            abstr_base_name_dict = classutils.getClassNameDict(base_el, abstract=True)
+
+            is_accepted_type = isAcceptedType(base_el)
+            is_native        = isNative(base_el)
+            is_fundamental   = isFundamental(base_el)
+            is_std           = isStdType(base_el)
+            is_loaded_class  = isLoadedClass(base_el)
+
+
+            temp_dict = {}
+            temp_dict['class_name']       = base_name_dict
+            temp_dict['abstr_class_name'] = abstr_base_name_dict
+            temp_dict['wrapper_name']     = classutils.toWrapperType(base_name_dict['long'])
+            temp_dict['access']           = base_access
+            temp_dict['virtual']          = base_virtual
+            temp_dict['id']               = base_id
+
+            temp_dict['accepted']         = is_accepted_type
+            temp_dict['native']           = is_native
+            temp_dict['fundamental']      = is_fundamental
+            temp_dict['std']              = is_std
+            temp_dict['loaded']           = is_loaded_class
+
+            parent_classes.append(temp_dict)
+
+    return parent_classes
+
+# ====== END: getParentClasses ========
+
+
+
+# ====== getAllParentClasses ========
+
+def getAllParentClasses(class_el, only_native_classes=True, only_loaded_classes=False):
 
     parent_classes = []
 
@@ -713,7 +745,65 @@ def getParentClasses(class_el, only_native_classes=True, only_loaded_classes=Fal
 
     return parent_classes
 
-# ====== END: getParentClasses ========
+# ====== END: getAllParentClasses ========
+
+
+
+# ====== getAllTypesInClass ========
+
+def getAllTypesInClass(class_el, include_parents=False):
+
+    import modules.classutils as classutils
+    import modules.funcutils as funcutils
+
+    all_types = []
+
+    check_member_elements = getMemberElements(class_el)
+
+    class_id = class_el.get('id')
+    for mem_el in check_member_elements:
+
+        if mem_el.tag in ['Constructor', 'Destructor', 'Method', 'OperatorMethod']:
+            args_list = funcutils.getArgs(mem_el)
+            for arg_dict in args_list:
+
+                arg_type_el   = cfg.id_dict[arg_dict['id']]
+                arg_type_name = classutils.getClassNameDict(arg_type_el)                
+
+                arg_type_dict = {}
+                arg_type_dict['class_name'] = arg_type_name
+                arg_type_dict['el']         = arg_type_el
+
+                all_types.append(arg_type_dict)
+
+        if ('type' in mem_el.keys()) or ('returns' in mem_el.keys()):
+
+            mem_type, mem_type_kw, mem_type_id = findType(mem_el)
+
+            type_el   = cfg.id_dict[mem_type_id]
+            type_name = classutils.getClassNameDict(type_el)
+
+            type_dict = {}
+            type_dict['class_name'] = type_name
+            type_dict['el']         = type_el
+
+            all_types.append(type_dict)
+
+
+    if include_parents:
+        parent_classes = getParentClasses(class_el, only_native_classes=False, only_loaded_classes=False)
+
+        for parent_dict in parent_classes:
+
+            small_parent_dict = {}
+            small_parent_dict['class_name'] = parent_dict['class_name']
+            small_parent_dict['el']         = cfg.id_dict[parent_dict['id']]
+
+            all_types.append(small_parent_dict)
+
+    return all_types
+
+# ====== END: getAllTypesInClass ========
 
 
 
@@ -751,7 +841,7 @@ def getMemberFunctions(class_el, include_artificial=False, include_inherited=Fal
     # If include_inherited=True, append all (native) parent classes 
     # the list 'all_classes'
     if include_inherited:
-        parent_classes = getParentClasses(class_el, only_loaded_classes=True)
+        parent_classes = getAllParentClasses(class_el, only_loaded_classes=True)
         all_classes = all_classes + parent_classes
 
         # temp_class_list = list(all_classes)
@@ -842,3 +932,20 @@ def pointerAndRefCheck(input_type, byname=False):
     return pointerness, is_reference
 
 # ====== END: pointerAndRefCheck ========
+
+
+
+# ====== addIncludeGuard ========
+
+def addIncludeGuard(code, file_name):
+
+    guard_var = '__' + file_name.replace('.','_').upper() + '__'
+
+    guard_code_top    = '#ifndef ' + guard_var + '\n' + '#define ' + guard_var + '\n'
+    guard_code_bottom = '#endif /* ' + guard_var + ' */\n'
+    
+    new_code = guard_code_top + '\n' + code + '\n' + guard_code_bottom
+
+    return new_code 
+
+# ====== END: addIncludeGuard ========

@@ -124,7 +124,7 @@ def run():
 
         # Prepare element in return_code_dict
         if source_file_name not in return_code_dict.keys():
-            return_code_dict[source_file_name] = []
+            return_code_dict[source_file_name] = {'code_tuples':[], 'add_include_guard':False}
 
         # Define code string
         n_indents = len(namespaces)
@@ -151,7 +151,7 @@ def run():
 
         # Register new code in return_code_dict
         insert_pos = -1   # end of file
-        return_code_dict[source_file_name].append( (insert_pos, add_code) )
+        return_code_dict[source_file_name]['code_tuples'].append( (insert_pos, add_code) )
 
 
     #

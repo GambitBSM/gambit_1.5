@@ -20,6 +20,7 @@ std_types_dict   = OrderedDict()
 typedef_dict     = OrderedDict()
 class_dict       = OrderedDict()
 func_dict        = OrderedDict()
+new_header_files = OrderedDict()
 accepted_types   = [] 
 std_headers_used = []
 
@@ -31,7 +32,7 @@ accepted_paths     = ['classloader_example/original']
 
 std_include_paths  = ['/usr/include/']
 
-loaded_classes       = ['T', 'X']
+loaded_classes       = ['T', 'X', 'MyNamespace::SomeClass<int>']
 loaded_functions     = []
 
 wrapper_class_tree     = True
@@ -55,7 +56,7 @@ indent = 4
 
 
 # Dictionary of what header to include for various standard types
-class_header_dict = {
+known_class_headers = {
  	"std::array"             : "<array>", 
  	"std::vector"            : "<vector>", 
  	"std::deque"             : "<deque>", 
@@ -71,5 +72,6 @@ class_header_dict = {
  	"std::unordered_multimap": "<unordered_map>", 
  	"std::stack"             : "<stack>", 
  	"std::queue"             : "<queue>",
- 	"std::priority_queue"    : "<queue>"
+ 	"std::priority_queue"    : "<queue>",
+ 	"std::string"            : "<string>",
 }

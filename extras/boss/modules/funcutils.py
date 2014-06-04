@@ -244,12 +244,15 @@ def constrWrapperArgs(args, add_ref=False):
     for arg_dict in w_args:
         if arg_dict['native'] == True:
             if arg_dict['loaded_class']:
-                if len(arg_dict['type_namespaces']) > 0:
-                    # namespaces, type_name = arg_dict['type'].rsplit('::',1)
-                    # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
-                    arg_dict['type'] = classutils.getAbstractClassName(arg_dict['type'])
-                else:
-                    arg_dict['type'] = cfg.abstr_class_prefix + arg_dict['type']
+
+                arg_dict['type'] = classutils.toAbstractType(arg_dict['type'])
+
+                # if len(arg_dict['type_namespaces']) > 0:
+                #     # namespaces, type_name = arg_dict['type'].rsplit('::',1)
+                #     # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
+                #     arg_dict['type'] = classutils.getAbstractClassName(arg_dict['type'])
+                # else:
+                #     arg_dict['type'] = cfg.abstr_class_prefix + arg_dict['type']
 
                 if add_ref:
                     if ('&' not in arg_dict['type']) and ('*' not in arg_dict['type']):

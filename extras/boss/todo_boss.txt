@@ -79,35 +79,29 @@ accepting a template specialization as a standard type.
 
 
 (11)
-Make sure that all abstract headers include any other abstract headers needed. 
-
-
-(12)
 BOSS needs to tackle structs as well as classes.
 
 
+(12)
+UPDATE:
+Is this not needed as long as we are absolutely sure that all virtual methods are overwritten?
+I can't seem to produce the 'unused parameter' or 'unused return' errors with the example code...
+
+OLD:
+Pat suggested a fix for getting rid of the pragma statements. Figure out what it was and
+implement it.
+
+
 (13)
-Make sure that all wrapper headers inlcude any other wrapper headers needed.
-
-
-(14)
-Implement the use of cfg.class_header_dict to include the correct header files for 
-various standard types
+Fix constrFactoryFunction to work properly with template classes
 
 
 
 Small things to fix:
 --------------------
 
-- Rewrite utils.getParentClasses such that is works in a way similar to getArgs.
-  
-  Currently it simply returns a list of the XML elements for *all* parent classes, 
-  not just the first inheritance level. This should probably be changed, or at least
-  a flag should be added to control how far up the inheritance tree it should go.
-
-  When this is done we can make use of it in generateWrapperHeader when constructing
-  the line declaring inheritance for the wrapper classes.
-
+- Change return type of virtual member functions on abstract classes.
+  Change: return X --> return Abstract_X
 
 
 

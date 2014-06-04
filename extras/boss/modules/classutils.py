@@ -34,26 +34,17 @@ def getAbstractClassName(input_name, prefix=cfg.abstr_class_prefix, short=False)
 
 # ====== constrEmptyTemplClassDecl ========
 
-def constrEmptyTemplClassDecl(short_abstract_class_name, namespaces, template_bracket, indent=4):
+def constrEmptyTemplClassDecl(abstr_class_name_short, namespaces, template_bracket, indent=4):
 
     n_indents  = len(namespaces)
     class_decl = ''
 
-    # - Construct the beginning of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'open')
-    # for ns in namespaces:
-    #     class_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
-    #     class_decl += ' '*n_indents*indent + '{' + '\n'
-    #     n_indents += 1
 
     class_decl += ' '*n_indents*indent + 'template ' + template_bracket + '\n'
-    class_decl += ' '*n_indents*indent + 'class ' + short_abstract_class_name + ' {};\n'
+    class_decl += ' '*n_indents*indent + 'class ' + abstr_class_name_short + ' {};\n'
 
-    # - Construct the closing of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'close')
-    # for ns in namespaces:
-    #     n_indents -= 1
-    #     class_decl += ' '*n_indents*indent + '}' + '\n'
     
     class_decl += '\n'
 
@@ -65,26 +56,17 @@ def constrEmptyTemplClassDecl(short_abstract_class_name, namespaces, template_br
 
 # ====== constrTemplForwDecl ========
 
-def constrTemplForwDecl(short_class_name, namespaces, template_bracket, indent=4):
+def constrTemplForwDecl(class_name_short, namespaces, template_bracket, indent=4):
 
     n_indents = len(namespaces)
     forw_decl = ''
 
-    # - Construct the beginning of the namespaces
     forw_decl += utils.constrNamespace(namespaces, 'open')
-    # for ns in namespaces:
-    #     forw_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
-    #     forw_decl += ' '*n_indents*indent + '{' + '\n'
-    #     n_indents += 1
 
     forw_decl += ' '*n_indents*indent + 'template ' + template_bracket + '\n'
-    forw_decl += ' '*n_indents*indent + 'class ' + short_class_name + ';\n'
+    forw_decl += ' '*n_indents*indent + 'class ' + class_name_short + ';\n'
 
-    # - Construct the closing of the namespaces
     forw_decl += utils.constrNamespace(namespaces, 'close')
-    # for ns in namespaces:
-    #     n_indents -= 1
-    #     forw_decl += ' '*n_indents*indent + '}' + '\n'
     
     forw_decl += '\n'
 
@@ -96,7 +78,7 @@ def constrTemplForwDecl(short_class_name, namespaces, template_bracket, indent=4
 
 # ====== constrAbstractClassDecl ========
 
-def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_name, namespaces, indent=4, template_types=[], 
+def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, namespaces, indent=4, template_types=[], 
                             has_copy_constructor=True,  has_assignment_operator=True):
 
     n_indents = len(namespaces)
@@ -110,7 +92,6 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
         is_template = False
 
 
-
     # Create list of all 'non-artificial' members of the class
     member_elements = []
     if 'members' in class_el.keys():
@@ -118,6 +99,9 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
             el = cfg.id_dict[mem_id]
             if not 'artificial' in el.keys():
                 member_elements.append(el)
+
+    # Get list of dicts with info on parent classes
+    parent_classes = utils.getParentClasses(class_el)
 
     #
     # Construct the abstract class declaration
@@ -127,56 +111,35 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
     class_decl += '#pragma GCC diagnostic ignored "-Wunused-parameter"\n'
     class_decl += '#pragma GCC diagnostic ignored "-Wreturn-type"\n'
 
-
-    # - Construct the name of the abstract class, including full namespace
-    # short_class_name    = class_el.get('name')
-    # full_class_name     = class_el.get('demangled').replace(' ','')
-    # abstract_class_name = getAbstractClassName(full_class_name, prefix=cfg.abstr_class_prefix)
-    # short_abstract_class_name = abstract_class_name.rsplit('::',1)[-1]
-    # namespaces = abstract_class_name.split('::')[:-1]
-
     # - Construct the beginning of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'open')
-    # for ns in namespaces:
-    #     class_decl += ' '*n_indents*indent + 'namespace ' + ns + '\n'
-    #     class_decl += ' '*n_indents*indent + '{' + '\n'
-    #     n_indents += 1
-
-    # # - Forward declare the child class (so that it can be used for input arguments)
-    # #   (for template classes this is already taken care of)
-    # if not is_template:
-    #     class_decl += ' '*n_indents*indent + 'class ' + short_class_name + ';\n' #.split('<',1)[0] + ';\n'
 
     # - If this class is a template specialization, add 'template <>' at the top
     if is_template == True:
         class_decl += ' '*n_indents*indent + 'template <>\n'
 
     # - Construct the declaration line, with inheritance of abstract classes
-    base_el_list = class_el.findall('Base')
-    if len(base_el_list) > 0:
-        inheritance_line = ''
-        for base_el in base_el_list:
-            base_id            = base_el.get('type')
-            base_name          = cfg.id_dict[base_id].get('demangled')
+    inheritance_line = ''
+    for parent_dict in parent_classes:
 
-            if base_name in cfg.loaded_classes:
-                abstract_base_name = getAbstractClassName(base_name, prefix=cfg.abstr_class_prefix)
-                base_access        = base_el.get('access')
-                inheritance_line  += base_access + ' ' + 'virtual' + ' ' + abstract_base_name + ', '
-            else: 
-                pass
-        # - Remove trailing whitespace and comma, add colon
-        if inheritance_line != '':
-            inheritance_line = ' : ' + inheritance_line.rstrip(', ')
+        if parent_dict['loaded']:
+            inheritance_line += 'virtual ' + parent_dict['access'] + ' ' + parent_dict['abstr_class_name']['long_templ'] + ', '
 
-    else:
-        inheritance_line = ''
+        elif parent_dict['fundamental'] or parent_dict['std']:
+            inheritance_line += 'virtual ' + parent_dict['access'] + ' ' + parent_dict['class_name']['long_templ'] + ', '
+
+        else:
+            warnings.warn("In class '%s', the parent class '%s' is ignored (not loaded class or std/fundamental type)." % (class_name_short, parent_dict['class_name']['long_templ']))
+            continue
+
+    if inheritance_line != '':
+        inheritance_line = ' : ' + inheritance_line.rstrip(', ')
+
     class_decl += ' '*n_indents*indent
-    
     if is_template:
-        class_decl += 'class ' + short_abstract_class_name + '<' + ','.join(template_types) + '>' + inheritance_line + '\n'
+        class_decl += 'class ' + abstr_class_name_short + '<' + ','.join(template_types) + '>' + inheritance_line + '\n'
     else:
-        class_decl += 'class ' + short_abstract_class_name + inheritance_line + '\n'
+        class_decl += 'class ' + abstr_class_name_short + inheritance_line + '\n'
 
     # - Construct body of class declaration
     current_access = ''
@@ -247,7 +210,6 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
                 #   }
                 #
                 if return_is_native:
-                    # w2_return_type = cfg.abstr_class_prefix + w_return_type
                     w2_return_type = getAbstractClassName(w_return_type)
                 else:
                     w2_return_type = w_return_type
@@ -294,9 +256,9 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
         class_decl += '\n'
         class_decl += ' '*(n_indents+1)*indent + 'public:\n'
         if has_assignment_operator:
-            class_decl += constrPtrAssignFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
+            class_decl += constrPtrAssignFunc(abstr_class_name_short, class_name_short, virtual=True, indent=indent, n_indents=n_indents+2)
         if has_copy_constructor:
-            class_decl += constrPtrCopyFunc(short_abstract_class_name, short_class_name, virtual=True, indent=indent, n_indents=n_indents+2)
+            class_decl += constrPtrCopyFunc(abstr_class_name_short, class_name_short, virtual=True, indent=indent, n_indents=n_indents+2)
 
     # # - Construct the 'downcast' converter function
     # class_decl += '\n'
@@ -306,21 +268,17 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
     # else:
     #     template_bracket = ''
     # class_decl += ' '*(n_indents+1)*indent + 'public:\n'
-    # class_decl += constrDowncastFunction(short_class_name, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
+    # class_decl += constrDowncastFunction(class_name_short, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
 
     # - Construct an empty virtual destructor
     class_decl += ' '*(n_indents+2)*indent
-    class_decl += 'virtual ~' + short_abstract_class_name + '() {};\n'
+    class_decl += 'virtual ~' + abstr_class_name_short + '() {};\n'
 
     # - Close the class body
     class_decl += ' '*n_indents*indent + '};' + '\n'
 
     # - Construct the closing of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'close')
-    # for ns in namespaces:
-    #     n_indents -= 1
-    #     class_decl += ' '*n_indents*indent + '}' + '\n'
-
 
     class_decl += '#pragma GCC diagnostic pop\n'
     return class_decl
@@ -331,7 +289,7 @@ def constrAbstractClassDecl(class_el, short_class_name, short_abstract_class_nam
 
 # ====== constrFactoryFunction ========
 
-def constrFactoryFunction(class_el, full_class_name, indent=4, template_types=[]):
+def constrFactoryFunction(class_el, class_name, indent=4, template_types=[]):
 
     # Create list of all constructors of the class
     constructor_elements = []
@@ -350,9 +308,7 @@ def constrFactoryFunction(class_el, full_class_name, indent=4, template_types=[]
     for el in constructor_elements:
 
         # Useful variables
-        # full_class_name  = el.get('demangled').rsplit('::',1)[0]
-        short_class_name = full_class_name.split('::')[-1].split('<')[0]
-        factory_name = 'Factory_' + short_class_name
+        factory_name = 'Factory_' + class_name['short']
         if len(template_types) > 0:
             factory_name += '_' + '_'.join(template_types)
 
@@ -374,11 +330,11 @@ def constrFactoryFunction(class_el, full_class_name, indent=4, template_types=[]
         args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_type=False, cast_to_original=True)
         
         # Generate declaration line:
-        return_type = getAbstractClassName(full_class_name, prefix=cfg.abstr_class_prefix)
+        return_type = getAbstractClassName(class_name['long'], prefix=cfg.abstr_class_prefix)
         func_def += return_type + '* ' + factory_name + args_bracket + '\n'
         # Generate body
         func_def += '{' + '\n'
-        func_def += indent*' ' + 'return new ' + full_class_name + args_bracket_notypes + ';' + '\n'
+        func_def += indent*' ' + 'return new ' + class_name['long'] + args_bracket_notypes + ';' + '\n'
         func_def += '}' + 2*'\n'
 
     return func_def
@@ -579,16 +535,16 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
 
 # ====== constrPtrCopyFunc ========
 
-def constrPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
+def constrPtrCopyFunc(abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0):
 
     ptr_code = ''
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        ptr_code += 'virtual '+ short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '() {std::cout << "Called virtual function" << std::endl;};\n'   
+        ptr_code += 'virtual '+ abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '() {std::cout << "Called virtual function" << std::endl;};\n'   
     else:
-        ptr_code += short_abstr_class_name + '*' + ' pointerCopy' + cfg.code_suffix + '()'
-        ptr_code += ' ' + '{ return new ' + short_class_name + '(*this); }\n'
+        ptr_code += abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '()'
+        ptr_code += ' ' + '{ return new ' + class_name_short + '(*this); }\n'
 
     return ptr_code
 
@@ -598,16 +554,16 @@ def constrPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, i
 
 # ====== constrPtrAssignFunc ========
 
-def constrPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=0):
+def constrPtrAssignFunc(abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0):
 
     ptr_code = ''
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in) {std::cout << "Called virtual function" << std::endl;};\n'
+        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '* in) {std::cout << "Called virtual function" << std::endl;};\n'
     else:
-        ptr_code += 'void pointerAssign' + cfg.code_suffix + '(' + short_abstr_class_name + '* in)'
-        ptr_code += ' ' + '{ *this = *dynamic_cast<' + short_class_name + '*>(in); }\n'        
+        ptr_code += 'void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '* in)'
+        ptr_code += ' ' + '{ *this = *dynamic_cast<' + class_name_short + '*>(in); }\n'        
 
     return ptr_code
 
@@ -696,7 +652,7 @@ def toWrapperType(input_type_name):
 
     # Insert wrapper class suffix
     if '<' in type_name:
-        type_name_part_one, type_name_part_two = type_name.split('<',1)[0]
+        type_name_part_one, type_name_part_two = type_name.split('<',1)
         type_name = type_name_part_one + cfg.code_suffix + '<' + type_name_part_two
     else:
         type_name = type_name + cfg.code_suffix
@@ -752,3 +708,89 @@ def toAbstractType(input_type_name, include_namespace=True, add_pointer=False):
     return type_name
 
 # ====== END: toAbstractType ========
+
+
+
+# ====== getClassNameDict ========
+
+def getClassNameDict(class_el, abstract=False):
+
+    class_name = {}
+
+    if 'demangled' in class_el.keys():
+        class_name['long_templ']  = class_el.get('demangled')
+    elif 'name' in class_el.keys():
+        class_name['long_templ']  = class_el.get('name')
+    else:
+        raise Exception('Cannot determine the name of XML element %s' % class_el.get('id'))
+    class_name['long']        = class_name['long_templ'].split('<',1)[0]
+    class_name['short_templ'] = class_el.get('name')
+    class_name['short']       = class_name['short_templ'].split('<',1)[0]
+
+    if abstract:
+        abstr_class_name = {}
+        abstr_class_name['long_templ']  = getAbstractClassName(class_name['long_templ'], prefix=cfg.abstr_class_prefix)
+        abstr_class_name['long']        = abstr_class_name['long_templ'].split('<',1)[0]
+        abstr_class_name['short_templ'] = getAbstractClassName(class_name['long_templ'], prefix=cfg.abstr_class_prefix, short=True)
+        abstr_class_name['short']       = abstr_class_name['short_templ'].split('<',1)[0]
+
+        return abstr_class_name
+
+    else:
+        return class_name
+
+# ====== END: getClassNameDict ========
+
+
+
+# ====== getIncludeStatements ========
+
+def getIncludeStatements(all_types, convert_loaded_to):
+
+    convert_loaded_to = convert_loaded_to.lower()
+    if convert_loaded_to not in ['abstract', 'wrapper']:
+        raise Exception("getIncludeStatements: Second argument must be either 'abstract' or 'wrapper'.")
+
+    include_statements = []
+
+    for type_dict in all_types:
+
+        type_el   = type_dict['el']
+        type_name = type_dict['class_name']
+
+        if utils.isAcceptedType(type_el):
+
+            if utils.isFundamental(type_el):
+                pass
+
+            elif utils.isLoadedClass(type_el):
+                # class_name_dict = getClassNameDict(type_el)
+                include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
+
+            elif utils.isStdType(type_el):
+
+                # type_name_no_templ = type_name.split('<',1)[0]
+
+                if type_name['long'] in cfg.known_class_headers:
+                    header_name = cfg.known_class_headers[type_name['long']]
+                    if (header_name[0] == '<') and (header_name[-1] == '>'):
+                        include_statements.append('#include ' + cfg.known_class_headers[type_name['long']])
+                    else:
+                        include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
+                else:
+                    warnings.warn("The standard type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long'])
+
+            else:
+                if type_name in cfg.known_class_headers:
+                    include_statements.append('#include "' + cfg.known_class_headers[type_name] + '"')
+                else:
+                    warnings.warn("The type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name)
+        else:
+            warnings.warn("The type '%s' is unknown. No header file included." % type_name)
+
+    # Remove duplicates and return list
+    include_statements = list( set(include_statements) )
+
+    return include_statements
+
+# ====== END: getIncludeStatements ========

@@ -2,31 +2,43 @@
 #define __CLASSES_HPP__
 
 #include <iostream>
+#include <string>
+#include <vector>
 
-
-class U
+namespace MyNamespace
 {
-    public:
+    template<typename T>
+    class SomeClass {};
 
-        U()
-        {
-            std::cout << "(Constructor of U)" << std::endl;
-        }
-
-        ~U()
-        {
-            std::cout << "(Destructor of U)" << std::endl;
-        }
-
-        void memberFunc()
-        {
-            std::cout << "This is memberFunc from class U" << std::endl;
-        }
-};
+    SomeClass<int> dummy_instance;
+}
 
 
+namespace DummyNameSpace
+{
+    class U
+    {
+        public:
 
-class T : public U
+            U()
+            {
+                std::cout << "(Constructor of U)" << std::endl;
+            }
+
+            ~U()
+            {
+                std::cout << "(Destructor of U)" << std::endl;
+            }
+
+            void memberFunc(std::string s_in, std::vector<int> a)
+            {
+                std::cout << "This is memberFunc from class U" << std::endl;
+            }
+    };
+}
+
+
+class T : public DummyNameSpace::U, private std::string
 {
     public:
         // Member variables
