@@ -21,13 +21,15 @@
       implicit none
       include 'nulike.h'
 
-      real*8 log10E, tS_tot, nulike_dPhi_SdE, muonyield
+      real*8 log10E, tS_tot, nulike_dPhi_SdE, temp
+      real*8 muonyield
       external muonyield
 
       !Obtain the neutrino contribution in yr^-1 GeV^-1
       nulike_dP_SdE = nulike_dPhi_SdE(log10E,1,muonyield)
       !Obtain the anti-neutrino contribution in yr^-1 GeV^-1
-      nulike_dP_SdE = nulike_dP_SdE + nulike_dPhi_SdE(log10E,2,muonyield)
+      temp = nulike_dPhi_SdE(log10E,2,muonyield)
+      nulike_dP_SdE = nulike_dP_SdE + temp
       !Normalise the distribution to differential probability per GeV
       !nulike_dP_SdE in GeV^-1, exp_time in s, annrate in s^-1
       nulike_dP_SdE = nulike_dP_SdE * exp_time * annrate / tS_tot

@@ -31,7 +31,8 @@
 
       !Skip over header lines
       instring = '#'
-      do while (instring(1:1) .eq. '#' .or. instring .eq. '[t]' .or. instring .eq. '[v]')
+      do while (instring(1:1) .eq. '#' .or. instring 
+     & .eq. '[t]' .or. instring .eq. '[v]')
         read(lun, fmt='(A3)'), instring
       enddo
 

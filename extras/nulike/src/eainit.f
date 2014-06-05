@@ -19,7 +19,8 @@
 *** Date: April 8, 2011
 ***********************************************************************
 
-      subroutine nulike_eainit(filename,nbins,doSuperBinning,superBinWid)
+      subroutine nulike_eainit(filename,nbins,
+     & doSuperBinning,superBinWid)
 
       implicit none
       include 'nulike.h'

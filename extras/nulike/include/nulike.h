@@ -107,7 +107,8 @@
      & bestGuessBin, nBinsEA, nBinsEAError, nBinsBGAng,nBinsBGE,nEvents,
      & nHistograms, nnchan_total, nchan_min, nchan_max, maxEAErrIndex,
      & nchan_hist2BGoffset, FullSkyBG, ptypeshare, nchanshare,
-     & nchansaved, pvalBGPoisComputed, sysErrDist_logNorm, nulike_version
+     & nchansaved, pvalBGPoisComputed,
+     & sysErrDist_logNorm, nulike_version
       save /nulike_comm/
 
       ! These parameters will be initialized in a block data routine

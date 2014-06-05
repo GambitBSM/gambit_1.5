@@ -186,7 +186,8 @@
      &   2,0,.false.,.false.,2*nHistograms-2,working,edisp_derivs,
      &   edisp_sigma,IER)
         if (IER .lt. 0) then
-          write(*,*) 'Error in nulike_edispinit: TSPSI failed with error'
+          write(*,*) 'Error in nulike_edispinit: '
+          write(*,*) 'TSPSI failed with error'
           write(*,*) 'code',IER, ' at i=',i
           stop
         endif
