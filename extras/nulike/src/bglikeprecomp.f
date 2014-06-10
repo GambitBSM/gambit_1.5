@@ -12,8 +12,12 @@
       include 'nulike.h'
 
       real*8 nulike_pval
+      real*8 theta_sum
+      real*8 events_sum
+      theta_sum = sum(theta_BG)
+      events_sum = sum(nEvents_inEAErrBins)
 
-      BGpvalPoissonian = nulike_pval(sum(nEvents_inEAErrBins),sum(theta_BG),0.d0)
+      BGpvalPoissonian = nulike_pval(events_sum,theta_sum,0.d0)
       pvalBGPoisComputed = .true.
 
       end subroutine nulike_bglikeprecomp

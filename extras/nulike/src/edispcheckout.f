@@ -24,7 +24,9 @@
       nchansaved = nchan
       nchan_index = nchan - nchan_min + 1
       if (hist_nchan(1,nchan_index) .ne. nchan) then
-        stop'Something is wrong with nchan_index in nulike_edispcheckout'
+        write(*,*) 'Something is wrong with nchan_index'
+        write(*,*) 'in nulike_edispcheckout'
+        stop
       endif
 
       do j = 1, nHistograms

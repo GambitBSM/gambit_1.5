@@ -103,7 +103,8 @@
       
       open(lun,file=effareafile,IOSTAT=IFAIL, ACTION='READ')
       if (IFAIL .ne. 0) then
-        write(*,*) 'Error opening effective area/volume file. ',effareafile,'.'
+        write(*,*) 'Error opening effective area/volume file. ',
+     &effareafile,'.'
         write(*,*) 'Quitting...'
         stop
       endif
@@ -114,7 +115,8 @@
       enddo
 
       if (instring .ne. 'B') then
-        write(*,*) 'Bad format in effective area/volume file ',effareafile,'.'
+        write(*,*) 'Bad format in effective area/volume file ',
+     &effareafile,'.'
         write(*,*) 'First non-comment line begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -127,7 +129,8 @@
         enddo
         read(lun, fmt=*, IOSTAT=IFAIL, END=10) instring, nBinsEA
         if (IFAIL .ne. 0) then
-         write(*,*) 'Bad format in effective area/volume file ',effareafile,'.'
+         write(*,*) 'Bad format in effective area/volume file ',
+     &effareafile,'.'
          write(*,*) 'Quitting...'
          stop
         endif
@@ -239,12 +242,13 @@
       endif 
 
       write(*,*) 
-      write(*,*) '**********************************************************'
-      write(*,*) '*                   nulike 1.0                           *'
-      write(*,*) '*              Pat Scott, Chris Savage                   *'
-      write(*,*) '*                 arXiv:1207.0810                        *'       
-      write(*,*) '* Neutrino telescope likelihood version: ', nulike_version,' *' 
-      write(*,*) '**********************************************************'
+      write(*,*) '*****************************************************'
+      write(*,*) '*                 nulike 1.0                        *'
+      write(*,*) '*            Pat Scott, Chris Savage                *'
+      write(*,*) '*               arXiv:1207.0810                     *'       
+      write(*,*) '* Neutrino telescope likelihood version: ',
+     &nulike_version,' *' 
+      write(*,*) '*****************************************************'
 
       do while (instring .ne. '###--Exposure--')
         read(lun, fmt=*) instring
@@ -362,10 +366,12 @@
       call nulike_eainit(effareafile,nBinsEA,doSuperBinning,superBinWid)
 
       !Read in the actual background data
-      call nulike_bginit(BGfile, nBinsBGAng, nBinsBGE, BGfirst, BGsecond)
+      call nulike_bginit(BGfile, nBinsBGAng,
+     & nBinsBGE, BGfirst, BGsecond)
 
       !Read in the actual nchan response histograms and rearrange them into energy dispersion estimators
-      call nulike_edispinit(nchandistfile, nHistograms, nnchan, pLawIndx)
+      call nulike_edispinit(nchandistfile, nHistograms,
+     & nnchan, pLawIndx)
 
       !Read in the actual detail of all events, and sort them into the superbins determined from the errors on the effective area/volume
       call nulike_eventinit(eventfile, nEvents)

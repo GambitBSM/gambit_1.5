@@ -69,7 +69,8 @@
       real*8 Nsignal_predicted, NBG_predicted, NBG_expected, nulike_pval
       real*8 lnlike, pvalue, referenceLike, dof, DGAMIC, DGAMMA, muonyield
       real*8 nLikelihood, angularLikelihood, spectralLikelihood, scaling
-      real*8 theta_tot, f_S, nulike_anglike, nulike_speclike, nulike_nlike
+      real*8 theta_tot, f_S, nulike_anglike, nulike_speclike
+      real*8 nulike_nlike
       real*8 erval1, erval2, BGpvalChi2, deltalnlike, mwimp, ann_rate
       logical pvalFromRef, nulike_speclike_reset, doProfiling
       character (len=*) pref,f1,f2,f3,f4
@@ -151,7 +152,7 @@
 
         !Calculate the number likelihood for this superbin
         nLikelihood = nulike_nlike(nEvents_inEAErrBins(i),
-     &   theta_tot,theta_S(i),EAErr_inEAErrBins(i),theoryErr)
+     & theta_tot,theta_S(i),EAErr_inEAErrBins(i),theoryErr)
 
         if (doProfiling) then
           call system_clock(counted1,countrate)
