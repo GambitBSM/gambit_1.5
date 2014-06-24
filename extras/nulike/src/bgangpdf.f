@@ -16,20 +16,21 @@
       implicit none
       include 'nulike.h'
 
-      real*8 cosphi, CosToInvDeg
+      real*8 cosphi, CosToInvDeg, nulike_bgangpdf_a(1)
       integer IER
 
-      call TSVAL1(nBinsBGAng,cos(BGangdist_phi),BGangdist_prob,
-     & BGangdist_derivs,BGangdist_sigma,0,1,cosphi,nulike_bgangpdf,IER)
-
-      CosToInvDeg = sqrt(1.d0 - cosphi*cosphi) * pi / 180.d0
-      nulike_bgangpdf = nulike_bgangpdf * CosToInvDeg
-     & / BGangdist_conenorm
+      call TSVAL1(nBinsBGAng(analysis),BGangdist_phi(:,analysis),
+     & BGangdist_prob(:,analysis),BGangdist_derivs(:,analysis),
+     & BGangdist_sigma(:,analysis),0,1,cosphi,nulike_bgangpdf_a,IER)
 
       if (IER .lt. 0) then
-        write(*,*) 'TSVAL1 error from background spectral'
-        write(*,*) 'distribution in nulike_bgspec, code:', IER
+        write(*,*) 'TSVAL1 error from background angular'
+        write(*,*) 'distribution in nulike_bgangpdf, code:', IER
         stop
       endif
+
+      CosToInvDeg = sqrt(1.d0 - cosphi*cosphi) * pi / 180.d0
+      nulike_bgangpdf = nulike_bgangpdf_a(1) * CosToInvDeg / 
+     &                  BGangdist_conenorm(analysis)
 
       end function nulike_bgangpdf

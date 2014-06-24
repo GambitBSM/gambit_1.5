@@ -1,63 +1,85 @@
 ***********************************************************************
 *** nulike_signal computes the predicted number of neutrino events due
-*** to neutralino annihilation in each superbin, saving global variables
-*** for later access by likelihood codes.
+*** to neutralino annihilation.
 ***        
-*** Input:      muonyield       external double function that returns
-***                             the differential muon/neutrino flux
+*** Input:      nuyield         External double function that returns
+***                             the differential neutrino flux
 ***                             at the detector in units of m^-2 GeV^-1
+***                             annihilation^-1
+***             annrate         Annihilation rate (s^-1) 
+***             logmw           log_10(m_WIMP / GeV)
+***             like            Likelihood version (2012 or 2014)
 ***
+*** Output:     theta_S         predicted number of signal events.
+*** 
 *** Author: Pat Scott (patscott@physics.mcgill.ca)
 *** Date: Apr 22, 2011
 *** Modified: March 6 2014
+*** Modified: Jun 3, 6, 8 2014
 ***********************************************************************
 
 
-      subroutine nulike_signal(muonyield)
+      double precision function nulike_signal(nuyield, annrate, logmw, like)
 
       implicit none
       include 'nulike.h'
 
-      real*8 integral, eps, nulike_simpson, nulike_sigintegrand
-      real*8 muonyield, upperLimit
-      integer i
-      parameter (eps = 1.d-3)
-      external nulike_sigintegrand, muonyield
+      real*8 integral, nulike_simpson, nulike_sigintegrand, logmw
+      real*8 nuyield, upperLimit, theta_Snu, theta_Snubar, annrate
+      real*8 nulike_specangintegrand, eps2012, eps2014
+      integer like
+      parameter (eps2012 = 1.d-3, eps2014 = 1e-3)
+      external nuyield, nulike_sigintegrand, nulike_specangintegrand
  
-      theta_S = 0.d0
+      ! Short-circuit if the mass is too low to produce any observable events.
+      if (logmw .lt. sens_logE(1,1,analysis)) then
+        nulike_signal = 0.d0
+        return
+      endif
       
-      do i = 1,nBinsEAError
 
-        if (log10mwimp .lt. EAlogE_inEAErrBins(1,i)) then
+      ! Switch according to likelihood version.
+      select case (like)
 
-          theta_Snu(i) = 0.d0
-          theta_Snubar(i) = 0.d0
- 
+      ! 2012 likelihood, as per arXiv:1207.0810
+      case (2012)
+
+        if (logmw .lt. sens_logE(2,nSensBins(analysis),analysis)) then
+          upperLimit = logmw
         else
-
-          if (log10mwimp .lt. EAlogE_inEAErrBins(2,i)) then
-            upperLimit = log10mwimp
-          else
-            upperLimit = EAlogE_inEAErrBins(2,i)
-          endif
-
-          ptypeshare = 1
-          integral = nulike_simpson(nulike_sigintegrand,muonyield,
-     &     EAlogE_inEAErrBins(1,i),upperLimit,eps)
-          theta_Snu(i) = integral * dlog(10.d0) * exp_time * annrate
-
-          ptypeshare = 2
-          integral = nulike_simpson(nulike_sigintegrand,muonyield,
-     &     EAlogE_inEAErrBins(1,i),upperLimit,eps)
-          theta_Snubar(i) = integral * dlog(10.d0) * exp_time *annrate
-
+          upperLimit = sens_logE(2,nSensBins(analysis),analysis)
         endif
 
-        theta_S(i) = theta_Snu(i) + theta_Snubar(i) 
+        ! Neutrinos
+        ptypeshare = 1
+        integral = nulike_simpson(nulike_sigintegrand,nuyield,
+     &   sens_logE(1,1,analysis),upperLimit,eps2012)
+        theta_Snu = integral * dlog(10.d0) * exp_time(analysis) * annrate
 
-      enddo
+        ! Anti-neutrinos
+        ptypeshare = 2
+        integral = nulike_simpson(nulike_sigintegrand,nuyield,
+     &   sens_logE(1,1,analysis),upperLimit,eps2012)
+        theta_Snubar = integral * dlog(10.d0) * exp_time(analysis) * annrate
 
-      theta_S_total = sum(theta_S)
+        ! Total
+        nulike_signal = theta_Snu + theta_Snubar 
 
-      end subroutine nulike_signal
+      !2014 likelihood, as per arXiv:141x.xxxx
+      case (2014)
+
+        eventnumshare = 0 ! Use effective area from previous tabulation.
+        integral = nulike_simpson(nulike_specangintegrand,nuyield,
+     &   sens_logE(1,1,analysis),logmw,eps2014)
+        nulike_signal = integral * dlog(10.d0) * exp_time(analysis) * annrate
+
+      case default
+        write(*,*) "Unrecognised likelihood version in nulike_signal."
+        write(*,*) "Quitting..."
+        stop
+
+      end select
+
+
+      end function nulike_signal
 

@@ -61,7 +61,7 @@
       ! Checks --------------------------------------------
       IF ((n .LT. 0) .OR. (thetab .LT. 0d0)
      &    .OR. (thetas .LT. 0d0) .OR. (sigma .LT. 0d0)) THEN
-        print*, 'ERROR: nulike_lnpilnsum called with negative argument'
+        WRITE(*,*) 'ERROR: nulike_lnpilnsum called with negative argument'
         STOP
       END IF
       
