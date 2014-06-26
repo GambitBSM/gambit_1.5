@@ -887,7 +887,7 @@
       IMPLICIT NONE
       REAL*8 alpha,r,eta,yi,ymin,ymax,y0
       LOGICAL found
-      REAL*8 expy,f0,f1,f2,deltay,ya,yb,fa,fb,y_prev,f_prev,tmp
+      REAL*8 expy,f0,f1,f2,deltay,ya,yb,fa,fb,y_prev,f_prev
       INTEGER K,MAX_ITERATIONS,MAX_BISECTIONS
       PARAMETER(MAX_ITERATIONS=8,MAX_BISECTIONS=40)
       INTEGER NDEBUG
@@ -896,6 +896,7 @@
       !WRITE(*,'(A,6(G))') 'findzero arguments:',alpha,r,eta,yi,ymin,ymax
       
       found = .FALSE.
+      deltay = HUGE(1d0)
       y0 = yi
       
       ! Bracketing -----------------------------

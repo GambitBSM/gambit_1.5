@@ -20,7 +20,7 @@
       real*8 f,aux,a,b,tot,eps,st,os,ost,del,sum,x
       integer jmax,it,l,j,nfcn,jdid
       external f,aux
-      parameter (jmax=30)
+      parameter (jmax=25)
 
       nulike_simpson=0.d0
       del=b-a
@@ -48,7 +48,7 @@
               nulike_simpson=tot
               return
            endif
-     	endif
+        endif
         os=tot
         ost=st
       enddo

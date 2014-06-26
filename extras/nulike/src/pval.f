@@ -9,6 +9,7 @@
 ***
 *** Author: Pat Scott (patscott@physics.mcgill.ca)
 *** Date: May, June, July, Dec 2011
+*** Modified: Jun 3, 6 2014
 ***********************************************************************
 
       double precision function nulike_pval(ntot,theta_tot,theta_sig)
@@ -16,7 +17,7 @@
       implicit none
       include 'nulike.h'
 
-      integer ntot, i
+      integer ntot
       real*8 theta_tot, theta_sig, sigma, lnpval, lnpin, lngesum
 
       if (theta_tot.lt.0.d0.or.ntot.lt.0.or.theta_sig.lt.0.d0) then 
@@ -24,8 +25,9 @@
         stop 'Error: something has gone negative in nulike_pval!'
       endif
 
-      sigma = dsqrt(EAErr_max*EAErr_max+theoryErr*theoryErr)
-      if (sysErrDist_logNorm) then
+      sigma = dsqrt(EAErr(analysis)*EAErr(analysis)+
+     & theoryErr(analysis)*theoryErr(analysis))
+      if (sysErrDist_logNorm(analysis)) then
         !Treat percentage error as log-normal distributed
         call nulike_lnpilnsum(ntot,theta_tot-theta_sig,theta_sig,
      &   sigma,lnpin,lnpval,lngesum)
