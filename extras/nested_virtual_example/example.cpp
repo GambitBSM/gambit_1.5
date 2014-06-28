@@ -30,4 +30,23 @@ int main()
   std::cout << int_example.Insides1.get_f_of_mA(1.1) << std::endl;
   std::cout << int_example.Insides2.get_f_of_mB(1.1, 1.1) << std::endl;
 
+  //Create some references-to-base
+  specialised_outer<double> dbl_example2;
+  specialised_outer<int> int_example2;
+
+  outer& ptr2base1(dbl_example2);
+  outer& ptr2base2(int_example2);
+
+  //Check that results match the above
+  ptr2base1.Insides1.set_mA(0.4);
+  ptr2base1.Insides2.set_mB(0.4);
+  ptr2base2.Insides1.set_mA(0.4);
+  ptr2base2.Insides2.set_mB(0.4);
+
+  std::cout << "From ptrs to base" << std::endl;
+  std::cout << ptr2base1.Insides1.get_f_of_mA(1.1) << std::endl;
+  std::cout << ptr2base1.Insides2.get_f_of_mB(1.1, 1.1) << std::endl;
+  std::cout << ptr2base2.Insides1.get_f_of_mA(1.1) << std::endl;
+  std::cout << ptr2base2.Insides2.get_f_of_mB(1.1, 1.1) << std::endl;
+
 }
