@@ -2,9 +2,19 @@
 *** nulike_bounds returns counts, likelihoods and p-values from neutrino
 *** telescope searches for dark matter annihilation in the Sun. 
 ***
-*** input: mwimp         WIMP mass (GeV)
+*** input: analysis_name Name of the nulike analysis to use for calculating
+***                      likelihood and/or p-value.
 ***
-***        ann_rate      Annihilation rate (s^-1) 
+***        mwimp         WIMP mass (GeV)
+***
+***        annrate       Annihilation rate (s^-1) 
+***
+***        nuyield       Name of a function that takes arguments 
+***                       real*8   log10E  log_10(E_nu / GeV)
+***                       integer  ptype   1=nu, 2=nubar
+***                      and returns
+***                       real*8   differential neutrino flux at the detector
+***                                (m^-2 GeV^-1 annihilation^-1)
 ***
 ***        liketype      Sets combination of data to use in likelihood
 ***                         calculations
@@ -54,34 +64,36 @@
 *** Date: Mar 20, 2011
 *** Updated: Jul 21, 2011
 ***          Mar 6, 2014
+***          Jun 3, 6, 8 2014
 ***********************************************************************
 
 
-      subroutine nulike_bounds(mwimp, ann_rate, muonyield, 
-     & Nsignal_predicted, NBG_expected, Ntotal_observed, 
+      subroutine nulike_bounds(analysis_name, mwimp, annrate, 
+     & nuyield, Nsignal_predicted, NBG_expected, Ntotal_observed, 
      & lnlike, pvalue, liketype, pvalFromRef, referenceLike, dof)
 
       implicit none
       include 'nulike.h'
 
-      integer Ntotal_observed, liketype, i, j, k, l
-      integer counted1, counted2, countrate
-      real*8 Nsignal_predicted, NBG_predicted, NBG_expected, nulike_pval
-      real*8 lnlike, pvalue, referenceLike, dof, DGAMIC, DGAMMA, muonyield
-      real*8 nLikelihood, angularLikelihood, spectralLikelihood, scaling
+      integer Ntotal_observed, liketype, j
+      integer counted1, counted2, countrate, nulike_amap
+      real*8 Nsignal_predicted, NBG_expected, nulike_pval, theta_S
+      real*8 lnlike, pvalue, referenceLike, dof, DGAMIC, DGAMMA, nuyield
+      real*8 nLikelihood, angularLikelihood, spectralLikelihood, logmw
       real*8 theta_tot, f_S, nulike_anglike, nulike_speclike, nulike_nlike
-      real*8 erval1, erval2, BGpvalChi2, deltalnlike, mwimp, ann_rate
+      real*8 deltalnlike, mwimp, annrate, specAngLikelihood, nulike_signal
+      real*8 nulike_specanglike
       logical pvalFromRef, nulike_speclike_reset, doProfiling
-      character (len=*) pref,f1,f2,f3,f4
-      external muonyield
+      character (len=nulike_clen) analysis_name
+      external nuyield
       !Hidden option for doing speed profiling
       parameter (doProfiling = .false.)
-      parameter (pref = 'share/DarkSUSY/IC_data/')
-      parameter (f1 = pref//'events_10deg_IC79.dat')
-      parameter (f2 = pref//'energy_histograms_IC79.dat')
-      parameter (f3 = pref//'BG_distributions_IC79.dat')
-      parameter (f4 = pref//'nuEffArea_IC79.dat')
         
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 1. Initialisation
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       if (doProfiling) call system_clock(counted1,countrate)
 
       !Check validity of user-provided liketype
@@ -91,14 +103,33 @@
         stop
       endif
      
-      !if nulike_init has not yet been called, call it with the default IC-79 options
+      !If nulike_init has not yet been called, quit.
       if (.not. nulike_init_called) then
-        call nulike_init(f1,f2,f3,f4,20.d0,0.05d0,.true.,.true.)
+        write(*,*) "Please call nulike_init before nulike_bounds."
+        write(*,*) 'Quitting...'
+        stop
       endif
+      
+      !Look up the analysis requested by the user.
+      analysis = nulike_amap(analysis_name)
+      if (analysis .eq. 0) then
+        write(*,*) "Analysis '"//trim(analysis_name)//"' requested of nulike_bounds"
+        write(*,*) 'is not one of the ones that has already been loaded.'
+        write(*,*) 'Quitting...'
+        stop
+      endif
+      
+      !Make sure the user has not tried to use the 2014 like with only angular or only spectral likelihood.
+      if (likelihood_version(analysis) .eq. 2014 .and. 
+     & (liketype .eq. 2 .or. liketype .eq. 3) ) then
+        write(*,*) "Analysis '"//trim(analysis_name)//"' requested of nulike_bounds"
+        write(*,*) 'uses the 2014 likelihood, which is incompatible with liketype = ',liketype
+        write(*,*) 'Quitting...'
+        stop
+      endif 
 
-      !Set internal WMIP mass and annihilation rate
-      annrate = ann_rate
-      log10mwimp = dlog10(mwimp)
+      !Take log of WIMP mass
+      logmw = dlog10(mwimp)
 
       if (doProfiling) then
         call system_clock(counted2,countrate)
@@ -106,8 +137,17 @@
      &   real(counted2 - counted1)/real(countrate)
       endif  
 
-      !Calculate signal counts and spectrum
-      call nulike_signal(muonyield)
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 2. Signal calculation
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      !Calculate signal counts and spectrum. 
+      theta_S = nulike_signal(nuyield, annrate, logmw, likelihood_version(analysis))
+      !Calculate the total predicted number of events
+      theta_tot = theta_BG(analysis) + theta_S
+      !Calculate the signal fraction.
+      f_S = theta_S / theta_tot
 
       if (doProfiling) then
         call system_clock(counted1,countrate)
@@ -115,60 +155,91 @@
      &   real(counted1 - counted2)/real(countrate)
       endif  
 
-      !Calculate likelihood
-      lnlike = 0.d0
-      Nsignal_predicted = 0.d0
-      NBG_expected = 0.d0
-      !Step through the superbins
-      do i = 1, nBinsEAError
-        angularLikelihood = 0.d0
-        spectralLikelihood = 0.d0
-        theta_tot = theta_BG(i) + theta_S(i)
-        f_S = theta_S(i) / theta_tot
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 3. Number likelihood
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      !Calculate the number likelihood
+      nLikelihood = nulike_nlike(nEvents(analysis),
+     & theta_tot,theta_S,EAErr(analysis),theoryErr(analysis))
+
+      if (doProfiling) then
+        call system_clock(counted1,countrate)
+        write(*,*) 'Elapsed time on number likelihood calc (s): ', 
+     &   real(counted1 - counted2)/real(countrate)
+      endif  
+
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 4. Angular and/or spectral likelihood
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      ! Switch according to likelihood version.
+      select case (likelihood_version(analysis))
+
+      ! 2012 likelihood, as per arXiv:1207.0810
+      case (2012)
+        angularLikelihood = 0.d0  
+        spectralLikelihood = 0.d0 
         if (liketype .ne. 1) then
           !Reset the saved spectral likelihoods next time nulike_speclike is run
           nulike_speclike_reset = .true.
-          !Step through the events in each superbin
-          do j = 1, nEvents_inEAErrBins(i)
+          !Step through the individual events
+          do j = 1, nEvents(analysis)
             !Add in angular likelihood for this event
             if (liketype .eq. 2 .or. liketype .eq. 4) 
      &       angularLikelihood = angularLikelihood + nulike_anglike(
-     &        events_cosphi(i,j),events_cosphiErr(i,j),f_S)
+     &       events_cosphi(j,analysis),events_cosphiErr(j,analysis),f_S)
             !Add in spectral likelihood for this event
             if (liketype .eq. 3 .or. liketype .eq. 4) 
      &       spectralLikelihood = spectralLikelihood + nulike_speclike(
-     &        events_nchan(i,j),theta_S(i),f_S,nulike_speclike_reset,
-     &        EAlogE_inEAErrBins(1,i),EAlogE_inEAErrBins(2,i),
-     &        muonyield)
+     &       events_nchan(j,analysis),theta_S,f_S,annrate,logmw,
+     &       nulike_speclike_reset,
+     &       sens_logE(1,1,analysis),
+     &       sens_logE(2,nSensBins(analysis),analysis),
+     &       nuyield)
+          enddo
+        endif
+        specAngLikelihood = angularLikelihood + spectralLikelihood
+
+      !2014 likelihood, as per arXiv:141x.xxxx
+      case (2014)
+        specAngLikelihood = 0.d0
+        if (liketype .eq. 4) then
+          !Step through the individual events
+          do j = 1, nEvents(analysis)          
+            specAngLikelihood = specAngLikelihood + nulike_specanglike(j,
+     &       theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), nuyield)
           enddo
         endif
 
-        if (doProfiling) then
-          call system_clock(counted2,countrate)
-          write(*,*) 'Elapsed time on ang/spec likelihood calc (s): ', 
-     &     real(counted2 - counted1)/real(countrate)
-        endif  
+      case default
+        write(*,*) "Unrecognised likelihood version in nulike_bounds."
+        write(*,*) "Quitting..."
+        stop
 
-        !Calculate the number likelihood for this superbin
-        nLikelihood = nulike_nlike(nEvents_inEAErrBins(i),
-     &   theta_tot,theta_S(i),EAErr_inEAErrBins(i),theoryErr)
+      end select
 
-        if (doProfiling) then
-          call system_clock(counted1,countrate)
-          write(*,*) 'Elapsed time on number likelihood calc (s): ', 
-     &     real(counted1 - counted2)/real(countrate)
-        endif  
+      if (doProfiling) then
+        call system_clock(counted2,countrate)
+        write(*,*) 'Elapsed time on ang/spec likelihood calc (s): ', 
+     &   real(counted2 - counted1)/real(countrate)
+      endif  
 
-        !Put together the number, angular and spectral likelihoods
-        lnlike = lnlike + nLikelihood + angularLikelihood + 
-     &   spectralLikelihood
-      enddo 
 
-      !Work out total counts
-      NBG_expected = sum(theta_BG)
-      Nsignal_predicted = theta_S_total
-      Ntotal_observed = sum(nEvents_inEAErrBins)
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 5. Combined likelihood
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      !Put together the number, angular and spectral likelihoods
+      lnlike = nLikelihood + specAngLikelihood
       
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 6. p value
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       !Calculate pvalue
       if (pValFromRef) then !compute p-value with reference to input log likelihood
 
@@ -177,11 +248,10 @@
 
       else                  !compute p-value with reference to background
 
-        theta_tot = NBG_expected + theta_S_total
         !p-value from Poissonian statistics
-        if (.not. pvalBGPoisComputed) call nulike_bglikeprecomp
-        pvalue = nulike_pval(Ntotal_observed, theta_tot, theta_S_total)
-        pvalue = pvalue / BGpvalPoissonian
+        if (.not. pvalBGPoisComputed(analysis)) call nulike_bglikeprecomp
+        pvalue = nulike_pval(nEvents(analysis), theta_tot, theta_S)
+        pvalue = pvalue / BGpvalPoissonian(analysis)
         
       endif
 
@@ -190,6 +260,16 @@
         write(*,*) 'Elapsed time on pval calc (s): ',
      &   real(counted2 - counted1)/real(countrate)
       endif  
+
+
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! 7. Data return
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      !Export various counts
+      NBG_expected = theta_BG(analysis)
+      Nsignal_predicted = theta_S
+      Ntotal_observed = nEvents(analysis) 
 
       end subroutine nulike_bounds
 
