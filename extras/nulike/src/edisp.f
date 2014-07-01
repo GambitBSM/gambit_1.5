@@ -4,27 +4,58 @@
 *** number of hit DOMs. 
 ***
 *** Input:	log10E	        log(neutrino energy/GeV)
-*** 		nchan		number of hit DOMs
-*** Output:                     energy dispersion (chan^-1)
+*** 		ee		value of the energy estimator (e.g. nchan)
+*** Output:                     energy dispersion (units of ee^-1)
 ***       
 *** Author: Pat Scott (patscott@physics.mcgill.ca)
 *** Date: Apr 24, 2011
+*** Modified: Jun 7, 15 2014
 ***********************************************************************
 
-      real*8 function nulike_edisp(log10E, nchan)
+      real*8 function nulike_edisp(log10E, ee, like)
 
       implicit none
       include 'nulike.h'
+      include 'nuprep.h'
 
-      real*8 log10E
-      integer nchan, IER
+      real*8 log10E, ee, nulike_edisp_a(1)
+      integer nchan_index, IER, like
 
-      if (nchan .ne. nchansaved) then
-        call nulike_edispcheckout(nchan)
-      endif
+      !Switch according to likelihood version.
+      select case (like)
 
-      call TSVAL1(nHistograms,hist_logEcentres,edisp_prob,
-     & edisp_derivs,edisp_sigma,0,1,log10E,nulike_edisp,IER)
+      !2012 likelihood, as per arXiv:1207.0810
+      case (2012)
+
+        if (ee .lt. ee_min(analysis) .or. ee .gt. ee_max(analysis)) then
+          write(*,*) 'Error in nulike_edisp: energy estimator outside'
+          write(*,*) 'tabulated range: ee=',ee,'.  Quitting...'
+          stop
+        endif
+
+        nchan_index = nint(ee) - nint(ee_min(analysis)) + 1
+        if (hist_nchan(1,nchan_index,analysis) .ne. nint(ee)) then
+          stop'Something is wrong with nchan_index in nulike_edisp'
+        endif
+
+        call TSVAL1(nHistograms(analysis),hist_logEcentres(:,analysis),
+     &   hist_prob(:,nchan_index,analysis),hist_derivs(:,nchan_index,analysis),
+     &   hist_sigma(:,nchan_index,analysis),0,1,log10E,nulike_edisp_a,IER)
+        nulike_edisp = nulike_edisp_a(1)
+
+      !2014 likelihood, as per arXiv:141x.xxxx
+      case (2014)
+
+        call TSVAL1(nhist,hist_logEnergies,hist_single_ee_prob,
+     &   hist_single_ee_derivs,hist_single_ee_sigma,0,1,log10E,nulike_edisp_a,IER)
+        nulike_edisp = nulike_edisp_a(1)
+
+      case default
+        write(*,*) "Unrecognised likelihood version in nulike_init."
+        write(*,*) "Quitting..."
+        stop
+
+      end select
 
       if (nulike_edisp .lt. 0.d0) nulike_edisp = 0.d0
 

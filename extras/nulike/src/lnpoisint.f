@@ -24,18 +24,15 @@
       integer obscounts
       real*8 counts_tot, counts_sig, errorsq
       real*8 nulike_lnpiln, nulike_lnpin
-      real*8 counts_tot_minus_sig
       logical logNormal
 
-      counts_tot_minus_sig = counts_tot-counts_sig
-      
       if (logNormal) then
         !Treat percentage error as log-normal distributed
-        nulike_lnpoisint = nulike_lnpiln(obscounts,counts_tot_minus_sig, 
+        nulike_lnpoisint = nulike_lnpiln(obscounts,counts_tot-counts_sig,
      &   counts_sig,dsqrt(errorsq))
       else
         !Treat percentage error as Gaussianly-distributed
-        nulike_lnpoisint = nulike_lnpin(obscounts,counts_tot_minus_sig, 
+        nulike_lnpoisint = nulike_lnpin(obscounts,counts_tot-counts_sig,
      &   counts_sig,dsqrt(errorsq))
       endif
 
