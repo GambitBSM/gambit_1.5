@@ -27,6 +27,7 @@
 #include "simple_hep_lib/Event.hpp"                 // Gambit's event interface
 #include "DetectorResponse.hpp"
 #include "json/json.h"
+#include <string>
 #include <vector>
 #include <gsl/gsl_rng.h>
 
@@ -42,6 +43,10 @@ namespace fast_sim {
   // ATLAS2011  will try to reproduce the performance of the ATLAS detector
   // CMS2011    will try to reproduce the performance of the CMS detector
 
+  // predefined responses that can be used
+  enum Response_Type { PT, ETA, PT_ETA, ISO };
+
+/*
   typedef struct {
 
     std::vector<hep_simple_lib::Jet*> _jets;
@@ -58,18 +63,19 @@ namespace fast_sim {
     double _METPhi;
 
   } FastSimEvent;
+  */
 
   struct Acceptance {
-
+    bool _init;
+    Response_Type _type;
     std::string _name;
     int _nbinsx;
     int _nbinsy;
     int _ndim;
     std::vector<double> _bin_edges_x;
+    std::vector<double> _bin_edges_y;
     std::vector<double> _binvals;
   };
-
-
 
   struct PProperties {
 
@@ -80,8 +86,7 @@ namespace fast_sim {
     double _max_eta;
     double _iso;
     bool _test_acceptance; // determines whether the particle has an acceptance or not
-    Acceptance _pt;
-    Acceptance _eta;
+    std::vector<Acceptance> _response;
   };
 
 
@@ -90,21 +95,24 @@ namespace fast_sim {
       FastSim();
       ~FastSim();
 
-      void init(DetectorType which);
-      void init(std::string filename);
+      
+      void init(DetectorType which,int debug_level);
+      void init(std::string filename,int debug_level);
 
 
       void Baseline_Response();
 
+      
       int FastSim_Reader(std::string filename);
       int FastSim_ObjectReader(Json::Value phys_object, PProperties &particle_props);
 
 
       int FastSim_AcceptanceItemReader(const Json::Value reco_object, Acceptance &efficiency);
+//      int FastSim_AcceptanceItemReader(const Json::Value reco_object, Acceptance_2D &efficiency);
       int FastSim_InfoReader(const Json::Value histo_object, int &ndim, int &nbinsx, int &nbinsy,
       std::vector<double> &bin_edgesx, std::vector<double> &bin_edgesy, std::vector<double> &histo_values);
       int FastSim_ArrayReader(const Json::Value array, std::vector<double> &values );
-
+      
 
 
       void doDetectorResponse();
@@ -112,7 +120,8 @@ namespace fast_sim {
 
       // this functions set the particle list for each type
       void setParticles(std::vector<hep_simple_lib::Particle*> electrons, std::vector<hep_simple_lib::Particle*> muons,
-          std::vector<hep_simple_lib::Particle*> photons,std::vector<hep_simple_lib::Particle*>charged_hadrons,
+          std::vector<hep_simple_lib::Particle*> photons,std::vector<hep_simple_lib::Particle*> nonprompt_leptons,
+          std::vector<hep_simple_lib::Particle*>charged_hadrons,
           std::vector<hep_simple_lib::Particle*> bjets, std::vector<hep_simple_lib::Particle*> tauhads, std::vector<hep_simple_lib::Particle*> weaklyint );
       void setBQuarks(std::vector<hep_simple_lib::Particle*> particles);
       void setElectrons(std::vector<hep_simple_lib::Particle*> particles);
@@ -120,12 +129,15 @@ namespace fast_sim {
       void setPhotons(std::vector<hep_simple_lib::Particle*> particles);
       void setTauHads(std::vector<hep_simple_lib::Particle*> particles);
       void setChargedHadrons(std::vector<hep_simple_lib::Particle*> particles);
-      void setNonPromptChargedParticles(std::vector<hep_simple_lib::Particle*> particles);
+      void setNonPromptLeptons(std::vector<hep_simple_lib::Particle*> particles);
       void setWeaklyInteracting(std::vector<hep_simple_lib::Particle*> particles);
 
       // acceptance methods
       void selectParticles(std::vector<hep_simple_lib::Particle*> stable_particles, PProperties *cuts, std::vector<hep_simple_lib::Particle*> &chosen_particles);
-      bool isParticleMeasured(Acceptance acceptance, double test_value);
+
+      void selectJets(std::vector<hep_simple_lib::Jet*> jets, PProperties *cuts, std::vector<hep_simple_lib::Jet*> &measured_jets);
+      bool isParticleMeasured(Acceptance acceptance, double test_value_x,double test_value_y);
+      bool isParticleMeasured(Acceptance acceptance, double test_value_x);
 
       void clear();
 
@@ -135,18 +147,26 @@ namespace fast_sim {
       void MuonResponse();
       void PhotonResponse();
       void JetResponse();
-      void FindBJets();
+      void ChooseBJets();
       void AppliedIsolation();
 
       double calcIsoEt(double or_eta, double or_phi);
 
       bool CheckOverlap(hep_simple_lib::Particle *p1, hep_simple_lib::Particle *p2);
 
-      void calcMET();
-      double MET();
+      void calcMET_CaloSum();
+      void calcMET_truth();
+      void MET_truth(double &met, double &phi);
+      void MET(double &met, double &phi);
+
+
       double METx();
       double METy();
       double METphi();
+      double METx_truth();
+      double METy_truth();
+      double METphi_truth();
+
 
 
       void printMuons();
@@ -156,13 +176,14 @@ namespace fast_sim {
       void printParticles();
 
       void fillcellvector(double pt, double eta, double phi);
-      int NElectrons(){ return _stable_electrons.size(); }
-      int NMuons(){ return _stable_muons.size(); }
+      int NElectrons(){ return _prompt_electrons.size(); }
+      int NMuons(){ return _prompt_muons.size(); }
 
 
       void getRecoEvent(hep_simple_lib::Event &event);
-      void getRecoEvent(hep_simple_lib::Event &event, std::string electron_category, float electron_isolation);
-
+      void getRecoEvent(hep_simple_lib::Event &event, std::string electron_category, float electron_isolation, std::string muon_category, float muon_isolation,
+                        std::string btag_category);
+      
     private:
 
       // calorimeter range and granularity
@@ -226,12 +247,13 @@ namespace fast_sim {
       PProperties* _bjet;
       PProperties* _rest;
 
+      
       // the particles
       std::vector<hep_simple_lib::Particle*> _chargedhads;
       std::vector<hep_simple_lib::Particle*> _stable_interacting_particles;
-      std::vector<hep_simple_lib::Particle*> _stable_electrons;
-      std::vector<hep_simple_lib::Particle*> _stable_muons;
-      std::vector<hep_simple_lib::Particle*> _stable_photons;
+      std::vector<hep_simple_lib::Particle*> _prompt_electrons;
+      std::vector<hep_simple_lib::Particle*> _prompt_muons;
+      std::vector<hep_simple_lib::Particle*> _prompt_photons;
       //std::vector<hep_simple_lib::Particle*> _iso_electrons;
       //std::vector<hep_simple_lib::Particle*> _iso_muons;
       //std::vector<hep_simple_lib::Particle*> _iso_photons;
@@ -243,15 +265,19 @@ namespace fast_sim {
       std::vector<hep_simple_lib::Particle*> _tauhads;
       std::vector<hep_simple_lib::Jet*> _jets;
       std::vector<hep_simple_lib::Jet*> _bjets;
+      
       // measurements
       double _metx;
       double _mety;
+      double _metx_truth;
+      double _mety_truth;
 
 
+      
       DetectorType _simtype;
       DetectorResponse _nodetector;
       ATLAS_Simple_Response _atlas_simple_response;
-
+      
 
       /*
          double etacel = 5.0; //rapidity coverage
