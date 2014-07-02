@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/serialization/access.hpp>
+//#include <boost/serialization/access.hpp>
 #include "simple_hep_lib/MathUtils.hpp"
 #include "simple_hep_lib/Vectors.hpp"
 
@@ -13,14 +13,14 @@ namespace hep_simple_lib {
 
       /// @name Serialization
       //@{
-      friend class boost::serialization::access;
+      //friend class boost::serialization::access;
 
-      template<class Archive>
-      void serialize(Archive & ar, const unsigned int version) {
-        ar & _p4;
-        ar & _pdgId;
-        ar & _prompt;
-      }
+      //template<class Archive>
+      //void serialize(Archive & ar, const unsigned int version) {
+      //  ar & _p4;
+      //  ar & _pdgId;
+      //  ar & _prompt;
+     // }
       //@}
 
       /// @name Storage

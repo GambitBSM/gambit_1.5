@@ -22,6 +22,7 @@
 
 
 #include "FastSim.hpp"
+#include "FastSim_Logger.hpp"
 #include "json/json.h"
 
 #include <algorithm>
@@ -31,6 +32,8 @@
 #include <fstream>
 
 
+extern logging::logger log_inst(0);
+
 namespace fast_sim {
 
   int FastSim::FastSim_Reader(std::string init_filename) {
@@ -38,6 +41,8 @@ namespace fast_sim {
 
     std::ifstream fastsim_datacard(init_filename.c_str());
     if (not fastsim_datacard.good()) {
+
+      LOG_ERR("JSonReader Could not open file:",init_filename);
       // could not open the file
       return -1;
     }
@@ -51,8 +56,7 @@ namespace fast_sim {
     if ( !parsingSuccessful )
     {
       // report to the user the failure and their locations in the document.
-      std::cout  << "Failed to parse configuration\n"
-        << reader.getFormattedErrorMessages();
+      LOG_WARN("JSonReader Failed to parse configuration:",reader.getFormattedErrorMessages());
       return -1;
     }
 
@@ -83,13 +87,18 @@ namespace fast_sim {
     _cluster_rcone = detector.get("cluster_rcone",0.4).asDouble();
     _cluster_etmin = detector.get("cluster_etmin",5.0).asDouble();
     _min_dr = detector.get("dr_min",0.2).asDouble();
+    std::string temp = detector.get("jet_reco","fastjet").asString();
+    if (temp == "fastjet")
+      _fastjet = true;
+    else
+      _fastjet = false;
 
     const Json::Value perf_objects  = root["Performance"];
 
     PProperties *particle_props;
-    std::cout << "size of the list is " << perf_objects.size() << std::endl;
+
+    LOG_DEBUG1("JSonReader Number of Performance objects:",perf_objects.size());
     for (Json::ValueIterator itr = perf_objects.begin(); itr != perf_objects.end(); itr++) {
-//    for ( int index = 0; index < (int)perf_objects.size(); ++index ) { // Iterates over the sequence elements.
 
       particle_props = new PProperties;
 
@@ -97,66 +106,9 @@ namespace fast_sim {
       _detector_perf.push_back(particle_props);
     }
 
-      /*
-      type_str = phys_objects[index].get("type","jet").asString();
-
-      min_pt = phys_objects[index].get("min_pt","10.0").asDouble();
-      min_eta = phys_objects[index].get("min_eta","-4.0").asDouble();
-      max_eta = phys_objects[index].get("max_eta","4.0").asDouble();
-
-      if (type_str == "hadrons") { // hadrons only defined the minimum track pt
-        _min_track_pt  = min_pt;  // GeV
-        break;
-      }
-
-      level_str = phys_objects[index].get("level","loose").asString();
-      if ((type_str == "electron") || (level_str == "loose")) {
-
-        iso_cut = phys_objects[index].get("iso","0.4").asDouble();
-        _min_ele_pt  = min_pt;  // GeV
-        _minEt_isol_electron = iso_cut;
-        _min_ele_eta = min_eta;
-        _max_ele_eta = max_eta;
-      }
-      else if ((type_str == "muon") || (level_str == "loose")) {
-
-        iso_cut = phys_objects[index].get("iso","0.4").asDouble();
-        _minEt_isol_muon = iso_cut;
-        _min_muon_pt  = min_pt;  // GeV
-        _min_muon_eta = min_eta;
-        _max_muon_eta = max_eta;
-      }
-      else if ((type_str == "photon") || (level_str == "loose")) {
-
-        iso_cut = phys_objects[index].get("iso","0.4").asDouble();
-        _minEt_isol_photon = iso_cut;
-        _min_photon_pt  = min_pt;  // GeV
-        _min_photon_eta = min_eta;
-        _max_photon_eta = max_eta;
-      }
-      else if ((type_str == "jet") || (level_str == "loose")) {
-
-        _min_jet_pt  = min_pt;  // GeV
-        _min_jet_eta = min_eta;
-        _max_jet_eta = max_eta;
-      }
-      else if ((type_str == "bjet") || (level_str == "loose")) {
-        _min_bjet_pt  = min_pt;  // GeV
-        _min_bjet_eta = min_eta;
-        _max_bjet_eta = max_eta;
-      }
-      else if ((type_str == "tauhad") || (level_str == "loose")) {
-        _min_tauhad_pt  = min_pt;  // GeV
-        _min_tauhad_eta = min_eta;
-        _max_tauhad_eta = max_eta;
-      }
-    }
-    */
-
+    // a hack for now
     _calo_neta = int(2*_calo_etamax/_calo_deta);
     _calo_nphi = int(2*3.2/_calo_dphi);
-
-
 
     // everything is fine
     return 0;
@@ -166,29 +118,34 @@ namespace fast_sim {
 
   int FastSim::FastSim_ObjectReader(const Json::Value phys_objects,PProperties &particle_props) {
 
-    // need to add warnings if the fields are missing, when we get the logger
-     std::cout << "type " << std::endl;
+    int val; // return value
 
+    // need to add warnings if the fields are missing, when we get the logger
     if (not phys_objects["type"].empty()) 
       particle_props._pid = phys_objects.get("type","13").asInt();
+    LOG_DEBUG1("JSonReader Particle Type ",particle_props._pid);
 
-     std::cout << "level " << std::endl;
     if (not phys_objects["level"].empty()) 
       particle_props._level = phys_objects.get("level","loose").asString();
+    LOG_DEBUG1("JSonReader Particle Category ",particle_props._level);
 
     if (not phys_objects["min_pt"].empty()) 
       particle_props._min_pt = phys_objects.get("min_pt","0.0").asDouble();
-    std::cout << "min_pt " << std::endl;
+    LOG_DEBUG1("JSonReader Particle Min_Pt Cut ",particle_props._min_pt);
+
     if (not phys_objects["min_eta"].empty()) 
       particle_props._min_eta = phys_objects.get("min_eta","-20000.0").asDouble();
-    std::cout << "min_eta " << std::endl;
+    LOG_DEBUG1("JSonReader Particle Min_Eta Cut ",particle_props._min_eta);
+
     if (not phys_objects["max_eta"].empty()) 
       particle_props._max_eta = phys_objects.get("max_eta","20000.0").asDouble();
+    LOG_DEBUG1("JSonReader Particle Max_Eta Cut ",particle_props._max_eta);
+
     if (not phys_objects["iso"].empty()) 
       particle_props._iso = phys_objects.get("iso","20000").asDouble();
-    std::cout << "iso " << std::endl;
+    LOG_DEBUG1("JSonReader Particle Isolation Cut ",particle_props._iso);
 
-    std::cout << phys_objects["acceptance_reco"].empty() << std::endl;
+    LOG_DEBUG1("JSonReader Particle Acceptance Reco ");
     if (not phys_objects["acceptance_reco"].empty()) {
       const Json::Value accept_objects = phys_objects["acceptance_reco"];
 
@@ -196,29 +153,66 @@ namespace fast_sim {
       for (Json::ValueIterator itr = accept_objects.begin(); itr != accept_objects.end(); itr++) {
 
         if (((*itr)["name"].empty()) || ((*itr)["info"].empty())) {
-          std::cout << " name or the histogram of acceptance is missing " << std::endl;
+          LOG_WARN("JSonReader Particle name or histogram of acceptance is missing ");
           continue;
         }
-          
-        std::cout << "reading the acceptance " << std::endl;
-        if ("eta" == (*itr).get("name","eta").asString()) {
 
-          std::cout << "eta " << (*itr).get("name","eta").asString() << std::endl;
-          FastSim_AcceptanceItemReader(*itr,particle_props._eta);
+        Acceptance new_acceptance;
+
+        std::string accept_name = (*itr).get("name","xxx").asString();
+        if ("eta" == accept_name) {
+          LOG_DEBUG1("JSonReader Particle Acceptance Name ", (*itr).get("name","eta").asString());
+          val=FastSim_AcceptanceItemReader(*itr,new_acceptance);
+          if (val != 0)
+            return val;
+          new_acceptance._init = true;
+          new_acceptance._type = ETA;
+          particle_props._response.push_back(new_acceptance);
+          LOG_DEBUG1("JSonReader Particle Acceptance Ok ", new_acceptance._name);
         }
-        else
+        else if ("pt" == accept_name) 
         {
-          std::cout << "not eta " <<  (*itr).get("name","eta").asString() << std::endl;
-          FastSim_AcceptanceItemReader(*itr,particle_props._pt);
-
-          std::cout << "acceptance" << particle_props._pt._name << std::endl;
+          LOG_DEBUG1("JSonReader Particle Acceptance Name ", (*itr).get("name","pt").asString());
+          val=FastSim_AcceptanceItemReader(*itr,new_acceptance);
+          if (val != 0)
+            return val;
+          new_acceptance._init = true;
+          new_acceptance._type = PT;
+          particle_props._response.push_back(new_acceptance);
+          LOG_DEBUG1("JSonReader Particle Acceptance Ok ", new_acceptance._name);
         }
+        else if ("pt_eta" ==  accept_name) 
+        {
+          LOG_DEBUG1("JSonReader Particle Acceptance Name ", (*itr).get("name","pt_eta").asString());
+          val=FastSim_AcceptanceItemReader(*itr,new_acceptance);
+          if (val != 0)
+            return val;
+          new_acceptance._init = true;
+          new_acceptance._type = PT_ETA;
+          particle_props._response.push_back(new_acceptance);
+          LOG_DEBUG1("JSonReader Particle Acceptance Read ", new_acceptance._name);
+        }
+        else if ("iso" == accept_name) 
+        {
+          LOG_DEBUG1("JSonReader Particle Acceptance Name ", (*itr).get("name","iso").asString());
+          val=FastSim_AcceptanceItemReader(*itr,new_acceptance);
+          if (val != 0)
+            return val;
+          new_acceptance._init = true;
+          new_acceptance._type = ISO;
+          particle_props._response.push_back(new_acceptance);
+          LOG_DEBUG1("JSonReader Particle Acceptance Read ", new_acceptance._name);
+        }
+        else {
 
+          LOG_ERR("JSonReader Response Object not defined ", accept_name);
+          return -1;
+        }
       }
     }
     else {// the acceptance was null was it should be perfect
-        std::cout << "acceptance was null" << std::endl;
 
+      LOG_WARN("JSonReader Acceptance was Null, efficiency is set to 1 for the complete range ");
      particle_props._test_acceptance = false;
     }
 
@@ -228,6 +222,38 @@ namespace fast_sim {
 
 
   int FastSim::FastSim_AcceptanceItemReader(const Json::Value reco_object,Acceptance &efficiency) {
+
+    std::vector<double> bin_edgesx,bin_edgesy,histo_values;
+    int ndim,nbinsx,nbinsy,error;
+    
+    efficiency._name = reco_object.get("name","eta").asString();
+
+    LOG_DEBUG1("JSonReader Acceptance name ",efficiency._name);
+    error = FastSim_InfoReader(reco_object["info"],ndim,nbinsx,nbinsy, bin_edgesx,bin_edgesy,histo_values);
+    if (error != 0) // check whether that is something went wrong when reading the Info
+      return error;
+
+    efficiency._ndim = ndim;
+    efficiency._nbinsx = nbinsx;
+
+    for (size_t kk=0;kk<bin_edgesx.size();kk++)
+      efficiency._bin_edges_x.push_back(bin_edgesx[kk]);
+
+    if (ndim == 2) {
+
+      efficiency._nbinsy = nbinsy;
+      for (size_t kk=0;kk<bin_edgesy.size();kk++)
+        efficiency._bin_edges_y.push_back(bin_edgesy[kk]);
+    }
+
+    for (size_t kk=0;kk<histo_values.size();kk++)
+      efficiency._binvals.push_back(histo_values[kk]);
+
+    return 0;
+  }
+
+/*
+  int FastSim::FastSim_AcceptanceItemReader(const Json::Value reco_object,Acceptance_2D &efficiency) {
 
     std::vector<double> bin_edgesx,bin_edgesy,histo_values;
     int ndim,nbinsx,nbinsy;
@@ -242,69 +268,81 @@ namespace fast_sim {
     for (size_t kk=0;kk<bin_edgesx.size();kk++)
       efficiency._bin_edges_x.push_back(bin_edgesx[kk]);
 
-//    for (size_t kk=0;kk<bin_edgesy.size();kk++)
-//      efficiency._bin_edges_y.push_back(bin_edgey[kk]);
+    for (size_t kk=0;kk<bin_edgesy.size();kk++)
+      efficiency._bin_edges_y.push_back(bin_edgesy[kk]);
 
     for (size_t kk=0;kk<histo_values.size();kk++)
       efficiency._binvals.push_back(histo_values[kk]);
 
-    std::cout << "Acceptance name " << efficiency._name << std::endl;
+    std::cout << "Acceptance 2D name " << efficiency._name << std::endl;
+    for (size_t kk=0;kk<histo_values.size();kk++)
+      std::cout << " bin edges " << efficiency._bin_edges_x[kk] << std::endl;;
     for (size_t kk=0;kk<histo_values.size();kk++)
       std::cout << " bin edges " << efficiency._bin_edges_x[kk] << std::endl;;
 
     return 0;
   }
+*/
+
+
 
   int FastSim::FastSim_InfoReader(const Json::Value histo_object, int &ndim, int &nbinsx, int &nbinsy,
       std::vector<double> &bin_edgesx, std::vector<double> &bin_edgesy, std::vector<double> &histo_values) {
 
     if ((histo_object["ndim"].empty()) || (histo_object["nbinx"].empty()) || (histo_object["axisx"].empty())) {
-      std::cout << " missing info fields " << std::endl;
+      LOG_ERR("JSonReader missing info fields - either ndim, nbinx axisx nbiny axisy are not defined in file ");
       return -1;
     }
 
     ndim = histo_object.get("ndim","1").asInt();
-    std::cout << " ndim " << ndim << std::endl;
-    nbinsx = histo_object.get("nbinx","50").asInt();
+    LOG_DEBUG1("JSonReader - Number of dimensions is",ndim);
+    switch(ndim) {
+      case 1: { // read only the x-axis
+                nbinsx = histo_object.get("nbinx","50").asInt();
+                const Json::Value axisx  = histo_object["axisx"];
+                FastSim_ArrayReader(axisx,bin_edgesx);
+                if ((int)bin_edgesx.size() != (nbinsx+1)) {
+                  LOG_ERR("JSonReader Error the number of bins specified in the x-axis and the number of edges are incompatible",bin_edgesx.size(),nbinsx);
+                  return -1;
+                }
 
-    // now get the bin edges
-    const Json::Value axisx  = histo_object["axisx"];
-    FastSim_ArrayReader(axisx,bin_edgesx);
-    std::cout << " counted " << bin_edgesx.size() << " nbinsx " << nbinsx << std::endl;
-    if ((int)bin_edgesx.size() != (nbinsx+1)) {
-      std::cout << "error number of x bins and the number of y bin edges are wrong: " << bin_edgesx.size() << " " << nbinsx << std::endl;
-      return -1;
+                const Json::Value hvalues  = histo_object["val"];
+                FastSim_ArrayReader(hvalues,histo_values);
+                if ((int)histo_values.size() != nbinsx) {
+                  LOG_ERR("JSonReader Error the number of bins and the number bin values are incompatible",histo_values.size(),nbinsx);
+                  return -1;
+                }
+              }
+              break;
+      case 2: {// we need to read the y-axis as well as the x-axis
+
+                nbinsx = histo_object.get("nbinx","50").asInt();
+                const Json::Value axisx  = histo_object["axisx"];
+                FastSim_ArrayReader(axisx,bin_edgesx);
+                if ((int)bin_edgesx.size() != (nbinsx+1)) {
+                  LOG_ERR("JSonReader Error the number of bins specified in the x-axis and the number of edges are incompatible",bin_edgesx.size(),nbinsx);
+                  return -1;
+                }
+
+                nbinsy = histo_object.get("nbiny","50").asInt();
+                const Json::Value axisy  = histo_object["axisy"];
+                FastSim_ArrayReader(axisy,bin_edgesy);
+                if ((int)bin_edgesy.size() != nbinsy+1) {
+                  LOG_ERR("JSonReader Error the number of bins specified in the y-axis and the number bin values are incompatible",histo_values.size(),nbinsx);
+                  return -1;
+                }
+                const Json::Value hvalues  = histo_object["val"];
+                FastSim_ArrayReader(hvalues,histo_values);
+                if ((int)hvalues.size() != (nbinsx*nbinsy)) {
+                  LOG_ERR("JSonReader Error the number of bins (nbinx*nbiny)",nbinsx*nbinsy,"and the number bin values are incompatible",histo_values.size());
+                  return -1;
+                }
+              }
+              break;
+      default:
+              LOG_ERR("JSonReader Error the number of dimensions is not supported",ndim);
+              return -1;
     }
-
-    if (ndim == 1) {
-      const Json::Value hvalues  = histo_object["val"];
-      FastSim_ArrayReader(hvalues,histo_values);
-      if ((int)histo_values.size() != nbinsx) {
-        std::cout << "1d error number of bins and number of values are different: " << histo_values.size() << " " << nbinsx << std::endl;
-        return -1;
-      }
-    }
-    else if (ndim == 2) {// we need to read the axisy
-
-      nbinsy = histo_object.get("nbiny","50").asInt();
-
-      const Json::Value axisy  = histo_object["axisy"];
-      FastSim_ArrayReader(axisy,bin_edgesy);
-      if ((int)bin_edgesy.size() != nbinsy+1) {
-        std::cout << "error number of y bins and the number of y bin edges are wrong: " << bin_edgesy.size() << " " << nbinsx << std::endl;
-        return -1;
-      }
-      const Json::Value hvalues  = histo_object["val"];
-      FastSim_ArrayReader(hvalues,histo_values);
-      if ((int)hvalues.size() != (nbinsx*nbinsy)) {
-        std::cout << "2d error number of bins (binx*biny) and number of values are different: " << hvalues.size() << " " << nbinsx*nbinsy << std::endl;
-        return -1;
-      }
-    }
-    else {
-      std::cout << " the number of dimesions is not supported " << ndim << std::endl;
-    }
-
     return 0;
   }
 

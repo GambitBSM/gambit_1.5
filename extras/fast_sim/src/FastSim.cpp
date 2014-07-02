@@ -28,6 +28,10 @@
 #include <iostream>
 #include <gsl/gsl_randist.h>
 
+#include "FastSim_Logger.hpp"
+
+static logging::logger log_inst(0);
+
 
 using namespace std;
 //using namespace fastjet;
@@ -39,6 +43,8 @@ namespace fast_sim {
   FastSim::FastSim() {
     _metx = -1.0;
     _mety = -1.0;
+    _metx_truth = -1.0;
+    _mety_truth = -1.0;
 
     _electron = NULL;
     _muon = NULL;
@@ -49,11 +55,103 @@ namespace fast_sim {
     _rest = NULL;
 
     _random_num = gsl_rng_alloc(gsl_rng_mt19937);
+
+    LOG_INFO("FastSim started:");
     //srand(1);
     // srand(time(NULL));
 
-    init(fast_sim::NOMINAL);
+    //init(fast_sim::NOMINAL);
   }
+
+
+  FastSim::~FastSim() {
+
+    clear();
+
+   for (size_t i = 0; i < _detector_perf.size(); i++) {
+
+     if (_electron == _detector_perf[i])
+       _electron = NULL;
+
+     if (_muon == _detector_perf[i])
+       _muon = NULL;
+
+     if (_photon == _detector_perf[i])
+       _photon = NULL;
+
+     if (_tau == _detector_perf[i])
+       _tau = NULL;
+
+     if (_bjet == _detector_perf[i])
+       _bjet = NULL;
+
+     if (_jet == _detector_perf[i])
+       _jet = NULL;
+
+     if (_rest == _detector_perf[i])
+       _rest = NULL;
+
+     delete _detector_perf[i];
+   }
+
+   _detector_perf.clear();
+
+   if (_electron != NULL)
+     delete _electron;
+
+   if (_muon != NULL)
+     delete _muon;
+
+   if (_tau != NULL)
+     delete _tau;
+
+   if (_jet != NULL)
+     delete _jet;
+
+   if (_bjet != NULL)
+     delete _bjet;
+
+   if (_rest != NULL)
+     delete _rest;
+
+   if (_photon != NULL)
+     delete _photon;
+
+
+  gsl_rng_free(_random_num);
+
+
+    /*
+    // for (size_t i = 0; i < _prompt_electrons.size();i++) delete _prompt_electrons[i];
+    // _prompt_electrons.clear();
+#define DELETE_PTRVEC(vec) for (size_t i = 0; i < vec.size();i++) delete vec[i]; vec.clear()
+
+    DELETE_PTRVEC(_prompt_electrons);
+    DELETE_PTRVEC(_prompt_muons);
+    DELETE_PTRVEC(_prompt_photons);
+    DELETE_PTRVEC(_bquarks);
+    DELETE_PTRVEC(_bjets);
+    DELETE_PTRVEC(_jets);
+    DELETE_PTRVEC(_tauhads);
+    DELETE_PTRVEC(_chargedhads);
+    DELETE_PTRVEC(_weakly_interacting);
+
+    DELETE_PTRVEC(_iso_electrons);
+    DELETE_PTRVEC(_iso_muons);
+    DELETE_PTRVEC(_iso_photons);
+
+    DELETE_PTRVEC(_noniso_electrons);
+    DELETE_PTRVEC(_noniso_muons);
+    DELETE_PTRVEC(_noniso_photons);
+
+
+
+#undef DELETE_PTRVEC
+*/
+  }
+
+
+
 
   void FastSim::Baseline_Response() {
     // this function has the baseline response 
@@ -142,99 +240,15 @@ namespace fast_sim {
   }
 
 
-  FastSim::~FastSim() {
-
-    clear();
-
-   for (size_t i = 0; i < _detector_perf.size(); i++) {
-
-     if (_electron == _detector_perf[i])
-       _electron = NULL;
-
-     if (_muon == _detector_perf[i])
-       _muon = NULL;
-
-     if (_photon == _detector_perf[i])
-       _photon = NULL;
-
-     if (_tau == _detector_perf[i])
-       _tau = NULL;
-
-     if (_bjet == _detector_perf[i])
-       _bjet = NULL;
-
-     if (_jet == _detector_perf[i])
-       _jet = NULL;
-
-     if (_rest == _detector_perf[i])
-       _rest = NULL;
-
-     delete _detector_perf[i];
-   }
-
-   _detector_perf.clear();
-
-   if (_electron != NULL)
-     delete _electron;
-
-   if (_muon != NULL)
-     delete _muon;
-
-   if (_tau != NULL)
-     delete _tau;
-
-   if (_jet != NULL)
-     delete _jet;
-
-   if (_bjet != NULL)
-     delete _bjet;
-
-   if (_rest != NULL)
-     delete _rest;
-
-   if (_photon != NULL)
-     delete _photon;
+  void FastSim::init(DetectorType which,int debug_level) {
 
 
-  gsl_rng_free(_random_num);
-
-
-    /*
-    // for (size_t i = 0; i < _stable_electrons.size();i++) delete _stable_electrons[i];
-    // _stable_electrons.clear();
-#define DELETE_PTRVEC(vec) for (size_t i = 0; i < vec.size();i++) delete vec[i]; vec.clear()
-
-    DELETE_PTRVEC(_stable_electrons);
-    DELETE_PTRVEC(_stable_muons);
-    DELETE_PTRVEC(_stable_photons);
-    DELETE_PTRVEC(_bquarks);
-    DELETE_PTRVEC(_bjets);
-    DELETE_PTRVEC(_jets);
-    DELETE_PTRVEC(_tauhads);
-    DELETE_PTRVEC(_chargedhads);
-    DELETE_PTRVEC(_weakly_interacting);
-
-    DELETE_PTRVEC(_iso_electrons);
-    DELETE_PTRVEC(_iso_muons);
-    DELETE_PTRVEC(_iso_photons);
-
-    DELETE_PTRVEC(_noniso_electrons);
-    DELETE_PTRVEC(_noniso_muons);
-    DELETE_PTRVEC(_noniso_photons);
-
-
-
-#undef DELETE_PTRVEC
-*/
-  }
-
-
-  void FastSim::init(DetectorType which) {
+    log_inst.set_verbosity(debug_level);
     _simtype = which;
     switch(which) {
       case NOMINAL:
         // initialise the cuts and calorimeter limits and granularity for  the NOMINAL
-        cout << "FastSim library loaded and initialised with nominal sim." << endl;
+        LOG_INFO("FastSim initialised with the nominal Detector");
 
         /*
         _min_muon_pt = 20.0;  // GeV
@@ -287,14 +301,17 @@ namespace fast_sim {
     }
   }
 
-  void FastSim::init(std::string init_filename) {
+  void FastSim::init(std::string init_filename,int debug_level) {
 
     // this constructor uses the json datacard to initialise the properties of the detector
     // and the physics object whose response will be simulated
 
+    log_inst.set_verbosity(debug_level);
     if (FastSim_Reader(init_filename) < 0) {
-      cerr << "Error reading the FastSim param_card" << endl;
+
+      LOG_ERR("Error reading the FastSim param_card");
     }
+    LOG_INFO("FastSim initialised with:",init_filename);
 
     for (std::vector<PProperties*>::iterator it = _detector_perf.begin();it != _detector_perf.end(); it++) {
 
@@ -312,10 +329,16 @@ namespace fast_sim {
           default: ;
         }
       }
+//      else {
+//
+//     LOG_ERR(" error on ",(*it)->_level);
+//      }
 
     }
 
+    // initialize anything that was missed by the initialization
     Baseline_Response(); 
+
   }
 
 
@@ -327,23 +350,23 @@ namespace fast_sim {
     DELETE_PTRVEC(_stable_interacting_particles);
     DELETE_PTRVEC(_weakly_interacting);
 
-    _stable_electrons.clear();
-    _stable_muons.clear();
-    _stable_photons.clear();
+    _prompt_electrons.clear();
+    _prompt_muons.clear();
+    _prompt_photons.clear();
     _jets.clear();
     _tauhads.clear();
+    _bquarks.clear();
     _bjets.clear();
     _chargedhads.clear();
-//    cout << "fast sim here 2 " << endl;
 
 #undef DELETE_PTRVEC
 
    /*
     _chargedhads.clear();
     _stable_interacting_particles.clear();
-    _stable_electrons.clear();
-    _stable_muons.clear();
-    _stable_photons.clear();
+    _prompt_electrons.clear();
+    _prompt_muons.clear();
+    _prompt_photons.clear();
     _iso_electrons.clear();
     _iso_muons.clear();
     _iso_photons.clear();
@@ -378,7 +401,8 @@ namespace fast_sim {
 
 
   void FastSim::setParticles(vector<Particle*> electrons, vector<Particle*> muons,
-      vector<Particle*> photons,vector<Particle*>charged_hadrons,
+      vector<Particle*> photons, vector<Particle*> nonprompt_leptons,
+      vector<Particle*>charged_hadrons,
       vector<Particle*> bquarks, vector<Particle*> tauhads, vector<Particle*> weaklyint ) {
 
     clear();
@@ -389,7 +413,7 @@ namespace fast_sim {
 
     setBQuarks(bquarks);
     setChargedHadrons(charged_hadrons);
-    //setNonPromptChargedParticles(charged_hadrons);
+    setNonPromptLeptons(nonprompt_leptons);
     setTauHads(tauhads);
     setWeaklyInteracting(weaklyint);
 
@@ -399,7 +423,8 @@ namespace fast_sim {
   void FastSim::setElectrons(vector<Particle*> particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) != 11) {
-        cerr << "Warning: PID " << particles[i]->pid() << " found in the electron particle list" << endl;
+
+        LOG_WARN("Particles with PID ",particles[i]->pid()," found in the electron list!!");
         continue;
       }
 
@@ -415,9 +440,10 @@ namespace fast_sim {
       if ((particles[i]->eta() < _electron->_min_eta) or (particles[i]->eta() > _electron->_max_eta)) continue;
 
       if (particles[i]->pT() < _electron->_min_pt) continue;
+      LOG_DEBUG1("Chosen Electron ",i,particles[i]->pT(), particles[i]->eta()," cuts applied are ", _electron->_min_pt, _electron->_min_eta,_electron->_max_eta);
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
-      _stable_electrons.push_back(chosen);
+      _prompt_electrons.push_back(chosen);
     }
   }
 
@@ -425,7 +451,7 @@ namespace fast_sim {
   void FastSim::setMuons(vector<Particle*> particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) != 13) {
-        cerr << "Warning: PID " << particles[i]->pid() << " found in the muon particle list" << endl;
+        LOG_WARN("Particles with PID ",particles[i]->pid()," found in the muon list!!");
         continue;
       }
 
@@ -435,13 +461,16 @@ namespace fast_sim {
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
 
-
+      LOG_DEBUG1("Set muon ",i,particles[i]->pT(), particles[i]->eta()," cuts applied are ", _muon->_min_pt, _muon->_min_eta,_muon->_max_eta);
       if ((particles[i]->eta() < _muon->_min_eta) or (particles[i]->eta() > _muon->_max_eta)) continue;
 
+
       if (particles[i]->pT() < _muon->_min_pt) continue;
+
+      LOG_DEBUG1("Chosen muon ",i,particles[i]->pT(), particles[i]->eta()," cuts applied are ", _muon->_min_pt, _muon->_min_eta,_muon->_max_eta);
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
-      _stable_muons.push_back(chosen);
+      _prompt_muons.push_back(chosen);
     }
   }
 
@@ -449,7 +478,7 @@ namespace fast_sim {
   void FastSim::setPhotons(vector<Particle*> particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) != 22) {
-        cerr << "Warning: PID " << particles[i]->pid() << " found in the photon particle list" << endl;
+        LOG_WARN("Particles with PID ",particles[i]->pid()," found in the photon list!!");
         continue;
       }
 
@@ -459,12 +488,14 @@ namespace fast_sim {
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen); //< @todo Build later?
 
+      //LOG_DEBUG1("Set photons ",i,particles[i]->pT(), particles[i]->eta()," cuts applied are ", _photon->_min_pt, _photon->_min_eta,_photon->_max_eta);
       if ((particles[i]->eta() < _photon->_min_eta) or (particles[i]->eta() > _photon->_max_eta)) continue;
 
       if (particles[i]->pT() < _photon->_min_pt) continue;
+      //LOG_DEBUG1("Chosen");
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
-      _stable_photons.push_back(chosen);
+      _prompt_photons.push_back(chosen);
 
       //cout << " photon pt " <<  particles[i]->pT() << " " << _min_photon_pt << " eta " << particles[i]->eta() << " phi " << particles[i]->phi() <<  endl;
     }
@@ -476,7 +507,7 @@ namespace fast_sim {
   void FastSim::setBQuarks(vector<Particle*> particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) != 5) {
-        cerr << "Warning: PID " << particles[i]->pid() << " found in the b-quark particle list" << endl;
+        LOG_WARN("Particles with PID ",particles[i]->pid()," found b-quark list!!");
         continue;
       }
 
@@ -487,11 +518,12 @@ namespace fast_sim {
       //_stable_interacting_particles.push_back(chosen); //< @todo Build later?
 
 
-      if ((particles[i]->eta() < _bjet->_min_eta) or (particles[i]->eta() > _bjet->_max_eta)) continue;
-      if (particles[i]->pT() < _bjet->_min_pt) continue;
+      //if ((particles[i]->eta() < _bjet->_min_eta) or (particles[i]->eta() > _bjet->_max_eta)) continue;
+      //if (particles[i]->pT() < _bjet->_min_pt) continue;
 
-      //chosen = new Particle(particles[i]);
-      //_bquarks.push_back(chosen);
+      // just keep the b-quark, we will match it to a jet later on
+      Particle* chosen = new Particle(particles[i]);
+      _bquarks.push_back(chosen);
     }
   }
 
@@ -499,7 +531,7 @@ namespace fast_sim {
   void FastSim::setTauHads(vector<Particle*> particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) != 15) {
-        cerr << "Warning: PID " << particles[i]->pid() << " found in the tau particle list" << endl;
+        LOG_WARN("Particles with PID ",particles[i]->pid()," found in the hadronic tau list!!");
         continue;
       }
 
@@ -520,7 +552,7 @@ namespace fast_sim {
   void FastSim::setChargedHadrons(vector<Particle*> particles) {
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) == 11 || abs(particles[i]->pid()) == 13) {
-        cerr << "Warning: PID " << particles[i]->pid() << " found in the charged hadron particle list" << endl;
+        LOG_WARN("leptons ",particles[i]->pid()," found in the charged hadron list!!");
         continue;
       }
 
@@ -533,42 +565,43 @@ namespace fast_sim {
     }
   }
 
-  void FastSim::setNonPromptChargedParticles(vector<Particle*> particles) {
-    // this needs work
-    /*
+  void FastSim::setNonPromptLeptons(vector<Particle*> particles) {
+    
     for (size_t i = 0; i < particles.size(); ++i) {
-      //    if (abs(particles[i]->pid()) == 11 || abs(particles[i]->pid()) == 13) {
-      //      cerr << "Warning: PID " << particles[i]->pid() << " found in the charged hadron particle list" << endl;
-      //      continue;
-      //    }
-      if (fabs(particles[i]->eta()) > _calo_etamax) continue;
+      if ((abs(particles[i]->pid()) != 11) && (abs(particles[i]->pid()) != 13)) {
+        LOG_WARN("non leptons ",particles[i]->pid(),particles[i]->pT(),particles[i]->eta()," found in non-prompt lepton list!!");
+        continue;
+      }
+
+      if ((particles[i]->eta() < _rest->_min_eta) or (particles[i]->eta() > _rest->_max_eta)) continue;
+      if (particles[i]->pT() < _rest->_min_pt) continue;
+
       Particle* chosen = new Particle(particles[i]);
-      _chargedhads.push_back(chosen);
       _stable_interacting_particles.push_back(chosen);
+
+      LOG_DEBUG1("non-prompt lepton ",i,particles[i]->pid(),particles[i]->pT(),particles[i]->eta(),particles[i]->phi());
     }
-    */
   }
 
 
-
   void FastSim::setWeaklyInteracting(vector<Particle*> particles) {
+    // its up to the user to fill the weakly interacting particles 
+    // correctly 
 
     Particle* chosen;
     for (size_t i = 0; i < particles.size(); ++i) {
-      /// @todo Use HepPID to check for weak interactions
-      //
 
       switch(abs(particles[i]->pid())) {
         case 12:
         case 14:
         case 16:
-        case 1000022:
-
           chosen = new Particle(particles[i]);
           _weakly_interacting.push_back(chosen);
           break;
         default:
-        cerr << "Warning: PID " << particles[i]->pid() << " found in weakly interacting particles" << endl;
+          chosen = new Particle(particles[i]);
+          _weakly_interacting.push_back(chosen);
+          LOG_WARN("Particles with PID ",particles[i]->pid()," found in the weakly interacting list!!");
        }
     }
   }
@@ -578,7 +611,7 @@ namespace fast_sim {
   ///
   /// It just adds the x and y components of the weakly interacting particles
   /// @todo Rename to calcMET()
-  void FastSim::calcMET() {
+  void FastSim::calcMET_truth() {
     double totalx = 0.0;
     double totaly = 0.0;
     for (size_t i = 0; i <_weakly_interacting.size();i++) {
@@ -586,24 +619,58 @@ namespace fast_sim {
       totaly += _weakly_interacting[i]->mom().py();
     }
     /// @todo Need to apply the detector resolution to this value
+    _metx_truth = totalx;
+    _mety_truth = totaly;
+  }
+
+  void FastSim::calcMET_CaloSum() {
+    double totalx = 0.0;
+    double totaly = 0.0;
+    int ncell = _cellswitch.size();
+    for (int i = 0; i < ncell; i++) {
+
+      totalx += _cellmom[i]*cos(_cellphi[i]);
+      totaly += _cellmom[i]*sin(_cellphi[i]);
+    }
+
+    /// @todo Need to apply the detector resolution to this value
     _metx = totalx;
     _mety = totaly;
   }
 
 
+
+
   // Return the missing ET associated with the event
-  double FastSim::MET() {
-    if (_metx < 0) // the MET has not been calculated for the event
-      calcMET();
-    /// @todo Use add_quad
-    return sqrt(_metx*_metx + _mety*_mety);
+  // it only includes the weakly interacting particles
+  void FastSim::MET_truth(double &met, double &phi) {
+    met = -99.0;
+    phi = -99.0;
+    if (_metx_truth < 0) // the MET has not been calculated for the event
+      calcMET_truth();
+
+    met = sqrt(_metx_truth*_metx_truth + _mety_truth*_mety_truth);
+    phi = atan2(_metx_truth,_mety_truth);
+    
   }
 
+  // Return the missing ET associated with the event
+  // it uses the sum of the  calorimeter cells
+  void FastSim::MET(double &met, double &phi) {
+    met = -99.0;
+    phi = -99.0;
+    if (_metx < 0) // the MET has not been calculated for the event
+      calcMET_CaloSum();
+
+    met = sqrt(_metx*_metx + _mety*_mety);
+    phi = atan2(_metx,_mety);
+    
+  }
 
   // Return the y-component of the event's missing ET
   double FastSim::METx() {
     if (_metx < 0) // the MET has not been calculated for the event
-      calcMET();
+      calcMET_CaloSum();
     return _metx;
   }
 
@@ -611,7 +678,7 @@ namespace fast_sim {
   // Return the x-component of the event's missing ET
   double FastSim::METy() {
     if (_metx < 0) // the MET has not been calculated for the event
-      calcMET();
+      calcMET_CaloSum();
     return _mety;
   }
 
@@ -619,15 +686,41 @@ namespace fast_sim {
   // Return the phi-component of the event's MET vector
   double FastSim::METphi() {
     if (_metx < 0) // the MET has not been calculated for the event
-      calcMET();
+      calcMET_CaloSum();
     return atan2(_metx,_mety);
   }
+
+  // Return the y-component of the event's missing ET
+  double FastSim::METx_truth() {
+    if (_metx < 0) // the MET has not been calculated for the event
+      calcMET_truth();
+    return _metx_truth;
+  }
+
+
+  // Return the x-component of the event's missing ET
+  double FastSim::METy_truth() {
+    if (_metx < 0) // the MET has not been calculated for the event
+      calcMET_truth();
+    return _mety_truth;
+  }
+
+
+  // Return the phi-component of the event's MET vector
+  double FastSim::METphi_truth() {
+    if (_metx < 0) // the MET has not been calculated for the event
+      calcMET_truth();
+    return atan2(_metx_truth,_mety_truth);
+  }
+
+
 
 
   /// @todo Rename
   void FastSim::doDetectorResponse() {
     // this function runs the fast simulation for the particles list provided
     //
+
 
     //cout << "detector response " << endl;
     // determine which cells which have been traversed by the interacting particles
@@ -641,7 +734,9 @@ namespace fast_sim {
 
     // add all the neutrinos and determine the maginute of the
     // missing momentum and phi
-    calcMET();
+    LOG_DEBUG1("Calculating MET");
+    calcMET_CaloSum();
+    calcMET_truth();
 
 
     // now for the jets, only clustering for now, fast jet will be incorporated soon
@@ -650,10 +745,15 @@ namespace fast_sim {
       case NOMINAL:
         if (_fastjet) {
           //cout << " doing jet " << endl;
+          
+          LOG_DEBUG1("Using FastJet");
           JetResponse();
         }
-        else
+        else {
+
+          LOG_DEBUG1("Using Clustering");
           Clustering();
+        }
         break;
       default:;
     }
@@ -665,8 +765,9 @@ namespace fast_sim {
     //
     //cout << "isolation " << endl;
     AppliedIsolation();
-    // find bjets
-    FindBJets();
+    // find bjets using the bquark list and the reconstructed jets
+    LOG_DEBUG1("Selecting Bjets");
+    ChooseBJets();
 
     // the taus to be implemented
 
@@ -682,7 +783,11 @@ namespace fast_sim {
     if (not cuts->_test_acceptance) {
       // there is no acceptance information so it is assume it is perfect, return all the particles
 
-//      std::cout << " no acceptance found " << std::endl;
+      if (stable_particles.size() > 0)
+        LOG_WARN("No Acceptance found for ",stable_particles[0]->pid()," ideal response assumed");
+      else
+        LOG_WARN("No Acceptance found - ideal response is assumed");
+
       for (size_t i=0;i<stable_particles.size();i++) {
         Particle *temp_p = new Particle(stable_particles[i]);
         chosen_particles.push_back(temp_p);
@@ -692,8 +797,29 @@ namespace fast_sim {
 
     for (size_t i=0;i<stable_particles.size();i++) {
 
-      //std::cout << " eta " << cuts->_eta._ndim << " pt " <<  cuts->_pt._ndim << std::endl;
-      if (isParticleMeasured(cuts->_eta,stable_particles[i]->eta()) && (isParticleMeasured(cuts->_pt,stable_particles[i]->pT()))) {
+      bool passed_cuts = true;
+      for (size_t cc= 0l; cc < cuts->_response.size();cc++) {
+
+        switch(cuts->_response[cc]._type) {
+          case PT: //1d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],stable_particles[i]->pT());
+            break;
+          case ETA: //1d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],stable_particles[i]->eta());
+            break;
+          case ISO: //1d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],stable_particles[i]->isol());
+            break;
+          case PT_ETA: //2d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],stable_particles[i]->pT(),stable_particles[i]->eta());
+            break;
+          default:
+            LOG_WARN("Response Variable Not Implemented Yet");
+        }
+        if (!passed_cuts) 
+          break;  // do not test the rest of the responses, it has failed
+      }
+      if (passed_cuts) {
         Particle *temp_p = new Particle(stable_particles[i]);
         chosen_particles.push_back(temp_p);
       }
@@ -701,11 +827,59 @@ namespace fast_sim {
     return;
   }
 
+  void FastSim::selectJets(vector<Jet*> jets, PProperties *cuts, vector<Jet*> &measured_jets) {
+    // this function will select the jets according to the specified cuts
+    // assume the jets have passed the baseline selection
+
+    if (not cuts->_test_acceptance) {
+      // there is no acceptance information so it is assume it is perfect, return all the particles
+
+        LOG_WARN("No Acceptance found for jets, ideal response assumed for all jets: ", jets.size());
+
+      for (size_t i=0;i<jets.size();i++) {
+        Jet *temp_j = new Jet(jets[i]->mom(),jets[i]->isBJet());
+        measured_jets.push_back(temp_j);
+      }
+      return;
+    }
+
+    for (size_t i=0;i<jets.size();i++) {
+
+      bool passed_cuts = true;
+      for (size_t cc= 0l; cc < cuts->_response.size();cc++) {
+
+        switch(cuts->_response[cc]._type) {
+          case PT: //1d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->pT());
+            break;
+          case ETA: //1d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->eta());
+            break;
+          case PT_ETA: //2d map
+            passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->pT(),jets[i]->eta());
+            break;
+          default:
+            LOG_WARN("Response Variable Not Implemented Yet");
+        }
+        if (!passed_cuts) 
+          break;  // do not test the rest of the responses, it has failed
+      }
+      if (passed_cuts) {
+        Jet *temp_j = new Jet(jets[i]->mom(),jets[i]->isBJet());
+        measured_jets.push_back(temp_j);
+      }
+    }
+    return;
+  }
+
+
+
+
   bool FastSim::isParticleMeasured(Acceptance acceptance, double test_value) {
     // this function determines whether the particle passes the cut
 
     if (acceptance._ndim != 1) {
-      std::cout << "error the number of dimensions of the acceptance should be 1 " << std::endl;
+      LOG_ERR("Error the number of dimensions of the acceptance",acceptance._name,acceptance._ndim," should be 1");
       return false; // the number of dimensions should be equal to 1
     }
 
@@ -714,17 +888,19 @@ namespace fast_sim {
 
     //std::cout << " name of acceptance " << acceptance._name << " test val " << test_value << std::endl;
     // check if the value of the test_value is greater than the highest x-limit
-    if (test_value >= acceptance._bin_edges_x.back()) {
+    if ((test_value >= acceptance._bin_edges_x.back()) || ( test_value < acceptance._bin_edges_x[0])) {
 
-        chosen_bin = (int)acceptance._bin_edges_x.size()-2; // bins are counted from 0
-//        std::cout << " pass the limit  " << acceptance._name << " test val " << test_value << " chosen bin " << chosen_bin << " " << acceptance._binvals.back()<< std::endl;
+      //chosen_bin = (int)acceptance._bin_edges_x.size()-2; // bins are counted from 0
+      //        std::cout << " pass the limit  " << acceptance._name << " test val " << test_value << " chosen bin " << chosen_bin << " " << acceptance._binvals.back()<< std::endl;
+      chosen_bin = -1;
+
     }
     else {
 
       for (size_t k=0; k<acceptance._bin_edges_x.size()-1;k++) {
 
         if ((test_value >= acceptance._bin_edges_x[k]) && (test_value < acceptance._bin_edges_x[k+1])) {
-//          std::cout << " value is located in bin " << k << " between " << acceptance._bin_edges_x[k] << " " << acceptance._bin_edges_x[k+1]<<  " bin val " << acceptance._binvals[k] <<  std::endl;
+          //          std::cout << " value is located in bin " << k << " between " << acceptance._bin_edges_x[k] << " " << acceptance._bin_edges_x[k+1]<<  " bin val " << acceptance._binvals[k] <<  std::endl;
           // we found the bin that our test_value corresponds to
           chosen_bin = (int)k;
           break;
@@ -732,9 +908,9 @@ namespace fast_sim {
       }
     }
 
-    if (chosen_bin == -1) {// particle was not measured - return false
-      //std::cout << " failed " << chosen_bin << std::endl;
-      return false;
+    if (chosen_bin == -1) { 
+      // the particle 
+      return true;
     }
 
     //dice_roll =  hep_simple_lib::closed_interval_rand(0.0,1.0);
@@ -750,16 +926,82 @@ namespace fast_sim {
 
   }
 
+  bool FastSim::isParticleMeasured(Acceptance acceptance, double test_valuex, double test_valuey) {
+    // this function determines whether the particle passes the cut
+
+    if (acceptance._ndim != 2) {
+      LOG_ERR("Error the number of dimensions of the acceptance",acceptance._name,acceptance._ndim," should be 2");
+      return false; // the number of dimensions should be equal to 1
+    }
+
+    int chosen_bin_y=-1;
+    int chosen_bin_x=-1;
+    double dice_roll;
+
+    //std::cout << " name of acceptance " << acceptance._name << " test val " << test_value << std::endl;
+    // check if the value of the test_value is greater than the highest x-limit
+    if ((test_valuex >= acceptance._bin_edges_x.back()) || ( test_valuex < acceptance._bin_edges_x[0]) || (test_valuey >= acceptance._bin_edges_y.back()) || ( test_valuey < acceptance._bin_edges_y[0])) {
+
+      chosen_bin_y = -1;
+      chosen_bin_x = -1;
+
+   //      chosen_bin = (int)acceptance._bin_edges_x.size()-2; // bins are counted from 0
+   //        std::cout << " pass the limit  " << acceptance._name << " test val " << test_value << " chosen bin " << chosen_bin << " " << acceptance._binvals.back()<< std::endl;
+    }
+    else {
+
+      for (size_t k=0; k<acceptance._bin_edges_x.size()-1;k++) {
+
+        if ((test_valuex >= acceptance._bin_edges_x[k]) && (test_valuex < acceptance._bin_edges_x[k+1])) {
+          chosen_bin_x = (int)k;
+          break;
+        }
+      }
+
+      for (size_t l=0; l<acceptance._bin_edges_y.size()-1;l++) {
+
+        if ((test_valuey >= acceptance._bin_edges_y[l]) && (test_valuey < acceptance._bin_edges_y[l+1])) {
+          //          std::cout << " value is located in bin " << k << " between " << acceptance._bin_edges_x[k] << " " << acceptance._bin_edges_x[k+1]<<  " bin val " << acceptance._binvals[k] <<  std::endl;
+          // we found the bin that our test_value corresponds to
+          chosen_bin_y = (int)l;
+          break;
+        }
+      }
+    }
+
+    if ((chosen_bin_x == -1) || ( chosen_bin_y == -1)) { 
+      // the particle 
+      return true;
+    }
+
+    //dice_roll =  hep_simple_lib::closed_interval_rand(0.0,1.0);
+    dice_roll = gsl_rng_uniform(_random_num);
+
+    int index = chosen_bin_x + (acceptance._bin_edges_y.size()-1)*chosen_bin_y;
+    LOG_DEBUG1("IsParticle 2D valuex ",test_valuex,"bin_x ",chosen_bin_x," valuey ",test_valuey," bin_y",chosen_bin_y," 2d map index ", index,acceptance._binvals[index]);
+
+    if (dice_roll >= acceptance._binvals[index]) {
+      LOG_DEBUG1("IsParticle 2D Failed - random result ",dice_roll);
+      return false; // particle not measured
+    }
+    else {
+      LOG_DEBUG1("IsParticle 2D Pass - random result ",dice_roll);
+      return true; // particle measured
+    }
+
+  }
+
+
   void FastSim::getRecoEvent(Event &event) {
     // this function fills the gambit event interface with the reconstructed particles
 
     // we will copy the prompt particles only - the isolated ones
 
-    //cout << " the size of physics electrons " << _stable_electrons.size() << endl;
+    //cout << " the size of physics electrons " << _prompt_electrons.size() << endl;
     //printElectrons();
-    event.add_particles(_stable_electrons);
-    event.add_particles(_stable_muons);
-    event.add_particles(_stable_photons);
+    event.add_particles(_prompt_electrons);
+    event.add_particles(_prompt_muons);
+    event.add_particles(_prompt_photons);
 
     //  for (size_t i=0;i<_iso_electrons.size();i++)
     //    event.addParticle(_iso_electrons[i]);
@@ -772,6 +1014,7 @@ namespace fast_sim {
 
     // the MET
     event.set_missingmom(P4::mkXYZM(METx(), METy(), 0., 0.));
+    event.set_missingmom_truth(P4::mkXYZM(METx_truth(), METy_truth(), 0., 0.));
 
     for (size_t i=0;i<_jets.size();i++)
       event.addJet(_jets[i]);
@@ -791,15 +1034,18 @@ namespace fast_sim {
 
   }
 
-  void FastSim::getRecoEvent(Event &event, std::string electron_category, float electron_isolation) {
+  void FastSim::getRecoEvent(Event &event, std::string electron_category, float electron_isolation,
+                                           std::string muon_category, float muon_isolation,
+                                           std::string btag_category) {
     // this function fills the gambit event interface with the reconstructed particles
 
     // we will copy the prompt particles only - the isolated ones
 
-    //cout << " the size of physics electrons " << _stable_electrons.size() << endl;
+    //cout << " the size of physics electrons " << _prompt_electrons.size() << endl;
     //printElectrons();
 
-    std::vector<Particle*> selected_electrons;
+    std::vector<Particle*> measured_electrons, measured_muons;
+    std::vector<Jet*> measured_bjets;
 
     // search for the 
 
@@ -809,19 +1055,35 @@ namespace fast_sim {
       switch ((*it)->_pid) {
 
         case 11: // the electron
+        case -11:
                  if ((*it)->_level == electron_category) {
                    // an acceptance with a matching level has been found
-                   selectParticles(_stable_electrons,(*it),selected_electrons);
+                   selectParticles(_prompt_electrons,(*it),measured_electrons);
+                 }
+                 break;
+        case 13: // the electron
+        case -13:
+                 if ((*it)->_level == muon_category) {
+                   // an acceptance with a matching level has been found
+                   selectParticles(_prompt_muons,(*it),measured_muons);
+                 }
+                 break;
+        case -5:
+        case 5: // b-tagging
+                 if ((*it)->_level == btag_category) {
+                   // an acceptance with a matching level has been found
+                   selectJets(_bjets,(*it),measured_bjets);
                  }
                  break;
         default: ;
       }
     }
 
-    //std::cout << " size of selected electrons is " << selected_electrons.size() << std::endl;
-    event.add_particles(selected_electrons);
-    event.add_particles(_stable_muons);
-    event.add_particles(_stable_photons);
+    //std::cout << " size of measured electrons is " << measured_electrons.size() << std::endl;
+    LOG_DEBUG1("The number of measured prompt electrons is:",measured_electrons.size(),"muons:",measured_muons.size(),"bjets",measured_bjets.size());
+    event.add_particles(measured_electrons);
+    event.add_particles(measured_muons);
+    event.add_particles(_prompt_photons);
 
     //  for (size_t i=0;i<_iso_electrons.size();i++)
     //    event.addParticle(_iso_electrons[i]);
@@ -834,51 +1096,44 @@ namespace fast_sim {
 
     // the MET
     event.set_missingmom(P4::mkXYZM(METx(), METy(), 0., 0.));
+    event.set_missingmom_truth(P4::mkXYZM(METx_truth(), METy_truth(), 0., 0.));
 
-    for (size_t i=0;i<_jets.size();i++)
+    // b-tagging and measured jets
+    for (size_t i=0;i<_jets.size();i++) {
+
+      bool btagged = false;
+      for (size_t b=0;b<_bjets.size();b++) {
+
+        if (_jets[i]->mom().deltaR_rap(measured_bjets[b]->mom()) < 0.2) { // this jet is actuall b-tagged
+          btagged = true;
+          break;
+        }
+      }
+      _jets[i]->setBJet(btagged);
       event.addJet(_jets[i]);
-
-
-
-    /* still need to add the jets, bjets and the taus
-       if(candidate->BTag)
-       recoJet = new Jet(momentum.Px(), momentum.Py(), momentum.Pz(),
-       momentum.E(), true);
-       else
-       recoJet = new Jet(momentum.Px(), momentum.Py(), momentum.Pz(),
-       momentum.E(), false);
-       event.addJet(recoJet);
-       */
-
-
+    }
   }
-
-
-
-
-
-
 
   /// @todo Rename
   void FastSim::MuonResponse() {
 
-    std::vector<Particle*>::iterator newEnd;
-    //cout << " the number of muons is " << _stable_muons.size() << endl;
-    for (size_t j = 0; j < _stable_muons.size(); j++) {
+    //std::vector<Particle*>::iterator newEnd;
+    //cout << " the number of muons is " << _prompt_muons.size() << endl;
+    for (size_t j = 0; j < _prompt_muons.size(); j++) {
       switch(_simtype)
       {
         case NOMINAL:
-          _nodetector.MuonResponse(*_stable_muons[j]);
+          _nodetector.MuonResponse(*_prompt_muons[j]);
           // Clustering();
           break;
 
         case ATLAS:
-          _atlas_simple_response.MuonResponse(*_stable_muons[j]);
-          //      _stable_muons.erase(std::remove(_stable_muons[j],_stable_muons[j],1);
+          _atlas_simple_response.MuonResponse(*_prompt_muons[j]);
+          //      _prompt_muons.erase(std::remove(_prompt_muons[j],_prompt_muons[j],1);
           //      if not _atlas_simple_response.muonEfficiency(*_stable_muon[j]) {
 
-          //        newEnd = std::remove(_stable_muons.begin(), _stable_muons.end(),_stable_muons[j]);
-          //        _stable_muons.erase(newEnd);
+          //        newEnd = std::remove(_prompt_muons.begin(), _prompt_muons.end(),_prompt_muons[j]);
+          //        _prompt_muons.erase(newEnd);
           break;
 
         default:
@@ -892,17 +1147,17 @@ namespace fast_sim {
   void FastSim::ElectronResponse() {
 
     //std::cout << " electron " << std::endl;
-    for (size_t j = 0; j <_stable_electrons.size(); j++) {
+    for (size_t j = 0; j <_prompt_electrons.size(); j++) {
 
       switch(_simtype)
       {
         case NOMINAL:
-          _nodetector.ElectronResponse(*_stable_electrons[j]);
+          _nodetector.ElectronResponse(*_prompt_electrons[j]);
           // Clustering();
           break;
 
         case ATLAS:
-          _atlas_simple_response.ElectronResponse(*_stable_electrons[j]);
+          _atlas_simple_response.ElectronResponse(*_prompt_electrons[j]);
           break;
 
         default:
@@ -916,15 +1171,15 @@ namespace fast_sim {
   void FastSim::PhotonResponse() {
 
     //std::cout << " photon " << std::endl;
-    for (size_t j = 0; j < _stable_photons.size(); j++) {
+    for (size_t j = 0; j < _prompt_photons.size(); j++) {
       switch(_simtype) {
         case NOMINAL:
-          _nodetector.PhotonResponse(*_stable_photons[j]);
+          _nodetector.PhotonResponse(*_prompt_photons[j]);
           // Clustering();
           break;
 
         case ATLAS:
-          _atlas_simple_response.PhotonResponse(*_stable_photons[j]);
+          _atlas_simple_response.PhotonResponse(*_prompt_photons[j]);
           break;
 
         default:
@@ -1001,14 +1256,26 @@ namespace fast_sim {
       //          << endl;
       //   }
     }
-    //cout << " size of jets " << _jets.size() << std::endl;
+    LOG_DEBUG1(" size of jets ",_jets.size());
   }
 
 
-  /// @todo Rename
-  void FastSim::FindBJets() {
+  void FastSim::ChooseBJets() {
     // this function will find the overlap between the jets and b quarks
     // jets which overlap will be categorised as b-jets
+
+    // lets find which jets overlap with the bquarks
+    for (size_t b = 0; b <_bquarks.size(); b++) {
+      for (size_t j = 0; j <_jets.size(); j++) {
+
+        LOG_DEBUG2("Choosing BJets - Bquark",b,_bquarks[b]->pT(),_bquarks[b]->eta(),_bquarks[b]->phi()," Jet ",j,_jets[j]->pT(),_jets[j]->eta(),_jets[j]->phi());
+        if (_jets[j]->mom().deltaR_rap(_bquarks[b]->mom()) < 0.2) { // we found a b-quark and a reconstructed jet overlappling
+          Jet *bjet = new Jet(_jets[j]->mom(),true);  // copy the jet and tagged as a b jet
+          _bjets.push_back(bjet);
+          break;
+        }
+      }
+    }
   }
 
 
@@ -1028,6 +1295,8 @@ namespace fast_sim {
 
     double eta,phi,pt;
 
+    double sum_x = 0.0;
+    double sum_y = 0.0;
     //  printf(" filling the calorimeter:\n");
     for (size_t i = 0; i < _stable_interacting_particles.size();i++) {
 
@@ -1038,8 +1307,27 @@ namespace fast_sim {
       phi = _stable_interacting_particles[i]->mom().phi();
       pt = _stable_interacting_particles[i]->mom().pT();
 
+      sum_x += _stable_interacting_particles[i]->mom().px();
+      sum_y += _stable_interacting_particles[i]->mom().py();
+
       //cout << "id " << _stable_interacting_particles[i]->pid() << " pt " << pt << " eta " << eta << " phi " << phi << endl;
       fillcellvector(pt,eta,phi);
+
+      /*
+      double totalx = 0.0;
+      double totaly = 0.0;
+      for (size_t k = 0; k < _cellmom.size(); k++) { 
+        totalx += _cellmom[k]*cos(_cellphi[k]);
+        totaly += _cellmom[k]*sin(_cellphi[k]);
+
+        cout << k <<  " x " << _cellmom[k]*cos(_cellphi[k]) << " y " <<_cellmom[k]*sin(_cellphi[k]) << " totalx " << totalx  << " totaly " << totaly << endl;
+
+
+
+        cout << "_cellmon[" << k << "] " << _cellmom[k] << " _cellhits[" << k << "] = " << _cellhits[k] << " phi " << _cellphi[k] << " " << phi << endl;
+      }
+      cout << " size " << _cellmom.size() << " totalx " << totalx << " totaly " << totaly << endl;
+      */
 
       // sumx += pt*cos(phi);
       // sumy += pt*sin(phi);
@@ -1047,6 +1335,8 @@ namespace fast_sim {
       // sumz += _stable_interacting_particles[i]->mom.pz();
       // sume += _stable_interacting_particles[i]->mom.E();
     }
+
+    //cout << " the sum is " << sum_x << " " << sum_y << " " << sqrt(sum_x*sum_x + sum_y*sum_y) << endl;
 
     // for debugging
     // printf("Direct from event list:            px %10.2f  py %10.2f pz %10.2f E %10.2f\n", sumx, sumy, sumz, sume);
@@ -1086,26 +1376,26 @@ namespace fast_sim {
 
     double ConeEt;
     // electrons
-    for (size_t ee=0;ee<_stable_electrons.size();ee++) {
+    for (size_t ee=0;ee<_prompt_electrons.size();ee++) {
 
-      //    cout << "Electron eta " << _stable_electrons[ee]->mom().eta() << " phi " <<_stable_electrons[ee]->mom().phi() << endl;
-      ConeEt = calcIsoEt(_stable_electrons[ee]->mom().eta() ,_stable_electrons[ee]->mom().phi());
+      //    cout << "Electron eta " << _prompt_electrons[ee]->mom().eta() << " phi " <<_prompt_electrons[ee]->mom().phi() << endl;
+      ConeEt = calcIsoEt(_prompt_electrons[ee]->mom().eta() ,_prompt_electrons[ee]->mom().phi());
 
-      _stable_electrons[ee]->set_isol(ConeEt);
+      _prompt_electrons[ee]->set_isol(ConeEt);
 
       /*
 
       //cout << "E coneEt " << ConeEt << endl;
       if (ConeEt > _minEt_isol_electron) {
-        _stable_electrons[ee]->set_prompt(false);
-//        Particle *temp_p = new Particle(_stable_electrons[ee]);
+        _prompt_electrons[ee]->set_prompt(false);
+//        Particle *temp_p = new Particle(_prompt_electrons[ee]);
 //        _noniso_electrons.push_back(temp_p);
         isolated = false;
       }
       if (isolated) {
-        cout << "Isolated Electron eta " << _stable_electrons[ee]->mom().eta() << " phi " <<_stable_electrons[ee]->mom().phi() << endl;
-        _stable_electrons[ee]->set_prompt(true);
-        Particle *temp_p = new Particle(_stable_electrons[ee]);
+        cout << "Isolated Electron eta " << _prompt_electrons[ee]->mom().eta() << " phi " <<_prompt_electrons[ee]->mom().phi() << endl;
+        _prompt_electrons[ee]->set_prompt(true);
+        Particle *temp_p = new Particle(_prompt_electrons[ee]);
         _iso_electrons.push_back(temp_p);
       }
       */
@@ -1113,50 +1403,50 @@ namespace fast_sim {
 
 
     // muon
-    for (size_t mu=0;mu<_stable_muons.size();mu++) {
+    for (size_t mu=0;mu<_prompt_muons.size();mu++) {
 
-      //    cout << "Muon eta " << _stable_muons[mu]->mom().eta() << " phi " <<_stable_muons[mu]->mom().phi() << endl;
-      ConeEt = calcIsoEt(_stable_muons[mu]->mom().eta() ,_stable_muons[mu]->mom().phi());
+      //    cout << "Muon eta " << _prompt_muons[mu]->mom().eta() << " phi " <<_prompt_muons[mu]->mom().phi() << endl;
+      ConeEt = calcIsoEt(_prompt_muons[mu]->mom().eta() ,_prompt_muons[mu]->mom().phi());
 
-      _stable_muons[mu]->set_isol(ConeEt);
+      _prompt_muons[mu]->set_isol(ConeEt);
 
       /*
       if (ConeEt > _minEt_isol_muon) {
-        _stable_muons[mu]->set_prompt(false);
-        Particle *temp_p = new Particle(_stable_muons[mu]);
+        _prompt_muons[mu]->set_prompt(false);
+        Particle *temp_p = new Particle(_prompt_muons[mu]);
         _noniso_muons.push_back(temp_p);
         isolated = false;
       }
       if (isolated) {
-        _stable_muons[mu]->set_prompt(true);
-        Particle *temp_p = new Particle(_stable_muons[mu]);
+        _prompt_muons[mu]->set_prompt(true);
+        Particle *temp_p = new Particle(_prompt_muons[mu]);
         _iso_muons.push_back(temp_p);
       }
       */
     }
 
     // photon
-    for (size_t ph=0;ph<_stable_photons.size();ph++) {
-      //    cout << "photon eta " << _stable_photons[ph]->mom().eta() << " phi " <<_stable_photons[ph]->mom().phi() << endl;
-      ConeEt = calcIsoEt(_stable_photons[ph]->mom().eta() ,_stable_photons[ph]->mom().phi());
+    for (size_t ph=0;ph<_prompt_photons.size();ph++) {
+      //    cout << "photon eta " << _prompt_photons[ph]->mom().eta() << " phi " <<_prompt_photons[ph]->mom().phi() << endl;
+      ConeEt = calcIsoEt(_prompt_photons[ph]->mom().eta() ,_prompt_photons[ph]->mom().phi());
       //cout << "photon coneEt " << ConeEt << endl;
 
-      _stable_photons[ph]->set_isol(ConeEt);
+      _prompt_photons[ph]->set_isol(ConeEt);
 
       /*
       if (ConeEt > _minEt_isol_photon) {
 
-        _stable_photons[ph]->set_prompt(false);
-        Particle *temp_p = new Particle(_stable_photons[ph]);
+        _prompt_photons[ph]->set_prompt(false);
+        Particle *temp_p = new Particle(_prompt_photons[ph]);
         _noniso_photons.push_back(temp_p);
         isolated = false;
       }
       if (isolated) {
 
-        cout << "Isolated photon eta " << _stable_photons[ph]->mom().eta() << " phi " <<_stable_photons[ph]->mom().phi() << endl;
+        cout << "Isolated photon eta " << _prompt_photons[ph]->mom().eta() << " phi " <<_prompt_photons[ph]->mom().phi() << endl;
         //
-        _stable_photons[ph]->set_prompt(true);
-        Particle *temp_p = new Particle(_stable_photons[ph]);
+        _prompt_photons[ph]->set_prompt(true);
+        Particle *temp_p = new Particle(_prompt_photons[ph]);
         _iso_photons.push_back(temp_p);
       }
       */
@@ -1167,51 +1457,51 @@ namespace fast_sim {
     // electrons and jets
     /*
        bool isolated;
-       for (int ee=0;ee<_stable_electrons.size();ee++) {
+       for (int ee=0;ee<_prompt_electrons.size();ee++) {
 
        isolated = true;
        for (int jj=0;jj<_jets.size();jj++) {
 
-       if (CheckOverlap(_stable_electrons[ee],_jets[jj])) {
-       _noniso_electrons.push_back(_stable_electrons[ee]);
+       if (CheckOverlap(_prompt_electrons[ee],_jets[jj])) {
+       _noniso_electrons.push_back(_prompt_electrons[ee]);
        isolated = false;
        continue;
        }
        }
        if (isolated)
-       _iso_electrons.push_back(_stable_electrons[ee]);
+       _iso_electrons.push_back(_prompt_electrons[ee]);
        }
 
     // muon and jets
-    for (int mu=0;mu<_stable_muons.size();mu++) {
+    for (int mu=0;mu<_prompt_muons.size();mu++) {
 
     isolated = true;
     for (int jj=0;jj<_jets.size();jj++) {
 
-    if (CheckOverlap(_stable_muons[mu],_jets[jj])) {
-    _noniso_muons.push_back(_stable_muons[mu]);
+    if (CheckOverlap(_prompt_muons[mu],_jets[jj])) {
+    _noniso_muons.push_back(_prompt_muons[mu]);
     isolated = false;
     continue;
     }
     }
     if (isolated)
-    _iso_muons.push_back(_stable_muons[mu]);
+    _iso_muons.push_back(_prompt_muons[mu]);
     }
 
     // photon and jets
-    for (int ph=0;ph<_stable_photons.size();ph++) {
+    for (int ph=0;ph<_prompt_photons.size();ph++) {
 
     isolated = true;
     for (int jj=0;jj<_jets.size();jj++) {
 
-    if (CheckOverlap(_stable_photons[ph],_jets[jj])) {
-    _noniso_photons.push_back(_stable_photons[ph]);
+    if (CheckOverlap(_prompt_photons[ph],_jets[jj])) {
+    _noniso_photons.push_back(_prompt_photons[ph]);
     isolated = false;
     continue;
     }
     }
     if (isolated)
-    _iso_photons.push_back(_stable_photons[ph]);
+    _iso_photons.push_back(_prompt_photons[ph]);
     }
     */
 
@@ -1476,39 +1766,39 @@ namespace fast_sim {
 
   /// @todo Rename
   void FastSim::printMuons() {
-    cout << "Number of muons is " << _stable_muons.size() << endl;
-    for (int j=0;j<(int)_stable_muons.size();j++) {
-      cout << "Muon " << j << " "<< _stable_muons[j]->pid() << " P: "<< _stable_muons[j]->mom().px() << " " << _stable_muons[j]->mom().py() << " " << _stable_muons[j]->mom().pz() << " " << _stable_muons[j]->mom().E() << " Eta: " <<
-        _stable_muons[j]->mom().eta() << " Phi: " << _stable_muons[j]->mom().phi()  << endl;
+    LOG_INFO("Number of muons is ",_prompt_muons.size());
+    for (int j=0;j<(int)_prompt_muons.size();j++) {
+      LOG_INFO("Muons ",j,_prompt_muons[j]->pid()," P: ", _prompt_muons[j]->mom().px(),_prompt_muons[j]->mom().py(),_prompt_muons[j]->mom().pz(),
+        _prompt_muons[j]->mom().E()," Eta: ",_prompt_muons[j]->mom().eta()," Phi: ",_prompt_muons[j]->mom().phi());
     }
   }
 
 
   /// @todo Rename
   void FastSim::printElectrons() {
-    cout << "Number of electrons is " << _stable_electrons.size() << endl;
-    for (int j=0;j<(int)_stable_electrons.size();j++) {
-      cout << "Electron " << j << " "<< _stable_electrons[j]->pid() << " P: "<< _stable_electrons[j]->mom().px() << " " << _stable_electrons[j]->mom().py() << " " << _stable_electrons[j]->mom().pz() << " " << _stable_electrons[j]->mom().E()
-        << " Eta: " << _stable_electrons[j]->mom().eta() << " Phi: " << _stable_electrons[j]->mom().phi()  << endl;
+
+    LOG_INFO("Number of electrons is ",_prompt_electrons.size());
+    for (int j=0;j<(int)_prompt_electrons.size();j++) {
+      LOG_INFO("Electrons ",j,_prompt_electrons[j]->pid()," P: ", _prompt_electrons[j]->mom().px(),_prompt_electrons[j]->mom().py(),_prompt_electrons[j]->mom().pz(),
+        _prompt_electrons[j]->mom().E()," Eta: ",_prompt_electrons[j]->mom().eta()," Phi: ",_prompt_electrons[j]->mom().phi());
     }
   }
 
 
   /// @todo Rename
   void FastSim::printPhotons() {
-    cout << "Number of photons is " << _stable_photons.size() << endl;
-    for (int j=0;j<(int)_stable_photons.size();j++) {
-      cout << "Photon " << j <<" "<< _stable_photons[j]->pid() << " P: "<< _stable_photons[j]->mom().px() << " " << _stable_photons[j]->mom().py() << " " << _stable_photons[j]->mom().pz() << " " << _stable_photons[j]->mom().E()
-        << " Eta: " << _stable_photons[j]->mom().eta() << " Phi: " << _stable_photons[j]->mom().phi()
-        << endl;
+    LOG_INFO("Number of photons is ",_prompt_photons.size());
+    for (int j=0;j<(int)_prompt_photons.size();j++) {
+      LOG_INFO("Photons ",j,_prompt_photons[j]->pid()," P: ", _prompt_photons[j]->mom().px(),_prompt_photons[j]->mom().py(),_prompt_photons[j]->mom().pz(),
+        _prompt_photons[j]->mom().E()," Eta: ",_prompt_photons[j]->mom().eta()," Phi: ",_prompt_photons[j]->mom().phi());
     }
   }
 
   void FastSim::printSummary() {
 
-    cout << "Number of prompt electrons  : " << _stable_electrons.size() << endl;
-    cout << "Number of prompt muons      : " << _stable_muons.size() << endl;
-    cout << "Number of prompt photons    : " << _stable_photons.size() << endl;
+    LOG_INFO("Number of prompt electrons is ",_prompt_electrons.size() );
+    LOG_INFO("Number of prompt muons is ",_prompt_muons.size() );
+    LOG_INFO("Number of prompt photons is ",_prompt_photons.size() );
 
   }
   }
