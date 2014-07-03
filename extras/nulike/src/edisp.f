@@ -27,7 +27,7 @@
       !2012 likelihood, as per arXiv:1207.0810
       case (2012)
 
-        if(ee .lt. ee_min(analysis) .or. ee .gt. ee_max(analysis)) then
+        if (ee .lt. ee_min(analysis) .or. ee .gt. ee_max(analysis)) then
           write(*,*) 'Error in nulike_edisp: energy estimator outside'
           write(*,*) 'tabulated range: ee=',ee,'.  Quitting...'
           stop
@@ -39,18 +39,15 @@
         endif
 
         call TSVAL1(nHistograms(analysis),hist_logEcentres(:,analysis),
-     &   hist_prob(:,nchan_index,analysis),
-     &   hist_derivs(:,nchan_index,analysis),
-     &   hist_sigma(:,nchan_index,analysis),0,1,log10E,
-     &   nulike_edisp_a,IER)
+     &   hist_prob(:,nchan_index,analysis),hist_derivs(:,nchan_index,analysis),
+     &   hist_sigma(:,nchan_index,analysis),0,1,log10E,nulike_edisp_a,IER)
         nulike_edisp = nulike_edisp_a(1)
 
       !2014 likelihood, as per arXiv:141x.xxxx
       case (2014)
 
         call TSVAL1(nhist,hist_logEnergies,hist_single_ee_prob,
-     &   hist_single_ee_derivs,hist_single_ee_sigma,0,1,log10E,
-     &   nulike_edisp_a,IER)
+     &   hist_single_ee_derivs,hist_single_ee_sigma,0,1,log10E,nulike_edisp_a,IER)
         nulike_edisp = nulike_edisp_a(1)
 
       case default

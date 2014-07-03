@@ -20,12 +20,12 @@ TSPACK=contrib/TSPACK
 #MODULE=-module
 # Define fortran compiler and options: gnu
 FF=gfortran
-FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
+FOPT2=-O -ffixed-line-length-none -Wall -fcheck=all
 MODULE=J
 
 # Set internal compile commands
 FC=$(FF)
-FFLAGS=$(FOPT) -I$(INC) $(MODULE) $(BUILD) -fPIC
+FFLAGS=$(FOPT2) -I$(INC) $(MODULE) $(BUILD) -fPIC
 
 # Define library-making options
 RANLIB = ranlib

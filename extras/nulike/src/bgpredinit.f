@@ -17,21 +17,15 @@
 
       !Die if the cut angle is so small it is fully contained in the first angular bin
       !of the background prediction.
-      if (cosphimax .ge. BGangdist_phi(nBinsBGAng(analysis),analysis)) 
-     &then
-        write(*,*) "Analysis '"
-     &//trim(analysis_name_array(analysis))//"'"
+      if (cosphimax .ge. BGangdist_phi(nBinsBGAng(analysis),analysis)) then
+        write(*,*) "Analysis '"//trim(analysis_name_array(analysis))//"'"
         write(*,*) 'phi_cut = ',acos(cosphimax)*180.d0/pi,' deg'
-        write(*,*) '1st entry of BGangdist_phi = ',
-     & acos(BGangdist_phi(nBinsBGAng(analysis),analysis))*180.d0/pi,
-     & ' deg'
+        write(*,*) '1st entry of BGangdist_phi = ',acos(BGangdist_phi(nBinsBGAng(analysis),analysis))*180.d0/pi,' deg'
         write(*,*) 'Error: requested cut angle phi_cut is equal to '
         write(*,*) 'or smaller than the centre of the first bin in'
         write(*,*) 'which the angular distribution of the background'
-        write(*,*) 'is specified.  Please use a larger value of
-     & phi_cut,'
-        write(*,*) 'or provide a higher-resolution background
-     & datafile.'
+        write(*,*) 'is specified.  Please use a larger value of phi_cut,'
+        write(*,*) 'or provide a higher-resolution background datafile.'
         stop
       endif
 
