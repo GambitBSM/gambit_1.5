@@ -31,7 +31,8 @@
       external nuyield
 
       !Return energy dispersion
-      edisp = nulike_edisp(log10E,nchanshare,likelihood_version(analysis))
+      edisp = nulike_edisp(log10E,nchanshare,
+     & likelihood_version(analysis))
       !Return spectral probability distribution function
       specpdf = nulike_dP_SdE(log10E,thetashare,nuyield)
       !Put them together, weight by E to give full integrand

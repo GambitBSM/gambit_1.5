@@ -34,8 +34,10 @@
 
       !Scale neutrino and anti-neutrino yields by saved weights.
       nulike_specangintegrand =  
-     & nuyield(log10E,1)*nulike_tabulated_weight(log10E,1,eventnumshare) +
-     & nuyield(log10E,2)*nulike_tabulated_weight(log10E,2,eventnumshare)
+     & nuyield(log10E,1)*nulike_tabulated_weight(log10E,1,
+     & eventnumshare) +
+     & nuyield(log10E,2)*nulike_tabulated_weight(log10E,2,
+     & eventnumshare)
 
       !Weight by E to give full integrand
       nulike_specangintegrand = nulike_specangintegrand * 10.d0**log10E

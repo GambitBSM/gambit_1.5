@@ -82,13 +82,16 @@
      & sens_nusigma(:,analysis),IER)
       if (IER .lt. 0) then
         write(*,*) 'Error in nulike_sensinit: TSPSI failed with error'
-        write(*,*) 'code',IER,' in setting up nu/lepton effective area/vol.'
+        write(*,*) 'code',IER,' in setting up nu/lepton effective
+     &                          area/vol.'
         stop
       endif
 
       !Set up interpolation in anti-neutrino effective area/volume
-      call TSPSI(nbins,sens_logEcentres(:,analysis),sens_nubar(:,analysis),
-     & 2,0,.false.,.false.,2*nbins-2,working,sens_nubarderivs(:,analysis),
+      call TSPSI(nbins,sens_logEcentres(:,analysis),
+     & sens_nubar(:,analysis),
+     & 2,0,.false.,.false.,2*nbins-2,working,
+     & sens_nubarderivs(:,analysis),
      & sens_nubarsigma(:,analysis),IER)
       if (IER .lt. 0) then
         write(*,*) 'Error in nulike_sensinit: TSPSI failed with error'
@@ -97,8 +100,10 @@
       endif
 
       !Set up interpolation in angular resolution
-      call TSPSI(nbins,sens_logEcentres(:,analysis),sens_AngRes(:,analysis),
-     & 2,0,.false.,.false.,2*nbins-2,working,sens_AngResderivs(:,analysis),
+      call TSPSI(nbins,sens_logEcentres(:,analysis),
+     & sens_AngRes(:,analysis),
+     & 2,0,.false.,.false.,2*nbins-2,working,
+     & sens_AngResderivs(:,analysis),
      & sens_AngRessigma(:,analysis),IER)
       if (IER .lt. 0) then
         write(*,*) 'Error in nulike_sensinit: TSPSI failed with error'

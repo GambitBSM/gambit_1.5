@@ -10,8 +10,10 @@
 //
 // Christoph Weniger, 2014-03-15, c.weniger@uva.nl
 //
-
-#include "BaseFunctions.hpp"
+#include <memory>
+using namespace std;
+#include "base_functions.hpp"
+//#include "shared_types.hpp"
 #include <iostream>
 #include <fstream>
 using namespace Gambit::BF;

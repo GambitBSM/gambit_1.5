@@ -17,8 +17,8 @@ int FastSim_Init(int which)
 {
   switch(which) {
     default:
-    case 0:_my_fast_sim.init(fast_sim::NOMINAL);break;
-    case 1:_my_fast_sim.init(fast_sim::ATLAS);break;
+    case 0:_my_fast_sim.init(fast_sim::NOMINAL, 0);break; // added '0' in default spot so that gambit would compile
+    case 1:_my_fast_sim.init(fast_sim::ATLAS, 0);break;
   }
 
   return 0;
@@ -29,6 +29,7 @@ int FastSim_ReadEvents( int &events) {
   vector<hep_simple_lib::Particle*> _electrons;
   vector<hep_simple_lib::Particle*> _muons;
   vector<hep_simple_lib::Particle*> _photons;
+  vector<hep_simple_lib::Particle*> _nonprompt_leptons; //GM:  add so that gambit will compile
   vector<hep_simple_lib::Particle*> _bjets;
   vector<hep_simple_lib::Particle*> _tauhads;
   vector<hep_simple_lib::Particle*> _chargedhads;
@@ -39,7 +40,7 @@ int FastSim_ReadEvents( int &events) {
   _electrons.push_back(chosen);
  
   hep_simple_lib::Event reco_event;
-  _my_fast_sim.setParticles(_electrons, _muons, _photons, _chargedhads, _bjets, _tauhads, _weakly_interacting);
+  _my_fast_sim.setParticles(_electrons, _muons, _photons, _nonprompt_leptons, _chargedhads, _bjets, _tauhads, _weakly_interacting);
 
   //cout << " do detector response " << std::endl;
   _my_fast_sim.doDetectorResponse();

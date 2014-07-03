@@ -24,13 +24,14 @@
       ! 2012 likelihood, as per arXiv:1207.0810
       case (2012)
 
-        if (ee .lt. ee_min(analysis) .or. ee .gt. ee_max(analysis)) then
+        if(ee .lt. ee_min(analysis) .or. ee .gt. ee_max(analysis)) then
           write(*,*) 'Error in nulike_bgspec: energy estimator outside'
           write(*,*) 'tabulated range: ee=',ee,'.  Quitting...'
           stop
         endif
   
-        nchan_index = nint(ee) - nint(ee_min(analysis)) + 1 - nchan_hist2BGoffset(analysis)
+        nchan_index = nint(ee) - nint(ee_min(analysis)) + 1 - 
+     & nchan_hist2BGoffset(analysis)
         if (BGeedist_ee(nchan_index,analysis) .ne. ee) then
           write(*,*) BGeedist_ee(nchan_index,analysis), ee, nchan_index
           stop 'Something is wrong with nchan_index in nulike_bgspec.'
@@ -42,7 +43,8 @@
       case (2014)
 
         !If the value of the energy estimator is outside the range of this histogram, return zero.
-        if (ee .lt. BGeedist_ee(1,analysis) .or. ee .gt. BGeedist_ee(nBinsBGE(analysis),analysis) ) then
+        if (ee .lt. BGeedist_ee(1,analysis) .or. ee .gt. 
+     & BGeedist_ee(nBinsBGE(analysis),analysis) ) then
           nulike_bgspec = 0.d0
         else !If the measured value of the energy estimator is in the range of this histogram, set the prob by interpolating.
           ee_a(1) = ee

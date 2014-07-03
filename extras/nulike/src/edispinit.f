@@ -44,7 +44,8 @@
 
       !Read actual data
       do i = 1, nhgms
-        read(lun, *) instring, hist_logE(1,i,analysis), hist_logE(2,i,analysis)
+        read(lun, *) instring, hist_logE(1,i,analysis),
+     &  hist_logE(2,i,analysis)
         hist_logEcentres(i,analysis) = 0.5d0*(hist_logE(1,i,analysis)+
      &   hist_logE(2,i,analysis))
         do j = 1, nbins_ee(i)
@@ -81,7 +82,8 @@
         !up with indexing of nchan values in observed background spectrum.
         nchan_hist2BGoffset(analysis) = -1
         do k = 1, nnchan_total(analysis)
-          if (hist_nchan(1,k,analysis) .eq. BGeedist_ee(1,analysis)) then 
+          if (hist_nchan(1,k,analysis) .eq. BGeedist_ee(1,analysis)) 
+     &    then
             nchan_hist2BGoffset(analysis) = k-1
           endif
         enddo
@@ -89,11 +91,14 @@
         !Set up interpolation in each nchan across energy histograms for use as energy dispersion estimator
         do i = 1, nnchan_total(analysis)
  
-          call TSPSI(nHistograms(analysis),hist_logEcentres(:,analysis),hist_prob(:,i,analysis),
-     &     2,0,.false.,.false.,2*nHistograms(analysis)-2,working,hist_derivs(:,i,analysis),
+          call TSPSI(nHistograms(analysis),
+     &     hist_logEcentres(:,analysis),hist_prob(:,i,analysis),
+     &     2,0,.false.,.false.,2*nHistograms(analysis)-2,working,
+     &     hist_derivs(:,i,analysis),
      &     hist_sigma(:,i,analysis),IER)
           if (IER .lt. 0) then
-            write(*,*) 'Error in nulike_edispinit: TSPSI failed with error'
+            write(*,*) 'Error in nulike_edispinit: 
+     &                  TSPSI failed with error'
             write(*,*) 'code ',IER, ' at i=',i,' (like = ',like,').'
             stop
           endif
@@ -111,10 +116,13 @@
         !Set up interpolation within each energy histogram, for later seeding of event-specific energy dispersion estimator
         do i = 1, nhgms
 
-          call TSPSI(nbins_ee(i),hist_ee_flip(:,i),hist_prob_flip(:,i),2,0,.false.,.false.,
-     &     2*nbins_ee(i)-2,working2,hist_derivs_flip(:,i),hist_sigma_flip(:,i),IER)
+          call TSPSI(nbins_ee(i),hist_ee_flip(:,i),hist_prob_flip(:,i),
+     &     2,0,.false.,.false.,
+     &     2*nbins_ee(i)-2,working2,hist_derivs_flip(:,i),
+     &     hist_sigma_flip(:,i),IER)
           if (IER .lt. 0) then
-            write(*,*) 'Error in nulike_edispinit: TSPSI failed with error'
+            write(*,*) 'Error in nulike_edispinit: TSPSI failed
+     & with error'
             write(*,*) 'code ',IER, ' at i=',i,' (like = ',like,').'
             stop
           endif
@@ -122,7 +130,8 @@
         enddo
 
       case default
-        write(*,*) "Unrecognised likelihood version in nulike_edispinit."
+        write(*,*) "Unrecognised likelihood version in
+     & nulike_edispinit."
         write(*,*) "Quitting..."
         stop
 

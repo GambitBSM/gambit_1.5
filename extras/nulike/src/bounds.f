@@ -78,10 +78,13 @@
       integer Ntotal_observed, liketype, j
       integer counted1, counted2, countrate, nulike_amap
       real*8 Nsignal_predicted, NBG_expected, nulike_pval, theta_S
-      real*8 lnlike, pvalue, referenceLike, dof, DGAMIC, DGAMMA, nuyield
+      real*8 lnlike, pvalue, referenceLike, dof
+      real*8 DGAMIC, DGAMMA, nuyield
       real*8 nLikelihood, angularLikelihood, spectralLikelihood, logmw
-      real*8 theta_tot, f_S, nulike_anglike, nulike_speclike, nulike_nlike
-      real*8 deltalnlike, mwimp, annrate, specAngLikelihood, nulike_signal
+      real*8 theta_tot, f_S, nulike_anglike
+      real*8 nulike_speclike, nulike_nlike
+      real*8 deltalnlike, mwimp, annrate
+      real*8 specAngLikelihood, nulike_signal
       real*8 nulike_specanglike
       logical pvalFromRef, nulike_speclike_reset, doProfiling
       character (len=nulike_clen) analysis_name
@@ -113,8 +116,10 @@
       !Look up the analysis requested by the user.
       analysis = nulike_amap(analysis_name)
       if (analysis .eq. 0) then
-        write(*,*) "Analysis '"//trim(analysis_name)//"' requested of nulike_bounds"
-        write(*,*) 'is not one of the ones that has already been loaded.'
+        write(*,*) "Analysis '"//trim(analysis_name)//
+     &"' requested of nulike_bounds"
+        write(*,*) 'is not one of the ones that has already 
+     &              been loaded.'
         write(*,*) 'Quitting...'
         stop
       endif
@@ -122,8 +127,10 @@
       !Make sure the user has not tried to use the 2014 like with only angular or only spectral likelihood.
       if (likelihood_version(analysis) .eq. 2014 .and. 
      & (liketype .eq. 2 .or. liketype .eq. 3) ) then
-        write(*,*) "Analysis '"//trim(analysis_name)//"' requested of nulike_bounds"
-        write(*,*) 'uses the 2014 likelihood, which is incompatible with liketype = ',liketype
+        write(*,*) "Analysis '"//trim(analysis_name)//
+     &"' requested of nulike_bounds"
+        write(*,*) 'uses the 2014 likelihood, which is
+     & incompatible with liketype = ',liketype
         write(*,*) 'Quitting...'
         stop
       endif 
@@ -143,7 +150,8 @@
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       !Calculate signal counts and spectrum. 
-      theta_S = nulike_signal(nuyield, annrate, logmw, likelihood_version(analysis))
+      theta_S = nulike_signal(nuyield, annrate, logmw, 
+     & likelihood_version(analysis))
       !Calculate the total predicted number of events
       theta_tot = theta_BG(analysis) + theta_S
       !Calculate the signal fraction.
@@ -190,7 +198,8 @@
             !Add in angular likelihood for this event
             if (liketype .eq. 2 .or. liketype .eq. 4) 
      &       angularLikelihood = angularLikelihood + nulike_anglike(
-     &       events_cosphi(j,analysis),events_cosphiErr(j,analysis),f_S)
+     &       events_cosphi(j,analysis),events_cosphiErr(j,analysis),
+     &       f_S)
             !Add in spectral likelihood for this event
             if (liketype .eq. 3 .or. liketype .eq. 4) 
      &       spectralLikelihood = spectralLikelihood + nulike_speclike(
@@ -209,8 +218,9 @@
         if (liketype .eq. 4) then
           !Step through the individual events
           do j = 1, nEvents(analysis)          
-            specAngLikelihood = specAngLikelihood + nulike_specanglike(j,
-     &       theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), nuyield)
+            specAngLikelihood = specAngLikelihood + nulike_specanglike(
+     &       j, theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), 
+     &       nuyield)
           enddo
         endif
 
@@ -249,7 +259,8 @@
       else                  !compute p-value with reference to background
 
         !p-value from Poissonian statistics
-        if (.not. pvalBGPoisComputed(analysis)) call nulike_bglikeprecomp
+        if (.not. pvalBGPoisComputed(analysis)) 
+     & call nulike_bglikeprecomp
         pvalue = nulike_pval(nEvents(analysis), theta_tot, theta_S)
         pvalue = pvalue / BGpvalPoissonian(analysis)
         

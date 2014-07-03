@@ -28,12 +28,12 @@
 
       if (logNormal) then
         !Treat percentage error as log-normal distributed
-        nulike_lnpoisint = nulike_lnpiln(obscounts,counts_tot-counts_sig,
-     &   counts_sig,dsqrt(errorsq))
+        nulike_lnpoisint = nulike_lnpiln(obscounts,
+     & counts_tot-counts_sig,counts_sig,dsqrt(errorsq))
       else
         !Treat percentage error as Gaussianly-distributed
-        nulike_lnpoisint = nulike_lnpin(obscounts,counts_tot-counts_sig,
-     &   counts_sig,dsqrt(errorsq))
+        nulike_lnpoisint = nulike_lnpin(obscounts,
+     & counts_tot-counts_sig,counts_sig,dsqrt(errorsq))
       endif
 
 

@@ -49,7 +49,8 @@
       real*8  BGangdist_prob(max_nBinsBGAng,max_analyses)
       real*8  BGangdist_derivs(max_nBinsBGAng,max_analyses)
       real*8  BGangdist_sigma(max_nBinsBGAng,max_analyses)
-      real*8  BGangdist_norm(max_analyses), BGangdist_conenorm(max_analyses)
+      real*8  BGangdist_norm(max_analyses), 
+     & BGangdist_conenorm(max_analyses)
       real*8  BGeedist_ee(max_nBinsBGE,max_analyses)
       real*8  BGeedist_prob(max_nBinsBGE,max_analyses)
       real*8  BGeedist_derivs(max_nBinsBGE,max_analyses)

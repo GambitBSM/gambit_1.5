@@ -81,21 +81,26 @@
       leptypeshare = 2
 
       !Open event file, determine the total number of events, likelihood version
-      call nulike_preparse_eventfile(eventfile, nEvents_in_file, exp_time, like)
+      call nulike_preparse_eventfile(eventfile, nEvents_in_file,
+     & exp_time, like)
       !Die if the event file is not meant for 2014-type likelihoods.
-      if (like .ne. 2014) stop 'Error: event file is not for 2014 likelihood.'
+      if (like .ne. 2014) stop
+     & 'Error: event file is not for 2014 likelihood.'
       !Set nEvents to zero to indicate to eventinit that it has not been determined elsewhere.
       nEvents = 0
       !Read in the actual details of all events.
-      call nulike_eventinit(eventfile, nEvents_in_file, nEvents, dcos(phi_cut*pi/180.d0), 2014)
+      call nulike_eventinit(eventfile, nEvents_in_file, nEvents, 
+     & dcos(phi_cut*pi/180.d0), 2014)
 
       !Open neutrino effective volume file and determine number of bins
-      call nulike_preparse_effarea_or_volume(effvolfile, nbins_effvol, density, 2014)
+      call nulike_preparse_effarea_or_volume(effvolfile, nbins_effvol,
+     & density, 2014)
       !Read in the actual effective volume and PSF data.
       call nulike_sensinit(effvolfile,nbins_effvol)
 
       !Open file of energy estimators, determine how many histograms and how many bins in each histogram.
-      call nulike_preparse_energy_dispersion(edispfile, nhist, ncols, ee_min, ee_max, 2014)
+      call nulike_preparse_energy_dispersion(edispfile, nhist, ncols,
+     & ee_min, ee_max, 2014)
       !Read in the actual energy estimator response histograms and rearrange them into energy dispersion estimators
       call nulike_edispinit(edispfile, nhist, ncols, ee_min, 2014)
     
@@ -104,7 +109,8 @@
       numdens_p = 10.d5 * density / m_water
 
       !Try to open the file for saving the effective area
-      open(lun, file=partialfolder//'/effective_area.dat', form='unformatted', 
+      open(lun, file=partialfolder//'/effective_area.dat',
+     & form='unformatted',
      & action='WRITE', status='NEW', err=20, recl=nEnergies*2*8)
 
       !That worked, so now we can at least make some sort of claim about what is to come...
@@ -119,9 +125,12 @@
 
       !Save auxiliary info about the partial likelihoods
       open(lun2, file=partialfolder//'/partlikes.aux', action='WRITE')
-      write(lun2, fmt=*) '#This file provides auxiliary information about partial likelihoods.'
-      write(lun2, fmt=*) '#It was generated automatically by nulike_partials.'
-      write(lun2, fmt='(A1,2I8,3E16.5)') ' ', nEvents, nEnergies, phi_cut, logE_min, logE_max
+      write(lun2, fmt=*) '#This file provides auxiliary information
+     & about partial likelihoods.'
+      write(lun2, fmt=*) 
+     & '#It was generated automatically by nulike_partials.'
+      write(lun2, fmt='(A1,2I8,3E16.5)') ' ', nEvents, nEnergies, 
+     & phi_cut, logE_min, logE_max
       close(lun2)
 
       !Compute and save the effective area
@@ -129,63 +138,81 @@
       eventnumshare = 0
       !Step through each energy
       do i = 1, nEnergies
-        log10Eshare = logE_min + dble(i-1)/dble(nEnergies-1)*(logE_max - logE_min)
+        log10Eshare = logE_min + dble(i-1)/dble(nEnergies-1)*
+     &                (logE_max - logE_min)
         Eshare = 10.d0**log10Eshare
-        write(*,*) '    Computing effective areas for E = ',Eshare,' GeV'
+        write(*,*) '    Computing effective areas for E = ',Eshare,
+     &' GeV'
         !If the neutrino already has less energy than the lowest-E lepton that can be detected,
         !we know the effective volume will always be zero and the efffective area is zero.
         if (log10Eshare .lt. min_detectable_logE) then
           partial_likes(i,:) = 0.d0
         else !Otherwise, we might see some leptons, so iterate over CP eigenstates
           do ptypeshare = 1, 2
-            partial_likes(i,ptypeshare) = nulike_simpson(nulike_partintegrand1,
+            partial_likes(i,ptypeshare) = nulike_simpson(
+     &       nulike_partintegrand1,
      &       dsdxdy,0.d0,0.9999999999d0,eps_partials) !x=1 contribution is tiny and causes issues for CTEQ6 DIS PDFs
           enddo
         endif
-        write(*,*) '      Effective area (m^2), nu:    ',partial_likes(i,1)
-        write(*,*) '      Effective area (m^2), nubar: ',partial_likes(i,2)
+        write(*,*) '      Effective area (m^2), nu:    ',
+     &                                  partial_likes(i,1)
+        write(*,*) '      Effective area (m^2), nubar: ',
+     &                                  partial_likes(i,2)
       enddo
       !Save effective area for this event.
       write(lun) partial_likes
       close(lun) 
 
       !Check that the already-saved auxiliary info matches 
-20    open(lun, file=partialfolder//'/partlikes.aux', err=60, action='READ')
+20    open(lun, file=partialfolder//'/partlikes.aux', err=60, 
+     &                                          action='READ')
       !Skip header
       instring = '#'
       do while (instring(1:1) .eq. '#' .or. instring(2:2) .eq. '#')
         read(lun, fmt='(A100)'), instring
       enddo
-      read(instring, fmt=*) nEvents2, nEnergies2, phi_cut2, logE_min2, logE_max2
-      if (nEvents .ne. nEvents2 .or. nEnergies .ne. nEnergies2 .or. phi_cut .ne. phi_cut2
+      read(instring, fmt=*) nEvents2, nEnergies2, phi_cut2, logE_min2,
+     &                      logE_max2
+      if (nEvents .ne. nEvents2 .or. nEnergies .ne. nEnergies2 .or.
+     & phi_cut .ne. phi_cut2
      & .or. logE_min .ne. logE_min2 .or. logE_max .ne. logE_max2) then
-        write(*,*) 'Current nEvents, nEnergies, phi_cut, logE_min, logE_max:'
+        write(*,*) 
+     &  'Current nEvents, nEnergies, phi_cut, logE_min, logE_max:'
         write(*,*) nEvents, nEnergies, phi_cut, logE_min, logE_max
-        write(*,*) 'Saved nEvents, nEnergies, phi_cut, logE_min, logE_max:'
+        write(*,*) 
+     &  'Saved nEvents, nEnergies, phi_cut, logE_min, logE_max:'
         write(*,*) nEvents2, nEnergies2, phi_cut2, logE_min2, logE_max2
-        write(*,*) 'Check your parameters, or delete '//partialfolder//' to start over.'
+        write(*,*) 'Check your parameters, or delete '
+     &              //partialfolder//' to start over.'
         stop
       endif
 
       !Step through the events and compute partial likelihoods for each one
-      write(*,*) 'Computing partial likelihoods for ',nEvents,' events.'
+      write(*,*) 'Computing partial likelihoods for ',nEvents,
+     &                                                  ' events.'
       do eventnumshare = 1, nEvents
 
         write(eventstring,fmt=evnmshrfmt(eventnumshare)) eventnumshare
-        open(lun, file=partialfolder//'/partlike_event'//trim(eventstring)//'.dat', form='unformatted',
+        open(lun, file=partialfolder//'/partlike_event'
+     &          //trim(eventstring)//'.dat', form='unformatted',
      &   action='WRITE', status='NEW', err=40, recl=nEnergies*2*8)
 
-        write(*,*) '  Computing partial likelihood for event ',eventnumshare
+        write(*,*) '  Computing partial likelihood for event ',
+     &                                          eventnumshare
 
         !Arrange the energy dispersion function for this event.
         do i = 1, nhist
           !If the measured value of the energy estimator is outside the range of this histogram, set the prob to zero.
-          if (events_ee(eventnumshare,analysis) .lt. hist_ee_flip(1,i) .or. 
-     &        events_ee(eventnumshare,analysis) .gt. hist_ee_flip(ncols(i),i) ) then
+          if (events_ee(eventnumshare,analysis) .lt. 
+     &        hist_ee_flip(1,i) .or. 
+     &        events_ee(eventnumshare,analysis) .gt. 
+     &        hist_ee_flip(ncols(i),i) ) then
             hist_single_ee_prob(i) = 0.d0
           else !If the measured value of the energy estimator is in the range of this histogram, set the prob by interpolating.
-            call TSVAL1(ncols(i),hist_ee_flip(:,i),hist_prob_flip(:,i),hist_derivs_flip(:,i),
-     &       hist_sigma_flip(:,i),0,1,events_ee(eventnumshare,analysis),hist_single_ee_prob(i),IER)
+            call TSVAL1(ncols(i),hist_ee_flip(:,i),hist_prob_flip(:,i),
+     &           hist_derivs_flip(:,i),
+     &       hist_sigma_flip(:,i),0,1,events_ee(eventnumshare,
+     &                            analysis),hist_single_ee_prob(i),IER)
             if (IER .lt. 0) then
               write(*,*) 'TSVAL1 error from energy dispersion'
               write(*,*) 'in nulike_partials, code: ', IER, 'i=',i 
@@ -194,8 +221,10 @@
           endif
         enddo
         !Initialise the interpolator in energy of the energy dispersion for this event.
-        call TSPSI(nhist,hist_logEnergies,hist_single_ee_prob,2,0,.false.,.false.,
-     &   2*nhist-2,working,hist_single_ee_derivs,hist_single_ee_sigma,IER)
+        call TSPSI(nhist,hist_logEnergies,hist_single_ee_prob,2,0,
+     &             .false.,.false.,
+     &   2*nhist-2,working,hist_single_ee_derivs,hist_single_ee_sigma,
+     &   IER)
         if (IER .lt. 0) then
           write(*,*) 'TSPSI error from energy dispersion'
           write(*,*) 'in nulike_partials, code: ', IER 
@@ -204,21 +233,26 @@
 
         !Step through each energy
         do i = 1, nEnergies
-          log10Eshare = logE_min + dble(i-1)/dble(nEnergies-1)*(logE_max - logE_min)
+          log10Eshare = logE_min + dble(i-1)/dble(nEnergies-1)*
+     &    (logE_max - logE_min)
           Eshare = 10.d0**log10Eshare
-          write(*,*) '    Computing partial likelihoods for E = ',Eshare,' GeV'
+          write(*,*) '    Computing partial likelihoods for E = ',
+     &                Eshare,' GeV'
           !If the neutrino already has less energy than the lowest-E lepton that can be detected,
           !we know the effective volume will always be zero and the partial likelihoods are zero.
           if (log10Eshare .lt. min_detectable_logE) then
             partial_likes(i,:) = 0.d0
           else !Otherwise, we might see some leptons, so iterate over CP eigenstates
             do ptypeshare = 1, 2
-              partial_likes(i,ptypeshare) = nulike_simpson(nulike_partintegrand1,
+              partial_likes(i,ptypeshare) = nulike_simpson(
+     &         nulike_partintegrand1,
      &         dsdxdy,0.d0,0.9999999999d0,eps_partials) !x=1 contribution is tiny and causes issues for CTEQ6 DIS PDFs
             enddo
           endif
-          write(*,*) '      Partial likelihood, nu:    ',partial_likes(i,1)
-          write(*,*) '      Partial likelihood, nubar: ',partial_likes(i,2)
+          write(*,*) '      Partial likelihood, nu:    ',
+     &               partial_likes(i,1)
+          write(*,*) '      Partial likelihood, nubar: ',
+     &               partial_likes(i,2)
         enddo
 
         !Save partial likelihoods for this event.
@@ -234,7 +268,8 @@
       return
 
       !Try to work out if auxiliary file is just missing or if the whole directory is not there.
-60    open(lun, file=partialfolder//'/.direxists', action='WRITE', status='REPLACE', err=80)
+60    open(lun, file=partialfolder//'/.direxists', action='WRITE',
+     & status='REPLACE', err=80)
       write(*,*) 'Missing file:'
       write(*,*) partialfolder//'/partlikes.aux.'
       stop ' Nulike_partials cannot continue.'

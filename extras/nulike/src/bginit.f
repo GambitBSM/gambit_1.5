@@ -98,7 +98,8 @@
         if (ee_max(analysis) .lt. BGeedist_ee(nbins_ee,analysis))
      &   ee_max(analysis) = BGeedist_ee(nbins_ee,analysis)
         !Reset nnchan_total
-        nnchan_total(analysis) = nint(ee_max(analysis) - ee_min(analysis)) + 1
+        nnchan_total(analysis) = nint(ee_max(analysis) 
+     & - ee_min(analysis)) + 1
         !Make sure we didn't break everything
         if (nnchan_total(analysis) .gt. max_ncols) then
           write(*,*)
@@ -113,8 +114,10 @@
       case (2014)
 
         !Set up interpolation in energy distribution.
-        call TSPSI(nbins_ee,BGeedist_ee(:,analysis),BGeedist_prob(:,analysis),2,0,.false.,.false.,
-     &   2*nbins_ee-2,eeworking,BGeedist_derivs(:,analysis),BGeedist_sigma(:,analysis),IER)
+        call TSPSI(nbins_ee,BGeedist_ee(:,analysis),
+     & BGeedist_prob(:,analysis),2,0,.false.,.false.,
+     &   2*nbins_ee-2,eeworking,BGeedist_derivs(:,analysis),
+     & BGeedist_sigma(:,analysis),IER)
         if (IER .lt. 0) then
           write(*,*) 'TSPSI error from spectral distribution of'
           write(*,*) 'background in nulike_bginit, code: ', IER 
@@ -145,14 +148,17 @@
         BGangdist_phi(i,analysis) = 
      &   BGangdist_phi_temp(nbins_angular+1-i)/180.d0 * pi
         !Convert probabilities from dP/dphi to dP/dcos(phi) and flip em
-        BGangdist_prob(i,analysis) = BGangdist_prob_temp(nbins_angular+1-i)/
+        BGangdist_prob(i,analysis) = 
+     &BGangdist_prob_temp(nbins_angular+1-i)/
      &   dsin(BGangdist_phi(i,analysis)) * 180.d0 / pi
       enddo
       BGangdist_phi(:,analysis) = dcos(BGangdist_phi(:,analysis))
 
       !Initialise interpolator
-      call TSPSI(nbins_angular,BGangdist_phi(:,analysis),BGangdist_prob(:,analysis),
-     & 2,0,.false.,.false.,2*nbins_angular-2,angworking,BGangdist_derivs(:,analysis),
+      call TSPSI(nbins_angular,BGangdist_phi(:,analysis),
+     &BGangdist_prob(:,analysis),
+     & 2,0,.false.,.false.,2*nbins_angular-2,angworking,
+     &BGangdist_derivs(:,analysis),
      & BGangdist_sigma(:,analysis),IER)
       if (IER .lt. 0) then
         write(*,*) 'Error in nulike_bgnit: TSPSI failed with error'
@@ -172,7 +178,8 @@
       endif
 
       !Make sure energy estimator histograms are properly normalised
-      BGeedist_prob(:,analysis) = BGeedist_prob(:,analysis)/sum(BGeedist_prob(:,analysis))
+      BGeedist_prob(:,analysis) = BGeedist_prob(:,analysis)
+     &/sum(BGeedist_prob(:,analysis))
 
 
       end subroutine nulike_bginit

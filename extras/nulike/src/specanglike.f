@@ -52,9 +52,11 @@
         sigpartial = 0.d0
       else
         eventnumshare = event_number
-        sigpartial = nulike_simpson(nulike_specangintegrand,nuyield,logEmin,logmw,eps)
+        sigpartial = nulike_simpson(nulike_specangintegrand,nuyield,logE
+     &min,logmw,eps)
         !write(*,*) eventnumshare, sigpartial, exp_time(analysis), theta_S, annrate
-        sigpartial = exp_time(analysis) / theta_S * annrate * dlog(10.d0) * sigpartial
+        sigpartial = exp_time(analysis) / theta_S * annrate * dlog(10.d0
+     &) * sigpartial
         !write(*,*) sigpartial
       endif
 

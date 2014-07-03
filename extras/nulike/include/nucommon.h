@@ -10,7 +10,8 @@
 !  author: Pat Scott (patscott@physics.mcgill.ca), June 12, 2014
 
       integer max_nPrecompE,max_nSensBins,max_nBinsBGAng,max_nBinsBGE
-      integer max_nEvents,max_nHistograms,max_ncols,max_analyses,nulike_clen
+      integer max_nEvents,max_nHistograms,max_ncols,max_analyses,
+     & nulike_clen
       parameter(nulike_clen     = 300)  !Length of fixed-length strings in nulike
       parameter(max_nPrecompE   = 1000) !Maximum number partial likelihoods per event
       parameter(max_nSensBins   = 50)   !Maximum number of bins in the effective area or volume
@@ -22,7 +23,8 @@
       parameter(max_analyses    = 15)   !Maximum number of analyses that can be loaded up
 
       integer angular, enrgyest, events, lun, lun2
-      parameter(angular = 1, enrgyest = 2, events = 3, lun = 20, lun2 = 21)
+      parameter(angular = 1, enrgyest = 2, events = 3, lun = 20,
+     & lun2 = 21)
 
       real*8 pi
       parameter (pi=3.141592653589793238d0)
@@ -36,7 +38,8 @@
       real*8  Eshare, min_detectable_logE
       real*8  events_ee(max_nEvents,max_analyses)
 
-      common /nu_comm/ Eshare, min_detectable_logE, events_ee, analysis, ptypeshare, eventnumshare
+      common /nu_comm/ Eshare, min_detectable_logE, events_ee, 
+     & analysis, ptypeshare, eventnumshare
       save /nu_comm/
 
       ! This parameter will be initialized in a block data routine

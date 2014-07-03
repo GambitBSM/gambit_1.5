@@ -58,7 +58,8 @@
       implicit none
       include 'nulike.h'
 
-      character (len=nulike_clen) analysis_name, eventfile, BGfile, file3, nchandistfile
+      character (len=nulike_clen) analysis_name, eventfile,
+     & BGfile, file3, nchandistfile
       integer nnchan(max_nHistograms), nAnalyses
       integer BGfirst, BGsecond, nulike_amap
       real*8 phi_cut, theoryError, cosphimax, dummy
@@ -95,11 +96,14 @@
       theoryErr(analysis) = theoryError
     
       !Open event file, determine the total number of events and likelihood version
-      call nulike_preparse_eventfile(eventfile, nEvents_in_file(analysis), exp_time(analysis), likelihood_version(analysis))
+      call nulike_preparse_eventfile(eventfile, 
+     &     nEvents_in_file(analysis), exp_time(analysis), 
+     &     likelihood_version(analysis))
 
       !Open background file, determine numbers of bins for angular 
       !and nchan distributions, and which comes first
-      call nulike_preparse_bgfile(BGfile, nBinsBGAng(analysis), nBinsBGE(analysis), BGfirst, BGsecond)
+      call nulike_preparse_bgfile(BGfile, nBinsBGAng(analysis), 
+     &     nBinsBGE(analysis), BGfirst, BGsecond)
 
 
       !Switch according to likelihood version.
@@ -113,41 +117,50 @@
         cosphimax = dcos(phi_cut*pi/180.d0)
 
         !Open neutrino effective area file and determine number of bins
-        call nulike_preparse_effarea_or_volume(file3,nSensBins(analysis), dummy, 2012)
+        call nulike_preparse_effarea_or_volume
+     &       (file3,nSensBins(analysis), dummy, 2012)
         !Read in the actual effective area and PSF data.
         call nulike_sensinit(file3,nSensBins(analysis))
 
         !Open file of nchan response histograms (energy dispersions), determine how many histograms
         !and how many bins in each histogram.
-        call nulike_preparse_energy_dispersion(nchandistfile, nHistograms(analysis), nnchan, 
+        call nulike_preparse_energy_dispersion(nchandistfile, 
+     &       nHistograms(analysis), nnchan, 
      &   ee_min(analysis), ee_max(analysis), 2012)
-        nnchan_total(analysis) = nint(ee_max(analysis) - ee_max(analysis)) + 1
+        nnchan_total(analysis) = nint(ee_max(analysis) - 
+     &  ee_max(analysis)) + 1
       
         !Read in the actual background data
-        call nulike_bginit(BGfile, nBinsBGAng(analysis), nBinsBGE(analysis), BGfirst, BGsecond, 2012)
+        call nulike_bginit(BGfile, nBinsBGAng(analysis), 
+     &       nBinsBGE(analysis), BGfirst, BGsecond, 2012)
 
         !Read in the actual nchan response histograms and rearrange them into energy dispersion estimators
-        call nulike_edispinit(nchandistfile, nHistograms(analysis), nnchan, ee_min(analysis), 2012)
+        call nulike_edispinit(nchandistfile, nHistograms(analysis), 
+     &       nnchan, ee_min(analysis), 2012)
 
       !2014 likelihood, as per arXiv:141x.xxxx (load the precalculated effective area and partial likelihoods.)
       case (2014)
 
         !Read in partial likelihoods, return number of events, cut angle and no. of energies tabulated over
-        call nulike_specanginit(file3,nEvents(analysis),phi_max_deg(analysis),nPrecompE(analysis))
+        call nulike_specanginit(file3,nEvents(analysis),
+     &       phi_max_deg(analysis),nPrecompE(analysis))
         cosphimax = dcos(phi_max_deg(analysis)*pi/180.d0)
 
         !Read in the actual background data
-        call nulike_bginit(BGfile, nBinsBGAng(analysis), nBinsBGE(analysis), BGfirst, BGsecond, 2014)
+        call nulike_bginit(BGfile, nBinsBGAng(analysis), 
+     &       nBinsBGE(analysis), BGfirst, BGsecond, 2014)
 
       case default
-        write(*,*) "Unrecognised likelihood version in nulike_init: ", likelihood_version(analysis)
+        write(*,*) "Unrecognised likelihood version in nulike_init: ",
+     &  likelihood_version(analysis)
         write(*,*) "Quitting..."
         stop
 
       end select
 
       !Read in the actual details of all events.
-      call nulike_eventinit(eventfile, nEvents_in_file(analysis), nEvents(analysis), cosphimax, likelihood_version(analysis))
+      call nulike_eventinit(eventfile, nEvents_in_file(analysis), 
+     &     nEvents(analysis), cosphimax, likelihood_version(analysis))
 
       !Calculate the expected background count.
       call nulike_bgpredinit(cosphimax)
@@ -157,6 +170,7 @@
       pvalBGPoisComputed(analysis) = .false.
       if (BGLikePrecompute) call nulike_bglikeprecomp
 
-      write(*,*) "Initialisation of nulike analysis '"//trim(analysis_name)//"' complete."
+      write(*,*) "Initialisation of nulike analysis '"
+     &          //trim(analysis_name)//"' complete."
 
       end subroutine nulike_init
