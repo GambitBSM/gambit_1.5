@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simple_hep_lib/MathUtils.hpp"
-#include <boost/serialization/access.hpp>
+//#include <boost/serialization/access.hpp>
 #include <sstream>
 #include <iostream>
 #include <cmath>
@@ -88,7 +88,7 @@ namespace hep_simple_lib {
     private:
       /// @name Serialization
       //@{
-      friend class boost::serialization::access;
+      //friend class boost::serialization::access;
 
       template<class Archive>
       void serialize(Archive & ar, const unsigned int version) {
