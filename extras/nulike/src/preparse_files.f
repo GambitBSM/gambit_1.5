@@ -8,8 +8,7 @@
 
 
       !Open event file, determine the total number of events and likelihood version
-      subroutine nulike_preparse_eventfile(eventfile, nevents, exp_time,
-     & like)
+      subroutine nulike_preparse_eventfile(eventfile, nevents, exp_time, like)
 
       implicit none
       include 'nucommon.h'
@@ -33,8 +32,7 @@
       read(lun, fmt=*) instring, instring2
 
       if (instring .ne. '[v]') then
-        write(*,*) 'Bad format in neutrino telescope event file ',eventf
-     &ile,'.'
+        write(*,*) 'Bad format in neutrino telescope event file ',eventfile,'.'
         write(*,*) 'First non-comment line begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -49,8 +47,7 @@
       read(lun, fmt=*) instring, instring2
 
       if (instring(1:3) .ne. '[t]') then
-        write(*,*) 'Bad format in neutrino telescope event file ',eventf
-     &ile,'.'
+        write(*,*) 'Bad format in neutrino telescope event file ',eventfile,'.'
         write(*,*) 'Second non-comment line begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -64,8 +61,7 @@
           read(lun, fmt=*, IOSTAT=IFAIL, END=30), instring
         enddo
         if (IFAIL .ne. 0) then
-         write(*,*) 'Bad format in neutrino telescope event file.',event
-     &file,'.'
+         write(*,*) 'Bad format in neutrino telescope event file.',eventfile,'.'
          write(*,*) 'Quitting...'
          stop
         endif
@@ -87,8 +83,7 @@
 
       !Open background file, determine numbers of bins for angular 
       !and energy-estimator distributions, and which comes first
-      subroutine nulike_preparse_bgfile(BGfile, nbins_ang, nbins_E, firs
-     &t, second)
+      subroutine nulike_preparse_bgfile(BGfile, nbins_ang, nbins_E, first, second)
 
       implicit none
       include 'nucommon.h'
@@ -99,8 +94,7 @@
 
       open(lun,file=BGfile,IOSTAT=IFAIL, ACTION='READ')
       if (IFAIL .ne. 0) then
-        write(*,*) 'Error opening neutrino telescope background file. ',
-     &BGfile,'.'
+        write(*,*) 'Error opening neutrino telescope background file. ',BGfile,'.'
         write(*,*) 'Quitting...'
         stop
       endif 
@@ -134,12 +128,10 @@
           endif
         enddo
         read(lun, fmt=*, IOSTAT=IFAIL, END=20), instring
-        if (current .ne. events) read(lun, fmt=*, IOSTAT=IFAIL, END=20),
-     & instring
+        if (current .ne. events) read(lun, fmt=*, IOSTAT=IFAIL, END=20), instring
    
         if (IFAIL .ne. 0) then
-         write(*,*) 'Bad format in neutrino telescope background file ',
-     &BGfile,'.'
+         write(*,*) 'Bad format in neutrino telescope background file ',BGfile,'.'
          write(*,*) 'Quitting...'
          stop
         endif
@@ -153,8 +145,7 @@
       if (current .eq. angular) nbins_ang = nbins_run
       if (current .eq. enrgyest) nbins_E = nbins_run
 
-      if (nbins_ang .gt. max_nBinsBGAng .or. nbins_E .gt. max_nBinsBGE) 
-     &then
+      if (nbins_ang .gt. max_nBinsBGAng .or. nbins_E .gt. max_nBinsBGE) then
         write(*,*) 'Background file contains more data than'
         write(*,*) 'nulike has been configured to handle.'
         write(*,*) 'Increase max_nBinsBGE or max_nBinsBGAng'
@@ -167,8 +158,7 @@
 
 
       !Open neutrino effective area or volume file and determine number of bins
-      subroutine nulike_preparse_effarea_or_volume(fname, nbins, rho, li
-     &ke)
+      subroutine nulike_preparse_effarea_or_volume(fname, nbins, rho, like)
       
       implicit none
       include 'nucommon.h'
@@ -179,25 +169,21 @@
 
       open(lun,file=fname,IOSTAT=IFAIL, ACTION='READ')
       if (IFAIL .ne. 0) then
-        write(*,*) 'Error opening effective area/volume file. ',fname,'.
-     &'
+        write(*,*) 'Error opening effective area/volume file. ',fname,'.'
         write(*,*) 'Quitting...'
         stop
       endif
 
       instring = '#'
-      do while (instring(1:1) .eq. '#' .and. instring .ne. '###--Density
-     &--')
+      do while (instring(1:1) .eq. '#' .and. instring .ne. '###--Density--')
         read(lun, fmt=*), instring        
       enddo
 
       if (instring .eq. '###--Density--') then
         read(lun, fmt=*) instring, instring2 
         if (instring .ne. 'rho') then
-          write(*,*) 'Bad format in effective area/volume file ',fname,'
-     &.'
-          write(*,*) 'First line in density section begins with: ',instr
-     &ing
+          write(*,*) 'Bad format in effective area/volume file ',fname,'.'
+          write(*,*) 'First line in density section begins with: ',instring
           write(*,*) 'Quitting...'
           stop
         endif 
@@ -205,15 +191,13 @@
         read(lun, fmt=*), instring 
         read(lun, fmt=*), instring 
       else
-        if (like .eq. 2014) stop 'Density required in effective volume f
-     &ile for 2014 likelihood.'
+        if (like .eq. 2014) stop 'Density required in effective volume file for 2014 likelihood.'
         rho = 0.d0
       endif
       
       if (instring(1:1) .ne. 'B') then
         write(*,*) 'Bad format in effective area/volume file ',fname,'.'
-        write(*,*) 'First line in response section begins with: ',instri
-     &ng
+        write(*,*) 'First line in response section begins with: ',instring
         write(*,*) 'Quitting...'
         stop
       endif 
@@ -225,8 +209,7 @@
         enddo
         read(lun, fmt=*, IOSTAT=IFAIL, END=10) instring
         if (IFAIL .ne. 0) then
-          write(*,*) 'Bad format in effective area/volume file ',fname,'
-     &.'
+          write(*,*) 'Bad format in effective area/volume file ',fname,'.'
           write(*,*) 'Quitting...'
           stop
         endif
@@ -250,8 +233,7 @@
 
       !Open file of energy estimator response histograms, determine how
       !many histograms and how many bins in each histogram.
-      subroutine nulike_preparse_energy_dispersion(edispfile, nhist, nco
-     &l, ee_max, ee_min, like)
+      subroutine nulike_preparse_energy_dispersion(edispfile, nhist, ncol, ee_max, ee_min, like)
 
       implicit none
       include 'nucommon.h'
@@ -323,8 +305,7 @@
       if ( 
      &     (maxval(ncol) .gt. max_ncols)
      &     .or.
-     &     (like .eq. 2012 .and. nint(ee_max - ee_min) + 1 .gt. max_ncol
-     &s)
+     &     (like .eq. 2012 .and. nint(ee_max - ee_min) + 1 .gt. max_ncols)
      &   ) then
         write(*,*) 'Neutrino telescope energy dispersion histogram'
         write(*,*) 'file contains more energy estimator values'

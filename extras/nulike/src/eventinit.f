@@ -11,8 +11,7 @@
 *** Modified: March 5, June 15 2014
 ***********************************************************************
 
-      subroutine nulike_eventinit(filename, totalevents, cutevents, 
-     &                                              cosphimin, like)
+      subroutine nulike_eventinit(filename, totalevents, cutevents, cosphimin, like)
 
       implicit none
       include 'nulike.h'
@@ -31,8 +30,7 @@
 
       !Skip over header lines
       instring = '#'
-      do while (instring(1:1) .eq. '#' .or. instring .eq. '[t]' .or. 
-     &          instring .eq. '[v]')
+      do while (instring(1:1) .eq. '#' .or. instring .eq. '[t]' .or. instring .eq. '[v]')
         read(lun, fmt='(A3)'), instring
       enddo
 
@@ -55,17 +53,14 @@
           case default
             stop 'Unrecognised likelihood type in nulike_eventinit.'
           end select
-          if (cosphiErr .eq. 0.d0) stop 
-     &          'Error in event file: an event with phi_err=0!'
+          if (cosphiErr .eq. 0.d0) stop 'Error in event file: an event with phi_err=0!'
           events_cosphi(cutevents,analysis) = cosphi
           events_cosphiErr(cutevents,analysis) = cosphiErr
         endif
       enddo
 
-      if (like .eq. 2014 .and. savedevents .gt. 0 .and. cutevents .ne. 
-     &    savedevents)
-     & stop 'Number of events in partial likelihood file and event
-     & file do not match!! Death.'
+      if (like .eq. 2014 .and. savedevents .gt. 0 .and. cutevents .ne. savedevents)
+     & stop 'Number of events in partial likelihood file and event file do not match!! Death.'
 
       close(lun)
 

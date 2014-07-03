@@ -19,8 +19,7 @@
 ***********************************************************************
 
 
-      double precision function nulike_signal(nuyield, annrate, logmw,
-     & like)
+      double precision function nulike_signal(nuyield, annrate, logmw, like)
 
       implicit none
       include 'nulike.h'
@@ -55,15 +54,13 @@
         ptypeshare = 1
         integral = nulike_simpson(nulike_sigintegrand,nuyield,
      &   sens_logE(1,1,analysis),upperLimit,eps2012)
-        theta_Snu = integral * dlog(10.d0) * exp_time(analysis)
-     &   * annrate
+        theta_Snu = integral * dlog(10.d0) * exp_time(analysis) * annrate
 
         ! Anti-neutrinos
         ptypeshare = 2
         integral = nulike_simpson(nulike_sigintegrand,nuyield,
      &   sens_logE(1,1,analysis),upperLimit,eps2012)
-        theta_Snubar = integral * dlog(10.d0) * exp_time(analysis)
-     &   * annrate
+        theta_Snubar = integral * dlog(10.d0) * exp_time(analysis) * annrate
 
         ! Total
         nulike_signal = theta_Snu + theta_Snubar 
@@ -74,8 +71,7 @@
         eventnumshare = 0 ! Use effective area from previous tabulation.
         integral = nulike_simpson(nulike_specangintegrand,nuyield,
      &   sens_logE(1,1,analysis),logmw,eps2014)
-        nulike_signal = integral * dlog(10.d0) * exp_time(analysis)
-     &   * annrate
+        nulike_signal = integral * dlog(10.d0) * exp_time(analysis) * annrate
 
       case default
         write(*,*) "Unrecognised likelihood version in nulike_signal."
