@@ -35,6 +35,7 @@ std_include_paths  = ['/usr/include/']
 
 # loaded_classes       = ['MyInt', 'DummyNameSpace::U']
 loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Event', 'Pythia8::Particle']
+# loaded_classes       = ['T', 'X', 'MyNamespace::SomeClass<int>']
 loaded_functions     = []
 
 wrapper_class_tree     = True
