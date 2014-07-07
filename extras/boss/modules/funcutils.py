@@ -159,12 +159,13 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
 
                 else:
                     if include_namespace:
-                        namespaces = arg_dict['type_namespaces']
+                        args_seq += arg_dict['type']
+                    else:
+                        args_seq += utils.removeNamespace(arg_dict['type'])
+                        # namespaces = arg_dict['type_namespaces']
+                        # if len(namespaces)>0:
+                        #     args_seq += '::'.join(namespaces) + '::'
 
-                        if len(namespaces)>0:
-                            args_seq += '::'.join(namespaces) + '::'
-
-                    args_seq += arg_dict['type']
 
             if include_arg_type and include_arg_name:
                 args_seq += ' '
@@ -244,12 +245,15 @@ def constrWrapperArgs(args, add_ref=False):
     for arg_dict in w_args:
         if arg_dict['native'] == True:
             if arg_dict['loaded_class']:
-                if len(arg_dict['type_namespaces']) > 0:
-                    # namespaces, type_name = arg_dict['type'].rsplit('::',1)
-                    # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
-                    arg_dict['type'] = classutils.getAbstractClassName(arg_dict['type'])
-                else:
-                    arg_dict['type'] = cfg.abstr_class_prefix + arg_dict['type']
+
+                arg_dict['type'] = classutils.toAbstractType(arg_dict['type'])
+
+                # if len(arg_dict['type_namespaces']) > 0:
+                #     # namespaces, type_name = arg_dict['type'].rsplit('::',1)
+                #     # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
+                #     arg_dict['type'] = classutils.getAbstractClassName(arg_dict['type'])
+                # else:
+                #     arg_dict['type'] = cfg.abstr_class_prefix + arg_dict['type']
 
                 if add_ref:
                     if ('&' not in arg_dict['type']) and ('*' not in arg_dict['type']):
@@ -491,3 +495,24 @@ def usesNativeType(func_el):
     return uses_native_type
 
 # ======== END: usesNativeType ========
+
+
+
+# ======== usesLoadedType ========
+
+def usesLoadedType(func_el):
+
+    uses_loaded_type = False
+
+    return_type_name, return_kw, return_id = utils.findType(func_el)
+    return_is_loaded = utils.isLoadedClass( cfg.id_dict[return_id] )
+
+    args = getArgs(func_el)
+    is_arg_loaded = [arg_dict['loaded_class'] for arg_dict in args]
+
+    if (return_is_loaded) or (True in is_arg_loaded):
+        uses_loaded_type = True
+
+    return uses_loaded_type
+
+# ======== END: usesLoadedType ========

@@ -22,7 +22,6 @@ classes_done          = []
 template_done         = []
 templ_spec_done       = []
 added_parent          = []
-#wrapper_class_headers = {}
 
 #
 # Main function for parsing classes
@@ -40,36 +39,36 @@ def run():
     # Loop over all classes 
     #
     
-    for class_name_full, class_el in cfg.class_dict.items():
+    for class_name_long, class_el in cfg.class_dict.items():
 
         # Print current class
         print
-        print '~~~~ Current class: ' + class_name_full + ' ~~~~'
+        print '~~~~ Current class: ' + class_name_long + ' ~~~~'
         print
 
         # Check if we've done this class already
-        if class_name_full in classes_done:
+        if class_name_long in classes_done:
             print ' '*15 + '--> Class already done'
             continue
 
+        # Generate dicts with different variations of the class name
+        class_name       = classutils.getClassNameDict(class_el)
+        abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
 
-        # NOT NEEDED WHEN PARSING ONLY LISTED CLASSES:
-        #
-        # # Check if this class is native to the source code
-        # if utils.isNative(class_el):
-        #     if 'extern' in class_el.keys() and class_el.get('extern') == "1":
-        #         print ' '*15 + '--> Class %s RECOGNIZED but IGNORED' % class_name_full
-        #         continue
-        #     else:
-        #         print ' '*15 + '--> Class %s ACCEPTED' % class_name_full
-        #         pass
-        # else:
-        #     print ' '*15 + '--> Class IGNORED'
-        #     continue
+
+        print
+        print 'CLASS NAME:'
+        print class_name
+        print
+        print 'ABSTRACT CLASS NAME:'
+        print abstr_class_name
+        print
+
+
 
 
         # Check if this is a template class
-        if '<' in class_name_full:
+        if '<' in class_name['long_templ']:
             is_template = True
         else:
             is_template = False
@@ -77,37 +76,39 @@ def run():
 
         # Make list of all types in use in this class
         # Also, make a separate list of all std types
-        check_member_elements = utils.getMemberElements(class_el)
-        cfg.all_types_in_class = {};
-        cfg.std_types_in_class = {};
 
-        class_id = class_el.get('id')
-        for mem_el in check_member_elements:
+        all_types_in_class = utils.getAllTypesInClass(class_el, include_parents=True)
 
-            if mem_el.tag in ['Constructor', 'Destructor', 'Method', 'OperatorMethod']:
-                args_list = funcutils.getArgs(mem_el)
-                for arg_dict in args_list:
-                    arg_type_el = cfg.id_dict[arg_dict['id']]
+        # check_member_elements = utils.getMemberElements(class_el)
+        # cfg.all_types_in_class = {};
+        # cfg.std_types_in_class = {};
 
-                    arg_type = arg_dict['type']
+        # class_id = class_el.get('id')
+        # for mem_el in check_member_elements:
 
-                    if arg_type not in cfg.all_types_in_class.keys():
-                        cfg.all_types_in_class[arg_type] = arg_type_el
+        #     if mem_el.tag in ['Constructor', 'Destructor', 'Method', 'OperatorMethod']:
+        #         args_list = funcutils.getArgs(mem_el)
+        #         for arg_dict in args_list:
+        #             arg_type_el = cfg.id_dict[arg_dict['id']]
 
-                        if utils.isStdType(arg_type_el):
-                            cfg.std_types_in_class[arg_type] = arg_type_el
+        #             arg_type = arg_dict['type']
+
+        #             if arg_type not in cfg.all_types_in_class.keys():
+        #                 cfg.all_types_in_class[arg_type] = arg_type_el
+
+        #                 if utils.isStdType(arg_type_el):
+        #                     cfg.std_types_in_class[arg_type] = arg_type_el
 
 
-            if ('type' in mem_el.keys()) or ('returns' in mem_el.keys()):
-                mem_type, mem_type_kw, mem_type_id = utils.findType(mem_el)
-                type_el = cfg.id_dict[mem_type_id]
+        #     if ('type' in mem_el.keys()) or ('returns' in mem_el.keys()):
+        #         mem_type, mem_type_kw, mem_type_id = utils.findType(mem_el)
+        #         type_el = cfg.id_dict[mem_type_id]
 
-                if mem_type not in cfg.all_types_in_class.keys():
-                    cfg.all_types_in_class[mem_type] = type_el
+        #         if mem_type not in cfg.all_types_in_class.keys():
+        #             cfg.all_types_in_class[mem_type] = type_el
 
-                    if utils.isStdType(type_el):
-                        cfg.std_types_in_class[mem_type] = type_el
-
+        #             if utils.isStdType(type_el):
+        #                 cfg.std_types_in_class[mem_type] = type_el
 
                 # if utils.isStdType(type_el):
                 #     if mem_type not in cfg.std_types_in_class:
@@ -129,61 +130,57 @@ def run():
 
         
         # Set a bunch of generally useful variables 
-        class_name             = class_name_full.split('<',1)[0]
-        short_class_name       = class_el.get('name').split('<',1)[0]
-        short_abstr_class_name = classutils.getAbstractClassName(class_name, prefix=cfg.abstr_class_prefix, short=True)
-
         src_file_el        = cfg.id_dict[class_el.get('file')]
         src_file_name      = src_file_el.get('name')
         src_dir            = os.path.split(src_file_name)[0]
 
-        short_abstr_class_fname = cfg.abstr_header_prefix + short_class_name + cfg.header_extension
+        short_abstr_class_fname = cfg.new_header_files[class_name['long']]['abstract']
         abstr_class_fname       = os.path.join(cfg.extra_output_dir, short_abstr_class_fname)
 
-        namespaces    = class_name.split('::')[:-1]
+        namespaces    = class_name['long'].split('::')[:-1]
         has_namespace = bool(len(namespaces))
 
-        has_copy_constructor    = classutils.checkCopyConstructor(class_el)
+        has_copy_constructor, copy_constructor_id = classutils.checkCopyConstructor(class_el, return_id=True)
         has_assignment_operator = classutils.checkAssignmentOperator(class_el)
 
 
         # Prepare entries in return_code_dict and src_includes
         if abstr_class_fname not in return_code_dict.keys():
-            return_code_dict[abstr_class_fname] = []
+            return_code_dict[abstr_class_fname] = {'code_tuples':[], 'add_include_guard':True}
         if src_file_name not in return_code_dict.keys():
-            return_code_dict[src_file_name] = []
+            return_code_dict[src_file_name] = {'code_tuples':[], 'add_include_guard':False}
         if src_file_name not in src_includes.keys():
             src_includes[src_file_name] = []
 
 
-        # Register an include statement for this header file, to go in the file cfg.all_headers_fname
-        include_line = '#include "' + short_abstr_class_fname + '"\n' 
-        all_headers_file_path = os.path.join(cfg.extra_output_dir, cfg.all_headers_fname)
+        # # Register an include statement for this header file, to go in the file cfg.all_headers_fname
+        # include_line = '#include "' + short_abstr_class_fname + '"\n' 
+        # all_headers_file_path = os.path.join(cfg.extra_output_dir, cfg.all_headers_fname)
 
-        if all_headers_file_path not in return_code_dict.keys():
-            return_code_dict[all_headers_file_path] = []
-        if include_line not in [ inc_tuple[1] for inc_tuple in return_code_dict[all_headers_file_path] ]:
-            return_code_dict[all_headers_file_path].append( (0, include_line) )
+        # if all_headers_file_path not in return_code_dict.keys():
+        #     return_code_dict[all_headers_file_path] = {'code_tuples':[], 'add_include_guard':True}
+        # if include_line not in [ inc_tuple[1] for inc_tuple in return_code_dict[all_headers_file_path]['code_tuples'] ]:
+        #     return_code_dict[all_headers_file_path]['code_tuples'].append( (0, include_line) )
 
 
         # Treat the first specialization of a template class differently
-        if is_template and class_name not in template_done:
+        if is_template and class_name['long'] not in template_done:
             template_bracket, template_types = utils.getTemplateBracket(class_el)
             
             empty_templ_class_decl = ''
-            empty_templ_class_decl += classutils.constrEmptyTemplClassDecl(short_abstr_class_name, namespaces, template_bracket, indent=cfg.indent)
-            empty_templ_class_decl += classutils.constrTemplForwDecl(short_class_name, namespaces, template_bracket, indent=cfg.indent)
+            empty_templ_class_decl += classutils.constrEmptyTemplClassDecl(abstr_class_name['short'], namespaces, template_bracket, indent=cfg.indent)
+            empty_templ_class_decl += classutils.constrTemplForwDecl(class_name['short'], namespaces, template_bracket, indent=cfg.indent)
 
-            return_code_dict[abstr_class_fname].append( (0, empty_templ_class_decl) )
+            return_code_dict[abstr_class_fname]['code_tuples'].append( (0, empty_templ_class_decl) )
 
 
         # Get template arguments for specialization, 
         # and check that they are acceptable
-        if is_template and class_name_full not in templ_spec_done:
+        if is_template and class_name['long'] not in templ_spec_done:
             spec_template_types = utils.getSpecTemplateTypes(class_el)
             for template_type in spec_template_types:
                 if (template_type not in cfg.accepted_types):
-                    raise Exception("The template specialization type '" + template_type + "' for class " + class_name_full + " is not among accepted types.")
+                    raise Exception("The template specialization type '" + template_type + "' for class " + class_name['long'] + " is not among accepted types.")
 
 
         # Construct code for the abstract class header file and register it
@@ -195,29 +192,43 @@ def run():
         class_decl += '#include <iostream>  // FOR DEBUG: Allow virtual member functions to print a warning if executed.\n'
         class_decl += '\n'
 
+        # - Add include statements
+        include_statements = []
+        include_statements += classutils.getIncludeStatements(all_types_in_class, 'abstract')
+        include_statements_code = '\n'.join(include_statements) + 2*'\n'
+        class_decl += include_statements_code
+
+
         # - Add forward declarations at the top of the header file  
         #
         #   FIXME: For now, this includes forward declarations of *all* loaded native classes.
         #          Should limit this to only the forward declarations needed for the given abstract class.
-        class_decl += '// Forward declarations:\n'
-        class_decl += utils.constrForwardDecls()
-        class_decl += '\n'
+        #   FIXME: Anything depending on the forward declaration of the original class should go into a 
+        #          separate header (abstract_SomeClass_extra.hpp).
+        # 
+        # class_decl += '// Forward declarations:\n'
+        # class_decl += utils.constrForwardDecls()
+        # class_decl += '\n'
 
 
         # - Add the the code for the abstract class
-        if (is_template == True) and (class_name_full in templ_spec_done):
+        if (is_template == True) and (class_name['long'] in templ_spec_done):
             pass
-        elif (is_template == True) and (class_name_full not in templ_spec_done):
-            class_decl += classutils.constrAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, 
-                                                                indent=cfg.indent, template_types=spec_template_types, 
-                                                                has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
+        elif (is_template == True) and (class_name['long'] not in templ_spec_done):
+            class_decl += classutils.constrAbstractClassDecl(class_el, class_name['short'], abstr_class_name['short'], namespaces, 
+                                                             indent=cfg.indent, template_types=spec_template_types, 
+                                                             has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
             class_decl += '\n'
         else:
-            class_decl += classutils.constrAbstractClassDecl(class_el, short_class_name, short_abstr_class_name, namespaces, indent=cfg.indent, 
-                                                                has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
+            class_decl += classutils.constrAbstractClassDecl(class_el, class_name['short'], abstr_class_name['short'], namespaces, indent=cfg.indent, 
+                                                             has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
             class_decl += '\n'
 
-        return_code_dict[abstr_class_fname].append( (-1, class_decl) )
+        # - Add include guards
+        # class_decl = utils.addIncludeGuard(class_decl, short_abstr_class_fname)
+
+        # - Register code
+        return_code_dict[abstr_class_fname]['code_tuples'].append( (-1, class_decl) )
 
 
         # Add abstract class to inheritance list of original class
@@ -236,9 +247,9 @@ def run():
         # First, find position of class name
         search_limit = newline_pos
         while search_limit > -1:
-            pos = file_content_nocomments[:search_limit].rfind(short_class_name)
+            pos = file_content_nocomments[:search_limit].rfind(class_name['short'])
             pre_char  = file_content_nocomments[pos-1]
-            post_char = file_content_nocomments[pos+len(short_class_name)]
+            post_char = file_content_nocomments[pos+len(class_name['short'])]
             if (pre_char in [' ','\n','\t']) and (post_char in [' ', ':', '\n', '<', '{']):
                 break
             else:
@@ -252,7 +263,7 @@ def run():
         
             # - Determine whether this is the source for the general template 
             #   or for a specialization (look for '<' after class name)
-            temp_pos = class_name_pos + len(short_class_name)
+            temp_pos = class_name_pos + len(class_name['short'])
             while True:
                 next_char = file_content_nocomments[temp_pos]
                 if next_char not in [' ', '\t', '\n']:
@@ -272,15 +283,15 @@ def run():
 
 
         # If no previous parent classes:
-        if (class_el.get('bases') == "") and (class_name_full not in added_parent):
+        if (class_el.get('bases') == "") and (class_name['long'] not in added_parent):
 
             # - Calculate insert position
-            insert_pos = class_name_pos + len(short_class_name)
+            insert_pos = class_name_pos + len(class_name['short'])
             if is_template and src_is_specialization:
                 insert_pos += len(add_template_bracket)
 
             # - Generate code
-            add_code = ' : public virtual ' + short_abstr_class_name
+            add_code = ' : public virtual ' + abstr_class_name['short']
             if is_template == True:
                 add_code += add_template_bracket
 
@@ -289,27 +300,25 @@ def run():
 
             # - Get colon position
             if is_template and src_is_specialization:
-                temp_pos = class_name_pos + len(short_class_name) + len(add_template_bracket)
+                temp_pos = class_name_pos + len(class_name['short']) + len(add_template_bracket)
             else:
-                temp_pos = class_name_pos + len(short_class_name)
+                temp_pos = class_name_pos + len(class_name['short'])
             colon_pos = temp_pos + file_content_nocomments[temp_pos:newline_pos].find(':')
 
             # - Calculate insert position
             insert_pos = colon_pos + 1
 
             # - Generate code
-            add_code = ' public virtual ' + short_abstr_class_name
+            add_code = ' public virtual ' + abstr_class_name['short']
             if is_template == True:
                 add_code += add_template_bracket
             add_code += ','
 
         # - Register new code
-        if src_file_name not in return_code_dict.keys():
-            return_code_dict[src_file_name] = []
-        return_code_dict[src_file_name].append( (insert_pos, add_code) )
+        return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, add_code) )
 
         # - Update added_parent dict
-        added_parent.append(class_name_full)
+        added_parent.append(class_name['long'])
 
 
         # Generate code for #include statement in orginal header/source file 
@@ -346,14 +355,15 @@ def run():
             include_code += '\n'*has_namespace
 
             # - Register code
-            return_code_dict[src_file_name].append( (insert_pos, include_code) )
+            return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, include_code) )
 
             # - Register include line
             src_includes[src_file_name].append(src_include_line)
 
 
-        # Generate wrappers for all member functions that make use of native types
-
+        # Generate wrappers for all member functions that make use of native types,
+        # and reference returning functions for all public member variables that have an accepted type
+        
         # - Create lists of all 'non-artificial' members of the class
         member_methods   = []
         member_variables = []
@@ -365,6 +375,7 @@ def run():
                         if funcutils.usesNativeType(el):
                             member_methods.append(el)
                     elif (el.tag in ('Field', 'Variable')) and (el.get('access') == 'public'):
+                        if utils.isAcceptedType(el):
                             member_variables.append(el)
 
                     # append_method = False
@@ -393,7 +404,7 @@ def run():
             # wrapper_code += ' '*(len(namespaces)+2)*cfg.indent + 'WRAPPER CODE FOR ' + mem_el.get('name') + ' GOES HERE!\n'
 
         # - Register code
-        return_code_dict[src_file_name].append( (insert_pos, wrapper_code) )            
+        return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, wrapper_code) )            
 
         # - Generate a reference-returning method for each (public) member variable:
         ref_func_code = ''
@@ -407,7 +418,7 @@ def run():
 
         # - Register code
         if ref_func_code != '':
-            return_code_dict[src_file_name].append( (insert_pos, ref_func_code) )            
+            return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, ref_func_code) )            
 
 
         # Generate pointer-based copy and assignment functions
@@ -415,11 +426,11 @@ def run():
         ptr_code  = '\n'
         ptr_code += ' '*cfg.indent*(n_indents+1) + 'public:\n'
 
-        ptr_code += classutils.constrPtrCopyFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
-        ptr_code += classutils.constrPtrAssignFunc(short_abstr_class_name, short_class_name, virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+        ptr_code += classutils.constrPtrCopyFunc(abstr_class_name['short'], class_name['short'], virtual=False, indent=cfg.indent, n_indents=n_indents+2)
+        ptr_code += classutils.constrPtrAssignFunc(abstr_class_name['short'], class_name['short'], virtual=False, indent=cfg.indent, n_indents=n_indents+2)
         
         # - Register code
-        return_code_dict[src_file_name].append( (insert_pos, ptr_code) )
+        return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, ptr_code) )
 
 
         # Generate info for factory 
@@ -427,19 +438,19 @@ def run():
         # fact_subdict = {}
         # fact_subdict['include']  = '#include "' + os.path.basename(class_file_name) + '"\n'
         # fact_subdict['func_def'] = constrFactoryFunction(class_el, indent=cfg.indent)
-        # factories_dict[short_class_name] = fact_subdict
+        # factories_dict[class_name['short']] = fact_subdict
 
         factory_file_content  = ''
-        if is_template and class_name in template_done:
+        if is_template and class_name['long'] in template_done:
             pass
         else:
             src_file_name_base = os.path.basename(src_file_name)
             factory_file_content += '#include "' + os.path.join(cfg.add_path_to_includes, src_file_name_base) + '"\n'
             factory_file_content += '\n'
         if is_template:
-            factory_file_content += classutils.constrFactoryFunction(class_el, class_name_full, indent=cfg.indent, template_types=spec_template_types)
+            factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, template_types=spec_template_types, skip_copy_constructors=True)
         else:
-            factory_file_content += classutils.constrFactoryFunction(class_el, class_name_full, indent=cfg.indent)
+            factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, skip_copy_constructors=True)
         factory_file_content += '\n'
 
         # # Add include statements
@@ -459,41 +470,44 @@ def run():
         # - Generate factory file name
         dir_name = cfg.extra_output_dir
         # dir_name = os.path.split(src_file_el.get('name'))[0]
-        factory_file_name = os.path.join(dir_name, cfg.factory_file_prefix + short_class_name + cfg.source_extension)
+        factory_file_name = os.path.join(dir_name, cfg.factory_file_prefix + class_name['short'] + cfg.source_extension)
 
         # - Register code
         if factory_file_name not in return_code_dict.keys():
-            return_code_dict[factory_file_name] = []
-        return_code_dict[factory_file_name].append( (-1, factory_file_content) )
+            return_code_dict[factory_file_name] = {'code_tuples':[], 'add_include_guard':False}
+        return_code_dict[factory_file_name]['code_tuples'].append( (-1, factory_file_content) )
 
 
         #
         # Generate a header containing the GAMBIT wrapper class
         #
-        short_wrapper_class_fname = cfg.wrapper_header_prefix + short_class_name + cfg.header_extension
+        # short_wrapper_class_fname = cfg.wrapper_header_prefix + class_name['short'] + cfg.header_extension
+        short_wrapper_class_fname = cfg.new_header_files[class_name['long']]['wrapper']
         wrapper_class_fname = os.path.join(cfg.extra_output_dir, short_wrapper_class_fname)
         
-        wrapper_class_file_content = generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, 
-                                                           short_abstr_class_fname, has_copy_constructor, has_assignment_operator)
+        wrapper_class_file_content = generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
+                                                           short_abstr_class_fname, short_wrapper_class_fname,
+                                                           all_types_in_class, has_assignment_operator, has_copy_constructor,
+                                                           copy_constructor_id=copy_constructor_id)
 
         # - Update dict of wrapper class header files
-        #wrapper_class_headers[short_class_name] = wrapper_class_fname
+        #wrapper_class_headers[class_name['short']] = wrapper_class_fname
 
         # - Register code
         if wrapper_class_fname not in return_code_dict.keys():
-            return_code_dict[wrapper_class_fname] = []
-        return_code_dict[wrapper_class_fname].append( (0, wrapper_class_file_content) )
+            return_code_dict[wrapper_class_fname] = {'code_tuples':[], 'add_include_guard':True}
+        return_code_dict[wrapper_class_fname]['code_tuples'].append( (0, wrapper_class_file_content) )
 
 
         #
         # Keep track of classes done
         #
-        classes_done.append(class_name_full)
+        classes_done.append(class_name['long'])
         if is_template: 
-            if class_name not in template_done:
-                template_done.append(class_name)
-            if class_name_full not in templ_spec_done:
-                templ_spec_done.append(class_name_full)
+            if class_name['long'] not in template_done:
+                template_done.append(class_name['long'])
+            if class_name['long'] not in templ_spec_done:
+                templ_spec_done.append(class_name['long'])
         
         print '...Done'
         print
@@ -525,11 +539,12 @@ def run():
 #
 # Function for generating a header file with a GAMBIT wrapper class
 #
-def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, namespaces, 
-                          short_abstr_class_fname, has_copy_constructor, has_assignment_operator):
+def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
+                          short_abstr_class_fname, short_wrapper_class_fname,
+                          all_types_in_class, has_assignment_operator, has_copy_constructor,
+                          copy_constructor_id=''):
 
     # Useful variables
-    abstr_class_name = '::'.join(namespaces) + '::'*bool(len(namespaces)) + short_abstr_class_name
     indent           = ' '*cfg.indent
 
     # Useful lists
@@ -542,7 +557,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     for mem_el in class_members:
         # if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
         #     if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
-        #         warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+        #         warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
         #     else:
         #         class_functions.append(mem_el)
 
@@ -550,15 +565,49 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
             if utils.isAcceptedType(mem_el):
                 class_variables.append(mem_el)
             else:
-                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
         else:
             pass
     for mem_el in class_members_full:
+
+        # Skip the copy constructor
+        if has_copy_constructor and (mem_el.get('id') == copy_constructor_id):
+            continue
+
+        # Store constructor if acceptable
         if (mem_el.tag == 'Constructor') and (mem_el.get('access') == 'public'):
             if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
-                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), short_class_name))
+                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
             else:
                 class_constructors.append(mem_el)
+
+
+    # Create a list of dicts with info on the (loaded) parent classes
+    loaded_parent_classes = utils.getParentClasses(class_el, only_loaded_classes=True)
+
+    # loaded_parent_classes = []
+    # if cfg.wrapper_class_tree:
+
+    #     for sub_el in class_el.getchildren():
+    #         if sub_el.tag == 'Base':
+
+    #             base_id = sub_el.get('type')
+    #             base_el = cfg.id_dict[base_id]
+
+    #             if utils.isLoadedClass(base_el):
+
+    #                 base_access    = sub_el.get('access')
+    #                 base_virtual   = bool( int( sub_el.get('virtual') ) )
+    #                 base_name_dict = classutils.getClassNameDict(base_el)
+
+    #                 temp_dict = {}
+    #                 temp_dict['class_name_long'] = base_name_dict['long']
+    #                 temp_dict['wrapper_name']    = classutils.toWrapperType(base_name_dict['long'])
+    #                 temp_dict['access']          = sub_el.get('access')
+    #                 temp_dict['virtual']         = bool( int( sub_el.get('virtual') ) )
+    #                 temp_dict['id']              = base_id  = sub_el.get('type')
+
+    #                 loaded_parent_classes.append(temp_dict)
 
 
     #
@@ -570,8 +619,8 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     # FOR DEBUG: print all types used in this class
     code += '// FOR DEBUG:\n'
     code += '// Types originally used in this class:\n'
-    for type_name in cfg.all_types_in_class.keys():
-        code += '// - ' + type_name + '\n'
+    for type_dict in all_types_in_class:
+        code += '// - ' + type_dict['class_name']['long_templ'] + '\n'
 
     # # Add include statement for abstract class header
     # code += '\n'
@@ -609,14 +658,16 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     temp_code = ''
     for i, constr_el in enumerate(class_constructors):
 
+        # Check
+
         # Identify arguments, translate argument type of loaded classes
         # and construct the argument bracket
         args = funcutils.getArgs(constr_el)
         w_args = funcutils.constrWrapperArgs(args, add_ref=True)
-        args_bracket = funcutils.constrArgsBracket(w_args, include_arg_name=False, include_arg_type=True)
+        args_bracket = funcutils.constrArgsBracket(w_args, include_arg_name=False, include_arg_type=True, include_namespace=True)
 
         # Construct factory pointer code
-        temp_code += abstr_class_name + '* (*Factory_' + short_class_name + '_' + str(i) + ')' + args_bracket + ' = NULL;\n'
+        temp_code += abstr_class_name['long'] + '* (*Factory_' + class_name['short'] + '_' + str(i) + ')' + args_bracket + ' = NULL;\n'
 
     if temp_code != '':
         code += '\n'
@@ -628,27 +679,16 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     # Generate code for wrapper class
     #
 
-    short_wrapper_class_name = short_class_name + cfg.code_suffix
+    short_wrapper_class_name = class_name['short'] + cfg.code_suffix
 
     # Construct line declaring inheritance of other wrapper classes
     inheritance_line = ''
-    if cfg.wrapper_class_tree:
+    for parent_dict in loaded_parent_classes:
 
-        for sub_el in class_el.getchildren():
-            if sub_el.tag == 'Base':
+        inheritance_line += 'virtual '*parent_dict['virtual'] + parent_dict['access'] + ' ' + parent_dict['wrapper_name'] + ', '
 
-                base_id      = sub_el.get('type')
-                base_access  = sub_el.get('access')
-                base_virtual = bool( int( sub_el.get('virtual') ) )
-
-                base_el   = cfg.id_dict[base_id]
-                base_name = base_el.get('demangled')
-
-                if utils.isLoadedClass(base_el):
-                    base_wrapper_name = classutils.toWrapperType(base_name)
-                    inheritance_line += 'virtual '*base_virtual + base_access + ' ' + base_wrapper_name + ', '
-        if inheritance_line != '':
-            inheritance_line = ' : ' + inheritance_line.rstrip(', ')
+    if inheritance_line != '':
+        inheritance_line = ' : ' + inheritance_line.rstrip(', ')
 
     # Class declaration line
     code += '\n'
@@ -670,7 +710,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     code += 2*indent + '// Member variables: \n'
 
     # Public variable: pointer to abstract class: Abstract_ClassX* BEptr
-    code += 2*indent + abstr_class_name + '* BEptr;\n'
+    code += 2*indent + abstr_class_name['long'] + '* BEptr;\n'
 
     # Add references to all public variables
     for var_el in class_variables:
@@ -789,7 +829,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
         args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
 
         temp_code += 2*indent + short_wrapper_class_name + args_bracket + ' :\n'
-        temp_code += 3*indent + 'BEptr( Factory_' + short_class_name + '_' + str(i) + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
+        temp_code += 3*indent + 'BEptr( Factory_' + class_name['short'] + '_' + str(i) + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
         temp_code += common_init_list_code
         temp_code += common_constructor_body
 
@@ -803,7 +843,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
 
     # Add special constructor based on abstract pointer (This is needed to allow return-by-value with the wrapper classes.)
     code += 2*indent + '// Special pointer-based constructor: \n'
-    code += 2*indent + short_wrapper_class_name + '(' + abstr_class_name +'* in) :\n'
+    code += 2*indent + short_wrapper_class_name + '(' + abstr_class_name['long'] +'* in) :\n'
     code += 3*indent + 'BEptr(in),\n'
     code += common_init_list_code
     code += common_constructor_body
@@ -824,7 +864,7 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     if has_assignment_operator:
         code += '\n'
         code += 2*indent + '// Assignment operator: \n'
-        code += 2*indent + short_wrapper_class_name + '& ' + short_wrapper_class_name + '::operator=(const ' + short_wrapper_class_name +'& in)\n'
+        code += 2*indent + short_wrapper_class_name + '& ' + 'operator=(const ' + short_wrapper_class_name +'& in)\n'
         code += 2*indent + '{\n'
         code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr); }\n'
         code += 2*indent + '}\n'
@@ -842,13 +882,28 @@ def generateWrapperHeader(class_el, short_class_name, short_abstr_class_name, na
     # Close class body
     code += '};\n'
 
-    # Add include guards
-    guard_var = '__' + cfg.wrapper_header_prefix + short_class_name + '_' + cfg.header_extension.replace('.','') + '__'
-    guard_var = guard_var.upper()
-    guard_code_top = '#ifndef ' + guard_var + '\n' + '#define ' + guard_var + '\n'
-    guard_code_bottom = '#endif /* ' + guard_var + ' */\n'
     
-    code = guard_code_top + '\n' + code + '\n' + guard_code_bottom
+    # Add #include statements at the beginning
+    include_statements = []
+
+    # - Abstract class for the wrapped class
+    include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, cfg.new_header_files[class_name['long']]['abstract']) + '"' )
+
+    # - Wrapper parent classes
+    for parent_dict in loaded_parent_classes:
+        include_statements.append('#include "' + cfg.new_header_files[ parent_dict['class_name']['long'] ]['wrapper'] + '"')
+
+    # - Any other types
+    include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper')
+
+    # Remove duplicates and construct code
+    include_statements = list( set(include_statements) )
+    include_statements_code = '\n'.join(include_statements) + 2*'\n'
+    code = include_statements_code + code
+
+
+    # Add include guards
+    # code = utils.addIncludeGuard(code, short_wrapper_class_fname)
 
     # Return code
     return code

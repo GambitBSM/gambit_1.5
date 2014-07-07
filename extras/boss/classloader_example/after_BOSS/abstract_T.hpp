@@ -14,7 +14,7 @@ class Abstract_T : public virtual Abstract_U
         virtual int& i_ref_GAMBIT() {std::cout << "Called virtual function" << std::endl;};
 
         virtual Abstract_T* pointerCopy_GAMBIT() {std::cout << "Called virtual function" << std::endl;};
-
+        
         virtual void pointerAssign_GAMBIT(Abstract_T *in){std::cout << "Called virtual function" << std::endl;}     
 
         virtual double& d_ref_GAMBIT() {std::cout << "Called virtual function" << std::endl;};

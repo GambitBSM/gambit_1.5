@@ -2,31 +2,91 @@
 #define __CLASSES_HPP__
 
 #include <iostream>
+#include <string>
+#include <vector>
 
+// namespace MyNamespace
+// {
+//     template<typename T>
+//     class SomeClass {};
 
-class U
+//     SomeClass<int> dummy_instance;
+// }
+
+class MyInt
 {
     public:
-
-        U()
-        {
-            std::cout << "(Constructor of U)" << std::endl;
-        }
-
-        ~U()
-        {
-            std::cout << "(Destructor of U)" << std::endl;
-        }
-
-        void memberFunc()
-        {
-            std::cout << "This is memberFunc from class U" << std::endl;
-        }
+        
+        int val;
+        
+        MyInt(int val_in) : val(val_in)
+        {}
 };
 
 
+namespace DummyNameSpace
+{
+    class U
+    {
+        public:
 
-class T : public U
+            U()
+            {
+                std::cout << "(Constructor of U)" << std::endl;
+            }
+
+            ~U()
+            {
+                std::cout << "(Destructor of U)" << std::endl;
+            }
+
+            // void memberFunc(std::string s_in, std::vector<int> a)
+            // {
+            //     std::cout << "This is memberFunc from class U" << std::endl;
+            // }
+
+            void printStr(std::string s_in)
+            {
+                std::cout << "This is printStr in class U. Got string: " << std::endl; 
+                std::cout << s_in << std::endl;
+            }
+
+            void printVec(std::vector<int> v_in)
+            {
+                std::cout << "This is printVec in class U. Got vector: " << std::endl;
+                for (std::vector<int>::const_iterator i = v_in.begin(); i != v_in.end(); ++i)
+                {
+                    std::cout << " " << *i;
+                }
+                std::cout << std::endl;
+            }
+
+            // void printVecMyInt(std::vector<MyInt> v_in)
+            // {
+            //     std::cout << "This is printVecMyInt in class U. Got vector: " << std::endl;
+            //     for (std::vector<MyInt>::const_iterator i = v_in.begin(); i != v_in.end(); ++i)
+            //     {
+            //         std::cout << " " << (*i).val;
+            //     }
+            //     std::cout << std::endl;
+            // }
+
+            std::vector<int>& changeVec(std::vector<int>& v_in, int el, int new_val)
+            {
+                std::cout << "This is changeVec in class U. Changing vector content... " << std::endl;
+
+                v_in[el] = new_val;
+
+                std::cout << "...done. Now returning the modified vector." << std::endl;
+
+                return v_in;
+            }
+
+    };
+}
+
+
+class T : public DummyNameSpace::U, private std::string
 {
     public:
         // Member variables
@@ -103,25 +163,25 @@ class X
 };
 
 
-template <typename Type>
-class Container
-{
-    public:
-        // Member variables
-        Type var;
+// template <typename Type>
+// class Container
+// {
+//     public:
+//         // Member variables
+//         Type var;
 
-        // Constructor
-        Container() {}
+//         // Constructor
+//         Container() {}
 
-        Container(Type in) : var(in) {}
+//         Container(Type in) : var(in) {}
 
-        void printMsg()
-        {
-            std::cout << std::endl;
-            std::cout << "A message from class 'Container'." << std::endl;
-            std::cout << std::endl;
-        }
+//         void printMsg()
+//         {
+//             std::cout << std::endl;
+//             std::cout << "A message from class 'Container'." << std::endl;
+//             std::cout << std::endl;
+//         }
 
-};
+// };
 
 #endif  /* __CLASSES_HPP__ */

@@ -258,7 +258,7 @@ def main():
 
             for class_name in cfg.loaded_classes:
                 class_el = cfg.class_dict[class_name]
-                parents_el_list = utils.getParentClasses(class_el, only_native_classes=True)
+                parents_el_list = utils.getAllParentClasses(class_el, only_native_classes=True)
 
                 for el in parents_el_list:
                     if 'demangled' in el.keys():
@@ -276,6 +276,19 @@ def main():
         # Update global list: accepted types
         fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
         cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.loaded_classes + cfg.typedef_dict.keys()
+
+
+        # Update global dict: new header files
+        for class_name in cfg.loaded_classes:
+            
+            class_name_short = class_name.split('<',1)[0].split('::')[-1]
+            class_name_long  = class_name.split('<',1)[0]
+
+            if class_name_long not in cfg.new_header_files.keys():
+                
+                abstract_header_name = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
+                wrapper_header_name  = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
+                cfg.new_header_files[class_name_long] = {'abstract': abstract_header_name, 'wrapper': wrapper_header_name}
 
 
 
@@ -308,11 +321,21 @@ def main():
 
         temp_new_code = classparse.run()
 
-        for src_file_name in temp_new_code:
+        for src_file_name in temp_new_code.keys():
+
             if src_file_name not in new_code:
-                new_code[src_file_name] = []
-            for code_tuple in temp_new_code[src_file_name]:
-                new_code[src_file_name].append(code_tuple)
+                new_code[src_file_name] = {'code_tuples':[], 'add_include_guard':False}
+
+            new_code[src_file_name]['code_tuples']      += temp_new_code[src_file_name]['code_tuples']
+            new_code[src_file_name]['add_include_guard'] = temp_new_code[src_file_name]['add_include_guard']
+
+
+        # for src_file_name in temp_new_code:
+        #     if src_file_name not in new_code:
+        #         new_code[src_file_name] = []
+        #     for code_tuple in temp_new_code[src_file_name]:
+        #         new_code[src_file_name].append(code_tuple)
+        #     new_code[s]
 
         #
         # Parse functions
@@ -320,71 +343,29 @@ def main():
 
         temp_new_code = funcparse.run()
 
-        for src_file_name in temp_new_code:
+        for src_file_name in temp_new_code.keys():
+
             if src_file_name not in new_code:
-                new_code[src_file_name] = []
-            for code_tuple in temp_new_code[src_file_name]:
-                new_code[src_file_name].append(code_tuple)
+                new_code[src_file_name] = {'code_tuples':[], 'add_include_guard':False}
 
-        #
-        # Create header with typedefs
-        #
-        code_tuple = utils.constrTypedefHeader()
+            new_code[src_file_name]['code_tuples']      += temp_new_code[src_file_name]['code_tuples']
+            new_code[src_file_name]['add_include_guard'] = temp_new_code[src_file_name]['add_include_guard']
 
+        # for src_file_name in temp_new_code:
+        #     if src_file_name not in new_code:
+        #         new_code[src_file_name] = []
+        #     for code_tuple in temp_new_code[src_file_name]:
+        #         new_code[src_file_name].append(code_tuple)
 
-        # typedef_code = ''
-        # insert_pos   = 0
+        # #
+        # # Create header with typedefs
+        # #
+        # code_tuple = utils.constrTypedefHeader()
 
-        # # - Forward declarations
-        # typedef_code += '// Forward declarations:\n'
-        # for class_name_full, class_el in cfg.class_dict.items():
-
-        #     class_name_short       = class_name_full.split('<',1)[0]
-        #     abstr_class_name       = classutils.getAbstractClassName(class_name_full)
-        #     abstr_class_name_short = abstr_class_name.split('<',1)[0]
-
-        #     # print 'class_name_full        ', class_name_full
-        #     # print 'class_name_short       ', class_name_short
-        #     # print 'abstr_class_name       ', abstr_class_name
-        #     # print 'abstr_class_name_short ', abstr_class_name_short
-
-
-        #     if '<' in class_name_full:
-        #         is_template = True
-        #     else:
-        #         is_template = False
-
-        #     if is_template:
-        #         template_bracket = utils.getTemplateBracket(class_el)[0]
-        #         # spec_template_types = utils.getSpecTemplateTypes(class_el)
-        #         # spec_template_bracket = '<' + ','.join(spec_template_types) + '>'
-
-        #     if is_template:
-        #         typedef_code += 'template ' + template_bracket + '\n'
-        #         typedef_code += 'class ' + abstr_class_name_short + ';\n'
-                
-        #         typedef_code += 'template ' + template_bracket + '\n'
-        #         typedef_code += 'class ' + class_name_short + ';\n'
-                
-        #         typedef_code += 'class ' + abstr_class_name + ';\n'
-        #         typedef_code += 'class ' + class_name_full + ';\n'
-        #     else:
-        #         typedef_code += 'class ' + abstr_class_name + ';\n'
-        #         typedef_code += 'class ' + class_name_full + ';\n'
-        # typedef_code += '\n'
-
-        # # - Typedefs
-        # typedef_code += '// Typedefs:\n'
-        # for typedef_name, typedef_el in cfg.typedef_dict.items():
-        #     type_name, type_kw, type_id = utils.findType(typedef_el)
-        #     typedef_code += 'typedef ' + type_name + ' ' + typedef_name + ';\n'
-
-        # code_tuple = (insert_pos, typedef_code)
-        
-        typedef_file_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname)
-        if typedef_file_path not in new_code.keys():
-            new_code[typedef_file_path] = []
-        new_code[typedef_file_path].append(code_tuple)
+        # typedef_file_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname)
+        # if typedef_file_path not in new_code.keys():
+        #     new_code[typedef_file_path] = {'code_tuples':[], 'add_include_guard':False}
+        # new_code[typedef_file_path]['code_tuples'].append(code_tuple)
 
 
 
@@ -396,7 +377,10 @@ def main():
     # (Write new code to source files)
     #
 
-    for src_file_name, code_tuples in new_code.iteritems():
+    for src_file_name, code_dict in new_code.iteritems():
+
+        add_include_guard = code_dict['add_include_guard']
+        code_tuples = code_dict['code_tuples']
 
         code_tuples.sort( key=lambda x : x[0], reverse=True )
 
@@ -443,6 +427,11 @@ def main():
                 new_file_content = new_file_content[:pos] + code + new_file_content[pos:]
             else:
                 raise UserWarning('Ignored duplicate code\n' + code + '\n\n')
+
+        # Add include guard where requested
+        if add_include_guard:
+            short_new_src_file_name = os.path.basename(new_src_file_name)
+            new_file_content = utils.addIncludeGuard(new_file_content, short_new_src_file_name)
 
         # Do the writing!
         if not options.debug_mode_flag:
