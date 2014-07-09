@@ -18,6 +18,7 @@ SI_ROOT=$PWD
 
 # Make SuperIso after adding -fPIC to the CFLAGS
 rm -f $SI_ROOT/src/*.so # make does not like *.so files under src
+
 make
 cd $SI_ROOT/src/
 make distclean
@@ -29,7 +30,7 @@ sed -i 's/CFLAGS = -lm -fPIC/CFLAGS =/g' FlagsForMake
 mkdir tmp_so
 cd tmp_so
 ar x ../libisospin.a
-gcc -shared -Wl,-soname,libsuperiso.so -o ../libsuperiso.so *.o -lm
+gcc -shared -Wl,libsuperiso.so -o ../libsuperiso.so *.o -lm
 cd ../
 rm -rf tmp_so
 exit
