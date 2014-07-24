@@ -24,7 +24,6 @@ class MyInt
 };
 
 
-
 namespace DummyNameSpace
 {
     class U

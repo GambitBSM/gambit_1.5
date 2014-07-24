@@ -316,6 +316,27 @@ def main():
 
 
         #
+        # Write header with base wrapper class
+        #
+
+        wrapper_base_class_name = 'WrapperBase'
+
+        code_tuple = classutils.generateWrapperBaseHeader(wrapper_base_class_name)
+
+        wrapper_base_header_fname = cfg.wrapper_header_prefix + wrapper_base_class_name + cfg.header_extension
+        wrapper_base_header_path  = os.path.join(cfg.extra_output_dir, wrapper_base_header_fname)
+
+        # - Update cfg.new_header_files
+        if wrapper_base_class_name not in cfg.new_header_files:
+            cfg.new_header_files[wrapper_base_class_name] = {'abstract': '', 'wrapper': wrapper_base_header_fname}
+
+        # - Register header file in the 'new_code' dict
+        if wrapper_base_header_path not in new_code.keys():
+            new_code[wrapper_base_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        new_code[wrapper_base_header_path]['code_tuples'].append(code_tuple)
+
+
+        #
         # Parse classes
         #
 
@@ -337,6 +358,7 @@ def main():
         #         new_code[src_file_name].append(code_tuple)
         #     new_code[s]
 
+
         #
         # Parse functions
         #
@@ -357,16 +379,32 @@ def main():
         #     for code_tuple in temp_new_code[src_file_name]:
         #         new_code[src_file_name].append(code_tuple)
 
-        # #
-        # # Create header with typedefs
-        # #
-        # code_tuple = utils.constrTypedefHeader()
 
-        # typedef_file_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname)
-        # if typedef_file_path not in new_code.keys():
-        #     new_code[typedef_file_path] = {'code_tuples':[], 'add_include_guard':False}
-        # new_code[typedef_file_path]['code_tuples'].append(code_tuple)
+        #
+        # Create header with typedefs
+        #
 
+        code_tuple = utils.constrTypedefHeader()
+
+        typedef_header_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname)
+        
+        if typedef_header_path not in new_code.keys():
+            new_code[typedef_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        new_code[typedef_header_path]['code_tuples'].append(code_tuple)
+
+
+
+        #
+        # Create header forward declarations of all abstract classes
+        #
+
+        code_tuple = utils.constrForwardDeclHeader()
+
+        frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname)
+        
+        if frwd_decls_header_path not in new_code.keys():
+            new_code[frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        new_code[frwd_decls_header_path]['code_tuples'].append(code_tuple)
 
 
     #
@@ -422,11 +460,20 @@ def main():
                 if not code in new_file_content:
                     new_file_content = new_file_content + code    
                 else:
-                    raise UserWarning('Ignored duplicate code\n' + code + '\n\n')
+                    # Ignore duplicate code. (Generate warning is duplicated code is not blank.)
+                    if code.strip() != '':
+                        warnings.warn('Ignored duplicate code: \n' + code + '\n\n')
+                    else:
+                        pass
+
             elif new_file_content[pos:].find(code) != 0:
                 new_file_content = new_file_content[:pos] + code + new_file_content[pos:]
             else:
-                raise UserWarning('Ignored duplicate code\n' + code + '\n\n')
+                # Ignore duplicate code. (Generate warning is duplicated code is not blank.)
+                if code.strip() != '':
+                    warnings.warn('Ignored duplicate code: \n' + code + '\n\n')
+                else:
+                    pass
 
         # Add include guard where requested
         if add_include_guard:

@@ -24,7 +24,7 @@ def isFundamental(el):
 
     return is_fundamental
 
-# ====== END: isNative ========
+# ====== END: isFundamental ========
 
 
 # ====== isNative ========
@@ -367,6 +367,9 @@ def findType(el_input):
             # change xlm element 'el'
             el = cfg.id_dict[type_id]
 
+    # Remove duplicates from the additional_keywords list
+    additional_keywords = list(set(additional_keywords))
+
     # When we exit the loop, 'el' is at the final element.
     # The typename is in the 'name'/'demangled' attribute
     if 'demangled' in el.keys():
@@ -610,13 +613,77 @@ def isLoadedClass(input_type, byname=False):
 
 
 
-# ====== constrForwardDecls ========
+# # ====== constrForwardDecls ========
 
-def constrForwardDecls():
+# def constrForwardDecls():
+
+#     import modules.classutils as classutils
+
+#     code = ''
+#     current_namespaces = []
+
+#     for class_name_long, class_el in cfg.class_dict.items():
+
+#         # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
+#         namespaces    = getNamespaces(class_el)
+#         has_namespace = bool(len(namespaces))
+#         namespace_str = '::'.join(namespaces) + '::'*has_namespace
+
+#         class_name       = classutils.getClassNameDict(class_el)
+#         abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
+
+#         if namespaces != current_namespaces:
+#             # close current namespace
+#             code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
+#             # open new namespace
+#             code += constrNamespace(namespaces, 'open', indent=cfg.indent)
+#             # update current namespace
+#             current_namespaces = namespaces
+
+#         # Add forward decls
+#         n_indents   = len(namespaces)
+#         full_indent = ' '*n_indents*cfg.indent
+        
+#         if '<' in class_name['long_templ']:
+#             is_template = True
+#         else:
+#             is_template = False
+
+#         if is_template:
+#             template_bracket = getTemplateBracket(class_el)[0]
+
+#         if is_template:
+#             code += full_indent + 'template ' + template_bracket + '\n'
+#             code += full_indent + 'class ' + abstr_class_name['short'] + ';\n'
+            
+#             code += full_indent + 'template ' + template_bracket + '\n'
+#             code += full_indent + 'class ' + class_name['short'] + ';\n'
+            
+#             code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
+#             code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
+#         else:
+#             code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
+#             code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
+    
+#     # Close current namespace
+#     code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
+#     code += '\n'
+
+#     return code
+
+# # ====== END: constrForwardDecls ========
+
+
+
+# ====== constrForwardDeclHeader ========
+
+def constrForwardDeclHeader():
 
     import modules.classutils as classutils
 
     code = ''
+    insert_pos = 0
+
     current_namespaces = []
 
     for class_name_long, class_el in cfg.class_dict.items():
@@ -626,7 +693,7 @@ def constrForwardDecls():
         has_namespace = bool(len(namespaces))
         namespace_str = '::'.join(namespaces) + '::'*has_namespace
 
-        class_name       = classutils.getClassNameDict(class_el)
+        # class_name       = classutils.getClassNameDict(class_el)
         abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
 
         if namespaces != current_namespaces:
@@ -641,7 +708,7 @@ def constrForwardDecls():
         n_indents   = len(namespaces)
         full_indent = ' '*n_indents*cfg.indent
         
-        if '<' in class_name['long_templ']:
+        if '<' in abstr_class_name['long_templ']:
             is_template = True
         else:
             is_template = False
@@ -653,22 +720,24 @@ def constrForwardDecls():
             code += full_indent + 'template ' + template_bracket + '\n'
             code += full_indent + 'class ' + abstr_class_name['short'] + ';\n'
             
-            code += full_indent + 'template ' + template_bracket + '\n'
-            code += full_indent + 'class ' + class_name['short'] + ';\n'
+            # code += full_indent + 'template ' + template_bracket + '\n'
+            # code += full_indent + 'class ' + class_name['short'] + ';\n'
             
             code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
-            code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
+            # code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
         else:
             code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
-            code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
+            # code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
     
     # Close current namespace
     code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
     code += '\n'
 
-    return code
+    code_tuple = (insert_pos, code)
 
-# ====== END: constrForwardDecls ========
+    return code_tuple
+
+# ====== END: constrForwardDeclHeader ========
 
 
 
@@ -679,9 +748,9 @@ def constrTypedefHeader():
     typedef_code = ''
     insert_pos   = 0
 
-    # - Forward declarations
-    typedef_code += '// Forward declarations:\n'
-    typedef_code += constrForwardDecls()
+    # # - Forward declarations
+    # typedef_code += '// Forward declarations:\n'
+    # typedef_code += constrForwardDecls()
 
     # - Typedefs
     typedef_code += '// Typedefs:\n'
@@ -863,7 +932,7 @@ def getMemberElements(el, include_artificial=False):
 
 # ====== getMemberFunctions ========
 
-def getMemberFunctions(class_el, include_artificial=False, include_inherited=False, only_accepted=True, limit_pointerness=True):
+def getMemberFunctions(class_el, include_artificial=False, include_inherited=False, only_accepted=True, limit_pointerness=True, include_operators=False):
 
     import modules.funcutils as funcutils
 
@@ -894,10 +963,17 @@ def getMemberFunctions(class_el, include_artificial=False, include_inherited=Fal
 
     # Extract only regular member functions (no variables, constructors, destructors, ...)
     for mem_el in all_members:
-        if (mem_el.tag == 'Method') and (mem_el.get('access') == 'public'):
+        if (mem_el.tag == 'Method' or (include_operators==True and mem_el.tag=='OperatorMethod')) and (mem_el.get('access') == 'public'):
+
             if only_accepted and funcutils.ignoreFunction(mem_el, limit_pointerness=limit_pointerness):
-                warnings.warn('The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_el.get('name')))
+                method_name = mem_el.get('name')
+                if mem_el.tag=='OperatorMethod':
+                    method_name = 'operator' + method_name
+                # warnings.warn('The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (method_name, class_el.get('name')))
+                print 'INFO: ' + 'The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (method_name, class_el.get('name'))
+
                 continue
+
             else:
                 all_functions.append(mem_el)
 
@@ -954,8 +1030,6 @@ def pointerAndRefCheck(input_type, byname=False):
     if '<' in type_name:
         type_name = type_name.split('<',1)[0] + type_name.rsplit('>',1)[-1]
 
-    print 'Type name:', type_name
-
     # Check pointerness
     pointerness = type_name.count('*')
 
@@ -982,3 +1056,62 @@ def addIncludeGuard(code, file_name):
     return new_code 
 
 # ====== END: addIncludeGuard ========
+
+
+
+# ====== identifyIncludedHeaders ========
+
+def identifyIncludedHeaders(content, only_native=True):
+    
+    return_dict = OrderedDict()
+
+    # Remove comments
+    content      = removeComments(content, insert_blanks=True)
+    content_list = content.split('\n')
+
+    # Parse content and identify header file names
+    headers_in_file = []
+    for line in content_list:
+
+        line = line.strip()
+
+        if line[0:8] == '#include':
+            
+            header_file_name = line.split()[1]
+
+            # Skip standard headers (of the form: #include <FILENAME>)
+            if header_file_name[0] == '<':
+                continue
+            else:
+                header_file_name = header_file_name.strip('"')
+                headers_in_file.append(os.path.basename(header_file_name))
+        else:
+            continue
+
+    # Connect with XML elements
+    for check_file_path, file_el in cfg.file_dict.items():
+
+        # - If only_native=True, check for match with cfg.accepted_paths
+        if only_native:
+            is_native_file = False
+            for accepted_path in cfg.accepted_paths:
+                if accepted_path in os.path.dirname(check_file_path):
+                    is_native_file = True
+                    break
+            if not is_native_file:
+                continue
+
+        # - Cut down to file name only
+        check_file_name = os.path.basename(check_file_path)
+
+        # - Keep XML id if the corresponding file name mathces with an identified header
+        if check_file_name in headers_in_file:
+            return_dict[check_file_name] = file_el.get('id')
+
+    return return_dict
+
+# ====== END: identifyIncludedHeaders ========
+
+
+
+

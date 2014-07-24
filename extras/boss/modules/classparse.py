@@ -55,18 +55,6 @@ def run():
         class_name       = classutils.getClassNameDict(class_el)
         abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
 
-
-        print
-        print 'CLASS NAME:'
-        print class_name
-        print
-        print 'ABSTRACT CLASS NAME:'
-        print abstr_class_name
-        print
-
-
-
-
         # Check if this is a template class
         if '<' in class_name['long_templ']:
             is_template = True
@@ -140,8 +128,13 @@ def run():
         namespaces    = class_name['long'].split('::')[:-1]
         has_namespace = bool(len(namespaces))
 
-        has_copy_constructor, copy_constructor_id = classutils.checkCopyConstructor(class_el, return_id=True)
-        has_assignment_operator = classutils.checkAssignmentOperator(class_el)
+        has_copy_constructor, copy_constructor_id         = classutils.checkCopyConstructor(class_el, return_id=True)
+        has_assignment_operator, assignment_is_artificial = classutils.checkAssignmentOperator(class_el)
+        
+        if has_assignment_operator and assignment_is_artificial:
+            construct_assignment_operator = True
+        else:
+            construct_assignment_operator = False
 
 
         # Prepare entries in return_code_dict and src_includes
@@ -193,8 +186,10 @@ def run():
         class_decl += '\n'
 
         # - Add include statements
-        include_statements = []
-        include_statements += classutils.getIncludeStatements(all_types_in_class, 'abstract')
+        include_statements  = []
+        include_statements += ['#include "' + cfg.frwd_decls_abs_fname + '"']
+        # include_statements += classutils.getIncludeStatements(all_types_in_class, 'abstract', exclude_types=[class_name])
+        include_statements += classutils.getIncludeStatements(class_el, 'abstract', exclude_types=[class_name])
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
         class_decl += include_statements_code
 
@@ -217,11 +212,11 @@ def run():
         elif (is_template == True) and (class_name['long'] not in templ_spec_done):
             class_decl += classutils.constrAbstractClassDecl(class_el, class_name['short'], abstr_class_name['short'], namespaces, 
                                                              indent=cfg.indent, template_types=spec_template_types, 
-                                                             has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
+                                                             has_copy_constructor=has_copy_constructor, construct_assignment_operator=construct_assignment_operator)
             class_decl += '\n'
         else:
             class_decl += classutils.constrAbstractClassDecl(class_el, class_name['short'], abstr_class_name['short'], namespaces, indent=cfg.indent, 
-                                                             has_copy_constructor=has_copy_constructor, has_assignment_operator=has_assignment_operator)
+                                                             has_copy_constructor=has_copy_constructor, construct_assignment_operator=construct_assignment_operator)
             class_decl += '\n'
 
         # - Add include guards
@@ -322,7 +317,8 @@ def run():
 
 
         # Generate code for #include statement in orginal header/source file 
-        src_include_line = '#include "' + os.path.join(cfg.add_path_to_includes, short_abstr_class_fname) + '"'
+        # src_include_line = '#include "' + os.path.join(cfg.add_path_to_includes, short_abstr_class_fname) + '"'
+        src_include_line = '#include "' + short_abstr_class_fname + '"'
         if src_include_line in src_includes[src_file_name]:
             pass
         else:
@@ -367,6 +363,7 @@ def run():
         # - Create lists of all 'non-artificial' members of the class
         member_methods   = []
         member_variables = []
+        member_operators = []
         if 'members' in class_el.keys():
             for mem_id in class_el.get('members').split():
                 el = cfg.id_dict[mem_id]
@@ -374,6 +371,9 @@ def run():
                     if (el.tag == 'Method') and (not funcutils.ignoreFunction(el)):
                         if funcutils.usesNativeType(el):
                             member_methods.append(el)
+                    elif (el.tag == 'OperatorMethod') and (not funcutils.ignoreFunction(el)):
+                        if funcutils.usesNativeType(el):
+                            member_operators.append(el)
                     elif (el.tag in ('Field', 'Variable')) and (el.get('access') == 'public'):
                         if utils.isAcceptedType(el):
                             member_variables.append(el)
@@ -401,10 +401,27 @@ def run():
                 wrapper_code += ' '*(len(namespaces)+1)*cfg.indent + method_access +':\n'
                 current_access = method_access
             wrapper_code += classutils.constrWrapperFunction(method_el, indent=cfg.indent, n_indents=len(namespaces)+2)
-            # wrapper_code += ' '*(len(namespaces)+2)*cfg.indent + 'WRAPPER CODE FOR ' + mem_el.get('name') + ' GOES HERE!\n'
 
         # - Register code
         return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, wrapper_code) )            
+
+        # - Generate code for each member operator
+        operator_code  = '\n'
+        for operator_el in member_operators:
+            operator_access = operator_el.get('access')
+            if operator_access != current_access:
+                operator_code += ' '*(len(namespaces)+1)*cfg.indent + operator_access +':\n'
+                current_access = operator_access
+            operator_code += classutils.constrWrapperFunction(operator_el, indent=cfg.indent, n_indents=len(namespaces)+2)
+            # operator_code += ' '*(len(namespaces)+2)*cfg.indent + 'WRAPPER CODE FOR operator' + operator_el.get('name') + ' GOES HERE!\n'
+
+            # Abstract_Particle* operator_squarebracket_gambit(int i)
+            # { 
+            #     return new Pythia8::Particle( operator[](i) );
+            # }
+
+        # - Register code
+        return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, operator_code) )            
 
         # - Generate a reference-returning method for each (public) member variable:
         ref_func_code = ''
@@ -434,12 +451,6 @@ def run():
 
 
         # Generate info for factory 
-        
-        # fact_subdict = {}
-        # fact_subdict['include']  = '#include "' + os.path.basename(class_file_name) + '"\n'
-        # fact_subdict['func_def'] = constrFactoryFunction(class_el, indent=cfg.indent)
-        # factories_dict[class_name['short']] = fact_subdict
-
         factory_file_content  = ''
         if is_template and class_name['long'] in template_done:
             pass
@@ -469,7 +480,6 @@ def run():
 
         # - Generate factory file name
         dir_name = cfg.extra_output_dir
-        # dir_name = os.path.split(src_file_el.get('name'))[0]
         factory_file_name = os.path.join(dir_name, cfg.factory_file_prefix + class_name['short'] + cfg.source_extension)
 
         # - Register code
@@ -487,7 +497,7 @@ def run():
         
         wrapper_class_file_content = generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
                                                            short_abstr_class_fname, short_wrapper_class_fname,
-                                                           all_types_in_class, has_assignment_operator, has_copy_constructor,
+                                                           construct_assignment_operator, has_copy_constructor,
                                                            copy_constructor_id=copy_constructor_id)
 
         # - Update dict of wrapper class header files
@@ -500,6 +510,17 @@ def run():
 
 
         #
+        # Add typedef to the wrapper_typedefs file (example: typedef SomeClass_gambit SomeClass; )
+        #
+        wrapper_class_name = classutils.toWrapperType(class_name['short'])
+        typedef_code = 'typedef ' + wrapper_class_name + ' ' + class_name['short'] + ';\n'
+
+        if cfg.wrapper_typedefs_fname not in return_code_dict.keys():
+            return_code_dict[cfg.wrapper_typedefs_fname] = {'code_tuples':[], 'add_include_guard':True}
+        return_code_dict[cfg.wrapper_typedefs_fname]['code_tuples'].append( (-1, typedef_code) )
+
+
+        #
         # Keep track of classes done
         #
         classes_done.append(class_name['long'])
@@ -509,7 +530,8 @@ def run():
             if class_name['long'] not in templ_spec_done:
                 templ_spec_done.append(class_name['long'])
         
-        print '...Done'
+        print
+        print '~~~~ Class ' + class_name_long + ' done ~~~~'
         print
         print
 
@@ -518,9 +540,9 @@ def run():
     #    
 
     print
-    print 'CLASSES DONE:    ', classes_done
-    print 'TEMPLATE DONE:   ', template_done
-    print 'TEMPL_SPEC DONE: ', templ_spec_done
+    print 'CLASSES DONE                  : ', classes_done
+    print 'TEMPLATES DONE                : ', template_done
+    print 'TEMPLATE SPECIALIZATIONS DONE : ', templ_spec_done
     print
 
 
@@ -541,16 +563,17 @@ def run():
 #
 def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
                           short_abstr_class_fname, short_wrapper_class_fname,
-                          all_types_in_class, has_assignment_operator, has_copy_constructor,
+                          construct_assignment_operator, has_copy_constructor,
                           copy_constructor_id=''):
 
     # Useful variables
-    indent           = ' '*cfg.indent
+    indent = ' '*cfg.indent
+    wrapper_base_class_name = 'WrapperBase<' + abstr_class_name['long'] + '>'
 
     # Useful lists
     class_variables    = []
     class_functions    = utils.getMemberFunctions(class_el, include_artificial=False, include_inherited=cfg.wrap_inherited_members, 
-                                                            only_accepted=True, limit_pointerness=True)
+                                                            only_accepted=True, limit_pointerness=True, include_operators=True)
     class_constructors = []
     class_members      = utils.getMemberElements(class_el, include_artificial=False)
     class_members_full = utils.getMemberElements(class_el, include_artificial=True)
@@ -565,7 +588,8 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
             if utils.isAcceptedType(mem_el):
                 class_variables.append(mem_el)
             else:
-                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
+                # warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
+                print 'INFO: ' + 'The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short'])
         else:
             pass
     for mem_el in class_members_full:
@@ -577,37 +601,14 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         # Store constructor if acceptable
         if (mem_el.tag == 'Constructor') and (mem_el.get('access') == 'public'):
             if funcutils.ignoreFunction(mem_el, limit_pointerness=True):
-                warnings.warn('The member "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
+                # warnings.warn('The constructor "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short']))
+                print 'INFO: ' + 'The constructor "%s" in class "%s" makes use of a non-accepted type and will be ignored.' % (mem_el.get('name'), class_name['short'])
             else:
                 class_constructors.append(mem_el)
 
 
     # Create a list of dicts with info on the (loaded) parent classes
     loaded_parent_classes = utils.getParentClasses(class_el, only_loaded_classes=True)
-
-    # loaded_parent_classes = []
-    # if cfg.wrapper_class_tree:
-
-    #     for sub_el in class_el.getchildren():
-    #         if sub_el.tag == 'Base':
-
-    #             base_id = sub_el.get('type')
-    #             base_el = cfg.id_dict[base_id]
-
-    #             if utils.isLoadedClass(base_el):
-
-    #                 base_access    = sub_el.get('access')
-    #                 base_virtual   = bool( int( sub_el.get('virtual') ) )
-    #                 base_name_dict = classutils.getClassNameDict(base_el)
-
-    #                 temp_dict = {}
-    #                 temp_dict['class_name_long'] = base_name_dict['long']
-    #                 temp_dict['wrapper_name']    = classutils.toWrapperType(base_name_dict['long'])
-    #                 temp_dict['access']          = sub_el.get('access')
-    #                 temp_dict['virtual']         = bool( int( sub_el.get('virtual') ) )
-    #                 temp_dict['id']              = base_id  = sub_el.get('type')
-
-    #                 loaded_parent_classes.append(temp_dict)
 
 
     #
@@ -617,10 +618,11 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     code = ''
 
     # FOR DEBUG: print all types used in this class
-    code += '// FOR DEBUG:\n'
-    code += '// Types originally used in this class:\n'
-    for type_dict in all_types_in_class:
-        code += '// - ' + type_dict['class_name']['long_templ'] + '\n'
+    # code += '// FOR DEBUG:\n'
+    # code += '// Types originally used in this class:\n'
+    # all_types_in_class = utils.getAllTypesInClass(class_el, include_parents=True)
+    # for type_dict in all_types_in_class:
+    #     code += '// - ' + type_dict['class_name']['long_templ'] + '\n'
 
     # # Add include statement for abstract class header
     # code += '\n'
@@ -681,8 +683,9 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
 
     short_wrapper_class_name = class_name['short'] + cfg.code_suffix
 
-    # Construct line declaring inheritance of other wrapper classes
-    inheritance_line = ''
+    # Construct line declaring inheritance from the wrapper base class (WrapperBase)
+    # and from other wrapper classes
+    inheritance_line = 'public ' + wrapper_base_class_name
     for parent_dict in loaded_parent_classes:
 
         inheritance_line += 'virtual '*parent_dict['virtual'] + parent_dict['access'] + ' ' + parent_dict['wrapper_name'] + ', '
@@ -697,11 +700,11 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     # Class body
     code += '{\n'
 
-    # Start private block
-    code += indent + 'private:\n'
+    # # Start private block
+    # code += indent + 'private:\n'
     
-    # Private variable: bool member_element
-    code += 2*indent + 'bool member_variable;\n'
+    # # Private variable: bool member_element
+    # code += 2*indent + 'bool member_variable;\n'
 
     # Start public block
     code += indent + 'public:\n'
@@ -709,8 +712,8 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     # Variables:
     code += 2*indent + '// Member variables: \n'
 
-    # Public variable: pointer to abstract class: Abstract_ClassX* BEptr
-    code += 2*indent + abstr_class_name['long'] + '* BEptr;\n'
+    # # Public variable: pointer to abstract class: Abstract_ClassX* BEptr
+    # code += 2*indent + abstr_class_name['long'] + '* BEptr;\n'
 
     # Add references to all public variables
     for var_el in class_variables:
@@ -742,11 +745,25 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     code += '\n'
     code += 2*indent + '// Member functions: \n'
 
-    # Add wrappers for all member functions
+    # Add wrappers for all member functions (including operator functions)
     for func_el in class_functions:
 
+        # Check if this is an operator function
+        is_operator = False
+        if func_el.tag == 'OperatorMethod':
+            is_operator = True
+
         # Function name
-        func_name = func_el.get('name')
+        if is_operator:
+            func_name = 'operator' + func_el.get('name')
+        else:
+            func_name = func_el.get('name')
+
+        # Check constness
+        if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
+            is_const = True
+        else:
+            is_const = False
 
         # Determine return type
         return_type, return_type_kw, return_type_id = utils.findType(func_el)
@@ -758,16 +775,16 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
 
         # Arguments
         args = funcutils.getArgs(func_el)
-        args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
+        args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True, use_wrapper_base_class=True)
 
         # Convert return type if loaded class
         if utils.isLoadedClass(return_type, byname=True):
-            use_return_type = classutils.toWrapperType(return_type)
+            use_return_type = classutils.toWrapperType(return_type, remove_reference=True)
         else:
             use_return_type = return_type
 
         # Write declaration line
-        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + '\n'
+        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + is_const*' const' '\n'
 
         # Write function body
         code += 2*indent + '{\n'
@@ -783,10 +800,10 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         code += 2*indent + '}\n'
         code += '\n'
 
-    # Add special member function: _set_member(bool) - set the variable 'member_variable' to true/false
-    code += '\n'
-    code += 2*indent + '// Special member function to set member_variable: \n'
-    code += 2*indent + 'void _set_member_variable(bool in) { member_variable = in; }\n'    
+    # # Add special member function: _set_member(bool) - set the variable 'member_variable' to true/false
+    # code += '\n'
+    # code += 2*indent + '// Special member function to set member_variable: \n'
+    # code += 2*indent + 'void _set_member_variable(bool in) { member_variable = in; }\n'    
 
 
     #
@@ -802,7 +819,8 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
             common_init_list_code += 3*indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
         else:
             common_init_list_code += 3*indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
-    common_init_list_code += 3*indent + 'member_variable(false)\n'
+    if common_init_list_code != '':
+        common_init_list_code = common_init_list_code.rstrip(',\n') + '\n'
 
     common_constructor_body = ''
     common_constructor_body += 2*indent + '{\n'
@@ -829,8 +847,12 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
 
         temp_code += 2*indent + short_wrapper_class_name + args_bracket + ' :\n'
-        temp_code += 3*indent + 'BEptr( Factory_' + class_name['short'] + '_' + str(i) + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
-        temp_code += common_init_list_code
+        # temp_code += 3*indent + 'BEptr( Factory_' + class_name['short'] + '_' + str(i) + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
+        temp_code += 3*indent + wrapper_base_class_name + '( Factory_' + class_name['short'] + '_' + str(i) + args_bracket_notypes + ', ' + 'false' + ' )'  # FIXME: This is not general. Fix argument list.
+        if common_init_list_code != '':
+            temp_code += ',\n' + common_init_list_code
+        else:
+            temp_code += '\n'
         temp_code += common_constructor_body
 
         temp_code += '\n'
@@ -844,8 +866,12 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     # Add special constructor based on abstract pointer (This is needed to allow return-by-value with the wrapper classes.)
     code += 2*indent + '// Special pointer-based constructor: \n'
     code += 2*indent + short_wrapper_class_name + '(' + abstr_class_name['long'] +'* in) :\n'
-    code += 3*indent + 'BEptr(in),\n'
-    code += common_init_list_code
+    # code += 3*indent + 'BEptr(in),\n'
+    code += 3*indent + wrapper_base_class_name + '( in, false )'  # FIXME: This is not general. Fix argument list.
+    if common_init_list_code != '':
+        code += ',\n' + common_init_list_code
+    else:
+        code += '\n'
     code += common_constructor_body
 
 
@@ -854,14 +880,19 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         code += '\n'
         code += 2*indent + '// Copy constructor: \n'
         code += 2*indent + short_wrapper_class_name + '(const ' + short_wrapper_class_name +'& in) :\n'
-        code += 3*indent + 'BEptr(in.BEptr->pointerCopy' + cfg.code_suffix + '()),\n'
-        code += common_init_list_code
+        # code += 3*indent + 'BEptr(in.BEptr->pointerCopy' + cfg.code_suffix + '()),\n'
+        code += 3*indent + wrapper_base_class_name + '( in.BEptr->pointerCopy' + cfg.code_suffix + '(), false )'  # FIXME: This is not general. Fix argument list.
+        if common_init_list_code != '':
+            code += ',\n' + common_init_list_code
+        else:
+            code += '\n'
         code += common_constructor_body
+
 
     #
     # Add assignment operator
     #
-    if has_assignment_operator:
+    if construct_assignment_operator:
         code += '\n'
         code += 2*indent + '// Assignment operator: \n'
         code += 2*indent + short_wrapper_class_name + '& ' + 'operator=(const ' + short_wrapper_class_name +'& in)\n'
@@ -869,15 +900,15 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr); }\n'
         code += 2*indent + '}\n'
 
-    #
-    # Add destructor
-    #
-    code += '\n'
-    code += 2*indent + '// Destructor: \n'
-    code += 2*indent + '~' + short_wrapper_class_name + '()\n'
-    code += 2*indent + '{\n'
-    code += 3*indent + 'if(member_variable==false) { delete BEptr; }\n'
-    code += 2*indent + '}\n'
+    # #
+    # # Add destructor
+    # #
+    # code += '\n'
+    # code += 2*indent + '// Destructor: \n'
+    # code += 2*indent + '~' + short_wrapper_class_name + '()\n'
+    # code += 2*indent + '{\n'
+    # code += 3*indent + 'if(member_variable==false) { delete BEptr; }\n'
+    # code += 2*indent + '}\n'
 
     # Close class body
     code += '};\n'
@@ -886,15 +917,20 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     # Add #include statements at the beginning
     include_statements = []
 
-    # - Abstract class for the wrapped class
-    include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, cfg.new_header_files[class_name['long']]['abstract']) + '"' )
+    # - Base class for all wrapper classes
+    include_statements.append( '#include "' + cfg.new_header_files['WrapperBase']['wrapper'] + '"')
+
+    # - Abstract class for the original class
+    include_statements.append( '#include "' + cfg.new_header_files[class_name['long']]['abstract'] + '"' )
+    # include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, cfg.new_header_files[class_name['long']]['abstract']) + '"' )
 
     # - Wrapper parent classes
     for parent_dict in loaded_parent_classes:
         include_statements.append('#include "' + cfg.new_header_files[ parent_dict['class_name']['long'] ]['wrapper'] + '"')
 
-    # - Any other types
-    include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper')
+    # - Any other types (excluding the current wrapper class)
+    # include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper', add_extra_include_path=False)
+    include_statements += classutils.getIncludeStatements(class_el, 'wrapper', add_extra_include_path=False, exclude_types=[class_name])
 
     # Remove duplicates and construct code
     include_statements = list( set(include_statements) )

@@ -3,8 +3,8 @@ Todo list for BOSS:
 
 Currently working on: 
 
-Anders: 1
-Abram : 2
+Anders: 7, 15
+Abram : ?
 
 
 (1)
@@ -42,7 +42,7 @@ general global functions.
 
 
 (6)
-Figure out how to deal with friend classes and functions? Do we even have to worry about it?
+Figure out how to deal with friend classes and functions? Do we even have to worry about this?
 
 
 (7)
@@ -115,31 +115,21 @@ Will implement alt. 2) for now, but we should investigate whether we should aim 
 
 
 (15)
-BOSS needs to handle operator overloading.
+Fix ownership of the BEptr among various instances of WrapperBase<Abstract_SomeClass>
+Example: If the copy constructor is used to create a temporary copy of a WrapperBase instance, 
+this copy should NOT have permissions to delete BEptr...
+
+Is there a truly safe way of dealing with this? Shared pointer?
+Failing to deal with this issue will lead to segfaults...
 
 
 
 (16)
-Make sure that virtual functions are only created for member functions that are actually implemented.
-(Functions without implementation in a given translation unit will have extern="1" in the corresponding XML file)
-
-This means that, in the loop over input XML files, BOSS cannot simply skip a class just because it was present in a 
-previous XML file. BOSS must check at the level of class member functions whether they're already done or not.
+Handle operator names in a more elegant way. Currently a simple dictionary is used (cfg.operator_names), but this won't
+work when a single operator can be interpreted in different ways depending on context. (Example: the '*' operator can 
+either be multiplication or pointer dereferencing.) Create a utils function for returning the correct operator name?
 
 
-
-(17)
-To avoid cases of circular wrapper class dependence, in which all classes cannot be fully defined, we must make all wrapper classes
-inherit from a (templated) base class, e.g. WrapperBase<Abstract_X>. It is this base class that should hold the pointer 
-to the abstract class (BEptr), along with other common elements (bool member_variable, constructor, destructor, ...).
-
-Such circular dependence can occur when the original class structure relies on using pointers to forward-declared 
-classes (i.e. without ever dereferencing the pointers). If the wrapper class should contain BEptr, then a pointer to 
-a wrapper class instance would have to be dereferenced in order to access BEptr. Thus, the wrapper class could not be used
-simply as a forward declared class, meaning that we couldn't use the same layout as the original class structure...
-
-When BEptr is contained in a base class (which is fully defined before any of the child wrapper classes are defined), any
-function that needs access to BEptr can interpret a wrapper class input argument as the corresponding base class.
 
 
 Small things to fix:

@@ -113,7 +113,8 @@ def getArgs(func_el):
 # ======== constrArgsBracket ========
 
 def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False,
-                      cast_to_original=False, use_wrapper_class=False, wrapper_to_pointer=False):
+                      cast_to_original=False, use_wrapper_class=False, wrapper_to_pointer=False, 
+                      use_wrapper_base_class=False):
 
     #
     # Requires a list of dicts as input, as returned by 'getArgs' or 'constrWrapperArgs'.
@@ -143,7 +144,13 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                 if ('*' not in check_type) and ('&' not in check_type):
                     cast_to_type = cast_to_type + '&'
 
-                args_seq += 'dynamic_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'
+                # Add qualifiers
+                if len(arg_dict['kw']) > 0:
+                    qualifiers = ' '.join(arg_dict['kw'])
+                    cast_to_type = qualifiers + ' ' + cast_to_type
+
+                # args_seq += 'dynamic_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'
+                args_seq += 'reinterpret_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'  # Switched to reinterpret cast to be able to cast forward declared types
 
             else:
 
@@ -155,7 +162,7 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                 args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
 
                 if use_wrapper_class and arg_dict['loaded_class'] == True:
-                    args_seq += classutils.toWrapperType(arg_dict['type'])
+                    args_seq += classutils.toWrapperType(arg_dict['type'], use_base_type=use_wrapper_base_class)
 
                 else:
                     if include_namespace:
@@ -197,8 +204,17 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
 
 def constrWrapperName(func_el):
 
-    func_name   = func_el.get('name')
-    w_func_name = func_name + cfg.code_suffix
+    # Check if this is an operator function
+    is_operator = False
+    if func_el.tag == 'OperatorMethod':
+        is_operator = True
+
+    func_name = func_el.get('name')
+
+    if is_operator:
+        w_func_name = 'operator_' + cfg.operator_names[func_name] + cfg.code_suffix
+    else:
+        w_func_name = func_name + cfg.code_suffix
 
     return w_func_name
 
@@ -270,12 +286,15 @@ def constrWrapperArgs(args, add_ref=False):
 
 # ======== constrDeclLine ========
 
-def constrDeclLine(return_type, func_name, args_bracket, keywords=[]):
+def constrDeclLine(return_type, func_name, args_bracket, keywords=[], is_const=False):
 
     decl_line = ''
     for keyw in keywords: 
         decl_line += keyw + ' '
     decl_line += return_type + ' ' + func_name + args_bracket
+
+    if is_const:
+        decl_line = decl_line + ' const'
 
     return decl_line
 
@@ -449,7 +468,8 @@ def ignoreFunction(func_el, limit_pointerness=False):
     if 'returns' in func_el.keys():
         if not utils.isAcceptedType(func_el):
             return_type, return_kw, return_id = utils.findType(func_el)
-            warnings.warn('The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type))
+            # warnings.warn('The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type))
+            print 'INFO: ' + 'The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type)
             return_type_accepted = False
 
     # Check argument types
@@ -457,13 +477,15 @@ def ignoreFunction(func_el, limit_pointerness=False):
     for arg_dict in args:
         arg_type_name = arg_dict['type']
         if not utils.isAcceptedType(arg_type_name, byname=True):
-            warnings.warn('The function "%s" makes use of a non-accepted argument type "%s" and will be ignored.' % (func_el.get('name'), arg_type_name))
+            # warnings.warn('The function "%s" makes use of a non-accepted argument type "%s" and will be ignored.' % (func_el.get('name'), arg_type_name))
+            print 'INFO: ' + 'The function "%s" makes use of a non-accepted argument type "%s" and will be ignored.' % (func_el.get('name'), arg_type_name)
             arg_types_accepted = False
             break
         if limit_pointerness == True:
             if utils.isLoadedClass(arg_type_name, byname=True):
                 if ('**' in arg_type_name) or ('*&' in arg_type_name):
-                    warnings.warn('The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a loaded class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name))
+                    # warnings.warn('The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a loaded class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name))
+                    print 'INFO: ' + 'The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a loaded class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name)
                     arg_types_accepted = False
                     break
 
