@@ -2,8 +2,8 @@
 
 #include "simple_hep_lib/Particle.hpp"
 #include "simple_hep_lib/Jet.hpp"
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/vector.hpp>
+//#include <boost/serialization/access.hpp>
+//#include <boost/serialization/vector.hpp>
 #include <algorithm>
 
 namespace hep_simple_lib {
@@ -16,8 +16,8 @@ namespace hep_simple_lib {
       /// @name Serialization
       /// @todo This may have to be a Printer function... ask Ben about Printers
       //@{
-      friend class boost::serialization::access;
-
+      //friend class boost::serialization::access;
+      /*
       template<class Archive>
       void serialize(Archive & ar, const unsigned int version) {
         ar & _photons;
@@ -28,6 +28,7 @@ namespace hep_simple_lib {
         ar & _jets;
         ar & _pmiss;
       }
+      */
       //@}
 
       /// @name Internal particle / vector containers
@@ -46,6 +47,7 @@ namespace hep_simple_lib {
 
       /// Missing momentum vector
       P4 _pmiss;
+      P4 _pmiss_truth;
 
       //@}
 
@@ -240,6 +242,25 @@ namespace hep_simple_lib {
       double met() const {
         return missingmom().pT();
       }
+
+      ///
+      /// the sum over momenta of final state invisibles
+      const P4& missingmom_truth() const {
+        return _pmiss_truth;
+      }
+
+      /// @brief Set the missing energy vector
+      ///
+      ///the sum over momenta of final state invisibles
+      void set_missingmom_truth(const P4& pmiss) {
+        _pmiss_truth = pmiss;
+      }
+
+      /// Get the missing ET in GeV calculated from the invisibles
+      double met_truth() const {
+        return missingmom_truth().pT();
+      }
+
 
       //@}
 
