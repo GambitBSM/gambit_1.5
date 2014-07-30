@@ -16,24 +16,24 @@ namespace Pythia8
     class Abstract_Particle
     {
         private:
-            // IGNORED: Variable  -- Name: TINY  -- XML id: _19566
-            // IGNORED: Field  -- Name: idSave  -- XML id: _19567
-            // IGNORED: Field  -- Name: statusSave  -- XML id: _19568
-            // IGNORED: Field  -- Name: mother1Save  -- XML id: _19569
-            // IGNORED: Field  -- Name: mother2Save  -- XML id: _19570
-            // IGNORED: Field  -- Name: daughter1Save  -- XML id: _19571
-            // IGNORED: Field  -- Name: daughter2Save  -- XML id: _19572
-            // IGNORED: Field  -- Name: colSave  -- XML id: _19573
-            // IGNORED: Field  -- Name: acolSave  -- XML id: _19574
-            // IGNORED: Field  -- Name: pSave  -- XML id: _19575
-            // IGNORED: Field  -- Name: mSave  -- XML id: _19576
-            // IGNORED: Field  -- Name: scaleSave  -- XML id: _19577
-            // IGNORED: Field  -- Name: polSave  -- XML id: _19578
-            // IGNORED: Field  -- Name: hasVertexSave  -- XML id: _19579
-            // IGNORED: Field  -- Name: vProdSave  -- XML id: _19580
-            // IGNORED: Field  -- Name: tauSave  -- XML id: _19581
-            // IGNORED: Field  -- Name: pdePtr  -- XML id: _19582
-            // IGNORED: Field  -- Name: evtPtr  -- XML id: _19583
+            // IGNORED: Variable  -- Name: TINY  -- XML id: _18693
+            // IGNORED: Field  -- Name: idSave  -- XML id: _18694
+            // IGNORED: Field  -- Name: statusSave  -- XML id: _18695
+            // IGNORED: Field  -- Name: mother1Save  -- XML id: _18696
+            // IGNORED: Field  -- Name: mother2Save  -- XML id: _18697
+            // IGNORED: Field  -- Name: daughter1Save  -- XML id: _18698
+            // IGNORED: Field  -- Name: daughter2Save  -- XML id: _18699
+            // IGNORED: Field  -- Name: colSave  -- XML id: _18700
+            // IGNORED: Field  -- Name: acolSave  -- XML id: _18701
+            // IGNORED: Field  -- Name: pSave  -- XML id: _18702
+            // IGNORED: Field  -- Name: mSave  -- XML id: _18703
+            // IGNORED: Field  -- Name: scaleSave  -- XML id: _18704
+            // IGNORED: Field  -- Name: polSave  -- XML id: _18705
+            // IGNORED: Field  -- Name: hasVertexSave  -- XML id: _18706
+            // IGNORED: Field  -- Name: vProdSave  -- XML id: _18707
+            // IGNORED: Field  -- Name: tauSave  -- XML id: _18708
+            // IGNORED: Field  -- Name: pdePtr  -- XML id: _18709
+            // IGNORED: Field  -- Name: evtPtr  -- XML id: _18710
         public:
 
             virtual Pythia8::Abstract_Particle* operator_assignment_gambit(const Pythia8::Abstract_Particle& pt) {std::cout << "Called virtual function" << std::endl;};

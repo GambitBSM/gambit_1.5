@@ -52,9 +52,18 @@ int main(int argc, char * argv[])
   // }
   // cout << endl;
 
+  char* pythiaPath;
+  pythiaPath = getenv("PYTHIA8DIR");
+  string libName;
 
-
-  string libName = "../libpythia8.so";
+  if(pythiaPath != NULL)
+  {
+    libName = pythiaPath;
+    libName += "/lib";
+  }
+  else
+    libName = "..";
+  libName += "/libpythia8.so";
 
   cout << "Trying to load library from: " << libName.c_str() << endl;
   

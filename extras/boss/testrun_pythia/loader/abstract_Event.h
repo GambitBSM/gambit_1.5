@@ -18,17 +18,17 @@ namespace Pythia8
     class Abstract_Event
     {
         private:
-            // IGNORED: Variable  -- Name: IPERLINE  -- XML id: _24569
-            // IGNORED: Field  -- Name: startColTag  -- XML id: _24570
-            // IGNORED: Field  -- Name: entry  -- XML id: _24571
-            // IGNORED: Field  -- Name: junction  -- XML id: _24572
-            // IGNORED: Field  -- Name: maxColTag  -- XML id: _24573
-            // IGNORED: Field  -- Name: savedSize  -- XML id: _24574
-            // IGNORED: Field  -- Name: savedJunctionSize  -- XML id: _24575
-            // IGNORED: Field  -- Name: scaleSave  -- XML id: _24576
-            // IGNORED: Field  -- Name: scaleSecondSave  -- XML id: _24577
-            // IGNORED: Field  -- Name: headerList  -- XML id: _24578
-            // IGNORED: Field  -- Name: particleDataPtr  -- XML id: _24579
+            // IGNORED: Variable  -- Name: IPERLINE  -- XML id: _23576
+            // IGNORED: Field  -- Name: startColTag  -- XML id: _23577
+            // IGNORED: Field  -- Name: entry  -- XML id: _23578
+            // IGNORED: Field  -- Name: junction  -- XML id: _23579
+            // IGNORED: Field  -- Name: maxColTag  -- XML id: _23580
+            // IGNORED: Field  -- Name: savedSize  -- XML id: _23581
+            // IGNORED: Field  -- Name: savedJunctionSize  -- XML id: _23582
+            // IGNORED: Field  -- Name: scaleSave  -- XML id: _23583
+            // IGNORED: Field  -- Name: scaleSecondSave  -- XML id: _23584
+            // IGNORED: Field  -- Name: headerList  -- XML id: _23585
+            // IGNORED: Field  -- Name: particleDataPtr  -- XML id: _23586
         public:
 
             virtual Pythia8::Abstract_Event* operator_assignment_gambit(const Pythia8::Abstract_Event& oldEvent) {std::cout << "Called virtual function" << std::endl;};

@@ -16,25 +16,25 @@ namespace Pythia8
     class Abstract_Hist
     {
         private:
-            // IGNORED: Variable  -- Name: NBINMAX  -- XML id: _23079
-            // IGNORED: Variable  -- Name: NCOLMAX  -- XML id: _23080
-            // IGNORED: Variable  -- Name: NLINES  -- XML id: _23081
-            // IGNORED: Variable  -- Name: TOLERANCE  -- XML id: _23082
-            // IGNORED: Variable  -- Name: TINY  -- XML id: _23083
-            // IGNORED: Variable  -- Name: LARGE  -- XML id: _23084
-            // IGNORED: Variable  -- Name: SMALLFRAC  -- XML id: _23085
-            // IGNORED: Variable  -- Name: DYAC  -- XML id: _23086
-            // IGNORED: Variable  -- Name: NUMBER  -- XML id: _23087
-            // IGNORED: Field  -- Name: title  -- XML id: _23088
-            // IGNORED: Field  -- Name: nBin  -- XML id: _23089
-            // IGNORED: Field  -- Name: nFill  -- XML id: _23090
-            // IGNORED: Field  -- Name: xMin  -- XML id: _23091
-            // IGNORED: Field  -- Name: xMax  -- XML id: _23092
-            // IGNORED: Field  -- Name: dx  -- XML id: _23093
-            // IGNORED: Field  -- Name: under  -- XML id: _23094
-            // IGNORED: Field  -- Name: inside  -- XML id: _23095
-            // IGNORED: Field  -- Name: over  -- XML id: _23096
-            // IGNORED: Field  -- Name: res  -- XML id: _23097
+            // IGNORED: Variable  -- Name: NBINMAX  -- XML id: _22141
+            // IGNORED: Variable  -- Name: NCOLMAX  -- XML id: _22142
+            // IGNORED: Variable  -- Name: NLINES  -- XML id: _22143
+            // IGNORED: Variable  -- Name: TOLERANCE  -- XML id: _22144
+            // IGNORED: Variable  -- Name: TINY  -- XML id: _22145
+            // IGNORED: Variable  -- Name: LARGE  -- XML id: _22146
+            // IGNORED: Variable  -- Name: SMALLFRAC  -- XML id: _22147
+            // IGNORED: Variable  -- Name: DYAC  -- XML id: _22148
+            // IGNORED: Variable  -- Name: NUMBER  -- XML id: _22149
+            // IGNORED: Field  -- Name: title  -- XML id: _22150
+            // IGNORED: Field  -- Name: nBin  -- XML id: _22151
+            // IGNORED: Field  -- Name: nFill  -- XML id: _22152
+            // IGNORED: Field  -- Name: xMin  -- XML id: _22153
+            // IGNORED: Field  -- Name: xMax  -- XML id: _22154
+            // IGNORED: Field  -- Name: dx  -- XML id: _22155
+            // IGNORED: Field  -- Name: under  -- XML id: _22156
+            // IGNORED: Field  -- Name: inside  -- XML id: _22157
+            // IGNORED: Field  -- Name: over  -- XML id: _22158
+            // IGNORED: Field  -- Name: res  -- XML id: _22159
         public:
 
             virtual Pythia8::Abstract_Hist* operator_assignment_gambit(const Pythia8::Abstract_Hist& h) {std::cout << "Called virtual function" << std::endl;};

@@ -29,7 +29,7 @@ all_types_in_class = {}
 
 
 # accepted_paths     = ['classloader_example/original']
-accepted_paths     = ['pythia8186_original']
+accepted_paths     = ['pythia8186_original', 'pythia8186']
 
 std_include_paths  = ['/usr/include/']
 

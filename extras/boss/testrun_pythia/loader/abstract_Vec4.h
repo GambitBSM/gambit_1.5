@@ -13,11 +13,11 @@ namespace Pythia8
     class Abstract_Vec4
     {
         private:
-            // IGNORED: Variable  -- Name: TINY  -- XML id: _22814
-            // IGNORED: Field  -- Name: xx  -- XML id: _22815
-            // IGNORED: Field  -- Name: yy  -- XML id: _22816
-            // IGNORED: Field  -- Name: zz  -- XML id: _22817
-            // IGNORED: Field  -- Name: tt  -- XML id: _22818
+            // IGNORED: Variable  -- Name: TINY  -- XML id: _21851
+            // IGNORED: Field  -- Name: xx  -- XML id: _21852
+            // IGNORED: Field  -- Name: yy  -- XML id: _21853
+            // IGNORED: Field  -- Name: zz  -- XML id: _21854
+            // IGNORED: Field  -- Name: tt  -- XML id: _21855
         public:
 
             virtual Pythia8::Abstract_Vec4* operator_assignment_gambit(const Pythia8::Abstract_Vec4& v) {std::cout << "Called virtual function" << std::endl;};
