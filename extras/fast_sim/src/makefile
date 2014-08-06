@@ -27,7 +27,9 @@ FJ_DIR := $(shell fastjet-config --prefix)
 #libfastsim.so: $(FASTSIMDIR)/src/FastSim_Reader.o $(FASTSIMDIR)/src/FastSim_Log.o $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/fastsim_interface.o $(FASTSIMDIR)/src/jsoncpp.o
 
 
-libfastsim.so: $(FASTSIMDIR)/src/FastSim_Log.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/jsoncpp.o $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/FastSim_Reader.o 
+libfastsim.so: $(FASTSIMDIR)/src/FastSim_Log.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/jsoncpp.o $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/FastSim_Reader.o $(FASTSIMDIR)/src/fastsim_interface.o
+#libfastsim.so: $(FASTSIMDIR)/src/FastSim_Log.o $(FASTSIMDIR)/src/DetectorResponse.o $(FASTSIMDIR)/src/jsoncpp.o $(FASTSIMDIR)/src/FastSim.o $(FASTSIMDIR)/src/FastSim_Reader.o
+#libfastsim.so: $(FASTSIMDIR)/src/fastsimple.o 
 
 
 # Intention is to pull symbols from FastJet into the fastsim backend (same should happen for direct pythia event filling... and any analyses that use jet structure)
@@ -45,4 +47,4 @@ example: example-fastsim-py8.cpp $(FASTSIMDIR)/src/libfastsim.so
 
 .PHONY: clean
 clean:
-			rm *.o example simple
+			rm *.o example
