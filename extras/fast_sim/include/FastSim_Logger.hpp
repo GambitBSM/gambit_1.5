@@ -12,15 +12,16 @@
 //static logging::logger log_inst( "fastsim_execution.log" );
 
 #ifdef LOGGING_LEVEL_1
-#define LOG_INFO log_inst.print< logging::severity_type::info,0 >
-#define LOG_DEBUG1 log_inst.print<logging::severity_type::debug,1 >
+#define LOG_INFO _log_inst->print< logging::severity_type::info,0 >
+#define LOG_DEBUG1 _log_inst->print<logging::severity_type::debug,1 >
 //#define LOG_DEBUG1 log_inst.print<logging::severity_type::debug >
-#define LOG_DEBUG2 log_inst.print<logging::severity_type::debug,2 >
-#define LOG_ERR log_inst.print< logging::severity_type::error,0 >
-#define LOG_WARN log_inst.print< logging::severity_type::warning,0 >
+#define LOG_DEBUG2 _log_inst->print<logging::severity_type::debug,2 >
+#define LOG_ERR _log_inst->print< logging::severity_type::error,0 >
+#define LOG_WARN _log_inst->print< logging::severity_type::warning,0 >
 #else
-#define LOG_INFO log_inst.print< logging::severity_type::info,0 >
-#define LOG_DEBUG(...) 
+#define LOG_INFO(...)
+#define LOG_DEBUG1(...) 
+#define LOG_DEBUG2(...) 
 #define LOG_ERR(...)
 #define LOG_WARN(...)
 #endif

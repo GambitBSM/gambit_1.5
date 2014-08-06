@@ -40,8 +40,8 @@ namespace logging
 	void logger::print_impl()
 	{
 		//policy->write( get_logline_header() + log_stream.str() );
-    std::cout << get_logline_header() + _log_stream.str() << std::endl;
-		_log_stream.str("");
+    //std::cout << get_logline_header() + _log_stream.str() << std::endl;
+		//_log_stream.str("");
 	}
 
 
@@ -79,6 +79,24 @@ namespace logging
 
 
 	//template< typename log_policy >
+	logger::logger()
+	{
+		_log_line_number = 0;
+    _verbosity_level = 0; // set by the user
+
+//		policy = new log_policy;
+//		if( !policy )
+//		{
+//			throw std::runtime_error("LOGGER: Unable to create the logger instance"); 
+//		}
+
+//		log_stream.precision(3);
+//		policy->open_ostream( name );
+
+	}
+
+
+
 	logger::logger(int verbosity )
 	{
 		_log_line_number = 0;

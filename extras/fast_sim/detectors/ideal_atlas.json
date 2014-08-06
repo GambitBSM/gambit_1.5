@@ -12,6 +12,10 @@
         "jet_reco": "fastjet",
         "jet_algorithm": "antikt",
         "dr_min":0.2
+        "muonP_resolution":0.0,
+        "electronP_resolution":0.0,
+        "photonP_resolution":0.0,
+        "JetP_resolution":0.0
     },
     "Performance": [
         {

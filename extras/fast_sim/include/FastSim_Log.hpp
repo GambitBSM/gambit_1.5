@@ -5,7 +5,6 @@
 // Class and template denitifions - does require C++11
 // A. Saavedra  June 25-06-2014
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <sstream>
 #include <memory>
@@ -57,7 +56,7 @@ namespace logging
 		unsigned _log_line_number;
 		std::string get_time();
 		std::string get_logline_header();
-		std::stringstream _log_stream;
+		//std::stringstream _log_stream;
     int _verbosity_level;
 		std::mutex _write_mutex;
 
@@ -67,6 +66,7 @@ namespace logging
 		void print_impl(First parm1, Rest...parm);
 	public:
 		logger(int verbosity );
+		logger();
 
     void set_verbosity(int verbosity);
 		template< severity_type severity,int verbosity, typename...Args >
@@ -82,9 +82,11 @@ namespace logging
 	{
 		_write_mutex.lock();
 
+    /*
     switch( severity )
     {
       case severity_type::debug:
+
         if (verbosity <= _verbosity_level) {
           _log_stream<<"<FastSim DEBUG> :";
         }
@@ -108,13 +110,14 @@ namespace logging
     else {
       print_impl( args... );
     }
+    */
     _write_mutex.unlock();
   }
 
 		template<typename First, typename...Rest >
 	void logger::print_impl(First parm1, Rest...parm)
 	{
-		_log_stream<<" "<<parm1;
+		//_log_stream<<" "<<parm1;
 		print_impl(parm...);	
 	}
 
