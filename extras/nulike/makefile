@@ -17,15 +17,29 @@ TSPACK=contrib/TSPACK
 # Define fortran compiler and options: intel
 #FF=ifort
 #FOPT=-O -extend_source -warn all -check all
-#MODULE=-module
+#MODULE=module
 # Define fortran compiler and options: gnu
 FF=gfortran
-FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
-MODULE=J
+#FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
+#MODULE=J
+
+# Use above definitions for the compiler used
+ifeq ("$(FF)", "ifort")
+FFOPT = $(FOPT) -O -extend_source -warn all -check all
+FMODULE = module
+else
+ifeq ("$(FF)", "gfortran")
+FFOPT = $(FOPT) -O -ffixed-line-length-none -Wall -fcheck=all
+FMODULE = J
+else
+FFOPT = $(FOPT)
+FMODULE = $(MODULE)
+endif
+endif
 
 # Set internal compile commands
 FC=$(FF)
-FFLAGS=$(FOPT) -I$(INC) -$(MODULE) $(BUILD) -fPIC
+FFLAGS=$(FFOPT) -I$(INC) -$(FMODULE) $(BUILD) -fPIC
 
 # Define library-making options
 RANLIB = ranlib
