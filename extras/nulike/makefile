@@ -20,26 +20,17 @@ TSPACK=contrib/TSPACK
 #MODULE=module
 # Define fortran compiler and options: gnu
 FF=gfortran
-#FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
-#MODULE=J
+FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
+MODULE=J
 
-# Use above definitions for the compiler used
-ifeq ("$(FF)", "ifort")
-FFOPT = $(FOPT) -O -extend_source -warn all -check all
-FMODULE = module
-else
-ifeq ("$(FF)", "gfortran")
-FFOPT = $(FOPT) -O -ffixed-line-length-none -Wall -fcheck=all
-FMODULE = J
-else
-FFOPT = $(FOPT)
-FMODULE = $(MODULE)
-endif
-endif
+# NOTE -- The above definitions are not used in hte
+# gambit compilation!  FMODULE = J and
+# FEXTRA = -ffixed-line-length-none must be defined
+# in the main makefile of gambit in order to compile.
 
 # Set internal compile commands
 FC=$(FF)
-FFLAGS=$(FFOPT) -I$(INC) -$(FMODULE) $(BUILD) -fPIC
+FFLAGS=$(FOPT) -I$(INC) -$(MODULE) $(BUILD) -fPIC
 
 # Define library-making options
 RANLIB = ranlib
