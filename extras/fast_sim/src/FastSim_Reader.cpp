@@ -32,7 +32,7 @@
 #include <fstream>
 
 
-extern logging::logger log_inst(0);
+//extern logging::logger log_inst(0);
 
 namespace fast_sim {
 
@@ -92,6 +92,7 @@ namespace fast_sim {
       _fastjet = true;
     else
       _fastjet = false;
+
 
     const Json::Value perf_objects  = root["Performance"];
 
