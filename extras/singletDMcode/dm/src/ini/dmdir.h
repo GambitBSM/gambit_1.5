@@ -1,2 +1,2 @@
-      data dmroot/'/home/pat/Projects/SingletDM/SingletUpdate/Code/dm& 
-     &/'/
+      data dmroot/'/home/mwhi/Gambit2014/gambit/extras/singletDMcode/& 
+     &dm/'/
