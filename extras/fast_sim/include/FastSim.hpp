@@ -31,7 +31,11 @@
 #include <vector>
 #include <gsl/gsl_rng.h>
 
+#include <iostream>
+#include "FastSim_Log.hpp"
+
 namespace fast_sim {
+
 
   enum DetectorType { NOMINAL,ATLAS, CMS, EXPERIMENTAL};
   // NOMINAL the energy response is smeared and the calorimeter parameters are the same as the ACERDET
@@ -95,7 +99,8 @@ namespace fast_sim {
       FastSim();
       ~FastSim();
 
-      
+      logging::logger *_log_inst;
+      void init(int debug_level); // demonstrator for gambit code
       void init(DetectorType which,int debug_level);
       void init(std::string filename,int debug_level);
 
@@ -204,6 +209,13 @@ namespace fast_sim {
 
       bool _fastjet;
       int _count;
+
+      // energy/momentum resolutions
+      double _muon_resolution; // the sigma
+      double _electron_resolution;
+      double _photon_resolution;
+      double _jet_resolution;
+
 
       // the particles
       /*

@@ -30,7 +30,7 @@
 
 #include "FastSim_Logger.hpp"
 
-static logging::logger log_inst(0);
+//static logging::logger log_inst(0);
 
 
 using namespace std;
@@ -56,6 +56,7 @@ namespace fast_sim {
 
     _random_num = gsl_rng_alloc(gsl_rng_mt19937);
 
+    _log_inst = new logging::logger();
     LOG_INFO("FastSim started:");
     //srand(1);
     // srand(time(NULL));
@@ -92,6 +93,7 @@ namespace fast_sim {
        _rest = NULL;
 
      delete _detector_perf[i];
+
    }
 
    _detector_perf.clear();
@@ -120,6 +122,7 @@ namespace fast_sim {
 
   gsl_rng_free(_random_num);
 
+  delete _log_inst;
 
     /*
     // for (size_t i = 0; i < _prompt_electrons.size();i++) delete _prompt_electrons[i];
@@ -239,11 +242,15 @@ namespace fast_sim {
 
   }
 
+  void FastSim::init(int debug_level) {
+
+    init(fast_sim::NOMINAL,0);
+  }
 
   void FastSim::init(DetectorType which,int debug_level) {
 
 
-    log_inst.set_verbosity(debug_level);
+    _log_inst->set_verbosity(debug_level);
     _simtype = which;
     switch(which) {
       case NOMINAL:
@@ -306,7 +313,7 @@ namespace fast_sim {
     // this constructor uses the json datacard to initialise the properties of the detector
     // and the physics object whose response will be simulated
 
-    log_inst.set_verbosity(debug_level);
+    _log_inst->set_verbosity(debug_level);
     if (FastSim_Reader(init_filename) < 0) {
 
       LOG_ERR("Error reading the FastSim param_card");
@@ -739,31 +746,20 @@ namespace fast_sim {
     calcMET_truth();
 
 
-    // now for the jets, only clustering for now, fast jet will be incorporated soon
-    switch(_simtype)
-    {
-      case NOMINAL:
-        if (_fastjet) {
-          //cout << " doing jet " << endl;
-          
-          LOG_DEBUG1("Using FastJet");
-          JetResponse();
-        }
-        else {
-
-          LOG_DEBUG1("Using Clustering");
-          Clustering();
-        }
-        break;
-      default:;
+    if (_fastjet) {
+      LOG_DEBUG1("Using FastJet");
+      JetResponse();
     }
+    else {
 
+      LOG_DEBUG1("Using Clustering");
+      Clustering();
+    }
 
     // determine which leptons and photons are isolated
     // so far it only checks whether they overlap which jets
     // need to check consitency, the jets are electrons
-    //
-    //cout << "isolation " << endl;
+    LOG_DEBUG1("Apply Isolation for prompt leptons");
     AppliedIsolation();
     // find bjets using the bquark list and the reconstructed jets
     LOG_DEBUG1("Selecting Bjets");

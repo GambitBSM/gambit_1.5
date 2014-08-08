@@ -17,11 +17,16 @@ TSPACK=contrib/TSPACK
 # Define fortran compiler and options: intel
 #FF=ifort
 #FOPT=-O -extend_source -warn all -check all
-#MODULE=-module
+#MODULE=module
 # Define fortran compiler and options: gnu
 FF=gfortran
 FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
 MODULE=J
+
+# NOTE -- The above definitions are not used in hte
+# gambit compilation!  FMODULE = J and
+# FEXTRA = -ffixed-line-length-none must be defined
+# in the main makefile of gambit in order to compile.
 
 # Set internal compile commands
 FC=$(FF)
