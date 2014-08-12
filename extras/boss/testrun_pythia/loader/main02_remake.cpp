@@ -142,11 +142,11 @@ int main(int argc, char * argv[])
   // Generator. Process selection. Tevatron initialization. Histogram.
   Pythia pythia("../../pythia8186/xmldoc", true);
 
-  pythia.readString("Beams:idB = -2212", true);
-  pythia.readString("Beams:eCM = 1960.", true);
-  pythia.readString("WeakSingleBoson:ffbar2gmZ = on", true);
-  pythia.readString("PhaseSpace:mHatMin = 80.", true);
-  pythia.readString("PhaseSpace:mHatMax = 120.", true);
+  pythia.readString("Beams:idB = -2212");
+  pythia.readString("Beams:eCM = 1960.");
+  pythia.readString("WeakSingleBoson:ffbar2gmZ = on");
+  pythia.readString("PhaseSpace:mHatMin = 80.");
+  pythia.readString("PhaseSpace:mHatMax = 120.");
   pythia.init();
   Hist pTZ("dN/dpTZ", 100, 0., 100.);
   // Begin event loop. Generate event. Skip if error. List first one.
@@ -156,7 +156,7 @@ int main(int argc, char * argv[])
     int iZ = 0;
     for (int i = 0; i < pythia.event.size(); ++i)
       if (pythia.event[i].id() == 23) iZ = i;
-    pTZ.fill( pythia.event[iZ].pT(), 1.0 );
+    pTZ.fill( pythia.event[iZ].pT() );
   // End of event loop. Statistics. Histogram. Done.
   }
   pythia.stat();

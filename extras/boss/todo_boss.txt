@@ -3,7 +3,7 @@ Todo list for BOSS:
 
 Currently working on: 
 
-Anders: 7, 15
+Anders: 7, 3
 Abram : ?
 
 
@@ -115,16 +115,6 @@ Will implement alt. 2) for now, but we should investigate whether we should aim 
 
 
 (15)
-Fix ownership of the BEptr among various instances of WrapperBase<Abstract_SomeClass>
-Example: If the copy constructor is used to create a temporary copy of a WrapperBase instance, 
-this copy should NOT have permissions to delete BEptr...
-
-Is there a truly safe way of dealing with this? Shared pointer?
-Failing to deal with this issue will lead to segfaults...
-
-
-
-(16)
 Handle operator names in a more elegant way. Currently a simple dictionary is used (cfg.operator_names), but this won't
 work when a single operator can be interpreted in different ways depending on context. (Example: the '*' operator can 
 either be multiplication or pointer dereferencing.) Create a utils function for returning the correct operator name?

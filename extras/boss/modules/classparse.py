@@ -357,7 +357,7 @@ def run():
             src_includes[src_file_name].append(src_include_line)
 
 
-        # Generate wrappers for all member functions that make use of native types,
+        # Generate wrappers for all member functions that make use of native types and/or default arguments,
         # and reference returning functions for all public member variables that have an accepted type
         
         # - Create lists of all 'non-artificial' members of the class
@@ -369,8 +369,7 @@ def run():
                 el = cfg.id_dict[mem_id]
                 if not 'artificial' in el.keys():
                     if (el.tag == 'Method') and (not funcutils.ignoreFunction(el)):
-                        if funcutils.usesNativeType(el):
-                            member_methods.append(el)
+                        member_methods.append(el)
                     elif (el.tag == 'OperatorMethod') and (not funcutils.ignoreFunction(el)):
                         if funcutils.usesNativeType(el):
                             member_operators.append(el)
@@ -396,11 +395,30 @@ def run():
         wrapper_code  = '\n'
         current_access = None
         for method_el in member_methods:
-            method_access = method_el.get('access')
-            if method_access != current_access:
-                wrapper_code += ' '*(len(namespaces)+1)*cfg.indent + method_access +':\n'
-                current_access = method_access
-            wrapper_code += classutils.constrWrapperFunction(method_el, indent=cfg.indent, n_indents=len(namespaces)+2)
+
+            # We need to generate as many overloaded versions as there are arguments with default values
+            n_overloads = funcutils.numberOfDefaultArgs(method_el)
+            
+            # Check for native types
+            uses_native_type = funcutils.usesNativeType(method_el)
+
+            # If no native types are used and no arguments have default values, 
+            # we don't need a wrapper
+            if (not uses_native_type) and (n_overloads == 0):
+                continue
+
+            # Generate wrapper code
+            for remove_n_args in range(n_overloads+1):
+                
+                if (remove_n_args==0) and (not uses_native_type):
+                    continue
+
+                method_access = method_el.get('access')
+                if method_access != current_access:
+                    wrapper_code += ' '*(len(namespaces)+1)*cfg.indent + method_access +':\n'
+                    current_access = method_access
+                wrapper_code += classutils.constrWrapperFunction(method_el, indent=cfg.indent, n_indents=len(namespaces)+2, remove_n_args=remove_n_args)
+                wrapper_code += '\n'
 
         # - Register code
         return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, wrapper_code) )            
@@ -745,7 +763,12 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     code += '\n'
     code += 2*indent + '// Member functions: \n'
 
-    # Add wrappers for all member functions (including operator functions)
+    # Add wrappers for all member functions, including operator functions
+    # and overloaded versions of functions with default value arguments
+
+    class_functions = funcutils.multiplyDefaultArgFunctions(class_functions)
+    done_members = []
+
     for func_el in class_functions:
 
         # Check if this is an operator function
@@ -753,11 +776,21 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         if func_el.tag == 'OperatorMethod':
             is_operator = True
 
+        # Check if we're generating an overload of a previous member function
+        overload_n = done_members.count(func_el)
+        is_overload = bool(overload_n)
+
         # Function name
         if is_operator:
             func_name = 'operator' + func_el.get('name')
         else:
             func_name = func_el.get('name')
+
+        # Name of function to call (in abstract class)
+        if is_overload and (not is_operator):
+            call_func_name = func_name + cfg.code_suffix + '_overload_' + str(overload_n)
+        else:
+            call_func_name = func_name
 
         # Check constness
         if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
@@ -775,6 +808,10 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
 
         # Arguments
         args = funcutils.getArgs(func_el)
+
+        if is_overload:
+            args = args[:-overload_n]
+
         args_bracket = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True, use_wrapper_base_class=True)
 
         # Convert return type if loaded class
@@ -784,7 +821,7 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
             use_return_type = return_type
 
         # Write declaration line
-        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + is_const*' const' '\n'
+        code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + is_const*' const' + '\n'
 
         # Write function body
         code += 2*indent + '{\n'
@@ -795,10 +832,13 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
             code += 3*indent + 'return '
 
         args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
-        code += 'BEptr->' + func_name + args_bracket_notypes + ';\n'
+        code += 'BEptr->' + call_func_name + args_bracket_notypes + ';\n'
 
         code += 2*indent + '}\n'
         code += '\n'
+
+        # Keep track of functions done
+        done_members.append(func_el)
 
     # # Add special member function: _set_member(bool) - set the variable 'member_variable' to true/false
     # code += '\n'
@@ -828,7 +868,7 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         var_name = var_el.get('name')
         var_type, var_type_kw, var_type_id = utils.findType(var_el)
         if utils.isLoadedClass(var_type, byname=True):
-            common_constructor_body += 3*indent + var_name + '._set_member_variable(true);\n'
+            common_constructor_body += 3*indent + var_name + '._setMemberVariable(true);\n'
     common_constructor_body += 2*indent + '}\n'
 
 
@@ -897,7 +937,8 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
         code += 2*indent + '// Assignment operator: \n'
         code += 2*indent + short_wrapper_class_name + '& ' + 'operator=(const ' + short_wrapper_class_name +'& in)\n'
         code += 2*indent + '{\n'
-        code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr); }\n'
+        code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr.get()); }\n'
+        code += 3*indent + 'return *this;'
         code += 2*indent + '}\n'
 
     # #

@@ -152,7 +152,7 @@ int main(int argc, char * argv[])
   Event& event = pythia.event;
 
   // Read in commands from external file.
-  pythia.readFile("./main03.cmnd", true, -999);
+  pythia.readFile("./main03.cmnd");
 
   // Extract settings to be used in the main program.
   int nEvent = pythia.mode("Main:numberOfEvents");
@@ -171,7 +171,6 @@ int main(int argc, char * argv[])
   Hist epCons("deviation from energy-momentum conservation", 100, 0., 1e-6);
 
   // Begin event loop.
-  cout << " HERE: Start event loop.\n";
   int iAbort = 0;
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
 
@@ -183,7 +182,7 @@ int main(int argc, char * argv[])
     }
 
     // Fill hard scale of event.
-    pThard.fill( pythia.info.pTHat(0), 1.0 );
+    pThard.fill( pythia.info.pTHat() );
 
     // Loop over final particles in the event.
     int  nFin = 0;
@@ -198,19 +197,19 @@ int main(int argc, char * argv[])
       // Analyze charged particles and fill histograms.
       if (event[i].isCharged()) {
         ++nChg;
-        dndy.fill( event[i].y(), 1.0);
-        dndeta.fill( event[i].eta(), 1.0 );
-        dndpT.fill( event[i].pT(), 1.0 );
+        dndy.fill( event[i].y() );
+        dndeta.fill( event[i].eta() );
+        dndpT.fill( event[i].pT() );
       }
 
     // End of particle loop. Fill global properties.
     }
-    nFinal.fill( nFin, 1.0 );
-    nCharged.fill( nChg, 1.0 );
+    nFinal.fill( nFin );
+    nCharged.fill( nChg );
     pSum /= event[0].e();
     double epDev = abs(pSum.e() - 1.) + abs(pSum.px()) + abs(pSum.py())
       + abs(pSum.pz());
-    epCons.fill(epDev, 1.0);
+    epCons.fill(epDev);
 
   // End of event loop.
   }

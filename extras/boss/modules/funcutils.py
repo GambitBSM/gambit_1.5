@@ -22,7 +22,7 @@ def getArgs(func_el):
     # Returns a list with one dict per argument.
     # Each dict contains the following keywords:
     # 
-    #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'namespaces', 'loaded_class', 'type_namespaces'
+    #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'namespaces', 'loaded_class', 'type_namespaces', 'default'
     #
 
     args = []
@@ -45,6 +45,11 @@ def getArgs(func_el):
 
             type_el = cfg.id_dict[arg_dict['id']]
             arg_dict['type_namespaces'] = utils.getNamespaces(type_el)
+
+            if 'default' in sub_el.keys():
+                arg_dict['default'] = True
+            else:
+                arg_dict['default'] = False
 
             args.append(arg_dict)
 
@@ -182,7 +187,7 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                     if arg_dict['type'].count('*') == 0:
                         args_seq += '*' + arg_dict['name'] + '.BEptr'
                     elif arg_dict['type'].count('*') == 1:
-                        args_seq += '(*' + arg_dict['name'] + ')' + '.BEptr'
+                        args_seq += '(*' + arg_dict['name'] + ')' + '.BEptr.get()'
                     else:
                         raise Exception('funcutils.constrArgsBracket cannot presently deal with arguments of type pointer-to-pointer for wrapper classes.')
                 else:
@@ -538,3 +543,47 @@ def usesLoadedType(func_el):
     return uses_loaded_type
 
 # ======== END: usesLoadedType ========
+
+
+
+# ======== numberOfDefaultArgs ========
+
+def numberOfDefaultArgs(func_el):
+
+    n_def_args = 0
+
+    args = getArgs(func_el)
+    for arg_dict in args:
+        if arg_dict['default']:
+            n_def_args += 1
+
+    return n_def_args
+
+# ======== END: numberOfDefaultArgs ========
+
+
+
+# ======== multiplyDefaultArgFunctions ========
+
+def multiplyDefaultArgFunctions(element_list, include_operators=False, include_constructors=False):
+
+    new_element_list = []
+
+    accepted_tags = ['Method']
+    if include_operators:
+        accepted_tags.append('OperatorMethod')
+    if include_constructors:
+        accepted_tags.append('Constructor')
+
+    for el in element_list:
+
+        if el.tag in accepted_tags:
+            n_def_args = numberOfDefaultArgs(el)
+            new_element_list += (n_def_args+1)*[el]
+
+        else:
+            new_element_list += [el]
+            
+    return new_element_list
+
+# ======== END: multiplyDefaultArgFunctions ========

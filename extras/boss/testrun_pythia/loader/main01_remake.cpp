@@ -142,27 +142,31 @@ int main(int argc, char * argv[])
 
   Pythia pythia("../../pythia8186/xmldoc", true);
 
-  pythia.readString("Beams:eCM = 8000.", true);
-  pythia.readString("HardQCD:all = on", true);
-  pythia.readString("PhaseSpace:pTHatMin = 20.", true);
+  pythia.readString("Beams:eCM = 8000.");
+  pythia.readString("HardQCD:all = on");
+  pythia.readString("PhaseSpace:pTHatMin = 20.");
+  // pythia.readString("Beams:eCM = 8000.", true);
+  // pythia.readString("HardQCD:all = on", true);
+  // pythia.readString("PhaseSpace:pTHatMin = 20.", true);
   pythia.init();
 
-  Hist mult("charged multiplicity", 100, -0.5, 799.5);
+  Hist mult("charged multiplicity", 2, -0.5, 799.5);
   // Begin event loop. Generate event. Skip if error. List first one.
-  for (int iEvent = 0; iEvent < 100; ++iEvent) {
+  for (int iEvent = 0; iEvent < 2; ++iEvent) {
     if (!pythia.next()) continue;
     // Find number of all final charged particles and fill histogram.
     int nCharged = 0;
     for (int i = 0; i < pythia.event.size(); ++i)
       if (pythia.event[i].isFinal() && pythia.event[i].isCharged())
         ++nCharged;
-    mult.fill( nCharged, 1.0 );
+    mult.fill( nCharged );
     cout << "Event: " << iEvent << "   nCharged: " << nCharged << endl;
   // End of event loop. Statistics. Histogram. Done.
   }
 
   pythia.stat();
   // cout << mult;  <-- This won't work as we haven't defined the << operator for Hist
+
 
 
   //

@@ -99,7 +99,18 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
         for mem_id in class_el.get('members').split():
             el = cfg.id_dict[mem_id]
             if not 'artificial' in el.keys():
-                member_elements.append(el)
+                if el.tag == 'Method':
+                    n_overloads = funcutils.numberOfDefaultArgs(el)
+                    member_elements += (n_overloads+1)*[el]
+                else:
+                    member_elements.append(el)
+
+    # # Create list of member functions that needs overloading due to default argument values
+    # overload_members = []
+    # for i in range(len(member_elements)):
+    #     if ( member_elements[i].tag == 'Method' ) and ( funcutils.numberOfDefaultArgs(member_elements[i])>0 ):
+    #         overload_members.append(member_elements[i])
+
 
     # Get list of dicts with info on parent classes
     parent_classes = utils.getParentClasses(class_el)
@@ -147,6 +158,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     current_access = ''
     class_decl += ' '*n_indents*indent
     class_decl += '{' + '\n'
+    done_members = []
     for el in member_elements:
 
         # Check access
@@ -174,6 +186,10 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                 print 'INFO: The member function "' + is_operator*'operator' + el.get('name') + '" is ignored due to non-accepted type(s).'
                 continue
 
+            # Check if this member function makes use of loaded types
+            uses_loaded_type = funcutils.usesLoadedType(el)
+
+
             return_type, return_kw, return_id = utils.findType( cfg.id_dict[el.get('returns')] )
             return_type_base = return_type.replace('*','').replace('&','')
             
@@ -184,11 +200,22 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             return_is_loaded = utils.isLoadedClass(return_el)
             args = funcutils.getArgs(el)
 
+
             # Check constness
             if ('const' in el.keys()) and (el.get('const')=='1'):
                 is_const = True
             else:
                 is_const = False
+
+            # Check if we're generating an overload of a previous member function.
+            overload_n = done_members.count(el)
+            is_overload = bool(overload_n)
+
+            # If so, remove some arguments with default values
+            if is_overload:
+                args = args[:-overload_n]
+
+
 
             # if (return_type == 'void') or (return_type.count('*') > 0):
             #     w_return_type = return_type
@@ -204,13 +231,16 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             if is_operator:
                 w_func_name = 'operator_' + cfg.operator_names[el.get('name')] + cfg.code_suffix
             else:
-                w_func_name = el.get('name') + cfg.code_suffix
-            
+                if uses_loaded_type:
+                    w_func_name = el.get('name') + cfg.code_suffix + is_overload*('_overload_' + str(overload_n))
+                else:
+                    w_func_name = el.get('name') + is_overload*(cfg.code_suffix + '_overload_' + str(overload_n))
+
 
             #
             # If the method makes use of a loaded class, construct a pair of wrapper methods.
             #
-            if funcutils.usesLoadedType(el):
+            if uses_loaded_type:
 
                 # Construct the virtual member function that is overridden, e.g.:  
                 #
@@ -266,7 +296,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             else:
                 class_decl += '\n'
                 class_decl += ' '*(n_indents+2)*indent
-                class_decl += 'virtual ' + return_kw_str + return_type + ' ' + is_operator*'operator' + el.get('name') + w_args_bracket + is_const*' const' + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
+                class_decl += 'virtual ' + return_kw_str + return_type + ' ' + is_operator*'operator' + w_func_name + w_args_bracket + is_const*' const' + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
 
 
         #
@@ -285,6 +315,12 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                 class_decl += '// IGNORED: ' + el.tag + '  -- XML id: ' + el.get('id') + '\n'
 
     
+        #
+        # Keep track of members that we've already done 
+        #
+        done_members.append(el)
+
+
     # - Construct 'pointerAssign' and 'pointerCopy' functions
     if has_copy_constructor or construct_assignment_operator:
         class_decl += '\n'
@@ -468,7 +504,7 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
 
 # ====== constrWrapperFunction ========
 
-def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
+def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_args=0):
 
     # Check if this is an operator function
     is_operator = False
@@ -496,6 +532,10 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     # Function arguments (get list of dicts with argument info)
     args = funcutils.getArgs(method_el)
 
+    # Remove arguments when creating overloaded versions (for dealing with default argument values)
+    if remove_n_args > 0:
+        args = args[:-remove_n_args]
+
     # Check constness
     if ('const' in method_el.keys()) and (method_el.get('const')=='1'):
         is_const = True
@@ -504,6 +544,9 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
 
     # Construct wrapper function name
     w_func_name = funcutils.constrWrapperName(method_el)
+    if remove_n_args > 0:
+        w_func_name += '_overload_' + str(remove_n_args)
+
 
     # Choose wrapper return type
     if return_is_loaded_class:
@@ -527,6 +570,7 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0):
     # else:
     #     w_return_type = return_type
 
+    
     # Construct list of arguments for wrapper function
     w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
@@ -821,27 +865,53 @@ def generateWrapperBaseHeader(wrapper_base_name):
 
     insert_pos = 0
 
-    # Header code
-    code = ( "template <typename T>\n" 
-             "class " + wrapper_base_name + "\n"
+    # std::shared_ptr lives in the <memory> header
+    code = "#include <memory>\n"
+    code += "\n"
+
+    # A deleter functor needed by std::shared_ptr
+    code += ("template <typename T>\n"
+             "class Deleter\n"
              "{\n"
              "    protected:\n"
              "        bool member_variable;\n"
+             "\n"
              "    public:\n"
-             "        T* BEptr;\n"
+             "        Deleter() : member_variable(false) {}\n"
+             "        Deleter(bool memvar_in) : member_variable(memvar_in) {}\n"
+             "\n"
+             "        void setMemberVariable(bool memvar_in)\n"
+             "        {\n"
+             "            member_variable = memvar_in;\n"
+             "        }\n"
+             "\n"
+             "        void operator()(T* ptr)\n"
+             "        {\n"
+             "            if (member_variable==false) { delete ptr; }\n"
+             "        }\n"
+             "};\n")
+
+    code += "\n"
+
+    # Wrapper base class code
+    code += ("template <typename T>\n" 
+             "class " + wrapper_base_name + "\n"
+             "{\n"
+             "    public:\n"
+             "        std::shared_ptr<T> BEptr;\n"
              "\n"
              "        // Constructor\n"
-             "        WrapperBase(T* BEptr_in, bool memvar_in) : BEptr(BEptr_in), member_variable(memvar_in) {}\n"
-             "\n"
-             "        // Special member function to set member_variable: \n"
-             "        void _set_member_variable(bool memvar_in) { member_variable = memvar_in; }\n"
-             "\n"
-             "        // Destructor: \n"
-             "        ~WrapperBase()\n"
+             "        WrapperBase(T* BEptr_in, bool memvar_in)\n"
              "        {\n"
-             "            if(member_variable==false) { delete BEptr; }\n"
+             "            BEptr.reset(BEptr_in, Deleter<T>(memvar_in));\n"
              "        }\n"
-             "};\n" )
+             "\n"
+             "        // Special member function to set member_variable in Deleter: \n"
+             "        void _setMemberVariable(bool memvar_in)\n" 
+             "        {\n" 
+             "            std::get_deleter<Deleter<T> >(BEptr)->setMemberVariable(memvar_in);\n"
+             "        }\n"
+             "};\n")
     
 
     # Register code and return dict
