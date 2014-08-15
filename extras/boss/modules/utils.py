@@ -197,7 +197,7 @@ def getTemplateBracket(el):
 def getSpecTemplateTypes(el):
 
     # Classes and functions must be treated differently
-    if el.tag == 'Class':
+    if el.tag in ['Class', 'Struct']:
         spec_types = el.get('name').split('<',1)[1].rsplit('>',1)[0].strip()
     elif el.tag == 'Function':
         spec_types = el.get('demangled').split('<',1)[1].rsplit('>',1)[0].strip()

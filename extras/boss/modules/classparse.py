@@ -326,7 +326,7 @@ def run():
             if is_template == True:
                 insert_pos = file_content_nocomments[:class_name_pos].rfind('template')
             else:
-                insert_pos = file_content_nocomments[:class_name_pos].rfind('class')
+                insert_pos = max(file_content_nocomments[:class_name_pos].rfind('class'), file_content_nocomments[:class_name_pos].rfind('struct'))
             # - Adjust for the indentation
             use_indent = ''
             while insert_pos > 0:

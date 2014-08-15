@@ -147,7 +147,7 @@ def main():
         #     print [std_type]
 
 
-        # for el in root.findall('Class'):
+        # for el in root.findall(('Class') + root.findall('Struct')):
         #     if utils.isStdType(el):
         #         cfg.std_types_dict[el.get('name')] = el
         # for el in root.findall('Struct'):
@@ -165,7 +165,7 @@ def main():
             coords = [0, 0]
             count = 0
             mini_class_dict = {}
-            for el in root.findall('Class'):
+            for el in (root.findall('Class') + root.findall('Struct')):
                 demangled_class_name = el.get('demangled')
                 if coords[0] == 0:
                     # then, new screen of classes to choose from
@@ -195,7 +195,7 @@ def main():
                 while(choices[0].strip()):
                     cfg.loaded_classes.append(mini_class_dict[choices[0].strip()])
                     choices = choices[2].partition(',')
-        for el in root.findall('Class'):
+        for el in (root.findall('Class') + root.findall('Struct')):
             demangled_class_name = el.get('demangled')
             if demangled_class_name in cfg.loaded_classes:
                 cfg.class_dict[demangled_class_name] = el

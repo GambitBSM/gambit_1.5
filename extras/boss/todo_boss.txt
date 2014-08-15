@@ -79,10 +79,6 @@ accepting a template specialization as a standard type.
 
 
 (11)
-BOSS needs to tackle structs as well as classes.
-
-
-(12)
 UPDATE:
 Is this not needed as long as we are absolutely sure that all virtual methods are overwritten?
 I can't seem to produce the 'unused parameter' or 'unused return' errors with the example code...
@@ -92,12 +88,11 @@ Pat suggested a fix for getting rid of the pragma statements. Figure out what it
 implement it.
 
 
-(13)
+(12)
 Fix constrFactoryFunction to work properly with template classes
 
 
-
-(14)
+(13)
 How do deal with inheritance of accepted, but non-loaded, classes. (E.g. some class inheriting from one of the
 std:: classes). We cannot have both class X and class Abstract_X inheriting from the same class, as this will cause
 an ambiguity error (even if we use virtual inheritance). 
@@ -113,8 +108,7 @@ an ambiguity error (even if we use virtual inheritance).
 Will implement alt. 2) for now, but we should investigate whether we should aim for alt. 1) in the future.
 
 
-
-(15)
+(14)
 Handle operator names in a more elegant way. Currently a simple dictionary is used (cfg.operator_names), but this won't
 work when a single operator can be interpreted in different ways depending on context. (Example: the '*' operator can 
 either be multiplication or pointer dereferencing.) Create a utils function for returning the correct operator name?
