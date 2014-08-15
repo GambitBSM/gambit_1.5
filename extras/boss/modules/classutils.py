@@ -99,11 +99,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
         for mem_id in class_el.get('members').split():
             el = cfg.id_dict[mem_id]
             if not 'artificial' in el.keys():
-                if el.tag == 'Method':
-                    n_overloads = funcutils.numberOfDefaultArgs(el)
-                    member_elements += (n_overloads+1)*[el]
-                else:
-                    member_elements.append(el)
+                member_elements.append(el)
 
     # # Create list of member functions that needs overloading due to default argument values
     # overload_members = []
@@ -119,9 +115,10 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     # Construct the abstract class declaration
     #
     
-    class_decl = '#pragma GCC diagnostic push\n'
-    class_decl += '#pragma GCC diagnostic ignored "-Wunused-parameter"\n'
-    class_decl += '#pragma GCC diagnostic ignored "-Wreturn-type"\n'
+    class_decl = ''
+    # class_decl = '#pragma GCC diagnostic push\n'
+    # class_decl += '#pragma GCC diagnostic ignored "-Wunused-parameter"\n'
+    # class_decl += '#pragma GCC diagnostic ignored "-Wreturn-type"\n'
 
     # - Construct the beginning of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'open')
@@ -199,6 +196,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             return_el = cfg.id_dict[return_id]
             return_is_loaded = utils.isLoadedClass(return_el)
             args = funcutils.getArgs(el)
+            w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
 
             # Check constness
@@ -207,15 +205,13 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             else:
                 is_const = False
 
-            # Check if we're generating an overload of a previous member function.
-            overload_n = done_members.count(el)
-            is_overload = bool(overload_n)
+            # # Check if we're generating an overload of a previous member function.
+            # overload_n = done_members.count(el)
+            # is_overload = bool(overload_n)
 
-            # If so, remove some arguments with default values
-            if is_overload:
-                args = args[:-overload_n]
-
-
+            # # If so, remove some arguments with default values
+            # if is_overload:
+            #     args = args[:-overload_n]
 
             # if (return_type == 'void') or (return_type.count('*') > 0):
             #     w_return_type = return_type
@@ -224,79 +220,108 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             # else:
             #     w_return_type = return_type
 
-            w_args = funcutils.constrWrapperArgs(args, add_ref=True)
-            w_args_bracket = funcutils.constrArgsBracket(w_args, include_namespace=True)
-            w_args_bracket_notypes = funcutils.constrArgsBracket(w_args, include_arg_type=False)
+            # If default arguments are used, we need to generate overloaded versions
+            n_overloads = funcutils.numberOfDefaultArgs(el)
 
-            if is_operator:
-                w_func_name = 'operator_' + cfg.operator_names[el.get('name')] + cfg.code_suffix
-            else:
-                if uses_loaded_type:
-                    w_func_name = el.get('name') + cfg.code_suffix + is_overload*('_overload_' + str(overload_n))
+            # One overloaded version for each set of default arguments
+            for remove_n_args in range(n_overloads+1):
+
+                if remove_n_args == 0:
+                    use_args   = args
+                    use_w_args = w_args
                 else:
-                    w_func_name = el.get('name') + is_overload*(cfg.code_suffix + '_overload_' + str(overload_n))
+                    use_args   = args[:-remove_n_args]
+                    use_w_args = w_args[:-remove_n_args]
 
 
-            #
-            # If the method makes use of a loaded class, construct a pair of wrapper methods.
-            #
-            if uses_loaded_type:
+                w_args_bracket = funcutils.constrArgsBracket(use_w_args, include_arg_name=True, include_arg_type=True, include_namespace=True)
+                w_args_bracket_notypes = funcutils.constrArgsBracket(use_w_args, include_arg_name=True, include_arg_type=False)
+                w_args_bracket_nonames = funcutils.constrArgsBracket(use_w_args, include_arg_name=False, include_arg_type=True, include_namespace=True)
 
-                # Construct the virtual member function that is overridden, e.g.:  
-                #
-                #   virtual X* getX_GAMBIT(arguments) {}
-                #
-
-                if return_is_loaded:
-                    if return_type.count('*') > 0:
-                        w_return_type = toAbstractType(return_type, include_namespace=True)
-                    else:
-                        w_return_type = toAbstractType(return_type, include_namespace=True, add_pointer=True, remove_reference=True)
-                else:
-                    w_return_type = return_type
-
-                class_decl += '\n'
-                class_decl += ' '*(n_indents+2)*indent
-                class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket + is_const*' const' + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
-
-
-                # Construct the member function with the original name, wrapping the overridden one, e.g.: 
-                #
-                #   Abstract__X* getX(arguments)
-                #   {
-                #     return reinterpret_cast<Abstract__X*>(getX_GAMBIT(arguments));
-                #   }
-                #
-
+                
                 if is_operator:
-                    w2_func_name = 'operator' + el.get('name')
+                    if uses_loaded_type:
+                        w_func_name = 'operator_' + cfg.operator_names[el.get('name')] + cfg.code_suffix
+                    else:
+                        w_func_name = 'operator' + el.get('name')    
                 else:
-                    w2_func_name = el.get('name')
-                w2_args_bracket = w_args_bracket
+                    if uses_loaded_type or (remove_n_args>0):
+                        w_func_name = el.get('name') + cfg.code_suffix 
+                    else:
+                        w_func_name = el.get('name')
 
-                class_decl += ' '*(n_indents+2)*indent 
-                class_decl += return_kw_str + w_return_type + ' ' + w2_func_name + w2_args_bracket + is_const*' const' +'\n'
-                class_decl += ' '*(n_indents+2)*indent + '{\n'
-                if (return_type == 'void'):
-                    class_decl += ' '*(n_indents+3)*indent + w_func_name + w_args_bracket_notypes + ';\n'
-                else:
-                    # OLD:
-                    # if return_is_loaded:
-                    #     class_decl += ' '*(n_indents+3)*indent + 'return reinterpret_cast<' + return_kw_str + w_return_type + '>(' + w_func_name + w_args_bracket_notypes + ');\n'
+
+
+                    # if is_operator:
+                    #     w_func_name = 'operator_' + cfg.operator_names[el.get('name')] + cfg.code_suffix
                     # else:
-                    #     class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
-                    # NEW:
-                    class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
+                    #     w_func_name = el.get('name') + cfg.code_suffix 
 
-                class_decl += ' '*(n_indents+2)*indent + '}\n'
+                    # if remove_n_args > 0:
+                    #     w_func_name += '_overload_' + str(remove_n_args)
 
-            #
-            # If the method does not make use of any loaded class, construct a single virtual method
-            #
-            else:
-                class_decl += '\n'
-                class_decl += ' '*(n_indents+2)*indent
-                class_decl += 'virtual ' + return_kw_str + return_type + ' ' + is_operator*'operator' + w_func_name + w_args_bracket + is_const*' const' + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
+                #
+                # If the method makes use of a loaded class, construct a pair of wrapper methods.
+                #
+                if uses_loaded_type:
+
+                    # Construct the virtual member function that is overridden, e.g.:  
+                    #
+                    #   virtual X* getX_GAMBIT(arguments) {}
+                    #
+
+                    if return_is_loaded:
+                        if return_type.count('*') > 0:
+                            w_return_type = toAbstractType(return_type, include_namespace=True)
+                        else:
+                            w_return_type = toAbstractType(return_type, include_namespace=True, add_pointer=True, remove_reference=True)
+                    else:
+                        w_return_type = return_type
+
+                    class_decl += '\n'
+                    class_decl += ' '*(n_indents+2)*indent
+                    # class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket_nonames + is_const*' const' + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
+                    class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket_nonames + is_const*' const' + ' =0;' + '\n'
+
+
+                    # Construct the member function with the original name, wrapping the overridden one, e.g.: 
+                    #
+                    #   Abstract__X* getX(arguments)
+                    #   {
+                    #     return reinterpret_cast<Abstract__X*>(getX_GAMBIT(arguments));
+                    #   }
+                    #
+
+                    if is_operator:
+                        w2_func_name = 'operator' + el.get('name')
+                    else:
+                        w2_func_name = el.get('name')
+                    w2_args_bracket = w_args_bracket
+
+                    class_decl += ' '*(n_indents+2)*indent 
+                    class_decl += return_kw_str + w_return_type + ' ' + w2_func_name + w2_args_bracket + is_const*' const' +'\n'
+                    class_decl += ' '*(n_indents+2)*indent + '{\n'
+                    if (return_type == 'void'):
+                        class_decl += ' '*(n_indents+3)*indent + w_func_name + w_args_bracket_notypes + ';\n'
+                    else:
+                        # OLD:
+                        # if return_is_loaded:
+                        #     class_decl += ' '*(n_indents+3)*indent + 'return reinterpret_cast<' + return_kw_str + w_return_type + '>(' + w_func_name + w_args_bracket_notypes + ');\n'
+                        # else:
+                        #     class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
+                        # NEW:
+                        class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
+
+                    class_decl += ' '*(n_indents+2)*indent + '}\n'
+
+                #
+                # If the method does not make use of any loaded class, construct a single virtual method
+                #
+                else:
+                    class_decl += '\n'
+                    class_decl += ' '*(n_indents+2)*indent
+                    # class_decl += 'virtual ' + return_kw_str + return_type + ' ' + w_func_name + w_args_bracket_nonames + is_const*' const' + ' {std::cout << "Called virtual function" << std::endl;};' + '\n'
+                    class_decl += 'virtual ' + return_kw_str + return_type + ' ' + w_func_name + w_args_bracket_nonames + is_const*' const' + ' =0;' + '\n'
 
 
         #
@@ -315,11 +340,6 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                 class_decl += '// IGNORED: ' + el.tag + '  -- XML id: ' + el.get('id') + '\n'
 
     
-        #
-        # Keep track of members that we've already done 
-        #
-        done_members.append(el)
-
 
     # - Construct 'pointerAssign' and 'pointerCopy' functions
     if has_copy_constructor or construct_assignment_operator:
@@ -350,7 +370,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     # - Construct the closing of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'close')
 
-    class_decl += '#pragma GCC diagnostic pop\n'
+    # class_decl += '#pragma GCC diagnostic pop\n'
     return class_decl
 
 # ====== END: constrAbstractClassDecl ========
@@ -388,6 +408,9 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
         if len(template_types) > 0:
             factory_name += '_' + '_'.join(template_types)
 
+        # We need to generate as many overloaded versions as there are arguments with default values
+        n_overloads = funcutils.numberOfDefaultArgs(el)
+
         # Identify arguments
         args = funcutils.getArgs(el)
 
@@ -401,17 +424,27 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
                 args[i]['name'] = 'arg_' + str(argc)
                 argc += 1
 
-        # Construct bracket with input arguments
-        args_bracket = funcutils.constrArgsBracket(w_args, include_namespace=True)
-        args_bracket_notypes = funcutils.constrArgsBracket(args, include_arg_type=False, cast_to_original=True)
-        
-        # Generate declaration line:
-        return_type = toAbstractType(class_name['long'])
-        func_def += return_type + '* ' + factory_name + args_bracket + '\n'
-        # Generate body
-        func_def += '{' + '\n'
-        func_def += indent*' ' + 'return new ' + class_name['long'] + args_bracket_notypes + ';' + '\n'
-        func_def += '}' + 2*'\n'
+        # Generate one factory function for each set of default arguments
+        for remove_n_args in range(n_overloads+1):
+
+            if remove_n_args == 0:
+                use_args   = args
+                use_w_args = w_args
+            else:
+                use_args   = args[:-remove_n_args]
+                use_w_args = w_args[:-remove_n_args]
+
+            # Construct bracket with input arguments
+            args_bracket = funcutils.constrArgsBracket(use_w_args, include_namespace=True)
+            args_bracket_notypes = funcutils.constrArgsBracket(use_args, include_arg_type=False, cast_to_original=True)
+            
+            # Generate declaration line:
+            return_type = toAbstractType(class_name['long'])
+            func_def += return_type + '* ' + factory_name + args_bracket + '\n'
+            # Generate body
+            func_def += '{' + '\n'
+            func_def += indent*' ' + 'return new ' + class_name['long'] + args_bracket_notypes + ';' + '\n'
+            func_def += '}' + 2*'\n'
 
     return func_def
 
@@ -544,8 +577,8 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
 
     # Construct wrapper function name
     w_func_name = funcutils.constrWrapperName(method_el)
-    if remove_n_args > 0:
-        w_func_name += '_overload_' + str(remove_n_args)
+    # if remove_n_args > 0:
+    #     w_func_name += '_overload_' + str(remove_n_args)
 
 
     # Choose wrapper return type
@@ -619,7 +652,8 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
 
     func_code += ' '*n_indents*indent
     if virtual:
-        func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() {std::cout << "Called virtual function" << std::endl;};\n'
+        # func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() {std::cout << "Called virtual function" << std::endl;};\n'
+        func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() =0;\n'
     else:
         func_code += var_kw_str + return_type + '& ' + ref_method_name + '() { return ' + var_name  +'; }\n'
 
@@ -637,7 +671,8 @@ def constrPtrCopyFunc(abstr_class_name_short, class_name_short, virtual=False, i
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        ptr_code += 'virtual '+ abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '() {std::cout << "Called virtual function" << std::endl;};\n'   
+        # ptr_code += 'virtual '+ abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '() {std::cout << "Called virtual function" << std::endl;};\n'   
+        ptr_code += 'virtual '+ abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '() =0;\n'   
     else:
         ptr_code += abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '()'
         ptr_code += ' ' + '{ return new ' + class_name_short + '(*this); }\n'
@@ -656,7 +691,8 @@ def constrPtrAssignFunc(abstr_class_name_short, class_name_short, virtual=False,
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '* in) {std::cout << "Called virtual function" << std::endl;};\n'
+        # ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '*) {std::cout << "Called virtual function" << std::endl;};\n'
+        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '*) =0;\n'
     else:
         ptr_code += 'void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '* in)'
         ptr_code += ' ' + '{ *this = *dynamic_cast<' + class_name_short + '*>(in); }\n'        
@@ -859,67 +895,67 @@ def getClassNameDict(class_el, abstract=False):
 
 
 
-# ====== generateWrapperBaseHeader ========
+# # ====== generateWrapperBaseHeader ========
 
-def generateWrapperBaseHeader(wrapper_base_name):
+# def generateWrapperBaseHeader(wrapper_base_name):
 
-    insert_pos = 0
+#     insert_pos = 0
 
-    # std::shared_ptr lives in the <memory> header
-    code = "#include <memory>\n"
-    code += "\n"
+#     # std::shared_ptr lives in the <memory> header
+#     code = "#include <memory>\n"
+#     code += "\n"
 
-    # A deleter functor needed by std::shared_ptr
-    code += ("template <typename T>\n"
-             "class Deleter\n"
-             "{\n"
-             "    protected:\n"
-             "        bool member_variable;\n"
-             "\n"
-             "    public:\n"
-             "        Deleter() : member_variable(false) {}\n"
-             "        Deleter(bool memvar_in) : member_variable(memvar_in) {}\n"
-             "\n"
-             "        void setMemberVariable(bool memvar_in)\n"
-             "        {\n"
-             "            member_variable = memvar_in;\n"
-             "        }\n"
-             "\n"
-             "        void operator()(T* ptr)\n"
-             "        {\n"
-             "            if (member_variable==false) { delete ptr; }\n"
-             "        }\n"
-             "};\n")
+#     # A deleter functor needed by std::shared_ptr
+#     code += ("template <typename T>\n"
+#              "class Deleter\n"
+#              "{\n"
+#              "    protected:\n"
+#              "        bool member_variable;\n"
+#              "\n"
+#              "    public:\n"
+#              "        Deleter() : member_variable(false) {}\n"
+#              "        Deleter(bool memvar_in) : member_variable(memvar_in) {}\n"
+#              "\n"
+#              "        void setMemberVariable(bool memvar_in)\n"
+#              "        {\n"
+#              "            member_variable = memvar_in;\n"
+#              "        }\n"
+#              "\n"
+#              "        void operator()(T* ptr)\n"
+#              "        {\n"
+#              "            if (member_variable==false) { delete ptr; }\n"
+#              "        }\n"
+#              "};\n")
 
-    code += "\n"
+#     code += "\n"
 
-    # Wrapper base class code
-    code += ("template <typename T>\n" 
-             "class " + wrapper_base_name + "\n"
-             "{\n"
-             "    public:\n"
-             "        std::shared_ptr<T> BEptr;\n"
-             "\n"
-             "        // Constructor\n"
-             "        WrapperBase(T* BEptr_in, bool memvar_in)\n"
-             "        {\n"
-             "            BEptr.reset(BEptr_in, Deleter<T>(memvar_in));\n"
-             "        }\n"
-             "\n"
-             "        // Special member function to set member_variable in Deleter: \n"
-             "        void _setMemberVariable(bool memvar_in)\n" 
-             "        {\n" 
-             "            std::get_deleter<Deleter<T> >(BEptr)->setMemberVariable(memvar_in);\n"
-             "        }\n"
-             "};\n")
+#     # Wrapper base class code
+#     code += ("template <typename T>\n" 
+#              "class " + wrapper_base_name + "\n"
+#              "{\n"
+#              "    public:\n"
+#              "        std::shared_ptr<T> BEptr;\n"
+#              "\n"
+#              "        // Constructor\n"
+#              "        WrapperBase(T* BEptr_in, bool memvar_in)\n"
+#              "        {\n"
+#              "            BEptr.reset(BEptr_in, Deleter<T>(memvar_in));\n"
+#              "        }\n"
+#              "\n"
+#              "        // Special member function to set member_variable in Deleter: \n"
+#              "        void _setMemberVariable(bool memvar_in)\n" 
+#              "        {\n" 
+#              "            std::get_deleter<Deleter<T> >(BEptr)->setMemberVariable(memvar_in);\n"
+#              "        }\n"
+#              "};\n")
     
 
-    # Register code and return dict
-    # return_code_dict[fname]['code_tuples'].append( (0, code) )
+#     # Register code and return dict
+#     # return_code_dict[fname]['code_tuples'].append( (0, code) )
 
-    return (insert_pos, code)
+#     return (insert_pos, code)
 
-# ====== END: generateWrapperBaseHeader ========
+# # ====== END: generateWrapperBaseHeader ========
 
 
 

@@ -17,6 +17,7 @@ import xml.etree.ElementTree as ET
 import os
 import sys
 import warnings
+import shutil
 from collections import OrderedDict
 from optparse import OptionParser
 
@@ -316,25 +317,25 @@ def main():
             sys.exit()
 
 
-        #
-        # Write header with base wrapper class
-        #
+        # #
+        # # Write header with base wrapper class
+        # #
 
-        wrapper_base_class_name = 'WrapperBase'
+        # wrapper_base_class_name = 'WrapperBase'
 
-        code_tuple = classutils.generateWrapperBaseHeader(wrapper_base_class_name)
+        # code_tuple = classutils.generateWrapperBaseHeader(wrapper_base_class_name)
 
-        wrapper_base_header_fname = cfg.wrapper_header_prefix + wrapper_base_class_name + cfg.header_extension
-        wrapper_base_header_path  = os.path.join(cfg.extra_output_dir, wrapper_base_header_fname)
+        # wrapper_base_header_fname = cfg.wrapper_header_prefix + wrapper_base_class_name + cfg.header_extension
+        # wrapper_base_header_path  = os.path.join(cfg.extra_output_dir, wrapper_base_header_fname)
 
-        # - Update cfg.new_header_files
-        if wrapper_base_class_name not in cfg.new_header_files:
-            cfg.new_header_files[wrapper_base_class_name] = {'abstract': '', 'wrapper': wrapper_base_header_fname}
+        # # - Update cfg.new_header_files
+        # if wrapper_base_class_name not in cfg.new_header_files:
+        #     cfg.new_header_files[wrapper_base_class_name] = {'abstract': '', 'wrapper': wrapper_base_header_fname}
 
-        # - Register header file in the 'new_code' dict
-        if wrapper_base_header_path not in new_code.keys():
-            new_code[wrapper_base_header_path] = {'code_tuples':[], 'add_include_guard':True}
-        new_code[wrapper_base_header_path]['code_tuples'].append(code_tuple)
+        # # - Register header file in the 'new_code' dict
+        # if wrapper_base_header_path not in new_code.keys():
+        #     new_code[wrapper_base_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        # new_code[wrapper_base_header_path]['code_tuples'].append(code_tuple)
 
 
         #
@@ -413,7 +414,7 @@ def main():
     #
 
     #
-    # (Write new code to source files)
+    # Write new code to source files
     #
 
     for src_file_name, code_dict in new_code.iteritems():
@@ -489,6 +490,19 @@ def main():
 
         print new_file_content
         print
+
+
+    # 
+    # Copy and rename files from ./common_headers to output directory
+    #
+
+    source_file_name = 'common_headers/nullptr_check.hpp'
+    target_file_name = os.path.join(cfg.extra_output_dir, 'nullptr_check' + cfg.header_extension)
+    shutil.copy (source_file_name, target_file_name)
+
+    source_file_name = 'common_headers/WrapperBase.hpp'
+    target_file_name = os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + 'WrapperBase' + cfg.header_extension)
+    shutil.copy (source_file_name, target_file_name)
 
 
 # ====== END: main ========

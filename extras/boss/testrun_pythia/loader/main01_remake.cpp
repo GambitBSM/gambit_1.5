@@ -104,6 +104,9 @@ int main(int argc, char * argv[])
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_Pythia_0 = reinterpret_cast<Pythia8::Abstract_Pythia* (*)(std::string, bool)> (temp_ptr);
 
+  temp_ptr = dlsym(pHandle, "_Z14Factory_PythiaSs");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Pythia_0_overload_1 = reinterpret_cast<Pythia8::Abstract_Pythia* (*)(std::string)> (temp_ptr);
 
 
   // class Hist
@@ -140,10 +143,14 @@ int main(int argc, char * argv[])
   cout << endl;
 
 
-  Pythia pythia("../../pythia8186/xmldoc", true);
+  // Pythia pythia("../../pythia8186/xmldoc", true);
+  Pythia pythia("../../pythia8186/xmldoc");
 
+  cout << "call 1" << endl;
   pythia.readString("Beams:eCM = 8000.");
+  cout << "call 2" << endl;
   pythia.readString("HardQCD:all = on");
+  cout << "call 3" << endl;
   pythia.readString("PhaseSpace:pTHatMin = 20.");
   // pythia.readString("Beams:eCM = 8000.", true);
   // pythia.readString("HardQCD:all = on", true);
