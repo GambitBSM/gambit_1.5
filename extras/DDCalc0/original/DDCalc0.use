@@ -25,8 +25,12 @@ depends on the switch provided (only one of which may be given):
     WIMP-nucleon cross-sections (--events-by-mass)
 
   * The spin-independent (SI) or spin-dependent (SD) cross-section
-    exclusion limits tabulated by mass using the p-value
-    (--limits-SI or --limits-SD)
+    likelihood-based constraints tabulated by mass (--constraints-SI
+    or --constraints-SD)
+
+  * The spin-independent (SI) or spin-dependent (SD) cross-section
+    no-background-subtraction exclusion limits tabulated by mass
+    using the p-value (--limits-SI or --limits-SD)
 
 More details are given below.
 
@@ -192,8 +196,24 @@ the value will be ignored.  The tabulation of the masses can be modified
 using the --m-tabulation option.
 
 
-    DDCalc0 --limits-SI [options] [WIMP parameters]
-    DDCalc0 --limits-SD [options] [WIMP parameters]
+    DDCalc0 --constraints-SI [options]
+    DDCalc0 --constraints-SD [options]
+
+Tabulates by mass the cross-section lower and upper constraints in the
+spin-indepedent (SI) and spin-dependent (SD) cases.  Limits are
+determined using the likelihood (a Poisson with signal + background).
+The confidence level of this confidence region is given using the
+--confidence-level option, with the default being 0.9 (90% CL). In each
+case, the ratio of the WIMP-neutron & WIMP-proton couplings (Gp & Gn) is
+held fixed, with the ratio defined by an angle theta s.t. tan(theta) =
+Gn/Gp. The angle can be specified via the --theta-SI or --theta-SD option
+or, more conveniently, given in units of pi via --theta-SI-pi or
+--theta-SD-pi.  The default is Gp=Gn (theta = pi/4).  The tabulation of
+the masses can be modified using the --m-tabulation option.
+
+
+    DDCalc0 --limits-SI [options]
+    DDCalc0 --limits-SD [options]
 
 Tabulates by mass the cross-section upper limits in the spin-indepedent
 (SI) and spin-dependent (SD) cases.  Limits are determined using the
