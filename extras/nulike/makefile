@@ -20,7 +20,7 @@ TSPACK=contrib/TSPACK
 #MODULE=module
 # Define fortran compiler and options: gnu
 FF=gfortran
-FOPT=-O -ffixed-line-length-none -Wall -fcheck=all
+FOPT=-O -ffixed-line-length-none -Wall
 MODULE=J
 
 # NOTE -- The above definitions are not used in hte
