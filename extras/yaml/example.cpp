@@ -73,7 +73,7 @@ namespace YAML {
   };
 };
 
-int main()
+void test1()
 {
   // Read ini-file file
   std::vector<YAML::Node> roots = YAML::LoadAllFromFile("gambit.yaml");
@@ -96,6 +96,90 @@ int main()
   {
     parameters.push_back((*it).as<parameter>());
   }
+}
 
-  return 0;
+
+void printRound(YAML::Node node, int depth = 0)
+{
+    if (node.Type() == YAML::NodeType::Scalar)
+    {
+        for (int j = 0; j < depth; j++) std::cout << " ";
+        std::cout << node << std::endl;
+        return;
+    }
+    if (node.Type() == YAML::NodeType::Sequence)
+    {
+        for (unsigned int i = 0; i<node.size(); ++i)
+        {
+            printRound(node[i], depth + 1);
+        }
+        return;
+    }
+    if (node.Type() == YAML::NodeType::Map)
+    {
+        for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+        {
+            printRound(it->second, depth + 1);
+        }
+        return;
+    }
+}
+
+int importRound(YAML::Node node)
+{
+    int counter = 0;
+    if (node.Type() == YAML::NodeType::Scalar)
+    {
+        if ( node.Tag() == "!import" )
+        {
+            std::string filename = node.as<std::string>();
+            YAML::Node imported = YAML::LoadFile(filename);
+            node = imported;
+            std::cout << "Importing: " << filename << std::endl;
+            return 1;
+        }
+    }
+    if (node.Type() == YAML::NodeType::Sequence)
+    {
+        for (unsigned int i = 0; i<node.size(); ++i)
+        {
+            counter += importRound(node[i]);
+        }
+        return counter;
+    }
+    if (node.Type() == YAML::NodeType::Map)
+    {
+        for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+        {
+            counter += importRound(it->second);  // Only values are processed
+        }
+        return counter;
+    }
+}
+
+void test_import()
+{
+    YAML::Node node = YAML::LoadFile("master.yml");
+    printRound(node);
+    int import_counter = 0;
+    int last_import_counter = 0;
+    for ( int i = 0; i < 10; ++i)
+    {
+        last_import_counter = importRound(node);
+        import_counter += last_import_counter;
+    }
+    if (last_import_counter > 0)
+    {
+        std::cout << "Recursion depth for YAML imports exceeded." << std::endl;
+        exit(1);
+    }
+    printRound(node);
+    std::cout << "Number of YAML imports: " << import_counter << std::endl;
+}
+
+int main()
+{
+    //test1();
+    test_import();
+    return 0;
 }
