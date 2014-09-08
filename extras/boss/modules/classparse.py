@@ -62,7 +62,7 @@ def run():
             is_template = False
 
         # Check if there are any pure virtual methods in this class.
-        # If yes, print a warning an skip this class. (We cannot load such classes.)
+        # If yes, print a warning and skip this class. (We cannot load such classes.)
         check_member_elements = utils.getMemberElements(class_el)        
         pure_virtual_members = []
         for mem_el in check_member_elements:
@@ -76,59 +76,8 @@ def run():
             continue
 
         # Make list of all types in use in this class
-        # Also, make a separate list of all std types
         all_types_in_class = utils.getAllTypesInClass(class_el, include_parents=True)
 
-        # check_member_elements = utils.getMemberElements(class_el)
-        # cfg.all_types_in_class = {};
-        # cfg.std_types_in_class = {};
-
-        # class_id = class_el.get('id')
-        # for mem_el in check_member_elements:
-
-        #     if mem_el.tag in ['Constructor', 'Destructor', 'Method', 'OperatorMethod']:
-        #         args_list = funcutils.getArgs(mem_el)
-        #         for arg_dict in args_list:
-        #             arg_type_el = cfg.id_dict[arg_dict['id']]
-
-        #             arg_type = arg_dict['type']
-
-        #             if arg_type not in cfg.all_types_in_class.keys():
-        #                 cfg.all_types_in_class[arg_type] = arg_type_el
-
-        #                 if utils.isStdType(arg_type_el):
-        #                     cfg.std_types_in_class[arg_type] = arg_type_el
-
-
-        #     if ('type' in mem_el.keys()) or ('returns' in mem_el.keys()):
-        #         mem_type, mem_type_kw, mem_type_id = utils.findType(mem_el)
-        #         type_el = cfg.id_dict[mem_type_id]
-
-        #         if mem_type not in cfg.all_types_in_class.keys():
-        #             cfg.all_types_in_class[mem_type] = type_el
-
-        #             if utils.isStdType(type_el):
-        #                 cfg.std_types_in_class[mem_type] = type_el
-
-                # if utils.isStdType(type_el):
-                #     if mem_type not in cfg.std_types_in_class:
-                #         cfg.std_types_in_class.append(mem_type)
-
-        # while len(check_member_elements)>0:
-        #     print 'lenght: ', len(check_member_elements)
-        #     el = check_member_elements[-1]
-
-        #     if 'type' in el.keys():
-        #         mem_type, mem_type_kw, mem_type_id = utils.findType(el)
-        #         if mem_type not in cfg.types_used:
-        #             cfg.types_used.append(mem_type) 
-
-        #     append_elements = utils.getMemberElements(el)
-        #     check_member_elements = append_elements + check_member_elements
-        #     check_member_elements.pop()
-
-
-        
         # Set a bunch of generally useful variables 
         src_file_el        = cfg.id_dict[class_el.get('file')]
         src_file_name      = src_file_el.get('name')
@@ -188,14 +137,11 @@ def run():
                     raise Exception("The template specialization type '" + template_type + "' for class " + class_name['long'] + " is not among accepted types.")
 
 
+        #
         # Construct code for the abstract class header file and register it
-
+        #
+        
         class_decl = ''
-
-        # - DEBUG: For debug purposes, include <iostream> in all abstract header files
-        #          (To allow virtual member functions to print a warning if they are executed.)
-        class_decl += '#include <iostream>  // FOR DEBUG: Allow virtual member functions to print a warning if executed.\n'
-        class_decl += '\n'
 
         # - Add include statements
         include_statements  = []
@@ -231,14 +177,13 @@ def run():
                                                              has_copy_constructor=has_copy_constructor, construct_assignment_operator=construct_assignment_operator)
             class_decl += '\n'
 
-        # - Add include guards
-        # class_decl = utils.addIncludeGuard(class_decl, short_abstr_class_fname)
-
         # - Register code
         return_code_dict[abstr_class_fname]['code_tuples'].append( (-1, class_decl) )
 
 
+        #
         # Add abstract class to inheritance list of original class
+        #
 
         line_number = int(class_el.get('line'))
 
@@ -480,7 +425,10 @@ def run():
         return_code_dict[src_file_name]['code_tuples'].append( (insert_pos, ptr_code) )
 
 
-        # Generate info for factory 
+        #
+        # Generate factory function(s)
+        #
+
         factory_file_content  = ''
         # if is_template and class_name['long'] in template_done:
         #     pass
@@ -493,20 +441,6 @@ def run():
         else:
             factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, skip_copy_constructors=True, use_wrapper_class=True)
         factory_file_content += '\n'
-
-        # # Add include statements
-        # include_list = []
-        # for fact_subdict in factories_dict.values():
-        #     inc_line = fact_subdict['include']
-        #     if inc_line not in include_list:
-        #         include_list.append(inc_line)
-        # factory_file_content += ''.join(include_list)
-
-        # factory_file_content += 2*'\n'
-
-        # # Add function definitions
-        # for fact_subdict in factories_dict.values():
-        #     factory_file_content += fact_subdict['func_def']
 
         # - Generate factory file name
         dir_name = cfg.extra_output_dir
@@ -521,6 +455,7 @@ def run():
         #
         # Generate a header containing the GAMBIT wrapper class
         #
+
         # short_wrapper_class_fname = cfg.wrapper_header_prefix + class_name['short'] + cfg.header_extension
         short_wrapper_class_fname = cfg.new_header_files[class_name['long']]['wrapper']
         wrapper_class_fname = os.path.join(cfg.extra_output_dir, short_wrapper_class_fname)
@@ -542,6 +477,7 @@ def run():
         #
         # Add typedef to the wrapper_typedefs file (example: typedef SomeClass_gambit SomeClass; )
         #
+
         wrapper_class_name = classutils.toWrapperType(class_name['short'])
         typedef_code = 'typedef ' + wrapper_class_name + ' ' + class_name['short'] + ';\n'
 
@@ -553,6 +489,7 @@ def run():
         #
         # Keep track of classes done
         #
+
         classes_done.append(class_name['long'])
         if is_template: 
             if class_name['long'] not in template_done:
