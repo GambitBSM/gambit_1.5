@@ -27,12 +27,15 @@ std_headers_used = []
 std_types_in_class = {}
 all_types_in_class = {}
 
-accepted_paths     = ['pythia8186_original', 'pythia8186']
+# accepted_paths     = ['pythia8186_original', 'pythia8186']
+accepted_paths     = ['minimal_original', 'minimal']
 
 std_include_paths  = ['/usr/include/']
 
-loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
-loaded_functions     = ['Pythia8::m']
+# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
+# loaded_functions     = ['Pythia8::m']
+loaded_classes       = ['X', 'Y']
+loaded_functions     = []
 
 wrapper_class_tree     = True
 load_parent_classes    = False
@@ -44,13 +47,14 @@ abstr_header_prefix     = 'Abstract_'
 factory_file_prefix     = 'factory_'
 abstr_class_prefix      = 'Abstract_'
 wrapper_header_prefix   = 'GAMBIT_wrapper_'
-all_headers_fname       = 'all_abstract_headers.h'
-all_typedefs_fname      = 'all_typedefs.h'
-frwd_decls_abs_fname    = 'forward_decls_abstract_classes.h'
-wrapper_typedefs_fname  = 'GAMBIT_wrapper_typedefs.h'
-header_extension        = '.h'
-source_extension        = '.cc'
-add_path_to_includes    = 'Pythia8'
+all_headers_fname       = 'all_abstract_headers.hpp'
+all_typedefs_fname      = 'all_typedefs.hpp'
+frwd_decls_abs_fname    = 'forward_decls_abstract_classes.hpp'
+wrapper_typedefs_fname  = 'GAMBIT_wrapper_typedefs.hpp'
+header_extension        = '.hpp'
+source_extension        = '.cpp'
+add_path_to_includes    = ''     #'Pythia8'
+
 
 indent = 4
 

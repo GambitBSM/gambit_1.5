@@ -248,11 +248,15 @@ int main(int argc, char * argv[])
       // Analyze all particles.
       nFin++;
 
-      pSum += event[i].p();  // SEGFAULT!
+      pSum += event[i].p();  
     
+    
+
+
+
       cout << endl;
       cout << "TEST:  Start" << endl;
-      cout << "TEST:  statement: Particle p1" << endl;
+      cout << "TEST:  statement: Particle p1 = Factory_Particle()" << endl;
 
       Particle p1 = Factory_Particle();
 
