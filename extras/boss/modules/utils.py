@@ -335,7 +335,7 @@ def removeComments(content, insert_blanks=False):
 
 def findType(el_input):
 
-    check_keywords = ['static', 'const']
+    check_keywords = ['const']
     additional_keywords = []
     refs_and_pointers = ''
 
@@ -343,6 +343,10 @@ def findType(el_input):
     
     if el.tag in ['FundamentalType', 'Class', 'Struct']:
         type_id = el.get('id')
+
+    elif el.tag in ['Constructor']:
+        type_id = el.get('context')
+
     else:
         type_id = el.get('type')
         while ('type' in el.keys()) or ('returns' in el.keys()):
@@ -983,6 +987,48 @@ def getMemberFunctions(class_el, include_artificial=False, include_inherited=Fal
 
 
 
+# ====== getAllTypesInFunction ========
+
+def getAllTypesInFunction(func_el):
+
+    import modules.classutils as classutils
+    import modules.funcutils as funcutils
+
+    all_types = []
+
+    func_id = func_el.get('id')
+
+    if func_el.tag in ['Function', 'Constructor']:
+        args_list = funcutils.getArgs(func_el)
+        for arg_dict in args_list:
+
+            arg_type_el   = cfg.id_dict[arg_dict['id']]
+            arg_type_name = classutils.getClassNameDict(arg_type_el)                
+
+            arg_type_dict = {}
+            arg_type_dict['class_name'] = arg_type_name
+            arg_type_dict['el']         = arg_type_el
+
+            all_types.append(arg_type_dict)
+
+    if ('type' in func_el.keys()) or ('returns' in func_el.keys()) or (func_el.tag=='Constructor' and 'context' in func_el.keys()):
+
+        mem_type, mem_type_kw, mem_type_id = findType(func_el)
+
+        type_el   = cfg.id_dict[mem_type_id]
+        type_name = classutils.getClassNameDict(type_el)
+
+        type_dict = {}
+        type_dict['class_name'] = type_name
+        type_dict['el']         = type_el
+
+        all_types.append(type_dict)
+
+    return all_types
+
+# ====== END: getAllTypesInFunction ========
+
+
 
 # ====== constrNamespace ========
 
@@ -1114,4 +1160,172 @@ def identifyIncludedHeaders(content, only_native=True):
 
 
 
+# ====== isHeader ========
+
+def isHeader(file_el):
+
+    is_header = False
+
+    file_name = file_el.get('name')
+    if '.' in file_name:
+        extension = file_name.rsplit('.',1)[1]
+        if extension.lower() in ['hpp', 'h']:
+            is_header = True
+
+    return is_header
+
+# ====== END: isHeader ========
+
+
+
+# ====== getIncludeStatements ========
+
+def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[], input_element='class'):
+
+    include_statements = []
+
+    # Check string arguments
+    convert_loaded_to = convert_loaded_to.lower()
+    input_element     = input_element.lower()
+    if convert_loaded_to not in ['none', 'abstract', 'wrapper']:
+        raise Exception("getIncludeStatements: Keyword argument 'convert_loaded_to=' must be either 'none', 'abstract' or 'wrapper'.")
+    if input_element not in ['class', 'function']:
+        raise Exception("getIncludeStatements: Keyword argument 'input_element=' must be either 'class' or 'function'.")
+
+    # Get list of all types used in this class/function (each entry is a dict)
+    if input_element == 'class':
+        all_types = getAllTypesInClass(input_el, include_parents=False)
+    elif input_element == 'function':
+        all_types = getAllTypesInFunction(input_el)
+
+    # Get file name and line number of the current class/function
+    start_line_number = int( input_el.get('line') )
+    start_file_el     = cfg.id_dict[ input_el.get('file') ]
+    start_file_path   = start_file_el.get('name')
+
+    # Read file from beginning to position of class/function definition
+    start_file         = open(start_file_path, 'r')
+    start_file_content = start_file.readlines()[0:start_line_number]
+    start_file_content = ''.join(start_file_content)
+    start_file.close()
+
+    # Identify included header files from this file (utils.identifyIncludedHeaders returns a dict of the form {header_file_name: xml_id})
+    included_headers_dict = identifyIncludedHeaders(start_file_content, only_native=True)
+
+    # Move up the header tree and identify all the relevant (native) included headers
+    header_paths = [ cfg.id_dict[file_id].get('name') for file_id in included_headers_dict.values() ]
+    header_paths_done = []
+
+    while len(header_paths) > 0:
+
+        header_path = header_paths.pop()
+
+        # Read header
+        header         = open(header_path, 'r')
+        header_content = header.read()
+        header.close()
+
+        # Identify new headers
+        new_included_headers = identifyIncludedHeaders(header_content, only_native=True)
+
+        # Add any new headers to included_headers_dict
+        for file_name, file_id in new_included_headers.items():
+            if file_name not in included_headers_dict.keys():
+                included_headers_dict[file_name] = file_id
+
+        # Add any new headers to the list of header files to check
+        new_header_paths = [ cfg.id_dict[header_id].get('name') for header_id in new_included_headers.values() ]
+        for new_path in new_header_paths:
+            if (new_path not in header_paths) and (new_path not in header_paths_done):
+                header_paths.append(new_path)
+
+        # Keep track of headers we've done
+        header_paths_done.append(header_path)
+
+
+    # Determine what include statements to generate:
+
+    for type_dict in all_types:
+
+        type_el   = type_dict['el']
+        type_name = type_dict['class_name']
+
+        if type_name in exclude_types:
+            continue
+
+        if isAcceptedType(type_el):
+
+            if isFundamental(type_el):
+                pass
+
+            elif isLoadedClass(type_el):
+
+                # For each loaded class used in this class/function, check whether the corresponding class definition can be
+                # found in the current file (above current class/function) or among the included headers. Only include headers 
+                # for the loaded classes that pass this check. (If no such class definition is found, it must be a 
+                # case of simply using forward declaration, in which case we should *not* include the corresponding header.) 
+
+                type_file_id = type_el.get('file')
+                type_line_number = int(type_el.get('line'))
+
+                if (type_file_id in included_headers_dict.values()) :
+                    type_definition_found = True
+                elif (type_file_id == input_el.get('file')) and (type_line_number < start_line_number):
+                    type_definition_found = True
+                else:
+                    type_definition_found = False
+
+                if type_definition_found:
+                    if convert_loaded_to == 'none':
+
+                        type_file_el = cfg.id_dict[type_file_id]
+                        type_file_full_path = type_file_el.get('name')
+
+                        if isHeader(type_file_el):
+                            type_file_basename = os.path.basename(type_file_full_path)
+                            if add_extra_include_path:
+                                include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, type_file_basename) + '"')
+                            else:
+                                include_statements.append('#include "' + type_file_basename + '"')
+                        else:
+                            print 'INFO: ' + 'Found declaration of loaded type "%s" in file "%s", but this file is not recognized as a header file. No header file include statement generated.' % (type_name['long_templ'], type_file_full_path)
+
+                    else:
+                        if add_extra_include_path:
+                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][convert_loaded_to]) + '"')
+                        else:
+                            include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
+
+                else:
+                    # This must be a case of a type that is only forward declared. Don't include any header (as this will typically lead to a 'header loop').
+                    continue
+
+            elif isStdType(type_el):
+
+                if type_name['long'] in cfg.known_class_headers:
+                    header_name = cfg.known_class_headers[type_name['long']]
+                    if (header_name[0] == '<') and (header_name[-1] == '>'):
+                        include_statements.append('#include ' + cfg.known_class_headers[type_name['long']])
+                    else:
+                        include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
+                else:
+                    # warnings.warn("The standard type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long_templ'])
+                    print 'INFO: ' + 'The standard type "%s" has no specified header file. Please update modules/cfg.py. No header file include statement generated.' % type_name['long_templ']
+
+            else:
+                if type_name['long'] in cfg.known_class_headers:
+                    include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
+                else:
+                    # warnings.warn("The type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long'])
+                    print 'INFO: ' + 'The type "%s" has no specified header file. Please update modules/cfg.py. No header file include statement generated.' % type_name['long']
+        else:
+            # warnings.warn("The type '%s' is unknown. No header file included." % type_name['long'])
+            print 'INFO: ' + 'The type "%s" is unknown. No header file include statement generated.' % type_name['long']
+
+    # Remove duplicates and return list
+    include_statements = list( set(include_statements) )
+
+    return include_statements
+
+# ====== END: getIncludeStatements ========
 

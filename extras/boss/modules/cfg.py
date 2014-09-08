@@ -27,23 +27,20 @@ std_headers_used = []
 std_types_in_class = {}
 all_types_in_class = {}
 
-
-# accepted_paths     = ['classloader_example/original']
 accepted_paths     = ['pythia8186_original', 'pythia8186']
 
 std_include_paths  = ['/usr/include/']
 
-# loaded_classes       = ['MyInt', 'DummyNameSpace::U']
 loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
-loaded_functions     = []
+loaded_functions     = ['Pythia8::m']
 
 wrapper_class_tree     = True
 load_parent_classes    = False
 wrap_inherited_members = False
 
 extra_output_dir        = 'output'
-code_suffix             = '_gambit'
-abstr_header_prefix     = 'abstract_'
+code_suffix             = '_GAMBIT'
+abstr_header_prefix     = 'Abstract_'
 factory_file_prefix     = 'factory_'
 abstr_class_prefix      = 'Abstract_'
 wrapper_header_prefix   = 'GAMBIT_wrapper_'
@@ -54,7 +51,6 @@ wrapper_typedefs_fname  = 'GAMBIT_wrapper_typedefs.h'
 header_extension        = '.h'
 source_extension        = '.cc'
 add_path_to_includes    = 'Pythia8'
-
 
 indent = 4
 
@@ -91,8 +87,8 @@ operator_names = {
     "*"   : "multiplication",
     "/"   : "division",
     "%"   : "modulo",
-    "++"  : "increment",
-    "--"  : "decrement",
+    # "++"  : "increment",  # Need to differentiate between ++i and i++. Commented out for now.
+    # "--"  : "decrement",
     "+="  : "addition_assignment",
     "-="  : "subtraction_assignment",
     "*="  : "multiplication_assignment",

@@ -3,8 +3,8 @@
 #include <string>
 #include <stdlib.h>
 
-// #include "GAMBIT_wrapper_Event.h"
-// #include "GAMBIT_wrapper_Particle.h"
+#include "GAMBIT_wrapper_Particle.h"
+#include "GAMBIT_wrapper_Event.h"
 #include "GAMBIT_wrapper_Hist.h"
 #include "GAMBIT_wrapper_Pythia.h"
 #include "GAMBIT_wrapper_typedefs.h"
@@ -123,17 +123,23 @@ int main(int argc, char * argv[])
 
 
 
-  // // class Particle
-  // temp_ptr = dlsym(pHandle, "_Z16Factory_Particlev");
-  // if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  // Factory_Particle_0 = reinterpret_cast<Pythia8::Abstract_Particle* (*)()> (temp_ptr);
+
+
+  // class Particle
+  temp_ptr = dlsym(pHandle, "_Z16Factory_Particlev");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Particle_0 = reinterpret_cast<Pythia8::Abstract_Particle* (*)()> (temp_ptr);
 
 
 
-  // // class Event
-  // temp_ptr = dlsym(pHandle, "_Z13Factory_Eventi");
-  // if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
-  // Factory_Event_0 = reinterpret_cast<Pythia8::Abstract_Event* (*)(int)> (temp_ptr);
+  // class Event
+  temp_ptr = dlsym(pHandle, "_Z13Factory_Eventi");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Event_0 = reinterpret_cast<Pythia8::Abstract_Event* (*)(int)> (temp_ptr);
+
+  temp_ptr = dlsym(pHandle, "_Z13Factory_Eventv");
+  if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  Factory_Event_0_overload_1 = reinterpret_cast<Pythia8::Abstract_Event* (*)()> (temp_ptr);
 
 
   // ------------
@@ -144,6 +150,51 @@ int main(int argc, char * argv[])
   cout << endl;
   cout << "=======================" << endl;
   cout << endl;
+
+
+  // {
+  //   cout << endl;
+  //   cout << "START SCOPE 1" << endl;
+  //   cout << endl;
+
+
+  //   cout << "Constructing Vec4 'p1'" << endl;
+  //   Vec4 p1(0.0, 0.0, 0.0, 0.0);  
+
+  //   {
+  //     cout << endl;
+  //     cout << "START SCOPE 2" << endl;
+  //     cout << endl;
+
+  //     cout << endl;
+  //     cout << "Constructing Vec4 'p2'" << endl;
+  //     Vec4 p2(1.0, 2.0, 3.0, 4.0);
+      
+  //     cout << endl;
+  //     cout << "Exectuing 'Vec4 p3 = p1 += p2'" << endl;
+  //     p1 += p2;
+  //     Vec4& p1_ref = p1;
+
+  //     p1_ref = Vec4(2.0, 2.0, 2.0, 2.0);
+
+  //     p1_ref = 9.9;
+
+  //     cout << endl;
+  //     cout << "END SCOPE 2" << endl;
+  //     cout << endl;
+  //   }
+  
+  //   cout << "  p1 : " << p1.px() << " , " << p1.py() << " , " << p1.pz() << " , " << p1.e() << endl;
+
+
+  //   cout << endl;
+  //   cout << "END SCOPE 1" << endl;
+  //   cout << endl;
+  // }
+
+  // PROBLEM: p1 is never deleted, while p2 is deleted twice.
+
+
 
 
   Pythia pythia("../../pythia8186/xmldoc", false);
@@ -188,12 +239,29 @@ int main(int argc, char * argv[])
     int  nFin = 0;
     int  nChg = 0;
     Vec4 pSum(0.0, 0.0, 0.0, 0.0);
+
+
     for (int i = 0; i < event.size(); ++i) if (event[i].isFinal()) {
 
-       // Analyze all particles.
+      // Analyze all particles.
       nFin++;
-      pSum += event[i].p();
+
+      pSum += event[i].p();  // SEGFAULT!
     
+      cout << endl;
+      cout << "TEST:  Start" << endl;
+      cout << "TEST:  statement: Particle p1" << endl;
+      Particle p1;
+      cout << "TEST:  statement: p1.id(123)" << endl;
+      p1.id(123);
+      cout << "TEST:  p1.id() = " << p1.id() << endl;
+      cout << "TEST:  statement: event[i] = p1" << endl;
+      event[i] = p1;
+      cout << "TEST:  event[i].id() = " << event[i].id() << endl;
+      cout << "TEST:  End" << endl;
+
+
+
       // Analyze charged particles and fill histograms.
       if (event[i].isCharged()) {
         ++nChg;
@@ -204,6 +272,7 @@ int main(int argc, char * argv[])
 
     // End of particle loop. Fill global properties.
     }
+
     nFinal.fill( nFin );
     nCharged.fill( nChg );
     pSum /= event[0].e();
@@ -214,6 +283,7 @@ int main(int argc, char * argv[])
   // End of event loop.
   }
    
+
   // Final statistics. Normalize and output histograms.
   pythia.stat();
   dndy   *=  5. / nEvent;

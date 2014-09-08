@@ -33,6 +33,9 @@ import modules.utils as utils
 
 def main():
 
+    print
+    print
+
     #
     # Initialization
     #
@@ -52,14 +55,14 @@ def main():
                           version="%prog 0.1")
     parser.add_option("-l", "--list",
                       action="store_true",
-                      dest="list_classes_flag",
+                      dest="list_flag",
                       default=False,
                       help="Output a list of the available classes and functions.")
-    parser.add_option("-c", "--choose-classes",
+    parser.add_option("-c", "--choose",
                       action="store_true",
-                      dest="choose_classes_flag",
+                      dest="choose_flag",
                       default=False,
-                      help="Choose from a list of the available classes at runtime.")
+                      help="Choose from a list of the available classes and functions at runtime.")
     parser.add_option("-p", "--set-path-id",
                       action="store_true",
                       dest="set_path_ids_flag",
@@ -84,9 +87,10 @@ def main():
     xml_files = args
 
     # Set up a few more things before the file loop
-    if options.choose_classes_flag:
-        print 'Overwriting any values in cfg.loaded_classes...'
-        cfg.loaded_classes = []
+    if options.choose_flag:
+        print 'Overwriting any values in cfg.loaded_classes and cfg.loaded_functions...'
+        cfg.loaded_classes   = []
+        cfg.loaded_functions = []
     if options.set_path_ids_flag:
         print 'Overwriting any values in cfg.accepted_paths...'
         cfg.accepted_paths = []
@@ -157,7 +161,7 @@ def main():
 
         # Update global dict: class name --> class xml element
         # Classes before typedefs, so the user can choose the classes they want
-        if options.choose_classes_flag:
+        if options.choose_flag:
             # ultimately:   terminal_size = (rows - 8, columns - 8)
             terminal_size = os.popen('stty size', 'r').read().split()
             terminal_size = (int(terminal_size[0]) - 8, int(terminal_size[1]) - 8)
@@ -199,7 +203,7 @@ def main():
             demangled_class_name = el.get('demangled')
             if demangled_class_name in cfg.loaded_classes:
                 cfg.class_dict[demangled_class_name] = el
-            elif options.list_classes_flag and utils.isNative(el):
+            elif options.list_flag and utils.isNative(el):
                 cfg.class_dict[demangled_class_name] = el
 
 
@@ -243,16 +247,78 @@ def main():
         for el in root.findall('Function'):
             if 'demangled' in el.keys():
                 demangled_name = el.get('demangled')
+
                 # Template functions have more complicated 'demangled' entries...
                 if '<' in demangled_name:
                     func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
                 else:
                     func_name_full = demangled_name.split('(',1)[0]
-                func_name_full = func_name_full
+
                 if func_name_full in cfg.loaded_functions:
                     cfg.func_dict[func_name_full] = el
-                elif (options.list_classes_flag) and (utils.isNative(el)):
+                elif (options.list_flag) and (utils.isNative(el)):
                     cfg.func_dict[func_name_full] = el
+
+
+        # Update global dict: function name --> function xml element
+        if options.choose_flag:
+            # # ultimately:   terminal_size = (rows - 8, columns - 8)
+            # terminal_size = os.popen('stty size', 'r').read().split()
+            # terminal_size = (int(terminal_size[0]) - 8, int(terminal_size[1]) - 8)
+            # qtr = terminal_size[1] / 4
+            coords = [0, 0]
+            count = 0
+            mini_func_dict = {}
+            for el in root.findall('Function'):
+                if 'demangled' in el.keys():
+                    demangled_func_name = el.get('demangled')
+                    # Template functions have more complicated 'demangled' entries...
+                    if '<' in demangled_func_name:
+                        func_name_full = demangled_func_name.split(' ',1)[1].split('(',1)[0]
+                    else:
+                        func_name_full = demangled_func_name.split('(',1)[0]
+
+                    if coords[0] == 0:
+                        # then, new screen of functions to choose from
+                        coords[0] += 1
+                        count = 0
+                        mini_func_dict.clear()
+                        print '\n\n Choose what functions you need from this list: \n\n   ',
+                    if utils.isNative(el):
+                        count += 1
+                        mini_func_dict[str(count)] = func_name_full
+                        item = str(count) + '. ' + func_name_full
+                        item += ' '*(qtr - (len(item)+1)%qtr)
+                        if coords[1] and len(item) + coords[1] + 1 >= terminal_size[1]:
+                            coords[0] += 1
+                            coords[1] = 0
+                            print '\n   ',
+                        coords[1] += len(item) + 1
+                        print item,
+                        if coords[0] >= terminal_size[0]:
+                            coords[0] = 0
+                            choices = raw_input('\n\n Input a comma separated list of the numbers indicating the functions you want:\n').partition(',')
+                            while(choices[0].strip()):
+                                cfg.loaded_functions.append(mini_func_dict[choices[0].strip()])
+                                choices = choices[2].partition(',')
+            else:
+                choices = raw_input('\n\n Input a comma separated list of the numbers indicating the functions you want:\n').partition(',')
+                while(choices[0].strip()):
+                    cfg.loaded_functions.append(mini_func_dict[choices[0].strip()])
+                    choices = choices[2].partition(',')
+        for el in root.findall('Function'):
+            if 'demangled' in el.keys():
+                demangled_func_name = el.get('demangled')
+                # Template functions have more complicated 'demangled' entries...
+                if '<' in demangled_func_name:
+                    func_name_full = demangled_func_name.split(' ',1)[1].split('(',1)[0]
+                else:
+                    func_name_full = demangled_func_name.split('(',1)[0]
+                if func_name_full in cfg.loaded_functions:
+                    cfg.func_dict[func_name_full] = el
+                elif (options.list_flag) and (utils.isNative(el)):
+                    cfg.func_dict[func_name_full] = el
+
 
 
         # If requested, append any (native) parent classes to the cfg.loaded_classes list
@@ -298,21 +364,21 @@ def main():
         # If -l option is given, print a list of all avilable classes and functions, then exit.
         #
 
-        if options.list_classes_flag:
+        if options.list_flag:
 
-            if not options.choose_classes_flag:
+            if not options.choose_flag:
                 print 'Classes:'
                 print '--------'
                 for demangled_class_name in cfg.class_dict:
                     print ' - ' + demangled_class_name
                 print
 
-            print 'Functions:'
-            print '----------'
-            for func_el in cfg.func_dict.values():
-                extended_name = func_el.get('demangled')
-                print ' - ' + extended_name
-            print
+                print 'Functions:'
+                print '----------'
+                for func_el in cfg.func_dict.values():
+                    extended_name = func_el.get('demangled')
+                    print ' - ' + extended_name
+                print
 
             sys.exit()
 
@@ -429,12 +495,6 @@ def main():
         if code_tuples == []:
             continue
 
-        print 
-        print
-        print 'FILE : ', new_src_file_name
-        print '========================================='
-
-
         boss_backup_exists = False
         if os.path.isfile(src_file_name):
             try:
@@ -482,28 +542,50 @@ def main():
             short_new_src_file_name = os.path.basename(new_src_file_name)
             new_file_content = utils.addIncludeGuard(new_file_content, short_new_src_file_name)
 
-        # Do the writing!
-        if not options.debug_mode_flag:
+        # Do the writing! (If debug_mode, only print file content to screen)
+        if options.debug_mode_flag:
+            print 
+            print
+            print 'FILE : ', new_src_file_name
+            print '========================================='
+            print new_file_content
+            print
+        else:
             f = open(new_src_file_name, 'w')
             f.write(new_file_content)
             f.close()
 
-        print new_file_content
-        print
 
 
     # 
     # Copy and rename files from ./common_headers to output directory
-    #
+    # 
 
-    source_file_name = 'common_headers/nullptr_check.hpp'
-    target_file_name = os.path.join(cfg.extra_output_dir, 'nullptr_check' + cfg.header_extension)
-    shutil.copy (source_file_name, target_file_name)
+    # - WrapperBase.hpp
 
     source_file_name = 'common_headers/WrapperBase.hpp'
     target_file_name = os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + 'WrapperBase' + cfg.header_extension)
-    shutil.copy (source_file_name, target_file_name)
+    
+    f_src = open(source_file_name, 'r')
+    content = f_src.read()
+    f_src.close()
 
+    new_content = content.replace('__CODE_SUFFIX__', cfg.code_suffix)
+
+    f_target = open(target_file_name, 'w')
+    f_target.write(new_content)
+    f_target.close()
+
+
+    # - nullptr_check.hpp
+
+    # source_file_name = 'common_headers/nullptr_check.hpp'
+    # target_file_name = os.path.join(cfg.extra_output_dir, 'nullptr_check' + cfg.header_extension)
+    # shutil.copy (source_file_name, target_file_name)
+
+
+    print 
+    print
 
 # ====== END: main ========
 

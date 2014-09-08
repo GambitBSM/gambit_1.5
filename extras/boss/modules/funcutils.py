@@ -154,8 +154,16 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                     qualifiers = ' '.join(arg_dict['kw'])
                     cast_to_type = qualifiers + ' ' + cast_to_type
 
-                # args_seq += 'dynamic_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'
-                args_seq += 'reinterpret_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'  # Switched to reinterpret cast to be able to cast forward declared types
+                # Determine what argument name to use (arg_name or *arg_name.BEptr or ...)
+                if wrapper_to_pointer:
+                    if arg_dict['type'].count('*') == 0:
+                        use_name = '*' + arg_dict['name'] + '.BEptr'
+                    elif arg_dict['type'].count('*') == 1:
+                        # use_name = '(*' + arg_dict['name'] + ')' + '.BEptr.get()'
+                        use_name = '(*' + arg_dict['name'] + ')' + '.BEptr'
+                    args_seq += 'reinterpret_cast< ' + cast_to_type + ' >(' + use_name + ')'
+                else:
+                    args_seq += 'reinterpret_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'  # Switched to reinterpret cast to be able to cast forward declared types
 
             else:
 
@@ -187,7 +195,8 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                     if arg_dict['type'].count('*') == 0:
                         args_seq += '*' + arg_dict['name'] + '.BEptr'
                     elif arg_dict['type'].count('*') == 1:
-                        args_seq += '(*' + arg_dict['name'] + ')' + '.BEptr.get()'
+                        # args_seq += '(*' + arg_dict['name'] + ')' + '.BEptr.get()'
+                        args_seq += '(*' + arg_dict['name'] + ')' + '.BEptr'
                     else:
                         raise Exception('funcutils.constrArgsBracket cannot presently deal with arguments of type pointer-to-pointer for wrapper classes.')
                 else:
@@ -247,7 +256,7 @@ def constrWrapperName(func_el):
 
 # ======== constrWrapperArgs ========
 
-def constrWrapperArgs(args, add_ref=False):
+def constrWrapperArgs(args, add_ref=False, convert_loaded_to_abstract=True):
 
     #
     # Requires a list of dicts as input, as returned by 'getArgs'.
@@ -267,7 +276,8 @@ def constrWrapperArgs(args, add_ref=False):
         if arg_dict['native'] == True:
             if arg_dict['loaded_class']:
 
-                arg_dict['type'] = classutils.toAbstractType(arg_dict['type'])
+                if convert_loaded_to_abstract:
+                    arg_dict['type'] = classutils.toAbstractType(arg_dict['type'])
 
                 # if len(arg_dict['type_namespaces']) > 0:
                 #     # namespaces, type_name = arg_dict['type'].rsplit('::',1)
@@ -450,7 +460,10 @@ def constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keyw
         use_return_type.rstrip('*')
 
         if return_is_loaded_class:
-            w_func_body += 'new ' + use_return_type + '(' + func_name + args_bracket_notypes + ');\n'
+            if is_ref:
+                w_func_body += '&(' + func_name + args_bracket_notypes + ');\n'
+            else:
+                w_func_body += 'new ' + use_return_type + '(' + func_name + args_bracket_notypes + ');\n'
         else:
             w_func_body += func_name + args_bracket_notypes + ';\n'
 
@@ -587,3 +600,26 @@ def multiplyDefaultArgFunctions(element_list, include_operators=False, include_c
     return new_element_list
 
 # ======== END: multiplyDefaultArgFunctions ========
+
+
+
+# ======== constrExternFuncDecl ========
+
+def constrExternFuncDecl(func_el):
+
+    extern_decl = ''
+
+    return_type, return_kw, return_id = utils.findType( cfg.id_dict[func_el.get('returns')] )
+    namespaces = utils.getNamespaces(func_el)
+    
+    n_indents = len(namespaces)
+
+    extern_decl += utils.constrNamespace(namespaces, 'open')
+    extern_decl += ' '*cfg.indent*n_indents + 'extern ' + return_type + ' ' + utils.removeNamespace(func_el.get('demangled')) + ';\n'
+    extern_decl += utils.constrNamespace(namespaces, 'close')
+
+    return extern_decl
+
+# ======== END: constrExternFuncDecl ========
+
+

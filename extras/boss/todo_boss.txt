@@ -7,10 +7,6 @@ Anders: 7, 3
 Abram : ?
 
 
-(1)
-Generate the code for the GAMBIT wrapper classes (in a new header file).
-
-
 (2)
 Implement a fix for the nameclash between the forward declarations
 used in 'abstract_SomeClass.hpp' and the typedef that will be used in
@@ -23,17 +19,6 @@ declarations, and stick this in another header 'abstract_SomeClass_extras.hpp'
 that will only be included by the external code, not by GAMBIT.
 
 
-(3)
-Rewrite/extend bits of funcparse.py and funcutils.py to generate wrapper functions
-for all global functions found in the original code. (Check out the file 'after_BOSS/functions.cpp'
-in the example that we passed around earlier.)
-
-
-(4)
-Following from (3), we need BOSS to output a header file with GAMBIT wrapper functions 
-for the functions generated in (3). (See 'GAMBIT_wrapper_functions.hpp' in the example.)
-
-
 (5)
 Make BOSS generate the 'backend_SomeCode.hpp' file that will go into
 'GAMBIT/modules/Backends/include/'. Mostly, this amounts to generating all
@@ -43,11 +28,6 @@ general global functions.
 
 (6)
 Figure out how to deal with friend classes and functions? Do we even have to worry about this?
-
-
-(7)
-For all functions (global and class members), catch any default argument values and propagate them 
-to the wrapper functions BOSS produce.
 
 
 (8)
@@ -76,16 +56,6 @@ appears before any of the specializations.
 (10)
 When creating cfg.std_types_dict, we must check all template arguments before 
 accepting a template specialization as a standard type.
-
-
-(11)
-UPDATE:
-Is this not needed as long as we are absolutely sure that all virtual methods are overwritten?
-I can't seem to produce the 'unused parameter' or 'unused return' errors with the example code...
-
-OLD:
-Pat suggested a fix for getting rid of the pragma statements. Figure out what it was and
-implement it.
 
 
 (12)
