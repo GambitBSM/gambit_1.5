@@ -3,7 +3,7 @@ Todo list for BOSS:
 
 Currently working on: 
 
-Anders: 7, 3
+Anders: 14, 16
 Abram : ?
 
 
@@ -83,6 +83,19 @@ Handle operator names in a more elegant way. Currently a simple dictionary is us
 work when a single operator can be interpreted in different ways depending on context. (Example: the '*' operator can 
 either be multiplication or pointer dereferencing.) Create a utils function for returning the correct operator name?
 
+(15)
+Deal with classes-within-classes.
+
+(16) 
+Investigate if abstract class declarations are enough for the wrapper classes to compile and be usable on the GAMBIT side.
+If so, then the abstract class definitions will go into .cpp files instead of headers, and only be compiled in the backend.
+In that case, the functionality of determining whether or not an abstract instance has a wrapper already or not, and making
+one if it does not, falls on a method of the abstract class -- so the abstract's .cpp files will need to include the headers
+of both the abstract *and* the wrapper.
+
+(17)
+Do away with STL dictionary by following include statements backwards to determine which
+standard/boost/other headers need to be included in the abstract and wrapper classes.
 
 
 
