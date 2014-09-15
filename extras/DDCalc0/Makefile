@@ -2,16 +2,21 @@
 # Minimal makefile for building the shared library         # 
 ############################################################
 
-FC := gfortran
+FC = gfortran
 
-FFLAGS := -O3 -fno-range-check -shared -fPIC
+FFLAGS = -O3 -fPIC
 
-library := DDCalc0.so
+library = libDDCalc0.so
 
-fsources := DDCalc0.f90
+fobjects = DDCalc0.o
 
-all: $(fsources)
-	$(FC) $(FFLAGS) -o $(library) $(fsources)
+all: $(library)
+
+%.o: %.f90
+	$(FC) $(FFLAGS) -c $< -o $@
+
+$(library): $(fobjects)
+	$(FC) -shared -o $(library) $(fobjects)
 
 clean:
-	-rm -rf $(library)
+	-rm -rf $(library) $(fobjects) *.mod
