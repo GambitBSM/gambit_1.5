@@ -93,6 +93,9 @@ standard/boost/other headers need to be included in the abstract and wrapper cla
 (18)
 Set up a first working example of using a 'BOSSed' Pythia as a backend in GAMBIT.
 
+(19)
+Does BOSS produce the correct output when run with several .xml files at once?
+According to Abram there may be an issue here. (Not covered by the current testing with Pythia.)
 
 
 Small things to fix:
