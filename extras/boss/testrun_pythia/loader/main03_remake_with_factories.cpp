@@ -11,7 +11,6 @@
 #include "boss_loaded_classes.h"
 #include "GAMBIT_wrapper_typedefs.h"
 
-#include "add_test_func.h"
 
 using std::string;
 using std::vector;
@@ -312,8 +311,6 @@ int main(int argc, char * argv[])
 
       cout << "TEST:  End" << endl;
 
-
-      test_func(p1);
 
 
       // Analyze charged particles and fill histograms.
