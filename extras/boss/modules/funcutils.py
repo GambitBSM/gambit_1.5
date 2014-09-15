@@ -161,9 +161,9 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                     elif arg_dict['type'].count('*') == 1:
                         # use_name = '(*' + arg_dict['name'] + ')' + '.BEptr.get()'
                         use_name = '(*' + arg_dict['name'] + ')' + '.BEptr'
-                    args_seq += 'reinterpret_cast< ' + cast_to_type + ' >(' + use_name + ')'
+                    args_seq += 'dynamic_cast< ' + cast_to_type + ' >(' + use_name + ')'
                 else:
-                    args_seq += 'reinterpret_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'  # Switched to reinterpret cast to be able to cast forward declared types
+                    args_seq += 'dynamic_cast< ' + cast_to_type + ' >(' + arg_dict['name'] + ')'
 
             else:
 
@@ -216,19 +216,24 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
 
 # ======== constrWrapperName ========
 
-def constrWrapperName(func_el):
+def constrWrapperName(func_el, include_full_namespace=True):
 
     # Check if this is an operator function
     is_operator = False
     if func_el.tag == 'OperatorMethod':
         is_operator = True
 
-    func_name = func_el.get('name')
+    func_name_short = func_el.get('name')
 
     if is_operator:
-        w_func_name = 'operator_' + cfg.operator_names[func_name] + cfg.code_suffix
+        w_func_name = 'operator_' + cfg.operator_names[func_name_short] + cfg.code_suffix
     else:
-        w_func_name = func_name + cfg.code_suffix
+        w_func_name = func_name_short + cfg.code_suffix
+
+    if include_full_namespace:
+        namespaces = utils.getNamespaces(func_el)
+        if len(namespaces) > 0:
+            w_func_name = '::'.join(namespaces) + '::' + w_func_name
 
     return w_func_name
 
@@ -462,6 +467,8 @@ def constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keyw
         if return_is_loaded_class:
             if is_ref:
                 w_func_body += '&(' + func_name + args_bracket_notypes + ');\n'
+            elif (not is_ref) and (pointerness > 0):
+                w_func_body += func_name + args_bracket_notypes + ';\n'
             else:
                 w_func_body += 'new ' + use_return_type + '(' + func_name + args_bracket_notypes + ');\n'
         else:

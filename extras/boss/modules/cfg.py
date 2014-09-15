@@ -34,7 +34,7 @@ std_include_paths  = ['/usr/include/']
 
 # loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
 # loaded_functions     = ['Pythia8::m']
-loaded_classes       = ['X', 'Y']
+loaded_classes       = ['X', 'DummyNamespace::Y']
 loaded_functions     = []
 
 wrapper_class_tree     = True
@@ -47,13 +47,17 @@ abstr_header_prefix     = 'Abstract_'
 factory_file_prefix     = 'factory_'
 abstr_class_prefix      = 'Abstract_'
 wrapper_header_prefix   = 'GAMBIT_wrapper_'
-all_headers_fname       = 'all_abstract_headers.hpp'
-all_typedefs_fname      = 'all_typedefs.hpp'
-frwd_decls_abs_fname    = 'forward_decls_abstract_classes.hpp'
-wrapper_typedefs_fname  = 'GAMBIT_wrapper_typedefs.hpp'
+
+all_wrapper_fname       = 'boss_loaded_classes'
+wrapper_deleter_fname   = 'wrapper_deleter'
+all_typedefs_fname      = 'all_typedefs'
+frwd_decls_abs_fname    = 'forward_decls_abstract_classes'
+wrapper_typedefs_fname  = 'GAMBIT_wrapper_typedefs'
+
 header_extension        = '.hpp'
 source_extension        = '.cpp'
-add_path_to_includes    = ''     #'Pythia8'
+
+add_path_to_includes    = '' #'Pythia8'
 
 
 indent = 4

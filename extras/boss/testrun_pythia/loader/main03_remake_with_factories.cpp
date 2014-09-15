@@ -3,12 +3,15 @@
 #include <string>
 #include <stdlib.h>
 
-#include "GAMBIT_wrapper_Particle.h"
-#include "GAMBIT_wrapper_Event.h"
-#include "GAMBIT_wrapper_Hist.h"
-#include "GAMBIT_wrapper_Pythia.h"
+// #include "GAMBIT_wrapper_Particle.h"
+// #include "GAMBIT_wrapper_Event.h"
+// #include "GAMBIT_wrapper_Hist.h"
+// #include "GAMBIT_wrapper_Pythia.h"
+
+#include "boss_loaded_classes.h"
 #include "GAMBIT_wrapper_typedefs.h"
 
+#include "add_test_func.h"
 
 using std::string;
 using std::vector;
@@ -68,7 +71,7 @@ int main(int argc, char * argv[])
   cout << "Trying to load library from: " << libName.c_str() << endl;
   
   void * pHandle;
-  if( (pHandle = dlopen(libName.c_str(), RTLD_LAZY | RTLD_GLOBAL)) == NULL)
+  if( (pHandle = dlopen(libName.c_str(), RTLD_LAZY | RTLD_LOCAL)) == NULL)
   {
     cout << "Fail!" << endl; 
   }
@@ -266,17 +269,16 @@ int main(int argc, char * argv[])
 
       cout << "TEST:  p1.id() = " << p1.id() << endl;
 
-      // event[i] = p1;
+      event[i] = p1;
       
 
       // Particle p2( event[i] = p1 );
 
       // Particle p2 = event[i] = p1;
 
-      Particle p2 = Factory_Particle();
-      p2 = event[i] = p1;
+      // Particle& p2 = event[i] = p1;
 
-      p2.id(999);
+      // p2.id(999);
       
       // Particle& p2 = p1;
       // p2.id(999);
@@ -310,6 +312,8 @@ int main(int argc, char * argv[])
 
       cout << "TEST:  End" << endl;
 
+
+      test_func(p1);
 
 
       // Analyze charged particles and fill histograms.

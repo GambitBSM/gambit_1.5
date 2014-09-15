@@ -18,6 +18,7 @@ import os
 import sys
 import warnings
 import shutil
+import glob
 from collections import OrderedDict
 from optparse import OptionParser
 
@@ -454,7 +455,7 @@ def main():
 
         code_tuple = utils.constrTypedefHeader()
 
-        typedef_header_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname)
+        typedef_header_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname + cfg.header_extension)
         
         if typedef_header_path not in new_code.keys():
             new_code[typedef_header_path] = {'code_tuples':[], 'add_include_guard':True}
@@ -468,7 +469,7 @@ def main():
 
         code_tuple = utils.constrForwardDeclHeader()
 
-        frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname)
+        frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension)
         
         if frwd_decls_header_path not in new_code.keys():
             new_code[frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
@@ -478,6 +479,27 @@ def main():
     #
     # END: loop over xml files
     #
+
+    #
+    # Add include statement at beginning of wrapper deleter source file
+    #    
+    w_deleter_include = '#include "' + os.path.join(cfg.add_path_to_includes, cfg.wrapper_deleter_fname + cfg.header_extension) + '"\n'
+    w_deleter_source_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.source_extension)
+    if w_deleter_source_path not in new_code.keys():
+        new_code[w_deleter_source_path] = {'code_tuples':[], 'add_include_guard':False}
+    new_code[w_deleter_source_path]['code_tuples'].append( (0, w_deleter_include) )
+
+
+    #
+    # Add include statement at beginning of wrapper deleter header file
+    #    
+    w_deleter_include = '#include "' + os.path.join(cfg.add_path_to_includes, cfg.all_wrapper_fname + cfg.header_extension) + '"\n'
+    w_deleter_header_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.header_extension)
+    if w_deleter_header_path not in new_code.keys():
+        new_code[w_deleter_header_path] = {'code_tuples':[], 'add_include_guard':True}
+    new_code[w_deleter_header_path]['code_tuples'].append( (0, w_deleter_include) )
+
+
 
     #
     # Write new code to source files
@@ -561,6 +583,13 @@ def main():
     # Copy and rename files from ./common_headers to output directory
     # 
 
+    # - AbstractBase.hpp
+
+    source_file_name = 'common_headers/AbstractBase.hpp'
+    target_file_name = os.path.join(cfg.extra_output_dir, 'AbstractBase' + cfg.header_extension)
+    shutil.copyfile(source_file_name, target_file_name)
+
+
     # - WrapperBase.hpp
 
     source_file_name = 'common_headers/WrapperBase.hpp'
@@ -577,6 +606,22 @@ def main():
     f_target.close()
 
 
+    # # - boss_loaded_classes.hpp
+
+    # source_file_name = 'common_headers/boss_loaded_classes.hpp'
+    # target_file_name = os.path.join(cfg.extra_output_dir, 'boss_loaded_classes' + cfg.header_extension)
+
+    # f_src = open(source_file_name, 'r')
+    # content = f_src.read()
+    # f_src.close()
+
+    # new_content = content.replace('__HEADER_EXTENSION__', cfg.header_extension)
+
+    # f_target = open(target_file_name, 'w')
+    # f_target.write(new_content)
+    # f_target.close()
+
+
     # - nullptr_check.hpp
 
     # source_file_name = 'common_headers/nullptr_check.hpp'
@@ -586,6 +631,48 @@ def main():
 
     print 
     print
+
+
+    # 
+    # Organize output files into two folders: One for files that must be compiled and linked to original code, and
+    # one for files that must be included in the program using the loaded classes
+    # 
+
+    additions_for_ext_code_dir   = os.path.join(cfg.extra_output_dir, 'additions_for_external_code')
+    include_in_loader_output_dir = os.path.join(cfg.extra_output_dir, 'include_in_classloading_code') 
+
+    # - Create directories
+    try:
+        os.mkdir(additions_for_ext_code_dir)
+        os.mkdir(include_in_loader_output_dir)
+    except OSError, e:
+        if e.errno == 17:
+            pass
+        else:
+            raise
+
+
+    # - First copy files to include_in_loader_output_dir
+    copy_files_list  = []
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'AbstractBase' + cfg.header_extension) )             # + abstract base class header
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'WrapperBase' + cfg.header_extension) )              # + wrapper base class header
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.abstr_header_prefix + '*') )                     # + abstract class headers
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + '*') )                   # + wrapper class headers
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension) )      # + header including all wrapper headers
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension) )   # + header with forward declarations for all abstract classes
+    
+    for cp_file in copy_files_list:
+        shutil.copy(cp_file, include_in_loader_output_dir)
+
+    # - Then move all files to additions_for_ext_code_dir
+    move_files_list  = []
+    move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.header_extension) )   # + header files
+    move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.source_extension) )   # + source files
+
+    for mv_file in move_files_list:
+        shutil.move(mv_file, additions_for_ext_code_dir)
+
+
 
 # ====== END: main ========
 

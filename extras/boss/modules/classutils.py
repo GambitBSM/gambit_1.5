@@ -111,14 +111,26 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     # Get list of dicts with info on parent classes
     parent_classes = utils.getParentClasses(class_el)
 
+    # Get wrapper class name (short)
+    w_class_name = toWrapperType(class_name_short)
+
+
     #
     # Construct the abstract class declaration
     #
     
     class_decl = ''
+
     # class_decl = '#pragma GCC diagnostic push\n'
     # class_decl += '#pragma GCC diagnostic ignored "-Wunused-parameter"\n'
     # class_decl += '#pragma GCC diagnostic ignored "-Wreturn-type"\n'
+
+
+    # - Add forward declarations needed by the 'destructor pattern'
+    class_decl += '// Forward declarations needed by the destructor pattern.\n'
+    class_decl += 'class ' + w_class_name + ';\n'
+    class_decl += 'void wrapper_deleter(' + w_class_name + '*);\n'
+    class_decl += '\n'
 
     # - Construct the beginning of the namespaces
     class_decl += utils.constrNamespace(namespaces, 'open')
@@ -128,7 +140,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
         class_decl += ' '*n_indents*indent + 'template <>\n'
 
     # - Construct the declaration line, with inheritance of abstract classes
-    inheritance_line = ''
+    inheritance_line = ' : virtual public AbstractBase, '
     for parent_dict in parent_classes:
 
         if parent_dict['loaded']:
@@ -142,8 +154,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             warnings.warn("In class '%s', the parent class '%s' is ignored (not loaded class or std/fundamental type)." % (abstr_class_name_short, parent_dict['class_name']['long_templ']))
             continue
 
-    if inheritance_line != '':
-        inheritance_line = ' : ' + inheritance_line.rstrip(', ')
+    inheritance_line = inheritance_line.rstrip(', ')
 
     class_decl += ' '*n_indents*indent
     if is_template:
@@ -245,6 +256,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                     else:
                         w_func_name = 'operator' + el.get('name')    
                 else:
+                    # w_func_name = el.get('name') + cfg.code_suffix 
                     if uses_loaded_type or (remove_n_args>0):
                         w_func_name = el.get('name') + cfg.code_suffix 
                     else:
@@ -284,35 +296,35 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                     class_decl += 'virtual ' + return_kw_str + w_return_type + ' ' + w_func_name + w_args_bracket_nonames + is_const*' const' + ' =0;' + '\n'
 
 
-                    # Construct the member function with the original name, wrapping the overridden one, e.g.: 
-                    #
-                    #   Abstract__X* getX(arguments)
-                    #   {
-                    #     return reinterpret_cast<Abstract__X*>(getX_GAMBIT(arguments));
-                    #   }
-                    #
+                    # # Construct the member function with the original name, wrapping the overridden one, e.g.: 
+                    # #
+                    # #   Abstract__X* getX(arguments)
+                    # #   {
+                    # #     return reinterpret_cast<Abstract__X*>(getX_GAMBIT(arguments));
+                    # #   }
+                    # #
 
-                    if is_operator:
-                        w2_func_name = 'operator' + el.get('name')
-                    else:
-                        w2_func_name = el.get('name')
-                    w2_args_bracket = w_args_bracket
+                    # if is_operator:
+                    #     w2_func_name = 'operator' + el.get('name')
+                    # else:
+                    #     w2_func_name = el.get('name')
+                    # w2_args_bracket = w_args_bracket
 
-                    class_decl += ' '*(n_indents+2)*indent 
-                    class_decl += return_kw_str + w_return_type + ' ' + w2_func_name + w2_args_bracket + is_const*' const' +'\n'
-                    class_decl += ' '*(n_indents+2)*indent + '{\n'
-                    if (return_type == 'void'):
-                        class_decl += ' '*(n_indents+3)*indent + w_func_name + w_args_bracket_notypes + ';\n'
-                    else:
-                        # OLD:
-                        # if return_is_loaded:
-                        #     class_decl += ' '*(n_indents+3)*indent + 'return reinterpret_cast<' + return_kw_str + w_return_type + '>(' + w_func_name + w_args_bracket_notypes + ');\n'
-                        # else:
-                        #     class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
-                        # NEW:
-                        class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
+                    # class_decl += ' '*(n_indents+2)*indent 
+                    # class_decl += return_kw_str + w_return_type + ' ' + w2_func_name + w2_args_bracket + is_const*' const' +'\n'
+                    # class_decl += ' '*(n_indents+2)*indent + '{\n'
+                    # if (return_type == 'void'):
+                    #     class_decl += ' '*(n_indents+3)*indent + w_func_name + w_args_bracket_notypes + ';\n'
+                    # else:
+                    #     # OLD:
+                    #     # if return_is_loaded:
+                    #     #     class_decl += ' '*(n_indents+3)*indent + 'return reinterpret_cast<' + return_kw_str + w_return_type + '>(' + w_func_name + w_args_bracket_notypes + ');\n'
+                    #     # else:
+                    #     #     class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
+                    #     # NEW:
+                    #     class_decl += ' '*(n_indents+3)*indent + 'return ' + w_func_name + w_args_bracket_notypes + ';\n'
 
-                    class_decl += ' '*(n_indents+2)*indent + '}\n'
+                    # class_decl += ' '*(n_indents+2)*indent + '}\n'
 
                 #
                 # If the method does not make use of any loaded class, construct a single virtual method
@@ -352,8 +364,8 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
 
     class_decl += '\n'
     class_decl += ' '*(n_indents+1)*indent + 'public:\n'
-    class_decl += constrPtrAssignFunc(abstr_class_name_short, class_name_short, virtual=True, indent=indent, n_indents=n_indents+2)
-    class_decl += constrPtrCopyFunc(abstr_class_name_short, class_name_short, virtual=True, indent=indent, n_indents=n_indents+2)
+    class_decl += constrPtrAssignFunc(class_el, abstr_class_name_short, class_name_short, virtual=True, indent=indent, n_indents=n_indents+2)
+    class_decl += constrPtrCopyFunc(class_el, abstr_class_name_short, class_name_short, virtual=True, indent=indent, n_indents=n_indents+2)
 
 
 
@@ -367,9 +379,37 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     # class_decl += ' '*(n_indents+1)*indent + 'public:\n'
     # class_decl += constrDowncastFunction(class_name_short, indent=indent, n_indents=n_indents+2, template_bracket=template_bracket)
 
-    # - Construct an empty virtual destructor
-    class_decl += ' '*(n_indents+2)*indent
-    class_decl += 'virtual ~' + abstr_class_name_short + '() {};\n'
+    # # - Construct an empty virtual destructor
+    # class_decl += ' '*(n_indents+2)*indent
+    # class_decl += 'virtual ~' + abstr_class_name_short + '() {};\n'
+
+
+    # - Construct code needed for 'destructor pattern' (abstract class and wrapper class must can delete each other)
+    class_decl += '\n'
+    class_decl += ' '*(n_indents+1)*indent + 'private:\n'
+    class_decl += ' '*(n_indents+2)*indent + w_class_name + '* wptr;\n'
+
+    class_decl += '\n'
+    class_decl += ' '*(n_indents+1)*indent + 'public:\n'
+    class_decl += ' '*(n_indents+2)*indent + 'void wrapper' + cfg.code_suffix + '(' + w_class_name + '* wptr_in)\n'
+    class_decl += ' '*(n_indents+2)*indent + '{\n'
+    class_decl += ' '*(n_indents+3)*indent + 'wptr = wptr_in;\n'
+    class_decl += ' '*(n_indents+3)*indent + 'is_wrapped(true);\n'
+    class_decl += ' '*(n_indents+2)*indent + '}\n'
+    class_decl += '\n'
+    class_decl += ' '*(n_indents+2)*indent + w_class_name + '* wrapper' + cfg.code_suffix + '()\n'
+    class_decl += ' '*(n_indents+2)*indent + '{\n'
+    class_decl += ' '*(n_indents+3)*indent + 'return wptr;\n'
+    class_decl += ' '*(n_indents+2)*indent + '}\n'
+    class_decl += '\n'
+    class_decl += ' '*(n_indents+2)*indent + 'virtual ~' + abstr_class_name_short + '()\n' 
+    class_decl += ' '*(n_indents+2)*indent + '{\n'
+    class_decl += ' '*(n_indents+3)*indent + 'if (can_delete_wrapper())\n' 
+    class_decl += ' '*(n_indents+3)*indent + '{\n'
+    class_decl += ' '*(n_indents+4)*indent + 'can_delete_me(false);\n'
+    class_decl += ' '*(n_indents+4)*indent + 'wrapper_deleter(wptr);\n'
+    class_decl += ' '*(n_indents+3)*indent + '}\n'
+    class_decl += ' '*(n_indents+2)*indent + '}\n'
 
     # - Close the class body
     class_decl += ' '*n_indents*indent + '};' + '\n'
@@ -574,7 +614,7 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
 
 # ====== constrWrapperFunction ========
 
-def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_args=0):
+def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_args=0, only_declaration=False, include_full_namespace=False):
 
     # Check if this is an operator function
     is_operator = False
@@ -613,7 +653,7 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
         is_const = False
 
     # Construct wrapper function name
-    w_func_name = funcutils.constrWrapperName(method_el)
+    w_func_name = funcutils.constrWrapperName(method_el, include_full_namespace=include_full_namespace)
     # if remove_n_args > 0:
     #     w_func_name += '_overload_' + str(remove_n_args)
 
@@ -645,18 +685,27 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
     w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
     # Construct bracket with input arguments for wrapper function
-    w_args_bracket = funcutils.constrArgsBracket(w_args)
+    if only_declaration:
+        w_args_bracket = funcutils.constrArgsBracket(w_args, include_arg_name=False)
+    else:
+        w_args_bracket = funcutils.constrArgsBracket(w_args)
 
     # Construct declaration line for wrapper function
     w_func_line = funcutils.constrDeclLine(w_return_type, w_func_name, w_args_bracket, keywords=return_kw, is_const=is_const)
 
     # Construct function body for wrapper function
-    w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keywords=return_kw)
+    if only_declaration:
+        pass
+    else:
+        w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keywords=return_kw)
 
     # Combine code and add indentation
     wrapper_code  = ''
-    wrapper_code += utils.addIndentation(w_func_line, n_indents*indent) + '\n'
-    wrapper_code += utils.addIndentation(w_func_body, n_indents*indent) + '\n'
+    if only_declaration:
+        wrapper_code += utils.addIndentation(w_func_line, n_indents*indent) + ';\n'
+    else:
+        wrapper_code += utils.addIndentation(w_func_line, n_indents*indent) + '\n'
+        wrapper_code += utils.addIndentation(w_func_body, n_indents*indent) + '\n'
 
     # Return result
     return wrapper_code
@@ -667,12 +716,17 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
 
 # ====== constrVariableRefFunction ========
 
-def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=0):
+def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indents=0, only_declaration=False, include_full_namespace=False):
 
     func_code = ''
 
     var_name = var_el.get('name')
     ref_method_name = var_name + '_ref' + cfg.code_suffix
+
+    if include_full_namespace:
+        namespaces = utils.getNamespaces(var_el)
+        if len(namespaces) > 0:
+            ref_method_name = '::'.join(namespaces) + '::' + ref_method_name
 
     var_type, var_kw, var_id = utils.findType( cfg.id_dict[var_el.get('type')] )
     var_type_base = var_type.replace('*','').replace('&','')
@@ -683,7 +737,10 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
     var_el = cfg.id_dict[var_id]
     var_is_loaded_class = utils.isLoadedClass(var_el)
     if var_is_loaded_class:
-        return_type = getAbstractClassName(var_type_base, prefix=cfg.abstr_class_prefix, short=True)
+        if include_full_namespace:
+            return_type = getAbstractClassName(var_type_base, prefix=cfg.abstr_class_prefix, short=False)
+        else:
+            return_type = getAbstractClassName(var_type_base, prefix=cfg.abstr_class_prefix, short=True)
     else:
         return_type = var_type_base
 
@@ -692,7 +749,11 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
         # func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() {std::cout << "Called virtual function" << std::endl;};\n'
         func_code += 'virtual ' + var_kw_str + return_type + '& ' + ref_method_name + '() =0;\n'
     else:
-        func_code += var_kw_str + return_type + '& ' + ref_method_name + '() { return ' + var_name  +'; }\n'
+        func_code += var_kw_str + return_type + '& ' + ref_method_name + '()' 
+        if only_declaration:
+            func_code += ';\n'
+        else:
+            func_code += ' { return ' + var_name  +'; }\n'
 
     return func_code
 
@@ -702,17 +763,32 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
 
 # ====== constrPtrCopyFunc ========
 
-def constrPtrCopyFunc(abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0):
+def constrPtrCopyFunc(class_el, abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0, only_declaration=False, include_full_namespace=False):
+
+    func_name = 'pointerCopy' + cfg.code_suffix
+    class_name = class_name_short
+    abstr_class_name = abstr_class_name_short
+
+    if include_full_namespace:
+        namespaces_with_self = utils.getNamespaces(class_el, include_self=True)
+        namespaces           = utils.getNamespaces(class_el)
+        if len(namespaces_with_self) > 0:
+            func_name = '::'.join(namespaces_with_self) + '::' + func_name
+        if len(namespaces) > 0:
+            abstr_class_name = '::'.join(namespaces) + '::' + abstr_class_name
+            class_name = '::'.join(namespaces) + '::' + class_name
 
     ptr_code = ''
     ptr_code += ' '*cfg.indent*n_indents
-    
+   
     if virtual:
-        # ptr_code += 'virtual '+ abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '() {std::cout << "Called virtual function" << std::endl;};\n'   
-        ptr_code += 'virtual '+ abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '() =0;\n'   
+        ptr_code += 'virtual '+ abstr_class_name + '*' + ' ' + func_name + '() =0;\n'   
     else:
-        ptr_code += abstr_class_name_short + '*' + ' pointerCopy' + cfg.code_suffix + '()'
-        ptr_code += ' ' + '{ return new ' + class_name_short + '(*this); }\n'
+        ptr_code += abstr_class_name + '*' + ' ' + func_name + '()'
+        if only_declaration:
+            ptr_code += ';\n'
+        else:
+            ptr_code += ' ' + '{ return new ' + class_name + '(*this); }\n'
 
     return ptr_code
 
@@ -722,17 +798,32 @@ def constrPtrCopyFunc(abstr_class_name_short, class_name_short, virtual=False, i
 
 # ====== constrPtrAssignFunc ========
 
-def constrPtrAssignFunc(abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0):
+def constrPtrAssignFunc(class_el, abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0, only_declaration=False, include_full_namespace=False):
+
+    func_name  = 'pointerAssign' + cfg.code_suffix
+    class_name = class_name_short
+    abstr_class_name = abstr_class_name_short
+
+    if include_full_namespace:
+        namespaces_with_self = utils.getNamespaces(class_el, include_self=True)
+        namespaces           = utils.getNamespaces(class_el)
+        if len(namespaces_with_self) > 0:
+            func_name = '::'.join(namespaces_with_self) + '::' + func_name
+        if len(namespaces) > 0:
+            abstr_class_name = '::'.join(namespaces) + '::' + abstr_class_name
+            class_name = '::'.join(namespaces) + '::' + class_name
 
     ptr_code = ''
     ptr_code += ' '*cfg.indent*n_indents
     
     if virtual:
-        # ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '*) {std::cout << "Called virtual function" << std::endl;};\n'
-        ptr_code += 'virtual void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '*) =0;\n'
+        ptr_code += 'virtual void ' + func_name + '(' + abstr_class_name + '*) =0;\n'
     else:
-        ptr_code += 'void pointerAssign' + cfg.code_suffix + '(' + abstr_class_name_short + '* in)'
-        ptr_code += ' ' + '{ *this = *dynamic_cast<' + class_name_short + '*>(in); }\n'        
+        ptr_code += 'void ' + func_name + '(' + abstr_class_name + '* in)'
+        if only_declaration:
+            ptr_code += ';\n'
+        else:
+            ptr_code += ' ' + '{ *this = *dynamic_cast<' + class_name_short + '*>(in); }\n'        
 
     return ptr_code
 
@@ -809,7 +900,7 @@ def checkCopyConstructor(class_el, return_id=False):
 
 # ====== toWrapperType ========
 
-def toWrapperType(input_type_name, remove_reference=False, use_base_type=False):
+def toWrapperType(input_type_name, remove_reference=False, remove_pointers=False, use_base_type=False):
 
     # input_type_name  = NameSpace::SomeType<int>**&
     # output_type_name = SomeType_GAMBIT<int>**&
@@ -839,10 +930,15 @@ def toWrapperType(input_type_name, remove_reference=False, use_base_type=False):
             type_name = type_name + cfg.code_suffix
 
     # Add '*' and '&'
-    if remove_reference:
-        type_name = type_name + '*'*n_pointers
+    if remove_pointers:
+        pass
     else:
-        type_name = type_name + '*'*n_pointers + '&'*is_ref
+        type_name = type_name + '*'*n_pointers
+
+    if remove_reference:
+        pass
+    else:
+        type_name = type_name + '&'*is_ref
 
     # Return result
     return type_name
@@ -853,7 +949,7 @@ def toWrapperType(input_type_name, remove_reference=False, use_base_type=False):
 
 # ====== toAbstractType ========
 
-def toAbstractType(input_type_name, include_namespace=True, add_pointer=False, remove_reference=False):
+def toAbstractType(input_type_name, include_namespace=True, add_pointer=False, remove_reference=False, remove_pointers=False):
 
     # input_type_name  = NameSpace::SomeType<int>**&
     # output_type_name = NameSpace::Abstract__SomeType_GAMBIT<int>**&
@@ -878,20 +974,35 @@ def toAbstractType(input_type_name, include_namespace=True, add_pointer=False, r
         namespace = ''
 
     # Add abstract class prefix
+    # if namespace == '':
+    #     type_name = cfg.abstr_class_prefix + type_name
+    # else:
+    #     type_name_short = utils.removeNamespace(type_name)
+    #     type_name = (namespace+'::')*include_namespace  + cfg.abstr_class_prefix + type_name_short
+
+
+    type_name_short = utils.removeNamespace(type_name)
+
+    if is_ref and remove_reference:
+        type_name_short = type_name_short.replace('&','')
+
+    if (n_pointers > 0) and remove_pointers:
+        type_name_short = type_name_short.replace('*','')
+
     if namespace == '':
-        type_name = cfg.abstr_class_prefix + type_name
+        type_name = cfg.abstr_class_prefix + type_name_short
     else:
-        type_name_short = utils.removeNamespace(type_name)
         type_name = (namespace+'::')*include_namespace  + cfg.abstr_class_prefix + type_name_short
 
+
     if add_pointer:
-        if is_ref:
+        if is_ref and not remove_reference:
             type_name = type_name.rstrip('&') + '*&'
         else:
             type_name = type_name + '*'
 
-    if remove_reference and is_ref:
-        type_name = type_name.replace('&','')
+    # if remove_reference and is_ref:
+    #     type_name = type_name.replace('&','')
 
     # Return result
     return type_name

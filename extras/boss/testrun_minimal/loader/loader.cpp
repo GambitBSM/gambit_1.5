@@ -3,8 +3,9 @@
 #include <string>
 #include <stdlib.h>
 
-#include "GAMBIT_wrapper_X.hpp"
-#include "GAMBIT_wrapper_Y.hpp"
+// #include "GAMBIT_wrapper_X.hpp"
+// #include "GAMBIT_wrapper_Y.hpp"
+#include "boss_loaded_classes.hpp"
 #include "GAMBIT_wrapper_typedefs.hpp"
 
 
@@ -80,6 +81,11 @@ int main(int argc, char * argv[])
   if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
   Factory_Y_2 = reinterpret_cast<Y (*)(X)> (temp_ptr);
 
+  // Abstract_Y* (*Factory_Y_2_abs)(Abstract_X*);
+  // temp_ptr = dlsym(pHandle, "_Z13Factory_Y_absP10Abstract_X");
+  // if(!temp_ptr) { cout << dlerror() << endl; exit(1); }
+  // Factory_Y_2_abs = reinterpret_cast<Abstract_Y* (*)(Abstract_X*)> (temp_ptr);
+
 
 
   // ------------
@@ -93,10 +99,40 @@ int main(int argc, char * argv[])
 
 
   X x1 = Factory_X_1();
-  X x2 = Factory_X_2(10);
+  x1.i = 10;
+  cout << "  x1.i = " << x1.i << endl;
+
+  X& x2 = x1.return_ref_this();
+  x2.i = 20;
+
+  cout << "  x1.i = " << x1.i << endl;
+  cout << "  x2.i = " << x2.i << endl;
+
+  // X x3(x1);
+  X x3 = x2;
+
+  x3.i = 30;
+  cout << "  x3.i = " << x3.i << endl;
+  cout << "  x1.i = " << x1.i << endl;
+
+
+  X x4 = x3 + x1;
+  cout << "  x4.i = " << x4.i << endl;
+
+
+  cout << endl;
+  cout << endl;
+  cout << endl;
+
+
+  // X x3 = Factory_X_2(100);
+
+
+  // X x2 = Factory_X_2(10);
 
   Y y1 = Factory_Y_1();
   Y y2 = Factory_Y_2(x2);
+  // Y y2( Factory_Y_2_abs(x2.BEptr) );
 
 
   cout << "  x1.i = " << x1.i << endl;
@@ -106,7 +142,7 @@ int main(int argc, char * argv[])
 
   cout << "  ... " << endl;
 
-  X x3 = y2.get_x();
+  // X x3 = y2.get_x();
   x3.i += 5;
   y2.set_x(x3);
 
@@ -114,6 +150,17 @@ int main(int argc, char * argv[])
   cout << "  y2.x.i = " << y2.x.i << endl;
 
 
+  cout << "  ... " << endl;
+
+
+  X* xptr = x3.return_ptr_this();
+  xptr->i += 5;
+
+  cout << "  x3.i = " << x3.i << endl;
+
+  y2.set_x_ptr(xptr);
+  
+  cout << "  y2.x.i = " << y2.x.i << endl;
 
   //
   // Done

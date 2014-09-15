@@ -493,15 +493,31 @@ def addIndentation(content, indent):
 
 # ====== getNamespaces ========
 
-def getNamespaces(xml_el):
+def getNamespaces(xml_el, include_self=False):
 
     namespaces = []
 
-    if 'demangled' in xml_el.keys():
-        full_name = xml_el.get('demangled')
-        modified_name = full_name.split('<')[0]
+    if include_self:
+        namespaces.append(xml_el.get('name'))
 
-        namespaces = modified_name.split('::')[:-1]
+    # if 'demangled' in xml_el.keys():
+    #     full_name = xml_el.get('demangled')
+    #     modified_name = full_name.split('<')[0]
+
+    #     namespaces = modified_name.split('::')[:-1]
+
+    current_xml_el = xml_el
+    while 'context' in current_xml_el.keys():
+        context_id = current_xml_el.get('context')
+        context_xml_el = cfg.id_dict[context_id]
+        context_name = context_xml_el.get('name')
+        namespaces.append(context_name)
+        current_xml_el = context_xml_el
+
+    namespaces.reverse()
+
+    # Remove the first, default namespace in the XML file from the list (with name='::')
+    namespaces = namespaces[1:]
 
     return namespaces
 
