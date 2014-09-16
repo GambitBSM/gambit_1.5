@@ -30,7 +30,7 @@ sed -i 's/CFLAGS = -lm -fPIC/CFLAGS =/g' FlagsForMake
 mkdir tmp_so
 cd tmp_so
 ar x ../libisospin.a
-gcc -shared -Wl,libsuperiso.so -o ../libsuperiso.so *.o -lm
+gcc -shared -o ../libsuperiso.so *.o -lm
 cd ../
 rm -rf tmp_so
 exit
