@@ -8,7 +8,7 @@ MODULE DDCALC0
 ! and corresponding likelihoods/exclusion levels.
 ! 
 ! To compile:
-!     gfortran -O3 -o DDCalc0 DDCalc0.f90
+!     gfortran -O3 -fno-range-check -o DDCalc0 DDCalc0.f90
 !     ifort -fast -o DDCalc0 DDCalc0.f90
 ! 
 ! To see usage:
@@ -16,7 +16,8 @@ MODULE DDCALC0
 ! 
 ! 
 !   Created by Chris Savage
-!   University of Utah   (2014- )
+!   University of Utah   (2013 - 2014)
+!   Nordita              (2014 -     )
 ! 
 !   With contributions from:
 !     Andre Scaffidi            University of Adelaide (2014)

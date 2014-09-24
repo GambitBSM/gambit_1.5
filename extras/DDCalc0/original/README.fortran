@@ -62,7 +62,7 @@ CALL DARWIN_Xe_2014_CalcRates()
 
 ! Event quantities.
 ! Only LUX shown, but other experiments have analogous routines.
-N   = LUX_213_Events()       ! observed events (INTEGER)
+N   = LUX_2013_Events()      ! observed events (INTEGER)
 b   = LUX_2013_Background()  ! expected background (REAL*8)
 s   = LUX_2013_Signal()      ! expected WIMP signal (REAL*8)
 sSI = LUX_2013_SignalSI()    ! expected SI WIMP signal (REAL*8)
