@@ -30,8 +30,6 @@
 
 #include "FastSim_Logger.hpp"
 
-//static logging::logger log_inst(0);
-
 
 using namespace std;
 //using namespace fastjet;
@@ -159,6 +157,22 @@ namespace fast_sim {
   void FastSim::Baseline_Response() {
     // this function has the baseline response 
     //
+
+    // lets initialize the log file
+    switch(_simtype)
+    {
+      case NOMINAL:
+        _nodetector._log_inst = _log_inst; break;
+      case ATLAS:
+        _atlas_simple_response._log_inst = _log_inst; break;
+      case CMS:
+        LOG_WARN("CMS detector model not implemented yet!!"); break;
+      case EXPERIMENTAL:
+        LOG_WARN("EXPERIMENTAL detector model not implemented yet!!"); break;
+      default:
+        LOG_WARN("Unknown detector model chosen, not implemented yet!!"); break;
+    }
+
 
     // if the baseline was not defined in the json file then we need to specified default ones
     PProperties *new_pprop;
@@ -1167,7 +1181,10 @@ namespace fast_sim {
           break;
 
         case ATLAS:
+
+           LOG_DEBUG1("Electron before smear",_prompt_electrons[j]->mom().px(),_prompt_electrons[j]->mom().py(),_prompt_electrons[j]->mom().pz(),_prompt_electrons[j]->pT(),_prompt_electrons[j]->mom().phi(),_prompt_electrons[j]->mom().eta());
           _atlas_simple_response.ElectronResponse(*_prompt_electrons[j]);
+           LOG_DEBUG1("Electron after smear",_prompt_electrons[j]->mom().px(),_prompt_electrons[j]->mom().py(),_prompt_electrons[j]->mom().pz(),_prompt_electrons[j]->pT(),_prompt_electrons[j]->mom().phi(),_prompt_electrons[j]->mom().eta());
           break;
 
         default:
