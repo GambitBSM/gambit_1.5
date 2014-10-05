@@ -2,7 +2,7 @@
 #define __CLASSES_HPP__
 
 #include "abstracts.hpp"
-#include <iostream>
+#include <iostream> /* <-- Just test code */ 
 
 class X : public virtual Abstract_X 
 {
@@ -10,9 +10,9 @@ class X : public virtual Abstract_X
         
         int i;
 
-        X() : i(0) { std::cout << "Making an X with regular constructor." << std::endl; }
+        X() : i(0) { /* Just test code: */ std::cout << "Making an X with regular constructor in BOSSMinimalExample_1_2." << std::endl; }
 
-        X(int i_in) : i(2*i_in) { std::cout << "Making an X with int constructor." << std::endl; }
+        X(int i_in) : i(2*i_in) { /* Just test code: */ std::cout << "Making an X with int constructor in BOSSMinimalExample_1_2." << std::endl; }
 
     public:
         Abstract_X* pointerCopy_GAMBIT() { return new X(*this); }
@@ -30,11 +30,12 @@ class Y : public virtual Abstract_Y
 
         X x;
 
-        Y() {}
+        Y() { /* Just test code: */ std::cout << "Making a Y with regular constructor in BOSSMinimalExample_1_2." << std::endl; }
 
         Y(X x_in) : x(x_in)
         {
             x = x_in;
+            /* Just test code: */ std::cout << "Making a Y with X-arged constructor in BOSSMinimalExample_1_2." << std::endl; 
         }
 
         X get_x()

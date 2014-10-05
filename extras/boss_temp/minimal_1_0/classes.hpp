@@ -2,6 +2,7 @@
 #define __CLASSES_HPP__
 
 #include "abstracts.hpp"
+#include <iostream> /* <-- Just test code */ 
 
 namespace nspace1
 {
@@ -13,9 +14,9 @@ namespace nspace1
         
         int i;
 
-        X() : i(0) {}
+        X() : i(0) { /* Just test code: */ std::cout << "Making an X with regular constructor in BOSSMinimalExample_1_0." << std::endl; }
 
-        X(int i_in) : i(i_in) {}
+        X(int i_in) : i(i_in) { /* Just test code: */ std::cout << "Making an X with int constructor in BOSSMinimalExample_1_0." << std::endl; }
 
       public:
         Abstract_X* pointerCopy_GAMBIT() { return new X(*this); }
@@ -37,11 +38,12 @@ namespace nspace3
 
         nspace1::nspace2::X x;
 
-        Y() {}
+        Y() { /* Just test code: */ std::cout << "Making a Y with regular constructor in BOSSMinimalExample_1_0." << std::endl; }
 
         Y(nspace1::nspace2::X x_in) : x(x_in)
         {
             x = x_in;
+            /* Just test code: */ std::cout << "Making a Y with X-arged constructor in BOSSMinimalExample_1_0." << std::endl;
         }
 
         nspace1::nspace2::X get_x()
