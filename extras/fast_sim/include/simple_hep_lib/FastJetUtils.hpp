@@ -6,6 +6,8 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
+#include <iostream>
+
 namespace hep_simple_lib {
 
     /// @name Converters to/from the Gambit 4-vector
@@ -35,6 +37,7 @@ namespace hep_simple_lib {
 
 
     inline double deltaPhi(const fastjet::PseudoJet& a, const fastjet::PseudoJet& b) {
+      std::cout " Here 6 " std::endl;
       return delta_phi(a.phi(), b.phi());
     }
 
