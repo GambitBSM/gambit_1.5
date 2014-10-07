@@ -30,8 +30,6 @@
 
 #include "FastSim_Logger.hpp"
 
-//static logging::logger log_inst(0);
-
 
 using namespace std;
 //using namespace fastjet;
@@ -40,7 +38,7 @@ using namespace hep_simple_lib;
 
 namespace fast_sim {
 
-  FastSim::FastSim() {
+     FastSim::FastSim() {
     _metx = -1.0;
     _mety = -1.0;
     _metx_truth = -1.0;
@@ -159,6 +157,22 @@ namespace fast_sim {
   void FastSim::Baseline_Response() {
     // this function has the baseline response 
     //
+
+    // lets initialize the log file
+    switch(_simtype)
+    {
+      case NOMINAL:
+        _nodetector._log_inst = _log_inst; break;
+      case ATLAS:
+        _atlas_simple_response._log_inst = _log_inst; break;
+      case CMS:
+        LOG_WARN("CMS detector model not implemented yet!!"); break;
+      case EXPERIMENTAL:
+        LOG_WARN("EXPERIMENTAL detector model not implemented yet!!"); break;
+      default:
+        LOG_WARN("Unknown detector model chosen, not implemented yet!!"); break;
+    }
+
 
     // if the baseline was not defined in the json file then we need to specified default ones
     PProperties *new_pprop;
@@ -428,6 +442,7 @@ namespace fast_sim {
 
 
   void FastSim::setElectrons(vector<Particle*> particles) {
+
     for (size_t i = 0; i < particles.size(); ++i) {
       if (abs(particles[i]->pid()) != 11) {
 
@@ -443,6 +458,7 @@ namespace fast_sim {
       Particle* chosen = new Particle(particles[i]);
       _stable_interacting_particles.push_back(chosen);
 
+      
       // _electron represents the baseline reconstruction
       if ((particles[i]->eta() < _electron->_min_eta) or (particles[i]->eta() > _electron->_max_eta)) continue;
 
@@ -451,6 +467,7 @@ namespace fast_sim {
       chosen = new Particle(particles[i]);
       chosen->set_prompt(true);
       _prompt_electrons.push_back(chosen);
+    
     }
   }
 
@@ -731,12 +748,16 @@ namespace fast_sim {
 
     //cout << "detector response " << endl;
     // determine which cells which have been traversed by the interacting particles
+    LOG_DEBUG1("Determine Cells Hit");
     FindCells();
 
 
     // for the individual particles determine the response of detector on their momentum
+    LOG_DEBUG1("Electron Response");
     ElectronResponse();
+    LOG_DEBUG1("Photon Response");
     PhotonResponse();
+    LOG_DEBUG1("Muon Response");
     MuonResponse();
 
     // add all the neutrinos and determine the maginute of the
@@ -974,7 +995,14 @@ namespace fast_sim {
     dice_roll = gsl_rng_uniform(_random_num);
 
     int index = chosen_bin_x + (acceptance._bin_edges_y.size()-1)*chosen_bin_y;
-    LOG_DEBUG1("IsParticle 2D valuex ",test_valuex,"bin_x ",chosen_bin_x," valuey ",test_valuey," bin_y",chosen_bin_y," 2d map index ", index,acceptance._binvals[index]);
+
+    LOG_DEBUG1("IsParticle 2D valuex ",test_valuex,"bin_x ",chosen_bin_x," valuey ",test_valuey," bin_y",chosen_bin_y," 2d map index ", index, " max index ",acceptance._binvals.size());
+    if ((unsigned)index > acceptance._binvals.size()) {
+      LOG_DEBUG1("IsParticle 2D Failed - outside limits ",index, " limits ",acceptance._binvals.size());
+      return false; // particle not measured
+    }
+
+    LOG_DEBUG1("IsParticle 2D valuex acceptance: ",acceptance._binvals[index]);
 
     if (dice_roll >= acceptance._binvals[index]) {
       LOG_DEBUG1("IsParticle 2D Failed - random result ",dice_roll);
@@ -1153,7 +1181,10 @@ namespace fast_sim {
           break;
 
         case ATLAS:
+
+           LOG_DEBUG1("Electron before smear",_prompt_electrons[j]->mom().px(),_prompt_electrons[j]->mom().py(),_prompt_electrons[j]->mom().pz(),_prompt_electrons[j]->pT(),_prompt_electrons[j]->mom().phi(),_prompt_electrons[j]->mom().eta());
           _atlas_simple_response.ElectronResponse(*_prompt_electrons[j]);
+           LOG_DEBUG1("Electron after smear",_prompt_electrons[j]->mom().px(),_prompt_electrons[j]->mom().py(),_prompt_electrons[j]->mom().pz(),_prompt_electrons[j]->pT(),_prompt_electrons[j]->mom().phi(),_prompt_electrons[j]->mom().eta());
           break;
 
         default:
@@ -1629,7 +1660,10 @@ namespace fast_sim {
             if (_cellswitch[i]!=0) {
               phic  = _cellphi[i];
               etac  = _celleta[i];
-              etad = etac-temp_cluseta;
+              etad = etac-temp_cluseta
+
+;
+	      std::cout << "phic " << phic << temp_clusphi << std::endl;
               phid = hep_simple_lib::delta_phi(phic, temp_clusphi);
 
               dr = sqrt(pow(etad,2)+ pow(phid,2));
@@ -1739,7 +1773,7 @@ namespace fast_sim {
       eta = _celleta[i];
       phi = _cellphi[i];
 
-
+      //std::cout << "or_phi " << or_phi << phi << std::endl;
       dphi = hep_simple_lib::delta_phi(or_phi,phi);
       deta = fabs(or_eta - eta);
       dR = sqrt(dphi*dphi + deta*deta);

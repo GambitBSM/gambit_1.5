@@ -4,6 +4,8 @@
 #include "simple_hep_lib/MathUtils.hpp"
 #include "simple_hep_lib/Vectors.hpp"
 
+#include <iostream>
+
 namespace hep_simple_lib {
 
 
@@ -59,7 +61,9 @@ namespace hep_simple_lib {
 
       /// Copy constructor
       Particle(const Particle& p)
-        : _p4(p.mom()), _pdgId(p.pid()), _prompt(p.is_prompt()), _isol4(p.isol()) {  }
+        : _p4(p.mom()), _pdgId(p.pid()), _prompt(p.is_prompt()), _isol4(p.isol()) {
+          std::cout << " here 2 " << std::endl;
+            }
 
       /// Copy constructor from a pointer
       Particle(const Particle* p)

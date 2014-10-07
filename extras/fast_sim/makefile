@@ -57,7 +57,10 @@ $(BUILD)/%.o : $(EXAMPLES)/%.cc
 	$(CC) -c $(CFLAGS) $(FJ_CXXFLAGS) $(PY8_CXXFLAGS) $(ROOT_CXXFLAGS) -I$(INCLUDE) $< -o $@
 
 libfastsim.so: $(OBJECTS)
-	$(CC) -shared -o $(LIB)/$@ $^ $(FJ_LDFLAGS) -lgsl
+	$(CC) -shared -o $(LIB)/$@ $^ $(FJ_LDFLAGS) -lgsl -lgslcblas
+
+pythia8_pgun:  libfastsim.so $(BUILD)/example-fastsim-py8-pgun.o 
+	$(CC) $(CFLAGS) -I$(INCLUDE) $(PY8_LDFLAGS) $(ROOT_LDFLAGS) -L$(LIB) -lfastsim $(BUILD)/example-fastsim-py8-pgun.o -o $@
 
 pythia8_example: libfastsim.so $(BUILD)/example-fastsim-py8.o 
 	$(CC) $(CFLAGS) -I$(INCLUDE) $(PY8_LDFLAGS) $(ROOT_LDFLAGS) -L$(LIB) -lfastsim $(BUILD)/example-fastsim-py8.o -o $@

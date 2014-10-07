@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 namespace hep_simple_lib {
 
@@ -112,6 +113,7 @@ namespace hep_simple_lib {
     /// @todo SFINAE specialisation using C++11 machinery
     inline double delta_phi(double a, double b) {
       double rtn = a - b;
+      //std::cout << " a " << a << " b " << b << std::endl;
       rtn = fmod(rtn, 2*M_PI);
       if (rtn == 0) return 0;
       assert(rtn >= -2*M_PI && rtn <= 2*M_PI);
