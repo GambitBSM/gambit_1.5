@@ -3,7 +3,7 @@ Todo list for BOSS:
 
 Currently working on: 
 
-Anders: 14, 17, 18
+Anders: 17, 18
 Abram : ?
 
 
@@ -77,18 +77,19 @@ an ambiguity error (even if we use virtual inheritance).
 
 Will implement alt. 2) for now, but we should investigate whether we should aim for alt. 1) in the future.
 
-
-(14)
-Handle operator names in a more elegant way. Currently a simple dictionary is used (cfg.operator_names), but this won't
-work when a single operator can be interpreted in different ways depending on context. (Example: the '*' operator can 
-either be multiplication or pointer dereferencing.) Create a utils function for returning the correct operator name?
-
 (15)
 Deal with classes-within-classes.
 
 (17)
 Do away with STL dictionary by following include statements backwards to determine which
 standard/boost/other headers need to be included in the abstract and wrapper classes.
+
+UPDATE: 
+There's probably no way around having a dictionary like that. It should be expanded to contain some 
+common BOOST (and ROOT?) types as an example. Also, if BOSS encounters a type with no known header file, 
+it could output a hint about where it comes from (STD library, BOOST, etc...) Search the header path and 
+type namespace to look for hints.
+
 
 (18)
 Set up a first working example of using a 'BOSSed' Pythia as a backend in GAMBIT.

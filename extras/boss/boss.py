@@ -51,6 +51,17 @@ def main():
       if e.errno != 17:
         raise e
 
+    # Special settings for gambit mode:
+    if cfg.gambit_mode:
+
+        cfg.gambit_backend_safeversion = cfg.gambit_backend_version.replace('.','_')
+
+        cfg.all_wrapper_fname = 'loadedtypes_' + cfg.gambit_backend_name.lower() + '_' + cfg.gambit_backend_safeversion.lower()
+
+        cfg.gambit_full_namespace = cfg.gambit_base_namespace.rstrip('::') + '::' + cfg.gambit_backend_name + '_' + cfg.gambit_backend_safeversion
+
+
+
     # Parse command line arguments and options
     parser = OptionParser(usage="usage: %prog [options] xmlfiles",
                           version="%prog 0.1")
@@ -355,9 +366,13 @@ def main():
 
             if class_name_long not in cfg.new_header_files.keys():
                 
-                abstract_header_name = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
-                wrapper_header_name  = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
-                cfg.new_header_files[class_name_long] = {'abstract': abstract_header_name, 'wrapper': wrapper_header_name}
+                abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
+                wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
+                wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
+                wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
+                
+                cfg.new_header_files[class_name_long] = {'abstract': abstract_header_name, 'wrapper': wrapper_header_name, 
+                                                         'wrapper_decl': wrapper_decl_header_name, 'wrapper_def': wrapper_def_header_name,}
 
 
 
@@ -464,21 +479,47 @@ def main():
 
 
         #
-        # Create header forward declarations of all abstract classes
+        # Create header with forward declarations of all abstract classes
         #
 
-        code_tuple = utils.constrForwardDeclHeader()
+        code_tuple = utils.constrAbsForwardDeclHeader()
 
-        frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension)
+        abs_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension)
         
-        if frwd_decls_header_path not in new_code.keys():
-            new_code[frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
-        new_code[frwd_decls_header_path]['code_tuples'].append(code_tuple)
+        if abs_frwd_decls_header_path not in new_code.keys():
+            new_code[abs_frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        new_code[abs_frwd_decls_header_path]['code_tuples'].append(code_tuple)
+
+
+        #
+        # Create header with forward declarations of all wrapper classes
+        #
+
+        code_tuple = utils.constrWrpForwardDeclHeader()
+
+        wrp_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_wrp_fname + cfg.header_extension)
+        
+        if wrp_frwd_decls_header_path not in new_code.keys():
+            new_code[wrp_frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        new_code[wrp_frwd_decls_header_path]['code_tuples'].append(code_tuple)
 
 
     #
     # END: loop over xml files
     #
+
+
+    #
+    # If cfg.gambit_mode = True, add namespace tags to thw wrapper typedefs header
+    #
+
+    if cfg.gambit_mode:
+        wrapper_typedefs_path = cfg.wrapper_typedefs_fname + cfg.header_extension
+        if wrapper_typedefs_path not in new_code.keys():
+            new_code[wrapper_typedefs_path] = {'code_tuples':[], 'add_include_guard':True}
+        new_code[wrapper_typedefs_path]['code_tuples'].append( (0, '__START_GAMBIT_NAMESPACE__\n') )
+        new_code[wrapper_typedefs_path]['code_tuples'].append( (-1,'__END_GAMBIT_NAMESPACE__\n') )
+
 
     #
     # Add include statement at beginning of wrapper deleter source file
@@ -493,7 +534,7 @@ def main():
     #
     # Add include statement at beginning of wrapper deleter header file
     #    
-    w_deleter_include = '#include "' + os.path.join(cfg.add_path_to_includes, cfg.all_wrapper_fname + cfg.header_extension) + '"\n'
+    w_deleter_include = '#include "' + os.path.join(cfg.add_path_to_includes, cfg.all_wrapper_fname + '_decl' + cfg.header_extension) + '"\n'
     w_deleter_header_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.header_extension)
     if w_deleter_header_path not in new_code.keys():
         new_code[w_deleter_header_path] = {'code_tuples':[], 'add_include_guard':True}
@@ -578,6 +619,54 @@ def main():
             f.close()
 
 
+    #
+    # Generate the master header
+    #
+
+    all_wrapper_decl_header_path = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_decl' + cfg.header_extension)
+    all_wrapper_def_header_path  = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_def' + cfg.header_extension)
+    master_header_path           = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension)
+
+    f = open(all_wrapper_decl_header_path, 'r')
+    all_wrapper_decl_header_content = f.read()
+    f.close()
+
+    f = open(all_wrapper_def_header_path, 'r')
+    all_wrapper_def_header_content = f.read()
+    f.close()
+
+    master_header_content  = '\n' 
+    master_header_content += '// Loaded types declarations:\n'
+    master_header_content += '// --------------------------\n'
+    master_header_content += '\n' 
+    master_header_content += all_wrapper_decl_header_content
+    master_header_content += '\n' 
+    master_header_content += '// Loaded types implementations:\n'
+    master_header_content += '// -----------------------------\n'
+    master_header_content += '\n' 
+    master_header_content += all_wrapper_def_header_content
+    master_header_content += '\n' 
+    master_header_content += '// Typedefs: wrapper class name --> original class name:\n'
+    master_header_content += '// -----------------------------------------------------\n'
+    master_header_content += '\n' 
+    master_header_content += '#include "' + cfg.wrapper_typedefs_fname + cfg.header_extension + '"\n' 
+
+
+    # Add include guards
+    master_header_content = utils.addIncludeGuard(master_header_content, cfg.all_wrapper_fname)
+
+    # Write the master header (if not in debug_mode)
+    if not options.debug_mode_flag:
+        f = open(master_header_path, 'w')
+        f.write(master_header_content)
+        f.close()
+
+    # # Remove the temporary '_decl' and '_def' header files we used to construct the master header
+    # os.remove(all_wrapper_decl_header_path)
+    # os.remove(all_wrapper_def_header_path)
+
+
+
 
     # 
     # Copy and rename files from ./common_headers to output directory
@@ -629,10 +718,6 @@ def main():
     # shutil.copy (source_file_name, target_file_name)
 
 
-    print 
-    print
-
-
     # 
     # Organize output files into two folders: One for files that must be compiled and linked to original code, and
     # one for files that must be included in the program using the loaded classes
@@ -651,8 +736,15 @@ def main():
         else:
             raise
 
+    # - First, move files that should *only* go into include_in_loader_output_dir
+    move_files_list  = []
+    move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_typedefs_fname + cfg.header_extension) )   # + wrapper typedefs header
+    move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension) )        # + master header that includes all wrapper headers + wrapper typedefs
 
-    # - First copy files to include_in_loader_output_dir
+    for mv_file in move_files_list:
+        shutil.move(mv_file, include_in_loader_output_dir)
+
+    # - Next, copy to include_in_loader_output_dir the files that should go in both include_in_loader_output_dir and additions_for_ext_code_dir
     copy_files_list  = []
     copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'AbstractBase' + cfg.header_extension) )             # + abstract base class header
     copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'WrapperBase' + cfg.header_extension) )              # + wrapper base class header
@@ -660,17 +752,76 @@ def main():
     copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + '*') )                   # + wrapper class headers
     copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension) )      # + header including all wrapper headers
     copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension) )   # + header with forward declarations for all abstract classes
+    copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.frwd_decls_wrp_fname + cfg.header_extension) )   # + header with forward declarations for all wrapper classes
     
     for cp_file in copy_files_list:
         shutil.copy(cp_file, include_in_loader_output_dir)
 
-    # - Then move all files to additions_for_ext_code_dir
+    # - Finally move all (remaining) files to additions_for_ext_code_dir
     move_files_list  = []
     move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.header_extension) )   # + header files
     move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.source_extension) )   # + source files
 
     for mv_file in move_files_list:
         shutil.move(mv_file, additions_for_ext_code_dir)
+
+
+    # #
+    # # If cfg.gambit_mode = True, in the directory include_in_loader_output_dir the 'master header' cfg.all_wrapper_fname should
+    # # be renamed to loadedtypes_BACKENDNAME_VERSION.hpp
+    # #
+    # if cfg.gambit_mode:
+    #     move_from = os.path.join(include_in_loader_output_dir, cfg.all_wrapper_fname + cfg.header_extension)
+    #     move_to   = os.path.join(include_in_loader_output_dir, 'loadedtypes_' + cfg.gambit_backend_name.lower() + '_' + cfg.gambit_backend_safeversion.lower() + cfg.header_extension)
+    #     shutil.move(move_from, move_to)
+
+
+    #
+    # Run through all the generated files and use the code tags __START_GAMBIT_NAMESPACE__ and __END_GAMBIT_NAMESPACE__ to construct
+    # the correct namespace. If cfg.gambit_mode = False, then simply remove these tags
+    #
+
+    open_namespace_tag  = '__START_GAMBIT_NAMESPACE__'
+    close_namespace_tag = '__END_GAMBIT_NAMESPACE__'
+
+    remove_tags_from_files = glob.glob( os.path.join(additions_for_ext_code_dir, '*') )
+    construct_namespace_in_files = []
+    if cfg.gambit_mode:
+        construct_namespace_in_files += glob.glob( os.path.join(include_in_loader_output_dir, '*') )
+    else:
+        remove_tags_from_files += glob.glob( os.path.join(include_in_loader_output_dir, '*') )
+
+
+    # - Remove namespace tags from given files
+    for file_path in remove_tags_from_files:
+
+        f = open(file_path, 'r')
+        content = f.read()
+        f.close()
+
+        new_content = content.replace(open_namespace_tag, '').replace(close_namespace_tag, '')
+
+        f = open(file_path, 'w')
+        f.write(new_content)
+        f.close()
+
+
+    # - Construct namespace in given files
+    for file_path in construct_namespace_in_files:
+
+        f = open(file_path, 'r')
+        content = f.read()
+        f.close()
+
+        new_content = utils.constrNamespaceFromTags(content, cfg.gambit_full_namespace, open_namespace_tag, close_namespace_tag)
+
+        f = open(file_path, 'w')
+        f.write(new_content)
+        f.close()
+
+
+    print 
+    print
 
 
 

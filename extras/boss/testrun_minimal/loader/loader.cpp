@@ -3,10 +3,19 @@
 #include <string>
 #include <stdlib.h>
 
-// #include "GAMBIT_wrapper_X.hpp"
-// #include "GAMBIT_wrapper_Y.hpp"
-#include "boss_loaded_classes.hpp"
-#include "GAMBIT_wrapper_typedefs.hpp"
+
+#include "loadedtypes_minimal_0_1.hpp"
+
+using namespace Gambit::Backends::Minimal_0_1;
+
+// #include "boss_loaded_classes.hpp"
+
+// #include "GAMBIT_wrapper_X_def.hpp"
+// #include "GAMBIT_wrapper_Y_def.hpp"
+
+// #include "GAMBIT_wrapper_typedefs.hpp"
+
+
 
 
 using std::string;
@@ -161,6 +170,22 @@ int main(int argc, char * argv[])
   y2.set_x_ptr(xptr);
   
   cout << "  y2.x.i = " << y2.x.i << endl;
+
+
+  cout << "  ... " << endl;
+
+
+  x3.set_yptr(&y2);
+
+  Y* yptr = x3.get_yptr();
+
+  yptr->x.i = 999;
+
+  cout << "  y2.x.i = " << y2.x.i << endl;
+
+
+
+
 
   //
   // Done

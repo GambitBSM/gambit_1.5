@@ -73,7 +73,8 @@ def run():
 
         # - Generate include statements based on the types used in the function
         include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='none', input_element='function', add_extra_include_path=True)
-        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper', input_element='function', add_extra_include_path=True)
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_decl', input_element='function', add_extra_include_path=True)
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_def', input_element='function', add_extra_include_path=True)
 
         # - Then check if we have a header file for the function in question.
         #   If not, declare the original function as 'extern'
@@ -84,7 +85,7 @@ def run():
             header_base_name = os.path.basename(header_full_path)
             include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, header_base_name) + '"')
 
-        include_statements = list( set(include_statements) )
+        include_statements = list( OrderedDict.fromkeys(include_statements) )
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
 
 

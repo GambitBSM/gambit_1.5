@@ -13,28 +13,39 @@
 from collections import OrderedDict
 
 
-xml_file_name    = ''
-id_dict          = OrderedDict() 
-file_dict        = OrderedDict()
-std_types_dict   = OrderedDict()
-typedef_dict     = OrderedDict()
-class_dict       = OrderedDict()
-func_dict        = OrderedDict()
-new_header_files = OrderedDict()
-accepted_types   = [] 
-std_headers_used = []
+# GAMBIT specific options:
+# -- NOTE: Setting gambit_mode = True will overwrite some of the other choices below, like 'all_wrapper_fname'.
+gambit_mode            = True
+gambit_backend_name    = 'Minimal'
+gambit_backend_version = '0.1'
+gambit_base_namespace  = 'Gambit::Backends'
 
-std_types_in_class = {}
-all_types_in_class = {}
+
+# Information about the external code:
 
 # accepted_paths     = ['pythia8186_original', 'pythia8186']
 accepted_paths     = ['minimal_original', 'minimal']
 
 std_include_paths  = ['/usr/include/']
 
+# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Event', 'Pythia8::Particle']
+
 # loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
-# loaded_functions     = ['Pythia8::m']
-loaded_classes       = ['X', 'DummyNamespace::Y']
+
+
+# loaded_classes       = ['Pythia8::ParticleDataEntry', 'Pythia8::ResonanceWidths']
+
+# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4',
+#                         'Pythia8::Sphericity', 'Pythia8::Thrust', 'Pythia8::ClusterJet', 'Pythia8::ParticleData', 'Pythia8::ParticleDataEntry',
+#                         'Pythia8::RotBstMatrix', 'Pythia8::Junction', 'Pythia8::Couplings', 'Pythia8::ResonanceWidths', 'Pythia8::DecayChannel']
+
+# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Settings', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4',
+#                         'Pythia8::Sphericity', 'Pythia8::Thrust', 'Pythia8::ClusterJet', 'Pythia8::ParticleData', 'Pythia8::ParticleDataEntry',
+#                         'Pythia8::RotBstMatrix', 'Pythia8::Junction', 'Pythia8::Couplings', 'Pythia8::ResonanceWidths', 'Pythia8::DecayChannel']
+
+# loaded_functions     = ['']
+
+loaded_classes       = ['NamespaceForX::X', 'NamespaceForY::Y']
 loaded_functions     = []
 
 wrapper_class_tree     = True
@@ -52,18 +63,20 @@ all_wrapper_fname       = 'boss_loaded_classes'
 wrapper_deleter_fname   = 'wrapper_deleter'
 all_typedefs_fname      = 'all_typedefs'
 frwd_decls_abs_fname    = 'forward_decls_abstract_classes'
-wrapper_typedefs_fname  = 'GAMBIT_wrapper_typedefs'
+frwd_decls_wrp_fname    = 'forward_decls_wrapper_classes'
+wrapper_typedefs_fname  = 'wrapper_typedefs'
 
 header_extension        = '.hpp'
 source_extension        = '.cpp'
 
-add_path_to_includes    = '' #'Pythia8'
+add_path_to_includes    = ''  #'Pythia8'
 
 
 indent = 4
 
 
 # Dictionary of what header to include for various standard types
+
 known_class_headers = {
     "std::array"             : "<array>", 
     "std::vector"            : "<vector>", 
@@ -88,20 +101,67 @@ known_class_headers = {
 }
 
 
+# Dictionary of what names to use for various operator symbols
+
 operator_names = {
-    "="   : "assignment",
-    "+"   : "addition",
-    "-"   : "subtraction",
-    "*"   : "multiplication",
-    "/"   : "division",
-    "%"   : "modulo",
-    # "++"  : "increment",  # Need to differentiate between ++i and i++. Commented out for now.
-    # "--"  : "decrement",
-    "+="  : "addition_assignment",
-    "-="  : "subtraction_assignment",
-    "*="  : "multiplication_assignment",
-    "/="  : "division_assignment",
-    "%="  : "modulo_assignment",
-    "[]"  : "array_subscript",
-    "()"  : "function_call",
+          "="   : "equal",
+          "+"   : "plus",
+          "-"   : "minus",
+          "*"   : "asterix",
+          "/"   : "slash",
+          "%"   : "percent",
+          "&"   : "ampersand",
+          "++"  : "plus_plus", 
+          "--"  : "minus_minus",
+          "+="  : "plus_equal",
+          "-="  : "minus_equal",
+          "*="  : "asterix_equal",
+          "/="  : "slash_equal",
+          "%="  : "percent_equal",
+          "&="  : "ampersand_equal",
+          "|="  : "bar_equal",
+          "^="  : "caret_equal",
+         "<<="  : "double_angle_bracket_left_equal",
+         ">>="  : "double_angle_bracket_right_equal",
+          "[]"  : "square_bracket_pair",
+          "()"  : "round_bracket_pair",
+          "=="  : "double_equal",
+          "!="  : "exclamation_equal",
+          ">"   : "angle_bracket_right",
+          "<"   : "angle_bracket_left",
+          ">="  : "angle_bracket_right_equal",
+          "<="  : "angle_bracket_left_equal",
+          "!"   : "exclamation",
+          "&&"  : "double_ampersand",
+          "|"   : "bar",
+          "^"   : "caret",
+          "<<"  : "double_angle_bracket_left",
+          ">>"  : "double_angle_bracket_right",
+          "->"  : "arrow",
+         "->*"  : "arrow_asterix",
+          ","   : "comma",
+         "new"  : "new",
+       "new[]"  : "new_square_bracket_pair",
+      "delete"  : "delete",
+    "delete[]"  : "delete_square_bracket_pair",
 }
+
+
+# Some global variables
+
+xml_file_name    = ''
+id_dict          = OrderedDict() 
+file_dict        = OrderedDict()
+std_types_dict   = OrderedDict()
+typedef_dict     = OrderedDict()
+class_dict       = OrderedDict()
+func_dict        = OrderedDict()
+new_header_files = OrderedDict()
+accepted_types   = [] 
+std_headers_used = []
+
+std_types_in_class = {}
+all_types_in_class = {}
+
+gambit_full_namespace = ''
+gambit_backend_safeversion = ''

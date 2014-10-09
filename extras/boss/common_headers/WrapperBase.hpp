@@ -1,6 +1,8 @@
 #ifndef __WRAPPERBASE__
 #define __WRAPPERBASE__
 
+__START_GAMBIT_NAMESPACE__
+
 template <typename T>
 class WrapperBase
 {
@@ -109,5 +111,7 @@ class WrapperBase
 
 
 };
+
+__END_GAMBIT_NAMESPACE__
 
 #endif /* __WRAPPERBASE__ */

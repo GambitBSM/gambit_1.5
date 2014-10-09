@@ -70,7 +70,7 @@ int main(int argc, char * argv[])
   cout << "Trying to load library from: " << libName.c_str() << endl;
   
   void * pHandle;
-  if( (pHandle = dlopen(libName.c_str(), RTLD_LAZY | RTLD_LOCAL)) == NULL)
+  if( (pHandle = dlopen(libName.c_str(), RTLD_LAZY | RTLD_GLOBAL)) == NULL)
   {
     cout << "Fail!" << endl; 
   }
@@ -258,56 +258,66 @@ int main(int argc, char * argv[])
 
       cout << endl;
       cout << "TEST:  Start" << endl;
-      cout << "TEST:  statement: Particle p1 = Factory_Particle()" << endl;
+
+      Event* eptr = event[i].getEvtPtr();
 
       Particle p1 = Factory_Particle();
-
-      cout << "TEST:  statement: p1.id(123)" << endl;
-
       p1.id(123);
-
-      cout << "TEST:  p1.id() = " << p1.id() << endl;
-
       event[i] = p1;
-      
 
-      // Particle p2( event[i] = p1 );
+      cout << "eptr[i].id() = " << (*eptr)[i].id() << endl;
 
-      // Particle p2 = event[i] = p1;
 
-      // Particle& p2 = event[i] = p1;
+      // cout << "TEST:  statement: Particle p1 = Factory_Particle()" << endl;
 
-      // p2.id(999);
-      
-      // Particle& p2 = p1;
-      // p2.id(999);
+      // Particle p1 = Factory_Particle();
+
+      // cout << "TEST:  statement: p1.id(123)" << endl;
+
+      // p1.id(123);
 
       // cout << "TEST:  p1.id() = " << p1.id() << endl;
 
-      // Need something like this:
-      // Alt 1:
-      //        Particle p1_ref(event[i] = p1, gbool<true>);
-      // Alt 2:
-      //        Particle_REF p1_ref = event[i] = p1;
-      
-      // Currently, this will provide us with an instance
-      // that can alter the content of event[i], while the syntax
-      // suggests that it just copies the value... Dangerous!
-
-      // cout << "TEST:  statement: event[i] = p1" << endl;
       // event[i] = p1;
+      
 
-      // cout << "TEST:  statement: Particle p2(event[i] = p1)" << endl;
-      // Particle p2( event[i] );
-      // cout << "TEST:  statement: p2.id(999)" << endl;
-      // p2.id(999);
+      // // Particle p2( event[i] = p1 );
+
+      // // Particle p2 = event[i] = p1;
+
+      // // Particle& p2 = event[i] = p1;
+
+      // // p2.id(999);
+      
+      // // Particle& p2 = p1;
+      // // p2.id(999);
+
+      // // cout << "TEST:  p1.id() = " << p1.id() << endl;
+
+      // // Need something like this:
+      // // Alt 1:
+      // //        Particle p1_ref(event[i] = p1, gbool<true>);
+      // // Alt 2:
+      // //        Particle_REF p1_ref = event[i] = p1;
+      
+      // // Currently, this will provide us with an instance
+      // // that can alter the content of event[i], while the syntax
+      // // suggests that it just copies the value... Dangerous!
+
+      // // cout << "TEST:  statement: event[i] = p1" << endl;
+      // // event[i] = p1;
+
+      // // cout << "TEST:  statement: Particle p2(event[i] = p1)" << endl;
+      // // Particle p2( event[i] );
+      // // cout << "TEST:  statement: p2.id(999)" << endl;
+      // // p2.id(999);
 
       
-      // Particle_REF ev_i_ref = event[i] = p1;
-      // ev_i_ref = p1;
+      // // Particle_REF ev_i_ref = event[i] = p1;
+      // // ev_i_ref = p1;
 
 
-      cout << "TEST:  event[i].id() = " << event[i].id() << endl;
+      // cout << "TEST:  event[i].id() = " << event[i].id() << endl;
 
       cout << "TEST:  End" << endl;
 

@@ -468,7 +468,7 @@ def run():
         include_statements = utils.getIncludeStatements(class_el, convert_loaded_to='abstract', add_extra_include_path=True, input_element='class')
         if utils.isHeader(original_class_file_el):
             include_statements.append( '#include "' + os.path.join(cfg.add_path_to_includes, original_class_file_name_base) + '"')
-        include_statements = list(set(include_statements))
+        include_statements = list( OrderedDict.fromkeys(include_statements) )
         include_statements_code = '\n'.join(include_statements) + '\n'
 
         # - Register the code
@@ -487,9 +487,9 @@ def run():
         #     factory_file_content += '#include "' + os.path.join(cfg.add_path_to_includes, original_class_file_name_base) + '"\n'
         #     factory_file_content += '\n'
         if is_template:
-            factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, template_types=spec_template_types, skip_copy_constructors=True, use_wrapper_class=True)
+            factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, template_types=spec_template_types, skip_copy_constructors=True, use_wrapper_class=False)
         else:
-            factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, skip_copy_constructors=True, use_wrapper_class=True)
+            factory_file_content += classutils.constrFactoryFunction(class_el, class_name, indent=cfg.indent, skip_copy_constructors=True, use_wrapper_class=False)
         factory_file_content += '\n'
 
         # - Generate factory file name
@@ -507,48 +507,79 @@ def run():
         #
 
         # short_wrapper_class_fname = cfg.wrapper_header_prefix + class_name['short'] + cfg.header_extension
-        short_wrapper_class_fname = cfg.new_header_files[class_name['long']]['wrapper']
-        wrapper_class_fname = os.path.join(cfg.extra_output_dir, short_wrapper_class_fname)
+        # short_wrapper_class_fname = cfg.new_header_files[class_name['long']]['wrapper']
         
-        wrapper_class_file_content = generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
-                                                           short_abstr_class_fname, short_wrapper_class_fname,
-                                                           construct_assignment_operator, has_copy_constructor,
-                                                           copy_constructor_id=copy_constructor_id)
+        wrapper_decl_header_fname = cfg.new_header_files[class_name['long']]['wrapper_decl']
+        wrapper_def_header_fname  = cfg.new_header_files[class_name['long']]['wrapper_def']
+        wrapper_header_fname      = cfg.new_header_files[class_name['long']]['wrapper']
 
-        # - Update dict of wrapper class header files
-        #wrapper_class_headers[class_name['short']] = wrapper_class_fname
+        wrapper_decl_header_path = os.path.join(cfg.extra_output_dir, wrapper_decl_header_fname)
+        wrapper_def_header_path  = os.path.join(cfg.extra_output_dir, wrapper_def_header_fname)
+        wrapper_header_path      = os.path.join(cfg.extra_output_dir, wrapper_header_fname)
+        
+        # - Get code for the declaration and implementation headers
+        wrapper_decl_header_content, wrapper_def_header_content = generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
+                                                                                        short_abstr_class_fname, 
+                                                                                        construct_assignment_operator, has_copy_constructor,
+                                                                                        copy_constructor_id=copy_constructor_id)
+
+        # - Code for the overall header file
+        wrapper_header_content  = '\n'
+        wrapper_header_content += '#include "' + wrapper_decl_header_fname + '"\n'
+        wrapper_header_content += '#include "' + wrapper_def_header_fname + '"\n'
+        wrapper_header_content += '\n'
+
 
         # - Register code
-        if wrapper_class_fname not in return_code_dict.keys():
-            return_code_dict[wrapper_class_fname] = {'code_tuples':[], 'add_include_guard':True}
-        return_code_dict[wrapper_class_fname]['code_tuples'].append( (0, wrapper_class_file_content) )
+        if wrapper_decl_header_path not in return_code_dict.keys():
+            return_code_dict[wrapper_decl_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        return_code_dict[wrapper_decl_header_path]['code_tuples'].append( (0, wrapper_decl_header_content) )
+
+        if wrapper_def_header_path not in return_code_dict.keys():
+            return_code_dict[wrapper_def_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        return_code_dict[wrapper_def_header_path]['code_tuples'].append( (0, wrapper_def_header_content) )
+
+        if wrapper_header_path not in return_code_dict.keys():
+            return_code_dict[wrapper_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        return_code_dict[wrapper_header_path]['code_tuples'].append( (0, wrapper_header_content) )
+
+
 
 
         #
-        # Add wrapper header to 'master header' (header that includes all wrapper classes)
+        # Add wrapper headers to '_decl' and '_def' parts of the 'master header' (header that includes all wrapper classes)
         #
 
-        master_header_include = '#include "' + short_wrapper_class_fname + '"\n'
+        master_header_include_decl = '#include "' + cfg.new_header_files[class_name['long']]['wrapper_decl'] + '"\n'
 
-        all_wrapper_header_path = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension)          
-        if all_wrapper_header_path not in return_code_dict.keys():
-            return_code_dict[all_wrapper_header_path] = {'code_tuples':[], 'add_include_guard':True}
-        return_code_dict[all_wrapper_header_path]['code_tuples'].append( (0, master_header_include) )        
+        all_wrapper_decl_header_path = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_decl' + cfg.header_extension)
+        if all_wrapper_decl_header_path not in return_code_dict.keys():
+            return_code_dict[all_wrapper_decl_header_path] = {'code_tuples':[], 'add_include_guard':False}
+        return_code_dict[all_wrapper_decl_header_path]['code_tuples'].append( (-1, master_header_include_decl) )        
+
+
+        master_header_include_def  = '#include "' + cfg.new_header_files[class_name['long']]['wrapper_def'] + '"\n'
+
+        all_wrapper_def_header_path = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_def' + cfg.header_extension)          
+        if all_wrapper_def_header_path not in return_code_dict.keys():
+            return_code_dict[all_wrapper_def_header_path] = {'code_tuples':[], 'add_include_guard':False}
+        return_code_dict[all_wrapper_def_header_path]['code_tuples'].append( (-1, master_header_include_def) )        
+
 
 
         #
         # Construct a function for deleting a pointer-to-wrapper and place it in the designated source & header file
         #
 
-        short_wrapper_class_name = classutils.toWrapperType(class_name['short'])
+        wrapper_class_name = classutils.toWrapperType(class_name['long'], include_namespace=True)
 
         # - Function declaration
         w_deleter_decl  = '\n'
-        w_deleter_decl += 'void wrapper_deleter(' + short_wrapper_class_name + '*);\n'
+        w_deleter_decl += 'void wrapper_deleter(' + wrapper_class_name + '*);\n'
 
         # - Function implementation
         w_deleter_impl  = '\n'
-        w_deleter_impl += 'void wrapper_deleter(' + short_wrapper_class_name + '* wptr)\n'
+        w_deleter_impl += 'void wrapper_deleter(' + wrapper_class_name + '* wptr)\n'
         w_deleter_impl += '{\n'
         w_deleter_impl += ' '*cfg.indent + 'delete wptr;\n'
         w_deleter_impl += '}\n'
@@ -571,8 +602,21 @@ def run():
         # Add typedef to the wrapper_typedefs file (example: typedef SomeClass_gambit SomeClass; )
         #
 
-        wrapper_class_name = classutils.toWrapperType(class_name['short'])
-        typedef_code = 'typedef ' + wrapper_class_name + ' ' + class_name['short'] + ';\n'
+        short_wrapper_class_name = classutils.toWrapperType(class_name['short'])
+
+        namespace, short_class_name = utils.removeNamespace(class_name['long'], return_namespace=True)
+
+        if namespace == '':
+            namespace_list = []
+        else:
+            namespace_list = namespace.split('::')
+
+        n_indents = len(namespace_list)
+
+        typedef_code  = ''
+        typedef_code += utils.constrNamespace(namespace_list,'open')
+        typedef_code += ' '*cfg.indent*n_indents + 'typedef ' + short_wrapper_class_name + ' ' + class_name['short'] + ';\n'
+        typedef_code += utils.constrNamespace(namespace_list,'close')
 
         wrapper_typedefs_path = cfg.wrapper_typedefs_fname + cfg.header_extension
 
@@ -618,19 +662,21 @@ def run():
 # END: run()
 #
 
-
+#
+# -------------------------------------------------------------------
+#
 
 #
 # Function for generating a header file with a GAMBIT wrapper class
 #
 def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces, 
-                          short_abstr_class_fname, short_wrapper_class_fname,
+                          short_abstr_class_fname,
                           construct_assignment_operator, has_copy_constructor,
                           copy_constructor_id=''):
 
     # Useful variables
     indent = ' '*cfg.indent
-    wrapper_base_class_name = 'WrapperBase<' + abstr_class_name['long'] + '>'
+    # wrapper_base_class_name = 'WrapperBase<' + abstr_class_name['long'] + '>'
 
     # Useful lists
     class_variables    = []
@@ -677,439 +723,76 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     # Start code generation
     #
 
-    code = ''
 
+    decl_code = classutils.constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class_variables, class_functions, class_constructors, has_copy_constructor, indent=indent)
 
-    #
-    # --- UPDATE: The code that declares factory function pointers is currently commented out
-    #
-    # # Create one factory function pointer for each constructor.
-    # # Initialize pointers to NULL - they will later be filled by dynamic loading
-    # # We append a number (e.g. '_1') to the function pointer name to make sure each overload of a constructor
-    # # gets a unique.
-    # temp_code = ''
-    # for i, constr_el in enumerate(class_constructors):
+    def_code  = classutils.constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_variables, class_functions, class_constructors, has_copy_constructor, indent=indent, do_inline=True)
 
-    #     # We need pointers for all the overloaded factory functions (generated due to default value arguments)
-    #     n_overloads = funcutils.numberOfDefaultArgs(constr_el)
 
-    #     # Identify arguments, translate argument type of loaded classes
-    #     # and construct the argument bracket
-    #     args = funcutils.getArgs(constr_el)
-    #     w_args = funcutils.constrWrapperArgs(args, add_ref=True)
-
-    #     # One factory function pointer for each set of default arguments
-    #     for remove_n_args in range(n_overloads+1):
-
-    #         if remove_n_args == 0:
-    #             use_w_args = w_args
-    #         else:
-    #             use_w_args = w_args[:-remove_n_args]
-
-    #         args_bracket = funcutils.constrArgsBracket(use_w_args, include_arg_name=False, include_arg_type=True, include_namespace=True)
-
-    #         # Factory pointer name
-    #         factory_ptr_name = 'Factory_' + class_name['short'] + '_' + str(i)
-    #         if remove_n_args > 0:
-    #             factory_ptr_name += '_overload_' + str(remove_n_args)
-
-    #         # Construct factory pointer code
-    #         temp_code += abstr_class_name['long'] + '* (*' + factory_ptr_name + ')' + args_bracket + ' = NULL;\n'
-
-    # if temp_code != '':
-    #     code += '\n'
-    #     code += "// Factory function pointers to be filled by dynamic loading\n"
-    #     code += temp_code
-
-
-    #
-    # Generate code for wrapper class
-    #
-
-    short_wrapper_class_name = class_name['short'] + cfg.code_suffix
-
-    # Construct line declaring inheritance from the wrapper base class (WrapperBase)
-    # and from other wrapper classes
-    inheritance_line = 'public ' + wrapper_base_class_name
-    for parent_dict in loaded_parent_classes:
-
-        inheritance_line += 'virtual '*parent_dict['virtual'] + parent_dict['access'] + ' ' + parent_dict['wrapper_name'] + ', '
-
-    if inheritance_line != '':
-        inheritance_line = ' : ' + inheritance_line.rstrip(', ')
-
-    # Class declaration line
-    code += '\n'
-    code += 'class ' + short_wrapper_class_name + inheritance_line + '\n'
-
-    # Class body
-    code += '{\n'
-
-    # # Start private block
-    # code += indent + 'private:\n'
-    
-    # # Private variable: bool member_element
-    # code += 2*indent + 'bool member_variable;\n'
-
-    # Start public block
-    code += indent + 'public:\n'
-
-    # Variables:
-    code += 2*indent + '// Member variables: \n'
-
-    # # Public variable: pointer to abstract class: Abstract_ClassX* BEptr
-    # code += 2*indent + abstr_class_name['long'] + '* BEptr;\n'
-
-    # Add references to all public variables
-    for var_el in class_variables:
-
-        # Variable name
-        var_name = var_el.get('name')
-
-        # Determine variable type
-        var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        var_is_loaded_class = utils.isLoadedClass(var_type, byname=True)
-
-        if var_is_loaded_class:
-            use_var_type = classutils.toWrapperType(var_type)
-        else:
-            use_var_type = var_type
-
-        # Remove '&' from use_var_type if it exists
-        use_var_type = use_var_type.replace('&','')
-
-        # Write line
-        # FIXME: Should we include keywords here (const, static, ...)?
-        if var_is_loaded_class:
-            code += 2*indent + use_var_type + ' ' + var_name + ';\n'
-        else:
-            code += 2*indent + use_var_type + '& ' + var_name + ';\n'
-
-
-    # Functions:
-    code += '\n'
-    code += 2*indent + '// Member functions: \n'
-
-    # Add wrappers for all member functions, including operator functions
-    # and overloaded versions of functions with default value arguments
-
-    # class_functions = funcutils.multiplyDefaultArgFunctions(class_functions)
-    # done_members = []
-
-    for func_el in class_functions:
-
-        # Check if this is an operator function
-        is_operator = False
-        if func_el.tag == 'OperatorMethod':
-            is_operator = True
-
-        # Check if this function makes use of any loaded types
-        uses_loaded_type = funcutils.usesLoadedType(func_el)
-
-        # # Check if we're generating an overload of a previous member function
-        # overload_n = done_members.count(func_el)
-        # is_overload = bool(overload_n)
-
-        # Function name
-        if is_operator:
-            func_name = 'operator' + func_el.get('name')
-        else:
-            func_name = func_el.get('name')
-
-        # Check constness
-        if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
-            is_const = True
-        else:
-            is_const = False
-
-        # Determine return type
-        return_type, return_type_kw, return_type_id = utils.findType(func_el)
-        return_type_el = cfg.id_dict[return_type_id]
-
-        pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
-        return_is_loaded    = utils.isLoadedClass(return_type, byname=True)
-
-        # Convert return type if loaded class
-        if return_is_loaded:
-            # use_return_type = classutils.toWrapperType(return_type, remove_reference=True)
-            use_return_type = classutils.toWrapperType(return_type)
-        else:
-            use_return_type = return_type
-
-        # If return-by-value, then a const qualifier on the return value is meaningless
-        # (will result in a compiler warning)
-        if utils.pointerAndRefCheck(use_return_type, byname=True) == (0, False):
-            if 'const' in return_type_kw:
-                return_type_kw.remove('const')
-
-        # Return keywords
-        return_kw_str = ' '.join(return_type_kw)        
-        return_kw_str += ' '*bool(len(return_type_kw))
-
-        # Arguments
-        args = funcutils.getArgs(func_el)
-
-
-        # One function for each set of default arguments
-        n_overloads = funcutils.numberOfDefaultArgs(func_el)
-        for remove_n_args in range(n_overloads+1):
-
-            if remove_n_args == 0:
-                use_args = args
-            else:
-                use_args = args[:-remove_n_args]
-
-            # For operators, take wrapper class types as input. For functions, take WrapperBase as input.
-            if is_operator:
-                args_bracket = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
-            else:
-                args_bracket = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True, use_wrapper_base_class=True)                
-
-            # Name of function to call (in abstract class)
-            # if (remove_n_args > 0) and (not is_operator):
-            #     call_func_name = func_name + cfg.code_suffix
-            # else:
-            #     call_func_name = func_name
-            if is_operator:
-                call_func_name = 'operator_' + cfg.operator_names[func_el.get('name')] + cfg.code_suffix
-            else:
-                # call_func_name = func_name + cfg.code_suffix
-                if uses_loaded_type or (remove_n_args>0):
-                    call_func_name = func_name + cfg.code_suffix 
-                else:
-                    call_func_name = func_name
-
-
-            # Write declaration line
-            code += 2*indent + return_kw_str + use_return_type + ' ' + func_name + args_bracket + is_const*' const' + '\n'
-
-            # Write function body
-            code += 2*indent + '{\n'
-
-            if return_type == 'void':
-                code += 3*indent
-            else:
-                code += 3*indent + 'return '
-
-            args_bracket_notypes = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
-
-            if return_is_loaded: 
-                if is_ref:
-                    # return reference_returner<X_GAMBIT, Abstract_X>( BEptr->return_ref_this_GAMBIT() );
-                    # code += use_return_type + '( BEptr->' + call_func_name + args_bracket_notypes + ' , true);\n'
-                    abs_return_type_for_templ = classutils.toAbstractType(return_type, include_namespace=True, remove_reference=True, remove_pointers=True)
-                    w_return_type_for_templ = classutils.toWrapperType(return_type, remove_reference=True, remove_pointers=True)
-                    code += 'reference_returner< ' + w_return_type_for_templ + ', ' + abs_return_type_for_templ +  ' >( BEptr->' + call_func_name + args_bracket_notypes + ' );\n'
-                elif (not is_ref) and (pointerness > 0):
-                    abs_return_type_for_templ = classutils.toAbstractType(return_type, include_namespace=True, remove_reference=True, remove_pointers=True)
-                    w_return_type_for_templ = classutils.toWrapperType(return_type, remove_reference=True, remove_pointers=True)
-                    code += 'pointer_returner< ' + w_return_type_for_templ + ', ' + abs_return_type_for_templ +  ' >( BEptr->' + call_func_name + args_bracket_notypes + ' );\n'
-                else:
-                    code += use_return_type + '( BEptr->' + call_func_name + args_bracket_notypes + ' );\n'
-            else:                
-                code += 'BEptr->' + call_func_name + args_bracket_notypes + ';\n'
-
-            code += 2*indent + '}\n'
-            code += '\n'
-
-        # # Keep track of functions done
-        # done_members.append(func_el)
-
-    # # Add special member function: _set_member(bool) - set the variable 'member_variable' to true/false
-    # code += '\n'
-    # code += 2*indent + '// Special member function to set member_variable: \n'
-    # code += 2*indent + 'void _set_member_variable(bool in) { member_variable = in; }\n'    
-
-
-    #
-    # Add all constructors here...
-    #
-
-    # First generate some code common to all constructors
-    common_init_list_code = ''
-    for var_el in class_variables:
-        var_name = var_el.get('name')
-        var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        if utils.isLoadedClass(var_type, byname=True):
-            common_init_list_code += 3*indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
-        else:
-            common_init_list_code += 3*indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
-    if common_init_list_code != '':
-        common_init_list_code = common_init_list_code.rstrip(',\n') + '\n'
-
-    common_constructor_body = ''
-    common_constructor_body += 2*indent + '{\n'
-    common_constructor_body += 3*indent + 'BEptr->wrapper' + cfg.code_suffix + '(this);\n'
-
-    for var_el in class_variables:
-        var_name = var_el.get('name')
-        var_type, var_type_kw, var_type_id = utils.findType(var_el)
-        if utils.isLoadedClass(var_type, byname=True):
-            common_constructor_body += 3*indent + var_name + '._setMemberVariable(true);\n'
-
-    common_constructor_body += 2*indent + '}\n'
-
-
-
-    #
-    # --- UPDATE: The code for generating wrapper class constructors is currently commented out
-    #
-
-    # # Add wrappers for all original constructors except the copy constructor
-    # temp_code = ''
-    # for i, constr_el in enumerate(class_constructors):
-
-    #     # Identify arguments
-    #     args = funcutils.getArgs(constr_el)
-    #     factory_args = funcutils.constrWrapperArgs(args, add_ref=True)
-
-    #     # Skip if this is a copy constructor. (Another copy constructor is added below.)
-    #     if (len(args) == 1) and (args[0]['id'] == class_el.get('id')):
-    #         continue
-
-    #     # If default arguments are use, we need overloaded constructors to connect to the overloaded
-    #     # factory function pointers
-    #     n_overloads = funcutils.numberOfDefaultArgs(constr_el)
-
-    #     # One constructor for each set of default arguments
-    #     for remove_n_args in range(n_overloads+1):
-
-    #         if remove_n_args == 0:
-    #             use_args         = args
-    #             factory_use_args = factory_args
-    #         else:
-    #             use_args         = args[:-remove_n_args]
-    #             factory_use_args = factory_args[:-remove_n_args]
-
-    #         args_bracket = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
-    #         args_bracket_notypes = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
-    #         factory_args_bracket = funcutils.constrArgsBracket(factory_use_args, include_arg_name=False, include_arg_type=True, include_namespace=True)
-
-    #         # Factory pointer name
-    #         factory_ptr_name = 'Factory_' + class_name['short'] + '_' + str(i)
-    #         if remove_n_args > 0:
-    #             factory_ptr_name += '_overload_' + str(remove_n_args)
-
-    #         temp_code += 2*indent + short_wrapper_class_name + args_bracket + ' :\n'
-    #         # temp_code += 3*indent + 'BEptr( Factory_' + class_name['short'] + '_' + str(i) + args_bracket_notypes + ' ),\n'  # FIXME: This is not general. Fix argument list.
-    #         temp_code += 3*indent + wrapper_base_class_name + '( ' + 'nullptr_check< '+ abstr_class_name['long'] + '* (*)' + factory_args_bracket + ' >(' + factory_ptr_name +')'+ args_bracket_notypes + ', ' + 'false' + ' )'  # FIXME: This is not general. Fix argument list.
-    #         if common_init_list_code != '':
-    #             temp_code += ',\n' + common_init_list_code
-    #         else:
-    #             temp_code += '\n'
-    #         temp_code += common_constructor_body
-
-    #         temp_code += '\n'
-
-    # if temp_code != '':
-    #     code += '\n'
-    #     code += 2*indent + '// Wrappers for original constructors: \n'    
-    #     code += temp_code
-
-
-    # Add special constructor based on abstract pointer (This is needed to allow return-by-value with the wrapper classes.)
-    code += 2*indent + '// Special pointer-based constructor: \n'
-    code += 2*indent + short_wrapper_class_name + '(' + abstr_class_name['long'] +'* in, bool memvar_in=false) :\n'
-    # code += 3*indent + 'BEptr(in),\n'
-    code += 3*indent + wrapper_base_class_name + '( in, memvar_in )'  # FIXME: This is not general. Fix argument list.
-    if common_init_list_code != '':
-        code += ',\n' + common_init_list_code
-    else:
-        code += '\n'
-    code += common_constructor_body
-
-    # Add copy constructor
-    if has_copy_constructor:
-        code += '\n'
-        code += 2*indent + '// Copy constructor: \n'
-        code += 2*indent + short_wrapper_class_name + '(const ' + short_wrapper_class_name +'& in) :\n'
-        # code += 3*indent + 'BEptr(in),\n'
-        code += 3*indent + wrapper_base_class_name + '(in)'  # FIXME: This is not general. Fix argument list.
-        if common_init_list_code != '':
-            code += ',\n' + common_init_list_code
-        else:
-            code += '\n'
-        code += common_constructor_body
-
-
-    # # Add copy constructor -- UPDATE: now placed in WrapperBase
-    # if has_copy_constructor:
-    #     code += '\n'
-    #     code += 2*indent + '// Copy constructor: \n'
-    #     code += 2*indent + short_wrapper_class_name + '(const ' + short_wrapper_class_name +'& in) :\n'
-    #     # code += 3*indent + 'BEptr(in.BEptr->pointerCopy' + cfg.code_suffix + '()),\n'
-    #     code += 3*indent + wrapper_base_class_name + '( in.BEptr->pointerCopy' + cfg.code_suffix + '(), false )'  # FIXME: This is not general. Fix argument list.
-    #     if common_init_list_code != '':
-    #         code += ',\n' + common_init_list_code
-    #     else:
-    #         code += '\n'
-    #     code += common_constructor_body
-
-
-    #
-    # Add assignment operator -- UPDATE: now placed in WrapperBase
-    #
-    # if construct_assignment_operator:
-    #     code += '\n'
-    #     code += 2*indent + '// Assignment operator: \n'
-    #     code += 2*indent + short_wrapper_class_name + '& ' + 'operator=(const ' + short_wrapper_class_name +'& in)\n'
-    #     code += 2*indent + '{\n'
-    #     # code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr.get()); }\n'
-    #     code += 3*indent + 'if (this != &in) { BEptr->pointerAssign' + cfg.code_suffix + '(in.BEptr); }\n'
-    #     code += 3*indent + 'return *this;'
-    #     code += 2*indent + '}\n'
-
-    # #
-    # # Add destructor
-    # #
-    # code += '\n'
-    # code += 2*indent + '// Destructor: \n'
-    # code += 2*indent + '~' + short_wrapper_class_name + '()\n'
-    # code += 2*indent + '{\n'
-    # code += 3*indent + 'if(member_variable==false) { delete BEptr; }\n'
-    # code += 2*indent + '}\n'
-
-    # Close class body
-    code += '};\n'
+    # If in GAMBIT mode, put in tags for the GAMBIT namespace
+    if cfg.gambit_mode:
+        decl_code = '\n__START_GAMBIT_NAMESPACE__\n' + decl_code + '\n__END_GAMBIT_NAMESPACE__\n'
+        def_code  = '\n__START_GAMBIT_NAMESPACE__\n' + def_code  + '\n__END_GAMBIT_NAMESPACE__\n'
 
     
-    # Add #include statements at the beginning
-    include_statements = []
+    #
+    # Add #include statements for the declaration code
+    #
+
+    decl_code_include_statements = []
 
     # - Header where NULL is defined
-    include_statements.append( '#include <cstddef>' )
+    decl_code_include_statements.append( '#include <cstddef>' )
 
-    # # - Header where the function nullptr_check is defined
-    # include_statements.append( '#include "nullptr_check' + cfg.header_extension + '"')
+    # - Header where the function nullptr_check is defined
+    # decl_code_include_statements.append( '#include "nullptr_check' + cfg.header_extension + '"')
+
+    # - Header with forward declarations to all wrapper classes
+    decl_code_include_statements.append( '#include "' + cfg.frwd_decls_wrp_fname + cfg.header_extension + '"')
 
     # - Base class for all wrapper classes
-    include_statements.append( '#include "' + cfg.wrapper_header_prefix + 'WrapperBase' + cfg.header_extension + '"')
-    # include_statements.append( '#include "' + cfg.new_header_files['WrapperBase']['wrapper'] + '"')
+    decl_code_include_statements.append( '#include "' + cfg.wrapper_header_prefix + 'WrapperBase' + cfg.header_extension + '"')
+    # decl_code_include_statements.append( '#include "' + cfg.new_header_files['WrapperBase']['wrapper'] + '"')
 
     # - Abstract class for the original class
-    include_statements.append( '#include "' + cfg.new_header_files[class_name['long']]['abstract'] + '"' )
-    # include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, cfg.new_header_files[class_name['long']]['abstract']) + '"' )
+    decl_code_include_statements.append( '#include "' + cfg.new_header_files[class_name['long']]['abstract'] + '"' )
+    # decl_code_include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, cfg.new_header_files[class_name['long']]['abstract']) + '"' )
 
     # - Wrapper parent classes
     for parent_dict in loaded_parent_classes:
-        include_statements.append('#include "' + cfg.new_header_files[ parent_dict['class_name']['long'] ]['wrapper'] + '"')
+        decl_code_include_statements.append('#include "' + cfg.new_header_files[ parent_dict['class_name']['long'] ]['wrapper_decl'] + '"')
 
     # - Any other types (excluding the current wrapper class)
-    # include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper', add_extra_include_path=False)
-    include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper', add_extra_include_path=False, exclude_types=[class_name])
-
+    # decl_code_include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper', add_extra_include_path=False)
+    # decl_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper', add_extra_include_path=False, exclude_types=[class_name])
+    decl_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', add_extra_include_path=False, exclude_types=[class_name], skip_forward_declared=True)
 
     # Remove duplicates and construct code
-    include_statements = list( set(include_statements) )
-    include_statements_code = '\n'.join(include_statements) + 2*'\n'
-    code = include_statements_code + code
+    decl_code_include_statements = list( OrderedDict.fromkeys(decl_code_include_statements) )
+    decl_include_statements_code = '\n'.join(decl_code_include_statements) + 2*'\n'
+    decl_code = decl_include_statements_code + decl_code
 
 
-    # Add include guards
-    # code = utils.addIncludeGuard(code, short_wrapper_class_fname)
+
+    #
+    # Add #include statements for the declaration code
+    #
+
+    def_code_include_statements = []
+
+    # - Any other types (excluding the current wrapper class)
+    # def_code_include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper', add_extra_include_path=False)
+    # def_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper', add_extra_include_path=False, exclude_types=[class_name])
+    def_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', add_extra_include_path=False, exclude_types=[class_name], skip_forward_declared=False)
+
+    # Remove duplicates and construct code
+    def_code_include_statements = list( OrderedDict.fromkeys(def_code_include_statements) )
+    def_include_statements_code = '\n'.join(def_code_include_statements) + 2*'\n'
+    def_code = def_include_statements_code + def_code
+
 
     # Return code
-    return code
+    return decl_code, def_code
 
 #
 # END: generateWrapperHeader

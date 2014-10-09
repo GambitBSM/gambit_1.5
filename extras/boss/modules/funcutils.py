@@ -175,7 +175,7 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
                 args_seq += ''.join([ kw+' ' for kw in arg_dict['kw'] ])
 
                 if use_wrapper_class and arg_dict['loaded_class'] == True:
-                    args_seq += classutils.toWrapperType(arg_dict['type'], use_base_type=use_wrapper_base_class)
+                    args_seq += classutils.toWrapperType(arg_dict['type'], use_base_type=use_wrapper_base_class, include_namespace=include_namespace)
 
                 else:
                     if include_namespace:

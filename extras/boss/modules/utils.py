@@ -372,7 +372,7 @@ def findType(el_input):
             el = cfg.id_dict[type_id]
 
     # Remove duplicates from the additional_keywords list
-    additional_keywords = list(set(additional_keywords))
+    additional_keywords = list( OrderedDict.fromkeys(additional_keywords) )
 
     # When we exit the loop, 'el' is at the final element.
     # The typename is in the 'name'/'demangled' attribute
@@ -477,13 +477,18 @@ def getBracketPositions(content, delims=['{','}']):
 
 def addIndentation(content, indent):
 
-    lines = content.split('\n')
-    new_content = '\n'.join( [' '*indent + line for line in lines] )
+    if indent == 0:
+        new_content = content
 
-    # If the last char in content was a newline, 
-    # remove the indentation that was added after that newline
-    if lines[-1] == '':
-        new_content = new_content[:-indent]
+    else:
+        lines = content.split('\n')
+
+        new_content = '\n'.join( [' '*indent + line for line in lines] )
+
+        # If the last char in content was a newline, 
+        # remove the indentation that was added after that newline
+        if lines[-1] == '':
+            new_content = new_content[:-indent]
 
     return new_content
 
@@ -542,7 +547,7 @@ def removeTemplateBracket(type_name):
 
 # ====== removeNamespace ========
 
-def removeNamespace(type_name):
+def removeNamespace(type_name, return_namespace=False):
     
     type_name_notempl = removeTemplateBracket(type_name)
 
@@ -551,8 +556,12 @@ def removeNamespace(type_name):
         new_type_name = type_name.replace(namespace+'::','',1)
     else:
         new_type_name = type_name
+        namespace = ''
 
-    return new_type_name
+    if return_namespace:
+        return namespace, new_type_name
+    else:
+        return new_type_name
 
 # ====== END: removeNamespace ========
 
@@ -695,9 +704,9 @@ def isLoadedClass(input_type, byname=False):
 
 
 
-# ====== constrForwardDeclHeader ========
+# ====== constrAbsForwardDeclHeader ========
 
-def constrForwardDeclHeader():
+def constrAbsForwardDeclHeader():
 
     import modules.classutils as classutils
 
@@ -753,11 +762,60 @@ def constrForwardDeclHeader():
     code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
     code += '\n'
 
+    # If in GAMBIT mode, put in tags for the GAMBIT namespace
+    if cfg.gambit_mode:
+        code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+
     code_tuple = (insert_pos, code)
 
     return code_tuple
 
-# ====== END: constrForwardDeclHeader ========
+# ====== END: constrAbsForwardDeclHeader ========
+
+
+
+# ====== constrWrpForwardDeclHeader ========
+
+def constrWrpForwardDeclHeader():
+
+    import modules.classutils as classutils
+
+    code = ''
+    insert_pos = 0
+
+    for class_name in cfg.loaded_classes:
+
+        wrapper_class_name = classutils.toWrapperType(class_name, include_namespace=True)
+        namespace, wrapper_class_name_short = removeNamespace(wrapper_class_name, return_namespace=True)
+
+        if namespace == '':
+            namespace_list = []
+        else:
+            namespace_list = namespace.split('::')
+
+        n_indents = len(namespace_list)
+        
+
+        # - Open namespace
+        code += constrNamespace(namespace_list, 'open')
+
+        # - Forward declaration
+        code += ' '*n_indents*cfg.indent + 'class ' + wrapper_class_name_short + ';\n'
+
+        # - Close namespace
+        code += constrNamespace(namespace_list, 'close')
+
+
+
+    # If in GAMBIT mode, put in tags for the GAMBIT namespace
+    if cfg.gambit_mode:
+        code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+
+    code_tuple = (insert_pos, code)
+
+    return code_tuple
+
+# ====== END: constrWrpForwardDeclHeader ========
 
 
 
@@ -1196,15 +1254,15 @@ def isHeader(file_el):
 
 # ====== getIncludeStatements ========
 
-def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[], input_element='class'):
+def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[], input_element='class', skip_forward_declared=True):
 
     include_statements = []
 
     # Check string arguments
     convert_loaded_to = convert_loaded_to.lower()
     input_element     = input_element.lower()
-    if convert_loaded_to not in ['none', 'abstract', 'wrapper']:
-        raise Exception("getIncludeStatements: Keyword argument 'convert_loaded_to=' must be either 'none', 'abstract' or 'wrapper'.")
+    if convert_loaded_to not in ['none', 'abstract', 'wrapper', 'wrapper_decl', 'wrapper_def']:
+        raise Exception("getIncludeStatements: Keyword argument 'convert_loaded_to=' must be either 'none', 'abstract', 'wrapper', 'wrapper_decl' or 'wrapper_def'.")
     if input_element not in ['class', 'function']:
         raise Exception("getIncludeStatements: Keyword argument 'input_element=' must be either 'class' or 'function'.")
 
@@ -1276,10 +1334,37 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
 
             elif isLoadedClass(type_el):
 
+                # # ---> Update start here
+
+                # type_file_id = type_el.get('file')
+                # type_line_number = int(type_el.get('line'))
+
+                # if convert_loaded_to == 'none':
+
+                #     type_file_el = cfg.id_dict[type_file_id]
+                #     type_file_full_path = type_file_el.get('name')
+
+                #     if isHeader(type_file_el):
+                #         type_file_basename = os.path.basename(type_file_full_path)
+                #         if add_extra_include_path:
+                #             include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, type_file_basename) + '"')
+                #         else:
+                #             include_statements.append('#include "' + type_file_basename + '"')
+                #     else:
+                #         print 'INFO: ' + 'Found declaration of loaded type "%s" in file "%s", but this file is not recognized as a header file. No header file include statement generated.' % (type_name['long_templ'], type_file_full_path)
+
+                # else:
+                #     if add_extra_include_path:
+                #         include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][convert_loaded_to]) + '"')
+                #     else:
+                #         include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
+
+                # # <--- Update ends here
+
+
                 # For each loaded class used in this class/function, check whether the corresponding class definition can be
-                # found in the current file (above current class/function) or among the included headers. Only include headers 
-                # for the loaded classes that pass this check. (If no such class definition is found, it must be a 
-                # case of simply using forward declaration, in which case we should *not* include the corresponding header.) 
+                # found in the current file (above current class/function) or among the included headers. If no such class 
+                # definition is found, it must be a case of simply using forward declaration.
 
                 type_file_id = type_el.get('file')
                 type_line_number = int(type_el.get('line'))
@@ -1291,7 +1376,11 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                 else:
                     type_definition_found = False
 
-                if type_definition_found:
+                if (not type_definition_found) and (skip_forward_declared):
+                    # This must be a case of a type that is only forward declared. Don't include any header (as this will typically lead to a 'header loop').
+                    continue
+
+                else:
                     if convert_loaded_to == 'none':
 
                         type_file_el = cfg.id_dict[type_file_id]
@@ -1311,10 +1400,6 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                             include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][convert_loaded_to]) + '"')
                         else:
                             include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
-
-                else:
-                    # This must be a case of a type that is only forward declared. Don't include any header (as this will typically lead to a 'header loop').
-                    continue
 
             elif isStdType(type_el):
 
@@ -1339,9 +1424,50 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
             print 'INFO: ' + 'The type "%s" is unknown. No header file include statement generated.' % type_name['long']
 
     # Remove duplicates and return list
-    include_statements = list( set(include_statements) )
+    include_statements = list( OrderedDict.fromkeys(include_statements) )
 
     return include_statements
 
 # ====== END: getIncludeStatements ========
 
+
+
+# ====== constrNamespaceFromTags ========
+
+def constrNamespaceFromTags(content, new_namespace, open_tag, close_tag):
+
+    new_namespace_list = new_namespace.split('::')
+
+    # Find tag positions
+    open_pos  = content.find(open_tag)
+    close_pos = content.find(close_tag)
+
+    if (open_pos == -1) and (close_pos == -1):
+        # No tags found. Do nothing.
+        return content
+    elif (open_pos == -1) or (close_pos == -1):
+        raise Exception('Matching pair of namespace tags %s and %s not found in given content.' % (open_tag, close_tag))
+    else:
+        pass
+
+    # Split content into three parts
+    content_before = content[:open_pos]
+    content_within = content[open_pos:close_pos]
+    content_after  = content[close_pos:]
+
+    # Remove the namespace tags
+    content_within = content_within.replace(open_tag, '')
+    content_after  = content_after.replace(close_tag, '')
+
+    # Add indentation to middle part
+    content_within = addIndentation(content_within, cfg.indent*len(new_namespace_list))
+
+    # Contruct new namespace and combine code
+    open_new_namespace_code  = constrNamespace(new_namespace_list, 'open', indent=cfg.indent)
+    close_new_namespace_code = constrNamespace(new_namespace_list, 'close', indent=cfg.indent)
+
+    new_content = content_before + open_new_namespace_code + content_within + close_new_namespace_code + content_after
+
+    return new_content
+
+# ====== END: constrNamespaceFromTags ========
