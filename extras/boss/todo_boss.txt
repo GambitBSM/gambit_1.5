@@ -1,240 +1,167 @@
-- Ideas after discussion with Lars:
- 
-  -- For every member variable (Type t;) in the original class, create a reference variable in the abstract class
-     (Abstract__Type& t;) and initialize it in the constructor of the abstract class. For this initialization, 
-     use generated accessor functions that we put into the original class (e.g. Type& t_accessor() {return t;} )
+Todo list for BOSS:
+-------------------
 
-  -- Can we construct wrapper classes on the GAMBIT side that "happen to" have the same name as
-     the original backend classes, and that will provide nearly the exact same user-interface as when 
-     using the original class?
+Currently working on: 
 
+Anders: 17, 18
+Abram : ?
 
 
-STUFF TO DO:
-------------
+(2)
+Implement a fix for the nameclash between the forward declarations
+used in 'abstract_SomeClass.hpp' and the typedef that will be used in
+GAMBIT to rename the wrapper classes: 
+  typedef SomeClass_GAMBIT SomeClass
 
+-- POSSIBLE FIX:
+Extract from 'abstract_SomeClass.hpp' anything that depends on the forward
+declarations, and stick this in another header 'abstract_SomeClass_extras.hpp'
+that will only be included by the external code, not by GAMBIT.
 
 
+(5)
+Make BOSS generate the 'backend_SomeCode.hpp' file that will go into
+'GAMBIT/modules/Backends/include/'. Mostly, this amounts to generating all
+the correct BE_FUNCTION(...) lines for both class factory functions and
+general global functions.
 
-- For public member variables, produce default getters/setters (or a single by-ref function)
 
-  member variable:
+(6)
+Figure out how to deal with friend classes and functions? Do we even have to worry about this?
 
-    SomeType somevar
 
-  alternatives:
+(8)
+At the moment BOSS does not know how to deal with function pointers as return/argument type...
 
-    1)  
-        SomeType somevar_()              <-- Get method, by value
-        void somevar_(SomeType input)    <-- Set method, by value
 
-    2)  
-        SomeType& somevar_()             <-- Get method, by ref
-        void somevar_(SomeType& input)   <-- Set method, by ref
+(9)
+Generate the correct wrapper functions for template functions.
 
-    3)
-        SomeType& somevar_()             <-- Get & set method, by ref
+-- POSSIBLE FIX:
+When parsing the original code: When the first specialization is encountered, 
+write an empty, general template function:
 
+  template <typename T, typename U>
+  void tempFunc_GAMBIT(T t, U u) {}
 
-  Go for alternative #3. Implement as follows:
+Then write the wrapper for the given specialization:
 
-    - In the original source file, create one method:
+  template<>
+  void tempFunc_GAMBIT<int, double>(int i, double d) {}
 
-        SomeType& somevar_GAMBIT()
+When writing to the source code file, make sure that the empty template function
+appears before any of the specializations.
 
-    - In the abstract class header, create two methods:
 
-        virtual SomeType& somevar_GAMBIT()
+(10)
+When creating cfg.std_types_dict, we must check all template arguments before 
+accepting a template specialization as a standard type.
 
-        SomeType& somevar()
-        {
-          return 
-        }
 
-        ...NOT CORRECT. FIXME.
+(12)
+Fix constrFactoryFunction to work properly with template classes
 
 
+(13)
+How do deal with inheritance of accepted, but non-loaded, classes. (E.g. some class inheriting from one of the
+std:: classes). We cannot have both class X and class Abstract_X inheriting from the same class, as this will cause
+an ambiguity error (even if we use virtual inheritance). 
 
-- Friend classes and functions?
+  Possible solutions:
 
+    Alt 1) Move inheritance from class X and up to class Abstract_X.
+           This requires us to find the position of the inheritance statement in the original source and remove it.
 
-- At the moment there's no way to deal with function pointers as return/argument type...
-  -- To identify function pointers, use the XML element.tag: First look for tag 'PointerType' and then for 'FunctionType'.
+    Alt 2) Simply don't add an inheritance statement for class Abstract_X.
+           This probably means that none of the inherited member functions can be loaded.
 
+Will implement alt. 2) for now, but we should investigate whether we should aim for alt. 1) in the future.
 
-- Catch default argument values and propagate them to the wrapper functions and Abstract class members
+(15)
+Deal with classes-within-classes.
 
+(17)
+Do away with STL dictionary by following include statements backwards to determine which
+standard/boost/other headers need to be included in the abstract and wrapper classes.
 
-- Generate headers for GAMBIT: SomeCode_backend.hpp, SomeCode_types.hpp
+UPDATE: 
+There's probably no way around having a dictionary like that. It should be expanded to contain some 
+common BOOST (and ROOT?) types as an example. Also, if BOSS encounters a type with no known header file, 
+it could output a hint about where it comes from (STD library, BOOST, etc...) Search the header path and 
+type namespace to look for hints.
 
 
-- Add nice typedefs to SomeCode_types.hpp  (e.g.: typedef GAMBIT_ClassX Abstract__ClassX; )
+(18)
+Set up a first working example of using a 'BOSSed' Pythia as a backend in GAMBIT.
 
+(19)
+Does BOSS produce the correct output when run with several .xml files at once?
+According to Abram there may be an issue here. (Not covered by the current testing with Pythia.)
 
-- When creating cfg.std_types_dict, must check template arguments before accepting template specializations.
-  Must *first* check all non-template types, *then* decide if template specializations are acceptable. 
-  (All template spec. types must be known.)
 
+Small things to fix:
+--------------------
 
-- Inheritance and classes from standard libraries (std::string, std::complex, ...):
 
-  -- Alt 1) Move inheritance from class X to Abtract__X
-  -- Alt 2) ?
 
-  More generally, different cases of inheritance:
 
-    1. Native class, parsed for classloading
-    
-    2. Native class, not parsed
-    
-    3. External class, probably not parsed for classloading 
-       (A class used via compile-time linking, e.g. a ROOT class used in Delphes.)
-    
-    4. Class from C++ standard library, not parsed
 
-    How to deal with the different cases? Case #1 is the default case, 
-    while case #4 can be solved my moving the inheritance from class X to 
-    class Abstract__X. 
-    Are there other alternatives than this?
+Known issues (not yet on the todo list):
+----------------------------------------
 
+(a)
+UPDATE:
+If we allow the BEptr within a wrapper class to change target, we can no longer
+guarantee that the memory of the original class instance (created with the 'new' operator)
+will be deleted. (Also, if the user has two pointers to a single wrapper class instance, and
+then tries to modify one of them using some wrapped function, the other pointer will also be
+affected indirectly, since the pointer manipulation would happen at the level of the common 
+BEptr.)
 
-- For (global) functions that use return-by-value of native classes, let wrapper use return-by-pointer instead (polymorphism)
-  (Already in place for class member functions.)
+Thus, we should not allow BEptr to change target. This has the consequence that
+any original function that may change the destination of a pointer-to-original-class has to be ignored
+by the wrapper system that BOSS constructs. (That is, functions that take pointer-to-pointer or 
+reference-to-pointer as input.)
 
+One possible way around this is to let the user work directly with the abstract classes in cases like this.
+Another option is to generate wrapper code also for functions that take pointer-to-pointer or reference-to-pointer,
+but inform the user of the potential risks...
 
-- Fix template functions
-  
-  - If first specialization, write an empty, general template function:
 
-      template <typename T, typename U>
-      void tempFunc_GAMBIT(T t, U u) {}
+OLD:
+Working with double pointers (pointer-to-pointer) to classes seem to require that
+we add another variable 'BEptr2' to the wrapper classes:
 
-  - Write wrapper for the given specialization:
+ Abstract_SomeClass* BEptr;    // Initialized by the Factory_SomeClass function.
+ Abstract_SomeClass** BEptr2;  // Initialized to point to BEptr.
 
-      template<>
-      void tempFunc_GAMBIT<int, double>(int i, double d) {}
+This allows us to do (**SomeClass_GAMBIT).BEptr2 to convert from double-pointer-to-wrapper-class 
+to double-pointer-to-abstract-class, which can further be cast to double-pointer-to-original-class
+inside the BOSSed external code.
 
-  - When writing new source code, write the empty template function before
-    any of the specializations (how?)
+However, if the BEptr variable of two wrapper class instances end up pointing to the *same* 
+original class instance, we'll get a terrible memory crash when the wrapper class destructor is run 
+("double free or corruption"). A dummy example of such a scenario would be if the original code 
+contained a function like this:
 
-...........................................................................
+  void pointToTheSame(SomeClass** scpp1, SomeClass** scpp2)
+  {
+    *scpp1 = *scpp2;
+  }
 
+Can we protect ourselves from this somehow? This might be a fundamental problem with the classloading system,
+since it is based on using the 'new' operator to create pointers (on the heap) to instances of the original class.
+These pointers must be deleted somewhere in order to avoid a memory leak, and if two point to the same object we get a
+crash. Could this perhaps be solved by some clever use of 'smart pointers'?
 
-DONE! -- Code cleanup: In most of decode we use .replace(' ','') to remove blanks from the class/function/type names given by
-                       the "demangled" value of XML elements. Should we force this everywhere? Atm we don't do it for the typenames 
-                       returned by utils.findType or utils.getArgs. (The blanks *are* needed to write acceptable C++ code).
 
-                       Will try to remove all the .replace(' ','')
 
 
-DONE! -- Only write _GAMBIT type wrappers for member functions using native types.
-         For functions with only known types, do a simple virtual function in Abstract__X and leave class X unchanged.
 
 
-DONE! -- When writing forward declarations, put them in the correct namespace!
 
 
-DONE! -- Add forward declaration when needed in abstract_SomeClass.hpp
 
-
-DONE! -- Make sure files in 'extra_output' folder are not overwritten when -d flag is set
-
-
-DONE! -- Redirect all files edited to the 'extra_output' folder
-
-
-DONE! -- When wrapper function take argument by ref, make sure it is converted correct:
-
-
-DONE! -- When writing wrapper functions in the abstract class, make sure that reinterpret cast maintains qualifiers.
-
-
-DONE! -- Fix namespace + '~' combo for destructors
-
-
-DONE! -- Write a list of all types used
-
-
-DONE! -- Move code for creating all_typedefs.hpp out of boss.py (to utils.py?)
-
-
-DONE! -- Leave out wrappers that are currently not needed (currently: 'abstractify' and 'upcast' are not used)
-
-
-DONE! -- Fix double namespaces in factory function arguments
-
-
-DONE! -- Only write native typedefs (so we don't copy typedefs from the standard headers etc.)
-
-
-- How to best deal with typedefs? Simply replace them by actual type? Create a header with all the typedefs?
-    DONE! -- Run through all typedefs in xml file, keep those that have an accepted or fundamental type
-    DONE! -- Create a list/dict of accepted_types. (Use 'id' as key? Make sure it corresponds to findType!)
-    DONE! -- In abstract classes and wrapper functions, use the original typenames (if in accepted_types).
-    DONE! -- Create a header "all_typedefs.hpp" with the following content:
-             (Forward declarations for all accepted classes. Typedefs for all accepted/fundamental types.)
-
-             // Forward declarations:
-             class Abstract__X;
-             class X;
-             ...
-
-             // Typedefs:
-             typedef int Int_t;
-             typedef Abstract__X* myAbsXptr_t; 
-
-
-  DONE! -- Command line option: Print all available (native) classes and functions
-
-  DONE! -- IMPORTANT: Make factories return abstract class pointer! (Otherwise, polymorphism doesn't happen!)
-
-- Internal class variables: If native type, we must use the abstract type, e.g.:  X x;  -->  Abstract__X x;
-  WRONG! As member variables cannot be made polymorphic, they should not be accessed directly anyway.
-         Construct getters/setters for all variables that needs accessing. Otherwise, leave them out. 
-
-  DONE! -- For any member function with return-by-value, let the wrapper return a pointer instead, created on the 'heap' with the 'new' keyword.
-           (Due to polymorphism only working on pointers/references.)
-
-  DONE! -- Fix template classes (don't confuse a new specialization as a new class.)
-
-  DONE! ---- Make sure that specializations in the orginal source also get Abstract__CLASS<special> (and not Abstract__CLASS<T>) added to its inheritance list.
-
-  DONE! ---- Connected to above? : Fix the question of number of parents already added in the case of template specializations
-
-  DONE! ---- Make sure that when specializations appear in the original source, the abstract header is not included once more
-
-  
-  DONE!-- Construct the various converter member functions for classes
-
-            In class 'Abstract__A':
-
-              A* downcast() 
-              { 
-                  return reinterpret_cast<A*>(this); 
-              }
-
-
-- Construct the _GAMBIT wrapper functions for class member functions (just like for functions)
-
-  Example: a member function takes an instance of the class as input 
-
-  - In original class 'A':   void printA(A a);
-
-        void printA(A a);
-
-        void printA_GAMBIT(A * a) 
-        { 
-            a->printA(*a); 
-        }
-
-  - In abstract parent class 'Abstract__A':
-
-        virtual void printA_GAMBIT(A * a) {}; 
-
-        void printA(Abstract__A a_abs)
-        {
-            printA_GAMBIT( a_abs.downcast() );
-        }
 
 
 
