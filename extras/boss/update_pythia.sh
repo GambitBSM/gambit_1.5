@@ -1,5 +1,3 @@
-rm -rf pythia8186
-cp -r pythia8186_original pythia8186
 
 cp headers_by_hand/identification_pythia.hpp pythia_BOSS_output/backend_types/BOSSedPythia_1_0/identification.hpp
 cp headers_by_hand/loaded_types_pythia.hpp pythia_BOSS_output/backend_types/BOSSedPythia_1_0/loaded_types.hpp

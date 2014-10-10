@@ -1,6 +1,0 @@
-#include "backend_types/BOSSedPythia_1_0/wrapper_Pythia_def.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Event_def.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Hist_def.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_def.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Info_def.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Particle_def.h"
