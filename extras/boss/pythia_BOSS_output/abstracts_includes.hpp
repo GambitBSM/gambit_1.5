@@ -1,0 +1,6 @@
+#include "backend_types/BOSSedPythia_1_0/abstract_Pythia.h"
+#include "backend_types/BOSSedPythia_1_0/abstract_Event.h"
+#include "backend_types/BOSSedPythia_1_0/abstract_Hist.h"
+#include "backend_types/BOSSedPythia_1_0/abstract_Vec4.h"
+#include "backend_types/BOSSedPythia_1_0/abstract_Info.h"
+#include "backend_types/BOSSedPythia_1_0/abstract_Particle.h"

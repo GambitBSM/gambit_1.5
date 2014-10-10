@@ -16,60 +16,50 @@ from collections import OrderedDict
 # GAMBIT specific options:
 # -- NOTE: Setting gambit_mode = True will overwrite some of the other choices below, like 'all_wrapper_fname'.
 gambit_mode            = True
-gambit_backend_name    = 'Minimal'
-gambit_backend_version = '0.1'
-gambit_base_namespace  = 'Gambit::Backends'
+# gambit_backend_name    = 'BOSSMinimalExample'
+gambit_backend_name    = 'BOSSedPythia'
+gambit_backend_version = '1.0'
+gambit_base_namespace  = ''
+gambit_backend_basedir = 'backend_types'
 
 
 # Information about the external code:
 
-# accepted_paths     = ['pythia8186_original', 'pythia8186']
-accepted_paths     = ['minimal_original', 'minimal']
+accepted_paths     = ['pythia8186_original', 'pythia8186']
+# accepted_paths     = ['minimal_1_0_original', 'minimal_1_0']
 
 std_include_paths  = ['/usr/include/']
 
-# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Event', 'Pythia8::Particle']
+# loaded_classes       = ['Pythia8::Pythia']
+loaded_classes         = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
+# loaded_classes       = ['nspace1::nspace2::X', 'nspace3::Y']
+# loaded_classes       = ['X', 'Y']
 
-# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
-
-
-# loaded_classes       = ['Pythia8::ParticleDataEntry', 'Pythia8::ResonanceWidths']
-
-# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4',
-#                         'Pythia8::Sphericity', 'Pythia8::Thrust', 'Pythia8::ClusterJet', 'Pythia8::ParticleData', 'Pythia8::ParticleDataEntry',
-#                         'Pythia8::RotBstMatrix', 'Pythia8::Junction', 'Pythia8::Couplings', 'Pythia8::ResonanceWidths', 'Pythia8::DecayChannel']
-
-# loaded_classes       = ['Pythia8::Pythia', 'Pythia8::Settings', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4',
-#                         'Pythia8::Sphericity', 'Pythia8::Thrust', 'Pythia8::ClusterJet', 'Pythia8::ParticleData', 'Pythia8::ParticleDataEntry',
-#                         'Pythia8::RotBstMatrix', 'Pythia8::Junction', 'Pythia8::Couplings', 'Pythia8::ResonanceWidths', 'Pythia8::DecayChannel']
-
-# loaded_functions     = ['']
-
-loaded_classes       = ['NamespaceForX::X', 'NamespaceForY::Y']
 loaded_functions     = []
 
 wrapper_class_tree     = True
 load_parent_classes    = False
 wrap_inherited_members = False
 
-extra_output_dir        = 'output'
+# extra_output_dir        = 'minimal_1_0'
+extra_output_dir        = 'pythia_BOSS_output'
 code_suffix             = '_GAMBIT'
-abstr_header_prefix     = 'Abstract_'
+abstr_header_prefix     = 'abstract_'
 factory_file_prefix     = 'factory_'
 abstr_class_prefix      = 'Abstract_'
-wrapper_header_prefix   = 'GAMBIT_wrapper_'
+wrapper_header_prefix   = 'wrapper_'
 
 all_wrapper_fname       = 'boss_loaded_classes'
-wrapper_deleter_fname   = 'wrapper_deleter'
+wrapper_deleter_fname   = 'wrapperdeleter'
 all_typedefs_fname      = 'all_typedefs'
 frwd_decls_abs_fname    = 'forward_decls_abstract_classes'
 frwd_decls_wrp_fname    = 'forward_decls_wrapper_classes'
-wrapper_typedefs_fname  = 'wrapper_typedefs'
+wrapper_typedefs_fname  = 'wrappertypedefs'
 
-header_extension        = '.hpp'
-source_extension        = '.cpp'
+header_extension        = '.h'
+source_extension        = '.cc'
 
-add_path_to_includes    = ''  #'Pythia8'
+add_path_to_includes    = 'Pythia8'  #'Pythia8'
 
 
 indent = 4
@@ -164,4 +154,8 @@ std_types_in_class = {}
 all_types_in_class = {}
 
 gambit_full_namespace = ''
+gambit_backend_namespace = 'CAT_3(BACKENDNAME,_,SAFE_VERSION)'
 gambit_backend_safeversion = ''
+gambit_backend_name_full = ''
+
+n_classes_done = 0

@@ -762,9 +762,14 @@ def constrAbsForwardDeclHeader():
     code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
     code += '\n'
 
-    # If in GAMBIT mode, put in tags for the GAMBIT namespace
-    if cfg.gambit_mode:
-        code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+
+    # Insert tags for the GAMBIT namespace
+    code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+
+
+    # Insert include statements needed by GAMBIT
+    code = '\n' + '#include "identification.hpp"\n' + code + '\n#include "backend_undefs.hpp"\n'
+
 
     code_tuple = (insert_pos, code)
 
@@ -785,8 +790,9 @@ def constrWrpForwardDeclHeader():
 
     for class_name in cfg.loaded_classes:
 
-        wrapper_class_name = classutils.toWrapperType(class_name, include_namespace=True)
-        namespace, wrapper_class_name_short = removeNamespace(wrapper_class_name, return_namespace=True)
+        # wrapper_class_name = classutils.toWrapperType(class_name, include_namespace=True)
+        # namespace, wrapper_class_name_short = removeNamespace(wrapper_class_name, return_namespace=True)
+        namespace, class_name_short = removeNamespace(class_name, return_namespace=True)
 
         if namespace == '':
             namespace_list = []
@@ -800,16 +806,20 @@ def constrWrpForwardDeclHeader():
         code += constrNamespace(namespace_list, 'open')
 
         # - Forward declaration
-        code += ' '*n_indents*cfg.indent + 'class ' + wrapper_class_name_short + ';\n'
+        code += ' '*n_indents*cfg.indent + 'class ' + class_name_short + ';\n'
 
         # - Close namespace
         code += constrNamespace(namespace_list, 'close')
 
 
 
-    # If in GAMBIT mode, put in tags for the GAMBIT namespace
-    if cfg.gambit_mode:
-        code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+    # Insert tags for the GAMBIT namespace
+    code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+
+
+    # Insert include statements needed by GAMBIT
+    code = '\n' + '#include "identification.hpp"\n' + code + '\n#include "backend_undefs.hpp"\n'
+
 
     code_tuple = (insert_pos, code)
 
@@ -1164,9 +1174,14 @@ def pointerAndRefCheck(input_type, byname=False):
 
 # ====== addIncludeGuard ========
 
-def addIncludeGuard(code, file_name):
+def addIncludeGuard(code, file_name, extra_string=''):
 
-    guard_var = '__' + file_name.replace('.','_').upper() + '__'
+    if extra_string == '':
+        guard_var = '__' + file_name.replace('.','_').upper() + '__'
+    else:
+        file_name_no_ext, file_ext = os.path.splitext(file_name)
+        guard_var = '__' + file_name_no_ext.replace('.','_').upper() + '_' + extra_string + file_ext.replace('.','_').upper()  + '__'
+
 
     guard_code_top    = '#ifndef ' + guard_var + '\n' + '#define ' + guard_var + '\n'
     guard_code_bottom = '#endif /* ' + guard_var + ' */\n'
@@ -1254,7 +1269,7 @@ def isHeader(file_el):
 
 # ====== getIncludeStatements ========
 
-def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[], input_element='class', skip_forward_declared=True):
+def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[], input_element='class', skip_forward_declared=True, use_full_path=False):
 
     include_statements = []
 
@@ -1396,10 +1411,15 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                             print 'INFO: ' + 'Found declaration of loaded type "%s" in file "%s", but this file is not recognized as a header file. No header file include statement generated.' % (type_name['long_templ'], type_file_full_path)
 
                     else:
-                        if add_extra_include_path:
-                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][convert_loaded_to]) + '"')
+                        if use_full_path:
+                            header_key = convert_loaded_to + '_fullpath'
                         else:
-                            include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
+                            header_key = convert_loaded_to
+
+                        if add_extra_include_path:
+                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][header_key]) + '"')
+                        else:
+                            include_statements.append('#include "' + cfg.new_header_files[type_name['long']][header_key] + '"')
 
             elif isStdType(type_el):
 
