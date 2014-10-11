@@ -1,0 +1,9 @@
+The following classes should work from GAMBIT:
+----------------------------------------------
+
+Pythia8::Pythia
+Pythia8::Hist
+Pythia8::Event
+Pythia8::Particle
+Pythia8::Vec4
+Pythia8::Info
