@@ -478,17 +478,17 @@ def main():
         #         new_code[src_file_name].append(code_tuple)
 
 
-        #
-        # Create header with typedefs
-        #
+        # #
+        # # Create header with typedefs
+        # #
 
-        code_tuple = utils.constrTypedefHeader()
+        # code_tuple = utils.constrTypedefHeader()
 
-        typedef_header_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname + cfg.header_extension)
+        # typedef_header_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname + cfg.header_extension)
         
-        if typedef_header_path not in new_code.keys():
-            new_code[typedef_header_path] = {'code_tuples':[], 'add_include_guard':True}
-        new_code[typedef_header_path]['code_tuples'].append(code_tuple)
+        # if typedef_header_path not in new_code.keys():
+        #     new_code[typedef_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        # new_code[typedef_header_path]['code_tuples'].append(code_tuple)
 
 
 
