@@ -1,31 +1,31 @@
 #include "wrapperdeleter.h"
 
-void wrapper_deleter(Pythia8::Particle_GAMBIT* wptr)
+void wrapper_deleter(Pythia8::Particle__BOSS* wptr)
 {
     delete wptr;
 }
 
-void wrapper_deleter(Pythia8::Info_GAMBIT* wptr)
+void wrapper_deleter(Pythia8::Info__BOSS* wptr)
 {
     delete wptr;
 }
 
-void wrapper_deleter(Pythia8::Vec4_GAMBIT* wptr)
+void wrapper_deleter(Pythia8::Vec4__BOSS* wptr)
 {
     delete wptr;
 }
 
-void wrapper_deleter(Pythia8::Hist_GAMBIT* wptr)
+void wrapper_deleter(Pythia8::Hist__BOSS* wptr)
 {
     delete wptr;
 }
 
-void wrapper_deleter(Pythia8::Event_GAMBIT* wptr)
+void wrapper_deleter(Pythia8::Event__BOSS* wptr)
 {
     delete wptr;
 }
 
-void wrapper_deleter(Pythia8::Pythia_GAMBIT* wptr)
+void wrapper_deleter(Pythia8::Pythia__BOSS* wptr)
 {
     delete wptr;
 }

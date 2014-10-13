@@ -234,36 +234,36 @@ private:
 
 
         public:
-            Abstract_Vec4* pointerCopy_GAMBIT();
-            void pointerAssign_GAMBIT(Abstract_Vec4* in);
+            Abstract_Vec4* pointerCopy__BOSS();
+            void pointerAssign__BOSS(Abstract_Vec4* in);
 
-            Pythia8::Abstract_Vec4* operator_equal_GAMBIT(const Pythia8::Abstract_Vec4&);
+            Pythia8::Abstract_Vec4* operator_equal__BOSS(const Pythia8::Abstract_Vec4&);
 
-            Pythia8::Abstract_Vec4* operator_equal_GAMBIT(double);
+            Pythia8::Abstract_Vec4* operator_equal__BOSS(double);
 
-            Pythia8::Abstract_Vec4* operator_minus_GAMBIT();
+            Pythia8::Abstract_Vec4* operator_minus__BOSS();
 
-            Pythia8::Abstract_Vec4* operator_plus_equal_GAMBIT(const Pythia8::Abstract_Vec4&);
+            Pythia8::Abstract_Vec4* operator_plus_equal__BOSS(const Pythia8::Abstract_Vec4&);
 
-            Pythia8::Abstract_Vec4* operator_minus_equal_GAMBIT(const Pythia8::Abstract_Vec4&);
+            Pythia8::Abstract_Vec4* operator_minus_equal__BOSS(const Pythia8::Abstract_Vec4&);
 
-            Pythia8::Abstract_Vec4* operator_asterix_equal_GAMBIT(double);
+            Pythia8::Abstract_Vec4* operator_asterix_equal__BOSS(double);
 
-            Pythia8::Abstract_Vec4* operator_slash_equal_GAMBIT(double);
+            Pythia8::Abstract_Vec4* operator_slash_equal__BOSS(double);
 
 
         public:
-            void p_GAMBIT(Pythia8::Abstract_Vec4&);
+            void p__BOSS(Pythia8::Abstract_Vec4&);
 
-            void rotaxis_GAMBIT(double, const Pythia8::Abstract_Vec4&);
+            void rotaxis__BOSS(double, const Pythia8::Abstract_Vec4&);
 
-            void bst_GAMBIT(const Pythia8::Abstract_Vec4&);
+            void bst__BOSS(const Pythia8::Abstract_Vec4&);
 
-            void bst_GAMBIT(const Pythia8::Abstract_Vec4&, double);
+            void bst__BOSS(const Pythia8::Abstract_Vec4&, double);
 
-            void bstback_GAMBIT(const Pythia8::Abstract_Vec4&);
+            void bstback__BOSS(const Pythia8::Abstract_Vec4&);
 
-            void bstback_GAMBIT(const Pythia8::Abstract_Vec4&, double);
+            void bstback__BOSS(const Pythia8::Abstract_Vec4&, double);
 
 };
 
@@ -491,54 +491,54 @@ private:
 
 
         public:
-            Abstract_Hist* pointerCopy_GAMBIT();
-            void pointerAssign_GAMBIT(Abstract_Hist* in);
+            Abstract_Hist* pointerCopy__BOSS();
+            void pointerAssign__BOSS(Abstract_Hist* in);
 
-            Pythia8::Abstract_Hist* operator_equal_GAMBIT(const Pythia8::Abstract_Hist&);
+            Pythia8::Abstract_Hist* operator_equal__BOSS(const Pythia8::Abstract_Hist&);
 
-            Pythia8::Abstract_Hist* operator_plus_equal_GAMBIT(const Pythia8::Abstract_Hist&);
+            Pythia8::Abstract_Hist* operator_plus_equal__BOSS(const Pythia8::Abstract_Hist&);
 
-            Pythia8::Abstract_Hist* operator_minus_equal_GAMBIT(const Pythia8::Abstract_Hist&);
+            Pythia8::Abstract_Hist* operator_minus_equal__BOSS(const Pythia8::Abstract_Hist&);
 
-            Pythia8::Abstract_Hist* operator_asterix_equal_GAMBIT(const Pythia8::Abstract_Hist&);
+            Pythia8::Abstract_Hist* operator_asterix_equal__BOSS(const Pythia8::Abstract_Hist&);
 
-            Pythia8::Abstract_Hist* operator_slash_equal_GAMBIT(const Pythia8::Abstract_Hist&);
+            Pythia8::Abstract_Hist* operator_slash_equal__BOSS(const Pythia8::Abstract_Hist&);
 
-            Pythia8::Abstract_Hist* operator_plus_equal_GAMBIT(double);
+            Pythia8::Abstract_Hist* operator_plus_equal__BOSS(double);
 
-            Pythia8::Abstract_Hist* operator_minus_equal_GAMBIT(double);
+            Pythia8::Abstract_Hist* operator_minus_equal__BOSS(double);
 
-            Pythia8::Abstract_Hist* operator_asterix_equal_GAMBIT(double);
+            Pythia8::Abstract_Hist* operator_asterix_equal__BOSS(double);
 
-            Pythia8::Abstract_Hist* operator_slash_equal_GAMBIT(double);
+            Pythia8::Abstract_Hist* operator_slash_equal__BOSS(double);
 
 
         public:
-            void book_GAMBIT(std::string, int, double);
+            void book__BOSS(std::string, int, double);
 
-            void book_GAMBIT(std::string, int);
+            void book__BOSS(std::string, int);
 
-            void book_GAMBIT(std::string);
+            void book__BOSS(std::string);
 
-            void book_GAMBIT();
+            void book__BOSS();
 
-            void name_GAMBIT();
+            void name__BOSS();
 
-            void fill_GAMBIT(double);
+            void fill__BOSS(double);
 
-            void table_GAMBIT(std::ostream&, bool) const;
+            void table__BOSS(std::ostream&, bool) const;
 
-            void table_GAMBIT(std::ostream&) const;
+            void table__BOSS(std::ostream&) const;
 
-            void table_GAMBIT() const;
+            void table__BOSS() const;
 
-            void table_GAMBIT(std::string, bool) const;
+            void table__BOSS(std::string, bool) const;
 
-            void table_GAMBIT(std::string) const;
+            void table__BOSS(std::string) const;
 
-            bool sameSize_GAMBIT(const Pythia8::Abstract_Hist&) const;
+            bool sameSize__BOSS(const Pythia8::Abstract_Hist&) const;
 
-            void takeLog_GAMBIT();
+            void takeLog__BOSS();
 
 };
 

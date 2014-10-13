@@ -351,53 +351,53 @@ private:
 
 
         public:
-            Abstract_Pythia* pointerCopy_GAMBIT();
-            void pointerAssign_GAMBIT(Abstract_Pythia* in);
+            Abstract_Pythia* pointerCopy__BOSS();
+            void pointerAssign__BOSS(Abstract_Pythia* in);
 
         public:
-            Pythia8::Abstract_Event& process_ref_GAMBIT();
+            Pythia8::Abstract_Event& process_ref__BOSS();
 
-            Pythia8::Abstract_Event& event_ref_GAMBIT();
+            Pythia8::Abstract_Event& event_ref__BOSS();
 
-            Pythia8::Abstract_Info& info_ref_GAMBIT();
+            Pythia8::Abstract_Info& info_ref__BOSS();
 
 
-            Pythia8::Abstract_Pythia* operator_equal_GAMBIT(const Pythia8::Abstract_Pythia&);
+            Pythia8::Abstract_Pythia* operator_equal__BOSS(const Pythia8::Abstract_Pythia&);
 
 
         public:
-            bool readString_GAMBIT(std::string);
+            bool readString__BOSS(std::string);
 
-            bool readFile_GAMBIT(std::string, bool);
+            bool readFile__BOSS(std::string, bool);
 
-            bool readFile_GAMBIT(std::string);
+            bool readFile__BOSS(std::string);
 
-            bool readFile_GAMBIT(std::istream&, bool);
+            bool readFile__BOSS(std::istream&, bool);
 
-            bool readFile_GAMBIT(std::istream&);
+            bool readFile__BOSS(std::istream&);
 
-            bool readFile_GAMBIT();
+            bool readFile__BOSS();
 
-            bool init_GAMBIT(std::string);
+            bool init__BOSS(std::string);
 
-            int forceTimeShower_GAMBIT(int, int, double);
+            int forceTimeShower__BOSS(int, int, double);
 
-            bool forceHadronLevel_GAMBIT();
+            bool forceHadronLevel__BOSS();
 
-            void LHAeventList_GAMBIT();
+            void LHAeventList__BOSS();
 
-            void statistics_GAMBIT(bool);
+            void statistics__BOSS(bool);
 
-            void statistics_GAMBIT();
+            void statistics__BOSS();
 
         private:
-            void banner_GAMBIT();
+            void banner__BOSS();
 
-            int readSubrun_GAMBIT(std::string, bool);
+            int readSubrun__BOSS(std::string, bool);
 
-            int readSubrun_GAMBIT(std::string);
+            int readSubrun__BOSS(std::string);
 
-            bool check_GAMBIT();
+            bool check__BOSS();
 
 };
  

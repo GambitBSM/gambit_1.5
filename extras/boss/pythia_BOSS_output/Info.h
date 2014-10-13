@@ -408,122 +408,122 @@ private:
 
 
         public:
-            Abstract_Info* pointerCopy_GAMBIT();
-            void pointerAssign_GAMBIT(Abstract_Info* in);
+            Abstract_Info* pointerCopy__BOSS();
+            void pointerAssign__BOSS(Abstract_Info* in);
 
         public:
-            void list_GAMBIT() const;
+            void list__BOSS() const;
 
-            bool hasSub_GAMBIT() const;
+            bool hasSub__BOSS() const;
 
-            std::string nameSub_GAMBIT() const;
+            std::string nameSub__BOSS() const;
 
-            int codeSub_GAMBIT() const;
+            int codeSub__BOSS() const;
 
-            int nFinalSub_GAMBIT() const;
+            int nFinalSub__BOSS() const;
 
-            int id1_GAMBIT() const;
+            int id1__BOSS() const;
 
-            int id2_GAMBIT() const;
+            int id2__BOSS() const;
 
-            double x1_GAMBIT() const;
+            double x1__BOSS() const;
 
-            double x2_GAMBIT() const;
+            double x2__BOSS() const;
 
-            double y_GAMBIT() const;
+            double y__BOSS() const;
 
-            double tau_GAMBIT() const;
+            double tau__BOSS() const;
 
-            int id1pdf_GAMBIT() const;
+            int id1pdf__BOSS() const;
 
-            int id2pdf_GAMBIT() const;
+            int id2pdf__BOSS() const;
 
-            double x1pdf_GAMBIT() const;
+            double x1pdf__BOSS() const;
 
-            double x2pdf_GAMBIT() const;
+            double x2pdf__BOSS() const;
 
-            double pdf1_GAMBIT() const;
+            double pdf1__BOSS() const;
 
-            double pdf2_GAMBIT() const;
+            double pdf2__BOSS() const;
 
-            double QFac_GAMBIT() const;
+            double QFac__BOSS() const;
 
-            double Q2Fac_GAMBIT() const;
+            double Q2Fac__BOSS() const;
 
-            double alphaS_GAMBIT() const;
+            double alphaS__BOSS() const;
 
-            double alphaEM_GAMBIT() const;
+            double alphaEM__BOSS() const;
 
-            double QRen_GAMBIT() const;
+            double QRen__BOSS() const;
 
-            double Q2Ren_GAMBIT() const;
+            double Q2Ren__BOSS() const;
 
-            double scalup_GAMBIT() const;
+            double scalup__BOSS() const;
 
-            double mHat_GAMBIT() const;
+            double mHat__BOSS() const;
 
-            double sHat_GAMBIT() const;
+            double sHat__BOSS() const;
 
-            double tHat_GAMBIT() const;
+            double tHat__BOSS() const;
 
-            double uHat_GAMBIT() const;
+            double uHat__BOSS() const;
 
-            double pTHat_GAMBIT() const;
+            double pTHat__BOSS() const;
 
-            double pT2Hat_GAMBIT() const;
+            double pT2Hat__BOSS() const;
 
-            double m3Hat_GAMBIT() const;
+            double m3Hat__BOSS() const;
 
-            double m4Hat_GAMBIT() const;
+            double m4Hat__BOSS() const;
 
-            double thetaHat_GAMBIT() const;
+            double thetaHat__BOSS() const;
 
-            double phiHat_GAMBIT() const;
+            double phiHat__BOSS() const;
 
-            std::string nameProc_GAMBIT();
+            std::string nameProc__BOSS();
 
-            long int nTried_GAMBIT();
+            long int nTried__BOSS();
 
-            long int nSelected_GAMBIT();
+            long int nSelected__BOSS();
 
-            long int nAccepted_GAMBIT();
+            long int nAccepted__BOSS();
 
-            double sigmaGen_GAMBIT();
+            double sigmaGen__BOSS();
 
-            double sigmaErr_GAMBIT();
+            double sigmaErr__BOSS();
 
-            void setCounter_GAMBIT(int);
+            void setCounter__BOSS(int);
 
-            void addCounter_GAMBIT(int);
+            void addCounter__BOSS(int);
 
-            void errorMsg_GAMBIT(std::string, std::string, bool);
+            void errorMsg__BOSS(std::string, std::string, bool);
 
-            void errorMsg_GAMBIT(std::string, std::string);
+            void errorMsg__BOSS(std::string, std::string);
 
-            void errorMsg_GAMBIT(std::string);
+            void errorMsg__BOSS(std::string);
 
-            void errorStatistics_GAMBIT();
+            void errorStatistics__BOSS();
 
         private:
-            void setType_GAMBIT(std::string, int, int, bool, bool, bool, bool, bool);
+            void setType__BOSS(std::string, int, int, bool, bool, bool, bool, bool);
 
-            void setType_GAMBIT(std::string, int, int, bool, bool, bool, bool);
+            void setType__BOSS(std::string, int, int, bool, bool, bool, bool);
 
-            void setType_GAMBIT(std::string, int, int, bool, bool, bool);
+            void setType__BOSS(std::string, int, int, bool, bool, bool);
 
-            void setType_GAMBIT(std::string, int, int, bool, bool);
+            void setType__BOSS(std::string, int, int, bool, bool);
 
-            void setType_GAMBIT(std::string, int, int, bool);
+            void setType__BOSS(std::string, int, int, bool);
 
-            void setType_GAMBIT(std::string, int, int);
+            void setType__BOSS(std::string, int, int);
 
-            void setTypeMPI_GAMBIT(int, double, int, int);
+            void setTypeMPI__BOSS(int, double, int, int);
 
-            void setTypeMPI_GAMBIT(int, double, int);
+            void setTypeMPI__BOSS(int, double, int);
 
-            void setTypeMPI_GAMBIT(int, double);
+            void setTypeMPI__BOSS(int, double);
 
-            void setImpact_GAMBIT(double, double);
+            void setImpact__BOSS(double, double);
 
 };
  

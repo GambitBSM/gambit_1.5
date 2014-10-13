@@ -32,7 +32,7 @@ namespace Pythia8
         return new Hist(titleIn);
     }
     
-    Abstract_Hist* Factory_Hist(std::string titleIn, const Pythia8::Hist_GAMBIT& h)
+    Abstract_Hist* Factory_Hist(std::string titleIn, const Pythia8::Hist__BOSS& h)
     {
         return new Hist(titleIn, dynamic_cast< const Pythia8::Hist& >(*h.BEptr));
     }

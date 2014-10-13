@@ -10,6 +10,7 @@ import os
 import warnings
 
 import modules.cfg as cfg
+import modules.gb as gb
 import modules.utils as utils
 import modules.classutils as classutils
 import modules.funcutils as funcutils
@@ -39,7 +40,7 @@ def run():
     # Loop over all classes 
     #
     
-    for class_name_long, class_el in cfg.class_dict.items():
+    for class_name_long, class_el in gb.class_dict.items():
 
         # Print current class
         print
@@ -72,20 +73,20 @@ def run():
         if len(pure_virtual_members) > 0:
             print 'INFO: ' + 'The following member functions in class "%s" are pure virtual: %s' % (class_name['long_templ'], ', '.join(pure_virtual_members))
             print 'INFO: ' + 'Class "%s" cannot be loaded and will be ignored.' % (class_name['long_templ'])
-            cfg.class_dict.pop(class_name_long)
+            gb.class_dict.pop(class_name_long)
             continue
 
         # Make list of all types in use in this class
         all_types_in_class = utils.getAllTypesInClass(class_el, include_parents=True)
 
         # Set a bunch of generally useful variables 
-        original_class_file_el        = cfg.id_dict[class_el.get('file')]
+        original_class_file_el        = gb.id_dict[class_el.get('file')]
         original_class_file_name      = original_class_file_el.get('name')
         original_class_file_name_base = os.path.basename(original_class_file_name)
         original_class_file_dir       = os.path.split(original_class_file_name)[0]
-        extras_src_file_name          = os.path.join(cfg.extra_output_dir, class_name['short'] + '_extras' + cfg.code_suffix + cfg.source_extension)
+        extras_src_file_name          = os.path.join(cfg.extra_output_dir, class_name['short'] + '_extras' + gb.code_suffix + cfg.source_extension)
 
-        short_abstr_class_fname = cfg.new_header_files[class_name['long']]['abstract']
+        short_abstr_class_fname = gb.new_header_files[class_name['long']]['abstract']
         abstr_class_fname       = os.path.join(cfg.extra_output_dir, short_abstr_class_fname)
 
         namespaces    = class_name['long'].split('::')[:-1]
@@ -127,7 +128,7 @@ def run():
         if is_template and class_name['long'] not in templ_spec_done:
             spec_template_types = utils.getSpecTemplateTypes(class_el)
             for template_type in spec_template_types:
-                if (template_type not in cfg.accepted_types):
+                if (template_type not in gb.accepted_types):
                     raise Exception("The template specialization type '" + template_type + "' for class " + class_name['long'] + " is not among accepted types.")
 
 
@@ -140,8 +141,8 @@ def run():
         # - Add include statements
         include_statements  = []
         include_statements  = ['#include "abstractbase.hpp"']
-        include_statements += ['#include "' + cfg.frwd_decls_abs_fname + cfg.header_extension + '"']
-        include_statements += ['#include "' + cfg.frwd_decls_wrp_fname + cfg.header_extension + '"']
+        include_statements += ['#include "' + gb.frwd_decls_abs_fname + cfg.header_extension + '"']
+        include_statements += ['#include "' + gb.frwd_decls_wrp_fname + cfg.header_extension + '"']
         # include_statements += classutils.getIncludeStatements(all_types_in_class, 'abstract', exclude_types=[class_name])
         include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='abstract', exclude_types=[class_name])
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
@@ -272,7 +273,7 @@ def run():
         # Generate code for #include statement in orginal header/source file 
         # include_line = '#include "' + os.path.join(cfg.add_path_to_includes, short_abstr_class_fname) + '"'
         # include_line = '#include "' + short_abstr_class_fname + '"'
-        include_line = '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, short_abstr_class_fname ) + '"'
+        include_line = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, short_abstr_class_fname ) + '"'
         if include_line in includes[original_class_file_name]:
             pass
         else:
@@ -322,7 +323,7 @@ def run():
         member_operators = []
         if 'members' in class_el.keys():
             for mem_id in class_el.get('members').split():
-                el = cfg.id_dict[mem_id]
+                el = gb.id_dict[mem_id]
                 if not 'artificial' in el.keys():
                     if (el.tag == 'Method') and (not funcutils.ignoreFunction(el)):
                         member_methods.append(el)
@@ -335,7 +336,7 @@ def run():
 
                     # append_method = False
                     # return_type_name, return_kw, return_id = utils.findType(el)
-                    # return_is_native = utils.isNative( cfg.id_dict[return_id] )
+                    # return_is_native = utils.isNative( gb.id_dict[return_id] )
                     # args = funcutils.getArgs(el)
                     # is_arg_native = [arg_dict['native'] for arg_dict in args]
                     # if return_is_native or True in is_arg_native:
@@ -511,11 +512,11 @@ def run():
         #
 
         # short_wrapper_class_fname = cfg.wrapper_header_prefix + class_name['short'] + cfg.header_extension
-        # short_wrapper_class_fname = cfg.new_header_files[class_name['long']]['wrapper']
+        # short_wrapper_class_fname = gb.new_header_files[class_name['long']]['wrapper']
         
-        wrapper_decl_header_fname = cfg.new_header_files[class_name['long']]['wrapper_decl']
-        wrapper_def_header_fname  = cfg.new_header_files[class_name['long']]['wrapper_def']
-        wrapper_header_fname      = cfg.new_header_files[class_name['long']]['wrapper']
+        wrapper_decl_header_fname = gb.new_header_files[class_name['long']]['wrapper_decl']
+        wrapper_def_header_fname  = gb.new_header_files[class_name['long']]['wrapper_def']
+        wrapper_header_fname      = gb.new_header_files[class_name['long']]['wrapper']
 
         wrapper_decl_header_path = os.path.join(cfg.extra_output_dir, wrapper_decl_header_fname)
         wrapper_def_header_path  = os.path.join(cfg.extra_output_dir, wrapper_def_header_fname)
@@ -556,9 +557,9 @@ def run():
         wrapper_class_name = classutils.toWrapperType(class_name['long'], include_namespace=True)
 
         # - Include statement for the header file
-        # wrapper_decl_header_path = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.new_header_files[class_name['long']]['wrapper_decl'] )
+        # wrapper_decl_header_path = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, gb.new_header_files[class_name['long']]['wrapper_decl'] )
         # wrapper_include_statement_decl = '#include "' + wrapper_decl_header_path + '"\n'
-        wrapper_include_statement_decl = '#include "' + cfg.new_header_files[class_name['long']]['wrapper_decl_fullpath'] + '"\n'
+        wrapper_include_statement_decl = '#include "' + gb.new_header_files[class_name['long']]['wrapper_decl_fullpath'] + '"\n'
 
         # - Function declaration
         w_deleter_decl  = '\n'
@@ -572,8 +573,8 @@ def run():
         w_deleter_impl += '}\n'
 
         # - Register code
-        w_deleter_header_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.header_extension)
-        w_deleter_source_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.source_extension)
+        w_deleter_header_path = os.path.join(cfg.extra_output_dir, gb.wrapper_deleter_fname + cfg.header_extension)
+        w_deleter_source_path = os.path.join(cfg.extra_output_dir, gb.wrapper_deleter_fname + cfg.source_extension)
 
         if w_deleter_header_path not in return_code_dict.keys():
             return_code_dict[w_deleter_header_path] = {'code_tuples':[], 'add_include_guard':True}
@@ -590,49 +591,41 @@ def run():
 
 
 
-        #
-        # Add include statement to 'abstracts_includes.hpp'
-        #
+        # #
+        # # Add include statement to 'abstracts_includes.hpp'
+        # #
 
-        # abstr_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, short_abstr_class_fname ) + '"\n'
-        abstr_include_statement = '#include "' + cfg.new_header_files[class_name['long']]['abstract_fullpath'] + '"\n'
+        # # abstr_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, short_abstr_class_fname ) + '"\n'
+        # abstr_include_statement = '#include "' + gb.new_header_files[class_name['long']]['abstract_fullpath'] + '"\n'
 
-        abstracts_includes_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_includes.hpp')
-        if abstracts_includes_header_path not in return_code_dict.keys():
-            return_code_dict[abstracts_includes_header_path] = {'code_tuples':[], 'add_include_guard':False}
-        return_code_dict[abstracts_includes_header_path]['code_tuples'].append( (0, abstr_include_statement) )
-
-
-        #
-        # Add include statements to 'wrappers_includes.hpp'
-        #
-
-        # wrapper_decl_header_path = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.new_header_files[class_name['long']]['wrapper_decl'] )
-        # wrapper_include_statement_decl = '#include "' + wrapper_decl_header_path + '"\n'
-        wrapper_include_statement_decl = '#include "' + cfg.new_header_files[class_name['long']]['wrapper_decl_fullpath'] + '"\n'
-
-        wrappers_decl_includes_header_path = os.path.join(cfg.extra_output_dir, 'wrappers_decl_includes.hpp')
-        if wrappers_decl_includes_header_path not in return_code_dict.keys():
-            return_code_dict[wrappers_decl_includes_header_path] = {'code_tuples':[], 'add_include_guard':False}
-        return_code_dict[wrappers_decl_includes_header_path]['code_tuples'].append( (0, wrapper_include_statement_decl) )        
+        # abstracts_includes_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_includes.hpp')
+        # if abstracts_includes_header_path not in return_code_dict.keys():
+        #     return_code_dict[abstracts_includes_header_path] = {'code_tuples':[], 'add_include_guard':False}
+        # return_code_dict[abstracts_includes_header_path]['code_tuples'].append( (0, abstr_include_statement) )
 
 
-        # wrapper_def_header_path = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.new_header_files[class_name['long']]['wrapper_def'] )
-        # wrapper_include_statement_def = '#include "' + wrapper_def_header_path + '"\n'
-        wrapper_include_statement_def = '#include "' + cfg.new_header_files[class_name['long']]['wrapper_def_fullpath'] + '"\n'
+        # #
+        # # Add include statements to 'wrappers_includes.hpp'
+        # #
 
-        wrappers_def_includes_header_path = os.path.join(cfg.extra_output_dir, 'wrappers_def_includes.hpp')
-        if wrappers_def_includes_header_path not in return_code_dict.keys():
-            return_code_dict[wrappers_def_includes_header_path] = {'code_tuples':[], 'add_include_guard':False}
-        return_code_dict[wrappers_def_includes_header_path]['code_tuples'].append( (0, wrapper_include_statement_def) )        
+        # # wrapper_decl_header_path = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, gb.new_header_files[class_name['long']]['wrapper_decl'] )
+        # # wrapper_include_statement_decl = '#include "' + wrapper_decl_header_path + '"\n'
+        # wrapper_include_statement_decl = '#include "' + gb.new_header_files[class_name['long']]['wrapper_decl_fullpath'] + '"\n'
+
+        # wrappers_decl_includes_header_path = os.path.join(cfg.extra_output_dir, 'wrappers_decl_includes.hpp')
+        # if wrappers_decl_includes_header_path not in return_code_dict.keys():
+        #     return_code_dict[wrappers_decl_includes_header_path] = {'code_tuples':[], 'add_include_guard':False}
+        # return_code_dict[wrappers_decl_includes_header_path]['code_tuples'].append( (0, wrapper_include_statement_decl) )        
 
 
-        # wrapper_include_statement_def  = '#include "' + cfg.new_header_files[class_name['long']]['wrapper_def'] + '"\n'
+        # # wrapper_def_header_path = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, gb.new_header_files[class_name['long']]['wrapper_def'] )
+        # # wrapper_include_statement_def = '#include "' + wrapper_def_header_path + '"\n'
+        # wrapper_include_statement_def = '#include "' + gb.new_header_files[class_name['long']]['wrapper_def_fullpath'] + '"\n'
 
-        # all_wrapper_def_header_path = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_def' + cfg.header_extension)          
-        # if all_wrapper_def_header_path not in return_code_dict.keys():
-        #     return_code_dict[all_wrapper_def_header_path] = {'code_tuples':[], 'add_include_guard':False}
-        # return_code_dict[all_wrapper_def_header_path]['code_tuples'].append( (-1, wrapper_include_statement_def) )        
+        # wrappers_def_includes_header_path = os.path.join(cfg.extra_output_dir, 'wrappers_def_includes.hpp')
+        # if wrappers_def_includes_header_path not in return_code_dict.keys():
+        #     return_code_dict[wrappers_def_includes_header_path] = {'code_tuples':[], 'add_include_guard':False}
+        # return_code_dict[wrappers_def_includes_header_path]['code_tuples'].append( (0, wrapper_include_statement_def) )        
 
 
 
@@ -644,14 +637,14 @@ def run():
         abstr_typedef_code  = ''
         abstr_typedef_code += utils.constrNamespace(namespaces, 'open', indent=cfg.indent)
 
-        temp_namespace_list = [cfg.gambit_backend_namespace] + namespaces
+        temp_namespace_list = [gb.gambit_backend_namespace] + namespaces
         abstr_typedef_code += indent + 'typedef ' + '::'.join(temp_namespace_list) + '::' + abstr_class_name['short'] + ' ' + abstr_class_name['short'] + ';\n'
 
         abstr_typedef_code += utils.constrNamespace(namespaces, 'close', indent=cfg.indent)
         abstr_typedef_code += '\n'
 
-        frw_decl_include_statement       = '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.frwd_decls_abs_fname + cfg.header_extension) + '"\n'
-        identification_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, 'identification.hpp') + '"\n\n'
+        frw_decl_include_statement       = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, gb.frwd_decls_abs_fname + cfg.header_extension) + '"\n'
+        identification_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n\n'
         undef_include_statement          = '#include "backend_undefs.hpp"\n'
 
         abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_typedefs.hpp')
@@ -674,14 +667,14 @@ def run():
         wrapper_typedef_code  = ''
         wrapper_typedef_code += utils.constrNamespace(namespaces,'open')
 
-        temp_namespace_list = [cfg.gambit_backend_namespace] + namespaces
+        temp_namespace_list = [gb.gambit_backend_namespace] + namespaces
         wrapper_typedef_code += indent + 'typedef ' + '::'.join(temp_namespace_list) + '::' + class_name['short'] + ' ' + short_wrapper_class_name + ';\n'
 
         wrapper_typedef_code += utils.constrNamespace(namespaces,'close')
         wrapper_typedef_code += '\n'
 
-        frw_decl_include_statement       = '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.frwd_decls_wrp_fname + cfg.header_extension) + '"\n'
-        identification_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, 'identification.hpp') + '"\n\n'
+        frw_decl_include_statement       = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, gb.frwd_decls_wrp_fname + cfg.header_extension) + '"\n'
+        identification_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n\n'
         undef_include_statement          = '#include "backend_undefs.hpp"\n'
 
         wrapper_typedefs_path = os.path.join(cfg.extra_output_dir, 'wrappers_typedefs.hpp')
@@ -714,7 +707,7 @@ def run():
         print
 
     #
-    # END: Loop over all classes in cfg.class_dict
+    # END: Loop over all classes in gb.class_dict
     #    
 
     # print
@@ -725,7 +718,7 @@ def run():
 
 
     # Increase class counter
-    cfg.n_classes_done += 1
+    gb.n_classes_done += 1
 
     #
     # Return result 
@@ -826,19 +819,19 @@ def generateWrapperHeader(class_el, class_name, abstr_class_name, namespaces,
     # decl_code_include_statements.append( '#include "nullptr_check' + cfg.header_extension + '"')
 
     # - Header with forward declarations to all wrapper classes
-    decl_code_include_statements.append( '#include "' + cfg.frwd_decls_wrp_fname + cfg.header_extension + '"')
+    decl_code_include_statements.append( '#include "' + gb.frwd_decls_wrp_fname + cfg.header_extension + '"')
 
     # - Base class for all wrapper classes
     decl_code_include_statements.append( '#include "' + 'wrapperbase.hpp"')
-    # decl_code_include_statements.append( '#include "' + cfg.new_header_files['WrapperBase']['wrapper'] + '"')
+    # decl_code_include_statements.append( '#include "' + gb.new_header_files['WrapperBase']['wrapper'] + '"')
 
     # - Abstract class for the original class
-    decl_code_include_statements.append( '#include "' + cfg.new_header_files[class_name['long']]['abstract'] + '"' )
-    # decl_code_include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, cfg.new_header_files[class_name['long']]['abstract']) + '"' )
+    decl_code_include_statements.append( '#include "' + gb.new_header_files[class_name['long']]['abstract'] + '"' )
+    # decl_code_include_statements.append( '#include "' + os.path.join( cfg.add_path_to_includes, gb.new_header_files[class_name['long']]['abstract']) + '"' )
 
     # - Wrapper parent classes
     for parent_dict in loaded_parent_classes:
-        decl_code_include_statements.append('#include "' + cfg.new_header_files[ parent_dict['class_name']['long'] ]['wrapper_decl'] + '"')
+        decl_code_include_statements.append('#include "' + gb.new_header_files[ parent_dict['class_name']['long'] ]['wrapper_decl'] + '"')
 
     # - Any other types (excluding the current wrapper class)
     # decl_code_include_statements += classutils.getIncludeStatements(all_types_in_class, 'wrapper', add_extra_include_path=False)
