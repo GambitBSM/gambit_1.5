@@ -1,8 +1,8 @@
 #include "backend_types/BOSSedPythia_1_0/abstract_Vec4.h"
 #include <vector>
 #include <string>
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 #include "Pythia8/Event.h"
 
 void Pythia8::Particle::setEvtPtr__BOSS(Pythia8::Abstract_Event* evtPtrIn)

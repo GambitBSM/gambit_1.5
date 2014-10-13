@@ -1,5 +1,5 @@
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 #include "Pythia8/Basics.h"
 
 void Pythia8::Vec4::p__BOSS(Pythia8::Abstract_Vec4& pIn)

@@ -46,7 +46,7 @@ namespace Pythia8 {
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Pythia.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Pythia : public virtual Abstract_Pythia {
 

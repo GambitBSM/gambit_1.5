@@ -60,13 +60,13 @@ class WrapperBase
         {
             if (ptr->is_wrapped())
             {
-                return (ptr->wrapper_GAMBIT());
+                return (ptr->wrapper__BOSS());
             }
 
             else
             {
                 U* wptr = new U(ptr);
-                ptr->wrapper_GAMBIT(wptr);
+                ptr->wrapper__BOSS(wptr);
                 ptr->can_delete_wrapper(true);
                 return wptr;
             }

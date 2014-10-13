@@ -111,7 +111,7 @@ class RotBstMatrix;
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Vec4.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Vec4 : public virtual Abstract_Vec4 {
 
@@ -384,7 +384,7 @@ ostream& operator<<(ostream&, const RotBstMatrix&) ;
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Hist.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Hist : public virtual Abstract_Hist{
 

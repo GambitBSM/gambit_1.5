@@ -37,10 +37,11 @@ all_wrapper_fname  = 'loadedtypes_' + cfg.gambit_backend_name.lower() + '_' + ga
 all_typedefs_fname = 'all_typedefs'
 
 
-wrapper_deleter_fname  = 'wrapperdeleter'
-frwd_decls_abs_fname   = 'forward_decls_abstract_classes'
-frwd_decls_wrp_fname   = 'forward_decls_wrapper_classes'
-wrapper_typedefs_fname = 'wrappertypedefs'
+wrapper_deleter_fname   = 'wrapperdeleter'
+frwd_decls_abs_fname    = 'forward_decls_abstract_classes'
+frwd_decls_wrp_fname    = 'forward_decls_wrapper_classes'
+wrapper_typedefs_fname  = 'wrappertypedefs'
+abstract_typedefs_fname = 'abstracttypedefs'
 
 
 n_classes_done = 0

@@ -5,8 +5,8 @@
 #include <vector>
 #include <istream>
 #include <ostream>
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 #include "Pythia8/Pythia.h"
 
 bool Pythia8::Pythia::readString__BOSS(std::string arg_1)

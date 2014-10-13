@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 #include "Pythia8/Info.h"
 
 void Pythia8::Info::list__BOSS() const

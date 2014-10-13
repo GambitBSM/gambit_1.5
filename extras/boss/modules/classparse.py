@@ -300,7 +300,7 @@ def run():
                 include_code += '} '
             include_code += '\n'*has_namespace
             include_code += use_indent + include_line + '\n'
-            include_code += use_indent + '#include "abstracts_typedefs.hpp"\n'
+            include_code += use_indent + '#include "' + gb.abstract_typedefs_fname + cfg.header_extension +  '"\n'
             include_code += use_indent
             for ns in namespaces:
                 include_code += 'namespace ' + ns + ' { '
@@ -469,8 +469,8 @@ def run():
 
         # - Generate include statements for the new source file
         include_statements = utils.getIncludeStatements(class_el, convert_loaded_to='abstract', add_extra_include_path=False, input_element='class', use_full_path=True)
-        include_statements.append ('#include "abstracts_typedefs.hpp"')
-        include_statements.append ('#include "wrappers_typedefs.hpp"')
+        include_statements.append ('#include "' + gb.abstract_typedefs_fname + cfg.header_extension + '"')
+        include_statements.append ('#include "' + gb.wrapper_typedefs_fname + cfg.header_extension + '"')
         if utils.isHeader(original_class_file_el):
             include_statements.append( '#include "' + os.path.join(cfg.add_path_to_includes, original_class_file_name_base) + '"')
         include_statements = list( OrderedDict.fromkeys(include_statements) )
@@ -579,7 +579,7 @@ def run():
         if w_deleter_header_path not in return_code_dict.keys():
             return_code_dict[w_deleter_header_path] = {'code_tuples':[], 'add_include_guard':True}
 
-            return_code_dict[w_deleter_header_path]['code_tuples'].append( (0, '#include "wrappers_typedefs.hpp"\n') )
+            return_code_dict[w_deleter_header_path]['code_tuples'].append( (0, '#include "' + gb.wrapper_typedefs_fname + cfg.header_extension + '"\n') )
 
         return_code_dict[w_deleter_header_path]['code_tuples'].append( (0, wrapper_include_statement_decl) )        
         return_code_dict[w_deleter_header_path]['code_tuples'].append( (-1, w_deleter_decl) )        
@@ -630,7 +630,7 @@ def run():
 
 
         #
-        # Add typedef to 'abstracts_typedefs.hpp'
+        # Add typedef to 'abstracttypedefs.hpp'
         #
 
         indent = ' '*cfg.indent*len(namespaces)
@@ -647,7 +647,7 @@ def run():
         identification_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n\n'
         undef_include_statement          = '#include "backend_undefs.hpp"\n'
 
-        abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_typedefs.hpp')
+        abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, gb.abstract_typedefs_fname + cfg.header_extension)
         if abstracts_typedefs_header_path not in return_code_dict.keys():
             return_code_dict[abstracts_typedefs_header_path] = {'code_tuples':[], 'add_include_guard':False}
 
@@ -659,7 +659,7 @@ def run():
 
 
         #
-        # Add typedef to 'wrappers_typdefs.hpp'
+        # Add typedef to 'wrappertypdefs.hpp'
         #
 
         short_wrapper_class_name = classutils.toWrapperType(class_name['short'])
@@ -677,7 +677,7 @@ def run():
         identification_include_statement = '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n\n'
         undef_include_statement          = '#include "backend_undefs.hpp"\n'
 
-        wrapper_typedefs_path = os.path.join(cfg.extra_output_dir, 'wrappers_typedefs.hpp')
+        wrapper_typedefs_path = os.path.join(cfg.extra_output_dir, gb.wrapper_typedefs_fname + cfg.header_extension)
 
         if wrapper_typedefs_path not in return_code_dict.keys():
             return_code_dict[wrapper_typedefs_path] = {'code_tuples':[], 'add_include_guard':False}

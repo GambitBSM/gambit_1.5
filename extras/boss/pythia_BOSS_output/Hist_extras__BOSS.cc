@@ -1,8 +1,8 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 #include "Pythia8/Basics.h"
 
 void Pythia8::Hist::book__BOSS(std::string titleIn, int nBinIn, double xMinIn)

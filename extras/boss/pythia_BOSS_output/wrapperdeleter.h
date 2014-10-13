@@ -7,7 +7,7 @@
 #include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Info_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Particle_decl.h"
-#include "wrappers_typedefs.hpp"
+#include "wrappertypedefs.h"
 
 void wrapper_deleter(Pythia8::Particle__BOSS*);
 

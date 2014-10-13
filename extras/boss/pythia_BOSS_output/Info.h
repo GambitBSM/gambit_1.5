@@ -24,7 +24,7 @@ namespace Pythia8 {
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Info.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Info : public virtual Abstract_Info {
 

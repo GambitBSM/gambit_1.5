@@ -31,7 +31,7 @@ class Event;
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Particle.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Particle : public virtual Abstract_Particle {
 
@@ -420,7 +420,7 @@ private:
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Event.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Event : public virtual Abstract_Event {
     

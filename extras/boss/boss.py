@@ -623,7 +623,7 @@ def main():
     # #
 
     # abstracts_includes_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_includes_TEMP.hpp')
-    # abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_typedefs.hpp')
+    # abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, abstract_typedefs_fname + cfg.header_extension)
     # abstracts_header_path          = os.path.join(cfg.extra_output_dir, 'abstracts' + cfg.header_extension)
 
     # f = open(abstracts_includes_header_path, 'r')
@@ -658,7 +658,7 @@ def main():
     #     f.write(abstracts_header_content)
     #     f.close()
 
-    # # Remove the temporary headers 'abstracts_includes_TEMP.hpp' and 'abstracts_typedefs_TEMP.hpp' we used to construct the master header
+    # # Remove the temporary headers 'abstracts_includes_TEMP.hpp' and 'abstracttypedefs.hpp' we used to construct the master header
     # os.remove(abstracts_includes_header_path)
     # # os.remove(abstracts_typedefs_header_path)
 

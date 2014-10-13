@@ -2,8 +2,8 @@
 #include "Pythia8/Pythia.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Pythia_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Pythia_def.h"
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 
 namespace Pythia8
 {

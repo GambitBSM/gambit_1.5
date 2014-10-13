@@ -2,8 +2,8 @@
 #include "backend_types/BOSSedPythia_1_0/wrapper_Hist_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Hist_def.h"
 #include <string>
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 
 namespace Pythia8
 {

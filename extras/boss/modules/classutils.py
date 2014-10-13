@@ -545,8 +545,8 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
     func_def_in_ns += utils.constrNamespace(namespaces, 'close')
 
     if add_include_statements:
-        include_statements.append( '#include "abstracts_typedefs.hpp"' )
-        include_statements.append( '#include "wrappers_typedefs.hpp"' )
+        include_statements.append( '#include "' + gb.abstract_typedefs_fname + cfg.header_extension + '"' )
+        include_statements.append( '#include "' + gb.wrapper_typedefs_fname + cfg.header_extension + '"' )
         include_statements = list( OrderedDict.fromkeys(include_statements) )
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
         func_def_in_ns = include_statements_code + func_def_in_ns
