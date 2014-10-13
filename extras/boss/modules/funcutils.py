@@ -11,6 +11,7 @@ import copy
 import warnings
 
 import modules.cfg as cfg
+import modules.gb as gb
 import modules.utils as utils
 
 
@@ -38,12 +39,12 @@ def getArgs(func_el):
                 argc += 1
             arg_dict['type'], arg_dict['kw'], arg_dict['id'] = utils.findType(sub_el)
 
-            arg_type_el = cfg.id_dict[arg_dict['id']]
+            arg_type_el = gb.id_dict[arg_dict['id']]
             arg_dict['native']      = utils.isNative(arg_type_el)
             arg_dict['fundamental'] = utils.isFundamental(arg_type_el)
             arg_dict['loaded_class'] = utils.isLoadedClass(arg_type_el)
 
-            type_el = cfg.id_dict[arg_dict['id']]
+            type_el = gb.id_dict[arg_dict['id']]
             arg_dict['type_namespaces'] = utils.getNamespaces(type_el)
 
             if 'default' in sub_el.keys():
@@ -226,9 +227,9 @@ def constrWrapperName(func_el, include_full_namespace=True):
     func_name_short = func_el.get('name')
 
     if is_operator:
-        w_func_name = 'operator_' + cfg.operator_names[func_name_short] + cfg.code_suffix
+        w_func_name = 'operator_' + gb.operator_names[func_name_short] + gb.code_suffix
     else:
-        w_func_name = func_name_short + cfg.code_suffix
+        w_func_name = func_name_short + gb.code_suffix
 
     if include_full_namespace:
         namespaces = utils.getNamespaces(func_el)
@@ -245,11 +246,11 @@ def constrWrapperName(func_el, include_full_namespace=True):
 
 # def chooseWrapperReturnType(return_el):
 
-#     # return_type, return_kw, return_id = utils.findType( cfg.id_dict[func_el.get('returns')] )
-#     # return_el = cfg.id_dict[return_id]
+#     # return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
+#     # return_el = gb.id_dict[return_id]
 
 #     if utils.isNative(return_el):
-#         w_return_type = cfg.abstr_class_prefix + return_type
+#         w_return_type = gb.abstr_class_prefix + return_type
 #     else:
 #         w_return_type = return_type
 
@@ -286,10 +287,10 @@ def constrWrapperArgs(args, add_ref=False, convert_loaded_to_abstract=True):
 
                 # if len(arg_dict['type_namespaces']) > 0:
                 #     # namespaces, type_name = arg_dict['type'].rsplit('::',1)
-                #     # arg_dict['type'] = namespaces + '::' + cfg.abstr_class_prefix + type_name
+                #     # arg_dict['type'] = namespaces + '::' + gb.abstr_class_prefix + type_name
                 #     arg_dict['type'] = classutils.getAbstractClassName(arg_dict['type'])
                 # else:
-                #     arg_dict['type'] = cfg.abstr_class_prefix + arg_dict['type']
+                #     arg_dict['type'] = gb.abstr_class_prefix + arg_dict['type']
 
                 if add_ref:
                     if ('&' not in arg_dict['type']) and ('*' not in arg_dict['type']):
@@ -385,7 +386,7 @@ def constrDeclLine(return_type, func_name, args_bracket, keywords=[], is_const=F
 #     kw_str            = ' '.join(keywords) + ' '*bool(len(keywords))
     
 #     # if return_is_native:
-#     #     w_return_type = cfg.abstr_class_prefix + return_type
+#     #     w_return_type = gb.abstr_class_prefix + return_type
 #     # else:
 #     #     w_return_type = return_type
 
@@ -531,7 +532,7 @@ def usesNativeType(func_el):
     uses_native_type = False
 
     return_type_name, return_kw, return_id = utils.findType(func_el)
-    return_is_native = utils.isNative( cfg.id_dict[return_id] )
+    return_is_native = utils.isNative( gb.id_dict[return_id] )
 
     args = getArgs(func_el)
     is_arg_native = [arg_dict['native'] for arg_dict in args]
@@ -552,7 +553,7 @@ def usesLoadedType(func_el):
     uses_loaded_type = False
 
     return_type_name, return_kw, return_id = utils.findType(func_el)
-    return_is_loaded = utils.isLoadedClass( cfg.id_dict[return_id] )
+    return_is_loaded = utils.isLoadedClass( gb.id_dict[return_id] )
 
     args = getArgs(func_el)
     is_arg_loaded = [arg_dict['loaded_class'] for arg_dict in args]
@@ -616,7 +617,7 @@ def constrExternFuncDecl(func_el):
 
     extern_decl = ''
 
-    return_type, return_kw, return_id = utils.findType( cfg.id_dict[func_el.get('returns')] )
+    return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
     namespaces = utils.getNamespaces(func_el)
     
     n_indents = len(namespaces)

@@ -7,18 +7,18 @@
 #include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Info_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Particle_decl.h"
-#include "wrappers_typedefs.hpp"
+#include "wrappertypedefs.h"
 
-void wrapper_deleter(Pythia8::Particle_GAMBIT*);
+void wrapper_deleter(Pythia8::Particle__BOSS*);
 
-void wrapper_deleter(Pythia8::Info_GAMBIT*);
+void wrapper_deleter(Pythia8::Info__BOSS*);
 
-void wrapper_deleter(Pythia8::Vec4_GAMBIT*);
+void wrapper_deleter(Pythia8::Vec4__BOSS*);
 
-void wrapper_deleter(Pythia8::Hist_GAMBIT*);
+void wrapper_deleter(Pythia8::Hist__BOSS*);
 
-void wrapper_deleter(Pythia8::Event_GAMBIT*);
+void wrapper_deleter(Pythia8::Event__BOSS*);
 
-void wrapper_deleter(Pythia8::Pythia_GAMBIT*);
+void wrapper_deleter(Pythia8::Pythia__BOSS*);
 
 #endif /* __WRAPPERDELETER_BOSSedPythia_1_0_H__ */

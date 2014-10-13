@@ -1,8 +1,8 @@
 #include "Pythia8/Event.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Event_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Event_def.h"
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 
 namespace Pythia8
 {

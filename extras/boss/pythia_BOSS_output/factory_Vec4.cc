@@ -1,8 +1,8 @@
 #include "Pythia8/Basics.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_def.h"
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 
 namespace Pythia8
 {

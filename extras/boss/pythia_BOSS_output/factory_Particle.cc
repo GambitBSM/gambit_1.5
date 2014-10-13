@@ -4,8 +4,8 @@
 #include "Pythia8/Basics.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_decl.h"
 #include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_def.h"
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
 
 namespace Pythia8
 {
@@ -89,22 +89,22 @@ namespace Pythia8
         return new Particle(idIn);
     }
     
-    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4_GAMBIT& pIn, double mIn, double scaleIn, double polIn)
+    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4__BOSS& pIn, double mIn, double scaleIn, double polIn)
     {
         return new Particle(idIn, statusIn, mother1In, mother2In, daughter1In, daughter2In, colIn, acolIn, dynamic_cast< Pythia8::Vec4& >(*pIn.BEptr), mIn, scaleIn, polIn);
     }
     
-    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4_GAMBIT& pIn, double mIn, double scaleIn)
+    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4__BOSS& pIn, double mIn, double scaleIn)
     {
         return new Particle(idIn, statusIn, mother1In, mother2In, daughter1In, daughter2In, colIn, acolIn, dynamic_cast< Pythia8::Vec4& >(*pIn.BEptr), mIn, scaleIn);
     }
     
-    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4_GAMBIT& pIn, double mIn)
+    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4__BOSS& pIn, double mIn)
     {
         return new Particle(idIn, statusIn, mother1In, mother2In, daughter1In, daughter2In, colIn, acolIn, dynamic_cast< Pythia8::Vec4& >(*pIn.BEptr), mIn);
     }
     
-    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4_GAMBIT& pIn)
+    Abstract_Particle* Factory_Particle(int idIn, int statusIn, int mother1In, int mother2In, int daughter1In, int daughter2In, int colIn, int acolIn, Pythia8::Vec4__BOSS& pIn)
     {
         return new Particle(idIn, statusIn, mother1In, mother2In, daughter1In, daughter2In, colIn, acolIn, dynamic_cast< Pythia8::Vec4& >(*pIn.BEptr));
     }

@@ -31,7 +31,7 @@ class Event;
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Particle.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Particle : public virtual Abstract_Particle {
 
@@ -310,50 +310,50 @@ private:
 
 
         public:
-            Abstract_Particle* pointerCopy_GAMBIT();
-            void pointerAssign_GAMBIT(Abstract_Particle* in);
+            Abstract_Particle* pointerCopy__BOSS();
+            void pointerAssign__BOSS(Abstract_Particle* in);
 
-            Pythia8::Abstract_Particle* operator_equal_GAMBIT(const Pythia8::Abstract_Particle&);
+            Pythia8::Abstract_Particle* operator_equal__BOSS(const Pythia8::Abstract_Particle&);
 
 
         public:
-            void setEvtPtr_GAMBIT(Pythia8::Abstract_Event*);
+            void setEvtPtr__BOSS(Pythia8::Abstract_Event*);
 
-            Pythia8::Abstract_Event* getEvtPtr_GAMBIT();
+            Pythia8::Abstract_Event* getEvtPtr__BOSS();
 
-            void mothers_GAMBIT(int);
+            void mothers__BOSS(int);
 
-            void mothers_GAMBIT();
+            void mothers__BOSS();
 
-            void daughters_GAMBIT(int);
+            void daughters__BOSS(int);
 
-            void daughters_GAMBIT();
+            void daughters__BOSS();
 
-            void cols_GAMBIT(int);
+            void cols__BOSS(int);
 
-            void cols_GAMBIT();
+            void cols__BOSS();
 
-            void p_GAMBIT(Pythia8::Abstract_Vec4&);
+            void p__BOSS(Pythia8::Abstract_Vec4&);
 
-            void vProd_GAMBIT(Pythia8::Abstract_Vec4&);
+            void vProd__BOSS(Pythia8::Abstract_Vec4&);
 
-            Pythia8::Abstract_Vec4* p_GAMBIT() const;
+            Pythia8::Abstract_Vec4* p__BOSS() const;
 
-            Pythia8::Abstract_Vec4* vProd_GAMBIT() const;
+            Pythia8::Abstract_Vec4* vProd__BOSS() const;
 
-            Pythia8::Abstract_Vec4* vDec_GAMBIT() const;
+            Pythia8::Abstract_Vec4* vDec__BOSS() const;
 
-            std::vector<int, std::allocator<int> > sisterList_GAMBIT() const;
+            std::vector<int, std::allocator<int> > sisterList__BOSS() const;
 
-            std::string nameWithStatus_GAMBIT() const;
+            std::string nameWithStatus__BOSS() const;
 
-            void bst_GAMBIT(const Pythia8::Abstract_Vec4&);
+            void bst__BOSS(const Pythia8::Abstract_Vec4&);
 
-            void bst_GAMBIT(const Pythia8::Abstract_Vec4&, double);
+            void bst__BOSS(const Pythia8::Abstract_Vec4&, double);
 
-            void bstback_GAMBIT(const Pythia8::Abstract_Vec4&);
+            void bstback__BOSS(const Pythia8::Abstract_Vec4&);
 
-            void bstback_GAMBIT(const Pythia8::Abstract_Vec4&, double);
+            void bstback__BOSS(const Pythia8::Abstract_Vec4&, double);
 
 };
 
@@ -420,7 +420,7 @@ private:
 
 } 
 #include "backend_types/BOSSedPythia_1_0/abstract_Event.h"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Event : public virtual Abstract_Event {
     
@@ -661,70 +661,70 @@ private:
   
 
         public:
-            Abstract_Event* pointerCopy_GAMBIT();
-            void pointerAssign_GAMBIT(Abstract_Event* in);
+            Abstract_Event* pointerCopy__BOSS();
+            void pointerAssign__BOSS(Abstract_Event* in);
 
-            Pythia8::Abstract_Event* operator_equal_GAMBIT(const Pythia8::Abstract_Event&);
+            Pythia8::Abstract_Event* operator_equal__BOSS(const Pythia8::Abstract_Event&);
 
-            Pythia8::Abstract_Particle* operator_square_bracket_pair_GAMBIT(int);
+            Pythia8::Abstract_Particle* operator_square_bracket_pair__BOSS(int);
 
-            const Pythia8::Abstract_Particle* operator_square_bracket_pair_GAMBIT(int) const;
+            const Pythia8::Abstract_Particle* operator_square_bracket_pair__BOSS(int) const;
 
-            Pythia8::Abstract_Event* operator_plus_equal_GAMBIT(const Pythia8::Abstract_Event&);
+            Pythia8::Abstract_Event* operator_plus_equal__BOSS(const Pythia8::Abstract_Event&);
 
 
         public:
-            Pythia8::Abstract_Particle* front_GAMBIT();
+            Pythia8::Abstract_Particle* front__BOSS();
 
-            Pythia8::Abstract_Particle* at_GAMBIT(int);
+            Pythia8::Abstract_Particle* at__BOSS(int);
 
-            Pythia8::Abstract_Particle* back_GAMBIT();
+            Pythia8::Abstract_Particle* back__BOSS();
 
-            int append_GAMBIT(Pythia8::Abstract_Particle&);
+            int append__BOSS(Pythia8::Abstract_Particle&);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, double, double, double, double, double, double);
+            int append__BOSS(int, int, int, int, int, int, int, int, double, double, double, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, double, double, double, double, double);
+            int append__BOSS(int, int, int, int, int, int, int, int, double, double, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, double, double, double, double);
+            int append__BOSS(int, int, int, int, int, int, int, int, double, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&, double, double, double);
+            int append__BOSS(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&, double, double);
+            int append__BOSS(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&, double, double);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&, double);
+            int append__BOSS(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&, double);
 
-            int append_GAMBIT(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&);
+            int append__BOSS(int, int, int, int, int, int, int, int, Pythia8::Abstract_Vec4&);
 
-            int append_GAMBIT(int, int, int, int, double, double, double, double, double, double);
+            int append__BOSS(int, int, int, int, double, double, double, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, double, double, double, double, double);
+            int append__BOSS(int, int, int, int, double, double, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, double, double, double, double);
+            int append__BOSS(int, int, int, int, double, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, Pythia8::Abstract_Vec4&, double, double, double);
+            int append__BOSS(int, int, int, int, Pythia8::Abstract_Vec4&, double, double, double);
 
-            int append_GAMBIT(int, int, int, int, Pythia8::Abstract_Vec4&, double, double);
+            int append__BOSS(int, int, int, int, Pythia8::Abstract_Vec4&, double, double);
 
-            int append_GAMBIT(int, int, int, int, Pythia8::Abstract_Vec4&, double);
+            int append__BOSS(int, int, int, int, Pythia8::Abstract_Vec4&, double);
 
-            int append_GAMBIT(int, int, int, int, Pythia8::Abstract_Vec4&);
+            int append__BOSS(int, int, int, int, Pythia8::Abstract_Vec4&);
 
-            void setEvtPtr_GAMBIT();
+            void setEvtPtr__BOSS();
 
-            int copy_GAMBIT(int);
+            int copy__BOSS(int);
 
-            void list_GAMBIT(bool) const;
+            void list__BOSS(bool) const;
 
-            void popBack_GAMBIT();
+            void popBack__BOSS();
 
-            void initColTag_GAMBIT();
+            void initColTag__BOSS();
 
-            std::vector<int, std::allocator<int> > sisterListTopBot_GAMBIT(int) const;
+            std::vector<int, std::allocator<int> > sisterListTopBot__BOSS(int) const;
 
-            void bst_GAMBIT(const Pythia8::Abstract_Vec4&);
+            void bst__BOSS(const Pythia8::Abstract_Vec4&);
 
-            void listJunctions_GAMBIT() const;
+            void listJunctions__BOSS() const;
 
 };
 

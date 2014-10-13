@@ -11,19 +11,20 @@ import warnings
 import os
 
 import modules.cfg as cfg
+import modules.gb as gb
 import modules.funcutils as funcutils
 import modules.utils as utils
 
 
 # ====== getAbstractClassName ========
 
-def getAbstractClassName(input_name, prefix=cfg.abstr_class_prefix, short=False):
+def getAbstractClassName(input_name, prefix=gb.abstr_class_prefix, short=False):
 
     if '::' in input_name:
         namespaces, short_class_name = input_name.rsplit('::',1)
-        abstract_class_name = namespaces + '::' + cfg.abstr_class_prefix + short_class_name
+        abstract_class_name = namespaces + '::' + gb.abstr_class_prefix + short_class_name
     else:
-        abstract_class_name = cfg.abstr_class_prefix + input_name
+        abstract_class_name = gb.abstr_class_prefix + input_name
 
     if short == True:
         return abstract_class_name.rsplit('::',1)[-1]
@@ -103,7 +104,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     member_elements = []
     if 'members' in class_el.keys():
         for mem_id in class_el.get('members').split():
-            el = cfg.id_dict[mem_id]
+            el = gb.id_dict[mem_id]
             if not 'artificial' in el.keys():
                 member_elements.append(el)
 
@@ -196,13 +197,13 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             uses_loaded_type = funcutils.usesLoadedType(el)
 
 
-            return_type, return_kw, return_id = utils.findType( cfg.id_dict[el.get('returns')] )
+            return_type, return_kw, return_id = utils.findType( gb.id_dict[el.get('returns')] )
             return_type_base = return_type.replace('*','').replace('&','')
             
             return_kw_str = ' '.join(return_kw)        
             return_kw_str += ' '*bool(len(return_kw))
 
-            return_el = cfg.id_dict[return_id]
+            return_el = gb.id_dict[return_id]
             return_is_loaded = utils.isLoadedClass(return_el)
             args = funcutils.getArgs(el)
             w_args = funcutils.constrWrapperArgs(args, add_ref=True)
@@ -250,22 +251,22 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                 
                 if is_operator:
                     if uses_loaded_type:
-                        w_func_name = 'operator_' + cfg.operator_names[el.get('name')] + cfg.code_suffix
+                        w_func_name = 'operator_' + gb.operator_names[el.get('name')] + gb.code_suffix
                     else:
                         w_func_name = 'operator' + el.get('name')    
                 else:
-                    # w_func_name = el.get('name') + cfg.code_suffix 
+                    # w_func_name = el.get('name') + gb.code_suffix 
                     if uses_loaded_type or (remove_n_args>0):
-                        w_func_name = el.get('name') + cfg.code_suffix 
+                        w_func_name = el.get('name') + gb.code_suffix 
                     else:
                         w_func_name = el.get('name')
 
 
 
                     # if is_operator:
-                    #     w_func_name = 'operator_' + cfg.operator_names[el.get('name')] + cfg.code_suffix
+                    #     w_func_name = 'operator_' + gb.operator_names[el.get('name')] + gb.code_suffix
                     # else:
-                    #     w_func_name = el.get('name') + cfg.code_suffix 
+                    #     w_func_name = el.get('name') + gb.code_suffix 
 
                     # if remove_n_args > 0:
                     #     w_func_name += '_overload_' + str(remove_n_args)
@@ -389,13 +390,13 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
 
     class_decl += '\n'
     class_decl += ' '*(n_indents+1)*indent + 'public:\n'
-    class_decl += ' '*(n_indents+2)*indent + 'void wrapper' + cfg.code_suffix + '(' + class_name_short + '* wptr_in)\n'
+    class_decl += ' '*(n_indents+2)*indent + 'void wrapper' + gb.code_suffix + '(' + class_name_short + '* wptr_in)\n'
     class_decl += ' '*(n_indents+2)*indent + '{\n'
     class_decl += ' '*(n_indents+3)*indent + 'wptr = wptr_in;\n'
     class_decl += ' '*(n_indents+3)*indent + 'is_wrapped(true);\n'
     class_decl += ' '*(n_indents+2)*indent + '}\n'
     class_decl += '\n'
-    class_decl += ' '*(n_indents+2)*indent + class_name_short + '* wrapper' + cfg.code_suffix + '()\n'
+    class_decl += ' '*(n_indents+2)*indent + class_name_short + '* wrapper' + gb.code_suffix + '()\n'
     class_decl += ' '*(n_indents+2)*indent + '{\n'
     class_decl += ' '*(n_indents+3)*indent + 'return wptr;\n'
     class_decl += ' '*(n_indents+2)*indent + '}\n'
@@ -423,7 +424,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
     # - Add forward declaration of wrapper_deleter function (needed by the 'destructor pattern')
     frwd_decl_deleter  = '\n'
     frwd_decl_deleter += '// Forward declaration needed by the destructor pattern.\n'
-    frwd_decl_deleter += 'void wrapper_deleter(' + cfg.gambit_backend_namespace + '::' + class_name_long + '*);\n'
+    frwd_decl_deleter += 'void wrapper_deleter(' + gb.gambit_backend_namespace + '::' + class_name_long + '*);\n'
     frwd_decl_deleter += '\n'
 
     class_decl = frwd_decl_deleter + class_decl
@@ -454,7 +455,7 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
     constructor_elements = []
     if 'members' in class_el.keys():
         for mem_id in class_el.get('members').split():
-            el = cfg.id_dict[mem_id]
+            el = gb.id_dict[mem_id]
             if (el.tag == 'Constructor') and (el.get('access') == 'public'): #and ('artificial' not in el.keys()):  #(el.get('explicit') == "1"):
                 if skip_copy_constructors and (el.get('id') == copy_constr_id):
                     pass
@@ -544,8 +545,8 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
     func_def_in_ns += utils.constrNamespace(namespaces, 'close')
 
     if add_include_statements:
-        include_statements.append( '#include "abstracts_typedefs.hpp"' )
-        include_statements.append( '#include "wrappers_typedefs.hpp"' )
+        include_statements.append( '#include "' + gb.abstract_typedefs_fname + cfg.header_extension + '"' )
+        include_statements.append( '#include "' + gb.wrapper_typedefs_fname + cfg.header_extension + '"' )
         include_statements = list( OrderedDict.fromkeys(include_statements) )
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
         func_def_in_ns = include_statements_code + func_def_in_ns
@@ -649,8 +650,8 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
         is_operator = True
 
     # If operator, check that we have a name for it
-    if (is_operator) and (method_el.get('name') not in cfg.operator_names.keys()):
-        raise Exception('No known name for the operator: %s  -- Add an entry to the following dictionary: cfg.operator_names' % method_el.get('name'))
+    if (is_operator) and (method_el.get('name') not in gb.operator_names.keys()):
+        raise Exception('No known name for the operator: %s  -- Add an entry to the following dictionary: gb.operator_names' % method_el.get('name'))
 
     # Function name
     if is_operator:
@@ -660,8 +661,8 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
 
 
     # Function return type
-    return_type, return_kw, return_id = utils.findType( cfg.id_dict[method_el.get('returns')] )
-    return_el = cfg.id_dict[return_id]
+    return_type, return_kw, return_id = utils.findType( gb.id_dict[method_el.get('returns')] )
+    return_el = gb.id_dict[return_id]
 
     return_is_loaded_class = utils.isLoadedClass(return_el)
     pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
@@ -703,7 +704,7 @@ def constrWrapperFunction(method_el, indent=cfg.indent, n_indents=0, remove_n_ar
     #     w_return_type = return_type.replace(return_type_base, return_type_base+'*')
 
     # if return_is_native:
-    #     w_return_type = cfg.abstr_class_prefix + return_type
+    #     w_return_type = gb.abstr_class_prefix + return_type
     # else:
     #     w_return_type = return_type
 
@@ -751,14 +752,14 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
 
     pointerness, is_ref = utils.pointerAndRefCheck(var_el)
 
-    ref_method_name = var_name + '_ref' + cfg.code_suffix
+    ref_method_name = var_name + '_ref' + gb.code_suffix
 
     if include_full_namespace:
         namespaces = utils.getNamespaces(var_el)
         if len(namespaces) > 0:
             ref_method_name = '::'.join(namespaces) + '::' + ref_method_name
 
-    var_type, var_kw, var_id = utils.findType( cfg.id_dict[var_el.get('type')] )
+    var_type, var_kw, var_id = utils.findType( gb.id_dict[var_el.get('type')] )
 
     var_kw_str = ' '.join(var_kw)        
     var_kw_str += ' '*bool(len(var_kw))
@@ -795,7 +796,7 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
 
 def constrPtrCopyFunc(class_el, abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0, only_declaration=False, include_full_namespace=False):
 
-    func_name = 'pointerCopy' + cfg.code_suffix
+    func_name = 'pointerCopy' + gb.code_suffix
     class_name = class_name_short
     abstr_class_name = abstr_class_name_short
 
@@ -830,7 +831,7 @@ def constrPtrCopyFunc(class_el, abstr_class_name_short, class_name_short, virtua
 
 def constrPtrAssignFunc(class_el, abstr_class_name_short, class_name_short, virtual=False, indent=cfg.indent, n_indents=0, only_declaration=False, include_full_namespace=False):
 
-    func_name  = 'pointerAssign' + cfg.code_suffix
+    func_name  = 'pointerAssign' + gb.code_suffix
     class_name = class_name_short
     abstr_class_name = abstr_class_name_short
 
@@ -957,9 +958,9 @@ def toWrapperType(input_type_name, remove_reference=False, remove_pointers=False
         # Insert wrapper class suffix
         if '<' in type_name:
             short_type_name_part_one, short_type_name_part_two = short_type_name.split('<',1)
-            short_type_name = short_type_name_part_one + cfg.code_suffix + '<' + short_type_name_part_two
+            short_type_name = short_type_name_part_one + gb.code_suffix + '<' + short_type_name_part_two
         else:
-            short_type_name = short_type_name + cfg.code_suffix
+            short_type_name = short_type_name + gb.code_suffix
 
     # Add '*' and '&'
     if remove_pointers:
@@ -1012,9 +1013,9 @@ def toAbstractType(input_type_name, include_namespace=True, add_pointer=False, r
         type_name_short = type_name_short.replace('*','')
 
     if namespace == '':
-        type_name = cfg.abstr_class_prefix + type_name_short
+        type_name = gb.abstr_class_prefix + type_name_short
     else:
-        type_name = (namespace+'::')*include_namespace  + cfg.abstr_class_prefix + type_name_short
+        type_name = (namespace+'::')*include_namespace  + gb.abstr_class_prefix + type_name_short
 
 
     if add_pointer:
@@ -1051,9 +1052,9 @@ def getClassNameDict(class_el, abstract=False):
 
     if abstract:
         abstr_class_name = {}
-        abstr_class_name['long_templ']  = getAbstractClassName(class_name['long_templ'], prefix=cfg.abstr_class_prefix)
+        abstr_class_name['long_templ']  = getAbstractClassName(class_name['long_templ'], prefix=gb.abstr_class_prefix)
         abstr_class_name['long']        = abstr_class_name['long_templ'].split('<',1)[0]
-        abstr_class_name['short_templ'] = getAbstractClassName(class_name['long_templ'], prefix=cfg.abstr_class_prefix, short=True)
+        abstr_class_name['short_templ'] = getAbstractClassName(class_name['long_templ'], prefix=gb.abstr_class_prefix, short=True)
         abstr_class_name['short']       = abstr_class_name['short_templ'].split('<',1)[0]
 
         return abstr_class_name
@@ -1151,7 +1152,7 @@ def getClassNameDict(class_el, abstract=False):
 
 #     # Get file name and line number of the current class
 #     class_line_number = int( el.get('line') )
-#     class_file_el     = cfg.id_dict[ el.get('file') ]
+#     class_file_el     = gb.id_dict[ el.get('file') ]
 #     class_file_path   = class_file_el.get('name')
 
 #     # Read file from beginning to position of class definition
@@ -1164,7 +1165,7 @@ def getClassNameDict(class_el, abstract=False):
 #     included_headers_dict = utils.identifyIncludedHeaders(class_file_content, only_native=True)
 
 #     # Move up the header tree and identify all the relevant (native) included headers
-#     header_paths = [ cfg.id_dict[file_id].get('name') for file_id in included_headers_dict.values() ]
+#     header_paths = [ gb.id_dict[file_id].get('name') for file_id in included_headers_dict.values() ]
 #     header_paths_done = []
 
 #     while len(header_paths) > 0:
@@ -1185,7 +1186,7 @@ def getClassNameDict(class_el, abstract=False):
 #                 included_headers_dict[file_name] = file_id
 
 #         # Add any new headers to the list of header files to check
-#         new_header_paths = [ cfg.id_dict[header_id].get('name') for header_id in new_included_headers.values() ]
+#         new_header_paths = [ gb.id_dict[header_id].get('name') for header_id in new_included_headers.values() ]
 #         for new_path in new_header_paths:
 #             if (new_path not in header_paths) and (new_path not in header_paths_done):
 #                 header_paths.append(new_path)
@@ -1229,7 +1230,7 @@ def getClassNameDict(class_el, abstract=False):
 #                 if type_definition_found:
 #                     if convert_loaded_to == 'none':
 
-#                         type_file_el = cfg.id_dict[type_file_id]
+#                         type_file_el = gb.id_dict[type_file_id]
 #                         type_file_full_path = type_file_el.get('name')
 
 #                         if utils.isHeader(type_file_el):
@@ -1243,9 +1244,9 @@ def getClassNameDict(class_el, abstract=False):
 
 #                     else:
 #                         if add_extra_include_path:
-#                             include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][convert_loaded_to]) + '"')
+#                             include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, gb.new_header_files[type_name['long']][convert_loaded_to]) + '"')
 #                         else:
-#                             include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
+#                             include_statements.append('#include "' + gb.new_header_files[type_name['long']][convert_loaded_to] + '"')
 
 #                 else:
 #                     # This must be a case of a type that is only forward declared. Don't include any header (as this will typically lead to a 'header loop').
@@ -1462,7 +1463,7 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
 
         # Determine return type
         return_type, return_type_kw, return_type_id = utils.findType(func_el)
-        return_type_el = cfg.id_dict[return_type_id]
+        return_type_el = gb.id_dict[return_type_id]
 
         pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
         return_is_loaded    = utils.isLoadedClass(return_type, byname=True)
@@ -1499,15 +1500,15 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
 
             # Name of function to call (in abstract class)
             # if (remove_n_args > 0) and (not is_operator):
-            #     call_func_name = func_name + cfg.code_suffix
+            #     call_func_name = func_name + gb.code_suffix
             # else:
             #     call_func_name = func_name
             if is_operator:
-                call_func_name = 'operator_' + cfg.operator_names[func_el.get('name')] + cfg.code_suffix
+                call_func_name = 'operator_' + gb.operator_names[func_el.get('name')] + gb.code_suffix
             else:
-                # call_func_name = func_name + cfg.code_suffix
+                # call_func_name = func_name + gb.code_suffix
                 if uses_loaded_type or (remove_n_args>0):
-                    call_func_name = func_name + cfg.code_suffix 
+                    call_func_name = func_name + gb.code_suffix 
                 else:
                     call_func_name = func_name
 
@@ -1655,7 +1656,7 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
         # Determine return type
         return_type, return_type_kw, return_type_id = utils.findType(func_el)
-        return_type_el = cfg.id_dict[return_type_id]
+        return_type_el = gb.id_dict[return_type_id]
 
         pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
         return_is_loaded    = utils.isLoadedClass(return_type, byname=True)
@@ -1691,15 +1692,15 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
             # Name of function to call (in abstract class)
             # if (remove_n_args > 0) and (not is_operator):
-            #     call_func_name = func_name + cfg.code_suffix
+            #     call_func_name = func_name + gb.code_suffix
             # else:
             #     call_func_name = func_name
             if is_operator:
-                call_func_name = 'operator_' + cfg.operator_names[func_el.get('name')] + cfg.code_suffix
+                call_func_name = 'operator_' + gb.operator_names[func_el.get('name')] + gb.code_suffix
             else:
-                # call_func_name = func_name + cfg.code_suffix
+                # call_func_name = func_name + gb.code_suffix
                 if uses_loaded_type or (remove_n_args>0):
-                    call_func_name = func_name + cfg.code_suffix 
+                    call_func_name = func_name + gb.code_suffix 
                 else:
                     call_func_name = func_name
 
@@ -1747,7 +1748,7 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
     common_constructor_body = ''
     common_constructor_body += '{\n'
-    common_constructor_body += indent + 'BEptr->wrapper' + cfg.code_suffix + '(this);\n'
+    common_constructor_body += indent + 'BEptr->wrapper' + gb.code_suffix + '(this);\n'
 
     for var_el in class_variables:
 
@@ -1766,13 +1767,13 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
         # Construct common initialization list
         if var_is_loaded_class:
             if pointerness == 0:
-                common_init_list_code += indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
+                common_init_list_code += indent + var_name + '(&(BEptr->' + var_name + '_ref' + gb.code_suffix + '())),\n'
             elif pointerness == 1:
-                common_init_list_code += indent + var_name + '(new ' + wrapper_type_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
+                common_init_list_code += indent + var_name + '(new ' + wrapper_type_name + '(BEptr->' + var_name + '_ref' + gb.code_suffix + '())),\n'
             else:
                 raise Exception('The BOSS wrapper class system cannot presently handle member variables that have a pointerness > 1')
         else:
-            common_init_list_code += indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
+            common_init_list_code += indent + var_name + '(BEptr->' + var_name + '_ref' + gb.code_suffix + '()),\n'
 
         # Add line to common constructor body
         if var_is_loaded_class:
@@ -1789,19 +1790,19 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
     #     if utils.isLoadedClass(var_type, byname=True):
     #         if pointerness == 0:
-    #             common_init_list_code += indent + var_name + '(&(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
+    #             common_init_list_code += indent + var_name + '(&(BEptr->' + var_name + '_ref' + gb.code_suffix + '())),\n'
     #         elif pointerness == 1:
-    #             common_init_list_code += indent + var_name + '(new ' + wrapper_type_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '())),\n'
+    #             common_init_list_code += indent + var_name + '(new ' + wrapper_type_name + '(BEptr->' + var_name + '_ref' + gb.code_suffix + '())),\n'
     #         else:
     #             raise Exception('The BOSS wrapper class system cannot presently handle member variables that have a pointerness > 1')
     #     else:
-    #         common_init_list_code += indent + var_name + '(BEptr->' + var_name + '_ref' + cfg.code_suffix + '()),\n'
+    #         common_init_list_code += indent + var_name + '(BEptr->' + var_name + '_ref' + gb.code_suffix + '()),\n'
     # if common_init_list_code != '':
     #     common_init_list_code = common_init_list_code.rstrip(',\n') + '\n'
 
     # common_constructor_body = ''
     # common_constructor_body += '{\n'
-    # common_constructor_body += indent + 'BEptr->wrapper' + cfg.code_suffix + '(this);\n'
+    # common_constructor_body += indent + 'BEptr->wrapper' + gb.code_suffix + '(this);\n'
 
     # for var_el in class_variables:
     #     var_name = var_el.get('name')
