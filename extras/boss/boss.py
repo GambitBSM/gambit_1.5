@@ -770,7 +770,7 @@ def main():
 
 
     # 
-    # Copy and rename files from ./common_headers to output directory
+    # Copy and edit files from common_headers/
     # 
 
     # - abstractbase.hpp
@@ -784,39 +784,25 @@ def main():
 
     source_file_name = 'common_headers/wrapperbase.hpp'
     target_file_name = os.path.join(cfg.extra_output_dir, 'wrapperbase.hpp')
-    
-    f_src = open(source_file_name, 'r')
-    content = f_src.read()
-    f_src.close()
 
-    new_content = content.replace('__CODE_SUFFIX__', gb.code_suffix)
+    new_content = utils.replaceCodeTags(source_file_name, file_input=True)
 
     f_target = open(target_file_name, 'w')
     f_target.write(new_content)
     f_target.close()
 
 
-    # # - boss_loaded_classes.hpp
+    # - identification.hpp
 
-    # source_file_name = 'common_headers/boss_loaded_classes.hpp'
-    # target_file_name = os.path.join(cfg.extra_output_dir, 'boss_loaded_classes' + cfg.header_extension)
+    source_file_name = 'common_headers/identification.hpp'
+    target_file_name = os.path.join(cfg.extra_output_dir, 'identification.hpp')
 
-    # f_src = open(source_file_name, 'r')
-    # content = f_src.read()
-    # f_src.close()
+    new_content = utils.replaceCodeTags(source_file_name, file_input=True)
 
-    # new_content = content.replace('__HEADER_EXTENSION__', cfg.header_extension)
+    f_target = open(target_file_name, 'w')
+    f_target.write(new_content)
+    f_target.close()
 
-    # f_target = open(target_file_name, 'w')
-    # f_target.write(new_content)
-    # f_target.close()
-
-
-    # - nullptr_check.hpp
-
-    # source_file_name = 'common_headers/nullptr_check.hpp'
-    # target_file_name = os.path.join(cfg.extra_output_dir, 'nullptr_check' + cfg.header_extension)
-    # shutil.copy (source_file_name, target_file_name)
 
 
     # 
@@ -870,6 +856,9 @@ def main():
     # -- header with forward declarations for all wrapper classes
     move_files_list += [ os.path.join(cfg.extra_output_dir, gb.frwd_decls_wrp_fname + cfg.header_extension) ]
 
+    # -- identification.hpp
+    move_files_list += [ os.path.join(cfg.extra_output_dir, 'identification.hpp') ]    
+
     for mv_file in move_files_list:
         shutil.move(mv_file, gambit_backend_dir_complete)
 
@@ -881,7 +870,6 @@ def main():
     copy_files_list  = []
     
     copy_files_list += ['headers_by_hand/loaded_types.hpp' ]
-    copy_files_list += ['headers_by_hand/identification.hpp' ]
 
     for cp_file in copy_files_list:
         shutil.copy(cp_file, gambit_backend_dir_complete)
@@ -895,38 +883,6 @@ def main():
 
     for cp_file in copy_files_list:
         shutil.copy(cp_file, cfg.extra_output_dir)
-
-
-
-    # # - First, move files that should *only* go into gambit_backend_dir_complete
-    # move_files_list  = []
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, gb.wrapper_typedefs_fname + cfg.header_extension) )   # + wrapper typedefs header
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, gb.all_wrapper_fname + cfg.header_extension) )        # + master header that includes all wrapper headers + wrapper typedefs
-
-    # for mv_file in move_files_list:
-    #     shutil.move(mv_file, gambit_backend_dir_complete)
-
-    # # - Next, copy to gambit_backend_dir_complete the files that should go in both gambit_backend_dir_complete and cfg.extra_output_dir
-    # copy_files_list  = []
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'AbstractBase' + cfg.header_extension) )             # + abstract base class header
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'WrapperBase' + cfg.header_extension) )              # + wrapper base class header
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.abstr_header_prefix + '*') )                     # + abstract class headers
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + '*') )                   # + wrapper class headers
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, gb.all_wrapper_fname + cfg.header_extension) )      # + header including all wrapper headers
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, gb.frwd_decls_abs_fname + cfg.header_extension) )   # + header with forward declarations for all abstract classes
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, gb.frwd_decls_wrp_fname + cfg.header_extension) )   # + header with forward declarations for all wrapper classes
-    
-    # for cp_file in copy_files_list:
-    #     shutil.copy(cp_file, gambit_backend_dir_complete)
-
-    # # - Finally move all (remaining) files to cfg.extra_output_dir
-    # move_files_list  = []
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.header_extension) )   # + header files
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.source_extension) )   # + source files
-
-    # for mv_file in move_files_list:
-    #     shutil.move(mv_file, cfg.extra_output_dir)
-
 
 
     #

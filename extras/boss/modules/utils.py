@@ -1492,3 +1492,29 @@ def constrNamespaceFromTags(content, new_namespace, open_tag, close_tag):
     return new_content
 
 # ====== END: constrNamespaceFromTags ========
+
+
+
+# ====== replaceCodeTags ========
+
+def replaceCodeTags(input, file_input=False):
+
+    # Input is either a file name or a string with content
+    if file_input:
+        f = open(input, 'r')
+        new_content = f.read()
+        f.close()
+    else:
+        new_content = input
+
+    # Replace various tags in template code with code specific for the current backend
+    new_content = new_content.replace('__BACKEND_NAME__'         ,  cfg.gambit_backend_name)
+    new_content = new_content.replace('__SHARED_LIB_FILE_NAME__' ,  cfg.shared_lib_file_name)
+    new_content = new_content.replace('__BACKEND_VERSION__'      ,  cfg.gambit_backend_version)
+    new_content = new_content.replace('__BACKEND_SAFE_VERSION__' ,  gb.gambit_backend_safeversion)
+    new_content = new_content.replace('__CODE_SUFFIX__'          ,  gb.code_suffix)
+
+    # Return code
+    return new_content
+
+# ====== END: replaceCodeTags ========

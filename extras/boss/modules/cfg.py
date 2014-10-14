@@ -9,11 +9,13 @@ from collections import OrderedDict
 
 
 # GAMBIT specific options:
+
 gambit_backend_name    = 'BOSSedPythia'
 gambit_backend_version = '1.0'
 gambit_base_namespace  = ''
 gambit_backend_basedir = 'backend_types'
 
+shared_lib_file_name = 'libpythia8.so'
 
 # Information about the external code:
 
