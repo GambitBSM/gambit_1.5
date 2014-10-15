@@ -1,0 +1,117 @@
+#ifndef __WRAPPERBASE__
+#define __WRAPPERBASE__
+
+__START_GAMBIT_NAMESPACE__
+
+template <typename T>
+class WrapperBase
+{
+    public:
+        T* BEptr;
+        bool memvar;
+
+        // Constructor
+        WrapperBase(T* BEptr_in, bool memvar_in) : BEptr(BEptr_in), memvar(memvar_in)
+        {
+            // BEptr->wrapper__CODE_SUFFIX__(this);
+        }
+
+        // Copy constructor: 
+        WrapperBase(const WrapperBase<T>& in) :
+            BEptr(in.BEptr->pointerCopy__CODE_SUFFIX__()),
+            memvar(in.memvar)
+        {
+            // BEptr->wrapper__CODE_SUFFIX__(this);
+        }
+
+        // Assignment operator
+        WrapperBase& operator=(const WrapperBase<T>& in)
+        {
+            if (this != &in) 
+            { 
+                BEptr->pointerAssign__CODE_SUFFIX__(in.BEptr); 
+            }
+            return *this;        
+        }
+
+        // Special member function to set member_variable: 
+        void _setMemberVariable(bool memvar_in)
+        {
+            memvar = memvar_in;
+        }
+
+        ~WrapperBase()
+        {
+            if (!memvar)
+            {
+                if (BEptr->can_delete_me())
+                {
+                    delete BEptr;
+                }
+            }
+        }
+
+
+    protected:
+
+        // Function used to return pointer-to-wrapper
+        template<typename U, typename V>
+        U* pointer_returner(V* ptr)
+        {
+            if (ptr->is_wrapped())
+            {
+                return (ptr->wrapper__CODE_SUFFIX__());
+            }
+
+            else
+            {
+                U* wptr = new U(ptr);
+                ptr->wrapper__CODE_SUFFIX__(wptr);
+                ptr->can_delete_wrapper(true);
+                return wptr;
+            }
+        }
+
+
+        // Function used to return reference-to-wrapper
+        template<typename U, typename V>
+        U& reference_returner(V* ptr)
+        {
+            if (ptr->is_wrapped())
+            {
+                return *(ptr->wrapper__CODE_SUFFIX__());
+            }
+
+            else
+            {
+                U* wptr = new U(ptr);
+                ptr->wrapper__CODE_SUFFIX__(wptr);
+                ptr->can_delete_wrapper(true);
+                return *wptr;
+            }
+        }
+
+        // Const version of the above function
+        template<typename U, typename V>
+        U& reference_returner(V* ptr) const
+        {
+            if (ptr->is_wrapped())
+            {
+                return *(ptr->wrapper__CODE_SUFFIX__());
+            }
+
+            else
+            {
+                U* wptr = new U(ptr);
+                ptr->wrapper__CODE_SUFFIX__(wptr);
+                ptr->can_delete_wrapper(true);
+                return *wptr;
+            }
+        }
+
+
+};
+
+__END_GAMBIT_NAMESPACE__
+
+#endif /* __WRAPPERBASE__ */

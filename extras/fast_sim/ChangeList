@@ -1,5 +1,12 @@
+Aldo Saavedra <a.saavedra@physics.usyd.edu.au>  20-09-2014
+* Fixed the logger
+* Added the detector description  fastim_atlas_2d.json - it uses the atlas detector rather than nominal
+* Added the pythia8 particle gun example
+* Added an analysis script to calculate the resolution from ttree created by the fastsim
+
 Aldo Saavedra <a.saavedra@physics.usyd.edu.au>  5-08-2014
 * Fixed the segmentation fault caused by the logger. the logger is not a global variable anymore but public variable of fastsim
+
 Aldo Saavedra <a.saavedra@physics.usyd.edu.au>  1-07-2014
 * Added b-tagging - uses the b-quarks provided by the user 
 * Two dimensional efficiency maps

@@ -1,4 +1,5 @@
 #include "simple_hep_lib/Particle.hpp"
+#include "FastSim_Log.hpp"
 
 #include <gsl/gsl_rng.h>
 #include <time.h>
@@ -23,6 +24,8 @@ class DetectorResponse
   public:
     DetectorResponse();
     ~DetectorResponse();
+
+    logging::logger *_log_inst;
     virtual void MuonResponse(hep_simple_lib::Particle& muon) { };
     virtual void PhotonResponse(hep_simple_lib::Particle& ph) {};
     virtual void ElectronResponse(hep_simple_lib::Particle& ele) {};

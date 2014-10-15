@@ -80,44 +80,41 @@ namespace logging
 		template< severity_type severity, int verbosity, typename...Args >
 	void logger::print(Args...args )
 	{
+    std::string messg;
 		_write_mutex.lock();
 
-    /*
     switch( severity )
     {
       case severity_type::debug:
-
-        if (verbosity <= _verbosity_level) {
-          _log_stream<<"<FastSim DEBUG> :";
-        }
+        messg = "<FastSim DEBUG> :";
         break;
       case severity_type::info:
-        _log_stream<<"<FastSim INFO> :";
+        messg = "<FastSim INFO> :";
         break;
       case severity_type::warning:
-        _log_stream<<"<FastSim WARNING> :";
+        messg = "<FastSim WARNING> :";
         break;
       case severity_type::error:
-        _log_stream<<"<FastSim ERROR> :";
+        messg ="<FastSim ERROR> :";
         break;
     }
 
     if (severity ==severity_type::debug) {
       if (verbosity <= _verbosity_level) {
-        print_impl( args... );
+        print_impl( messg,args... );
       }
     }
     else {
-      print_impl( args... );
+      print_impl( messg,args... );
     }
-    */
+    
     _write_mutex.unlock();
   }
 
 		template<typename First, typename...Rest >
 	void logger::print_impl(First parm1, Rest...parm)
 	{
-		//_log_stream<<" "<<parm1;
+    std::cout <<" "<<parm1;
 		print_impl(parm...);	
 	}
 
