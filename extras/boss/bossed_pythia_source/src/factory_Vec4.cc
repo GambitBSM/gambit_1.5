@@ -1,8 +1,10 @@
 #include "Pythia8/Basics.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_decl.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_def.h"
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "backend_types/Pythia_8_186/wrapper_Vec4_decl.h"
+#include "backend_types/Pythia_8_186/wrapper_Vec4_def.h"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
+
+// FACTORY_SIGNATURES_ORDER: ##(double, double, double, double)##(double, double, double)##(double, double)##(double)##()##
 
 namespace Pythia8
 {

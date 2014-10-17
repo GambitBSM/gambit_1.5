@@ -110,7 +110,7 @@ class RotBstMatrix;
 // (But can equally well be used to hold space-time four-vectors.)
 
 } 
-#include "backend_types/BOSSedPythia_1_0/abstract_Vec4.h"
+#include "backend_types/Pythia_8_186/abstract_Vec4.h"
 #include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Vec4 : public virtual Abstract_Vec4 {
@@ -383,7 +383,7 @@ ostream& operator<<(ostream&, const RotBstMatrix&) ;
 // This class handles a single histogram at a time.
 
 } 
-#include "backend_types/BOSSedPythia_1_0/abstract_Hist.h"
+#include "backend_types/Pythia_8_186/abstract_Hist.h"
 #include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Hist : public virtual Abstract_Hist{

@@ -30,7 +30,7 @@ class Event;
 // This class holds info on a particle in general.
 
 } 
-#include "backend_types/BOSSedPythia_1_0/abstract_Particle.h"
+#include "backend_types/Pythia_8_186/abstract_Particle.h"
 #include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Particle : public virtual Abstract_Particle {
@@ -419,7 +419,7 @@ private:
 // The Event class holds all info on the generated event.
 
 } 
-#include "backend_types/BOSSedPythia_1_0/abstract_Event.h"
+#include "backend_types/Pythia_8_186/abstract_Event.h"
 #include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Event : public virtual Abstract_Event {

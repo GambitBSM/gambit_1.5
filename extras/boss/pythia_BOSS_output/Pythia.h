@@ -45,7 +45,7 @@ namespace Pythia8 {
 // The Pythia class contains the top-level routines to generate an event.
 
 } 
-#include "backend_types/BOSSedPythia_1_0/abstract_Pythia.h"
+#include "backend_types/Pythia_8_186/abstract_Pythia.h"
 #include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Pythia : public virtual Abstract_Pythia {

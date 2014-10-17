@@ -19,6 +19,7 @@ import sys
 import warnings
 import shutil
 import glob
+import subprocess
 from collections import OrderedDict
 from optparse import OptionParser
 
@@ -36,7 +37,12 @@ import modules.utils as utils
 def main():
 
     print
-    print
+    print '    ================================='
+    print '    ||                             ||'
+    print '    ||  BOSS - Backend-On-a-Stick  ||'
+    print '    ||                             ||'
+    print '    ================================='
+    print 
 
     #
     # Initialization
@@ -82,11 +88,9 @@ def main():
                       help="Test run. No source files are changed.")
     (options, args) = parser.parse_args()
 
-    if len(args) < 1:
-        parser.error("No xml file(s) specified")
 
-    # Get the xml file names from command line input
-    xml_files = args
+    # Get the input file names from command line input
+    input_files = args
 
     # Set up a few more things before the file loop
     if options.choose_flag:
@@ -107,6 +111,65 @@ def main():
             while(paths[0].strip()):
                 cfg.accepted_paths.append(paths[0].strip())
                 paths = paths[2].partition(',')
+
+
+    #
+    # Run gccxml for all input header/source files
+    #
+    xml_files = []
+    for input_file_path in input_files:
+
+        # Get path and filename for the input file
+        input_file_dir, input_file_short_name = os.path.split(input_file_path)
+
+        # Construct file name for xml file produced by gccxml
+        # xml_file_path = os.path.join('temp', os.path.splitext(input_file_short_name)[0] + '.xml' )
+        xml_file_path = os.path.join('temp', input_file_path.replace('/','_').replace('.','_') + '.xml' )
+
+
+        # Construct gccxml command to run
+        gccxml_cmd = 'gccxml '
+
+        # - Add include paths
+        if cfg.include_path != '':
+            gccxml_cmd += '-I' + cfg.include_path + ' '
+        for add_incl_path in cfg.additional_include_paths:
+            gccxml_cmd += '-I' + add_incl_path + ' '
+
+        # - Add the input file (full path)
+        gccxml_cmd += input_file_path
+
+        # - Add gccxml option that specifies the xml output file: input_file_short_name.xml
+        gccxml_cmd += ' -fxml=' + xml_file_path
+
+
+        # Run gccxml
+        print 'Runing command: ' + gccxml_cmd
+        proc = subprocess.Popen(gccxml_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+
+        if proc.returncode != 0:        
+            print 'ERROR: gccxml failed. Printing output:'
+            output = proc.stderr.read()
+            print 
+            print '==== START GCCXML OUTPUT ===='
+            print
+            print output
+            print '==== END GCCXML OUTPUT ===='
+            print
+            sys.exit()
+        
+        else:
+            print 'Command finished successfully.'
+
+
+        # Append xml file to list of xml files
+        xml_files.append(xml_file_path)
+
+    #
+    # END: Run gccxml on input files
+    #
+
 
 
     #
@@ -509,18 +572,6 @@ def main():
     # END: loop over xml files
     #
 
-
-    #
-    # Add GAMBIT namespace tags to the wrapper typedefs header
-    #
-
-    # wrapper_typedefs_path = gb.wrapper_typedefs_fname + cfg.header_extension
-    # if wrapper_typedefs_path not in new_code.keys():
-    #     new_code[wrapper_typedefs_path] = {'code_tuples':[], 'add_include_guard':True}
-    # new_code[wrapper_typedefs_path]['code_tuples'].append( (0, '__START_GAMBIT_NAMESPACE__\n') )
-    # new_code[wrapper_typedefs_path]['code_tuples'].append( (-1,'__END_GAMBIT_NAMESPACE__\n') )
-
-
     #
     # Add include statement at beginning of wrapper deleter source file
     #    
@@ -529,17 +580,6 @@ def main():
     if w_deleter_source_path not in new_code.keys():
         new_code[w_deleter_source_path] = {'code_tuples':[], 'add_include_guard':False}
     new_code[w_deleter_source_path]['code_tuples'].append( (0, w_deleter_include) )
-
-
-    # #
-    # # Add include statement at beginning of wrapper deleter header file
-    # #    
-    # w_deleter_include = '#include "' + os.path.join(cfg.add_path_to_includes, gb.all_wrapper_fname + '_decl' + cfg.header_extension) + '"\n'
-    # w_deleter_header_path = os.path.join(cfg.extra_output_dir, gb.wrapper_deleter_fname + cfg.header_extension)
-    # if w_deleter_header_path not in new_code.keys():
-    #     new_code[w_deleter_header_path] = {'code_tuples':[], 'add_include_guard':True}
-    # new_code[w_deleter_header_path]['code_tuples'].append( (0, w_deleter_include) )
-
 
 
     #
@@ -618,155 +658,6 @@ def main():
             f.write(new_file_content)
             f.close()
 
-    # #
-    # # Generate 'abstracts' header
-    # #
-
-    # abstracts_includes_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_includes_TEMP.hpp')
-    # abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, abstract_typedefs_fname + cfg.header_extension)
-    # abstracts_header_path          = os.path.join(cfg.extra_output_dir, 'abstracts' + cfg.header_extension)
-
-    # f = open(abstracts_includes_header_path, 'r')
-    # abstracts_includes_header_content = f.read()
-    # f.close()
-
-    # f = open(abstracts_typedefs_header_path, 'r')
-    # abstracts_typedefs_header_content = f.read()
-    # f.close()
-
-    # abstracts_header_content  = '\n' 
-    # abstracts_header_content += '// Abstract classes:\n'
-    # abstracts_header_content += '// -----------------\n'
-    # abstracts_header_content += '\n' 
-    # abstracts_header_content += abstracts_includes_header_content
-    # abstracts_header_content += '\n' 
-    # abstracts_header_content += '// Typedefs for abstract classes:\n'
-    # abstracts_header_content += '// ------------------------------\n'
-    # abstracts_header_content += '\n' 
-    # abstracts_header_content += '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n'
-    # abstracts_header_content += abstracts_typedefs_header_content
-    # abstracts_header_content += '#include "backend_undefs.hpp"\n'
-    # abstracts_header_content += '\n' 
-
-
-    # # Add include guards
-    # abstracts_header_content = utils.addIncludeGuard(abstracts_header_content, os.path.basename(abstracts_header_path))
-
-    # # Write the 'abstracts' header (if not in debug_mode)
-    # if not options.debug_mode_flag:
-    #     f = open(abstracts_header_path, 'w')
-    #     f.write(abstracts_header_content)
-    #     f.close()
-
-    # # Remove the temporary headers 'abstracts_includes_TEMP.hpp' and 'abstracttypedefs.hpp' we used to construct the master header
-    # os.remove(abstracts_includes_header_path)
-    # # os.remove(abstracts_typedefs_header_path)
-
-
-
-    # #
-    # # Generate 'wrappers' header
-    # #
-
-    # wrappers_decl_includes_header_path = os.path.join(cfg.extra_output_dir, 'wrappers_decl_includes_TEMP.hpp')
-    # wrappers_def_includes_header_path  = os.path.join(cfg.extra_output_dir, 'wrappers_def_includes_TEMP.hpp')
-    # wrappers_typedefs_header_path      = os.path.join(cfg.extra_output_dir, 'wrappers_typedefs_TEMP.hpp')
-    # wrappers_header_path               = os.path.join(cfg.extra_output_dir, 'wrappers' + cfg.header_extension)
-
-    # f = open(wrappers_decl_includes_header_path, 'r')
-    # wrappers_decl_includes_header_content = f.read()
-    # f.close()
-
-    # f = open(wrappers_def_includes_header_path, 'r')
-    # wrappers_def_includes_header_content = f.read()
-    # f.close()
-
-    # f = open(wrappers_typedefs_header_path, 'r')
-    # wrappers_typedefs_header_content = f.read()
-    # f.close()
-
-    # wrappers_header_content  = '\n' 
-    # wrappers_header_content += '// Wrapper classes:\n'
-    # wrappers_header_content += '// ----------------\n'
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += wrappers_decl_includes_header_content
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += wrappers_def_includes_header_content
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += '// Typedefs for wrapper classes:\n'
-    # wrappers_header_content += '// -----------------------------\n'
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += '#include "' + os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n'
-    # wrappers_header_content += wrappers_typedefs_header_content
-    # wrappers_header_content += '#include "backend_undefs.hpp"\n'
-    # wrappers_header_content += '\n' 
-
-
-    # # Add include guards
-    # wrappers_header_content = utils.addIncludeGuard(wrappers_header_content, os.path.basename(wrappers_header_path))
-
-    # # Write the 'wrappers' header (if not in debug_mode)
-    # if not options.debug_mode_flag:
-    #     f = open(wrappers_header_path, 'w')
-    #     f.write(wrappers_header_content)
-    #     f.close()
-
-    # # Remove the temporary headers 'wrappers_decl_includes_TEMP.hpp', 'wrappers_def_includes_TEMP.hpp' and 'wrappers_typedefs_TEMP.hpp' 
-    # # we used to construct the master header
-    # os.remove(wrappers_decl_includes_header_path)
-    # os.remove(wrappers_def_includes_header_path)
-    # os.remove(wrappers_typedefs_header_path)
-
-
-
-
-    # #
-    # # Generate the master header
-    # #
-
-    # all_wrapper_decl_header_path = os.path.join(cfg.extra_output_dir, gb.all_wrapper_fname + '_decl' + cfg.header_extension)
-    # all_wrapper_def_header_path  = os.path.join(cfg.extra_output_dir, gb.all_wrapper_fname + '_def' + cfg.header_extension)
-    # master_header_path           = os.path.join(cfg.extra_output_dir, gb.all_wrapper_fname + cfg.header_extension)
-
-    # f = open(all_wrapper_decl_header_path, 'r')
-    # all_wrapper_decl_header_content = f.read()
-    # f.close()
-
-    # f = open(all_wrapper_def_header_path, 'r')
-    # all_wrapper_def_header_content = f.read()
-    # f.close()
-
-    # master_header_content  = '\n' 
-    # master_header_content += '// Loaded types declarations:\n'
-    # master_header_content += '// --------------------------\n'
-    # master_header_content += '\n' 
-    # master_header_content += all_wrapper_decl_header_content
-    # master_header_content += '\n' 
-    # master_header_content += '// Loaded types implementations:\n'
-    # master_header_content += '// -----------------------------\n'
-    # master_header_content += '\n' 
-    # master_header_content += all_wrapper_def_header_content
-    # master_header_content += '\n' 
-    # master_header_content += '// Typedefs: wrapper class name --> original class name:\n'
-    # master_header_content += '// -----------------------------------------------------\n'
-    # master_header_content += '\n' 
-    # master_header_content += '#include "' + gb.wrapper_typedefs_fname + cfg.header_extension + '"\n' 
-
-
-    # # Add include guards
-    # master_header_content = utils.addIncludeGuard(master_header_content, gb.all_wrapper_fname)
-
-    # # Write the master header (if not in debug_mode)
-    # if not options.debug_mode_flag:
-    #     f = open(master_header_path, 'w')
-    #     f.write(master_header_content)
-    #     f.close()
-
-    # # # Remove the temporary '_decl' and '_def' header files we used to construct the master header
-    # # os.remove(all_wrapper_decl_header_path)
-    # # os.remove(all_wrapper_def_header_path)
-
-
 
 
     # 
@@ -839,7 +730,7 @@ def main():
             raise
 
 
-    # NEW: move files to correct directories
+    # Move files to correct directories
 
     # - To gambit_backend_dir_complete
     move_files_list  = []
@@ -864,7 +755,7 @@ def main():
 
 
     
-    # NEW: copy files to correct directories
+    # Copy files to correct directories
 
     # - To gambit_backend_dir_complete
     copy_files_list  = []
@@ -931,10 +822,108 @@ def main():
         f.close()
 
 
+
+    #
+    # Copy files to the correct locations within the source tree of the original code
+    #
+
+    print
+    print 'Copying generated files to original source tree:'
+    print '------------------------------------------------'
     print 
+
+
+    # - Copy all manipulated original files
+    for original_file_short_name, original_file_full_path in gb.original_file_paths.items():
+
+        cp_source = os.path.join(cfg.extra_output_dir,original_file_short_name)
+        cp_target = original_file_full_path
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
     print
 
 
+    # - Copy factory source files
+    for class_name_long in gb.classes_done:
+
+        class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        class_name_short = utils.removeTemplateBracket(class_name_short)
+
+        factory_source_fname_short = cfg.factory_file_prefix + class_name_short + cfg.source_extension
+
+        cp_source = os.path.join(cfg.extra_output_dir, factory_source_fname_short)
+        cp_target = os.path.join(cfg.source_path, factory_source_fname_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+
+    # - Copy 'extras' source files (containing implementations for the helper functions that BOSS adds to the original classes)
+    for class_name_long in gb.classes_done:
+
+        class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        class_name_short = utils.removeTemplateBracket(class_name_short)
+
+        extra_source_fname_short = class_name_short + '_extras' + gb.code_suffix + cfg.source_extension
+
+        cp_source = os.path.join(cfg.extra_output_dir, extra_source_fname_short)
+        cp_target = os.path.join(cfg.source_path, extra_source_fname_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+
+    # - Copy files that are common for all BOSS runs
+    files_to_incl_path = []
+    files_to_incl_path.append( 'abstractbase.hpp' )                                      # abstractbase.hpp
+    files_to_incl_path.append( gb.abstract_typedefs_fname + cfg.header_extension )       # abstracttypedefs.hpp
+    files_to_incl_path.append( 'backend_undefs.hpp' )                                    # backend_undefs.hpp
+    files_to_incl_path.append( 'cats.hpp' )                                              # cats.hpp
+    files_to_incl_path.append( 'wrapperbase.hpp' )                                       # wrapperbase.hpp
+    files_to_incl_path.append( gb.wrapper_deleter_fname + cfg.header_extension )         # wrapperdeleter.hpp
+    files_to_incl_path.append( gb.wrapper_typedefs_fname + cfg.header_extension )        # wrappertypedefs.hpp
+
+    for file_name_short in files_to_incl_path:
+        cp_source = os.path.join(cfg.extra_output_dir, file_name_short)
+        cp_target = os.path.join(cfg.include_path, file_name_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+    files_to_src_path = []
+    files_to_src_path.append( gb.wrapper_deleter_fname + cfg.source_extension )         # wrapperdeleter.cpp
+
+    for file_name_short in files_to_src_path:
+        cp_source = os.path.join(cfg.extra_output_dir, file_name_short)
+        cp_target = os.path.join(cfg.source_path, file_name_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+
+    # - Copy the entire backend_types/ directory to the include directory
+    cp_source = os.path.join(cfg.extra_output_dir, cfg.gambit_backend_basedir)
+    cp_target = os.path.join(cfg.include_path, cfg.gambit_backend_basedir)
+
+    if os.path.isdir(cp_source):
+        print '   ' + cp_source + '   --->   ' + cp_target
+        shutil.copytree(cp_source, cp_target)
+
+
+
+
+    print 
+    print
 
 # ====== END: main ========
 

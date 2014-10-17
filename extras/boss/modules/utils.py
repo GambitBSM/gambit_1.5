@@ -9,6 +9,7 @@ from collections import OrderedDict
 from operator import itemgetter
 import os
 import warnings
+import subprocess
 
 import modules.cfg as cfg
 import modules.gb as gb
@@ -1518,3 +1519,168 @@ def replaceCodeTags(input, file_input=False):
     return new_content
 
 # ====== END: replaceCodeTags ========
+
+
+
+# ====== constrLoadedTypesHeader ======
+
+def constrLoadedTypesHeader(lib_file_path):
+
+    #
+    # Check that the shared library exists
+    #
+    if not os.path.isfile(lib_file_path):
+        raise IOError("The file '%s' was not found." % lib_file_path)
+
+    #
+    # Check that commands 'nm' and 'c++filt' are available
+    #
+    nm_check_cmd   = 'which nm'
+    filt_check_cmd = 'which c++filt'
+
+    nm_check_proc   = subprocess.Popen(nm_check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    filt_check_proc = subprocess.Popen(filt_check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+    nm_check_output   = nm_check_proc.stdout.read()
+    filt_check_output = filt_check_proc.stdout.read()
+
+    if (nm_check_output==''):
+        raise Exception("The required command 'nm' does not seem to be available.")
+    elif (filt_check_output==''):
+        raise Exception("The required command 'c++filt' does not seem to be available.")
+
+
+    #
+    # Use 'nm' and 'c++filt' to construct dictionary from class name to factory symbol names and argument brackets
+    #
+    cmd_mangled   = 'nm ' + lib_file_path
+    cmd_demangled = 'nm ' + lib_file_path + ' | c++filt -i'
+
+    proc_mangled = subprocess.Popen(cmd_mangled, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output_mangled = proc_mangled.stdout.readlines()
+
+    proc_demangled = subprocess.Popen(cmd_demangled, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output_demangled = proc_demangled.stdout.readlines()
+
+    factory_dict = OrderedDict()
+    for i in range(len(output_mangled)):
+
+        mangled_line   = output_mangled[i]
+        demangled_line = output_demangled[i]
+
+        if ('Factory_' in mangled_line) and ('Factory_' in demangled_line):
+
+            arg_bracket_start_pos = demangled_line.rfind('(')
+            arg_bracket = demangled_line[arg_bracket_start_pos:].replace(' ','').replace('\n','')
+
+            signature_start_pos = demangled_line[:arg_bracket_start_pos].rfind(' ')
+            factory_name_long   = demangled_line[signature_start_pos+1:arg_bracket_start_pos].replace(' ','')
+
+            class_name_long = factory_name_long.replace('Factory_','')
+
+            factory_symbol = mangled_line.split(' ')[-1].rstrip('\n')
+
+            # Add entry to factory_dict
+            if class_name_long in cfg.loaded_classes:
+
+                if class_name_long not in factory_dict.keys():
+                    factory_dict[class_name_long] = []
+
+                factory_dict[class_name_long].append( (factory_symbol, arg_bracket) )
+
+    # If not a single factory function was matched to a loaded class, raise an exception
+    if len(factory_dict) == 0:
+        raise Exception("No factory functions matching the classes %s were found in the file '%s'. No header file generated." % (cfg.loaded_classes, lib_file_path))
+
+    # Print warnings for any loaded class for which no matching factory function was found
+    for class_name_long in cfg.loaded_classes:
+        if not class_name_long in factory_dict.keys():
+            print "WARNING: No factory function detected in '%s' for class '%s'." % (lib_file_path, class_name_long)
+
+
+    # 
+    # Construct the code lines for the loaded classes, containg all the factory symbols and argument brackets for that class
+    #
+    class_lines = []
+    for class_name_long in factory_dict.keys():
+
+        class_line = '  (( /*class*/'
+
+        namespace, class_name_short = removeNamespace(class_name_long, return_namespace=True)
+
+        if namespace == '':
+            namespace_list = []
+        else:
+            namespace_list = namespace.split('::')
+
+        for ns_part in namespace_list:
+            class_line += '(' + ns_part + ')'
+
+        class_line += '(' + class_name_short + '),'
+
+
+        class_line += '    /*constructors*/'
+        for symbol, arg_bracket in factory_dict[class_name_long]:
+            class_line += '(("' + symbol + '",' + arg_bracket + ')) '
+
+        class_line += ')) \\'
+        class_lines.append(class_line)
+
+    class_lines_code  = ''
+    class_lines_code += '#define ' + gb.gambit_backend_name_full + '_all_data \\\n'
+    class_lines_code += '\n'.join(class_lines) + '\n'
+
+
+
+    
+    #
+    # Construct include guards with additional  ' 1' appended to the line starting with #define 
+    #
+    incl_guard = addIncludeGuard('', 'loaded_types.hpp', extra_string=gb.gambit_backend_name_full)
+    incl_guard_lines = incl_guard.split('\n')
+
+    incl_guard_start = '\n'.join(incl_guard_lines[:2]) + ' 1\n'
+    incl_guard_end   = incl_guard_lines[-2] + '\n'
+
+
+    #
+    # Construct include statements
+    #
+    incl_statements_code = ''
+    for class_name_long in factory_dict.keys():
+        namespace, class_name_short = removeNamespace(class_name_long, return_namespace=True)
+        incl_statements_code += '#include "' + cfg.wrapper_header_prefix + class_name_short + cfg.header_extension + '"\n'
+    incl_statements_code += '#include "identification.hpp"\n'
+
+
+    #
+    # Combine everything to construct header code
+    #
+    code  = ''
+    code += incl_guard_start
+
+    code += '\n'
+    code += incl_statements_code
+
+    code += '\n'
+    code += '// Indicate which types are provided by this backend, and what the symbols of their factories are.\n'
+    code += class_lines_code
+
+    code += '\n'
+    code += '// If the default version has been loaded, set it as default.\n'
+    code += '#if ALREADY_LOADED(CAT_3(BACKENDNAME,_,CAT(Default_,BACKENDNAME)))\n'
+    code += '  SET_DEFAULT_VERSION_FOR_LOADING_TYPES(BACKENDNAME,SAFE_VERSION,CAT(Default_,BACKENDNAME))\n'
+    code += '#endif\n'
+
+    code += '\n'
+    code += '// Undefine macros to avoid conflict with other backends.\n'
+    code += '#include "backend_undefs.hpp"\n'
+
+    code += '\n'
+    code += incl_guard_end
+
+    return code
+    
+# ====== END: constrLoadedTypesHeader ======
+
+

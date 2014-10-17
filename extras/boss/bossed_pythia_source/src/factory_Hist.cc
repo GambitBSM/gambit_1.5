@@ -1,9 +1,11 @@
 #include "Pythia8/Basics.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Hist_decl.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Hist_def.h"
+#include "backend_types/Pythia_8_186/wrapper_Hist_decl.h"
+#include "backend_types/Pythia_8_186/wrapper_Hist_def.h"
 #include <string>
-#include "abstracts_typedefs.hpp"
-#include "wrappers_typedefs.hpp"
+#include "abstracttypedefs.h"
+#include "wrappertypedefs.h"
+
+// FACTORY_SIGNATURES_ORDER: ##()##(std::string, int, double, double)##(std::string, int, double)##(std::string, int)##(std::string)##(std::string, const Pythia8::Hist__BOSS&)##
 
 namespace Pythia8
 {
@@ -32,7 +34,7 @@ namespace Pythia8
         return new Hist(titleIn);
     }
     
-    Abstract_Hist* Factory_Hist(std::string titleIn, const Pythia8::Hist_GAMBIT& h)
+    Abstract_Hist* Factory_Hist(std::string titleIn, const Pythia8::Hist__BOSS& h)
     {
         return new Hist(titleIn, dynamic_cast< const Pythia8::Hist& >(*h.BEptr));
     }
