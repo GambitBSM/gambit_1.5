@@ -16,8 +16,8 @@ OBJECTS = $(CPPOBJECTS) $(CCOBJECTS)
 TARGETS = pythia8_example #simple_example
 
 # The following should really be done in a configure/cmake script rather than this makefile.
-PY8_CXXFLAGS := $(shell pythia8-config --cxxflags)
-PY8_LDFLAGS := $(shell pythia8-config --libs)
+PY8_CXXFLAGS := $(shell pythia8-config --cxxflags --hepmc)
+PY8_LDFLAGS := $(shell pythia8-config --libs --hepmc)
 ROOT_CXXFLAGS := $(shell root-config --cflags)
 ROOT_LDFLAGS := $(shell root-config --libs)
 FJ_CXXFLAGS := $(shell fastjet-config --cxxflags)
