@@ -19,10 +19,12 @@ import sys
 import warnings
 import shutil
 import glob
+import subprocess
 from collections import OrderedDict
 from optparse import OptionParser
 
 import modules.cfg as cfg
+import modules.gb as gb
 import modules.classutils as classutils
 import modules.classparse as classparse
 import modules.funcparse as funcparse
@@ -35,7 +37,12 @@ import modules.utils as utils
 def main():
 
     print
-    print
+    print '    ================================='
+    print '    ||                             ||'
+    print '    ||  BOSS - Backend-On-a-Stick  ||'
+    print '    ||                             ||'
+    print '    ================================='
+    print 
 
     #
     # Initialization
@@ -50,20 +57,6 @@ def main():
     except OSError, e:
       if e.errno != 17:
         raise e
-
-    # Set GAMBIT variables
-    cfg.gambit_backend_safeversion = cfg.gambit_backend_version.replace('.','_')
-
-    cfg.all_wrapper_fname = 'loadedtypes_' + cfg.gambit_backend_name.lower() + '_' + cfg.gambit_backend_safeversion.lower()
-
-    # cfg.gambit_full_namespace = cfg.gambit_base_namespace.rstrip('::') + '::' + cfg.gambit_backend_name + '_' + cfg.gambit_backend_safeversion
-
-    cfg.gambit_backend_name_full = cfg.gambit_backend_name + '_' + cfg.gambit_backend_safeversion
-
-
-    # Initialize variables
-    cfg.n_classes_done = 0
-
 
     # Parse command line arguments and options
     parser = OptionParser(usage="usage: %prog [options] xmlfiles",
@@ -95,11 +88,9 @@ def main():
                       help="Test run. No source files are changed.")
     (options, args) = parser.parse_args()
 
-    if len(args) < 1:
-        parser.error("No xml file(s) specified")
 
-    # Get the xml file names from command line input
-    xml_files = args
+    # Get the input file names from command line input
+    input_files = args
 
     # Set up a few more things before the file loop
     if options.choose_flag:
@@ -123,6 +114,65 @@ def main():
 
 
     #
+    # Run gccxml for all input header/source files
+    #
+    xml_files = []
+    for input_file_path in input_files:
+
+        # Get path and filename for the input file
+        input_file_dir, input_file_short_name = os.path.split(input_file_path)
+
+        # Construct file name for xml file produced by gccxml
+        # xml_file_path = os.path.join('temp', os.path.splitext(input_file_short_name)[0] + '.xml' )
+        xml_file_path = os.path.join('temp', input_file_path.replace('/','_').replace('.','_') + '.xml' )
+
+
+        # Construct gccxml command to run
+        gccxml_cmd = 'gccxml '
+
+        # - Add include paths
+        if cfg.include_path != '':
+            gccxml_cmd += '-I' + cfg.include_path + ' '
+        for add_incl_path in cfg.additional_include_paths:
+            gccxml_cmd += '-I' + add_incl_path + ' '
+
+        # - Add the input file (full path)
+        gccxml_cmd += input_file_path
+
+        # - Add gccxml option that specifies the xml output file: input_file_short_name.xml
+        gccxml_cmd += ' -fxml=' + xml_file_path
+
+
+        # Run gccxml
+        print 'Runing command: ' + gccxml_cmd
+        proc = subprocess.Popen(gccxml_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+
+        if proc.returncode != 0:        
+            print 'ERROR: gccxml failed. Printing output:'
+            output = proc.stderr.read()
+            print 
+            print '==== START GCCXML OUTPUT ===='
+            print
+            print output
+            print '==== END GCCXML OUTPUT ===='
+            print
+            sys.exit()
+        
+        else:
+            print 'Command finished successfully.'
+
+
+        # Append xml file to list of xml files
+        xml_files.append(xml_file_path)
+
+    #
+    # END: Run gccxml on input files
+    #
+
+
+
+    #
     # Loop over all the xml files
     #
 
@@ -134,17 +184,17 @@ def main():
         print
 
         # Set global xml file name and parse it using ElementTree
-        cfg.xml_file_name = current_xml_file
-        tree = ET.parse(cfg.xml_file_name)
+        gb.xml_file_name = current_xml_file
+        tree = ET.parse(gb.xml_file_name)
         root = tree.getroot()
 
 
         # Update global dict: id --> xml element (all elements)
-        cfg.id_dict = OrderedDict([ (el.get('id'), el) for el in root.getchildren() ]) 
+        gb.id_dict = OrderedDict([ (el.get('id'), el) for el in root.getchildren() ]) 
 
 
         # Update global dict: file name --> file xml element
-        cfg.file_dict = OrderedDict([ (el.get('name'), el) for el in root.findall('File') ])
+        gb.file_dict = OrderedDict([ (el.get('name'), el) for el in root.findall('File') ])
 
 
         # Update global dict: std type --> type xml element
@@ -160,18 +210,18 @@ def main():
                 else:
                     std_type_name = el.get('name')
 
-                cfg.std_types_dict[std_type_name] = el
+                gb.std_types_dict[std_type_name] = el
                 
-        # for std_type in cfg.std_types_dict.keys():
+        # for std_type in gb.std_types_dict.keys():
         #     print [std_type]
 
 
         # for el in root.findall(('Class') + root.findall('Struct')):
         #     if utils.isStdType(el):
-        #         cfg.std_types_dict[el.get('name')] = el
+        #         gb.std_types_dict[el.get('name')] = el
         # for el in root.findall('Struct'):
         #     if utils.isStdType(el):
-        #         cfg.std_types_dict[el.get('name')] = el
+        #         gb.std_types_dict[el.get('name')] = el
 
 
         # Update global dict: class name --> class xml element
@@ -217,13 +267,13 @@ def main():
         for el in (root.findall('Class') + root.findall('Struct')):
             demangled_class_name = el.get('demangled')
             if demangled_class_name in cfg.loaded_classes:
-                cfg.class_dict[demangled_class_name] = el
+                gb.class_dict[demangled_class_name] = el
             elif options.list_flag and utils.isNative(el):
-                cfg.class_dict[demangled_class_name] = el
+                gb.class_dict[demangled_class_name] = el
 
 
         # Update global dict: typedef name --> typedef xml element
-        cfg.typedef_dict = OrderedDict() 
+        gb.typedef_dict = OrderedDict() 
         for el in root.findall('Typedef'):
 
             # Only accept native typedefs:
@@ -236,12 +286,12 @@ def main():
                 except:
                     warnings.warn("Could not determine type of xml element with 'id'=%s" % el.get('id')) 
                     continue
-                type_el = cfg.id_dict[type_id]
+                type_el = gb.id_dict[type_id]
 
 
                 # If underlying type is a fundamental or standard type, accept it right away
                 if utils.isFundamental(type_el) or utils.isStdType(type_el):
-                    cfg.typedef_dict[typedef_name] = el
+                    gb.typedef_dict[typedef_name] = el
                 
                 # If underlying type is a class/struct, check if it's acceptable
                 elif type_el.tag in ['Class', 'Struct']:
@@ -251,7 +301,7 @@ def main():
                         complete_type_name = type_el.get('name')
                     
                     if complete_type_name in cfg.loaded_classes:
-                        cfg.typedef_dict[typedef_name] = el
+                        gb.typedef_dict[typedef_name] = el
                 
                 # If neither fundamental or class/struct, ignore it.
                 else:
@@ -270,9 +320,9 @@ def main():
                     func_name_full = demangled_name.split('(',1)[0]
 
                 if func_name_full in cfg.loaded_functions:
-                    cfg.func_dict[func_name_full] = el
+                    gb.func_dict[func_name_full] = el
                 elif (options.list_flag) and (utils.isNative(el)):
-                    cfg.func_dict[func_name_full] = el
+                    gb.func_dict[func_name_full] = el
 
 
         # Update global dict: function name --> function xml element
@@ -330,9 +380,9 @@ def main():
                 else:
                     func_name_full = demangled_func_name.split('(',1)[0]
                 if func_name_full in cfg.loaded_functions:
-                    cfg.func_dict[func_name_full] = el
+                    gb.func_dict[func_name_full] = el
                 elif (options.list_flag) and (utils.isNative(el)):
-                    cfg.func_dict[func_name_full] = el
+                    gb.func_dict[func_name_full] = el
 
 
 
@@ -340,7 +390,7 @@ def main():
         if cfg.load_parent_classes:
 
             for class_name in cfg.loaded_classes:
-                class_el = cfg.class_dict[class_name]
+                class_el = gb.class_dict[class_name]
                 parents_el_list = utils.getAllParentClasses(class_el, only_native_classes=True)
 
                 for el in parents_el_list:
@@ -351,14 +401,14 @@ def main():
                         if demangled_name not in cfg.loaded_classes:
                             cfg.loaded_classes.append(demangled_name)
                         
-                        # - Update cfg.class_dict
-                        if demangled_name not in cfg.class_dict.keys():
-                            cfg.class_dict[demangled_name] = el
+                        # - Update gb.class_dict
+                        if demangled_name not in gb.class_dict.keys():
+                            gb.class_dict[demangled_name] = el
 
 
         # Update global list: accepted types
         fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
-        cfg.accepted_types = fundamental_types + cfg.std_types_dict.keys() + cfg.loaded_classes + cfg.typedef_dict.keys()
+        gb.accepted_types  = fundamental_types + gb.std_types_dict.keys() + cfg.loaded_classes + gb.typedef_dict.keys()
 
 
         # Update global dict: new header files
@@ -367,19 +417,19 @@ def main():
             class_name_short = class_name.split('<',1)[0].split('::')[-1]
             class_name_long  = class_name.split('<',1)[0]
 
-            if class_name_long not in cfg.new_header_files.keys():
+            if class_name_long not in gb.new_header_files.keys():
               
                 abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
                 wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
                 wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
                 wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
 
-                abstract_header_fullpath     = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
-                wrapper_header_fullpath      = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
-                wrapper_decl_header_fullpath = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
-                wrapper_def_header_fullpath  = os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
+                abstract_header_fullpath     = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
+                wrapper_header_fullpath      = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
+                wrapper_decl_header_fullpath = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
+                wrapper_def_header_fullpath  = os.path.join(cfg.gambit_backend_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
                 
-                cfg.new_header_files[class_name_long] = {   'abstract': abstract_header_name, 
+                gb.new_header_files[class_name_long] = {   'abstract': abstract_header_name, 
                                                             'wrapper': wrapper_header_name, 
                                                             'wrapper_decl': wrapper_decl_header_name,
                                                             'wrapper_def': wrapper_def_header_name,
@@ -399,13 +449,13 @@ def main():
             if not options.choose_flag:
                 print 'Classes:'
                 print '--------'
-                for demangled_class_name in cfg.class_dict:
+                for demangled_class_name in gb.class_dict:
                     print ' - ' + demangled_class_name
                 print
 
                 print 'Functions:'
                 print '----------'
-                for func_el in cfg.func_dict.values():
+                for func_el in gb.func_dict.values():
                     extended_name = func_el.get('demangled')
                     print ' - ' + extended_name
                 print
@@ -424,9 +474,9 @@ def main():
         # wrapper_base_header_fname = cfg.wrapper_header_prefix + wrapper_base_class_name + cfg.header_extension
         # wrapper_base_header_path  = os.path.join(cfg.extra_output_dir, wrapper_base_header_fname)
 
-        # # - Update cfg.new_header_files
-        # if wrapper_base_class_name not in cfg.new_header_files:
-        #     cfg.new_header_files[wrapper_base_class_name] = {'abstract': '', 'wrapper': wrapper_base_header_fname}
+        # # - Update gb.new_header_files
+        # if wrapper_base_class_name not in gb.new_header_files:
+        #     gb.new_header_files[wrapper_base_class_name] = {'abstract': '', 'wrapper': wrapper_base_header_fname}
 
         # # - Register header file in the 'new_code' dict
         # if wrapper_base_header_path not in new_code.keys():
@@ -478,17 +528,17 @@ def main():
         #         new_code[src_file_name].append(code_tuple)
 
 
-        #
-        # Create header with typedefs
-        #
+        # #
+        # # Create header with typedefs
+        # #
 
-        code_tuple = utils.constrTypedefHeader()
+        # code_tuple = utils.constrTypedefHeader()
 
-        typedef_header_path = os.path.join(cfg.extra_output_dir, cfg.all_typedefs_fname + cfg.header_extension)
+        # typedef_header_path = os.path.join(cfg.extra_output_dir, gb.all_typedefs_fname + cfg.header_extension)
         
-        if typedef_header_path not in new_code.keys():
-            new_code[typedef_header_path] = {'code_tuples':[], 'add_include_guard':True}
-        new_code[typedef_header_path]['code_tuples'].append(code_tuple)
+        # if typedef_header_path not in new_code.keys():
+        #     new_code[typedef_header_path] = {'code_tuples':[], 'add_include_guard':True}
+        # new_code[typedef_header_path]['code_tuples'].append(code_tuple)
 
 
 
@@ -498,7 +548,7 @@ def main():
 
         code_tuple = utils.constrAbsForwardDeclHeader()
 
-        abs_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension)
+        abs_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, gb.frwd_decls_abs_fname + cfg.header_extension)
         
         if abs_frwd_decls_header_path not in new_code.keys():
             new_code[abs_frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
@@ -511,7 +561,7 @@ def main():
 
         code_tuple = utils.constrWrpForwardDeclHeader()
 
-        wrp_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, cfg.frwd_decls_wrp_fname + cfg.header_extension)
+        wrp_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, gb.frwd_decls_wrp_fname + cfg.header_extension)
         
         if wrp_frwd_decls_header_path not in new_code.keys():
             new_code[wrp_frwd_decls_header_path] = {'code_tuples':[], 'add_include_guard':True}
@@ -522,38 +572,14 @@ def main():
     # END: loop over xml files
     #
 
-
-    # #
-    # # If cfg.gambit_mode = True, add namespace tags to thw wrapper typedefs header
-    # #
-
-    # if cfg.gambit_mode:
-    #     wrapper_typedefs_path = cfg.wrapper_typedefs_fname + cfg.header_extension
-    #     if wrapper_typedefs_path not in new_code.keys():
-    #         new_code[wrapper_typedefs_path] = {'code_tuples':[], 'add_include_guard':True}
-    #     new_code[wrapper_typedefs_path]['code_tuples'].append( (0, '__START_GAMBIT_NAMESPACE__\n') )
-    #     new_code[wrapper_typedefs_path]['code_tuples'].append( (-1,'__END_GAMBIT_NAMESPACE__\n') )
-
-
     #
     # Add include statement at beginning of wrapper deleter source file
     #    
-    w_deleter_include = '#include "' + os.path.join(cfg.wrapper_deleter_fname + cfg.header_extension) + '"\n'
-    w_deleter_source_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.source_extension)
+    w_deleter_include = '#include "' + os.path.join(gb.wrapper_deleter_fname + cfg.header_extension) + '"\n'
+    w_deleter_source_path = os.path.join(cfg.extra_output_dir, gb.wrapper_deleter_fname + cfg.source_extension)
     if w_deleter_source_path not in new_code.keys():
         new_code[w_deleter_source_path] = {'code_tuples':[], 'add_include_guard':False}
     new_code[w_deleter_source_path]['code_tuples'].append( (0, w_deleter_include) )
-
-
-    # #
-    # # Add include statement at beginning of wrapper deleter header file
-    # #    
-    # w_deleter_include = '#include "' + os.path.join(cfg.add_path_to_includes, cfg.all_wrapper_fname + '_decl' + cfg.header_extension) + '"\n'
-    # w_deleter_header_path = os.path.join(cfg.extra_output_dir, cfg.wrapper_deleter_fname + cfg.header_extension)
-    # if w_deleter_header_path not in new_code.keys():
-    #     new_code[w_deleter_header_path] = {'code_tuples':[], 'add_include_guard':True}
-    # new_code[w_deleter_header_path]['code_tuples'].append( (0, w_deleter_include) )
-
 
 
     #
@@ -617,7 +643,7 @@ def main():
         # Add include guard where requested
         if add_include_guard:
             short_new_src_file_name = os.path.basename(new_src_file_name)
-            new_file_content = utils.addIncludeGuard(new_file_content, short_new_src_file_name, extra_string=cfg.gambit_backend_name_full)
+            new_file_content = utils.addIncludeGuard(new_file_content, short_new_src_file_name, extra_string=gb.gambit_backend_name_full)
 
         # Do the writing! (If debug_mode, only print file content to screen)
         if options.debug_mode_flag:
@@ -632,159 +658,10 @@ def main():
             f.write(new_file_content)
             f.close()
 
-    # #
-    # # Generate 'abstracts' header
-    # #
-
-    # abstracts_includes_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_includes_TEMP.hpp')
-    # abstracts_typedefs_header_path = os.path.join(cfg.extra_output_dir, 'abstracts_typedefs.hpp')
-    # abstracts_header_path          = os.path.join(cfg.extra_output_dir, 'abstracts' + cfg.header_extension)
-
-    # f = open(abstracts_includes_header_path, 'r')
-    # abstracts_includes_header_content = f.read()
-    # f.close()
-
-    # f = open(abstracts_typedefs_header_path, 'r')
-    # abstracts_typedefs_header_content = f.read()
-    # f.close()
-
-    # abstracts_header_content  = '\n' 
-    # abstracts_header_content += '// Abstract classes:\n'
-    # abstracts_header_content += '// -----------------\n'
-    # abstracts_header_content += '\n' 
-    # abstracts_header_content += abstracts_includes_header_content
-    # abstracts_header_content += '\n' 
-    # abstracts_header_content += '// Typedefs for abstract classes:\n'
-    # abstracts_header_content += '// ------------------------------\n'
-    # abstracts_header_content += '\n' 
-    # abstracts_header_content += '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, 'identification.hpp') + '"\n'
-    # abstracts_header_content += abstracts_typedefs_header_content
-    # abstracts_header_content += '#include "backend_undefs.hpp"\n'
-    # abstracts_header_content += '\n' 
-
-
-    # # Add include guards
-    # abstracts_header_content = utils.addIncludeGuard(abstracts_header_content, os.path.basename(abstracts_header_path))
-
-    # # Write the 'abstracts' header (if not in debug_mode)
-    # if not options.debug_mode_flag:
-    #     f = open(abstracts_header_path, 'w')
-    #     f.write(abstracts_header_content)
-    #     f.close()
-
-    # # Remove the temporary headers 'abstracts_includes_TEMP.hpp' and 'abstracts_typedefs_TEMP.hpp' we used to construct the master header
-    # os.remove(abstracts_includes_header_path)
-    # # os.remove(abstracts_typedefs_header_path)
-
-
-
-    # #
-    # # Generate 'wrappers' header
-    # #
-
-    # wrappers_decl_includes_header_path = os.path.join(cfg.extra_output_dir, 'wrappers_decl_includes_TEMP.hpp')
-    # wrappers_def_includes_header_path  = os.path.join(cfg.extra_output_dir, 'wrappers_def_includes_TEMP.hpp')
-    # wrappers_typedefs_header_path      = os.path.join(cfg.extra_output_dir, 'wrappers_typedefs_TEMP.hpp')
-    # wrappers_header_path               = os.path.join(cfg.extra_output_dir, 'wrappers' + cfg.header_extension)
-
-    # f = open(wrappers_decl_includes_header_path, 'r')
-    # wrappers_decl_includes_header_content = f.read()
-    # f.close()
-
-    # f = open(wrappers_def_includes_header_path, 'r')
-    # wrappers_def_includes_header_content = f.read()
-    # f.close()
-
-    # f = open(wrappers_typedefs_header_path, 'r')
-    # wrappers_typedefs_header_content = f.read()
-    # f.close()
-
-    # wrappers_header_content  = '\n' 
-    # wrappers_header_content += '// Wrapper classes:\n'
-    # wrappers_header_content += '// ----------------\n'
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += wrappers_decl_includes_header_content
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += wrappers_def_includes_header_content
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += '// Typedefs for wrapper classes:\n'
-    # wrappers_header_content += '// -----------------------------\n'
-    # wrappers_header_content += '\n' 
-    # wrappers_header_content += '#include "' + os.path.join(cfg.gambit_backend_basedir, cfg.gambit_backend_name_full, 'identification.hpp') + '"\n'
-    # wrappers_header_content += wrappers_typedefs_header_content
-    # wrappers_header_content += '#include "backend_undefs.hpp"\n'
-    # wrappers_header_content += '\n' 
-
-
-    # # Add include guards
-    # wrappers_header_content = utils.addIncludeGuard(wrappers_header_content, os.path.basename(wrappers_header_path))
-
-    # # Write the 'wrappers' header (if not in debug_mode)
-    # if not options.debug_mode_flag:
-    #     f = open(wrappers_header_path, 'w')
-    #     f.write(wrappers_header_content)
-    #     f.close()
-
-    # # Remove the temporary headers 'wrappers_decl_includes_TEMP.hpp', 'wrappers_def_includes_TEMP.hpp' and 'wrappers_typedefs_TEMP.hpp' 
-    # # we used to construct the master header
-    # os.remove(wrappers_decl_includes_header_path)
-    # os.remove(wrappers_def_includes_header_path)
-    # os.remove(wrappers_typedefs_header_path)
-
-
-
-
-    # #
-    # # Generate the master header
-    # #
-
-    # all_wrapper_decl_header_path = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_decl' + cfg.header_extension)
-    # all_wrapper_def_header_path  = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + '_def' + cfg.header_extension)
-    # master_header_path           = os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension)
-
-    # f = open(all_wrapper_decl_header_path, 'r')
-    # all_wrapper_decl_header_content = f.read()
-    # f.close()
-
-    # f = open(all_wrapper_def_header_path, 'r')
-    # all_wrapper_def_header_content = f.read()
-    # f.close()
-
-    # master_header_content  = '\n' 
-    # master_header_content += '// Loaded types declarations:\n'
-    # master_header_content += '// --------------------------\n'
-    # master_header_content += '\n' 
-    # master_header_content += all_wrapper_decl_header_content
-    # master_header_content += '\n' 
-    # master_header_content += '// Loaded types implementations:\n'
-    # master_header_content += '// -----------------------------\n'
-    # master_header_content += '\n' 
-    # master_header_content += all_wrapper_def_header_content
-    # master_header_content += '\n' 
-    # master_header_content += '// Typedefs: wrapper class name --> original class name:\n'
-    # master_header_content += '// -----------------------------------------------------\n'
-    # master_header_content += '\n' 
-    # master_header_content += '#include "' + cfg.wrapper_typedefs_fname + cfg.header_extension + '"\n' 
-
-
-    # # Add include guards
-    # master_header_content = utils.addIncludeGuard(master_header_content, cfg.all_wrapper_fname)
-
-    # # Write the master header (if not in debug_mode)
-    # if not options.debug_mode_flag:
-    #     f = open(master_header_path, 'w')
-    #     f.write(master_header_content)
-    #     f.close()
-
-    # # # Remove the temporary '_decl' and '_def' header files we used to construct the master header
-    # # os.remove(all_wrapper_decl_header_path)
-    # # os.remove(all_wrapper_def_header_path)
-
-
 
 
     # 
-    # Copy and rename files from ./common_headers to output directory
+    # Copy and edit files from common_headers/
     # 
 
     # - abstractbase.hpp
@@ -798,39 +675,25 @@ def main():
 
     source_file_name = 'common_headers/wrapperbase.hpp'
     target_file_name = os.path.join(cfg.extra_output_dir, 'wrapperbase.hpp')
-    
-    f_src = open(source_file_name, 'r')
-    content = f_src.read()
-    f_src.close()
 
-    new_content = content.replace('__CODE_SUFFIX__', cfg.code_suffix)
+    new_content = utils.replaceCodeTags(source_file_name, file_input=True)
 
     f_target = open(target_file_name, 'w')
     f_target.write(new_content)
     f_target.close()
 
 
-    # # - boss_loaded_classes.hpp
+    # - identification.hpp
 
-    # source_file_name = 'common_headers/boss_loaded_classes.hpp'
-    # target_file_name = os.path.join(cfg.extra_output_dir, 'boss_loaded_classes' + cfg.header_extension)
+    source_file_name = 'common_headers/identification.hpp'
+    target_file_name = os.path.join(cfg.extra_output_dir, 'identification.hpp')
 
-    # f_src = open(source_file_name, 'r')
-    # content = f_src.read()
-    # f_src.close()
+    new_content = utils.replaceCodeTags(source_file_name, file_input=True)
 
-    # new_content = content.replace('__HEADER_EXTENSION__', cfg.header_extension)
+    f_target = open(target_file_name, 'w')
+    f_target.write(new_content)
+    f_target.close()
 
-    # f_target = open(target_file_name, 'w')
-    # f_target.write(new_content)
-    # f_target.close()
-
-
-    # - nullptr_check.hpp
-
-    # source_file_name = 'common_headers/nullptr_check.hpp'
-    # target_file_name = os.path.join(cfg.extra_output_dir, 'nullptr_check' + cfg.header_extension)
-    # shutil.copy (source_file_name, target_file_name)
 
 
     # 
@@ -838,7 +701,7 @@ def main():
     # with the files that should be copied to GAMBIT
     #
 
-    gambit_backend_dir_complete = os.path.join(cfg.extra_output_dir, cfg.gambit_backend_basedir, cfg.gambit_backend_name_full) 
+    gambit_backend_dir_complete = os.path.join(cfg.extra_output_dir, cfg.gambit_backend_basedir, gb.gambit_backend_name_full) 
 
     # - Create directories
     try:
@@ -867,7 +730,7 @@ def main():
             raise
 
 
-    # NEW: move files to correct directories
+    # Move files to correct directories
 
     # - To gambit_backend_dir_complete
     move_files_list  = []
@@ -879,23 +742,25 @@ def main():
     move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + '*') )
 
     # -- header with forward declarations for all abstract classes
-    move_files_list += [ os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension) ]
+    move_files_list += [ os.path.join(cfg.extra_output_dir, gb.frwd_decls_abs_fname + cfg.header_extension) ]
 
     # -- header with forward declarations for all wrapper classes
-    move_files_list += [ os.path.join(cfg.extra_output_dir, cfg.frwd_decls_wrp_fname + cfg.header_extension) ]
+    move_files_list += [ os.path.join(cfg.extra_output_dir, gb.frwd_decls_wrp_fname + cfg.header_extension) ]
+
+    # -- identification.hpp
+    move_files_list += [ os.path.join(cfg.extra_output_dir, 'identification.hpp') ]    
 
     for mv_file in move_files_list:
         shutil.move(mv_file, gambit_backend_dir_complete)
 
 
     
-    # NEW: copy files to correct directories
+    # Copy files to correct directories
 
     # - To gambit_backend_dir_complete
     copy_files_list  = []
     
     copy_files_list += ['headers_by_hand/loaded_types.hpp' ]
-    copy_files_list += ['headers_by_hand/identification.hpp' ]
 
     for cp_file in copy_files_list:
         shutil.copy(cp_file, gambit_backend_dir_complete)
@@ -911,61 +776,16 @@ def main():
         shutil.copy(cp_file, cfg.extra_output_dir)
 
 
-
-    # # - First, move files that should *only* go into gambit_backend_dir_complete
-    # move_files_list  = []
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_typedefs_fname + cfg.header_extension) )   # + wrapper typedefs header
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension) )        # + master header that includes all wrapper headers + wrapper typedefs
-
-    # for mv_file in move_files_list:
-    #     shutil.move(mv_file, gambit_backend_dir_complete)
-
-    # # - Next, copy to gambit_backend_dir_complete the files that should go in both gambit_backend_dir_complete and cfg.extra_output_dir
-    # copy_files_list  = []
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'AbstractBase' + cfg.header_extension) )             # + abstract base class header
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, 'WrapperBase' + cfg.header_extension) )              # + wrapper base class header
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.abstr_header_prefix + '*') )                     # + abstract class headers
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.wrapper_header_prefix + '*') )                   # + wrapper class headers
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.all_wrapper_fname + cfg.header_extension) )      # + header including all wrapper headers
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.frwd_decls_abs_fname + cfg.header_extension) )   # + header with forward declarations for all abstract classes
-    # copy_files_list += glob.glob( os.path.join(cfg.extra_output_dir, cfg.frwd_decls_wrp_fname + cfg.header_extension) )   # + header with forward declarations for all wrapper classes
-    
-    # for cp_file in copy_files_list:
-    #     shutil.copy(cp_file, gambit_backend_dir_complete)
-
-    # # - Finally move all (remaining) files to cfg.extra_output_dir
-    # move_files_list  = []
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.header_extension) )   # + header files
-    # move_files_list += glob.glob( os.path.join(cfg.extra_output_dir, '*' + cfg.source_extension) )   # + source files
-
-    # for mv_file in move_files_list:
-    #     shutil.move(mv_file, cfg.extra_output_dir)
-
-
-    # # #
-    # # # If cfg.gambit_mode = True, in the directory gambit_backend_dir_complete the 'master header' cfg.all_wrapper_fname should
-    # # # be renamed to loadedtypes_BACKENDNAME_VERSION.hpp
-    # # #
-    # # if cfg.gambit_mode:
-    # #     move_from = os.path.join(gambit_backend_dir_complete, cfg.all_wrapper_fname + cfg.header_extension)
-    # #     move_to   = os.path.join(gambit_backend_dir_complete, 'loadedtypes_' + cfg.gambit_backend_name.lower() + '_' + cfg.gambit_backend_safeversion.lower() + cfg.header_extension)
-    # #     shutil.move(move_from, move_to)
-
-
     #
     # Run through all the generated files and use the code tags __START_GAMBIT_NAMESPACE__ and __END_GAMBIT_NAMESPACE__ to construct
-    # the correct namespace. If cfg.gambit_mode = False, then simply remove these tags
+    # the correct namespace.
     #
 
     open_namespace_tag  = '__START_GAMBIT_NAMESPACE__'
     close_namespace_tag = '__END_GAMBIT_NAMESPACE__'
 
-    remove_tags_from_files = glob.glob( os.path.join(cfg.extra_output_dir, '*') )
-    construct_namespace_in_files = []
-    if cfg.gambit_mode:
-        construct_namespace_in_files += glob.glob( os.path.join(gambit_backend_dir_complete, '*') )
-    else:
-        remove_tags_from_files += glob.glob( os.path.join(gambit_backend_dir_complete, '*') )
+    remove_tags_from_files       = glob.glob( os.path.join(cfg.extra_output_dir, '*') )
+    construct_namespace_in_files = glob.glob( os.path.join(gambit_backend_dir_complete, '*') )
 
 
     # - Remove namespace tags from given files
@@ -995,17 +815,115 @@ def main():
         content = f.read()
         f.close()
 
-        new_content = utils.constrNamespaceFromTags(content, cfg.gambit_backend_namespace, open_namespace_tag, close_namespace_tag)
+        new_content = utils.constrNamespaceFromTags(content, gb.gambit_backend_namespace, open_namespace_tag, close_namespace_tag)
 
         f = open(file_path, 'w')
         f.write(new_content)
         f.close()
 
 
+
+    #
+    # Copy files to the correct locations within the source tree of the original code
+    #
+
+    print
+    print 'Copying generated files to original source tree:'
+    print '------------------------------------------------'
     print 
+
+
+    # - Copy all manipulated original files
+    for original_file_short_name, original_file_full_path in gb.original_file_paths.items():
+
+        cp_source = os.path.join(cfg.extra_output_dir,original_file_short_name)
+        cp_target = original_file_full_path
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
     print
 
 
+    # - Copy factory source files
+    for class_name_long in gb.classes_done:
+
+        class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        class_name_short = utils.removeTemplateBracket(class_name_short)
+
+        factory_source_fname_short = cfg.factory_file_prefix + class_name_short + cfg.source_extension
+
+        cp_source = os.path.join(cfg.extra_output_dir, factory_source_fname_short)
+        cp_target = os.path.join(cfg.source_path, factory_source_fname_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+
+    # - Copy 'extras' source files (containing implementations for the helper functions that BOSS adds to the original classes)
+    for class_name_long in gb.classes_done:
+
+        class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        class_name_short = utils.removeTemplateBracket(class_name_short)
+
+        extra_source_fname_short = class_name_short + '_extras' + gb.code_suffix + cfg.source_extension
+
+        cp_source = os.path.join(cfg.extra_output_dir, extra_source_fname_short)
+        cp_target = os.path.join(cfg.source_path, extra_source_fname_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+
+    # - Copy files that are common for all BOSS runs
+    files_to_incl_path = []
+    files_to_incl_path.append( 'abstractbase.hpp' )                                      # abstractbase.hpp
+    files_to_incl_path.append( gb.abstract_typedefs_fname + cfg.header_extension )       # abstracttypedefs.hpp
+    files_to_incl_path.append( 'backend_undefs.hpp' )                                    # backend_undefs.hpp
+    files_to_incl_path.append( 'cats.hpp' )                                              # cats.hpp
+    files_to_incl_path.append( 'wrapperbase.hpp' )                                       # wrapperbase.hpp
+    files_to_incl_path.append( gb.wrapper_deleter_fname + cfg.header_extension )         # wrapperdeleter.hpp
+    files_to_incl_path.append( gb.wrapper_typedefs_fname + cfg.header_extension )        # wrappertypedefs.hpp
+
+    for file_name_short in files_to_incl_path:
+        cp_source = os.path.join(cfg.extra_output_dir, file_name_short)
+        cp_target = os.path.join(cfg.include_path, file_name_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+    files_to_src_path = []
+    files_to_src_path.append( gb.wrapper_deleter_fname + cfg.source_extension )         # wrapperdeleter.cpp
+
+    for file_name_short in files_to_src_path:
+        cp_source = os.path.join(cfg.extra_output_dir, file_name_short)
+        cp_target = os.path.join(cfg.source_path, file_name_short)
+
+        if os.path.isfile(cp_source):
+            shutil.copyfile(cp_source, cp_target)
+            print '   ' + cp_source + '   --->   ' + cp_target
+    print
+
+
+    # - Copy the entire backend_types/ directory to the include directory
+    cp_source = os.path.join(cfg.extra_output_dir, cfg.gambit_backend_basedir)
+    cp_target = os.path.join(cfg.include_path, cfg.gambit_backend_basedir)
+
+    if os.path.isdir(cp_source):
+        print '   ' + cp_source + '   --->   ' + cp_target
+        shutil.copytree(cp_source, cp_target)
+
+
+
+
+    print 
+    print
 
 # ====== END: main ========
 

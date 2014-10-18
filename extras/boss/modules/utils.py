@@ -9,8 +9,10 @@ from collections import OrderedDict
 from operator import itemgetter
 import os
 import warnings
+import subprocess
 
 import modules.cfg as cfg
+import modules.gb as gb
 
 
 # ====== isFundamental ========
@@ -46,7 +48,7 @@ def isNative(el):
         if el.tag == 'File':
             file_el = el
         else:
-            file_el = cfg.id_dict[el.get('file')]
+            file_el = gb.id_dict[el.get('file')]
 
         check_path = file_el.get('name')
 
@@ -91,15 +93,15 @@ def isStdType(el):
             if demangled_name[0:5] == 'std::':
                 is_std = True
 
-        # file_el = cfg.id_dict[el.get('file')]
+        # file_el = gb.id_dict[el.get('file')]
 
         # check_path = file_el.get('name')
 
         # for std_path in cfg.std_include_paths:
         #     if std_path in os.path.dirname(check_path):
         #         is_std = True
-        #         if check_path not in cfg.std_headers_used:
-        #             cfg.std_headers_used.append(check_path)
+        #         if check_path not in gb.std_headers_used:
+        #             gb.std_headers_used.append(check_path)
         #         break
 
     else:
@@ -117,7 +119,7 @@ def isStdType(el):
 
 def getTemplateBracket(el):
 
-    src_file_name = cfg.id_dict[el.get('file')].get('name')
+    src_file_name = gb.id_dict[el.get('file')].get('name')
     line_number   = int(el.get('line'))
 
     print
@@ -369,7 +371,7 @@ def findType(el_input):
                     additional_keywords.append(keyword)
 
             # change xlm element 'el'
-            el = cfg.id_dict[type_id]
+            el = gb.id_dict[type_id]
 
     # Remove duplicates from the additional_keywords list
     additional_keywords = list( OrderedDict.fromkeys(additional_keywords) )
@@ -410,7 +412,7 @@ def findNewLinePos(content, line_number):
 # def generateAbstractFilePath(el, short_name, prefix='abstract_', suffix='.hpp'):
 
 #     short_abstr_fname  = prefix + short_name.lower() + suffix
-#     src_file_el = cfg.id_dict[el.get('file')]
+#     src_file_el = gb.id_dict[el.get('file')]
 #     dir_name = os.path.split(src_file_el.get('name'))[0]
     
 #     return os.path.join(dir_name,short_abstr_fname)
@@ -514,7 +516,7 @@ def getNamespaces(xml_el, include_self=False):
     current_xml_el = xml_el
     while 'context' in current_xml_el.keys():
         context_id = current_xml_el.get('context')
-        context_xml_el = cfg.id_dict[context_id]
+        context_xml_el = gb.id_dict[context_id]
         context_name = context_xml_el.get('name')
         namespaces.append(context_name)
         current_xml_el = context_xml_el
@@ -580,22 +582,22 @@ def isAcceptedType(input_type, byname=False):
     # If input_type is a string
     if byname:
         base_input_type = input_type.replace('*', '').replace('&','')
-        if base_input_type in cfg.accepted_types:
+        if base_input_type in gb.accepted_types:
             is_accepted_type = True
 
     # If input_type is an XML element
     else:
         type_name, type_kw, type_id = findType(input_type)
-        type_el = cfg.id_dict[type_id]
+        type_el = gb.id_dict[type_id]
 
         if type_el.tag in ['Class', 'Struct']:
             demangled_name = type_el.get('demangled')
-            if demangled_name in cfg.accepted_types:
+            if demangled_name in gb.accepted_types:
                 is_accepted_type = True
 
         elif type_el.tag=='FundamentalType':
             type_name = type_el.get('name')
-            if type_name in cfg.accepted_types:
+            if type_name in gb.accepted_types:
                 is_accepted_type = True
 
         else:
@@ -629,7 +631,7 @@ def isLoadedClass(input_type, byname=False):
 
     else:
         type_name, type_kw, type_id = findType(input_type)
-        type_el = cfg.id_dict[type_id]
+        type_el = gb.id_dict[type_id]
 
         if type_el.tag in ['Class', 'Struct']:
             demangled_name = type_el.get('demangled')
@@ -651,7 +653,7 @@ def isLoadedClass(input_type, byname=False):
 #     code = ''
 #     current_namespaces = []
 
-#     for class_name_long, class_el in cfg.class_dict.items():
+#     for class_name_long, class_el in gb.class_dict.items():
 
 #         # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
 #         namespaces    = getNamespaces(class_el)
@@ -715,7 +717,7 @@ def constrAbsForwardDeclHeader():
 
     current_namespaces = []
 
-    for class_name_long, class_el in cfg.class_dict.items():
+    for class_name_long, class_el in gb.class_dict.items():
 
         # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
         namespaces    = getNamespaces(class_el)
@@ -842,7 +844,7 @@ def constrTypedefHeader():
 
     # - Typedefs
     typedef_code += '// Typedefs:\n'
-    for typedef_name, typedef_el in cfg.typedef_dict.items():
+    for typedef_name, typedef_el in gb.typedef_dict.items():
         type_name, type_kw, type_id = findType(typedef_el)
         typedef_code += 'typedef ' + type_name + ' ' + typedef_name + ';\n'
 
@@ -866,7 +868,7 @@ def getParentClasses(class_el, only_native_classes=False, only_loaded_classes=Fa
     for sub_el in sub_el_list:
 
         base_id = sub_el.get('type')
-        base_el = cfg.id_dict[base_id]
+        base_el = gb.id_dict[base_id]
 
         if (only_loaded_classes) and (not isLoadedClass(base_el)):
             continue
@@ -923,7 +925,7 @@ def getAllParentClasses(class_el, only_native_classes=True, only_loaded_classes=
                 # Remove accessor info from id, e.g. "private:_123" --> "_123"
                 parent_class_id = parent_class_id.split(':')[-1]
 
-                parent_class_el = cfg.id_dict[parent_class_id]
+                parent_class_el = gb.id_dict[parent_class_id]
 
                 if only_loaded_classes and not isLoadedClass(parent_class_el):
                     continue
@@ -957,7 +959,7 @@ def getAllTypesInClass(class_el, include_parents=False):
             args_list = funcutils.getArgs(mem_el)
             for arg_dict in args_list:
 
-                arg_type_el   = cfg.id_dict[arg_dict['id']]
+                arg_type_el   = gb.id_dict[arg_dict['id']]
                 arg_type_name = classutils.getClassNameDict(arg_type_el)                
 
                 arg_type_dict = {}
@@ -970,7 +972,7 @@ def getAllTypesInClass(class_el, include_parents=False):
 
             mem_type, mem_type_kw, mem_type_id = findType(mem_el)
 
-            type_el   = cfg.id_dict[mem_type_id]
+            type_el   = gb.id_dict[mem_type_id]
             type_name = classutils.getClassNameDict(type_el)
 
             type_dict = {}
@@ -987,7 +989,7 @@ def getAllTypesInClass(class_el, include_parents=False):
 
             small_parent_dict = {}
             small_parent_dict['class_name'] = parent_dict['class_name']
-            small_parent_dict['el']         = cfg.id_dict[parent_dict['id']]
+            small_parent_dict['el']         = gb.id_dict[parent_dict['id']]
 
             all_types.append(small_parent_dict)
 
@@ -1005,7 +1007,7 @@ def getMemberElements(el, include_artificial=False):
 
     if 'members' in el.keys():
         for mem_id in el.get('members').split():
-            mem_el = cfg.id_dict[mem_id]
+            mem_el = gb.id_dict[mem_id]
             if include_artificial:
                 member_elements.append(mem_el)
             else:
@@ -1039,7 +1041,7 @@ def getMemberFunctions(class_el, include_artificial=False, include_inherited=Fal
         #     current_class = temp_class_list.pop()
         #     if 'bases' in current_class.keys():
         #         for parent_class_id in current_class.get('bases').split():
-        #             parent_class_el = cfg.id_dict[parent_class_id]
+        #             parent_class_el = gb.id_dict[parent_class_id]
         #             if isLoadedClass(parent_class_el):
         #                 all_classes.append(parent_class_el)
         #                 temp_class_list.append(parent_class_el)
@@ -1086,7 +1088,7 @@ def getAllTypesInFunction(func_el):
         args_list = funcutils.getArgs(func_el)
         for arg_dict in args_list:
 
-            arg_type_el   = cfg.id_dict[arg_dict['id']]
+            arg_type_el   = gb.id_dict[arg_dict['id']]
             arg_type_name = classutils.getClassNameDict(arg_type_el)                
 
             arg_type_dict = {}
@@ -1099,7 +1101,7 @@ def getAllTypesInFunction(func_el):
 
         mem_type, mem_type_kw, mem_type_id = findType(func_el)
 
-        type_el   = cfg.id_dict[mem_type_id]
+        type_el   = gb.id_dict[mem_type_id]
         type_name = classutils.getClassNameDict(type_el)
 
         type_dict = {}
@@ -1224,7 +1226,7 @@ def identifyIncludedHeaders(content, only_native=True):
             continue
 
     # Connect with XML elements
-    for check_file_path, file_el in cfg.file_dict.items():
+    for check_file_path, file_el in gb.file_dict.items():
 
         # - If only_native=True, check for match with cfg.accepted_paths
         if only_native:
@@ -1289,7 +1291,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
 
     # Get file name and line number of the current class/function
     start_line_number = int( input_el.get('line') )
-    start_file_el     = cfg.id_dict[ input_el.get('file') ]
+    start_file_el     = gb.id_dict[ input_el.get('file') ]
     start_file_path   = start_file_el.get('name')
 
     # Read file from beginning to position of class/function definition
@@ -1302,7 +1304,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
     included_headers_dict = identifyIncludedHeaders(start_file_content, only_native=True)
 
     # Move up the header tree and identify all the relevant (native) included headers
-    header_paths = [ cfg.id_dict[file_id].get('name') for file_id in included_headers_dict.values() ]
+    header_paths = [ gb.id_dict[file_id].get('name') for file_id in included_headers_dict.values() ]
     header_paths_done = []
 
     while len(header_paths) > 0:
@@ -1323,7 +1325,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                 included_headers_dict[file_name] = file_id
 
         # Add any new headers to the list of header files to check
-        new_header_paths = [ cfg.id_dict[header_id].get('name') for header_id in new_included_headers.values() ]
+        new_header_paths = [ gb.id_dict[header_id].get('name') for header_id in new_included_headers.values() ]
         for new_path in new_header_paths:
             if (new_path not in header_paths) and (new_path not in header_paths_done):
                 header_paths.append(new_path)
@@ -1356,7 +1358,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
 
                 # if convert_loaded_to == 'none':
 
-                #     type_file_el = cfg.id_dict[type_file_id]
+                #     type_file_el = gb.id_dict[type_file_id]
                 #     type_file_full_path = type_file_el.get('name')
 
                 #     if isHeader(type_file_el):
@@ -1370,9 +1372,9 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
 
                 # else:
                 #     if add_extra_include_path:
-                #         include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][convert_loaded_to]) + '"')
+                #         include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, gb.new_header_files[type_name['long']][convert_loaded_to]) + '"')
                 #     else:
-                #         include_statements.append('#include "' + cfg.new_header_files[type_name['long']][convert_loaded_to] + '"')
+                #         include_statements.append('#include "' + gb.new_header_files[type_name['long']][convert_loaded_to] + '"')
 
                 # # <--- Update ends here
 
@@ -1398,7 +1400,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                 else:
                     if convert_loaded_to == 'none':
 
-                        type_file_el = cfg.id_dict[type_file_id]
+                        type_file_el = gb.id_dict[type_file_id]
                         type_file_full_path = type_file_el.get('name')
 
                         if isHeader(type_file_el):
@@ -1417,9 +1419,9 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                             header_key = convert_loaded_to
 
                         if add_extra_include_path:
-                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, cfg.new_header_files[type_name['long']][header_key]) + '"')
+                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, gb.new_header_files[type_name['long']][header_key]) + '"')
                         else:
-                            include_statements.append('#include "' + cfg.new_header_files[type_name['long']][header_key] + '"')
+                            include_statements.append('#include "' + gb.new_header_files[type_name['long']][header_key] + '"')
 
             elif isStdType(type_el):
 
@@ -1491,3 +1493,194 @@ def constrNamespaceFromTags(content, new_namespace, open_tag, close_tag):
     return new_content
 
 # ====== END: constrNamespaceFromTags ========
+
+
+
+# ====== replaceCodeTags ========
+
+def replaceCodeTags(input, file_input=False):
+
+    # Input is either a file name or a string with content
+    if file_input:
+        f = open(input, 'r')
+        new_content = f.read()
+        f.close()
+    else:
+        new_content = input
+
+    # Replace various tags in template code with code specific for the current backend
+    new_content = new_content.replace('__BACKEND_NAME__'         ,  cfg.gambit_backend_name)
+    new_content = new_content.replace('__SHARED_LIB_FILE_NAME__' ,  cfg.shared_lib_file_name)
+    new_content = new_content.replace('__BACKEND_VERSION__'      ,  cfg.gambit_backend_version)
+    new_content = new_content.replace('__BACKEND_SAFE_VERSION__' ,  gb.gambit_backend_safeversion)
+    new_content = new_content.replace('__CODE_SUFFIX__'          ,  gb.code_suffix)
+
+    # Return code
+    return new_content
+
+# ====== END: replaceCodeTags ========
+
+
+
+# ====== constrLoadedTypesHeader ======
+
+def constrLoadedTypesHeader(lib_file_path):
+
+    #
+    # Check that the shared library exists
+    #
+    if not os.path.isfile(lib_file_path):
+        raise IOError("The file '%s' was not found." % lib_file_path)
+
+    #
+    # Check that commands 'nm' and 'c++filt' are available
+    #
+    nm_check_cmd   = 'which nm'
+    filt_check_cmd = 'which c++filt'
+
+    nm_check_proc   = subprocess.Popen(nm_check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    filt_check_proc = subprocess.Popen(filt_check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+    nm_check_output   = nm_check_proc.stdout.read()
+    filt_check_output = filt_check_proc.stdout.read()
+
+    if (nm_check_output==''):
+        raise Exception("The required command 'nm' does not seem to be available.")
+    elif (filt_check_output==''):
+        raise Exception("The required command 'c++filt' does not seem to be available.")
+
+
+    #
+    # Use 'nm' and 'c++filt' to construct dictionary from class name to factory symbol names and argument brackets
+    #
+    cmd_mangled   = 'nm ' + lib_file_path
+    cmd_demangled = 'nm ' + lib_file_path + ' | c++filt -i'
+
+    proc_mangled = subprocess.Popen(cmd_mangled, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output_mangled = proc_mangled.stdout.readlines()
+
+    proc_demangled = subprocess.Popen(cmd_demangled, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output_demangled = proc_demangled.stdout.readlines()
+
+    factory_dict = OrderedDict()
+    for i in range(len(output_mangled)):
+
+        mangled_line   = output_mangled[i]
+        demangled_line = output_demangled[i]
+
+        if ('Factory_' in mangled_line) and ('Factory_' in demangled_line):
+
+            arg_bracket_start_pos = demangled_line.rfind('(')
+            arg_bracket = demangled_line[arg_bracket_start_pos:].replace(' ','').replace('\n','')
+
+            signature_start_pos = demangled_line[:arg_bracket_start_pos].rfind(' ')
+            factory_name_long   = demangled_line[signature_start_pos+1:arg_bracket_start_pos].replace(' ','')
+
+            class_name_long = factory_name_long.replace('Factory_','')
+
+            factory_symbol = mangled_line.split(' ')[-1].rstrip('\n')
+
+            # Add entry to factory_dict
+            if class_name_long in cfg.loaded_classes:
+
+                if class_name_long not in factory_dict.keys():
+                    factory_dict[class_name_long] = []
+
+                factory_dict[class_name_long].append( (factory_symbol, arg_bracket) )
+
+    # If not a single factory function was matched to a loaded class, raise an exception
+    if len(factory_dict) == 0:
+        raise Exception("No factory functions matching the classes %s were found in the file '%s'. No header file generated." % (cfg.loaded_classes, lib_file_path))
+
+    # Print warnings for any loaded class for which no matching factory function was found
+    for class_name_long in cfg.loaded_classes:
+        if not class_name_long in factory_dict.keys():
+            print "WARNING: No factory function detected in '%s' for class '%s'." % (lib_file_path, class_name_long)
+
+
+    # 
+    # Construct the code lines for the loaded classes, containg all the factory symbols and argument brackets for that class
+    #
+    class_lines = []
+    for class_name_long in factory_dict.keys():
+
+        class_line = '  (( /*class*/'
+
+        namespace, class_name_short = removeNamespace(class_name_long, return_namespace=True)
+
+        if namespace == '':
+            namespace_list = []
+        else:
+            namespace_list = namespace.split('::')
+
+        for ns_part in namespace_list:
+            class_line += '(' + ns_part + ')'
+
+        class_line += '(' + class_name_short + '),'
+
+
+        class_line += '    /*constructors*/'
+        for symbol, arg_bracket in factory_dict[class_name_long]:
+            class_line += '(("' + symbol + '",' + arg_bracket + ')) '
+
+        class_line += ')) \\'
+        class_lines.append(class_line)
+
+    class_lines_code  = ''
+    class_lines_code += '#define ' + gb.gambit_backend_name_full + '_all_data \\\n'
+    class_lines_code += '\n'.join(class_lines) + '\n'
+
+
+
+    
+    #
+    # Construct include guards with additional  ' 1' appended to the line starting with #define 
+    #
+    incl_guard = addIncludeGuard('', 'loaded_types.hpp', extra_string=gb.gambit_backend_name_full)
+    incl_guard_lines = incl_guard.split('\n')
+
+    incl_guard_start = '\n'.join(incl_guard_lines[:2]) + ' 1\n'
+    incl_guard_end   = incl_guard_lines[-2] + '\n'
+
+
+    #
+    # Construct include statements
+    #
+    incl_statements_code = ''
+    for class_name_long in factory_dict.keys():
+        namespace, class_name_short = removeNamespace(class_name_long, return_namespace=True)
+        incl_statements_code += '#include "' + cfg.wrapper_header_prefix + class_name_short + cfg.header_extension + '"\n'
+    incl_statements_code += '#include "identification.hpp"\n'
+
+
+    #
+    # Combine everything to construct header code
+    #
+    code  = ''
+    code += incl_guard_start
+
+    code += '\n'
+    code += incl_statements_code
+
+    code += '\n'
+    code += '// Indicate which types are provided by this backend, and what the symbols of their factories are.\n'
+    code += class_lines_code
+
+    code += '\n'
+    code += '// If the default version has been loaded, set it as default.\n'
+    code += '#if ALREADY_LOADED(CAT_3(BACKENDNAME,_,CAT(Default_,BACKENDNAME)))\n'
+    code += '  SET_DEFAULT_VERSION_FOR_LOADING_TYPES(BACKENDNAME,SAFE_VERSION,CAT(Default_,BACKENDNAME))\n'
+    code += '#endif\n'
+
+    code += '\n'
+    code += '// Undefine macros to avoid conflict with other backends.\n'
+    code += '#include "backend_undefs.hpp"\n'
+
+    code += '\n'
+    code += incl_guard_end
+
+    return code
+    
+# ====== END: constrLoadedTypesHeader ======
+
+

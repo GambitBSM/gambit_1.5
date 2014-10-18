@@ -10,6 +10,7 @@ import os
 import copy
 
 import modules.cfg as cfg
+import modules.gb as gb
 import modules.utils as utils
 import modules.funcutils as funcutils
 import modules.classutils as classutils
@@ -29,7 +30,7 @@ def run():
     # Loop over all functions 
     #
     
-    for func_name_full, func_el in cfg.func_dict.items():
+    for func_name_full, func_el in gb.func_dict.items():
 
         # Print current function
         print
@@ -66,7 +67,7 @@ def run():
         #
 
         # New source file name
-        new_source_fname = os.path.join(cfg.extra_output_dir, func_name.lower() + cfg.code_suffix + cfg.source_extension)
+        new_source_fname = os.path.join(cfg.extra_output_dir, func_name.lower() + gb.code_suffix + cfg.source_extension)
 
         # Get include statements
         include_statements = []
@@ -78,7 +79,7 @@ def run():
 
         # - Then check if we have a header file for the function in question.
         #   If not, declare the original function as 'extern'
-        file_el = cfg.id_dict[func_el.get('file')]
+        file_el = gb.id_dict[func_el.get('file')]
         has_function_header = utils.isHeader(file_el)
         if has_function_header:
             header_full_path = file_el.get('name')
@@ -172,8 +173,8 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
     w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
     # Identify return type 
-    return_type, return_kw, return_id = utils.findType( cfg.id_dict[func_el.get('returns')] )
-    return_el = cfg.id_dict[return_id]
+    return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
+    return_el = gb.id_dict[return_id]
 
     return_is_loaded_class = utils.isLoadedClass(return_el)
     pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
@@ -190,7 +191,7 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
     wrapper_code = '// Wrapper function(s)\n'
 
     # Function name
-    func_name = func_el.get('name') + cfg.code_suffix
+    func_name = func_el.get('name') + gb.code_suffix
 
     # Check constness
     if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
@@ -244,8 +245,8 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
 
 
         # # Function return type
-        # return_type, return_kw, return_id = utils.findType( cfg.id_dict[func_el.get('returns')] )
-        # return_el = cfg.id_dict[return_id]
+        # return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
+        # return_el = gb.id_dict[return_id]
         # return_is_native = utils.isNative(return_el)
 
 
@@ -264,7 +265,7 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
         # else:
         #     w_return_type = return_type.replace(return_type_base, return_type_base+'*')
         # # if return_is_native:
-        # #     w_return_type = cfg.abstr_class_prefix + return_type
+        # #     w_return_type = gb.abstr_class_prefix + return_type
         # # else:
         # #     w_return_type = return_type
 
@@ -286,5 +287,5 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
         # Combine new code
 
         # Get info
-        # source_file_el   = cfg.id_dict[func_el.get('file')]
+        # source_file_el   = gb.id_dict[func_el.get('file')]
         # source_file_name = source_file_el.get('name')

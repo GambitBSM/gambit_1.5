@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
 ## Pythia path variables based on args given to configure
-prefix=/home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186
-datadir=/home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186
+prefix=/home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186_original
+datadir=/home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186_original
 includedir=$prefix/include
 libdir=$prefix/lib
 ## External path variables, also calculated by configure
