@@ -12,17 +12,19 @@ from collections import OrderedDict
 import modules.cfg as cfg
 
 
-xml_file_name      = ''
-id_dict            = OrderedDict() 
-file_dict          = OrderedDict()
-std_types_dict     = OrderedDict()
-typedef_dict       = OrderedDict()
-class_dict         = OrderedDict()
-func_dict          = OrderedDict()
-new_header_files   = OrderedDict()
-accepted_types     = [] 
-std_headers_used   = []
-
+xml_file_name        = ''
+id_dict              = OrderedDict() 
+file_dict            = OrderedDict()
+std_types_dict       = OrderedDict()
+typedef_dict         = OrderedDict()
+class_dict           = OrderedDict()
+func_dict            = OrderedDict()
+new_header_files     = OrderedDict()
+accepted_types       = [] 
+std_headers_used     = []
+original_file_paths  = OrderedDict()
+classes_done         = []
+n_classes_done       = 0
 
 gambit_backend_namespace   = 'CAT_3(BACKENDNAME,_,SAFE_VERSION)'
 gambit_backend_safeversion = cfg.gambit_backend_version.replace('.','_')
@@ -44,7 +46,6 @@ wrapper_typedefs_fname  = 'wrappertypedefs'
 abstract_typedefs_fname = 'abstracttypedefs'
 
 
-n_classes_done = 0
 
 
 # Dictionary of what names to use for various operator symbols

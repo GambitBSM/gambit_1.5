@@ -1,11 +1,13 @@
 #include "Pythia8/Event.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Particle_decl.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Particle_def.h"
+#include "backend_types/Pythia_8_186/wrapper_Particle_decl.h"
+#include "backend_types/Pythia_8_186/wrapper_Particle_def.h"
 #include "Pythia8/Basics.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_decl.h"
-#include "backend_types/BOSSedPythia_1_0/wrapper_Vec4_def.h"
+#include "backend_types/Pythia_8_186/wrapper_Vec4_decl.h"
+#include "backend_types/Pythia_8_186/wrapper_Vec4_def.h"
 #include "abstracttypedefs.h"
 #include "wrappertypedefs.h"
+
+// FACTORY_SIGNATURES_ORDER: ##()##(int, int, int, int, int, int, int, int, double, double, double, double, double, double, double)##(int, int, int, int, int, int, int, int, double, double, double, double, double, double)##(int, int, int, int, int, int, int, int, double, double, double, double, double)##(int, int, int, int, int, int, int, int, double, double, double, double)##(int, int, int, int, int, int, int, int, double, double, double)##(int, int, int, int, int, int, int, int, double, double)##(int, int, int, int, int, int, int, int, double)##(int, int, int, int, int, int, int, int)##(int, int, int, int, int, int, int)##(int, int, int, int, int, int)##(int, int, int, int, int)##(int, int, int, int)##(int, int, int)##(int, int)##(int)##(int, int, int, int, int, int, int, int, Pythia8::Vec4__BOSS&, double, double, double)##(int, int, int, int, int, int, int, int, Pythia8::Vec4__BOSS&, double, double)##(int, int, int, int, int, int, int, int, Pythia8::Vec4__BOSS&, double)##(int, int, int, int, int, int, int, int, Pythia8::Vec4__BOSS&)##
 
 namespace Pythia8
 {

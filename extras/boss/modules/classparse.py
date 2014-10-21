@@ -19,7 +19,6 @@ import modules.funcutils as funcutils
 # Module-level globals
 #
 
-classes_done          = []
 template_done         = []
 templ_spec_done       = []
 added_parent          = []
@@ -48,7 +47,7 @@ def run():
         print
 
         # Check if we've done this class already
-        if class_name_long in classes_done:
+        if class_name_long in gb.classes_done:
             print ' '*15 + '--> Class already done'
             continue
 
@@ -99,6 +98,10 @@ def run():
             construct_assignment_operator = True
         else:
             construct_assignment_operator = False
+
+
+        # Register paths of original files in global dict
+        gb.original_file_paths[original_class_file_name_base] = original_class_file_name
 
 
         # Prepare entries in return_code_dict and includes
@@ -694,7 +697,7 @@ def run():
         # Keep track of classes done
         #
 
-        classes_done.append(class_name['long'])
+        gb.classes_done.append(class_name['long'])
         if is_template: 
             if class_name['long'] not in template_done:
                 template_done.append(class_name['long'])
@@ -706,19 +709,20 @@ def run():
         print
         print
 
+        # Increase class counter
+        gb.n_classes_done += 1
+
     #
     # END: Loop over all classes in gb.class_dict
     #    
 
     # print
-    # print 'CLASSES DONE                  : ', classes_done
+    # print 'CLASSES DONE                  : ', gb.classes_done
     # print 'TEMPLATES DONE                : ', template_done
     # print 'TEMPLATE SPECIALIZATIONS DONE : ', templ_spec_done
     # print
 
 
-    # Increase class counter
-    gb.n_classes_done += 1
 
     #
     # Return result 

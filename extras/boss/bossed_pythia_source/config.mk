@@ -11,5 +11,5 @@ FLIBS = -lgfortran -lgfortranbegin
 LDFLAGSSHARED = -O2 -ansi -pedantic -W -Wall -Wshadow -fPIC -shared
 LDFLAGLIBNAME = -Wl,-soname
 SHAREDSUFFIX = so
-INSTALLDIR = /home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186
-DATADIR = /home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186
+INSTALLDIR = /home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186_original
+DATADIR = /home/anders/UiO/GAMBIT/gambit_repos/extras/boss/pythia8186_original

@@ -2,7 +2,7 @@
 #define __CLASSES_HPP__
 
 #include "backend_types/BOSSMinimalExample_1_2/abstract_X.hpp"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.hpp"
 class X : public virtual Abstract_X 
 {
     public:
@@ -29,20 +29,20 @@ class X : public virtual Abstract_X
         }
 
     public:
-        Abstract_X* pointerCopy_GAMBIT();
-        void pointerAssign_GAMBIT(Abstract_X* in);
+        Abstract_X* pointerCopy__BOSS();
+        void pointerAssign__BOSS(Abstract_X* in);
 
     public:
-        int& i_ref_GAMBIT();
+        int& i_ref__BOSS();
 
 
-        Abstract_X* operator_plus_GAMBIT(Abstract_X&);
+        Abstract_X* operator_plus__BOSS(Abstract_X&);
 
 
     public:
-        Abstract_X* return_ref_this_GAMBIT();
+        Abstract_X* return_ref_this__BOSS();
 
-        Abstract_X* return_ptr_this_GAMBIT();
+        Abstract_X* return_ptr_this__BOSS();
 
 };
 
@@ -50,7 +50,7 @@ class X : public virtual Abstract_X
 
 
 #include "backend_types/BOSSMinimalExample_1_2/abstract_Y.hpp"
-#include "abstracts_typedefs.hpp"
+#include "abstracttypedefs.hpp"
 class Y : public virtual Abstract_Y
 {
     public:
@@ -80,19 +80,19 @@ class Y : public virtual Abstract_Y
         }
 
     public:
-        Abstract_Y* pointerCopy_GAMBIT();
-        void pointerAssign_GAMBIT(Abstract_Y* in);
+        Abstract_Y* pointerCopy__BOSS();
+        void pointerAssign__BOSS(Abstract_Y* in);
 
     public:
-        Abstract_X& x_ref_GAMBIT();
+        Abstract_X& x_ref__BOSS();
 
 
     public:
-        Abstract_X* get_x_GAMBIT();
+        Abstract_X* get_x__BOSS();
 
-        void set_x_GAMBIT(Abstract_X&);
+        void set_x__BOSS(Abstract_X&);
 
-        void set_x_ptr_GAMBIT(Abstract_X*);
+        void set_x_ptr__BOSS(Abstract_X*);
 
 };
 
