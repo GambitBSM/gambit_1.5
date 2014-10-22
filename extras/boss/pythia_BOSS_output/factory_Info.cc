@@ -4,11 +4,9 @@
 #include "abstracttypedefs.h"
 #include "wrappertypedefs.h"
 
-// FACTORY_SIGNATURES_ORDER: ##()##
-
 namespace Pythia8
 {
-    Abstract_Info* Factory_Info()
+    Abstract_Info* Factory_Info_0()
     {
         return new Info();
     }

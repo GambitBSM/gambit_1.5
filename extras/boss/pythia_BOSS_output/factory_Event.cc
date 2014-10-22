@@ -4,16 +4,14 @@
 #include "abstracttypedefs.h"
 #include "wrappertypedefs.h"
 
-// FACTORY_SIGNATURES_ORDER: ##(int)##()##
-
 namespace Pythia8
 {
-    Abstract_Event* Factory_Event(int capacity)
+    Abstract_Event* Factory_Event_0(int capacity)
     {
         return new Event(capacity);
     }
     
-    Abstract_Event* Factory_Event()
+    Abstract_Event* Factory_Event_1()
     {
         return new Event();
     }

@@ -120,7 +120,7 @@ def getArgs(func_el):
 
 def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, include_namespace=False,
                       cast_to_original=False, use_wrapper_class=False, wrapper_to_pointer=False, 
-                      use_wrapper_base_class=False):
+                      use_wrapper_base_class=False, add_namespace_to_loaded=''):
 
     #
     # Requires a list of dicts as input, as returned by 'getArgs' or 'constrWrapperArgs'.
@@ -131,7 +131,15 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
     # Construct bracket with input arguments
     args_seq = ''
     argc = 1
-    for arg_dict in args:
+    for i in range(len(args)):
+
+        # We must create a new copy since we may be altering the content later
+        arg_dict = dict(args[i])
+
+        if arg_dict['loaded_class'] and (add_namespace_to_loaded != ''):
+            add_namespaces = add_namespace_to_loaded.split('::')
+            arg_dict['type_namespaces'] = add_namespaces + arg_dict['type_namespaces']
+            arg_dict['type'] = add_namespace_to_loaded + '::' + arg_dict['type']
 
         if include_arg_name and cast_to_original:
 

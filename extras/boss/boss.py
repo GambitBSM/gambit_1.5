@@ -116,6 +116,12 @@ def main():
     #
     # Run gccxml for all input header/source files
     #
+
+    print
+    print 'Parsing the input files:'
+    print '------------------------'
+    print 
+
     xml_files = []
     for input_file_path in input_files:
 
@@ -757,13 +763,13 @@ def main():
     
     # Copy files to correct directories
 
-    # - To gambit_backend_dir_complete
-    copy_files_list  = []
+    # # - To gambit_backend_dir_complete
+    # copy_files_list  = []
     
-    copy_files_list += ['headers_by_hand/loaded_types.hpp' ]
+    # copy_files_list += ['headers_by_hand/loaded_types.hpp' ]
 
-    for cp_file in copy_files_list:
-        shutil.copy(cp_file, gambit_backend_dir_complete)
+    # for cp_file in copy_files_list:
+    #     shutil.copy(cp_file, gambit_backend_dir_complete)
 
 
     # - To cfg.extra_output_dir
@@ -826,7 +832,6 @@ def main():
     #
     # Copy files to the correct locations within the source tree of the original code
     #
-
     print
     print 'Copying generated files to original source tree:'
     print '------------------------------------------------'
@@ -846,12 +851,12 @@ def main():
 
 
     # - Copy factory source files
-    for class_name_long in gb.classes_done:
+    for class_name in gb.classes_done:
 
-        class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
-        class_name_short = utils.removeTemplateBracket(class_name_short)
+        # class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        # class_name_short = utils.removeTemplateBracket(class_name_short)
 
-        factory_source_fname_short = cfg.factory_file_prefix + class_name_short + cfg.source_extension
+        factory_source_fname_short = cfg.factory_file_prefix + class_name['short'] + cfg.source_extension
 
         cp_source = os.path.join(cfg.extra_output_dir, factory_source_fname_short)
         cp_target = os.path.join(cfg.source_path, factory_source_fname_short)
@@ -863,12 +868,12 @@ def main():
 
 
     # - Copy 'extras' source files (containing implementations for the helper functions that BOSS adds to the original classes)
-    for class_name_long in gb.classes_done:
+    for class_name in gb.classes_done:
 
-        class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
-        class_name_short = utils.removeTemplateBracket(class_name_short)
+        # class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        # class_name_short = utils.removeTemplateBracket(class_name_short)
 
-        extra_source_fname_short = class_name_short + '_extras' + gb.code_suffix + cfg.source_extension
+        extra_source_fname_short = class_name['short'] + '_extras' + gb.code_suffix + cfg.source_extension
 
         cp_source = os.path.join(cfg.extra_output_dir, extra_source_fname_short)
         cp_target = os.path.join(cfg.source_path, extra_source_fname_short)
@@ -919,6 +924,124 @@ def main():
         print '   ' + cp_source + '   --->   ' + cp_target
         shutil.copytree(cp_source, cp_target)
 
+    #
+    # END: Copy files to original source tree
+    #
+
+
+    #
+    # Parse all factory function source files using gccxml
+    #
+
+    print
+    print 'Parsing the generated factory function source files:'
+    print '----------------------------------------------------'
+    print 
+
+    factory_xml_files = OrderedDict()
+    for class_name in gb.classes_done:
+
+        # Construct factory file name
+        # class_name_short = utils.removeNamespace(class_name_long, return_namespace=False)
+        # class_name_short = utils.removeTemplateBracket(class_name_short)
+
+        factory_source_fname_short = cfg.factory_file_prefix + class_name['short'] + cfg.source_extension
+        factory_source_path        = os.path.join(cfg.source_path, factory_source_fname_short)
+
+        # Construct file name for xml file produced by gccxml
+        xml_file_path = os.path.join('temp', factory_source_path.replace('/','_').replace('.','_') + '.xml' )
+
+        # Construct gccxml command to run
+        gccxml_cmd = 'gccxml '
+
+        # - Add include paths
+        if cfg.include_path != '':
+            gccxml_cmd += '-I' + cfg.include_path + ' '
+        for add_incl_path in cfg.additional_include_paths:
+            gccxml_cmd += '-I' + add_incl_path + ' '
+
+        # - Add the factory source file (full path)
+        gccxml_cmd += factory_source_path
+
+        # - Add gccxml option that specifies the xml output file: input_file_short_name.xml
+        gccxml_cmd += ' -fxml=' + xml_file_path
+
+
+        # Run gccxml
+        print 'Runing command: ' + gccxml_cmd
+        proc = subprocess.Popen(gccxml_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc.wait()
+
+        if proc.returncode != 0:        
+            print 'ERROR: gccxml failed. Printing output:'
+            output = proc.stderr.read()
+            print 
+            print '==== START GCCXML OUTPUT ===='
+            print
+            print output
+            print '==== END GCCXML OUTPUT ===='
+            print
+            sys.exit()
+        
+        else:
+            print 'Command finished successfully.'
+
+        # Add factory xml file to dict
+        factory_xml_files[class_name['long']] = xml_file_path
+
+    #
+    # END: Parse all factory function source files
+    #
+
+
+    #
+    # Generate header file 'loaded_types.hpp'
+    #
+
+    print
+    print 'Generating file loaded_types.hpp:'
+    print '---------------------------------'
+    print 
+
+    # First update the 'symbol' entry in the dictionaries containing the factory function info
+    for class_name in gb.classes_done:
+
+        print 'CURRENT CLASS: ' + class_name['long']
+
+        # Set useful variables
+        xml_file = factory_xml_files[class_name['long']]
+        info_dicts_list = gb.factory_info[class_name['long']]
+
+
+        # Get all function elements in the xml file
+        factory_func_elements = OrderedDict()
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+        for func_el in root.findall('Function'):
+            func_name = func_el.get('name')
+            factory_func_elements[func_name] = func_el
+
+        for info_dict in info_dicts_list:
+
+            factory_el = factory_func_elements[ info_dict['name'] ]
+            info_dict['symbol'] = factory_el.get('mangled')
+
+            # print 'FACTORY: ' + factory_name + '   SYMBOL: ' + factory_el.get('mangled') + '   ARGS: ' + factory_args_bracket
+        print
+
+    
+    # Generate the code for loaded_types.hpp
+    loaded_types_header_content = utils.constrLoadedTypesHeader()
+
+    # Write to file
+    loaded_types_output_path = os.path.join(gambit_backend_dir_complete, 'loaded_types.hpp')
+    f = open(loaded_types_output_path, 'w')
+    f.write(loaded_types_header_content)
+    f.close()
+
+    #
+    # END: Generate 'loaded_types.hpp'
+    #
 
 
 

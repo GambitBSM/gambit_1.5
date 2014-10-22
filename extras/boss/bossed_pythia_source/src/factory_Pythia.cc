@@ -5,21 +5,19 @@
 #include "abstracttypedefs.h"
 #include "wrappertypedefs.h"
 
-// FACTORY_SIGNATURES_ORDER: ##(std::string, bool)##(std::string)##()##
-
 namespace Pythia8
 {
-    Abstract_Pythia* Factory_Pythia(std::string xmlDir, bool printBanner)
+    Abstract_Pythia* Factory_Pythia_0(std::string xmlDir, bool printBanner)
     {
         return new Pythia(xmlDir, printBanner);
     }
     
-    Abstract_Pythia* Factory_Pythia(std::string xmlDir)
+    Abstract_Pythia* Factory_Pythia_1(std::string xmlDir)
     {
         return new Pythia(xmlDir);
     }
     
-    Abstract_Pythia* Factory_Pythia()
+    Abstract_Pythia* Factory_Pythia_2()
     {
         return new Pythia();
     }

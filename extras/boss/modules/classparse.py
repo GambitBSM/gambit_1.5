@@ -487,6 +487,12 @@ def run():
         # Generate factory function(s)
         #
 
+
+        # - Prepare entry in global dict with factory function info
+        if class_name['long'] not in gb.factory_info.keys():
+            gb.factory_info[class_name['long']] = []
+
+        # - Generate factory file content
         factory_file_content  = ''
         # if is_template and class_name['long'] in template_done:
         #     pass
@@ -697,7 +703,7 @@ def run():
         # Keep track of classes done
         #
 
-        gb.classes_done.append(class_name['long'])
+        gb.classes_done.append(class_name)
         if is_template: 
             if class_name['long'] not in template_done:
                 template_done.append(class_name['long'])
@@ -705,7 +711,7 @@ def run():
                 templ_spec_done.append(class_name['long'])
         
         print
-        print '~~~~ Class ' + class_name_long + ' done ~~~~'
+        print '~~~~ Class ' + class_name['long'] + ' done ~~~~'
         print
         print
 

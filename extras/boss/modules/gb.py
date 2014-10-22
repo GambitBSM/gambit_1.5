@@ -25,6 +25,7 @@ std_headers_used     = []
 original_file_paths  = OrderedDict()
 classes_done         = []
 n_classes_done       = 0
+factory_info         = OrderedDict()
 
 gambit_backend_namespace   = 'CAT_3(BACKENDNAME,_,SAFE_VERSION)'
 gambit_backend_safeversion = cfg.gambit_backend_version.replace('.','_')

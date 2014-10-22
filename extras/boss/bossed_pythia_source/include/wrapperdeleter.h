@@ -1,5 +1,5 @@
-#ifndef __WRAPPERDELETER_Pythia_8_186_H__
-#define __WRAPPERDELETER_Pythia_8_186_H__
+#ifndef __wrapperdeleter_Pythia_8_186_h__
+#define __wrapperdeleter_Pythia_8_186_h__
 
 #include "backend_types/Pythia_8_186/wrapper_Pythia_decl.h"
 #include "backend_types/Pythia_8_186/wrapper_Event_decl.h"
@@ -21,4 +21,4 @@ void wrapper_deleter(Pythia8::Event__BOSS*);
 
 void wrapper_deleter(Pythia8::Pythia__BOSS*);
 
-#endif /* __WRAPPERDELETER_Pythia_8_186_H__ */
+#endif /* __wrapperdeleter_Pythia_8_186_h__ */
