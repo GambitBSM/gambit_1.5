@@ -333,17 +333,17 @@ void boostMatrixParentFrame(mat4 &mat, vec4 &p_parent)
 // Decay channel. Contains the partial width of the channel and the PIDs of the final state particles
 struct channel
 {
-    channel(int ipID0, int ipID1, double ipartialWidth)
+    channel(string ipID0, string ipID1, double ipartialWidth)
     {
         pID0 = ipID0;
         pID1 = ipID1;
         partialWidth = ipartialWidth;
     }
-    int pID0;
-    int pID1;
+    string pID0;
+    string pID1;
     double partialWidth;
     bool same(const channel &in) const{return in.pID0==pID0 && in.pID1 == pID1;}
-	int& operator[](unsigned int i)
+	string& operator[](unsigned int i)
     {
         if(i<2)
             return (i==0) ? pID0 : pID1;
@@ -362,7 +362,7 @@ class DecayTableEntry
     public:
         const double m;
         bool chainDecay;        
-        DecayTableEntry(int iPID, double im, bool ichainDecay) : m(im)
+        DecayTableEntry(string iPID, double im, bool ichainDecay) : m(im)
         {
             pID = iPID;
             chainDecay = ichainDecay;
@@ -372,7 +372,7 @@ class DecayTableEntry
         }
         DecayTableEntry() : m(-1)
         {
-            pID = 0;
+            pID = "";
             chainDecay = false;
             totalWidth = 0;
             randInit = false;
@@ -410,7 +410,7 @@ class DecayTableEntry
             }
             return false;
         }
-        void addChannel(int pID0, int pID1, double partialWidth)
+        void addChannel(string pID0, string pID1, double partialWidth)
         {
             if(!chainDecay)
             {
@@ -439,7 +439,7 @@ class DecayTableEntry
         vector<channel> table;
         vector<double> randLims;
         double totalWidth; 
-        int pID;
+        string pID;
         bool randInit;
         unsigned int Nchn;
 };
@@ -448,17 +448,17 @@ class DecayTableEntry
 // Uses particle PID as array index
 struct DecayTable
 {
-    map<int,DecayTableEntry> table;
+    map<string,DecayTableEntry> table;
     // Add particle to decay table, specifying particle ID, mass and whether or not it should be decayed in decay chains
-    void addEntry(int iPID, double im, bool ichainDecay)
+    void addEntry(string iPID, double im, bool ichainDecay)
     {
-        table.insert ( std::pair<int,DecayTableEntry>(iPID,DecayTableEntry(iPID,im,ichainDecay)) );
+        table.insert ( std::pair<string,DecayTableEntry>(iPID,DecayTableEntry(iPID,im,ichainDecay)) );
     }
-    channel randomDecay(int pID)
+    channel randomDecay(string pID)
     {
         return table[pID].randomDecay();
     }     
-    DecayTableEntry& operator[](int i){ return table[i];}  
+    DecayTableEntry& operator[](string i){ return table[i];}  
 };
 
 // The main decay chain class. Each link (particle) in the decay chain is an instance of this class, with pointers to its mother and daughter links.
@@ -473,7 +473,7 @@ class chainParticle
             child1=NULL;
             child2=NULL;
             p_parent=Ep4vec(vec3(0),E_COM); 
-            pID=0;
+            pID="";
             chainGeneration=0;
             decayTable = dc;
             isParent = false;
@@ -481,7 +481,7 @@ class chainParticle
             boostToLabFrame    = mat4::identity();            
         }
         // Constructor for the base node. Case: Base node is a decaying particle.
-        chainParticle(vec3 ipLab, DecayTable *dc, int ipID) : m((*dc)[ipID].m)
+        chainParticle(vec3 ipLab, DecayTable *dc, string ipID) : m((*dc)[ipID].m)
         {
             parent=NULL;
             child1=NULL;
@@ -636,7 +636,7 @@ class chainParticle
         mat4 boostToParentFrame;
         mat4 boostToLabFrame;
         vec4 p_parent;              // 4-momentum in parent's rest frame
-        unsigned int pID;           // Particle identifier
+        string pID;           // Particle identifier
         // Chain properties
         int chainGeneration;
         chainParticle *child1;
@@ -651,7 +651,7 @@ class chainParticle
             boostToLabFrame = parent->boostToLabFrame*boostToParentFrame;                 
         }
         // Constructor used by member functions during chain generation.
-        chainParticle(const vec4 &pp, double im, DecayTable *dc, chainParticle *iparent, int ichainGeneration, int ipID) : m(im)
+        chainParticle(const vec4 &pp, double im, DecayTable *dc, chainParticle *iparent, int ichainGeneration, string ipID) : m(im)
         {
             parent=iparent;
             child1=NULL;
