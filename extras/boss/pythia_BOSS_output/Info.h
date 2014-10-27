@@ -23,7 +23,7 @@ namespace Pythia8 {
 // are still public, to work also for user-written FSR/ISR classes.
 
 } 
-#include "backend_types/BOSSedPythia_1_0/abstract_Info.h"
+#include "backend_types/Pythia_8_186/abstract_Info.h"
 #include "abstracttypedefs.h"
 namespace Pythia8 { 
 class Info : public virtual Abstract_Info {

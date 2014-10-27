@@ -442,7 +442,7 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
 
 # ====== constrFactoryFunction ========
 
-def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], skip_copy_constructors=False, use_wrapper_return=False, use_wrapper_args=False, add_include_statements=True):
+def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], skip_copy_constructors=False, use_wrapper_return=False, use_wrapper_args=False, add_include_statements=True, add_signatures_comment=True):
 
     # Replace '*' and '&' in list of template types
     template_types = [e.replace('*','P').replace('&','R') for e in template_types]
@@ -469,6 +469,9 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
 
     # Construct factory function definition(s)
     func_def = ''
+    # factory_signatures_comment = '// FACTORY_SIGNATURES_ORDER: '
+
+    counter = 0
     for el in constructor_elements:
 
         if add_include_statements:
@@ -476,11 +479,6 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
             include_statements += utils.getIncludeStatements(el, convert_loaded_to='none', input_element='function', add_extra_include_path=True, skip_forward_declared=True)
             include_statements += utils.getIncludeStatements(el, convert_loaded_to='wrapper_decl', input_element='function', add_extra_include_path=False, skip_forward_declared=True, use_full_path=True)
             include_statements += utils.getIncludeStatements(el, convert_loaded_to='wrapper_def', input_element='function', add_extra_include_path=False, skip_forward_declared=True, use_full_path=True)
-
-        # Useful variables
-        factory_name = 'Factory_' + class_name['short']
-        if len(template_types) > 0:
-            factory_name += '_' + '_'.join(template_types)
 
         # We need to generate as many overloaded versions as there are arguments with default values
         n_overloads = funcutils.numberOfDefaultArgs(el)
@@ -504,6 +502,11 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
         # Generate one factory function for each set of default arguments
         for remove_n_args in range(n_overloads+1):
 
+            # - Factory function name
+            factory_name = 'Factory_' + class_name['short'] + '_' + str(counter)
+            if len(template_types) > 0:
+                factory_name += '_' + '_'.join(template_types)
+
             if remove_n_args == 0:
                 use_args   = args
                 use_w_args = w_args
@@ -518,6 +521,7 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
             else:
                 args_bracket         = funcutils.constrArgsBracket(use_w_args, include_namespace=True)
                 args_bracket_notypes = funcutils.constrArgsBracket(use_args, include_arg_type=False, cast_to_original=True)
+            args_bracket_nonames = funcutils.constrArgsBracket(use_args, include_namespace=True, include_arg_type=True, include_arg_name=False, add_namespace_to_loaded='my_ns') 
             
             # Generate declaration line:
             if use_wrapper_return:
@@ -534,6 +538,22 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
                 func_def += indent*' ' + 'return new ' + class_name['short'] + args_bracket_notypes + ';' + '\n'
             func_def += '}' + 2*'\n'
 
+            # Add info to global dict with factory function info
+            info_dict = OrderedDict()
+            info_dict['name']         = factory_name
+            info_dict['args_bracket'] = args_bracket_nonames
+            info_dict['symbol']       = ''  # Will be filled when the factory function source files are parsed by gccxml
+            # gb.factory_info[class_name['long']].append( (factory_name, args_bracket_nonames) )
+            gb.factory_info[class_name['long']].append( info_dict )
+
+            # Increment counter
+            counter += 1
+
+    #         # Add argument bracket to factory_signatures_comment:
+    #         factory_signatures_comment += '##' + args_bracket_nonames
+
+    # factory_signatures_comment += '##\n'
+
 
     # Encapsulate code in the correct namespace
     namespaces = utils.getNamespaces(class_el)
@@ -544,14 +564,19 @@ def constrFactoryFunction(class_el, class_name, indent=4, template_types=[], ski
     func_def_in_ns += utils.addIndentation(func_def, n_indents*cfg.indent)
     func_def_in_ns += utils.constrNamespace(namespaces, 'close')
 
+    return_code = func_def_in_ns
+
+    # if add_signatures_comment:
+    #     return_code = factory_signatures_comment +'\n' + return_code
+
     if add_include_statements:
         include_statements.append( '#include "' + gb.abstract_typedefs_fname + cfg.header_extension + '"' )
         include_statements.append( '#include "' + gb.wrapper_typedefs_fname + cfg.header_extension + '"' )
         include_statements = list( OrderedDict.fromkeys(include_statements) )
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
-        func_def_in_ns = include_statements_code + func_def_in_ns
+        return_code = include_statements_code + return_code
 
-    return func_def_in_ns
+    return return_code
 
 # ====== END: constrFactoryFunction ========
 
