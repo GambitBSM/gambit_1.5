@@ -6,7 +6,7 @@ CXX=g++
 AR=ar
 
 CXXFLAGS=
-CPPFLAGS=-D EFTB_PATH=\"/home/weniger/Work/Projects/gamLike/\"
+CPPFLAGS=
 ARFLAGS=rv
 
 LDLIBS=-lgsl -lblas
