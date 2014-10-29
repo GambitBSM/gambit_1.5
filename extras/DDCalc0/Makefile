@@ -16,7 +16,6 @@ empty :=
 space := ${empty} ${empty}
 lpar  := ${empty}(${empty}
 rpar  := ${empty})${empty}
-FFLAGS = -O3 -fPIC -fno-range-check
 
 
 #################### VERSION ###############################
