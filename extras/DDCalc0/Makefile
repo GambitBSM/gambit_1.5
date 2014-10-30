@@ -6,6 +6,7 @@
 #   make all                                               #
 #                                                          #
 #   C Savage     University of Utah     2014               #
+#                Nordita                2014               #
 #                                                          #
 ############################################################
 
@@ -47,14 +48,17 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 
 # Fortran compiler (search)
 # If FC not already set to ifort or gfortran, search
-# for those compilers.
+# for those compilers.  Any passed FC really only needs
+# 'ifort' or 'gfortran' in the name, e.g. gfortran-4.9
+# would be valid.
 #ifeq (,$(filter $(FC),ifort gfortran))
-#  FC := $(or $(shell which ifort 2> /dev/null),\
-#             $(shell which gfortran 2> /dev/null),\
-#             $(error Could not find ifort or gfortran compiler \
-#                     in the path.  A valid compiler must be given.))
-#  FC := $(notdir $(FC))
-#endif
+ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC)))
+  FC := $(or $(shell which ifort 2> /dev/null),\
+             $(shell which gfortran 2> /dev/null),\
+             $(error Could not find ifort or gfortran compiler \
+                     in the path.  A valid compiler must be given.))
+  FC := $(notdir $(FC))
+endif
 
 # Explicit compiler, specified by additional 'ifort' or
 # 'gfortran' target.
@@ -66,24 +70,24 @@ ifneq (,$(findstring gfortran,$(MAKECMDGOALS)))
 endif
 
 # Fortran compiler flags
-#ifeq (,$(FFLAGS))
-#  ifeq ($(FC),ifort)
-#    FFLAGS := -fast
-#  else ifeq ($(FC),gfortran)
-#    FFLAGS := -O3 -fno-range-check
-#  else
-#    $(error Invalid compiler: $(FC).  Must use ifort or gfortran.)
-#  endif
-#endif
+ifeq (,$(FFLAGS))
+  ifneq (,$(findstring ifort,$(FC)))
+    FFLAGS := -fast
+  else ifneq (,$(findstring gfortran,$(FC)))
+    FFLAGS := -O3 -fno-range-check
+  else
+    $(error Invalid compiler: $(FC).  Must use ifort or gfortran.)
+  endif
+endif
 
 # Ensure required compiler flags
-#ifeq ($(FC),gfortran)
+ifneq (,$(findstring gfortran,$(FC)))
   # disable compile-time range checking due to large integer
   # constants in math routines (allows for INTEGER*8)
-#  ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
-#    FFLAGS += -fno-range-check
-#  endif
-#endif
+  ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
+    FFLAGS += -fno-range-check
+  endif
+endif
 
 # Flags used for shared object library.
 # Shared library code must be compiled with -fPIC, which is
