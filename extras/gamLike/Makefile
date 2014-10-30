@@ -2,11 +2,11 @@ BUILD=./
 SRC=src
 LIB=./
 
-CXX=g++
+CC=g++
 AR=ar
 
-CXXFLAGS=
-CPPFLAGS=
+CFLAGS=
+
 ARFLAGS=rv
 
 LDLIBS=-lgsl -lblas
@@ -18,13 +18,13 @@ OBJ = $(patsubst %.cc,$(BUILD)/%.o,$(SOURCES))
 all: $(LIB)/gamLike.a $(LIB)/gamLike.so
 
 $(BUILD)/%.o: $(SRC)/%.cc src/gamLike.h
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIB)/gamLike.a: $(OBJ)
 	$(AR) $(ARFLAGS) $@ $^
 
 $(LIB)/gamLike.so: $(OBJ)
-	$(CXX) -shared -rdynamic -o $@ $^ $(LDLIBS)
+	$(CC) -shared -rdynamic -o $@ $^ $(LDLIBS)
 
 .PHONY: clean tarball
 clean:
