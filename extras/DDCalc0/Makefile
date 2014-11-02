@@ -81,7 +81,7 @@ ifeq (,$(FFLAGS))
 endif
 
 # Ensure required compiler flags
-ifneq (,$(findstring gfortran,$(FC)))
+ifneq (, $or( $(findstring gfortran, $(FC)), $(findstring f95,$(FC)) ) )
   # disable compile-time range checking due to large integer
   # constants in math routines (allows for INTEGER*8)
   ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
@@ -99,7 +99,6 @@ SOFFLAGS := $(FFLAGS)
 ifeq (,$(findstring -fPIC,$(FFLAGS)))
   SOFFLAGS += -fPIC
 endif
-
 
 #################### FILES / TARGETS #######################
 
