@@ -52,31 +52,35 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 # 'ifort' or 'gfortran' in the name, e.g. gfortran-4.9
 # would be valid.
 #ifeq (,$(filter $(FC),ifort gfortran))
-ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC)))
-  FC := $(or $(shell which ifort 2> /dev/null),\
-             $(shell which gfortran 2> /dev/null),\
-             $(error Could not find ifort or gfortran compiler \
-                     in the path.  A valid compiler must be given.))
-  FC := $(notdir $(FC))
+ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC))$(findstring f95,$(FC)))
+  override FC := $(or $(shell which ifort 2> /dev/null),\
+                      $(shell which gfortran 2> /dev/null),\
+                      $(shell which f95 2> /dev/null),\
+                      $(error Could not find ifort or gfortran compiler \
+                              in the path.  A valid compiler must be given.))
+  override FC := $(notdir $(FC))
 endif
 
 # Explicit compiler, specified by additional 'ifort' or
 # 'gfortran' target.
 ifneq (,$(findstring ifort,$(MAKECMDGOALS)))
-  FC := ifort
+  override FC := ifort
 endif
 ifneq (,$(findstring gfortran,$(MAKECMDGOALS)))
-  FC := gfortran
+  override FC := gfortran
+endif
+ifneq (,$(findstring f95,$(MAKECMDGOALS)))
+  override FC := f95
 endif
 
 # Fortran compiler flags
 ifeq (,$(FFLAGS))
   ifneq (,$(findstring ifort,$(FC)))
     FFLAGS := -fast
-  else ifneq (,$(findstring gfortran,$(FC)))
+  else ifneq (,$(findstring gfortran,$(FC))$(findstring f95,$(FC)))
     FFLAGS := -O3 -fno-range-check
   else
-    $(error Invalid compiler: $(FC).  Must use ifort or gfortran.)
+    $(error Invalid compiler: $(FC).  Must use ifort or gfortran/f95.)
   endif
 endif
 
@@ -85,7 +89,7 @@ ifneq (, $or( $(findstring gfortran, $(FC)), $(findstring f95,$(FC)) ) )
   # disable compile-time range checking due to large integer
   # constants in math routines (allows for INTEGER*8)
   ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
-    FFLAGS += -fno-range-check
+    override FFLAGS += -fno-range-check
   endif
 endif
 
