@@ -18,6 +18,7 @@ template class std::vector<float>;
 //#include "Particle.hpp"
 #include "FastSim.hpp"
 
+bool _parton_level=0;
 
 //////////////////////////////////////////////////
 
@@ -606,6 +607,14 @@ void MyAnalysis::SelectParticles(Pythia8::Event& event) {
        }
     }
     else {
+
+      if (_parton_level) {
+        if ((event[i].isQuark()) && (fabs(event[i].id()) < 5)) {
+
+          chosen = new hep_simple_lib::Particle(event[i].px(), event[i].py(), event[i].pz(), event[i].id());
+          _chargedhads.push_back(chosen);
+        }
+      }
 
       //if (event[i].isFinal()) {
       /*
