@@ -1,0 +1,2 @@
+#!/bin/bash
+cp -f MSSM_main.c MSSM/main.c
