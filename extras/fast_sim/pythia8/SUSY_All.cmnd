@@ -4,7 +4,7 @@
 ! Lines not beginning with a letter or digit are comments.
 
 ! 1) Settings used in the main program.
-Main:numberOfEvents = 10000        ! number of events to generate
+Main:numberOfEvents = 5000        ! number of events to generate
 Main:timesAllowErrors = 3          ! how many aborts before run stops
 
 ! 2) Settings related to output in init(), next() and stat().
@@ -18,15 +18,15 @@ Next:numberShowEvent = 2           ! print event record n times
 ! 3) Beam parameter settings. Values below agree with default ones.
 Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
 Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
-Beams:eCM = 10000.                 ! CM energy of collision
+Beams:eCM = 8000.                 ! CM energy of collision
 
 ! 4) Read SLHA spectrum
 SLHA:file = cmssm.spc              ! Sample SLHA1 spectrum for CMSSM-10.1.1
 #SLHA:file = sps1aWithDecays.spc     ! Older example including DECAY tables
 
 ! 5) Process selection
-SUSY:all = on                      ! Switches on ALL (~400) SUSY processes
-#SUSY:gg2gluinogluino  = on
+#SUSY:all = on                      ! Switches on ALL (~400) SUSY processes
+SUSY:gg2gluinogluino  = on
 #SUSY:qqbar2gluinogluino  = on
 #SUSY:qg2squarkgluino = on
 #SUSY:gg2squarkantisquark = on
@@ -45,4 +45,4 @@ SUSY:all = on                      ! Switches on ALL (~400) SUSY processes
 PartonLevel:MPI = off              ! no multiparton interactions
 PartonLevel:ISR = off              ! no initial-state radiation
 PartonLevel:FSR = off              ! no final-state radiation
-HadronLevel:Hadronize = off        ! no hadronization
+HadronLevel:Hadronize = on        ! no hadronization

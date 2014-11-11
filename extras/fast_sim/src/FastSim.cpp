@@ -848,10 +848,11 @@ namespace fast_sim {
     // this function will select the jets according to the specified cuts
     // assume the jets have passed the baseline selection
 
+    /*
     if (not cuts->_test_acceptance) {
       // there is no acceptance information so it is assume it is perfect, return all the particles
 
-        LOG_WARN("No Acceptance found for jets, ideal response assumed for all jets: ", jets.size());
+        //LOG_WARN("No Acceptance found for jets, ideal response assumed for all jets: ", jets.size());
 
       for (size_t i=0;i<jets.size();i++) {
         Jet *temp_j = new Jet(jets[i]->mom(),jets[i]->isBJet());
@@ -859,18 +860,28 @@ namespace fast_sim {
       }
       return;
     }
+    */
 
+    //LOG_WARN("No Acceptance found for jets, ideal response assumed for all jets: ", jets.size());
     for (size_t i=0;i<jets.size();i++) {
 
       bool passed_cuts = true;
+
+      /*
       for (size_t cc= 0l; cc < cuts->_response.size();cc++) {
 
         switch(cuts->_response[cc]._type) {
           case PT: //1d map
-            passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->pT());
+            if (jets[i]->pT() < 30.0)
+              passed_cuts = false;
+
+            //passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->pT());
             break;
           case ETA: //1d map
-            passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->eta());
+
+            if (fabs(jets[i]->eta()) > 3.0)
+              passed_cuts = false;
+            //passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->eta());
             break;
           case PT_ETA: //2d map
             passed_cuts = isParticleMeasured(cuts->_response[cc],jets[i]->pT(),jets[i]->eta());
@@ -881,6 +892,15 @@ namespace fast_sim {
         if (!passed_cuts) 
           break;  // do not test the rest of the responses, it has failed
       }
+      */
+
+      //LOG_WARN("Jets Pt: ", jets[i]->pT(),jets[i]->eta());
+      if (jets[i]->pT() < 30.0)
+         passed_cuts = false;
+
+      if (fabs(jets[i]->eta()) > 3.0)
+         passed_cuts = false;
+
       if (passed_cuts) {
         Jet *temp_j = new Jet(jets[i]->mom(),jets[i]->isBJet());
         measured_jets.push_back(temp_j);
@@ -1069,7 +1089,7 @@ namespace fast_sim {
     //printElectrons();
 
     std::vector<Particle*> measured_electrons, measured_muons;
-    std::vector<Jet*> measured_bjets;
+    std::vector<Jet*> measured_bjets, measured_jets;
 
     // search for the 
 
@@ -1103,6 +1123,8 @@ namespace fast_sim {
       }
     }
 
+    selectJets(_jets,NULL,measured_jets);
+
     //std::cout << " size of measured electrons is " << measured_electrons.size() << std::endl;
     LOG_DEBUG1("The number of measured prompt electrons is:",measured_electrons.size(),"muons:",measured_muons.size(),"bjets",measured_bjets.size());
     event.add_particles(measured_electrons);
@@ -1123,10 +1145,10 @@ namespace fast_sim {
     event.set_missingmom_truth(P4::mkXYZM(METx_truth(), METy_truth(), 0., 0.));
 
     // b-tagging and measured jets
-    for (size_t i=0;i<_jets.size();i++) {
+    for (size_t i=0;i<measured_jets.size();i++) {
 
       bool btagged = false;
-      for (size_t b=0;b<_bjets.size();b++) {
+      for (size_t b=0;b<measured_bjets.size();b++) {
 
         if (_jets[i]->mom().deltaR_rap(measured_bjets[b]->mom()) < 0.2) { // this jet is actuall b-tagged
           btagged = true;
@@ -1134,7 +1156,7 @@ namespace fast_sim {
         }
       }
       _jets[i]->setBJet(btagged);
-      event.addJet(_jets[i]);
+      event.addJet(measured_jets[i]);
     }
   }
 

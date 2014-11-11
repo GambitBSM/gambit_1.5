@@ -46,7 +46,8 @@ namespace gamLike
         return y0 + (y1-y0) * log(x/x0) / log(x1/x0);  // lin-vs-log interpolation for lnL vs flux
     }
 
-    GamLike::GamLike(std::string filename, double J_mean, double J_err, int method, int filetype): J_mean(J_mean), J_err(J_err), filename(filename), method(method), filetype(filetype)
+    GamLike::GamLike(std::string filename, double J_mean, double J_err, int method, int filetype): 
+        method(method), filetype(filetype), J_mean(J_mean), J_err(J_err), filename(filename)
     {
         if (filetype == 0)
             loadData_lnLtab(filename);
@@ -116,6 +117,7 @@ namespace gamLike
                 return log(L_max);
             }
         }
+        return -1e10;
     }
 
     E_bins GamLike::getEbins()
@@ -166,11 +168,11 @@ namespace gamLike
         e_bins.push_back(ebin);
         lnL_vs_flux.push_back(std::pair<std::vector<double>, std::vector<double> >(phi_list, lnL_list));
         in.close();
+        return 0;
     }
 
     int GamLike::loadData_Sigma(std::string filename)
     {
-        int nlines = 0;
         double tmp;
         std::pair<double, double> ebin;
 
@@ -207,6 +209,7 @@ namespace gamLike
         std::cout << "Flux vector length: " << this->flux.size() << std::endl;
         std::cout << "Sigma dim: " << this->Sigma.size() << " x " << this->Sigma.begin()->size() << std::endl;
         in.close();
+        return 0;
     }
 
     double GamLike::lnL(std::vector<double> Phi, double J)
