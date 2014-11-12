@@ -39,6 +39,7 @@ namespace logging
 
 	void logger::print_impl()
 	{
+    std::cout << std::endl;
 		//policy->write( get_logline_header() + log_stream.str() );
     //std::cout << get_logline_header() + _log_stream.str() << std::endl;
 		//_log_stream.str("");

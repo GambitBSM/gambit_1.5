@@ -1,4 +1,5 @@
 #include "DetectorResponse.hpp"
+#include "FastSim_Logger.hpp"
 
 #include <gsl/gsl_randist.h>
 
@@ -37,17 +38,20 @@ ATLAS_Simple_Response::ATLAS_Simple_Response(){
 void ATLAS_Simple_Response::MuonResponse(Particle& muon){
   // smears the momemtum of a muon
 
-  double newpx,newpy,newpz,newe; //,newpt;
+  double newpt; //,newpt;
 
   double distr = gsl_ran_gaussian(_random_num,1);
   double sigma = distr*_muon_resolution*muon.mom().rho();
 
-  newpx = muon.mom().px()/(1+sigma);
-  newpy = muon.mom().py()/(1+sigma);
-  newpz = muon.mom().pz()/(1+sigma);
-  newe = muon.mom().E()/(1+sigma);
+  newpt = muon.mom().pT()/(1+sigma);
 
-  P4 newp(newpx,newpy,newpz,newe);
+//  newpx = muon.mom().px()/(1+sigma);
+//  newpy = muon.mom().py()/(1+sigma);
+//  newpz = muon.mom().pz()/(1+sigma);
+//  newe = muon.mom().E()/(1+sigma);
+
+  P4 newp= P4::mkEtaPhiMPt(muon.mom().eta(),muon.mom().phi(),0.1057,newpt);
+//  P4 newp(newpx,newpy,newpz,newe);
 
   muon.set_mom(newp);
 //  muon.mom().setPM(newpx,newpy,newpz,0.1057);
@@ -96,7 +100,8 @@ void ATLAS_Simple_Response::PhotonResponse(Particle& photon){
 void ATLAS_Simple_Response::ElectronResponse(Particle& electron){
   // smears the momemtum of a electron
 
-  double newpx,newpy,newpz,newe; //,newpt;
+  double newE; //
+  P4 new_el;
 
   if (electron.mom().E() <= 0)
     return;
@@ -104,13 +109,21 @@ void ATLAS_Simple_Response::ElectronResponse(Particle& electron){
   double distr = gsl_ran_gaussian(_random_num,1);
   double sigma = distr*_electron_resolution*1.0/sqrt(electron.mom().E());
 
-  newpx = electron.mom().px()/(1+sigma);
-  newpy = electron.mom().py()/(1+sigma);
-  newpz = electron.mom().pz()/(1+sigma);
-  newe = electron.mom().E()/(1+sigma);
+  newE = electron.mom().E()/(1+sigma);
 
-  P4 newp(newpx,newpy,newpz,newe);
-  electron.set_mom(newp);
+//  newpx = muon.mom().px()/(1+sigma);
+//  newpy = muon.mom().py()/(1+sigma);
+//  newpz = muon.mom().pz()/(1+sigma);
+//  newe = muon.mom().E()/(1+sigma);
+
+  P4 newp_el = P4::mkEtaPhiME(electron.mom().eta(),electron.mom().phi(),0.511e-03,newE);
+
+  LOG_DEBUG1("Smeared four vector ",new_el.px(),new_el.py(),new_el.pz(),new_el.phi(),new_el.eta(),new_el.pT());
+
+  //newe = electron.mom().E()/(1+sigma);
+
+  //P4 newp(newpx,newpy,newpz,newe);
+  electron.set_mom(newp_el);
 
 //  electron.mom().setPM(newpx,newpy,newpz,0.0);
 //  Particle newelectron(newpx,newpy,newpz,0.0,electron.pid());

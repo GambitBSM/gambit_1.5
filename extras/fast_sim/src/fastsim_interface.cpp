@@ -10,20 +10,23 @@
 //fast_sim::FastSim _my_fast_sim;
 
 
-int FastSim_Init(int which);
+int FastSim_Init_Test(int which);
 //int FastSim_ReadEvents( int &events);
 
 
-int FastSim_Init(int which)
+int FastSim_Init_Test(int which)
 {
 
   fast_sim::FastSim _my_fast_sim;
+
+  
   
   switch(which) {
-    default:
     case 0:_my_fast_sim.init(fast_sim::NOMINAL, 0);break; // added '0' in default spot so that gambit would compile
     case 1:_my_fast_sim.init(fast_sim::ATLAS, 0);break;
+    default: ;
   }
+  
   
   
   return 0;

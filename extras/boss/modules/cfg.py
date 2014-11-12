@@ -1,80 +1,84 @@
-##########################################
-#                                        #
-#  Global configuration module for BOSS  #
-#                                        #
-##########################################
-
-#
-# Variables in this module can be accessed and altered by 
-# all other modules. The values listet here are only default
-# values.
-#
+###################################
+#                                 #
+#  Configuration module for BOSS  #
+#                                 #
+###################################
 
 from collections import OrderedDict
 
 
-xml_file_name    = ''
-id_dict          = OrderedDict() 
-file_dict        = OrderedDict()
-std_types_dict   = OrderedDict()
-typedef_dict     = OrderedDict()
-class_dict       = OrderedDict()
-func_dict        = OrderedDict()
-accepted_types   = [] 
-std_headers_used = []
 
-std_types_used     = []
-all_types_in_class = []
+# GAMBIT specific options:
 
+gambit_backend_name    = 'Pythia'
+# gambit_backend_name    = 'BOSSMinimalExample'
+gambit_backend_version = '8.186'
+# gambit_backend_version = '1.2'
+gambit_base_namespace  = ''
+gambit_backend_basedir = 'backend_types'
 
-accepted_paths     = ['pythia8185']
-# accepted_paths     = ['softsusy']
+shared_lib_file_name = 'libpythia8.so'
+# shared_lib_file_name = 'libminimal_1_2.so'
 
+# Information about the external code:
+
+include_path = 'pythia8186/include'
+# include_path = 'minimal_1_2'
+source_path  = 'pythia8186/src'
+# source_path  = 'minimal_1_2'
+
+additional_include_paths = []
+
+accepted_paths     = ['pythia8186']
+# accepted_paths     = ['minimal_1_2']
 std_include_paths  = ['/usr/include/']
 
-accepted_classes   = ['Pythia8::ParticleData', 'Pythia8::RotBstMatrix', 
-                      'Pythia8::Vec4', 'Pythia8::Particle', 
-                      'Pythia8::Event', 'Pythia8::Pythia']
+loaded_classes     = ['Pythia8::Pythia', 'Pythia8::Hist', 'Pythia8::Event', 'Pythia8::Particle', 'Pythia8::Info', 'Pythia8::Vec4']
+# loaded_classes     = ['nspace1::nspace2::X', 'nspace3::Y']
+# loaded_classes     = ['X', 'Y']
+loaded_functions   = []
 
-# accepted_classes   = ['Pythia8::Flag', 'Pythia8::Mode', 
-#                       'Pythia8::Parm', 'Pythia8::Word', 
-#                       'Pythia8::FVec', 'Pythia8::MVec',
-#                       'Pythia8::PVec', 'Pythia8::Settings']
+wrapper_class_tree     = True
+load_parent_classes    = False
+wrap_inherited_members = False
 
-
-# accepted_classes   = ['DoubleVector']
- # - ComplexMatrix
- # - OpMultiply<Complex>
- # - AltEwsbMssm
- # - ComplexVector
- # - DoubleMatrix
- # - Indexable<Complex,ComplexVector>
- # - Indexable<double,DoubleVector>
- # - QedQcd
- # - SoftParsMssm
- # - MssmSoftsusy
- # - MatIndexable<Complex,ComplexMatrix>
- # - MatIndexable<double,DoubleMatrix>
- # - Complex
- # - MssmSusy
- # - RGE
-
-accepted_functions = []
-
-extra_output_dir      = 'test_output'
-# extra_output_dir      = 'extra_output_softsusy'
-code_suffix           = '_GAMBIT'
+extra_output_dir      = 'pythia_BOSS_output'
+# extra_output_dir      = 'minimal_1_2_BOSS_output'
 abstr_header_prefix   = 'abstract_'
+wrapper_header_prefix = 'wrapper_'
 factory_file_prefix   = 'factory_'
-abstr_class_prefix    = 'Abstract__'
-all_headers_fname     = 'all_abstract_headers.hpp'
-all_typedefs_fname    = 'all_typedefs.hpp'
-header_extension      = '.h'
-source_extension      = '.cc'
-add_path_to_includes  = 'Pythia8'
 
-# header_extension      = '.h'
-# source_extension      = '.cpp'
-# add_path_to_includes  = ''
+header_extension = '.h'
+source_extension = '.cc'
+
+add_path_to_includes = 'Pythia8'
+# add_path_to_includes = ''
 
 indent = 4
+
+
+# Dictionary of what header to include for various standard types
+
+known_class_headers = {
+    "std::array"             : "<array>", 
+    "std::vector"            : "<vector>", 
+    "std::deque"             : "<deque>", 
+    "std::list"              : "<list>", 
+    "std::forward_list"      : "<forward_list>", 
+    "std::set"               : "<set>",  
+    "std::multiset"          : "<set>", 
+    "std::map"               : "<map>", 
+    "std::multimap"          : "<map>", 
+    "std::unordered_set"     : "<unordered_set>", 
+    "std::unordered_multiset": "<unordered_set>", 
+    "std::unordered_map"     : "<unordered_map>", 
+    "std::unordered_multimap": "<unordered_map>", 
+    "std::stack"             : "<stack>", 
+    "std::queue"             : "<queue>",
+    "std::priority_queue"    : "<queue>",
+    "std::string"            : "<string>",
+    "std::istream"           : "<istream>",
+    "std::ostream"           : "<ostream>",
+    "std::iostream"          : "<iostream>"
+}
+

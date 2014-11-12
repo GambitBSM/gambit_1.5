@@ -8,15 +8,19 @@ MODULE DDCALC0
 ! and corresponding likelihoods/exclusion levels.
 ! 
 ! To compile:
-!    gfortran -O3 -o DDCalc0 DDCalc0.f90
-!    ifort -fast -o DDCalc0 DDCalc0.f90
+!     gfortran -O3 -fno-range-check -o DDCalc0 DDCalc0.f90
+!     ifort -fast -o DDCalc0 DDCalc0.f90
 ! 
 ! To see usage:
-!    ./DDCalc0 --help
+!     ./DDCalc0 --help
 ! 
 ! 
-!    Created by Chris Savage
-!    University of Utah   (2014- )
+!   Created by Chris Savage
+!   University of Utah   (2013 - 2014)
+!   Nordita              (2014 -     )
+! 
+!   With contributions from:
+!     Andre Scaffidi            University of Adelaide (2014)
 ! 
 ! 
 ! 
@@ -35,6 +39,21 @@ MODULE DDCALC0
 !   Define names for accessing routines (useful in some circumstances).
 ! 
 ! MODULE ROUTINES
+!  * SIMPLE INTERFACE ROUTINES
+!    Basic routines that can be used to initialize the module and
+!    set WIMP parameters.  Meant to provide a simple, basic interface
+!    for external access to the module.
+! Experiment specific:
+!  * LUX 2013 ROUTINES
+!    Routines for calculating rates/likelihoods for the LUX 2013
+!    analysis.
+!  * DARWIN ARGON 2014 ROUTINES
+!    Routines for calculating rates/likelihoods for the proposed
+!    DARWIN argon-based detector, using a 2014 parameters estimate.
+!  * DARWIN XENON 2014 ROUTINES
+!    Routines for calculating rates/likelihoods for the proposed
+!    DARWIN xenon-based detector, using a 2014 parameters estimate.
+! Generic:
 !  * MAIN ROUTINES
 !    Main routines used for each program mode.
 !  * INITIALIZATION
@@ -58,7 +77,7 @@ MODULE DDCALC0
 !    Routines for determining isotope and nuclear properties, including
 !    isotopic compositions, nuclear masses, and form factors (both
 !    spin-independent and spin-dependent).
-!    [NOTE: NO IMPLEMENTATION FOR SD CASE -- JUST SET TO ZERO.]
+!    [NOTE: LIMITED IMPLEMENTATION FOR SD CASE -- MOSTLY SET TO ZERO.]
 !  * DETECTOR SETUP ROUTINES
 !    Routines for initializing and modifying the detector setup,
 !    notatably by setting isotopes to use, loading efficiencies from
@@ -124,39 +143,263 @@ PRIVATE
 ! public access.  Due to the global private default scope, only
 ! routines explicitly listed here are externally accessible.
 ! 
+! Interfaces are used to provide an exernally accessible name that
+! differs from the actual function name (the latter will remain only
+! privately accessible).  The externally accessible names all include
+! a 'DDCalc0_' prefix.
+! 
 ! Public constants are declared in the constants section below.
 
+! SIMPLE INTERFACE ROUTINES --------------------------------------------
+
+! These are basic routines for externally accessing the module that
+! can be used for initialization and setting WIMP parameters.  These
+! are meant to allow for a simpler interface to this module; other
+! routines are more robust and provide more capabilities.
+
+! Module initialization:
+!     SUBROUTINE DDCalc0_Init()
+PUBLIC :: DDCalc0_Init
+
+! Standard Halo Model (SHM) settings:
+!     SUBROUTINE DDCalc0_SetSHM(rho,vrot,v0,vesc)
+! where the arguments are the local dark matter density [GeV/cm^3],
+! the local disk rotation speed [km/s], the most probable dark matter
+! speed in the galactic rest frame [km/s], and the galactic escape
+! speed [km/s].  This routine need only be called if non-default
+! values are desired (0.4, 235, 235, and 550, respectively).
+PUBLIC :: DDCalc0_SetSHM
+
+! WIMP parameter settings:
+!     SUBROUTINE DDCalc0_SetWIMP_mfa(m,fp,fn,ap,an)
+!     SUBROUTINE DDCalc0_SetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
+!     SUBROUTINE DDCalc0_SetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
+! where m is the WIMP mass [GeV], f is spin-independent (SI) WIMP-
+! nucleon coupling [GeV^-2], a is the spin-dependent (SD) WIMP-nucleon
+! coupling [unitless], G are the effective 4-fermion vertex couplings,
+! related by:
+!     GpSI = 2 fp        GpSD = 2\sqrt{2} G_F ap
+!     GnSI = 2 fn        GnSD = 2\sqrt{2} G_F an
+! and sigma is the WIMP-nucleon scattering cross-section [pb].
+! Negative cross-sections indicate the corresponding coupling should
+! be negative.  In all cases, 'p' refers to proton and 'n' to neutron.
+PUBLIC :: DDCalc0_SetWIMP_mfa,DDCalc0_SetWIMP_mG,DDCalc0_SetWIMP_msigma
+
+
+! EXPERIMENT-SPECIFIC ROUTINES -----------------------------------------
+
+! To use any of the routines for a particular experiment, the
+! corresponding init() routine must be called once.  The corresponding
+! calc() routine must be called after each change in the WIMP
+! parameters.
+
+! Detector initialization:
+!     SUBROUTINE Init(intervals)
+! where intervals is logical indicating if calculations should be
+! performed for analysis sub-intervals (i.e. intervals between
+! observed events).  This is only necessary for maximum gap
+! calculations and can be set to .FALSE. for likelihood analyses.
+PUBLIC :: LUX_2013_Init,DARWIN_Ar_2014_Init,DARWIN_Xe_2014_Init
+
+! Rate calculation:
+!     SUBROUTINE CalcRates()
+! Performs the rate calculations used for likelihoods/confidence
+! intervals.  Must be called after any changes to the WIMP parameters.
+! Actual calculation values are accessed through other routines.
+PUBLIC :: LUX_2013_CalcRates,DARWIN_Ar_2014_CalcRates,DARWIN_Xe_2014_CalcRates
+
+! Number of observed events in the analysis:
+!     INTEGER FUNCTION Events()
+PUBLIC :: LUX_2013_Events,DARWIN_Ar_2014_Events,DARWIN_Xe_2014_Events
+
+! Average expected number of background events in the analysis:
+!     REAL*8 FUNCTION Background()
+PUBLIC :: LUX_2013_Background,DARWIN_Ar_2014_Background,DARWIN_Xe_2014_Background
+
+! Average expected number of signal events in the analysis:
+!     REAL*8 FUNCTION Signal()
+! Or the separate spin-independent and spin-dependent contributions:
+!     REAL*8 FUNCTION SignalSI()
+!     REAL*8 FUNCTION SignalSD()
+PUBLIC :: LUX_2013_Signal,  DARWIN_Ar_2014_Signal,  DARWIN_Xe_2014_Signal
+PUBLIC :: LUX_2013_SignalSI,DARWIN_Ar_2014_SignalSI,DARWIN_Xe_2014_SignalSI
+PUBLIC :: LUX_2013_SignalSD,DARWIN_Ar_2014_SignalSD,DARWIN_Xe_2014_SignalSD
+
+! Log-likelihood for current WIMP:
+!     REAL*8 FUNCTION LogLikelihood()
+! Based upon a Poisson distribution in the number of observed events
+! given the expected background+signal.  Calc() must be called first.
+PUBLIC :: LUX_2013_LogLikelihood,DARWIN_Xe_2014_LogLikelihood,DARWIN_Ar_2014_LogLikelihood
+
+! Logarithm of the p-value for current WIMP:
+!     REAL*8 FUNCTION LogPValue()
+! Based upon the maximum gap method if Init() called with intervals =
+! .TRUE., a signal-only (no-background) Poisson distribution otherwise.
+! Calc() must be called first.
+PUBLIC :: LUX_2013_LogPValue,DARWIN_Xe_2014_LogPValue,DARWIN_Ar_2014_LogPValue
+
+! Scale by which the current WIMP cross-sections must be multiplied to
+! achieve the given p-value:
+!     REAL*8 FUNCTION ScaleToPValue(lnp)
+! where lnp is the logarithm of the desired p-value (p=1-CL).
+! Calc() must be called first.
+PUBLIC :: LUX_2013_ScaleToPValue,DARWIN_Xe_2014_ScaleToPValue,DARWIN_Ar_2014_ScaleToPValue
+
+! Detector structure initialization (ADVANCED USAGE ONLY):
+!     SUBROUTINE InitTo(D,intervals)
+! where D is a DetectorRateStruct structure and intervals is as
+! described for the initialization routines above.  The D structure
+! can be used in the generic routines below.  These routines are
+! not intended for standard usage, so ignore them unless you are
+! familiar with the internals of this code.
+PUBLIC :: LUX_2013_InitTo,DARWIN_Ar_2014_InitTo,DARWIN_Xe_2014_InitTo
+
+
+! MAIN ROUTINES --------------------------------------------------------
+
 ! Main routine
-PUBLIC :: main
+PUBLIC :: DDCalc0_Main
+INTERFACE DDCalc0_Main
+  MODULE PROCEDURE main
+END INTERFACE
 
 ! Main routines for specific running modes
-PUBLIC :: MainEventsAndLikelihoods,MainEventsAndLikelihoodsInteractive, &
-          MainLogLikelihood,MainLogLikelihoodInteractive,               &
-          MainLogPValue,MainLogPValueInteractive,                       &
-          MainSpectrum,MainEventsByMass,MainLimitsSI,MainLimitsSD
+PUBLIC :: DDCalc0_MainEventsAndLikelihoods,                             &
+          DDCalc0_MainEventsAndLikelihoodsInteractive,                  &
+          DDCalc0_MainLogLikelihood,DDCalc0_MainLogLikelihoodInteractive,&
+          DDCalc0_MainLogPValue,DDCalc0_MainLogPValueInteractive,       &
+          DDCalc0_MainSpectrum,DDCalc0_MainEventsByMass,                &
+          DDCalc0_MainConstraintsSI,DDCalc0_MainConstraintsSD,          &
+          DDCalc0_MainLimitsSI,DDCalc0_MainLimitsSD
+INTERFACE DDCalc0_MainEventsAndLikelihoods
+  MODULE PROCEDURE MainEventsAndLikelihoods
+END INTERFACE
+INTERFACE DDCalc0_MainEventsAndLikelihoodsInteractive
+  MODULE PROCEDURE MainEventsAndLikelihoodsInteractive
+END INTERFACE
+INTERFACE DDCalc0_MainLogLikelihood
+  MODULE PROCEDURE MainLogLikelihood
+END INTERFACE
+INTERFACE DDCalc0_MainLogLikelihoodInteractive
+  MODULE PROCEDURE MainLogLikelihoodInteractive
+END INTERFACE
+INTERFACE DDCalc0_MainLogPValue
+  MODULE PROCEDURE MainLogPValue
+END INTERFACE
+INTERFACE DDCalc0_MainLogPValueInteractive
+  MODULE PROCEDURE MainLogPValueInteractive
+END INTERFACE
+INTERFACE DDCalc0_MainSpectrum
+  MODULE PROCEDURE MainSpectrum
+END INTERFACE
+INTERFACE DDCalc0_MainEventsByMass
+  MODULE PROCEDURE MainEventsByMass
+END INTERFACE
+INTERFACE DDCalc0_MainConstraintsSI
+  MODULE PROCEDURE MainConstraintsSI
+END INTERFACE
+INTERFACE DDCalc0_MainConstraintsSD
+  MODULE PROCEDURE MainConstraintsSD
+END INTERFACE
+INTERFACE DDCalc0_MainLimitsSI
+  MODULE PROCEDURE MainLimitsSI
+END INTERFACE
+INTERFACE DDCalc0_MainLimitsSD
+  MODULE PROCEDURE MainLimitsSD
+END INTERFACE
+
+
+! GENERIC ROUTINES -----------------------------------------------------
 
 ! Initialization routines
-PUBLIC :: Initialize,InitializeCL
+PUBLIC :: DDCalc0_Initialize,DDCalc0_InitializeCL
+INTERFACE DDCalc0_Initialize
+  MODULE PROCEDURE Initialize
+END INTERFACE
+INTERFACE DDCalc0_InitializeCL
+  MODULE PROCEDURE InitializeCL
+END INTERFACE
 
 ! WIMP mass & couplings routines
-PUBLIC :: SetWIMP,GetWIMP,InitWIMP,InitWIMPCL
+PUBLIC :: DDCalc0_GetWIMP,DDCalc0_SetWIMP,                              &
+          DDCalc0_InitWIMP,DDCalc0_InitWIMPCL
+INTERFACE DDCalc0_GetWIMP
+  MODULE PROCEDURE GetWIMP
+END INTERFACE
+INTERFACE DDCalc0_SetWIMP
+  MODULE PROCEDURE SetWIMP
+END INTERFACE
+INTERFACE DDCalc0_InitWIMP
+  MODULE PROCEDURE InitWIMP
+END INTERFACE
+INTERFACE DDCalc0_InitWIMPCL
+  MODULE PROCEDURE InitWIMPCL
+END INTERFACE
 
 ! Dark matter halo distribution routines
-PUBLIC :: SetHalo,GetHalo,InitHalo,InitHaloCL
+PUBLIC :: DDCalc0_GetHalo,DDCalc0_SetHalo,                              &
+          DDCalc0_InitHalo,DDCalc0_InitHaloCL
+INTERFACE DDCalc0_GetHalo
+  MODULE PROCEDURE GetHalo
+END INTERFACE
+INTERFACE DDCalc0_SetHalo
+  MODULE PROCEDURE SetHalo
+END INTERFACE
+INTERFACE DDCalc0_InitHalo
+  MODULE PROCEDURE InitHalo
+END INTERFACE
+INTERFACE DDCalc0_InitHaloCL
+  MODULE PROCEDURE InitHaloCL
+END INTERFACE
 
 ! Detector properties routines
-PUBLIC :: SetDetector,GetDetector,InitDetector,InitDetectorCL
+PUBLIC :: DDCalc0_GetDetector,DDCalc0_SetDetector,                      &
+          DDCalc0_InitDetector,DDCalc0_InitDetectorCL
+INTERFACE DDCalc0_GetDetector
+  MODULE PROCEDURE GetDetector
+END INTERFACE
+INTERFACE DDCalc0_SetDetector
+  MODULE PROCEDURE SetDetector
+END INTERFACE
+INTERFACE DDCalc0_InitDetector
+  MODULE PROCEDURE InitDetector
+END INTERFACE
+INTERFACE DDCalc0_InitDetectorCL
+  MODULE PROCEDURE InitDetectorCL
+END INTERFACE
 
-! Experiment-specific detector initialization
-PUBLIC :: InitDetectorLUX2013,InitDetectorDARWIN2014
+! Rate calculation routines
+PUBLIC :: DDCalc0_GetRates,DDCalc0_CalcRates
+INTERFACE DDCalc0_GetRates
+  MODULE PROCEDURE GetRates
+END INTERFACE
+INTERFACE DDCalc0_CalcRates
+  MODULE PROCEDURE CalcRates
+END INTERFACE
 
-! Needed for GAMBIT backending
-PUBLIC :: CalcRates,LogLikelihood,WriteWIMPHeader
+! Likelihood/p-value routines
+PUBLIC :: DDCalc0_LogLikelihood,DDCalc0_LogPValue,DDCalc0_ScaleToPValue
+INTERFACE DDCalc0_LogLikelihood
+  MODULE PROCEDURE LogLikelihood
+END INTERFACE
+INTERFACE DDCalc0_LogPValue
+  MODULE PROCEDURE LogPValue
+END INTERFACE
+INTERFACE DDCalc0_ScaleToPValue
+  MODULE PROCEDURE ScaleToPValue
+END INTERFACE
+
 
 
 !#######################################################################
 ! CONSTANTS/GLOBAL VARIABLES/STRUCTURES
 !#######################################################################
+
+! VERSION --------------------------------------------------------------
+
+! Version of this software
+CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.11'
+
 
 ! MATH CONSTANTS -------------------------------------------------------
 
@@ -370,9 +613,38 @@ END TYPE
 TYPE(HaloStruct), PRIVATE :: Halo
 
 
+! DETECTOR EFFICIENCY --------------------------------------------------
+
+! Structure to contain tabulated detection efficiencies as a
+! function of energy, for the overall analysis range and possibly
+! for subintervals/bins.
+! 
+TYPE, PUBLIC :: EfficiencyStruct
+  
+  ! File containing efficiencies
+  CHARACTER(LEN=1024) :: file = ''
+  
+  ! Number of tabulation points (energies).
+  INTEGER :: NE = -1
+  
+  ! Tabulated energies [keV].  Array of size [1:NE].
+  REAL*8, ALLOCATABLE :: E(:)
+  
+  ! Number of S1 bins/intervals with efficiencies.
+  ! Will calculate rates for each bin/interval plus total.
+  INTEGER :: Neff = -1
+  
+  ! Array of size [1:NE,0:Neff] with the second index for the S1
+  ! bin/interval (zero for full range)
+  REAL*8, ALLOCATABLE :: eff(:,:)
+  
+END TYPE
+
+
 ! DETECTOR RATES -------------------------------------------------------
 
 ! Structure to contain tabulated rates as a function of energy.
+! 
 TYPE, PUBLIC :: DetectorRateStruct
   
   ! Label --------------------------------------
@@ -437,9 +709,9 @@ TYPE, PUBLIC :: DetectorRateStruct
   !   Wsi(+1,:,:) = (1/pi) Z^2 F^2(q)        ! SI proton
   !   Wsi( 0,:,:) = (1/pi) 2*Z*(A-Z) F^2(q)  ! SI crossterm
   !   Wsi(-1,:,:) = (1/pi) (A-Z)^2 F^2(q)    ! SI neutron
-  !   Wsd(+1,:,:) = (4/pi) 1/(2J+1) Spp(q)   ! SD proton
-  !   Wsd( 0,:,:) = (4/pi) 1/(2J+1) Spn(q)   ! SD crossterm
-  !   Wsd(-1,:,:) = (4/pi) 1/(2J+1) Snn(q)   ! SD neutron
+  !   Wsd(+1,:,:) = 4/(2J+1) Spp(q)          ! SD proton
+  !   Wsd( 0,:,:) = 4/(2J+1) Spn(q)          ! SD crossterm
+  !   Wsd(-1,:,:) = 4/(2J+1) Snn(q)          ! SD neutron
   ! The above definitions give for the conventional SI and SD
   ! cross-sections:
   !   \sigma(q) = \mu^2 (hbar c)^2 [W(1)*Gp^2 + W(0)*Gp*Gn + W(-1)*Gn^2]
@@ -464,31 +736,37 @@ TYPE, PUBLIC :: DetectorRateStruct
   ! Tabulated mean inverse speed (eta) [s/km] at the above vmin.
   REAL*8, ALLOCATABLE :: eta(:,:)
   
-  ! Rates (reference couplings) ----------------
-  ! Reference rates, differential or integrated, calculated at \sigma
-  ! = 1 pb for each coupling.  Differential arrays are of size
-  ! [-1:1,1:NE,0:Neff] and integrated arrays are of size [-1:1,0:Neff].
-  ! The final index is for the S1 bin/interval (0 for full range), while
-  ! the first index is for the SI & SD proton & neutron components at
-  ! sigma = 1 pb in each case.
-  ! 
-  ! Tabulated integrals are defined as:
-  !   R(E_k) = \int_0^{E_k} dE dR/dE - \int_0^\infty dR dR/dE
-  !          = - \int_{E_k}^\infty dE dR/dE
-  ! The rate within [E_a,E_b] is then:
-  !   R(E_b) - R(E_a)
-  ! 
-  ! Tabulated differential rates [cpd/kg/keV]
-  REAL*8, ALLOCATABLE :: dRdEsi0(:,:,:),dRdEsd0(:,:,:)
-  ! Integrated rates [cpd/kg].
+  ! Differential rates (reference couplings) ---
+  ! Reference differential rates calculated at \sigma = 1 pb for each
+  ! coupling and tabulated by energy.  Differential arrays are of size
+  ! [-1:1,1:NE] and are given separately for SI and SD couplings.  The
+  ! first index is for the proton & neutron components at sigma = 1 pb
+  ! in each case and the second index is that of the energy (given by
+  ! the E array at the same index).  These represent raw rates prior to
+  ! any efficiency cuts. [cpd/kg/keV]
+  REAL*8, ALLOCATABLE :: dRdEsi0(:,:),dRdEsd0(:,:)
+  
+  ! Integrated rates (reference couplings) -----
+  ! Reference integrated rates calculated at \sigma = 1 pb for each
+  ! coupling, with the efficiency-weighted integral done separately
+  ! for each available efficiency curve.  Arrays are of size
+  ! [-1:1,0:Neff].  The first index is for the proton & neutron
+  ! components at sigma = 1 pb in each case and the second index is for
+  ! the S1 bin/interval (0 for full range). [cpd/kg]
   REAL*8, ALLOCATABLE :: Rsi0(:,:),Rsd0(:,:)
   
-  ! Rates (actual couplings) -------------------
-  ! Rates at given couplings.  Differential arrays are of size
-  ! [1:NE,0:Neff] and integrated arrays are of size [0:Neff].
-  ! Tabulated differential rates [cpd/kg/keV]
-  REAL*8, ALLOCATABLE :: dRdEsi(:,:),dRdEsd(:,:),dRdE(:,:)
-  ! Integrated rates [cpd/kg].
+  ! Differential rates (actual couplings) ------
+  ! Differential rates at given couplings, tabulated by energy.
+  ! Arrays are of size [1:NE], given separately for SI and SD couplings
+  ! as well as the SI+SD total. [cpd/kg/keV]
+  REAL*8, ALLOCATABLE :: dRdEsi(:),dRdEsd(:),dRdE(:)
+  
+  ! Integrated rates (actual couplings) --------
+  ! Efficiency-corrected rates at given couplings.  Arrays are of size
+  ! [0:Neff] with the index being that of the S1 bin/interval
+  ! efficiency curve used in the integral (0 for full range).  Given
+  ! separately for SI and SD components as well as the SI+SD total.
+  ! [cpd/kg]
   REAL*8, ALLOCATABLE :: Rsi(:),Rsd(:),R(:)
   
   ! Events -------------------------------------
@@ -500,8 +778,14 @@ TYPE, PUBLIC :: DetectorRateStruct
   
 END TYPE
 
-! Default (internal) detector rate structure
-TYPE(DetectorRateStruct), PRIVATE :: Detector
+! Default (internal) detector rate structure.
+TYPE(DetectorRateStruct), TARGET, PRIVATE :: DefaultDetector
+
+! Structures for specific experiments
+! NOTE: These will be initialized to internally defined states and
+! are not externally modifiable.
+TYPE(DetectorRateStruct), PRIVATE :: LUX_2013
+TYPE(DetectorRateStruct), PRIVATE :: DARWIN_Ar_2014,DARWIN_Xe_2014
 
 
 ! TABULATION -----------------------------------------------------------
@@ -589,6 +873,880 @@ CONTAINS
 
 
 !=======================================================================
+! SIMPLE INTERFACE ROUTINES
+! Basic versions of routines that are required for using this module
+! externally.  These are meant to allow for a simpler interface to
+! this module; other routines are more robust and provide more
+! capabilities.
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module.  Must be run once before use of any
+! module routines.
+! 
+! For more detailed initialization, see:
+!   Initialize() [interface name: DDCalc0_Initialize]
+! 
+SUBROUTINE DDCalc0_Init()
+  IMPLICIT NONE
+  CALL Initialize(.TRUE.)
+END SUBROUTINE
+
+
+!-----------------------------------------------------------------------
+! Sets the dark matter halo to the Standard Halo Model (SHM) with the
+! given parameters.  Need only be run if non-default parameters are
+! to be used.
+! 
+! For more detailed halo settings, see:
+!   SetHalo() [interface name: DDCalc0_SetHalo]
+! 
+! Input arguments:
+!   rho         Local dark matter density [GeV/cm^3].  Default is
+!               0.4 GeV/cm^3.
+!   vrot        Local galactic disk rotation speed [km/s].  Default is
+!               235 km/s.
+!   v0          Most probable speed [km/s] in the galactic rest frame.
+!               For the conventional isothermal sphere, this should be
+!               the same as vrot.  Default is 235 km/s.
+!   vesc        Galactic escape speed [km/s] in the galactic rest
+!               frame.  Default is 550 km/s.
+! 
+SUBROUTINE DDCalc0_SetSHM(rho,vrot,v0,vesc)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: rho,vrot,v0,vesc
+  CALL SetHalo(rho=rho,vrot=vrot,v0=v0,vesc=vesc)
+END SUBROUTINE
+
+
+!-----------------------------------------------------------------------
+! Sets the WIMP mass and couplings.  Couplings are specified via
+! the commonly used fp/fn (spin-independent) and ap/an (spin-dependent)
+! normalizations.
+! 
+! For more detailed WIMP settings, see:
+!   SetWIMP() [interface name: DDCalc0_SetWIMP]
+! 
+! Input arguments:
+!   m           WIMP mass [GeV].
+!   fp          Spin-independent WIMP-proton coupling [GeV^-2].
+!               Related by GpSI = 2 fp.
+!   fn          Spin-independent WIMP-neutron coupling [GeV^-2].
+!               Related by GnSI = 2 fn.
+!   ap          Spin-dependent WIMP-proton coupling [unitless].
+!               Related by GpSD = 2\sqrt{2} G_F ap.
+!   an          Spin-dependent WIMP-neutron coupling [unitless].
+!               Related by GnSD = 2\sqrt{2} G_F an.
+! 
+SUBROUTINE DDCalc0_SetWIMP_mfa(m,fp,fn,ap,an)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: m,fp,fn,ap,an
+  CALL SetWIMP(m=m,fp=fp,fn=fn,ap=ap,an=an)
+END SUBROUTINE
+
+
+!-----------------------------------------------------------------------
+! Sets the WIMP mass and couplings.  Couplings are specified via
+! their effective 4-fermion vertex couplings 'G'.
+! 
+! For more detailed WIMP settings, see:
+!   SetWIMP() [interface name: DDCalc0_SetWIMP]
+! 
+! Input arguments:
+!   m           WIMP mass [GeV].
+!   GpSI        Spin-independent WIMP-proton coupling [GeV^-2].
+!               Related by GpSI = 2 fp.
+!   GnSI        Spin-independent WIMP-neutron coupling [GeV^-2].
+!               Related by GnSI = 2 fn.
+!   GpSD        Spin-dependent WIMP-proton coupling [GeV^-2].
+!               Related by GpSD = 2\sqrt{2} G_F ap.
+!   GnSD        Spin-dependent WIMP-neutron coupling [GeV^-2].
+!               Related by GnSD = 2\sqrt{2} G_F an.
+! 
+SUBROUTINE DDCalc0_SetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: m,GpSI,GnSI,GpSD,GnSD
+  CALL SetWIMP(m=m,GpSI=GpSI,GnSI=GnSI,GpSD=GpSD,GnSD=GnSD)
+END SUBROUTINE
+
+
+!-----------------------------------------------------------------------
+! Sets the WIMP mass and couplings.  Couplings are specified via
+! their effective 4-fermion vertex couplings 'G'.
+! 
+! For more detailed WIMP settings, see:
+!   SetWIMP() [interface name: DDCalc0_SetWIMP].
+! 
+! Input arguments, give negative vale to cross-sections inputs to
+! set the corresponding coupling negative:
+!   m           WIMP mass [GeV].
+!   sigmapSI    Spin-independent WIMP-proton cross-section [pb].
+!   sigmanSI    Spin-independent WIMP-neutron cross-section [pb].
+!   sigmapSD    Spin-dependent WIMP-proton cross-section [pb].
+!   sigmanSD    Spin-dependent WIMP-neutron cross-section [pb].
+! 
+SUBROUTINE DDCalc0_SetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: m,sigmapSI,sigmanSI,sigmapSD,sigmanSD
+  CALL SetWIMP(m=m,sigmapSI=sigmapSI,sigmanSI=sigmanSI,                 &
+               sigmapSD=sigmapSD,sigmanSD=sigmanSD)
+END SUBROUTINE
+
+
+
+!=======================================================================
+! LUX 2013 ANALYSIS ROUTINES
+! Based upon the LUX 2013 analysis [1310.8214].  One event seen in
+! the analysis region.
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module to perform calculations for the LUX 2013
+! analysis.  This must be called if any of the following LUX 2013
+! routines are to be used.
+! 
+! Required input arguments:
+!     intervals   Indicates if sub-intervals should be included.
+!                 Only necessary if confidence intervals using the
+!                 maximum gap method are desired.
+! 
+SUBROUTINE LUX_2013_Init(intervals)
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: intervals
+  
+  CALL LUX_2013_InitTo(LUX_2013,intervals)
+  
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Calculates various rate quantities using the current WIMP.
+! Must be called each time the WIMP parameters are modified.
+! 
+SUBROUTINE LUX_2013_CalcRates()
+  IMPLICIT NONE
+  CALL CalcRates(LUX_2013)
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+FUNCTION LUX_2013_Events() RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  CALL GetRates(LUX_2013,Nevents=N)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+FUNCTION LUX_2013_Background() RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  CALL GetRates(LUX_2013,background=b)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+FUNCTION LUX_2013_Signal() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(LUX_2013,signal=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+FUNCTION LUX_2013_SignalSI() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(LUX_2013,signal_si=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+FUNCTION LUX_2013_SignalSD() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(LUX_2013,signal_sd=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log-likelihood for the current WIMP mass and couplings.
+! Uses a Poisson distribution in the number of observed events N:
+!    P(N|s+b)
+! where s is the average expected signal and b is the average expected
+! background.
+! 
+FUNCTION LUX_2013_LogLikelihood() RESULT(lnlike)
+  IMPLICIT NONE
+  REAL*8 :: lnlike
+  lnlike = LogLikelihood(LUX_2013)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log of the p-value for the current WIMP mass and
+! couplings (NO BACKGROUND SUBTRACTION).  Uses the maximum gap method
+! if LUX_2013_Init was called with argument intervals=.TRUE.,
+! otherwise uses a Poisson distribution in the number of observed
+! events N:
+!    P(N|s)
+! where s is the average expected signal (background contributions are
+! ignored).
+! 
+FUNCTION LUX_2013_LogPValue() RESULT(lnp)
+  IMPLICIT NONE
+  REAL*8 :: lnp
+  lnp = LogPValue(LUX_2013)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Required input argument:
+!   lnp         The logarithm of the desired p-value (p = 1-CL).
+! 
+FUNCTION LUX_2013_ScaleToPValue(lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp
+  x = ScaleToPValue(LUX_2013,lnp)
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! INTERNAL ROUTINE.
+! Initializes the given DetectorRateStruct to the LUX 2013 analysis.
+! This is meant as an internal routine; external access should be
+! through LUX_2013_InitDetector instead.
+! 
+! The efficiencies used here were generated using TPCMC.
+! 
+! Required input arguments:
+!     D           The DetectorRateStruct to initialize
+!     intervals   Indicates if sub-intervals should be included
+! 
+SUBROUTINE LUX_2013_InitTo(D,intervals)
+  IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(OUT) :: D
+  LOGICAL, INTENT(IN) :: intervals
+  INTEGER, PARAMETER :: NE = 151
+  INTEGER, PARAMETER :: NEFF = 2
+  ! Efficiency curves energy tabulation points
+  REAL*8, PARAMETER :: E(NE)                                            &
+      =       (/ 0.10000d0, 0.10471d0, 0.10965d0, 0.11482d0, 0.12023d0, &
+      0.12589d0, 0.13183d0, 0.13804d0, 0.14454d0, 0.15136d0, 0.15849d0, &
+      0.16596d0, 0.17378d0, 0.18197d0, 0.19055d0, 0.19953d0, 0.20893d0, &
+      0.21878d0, 0.22909d0, 0.23988d0, 0.25119d0, 0.26303d0, 0.27542d0, &
+      0.28840d0, 0.30200d0, 0.31623d0, 0.33113d0, 0.34674d0, 0.36308d0, &
+      0.38019d0, 0.39811d0, 0.41687d0, 0.43652d0, 0.45709d0, 0.47863d0, &
+      0.50119d0, 0.52481d0, 0.54954d0, 0.57544d0, 0.60256d0, 0.63096d0, &
+      0.66069d0, 0.69183d0, 0.72444d0, 0.75858d0, 0.79433d0, 0.83176d0, &
+      0.87096d0, 0.91201d0, 0.95499d0, 1.0000d0,  1.0471d0,  1.0965d0,  &
+      1.1482d0,  1.2023d0,  1.2589d0,  1.3183d0,  1.3804d0,  1.4454d0,  &
+      1.5136d0,  1.5849d0,  1.6596d0,  1.7378d0,  1.8197d0,  1.9055d0,  &
+      1.9953d0,  2.0893d0,  2.1878d0,  2.2909d0,  2.3988d0,  2.5119d0,  &
+      2.6303d0,  2.7542d0,  2.8840d0,  3.0200d0,  3.1623d0,  3.3113d0,  &
+      3.4674d0,  3.6308d0,  3.8019d0,  3.9811d0,  4.1687d0,  4.3652d0,  &
+      4.5709d0,  4.7863d0,  5.0119d0,  5.2481d0,  5.4954d0,  5.7544d0,  &
+      6.0256d0,  6.3096d0,  6.6069d0,  6.9183d0,  7.2444d0,  7.5858d0,  &
+      7.9433d0,  8.3176d0,  8.7096d0,  9.1201d0,  9.5499d0, 10.000d0,   &
+     10.471d0,  10.965d0,  11.482d0,  12.023d0,  12.589d0,  13.183d0,   &
+     13.804d0,  14.454d0,  15.136d0,  15.849d0,  16.596d0,  17.378d0,   &
+     18.197d0,  19.055d0,  19.953d0,  20.893d0,  21.878d0,  22.909d0,   &
+     23.988d0,  25.119d0,  26.303d0,  27.542d0,  28.840d0,  30.200d0,   &
+     31.623d0,  33.113d0,  34.674d0,  36.308d0,  38.019d0,  39.811d0,   &
+     41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
+     54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
+     72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
+     95.499d0,100.00d0 /)
+  ! Efficiency (total)
+  REAL*8, PARAMETER :: EFF0(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 2.00000d-7,1.00000d-7,2.00000d-7,5.00000d-7,5.00000d-7,&
+      7.00000d-7,7.00000d-7,1.20000d-6,1.80000d-6,2.30000d-6,3.90000d-6,&
+      5.40000d-6,8.50000d-6,1.23000d-5,1.70000d-5,2.38000d-5,3.31000d-5,&
+      4.61000d-5,5.94000d-5,9.26000d-5,1.21600d-4,1.72500d-4,2.34500d-4,&
+      3.33300d-4,4.56700d-4,6.38400d-4,8.84300d-4,1.33540d-3,1.84720d-3,&
+      2.51600d-3,3.31170d-3,4.43180d-3,5.93570d-3,7.78490d-3,1.02271d-2,&
+      1.33162d-2,1.72063d-2,2.22009d-2,2.73286d-2,3.45888d-2,4.36821d-2,&
+      5.45799d-2,6.77302d-2,8.32638d-2,1.00680d-1,1.21170d-1,1.43630d-1,&
+      1.68140d-1,1.94250d-1,2.21300d-1,2.48970d-1,2.76390d-1,3.02480d-1,&
+      3.26300d-1,3.48160d-1,3.66100d-1,3.79720d-1,3.89880d-1,3.95620d-1,&
+      3.97780d-1,3.96640d-1,3.92580d-1,3.87090d-1,3.79880d-1,3.73050d-1,&
+      3.65850d-1,3.58740d-1,3.53390d-1,3.48230d-1,3.43970d-1,3.41220d-1,&
+      3.38810d-1,3.37650d-1,3.36940d-1,3.36130d-1,3.35760d-1,3.34690d-1,&
+      3.33280d-1,3.32160d-1,3.31870d-1,3.32150d-1,3.32200d-1,3.31440d-1,&
+      3.28070d-1,3.20960d-1,3.07340d-1,2.84620d-1,2.50940d-1,2.07520d-1,&
+      1.58600d-1,1.10370d-1,6.96978d-2,3.92375d-2,1.98434d-2,8.79110d-3,&
+      3.44320d-3,1.18140d-3,3.65300d-4,9.83000d-5,2.27000d-5,5.00000d-6,&
+      3.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (first interval)
+  REAL*8, PARAMETER :: EFF1(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 2.00000d-7,1.00000d-7,2.00000d-7,5.00000d-7,5.00000d-7,&
+      6.00000d-7,7.00000d-7,1.20000d-6,1.80000d-6,2.30000d-6,3.80000d-6,&
+      5.20000d-6,7.90000d-6,1.18000d-5,1.66000d-5,2.28000d-5,3.16000d-5,&
+      4.33000d-5,5.57000d-5,8.52000d-5,1.12700d-4,1.59900d-4,2.15100d-4,&
+      3.04800d-4,4.11400d-4,5.74500d-4,7.88300d-4,1.16420d-3,1.59150d-3,&
+      2.16230d-3,2.78910d-3,3.71100d-3,4.89860d-3,6.29290d-3,8.15860d-3,&
+      1.03830d-2,1.31709d-2,1.66408d-2,2.02664d-2,2.50647d-2,3.07883d-2,&
+      3.72727d-2,4.46930d-2,5.28245d-2,6.11301d-2,7.03714d-2,7.93184d-2,&
+      8.75027d-2,9.49859d-2,1.01120d-1,1.05340d-1,1.07160d-1,1.06570d-1,&
+      1.03200d-1,9.76218d-2,8.97488d-2,7.98012d-2,6.90608d-2,5.76738d-2,&
+      4.66902d-2,3.63217d-2,2.71772d-2,1.96357d-2,1.34951d-2,8.86060d-3,&
+      5.57630d-3,3.35120d-3,1.90010d-3,1.02690d-3,5.29500d-4,2.54600d-4,&
+      1.14600d-4,4.86000d-5,1.93000d-5,6.70000d-6,2.90000d-6,1.40000d-6,&
+      0.00000d0, 1.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (second interval)
+  REAL*8, PARAMETER :: EFF2(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      1.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 1.00000d-7,&
+      2.00000d-7,6.00000d-7,5.00000d-7,4.00000d-7,1.00000d-6,1.50000d-6,&
+      2.80000d-6,3.70000d-6,7.40000d-6,8.90000d-6,1.26000d-5,1.94000d-5,&
+      2.85000d-5,4.53000d-5,6.39000d-5,9.60000d-5,1.71200d-4,2.55700d-4,&
+      3.53700d-4,5.22600d-4,7.20800d-4,1.03710d-3,1.49200d-3,2.06850d-3,&
+      2.93320d-3,4.03540d-3,5.56010d-3,7.06220d-3,9.52410d-3,1.28938d-2,&
+      1.73072d-2,2.30372d-2,3.04393d-2,3.95450d-2,5.07938d-2,6.43164d-2,&
+      8.06401d-2,9.92666d-2,1.20180d-1,1.43630d-1,1.69230d-1,1.95910d-1,&
+      2.23100d-1,2.50540d-1,2.76350d-1,2.99920d-1,3.20820d-1,3.37950d-1,&
+      3.51090d-1,3.60320d-1,3.65400d-1,3.67460d-1,3.66390d-1,3.64190d-1,&
+      3.60270d-1,3.55390d-1,3.51490d-1,3.47210d-1,3.43440d-1,3.40970d-1,&
+      3.38690d-1,3.37600d-1,3.36920d-1,3.36130d-1,3.35750d-1,3.34690d-1,&
+      3.33280d-1,3.32160d-1,3.31870d-1,3.32150d-1,3.32200d-1,3.31440d-1,&
+      3.28070d-1,3.20960d-1,3.07340d-1,2.84620d-1,2.50940d-1,2.07520d-1,&
+      1.58600d-1,1.10370d-1,6.96978d-2,3.92375d-2,1.98434d-2,8.79110d-3,&
+      3.44320d-3,1.18140d-3,3.65300d-4,9.83000d-5,2.27000d-5,5.00000d-6,&
+      3.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiencies array (2D)
+  REAL*8, PARAMETER :: EFF(NE,0:NEFF)                                   &
+      = RESHAPE( (/ EFF0(:), EFF1(:), EFF2(:) /) ,SHAPE(EFF))
+  
+  ! One call for all settings.
+  ! Most of these _must_ be there to ensure everything get initialized.
+  IF (intervals) THEN
+    CALL SetDetector(D,mass=118d0,time=85.3d0,Nevents=1,                &
+                     background=0.64d0,Zelem=54,                        &
+                     NE=NE,E=E,Neff=NEFF,eff=EFF)
+  ELSE
+    CALL SetDetector(D,mass=118d0,time=85.3d0,Nevents=1,                &
+                     background=0.64d0,Zelem=54,                        &
+                     NE=NE,E=E,Neff=0,eff=EFF(:,0:0))
+  END IF
+  D%eff_file = '[LUX 2013]'
+  
+END SUBROUTINE
+
+
+
+!=======================================================================
+! DARWIN ARGON ANALYSIS ROUTINES
+! Based upon a DARWIN argon-based analysis (2014 estimated parameters)
+! [14MM.XXXX].  Zero events assumed in the analysis region.
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module to perform calculations for a DARWIN
+! argon-based analysis (2014 estimates).  This must be called if any
+! of the following DARWIN routines are to be used.
+! 
+! Required input arguments:
+!     intervals   Indicates if sub-intervals should be included.
+!                 Only necessary if confidence intervals using the
+!                 maximum gap method are desired.
+! 
+SUBROUTINE DARWIN_Ar_2014_Init(intervals)
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: intervals
+  
+  CALL DARWIN_Ar_2014_InitTo(DARWIN_Ar_2014,intervals)
+  
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Calculates various rate quantities using the current WIMP.
+! Must be called each time the WIMP parameters are modified.
+! 
+SUBROUTINE DARWIN_Ar_2014_CalcRates()
+  IMPLICIT NONE
+  CALL CalcRates(DARWIN_Ar_2014)
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+FUNCTION DARWIN_Ar_2014_Events() RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  CALL GetRates(DARWIN_Ar_2014,Nevents=N)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+FUNCTION DARWIN_Ar_2014_Background() RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  CALL GetRates(DARWIN_Ar_2014,background=b)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+FUNCTION DARWIN_Ar_2014_Signal() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(DARWIN_Ar_2014,signal=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+FUNCTION DARWIN_Ar_2014_SignalSI() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(DARWIN_Ar_2014,signal_si=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+FUNCTION DARWIN_Ar_2014_SignalSD() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(DARWIN_Ar_2014,signal_sd=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log-likelihood for the current WIMP mass and couplings.
+! Uses a Poisson distribution in the number of observed events N:
+!    P(N|s+b)
+! where s is the average expected signal and b is the average expected
+! background.
+! 
+FUNCTION DARWIN_Ar_2014_LogLikelihood() RESULT(lnlike)
+  IMPLICIT NONE
+  REAL*8 :: lnlike
+  lnlike = LogLikelihood(DARWIN_Ar_2014)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log of the p-value for the current WIMP mass and
+! couplings (NO BACKGROUND SUBTRACTION).  Uses the maximum gap method
+! if DARWIN_Ar_2014_Init was called with argument intervals=.TRUE.,
+! otherwise uses a Poisson distribution in the number of observed
+! events N:
+!    P(N|s)
+! where s is the average expected signal (background contributions are
+! ignored).
+! 
+FUNCTION DARWIN_Ar_2014_LogPValue() RESULT(lnp)
+  IMPLICIT NONE
+  REAL*8 :: lnp
+  lnp = LogPValue(DARWIN_Ar_2014)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Required input argument:
+!   lnp         The logarithm of the desired p-value (p = 1-CL).
+! 
+FUNCTION DARWIN_Ar_2014_ScaleToPValue(lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp
+  x = ScaleToPValue(DARWIN_Ar_2014,lnp)
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! INTERNAL ROUTINE.
+! Initializes the given DetectorRateStruct to the proposed DARWIN
+! argon-based detector (2014 estimate).  This is meant as an internal
+! routine; external access should be through
+! DARWIN_Ar_2014_InitDetector instead.
+! 
+! The efficiencies used here were generated using TPCMC.
+! 
+! Required input arguments:
+!     D           The DetectorRateStruct to initialize
+!     intervals   Indicates if sub-intervals should be included
+! 
+SUBROUTINE DARWIN_Ar_2014_InitTo(D,intervals)
+  IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(OUT) :: D
+  LOGICAL, INTENT(IN) :: intervals
+  INTEGER, PARAMETER :: NE = 151
+  INTEGER, PARAMETER :: NEFF = 1
+  ! Efficiency curves energy tabulation points
+  REAL*8, PARAMETER :: E(NE)                                            &
+      =       (/ 0.10000d0, 0.10471d0, 0.10965d0, 0.11482d0, 0.12023d0, &
+      0.12589d0, 0.13183d0, 0.13804d0, 0.14454d0, 0.15136d0, 0.15849d0, &
+      0.16596d0, 0.17378d0, 0.18197d0, 0.19055d0, 0.19953d0, 0.20893d0, &
+      0.21878d0, 0.22909d0, 0.23988d0, 0.25119d0, 0.26303d0, 0.27542d0, &
+      0.28840d0, 0.30200d0, 0.31623d0, 0.33113d0, 0.34674d0, 0.36308d0, &
+      0.38019d0, 0.39811d0, 0.41687d0, 0.43652d0, 0.45709d0, 0.47863d0, &
+      0.50119d0, 0.52481d0, 0.54954d0, 0.57544d0, 0.60256d0, 0.63096d0, &
+      0.66069d0, 0.69183d0, 0.72444d0, 0.75858d0, 0.79433d0, 0.83176d0, &
+      0.87096d0, 0.91201d0, 0.95499d0, 1.0000d0,  1.0471d0,  1.0965d0,  &
+      1.1482d0,  1.2023d0,  1.2589d0,  1.3183d0,  1.3804d0,  1.4454d0,  &
+      1.5136d0,  1.5849d0,  1.6596d0,  1.7378d0,  1.8197d0,  1.9055d0,  &
+      1.9953d0,  2.0893d0,  2.1878d0,  2.2909d0,  2.3988d0,  2.5119d0,  &
+      2.6303d0,  2.7542d0,  2.8840d0,  3.0200d0,  3.1623d0,  3.3113d0,  &
+      3.4674d0,  3.6308d0,  3.8019d0,  3.9811d0,  4.1687d0,  4.3652d0,  &
+      4.5709d0,  4.7863d0,  5.0119d0,  5.2481d0,  5.4954d0,  5.7544d0,  &
+      6.0256d0,  6.3096d0,  6.6069d0,  6.9183d0,  7.2444d0,  7.5858d0,  &
+      7.9433d0,  8.3176d0,  8.7096d0,  9.1201d0,  9.5499d0, 10.000d0,   &
+     10.471d0,  10.965d0,  11.482d0,  12.023d0,  12.589d0,  13.183d0,   &
+     13.804d0,  14.454d0,  15.136d0,  15.849d0,  16.596d0,  17.378d0,   &
+     18.197d0,  19.055d0,  19.953d0,  20.893d0,  21.878d0,  22.909d0,   &
+     23.988d0,  25.119d0,  26.303d0,  27.542d0,  28.840d0,  30.200d0,   &
+     31.623d0,  33.113d0,  34.674d0,  36.308d0,  38.019d0,  39.811d0,   &
+     41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
+     54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
+     72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
+     95.499d0,100.00d0 /)
+  ! Efficiency (total)
+  REAL*8, PARAMETER :: EFF0(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      1.00000d-6,1.00000d-6,3.00000d-6,5.00000d-6,4.00000d-6,4.00000d-6,&
+      6.00000d-6,9.00000d-6,1.20000d-5,1.70000d-5,3.60000d-5,5.40000d-5,&
+      7.00000d-5,1.06000d-4,1.48000d-4,2.48000d-4,3.74000d-4,5.11000d-4,&
+      6.61000d-4,9.53000d-4,1.32400d-3,1.91900d-3,2.57200d-3,3.42800d-3,&
+      4.78200d-3,6.31100d-3,8.37200d-3,1.11320d-2,1.43600d-2,1.88560d-2,&
+      2.39690d-2,3.04640d-2,3.85180d-2,4.79960d-2,5.92610d-2,7.20370d-2,&
+      8.75540d-2,1.04670d-1,1.24360d-1,1.44260d-1,1.67600d-1,1.92550d-1,&
+      2.19830d-1,2.45220d-1,2.71260d-1,2.95940d-1,3.20590d-1,3.44590d-1,&
+      3.66380d-1,3.85290d-1,4.02490d-1,4.17410d-1,4.30070d-1,4.40120d-1,&
+      4.47510d-1,4.55340d-1,4.59120d-1,4.63940d-1,4.66210d-1,4.67680d-1,&
+      4.70120d-1,4.70570d-1,4.72180d-1,4.73500d-1,4.75110d-1,4.75610d-1,&
+      4.76660d-1,4.77150d-1,4.77350d-1,4.77890d-1,4.78970d-1,4.79310d-1,&
+      4.80410d-1,4.81470d-1,4.81580d-1,4.83040d-1,4.82920d-1,4.82570d-1,&
+      4.83820d-1,4.84220d-1,4.85050d-1,4.84690d-1,4.85190d-1,4.84650d-1,&
+      4.84290d-1,4.83720d-1,4.84160d-1,4.83160d-1,4.81950d-1,4.79380d-1,&
+      4.76860d-1,4.73220d-1,4.62790d-1,4.43970d-1,4.14520d-1,3.73500d-1,&
+      3.19880d-1,2.59970d-1,1.96280d-1,1.36860d-1,8.72900d-2,5.09020d-2,&
+      2.65530d-2,1.23380d-2,5.26700d-3,1.86600d-3,6.02000d-4,1.50000d-4,&
+      4.60000d-5,3.00000d-6,3.00000d-6,0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (first and only interval)
+  REAL*8, PARAMETER :: EFF1(NE) = EFF0
+  ! Efficiencies array (2D)
+  REAL*8, PARAMETER :: EFF(NE,0:NEFF)                                   &
+      = RESHAPE( (/ EFF0(:), EFF1(:) /) ,SHAPE(EFF))
+  
+  ! One call for all settings.
+  ! Most of these _must_ be there to ensure everything get initialized.
+  IF (intervals) THEN
+    CALL SetDetector(D,mass=20d3,time=2d0*365d0,Nevents=0,              &
+                     background=0.5d0,Zelem=18,                         &
+                     NE=NE,E=E,Neff=NEFF,eff=EFF)
+  ELSE
+    CALL SetDetector(D,mass=20d3,time=2d0*365d0,Nevents=0,              &
+                     background=0.5d0,Zelem=18,                         &
+                     NE=NE,E=E,Neff=0,eff=EFF(:,0:0))
+  END IF
+  D%eff_file = '[DARWIN Ar 2014]'
+  
+END SUBROUTINE
+
+
+
+!=======================================================================
+! DARWIN XENON ANALYSIS ROUTINES
+! Based upon a DARWIN xenon-based analysis (2014 estimated parameters)
+! [14MM.XXXX].  Zero events assumed in the analysis region.
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module to perform calculations for a DARWIN
+! xenon-based analysis (2014 estimates).  This must be called if any
+! of the following DARWIN routines are to be used.
+! 
+! Required input arguments:
+!     intervals   Indicates if sub-intervals should be included.
+!                 Only necessary if confidence intervals using the
+!                 maximum gap method are desired.
+! 
+SUBROUTINE DARWIN_Xe_2014_Init(intervals)
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: intervals
+  
+  CALL DARWIN_Xe_2014_InitTo(DARWIN_Xe_2014,intervals)
+  
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Calculates various rate quantities using the current WIMP.
+! Must be called each time the WIMP parameters are modified.
+! 
+SUBROUTINE DARWIN_Xe_2014_CalcRates()
+  IMPLICIT NONE
+  CALL CalcRates(DARWIN_Xe_2014)
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+FUNCTION DARWIN_Xe_2014_Events() RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  CALL GetRates(DARWIN_Xe_2014,Nevents=N)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+FUNCTION DARWIN_Xe_2014_Background() RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  CALL GetRates(DARWIN_Xe_2014,background=b)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+FUNCTION DARWIN_Xe_2014_Signal() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(DARWIN_Xe_2014,signal=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+FUNCTION DARWIN_Xe_2014_SignalSI() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(DARWIN_Xe_2014,signal_si=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+FUNCTION DARWIN_Xe_2014_SignalSD() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(DARWIN_Xe_2014,signal_sd=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log-likelihood for the current WIMP mass and couplings.
+! Uses a Poisson distribution in the number of observed events N:
+!    P(N|s+b)
+! where s is the average expected signal and b is the average expected
+! background.
+! 
+FUNCTION DARWIN_Xe_2014_LogLikelihood() RESULT(lnlike)
+  IMPLICIT NONE
+  REAL*8 :: lnlike
+  lnlike = LogLikelihood(DARWIN_Xe_2014)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log of the p-value for the current WIMP mass and
+! couplings (NO BACKGROUND SUBTRACTION).  Uses the maximum gap method
+! if DARWIN_Xe_2014_Init was called with argument intervals=.TRUE.,
+! otherwise uses a Poisson distribution in the number of observed
+! events N:
+!    P(N|s)
+! where s is the average expected signal (background contributions are
+! ignored).
+! 
+FUNCTION DARWIN_Xe_2014_LogPValue() RESULT(lnp)
+  IMPLICIT NONE
+  REAL*8 :: lnp
+  lnp = LogPValue(DARWIN_Xe_2014)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Required input argument:
+!   lnp         The logarithm of the desired p-value (p = 1-CL).
+! 
+FUNCTION DARWIN_Xe_2014_ScaleToPValue(lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp
+  x = ScaleToPValue(DARWIN_Xe_2014,lnp)
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! INTERNAL ROUTINE.
+! Initializes the given DetectorRateStruct to the proposed DARWIN
+! xenon-based detector (2014 estimate).  This is meant as an internal
+! routine; external access should be through
+! DARWIN_Xe_2014_InitDetector instead.
+! 
+! The efficiencies used here were generated using TPCMC.
+! 
+! Required input arguments:
+!     D           The DetectorRateStruct to initialize
+!     intervals   Indicates if sub-intervals should be included
+! 
+SUBROUTINE DARWIN_Xe_2014_InitTo(D,intervals)
+  IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(OUT) :: D
+  LOGICAL, INTENT(IN) :: intervals
+  INTEGER, PARAMETER :: NE = 151
+  INTEGER, PARAMETER :: NEFF = 1
+  ! Efficiency curves energy tabulation points
+  REAL*8, PARAMETER :: E(NE)                                            &
+      =       (/ 0.10000d0, 0.10471d0, 0.10965d0, 0.11482d0, 0.12023d0, &
+      0.12589d0, 0.13183d0, 0.13804d0, 0.14454d0, 0.15136d0, 0.15849d0, &
+      0.16596d0, 0.17378d0, 0.18197d0, 0.19055d0, 0.19953d0, 0.20893d0, &
+      0.21878d0, 0.22909d0, 0.23988d0, 0.25119d0, 0.26303d0, 0.27542d0, &
+      0.28840d0, 0.30200d0, 0.31623d0, 0.33113d0, 0.34674d0, 0.36308d0, &
+      0.38019d0, 0.39811d0, 0.41687d0, 0.43652d0, 0.45709d0, 0.47863d0, &
+      0.50119d0, 0.52481d0, 0.54954d0, 0.57544d0, 0.60256d0, 0.63096d0, &
+      0.66069d0, 0.69183d0, 0.72444d0, 0.75858d0, 0.79433d0, 0.83176d0, &
+      0.87096d0, 0.91201d0, 0.95499d0, 1.0000d0,  1.0471d0,  1.0965d0,  &
+      1.1482d0,  1.2023d0,  1.2589d0,  1.3183d0,  1.3804d0,  1.4454d0,  &
+      1.5136d0,  1.5849d0,  1.6596d0,  1.7378d0,  1.8197d0,  1.9055d0,  &
+      1.9953d0,  2.0893d0,  2.1878d0,  2.2909d0,  2.3988d0,  2.5119d0,  &
+      2.6303d0,  2.7542d0,  2.8840d0,  3.0200d0,  3.1623d0,  3.3113d0,  &
+      3.4674d0,  3.6308d0,  3.8019d0,  3.9811d0,  4.1687d0,  4.3652d0,  &
+      4.5709d0,  4.7863d0,  5.0119d0,  5.2481d0,  5.4954d0,  5.7544d0,  &
+      6.0256d0,  6.3096d0,  6.6069d0,  6.9183d0,  7.2444d0,  7.5858d0,  &
+      7.9433d0,  8.3176d0,  8.7096d0,  9.1201d0,  9.5499d0, 10.000d0,   &
+     10.471d0,  10.965d0,  11.482d0,  12.023d0,  12.589d0,  13.183d0,   &
+     13.804d0,  14.454d0,  15.136d0,  15.849d0,  16.596d0,  17.378d0,   &
+     18.197d0,  19.055d0,  19.953d0,  20.893d0,  21.878d0,  22.909d0,   &
+     23.988d0,  25.119d0,  26.303d0,  27.542d0,  28.840d0,  30.200d0,   &
+     31.623d0,  33.113d0,  34.674d0,  36.308d0,  38.019d0,  39.811d0,   &
+     41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
+     54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
+     72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
+     95.499d0,100.00d0 /)
+  ! Efficiency (total)
+  REAL*8, PARAMETER :: EFF0(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 1.00000d-5,2.00000d-5,0.00000d0, &
+      1.00000d-5,2.00000d-5,1.00000d-5,3.00000d-5,6.00000d-5,4.00000d-5,&
+      1.60000d-4,2.50000d-4,3.30000d-4,4.30000d-4,5.80000d-4,8.30000d-4,&
+      1.29000d-3,1.73000d-3,2.61000d-3,3.38000d-3,4.71000d-3,6.67000d-3,&
+      8.93000d-3,1.18500d-2,1.66700d-2,2.11800d-2,2.76600d-2,3.70100d-2,&
+      4.62800d-2,5.57800d-2,7.03000d-2,8.48500d-2,1.00920d-1,1.19770d-1,&
+      1.40370d-1,1.59900d-1,1.83670d-1,2.13730d-1,2.34620d-1,2.60470d-1,&
+      2.90490d-1,3.10700d-1,3.37130d-1,3.59870d-1,3.81220d-1,3.97590d-1,&
+      4.13050d-1,4.29350d-1,4.33960d-1,4.43460d-1,4.50340d-1,4.54710d-1,&
+      4.58700d-1,4.64210d-1,4.63840d-1,4.65210d-1,4.67910d-1,4.69700d-1,&
+      4.71550d-1,4.70310d-1,4.72880d-1,4.73510d-1,4.77040d-1,4.76320d-1,&
+      4.78180d-1,4.74830d-1,4.77390d-1,4.79300d-1,4.80260d-1,4.81980d-1,&
+      4.79980d-1,4.83400d-1,4.85070d-1,4.83660d-1,4.86320d-1,4.83460d-1,&
+      4.84910d-1,4.85100d-1,4.81940d-1,4.83840d-1,4.83400d-1,4.78140d-1,&
+      4.77990d-1,4.70180d-1,4.48760d-1,4.18240d-1,3.67580d-1,3.03320d-1,&
+      2.31100d-1,1.54890d-1,9.42000d-2,5.02400d-2,2.18100d-2,8.18000d-3,&
+      2.44000d-3,7.40000d-4,1.70000d-4,1.00000d-5,1.00000d-5,0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (first and only interval)
+  REAL*8, PARAMETER :: EFF1(NE) = EFF0
+  ! Efficiencies array (2D)
+  REAL*8, PARAMETER :: EFF(NE,0:NEFF)                                   &
+      = RESHAPE( (/ EFF0(:), EFF1(:) /) ,SHAPE(EFF))
+  
+  ! One call for all settings.
+  ! Most of these _must_ be there to ensure everything get initialized.
+  IF (intervals) THEN
+    CALL SetDetector(D,mass=12d3,time=2d0*365d0,Nevents=0,              &
+                     background=0.5d0,Zelem=54,                         &
+                     NE=NE,E=E,Neff=NEFF,eff=EFF)
+  ELSE
+    CALL SetDetector(D,mass=12d3,time=2d0*365d0,Nevents=0,              &
+                     background=0.5d0,Zelem=54,                         &
+                     NE=NE,E=E,Neff=0,eff=EFF(:,0:0))
+  END IF
+  D%eff_file = '[DARWIN Xe 2014]'
+  
+END SUBROUTINE
+
+
+
+!=======================================================================
 ! MAIN ROUTINES
 !=======================================================================
 
@@ -615,31 +1773,55 @@ SUBROUTINE main()
   interactive = GetLongArg('interactive') .OR.                          &
                 ((Arguments%Nparameters .EQ. 0) .AND. .NOT. GetLongArg('m'))
   
-  ! Determine program mode
+  ! Determine program mode =============
+  
+  ! ------------------------------------
+  ! Calculates the log-likelihood (w/ background)
   IF (GetLongArg('log-likelihood')) THEN
     IF (interactive) THEN
       CALL MainLogLikelihoodInteractive()
     ELSE
       CALL MainLogLikelihood()
     END IF
+  ! ------------------------------------
+  ! Calculates the log of the p-value (no background subtraction)
   ELSE IF (GetLongArg('log-pvalue')) THEN
     IF (interactive) THEN
       CALL MainLogPValueInteractive()
     ELSE
       CALL MainLogPValue()
     END IF
+  ! ------------------------------------
+  ! Prints the raw recoil spectrum dR/dE
   ELSE IF (GetLongArg('spectrum')) THEN
     CALL MainSpectrum()
+  ! ------------------------------------
+  ! Calculates expected events, tabulated by WIMP mass
   ELSE IF (GetLongArg('events-by-mass')) THEN
     CALL MainEventsByMass()
+  ! ------------------------------------
+  ! Calculates spin-independent likelihood contraints,
+  ! tabulated by WIMP mass
   ELSE IF (GetLongArg('constraints-SI')) THEN
     CALL MainConstraintsSI()
+  ! ------------------------------------
+  ! Calculates spin-dependent likelihood contraints,
+  ! tabulated by WIMP mass
   ELSE IF (GetLongArg('constraints-SD')) THEN
     CALL MainConstraintsSD()
+  ! ------------------------------------
+  ! Calculates spin-independent no-background-subtraction limits,
+  ! tabulated by WIMP mass
   ELSE IF (GetLongArg('limits-SI')) THEN
     CALL MainLimitsSI()
+  ! ------------------------------------
+  ! Calculates spin-dependent no-background-subtraction limits,
+  ! tabulated by WIMP mass
   ELSE IF (GetLongArg('limits-SD')) THEN
     CALL MainLimitsSD()
+  ! ------------------------------------
+  ! Default case:
+  ! Calculate both expected events and likelihoods
   ELSE
     IF (interactive) THEN
       CALL MainEventsAndLikelihoodsInteractive()
@@ -1095,7 +2277,8 @@ SUBROUTINE MainConstraintsSI()
   IF (ABS(Gn) .LT. 1d-8) Gn = 0d0
   
   ! Calculate allowed signal rates
-  CALL FeldmanCousinsPoissonCI(lnp,Detector%Nevents,Detector%MuBackground,s1,s2)
+  CALL FeldmanCousinsPoissonCI(lnp,DefaultDetector%Nevents,             &
+                               DefaultDetector%MuBackground,s1,s2)
   
   ! Write out header.
   IF (VerbosityLevel .GE. 2) THEN
@@ -1172,7 +2355,8 @@ SUBROUTINE MainConstraintsSD()
   IF (ABS(Gn) .LT. 1d-8) Gn = 0d0
   
   ! Calculate allowed signal rates
-  CALL FeldmanCousinsPoissonCI(lnp,Detector%Nevents,Detector%MuBackground,s1,s2)
+  CALL FeldmanCousinsPoissonCI(lnp,DefaultDetector%Nevents,             &
+                               DefaultDetector%MuBackground,s1,s2)
   
   ! Write out header.
   IF (VerbosityLevel .GE. 2) THEN
@@ -1364,7 +2548,7 @@ END SUBROUTINE
 ! analysis.  If a different setup is desired, the various Set() methods
 ! must be used.
 ! 
-! Optional input argument:
+! Optional input arguments:
 !   intervals   Indicates if rates for sub-intervals should be
 !               calculated as well as the total rate (default: true).
 !               These are unnecessary for some calculations.
@@ -1432,64 +2616,6 @@ SUBROUTINE InitializeCL(intervals)
   
   ! Initialize detector isotopes, efficiencies, array sizing, etc.
   CALL InitDetectorCL(intervals=intervals0)
-  
-END SUBROUTINE
-
-
-! ----------------------------------------------------------------------
-! Initialization routine that sets various parameters to match that of
-! the LUX 2013 analysis.
-! 
-! Optional input argument:
-!   intervals   Indicates if rates for sub-intervals should be
-!               calculated as well as the total rate (default: true).
-!               These are unnecessary for some calculations.
-! 
-SUBROUTINE InitializeLUX2013(intervals)
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN), OPTIONAL :: intervals
-  LOGICAL :: intervals0
-  
-  intervals0 = .TRUE.
-  IF (PRESENT(intervals)) intervals0 = intervals
-  
-  ! Initialize WIMP mass and couplings.
-  CALL InitWIMP()
-  
-  ! Initialize halo.
-  CALL InitHalo()
-  
-  ! Initialize detector isotopes, efficiencies, array sizing, etc.
-  CALL InitDetectorLUX2013(intervals=intervals0)
-  
-END SUBROUTINE
-
-
-! ----------------------------------------------------------------------
-! Initialization routine that sets various parameters to match that of
-! the proposed DARWIN xenon detector (as of 2014).
-! 
-! Optional input argument:
-!   intervals   Indicates if rates for sub-intervals should be
-!               calculated as well as the total rate (default: true).
-!               These are unnecessary for some calculations.
-! 
-SUBROUTINE InitializeDARWIN2014(intervals)
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN), OPTIONAL :: intervals
-  LOGICAL :: intervals0
-  
-  intervals0 = .TRUE.
-  IF (PRESENT(intervals)) intervals0 = intervals
-  
-  ! Initialize WIMP mass and couplings.
-  CALL InitWIMP()
-  
-  ! Initialize halo.
-  CALL InitHalo()
-  
-  ! Initialize detector isotopes, efficiencies, array sizing, etc.
-  CALL InitDetectorDARWIN2014(intervals=intervals0)
   
 END SUBROUTINE
 
@@ -1703,6 +2829,14 @@ SUBROUTINE WriteCommandHeader(extra_lines)
   WRITE(*,'(A)') COMMENT_PREFIX &
       // TRIM(datetime)
   
+  ! Version
+  !WRITE(*,'(A)') COMMENT_PREFIX &
+  !    // 'DDCalc0 version: ' // TRIM(VERSION_STRING)
+  !WRITE(*,'(A)') COMMENT_PREFIX &
+  !    // 'See/cite C. Savage et al., arxiv:14MM.XXXX.'
+  WRITE(*,'(A)') COMMENT_PREFIX &
+      // 'DDCalc0 version ' // TRIM(VERSION_STRING) // '.  See/cite C. Savage et al., arxiv:14MM.XXXX.'
+  
   WRITE(*,'(A)') COMMENT_PREFIX
   
   IF (PRESENT(extra_lines)) CALL WriteEmptyCommentLines(extra_lines)
@@ -1726,7 +2860,7 @@ SUBROUTINE WriteWIMPHeader(extra_lines)
   
   ! Mass
   WRITE(*,'(A,F11.4)') COMMENT_PREFIX &
-      // 'WIMP mass [GeV]                      =',WIMP%m
+      // 'WIMP mass [GeV]                       =',WIMP%m
   WRITE(*,'(A)') COMMENT_PREFIX
   
   ! Couplings
@@ -1776,7 +2910,7 @@ SUBROUTINE WriteHaloHeader(extra_lines)
   
   ! Density
   WRITE(*,'(A,F11.4)') COMMENT_PREFIX &
-      // 'Local dark matter density [GeV/cm^3] =',Halo%rho
+      // 'Local dark matter density [GeV/cm^3]  =',Halo%rho
   WRITE(*,'(A)') COMMENT_PREFIX
   
   ! Halo velocity distribution
@@ -1804,7 +2938,7 @@ SUBROUTINE WriteHaloHeader(extra_lines)
     !WRITE(*,'(A)') COMMENT_PREFIX &
     !    // '    ' // TRIM(Halo%eta_file)
     WRITE(*,'(A,A)') COMMENT_PREFIX &
-        // 'Mean inverse speed tabulation file    = ',TRIM(Detector%eff_file)
+        // 'Mean inverse speed tabulation file    = ',TRIM(Halo%eta_file)
   ELSE
     ! User provided tabulation
     ! This really shouldn't occur here because there is no way
@@ -1834,32 +2968,32 @@ SUBROUTINE WriteDetectorHeader(extra_lines)
   
   ! Exposure, observed events, expected background events
   WRITE(*,'(A,1PG12.4)') COMMENT_PREFIX &
-      // 'Detector exposure [kg day]            =',Detector%exposure
-  IF (Detector%Nevents .GE. 0) THEN
+      // 'Detector exposure [kg day]            =',DefaultDetector%exposure
+  IF (DefaultDetector%Nevents .GE. 0) THEN
     WRITE(*,'(A,I6)') COMMENT_PREFIX &
-      // 'Observed events                       =',Detector%Nevents
+      // 'Observed events                       =',DefaultDetector%Nevents
   END IF
   WRITE(*,'(A,F11.4)') COMMENT_PREFIX &
-      // 'Average expected background events    =',Detector%MuBackground
+      // 'Average expected background events    =',DefaultDetector%MuBackground
   WRITE(*,'(A)') COMMENT_PREFIX
   
   ! Detector isotopes
   WRITE(*,'(A,I6)') COMMENT_PREFIX &
-      // 'Isotopes                              =',Detector%Niso
+      // 'Isotopes                              =',DefaultDetector%Niso
   WRITE(*,'(A,99(3X,I4,2X))') COMMENT_PREFIX &
-      // '  Atomic number Z       ',Detector%Ziso
+      // '  Atomic number Z       ',DefaultDetector%Ziso
   WRITE(*,'(A,99(3X,I4,2X))') COMMENT_PREFIX &
-      // '  Atomic mass number A  ',Detector%Aiso
+      // '  Atomic mass number A  ',DefaultDetector%Aiso
   WRITE(*,'(A,99(1X,F8.5))') COMMENT_PREFIX &
-      // '  Mass fraction         ',Detector%fiso
+      // '  Mass fraction         ',DefaultDetector%fiso
   WRITE(*,'(A)') COMMENT_PREFIX
   
   ! Efficiencies and intervals/bins
   WRITE(*,'(A,A)') COMMENT_PREFIX &
-      // 'Efficiency file                       = ',TRIM(Detector%eff_file)
-  IF (Detector%Neff .GT. 0) THEN
+      // 'Efficiency file                       = ',TRIM(DefaultDetector%eff_file)
+  IF (DefaultDetector%Neff .GT. 0) THEN
     WRITE(*,'(A,I6)') COMMENT_PREFIX &
-      // 'Number of bins/sub-intervals          =',Detector%Neff
+      // 'Number of bins/sub-intervals          =',DefaultDetector%Neff
   END IF
   WRITE(*,'(A)') COMMENT_PREFIX
   
@@ -1957,7 +3091,7 @@ SUBROUTINE WriteLogPValueHeader(extra_lines)
   IMPLICIT NONE
   INTEGER, INTENT(IN), OPTIONAL :: extra_lines
   
-  IF (Detector%Neff .EQ. Detector%Nevents+1) THEN
+  IF (DefaultDetector%Neff .EQ. DefaultDetector%Nevents+1) THEN
     WRITE(*,'(A)') COMMENT_PREFIX &
         // 'The log of the p-value for the given parameters is given below,'
     WRITE(*,'(A)') COMMENT_PREFIX &
@@ -2016,10 +3150,10 @@ SUBROUTINE WriteEventsAndLikelihoodsHeader(extra_lines)
     WRITE(*,'(A)') COMMENT_PREFIX &
         // '  signal(SI)   Average expected spin-independent signal events.'
     WRITE(*,'(A)') COMMENT_PREFIX &
-        // '  signal(SD)   Average expected spin-dependent signal events (NOT IMPLEMENTED).'
+        // '  signal(SD)   Average expected spin-dependent signal events.'
     WRITE(*,'(A)') COMMENT_PREFIX &
         // '  log(L)       Log-likelihood using the Poisson distribution (signal+background).'
-    IF (Detector%Neff .EQ. Detector%Nevents+1) THEN
+    IF (DefaultDetector%Neff .EQ. DefaultDetector%Nevents+1) THEN
       WRITE(*,'(A)') COMMENT_PREFIX &
         // '  log(p)       Log of the p-value determined using the maximum gap method;'
       WRITE(*,'(A)') COMMENT_PREFIX &
@@ -2087,16 +3221,18 @@ SUBROUTINE WriteEventsAndLikelihoodsData()
   CASE (:2)
     WRITE(*,'(A,1(2X,I5,2X),3(1X,1PG11.4),2(1X,1PG11.4))')              &
         DATA_PREFIX,                                                    &
-        Detector%Nevents,Detector%MuBackground,                         &
-        Detector%MuSignalSI(0),Detector%MuSignalSD(0),lnLike,lnp
+        DefaultDetector%Nevents,DefaultDetector%MuBackground,           &
+        DefaultDetector%MuSignalSI(0),DefaultDetector%MuSignalSD(0),    &
+        lnLike,lnp
   CASE (3:)
     WRITE(*,'(A,1(1X,F10.3),4(1X,1PG10.3),4(1X,1PG10.3),1(2X,I5,2X),3(1X,1PG11.4),2(1X,1PG11.4))') &
         DATA_PREFIX,                                                    &
         WIMP%m,WIMP%GpSI,WIMP%GnSI,WIMP%GpSD,WIMP%GnSD,                 &
         GpToSigmapSI(WIMP%m,WIMP%GpSI),GnToSigmanSI(WIMP%m,WIMP%GnSI),  &
         GpToSigmapSD(WIMP%m,WIMP%GpSD),GnToSigmanSD(WIMP%m,WIMP%GnSD),  &
-        Detector%Nevents,Detector%MuBackground,                         &
-        Detector%MuSignalSI(0),Detector%MuSignalSD(0),lnLike,lnp
+        DefaultDetector%Nevents,DefaultDetector%MuBackground,           &
+        DefaultDetector%MuSignalSI(0),DefaultDetector%MuSignalSD(0),    &
+        lnLike,lnp
   END SELECT
   
 END SUBROUTINE
@@ -2220,7 +3356,7 @@ END SUBROUTINE
 
 !-----------------------------------------------------------------------
 ! Prints to standard output the tabulated differential rate spectrum
-! current WIMP mass and couplings.
+! for the current WIMP mass and couplings.
 ! 
 SUBROUTINE WriteSpectrumData()
   IMPLICIT NONE
@@ -2229,29 +3365,29 @@ SUBROUTINE WriteSpectrumData()
   ! Columns to print depend on the verbosity level.
   ! For data, only absolute value of verbosity is used.
   
-  DO KE = 1,Detector%NE
+  DO KE = 1,DefaultDetector%NE
     WRITE(*,'(A,1(1X,F10.4))',ADVANCE='NO') DATA_PREFIX,                &
-        Detector%E(KE)
+        DefaultDetector%E(KE)
     SELECT CASE (ABS(VerbosityLevel))
     CASE (:2)
       ! Differential rate
       WRITE(*,'(1(1X,1PG12.5))',ADVANCE='NO')                           &
-          CoerceExponent(Detector%dRdE(KE,0),2,5)
+          CoerceExponent(DefaultDetector%dRdE(KE),2,5)
     CASE (3)
       ! Combined, si, sd
       WRITE(*,'(3(1X,1PG12.5))',ADVANCE='NO')                           &
-          CoerceExponent(Detector%dRdE(KE,0),2,5),                      &
-          CoerceExponent(Detector%dRdEsi(KE,0),2,5),                    &
-          CoerceExponent(Detector%dRdEsd(KE,0),2,5)
+          CoerceExponent(DefaultDetector%dRdE(KE),2,5),                 &
+          CoerceExponent(DefaultDetector%dRdEsi(KE),2,5),               &
+          CoerceExponent(DefaultDetector%dRdEsd(KE),2,5)
     CASE (4:)
       ! Reference rate components
       WRITE(*,'(6(1X,1PG12.5))',ADVANCE='NO')                           &
-          CoerceExponent(Detector%dRdEsi0(+1,KE,0),2,5),                &
-          CoerceExponent(Detector%dRdEsi0( 0,KE,0),2,5),                &
-          CoerceExponent(Detector%dRdEsi0(-1,KE,0),2,5),                &
-          CoerceExponent(Detector%dRdEsd0(+1,KE,0),2,5),                &
-          CoerceExponent(Detector%dRdEsd0( 0,KE,0),2,5),                &
-          CoerceExponent(Detector%dRdEsd0(-1,KE,0),2,5)
+          CoerceExponent(DefaultDetector%dRdEsi0(+1,KE),2,5),           &
+          CoerceExponent(DefaultDetector%dRdEsi0( 0,KE),2,5),           &
+          CoerceExponent(DefaultDetector%dRdEsi0(-1,KE),2,5),           &
+          CoerceExponent(DefaultDetector%dRdEsd0(+1,KE),2,5),           &
+          CoerceExponent(DefaultDetector%dRdEsd0( 0,KE),2,5),           &
+          CoerceExponent(DefaultDetector%dRdEsd0(-1,KE),2,5)
     END SELECT
     WRITE(*,'(A)') ''
   END DO
@@ -2328,7 +3464,7 @@ SUBROUTINE WriteEventsByMassHeader(extra_lines)
     WRITE(*,'(A)') COMMENT_PREFIX &
         // '  events(SI)   Average expected spin-independent events.'
     WRITE(*,'(A)') COMMENT_PREFIX &
-        // '  events(SD)   Average expected spin-dependent events (NOT IMPLEMENTED).'
+        // '  events(SD)   Average expected spin-dependent events.'
   END IF
   
   IF (VerbosityLevel .GE. 2) THEN
@@ -2364,7 +3500,7 @@ SUBROUTINE WriteEventsByMassColumnHeader()
     WRITE(*,'(1(1X,A23))',ADVANCE='NO')                                 &
         '----- full range ------'
     ! Events for sub-intervals
-    DO Keff = 1,Detector%Neff
+    DO Keff = 1,DefaultDetector%Neff
       WRITE(*,'(1X,A1)',ADVANCE='NO') '|'
       WRITE(*,'(1(1X,A14,I3,A6))',ADVANCE='NO')                         &
           '----- interval',Keff,' -----'
@@ -2395,7 +3531,7 @@ SUBROUTINE WriteEventsByMassColumnHeader()
   
   ! Events for sub-intervals
   IF (VerbosityLevel .GE. 3) THEN
-    DO Keff = 1,Detector%Neff
+    DO Keff = 1,DefaultDetector%Neff
       WRITE(*,'(1X,A1)',ADVANCE='NO') ' '
       WRITE(*,'(2(1X,A11))',ADVANCE='NO') ' events(SI)',' events(SD)'
     END DO
@@ -2431,16 +3567,16 @@ SUBROUTINE WriteEventsByMassData()
   ! Events (full range)
   IF (ABS(VerbosityLevel) .GE. 3) WRITE(*,'(1X,A1)',ADVANCE='NO') ' '
   WRITE(*,'(2(1X,1PG11.4))',ADVANCE='NO')                               &
-      CoerceExponent(Detector%MuSignalSI(0),2,4),                       &
-      CoerceExponent(Detector%MuSignalSD(0),2,4)
+      CoerceExponent(DefaultDetector%MuSignalSI(0),2,4),                &
+      CoerceExponent(DefaultDetector%MuSignalSD(0),2,4)
   
   ! Events for sub-intervals
   IF (ABS(VerbosityLevel) .GE. 3) THEN
-    DO Keff = 1,Detector%Neff
+    DO Keff = 1,DefaultDetector%Neff
       WRITE(*,'(1X,A1)',ADVANCE='NO') ' '
       WRITE(*,'(2(1X,1PG11.4))',ADVANCE='NO')                           &
-          CoerceExponent(Detector%MuSignalSI(Keff),2,4),                &
-          CoerceExponent(Detector%MuSignalSD(Keff),2,4)
+          CoerceExponent(DefaultDetector%MuSignalSI(Keff),2,4),         &
+          CoerceExponent(DefaultDetector%MuSignalSD(Keff),2,4)
     END DO
   END IF
   
@@ -2761,7 +3897,7 @@ SUBROUTINE WriteConstraintsSDData(s1,s2)
   
   ! Need scale factors x s.t. sigma -> x*sigma gives desired
   ! number of events.
-  CALL GetRates(signal_si=mu)
+  CALL GetRates(signal_sd=mu)
   ! Empty set case
   IF (s2 .EQ. 0d0) THEN
     x1 = 0d0
@@ -2829,7 +3965,7 @@ SUBROUTINE WriteLimitsSIHeader(lnp,thetaG,extra_lines)
         // 'section(s) that are not excluded.  Cross-sections are excluded if their'
     WRITE(*,'(A)') COMMENT_PREFIX &
         // 'p-value is smaller than the given p-value, where the p-value is'
-    IF (Detector%Neff .EQ. Detector%Nevents+1) THEN
+    IF (DefaultDetector%Neff .EQ. DefaultDetector%Nevents+1) THEN
       WRITE(*,'(A)') COMMENT_PREFIX &
         // 'determined using the maximum gap method; see Yellin, Phys. Rev. D 66,'
       WRITE(*,'(A)') COMMENT_PREFIX &
@@ -2931,7 +4067,7 @@ SUBROUTINE WriteLimitsSIData(lnp)
   REAL*8 :: x,sigmapSI,sigmanSI
   
   ! Need scale factor
-  x = ScaleToPValue(lnp)
+  x = ScaleToPValue(lnp=lnp)
   
   ! Cross-sections (multiply by x for limit)
   CALL GetWIMP(sigmapSI=sigmapSI,sigmanSI=sigmanSI)
@@ -2986,7 +4122,7 @@ SUBROUTINE WriteLimitsSDHeader(lnp,thetaG,extra_lines)
         // 'section(s) that are not excluded.  Cross-sections are excluded if their'
     WRITE(*,'(A)') COMMENT_PREFIX &
         // 'p-value is smaller than the given p-value, where the p-value is'
-    IF (Detector%Neff .EQ. Detector%Nevents+1) THEN
+    IF (DefaultDetector%Neff .EQ. DefaultDetector%Nevents+1) THEN
       WRITE(*,'(A)') COMMENT_PREFIX &
         // 'determined using the maximum gap method; see Yellin, Phys. Rev. D 66,'
       WRITE(*,'(A)') COMMENT_PREFIX &
@@ -3013,9 +4149,9 @@ SUBROUTINE WriteLimitsSDHeader(lnp,thetaG,extra_lines)
         // '  theta/PI              =',CoerceNumber(thetaG/PI,10,5)
     WRITE(*,'(A)') COMMENT_PREFIX
     
-    WRITE(*,'(A)') COMMENT_PREFIX &
-        // 'NOTE: SPIN-DEPENDENT FORM FACTORS NOT IMPLEMENTED.'
-    WRITE(*,'(A)') COMMENT_PREFIX
+    !WRITE(*,'(A)') COMMENT_PREFIX &
+    !    // 'NOTE: SPIN-DEPENDENT FORM FACTORS NOT IMPLEMENTED.'
+    !WRITE(*,'(A)') COMMENT_PREFIX
   END IF
   
   IF (VerbosityLevel .GE. 2) THEN
@@ -3094,7 +4230,7 @@ SUBROUTINE WriteLimitsSDData(lnp)
   REAL*8 :: x,sigmapSD,sigmanSD
   
   ! Need scale factor
-  x = ScaleToPValue(lnp)
+  x = ScaleToPValue(lnp=lnp)
   
   ! Cross-sections (multiply by x for limit)
   CALL GetWIMP(sigmapSD=sigmapSD,sigmanSD=sigmanSD)
@@ -4363,7 +5499,7 @@ ELEMENTAL FUNCTION MeanInverseSpeed0(vmin) RESULT(eta)
   
   ! Special case: no finite cutoff (vesc is effectively infinite)
   IF (z .GT. 25d0) THEN
-    eta = ERF2(x-y,x+y) / (2*v0)
+    eta = ERF2(x-y,x+y) / (2*vobs)
     RETURN
   END IF
   
@@ -4453,7 +5589,7 @@ PURE FUNCTION MeanInverseSpeed1(N,vmin) RESULT(eta)
   
   ! Special case: no finite cutoff (vesc is effectively infinite)
   IF (z .GT. 25d0) THEN
-    eta = ERF2(x-y,x+y) / (2*v0)
+    eta = ERF2(x-y,x+y) / (2*vobs)
     RETURN
   END IF
   
@@ -4550,7 +5686,7 @@ PURE FUNCTION MeanInverseSpeed2(N1,N2,vmin) RESULT(eta)
   
   ! Special case: no finite cutoff (vesc is effectively infinite)
   IF (z .GT. 25d0) THEN
-    eta = ERF2(x-y,x+y) / (2*v0)
+    eta = ERF2(x-y,x+y) / (2*vobs)
     RETURN
   END IF
   
@@ -4849,16 +5985,20 @@ END SUBROUTINE
 
 
 ! ----------------------------------------------------------------------
-! Calculates the spin-dependent weighted form factor Wsi for the given
+! Calculates the spin-dependent weighted form factor Wsd for the given
 ! isotope at the given momentum transfer q, defined as:
-!   Wsd(+1,:) = (4/pi) 1/(2J+1) Spp(q)   ! SD proton
-!   Wsd( 0,:) = (4/pi) 1/(2J+1) Spn(q)   ! SD crossterm
-!   Wsd(-1,:) = (4/pi) 1/(2J+1) Snn(q)   ! SD neutron
+!   Wsd(+1,:) = 4/(2J+1) Spp(q)          ! SD proton
+!   Wsd( 0,:) = 4/(2J+1) Spn(q)          ! SD crossterm
+!   Wsd(-1,:) = 4/(2J+1) Snn(q)          ! SD neutron
 ! where J is the nuclear spin and Spp/Spn/Snn are the spin structure
 ! functions.  For a comprehensive review of available spin structure
 ! functions, see:
 !   Bednyakov & Simkovic, Phys. Part. Nucl. 37, S106 (2006)
 !     [hep-ph/0608097]
+! Note that, in the above review, the quantities "ap" & "an" are
+! actually the quantities Gp & Gn as used here, not the quantities
+! ap & an as used here or in much of the other direct detection
+! literature.
 ! 
 ! Xenon form factors implemented by Andre Scaffidi.
 ! 
@@ -4878,119 +6018,132 @@ PURE SUBROUTINE CalcWSD(Z,A,N,q,W)
   INTEGER, INTENT(IN) :: Z,A,N
   REAL*8, INTENT(IN) :: q(1:N)
   REAL*8, INTENT(OUT) :: W(-1:1,1:N)
-  REAL*8 :: u(1:N),Spp(1:N),Spn(1:N),Snn(1:N),S00(1:N),S01(1:N),S11(1:N), C(-1:1,1:N), J
-  INTEGER :: ii,jj,pp
-  REAL*8, PARAMETER :: b = 2.2853d0 / HBARC !Given in fm in mendez et al. Divide by hbarc to ensure 
-  double precision :: C00(1:10),C11(1:10),C01(1:10)  
+  REAL*8 :: J,u,uk,expu,S00,S11,S01,Spp(1:N),Spn(1:N),Snn(1:N)
+  INTEGER :: I,K
   
-  ! Stucture constants as calculated by mendez et al Table 1 for 
-  ! Xe 129. These were taken from the 1b+2b columns where possible. 
-  REAL*8, PARAMETER :: C00_XE129(10) = (/ 0.054731d0, -0.146897d0,      &
-      0.182479d0,   -0.128112d0, 0.0539978d0, -0.01333135d0,            &
+  ! Stucture constants as calculated by Menendez et al. [1208.1094] Table 1 for
+  ! Xe 129. These were taken from the 1b+2b columns where possible
+  REAL*8, PARAMETER :: B_XE129 = 2.2853d0 / HBARC  ! Harmonic oscillator length [GeV^-1]
+  INTEGER, PARAMETER :: NC_XE129 = 9
+  REAL*8, PARAMETER :: C00_XE129(0:9) = (/ 0.054731d0, -0.146897d0,     &
+      0.182479d0,   -0.128112d0, 0.0539978d0, -0.0133335d0,             &
       0.00190579d0, -1.48373d-4, 5.11732d-6,  -2.06597d-8  /)
-  REAL*8, PARAMETER :: C11_XE129(10) = (/  0.02933d0, -0.0905396d0,     &
-      0.122783d0,   -0.0912046d0, 0.0401076d0, -0.010590d0,             &
-      0.00168737d0, -1.5668d-4,   7.69202d-6,  -1.48874d-7 /)
-  REAL*8, PARAMETER :: C01_XE129(10) = (/ -0.0796645d0, 0.231997d0,     &
+  REAL*8, PARAMETER :: C11_XE129(0:9) = (/  0.02933d0, -0.0905396d0,    &
+      0.122783d0,   -0.0912046d0, 0.0401076d0, -0.010598d0,             &
+      0.00168737d0, -1.56768d-4,  7.69202d-6,  -1.48874d-7 /)
+  REAL*8, PARAMETER :: C01_XE129(0:9) = (/ -0.0796645d0, 0.231997d0,    &
       -0.304198d0,   0.222024d0, -0.096693d0, 0.0251835d0,              &
       -0.00392356d0, 3.53343d-4, -1.65058d-5, 2.88576d-7 /)
   
-  ! Structure constants as calculated by mendez et al Table 1 for 
-  ! Xe 131, again, 1b + 2b currents used  
-  REAL*8, PARAMETER :: C00_XE131(10) = (/ 0.0417889d0, -0.111171d0,     &
+  ! Structure constants as calculated by Menendez et al. [1208.1094] Table 1 for
+  ! Xe 131, again, 1b + 2b currents used
+  REAL*8, PARAMETER :: B_XE131 = 2.2905d0 / HBARC  ! Harmonic oscillator length [GeV^-1]
+  INTEGER, PARAMETER :: NC_XE131 = 9
+  REAL*8, PARAMETER :: C00_XE131(0:9) = (/ 0.0417889d0, -0.111171d0,    &
       0.171966d0,   -0.133219d0, 0.0633805d0, -0.0178388d0,             &
       0.00282476d0, -2.31681d-4, 7.78223d-6,  -4.49287d-10 /)
-  REAL*8, PARAMETER :: C11_XE131(10) = (/ 0.022446d0, -0.0733931d0,     &
+  REAL*8, PARAMETER :: C11_XE131(0:9) = (/ 0.022446d0, -0.0733931d0,    &
       0.110509d0,   -0.0868752d0, 0.0405399d0, -0.0113544d0,            &
       0.00187572d0, -1.75285d-4,  8.40043d-6,  -1.53632d-7 /)
-  REAL*8, PARAMETER :: C01_XE131(10) = (/ -0.0608808d0, 0.181473d0,     &
+  REAL*8, PARAMETER :: C01_XE131(0:9) = (/ -0.0608808d0, 0.181473d0,    &
       -0.272533d0,  0.211776d0, -0.0985956d0, 0.027438d0,               &
       -0.0044424d0, 3.97619d-4, -1.74758d-5,  2.55979d-7 /)
   
-  u = (q**2)*(b**2) / 2d0 !unitless variable u -  Sij = Sij(u) = Sij(q)
+  ! Initialization
+  ! Most isotopes have zero spin (=> zero form factor)
+  J   = 0d0
+  Spp = 0d0
+  Snn = 0d0
+  Spn = 0d0
+  W   = 0d0
   
-  !The structure constants vary depending on isotope:
+  ! Xenon -------------------------------------
+  IF (Z .EQ. 54) THEN
+    ! Xenon 129 ----------------
+    ! From Menendez et al. [1208.1094].
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 129) THEN
+      ! Nuclear spin
+      J=0.5d0
+      ! Cycle over input momenta
+      DO I=1,N
+        u  = 0.5d0 * (q(I)*B_XE129)**2
+        uk = 1
+        S00 = 0d0
+        S11 = 0d0
+        S01 = 0d0
+        ! Fits over 0 < u < 3 (probably).
+        ! Conservatively set to zero outside this region.
+        IF (u .LE. 3d0) THEN
+          DO K=0,NC_XE129
+            S00 = S00 + uk * C00_XE129(K)
+            S11 = S11 + uk * C11_XE129(K)
+            S01 = S01 + uk * C01_XE129(K)
+            uk = u*uk
+          END DO
+          expu = EXP(-u)
+          S00 = expu * S00
+          S11 = expu * S11
+          S01 = expu * S01
+        END IF
+        ! Basis transformation: a0=ap+an, a1=ap-an
+        Spp(I) = S00 + S11 + S01
+        Snn(I) = S00 + S11 - S01
+        Spn(I) = S00 - S11
+      END DO
+      
+    ! Xenon 131 ----------------
+    ! From Menendez et al. [1208.1094].
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    ELSE IF (A .EQ. 131) THEN
+      ! Nuclear spin
+      J=1.5d0
+      ! Cycle over input momenta
+      DO I=1,N
+        u  = 0.5d0 * (q(I)*B_XE131)**2
+        uk = 1
+        S00 = 0d0
+        S11 = 0d0
+        S01 = 0d0
+        ! Fits over 0 < u < 3 (probably).
+        ! Conservatively set to zero outside this region.
+        IF (u .LE. 3d0) THEN
+          DO K=0,NC_XE131
+            S00 = S00 + uk * C00_XE131(K)
+            S11 = S11 + uk * C11_XE131(K)
+            S01 = S01 + uk * C01_XE131(K)
+            uk = u*uk
+          END DO
+          expu = EXP(-u)
+          S00 = expu * S00
+          S11 = expu * S11
+          S01 = expu * S01
+        END IF
+        ! Basis transformation: a0=ap+an, a1=ap-an
+        Spp(I) = S00 + S11 + S01
+        Snn(I) = S00 + S11 - S01
+        Spn(I) = S00 - S11
+      END DO
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
   
-  IF (A==129) THEN
-    
-    J=0.5d0
-    C00 = C00_XE129
-    C11 = C11_XE129
-    C01 = C01_XE129
-    
-    !open(unit = 101, file = '129.dat', action = 'read')
-    !DO pp=1,10
-    !   READ(101,*,END=44) C00(pp),C11(pp),C01(pp) 
-    !END DO     
-    !44  close(101)
-    
-  ELSEIF (A==131) THEN
-    
-    J=1.5d0
-    C00 = C00_XE131
-    C11 = C11_XE131
-    C01 = C01_XE131
-
-    !open(unit = 101, file = '131.dat', action = 'read')
-    !DO pp=1,10
-    !  READ(101,*,END=33) C00(pp),C11(pp),C01(pp) 
-    !END DO     
-    !33  close(101)
-
-  ELSE 
-     
-     J = 0d0
-     C00 = 0d0
-     C01 = 0d0
-     C11 = 0d0
-     
+  ! Zero spin or unimplemented isotope ---------
+  ELSE
+    W = 0d0
+    RETURN
   ENDIF
-  !Proceed to implement structure functions as calculated by mendez et. al
-  !Figures 2 and 3 of this paper plot the stucture functions for 0<=u<=3
-  !Provide cuttoff at u = 0 and 3
-     
-  DO ii=1,N
-     
-     IF (u(ii) <= 3) THEN
-
-        S00(ii) = 0d0  !Initialising the arrays 
-        S01(ii) = 0d0
-        S11(ii) = 0d0
- 
-        DO jj=1,10
-           
-           S00(ii) = S00(ii) + exp(-u(ii))*C00(jj)*(u(ii)**(jj)) !Evaluating sum
-           S01(ii) = S01(ii) + exp(-u(ii))*C01(jj)*(u(ii)**(jj))
-           S11(ii) = S11(ii) + exp(-u(ii))*C11(jj)*(u(ii)**(jj))
-
-        END DO
-     ELSEIF (u(ii) <= 0) THEN
-        
-        S00(ii) = 0d0 ! Truncating the structure functions 
-        S11(ii) = 0d0
-        S01(ii) = 0d0
-        
-     ELSE
-        
-        S00(ii) = 0d0
-        S11(ii) = 0d0
-        S01(ii) = 0d0
-        
-     ENDIF
-     
-     
-  END DO
   
-  ! By making the basis transformation: a0=ap+an, a1=ap-an we obtain
-  
-  Spp = S00+S11+S01
-  Snn = S00+S11-S01
-  Spn = S00-S11
-  
-  
-  W(+1,:) = (4d0 / PI)*(1d0 / (2d0*J + 1d0))* Spp   ! SD proton
-  W( 0,:) = (4d0 / PI)*(1d0 / (2d0*J + 1d0))* Spn   ! SD crossterm
-  W(-1,:) = (4d0 / PI)*(1d0 / (2d0*J + 1d0))* Snn   ! SD neutron
+  ! Weighted form factors
+  W(+1,:) = (4d0 / (2d0*J + 1d0)) * Spp    ! SD proton
+  W( 0,:) = (4d0 / (2d0*J + 1d0)) * Spn    ! SD crossterm
+  W(-1,:) = (4d0 / (2d0*J + 1d0)) * Snn    ! SD neutron
   
 END SUBROUTINE
 
@@ -5025,6 +6178,10 @@ END FUNCTION
 ! Note this only allows access to fixed quantities, not quantities that
 ! are recalculated for each WIMP (see GetRates() for that).
 ! 
+! Optional input argument:
+!   D           The DetectorRateStruct structure to extract detector
+!               quantities from.  If not given, a default structure
+!               (internally stored) will be used.
 ! Optional output arguments:
 !   mass        Detector fiducial mass [kg]
 !   time        Detector exposure time [day]
@@ -5055,68 +6212,78 @@ END FUNCTION
 !               factors for spin-independent (SI) and spin-dependent
 !               (SD) couplings.  Allocated to size [-1:1,1:NE,1:Niso].
 ! 
-SUBROUTINE GetDetector(mass,time,exposure,Nevents,background,           &
+SUBROUTINE GetDetector(D,mass,time,exposure,Nevents,background,         &
                        Niso,Ziso,Aiso,fiso,Miso,NE,E,Neff,eff_file,eff, &
                        Wsi,Wsd)
   IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(IN), TARGET, OPTIONAL :: D
   CHARACTER(LEN=*), INTENT(OUT), OPTIONAL :: eff_file
   INTEGER, INTENT(OUT), OPTIONAL :: Nevents,Niso,NE,Neff
   INTEGER, ALLOCATABLE, INTENT(OUT), OPTIONAL :: Ziso(:),Aiso(:)
   REAL*8, INTENT(OUT), OPTIONAL :: mass,time,exposure,background
   REAL*8, ALLOCATABLE, INTENT(OUT), OPTIONAL :: fiso(:),Miso(:),E(:),   &
           eff(:,:),Wsi(:,:,:),Wsd(:,:,:)
+  TYPE(DetectorRateStruct), POINTER :: DP
+  
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
   
   ! Exposures
-  IF (PRESENT(mass))     mass     = Detector%mass
-  IF (PRESENT(time))     time     = Detector%time
-  IF (PRESENT(exposure)) exposure = Detector%exposure
+  IF (PRESENT(mass))     mass     = DP%mass
+  IF (PRESENT(time))     time     = DP%time
+  IF (PRESENT(exposure)) exposure = DP%exposure
   
   ! Observed events and expected background events
-  IF (PRESENT(Nevents))    Nevents    = Detector%Nevents
-  IF (PRESENT(background)) background = Detector%MuBackground
+  IF (PRESENT(Nevents))    Nevents    = DP%Nevents
+  IF (PRESENT(background)) background = DP%MuBackground
   
   ! Isotope data
-  IF (PRESENT(Niso)) Niso = Detector%Niso
+  IF (PRESENT(Niso)) Niso = DP%Niso
   IF (PRESENT(Ziso)) THEN
-    ALLOCATE(Ziso(Detector%Niso))
-    Ziso = Detector%Ziso
+    ALLOCATE(Ziso(DP%Niso))
+    Ziso = DP%Ziso
   END IF
   IF (PRESENT(Aiso)) THEN
-    ALLOCATE(Aiso(Detector%Niso))
-    Aiso = Detector%Aiso
+    ALLOCATE(Aiso(DP%Niso))
+    Aiso = DP%Aiso
   END IF
   IF (PRESENT(fiso)) THEN
-    ALLOCATE(fiso(Detector%Niso))
-    fiso = Detector%fiso
+    ALLOCATE(fiso(DP%Niso))
+    fiso = DP%fiso
   END IF
   IF (PRESENT(Miso)) THEN
-    ALLOCATE(Miso(Detector%Niso))
-    Miso = Detector%Miso
+    ALLOCATE(Miso(DP%Niso))
+    Miso = DP%Miso
   END IF
   
   ! Recoil energies
-  IF (PRESENT(NE)) NE = Detector%NE
+  IF (PRESENT(NE)) NE = DP%NE
   IF (PRESENT(E)) THEN
-    ALLOCATE(E(Detector%NE))
-    E = Detector%E
+    ALLOCATE(E(DP%NE))
+    E = DP%E
   END IF
   
   ! Efficiencies
-  IF (PRESENT(Neff))     Neff     = Detector%Neff
-  IF (PRESENT(eff_file)) eff_file = Detector%eff_file
+  IF (PRESENT(Neff))     Neff     = DP%Neff
+  IF (PRESENT(eff_file)) eff_file = DP%eff_file
   IF (PRESENT(eff)) THEN
-    ALLOCATE(eff(Detector%NE,0:Detector%Neff))
-    eff = Detector%eff
+    ALLOCATE(eff(DP%NE,0:DP%Neff))
+    eff = DP%eff
   END IF
   
   ! Weighted form factors
   IF (PRESENT(Wsi)) THEN
-    ALLOCATE(Wsi(-1:1,Detector%NE,0:Detector%Niso))
-    Wsi = Detector%Wsi
+    ALLOCATE(Wsi(-1:1,DP%NE,0:DP%Niso))
+    Wsi = DP%Wsi
   END IF
   IF (PRESENT(Wsd)) THEN
-    ALLOCATE(Wsd(-1:1,Detector%NE,0:Detector%Niso))
-    Wsd = Detector%Wsd
+    ALLOCATE(Wsd(-1:1,DP%NE,0:DP%Niso))
+    Wsd = DP%Wsd
   END IF
   
 END SUBROUTINE
@@ -5129,6 +6296,10 @@ END SUBROUTINE
 ! need be calculated only once, not quantities that are recalculated
 ! for each WIMP (see SetRates() for that).
 ! 
+! Optional input/output argument:
+!   D           The DetectorRateStruct structure containing detector
+!               data to be modified.  If not given, a default structure
+!               (internally stored) will be used.
 ! Optional input arguments:
 !   mass        Detector fiducial mass [kg]
 !   time        Detector exposure time [day]
@@ -5159,8 +6330,7 @@ END SUBROUTINE
 ! Optional efficiency curve(s) arguments.  If specified by file, the
 ! recoil energy tabulation will be set to that of the file.  If eff is
 ! given, NE and Neff must also be given for it to take effect.
-!   eff_file    File from which efficiencies shoud be read; use '' to
-!               set to the internal default (LUX 2013 result).
+!   eff_file    File from which efficiencies shoud be read.
 !   eff_filename Sets the stored file name _without_ loading any data
 !               from the file.
 !   intervals   Specify if sub-intervals should be loaded from the
@@ -5182,11 +6352,12 @@ END SUBROUTINE
 !               form factors for spin-independent (SI) and spin-
 !               dependent (SD) couplings.
 ! 
-SUBROUTINE SetDetector(mass,time,exposure,Nevents,background,           &
+SUBROUTINE SetDetector(D,mass,time,exposure,Nevents,background,         &
                        Niso,Ziso,Aiso,fiso,Zelem,                       &
                        NE,E,eff_file,eff_filename,intervals,            &
                        Neff,eff,Emin,Wsi,Wsd)
   IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(INOUT), TARGET, OPTIONAL :: D
   CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: eff_file,eff_filename
   LOGICAL, INTENT(IN), OPTIONAL :: intervals
   INTEGER, INTENT(IN), OPTIONAL :: Nevents,Niso,Zelem,NE,Neff
@@ -5197,9 +6368,18 @@ SUBROUTINE SetDetector(mass,time,exposure,Nevents,background,           &
   !        Wsi(-1:1,NE,Niso),Wsd(-1:1,NE,Niso)
   REAL*8, INTENT(IN), OPTIONAL :: fiso(:),E(:),eff(:,0:),               &
           Wsi(-1:,:,:),Wsd(-1:,:,:)
+  TYPE(DetectorRateStruct), POINTER :: DP
   LOGICAL :: intervals0,iso_change,E_change,eff_change
   INTEGER :: Niso0,NE0,Neff0,KE,Kiso
   REAL*8 :: f
+  
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
   
   ! Indicate if quantities changed, indicating need for
   ! array resizing and initialization
@@ -5208,9 +6388,9 @@ SUBROUTINE SetDetector(mass,time,exposure,Nevents,background,           &
   eff_change = .FALSE.
   
   ! Initial array sizes
-  Niso0 = Detector%Niso
-  NE0   = Detector%NE
-  Neff0 = Detector%Neff
+  Niso0 = DP%Niso
+  NE0   = DP%NE
+  Neff0 = DP%Neff
   
   ! Include sub-intervals?
   intervals0 = .TRUE.
@@ -5218,127 +6398,121 @@ SUBROUTINE SetDetector(mass,time,exposure,Nevents,background,           &
   
   ! Exposures
   IF (PRESENT(mass)) THEN
-    Detector%mass     = mass
-    Detector%exposure = Detector%mass * Detector%time
+    DP%mass     = mass
+    DP%exposure = DP%mass * DP%time
   END IF
   IF (PRESENT(time)) THEN
-    Detector%time     = time
-    Detector%exposure = Detector%mass * Detector%time
+    DP%time     = time
+    DP%exposure = DP%mass * DP%time
   END IF
   IF (PRESENT(exposure)) THEN
-    Detector%mass     = -1d0
-    Detector%time     = -1d0
-    Detector%exposure = exposure
+    DP%mass     = -1d0
+    DP%time     = -1d0
+    DP%exposure = exposure
   END IF
   
   ! Observed events and expected background events
-  IF (PRESENT(Nevents))    Detector%Nevents      = Nevents
-  IF (PRESENT(background)) Detector%MuBackground = background
+  IF (PRESENT(Nevents))    DP%Nevents      = Nevents
+  IF (PRESENT(background)) DP%MuBackground = background
   
   ! Isotope data
   IF (PRESENT(Niso)) THEN
-    IF (Niso .EQ. Detector%Niso) THEN
+    IF (Niso .EQ. DP%Niso) THEN
       IF (PRESENT(Ziso)) THEN
-        Detector%Ziso = Ziso(1:Niso)
+        DP%Ziso = Ziso(1:Niso)
         iso_change = .TRUE.
       END IF
       IF (PRESENT(Aiso)) THEN
-        Detector%Aiso = Aiso(1:Niso)
+        DP%Aiso = Aiso(1:Niso)
         iso_change = .TRUE.
       END IF
       IF (PRESENT(fiso)) THEN
-        Detector%fiso = fiso(1:Niso)
+        DP%fiso = fiso(1:Niso)
         iso_change = .TRUE.
       END IF
       IF (iso_change) THEN
-        Detector%Miso = IsotopeMass(Detector%Ziso,Detector%Aiso)
+        DP%Miso = IsotopeMass(DP%Ziso,DP%Aiso)
       END IF
     ELSE IF (PRESENT(Ziso) .AND. PRESENT(Aiso) .AND. PRESENT(fiso)) THEN
-      IF (ALLOCATED(Detector%Ziso)) DEALLOCATE(Detector%Ziso)
-      IF (ALLOCATED(Detector%Aiso)) DEALLOCATE(Detector%Aiso)
-      IF (ALLOCATED(Detector%fiso)) DEALLOCATE(Detector%fiso)
-      IF (ALLOCATED(Detector%Miso)) DEALLOCATE(Detector%Miso)
-      ALLOCATE(Detector%Ziso(Niso),Detector%Aiso(Niso),                 &
-               Detector%fiso(Niso),Detector%Miso(Niso))
-      Detector%Niso = Niso
-      Detector%Ziso = Ziso(1:Niso)
-      Detector%Aiso = Aiso(1:Niso)
-      Detector%fiso = fiso(1:Niso)
-      Detector%Miso = IsotopeMass(Detector%Ziso,Detector%Aiso)
+      IF (ALLOCATED(DP%Ziso)) DEALLOCATE(DP%Ziso)
+      IF (ALLOCATED(DP%Aiso)) DEALLOCATE(DP%Aiso)
+      IF (ALLOCATED(DP%fiso)) DEALLOCATE(DP%fiso)
+      IF (ALLOCATED(DP%Miso)) DEALLOCATE(DP%Miso)
+      ALLOCATE(DP%Ziso(Niso),DP%Aiso(Niso),DP%fiso(Niso),DP%Miso(Niso))
+      DP%Niso = Niso
+      DP%Ziso = Ziso(1:Niso)
+      DP%Aiso = Aiso(1:Niso)
+      DP%fiso = fiso(1:Niso)
+      DP%Miso = IsotopeMass(DP%Ziso,DP%Aiso)
       iso_change = .TRUE.
     END IF
   END IF
   IF (PRESENT(Zelem)) THEN
-    CALL IsotopeList(Zelem,Detector%Niso,Detector%Ziso,Detector%Aiso,   &
-                     Detector%fiso,Detector%Miso)
+    CALL IsotopeList(Zelem,DP%Niso,DP%Ziso,DP%Aiso,DP%fiso,DP%Miso)
     iso_change = .TRUE.
   END IF
   
   ! Energy and/or efficiencies
   IF (PRESENT(NE)) THEN
     IF (PRESENT(E)) THEN
-      IF (ALLOCATED(Detector%E) .AND. (NE .NE. Detector%NE)) DEALLOCATE(Detector%E)
-      IF (.NOT. ALLOCATED(Detector%E)) ALLOCATE(Detector%E(NE))
-      Detector%NE = NE
-      Detector%E = E(1:NE)
+      IF (ALLOCATED(DP%E) .AND. (NE .NE. DP%NE)) DEALLOCATE(DP%E)
+      IF (.NOT. ALLOCATED(DP%E)) ALLOCATE(DP%E(NE))
+      DP%NE = NE
+      DP%E = E(1:NE)
       E_change = .TRUE.
     END IF
     IF (PRESENT(Neff) .AND. PRESENT(eff)) THEN
-      Detector%Neff = Neff
-      IF (ALLOCATED(Detector%eff)) DEALLOCATE(Detector%eff)
-      ALLOCATE(Detector%eff(NE,0:Neff))
-      Detector%eff = eff(1:NE,0:Neff)
+      DP%Neff = Neff
+      IF (ALLOCATED(DP%eff)) DEALLOCATE(DP%eff)
+      ALLOCATE(DP%eff(NE,0:Neff))
+      DP%eff = eff(1:NE,0:Neff)
       eff_change = .TRUE.
     END IF
     ! Bad case: E changed, but eff was not (and will not be) updated.
     ! Set to 100% efficiency, without sub-intervals.  Useful for
     ! raw rate calculations.
     IF (E_change .AND. .NOT. eff_change .AND. .NOT. PRESENT(eff_file)) THEN
-      IF (ALLOCATED(Detector%eff)) DEALLOCATE(Detector%eff)
-      Detector%Neff = 0
-      ALLOCATE(Detector%eff(NE,0:0))
-      Detector%eff = 1d0
+      IF (ALLOCATED(DP%eff)) DEALLOCATE(DP%eff)
+      DP%Neff = 0
+      ALLOCATE(DP%eff(NE,0:0))
+      DP%eff = 1d0
     END IF
   END IF
   
   ! Load efficiencies from file
   IF (PRESENT(eff_file)) THEN
-    IF (eff_file .EQ. '') THEN
-      Detector%eff_file = '[LUX 2013 (default)]'
-      CALL LoadEfficiencyLUX2013(Detector%NE,Detector%E,Detector%Neff,  &
-                                 Detector%eff,intervals0)
-    ELSE
-      Detector%eff_file = eff_file
-      CALL LoadEfficiencyFile(eff_file,Detector%NE,Detector%E,          &
-                              Detector%Neff,Detector%eff,intervals0)
+    IF (eff_file .NE. '') THEN
+      DP%eff_file = eff_file
+      CALL LoadEfficiencyFile(eff_file,DP%NE,DP%E,DP%Neff,DP%eff,       &
+                              intervals0)
+      E_change   = .TRUE.
+      eff_change = .TRUE.
     END IF
-    E_change   = .TRUE.
-    eff_change = .TRUE.
   END IF
   
   ! Saved efficiency file name
-  IF (PRESENT(eff_filename)) Detector%eff_file = eff_filename
+  IF (PRESENT(eff_filename)) DP%eff_file = eff_filename
   
   ! Apply threshold cut.
   ! We move all E < Emin tabulation points to Emin and set the
   ! efficiency of the final one to an interpolated value to
   ! maintain the original shape over any partially cropped bin.
   IF (PRESENT(Emin)) THEN
-    KE = BSearch(Detector%NE,Detector%E,Emin)
-    IF (KE .GE. Detector%NE) THEN
-      Detector%E   = Emin
-      Detector%eff = 0d0
+    KE = BSearch(DP%NE,DP%E,Emin)
+    IF (KE .GE. DP%NE) THEN
+      DP%E   = Emin
+      DP%eff = 0d0
       E_change   = .TRUE.
       eff_change = .TRUE.
     ELSE IF (KE .GE. 1) THEN
-      IF (Detector%E(KE) .LT. Detector%E(KE+1)) THEN
-        f = (Emin - Detector%E(KE)) / (Detector%E(KE+1) - Detector%E(KE))
+      IF (DP%E(KE) .LT. DP%E(KE+1)) THEN
+        f = (Emin - DP%E(KE)) / (DP%E(KE+1) - DP%E(KE))
       ELSE
         f = 1d0
       END IF
-      Detector%E(:KE) = Emin
-      Detector%eff(KE,:) = (1d0-f)*Detector%eff(KE,:) + f*Detector%eff(KE+1,:)
-      Detector%eff(1:KE-1,:) = 0d0
+      DP%E(:KE) = Emin
+      DP%eff(KE,:) = (1d0-f)*DP%eff(KE,:) + f*DP%eff(KE+1,:)
+      DP%eff(1:KE-1,:) = 0d0
       E_change   = .TRUE.
       eff_change = .TRUE.
     END IF
@@ -5346,103 +6520,103 @@ SUBROUTINE SetDetector(mass,time,exposure,Nevents,background,           &
   
   ! Weighted form factors (SI)
   IF (PRESENT(NE) .AND. PRESENT(Niso) .AND. PRESENT(Wsi)) THEN
-    IF (ALLOCATED(Detector%Wsi)) DEALLOCATE(Detector%Wsi)
-    ALLOCATE(Detector%Wsi(-1:1,NE,Niso))
-    Detector%Wsi = Wsi(-1:1,1:NE,1:Niso)
-  ELSE IF ((iso_change .OR. E_change) .AND. (Detector%Niso .GE. 0)      &
-           .AND. (Detector%NE .GE. 0)) THEN
-    IF (ALLOCATED(Detector%Wsi)) DEALLOCATE(Detector%Wsi)
-    ALLOCATE(Detector%Wsi(-1:1,Detector%NE,Detector%Niso))
-    DO Kiso = 1,Detector%Niso
-      CALL CalcWSI(Detector%Ziso(Kiso),Detector%Aiso(Kiso),Detector%NE, &
-                   EToQ(Detector%E,Detector%Miso(Kiso)),Detector%Wsi(:,:,Kiso))
+    IF (ALLOCATED(DP%Wsi)) DEALLOCATE(DP%Wsi)
+    ALLOCATE(DP%Wsi(-1:1,NE,Niso))
+    DP%Wsi = Wsi(-1:1,1:NE,1:Niso)
+  ELSE IF ((iso_change .OR. E_change) .AND. (DP%Niso .GE. 0)            &
+           .AND. (DP%NE .GE. 0)) THEN
+    IF (ALLOCATED(DP%Wsi)) DEALLOCATE(DP%Wsi)
+    ALLOCATE(DP%Wsi(-1:1,DP%NE,DP%Niso))
+    DO Kiso = 1,DP%Niso
+      CALL CalcWSI(DP%Ziso(Kiso),DP%Aiso(Kiso),DP%NE,                   &
+                   EToQ(DP%E,DP%Miso(Kiso)),DP%Wsi(:,:,Kiso))
     END DO
   END IF
   
   ! Weighted form factors (SD)
   IF (PRESENT(NE) .AND. PRESENT(Niso) .AND. PRESENT(Wsd)) THEN
-    IF (ALLOCATED(Detector%Wsd)) DEALLOCATE(Detector%Wsd)
-    ALLOCATE(Detector%Wsd(-1:1,NE,Niso))
-    Detector%Wsd = Wsd(-1:1,1:NE,1:Niso)
-  ELSE IF ((iso_change .OR. E_change) .AND. (Detector%Niso .GE. 0)      &
-           .AND. (Detector%NE .GE. 0)) THEN
-    IF (ALLOCATED(Detector%Wsd)) DEALLOCATE(Detector%Wsd)
-    ALLOCATE(Detector%Wsd(-1:1,Detector%NE,Detector%Niso))
-    DO Kiso = 1,Detector%Niso
-      CALL CalcWSD(Detector%Ziso(Kiso),Detector%Aiso(Kiso),Detector%NE, &
-                   EToQ(Detector%E,Detector%Miso(Kiso)),Detector%Wsd(:,:,Kiso))
+    IF (ALLOCATED(DP%Wsd)) DEALLOCATE(DP%Wsd)
+    ALLOCATE(DP%Wsd(-1:1,NE,Niso))
+    DP%Wsd = Wsd(-1:1,1:NE,1:Niso)
+  ELSE IF ((iso_change .OR. E_change) .AND. (DP%Niso .GE. 0)            &
+           .AND. (DP%NE .GE. 0)) THEN
+    IF (ALLOCATED(DP%Wsd)) DEALLOCATE(DP%Wsd)
+    ALLOCATE(DP%Wsd(-1:1,DP%NE,DP%Niso))
+    DO Kiso = 1,DP%Niso
+      CALL CalcWSD(DP%Ziso(Kiso),DP%Aiso(Kiso),DP%NE,                   &
+                   EToQ(DP%E,DP%Miso(Kiso)),DP%Wsd(:,:,Kiso))
     END DO
   END IF
   
   ! Resize halo velocity arrays if necessary
-  IF ((iso_change .OR. E_change) .AND. (Detector%Niso .GE. 0)           &
-      .AND. (Detector%NE .GE. 0)) THEN
-    IF (ALLOCATED(Detector%vmin)) DEALLOCATE(Detector%vmin)
-    ALLOCATE(Detector%vmin(Detector%NE,Detector%Niso))
-    IF (ALLOCATED(Detector%eta))  DEALLOCATE(Detector%eta)
-    ALLOCATE(Detector%eta(Detector%NE,Detector%Niso))
+  IF ((iso_change .OR. E_change) .AND. (DP%Niso .GE. 0)                 &
+      .AND. (DP%NE .GE. 0)) THEN
+    IF (ALLOCATED(DP%vmin)) DEALLOCATE(DP%vmin)
+    ALLOCATE(DP%vmin(DP%NE,DP%Niso))
+    IF (ALLOCATED(DP%eta))  DEALLOCATE(DP%eta)
+    ALLOCATE(DP%eta(DP%NE,DP%Niso))
   END IF
   
   ! Resize rate arrays if necessary
-  IF ((E_change .OR. eff_change) .AND. (Detector%NE .GE. 0)             &
-      .AND. (Detector%Neff .GE. 0)) THEN
-    IF (ALLOCATED(Detector%dRdEsi0)) DEALLOCATE(Detector%dRdEsi0)
-    ALLOCATE(Detector%dRdEsi0(-1:1,Detector%NE,0:Detector%Neff))
-    IF (ALLOCATED(Detector%dRdEsd0)) DEALLOCATE(Detector%dRdEsd0)
-    ALLOCATE(Detector%dRdEsd0(-1:1,Detector%NE,0:Detector%Neff))
-    IF (ALLOCATED(Detector%Rsi0)) DEALLOCATE(Detector%Rsi0)
-    ALLOCATE(Detector%Rsi0(-1:1,0:Detector%Neff))
-    IF (ALLOCATED(Detector%Rsd0)) DEALLOCATE(Detector%Rsd0)
-    ALLOCATE(Detector%Rsd0(-1:1,0:Detector%Neff))
-    IF (ALLOCATED(Detector%dRdEsi)) DEALLOCATE(Detector%dRdEsi)
-    ALLOCATE(Detector%dRdEsi(Detector%NE,0:Detector%Neff))
-    IF (ALLOCATED(Detector%dRdEsd)) DEALLOCATE(Detector%dRdEsd)
-    ALLOCATE(Detector%dRdEsd(Detector%NE,0:Detector%Neff))
-    IF (ALLOCATED(Detector%dRdE)) DEALLOCATE(Detector%dRdE)
-    ALLOCATE(Detector%dRdE(Detector%NE,0:Detector%Neff))
-    IF (ALLOCATED(Detector%Rsi)) DEALLOCATE(Detector%Rsi)
-    ALLOCATE(Detector%Rsi(0:Detector%Neff))
-    IF (ALLOCATED(Detector%Rsd)) DEALLOCATE(Detector%Rsd)
-    ALLOCATE(Detector%Rsd(0:Detector%Neff))
-    IF (ALLOCATED(Detector%R)) DEALLOCATE(Detector%R)
-    ALLOCATE(Detector%R(0:Detector%Neff))
+  IF ((E_change .OR. eff_change) .AND. (DP%NE .GE. 0)                   &
+      .AND. (DP%Neff .GE. 0)) THEN
+    IF (ALLOCATED(DP%dRdEsi0)) DEALLOCATE(DP%dRdEsi0)
+    ALLOCATE(DP%dRdEsi0(-1:1,DP%NE))
+    IF (ALLOCATED(DP%dRdEsd0)) DEALLOCATE(DP%dRdEsd0)
+    ALLOCATE(DP%dRdEsd0(-1:1,DP%NE))
+    IF (ALLOCATED(DP%Rsi0)) DEALLOCATE(DP%Rsi0)
+    ALLOCATE(DP%Rsi0(-1:1,0:DP%Neff))
+    IF (ALLOCATED(DP%Rsd0)) DEALLOCATE(DP%Rsd0)
+    ALLOCATE(DP%Rsd0(-1:1,0:DP%Neff))
+    IF (ALLOCATED(DP%dRdEsi)) DEALLOCATE(DP%dRdEsi)
+    ALLOCATE(DP%dRdEsi(DP%NE))
+    IF (ALLOCATED(DP%dRdEsd)) DEALLOCATE(DP%dRdEsd)
+    ALLOCATE(DP%dRdEsd(DP%NE))
+    IF (ALLOCATED(DP%dRdE)) DEALLOCATE(DP%dRdE)
+    ALLOCATE(DP%dRdE(DP%NE))
+    IF (ALLOCATED(DP%Rsi)) DEALLOCATE(DP%Rsi)
+    ALLOCATE(DP%Rsi(0:DP%Neff))
+    IF (ALLOCATED(DP%Rsd)) DEALLOCATE(DP%Rsd)
+    ALLOCATE(DP%Rsd(0:DP%Neff))
+    IF (ALLOCATED(DP%R)) DEALLOCATE(DP%R)
+    ALLOCATE(DP%R(0:DP%Neff))
   END IF
   
   ! Resize event arrays if necessary
-  IF (eff_change .AND. (Detector%Neff .GE. 0)) THEN
-    IF (ALLOCATED(Detector%MuSignalSI0)) DEALLOCATE(Detector%MuSignalSI0)
-    ALLOCATE(Detector%MuSignalSI0(-1:1,0:Detector%Neff))
-    IF (ALLOCATED(Detector%MuSignalSD0)) DEALLOCATE(Detector%MuSignalSD0)
-    ALLOCATE(Detector%MuSignalSD0(-1:1,0:Detector%Neff))
-    IF (ALLOCATED(Detector%MuSignalSI)) DEALLOCATE(Detector%MuSignalSI)
-    ALLOCATE(Detector%MuSignalSI(0:Detector%Neff))
-    IF (ALLOCATED(Detector%MuSignalSD)) DEALLOCATE(Detector%MuSignalSD)
-    ALLOCATE(Detector%MuSignalSD(0:Detector%Neff))
-    IF (ALLOCATED(Detector%MuSignal)) DEALLOCATE(Detector%MuSignal)
-    ALLOCATE(Detector%MuSignal(0:Detector%Neff))
+  IF (eff_change .AND. (DP%Neff .GE. 0)) THEN
+    IF (ALLOCATED(DP%MuSignalSI0)) DEALLOCATE(DP%MuSignalSI0)
+    ALLOCATE(DP%MuSignalSI0(-1:1,0:DP%Neff))
+    IF (ALLOCATED(DP%MuSignalSD0)) DEALLOCATE(DP%MuSignalSD0)
+    ALLOCATE(DP%MuSignalSD0(-1:1,0:DP%Neff))
+    IF (ALLOCATED(DP%MuSignalSI)) DEALLOCATE(DP%MuSignalSI)
+    ALLOCATE(DP%MuSignalSI(0:DP%Neff))
+    IF (ALLOCATED(DP%MuSignalSD)) DEALLOCATE(DP%MuSignalSD)
+    ALLOCATE(DP%MuSignalSD(0:DP%Neff))
+    IF (ALLOCATED(DP%MuSignal)) DEALLOCATE(DP%MuSignal)
+    ALLOCATE(DP%MuSignal(0:DP%Neff))
   END IF
   
   ! Set all calculable quantities to zero
   IF ((iso_change .OR. E_change .OR. eff_change)                        &
-       .AND. (Detector%Niso .GE. 0) .AND. (Detector%NE .GE. 0)          &
-       .AND. (Detector%Neff .GE. 0)) THEN
-    Detector%vmin        = 0d0
-    Detector%eta         = 0d0
-    Detector%dRdEsi0     = 0d0
-    Detector%dRdEsd0     = 0d0
-    Detector%Rsi0        = 0d0
-    Detector%Rsd0        = 0d0
-    Detector%dRdEsi      = 0d0
-    Detector%dRdEsd      = 0d0
-    Detector%dRdE        = 0d0
-    Detector%Rsi         = 0d0
-    Detector%Rsd         = 0d0
-    Detector%R           = 0d0
-    Detector%MuSignalSI0 = 0d0
-    Detector%MuSignalSD0 = 0d0
-    Detector%MuSignalSI  = 0d0
-    Detector%MuSignalSD  = 0d0
-    Detector%MuSignal    = 0d0
+       .AND. (DP%Niso .GE. 0) .AND. (DP%NE .GE. 0)                      &
+       .AND. (DP%Neff .GE. 0)) THEN
+    DP%vmin        = 0d0
+    DP%eta         = 0d0
+    DP%dRdEsi0     = 0d0
+    DP%dRdEsd0     = 0d0
+    DP%Rsi0        = 0d0
+    DP%Rsd0        = 0d0
+    DP%dRdEsi      = 0d0
+    DP%dRdEsd      = 0d0
+    DP%dRdE        = 0d0
+    DP%Rsi         = 0d0
+    DP%Rsd         = 0d0
+    DP%R           = 0d0
+    DP%MuSignalSI0 = 0d0
+    DP%MuSignalSD0 = 0d0
+    DP%MuSignalSI  = 0d0
+    DP%MuSignalSD  = 0d0
+    DP%MuSignal    = 0d0
   END IF
   
 END SUBROUTINE
@@ -5454,22 +6628,36 @@ END SUBROUTINE
 ! If something other than this is desired, use the SetDetector()
 ! function after this.
 ! 
-! Optional input arguments:
+! Optional output argument:
+!   D           The DetectorRateStruct structure to be initialized.
+!               If not given, the default structure (internally stored)
+!               will be initialized.
+! Optional input argument:
 !   intervals   Specify if sub-intervals should be loaded; otherwise,
 !               only the full interval is used for calculations
 !               (default: true).
 ! 
-SUBROUTINE InitDetector(intervals)
+SUBROUTINE InitDetector(D,intervals)
   IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(OUT), TARGET, OPTIONAL :: D
   LOGICAL, INTENT(IN), OPTIONAL :: intervals
+  TYPE(DetectorRateStruct), POINTER :: DP
   LOGICAL :: intervals0
+  
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
   
   ! Include sub-intervals?
   intervals0 = .TRUE.
   IF (PRESENT(intervals)) intervals0 = intervals
   
   ! Set to LUX 2013 analysis
-  CALL InitDetectorLUX2013(intervals0)
+  CALL LUX_2013_InitTo(DP,intervals0)
   
 END SUBROUTINE
 
@@ -5511,6 +6699,10 @@ END SUBROUTINE
 !                        ! [keV] to zero, removing all contributions from recoils
 !                        ! at lower energies.  Not reversible.
 ! 
+! Optional output argument:
+!   D           The DetectorRateStruct structure to be initialized.
+!               If not given, the default structure (internally stored)
+!               will be initialized.
 ! Optional input arguments:
 !   eff_file    File from which efficiencies shoud be read.  If not
 !               given or set to '', an internal default will be used
@@ -5520,16 +6712,26 @@ END SUBROUTINE
 !               efficiency file (if available); otherwise, only the
 !               full interval is used for calculations (default: true).
 ! 
-SUBROUTINE InitDetectorCL(eff_file,intervals)
+SUBROUTINE InitDetectorCL(D,eff_file,intervals)
   IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(OUT), TARGET, OPTIONAL :: D
   CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: eff_file
   LOGICAL, INTENT(IN), OPTIONAL :: intervals
+  TYPE(DetectorRateStruct), POINTER :: DP
   CHARACTER(LEN=1024) :: eff_file0
   LOGICAL :: intervals0
   INTEGER :: Nevents,Niso,Zelem,NE,Neff,N1,N2,N3
   INTEGER, ALLOCATABLE :: Ziso(:),Aiso(:)
   REAL*8 :: mass,time,exposure,background,Emin
   REAL*8, ALLOCATABLE :: fiso(:),E(:),eff(:,:)
+  
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
   
   Niso = -1
   NE   = -1
@@ -5548,20 +6750,23 @@ SUBROUTINE InitDetectorCL(eff_file,intervals)
   ! Experiment-specific settings
   ! LUX 2013 result
   IF (GetLongArg('LUX-2013')) THEN
-    CALL InitDetectorLUX2013(intervals0)
-  ! DARWIN proposal (as of 2014)
-  ELSE IF (GetLongArg('DARWIN-2014')) THEN
-    CALL InitDetectorDARWIN2014(intervals0)
+    CALL LUX_2013_InitTo(DP,intervals0)
+  ! DARWIN proposal, xenon-based (as of 2014)
+  ELSE IF (GetLongArg('DARWIN-Xe-2014')) THEN
+    CALL DARWIN_Xe_2014_InitTo(DP,intervals0)
+  ! DARWIN proposal, argon-based (as of 2014)
+  ELSE IF (GetLongArg('DARWIN-Ar-2014')) THEN
+    CALL DARWIN_Ar_2014_InitTo(DP,intervals0)
   ! Defaults (LUX 2013)
   ELSE
-    CALL InitDetectorLUX2013(intervals0)
+    CALL LUX_2013_InitTo(DP,intervals0)
     CALL SetDetector(eff_filename='[LUX 2013 (default)]')
   END IF
   
   ! If given, load efficiency file
   IF (TRIM(eff_file0) .NE. '') THEN
     CALL LoadEfficiencyFile(eff_file0,NE,E,Neff,eff,intervals0)
-    CALL SetDetector(eff_file=eff_file0,intervals=intervals0)
+    CALL SetDetector(DP,eff_file=eff_file0,intervals=intervals0)
   END IF
   
   ! Update isotopes
@@ -5570,105 +6775,35 @@ SUBROUTINE InitDetectorCL(eff_file,intervals)
       .AND. GetLongArgReals('isotope-f',fiso,N3)) THEN
     IF ((N1 .EQ. N2) .AND. (N1 .EQ. N3)) THEN
       Niso = N1
-      CALL SetDetector(Niso=Niso,Ziso=Ziso,Aiso=Aiso,fiso=fiso)
+      CALL SetDetector(DP,Niso=Niso,Ziso=Ziso,Aiso=Aiso,fiso=fiso)
     END IF
   ELSE IF (GetLongArgInteger('element-Z',Zelem)) THEN
-    CALL SetDetector(Zelem=Zelem)
+    CALL SetDetector(DP,Zelem=Zelem)
   ELSE IF (GetLongArg('argon')) THEN
-    CALL SetDetector(Zelem=18)
+    CALL SetDetector(DP,Zelem=18)
   ELSE IF (GetLongArg('germanium')) THEN
-    CALL SetDetector(Zelem=32)
+    CALL SetDetector(DP,Zelem=32)
   ELSE IF (GetLongArg('silicon')) THEN
-    CALL SetDetector(Zelem=14)
+    CALL SetDetector(DP,Zelem=14)
   ELSE IF (GetLongArg('xenon')) THEN
-    CALL SetDetector(Zelem=54)
+    CALL SetDetector(DP,Zelem=54)
   ELSE IF (GetLongArg('sodium-iodide')) THEN
-    CALL SetDetector(Zelem=1153)
+    CALL SetDetector(DP,Zelem=1153)
   END IF
   
   ! Update exposures
-  IF (GetLongArgReal('mass',mass))         CALL SetDetector(mass=mass)
-  IF (GetLongArgReal('time',time))         CALL SetDetector(time=time)
-  IF (GetLongArgReal('exposure',exposure)) CALL SetDetector(exposure=exposure)
+  IF (GetLongArgReal('mass',mass))         CALL SetDetector(DP,mass=mass)
+  IF (GetLongArgReal('time',time))         CALL SetDetector(DP,time=time)
+  IF (GetLongArgReal('exposure',exposure)) CALL SetDetector(DP,exposure=exposure)
   
   ! Update observed events and expected background events
-  IF (GetLongArgInteger('events',Nevents))     CALL SetDetector(Nevents=Nevents)
-  IF (GetLongArgReal('background',background)) CALL SetDetector(background=background)
+  IF (GetLongArgInteger('events',Nevents))     CALL SetDetector(DP,Nevents=Nevents)
+  IF (GetLongArgReal('background',background)) CALL SetDetector(DP,background=background)
   
   ! Set an energy threshold
   IF (GetLongArgReal('Emin',Emin)) THEN
-    CALL SetDetector(Emin=Emin)
+    CALL SetDetector(DP,Emin=Emin)
   END IF
-  
-END SUBROUTINE
-
-
-!-----------------------------------------------------------------------
-! Initializes the detector to the LUX 2013 analysis using only
-! internally available settings/efficiencies.  Does not check
-! for command-line options, so it is safe for use with linked
-! modules.
-! 
-! Optional input arguments:
-!   intervals   Specify if sub-intervals should be loaded; otherwise,
-!               only the full interval is used for calculations
-!               (default: true).
-! 
-SUBROUTINE InitDetectorLUX2013(intervals)
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN), OPTIONAL :: intervals
-  LOGICAL :: intervals0
-  INTEGER :: NE,Neff
-  REAL*8, ALLOCATABLE :: E(:),eff(:,:)
-  
-  ! Include sub-intervals?
-  intervals0 = .TRUE.
-  IF (PRESENT(intervals)) intervals0 = intervals
-  
-  ! Get efficiency curve(s)
-  CALL LoadEfficiencyLUX2013(NE,E,Neff,eff,intervals0)
-  
-  ! One call for all settings.
-  ! Most of these _must_ be there to ensure everything get initialized.
-  CALL SetDetector(mass=118d0,time=85.3d0,Nevents=1,background=0.64d0,  &
-                   Zelem=54,NE=NE,E=E,Neff=Neff,eff=eff)
-  
-  Detector%eff_file = '[LUX 2013]'
-  
-END SUBROUTINE
-
-
-!-----------------------------------------------------------------------
-! Initializes the detector to the proposed DARWIN detector (as of
-! 2014) using only internally available settings/efficiencies.
-! Does not check for command-line options, so it is safe for use
-! with linked modules.
-! 
-! Optional input arguments:
-!   intervals   Specify if sub-intervals should be loaded; otherwise,
-!               only the full interval is used for calculations
-!               (default: true).
-! 
-SUBROUTINE InitDetectorDARWIN2014(intervals)
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN), OPTIONAL :: intervals
-  LOGICAL :: intervals0
-  INTEGER :: NE,Neff
-  REAL*8, ALLOCATABLE :: E(:),eff(:,:)
-  
-  ! Include sub-intervals?
-  intervals0 = .TRUE.
-  IF (PRESENT(intervals)) intervals0 = intervals
-  
-  ! Get efficiency curve(s)
-  CALL LoadEfficiencyDARWIN2014(NE,E,Neff,eff,intervals0)
-  
-  ! One call for all settings.
-  ! Most of these _must_ be there to ensure everything get initialized.
-  CALL SetDetector(mass=10d3,time=2d0*365d0,Nevents=0,background=0.5d0, &
-                   Zelem=54,NE=NE,E=E,Neff=Neff,eff=eff)
-  
-  Detector%eff_file = '[DARWIN 2014]'
   
 END SUBROUTINE
 
@@ -5744,261 +6879,19 @@ SUBROUTINE LoadEfficiencyFile(file,NE,E,Neff,eff,intervals)
 END SUBROUTINE
 
 
-! ----------------------------------------------------------------------
-! Sets the efficiencies to the the LUX 2013 results generated with
-! TPCMC.
-! 
-! Required output arguments:
-!     NE         Number of recoil energy tabulation points loaded
-!     E          Allocatable array to contain energies [keV].
-!                Allocated to size [1:NE].
-!     Neff       Number of sub-interval efficiencies loaded (0 if
-!                intervals=false).
-!     eff        Allocatable array to contain efficiency curves for
-!                the total range and each sub-interval (if
-!                intervals=true).  Allocated to size [1:NE,0:Neff].
-! Required input argument:
-!     intervals  Indicates if sub-intervals should be included.
-! 
-SUBROUTINE LoadEfficiencyLUX2013(NE,E,Neff,eff,intervals)
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN) :: intervals
-  INTEGER, INTENT(OUT) :: NE,Neff
-  REAL*8, ALLOCATABLE, INTENT(OUT) :: E(:),eff(:,:)
-  INTEGER, PARAMETER :: DEF_NE = 151
-  INTEGER, PARAMETER :: DEF_NEFF = 2
-  REAL*8, PARAMETER :: DEF_E(DEF_NE)                                    &
-      =       (/ 0.10000d0, 0.10471d0, 0.10965d0, 0.11482d0, 0.12023d0, &
-      0.12589d0, 0.13183d0, 0.13804d0, 0.14454d0, 0.15136d0, 0.15849d0, &
-      0.16596d0, 0.17378d0, 0.18197d0, 0.19055d0, 0.19953d0, 0.20893d0, &
-      0.21878d0, 0.22909d0, 0.23988d0, 0.25119d0, 0.26303d0, 0.27542d0, &
-      0.28840d0, 0.30200d0, 0.31623d0, 0.33113d0, 0.34674d0, 0.36308d0, &
-      0.38019d0, 0.39811d0, 0.41687d0, 0.43652d0, 0.45709d0, 0.47863d0, &
-      0.50119d0, 0.52481d0, 0.54954d0, 0.57544d0, 0.60256d0, 0.63096d0, &
-      0.66069d0, 0.69183d0, 0.72444d0, 0.75858d0, 0.79433d0, 0.83176d0, &
-      0.87096d0, 0.91201d0, 0.95499d0, 1.0000d0,  1.0471d0,  1.0965d0,  &
-      1.1482d0,  1.2023d0,  1.2589d0,  1.3183d0,  1.3804d0,  1.4454d0,  &
-      1.5136d0,  1.5849d0,  1.6596d0,  1.7378d0,  1.8197d0,  1.9055d0,  &
-      1.9953d0,  2.0893d0,  2.1878d0,  2.2909d0,  2.3988d0,  2.5119d0,  &
-      2.6303d0,  2.7542d0,  2.8840d0,  3.0200d0,  3.1623d0,  3.3113d0,  &
-      3.4674d0,  3.6308d0,  3.8019d0,  3.9811d0,  4.1687d0,  4.3652d0,  &
-      4.5709d0,  4.7863d0,  5.0119d0,  5.2481d0,  5.4954d0,  5.7544d0,  &
-      6.0256d0,  6.3096d0,  6.6069d0,  6.9183d0,  7.2444d0,  7.5858d0,  &
-      7.9433d0,  8.3176d0,  8.7096d0,  9.1201d0,  9.5499d0, 10.000d0,   &
-     10.471d0,  10.965d0,  11.482d0,  12.023d0,  12.589d0,  13.183d0,   &
-     13.804d0,  14.454d0,  15.136d0,  15.849d0,  16.596d0,  17.378d0,   &
-     18.197d0,  19.055d0,  19.953d0,  20.893d0,  21.878d0,  22.909d0,   &
-     23.988d0,  25.119d0,  26.303d0,  27.542d0,  28.840d0,  30.200d0,   &
-     31.623d0,  33.113d0,  34.674d0,  36.308d0,  38.019d0,  39.811d0,   &
-     41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
-     54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
-     72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
-     95.499d0,100.00d0 /)
-  REAL*8, PARAMETER :: DEF_EFF0(DEF_NE)                                 &
-      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 1.00000d-8,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      2.00000d-8,0.00000d0, 3.00000d-8,8.00000d-8,1.10000d-7,1.20000d-7,&
-      2.30000d-7,3.50000d-7,6.60000d-7,8.50000d-7,1.59000d-6,2.30000d-6,&
-      4.06000d-6,6.05000d-6,9.52000d-6,1.46900d-5,2.35400d-5,3.51800d-5,&
-      5.56200d-5,8.67700d-5,1.31930d-4,2.01380d-4,3.05380d-4,4.56690d-4,&
-      6.84530d-4,1.01087d-3,1.48490d-3,2.15796d-3,3.11873d-3,4.44783d-3,&
-      6.29406d-3,8.78041d-3,1.21397d-2,1.65943d-2,2.24117d-2,2.99112d-2,&
-      3.93725d-2,5.11172d-2,6.54354d-2,8.24989d-2,0.10261d0, 0.12531d0, &
-      0.15080d0, 0.17842d0, 0.20748d0, 0.23724d0, 0.26633d0, 0.29371d0, &
-      0.31825d0, 0.33881d0, 0.35431d0, 0.36449d0, 0.36924d0, 0.36858d0, &
-      0.36316d0, 0.35383d0, 0.34188d0, 0.32827d0, 0.31393d0, 0.30000d0, &
-      0.28686d0, 0.27505d0, 0.26473d0, 0.25583d0, 0.24841d0, 0.24216d0, &
-      0.23686d0, 0.23228d0, 0.22839d0, 0.22491d0, 0.22181d0, 0.21871d0, &
-      0.21596d0, 0.21369d0, 0.21137d0, 0.20910d0, 0.20603d0, 0.20274d0, &
-      0.19908d0, 0.19481d0, 0.19005d0, 0.18294d0, 0.17363d0, 0.15884d0, &
-      0.13800d0, 0.11243d0, 8.37676d-2,5.71861d-2,3.49665d-2,1.89811d-2,&
-      9.12338d-3,3.78510d-3,1.36952d-3,4.28510d-4,1.15360d-4,2.60900d-5,&
-      5.40000d-6,1.00000d-6,2.20000d-7,4.00000d-8,1.00000d-8,0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0 /)
-  REAL*8, PARAMETER :: DEF_EFF1(DEF_NE)                                 &
-      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 1.00000d-8,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      2.00000d-8,0.00000d0, 3.00000d-8,8.00000d-8,1.10000d-7,1.20000d-7,&
-      2.20000d-7,3.50000d-7,6.40000d-7,8.40000d-7,1.52000d-6,2.15000d-6,&
-      3.90000d-6,5.73000d-6,9.11000d-6,1.39200d-5,2.21500d-5,3.31700d-5,&
-      5.20800d-5,8.12600d-5,1.21970d-4,1.85360d-4,2.80000d-4,4.13480d-4,&
-      6.15600d-4,9.03080d-4,1.31120d-3,1.88191d-3,2.69178d-3,3.79395d-3,&
-      5.29590d-3,7.26579d-3,9.87723d-3,1.32595d-2,1.75408d-2,2.28882d-2,&
-      2.93985d-2,3.71427d-2,4.61425d-2,5.62639d-2,6.74287d-2,7.90382d-2,&
-      9.09387d-2,0.10225d0, 0.11238d0, 0.12052d0, 0.12598d0, 0.12816d0, &
-      0.12676d0, 0.12172d0, 0.11315d0, 0.10190d0, 8.85762d-2,7.41885d-2,&
-      5.98552d-2,4.63090d-2,3.44194d-2,2.44530d-2,1.65675d-2,1.06992d-2,&
-      6.55699d-3,3.82030d-3,2.09992d-3,1.08640d-3,5.33450d-4,2.43390d-4,&
-      1.07450d-4,4.12600d-5,1.51000d-5,5.44000d-6,1.84000d-6,5.60000d-7,&
-      1.10000d-7,3.00000d-8,1.00000d-8,0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0 /)
-  REAL*8, PARAMETER :: DEF_EFF2(DEF_NE)                                 &
-      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      1.00000d-8,0.00000d0, 2.00000d-8,1.00000d-8,7.00000d-8,1.50000d-7,&
-      1.60000d-7,3.20000d-7,4.10000d-7,7.70000d-7,1.39000d-6,2.01000d-6,&
-      3.54000d-6,5.51000d-6,9.96000d-6,1.60200d-5,2.53800d-5,4.32100d-5,&
-      6.89300d-5,1.07790d-4,1.73700d-4,2.76050d-4,4.26950d-4,6.53880d-4,&
-      9.98160d-4,1.51462d-3,2.26247d-3,3.33480d-3,4.87083d-3,7.02296d-3,&
-      9.97401d-3,1.39745d-2,1.92929d-2,2.62351d-2,3.51781d-2,4.62748d-2,&
-      5.98600d-2,7.61721d-2,9.50964d-2,0.11672d0, 0.14035d0, 0.16554d0, &
-      0.19149d0, 0.21709d0, 0.24116d0, 0.26259d0, 0.28067d0, 0.29439d0, &
-      0.30331d0, 0.30752d0, 0.30746d0, 0.30382d0, 0.29736d0, 0.28930d0, &
-      0.28031d0, 0.27122d0, 0.26263d0, 0.25474d0, 0.24788d0, 0.24191d0, &
-      0.23675d0, 0.23224d0, 0.22837d0, 0.22490d0, 0.22181d0, 0.21871d0, &
-      0.21596d0, 0.21369d0, 0.21137d0, 0.20910d0, 0.20603d0, 0.20274d0, &
-      0.19908d0, 0.19481d0, 0.19005d0, 0.18294d0, 0.17363d0, 0.15884d0, &
-      0.13800d0, 0.11243d0, 8.37676d-2,5.71861d-2,3.49665d-2,1.89811d-2,&
-      9.12338d-3,3.78510d-3,1.36952d-3,4.28510d-4,1.15360d-4,2.60900d-5,&
-      5.40000d-6,1.00000d-6,2.20000d-7,4.00000d-8,1.00000d-8,0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0 /)
-  
-  NE = DEF_NE
-  ALLOCATE(E(NE))
-  E = DEF_E
-  IF (intervals) THEN
-    Neff = DEF_NEFF
-    ALLOCATE(eff(NE,0:Neff))
-    eff(:,0) = DEF_EFF0
-    eff(:,1) = DEF_EFF1
-    eff(:,2) = DEF_EFF2
-  ELSE
-    Neff = 0
-    ALLOCATE(eff(NE,0:Neff))
-    eff(:,0) = DEF_EFF0
-  END IF
-  
-END SUBROUTINE
-
-
-! ----------------------------------------------------------------------
-! Sets the efficiencies to the the proposed DARWIN detector (as of 2014)
-! generated with TPCMC.  Assuming no events in analysis region.
-! 
-! Required output arguments:
-!     NE         Number of recoil energy tabulation points loaded
-!     E          Allocatable array to contain energies [keV].
-!                Allocated to size [1:NE].
-!     Neff       Number of sub-interval efficiencies loaded (0 if
-!                intervals=false).
-!     eff        Allocatable array to contain efficiency curves for
-!                the total range and each sub-interval (if
-!                intervals=true).  Allocated to size [1:NE,0:Neff].
-! Required input argument:
-!     intervals  Indicates if sub-intervals should be included.
-! 
-SUBROUTINE LoadEfficiencyDARWIN2014(NE,E,Neff,eff,intervals)
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN) :: intervals
-  INTEGER, INTENT(OUT) :: NE,Neff
-  REAL*8, ALLOCATABLE, INTENT(OUT) :: E(:),eff(:,:)
-  INTEGER, PARAMETER :: DEF_NE = 151
-  INTEGER, PARAMETER :: DEF_NEFF = 1
-  REAL*8, PARAMETER :: DEF_E(DEF_NE)                                    &
-      =       (/ 0.10000d0, 0.10471d0, 0.10965d0, 0.11482d0, 0.12023d0, &
-      0.12589d0, 0.13183d0, 0.13804d0, 0.14454d0, 0.15136d0, 0.15849d0, &
-      0.16596d0, 0.17378d0, 0.18197d0, 0.19055d0, 0.19953d0, 0.20893d0, &
-      0.21878d0, 0.22909d0, 0.23988d0, 0.25119d0, 0.26303d0, 0.27542d0, &
-      0.28840d0, 0.30200d0, 0.31623d0, 0.33113d0, 0.34674d0, 0.36308d0, &
-      0.38019d0, 0.39811d0, 0.41687d0, 0.43652d0, 0.45709d0, 0.47863d0, &
-      0.50119d0, 0.52481d0, 0.54954d0, 0.57544d0, 0.60256d0, 0.63096d0, &
-      0.66069d0, 0.69183d0, 0.72444d0, 0.75858d0, 0.79433d0, 0.83176d0, &
-      0.87096d0, 0.91201d0, 0.95499d0, 1.0000d0,  1.0471d0,  1.0965d0,  &
-      1.1482d0,  1.2023d0,  1.2589d0,  1.3183d0,  1.3804d0,  1.4454d0,  &
-      1.5136d0,  1.5849d0,  1.6596d0,  1.7378d0,  1.8197d0,  1.9055d0,  &
-      1.9953d0,  2.0893d0,  2.1878d0,  2.2909d0,  2.3988d0,  2.5119d0,  &
-      2.6303d0,  2.7542d0,  2.8840d0,  3.0200d0,  3.1623d0,  3.3113d0,  &
-      3.4674d0,  3.6308d0,  3.8019d0,  3.9811d0,  4.1687d0,  4.3652d0,  &
-      4.5709d0,  4.7863d0,  5.0119d0,  5.2481d0,  5.4954d0,  5.7544d0,  &
-      6.0256d0,  6.3096d0,  6.6069d0,  6.9183d0,  7.2444d0,  7.5858d0,  &
-      7.9433d0,  8.3176d0,  8.7096d0,  9.1201d0,  9.5499d0, 10.000d0,   &
-     10.471d0,  10.965d0,  11.482d0,  12.023d0,  12.589d0,  13.183d0,   &
-     13.804d0,  14.454d0,  15.136d0,  15.849d0,  16.596d0,  17.378d0,   &
-     18.197d0,  19.055d0,  19.953d0,  20.893d0,  21.878d0,  22.909d0,   &
-     23.988d0,  25.119d0,  26.303d0,  27.542d0,  28.840d0,  30.200d0,   &
-     31.623d0,  33.113d0,  34.674d0,  36.308d0,  38.019d0,  39.811d0,   &
-     41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
-     54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
-     72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
-     95.499d0,100.00d0 /)
-  REAL*8, PARAMETER :: DEF_EFF0(DEF_NE)                                 &
-      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 1.00000d-6,0.00000d0, 3.00000d-6,&
-      4.00000d-6,2.00000d-6,7.00000d-6,9.00000d-6,6.00000d-6,3.00000d-5,&
-      5.60000d-5,9.00000d-5,1.17000d-4,2.02000d-4,4.00000d-4,6.03000d-4,&
-      1.04000d-3,1.66000d-3,2.58100d-3,4.10800d-3,6.06800d-3,9.05700d-3,&
-      1.34780d-2,1.89780d-2,2.70570d-2,3.74760d-2,5.10350d-2,6.82060d-2,&
-      8.87360d-2,1.12390d-1,1.40970d-1,1.72170d-1,2.05770d-1,2.39970d-1,&
-      2.76410d-1,3.09390d-1,3.41490d-1,3.70320d-1,3.94730d-1,4.12930d-1,&
-      4.29360d-1,4.41880d-1,4.50260d-1,4.56260d-1,4.61640d-1,4.64030d-1,&
-      4.66200d-1,4.67520d-1,4.68970d-1,4.70290d-1,4.69720d-1,4.71130d-1,&
-      4.72290d-1,4.73480d-1,4.73980d-1,4.74760d-1,4.75420d-1,4.76580d-1,&
-      4.77110d-1,4.78920d-1,4.78690d-1,4.79120d-1,4.80380d-1,4.80400d-1,&
-      4.78600d-1,4.79650d-1,4.77540d-1,4.79220d-1,4.76860d-1,4.75380d-1,&
-      4.72280d-1,4.65010d-1,4.49180d-1,4.18630d-1,3.71310d-1,3.07330d-1,&
-      2.32540d-1,1.58710d-1,9.57830d-2,5.00340d-2,2.24170d-2,8.56400d-3,&
-      2.74200d-3,7.49000d-4,1.75000d-4,3.00000d-5,5.00000d-6,3.00000d-6,&
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0 /)
-  REAL*8, PARAMETER :: DEF_EFF1(DEF_NE) = DEF_EFF0
-  
-  NE = DEF_NE
-  ALLOCATE(E(NE))
-  E = DEF_E
-  IF (intervals) THEN
-    Neff = DEF_NEFF
-    ALLOCATE(eff(NE,0:Neff))
-    eff(:,0) = DEF_EFF0
-    eff(:,1) = DEF_EFF1
-  ELSE
-    Neff = 0
-    ALLOCATE(eff(NE,0:Neff))
-    eff(:,0) = DEF_EFF0
-  END IF
-  
-END SUBROUTINE
-
-
 
 !=======================================================================
 ! RATE ROUTINES
 !=======================================================================
 
 ! ----------------------------------------------------------------------
-! Get various rate quantities.  These require CalcRate() to have been
+! Get various rate quantities.  These require CalcRates() to have been
 ! run first.
 ! 
+! Optional input argument:
+!   D           The DetectorRateStruct structure to extract rate
+!               quantities from.  If not given, a default structure
+!               (internally stored) will be used.
 ! Optional output arguments:
 !   Nevents     Number of observed events
 !   background  Average expected background events
@@ -6024,33 +6917,43 @@ END SUBROUTINE
 !               Same as 'binrate' but for only spin-independent or
 !               spin-dependent events, respectively.
 !   
-SUBROUTINE GetRates(Nevents,background,signal,signal_si,signal_sd,      &
+SUBROUTINE GetRates(D,Nevents,background,signal,signal_si,signal_sd,    &
                     rate,rate_si,rate_sd,Nbins,binsignal,binsignal_si,  &
                     binsignal_sd,binrate,binrate_si,binrate_sd)
   IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(IN), TARGET, OPTIONAL :: D
   INTEGER, INTENT(OUT), OPTIONAL :: Nevents,Nbins
   REAL*8, INTENT(OUT), OPTIONAL :: background,signal,signal_si,signal_sd,&
           rate,rate_si,rate_sd
   REAL*8, ALLOCATABLE, INTENT(OUT), OPTIONAL :: binsignal(:),           &
           binsignal_si(:),binsignal_sd(:),binrate(:),binrate_si(:),     &
           binrate_sd(:)
+  TYPE(DetectorRateStruct), POINTER :: DP
   INTEGER :: Neff
   
-  Neff = Detector%Neff
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
+  
+  Neff = DP%Neff
   
   ! Observed events and expected background events
-  IF (PRESENT(Nevents))    Nevents    = Detector%Nevents
-  IF (PRESENT(background)) background = Detector%MuBackground
+  IF (PRESENT(Nevents))    Nevents    = DP%Nevents
+  IF (PRESENT(background)) background = DP%MuBackground
   
   ! Signal events
-  IF (PRESENT(signal))    signal    = Detector%MuSignal(0)
-  IF (PRESENT(signal_si)) signal_si = Detector%MuSignalSI(0)
-  IF (PRESENT(signal_sd)) signal_sd = Detector%MuSignalSD(0)
+  IF (PRESENT(signal))    signal    = DP%MuSignal(0)
+  IF (PRESENT(signal_si)) signal_si = DP%MuSignalSI(0)
+  IF (PRESENT(signal_sd)) signal_sd = DP%MuSignalSD(0)
   
   ! Signal rates
-  IF (PRESENT(rate))    rate    = Detector%R(0)
-  IF (PRESENT(rate_si)) rate_si = Detector%Rsi(0)
-  IF (PRESENT(rate_sd)) rate_sd = Detector%Rsd(0)
+  IF (PRESENT(rate))    rate    = DP%R(0)
+  IF (PRESENT(rate_si)) rate_si = DP%Rsi(0)
+  IF (PRESENT(rate_sd)) rate_sd = DP%Rsd(0)
   
   ! Bins
   IF (PRESENT(Nbins)) Nbins = Neff
@@ -6058,29 +6961,29 @@ SUBROUTINE GetRates(Nevents,background,signal,signal_si,signal_sd,      &
   ! Signal events by bin
   IF (PRESENT(binsignal)) THEN
     ALLOCATE(binsignal(Neff))
-    binsignal = Detector%MuSignal(1:Neff)
+    binsignal = DP%MuSignal(1:Neff)
   END IF
   IF (PRESENT(binsignal_si)) THEN
     ALLOCATE(binsignal_si(Neff))
-    binsignal_si = Detector%MuSignalSI(1:Neff)
+    binsignal_si = DP%MuSignalSI(1:Neff)
   END IF
   IF (PRESENT(binsignal_sd)) THEN
     ALLOCATE(binsignal_sd(Neff))
-    binsignal_sd = Detector%MuSignalSD(1:Neff)
+    binsignal_sd = DP%MuSignalSD(1:Neff)
   END IF
   
   ! Signal rates by bin
   IF (PRESENT(binrate)) THEN
     ALLOCATE(binrate(Neff))
-    binrate = Detector%MuSignal(1:Neff)
+    binrate = DP%MuSignal(1:Neff)
   END IF
   IF (PRESENT(binrate_si)) THEN
     ALLOCATE(binrate_si(Neff))
-    binrate_si = Detector%MuSignalSI(1:Neff)
+    binrate_si = DP%MuSignalSI(1:Neff)
   END IF
   IF (PRESENT(binrate_sd)) THEN
     ALLOCATE(binrate_sd(Neff))
-    binrate_sd = Detector%MuSignalSD(1:Neff)
+    binrate_sd = DP%MuSignalSD(1:Neff)
   END IF
   
 END SUBROUTINE
@@ -6092,8 +6995,16 @@ END SUBROUTINE
 ! rate calculations and must be called any time the WIMP mass
 ! and/or couplings are modified.
 ! 
-SUBROUTINE CalcRates()
+! Optional input/output argument:
+!   D           The DetectorRateStruct structure containing detector
+!               data, also where calculated rate data will be placed.
+!               If not given, a default structure (internally stored)
+!               will be used.
+! 
+SUBROUTINE CalcRates(D)
   IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(INOUT), TARGET, OPTIONAL :: D
+  TYPE(DetectorRateStruct), POINTER :: DP
   INTEGER :: Kiso,KE,Keff
   REAL*8 :: alphasi(-1:1),alphasd(-1:1)
   ! Constant used to convert units:
@@ -6116,9 +7027,9 @@ SUBROUTINE CalcRates()
   !   Wsi(+1,E) = (1/pi) Z^2 F^2(E)        ! SI proton
   !   Wsi( 0,E) = (1/pi) 2*Z*(A-Z) F^2(E)  ! SI crossterm
   !   Wsi(-1,E) = (1/pi) (A-Z)^2 F^2(E)    ! SI neutron
-  !   Wsd(+1,E) = (4/pi) 1/(2J+1) Spp(E)   ! SD proton
-  !   Wsd( 0,E) = (4/pi) 1/(2J+1) Spn(E)   ! SD crossterm
-  !   Wsd(-1,E) = (4/pi) 1/(2J+1) Snn(E)   ! SD neutron
+  !   Wsd(+1,E) = 4/(2J+1) Spp(E)          ! SD proton
+  !   Wsd( 0,E) = 4/(2J+1) Spn(E)          ! SD crossterm
+  !   Wsd(-1,E) = 4/(2J+1) Snn(E)          ! SD neutron
   ! The above definitions give for the conventional SI and SD
   ! cross-sections:
   !   \sigma(E) = \mu^2 (hbar c)^2 [W(+1,E)*Gp^2 + W(0,E)*Gp*Gn + W(-1,E)*Gn^2]
@@ -6135,8 +7046,8 @@ SUBROUTINE CalcRates()
   ! tabulation points (energies) and Niso is the number of isotopes.
   ! As these factors are independent of the WIMP, they are calculated
   ! only once, during initialization (nothing needs to be done here).
-  ! NOTE ONLY SI FORM FACTORS ARE ACTUALLY CALCULATED.  SD FORM FACTORS
-  ! ARE SET TO ZERO (TO BE IMPLEMENTED IN THE FUTURE).
+  ! SD FORM FACTORS ARE ONLY IMPLEMENTED FOR XENON.  ALL OTHER SD FORM
+  ! FACTORS ARE SET TO ZERO.
   ! 
   ! The mean inverse speed
   !   eta(E) = \int_{v>vmin} d^3v (1/v) f(v),
@@ -6151,12 +7062,13 @@ SUBROUTINE CalcRates()
   ! When factoring in detector efficiencies and energy resolution, the
   ! total rate of observed events is given by:
   !   R = \int_0^\infty dE \phi(E) dR/dE(E)
-  ! where \phi(E) is the efficiency/response factor.  Because we wish
-  ! to do this integral, we calculate \phi(E) dR/dE(E) in the arrays
-  ! below.  NOTE THIS IS NOT A PHYSICALLY OBSERVED SPECTRUM.  The
-  ! actual observed spectrum, dR/dS1(S1), cannot be calculated directly
-  ! using \phi(E), but the definition of \phi(E) allows the integrals
-  ! to be related as we can also write the rate as:
+  ! where \phi(E) is the efficiency/response factor defined as the
+  ! fraction of events at a given energy E that will be both observed
+  ! and fall within some particular S1 analysis range.  The actual
+  ! observed spectrum is dR/dS1(S1), NOT the quantity \phi(E) dR/dE(E);
+  ! the former cannot be directly calculated using \phi(E).  However,
+  ! the definition of \phi(E) allows the integral of each spectrum to
+  ! be related as we can also write the rate as:
   !   R = \int_{S1min}^{S1max} dS1 dR/dS1(S1)
   ! The \phi(E) are calculated for _specific_ ranges of S1.  As these
   ! efficiencies are independent of the WIMP, they do not need to be
@@ -6187,11 +7099,11 @@ SUBROUTINE CalcRates()
   ! cannot be recalculated with this program (everything else can).
   ! 
   ! In the calculations below, we calculate the differential rates
-  ! \phi(E) dR/dE(E) (perhaps misleadingly called just 'dRdE') for each
-  ! of the isotopes and each of the SI & SD couplings.  Then we
-  ! integrate over E and sum contributions together to get the total
-  ! rates and expected events.  The separate coupling spectra are saved
-  ! to allow for possible further inspection.
+  ! dR/dE(E) for each of the isotopes and each of the SI & SD couplings.
+  ! Then we perform an efficiency-weighted integral over E and sum
+  ! contributions together to get the total rates and expected events.
+  ! The separate coupling spectra are saved to allow for possible
+  ! further inspection.
   ! 
   ! To be clear, the following are required to determine the full rate:
   !   * Sum over SI & SD contributions (with a Gp^2, Gn^2, and Gp*Gn
@@ -6225,9 +7137,17 @@ SUBROUTINE CalcRates()
   ! sigmapp0(E) [+1], sigmann0(E) [-1], or sigmapn0(E) [0].
   !---------------------------------------------
   
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
+  
   ! Update mean inverse speed.
-  Detector%vmin = EToVmin(Detector%NE,Detector%E,WIMP%m,Detector%Niso,Detector%Miso)
-  Detector%eta  = MeanInverseSpeed(Detector%NE,Detector%Niso,Detector%vmin)
+  DP%vmin = EToVmin(DP%NE,DP%E,WIMP%m,DP%Niso,DP%Miso)
+  DP%eta  = MeanInverseSpeed(DP%NE,DP%Niso,DP%vmin)
   
   ! Below, we will calculate reference rates for reference couplings
   ! GpSI0, GnSI0, GpSD0, & GnSD0 defined such that WIMP-nucleon
@@ -6241,103 +7161,98 @@ SUBROUTINE CalcRates()
   alphasd( 0) = (WIMP%GpSD/WIMP%GpSD0)*(WIMP%GnSD/WIMP%GnSD0)  ! SD crossterm
   alphasd(-1) = (WIMP%GnSD/WIMP%GnSD0)**2                      ! SD neutron
   
-  ! Reference differential rates for each efficiency curve.
+  ! Reference differential rates.
   ! Keep separate contributions from Gp^2, Gn^2, and Gp*Gn terms.
-  Detector%dRdEsi0 = 0d0
-  Detector%dRdEsd0 = 0d0
-  ! Cycle over efficiency curves.
-  DO Keff = 0,Detector%Neff
-    ! Mass-fraction weighted sum over isotopes.
-    DO Kiso = 1,Detector%Niso
-      ! SI proton term
-      Detector%dRdEsi0(+1,:,Keff) = Detector%dRdEsi0(+1,:,Keff)         &
-          +  Detector%fiso(Kiso) / (2 * WIMP%m)                         &
-             * Halo%rho * Detector%eta(:,Kiso)                          &
-             * Detector%eff(:,Keff)                                     &
-             * Detector%Wsi(+1,:,Kiso) * WIMP%GpSI0**2                  &
-             * TO_CPD_KG_KEV
-      ! SI cross term
-      Detector%dRdEsi0( 0,:,Keff) = Detector%dRdEsi0( 0,:,Keff)         &
-          +  Detector%fiso(Kiso) / (2 * WIMP%m)                         &
-             * Halo%rho * Detector%eta(:,Kiso)                          &
-             * Detector%eff(:,Keff)                                     &
-             * Detector%Wsi( 0,:,Kiso) * WIMP%GpSI0*WIMP%GnSI0          &
-             * TO_CPD_KG_KEV
-      ! SI neutron term
-      Detector%dRdEsi0(-1,:,Keff) = Detector%dRdEsi0(-1,:,Keff)         &
-          +  Detector%fiso(Kiso) / (2 * WIMP%m)                         &
-             * Halo%rho * Detector%eta(:,Kiso)                          &
-             * Detector%eff(:,Keff)                                     &
-             * Detector%Wsi(-1,:,Kiso) * WIMP%GnSI0**2                  &
-             * TO_CPD_KG_KEV
-      ! SD proton term
-      Detector%dRdEsd0(+1,:,Keff) = Detector%dRdEsd0(+1,:,Keff)         &
-          +  Detector%fiso(Kiso) / (2 * WIMP%m)                         &
-             * Halo%rho * Detector%eta(:,Kiso)                          &
-             * Detector%eff(:,Keff)                                     &
-             * Detector%Wsd(+1,:,Kiso) * WIMP%GpSD0**2                  &
-             * TO_CPD_KG_KEV
-      ! SD cross term
-      Detector%dRdEsd0( 0,:,Keff) = Detector%dRdEsd0( 0,:,Keff)         &
-          +  Detector%fiso(Kiso) / (2 * WIMP%m)                         &
-             * Halo%rho * Detector%eta(:,Kiso)                          &
-             * Detector%eff(:,Keff)                                     &
-             * Detector%Wsd( 0,:,Kiso) * WIMP%GpSD0*WIMP%GnSD0          &
-             * TO_CPD_KG_KEV
-      ! SD neutron term
-      Detector%dRdEsd0(-1,:,Keff) = Detector%dRdEsd0(-1,:,Keff)         &
-          +  Detector%fiso(Kiso) / (2 * WIMP%m)                         &
-             * Halo%rho * Detector%eta(:,Kiso)                          &
-             * Detector%eff(:,Keff)                                     &
-             * Detector%Wsd(-1,:,Kiso) * WIMP%GnSD0**2                  &
-             * TO_CPD_KG_KEV
-    END DO
+  DP%dRdEsi0 = 0d0
+  DP%dRdEsd0 = 0d0
+  ! Mass-fraction weighted sum over isotopes.
+  DO Kiso = 1,DP%Niso
+    ! SI proton term
+    DP%dRdEsi0(+1,:) = DP%dRdEsi0(+1,:)                                 &
+        +  DP%fiso(Kiso) / (2 * WIMP%m)                                 &
+           * Halo%rho * DP%eta(:,Kiso)                                  &
+           * DP%Wsi(+1,:,Kiso) * WIMP%GpSI0**2                          &
+           * TO_CPD_KG_KEV
+    ! SI cross term
+    DP%dRdEsi0( 0,:) = DP%dRdEsi0( 0,:)                                 &
+        +  DP%fiso(Kiso) / (2 * WIMP%m)                                 &
+           * Halo%rho * DP%eta(:,Kiso)                                  &
+           * DP%Wsi( 0,:,Kiso) * WIMP%GpSI0*WIMP%GnSI0                  &
+           * TO_CPD_KG_KEV
+    ! SI neutron term
+    DP%dRdEsi0(-1,:) = DP%dRdEsi0(-1,:)                                 &
+        +  DP%fiso(Kiso) / (2 * WIMP%m)                                 &
+           * Halo%rho * DP%eta(:,Kiso)                                  &
+           * DP%Wsi(-1,:,Kiso) * WIMP%GnSI0**2                          &
+           * TO_CPD_KG_KEV
+    ! SD proton term
+    DP%dRdEsd0(+1,:) = DP%dRdEsd0(+1,:)                                 &
+        +  DP%fiso(Kiso) / (2 * WIMP%m)                                 &
+           * Halo%rho * DP%eta(:,Kiso)                                  &
+           * DP%Wsd(+1,:,Kiso) * WIMP%GpSD0**2                          &
+           * TO_CPD_KG_KEV
+    ! SD cross term
+    DP%dRdEsd0( 0,:) = DP%dRdEsd0( 0,:)                                 &
+        +  DP%fiso(Kiso) / (2 * WIMP%m)                                 &
+           * Halo%rho * DP%eta(:,Kiso)                                  &
+           * DP%Wsd( 0,:,Kiso) * WIMP%GpSD0*WIMP%GnSD0                  &
+           * TO_CPD_KG_KEV
+    ! SD neutron term
+    DP%dRdEsd0(-1,:) = DP%dRdEsd0(-1,:)                                 &
+        +  DP%fiso(Kiso) / (2 * WIMP%m)                                 &
+           * Halo%rho * DP%eta(:,Kiso)                                  &
+           * DP%Wsd(-1,:,Kiso) * WIMP%GnSD0**2                          &
+           * TO_CPD_KG_KEV
   END DO
   
-  ! Integrate to find total rates.
+  ! Integrate (efficiency-weighted) to find total rates.
   ! Uses a simple trapezoidal integration.
-  Detector%Rsi0 = 0d0
-  Detector%Rsd0 = 0d0
-  ! Cycle over E bins.
-  DO KE = 1,Detector%NE-1
-    Detector%Rsi0(:,:) = Detector%Rsi0(:,:)                             &
-        + 0.5d0 * (Detector%E(KE+1) - Detector%E(KE))                   &
-          * (Detector%dRdEsi0(:,KE,:) + Detector%dRdEsi0(:,KE+1,:))
-    Detector%Rsd0(:,:) = Detector%Rsd0(:,:)                             &
-        + 0.5d0 * (Detector%E(KE+1) - Detector%E(KE))                   &
-          * (Detector%dRdEsd0(:,KE,:) + Detector%dRdEsd0(:,KE+1,:))
+  DP%Rsi0 = 0d0
+  DP%Rsd0 = 0d0
+  ! Cycle over E bins and efficiency curves.
+  DO KE = 1,DP%NE-1
+    DO Keff = 0,DP%Neff
+      DP%Rsi0(:,Keff) = DP%Rsi0(:,Keff)                                 &
+          + 0.5d0 * (DP%E(KE+1) - DP%E(KE))                             &
+            * (DP%eff(KE,Keff)*DP%dRdEsi0(:,KE)                         &
+               + DP%eff(KE+1,Keff)*DP%dRdEsi0(:,KE+1))
+      DP%Rsd0(:,Keff) = DP%Rsd0(:,Keff)                                 &
+          + 0.5d0 * (DP%E(KE+1) - DP%E(KE))                             &
+            * (DP%eff(KE,Keff)*DP%dRdEsd0(:,KE)                         &
+               + DP%eff(KE+1,Keff)*DP%dRdEsd0(:,KE+1))
+    END DO
   END DO
   
   ! Rates for actual couplings.  Here do separate SI and SD rates
   ! as well as total.
-  Detector%dRdEsi(:,:) =  alphasi(+1) * Detector%dRdEsi0(+1,:,:)        &
-                        + alphasi( 0) * Detector%dRdEsi0( 0,:,:)        &
-                        + alphasi(-1) * Detector%dRdEsi0(-1,:,:)
-  Detector%dRdEsd(:,:) =  alphasd(+1) * Detector%dRdEsd0(+1,:,:)        &
-                        + alphasd( 0) * Detector%dRdEsd0( 0,:,:)        &
-                        + alphasd(-1) * Detector%dRdEsd0(-1,:,:)
-  Detector%dRdE(:,:)   = Detector%dRdEsi(:,:) + Detector%dRdEsd(:,:)
-  Detector%Rsi(:) =  alphasi(+1) * Detector%Rsi0(+1,:)                  &
-                   + alphasi( 0) * Detector%Rsi0( 0,:)                  &
-                   + alphasi(-1) * Detector%Rsi0(-1,:)
-  Detector%Rsd(:) =  alphasd(+1) * Detector%Rsd0(+1,:)                  &
-                   + alphasd( 0) * Detector%Rsd0( 0,:)                  &
-                   + alphasd(-1) * Detector%Rsd0(-1,:)
-  Detector%R(:)   = Detector%Rsi(:) + Detector%Rsd(:)
+  DP%dRdEsi(:) =  alphasi(+1) * DP%dRdEsi0(+1,:)                        &
+                + alphasi( 0) * DP%dRdEsi0( 0,:)                        &
+                + alphasi(-1) * DP%dRdEsi0(-1,:)
+  DP%dRdEsd(:) =  alphasd(+1) * DP%dRdEsd0(+1,:)                        &
+                + alphasd( 0) * DP%dRdEsd0( 0,:)                        &
+                + alphasd(-1) * DP%dRdEsd0(-1,:)
+  DP%dRdE(:)   = DP%dRdEsi(:) + DP%dRdEsd(:)
+  DP%Rsi(:) =  alphasi(+1) * DP%Rsi0(+1,:)                              &
+             + alphasi( 0) * DP%Rsi0( 0,:)                              &
+             + alphasi(-1) * DP%Rsi0(-1,:)
+  DP%Rsd(:) =  alphasd(+1) * DP%Rsd0(+1,:)                              &
+             + alphasd( 0) * DP%Rsd0( 0,:)                              &
+             + alphasd(-1) * DP%Rsd0(-1,:)
+  DP%R(:)   = DP%Rsi(:) + DP%Rsd(:)
   
   ! Average expected event (components at reference couplings)
-  Detector%MuSignalSI0(:,:) = Detector%exposure * Detector%Rsi0(:,:)
-  Detector%MuSignalSD0(:,:) = Detector%exposure * Detector%Rsd0(:,:)
+  DP%MuSignalSI0(:,:) = DP%exposure * DP%Rsi0(:,:)
+  DP%MuSignalSD0(:,:) = DP%exposure * DP%Rsd0(:,:)
   
   ! Average expected events.
   ! Could also achieve this by e.g. exposure * Rsi(:).
-  Detector%MuSignalSI(:) =  alphasi(+1) * Detector%MuSignalSI0(+1,:)    &
-                          + alphasi( 0) * Detector%MuSignalSI0( 0,:)    &
-                          + alphasi(-1) * Detector%MuSignalSI0(-1,:)
-  Detector%MuSignalSD(:) =  alphasd(+1) * Detector%MuSignalSD0(+1,:)    &
-                          + alphasd( 0) * Detector%MuSignalSD0( 0,:)    &
-                          + alphasd(-1) * Detector%MuSignalSD0(-1,:)
-  Detector%MuSignal(:)   = Detector%MuSignalSI(:) + Detector%MuSignalSD(:)
+  DP%MuSignalSI(:) =  alphasi(+1) * DP%MuSignalSI0(+1,:)                &
+                    + alphasi( 0) * DP%MuSignalSI0( 0,:)                &
+                    + alphasi(-1) * DP%MuSignalSI0(-1,:)
+  DP%MuSignalSD(:) =  alphasd(+1) * DP%MuSignalSD0(+1,:)                &
+                    + alphasd( 0) * DP%MuSignalSD0( 0,:)                &
+                    + alphasd(-1) * DP%MuSignalSD0(-1,:)
+  DP%MuSignal(:)   = DP%MuSignalSI(:) + DP%MuSignalSD(:)
   
 END SUBROUTINE
 
@@ -6354,17 +7269,32 @@ END SUBROUTINE
 ! where s is the average expected signal and b is the average expected
 ! background.
 ! 
-PURE FUNCTION LogLikelihood() RESULT(lnlike)
+! Optional input argument:
+!   D           The DetectorRateStruct structure containing detector
+!               and rate date to calculate the likelihood for.  If
+!               not given, a default structure (internally stored)
+!               will be used.
+! 
+FUNCTION LogLikelihood(D) RESULT(lnlike)
   IMPLICIT NONE
   REAL*8 :: lnlike
+  TYPE(DetectorRateStruct), INTENT(IN), TARGET, OPTIONAL :: D
+  TYPE(DetectorRateStruct), POINTER :: DP
   INTEGER :: N
   REAL*8 :: b,s,mu
-  REAL*8, PARAMETER :: e = 2.7182818284590452d0
+  
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
   
   ! Get observed events and expected events
-  N = Detector%Nevents
-  b = Detector%MuBackground
-  s = Detector%MuSignal(0)
+  N = DP%Nevents
+  b = DP%MuBackground
+  s = DP%MuSignal(0)
   mu = s + b
   
   ! Poisson likelihood (routine handles special cases)
@@ -6383,22 +7313,259 @@ END FUNCTION
 ! where s is the average expected signal (background contributions are
 ! ignored).
 ! 
-PURE FUNCTION LogPValue() RESULT(lnp)
+! Optional input argument:
+!   D           The DetectorRateStruct structure containing detector
+!               and rate date to calculate the p-value for.  If not
+!               given, a default structure (internally stored) will
+!               be used.
+! 
+FUNCTION LogPValue(D) RESULT(lnp)
   IMPLICIT NONE
   REAL*8 :: lnp
+  TYPE(DetectorRateStruct), INTENT(IN), TARGET, OPTIONAL :: D
+  TYPE(DetectorRateStruct), POINTER :: DP
   INTEGER :: N,I
   REAL*8 :: s,mu
   
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
+  
   ! Get observed events and expected events
-  N  = Detector%Nevents
-  mu = Detector%MuSignal(0)
+  N  = DP%Nevents
+  mu = DP%MuSignal(0)
   
   ! Check if rates are available for each interval
-  IF (Detector%NEff .EQ. Detector%Nevents+1) THEN
-    lnp = LogMaximumGapP(mu,MAXVAL(Detector%MuSignal(1:N+1)))
+  IF (DP%NEff .EQ. DP%Nevents+1) THEN
+    lnp = LogMaximumGapP(mu,MAXVAL(DP%MuSignal(1:N+1)))
   ELSE
     lnp = LogPoissonP(N,mu)
   END IF
+  
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Optional input arguments:
+!   D           The DetectorRateStruct structure containing detector
+!               and rate date to calculate the scaling for.  If not
+!               given, a default structure (internally stored) will
+!               be used.
+!   lnp         The logarithm of the desired p-value.  Default is
+!               p=0.1 (90% CL).
+! 
+FUNCTION ScaleToPValue(D,lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  TYPE(DetectorRateStruct), INTENT(IN), TARGET, OPTIONAL :: D
+  REAL*8, INTENT(IN), OPTIONAL :: lnp
+  TYPE(DetectorRateStruct), POINTER :: DP
+  INTEGER :: N
+  REAL*8 :: lnp0,mu,f
+  
+  ! Get pointer to detector structure to be used: either an explicitly
+  ! provided structure or the default, internally-stored structure.
+  IF (PRESENT(D)) THEN
+    DP => D
+  ELSE
+    DP => DefaultDetector
+  END IF
+  
+  ! logarithm of p-value to use
+  IF (PRESENT(lnp)) THEN
+    lnp0 = lnp
+  ELSE
+    lnp0 = LOG(0.1d0)
+  END IF
+  
+  ! Get observed events and expected events
+  N  = DP%Nevents
+  mu = DP%MuSignal(0)
+  
+  IF (mu .LE. 0d0) THEN
+    x = HUGE(1d0)
+    RETURN
+  END IF
+  
+  IF (lnp0 .GE. 0d0) THEN
+    x = 0d0
+    RETURN
+  END IF
+  
+  ! Use maximum gap if intervals available, otherwise Poisson
+  IF (DP%NEff .EQ. DP%Nevents+1) THEN
+    f = MAXVAL(DP%MuSignal(1:N+1)) / mu
+    x = MaximumGapScaleToPValue(lnp0,mu,f)
+  ELSE
+    x = PoissonScaleToPValue(lnp0,N,mu)
+  END IF
+  
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the signal must be scaled (s -> x*s)
+! to achieve the desired p-value (given as log(p)) using the maximum
+! gap method.
+! 
+! NOTE: Uses quickly implemented numerical methods.  Could be much
+!       better optimized if the need arises.
+! 
+! Input arguments:
+!   lnp         The logarithm of the desired p-value.
+!   mu          The total expected number of events.
+!   f           The largest fraction of events expected in any interval
+!               (i.e. the "maximum" gap).
+! 
+PURE FUNCTION MaximumGapScaleToPValue(lnp,mu,f) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp,mu,f
+  REAL*8 :: x1,lnp1,x2,lnp2,xm,lnpm
+  
+  IF (mu .LE. 0d0) THEN
+    x = HUGE(1d0)
+    RETURN
+  END IF
+  
+  ! Should not happen...
+  IF (lnp .GE. 0d0) THEN
+    x = 0d0
+    RETURN
+  END IF
+  
+  ! Should not happen...
+  IF (f .LE. 0d0) THEN
+    x = HUGE(1d0)
+    RETURN
+  END IF
+  
+  ! Special case
+  IF (f .GE. 1d0) THEN
+    x = -lnp / mu
+    RETURN
+  END IF
+  
+  ! Starting point
+  x1   = 1d0 / mu
+  lnp1 = LogMaximumGapP(x1*mu,x1*f*mu)
+  ! Bracket
+  IF (lnp1 .GT. lnp) THEN
+    x2   = 2d0*x1
+    lnp2 = LogMaximumGapP(x2*mu,x2*f*mu)
+    DO WHILE (lnp2 .GE. lnp)
+      x1   = x2
+      lnp1 = lnp2
+      x2   = 2d0*x2
+      lnp2 = LogMaximumGapP(x2*mu,x2*f*mu)
+    END DO
+  ELSE
+    DO WHILE (lnp1 .LE. lnp)
+      x2   = x1
+      lnp2 = lnp1
+      x1   = 0.5d0*x1
+      lnp1 = LogMaximumGapP(x1*mu,x1*f*mu)
+    END DO
+  END IF
+  
+  ! Bisection (geometric)
+  DO WHILE ((ABS(lnp2-lnp1) .GT. 1d-5) .AND. (ABS(LOG(x2/x1)) .GT. 1d-5))
+    xm   = SQRT(x1*x2)
+    lnpm = LogMaximumGapP(xm*mu,xm*f*mu)
+    IF (lnpm .GE. lnp) THEN
+      x1   = xm
+      lnp1 = lnpm
+    ELSE
+      x2   = xm
+      lnp2 = lnpm
+    END IF
+  END DO
+  x = 0.5d0*(x1+x2)
+  
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the signal must be scaled (s -> x*s)
+! to achieve the desired p-value (given as log(p)) using a Poisson
+! distribution.
+! 
+! NOTE: Uses quickly implemented numerical methods.  Could be much
+!       better optimized if the need arises.
+! 
+! Input arguments:
+!   lnp         The logarithm of the desired p-value.
+!   N           Number of observed events.
+!   mu          The total expected number of events.
+! 
+PURE FUNCTION PoissonScaleToPValue(lnp,N,mu) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  INTEGER, INTENT(IN) :: N
+  REAL*8, INTENT(IN) :: lnp,mu
+  REAL*8 :: x1,lnp1,x2,lnp2,xm,lnpm
+  
+  IF (mu .LE. 0d0) THEN
+    x = HUGE(1d0)
+    RETURN
+  END IF
+  
+  ! Should not happen...
+  IF (lnp .GE. 0d0) THEN
+    x = 0d0
+    RETURN
+  END IF
+  
+  ! Analytic formula for N=0
+  IF (N .EQ. 0) THEN
+    x = -lnp / mu
+    RETURN
+  END IF
+  
+  ! Starting point
+  x1   = N / mu
+  lnp1 = LogPoissonP(N,x1*mu)
+  
+  ! Bracket
+  IF (lnp1 .GT. lnp) THEN
+    x2   = 2d0*x1
+    lnp2 = LogPoissonP(N,x2*mu)
+    DO WHILE (lnp2 .GE. lnp)
+      x1   = x2
+      lnp1 = lnp2
+      x2   = 2d0*x2
+      lnp2 = LogPoissonP(N,x2*mu)
+    END DO
+  ELSE
+    DO WHILE (lnp1 .LE. lnp)
+      x2   = x1
+      lnp2 = lnp1
+      x1   = 0.5d0*x1
+      lnp1 = LogPoissonP(N,x1*mu)
+    END DO
+  END IF
+  
+  ! Bisection (geometric)
+  DO WHILE ((ABS(lnp2-lnp1) .GT. 1d-5) .AND. (ABS(x2-x1) .GT. 1d-5))
+    xm   = SQRT(x1*x2)
+    lnpm = LogPoissonP(N,xm*mu)
+    IF (lnpm .GE. lnp) THEN
+      x1   = xm
+      lnp1 = lnpm
+    ELSE
+      x2   = xm
+      lnp2 = lnpm
+    END IF
+  END DO
+  x = 0.5d0*(x1+x2)
   
 END FUNCTION
 
@@ -6708,128 +7875,6 @@ END SUBROUTINE
 
 
 ! ----------------------------------------------------------------------
-! Calculates the factor x by which the cross-sections must be scaled
-! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
-! See LogPValue() above for a description of the statistics.
-! 
-! NOTE: Uses quickly implemented numerical methods.  Could be much
-!       better optimized if the need arises.
-! 
-! Input argument:
-!   lnp         The logarithm of the desired p-value
-! 
-PURE FUNCTION ScaleToPValue(lnp) RESULT(x)
-  IMPLICIT NONE
-  REAL*8 :: x
-  REAL*8, INTENT(IN) :: lnp
-  INTEGER :: N,I
-  REAL*8 :: s,mu,f,x1,lnp1,x2,lnp2,xm,lnpm
-  
-  ! Get observed events and expected events
-  N  = Detector%Nevents
-  mu = Detector%MuSignal(0)
-  
-  IF (mu .LE. 0d0) THEN
-    x = HUGE(1d0)
-    RETURN
-  END IF
-  
-  IF (lnp .GE. 0d0) THEN
-    x = 0d0
-    RETURN
-  END IF
-  
-  ! Use maximum gap if intervals available, otherwise Poisson
-  
-  ! Maximum gap: bracket, then bisection method
-  IF (Detector%NEff .EQ. Detector%Nevents+1) THEN
-    f = MAXVAL(Detector%MuSignal(1:N+1)) / mu
-    ! Special case
-    IF (f .GE. 1d0) THEN
-      x = -lnp / mu
-      RETURN
-    END IF
-    ! Starting point
-    x1   = 1d0 / mu
-    lnp1 = LogMaximumGapP(x1*mu,x1*f*mu)
-    ! Bracket
-    IF (lnp1 .GT. lnp) THEN
-      x2   = 2d0*x1
-      lnp2 = LogMaximumGapP(x2*mu,x2*f*mu)
-      DO WHILE (lnp2 .GE. lnp)
-        x1   = x2
-        lnp1 = lnp2
-        x2   = 2d0*x2
-        lnp2 = LogMaximumGapP(x2*mu,x2*f*mu)
-      END DO
-    ELSE
-      DO WHILE (lnp1 .LE. lnp)
-        x2   = x1
-        lnp2 = lnp1
-        x1   = 0.5d0*x1
-        lnp1 = LogMaximumGapP(x1*mu,x1*f*mu)
-      END DO
-    END IF
-    ! Bisection (geometric)
-    DO WHILE ((ABS(lnp2-lnp1) .GT. 1d-5) .AND. (ABS(LOG(x2/x1)) .GT. 1d-5))
-      xm   = SQRT(x1*x2)
-      lnpm = LogMaximumGapP(xm*mu,xm*f*mu)
-      IF (lnpm .GE. lnp) THEN
-        x1   = xm
-        lnp1 = lnpm
-      ELSE
-        x2   = xm
-        lnp2 = lnpm
-      END IF
-    END DO
-    x = 0.5d0*(x1+x2)
-  
-  ! Poisson: analytic formula for N=0
-  ELSE IF (N .EQ. 0) THEN
-    x = -lnp / mu
-  
-  ! Poisson: bracket, then bisection method
-  ELSE
-    ! Starting point
-    x1   = N / mu
-    lnp1 = LogPoissonP(N,x1*mu)
-    ! Bracket
-    IF (lnp1 .GT. lnp) THEN
-      x2   = 2d0*x1
-      lnp2 = LogPoissonP(N,x2*mu)
-      DO WHILE (lnp2 .GE. lnp)
-        x1   = x2
-        lnp1 = lnp2
-        x2   = 2d0*x2
-        lnp2 = LogPoissonP(N,x2*mu)
-      END DO
-    ELSE
-      DO WHILE (lnp1 .LE. lnp)
-        x2   = x1
-        lnp2 = lnp1
-        x1   = 0.5d0*x1
-        lnp1 = LogPoissonP(N,x1*mu)
-      END DO
-    END IF
-    ! Bisection (geometric)
-    DO WHILE ((ABS(lnp2-lnp1) .GT. 1d-5) .AND. (ABS(x2-x1) .GT. 1d-5))
-      xm   = SQRT(x1*x2)
-      lnpm = LogPoissonP(N,xm*mu)
-      IF (lnpm .GE. lnp) THEN
-        x1   = xm
-        lnp1 = lnpm
-      ELSE
-        x2   = xm
-        lnp2 = lnpm
-      END IF
-    END DO
-    x = 0.5d0*(x1+x2)
-  END IF
-  
-END FUNCTION
-
-
-! ----------------------------------------------------------------------
 ! For the Poisson distribution P(k|mu), calculates the log of the
 ! p-value, where p is defined as:
 !   p = \Sum_{k\le N} P(k|mu)
@@ -6852,6 +7897,16 @@ END FUNCTION
 ! For the Poisson distribution P(k|mu), calculates the log of the sums:
 !   lesum = \Sum_{k\le N} P(k|mu)
 !   gesum = \Sum_{k\ge N} P(k|mu)
+! This routine calculates the smaller of the two and uses the relation
+!   lesum + gesum = 1 + P(N|mu)
+! to find the other (note the k=N term appears in both sums).
+! 
+! Input arguments:
+!   N           Maximum/minimum k in sum
+!   mu          Mean of the Poisson
+! Output arguments:
+!   lnlesum     The logarithm of the sum of Poisson terms k = 0,1,...,N.
+!   lngesum     The logarithm of the sum of Poisson terms k = N,N+1,....
 ! 
 PURE SUBROUTINE LogPoissonSums(N,mu,lnlesum,lngesum)
   IMPLICIT NONE
@@ -7707,7 +8762,7 @@ END SUBROUTINE GetFullCommand
 ! available unit number could be found.
 ! NOTE: A free unit number is a unit number not currently connected
 !       at the time this function is called.  Numbers are not reserved,
-!       so do assume this number will remain free if it is not used
+!       so do not assume this number will remain free if it is not used
 !       to open a file immediately.
 ! 
 FUNCTION FreeIOUnit() RESULT(Nio)
@@ -8753,9 +9808,10 @@ END FUNCTION
 !-----------------------------------------------------------------------
 ! The inverse error function, finding x given y such that y = ERF(x).
 ! 
-! This is a quick implementation that has not been optimized for speed
-! and has not been tested for precision (though it should be close to
-! double precision in most cases).
+! This implementation uses Halley's method.  It seems to be reasonable
+! in terms of speed and precision and has had a cursory check for
+! robustness, but there may be more optimal algorithms than this.
+! Precision seems to be within ~10*EPSILON (usually even closer).
 ! 
 ELEMENTAL FUNCTION ERFINV(y) RESULT(x)
   IMPLICIT NONE
@@ -8781,7 +9837,7 @@ ELEMENTAL FUNCTION ERFINV(y) RESULT(x)
     x = y*(29.849915d0+y2*(-61.896833d0+y2*32.044810d0)) / (-1.0007339d0+y2)
   ELSE IF (y0 .LT. 1d0) THEN
     w = -LOG(1-y2)
-    x = SQRT(w - 0.5d0*LOG(QUARTERPI*w))
+    x = SIGN(SQRT(w - 0.5d0*LOG(QUARTERPI*w)),y)
   ELSE
     x = SIGN(HUGE(x),y)
     RETURN
@@ -8793,10 +9849,64 @@ ELEMENTAL FUNCTION ERFINV(y) RESULT(x)
   ! in all cases (though not proved).
   DO K=1,3
     fk    = ERF(x) - y
+    ! Newton's
+    !delta = - fk / (2*INVSQRTPI*EXP(-x**2))
+    ! Halley's
     delta = fk / (x*fk - 2*INVSQRTPI*EXP(-x**2))
     x     = x + delta
   END DO
   
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! The inverse complementary error function, finding x given y such that
+! y = ERFC(x).
+! 
+! This is a quick implementation that has not been optimized for speed
+! and has not been tested for precision (though it should be close to
+! double precision in most cases).
+! 
+ELEMENTAL FUNCTION ERFCINV(y) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: y
+  INTEGER :: K
+  REAL*8 :: fk,delta
+  REAL*8, PARAMETER :: INVPI      = 0.31830988618379067d0  ! 1/Pi
+  REAL*8, PARAMETER :: INVSQRTPI  = 0.56418958354775629d0  ! 1/Sqrt(Pi)
+
+  ! Use ERFINV via the relation erfc^-1(1-z) = erf^-1(z).
+  ! Below algorith (Halley's method, 5 iterations) works fine for
+  ! y < 0.5 and possibly to higher y values, but ERFINV is faster
+  ! (by x2-5), so we use that where loss of precision is minimal.
+  IF (y .GT. 0.01d0) THEN
+    x = ERFINV(1d0-y)
+    RETURN
+  ELSE IF (y .LE. 0d0) THEN
+    x = HUGE(x)
+    RETURN
+  END IF
+
+  ! Only small, positive y at this point.
+
+  ! Initial guess: invert first term of asymptotic expansion
+  !   y = erfc(x) = e^{-x^2} / (x\sqrt{\pi}) [1 + O(1/x^2)]
+  x = SQRT(0.5d0*LAMBERTW(2*INVPI/y**2))
+
+  ! Halley's method.  Checked by hand that double precision is achieved
+  ! by five iterations for tested cases (epsilon, ~ 0.5).  No safety
+  ! checks as the algorithm appears to be convergent in all cases
+  ! (though not proved).
+  DO K=1,5
+    fk    = ERFC(x) - y
+    ! Newton's
+    !delta = fk / (2*INVSQRTPI*EXP(-x**2))
+    ! Halley's
+    delta = fk / (x*fk + 2*INVSQRTPI*EXP(-x**2))
+    x     = x + delta
+  END DO
+
 END FUNCTION
 
 
@@ -11149,7 +12259,7 @@ END MODULE
 PROGRAM DDCalc0run
   USE DDCALC0
   IMPLICIT NONE
-  CALL main()
+  CALL DDCalc0_Main()
 END PROGRAM
 
 
