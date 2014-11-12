@@ -1,0 +1,6 @@
+#!/bin/bash 
+
+make
+cd MSSM
+make
+gcc  -shared -o libmicromegas.so main.c lib/aLib.a ../sources/micromegas.a ../CalcHEP_src/lib/dynamic_me.a ../sources/micromegas.a work/work_aux.a lib/aLib.a ../CalcHEP_src/lib/sqme_aux.so ../CalcHEP_src/lib/libSLHAplus.a ../CalcHEP_src/lib/num_c.a ../CalcHEP_src/lib/ntools.a  ../CalcHEP_src/lib/serv.a -lX11 -rdynamic -ldl -lm
