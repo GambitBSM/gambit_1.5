@@ -9,7 +9,8 @@ CFLAGS=
 
 ARFLAGS=rv
 
-LDLIBS=-lgsl -lblas
+# harmonised with the main makefile - changed blas to gslcblas - A.S
+LDLIBS=-lgsl -lgslcblas
 
 SOURCES=gamLike.cc fermi_ini.cc fermi_like.cc
 
