@@ -1,16 +1,20 @@
+# Directories
 BUILD=./
 SRC=src
 LIB=./
 
-CC=g++
+# Standard tools
+CXX=g++
 AR=ar
 
-CFLAGS=
-
+# Flags
+CXXFLAGS=
 ARFLAGS=rv
+LDFLAGS=-shared -rdynamic
 
 # harmonised with the main makefile - changed blas to gslcblas - A.S
 LDLIBS=-lgsl -lgslcblas
+
 
 SOURCES=gamLike.cc fermi_ini.cc fermi_like.cc
 
@@ -19,13 +23,13 @@ OBJ = $(patsubst %.cc,$(BUILD)/%.o,$(SOURCES))
 all: $(LIB)/gamLike.a $(LIB)/gamLike.so
 
 $(BUILD)/%.o: $(SRC)/%.cc src/gamLike.h
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(LIB)/gamLike.a: $(OBJ)
 	$(AR) $(ARFLAGS) $@ $^
 
 $(LIB)/gamLike.so: $(OBJ)
-	$(CC) -shared -rdynamic -o $@ $^ $(LDLIBS)
+	$(CXX) $(CXXFLAGS) -o $@ $(LDFLAGS) $^ $(LDLIBS)
 
 .PHONY: clean tarball
 clean:
