@@ -1,9 +1,13 @@
 
 #include <vector>
+#include <string>
 #include <algorithm>
 #include <iostream>
 // Pythia8
 #include "Pythia8/Pythia.h"
+#include "Pythia8/Pythia8ToHepMC.h"
+#include "HepMC/GenEvent.h"
+#include "HepMC/IO_GenEvent.h"
 
 // ROOT
 #include "TROOT.h"
@@ -97,6 +101,7 @@ private:
   std::vector<float> _el_px;
   std::vector<float> _el_py;
   std::vector<float> _el_pz;
+  std::vector<float> _el_E;
   std::vector<float> _el_iso;
   std::vector<int>   _el_type;
   // truth electrons
@@ -108,6 +113,7 @@ private:
   std::vector<float> _truth_el_px;
   std::vector<float> _truth_el_py;
   std::vector<float> _truth_el_pz;
+  std::vector<float> _truth_el_E;
   std::vector<float> _truth_el_iso;
   int _nphotons;
   std::vector<int> _ph_charge;
@@ -117,6 +123,7 @@ private:
   std::vector<float> _ph_px;
   std::vector<float> _ph_py;
   std::vector<float> _ph_pz;
+  std::vector<float> _ph_E;
   std::vector<float> _ph_iso;
   std::vector<int>   _ph_type;
   // truth _phectrons
@@ -128,6 +135,7 @@ private:
   std::vector<float> _truth_ph_px;
   std::vector<float> _truth_ph_py;
   std::vector<float> _truth_ph_pz;
+  std::vector<float> _truth_ph_E;
   std::vector<float> _truth_ph_iso;
   // muons
   int _nmuons;
@@ -138,6 +146,7 @@ private:
   std::vector<float> _mu_px;
   std::vector<float> _mu_py;
   std::vector<float> _mu_pz;
+  std::vector<float> _mu_E;
   std::vector<float> _mu_iso;
   std::vector<int>   _mu_type;
   int _truth_nmuons;
@@ -148,6 +157,7 @@ private:
   std::vector<float> _truth_mu_px;
   std::vector<float> _truth_mu_py;
   std::vector<float> _truth_mu_pz;
+  std::vector<float> _truth_mu_E;
   std::vector<float> _truth_mu_iso;
    // had taus
   int _nhtaus;
@@ -158,6 +168,7 @@ private:
   std::vector<float> _htau_px;
   std::vector<float> _htau_py;
   std::vector<float> _htau_pz;
+  std::vector<float> _htau_E;
   std::vector<float> _htau_iso;
   std::vector<int>   _htau_type;
   int _truth_nhtaus;
@@ -168,6 +179,7 @@ private:
   std::vector<float> _truth_htau_px;
   std::vector<float> _truth_htau_py;
   std::vector<float> _truth_htau_pz;
+  std::vector<float> _truth_htau_E;
   std::vector<float> _truth_htau_iso;
  
   // jets
@@ -233,12 +245,12 @@ void MyAnalysis::clear_vectors() {
   _nelecs = 0;
   _el_charge.clear();
   _el_eta.clear();
-
   _el_phi.clear();
   _el_pt.clear();
   _el_px.clear();
   _el_py.clear();
   _el_pz.clear();
+  _el_E.clear();
   _el_iso.clear();
   _el_type.clear();
   // truth electrons
@@ -250,6 +262,7 @@ void MyAnalysis::clear_vectors() {
   _truth_el_px.clear();
   _truth_el_py.clear();
   _truth_el_pz.clear();
+  _truth_el_E.clear();
   _truth_el_iso.clear();
   _nphotons = 0;
   _ph_charge.clear();
@@ -259,6 +272,7 @@ void MyAnalysis::clear_vectors() {
   _ph_px.clear();
   _ph_py.clear();
   _ph_pz.clear();
+  _ph_E.clear();
   _ph_iso.clear();
   _ph_type.clear();
   // truth _phectrons
@@ -270,6 +284,7 @@ void MyAnalysis::clear_vectors() {
   _truth_ph_px.clear();
   _truth_ph_py.clear();
   _truth_ph_pz.clear();
+  _truth_ph_E.clear();
   _truth_ph_iso.clear();
   // muons
   _nmuons = 0;
@@ -280,6 +295,7 @@ void MyAnalysis::clear_vectors() {
   _mu_px.clear();
   _mu_py.clear();
   _mu_pz.clear();
+  _mu_E.clear();
   _mu_iso.clear();
   _mu_type.clear();
   _truth_nmuons = 0;
@@ -290,6 +306,7 @@ void MyAnalysis::clear_vectors() {
   _truth_mu_px.clear();
   _truth_mu_py.clear();
   _truth_mu_pz.clear();
+  _truth_mu_E.clear();
   _truth_mu_iso.clear();
    // had taus
   _nhtaus = 0;
@@ -300,6 +317,7 @@ void MyAnalysis::clear_vectors() {
   _htau_px.clear();
   _htau_py.clear();
   _htau_pz.clear();
+  _htau_E.clear();
   _htau_iso.clear();
   _htau_type.clear();
   _truth_nhtaus = 0;
@@ -310,6 +328,7 @@ void MyAnalysis::clear_vectors() {
   _truth_htau_px.clear();
   _truth_htau_py.clear();
   _truth_htau_pz.clear();
+  _truth_htau_E.clear();
   _truth_htau_iso.clear();
  
   // jets
@@ -383,6 +402,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("el_px",&_el_px);
   _tree->Branch("el_py",&_el_py);
   _tree->Branch("el_pz",&_el_pz);
+  _tree->Branch("el_E",&_el_E);
   _tree->Branch("el_iso",&_el_iso);
   _tree->Branch("el_type",&_el_type);
 
@@ -394,6 +414,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("truth_el_px",    &_truth_el_px);
   _tree->Branch("truth_el_py",    &_truth_el_py);
   _tree->Branch("truth_el_pz",    &_truth_el_pz);
+  _tree->Branch("truth_el_E",    &_truth_el_E);
   _tree->Branch("truth_el_iso",   &_truth_el_iso);
                                   
  //fastsim photons
@@ -404,6 +425,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("ph_px",    &_ph_px);
   _tree->Branch("ph_py",    &_ph_py);
   _tree->Branch("ph_pz",    &_ph_pz);
+  _tree->Branch("ph_E",    &_ph_E);
   _tree->Branch("ph_iso",   &_ph_iso);
   _tree->Branch("ph_type",  &_ph_type);
 
@@ -415,6 +437,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("truth_ph_px",    &_truth_ph_px);
   _tree->Branch("truth_ph_py",    &_truth_ph_py);
   _tree->Branch("truth_ph_pz",    &_truth_ph_pz);
+  _tree->Branch("truth_ph_E",    &_truth_ph_E);
   _tree->Branch("truth_ph_iso",   &_truth_ph_iso);
 
   // fastsim muons
@@ -425,6 +448,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("mu_px",    &_mu_px);
   _tree->Branch("mu_py",    &_mu_py);
   _tree->Branch("mu_pz",    &_mu_pz);
+  _tree->Branch("mu_E",    &_mu_E);
   _tree->Branch("mu_iso",   &_mu_iso);
   _tree->Branch("mu_type",  &_mu_type);
 
@@ -436,6 +460,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("truth_mu_px",    &_truth_mu_px);
   _tree->Branch("truth_mu_py",    &_truth_mu_py);
   _tree->Branch("truth_mu_pz",    &_truth_mu_pz);
+  _tree->Branch("truth_mu_E",    &_truth_mu_E);
   _tree->Branch("truth_mu_iso",   &_truth_mu_iso);
 
   // fastsim hadronic taus
@@ -446,6 +471,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("htau_px",    &_htau_px);
   _tree->Branch("htau_py",    &_htau_py);
   _tree->Branch("htau_pz",    &_htau_pz);
+  _tree->Branch("htau_E",     &_htau_E);
   _tree->Branch("htau_iso",   &_htau_iso);
   _tree->Branch("htau_type",  &_htau_type);
 
@@ -457,6 +483,7 @@ void MyAnalysis::init(std::string fastsim_initfilename, std::string output_rootf
   _tree->Branch("truth_htau_px",     &_truth_htau_px);
   _tree->Branch("truth_htau_py",     &_truth_htau_py);
   _tree->Branch("truth_htau_pz",     &_truth_htau_pz);
+  _tree->Branch("truth_htau_E",     &_truth_htau_E);
   _tree->Branch("truth_htau_iso",    &_truth_htau_iso);
  
   // fastsim jets
@@ -755,7 +782,6 @@ void MyAnalysis::analyze(Pythia8::Event& event) {
 }
 */
 
-
 void MyAnalysis::PrintParticles( vector<hep_simple_lib::Particle*> list)
 {
   for (int j=0;j<(int)list.size();j++) {
@@ -808,6 +834,7 @@ void MyAnalysis::FillTree(hep_simple_lib::Event &fastevent,vector<hep_simple_lib
     _el_px.push_back(fastevent.electrons()[kk]->mom().px());
     _el_py.push_back(fastevent.electrons()[kk]->mom().py());
     _el_pz.push_back(fastevent.electrons()[kk]->mom().pz());
+    _el_E.push_back(fastevent.electrons()[kk]->mom().E());
     _el_eta.push_back(fastevent.electrons()[kk]->eta());
     _el_phi.push_back(fastevent.electrons()[kk]->phi());
     _el_iso.push_back(fastevent.electrons()[kk]->isol());
@@ -822,6 +849,7 @@ void MyAnalysis::FillTree(hep_simple_lib::Event &fastevent,vector<hep_simple_lib
     _mu_px.push_back(fastevent.muons()[kk]->mom().px());
     _mu_py.push_back(fastevent.muons()[kk]->mom().py());
     _mu_pz.push_back(fastevent.muons()[kk]->mom().pz());
+    _mu_E.push_back(fastevent.muons()[kk]->mom().E());
     _mu_eta.push_back(fastevent.muons()[kk]->eta());
     _mu_phi.push_back(fastevent.muons()[kk]->phi());
     _mu_iso.push_back(fastevent.muons()[kk]->isol());
@@ -850,6 +878,7 @@ void MyAnalysis::FillTree(hep_simple_lib::Event &fastevent,vector<hep_simple_lib
     _truth_el_px.push_back(truth_el[kk]->mom().px());
     _truth_el_py.push_back(truth_el[kk]->mom().py());
     _truth_el_pz.push_back(truth_el[kk]->mom().pz());
+    _truth_el_E.push_back(truth_el[kk]->mom().E());
     _truth_el_eta.push_back(truth_el[kk]->eta());
     _truth_el_phi.push_back(truth_el[kk]->phi());
     _truth_el_iso.push_back(truth_el[kk]->isol());
@@ -1019,6 +1048,17 @@ void MyAnalysis::finish() {
 
 }
 
+bool replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
+
+
+
 std::string getCmdOption(char ** begin, char ** end, const std::string & option)
 {
     char ** itr = std::find(begin, end, option);
@@ -1038,16 +1078,24 @@ bool cmdOptionExists(char** begin, char** end, const std::string& option)
 }
 
 // this function reads the comamnd line options
-int cmdReadOptions(int argc, char* argv[], int &particle_pdgid,  int &nevents, std::string &json_filename,  std::string &out_filename, int &debug_level) 
+int cmdReadOptions(int argc, char* argv[], int &particle_pdgid, 
+                   float &gen_energy,
+                   int &nevents, 
+                   std::string &json_filename,  
+                   std::string &out_filename, 
+                   bool &save_hepmc,
+                   int &debug_level) 
 {
 
   // the defaults
   particle_pdgid = 11;
   nevents = 1000;
+  save_hepmc = false;
+  gen_energy = 100;
 
   if ((cmdOptionExists(argv, argv+argc, "-h")) || (argc == 0))
   {
-    std::cout << " usage ./example -pid pdgid=11 -n nevents=1000 -j fastsim_description.json -o output_rootfilename < -d debug level > \n"
+     std::cout << " usage ./example -pid pdgid=11 -E 100 -n nevents=1000 -j fastsim_description.json -o output_rootfilename < -d debug level >  < -hepmc > save generated events in hepmc file \n"
               << " -h to display this message \n"
               << " the debug level is 0 so if the option is omitted, the program will not print any debug statements\n"
               << " possible values can be 1,2, or 3 " << std::endl;
@@ -1065,10 +1113,15 @@ int cmdReadOptions(int argc, char* argv[], int &particle_pdgid,  int &nevents, s
      nevents = atoi(getCmdOption(argv, argv + argc, "-n").c_str());
 
 
+  // pt of generated particles
+  if (cmdOptionExists(argv, argv+argc, "-E")) 
+     gen_energy = atof(getCmdOption(argv, argv + argc, "-E").c_str());
+
+
   if (cmdOptionExists(argv, argv+argc, "-j")) 
      json_filename = getCmdOption(argv, argv + argc, "-j");
   else {
-     std::cout << " usage ./example -pid pdgid=11 -n nevents=1000 -j fastsim_description.json -o output_rootfilename < -d debug level > \n"
+     std::cout << " usage ./example -pid pdgid=11 -E 100 -n nevents=1000 -j fastsim_description.json -o output_rootfilename < -d debug level >  < -hepmc > save generated events in hepmc file \n"
               << " the debug level is 0 so if the option is omitted, the program will not print any debug statements\n"
               << " possible values can be 1,2, or 3 " << std::endl;
     return 1;
@@ -1078,13 +1131,12 @@ int cmdReadOptions(int argc, char* argv[], int &particle_pdgid,  int &nevents, s
   if (cmdOptionExists(argv, argv+argc, "-o")) 
      out_filename = getCmdOption(argv, argv + argc, "-o");
   else {
-     std::cout << " usage ./example -pid pdgid=11 -n nevents=1000 -j fastsim_description.json -o output_rootfilename < -d debug level > \n"
+     std::cout << " usage ./example -pid pdgid=11 -E 100 -n nevents=1000 -j fastsim_description.json -o output_rootfilename < -d debug level >  < -hepmc > save generated events in hepmc file \n"
               << " the debug level is 0 so if the option is omitted, the program will not print any debug statements\n"
               << " possible values can be 1,2, or 3 " << std::endl;
     return 1;
     
   }
-
 
   std::cout << " output file " << out_filename << std::endl;
 
@@ -1092,6 +1144,11 @@ int cmdReadOptions(int argc, char* argv[], int &particle_pdgid,  int &nevents, s
     std::string val = getCmdOption(argv, argv + argc, "-d");
      debug_level = stol(val.c_str());
   }
+
+  // save generated as hepmc 
+  if (cmdOptionExists(argv, argv+argc, "-hepmc")) 
+    save_hepmc = true;
+
 
 
   return 0;
@@ -1112,8 +1169,15 @@ int main(int argc, char* argv[]) {
   int debug_level=0;
   int nEvent = 10;
   int nAbort = 1;
+  bool do_hepmc;
+  float particle_energy;
 
-  if (cmdReadOptions(argc,argv,particle_gun_pdgid,nEvent,json_filename,out_filename,debug_level) != 0)
+  // used to save the events if required
+  HepMC::Pythia8ToHepMC ToHepMC;
+  // Specify file where HepMC events will be stored.
+  HepMC::IO_GenEvent *ascii_io = NULL;
+
+  if (cmdReadOptions(argc,argv,particle_gun_pdgid,particle_energy, nEvent,json_filename,out_filename,do_hepmc, debug_level) != 0)
     return 1;
 
   ifstream is2(json_filename);
@@ -1122,6 +1186,18 @@ int main(int argc, char* argv[]) {
          << " Program stopped! " << endl;
     return 1;
   }
+
+  if (do_hepmc) { // we are saving the generated events in a filename .'dat'
+    std::string hepmc_filename = out_filename;
+    replace(hepmc_filename,".root","");
+    hepmc_filename += ".dat";
+    ascii_io = new HepMC::IO_GenEvent(hepmc_filename, std::ios::out);
+  }
+
+  // lets make sure the filename has the .root
+  std::size_t found = out_filename.find(".root");
+  if (found == std::string::npos)
+    out_filename += ".root";
 
   // root dictionary loading
   gROOT->ProcessLine("#include <vector>");
@@ -1180,10 +1256,7 @@ int main(int argc, char* argv[]) {
 
     //printf("Event %d\n",iEvent);
 
-     fillParticle(particle_gun_pdgid, 60.0, -1., 0.,event, pdt, pythia.rndm, atRest);
-
-
-
+     fillParticle(particle_gun_pdgid, particle_energy, -1., 0.,event, pdt, pythia.rndm, atRest);
 
     // Generate events. Quit if too many failures.
     if (!pythia.next()) {
@@ -1195,7 +1268,16 @@ int main(int argc, char* argv[]) {
     // User Analysis of current event.
     myAnalysis.analyze( pythia.event);
 
-  // End of event loop.
+    if (do_hepmc) {
+      // save the generated event in a hepmc file
+      HepMC::GenEvent* hepmcevt = new HepMC::GenEvent();
+      ToHepMC.fill_next_event( pythia, hepmcevt );
+
+      // Write the HepMC event to file. Done with it.
+      *ascii_io << hepmcevt;
+      delete hepmcevt;
+    }
+
   }
 
   // Final statistics.
@@ -1203,6 +1285,8 @@ int main(int argc, char* argv[]) {
 
   // User finishing.
   myAnalysis.finish();
+
+  delete ascii_io;
 
   // Done.
   return 0;
