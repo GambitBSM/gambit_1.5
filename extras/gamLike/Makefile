@@ -8,7 +8,7 @@ CXX=g++
 AR=ar
 
 # Flags
-CXXFLAGS=
+CXXFLAGS=-fPIC
 ARFLAGS=rv
 LDFLAGS=-shared -rdynamic
 
