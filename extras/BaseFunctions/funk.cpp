@@ -92,10 +92,19 @@ class FunkBase: public enable_shared_from_this<FunkBase>
         template <typename... Args> FunkPtr set (Args... args);
         template <typename... Args> double eval (Args... args);
 
+        PlainPtrs<double> plain(const char*);
         PlainPtrs<double,double> plain(const char*, const char*);
+        PlainPtrs<double,double,double> plain(const char*, const char*, const char*);
+        PlainPtrs<double,double,double,double> plain(const char*, const char*, const char*, const char*);
 
         template <typename T>
+        PlainPtr<double> plain(const char*);
+        template <typename T>
         PlainPtr<double,double> plain(const char*, const char*);
+        template <typename T>
+        PlainPtr<double,double,double> plain(const char*, const char*, const char*);
+        template <typename T>
+        PlainPtr<double,double,double,double> plain(const char*, const char*, const char*, const char*);
 
         virtual double value(const FunkArgs&) = 0;
 
@@ -121,19 +130,55 @@ class FunkBase: public enable_shared_from_this<FunkBase>
 class FunkPlain: public FunkBase
 {
     public:
+        FunkPlain(FunkPtr f, const char* arg1) : f(f), arg1(arg1) {};
         FunkPlain(FunkPtr f, const char* arg1, const char* arg2) : f(f), arg1(arg1), arg2(arg2) {};
+        FunkPlain(FunkPtr f, const char* arg1, const char* arg2, const char* arg3) : f(f), arg1(arg1), arg2(arg2), arg3(arg3) {};
+        FunkPlain(FunkPtr f, const char* arg1, const char* arg2, const char* arg3, const char* arg4) : f(f), arg1(arg1), arg2(arg2), arg3(arg3), arg4(arg4) {};
 
-        static double plain2(double x1, double x2, void* ptr)
+        static double plain2p(double x1, void* ptr)
+        {
+            FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(ptr);
+            return funkPtrPtr->eval(funkPtrPtr->arg1, x1);
+        }
+        static double plain2p(double x1, double x2, void* ptr)
         {
             FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(ptr);
             return funkPtrPtr->eval(funkPtrPtr->arg1, x1, funkPtrPtr->arg2, x2);
         }
+        static double plain3p(double x1, double x2, double x3, void* ptr)
+        {
+            FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(ptr);
+            return funkPtrPtr->eval(funkPtrPtr->arg1, x1, funkPtrPtr->arg2, x2, funkPtrPtr->arg3, x3);
+        }
+        static double plain4p(double x1, double x2, double x3, double x4, void* ptr)
+        {
+            FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(ptr);
+            return funkPtrPtr->eval(funkPtrPtr->arg1, x1, funkPtrPtr->arg2, x2, funkPtrPtr->arg3, x3, funkPtrPtr->arg4, x4);
+        }
 
+        template <typename T>
+        static double plain1(double x1)
+        {
+            FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(T::ptr);
+            return funkPtrPtr->eval(funkPtrPtr->arg1, x1);
+        }
         template <typename T>
         static double plain2(double x1, double x2)
         {
             FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(T::ptr);
             return funkPtrPtr->eval(funkPtrPtr->arg1, x1, funkPtrPtr->arg2, x2);
+        }
+        template <typename T>
+        static double plain3(double x1, double x2, double x3)
+        {
+            FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(T::ptr);
+            return funkPtrPtr->eval(funkPtrPtr->arg1, x1, funkPtrPtr->arg2, x2, funkPtrPtr->arg3, x3);
+        }
+        template <typename T>
+        static double plain4(double x1, double x2, double x3, double x4)
+        {
+            FunkPlain * funkPtrPtr = static_cast<FunkPlain*>(T::ptr);
+            return funkPtrPtr->eval(funkPtrPtr->arg1, x1, funkPtrPtr->arg2, x2, funkPtrPtr->arg3, x3, funkPtrPtr->arg4, x4);
         }
 
         double value(const FunkArgs& args) 
@@ -145,19 +190,54 @@ class FunkPlain: public FunkBase
         FunkPtr f;
         const char* arg1;
         const char* arg2;
+        const char* arg3;
+        const char* arg4;
 };
 
+PlainPtrs<double> FunkBase::plain(const char* arg1)
+{
+    void* ptr = new FunkPlain(shared_from_this(), arg1);
+    return PlainPtrs<double>(&FunkPlain::plain2p, ptr);
+}
 PlainPtrs<double,double> FunkBase::plain(const char* arg1, const char* arg2)
 {
     void* ptr = new FunkPlain(shared_from_this(), arg1, arg2);
-    return PlainPtrs<double,double>(&FunkPlain::plain2, ptr);
+    return PlainPtrs<double,double>(&FunkPlain::plain2p, ptr);
+}
+PlainPtrs<double,double,double> FunkBase::plain(const char* arg1, const char* arg2, const char* arg3)
+{
+    void* ptr = new FunkPlain(shared_from_this(), arg1, arg2, arg3);
+    return PlainPtrs<double,double,double>(&FunkPlain::plain3p, ptr);
+}
+PlainPtrs<double,double,double,double> FunkBase::plain(const char* arg1, const char* arg2, const char* arg3, const char* arg4)
+{
+    void* ptr = new FunkPlain(shared_from_this(), arg1, arg2, arg3, arg4);
+    return PlainPtrs<double,double,double,double>(&FunkPlain::plain4p, ptr);
 }
 
+template <typename T>
+PlainPtr<double> FunkBase::plain(const char* arg1)
+{
+    T::ptr = new FunkPlain(shared_from_this(), arg1);
+    return &FunkPlain::plain1<T>;
+}
 template <typename T>
 PlainPtr<double,double> FunkBase::plain(const char* arg1, const char* arg2)
 {
     T::ptr = new FunkPlain(shared_from_this(), arg1, arg2);
     return &FunkPlain::plain2<T>;
+}
+template <typename T>
+PlainPtr<double,double,double> FunkBase::plain(const char* arg1, const char* arg2, const char* arg3)
+{
+    T::ptr = new FunkPlain(shared_from_this(), arg1, arg2, arg3);
+    return &FunkPlain::plain3<T>;
+}
+template <typename T>
+PlainPtr<double,double,double,double> FunkBase::plain(const char* arg1, const char* arg2, const char* arg3, const char* arg4)
+{
+    T::ptr = new FunkPlain(shared_from_this(), arg1, arg2, arg3, arg4);
+    return &FunkPlain::plain4<T>;
 }
 
 class FunkDerived: public FunkBase
@@ -452,7 +532,11 @@ int main()
     std::tie(p1, p2) = (v("x")*v("y"))->plain("x", "y");
     std::cout << p1(3, 2, p2) << std::endl;
 
-    double(*p3)(double,double);
-    p3 = (v("x")*v("y"))->plain<FUNK_F1>("x", "y");
-    std::cout << p3(4, 1) << std::endl;
+    //double(*p3)(double,double);
+    auto p3 = (log(v("z"))*v("x")*v("y"))->plain<FUNK_F1>("x", "y", "z");
+    std::cout << p3(4, 1, -1) << std::endl;
+
+    auto f = log(v("z"));
+
+    f->integrate("s", 3, 5);
 }
