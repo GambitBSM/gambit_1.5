@@ -897,17 +897,18 @@ namespace Funk
             // Required for rewiring input parameters
             std::vector<int> mapF, mapL;  // Maps output indices on input indices
             std::vector<double> Xin, Xout;
-            unsigned int nout, i;
+            unsigned int nout;
+            int i;
 
             // Integration range and function pointer
-            const char *lim0, *lim1;
             FunkPtr fptr;
+            const char *lim0, *lim1;
 
             // GSL workspace and parameters
             gsl_integration_workspace * gsl_workspace;
-            double epsabs;
-            double epsrel;
             size_t limit;
+            double epsrel;
+            double epsabs;
     };
 
     // Standard behaviour
@@ -923,5 +924,7 @@ namespace Funk
     FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, FunkPtr g, double x) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, g, TMPID2, x); }
 }
 
+#undef TMPID1
+#undef TMPID2
 
 #endif  // __FUNK_HPP__
