@@ -6,8 +6,10 @@
  *  | | | |_| | | | |   <| |_| | (_) | | | \__ \
  *  \_|  \__,_|_| |_|_|\_\\__|_|\___/|_| |_|___/
  * 
- *          Christoph Weniger, Dec 2014
- *             <c.weniger@uva.nl>
+ *  v0.1
+ *
+ *  Christoph Weniger, Dec 2014
+ *  <c.weniger@uva.nl>
  */
 
 #ifndef __FUNK_HPP__
@@ -31,6 +33,15 @@ using boost::enable_shared_from_this;
 //#include <memory>
 //using std::shared_ptr;
 //using std::enable_shared_from_this;
+
+#define DEF_FUNKTRAIT(C) class C { public: static void* ptr; }; void* C::ptr = 0;
+
+// Argument names for internal usage
+#define TMPID1 "FUNKTAG_TMP1_52428"
+#define TMPID2 "FUNKTAG_TMP2_52428"
+
+// Extensions
+#include <gsl/gsl_integration.h>
 
 namespace Funk
 {
@@ -122,6 +133,12 @@ namespace Funk
         return it - args.begin();
     }
 
+    bool hasArg(ArgsType & args, const char* arg)
+    {
+        auto it = std::find(args.begin(), args.end(), arg);
+        return it!=args.end();
+    }
+
 
     //
     // Central virtual base class
@@ -142,11 +159,11 @@ namespace Funk
             // Extension handles
             // TODO: Implement
             // - tabularize
-            // - integrate
+            template <typename... Args> FunkPtr gsl_integration(Args... args);
 
             // Convenience functions
             const std::vector<const char*> & getArgs() { return args; };
-            void help();
+            FunkPtr help();
 
             // Plain function generators (up to four arguments)
             PlainPtrs<double> plain(const char*);
@@ -280,12 +297,12 @@ namespace Funk
                 ArgsType argsG = g->getArgs();
                 XoutF.resize(argsF.size());
                 XoutG.resize(argsG.size());
-                i = eraseArg(argsF, arg);
-                args = joinArgs(argsG, args);
-                mapF = getMap(argsF, args);
-                mapG = getMap(args, argsG);
                 nF = XoutF.size();
                 nG = XoutG.size();
+                i = eraseArg(argsF, arg);
+                args = joinArgs(argsG, argsF);
+                mapF = getMap(args, f->getArgs());
+                mapG = getMap(args, argsG);
             };
 
             double value(const std::vector<double> & Xin)
@@ -299,7 +316,7 @@ namespace Funk
                 else
                 {
                     applyMap(XoutG, mapG, Xin, nG);
-                    applyInvMap(XoutF, mapF, Xin, nF-1);
+                    applyMap(XoutF, mapF, Xin, nF);
                     XoutF[i] = g->value(XoutG);
                     return f->value(XoutF);
                 }
@@ -356,6 +373,28 @@ namespace Funk
 
 
     //
+    // Derived class that implements constant
+    //
+
+    class FunkConst: public FunkBase
+    {
+        public:
+            FunkConst(double x) : x(x)
+            {
+                args.resize(0);
+            }
+
+            double value(const std::vector<double> & X)
+            {
+                return x;
+            }
+        private:
+            double x;
+    };
+    FunkPtr con(double x) { return FunkPtr(new FunkConst(x)); }
+
+
+    //
     // Derived class that implements simple linear variable
     //
 
@@ -399,7 +438,9 @@ namespace Funk
         {
             auto args = f->getArgs();
             if ( std::find(args.begin(), args.end(), it->first) != args.end() )
+            {
                 f = FunkPtr(new FunkDerived(f, it->first, it->second));
+            }
             else
             {
                 std::cout << "Funk: Ignoring \"" << it->first << "\" = function" << std::endl;
@@ -453,7 +494,12 @@ namespace Funk
         return this->value(Xout);
     }
 
-    void FunkBase::help()
+    template <typename... Args> FunkPtr FunkBase::gsl_integration(Args... args)
+    {
+        return getIntegrate_gsl1d(shared_from_this(), args...);
+    }
+
+    FunkPtr FunkBase::help()
     {
         std::cout << "Arguments:";
         for ( auto it = args.begin(); it != args.end(); it++ )
@@ -461,6 +507,7 @@ namespace Funk
             std::cout << " \"" << *it << "\"";
         }
         std::cout << std::endl;
+        return shared_from_this();
     }
 
     template <typename... Args> void FunkBase::digest_arguments(const char* arg, double y, Args... args)
@@ -760,8 +807,121 @@ namespace Funk
             std::string mode;
     };
     FunkPtr interp(const char * arg, std::vector<double> x, std::vector<double> y) { return FunkPtr(new FunkInterp(arg, x, y)); }
+
+
+    //
+    // GSL integration
+    //
+
+    class FunkIntegrate_gsl1d: public FunkBase, public gsl_function
+    {
+        public:
+            FunkIntegrate_gsl1d(FunkPtr fptr, const char * arg, const char * lim0, const char * lim1) : 
+                fptr(fptr), lim0(lim0), lim1(lim1), limit(100), epsrel(1e-2), epsabs(1e-2)
+            {
+                auto f_args = fptr->getArgs();
+                if ( arg == lim0 or arg == lim1 ) 
+                {
+                    std::cout << "ERROR: boundary equal integration variable." << std::endl;
+                    exit(-1);
+                }
+                if ( lim0 == lim1 )
+                {
+                    std::cout << "Warning: Boundaries identical." << std::endl;
+                }
+                if ( not hasArg(f_args, arg) )
+                {
+                    std::cout << "Warning: Integrand independent of integration variable." << std::endl;
+                    i = -1;
+                    args = joinArgs(f_args, vec(lim0, lim1));
+                    mapF = getMap(args, fptr->getArgs());
+                    mapL = getMap(args, vec(lim0, lim1));
+                    Xout.resize(fptr->getArgs().size());
+                    nout = Xout.size();
+                }
+                else
+                {
+                    i = eraseArg(f_args, arg);
+                    args = joinArgs(f_args, vec(lim0, lim1));
+                    mapF = getMap(args, fptr->getArgs());
+                    mapL = getMap(args, vec(lim0, lim1));
+
+                    Xout.resize(fptr->getArgs().size());
+                    nout = Xout.size();
+                }
+
+                gsl_workspace = gsl_integration_workspace_alloc (100000);
+            }
+            
+            ~FunkIntegrate_gsl1d()
+            {
+                gsl_integration_workspace_free(gsl_workspace);
+            }
+
+            FunkPtr set_epsrel(double epsrel) { this->epsrel = epsrel; return this->shared_from_this(); }
+            FunkPtr set_epsabs(double epsabs) { this->epsabs = epsabs; return this->shared_from_this(); }
+            FunkPtr set_limit(size_t limit) { this->limit = limit; return this->shared_from_this(); }
+
+            double value(const std::vector<double> & X)
+            {
+                double result, error;
+                Xin = X;
+
+                // Setup gsl_function
+                if ( i != -1 )
+                    function=&FunkIntegrate_gsl1d::invoke;
+                else
+                    function=&FunkIntegrate_gsl1d::invoke2;
+                params=this;
+
+                gsl_integration_qags(this, X[mapL[0]], X[mapL[1]], epsabs, epsrel, limit, gsl_workspace, &result, &error);
+                //TODO: Add error checks to integration output!!
+
+                return result;
+            }            
+            
+        private:
+            // Static member function that invokes integrand
+            static double invoke(double x, void *params) {
+                FunkIntegrate_gsl1d * ptr = static_cast<FunkIntegrate_gsl1d*>(params);
+                applyMap(ptr->Xout, ptr->mapF, ptr->Xin, ptr->nout);
+                ptr->Xout[ptr->i] = x;
+                return ptr->fptr->value(ptr->Xout);
+            }
+            static double invoke2(double x, void *params) {
+                FunkIntegrate_gsl1d * ptr = static_cast<FunkIntegrate_gsl1d*>(params);
+                applyMap(ptr->Xout, ptr->mapF, ptr->Xin, ptr->nout);
+                return ptr->fptr->value(ptr->Xout);
+            }
+
+            // Required for rewiring input parameters
+            std::vector<int> mapF, mapL;  // Maps output indices on input indices
+            std::vector<double> Xin, Xout;
+            unsigned int nout, i;
+
+            // Integration range and function pointer
+            const char *lim0, *lim1;
+            FunkPtr fptr;
+
+            // GSL workspace and parameters
+            gsl_integration_workspace * gsl_workspace;
+            double epsabs;
+            double epsrel;
+            size_t limit;
+    };
+
+    // Standard behaviour
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, const char *lim0, const char *lim1) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, lim0, lim1)); }
+    // Convenient overloads
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, const char *lim0, double x) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, lim0, TMPID1))->set(TMPID1, x); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, double x, const char *lim1) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, lim1))->set(TMPID1, x); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, double x, double y) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, x, TMPID2, y); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, const char *lim0, FunkPtr g) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, lim0, TMPID1))->set(TMPID1, g); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, FunkPtr g, const char *lim1) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, lim1))->set(TMPID1, g); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, FunkPtr g1, FunkPtr g2) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, g1)->set(TMPID2, g2); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, double x, FunkPtr g) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, x, TMPID2, g); }
+    FunkPtr getIntegrate_gsl1d(FunkPtr fptr, const char *arg, FunkPtr g, double x) { return FunkPtr(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, g, TMPID2, x); }
 }
 
-#define DEF_FUNKTRAIT(C) class C { public: static void* ptr; }; void* C::ptr = 0;
 
 #endif  // __FUNK_HPP__
