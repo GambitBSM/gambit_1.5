@@ -1,12 +1,14 @@
-/// ______           _    _   _                 
-/// |  ___|         | |  | | (_)                
-/// | |_ _   _ _ __ | | _| |_ _  ___  _ __  ___ 
-/// |  _| | | | '_ \| |/ / __| |/ _ \| '_ \/ __|
-/// | | | |_| | | | |   <| |_| | (_) | | | \__ \
-/// \_|  \__,_|_| |_|_|\_\\__|_|\___/|_| |_|___/
-///
-///         Christoph Weniger, Dec 2014
-///             <c.weniger@uva.nl>
+/*
+ *  ______           _    _   _                 
+ *  |  ___|         | |  | | (_)                
+ *  | |_ _   _ _ __ | | _| |_ _  ___  _ __  ___ 
+ *  |  _| | | | '_ \| |/ / __| |/ _ \| '_ \/ __|
+ *  | | | |_| | | | |   <| |_| | (_) | | | \__ \
+ *  \_|  \__,_|_| |_|_|\_\\__|_|\___/|_| |_|___/
+ * 
+ *          Christoph Weniger, Dec 2014
+ *             <c.weniger@uva.nl>
+ */
 
 #ifndef __FUNK_HPP__
 #define __FUNK_HPP__
@@ -137,6 +139,11 @@ namespace Funk
             template <typename... Args> double eval(Args... args);
             template <typename... Args> double get(Args... argss);
 
+            // Extension handles
+            // TODO: Implement
+            // - tabularize
+            // - integrate
+
             // Convenience functions
             const std::vector<const char*> & getArgs() { return args; };
             void help();
@@ -165,7 +172,7 @@ namespace Funk
             // Internal structure required for bind
             std::vector<int> bind_map;
             std::vector<double> Xout;
-            int nout;
+            unsigned int nout;
 
             std::map<const char*, double> tmp_argmap;
             std::map<const char*, FunkPtr> tmp_funmap;
@@ -689,6 +696,70 @@ namespace Funk
     MATH_OPERATION(fmax)
 #undef MATH_OPERATION
 
+    ////////////////////////////////////////
+    // *** End of core implementation ***
+    ////////////////////////////////////////
+
+
+
+    ////////////////////////////////////////
+    //        *** Extensions ***
+    ////////////////////////////////////////
+
+
+    //
+    // Derived class: 1dim linear or logarithmic interpolation
+    //
+
+    class FunkInterp : public FunkBase
+    {
+        public:
+            FunkInterp(const char * arg, std::vector<double> & Xgrid, std::vector<double> & Ygrid, std::string mode = "lin")
+            {
+                this->arg = arg;
+                this->Xgrid = Xgrid;
+                this->Ygrid = Ygrid;
+                if ( mode == "lin" ) this->ptr = &FunkInterp::linearInterp;
+                else if ( mode == "log" ) this->ptr = &FunkInterp::logInterp;
+            };
+
+            double value(const std::vector<double> & X)
+            {
+                return (this->*ptr)(X[0]);
+            }
+
+        private:
+            double logInterp(double x)
+            {
+                // Linear interpolation in log-log space
+                if (x<Xgrid.front() or x>Xgrid.back()) return 0;
+                int i = 0; for (; Xgrid[i] < x; i++) {};  // Find index
+                double x0 = Xgrid[i-1];
+                double x1 = Xgrid[i];
+                double y0 = Ygrid[i-1];
+                double y1 = Ygrid[i];
+                return y0 * std::exp(std::log(y1/y0) * std::log(x/x0) / std::log(x1/x0));
+            }
+
+            double linearInterp(double x)
+            {
+                // Linear interpolation in lin-lin space
+                if (x<Xgrid.front() or x>Xgrid.back()) return 0;
+                int i = 0; for (; Xgrid[i] < x; i++) {};  // Find index
+                double x0 = Xgrid[i-1];
+                double x1 = Xgrid[i];
+                double y0 = Ygrid[i-1];
+                double y1 = Ygrid[i];
+                return y0 + (x-x0)/(x1-x0)*(y1-y0);
+            }
+
+            double(FunkInterp::*ptr)(double);
+            const char * arg;
+            std::vector<double> Xgrid;
+            std::vector<double> Ygrid;
+            std::string mode;
+    };
+    FunkPtr interp(const char * arg, std::vector<double> x, std::vector<double> y) { return FunkPtr(new FunkInterp(arg, x, y)); }
 }
 
 #define DEF_FUNKTRAIT(C) class C { public: static void* ptr; }; void* C::ptr = 0;
