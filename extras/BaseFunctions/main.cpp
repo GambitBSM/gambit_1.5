@@ -1,4 +1,4 @@
-#include "funk.hpp"
+#include "funktions.hpp"
 
 double plain_f(double x, double y)
 {
@@ -40,16 +40,23 @@ double r_los_func2(double s)
     return sqrt(pow(s, 2) + pow(Rsun, 2) - 2*s*Rsun*cos(phi));
 }
 
+double fort(int& i, double& x, double& y)
+{
+    return x*y + i;
+}
+
 DEF_FUNKTRAIT(T)
 
 int main()
 {
-    /*
     auto x = Funk::var("x");
     auto y = Funk::var("y");
     auto z = Funk::var("z");
     auto a = Funk::var("a");
     auto b = Funk::var("b");
+
+    auto Fort = Funk::func(fort, 3., y, z);
+    std::cout << Fort->help()->eval("y", 3, "z", 4) << std::endl;
 
     // Setting variables
     {
@@ -77,15 +84,16 @@ int main()
         std::cout << A << std::endl;
     }
 
-
     // Plain functions
     {
-        auto f = Funk::func(plain_f, "x", "y");
+        std::cout << "Plain functions:" << std::endl;
+        auto f = Funk::func(plain_f, x, y);
         double r = 2;
         double A = f->gsl_integration("y", -sqrt(r*r-x*x), sqrt(r*r-x*x))->gsl_integration("x", -r, r)->eval();
         std::cout << A << std::endl;
         double (*plainF)(double);
         plainF = f->gsl_integration("y", -sqrt(a*a-x*x), sqrt(a*a-x*x))->gsl_integration("x", -a, a)->plain<T>("a");
+        (void)plainF;
 
         void *ptr;
         double(*plainF2)(double, void*);
@@ -95,11 +103,9 @@ int main()
             plainF2(1, ptr);
         }
     }
-    */
 
     // Line-of-sight integrals
     {
-        /*
         {
             std::cout << "1: slow." << std::endl;
 
@@ -128,35 +134,32 @@ int main()
             double Rsun = 8.5;
             double phi = 1;
 
-            auto rho_dm = Funk::func(rho_func, "r", "r_s", "rho_s");
-            auto r_los = Funk::func(r_los_func, "s", "Rsun", "phi");
+            auto rho_dm = Funk::func(rho_func, Funk::var("r"), Funk::var("r_s"), Funk::var("rho_s"));
+            auto r_los = Funk::func(r_los_func, Funk::var("s"), Funk::var("Rsun"), Funk::var("phi"));
             auto integral = pow(rho_dm, 2)->set("r_s", r_s, "rho_s", rho_s, "r", r_los)->set("Rsun", Rsun, "phi", phi)->gsl_integration("s", 0, 1000);
             for (int i = 0; i < 10000; i++) {
                 integral->eval();
             }
         }
-        */
 
         {
             std::cout << "3: medium." << std::endl;
 
-            auto rho_dm = Funk::func(rho_func2, "r");
-            auto r_los = Funk::func(r_los_func2, "s");
+            auto rho_dm = Funk::func(rho_func2, Funk::var("r"));
+            auto r_los = Funk::func(r_los_func2, Funk::var("s"));
             auto integral = pow(rho_dm, 2)->set("r", r_los)->gsl_integration("s", 0, 1000);
             for (int i = 0; i < 10000; i++) {
                 integral->eval();
             }
         }
 
-        /*
         {
             std::cout << "4: fast." << std::endl;
 
-            auto integral = Funk::func(integrand, "s")->gsl_integration("s", 0, 1000);
+            auto integral = Funk::func(integrand, Funk::var("s"))->gsl_integration("s", 0, 1000);
             for (int i = 0; i < 10000; i++) {
                 integral->eval();
             }
         }
-        */
     }
 }
