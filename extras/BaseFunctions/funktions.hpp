@@ -740,7 +740,7 @@ namespace Funk
     };                                                                                                    \
     inline Funk operator SYMBOL (Funk f1, Funk f2) { return Funk(new FunkMath_##OPERATION(f1, f2)); }\
     inline Funk operator SYMBOL (double x, Funk f) { return Funk(new FunkMath_##OPERATION(x, f)); }     \
-    inline Funk operator SYMBOL (Funk f, double x) { return Funk(new FunkMath_##OPERATION(x, f)); }
+    inline Funk operator SYMBOL (Funk f, double x) { return Funk(new FunkMath_##OPERATION(f, x)); }
     MATH_OPERATION(Sum,+)
     MATH_OPERATION(Mul,*)
     MATH_OPERATION(Div,/)
