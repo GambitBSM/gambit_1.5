@@ -41,8 +41,6 @@
 // Extensions
 #include <gsl/gsl_integration.h>
 
-namespace Gambit
-{
 namespace Funk
 {
     //
@@ -140,6 +138,42 @@ namespace Funk
         auto it = std::find(args.begin(), args.end(), arg);
         return it!=args.end();
     }
+
+
+    //
+    // Index lists (taken from stackoverflow)
+    //
+
+    // The structure that encapsulates index lists
+    template <size_t... Is>
+    struct index_list
+    {
+    };
+
+    // Collects internal details for generating index ranges [MIN, MAX)
+    namespace detail
+    {
+        // Declare primary template for index range builder
+        template <size_t MIN, size_t N, size_t... Is>
+        struct range_builder;
+
+        // Base step
+        template <size_t MIN, size_t... Is>
+        struct range_builder<MIN, MIN, Is...>
+        {
+            typedef index_list<Is...> type;
+        };
+
+        // Induction step
+        template <size_t MIN, size_t N, size_t... Is>
+        struct range_builder : public range_builder<MIN, N - 1, N - 1, Is...>
+        {
+        };
+    }
+
+    // Meta-function that returns a [MIN, MAX) index range
+    template<size_t MIN, size_t MAX>
+    using index_range = typename detail::range_builder<MIN, MAX>::type;
 
 
     //
@@ -339,35 +373,59 @@ namespace Funk
     //
 
     template <typename... funcargs>
-    class FunkFunc: public FunkBase
+    class FunkFunc : public FunkBase
     {
         public:
             template <typename... Args>
             FunkFunc(double (*f)(funcargs...), Args... argss)
             {
                 ptr = f;
-                args = vec<const char*>(argss...);
+                digest_input(argss...);
             }
 
             double value(const std::vector<double> & X)
             {
-                return args_from_vec(X);
+                for ( unsigned int i = 0; i < X.size() ; i++ )
+                {
+                    *map[i] = X[i];
+                }
+                return ppp(index_range<0, sizeof...(funcargs)>());
+            }
+
+            template <size_t... Args>
+            double ppp(index_list<Args...>)
+            {
+                return (*ptr)(std::get<Args>(input)...);
             }
 
         private:
+            std::tuple<typename std::remove_reference<funcargs>::type...> input;
+            std::vector<double*> map;
             double (*ptr)(funcargs...);
 
-            // Return value according to map
-            template <typename... Args>
-            double args_from_vec(const std::vector<double> & X, Args... args)
+            // Digest input parameters 
+            // (forwarding everything except Funk::Funk types, which is mapped onto
+            // funktion parameters)
+            template<typename T, typename... Args>
+            void digest_input(T x, Args... argss)
             {
-                return args_from_vec(X, args..., X[sizeof...(args)]);
+                const int i = sizeof...(funcargs) - sizeof...(argss) - 1;
+                std::get<i>(input) = x;
+                digest_input(argss...);
             }
-            double args_from_vec(const std::vector<double> & X, funcargs... args)
+            template<typename... Args>
+            void digest_input(Funk x, Args... argss)
             {
-                return (*ptr)(args...);
+                const int i = sizeof...(funcargs) - sizeof...(argss) - 1;
+                map.push_back(&std::get<i>(input));
+                assert(x->getArgs().size() == 1);
+                // TODO: Check that variable is indeed linear variable
+                args.push_back(x->getArgs()[0]);
+                digest_input(argss...);
             }
+            void digest_input() {};
     };
+
 
     template <typename... funcargs, typename... Args>
     Funk func(double (*f)(funcargs...), Args... args) {
@@ -927,7 +985,6 @@ namespace Funk
     inline Funk getIntegrate_gsl1d(Funk fptr, const char *arg, Funk g1, Funk g2) { return Funk(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, g1)->set(TMPID2, g2); }
     inline Funk getIntegrate_gsl1d(Funk fptr, const char *arg, double x, Funk g) { return Funk(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, x, TMPID2, g); }
     inline Funk getIntegrate_gsl1d(Funk fptr, const char *arg, Funk g, double x) { return Funk(new FunkIntegrate_gsl1d(fptr, arg, TMPID1, TMPID2))->set(TMPID1, g, TMPID2, x); }
-}
 }
 
 #undef TMPID1
