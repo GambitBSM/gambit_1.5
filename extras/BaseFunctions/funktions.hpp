@@ -191,6 +191,7 @@ namespace Funk
             template <typename... Args> Funk bind(Args... argss);
             template <typename... Args> double eval(Args... args);
             template <typename... Args> double get(Args... argss);
+            template <typename... Args> double operator() (Args... argss) { return this->eval(argss...); }
 
             // Extension handles
             // TODO: Implement
@@ -440,21 +441,24 @@ namespace Funk
     class FunkConst: public FunkBase
     {
         public:
-            FunkConst(double x) : x(x)
-            {
-                args.resize(0);
-            }
+            template <typename... Args>
+            FunkConst(double c, Args ...argss) : c(c) { args = vec(argss...); }
+            FunkConst(double c) : c(c) { args.resize(0); }
 
             double value(const std::vector<double> & X)
             {
                 (void)X;
-                return x;
+                return c;
             }
         private:
-            double x;
+            double c;
     };
-    inline Funk cnst(double x) { return Funk(new FunkConst(x)); }
-
+    template <typename... Args>
+    inline Funk one(Args... argss) { return Funk(new FunkConst(1., argss...)); }
+    template <typename... Args>
+    inline Funk zero(Args... argss) { return Funk(new FunkConst(0., argss...)); }
+    template <typename... Args>
+    inline Funk cnst(double x, Args... argss) { return Funk(new FunkConst(x, argss...)); }
 
     //
     // Derived class that implements simple linear variable
