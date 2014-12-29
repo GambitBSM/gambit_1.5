@@ -75,8 +75,8 @@ The WIMP mass, couplings, and/or cross-sections may alternatively be
 supplied through command-line options, e.g. '--m=100'.  However, these
 will only be used if _no_ arguments are supplied.
 
-NOTE: SPIN-DEPENDENT FORM FACTORS HAVE NOT BEEN IMPLEMENTED; ALL SD
-      RATES ARE SIMPLY SET TO ZERO.
+NOTE: SPIN-DEPENDENT FORM FACTORS HAVE ONLY BEEN IMPLEMENTED FOR XENON;
+      ALL OTHER SD RATES ARE SIMPLY SET TO ZERO.
 
 
 SIGNAL CALCULATION
@@ -145,7 +145,7 @@ The program can be called the following ways with the described
 resulting behavior:
 
 
-    DDCalc0 [options] [WIMP parameters]
+    DDCalc0run [options] [WIMP parameters]
 
 Calculates the expected number of signal events in the analysis region
 for the given WIMP parameters, the likelihood of the WIMP parameters,
@@ -158,7 +158,7 @@ parameters in the same format as described for the program arguments
 above.  An empty (or invalid) line terminates the program.
 
 
-    DDCalc0 --log-likelihood [options] [WIMP parameters]
+    DDCalc0run --log-likelihood [options] [WIMP parameters]
 
 Calculates the log of the likelihood for the given WIMP parameters.  If
 the '--interactive' flag is provided or no WIMP parameters are given, an
@@ -169,7 +169,7 @@ as described for the program arguments above.  An empty (or invalid)
 line terminates the program.
 
 
-    DDCalc0 --log-pvalue [options] [WIMP parameters]
+    DDCalc0run --log-pvalue [options] [WIMP parameters]
 
 Calculates the log of the p-value for the given WIMP parameters.  If the
 '--interactive' flag is provided or no WIMP parameters given, an
@@ -180,14 +180,14 @@ as described for the program arguments above.  An empty (or invalid)
 line terminates the program.
 
 
-    DDCalc0 --spectrum [options] [WIMP parameters]
+    DDCalc0run --spectrum [options] [WIMP parameters]
 
 Tabulates by energy the raw recoil spectrum dR/dE(E) for the detector
 material and given WIMP parameters.  The tabulation of the energies can
 be modified using the --E-tabulation option.
 
 
-    DDCalc0 --events-by-mass [options] [WIMP parameters]
+    DDCalc0run --events-by-mass [options] [WIMP parameters]
 
 Tabulates by WIMP mass the expected signal events for fixed WIMP-nucleon
 cross-sections.  When supplying WIMP parameter arguments, a WIMP mass
@@ -196,8 +196,8 @@ the value will be ignored.  The tabulation of the masses can be modified
 using the --m-tabulation option.
 
 
-    DDCalc0 --constraints-SI [options]
-    DDCalc0 --constraints-SD [options]
+    DDCalc0run --constraints-SI [options]
+    DDCalc0run --constraints-SD [options]
 
 Tabulates by mass the cross-section lower and upper constraints in the
 spin-indepedent (SI) and spin-dependent (SD) cases.  Limits are
@@ -212,8 +212,8 @@ or, more conveniently, given in units of pi via --theta-SI-pi or
 the masses can be modified using the --m-tabulation option.
 
 
-    DDCalc0 --limits-SI [options]
-    DDCalc0 --limits-SD [options]
+    DDCalc0run --limits-SI [options]
+    DDCalc0run --limits-SD [options]
 
 Tabulates by mass the cross-section upper limits in the spin-indepedent
 (SI) and spin-dependent (SD) cases.  Limits are determined using the
@@ -450,6 +450,11 @@ Experiment-specific initialization options.  These options will set
 detector exposures, isotopic compositions, efficiencies, etc. to match
 that of the given experimental analysis.  Settings can be modified via
 the detector options described later.
+
+   --XENON100-2012
+         Sets the detector and analysis to that of the XENON100 2012
+         result (E. Aprile et al., arxiv:1207.5988).  Efficiencies
+         were pre-calculated using TPCMC (C. Savage, arxiv:14MM.xxxx).
 
    --LUX-2013 [default]
          Sets the detector and analysis to that of the LUX 2013
