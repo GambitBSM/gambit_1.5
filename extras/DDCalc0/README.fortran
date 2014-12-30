@@ -13,6 +13,7 @@ CALL DDCalc0_Init()
 ! Initialize any experiments for which likelihoods are to be calculated.
 ! The argument indicates if extra calculations necessary for maximum gap
 ! statistics should be performed (unnecessary for likelihoods).
+CALL XENON100_2012_Init(.FALSE.)
 CALL LUX_2013_Init(.FALSE.)
 CALL DARWIN_Ar_2014_Init(.FALSE.)
 CALL DARWIN_Xe_2014_Init(.FALSE.)
@@ -54,8 +55,16 @@ CALL DDCalc0_SetWIMP_mfa(100d0,4.832d-5,4.825d-5,0.1691d0,0.1689d0)
 CALL DDCalc0_SetWIMP_mG(100d0,9.663d-5,9.650d-5,5.579d-6,5.571d-6)
 CALL DDCalc0_SetWIMP_msigma(100d0,1d0,1d0,0.01d0,0.01d0)
 
+! Get the WIMP parameters using 'DDCalc0_GetWIMP_<...>' with the
+! same signature and units as above.  The only difference is that
+! WIMP-nucleon cross-sections are always positive.
+!CALL DDCalc0_GetWIMP_mfa(m,fp,fn,ap,an)
+!CALL DDCalc0_GetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
+!CALL DDCalc0_GetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
+
 ! After any change to the WIMP or halo parameters, perform the
 ! rate calculations necessary for the likelihoods.
+CALL XENON100_2012_CalcRates()
 CALL LUX_2013_CalcRates()
 CALL DARWIN_Ar_2014_CalcRates()
 CALL DARWIN_Xe_2014_CalcRates()
@@ -72,6 +81,7 @@ sSD = LUX_2013_SignalSD()    ! expected SD WIMP signal (REAL*8)
 ! are _not_ multiplied by -2.  The likelihood is calculated using
 ! a Poisson given the observed number of events and expected signal
 ! + background.
+lnlike_XENON100  = XENON100_2012_LogLikelihood()
 lnlike_LUX       = LUX_2013_LogLikelihood()
 lnlike_DARWIN_Ar = DARWIN_Ar_2014_LogLikelihood()
 lnlike_DARWIN_Xe = DARWIN_Xe_2014_LogLikelihood()
@@ -84,6 +94,7 @@ lnlike_DARWIN_Xe = DARWIN_Xe_2014_LogLikelihood()
 ! is useful for excluding WIMP parameters.  However, since it is
 ! not a true p-value, it should not be interpreted as being related
 ! to any particular likelihood.
+lnp_XENON100  = XENON100_2012_LogPValue()
 lnp_LUX       = LUX_2013_LogPValue()
 lnp_DARWIN_Ar = DARWIN_Ar_2014_LogPValue()
 lnp_DARWIN_Xe = DARWIN_Xe_2014_LogPValue()
@@ -97,6 +108,7 @@ lnp_DARWIN_Xe = DARWIN_Xe_2014_LogPValue()
 ! x*(10. pb) would be the SI cross-section at a WIMP mass of
 ! 100 GeV at which the experiment is excluded at the 90% CL
 ! (p=1-CL).
+x_XENON100  = XENON100_2012_ScaleToPValue(LOG(0.1d0))
 x_LUX       = LUX_2013_ScaleToPValue(LOG(0.1d0))
 x_DARWIN_Ar = DARWIN_Ar_2014_ScaleToPValue(LOG(0.1d0))
 x_DARWIN_Xe = DARWIN_Xe_2014_ScaleToPValue(LOG(0.1d0))
