@@ -52,44 +52,40 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 # 'ifort' or 'gfortran' in the name, e.g. gfortran-4.9
 # would be valid.
 #ifeq (,$(filter $(FC),ifort gfortran))
-ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC))$(findstring f95,$(FC)))
-  override FC := $(or $(shell which ifort 2> /dev/null),\
-                      $(shell which gfortran 2> /dev/null),\
-                      $(shell which f95 2> /dev/null),\
-                      $(error Could not find ifort or gfortran compiler \
-                              in the path.  A valid compiler must be given.))
-  override FC := $(notdir $(FC))
+ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC)))
+  FC := $(or $(shell which ifort 2> /dev/null),\
+             $(shell which gfortran 2> /dev/null),\
+             $(error Could not find ifort or gfortran compiler \
+                     in the path.  A valid compiler must be given.))
+  FC := $(notdir $(FC))
 endif
 
 # Explicit compiler, specified by additional 'ifort' or
 # 'gfortran' target.
 ifneq (,$(findstring ifort,$(MAKECMDGOALS)))
-  override FC := ifort
+  FC := ifort
 endif
 ifneq (,$(findstring gfortran,$(MAKECMDGOALS)))
-  override FC := gfortran
-endif
-ifneq (,$(findstring f95,$(MAKECMDGOALS)))
-  override FC := f95
+  FC := gfortran
 endif
 
 # Fortran compiler flags
 ifeq (,$(FFLAGS))
   ifneq (,$(findstring ifort,$(FC)))
     FFLAGS := -fast
-  else ifneq (,$(findstring gfortran,$(FC))$(findstring f95,$(FC)))
+  else ifneq (,$(findstring gfortran,$(FC)))
     FFLAGS := -O3 -fno-range-check
   else
-    $(error Invalid compiler: $(FC).  Must use ifort or gfortran/f95.)
+    $(error Invalid compiler: $(FC).  Must use ifort or gfortran.)
   endif
 endif
 
 # Ensure required compiler flags
-ifneq (, $or( $(findstring gfortran, $(FC)), $(findstring f95,$(FC)) ) )
+ifneq (,$(findstring gfortran,$(FC)))
   # disable compile-time range checking due to large integer
   # constants in math routines (allows for INTEGER*8)
   ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
-    override FFLAGS += -fno-range-check
+    FFLAGS += -fno-range-check
   endif
 endif
 
@@ -104,6 +100,7 @@ ifeq (,$(findstring -fPIC,$(FFLAGS)))
   SOFFLAGS += -fPIC
 endif
 
+
 #################### FILES / TARGETS #######################
 
 #f90objects := DDCalc0.o
@@ -111,7 +108,7 @@ endif
 #f90mods := $(shell echo $(f90objects:.o=.mod) | tr A-Z a-z)
 
 # Main programs
-fprograms := DDCalc0
+fprograms := DDCalc0run
 
 # Module files (lower case as that is usual output filename)
 fmodules := ddcalc0.mod
@@ -133,7 +130,7 @@ fincludes :=
 fsources := $(fincludes) $(fobjects:.o=.f90) $(fprograms:=.f90)
 
 # Additional files to include in tar file
-extrafiles := Makefile DDCalc0.use README.fortran
+extrafiles := Makefile DDCalc0run.use README.fortran DDCalc0.hpp
 
 # Tar file
 tarfile := DDCalc0.tar.gz
@@ -167,6 +164,7 @@ cleanishfiles := $(fprograms:=.dSYM) $(fobjects:.o=.dSYM)
 
 # Program dependencies
 #$(fprograms): object1.o
+$(fprograms): DDCalc0.f90
 
 # Specific dependencies
 #program1: object1.o
@@ -203,7 +201,8 @@ ifort gfortran:
 # Rule for building programs
 $(fprograms): % : %.f90
 	@echo "===== Compiling $@ ====="
-	$(FC) $(FFLAGS) -o $@ $< $(filter %.o,$^)
+#	$(FC) $(FFLAGS) -o $@ $< $(filter %.o,$^)
+	$(FC) $(FFLAGS) $(filter-out $<,$^) -o $@ $<
 
 # Rule for building objects
 $(fobjects): %.o : %.f90
