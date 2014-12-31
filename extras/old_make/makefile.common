@@ -63,6 +63,50 @@ MULTINESTINC = /usr/local/includes#                                       # path
 MULTINESTLIBDIR = /home/farmer/apps/MultiNest_v3.3_CMake/multinest/lib#   # path containing "libmultinest.so"
 #**********************
 
+#********************** Temporary stuff for hard-linking against flexiblesusy libraries
+# Mostly grabbed from Peter's stand-alone example Makefile, contrib/flexiblesusy/MSSM/examples/standalone-new/Makefile
+# Need to make sure flexiblesusy libraries are compiled first!
+
+# Package information
+PKGNAME         := FlexibleSUSY
+VERSION         := 0.5.3
+ABSBASEDIR      := contrib/MassSpectra/flexiblesusy/
+
+LIBEXT          := .a
+
+# Perhaps can automate this better in cmake?
+MODEL1          := CMSSM
+MODEL2          := MSSMatMGUT
+
+MODEL1DIR       := $(ABSBASEDIR)/models/$(MODEL1)
+MODEL2DIR       := $(ABSBASEDIR)/models/$(MODEL2)
+
+CONFIGDIR       := $(ABSBASEDIR)/config
+FLEXIDIR        := $(ABSBASEDIR)/src
+LEGACYDIR       := $(ABSBASEDIR)/legacy
+
+INCMODEL1       := -I$(MODEL1DIR)
+INCMODEL2       := -I$(MODEL2DIR)
+INCMODELS       := $(INCMODEL1) $(INCMODEL2)
+
+INCCONFIG       := -I$(CONFIGDIR)
+INCFLEXI        := -I$(FLEXIDIR)
+INCLEGACY       := -I$(LEGACYDIR)
+INCSPECTRUMHPP  := -I$(ABSBASEDIR)/../
+
+LIBMODEL1       := $(MODEL1DIR)/lib$(MODEL1)$(LIBEXT)
+LIBMODEL2       := $(MODEL2DIR)/lib$(MODEL2)$(LIBEXT)
+LIBMODELS       := $(LIBMODEL1) $(LIBMODEL2)
+
+LIBFLEXI        := $(FLEXIDIR)/libflexisusy$(LIBEXT)
+LIBLEGACY       := $(LEGACYDIR)/liblegacy$(LIBEXT)
+
+INCEIGEN        := -I../extras/eigen3
+
+FLEXINCS := $(INCCONFIG) $(INCFLEXI) $(INCLEGACY) $(INCMODELS) $(INCEIGEN) $(INCSPECTRUMHPP)
+FLEXLIBS := $(LIBMODELS) $(LIBFLEXI) $(LIBLEGACY)
+#**********************
+
 # Location of gambit sub-directories
 COREDIR = Core
 MODELDIR = Models
@@ -76,6 +120,7 @@ EWPODIR = EWPOBit
 DARKDIR = DarkBit
 FLAVDIR = FlavBit
 HIGGSDIR = HiggsBit
+SPECDIR = SpecBit
 DECAYDIR = DecayBit
 EXAMPLEADIR = ExampleBit_A
 EXAMPLEBDIR = ExampleBit_B
@@ -96,8 +141,8 @@ BOSSMINIDIR = ../extras/boss
 GCC++EXTRA= -Woverloaded-virtual
 # added -I. as a hack to find cmake_variables.hpp 
 CFLAGS= -I$(COREDIR)/include \
+  -I$(MODELDIR)/include -I$(MODELDIR)/models\
   -I. \
-  -I$(MODELDIR)/include \
   -I$(UTILSDIR)/include \
   -I$(PRINTERSDIR)/include \
   -I$(LOGGINGDIR)/include \
@@ -111,6 +156,7 @@ CFLAGS= -I$(COREDIR)/include \
   -I$(DARKDIR)/include \
   -I$(FLAVDIR)/include \
   -I$(HIGGSDIR)/include \
+  -I$(SPECDIR)/include \
   -I$(DECAYDIR)/include \
   -I$(YAMLDIR)/include \
   -I$(SLHAEADIR) \
@@ -118,6 +164,7 @@ CFLAGS= -I$(COREDIR)/include \
   -I$(MCUTILSDIR)/include \
   -I$(FASTSIMDIR)/include \
   -I$(MULTINESTINC) \
+  $(FLEXINCS) \
   -I$cmake
 
 ifdef CPPFLAGS
@@ -175,6 +222,8 @@ else
   BOOST_DATE_TIME := $(filter libboost_date_time.%,$(notdir $(wildcard /usr/lib/*)))
   BOOST_LDFLAGS += $(if $(BOOST_DATE_TIME), -lboost_date_time -lboost_regex)
 endif
+# Ben> I had a need to create directories in the logging system, and boost_filesystem seemed the most portable option. However, it is not a header-only library, so we need to link to it now, and also to boost_system which it apparently depends on.
+BOOST_LDFLAGS += -lboost_system -lboost_filesystem
 ifndef SHH
   $(info INFO:)
   $(info -- Boost Flags --)
@@ -320,10 +369,12 @@ COREINC:=$(wildcard $(COREDIR)/include/*hpp) $(wildcard $(COREDIR)/include/*h)
 CORESRC:=$(wildcard $(COREDIR)/src/*cpp)
 COREOBJS:=$(addprefix $(COREDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$(CORESRC))))
 
-MODELINC:=$(wildcard $(MODELDIR)/include/*hpp) $(wildcard $(MODELDIR)/include/*/*hpp) \
+MODELINC:=$(wildcard $(MODELDIR)/include/*hpp) $(wildcard $(MODELDIR)/models/*hpp) \
  $(wildcard $(MODELDIR)/include/*h) $(wildcard $(MODELDIR)/include/*/*h)
 MODELSRC:=$(wildcard $(MODELDIR)/src/*cpp)
-MODELOBJS:=$(addprefix $(MODELDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$(MODELSRC))))
+MODELSRCmodels:= $(wildcard $(MODELDIR)/models/*cpp)
+MODELOBJS:=$(addprefix $(MODELDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$(MODELSRC)))) \
+           $(addprefix $(MODELDIR)/models/,$(notdir $(patsubst %.cpp,%.o,$(MODELSRCmodels))))
 
 UTILSINC:=$(wildcard $(UTILSDIR)/include/*hpp) $(wildcard $(UTILSDIR)/include/*h)
 UTILSSRC:=$(wildcard $(UTILSDIR)/src/*cpp)
@@ -358,6 +409,10 @@ HIGGSINC:=$(wildcard $(HIGGSDIR)/include/*hpp) $(wildcard $(HIGGSDIR)/include/*h
 HIGGSSRC:=$(wildcard $(HIGGSDIR)/src/*cpp)
 HIGGSOBJS:=$(addprefix $(HIGGSDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$(HIGGSSRC))))
 
+SPECINC:=$(wildcard $(SPECDIR)/include/*hpp) $(wildcard $(SPECDIR)/include/*h)
+SPECSRC:=$(wildcard $(SPECDIR)/src/*cpp)
+SPECOBJS:=$(addprefix $(SPECDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$(SPECSRC))))
+
 DECAYINC:=$(wildcard $(DECAYDIR)/include/*hpp) $(wildcard $(DECAYDIR)/include/*h)
 DECAYSRC:=$(wildcard $(DECAYDIR)/src/*cpp)
 DECAYOBJS:=$(addprefix $(DECAYDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$(DECAYSRC))))
@@ -382,7 +437,8 @@ EXAMPLE_BOBJS:=$(addprefix $(EXAMPLEBDIR)/build/,$(notdir $(patsubst %.cpp,%.o,$
 STANDALONEINC = $(BACKENDINC) $(UTILSINC) $(MODELINC) $(LOGINC)
 GAMBITINC = $(PRINTINC) $(COREINC)
 STANDALONEOBJS = $(MODELOBJS) $(UTILSOBJS) $(LOGOBJS) $(BACKENDOBJS)
-MODULEOBJS = $(SCANOBJS) $(DARKOBJS) $(FLAVOBJS) $(HIGGSOBJS) $(DECAYOBJS) $(EXAMPLE_AOBJS) $(EXAMPLE_BOBJS) $(EWPOOBJS)
+MODULEOBJS = $(SCANOBJS) $(DARKOBJS) $(FLAVOBJS) $(HIGGSOBJS) $(SPECOBJS) $(DECAYOBJS) $(EXAMPLE_AOBJS) $(EXAMPLE_BOBJS) $(FLEXLIBS) $(EWPOOBJS)
+
 ifdef COLLIDE
   MODULEOBJS += $(COLLIDEROBJS)
 endif
@@ -390,7 +446,7 @@ ALLOBJECTS = $(STANDALONEOBJS) $(MODULEOBJS) $(PRINTOBJS) $(COREOBJS)
 
 ROLLCALL_HEADERS:=$(wildcard */*/*_rollcall.hpp) $(wildcard */*/*/*_rollcall.hpp)
 FRONTEND_HEADERS:=$(wildcard Backends/include/frontends/*.hpp)
-MODEL_HEADERS:=$(wildcard Models/include/models/*.hpp)
+MODEL_HEADERS:=$(wildcard Models/models/*.hpp)
 FUNCTOR_TYPES:= $(UTILSDIR)/include/all_functor_types.hpp
 MODULE_HARVESTER:= $(UTILSDIR)/scripts/module_harvester.py
 BACKEND_HARVESTER:= $(BACKENDDIR)/scripts/backend_harvester.py
@@ -444,6 +500,10 @@ $(MODELDIR)/build/%.o: $(MODELDIR)/src/%.cpp $(STANDALONEINC)
 	@echo ___________Compiling $<:
 	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
 
+$(MODELDIR)/models/%.o: $(MODELDIR)/models/%.cpp $(STANDALONEINC)
+	@echo ___________Compiling $<:
+	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
+
 $(SCANDIR)/build/%.o: $(SCANDIR)/src/%.cpp $(STANDALONEINC) $(SCANINC)
 	@echo ___________Compiling $<:
 	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
@@ -468,6 +528,14 @@ $(FLAVDIR)/build/%.o: $(FLAVDIR)/src/%.cpp $(STANDALONEINC) $(FLAVINC)
 	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
 
 $(HIGGSDIR)/build/%.o: $(HIGGSDIR)/src/%.cpp $(STANDALONEINC) $(HIGGSINC)
+	@echo ___________Compiling $<:
+	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
+
+$(SPECDIR)/build/%.o: $(SPECDIR)/src/%.cpp $(STANDALONEINC) $(SPECINC)
+	@echo ___________Compiling $<:
+	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
+
+$(SPECDIR)/build/%.o: $(SPECDIR)/src/%.cpp $(STANDALONEINC) $(SPECINC)
 	@echo ___________Compiling $<:
 	$(CC) $(CFLAGS) $(CCEXTRA) -c $< -o $@
 
@@ -702,6 +770,7 @@ clean_modules:
 	@rm -rf $(FUNCTOR_TYPES)
 	@rm -rf */build/*
 	@rm -f $(COLLIDERDIR)/src/analyses/*.o
+	@rm -f $(MODELDIR)/models/*.o
 	@rm -f $(COLLIDERDIR)/src/delphes/*_dict.*
 
 clean_executables:

@@ -25,9 +25,10 @@ class outer
 
     /// Constructor
     outer(inner1& inner1instance, inner2& inner2instance) : Insides1 (inner1instance), Insides2 (inner2instance) {}
-
+   
 
   public:
+
     // Actually probably no need for these to be here
     virtual double set_somevar(double) = 0;
     virtual double get_somevar() = 0;
@@ -35,7 +36,7 @@ class outer
     /// Internal references to instances of the inner classes.
     inner1& Insides1;
     inner2& Insides2;
-
+  
 };
 
 
@@ -69,7 +70,9 @@ class specialised_outer : public outer
       public:
         specialised_inner2(outer& x) : my_parent(x) {}
         void set_mB(double input_mB)                 { mB = U(input_mB); }
+
         double get_f_of_mB(double par1, double par2) { return double(mB) * par1 + par2 * my_parent.get_somevar(); }
+
     };   
 
     /// Internal instances of the derived inner classes
@@ -77,6 +80,7 @@ class specialised_outer : public outer
     specialised_inner2<T> myInner2;
 
     double somevar;
+
 
   public:
     double set_somevar(double x) { somevar = x; }
