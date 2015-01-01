@@ -51,7 +51,6 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 # for those compilers.  Any passed FC really only needs
 # 'ifort' or 'gfortran' in the name, e.g. gfortran-4.9
 # would be valid.
-#ifeq (,$(filter $(FC),ifort gfortran))
 ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC)))
   FC := $(or $(shell which ifort 2> /dev/null),\
              $(shell which gfortran 2> /dev/null),\
@@ -200,69 +199,65 @@ ifort gfortran:
 
 # Rule for building programs
 $(fprograms): % : %.f90
-	@echo "===== Compiling $@ ====="
+	@echo "===== Compiling $@ =====" $(OUTPUT_PIPE)
 #	$(FC) $(FFLAGS) -o $@ $< $(filter %.o,$^)
 	$(FC) $(FFLAGS) $(filter-out $<,$^) -o $@ $<
 
 # Rule for building objects
 $(fobjects): %.o : %.f90
-	@echo "===== Compiling $@ ====="
+	@echo "===== Compiling $@ =====" $(OUTPUT_PIPE)
 	$(FC) $(FFLAGS) -o $@ -c $<
 
 # Rule for building static library
 $(statlib): $(fobjects)
-	@echo "===== Generating $@ ====="
+	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
 	ar rcs $@ $^
 
 # Rule for building shared library
 # We recompile from source to ensure -fPIC flag
 # regardless if that flag is used elsewhere.
-#$(sharedlib): $(fobjects)
-#	@echo "===== Generating $@ ====="
-#	$(FC) -shared -o $@ $^
 $(sharedlib): $(fobjects:.o=.f90)
-	@echo "===== Generating $@ ====="
+	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
 	$(FC) $(SOFFLAGS) -shared -o $@ $^
 
 # Generate tar archive
 tar: $(tarfile)
 $(tarfile): $(fsources) $(extrafiles)
-	@echo "===== Generating $@ ====="
+	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
 #	tar -czvf $@ $^
 	tar -czf $@ $^
 
 # Generate archive file
 dist: $(distfile)
 $(distfile): $(fsources) $(extrafiles)
-	@echo "===== Generating $@ ====="
+	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
 	mkdir -p ".archive-temp/$(DIST_DIR)"
 	cp -al --parents $^ ".archive-temp/$(DIST_DIR)/"
-#	tar -czvf $@ -C ".archive-temp" "$(DIST_DIR)"
 	tar -czf $@ -C ".archive-temp" "$(DIST_DIR)"
 	rm -rf ".archive-temp"
 
 # Remove files
 clean: FORCE
-	@echo "===== Cleaning ====="
+	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
 	-rm -rf $(cleanfiles)
 cleaner: FORCE
-	@echo "===== Cleaning ====="
+	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
 	-rm -rf $(cleanerfiles)
 cleanest: FORCE
-	@echo "===== Cleaning ====="
+	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
 	-rm -rf $(cleanestfiles)
 cleanish: FORCE
-	@echo "===== Cleaning ====="
+	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
 	-rm -rf $(cleanishfiles)
 
 # Remove tar file
 clean-tar: FORCE
-	@echo "===== Deleting tar file ====="
+	@echo "===== Deleting tar file =====" $(OUTPUT_PIPE)
 	-rm -f $(tarfile)
 
 # Remove distributable tar file
 clean-dist: FORCE
-	@echo "===== Deleting distributable files ====="
+	@echo "===== Deleting distributable files =====" $(OUTPUT_PIPE)
 	-rm -f $(distfile)
 
 # Clean targets
