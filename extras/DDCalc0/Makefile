@@ -85,7 +85,7 @@ ifneq (,$(findstring gfortran,$(FC)))
   # disable compile-time range checking due to large integer
   # constants in math routines (allows for INTEGER*8)
   ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
-    FFLAGS += -fno-range-check
+    override FFLAGS += -fno-range-check
   endif
 endif
 
