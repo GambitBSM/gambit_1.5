@@ -8,11 +8,15 @@ MODULE DDCALC0
 ! and corresponding likelihoods/exclusion levels.
 ! 
 ! To compile:
-!     gfortran -O3 -fno-range-check -o DDCalc0 DDCalc0.f90
-!     ifort -fast -o DDCalc0 DDCalc0.f90
+!     gfortran -O3 -fno-range-check -c -o DDCalc0.o DDCalc0.f90
+!     ifort -fast -c -o DDCalc0.o DDCalc0.f90
+! 
+! To compile program 'DDCalc0run':
+!     gfortran -O3 -fno-range-check DDCalc0.f90 -o DDCalc0run DDCalc0run.f90
+!     ifort -fast DDCalc0.f90 -o DDCalc0run DDCalc0run.f90
 ! 
 ! To see usage:
-!     ./DDCalc0 --help
+!     ./DDCalc0run --help
 ! 
 ! 
 !   Created by Chris Savage
@@ -115,9 +119,6 @@ MODULE DDCALC0
 !  * TIME UTILITY FUNCTIONS
 !    Utility functions for examining wall or CPU time.
 ! 
-! PROGRAM
-!   A simple program that just calls the main() routine in the module.
-! 
 !#######################################################################
 
 
@@ -146,7 +147,8 @@ PRIVATE
 ! Interfaces are used to provide an exernally accessible name that
 ! differs from the actual function name (the latter will remain only
 ! privately accessible).  The externally accessible names all include
-! a 'DDCalc0_' prefix.
+! a 'DDCalc0_' prefix or an experiment-specific prefix (e.g.
+! 'LUX_2013_').
 ! 
 ! Public constants are declared in the constants section below.
 
@@ -185,6 +187,11 @@ PUBLIC :: DDCalc0_SetSHM
 ! be negative.  In all cases, 'p' refers to proton and 'n' to neutron.
 PUBLIC :: DDCalc0_SetWIMP_mfa,DDCalc0_SetWIMP_mG,DDCalc0_SetWIMP_msigma
 
+! Same as above, but retrieves current WIMP parameters.
+! The only difference: cross-sections are always positive, regardless
+! of the sign of the corresponding coupling.
+PUBLIC :: DDCalc0_GetWIMP_mfa,DDCalc0_GetWIMP_mG,DDCalc0_GetWIMP_msigma
+
 
 ! EXPERIMENT-SPECIFIC ROUTINES -----------------------------------------
 
@@ -199,51 +206,71 @@ PUBLIC :: DDCalc0_SetWIMP_mfa,DDCalc0_SetWIMP_mG,DDCalc0_SetWIMP_msigma
 ! performed for analysis sub-intervals (i.e. intervals between
 ! observed events).  This is only necessary for maximum gap
 ! calculations and can be set to .FALSE. for likelihood analyses.
-PUBLIC :: LUX_2013_Init,DARWIN_Ar_2014_Init,DARWIN_Xe_2014_Init
+PUBLIC :: XENON100_2012_Init,LUX_2013_Init, &
+          DARWIN_Ar_2014_Init,DARWIN_Xe_2014_Init
+
+! Set minimum recoil energy Emin to consider [keV] (initially set to
+! 0 keV):
+!     SUBROUTINE SetEmin(Emin)
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin, &
+          DARWIN_Ar_2014_SetEmin,DARWIN_Xe_2014_SetEmin
 
 ! Rate calculation:
 !     SUBROUTINE CalcRates()
 ! Performs the rate calculations used for likelihoods/confidence
 ! intervals.  Must be called after any changes to the WIMP parameters.
 ! Actual calculation values are accessed through other routines.
-PUBLIC :: LUX_2013_CalcRates,DARWIN_Ar_2014_CalcRates,DARWIN_Xe_2014_CalcRates
+PUBLIC :: XENON100_2012_CalcRates,LUX_2013_CalcRates, &
+          DARWIN_Ar_2014_CalcRates,DARWIN_Xe_2014_CalcRates
 
 ! Number of observed events in the analysis:
 !     INTEGER FUNCTION Events()
-PUBLIC :: LUX_2013_Events,DARWIN_Ar_2014_Events,DARWIN_Xe_2014_Events
+PUBLIC :: XENON100_2012_Events,LUX_2013_Events, &
+          DARWIN_Ar_2014_Events,DARWIN_Xe_2014_Events
 
 ! Average expected number of background events in the analysis:
 !     REAL*8 FUNCTION Background()
-PUBLIC :: LUX_2013_Background,DARWIN_Ar_2014_Background,DARWIN_Xe_2014_Background
+PUBLIC :: XENON100_2012_Background,LUX_2013_Background, &
+          DARWIN_Ar_2014_Background,DARWIN_Xe_2014_Background
 
 ! Average expected number of signal events in the analysis:
 !     REAL*8 FUNCTION Signal()
 ! Or the separate spin-independent and spin-dependent contributions:
 !     REAL*8 FUNCTION SignalSI()
 !     REAL*8 FUNCTION SignalSD()
-PUBLIC :: LUX_2013_Signal,  DARWIN_Ar_2014_Signal,  DARWIN_Xe_2014_Signal
-PUBLIC :: LUX_2013_SignalSI,DARWIN_Ar_2014_SignalSI,DARWIN_Xe_2014_SignalSI
-PUBLIC :: LUX_2013_SignalSD,DARWIN_Ar_2014_SignalSD,DARWIN_Xe_2014_SignalSD
+PUBLIC :: XENON100_2012_Signal,  LUX_2013_Signal,   &
+          DARWIN_Ar_2014_Signal,  DARWIN_Xe_2014_Signal
+PUBLIC :: XENON100_2012_SignalSI,LUX_2013_SignalSI, &
+          DARWIN_Ar_2014_SignalSI,DARWIN_Xe_2014_SignalSI
+PUBLIC :: XENON100_2012_SignalSD,LUX_2013_SignalSD, &
+          DARWIN_Ar_2014_SignalSD,DARWIN_Xe_2014_SignalSD
 
 ! Log-likelihood for current WIMP:
 !     REAL*8 FUNCTION LogLikelihood()
 ! Based upon a Poisson distribution in the number of observed events
 ! given the expected background+signal.  Calc() must be called first.
-PUBLIC :: LUX_2013_LogLikelihood,DARWIN_Xe_2014_LogLikelihood,DARWIN_Ar_2014_LogLikelihood
+PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood, &
+          DARWIN_Xe_2014_LogLikelihood,DARWIN_Ar_2014_LogLikelihood
 
 ! Logarithm of the p-value for current WIMP:
 !     REAL*8 FUNCTION LogPValue()
 ! Based upon the maximum gap method if Init() called with intervals =
 ! .TRUE., a signal-only (no-background) Poisson distribution otherwise.
 ! Calc() must be called first.
-PUBLIC :: LUX_2013_LogPValue,DARWIN_Xe_2014_LogPValue,DARWIN_Ar_2014_LogPValue
+PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue, &
+          DARWIN_Xe_2014_LogPValue,DARWIN_Ar_2014_LogPValue
 
 ! Scale by which the current WIMP cross-sections must be multiplied to
 ! achieve the given p-value:
 !     REAL*8 FUNCTION ScaleToPValue(lnp)
 ! where lnp is the logarithm of the desired p-value (p=1-CL).
 ! Calc() must be called first.
-PUBLIC :: LUX_2013_ScaleToPValue,DARWIN_Xe_2014_ScaleToPValue,DARWIN_Ar_2014_ScaleToPValue
+PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue, &
+          DARWIN_Xe_2014_ScaleToPValue,DARWIN_Ar_2014_ScaleToPValue
 
 ! Detector structure initialization (ADVANCED USAGE ONLY):
 !     SUBROUTINE InitTo(D,intervals)
@@ -252,7 +279,8 @@ PUBLIC :: LUX_2013_ScaleToPValue,DARWIN_Xe_2014_ScaleToPValue,DARWIN_Ar_2014_Sca
 ! can be used in the generic routines below.  These routines are
 ! not intended for standard usage, so ignore them unless you are
 ! familiar with the internals of this code.
-PUBLIC :: LUX_2013_InitTo,DARWIN_Ar_2014_InitTo,DARWIN_Xe_2014_InitTo
+PUBLIC :: XENON100_2012_InitTo,LUX_2013_InitTo, &
+          DARWIN_Ar_2014_InitTo,DARWIN_Xe_2014_InitTo
 
 
 ! MAIN ROUTINES --------------------------------------------------------
@@ -377,6 +405,25 @@ INTERFACE DDCalc0_CalcRates
   MODULE PROCEDURE CalcRates
 END INTERFACE
 
+! Event routines (utility)
+PUBLIC :: DDCalc0_Events,DDCalc0_Background
+PUBLIC :: DDCalc0_Signal,DDCalc0_SignalSI,DDCalc0_SignalSD
+INTERFACE DDCalc0_Events
+  MODULE PROCEDURE GetEvents
+END INTERFACE
+INTERFACE DDCalc0_Background
+  MODULE PROCEDURE GetBackground
+END INTERFACE
+INTERFACE DDCalc0_Signal
+  MODULE PROCEDURE GetSignal
+END INTERFACE
+INTERFACE DDCalc0_SignalSI
+  MODULE PROCEDURE GetSignalSI
+END INTERFACE
+INTERFACE DDCalc0_SignalSD
+  MODULE PROCEDURE GetSignalSD
+END INTERFACE
+
 ! Likelihood/p-value routines
 PUBLIC :: DDCalc0_LogLikelihood,DDCalc0_LogPValue,DDCalc0_ScaleToPValue
 INTERFACE DDCalc0_LogLikelihood
@@ -398,7 +445,7 @@ END INTERFACE
 ! VERSION --------------------------------------------------------------
 
 ! Version of this software
-CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.11'
+CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.15'
 
 
 ! MATH CONSTANTS -------------------------------------------------------
@@ -619,7 +666,7 @@ TYPE(HaloStruct), PRIVATE :: Halo
 ! function of energy, for the overall analysis range and possibly
 ! for subintervals/bins.
 ! 
-TYPE, PUBLIC :: EfficiencyStruct
+TYPE, PUBLIC :: DetectorEfficiencyStruct
   
   ! File containing efficiencies
   CHARACTER(LEN=1024) :: file = ''
@@ -630,13 +677,43 @@ TYPE, PUBLIC :: EfficiencyStruct
   ! Tabulated energies [keV].  Array of size [1:NE].
   REAL*8, ALLOCATABLE :: E(:)
   
-  ! Number of S1 bins/intervals with efficiencies.
-  ! Will calculate rates for each bin/interval plus total.
+  ! Number of S1 bins/sub-intervals with efficiencies (does not
+  ! include total interval). Will calculate rates for each bin/interval
+  ! plus total.
   INTEGER :: Neff = -1
   
   ! Array of size [1:NE,0:Neff] with the second index for the S1
   ! bin/interval (zero for full range)
   REAL*8, ALLOCATABLE :: eff(:,:)
+  
+END TYPE
+
+
+! DETECTOR PARAMETERS --------------------------------------------------
+
+! Structure to contain various detector parameters.
+! 
+TYPE, PUBLIC :: DetectorParameterStruct
+  
+  ! Exposure -----------------------------------
+  ! Detector fiducial mass [kg]
+  REAL*8 :: mass = 118d0
+  
+  ! Detector exposure time [day]
+  REAL*8 :: time = 85.3d0
+  
+  ! Total detector exposure [kg*day]
+  REAL*8 :: exposure = 118d0*85.3d0
+  
+  ! Isotopes -----------------------------------
+  ! Number of isotopes
+  INTEGER :: Niso = -1
+  
+  ! Detector isotopes, their mass fractions, and nuclear masses [GeV]
+  INTEGER, ALLOCATABLE :: Ziso(:)
+  INTEGER, ALLOCATABLE :: Aiso(:)
+  REAL*8, ALLOCATABLE  :: fiso(:)
+  REAL*8, ALLOCATABLE  :: Miso(:)  ! Calculated internally
   
 END TYPE
 
@@ -784,6 +861,7 @@ TYPE(DetectorRateStruct), TARGET, PRIVATE :: DefaultDetector
 ! Structures for specific experiments
 ! NOTE: These will be initialized to internally defined states and
 ! are not externally modifiable.
+TYPE(DetectorRateStruct), PRIVATE :: XENON100_2012
 TYPE(DetectorRateStruct), PRIVATE :: LUX_2013
 TYPE(DetectorRateStruct), PRIVATE :: DARWIN_Ar_2014,DARWIN_Xe_2014
 
@@ -850,6 +928,11 @@ TYPE(RandState), PRIVATE :: DEFAULT_RandState
 !     under the new name (if interface is public).
 !  *) Allow for multiple routines to be accessed in the same
 !     name, as long as signatures are not ambiguous.
+
+! Interpolation functions: scalar and array-valued
+INTERFACE LinearInterpolate
+  MODULE PROCEDURE LinearInterpolate_S,LinearInterpolate_A
+END INTERFACE
 
 ! Convert E to vmin given the scalar or vector arguments.
 ! Access all versions under function name 'EToVmin'.
@@ -920,14 +1003,15 @@ END SUBROUTINE
 
 
 !-----------------------------------------------------------------------
-! Sets the WIMP mass and couplings.  Couplings are specified via
+! Sets/gets the WIMP mass and couplings.  Couplings are specified via
 ! the commonly used fp/fn (spin-independent) and ap/an (spin-dependent)
 ! normalizations.
 ! 
 ! For more detailed WIMP settings, see:
 !   SetWIMP() [interface name: DDCalc0_SetWIMP]
+!   GetWIMP() [interface name: DDCalc0_GetWIMP]
 ! 
-! Input arguments:
+! Input/output arguments:
 !   m           WIMP mass [GeV].
 !   fp          Spin-independent WIMP-proton coupling [GeV^-2].
 !               Related by GpSI = 2 fp.
@@ -944,15 +1028,22 @@ SUBROUTINE DDCalc0_SetWIMP_mfa(m,fp,fn,ap,an)
   CALL SetWIMP(m=m,fp=fp,fn=fn,ap=ap,an=an)
 END SUBROUTINE
 
+SUBROUTINE DDCalc0_GetWIMP_mfa(m,fp,fn,ap,an)
+  IMPLICIT NONE
+  REAL*8, INTENT(OUT) :: m,fp,fn,ap,an
+  CALL GetWIMP(m=m,fp=fp,fn=fn,ap=ap,an=an)
+END SUBROUTINE
+
 
 !-----------------------------------------------------------------------
-! Sets the WIMP mass and couplings.  Couplings are specified via
+! Sets/gets the WIMP mass and couplings.  Couplings are specified via
 ! their effective 4-fermion vertex couplings 'G'.
 ! 
 ! For more detailed WIMP settings, see:
 !   SetWIMP() [interface name: DDCalc0_SetWIMP]
+!   GetWIMP() [interface name: DDCalc0_GetWIMP]
 ! 
-! Input arguments:
+! Input/output arguments:
 !   m           WIMP mass [GeV].
 !   GpSI        Spin-independent WIMP-proton coupling [GeV^-2].
 !               Related by GpSI = 2 fp.
@@ -969,16 +1060,23 @@ SUBROUTINE DDCalc0_SetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
   CALL SetWIMP(m=m,GpSI=GpSI,GnSI=GnSI,GpSD=GpSD,GnSD=GnSD)
 END SUBROUTINE
 
+SUBROUTINE DDCalc0_GetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
+  IMPLICIT NONE
+  REAL*8, INTENT(OUT) :: m,GpSI,GnSI,GpSD,GnSD
+  CALL GetWIMP(m=m,GpSI=GpSI,GnSI=GnSI,GpSD=GpSD,GnSD=GnSD)
+END SUBROUTINE
+
 
 !-----------------------------------------------------------------------
-! Sets the WIMP mass and couplings.  Couplings are specified via
-! their effective 4-fermion vertex couplings 'G'.
+! Sets/gets the WIMP mass and couplings.  Couplings are specified via
+! their corresponding WIMP-nucleon cross-sections.
 ! 
 ! For more detailed WIMP settings, see:
 !   SetWIMP() [interface name: DDCalc0_SetWIMP].
+!   GetWIMP() [interface name: DDCalc0_GetWIMP]
 ! 
-! Input arguments, give negative vale to cross-sections inputs to
-! set the corresponding coupling negative:
+! Input/output arguments.  As input, give negative value to cross-
+! sections to set the corresponding coupling negative:
 !   m           WIMP mass [GeV].
 !   sigmapSI    Spin-independent WIMP-proton cross-section [pb].
 !   sigmanSI    Spin-independent WIMP-neutron cross-section [pb].
@@ -990,6 +1088,349 @@ SUBROUTINE DDCalc0_SetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
   REAL*8, INTENT(IN) :: m,sigmapSI,sigmanSI,sigmapSD,sigmanSD
   CALL SetWIMP(m=m,sigmapSI=sigmapSI,sigmanSI=sigmanSI,                 &
                sigmapSD=sigmapSD,sigmanSD=sigmanSD)
+END SUBROUTINE
+
+SUBROUTINE DDCalc0_GetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
+  IMPLICIT NONE
+  REAL*8, INTENT(OUT) :: m,sigmapSI,sigmanSI,sigmapSD,sigmanSD
+  CALL GetWIMP(m=m,sigmapSI=sigmapSI,sigmanSI=sigmanSI,                 &
+               sigmapSD=sigmapSD,sigmanSD=sigmanSD)
+END SUBROUTINE
+
+
+
+!=======================================================================
+! XENON100 2012 ANALYSIS ROUTINES
+! Based upon the XENON100 2012 analysis [1207.5988].  Two events seen in
+! the analysis region.
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module to perform calculations for the XENON100 2012
+! analysis.  This must be called if any of the following XENON100 2012
+! routines are to be used.
+! 
+! Required input arguments:
+!     intervals   Indicates if sub-intervals should be included.
+!                 Only necessary if confidence intervals using the
+!                 maximum gap method are desired.
+! 
+SUBROUTINE XENON100_2012_Init(intervals)
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: intervals
+  
+  CALL XENON100_2012_InitTo(XENON100_2012,intervals)
+  
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Sets the minimum recoil energy to be included in the calculations.
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+! 
+! Required input arguments:
+!     Emin        The minimum recoil energy to consider [keV]
+! 
+SUBROUTINE XENON100_2012_SetEmin(Emin)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: Emin
+  LOGICAL :: intervals
+  ! Due to implementation of efficiencies and Emin,
+  ! structure needs to be reinitialized first.
+  intervals = XENON100_2012%Neff .NE. 0
+  CALL XENON100_2012_Init(intervals)
+  CALL SetDetector(XENON100_2012,Emin=Emin)
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Calculates various rate quantities using the current WIMP.
+! Must be called each time the WIMP parameters are modified.
+! 
+SUBROUTINE XENON100_2012_CalcRates()
+  IMPLICIT NONE
+  CALL CalcRates(XENON100_2012)
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+FUNCTION XENON100_2012_Events() RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  CALL GetRates(XENON100_2012,Nevents=N)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+FUNCTION XENON100_2012_Background() RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  CALL GetRates(XENON100_2012,background=b)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+FUNCTION XENON100_2012_Signal() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(XENON100_2012,signal=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+FUNCTION XENON100_2012_SignalSI() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(XENON100_2012,signal_si=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+FUNCTION XENON100_2012_SignalSD() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(XENON100_2012,signal_sd=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log-likelihood for the current WIMP mass and couplings.
+! Uses a Poisson distribution in the number of observed events N:
+!    P(N|s+b)
+! where s is the average expected signal and b is the average expected
+! background.
+! 
+FUNCTION XENON100_2012_LogLikelihood() RESULT(lnlike)
+  IMPLICIT NONE
+  REAL*8 :: lnlike
+  lnlike = LogLikelihood(XENON100_2012)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log of the p-value for the current WIMP mass and
+! couplings (NO BACKGROUND SUBTRACTION).  Uses the maximum gap method
+! if XENON100_2012_Init was called with argument intervals=.TRUE.,
+! otherwise uses a Poisson distribution in the number of observed
+! events N:
+!    P(N|s)
+! where s is the average expected signal (background contributions are
+! ignored).
+! 
+FUNCTION XENON100_2012_LogPValue() RESULT(lnp)
+  IMPLICIT NONE
+  REAL*8 :: lnp
+  lnp = LogPValue(XENON100_2012)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Required input argument:
+!   lnp         The logarithm of the desired p-value (p = 1-CL).
+! 
+FUNCTION XENON100_2012_ScaleToPValue(lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp
+  x = ScaleToPValue(XENON100_2012,lnp)
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! INTERNAL ROUTINE.
+! Initializes the given DetectorRateStruct to the XENON100 2012 analysis.
+! This is meant as an internal routine; external access should be
+! through XENON100_2012_InitDetector instead.
+! 
+! The efficiencies used here were generated using TPCMC.
+! 
+! Required input arguments:
+!     D           The DetectorRateStruct to initialize
+!     intervals   Indicates if sub-intervals should be included
+! 
+SUBROUTINE XENON100_2012_InitTo(D,intervals)
+  IMPLICIT NONE
+  TYPE(DetectorRateStruct), INTENT(OUT) :: D
+  LOGICAL, INTENT(IN) :: intervals
+  INTEGER, PARAMETER :: NE = 151
+  INTEGER, PARAMETER :: NEFF = 3
+  ! Efficiency curves energy tabulation points
+  REAL*8, PARAMETER :: E(NE)                                            &
+      =       (/ 0.10000d0, 0.10471d0, 0.10965d0, 0.11482d0, 0.12023d0, &
+      0.12589d0, 0.13183d0, 0.13804d0, 0.14454d0, 0.15136d0, 0.15849d0, &
+      0.16596d0, 0.17378d0, 0.18197d0, 0.19055d0, 0.19953d0, 0.20893d0, &
+      0.21878d0, 0.22909d0, 0.23988d0, 0.25119d0, 0.26303d0, 0.27542d0, &
+      0.28840d0, 0.30200d0, 0.31623d0, 0.33113d0, 0.34674d0, 0.36308d0, &
+      0.38019d0, 0.39811d0, 0.41687d0, 0.43652d0, 0.45709d0, 0.47863d0, &
+      0.50119d0, 0.52481d0, 0.54954d0, 0.57544d0, 0.60256d0, 0.63096d0, &
+      0.66069d0, 0.69183d0, 0.72444d0, 0.75858d0, 0.79433d0, 0.83176d0, &
+      0.87096d0, 0.91201d0, 0.95499d0, 1.0000d0,  1.0471d0,  1.0965d0,  &
+      1.1482d0,  1.2023d0,  1.2589d0,  1.3183d0,  1.3804d0,  1.4454d0,  &
+      1.5136d0,  1.5849d0,  1.6596d0,  1.7378d0,  1.8197d0,  1.9055d0,  &
+      1.9953d0,  2.0893d0,  2.1878d0,  2.2909d0,  2.3988d0,  2.5119d0,  &
+      2.6303d0,  2.7542d0,  2.8840d0,  3.0200d0,  3.1623d0,  3.3113d0,  &
+      3.4674d0,  3.6308d0,  3.8019d0,  3.9811d0,  4.1687d0,  4.3652d0,  &
+      4.5709d0,  4.7863d0,  5.0119d0,  5.2481d0,  5.4954d0,  5.7544d0,  &
+      6.0256d0,  6.3096d0,  6.6069d0,  6.9183d0,  7.2444d0,  7.5858d0,  &
+      7.9433d0,  8.3176d0,  8.7096d0,  9.1201d0,  9.5499d0, 10.000d0,   &
+     10.471d0,  10.965d0,  11.482d0,  12.023d0,  12.589d0,  13.183d0,   &
+     13.804d0,  14.454d0,  15.136d0,  15.849d0,  16.596d0,  17.378d0,   &
+     18.197d0,  19.055d0,  19.953d0,  20.893d0,  21.878d0,  22.909d0,   &
+     23.988d0,  25.119d0,  26.303d0,  27.542d0,  28.840d0,  30.200d0,   &
+     31.623d0,  33.113d0,  34.674d0,  36.308d0,  38.019d0,  39.811d0,   &
+     41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
+     54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
+     72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
+     95.499d0,100.00d0 /)
+  ! Efficiency (total)
+  REAL*8, PARAMETER :: EFF0(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      4.00000d-6,1.00000d-6,4.00000d-6,2.00000d-6,5.00000d-6,1.20000d-5,&
+      1.00000d-5,1.40000d-5,2.60000d-5,3.60000d-5,3.50000d-5,7.60000d-5,&
+      8.70000d-5,1.16000d-4,1.76000d-4,2.20000d-4,3.49000d-4,4.83000d-4,&
+      7.35000d-4,9.10000d-4,1.33200d-3,1.65400d-3,2.34300d-3,2.92200d-3,&
+      4.00500d-3,5.06900d-3,6.38100d-3,7.86100d-3,9.81400d-3,1.27250d-2,&
+      1.56120d-2,1.92370d-2,2.36900d-2,2.82510d-2,3.36450d-2,4.02370d-2,&
+      4.66420d-2,5.47130d-2,6.41220d-2,7.29530d-2,8.46030d-2,9.60320d-2,&
+      1.09300d-1,1.23320d-1,1.39660d-1,1.55620d-1,1.74690d-1,1.94520d-1,&
+      2.16200d-1,2.38030d-1,2.61850d-1,2.85090d-1,3.09390d-1,3.29750d-1,&
+      3.52810d-1,3.70130d-1,3.84230d-1,3.95210d-1,4.00710d-1,4.03610d-1,&
+      4.01040d-1,3.94630d-1,3.84650d-1,3.72750d-1,3.59150d-1,3.43050d-1,&
+      3.27380d-1,3.13490d-1,2.98190d-1,2.83900d-1,2.72670d-1,2.60230d-1,&
+      2.50270d-1,2.39970d-1,2.30500d-1,2.21070d-1,2.10540d-1,1.98930d-1,&
+      1.86480d-1,1.70950d-1,1.53000d-1,1.32510d-1,1.09770d-1,8.64570d-2,&
+      6.48630d-2,4.59830d-2,3.03230d-2,1.85540d-2,1.06490d-2,5.61100d-3,&
+      2.66100d-3,1.22700d-3,5.37000d-4,2.15000d-4,7.20000d-5,2.70000d-5,&
+      6.00000d-6,5.00000d-6,2.00000d-6,0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (first interval)
+  REAL*8, PARAMETER :: EFF1(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      4.00000d-6,1.00000d-6,2.00000d-6,2.00000d-6,2.00000d-6,7.00000d-6,&
+      7.00000d-6,1.20000d-5,1.80000d-5,1.90000d-5,1.80000d-5,4.50000d-5,&
+      5.00000d-5,6.60000d-5,9.90000d-5,1.31000d-4,2.04000d-4,2.62000d-4,&
+      3.86000d-4,4.72000d-4,6.91000d-4,8.25000d-4,1.12100d-3,1.32800d-3,&
+      1.81300d-3,2.17300d-3,2.63700d-3,3.16700d-3,4.01900d-3,5.00000d-3,&
+      5.84600d-3,7.08400d-3,8.07700d-3,9.52700d-3,1.07220d-2,1.22500d-2,&
+      1.38680d-2,1.54030d-2,1.73800d-2,1.91490d-2,2.11010d-2,2.34970d-2,&
+      2.55000d-2,2.75090d-2,2.98440d-2,3.21020d-2,3.46350d-2,3.63250d-2,&
+      3.87330d-2,3.98790d-2,4.15350d-2,4.20320d-2,4.20200d-2,4.11880d-2,&
+      3.96450d-2,3.72390d-2,3.35650d-2,2.97950d-2,2.55980d-2,2.09740d-2,&
+      1.67220d-2,1.26450d-2,9.26300d-3,6.46100d-3,4.18800d-3,2.65400d-3,&
+      1.49700d-3,9.08000d-4,4.94000d-4,2.52000d-4,1.15000d-4,5.30000d-5,&
+      1.80000d-5,1.00000d-5,3.00000d-6,2.00000d-6,0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (second interval)
+  REAL*8, PARAMETER :: EFF2(NE)                                         &
+     =        (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 2.00000d-6,0.00000d0, 3.00000d-6,5.00000d-6,&
+      2.00000d-6,2.00000d-6,7.00000d-6,1.60000d-5,1.30000d-5,2.40000d-5,&
+      2.70000d-5,4.40000d-5,6.60000d-5,7.10000d-5,1.23000d-4,1.81000d-4,&
+      2.80000d-4,3.18000d-4,4.81000d-4,6.01000d-4,8.92000d-4,1.12500d-3,&
+      1.57100d-3,1.97900d-3,2.53400d-3,3.11900d-3,3.76600d-3,4.85500d-3,&
+      5.99400d-3,7.26200d-3,8.97600d-3,1.06020d-2,1.24910d-2,1.47470d-2,&
+      1.67300d-2,1.92640d-2,2.21710d-2,2.49040d-2,2.81090d-2,3.10880d-2,&
+      3.45400d-2,3.84720d-2,4.16550d-2,4.56960d-2,4.96820d-2,5.38700d-2,&
+      5.85350d-2,6.20200d-2,6.60030d-2,6.81040d-2,7.06770d-2,7.07810d-2,&
+      7.09020d-2,6.90490d-2,6.44180d-2,5.90480d-2,5.28870d-2,4.62860d-2,&
+      3.85470d-2,3.06790d-2,2.35860d-2,1.74240d-2,1.25220d-2,8.14600d-3,&
+      5.31700d-3,3.32900d-3,1.80300d-3,1.01000d-3,5.14000d-4,2.38000d-4,&
+      1.05000d-4,5.40000d-5,1.80000d-5,7.00000d-6,3.00000d-6,0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiency (third interval)
+  REAL*8, PARAMETER :: EFF3(NE)                                         &
+      =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      1.00000d-6,0.00000d0, 1.00000d-6,1.00000d-6,4.00000d-6,7.00000d-6,&
+      1.00000d-5,6.00000d-6,1.10000d-5,1.80000d-5,2.20000d-5,4.00000d-5,&
+      6.90000d-5,1.20000d-4,1.60000d-4,2.28000d-4,3.30000d-4,4.69000d-4,&
+      6.21000d-4,9.17000d-4,1.21000d-3,1.57500d-3,2.02900d-3,2.87000d-3,&
+      3.77200d-3,4.89100d-3,6.63700d-3,8.12200d-3,1.04320d-2,1.32400d-2,&
+      1.60440d-2,2.00460d-2,2.45710d-2,2.89000d-2,3.53930d-2,4.14470d-2,&
+      4.92590d-2,5.73430d-2,6.81650d-2,7.78210d-2,9.03720d-2,1.04320d-1,&
+      1.18930d-1,1.36130d-1,1.54310d-1,1.74960d-1,1.96690d-1,2.17780d-1,&
+      2.42270d-1,2.63840d-1,2.86240d-1,3.06370d-1,3.22220d-1,3.36350d-1,&
+      3.45770d-1,3.51300d-1,3.51800d-1,3.48860d-1,3.42440d-1,3.32250d-1,&
+      3.20570d-1,3.09260d-1,2.95900d-1,2.82640d-1,2.72040d-1,2.59930d-1,&
+      2.50150d-1,2.39910d-1,2.30480d-1,2.21060d-1,2.10540d-1,1.98930d-1,&
+      1.86480d-1,1.70950d-1,1.53000d-1,1.32510d-1,1.09770d-1,8.64570d-2,&
+      6.48630d-2,4.59830d-2,3.03230d-2,1.85540d-2,1.06490d-2,5.61100d-3,&
+      2.66100d-3,1.22700d-3,5.37000d-4,2.15000d-4,7.20000d-5,2.70000d-5,&
+      6.00000d-6,5.00000d-6,2.00000d-6,0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      0.00000d0, 0.00000d0 /)
+  ! Efficiencies array (2D)
+  REAL*8, PARAMETER :: EFF(NE,0:NEFF)                                   &
+      = RESHAPE( (/ EFF0(:), EFF1(:), EFF2(:), EFF3(:) /) ,SHAPE(EFF))
+  
+  ! One call for all settings.
+  ! Most of these _must_ be there to ensure everything get initialized.
+  IF (intervals) THEN
+    CALL SetDetector(D,mass=34d0,time=224.6d0,Nevents=2,                &
+                     background=1.0d0,Zelem=54,                         &
+                     NE=NE,E=E,Neff=NEFF,eff=EFF)
+  ELSE
+    CALL SetDetector(D,mass=34d0,time=224.6d0,Nevents=2,                &
+                     background=1.0d0,Zelem=54,                         &
+                     NE=NE,E=E,Neff=0,eff=EFF(:,0:0))
+  END IF
+  D%eff_file = '[XENON100 2012]'
+  
 END SUBROUTINE
 
 
@@ -1016,6 +1457,28 @@ SUBROUTINE LUX_2013_Init(intervals)
   
   CALL LUX_2013_InitTo(LUX_2013,intervals)
   
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Sets the minimum recoil energy to be included in the calculations.
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+! 
+! Required input arguments:
+!     Emin        The minimum recoil energy to consider [keV]
+! 
+SUBROUTINE LUX_2013_SetEmin(Emin)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: Emin
+  LOGICAL :: intervals
+  ! Due to implementation of efficiencies and Emin,
+  ! structure needs to be reinitialized first.
+  intervals = LUX_2013%Neff .NE. 0
+  CALL LUX_2013_Init(intervals)
+  CALL SetDetector(LUX_2013,Emin=Emin)
 END SUBROUTINE
 
 
@@ -1175,6 +1638,7 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
      54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
      72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
      95.499d0,100.00d0 /)
+  ! LOWER 50% NR BAND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ! Efficiency (total)
   REAL*8, PARAMETER :: EFF0(NE)                                         &
       =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
@@ -1182,24 +1646,24 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 2.00000d-7,1.00000d-7,2.00000d-7,5.00000d-7,5.00000d-7,&
-      7.00000d-7,7.00000d-7,1.20000d-6,1.80000d-6,2.30000d-6,3.90000d-6,&
-      5.40000d-6,8.50000d-6,1.23000d-5,1.70000d-5,2.38000d-5,3.31000d-5,&
-      4.61000d-5,5.94000d-5,9.26000d-5,1.21600d-4,1.72500d-4,2.34500d-4,&
-      3.33300d-4,4.56700d-4,6.38400d-4,8.84300d-4,1.33540d-3,1.84720d-3,&
-      2.51600d-3,3.31170d-3,4.43180d-3,5.93570d-3,7.78490d-3,1.02271d-2,&
-      1.33162d-2,1.72063d-2,2.22009d-2,2.73286d-2,3.45888d-2,4.36821d-2,&
-      5.45799d-2,6.77302d-2,8.32638d-2,1.00680d-1,1.21170d-1,1.43630d-1,&
-      1.68140d-1,1.94250d-1,2.21300d-1,2.48970d-1,2.76390d-1,3.02480d-1,&
-      3.26300d-1,3.48160d-1,3.66100d-1,3.79720d-1,3.89880d-1,3.95620d-1,&
-      3.97780d-1,3.96640d-1,3.92580d-1,3.87090d-1,3.79880d-1,3.73050d-1,&
-      3.65850d-1,3.58740d-1,3.53390d-1,3.48230d-1,3.43970d-1,3.41220d-1,&
-      3.38810d-1,3.37650d-1,3.36940d-1,3.36130d-1,3.35760d-1,3.34690d-1,&
-      3.33280d-1,3.32160d-1,3.31870d-1,3.32150d-1,3.32200d-1,3.31440d-1,&
-      3.28070d-1,3.20960d-1,3.07340d-1,2.84620d-1,2.50940d-1,2.07520d-1,&
-      1.58600d-1,1.10370d-1,6.96978d-2,3.92375d-2,1.98434d-2,8.79110d-3,&
-      3.44320d-3,1.18140d-3,3.65300d-4,9.83000d-5,2.27000d-5,5.00000d-6,&
-      3.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      2.00000d-7,2.00000d-7,2.00000d-7,3.00000d-7,6.00000d-7,1.20000d-6,&
+      1.40000d-6,1.90000d-6,4.20000d-6,4.80000d-6,6.50000d-6,1.08000d-5,&
+      1.74000d-5,2.38000d-5,3.42000d-5,4.58000d-5,6.88000d-5,9.74000d-5,&
+      1.37700d-4,1.96200d-4,2.84900d-4,3.97300d-4,5.54700d-4,7.81600d-4,&
+      1.08660d-3,1.54220d-3,2.12830d-3,2.95810d-3,4.36510d-3,6.05560d-3,&
+      8.07280d-3,1.08272d-2,1.40706d-2,1.84873d-2,2.39837d-2,3.08424d-2,&
+      3.95926d-2,4.99352d-2,6.27487d-2,7.66224d-2,9.42524d-2,1.15720d-1,&
+      1.40320d-1,1.67930d-1,1.98780d-1,2.32650d-1,2.68550d-1,3.06370d-1,&
+      3.45110d-1,3.83720d-1,4.20080d-1,4.55080d-1,4.86810d-1,5.14040d-1,&
+      5.37080d-1,5.54520d-1,5.66770d-1,5.73020d-1,5.74600d-1,5.71510d-1,&
+      5.64900d-1,5.54790d-1,5.43390d-1,5.31050d-1,5.17910d-1,5.05330d-1,&
+      4.94050d-1,4.83350d-1,4.74620d-1,4.67740d-1,4.61250d-1,4.56760d-1,&
+      4.52870d-1,4.49950d-1,4.47830d-1,4.46160d-1,4.44270d-1,4.42740d-1,&
+      4.41050d-1,4.39550d-1,4.38810d-1,4.37010d-1,4.33900d-1,4.28450d-1,&
+      4.18620d-1,4.02840d-1,3.78120d-1,3.42460d-1,2.94850d-1,2.37970d-1,&
+      1.77820d-1,1.21260d-1,7.52971d-2,4.19808d-2,2.08447d-2,9.20250d-3,&
+      3.55500d-3,1.23880d-3,3.67200d-4,9.76000d-5,2.22000d-5,5.50000d-6,&
+      9.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0 /)
@@ -1210,20 +1674,20 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 2.00000d-7,1.00000d-7,2.00000d-7,5.00000d-7,5.00000d-7,&
-      6.00000d-7,7.00000d-7,1.20000d-6,1.80000d-6,2.30000d-6,3.80000d-6,&
-      5.20000d-6,7.90000d-6,1.18000d-5,1.66000d-5,2.28000d-5,3.16000d-5,&
-      4.33000d-5,5.57000d-5,8.52000d-5,1.12700d-4,1.59900d-4,2.15100d-4,&
-      3.04800d-4,4.11400d-4,5.74500d-4,7.88300d-4,1.16420d-3,1.59150d-3,&
-      2.16230d-3,2.78910d-3,3.71100d-3,4.89860d-3,6.29290d-3,8.15860d-3,&
-      1.03830d-2,1.31709d-2,1.66408d-2,2.02664d-2,2.50647d-2,3.07883d-2,&
-      3.72727d-2,4.46930d-2,5.28245d-2,6.11301d-2,7.03714d-2,7.93184d-2,&
-      8.75027d-2,9.49859d-2,1.01120d-1,1.05340d-1,1.07160d-1,1.06570d-1,&
-      1.03200d-1,9.76218d-2,8.97488d-2,7.98012d-2,6.90608d-2,5.76738d-2,&
-      4.66902d-2,3.63217d-2,2.71772d-2,1.96357d-2,1.34951d-2,8.86060d-3,&
-      5.57630d-3,3.35120d-3,1.90010d-3,1.02690d-3,5.29500d-4,2.54600d-4,&
-      1.14600d-4,4.86000d-5,1.93000d-5,6.70000d-6,2.90000d-6,1.40000d-6,&
-      0.00000d0, 1.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      1.00000d-7,2.00000d-7,2.00000d-7,3.00000d-7,6.00000d-7,1.10000d-6,&
+      1.10000d-6,1.70000d-6,3.60000d-6,4.50000d-6,5.70000d-6,9.30000d-6,&
+      1.54000d-5,2.07000d-5,2.90000d-5,3.92000d-5,5.91000d-5,8.30000d-5,&
+      1.17700d-4,1.62500d-4,2.37000d-4,3.26000d-4,4.56700d-4,6.23200d-4,&
+      8.61500d-4,1.21160d-3,1.64560d-3,2.25640d-3,3.25450d-3,4.43340d-3,&
+      5.82990d-3,7.69370d-3,9.85520d-3,1.27067d-2,1.61984d-2,2.03405d-2,&
+      2.56110d-2,3.15482d-2,3.86713d-2,4.64675d-2,5.56741d-2,6.63380d-2,&
+      7.77153d-2,8.96590d-2,1.02090d-1,1.14360d-1,1.25880d-1,1.36440d-1,&
+      1.45460d-1,1.51910d-1,1.55090d-1,1.55910d-1,1.53090d-1,1.46780d-1,&
+      1.37830d-1,1.26400d-1,1.12860d-1,9.78608d-2,8.25226d-2,6.74473d-2,&
+      5.35181d-2,4.07813d-2,3.01037d-2,2.13387d-2,1.44853d-2,9.50610d-3,&
+      5.88720d-3,3.47590d-3,1.97510d-3,1.07430d-3,5.52700d-4,2.55800d-4,&
+      1.12100d-4,5.05000d-5,2.12000d-5,6.90000d-6,2.10000d-6,8.00000d-7,&
+      0.00000d0, 2.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
@@ -1238,27 +1702,114 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
-      0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       1.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 1.00000d-7,&
-      2.00000d-7,6.00000d-7,5.00000d-7,4.00000d-7,1.00000d-6,1.50000d-6,&
-      2.80000d-6,3.70000d-6,7.40000d-6,8.90000d-6,1.26000d-5,1.94000d-5,&
-      2.85000d-5,4.53000d-5,6.39000d-5,9.60000d-5,1.71200d-4,2.55700d-4,&
-      3.53700d-4,5.22600d-4,7.20800d-4,1.03710d-3,1.49200d-3,2.06850d-3,&
-      2.93320d-3,4.03540d-3,5.56010d-3,7.06220d-3,9.52410d-3,1.28938d-2,&
-      1.73072d-2,2.30372d-2,3.04393d-2,3.95450d-2,5.07938d-2,6.43164d-2,&
-      8.06401d-2,9.92666d-2,1.20180d-1,1.43630d-1,1.69230d-1,1.95910d-1,&
-      2.23100d-1,2.50540d-1,2.76350d-1,2.99920d-1,3.20820d-1,3.37950d-1,&
-      3.51090d-1,3.60320d-1,3.65400d-1,3.67460d-1,3.66390d-1,3.64190d-1,&
-      3.60270d-1,3.55390d-1,3.51490d-1,3.47210d-1,3.43440d-1,3.40970d-1,&
-      3.38690d-1,3.37600d-1,3.36920d-1,3.36130d-1,3.35750d-1,3.34690d-1,&
-      3.33280d-1,3.32160d-1,3.31870d-1,3.32150d-1,3.32200d-1,3.31440d-1,&
-      3.28070d-1,3.20960d-1,3.07340d-1,2.84620d-1,2.50940d-1,2.07520d-1,&
-      1.58600d-1,1.10370d-1,6.96978d-2,3.92375d-2,1.98434d-2,8.79110d-3,&
-      3.44320d-3,1.18140d-3,3.65300d-4,9.83000d-5,2.27000d-5,5.00000d-6,&
-      3.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+      3.00000d-7,2.00000d-7,6.00000d-7,3.00000d-7,8.00000d-7,1.50000d-6,&
+      2.00000d-6,3.10000d-6,5.20000d-6,6.60000d-6,9.70000d-6,1.44000d-5,&
+      2.00000d-5,3.37000d-5,4.79000d-5,7.13000d-5,9.80000d-5,1.58400d-4,&
+      2.25100d-4,3.30600d-4,4.82700d-4,7.01700d-4,1.11060d-3,1.62220d-3,&
+      2.24290d-3,3.13350d-3,4.21540d-3,5.78060d-3,7.78530d-3,1.05019d-2,&
+      1.39816d-2,1.83870d-2,2.40774d-2,3.01549d-2,3.85783d-2,4.93773d-2,&
+      6.26065d-2,7.82662d-2,9.66959d-2,1.18290d-1,1.42670d-1,1.69920d-1,&
+      1.99650d-1,2.31820d-1,2.64980d-1,2.99170d-1,3.33710d-1,3.67250d-1,&
+      3.99250d-1,4.28120d-1,4.53910d-1,4.75160d-1,4.92080d-1,5.04070d-1,&
+      5.11390d-1,5.14010d-1,5.13290d-1,5.09720d-1,5.03430d-1,4.95830d-1,&
+      4.88170d-1,4.79880d-1,4.72650d-1,4.66660d-1,4.60700d-1,4.56500d-1,&
+      4.52750d-1,4.49900d-1,4.47800d-1,4.46160d-1,4.44260d-1,4.42740d-1,&
+      4.41050d-1,4.39550d-1,4.38810d-1,4.37010d-1,4.33900d-1,4.28450d-1,&
+      4.18620d-1,4.02840d-1,3.78120d-1,3.42460d-1,2.94850d-1,2.37970d-1,&
+      1.77820d-1,1.21260d-1,7.52971d-2,4.19808d-2,2.08447d-2,9.20250d-3,&
+      3.55500d-3,1.23880d-3,3.67200d-4,9.76000d-5,2.22000d-5,5.50000d-6,&
+      9.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
       0.00000d0, 0.00000d0 /)
+  ! END: LOWER 50% NR BAND <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  ! BEGIN 10-50% NR BAND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  ! Efficiency (total)
+  !REAL*8, PARAMETER :: EFF0(NE)                                         &
+  !    =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 2.00000d-7,1.00000d-7,2.00000d-7,5.00000d-7,5.00000d-7,&
+  !    7.00000d-7,7.00000d-7,1.20000d-6,1.80000d-6,2.30000d-6,3.90000d-6,&
+  !    5.40000d-6,8.50000d-6,1.23000d-5,1.70000d-5,2.38000d-5,3.31000d-5,&
+  !    4.61000d-5,5.94000d-5,9.26000d-5,1.21600d-4,1.72500d-4,2.34500d-4,&
+  !    3.33300d-4,4.56700d-4,6.38400d-4,8.84300d-4,1.33540d-3,1.84720d-3,&
+  !    2.51600d-3,3.31170d-3,4.43180d-3,5.93570d-3,7.78490d-3,1.02271d-2,&
+  !    1.33162d-2,1.72063d-2,2.22009d-2,2.73286d-2,3.45888d-2,4.36821d-2,&
+  !    5.45799d-2,6.77302d-2,8.32638d-2,1.00680d-1,1.21170d-1,1.43630d-1,&
+  !    1.68140d-1,1.94250d-1,2.21300d-1,2.48970d-1,2.76390d-1,3.02480d-1,&
+  !    3.26300d-1,3.48160d-1,3.66100d-1,3.79720d-1,3.89880d-1,3.95620d-1,&
+  !    3.97780d-1,3.96640d-1,3.92580d-1,3.87090d-1,3.79880d-1,3.73050d-1,&
+  !    3.65850d-1,3.58740d-1,3.53390d-1,3.48230d-1,3.43970d-1,3.41220d-1,&
+  !    3.38810d-1,3.37650d-1,3.36940d-1,3.36130d-1,3.35760d-1,3.34690d-1,&
+  !    3.33280d-1,3.32160d-1,3.31870d-1,3.32150d-1,3.32200d-1,3.31440d-1,&
+  !    3.28070d-1,3.20960d-1,3.07340d-1,2.84620d-1,2.50940d-1,2.07520d-1,&
+  !    1.58600d-1,1.10370d-1,6.96978d-2,3.92375d-2,1.98434d-2,8.79110d-3,&
+  !    3.44320d-3,1.18140d-3,3.65300d-4,9.83000d-5,2.27000d-5,5.00000d-6,&
+  !    3.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0 /)
+  ! Efficiency (first interval)
+  !REAL*8, PARAMETER :: EFF1(NE)                                         &
+  !    =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 2.00000d-7,1.00000d-7,2.00000d-7,5.00000d-7,5.00000d-7,&
+  !    6.00000d-7,7.00000d-7,1.20000d-6,1.80000d-6,2.30000d-6,3.80000d-6,&
+  !    5.20000d-6,7.90000d-6,1.18000d-5,1.66000d-5,2.28000d-5,3.16000d-5,&
+  !    4.33000d-5,5.57000d-5,8.52000d-5,1.12700d-4,1.59900d-4,2.15100d-4,&
+  !    3.04800d-4,4.11400d-4,5.74500d-4,7.88300d-4,1.16420d-3,1.59150d-3,&
+  !    2.16230d-3,2.78910d-3,3.71100d-3,4.89860d-3,6.29290d-3,8.15860d-3,&
+  !    1.03830d-2,1.31709d-2,1.66408d-2,2.02664d-2,2.50647d-2,3.07883d-2,&
+  !    3.72727d-2,4.46930d-2,5.28245d-2,6.11301d-2,7.03714d-2,7.93184d-2,&
+  !    8.75027d-2,9.49859d-2,1.01120d-1,1.05340d-1,1.07160d-1,1.06570d-1,&
+  !    1.03200d-1,9.76218d-2,8.97488d-2,7.98012d-2,6.90608d-2,5.76738d-2,&
+  !    4.66902d-2,3.63217d-2,2.71772d-2,1.96357d-2,1.34951d-2,8.86060d-3,&
+  !    5.57630d-3,3.35120d-3,1.90010d-3,1.02690d-3,5.29500d-4,2.54600d-4,&
+  !    1.14600d-4,4.86000d-5,1.93000d-5,6.70000d-6,2.90000d-6,1.40000d-6,&
+  !    0.00000d0, 1.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0 /)
+  ! Efficiency (second interval)
+  !REAL*8, PARAMETER :: EFF2(NE)                                         &
+  !    =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    1.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 1.00000d-7,&
+  !    2.00000d-7,6.00000d-7,5.00000d-7,4.00000d-7,1.00000d-6,1.50000d-6,&
+  !    2.80000d-6,3.70000d-6,7.40000d-6,8.90000d-6,1.26000d-5,1.94000d-5,&
+  !    2.85000d-5,4.53000d-5,6.39000d-5,9.60000d-5,1.71200d-4,2.55700d-4,&
+  !    3.53700d-4,5.22600d-4,7.20800d-4,1.03710d-3,1.49200d-3,2.06850d-3,&
+  !    2.93320d-3,4.03540d-3,5.56010d-3,7.06220d-3,9.52410d-3,1.28938d-2,&
+  !    1.73072d-2,2.30372d-2,3.04393d-2,3.95450d-2,5.07938d-2,6.43164d-2,&
+  !    8.06401d-2,9.92666d-2,1.20180d-1,1.43630d-1,1.69230d-1,1.95910d-1,&
+  !    2.23100d-1,2.50540d-1,2.76350d-1,2.99920d-1,3.20820d-1,3.37950d-1,&
+  !    3.51090d-1,3.60320d-1,3.65400d-1,3.67460d-1,3.66390d-1,3.64190d-1,&
+  !    3.60270d-1,3.55390d-1,3.51490d-1,3.47210d-1,3.43440d-1,3.40970d-1,&
+  !    3.38690d-1,3.37600d-1,3.36920d-1,3.36130d-1,3.35750d-1,3.34690d-1,&
+  !    3.33280d-1,3.32160d-1,3.31870d-1,3.32150d-1,3.32200d-1,3.31440d-1,&
+  !    3.28070d-1,3.20960d-1,3.07340d-1,2.84620d-1,2.50940d-1,2.07520d-1,&
+  !    1.58600d-1,1.10370d-1,6.96978d-2,3.92375d-2,1.98434d-2,8.79110d-3,&
+  !    3.44320d-3,1.18140d-3,3.65300d-4,9.83000d-5,2.27000d-5,5.00000d-6,&
+  !    3.00000d-7,0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
+  !    0.00000d0, 0.00000d0 /)
+  ! END: 10-50% NR BAND <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   ! Efficiencies array (2D)
   REAL*8, PARAMETER :: EFF(NE,0:NEFF)                                   &
       = RESHAPE( (/ EFF0(:), EFF1(:), EFF2(:) /) ,SHAPE(EFF))
@@ -1302,6 +1853,28 @@ SUBROUTINE DARWIN_Ar_2014_Init(intervals)
   
   CALL DARWIN_Ar_2014_InitTo(DARWIN_Ar_2014,intervals)
   
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Sets the minimum recoil energy to be included in the calculations.
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+! 
+! Required input arguments:
+!     Emin        The minimum recoil energy to consider [keV]
+! 
+SUBROUTINE DARWIN_Ar_2014_SetEmin(Emin)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: Emin
+  LOGICAL :: intervals
+  ! Due to implementation of efficiencies and Emin,
+  ! structure needs to be reinitialized first.
+  intervals = DARWIN_Ar_2014%Neff .NE. 0
+  CALL DARWIN_Ar_2014_Init(intervals)
+  CALL SetDetector(DARWIN_Ar_2014,Emin=Emin)
 END SUBROUTINE
 
 
@@ -1535,6 +2108,28 @@ SUBROUTINE DARWIN_Xe_2014_Init(intervals)
   
   CALL DARWIN_Xe_2014_InitTo(DARWIN_Xe_2014,intervals)
   
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Sets the minimum recoil energy to be included in the calculations.
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+! 
+! Required input arguments:
+!     Emin        The minimum recoil energy to consider [keV]
+! 
+SUBROUTINE DARWIN_Xe_2014_SetEmin(Emin)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: Emin
+  LOGICAL :: intervals
+  ! Due to implementation of efficiencies and Emin,
+  ! structure needs to be reinitialized first.
+  intervals = DARWIN_Xe_2014%Neff .NE. 0
+  CALL DARWIN_Xe_2014_Init(intervals)
+  CALL SetDetector(DARWIN_Xe_2014,Emin=Emin)
 END SUBROUTINE
 
 
@@ -3972,9 +4567,7 @@ SUBROUTINE WriteLimitsSIHeader(lnp,thetaG,extra_lines)
         // '032005 (2002) [physics/0203002].'
     ELSE
       WRITE(*,'(A)') COMMENT_PREFIX &
-        // 'determined using the Poisson distribution (signal only: no background'
-      WRITE(*,'(A)') COMMENT_PREFIX &
-        // ').'
+        // 'determined using the Poisson distribution (signal only: no background).'
     END IF
     WRITE(*,'(A,1(2X,1PG12.4))') COMMENT_PREFIX &
         // '  p-value               =',CoerceExponent(EXP(lnp),2,4)
@@ -5075,7 +5668,11 @@ SUBROUTINE InitHaloCL()
   INTEGER :: I,K,Nval,ios
   REAL*8 :: vrot,vobs,rho,v0,vesc
   REAL*8, ALLOCATABLE :: vlsr(:),vpec(:),vsun(:),vbulk(:)
-  CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE :: aval
+  ! Older compiler compatibility
+  INTEGER, PARAMETER :: NCHAR = 1024
+  CHARACTER(LEN=NCHAR), DIMENSION(:), ALLOCATABLE :: aval
+  ! ...but this would be better better (needs gfortran 4.6+)
+  !CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE :: aval
   
   CALL InitHalo()
   
@@ -5120,7 +5717,7 @@ SUBROUTINE InitHaloCL()
   IF (GetLongArgReal('vesc',vesc)) CALL SetEscapeSpeed(vesc)
   
   !IF (GetLongArgString('eta-file',eta_file)) CALL SetHalo(eta_file=eta_file)
-  IF (GetLongArgStrings('eta-file',1024,aval,Nval)) THEN
+  IF (GetLongArgStrings('eta-file',NCHAR,aval,Nval)) THEN
     IF (Nval .GE. 2) THEN
       READ(aval(2),*,IOSTAT=ios) K
       IF (ios .NE. 0) K = 2
@@ -6749,7 +7346,9 @@ SUBROUTINE InitDetectorCL(D,eff_file,intervals)
   
   ! Experiment-specific settings
   ! LUX 2013 result
-  IF (GetLongArg('LUX-2013')) THEN
+  IF (GetLongArg('XENON100-2012')) THEN
+    CALL XENON100_2012_InitTo(DP,intervals0)
+  ELSE IF (GetLongArg('LUX-2013')) THEN
     CALL LUX_2013_InitTo(DP,intervals0)
   ! DARWIN proposal, xenon-based (as of 2014)
   ELSE IF (GetLongArg('DARWIN-Xe-2014')) THEN
@@ -7255,6 +7854,82 @@ SUBROUTINE CalcRates(D)
   DP%MuSignal(:)   = DP%MuSignalSI(:) + DP%MuSignalSD(:)
   
 END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+! Required input argument:
+!   D           A DetectorRateStruct containing detector info.
+! 
+FUNCTION GetEvents(D) RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  TYPE(DetectorRateStruct), INTENT(IN) :: D
+  CALL GetRates(D,Nevents=N)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+! Required input argument:
+!   D           A DetectorRateStruct containing detector info.
+! 
+FUNCTION GetBackground(D) RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  TYPE(DetectorRateStruct), INTENT(IN) :: D
+  CALL GetRates(D,background=b)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+! Required input argument:
+!   D           A DetectorRateStruct containing rates (CalcRates(D) must
+!               have already been called).
+! 
+FUNCTION GetSignal(D) RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  TYPE(DetectorRateStruct), INTENT(IN) :: D
+  CALL GetRates(D,signal=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+! Required input argument:
+!   D           A DetectorRateStruct containing rates (CalcRates(D) must
+!               have already been called).
+! 
+FUNCTION GetSignalSI(D) RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  TYPE(DetectorRateStruct), INTENT(IN) :: D
+  CALL GetRates(D,signal_si=s)
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+! Required input argument:
+!   D           A DetectorRateStruct containing rates (CalcRates(D) must
+!               have already been called).
+! 
+FUNCTION GetSignalSD(D) RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  TYPE(DetectorRateStruct), INTENT(IN) :: D
+  CALL GetRates(D,signal_sd=s)
+END FUNCTION
 
 
 
@@ -8392,7 +9067,7 @@ FUNCTION GetLongArgString(akey,aval) RESULT(status)
   LOGICAL :: status
   CHARACTER*(*), INTENT(IN) :: akey
   CHARACTER*(*), INTENT(OUT) :: aval
-  CHARACTER*256 :: arg
+  CHARACTER*1024 :: arg
   INTEGER :: I,Narg,len,pos
   
   Narg   = IARGC()
@@ -8418,8 +9093,15 @@ END FUNCTION GetLongArgString
 ! Checks if the given argument key is given as a command line argument
 ! of the form --akey=<aval1>,<aval2>,... and inserts the appropriate
 ! CHARACTER*N values into aval (ALLOCATABLE array of length Nval).
-! The aval array MUST have deferred character length, i.e. declare as:
+! 
+! Currently requires allocatable array of fixed length strings,
+! declared as:
+!   CHARACTER(LEN=N), DIMENSION(:), ALLOCATABLE :: aval
+! 
+! A better implementation (but requires gfortran 4.6+) uses deferred-
+! length strings, where aval is declared as:
 !   CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE :: aval
+! 
 ! Returns .TRUE. if valid key was found, .FALSE. otherwise.
 ! 
 ! NOTE: This function must be defined within a module or the use of
@@ -8430,16 +9112,19 @@ FUNCTION GetLongArgStrings(akey,N,aval,Nval) RESULT(status)
   LOGICAL :: status
   CHARACTER*(*), INTENT(IN) :: akey
   INTEGER, INTENT(IN) :: N
-  CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: aval
+  ! Fixed length strings
+  CHARACTER(LEN=N), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: aval
+  ! Better: use deferred length strings (but needs gfortran 4.6+)
+  !CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: aval
   INTEGER, INTENT(OUT) :: Nval
-  CHARACTER*256 :: sval
+  CHARACTER*1024 :: sval
   INTEGER :: I1,I2,Ia,ios
   
   IF (.NOT. GetLongArgString(akey,sval)) THEN
     status = .FALSE.
     RETURN
   END IF
-
+  
   status = .TRUE.
   
   ! Find number of values
@@ -8516,8 +9201,11 @@ FUNCTION GetLongArgLogicals(akey,aval,Nval) RESULT(status)
   CHARACTER*(*), INTENT(IN) :: akey
   LOGICAL, ALLOCATABLE, INTENT(OUT) :: aval(:)
   INTEGER, INTENT(OUT) :: Nval
+  ! Fixed length strings
   INTEGER, PARAMETER :: N = 64
-  CHARACTER(LEN=:), ALLOCATABLE :: sval(:)
+  CHARACTER(LEN=N), ALLOCATABLE :: sval(:)
+  ! Better: use deferred length strings (but needs gfortran 4.6+)
+  !CHARACTER(LEN=:), ALLOCATABLE :: sval(:)
   INTEGER :: I,ios
   
   IF (.NOT. GetLongArgStrings(akey,N,sval,Nval)) THEN
@@ -8591,8 +9279,11 @@ FUNCTION GetLongArgIntegers(akey,aval,Nval) RESULT(status)
   CHARACTER*(*), INTENT(IN) :: akey
   INTEGER, ALLOCATABLE, INTENT(OUT) :: aval(:)
   INTEGER, INTENT(OUT) :: Nval
+  ! Fixed length strings
   INTEGER, PARAMETER :: N = 64
-  CHARACTER(LEN=:), ALLOCATABLE :: sval(:)
+  CHARACTER(LEN=N), ALLOCATABLE :: sval(:)
+  ! Better: use deferred length strings (but needs gfortran 4.6+)
+  !CHARACTER(LEN=:), ALLOCATABLE :: sval(:)
   INTEGER :: I,ios
   
   IF (.NOT. GetLongArgStrings(akey,N,sval,Nval)) THEN
@@ -8658,8 +9349,11 @@ FUNCTION GetLongArgReals(akey,aval,Nval) RESULT(status)
   CHARACTER*(*), INTENT(IN) :: akey
   REAL*8, ALLOCATABLE, INTENT(OUT) :: aval(:)
   INTEGER, INTENT(OUT) :: Nval
+  ! Fixed length strings
   INTEGER, PARAMETER :: N = 64
-  CHARACTER(LEN=:), ALLOCATABLE :: sval(:)
+  CHARACTER(LEN=N), ALLOCATABLE :: sval(:)
+  ! Better: use deferred length strings (but needs gfortran 4.6+)
+  !CHARACTER(LEN=:), ALLOCATABLE :: sval(:)
   INTEGER :: I,ios
   
   IF (.NOT. GetLongArgStrings(akey,N,sval,Nval)) THEN
@@ -9284,8 +9978,11 @@ SUBROUTINE GetTabulationArgs(akey,xmin,xmax,N,use_log)
   LOGICAL :: status,Ltmp
   INTEGER :: Nval,ios,Itmp
   REAL*8 :: Rtmp
+  ! Older compiler compatibility
   INTEGER, PARAMETER :: NCHAR = 32
-  CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE :: aval
+  CHARACTER(LEN=NCHAR), DIMENSION(:), ALLOCATABLE :: aval
+  ! ...but this would be better better (needs gfortran 4.6+)
+  !CHARACTER(LEN=:), DIMENSION(:), ALLOCATABLE :: aval
   
   IF (.NOT. GetLongArgStrings(akey,NCHAR,aval,Nval)) RETURN
   
@@ -9483,6 +10180,155 @@ PURE FUNCTION TabulationBin(TS,x) RESULT (K)
     K = NINT((x-TS%xmin)/TS%delta)
   END IF
   IF ((K .LT. 0) .OR. (K .GT. TS%N)) K = -1
+  
+END FUNCTION
+
+
+
+!=======================================================================
+! INTERPOLATION
+! Interpolation routines are given in two forms: scalar and array
+! interpolation location(s).  An interface is defined at the top of
+! the file to allow for a common name.
+!=======================================================================
+
+! ----------------------------------------------------------------------
+! NOTE: Will use interface 'LinearInterpolate'.
+! Determines y(x=x0) using linear interpolation between the points
+! specified by the arrays x(N) and y(N).
+! 
+! Input arguments:
+!   N               Length of x & y arrays
+!   x,y             Arrays of x and y points defining y(x).
+!                   Array in x must be increasing.
+!   x0              Value to interpolate at
+! Optional input arguments:
+!   extrapolate     Indicate if y(x0) should be extrapolated from the
+!                   given points if x0 falls outside of the domain of x.
+!                   If set to .FALSE., this routine will return 0 if
+!                   x0 is outside the domain.  Default is .TRUE.
+! 
+PURE FUNCTION LinearInterpolate_S(N,x,y,x0,extrapolate) RESULT(y0)
+  IMPLICIT NONE
+  REAL*8 :: y0
+  INTEGER, INTENT(IN) :: N
+  REAL*8, INTENT(IN) :: x(N),y(N),x0
+  LOGICAL, INTENT(IN), OPTIONAL :: extrapolate
+  INTEGER :: I
+  REAL*8 :: a,b
+  
+  y0 = 0d0
+  IF (N .EQ. 0) RETURN
+  
+  IF (PRESENT(extrapolate)) THEN
+    IF ((.NOT. extrapolate)                                             &
+        .AND. ((x0 .LT. x(1)) .OR. (x0 .GT. x(N)))) THEN
+      RETURN
+    END IF
+  END IF
+  
+  IF (N .EQ. 1) THEN
+    y0 = y(1)
+    RETURN
+  END IF
+  
+  ! Find interval to use for linear interpolation.
+  ! Index here is for lower point in interval.
+  I = BSearch(N,x,x0)
+  I = MIN(I,N-1)
+  I = MAX(I,1)
+  
+  IF (x(I) .EQ. x(I+1)) THEN
+    y0 = 0.5d0 * (y(I) + y(I+1))
+  ELSE
+    a  = (y(I+1) - y(I)) / (x(I+1) - x(I))
+    b  = y(I) - a*x(I)
+    y0 = a*x0 + b
+  END IF
+  
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! NOTE: Will use interface 'LinearInterpolate'.
+! Determines y(x=x0) using linear interpolation between the points
+! specified by the arrays x(N) and y(N).
+! 
+! Input arguments:
+!   N               Length of x & y arrays
+!   x,y             Arrays of x and y points defining y(x).
+!                   Array in x must be increasing.
+!   N0              Length of x0 array
+!   x0              Array of values to interpolate at
+! Optional input arguments:
+!   extrapolate     Indicate if y(x0) should be extrapolated from the
+!                   given points if x0 falls outside of the domain of x.
+!                   If set to .FALSE., this routine will return 0 if
+!                   x0 is outside the domain.  Default is .TRUE.
+! 
+PURE FUNCTION LinearInterpolate_A(N,x,y,N0,x0,extrapolate) RESULT(y0)
+  IMPLICIT NONE
+  REAL*8 :: y0(N0)
+  INTEGER, INTENT(IN) :: N,N0
+  REAL*8, INTENT(IN) :: x(N),y(N),x0(N0)
+  LOGICAL, INTENT(IN), OPTIONAL :: extrapolate
+  LOGICAL :: extrapolate0
+  INTEGER :: I,I0,Is
+  REAL*8 :: a,b
+  
+  extrapolate0 = .TRUE.
+  IF (PRESENT(extrapolate)) extrapolate0 = extrapolate
+  
+  ! Nothing to interpolate
+  IF (N .EQ. 0) THEN
+    y0 = 0d0
+    RETURN
+  END IF
+  
+  ! Single point: no searching necessary
+  IF (N .EQ. 1) THEN
+    IF (extrapolate0) THEN
+      y0 = y(1)
+    ELSE
+      WHERE(x0 .EQ. x(1))
+        y0 = y(1)
+      ELSE WHERE
+        y0 = 0d0
+      END WHERE
+    END IF
+    RETURN
+  END IF
+  
+  ! Cycle through x0 points
+  Is = 0
+  IF (extrapolate0) THEN
+    DO I0 = 1,N0
+      Is = BSearch(N,x,x0(I0),Is)
+      Is = MAX(MIN(I,N-1),1)
+      IF (x(I0) .EQ. x(I0+1)) THEN
+        y0 = 0.5d0 * (y(I0) + y(I0+1))
+      ELSE
+        a      = (y(I0+1) - y(I0)) / (x(I0+1) - x(I0))
+        b      = y(I0) - a*x(I0)
+        y0(I0) = a*x0(I0) + b
+      END IF
+    END DO
+  ELSE
+    DO I0 = 1,N0
+      IF ((x0(I0) .LT. x(1)) .OR. (x0(I0) .GE. x(N))) THEN
+        y0(I0) = 0d0
+      ELSE
+        Is = BSearch(N,x,x0(I0),Is)
+        IF (x(I0) .EQ. x(I0+1)) THEN
+          y0 = 0.5d0 * (y(I0) + y(I0+1))
+        ELSE
+          a      = (y(I0+1) - y(I0)) / (x(I0+1) - x(I0))
+          b      = y(I0) - a*x(I0)
+          y0(I0) = a*x0(I0) + b
+        END IF
+      END IF
+    END DO
+  END IF
   
 END FUNCTION
 
@@ -10313,7 +11159,6 @@ ELEMENTAL SUBROUTINE GAMMA_PQ(s,x,P,Q)
     REAL*8 :: P
     INTEGER :: K
     REAL*8 :: zk,sum
-    REAL*8 :: LOG_GAMMA
     ! P(s,x) = x^s e^{-x} \Sum_{k=0}^\infty x^k / \Gamma(s+k+1)
     K   = 0
     zk  = 1d0
@@ -10342,7 +11187,6 @@ ELEMENTAL SUBROUTINE GAMMA_PQ(s,x,P,Q)
     REAL*8 :: Q
     INTEGER :: K
     REAL*8 :: xs1,fk,Ck,Dk,Deltak
-    REAL*8 :: LOG_GAMMA
     ! Continued fraction (see Numerical Recipes):
     !   Q(s,x) = x^s e^{-x} / \Gamma(s)
     !            / (x-s+1 + K_k(-k(k-s),-s+2k+x+1)_{1}^{\infty})
@@ -12094,20 +12938,25 @@ END SUBROUTINE HSort
 
 
 ! ----------------------------------------------------------------------
-! Searches the given array, assumed to be sorted in increasing order,
-! for the given value using a binary search algorithm.  Returns the
-! index I such that x(I) <= x0 < x(I+1), 0 if x0 < x(1), or N if
-! x(N2) <= x0.
-!   N               array length
-!   x               array of data to be searched (must be sorted)
-!   x0              value to search for
+! Searches the given array of size [1:N], assumed to be sorted in
+! increasing order, for the given value using a binary search algorithm.
+! Returns the index I such that x(I) <= x0 < x(I+1), 0 if x0 < x(1),
+! or N if x(N) <= x0.
 ! 
-PURE FUNCTION BSearch(N,x,x0) RESULT(index)
+! Input arguments:
+!   N               Size of x array
+!   x               Array of data to be searched (must be sorted)
+!   x0              Value to search for
+! Optional input arguments:
+!   Istart          Index to start searching from
+! 
+PURE FUNCTION BSearch(N,x,x0,Istart) RESULT(index)
   IMPLICIT NONE
   INTEGER :: index
   INTEGER, INTENT(IN) :: N
   REAL*8, INTENT(IN) :: x(N),x0
-  INTEGER :: Ilow,Ihigh,Imid
+  INTEGER, INTENT(IN), OPTIONAL :: Istart
+  INTEGER :: Ilow,Ihigh,Imid,step,dir
   
   ! Check if in bounds
   IF (x0 .LT. x(1)) THEN
@@ -12118,8 +12967,46 @@ PURE FUNCTION BSearch(N,x,x0) RESULT(index)
     RETURN
   END IF
   
-  Ilow  = 1
-  Ihigh = N
+  ! If starting index given, bracket desired index
+  IF (PRESENT(Istart)) THEN
+    ! Find one bound
+    IF (Istart .LE. 1) THEN
+      Ilow = 1
+      dir = +1
+    ELSE IF (Istart .LT. N) THEN
+      IF (x0 .GE. x(Istart)) THEN
+        Ilow = Istart
+        dir = +1
+      ELSE
+        Ihigh = Istart
+        dir = -1
+      END IF
+    ELSE
+      Ihigh = N
+      dir = -1
+    END IF
+    ! Search up or down in increasing step sizes to find other bound
+    step = 1
+    IF (dir .GT. 0) THEN
+      Ihigh = MIN(Ilow + step,N)
+      DO WHILE (x0 .GT. x(Ihigh))
+        Ilow  = Ihigh
+        Ihigh = MIN(Ilow + step,N)
+        step  = 2*step
+      END DO
+    ELSE IF (dir .LT. 0) THEN
+      Ilow = MAX(Ihigh - step,1)
+      DO WHILE (x0 .LT. x(Ilow))
+        Ihigh = Ilow
+        Ilow  = MAX(Ilow - step,1)
+        step  = 2*step
+      END DO
+    END IF
+  ! No starting index given, search entire array
+  ELSE
+    Ilow  = 1
+    Ihigh = N
+  END IF
   
   ! Binary search
   DO WHILE (Ihigh-Ilow .GT. 1)
@@ -12250,18 +13137,6 @@ END SUBROUTINE
 !#######################################################################
 END MODULE
 !#######################################################################
-
-
-!#######################################################################
-! PROGRAM
-!#######################################################################
-
-PROGRAM DDCalc0run
-  USE DDCALC0
-  IMPLICIT NONE
-  CALL DDCalc0_Main()
-END PROGRAM
-
 
 
 !#######################################################################
