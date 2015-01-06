@@ -25,8 +25,9 @@ int main()
     // Getting back plain functions without void pointer...
     // (the pointer is carried by T, on which a static member function of
     // Funk::Funk is templated)
-    double (*plain)(double, double) = F->plain<T>("x", "y");
-    std::cout << plain(1, 1) << std::endl;
+    double (*plain)(double&, double&) = F->plain<T>("x", "y");
+    double a, b = 1.;
+    std::cout << plain(a, b) << std::endl;
 
     // ...and with the usual void* pointer
     double (*plainV)(double, double, void*);
