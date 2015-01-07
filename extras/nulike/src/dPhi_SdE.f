@@ -19,6 +19,7 @@
 ***                             the differential neutrino flux
 ***                             at the detector in units of m^-2 GeV^-1
 ***                             annihilation^-1
+***             context         A c_ptr passed in to nuyield when it is called
 ***
 *** Output:                     differential flux (GeV^-1 annihilation^-1)
 ***       
@@ -28,20 +29,31 @@
 ***********************************************************************
 
 
-      real*8 function nulike_dPhi_SdE(log10E,ptype,nuyield)
+      real*8 function nulike_dPhi_SdE(log10E,ptype,nuyield,context)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
-      include 'nulike.h'
+      include 'nulike_internal.h'
 
       real*8 log10E, effArea, angLossFac
       real*8 sigma, spec, nulike_sens, nulike_angres
-      real*8 nuyield 
       integer ptype
-      external nuyield
+      type(c_ptr) context
+
+      interface
+        real*8 function nuyield(log10E,ptype,context) BIND(C)
+          use iso_c_binding, only: c_ptr
+          implicit none
+          real*8 log10E
+          integer ptype
+          type(c_ptr) :: context
+        end function
+      end interface
 
       !Obtain differential neutrino or anti-neutrino 
       !flux spectrum as it arrives at the detector; spec in m^-2 GeV^-1 annihilation^-1
-      spec = nuyield(log10E,ptype)
+      spec = nuyield(log10E,ptype,context)
       
       !Obtain effective area for relevant species and energy; effArea in m^2
       effArea = nulike_sens(log10E, ptype)

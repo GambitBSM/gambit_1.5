@@ -27,7 +27,7 @@
       real*8 function nulike_specangintegrand(log10E,nuyield)
 
       implicit none
-      include 'nulike.h'
+      include 'nulike_internal.h'
 
       real*8 log10E, nuyield, nulike_tabulated_weight
       external nuyield
