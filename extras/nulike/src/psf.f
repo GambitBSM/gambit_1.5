@@ -7,6 +7,7 @@
 *** a 2D Gaussian PSF, i.e. the 39.3% confidence value of the angular 
 *** deviation (not 68%), and may be given by e.g. the parabaloid sigma
 *** for an individual event, or the global mean angular error.
+*** This is the 2012 version, only used by the 2012 likelihood.
 *** 
 *** Input:	phi_obs	        observed angle (degrees)
 ***             phi_pred        predicted angle (degrees)
