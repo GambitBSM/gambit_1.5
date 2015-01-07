@@ -28,11 +28,11 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 
 #################### COMPILER ##############################
 
-# The fortran compiler can be explicitly set here, along
-# with the compilation options.  If not explicitly set, make
-# will search for ifort and gfortran, in that order, and use
-# one of those.  The compiler can also be be chosen by
-# adding a 'ifort' or 'gfortran' target to the make command.
+# The fortran compiler is set here, along with the
+# compilation options.  If the compiler is not specified via
+# an environmental variable or as an argument to the make
+# invocation (FC=<...>), make will search for ifort and
+# gfortran, in that order, and use one of those.
 
 # This section simply sets FC and FFLAGS, so if you have
 # difficulty running this makefile, simply set those two
@@ -46,45 +46,76 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 #FC := gfortran
 #FFLAGS := -O3 -fno-range-check
 
-# Fortran compiler (search)
-# If FC not already set to ifort or gfortran, search
-# for those compilers.  Any passed FC really only needs
-# 'ifort' or 'gfortran' in the name, e.g. gfortran-4.9
-# would be valid.
-ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC)))
-  FC := $(or $(shell which ifort 2> /dev/null),\
+# Command used to search for ifort or gfortran compiler.
+# Gives an error if neither is found.
+GETFC = $(or $(shell which ifort 2> /dev/null),\
              $(shell which gfortran 2> /dev/null),\
              $(error Could not find ifort or gfortran compiler \
                      in the path.  A valid compiler must be given.))
+
+# If FC is not set, search for ifort or gfortran compilers,
+# in that order.  If neither is found, make stops with an
+# error message.
+ifneq (,$(findstring "$(origin FC)","undefined" "default"))
+  #FC := $(or $(shell which ifort 2> /dev/null),\
+  #           $(shell which gfortran 2> /dev/null),\
+  #           $(error Could not find ifort or gfortran compiler \
+  #                   in the path.  A valid compiler must be given.))
+  FC := $(GETFC)
   FC := $(notdir $(FC))
 endif
 
-# Explicit compiler, specified by additional 'ifort' or
-# 'gfortran' target.
-ifneq (,$(findstring ifort,$(MAKECMDGOALS)))
-  FC := ifort
-endif
-ifneq (,$(findstring gfortran,$(MAKECMDGOALS)))
-  FC := gfortran
+# Check if FC is empty, which is only possible if it was
+# explicitly set that way via argument or environmental
+# variable.  Search for ifort and gfortran in that case.
+ifeq (,$(FC))
+  $(info WARNING: FC was specified but empty.  Searching for new compiler...)
+  # If FC passed as an argument, must override
+  ifeq ("$(origin FC)","command line")
+    override FC := $(GETFC)
+    override FC := $(notdir $(FC))
+  else
+    FC := $(GETFC)
+    FC := $(notdir $(FC))
+  endif
+  $(info $(empty)  Found: $(FC))
 endif
 
-# Fortran compiler flags
-ifeq (,$(FFLAGS))
+# Check if using ifort or gfortran and give a warning
+# otherwise.  These are the only supported compilers.
+ifeq (,$(findstring ifort,$(FC))$(findstring gfortran,$(FC)))
+  $(info $(empty)------------------------------------------------------------)
+  $(info $(empty)  WARNING:)
+  $(info $(empty)  Only the ifort $(lpar)Intel$(rpar) and gfortran \
+                 $(lpar)GCC$(rpar) compilers have)
+  $(info $(empty)  been tested with DDCalc0.  Proceeding with unsupported)
+  $(info $(empty)  compiler $(FC).)
+  $(info $(empty)------------------------------------------------------------)
+  #$(info $(empty))
+endif
+
+# Fortran compiler flags.  Update only if not already specified.
+ifneq (,$(findstring "$(origin FFLAGS)","undefined" "default"))
   ifneq (,$(findstring ifort,$(FC)))
     FFLAGS := -fast
   else ifneq (,$(findstring gfortran,$(FC)))
     FFLAGS := -O3 -fno-range-check
   else
-    $(error Invalid compiler: $(FC).  Must use ifort or gfortran.)
+    $(info WARNING: No default compilation flags for compiler $(FC).)
   endif
 endif
 
-# Ensure required compiler flags
+# Ensure required compiler flags.
 ifneq (,$(findstring gfortran,$(FC)))
   # disable compile-time range checking due to large integer
   # constants in math routines (allows for INTEGER*8)
   ifeq (,$(findstring -fno-range-check,$(FFLAGS)))
-    override FFLAGS += -fno-range-check
+    # If FFLAGS passed as an argument, must override
+    ifeq ("$(origin FFLAGS)","command line")
+      override FFLAGS += -fno-range-check
+    else
+      FFLAGS += -fno-range-check
+    endif
   endif
 endif
 
@@ -99,6 +130,11 @@ ifeq (,$(findstring -fPIC,$(FFLAGS)))
   SOFFLAGS += -fPIC
 endif
 
+# Debugging
+#$(info FC      =$(FC) ($(origin FC)))
+#$(info FFLAGS  =$(FFLAGS) ($(origin FFLAGS)))
+#$(info SOFFLAGS=$(SOFFLAGS) ($(origin SOFFLAGS)))
+
 
 #################### FILES / TARGETS #######################
 
@@ -108,6 +144,9 @@ endif
 
 # Main programs
 fprograms := DDCalc0run
+
+# Example/test programs
+ftestprograms := DDCalc0_example
 
 # Module files (lower case as that is usual output filename)
 fmodules := ddcalc0.mod
@@ -124,12 +163,15 @@ libraries := $(statlib) $(sharedlib)
 # Include files
 # e.g. file.h
 fincludes := 
+cincludes := DDCalc0.hpp
 
 # Source files
-fsources := $(fincludes) $(fobjects:.o=.f90) $(fprograms:=.f90)
+fsources := $(fincludes) $(fobjects:.o=.f90) $(fprograms:=.f90) $(ftestprograms:=.f90)
+csources := $(cincludes)
+sources  := $(fsources) $(csources)
 
 # Additional files to include in tar file
-extrafiles := Makefile DDCalc0run.use README.fortran DDCalc0.hpp
+extrafiles := Makefile DDCalc0run.use example_efficiencies.dat
 
 # Tar file
 tarfile := DDCalc0.tar.gz
@@ -142,6 +184,7 @@ DIST_DIR := DDCalc0-$(DDCALC0_VERSION)
 # Note some compilers leave .dSYM files/directories for debugging.
 # All generated files except for PDF and tar files.
 cleanfiles := $(fprograms) $(fprograms:=.dSYM) \
+              $(ftestprograms) $(ftestprograms:=.dSYM) \
               $(fobjects) $(fobjects:.o=.dSYM) \
               $(fmodules) \
               $(libraries)
@@ -164,6 +207,7 @@ cleanishfiles := $(fprograms:=.dSYM) $(fobjects:.o=.dSYM)
 # Program dependencies
 #$(fprograms): object1.o
 $(fprograms): DDCalc0.f90
+$(ftestprograms): DDCalc0.f90
 
 # Specific dependencies
 #program1: object1.o
@@ -178,13 +222,13 @@ $(fprograms): DDCalc0.f90
 .DEFAULT_GOAL := bin
 
 # Phony targets
-.PHONY: all bin lib doc tar dist FORCE \
+.PHONY: all bin lib examples doc tar dist FORCE \
         clean cleaner cleanest cleanish \
         clean-tar clean-dist \
         ifort gfortran
 
 # Default is to build programs
-all: $(fobjects) $(libraries) $(fprograms)
+all: $(fobjects) $(libraries) $(fprograms) $(ftestprograms)
 
 # Binaries (programs)
 bin: $(fprograms)
@@ -192,72 +236,79 @@ bin: $(fprograms)
 # Libraries
 lib: $(libraries)
 
+# Example/test binaries (programs)
+examples: $(ftestprograms)
+
 # Define a do-nothing rule for dummy targets
 # (avoids "nothing to be done" messages)
 ifort gfortran:
 	@:
 
 # Rule for building programs
-$(fprograms): % : %.f90
-	@echo "===== Compiling $@ =====" $(OUTPUT_PIPE)
+$(fprograms) $(ftestprograms): % : %.f90
+	@echo "===== Compiling $@ ====="
 #	$(FC) $(FFLAGS) -o $@ $< $(filter %.o,$^)
 	$(FC) $(FFLAGS) $(filter-out $<,$^) -o $@ $<
 
 # Rule for building objects
 $(fobjects): %.o : %.f90
-	@echo "===== Compiling $@ =====" $(OUTPUT_PIPE)
+	@echo "===== Compiling $@ ====="
 	$(FC) $(FFLAGS) -o $@ -c $<
 
 # Rule for building static library
 $(statlib): $(fobjects)
-	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
+	@echo "===== Generating $@ ====="
 	ar rcs $@ $^
 
 # Rule for building shared library
 # We recompile from source to ensure -fPIC flag
 # regardless if that flag is used elsewhere.
+#$(sharedlib): $(fobjects)
+#	@echo "===== Generating $@ ====="
+#	$(FC) -shared -o $@ $^
 $(sharedlib): $(fobjects:.o=.f90)
-	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
+	@echo "===== Generating $@ ====="
 	$(FC) $(SOFFLAGS) -shared -o $@ $^
 
 # Generate tar archive
 tar: $(tarfile)
-$(tarfile): $(fsources) $(extrafiles)
-	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
+$(tarfile): $(sources) $(extrafiles)
+	@echo "===== Generating $@ ====="
 #	tar -czvf $@ $^
 	tar -czf $@ $^
 
 # Generate archive file
 dist: $(distfile)
-$(distfile): $(fsources) $(extrafiles)
-	@echo "===== Generating $@ =====" $(OUTPUT_PIPE)
+$(distfile): $(sources) $(extrafiles)
+	@echo "===== Generating $@ ====="
 	mkdir -p ".archive-temp/$(DIST_DIR)"
 	cp -al --parents $^ ".archive-temp/$(DIST_DIR)/"
+#	tar -czvf $@ -C ".archive-temp" "$(DIST_DIR)"
 	tar -czf $@ -C ".archive-temp" "$(DIST_DIR)"
 	rm -rf ".archive-temp"
 
 # Remove files
 clean: FORCE
-	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
+	@echo "===== Cleaning ====="
 	-rm -rf $(cleanfiles)
 cleaner: FORCE
-	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
+	@echo "===== Cleaning ====="
 	-rm -rf $(cleanerfiles)
 cleanest: FORCE
-	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
+	@echo "===== Cleaning ====="
 	-rm -rf $(cleanestfiles)
 cleanish: FORCE
-	@echo "===== Cleaning =====" $(OUTPUT_PIPE)
+	@echo "===== Cleaning ====="
 	-rm -rf $(cleanishfiles)
 
 # Remove tar file
 clean-tar: FORCE
-	@echo "===== Deleting tar file =====" $(OUTPUT_PIPE)
+	@echo "===== Deleting tar file ====="
 	-rm -f $(tarfile)
 
 # Remove distributable tar file
 clean-dist: FORCE
-	@echo "===== Deleting distributable files =====" $(OUTPUT_PIPE)
+	@echo "===== Deleting distributable files ====="
 	-rm -f $(distfile)
 
 # Clean targets

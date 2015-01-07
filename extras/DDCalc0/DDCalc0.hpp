@@ -15,10 +15,19 @@
 // Declare routines found in DDCalc0 module library.
 // Not intended to be called directly by users (see following section).
 
-// Naming convention for Fortran module routine is typically:
-//   __<modulename>_MOD_<routinename>
-// where the module and routine names are in lower case.
+// Naming conventions for the object/library symbols of Fortran module
+// routines are typically:
+//   __<modulename>_MOD_<routinename>  [gfortran]
+//   <modulename>_mp_<routinename>_    [ifort]
+// where the module and routine names are in lower case.  To avoid
+// compiler-dependendent symbol names, BIND() statements are used in
+// the Fortran source code to explicitly specify the symbol names.
+// We chose as our naming convention the gfortran naming convention.
+// [n.b.: For non-module routines, '<routinename>_' (again in lower
+// case) is the convention for both compilers.]
+// 
 // Arguments are explained later.
+// 
 extern "C" {
   // Initialization
   void __ddcalc0_MOD_ddcalc0_init();

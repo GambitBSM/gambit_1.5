@@ -134,6 +134,9 @@ IMPLICIT NONE
 ! external access.
 PRIVATE
 
+! Version of this software
+CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.17'
+
 
 
 !#######################################################################
@@ -151,6 +154,33 @@ PRIVATE
 ! 'LUX_2013_').
 ! 
 ! Public constants are declared in the constants section below.
+
+
+! NAME MANGLING --------------------------------------------------------
+
+! The external symbol names in compiled objects/libraries is compiler-
+! dependent in some cases.  The gfortran compiler module procedure
+! symbol names are of the form:
+!   __<modulename>_MOD_<routinename>
+! with <modulename> and <routinename> the name of the module and the
+! subroutine, respectively, converted to lower case.  The ifort
+! compiler instead uses:
+!   <modulename>_mp_<routinename>_
+! again with the module and subroutine names in lower case.  To allow
+! for easier interfacing with C/C++, which must call routines by this
+! compiler-dependent external symbol name, we use the Fortran 2003
+! BIND() feature to explicitly specify the symbol name for some of the
+! public subroutines; the BIND() directive appears in the function
+! definitions later in this file.  We choose as our naming convention
+! the gfortran convention.
+! 
+! Name mangling is mainly an issue for modules.  For non-module
+! routines, both gfortran and ifort use:
+!   <routinename>_
+! where the routine name is in lower case.  Use of BIND() for such
+! routines requires an interface to be declared in any routine that
+! calls the BIND() routine.
+
 
 ! SIMPLE INTERFACE ROUTINES --------------------------------------------
 
@@ -441,12 +471,6 @@ END INTERFACE
 !#######################################################################
 ! CONSTANTS/GLOBAL VARIABLES/STRUCTURES
 !#######################################################################
-
-! VERSION --------------------------------------------------------------
-
-! Version of this software
-CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.15'
-
 
 ! MATH CONSTANTS -------------------------------------------------------
 
@@ -961,6 +985,9 @@ CONTAINS
 ! externally.  These are meant to allow for a simpler interface to
 ! this module; other routines are more robust and provide more
 ! capabilities.
+! 
+! BIND() is used to specify compiler-independent object file symbol
+! names to allow for easier interfacing with C/C++.  
 !=======================================================================
 
 !-----------------------------------------------------------------------
@@ -970,7 +997,8 @@ CONTAINS
 ! For more detailed initialization, see:
 !   Initialize() [interface name: DDCalc0_Initialize]
 ! 
-SUBROUTINE DDCalc0_Init()
+SUBROUTINE DDCalc0_Init() &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_init')
   IMPLICIT NONE
   CALL Initialize(.TRUE.)
 END SUBROUTINE
@@ -995,7 +1023,8 @@ END SUBROUTINE
 !   vesc        Galactic escape speed [km/s] in the galactic rest
 !               frame.  Default is 550 km/s.
 ! 
-SUBROUTINE DDCalc0_SetSHM(rho,vrot,v0,vesc)
+SUBROUTINE DDCalc0_SetSHM(rho,vrot,v0,vesc) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_setshm')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: rho,vrot,v0,vesc
   CALL SetHalo(rho=rho,vrot=vrot,v0=v0,vesc=vesc)
@@ -1022,13 +1051,15 @@ END SUBROUTINE
 !   an          Spin-dependent WIMP-neutron coupling [unitless].
 !               Related by GnSD = 2\sqrt{2} G_F an.
 ! 
-SUBROUTINE DDCalc0_SetWIMP_mfa(m,fp,fn,ap,an)
+SUBROUTINE DDCalc0_SetWIMP_mfa(m,fp,fn,ap,an) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_setwimp_mfa')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: m,fp,fn,ap,an
   CALL SetWIMP(m=m,fp=fp,fn=fn,ap=ap,an=an)
 END SUBROUTINE
 
-SUBROUTINE DDCalc0_GetWIMP_mfa(m,fp,fn,ap,an)
+SUBROUTINE DDCalc0_GetWIMP_mfa(m,fp,fn,ap,an) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_getwimp_mfa')
   IMPLICIT NONE
   REAL*8, INTENT(OUT) :: m,fp,fn,ap,an
   CALL GetWIMP(m=m,fp=fp,fn=fn,ap=ap,an=an)
@@ -1054,13 +1085,15 @@ END SUBROUTINE
 !   GnSD        Spin-dependent WIMP-neutron coupling [GeV^-2].
 !               Related by GnSD = 2\sqrt{2} G_F an.
 ! 
-SUBROUTINE DDCalc0_SetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
+SUBROUTINE DDCalc0_SetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_setwimp_mg')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: m,GpSI,GnSI,GpSD,GnSD
   CALL SetWIMP(m=m,GpSI=GpSI,GnSI=GnSI,GpSD=GpSD,GnSD=GnSD)
 END SUBROUTINE
 
-SUBROUTINE DDCalc0_GetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD)
+SUBROUTINE DDCalc0_GetWIMP_mG(m,GpSI,GnSI,GpSD,GnSD) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_getwimp_mg')
   IMPLICIT NONE
   REAL*8, INTENT(OUT) :: m,GpSI,GnSI,GpSD,GnSD
   CALL GetWIMP(m=m,GpSI=GpSI,GnSI=GnSI,GpSD=GpSD,GnSD=GnSD)
@@ -1083,14 +1116,16 @@ END SUBROUTINE
 !   sigmapSD    Spin-dependent WIMP-proton cross-section [pb].
 !   sigmanSD    Spin-dependent WIMP-neutron cross-section [pb].
 ! 
-SUBROUTINE DDCalc0_SetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
+SUBROUTINE DDCalc0_SetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_setwimp_msigma')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: m,sigmapSI,sigmanSI,sigmapSD,sigmanSD
   CALL SetWIMP(m=m,sigmapSI=sigmapSI,sigmanSI=sigmanSI,                 &
                sigmapSD=sigmapSD,sigmanSD=sigmanSD)
 END SUBROUTINE
 
-SUBROUTINE DDCalc0_GetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD)
+SUBROUTINE DDCalc0_GetWIMP_msigma(m,sigmapSI,sigmanSI,sigmapSD,sigmanSD) &
+           BIND(C,NAME='__ddcalc0_MOD_ddcalc0_getwimp_msigma')
   IMPLICIT NONE
   REAL*8, INTENT(OUT) :: m,sigmapSI,sigmanSI,sigmapSD,sigmanSD
   CALL GetWIMP(m=m,sigmapSI=sigmapSI,sigmanSI=sigmanSI,                 &
@@ -1103,6 +1138,9 @@ END SUBROUTINE
 ! XENON100 2012 ANALYSIS ROUTINES
 ! Based upon the XENON100 2012 analysis [1207.5988].  Two events seen in
 ! the analysis region.
+! 
+! BIND() is used to specify compiler-independent object file symbol
+! names to allow for easier interfacing with C/C++.  
 !=======================================================================
 
 !-----------------------------------------------------------------------
@@ -1115,7 +1153,8 @@ END SUBROUTINE
 !                 Only necessary if confidence intervals using the
 !                 maximum gap method are desired.
 ! 
-SUBROUTINE XENON100_2012_Init(intervals)
+SUBROUTINE XENON100_2012_Init(intervals) &
+           BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_init')
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: intervals
   
@@ -1134,7 +1173,8 @@ END SUBROUTINE
 ! Required input arguments:
 !     Emin        The minimum recoil energy to consider [keV]
 ! 
-SUBROUTINE XENON100_2012_SetEmin(Emin)
+SUBROUTINE XENON100_2012_SetEmin(Emin) &
+           BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_setemin')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: Emin
   LOGICAL :: intervals
@@ -1150,7 +1190,8 @@ END SUBROUTINE
 ! Calculates various rate quantities using the current WIMP.
 ! Must be called each time the WIMP parameters are modified.
 ! 
-SUBROUTINE XENON100_2012_CalcRates()
+SUBROUTINE XENON100_2012_CalcRates() &
+           BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_calcrates')
   IMPLICIT NONE
   CALL CalcRates(XENON100_2012)
 END SUBROUTINE
@@ -1159,7 +1200,8 @@ END SUBROUTINE
 ! ----------------------------------------------------------------------
 ! Returns the observed number of events.
 ! 
-FUNCTION XENON100_2012_Events() RESULT(N)
+FUNCTION XENON100_2012_Events() RESULT(N) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_events')
   IMPLICIT NONE
   INTEGER :: N
   CALL GetRates(XENON100_2012,Nevents=N)
@@ -1169,7 +1211,8 @@ END FUNCTION
 ! ----------------------------------------------------------------------
 ! Returns the average expected number of background events.
 ! 
-FUNCTION XENON100_2012_Background() RESULT(b)
+FUNCTION XENON100_2012_Background() RESULT(b) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_background')
   IMPLICIT NONE
   REAL*8 :: b
   CALL GetRates(XENON100_2012,background=b)
@@ -1180,7 +1223,8 @@ END FUNCTION
 ! Returns the average expected number of signal events for the
 ! current WIMP.
 ! 
-FUNCTION XENON100_2012_Signal() RESULT(s)
+FUNCTION XENON100_2012_Signal() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_signal')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(XENON100_2012,signal=s)
@@ -1191,7 +1235,8 @@ END FUNCTION
 ! Returns the average expected number of spin-independent signal events
 ! for the current WIMP.
 ! 
-FUNCTION XENON100_2012_SignalSI() RESULT(s)
+FUNCTION XENON100_2012_SignalSI() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_signalsi')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(XENON100_2012,signal_si=s)
@@ -1202,7 +1247,8 @@ END FUNCTION
 ! Returns the average expected number of spin-dependent signal events
 ! for the current WIMP.
 ! 
-FUNCTION XENON100_2012_SignalSD() RESULT(s)
+FUNCTION XENON100_2012_SignalSD() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_signalsd')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(XENON100_2012,signal_sd=s)
@@ -1216,7 +1262,8 @@ END FUNCTION
 ! where s is the average expected signal and b is the average expected
 ! background.
 ! 
-FUNCTION XENON100_2012_LogLikelihood() RESULT(lnlike)
+FUNCTION XENON100_2012_LogLikelihood() RESULT(lnlike) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_loglikelihood')
   IMPLICIT NONE
   REAL*8 :: lnlike
   lnlike = LogLikelihood(XENON100_2012)
@@ -1233,7 +1280,8 @@ END FUNCTION
 ! where s is the average expected signal (background contributions are
 ! ignored).
 ! 
-FUNCTION XENON100_2012_LogPValue() RESULT(lnp)
+FUNCTION XENON100_2012_LogPValue() RESULT(lnp) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_logpvalue')
   IMPLICIT NONE
   REAL*8 :: lnp
   lnp = LogPValue(XENON100_2012)
@@ -1248,7 +1296,8 @@ END FUNCTION
 ! Required input argument:
 !   lnp         The logarithm of the desired p-value (p = 1-CL).
 ! 
-FUNCTION XENON100_2012_ScaleToPValue(lnp) RESULT(x)
+FUNCTION XENON100_2012_ScaleToPValue(lnp) RESULT(x) &
+         BIND(C,NAME='__ddcalc0_MOD_xenon100_2012_scaletopvalue')
   IMPLICIT NONE
   REAL*8 :: x
   REAL*8, INTENT(IN) :: lnp
@@ -1439,6 +1488,9 @@ END SUBROUTINE
 ! LUX 2013 ANALYSIS ROUTINES
 ! Based upon the LUX 2013 analysis [1310.8214].  One event seen in
 ! the analysis region.
+! 
+! BIND() is used to specify compiler-independent object file symbol
+! names to allow for easier interfacing with C/C++.  
 !=======================================================================
 
 !-----------------------------------------------------------------------
@@ -1451,7 +1503,8 @@ END SUBROUTINE
 !                 Only necessary if confidence intervals using the
 !                 maximum gap method are desired.
 ! 
-SUBROUTINE LUX_2013_Init(intervals)
+SUBROUTINE LUX_2013_Init(intervals) &
+           BIND(C,NAME='__ddcalc0_MOD_lux_2013_init')
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: intervals
   
@@ -1470,7 +1523,8 @@ END SUBROUTINE
 ! Required input arguments:
 !     Emin        The minimum recoil energy to consider [keV]
 ! 
-SUBROUTINE LUX_2013_SetEmin(Emin)
+SUBROUTINE LUX_2013_SetEmin(Emin) &
+           BIND(C,NAME='__ddcalc0_MOD_lux_2013_setemin')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: Emin
   LOGICAL :: intervals
@@ -1486,7 +1540,8 @@ END SUBROUTINE
 ! Calculates various rate quantities using the current WIMP.
 ! Must be called each time the WIMP parameters are modified.
 ! 
-SUBROUTINE LUX_2013_CalcRates()
+SUBROUTINE LUX_2013_CalcRates() &
+           BIND(C,NAME='__ddcalc0_MOD_lux_2013_calcrates')
   IMPLICIT NONE
   CALL CalcRates(LUX_2013)
 END SUBROUTINE
@@ -1495,7 +1550,8 @@ END SUBROUTINE
 ! ----------------------------------------------------------------------
 ! Returns the observed number of events.
 ! 
-FUNCTION LUX_2013_Events() RESULT(N)
+FUNCTION LUX_2013_Events() RESULT(N) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_events')
   IMPLICIT NONE
   INTEGER :: N
   CALL GetRates(LUX_2013,Nevents=N)
@@ -1505,7 +1561,8 @@ END FUNCTION
 ! ----------------------------------------------------------------------
 ! Returns the average expected number of background events.
 ! 
-FUNCTION LUX_2013_Background() RESULT(b)
+FUNCTION LUX_2013_Background() RESULT(b) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_background')
   IMPLICIT NONE
   REAL*8 :: b
   CALL GetRates(LUX_2013,background=b)
@@ -1516,7 +1573,8 @@ END FUNCTION
 ! Returns the average expected number of signal events for the
 ! current WIMP.
 ! 
-FUNCTION LUX_2013_Signal() RESULT(s)
+FUNCTION LUX_2013_Signal() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_signal')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(LUX_2013,signal=s)
@@ -1527,7 +1585,8 @@ END FUNCTION
 ! Returns the average expected number of spin-independent signal events
 ! for the current WIMP.
 ! 
-FUNCTION LUX_2013_SignalSI() RESULT(s)
+FUNCTION LUX_2013_SignalSI() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_signalsi')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(LUX_2013,signal_si=s)
@@ -1538,7 +1597,8 @@ END FUNCTION
 ! Returns the average expected number of spin-dependent signal events
 ! for the current WIMP.
 ! 
-FUNCTION LUX_2013_SignalSD() RESULT(s)
+FUNCTION LUX_2013_SignalSD() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_signalsd')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(LUX_2013,signal_sd=s)
@@ -1552,7 +1612,8 @@ END FUNCTION
 ! where s is the average expected signal and b is the average expected
 ! background.
 ! 
-FUNCTION LUX_2013_LogLikelihood() RESULT(lnlike)
+FUNCTION LUX_2013_LogLikelihood() RESULT(lnlike) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_loglikelihood')
   IMPLICIT NONE
   REAL*8 :: lnlike
   lnlike = LogLikelihood(LUX_2013)
@@ -1569,7 +1630,8 @@ END FUNCTION
 ! where s is the average expected signal (background contributions are
 ! ignored).
 ! 
-FUNCTION LUX_2013_LogPValue() RESULT(lnp)
+FUNCTION LUX_2013_LogPValue() RESULT(lnp) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_logpvalue')
   IMPLICIT NONE
   REAL*8 :: lnp
   lnp = LogPValue(LUX_2013)
@@ -1584,7 +1646,8 @@ END FUNCTION
 ! Required input argument:
 !   lnp         The logarithm of the desired p-value (p = 1-CL).
 ! 
-FUNCTION LUX_2013_ScaleToPValue(lnp) RESULT(x)
+FUNCTION LUX_2013_ScaleToPValue(lnp) RESULT(x) &
+         BIND(C,NAME='__ddcalc0_MOD_lux_2013_scaletopvalue')
   IMPLICIT NONE
   REAL*8 :: x
   REAL*8, INTENT(IN) :: lnp
@@ -1835,6 +1898,9 @@ END SUBROUTINE
 ! DARWIN ARGON ANALYSIS ROUTINES
 ! Based upon a DARWIN argon-based analysis (2014 estimated parameters)
 ! [14MM.XXXX].  Zero events assumed in the analysis region.
+! 
+! BIND() is used to specify compiler-independent object file symbol
+! names to allow for easier interfacing with C/C++.  
 !=======================================================================
 
 !-----------------------------------------------------------------------
@@ -1847,7 +1913,8 @@ END SUBROUTINE
 !                 Only necessary if confidence intervals using the
 !                 maximum gap method are desired.
 ! 
-SUBROUTINE DARWIN_Ar_2014_Init(intervals)
+SUBROUTINE DARWIN_Ar_2014_Init(intervals) &
+           BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_init')
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: intervals
   
@@ -1866,7 +1933,8 @@ END SUBROUTINE
 ! Required input arguments:
 !     Emin        The minimum recoil energy to consider [keV]
 ! 
-SUBROUTINE DARWIN_Ar_2014_SetEmin(Emin)
+SUBROUTINE DARWIN_Ar_2014_SetEmin(Emin) &
+           BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_setemin')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: Emin
   LOGICAL :: intervals
@@ -1882,7 +1950,8 @@ END SUBROUTINE
 ! Calculates various rate quantities using the current WIMP.
 ! Must be called each time the WIMP parameters are modified.
 ! 
-SUBROUTINE DARWIN_Ar_2014_CalcRates()
+SUBROUTINE DARWIN_Ar_2014_CalcRates() &
+           BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_calcrates')
   IMPLICIT NONE
   CALL CalcRates(DARWIN_Ar_2014)
 END SUBROUTINE
@@ -1891,7 +1960,8 @@ END SUBROUTINE
 ! ----------------------------------------------------------------------
 ! Returns the observed number of events.
 ! 
-FUNCTION DARWIN_Ar_2014_Events() RESULT(N)
+FUNCTION DARWIN_Ar_2014_Events() RESULT(N) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_events')
   IMPLICIT NONE
   INTEGER :: N
   CALL GetRates(DARWIN_Ar_2014,Nevents=N)
@@ -1901,7 +1971,8 @@ END FUNCTION
 ! ----------------------------------------------------------------------
 ! Returns the average expected number of background events.
 ! 
-FUNCTION DARWIN_Ar_2014_Background() RESULT(b)
+FUNCTION DARWIN_Ar_2014_Background() RESULT(b) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_background')
   IMPLICIT NONE
   REAL*8 :: b
   CALL GetRates(DARWIN_Ar_2014,background=b)
@@ -1912,7 +1983,8 @@ END FUNCTION
 ! Returns the average expected number of signal events for the
 ! current WIMP.
 ! 
-FUNCTION DARWIN_Ar_2014_Signal() RESULT(s)
+FUNCTION DARWIN_Ar_2014_Signal() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_signal')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(DARWIN_Ar_2014,signal=s)
@@ -1923,7 +1995,8 @@ END FUNCTION
 ! Returns the average expected number of spin-independent signal events
 ! for the current WIMP.
 ! 
-FUNCTION DARWIN_Ar_2014_SignalSI() RESULT(s)
+FUNCTION DARWIN_Ar_2014_SignalSI() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_signalsi')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(DARWIN_Ar_2014,signal_si=s)
@@ -1934,7 +2007,8 @@ END FUNCTION
 ! Returns the average expected number of spin-dependent signal events
 ! for the current WIMP.
 ! 
-FUNCTION DARWIN_Ar_2014_SignalSD() RESULT(s)
+FUNCTION DARWIN_Ar_2014_SignalSD() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_signalsd')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(DARWIN_Ar_2014,signal_sd=s)
@@ -1948,7 +2022,8 @@ END FUNCTION
 ! where s is the average expected signal and b is the average expected
 ! background.
 ! 
-FUNCTION DARWIN_Ar_2014_LogLikelihood() RESULT(lnlike)
+FUNCTION DARWIN_Ar_2014_LogLikelihood() RESULT(lnlike) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_loglikelihood')
   IMPLICIT NONE
   REAL*8 :: lnlike
   lnlike = LogLikelihood(DARWIN_Ar_2014)
@@ -1965,7 +2040,8 @@ END FUNCTION
 ! where s is the average expected signal (background contributions are
 ! ignored).
 ! 
-FUNCTION DARWIN_Ar_2014_LogPValue() RESULT(lnp)
+FUNCTION DARWIN_Ar_2014_LogPValue() RESULT(lnp) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_logpvalue')
   IMPLICIT NONE
   REAL*8 :: lnp
   lnp = LogPValue(DARWIN_Ar_2014)
@@ -1980,7 +2056,8 @@ END FUNCTION
 ! Required input argument:
 !   lnp         The logarithm of the desired p-value (p = 1-CL).
 ! 
-FUNCTION DARWIN_Ar_2014_ScaleToPValue(lnp) RESULT(x)
+FUNCTION DARWIN_Ar_2014_ScaleToPValue(lnp) RESULT(x) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_ar_2014_scaletopvalue')
   IMPLICIT NONE
   REAL*8 :: x
   REAL*8, INTENT(IN) :: lnp
@@ -2102,7 +2179,8 @@ END SUBROUTINE
 !                 Only necessary if confidence intervals using the
 !                 maximum gap method are desired.
 ! 
-SUBROUTINE DARWIN_Xe_2014_Init(intervals)
+SUBROUTINE DARWIN_Xe_2014_Init(intervals) &
+           BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_init')
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: intervals
   
@@ -2121,7 +2199,8 @@ END SUBROUTINE
 ! Required input arguments:
 !     Emin        The minimum recoil energy to consider [keV]
 ! 
-SUBROUTINE DARWIN_Xe_2014_SetEmin(Emin)
+SUBROUTINE DARWIN_Xe_2014_SetEmin(Emin) &
+           BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_setemin')
   IMPLICIT NONE
   REAL*8, INTENT(IN) :: Emin
   LOGICAL :: intervals
@@ -2137,7 +2216,8 @@ END SUBROUTINE
 ! Calculates various rate quantities using the current WIMP.
 ! Must be called each time the WIMP parameters are modified.
 ! 
-SUBROUTINE DARWIN_Xe_2014_CalcRates()
+SUBROUTINE DARWIN_Xe_2014_CalcRates() &
+           BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_calcrates')
   IMPLICIT NONE
   CALL CalcRates(DARWIN_Xe_2014)
 END SUBROUTINE
@@ -2146,7 +2226,8 @@ END SUBROUTINE
 ! ----------------------------------------------------------------------
 ! Returns the observed number of events.
 ! 
-FUNCTION DARWIN_Xe_2014_Events() RESULT(N)
+FUNCTION DARWIN_Xe_2014_Events() RESULT(N) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_events')
   IMPLICIT NONE
   INTEGER :: N
   CALL GetRates(DARWIN_Xe_2014,Nevents=N)
@@ -2156,7 +2237,8 @@ END FUNCTION
 ! ----------------------------------------------------------------------
 ! Returns the average expected number of background events.
 ! 
-FUNCTION DARWIN_Xe_2014_Background() RESULT(b)
+FUNCTION DARWIN_Xe_2014_Background() RESULT(b) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_background')
   IMPLICIT NONE
   REAL*8 :: b
   CALL GetRates(DARWIN_Xe_2014,background=b)
@@ -2167,7 +2249,8 @@ END FUNCTION
 ! Returns the average expected number of signal events for the
 ! current WIMP.
 ! 
-FUNCTION DARWIN_Xe_2014_Signal() RESULT(s)
+FUNCTION DARWIN_Xe_2014_Signal() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_signal')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(DARWIN_Xe_2014,signal=s)
@@ -2178,7 +2261,8 @@ END FUNCTION
 ! Returns the average expected number of spin-independent signal events
 ! for the current WIMP.
 ! 
-FUNCTION DARWIN_Xe_2014_SignalSI() RESULT(s)
+FUNCTION DARWIN_Xe_2014_SignalSI() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_signalsi')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(DARWIN_Xe_2014,signal_si=s)
@@ -2189,7 +2273,8 @@ END FUNCTION
 ! Returns the average expected number of spin-dependent signal events
 ! for the current WIMP.
 ! 
-FUNCTION DARWIN_Xe_2014_SignalSD() RESULT(s)
+FUNCTION DARWIN_Xe_2014_SignalSD() RESULT(s) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_signalsd')
   IMPLICIT NONE
   REAL*8 :: s
   CALL GetRates(DARWIN_Xe_2014,signal_sd=s)
@@ -2203,7 +2288,8 @@ END FUNCTION
 ! where s is the average expected signal and b is the average expected
 ! background.
 ! 
-FUNCTION DARWIN_Xe_2014_LogLikelihood() RESULT(lnlike)
+FUNCTION DARWIN_Xe_2014_LogLikelihood() RESULT(lnlike) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_loglikelihood')
   IMPLICIT NONE
   REAL*8 :: lnlike
   lnlike = LogLikelihood(DARWIN_Xe_2014)
@@ -2220,7 +2306,8 @@ END FUNCTION
 ! where s is the average expected signal (background contributions are
 ! ignored).
 ! 
-FUNCTION DARWIN_Xe_2014_LogPValue() RESULT(lnp)
+FUNCTION DARWIN_Xe_2014_LogPValue() RESULT(lnp) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_logpvalue')
   IMPLICIT NONE
   REAL*8 :: lnp
   lnp = LogPValue(DARWIN_Xe_2014)
@@ -2235,7 +2322,8 @@ END FUNCTION
 ! Required input argument:
 !   lnp         The logarithm of the desired p-value (p = 1-CL).
 ! 
-FUNCTION DARWIN_Xe_2014_ScaleToPValue(lnp) RESULT(x)
+FUNCTION DARWIN_Xe_2014_ScaleToPValue(lnp) RESULT(x) &
+         BIND(C,NAME='__ddcalc0_MOD_darwin_xe_2014_scaletopvalue')
   IMPLICIT NONE
   REAL*8 :: x
   REAL*8, INTENT(IN) :: lnp
@@ -3428,9 +3516,9 @@ SUBROUTINE WriteCommandHeader(extra_lines)
   !WRITE(*,'(A)') COMMENT_PREFIX &
   !    // 'DDCalc0 version: ' // TRIM(VERSION_STRING)
   !WRITE(*,'(A)') COMMENT_PREFIX &
-  !    // 'See/cite C. Savage et al., arxiv:14MM.XXXX.'
+  !    // 'See/cite C. Savage et al., arxiv:15MM.XXXX.'
   WRITE(*,'(A)') COMMENT_PREFIX &
-      // 'DDCalc0 version ' // TRIM(VERSION_STRING) // '.  See/cite C. Savage et al., arxiv:14MM.XXXX.'
+      // 'DDCalc0 version ' // TRIM(VERSION_STRING) // '.  See/cite C. Savage et al., arxiv:15MM.XXXX.'
   
   WRITE(*,'(A)') COMMENT_PREFIX
   
