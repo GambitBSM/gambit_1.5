@@ -12,6 +12,7 @@
 ***        nuyield       Name of a function that takes arguments 
 ***                       real*8   log10E  log_10(E_nu / GeV)
 ***                       integer  ptype   1=nu, 2=nubar
+***                       c_ptr    context A void C pointer that can be used for callback
 ***                      and returns
 ***                       real*8   differential neutrino flux at the detector
 ***                                (m^-2 GeV^-1 annihilation^-1)
@@ -47,6 +48,8 @@
 ***                      from the minimum (i.e. the number of free parameters
 ***                      in a scan minus the number profiled over).
 ***
+***        context       A c_ptr passed in to nuyield when it is called
+***
 ***                              
 *** output: Nsignal_predicted  Predicted number of signal events within 
 ***                      phi_cut (includes solar coronal BG)
@@ -68,31 +71,54 @@
 ***********************************************************************
 
 
-      subroutine nulike_bounds(analysis_name, mwimp, annrate, 
+      subroutine nulike_bounds(analysis_name_in, mwimp, annrate, 
      & nuyield, Nsignal_predicted, NBG_expected, Ntotal_observed, 
-     & lnlike, pvalue, liketype, pvalFromRef, referenceLike, dof)
+     & lnlike, pvalue, liketype, pvalFromRef, referenceLike, dof,
+     & context) bind(c)
 
+      use iso_c_binding, only: c_ptr, c_char, c_double, c_int, c_bool
+      
       implicit none
-      include 'nulike.h'
+      include 'nulike_internal.h'
 
-      integer Ntotal_observed, liketype, j
+      integer(c_int), intent(inout) :: Ntotal_observed
+      integer(c_int), intent(in) :: liketype
+      real(c_double), intent(inout) :: Nsignal_predicted, NBG_expected, lnlike, pvalue
+      real(c_double), intent(in) :: referenceLike, dof, mwimp, annrate
+      logical(c_bool), intent(in) :: pvalFromRef
+      character(kind=c_char), dimension(nulike_clen), intent(inout) :: analysis_name_in
+      type(c_ptr), intent(inout) :: context
+
+      integer j
       integer counted1, counted2, countrate, nulike_amap
-      real*8 Nsignal_predicted, NBG_expected, nulike_pval, theta_S
-      real*8 lnlike, pvalue, referenceLike, dof, DGAMIC, DGAMMA, nuyield
+      real*8 nulike_pval, theta_S, DGAMIC, DGAMMA
       real*8 nLikelihood, angularLikelihood, spectralLikelihood, logmw
       real*8 theta_tot, f_S, nulike_anglike, nulike_speclike, nulike_nlike
-      real*8 deltalnlike, mwimp, annrate, specAngLikelihood, nulike_signal
-      real*8 nulike_specanglike
-      logical pvalFromRef, nulike_speclike_reset, doProfiling
-      character (len=nulike_clen) analysis_name
-      external nuyield
+      real*8 deltalnlike, specAngLikelihood, nulike_signal, nulike_specanglike
+      logical nulike_speclike_reset, doProfiling
+      character(len=nulike_clen) analysis_name
       !Hidden option for doing speed profiling
       parameter (doProfiling = .false.)
         
+      interface
+        real(c_double) function nuyield(log10E,ptype,context) bind(c)
+          use iso_c_binding, only: c_ptr, c_double, c_int
+          implicit none
+          real(c_double), intent(in) :: log10E
+          integer(c_int), intent(in) :: ptype
+          type(c_ptr), intent(inout) :: context
+        end function
+      end interface
+
 
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ! 1. Initialisation
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      analysis_name = analysis_name_in(1)
+      do j = 1, nulike_clen
+        analysis_name = analysis_name(1:j-1)//analysis_name_in(j)
+      enddo
 
       if (doProfiling) call system_clock(counted1,countrate)
 
@@ -143,7 +169,7 @@
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       !Calculate signal counts and spectrum. 
-      theta_S = nulike_signal(nuyield, annrate, logmw, likelihood_version(analysis))
+      theta_S = nulike_signal(nuyield, context, annrate, logmw, likelihood_version(analysis))
       !Calculate the total predicted number of events
       theta_tot = theta_BG(analysis) + theta_S
       !Calculate the signal fraction.
@@ -198,19 +224,19 @@
      &       nulike_speclike_reset,
      &       sens_logE(1,1,analysis),
      &       sens_logE(2,nSensBins(analysis),analysis),
-     &       nuyield)
+     &       nuyield, context)
           enddo
         endif
         specAngLikelihood = angularLikelihood + spectralLikelihood
 
-      !2014 likelihood, as per arXiv:141x.xxxx
+      !2014 likelihood, as per arXiv:150x.xxxx
       case (2014)
         specAngLikelihood = 0.d0
         if (liketype .eq. 4) then
           !Step through the individual events
           do j = 1, nEvents(analysis)          
             specAngLikelihood = specAngLikelihood + nulike_specanglike(j,
-     &       theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), nuyield)
+     &       theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), nuyield, context)
           enddo
         endif
 
