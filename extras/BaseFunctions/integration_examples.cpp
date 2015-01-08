@@ -91,7 +91,7 @@ int main()
         double r = 2;
         double A = f->gsl_integration("y", -sqrt(r*r-x*x), sqrt(r*r-x*x))->gsl_integration("x", -r, r)->eval();
         std::cout << A << std::endl;
-        double (*plainF)(double);
+        double (*plainF)(double&);
         plainF = f->gsl_integration("y", -sqrt(a*a-x*x), sqrt(a*a-x*x))->gsl_integration("x", -a, a)->plain<T>("a");
         (void)plainF;
 
