@@ -1,7 +1,7 @@
 !=======================================================================
 !  Integrate function f between a and b using Simpson's rule.
 !
-!  Input:  integrand f, auxilary function aux
+!  Input:  integrand f, auxilary function aux, context ptr
 !          integration limits a and b
 !
 !  Author: Joakim Edsjo (edsjo@physto.se) 96-05-16
@@ -9,24 +9,28 @@
 !          2007-07-27 Pat Scott added j > 6 condition to prevent
 !           spurious early convergence, removed os initial definition.
 !          2014-03-05 Pat Scott removed from DarkSUSY and added aux.
+!          2015-01-07 Pat Scott added ptr.
 !
 !  Adapted from DarkSUSY r919 (v5.1.1+)
 !  Initially based on Paolo Gondolo's wxint.f routine.
 !=======================================================================
 
-      real*8 function nulike_simpson(f,aux,a,b,eps)
-      implicit none
+      real*8 function nulike_simpson(f,aux,ptr,a,b,eps)
 
+      use iso_c_binding, only: c_ptr
+
+      implicit none
       real*8 f,aux,a,b,tot,eps,st,os,ost,del,sum,x
       integer jmax,it,l,j,nfcn,jdid
       external f,aux
+      type(c_ptr) ptr
       parameter (jmax=25)
 
       nulike_simpson=0.d0
       del=b-a
-      ost=0.5*del*(f(a,aux)+f(b,aux))
+      ost=0.5*del*(f(a,aux,ptr)+f(b,aux,ptr))
       x=0.5*(b+a)
-      st=0.5*(ost+del*f(x,aux))
+      st=0.5*(ost+del*f(x,aux,ptr))
       ost=st
       it=1
       nfcn=3
@@ -36,7 +40,7 @@
         x=a+0.5*del
         sum=0.0
         do l=1,it
-          sum=sum+f(x,aux)
+          sum=sum+f(x,aux,ptr)
           nfcn=nfcn+1
           x=x+del
         enddo

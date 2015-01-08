@@ -22,12 +22,12 @@ TSPACK=contrib/TSPACK
 
 # Define fortran compiler and options: intel
 FF=ifort
-#FOPT=-O -extend_source -warn all #(contributed numerical routines cause warnings)
-#MODULE=module
+FOPT=-O -extend_source -warn all #(contributed numerical routines cause warnings)
+MODULE=module
 # Define fortran compiler and options: gnu
-FF=gfortran
-FOPT=-O -ffixed-line-length-none # -Wall #(contributed numerical routines cause warnings)
-MODULE=J
+#FF=gfortran
+#FOPT=-O -ffixed-line-length-none # -Wall #(contributed numerical routines cause warnings)
+#MODULE=J
 
 # NOTE -- The above definitions are not used in the
 # gambit compilation!  FMODULE = J and
@@ -51,8 +51,8 @@ vpath %.h $(INC)
 F90SOURCES = cons.f90 incgam.f90 marcumq.f90
 SOURCES = besi0.f dgamic.f lngamma.f lambertw.f lambertw2.f \
 lambertwln.f flagblocks.f lnpin.f lnpiln.f lnpinsum.f lnpilnsum.f \
-simpson.f simpson2.f lnpoisint.f anglike.f angres.f bgangpdf.f \
-bginit.f bglikeprecomp.f bgpredinit.f bgspec.f bounds.f \
+simpson.f simpson1.f simpson2.f lnpoisint.f anglike.f angres.f \
+bgangpdf.f bginit.f bglikeprecomp.f bgpredinit.f bgspec.f bounds.f \
 dP_SdE.f dPhi_SdE.f sensinit.f edisp.f edispinit.f sens.f \
 eventinit.f init.f nlike.f psf.f pval.f analysis_map.f \
 sigintegrand.f signal.f specintegrand.f speclike.f utils.f \
