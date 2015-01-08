@@ -22,12 +22,12 @@ TSPACK=contrib/TSPACK
 
 # Define fortran compiler and options: intel
 FF=ifort
-#FOPT=-O -extend_source -warn all #(contributed numerical routines cause warnings)
-#MODULE=module
+FOPT=-O -extend_source -warn all #(contributed numerical routines cause warnings)
+MODULE=module
 # Define fortran compiler and options: gnu
-FF=gfortran
-FOPT=-O -ffixed-line-length-none # -Wall #(contributed numerical routines cause warnings)
-MODULE=J
+#FF=gfortran
+#FOPT=-O -ffixed-line-length-none # -Wall #(contributed numerical routines cause warnings)
+#MODULE=J
 
 # NOTE -- The above definitions are not used in the
 # gambit compilation!  FMODULE = J and

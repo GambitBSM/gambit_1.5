@@ -34,7 +34,7 @@
       integer like
       type(c_ptr) context
       parameter (eps2012 = 1.d-3, eps2014 = 1e-3)
-      external nuyield, nulike_sigintegrand, nulike_specangintegrand
+      external nuyield, nulike_sigintegrand, nulike_specangintegrand, nulike_simpson
  
       ! Short-circuit if the mass is too low to produce any observable events.
       if (logmw .lt. sens_logE(1,1,analysis)) then
