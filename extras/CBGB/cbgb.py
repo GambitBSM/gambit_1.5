@@ -33,13 +33,13 @@ print '  Requested common blocks:'
 print '  ------------------------'
 print
 
-cb_list = '    '
+cb_listing = '    '
 for i, cb_name in enumerate(cfg.load_common_blocks,1):
-    cb_list += cb_name + ', '
+    cb_listing += cb_name + ', '
 
     if i%4==0:
-        cb_list += '\n    '
-print cb_list
+        cb_listing += '\n    '
+print cb_listing.rstrip().rstrip(',')
 print
 print
 
@@ -54,6 +54,18 @@ out_file_be_types = open(gb.output_file_path_be_types, 'w')
 out_file_frontent = open(gb.output_file_path_frontent, 'w')
 
 
+#
+# Do some reformatting of the source code:
+#
+# - Convert all code to lower-case. (Fortran is not case-sensitive.)
+# - Replace tabs with spaces.
+# - Split source code into a list of lines.
+# - Remove all comments and blank lines.
+# - Remove all statement labels.
+# - Combine continued source lines into single lines.
+# - Remove leading and trailing blanks,
+#
+
 # Convert all source code to lower-case. (Fortran is not case-sensitive.)
 src_content = src_content.lower()
 
@@ -66,8 +78,18 @@ src_lines = src_content.splitlines()
 # Remove comments.
 src_lines = utils.removeComments(src_lines)
 
+# Remove statement labels.
+src_lines = utils.removeStatementLabels(src_lines)
+
+# Remove blank lines.
+src_lines = utils.removeBlankLines(src_lines)
+
 # Join continued lines.
 src_lines = utils.joinContinuedLines(src_lines)
+
+# Remove leading and trailing blanks
+src_lines = utils.removeLeadingTrailingBlanks(src_lines)
+
 
 
 # Identify the various parts of the code: program, functions and subroutines.

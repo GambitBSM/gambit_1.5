@@ -14,7 +14,7 @@ from modules import cfg
 # ====== removeComments ========
 
 # Takes a list of code lines and removes comments.
-# Lines starting with 'c' are replaces by an empty line, 
+# Lines starting with 'c' are replaced by an empty line, 
 # while for lines containing '!' everything after '!'
 # is removed.
 
@@ -46,48 +46,113 @@ def removeComments(code_lines):
 
 
 
+# ====== removeBlankLines ========
+
+# Removes any empty (all whitespace) strings from a list of strings.
+
+def removeBlankLines(code_lines):
+
+    # Walk through the list of code lines backwards and discard 
+    # any lines that contain nothing but whitespace.
+    for i in range(len(code_lines))[::-1]:
+        if code_lines[i].strip() == '':
+            code_lines.pop(i)
+
+    return code_lines
+
+# ====== END: removeBlankLines ========
+
+
+
+# ====== removeLeadingTrailingBlanks ========
+
+# Removes leading and trailing blanks from the strings
+# in a list of strings.
+
+def removeLeadingTrailingBlanks(code_lines):
+
+    for i in range(len(code_lines)):
+        code_lines[i] = code_lines[i].lstrip().rstrip()
+
+    return code_lines
+
+# ====== END: removeLeadingTrailingBlanks ========
+
+
+
+# ====== removeStatementLabels ========
+
+# Replaces statement labels with empty spaces.
+# (A statement label is a number given as the first 
+# non-blank part of a statement.)
+
+def removeStatementLabels(code_lines):
+
+    for i in range(len(code_lines)):
+
+        line = code_lines[i]
+
+        if cfg.format == 'fixed':
+            label = line[0:5].strip()
+            if label.isdigit():
+                code_lines[i] = line.replace(label, ' '*len(label), 1)
+
+        elif cfg.format == 'free':
+
+            line_list = line.split()
+            if (len(line_list) > 0):
+                label = line_list[0]
+                if label.isdigit():
+                    code_lines[i] = line.replace(label, ' '*len(label), 1)                    
+
+        else:
+            raise Exception("cfg.format must be set to either 'fixed' or 'free'.")
+
+    return code_lines
+
+# ====== END: removeStatementLabels ========
+
+
+
 # ====== joinContinuedLines ========
 
-def joinContinuedLines(src_lines):
+def joinContinuedLines(code_lines):
 
-    joined_src_lines = ['']
+    joined_code_lines = ['']
 
     if cfg.format == 'fixed':
 
-        for line in src_lines:
+        for line in code_lines:
             
-            # Ignore empty lines or lines with only a statement label (columns 1-5)
-            if len(line) < 6:
-                continue
-
             # Check for line continuation (any character at column 6).
-            
+            # (This assumes that len(line) >= 6 for all lines in code_lines,
+            # which should be OK due to prior code formatting.)
+
             # - If found, append to previous line.
-            if line[5] not in [' ','\t']:
-                joined_src_lines[-1] += line[6:]
+            try:
+                if line[5] not in [' ','\t']:
+                    joined_code_lines[-1] += line[6:]
+            except:
+                print [line]
+                raise
             
             # - If not found, store current_line and start constructing a new.
             else:
-                joined_src_lines.append(line)
+                joined_code_lines.append(line)
 
 
     elif cfg.format == 'free':
 
         continue_line = False
-        for line in src_lines:
-
-            # Ignore empty lines or lines with only a statement label (columns 1-5)
-            if len(line) == 0:
-                continue
-
+        for line in code_lines:
 
             if continue_line:
                 if line.lstrip()[0] == '&':
-                    joined_src_lines[-1] += line.lstrip()[1:].rstrip().rstrip('&')
+                    joined_code_lines[-1] += line.lstrip()[1:].rstrip().rstrip('&')
                 else:
-                    joined_src_lines[-1] += line.rstrip().rstrip('&')
+                    joined_code_lines[-1] += line.rstrip().rstrip('&')
             else:
-                joined_src_lines.append(line.rstrip().rstrip('&'))
+                joined_code_lines.append(line.rstrip().rstrip('&'))
 
 
             # Check for line continuation. (Line ends with '&'.)
@@ -99,10 +164,10 @@ def joinContinuedLines(src_lines):
     else:
         raise Exception("cfg.format must be set to either 'fixed' or 'free'.")
 
-    if joined_src_lines[0] == '':
-        joined_src_lines.pop(0)
+    if joined_code_lines[0] == '':
+        joined_code_lines.pop(0)
 
-    return joined_src_lines
+    return joined_code_lines
 
 
 # ====== END: joinContinuedLines ========
@@ -205,15 +270,8 @@ def getImplicitDefs(code_lines):
 
     for i,line in enumerate(code_lines):
 
-        # Remove blanks
-        line = line.strip()
-
         # Split line into words
         line_list = line.split()
-
-        # Ignore empty lines
-        if len(line_list) == 0:
-            continue
 
         # Look for 'implicit' statement
         if line_list[0] == 'implicit':
@@ -428,28 +486,35 @@ def getVariablesDict(code_lines, get_variables):
         #
         
         is_var_decl, type_name, type_size = isVariableDecl(line, return_type=True)
-        
-        if type_size > 1:
-            full_type_name = type_name + '*' + str(type_size)
-        else:
-            full_type_name = type_name
 
         if is_var_decl:
 
-            # Remove whitespace and type name
-            line = line.replace(' ','')
-            line = line.replace(full_type_name,'',1)
+            # Remove type name from beginning of line so that
+            # only the list of variable names remain.
+            full_type_name = type_name + '*' + str(type_size)
+            if line[:len(full_type_name)] == full_type_name:
+                line = line.replace(full_type_name,'',1)
+            elif line[:len(type_name)] == type_name:
+                line = line.replace(type_name,'',1)
 
             # Parse line to extract info on the different variables
             var_dicts = parseVariableSequence(line)
 
             # Append type_name and type_size to var_dicts
             for var_name in var_dicts.keys():
+
                 # - Add type name
                 var_dicts[var_name]['type'] = type_name
                 # - Use the maximum of the sizes specified in the type name and in the variable sequence
                 #   (Normally one of these should be 1 by default.)
                 var_dicts[var_name]['size'] = max(type_size,var_dicts[var_name]['size'])
+
+                # Check for character array type:
+                if (var_dicts[var_name]['type'] == 'character'): 
+                    dim_str = var_dicts[var_name]['dimension']
+                    size    = var_dicts[var_name]['size']
+                    if (dim_str == '') and (size > 1):
+                        var_dicts[var_name]['dimension'] = '1:%i' % size
 
             # For requested variables, append the variable dicts to return_var_dicts
             for var_name in var_dicts.keys():
@@ -640,6 +705,7 @@ def generateGambitCommonBlockDecl(cb_dict, var_info_dict):
         array_indices_tuples = getArrayIndicesTuples(var_dict['dimension'])
         is_array = bool(len(array_indices_tuples))
 
+
         if is_array:
             indicies_tuples_string = ','.join([str(t) for t in array_indices_tuples])
             code += indent + 'FORTRAN_ARRAY(%s,%s,%s)' % (c_type_name, var_name, indicies_tuples_string)
@@ -680,8 +746,8 @@ def getCTypeName(var_dict):
     fortran_type_name = var_dict['type']
     c_type_name = gb.type_translation_dict[fortran_type_name]
 
-    if (fortran_type_name == 'character') and (var_dict['size'] > 1):
-        c_type_name = 'char[%i]' % var_dict['size'] 
+    # if (fortran_type_name == 'character') and (var_dict['size'] > 1):
+    #     c_type_name = 'char[%i]' % var_dict['size'] 
 
     return c_type_name
 
