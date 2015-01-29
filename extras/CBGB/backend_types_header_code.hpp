@@ -26,8 +26,7 @@ DECLARE_FORTRAN_COMMONBLOCK(widthhl_hdec_type,  \
                                               GENERAL_VAR(double,hlbrz) \
                                               GENERAL_VAR(double,hlbra) \
                                               GENERAL_VAR(double,hlbraz) \
-                                              GENERAL_VAR(double,hlbrhw) \
-                                              GENERAL_VAR(double,hlwdth) )
+                                              GENERAL_VAR(double,hlbrhw) )
 
 DECLARE_FORTRAN_COMMONBLOCK(widthhh_hdec_type,  \
                                               GENERAL_VAR(double,hhbrb) \
@@ -43,9 +42,7 @@ DECLARE_FORTRAN_COMMONBLOCK(widthhh_hdec_type,  \
                                               GENERAL_VAR(double,hhbrz) \
                                               GENERAL_VAR(double,hhbrh) \
                                               GENERAL_VAR(double,hhbra) \
-                                              GENERAL_VAR(double,hhbraz) \
-                                              GENERAL_VAR(double,hhbrhw) \
-                                              GENERAL_VAR(double,hhwdth) )
+                                              GENERAL_VAR(double,hhbraz) )
 
 DECLARE_FORTRAN_COMMONBLOCK(widthhc_hdec_type,  \
                                               GENERAL_VAR(double,hcbrb) \
@@ -71,24 +68,7 @@ DECLARE_FORTRAN_COMMONBLOCK(wisusy_hdec_type,  \
                                              GENERAL_VAR(double,hhbrcht) \
                                              GENERAL_VAR(double,habrcht) \
                                              GENERAL_VAR(double,hlbrnet) \
-                                             GENERAL_VAR(double,hhbrnet) \
-                                             GENERAL_VAR(double,habrnet) \
-                                             GENERAL_VAR(double,hcbrcnt) \
-                                             GENERAL_VAR(double,hlbrsl) \
-                                             GENERAL_VAR(double,hhbrsl) \
-                                             GENERAL_VAR(double,hcbrsl) \
-                                             GENERAL_VAR(double,habrsl) \
-                                             GENERAL_VAR(double,habrst) \
-                                             GENERAL_VAR(double,habrsb) \
-                                             GENERAL_VAR(double,hhbrsq) \
-                                             FORTRAN_ARRAY(double,hhbrst,(1, 2),(1, 2)) \
-                                             FORTRAN_ARRAY(double,hhbrsb,(1, 2),(1, 2)) \
-                                             GENERAL_VAR(double,hhbrsqt) \
-                                             GENERAL_VAR(double,hcbrsq) \
-                                             FORTRAN_ARRAY(double,hcbrstb,(1, 2),(1, 2)) \
-                                             GENERAL_VAR(double,hcbrsqt) \
-                                             GENERAL_VAR(double,hlbrsq) \
-                                             GENERAL_VAR(double,hlbrsqt) )
+                                             GENERAL_VAR(double,hhbrnet) )
 
 DECLARE_FORTRAN_COMMONBLOCK(wisfer_hdec_type,  \
                                              GENERAL_VAR(double,bhlslnl) \
@@ -100,25 +80,7 @@ DECLARE_FORTRAN_COMMONBLOCK(wisfer_hdec_type,  \
                                              GENERAL_VAR(double,bhlsqdr) \
                                              GENERAL_VAR(double,bhlst) \
                                              GENERAL_VAR(double,bhlsb) \
-                                             GENERAL_VAR(double,bhlstau) \
-                                             GENERAL_VAR(double,bhhslnl) \
-                                             GENERAL_VAR(double,bhhslel) \
-                                             GENERAL_VAR(double,bhhsler) \
-                                             GENERAL_VAR(double,bhhsqul) \
-                                             GENERAL_VAR(double,bhhsqur) \
-                                             GENERAL_VAR(double,bhhsqdl) \
-                                             GENERAL_VAR(double,bhhsqdr) \
-                                             GENERAL_VAR(double,bhhst) \
-                                             GENERAL_VAR(double,bhhsb) \
-                                             GENERAL_VAR(double,bhhstau) \
-                                             GENERAL_VAR(double,bhastau) \
-                                             GENERAL_VAR(double,bhasb) \
-                                             GENERAL_VAR(double,bhast) \
-                                             GENERAL_VAR(double,bhcsl00) \
-                                             GENERAL_VAR(double,bhcsl11) \
-                                             GENERAL_VAR(double,bhcsl21) \
-                                             GENERAL_VAR(double,bhcsq) \
-                                             GENERAL_VAR(double,bhcstb) )
+                                             GENERAL_VAR(double,bhlstau) )
 
 DECLARE_FORTRAN_COMMONBLOCK(hd_golddec_type,  \
                                             FORTRAN_ARRAY(double,whlgd,(1, 4)) \
@@ -134,20 +96,7 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_char2body_type,  \
                                               FORTRAN_ARRAY(double,brcharsupl,(1, 2)) \
                                               FORTRAN_ARRAY(double,brcharsupr,(1, 2)) \
                                               FORTRAN_ARRAY(double,brcharsdownl,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharsdownr,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharsnel,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharsn1,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharsn2,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharsell,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharselr,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharstau1,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharstau2,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brcharhcneut,(1, 2),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brcharwneut,(1, 2),(1, 4)) \
-                                              GENERAL_VAR(double,brcharzchic) \
-                                              GENERAL_VAR(double,brcharhlchic) \
-                                              GENERAL_VAR(double,brcharhhchic) \
-                                              GENERAL_VAR(double,brcharhachic) )
+                                              GENERAL_VAR(double,brcharsdownr) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_char2bodygrav_type,  \
                                                   FORTRAN_ARRAY(double,brcharwgravitino,(1, 2)) \
@@ -164,17 +113,7 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_char3body_type,  \
                                               FORTRAN_ARRAY(double,brglchsb,(1, 2)) \
                                               FORTRAN_ARRAY(double,brgltopbb,(1, 2)) \
                                               GENERAL_VAR(double,brchee) \
-                                              GENERAL_VAR(double,brchmumu) \
-                                              GENERAL_VAR(double,brchtautau) \
-                                              GENERAL_VAR(double,brchnene) \
-                                              GENERAL_VAR(double,brchnmunmu) \
-                                              GENERAL_VAR(double,brchntauntau) \
-                                              GENERAL_VAR(double,brchupup) \
-                                              GENERAL_VAR(double,brchdodo) \
-                                              GENERAL_VAR(double,brchchch) \
-                                              GENERAL_VAR(double,brchstst) \
-                                              GENERAL_VAR(double,brchtoptop) \
-                                              GENERAL_VAR(double,brchbotbot) )
+                                              GENERAL_VAR(double,brchmumu) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_charwidth_type,  \
                                               FORTRAN_ARRAY(double,chartot,(1, 2)) )
@@ -187,20 +126,7 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_neut2body_type,  \
                                               FORTRAN_ARRAY(double,brneutsupl,(1, 4)) \
                                               FORTRAN_ARRAY(double,brneutsupr,(1, 4)) \
                                               FORTRAN_ARRAY(double,brneutsdownl,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutsdownr,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutsnel,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutsn1,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutsn2,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutsell,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutselr,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutstau1,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutstau2,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutwchar,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brneuthcchar,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brneutzneut,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneuthlneut,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneuthhneut,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneuthaneut,(1, 4),(1, 4)) )
+                                              GENERAL_VAR(double,brneutsdownr) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_neut2bodygrav_type,  \
                                                   FORTRAN_ARRAY(double,brneutgamgrav,(1, 4)) \
@@ -216,30 +142,15 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_neut3body_type,  \
                                               FORTRAN_ARRAY(double,brneutst,(1, 4),(1, 4)) \
                                               FORTRAN_ARRAY(double,brneutbot,(1, 4),(1, 4)) \
                                               FORTRAN_ARRAY(double,brneuttop,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutel,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutmu,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneuttau,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutnue,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutnumu,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brneutnutau,(1, 4),(1, 4)) \
-                                              FORTRAN_ARRAY(double,brchubd,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brchcbs,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brchtbb,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brchelne,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brchmunmu,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brchtauntau,(1, 4),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brglup,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brgldo,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brglch,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brglst,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brgltop,(1, 4)) \
-                                              FORTRAN_ARRAY(double,brglbot,(1, 4)) )
+                                              GENERAL_VAR(double,brneutel) \
+                                              GENERAL_VAR(double,brneutmu) \
+                                              GENERAL_VAR(double,brneuttau) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_neutloop_type,  \
                                              FORTRAN_ARRAY(double,brnraddec,(1, 4),(1, 4)) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_neutwidth_type,  \
-                                              FORTRAN_ARRAY(double,neuttot,(1, 4)) )
+                                              FORTRAN_ARRAY(int,neuttot,(1, 4)) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_glui2body_type,  \
                                               GENERAL_VAR(double,brgst1) \
@@ -302,13 +213,8 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_stop2body_type,  \
                                               FORTRAN_ARRAY(double,brst1wsb,(1, 2)) \
                                               FORTRAN_ARRAY(double,brst2charb,(1, 2)) \
                                               FORTRAN_ARRAY(double,brst2hcsb,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brst2wsb,(1, 2)) \
-                                              GENERAL_VAR(double,brst1glui) \
-                                              GENERAL_VAR(double,brst2glui) \
-                                              GENERAL_VAR(double,brst2hl) \
-                                              GENERAL_VAR(double,brst2hh) \
-                                              GENERAL_VAR(double,brst2ha) \
-                                              GENERAL_VAR(double,brst2ztop) )
+                                              GENERAL_VAR(double,brst2wsb) \
+                                              GENERAL_VAR(double,brst1glui) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_stop3body_type,  \
                                               FORTRAN_ARRAY(double,brstopw,(1, 2),(1, 4)) \
@@ -316,20 +222,11 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_stop3body_type,  \
                                               FORTRAN_ARRAY(double,brststau,(1, 2),(1, 2)) \
                                               FORTRAN_ARRAY(double,brstsntau,(1, 2),(1, 2)) \
                                               FORTRAN_ARRAY(double,brstsel,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstbsbst,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstbbsbt,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brsttausbnu,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstelsbnu,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstupsbdow,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstsnel,(1, 2)) \
-                                              GENERAL_VAR(double,brst2st1tt) \
-                                              GENERAL_VAR(double,brst2st1startt) \
-                                              GENERAL_VAR(double,brst2st1bb) \
-                                              GENERAL_VAR(double,brst2st1uu) \
-                                              GENERAL_VAR(double,brst2st1dd) \
-                                              GENERAL_VAR(double,brst2st1ee) \
-                                              GENERAL_VAR(double,brst2st1nunu) \
-                                              GENERAL_VAR(double,brst2st1tautau) )
+                                              GENERAL_VAR(double,brstbsbst) \
+                                              GENERAL_VAR(double,brstbbsbt) \
+                                              GENERAL_VAR(double,brsttausbnu) \
+                                              GENERAL_VAR(double,brstelsbnu) \
+                                              GENERAL_VAR(double,brstupsbdow) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_stoploop_type,  \
                                              GENERAL_VAR(double,brgamma) \
@@ -353,13 +250,8 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_sbot2body_type,  \
                                               FORTRAN_ARRAY(double,brsb1hcst,(1, 2)) \
                                               FORTRAN_ARRAY(double,brsb2hcst,(1, 2)) \
                                               FORTRAN_ARRAY(double,brsb1wst,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brsb2wst,(1, 2)) \
-                                              GENERAL_VAR(double,brsb1glui) \
-                                              GENERAL_VAR(double,brsb2glui) \
-                                              GENERAL_VAR(double,brsb2hl) \
-                                              GENERAL_VAR(double,brsb2hh) \
-                                              GENERAL_VAR(double,brsb2ha) \
-                                              GENERAL_VAR(double,brsb2zbot) )
+                                              GENERAL_VAR(double,brsb2wst) \
+                                              GENERAL_VAR(double,brsb1glui) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_sbot3body_type,  \
                                               FORTRAN_ARRAY(double,brsbstau,(1, 2),(1, 2)) \
@@ -368,20 +260,12 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_sbot3body_type,  \
                                               FORTRAN_ARRAY(double,brsbtstsb,(1, 2),(1, 2)) \
                                               FORTRAN_ARRAY(double,brsbtbstb,(1, 2),(1, 2)) \
                                               FORTRAN_ARRAY(double,brsbtaustnu,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brsbelstnu,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brsbupstdow,(1, 2),(1, 2)) \
-                                              FORTRAN_ARRAY(double,brsbsnel,(1, 2)) \
-                                              GENERAL_VAR(double,brsb2sb1bb) \
-                                              GENERAL_VAR(double,brsb2sb1starbb) \
-                                              GENERAL_VAR(double,brsb2sb1tt) \
-                                              GENERAL_VAR(double,brsb2sb1uu) \
-                                              GENERAL_VAR(double,brsb2sb1dd) \
-                                              GENERAL_VAR(double,brsb2sb1ee) \
-                                              GENERAL_VAR(double,brsb2sb1nunu) \
-                                              GENERAL_VAR(double,brsb2sb1tautau) )
+                                              GENERAL_VAR(double,brsbelstnu) \
+                                              GENERAL_VAR(double,brsbupstdow) \
+                                              GENERAL_VAR(double,brsbsnel) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_sbotwidth_type,  \
-                                              FORTRAN_ARRAY(double,sbottot,(1, 2)) )
+                                              GENERAL_VAR(double,sbottot) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_sel2body_type,  \
                                              FORTRAN_ARRAY(double,brsellneute,(1, 4)) \
@@ -405,14 +289,9 @@ DECLARE_FORTRAN_COMMONBLOCK(sd_stau2body_type,  \
                                               FORTRAN_ARRAY(double,brstau2neut,(1, 4)) \
                                               FORTRAN_ARRAY(double,brstau1char,(1, 2)) \
                                               FORTRAN_ARRAY(double,brstau1hcsn,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstau1wsn,(1, 2)) \
+                                              GENERAL_VAR(double,brstau1wsn) \
                                               FORTRAN_ARRAY(double,brstau2char,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstau2hcsn,(1, 2)) \
-                                              FORTRAN_ARRAY(double,brstau2wsn,(1, 2)) \
-                                              GENERAL_VAR(double,brstau2hl) \
-                                              GENERAL_VAR(double,brstau2hh) \
-                                              GENERAL_VAR(double,brstau2ha) \
-                                              GENERAL_VAR(double,brstau2ztau) )
+                                              FORTRAN_ARRAY(double,brstau2hcsn,(1, 2)) )
 
 DECLARE_FORTRAN_COMMONBLOCK(sd_stau2bodygrav_type,  \
                                                   GENERAL_VAR(double,brstautaugrav) )

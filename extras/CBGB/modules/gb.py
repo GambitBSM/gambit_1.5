@@ -61,32 +61,3 @@ default_implicit_types = {
                            'y': ('real',1),
                            'z': ('real',1)
                          }
-
-
-# known_types = [ 
-#                 'character',
-#                 'character*',
-#                 'complex',
-#                 'complex*8',
-#                 'complex*16',
-#                 'complex*32',
-#                 'doublecomplex',
-#                 'doubleprecision',
-#                 'integer',
-#                 'integer*2',
-#                 'integer*4',
-#                 'integer*8',
-#                 'logical',
-#                 'logical*1',
-#                 'logical*2',
-#                 'logical*4',
-#                 'logical*8',
-#                 'real',
-#                 'real*4',
-#                 'real*8',
-#                 'real*16',
-#                 'automatic',
-#                 'static'
-#               ]
-
-
