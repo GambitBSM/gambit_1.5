@@ -115,10 +115,6 @@ add up to the efficiency for the full analysis range.  These sub-
 interval efficiencies are provided for a few specific experiments and
 results (default again being the LUX 2013 result).
 
-For simplicity, internal tabulations are done at the energies provided
-by the efficiency file, so accuracy will be poor if the tabulation has
-a coarse resolution.
-
 
 LIKELIHOODS/P-VALUES
 ====================
@@ -190,26 +186,27 @@ be modified using the --E-tabulation option.
     DDCalc0run --events-by-mass [options] [WIMP parameters]
 
 Tabulates by WIMP mass the expected signal events for fixed WIMP-nucleon
-cross-sections.  When supplying WIMP parameter arguments, a WIMP mass
-must still be supplied as the first argument for proper parsing, though
-the value will be ignored.  The tabulation of the masses can be modified
-using the --m-tabulation option.
+cross-sections.  The tabulation of the masses can be modified using the
+--m-tabulation option.
 
 
     DDCalc0run --constraints-SI [options]
     DDCalc0run --constraints-SD [options]
 
 Tabulates by mass the cross-section lower and upper constraints in the
-spin-indepedent (SI) and spin-dependent (SD) cases.  Limits are
-determined using the likelihood (a Poisson with signal + background).
-The confidence level of this confidence region is given using the
---confidence-level option, with the default being 0.9 (90% CL). In each
-case, the ratio of the WIMP-neutron & WIMP-proton couplings (Gp & Gn) is
-held fixed, with the ratio defined by an angle theta s.t. tan(theta) =
-Gn/Gp. The angle can be specified via the --theta-SI or --theta-SD option
-or, more conveniently, given in units of pi via --theta-SI-pi or
---theta-SD-pi.  The default is Gp=Gn (theta = pi/4).  The tabulation of
-the masses can be modified using the --m-tabulation option.
+spin-independent (SI) and spin-dependent (SD) cases.  Constraints are
+1D confidence intervals at each mass, determined using the likelihood
+(a Poisson with signal + background) and Feldman-Cousins ordering
+(Feldman & Cousins, PRD 57, 3873 (1998) [physics/9711021]).  The
+confidence level of this confidence interval is given using the
+--confidence-level option, with the default being 0.9 (90% CL). In
+each case, the ratio of the WIMP-neutron & WIMP-proton couplings (Gp &
+Gn) is held fixed, with the ratio defined by an angle theta
+s.t. tan(theta) = Gn/Gp. The angle can be specified via the --theta-SI
+or --theta-SD option or, more conveniently, given in units of pi via
+--theta-SI-pi or --theta-SD-pi.  The default is Gp=Gn (theta = pi/4).
+The tabulation of the masses can be modified using the --m-tabulation
+option.
 
 
     DDCalc0run --limits-SI [options]
@@ -217,15 +214,16 @@ the masses can be modified using the --m-tabulation option.
 
 Tabulates by mass the cross-section upper limits in the spin-indepedent
 (SI) and spin-dependent (SD) cases.  Limits are determined using the
-p-value, i.e. these are conservative, no-background-subtraction limits.
-Excluded p-values are given using the --p or --lnp options, with the
-default being p=0.10 (90% CL exclusion limits).  In each case, the
-ratio of the WIMP-neutron & WIMP-proton couplings (Gp & Gn) is held
-fixed, with the ratio defined by an angle theta s.t. tan(theta) = Gn/Gp.
-The angle can be specified via the --theta-SI or --theta-SD option or,
-more conveniently, given in units of pi via --theta-SI-pi or
---theta-SD-pi.  The default is Gp=Gn (theta = pi/4).  The tabulation of
-the masses can be modified using the --m-tabulation option.
+p-value described above, i.e. these are conservative, no-background-
+subtraction limits.  Excluded p-values are given using the --p or --lnp
+options, with the default being p=0.10 (90% CL exclusion limits).  In
+each case, the ratio of the WIMP-neutron & WIMP-proton couplings (Gp &
+Gn) is held fixed, with the ratio defined by an angle theta s.t.
+tan(theta) = Gn/Gp.  The angle can be specified via the --theta-SI or
+--theta-SD option or, more conveniently, given in units of pi via
+--theta-SI-pi or --theta-SD-pi.  The default is Gp=Gn (theta = pi/4).
+The tabulation of the masses can be modified using the --m-tabulation
+option.
 
 
 OPTIONS
@@ -454,24 +452,24 @@ the detector options described later.
    --XENON100-2012
          Sets the detector and analysis to that of the XENON100 2012
          result (E. Aprile et al., arxiv:1207.5988).  Efficiencies
-         were pre-calculated using TPCMC (C. Savage, arxiv:14MM.xxxx).
+         were pre-calculated using TPCMC (C. Savage, arxiv:15MM.xxxx).
 
    --LUX-2013 [default]
          Sets the detector and analysis to that of the LUX 2013
          result (D.S. Akerib et al., arxiv:1310.8214).  Efficiencies
-         were pre-calculated using TPCMC (C. Savage, arxiv:14MM.xxxx).
+         were pre-calculated using TPCMC (C. Savage, arxiv:15MM.xxxx).
 
-   --DARWIN-Ar-2014
+   --DARWIN-Ar-2015
          Sets the detector and analysis to that of the xenon case for
-         the proposed DARWIN argon-based detector (2014 estimates) (J.
-         Conrad et al., arxiv:14MM.xxxx).  Efficiencies were pre-
-         calculated using TPCMC (C. Savage, arxiv:14MM.xxxx).
+         the proposed DARWIN argon-based detector (2015 estimates) (J.
+         Conrad et al., arxiv:15MM.xxxx).  Efficiencies were pre-
+         calculated using TPCMC (C. Savage, arxiv:15MM.xxxx).
 
-   --DARWIN-Xe-2014
+   --DARWIN-Xe-2015
          Sets the detector and analysis to that of the xenon case for
-         the proposed DARWIN xenon-based detector (2014 estimates) (J.
-         Conrad et al., arxiv:14MM.xxxx).  Efficiencies were pre-
-         calculated using TPCMC (C. Savage, arxiv:14MM.xxxx).
+         the proposed DARWIN xenon-based detector (2015 estimates) (J.
+         Conrad et al., arxiv:15MM.xxxx).  Efficiencies were pre-
+         calculated using TPCMC (C. Savage, arxiv:15MM.xxxx).
 
 
 General detector options.  The detector isotopic composition and analysis
@@ -553,6 +551,10 @@ Detector efficiency options:
          but the number of observed events must be set correctly for
          that method to actually be used (see --Nevents).
 
+         See the 'example_efficiencies.dat' file included with the
+         DDCalc0 distribution for an example of a valid efficiencies
+         file.
+
    --no-intervals
          Disables the use of sub-interval calculations, even if
          efficiencies for the sub-intervals are available.  This is
@@ -562,5 +564,6 @@ Detector efficiency options:
 
 
         C Savage        University of Utah            2014
+                        Nordita                       2014 - 2015
 
  
