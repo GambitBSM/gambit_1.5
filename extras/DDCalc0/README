@@ -1,0 +1,124 @@
+
+The DDCalc0 software package is a set of routines and a frontend for
+doing various dark matter direct detection calculations, notably
+likelihood constraints (Poisson-based with Feldman-Cousins ordering
+[Feldman & Cousins (1998)]) or exclusion limits (maximum gap [Yellin
+(2002)]) for several experimental results.  A full description of this
+package and the physics framework behind it can be found in C. Savage,
+arxiv:15MM.NNNNN.
+
+Experimental results implemented at this time:
+
+  * XENON100 2012: 34*224.6 kg-days
+    E. Aprile et al., PRL 109, 181301 (2012) [arxiv:1207.5988]
+
+  * LUX 2013: 118*85.3 kg-days
+    D.S. Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
+
+  * DARWIN projections (argon & xenon)
+    J. Conrad et al., in preparation.
+
+DDCalc0 makes use of efficiencies calculated using the TPCMC and NEST
+frameworks for all of the above experimental analyses.  Those two
+packages do not need to be installed as the resulting efficiencies are
+already provided (internally), though TPCMC and NEST should be cited
+when using DDCalc0 to examine any of the above experimental results.
+
+Please see the CITE document for the various supporting publications
+that should be cited when using DDCalc0.
+
+
+Compiling
+---------
+
+DDCalc0 is written as a Fortran 95 module, so compilation requires
+either the ifort (Intel) or gfortran (GCC) compiler to be installed.
+To build the DDCalc0 software, simply run:
+
+  make all
+
+This will generate the following:
+
+  * DDCalc0run
+    The main program for performing various rate and likelihood
+    calculations.
+
+  * DDCalc0.o, DDCalc0.a, DDCalc0.so
+    Object, static library, and shared object files for linking
+    with other software.
+
+  * DDCalc0_exampleF, DDCalc0_exampleC
+    Simple example programs with source code showing how to use
+    the DDCalc0 routines externally from either Fortran or C++.
+
+
+Usage (program)
+---------------
+
+The program 'DDCalc0run' is a frontend to the DDCalc0 routines.
+It can perform a variety of calculations; full details of its
+usage can be found by running:
+
+  ./DDCalc0run --help
+
+or by looking at the 'DDCalc0run.use' file.  As a quick example,
+try:
+
+  ./DDCalc0run --LUX-2013 --limits-SI --verbosity=3
+
+The above will, using the LUX 2013 results (--LUX-2013), generate
+upper limits on the spin-independent WIMP-nucleon cross-section
+using the maximum gap method (--limits-SI); the last flag
+(--verbosity=3) gives more detailed output.  Likelihood constraints
+can be generated using '--constraints-SI' instead.  Replace 'SI'
+with 'SD' for spin-dependent limits.
+
+
+Usage (linking)
+---------------
+
+The routines are designed to be accessible to other software packages.
+The example source file 'DDCalc0_exampleF.f90' gives details on the
+available routines and how they must be called from Fortran.
+
+For ease of use, a C++ interface is provided in the 'DDCalc0.hpp'
+header file that defines C++ functions of the same names and
+signatures as in Fortran (but using bool, int, and double in place of
+LOGICAL, INTEGER, and REAL*8).  This has been tested to work with
+modern versions of the GCC and Intel compilers, but due to various
+symbol naming conventions and type conversions, the header file cannot
+be guaranteed to work in every case.  The 'DDCalc0_exampleC.cpp'
+source file provides an example of how to call/use DDCalc0 routines
+from C++.
+
+
+Contact
+-------
+
+Any questions, comments, or suggestions can be directed to the primary
+author, Chris Savage <chris@savage.name>.
+
+
+Contributors
+------------
+
+The following have provided substantial help in the development and
+testing of the DDCalc0 package:
+
+  * Andre Scaffidi, Univ of Adelaide (2014-2015)
+    SD form factors, C++ interface and example, testing
+
+  * Martin White, Univ of Adelaide (2014-2015)
+    C++ interface and example, testing
+
+
+Acknowledgments
+---------------
+
+I would like to thank the following: Andre Scaffidi and Martin White
+for contributing to the code, particularly in helping out with the C++
+interface and form factor implementations; Matthew Szydagis for
+extensive help with TPCMC development, which provided the XENON100 and
+LUX efficiencies used in DDCalc0; and Miguel Pato for help with
+calibration/tuning of the LUX parameters.
+
