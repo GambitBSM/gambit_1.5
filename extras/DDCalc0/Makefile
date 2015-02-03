@@ -130,6 +130,33 @@ ifeq (,$(findstring -fPIC,$(FFLAGS)))
   SOFFLAGS += -fPIC
 endif
 
+# C++ compiler and flags.  Only used for test program.
+# CXX_FLIBS are libraries necessary for linking fortran
+# routines (compiler specific).
+ifneq (,$(findstring "$(origin CXX)","undefined" "default"))
+  ifneq (,$(findstring ifort,$(FC)))
+    CXX := icc
+  else ifneq (,$(findstring gfortran,$(FC)))
+    CXX := g++
+  endif
+endif
+ifneq (,$(findstring "$(origin CXXFLAGS)","undefined" "default"))
+  ifneq (,$(findstring icc,$(CXX)))
+    CXXFLAGS := 
+  else ifneq (,$(findstring g++,$(CXX)))
+    CXXFLAGS := 
+  endif
+endif
+ifneq (,$(findstring icc,$(CXX)))
+  CXX_FLIBS := -lifcore
+else ifneq (,$(findstring g++,$(CXX)))
+  CXX_FLIBS := -lgfortran
+else
+  $(info WARNING: Unsupported C++ compiler $(CXX).  Build may fail due to)
+  $(info unknown library dependencies.)
+  CXX_FLIBS := 
+endif
+
 # Debugging
 #$(info FC      =$(FC) ($(origin FC)))
 #$(info FFLAGS  =$(FFLAGS) ($(origin FFLAGS)))
@@ -146,7 +173,8 @@ endif
 fprograms := DDCalc0run
 
 # Example/test programs
-ftestprograms := DDCalc0_example
+ftestprograms := DDCalc0_exampleF
+ctestprograms := DDCalc0_exampleC
 
 # Module files (lower case as that is usual output filename)
 fmodules := ddcalc0.mod
@@ -167,11 +195,13 @@ cincludes := DDCalc0.hpp
 
 # Source files
 fsources := $(fincludes) $(fobjects:.o=.f90) $(fprograms:=.f90) $(ftestprograms:=.f90)
-csources := $(cincludes)
+csources := $(cincludes) $(ctestprograms:=.cpp)
 sources  := $(fsources) $(csources)
 
 # Additional files to include in tar file
-extrafiles := Makefile DDCalc0run.use example_efficiencies.dat
+extrafiles := Makefile DDCalc0run.use \
+              README LICENSE CITE CITE.bib \
+              example_efficiencies.dat
 
 # Tar file
 tarfile := DDCalc0.tar.gz
@@ -185,6 +215,7 @@ DIST_DIR := DDCalc0-$(DDCALC0_VERSION)
 # All generated files except for PDF and tar files.
 cleanfiles := $(fprograms) $(fprograms:=.dSYM) \
               $(ftestprograms) $(ftestprograms:=.dSYM) \
+              $(ctestprograms) \
               $(fobjects) $(fobjects:.o=.dSYM) \
               $(fmodules) \
               $(libraries)
@@ -208,6 +239,7 @@ cleanishfiles := $(fprograms:=.dSYM) $(fobjects:.o=.dSYM)
 #$(fprograms): object1.o
 $(fprograms): DDCalc0.f90
 $(ftestprograms): DDCalc0.f90
+$(ctestprograms): DDCalc0.o
 
 # Specific dependencies
 #program1: object1.o
@@ -228,7 +260,9 @@ $(ftestprograms): DDCalc0.f90
         ifort gfortran
 
 # Default is to build programs
-all: $(fobjects) $(libraries) $(fprograms) $(ftestprograms)
+all: $(fobjects) lib bin examples
+#all: $(fobjects) $(libraries) $(fprograms) \
+#     $(ftestprograms) $(ctestprograms)
 
 # Binaries (programs)
 bin: $(fprograms)
@@ -237,7 +271,7 @@ bin: $(fprograms)
 lib: $(libraries)
 
 # Example/test binaries (programs)
-examples: $(ftestprograms)
+examples: $(ftestprograms) $(ctestprograms)
 
 # Define a do-nothing rule for dummy targets
 # (avoids "nothing to be done" messages)
@@ -249,6 +283,11 @@ $(fprograms) $(ftestprograms): % : %.f90
 	@echo "===== Compiling $@ ====="
 #	$(FC) $(FFLAGS) -o $@ $< $(filter %.o,$^)
 	$(FC) $(FFLAGS) $(filter-out $<,$^) -o $@ $<
+
+# Rule for building programs (C++)
+$(ctestprograms): % : %.cpp
+	@echo "===== Compiling $@ ====="
+	$(CXX) $(CXXFLAGS) -o $@ $< $(filter %.o,$^) $(CXX_FLIBS)
 
 # Rule for building objects
 $(fobjects): %.o : %.f90
