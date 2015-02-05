@@ -1,17 +1,19 @@
 !#######################################################################
-! INTERFACE TESTING PROGRAM
+! DDCALC0 EXAMPLE PROGRAM (FORTRAN)
+! This program shows how to use the DDCalc0 module for calculating
+! various direct detection constraints.
 ! 
 ! Compile, assuming DDCalc0.o is already compiled:
-!   gfortran -o InterfaceCheck InterfaceCheck.f90 DDCalc0.o
-!   ifort -o InterfaceCheck InterfaceCheck.f90 DDCalc0.o
+!   gfortran -o DDCalc0_example DDCalc0_example.f90 DDCalc0.o
+!   ifort -o DDCalc0_example DDCalc0_example.f90 DDCalc0.o
 ! ...or everything done in a single command (no DDCalc0.o necessary):
-!   gfortran -fno-range-check DDCalc0.f90 -o InterfaceCheck InterfaceCheck.f90
-!   ifort DDCalc0.f90 -o InterfaceCheck InterfaceCheck.f90
+!   gfortran -fno-range-check DDCalc0.f90 -o DDCalc0_example DDCalc0_example.f90
+!   ifort DDCalc0.f90 -o DDCalc0_example DDCalc0_example.f90
 ! 
 ! Run:
-!   ./InterfaceCheck [--mfa|--mG|--msigma]
-! The optional flags indicate which set of coupling parameters are
-! to be used for input.
+!   ./DDCalc0_example [--mfa|--mG|--msigma]
+! where the optional flag specifies the form in which the WIMP-nucleon
+! couplings will be provided (default: --msigma).
 ! 
 ! 
 !   Created by Chris Savage
@@ -19,7 +21,7 @@
 ! 
 !#######################################################################
 
-PROGRAM InterfaceCheck
+PROGRAM DDCalc0_exampleF
   USE DDCALC0
   IMPLICIT NONE
   CHARACTER*32 :: arg
@@ -27,7 +29,7 @@ PROGRAM InterfaceCheck
   REAL*8 :: M,xpSI,xnSI,xpSD,xnSD
   REAL*8 :: GpSI,GnSI,GpSD,GnSD,fp,fn,ap,an,sigmapSI,sigmanSI,sigmapSD,sigmanSD
   REAL*8 :: lnp
-  TYPE(DetectorRateStruct) :: D
+  TYPE(DetectorStruct) :: D
   ! These constants will be used to specify the type of input parameters
   INTEGER, PARAMETER :: TYPE_MG     = 1
   INTEGER, PARAMETER :: TYPE_MFA    = 2
@@ -45,8 +47,20 @@ PROGRAM InterfaceCheck
       type = TYPE_MFA
     ELSE IF (arg .EQ. '--msigma') THEN
       type = TYPE_MSIGMA
+    ELSE IF (arg .EQ. '--help') THEN
+      WRITE(*,*) "Usage:"
+      WRITE(*,*) "  ./DDCalc0_exampleF [--mG|--mfa|--msigma]"
+      WRITE(*,*) "where the optional flag specifies the form in which the WIMP-"
+      WRITE(*,*) "nucleon couplings will be provided (default: --msigma)."
+      STOP;
+    ELSE
+      WRITE(*,*) "WARNING: Ignoring unknown argument '" // TRIM(arg) // "'."
     END IF
   END DO
+  
+  ! Write out directions for specifying input to this example program.
+  ! WriteDescription is defined below.
+  CALL WriteDescription(type)
   
   ! NOTE: The module must be loaded via a 'USE DDCALC0' statement
   ! in any routine that is to make use of DDCalc0 routines (see
@@ -65,8 +79,8 @@ PROGRAM InterfaceCheck
   ! we must use .TRUE. here.
   CALL XENON100_2012_Init(.TRUE.)
   CALL LUX_2013_Init(.TRUE.)
-  CALL DARWIN_Ar_2014_Init(.TRUE.)
-  CALL DARWIN_Xe_2014_Init(.TRUE.)
+  CALL DARWIN_Ar_2015_Init(.TRUE.)
+  CALL DARWIN_Xe_2015_Init(.TRUE.)
   
   ! Can optionally specify a minimum recoil energy to be included in
   ! the rate calculations [keV].  Note the efficiency curves already
@@ -77,8 +91,8 @@ PROGRAM InterfaceCheck
   ! EXAMPLE: Uncomment to set a minimum recoil energy of 3 keV.
   !CALL XENON100_2012_SetEmin(3d0)
   !CALL LUX_2013_SetEmin(3d0)
-  !CALL DARWIN_Ar_2014_SetEmin(3d0)
-  !CALL DARWIN_Xe_2014_SetEmin(3d0)
+  !CALL DARWIN_Ar_2015_SetEmin(3d0)
+  !CALL DARWIN_Xe_2015_SetEmin(3d0)
   
   ! Advanced usage:
   ! Explicit structure that is more configurable than above cases.
@@ -93,7 +107,7 @@ PROGRAM InterfaceCheck
   ! dependent interactions only implemented for 54 (xenon).
   CALL DDCalc0_SetDetector(D,Zelem=54)
   ! Change parameters from standard DARWIN argon case.
-  CALL DDCalc0_SetDetector(D,mass=118d0,time=2*85.3d0,Nevents=1,background=0.64d0)
+  CALL DDCalc0_SetDetector(D,mass=118d0,time=85.3d0,Nevents=1,background=0.64d0)
   ! Load efficiency curves from file.  First column is recoil energy
   ! [keV], the next column with values in [0,1] is the total detection
   ! efficiency.  Optionally (intervals=.TRUE.), additional columns are
@@ -104,17 +118,29 @@ PROGRAM InterfaceCheck
   CALL DDCalc0_SetDetector(D,eff_file='example_efficiencies.dat',intervals=.TRUE.)
   ! Set the minimum recoil energy [keV] to include.
   CALL DDCalc0_SetDetector(D,Emin=0d0)
+  ! Print to screen what our extra detector analysis is, labeled as
+  ! '(special)' in the output table.
+  WRITE(*,'(A)') ''
+  WRITE(*,'(A)') 'The (special) case below is identical to the LUX 2013 analysis.'
   
   ! TESTING:
   ! For comparison, set the D structure to represent the standard LUX
   ! case, but with a 3 keV minimum recoil energy.
   !CALL LUX_2013_InitTo(D,.TRUE.)
   !CALL DDCalc0_SetDetector(D,Emin=3d0)
+  !WRITE(*,'(A)') ''
+  !WRITE(*,'(A)') 'The (special) case below is the LUX 2013 analysis with a 3 keV'
+  !WRITE(*,'(A)') 'minimum recoil energy imposed.'
   
-  ! Write out directions for specifying input to this example program.
-  ! WriteDescription is defined below.
-  CALL WriteDescription(type)
+  ! Optionally set the Standard Halo Model parameters:
+  !   rho     Local dark matter density [GeV/cm^3]
+  !   vrot    Local disk rotation speed [km/s]
+  !   v0      Maxwell-Boltzmann most probable speed [km/s]
+  !   vesc    Galactic escape speed [km/s]
+  ! This example uses the default values (and is thus optional).
+  !DDCalc0_SetSHM(0.4d0,235d0,235d0,550d0)
   
+  ! INPUT LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ! Loop over input to this example program.
   ! GetWIMPParams is defined below.
   DO WHILE (GetWIMPParams(type,M,xpSI,xnSI,xpSD,xnSD))
@@ -169,13 +195,13 @@ PROGRAM InterfaceCheck
     ! maximum gap statistics.
     CALL XENON100_2012_CalcRates()
     CALL LUX_2013_CalcRates()
-    CALL DARWIN_Ar_2014_CalcRates()
-    CALL DARWIN_Xe_2014_CalcRates()
+    CALL DARWIN_Ar_2015_CalcRates()
+    CALL DARWIN_Xe_2015_CalcRates()
     CALL DDCalc0_CalcRates(D)
     
     ! Header
-    WRITE(*,'(A20,5(2X,A11))') '','XENON 2012 ',' LUX 2013  ',          &
-        'DARWIN Ar  ','DARWIN Xe  ','(special)  '
+    WRITE(*,'(A20,5(2X,A11))') '',' XENON 2012',' LUX 2013  ',          &
+        ' DARWIN Ar ',' DARWIN Xe ',' (special) '
     !WRITE(*,'(A20,5(1X,A12))') '','-----------','-----------',          &
     !    '-----------','-----------','-----------'
     
@@ -183,27 +209,27 @@ PROGRAM InterfaceCheck
     ! The observed number of events (INTEGER).
     WRITE(*,'(A20,5(2X,1X,I6,4X))') 'Observed events                 ', &
         XENON100_2012_Events(),LUX_2013_Events(),                       &
-        DARWIN_Ar_2014_Events(),DARWIN_Xe_2014_Events(),                &
+        DARWIN_Ar_2015_Events(),DARWIN_Xe_2015_Events(),                &
         DDCalc0_Events(D)
     ! The average expected background.
     WRITE(*,'(A20,5(2X,1PG11.4))')  'Expected background             ', &
         XENON100_2012_Background(),LUX_2013_Background(),               &
-        DARWIN_Ar_2014_Background(),DARWIN_Xe_2014_Background(),        &
+        DARWIN_Ar_2015_Background(),DARWIN_Xe_2015_Background(),        &
         DDCalc0_Background(D)
     ! The average expected WIMP signal.
     WRITE(*,'(A20,5(2X,1PG11.4))')  'Expected signal                 ', &
         XENON100_2012_Signal(),LUX_2013_Signal(),                       &
-        DARWIN_Ar_2014_Signal(),DARWIN_Xe_2014_Signal(),                &
+        DARWIN_Ar_2015_Signal(),DARWIN_Xe_2015_Signal(),                &
         DDCalc0_Signal(D)
     ! The average expected WIMP spin-independent signal.
     WRITE(*,'(A20,5(2X,1PG11.4))')  '  spin-independent              ', &
         XENON100_2012_SignalSI(),LUX_2013_SignalSI(),                   &
-        DARWIN_Ar_2014_SignalSI(),DARWIN_Xe_2014_SignalSI(),            &
+        DARWIN_Ar_2015_SignalSI(),DARWIN_Xe_2015_SignalSI(),            &
         DDCalc0_SignalSI(D)
     ! The average expected WIMP spin-dependent signal.
     WRITE(*,'(A20,5(2X,1PG11.4))')  '  spin-dependent                ', &
         XENON100_2012_SignalSD(),LUX_2013_SignalSD(),                   &
-        DARWIN_Ar_2014_SignalSD(),DARWIN_Xe_2014_SignalSD(),            &
+        DARWIN_Ar_2015_SignalSD(),DARWIN_Xe_2015_SignalSD(),            &
         DDCalc0_SignalSD(D)
     
     ! The log-likelihoods for the current WIMP; note these are _not_
@@ -211,7 +237,7 @@ PROGRAM InterfaceCheck
     ! given the observed number of events and expected signal+background.
     WRITE(*,'(A20,5(2X,1PG11.4))')  'Log-likelihood                  ', &
         XENON100_2012_LogLikelihood(),LUX_2013_LogLikelihood(),         &
-        DARWIN_Ar_2014_LogLikelihood(),DARWIN_Xe_2014_LogLikelihood(),  &
+        DARWIN_Ar_2015_LogLikelihood(),DARWIN_Xe_2015_LogLikelihood(),  &
         DDCalc0_LogLikelihood(D)
     
     ! The logarithm of the p-value, calculated without background
@@ -224,7 +250,7 @@ PROGRAM InterfaceCheck
     ! likelihood.
     WRITE(*,'(A20,5(2X,1PG11.4))')  'Max gap log(p-value)            ', &
         XENON100_2012_LogPValue(),LUX_2013_LogPValue(),                 &
-        DARWIN_Ar_2014_LogPValue(),DARWIN_Xe_2014_LogPValue(),          &
+        DARWIN_Ar_2015_LogPValue(),DARWIN_Xe_2015_LogPValue(),          &
         DDCalc0_LogPValue(D)
     
     ! The factor x by which the current WIMP cross- sections must be
@@ -236,15 +262,15 @@ PROGRAM InterfaceCheck
     ! at a WIMP mass of 100 GeV at which the experiment is excluded at
     ! the 90% CL (p=1-CL).
     lnp = LOG(0.1d0)
-    WRITE(*,'(A20,5(2X,1PG11.4))')  'Max gap x for 90% CL ', &
+    WRITE(*,'(A20,5(2X,1PG11.4))')  'Max gap x for 90% CL            ', &
         XENON100_2012_ScaleToPValue(lnp),LUX_2013_ScaleToPValue(lnp),   &
-        DARWIN_Ar_2014_ScaleToPValue(lnp),DARWIN_Xe_2014_ScaleToPValue(lnp), &
+        DARWIN_Ar_2015_ScaleToPValue(lnp),DARWIN_Xe_2015_ScaleToPValue(lnp), &
         DDCalc0_ScaleToPValue(D,lnp)
     WRITE(*,'(A60)')  '  * Factor x such that sigma->x*sigma gives desired p-value'
     
     !WRITE(*,*)
     
-  END DO
+  END DO  ! END INPUT LOOP <<<<<<<<<<<<<<<<<<<<<
   
   
   CONTAINS

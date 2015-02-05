@@ -1,0 +1,16 @@
+
+   =========================================================
+   |                                                       |
+   |   CBGB - Common Block harvester for GAMBIT Backends   |
+   |                                                       |
+   =========================================================
+
+To use CBGB:
+
+  1. Set configurations in modules/cfg.py 
+
+  2. Execute ./cbgb.py
+
+  3. Copy the generated code needed for GAMBIT from the following output files: 
+
+       backend_types_header_code.hpp, frontent_header_code.hpp
