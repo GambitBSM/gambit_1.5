@@ -105,6 +105,7 @@ int main(int argc, char* argv[]){
      actually necessary here. */
   XENON100_2012_Init(true);
   LUX_2013_Init(true);
+  SuperCDMS_2014_Init(true);
   DARWIN_Ar_2015_Init(true);
   DARWIN_Xe_2015_Init(true);
 
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]){
   // EXAMPLE: Uncomment to set a minimum recoil energy of 3 keV.
   //XENON100_2012_SetEmin(3.0);
   //LUX_2013_SetEmin(3.0);
+  //SuperCDMS_2014_SetEmin(3.0);
   //DARWIN_Ar_2015_SetEmin(3.0);
   //DARWIN_Xe_2015_SetEmin(3.0);
 
@@ -187,38 +189,51 @@ int main(int argc, char* argv[]){
        signals, likelihoods, and/or maximum gap statistics. */
     XENON100_2012_CalcRates();
     LUX_2013_CalcRates();
+    SuperCDMS_2014_CalcRates();
     DARWIN_Ar_2015_CalcRates();
     DARWIN_Xe_2015_CalcRates();
     
     /* Header */
-    printf("%-20s  %11s  %11s  %11s  %11s\n","",
-           " XENON 2012"," LUX 2013  "," DARWIN Ar "," DARWIN Xe ");
-    //printf("%-20s  %11s  %11s  %11s  %11s\n","",
-    //       "-----------","-----------","-----------","-----------");
+    printf("%-20s  %11s  %11s  %11s  %11s  %11s\n","",
+           " XENON 2012"," LUX 2013  ","SuCDMS 2014"," DARWIN Ar "," DARWIN Xe ");
+    //printf("%-20s  %11s  %11s  %11s  %11s  %11s\n","",
+    //       "-----------","-----------","-----------","-----------","-----------");
     
     /* Event quantities. */
-    printf("%-20s  % 6i       % 6i       % 6i       % 6i     \n","Observed events     ",
+    printf("%-20s  % 6i       % 6i       % 6i       % 6i       % 6i     \n",
+           "Observed events     ",
            XENON100_2012_Events(),LUX_2013_Events(),
+           SuperCDMS_2014_Events(),
            DARWIN_Ar_2015_Events(),DARWIN_Xe_2015_Events());
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","Expected background ",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "Expected background ",
            XENON100_2012_Background(),LUX_2013_Background(),
+           SuperCDMS_2014_Background(),
            DARWIN_Ar_2015_Background(),DARWIN_Xe_2015_Background());
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","Expected signal     ",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "Expected signal     ",
            XENON100_2012_Signal(),LUX_2013_Signal(),
+           SuperCDMS_2014_Signal(),
            DARWIN_Ar_2015_Signal(),DARWIN_Xe_2015_Signal());
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","  spin-independent  ",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "  spin-independent  ",
            XENON100_2012_SignalSI(),LUX_2013_SignalSI(),
+           SuperCDMS_2014_SignalSI(),
            DARWIN_Ar_2015_SignalSI(),DARWIN_Xe_2015_SignalSI());
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","  spin-dependent    ",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "  spin-dependent    ",
            XENON100_2012_SignalSD(),LUX_2013_SignalSD(),
+           SuperCDMS_2014_SignalSD(),
            DARWIN_Ar_2015_SignalSD(),DARWIN_Xe_2015_SignalSD());
     
     /* The log-likelihoods for the current WIMP; note these are _not_
        multiplied by -2.  The likelihood is calculated using a Poisson
        given the observed x.length() of events and expected signal +
        background. */
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","Log-likelihood      ",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "Log-likelihood      ",
            XENON100_2012_LogLikelihood(),LUX_2013_LogLikelihood(),
+           SuperCDMS_2014_LogLikelihood(),
            DARWIN_Ar_2015_LogLikelihood(),DARWIN_Xe_2015_LogLikelihood());
     
     /* The logarithm of the p-value, calculated without background
@@ -229,8 +244,10 @@ int main(int argc, char* argv[]){
        WIMP parameters.  However, since it is not a true p-value, it
        should not be interpreted as being related to any particular
        likelihood. */
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","Max gap log(p-value)",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "Max gap log(p-value)",
            XENON100_2012_LogPValue(),LUX_2013_LogPValue(),
+           SuperCDMS_2014_LogPValue(),
            DARWIN_Ar_2015_LogPValue(),DARWIN_Xe_2015_LogPValue());
     
     /* Returns a factor x by which the current WIMP cross-sections must
@@ -242,8 +259,10 @@ int main(int argc, char* argv[]){
        cross-section at a WIMP mass of 100 GeV at which the experiment
        is excluded at the 90% CL (p=1-CL). */
     double lnp = log(0.1);  // default value for optional argument
-    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n","Max gap x for 90% CL",
+    printf("%-20s  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g  %- #11.5g\n",
+           "Max gap x for 90% CL",
            XENON100_2012_ScaleToPValue(lnp),LUX_2013_ScaleToPValue(lnp),
+           SuperCDMS_2014_ScaleToPValue(lnp),
            DARWIN_Ar_2015_ScaleToPValue(lnp),DARWIN_Xe_2015_ScaleToPValue(lnp));
     cout << "         * Factor x such that sigma->x*sigma gives desired p-value" << endl;
     //cout << endl;
