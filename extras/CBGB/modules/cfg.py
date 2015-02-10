@@ -38,5 +38,5 @@ tabs_to_n_spaces = 6
 
 
 # Settings for constructing a GAMBIT capability corresponding to each common block:
-capability_prefix = 'susyhit_cb_'
+capability_prefix = 'cb_'
 capability_suffix = ''

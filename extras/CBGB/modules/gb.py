@@ -12,23 +12,24 @@ output_file_path_frontent = 'frontent_header_code.hpp'
 alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 
 
-# Type translations from Fortran to C
+# Type translations from Fortran to C (using GAMBIT typedefs)
 type_translation_dict = {
-                          'character'        : 'char',
-                          'doubleprecision'  : 'double',
-                          'integer'          : 'int',
-                          'integer*2'        : 'short',
-                          'integer*4'        : 'long int',
-                          'integer*8'        : 'long long int',
-                          'logical'          : 'int',
-                          'logical*1'        : 'bool',
-                          'logical*2'        : 'unsigned short int',
-                          'logical*4'        : 'unsigned long int',
-                          'logical*8'        : 'unsigned long long int',
-                          'real'             : 'float',
-                          'real*4'           : 'float',
-                          'real*8'           : 'double',
-                          'real*16'          : 'long double',
+                          'character'        : 'Fcharacter',
+                          'complex'          : 'Fcomplex',
+                          'complex*8'        : 'Fcomplex8',
+                          'complex*16'       : 'Fcomplex16',
+                          'doublecomplex'    : 'Fdouble_complex',
+                          'doubleprecision'  : 'Fdouble',
+                          'integer'          : 'Finteger',
+                          'integer*2'        : 'Finteger2',
+                          'integer*4'        : 'Finteger4',
+                          'integer*8'        : 'Finteger8',
+                          'logical'          : 'Flogical',
+                          'logical*1'        : 'Flogical1',
+                          'real'             : 'Freal',
+                          'real*4'           : 'Freal4',
+                          'real*8'           : 'Freal8',
+                          'real*16'          : 'Freal16',
                         }
 
 
@@ -61,3 +62,25 @@ default_implicit_types = {
                            'y': ('real',1),
                            'z': ('real',1)
                          }
+
+
+
+# Type translations if the GAMBIT Fortran typedefs are not used
+# type_translation_dict = {
+#                           'character'        : 'char',
+#                           'doubleprecision'  : 'double',
+#                           'integer'          : 'int',
+#                           'integer*2'        : 'short',
+#                           'integer*4'        : 'long int',
+#                           'integer*8'        : 'long long int',
+#                           'logical'          : 'int',
+#                           'logical*1'        : 'bool',
+#                           'logical*2'        : 'unsigned short int',
+#                           'logical*4'        : 'unsigned long int',
+#                           'logical*8'        : 'unsigned long long int',
+#                           'real'             : 'float',
+#                           'real*4'           : 'float',
+#                           'real*8'           : 'double',
+#                           'real*16'          : 'long double',
+#                         }
+

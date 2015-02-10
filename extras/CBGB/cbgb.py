@@ -90,6 +90,7 @@ src_lines = utils.joinContinuedLines(src_lines)
 # Remove leading and trailing blanks
 src_lines = utils.removeLeadingTrailingBlanks(src_lines)
 
+# print src_lines
 
 
 # Identify the various parts of the code: program, functions and subroutines.
@@ -101,6 +102,7 @@ src_lines = utils.removeLeadingTrailingBlanks(src_lines)
 #    ...
 #  }
 code_parts_dict = utils.getCodeParts(src_lines)
+# print code_parts_dict
 
 
 # Remove potential duplicates in list of common blocks to load.
@@ -109,6 +111,9 @@ cfg.load_common_blocks = list( OrderedDict.fromkeys(cfg.load_common_blocks) )
 # Create a copy of common block list and convert all common block names to lower-case.
 common_blocks_left = [cb_name.lower() for cb_name in cfg.load_common_blocks]
 
+# Variables to store the generated code
+be_types_file_content = ''
+frontend_file_content = ''
 
 #
 # Loop over code parts to extract info on common blocks.
@@ -125,6 +130,7 @@ for code_part_name, code_dict in code_parts_dict.items():
     # Get list of dicts with info on all common blocks in this code part.
     cb_dicts = utils.getCommonBlockDicts(code_lines)
 
+
     # Loop over the common blocks found.
     for cb_dict in cb_dicts:
 
@@ -136,12 +142,10 @@ for code_part_name, code_dict in code_parts_dict.items():
             var_info_dict = utils.getVariablesDict(code_lines, cb_dict['member_names'])
 
             # Generate code for the backend types header.
-            out_file_be_types.write('\n')            
-            out_file_be_types.write( utils.generateGambitCommonBlockDecl(cb_dict, var_info_dict) )
+            be_types_file_content += utils.generateGambitCommonBlockDecl(cb_dict, var_info_dict)
 
             # Generate code for the frontend header.
-            out_file_frontent.write('\n')            
-            out_file_frontent.write( utils.generateGambitFrontendCode(cb_dict) )
+            frontend_file_content += utils.generateGambitFrontendCode(cb_dict)
 
             # Remove common block from list of blocks remaining.
             common_blocks_left.remove(cb_dict['name'])
@@ -158,6 +162,17 @@ for code_part_name, code_dict in code_parts_dict.items():
 # END: loop over code parts
 #
 
+# Encapsulate backend types code in a Gambit namespace
+be_types_file_content = utils.addNamespace(be_types_file_content, 'Gambit', indent=4)
+
+# Write output files
+out_file_be_types.write('\n')            
+out_file_be_types.write(be_types_file_content)
+
+out_file_frontent.write('\n')            
+out_file_frontent.write(frontend_file_content)
+
+# Print summary
 print
 print
 print '  Summary:'
