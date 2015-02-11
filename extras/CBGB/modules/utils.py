@@ -229,7 +229,7 @@ def getCodeParts(code_lines):
         #
         # Detect end of a code part
         #
-        elif line.strip() == 'end':
+        elif line.replace(' ','').strip() in ['end','end'+keyword, 'end'+keyword+name]:
 
             if not found_start:
                 print 'WARNING: Unbalanced "end" statement at line %i' % (i+1)
@@ -492,13 +492,19 @@ def getVariablesDict(code_lines, get_variables):
             # Remove type name from beginning of line so that
             # only the list of variable names remain.
             full_type_name = type_name + '*' + str(type_size)
-            if line[:len(full_type_name)] == full_type_name:
-                line = line.replace(full_type_name,'',1)
-            elif line[:len(type_name)] == type_name:
-                line = line.replace(type_name,'',1)
+
+            line_list = line.split()
+            i = 1
+            while i <= len(line_list):
+                if ''.join(line_list[:i]) in full_type_name:
+                    i += 1
+                    continue
+                else:
+                    break
+            var_seq = ''.join(line_list[i-1:])
 
             # Parse line to extract info on the different variables
-            var_dicts = parseVariableSequence(line)
+            var_dicts = parseVariableSequence(var_seq)
 
             # Append type_name and type_size to var_dicts
             for var_name in var_dicts.keys():
@@ -687,32 +693,40 @@ def parseVariableSequence(var_seq_str):
 
 def generateGambitCommonBlockDecl(cb_dict, var_info_dict):
 
+    indent = ' '*4
+
     code = ''
 
     cb_name = cb_dict['name']
     cb_type_name = cb_name + '_type'
 
-    code += 'DECLARE_FORTRAN_COMMONBLOCK(%s, ' % cb_type_name
-
-    indent = (len(code)-1)*' '
+    code += 'struct %s\n' % cb_type_name
+    code += '{\n'
 
     for var_name, var_dict in var_info_dict.items():
 
-        # End previous line
-        code += ' \\\n'
-
         c_type_name = getCTypeName(var_dict)
-        array_indices_tuples = getArrayIndicesTuples(var_dict['dimension'])
-        is_array = bool(len(array_indices_tuples))
 
+        code += indent + c_type_name + ' ' + var_name + ';\n'
 
-        if is_array:
-            indicies_tuples_string = ','.join([str(t) for t in array_indices_tuples])
-            code += indent + 'FORTRAN_ARRAY(%s,%s,%s)' % (c_type_name, var_name, indicies_tuples_string)
-        else:
-            code += indent + 'GENERAL_VAR(%s,%s)' % (c_type_name, var_name)
+        # array_indices_tuples = getArrayIndicesTuples(var_dict['dimension'])
 
-    code += ' )\n'
+        # is_array = bool(len(array_indices_tuples))
+        
+        # if is_array:
+    
+        #     if c_type_name == 'char':
+        #         code += indent + '// Fstring, FstringArray: REMAINS TO BE IMPLEMENTED!\n'
+    
+        #     else:
+        #         all_indices_list = [i for tpl in array_indices_tuples for i in tpl]
+        #         all_indices_str = ','.join( map(str,all_indices_list) )
+        #         template_bracket = '< %s,%s >' % (c_type_name, all_indices_str)
+        #         code += indent + 'Farray' + template_bracket + ' ' + var_name + ';\n'
+        # else:
+        #     code += indent + c_type_name + ' ' + var_name + ';\n'
+
+    code += '};\n'
 
     return code
 
@@ -731,7 +745,7 @@ def generateGambitFrontendCode(cb_dict):
     cb_capability_name = cfg.capability_prefix + cb_name + cfg.capability_suffix
     cb_mangled_symbol  = cb_name + '_'
 
-    code += 'BE_VARIABLE(FORTRAN_COMMONBLOCK(%s, %s), "%s", "%s")\n' % (cb_type_name, cb_name, cb_mangled_symbol, cb_capability_name)
+    code += 'BE_VARIABLE(%s, %s, "%s", "%s")\n' % (cb_type_name, cb_name, cb_mangled_symbol, cb_capability_name)
 
     return code
 
@@ -744,13 +758,65 @@ def generateGambitFrontendCode(cb_dict):
 def getCTypeName(var_dict):
 
     fortran_type_name = var_dict['type']
-    c_type_name = gb.type_translation_dict[fortran_type_name]
+    c_type_base_name = gb.type_translation_dict[fortran_type_name]
 
-    # if (fortran_type_name == 'character') and (var_dict['size'] > 1):
-    #     c_type_name = 'char[%i]' % var_dict['size'] 
+    array_indices_tuples = getArrayIndicesTuples(var_dict['dimension'])
 
+    # Is this variable an array?
+    if (fortran_type_name != 'character') and (len(array_indices_tuples) > 0):
+        is_array = True
+    elif (fortran_type_name == 'character') and (len(array_indices_tuples) > 1):
+        is_array = True
+    else:
+        is_array = False
+
+    # For arrays, construct a string of comma-separated array indices
+    if is_array:
+        all_indices_list = [i for tpl in array_indices_tuples for i in tpl]
+        all_indices_str = ','.join( map(str,all_indices_list) )
+
+    #
+    # Determine the correct C++ type name
+    #
+
+    # Special treatment for the character type
+    if (fortran_type_name == 'character') and (var_dict['size'] > 1):
+        if is_array:
+            template_bracket = '< %i,%s >' % (var_dict['size'], all_indices_str)
+            c_type_name = 'FstringArray' + template_bracket
+        else:
+            c_type_name = 'Fstring<%i>' % var_dict['size'] 
+
+    # All other types
+    else:
+        if is_array:
+            template_bracket = '< %s,%s >' % (c_type_base_name, all_indices_str)
+            c_type_name = 'Farray' + template_bracket
+        else:
+            c_type_name = c_type_base_name
+
+    # Return result
     return c_type_name
 
 # ====== END: getCTypeName ========
+
+
+
+# ====== addNamespace ========
+
+# Encapsulate code string in a namespace
+
+def addNamespace(code, namespace_name, indent=4):
+
+    # Add indentation
+    code_lines = [' '*indent + line for line in code.splitlines()]
+    code = '\n'.join(code_lines)
+
+    # Add namespace
+    code = 'namespace ' + namespace_name + '\n' + '{\n' + code + '\n}\n'
+
+    return code
+
+# ====== END: addNamespace ========
 
 

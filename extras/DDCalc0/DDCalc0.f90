@@ -25,6 +25,7 @@ MODULE DDCALC0
 ! 
 !   With contributions from:
 !     Andre Scaffidi            University of Adelaide (2014)
+!     Lauren Hsu                FermiLab (2015)
 ! 
 ! 
 ! 
@@ -135,7 +136,7 @@ IMPLICIT NONE
 PRIVATE
 
 ! Version of this software
-CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.23pre'
+CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.24'
 
 
 
@@ -260,7 +261,7 @@ PUBLIC :: DDCalc0_GetWIMP_mfa,DDCalc0_GetWIMP_mG,DDCalc0_GetWIMP_msigma
 ! performed for analysis sub-intervals (i.e. intervals between
 ! observed events).  This is only necessary for maximum gap
 ! calculations and can be set to .FALSE. for likelihood analyses.
-PUBLIC :: XENON100_2012_Init,LUX_2013_Init, &
+PUBLIC :: XENON100_2012_Init,LUX_2013_Init,SuperCDMS_2014_Init, &
           DARWIN_Ar_2015_Init,DARWIN_Xe_2015_Init
 
 ! Set minimum recoil energy Emin to consider [keV] (initially set to
@@ -270,7 +271,7 @@ PUBLIC :: XENON100_2012_Init,LUX_2013_Init, &
 ! thresholds regardless of this setting, so setting this to 0 keV (the
 ! default behavior when initialization is performed) does not imply
 ! that very low energy recoils actually contribute to the signal.
-PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin, &
+PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin,SuperCDMS_2014_SetEMin, &
           DARWIN_Ar_2015_SetEmin,DARWIN_Xe_2015_SetEmin
 
 ! Rate calculation:
@@ -278,17 +279,17 @@ PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin, &
 ! Performs the rate calculations used for likelihoods/confidence
 ! intervals.  Must be called after any changes to the WIMP parameters.
 ! Actual calculation values are accessed through other routines.
-PUBLIC :: XENON100_2012_CalcRates,LUX_2013_CalcRates, &
+PUBLIC :: XENON100_2012_CalcRates,LUX_2013_CalcRates,SuperCDMS_2014_CalcRates, &
           DARWIN_Ar_2015_CalcRates,DARWIN_Xe_2015_CalcRates
 
 ! Number of observed events in the analysis:
 !     INTEGER FUNCTION Events()
-PUBLIC :: XENON100_2012_Events,LUX_2013_Events, &
+PUBLIC :: XENON100_2012_Events,LUX_2013_Events,SuperCDMS_2014_Events, &
           DARWIN_Ar_2015_Events,DARWIN_Xe_2015_Events
 
 ! Average expected number of background events in the analysis:
 !     REAL*8 FUNCTION Background()
-PUBLIC :: XENON100_2012_Background,LUX_2013_Background, &
+PUBLIC :: XENON100_2012_Background,LUX_2013_Background,SuperCDMS_2014_Background, &
           DARWIN_Ar_2015_Background,DARWIN_Xe_2015_Background
 
 ! Average expected number of signal events in the analysis:
@@ -296,18 +297,18 @@ PUBLIC :: XENON100_2012_Background,LUX_2013_Background, &
 ! Or the separate spin-independent and spin-dependent contributions:
 !     REAL*8 FUNCTION SignalSI()
 !     REAL*8 FUNCTION SignalSD()
-PUBLIC :: XENON100_2012_Signal,  LUX_2013_Signal,   &
+PUBLIC :: XENON100_2012_Signal,  LUX_2013_Signal, SuperCDMS_2014_Signal,   &
           DARWIN_Ar_2015_Signal,  DARWIN_Xe_2015_Signal
-PUBLIC :: XENON100_2012_SignalSI,LUX_2013_SignalSI, &
+PUBLIC :: XENON100_2012_SignalSI,LUX_2013_SignalSI, SuperCDMS_2014_SignalSI, &
           DARWIN_Ar_2015_SignalSI,DARWIN_Xe_2015_SignalSI
-PUBLIC :: XENON100_2012_SignalSD,LUX_2013_SignalSD, &
+PUBLIC :: XENON100_2012_SignalSD,LUX_2013_SignalSD, SuperCDMS_2014_SignalSD, &
           DARWIN_Ar_2015_SignalSD,DARWIN_Xe_2015_SignalSD
 
 ! Log-likelihood for current WIMP:
 !     REAL*8 FUNCTION LogLikelihood()
 ! Based upon a Poisson distribution in the number of observed events
 ! given the expected background+signal.  Calc() must be called first.
-PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood, &
+PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood,SuperCDMS_2014_LogLikelihood, &
           DARWIN_Xe_2015_LogLikelihood,DARWIN_Ar_2015_LogLikelihood
 
 ! Logarithm of the p-value for current WIMP:
@@ -315,7 +316,7 @@ PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood, &
 ! Based upon the maximum gap method if Init() called with intervals =
 ! .TRUE., a signal-only (no-background) Poisson distribution otherwise.
 ! Calc() must be called first.
-PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue, &
+PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue,SuperCDMS_2014_LogPValue, &
           DARWIN_Xe_2015_LogPValue,DARWIN_Ar_2015_LogPValue
 
 ! Scale by which the current WIMP cross-sections must be multiplied to
@@ -323,7 +324,7 @@ PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue, &
 !     REAL*8 FUNCTION ScaleToPValue(lnp)
 ! where lnp is the logarithm of the desired p-value (p=1-CL).
 ! Calc() must be called first.
-PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue, &
+PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue,SuperCDMS_2014_ScaleToPValue, &
           DARWIN_Xe_2015_ScaleToPValue,DARWIN_Ar_2015_ScaleToPValue
 
 ! Detector structure initialization (ADVANCED USAGE ONLY):
@@ -333,7 +334,7 @@ PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue, &
 ! can be used in the generic routines below.  These routines are
 ! not intended for standard usage, so ignore them unless you are
 ! familiar with the internals of this code.
-PUBLIC :: XENON100_2012_InitTo,LUX_2013_InitTo, &
+PUBLIC :: XENON100_2012_InitTo,LUX_2013_InitTo,SuperCDMS_2014_InitTo, &
           DARWIN_Ar_2015_InitTo,DARWIN_Xe_2015_InitTo
 
 
@@ -1069,6 +1070,7 @@ TYPE(DetectorStruct), TARGET, PRIVATE :: DefaultDetector
 ! are not externally modifiable.
 TYPE(DetectorStruct), PRIVATE :: XENON100_2012
 TYPE(DetectorStruct), PRIVATE :: LUX_2013
+TYPE(DetectorStruct), PRIVATE :: SuperCDMS_2014
 TYPE(DetectorStruct), PRIVATE :: DARWIN_Ar_2015,DARWIN_Xe_2015
 
 
@@ -2328,6 +2330,692 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
                    NEeff=NE,Eeff=E,Neff=NEFF,eff=EFF,                   &
                    intervals=intervals)
   D%eff_file = '[LUX 2013]'
+  
+END SUBROUTINE
+
+!=======================================================================
+! SuperCDMS 2014 ANALYSIS ROUTINES
+! added by LLH, Jan. 2015
+! Based upon the SuperCDMS low-mass WIMP search: PRL 112, 241302 (2014)
+! [1402.737].  11 candidate events seen in signal region (consistent
+! with background).
+! 
+! BIND() is used to specify compiler-independent object file symbol
+! names to allow for easier interfacing with C/C++.  
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module to perform calculations for the LUX 2013
+! analysis.  This must be called if any of the following LUX 2013
+! routines are to be used.
+! 
+! Required input arguments:
+!     intervals   Indicates if sub-intervals should be included.
+!                 Only necessary if confidence intervals using the
+!                 maximum gap method are desired.
+! 
+SUBROUTINE SuperCDMS_2014_Init(intervals)
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: intervals
+  CALL SuperCDMS_2014_InitTo(SuperCDMS_2014,intervals)
+END SUBROUTINE
+
+! C++ interface wrapper
+SUBROUTINE C_SuperCDMS_2014_Init(intervals) &
+           BIND(C,NAME='C_DDCALC0_supercdms_2014_init')
+  USE ISO_C_BINDING, only: C_BOOL
+  IMPLICIT NONE
+  LOGICAL(KIND=C_BOOL), INTENT(IN) :: intervals
+  CALL SuperCDMS_2014_Init(LOGICAL(intervals))
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Sets the minimum recoil energy to be included in the calculations.
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+! 
+! Required input arguments:
+!     Emin        The minimum recoil energy to consider [keV]
+! 
+SUBROUTINE SuperCDMS_2014_SetEmin(Emin)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: Emin
+  CALL SetDetector(SuperCDMS_2014,Emin=Emin)
+END SUBROUTINE
+
+! C++ interface wrapper
+SUBROUTINE C_SuperCDMS_2014_SetEmin(Emin) &
+           BIND(C,NAME='C_DDCALC0_supercdms_2014_setemin')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE), INTENT(IN) :: Emin
+  CALL SuperCDMS_2014_SetEmin(REAL(Emin,KIND=8))
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Calculates various rate quantities using the current WIMP.
+! Must be called each time the WIMP parameters are modified.
+! 
+SUBROUTINE SuperCDMS_2014_CalcRates()
+  IMPLICIT NONE
+  CALL CalcRates(SuperCDMS_2014)
+END SUBROUTINE
+
+! C++ interface wrapper
+SUBROUTINE C_SuperCDMS_2014_CalcRates() &
+           BIND(C,NAME='C_DDCALC0_supercdms_2014_calcrates')
+  IMPLICIT NONE
+  CALL SuperCDMS_2014_CalcRates()
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+FUNCTION SuperCDMS_2014_Events() RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  CALL GetRates(SuperCDMS_2014,Nevents=N)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_Events() RESULT(N) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_events')
+  USE ISO_C_BINDING, only: C_INT
+  IMPLICIT NONE
+  INTEGER(KIND=C_INT) :: N
+  ! Automatic type conversions here
+  N = SuperCDMS_2014_Events()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+FUNCTION SuperCDMS_2014_Background() RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  CALL GetRates(SuperCDMS_2014,background=b)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_Background() RESULT(b) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_background')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: b
+  ! Automatic type conversions here
+  b = SuperCDMS_2014_Background()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+FUNCTION SuperCDMS_2014_Signal() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(SuperCDMS_2014,signal=s)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_Signal() RESULT(s) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_signal')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: s
+  ! Automatic type conversions here
+  s = SuperCDMS_2014_Signal()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+FUNCTION SuperCDMS_2014_SignalSI() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(SuperCDMS_2014,signal_si=s)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_SignalSI() RESULT(s) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_signalsi')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: s
+  ! Automatic type conversions here
+  s = SuperCDMS_2014_SignalSI()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+FUNCTION SuperCDMS_2014_SignalSD() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(SuperCDMS_2014,signal_sd=s)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_SignalSD() RESULT(s) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_signalsd')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: s
+  ! Automatic type conversions here
+  s = SuperCDMS_2014_SignalSD()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log-likelihood for the current WIMP mass and couplings.
+! Uses a Poisson distribution in the number of observed events N:
+!    P(N|s+b)
+! where s is the average expected signal and b is the average expected
+! background.
+! 
+FUNCTION SuperCDMS_2014_LogLikelihood() RESULT(lnlike)
+  IMPLICIT NONE
+  REAL*8 :: lnlike
+  lnlike = LogLikelihood(SuperCDMS_2014)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_LogLikelihood() RESULT(lnlike) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_loglikelihood')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: lnlike
+  ! Automatic type conversions here
+  lnlike = SuperCDMS_2014_LogLikelihood()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log of the p-value for the current WIMP mass and
+! couplings (NO BACKGROUND SUBTRACTION).  Uses the maximum gap method
+! if SuperCDMS_2014_Init was called with argument intervals=.TRUE.,
+! otherwise uses a Poisson distribution in the number of observed
+! events N:
+!    P(N|s)
+! where s is the average expected signal (background contributions are
+! ignored).
+! 
+FUNCTION SuperCDMS_2014_LogPValue() RESULT(lnp)
+  IMPLICIT NONE
+  REAL*8 :: lnp
+  lnp = LogPValue(SuperCDMS_2014)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_LogPValue() RESULT(lnp) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_logpvalue')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: lnp
+  ! Automatic type conversions here
+  lnp = SuperCDMS_2014_LogPValue()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Required input argument:
+!   lnp         The logarithm of the desired p-value (p = 1-CL).
+! 
+FUNCTION SuperCDMS_2014_ScaleToPValue(lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp
+  x = ScaleToPValue(SuperCDMS_2014,lnp)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SuperCDMS_2014_ScaleToPValue(lnp) RESULT(x) &
+         BIND(C,NAME='C_DDCALC0_supercdms_2014_scaletopvalue')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: x
+  REAL(KIND=C_DOUBLE), INTENT(IN) :: lnp
+  ! Automatic type conversions here
+  x = SuperCDMS_2014_ScaleToPValue(REAL(lnp,KIND=8))
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! INTERNAL ROUTINE.
+! Initializes the given DetectorStruct to the SuperCDMS 2014 analysis.
+! This is meant as an internal routine; external access should be
+! through SuperCDMS_2014_Init instead.
+! 
+! Required input arguments:
+!     D           The DetectorStruct to initialize
+!     intervals   Indicates if sub-intervals should be included
+! 
+SUBROUTINE SuperCDMS_2014_InitTo(D,intervals)
+  IMPLICIT NONE
+  TYPE(DetectorStruct), INTENT(OUT) :: D
+  LOGICAL, INTENT(IN) :: intervals
+  INTEGER :: K
+  INTEGER, PARAMETER :: NE = 1112
+  ! Efficiency curves energy tabulation points
+  ! NOTE: Converted from phonon energies using Lindhard
+  REAL*8, PARAMETER :: E(NE)                                            &
+      =       (/ 1.60867d0, 1.61651d0, 1.62434d0, 1.63218d0, 1.64002d0, &
+      1.64785d0, 1.65568d0, 1.66351d0, 1.67134d0, 1.67917d0, 1.68700d0, &
+      1.69483d0, 1.70265d0, 1.71048d0, 1.71830d0, 1.72613d0, 1.73395d0, &
+      1.74177d0, 1.74959d0, 1.75740d0, 1.76522d0, 1.77304d0, 1.78085d0, &
+      1.78867d0, 1.79648d0, 1.80429d0, 1.81210d0, 1.81991d0, 1.82772d0, &
+      1.83553d0, 1.84333d0, 1.85114d0, 1.85895d0, 1.86675d0, 1.87455d0, &
+      1.88235d0, 1.89015d0, 1.89795d0, 1.90575d0, 1.91355d0, 1.92135d0, &
+      1.92914d0, 1.93694d0, 1.94473d0, 1.95253d0, 1.96032d0, 1.96811d0, &
+      1.97590d0, 1.98369d0, 1.99148d0, 1.99927d0, 2.00705d0, 2.01484d0, &
+      2.02263d0, 2.03041d0, 2.03819d0, 2.04598d0, 2.05376d0, 2.06154d0, &
+      2.06932d0, 2.07710d0, 2.08488d0, 2.09265d0, 2.10043d0, 2.10821d0, &
+      2.11598d0, 2.12376d0, 2.13153d0, 2.13930d0, 2.14707d0, 2.15484d0, &
+      2.16261d0, 2.17038d0, 2.17815d0, 2.18592d0, 2.19368d0, 2.20145d0, &
+      2.20921d0, 2.21698d0, 2.22474d0, 2.23250d0, 2.24027d0, 2.24803d0, &
+      2.25579d0, 2.26355d0, 2.27130d0, 2.27906d0, 2.28682d0, 2.29457d0, &
+      2.30233d0, 2.31008d0, 2.31784d0, 2.32559d0, 2.33334d0, 2.34109d0, &
+      2.34884d0, 2.35659d0, 2.36434d0, 2.37209d0, 2.37984d0, 2.38758d0, &
+      2.39533d0, 2.40307d0, 2.41082d0, 2.41856d0, 2.42630d0, 2.43404d0, &
+      2.44179d0, 2.44953d0, 2.45727d0, 2.46500d0, 2.47274d0, 2.48048d0, &
+      2.48822d0, 2.49595d0, 2.50369d0, 2.51142d0, 2.51915d0, 2.52689d0, &
+      2.53462d0, 2.54235d0, 2.55008d0, 2.55781d0, 2.56554d0, 2.57327d0, &
+      2.58100d0, 2.58872d0, 2.59645d0, 2.60417d0, 2.61190d0, 2.61962d0, &
+      2.62735d0, 2.63507d0, 2.64279d0, 2.65051d0, 2.65823d0, 2.66595d0, &
+      2.67367d0, 2.68139d0, 2.68911d0, 2.69682d0, 2.70454d0, 2.71225d0, &
+      2.71997d0, 2.72768d0, 2.73540d0, 2.74311d0, 2.75082d0, 2.75853d0, &
+      2.76624d0, 2.77395d0, 2.78166d0, 2.78937d0, 2.79708d0, 2.80479d0, &
+      2.81249d0, 2.82020d0, 2.82790d0, 2.83561d0, 2.84331d0, 2.85101d0, &
+      2.85872d0, 2.86642d0, 2.87412d0, 2.88182d0, 2.88952d0, 2.89722d0, &
+      2.90492d0, 2.91262d0, 2.92031d0, 2.92801d0, 2.93571d0, 2.94340d0, &
+      2.95110d0, 2.95879d0, 2.96648d0, 2.97418d0, 2.98187d0, 2.98956d0, &
+      2.99725d0, 3.00494d0, 3.01263d0, 3.02032d0, 3.02801d0, 3.03570d0, &
+      3.04338d0, 3.05107d0, 3.05876d0, 3.06644d0, 3.07413d0, 3.08181d0, &
+      3.08949d0, 3.09718d0, 3.10486d0, 3.11254d0, 3.12022d0, 3.12790d0, &
+      3.13558d0, 3.14326d0, 3.15094d0, 3.15862d0, 3.16629d0, 3.17397d0, &
+      3.18165d0, 3.18932d0, 3.19700d0, 3.20467d0, 3.21235d0, 3.22002d0, &
+      3.22769d0, 3.23536d0, 3.24303d0, 3.25071d0, 3.25838d0, 3.26605d0, &
+      3.27371d0, 3.28138d0, 3.28905d0, 3.29672d0, 3.30438d0, 3.31205d0, &
+      3.31972d0, 3.32738d0, 3.33505d0, 3.34271d0, 3.35037d0, 3.35804d0, &
+      3.36570d0, 3.37336d0, 3.38102d0, 3.38868d0, 3.39634d0, 3.40400d0, &
+      3.41166d0, 3.41932d0, 3.42697d0, 3.43463d0, 3.44229d0, 3.44994d0, &
+      3.45760d0, 3.46525d0, 3.47291d0, 3.48056d0, 3.48822d0, 3.49587d0, &
+      3.50352d0, 3.51117d0, 3.51882d0, 3.52647d0, 3.53412d0, 3.54177d0, &
+      3.54942d0, 3.55707d0, 3.56472d0, 3.57236d0, 3.58001d0, 3.58766d0, &
+      3.59530d0, 3.60295d0, 3.61059d0, 3.61824d0, 3.62588d0, 3.63352d0, &
+      3.64117d0, 3.64881d0, 3.65645d0, 3.66409d0, 3.67173d0, 3.67937d0, &
+      3.68701d0, 3.69465d0, 3.70228d0, 3.70992d0, 3.71756d0, 3.72520d0, &
+      3.73283d0, 3.74047d0, 3.74810d0, 3.75574d0, 3.76337d0, 3.77100d0, &
+      3.77864d0, 3.78627d0, 3.79390d0, 3.80153d0, 3.80916d0, 3.81679d0, &
+      3.82442d0, 3.83205d0, 3.83968d0, 3.84731d0, 3.85494d0, 3.86257d0, &
+      3.87019d0, 3.87782d0, 3.88545d0, 3.89307d0, 3.90070d0, 3.90832d0, &
+      3.91594d0, 3.92357d0, 3.93119d0, 3.93881d0, 3.94643d0, 3.95406d0, &
+      3.96168d0, 3.96930d0, 3.97692d0, 3.98454d0, 3.99216d0, 3.99977d0, &
+      4.00739d0, 4.01501d0, 4.02263d0, 4.03024d0, 4.03786d0, 4.04547d0, &
+      4.05309d0, 4.06070d0, 4.06832d0, 4.07593d0, 4.08355d0, 4.09116d0, &
+      4.09877d0, 4.10638d0, 4.11399d0, 4.12160d0, 4.12921d0, 4.13682d0, &
+      4.14443d0, 4.15204d0, 4.15965d0, 4.16726d0, 4.17487d0, 4.18247d0, &
+      4.19008d0, 4.19769d0, 4.20529d0, 4.21290d0, 4.22050d0, 4.22811d0, &
+      4.23571d0, 4.24331d0, 4.25091d0, 4.25852d0, 4.26612d0, 4.27372d0, &
+      4.28132d0, 4.28892d0, 4.29652d0, 4.30412d0, 4.31172d0, 4.31932d0, &
+      4.32692d0, 4.33452d0, 4.34211d0, 4.34971d0, 4.35731d0, 4.36490d0, &
+      4.37250d0, 4.38009d0, 4.38769d0, 4.39528d0, 4.40287d0, 4.41047d0, &
+      4.41806d0, 4.42565d0, 4.43325d0, 4.44084d0, 4.44843d0, 4.45602d0, &
+      4.46361d0, 4.47120d0, 4.47879d0, 4.48638d0, 4.49396d0, 4.50155d0, &
+      4.50914d0, 4.51673d0, 4.52431d0, 4.53190d0, 4.53949d0, 4.54707d0, &
+      4.55466d0, 4.56224d0, 4.56982d0, 4.57741d0, 4.58499d0, 4.59257d0, &
+      4.60016d0, 4.60774d0, 4.61532d0, 4.62290d0, 4.63048d0, 4.63806d0, &
+      4.64564d0, 4.65322d0, 4.66080d0, 4.66838d0, 4.67596d0, 4.68353d0, &
+      4.69111d0, 4.69869d0, 4.70626d0, 4.71384d0, 4.72142d0, 4.72899d0, &
+      4.73657d0, 4.74414d0, 4.75171d0, 4.75929d0, 4.76686d0, 4.77443d0, &
+      4.78200d0, 4.78958d0, 4.79715d0, 4.80472d0, 4.81229d0, 4.81986d0, &
+      4.82743d0, 4.83500d0, 4.84257d0, 4.85014d0, 4.85770d0, 4.86527d0, &
+      4.87284d0, 4.88041d0, 4.88797d0, 4.89554d0, 4.90310d0, 4.91067d0, &
+      4.91823d0, 4.92580d0, 4.93336d0, 4.94093d0, 4.94849d0, 4.95605d0, &
+      4.96361d0, 4.97118d0, 4.97874d0, 4.98630d0, 4.99386d0, 5.00142d0, &
+      5.00898d0, 5.01654d0, 5.02410d0, 5.03166d0, 5.03922d0, 5.04677d0, &
+      5.05433d0, 5.06189d0, 5.06944d0, 5.07700d0, 5.08456d0, 5.09211d0, &
+      5.09967d0, 5.10722d0, 5.11478d0, 5.12233d0, 5.12988d0, 5.13744d0, &
+      5.14499d0, 5.15254d0, 5.16010d0, 5.16765d0, 5.17520d0, 5.18275d0, &
+      5.19030d0, 5.19785d0, 5.20540d0, 5.21295d0, 5.22050d0, 5.22805d0, &
+      5.23560d0, 5.24314d0, 5.25069d0, 5.25824d0, 5.26578d0, 5.27333d0, &
+      5.28088d0, 5.28842d0, 5.29597d0, 5.30351d0, 5.31106d0, 5.31860d0, &
+      5.32614d0, 5.33369d0, 5.34123d0, 5.34877d0, 5.35632d0, 5.36386d0, &
+      5.37140d0, 5.37894d0, 5.38648d0, 5.39402d0, 5.40156d0, 5.40910d0, &
+      5.41664d0, 5.42418d0, 5.43172d0, 5.43925d0, 5.44679d0, 5.45433d0, &
+      5.46187d0, 5.46940d0, 5.47694d0, 5.48447d0, 5.49201d0, 5.49955d0, &
+      5.50708d0, 5.51461d0, 5.52215d0, 5.52968d0, 5.53722d0, 5.54475d0, &
+      5.55228d0, 5.55981d0, 5.56735d0, 5.57488d0, 5.58241d0, 5.58994d0, &
+      5.59747d0, 5.60500d0, 5.61253d0, 5.62006d0, 5.62759d0, 5.63512d0, &
+      5.64264d0, 5.65017d0, 5.65770d0, 5.66523d0, 5.67275d0, 5.68028d0, &
+      5.68781d0, 5.69533d0, 5.70286d0, 5.71038d0, 5.71791d0, 5.72543d0, &
+      5.73295d0, 5.74048d0, 5.74800d0, 5.75552d0, 5.76305d0, 5.77057d0, &
+      5.77809d0, 5.78561d0, 5.79313d0, 5.80065d0, 5.80817d0, 5.81569d0, &
+      5.82321d0, 5.83073d0, 5.83825d0, 5.84577d0, 5.85329d0, 5.86081d0, &
+      5.86833d0, 5.87584d0, 5.88336d0, 5.89088d0, 5.89839d0, 5.90591d0, &
+      5.91342d0, 5.92094d0, 5.92845d0, 5.93597d0, 5.94348d0, 5.95100d0, &
+      5.95851d0, 5.96602d0, 5.97354d0, 5.98105d0, 5.98856d0, 5.99607d0, &
+      6.00358d0, 6.01110d0, 6.01861d0, 6.02612d0, 6.03363d0, 6.04114d0, &
+      6.04865d0, 6.05615d0, 6.06366d0, 6.07117d0, 6.07868d0, 6.08619d0, &
+      6.09369d0, 6.10120d0, 6.10871d0, 6.11622d0, 6.12372d0, 6.13123d0, &
+      6.13873d0, 6.14624d0, 6.15374d0, 6.16125d0, 6.16875d0, 6.17625d0, &
+      6.18376d0, 6.19126d0, 6.19876d0, 6.20627d0, 6.21377d0, 6.22127d0, &
+      6.22877d0, 6.23627d0, 6.24377d0, 6.25127d0, 6.25877d0, 6.26627d0, &
+      6.27377d0, 6.28127d0, 6.28877d0, 6.29627d0, 6.30377d0, 6.31127d0, &
+      6.31876d0, 6.32626d0, 6.33376d0, 6.34125d0, 6.34875d0, 6.35625d0, &
+      6.36374d0, 6.37124d0, 6.37873d0, 6.38623d0, 6.39372d0, 6.40121d0, &
+      6.40871d0, 6.41620d0, 6.42370d0, 6.43119d0, 6.43868d0, 6.44617d0, &
+      6.45366d0, 6.46115d0, 6.46865d0, 6.47614d0, 6.48363d0, 6.49112d0, &
+      6.49861d0, 6.50610d0, 6.51359d0, 6.52107d0, 6.52856d0, 6.53605d0, &
+      6.54354d0, 6.55103d0, 6.55851d0, 6.56600d0, 6.57349d0, 6.58098d0, &
+      6.58846d0, 6.59595d0, 6.60343d0, 6.61092d0, 6.61840d0, 6.62589d0, &
+      6.63337d0, 6.64085d0, 6.64834d0, 6.65582d0, 6.66330d0, 6.67079d0, &
+      6.67827d0, 6.68575d0, 6.69323d0, 6.70071d0, 6.70819d0, 6.71568d0, &
+      6.72316d0, 6.73064d0, 6.73812d0, 6.74560d0, 6.75308d0, 6.76055d0, &
+      6.76803d0, 6.77551d0, 6.78299d0, 6.79047d0, 6.79794d0, 6.80542d0, &
+      6.81290d0, 6.82037d0, 6.82785d0, 6.83533d0, 6.84280d0, 6.85028d0, &
+      6.85775d0, 6.86523d0, 6.87270d0, 6.88018d0, 6.88765d0, 6.89512d0, &
+      6.90260d0, 6.91007d0, 6.91754d0, 6.92501d0, 6.93249d0, 6.93996d0, &
+      6.94743d0, 6.95490d0, 6.96237d0, 6.96984d0, 6.97731d0, 6.98478d0, &
+      6.99225d0, 6.99972d0, 7.00719d0, 7.01466d0, 7.02213d0, 7.02959d0, &
+      7.03706d0, 7.04453d0, 7.05200d0, 7.05946d0, 7.06693d0, 7.07440d0, &
+      7.08186d0, 7.08933d0, 7.09679d0, 7.10426d0, 7.11172d0, 7.11919d0, &
+      7.12665d0, 7.13412d0, 7.14158d0, 7.14904d0, 7.15651d0, 7.16397d0, &
+      7.17143d0, 7.17889d0, 7.18636d0, 7.19382d0, 7.20128d0, 7.20874d0, &
+      7.21620d0, 7.22366d0, 7.23112d0, 7.23858d0, 7.24604d0, 7.25350d0, &
+      7.26096d0, 7.26842d0, 7.27588d0, 7.28334d0, 7.29079d0, 7.29825d0, &
+      7.30571d0, 7.31317d0, 7.32062d0, 7.32808d0, 7.33554d0, 7.34299d0, &
+      7.35045d0, 7.35790d0, 7.36536d0, 7.37281d0, 7.38027d0, 7.38772d0, &
+      7.39518d0, 7.40263d0, 7.41008d0, 7.41754d0, 7.42499d0, 7.43244d0, &
+      7.43989d0, 7.44735d0, 7.45480d0, 7.46225d0, 7.46970d0, 7.47715d0, &
+      7.48460d0, 7.49205d0, 7.49950d0, 7.50695d0, 7.51440d0, 7.52185d0, &
+      7.52930d0, 7.53675d0, 7.54420d0, 7.55164d0, 7.55909d0, 7.56654d0, &
+      7.57399d0, 7.58143d0, 7.58888d0, 7.59633d0, 7.60377d0, 7.61122d0, &
+      7.61866d0, 7.62611d0, 7.63355d0, 7.64100d0, 7.64844d0, 7.65589d0, &
+      7.66333d0, 7.67077d0, 7.67822d0, 7.68566d0, 7.69310d0, 7.70055d0, &
+      7.70799d0, 7.71543d0, 7.72287d0, 7.73032d0, 7.73776d0, 7.74520d0, &
+      7.75264d0, 7.76008d0, 7.76752d0, 7.77496d0, 7.78240d0, 7.78984d0, &
+      7.79728d0, 7.80471d0, 7.81215d0, 7.81959d0, 7.82703d0, 7.83447d0, &
+      7.84190d0, 7.84934d0, 7.85678d0, 7.86421d0, 7.87165d0, 7.87909d0, &
+      7.88652d0, 7.89396d0, 7.90139d0, 7.90883d0, 7.91626d0, 7.92370d0, &
+      7.93113d0, 7.93857d0, 7.94600d0, 7.95343d0, 7.96087d0, 7.96830d0, &
+      7.97573d0, 7.98316d0, 7.99060d0, 7.99803d0, 8.00546d0, 8.01289d0, &
+      8.02032d0, 8.02775d0, 8.03518d0, 8.04261d0, 8.05004d0, 8.05747d0, &
+      8.06490d0, 8.07233d0, 8.07976d0, 8.08719d0, 8.09462d0, 8.10205d0, &
+      8.10947d0, 8.11690d0, 8.12433d0, 8.13176d0, 8.13918d0, 8.14661d0, &
+      8.15404d0, 8.16146d0, 8.16889d0, 8.17631d0, 8.18374d0, 8.19116d0, &
+      8.19859d0, 8.20601d0, 8.21344d0, 8.22086d0, 8.22828d0, 8.23571d0, &
+      8.24313d0, 8.25056d0, 8.25798d0, 8.26540d0, 8.27282d0, 8.28024d0, &
+      8.28767d0, 8.29509d0, 8.30251d0, 8.30993d0, 8.31735d0, 8.32477d0, &
+      8.33219d0, 8.33961d0, 8.34703d0, 8.35445d0, 8.36187d0, 8.36929d0, &
+      8.37671d0, 8.38412d0, 8.39154d0, 8.39896d0, 8.40638d0, 8.41380d0, &
+      8.42121d0, 8.42863d0, 8.43605d0, 8.44346d0, 8.45088d0, 8.45829d0, &
+      8.46571d0, 8.47313d0, 8.48054d0, 8.48796d0, 8.49537d0, 8.50278d0, &
+      8.51020d0, 8.51761d0, 8.52503d0, 8.53244d0, 8.53985d0, 8.54727d0, &
+      8.55468d0, 8.56209d0, 8.56950d0, 8.57691d0, 8.58433d0, 8.59174d0, &
+      8.59915d0, 8.60656d0, 8.61397d0, 8.62138d0, 8.62879d0, 8.63620d0, &
+      8.64361d0, 8.65102d0, 8.65843d0, 8.66584d0, 8.67325d0, 8.68065d0, &
+      8.68806d0, 8.69547d0, 8.70288d0, 8.71029d0, 8.71769d0, 8.72510d0, &
+      8.73251d0, 8.73991d0, 8.74732d0, 8.75472d0, 8.76213d0, 8.76954d0, &
+      8.77694d0, 8.78435d0, 8.79175d0, 8.79916d0, 8.80656d0, 8.81396d0, &
+      8.82137d0, 8.82877d0, 8.83617d0, 8.84358d0, 8.85098d0, 8.85838d0, &
+      8.86578d0, 8.87319d0, 8.88059d0, 8.88799d0, 8.89539d0, 8.90279d0, &
+      8.91019d0, 8.91759d0, 8.92499d0, 8.93239d0, 8.93979d0, 8.94719d0, &
+      8.95459d0, 8.96199d0, 8.96939d0, 8.97679d0, 8.98419d0, 8.99159d0, &
+      8.99899d0, 9.00638d0, 9.01378d0, 9.02118d0, 9.02857d0, 9.03597d0, &
+      9.04337d0, 9.05076d0, 9.05816d0, 9.06556d0, 9.07295d0, 9.08035d0, &
+      9.08774d0, 9.09514d0, 9.10253d0, 9.10993d0, 9.11732d0, 9.12471d0, &
+      9.13211d0, 9.13950d0, 9.14689d0, 9.15429d0, 9.16168d0, 9.16907d0, &
+      9.17647d0, 9.18386d0, 9.19125d0, 9.19864d0, 9.20603d0, 9.21342d0, &
+      9.22081d0, 9.22820d0, 9.23559d0, 9.24299d0, 9.25037d0, 9.25776d0, &
+      9.26515d0, 9.27254d0, 9.27993d0, 9.28732d0, 9.29471d0, 9.30210d0, &
+      9.30949d0, 9.31687d0, 9.32426d0, 9.33165d0, 9.33904d0, 9.34642d0, &
+      9.35381d0, 9.36120d0, 9.36858d0, 9.37597d0, 9.38336d0, 9.39074d0, &
+      9.39813d0, 9.40551d0, 9.41290d0, 9.42028d0, 9.42766d0, 9.43505d0, &
+      9.44243d0, 9.44982d0, 9.45720d0, 9.46458d0, 9.47197d0, 9.47935d0, &
+      9.48673d0, 9.49411d0, 9.50150d0, 9.50888d0, 9.51626d0, 9.52364d0, &
+      9.53102d0, 9.53840d0, 9.54578d0, 9.55317d0, 9.56055d0, 9.56793d0, &
+      9.57531d0, 9.58269d0, 9.59007d0, 9.59744d0, 9.60482d0, 9.61220d0, &
+      9.61958d0, 9.62696d0, 9.63434d0, 9.64172d0, 9.64909d0, 9.65647d0, &
+      9.66385d0, 9.67122d0, 9.67860d0, 9.68598d0, 9.69335d0, 9.70073d0, &
+      9.70811d0, 9.71548d0, 9.72286d0, 9.73023d0, 9.73761d0, 9.74498d0, &
+      9.75236d0, 9.75973d0, 9.76710d0, 9.77448d0, 9.78185d0, 9.78922d0, &
+      9.79660d0, 9.80397d0, 9.81134d0, 9.81872d0, 9.82609d0, 9.83346d0, &
+      9.84083d0, 9.84820d0, 9.85558d0, 9.86295d0, 9.87032d0, 9.87769d0, &
+      9.88506d0, 9.89243d0, 9.89980d0, 9.90717d0, 9.91454d0, 9.92191d0, &
+      9.92928d0, 9.93665d0, 9.94401d0, 9.95138d0, 9.95875d0, 9.96612d0, &
+      9.97349d0, 9.98086d0, 9.98086d0 /)
+  ! Efficiency (total), including T5Z3
+  REAL*8, PARAMETER :: EFF0(NE)                                         &
+      =       (/ 4.21628d-2,4.56586d-2,4.64347d-2,4.72082d-2,4.79792d-2,&
+      4.87478d-2,4.95142d-2,5.02783d-2,5.10401d-2,5.17996d-2,5.25568d-2,&
+      5.33114d-2,5.41480d-2,5.48988d-2,5.56465d-2,5.63907d-2,5.71493d-2,&
+      5.78875d-2,5.86215d-2,5.93508d-2,6.00752d-2,6.07943d-2,6.15076d-2,&
+      6.22149d-2,6.29158d-2,6.38929d-2,6.45838d-2,6.52673d-2,6.59429d-2,&
+      6.66103d-2,6.72693d-2,6.79195d-2,6.85606d-2,6.91924d-2,6.98146d-2,&
+      7.04270d-2,7.10294d-2,7.16216d-2,7.22034d-2,7.27747d-2,7.33354d-2,&
+      7.38854d-2,7.44246d-2,7.49529d-2,7.54704d-2,7.59770d-2,7.64727d-2,&
+      7.69576d-2,7.74317d-2,7.78950d-2,7.85230d-2,7.84758d-2,7.84249d-2,&
+      7.83712d-2,7.83155d-2,7.82586d-2,7.82014d-2,7.81445d-2,7.80887d-2,&
+      7.80347d-2,7.79832d-2,7.79347d-2,7.78899d-2,7.78494d-2,7.78136d-2,&
+      7.77830d-2,7.77582d-2,7.77395d-2,7.77274d-2,7.77223d-2,7.77245d-2,&
+      7.77344d-2,7.77523d-2,7.77785d-2,7.78132d-2,7.80296d-2,7.80833d-2,&
+      7.81463d-2,7.82187d-2,7.83007d-2,7.83924d-2,7.84941d-2,7.86057d-2,&
+      7.87276d-2,7.88597d-2,7.90021d-2,7.91550d-2,7.93183d-2,7.94922d-2,&
+      7.96767d-2,7.98718d-2,8.00776d-2,8.02940d-2,8.05212d-2,8.07590d-2,&
+      8.10076d-2,8.12668d-2,8.15368d-2,8.18174d-2,8.21087d-2,8.25698d-2,&
+      8.28828d-2,8.32064d-2,8.35404d-2,8.38849d-2,8.42399d-2,8.46051d-2,&
+      8.49808d-2,8.53666d-2,8.57627d-2,8.61689d-2,8.65853d-2,8.70116d-2,&
+      8.74479d-2,8.78941d-2,8.83502d-2,8.88160d-2,8.92915d-2,8.97766d-2,&
+      9.02712d-2,9.07753d-2,9.12888d-2,9.18117d-2,9.23437d-2,9.28849d-2,&
+      9.37831d-2,9.43442d-2,9.49143d-2,9.54932d-2,9.60809d-2,9.66772d-2,&
+      9.72821d-2,9.78955d-2,9.85173d-2,9.91473d-2,9.97855d-2,1.00432d-1,&
+      1.01086d-1,1.01748d-1,1.02418d-1,1.03096d-1,1.03781d-1,1.04473d-1,&
+      1.05173d-1,1.05881d-1,1.06595d-1,1.07316d-1,1.08045d-1,1.08780d-1,&
+      1.09521d-1,1.10459d-1,1.11214d-1,1.11976d-1,1.12744d-1,1.13518d-1,&
+      1.14298d-1,1.15084d-1,1.15876d-1,1.16673d-1,1.17476d-1,1.18284d-1,&
+      1.19098d-1,1.19916d-1,1.20740d-1,1.21568d-1,1.22401d-1,1.23239d-1,&
+      1.24082d-1,1.24928d-1,1.25779d-1,1.26634d-1,1.27493d-1,1.28356d-1,&
+      1.29222d-1,1.30092d-1,1.31117d-1,1.31994d-1,1.32873d-1,1.33756d-1,&
+      1.34642d-1,1.35530d-1,1.36421d-1,1.37314d-1,1.38209d-1,1.39106d-1,&
+      1.40005d-1,1.40906d-1,1.41808d-1,1.42712d-1,1.43617d-1,1.44523d-1,&
+      1.45430d-1,1.46338d-1,1.47246d-1,1.48155d-1,1.49065d-1,1.49974d-1,&
+      1.50884d-1,1.51794d-1,1.52703d-1,1.53593d-1,1.54503d-1,1.55413d-1,&
+      1.56322d-1,1.57231d-1,1.58139d-1,1.59045d-1,1.59951d-1,1.60856d-1,&
+      1.61759d-1,1.62662d-1,1.63562d-1,1.64462d-1,1.65359d-1,1.66255d-1,&
+      1.67149d-1,1.68042d-1,1.68932d-1,1.69820d-1,1.70706d-1,1.71590d-1,&
+      1.72471d-1,1.73350d-1,1.74226d-1,1.75100d-1,1.76170d-1,1.77038d-1,&
+      1.77904d-1,1.78766d-1,1.79626d-1,1.80481d-1,1.81334d-1,1.82183d-1,&
+      1.83028d-1,1.83870d-1,1.84707d-1,1.85541d-1,1.86371d-1,1.87196d-1,&
+      1.88017d-1,1.88834d-1,1.89646d-1,1.90454d-1,1.91257d-1,1.92055d-1,&
+      1.92847d-1,1.93635d-1,1.94418d-1,1.95195d-1,1.95967d-1,1.96544d-1,&
+      1.97305d-1,1.98059d-1,1.98808d-1,1.99552d-1,2.00291d-1,2.01024d-1,&
+      2.01751d-1,2.02474d-1,2.03192d-1,2.03904d-1,2.04612d-1,2.05314d-1,&
+      2.06012d-1,2.06705d-1,2.07394d-1,2.08077d-1,2.08757d-1,2.09431d-1,&
+      2.10102d-1,2.10768d-1,2.11430d-1,2.12087d-1,2.12741d-1,2.13390d-1,&
+      2.14779d-1,2.15422d-1,2.16061d-1,2.16696d-1,2.17328d-1,2.17955d-1,&
+      2.18580d-1,2.19200d-1,2.19817d-1,2.20431d-1,2.21041d-1,2.21649d-1,&
+      2.22252d-1,2.22853d-1,2.23451d-1,2.24140d-1,2.24738d-1,2.25333d-1,&
+      2.25926d-1,2.26516d-1,2.27103d-1,2.27689d-1,2.28272d-1,2.28853d-1,&
+      2.29432d-1,2.30646d-1,2.31222d-1,2.31797d-1,2.32369d-1,2.32940d-1,&
+      2.33509d-1,2.34077d-1,2.34644d-1,2.35209d-1,2.35773d-1,2.36336d-1,&
+      2.36897d-1,2.37458d-1,2.38018d-1,2.38576d-1,2.39135d-1,2.39692d-1,&
+      2.40249d-1,2.40805d-1,2.41361d-1,2.41917d-1,2.42472d-1,2.43028d-1,&
+      2.43583d-1,2.44138d-1,2.44654d-1,2.45208d-1,2.45762d-1,2.46317d-1,&
+      2.46873d-1,2.47429d-1,2.47985d-1,2.48542d-1,2.49101d-1,2.49660d-1,&
+      2.50219d-1,2.50780d-1,2.51343d-1,2.51906d-1,2.52471d-1,2.53037d-1,&
+      2.53605d-1,2.54174d-1,2.54745d-1,2.55318d-1,2.55892d-1,2.56469d-1,&
+      2.57048d-1,2.57629d-1,2.58212d-1,2.59283d-1,2.59874d-1,2.60466d-1,&
+      2.61062d-1,2.68432d-1,2.69150d-1,2.69871d-1,2.70596d-1,2.71325d-1,&
+      2.72057d-1,2.72792d-1,2.73531d-1,2.74273d-1,2.75019d-1,2.75768d-1,&
+      2.76521d-1,2.77277d-1,2.78036d-1,2.78799d-1,2.79566d-1,2.80335d-1,&
+      2.81108d-1,2.81885d-1,2.82665d-1,2.83448d-1,2.84380d-1,2.85170d-1,&
+      2.85963d-1,2.86759d-1,2.87559d-1,2.88361d-1,2.89167d-1,2.89977d-1,&
+      2.90789d-1,2.91605d-1,2.92423d-1,2.93245d-1,2.94070d-1,2.94898d-1,&
+      2.95729d-1,2.96563d-1,2.97400d-1,2.98240d-1,2.99083d-1,2.99929d-1,&
+      3.00777d-1,3.01629d-1,3.02483d-1,3.03340d-1,3.04200d-1,3.05048d-1,&
+      3.05914d-1,3.06783d-1,3.07655d-1,3.08530d-1,3.09407d-1,3.10286d-1,&
+      3.11168d-1,3.12052d-1,3.12939d-1,3.13828d-1,3.14720d-1,3.15614d-1,&
+      3.16510d-1,3.17409d-1,3.18310d-1,3.19213d-1,3.20118d-1,3.21025d-1,&
+      3.21934d-1,3.22846d-1,3.23759d-1,3.24675d-1,3.25592d-1,3.26512d-1,&
+      3.27892d-1,3.28817d-1,3.29744d-1,3.30672d-1,3.31603d-1,3.32535d-1,&
+      3.33469d-1,3.34404d-1,3.35341d-1,3.36280d-1,3.37220d-1,3.38162d-1,&
+      3.39106d-1,3.40051d-1,3.40997d-1,3.42894d-1,3.43763d-1,3.43845d-1,&
+      3.44797d-1,3.45751d-1,3.46706d-1,3.47662d-1,3.48620d-1,3.49578d-1,&
+      3.50539d-1,3.51547d-1,3.52510d-1,3.53475d-1,3.54440d-1,3.55407d-1,&
+      3.56374d-1,3.57343d-1,3.58312d-1,3.59283d-1,3.60254d-1,3.61226d-1,&
+      3.62198d-1,3.63171d-1,3.64144d-1,3.65118d-1,3.66093d-1,3.67068d-1,&
+      3.68043d-1,3.69018d-1,3.69994d-1,3.70969d-1,3.71945d-1,3.72920d-1,&
+      3.73896d-1,3.74871d-1,3.75274d-1,3.77636d-1,3.78639d-1,3.79643d-1,&
+      3.80647d-1,3.81651d-1,3.82654d-1,3.83658d-1,3.84662d-1,3.85665d-1,&
+      3.86668d-1,3.87670d-1,3.88672d-1,3.89674d-1,3.90675d-1,3.91675d-1,&
+      3.92675d-1,3.93674d-1,3.94672d-1,3.95670d-1,3.96666d-1,3.97661d-1,&
+      3.98655d-1,3.99648d-1,4.00640d-1,4.01866d-1,4.02858d-1,4.03849d-1,&
+      4.04838d-1,4.05825d-1,4.06811d-1,4.07795d-1,4.08777d-1,4.09758d-1,&
+      4.10736d-1,4.11712d-1,4.12687d-1,4.13659d-1,4.14629d-1,4.15597d-1,&
+      4.16562d-1,4.17525d-1,4.18485d-1,4.19443d-1,4.20398d-1,4.21350d-1,&
+      4.22300d-1,4.23247d-1,4.24190d-1,4.25131d-1,4.27238d-1,4.28175d-1,&
+      4.29108d-1,4.30038d-1,4.30965d-1,4.31888d-1,4.32808d-1,4.33724d-1,&
+      4.34637d-1,4.35545d-1,4.36450d-1,4.37351d-1,4.38248d-1,4.39140d-1,&
+      4.40029d-1,4.40913d-1,4.41793d-1,4.42669d-1,4.43540d-1,4.44407d-1,&
+      4.45269d-1,4.46127d-1,4.46979d-1,4.47827d-1,4.48670d-1,4.48208d-1,&
+      4.49038d-1,4.49863d-1,4.50684d-1,4.51499d-1,4.52309d-1,4.53114d-1,&
+      4.53914d-1,4.54710d-1,4.55500d-1,4.56285d-1,4.57065d-1,4.57840d-1,&
+      4.58610d-1,4.59375d-1,4.60135d-1,4.60891d-1,4.61641d-1,4.62386d-1,&
+      4.63127d-1,4.63862d-1,4.64593d-1,4.65319d-1,4.66040d-1,4.66756d-1,&
+      4.68439d-1,4.69146d-1,4.69849d-1,4.70547d-1,4.71240d-1,4.71928d-1,&
+      4.72612d-1,4.73291d-1,4.73965d-1,4.74634d-1,4.75299d-1,4.75959d-1,&
+      4.76615d-1,4.77266d-1,4.77912d-1,4.78554d-1,4.79191d-1,4.79824d-1,&
+      4.80453d-1,4.81077d-1,4.81696d-1,4.82311d-1,4.82922d-1,4.83529d-1,&
+      4.84131d-1,4.84724d-1,4.85320d-1,4.85911d-1,4.86498d-1,4.87081d-1,&
+      4.87660d-1,4.88234d-1,4.88805d-1,4.89372d-1,4.89934d-1,4.90493d-1,&
+      4.91047d-1,4.91598d-1,4.92145d-1,4.92688d-1,4.93227d-1,4.93762d-1,&
+      4.94294d-1,4.94821d-1,4.95345d-1,4.95866d-1,4.96383d-1,4.96896d-1,&
+      4.97406d-1,4.97912d-1,4.99263d-1,4.99763d-1,5.00259d-1,5.00752d-1,&
+      5.01241d-1,5.01728d-1,5.02211d-1,5.02690d-1,5.03167d-1,5.03641d-1,&
+      5.04111d-1,5.04578d-1,5.05043d-1,5.05504d-1,5.05963d-1,5.06418d-1,&
+      5.06871d-1,5.07321d-1,5.07768d-1,5.08212d-1,5.08654d-1,5.09093d-1,&
+      5.09530d-1,5.09963d-1,5.10395d-1,5.09351d-1,5.09777d-1,5.10200d-1,&
+      5.10621d-1,5.11039d-1,5.11455d-1,5.11868d-1,5.12279d-1,5.12687d-1,&
+      5.13093d-1,5.13496d-1,5.13897d-1,5.14295d-1,5.14690d-1,5.15083d-1,&
+      5.15473d-1,5.15861d-1,5.16246d-1,5.16628d-1,5.17008d-1,5.17385d-1,&
+      5.17760d-1,5.18131d-1,5.18501d-1,5.18867d-1,5.19634d-1,5.19993d-1,&
+      5.20350d-1,5.20704d-1,5.21056d-1,5.21405d-1,5.21750d-1,5.22094d-1,&
+      5.22434d-1,5.22772d-1,5.23107d-1,5.23439d-1,5.23768d-1,5.24094d-1,&
+      5.24418d-1,5.24739d-1,5.25057d-1,5.25372d-1,5.25684d-1,5.25993d-1,&
+      5.26300d-1,5.26603d-1,5.26904d-1,5.27202d-1,5.27497d-1,5.28945d-1,&
+      5.29235d-1,5.29522d-1,5.29806d-1,5.30086d-1,5.30364d-1,5.30639d-1,&
+      5.30910d-1,5.31179d-1,5.31445d-1,5.31707d-1,5.31967d-1,5.32223d-1,&
+      5.32476d-1,5.32726d-1,5.32973d-1,5.33217d-1,5.33458d-1,5.33695d-1,&
+      5.33929d-1,5.34160d-1,5.34388d-1,5.34613d-1,5.34834d-1,5.35053d-1,&
+      5.34267d-1,5.34478d-1,5.34685d-1,5.34889d-1,5.35090d-1,5.35287d-1,&
+      5.35481d-1,5.35672d-1,5.35859d-1,5.36043d-1,5.36223d-1,5.36401d-1,&
+      5.36574d-1,5.36744d-1,5.36911d-1,5.37075d-1,5.37234d-1,5.37391d-1,&
+      5.37544d-1,5.37693d-1,5.37839d-1,5.37981d-1,5.38119d-1,5.38254d-1,&
+      5.38386d-1,5.36868d-1,5.36992d-1,5.37113d-1,5.37229d-1,5.37343d-1,&
+      5.37453d-1,5.37560d-1,5.37663d-1,5.37763d-1,5.37860d-1,5.37954d-1,&
+      5.38044d-1,5.38132d-1,5.38216d-1,5.38298d-1,5.38377d-1,5.38452d-1,&
+      5.38525d-1,5.38596d-1,5.38663d-1,5.38728d-1,5.38790d-1,5.38850d-1,&
+      5.38907d-1,5.38962d-1,5.39884d-1,5.39935d-1,5.39983d-1,5.40030d-1,&
+      5.40074d-1,5.40115d-1,5.40155d-1,5.40192d-1,5.40228d-1,5.40261d-1,&
+      5.40293d-1,5.40322d-1,5.40350d-1,5.40376d-1,5.40400d-1,5.40422d-1,&
+      5.40443d-1,5.40462d-1,5.40480d-1,5.40496d-1,5.40510d-1,5.40523d-1,&
+      5.40535d-1,5.40546d-1,5.40555d-1,5.39900d-1,5.39907d-1,5.39912d-1,&
+      5.39916d-1,5.39919d-1,5.39922d-1,5.39923d-1,5.39923d-1,5.39923d-1,&
+      5.39922d-1,5.39920d-1,5.39917d-1,5.39914d-1,5.39910d-1,5.39905d-1,&
+      5.39900d-1,5.39895d-1,5.39889d-1,5.39883d-1,5.39876d-1,5.39870d-1,&
+      5.39862d-1,5.39855d-1,5.39848d-1,5.39840d-1,5.40458d-1,5.40451d-1,&
+      5.40444d-1,5.40437d-1,5.40430d-1,5.40423d-1,5.40416d-1,5.40410d-1,&
+      5.40404d-1,5.40399d-1,5.40393d-1,5.40389d-1,5.40385d-1,5.40381d-1,&
+      5.40378d-1,5.40376d-1,5.40374d-1,5.40374d-1,5.40373d-1,5.40374d-1,&
+      5.40376d-1,5.40379d-1,5.40382d-1,5.40387d-1,5.40393d-1,5.39703d-1,&
+      5.39710d-1,5.39719d-1,5.39729d-1,5.39740d-1,5.39752d-1,5.39765d-1,&
+      5.39779d-1,5.39794d-1,5.39811d-1,5.39828d-1,5.39846d-1,5.39864d-1,&
+      5.39884d-1,5.39905d-1,5.39926d-1,5.39948d-1,5.39971d-1,5.39995d-1,&
+      5.40019d-1,5.40044d-1,5.40070d-1,5.40096d-1,5.40123d-1,5.40151d-1,&
+      5.40620d-1,5.40649d-1,5.40679d-1,5.40709d-1,5.40740d-1,5.40771d-1,&
+      5.40802d-1,5.40834d-1,5.40866d-1,5.40898d-1,5.40931d-1,5.40964d-1,&
+      5.40997d-1,5.41031d-1,5.41064d-1,5.41098d-1,5.41132d-1,5.41166d-1,&
+      5.41200d-1,5.41234d-1,5.41268d-1,5.41302d-1,5.41336d-1,5.41371d-1,&
+      5.41404d-1,5.40845d-1,5.40879d-1,5.40914d-1,5.40947d-1,5.40981d-1,&
+      5.41015d-1,5.41048d-1,5.41081d-1,5.41113d-1,5.41146d-1,5.41178d-1,&
+      5.41209d-1,5.41240d-1,5.41271d-1,5.41301d-1,5.41331d-1,5.41360d-1,&
+      5.41389d-1,5.41417d-1,5.41445d-1,5.41472d-1,5.41498d-1,5.41524d-1,&
+      5.41549d-1,5.41573d-1,5.41584d-1,5.41606d-1,5.41628d-1,5.41649d-1,&
+      5.41669d-1,5.41688d-1,5.41706d-1,5.41723d-1,5.41740d-1,5.41755d-1,&
+      5.41769d-1,5.41783d-1,5.41795d-1,5.41806d-1,5.41816d-1,5.41825d-1,&
+      5.41833d-1,5.41840d-1,5.41845d-1,5.41850d-1,5.41853d-1,5.41854d-1,&
+      5.41855d-1,5.41854d-1,5.41851d-1,5.41989d-1,5.41984d-1,5.41977d-1,&
+      5.41969d-1,5.41960d-1,5.41948d-1,5.41936d-1,5.41921d-1,5.41905d-1,&
+      5.41888d-1,5.41869d-1,5.41848d-1,5.41825d-1,5.41801d-1,5.41775d-1,&
+      5.41747d-1,5.41718d-1,5.41686d-1,5.41653d-1,5.41618d-1,5.41581d-1,&
+      5.41542d-1,5.41501d-1,5.41458d-1,5.41414d-1,5.41711d-1,5.41663d-1,&
+      5.41613d-1,5.41561d-1,5.41506d-1,5.41450d-1,5.41391d-1,5.41331d-1,&
+      5.41268d-1,5.41202d-1,5.41135d-1,5.41065d-1,5.40993d-1,5.40918d-1,&
+      5.40841d-1,5.40762d-1,5.40680d-1,5.40596d-1,5.40509d-1,5.40419d-1,&
+      5.40327d-1,5.40233d-1,5.40136d-1,5.40036d-1,5.39934d-1,5.37776d-1,&
+      5.37668d-1,5.37558d-1,5.37445d-1,5.37329d-1,5.37210d-1,5.37088d-1,&
+      5.36963d-1,5.36836d-1,5.36706d-1,5.36573d-1,5.36436d-1,5.36297d-1,&
+      5.36155d-1,5.36010d-1,5.35862d-1,5.35710d-1,5.35556d-1,5.35398d-1,&
+      5.35238d-1,5.35074d-1,5.34907d-1,5.34737d-1,5.34563d-1,5.34386d-1,&
+      5.36406d-1,5.36223d-1,5.36036d-1,5.35845d-1,5.35652d-1,5.35454d-1,&
+      5.35254d-1,5.35049d-1,5.34842d-1,5.34630d-1,5.34415d-1,5.34197d-1,&
+      5.33975d-1,5.33749d-1,5.33520d-1,5.33287d-1,5.33050d-1,5.32809d-1,&
+      5.32565d-1,5.32317d-1,5.32065d-1,5.31809d-1,5.31550d-1,5.31286d-1,&
+      5.31018d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,&
+      5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,&
+      5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,&
+      5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,5.30784d-1,&
+      5.30784d-1,5.30784d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,&
+      5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,&
+      5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,&
+      5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,5.29415d-1,&
+      5.29415d-1,5.29415d-1,5.29415d-1,5.29802d-1,5.29802d-1,5.29802d-1,&
+      5.29802d-1,5.29802d-1,5.29802d-1,5.29802d-1,5.29802d-1,5.29802d-1,&
+      5.29802d-1,5.29802d-1,5.29802d-1 /)
+  ! Number of events
+  INTEGER, PARAMETER :: NINTERVALS = 12
+  ! Array containing interval bounds [E_k,E_{k+1}]
+  ! i.e. list of event energies plus bounds of overall energy range
+  REAL*8, PARAMETER :: E_INTERVALS(0:NINTERVALS)                        &
+      = (/ 1.60867d0,1.7d0,1.8d0,1.9d0,1.9d0,2.3d0,2.7d0,3.0d0,         &
+           5.8d0,7.0d0,7.8d0,9.4d0,9.98086d0 /)
+  ! Will build array of efficiencies below
+  REAL*8 :: EFF(NE,0:NINTERVALS)
+  
+  ! Fill in efficiencies
+  ! Interval efficiencies are just total efficiency with interval
+  ! energy range and zero elsewhere (ignoring energy resolution)
+  EFF(:,0) = EFF0
+  DO K=1,NINTERVALS
+    WHERE ((E .GE. E_INTERVALS(K-1)) .AND. (E .LE. E_INTERVALS(K)))
+      EFF(:,K) = EFF0
+    ELSE WHERE
+      EFF(:,K) = 0d0
+    END WHERE
+  END DO
+  
+  ! One call for all settings.
+  ! Most of these _must_ be there to ensure everything get initialized.
+  CALL SetDetector(D,mass=4.2d0,time=137.4d0,Nevents=11,                &
+                   background=6.1d0,Zelem=32,                           &
+                   NEeff=NE,Eeff=E,Neff=NINTERVALS,eff=EFF,             &
+                   intervals=intervals)
+  D%eff_file = '[SuperCDMS 2014]'
   
 END SUBROUTINE
 
@@ -8232,7 +8920,7 @@ SUBROUTINE InitDetector(D,intervals)
   IF (PRESENT(intervals)) intervals0 = intervals
   
   ! Set to LUX 2013 analysis
-  CALL LUX_2013_InitTo(DP,intervals0)
+  CALL SuperCDMS_2014_InitTo(DP,intervals0)
   
 END SUBROUTINE
 
@@ -8321,13 +9009,17 @@ SUBROUTINE InitDetectorCL(D,eff_file,intervals)
   intervals0 = .TRUE.
   IF (PRESENT(intervals)) intervals0 = intervals
   IF (GetLongArg('no-intervals')) intervals0 = .FALSE.
-  
+
   ! Experiment-specific settings
-  ! LUX 2013 result
+  ! XENON100 2012 result
   IF (GetLongArg('XENON100-2012')) THEN
     CALL XENON100_2012_InitTo(DP,intervals0)
+  ! LUX 2013 result
   ELSE IF (GetLongArg('LUX-2013')) THEN
     CALL LUX_2013_InitTo(DP,intervals0)
+  ! SuperCDMS 2014 result (low-energy analysis)
+  ELSE IF (GetLongArg('SuperCDMS-2014')) THEN
+    CALL SuperCDMS_2014_InitTo(DP,intervals0)
   ! DARWIN proposal, xenon-based (as of 2015)
   ELSE IF (GetLongArg('DARWIN-Xe-2015')) THEN
     CALL DARWIN_Xe_2015_InitTo(DP,intervals0)
@@ -8510,7 +9202,7 @@ SUBROUTINE CalcRates(D)
   IMPLICIT NONE
   TYPE(DetectorStruct), INTENT(INOUT), TARGET, OPTIONAL :: D
   TYPE(DetectorStruct), POINTER :: DP
-  INTEGER :: Kiso,KE,Keff
+  INTEGER :: Kiso,KE,Keff,Neff0
   REAL*8 :: alphasi(-1:1),alphasd(-1:1)
   ! Constant used to convert units:
   !   s / (cm^3 km GeV^4)  -->  cpd/kg/keV
@@ -8710,13 +9402,22 @@ SUBROUTINE CalcRates(D)
            * TO_CPD_KG_KEV
   END DO
   
+  ! Number of intervals/bins to do calculations for.
+  ! If intervals=.FALSE. then efficiency index is over [0:0]
+  ! (total only).
+  IF (DP%intervals) THEN
+    Neff0 = DP%Neff
+  ELSE
+    Neff0 = 0
+  END IF
+  
   ! Integrate (efficiency-weighted) to find total rates.
   ! Uses a simple trapezoidal integration.
   DP%Rsi0 = 0d0
   DP%Rsd0 = 0d0
   ! Cycle over E bins and efficiency curves.
   DO KE = 1,DP%NE-1
-    DO Keff = 0,DP%Neff
+    DO Keff = 0,Neff0
       DP%Rsi0(:,Keff) = DP%Rsi0(:,Keff)                                 &
           + 0.5d0 * (DP%E(KE+1) - DP%E(KE))                             &
             * (DP%eff0(KE,Keff)*DP%dRdEsi0(:,KE)                        &
@@ -9634,7 +10335,7 @@ PURE FUNCTION LogMaximumGapP(mu,x) RESULT(lnp)
       p = (K*x-mu)**(K-1) * EXP(-K*x) * (mu - K*(x-1)) / GAMMAI(K+1)
       psum = psum + p
     END DO
-    lnp = LOG(p)
+    lnp = LOG(psum)
   END SELECT
   
 END FUNCTION
