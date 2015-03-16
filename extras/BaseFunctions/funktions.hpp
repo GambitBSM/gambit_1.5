@@ -189,7 +189,7 @@ namespace Funk
         public:
             FunkBase() {}
             FunkBase(std::string funkType) : funkType(funkType) {}
-            ~FunkBase() {}
+            virtual ~FunkBase() {}
 
             // Standard handles
             template <typename... Args> Funk set(Args... args);
