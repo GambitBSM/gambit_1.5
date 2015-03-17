@@ -271,7 +271,61 @@ namespace Funk
                 return f->value(data, bindID);
             }
 
+            template <typename... Args> inline std::vector<double> vect(Args... argss)
+            {
+                std::vector<std::vector<double>> coll;
+                return this->vect2(coll, argss...);
+            }
+
         private:
+            template <typename... Args> inline std::vector<double> vect2(std::vector<std::vector<double>> & coll)
+            {
+                size_t size = 1;
+                std::vector<bool> vec_flag;
+                for ( auto it = coll.begin(); it != coll.end(); ++it )
+                {
+                    if ( it->size() == 1 )
+                    {
+                        vec_flag.push_back(false);
+                        continue;
+                    }
+                    vec_flag.push_back(true);
+                    if ( size == 1 ) size = it->size();
+                    if ( size != it->size() )
+                    {
+                        std::cout << "Warning: Inconsistent vector lengths." << std::endl;
+                        return vec<double>();
+                    }
+                }
+                auto r = vec<double>();
+                auto data = vec<double>();
+                data.resize(datalen);
+                for ( size_t i = 0; i != size; ++i )
+                {
+                    for ( size_t j = 0; j != coll.size(); ++j )
+                    {
+                        if ( vec_flag[j] )
+                            data[j] = coll[j][i];
+                        else
+                            data[j] = coll[j][0];
+                    }
+                    r.push_back(f->value(data, bindID));
+                }
+                return r;
+            }
+
+            template <typename... Args> inline std::vector<double> vect2(std::vector<std::vector<double>> & coll, double x, Args... argss)
+            {
+                coll.push_back(vec<double>(x));
+                return this->vect2(coll, argss...);
+            }
+
+            template <typename... Args> inline std::vector<double> vect2(std::vector<std::vector<double>> & coll, std::vector<double> v, Args... argss)
+            {
+                coll.push_back(v);
+                return this->vect2(coll, argss...);
+            }
+
             Funk f;  // bound function
             size_t datalen;
             intptr_t bindID;
@@ -437,6 +491,7 @@ namespace Funk
             {
                 std::tuple<typename std::remove_reference<funcargs>::type...> my_input;
                 size_t i = 0;
+                double result;
                 #pragma omp critical (FunkFunc_setInput)
                 {
                     for ( auto f = functions.begin(); f != functions.end(); ++f, ++i)
@@ -445,16 +500,17 @@ namespace Funk
                     }
                     my_input = input;
                 }
-                return ppp(typename detail::range_builder<0, sizeof...(funcargs)>::type(), my_input);
+                #pragma omp critical (FunkFunc_externalFunctionCall)
+                {
+                    result = ppp(typename detail::range_builder<0, sizeof...(funcargs)>::type(), my_input);
+                }
+                return result;
             }
 
             template <size_t... Args>
             double ppp(index_list<Args...>, std::tuple<typename std::remove_reference<funcargs>::type...> & my_input)
             {
-                #pragma omp critical(FunkFunc_externalFunctionCall)
-                {
-                    return (*ptr)(std::get<Args>(my_input)...);
-                }
+                return (*ptr)(std::get<Args>(my_input)...);
             }
 
         private:
@@ -504,6 +560,7 @@ namespace Funk
 
             double value(std::vector<double> & data, intptr_t bindID)
             {
+                double result;
                 #pragma omp critical(FunkFuncM_value)
                 {
                     size_t i = 0;
@@ -511,8 +568,9 @@ namespace Funk
                     {
                         *map[i] = (*f)->value(data, bindID);
                     }
-                    return ppp(typename detail::range_builder<0, sizeof...(funcargs)>::type());
+                    result = ppp(typename detail::range_builder<0, sizeof...(funcargs)>::type());
                 }
+                return result;
             }
 
             template <size_t... Args>
@@ -984,11 +1042,12 @@ namespace Funk
 
             double value(std::vector<double> & data, intptr_t bindID)
             {
+                double result;
                 #pragma omp critical(FunkIntegrate_gsl1d_integration)
                 {
                     local_data = data;
                     local_bindID = bindID;
-                    double result, error;
+                    double error;
                     function=&FunkIntegrate_gsl1d::invoke;
                     params=this;
                     double x0 = functions[1]->value(data, bindID);
@@ -1021,8 +1080,8 @@ namespace Funk
                         }
                         result = s;
                     }
-                    return result;
                 }
+                return result;
             }
             
         private:
