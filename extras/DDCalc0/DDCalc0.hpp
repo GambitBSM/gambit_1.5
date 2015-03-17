@@ -39,6 +39,7 @@ extern "C" {
   // Experiment initialization
   void C_DDCALC0_xenon100_2012_init(const bool *);
   void C_DDCALC0_lux_2013_init(const bool *);
+  void C_DDCALC0_supercdms_2014_init(const bool *);
   void C_DDCALC0_darwin_ar_2015_init(const bool *);
   void C_DDCALC0_darwin_xe_2015_init(const bool *);
   
@@ -63,54 +64,63 @@ extern "C" {
   // Minimum recoil energy to consider
   void C_DDCALC0_xenon100_2012_setemin(const double *);
   void C_DDCALC0_lux_2013_setemin(const double *);
+  void C_DDCALC0_supercdms_2014_setemin(const double *);
   void C_DDCALC0_darwin_ar_2015_setemin(const double *);
   void C_DDCALC0_darwin_xe_2015_setemin(const double *);
   
   // Perform calculations
   void C_DDCALC0_xenon100_2012_calcrates();
   void C_DDCALC0_lux_2013_calcrates();
+  void C_DDCALC0_supercdms_2014_calcrates();
   void C_DDCALC0_darwin_ar_2015_calcrates();
   void C_DDCALC0_darwin_xe_2015_calcrates();
   
   // Number of events
   int C_DDCALC0_xenon100_2012_events();
   int C_DDCALC0_lux_2013_events();
+  int C_DDCALC0_supercdms_2014_events();
   int C_DDCALC0_darwin_ar_2015_events();
   int C_DDCALC0_darwin_xe_2015_events();
   
   // Expected backgrounds
   double C_DDCALC0_xenon100_2012_background();
   double C_DDCALC0_lux_2013_background();
+  double C_DDCALC0_supercdms_2014_background();
   double C_DDCALC0_darwin_ar_2015_background();
   double C_DDCALC0_darwin_xe_2015_background();
   
   // Expected signal
   double C_DDCALC0_xenon100_2012_signal();
   double C_DDCALC0_lux_2013_signal();
+  double C_DDCALC0_supercdms_2014_signal();
   double C_DDCALC0_darwin_ar_2015_signal();
   double C_DDCALC0_darwin_xe_2015_signal();
   
   // Expected signal (spin-independent)
   double C_DDCALC0_xenon100_2012_signalsi();
   double C_DDCALC0_lux_2013_signalsi();
+  double C_DDCALC0_supercdms_2014_signalsi();
   double C_DDCALC0_darwin_ar_2015_signalsi();
   double C_DDCALC0_darwin_xe_2015_signalsi();
   
   // Expected signal (spin-dependent)
   double C_DDCALC0_xenon100_2012_signalsd();
   double C_DDCALC0_lux_2013_signalsd();
+  double C_DDCALC0_supercdms_2014_signalsd();
   double C_DDCALC0_darwin_ar_2015_signalsd();
   double C_DDCALC0_darwin_xe_2015_signalsd();
   
   // Log-likelihood
   double C_DDCALC0_xenon100_2012_loglikelihood();
   double C_DDCALC0_lux_2013_loglikelihood();
+  double C_DDCALC0_supercdms_2014_loglikelihood();
   double C_DDCALC0_darwin_ar_2015_loglikelihood();
   double C_DDCALC0_darwin_xe_2015_loglikelihood();
   
   // Log of the p-value
   double C_DDCALC0_xenon100_2012_logpvalue();
   double C_DDCALC0_lux_2013_logpvalue();
+  double C_DDCALC0_supercdms_2014_logpvalue();
   double C_DDCALC0_darwin_ar_2015_logpvalue();
   double C_DDCALC0_darwin_xe_2015_logpvalue();
   
@@ -118,6 +128,7 @@ extern "C" {
   // given p-value (given as log(p))
   double C_DDCALC0_xenon100_2012_scaletopvalue(const double *);
   double C_DDCALC0_lux_2013_scaletopvalue(const double *);
+  double C_DDCALC0_supercdms_2014_scaletopvalue(const double *);
   double C_DDCALC0_darwin_ar_2015_scaletopvalue(const double *);
   double C_DDCALC0_darwin_xe_2015_scaletopvalue(const double *);
   
@@ -139,6 +150,9 @@ void XENON100_2012_Init(const bool intervals=true) {
 };
 void LUX_2013_Init(const bool intervals=true) {
   C_DDCALC0_lux_2013_init(&intervals);
+};
+void SuperCDMS_2014_Init(const bool intervals=true) {
+  C_DDCALC0_supercdms_2014_init(&intervals);
 };
 void DARWIN_Ar_2015_Init(const bool intervals=true) {
   C_DDCALC0_darwin_ar_2015_init(&intervals);
@@ -216,6 +230,9 @@ void XENON100_2012_SetEmin(const double Emin) {
 void LUX_2013_SetEmin(const double Emin) {
   C_DDCALC0_lux_2013_setemin(&Emin);
 };
+void SuperCDMS_2014_SetEmin(const double Emin) {
+  C_DDCALC0_supercdms_2014_setemin(&Emin);
+};
 void DARWIN_Ar_2015_SetEmin(const double Emin) {
   C_DDCALC0_darwin_ar_2015_setemin(&Emin);
 };
@@ -231,6 +248,9 @@ void XENON100_2012_CalcRates() {
 void LUX_2013_CalcRates() {
   C_DDCALC0_lux_2013_calcrates();
 }
+void SuperCDMS_2014_CalcRates() {
+  C_DDCALC0_supercdms_2014_calcrates();
+}
 void DARWIN_Ar_2015_CalcRates() {
   C_DDCALC0_darwin_ar_2015_calcrates();
 }
@@ -244,6 +264,9 @@ int XENON100_2012_Events() {
 }
 int LUX_2013_Events() {
   return C_DDCALC0_lux_2013_events();
+}
+int SuperCDMS_2014_Events() {
+  return C_DDCALC0_supercdms_2014_events();
 }
 int DARWIN_Ar_2015_Events() {
   return C_DDCALC0_darwin_ar_2015_events();
@@ -259,6 +282,9 @@ double XENON100_2012_Background() {
 double LUX_2013_Background() {
   return C_DDCALC0_lux_2013_background();
 }
+double SuperCDMS_2014_Background() {
+  return C_DDCALC0_supercdms_2014_background();
+}
 double DARWIN_Ar_2015_Background() {
   return C_DDCALC0_darwin_ar_2015_background();
 }
@@ -272,6 +298,9 @@ double XENON100_2012_Signal() {
 }
 double LUX_2013_Signal() {
   return C_DDCALC0_lux_2013_signal();
+}
+double SuperCDMS_2014_Signal() {
+  return C_DDCALC0_supercdms_2014_signal();
 }
 double DARWIN_Ar_2015_Signal() {
   return C_DDCALC0_darwin_ar_2015_signal();
@@ -287,6 +316,9 @@ double XENON100_2012_SignalSI() {
 double LUX_2013_SignalSI() {
   return C_DDCALC0_lux_2013_signalsi();
 }
+double SuperCDMS_2014_SignalSI() {
+  return C_DDCALC0_supercdms_2014_signalsi();
+}
 double DARWIN_Ar_2015_SignalSI() {
   return C_DDCALC0_darwin_ar_2015_signalsi();
 }
@@ -300,6 +332,9 @@ double XENON100_2012_SignalSD() {
 }
 double LUX_2013_SignalSD() {
   return C_DDCALC0_lux_2013_signalsd();
+}
+double SuperCDMS_2014_SignalSD() {
+  return C_DDCALC0_supercdms_2014_signalsd();
 }
 double DARWIN_Ar_2015_SignalSD() {
   return C_DDCALC0_darwin_ar_2015_signalsd();
@@ -316,6 +351,9 @@ double XENON100_2012_LogLikelihood() {
 }
 double LUX_2013_LogLikelihood() {
   return C_DDCALC0_lux_2013_loglikelihood();
+}
+double SuperCDMS_2014_LogLikelihood() {
+  return C_DDCALC0_supercdms_2014_loglikelihood();
 }
 double DARWIN_Ar_2015_LogLikelihood() {
   return C_DDCALC0_darwin_ar_2015_loglikelihood();
@@ -337,6 +375,9 @@ double XENON100_2012_LogPValue() {
 double LUX_2013_LogPValue() {
   return C_DDCALC0_lux_2013_logpvalue();
 }
+double SuperCDMS_2014_LogPValue() {
+  return C_DDCALC0_supercdms_2014_logpvalue();
+}
 double DARWIN_Ar_2015_LogPValue() {
   return C_DDCALC0_darwin_ar_2015_logpvalue();
 }
@@ -357,6 +398,9 @@ double XENON100_2012_ScaleToPValue(const double logp=-2.302585) {
 }
 double LUX_2013_ScaleToPValue(const double logp=-2.302585) {
   return C_DDCALC0_lux_2013_scaletopvalue(&logp);
+}
+double SuperCDMS_2014_ScaleToPValue(const double logp=-2.302585) {
+  return C_DDCALC0_supercdms_2014_scaletopvalue(&logp);
 }
 double DARWIN_Ar_2015_ScaleToPValue(const double logp=-2.302585) {
   return C_DDCALC0_darwin_ar_2015_scaletopvalue(&logp);

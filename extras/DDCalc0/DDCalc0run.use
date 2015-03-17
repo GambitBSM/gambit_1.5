@@ -459,6 +459,10 @@ the detector options described later.
          result (D.S. Akerib et al., arxiv:1310.8214).  Efficiencies
          were pre-calculated using TPCMC (C. Savage, arxiv:15MM.xxxx).
 
+   --SuperCDMS-2014
+         Sets the detector and analysis to that of the  SuperCDMS 2014
+         low-energy result (R Agnese et al., arxiv:1402.7137).
+
    --DARWIN-Ar-2015
          Sets the detector and analysis to that of the xenon case for
          the proposed DARWIN argon-based detector (2015 estimates) (J.
