@@ -7,16 +7,12 @@
 !***                           nulike.h                               ***
 !***         this piece of code is needed as a separate file          ***
 !----------------------------------------------------------------------c
-!  author: Pat Scott (patscott@physics.mcgill.ca), March 26 2011, June 3, 6 2014
+!  author: Pat Scott (p.scott@imperial.ac.uk), March 26 2011, June 3, 6 2014
 
       include 'nucommon.h'
 
       integer nchan_maxallowed
       parameter(nchan_maxallowed = 100) !Maximum value of nchan
-
-      real*8 effZero, logZero
-      parameter(effZero = 1.d-100)
-      parameter(logZero = log10(effZero))
 
       character (len=nulike_clen) analysis_name_array(max_analyses)
       integer likelihood_version(max_analyses)
@@ -27,23 +23,23 @@
 
       integer nSensBins(max_analyses)
       integer nBinsBGAng(max_analyses), nBinsBGE(max_analyses)
-      integer nEvents(max_analyses), nEvents_in_file(max_analyses)
+      integer nEvents(max_analyses)
       integer nHistograms(max_analyses), nnchan_total(max_analyses)
       real*8  ee_min(max_analyses), ee_max(max_analyses) 
 
-      real*8 sens_logE(2,max_nSensBins,max_analyses)
-      real*8 sens_logEcentres(max_nSensBins,max_analyses)
-      real*8 sens_nu(max_nSensBins,max_analyses)
-      real*8 sens_nubar(max_nSensBins,max_analyses)
-      real*8 sens_syserr(max_nSensBins,max_analyses)
-      real*8 sens_staterr(max_nSensBins,max_analyses)
-      real*8 sens_AngRes(max_nSensBins,max_analyses)
-      real*8 sens_nuderivs(max_nSensBins,max_analyses)
-      real*8 sens_nubarderivs(max_nSensBins,max_analyses)
-      real*8 sens_AngResderivs(max_nSensBins,max_analyses)
-      real*8 sens_nusigma(max_nSensBins,max_analyses)
-      real*8 sens_nubarsigma(max_nSensBins,max_analyses)
-      real*8 sens_AngRessigma(max_nSensBins,max_analyses)
+      real*8 sens_logE(2,max_nSensBins+1,max_analyses)
+      real*8 sens_logEcentres(max_nSensBins+1,max_analyses)
+      real*8 sens_nu(max_nSensBins+1,max_analyses)
+      real*8 sens_nubar(max_nSensBins+1,max_analyses)
+      real*8 sens_syserr(max_nSensBins+1,max_analyses)
+      real*8 sens_staterr(max_nSensBins+1,max_analyses)
+      real*8 sens_AngRes(max_nSensBins+1,max_analyses)
+      real*8 sens_nuderivs(max_nSensBins+1,max_analyses)
+      real*8 sens_nubarderivs(max_nSensBins+1,max_analyses)
+      real*8 sens_AngResderivs(max_nSensBins+1,max_analyses)
+      real*8 sens_nusigma(max_nSensBins+1,max_analyses)
+      real*8 sens_nubarsigma(max_nSensBins+1,max_analyses)
+      real*8 sens_AngRessigma(max_nSensBins+1,max_analyses)
 
       real*8  BGangdist_phi(max_nBinsBGAng,max_analyses)
       real*8  BGangdist_prob(max_nBinsBGAng,max_analyses)
@@ -56,12 +52,12 @@
       real*8  BGeedist_sigma(max_nBinsBGE,max_analyses)
       integer FullSkyBG(max_analyses)
 
-      real*8  hist_logE(2,max_nHistograms,max_analyses)
-      real*8  hist_logEcentres(max_nHistograms,max_analyses)
-      integer hist_nchan(max_nHistograms,max_ncols,max_analyses)
-      real*8  hist_prob(max_nHistograms,max_ncols,max_analyses)
-      real*8  hist_derivs(max_nHistograms,max_ncols,max_analyses)
-      real*8  hist_sigma(max_nHistograms,max_ncols,max_analyses)
+      real*8  hist_logE(2,max_nHistograms+2,max_analyses)
+      real*8  hist_logEcentres(max_nHistograms+2,max_analyses)
+      integer hist_nchan(max_nHistograms+2,max_ncols,max_analyses)
+      real*8  hist_prob(max_nHistograms+2,max_ncols,max_analyses)
+      real*8  hist_derivs(max_nHistograms+2,max_ncols,max_analyses)
+      real*8  hist_sigma(max_nHistograms+2,max_ncols,max_analyses)
       integer nchan_hist2BGoffset(max_analyses)
 
       real*8  events_nchan(max_nEvents,max_analyses)
@@ -82,7 +78,20 @@
 
       real*8  thetashare, annrateshare, nchanshare
 
-      common /nulike_comm/ events_nchan, events_cosphi,
+      type(c_ptr) context_shared
+
+      abstract interface 
+        real*8 function nuyield_signature (log10E,ptype,context)
+          use iso_c_binding, only: c_ptr
+          real*8 log10E
+          integer ptype
+          type(c_ptr) context
+        end function nuyield_signature
+      end interface
+      procedure (nuyield_signature), pointer :: nuyield_ptr
+
+      common /nulike_comm/ context_shared, nuyield_ptr, 
+     & events_nchan, events_cosphi,
      & events_cosphiErr, sens_logE,sens_nu,theta_BG, BGeedist_prob,
      & sens_logEcentres, sens_nuderivs, sens_nubarderivs,
      & sens_AngResderivs, sens_nusigma, sens_nubarsigma,
@@ -96,7 +105,7 @@
      & precomp_sigma, precompEA_weights, precompEA_derivs, 
      & precompEA_sigma, ee_min, ee_max, nchanshare,
      & BGeedist_derivs, BGeedist_sigma,
-     & nBinsBGE, nBinsBGAng, nEvents, nEvents_in_file,
+     & nBinsBGE, nBinsBGAng, nEvents,
      & nSensBins, nPrecompE, nHistograms, nnchan_total,
      & nchan_hist2BGoffset, FullSkyBG,
      & pvalBGPoisComputed, sysErrDist_logNorm,
