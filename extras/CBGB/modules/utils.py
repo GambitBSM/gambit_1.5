@@ -128,17 +128,19 @@ def joinContinuedLines(code_lines):
             # (This assumes that len(line) >= 6 for all lines in code_lines,
             # which should be OK due to prior code formatting.)
 
-            # - If found, append to previous line.
             try:
+                # - If found, append to previous line.
                 if line[5] not in [' ','\t']:
                     joined_code_lines[-1] += line[6:]
+
+                # - If not found, store current_line and start constructing a new.
+                else:
+                    joined_code_lines.append(line)
+
             except:
                 print [line]
                 raise
             
-            # - If not found, store current_line and start constructing a new.
-            else:
-                joined_code_lines.append(line)
 
 
     elif cfg.format == 'free':
