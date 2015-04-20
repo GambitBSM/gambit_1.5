@@ -12,7 +12,7 @@
 ***                       dispersion function data.
 ***         like         likelihood version
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: April 8, 2011
 *** Modified: Jun 3, 7, 15 2014
 ***********************************************************************
@@ -20,18 +20,28 @@
       subroutine nulike_edispinit(filename, nhgms, nbins_ee,
      & min_ee, like)
 
+      use iso_c_binding, only: c_ptr
+
       implicit none
       include 'nulike_internal.h'
       include 'nuprep.h'
 
       character (len=*) filename
       character (len=20) instring
-      integer nhgms, nbins_ee(nhgms), dummyint, i, j, k
+      integer nhgms, nbins_ee(nhgms+2), dummyint, i, j, k
       integer like, IER
-      real*8  hist_ee_temp(max_nHistograms, max_ncols)
-      real*8  hist_prob_temp(max_nHistograms, max_ncols)
-      real*8  working(2*nHistograms(analysis)-2), min_ee
+      real*8  hist_ee_temp(max_nHistograms+2, max_ncols)
+      real*8  hist_prob_temp(max_nHistograms+2, max_ncols)
+      real*8  working(2*nhgms+2), min_ee
       real*8  working2(2*max_ncols-2)
+
+      !Increment the number of histograms by two, in order to allow for end-padding
+      nhgms = nhgms + 2
+      do i = nhgms-1, 2, -1
+        nbins_ee(i) = nbins_ee(i-1)
+      enddo
+      nbins_ee(nhgms) = nbins_ee(nhgms-1)
+      nbins_ee(1) = nbins_ee(2)
 
       !Read in ee response distribution for each incoming neutrino energy band
       open(lun,file=filename, ACTION='READ')
@@ -43,7 +53,7 @@
       enddo
 
       !Read actual data
-      do i = 1, nhgms
+      do i = 2, nhgms-1
         read(lun, *) instring, hist_logE(1,i,analysis), hist_logE(2,i,analysis)
         hist_logEcentres(i,analysis) = 0.5d0*(hist_logE(1,i,analysis)+
      &   hist_logE(2,i,analysis))
@@ -52,17 +62,35 @@
      &     hist_ee_temp(i,j), hist_prob_temp(i,j)
         enddo
         read(lun,*) instring
-        if (i .ne. nhgms) read(lun,*) instring
+        if (i .ne. nhgms-1) read(lun,*) instring
       enddo
 
+      !Close the data file
       close(lun)
 
+      !Fill in the end histograms
+      hist_logE(1,1,analysis) = hist_logE(1,2,analysis)
+      hist_logE(2,1,analysis) = hist_logE(1,2,analysis)
+      hist_logEcentres(1,analysis)  = hist_logE(1,2,analysis)
+      do j = 1, nbins_ee(1)
+        hist_ee_temp(1,j) = hist_ee_temp(2,j)
+        hist_prob_temp(1,j) = hist_prob_temp(2,j)
+      enddo
+      hist_logE(1,nhgms,analysis) = hist_logE(2,nhgms-1,analysis)
+      hist_logE(2,nhgms,analysis) = hist_logE(2,nhgms-1,analysis)
+      hist_logEcentres(nhgms,analysis)  = hist_logE(2,nhgms-1,analysis)
+      do j = 1, nbins_ee(nhgms)
+        hist_ee_temp(nhgms,j) = hist_ee_temp(nhgms-1,j)
+        hist_prob_temp(nhgms,j) = hist_prob_temp(nhgms-1,j)
+      enddo
 
       !Switch according to likelihood version.
       select case (like)
 
       !2012 likelihood, as per arXiv:1207.0810
       case (2012)
+
+        nHistograms(analysis) = nhgms
 
         !Arrange histograms so they all cover the same range in nchan
         hist_prob(:,:,analysis) = 0.d0
@@ -89,8 +117,8 @@
         !Set up interpolation in each nchan across energy histograms for use as energy dispersion estimator
         do i = 1, nnchan_total(analysis)
  
-          call TSPSI(nHistograms(analysis),hist_logEcentres(:,analysis),hist_prob(:,i,analysis),
-     &     2,0,.false.,.false.,2*nHistograms(analysis)-2,working,hist_derivs(:,i,analysis),
+          call TSPSI(nhgms,hist_logEcentres(:,analysis),hist_prob(:,i,analysis),
+     &     2,0,.false.,.false.,2*nhgms-2,working,hist_derivs(:,i,analysis),
      &     hist_sigma(:,i,analysis),IER)
           if (IER .lt. 0) then
             write(*,*) 'Error in nulike_edispinit: TSPSI failed with error'
@@ -106,7 +134,6 @@
         hist_ee_flip = transpose(hist_ee_temp)
         hist_prob_flip = transpose(hist_prob_temp)
         hist_logEnergies = hist_logEcentres(:,analysis)
-
 
         !Set up interpolation within each energy histogram, for later seeding of event-specific energy dispersion estimator
         do i = 1, nhgms

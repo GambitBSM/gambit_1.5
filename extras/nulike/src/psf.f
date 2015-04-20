@@ -16,11 +16,13 @@
 ***          
 *** Output:			PSF (degrees^-1)
 ***       
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: May 6, 2011
 ***********************************************************************
 
       real*8 function nulike_psf(phi_obs, phi_pred, sigma)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'

@@ -6,12 +6,14 @@
 ***          cosphimin    cosine(cutoff angle above which events will 
 ***                       be ignored)
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: April 8, 2011
 *** Modified: March 5, June 15 2014
 ***********************************************************************
 
       subroutine nulike_eventinit(filename, totalevents, cutevents, cosphimin, like)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
@@ -45,6 +47,14 @@
         !read in only events that have phi < phi_cut
         if (cosphi .gt. cosphimin) then
           cutevents = cutevents + 1
+          if (cutevents .gt. max_nEvents) then
+            write(*,*) 'Chosen angular cut includes more'
+            write(*,*) 'events than nulike has been configured to '
+            write(*,*) 'handle.  Increase max_nEvents in nuconst.h and' 
+            write(*,*) 'recompile.  You may need to reduce max_analyses'
+            write(*,*) 'to do this.'
+            stop
+          endif
           select case (like)
           case (2012)
             events_nchan(cutevents,analysis) = nint(ee)

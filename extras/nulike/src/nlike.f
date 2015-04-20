@@ -13,13 +13,15 @@
 ***		      
 *** output: ln(likelihood)  (dimensionless)
 ***       
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Apr 22, 2011, Jun 30, 2011, Jul 21, 2011
 *** Modified: Jun 6 2014
 ***********************************************************************
 
       real*8 function nulike_nlike(n_tot,theta_tot,theta_sig,sigma_eps,
      & tau)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
