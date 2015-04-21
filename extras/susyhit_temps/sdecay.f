@@ -98,6 +98,11 @@ c  file.]                                                              c
 c                                                                      c
 c cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc c
 
+      !Added by GAMBIT to make 100% sure 'unlikely' matches the fortran value.
+      double precision function s_hit_unlikely()
+      s_hit_unlikely = -123456789D0
+      end
+      
       subroutine sdecay(ifavvio_in) !Modified by GAMBIT
       
       implicit double precision (a-h,m,o-z)
