@@ -2,12 +2,14 @@
 *** nulike_bgpredinit calculates the expected number of background 
 *** counts, based on the background spectrum defined in nulike_bginit.
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: April 8, 2011
 *** Modified: Jun 3, 6 2014
 ***********************************************************************
 
       subroutine nulike_bgpredinit(cosphimax)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
