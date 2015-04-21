@@ -14,12 +14,14 @@
 ***                                  eventnum > 0 => weighting for event
 ***                                   eventnum (m^2 chan^-1 degrees^-1 )
 ***
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Jun 8, 2014
 ***********************************************************************
 
 
       real*8 function nulike_tabulated_weight(log10E,ptype,eventnum)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
@@ -40,6 +42,13 @@
 
       else
 
+        !If this event is just impossible for a signal to produce (e.g. it has ee where the probability
+        !of getting this ee from signal is zero), then just return zero.
+        if (all(precomp_weights(:,eventnum,ptype,analysis) - logZero .le. epsilon(logZero))) then
+          nulike_tabulated_weight = 0.d0
+          return
+        endif
+          
         !Call interpolator for this event to get weight for this energy
         call TSVAL1(nPrecompE(analysis),precomp_log10E(:,analysis),
      &   precomp_weights(:,eventnum,ptype,analysis),

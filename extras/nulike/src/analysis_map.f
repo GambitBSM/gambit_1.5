@@ -5,11 +5,13 @@
 *** input:  analysis_name  name of the analysis
 *** output:                index of the analysis
 ***       
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Jun 6, 2014
 ***********************************************************************
 
       integer function nulike_amap(analysis_name)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
