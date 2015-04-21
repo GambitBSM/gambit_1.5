@@ -1,6 +1,19 @@
 
 namespace Gambit
 {
+    struct susyhitin_type
+    {
+        Fdouble flagshsin;
+        Fdouble amsin;
+        Fdouble amcin;
+        Fdouble ammuonin;
+        Fdouble alphin;
+        Fdouble gamwin;
+        Fdouble gamzin;
+        Fdouble vusin;
+        Fdouble vcbin;
+        Fdouble rvubin;
+    };
     struct widtha_hdec_type
     {
         Fdouble abrb;

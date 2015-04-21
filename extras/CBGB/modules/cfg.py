@@ -30,7 +30,7 @@ load_common_blocks = ['WIDTHA_HDEC', 'WIDTHHL_HDEC', 'WIDTHHH_HDEC',
                       'SD_sbotwidth', 'SD_sel2body', 'SD_selwidth', 
                       'SD_snel2body', 'SD_snelwidth', 'SD_stau2body', 
                       'SD_stau2bodygrav', 'SD_stauwidth', 'SD_sntau2body', 
-                      'SD_sntauwidth', 'SD_top2body', 'SD_topwidth']
+                      'SD_sntauwidth', 'SD_top2body', 'SD_topwidth', 'SUSYHITIN']
 
 
 # Convert tabs to how many spaces?
