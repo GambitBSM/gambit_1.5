@@ -10,11 +10,13 @@
 ***         nenergies    number of energies for which partial likelihoods
 ***                       are to be read in for each event.
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Jun 15 2014
 ***********************************************************************
 
       subroutine nulike_specanginit(dirname, n_events, phi_cut, n_energies)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
@@ -58,7 +60,7 @@
      & 2,0,.false.,.false.,2*n_energies-2,working,precompEA_derivs(:,1,analysis),
      & precompEA_sigma(:,1,analysis),IER)
       if (IER .lt. 0) then
-        write(*,*) 'Error in nulike_specang: TSPSI failed with error'
+        write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
         write(*,*) 'code',IER,' in setting up neutrino effective area.'
         stop
       endif
@@ -68,7 +70,7 @@
      & 2,0,.false.,.false.,2*n_energies-2,working,precompEA_derivs(:,2,analysis),
      & precompEA_sigma(:,2,analysis),IER)
       if (IER .lt. 0) then
-        write(*,*) 'Error in nulike_specang: TSPSI failed with error'
+        write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
         write(*,*) 'code',IER,' in setting up nubar effective area.'
         stop
       endif
@@ -77,7 +79,7 @@
       do i = 1, n_events
 
         !Open and read in from the event file
-        write(eventstring,fmt=evnmshrfmt(eventnumshare)) i
+        write(eventstring,fmt=evnmshrfmt(i)) i
         precomp_weights(1:n_energies,i,:,analysis) = 
      &   nulike_read_weights(lun, trim(dirname)//'/partlike_event'//trim(eventstring)//'.dat', n_energies)
 
@@ -86,7 +88,7 @@
      &   2,0,.false.,.false.,2*n_energies-2,working,precomp_derivs(:,i,1,analysis),
      &   precomp_sigma(:,i,1,analysis),IER)
         if (IER .lt. 0) then
-          write(*,*) 'Error in nulike_specang: TSPSI failed with error'
+          write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
           write(*,*) 'code',IER,' in setting up neutrino effective area.'
           stop
         endif
@@ -96,7 +98,7 @@
      &   2,0,.false.,.false.,2*n_energies-2,working,precomp_derivs(:,i,2,analysis),
      &   precomp_sigma(:,i,2,analysis),IER)
         if (IER .lt. 0) then
-          write(*,*) 'Error in nulike_specang: TSPSI failed with error'
+          write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
           write(*,*) 'code',IER,' in setting up neutrino effective area.'
           stop
         endif
@@ -108,6 +110,8 @@
  
       !Does the reading-in of the weights from a binary file created by nulike_partials  
       function nulike_read_weights(local_lun, filename, n_energies)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
