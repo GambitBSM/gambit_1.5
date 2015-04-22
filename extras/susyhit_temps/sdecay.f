@@ -103,10 +103,9 @@ c cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc c
       s_hit_unlikely = -123456789D0
       end
       
-      subroutine sdecay(ifavvio_in) !Modified by GAMBIT
+      subroutine sdecay               !Modified by GAMBIT.
       
       implicit double precision (a-h,m,o-z)
-      integer ifavvio_in            !Added by GAMBIT
       double precision neutwchar,neutzneut,neuthcchar,neuthlneut,
      .       neuthhneut,neuthaneut,neutsell,neutselr,
      .       neutstau1,neutstau2,neutsn1,neutsn2,neutst1,neutst2,
@@ -519,7 +518,7 @@ c----- if iflag3bod2bod=2 2 body decay stop-> top neutralino above threshold
        flagdiff2bod3bod=30d0
 c----- end ramona added
 
-      if (.false.) then    !Added by GAMBIT.
+      if (.false.) then               !Added by GAMBIT.
 
       open(ninshs,file='susyhit.in',status='unknown')
 
@@ -562,14 +561,13 @@ c-----ramona chnaged 7/6/13
       flagshsin=2d0
       endif
 
-      else                 !Added by GAMBIT.
+      else                            !Added by GAMBIT.
 
-        flagshsin=2d0      !Added by GAMBIT.
-        flagoutput=2d0     !Added by GAMBIT.
-        ifavvio=ifavvio_in !Added by GAMBIT.
-        i4bod=1            !Added by GAMBIT.
+        flagshsin=0d0                 !Added by GAMBIT.
+        flagoutput=2d0                !Added by GAMBIT.
+        i4bod=1                       !Added by GAMBIT.
         
-      endif                !Added by GAMBIT.
+      endif                           !Added by GAMBIT.
 
 c---- end ramona chnaged
 c -- The following flags are not read in any more but hard-coded for - c
@@ -2548,7 +2546,7 @@ c                          The output file                             c
 c ==================================================================== c
 c -------------------------------------------------------------------- c
 
-      if(flagoutput.eq.1.D0) then !Modified by GAMBIT
+      if(flagoutput.eq.1.D0) then     !Modified by GAMBIT.
 
 c ------------------ output a la Les Houches accord ------------------ c
 
@@ -8406,7 +8404,7 @@ c      write(nout,102) bhcgd(2),2,ic2,igrav ,'BR(H+ -> ~chi_2+ ~G     )'
 
 c ---------------- output not a la Les Houches accord ---------------- c
 
-      elseif(flagoutput.eq.0.D0) then !Modified by GAMBIT
+      elseif(flagoutput.eq.0.D0) then !Modified by GAMBIT.
 
       write(21,*)
       write(21,*) "                              ======================"
@@ -12204,7 +12202,7 @@ c -- mb(mb)_MSbar --
          call SD_runmbmb(amzp,runmbz)
       endif
 
-      if(flagshsin.eq.1.D0) then
+      if(flagshsin.le.1.D0) then      !Modified by GAMBIT.
          samb = massval(34)
       endif
 
