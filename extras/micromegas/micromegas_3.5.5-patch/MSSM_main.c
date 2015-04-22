@@ -387,7 +387,10 @@ if(omegaCh){
   double SpNe[NZ],SpNm[NZ],SpNl[NZ];  
 //  double * SpNe=NULL,*SpNm=NULL,*SpNl=NULL;
   double Etest=Mcdm/2;
- 
+
+  readSpectra();
+  mInterp(3., 3, 3, SpP);
+
 /* default DarkSUSY parameters */
 
 /*
