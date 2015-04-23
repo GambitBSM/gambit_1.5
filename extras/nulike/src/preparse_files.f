@@ -2,7 +2,7 @@
 *** These routines pre-parse various data files and return basic info
 *** about them.
 ***
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: June 15 2014
 ***********************************************************************
 
@@ -17,9 +17,9 @@
       integer nevents, like, IFAIL, i
       real*8 exp_time
 
-      open(lun,file=eventfile,IOSTAT=IFAIL, ACTION='READ')
+      open(lun, file=eventfile, IOSTAT=IFAIL, ACTION='READ', STATUS='OLD')
       if (IFAIL .ne. 0) then
-        write(*,*) 'Error opening IC event file. ',eventfile,'.'
+        write(*,*) 'Error opening IC event file: ',trim(eventfile),'.'
         write(*,*) 'Quitting...'
         stop
       endif 
@@ -32,7 +32,7 @@
       read(lun, fmt=*) instring, instring2
 
       if (instring .ne. '[v]') then
-        write(*,*) 'Bad format in neutrino telescope event file ',eventfile,'.'
+        write(*,*) 'Bad format in neutrino telescope event file: ',trim(eventfile),'.'
         write(*,*) 'First non-comment line begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -47,7 +47,7 @@
       read(lun, fmt=*) instring, instring2
 
       if (instring(1:3) .ne. '[t]') then
-        write(*,*) 'Bad format in neutrino telescope event file ',eventfile,'.'
+        write(*,*) 'Bad format in neutrino telescope event file: ',trim(eventfile),'.'
         write(*,*) 'Second non-comment line begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -61,7 +61,7 @@
           read(lun, fmt=*, IOSTAT=IFAIL, END=30), instring
         enddo
         if (IFAIL .ne. 0) then
-         write(*,*) 'Bad format in neutrino telescope event file.',eventfile,'.'
+         write(*,*) 'Bad format in neutrino telescope event file: ',trim(eventfile),'.'
          write(*,*) 'Quitting...'
          stop
         endif
@@ -70,14 +70,6 @@
 
 30    close(lun)
       
-      if (nevents .gt. max_nEvents) then
-        write(*,*) 'Event file '//trim(eventfile)//' contains more'
-        write(*,*) 'events than nulike has been configured to '
-        write(*,*) 'handle.  Increase max_nEvents in nucommon.h and' 
-        write(*,*) 'recompile.'
-        stop
-      endif
-
       end subroutine nulike_preparse_eventfile
 
 
@@ -92,9 +84,9 @@
       integer nbins_ang, nbins_E, nbins_run
       integer first, second, current, altind(2), IFAIL, i
 
-      open(lun,file=BGfile,IOSTAT=IFAIL, ACTION='READ')
+      open(lun,file=BGfile,IOSTAT=IFAIL, ACTION='READ', STATUS='OLD')
       if (IFAIL .ne. 0) then
-        write(*,*) 'Error opening neutrino telescope background file. ',BGfile,'.'
+        write(*,*) 'Error opening neutrino telescope background file: ',trim(BGfile),'.'
         write(*,*) 'Quitting...'
         stop
       endif 
@@ -131,7 +123,7 @@
         if (current .ne. events) read(lun, fmt=*, IOSTAT=IFAIL, END=20), instring
    
         if (IFAIL .ne. 0) then
-         write(*,*) 'Bad format in neutrino telescope background file ',BGfile,'.'
+         write(*,*) 'Bad format in neutrino telescope background file: ',BGfile,'.'
          write(*,*) 'Quitting...'
          stop
         endif
@@ -149,7 +141,7 @@
         write(*,*) 'Background file contains more data than'
         write(*,*) 'nulike has been configured to handle.'
         write(*,*) 'Increase max_nBinsBGE or max_nBinsBGAng'
-        write(*,*) 'in nucommon.h and recompile.'
+        write(*,*) 'in nuconst.h and recompile.'
         stop
       endif
 
@@ -167,9 +159,9 @@
       integer nbins, like, IFAIL, i
       real*8 rho
 
-      open(lun,file=fname,IOSTAT=IFAIL, ACTION='READ')
+      open(lun, file=fname, IOSTAT=IFAIL, ACTION='READ', STATUS='OLD')
       if (IFAIL .ne. 0) then
-        write(*,*) 'Error opening effective area/volume file. ',fname,'.'
+        write(*,*) 'Error opening effective area/volume file: ',trim(fname),'.'
         write(*,*) 'Quitting...'
         stop
       endif
@@ -182,7 +174,7 @@
       if (instring .eq. '###--Density--') then
         read(lun, fmt=*) instring, instring2 
         if (instring .ne. 'rho') then
-          write(*,*) 'Bad format in effective area/volume file ',fname,'.'
+          write(*,*) 'Bad format in effective area/volume file: ',trim(fname),'.'
           write(*,*) 'First line in density section begins with: ',instring
           write(*,*) 'Quitting...'
           stop
@@ -196,7 +188,7 @@
       endif
       
       if (instring(1:1) .ne. 'B') then
-        write(*,*) 'Bad format in effective area/volume file ',fname,'.'
+        write(*,*) 'Bad format in effective area/volume file: ',trim(fname),'.'
         write(*,*) 'First line in response section begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -209,7 +201,7 @@
         enddo
         read(lun, fmt=*, IOSTAT=IFAIL, END=10) instring
         if (IFAIL .ne. 0) then
-          write(*,*) 'Bad format in effective area/volume file ',fname,'.'
+          write(*,*) 'Bad format in effective area/volume file: ',trim(fname),'.'
           write(*,*) 'Quitting...'
           stop
         endif
@@ -223,7 +215,7 @@
       if (nbins .gt. max_nSensBins) then
         write(*,*) 'Effective area/volume file contains more bins than'
         write(*,*) 'nulike has been configured to handle.'
-        write(*,*) 'Increase max_nSensBins in nucommon.h and' 
+        write(*,*) 'Increase max_nSensBins in nuconst.h and' 
         write(*,*) 'recompile.'
         stop
       endif
@@ -239,14 +231,14 @@
       include 'nucommon.h'
       character (len=*) edispfile
       character (len=30) instring, instring2
-      integer nhist, ncol(max_nHistograms), like, IFAIL, dummy
+      integer nhist, ncol(max_nHistograms+2), like, IFAIL, dummy
       real*8 ee, ee_max, ee_min
 
-      open(lun,file=edispfile,IOSTAT=IFAIL, ACTION='READ')
+      open(lun, file=edispfile, IOSTAT=IFAIL, ACTION='READ', STATUS='OLD')
       if (IFAIL .ne. 0) then
         write(*,*) 'Error opening distribution file of'
-        write(*,*) 'neutrino telescope energy estimator'
-        write(*,*) edispfile,'. Quitting...'
+        write(*,*) 'neutrino telescope energy estimator:'
+        write(*,*) trim(edispfile),'. Quitting...'
         stop
       endif
 
@@ -257,8 +249,8 @@
 
       if (instring .ne. 'H') then
         write(*,*) 'Bad format in distribution file of'
-        write(*,*) 'neutrino telescope energy estimator'
-        write(*,*) edispfile,'.'
+        write(*,*) 'neutrino telescope energy estimator:'
+        write(*,*) trim(edispfile),'.'
         write(*,*) 'First non-comment line begins with: ',instring
         write(*,*) 'Quitting...'
         stop
@@ -284,8 +276,8 @@
         endif     
 
         if (IFAIL .ne. 0) then
-          write(*,*) 'Bad format in energy dispersion histogram file'
-          write(*,*) edispfile,'.'
+          write(*,*) 'Bad format in energy dispersion histogram file:'
+          write(*,*) trim(edispfile),'.'
           write(*,*) 'Quitting...'
           stop
         endif
@@ -298,7 +290,7 @@
         write(*,*) 'Neutrino telescope energy dispersion histogram'
         write(*,*) 'file contains more histograms than nulike has'
         write(*,*) 'been configured to handle. Increase '
-        write(*,*) 'max_nHistograms in nucommon.h and recompile.'
+        write(*,*) 'max_nHistograms in nuconst.h and recompile.'
         stop
       endif
 
@@ -310,7 +302,7 @@
         write(*,*) 'Neutrino telescope energy dispersion histogram'
         write(*,*) 'file contains more energy estimator values'
         write(*,*) 'than nulike has been configured to handle.' 
-        write(*,*) 'Increase max_ncols in nucommon.h and recompile.'
+        write(*,*) 'Increase max_ncols in nuconst.h and recompile.'
         stop
       endif
 

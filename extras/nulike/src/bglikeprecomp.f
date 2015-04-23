@@ -2,12 +2,14 @@
 *** nulike_bglikeprecomp calls the calculation of the p-value for the
 *** background in IceCube calculations based on Poissonian statistics.
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: May, Jul, 2011
 *** Modified: Jun 3, 7 2014 
 ***********************************************************************
 
       subroutine nulike_bglikeprecomp
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'

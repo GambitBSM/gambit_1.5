@@ -13,13 +13,15 @@
 ***                          estimator or number of events).
 ***                          See nucommon.h for the key.
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: April 8, 2011
 *** Modified: Jun 6, 2014
 ***********************************************************************
 
       subroutine nulike_bginit(filename, nbins_angular, nbins_ee, 
      & first, second, like)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
@@ -68,8 +70,7 @@
             read(lun, *) instring, dummyfloat1, dummyfloat2
             if (indices(i).eq.angular) then
               !Read in observed angular distribution of background events
-              if (like .eq. 2012) BGangdist_phi_temp(j) = dummyfloat1
-              if (like .eq. 2014) BGangdist_phi_temp(j) = dummyfloat1-1 !FIXME this is a hack!!
+              BGangdist_phi_temp(j) = dummyfloat1
               BGangdist_prob_temp(j) = dummyfloat2
             else
               !Read in observed distribution of energy estimators (e.g. nchan)

@@ -8,12 +8,14 @@
 *** Input:	log10E	        log(neutrino energy/GeV)
 *** Output:			39.3% containment ang resolution (degrees)
 ***       
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Apr 24, 2011
 *** Modified: Jun 6, 2014
 ***********************************************************************
 
       real*8 function nulike_angres(log10E)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'

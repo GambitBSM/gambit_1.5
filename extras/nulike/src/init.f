@@ -45,7 +45,7 @@
 ***                      p-value for each model when nulike_bounds is called
 ***                      with pvalFromRef = F.     
 ***        
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Mar 20, 2011
 *** Modified: Mar, Jun 2014
 ***********************************************************************
@@ -55,12 +55,14 @@
      & file3, nchandistfile, phi_cut, theoryError, uselogNorm, 
      & BGLikePrecompute)
 
+      use iso_c_binding, only: c_ptr
+
       implicit none
       include 'nulike_internal.h'
 
       character (len=nulike_clen) analysis_name, eventfile, BGfile, file3, nchandistfile
-      integer nnchan(max_nHistograms), nAnalyses
-      integer BGfirst, BGsecond, nulike_amap
+      integer nnchan(max_nHistograms+2), nAnalyses
+      integer BGfirst, BGsecond, nulike_amap, nbins, nhist, nEvents_available
       real*8 phi_cut, theoryError, cosphimax, dummy
       logical BGLikePrecompute, uselogNorm
       external nulike_amap
@@ -95,7 +97,7 @@
       theoryErr(analysis) = theoryError
     
       !Open event file, determine the total number of events and likelihood version
-      call nulike_preparse_eventfile(eventfile, nEvents_in_file(analysis), exp_time(analysis), likelihood_version(analysis))
+      call nulike_preparse_eventfile(eventfile, nEvents_available, exp_time(analysis), likelihood_version(analysis))
 
       !Open background file, determine numbers of bins for angular 
       !and nchan distributions, and which comes first
@@ -113,13 +115,13 @@
         cosphimax = dcos(phi_cut*pi/180.d0)
 
         !Open neutrino effective area file and determine number of bins
-        call nulike_preparse_effarea_or_volume(file3,nSensBins(analysis), dummy, 2012)
+        call nulike_preparse_effarea_or_volume(file3, nbins, dummy, 2012)
         !Read in the actual effective area and PSF data.
-        call nulike_sensinit(file3,nSensBins(analysis))
+        call nulike_sensinit(file3, nbins)
 
         !Open file of nchan response histograms (energy dispersions), determine how many histograms
         !and how many bins in each histogram.
-        call nulike_preparse_energy_dispersion(nchandistfile, nHistograms(analysis), nnchan, 
+        call nulike_preparse_energy_dispersion(nchandistfile, nhist, nnchan, 
      &   ee_min(analysis), ee_max(analysis), 2012)
         nnchan_total(analysis) = nint(ee_max(analysis) - ee_max(analysis)) + 1
       
@@ -127,7 +129,7 @@
         call nulike_bginit(BGfile, nBinsBGAng(analysis), nBinsBGE(analysis), BGfirst, BGsecond, 2012)
 
         !Read in the actual nchan response histograms and rearrange them into energy dispersion estimators
-        call nulike_edispinit(nchandistfile, nHistograms(analysis), nnchan, ee_min(analysis), 2012)
+        call nulike_edispinit(nchandistfile, nhist, nnchan, ee_min(analysis), 2012)
 
       !2014 likelihood, as per arXiv:141x.xxxx (load the precalculated effective area and partial likelihoods.)
       case (2014)
@@ -147,7 +149,7 @@
       end select
 
       !Read in the actual details of all events.
-      call nulike_eventinit(eventfile, nEvents_in_file(analysis), nEvents(analysis), cosphimax, likelihood_version(analysis))
+      call nulike_eventinit(eventfile, nEvents_available, nEvents(analysis), cosphimax, likelihood_version(analysis))
 
       !Calculate the expected background count.
       call nulike_bgpredinit(cosphimax)
