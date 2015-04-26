@@ -8,7 +8,8 @@
 
 
 # Set path to source file:
-src_file_path = 'example/sdecay.f'
+#src_file_path = 'example/sdecay.f'
+src_file_path = '../susyhit_temps/hdecay.f'
 
 
 # Choose 'fixed' or 'free' format:
@@ -32,7 +33,8 @@ load_common_blocks = ['WIDTHA_HDEC', 'WIDTHHL_HDEC', 'WIDTHHH_HDEC',
                       'SD_stau2bodygrav', 'SD_stauwidth', 'SD_sntau2body', 
                       'SD_sntauwidth', 'SD_top2body', 'SD_topwidth', 
                       'SUSYHITIN', 'SD_leshouches1', 'SD_leshouches2',
-                      'SD_mbmb', 'flavviolation', 'SD_selectron']
+                      'SD_mbmb', 'flavviolation', 'SD_selectron',
+                      'SLHA_leshouches1_HDEC', 'SLHA_leshouches2_HDEC']
 
 
 # Convert tabs to how many spaces?
