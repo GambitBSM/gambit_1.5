@@ -7,12 +7,14 @@
 ***         theta_sig   predicted number of signal events
 *** output:           p value
 ***
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: May, June, July, Dec 2011
 *** Modified: Jun 3, 6 2014
 ***********************************************************************
 
       double precision function nulike_pval(ntot,theta_tot,theta_sig)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
