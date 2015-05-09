@@ -23,6 +23,8 @@ MODEL=SingletDM
 # distributions is it "-lX11" I believe
 X11="-L/usr/X11R6/lib -lX11"
 
+ROOT=$PWD
+
 mkdir ./so_tmp
 cd so_tmp
 ar -x ../../sources/micromegas.a
@@ -31,7 +33,7 @@ ar -x ../../sources/micromegas.a
 rm *Fort.o fortran.o
 
 # And now, build the shared library:
-$CXX -shared -o libmicromegas$MODEL.so *.o ../../CalcHEP_src/lib/sqme_aux.so ../work/work_aux.a ../../CalcHEP_src/lib/dynamic_me.a ../lib/aLib.a ../../CalcHEP_src/lib/libSLHAplus.a ../../CalcHEP_src/lib/ntools.a ../../CalcHEP_src/lib/num_c.a ../../CalcHEP_src/lib/serv.a $X11
+$CXX -shared -o libmicromegas$MODEL.so *.o $ROOT/../CalcHEP_src/lib/sqme_aux.so ../work/work_aux.a ../../CalcHEP_src/lib/dynamic_me.a ../lib/aLib.a ../../CalcHEP_src/lib/libSLHAplus.a ../../CalcHEP_src/lib/ntools.a ../../CalcHEP_src/lib/num_c.a ../../CalcHEP_src/lib/serv.a $X11
 
 # Move the shared object to the MODEL/lib directory and clean
 # up the mess.
