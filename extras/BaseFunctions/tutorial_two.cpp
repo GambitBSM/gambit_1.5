@@ -1,4 +1,4 @@
-#include "funktions2.hpp"
+#include "../../modules/Elements/include/gambit/Elements/funktions.hpp"
 // Compile with: 
 //   g++ tutorial.cpp -lgsl -lblas -std=c++11
 
