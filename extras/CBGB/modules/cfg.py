@@ -18,7 +18,7 @@ format = 'fixed'
 
 
 # List the common blocks to be loaded:
-load_common_blocks = ['mscptm']
+load_common_blocks = ['mspctm']
 
 
 # Convert tabs to how many spaces?
