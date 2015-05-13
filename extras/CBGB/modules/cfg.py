@@ -8,13 +8,9 @@
 
 
 # Set path to source file:
-<<<<<<< HEAD
-src_file_path = '../susyhit_temps/sdecay.f'
-=======
 #src_file_path = 'example/sdecay.f'
 src_file_path = 'example/dsmssm.h'
 #src_file_path = '../susyhit_temps/hdecay.f'
->>>>>>> master
 
 
 # Choose 'fixed' or 'free' format:
@@ -22,7 +18,10 @@ format = 'fixed'
 
 
 # List the common blocks to be loaded:
-load_common_blocks = ['mspctm']
+load_common_blocks = ['mspctm','pacodes','widths','intdof','vrtxs',
+                      'smruseful','smcuseful','couplingconstants','sckm',
+                      'mixing','mssmtype','mssmpar','mssmswitch',
+                      'sfermionmass','mssmwidths','mssmmixing']
 
 
 # Convert tabs to how many spaces?
