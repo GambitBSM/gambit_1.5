@@ -21,7 +21,7 @@ format = 'fixed'
 load_common_blocks = ['mspctm','pacodes','widths','intdof','vrtxs',
                       'smruseful','smcuseful','couplingconstants','sckm',
                       'mixing','mssmtype','mssmpar','mssmswitch',
-                      'sfermionmass','mssmwidths','mssmmixing',]
+                      'sfermionmass','mssmwidths','mssmmixing']
 
 
 # Convert tabs to how many spaces?
