@@ -8,8 +8,7 @@
 
 
 # Set path to source file:
-src_file_path = 'example/sdecay.f'
-#src_file_path = '../susyhit_temps/hdecay.f'
+src_file_path = '../susyhit_temps/sdecay.f'
 
 
 # Choose 'fixed' or 'free' format:

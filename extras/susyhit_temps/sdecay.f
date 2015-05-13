@@ -103,7 +103,7 @@ c cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc c
       s_hit_unlikely = -123456789D0
       end
       
-      subroutine sdecay               !Modified by GAMBIT.
+      subroutine sdecay                          !Modified by GAMBIT.
       
       implicit double precision (a-h,m,o-z)
       double precision neutwchar,neutzneut,neuthcchar,neuthlneut,
@@ -453,7 +453,7 @@ c -- useful when SDECAY is linked to other programs. ----------------- c
       COMMON/SD_stoploop/brgamma,brgammaup,brgammagluino
       COMMON/SD_stop4body/brgamma4bod,brgammaup4bod,brgammagluino4bod,
      .          br4bodoffshelltau
-      COMMON/SD_stopwidth/stoptot4
+      COMMON/SD_stopwidth/stoptot4,stoptot       !Modified by GAMBIT
       COMMON/SD_sbot2body/brsb1neutt,brsb2neutt,brsb1chart,brsb2chart,
      .          brsb1hcst,brsb2hcst,brsb1wst,brsb2wst,brsb1glui,
      .          brsb2glui,brsb2hl,brsb2hh,brsb2ha,brsb2zbot
@@ -518,7 +518,7 @@ c----- if iflag3bod2bod=2 2 body decay stop-> top neutralino above threshold
        flagdiff2bod3bod=30d0
 c----- end ramona added
 
-      if (.false.) then               !Added by GAMBIT.
+      if (.false.) then                          !Added by GAMBIT.
 
       open(ninshs,file='susyhit.in',status='unknown')
 
@@ -561,13 +561,13 @@ c-----ramona chnaged 7/6/13
       flagshsin=2d0
       endif
 
-      else                            !Added by GAMBIT.
+      else                                       !Added by GAMBIT.
 
-        flagshsin=0d0                 !Added by GAMBIT.
-        flagoutput=2d0                !Added by GAMBIT.
-        i4bod=1                       !Added by GAMBIT.
+        flagshsin=0d0                            !Added by GAMBIT.
+        flagoutput=2d0                           !Added by GAMBIT.
+        i4bod=1                                  !Added by GAMBIT.
         
-      endif                           !Added by GAMBIT.
+      endif                                      !Added by GAMBIT.
 
 c---- end ramona chnaged
 c -- The following flags are not read in any more but hard-coded for - c
@@ -2546,7 +2546,7 @@ c                          The output file                             c
 c ==================================================================== c
 c -------------------------------------------------------------------- c
 
-      if(flagoutput.eq.1.D0) then     !Modified by GAMBIT.
+      if(flagoutput.eq.1.D0) then                !Modified by GAMBIT.
 
 c ------------------ output a la Les Houches accord ------------------ c
 
@@ -8404,7 +8404,7 @@ c      write(nout,102) bhcgd(2),2,ic2,igrav ,'BR(H+ -> ~chi_2+ ~G     )'
 
 c ---------------- output not a la Les Houches accord ---------------- c
 
-      elseif(flagoutput.eq.0.D0) then !Modified by GAMBIT.
+      elseif(flagoutput.eq.0.D0) then            !Modified by GAMBIT.
 
       write(21,*)
       write(21,*) "                              ======================"
@@ -12202,7 +12202,7 @@ c -- mb(mb)_MSbar --
          call SD_runmbmb(amzp,runmbz)
       endif
 
-      if(flagshsin.le.1.D0) then      !Modified by GAMBIT.
+      if(flagshsin.le.1.D0) then                 !Modified by GAMBIT.
          samb = massval(34)
       endif
 

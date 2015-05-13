@@ -166,7 +166,7 @@ c end change susyhit
       COMMON/SLHA_vals_HDEC/islhai,islhao
 
       CALL READ_HDEC(TGBET,AMABEG,AMAEND,NMA)
-      if(islhao.eq.0) then                    !Modified by GAMBIT
+      if(islhao.eq.0) then                       !Modified by GAMBIT
          CALL HEAD_HDEC(TGBET,AMABEG)
       endif
 
@@ -184,7 +184,7 @@ c       CALL WRITE_HDEC(TGBET)
 c end change susyhit
  9999  CONTINUE
 
-      if(islhao.eq.0) CALL CLOSE_HDEC         !Modified by GAMBIT
+      if(islhao.eq.0) CALL CLOSE_HDEC            !Modified by GAMBIT
 
 c change susyhit
 c      STOP
@@ -329,8 +329,8 @@ c -- given by the slhaspectrum.in file --
 c -- parameters to be defined which are not given by the --
 c -- slhaspectrum.in file --
 
-      islhai  = 2                        !Modified by GAMBIT
-      islhao  = 2                        !Modified by GAMBIT
+      islhai  = 2                                !Modified by GAMBIT
+      islhao  = 2                                !Modified by GAMBIT
       ihiggs  = 5
       imodel  = 1
       nnlo    = 1
@@ -352,13 +352,13 @@ c -- initialization of the check array --
          check(i1) = 0
       end do
 
-      if(islhai.ge.1) then              !Added by GAMBIT
+      if(islhai.ge.1) then                       !Added by GAMBIT
         if(islhai.eq.1) then
 c change susyhit
          open(ninlha,file='slhaspectrum.in')
 c end change susyhit
          call SLHA_read_leshouches_HDEC(ninlha)
-        endif                           !Added by GAMBIT
+        endif                                    !Added by GAMBIT
 
 c -- G_F --
          if(smval(2).ne.0.D0) then
@@ -2347,7 +2347,7 @@ c ----------------------------- c
 
        close(nout)
 
-      elseif (islhao .eq. 0) then                 !Modified by GAMBIT
+      elseif (islhao .eq. 0) then                !Modified by GAMBIT
 
       IF(IHIGGS.EQ.0)THEN
       WRITE(NSA,20)AMSM,SMBRB,SMBRL,SMBRM,SMBRS,SMBRC,SMBRT
