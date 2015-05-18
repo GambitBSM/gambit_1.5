@@ -27,7 +27,7 @@ const int    ResonanceDecays::NTRYCHANNEL = 10;
 const int    ResonanceDecays::NTRYMASSES  = 10000;
 
 // Mass above threshold for allowed decays.
-const double ResonanceDecays::MSAFETY     = 0.1;
+const double ResonanceDecays::MSAFETY     = 0.01;
 
 // When constrainted kinematics cut high-mass tail of Breit-Wigner.
 const double ResonanceDecays::WIDTHCUT    = 5.;
