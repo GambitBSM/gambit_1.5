@@ -1,5 +1,5 @@
 // SigmaSUSY.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -10,7 +10,7 @@
 #include "Pythia8/SigmaSUSY.h"
 
 namespace Pythia8 {
-  
+
 //==========================================================================
 
 // Sigma2SUSY
@@ -33,8 +33,11 @@ double Sigma2SUSY::weightDecay( Event& process, int iResBeg, int iResEnd) {
   if (idMother == 6)
     return weightTopDecay( process, iResBeg, iResEnd);
 
+  //cout << "MJWCHECK susyresonance:3bodymatrixelement " << settingsPtr->lowerCaseFlag("susyresonance:3bodymatrixelement") << " susy:qq2squarksquark:onlyqcd " << settingsPtr->lowerCaseFlag("susy:qq2squarksquark:onlyqcd") << endl;
+
   // For Neutralino(i) decay hand over to standard routine.
-  if ( settingsPtr->flag("SUSYResonance:3BodyMatrixElement")
+  // MJW hardcode
+  if ( false
     && (idMother == 1000023 || idMother == 1000025 || idMother == 1000035) ) {
 
     // Nj -> Ni f fbar
@@ -65,7 +68,7 @@ double Sigma2SUSY::weightDecay( Event& process, int iResBeg, int iResEnd) {
         case 1000025: iddau = 3; break;
       }
       if( idmo<0 || iddau<0 ) return(1.0);
-      
+
       Sigma2qqbar2chi0chi0 localDecay(idmo,iddau,0);
       localDecay.init(infoPtr, settingsPtr, particleDataPtr,NULL,NULL,
                       NULL,couplingsPtr);
@@ -106,12 +109,12 @@ double Sigma2SUSY::weightDecay( Event& process, int iResBeg, int iResEnd) {
       return(wt/wtmax);
     }
   }
-  
+
   // Else done.
   return 1.;
 
 }
-  
+
 //==========================================================================
 
 // Sigma2qqbar2chi0chi0
@@ -120,7 +123,7 @@ double Sigma2SUSY::weightDecay( Event& process, int iResBeg, int iResEnd) {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2chi0chi0::initProc() {
 
   //Typecast to the correct couplings
@@ -166,14 +169,14 @@ double Sigma2qqbar2chi0chi0::sigmaHat() {
   if (id1*id2 >= 0) {
     return 0.0;
   }
-  
+
   // Only allow incoming states with sum(charge) = 0
   if ((id1+id2) % 2 != 0) {
     return 0.0;
   }
 
   if(id1<0) swapTU = true;
-  
+
   // Shorthands
   int idAbs1    = abs(id1);
   int idAbs2    = abs(id2);
@@ -184,7 +187,7 @@ double Sigma2qqbar2chi0chi0::sigmaHat() {
 
   double *LqqZloc;
   double *RqqZloc;
- 
+
   int iAdd=0;
 
   if( idAbs1 > 10 && idAbs1 < 17 ) {
@@ -240,7 +243,7 @@ double Sigma2qqbar2chi0chi0::sigmaHat() {
     double msq2    = pow(particleDataPtr->m0(idsq),2);
     double usq     = uH - msq2;
     double tsq     = tH - msq2;
-    
+
     complex Lsqq1X3;
     complex Lsqq1X4;
     complex Lsqq2X3;
@@ -345,7 +348,7 @@ void Sigma2qqbar2chi0chi0::setIdColAcol() {
 void Sigma2qqbar2charchi0::sigmaKin() {
 
   // Common flavour-independent factor.
-  
+
   sigma0 = M_PI / sH2 / 3.0 / pow2(coupSUSYPtr->sin2W) * pow2(alpEM) ;
   sigma0 /= 2.0 * (1 - coupSUSYPtr->sin2W) ;
 
@@ -370,7 +373,7 @@ double Sigma2qqbar2charchi0::sigmaHat() {
   if (id1*id2 >= 0) {
     return 0.0;
   }
-  
+
   // Only allow incoming states with sum(charge) = final state
   if (abs(id1) % 2 == abs(id2) % 2) return 0.0;
   int isPos  = (id3chi > 0 ? 1 : 0);
@@ -381,10 +384,10 @@ double Sigma2qqbar2charchi0::sigmaHat() {
   int idAbs1  = abs(id1);
   int iChar = abs(id3chi);
   int iNeut = abs(id4chi);
-  
+
   complex QuLL(0.0),QtLL(0.0),QuRR(0.0),QtRR(0.0);
   complex QuLR(0.0),QtLR(0.0),QuRL(0.0),QtRL(0.0);
-  
+
   // Calculate everything from udbar -> ~chi+ ~chi0 template process
   int iAdd=0;
   complex (*LudWloc)[4];
@@ -527,13 +530,13 @@ double Sigma2qqbar2charchar::sigmaHat() {
 
   // Only allow quark-antiquark incoming states
   if (id1*id2 >= 0) return 0.0;
-  
+
   // Only allow incoming states with sum(charge) = 0
   if ((id1+id2) % 2 != 0) return 0.0;
-  
+
   //if (id1 > 0 || id1==-1 || id1==-3 || id1==-5) return 0.0;
   //if (id1 < 0 || id1==1 || id1==3 || id1==5) return 0.0;
-  
+
   swapTU = (id1 < 0 ? true : false);
 
   // Flavour-dependent kinematics-dependent couplings.
@@ -541,7 +544,7 @@ double Sigma2qqbar2charchar::sigmaHat() {
   int idAbs2    = abs(id2);
   int i3        = abs(id3chi);
   int i4        = abs(id4chi);
-  
+
   // Flavour-dependent kinematics-dependent couplings.
   complex QuLL(0.0),QtLL(0.0),QuRR(0.0),QtRR(0.0);
   complex QuLR(0.0),QtLR(0.0),QuRL(0.0),QtRL(0.0);
@@ -552,7 +555,7 @@ double Sigma2qqbar2charchar::sigmaHat() {
   complex (*RsduXloc)[4][3];
   complex (*LsudXloc)[4][3];
   complex (*RsudXloc)[4][3];
- 
+
   int iShift(0);
   if( idAbs1 > 10 && idAbs1 < 17 ) {
     iShift+=10;
@@ -573,7 +576,7 @@ double Sigma2qqbar2charchar::sigmaHat() {
 
   // Add Z/gamma* for same-flavour in-quarks
   if (idAbs1 == idAbs2) {
-    
+
     QuLL = -LqqZloc[idAbs1-iShift]*conj(coupSUSYPtr->ORp[i3][i4]);
     QtLL = -LqqZloc[idAbs1-iShift]*conj(coupSUSYPtr->OLp[i3][i4]);
     QuRR = -RqqZloc[idAbs1-iShift]*conj(coupSUSYPtr->OLp[i3][i4]);
@@ -583,17 +586,17 @@ double Sigma2qqbar2charchar::sigmaHat() {
     QtLL *= propZ / 2.0 / (1.0-coupSUSYPtr->sin2W);
     QuRR *= propZ / 2.0 / (1.0-coupSUSYPtr->sin2W);
     QtRR *= propZ / 2.0 / (1.0-coupSUSYPtr->sin2W);
-  
+
     // s-channel gamma* (only for same-type charginos)
     if (i3 == i4) {
-    
+
       // Charge of in-particles
       double q    = particleDataPtr->chargeType(idAbs1)/3.0;
       QuLL += q * coupSUSYPtr->sin2W / sH;
       QuRR += q * coupSUSYPtr->sin2W / sH;
       QtLL += q * coupSUSYPtr->sin2W / sH;
       QtRR += q * coupSUSYPtr->sin2W / sH;
-    
+
     }
   }
 
@@ -602,12 +605,12 @@ double Sigma2qqbar2charchar::sigmaHat() {
 
   // Add t- or u-channel squark flavour sums to QmXY couplings
   for (int ksq=1; ksq<=6; ksq++) {
-    
+
     if(id1 % 2 == 0) {
 
       // u-channel diagrams only
       // up-type incoming; u-channel ~d
-      
+
       int idsd    = ((ksq+2)/3)*1000000 + 2*((ksq-1) % 3) + 1;
       idsd       +=iShift;
       double msq  = particleDataPtr->m0(idsd);
@@ -679,7 +682,7 @@ double Sigma2qqbar2charchar::sigmaHat() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2chi0squark::initProc() {
 
   //Typecast to the correct couplings
@@ -743,7 +746,7 @@ double Sigma2qg2chi0squark::sigmaHat() {
   // Only accept u(bar) -> ~u(bar) and d(bar) -> ~d(bar)
   if (particleDataPtr->chargeType(idq) != particleDataPtr->chargeType(id4))
     return 0.0;
-  
+
   // Couplings
   complex LsqqX, RsqqX;
   if (idq % 2 == 0) {
@@ -811,7 +814,7 @@ void Sigma2qg2chi0squark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2charsquark::initProc() {
 
   //Typecast to the correct couplings
@@ -851,7 +854,7 @@ double Sigma2qg2charsquark::sigmaHat() {
   // Only accept u(bar) -> ~d(bar) and d(bar) -> ~u(bar)
   if (particleDataPtr->chargeType(idq) == particleDataPtr->chargeType(id4))
     return 0.0;
-  
+
   // Generation index
   int iGq = (abs(idq)+1)/2;
 
@@ -926,7 +929,7 @@ void Sigma2qg2charsquark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qq2squarksquark::initProc() {
 
   //Typecast to the correct couplings
@@ -956,7 +959,7 @@ void Sigma2qq2squarksquark::initProc() {
   m2Char.resize(3);
   m2Char[1] = pow2(particleDataPtr->m0(coupSUSYPtr->idChar(1)));
   m2Char[2] = pow2(particleDataPtr->m0(coupSUSYPtr->idChar(2)));
-  
+
   // Set sizes of some arrays to be used below
   tNeut.resize(nNeut+1);
   uNeut.resize(nNeut+1);
@@ -1004,7 +1007,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
 
   // In-pair must be same-sign
   if (id1 * id2 < 0) return 0.0;
-  
+
   // Check correct charge sum
   if (isUD && abs(id1) %2 == abs(id2) % 2) return 0.0;
   if (!isUD && abs(id1) % 2 != abs(id2) % 2) return 0.0;
@@ -1050,8 +1053,9 @@ double Sigma2qq2squarksquark::sigmaHat() {
     for (int k=1;k<=2;k++) {
 
       // Skip if only including gluinos
-      if (settingsPtr->flag("SUSY:qq2squarksquark:onlyQCD")) continue;
-      
+      //MJW hardcode
+      //if (settingsPtr->lowerCaseFlag("susy:qq2squarksquark:onlyqcd")) continue;
+
       for (int l=1;l<=2;l++) {
 
         // kl-dependent factor for LL and RR contributions
@@ -1087,13 +1091,14 @@ double Sigma2qq2squarksquark::sigmaHat() {
 
       }
     }
-    
+
     // u-channel Neutralinos
     for (int k=1;k<=nNeut;k++) {
 
       // Skip if only including gluinos
-      if (settingsPtr->flag("SUSY:qq2squarksquark:onlyQCD")) continue;
-      
+      //MJW hardcode
+      //if (settingsPtr->lowerCaseFlag("susy:qq2squarksquark:onlyqcd")) continue;
+
       for (int l=1;l<=nNeut;l++) {
 
         // kl-dependent factor for LL, RR contributions
@@ -1126,7 +1131,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
         // Add to sum of u-channel neutralinos
         sumNu += sigmaNeut / uNeut[k] / uNeut[l]
           * real(Nkl[1][1] + Nkl[1][2] + Nkl[2][1] + Nkl[2][2]);
-                
+
       }
     }
 
@@ -1155,7 +1160,8 @@ double Sigma2qq2squarksquark::sigmaHat() {
       for (int l=1;l<=nNeut;l++) {
 
         // Skip if only including gluinos
-        if (settingsPtr->flag("SUSY:qq2squarksquark:onlyQCD")) continue;
+	//MJW hardcode
+	// if (settingsPtr->lowerCaseFlag("susy:qq2squarksquark:onlyqcd")) continue;
 
         // Note: CNkl defined as in [Boz07] with pi/sH2 factored out
         // [1][1] = LL, [1][2] = LR, [2][1] = RL, [2][2] = RR
@@ -1190,8 +1196,9 @@ double Sigma2qq2squarksquark::sigmaHat() {
     for (int k=1;k<=2;k++) {
 
       // Skip if only including gluinos
-      if (settingsPtr->flag("SUSY:qq2squarksquark:onlyQCD")) continue;
-        
+      //MJW hardcode
+      //if (settingsPtr->lowerCaseFlag("susy:qq2squarksquark:onlyqcd")) continue;
+
       // Note: CGk defined as in [Boz07] with sigmaCharGlu factored out
       // [1][1] = LL, [1][2] = LR, [2][1] = RL, [2][2] = RR
       double CGk[3][3];
@@ -1228,7 +1235,8 @@ double Sigma2qq2squarksquark::sigmaHat() {
     for (int k=1;k<=nNeut;k++) {
 
       // Skip if only including gluinos
-      if (settingsPtr->flag("SUSY:qq2squarksquark:onlyQCD")) continue;
+      //MJW hardcode
+      //if (settingsPtr->lowerCaseFlag("susy:qq2squarksquark:onlyqcd")) continue;
 
       for (int l=1;l<=nNeut;l++) {
 
@@ -1299,7 +1307,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
                   * conj(coupSUSYPtr->getRsqqX(iGen3,idIn1A,k))
                   * coupSUSYPtr->getRsqqX(iGen3,idIn2A,l)
                   * coupSUSYPtr->getRsqqX(iGen4,idIn1A,l) );
-          
+
         // Add to sums
         sumNt += sigmaNeut / tNeut[k] / tNeut[l]
           * real(NTkl[1][1] + NTkl[1][2] + NTkl[2][1] + NTkl[2][2]);
@@ -1315,7 +1323,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
       // k-dependent factor for LL and RR contributions
       double facMS = sH * particleDataPtr->m0(coupSUSYPtr->idNeut(k))
         * particleDataPtr->m0(1000021);
-      
+
       // Note: Nxkl defined as in [Boz07] with sigmaNeutGlu factored out
       // [1][1] = LL, [1][2] = LR, [2][1] = RL, [2][2] = RR
       complex NGA[3][3], NGB[3][3];
@@ -1367,7 +1375,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
         + real(NGB[1][1] + NGB[1][2] + NGB[2][1] + NGB[2][2])
         / uNeut[k] / tGlu );
     }
-    
+
     // t-channel + u-channel Gluinos + t/u interference
 
     // factor for LL and RR contributions
@@ -1424,7 +1432,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
              * coupSUSYPtr->getRsqqG(iGen4,idIn2A)
              * conj(coupSUSYPtr->getRsqqG(iGen3,idIn2A))
              * conj(coupSUSYPtr->getRsqqG(iGen4,idIn1A)) );
- 
+
     // Add to sums
     sumGt += sigmaGlu * real(GT[1][1] + GT[1][2] + GT[2][1] + GT[2][2])
       / pow2(tGlu) ;
@@ -1489,7 +1497,7 @@ void Sigma2qq2squarksquark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2squarkantisquark::initProc() {
 
   //Typecast to the correct couplings
@@ -1522,7 +1530,7 @@ void Sigma2qqbar2squarkantisquark::initProc() {
   m2Neut.resize(nNeut+1);
   for (int iNeut=1;iNeut<=nNeut;iNeut++)
     m2Neut[iNeut] = pow2(particleDataPtr->m0(coupSUSYPtr->idNeut(iNeut)));
-  
+
   // Set sizes of some arrays to be used below
   tNeut.resize(nNeut+1);
   uNeut.resize(nNeut+1);
@@ -1569,13 +1577,14 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
 
   // In-pair must be opposite-sign
   if (id1 * id2 > 0) return 0.0;
-  
+
   // Check correct charge sum
   if (isUD && abs(id1) %2 == abs(id2) % 2) return 0.0;
   if (!isUD && abs(id1) % 2 != abs(id2) % 2) return 0.0;
 
   // Check if using QCD diagrams only
-  bool onlyQCD = settingsPtr->flag("SUSY:qqbar2squarkantisquark:onlyQCD");
+  //MJW hardcode
+  bool onlyQCD = false;//settingsPtr->lowerCaseFlag("susy:qqbar2squarkantisquark:onlyqcd");
 
   // Coded UD sigma is for udbar -> ~u~d'*. Swap t<->u for dbaru -> ~u~d'*.
   swapTU = (isUD && abs(id1) % 2 != 0);
@@ -1631,7 +1640,7 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
     // leading color flow for t-channel gluino is annihilation-like
     sumColS += sigmaGlu / pow2(tGlu)
       * (GT[1][1] + GT[1][2] + GT[2][1] + GT[2][2]);
-      
+
     // W-Gluino interference (only contributes to LL helicities)
     if ( !onlyQCD ) {
       sumColS += sigmaEWG / 4.0 / xW / (1-xW)
@@ -1649,7 +1658,7 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
 
   // Case B) Same-isospin: qqbar -> ~d~d* , ~u~u*
   else {
-    
+
     double eQ  = (idIn1A % 2 == 0) ? 2./3. : 1./3. ;
     double eSq = (abs(id3Sav) % 2 == 0) ? 2./3. : 1./3. ;
 
@@ -1675,7 +1684,7 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
       // Add contribution to color topology: S
       sumColS += sigmaGlu / pow2(tGlu)
         * ( GT[1][1] + GT[1][2] + GT[2][1] + GT[2][2]);
-      
+
       // gluon-gluino interference (strictly flavor-diagonal)
       if (abs(id3Sav) == abs(id4Sav) && abs(id1) == abs(id2)) {
         double GG11, GG22;
@@ -1710,7 +1719,7 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
       sumColS += eQ * eSq * sigmaEW * facTU / 2.0 / xW / (1.-xW)
         * sqrt(norm(propZW)) / sH * CsqZ
         * (coupSUSYPtr->LqqZ[idIn1A] + coupSUSYPtr->LqqZ[idIn2A]);
-      
+
       // Gluino/gamma interference (only for same-isospin)
       if (eQ == eSq) {
         double CsqG11 = real(conj(coupSUSYPtr->LsuuG[iGen3][iGen1])
@@ -1727,7 +1736,7 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
           * (CsqG11 + CsqG22) / sH / tGlu;
       }
     }
-    
+
     // s-channel Z (only for q flavor = qbar flavor)
     if (abs(id1) == abs(id2)) {
       double CsqZ = norm(coupSUSYPtr->LsusuZ[iGen3][iGen4]
@@ -1754,10 +1763,10 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
           * ( GZ11 + GZ22 ) * sqrt(norm(propZW)) / tGlu;
       }
     }
-    
+
     // t-channel neutralinos
     // NOT YET IMPLEMENTED !
-    
+
   }
 
   // Cross section
@@ -1765,7 +1774,7 @@ double Sigma2qqbar2squarkantisquark::sigmaHat() {
 
   // Return answer.
   return sigma;
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1777,7 +1786,7 @@ void Sigma2qqbar2squarkantisquark::setIdColAcol() {
   // Check if charge conjugate final state?
   isCC = false;
   if (isUD && ( (id1-1)%2 < 0 || (id2-1)%2 < 0 )) isCC = true;
-  
+
   //check if charge conjugate
   id3 = (isCC) ? -id3Sav : id3Sav;
   id4 = (isCC) ? -id4Sav : id4Sav;
@@ -1821,7 +1830,7 @@ void Sigma2qqbar2squarkantisquark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2squarkantisquark::initProc() {
 
   //Typecast to the correct couplings
@@ -1833,7 +1842,7 @@ void Sigma2gg2squarkantisquark::initProc() {
 
   // Squark pole mass
   m2Sq = pow2(particleDataPtr->m0(id3Sav));
-  
+
   // Secondary open width fraction.
   openFracPair = particleDataPtr->resOpenFrac(id3Sav, id4Sav);
 
@@ -1895,7 +1904,7 @@ void Sigma2gg2squarkantisquark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2squarkgluino::initProc() {
 
   //Typecast to the correct couplings
@@ -1918,7 +1927,7 @@ void Sigma2qg2squarkgluino::initProc() {
 // Evaluate d(sigmaHat)/d(tHat), part independent of incoming flavour.
 
 void Sigma2qg2squarkgluino::sigmaKin() {
-  
+
   // Common pre-factor
   comFacHat = (M_PI / sH2) * pow2(alpS) * 0.5 * openFracPair;
 
@@ -1977,7 +1986,7 @@ void Sigma2qg2squarkgluino::setIdColAcol() {
   int idQ = (id1 == 21) ? id2 : id1;
   id3 = (idQ > 0) ? id3Sav : -id3Sav;
   id4 = 1000021;
-  
+
   // Set flavors
   setId( id1, id2, id3, id4);
 
@@ -2008,7 +2017,7 @@ void Sigma2qg2squarkgluino::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2gluinogluino::initProc() {
 
   //Typecast to the correct couplings
@@ -2016,7 +2025,7 @@ void Sigma2gg2gluinogluino::initProc() {
 
   // Secondary open width fraction.
   openFracPair = particleDataPtr->resOpenFrac(1000021, 1000021);
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -2041,7 +2050,7 @@ void Sigma2gg2gluinogluino::sigmaKin() {
   sigTU  = 2. * tHG * uHG / sH2 + s34Avg * (sH - 4. * s34Avg)
          / (tHG * uHG);
   sigSum = sigTS + sigUS + sigTU;
-    
+
   // Answer contains factor 1/2 from identical gluinos.
   sigma  = (M_PI / sH2) * pow2(alpS) * (9./4.) * 0.5 * sigSum
          * openFracPair;
@@ -2076,7 +2085,7 @@ void Sigma2gg2gluinogluino::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2gluinogluino::initProc() {
 
   //Typecast to the correct couplings
@@ -2117,7 +2126,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
 
   // Only allow quark-antiquark incoming states
   if (id1 * id2 > 0) return 0.0;
-  
+
   // In-pair must both be up-type or both down-type
   if ((id1+id2) % 2 != 0) return 0.0;
 
@@ -2161,7 +2170,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
     // tHG = tHat - m_gluino^2; uHG = uHat - m_gluino^2.
     double tHsq = tHG + s34Avg - mSq2;
     double uHsq = uHG + s34Avg - mSq2;
-    
+
     // ST and SU interferences: only if id1 == -id2 (so iQA == iQB)
     // incl 2N*(N^2 - 1)/N^2 color factor (note: original reference
     // <Fuk11> was missing a factor 2 on the color factor here.)
@@ -2175,7 +2184,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
       sigHel[0] += sigL;
       sigHel[1] += sigR;
     }
-    
+
     // T, U, and TU interferences
     for (int jSq=1; jSq<=6; ++jSq) {
       int    idSqJ = ((jSq+2)/3)*1000000 + 2*((jSq-1)%3) + abs(id1-1) % 2 + 1;
@@ -2184,7 +2193,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
       // tHG = tHat - m_gluino^2; uHG = uHat - m_gluino^2.
       double tHsqJ = tHG + s34Avg - mSqJ2;
       double uHsqJ = uHG + s34Avg - mSqJ2;
-      
+
       double Q11 = real(LsqqG[iSq][iQA] * conj(LsqqG[iSq][iQB])
                         * conj(LsqqG[jSq][iQA]) * LsqqG[jSq][iQB]);
       double Q12 = real(LsqqG[iSq][iQA] * conj(RsqqG[iSq][iQB])
@@ -2198,7 +2207,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
       double Qtt12 = 64./27. * Q12 * tHG2;
       double Qtt21 = 64./27. * Q21 * tHG2;
       double Qtt22 = 64./27. * Q22 * tHG2;
-      
+
       double Quu11 = 64./27. * Q11 * uHG2;
       double Quu12 = 64./27. * Q12 * uHG2;
       double Quu21 = 64./27. * Q21 * uHG2;
@@ -2208,7 +2217,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
       double Qtu12 = 16./27. * Q12 * (s34Avg * sH - tHG * uHG);
       double Qtu21 = 16./27. * Q21 * (s34Avg * sH - tHG * uHG);
       double Qtu22 = 16./27. * Q22 * (s34Avg * sH);
-      
+
       // Cross sections for each helicity configuration (incl average fac 1/4)
       sigHel[0] += Qtt11 / tHsq / tHsqJ
         + Quu11 / uHsq / uHsqJ
@@ -2222,7 +2231,7 @@ double Sigma2qqbar2gluinogluino::sigmaHat() {
       sigHel[3] += Qtt21 / tHsq / tHsqJ
         + Quu21 / uHsq / uHsqJ
         + Qtu21 / tHsq / uHsqJ;
-        
+
     }
 
   }
@@ -2290,7 +2299,7 @@ void Sigma1qq2antisquark::sigmaKin() {
   mRes = particleDataPtr->m0(abs(idRes));
   GammaRes = particleDataPtr->mWidth(abs(idRes));
   m2Res = pow2(mRes);
-    
+
   sigBW        = sH * GammaRes/ ( pow2(sH - m2Res) + pow2(mRes * GammaRes) );
   sigBW       *= 2.0/3.0/mRes;
 
@@ -2376,7 +2385,7 @@ void Sigma1qq2antisquark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2chi0gluino::initProc() {
 
   //Typecast to the correct couplings
@@ -2416,13 +2425,13 @@ double Sigma2qqbar2chi0gluino::sigmaHat() {
 
   // Only allow quark-antiquark incoming states
   if (id1*id2 >= 0) return 0.0;
-  
+
   // In-pair must both be up-type or both down-type
   if ((id1+id2) % 2 != 0) return 0.0;
 
   // Swap T and U if antiquark-quark instead of quark-antiquark
   if (id1<0) swapTU = true;
-  
+
   // Shorthands
   int idAbs1    = abs(id1);
   int idAbs2    = abs(id2);
@@ -2455,7 +2464,7 @@ double Sigma2qqbar2chi0gluino::sigmaHat() {
     double msq2    = pow(particleDataPtr->m0(idsq),2);
     double usq     = uH - msq2;
     double tsq     = tH - msq2;
-    
+
     complex Lsqq1X4;
     complex Lsqq2X4;
     complex Rsqq1X4;
@@ -2494,7 +2503,7 @@ double Sigma2qqbar2chi0gluino::sigmaHat() {
     QuRR += conj(Rsqq1X4)*Rsqq2G/usq;
     QuLR += conj(Lsqq1X4)*Rsqq2G/usq;
     QuRL += conj(Rsqq1X4)*Lsqq2G/usq;
-    
+
     // QtXY
     QtLL -= conj(Lsqq1G)*Lsqq2X4/tsq;
     QtRR -= conj(Rsqq1G)*Rsqq2X4/tsq;
@@ -2556,7 +2565,7 @@ void Sigma2qqbar2chi0gluino::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2chargluino::initProc() {
 
   //Typecast to the correct couplings
@@ -2577,7 +2586,7 @@ void Sigma2qqbar2chargluino::initProc() {
 void Sigma2qqbar2chargluino::sigmaKin() {
 
   // Common flavour-independent factor.
-  
+
   sigma0 = M_PI / sH2 * 4.0 / 9.0 / coupSUSYPtr->sin2W * alpEM * alpS ;
   sigma0 /= 2.0 * (1 - coupSUSYPtr->sin2W) ;
 
@@ -2596,7 +2605,7 @@ double Sigma2qqbar2chargluino::sigmaHat() {
 
   // Only allow particle-antiparticle incoming states
   if (id1*id2 >= 0) return 0.0;
-  
+
   // Only allow incoming states with sum(charge) = final state
   if (abs(id1) % 2 == abs(id2) % 2) return 0.0;
   int isPos  = (id4chi > 0 ? 1 : 0);
@@ -2606,10 +2615,10 @@ double Sigma2qqbar2chargluino::sigmaHat() {
   // Flavour-dependent kinematics-dependent couplings.
   int idAbs1  = abs(id1);
   int iChar = abs(id4chi);
-  
+
   complex QuLL(0.0),QtLL(0.0),QuRR(0.0),QtRR(0.0);
   complex QuLR(0.0),QtLR(0.0),QuRL(0.0),QtRL(0.0);
-  
+
   // Calculate everything from udbar -> ~chi+ ~chi0 template process
   complex LsddGl;
   complex RsddGl;
@@ -2624,7 +2633,7 @@ double Sigma2qqbar2chargluino::sigmaHat() {
   RsduXloc = coupSUSYPtr->RsduX;
   LsudXloc = coupSUSYPtr->LsudX;
   RsudXloc = coupSUSYPtr->RsudX;
-  
+
   // u dbar , ubar d : do nothing
   // dbar u , d ubar : swap 1<->2 and t<->u
   int iGu = abs(id1)/2;
@@ -2640,7 +2649,7 @@ double Sigma2qqbar2chargluino::sigmaHat() {
 
     int idsu=((jsq+2)/3)*1000000 + 2*((jsq-1) % 3) + 2 ;
     int idsd=((jsq+2)/3)*1000000 + 2*((jsq-1) % 3) + 1 ;
-    
+
     LsddGl = coupSUSYPtr->LsddG[jsq][iGd];
     RsddGl = coupSUSYPtr->RsddG[jsq][iGd];
     LsuuGl = coupSUSYPtr->LsuuG[jsq][iGu];
@@ -2709,13 +2718,13 @@ void Sigma2qqbar2chargluino::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2sleptonantislepton::initProc() {
 
   //Typecast to the correct couplings
   coupSUSYPtr = (CoupSUSY*) couplingsPtr;
 
-  // Is this a ~u_i ~d*_j, ~d_i ~u*_j final state or ~d_i ~d*_j, ~u_i ~u*_j
+  // Is this a ~e_i ~nu*_j, ~nu_i ~e*_j final state or ~e_i ~e*_j, ~nu_i ~nu*_j
   if (abs(id3Sav) % 2 == abs(id4Sav) % 2) isUD = false;
   else isUD = true;
 
@@ -2744,7 +2753,7 @@ void Sigma2qqbar2sleptonantislepton::initProc() {
   m2Neut.resize(nNeut+1);
   for (int iNeut=1;iNeut<=nNeut;iNeut++)
     m2Neut[iNeut] = pow2(particleDataPtr->m0(coupSUSYPtr->idNeut(iNeut)));
-  
+
   // Set sizes of some arrays to be used below
   tNeut.resize(nNeut+1);
   uNeut.resize(nNeut+1);
@@ -2788,7 +2797,7 @@ double Sigma2qqbar2sleptonantislepton::sigmaHat() {
 
   // In-pair must be opposite-sign
   if (id1 * id2 > 0) return 0.0;
-  
+
   // Check correct charge sum
   if (isUD && abs(id1) %2 == abs(id2) % 2) return 0.0;
   if (!isUD && abs(id1) % 2 != abs(id2) % 2) return 0.0;
@@ -2825,7 +2834,7 @@ double Sigma2qqbar2sleptonantislepton::sigmaHat() {
 
   // Common factor for LR and RL contributions
   double facTU =  uH*tH-s3*s4;
-  
+
   // Opposite-isospin: udbar -> ~l~v*
   if ( isUD ) {
 
@@ -2850,12 +2859,12 @@ double Sigma2qqbar2sleptonantislepton::sigmaHat() {
     // Factor 2 since contributes to both ha != hb helicities
     sumColS += (abs(CslZ) > 0.0) ? 2. * pow2(eQ) * pow2(eSl) * sigmaEW
       * facTU / pow2(sH) : 0.0;
-      
+
     // Z/gamma interference
     sumInterference += eQ * eSl * sigmaEW * facTU / 2.0 / xW / (1.-xW)
       * sqrt(norm(propZW)) / sH * CslZ
       * (coupSUSYPtr->LqqZ[idIn1A] + coupSUSYPtr->RqqZ[idIn1A]);
-    
+
     // s-channel Z
 
     CslZ = norm(coupSUSYPtr->LslslZ[iGen3][iGen4]
@@ -2880,7 +2889,7 @@ double Sigma2qqbar2sleptonantislepton::sigmaHat() {
 
   // Return answer.
   return sigma;
-  
+
 }
 
 //--------------------------------------------------------------------------
