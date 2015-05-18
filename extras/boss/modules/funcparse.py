@@ -74,8 +74,8 @@ def run():
 
         # - Generate include statements based on the types used in the function
         include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='none', input_element='function', add_extra_include_path=True)
-        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_decl', input_element='function', add_extra_include_path=True)
-        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_def', input_element='function', add_extra_include_path=True)
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_decl', input_element='function', add_extra_include_path=False, use_full_path=True)
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_def', input_element='function', add_extra_include_path=False, use_full_path=True)
 
         # - Then check if we have a header file for the function in question.
         #   If not, declare the original function as 'extern'
@@ -173,15 +173,15 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
     w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
     # Identify return type 
-    return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
-    return_el = gb.id_dict[return_id]
+    return_type_dict = utils.findType( gb.id_dict[func_el.get('returns')] )
+    return_el     = return_type_dict['el']
+    pointerness   = return_type_dict['pointerness']
+    is_ref        = return_type_dict['is_reference']
+    return_kw     = return_type_dict['cv_qualifiers']
+    
+    return_kw_str = ' '.join(return_kw) + ' '*bool(len(return_kw))
 
-    return_is_loaded_class = utils.isLoadedClass(return_el)
-    pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
-
-    # Return keywords
-    return_kw_str = ' '.join(return_kw)        
-    return_kw_str += ' '*bool(len(return_kw))
+    return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
 
 
     #
@@ -241,51 +241,3 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
     new_code += wrapper_code
 
     return new_code
-
-
-
-        # # Function return type
-        # return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
-        # return_el = gb.id_dict[return_id]
-        # return_is_native = utils.isNative(return_el)
-
-
-        # # Function arguments (get list of dicts with argument info)
-        # args = funcutils.getArgs(func_el)
-
-
-        # # Construct wrapper function name
-        # w_func_name = funcutils.constrWrapperName(func_el)
-
-
-        # # Choose wrapper return type
-        # return_type_base = return_type.replace('*','').replace('&','')
-        # if (return_type == 'void') or (return_type.count('*') > 0):
-        #     w_return_type = return_type
-        # else:
-        #     w_return_type = return_type.replace(return_type_base, return_type_base+'*')
-        # # if return_is_native:
-        # #     w_return_type = gb.abstr_class_prefix + return_type
-        # # else:
-        # #     w_return_type = return_type
-
-
-        # # Construct list of arguments for wrapper function
-        # w_args = funcutils.constrWrapperArgs(args)
-
-        # # Construct bracket with input arguments for wrapper function
-        # w_args_bracket = funcutils.constrArgsBracket(w_args)
-
-        # # Construct declaration line for wrapper function
-        # w_func_line = funcutils.constrDeclLine(w_return_type, w_func_name, w_args_bracket, keywords=return_kw)
-
-
-        # # Construct function body for wrapper function
-        # w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_native)
-
-
-        # Combine new code
-
-        # Get info
-        # source_file_el   = gb.id_dict[func_el.get('file')]
-        # source_file_name = source_file_el.get('name')
