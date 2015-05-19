@@ -1207,7 +1207,6 @@ def getMemberElements(el, include_artificial=False):
                     namespaces_list = getNamespaces(mem_el, include_self=True)
                     full_name = '::'.join(namespaces_list)
                     if full_name in cfg.ditch:
-                        print 'DITCH:', full_name
                         continue
 
 

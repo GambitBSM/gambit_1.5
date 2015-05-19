@@ -36,13 +36,14 @@ loaded_classes     = [
                       'Pythia8::Rndm',
                       'Pythia8::SlowJet',
                       'Pythia8::ParticleData',
-                      'Pythia8::ParticleDataEntry',
+                      'Pythia8::ParticleDataEntry',    # problem?
                       'Pythia8::Settings',
-                      'Pythia8::SigmaTotal',
-                      'Pythia8::SigmaProcess',
+                      # 'Pythia8::SigmaTotal',
+                      # 'Pythia8::SigmaProcess',       # problem
                       'Pythia8::PartonLevel',
                       'Pythia8::Couplings',
-                      'Pythia8::ResonanceGmZ',
+                      # 'Pythia8::ResonanceWidths',
+                      # 'Pythia8::ResonanceGmZ',       # problem
                       'Pythia8::CoupSUSY',
                       'Pythia8::SLHAinterface',
                      ]
@@ -53,7 +54,6 @@ ditch = [
           'Pythia8::Pythia::initSLHA',
         ]
 
-# wrapper_class_tree     = True
 load_parent_classes    = True
 wrap_inherited_members = False
 
