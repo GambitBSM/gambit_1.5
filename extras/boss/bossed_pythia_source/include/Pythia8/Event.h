@@ -1,3 +1,6 @@
+#ifndef __boss__Event_Pythia_8_186_h__
+#define __boss__Event_Pythia_8_186_h__
+
 // Event.h is a part of the PYTHIA event generator.
 // Copyright (C) 2014 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
@@ -30,8 +33,10 @@ class Event;
 // This class holds info on a particle in general.
 
 } 
+#define ENUMS_DECLARED
 #include "backend_types/Pythia_8_186/abstract_Particle.h"
-#include "abstracttypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Particle : public virtual Abstract_Particle {
 
@@ -84,8 +89,6 @@ public:
   // Member functions to set the Event and ParticleDataEntry pointers.
   void setEvtPtr(Event* evtPtrIn) { evtPtr = evtPtrIn; setPDEPtr();}
   void setPDEPtr(ParticleDataEntry* pdePtrIn = 0);
-
-  Event* getEvtPtr() { return evtPtr; }
       
   // Member functions for input.
   void id(int idIn) {idSave = idIn; setPDEPtr();}
@@ -311,6 +314,7 @@ private:
 
         public:
             Abstract_Particle* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Particle* in);
 
             Pythia8::Abstract_Particle* operator_equal__BOSS(const Pythia8::Abstract_Particle&);
@@ -319,7 +323,9 @@ private:
         public:
             void setEvtPtr__BOSS(Pythia8::Abstract_Event*);
 
-            Pythia8::Abstract_Event* getEvtPtr__BOSS();
+            void setPDEPtr__BOSS(Pythia8::Abstract_ParticleDataEntry*);
+
+            void setPDEPtr__BOSS();
 
             void mothers__BOSS(int);
 
@@ -343,9 +349,11 @@ private:
 
             Pythia8::Abstract_Vec4* vDec__BOSS() const;
 
-            std::vector<int, std::allocator<int> > sisterList__BOSS() const;
+            std::vector<int,std::allocator<int> > sisterList__BOSS() const;
 
-            std::string nameWithStatus__BOSS() const;
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameWithStatus__BOSS() const;
+
+            Pythia8::Abstract_ParticleDataEntry* particleDataEntry__BOSS() const;
 
             void bst__BOSS(const Pythia8::Abstract_Vec4&);
 
@@ -419,8 +427,10 @@ private:
 // The Event class holds all info on the generated event.
 
 } 
+#define ENUMS_DECLARED
 #include "backend_types/Pythia_8_186/abstract_Event.h"
-#include "abstracttypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Event : public virtual Abstract_Event {
     
@@ -662,6 +672,7 @@ private:
 
         public:
             Abstract_Event* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Event* in);
 
             Pythia8::Abstract_Event* operator_equal__BOSS(const Pythia8::Abstract_Event&);
@@ -674,6 +685,14 @@ private:
 
 
         public:
+            void init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, Pythia8::Abstract_ParticleData*, int);
+
+            void init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, Pythia8::Abstract_ParticleData*);
+
+            void init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            void init__BOSS();
+
             Pythia8::Abstract_Particle* front__BOSS();
 
             Pythia8::Abstract_Particle* at__BOSS(int);
@@ -720,7 +739,7 @@ private:
 
             void initColTag__BOSS();
 
-            std::vector<int, std::allocator<int> > sisterListTopBot__BOSS(int) const;
+            std::vector<int,std::allocator<int> > sisterListTopBot__BOSS(int) const;
 
             void bst__BOSS(const Pythia8::Abstract_Vec4&);
 
@@ -733,3 +752,5 @@ private:
 } // end namespace Pythia8
 
 #endif // end Pythia8_Event_H
+
+#endif /* __boss__Event_Pythia_8_186_h__ */
