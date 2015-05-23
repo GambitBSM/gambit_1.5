@@ -1,23 +1,23 @@
 #include <string>
 #include <vector>
-#include <ostream>
-#include "abstracttypedefs.h"
-#include "wrappertypedefs.h"
 #include "Pythia8/Basics.h"
+#include <ostream>
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 
-void Pythia8::Hist::book__BOSS(std::string titleIn, int nBinIn, double xMinIn)
+void Pythia8::Hist::book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > titleIn, int nBinIn, double xMinIn)
 {
     book(titleIn, nBinIn, xMinIn);
 }
 
 
-void Pythia8::Hist::book__BOSS(std::string titleIn, int nBinIn)
+void Pythia8::Hist::book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > titleIn, int nBinIn)
 {
     book(titleIn, nBinIn);
 }
 
 
-void Pythia8::Hist::book__BOSS(std::string titleIn)
+void Pythia8::Hist::book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > titleIn)
 {
     book(titleIn);
 }
@@ -41,13 +41,13 @@ void Pythia8::Hist::fill__BOSS(double x)
 }
 
 
-void Pythia8::Hist::table__BOSS(std::ostream& os, bool printOverUnder) const
+void Pythia8::Hist::table__BOSS(std::basic_ostream<char,std::char_traits<char> >& os, bool printOverUnder) const
 {
     table(os, printOverUnder);
 }
 
 
-void Pythia8::Hist::table__BOSS(std::ostream& os) const
+void Pythia8::Hist::table__BOSS(std::basic_ostream<char,std::char_traits<char> >& os) const
 {
     table(os);
 }
@@ -59,13 +59,13 @@ void Pythia8::Hist::table__BOSS() const
 }
 
 
-void Pythia8::Hist::table__BOSS(std::string fileName, bool printOverUnder) const
+void Pythia8::Hist::table__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > fileName, bool printOverUnder) const
 {
     table(fileName, printOverUnder);
 }
 
 
-void Pythia8::Hist::table__BOSS(std::string fileName) const
+void Pythia8::Hist::table__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > fileName) const
 {
     table(fileName);
 }
@@ -139,5 +139,20 @@ Pythia8::Abstract_Hist* Pythia8::Hist::operator_slash_equal__BOSS(double f)
 
 
 
-Pythia8::Abstract_Hist* Pythia8::Hist::pointerCopy__BOSS() { return new Pythia8::Hist(*this); }
-void Pythia8::Hist::pointerAssign__BOSS(Pythia8::Abstract_Hist* in) { *this = *dynamic_cast<Hist*>(in); }
+#include "backend_types/Pythia_8_186/identification.hpp"
+
+Pythia8::Abstract_Hist* Pythia8::Hist::pointerCopy__BOSS()
+{
+    Pythia8::Abstract_Hist* new_ptr = new Pythia8::Hist(*this);
+    new_ptr->can_delete_wrapper(true);
+    return new_ptr;
+}
+
+void Pythia8::Hist::pointerAssign__BOSS(Pythia8::Abstract_Hist* in)
+{
+    CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Hist* wptr_temp = wrapper__BOSS();
+    *this = *dynamic_cast<Hist*>(in);
+    wrapper__BOSS(wptr_temp);
+}
+
+#include "gambit/Backends/backend_undefs.hpp"

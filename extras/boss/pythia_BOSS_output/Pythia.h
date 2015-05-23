@@ -1,3 +1,6 @@
+#ifndef __boss__Pythia_Pythia_8_186_h__
+#define __boss__Pythia_Pythia_8_186_h__
+
 // Pythia.h is a part of the PYTHIA event generator.
 // Copyright (C) 2014 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
@@ -39,14 +42,15 @@
 
 namespace Pythia8 {
  
-
 //==========================================================================
 
 // The Pythia class contains the top-level routines to generate an event.
 
 } 
+#define ENUMS_DECLARED
 #include "backend_types/Pythia_8_186/abstract_Pythia.h"
-#include "abstracttypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Pythia : public virtual Abstract_Pythia {
 
@@ -346,12 +350,13 @@ private:
   // Check that the final event makes sense.
   bool check(ostream& os = cout);
 
-  // // Initialization of SLHA data.
-  // bool initSLHA ();
+  // Initialization of SLHA data.
+  bool initSLHA ();
 
 
         public:
             Abstract_Pythia* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Pythia* in);
 
         public:
@@ -361,24 +366,34 @@ private:
 
             Pythia8::Abstract_Info& info_ref__BOSS();
 
+            Pythia8::Abstract_Settings& settings_ref__BOSS();
+
+            Pythia8::Abstract_ParticleData& particleData_ref__BOSS();
+
+            Pythia8::Abstract_Rndm& rndm_ref__BOSS();
+
+            Pythia8::Abstract_Couplings& couplings_ref__BOSS();
+
+            Pythia8::Abstract_SLHAinterface& slhaInterface_ref__BOSS();
+
 
             Pythia8::Abstract_Pythia* operator_equal__BOSS(const Pythia8::Abstract_Pythia&);
 
 
         public:
-            bool readString__BOSS(std::string);
+            bool readString__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
-            bool readFile__BOSS(std::string, bool);
+            bool readFile__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool);
 
-            bool readFile__BOSS(std::string);
+            bool readFile__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
-            bool readFile__BOSS(std::istream&, bool);
+            bool readFile__BOSS(std::basic_istream<char,std::char_traits<char> >&, bool);
 
-            bool readFile__BOSS(std::istream&);
+            bool readFile__BOSS(std::basic_istream<char,std::char_traits<char> >&);
 
             bool readFile__BOSS();
 
-            bool init__BOSS(std::string);
+            bool init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
             int forceTimeShower__BOSS(int, int, double);
 
@@ -393,9 +408,9 @@ private:
         private:
             void banner__BOSS();
 
-            int readSubrun__BOSS(std::string, bool);
+            int readSubrun__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool);
 
-            int readSubrun__BOSS(std::string);
+            int readSubrun__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
             bool check__BOSS();
 
@@ -406,3 +421,5 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_Pythia_H
+
+#endif /* __boss__Pythia_Pythia_8_186_h__ */
