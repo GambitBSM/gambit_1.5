@@ -7,6 +7,7 @@
 #include "backend_types/Pythia_8_186/wrapper_Couplings.h"
 #include "backend_types/Pythia_8_186/wrapper_SLHAinterface.h"
 #include "backend_types/Pythia_8_186/wrapper_Hist.h"
+#include "backend_types/Pythia_8_186/wrapper_DecayChannel.h"
 #include "backend_types/Pythia_8_186/wrapper_Vec4.h"
 #include "backend_types/Pythia_8_186/wrapper_Settings.h"
 #include "backend_types/Pythia_8_186/wrapper_ParticleDataEntry.h"
@@ -38,6 +39,8 @@ void wrapper_deleter(Pythia8::ParticleDataEntry__BOSS*);
 void wrapper_deleter(Pythia8::Settings__BOSS*);
 
 void wrapper_deleter(Pythia8::Vec4__BOSS*);
+
+void wrapper_deleter(Pythia8::DecayChannel__BOSS*);
 
 void wrapper_deleter(Pythia8::Hist__BOSS*);
 

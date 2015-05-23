@@ -53,6 +53,11 @@ namespace Pythia8
 
 namespace Pythia8
 {
+    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::DecayChannel DecayChannel__BOSS;
+}
+
+namespace Pythia8
+{
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Hist Hist__BOSS;
 }
 

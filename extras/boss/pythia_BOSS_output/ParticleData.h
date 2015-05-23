@@ -35,7 +35,13 @@ class SUSYResonanceWidths;
 
 // This class holds info on a single decay channel.
 
-class DecayChannel {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_186/abstract_DecayChannel.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class DecayChannel : public virtual Abstract_DecayChannel {
 
 public:
   // Constructor.
@@ -99,6 +105,16 @@ private:
          openSecNeg;
   int    meModeSave, nProd, prod[8];
   bool   hasChangedSave;
+
+
+        public:
+            Abstract_DecayChannel* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_DecayChannel* in);
+
+
+        public:
+            void bRatio__BOSS(double);
 
 };
 
@@ -396,11 +412,17 @@ private:
 
             void addChannel__BOSS();
 
+            Pythia8::Abstract_DecayChannel* channel__BOSS(int);
+
+            const Pythia8::Abstract_DecayChannel* channel__BOSS(int) const;
+
             void rescaleBR__BOSS();
 
             bool preparePick__BOSS(int, double);
 
             bool preparePick__BOSS(int);
+
+            Pythia8::Abstract_DecayChannel* pickChannel__BOSS();
 
             void resInit__BOSS(Pythia8::Abstract_Info*, Pythia8::Abstract_Settings*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Couplings*);
 
