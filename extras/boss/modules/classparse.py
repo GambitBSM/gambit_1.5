@@ -14,6 +14,7 @@ import modules.gb as gb
 import modules.utils as utils
 import modules.classutils as classutils
 import modules.funcutils as funcutils
+import modules.infomsg as infomsg
 
 #
 # Module-level globals
@@ -41,20 +42,20 @@ def run():
     
     for class_name_long, class_el in gb.loaded_classes_in_xml.items():
 
+        # Clear all info messages
+        infomsg.clearInfoMessages()
+
         # Generate dicts with different variations of the class name
         class_name       = classutils.getClassNameDict(class_el)
         abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
 
         # Print current class
         print
-        print '~~~~ Current class: ' + class_name['long_templ'] + ' ~~~~'
-        print
+        print '  Class: ' + class_name['long_templ']
+        print '  -------' + '-'*len(class_name['long_templ'])
 
         # Check if this is a template class
-        if '<' in class_name['long_templ']:
-            is_template = True
-        else:
-            is_template = False
+        is_template = utils.isTemplateClass(class_el)
 
 
         # Make list of all types used in this class
@@ -216,18 +217,15 @@ def run():
             if class_name['long'] not in templ_spec_done:
                 templ_spec_done.append(class_name['long'])
         
-        print
-        print '~~~~ Class ' + class_name['long'] + ' done ~~~~'
-        print
-        print
 
         # Increase class counter
         gb.n_classes_done += 1
 
+        print
+
     #
     # END: Loop over all classes in gb.loaded_classes_in_xml
     #    
-
 
 # ====== END: run ========
 
@@ -591,16 +589,17 @@ def generateClassMemberInterface(class_el, class_name, abstr_class_name, namespa
 
     # - Generate include statements for the new source file
     include_statements = []
-    # include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='abstract', add_extra_include_path=False, input_element='class', use_full_path=True, forward_declared='include')
-    # include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='abstract', add_extra_include_path=False, input_element='class', use_full_path=True, forward_declared='exclude')
-    include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='none', add_extra_include_path=True, input_element='class', use_full_path=True, forward_declared='only')
-    include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper', add_extra_include_path=False, input_element='class', use_full_path=True, forward_declared='exclude')
+    # include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='abstract', input_element='class', use_full_path=True, forward_declared='include')
+    # include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='abstract', input_element='class', use_full_path=True, forward_declared='exclude')
+    include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='none', input_element='class', use_full_path=True, forward_declared='only')
+    include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper', input_element='class', use_full_path=True, forward_declared='exclude')
     include_statements.append('#include "' + os.path.join(gb.gambit_backend_incl_dir, gb.abstract_typedefs_fname + cfg.header_extension) + '"')
     include_statements.append('#include "' + os.path.join(gb.gambit_backend_incl_dir, gb.wrapper_typedefs_fname + cfg.header_extension) + '"')
 
     if utils.isHeader(original_class_file_el):
-        original_file_name_base = os.path.basename(original_file_name)
-        include_statements.append( '#include "' + os.path.join(cfg.add_path_to_includes, original_file_name_base) + '"')
+        use_path = utils.shortenHeaderPath(original_file_name)
+        include_statements.append( '#include "' + use_path + '"')
+
     include_statements = list( OrderedDict.fromkeys(include_statements) )
     include_statements_code = '\n'.join(include_statements) + '\n'
 
@@ -621,9 +620,9 @@ def generateClassMemberInterface(class_el, class_name, abstr_class_name, namespa
 
 def generateFactoryFunctions(class_el, class_name, is_template):
 
-    # Prepare entry in global dict with factory function info
-    if class_name['long'] not in gb.factory_info.keys():
-        gb.factory_info[class_name['long']] = []
+    # # Prepare entry in global dict with factory function info
+    # if class_name['long'] not in gb.factory_info.keys():
+    #     gb.factory_info[class_name['long']] = []
 
     # Generate factory file content
     factory_file_content  = ''
@@ -634,6 +633,10 @@ def generateFactoryFunctions(class_el, class_name, is_template):
     else:
         factory_file_content += classutils.constrFactoryFunctionCode(class_el, class_name, indent=cfg.indent, skip_copy_constructors=True, use_wrapper_return=False, use_wrapper_args=True)
     factory_file_content += '\n'
+
+    # # If no file content has been generated (no public constructors), return without doing anything
+    # if factory_file_content.strip() == '':
+    #     return
 
     # Generate factory file name
     dir_name = cfg.extra_output_dir

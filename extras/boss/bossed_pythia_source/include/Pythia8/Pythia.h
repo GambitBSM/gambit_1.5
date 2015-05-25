@@ -393,6 +393,12 @@ private:
 
             bool readFile__BOSS();
 
+            bool setUserHooksPtr__BOSS(Pythia8::Abstract_UserHooks*);
+
+            bool setSigmaPtr__BOSS(Pythia8::Abstract_SigmaProcess*);
+
+            bool setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths*);
+
             bool init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
             int forceTimeShower__BOSS(int, int, double);

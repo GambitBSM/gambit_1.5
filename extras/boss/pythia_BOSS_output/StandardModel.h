@@ -23,7 +23,13 @@ namespace Pythia8 {
 // The AlphaStrong class calculates the alpha_strong value at an arbitrary
 // scale, given the value at m_Z, to zeroth, first or second order.
 
-class AlphaStrong {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_186/abstract_AlphaStrong.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class AlphaStrong : public virtual Abstract_AlphaStrong {
 
 public:
 
@@ -96,6 +102,22 @@ private:
   bool   lastCallToFull;
   double valueRef, valueNow, scale2Now;
 
+
+        public:
+            Abstract_AlphaStrong* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_AlphaStrong* in);
+
+
+        public:
+            void init__BOSS(double, int, int);
+
+            void init__BOSS(double, int);
+
+            void init__BOSS(double);
+
+            void init__BOSS();
+
 };
 
 //==========================================================================
@@ -103,7 +125,13 @@ private:
 // The AlphaEM class calculates the alpha_electromagnetic value at an
 // arbitrary scale, given the value at 0 and m_Z, to zeroth or first order.
 
-class AlphaEM {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_186/abstract_AlphaEM.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class AlphaEM : public virtual Abstract_AlphaEM {
 
 public:
 
@@ -124,6 +152,16 @@ private:
   // Data members.
   int    order;
   double alpEM0, alpEMmZ, mZ2, bRun[5], alpEMstep[5];
+
+
+        public:
+            Abstract_AlphaEM* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_AlphaEM* in);
+
+
+        public:
+            void init__BOSS(int, Pythia8::Abstract_Settings*);
 
 };
 

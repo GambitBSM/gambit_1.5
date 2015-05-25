@@ -13,6 +13,7 @@ import os
 
 import modules.cfg as cfg
 
+boss_temp_dir = 'temp'
 
 new_code              = OrderedDict()
 xml_file_name         = ''
@@ -28,6 +29,8 @@ new_header_files      = OrderedDict()
 accepted_types        = [] 
 std_headers_used      = []
 original_file_paths   = OrderedDict()
+functions_done        = []
+n_functions_done      = 0
 classes_done          = []
 n_classes_done        = 0
 factory_info          = OrderedDict()
@@ -46,13 +49,13 @@ code_suffix         = '__BOSS'
 abstr_class_prefix  = 'Abstract_'
 
 
+func_return_utils_fname = 'function_return_utils'
 wrapper_deleter_fname   = 'wrapperdeleter'
 frwd_decls_abs_fname    = 'forward_decls_abstract_classes'
 frwd_decls_wrp_fname    = 'forward_decls_wrapper_classes'
 wrapper_typedefs_fname  = 'wrappertypedefs'
 abstract_typedefs_fname = 'abstracttypedefs'
 enum_decls_wrp_fname    = 'enum_decl_copies'
-
 
 
 # Dictionary of what names to use for various operator symbols

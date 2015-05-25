@@ -15,8 +15,8 @@ import modules.cfg as cfg
 import modules.gb as gb
 import modules.shelltimeout as shelltimeout
 import modules.exceptions as exceptions
+import modules.infomsg as infomsg
 
-import inspect
 
 
 # ====== isComplete ========
@@ -41,24 +41,45 @@ def isLoadable(class_el, print_warning=False):
 
     import modules.classutils as classutils
 
-    class_name  = classutils.getClassNameDict(class_el) 
     is_loadable = True
 
-    # - Check that class is complete (not only forward declared):
+    # - Any loadable class should have a "name" XML entry
+    if not 'name' in class_el.keys():
+        is_loadable = False
+        return is_loadable
+    
+    class_name = classutils.getClassNameDict(class_el) 
+
+
+    # - Check if class should be ditched. If yes, return right away.
+    if class_name['long_templ'] in cfg.ditch:
+        is_loadable = False
+        return is_loadable
+
+    # - Check if class is a template class. BOSS cannot handle this yet.
+    if isTemplateClass(class_el):
+        is_loadable = False
+        if print_warning:
+            reason = "This is a template class. BOSS cannot yet handle this."
+            infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
+        return is_loadable
+
+    # - Check that class is complete (not only forward declared).
     if not isComplete(class_el):
         is_loadable = False
         if print_warning:
-            print 'INFO: ' + 'Class %s is not complete.' % (class_name['long_templ'])
+            reason = "Class is incomplete, at least based on this XML file."
+            infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
+        return is_loadable
 
-    # - Check for pure virtual members:
+    # - Check for pure virtual members.
     pure_virtual_members = classutils.pureVirtualMembers(class_el)
     if len(pure_virtual_members) > 0:
         is_loadable = False
         if print_warning:
-            print 'INFO: ' + 'The following member functions in class %s are pure virtual: %s' % (class_name['long_templ'], ', '.join(pure_virtual_members))
-    
-    if (not is_loadable) and (print_warning):
-        print 'INFO: ' + 'Class %s cannot be loaded and will be ignored.' % (class_name['long_templ'])
+            reason = "Pure virtual member functions: %s." % ', '.join(pure_virtual_members)
+            infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
+        return is_loadable
 
     return is_loadable
 
@@ -78,6 +99,25 @@ def isFundamental(el):
     return is_fundamental
 
 # ====== END: isFundamental ========
+
+
+
+# ====== isTemplateClass ========
+
+def isTemplateClass(class_el):
+
+    import modules.classutils as classutils
+
+    is_template = False
+
+    class_name = classutils.getClassNameDict(class_el)
+
+    if '<' in class_name['long_templ']:
+        is_template = True
+
+    return is_template
+
+# ====== END: isTemplateClass ========
 
 
 
@@ -152,8 +192,6 @@ def isStdType(el):
 
     else:
         is_std = False
-        # warnings.warn('Cannot check whether XML element with id="%s" and tag "%s" is a standard type.' % (el.get('id'), el.tag))
-        # raise Exception('Cannot check whether XML element with id="%s" and tag "%s" is a standard type.' % (el.get('id'), el.tag))
 
     return is_std
 
@@ -731,6 +769,24 @@ def removeNamespace(type_name, return_namespace=False):
 
 
 
+# ====== removeArgumentBracket ========
+
+def removeArgumentBracket(func_signature, return_args_bracket=False):
+
+    args_bracket_start = func_signature.rfind('(')
+    
+    func_signature_noargs = func_signature[:args_bracket_start]
+    args_bracket          = func_signature[args_bracket_start:]
+
+    if return_args_bracket:
+        return func_signature_noargs, args_bracket
+    else:
+        return func_signature_noargs
+
+# ====== END: removeArgumentBracket ========
+
+
+
 # ====== isAcceptedType ========
 
 def isAcceptedType(input, byname=False):
@@ -763,27 +819,24 @@ def isAcceptedType(input, byname=False):
         array_limits = type_dict['array_limits']
 
 
-        # # BOSS cannot yet handle pointers to loaded types
-        # if (pointerness > 0) and isLoadedClass(type_el):
-        #     print 'INFO: ' + 'Problem with "%s". BOSS cannot yet handle pointer-to-loaded-type.' % (input.get('name'))
-        #     is_accepted_type = False
-        #     return is_accepted_type
-
         # BOSS cannot yet handle delarations of arrays with unspecified length
         if (is_array) and (len(array_limits) == 0):
-            print 'INFO: ' + 'Problem with "%s". BOSS cannot yet handle arrays declared with unspecified length.' % (input.get('name'))
+            reason = "BOSS cannot yet handle arrays declared with unspecified length."
+            infomsg.TypeNotAccepted(input.get('name'), reason).printMessage()
             is_accepted_type = False
             return is_accepted_type
 
         # BOSS cannot yet handle arrays of loaded types
         if isLoadedClass(type_el) and is_array:
-            print 'INFO: ' + 'Problem with "%s". BOSS cannot yet handle arrays of a loaded type.' % (input.get('name'))
+            reason = "BOSS cannot yet handle arrays of a loaded type."
+            infomsg.TypeNotAccepted(input.get('name'), reason).printMessage()
             is_accepted_type = False
             return is_accepted_type
 
         # BOSS cannot yet handle function pointers
         if type_dict['is_function_pointer']:
-            print 'INFO: ' + 'Problem with "%s". BOSS cannot yet handle function pointers.' % (input.get('name'))
+            reason = "BOSS cannot yet handle function pointers."
+            infomsg.TypeNotAccepted(input.get('name'), reason).printMessage()
             is_accepted_type = False
             return is_accepted_type
 
@@ -799,7 +852,8 @@ def isAcceptedType(input, byname=False):
                 is_accepted_type = True
 
         else:
-            warnings.warn('Cannot determine if XML element with id="%s" and tag "%s" corresponds to an accepted type. Assuming it does not.' % (input.get('id'), input.tag))
+            reason = "Cannot determine if XML element with id='%s' and tag '%s' corresponds to an accepted type. Assuming it does not." % (input.get('id'), input.tag)
+            infomsg.TypeNotAccepted(input.get('id'), reason).printMessage()
             is_accepted_type = False
 
     return is_accepted_type
@@ -1209,7 +1263,6 @@ def getMemberElements(el, include_artificial=False):
                     if full_name in cfg.ditch:
                         continue
 
-
             if include_artificial:
                 member_elements.append(mem_el)
             else:
@@ -1261,9 +1314,9 @@ def getMemberFunctions(class_el, include_artificial=False, include_inherited=Fal
                 method_name = mem_el.get('name')
                 if mem_el.tag=='OperatorMethod':
                     method_name = 'operator' + method_name
-                # warnings.warn('The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (method_name, class_el.get('name')))
-                print 'INFO: ' + 'The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (method_name, class_el.get('name'))
 
+                reason = "Makes use of a non-accepted type."
+                infomsg.IgnoredFunction(method_name, reason).printMessage()
                 continue
 
             else:
@@ -1489,7 +1542,7 @@ def isHeader(file_el):
 
 # ====== getIncludeStatements ========
 
-def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[],
+def getIncludeStatements(input_el, convert_loaded_to='none', exclude_types=[],
                          input_element='class', forward_declared='exclude',
                          use_full_path=False, include_parents=False):
 
@@ -1606,13 +1659,12 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                         type_file_full_path = type_file_el.get('name')
 
                         if isHeader(type_file_el):
-                            type_file_basename = os.path.basename(type_file_full_path)
-                            if add_extra_include_path:
-                                include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, type_file_basename) + '"')
-                            else:
-                                include_statements.append('#include "' + type_file_basename + '"')
+                            use_path = shortenHeaderPath(type_file_full_path)
+                            include_statements.append( '#include "' + use_path + '"')
+
                         else:
-                            print 'INFO: ' + 'Found declaration of loaded type "%s" in file "%s", but this file is not recognized as a header file. No header file include statement generated.' % (type_name['long_templ'], type_file_full_path)
+                            reason = "Found declaration of loaded type '%s' in file '%s', but this file is not recognized as a header file." % (type_name['long_templ'], type_file_full_path)
+                            infomsg.NoIncludeStatementGenerated(type_name['long_templ'], reason).printMessage()
 
                     else:
                         if use_full_path:
@@ -1620,10 +1672,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                         else:
                             header_key = convert_loaded_to
 
-                        if add_extra_include_path:
-                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, gb.new_header_files[type_name['long']][header_key]) + '"')
-                        else:
-                            include_statements.append('#include "' + gb.new_header_files[type_name['long']][header_key] + '"')
+                        include_statements.append('#include "' + gb.new_header_files[type_name['long']][header_key] + '"')
 
             elif isStdType(type_el):
 
@@ -1634,18 +1683,17 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                     else:
                         include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
                 else:
-                    # warnings.warn("The standard type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long_templ'])
-                    print 'INFO: ' + 'The standard type "%s" has no specified header file. Please update modules/cfg.py. No header file include statement generated.' % type_name['long_templ']
+                    reason = "The standard type '%s' has no specified header file. Please update modules/cfg.py." % type_name['long_templ']
+                    infomsg.NoIncludeStatementGenerated(type_name['long_templ'], reason).printMessage()
 
             else:
                 if type_name['long'] in cfg.known_class_headers:
                     include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
                 else:
-                    # warnings.warn("The type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long'])
-                    print 'INFO: ' + 'The type "%s" has no specified header file. Please update modules/cfg.py. No header file include statement generated.' % type_name['long_templ']
+                    reason = "The type '%s' has no specified header file. Please update modules/cfg.py." % type_name['long_templ']
+                    infomsg.NoIncludeStatementGenerated(type_name['long_templ'], reason).printMessage()
         else:
-            # warnings.warn("The type '%s' is unknown. No header file included." % type_name['long'])
-            print 'INFO: ' + 'The type "%s" is unknown or not loadable. No header file include statement generated.' % type_name['long_templ']
+            infomsg.NoIncludeStatementGenerated( type_name['long_templ'] ).printMessage()
 
     # Remove duplicates and return list
     include_statements = list( OrderedDict.fromkeys(include_statements) )
@@ -1678,6 +1726,31 @@ def getOriginalHeaderPath(el, full_path=False):
     return header_path
 
 # ====== END: getOriginalHeaderPath ========
+
+
+
+# ====== shortenHeaderPath ========
+
+def shortenHeaderPath(full_path):
+
+    shorter_path = full_path
+
+    # Split path into individual parts
+    path_parts = pathSplitAll(full_path)
+
+    for incl_path in cfg.include_paths:
+
+        incl_path_parts = pathSplitAll(incl_path)
+        n = len(incl_path_parts)
+
+        if len(path_parts) >= n:
+            if path_parts[0:n] == incl_path_parts:
+                shorter_path = os.path.join(*path_parts[n:])
+                break
+
+    return shorter_path
+
+# ====== END: shortenHeaderPath ========
 
 
 
@@ -1793,7 +1866,8 @@ def constrLoadedTypesHeaderContent():
     for class_name in gb.classes_done:
 
         if not class_name['long'] in gb.factory_info.keys():
-            print "WARNING: No factory function has been generated for class '%s'." % class_name['long']
+            reason = "Probably there are no public and accepted constructors."
+            infomsg.NoLoadedTypesEntry(class_name['long'], reason).printMessage()
 
         else:
 
@@ -1950,49 +2024,296 @@ def constrEnumDeclHeader(enum_el_list, file_output_path):
 
 # Calls gccxml from the shell (via modules.shelltimeout).
 
-def gccxmlRunner(source_path, include_paths_list, xml_output_path, timeout_limit=30., poll_interval=0.5):
+def gccxmlRunner(input_file_path, include_paths_list, xml_output_path, timeout_limit=30., poll_interval=0.5):
 
     # Construct gccxml command to run
-    gccxml_cmd = 'gccxml '
+    gccxml_cmd = os.path.join(cfg.gccxml_path, 'gccxml ')
 
     # - Add include paths
     for incl_path in include_paths_list:
         gccxml_cmd += '-I' + incl_path + ' '
 
-    # - Add the factory source file (full path)
-    gccxml_cmd += source_path + ' '
+    # - Add the input file path (full path)
+    gccxml_cmd += input_file_path + ' '
 
     # - Add gccxml option that specifies the xml output file: input_file_short_name.xml
-    gccxml_cmd += '-fxml=' + xml_output_path
+    # gccxml_cmd += '-fxml=' + xml_output_path
+    gccxml_cmd +='--gccxml-compiler ' + cfg.gccxml_compiler + ' -fxml=' + xml_output_path
 
     # Run gccxml
-    print 'Runing command: ' + gccxml_cmd
+    print '  Runing command: ' + gccxml_cmd
     proc, output, timed_out = shelltimeout.shrun(gccxml_cmd, timeout_limit, use_exec=True, poll_interval=poll_interval)
 
     did_fail = False
 
     # Check for timeout or error
     if timed_out:
-        print 'ERROR: gccxml timed out.'
+        print '  ERROR: gccxml timed out.'
         did_fail = True
     elif proc.returncode != 0:        
-        print 'ERROR: gccxml failed.'
+        print '  ERROR: gccxml failed.'
         did_fail = True
 
     # Print error report
     if did_fail:
         print
-        print '==== START GCCXML OUTPUT ===='
+        print 'START GCCXML OUTPUT'
+        print '-------------------'
         print
         print output
-        print '==== END GCCXML OUTPUT ===='
+        print 'END GCCXML OUTPUT'
+        print '-----------------'
         print
         raise Exception('gccxml failed')
     
     else:
-        print 'Command finished successfully.'
+        print '  Command finished successfully.'
     print
 
 # ====== END: gccxmlRunner ========
+
+
+
+# ====== pathSplitAll ========
+
+def pathSplitAll(path):
+
+    all_parts = []
+
+    current_path = path
+    while True:
+        
+        parts = os.path.split(current_path)
+        
+        if parts[0] == current_path:  # Stopping criterion for absolute paths
+            all_parts.insert(0, parts[0])
+            break
+        
+        elif parts[1] == current_path: # Stopping criterion for relative paths
+            all_parts.insert(0, parts[1])
+            break
+        
+        else:
+            current_path = parts[0]
+            all_parts.insert(0, parts[1])
+
+    return all_parts
+
+# ====== pathSplitAll ========
+
+
+
+# # ====== fillAcceptedTypesList ========
+
+# def fillAcceptedTypesList(xml_files):
+
+#     # Sets to store type names
+#     fundamental_types = set()
+#     enumeration_types = set()
+#     std_types         = set()
+#     loaded_classes    = set()
+#     typedefs          = set()
+
+
+#     for current_xml_file in xml_files:
+
+#         # Reset some variables for each new xml file
+#         all_classes_dict      = {}
+#         std_types_dict        = {}
+#         typedef_dict          = {}
+#         class_dict            = {}
+#         loaded_classes_in_xml = {}
+#         func_dict             = {}
+
+
+#         # Parse xml file using ElementTree
+#         tree = ET.parse(current_xml_file)
+#         root = tree.getroot()
+
+
+#         # Update global dict: class name --> class xml element (all classes)
+#         for class_el in (   root.findall('Class') 
+#                           + root.findall('Struct') 
+#                           + root.findall('FundamentalType') 
+#                           + root.findall('Typedef') ):
+
+#             if 'demangled' in class_el.keys():
+#                 class_name_long_templ = class_el.get('demangled')
+#                 gb.all_classes_dict[class_name_long_templ] = class_el
+#             elif 'name' in class_el.keys():
+#                 class_name_long_templ = class_el.get('name')
+#                 gb.all_classes_dict[class_name_long_templ] = class_el
+
+
+#         # Update global dict: std type --> type xml element
+#         for el in root.getchildren():
+#             is_std_type = False
+#             try:
+#                 is_std_type = utils.isStdType(el)
+#             except Exception:
+#                 pass
+#             if is_std_type:
+#                 if 'demangled' in el.keys():
+#                     std_type_name = el.get('demangled')    
+#                 else:
+#                     std_type_name = el.get('name')
+
+#                 gb.std_types_dict[std_type_name] = el
+                
+
+#         # Update global dict: class name --> class xml element
+#         for el in (root.findall('Class') + root.findall('Struct')):
+
+#             try:
+#                 class_name = classutils.getClassNameDict(el)
+#             except KeyError:
+#                 continue
+
+#             # Check if we have done this class already
+#             if class_name in gb.classes_done:
+#                 infomsg.ClassAlreadyDone( class_name['long_templ'] ).printMessage()
+#                 continue
+
+#             # Check that class is requested
+#             if (class_name['long_templ'] in cfg.loaded_classes):
+
+#                 # Skip classes that are not loadable (incomplete, abstract, ...) 
+#                 # (This should not be needed as we already check all classes listed in cfg.loaded_classes...)
+#                 if not utils.isLoadable(el, print_warning=True):
+#                     continue
+
+#                 # Store class xml element
+#                 gb.loaded_classes_in_xml[class_name['long_templ']] = el
+
+
+
+#         # Update global dict: typedef name --> typedef xml element
+#         gb.typedef_dict = OrderedDict() 
+#         for el in root.findall('Typedef'):
+
+#             # Only accept native typedefs:
+#             if utils.isNative(el):
+
+#                 typedef_name = el.get('name')
+
+#                 type_dict = utils.findType(el)
+#                 type_el = type_dict['el']
+
+#                 # If underlying type is a fundamental or standard type, accept it right away
+#                 if utils.isFundamental(type_el) or utils.isStdType(type_el):
+#                     gb.typedef_dict[typedef_name] = el
+                
+#                 # If underlying type is a class/struct, check if it's acceptable
+#                 elif type_el.tag in ['Class', 'Struct']:
+#                     if 'demangled' in type_el.keys():
+#                         complete_type_name = type_el.get('demangled')
+#                     else:
+#                         complete_type_name = type_el.get('name')
+                    
+#                     if complete_type_name in cfg.loaded_classes:
+#                         gb.typedef_dict[typedef_name] = el
+                
+#                 # If neither fundamental or class/struct, ignore it.
+#                 else:
+#                     pass
+
+
+#         # Update global dict: function name --> function xml element
+#         for el in root.findall('Function'):
+#             if 'demangled' in el.keys():
+#                 demangled_name = el.get('demangled')
+
+#                 # Template functions have more complicated 'demangled' entries...
+#                 if '<' in demangled_name:
+#                     func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
+#                 else:
+#                     func_name_full = demangled_name.split('(',1)[0]
+
+#                 if func_name_full in cfg.loaded_functions:
+#                     gb.func_dict[func_name_full] = el
+
+
+#         # Update global dict: function name --> function xml element
+#         for el in root.findall('Function'):
+#             if 'demangled' in el.keys():
+#                 demangled_func_name = el.get('demangled')
+#                 # Template functions have more complicated 'demangled' entries...
+#                 if '<' in demangled_func_name:
+#                     func_name_full = demangled_func_name.split(' ',1)[1].split('(',1)[0]
+#                 else:
+#                     func_name_full = demangled_func_name.split('(',1)[0]
+#                 if func_name_full in cfg.loaded_functions:
+#                     gb.func_dict[func_name_full] = el
+
+
+
+#         # # If requested, append any (native) parent classes to the cfg.loaded_classes list
+#         # if cfg.load_parent_classes:
+
+#         #     for class_name, class_el in gb.loaded_classes_in_xml.items():
+
+#         #         parents_el_list = utils.getAllParentClasses(class_el, only_native_classes=True)
+
+#         #         for el in parents_el_list:
+
+#         #             # Skip classes that are not loadable (incomplete, abstract, ...)
+#         #             if not utils.isLoadable(el, print_warning=True):
+#         #                 continue
+
+#         #             if 'demangled' in el.keys():
+#         #                 demangled_name = el.get('demangled')
+                        
+#         #                 # - Update cfg.loaded_classes
+#         #                 if demangled_name not in cfg.loaded_classes:
+#         #                     cfg.loaded_classes.append(demangled_name)
+                        
+#         #                 # - Update gb.class_dict
+#         #                 if demangled_name not in gb.loaded_classes_in_xml.keys():
+#         #                     gb.loaded_classes_in_xml[demangled_name] = el
+
+
+#     # Update global list: accepted types
+#     fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
+#     enumeration_types  = [ '::'.join( utils.getNamespaces(el, include_self=True) ) for el in root.findall('Enumeration')]
+
+#     gb.accepted_types  = fundamental_types + enumeration_types + gb.std_types_dict.keys() + cfg.loaded_classes + gb.typedef_dict.keys()
+
+#     # Remove from gb.accepted_types all classes that use of native types as template arguments
+#     # (BOSS cannot deal with this yet...)
+#     for i in range(len(gb.accepted_types))[::-1]:
+
+#         type_name = gb.accepted_types[i]
+
+#         # Get list of all template arguments (unpack any nested template arguments)
+#         unpacked_template_args = []
+#         utils.unpackAllSpecTemplateTypes(type_name, unpacked_template_args)
+
+#         # If no template arguments, continue
+#         if unpacked_template_args == []:
+#             continue
+
+#         else:
+#             # print 'TEMPL_ARGS:', unpacked_template_args
+#             for templ_arg in unpacked_template_args:
+
+#                 # Remove asterix and/or ampersand
+#                 base_templ_arg = utils.getBasicTypeName(templ_arg)
+
+#                 # Check that this type is listed in gb.all_classes_dict (all native types should be)
+#                 if base_templ_arg in gb.all_classes_dict.keys():
+
+#                     # Get xml entry for the type
+#                     class_el = gb.all_classes_dict[base_templ_arg]
+
+#                     # If this is a native type, remove the current entry (i) in gb.accepted_types
+#                     if utils.isNative(class_el):
+                        
+#                         # Remove entry i from gb.accepted_types
+#                         gb.accepted_types.pop(i)
+#                         break
+
+
+# # ====== END: fillAcceptedTypesList ========
+
 
 

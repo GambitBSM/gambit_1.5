@@ -11,7 +11,12 @@
 #include "backend_types/Pythia_8_186/wrapper_Couplings.h"
 #include "backend_types/Pythia_8_186/wrapper_SLHAinterface.h"
 #include "backend_types/Pythia_8_186/wrapper_Vec4.h"
+#include "backend_types/Pythia_8_186/wrapper_BeamParticle.h"
+#include "backend_types/Pythia_8_186/wrapper_UserHooks.h"
 #include "backend_types/Pythia_8_186/wrapper_PartonLevel.h"
+#include "backend_types/Pythia_8_186/wrapper_SigmaTotal.h"
+#include "backend_types/Pythia_8_186/wrapper_SigmaProcess.h"
+#include "backend_types/Pythia_8_186/wrapper_ResonanceWidths.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -48,6 +53,24 @@ bool Pythia8::Pythia::readFile__BOSS(std::basic_istream<char,std::char_traits<ch
 bool Pythia8::Pythia::readFile__BOSS()
 {
     return readFile();
+}
+
+
+bool Pythia8::Pythia::setUserHooksPtr__BOSS(Pythia8::Abstract_UserHooks* userHooksPtrIn)
+{
+    return setUserHooksPtr(dynamic_cast< Pythia8::UserHooks* >(userHooksPtrIn));
+}
+
+
+bool Pythia8::Pythia::setSigmaPtr__BOSS(Pythia8::Abstract_SigmaProcess* sigmaPtrIn)
+{
+    return setSigmaPtr(dynamic_cast< Pythia8::SigmaProcess* >(sigmaPtrIn));
+}
+
+
+bool Pythia8::Pythia::setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths* resonancePtrIn)
+{
+    return setResonancePtr(dynamic_cast< Pythia8::ResonanceWidths* >(resonancePtrIn));
 }
 
 

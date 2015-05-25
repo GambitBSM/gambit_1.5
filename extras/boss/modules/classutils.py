@@ -15,6 +15,7 @@ import modules.gb as gb
 import modules.funcutils as funcutils
 import modules.utils as utils
 import modules.exceptions as exceptions
+import modules.infomsg as infomsg
 
 
 # ====== getAbstractClassName ========
@@ -131,10 +132,12 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
 
         elif parent_dict['fundamental'] or parent_dict['std']:
             # inheritance_line += 'virtual ' + parent_dict['access'] + ' ' + parent_dict['class_name']['long_templ'] + ', '
-            warnings.warn("In class '%s', the parent class '%s' is ignored (to avoid inheritance ambiguity)." % (abstr_class_name_short, parent_dict['class_name']['long_templ']))
+            reason = 'Avoid inheritance ambiguity.'
+            infomsg.ParentClassIgnored(abstr_class_name_short, parent_dict['class_name']['long_templ'], reason).printMessage()
 
         else:
-            warnings.warn("In class '%s', the parent class '%s' is ignored (not loaded class or std/fundamental type)." % (abstr_class_name_short, parent_dict['class_name']['long_templ']))
+            reason = 'Not loaded or accepted type.'
+            infomsg.ParentClassIgnored(abstr_class_name_short, parent_dict['class_name']['long_templ'], reason).printMessage()
             continue
 
     inheritance_line = inheritance_line.rstrip(', ')
@@ -174,9 +177,9 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             if el.tag == 'OperatorMethod':
                 is_operator = True
 
-            # Check if this member function should be ignored based on unloaded types.
+            # Check if this member function should be ignored.
             if funcutils.ignoreFunction(el):
-                print 'INFO: The member function "' + is_operator*'operator' + el.get('name') + '" is ignored due to non-accepted type(s).'
+                # infomsg.IgnoredMemberFunction( is_operator*'operator' + el.get('name') ).printMessage()
                 continue
 
             # Check if this member function makes use of loaded types
@@ -394,7 +397,7 @@ def constrFactoryFunctionCode(class_el, class_name, indent=4, template_types=[],
     if skip_copy_constructors:
         has_copy_constructor, copy_constr_id = checkCopyConstructor(class_el, return_id=True)
 
-    # Create list of all constructors of the class
+    # Create list of all acceptable constructors of the class
     constructor_elements = []
     if 'members' in class_el.keys():
         for mem_id in class_el.get('members').split():
@@ -404,6 +407,13 @@ def constrFactoryFunctionCode(class_el, class_name, indent=4, template_types=[],
                     pass
                 else:
                     constructor_elements.append(el)
+                    
+
+    # If no public constructors are found, return nothing
+    if len(constructor_elements) == 0:
+        reason = "No public constructors."
+        infomsg.NoFactoryFunctions(class_name['long_templ'], reason).printMessage()
+        return ''
 
     # List to hold include statements that are generated based on the types used
     # in the constructors
@@ -418,8 +428,8 @@ def constrFactoryFunctionCode(class_el, class_name, indent=4, template_types=[],
 
         if add_include_statements:
             # - Generate include statements based on the types used in the constructor
-            include_statements += utils.getIncludeStatements(el, convert_loaded_to='none', input_element='function', add_extra_include_path=True, forward_declared='exclude')
-            include_statements += utils.getIncludeStatements(el, convert_loaded_to='wrapper', input_element='function', add_extra_include_path=False, forward_declared='exclude', use_full_path=True)
+            include_statements += utils.getIncludeStatements(el, convert_loaded_to='none', input_element='function', forward_declared='exclude')
+            include_statements += utils.getIncludeStatements(el, convert_loaded_to='wrapper', input_element='function', forward_declared='exclude', use_full_path=True)
 
         # We need to generate as many overloaded versions as there are arguments with default values
         n_overloads = funcutils.numberOfDefaultArgs(el)
@@ -488,11 +498,21 @@ def constrFactoryFunctionCode(class_el, class_name, indent=4, template_types=[],
             info_dict['name']         = factory_name
             info_dict['args_bracket'] = args_bracket_nonames
             info_dict['symbol']       = ''  # Will be filled when the factory function source files are parsed by gccxml
-            # gb.factory_info[class_name['long']].append( (factory_name, args_bracket_nonames) )
+
+            if class_name['long'] not in gb.factory_info.keys():
+                gb.factory_info[class_name['long']] = []
             gb.factory_info[class_name['long']].append( info_dict )
 
             # Increment counter
             counter += 1
+
+
+    # If no functions were generated, return nothing
+    if func_def == '':
+        reason = "No accepted constructors."
+        infomsg.NoFactoryFunctions(class_name['long_templ'], reason).printMessage()
+        return ''
+
 
     # Encapsulate code in the correct namespace
     namespaces = utils.getNamespaces(class_el)
@@ -507,10 +527,13 @@ def constrFactoryFunctionCode(class_el, class_name, indent=4, template_types=[],
 
     if add_include_statements:
         try:
-            original_header_fname = utils.getOriginalHeaderPath(class_el, full_path=False)
-            include_statements.append( '#include "' + os.path.join(cfg.add_path_to_includes, original_header_fname) + '"' )
+            original_header_fname = utils.getOriginalHeaderPath(class_el, full_path=True)
+            use_path = utils.shortenHeaderPath(original_header_fname)
+            include_statements.append( '#include "' + use_path + '"')
+
         except exceptions.ReturnError as e:
-            print 'INFO: No original header file found for class "%s". No include statement generated for the factory source file.' % class_name['long_templ']
+            reason =  "No original header file found."
+            infomsg.NoIncludeStatementGenerated(class_name['long_templ'], reason).printMessage()
             pass
 
         include_statements.append( '#include "' + gb.new_header_files[class_name['long']]['wrapper_fullpath'] + '"' )
@@ -1040,6 +1063,7 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
     factory_counter = 0
     for i, constr_el in enumerate(class_constructors):
 
+       
         # We need pointers for all the overloaded factory functions (generated due to default value arguments)
         n_overloads = funcutils.numberOfDefaultArgs(constr_el)
 
@@ -1772,8 +1796,8 @@ def generateWrapperHeaderCode(class_el, class_name, abstr_class_name, namespaces
             continue
 
         # Store constructor if acceptable
-        if (mem_el.tag == 'Constructor') and (mem_el.get('access') in ['public', 'protected']):
-
+        # if (mem_el.tag == 'Constructor') and (mem_el.get('access') in ['public', 'protected']):
+        if (mem_el.tag == 'Constructor') and (mem_el.get('access') == 'public'):
             class_constructors.append(mem_el)
 
     # Create a list of dicts with info on the (loaded) parent classes
@@ -1828,7 +1852,7 @@ def generateWrapperHeaderCode(class_el, class_name, abstr_class_name, namespaces
         decl_code_include_statements.append('#include "' + gb.new_header_files[ parent_dict['class_name']['long'] ]['wrapper_decl'] + '"')
 
     # - Any other types (excluding the current wrapper class)
-    decl_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', add_extra_include_path=False, exclude_types=[class_name], use_full_path=False, forward_declared='exclude')
+    decl_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', exclude_types=[class_name], use_full_path=False, forward_declared='exclude')
 
     # Remove duplicates and construct code
     decl_code_include_statements = list( OrderedDict.fromkeys(decl_code_include_statements) )
@@ -1843,7 +1867,7 @@ def generateWrapperHeaderCode(class_el, class_name, abstr_class_name, namespaces
     def_code_include_statements = []
 
     # - Any other types (excluding the current wrapper class)
-    def_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', add_extra_include_path=False, exclude_types=[class_name], use_full_path=False, forward_declared='include')
+    def_code_include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', exclude_types=[class_name], use_full_path=False, forward_declared='include')
 
     # Remove duplicates and construct code
     def_code_include_statements = list( OrderedDict.fromkeys(def_code_include_statements) )
@@ -1894,16 +1918,27 @@ def isAcceptedMemberVariable(mem_el):
     is_accepted = True
 
     if not utils.isAcceptedType(mem_el):
-        print 'INFO: Problem with member variable "%s". Type is not accepted or unknown to BOSS.' % (mem_el.get('name'))
+        reason = "Non-accepted type."
+        infomsg.IgnoredMemberVariable(mem_el.get('name'), reason).printMessage()
         is_accepted = False
         return is_accepted
 
+    # Should this member be ditched?
+    if 'name' in mem_el.keys():
+        namespaces_list = utils.getNamespaces(mem_el, include_self=True)
+        full_name = '::'.join(namespaces_list)
+        if full_name in cfg.ditch:
+            is_accepted = False
+            return is_accepted
+
+    # BOSS cannot yet handle member variables that are pointer-to-loaded-class.
     type_dict = utils.findType(mem_el)
     type_name = type_dict['name']
     pointerness = type_dict['pointerness']
 
     if utils.isLoadedClass(mem_el) and pointerness > 0:
-        print 'INFO: Problem with member variable "%s" of type "%s". BOSS cannot yet handle member variables of type pointer-to-loaded-class.' % (mem_el.get('name'), type_name)
+        reason = "BOSS cannot yet handle member variables of type pointer-to-loaded-class."
+        infomsg.IgnoredMemberVariable(mem_el.get('name'), reason).printMessage()
         is_accepted = False
         return is_accepted
 

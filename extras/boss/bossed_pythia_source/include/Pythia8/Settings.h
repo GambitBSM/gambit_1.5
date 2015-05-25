@@ -67,7 +67,13 @@ public:
 
 // Class for double parms (where parm is shorthand for parameter).
 
-class Parm {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_186/abstract_Parm.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class Parm : public virtual Abstract_Parm {
 
 public:
 
@@ -83,6 +89,29 @@ public:
   double valNow, valDefault;
   bool   hasMin, hasMax;
   double valMin, valMax;
+
+
+        public:
+            Abstract_Parm* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_Parm* in);
+
+        public:
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> >& name_ref__BOSS();
+
+            double& valNow_ref__BOSS();
+
+            double& valDefault_ref__BOSS();
+
+            bool& hasMin_ref__BOSS();
+
+            bool& hasMax_ref__BOSS();
+
+            double& valMin_ref__BOSS();
+
+            double& valMax_ref__BOSS();
+
+
 
 };
 

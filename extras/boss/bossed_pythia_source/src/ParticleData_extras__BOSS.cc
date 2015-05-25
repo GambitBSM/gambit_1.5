@@ -1,6 +1,7 @@
 #include <string>
 #include <ostream>
 #include <vector>
+#include "Pythia8/ResonanceWidths.h"
 #include "backend_types/Pythia_8_186/wrapper_Info.h"
 #include "backend_types/Pythia_8_186/wrapper_Settings.h"
 #include "backend_types/Pythia_8_186/wrapper_Rndm.h"
@@ -265,6 +266,12 @@ void Pythia8::ParticleData::setAll__BOSS(int idIn, std::basic_string<char,std::c
 void Pythia8::ParticleData::rescaleBR__BOSS(int idIn)
 {
     rescaleBR(idIn);
+}
+
+
+void Pythia8::ParticleData::setResonancePtr__BOSS(int idIn, Pythia8::Abstract_ResonanceWidths* resonancePtrIn)
+{
+    setResonancePtr(idIn, dynamic_cast< Pythia8::ResonanceWidths* >(resonancePtrIn));
 }
 
 

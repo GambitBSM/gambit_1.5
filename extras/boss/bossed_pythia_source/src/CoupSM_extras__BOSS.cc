@@ -1,4 +1,6 @@
 #include "backend_types/Pythia_8_186/wrapper_Rndm.h"
+#include "backend_types/Pythia_8_186/wrapper_AlphaStrong.h"
+#include "backend_types/Pythia_8_186/wrapper_AlphaEM.h"
 #include "backend_types/Pythia_8_186/wrapper_Settings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
