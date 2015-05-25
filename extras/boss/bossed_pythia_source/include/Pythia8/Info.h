@@ -1,3 +1,6 @@
+#ifndef __boss__Info_Pythia_8_186_h__
+#define __boss__Info_Pythia_8_186_h__
+
 // Info.h is a part of the PYTHIA event generator.
 // Copyright (C) 2014 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
@@ -23,8 +26,10 @@ namespace Pythia8 {
 // are still public, to work also for user-written FSR/ISR classes.
 
 } 
+#define ENUMS_DECLARED
 #include "backend_types/Pythia_8_186/abstract_Info.h"
-#include "abstracttypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Info : public virtual Abstract_Info {
 
@@ -409,14 +414,16 @@ private:
 
         public:
             Abstract_Info* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Info* in);
+
 
         public:
             void list__BOSS() const;
 
             bool hasSub__BOSS() const;
 
-            std::string nameSub__BOSS() const;
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameSub__BOSS() const;
 
             int codeSub__BOSS() const;
 
@@ -480,7 +487,7 @@ private:
 
             double phiHat__BOSS() const;
 
-            std::string nameProc__BOSS();
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameProc__BOSS();
 
             long int nTried__BOSS();
 
@@ -496,26 +503,26 @@ private:
 
             void addCounter__BOSS(int);
 
-            void errorMsg__BOSS(std::string, std::string, bool);
+            void errorMsg__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool);
 
-            void errorMsg__BOSS(std::string, std::string);
+            void errorMsg__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
-            void errorMsg__BOSS(std::string);
+            void errorMsg__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
             void errorStatistics__BOSS();
 
         private:
-            void setType__BOSS(std::string, int, int, bool, bool, bool, bool, bool);
+            void setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, int, bool, bool, bool, bool, bool);
 
-            void setType__BOSS(std::string, int, int, bool, bool, bool, bool);
+            void setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, int, bool, bool, bool, bool);
 
-            void setType__BOSS(std::string, int, int, bool, bool, bool);
+            void setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, int, bool, bool, bool);
 
-            void setType__BOSS(std::string, int, int, bool, bool);
+            void setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, int, bool, bool);
 
-            void setType__BOSS(std::string, int, int, bool);
+            void setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, int, bool);
 
-            void setType__BOSS(std::string, int, int);
+            void setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, int);
 
             void setTypeMPI__BOSS(int, double, int, int);
 
@@ -532,3 +539,5 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_Info_H
+
+#endif /* __boss__Info_Pythia_8_186_h__ */
