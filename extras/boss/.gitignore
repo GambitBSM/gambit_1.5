@@ -1,5 +1,7 @@
-# Make settings for the BOSSed Pythia
+# Files in the BOSSed Pythia source 
 bossed_pythia_source/Makefile.inc
+bossed_pythia_source/examples/Makefile.inc
+bossed_pythia_source/bin/pythia8-config
 
 # BOSS reset info files
 reset_info.*.boss
