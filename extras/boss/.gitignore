@@ -1,0 +1,5 @@
+# Make settings for the BOSSed Pythia
+bossed_pythia_source/Makefile.inc
+
+# BOSS reset info files
+reset_info.*.boss
