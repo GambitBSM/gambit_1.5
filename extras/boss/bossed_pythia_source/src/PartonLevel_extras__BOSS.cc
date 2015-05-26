@@ -1,14 +1,14 @@
 #include <vector>
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_Rndm.h"
-#include "backend_types/Pythia_8_186/wrapper_BeamParticle.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
-#include "backend_types/Pythia_8_186/wrapper_UserHooks.h"
-#include "backend_types/Pythia_8_186/wrapper_ResonanceDecays.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_SigmaTotal.h"
-#include "backend_types/Pythia_8_186/wrapper_Event.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleData.h"
+#include "backend_types/Pythia_8_209/wrapper_Rndm.h"
+#include "backend_types/Pythia_8_209/wrapper_BeamParticle.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_UserHooks.h"
+#include "backend_types/Pythia_8_209/wrapper_ResonanceDecays.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_SigmaTotal.h"
+#include "backend_types/Pythia_8_209/wrapper_Event.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/PartonLevel.h"
@@ -73,9 +73,21 @@ void Pythia8::PartonLevel::leaveResolvedDiff__BOSS(int iHardLoop, Pythia8::Abstr
 }
 
 
+void Pythia8::PartonLevel::setupHardDiff__BOSS(Pythia8::Abstract_Event& process)
+{
+    setupHardDiff(dynamic_cast< Pythia8::Event& >(process));
+}
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+void Pythia8::PartonLevel::leaveHardDiff__BOSS(Pythia8::Abstract_Event& process, Pythia8::Abstract_Event& event)
+{
+    leaveHardDiff(dynamic_cast< Pythia8::Event& >(process), dynamic_cast< Pythia8::Event& >(event));
+}
+
+
+
+
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_PartonLevel* Pythia8::PartonLevel::pointerCopy__BOSS()
 {

@@ -1,8 +1,8 @@
-#ifndef __boss__ResonanceWidths_Pythia_8_186_h__
-#define __boss__ResonanceWidths_Pythia_8_186_h__
+#ifndef __boss__ResonanceWidths_Pythia_8_209_h__
+#define __boss__ResonanceWidths_Pythia_8_209_h__
 
 // ResonanceWidths.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -35,7 +35,7 @@ class Couplings;
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_ResonanceWidths.h"
+#include "backend_types/Pythia_8_209/abstract_ResonanceWidths.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -49,14 +49,14 @@ public:
   // Set up standard properties.
   void initBasic(int idResIn, bool isGenericIn = false) {
     idRes = idResIn; isGeneric = isGenericIn;}
- 
+
   // Calculate and store partial and total widths at the nominal mass.
   virtual bool init(Info* infoPtrIn, Settings* settingsPtrIn,
     ParticleData* particleDataPtrIn, Couplings* couplingsPtrIn);
 
   // Return identity of particle species.
   int id() const {return idRes;}
- 
+
   // Calculate the total/open width for given mass, charge and instate.
   double width(int idSgn, double mHatIn, int idInFlavIn = 0,
     bool openOnly = false, bool setBR = false, int idOutFlav1 = 0,
@@ -116,7 +116,7 @@ protected:
 
   // Pointers to Standard Model and SUSY couplings.
   Couplings*    couplingsPtr;
- 
+
   // Initialize constants.
   virtual void initConstants() {}
 
@@ -124,7 +124,7 @@ protected:
   // for use by derived classes that implement additional models (eg SUSY).
   virtual bool initBSM() {return true;}
   virtual bool allowCalc() {return true;}
- 
+
   // Calculate various common prefactors for the current mass.
   // Optional argument calledFromInit only used for Z0.
   virtual void calcPreFac(bool = false) {}
@@ -175,12 +175,12 @@ protected:
             double numInt2BW__BOSS(double, double, double, double, double, double, double);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceGeneric class handles a generic resonance.
-// Only needs a constructor and allowCalc = false; for the rest uses 
-// defaults in base class. 
+// Only needs a constructor and allowCalc = false; for the rest uses
+// defaults in base class.
 
 class ResonanceGeneric : public ResonanceWidths {
 
@@ -193,14 +193,14 @@ public:
   virtual bool allowCalc() {return false;}
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceGmZ class handles the gamma*/Z0 resonance.
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_ResonanceGmZ.h"
+#include "backend_types/Pythia_8_209/abstract_ResonanceGmZ.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -216,10 +216,10 @@ private:
   // Locally stored properties and couplings.
   int    gmZmode;
   double thetaWRat, ei2, eivi, vi2ai2, gamNorm, intNorm, resNorm;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -239,7 +239,7 @@ private:
             void calcWidth__BOSS();
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceW class handles the W+- resonance.
@@ -255,10 +255,10 @@ private:
 
   // Locally stored properties and couplings.
   double thetaWRat, alpEM;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -266,7 +266,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceTop class handles the top/antitop resonance.
@@ -277,15 +277,15 @@ public:
 
   // Constructor.
   ResonanceTop(int idResIn) {initBasic(idResIn);}
- 
+
 private:
 
   // Locally stored properties and couplings.
   double thetaWRat, m2W, tanBeta, tan2Beta, mbRun;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -293,7 +293,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceFour class handles fourth-generation resonances.
@@ -304,15 +304,15 @@ public:
 
   // Constructor.
   ResonanceFour(int idResIn) {initBasic(idResIn);}
- 
+
 private:
 
   // Locally stored properties and couplings.
   double thetaWRat, m2W;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -320,7 +320,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceH class handles the SM and BSM Higgs resonance.
@@ -346,13 +346,13 @@ private:
   bool   useCubicWidth, useRunLoopMass, useNLOWidths;
   double sin2tW, cos2tW, mT, mZ, mW, mHchg, GammaT, GammaZ, GammaW,
          rescAlpS, rescColQ, coup2d, coup2u, coup2l, coup2Z, coup2W,
-         coup2Hchg, coup2H1H1, coup2A3A3, coup2H1Z, coup2A3Z, coup2A3H1, 
+         coup2Hchg, coup2H1H1, coup2A3A3, coup2H1Z, coup2A3Z, coup2A3H1,
          coup2HchgW, mLowT, mStepT, mLowZ, mStepZ, mLowW, mStepW,
          kinFacT[101], kinFacZ[101], kinFacW[101];
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -369,7 +369,7 @@ private:
   double eta2gaZ();
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceHchg class handles the H+- resonance.
@@ -386,10 +386,10 @@ private:
   // Locally stored properties and couplings.
   bool   useCubicWidth;
   double thetaWRat, mW, tanBeta, tan2Beta, coup2H1W;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -397,7 +397,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceZprime class handles the gamma*/Z0 /Z'^0 resonance.
@@ -412,14 +412,14 @@ public:
 private:
 
   // Locally stored properties and couplings.
-  int    gmZmode;
+  int    gmZmode, maxZpGen;
   double sin2tW, cos2tW, thetaWRat, mZ, GammaZ, m2Z, GamMRatZ, afZp[20],
          vfZp[20], coupZpWW, ei2, eivi, vai2, eivpi, vaivapi, vapi2,
          gamNorm, gamZNorm, ZNorm, gamZpNorm, ZZpNorm, ZpNorm;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -427,7 +427,7 @@ private:
   virtual void calcWidth(bool calledFromInit = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceWprime class handles the W'+- resonance.
@@ -443,10 +443,10 @@ private:
 
   // Locally stored properties and couplings.
   double thetaWRat, cos2tW, alpEM, aqWp, vqWp, alWp, vlWp, coupWpWZ;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -454,7 +454,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceRhorizontal class handles the R^0 resonance.
@@ -470,10 +470,10 @@ private:
 
   // Locally stored properties and couplings.
   double thetaWRat;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -481,7 +481,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-   
+
 //==========================================================================
 
 // The ResonanceExcited class handles excited-fermion resonances.
@@ -496,11 +496,11 @@ public:
 private:
 
   // Locally stored properties and couplings.
-  double Lambda, coupF, coupFprime, coupFcol, sin2tW, cos2tW;
- 
+  double Lambda, coupF, coupFprime, coupFcol, contactDec, sin2tW, cos2tW;
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -508,7 +508,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceGraviton class handles the excited Graviton resonance.
@@ -519,19 +519,19 @@ public:
 
   // Constructor.
   ResonanceGraviton(int idResIn) {initBasic(idResIn);}
- 
+
 private:
 
   // Locally stored properties and couplings.
   bool   eDsmbulk, eDvlvl;
   double kappaMG;
- 
+
   // Couplings between graviton and SM (map from particle id to coupling).
   double eDcoupling[27];
 
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -550,7 +550,7 @@ public:
 
   // Constructor.
   ResonanceKKgluon(int idResIn) {initBasic(idResIn);}
- 
+
 private:
 
   // Locally stored properties.
@@ -566,7 +566,7 @@ private:
 
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool calledFromInit = false);
 
@@ -590,10 +590,10 @@ private:
 
   // Locally stored properties and couplings.
   double kCoup;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -617,10 +617,10 @@ private:
 
   // Locally stored properties and couplings.
   double thetaWRat, mWR;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -628,7 +628,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceZRight class handles the Z_R^0 resonance.
@@ -644,10 +644,10 @@ private:
 
   // Locally stored properties and couplings.
   double sin2tW, thetaWRat;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -655,7 +655,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceWRight class handles the W_R+- resonance.
@@ -666,15 +666,15 @@ public:
 
   // Constructor.
   ResonanceWRight(int idResIn) {initBasic(idResIn);}
-  
+
 private:
 
   // Locally stored properties and couplings.
   double thetaWRat;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -682,7 +682,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 // The ResonanceHchgchgLeft class handles the H++/H-- (left) resonance.
@@ -693,15 +693,15 @@ public:
 
   // Constructor.
   ResonanceHchgchgLeft(int idResIn) {initBasic(idResIn);}
- 
+
 private:
 
   // Locally stored properties and couplings.
   double yukawa[4][4], gL, vL, mW;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -709,7 +709,7 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-   
+
 //==========================================================================
 
 // The ResonanceHchgchgRight class handles the H++/H-- (right) resonance.
@@ -720,16 +720,16 @@ public:
 
   // Constructor.
   ResonanceHchgchgRight(int idResIn) {initBasic(idResIn);}
- 
+
 private:
 
   // Locally stored properties and couplings.
   int    idWR;
   double yukawa[4][4], gR;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   virtual void calcPreFac(bool = false);
 
@@ -737,11 +737,11 @@ private:
   virtual void calcWidth(bool = false);
 
 };
-  
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_ResonanceWidths_H
 
-#endif /* __boss__ResonanceWidths_Pythia_8_186_h__ */
+#endif /* __boss__ResonanceWidths_Pythia_8_209_h__ */

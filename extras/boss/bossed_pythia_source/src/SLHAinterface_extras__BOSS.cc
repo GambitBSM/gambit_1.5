@@ -1,9 +1,9 @@
-#include "backend_types/Pythia_8_186/wrapper_CoupSUSY.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Rndm.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleData.h"
+#include "backend_types/Pythia_8_209/wrapper_CoupSUSY.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Rndm.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleData.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/SLHAinterface.h"
@@ -14,9 +14,9 @@ void Pythia8::SLHAinterface::setPtr__BOSS(Pythia8::Abstract_Info* infoPtrIn)
 }
 
 
-void Pythia8::SLHAinterface::init__BOSS(Pythia8::Abstract_Settings& settings, Pythia8::Abstract_Rndm* rndmPtr, Pythia8::Abstract_Couplings* couplingsPtrIn, Pythia8::Abstract_ParticleData* particleDataPtr, bool& useSHLAcouplings)
+void Pythia8::SLHAinterface::init__BOSS(Pythia8::Abstract_Settings& settings, Pythia8::Abstract_Rndm* rndmPtr, Pythia8::Abstract_Couplings* couplingsPtrIn, Pythia8::Abstract_ParticleData* particleDataPtr, bool& useSHLAcouplings, std::basic_stringstream<char,std::char_traits<char>,std::allocator<char> >& ParticleDataBuffer)
 {
-    init(dynamic_cast< Pythia8::Settings& >(settings), dynamic_cast< Pythia8::Rndm* >(rndmPtr), dynamic_cast< Pythia8::Couplings* >(couplingsPtrIn), dynamic_cast< Pythia8::ParticleData* >(particleDataPtr), useSHLAcouplings);
+    init(dynamic_cast< Pythia8::Settings& >(settings), dynamic_cast< Pythia8::Rndm* >(rndmPtr), dynamic_cast< Pythia8::Couplings* >(couplingsPtrIn), dynamic_cast< Pythia8::ParticleData* >(particleDataPtr), useSHLAcouplings, ParticleDataBuffer);
 }
 
 
@@ -38,7 +38,7 @@ Pythia8::Abstract_CoupSUSY& Pythia8::SLHAinterface::coupSUSY_ref__BOSS() { retur
 int& Pythia8::SLHAinterface::meMode_ref__BOSS() { return meMode; }
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_SLHAinterface* Pythia8::SLHAinterface::pointerCopy__BOSS()
 {

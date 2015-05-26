@@ -1,5 +1,5 @@
 // History.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -350,8 +350,8 @@ private:
   // Function to return the PDF-ratio part of the CKKWL weight.
   double weightTreePDFs( double maxscale, double pdfScale );
   // Function to return the no-emission probability part of the CKKWL weight.
-  double weightTreeEmissions( PartonLevel* trial, int type, int njetMax,
-    double maxscale );
+  double weightTreeEmissions( PartonLevel* trial, int type, int njetMin,
+    int njetMax, double maxscale );
 
   // Function to generate the O(\alpha_s)-term of the CKKWL-weight
   double weightFirst(PartonLevel* trial, double as0, double muR,

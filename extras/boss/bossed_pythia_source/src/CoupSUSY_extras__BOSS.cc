@@ -1,8 +1,7 @@
 #include <complex>
 #include "Pythia8/ParticleData.h"
-#include <string>
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/SusyCouplings.h"
@@ -150,8 +149,12 @@ std::complex<double> (&Pythia8::CoupSUSY::Rusq_ref__BOSS())[7][7] { return Rusq;
 
 std::complex<double> (&Pythia8::CoupSUSY::Rdsq_ref__BOSS())[7][7] { return Rdsq; }
 
+std::complex<double> (&Pythia8::CoupSUSY::Rsl_ref__BOSS())[7][7] { return Rsl; }
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+std::complex<double> (&Pythia8::CoupSUSY::Rsv_ref__BOSS())[7][7] { return Rsv; }
+
+
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_CoupSUSY* Pythia8::CoupSUSY::pointerCopy__BOSS()
 {

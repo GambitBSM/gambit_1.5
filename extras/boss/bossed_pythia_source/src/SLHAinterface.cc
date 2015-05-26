@@ -1,5 +1,5 @@
 // SLHAinterface.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -18,7 +18,7 @@ namespace Pythia8 {
 
 void SLHAinterface::init( Settings& settings, Rndm* rndmPtr,
   Couplings* couplingsPtrIn, ParticleData* particleDataPtr,
-  bool& useSLHAcouplings) {
+  bool& useSLHAcouplings, stringstream& particleDataBuffer) {
 
   // Initialize SLHA couplingsPtr to PYTHIA one by default
   couplingsPtr     = couplingsPtrIn;
@@ -27,7 +27,17 @@ void SLHAinterface::init( Settings& settings, Rndm* rndmPtr,
   // Check if SUSY couplings need to be read in
   if( !initSLHA(settings, particleDataPtr))
     infoPtr->errorMsg("Error in SLHAinterface::init: "
-                      "Could not read SLHA file");
+      "Could not read SLHA file");
+
+  // Reset any particle-related user settings.
+  string line;
+  string warnPref = "Warning in SLHAinterface::init: ";
+  while (getline(particleDataBuffer, line)
+    && settings.flag("SLHA:allowUserOverride")) {
+    bool pass = particleDataPtr->readString(line, true);
+    if (!pass) infoPtr->errorMsg(warnPref + "Unable to process line " + line);
+    else infoPtr->errorMsg(warnPref + "Overwriting SLHA by " + line);
+  }
 
   // SLHA sets isSUSY flag to tell us if there was an SLHA SUSY spectrum
   if (couplingsPtr->isSUSY) {
@@ -63,6 +73,8 @@ bool SLHAinterface::initSLHA(Settings& settings,
   string slhaFile    = settings.word("SLHA:file");
   int    verboseSLHA = settings.mode("SLHA:verbose");
   bool   slhaUseDec  = settings.flag("SLHA:useDecayTable");
+  bool   noSLHAFile  = ( slhaFile == "none" || slhaFile == "void"
+                      || slhaFile == ""     || slhaFile == " " );
 
   // Set internal data members
   meMode      = settings.mode("SLHA:meMode");
@@ -75,10 +87,19 @@ bool SLHAinterface::initSLHA(Settings& settings,
 
   // First check LHEF header (if reading from LHEF)
   if (readFrom == 1) {
+    // Check if there is a <slha> tag in the LHEF header
+    // Note: if the <slha> tag is NOT inside the <header>, it will be ignored.
+    string slhaInHeader( infoPtr->header("slha") );
+    if (slhaInHeader == "" && noSLHAFile) return true;
+    // If there is an <slha> tag, read file.
     if (lhefHeader != "void")
       ifailLHE = slha.readFile(lhefHeader, verboseSLHA, slhaUseDec );
     else if (lhefFile != "void")
       ifailLHE = slha.readFile(lhefFile, verboseSLHA, slhaUseDec );
+    else if (noSLHAFile) {
+      istringstream slhaInHeaderStream(slhaInHeader);
+      ifailLHE = slha.readFile(slhaInHeaderStream, verboseSLHA, slhaUseDec );
+    }
   }
 
   // If LHEF read successful, everything needed should already be ready
@@ -88,10 +109,7 @@ bool SLHAinterface::initSLHA(Settings& settings,
     // If no LHEF file or no SLHA info in header, read from SLHA:file
   } else {
     lhefFile = "void";
-    if ( settings.word("SLHA:file") == "none"
-      || settings.word("SLHA:file") == "void"
-      || settings.word("SLHA:file") == ""
-      || settings.word("SLHA:file") == " ") return true;
+    if ( noSLHAFile ) return true;
     ifailSpc = slha.readFile(slhaFile,verboseSLHA, slhaUseDec);
   }
 
@@ -124,15 +142,45 @@ bool SLHAinterface::initSLHA(Settings& settings,
   }
   else if (ifailSpc < 0) {
     infoPtr->errorMsg(warnPref + "Problem with SLHA spectrum.",
-                      "\n Only using masses and switching off SUSY.");
+      "\n Only using masses and switching off SUSY.");
     settings.flag("SUSY:all", false);
     couplingsPtr->isSUSY = false;
     slha.printSpectrum(ifailSpc);
   }
 
-  // NMSSM spectrum (modify existing Higgs names and add particles) 
+  // SLHA1 : SLHA2 compatibility
+  // Check whether scalar particle masses are ordered
+  bool isOrderedQ = true;
+  bool isOrderedL = true;
+  int idSdown[6]={1000001,1000003,1000005,2000001,2000003,2000005};
+  int idSup[6]={1000002,1000004,1000006,2000002,2000004,2000006};
+  int idSlep[6]={1000011,1000013,1000015,2000011,2000013,2000015};
+  for (int j=0;j<=4;j++) {
+    if (slha.mass(idSlep[j+1]) < slha.mass(idSlep[j]))
+      isOrderedL  = false;
+    if (slha.mass(idSup[j+1]) < slha.mass(idSup[j]))
+      isOrderedQ  = false;
+    if (slha.mass(idSdown[j+1]) < slha.mass(idSdown[j]))
+      isOrderedQ  = false;
+  }
+
+  // If ordered, change sparticle labels to mass-ordered enumeration
+  for (int i=1;i<=6;i++) {
+    ostringstream indx;
+    indx << i;
+    string uName = "~u_"+indx.str();
+    string dName = "~d_"+indx.str();
+    string lName = "~e_"+indx.str();
+    if (isOrderedQ) {
+      particleDataPtr->names(idSup[i-1],uName,uName+"bar");
+      particleDataPtr->names(idSdown[i-1],dName,dName+"bar");
+    }
+    if (isOrderedL) particleDataPtr->names(idSlep[i-1],lName+"-",lName+"+");
+  }
+
+  // NMSSM spectrum (modify existing Higgs names and add particles)
   if ( (ifailSpc == 1 || ifailSpc == 0) &&  slha.modsel(3) >= 1 ) {
-    // Modify Higgs names 
+    // Modify Higgs names
     particleDataPtr->name(25,"H_1");
     particleDataPtr->name(35,"H_2");
     particleDataPtr->name(45,"H_3");
@@ -144,35 +192,43 @@ bool SLHAinterface::initSLHA(Settings& settings,
   // SLHA2 spectrum with flavour mixing (modify squark and/or slepton names)
   if ( (ifailSpc == 1 || ifailSpc == 0) &&  slha.modsel(6) >= 1 ) {
     // Squark flavour violation
-    if ( (slha.modsel(6) == 1 || slha.modsel(6) >= 3) 
+    if ( (slha.modsel(6) == 1 || slha.modsel(6) >= 3)
          && slha.usqmix.exists() && slha.dsqmix.exists() ) {
       // Modify squark names
-      particleDataPtr->names(1000001,"~d1","~d1bar");
-      particleDataPtr->names(1000002,"~u1","~u1bar");
-      particleDataPtr->names(1000003,"~d2","~d2bar");
-      particleDataPtr->names(1000004,"~u2","~u2bar");
-      particleDataPtr->names(1000005,"~d3","~d3bar");
-      particleDataPtr->names(1000006,"~u3","~u3bar");
-      particleDataPtr->names(2000001,"~d4","~d4bar");
-      particleDataPtr->names(2000002,"~u4","~u4bar");
-      particleDataPtr->names(2000003,"~d5","~d5bar");
-      particleDataPtr->names(2000004,"~u5","~u5bar");
-      particleDataPtr->names(2000005,"~d6","~d6bar");
-      particleDataPtr->names(2000006,"~u6","~u6bar");
+      particleDataPtr->names(1000001,"~d_1","~d_1bar");
+      particleDataPtr->names(1000002,"~u_1","~u_1bar");
+      particleDataPtr->names(1000003,"~d_2","~d_2bar");
+      particleDataPtr->names(1000004,"~u_2","~u_2bar");
+      particleDataPtr->names(1000005,"~d_3","~d_3bar");
+      particleDataPtr->names(1000006,"~u_3","~u_3bar");
+      particleDataPtr->names(2000001,"~d_4","~d_4bar");
+      particleDataPtr->names(2000002,"~u_4","~u_4bar");
+      particleDataPtr->names(2000003,"~d_5","~d_5bar");
+      particleDataPtr->names(2000004,"~u_5","~u_5bar");
+      particleDataPtr->names(2000005,"~d_6","~d_6bar");
+      particleDataPtr->names(2000006,"~u_6","~u_6bar");
     }
     // Slepton flavour violation
-    if ( (slha.modsel(6) == 2 || slha.modsel(6) >= 3) 
+    if ( (slha.modsel(6) == 2 || slha.modsel(6) >= 3)
          && slha.selmix.exists()) {
       // Modify slepton names
-      particleDataPtr->names(1000011,"~e1-","~e1+");
-      particleDataPtr->names(1000013,"~e2-","~e2+");
-      particleDataPtr->names(1000015,"~e3-","~e3+");
-      particleDataPtr->names(2000011,"~e4-","~e4+");
-      particleDataPtr->names(2000013,"~e5-","~e5+");
-      particleDataPtr->names(2000015,"~e6-","~e6+");
+      particleDataPtr->names(1000011,"~e_1-","~e_1+");
+      particleDataPtr->names(1000013,"~e_2-","~e_2+");
+      particleDataPtr->names(1000015,"~e_3-","~e_3+");
+      particleDataPtr->names(2000011,"~e_4-","~e_4+");
+      particleDataPtr->names(2000013,"~e_5-","~e_5+");
+      particleDataPtr->names(2000015,"~e_6-","~e_6+");
+    }
+    // Neutrino flavour violation
+    if ( (slha.modsel(6) == 2 || slha.modsel(6) >= 3)
+         && slha.upmns.exists()) {
+      // Modify neutrino names (note that SM processes may not use UPMNS)
+      particleDataPtr->names(12,"nu_1","nu_1bar");
+      particleDataPtr->names(14,"nu_2","nu_2bar");
+      particleDataPtr->names(16,"nu_3","nu_3bar");
     }
     // Sneutrino flavour violation
-    if ( (slha.modsel(6) == 2 || slha.modsel(6) >= 3) 
+    if ( (slha.modsel(6) == 2 || slha.modsel(6) >= 3)
          && slha.snumix.exists()) {
       // Modify sneutrino names
       particleDataPtr->names(1000012,"~nu_1","~nu_1bar");
@@ -187,8 +243,8 @@ bool SLHAinterface::initSLHA(Settings& settings,
       particleDataPtr->names(1000016,"~nu_S3","~nu_S3bar");
       // Add the pseudoscalar sneutrinos
       particleDataPtr->addParticle(1000017, "~nu_A1", "~nu_A1bar",1, 0., 0);
-      particleDataPtr->addParticle(1000018, "~nu_A2", "~nu_A2bar",1, 0., 0);    
-      particleDataPtr->addParticle(1000019, "~nu_A3", "~nu_A3bar",1, 0., 0);    
+      particleDataPtr->addParticle(1000018, "~nu_A2", "~nu_A2bar",1, 0., 0);
+      particleDataPtr->addParticle(1000019, "~nu_A3", "~nu_A3bar",1, 0., 0);
     }
   }
 
@@ -196,36 +252,38 @@ bool SLHAinterface::initSLHA(Settings& settings,
   if ( (ifailSpc == 1 || ifailSpc == 0) &&  slha.modsel(4) >= 1 ) {
     if ( slha.rvnmix.exists() ) {
       // Neutralinos -> neutrinos
+      // Maintain R-conserving names since mass-ordering unlikely to change.
       particleDataPtr->names(12,"nu_1","nu_1bar");
       particleDataPtr->names(14,"nu_2","nu_2bar");
       particleDataPtr->names(16,"nu_3","nu_3bar");
-      particleDataPtr->names(1000022,"nu_4","nu_4bar");
-      particleDataPtr->names(1000023,"nu_5","nu_5bar");
-      particleDataPtr->names(1000025,"nu_6","nu_6bar");
-      particleDataPtr->names(1000035,"nu_7","nu_7bar");      
+      particleDataPtr->name(1000022,"~chi_10");
+      particleDataPtr->name(1000023,"~chi_20");
+      particleDataPtr->name(1000025,"~chi_30");
+      particleDataPtr->name(1000035,"~chi_40");
     }
     if ( slha.rvumix.exists() && slha.rvvmix.exists() ) {
       // Charginos -> charged leptons (note sign convention)
-      particleDataPtr->names(11,"e_1-","e_1+");
-      particleDataPtr->names(13,"e_2-","e_2+");
-      particleDataPtr->names(15,"e_3-","e_3+");
-      particleDataPtr->names(1000024,"e_4+","e_4-");
-      particleDataPtr->names(1000037,"e_5+","e_5-");
+      // Maintain R-conserving names since mass-ordering unlikely to change.
+      particleDataPtr->names(11,"e-","e+");
+      particleDataPtr->names(13,"mu-","mu+");
+      particleDataPtr->names(15,"tau-","tau+");
+      particleDataPtr->names(1000024,"~chi_1+","~chi_1-");
+      particleDataPtr->names(1000037,"~chi_2+","~chi_2-");
     }
     if ( slha.rvhmix.exists() ) {
-      // Sneutrinos -> higgses
-      particleDataPtr->name(25,"H_1");
-      particleDataPtr->name(35,"H_2");
-      particleDataPtr->name(1000012,"H_3");
-      particleDataPtr->name(1000014,"H_4");
-      particleDataPtr->name(1000016,"H_5");
+      // Sneutrinos -> higgses (general mass-ordered names)
+      particleDataPtr->name(25,"H_10");
+      particleDataPtr->name(35,"H_20");
+      particleDataPtr->names(1000012,"H_30","H_30");
+      particleDataPtr->names(1000014,"H_40","H_40");
+      particleDataPtr->names(1000016,"H_50","H_50");
     }
     if ( slha.rvamix.exists() ) {
-      // Sneutrinos -> higgses
-      particleDataPtr->name(36,"A_1");
-      particleDataPtr->name(1000017,"A_2");
-      particleDataPtr->name(1000018,"A_3");
-      particleDataPtr->name(1000019,"A_4");
+      // Sneutrinos -> higgses (general mass-ordered names)
+      particleDataPtr->name(36,"A_10");
+      particleDataPtr->names(1000017,"A_20","A_20");
+      particleDataPtr->names(1000018,"A_30","A_30");
+      particleDataPtr->names(1000019,"A_40","A_40");
     }
     if ( slha.rvlmix.exists() ) {
       // sleptons -> charged higgses (note sign convention)
@@ -239,15 +297,18 @@ bool SLHAinterface::initSLHA(Settings& settings,
     }
   }
 
-  // SLHA2 spectrum with CPV 
+  // SLHA2 spectrum with CPV
   if ( (ifailSpc == 1 || ifailSpc == 0) &&  slha.modsel(5) >= 1 ) {
     // no scalar/pseudoscalar distinction
-    particleDataPtr->name(25,"H_1");
-    particleDataPtr->name(35,"H_2");
-    particleDataPtr->name(36,"H_3");    
+    particleDataPtr->name(25,"H_10");
+    particleDataPtr->name(35,"H_20");
+    particleDataPtr->name(36,"H_30");
   }
 
+
   // Import qnumbers
+  vector<int> isQnumbers;
+  bool foundLowCode = false;
   if ( (ifailSpc == 1 || ifailSpc == 0) && slha.qnumbers.size() > 0) {
     for (int iQnum=0; iQnum < int(slha.qnumbers.size()); iQnum++) {
       // Always use positive id codes
@@ -256,7 +317,7 @@ bool SLHAinterface::initSLHA(Settings& settings,
       idCode << id;
       if (particleDataPtr->isParticle(id)) {
         infoPtr->errorMsg(warnPref + "ignoring QNUMBERS", "for id = "
-                          + idCode.str() + " (already exists)", true);
+          + idCode.str() + " (already exists)", true);
       } else {
         int qEM3    = slha.qnumbers[iQnum](1);
         int nSpins  = slha.qnumbers[iQnum](2);
@@ -297,14 +358,20 @@ bool SLHAinterface::initSLHA(Settings& settings,
           particleDataPtr->addParticle(id, name, antiName, nSpins, qEM3,
             colType);
         }
+        // Store list of particle codes added by QNUMBERS
+        isQnumbers.push_back(id);
+        if (id < 1000000) foundLowCode = true;
       }
     }
   }
+  // Inform user that BSM particles should ideally be assigned id codes > 1M
+  if (foundLowCode)
+    infoPtr->errorMsg(warnPref
+      + "using QNUMBERS for id codes < 1000000 may clash with SM.");
 
   // Import mass spectrum.
   bool   keepSM            = settings.flag("SLHA:keepSM");
   double minMassSM         = settings.parm("SLHA:minMassSM");
-  bool   allowUserOverride = settings.flag("SLHA:allowUserOverride");
   vector<int> idModified;
   if (ifailSpc == 1 || ifailSpc == 0) {
 
@@ -312,30 +379,27 @@ bool SLHAinterface::initSLHA(Settings& settings,
     int    id = slha.mass.first();
     // Loop through to update particle data.
     for (int i = 1; i <= slha.mass.size() ; i++) {
-      // Step to next mass entry 
+      // Step to next mass entry
       if (i>1) id = slha.mass.next();
       ostringstream idCode;
       idCode << id;
       double mass = abs(slha.mass(id));
 
+      // Check if this ID was added by qnumbers
+      bool isInternal = true;
+      for (unsigned int iq = 0; iq<isQnumbers.size(); ++iq)
+        if (id == isQnumbers[iq]) isInternal = false;
+
       // Ignore masses for known SM particles or particles with
       // default masses < minMassSM; overwrite masses for rest.
-      if (keepSM && (id < 25 || (id > 80 && id < 1000000))) ;
-      else if (id < 1000000 && particleDataPtr->m0(id) < minMassSM) {
-        cout<<" id = "<<id<<" m0 = "<<particleDataPtr->m0(id)<<" minMassSM = "
-            <<minMassSM<<endl;
+      if (keepSM && (id < 25 || (id > 80 && id < 1000000)) && isInternal)
         infoPtr->errorMsg(warnPref + "ignoring MASS entry", "for id = "
-                          + idCode.str() + " (m0 < SLHA:minMassSM)", true);
-      }
-
-      // Also ignore SLHA mass values if user has already set
-      // a different value and is allowed to override them.
-      else if (allowUserOverride && particleDataPtr->hasChanged(id)) {
-        ostringstream mValue;
-        mValue << particleDataPtr->m0(id);
-        infoPtr->errorMsg(warnPref + "keeping user mass",
-          "for id = " + idCode.str() + ", m0 = " + mValue.str(), true);
-        idModified.push_back(id);
+          + idCode.str()
+          + " (SLHA:keepSM. Use id > 1000000 for new particles)", true);
+      else if (id < 1000000 && particleDataPtr->m0(id) < minMassSM
+        && isInternal) {
+        infoPtr->errorMsg(warnPref + "ignoring MASS entry", "for id = "
+          + idCode.str() + " (m0 < SLHA:minMassSM)", true);
       }
       else {
         particleDataPtr->m0(id,mass);
@@ -358,22 +422,33 @@ bool SLHAinterface::initSLHA(Settings& settings,
     ParticleDataEntry* particlePtr
       = particleDataPtr->particleDataEntryPtr(idRes);
 
+    // Check if this ID was added by qnumbers
+    bool isInternal = true;
+    for (unsigned int iq = 0; iq<isQnumbers.size(); ++iq)
+      if (idRes == isQnumbers[iq]) isInternal = false;
+
     // Ignore decay channels for known SM particles or particles with
     // default masses < minMassSM; overwrite masses for rest.
-    if (keepSM && (idRes < 25 || (idRes > 80 && idRes < 1000000))) continue;
-    else if (idRes < 1000000 && particleDataPtr->m0(idRes) < minMassSM
-             && !particleDataPtr->hasChanged(idRes) ) {
+    if (keepSM && (idRes < 25 || (idRes > 80 && idRes < 1000000))
+        && isInternal) {
       infoPtr->errorMsg(warnPref + "ignoring DECAY table", "for id = "
-                        + idCode.str() + " (m0 < SLHA:minMassSM)", true);
+        + idCode.str()
+        + " (SLHA:keepSM. Use id > 1000000 for new particles)", true);
+      continue;
+    }
+    else if (idRes < 1000000 && particleDataPtr->m0(idRes) < minMassSM
+             && isInternal) {
+      infoPtr->errorMsg(warnPref + "ignoring DECAY table", "for id = "
+        + idCode.str() + " (m0 < SLHA:minMassSM)", true);
       continue;
     }
 
     // Verbose output. Let user know we are using these tables.
-    if (verboseSLHA <= 1) 
+    if (verboseSLHA <= 1)
       infoPtr->errorMsg(infoPref + "importing SLHA decay table(s)","");
-    else 
+    else
       infoPtr->errorMsg(infoPref + "importing SLHA decay table","for id = "
-                        +idCode.str(),true);
+        +idCode.str(),true);
 
     // Extract and store total width (absolute value, neg -> switch off)
     double widRes         = abs(slhaTable->getWidth());
@@ -390,7 +465,7 @@ bool SLHAinterface::initSLHA(Settings& settings,
     if (widRes > 0.) {
       double decayLength = 1.97e-13/widRes;
       particlePtr->setTau0(decayLength);
-    
+
       // Reset decay table of the particle. Allow decays, treat as resonance.
       if (slhaTable->size() > 0) {
         particlePtr->clearChannels();
@@ -489,7 +564,7 @@ bool SLHAinterface::initSLHA(Settings& settings,
       double massMin = min( massAvg, particlePtr->m0()) ;
       particlePtr->setMMin(massMin);
     }
-    
+
     // Add to list of particles that have been modified
     idModified.push_back(idRes);
 
@@ -535,12 +610,17 @@ bool SLHAinterface::initSLHA(Settings& settings,
         mSumMin = min(mSumMin, mSum);
       }
       // Require at least one on-shell channel
-      if (mSumMin > m0) {
+      if (mSumMin > m0 && particlePtr->id() != 25) {
         infoPtr->errorMsg(warnPref + "particle forced stable"," id = "
-                  + idCode.str() + " (no on-shell decay channels)", true);
+          + idCode.str() + " (no on-shell decay channels)", true);
         particlePtr->setMWidth(0.0);
         particlePtr->setMayDecay(false);
         continue;
+      }
+      else if (mSumMin > m0 && particlePtr->id() == 25) {
+        infoPtr->errorMsg(warnPref
+          + "allowing particle with no on-shell decays ",
+          " id = " + idCode.str() , true);
       }
       else {
       // mMin: lower cutoff on Breit-Wigner: default is mMin = m0 - 5*Gamma
@@ -550,9 +630,9 @@ bool SLHAinterface::initSLHA(Settings& settings,
         mMin = max(mSumMin,mMin);
         particlePtr->setMMin(mMin);
       }
-    } 
+    }
   }
-  
+
   return true;
 
 }
@@ -597,7 +677,7 @@ void SLHAinterface::pythia2slha(ParticleData* particleDataPtr) {
     ++count;
     if (count > 10000) {
       infoPtr->errorMsg("Error in SLHAinterface::pythia2slha(): "
-                        "encountered infinite loop when saving mass block");
+        "encountered infinite loop when saving mass block");
       break;
     }
   }
@@ -607,6 +687,3 @@ void SLHAinterface::pythia2slha(ParticleData* particleDataPtr) {
 //==========================================================================
 
 } // end namespace Pythia8
-
-
-

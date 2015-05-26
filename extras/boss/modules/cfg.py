@@ -14,16 +14,16 @@ gccxml_compiler = 'g++'       # g++, gcc, icpc, icc, ... (use name of executable
 # ~~~~~ GAMBIT-specific options ~~~~~
 
 gambit_backend_name    = 'Pythia'
-gambit_backend_version = '8.186'
+gambit_backend_version = '8.209'
 gambit_base_namespace  = ''
 
 
 # ~~~~~ Information about the external code ~~~~~
 
-include_paths = ['pythia8186/include']
-source_path   = 'pythia8186/src'
+include_paths = ['pythia8209/include']
+source_path   = 'pythia8209/src'
 
-accepted_paths = ['pythia8186']
+accepted_paths = ['pythia8209']
 
 
 loaded_classes = [

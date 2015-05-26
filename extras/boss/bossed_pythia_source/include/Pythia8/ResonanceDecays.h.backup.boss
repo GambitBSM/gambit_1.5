@@ -1,5 +1,5 @@
 // ResonanceDecays.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -18,7 +18,7 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
-  
+
 //==========================================================================
 
 // The ResonanceDecays class handles the sequential decay of resonances
@@ -35,7 +35,7 @@ public:
   void init(Info* infoPtrIn,  ParticleData* particleDataPtrIn,
     Rndm* rndmPtrIn) {infoPtr = infoPtrIn;
     particleDataPtr = particleDataPtrIn; rndmPtr = rndmPtrIn;}
- 
+
   // Generate the next decay sequence.
   bool next( Event& process, int iDecNow = 0);
 

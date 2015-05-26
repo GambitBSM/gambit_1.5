@@ -1,5 +1,5 @@
 // MultipartonInteractions.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -23,7 +23,7 @@
 #include "Pythia8/UserHooks.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // SigmaMultiparton is a helper class to MultipartonInteractions.
@@ -36,7 +36,7 @@ public:
 
   // Constructor.
   SigmaMultiparton() {}
-  
+
   // Destructor.
   ~SigmaMultiparton() {
     for (int i = 0; i < int(sigmaT.size()); ++i) delete sigmaT[i];
@@ -84,9 +84,9 @@ private:
 
   // Pointer to the random number generator.
   Rndm*          rndmPtr;
-  
+
 };
- 
+
 //==========================================================================
 
 // The MultipartonInteractions class contains the main methods for the
@@ -158,7 +158,7 @@ public:
   void statistics(bool resetStat = false, ostream& os = cout);
   void resetStatistics() { for ( map<int, int>::iterator iter = nGen.begin();
     iter != nGen.end(); ++iter) iter->second = 0; }
-  
+
 private:
 
   // Constants: could only be changed in the code itself.
@@ -302,7 +302,7 @@ private:
   void overlapNext(Event& event, double pTscale);
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

@@ -1,5 +1,5 @@
 // SigmaExtraDim.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -17,7 +17,7 @@ namespace Pythia8 {
 // Based on Eq. (8) in JHEP 1105 (2011) 092, arXiv:1101.4919.
 
 complex ampLedS(double x, double n, double L, double M) {
-  
+
   complex cS(0., 0.);
   if (n <= 0) return cS;
 
@@ -53,7 +53,7 @@ complex ampLedS(double x, double n, double L, double M) {
       cS = log(fabs(rat))/sqrX;
     }
   }
-  
+
   // Recursive part.
   int nL;
   int nD;
@@ -90,7 +90,7 @@ double funLedG(double x, double y) {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1gg2GravitonStar::initProc() {
 
   // Store G* mass and width for propagator.
@@ -165,7 +165,7 @@ void Sigma1gg2GravitonStar::setIdColAcol() {
 // Evaluate weight for G* decay angle.
 // SA: Angle dist. for decay G* -> W/Z/h, based on
 // Phys.Rev. D65 (2002) 075008, [arXiv:hep-ph/0103308v3]
-  
+
 double Sigma1gg2GravitonStar::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -225,7 +225,7 @@ double Sigma1gg2GravitonStar::weightDecay( Event& process, int iResBeg,
     wt = pow2(beta2 - 2.)*(1. - 2.*cost2 + cost4);
     wt /= 4.;
   }
-  
+
   // Done.
   return wt;
 
@@ -239,7 +239,7 @@ double Sigma1gg2GravitonStar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2GravitonStar::initProc() {
 
   // Store G* mass and width for propagator.
@@ -295,7 +295,7 @@ void Sigma1ffbar2GravitonStar::sigmaKin() {
 // Evaluate sigmaHat(sHat), part dependent of incoming flavour.
 
 double Sigma1ffbar2GravitonStar::sigmaHat() {
-  
+
   double sigma = sigma0;
 
   // RS graviton coupling
@@ -304,7 +304,7 @@ double Sigma1ffbar2GravitonStar::sigmaHat() {
 
   // If initial quarks, 1/N_C
   if (abs(id1) < 9) sigma /= 3.;
-  
+
   return sigma;
 }
 
@@ -385,7 +385,7 @@ double Sigma1ffbar2GravitonStar::weightDecay( Event& process, int iResBeg,
     wt = pow2(beta2 - 2.)*cost2*(1. - cost2);
     wt /= 4.;
   }
- 
+
   // Done.
   return wt;
 
@@ -399,7 +399,7 @@ double Sigma1ffbar2GravitonStar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1qqbar2KKgluonStar::initProc() {
 
   // Store kk-gluon* mass and width for propagator.
@@ -456,7 +456,7 @@ void Sigma1qqbar2KKgluonStar::sigmaKin() {
       if (mH > 2. * mf + MASSMARGIN) {
         double mr    = pow2(mf / mH);
         double beta  = sqrtpos(1. - 4. * mr);
-      
+
         // Store sum of combinations. For outstate only open channels.
         int onMode = gStarPtr->channel(i).onMode();
         if (onMode == 1 || onMode == 2) {
@@ -514,7 +514,7 @@ void Sigma1qqbar2KKgluonStar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for KK-gluon* decay angle (based on ffbar2gmZ).
-  
+
 double Sigma1qqbar2KKgluonStar::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -571,7 +571,7 @@ double Sigma1qqbar2KKgluonStar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2GravitonStarg::initProc() {
 
   // Store G* mass and width for propagator.
@@ -622,7 +622,7 @@ void Sigma2gg2GravitonStarg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for decay angles: currently G* assumed isotropic.
-  
+
 double Sigma2gg2GravitonStarg::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -646,7 +646,7 @@ double Sigma2gg2GravitonStarg::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2GravitonStarq::initProc() {
 
   // Store G* mass and width for propagator.
@@ -702,7 +702,7 @@ void Sigma2qg2GravitonStarq::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for decay angles: currently G* assumed isotropic.
-  
+
 double Sigma2qg2GravitonStarq::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -726,7 +726,7 @@ double Sigma2qg2GravitonStarq::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2GravitonStarg::initProc() {
 
   // Store G* mass and width for propagator.
@@ -777,7 +777,7 @@ void Sigma2qqbar2GravitonStarg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for decay angles: currently G* assumed isotropic.
-  
+
 double Sigma2qqbar2GravitonStarg::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -823,10 +823,10 @@ void Sigma2ffbar2TEVffbar::initProc() {
 
   // Allow to pick only gamma* or Z0 part of full gamma*/Z0 expression.
   gmZmode = settingsPtr->mode("ExtraDimensionsTEV:gmZmode");
-  
+
   // Pick number of KK excitations
-  nexcitationmax  = (int)settingsPtr->parm("ExtraDimensionsTEV:nMax");
-  
+  nexcitationmax  = settingsPtr->mode("ExtraDimensionsTEV:nMax");
+
   // Initialize the widths of the KK propogators.
   // partial width of the KK photon
   wgmKKFactor = 0.;
@@ -847,10 +847,10 @@ void Sigma2ffbar2TEVffbar::initProc() {
   // Store the KK mass parameter, equivalent to the mass of the first KK
   // excitation: particleDataPtr->m0(5000023);
   mStar = (double)settingsPtr->parm("ExtraDimensionsTEV:mStar");
-  
+
   // Get alphaEM - relevant for the calculation of the widths
   alphaemfixed = settingsPtr->parm("StandardModel:alphaEM0");
-  
+
   // initialize imaginari number
   mI = complex(0.,1.);
 
@@ -871,7 +871,7 @@ void Sigma2ffbar2TEVffbar::initProc() {
       }
     }
   }
-  
+
   // Get the helicity-couplings of the Z0 to all the fermions except top
   gMinusF  = ( couplingsPtr->t3f(idNew) - couplingsPtr->ef(idNew)
            * couplingsPtr->sin2thetaW() )
@@ -1069,13 +1069,13 @@ double Sigma2ffbar2TEVffbar::sigmaHat() {
         default: break;
       // end run over initial and final helicity states
       }
-          
+
           // sum all contributing amplitudes
       totalProp = gammaProp + resProp + ZPropKK + gmPropKK;
-          
+
           // angular distribution for the helicity configuration
       coefAngular = 1. + 4. * helicityF * helicityf * cosThe;
-          
+
           // the squared helicity matrix element
       helicityME2 += real(totalProp*conj(totalProp))*pow2(coefAngular);
     }
@@ -1131,7 +1131,7 @@ double Sigma2ffbar2TEVffbar::weightDecay( Event& process, int iResBeg,
   else return 1.;
 
 }
-                
+
 //==========================================================================
 
 // Sigma2gg2LEDUnparticleg class.
@@ -1141,7 +1141,7 @@ double Sigma2ffbar2TEVffbar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 void Sigma2gg2LEDUnparticleg::initProc() {
-  
+
   // Init model parameters.
   eDidG    = 5000039;
   if (eDgraviton) {
@@ -1160,7 +1160,7 @@ void Sigma2gg2LEDUnparticleg::initProc() {
     eDlambda   = settingsPtr->parm("ExtraDimensionsUnpart:lambda");
     eDcutoff   = settingsPtr->mode("ExtraDimensionsUnpart:CutOffMode");
   }
-  
+
   // The A(dU) or S'(n) value.
   double tmpAdU = 0;
   if (eDgraviton) {
@@ -1220,19 +1220,19 @@ void Sigma2gg2LEDUnparticleg::sigmaKin() {
       double yHC = pow(yH,3);
       double xHQ = pow(xH,4);
       double yHQ = pow(yH,4);
-      
+
       double T0 = 1/(xH*(yH-1-xH));
       double T1 = 1 + 2*xH + 3*xHS + 2*xHC + xHQ;
       double T2 = -2*yH*(1 + xHC);
       double T3 = 3*yHS*(1 + xHS);
       double T4 = -2*yHC*(1 + xH);
       double T5 = yHQ;
-      
+
       eDsigma0 = A0 * T0 *( T1 + T2 + T3 + T4 + T5 );
     }
 
   } else if (eDspin == 0) {
-    
+
     double A0  = 1/pow2(sH);
     double sHQ = pow(sH,4);
     double tHQ = pow(tH,4);
@@ -1278,7 +1278,7 @@ double Sigma2gg2LEDUnparticleg::sigmaHat() {
     double tmPexp = double(eDnGrav) + 2;
     sigma *= 1 / (1 + pow(tmPformfact, tmPexp));
   }
-  
+
   return sigma;
 }
 
@@ -1304,7 +1304,7 @@ void Sigma2gg2LEDUnparticleg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 void Sigma2qg2LEDUnparticleq::initProc() {
-  
+
   // Init model parameters.
   eDidG    = 5000039;
   if (eDgraviton) {
@@ -1389,19 +1389,19 @@ void Sigma2qg2LEDUnparticleq::sigmaKin() {
       double y2HS = pow2(y2H);
       double x2HC = pow(x2H,3);
       double y2HC = pow(y2H,3);
-      
+
       double T0 = -(yH - 1 - xH);
       double T20 = 1/(x2H*(y2H-1-x2H));
       double T21 = -4*x2H*(1 + x2H)*(1 + 2*x2H + 2*x2HS);
       double T22 = y2H*(1 + 6*x2H + 18*x2HS + 16*x2HC);
       double T23 = -6*y2HS*x2H*(1+2*x2H);
       double T24 = y2HC*(1 + 4*x2H);
-      
+
       eDsigma0 = A0 * T0 * T20 * ( T21 + T22 + T23 + T24 );
     }
 
   } else if (eDspin == 1) {
-    
+
     double A0  = 1/pow2(sH);
     double tmpTerm1 = tH - mGS;
     double tmpTerm2 = sH - mGS;
@@ -1409,7 +1409,7 @@ void Sigma2qg2LEDUnparticleq::sigmaKin() {
     eDsigma0 = A0 * (pow2(tmpTerm1) + pow2(tmpTerm2)) / (sH*tH);
 
   } else if (eDspin == 0) {
-    
+
     double A0  = 1/pow2(sH);
     // Sign correction by Tom
     eDsigma0 = A0 * (pow2(tH) + pow2(mGS)) / (sH*uH);
@@ -1454,7 +1454,7 @@ double Sigma2qg2LEDUnparticleq::sigmaHat() {
     double tmPexp = double(eDnGrav) + 2;
     sigma *= 1 / (1 + pow(tmPformfact, tmPexp));
   }
-  
+
   return sigma;
 }
 
@@ -1485,7 +1485,7 @@ void Sigma2qg2LEDUnparticleq::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 void Sigma2qqbar2LEDUnparticleg::initProc() {
-  
+
   // Init model parameters.
   eDidG    = 5000039;
   if (eDgraviton) {
@@ -1568,30 +1568,30 @@ void Sigma2qqbar2LEDUnparticleg::sigmaKin() {
       double yHS = pow2(yH);
       double xHC = pow(xH,3);
       double yHC = pow(yH,3);
-      
+
       double T0 = 1/(xH*(yH-1-xH));
       double T1 = -4*xH*(1 + xH)*(1 + 2*xH + 2*xHS);
       double T2 = yH*(1 + 6*xH + 18*xHS + 16*xHC);
       double T3 = -6*yHS*xH*(1+2*xH);
       double T4 = yHC*(1 + 4*xH);
-      
+
       eDsigma0 = A0 * T0 *( T1 + T2 + T3 + T4 );
     }
 
   } else if (eDspin == 1) {
-    
+
     double A0  = 1/pow2(sH);
     double tmpTerm1 = tH - mGS;
     double tmpTerm2 = uH - mGS;
 
     eDsigma0 = A0 * (pow2(tmpTerm1) + pow2(tmpTerm2)) / (tH * uH);
-    
+
   } else if (eDspin == 0) {
-    
+
     double A0  = 1/pow2(sH);
-    
+
     eDsigma0 = A0 * (pow2(sH) - pow2(mGS)) / (tH * uH);
-    
+
   }
 
   // Mass measure, (m^2)^(d-2).
@@ -1632,7 +1632,7 @@ double Sigma2qqbar2LEDUnparticleg::sigmaHat() {
     double tmPexp = double(eDnGrav) + 2;
     sigma *= 1 / (1 + pow(tmPformfact, tmPexp));
   }
-  
+
   return sigma;
 }
 
@@ -1763,7 +1763,7 @@ void Sigma2ffbar2LEDUnparticleZ::sigmaKin() {
   // phase space factors.
 
   if ( eDspin == 0 ) {
-    
+
     double A0 = 1/sHS;
     double T1 = - sH/tH - sH/uH;
     double T2 = - (1 - mZS/tH)*(1 - mUS/tH);
@@ -1771,15 +1771,15 @@ void Sigma2ffbar2LEDUnparticleZ::sigmaKin() {
     double T4 = 2*(1 - mUS/tH)*(1 - mUS/uH);
 
     eDsigma0 = A0 * ( T1 + T2 + T3 + T4);
-    
+
   } else if ( eDspin == 1 ) {
-    
+
     double A0 = 1/sHS;
     double T1 = 0.5 * (tH/uH + uH/tH);
     double T2 =  pow2(mZS + mUS)/(tH * uH);
     double T3 = - 0.5 * mUS * (mZS/tHS + mZS/uHS) ;
     double T4 = - (mZS+mUS)*(1/tH + 1/uH);
-    
+
     eDsigma0 = A0 * ( T1 + T2 + T3 + T4 );
 
   } else if ( eDspin == 2 ) {
@@ -1831,9 +1831,9 @@ void Sigma2ffbar2LEDUnparticleZ::sigmaKin() {
              + pow2(eDratio)*(H0 + 1/mUS*H2 + 1/pow2(mUS)*H4) );
 
   } else {
-    
+
     eDsigma0 = 0;
-  
+
   }
 
 }
@@ -1855,7 +1855,7 @@ double Sigma2ffbar2LEDUnparticleZ::sigmaHat() {
 
   // Total cross section
   double sigma = eDconstantTerm * facEWS * facSpect * eDsigma0;
-  
+
   // If f fbar are quarks (1/N_c)
   if (idAbs < 9) sigma /= 3.;
 
@@ -1892,7 +1892,7 @@ void Sigma2ffbar2LEDUnparticleZ::setIdColAcol() {
   if (id1 < 0) swapColAcol();
 
 }
-  
+
 //==========================================================================
 
 // Sigma2ffbar2LEDUnparticlegamma class.
@@ -1918,7 +1918,7 @@ void Sigma2ffbar2LEDUnparticlegamma::initProc() {
   // WARNING: Keep in mind that this class uses the photon limit
   //          of the Z+G/U ME code. This might give rise to some
   //          confusing things, e.g. mZ = particleDataPtr->m0(22);
-  
+
   // Init model parameters.
   eDidG        = 5000039;
   if (eDgraviton) {
@@ -2009,23 +2009,23 @@ void Sigma2ffbar2LEDUnparticlegamma::sigmaKin() {
   // phase space factors.
 
   if ( eDspin == 0 ) {
-    
+
     double A0 = 1/sHS;
     double T1 = - sH/tH - sH/uH;
     double T2 = - (1 - mZS/tH)*(1 - mUS/tH);
     double T3 = - (1 - mZS/uH)*(1 - mUS/uH);
     double T4 = 2*(1 - mUS/tH)*(1 - mUS/uH);
-    
+
     eDsigma0 = A0 * ( T1 + T2 + T3 + T4);
-    
+
   } else if ( eDspin == 1 ) {
-    
+
     double A0 = 1/sHS;
     double T1 = 0.5 * (tH/uH + uH/tH);
     double T2 =  pow2(mZS + mUS)/(tH * uH);
     double T3 = - 0.5 * mUS * (mZS/tHS + mZS/uHS) ;
     double T4 = - (mZS+mUS)*(1/tH + 1/uH);
-    
+
     eDsigma0 = A0 * ( T1 + T2 + T3 + T4 );
 
   } else if ( eDspin == 2 ) {
@@ -2079,9 +2079,9 @@ void Sigma2ffbar2LEDUnparticlegamma::sigmaKin() {
              + pow2(eDratio)*(H0 + 1/mUS*H2 + 1/pow2(mUS)*H4) );
 
   } else {
-    
+
     eDsigma0 = 0;
-  
+
   }
 
 }
@@ -2147,7 +2147,7 @@ void Sigma2ffbar2LEDUnparticlegamma::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 void Sigma2ffbar2LEDgammagamma::initProc() {
-  
+
   // Init model parameters.
   if (eDgraviton) {
     eDspin     = 2;
@@ -2328,7 +2328,7 @@ void Sigma2gg2LEDgammagamma::initProc() {
 //--------------------------------------------------------------------------
 
 void Sigma2gg2LEDgammagamma::sigmaKin() {
-  
+
   // Mandelstam variables.
   double sHS = pow2(sH);
   double sHQ = pow(sH, 4);
@@ -2402,7 +2402,7 @@ void Sigma2gg2LEDgammagamma::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 void Sigma2ffbar2LEDllbar::initProc() {
-  
+
   // Init model parameters.
   if (eDgraviton) {
     eDspin     = 2;
@@ -2523,7 +2523,7 @@ double Sigma2ffbar2LEDllbar::sigmaHat() {
   double tmPgRl = tmPgvl  - tmPgal;
   double tmPe2s2c2 = 4 * M_PI * alpEM
     / (couplingsPtr->sin2thetaW() * couplingsPtr->cos2thetaW());
-     
+
   // LL, RR, LR, RL  couplings.
   vector<double> tmPcoupZ;
   tmPcoupZ.push_back(tmPe2s2c2 * tmPgLq * tmPgLl);
@@ -2563,7 +2563,7 @@ double Sigma2ffbar2LEDllbar::sigmaHat() {
     // LR
     tmPcoupU.push_back(1);
   }
-  
+
   // Matrix elements
   double tmPMES = 0;
   if (eDspin == 1) {
@@ -2586,7 +2586,7 @@ double Sigma2ffbar2LEDllbar::sigmaHat() {
     }
 
   } else {
-    
+
     for (unsigned int i = 0; i<tmPcoupZ.size(); ++i) {
       double tmPMS = pow2(tmPe2QfQl * eDrePropGamma)
         + pow2(tmPcoupZ[i]) / eDdenomPropZ
@@ -2599,7 +2599,7 @@ double Sigma2ffbar2LEDllbar::sigmaHat() {
     tmPMES += 16 * tmPe2QfQl * eDrePropGamma * eDreA * eDpoly2;
     tmPMES += 16 * tmPe2s2c2 * eDreABW * (tmPgaq * tmPgal * eDpoly3
                                           + tmPgvq * tmPgvl * eDpoly2);
-    
+
   }
 
   // dsigma/dt, 2-to-2 phase space factors.
@@ -2736,7 +2736,7 @@ void Sigma2gg2LEDllbar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2LEDgg::initProc() {
 
   // Read model parameters.
@@ -2787,7 +2787,7 @@ void Sigma2gg2LEDgg::sigmaKin() {
   double sH3 = sH*sH2;
   double tH3 = tH*tH2;
   double uH3 = uH*uH2;
-  
+
   sigTS  = (128. * pow2(M_PI) * pow2(alpS)) * (9./4.)
          * (tH2 / sH2 + 2. * tH / sH + 3. + 2. * sH / tH + sH2 / tH2)
          + 24.*M_PI*alpS*( (sH3/tH + tH2 + 3.*(sH*tH + sH2))*sS.real()
@@ -2844,7 +2844,7 @@ void Sigma2gg2LEDgg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2LEDqqbar::initProc() {
 
   // Read number of quarks to be considered in massless approximation
@@ -2897,7 +2897,7 @@ void Sigma2gg2LEDqqbar::sigmaKin() {
   idNew = 1 + int( nQuarkNew * rndmPtr->flat() );
   mNew  = particleDataPtr->m0(idNew);
   m2New = mNew*mNew;
-  
+
   // Calculate kinematics dependence.
   sigTS = 0.;
   sigUS = 0.;
@@ -2944,7 +2944,7 @@ void Sigma2gg2LEDqqbar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2LEDqg::initProc() {
 
   // Read model parameters.
@@ -3035,7 +3035,7 @@ void Sigma2qg2LEDqg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qq2LEDqq::initProc() {
 
   // Read model parameters.
@@ -3153,7 +3153,7 @@ void Sigma2qq2LEDqq::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2LEDgg::initProc() {
 
   // Read model parameters.
@@ -3244,7 +3244,7 @@ void Sigma2qqbar2LEDgg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2LEDqqbarNew::initProc() {
 
   // Read number of quarks to be considered in massless approximation

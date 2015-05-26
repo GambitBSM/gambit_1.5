@@ -1,5 +1,5 @@
 // SLHAinterface.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -37,7 +37,8 @@ public:
 
   // Initialize and switch to SUSY couplings if reading SLHA spectrum
   void init( Settings& settings, Rndm* rndmPtr, Couplings* couplingsPtrIn,
-    ParticleData* particleDataPtr, bool& useSHLAcouplings );
+    ParticleData* particleDataPtr, bool& useSHLAcouplings,
+    stringstream& ParticleDataBuffer );
 
   // Initialize SUSY Les Houches Accord data.
   bool initSLHA(Settings& settings, ParticleData* particleDataPtr);
@@ -67,7 +68,3 @@ public:
 } // end namespace Pythia8
 
 #endif // Pythia8_SLHAinterface_H
-
-
-
-

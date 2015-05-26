@@ -1,5 +1,5 @@
 #include "Pythia8/SusyLesHouches.h"
-#include "backend_types/Pythia_8_186/wrapper_LHdecayChannel.h"
+#include "backend_types/Pythia_8_209/wrapper_LHdecayChannel.h"
 #include <vector>
 #include <string>
 #include "gambit/Backends/abstracttypedefs.h"

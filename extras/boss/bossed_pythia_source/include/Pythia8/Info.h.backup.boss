@@ -1,5 +1,5 @@
 // Info.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -10,9 +10,10 @@
 #define Pythia8_Info_H
 
 #include "Pythia8/PythiaStdlib.h"
+#include "Pythia8/LHEF3.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The Info class contains a mixed bag of information on the event
@@ -27,13 +28,16 @@ class Info {
 public:
 
   // Constructor.
-  Info() : eCMSave(0.), lowPTmin(false), a0MPISave(0.), weightCKKWLSave(1.),
-    weightFIRSTSave(0.) {
+  Info() : LHEFversionSave(0), initrwgt(NULL), generators(NULL),
+    weightgroups(NULL), init_weights(NULL), eventAttributes(NULL),
+    weights_detailed(NULL), weights_compressed(NULL), scales(NULL),
+    weights(NULL), rwgt(NULL), eCMSave(0.), lowPTmin(false), a0MPISave(0.),
+    abortPartonLevel(false), weightCKKWLSave(1.), weightFIRSTSave(0.) {
     for (int i = 0; i < 40; ++i) counters[i] = 0;}
 
   // Listing of most available information on current event.
   void   list(ostream& os = cout) const;
-  
+
   // Beam particles (in rest frame). CM energy of event.
   int    idA()                const {return idASave;}
   int    idB()                const {return idBSave;}
@@ -147,7 +151,7 @@ public:
 
   // Cross section estimate, optionally process by process.
   vector<int> codesHard();
-  string nameProc(int i = 0)  {return (i == 0) ? "sum" 
+  string nameProc(int i = 0)  {return (i == 0) ? "sum"
     : ( (procNameM[i] == "") ? "unknown process" : procNameM[i] );}
   long   nTried(int i = 0)    {return (i == 0) ? nTry : nTryM[i];}
   long   nSelected(int i = 0) {return (i == 0) ? nSel : nSelM[i];}
@@ -164,7 +168,7 @@ public:
 
   // Reset to empty map of error messages.
   void   errorReset() {messages.clear();}
-  
+
   // Print a message the first few times. Insert in database.
   void   errorMsg(string messageIn, string extraIn = " ",
     bool showAlways = false, ostream& os = cout);
@@ -213,13 +217,111 @@ public:
   }
 
   // Return a list of all header key names
-  vector < string > headerKeys() {
-    vector < string > keys;
-    for (map < string, string >::iterator it = headers.begin();
-        it != headers.end(); it++)
-      keys.push_back(it->first);
-    return keys;
-  }
+  vector < string > headerKeys();
+
+  // Return the number of processes in the LHEF.
+  int nProcessesLHEF() { return int(sigmaLHEFSave.size());}
+  // Return the cross section information read from LHEF.
+  double sigmaLHEF(int iProcess) { return sigmaLHEFSave[iProcess];}
+
+  // LHEF3 information: Public for easy access.
+  int LHEFversionSave;
+
+  // Save process information as read from init block of LHEF.
+  vector<double> sigmaLHEFSave;
+
+  // Contents of the LHAinitrwgt tag
+  LHAinitrwgt *initrwgt;
+
+  // Contents of the LHAgenerator tags.
+  vector<LHAgenerator > *generators;
+
+  // A map of the LHAweightgroup tags, indexed by name.
+  map<string,LHAweightgroup > *weightgroups;
+
+  // A map of the LHAweight tags, indexed by name.
+  map<string,LHAweight > *init_weights;
+
+  // Store current-event Les Houches event tags.
+  map<string, string > *eventAttributes;
+
+  // The weights associated with this event, as given by the LHAwgt tags
+  map<string,double > *weights_detailed;
+
+  // The weights associated with this event, as given by the LHAweights tags
+  vector<double > *weights_compressed;
+
+  // Contents of the LHAscales tag.
+  LHAscales *scales;
+
+  // Contents of the LHAweights tag (compressed format)
+  LHAweights *weights;
+
+  // Contents of the LHArwgt tag (detailed format)
+  LHArwgt *rwgt;
+
+  // Set the LHEF3 objects read from the init and header blocks.
+  void setLHEF3InitInfo();
+  void setLHEF3InitInfo( int LHEFversionIn, LHAinitrwgt *initrwgtIn,
+    vector<LHAgenerator> *generatorsIn,
+    map<string,LHAweightgroup> *weightgroupsIn,
+    map<string,LHAweight> *init_weightsIn );
+  // Set the LHEF3 objects read from the event block.
+  void setLHEF3EventInfo();
+  void setLHEF3EventInfo( map<string, string> *eventAttributesIn,
+    map<string, double > *weights_detailedIn,
+    vector<double > *weights_compressedIn,
+    LHAscales *scalesIn, LHAweights *weightsIn,
+    LHArwgt *rwgtIn );
+
+  // Retrieve events tag information.
+  string getEventAttribute(string key, bool doRemoveWhitespace = false);
+
+  // Retrieve LHEF version
+  int LHEFversion();
+
+  // Retrieve initrwgt tag information.
+  unsigned int getInitrwgtSize();
+
+  // Retrieve generator tag information.
+  unsigned int getGeneratorSize();
+  string getGeneratorValue(unsigned int n = 0);
+  string getGeneratorAttribute( unsigned int n, string key,
+    bool doRemoveWhitespace = false);
+
+  // Retrieve rwgt tag information.
+  unsigned int getWeightsDetailedSize();
+  double getWeightsDetailedValue(string n);
+  string getWeightsDetailedAttribute(string n, string key,
+    bool doRemoveWhitespace = false);
+
+  // Retrieve weights tag information.
+  unsigned int getWeightsCompressedSize();
+  double getWeightsCompressedValue(unsigned int n);
+  string getWeightsCompressedAttribute(string key,
+    bool doRemoveWhitespace = false);
+
+  // Retrieve scales tag information.
+  string getScalesValue(bool doRemoveWhitespace = false);
+  double getScalesAttribute(string key);
+
+  // Set LHEF headers
+  void setHeader(const string &key, const string &val)
+    { headers[key] = val; }
+
+  // Set abort in parton level.
+  void setAbortPartonLevel(bool abortIn) {abortPartonLevel = abortIn;}
+  bool getAbortPartonLevel() {return abortPartonLevel;}
+
+  // Get information on hard diffractive events.
+  bool   hasUnresolvedBeams() const {return hasUnresBeams;}
+  bool   isHardDiffractive()  const {return isHardDiffA || isHardDiffB;}
+  bool   isHardDiffractiveA() const {return isHardDiffA;}
+  bool   isHardDiffractiveB() const {return isHardDiffB;}
+  double xPomeronA()          const {return xPomA;}
+  double xPomeronB()          const {return xPomB;}
+  double tPomeronA()          const {return tPomA;}
+  double tPomeronB()          const {return tPomB;}
 
 private:
 
@@ -249,7 +351,8 @@ private:
 
   // Store current-event quantities.
   bool   isRes, isDiffA, isDiffB, isDiffC, isND, isLH, hasSubSave[4],
-         bIsSet, evolIsSet, atEOF, isVal1, isVal2, hasHistorySave;
+         bIsSet, evolIsSet, atEOF, isVal1, isVal2, hasHistorySave,
+         abortPartonLevel, isHardDiffA, isHardDiffB, hasUnresBeams;
   int    codeSave, codeSubSave[4], nFinalSave, nFinalSubSave[4], nTotal,
          id1Save[4], id2Save[4], id1pdfSave[4], id2pdfSave[4], nMPISave,
          nISRSave, nFSRinProcSave, nFSRinResSave;
@@ -258,7 +361,7 @@ private:
          Q2RenSave[4], scalupSave[4], sH[4], tH[4], uH[4], pTH[4], m3H[4],
          m4H[4], thetaH[4], phiH[4], weightSave, bMPISave, enhanceMPISave,
          pTmaxMPISave, pTmaxISRSave, pTmaxFSRSave, pTnowSave,
-         zNowISRSave, pT2NowISRSave;
+         zNowISRSave, pT2NowISRSave, xPomA, xPomB, tPomA, tPomB;
   string nameSave, nameSubSave[4];
   vector<int>    codeMPISave, iAMPISave, iBMPISave;
   vector<double> pTMPISave, eMPISave;
@@ -272,6 +375,9 @@ private:
   // Map for LHEF headers
   map<string, string> headers;
 
+  // Map for plugin libraries.
+  map<string, pair<void*, int> > plugins;
+
   // Friend classes allowed to set info.
   friend class Pythia;
   friend class ProcessLevel;
@@ -279,6 +385,8 @@ private:
   friend class PartonLevel;
   friend class MultipartonInteractions;
   friend class LHAup;
+  friend class LHAPDF;
+  friend class Diffraction;
 
   // Set info on the two incoming beams: only from Pythia class.
   void setBeamA( int idAin, double pzAin, double eAin, double mAin) {
@@ -290,7 +398,8 @@ private:
   // Reset info for current event: only from Pythia class.
   void clear() {
     isRes = isDiffA = isDiffB = isDiffC = isND = isLH = bIsSet
-      = evolIsSet = atEOF = isVal1 = isVal2 = hasHistorySave = false;
+      = evolIsSet = atEOF = isVal1 = isVal2 = hasHistorySave
+      = hasUnresBeams = false;
     codeSave = nFinalSave = nTotal = nMPISave = nISRSave = nFSRinProcSave
       = nFSRinResSave = 0;
     weightSave = bMPISave = enhanceMPISave = weightCKKWLSave = 1.;
@@ -308,7 +417,7 @@ private:
       nameSubSave[i] = " ";
     }
     codeMPISave.resize(0); iAMPISave.resize(0); iBMPISave.resize(0);
-    pTMPISave.resize(0); eMPISave.resize(0); }
+    pTMPISave.resize(0); eMPISave.resize(0); setHardDiff();}
 
   // Reset info arrays only for parton and hadron level.
   int sizeMPIarrays() const { return codeMPISave.size(); }
@@ -354,7 +463,7 @@ private:
 
   // Set info on cross section: from ProcessLevel (reset in Pythia).
   void sigmaReset() { nTry = nSel = nAcc = 0; sigGen = sigErr = wtAccSum = 0.;
-    procNameM.clear(); nTryM.clear(); nSelM.clear(); nAccM.clear(); 
+    procNameM.clear(); nTryM.clear(); nSelM.clear(); nAccM.clear();
     sigGenM.clear(); sigErrM.clear();}
   void setSigma( int i, string procNameIn, long nTryIn, long nSelIn,
     long nAccIn, double sigGenIn, double sigErrIn, double wtAccSumIn) {
@@ -363,7 +472,7 @@ private:
     else {procNameM[i] = procNameIn; nTryM[i] = nTryIn; nSelM[i] = nSelIn;
       nAccM[i] = nAccIn; sigGenM[i] = sigGenIn; sigErrM[i] = sigErrIn;} }
   void addSigma( int i, long nTryIn, long nSelIn, long nAccIn, double sigGenIn,
-    double sigErrIn) { nTryM[i] += nTryIn; nSelM[i] += nSelIn; 
+    double sigErrIn) { nTryM[i] += nTryIn; nSelM[i] += nSelIn;
     nAccM[i] += nAccIn; sigGenM[i] += sigGenIn;
     sigErrM[i] = sqrtpos(sigErrM[i]*sigErrM[i] + sigErrIn*sigErrIn); }
 
@@ -398,12 +507,24 @@ private:
   // Save merging weight (i.e.  CKKW-L-type weight, summed O(\alpha_s) weight)
   double weightCKKWLSave, weightFIRSTSave;
 
-  // Set LHEF headers
-  void setHeader(const string &key, const string &val)
-    { headers[key] = val; }
+  // Set info on resolved processes.
+  void setIsResolved(bool isResIn) {isRes = isResIn;}
+
+  // Set info on hard diffraction.
+  void setHardDiff( bool hasUnresBeamsIn = false,
+    bool isHardDiffAIn = false, bool isHardDiffBIn = false,
+    double xPomAIn = 0., double xPomBIn = 0., double tPomAIn = 0.,
+    double tPomBIn = 0.) { hasUnresBeams = hasUnresBeamsIn;
+      isHardDiffA = isHardDiffAIn; isHardDiffB = isHardDiffBIn;
+      xPomA = xPomAIn; xPomB = xPomBIn;
+      tPomA = tPomAIn; tPomB = tPomBIn;}
+
+  // Set information in hard diffractive events.
+  void setHasUnresolvedBeams(bool hasUnresBeamsIn)
+    {hasUnresBeams = hasUnresBeamsIn;}
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

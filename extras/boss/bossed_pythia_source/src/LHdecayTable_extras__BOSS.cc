@@ -1,6 +1,6 @@
 #include <vector>
 #include <string>
-#include "backend_types/Pythia_8_186/wrapper_LHdecayChannel.h"
+#include "backend_types/Pythia_8_209/wrapper_LHdecayChannel.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/SusyLesHouches.h"
@@ -31,7 +31,7 @@ Pythia8::Abstract_LHdecayChannel* Pythia8::LHdecayTable::getChannel__BOSS(int iC
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_LHdecayTable* Pythia8::LHdecayTable::pointerCopy__BOSS()
 {

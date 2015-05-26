@@ -1,10 +1,10 @@
 #include <string>
 #include "Pythia8/ResonanceWidths.h"
 #include "Pythia8/ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_DecayChannel.h"
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_DecayChannel.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -274,7 +274,7 @@ double Pythia8::ParticleDataEntry::resWidthChan__BOSS(double mHat)
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_ParticleDataEntry* Pythia8::ParticleDataEntry::pointerCopy__BOSS()
 {

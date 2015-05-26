@@ -1,5 +1,5 @@
 // BeamShape.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -8,7 +8,7 @@
 #include "Pythia8/BeamShape.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The BeamShape class.
@@ -37,7 +37,7 @@ namespace Pythia8 {
   sigmaPyB            = settings.parm("Beams:sigmaPyB");
   sigmaPzB            = settings.parm("Beams:sigmaPzB");
   maxDevB             = settings.parm("Beams:maxDevB");
- 
+
   // Parameters for beam vertex spread.
   sigmaVertexX        = settings.parm("Beams:sigmaVertexX");
   sigmaVertexY        = settings.parm("Beams:sigmaVertexY");
@@ -45,7 +45,7 @@ namespace Pythia8 {
   maxDevVertex        = settings.parm("Beams:maxDevVertex");
   sigmaTime           = settings.parm("Beams:sigmaTime");
   maxDevTime          = settings.parm("Beams:maxDevTime");
- 
+
   // Parameters for beam vertex offset.
   offsetX             = settings.parm("Beams:offsetVertexX");
   offsetY             = settings.parm("Beams:offsetVertexY");
@@ -144,8 +144,7 @@ void BeamShape::pick() {
   }
 
 }
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
-

@@ -1,11 +1,11 @@
-#include <ostream>
 #include <vector>
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_Rndm.h"
-#include "backend_types/Pythia_8_186/wrapper_Vec4.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Event.h"
+#include <ostream>
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleData.h"
+#include "backend_types/Pythia_8_209/wrapper_Rndm.h"
+#include "backend_types/Pythia_8_209/wrapper_Vec4.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Event.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/BeamParticle.h"
@@ -34,6 +34,12 @@ void Pythia8::BeamParticle::list__BOSS() const
 }
 
 
+bool Pythia8::BeamParticle::remnantFlavours__BOSS(Pythia8::Abstract_Event& event, bool isDIS)
+{
+    return remnantFlavours(dynamic_cast< Pythia8::Event& >(event), isDIS);
+}
+
+
 bool Pythia8::BeamParticle::remnantFlavours__BOSS(Pythia8::Abstract_Event& event)
 {
     return remnantFlavours(dynamic_cast< Pythia8::Event& >(event));
@@ -43,6 +49,30 @@ bool Pythia8::BeamParticle::remnantFlavours__BOSS(Pythia8::Abstract_Event& event
 bool Pythia8::BeamParticle::remnantColours__BOSS(Pythia8::Abstract_Event& event, std::vector<int,std::allocator<int> >& colFrom, std::vector<int,std::allocator<int> >& colTo)
 {
     return remnantColours(dynamic_cast< Pythia8::Event& >(event), colFrom, colTo);
+}
+
+
+bool Pythia8::BeamParticle::remnantFlavoursNew__BOSS(Pythia8::Abstract_Event& event)
+{
+    return remnantFlavoursNew(dynamic_cast< Pythia8::Event& >(event));
+}
+
+
+void Pythia8::BeamParticle::findColSetup__BOSS(Pythia8::Abstract_Event& event)
+{
+    findColSetup(dynamic_cast< Pythia8::Event& >(event));
+}
+
+
+void Pythia8::BeamParticle::setInitialCol__BOSS(Pythia8::Abstract_Event& event)
+{
+    setInitialCol(dynamic_cast< Pythia8::Event& >(event));
+}
+
+
+int Pythia8::BeamParticle::findSingleCol__BOSS(Pythia8::Abstract_Event& event, bool isAcol, bool useHardScatters)
+{
+    return findSingleCol(dynamic_cast< Pythia8::Event& >(event), isAcol, useHardScatters);
 }
 
 
@@ -60,7 +90,7 @@ const Pythia8::ResolvedParton& Pythia8::BeamParticle::operator_square_bracket_pa
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_BeamParticle* Pythia8::BeamParticle::pointerCopy__BOSS()
 {

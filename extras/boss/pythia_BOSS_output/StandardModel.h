@@ -1,8 +1,8 @@
-#ifndef __boss__StandardModel_Pythia_8_186_h__
-#define __boss__StandardModel_Pythia_8_186_h__
+#ifndef __boss__StandardModel_Pythia_8_209_h__
+#define __boss__StandardModel_Pythia_8_209_h__
 
 // StandardModel.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -25,7 +25,7 @@ namespace Pythia8 {
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_AlphaStrong.h"
+#include "backend_types/Pythia_8_209/abstract_AlphaStrong.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -37,17 +37,19 @@ public:
   AlphaStrong() : isInit(false), order(0),
     Lambda3Save(0.), Lambda4Save(0.), Lambda5Save(0.), Lambda6Save(0.),
     Lambda3Save2(0.), Lambda4Save2(0.), Lambda5Save2(0.), Lambda6Save2(0.),
-    scale2Min(0.), mc2(0.), mb2(0.), mt2(0.), lastCallToFull(false),
-    valueRef(0.), valueNow(0.), scale2Now(0.) {}
-  AlphaStrong(double valueIn, int orderIn = 1) {
-    init( valueIn, orderIn) ;}
-  
+    scale2Min(0.), mc(0.), mb(0.), mt(0.), mc2(0.), mb2(0.), mt2(0.),
+    lastCallToFull(false), valueRef(0.), valueNow(0.), scale2Now(0.) {}
+
   // Destructor.
   virtual ~AlphaStrong() {}
 
   // Initialization for given value at M_Z and given order.
   virtual void init(double valueIn = 0.12, int orderIn = 1, int nfmaxIn = 6,
     bool useCMWIn = false);
+
+  // Set flavour threshold values: m_c, m_b, m_t.
+  virtual void setThresholds(double mcIn, double mbIn, double mtIn) {
+    mt=mtIn; mb=min(mt,mbIn); mc=min(mb,mcIn);}
 
   // alpha_S value and Lambda values.
   double alphaS(double scale2);
@@ -82,7 +84,8 @@ protected:
   double scale2Min;
 
   // Flavour thresholds.
-  static const double MC, MB, MZ, MT;
+  static const double MZ;
+  double mc, mb, mt;
   double mc2, mb2, mt2;
 
   // CMW rescaling factors.
@@ -127,7 +130,7 @@ private:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_AlphaEM.h"
+#include "backend_types/Pythia_8_209/abstract_AlphaEM.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -172,7 +175,7 @@ private:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_CoupSM.h"
+#include "backend_types/Pythia_8_209/abstract_CoupSM.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -211,7 +214,7 @@ public:
   double t3f(int idAbs) {return 0.5*afSave[idAbs];}
   double lf(int idAbs) {return lfSave[idAbs];}
   double rf(int idAbs) {return rfSave[idAbs];}
-  
+
   // Return some squared couplings and other combinations.
   double ef2(int idAbs) {return ef2Save[idAbs];}
   double vf2(int idAbs) {return vf2Save[idAbs];}
@@ -269,14 +272,14 @@ protected:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Couplings.h"
+#include "backend_types/Pythia_8_209/abstract_Couplings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Couplings : public virtual Abstract_Couplings, public CoupSM {
 
 public:
-  
+
  Couplings() : isSUSY(false) {}
   bool isSUSY;
 
@@ -299,4 +302,4 @@ public:
 
 #endif // Pythia8_StandardModel_H
 
-#endif /* __boss__StandardModel_Pythia_8_186_h__ */
+#endif /* __boss__StandardModel_Pythia_8_209_h__ */

@@ -1,8 +1,8 @@
-#ifndef __boss__ResonanceDecays_Pythia_8_186_h__
-#define __boss__ResonanceDecays_Pythia_8_186_h__
+#ifndef __boss__ResonanceDecays_Pythia_8_209_h__
+#define __boss__ResonanceDecays_Pythia_8_209_h__
 
 // ResonanceDecays.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -21,7 +21,7 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
-  
+
 //==========================================================================
 
 // The ResonanceDecays class handles the sequential decay of resonances
@@ -29,7 +29,7 @@ namespace Pythia8 {
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_ResonanceDecays.h"
+#include "backend_types/Pythia_8_209/abstract_ResonanceDecays.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -44,7 +44,7 @@ public:
   void init(Info* infoPtrIn,  ParticleData* particleDataPtrIn,
     Rndm* rndmPtrIn) {infoPtr = infoPtrIn;
     particleDataPtr = particleDataPtrIn; rndmPtr = rndmPtrIn;}
- 
+
   // Generate the next decay sequence.
   bool next( Event& process, int iDecNow = 0);
 
@@ -105,4 +105,4 @@ private:
 
 #endif // Pythia8_ResonanceDecays_H
 
-#endif /* __boss__ResonanceDecays_Pythia_8_186_h__ */
+#endif /* __boss__ResonanceDecays_Pythia_8_209_h__ */

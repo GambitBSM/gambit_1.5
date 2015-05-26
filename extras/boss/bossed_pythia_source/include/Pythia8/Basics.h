@@ -1,8 +1,8 @@
-#ifndef __boss__Basics_Pythia_8_186_h__
-#define __boss__Basics_Pythia_8_186_h__
+#ifndef __boss__Basics_Pythia_8_209_h__
+#define __boss__Basics_Pythia_8_209_h__
 
 // Basics.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -19,7 +19,7 @@
 #include "Pythia8/PythiaStdlib.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // RndmEngine is the base class for external random number generators.
@@ -46,7 +46,7 @@ public:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Rndm.h"
+#include "backend_types/Pythia_8_209/abstract_Rndm.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -130,7 +130,7 @@ class RotBstMatrix;
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Vec4.h"
+#include "backend_types/Pythia_8_209/abstract_Vec4.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -146,7 +146,7 @@ public:
     zz = v.zz; tt = v.tt; } return *this; }
   Vec4& operator=(double value) { xx = value; yy = value; zz = value;
     tt = value; return *this; }
-      
+
   // Member functions for input.
   void reset() {xx = 0.; yy = 0.; zz = 0.; tt = 0.;}
   void p(double xIn, double yIn, double zIn, double tIn)
@@ -162,6 +162,12 @@ public:
   double py() const {return yy;}
   double pz() const {return zz;}
   double e() const {return tt;}
+  double& operator[](int i) {
+    if      (i == 1) return xx;
+    else if (i == 2) return yy;
+    else if (i == 3) return zz;
+    else             return tt;
+  }
   double mCalc() const {double temp = tt*tt - xx*xx - yy*yy - zz*zz;
     return (temp >= 0.) ? sqrt(temp) : -sqrt(-temp);}
   double m2Calc() const {return tt*tt - xx*xx - yy*yy - zz*zz;}
@@ -237,7 +243,7 @@ public:
   // phi is azimuthal angle between v1 and v2 around n axis.
   friend double phi(const Vec4& v1, const Vec4& v2, const Vec4& n);
   friend double cosphi(const Vec4& v1, const Vec4& v2, const Vec4& n);
- 
+
   // R is distance in cylindrical (y/eta, phi) coordinates.
   friend double RRapPhi(const Vec4& v1, const Vec4& v2);
   friend double REtaPhi(const Vec4& v1, const Vec4& v2);
@@ -406,7 +412,7 @@ ostream& operator<<(ostream&, const RotBstMatrix&) ;
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Hist.h"
+#include "backend_types/Pythia_8_209/abstract_Hist.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -431,11 +437,11 @@ public:
     nBin = h.nBin; nFill = h.nFill; xMin = h.xMin; xMax = h.xMax;
     dx = h.dx;  under = h.under; inside = h.inside; over = h.over;
     res = h.res; } return *this; }
-  
+
   // Book a histogram.
   void book(string titleIn = "  ", int nBinIn = 100, double xMinIn = 0.,
     double xMaxIn = 1.) ;
- 
+
   // Set title of a histogram.
   void name(string titleIn = "  ") {title = titleIn; }
 
@@ -600,4 +606,4 @@ Hist operator/(const Hist& h1, const Hist& h2);
 
 #endif // end Pythia8_Basics_H
 
-#endif /* __boss__Basics_Pythia_8_186_h__ */
+#endif /* __boss__Basics_Pythia_8_209_h__ */

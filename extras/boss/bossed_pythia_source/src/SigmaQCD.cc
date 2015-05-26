@@ -1,5 +1,5 @@
 // SigmaQCD.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -95,12 +95,12 @@ void Sigma0AB2XX::setIdColAcol() {
 // Select identity, colour and anticolour.
 
 void Sigma0AB2AXB::setIdColAcol() {
-  
+
   // Central diffractive state represented by rho_diffr0. Colours trivial.
   int idX = 9900110;
   setId( idA, idB, idA, idB,idX);
   setColAcol( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  
+
 }
 
 //==========================================================================
@@ -155,7 +155,7 @@ void Sigma2gg2gg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2qqbar::initProc() {
 
   // Read number of quarks to be considered in massless approximation.
@@ -173,7 +173,7 @@ void Sigma2gg2qqbar::sigmaKin() {
   idNew = 1 + int( nQuarkNew * rndmPtr->flat() );
   mNew  = particleDataPtr->m0(idNew);
   m2New = mNew*mNew;
-  
+
   // Calculate kinematics dependence.
   sigTS = 0.;
   sigUS = 0.;
@@ -344,7 +344,7 @@ void Sigma2qqbar2gg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2qqbarNew::initProc() {
 
   // Read number of quarks to be considered in massless approximation.
@@ -401,7 +401,7 @@ void Sigma2qqbar2qqbarNew::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2QQbar::initProc() {
 
   // Process name.
@@ -488,7 +488,7 @@ double Sigma2gg2QQbar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process, especially parton-flux object.
-  
+
 void Sigma2qqbar2QQbar::initProc() {
 
   // Process name.
@@ -582,7 +582,7 @@ void Sigma3gg2ggg::sigmaKin() {
   pp[4][5] = p4cm * p5cm;
   for (int i = 1; i < 5; ++i)
     for (int j = i + 1; j < 6; ++j) pp[j][i] = pp[i][j];
-  
+
   // Cross section, in three main sections.
   double num1 = cycle(1,2,3,4,5) + cycle(1,2,3,5,4) + cycle(1,2,4,3,5)
               + cycle(1,2,4,5,3) + cycle(1,2,5,3,4) + cycle(1,2,5,4,3)
@@ -808,7 +808,7 @@ void Sigma3qg2qgg::setIdColAcol(){
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3gg2qqbarg::initProc() {
 
   // Read number of quarks to be considered in massless approximation.
@@ -817,7 +817,7 @@ void Sigma3gg2qqbarg::initProc() {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Evaluate |M|^2 - no incoming flavour dependence.
 
 void Sigma3gg2qqbarg::sigmaKin() {
@@ -871,7 +871,7 @@ void Sigma3gg2qqbarg::setIdColAcol(){
   case 4: setColAcol( 1, 2, 2, 3, 0, 3, 1, 4, 4, 0 ); break;
   case 5: setColAcol( 1, 2, 2, 3, 1, 4, 0, 3, 4, 0 ); break;
   }
-  
+
 }
 
 //==========================================================================
@@ -921,7 +921,7 @@ inline double Sigma3qq2qqgDiff::m2Calc() {
                 u * (s * t + sp * tp) + up * (s * tp + sp * t);
   double num3 = (s + sp) * (s * sp - t * tp - u * up) +
                 2. * t * tp * (u + up) + 2. * u * up * (t + tp);
-    
+
   // (N^2 - 1)^2 / 4N^3 = 16. / 27.
   // (N^2 - 1)   / 4N^3 =  2. / 27.
   return (1. / 8.) * pow3(4. * M_PI * alpS) * num1 / den1 *
@@ -944,7 +944,7 @@ double Sigma3qq2qqgDiff::sigmaHat() {
 // Select identity, colour and anticolour.
 
 void Sigma3qq2qqgDiff::setIdColAcol(){
-  
+
   // Outgoing flavours; easiest just to map by hand
   switch (config) {
   case 0: id3 = id1; id4 = id2; id5 = 21;  break;
@@ -1016,7 +1016,7 @@ inline void Sigma3qq2qqgDiff::mapFinal() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3qqbar2qqbargDiff::initProc() {
 
   // Read number of quarks to be considered in massless approximation.
@@ -1054,7 +1054,7 @@ void Sigma3qqbar2qqbargDiff::sigmaKin() {
   // Extra factor of (nQuarkNew - 1) from new q/qbar pairs
   // XXX - Extra factor of (2.) from second possible crossing???
   sigma = 6. * (nQuarkNew - 1) * 2. * m2Calc();
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1116,7 +1116,7 @@ void Sigma3qqbar2qqbargDiff::setIdColAcol(){
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3qg2qqqbarDiff::initProc() {
 
   // Read number of quarks to be considered in massless approximation.
@@ -1153,7 +1153,7 @@ void Sigma3qg2qqqbarDiff::sigmaKin() {
     sigma[i] = -6. * (3. / 8.) * (nQuarkNew - 1) * m2Calc();
 
   }
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1306,7 +1306,7 @@ inline double Sigma3qq2qqgSame::m2Calc() {
   double num6 = s_sp * fac2 - fac3 - 2. * fac1;
   double num7 = (s * s + sp * sp) * fac2;
   double den7 = (ttp * uup);
-  
+
   // C1 = (N^2 - 1)^2 / 4N^3 = 16. / 27.
   // C2 = (N^2 - 1)   / 4N^3 =  2. / 27.
   // C3 = (N^4 - 1)   / 8N^4 = 10. / 81.
@@ -1355,7 +1355,7 @@ void Sigma3qq2qqgSame::setIdColAcol(){
   swap(acolSave[5], acolSave[gIdx + 3]);
   // Swap if qbar qbar incoming
   if (id1 < 0) swapColAcol();
-  
+
 }
 
 //--------------------------------------------------------------------------

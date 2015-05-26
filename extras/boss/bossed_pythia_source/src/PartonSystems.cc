@@ -1,5 +1,5 @@
 // PartonSystems.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -33,7 +33,7 @@ void PartonSystems::replace(int iSys, int iPosOld, int iPosNew) {
     systems[iSys].iOut[i] = iPosNew;
     return;
   }
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -94,7 +94,7 @@ void PartonSystems::list(ostream& os) const {
   os << "\n --------  PYTHIA Parton Systems Listing  -------------------"
      << "--------------------------------- "
      << "\n \n  no  inA  inB  out members  \n";
-  
+
   // Loop over system list and over members in each system.
   for (int iSys = 0; iSys < sizeSys(); ++iSys) {
     os << " " << setw(3) << iSys << " " << setw(4) << systems[iSys].iInA

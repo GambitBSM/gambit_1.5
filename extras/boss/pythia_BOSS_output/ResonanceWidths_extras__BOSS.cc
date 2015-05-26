@@ -1,7 +1,7 @@
 #include "Pythia8/ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/ResonanceWidths.h"
@@ -86,7 +86,7 @@ double Pythia8::ResonanceWidths::numInt2BW__BOSS(double mHatIn, double m1, doubl
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_ResonanceWidths* Pythia8::ResonanceWidths::pointerCopy__BOSS()
 {

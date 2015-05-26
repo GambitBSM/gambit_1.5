@@ -1,5 +1,5 @@
 // SigmaTotal.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -15,7 +15,7 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The SigmaTotal class contains parametrizations of total, elastic and
@@ -49,7 +49,7 @@ public:
 
   // Calculate cross sections in MBR model.
   bool calcMBRxsecs(int idA, int idB, double eCM);
-  
+
   // Get maximum of xi,dy distribution in MBR model (for event generation).
   double ddpMax()  const {return ddpmax;}
   double sdpMax()  const {return sdpmax;}
@@ -80,13 +80,13 @@ private:
 
   // Decide whether default or MBR diffractive cross sections.
   int    PomFlux;
-  
+
   // Constants: could only be changed in the code itself.
   static const int    IHADATABLE[], IHADBTABLE[], ISDTABLE[], IDDTABLE[];
   static const double MMIN, EPSILON, ETA, X[], Y[], BETA0[], BHAD[],
                       ALPHAPRIME, CONVERTEL, CONVERTSD, CONVERTDD, MMIN0,
                       CRES, MRES0, CSD[10][8], CDD[10][9], SPROTON;
-  
+
   // Integration of MBR cross sections and form factor approximation.
   static const int    NINTEG, NINTEG2;
   static const double HBARC2, FFA1, FFA2,FFB1, FFB2;
@@ -96,7 +96,7 @@ private:
   double sigAXB2TeV, sigTotOwn, sigElOwn, sigXBOwn, sigAXOwn, sigXXOwn,
          sigAXBOwn, maxXBOwn, maxAXOwn, maxXXOwn, maxAXBOwn, bSlope, rho,
          lambda, tAbsMin, alphaEM0, sigmaPomP, mPomP, pPomP;
-  
+
   // Parameters of MBR model.
   double MBReps, MBRalpha, MBRbeta0, MBRsigma0, m2min, dyminSDflux,
          dyminDDflux, dyminCDflux, dyminSD, dyminDD, dyminCD,
@@ -120,7 +120,7 @@ private:
   //  return ((x >= 0.) ? tmp : -tmp); }
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

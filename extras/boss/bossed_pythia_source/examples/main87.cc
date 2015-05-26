@@ -1,20 +1,19 @@
 // main87.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2011 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 // This program is written by Stefan Prestel.
-// It illustrates how to do NL3 merging,
-// see the Matrix Element Merging page in the online manual.
+// It illustrates how to do NL3 merging, see the Matrix Element
+// Merging page in the online manual. An example command is
+//     ./main87 main87.cmnd w_production hepmcout87.dat
+// where main87.cmnd supplies the commands, w_production provides the
+// input LHE events, and hepmcout87.dat is the output file. This
+// example requires HepMC.
 
 #include "Pythia8/Pythia.h"
-#include "Pythia8/Pythia8ToHepMC.h"
+#include "Pythia8Plugins/HepMC2.h"
 #include <unistd.h>
-
-#include "HepMC/GenEvent.h"
-#include "HepMC/IO_GenEvent.h"
-// Following line to be used with HepMC 2.04 onwards.
-#include "HepMC/Units.h"
 
 using namespace Pythia8;
 
@@ -105,10 +104,10 @@ int main( int argc, char* argv[] ){
 #endif
     string LHEfile = iPathTree + in.str();
 
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Start generation loop
     for( int iEvent=0; iEvent<nEvent; ++iEvent ){
@@ -163,10 +162,10 @@ int main( int argc, char* argv[] ){
 #endif
     string LHEfile = iPathLoop + in.str();
 
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterNLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Start generation loop
     for( int iEvent=0; iEvent<nEvent; ++iEvent ){
@@ -261,10 +260,10 @@ int main( int argc, char* argv[] ){
          << "Start tree level treatment for " << njetcounterLO << " jets"
          << endl;
 
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Remember position in vector of cross section estimates.
     int iNow = sizeLO-1-njetcounterLO;
@@ -353,10 +352,10 @@ int main( int argc, char* argv[] ){
          << "Start loop level treatment for " << njetcounterNLO << " jets"
          << endl;
 
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterNLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Remember position in vector of cross section estimates.
     int iNow = sizeNLO-1-njetcounterNLO;
@@ -447,10 +446,10 @@ int main( int argc, char* argv[] ){
          << "Start subtractive treatment for " << njetcounterCT << " jets"
          << endl;
 
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterCT);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Remember position in vector of cross section estimates.
     int iNow = sizeLO-1-njetcounterCT;

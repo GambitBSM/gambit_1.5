@@ -1,7 +1,7 @@
 #include <string>
 #include <ostream>
 #include <vector>
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/Settings.h"
@@ -90,6 +90,18 @@ void Pythia8::Settings::list__BOSS(std::basic_string<char,std::char_traits<char>
 }
 
 
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Settings::output__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > keyIn)
+{
+    return output(keyIn);
+}
+
+
+void Pythia8::Settings::addMode__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > keyIn, int defaultIn, bool hasMinIn, bool hasMaxIn, int minIn, int maxIn)
+{
+    addMode(keyIn, defaultIn, hasMinIn, hasMaxIn, minIn, maxIn);
+}
+
+
 void Pythia8::Settings::list__BOSS(bool doListAll, bool doListString, std::basic_string<char,std::char_traits<char>,std::allocator<char> > match)
 {
     list(doListAll, doListString, match);
@@ -98,7 +110,7 @@ void Pythia8::Settings::list__BOSS(bool doListAll, bool doListString, std::basic
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_Settings* Pythia8::Settings::pointerCopy__BOSS()
 {

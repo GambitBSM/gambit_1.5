@@ -1,5 +1,5 @@
 // BeamParticle.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -9,7 +9,24 @@
 #include "Pythia8/BeamParticle.h"
 
 namespace Pythia8 {
- 
+
+//==========================================================================
+
+// The ColState class.
+
+//--------------------------------------------------------------------------
+
+// Small storage class needed to find the full colour state
+// of all the scattered partons.
+
+class ColState {
+public:
+  ColState() : nTotal(0.) {}
+  vector< pair<int,int> > lastSteps;
+  // nTotal is integer but can become extremely big.
+  double nTotal;
+};
+
 //==========================================================================
 
 // The BeamParticle class.
@@ -21,6 +38,16 @@ namespace Pythia8 {
 
 // A lepton that takes (almost) the full beam energy does not leave a remnant.
 const double BeamParticle::XMINUNRESOLVED = 1. - 1e-10;
+
+// Fictitious Pomeron mass to leave some room for beam remnant.
+const double BeamParticle::POMERONMASS = 1.;
+
+// Maximum number of tries to find a suitable colour.
+const int BeamParticle::NMAX = 1000;
+
+// Maximum number of tries to randomly assign colours to beam remnant.
+// After this number is reached, a systematic approach is used.
+const int BeamParticle::NRANDOMTRIES = 1000;
 
 //--------------------------------------------------------------------------
 
@@ -54,15 +81,26 @@ void BeamParticle::init( int idIn, double pzIn, double eIn, double mIn,
   // Assume g(x) ~ (1-x)^power/x to constrain companion to sea quark.
   companionPower    = settings.mode("BeamRemnants:companionPower");
 
-  // Assume g(x) ~ (1-x)^power/x to constrain companion to sea quark.
-  companionPower    = settings.mode("BeamRemnants:companionPower");
+  // Assume g(x) ~ (1-x)^power/x with a cut-off for low x.
+  gluonPower        = settings.parm("BeamRemnants:gluonPower");
+  xGluonCutoff      = settings.parm("BeamRemnants:xGluonCutoff");
 
   // Allow or not more than one valence quark to be kicked out.
   allowJunction     = settings.flag("BeamRemnants:allowJunction");
 
+  // Choose whether to form a di-quark or
+  // a junction with new colur reconnection scheme.
+  beamJunction       = settings.flag("beamRemnants:beamJunction");
+
+  // Allow junctions in the outgoing colour state.
+  allowBeamJunctions = settings.flag("beamRemnants:allowBeamJunction");
+
   // For low-mass diffractive system kick out q/g = norm / mass^power.
   pickQuarkNorm     = settings.parm("Diffraction:pickQuarkNorm");
   pickQuarkPower    = settings.parm("Diffraction:pickQuarkPower");
+
+  // Controls the amount of saturation in the new model.
+  beamSat           = settings.parm("BeamRemnants:saturation");
 
   // Width of primordial kT distribution in low-mass diffractive systems.
   diffPrimKTwidth   = settings.parm("Diffraction:primKTwidth");
@@ -75,6 +113,7 @@ void BeamParticle::init( int idIn, double pzIn, double eIn, double mIn,
   initBeamKind();
   pBeam             = Vec4( 0., 0., pzIn, eIn);
   mBeam             = mIn;
+  clear();
 
 }
 
@@ -112,7 +151,7 @@ void BeamParticle::initBeamKind() {
     nVal[0]   = 1 ;
     nVal[1]   = 1 ;
     newValenceContent();
-  
+
   // Resolve valence content for assumed meson. Flunk unallowed codes.
   } else if (idBeamAbs < 1000) {
     int id1 = idBeamAbs/100;
@@ -120,7 +159,7 @@ void BeamParticle::initBeamKind() {
     if ( id1 < 1 || id1 > maxValQuark
       || id2 < 1 || id2 > maxValQuark ) return;
     isMesonBeam = true;
-    
+
     // Store valence content of a confirmed meson.
     nValKinds = 2;
     nVal[0]   = 1 ;
@@ -133,7 +172,7 @@ void BeamParticle::initBeamKind() {
       idVal[1] = -id1;
     }
     newValenceContent();
-  
+
   // Resolve valence content for assumed baryon. Flunk unallowed codes.
   } else {
     int id1 = idBeamAbs/1000;
@@ -160,7 +199,7 @@ void BeamParticle::initBeamKind() {
       ++nValKinds;
     }
   }
-  
+
   // Flip flavours for antimeson or antibaryon, and then done.
   if (idBeam < 0) for (int i = 0; i < nValKinds; ++i) idVal[i] = -idVal[i];
   isHadronBeam = true;
@@ -206,7 +245,8 @@ double BeamParticle::xMax(int iSkip) {
 
   // Minimum requirement on remaining energy > nominal mass for hadron.
   double xLeft = 1.;
-  if (isHadron()) xLeft -= m() / e();
+  if (idBeam == 990)   xLeft -= POMERONMASS / e();
+  else if (isHadron()) xLeft -= m() / e();
   if (size() == 0) return xLeft;
 
   // Subtract what was carried away by initiators (to date).
@@ -276,7 +316,7 @@ double BeamParticle::xfModified(int iSkip, int idIn, double x, double Q2) {
       // <x> for companion refers to fraction of x left INCLUDING sea quark.
       // To be modified further??
       * (1. + resolved[i].x() / xLeft);
-  
+
     // Calculate total rescaling factor and pdf for sea and gluon.
     double rescaleGS = max( 0., (1. - xValLeft - xCompAdded)
       / (1. - xValTot) );
@@ -287,7 +327,7 @@ double BeamParticle::xfModified(int iSkip, int idIn, double x, double Q2) {
     if (idIn == idVal[i] && nValLeft[i] > 0)
       xqVal = xfVal( idIn, xRescaled, Q2)
       * double(nValLeft[i]) / double(nVal[i]);
-                                                                               
+
     // Find companion part, by adding all companion contributions.
     for (int i = 0; i < size(); ++i)
     if (i != iSkip && resolved[i].id() == -idIn
@@ -308,7 +348,7 @@ double BeamParticle::xfModified(int iSkip, int idIn, double x, double Q2) {
     if (resolved[iSkip].isUnmatched()) return xqgSea + xqCompSum;
   }
   return xqgTot;
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -337,7 +377,7 @@ int BeamParticle::pickValSeaComp() {
     double xqRndm = xqgTot * rndmPtr->flat();
     if (xqRndm < xqVal) vsc = -3;
     else if (xqRndm < xqVal + xqgSea) vsc = -2;
- 
+
     // If not either, loop over all possible companion quarks.
     else {
       xqRndm -= xqVal + xqgSea;
@@ -354,7 +394,7 @@ int BeamParticle::pickValSeaComp() {
   // Bookkeep assignment; for sea--companion pair both ways.
   resolved[iSkipSave].companion(vsc);
   if (vsc >= 0) resolved[vsc].companion(iSkipSave);
-  
+
   // Done; return code for choice (to distinguish valence/sea in Info).
   return vsc;
 
@@ -370,7 +410,7 @@ double BeamParticle::xValFrac(int j, double Q2) {
   // Only recalculate when required.
   if (Q2 != Q2ValFracSav) {
     Q2ValFracSav = Q2;
-     
+
     // Q2-dependence of log-log form; assume fixed Lambda = 0.2.
     double llQ2 = log( log( max( 1., Q2) / 0.04 ));
 
@@ -475,13 +515,14 @@ double BeamParticle::xCompDist(double xc, double xs) {
 
 // Add required extra remnant flavour content. Also initial colours.
 
-bool BeamParticle::remnantFlavours(Event& event) {
+bool BeamParticle::remnantFlavours(Event& event, bool isDIS) {
 
   // A baryon will have a junction, unless a diquark is formed later.
   hasJunctionBeam = (isBaryon());
 
   // Store how many hard-scattering partons were removed from beam.
   nInit = size();
+  if (isDIS && nInit != 1) return false;
 
   // Find remaining valence quarks.
   for (int i = 0; i < nValKinds; ++i) {
@@ -527,9 +568,36 @@ bool BeamParticle::remnantFlavours(Event& event) {
   }
 
   // If no other remnants found, add a gluon or photon to carry momentum.
-  if (size() == nInit) {
+  if (size() == nInit && !isUnresolvedBeam) {
     int    idRemnant = (isHadronBeam) ? 21 : 22;
     append(0, idRemnant, 0., -1);
+  }
+
+  // For DIS allow collapse to one colour singlet hadron.
+  if (isHadronBeam && isDIS && size() > 2) {
+    if (size() != 4) {
+      infoPtr->errorMsg("Error in BeamParticle::remnantFlavours: "
+        "unexpected number of beam remnants for DIS");
+      return false;
+    }
+
+    // Companion last; find parton with matching colour.
+    int colTypeComp = particleDataPtr->colType( resolved[3].id() );
+    int colType1    = particleDataPtr->colType( resolved[1].id() );
+    int i12         = (colType1 == -colTypeComp) ? 1 : 2;
+
+    // Combine to new hadron flavour.
+    int idHad = flavSelPtr->combine( resolved[i12].id(), resolved[3].id() );
+    if (idHad == 0) {
+      infoPtr->errorMsg("Error in BeamParticle::remnantFlavours: "
+        "failed to combine hadron for DIS");
+      return false;
+    }
+
+    // Overwrite with hadron flavour and remove companion.
+    resolved[i12].id(idHad);
+    resolved.pop_back();
+    resolved[0].companion(-3);
   }
 
   // Set initiator and remnant masses.
@@ -583,7 +651,7 @@ bool BeamParticle::remnantColours(Event& event, vector<int>& colFrom,
     else if ( resolved[i].id() == 21
       && resolved[i].col() != resolved[i].acol() ) iGlu.push_back(i);
   }
-      
+
   // Pick a valence quark to which gluons are attached.
   // Do not resolve quarks in diquark. (More sophisticated??)
   int iValSel= iVal[0];
@@ -643,7 +711,7 @@ bool BeamParticle::remnantColours(Event& event, vector<int>& colFrom,
 
   // At end of gluon/(sea+companion) list.
   }
- 
+
   // Now begin checks, and also finding junction information.
   // Loop through remnant partons; isolate all colours and anticolours.
   vector<int> colList;
@@ -723,8 +791,13 @@ double BeamParticle::xRemnant( int i) {
 
   double x = 0.;
 
+  // Hadrons (only used for DIS) rather primitive for now (probably OK).
+  int idAbs = abs(resolved[i].id());
+  if (idAbs > 100 && (idAbs/10)%10 != 0) {
+    x = 1.;
+
   // Calculation of x of valence quark or diquark, for latter as sum.
-  if (resolved[i].isValence()) {
+  } else if (resolved[i].isValence()) {
 
     // Resolve diquark into sum of two quarks.
     int id1 = resolved[i].id();
@@ -733,7 +806,7 @@ double BeamParticle::xRemnant( int i) {
       id2 = (id1 > 0) ? (id1/100)%10 : -(((-id1)/100)%10);
       id1 = (id1 > 0) ? id1/1000 : -((-id1)/1000);
     }
- 
+
     // Loop over (up to) two quarks; add their contributions.
     for (int iId = 0; iId < 2; ++iId) {
       int idNow = (iId == 0) ? id1 : id2;
@@ -756,7 +829,7 @@ double BeamParticle::xRemnant( int i) {
       x += xPart;
     }
    if (id2 != 0) x *= valenceDiqEnhance;
-      
+
   // Calculation of x of sea quark, based on companion association.
   } else if (resolved[i].isCompanion()) {
 
@@ -773,12 +846,17 @@ double BeamParticle::xRemnant( int i) {
       * (pow2(x) + pow2(xCompanion)) / pow2(x + xCompanion)
       < rndmPtr->flat() );
 
-  // Else, rarely, a single gluon remnant, so value does not matter.
-  } else x = 1.;
+  // Else a gluon remnant.
+  // Rarely it is a single gluon remnant, for that case value does not matter.
+  } else {
+    do x = pow(xGluonCutoff, 1 - rndmPtr->flat());
+    while ( pow(1. - x, gluonPower) < rndmPtr->flat() );
+  }
+
   return x;
 
 }
-   
+
 //--------------------------------------------------------------------------
 
 // Print the list of resolved partons in a beam.
@@ -790,7 +868,7 @@ void BeamParticle::list(ostream& os) const {
      << "-------------------------------------------------------------\n"
      << "\n    i  iPos      id       x    comp   xqcomp    pTfact      "
      << "colours      p_x        p_y        p_z         e          m \n";
-  
+
   // Loop over list of removed partons and print it.
   double xSum  = 0.;
   Vec4   pSum;
@@ -820,32 +898,32 @@ void BeamParticle::list(ostream& os) const {
      << "---------------------------------------------------------------"
      << endl;
 }
-   
+
 //--------------------------------------------------------------------------
 
 // Test whether a lepton is to be considered as unresolved.
 
 bool BeamParticle::isUnresolvedLepton() {
- 
+
   // Require record to consist of lepton with full energy plus a photon.
   if (!isLeptonBeam || resolved.size() > 2 || resolved[1].id() != 22
     || resolved[0].x() < XMINUNRESOLVED) return false;
   return true;
-  
+
 }
-   
+
 //--------------------------------------------------------------------------
 
 // For a diffractive system, decide whether to kick out gluon or quark.
 
 bool BeamParticle::pickGluon(double mDiff) {
-  
+
   // Relative weight to pick a quark, assumed falling with energy.
   double probPickQuark = pickQuarkNorm / pow( mDiff, pickQuarkPower);
   return  ( (1. + probPickQuark) * rndmPtr->flat() < 1. );
-  
+
 }
-   
+
 //--------------------------------------------------------------------------
 
 // Pick a valence quark at random. (Used for diffractive systems.)
@@ -877,7 +955,7 @@ int BeamParticle::pickValence() {
   return idVal1;
 
 }
-   
+
 //--------------------------------------------------------------------------
 
 // Share lightcone momentum between two remnants in a diffractive system.
@@ -910,6 +988,660 @@ double BeamParticle::zShare( double mDiff, double m1, double m2) {
   // Done.
   return zRel;
 
+}
+
+// -------------------------------------------------------------------------
+
+// Find the colour configuration of the scattered partons
+// and update the colour tags to match this configuration.
+
+void BeamParticle::findColSetup(Event& event) {
+
+  // Reset current colour setup;
+  colSetup = make_pair(0,0);
+  cols.clear();
+  acols.clear();
+  colUpdates.clear();
+  nJuncs = 0;
+  nAjuncs = 0;
+
+  // Setup colour states.
+  vector<vector <vector <ColState> > > colStates;
+  colStates.resize(size() + 1);
+  for (int i = 0; i < size() + 1; ++i) {
+    colStates[i].resize(2*(i + 1));
+    for (int j = 0; j < 2*(i+1); ++j)
+      colStates[i][j].resize(2*(i+1));
+  }
+  colStates[0][0][0].nTotal = 1.;
+
+  bool noColouredParticles = true;
+  // Find all possible multiplets and their degeneracies.
+  for (int i = 0; i < size(); ++i) {
+    for (int j = 0; j < int(colStates[i].size()); ++j) {
+      for (int k = 0; k < int(colStates[i][j].size()); ++k) {
+        if (colStates[i][j][k].nTotal < 0.5) continue;
+        int idParton = resolved[i].id();
+
+        // If particle is a quark.
+        if (idParton > 0 && idParton < 9) {
+          colStates[i+1][j+1][k].lastSteps.push_back(make_pair(j,k));
+          colStates[i+1][j+1][k].nTotal += colStates[i][j][k].nTotal;
+          if (k > 0) {
+            colStates[i+1][j][k -1].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j][k -1].nTotal += colStates[i][j][k].nTotal;
+          }
+
+          // Junction combination.
+          if (j > 0 && allowBeamJunctions) {
+            colStates[i+1][j - 1][k + 1].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j - 1][k + 1].nTotal += colStates[i][j][k].nTotal;
+          }
+        }
+
+        // If particle is an anti quark.
+        if (idParton < 0 && idParton > -9) {
+          colStates[i+1][j][k + 1].lastSteps.push_back(make_pair(j,k));
+          colStates[i+1][j][k + 1].nTotal += colStates[i][j][k].nTotal;
+          if (j > 0) {
+            colStates[i+1][j - 1][k].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j - 1][k].nTotal += colStates[i][j][k].nTotal;
+          }
+
+          // Junction combination.
+          if (k > 0 && allowBeamJunctions) {
+            colStates[i+1][j + 1][k - 1].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j + 1][k - 1].nTotal += colStates[i][j][k].nTotal;
+          }
+        }
+
+        // If particle is a gluon.
+        if (idParton == 21) {
+          colStates[i+1][j + 1][k + 1].lastSteps.push_back(make_pair(j,k));
+          colStates[i+1][j + 1][k + 1].nTotal += colStates[i][j][k].nTotal;
+          if (j > 0) {
+            colStates[i+1][j][k].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j][k].nTotal += colStates[i][j][k].nTotal;
+          }
+          if (k > 0) {
+            colStates[i+1][j][k].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j][k].nTotal += colStates[i][j][k].nTotal;
+          }
+          if (j > 0 && k > 0) {
+            colStates[i+1][j - 1][k - 1].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j - 1][k - 1].nTotal += colStates[i][j][k].nTotal;
+          }
+
+          // Junction combinations.
+          if (k > 0 && allowBeamJunctions) {
+            colStates[i+1][j + 2][k - 1].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j + 2][k - 1].nTotal += colStates[i][j][k].nTotal;
+          }
+          if (j > 0 && allowBeamJunctions) {
+            colStates[i+1][j - 1][k + 2].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j - 1][k + 2].nTotal += colStates[i][j][k].nTotal;
+          }
+          if (j > 1 && allowBeamJunctions) {
+            colStates[i+1][j - 2][k + 1].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j - 2][k + 1].nTotal += colStates[i][j][k].nTotal;
+          }
+          if (k > 1 && allowBeamJunctions) {
+            colStates[i+1][j + 1][k - 2].lastSteps.push_back(make_pair(j,k));
+            colStates[i+1][j + 1][k - 2].nTotal += colStates[i][j][k].nTotal;
+          }
+        }
+        // If the parton is not a quark or a gluon.
+        if (idParton != 21 && abs(idParton) > 9) {
+          colStates[i+1][j][k].lastSteps.push_back(make_pair(j,k));
+          colStates[i+1][j][k].nTotal += colStates[i][j][k].nTotal;
+        } else
+          noColouredParticles = false;
+      }
+    }
+  }
+
+  // Pick a specific multiplet depending on colour weight and saturation.
+  // Start by calculating the sum of all weights.
+  double totalSize = 0;
+  for (int i = 0;i < int(colStates[size()].size()); ++i) {
+    for (int j = 0;j < int(colStates[size()][i].size()); ++j) {
+      // Do not allow colour singlet states, since this will overlap
+      // with diffractive events described elsewhere in PYTHIA.
+      if (i == 0 && j == 0 && !noColouredParticles) continue;
+
+      double multipletSize = (i + 1) * (j + 1) * (i + j + 2) / 2.;
+      totalSize += colStates[size()][i][j].nTotal *
+        multipletSize * exp(-multipletSize / beamSat);
+    }
+  }
+
+  // Choose one colour configuration.
+  double curSize = 0;
+  double chosenSize = rndmPtr->flat() * totalSize;
+  for (int i = 0;i < int(colStates[size()].size()); ++i) {
+    for (int j = 0;j < int(colStates[size()][i].size()); ++j) {
+
+      // Do not allow singlets.
+      if (i == 0 && j == 0 && !noColouredParticles) continue;
+
+      // Reweight according to multiplet size.
+      double multipletSize = (i + 1) * (j + 1) * (i + j + 2) / 2.;
+      curSize += colStates[size()][i][j].nTotal *
+        multipletSize * exp(-multipletSize / beamSat);
+      if (curSize > chosenSize) {
+        colSetup.first = i;
+        colSetup.second = j;
+        break;
+      }
+    }
+    if (curSize > chosenSize) break;
+  }
+
+  // Find the whole colour flow chain.
+  vector<pair<int, int> >  colSetupChain;
+  colSetupChain.resize(size() + 1);
+  pair<int,int> curColSetup = make_pair(colSetup.first, colSetup.second);
+  for (int i = size(); i > 0; --i) {
+    colSetupChain[i] = curColSetup;
+    int curColSize = colStates[i][curColSetup.first][curColSetup.second].
+      lastSteps.size();
+    int iCurCol = int(rndmPtr->flat() * curColSize);
+    curColSetup = colStates[i][curColSetup.first][curColSetup.second].
+      lastSteps[iCurCol];
+  }
+  colSetupChain[0] = curColSetup;
+
+  // Update scattered partons to reflect new colour configuration and
+  // store still unconnected colours and anti-colours.
+  for (int i = 0; i < size() ; ++i) {
+
+    // If particle is a quark.
+    if (resolved[i].id() > 0 && resolved[i].id() < 9) {
+      // Add quark to list of colours.
+      if (colSetupChain[i].first + 1 == colSetupChain[i + 1].first)
+        cols.push_back(resolved[i].col());
+
+      // Find anti colour that quark connects to and update event record.
+      else if (colSetupChain[i].second - 1 == colSetupChain[i + 1].second) {
+        int iAcol = int(acols.size() * rndmPtr->flat());
+        int acol = acols[iAcol];
+        acols.erase(acols.begin() + iAcol);
+        updateSingleCol(acol, resolved[i].col());
+      }
+
+      // Else must be junction:
+      else {
+        int iCol = int(cols.size() * rndmPtr->flat());
+        int juncCol = event.nextColTag();
+        event.appendJunction(1, cols[iCol], resolved[i].col(), juncCol);
+        event.saveJunctionSize();
+        acols.push_back(juncCol);
+        cols.erase(cols.begin() + iCol);
+        nJuncs++;
+      }
+    }
+
+    // If particle is an anti quark.
+    if (resolved[i].id() < 0 && resolved[i].id() > -9) {
+      // Add anti quark to list of anti colours
+      if (colSetupChain[i].second + 1 == colSetupChain[i + 1].second)
+        acols.push_back(resolved[i].acol());
+
+      // Find colour that anti quark connects to and update event record.
+      else if (colSetupChain[i].first - 1 == colSetupChain[i + 1].first) {
+        int iCol = int(cols.size() * rndmPtr->flat());
+        int col = cols[iCol];
+        cols.erase(cols.begin() + iCol);
+        updateSingleCol(col, resolved[i].acol());
+      }
+
+      // Else it has to be a junction configuration:
+      else {
+        int iAcol = int(acols.size() * rndmPtr->flat());
+        int juncCol = event.nextColTag();
+        event.appendJunction(2, acols[iAcol], resolved[i].acol(), juncCol);
+        event.saveJunctionSize();
+        cols.push_back(juncCol);
+        acols.erase(acols.begin() + iAcol);
+        nAjuncs++;
+      }
+    }
+
+    // If particle is a gluon.
+    if (resolved[i].id() == 21) {
+      // Add gluon to list of colours.
+      if (colSetupChain[i].first + 1 == colSetupChain[i + 1].first &&
+          colSetupChain[i].second + 1 == colSetupChain[i + 1].second ) {
+        acols.push_back(resolved[i].acol());
+        cols.push_back(resolved[i].col());
+      }
+
+      // Remove colour and anti colour.
+      if (colSetupChain[i].first - 1 == colSetupChain[i + 1].first &&
+          colSetupChain[i].second - 1 == colSetupChain[i + 1].second ) {
+        // First remove colour.
+        int iCol = int(cols.size() * rndmPtr->flat());
+        int col = cols[iCol];
+        cols.erase(cols.begin() + iCol);
+        updateSingleCol(col, resolved[i].acol());
+        // Then remove anti colour.
+        int iAcol = int(acols.size() * rndmPtr->flat());
+        int acol = acols[iAcol];
+        acols.erase(acols.begin() + iAcol);
+        updateSingleCol(acol, resolved[i].col());
+      }
+
+      // If the gluon connects to a single end.
+      // If it is possible to both go to a colour or anti colour pick randomly.
+      if (colSetupChain[i].first == colSetupChain[i + 1].first &&
+          colSetupChain[i].second == colSetupChain[i + 1].second ) {
+        bool removeColour = true;
+        if (cols.size() > 0 && acols.size() > 0)
+          removeColour = (rndmPtr->flat() > 0.5);
+        else if (acols.size() > 0)
+          removeColour = false;
+        // Remove colour and add new colour.
+        if (removeColour) {
+          int iCol = int(cols.size() * rndmPtr->flat());
+          int col = cols[iCol];
+          cols.erase(cols.begin() + iCol);
+          cols.push_back(resolved[i].col());
+          updateSingleCol(col, resolved[i].acol());
+        }
+        // Else remove anti colour and add new anti colour.
+        else {
+          int iAcol = int(acols.size() * rndmPtr->flat());
+          int acol = acols[iAcol];
+          acols.erase(acols.begin() + iAcol);
+          acols.push_back(resolved[i].acol());
+          updateSingleCol(acol, resolved[i].col());
+        }
+      }
+
+      // Junction configuratons.
+
+      // Gluon anti-junction case.
+      if (colSetupChain[i].first + 2 == colSetupChain[i + 1].first &&
+          colSetupChain[i].second - 1 == colSetupChain[i + 1].second ) {
+        int iAcol = int(acols.size() * rndmPtr->flat());
+        int acol = acols[iAcol];
+        acols.erase(acols.begin() + iAcol);
+        int acol3 = event.nextColTag();
+        event.appendJunction(2,acol,resolved[i].acol(),acol3);
+        cols.push_back(resolved[i].col());
+        cols.push_back(acol3);
+        nAjuncs++;
+      }
+
+      // Gluon junction case.
+      if (colSetupChain[i].first - 1 == colSetupChain[i + 1].first &&
+          colSetupChain[i].second + 2 == colSetupChain[i + 1].second ) {
+        int iCol = int(cols.size() * rndmPtr->flat());
+        int col = cols[iCol];
+        cols.erase(cols.begin() + iCol);
+        int col3 = event.nextColTag();
+        event.appendJunction(1,col,resolved[i].col(),col3);
+        acols.push_back(resolved[i].acol());
+        acols.push_back(col3);
+        nJuncs++;
+      }
+
+      // Gluon anti-junction case.
+      if (colSetupChain[i].first + 1 == colSetupChain[i + 1].first &&
+          colSetupChain[i].second - 2 == colSetupChain[i + 1].second ) {
+        int iAcol = int(acols.size() * rndmPtr->flat());
+        int acol = acols[iAcol];
+        acols.erase(acols.begin() + iAcol);
+        int iAcol2 = int(acols.size() * rndmPtr->flat());
+        int acol2 = acols[iAcol2];
+        acols.erase(acols.begin() + iAcol2);
+        event.appendJunction(2,acol,resolved[i].acol(),acol2);
+        cols.push_back(resolved[i].col());
+        nAjuncs++;
+      }
+
+      // Gluon junction case.
+      if (colSetupChain[i].first - 2 == colSetupChain[i + 1].first &&
+          colSetupChain[i].second + 1 == colSetupChain[i + 1].second ) {
+        int iCol = int(cols.size() * rndmPtr->flat());
+        int col = cols[iCol];
+        cols.erase(cols.begin() + iCol);
+        int iCol2 = int(cols.size() * rndmPtr->flat());
+        int col2 = cols[iCol2];
+        cols.erase(cols.begin() + iCol2);
+        event.appendJunction(1,col,resolved[i].col(),col2);
+        acols.push_back(resolved[i].acol());
+        nJuncs++;
+      }
+    }
+  }
+
+  // Done updating event.
+}
+
+// -------------------------------------------------------------------------
+
+// Add required extra remnant flavour content. Also initial colours.
+
+bool BeamParticle::remnantFlavoursNew(Event& event) {
+
+  // A baryon will have a junction, unless a diquark is formed later.
+  hasJunctionBeam = (isBaryon());
+
+  // Store how many hard-scattering partons were removed from beam.
+  nInit = size();
+
+  // Find remaining valence quarks.
+  for (int i = 0; i < nValKinds; ++i) {
+    nValLeft[i] = nVal[i];
+    for (int j = 0; j < nInit; ++j) if (resolved[j].isValence()
+      && resolved[j].id() == idVal[i]) --nValLeft[i];
+    // Add remaining valence quarks to record. Partly temporary values.
+    for (int k = 0; k < nValLeft[i]; ++k) append(0, idVal[i], 0., -3);
+  }
+  int nInitPlusVal = size();
+
+  // Find companion quarks to unmatched sea quarks.
+  for (int i = 0; i < nInit; ++i)
+  if (resolved[i].isUnmatched()) {
+
+    // Add companion quark to record; and bookkeep both ways.
+    append(0, -resolved[i].id(), 0., i);
+    resolved[i].companion(size() - 1);
+  }
+  int beamJunc = 0;
+  if (isBaryon()) beamJunc = 1;
+  if (id() < 0)   beamJunc = -beamJunc;
+
+  // Count the number of gluons that needs to be added.
+  int nGluons =  (colSetup.first + colSetup.second - (size() - nInit)
+                  +abs( (nJuncs - nAjuncs) - beamJunc)) / 2;
+  for (int i = 0; i < nGluons; i++) append(0,21,0.,-1);
+
+  // If no other remnants found, add a light q-qbar pair or a photon
+  // to carry momentum.
+  if (size() == nInit) {
+    if (!isHadron())
+      append(0, 22, 0., -1);
+    else {
+      int idRemnant = int(3*rndmPtr->flat())+1;
+      append(0, -idRemnant, 0., -1);
+      append(0,  idRemnant, 0., -1);
+      resolved[size()-2].companion(size() - 1);
+      resolved[size()-1].companion(size() - 2);
+    }
+  }
+
+  usedCol =  vector<bool>(size(),false);
+  usedAcol = vector<bool>(size(),false);
+
+  // If at least two valence quarks left in baryon and no junction formed.
+  // First check if junction already was moved into beam.
+  nDiffJuncs = nJuncs - nAjuncs - beamJunc;
+  if (isBaryon() && nInitPlusVal - nInit >= 2 && (
+      (nDiffJuncs > 0 && beamJunc < 0) ||
+      (nDiffJuncs < 0 && beamJunc > 0)) ) {
+
+    // If three, pick two at random to form junction, else trivial.
+    int iQ1 = nInit;
+    int iQ2 = nInit + 1;
+    if (nInitPlusVal - nInit == 3) {
+      double pickDq = 3. * rndmPtr->flat();
+      if (pickDq > 1.) iQ2 = nInit + 2;
+      if (pickDq > 2.) iQ1 = nInit + 1;
+    }
+
+    // Either form di-quark or (anti-)junction.
+    if (beamJunction) {
+      // Form anti junction.
+      if (resolved[iQ1].id() < 0) {
+
+        // Start by finding last colour in the out going particles.
+        usedAcol[iQ1] = true;
+        usedAcol[iQ2] = true;
+
+        // Find matching anti-colour.
+        int acol = findSingleCol(event, true, true);
+        if ( acol == 0) return false;
+
+        // Make the anti junction.
+        int newCol1 = event.nextColTag();
+        int newCol2 = event.nextColTag();
+        resolved[iQ1].acol(newCol1);
+        resolved[iQ2].acol(newCol2);
+        event.appendJunction(2, resolved[iQ1].acol(), resolved[iQ2].acol(),
+          acol);
+        nDiffJuncs--;
+      }
+
+      // Form Junction.
+      else {
+        // Start by finding last colour in the out going particles.
+        usedCol[iQ1] = true;
+        usedCol[iQ2] = true;
+
+        // Find matching colour.
+        int col = findSingleCol(event, false, true);
+        if (col == 0) return false;
+
+        // Make the junction.
+        int newCol1 = event.nextColTag();
+        int newCol2 = event.nextColTag();
+        resolved[iQ1].col(newCol1);
+        resolved[iQ2].col(newCol2);
+        event.appendJunction(1,resolved[iQ1].col(),resolved[iQ2].col(),col);
+        nDiffJuncs++;
+      }
+
+    // Form diquark.
+    } else {
+
+    // Pick spin 0 or 1 according to SU(6) wave function factors.
+      int idDq = flavSelPtr->makeDiquark( resolved[iQ1].id(),
+        resolved[iQ2].id(), idBeam);
+
+      // Overwrite with diquark flavour and remove one slot. No more junction.
+      if (nInitPlusVal - nInit == 3)
+        resolved[nInit + 2].id( resolved[3 * nInit + 3 - iQ2 - iQ1].id() );
+      resolved[nInit].id(idDq);
+      resolved.erase(resolved.begin() + nInit + 1);
+      hasJunctionBeam = false;
+
+      // Di-quark changes the baryon number.
+      if (idDq > 0) nDiffJuncs++;
+      else          nDiffJuncs--;
+    }
+  }
+
+  // Form anti-junction out of any beam remnants if needed.
+  while (nDiffJuncs > 0) {
+    int acol1 = findSingleCol(event, true, false);
+    int acol2 = findSingleCol(event, true, false);
+    int acol3 = findSingleCol(event, true, true);
+    event.appendJunction(2,acol1,acol2,acol3);
+    nDiffJuncs--;
+  }
+  // Form junction out of any beam remnants if needed.
+  while (nDiffJuncs < 0) {
+    int col1 = findSingleCol(event, false, false);
+    int col2 = findSingleCol(event, false, false);
+    int col3 = findSingleCol(event, false, true);
+    event.appendJunction(1,col1,col2,col3);
+    nDiffJuncs++;
+  }
+
+  // Set remaining colours first in random order.
+  for (int j = 0;j < NRANDOMTRIES; ++j) {
+    int i = int(rndmPtr->flat() * (size() - nInit) + nInit );
+    // Check if resolved has colour.
+    if ( resolved[i].hasCol() && !usedCol[i]) {
+      usedCol[i] = true;
+      int acol = findSingleCol(event,true,true);
+      if ( acol == 0) return false;
+      resolved[i].col(acol);
+    }
+    // Check if resolved has anti colour.
+    if ( resolved[i].hasAcol() && !usedAcol[i]) {
+      usedAcol[i] = true;
+      int col = findSingleCol(event, false, true);
+      if (col == 0) return false;
+      resolved[i].acol(col);
+    }
+  }
+
+  // Add all missed colours from the random assignment.
+  for (int i = nInit;i < size();i++) {
+    // Check if resolved has colour.
+    if ( resolved[i].hasCol() && !usedCol[i]) {
+      usedCol[i] = true;
+      int acol = findSingleCol(event,true,true);
+      if ( acol == 0) return false;
+      resolved[i].col(acol);
+    }
+    // Check if resolved has anti colour.
+    if ( resolved[i].hasAcol() && !usedAcol[i]) {
+      usedAcol[i] = true;
+      int col = findSingleCol(event, false, true);
+      if (col == 0) return false;
+      resolved[i].acol(col);
+    }
+  }
+
+  // Need to end in a colour singlet.
+  if (cols.size() != 0 || acols.size() != 0) {
+    infoPtr->errorMsg("Error in BeamParticle::RemnantFlavours: "
+      "Colour not conserved in beamRemnants");
+    return false;
+  }
+
+  // Set initiator and remnant masses.
+  for (int i = 0; i < size(); ++i) {
+    if (i < nInit) resolved[i].m(0.);
+    else resolved[i].m( particleDataPtr->m0( resolved[i].id() ) );
+  }
+
+  // For debug purposes: reject beams with resolved junction topology.
+  if (hasJunctionBeam && !allowJunction) return false;
+
+  // Done.
+  return true;
+
+}
+
+//--------------------------------------------------------------------------
+
+// Set initial colours.
+
+void BeamParticle::setInitialCol(Event& event) {
+
+  // Set beam colours equal to those in the event record.
+  for (int i = 0;i < size(); ++i) {
+    if (event[resolved[i].iPos()].col() != 0)
+      resolved[i].col(event[resolved[i].iPos()].col());
+    if (event[resolved[i].iPos()].acol() != 0)
+      resolved[i].acol(event[resolved[i].iPos()].acol());
+  }
+}
+
+//--------------------------------------------------------------------------
+
+// Find a single (anti-) colour in the beam, if it is a
+// beam remnant set the new colour.
+
+int BeamParticle::findSingleCol(Event& event, bool isAcol,
+  bool useHardScatters) {
+
+  // Look in the already scattered parton list.
+  if (useHardScatters) {
+    if (isAcol) {
+      if (acols.size() > 0) {
+        int iAcol = int(acols.size() * rndmPtr->flat());
+        int acol = acols[iAcol];
+        acols.erase(acols.begin() + iAcol);
+        return acol;
+      }
+    } else {
+      if (int(cols.size()) > 0) {
+        int iCol = int(cols.size() * rndmPtr->flat());
+        int col = cols[iCol];
+        cols.erase(cols.begin() + iCol);
+        return col;
+      }
+    }
+  }
+
+  // Look inside the beam remnants.
+  if (isAcol) {
+    for (int i = 0;i < NMAX; ++i) {
+      int iBeam = int((size() - nInit) * rndmPtr->flat()) + nInit;
+      if (resolved[iBeam].hasAcol() && !usedAcol[iBeam]) {
+        int acol = event.nextColTag();
+        resolved[iBeam].acol(acol);
+        usedAcol[iBeam] = true;
+        return acol;
+      }
+    }
+  } else {
+    for (int i = 0; i < NMAX; ++i) {
+      int iBeam = int((size() - nInit) * rndmPtr->flat()) + nInit;
+      if (resolved[iBeam].hasCol() && !usedCol[iBeam]) {
+        int col = event.nextColTag();
+        resolved[iBeam].col(col);
+        usedCol[iBeam] = true;
+        return col;
+      }
+    }
+  }
+
+  // Return 0 if no particle was found.
+  infoPtr->errorMsg("Error in BeamParticle::findSingleCol: "
+                    "could not find matching anti colour");
+  return 0;
+}
+
+//--------------------------------------------------------------------------
+
+// Update list of all colours in beam.
+
+void BeamParticle::updateCol(vector<pair<int,int> > colourChanges) {
+
+  for (int iCol = 0;iCol < int(colourChanges.size()); ++iCol) {
+    int oldCol = colourChanges[iCol].first;
+    int newCol = colourChanges[iCol].second;
+
+    // Update acols and cols.
+    for (int i = 0;i < int(cols.size()); ++i)
+      if (cols[i] == oldCol) cols[i] = newCol;
+    for (int i = 0;i < int(acols.size()); ++i)
+      if (acols[i] == oldCol) acols[i] = newCol;
+
+    // Update resolved partons colours.
+    for (int i = 0;i < int(resolved.size()); ++i) {
+      if (resolved[i].acol() == oldCol) resolved[i].acol(newCol);
+      if (resolved[i].col() == oldCol) resolved[i].col(newCol);
+    }
+  }
+  return;
+}
+
+//--------------------------------------------------------------------------
+
+void BeamParticle::updateSingleCol(int oldCol, int newCol) {
+
+  // Update acols and cols.
+  for (int i = 0; i < int(cols.size()); ++i)
+    if (cols[i] == oldCol) cols[i] = newCol;
+
+  for ( int i = 0; i < int(acols.size()); ++i)
+    if (acols[i] == oldCol) acols[i] = newCol;
+
+  // Update resolved partons colours.
+  for (int i = 0; i < int(resolved.size()); ++i) {
+    if (resolved[i].acol() == oldCol) resolved[i].acol(newCol);
+    if (resolved[i].col() == oldCol) resolved[i].col(newCol);
+  }
+
+  colUpdates.push_back(make_pair(oldCol,newCol));
 }
 
 //==========================================================================
