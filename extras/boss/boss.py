@@ -263,13 +263,16 @@ def main():
             # Find all available functions
             for el in root.findall('Function'):
                 if 'demangled' in el.keys():
-                    demangled_name = el.get('demangled')
 
-                    # Template functions have more complicated 'demangled' entries...
-                    if '<' in demangled_name:
-                        func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
-                    else:
-                        func_name_full = demangled_name.split('(',1)[0]
+                    func_name_full = el.get('demangled')
+
+                    # demangled_name = el.get('demangled')
+
+                    # # Template functions have more complicated 'demangled' entries...
+                    # if '<' in demangled_name:
+                    #     func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
+                    # else:
+                    #     func_name_full = demangled_name.split('(',1)[0]
 
                     if utils.isNative(el):
                         all_function_names.append(func_name_full)
@@ -297,23 +300,50 @@ def main():
 
 
     #
-    # Initialization
+    # Analyse types and functions
     #
 
+    print 'Analysing types and functions:'
+    print '------------------------------'
+    print
 
-    # Create all output directories that do not exist.
-    filehandling.createOutputDirectories()
+    #
+    # Read all xml elements of all files and store in two dict of dicts: 
+    #
+    # 1. all_id_dict:    file name --> xml id --> xml element
+    # 2. all_name_dict:  file name --> name   --> xml element
+    #
+    for xml_file in xml_files:
+
+        gb.all_id_dict[xml_file]   = OrderedDict()
+        gb.all_name_dict[xml_file] = OrderedDict()
+
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+
+        for el in root.getchildren():
+
+            # Fill id-based dict
+            gb.all_id_dict[xml_file][el.get('id')] = el
+
+            # Determine name
+            if 'demangled' in el.keys():
+                full_name = el.get('demangled')
+            elif 'name' in el.keys():
+                full_name = el.get('name')
+            else:
+                # Skip elements that don't have a name
+                continue
+            
+            # Fill name-based dict
+            gb.all_name_dict[xml_file][full_name] = el
 
 
     #
-    # TODO: Look up potential parent classes and add to cfg.loaded_classes
+    # Look up potential parent classes and add to cfg.loaded_classes
     #
-
-
-    #
-    # TODO: Fill the gb.accepted_types list
-    #
-
+    if cfg.load_parent_classes:
+        utils.addParentClasses()
 
 
     #
@@ -323,101 +353,77 @@ def main():
     # Remove duplicates from cfg.loaded_classes
     cfg.loaded_classes = list(OrderedDict.fromkeys(cfg.loaded_classes))
 
-    # Create list of names for all loadable classes
-    loadable_classes_names_list = []
+    for xml_file in xml_files:
+
+        # Set the global dicts for the current xml file
+        gb.id_dict   = gb.all_id_dict[xml_file]
+        gb.name_dict = gb.all_name_dict[xml_file]
+
+        # Loop over all named elements in the xml file
+        for full_name, el in gb.name_dict.items():
+
+            if el.tag in ['Class', 'Struct']:
+
+                if full_name in cfg.loaded_classes:
+
+                    is_loadable = utils.isLoadable(el, print_warning=True)
+
+                    if not is_loadable:
+                        
+                        cfg.loaded_classes.remove(full_name)
+
+
+    #
+    # Fill the gb.accepted_types list
+    #
+    utils.fillAcceptedTypesList()
+    
+
+    #
+    # Remove from cfg.loaded_functions all functions that are not loadable
+    #
+
+    # Remove duplicates from cfg.loaded_functions
+    cfg.loaded_functions = list(OrderedDict.fromkeys(cfg.loaded_functions))
 
     for xml_file in xml_files:
 
-        tree = ET.parse(xml_file)
-        root = tree.getroot()
+        # Set the global dicts for the current xml file
+        gb.id_dict   = gb.all_id_dict[xml_file]
+        gb.name_dict = gb.all_name_dict[xml_file]
 
-        # Set the global xml id dict. (Needed by the functions called from utils.)
-        gb.id_dict = OrderedDict([ (el.get('id'), el) for el in root.getchildren() ]) 
+        # Loop over all named elements in the xml file
+        for full_name, el in gb.name_dict.items():
 
-        # Loop all class xml elements found in the current xml file
-        for class_el in (root.findall('Class') + root.findall('Struct')):
+            if el.tag == 'Function':
 
-            # Get class name
-            try:
-                class_name = classutils.getClassNameDict(class_el, abstract=False)
-                class_name_long_templ = class_name['long_templ']
-            except KeyError:
-                class_name_long_templ = 'UNKNOWN_NAME'
-            except:
-                print '  ERROR: Unexpected error!'
-                raise
+                # Get function name
+                try:
+                    func_name = funcutils.getFunctionNameDict(el)
+                    func_name_long_templ_args = func_name['long_templ_args']
+                except KeyError:
+                    func_name_long_templ_args = 'UNKNOWN_NAME'
+                except:
+                    print '  ERROR: Unexpected error!'
+                    raise
 
-            # Check if class is loadable. For requested classes, print info message if not loadable.
-            if class_name_long_templ in cfg.loaded_classes:
-                is_loadable = utils.isLoadable(class_el, print_warning=True)
-            else:
-                is_loadable = utils.isLoadable(class_el)
+                if func_name_long_templ_args in cfg.loaded_functions:
 
-            # Store name of any loadable classes
-            if is_loadable:
-                loadable_classes_names_list.append(class_name_long_templ)
+                    is_loadable = not funcutils.ignoreFunction(el, limit_pointerness=True, print_warning=True)
 
-    # Remove unloadable classes from cfg.loaded_classes
-    for class_name_long_templ in cfg.loaded_classes[:]:
-        if class_name_long_templ not in loadable_classes_names_list:
-            cfg.loaded_classes.remove(class_name_long_templ)
-            # reason = "Possible explanations: not found, incomplete, abstract, ..."
-            # infomsg.RequestedClassNotLoadable( class_name_long_templ, reason ).printMessage()
+                    if not is_loadable:
+
+                        cfg.loaded_functions.remove(func_name_long_templ_args)
 
 
+    # # FOR NOW: IGNORE ALL FUNCTIONS
+    # if cfg.loaded_functions != []:
+    #     print
+    #     print '  WARNING: BOSS is currently ignoring all global functions! Expect this to be fixed any day...'
+    #     print
+    #     cfg.loaded_functions = []
 
-    # #
-    # # THIS MUST BE DONE *AFTER* gb.accepted_types HAS BEEN SET!  Remove from cfg.loaded_functions all functions that are not loadable
-    # #
 
-    # # Remove duplicates from cfg.loaded_functions
-    # cfg.loaded_functions = list(OrderedDict.fromkeys(cfg.loaded_functions))
-
-    # # Create list of names for all loadable functions
-    # loadable_functions_names_list = []
-
-    # for xml_file in xml_files:
-
-    #     tree = ET.parse(xml_file)
-    #     root = tree.getroot()
-
-    #     # Set the global xml id dict. (Needed by the functions called from utils.)
-    #     gb.id_dict = OrderedDict([ (el.get('id'), el) for el in root.getchildren() ]) 
-
-    #     # Loop all class xml elements found in the current xml file
-    #     for func_el in root.findall('Function'):
-
-    #         # Get function name
-    #         try:
-    #             func_name = funcutils.getFunctionNameDict(func_el)
-    #             func_name_long_templ = func_name['long_templ']
-    #         except KeyError:
-    #             func_name_long_templ = 'UNKNOWN_NAME'
-    #         except:
-    #             print '  ERROR: Unexpected error!'
-    #             raise
-
-    #         # Check if function is loadable. For requested functions, print info message if not loadable.
-    #         if func_name_long_templ in cfg.loaded_functions:
-    #             is_loadable = not funcutils.ignoreFunction(func_el, limit_pointerness=True, print_warning=True)
-    #         else:
-    #             is_loadable = not funcutils.ignoreFunction(func_el, limit_pointerness=True, print_warning=False)
-
-    #         # Store name of any loadable functions
-    #         if is_loadable:
-    #             loadable_functions_names_list.append(func_name_long_templ)
-
-    # # Remove unloadable functions from cfg.loaded_functions
-    # for func_name_long_templ in cfg.loaded_functions[:]:
-    #     if func_name_long_templ not in loadable_functions_names_list:
-    #         cfg.loaded_functions.remove(func_name_long_templ)
-
-    # FOR NOW: IGNORE ALL FUNCTIONS
-    if cfg.loaded_functions != []:
-        print
-        print '  WARNING: BOSS is currently ignoring all global functions! Expect this to be fixed any day...'
-        print
-        cfg.loaded_functions = []
 
 
     #
@@ -431,14 +437,15 @@ def main():
 
     for current_xml_file in xml_files:
 
+        # Set some global dicts for the current xml file
+        gb.id_dict   = gb.all_id_dict[current_xml_file]
+        gb.name_dict = gb.all_name_dict[current_xml_file]
+
         # Reset some global variables for each new xml file
         gb.xml_file_name = ''
-        gb.id_dict.clear()
         gb.file_dict.clear()
-        gb.all_classes_dict.clear()
         gb.std_types_dict.clear()
         gb.typedef_dict.clear()
-        gb.class_dict.clear()
         gb.loaded_classes_in_xml.clear()
         gb.func_dict.clear()
 
@@ -449,227 +456,130 @@ def main():
         print '  ------------------' + '-'*len(current_xml_file)
         print 
 
-        # Set global xml file name and parse it using ElementTree
+        # Set global xml file name
         gb.xml_file_name = current_xml_file
-        tree = ET.parse(gb.xml_file_name)
-        root = tree.getroot()
-
-        # Update global dict: id --> xml element (all elements)
-        gb.id_dict = OrderedDict([ (el.get('id'), el) for el in root.getchildren() ]) 
 
 
-        # Update global dict: file name --> file xml element
-        gb.file_dict = OrderedDict([ (el.get('name'), el) for el in root.findall('File') ])
+        #
+        # Loop over all elements in this xml file
+        #
+
+        for xml_id, el in gb.id_dict.items():
 
 
-        # Update global dict: class name --> class xml element (all classes)
-        for class_el in (   root.findall('Class') 
-                          + root.findall('Struct') 
-                          + root.findall('FundamentalType') 
-                          + root.findall('Typedef') ):
-
-            if 'demangled' in class_el.keys():
-                class_name_long_templ = class_el.get('demangled')
-                gb.all_classes_dict[class_name_long_templ] = class_el
-            elif 'name' in class_el.keys():
-                class_name_long_templ = class_el.get('name')
-                gb.all_classes_dict[class_name_long_templ] = class_el
+            # Update global dict: file name --> file xml element
+            if el.tag == 'File':
+                gb.file_dict[el.get('name')] = el
+            # gb.file_dict = OrderedDict([ (el.get('name'), el) for el in root.findall('File') ])
 
 
-        # Update global dict: std type --> type xml element
-        for el in root.getchildren():
-            is_std_type = False
-            try:
-                is_std_type = utils.isStdType(el)
-            except Exception:
-                pass
-            if is_std_type:
-                if 'demangled' in el.keys():
-                    std_type_name = el.get('demangled')    
-                else:
-                    std_type_name = el.get('name')
-
-                gb.std_types_dict[std_type_name] = el
-                
-
-        # Update global dict: class name --> class xml element
-        for el in (root.findall('Class') + root.findall('Struct')):
-
-            try:
+            # Update global dict: std type --> type xml element
+            if utils.isStdType(el):
                 class_name = classutils.getClassNameDict(el)
-            except KeyError:
-                continue
+                gb.std_types_dict[class_name['long_templ']] = el
 
-            # Check if we have done this class already
-            if class_name in gb.classes_done:
-                infomsg.ClassAlreadyDone( class_name['long_templ'] ).printMessage()
-                continue
 
-            # Check that class is requested
-            if (class_name['long_templ'] in cfg.loaded_classes):
+            # Update global dict of loaded classes in this xml file: class name --> class xml element
+            if el.tag in ['Class', 'Struct']:
 
-                # Skip classes that are not loadable (incomplete, abstract, ...) 
-                # (This should not be needed as we already check all classes listed in cfg.loaded_classes...)
-                if not utils.isLoadable(el, print_warning=True):
+                try:
+                    class_name = classutils.getClassNameDict(el)
+                except KeyError:
                     continue
 
-                # Store class xml element
-                gb.loaded_classes_in_xml[class_name['long_templ']] = el
+                # Check if we have done this class already
+                if class_name in gb.classes_done:
+                    infomsg.ClassAlreadyDone( class_name['long_templ'] ).printMessage()
+                    continue
+
+                # Check that class is requested
+                if (class_name['long_templ'] in cfg.loaded_classes):
+
+                    # Store class xml element
+                    gb.loaded_classes_in_xml[class_name['long_templ']] = el
 
 
 
-        # Update global dict: typedef name --> typedef xml element
-        gb.typedef_dict = OrderedDict() 
-        for el in root.findall('Typedef'):
+            # Update global dict: typedef name --> typedef xml element
+            if el.tag == 'Typedef':
 
-            # Only accept native typedefs:
-            if utils.isNative(el):
+                # Only accept native typedefs:
+                if utils.isNative(el):
 
-                typedef_name = el.get('name')
+                    typedef_name = el.get('name')
 
-                type_dict = utils.findType(el)
-                type_el = type_dict['el']
+                    type_dict = utils.findType(el)
+                    type_el = type_dict['el']
 
-                # If underlying type is a fundamental or standard type, accept it right away
-                if utils.isFundamental(type_el) or utils.isStdType(type_el):
-                    gb.typedef_dict[typedef_name] = el
-                
-                # If underlying type is a class/struct, check if it's acceptable
-                elif type_el.tag in ['Class', 'Struct']:
-                    if 'demangled' in type_el.keys():
-                        complete_type_name = type_el.get('demangled')
-                    else:
-                        complete_type_name = type_el.get('name')
-                    
-                    if complete_type_name in cfg.loaded_classes:
+                    # If underlying type is a fundamental or standard type, accept it right away
+                    if utils.isFundamental(type_el) or utils.isStdType(type_el):
                         gb.typedef_dict[typedef_name] = el
-                
-                # If neither fundamental or class/struct, ignore it.
-                else:
-                    pass
-
-
-        # Update global dict: function name --> function xml element
-        for el in root.findall('Function'):
-            if 'demangled' in el.keys():
-                demangled_name = el.get('demangled')
-
-                # Template functions have more complicated 'demangled' entries...
-                if '<' in demangled_name:
-                    func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
-                else:
-                    func_name_full = demangled_name.split('(',1)[0]
-
-                if func_name_full in cfg.loaded_functions:
-                    gb.func_dict[func_name_full] = el
-
-
-        # Update global dict: function name --> function xml element
-        for el in root.findall('Function'):
-            if 'demangled' in el.keys():
-                demangled_func_name = el.get('demangled')
-                # Template functions have more complicated 'demangled' entries...
-                if '<' in demangled_func_name:
-                    func_name_full = demangled_func_name.split(' ',1)[1].split('(',1)[0]
-                else:
-                    func_name_full = demangled_func_name.split('(',1)[0]
-                if func_name_full in cfg.loaded_functions:
-                    gb.func_dict[func_name_full] = el
-
-
-
-        # If requested, append any (native) parent classes to the cfg.loaded_classes list
-        if cfg.load_parent_classes:
-
-            for class_name, class_el in gb.loaded_classes_in_xml.items():
-
-                parents_el_list = utils.getAllParentClasses(class_el, only_native_classes=True)
-
-                for el in parents_el_list:
-
-                    # Skip classes that are not loadable (incomplete, abstract, ...)
-                    if not utils.isLoadable(el, print_warning=True):
-                        continue
-
-                    if 'demangled' in el.keys():
-                        demangled_name = el.get('demangled')
+                    
+                    # If underlying type is a class/struct, check if it's acceptable
+                    elif type_el.tag in ['Class', 'Struct']:
                         
-                        # - Update cfg.loaded_classes
-                        if demangled_name not in cfg.loaded_classes:
-                            cfg.loaded_classes.append(demangled_name)
-                        
-                        # - Update gb.class_dict
-                        if demangled_name not in gb.loaded_classes_in_xml.keys():
-                            gb.loaded_classes_in_xml[demangled_name] = el
+                        type_name = classutils.getClassNameDict(type_el)
+
+                        if type_name['long_templ'] in cfg.loaded_classes:
+                            gb.typedef_dict[typedef_name] = el
+                    
+                    # If neither fundamental or class/struct, ignore it.
+                    else:
+                        pass
 
 
-        # Update global list: accepted types
-        fundamental_types  = [ el.get('name') for el in root.findall('FundamentalType')]
-        enumeration_types  = [ '::'.join( utils.getNamespaces(el, include_self=True) ) for el in root.findall('Enumeration')]
+            # Update global dict: function name --> function xml element
+            if el.tag == 'Function':
 
-        gb.accepted_types  = fundamental_types + enumeration_types + gb.std_types_dict.keys() + cfg.loaded_classes + gb.typedef_dict.keys()
+                if 'demangled' in el.keys():
 
-        # Remove from gb.accepted_types all classes that use of native types as template arguments
-        # (BOSS cannot deal with this yet...)
-        for i in range(len(gb.accepted_types))[::-1]:
+                    func_name_full = el.get('demangled')
 
-            type_name = gb.accepted_types[i]
+                    # demangled_name = el.get('demangled')
 
-            # Get list of all template arguments (unpack any nested template arguments)
-            unpacked_template_args = []
-            utils.unpackAllSpecTemplateTypes(type_name, unpacked_template_args)
+                    # # Template functions have more complicated 'demangled' entries...
+                    # if '<' in demangled_name:
+                    #     func_name_full = demangled_name.split(' ',1)[1].split('(',1)[0]
+                    # else:
+                    #     func_name_full = demangled_name.split('(',1)[0]
 
-            # If no template arguments, continue
-            if unpacked_template_args == []:
-                continue
-
-            else:
-                # print 'TEMPL_ARGS:', unpacked_template_args
-                for templ_arg in unpacked_template_args:
-
-                    # Remove asterix and/or ampersand
-                    base_templ_arg = utils.getBasicTypeName(templ_arg)
-
-                    # Check that this type is listed in gb.all_classes_dict (all native types should be)
-                    if base_templ_arg in gb.all_classes_dict.keys():
-
-                        # Get xml entry for the type
-                        class_el = gb.all_classes_dict[base_templ_arg]
-
-                        # If this is a native type, remove the current entry (i) in gb.accepted_types
-                        if utils.isNative(class_el):
-                            
-                            # Remove entry i from gb.accepted_types
-                            gb.accepted_types.pop(i)
-                            break
+                    if func_name_full in cfg.loaded_functions:
+                        gb.func_dict[func_name_full] = el
 
 
-        # Update global dict: new header files
-        for class_name in cfg.loaded_classes:
-            
-            class_name_short = class_name.split('<',1)[0].split('::')[-1]
-            class_name_long  = class_name.split('<',1)[0]
 
-            if class_name_long not in gb.new_header_files.keys():
-              
-                abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
-                wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
-                wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
-                wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
+            # Add entries to global dict: new header files
+            if el in gb.loaded_classes_in_xml.values():
 
-                abstract_header_fullpath     = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
-                wrapper_header_fullpath      = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
-                wrapper_decl_header_fullpath = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
-                wrapper_def_header_fullpath  = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
-                
-                gb.new_header_files[class_name_long] = {    'abstract': abstract_header_name, 
-                                                            'wrapper': wrapper_header_name, 
-                                                            'wrapper_decl': wrapper_decl_header_name,
-                                                            'wrapper_def': wrapper_def_header_name,
-                                                            'abstract_fullpath': abstract_header_fullpath, 
-                                                            'wrapper_fullpath': wrapper_header_fullpath, 
-                                                            'wrapper_decl_fullpath': wrapper_decl_header_fullpath,
-                                                            'wrapper_def_fullpath': wrapper_def_header_fullpath    }
+                class_name = classutils.getClassNameDict(el)
+
+                class_name_short = class_name['short']
+                class_name_long  = class_name['long']
+
+                if class_name_long not in gb.new_header_files.keys():
+                  
+                    abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
+                    wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
+                    wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
+                    wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
+
+                    abstract_header_fullpath     = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
+                    wrapper_header_fullpath      = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
+                    wrapper_decl_header_fullpath = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
+                    wrapper_def_header_fullpath  = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
+                    
+                    gb.new_header_files[class_name_long] = {    'abstract': abstract_header_name, 
+                                                                'wrapper': wrapper_header_name, 
+                                                                'wrapper_decl': wrapper_decl_header_name,
+                                                                'wrapper_def': wrapper_def_header_name,
+                                                                'abstract_fullpath': abstract_header_fullpath, 
+                                                                'wrapper_fullpath': wrapper_header_fullpath, 
+                                                                'wrapper_decl_fullpath': wrapper_decl_header_fullpath,
+                                                                'wrapper_def_fullpath': wrapper_def_header_fullpath    }
+
+        #
+        # END: Loop over all elements in this xml file
+        #
 
 
         #
@@ -719,6 +629,10 @@ def main():
     # Write new files
     #
 
+    # Create all output directories that do not exist.
+    filehandling.createOutputDirectories()
+
+    # File writing loop
     for src_file_name, code_dict in gb.new_code.iteritems():
 
         add_include_guard = code_dict['add_include_guard']

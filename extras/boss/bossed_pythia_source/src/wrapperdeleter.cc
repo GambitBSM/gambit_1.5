@@ -110,6 +110,11 @@ void wrapper_deleter(Pythia8::SLHAinterface__BOSS* wptr)
     delete wptr;
 }
 
+void wrapper_deleter(Pythia8::SusyLesHouches__BOSS* wptr)
+{
+    delete wptr;
+}
+
 void wrapper_deleter(Pythia8::Couplings__BOSS* wptr)
 {
     delete wptr;

@@ -17,7 +17,12 @@ boss_temp_dir = 'temp'
 
 new_code              = OrderedDict()
 xml_file_name         = ''
+
 id_dict               = OrderedDict()
+all_id_dict           = OrderedDict()
+name_dict             = OrderedDict()
+all_name_dict         = OrderedDict()
+
 file_dict             = OrderedDict()
 all_classes_dict      = OrderedDict()
 std_types_dict        = OrderedDict()

@@ -9,6 +9,7 @@
 #include "backend_types/Pythia_8_209/wrapper_Event.h"
 #include "backend_types/Pythia_8_209/wrapper_SigmaProcess.h"
 #include "backend_types/Pythia_8_209/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_SusyLesHouches.h"
 #include "backend_types/Pythia_8_209/wrapper_SLHAinterface.h"
 #include "backend_types/Pythia_8_209/wrapper_AlphaEM.h"
 #include "backend_types/Pythia_8_209/wrapper_Hist.h"
@@ -76,6 +77,8 @@ void wrapper_deleter(Pythia8::Hist__BOSS*);
 void wrapper_deleter(Pythia8::AlphaEM__BOSS*);
 
 void wrapper_deleter(Pythia8::SLHAinterface__BOSS*);
+
+void wrapper_deleter(Pythia8::SusyLesHouches__BOSS*);
 
 void wrapper_deleter(Pythia8::Couplings__BOSS*);
 

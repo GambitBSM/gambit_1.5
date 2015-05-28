@@ -9,7 +9,7 @@
 
 Author: 
   Anders Kvellestad 
-  (with much appreciated help from Pat Scott, Lars A. Dal and Abram Krislock)
+  (with much appreciated help from Pat Scott, Lars A. Dal and Abram Krislock.)
 
 Date:
   May 2015
@@ -72,7 +72,9 @@ To accomplish dynamic loading of classes while maintaining the original class in
 BOSS constructs a "wrapper class" for every loaded class. This wrapper class type is
 shared by both the backend library and GAMBIT. However, there are several scenarios that
 BOSS cannot yet deal with properly, either because of limitations in gccxml or due to
-challenges related to this wrapper class system. In such cases BOSS will usually be able to generate functioning code, but there will be no interface to the problematic elements. The limitations most commonly encountered are:
+challenges related to this wrapper class system. In such cases BOSS will usually be able
+to generate functioning code, but there will be no interface to the problematic elements.
+The limitations most commonly encountered are:
 
 - Class members that make use of another class that is not loaded.
 

@@ -113,6 +113,11 @@ namespace Pythia8
 
 namespace Pythia8
 {
+    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_SusyLesHouches Abstract_SusyLesHouches;
+}
+
+namespace Pythia8
+{
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_Couplings Abstract_Couplings;
 }
 

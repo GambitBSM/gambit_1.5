@@ -435,7 +435,13 @@ namespace Pythia8 {
 
 //==========================================================================
 
-class SusyLesHouches {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_SusyLesHouches.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class SusyLesHouches : public virtual Abstract_SusyLesHouches {
 
 public:
 
@@ -696,6 +702,38 @@ private:
   int verboseSav;
   bool headerPrinted, footerPrinted, filePrinted;
   bool slhaRead, lhefRead, lhefSlha, useDecay;
+
+
+        public:
+            Abstract_SusyLesHouches* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_SusyLesHouches* in);
+
+        public:
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> >& slhaFile_ref__BOSS();
+
+            std::map<int,int,std::less<int>,std::allocator<std::pair<const int, int> > >& decayIndices_ref__BOSS();
+
+            std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >& qnumbersName_ref__BOSS();
+
+            std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >& qnumbersAntiName_ref__BOSS();
+
+
+
+        public:
+            int readFile__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int);
+
+            int readFile__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            int readFile__BOSS();
+
+            int readFile__BOSS(std::basic_istream<char,std::char_traits<char> >&, int);
+
+            int readFile__BOSS(std::basic_istream<char,std::char_traits<char> >&);
+
+            void printSpectrum__BOSS();
+
+            void message__BOSS(int, std::basic_string<char,std::char_traits<char>,std::allocator<char> >, std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
 };
 

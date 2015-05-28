@@ -333,6 +333,9 @@ private:
 
 
 
+        public:
+            void initSUSY__BOSS(Pythia8::Abstract_SusyLesHouches*, Pythia8::Abstract_Info*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Settings*);
+
 };
 
 //==========================================================================

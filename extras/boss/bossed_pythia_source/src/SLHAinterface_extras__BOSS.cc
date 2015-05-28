@@ -1,3 +1,4 @@
+#include "backend_types/Pythia_8_209/wrapper_SusyLesHouches.h"
 #include "backend_types/Pythia_8_209/wrapper_CoupSUSY.h"
 #include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "backend_types/Pythia_8_209/wrapper_Info.h"
@@ -32,6 +33,8 @@ void Pythia8::SLHAinterface::pythia2slha__BOSS(Pythia8::Abstract_ParticleData* p
 }
 
 
+
+Pythia8::Abstract_SusyLesHouches& Pythia8::SLHAinterface::slha_ref__BOSS() { return slha; }
 
 Pythia8::Abstract_CoupSUSY& Pythia8::SLHAinterface::coupSUSY_ref__BOSS() { return coupSUSY; }
 

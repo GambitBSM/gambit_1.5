@@ -6,6 +6,7 @@
 #include "backend_types/Pythia_8_209/wrapper_BeamParticle.h"
 #include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "backend_types/Pythia_8_209/wrapper_SigmaTotal.h"
+#include "backend_types/Pythia_8_209/wrapper_SusyLesHouches.h"
 #include "backend_types/Pythia_8_209/wrapper_Particle.h"
 #include "backend_types/Pythia_8_209/wrapper_Vec4.h"
 #include "backend_types/Pythia_8_209/wrapper_SLHAinterface.h"

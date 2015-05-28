@@ -42,10 +42,11 @@ loaded_classes = [
                     'Pythia8::SigmaProcess',
                     'Pythia8::PartonLevel',
                     'Pythia8::Couplings',
-                    'Pythia8::ResonanceWidths',
+                    # 'Pythia8::ResonanceWidths',
                     'Pythia8::ResonanceGmZ',   # test class
                     'Pythia8::CoupSUSY',
                     'Pythia8::SLHAinterface',
+                    'Pythia8::SusyLesHouches',
                     'Pythia8::LHdecayTable',
                     'Pythia8::LHdecayChannel',
                     'Pythia8::ResonanceDecays',
@@ -62,14 +63,17 @@ loaded_classes = [
                     'Pythia8::AlphaEM'
                  ]
 
-loaded_functions = []
+loaded_functions = [
+                      'Pythia8::m2(Pythia8::Wave4, Pythia8::Wave4)',
+                      'Pythia8::m2(Pythia8::Particle const&, Pythia8::Particle const&)',
+                   ]
 
 ditch = [
           'Pythia8::Pythia::initSLHA',
         ]
 
 
-load_parent_classes    = False
+load_parent_classes    = True
 wrap_inherited_members = False
 
 

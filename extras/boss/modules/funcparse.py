@@ -45,8 +45,8 @@ def run():
 
         # Print current function
         print
-        print '  Function: ' + func_name['long_templ']
-        print '  ----------' + '-'*len(func_name['long_templ'])
+        print '  Function: ' + func_name['long_templ_args']
+        print '  ----------' + '-'*len(func_name['long_templ_args'])
 
 
         # Check if this function is accepted

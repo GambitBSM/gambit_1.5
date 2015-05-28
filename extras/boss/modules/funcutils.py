@@ -347,7 +347,7 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warn
         if not utils.isAcceptedType(return_el):
             if print_warning:
                 reason = "Non-accepted return type '%s'." % return_type
-                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('name'), reason).printMessage()
+                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
             return_type_accepted = False
             return True 
 
@@ -366,13 +366,13 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warn
         if arg_dict['function_pointer']:
             if print_warning:
                 reason = "Function pointer type argument, '%s'." % arg_dict['name']
-                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('name'), reason).printMessage()
+                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
             arg_types_accepted = False
             break
         if not utils.isAcceptedType(arg_el):
             if print_warning:
                 reason = "Non-accepted argument type '%s'." % arg_type_name
-                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('name'), reason).printMessage()
+                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
             arg_types_accepted = False
             break
         if limit_pointerness == True:
@@ -380,7 +380,7 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warn
                 if ('**' in arg_type_name) or ('*&' in arg_type_name):
                     if print_warning:
                         reason = "Argument of type pointer-to-pointer/reference-to-pointer to loaded class, '%s'." % arg_type_name
-                        infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('name'), reason).printMessage()
+                        infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
                     arg_types_accepted = False
                     break
 

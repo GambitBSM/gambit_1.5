@@ -113,6 +113,11 @@ namespace Pythia8
 
 namespace Pythia8
 {
+    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::SusyLesHouches SusyLesHouches__BOSS;
+}
+
+namespace Pythia8
+{
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Couplings Couplings__BOSS;
 }
 

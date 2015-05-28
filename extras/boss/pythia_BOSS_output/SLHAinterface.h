@@ -77,6 +77,8 @@ public:
             void pointerAssign__BOSS(Abstract_SLHAinterface* in);
 
         public:
+            Pythia8::Abstract_SusyLesHouches& slha_ref__BOSS();
+
             Pythia8::Abstract_CoupSUSY& coupSUSY_ref__BOSS();
 
             int& meMode_ref__BOSS();
