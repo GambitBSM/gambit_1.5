@@ -1,3 +1,6 @@
+#ifndef __boss__Basics_Pythia_8_186_h__
+#define __boss__Basics_Pythia_8_186_h__
+
 // Basics.h is a part of the PYTHIA event generator.
 // Copyright (C) 2014 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
@@ -41,7 +44,13 @@ public:
 // This class handles random number generation according to the
 // Marsaglia-Zaman-Tsang algorithm.
 
-class Rndm {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_186/abstract_Rndm.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class Rndm : public virtual Abstract_Rndm {
 
 public:
 
@@ -96,6 +105,16 @@ private:
   bool   useExternalRndm;
   RndmEngine* rndmEngPtr;
 
+
+        public:
+            Abstract_Rndm* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_Rndm* in);
+
+
+        public:
+            void init__BOSS();
+
 };
 
 //==========================================================================
@@ -110,8 +129,10 @@ class RotBstMatrix;
 // (But can equally well be used to hold space-time four-vectors.)
 
 } 
+#define ENUMS_DECLARED
 #include "backend_types/Pythia_8_186/abstract_Vec4.h"
-#include "abstracttypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Vec4 : public virtual Abstract_Vec4 {
 
@@ -235,6 +256,7 @@ private:
 
         public:
             Abstract_Vec4* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Vec4* in);
 
             Pythia8::Abstract_Vec4* operator_equal__BOSS(const Pythia8::Abstract_Vec4&);
@@ -383,8 +405,10 @@ ostream& operator<<(ostream&, const RotBstMatrix&) ;
 // This class handles a single histogram at a time.
 
 } 
+#define ENUMS_DECLARED
 #include "backend_types/Pythia_8_186/abstract_Hist.h"
-#include "abstracttypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Hist : public virtual Abstract_Hist{
 
@@ -492,6 +516,7 @@ private:
 
         public:
             Abstract_Hist* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Hist* in);
 
             Pythia8::Abstract_Hist* operator_equal__BOSS(const Pythia8::Abstract_Hist&);
@@ -514,11 +539,11 @@ private:
 
 
         public:
-            void book__BOSS(std::string, int, double);
+            void book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, double);
 
-            void book__BOSS(std::string, int);
+            void book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int);
 
-            void book__BOSS(std::string);
+            void book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
             void book__BOSS();
 
@@ -526,15 +551,15 @@ private:
 
             void fill__BOSS(double);
 
-            void table__BOSS(std::ostream&, bool) const;
+            void table__BOSS(std::basic_ostream<char,std::char_traits<char> >&, bool) const;
 
-            void table__BOSS(std::ostream&) const;
+            void table__BOSS(std::basic_ostream<char,std::char_traits<char> >&) const;
 
             void table__BOSS() const;
 
-            void table__BOSS(std::string, bool) const;
+            void table__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool) const;
 
-            void table__BOSS(std::string) const;
+            void table__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >) const;
 
             bool sameSize__BOSS(const Pythia8::Abstract_Hist&) const;
 
@@ -574,3 +599,5 @@ Hist operator/(const Hist& h1, const Hist& h2);
 } // end namespace Pythia8
 
 #endif // end Pythia8_Basics_H
+
+#endif /* __boss__Basics_Pythia_8_186_h__ */

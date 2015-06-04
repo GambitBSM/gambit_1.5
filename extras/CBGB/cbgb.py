@@ -51,7 +51,7 @@ src_file.close()
 
 # Open output files
 out_file_be_types = open(gb.output_file_path_be_types, 'w')
-out_file_frontent = open(gb.output_file_path_frontent, 'w')
+out_file_frontend = open(gb.output_file_path_frontend, 'w')
 
 
 #
@@ -130,19 +130,23 @@ for code_part_name, code_dict in code_parts_dict.items():
     # Get list of dicts with info on all common blocks in this code part.
     cb_dicts = utils.getCommonBlockDicts(code_lines)
 
+    # Get dictionary with parameter definitions
+    parameter_defs = utils.getParameterDefs(code_lines)
+
 
     # Loop over the common blocks found.
     for cb_dict in cb_dicts:
 
         if cb_dict['name'] in common_blocks_left:
 
-            print "    In %s '%s': Found common block: '%s'" % (code_category, code_part_name, cb_dict['name'])
+            print "    In code part '%s': Found common block: '%s'" % (code_part_name, cb_dict['name'])
 
             # Get dict of dicts with info on the member variables for this common block.
             var_info_dict = utils.getVariablesDict(code_lines, cb_dict['member_names'])
 
+
             # Generate code for the backend types header.
-            be_types_file_content += utils.generateGambitCommonBlockDecl(cb_dict, var_info_dict)
+            be_types_file_content += utils.generateGambitCommonBlockDecl(cb_dict, var_info_dict, parameter_defs)
 
             # Generate code for the frontend header.
             frontend_file_content += utils.generateGambitFrontendCode(cb_dict)
@@ -169,8 +173,8 @@ be_types_file_content = utils.addNamespace(be_types_file_content, 'Gambit', inde
 out_file_be_types.write('\n')            
 out_file_be_types.write(be_types_file_content)
 
-out_file_frontent.write('\n')            
-out_file_frontent.write(frontend_file_content)
+out_file_frontend.write('\n')            
+out_file_frontend.write(frontend_file_content)
 
 # Print summary
 print
@@ -187,9 +191,9 @@ if len(common_blocks_left) > 0:
 
 # Close output files
 out_file_be_types.close()
-out_file_frontent.close()
+out_file_frontend.close()
 print 
-print '    Generated code for GAMBIT written to files: %s, %s.' % (gb.output_file_path_be_types, gb.output_file_path_frontent)
+print '    Generated code for GAMBIT written to files: %s, %s.' % (gb.output_file_path_be_types, gb.output_file_path_frontend)
 
 
 print

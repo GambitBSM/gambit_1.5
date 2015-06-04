@@ -7,7 +7,7 @@
 #
 
 output_file_path_be_types = 'backend_types_header_code.hpp'
-output_file_path_frontent = 'frontent_header_code.hpp'
+output_file_path_frontend = 'frontend_header_code.hpp'
 
 alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 

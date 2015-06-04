@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include "abstracttypedefs.h"
-#include "wrappertypedefs.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/Info.h"
 
 void Pythia8::Info::list__BOSS() const
@@ -18,7 +18,7 @@ bool Pythia8::Info::hasSub__BOSS() const
 }
 
 
-std::string Pythia8::Info::nameSub__BOSS() const
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::nameSub__BOSS() const
 {
     return nameSub();
 }
@@ -210,7 +210,7 @@ double Pythia8::Info::phiHat__BOSS() const
 }
 
 
-std::string Pythia8::Info::nameProc__BOSS()
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::nameProc__BOSS()
 {
     return nameProc();
 }
@@ -258,19 +258,19 @@ void Pythia8::Info::addCounter__BOSS(int i)
 }
 
 
-void Pythia8::Info::errorMsg__BOSS(std::string messageIn, std::string extraIn, bool showAlways)
+void Pythia8::Info::errorMsg__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > messageIn, std::basic_string<char,std::char_traits<char>,std::allocator<char> > extraIn, bool showAlways)
 {
     errorMsg(messageIn, extraIn, showAlways);
 }
 
 
-void Pythia8::Info::errorMsg__BOSS(std::string messageIn, std::string extraIn)
+void Pythia8::Info::errorMsg__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > messageIn, std::basic_string<char,std::char_traits<char>,std::allocator<char> > extraIn)
 {
     errorMsg(messageIn, extraIn);
 }
 
 
-void Pythia8::Info::errorMsg__BOSS(std::string messageIn)
+void Pythia8::Info::errorMsg__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > messageIn)
 {
     errorMsg(messageIn);
 }
@@ -282,37 +282,37 @@ void Pythia8::Info::errorStatistics__BOSS()
 }
 
 
-void Pythia8::Info::setType__BOSS(std::string nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin, bool isDiffractiveBin, bool isDiffractiveCin)
+void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin, bool isDiffractiveBin, bool isDiffractiveCin)
 {
     setType(nameIn, codeIn, nFinalIn, isNonDiffIn, isResolvedIn, isDiffractiveAin, isDiffractiveBin, isDiffractiveCin);
 }
 
 
-void Pythia8::Info::setType__BOSS(std::string nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin, bool isDiffractiveBin)
+void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin, bool isDiffractiveBin)
 {
     setType(nameIn, codeIn, nFinalIn, isNonDiffIn, isResolvedIn, isDiffractiveAin, isDiffractiveBin);
 }
 
 
-void Pythia8::Info::setType__BOSS(std::string nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin)
+void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin)
 {
     setType(nameIn, codeIn, nFinalIn, isNonDiffIn, isResolvedIn, isDiffractiveAin);
 }
 
 
-void Pythia8::Info::setType__BOSS(std::string nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn)
+void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn)
 {
     setType(nameIn, codeIn, nFinalIn, isNonDiffIn, isResolvedIn);
 }
 
 
-void Pythia8::Info::setType__BOSS(std::string nameIn, int codeIn, int nFinalIn, bool isNonDiffIn)
+void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn, bool isNonDiffIn)
 {
     setType(nameIn, codeIn, nFinalIn, isNonDiffIn);
 }
 
 
-void Pythia8::Info::setType__BOSS(std::string nameIn, int codeIn, int nFinalIn)
+void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn)
 {
     setType(nameIn, codeIn, nFinalIn);
 }
@@ -343,5 +343,21 @@ void Pythia8::Info::setImpact__BOSS(double bMPIIn, double enhanceMPIIn)
 
 
 
-Pythia8::Abstract_Info* Pythia8::Info::pointerCopy__BOSS() { return new Pythia8::Info(*this); }
-void Pythia8::Info::pointerAssign__BOSS(Pythia8::Abstract_Info* in) { *this = *dynamic_cast<Info*>(in); }
+
+#include "backend_types/Pythia_8_186/identification.hpp"
+
+Pythia8::Abstract_Info* Pythia8::Info::pointerCopy__BOSS()
+{
+    Pythia8::Abstract_Info* new_ptr = new Pythia8::Info(*this);
+    new_ptr->can_delete_wrapper(true);
+    return new_ptr;
+}
+
+void Pythia8::Info::pointerAssign__BOSS(Pythia8::Abstract_Info* in)
+{
+    CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Info* wptr_temp = wrapper__BOSS();
+    *this = *dynamic_cast<Info*>(in);
+    wrapper__BOSS(wptr_temp);
+}
+
+#include "gambit/Backends/backend_undefs.hpp"
