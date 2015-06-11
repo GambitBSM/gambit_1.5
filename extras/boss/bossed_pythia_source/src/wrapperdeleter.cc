@@ -50,6 +50,11 @@ void wrapper_deleter(Pythia8::Vec4__BOSS* wptr)
     delete wptr;
 }
 
+void wrapper_deleter(Pythia8::DecayChannel__BOSS* wptr)
+{
+    delete wptr;
+}
+
 void wrapper_deleter(Pythia8::Hist__BOSS* wptr)
 {
     delete wptr;

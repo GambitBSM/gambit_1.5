@@ -53,6 +53,11 @@ namespace Pythia8
 
 namespace Pythia8
 {
+    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_DecayChannel Abstract_DecayChannel;
+}
+
+namespace Pythia8
+{
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_Hist Abstract_Hist;
 }
 
