@@ -26,6 +26,8 @@
 // Stdlib header files for mathematics.
 #include <cmath>
 #include <cstdlib>
+// SLHAea (for SLHA input from an SLHAea object instead of a file)
+#include "SLHAea/slhaea.h"
 
 // Stdlib namespace
 using namespace std;
@@ -400,17 +402,21 @@ public:
   //Constructor, with and without filename.
   SusyLesHouches(int verboseIn=1) : verboseSav(verboseIn),
     headerPrinted(false), footerPrinted(false), filePrinted(false),
-    slhaRead(false), lhefRead(false), lhefSlha(false), useDecay(true) {};
+    slhaRead(false), lhefRead(false), lhefSlha(false), useDecay(true),
+    slhaeaCollPtr(nullptr) {};
   SusyLesHouches(string filename, int verboseIn=1) : verboseSav(verboseIn),
     headerPrinted(false), footerPrinted(false), filePrinted(false),
-    slhaRead(true), lhefRead(false), lhefSlha(false), useDecay(true)
-    {readFile(filename);};
+    slhaRead(true), lhefRead(false), lhefSlha(false), useDecay(true),
+    slhaeaCollPtr(nullptr) {readFile(filename);};
 
   //***************************** SLHA FILE I/O *****************************//
   // Read and write SLHA files
   int readFile(string slhaFileIn="slha.spc",int verboseIn=1,
     bool useDecayIn=true);
   //int writeFile(string filename): write SLHA file on filename
+  // Read from SLHAea::Coll
+  int readSLHAea(int verboseIn=1, bool useDecayIn=true);
+  void setSLHAea(const SLHAea::Coll* inputSLHAea) {slhaeaCollPtr = inputSLHAea;}
 
   //Output utilities
   void printHeader();   // print Header
@@ -649,6 +655,8 @@ private:
   int verboseSav;
   bool headerPrinted, footerPrinted, filePrinted;
   bool slhaRead, lhefRead, lhefSlha, useDecay;
+  // SLHAea Collection (for SLHA input from a SLHAea::Coll instead of a file)
+  const SLHAea::Coll* slhaeaCollPtr;
 
 };
 

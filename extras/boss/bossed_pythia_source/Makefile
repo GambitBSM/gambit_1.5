@@ -66,19 +66,19 @@ config.mk:
 
 $(MYTMPDIR)/%.o : $(SRCDIR)/%.cc
 	@mkdir -p $(MYTMPDIR)
-	$(CXX) $(CXXFLAGS) $(CXXFLAGSSHARED) -c -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $< -o $@
+	$(CXX) $(CXXFLAGS) $(CXXFLAGSSHARED) -c -I$(INCDIR) $< -o $@
 
 $(MYTMPDIR)/archive/%.o : $(SRCDIR)/%.cc
 	@mkdir -p $(MYTMPDIR)/archive
-	$(CXX) $(CXXFLAGS) -c -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $< -o $@
+	$(CXX) $(CXXFLAGS) -c -I$(INCDIR) $< -o $@
 
 $(MYTMPDIR)/%.o : lhapdfdummy/%.cc
 	@mkdir -p $(MYTMPDIR)
-	$(CXX) $(CXXFLAGS) $(CXXFLAGSSHARED) -c -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $< -o $@
+	$(CXX) $(CXXFLAGS) $(CXXFLAGSSHARED) -c -I$(INCDIR) $< -o $@
 
 $(MYTMPDIR)/archive/%.o : lhapdfdummy/%.cc
 	@mkdir -p $(MYTMPDIR)/archive
-	$(CXX) $(CXXFLAGS) -c -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $< -o $@
+	$(CXX) $(CXXFLAGS) -c -I$(INCDIR) $< -o $@
 
 # Creating the dependency files *.d
 # The compiler with option -M is used to build the dependency strings. They
@@ -91,7 +91,7 @@ ifeq ($(SHAREDLIBS),yes)
   $(MYTMPDIR)/%.d : $(SRCDIR)/%.cc
 	@echo Making dependency for file $<; \
 	mkdir -p $(MYTMPDIR); \
-	$(CC) -M -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $< | \
+	$(CC) -M -I$(INCDIR) $< | \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' | \
 	sed 's/$*\.o/$(MYTMPDIR)\/$*.o/' > $@; \
 	[ -s $@ ] || rm -f $@
@@ -100,7 +100,7 @@ endif
 $(MYTMPDIR)/archive/%.d : $(SRCDIR)/%.cc
 	@echo Making dependency for file $<; \
 	mkdir -p $(MYTMPDIR)/archive; \
-	$(CC) -M -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $< | \
+	$(CC) -M -I$(INCDIR) $< | \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' | \
 	sed 's/$*\.o/$(MYTMPDIR)\/archive\/$*.o/' > $@; \
 	[ -s $@ ] || rm -f $@
@@ -148,16 +148,16 @@ ifneq (x$(HEPMCLOCATION),x)
 
    $(MYTMPDIR)/%.o : pythia8tohepmc/%.cc config.mk
 	@mkdir -p $(MYTMPDIR)
-	$(CXX) $(CXXFLAGS) $(CXXFLAGSSHARED) $(HEPMCVFLAG) -c -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $(HEPMCINCLUDE) $< -o $@
+	$(CXX) $(CXXFLAGS) $(CXXFLAGSSHARED) $(HEPMCVFLAG) -c -I$(INCDIR) $(HEPMCINCLUDE) $< -o $@
 
    $(MYTMPDIR)/archive/%.o : pythia8tohepmc/%.cc config.mk
 	@mkdir -p $(MYTMPDIR)/archive
-	$(CXX) $(CXXFLAGS) $(HEPMCVFLAG) -c -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $(HEPMCINCLUDE) $< -o $@
+	$(CXX) $(CXXFLAGS) $(HEPMCVFLAG) -c -I$(INCDIR) $(HEPMCINCLUDE) $< -o $@
 
    $(MYTMPDIR)/%.d : pythia8tohepmc/%.cc
 	@echo Making dependency for file $<; \
 	mkdir -p $(MYTMPDIR); \
-	$(CC) -M -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $(HEPMCINCLUDE) $< | \
+	$(CC) -M -I$(INCDIR) $(HEPMCINCLUDE) $< | \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' | \
 	sed 's/$*.o/$(MYTMPDIR)\/$*.o/' > $@; \
 	[ -s $@ ] || rm -f $@
@@ -165,7 +165,7 @@ ifneq (x$(HEPMCLOCATION),x)
    $(MYTMPDIR)/archive/%.d : pythia8tohepmc/%.cc
 	@echo Making dependency for file $<; \
 	mkdir -p $(MYTMPDIR)/archive; \
-	$(CC) -M -I$(INCDIR) -I$(BOOST) -I$(SLHAEA) $(HEPMCINCLUDE) $< | \
+	$(CC) -M -I$(INCDIR) $(HEPMCINCLUDE) $< | \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' | \
 	sed 's/$*.o/$(MYTMPDIR)\/archive\/$*.o/' > $@; \
 	[ -s $@ ] || rm -f $@
