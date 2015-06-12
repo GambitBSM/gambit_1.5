@@ -1,5 +1,5 @@
 // main19.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -37,7 +37,7 @@ int poisson(double nAvg, Rndm& rndm) {
   // Initialize.
   double rSum  = 0.;
   double rTerm = 1.;
-  
+
   // Add to sum and check whether done.
   for (int i = 0; i < NMAX; ) {
     rSum += rTerm;
@@ -77,7 +77,7 @@ int main() {
 
   // One object where all individual events are to be collected.
   Event sumEvent;
- 
+
   // Switch off automatic event listing.
   pythiaSignal.readString("Next:numberShowInfo = 0");
   pythiaSignal.readString("Next:numberShowProcess = 0");
@@ -91,7 +91,7 @@ int main() {
   pythiaBeamBGas.readString("Next:numberShowInfo = 0");
   pythiaBeamBGas.readString("Next:numberShowProcess = 0");
   pythiaBeamBGas.readString("Next:numberShowEvent = 0");
- 
+
   // Initialize generator for signal processes.
   pythiaSignal.readString("HardQCD:all = on");
   pythiaSignal.readString("PhaseSpace:pTHatMin = 50.");
@@ -156,7 +156,7 @@ int main() {
       pythiaBeamAGas.next();
       sumEvent += pythiaBeamAGas.event;
     }
-  
+
     // Select the number of beam B + gas events to generate.
     int nBeamBGas = poisson(nBeamBGasAvg, pythiaBeamBGas.rndm);
     nBGH.fill( nBeamBGas );
@@ -166,7 +166,7 @@ int main() {
       pythiaBeamBGas.next();
       sumEvent += pythiaBeamBGas.event;
     }
-  
+
     // List first few events.
     if (iEvent < 1) {
       pythiaSignal.info.list();
@@ -182,7 +182,7 @@ int main() {
 
     // Fill net pZ - nonvanishing owing to beam + gas.
     sumPZH.fill( sumEvent[0].pz() );
- 
+
   // End of event loop
   }
 

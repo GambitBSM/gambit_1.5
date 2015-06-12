@@ -13,6 +13,7 @@ import warnings
 import modules.cfg as cfg
 import modules.gb as gb
 import modules.utils as utils
+import modules.infomsg as infomsg
 
 
 # ======== getArgs ========
@@ -231,8 +232,8 @@ def constrWrapperArgs(args, add_ref=False, convert_loaded_to_abstract=True):
                     if ('&' not in arg_dict['type']) and ('*' not in arg_dict['type']):
                         arg_dict['type'] = arg_dict['type'] + '&'
 
-            else:
-                warnings.warn('The argument "%s" is of a native type "%s" that BOSS is not parsing. The function using this should be ignored.' % (arg_dict['name'], arg_dict['type']))
+            # else:
+            #     print 'INFO: ' + 'The argument "%s" is of a native type "%s" that BOSS is not parsing. The function using this should be ignored.' % (arg_dict['name'], arg_dict['type'])
 
     return w_args
 
@@ -315,19 +316,40 @@ def constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keyw
 
 # ======== ignoreFunction ========
 
-def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0):
+def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warning=True):
 
     return_type_accepted   = True
     arg_types_accepted     = True
     template_args_accepted = True
 
+    # Check if this is an operator function
+    is_operator = False
+    if func_el.tag == 'OperatorMethod':
+        is_operator = True
+
+
+    # # Check function return type
+    # if 'returns' in func_el.keys():
+    #     if not utils.isAcceptedType(func_el):
+    #         return_type_dict = utils.findType(func_el)
+    #         return_type   = return_type_dict['name'] + '*'*return_type_dict['pointerness'] + '&'*return_type_dict['is_reference']
+    #         if print_warning:
+    #             reason = "Non-accepted return type '%s'." % return_type
+    #             infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('name'), reason).printMessage()
+    #         return_type_accepted = False
+    #         return True 
+
     # Check function return type
     if 'returns' in func_el.keys():
-        if not utils.isAcceptedType(func_el):
-            return_type_dict = utils.findType(func_el)
-            return_type   = return_type_dict['name'] + '*'*return_type_dict['pointerness'] + '&'*return_type_dict['is_reference']
-            print 'INFO: ' + 'The function "%s" makes use of a non-accepted return type "%s" and will be ignored.' % (func_el.get('name'), return_type)
+        return_type_dict = utils.findType(func_el)
+        return_type = return_type_dict['name'] + '*'*return_type_dict['pointerness'] + '&'*return_type_dict['is_reference']
+        return_el   = return_type_dict['el']  
+        if not utils.isAcceptedType(return_el):
+            if print_warning:
+                reason = "Non-accepted return type '%s'." % return_type
+                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
             return_type_accepted = False
+            return True 
 
     # Check argument types
     args = getArgs(func_el)
@@ -342,17 +364,23 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0):
         arg_el = gb.id_dict[arg_dict['id']]
 
         if arg_dict['function_pointer']:
-            print 'INFO: ' + 'The function "%s" (with %i arguments) makes use of a function pointer argument "%s" and will be ignored.' % (func_el.get('name'), use_n_args, arg_dict['name'])
+            if print_warning:
+                reason = "Function pointer type argument, '%s'." % arg_dict['name']
+                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
             arg_types_accepted = False
             break
         if not utils.isAcceptedType(arg_el):
-            print 'INFO: ' + 'The function "%s" (with %i arguments) makes use of a non-accepted argument type "%s" and will be ignored.' % (func_el.get('name'), use_n_args, arg_type_name)
+            if print_warning:
+                reason = "Non-accepted argument type '%s'." % arg_type_name
+                infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
             arg_types_accepted = False
             break
         if limit_pointerness == True:
             if utils.isLoadedClass(arg_el):
                 if ('**' in arg_type_name) or ('*&' in arg_type_name):
-                    print 'INFO: ' + 'The function "%s" makes use of a pointer-to-pointer or reference-to-pointer ("%s") for a loaded class. Such types cannot be handled safely by the BOSS wrapper system and thus this function will be ignored.' % (func_el.get('name'), arg_type_name)
+                    if print_warning:
+                        reason = "Argument of type pointer-to-pointer/reference-to-pointer to loaded class, '%s'." % arg_type_name
+                        infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
                     arg_types_accepted = False
                     break
 
@@ -447,12 +475,14 @@ def constrExternFuncDecl(func_el):
     return_type_dict = utils.findType( gb.id_dict[func_el.get('returns')] )
     return_type = return_type_dict['name'] + '*'*return_type_dict['pointerness'] + '&'*return_type_dict['is_reference']
 
+    func_name = getFunctionNameDict(func_el)
+
     namespaces = utils.getNamespaces(func_el)
-    
     n_indents = len(namespaces)
 
     extern_decl += utils.constrNamespace(namespaces, 'open')
-    extern_decl += ' '*cfg.indent*n_indents + 'extern ' + return_type + ' ' + utils.removeNamespace(func_el.get('demangled')) + ';\n'
+    # extern_decl += ' '*cfg.indent*n_indents + 'extern ' + return_type + ' ' + utils.removeNamespace(func_el.get('demangled')) + ';\n'
+    extern_decl += ' '*cfg.indent*n_indents + 'extern ' + return_type + ' ' + func_name['short_templ_args'] + ';\n'
     extern_decl += utils.constrNamespace(namespaces, 'close')
 
     return extern_decl
@@ -460,3 +490,75 @@ def constrExternFuncDecl(func_el):
 # ======== END: constrExternFuncDecl ========
 
 
+
+# ====== getFunctionNameDict ========
+
+def getFunctionNameDict(func_el):
+
+    # func_name = {}
+    func_name = OrderedDict()
+
+    # Check that the 'demangled' XML entry exists.
+    xml_id = func_el.get('id')
+    if 'demangled' not in func_el.keys():
+        raise KeyError('XML element %s does not contain the key "demangled".' % (xml_id))
+
+    # Get information about the return type.
+    return_type_dict = utils.findType(func_el)
+    return_el     = return_type_dict['el']
+    pointerness   = return_type_dict['pointerness']
+    is_ref        = return_type_dict['is_reference']
+    return_kw     = return_type_dict['cv_qualifiers']
+    
+    return_kw_str = ' '.join(return_kw) + ' '*bool(len(return_kw))
+
+    return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
+
+
+    #
+    # Start filling the name dict
+    #
+    
+    # If two or more functions have the same name, the return type will
+    # be part of the 'demangled' entry. Otherwise it will not.
+    
+    if (return_type + ' ') == func_el.get('demangled')[:len(return_type)+1]:
+    
+        func_name['long_templ_return_args']  = func_el.get('demangled')
+    
+        # Remove return type
+        if return_type == 'void':
+            func_name['long_templ_args'] = func_name['long_templ_return_args']
+        else:
+            func_name['long_templ_args'] = func_name['long_templ_return_args'].replace(return_type,'',1).strip()
+
+    else:
+
+        func_name['long_templ_args']  = func_el.get('demangled')
+    
+        # Add return type
+        if return_type == 'void':
+            func_name['long_templ_return_args'] = func_name['long_templ_args']
+        else:
+            func_name['long_templ_return_args'] = return_type + ' ' + func_name['long_templ_args']
+
+
+    # Remove argument bracket
+    func_name['long_templ'], args_bracket = utils.removeArgumentBracket(func_name['long_templ_args'], return_args_bracket=True)
+
+    # Remove template bracket
+    func_name['long'], template_bracket = utils.removeTemplateBracket(func_name['long_templ'], return_bracket=True)
+
+    # Remove namespace
+    func_name['short'] = utils.removeNamespace(func_name['long'])
+
+    # Combine short name and template bracket
+    func_name['short_templ'] = func_name['short'] + template_bracket
+
+    # Combine short name, template bracket and argument bracket
+    func_name['short_templ_args'] = func_name['short_templ'] + args_bracket
+
+
+    return func_name
+
+# ====== END: getFunctionNameDict ========

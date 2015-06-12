@@ -1,5 +1,5 @@
 // WeakShowerMEs.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -13,7 +13,7 @@
 #include "Pythia8/Basics.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The WeakShowerMEs provides ME's needed for W/Z emission in ISR or FSR.
@@ -24,13 +24,13 @@ public:
 
   // Constructor.
   WeakShowerMEs() {}
-  
+
   // Calculate the 2 to 2 ME uG -> uG, up to a known overall factor.
   double getTchanneluGuGME(double sHat,double tHat,double uHat);
-  
+
   // Calculate the 2 to 2 ME ud -> ud, up to a known overall factor.
   double getTchannelududME(double sHat,double tHat,double uHat);
-  
+
   // Calculate the 2 to 2 ME uu -> uu, up to a known overall factor.
   double getTchanneluuuuME(double sHat,double tHat,double uHat);
 
@@ -42,7 +42,7 @@ public:
   double getTchannelududZME(Vec4 p1,Vec4 p2,Vec4 p3,Vec4 p4,Vec4 p5);
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

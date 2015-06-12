@@ -1,5 +1,5 @@
 #include "Pythia8/StandardModel.h"
-#include "backend_types/Pythia_8_186/wrapper_CoupSM.h"
+#include "backend_types/Pythia_8_209/wrapper_CoupSM.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 

@@ -1,5 +1,5 @@
 // main52.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -20,12 +20,12 @@ int main() {
   int machine = 1;
   int nEvent  = 10000;
 
-  // Select new PDF set; LHAPDF file name conventions.
-  //string pdfSet = "cteq5l.LHgrid";
-  //string pdfSet = "cteq61.LHpdf";
-  //string pdfSet = "cteq61.LHgrid";
-  //string pdfSet = "MRST2004nlo.LHgrid";
-  string pdfSet = "MRST2001lo.LHgrid";
+  // Select new PDF set; LHAPDF5 file name conventions.
+  //string pdfSet = "LHAPDF5:cteq5l.LHgrid";
+  //string pdfSet = "LHAPDF5:cteq61.LHpdf";
+  //string pdfSet = "LHAPDF5:cteq61.LHgrid";
+  //string pdfSet = "LHAPDF5:MRST2004nlo.LHgrid";
+  string pdfSet = "LHAPDF5:MRST2001lo.LHgrid";
 
   // Histograms for hadron-level quantities.
   double nMax = (machine == 1) ? 199.5 : 399.5;
@@ -70,12 +70,11 @@ int main() {
 
     // In second run pick new PDF set.
     if (iRun == 1) {
-      pythia.readString("PDF:useLHAPDF = on");
-      pythia.readString("PDF:LHAPDFset = " + pdfSet);
+      pythia.readString("PDF:pSet = " + pdfSet);
 
      // Allow extrapolation of PDF's beyond x and Q2 boundaries, at own risk.
      // Default behaviour is to freeze PDF's at boundaries.
-     pythia.readString("PDF:extrapolateLHAPDF = on");
+     pythia.readString("PDF:extrapolate = on");
 
       // Need to change pT0Ref depending on choice of PDF.
       // One possibility: retune to same <n_charged>.
@@ -87,7 +86,7 @@ int main() {
     pythia.settings.parm("Beams:eCM", eCM);
     if (machine == 1) pythia.readString("Beams:idB = -2212");
     pythia.init();
-   
+
     // Begin event loop.
     for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
 
@@ -111,7 +110,7 @@ int main() {
           pTSpecNew.fill( event[i].pT()  );
         }
       }
-      
+
       // Fill histograms for summed quantities.
       if (iRun == 0) {
         nChargedOld.fill( nCh );
@@ -173,9 +172,10 @@ int main() {
   // Second part of study, as simple extra check:
   // Begin fill shape of effective PDF at typical MPI Q2 = 10 scale:
   // F_effective(x) = (9/4) x*g(x) + Sum_i (x*q_i(x) + x*qbar_i(x)).
+  Info info;
   double Q2 = 10.;
   PDF* oldPDF = new CTEQ5L(2212);
-  PDF* newPDF = new LHAPDF(2212, pdfSet, 0);
+  PDF* newPDF = new LHAPDF(2212, pdfSet, &info);
 
   // Histograms.
   Hist effFlinOld("F_effective( x, Q2 = 10) old", 100 , 0., 1.);
@@ -184,7 +184,7 @@ int main() {
   Hist effFlogOld("F_effective( x, Q2 = 10) old", 80 , -8., 0.);
   Hist effFlogNew("F_effective( x, Q2 = 10) new", 80 , -8., 0.);
   Hist effFlogRat("F_effective( x, Q2 = 10) new/old", 80 , -8., 0.);
-    
+
   // Loop over x values, in a linear scale.
   for (int iX = 0; iX < 99; ++iX) {
     double x = 0.005 + 0.01 * iX;
@@ -203,7 +203,7 @@ int main() {
 
   //End loop over x values, in a linear scale.
   }
-    
+
   // Loop over x values, in a logarithmic scale
   for (int iX = 0; iX < 80; ++iX) {
     double xLog = -(0.1 * iX + 0.05);

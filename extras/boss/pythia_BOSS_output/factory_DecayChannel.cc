@@ -1,5 +1,5 @@
 #include "Pythia8/ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_DecayChannel.h"
+#include "backend_types/Pythia_8_209/wrapper_DecayChannel.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 

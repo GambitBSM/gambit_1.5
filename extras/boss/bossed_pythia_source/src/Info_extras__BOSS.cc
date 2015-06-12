@@ -1,6 +1,6 @@
+#include <vector>
 #include <map>
 #include <string>
-#include <vector>
 #include <ostream>
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
@@ -282,6 +282,42 @@ void Pythia8::Info::errorStatistics__BOSS()
 }
 
 
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::getEventAttribute__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > key)
+{
+    return getEventAttribute(key);
+}
+
+
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::getGeneratorValue__BOSS()
+{
+    return getGeneratorValue();
+}
+
+
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::getGeneratorAttribute__BOSS(unsigned int n, std::basic_string<char,std::char_traits<char>,std::allocator<char> > key)
+{
+    return getGeneratorAttribute(n, key);
+}
+
+
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::getWeightsDetailedAttribute__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > n, std::basic_string<char,std::char_traits<char>,std::allocator<char> > key)
+{
+    return getWeightsDetailedAttribute(n, key);
+}
+
+
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::getWeightsCompressedAttribute__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > key)
+{
+    return getWeightsCompressedAttribute(key);
+}
+
+
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Info::getScalesValue__BOSS()
+{
+    return getScalesValue();
+}
+
+
 void Pythia8::Info::setType__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > nameIn, int codeIn, int nFinalIn, bool isNonDiffIn, bool isResolvedIn, bool isDiffractiveAin, bool isDiffractiveBin, bool isDiffractiveCin)
 {
     setType(nameIn, codeIn, nFinalIn, isNonDiffIn, isResolvedIn, isDiffractiveAin, isDiffractiveBin, isDiffractiveCin);
@@ -342,9 +378,61 @@ void Pythia8::Info::setImpact__BOSS(double bMPIIn, double enhanceMPIIn)
 }
 
 
+void Pythia8::Info::setHardDiff__BOSS(bool hasUnresBeamsIn, bool isHardDiffAIn, bool isHardDiffBIn, double xPomAIn, double xPomBIn, double tPomAIn)
+{
+    setHardDiff(hasUnresBeamsIn, isHardDiffAIn, isHardDiffBIn, xPomAIn, xPomBIn, tPomAIn);
+}
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+void Pythia8::Info::setHardDiff__BOSS(bool hasUnresBeamsIn, bool isHardDiffAIn, bool isHardDiffBIn, double xPomAIn, double xPomBIn)
+{
+    setHardDiff(hasUnresBeamsIn, isHardDiffAIn, isHardDiffBIn, xPomAIn, xPomBIn);
+}
+
+
+void Pythia8::Info::setHardDiff__BOSS(bool hasUnresBeamsIn, bool isHardDiffAIn, bool isHardDiffBIn, double xPomAIn)
+{
+    setHardDiff(hasUnresBeamsIn, isHardDiffAIn, isHardDiffBIn, xPomAIn);
+}
+
+
+void Pythia8::Info::setHardDiff__BOSS(bool hasUnresBeamsIn, bool isHardDiffAIn, bool isHardDiffBIn)
+{
+    setHardDiff(hasUnresBeamsIn, isHardDiffAIn, isHardDiffBIn);
+}
+
+
+void Pythia8::Info::setHardDiff__BOSS(bool hasUnresBeamsIn, bool isHardDiffAIn)
+{
+    setHardDiff(hasUnresBeamsIn, isHardDiffAIn);
+}
+
+
+void Pythia8::Info::setHardDiff__BOSS(bool hasUnresBeamsIn)
+{
+    setHardDiff(hasUnresBeamsIn);
+}
+
+
+void Pythia8::Info::setHardDiff__BOSS()
+{
+    setHardDiff();
+}
+
+
+
+int& Pythia8::Info::LHEFversionSave_ref__BOSS() { return LHEFversionSave; }
+
+std::vector<double,std::allocator<double> >& Pythia8::Info::sigmaLHEFSave_ref__BOSS() { return sigmaLHEFSave; }
+
+std::map<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::less<std::basic_string<char, std::char_traits<char>, std::allocator<char> > >,std::allocator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >*& Pythia8::Info::eventAttributes_ref__BOSS() { return eventAttributes; }
+
+std::map<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,double,std::less<std::basic_string<char, std::char_traits<char>, std::allocator<char> > >,std::allocator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char> >, double> > >*& Pythia8::Info::weights_detailed_ref__BOSS() { return weights_detailed; }
+
+std::vector<double,std::allocator<double> >*& Pythia8::Info::weights_compressed_ref__BOSS() { return weights_compressed; }
+
+
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_Info* Pythia8::Info::pointerCopy__BOSS()
 {

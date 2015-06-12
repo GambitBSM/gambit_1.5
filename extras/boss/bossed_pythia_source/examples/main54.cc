@@ -1,5 +1,5 @@
 // main54.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -9,20 +9,19 @@
 
 #include "Pythia8/Pythia.h"
 using namespace Pythia8;
- 
+
 int main() {
 
   cout<<"\n NNPDF2.3 QED LO phenomenology \n "<<endl;
   cout<<"\n Check access to NNPDF2.3 LO QED sets \n "<<endl;
-  
+
   // Generator.
   Pythia pythia;
- 
+
   // Access the PDFs.
   int idBeamIn = 2212;
   string xmlPath = "../xmldoc/";
-  Info* infoPtr = 0;
-  int member=0;
+  Info info;
 
   // Grid of studied points.
   string xpdf[] = {"x*g","x*d","x*u","x*s"};
@@ -30,26 +29,24 @@ int main() {
   double Q2[] = { 2.0, 10000.0 };
   string setName;
   string setName_lha;
- 
+
   // For timing checks.
   int const nq = 200;
   int const nx = 200;
-  
+
   // Loop over all internal PDF sets in Pythia8
-  // and compare with their LHAPDF correspondents.
-  for (int iFitIn = 1; iFitIn < 5; iFitIn++) {
+  // and compare with their LHAPDF5 correspondents.
+  for (int iFitIn = 3; iFitIn < 5; iFitIn++) {
 
     // Constructor for internal PDFs.
-    NNPDF pdfs_nnpdf( idBeamIn, iFitIn, xmlPath, infoPtr);
-    
+    NNPDF pdfs_nnpdf( idBeamIn, iFitIn, xmlPath, &info);
+
     // Constructor for LHAPDF.
-    if (iFitIn == 1) setName = "NNPDF23_lo_as_0130_qed_mem0.LHgrid";
-    if (iFitIn == 2) setName = "NNPDF23_lo_as_0119_qed_mem0.LHgrid";
-    if (iFitIn == 3) setName = "NNPDF23_nlo_as_0119_qed_mc_mem0.LHgrid";
-    if (iFitIn == 4) setName = "NNPDF23_nnlo_as_0119_qed_mc_mem0.LHgrid";
-    LHAPDF pdfs_nnpdf_lha( idBeamIn, setName, member);
+    if (iFitIn == 3) setName = "LHAPDF5:NNPDF23_nlo_as_0119_qed.LHgrid";
+    if (iFitIn == 4) setName = "LHAPDF5:NNPDF23_nnlo_as_0119_qed.LHgrid";
+    LHAPDF pdfs_nnpdf_lha( idBeamIn, setName, &info);
     cout << "\n PDF set = " << setName << " \n" << endl;
-  
+
     // Check quarks and gluons.
     for (int f = 0; f < 4; f++) {
       for (int iq = 0; iq < 2; iq++) {
@@ -80,10 +77,10 @@ int main() {
         if(diff > 1e-8) exit(-10);
       }
     }
-    
+
     // Now check the timings for evolution.
     cout << "\n Checking timings " << endl;
-    
+
     clock_t t1 = clock();
     for (int f = -4; f < 4; f++) {
       for (int iq = 0; iq < nq; iq++) {
@@ -97,7 +94,7 @@ int main() {
     clock_t t2 = clock();
     cout << " NNPDF internal timing = " << (t2-t1)/(double)CLOCKS_PER_SEC
          << endl;
-    
+
     t1=clock();
     for (int f = -4; f < 4; f++) {
       for (int iq = 0; iq < nq; iq++) {
@@ -111,7 +108,7 @@ int main() {
     t2=clock();
     cout << " NNPDF LHAPDF   timing = " << (t2-t1)/(double)CLOCKS_PER_SEC
          << endl;
-    
+
   } // End loop over NNPDF internal sets
 
   // Done.

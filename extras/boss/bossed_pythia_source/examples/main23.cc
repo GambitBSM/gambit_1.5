@@ -1,5 +1,5 @@
 // main23.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -12,7 +12,7 @@
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
- 
+
 //==========================================================================
 
 // A derived class to set beam momentum and interaction vertex spread.
@@ -161,7 +161,7 @@ private:
 // Initialization method for the random numbers.
 
 void stupidRndm::init() {
-    
+
   // Initial values.
   value = 0.5;
   exp10 = exp(10.);
@@ -186,7 +186,7 @@ double stupidRndm::flat() {
   return value;
 
 }
- 
+
 //==========================================================================
 
 // A simple scaling PDF. Not realistic; only to check that it works.
@@ -218,7 +218,7 @@ void Scaling::xfUpdate(int, double x, double ) {
   // Gluons and sea quarks carrying the rest.
   double gl  = 2.  * pow5(1. - x);
   double sea = 0.4 * pow5(1. - x);
- 
+
   // Update values
   xg    = gl;
   xu    = uv + 0.18 * sea;
@@ -239,7 +239,7 @@ void Scaling::xfUpdate(int, double x, double ) {
   idSav = 9;
 
 }
- 
+
 //==========================================================================
 
 int main() {

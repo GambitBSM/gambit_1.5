@@ -1,29 +1,11 @@
 // SusyLesHouches.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 #include "Pythia8/SusyLesHouches.h"
-
-// GZIP support.
-#ifdef GZIPSUPPORT
-
-// For GCC versions >= 4.6, can switch off shadow warnings.
-#if (defined GZIPSUPPORT && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406)
-#pragma GCC diagnostic ignored "-Wshadow"
-#endif
-
-// Boost includes.
-#include "boost/iostreams/filtering_stream.hpp"
-#include "boost/iostreams/filter/gzip.hpp"
-
-// Switch shadow warnings back on.
-#if (defined GZIPSUPPORT && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406)
-#pragma GCC diagnostic warning "-Wshadow"
-#endif
-
-#endif // GZIPSUPPORT
+#include "Pythia8/Streams.h"
 
 namespace Pythia8 {
 
@@ -31,42 +13,17 @@ namespace Pythia8 {
 
 // The SusyLesHouches class.
 
-//==========================================================================
+//--------------------------------------------------------------------------
 
 // Main routine to read in SLHA and LHEF+SLHA files
 
 int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
   bool useDecayIn) {
 
-  // Copy inputs to local
-  slhaFile    = slhaFileIn;
-  verboseSav  = verboseIn;
-  useDecay    = useDecayIn;
-
+  slhaFile = slhaFileIn;
   // Check that input file is OK.
-  int iFailFile=0;
   const char* cstring = slhaFile.c_str();
-
-// Construct istream without gzip support.
-#ifndef GZIPSUPPORT
-  ifstream file(cstring);
-
-// Construct istream with gzip support.
-#else
-  boost::iostreams::filtering_istream file;
-  ifstream fileBase(cstring);
-
-  // Pass along the 'good()' flag, so code elsewhere works unmodified.
-  if (!fileBase.good()) file.setstate(ios_base::badbit);
-
-  // Check filename ending to decide which filters to apply.
-  else {
-    const char *last = strrchr(cstring, '.');
-    if (last && strncmp(last, ".gz", 3) == 0)
-      file.push(boost::iostreams::gzip_decompressor());
-    file.push(fileBase);
-  }
-#endif
+  igzstream file(cstring);
 
   // Exit if input file not found. Else print file name.
   if (!file.good()) {
@@ -79,12 +36,23 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
     filePrinted = true;
   }
 
+  return readFile( file, verboseIn, useDecayIn );
+}
+
+int SusyLesHouches::readFile(istream& is, int verboseIn,
+  bool useDecayIn) {
+
+  int iFailFile=0;
+  // Copy inputs to local
+  verboseSav  = verboseIn;
+  useDecay    = useDecayIn;
+
   // Array of particles read in.
   vector<int> idRead;
 
   // Array of block names read in.
   vector<string> processedBlocks;
-  
+
   //Initial values for read-in variables.
   slhaRead=true;
   lhefRead=false;
@@ -105,14 +73,12 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
   int iLine=0;
 
   // Read in one line at a time.
-  while ( getline(file, line) ) {
+  while ( getline(is, line) ) {
     iLine++;
 
-    //Rewrite string in lowercase
-    for (unsigned int i=0;i<line.length();i++) line[i]=tolower(line[i]);
-
-    // Remove extra blanks
-    while (line.find("  ") != string::npos) line.erase( line.find("  "), 1);
+    //Rewrite string in lowercase, removing initial and tralining blanks
+    //as well as garbage characters
+    toLower(line);
 
     //Detect whether read-in is from a Les Houches Event File (LHEF).
     if (line.find("<leshouches") != string::npos
@@ -156,16 +122,18 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
 
     //Move comment to separate string
     if (line.find("#") != string::npos) {
-      if (line.find("#") + 1 < line.length() )
-        comment = line.substr(line.find("#")+1,line.length()-line.find("#")-2);
-      else
+      if (line.find("#") + 1 < line.length() ) {
+        int commentLength = line.length()-(line.find("#")+1);
+        comment = line.substr(line.find("#")+1,commentLength);
+      } else
         comment = "";
       line.erase(line.find("#"),line.length()-line.find("#")-1);
     }
 
-    // Remove blanks before and after an = sign.
+    // Remove blanks before and after an = sign. Also remove multiple blanks
     while (line.find(" =") != string::npos) line.erase( line.find(" ="), 1);
     while (line.find("= ") != string::npos) line.erase( line.find("= ")+1, 1);
+    while (line.find("  ") != string::npos) line.erase( line.find("  ")+1, 1);
 
     //New block.
     if (line.find("block") <= 1) {
@@ -178,7 +146,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
       int nameBegin=6 ;
       int nameEnd=blockIn.find(" ",7);
       blockName=blockIn.substr(nameBegin,nameEnd-nameBegin);
-      
+
       // QNUMBERS blocks (cf. arXiv:0712.3311 [hep-ph])
       if (blockIn.find("qnumbers") != string::npos) {
         // Extract ID code for new particle
@@ -234,7 +202,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
       }
 
       // Non-qnumbers blocks
-      // Skip if several copies of same block 
+      // Skip if several copies of same block
       // (facility to use interpolation of different q= not implemented)
       // only first copy of a given block type is kept
       else {
@@ -247,14 +215,14 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
           continue;
         }
         processedBlocks.push_back(blockName);
-        
+
         // Copy input file as generic blocks (containing strings)
         // (more will be done with SLHA1 & 2 specific blocks below, this is
         //  just to make sure we have a complete copy of the input file,
         //  including also any unknown/user/generic blocks)
         LHgenericBlock gBlock;
         genericBlocks[blockName]=gBlock;
-      }      
+      }
 
       //Find Q=... for DRbar running blocks
       if (blockIn.find("q=") != string::npos) {
@@ -312,10 +280,10 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
           if (blockName=="nmssmrun") nmssmrun.setq(q);
         };
       };
-      
+
       //Skip to next line.
       continue ;
-      
+
     }
 
     //New decay table
@@ -336,7 +304,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
       int nameBegin=6 ;
       int nameEnd=decay.find(" ",7);
       nameNow=decay.substr(nameBegin,nameEnd-nameBegin);
-      
+
       //Extract PDG code and width
       istringstream dstream(nameNow);
       dstream >> idNow;
@@ -410,7 +378,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
         int firstEqual = line.find_first_of("=");
         line.replace(firstEqual, 1, " ");
       };
-    
+
       //Parse data lines within given block
       //Constructed explicitly so that each block can have its own types and
       //own rules defined. For extra user blocks, just add more recognized
@@ -546,7 +514,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
       if (blockName == "nmhmix") ifail=nmhmix.set(linestream);
       if (blockName == "nmamix") ifail=nmamix.set(linestream);
       if (blockName == "nmnmix") ifail=nmnmix.set(linestream);
-      
+
       //DRbar Lagrangian parameters
       if (blockName == "gauge") ifail=gauge.set(linestream);
       if (blockName == "yu") ifail=yu.set(linestream);
@@ -617,7 +585,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
       if (line.size() >= 2) {
         genericBlocks[blockName].set(line);
       }
-        
+
     }
 
     // Decay table read-in
@@ -651,7 +619,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
       // Stop reading decay channels if not consistent.
       if (!ok || nDa < 2) {
         message(1,"readFile","read error or empty line",iLine);
-         
+
       // Append decay channel.
       } else {
         decays[decayIndices[idNow]].addChannel(brat,nDa,idDa);
@@ -667,7 +635,7 @@ int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
     return 102;
   }
   else return iFailFile;
-    
+
 }
 
 //--------------------------------------------------------------------------
@@ -680,8 +648,8 @@ void SusyLesHouches::printHeader() {
   if (! headerPrinted) {
     cout << " *-----------------------  SusyLesHouches SUSY/BSM"
          << " Interface  ------------------------*\n";
-    message(0,"","Last Change 03 Mar 2014 - P. Skands",0);
-    if (!filePrinted) {
+    message(0,"","Last Change 14 Jan 2015 - P. Skands",0);
+    if (!filePrinted && slhaFile != "" && slhaFile != " ") {
       message(0,"","Parsing: "+slhaFile,0);
       filePrinted=true;
     }
@@ -773,7 +741,7 @@ void SusyLesHouches::printSpectrum(int ifail) {
   for (int icur=1;icur<=6;icur++) cout << setw(6) << dsqmix(6,icur) << "  ";
 
   cout << endl;
-  
+
   // u squarks
   message(0,"","");
   cout << " |  ~u                  m     ~uL     ~cL     ~tL"
@@ -823,27 +791,27 @@ void SusyLesHouches::printSpectrum(int ifail) {
          << ( (mass(1000011) > 1e7) ? scientific : fixed) << mass(1000011)
          << fixed << "  ";
     for (int icur=1;icur<=6;icur++) cout << setw(6) << selmix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000013 " << setw(10)
          << ( (mass(1000013) > 1e7) ? scientific : fixed) << mass(1000013)
          << fixed << "  ";
     for (int icur=1;icur<=6;icur++) cout << setw(6) << selmix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000015 " << setw(10)
          << ( (mass(1000015) > 1e7) ? scientific : fixed) << mass(1000015)
          << fixed << "  ";
     for (int icur=1;icur<=6;icur++) cout << setw(6) << selmix(3,icur) << "  ";
-    
+
     cout << endl << " |     2000011 " << setw(10)
          << ( (mass(2000011) > 1e7) ? scientific : fixed) << mass(2000011)
          << fixed << "  ";
     for (int icur=1;icur<=6;icur++) cout << setw(6) << selmix(4,icur) << "  ";
-    
+
     cout << endl << " |     2000013 " << setw(10)
          << ( (mass(2000013) > 1e7) ? scientific : fixed) << mass(2000013)
          << fixed << "  " ;
     for (int icur=1;icur<=6;icur++) cout << setw(6) << selmix(5,icur) << "  ";
-    
+
     cout << endl << " |     2000015 " << setw(10)
          << ( (mass(2000015) > 1e7) ? scientific : fixed) << mass(2000015)
          << fixed << "  ";
@@ -858,32 +826,32 @@ void SusyLesHouches::printSpectrum(int ifail) {
     cout << setprecision(3) << " |         -37 " << setw(10) <<
       ( (mass(37) > 1e7) ? scientific : fixed) << mass(37) << fixed << "  ";
     for (int icur=1;icur<=8;icur++) cout << setw(6) << rvlmix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000011 " << setw(10)
          << ( (mass(1000011) > 1e7) ? scientific : fixed) << mass(1000011)
          << fixed << "  ";
     for (int icur=1;icur<=8;icur++) cout << setw(6) << rvlmix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000013 " << setw(10)
          << ( (mass(1000013) > 1e7) ? scientific : fixed) << mass(1000013)
          << fixed << "  ";
     for (int icur=1;icur<=8;icur++) cout << setw(6) << rvlmix(3,icur) << "  ";
-    
+
     cout << endl << " |     1000015 " << setw(10)
          << ( (mass(1000015) > 1e7) ? scientific : fixed) << mass(1000015)
          << fixed << "  ";
     for (int icur=1;icur<=8;icur++) cout << setw(6) << rvlmix(4,icur) << "  ";
-    
+
     cout << endl << " |     2000011 " << setw(10)
          << ( (mass(2000011) > 1e7) ? scientific : fixed) << mass(2000011)
          << fixed << "  ";
     for (int icur=1;icur<=8;icur++) cout << setw(6) << rvlmix(5,icur) << "  ";
-    
+
     cout << endl << " |     2000013 " << setw(10)
          << ( (mass(2000013) > 1e7) ? scientific : fixed) << mass(2000013)
          << fixed << "  " ;
     for (int icur=1;icur<=8;icur++) cout << setw(6) << rvlmix(6,icur) << "  ";
-    
+
     cout << endl << " |     2000015 " << setw(10)
          << ( (mass(2000015) > 1e7) ? scientific : fixed) << mass(2000015)
          << fixed << "  ";
@@ -899,19 +867,19 @@ void SusyLesHouches::printSpectrum(int ifail) {
     cout << " |  ~nu                 m";
     if (snumix.exists()) cout << "   ~nu_e  ~nu_mu ~nu_tau";
     cout << endl;
-    
+
     cout << setprecision(3) << " |     1000012 " << setw(10)
          << ( (mass(1000012) > 1e7) ? scientific : fixed) << mass(1000012)
          << fixed << "  ";
     if (snumix.exists()) for (int icur=1;icur<=3;icur++)
                            cout << setw(6) << snumix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000014 " << setw(10)
          << ( (mass(1000014) > 1e7) ? scientific : fixed) << mass(1000014)
          << fixed << "  ";
     if (snumix.exists()) for (int icur=1;icur<=3;icur++)
                            cout << setw(6) << snumix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000016 " << setw(10)
          << ( (mass(1000016) > 1e7) ? scientific : fixed) << mass(1000016)
          << fixed << "  ";
@@ -924,31 +892,31 @@ void SusyLesHouches::printSpectrum(int ifail) {
     cout << " |  H0/~nu              m";
     if (snumix.exists()) cout << "    H0_1    H0_2   ~nu_e  ~nu_mu ~nu_tau";
     cout << endl;
-    
+
     cout << setprecision(3) << " |          25 " << setw(10)
          << ( (mass(25) > 1e7) ? scientific : fixed) << mass(25)
          << fixed << "  ";
     if (rvhmix.exists()) for (int icur=1;icur<=5;icur++)
                            cout << setw(6) << rvhmix(1,icur) << "  ";
-    
+
     cout << endl << " |          35 " << setw(10)
          << ( (mass(35) > 1e7) ? scientific : fixed) << mass(35)
          << fixed << "  ";
     if (rvhmix.exists()) for (int icur=1;icur<=5;icur++)
                            cout << setw(6) << rvhmix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000012 " << setw(10)
          << ( (mass(1000012) > 1e7) ? scientific : fixed) << mass(1000012)
          << fixed << "  ";
     if (rvhmix.exists()) for (int icur=1;icur<=5;icur++)
                            cout << setw(6) << rvhmix(3,icur) << "  ";
-    
+
     cout << endl << " |     1000014 " << setw(10)
          << ( (mass(1000014) > 1e7) ? scientific : fixed) << mass(1000014)
          << fixed << "  ";
     if (rvhmix.exists()) for (int icur=1;icur<=5;icur++)
                            cout << setw(6) << rvhmix(4,icur) << "  ";
-    
+
     cout << endl << " |     1000016 " << setw(10)
          << ( (mass(1000016) > 1e7) ? scientific : fixed) << mass(1000016)
          << fixed << "  ";
@@ -967,17 +935,17 @@ void SusyLesHouches::printSpectrum(int ifail) {
          << ( (mass(36) > 1e7) ? scientific : fixed) << mass(36)
          << fixed << "  ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << rvamix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000017 " << setw(10)
          << ( (mass(1000017) > 1e7) ? scientific : fixed) << mass(1000017)
          << fixed << "  ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << rvamix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000018 " << setw(10)
          << ( (mass(1000018) > 1e7) ? scientific : fixed) << mass(1000018)
          << fixed << "  ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << rvamix(3,icur) << "  ";
-    
+
     cout << endl << " |     1000019 " << setw(10)
          << ( (mass(1000019) > 1e7) ? scientific : fixed) << mass(1000019)
          << fixed << "  ";
@@ -993,22 +961,22 @@ void SusyLesHouches::printSpectrum(int ifail) {
   if (modsel(3) >= 1) {
     cout << " |  ~chi0               m      ~B    ~W_3    ~H_1    ~H_2      ~S"
          << endl;
-    
+
     cout << setprecision(3) << " |     1000022 " << setw(10)
          << ( (mass(1000022) > 1e7) ? scientific : fixed) << mass(1000022)
          << fixed << "  ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << nmnmix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000023 " << setw(10)
          << ( (mass(1000023) > 1e7) ? scientific : fixed) << mass(1000023)
          << fixed << "  ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << nmnmix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000025 " << setw(10)
          << ( (mass(1000025) > 1e7) ? scientific : fixed) << mass(1000025)
          << fixed << "  ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << nmnmix(3,icur) << "  ";
-    
+
     cout << endl << " |     1000035 " << setw(10)
          << ( (mass(1000035) > 1e7) ? scientific : fixed) << mass(1000035)
          << fixed << "  ";
@@ -1025,22 +993,22 @@ void SusyLesHouches::printSpectrum(int ifail) {
   else if (modsel(4) < 1) {
     cout << " |  ~chi0               m      ~B    ~W_3    ~H_1    ~H_2"
          << endl;
-    
+
     cout << setprecision(3) << " |     1000022 " << setw(10)
          << ( (mass(1000022) > 1e7) ? scientific : fixed) << mass(1000022)
          << fixed << "  ";
     for (int icur=1;icur<=4;icur++) cout << setw(6) << nmix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000023 " << setw(10)
          << ( (mass(1000023) > 1e7) ? scientific : fixed) << mass(1000023)
          << fixed << "  ";
     for (int icur=1;icur<=4;icur++) cout << setw(6) << nmix(2,icur) << "  ";
-    
+
     cout << endl << " |     1000025 " << setw(10)
          << ( (mass(1000025) > 1e7) ? scientific : fixed) << mass(1000025)
          << fixed << "  ";
     for (int icur=1;icur<=4;icur++) cout << setw(6) << nmix(3,icur) << "  ";
-    
+
     cout << endl << " |     1000035 " << setw(10)
          << ( (mass(1000035) > 1e7) ? scientific : fixed) << mass(1000035)
          << fixed << "  ";
@@ -1052,12 +1020,12 @@ void SusyLesHouches::printSpectrum(int ifail) {
   else {
     cout << " |  nu/~chi0            m    nu_e   nu_mu  nu_tau      ~B"
          << "    ~W_3    ~H_1    ~H_2" << endl;
-    
+
     cout << setprecision(3) << " |          12 " << setw(10)
          << ( (mass(12) > 1e7) ? scientific : fixed) << mass(12)
          << fixed << "  ";
     for (int icur=1;icur<=7;icur++) cout << setw(6) << rvnmix(1,icur) << "  ";
-    
+
     cout << endl << " |          14 " << setw(10)
          << ( (mass(14) > 1e7) ? scientific : fixed) << mass(14)
          << fixed << "  ";
@@ -1076,12 +1044,12 @@ void SusyLesHouches::printSpectrum(int ifail) {
          << ( (mass(1000023) > 1e7) ? scientific : fixed) << mass(1000023)
          << fixed << "  ";
     for (int icur=1;icur<=7;icur++) cout << setw(6) << rvnmix(5,icur) << "  ";
-    
+
     cout << endl << " |     1000025 " << setw(10)
          << ( (mass(1000025) > 1e7) ? scientific : fixed) << mass(1000025)
          << fixed << "  ";
     for (int icur=1;icur<=7;icur++) cout << setw(6) << rvnmix(6,icur) << "  ";
-    
+
     cout << endl << " |     1000035 " << setw(10)
          << ( (mass(1000035) > 1e7) ? scientific : fixed) << mass(1000035)
          << fixed << "  ";
@@ -1096,14 +1064,14 @@ void SusyLesHouches::printSpectrum(int ifail) {
   if (modsel(4) < 1) {
     cout << " |  ~chi+               m   U:   ~W      ~H  |  V:   ~W      ~H"
          << endl;
-    
+
     cout << setprecision(3) << " |     1000024 " << setw(10)
          << ((mass(1000024) > 1e7) ? scientific : fixed) << mass(1000024)
          << fixed << "    ";
     for (int icur=1;icur<=2;icur++) cout << setw(6) << umix(1,icur) << "  ";
     cout << "|   ";
     for (int icur=1;icur<=2;icur++) cout << setw(6) << vmix(1,icur) << "  ";
-    
+
     cout << endl << " |     1000037 " << setw(10)
          << ((mass(1000037) > 1e7) ? scientific : fixed) << mass(1000037)
          << fixed << "    ";
@@ -1116,14 +1084,14 @@ void SusyLesHouches::printSpectrum(int ifail) {
   else {
     cout << " |  e+/~chi+            m   U:  eL+    muL+   tauL+     ~W+"
          << "    ~H1+  |  V:  eR+    muR+   tauR+     ~W+    ~H2+" << endl;
-    
+
     cout << setprecision(3) << " |         -11 " << setw(10)
          << ((mass(11) > 1e7) ? scientific : fixed) << mass(11)
          << fixed << "    ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << rvumix(1,icur) << "  ";
     cout << "|   ";
     for (int icur=1;icur<=5;icur++) cout << setw(6) << rvvmix(1,icur) << "  ";
-    
+
     cout << endl << " |         -13 " << setw(10)
          << ((mass(13) > 1e7) ? scientific : fixed) << mass(13)
          << fixed << "    ";
@@ -1162,19 +1130,19 @@ void SusyLesHouches::printSpectrum(int ifail) {
     cout << " |  H                   m";
     if (nmhmix.exists()) cout << "    H_10    H_20      S0";
     cout << endl;
-    
+
     cout << setprecision(3) << " |          25 " << setw(10)
          << ( (mass(25) > 1e7) ? scientific : fixed) << mass(25)
          << fixed << "  ";
     if (nmhmix.exists()) for (int icur=1;icur<=3;icur++)
                            cout << setw(6) << nmhmix(1,icur) << "  ";
-    
+
     cout << endl << " |          35 " << setw(10)
          << ( (mass(35) > 1e7) ? scientific : fixed) << mass(35)
          << fixed << "  ";
     if (nmhmix.exists()) for (int icur=1;icur<=3;icur++)
                            cout << setw(6) << nmhmix(2,icur) << "  ";
-    
+
     cout << endl << " |          45 " << setw(10)
          << ( (mass(45) > 1e7) ? scientific : fixed) << mass(45)
          << fixed << "  ";
@@ -1185,25 +1153,25 @@ void SusyLesHouches::printSpectrum(int ifail) {
     cout << " |  A                   m";
     if (nmamix.exists()) cout << "    H_10    H_20      S0";
     cout << endl;
-    
+
     cout << setprecision(3) << " |          36 " << setw(10)
          << ( (mass(36) > 1e7) ? scientific : fixed) << mass(36)
          << fixed << "  ";
     if (nmamix.exists()) for (int icur=1;icur<=3;icur++)
                            cout << setw(6) << nmamix(1,icur) << "  ";
-    
+
     cout << endl << " |          46 " << setw(10)
          << ( (mass(46) > 1e7) ? scientific : fixed) << mass(46)
          << fixed << "  ";
     if (nmamix.exists()) for (int icur=1;icur<=3;icur++)
                            cout << setw(6) << nmamix(2,icur) << "  ";
-    
+
     cout << endl <<" |"<<endl;
     cout << " |  H+                  m"<< endl;
-    
+
     cout << setprecision(3) << " |          37 " << setw(10)
          << ( (mass(37) > 1e7) ? scientific : fixed) << mass(37)<<endl;
-    
+
     cout << endl<<" |"<<endl;
   }
   // R-conserving MSSM (R-violating case handled above, with sneutrinos)
@@ -1220,11 +1188,11 @@ void SusyLesHouches::printSpectrum(int ifail) {
     cout << " |"<<endl;
     cout << " |     alpha     ";
     if (alpha.exists()) cout << setw(8) << alpha();
-    else cout << "  absent";    
+    else cout << "  absent";
     cout << endl<<" |"<<endl;
   }
   // Running Higgs parameters
-  if (hmix.exists()) { 
+  if (hmix.exists()) {
     cout << " |  Hmix "<<endl;
     cout << " |     mu        ";
     if (hmix.exists(1)) cout << setw(8) << hmix(1)
@@ -1296,7 +1264,7 @@ int SusyLesHouches::checkSpectrum() {
   if (!modsel.exists(5)) modsel.set(5,0);
   if (!modsel.exists(6)) modsel.set(6,0);
   if (!modsel.exists(11)) modsel.set(11,1);
-  
+
   // Step 2) Check for existence / duplication of blocks
 
   //Global
@@ -1344,7 +1312,7 @@ int SusyLesHouches::checkSpectrum() {
       message(1,"checkSpectrum","MSOFT not found",0);
     }
   }
-  
+
   //RPV (+ FLV)
   else if (modsel(4) != 0) {
     // Check for required SLHA2 blocks (or see if can be extracted from SLHA1)
@@ -1468,7 +1436,7 @@ int SusyLesHouches::checkSpectrum() {
       }
     }
   }
-  
+
   // FLV but not RPV (see above for FLV+RPV, below for FLV regardless of RPV)
   else if (modsel(6) != 0) {
     // Quark FLV
@@ -1498,7 +1466,7 @@ int SusyLesHouches::checkSpectrum() {
       }
     }
   }
-  
+
   // CPV
   if (modsel(5) != 0) {
     if (!cvhmix.exists()) {
@@ -1506,7 +1474,7 @@ int SusyLesHouches::checkSpectrum() {
       ifail=-1;
     }
   }
-  
+
   // FLV (regardless of whether RPV or not)
   if (modsel(6) != 0) {
     // Quark FLV
@@ -1555,7 +1523,7 @@ int SusyLesHouches::checkSpectrum() {
       }
     }
   }
-  
+
   // Step 3) SLHA1 --> SLHA2 interoperability
   //Note: the mass basis is NOT mass-ordered in SLHA1, so be careful!
   //Here, the mass basis is hence by PDG code, not by mass-ordered value.
@@ -1623,7 +1591,7 @@ int SusyLesHouches::checkSpectrum() {
       message(0,"checkSpectrum","Note: Neutralino sector is not mass-ordered"
               ,0);
     // Charginos
-    if (abs(mass(1000024)) > abs(mass(1000037))) 
+    if (abs(mass(1000024)) > abs(mass(1000037)))
       message(0,"checkSpectrum","Note: Chargino sector is not mass-ordered",0);
   }
 
@@ -1686,7 +1654,7 @@ int SusyLesHouches::checkSpectrum() {
         }
       }
     }
-    
+
   }
 
   //STOPMIX, SBOTMIX
@@ -1846,7 +1814,7 @@ int SusyLesHouches::checkSpectrum() {
               0);
     }
   }
-  
+
   //Check for documentation
   if (slhaRead && ! spinfo.exists(1)) spinfo.set(1,"unknown");
   if (slhaRead && ! spinfo.exists(2)) spinfo.set(2,"unknown");
@@ -1864,78 +1832,6 @@ int SusyLesHouches::checkSpectrum() {
 
   //Return
   return ifail;
-}
-
-//--------------------------------------------------------------------------
-
-// Check consistency of decay tables
-
-int SusyLesHouches::checkDecays() {
-
-  if (! headerPrinted) printHeader();
-  int iFailDecays=0;
-  
-  // Loop over all particles read in
-  for (int i = 0; i < int(decays.size()); ++i) {
-    
-    // Shorthand
-    LHdecayTable decTab = decays[i];
-    int idRes = decTab.getId();
-    double width = decTab.getWidth();
-    if (width <= 0.0 || decTab.size() == 0) continue;
-    
-    // Check sum of branching ratios and phase spaces
-    double sum = 0.0;
-    double absSum = 0.0;
-    int decSize = decTab.size();
-    for (int j = 0; j < decSize; ++j) {
-      
-      double brat = decTab.getBrat(j);
-      
-      // Check phase space
-      if (abs(brat) > 0.0) {
-        vector<int> idDa = decTab.getIdDa(j);
-        double massSum=abs(mass(idRes));
-        for (int k=0; k<int(idDa.size()); ++k) {
-          if (mass.exists(idDa[k])) massSum -= mass(abs(idDa[k]));
-          // If no MASS information read, use lowish values for check
-          else if (abs(idDa[k]) == 24) massSum -=  79.0;
-          else if (abs(idDa[k]) == 23) massSum -=  91.0;
-          else if (abs(idDa[k]) ==  6) massSum -= 165.0;
-          else if (abs(idDa[k]) ==  5) massSum -=   4.0;
-          else if (abs(idDa[k]) ==  4) massSum -=   1.0;
-        }
-        if (massSum < 0.0) {
-          // String containing decay name
-          ostringstream errCode;
-          errCode  <<  idRes  << " ->";
-          for (int jDa=0; jDa<int(idDa.size()); ++jDa)
-            errCode << " " << idDa[jDa];
-          message(1,"checkDecays",errCode.str()
-                  +": Phase Space Closed, but BR != 0");
-          iFailDecays = 1;
-        }
-        
-      }
-
-      // Sum up branching rations
-      sum += brat;
-      absSum += abs(brat);
-      
-    }
-
-    if (abs(1.0-absSum) > 1e-6) {
-      message(1,"checkDecays","sum(BR) != 1");
-      cout << " | offending particle: " << idRes << " sum(BR) = "
-           << absSum << endl;
-      iFailDecays = 2;
-    }
-    
-  }
-  // End of loop over particles. Done.
-  
-  return iFailDecays;
-
 }
 
 //--------------------------------------------------------------------------
@@ -1960,11 +1856,31 @@ void SusyLesHouches::message(int level, string place,string themessage,
   return;
 }
 
+//--------------------------------------------------------------------------
+
+// Convert string to lowercase for case-insensitive comparisons.
+// Also remove initial and trailing blanks and garbage characters, if any.
+// (eg removes DOS line break characters and similar)
+// Adapted from PYTHIA 8 Settings::toLower() method.
+
+void SusyLesHouches::toLower(string& name) {
+
+  // Copy string without initial and trailing blanks.
+  if (name.find_first_not_of(" \n\t\v\b\r\f\a") == string::npos) {
+    name = "";
+    return;
+  }
+  int firstChar = name.find_first_not_of(" \n\t\v\b\r\f\a");
+  int lastChar  = name.find_last_not_of(" \n\t\v\b\r\f\a");
+  string temp   = name.substr( firstChar, lastChar + 1 - firstChar);
+
+  // Convert to lowercase letter by letter.
+  for (int i = 0; i < int(temp.length()); ++i) temp[i] = tolower(temp[i]);
+  // Copy to input string and return
+  name=temp;
+
 }
 
 //==========================================================================
 
-
-
-
-
+} // end namespace Pythia8
