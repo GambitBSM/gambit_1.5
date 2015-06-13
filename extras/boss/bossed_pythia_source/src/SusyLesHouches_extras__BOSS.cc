@@ -36,6 +36,18 @@ int Pythia8::SusyLesHouches::readFile__BOSS(std::basic_istream<char,std::char_tr
 }
 
 
+int Pythia8::SusyLesHouches::readSLHAea__BOSS(int verboseIn)
+{
+    return readSLHAea(verboseIn);
+}
+
+
+int Pythia8::SusyLesHouches::readSLHAea__BOSS()
+{
+    return readSLHAea();
+}
+
+
 void Pythia8::SusyLesHouches::printSpectrum__BOSS()
 {
     printSpectrum();

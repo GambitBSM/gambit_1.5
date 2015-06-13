@@ -7,6 +7,57 @@
 #include "Pythia8/SusyLesHouches.h"
 #include "Pythia8/Streams.h"
 
+#define FILL_LHBLOCK(LHBLOCK, FILL_TYPE)   \
+      for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {  \
+        /* Add line to generic block (carbon copy of input structure) */  \
+        genericBlocks[blockName].set(lineIter->str());  \
+        if(!lineIter->is_data_line()) continue;  \
+        ifail = LHBLOCK.set(SLHAea::to<int>(lineIter->at(0)),  \
+                            SLHAea::to<FILL_TYPE>(lineIter->at(1)));  \
+        if (ifail == 1) {  \
+          message(0,"readSLHAea",blockName+" existing entry overwritten",0);  \
+        }  \
+      }
+
+#define FILL_STRING_LHBLOCK(LHBLOCK)   \
+      for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {  \
+        /* Add line to generic block (carbon copy of input structure) */  \
+        genericBlocks[blockName].set(lineIter->str());  \
+        if(!lineIter->is_data_line()) continue;  \
+        ifail = LHBLOCK.set(SLHAea::to<int>(lineIter->at(0)), lineIter->at(1));  \
+        if (ifail == 1) {  \
+          message(0,"readSLHAea",blockName+" existing entry overwritten",0);  \
+        }  \
+      }
+
+#define FILL_LHMATRIXBLOCK(LHMATRIXBLOCK)   \
+      for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {  \
+        /* Add line to generic block (carbon copy of input structure) */  \
+        genericBlocks[blockName].set(lineIter->str());  \
+        if(!lineIter->is_data_line()) continue;  \
+        ifail = LHMATRIXBLOCK.set(SLHAea::to<int>(lineIter->at(0)),  \
+                                  SLHAea::to<int>(lineIter->at(1)),  \
+                                  SLHAea::to<double>(lineIter->at(2)));  \
+        if (ifail == -1) {  \
+          message(0,"readSLHAea",blockName+" index out of range for matrix",0);  \
+        }  \
+      }
+
+#define FILL_LHTENSOR3BLOCK(LHTENSOR3BLOCK)   \
+      for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {  \
+        /* Add line to generic block (carbon copy of input structure) */  \
+        genericBlocks[blockName].set(lineIter->str());  \
+        if(!lineIter->is_data_line()) continue;  \
+        ifail = LHTENSOR3BLOCK.set(SLHAea::to<int>(lineIter->at(0)),  \
+                                   SLHAea::to<int>(lineIter->at(1)),  \
+                                   SLHAea::to<int>(lineIter->at(2)),  \
+                                   SLHAea::to<double>(lineIter->at(3)));  \
+        if (ifail == -1) {  \
+          message(0,"readSLHAea",blockName+" index out of range for tensor",0);  \
+        }  \
+      }
+
+
 namespace Pythia8 {
 
 //==========================================================================
@@ -20,6 +71,8 @@ namespace Pythia8 {
 int SusyLesHouches::readFile(string slhaFileIn, int verboseIn,
   bool useDecayIn) {
 
+  // If the slhaeaCollPtr is set, use readSLHAea instead.
+  if (slhaeaCollPtr) return readSLHAea(verboseIn, useDecayIn);
   slhaFile = slhaFileIn;
   // Check that input file is OK.
   const char* cstring = slhaFile.c_str();
@@ -635,8 +688,700 @@ int SusyLesHouches::readFile(istream& is, int verboseIn,
     return 102;
   }
   else return iFailFile;
+    
+}
+
+//--------------------------------------------------------------------------
+
+// Main routine to read in SLHA data from a SLHAea::Coll object
+
+int SusyLesHouches::readSLHAea(int verboseIn, bool useDecayIn) {
+
+  // Copy inputs to local
+  slhaFile = "SLHAea::Coll instance";
+  verboseSav = verboseIn;
+  useDecay = useDecayIn;
+
+  // Exit if SLHAea::Coll pointer not found.
+  if (!slhaeaCollPtr) {
+    message(2,"readSLHAea","has no SLHAea::Coll pointer",0);
+    return -1;
+    slhaRead=false;
+  }
+  if (verboseSav >= 3) {
+    message(0,"readSLHAea","parsing SLHAea::Coll instance",0);
+    filePrinted = true;
+  }
+
+  // Array of particles read in.
+  vector<int> idRead;
+
+  // Array of block names read in.
+  vector<string> processedBlocks;
+  
+  //Initial values for read-in variables.
+  slhaRead=true;
+  lhefRead=false;
+  lhefSlha=false;
+  /// @TODO Get other variables from the original function as needed
+  string newName, newAntiName;
+  int ifail;
+
+  // Read in one block at a time.
+  for (SLHAea::Coll::const_iterator blockIter = slhaeaCollPtr->begin(); blockIter != slhaeaCollPtr->end(); blockIter++) {
+
+    // Print header if not already done
+    if (! headerPrinted) printHeader();
+
+    const SLHAea::Block::const_iterator blockDefIter = blockIter->find_block_def();
+    string blockName = blockIter->name();
+    string blockType = blockDefIter->at(0);
+    toLower(blockName);
+    toLower(blockType);
+
+    if (blockName == "qnumbers") {    // QNUMBERS blocks (cf. arXiv:0712.3311 [hep-ph])
+      // ID code for new particle is the third entry of the block definition
+      const string pdgString = blockDefIter->at(2);
+      const string comment = blockDefIter->at(3).substr(1, blockDefIter->at(3).length()-1);
+
+      // Create new QNUMBERS LHblock with this code as zero'th entry
+      LHblock<int> newQnumbers;
+      newQnumbers.set(0, SLHAea::to<int>(pdgString));
+
+      // Default name: PDG code
+      ostringstream idStream;
+      idStream << newQnumbers(0);
+      const string defName = idStream.str();
+      const string defAntiName = "-"+defName;
+      newName = defName;
+      newAntiName = defAntiName;
+
+      // Attempt to extract names from comment string
+      if (comment.length() >= 1) {
+        int firstCommentBeg(0), firstCommentEnd(0);
+        if ( comment.find(" ") == 0) firstCommentBeg = 1;
+        if ( comment.find(" ",firstCommentBeg+1) == string::npos)
+          firstCommentEnd = comment.length();
+        else
+          firstCommentEnd = comment.find(" ",firstCommentBeg+1);
+        if (firstCommentEnd > firstCommentBeg)
+          newName = comment.substr(firstCommentBeg,
+                                   firstCommentEnd-firstCommentBeg);
+        // Now see if there is a separate name for antiparticle
+        int secondCommentBeg(firstCommentEnd+1), secondCommentEnd(0);
+        if (secondCommentBeg < int(comment.length())) {
+          if ( comment.find(" ",secondCommentBeg+1) == string::npos)
+            secondCommentEnd = comment.length();
+          else
+            secondCommentEnd = comment.find(" ",secondCommentBeg+1);
+          if (secondCommentEnd > secondCommentBeg)
+            newAntiName = comment.substr(secondCommentBeg,
+                                         secondCommentEnd-secondCommentBeg);
+        }
+      }
+
+      // If name given without specific antiname, set antiname to ""
+      if (newName != defName && newAntiName == defAntiName) newAntiName = "";
+      qnumbersName.push_back(newName);
+      qnumbersAntiName.push_back(newAntiName);
+      if (pdgString != newName) {
+        message(0,"readSLHAea","storing QNUMBERS for id = "+pdgString+" "
+                +newName+" "+newAntiName,0);
+      } else {
+        message(0,"readSLHAea","storing QNUMBERS for id = "+pdgString,0);
+      }
+
+      // Fill in the rest of the QNUMBERS info
+      FILL_LHBLOCK(newQnumbers, int)
+
+      // Add this new QNUMBERS block to the vector member within SusyLesHouches
+      qnumbers.push_back(newQnumbers);
+
+    } else if (blockType == "block") {    // Generic blocks
+      // Skip if several copies of same block 
+      // (facility to use interpolation of different q= not implemented)
+      // only first copy of a given block type is kept
+      bool exists = false;
+      for (int i=0; i<int(processedBlocks.size()); ++i) {
+        if (blockName == processedBlocks[i]) {exists = true; break;}
+      }
+      if (exists) {
+        message(0,"readSLHAea","skipping copy of block "+blockName,0);
+        continue;
+      }
+      processedBlocks.push_back(blockName);
+      // Copy input file as generic blocks (containing strings)
+      // (more will be done with SLHA1 & 2 specific blocks below, this is
+      //  just to make sure we have a complete copy of the input file,
+      //  including also any unknown/user/generic blocks)
+      LHgenericBlock gBlock;
+      genericBlocks[blockName]=gBlock;
+
+      //Find Q=... for DRbar running blocks
+      if (blockDefIter->data_size() > 3
+          && (blockDefIter->at(2) == "q=" || blockDefIter->at(2) == "q=")) {
+        const double q = SLHAea::to<double>(blockDefIter->at(3));
+        // SLHA1 running blocks
+        if (blockName=="hmix") hmix.setq(q);
+        else if (blockName=="yu") yu.setq(q);
+        else if (blockName=="yd") yd.setq(q);
+        else if (blockName=="ye") ye.setq(q);
+        else if (blockName=="au") au.setq(q);
+        else if (blockName=="ad") ad.setq(q);
+        else if (blockName=="ae") ae.setq(q);
+        else if (blockName=="msoft") msoft.setq(q);
+        else if (blockName=="gauge") gauge.setq(q);
+        // SLHA2 running blocks
+        else if (blockName=="vckm") vckm.setq(q);
+        else if (blockName=="upmns") upmns.setq(q);
+        else if (blockName=="msq2") msq2.setq(q);
+        else if (blockName=="msu2") msu2.setq(q);
+        else if (blockName=="msd2") msd2.setq(q);
+        else if (blockName=="msl2") msl2.setq(q);
+        else if (blockName=="mse2") mse2.setq(q);
+        else if (blockName=="tu") tu.setq(q);
+        else if (blockName=="td") td.setq(q);
+        else if (blockName=="te") te.setq(q);
+        else if (blockName=="rvlamlle") rvlamlle.setq(q);
+        else if (blockName=="rvlamlqd") rvlamlqd.setq(q);
+        else if (blockName=="rvlamudd") rvlamudd.setq(q);
+        else if (blockName=="rvtlle") rvtlle.setq(q);
+        else if (blockName=="rvtlqd") rvtlqd.setq(q);
+        else if (blockName=="rvtudd") rvtudd.setq(q);
+        else if (blockName=="rvkappa") rvkappa.setq(q);
+        else if (blockName=="rvd") rvd.setq(q);
+        else if (blockName=="rvm2lh1") rvm2lh1.setq(q);
+        else if (blockName=="rvsnvev") rvsnvev.setq(q);
+        else if (blockName=="imau") imau.setq(q);
+        else if (blockName=="imad") imad.setq(q);
+        else if (blockName=="imae") imae.setq(q);
+        else if (blockName=="imhmix") imhmix.setq(q);
+        else if (blockName=="immsoft") immsoft.setq(q);
+        else if (blockName=="imtu") imtu.setq(q);
+        else if (blockName=="imtd") imtd.setq(q);
+        else if (blockName=="imte") imte.setq(q);
+        else if (blockName=="imvckm") imvckm.setq(q);
+        else if (blockName=="imupmns") imupmns.setq(q);
+        else if (blockName=="immsq2") immsq2.setq(q);
+        else if (blockName=="immsu2") immsu2.setq(q);
+        else if (blockName=="immsd2") immsd2.setq(q);
+        else if (blockName=="immsl2") immsl2.setq(q);
+        else if (blockName=="immse2") immse2.setq(q);
+        else if (blockName=="nmssmrun") nmssmrun.setq(q);
+        else message(0,"readSLHAea",blockName+" ignoring Q scale",0);  \
+      }
+
+      // MODEL
+      if (blockName == "modsel") {
+        ifail = -1;
+        try {
+          ifail = modsel12.set(0, SLHAea::to<double>(blockIter->at(12).at(1)));
+        } catch (std::out_of_range& e) {}
+
+        try {
+          ifail = modsel21.set(0, SLHAea::to<int>(blockIter->at(21).at(1)));
+        } catch (std::out_of_range& e) {}
+
+        try {
+          ifail = modsel.set(0, SLHAea::to<int>(blockIter->at(1).at(1)));
+        } catch (std::out_of_range& e) {}
+
+        if (ifail == -1) {
+          message(1,"readFile","read error or empty line",0);
+        }
+        if (ifail == 1) {
+          message(0,"readFile",blockName+" existing entry overwritten",0);
+        }
+      }
+
+      // MODEL PARAMETERS
+      else if (blockName == "minpar") {
+        FILL_LHBLOCK(minpar, double)
+      }
+      else if (blockName == "sminputs") {
+        FILL_LHBLOCK(sminputs, double)
+      }
+      else if (blockName == "extpar") {
+        FILL_LHBLOCK(extpar, double)
+      }
+      else if (blockName == "qextpar") {
+        FILL_LHBLOCK(qextpar, double)
+      }
+      //FLV
+      else if (blockName == "vckmin") {
+        FILL_LHBLOCK(vckmin, double)
+      }
+      else if (blockName == "upmnsin") {
+        FILL_LHBLOCK(upmnsin, double)
+      }
+      else if (blockName == "msq2in") {
+        FILL_LHMATRIXBLOCK(msq2in)
+      }
+      else if (blockName == "msu2in") {
+        FILL_LHMATRIXBLOCK(msu2in)
+      }
+      else if (blockName == "msd2in") {
+        FILL_LHMATRIXBLOCK(msd2in)
+      }
+      else if (blockName == "msl2in") {
+        FILL_LHMATRIXBLOCK(msl2in)
+      }
+      else if (blockName == "mse2in") {
+        FILL_LHMATRIXBLOCK(mse2in)
+      }
+      else if (blockName == "tuin") {
+        FILL_LHMATRIXBLOCK(tuin)
+      }
+      else if (blockName == "tdin") {
+        FILL_LHMATRIXBLOCK(tdin)
+      }
+      else if (blockName == "tein") {
+        FILL_LHMATRIXBLOCK(tein)
+      }
+      //RPV
+      else if (blockName == "rvlamllein") {
+        FILL_LHTENSOR3BLOCK(rvlamllein)
+      }
+      else if (blockName == "rvlamlqdin") {
+        FILL_LHTENSOR3BLOCK(rvlamlqdin)
+      }
+      else if (blockName == "rvlamuddin") {
+        FILL_LHTENSOR3BLOCK(rvlamuddin)
+      }
+      else if (blockName == "rvtllein") {
+        FILL_LHTENSOR3BLOCK(rvtllein)
+      }
+      else if (blockName == "rvtlqdin") {
+        FILL_LHTENSOR3BLOCK(rvtlqdin)
+      }
+      else if (blockName == "rvtuddin") {
+        FILL_LHTENSOR3BLOCK(rvtuddin)
+      }
+      else if (blockName == "rvkappain") {
+        FILL_LHBLOCK(rvkappain, double)
+      }
+      else if (blockName == "rvdin") {
+        FILL_LHBLOCK(rvdin, double)
+      }
+      else if (blockName == "rvm2lh1in") {
+        FILL_LHBLOCK(rvm2lh1in, double)
+      }
+      else if (blockName == "rvsnvevin") {
+        FILL_LHBLOCK(rvsnvevin, double)
+      }
+      //CPV
+      else if (blockName == "imminpar") {
+        FILL_LHBLOCK(imminpar, double)
+      }
+      else if (blockName == "imextpar") {
+        FILL_LHBLOCK(imextpar, double)
+      }
+      //CPV +FLV
+      else if (blockName == "immsq2in") {
+        FILL_LHMATRIXBLOCK(immsq2in)
+      }
+      else if (blockName == "immsu2in") {
+        FILL_LHMATRIXBLOCK(immsu2in)
+      }
+      else if (blockName == "immsd2in") {
+        FILL_LHMATRIXBLOCK(immsd2in)
+      }
+      else if (blockName == "immsl2in") {
+        FILL_LHMATRIXBLOCK(immsl2in)
+      }
+      else if (blockName == "immse2in") {
+        FILL_LHMATRIXBLOCK(immse2in)
+      }
+      else if (blockName == "imtuin") {
+        FILL_LHMATRIXBLOCK(imtuin)
+      }
+      else if (blockName == "imtdin") {
+        FILL_LHMATRIXBLOCK(imtdin)
+      }
+      else if (blockName == "imtein") {
+        FILL_LHMATRIXBLOCK(imtein)
+      }
+      //Info:
+      else if (blockName == "spinfo" || blockName=="dcinfo") {
+        const string blockStr = (blockName=="dcinfo") ? "DCY" : "RGE";
+
+        for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {
+          /* Add line to generic block (carbon copy of input structure) */
+          genericBlocks[blockName].set(lineIter->str());
+
+          if(!lineIter->is_data_line()) continue;
+          ifail = 0;
+
+          try {
+            const int i = SLHAea::to<int>(lineIter->at(0));
+            string entry = lineIter->at(1);
+
+            if (i == 3) {
+              message(1,"readSLHAea","(from "+blockStr+" program): "+entry,0);
+              if (blockName == "spinfo") spinfo3.set(entry); // type string
+              else dcinfo3.set(entry); // type string
+            } else if (i==4) {
+              message(2,"readSLHAea","(from "+blockStr+" program): "+entry,0);
+              if (blockName == "spinfo") spinfo4.set(entry); // type string
+              else dcinfo4.set(entry); // type string
+            } else {
+              //Rewrite string in uppercase
+              for (unsigned int j=0; j<entry.length(); j++)
+                entry[j] = toupper(entry[j]);
+              ifail = (blockName=="spinfo") ? spinfo.set(i,entry)
+                      : dcinfo.set(i,entry); // type string
+            }
+          } catch (std::bad_cast& e) {
+            ifail=-1;
+          }
+
+          if (ifail == -1) {
+            message(1,"readSLHAea",blockName+" reading error",0);
+          }
+          if (ifail == 1) {
+            message(0,"readSLHAea",blockName+" existing entry overwritten",0);
+          }
+        }
+      }
+      //SPECTRUM
+      //Pole masses
+      else if (blockName == "mass") {
+        FILL_LHBLOCK(mass, double)
+      }
+
+      //Mixing
+      else if (blockName == "alpha") {
+        for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {
+          /* Add line to generic block (carbon copy of input structure) */
+          genericBlocks[blockName].set(lineIter->str());
+
+          if(!lineIter->is_data_line()) continue;
+          ifail = alpha.set(0, SLHAea::to<double>(lineIter->at(1)));
+          if (ifail == 1) {
+            message(0,"readSLHAea",blockName+" existing entry overwritten",0);
+          }
+        }
+      }
+      else if (blockName == "stopmix") {
+        FILL_LHMATRIXBLOCK(stopmix)
+      }
+      else if (blockName == "sbotmix") {
+        FILL_LHMATRIXBLOCK(sbotmix)
+      }
+      else if (blockName == "staumix") {
+        FILL_LHMATRIXBLOCK(staumix)
+      }
+      else if (blockName == "nmix") {
+        FILL_LHMATRIXBLOCK(nmix)
+      }
+      else if (blockName == "umix") {
+        FILL_LHMATRIXBLOCK(umix)
+      }
+      else if (blockName == "vmix") {
+        FILL_LHMATRIXBLOCK(vmix)
+      }
+      //FLV
+      else if (blockName == "usqmix") {
+        FILL_LHMATRIXBLOCK(usqmix)
+      }
+      else if (blockName == "dsqmix") {
+        FILL_LHMATRIXBLOCK(dsqmix)
+      }
+      else if (blockName == "selmix") {
+        FILL_LHMATRIXBLOCK(selmix)
+      }
+      else if (blockName == "snumix") {
+        FILL_LHMATRIXBLOCK(snumix)
+      }
+      else if (blockName == "snsmix") {
+        FILL_LHMATRIXBLOCK(snsmix)
+      }
+      else if (blockName == "snamix") {
+        FILL_LHMATRIXBLOCK(snamix)
+      }
+      //RPV
+      else if (blockName == "rvnmix") {
+        FILL_LHMATRIXBLOCK(rvnmix)
+      }
+      else if (blockName == "rvumix") {
+        FILL_LHMATRIXBLOCK(rvumix)
+      }
+      else if (blockName == "rvvmix") {
+        FILL_LHMATRIXBLOCK(rvvmix)
+      }
+      else if (blockName == "rvhmix") {
+        FILL_LHMATRIXBLOCK(rvhmix)
+      }
+      else if (blockName == "rvamix") {
+        FILL_LHMATRIXBLOCK(rvamix)
+      }
+      else if (blockName == "rvlmix") {
+        FILL_LHMATRIXBLOCK(rvlmix)
+      }
+      //CPV
+      else if (blockName == "cvhmix") {
+        FILL_LHMATRIXBLOCK(cvhmix)
+      }
+      else if (blockName == "imcvhmix") {
+        FILL_LHMATRIXBLOCK(imcvhmix)
+      }
+      //CPV + FLV
+      else if (blockName == "imusqmix") {
+        FILL_LHMATRIXBLOCK(imusqmix)
+      }
+      else if (blockName == "imdsqmix") {
+        FILL_LHMATRIXBLOCK(imdsqmix)
+      }
+      else if (blockName == "imselmix") {
+        FILL_LHMATRIXBLOCK(imselmix)
+      }
+      else if (blockName == "imsnumix") {
+        FILL_LHMATRIXBLOCK(imsnumix)
+      }
+      else if (blockName == "imnmix") {
+        FILL_LHMATRIXBLOCK(imnmix)
+      }
+      else if (blockName == "imumix") {
+        FILL_LHMATRIXBLOCK(imumix)
+      }
+      else if (blockName == "imvmix") {
+        FILL_LHMATRIXBLOCK(imvmix)
+      }
+      //NMSSM
+      else if (blockName == "nmhmix") {
+        FILL_LHMATRIXBLOCK(nmhmix)
+      }
+      else if (blockName == "nmamix") {
+        FILL_LHMATRIXBLOCK(nmamix)
+      }
+      else if (blockName == "nmnmix") {
+        FILL_LHMATRIXBLOCK(nmnmix)
+      }
+      
+      //DRbar Lagrangian parameters
+      else if (blockName == "gauge") {
+        FILL_LHBLOCK(gauge, double)
+      }
+      else if (blockName == "yu") {
+        FILL_LHMATRIXBLOCK(yu)
+      }
+      else if (blockName == "yd") {
+        FILL_LHMATRIXBLOCK(yd)
+      }
+      else if (blockName == "ye") {
+        FILL_LHMATRIXBLOCK(ye)
+      }
+      else if (blockName == "au") {
+        FILL_LHMATRIXBLOCK(au)
+      }
+      else if (blockName == "ad") {
+        FILL_LHMATRIXBLOCK(ad)
+      }
+      else if (blockName == "ae") {
+        FILL_LHMATRIXBLOCK(ae)
+      }
+      else if (blockName == "hmix") {
+        FILL_LHBLOCK(hmix, double)
+      }
+      else if (blockName == "msoft") {
+        FILL_LHBLOCK(msoft, double)
+      }
+      //FLV
+      else if (blockName == "vckm") {
+        FILL_LHMATRIXBLOCK(vckm)
+      }
+      else if (blockName == "upmns") {
+        FILL_LHMATRIXBLOCK(upmns)
+      }
+      else if (blockName == "msq2") {
+        FILL_LHMATRIXBLOCK(msq2)
+      }
+      else if (blockName == "msu2") {
+        FILL_LHMATRIXBLOCK(msu2)
+      }
+      else if (blockName == "msd2") {
+        FILL_LHMATRIXBLOCK(msd2)
+      }
+      else if (blockName == "msl2") {
+        FILL_LHMATRIXBLOCK(msl2)
+      }
+      else if (blockName == "mse2") {
+        FILL_LHMATRIXBLOCK(mse2)
+      }
+      else if (blockName == "tu") {
+        FILL_LHMATRIXBLOCK(tu)
+      }
+      else if (blockName == "td") {
+        FILL_LHMATRIXBLOCK(td)
+      }
+      else if (blockName == "te") {
+        FILL_LHMATRIXBLOCK(te)
+      }
+      //RPV
+      else if (blockName == "rvlamlle") {
+        FILL_LHTENSOR3BLOCK(rvlamlle)
+      }
+      else if (blockName == "rvlamlqd") {
+        FILL_LHTENSOR3BLOCK(rvlamlqd)
+      }
+      else if (blockName == "rvlamudd") {
+        FILL_LHTENSOR3BLOCK(rvlamudd)
+      }
+      else if (blockName == "rvtlle") {
+        FILL_LHTENSOR3BLOCK(rvtlle)
+      }
+      else if (blockName == "rvtlqd") {
+        FILL_LHTENSOR3BLOCK(rvtlqd)
+      }
+      else if (blockName == "rvtudd") {
+        FILL_LHTENSOR3BLOCK(rvtudd)
+      }
+      else if (blockName == "rvkappa") {
+        FILL_LHBLOCK(rvkappa, double)
+      }
+      else if (blockName == "rvd") {
+        FILL_LHBLOCK(rvd, double)
+      }
+      else if (blockName == "rvm2lh1") {
+        FILL_LHBLOCK(rvm2lh1, double)
+      }
+      else if (blockName == "rvsnvev") {
+        FILL_LHBLOCK(rvsnvev, double)
+      }
+      //CPV
+      else if (blockName == "imau") {
+        FILL_LHMATRIXBLOCK(imau)
+      }
+      else if (blockName == "imad") {
+        FILL_LHMATRIXBLOCK(imad)
+      }
+      else if (blockName == "imae") {
+        FILL_LHMATRIXBLOCK(imae)
+      }
+      else if (blockName == "imhmix") {
+        FILL_LHBLOCK(imhmix, double)
+      }
+      else if (blockName == "immsoft") {
+        FILL_LHBLOCK(immsoft, double)
+      }
+      //CPV+FLV
+      else if (blockName == "imvckm") {
+        FILL_LHMATRIXBLOCK(imvckm)
+      }
+      else if (blockName == "imupmns") {
+        FILL_LHMATRIXBLOCK(imupmns)
+      }
+      else if (blockName == "immsq2") {
+        FILL_LHMATRIXBLOCK(immsq2)
+      }
+      else if (blockName == "immsu2") {
+        FILL_LHMATRIXBLOCK(immsu2)
+      }
+      else if (blockName == "immsd2") {
+        FILL_LHMATRIXBLOCK(immsd2)
+      }
+      else if (blockName == "immsl2") {
+        FILL_LHMATRIXBLOCK(immsl2)
+      }
+      else if (blockName == "immse2") {
+        FILL_LHMATRIXBLOCK(immse2)
+      }
+      else if (blockName == "imtu") {
+        FILL_LHMATRIXBLOCK(imtu)
+      }
+      else if (blockName == "imtd") {
+        FILL_LHMATRIXBLOCK(imtd)
+      }
+      else if (blockName == "imte") {
+        FILL_LHMATRIXBLOCK(imte)
+      }
+      //NMSSM
+      else if (blockName == "nmssmrun") {
+        FILL_LHBLOCK(nmssmrun, double)
+      }
+      else message(0,"readSLHAea","storing non-SLHA(2) block: "+blockName,0);
+
+
+    } else if (blockType == "decay") {    // Decay blocks
+
+      //Ignore decay if decay table read-in switched off
+      if( !useDecay ) {
+        message(0,"readSLHAea","ignoring DECAY table for "+blockName
+                +" (DECAY read-in switched off)",0);
+        continue;
+      }
+
+      //Extract PDG code and width
+      int idDecay = 0;
+      double width = -1.;
+      try {
+        idDecay = SLHAea::to<int>(blockName);
+        width = SLHAea::to<double>(blockDefIter->at(2));
+      } catch (std::bad_cast& e) {
+        message(0,"readFile",
+                "PDG Code or decay width unreadable. Ignoring this DECAY block",0);
+        continue;
+      }
+
+      //Set PDG code and width
+      if (width <= 0.0) {
+        if (verboseSav >= 2)
+          message(0,"readSLHAea","reading stable particle "+blockName
+                  +"(forced width < 0 to zero)",0);
+        decays.push_back(LHdecayTable(idDecay, 0.0));
+        continue;
+      } else if (blockIter->data_size() == 0) {
+        if (verboseSav >= 2) message(0,"readSLHAea","reading WIDTH for "+blockName
+                +" (but no decay channels found)",0);
+        decays.push_back(LHdecayTable(idDecay, 0.0));
+        continue;
+      } else {
+        decays.push_back(LHdecayTable(idDecay, width));
+      }
+      decayIndices[idDecay] = decays.size() - 1;
+
+      //Print verbosely
+      if (verboseSav >= 2)
+        message(0,"readSLHAea","reading  DECAY table for "+blockName,0);
+
+      //Extract and set the decay channels and branching ratios
+      for(SLHAea::Block::const_iterator lineIter = blockIter->begin(); lineIter != blockIter->end(); lineIter++) {
+        if(!lineIter->is_data_line()) continue;
+        vector<int> idDa;
+        int nDa = 0;
+        double brat = -1.;
+        try {
+          brat = SLHAea::to<double>(lineIter->at(0));
+          nDa = SLHAea::to<int>(lineIter->at(1));
+          for (int i=0; i<nDa; i++) {
+            const int idThis = SLHAea::to<int>(lineIter->at(2+i));
+            idDa.push_back(idThis);
+          }
+        } catch (std::bad_cast& e) {
+          // Stop reading decay line for bad decay data
+          message(1,"readSLHAea","read error... ignoring decay channel",0);
+        }
+
+        if(nDa < 2) {
+          // Stop reading decay line for bad decay data
+          message(1,"readSLHAea","Not enough daughters... ignoring decay channel",0);
+        } else {
+          // Append decay channel.
+          decays[decayIndices[idDecay]].addChannel(brat,nDa,idDa);
+        }
+      }
+    }
+
+  }
+
+
+  //Print footer
+  printFooter();
+
+  return 0;
 
 }
+
 
 //--------------------------------------------------------------------------
 

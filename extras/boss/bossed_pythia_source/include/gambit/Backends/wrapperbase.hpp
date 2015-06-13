@@ -42,7 +42,7 @@ class WrapperBase
         }
 
         // Destructor
-        ~WrapperBase()
+        virtual ~WrapperBase()
         {
             if (not skip_delete)
             {
