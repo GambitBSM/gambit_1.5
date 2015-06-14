@@ -15,30 +15,35 @@ import modules.cfg as cfg
 
 boss_temp_dir = 'temp'
 
-new_code              = OrderedDict()
-xml_file_name         = ''
+new_code                = OrderedDict()
+xml_file_name           = ''
 
-id_dict               = OrderedDict()
-all_id_dict           = OrderedDict()
-name_dict             = OrderedDict()
-all_name_dict         = OrderedDict()
+id_dict                 = OrderedDict()
+all_id_dict             = OrderedDict()
+name_dict               = OrderedDict()
+all_name_dict           = OrderedDict()
 
-file_dict             = OrderedDict()
-all_classes_dict      = OrderedDict()
-std_types_dict        = OrderedDict()
-typedef_dict          = OrderedDict()
-class_dict            = OrderedDict()
-loaded_classes_in_xml = OrderedDict()
-func_dict             = OrderedDict()
-new_header_files      = OrderedDict()
-accepted_types        = [] 
-std_headers_used      = []
-original_file_paths   = OrderedDict()
-functions_done        = []
-n_functions_done      = 0
-classes_done          = []
-n_classes_done        = 0
-factory_info          = OrderedDict()
+file_dict               = OrderedDict()
+all_classes_dict        = OrderedDict()
+std_types_dict          = OrderedDict()
+typedef_dict            = OrderedDict()
+class_dict              = OrderedDict()
+loaded_classes_in_xml   = OrderedDict()
+func_dict               = OrderedDict()
+new_header_files        = OrderedDict()
+accepted_types          = [] 
+std_headers_used        = []
+original_file_paths     = OrderedDict()
+
+functions_done          = []
+classes_done            = []
+
+factory_info            = OrderedDict()
+class_factory_file_dict = OrderedDict()
+
+function_file_dict      = OrderedDict()
+wr_func_names           = OrderedDict()
+
 
 gambit_backend_namespace    = 'CAT_3(BACKENDNAME,_,SAFE_VERSION)'
 gambit_backend_safeversion  = cfg.gambit_backend_version.replace('.','_')
@@ -46,6 +51,9 @@ gambit_backend_name_full    = cfg.gambit_backend_name + '_' + gambit_backend_saf
 
 gambit_backend_types_basedir = 'backend_types'
 gambit_backend_dir_complete  = os.path.join(cfg.extra_output_dir, gambit_backend_types_basedir, gambit_backend_name_full) 
+
+gambit_frontend_base_dir = 'frontends'
+gambit_frontend_dir_complete = os.path.join(cfg.extra_output_dir, gambit_frontend_base_dir) 
 
 gambit_backend_incl_dir = 'gambit/Backends/'
 gambit_utils_incl_dir   = 'gambit/Utils/'
@@ -62,6 +70,8 @@ wrapper_typedefs_fname  = 'wrappertypedefs'
 abstract_typedefs_fname = 'abstracttypedefs'
 enum_decls_wrp_fname    = 'enum_decl_copies'
 
+frontend_fname          = gambit_backend_name_full + '.hpp'
+frontend_path           = os.path.join(gambit_frontend_dir_complete, frontend_fname)
 
 # Dictionary of what names to use for various operator symbols
 operator_names = {

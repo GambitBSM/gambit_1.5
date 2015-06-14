@@ -64,8 +64,8 @@ loaded_classes = [
                  ]
 
 loaded_functions = [
-                      'Pythia8::m2(Pythia8::Wave4, Pythia8::Wave4)',
-                      'Pythia8::m2(Pythia8::Particle const&, Pythia8::Particle const&)',
+                      # 'Pythia8::m2(Pythia8::Wave4, Pythia8::Wave4)',
+                      # 'Pythia8::m2(Pythia8::Particle const&, Pythia8::Particle const&)',
                    ]
 
 ditch = [
@@ -82,7 +82,7 @@ source_extension = '.cc'
 
 indent = 4
 
-extra_output_dir       = 'pythia_BOSS_output'
+extra_output_dir       = 'pythia_BOSS_output_TEMP'
 abstr_header_prefix    = 'abstract_'
 wrapper_header_prefix  = 'wrapper_'
 factory_file_prefix    = 'factory_'
@@ -93,7 +93,12 @@ function_files_prefix  = 'function_'
 
 std_include_paths  = ['/usr/include/']
 
+known_classes = [
+                   'SLHAea::Coll',
+                ]
+
 known_class_headers = {
+    "SLHAea::Coll'"          : "SLHAea/slhaea.h",
     "std::array"             : "<array>", 
     "std::vector"            : "<vector>", 
     "std::deque"             : "<deque>", 
