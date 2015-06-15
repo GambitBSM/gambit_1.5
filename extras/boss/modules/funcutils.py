@@ -25,7 +25,7 @@ def getArgs(func_el):
     # Each dict contains the following keywords:
     # 
     #   'name', 'type', 'kw', 'id', 'native', 'fundamental', 'enumeration', 'loaded_class',
-    #   'type_namespaces', 'default', 'function_pointer'
+    #   'known_class', 'type_namespaces', 'default', 'function_pointer'
     #
 
     args = []
@@ -59,6 +59,7 @@ def getArgs(func_el):
             arg_dict['fundamental'] = utils.isFundamental(arg_type_el)
             arg_dict['enumeration'] = utils.isEnumeration(arg_type_el)
             arg_dict['loaded_class'] = utils.isLoadedClass(arg_type_el)
+            arg_dict['known_class'] = utils.isKnownClass(arg_type_el)
             arg_dict['type_namespaces'] = utils.getNamespaces(arg_type_el)
 
             if 'default' in sub_el.keys():
@@ -146,7 +147,11 @@ def constrArgsBracket(args, include_arg_name=True, include_arg_type=True, includ
 
                 else:
                     if include_namespace:
-                        args_seq += arg_dict['type']
+                        # If known class, add '::' for absolute namespace
+                        if arg_dict['known_class']:
+                            args_seq += '::' + arg_dict['type']                       
+                        else:
+                            args_seq += arg_dict['type']
                     else:
                         args_seq += utils.removeNamespace(arg_dict['type'])
 

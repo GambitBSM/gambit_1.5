@@ -10,6 +10,7 @@ from operator import itemgetter
 import os
 import warnings
 import subprocess
+import copy
 
 import modules.cfg as cfg
 import modules.gb as gb
@@ -68,7 +69,7 @@ def isLoadable(class_el, print_warning=False):
     if not isComplete(class_el):
         is_loadable = False
         if print_warning:
-            reason = "Class is incomplete, at least based on this XML file."
+            reason = "Class is incomplete, at least based on XML file %s" % (gb.xml_file_name)
             infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
         return is_loadable
 
@@ -99,6 +100,33 @@ def isFundamental(el):
     return is_fundamental
 
 # ====== END: isFundamental ========
+
+
+
+# ====== isKnownClass ========
+
+def isKnownClass(el):
+
+    import modules.classutils as classutils
+    
+    is_known = False
+
+    type_dict = findType(el)
+    type_el = type_dict['el']
+
+    # - Any known class should have a "name" XML entry
+    if not 'name' in type_el.keys():
+        is_known = False
+        return is_known
+
+    class_name = classutils.getClassNameDict(type_el) 
+
+    if class_name['long_templ'] in cfg.known_classes:
+        is_known = True
+
+    return is_known
+
+# ====== END: isKnownClass ========
 
 
 
@@ -1474,6 +1502,10 @@ def getAllTypesInFunction(func_el):
 
 def constrNamespace(namespaces, open_or_close, indent=cfg.indent):
 
+    if len(namespaces) > 0:
+        if namespaces[0] == '::':
+            namespaces = namespaces[1:]
+
     code = ''
 
     if open_or_close == 'open':
@@ -2208,25 +2240,27 @@ def fillAcceptedTypesList():
 
     # Sets to store type names
     fundamental_types = set()
-    enumeration_types = set()
     std_types         = set()
+    known_classes     = set()
+    # enumeration_types = set()
     loaded_classes    = set()
 
 
     #
-    # Collect names of all fundamental, std, enumeration and loaded types that are acceptable
+    # Collect names of all fundamental, std, enumeration, known and loaded types that are acceptable
     #
-    for current_xml_file in gb.all_id_dict.keys():
+    for xml_file in gb.all_id_dict.keys():
 
         # Reset some variables for each new xml file
-        new_std_types           = set()
         new_fundamental_types   = set()
-        new_enumeration_types   = set()
+        new_std_types           = set()
+        new_known_classes       = set()
+        # new_enumeration_types   = set()
         new_loaded_classes      = set()
 
-        # Set the global dicts for the current xml file
-        gb.id_dict   = gb.all_id_dict[current_xml_file]
-        gb.name_dict = gb.all_name_dict[current_xml_file]
+
+        initGlobalXMLdicts(xml_file)
+
 
         # Loop over all named elements in the xml file
         for full_name, el in gb.name_dict.items():
@@ -2258,11 +2292,19 @@ def fillAcceptedTypesList():
                 new_std_types.add(full_name)
 
             #
-            # Enumeration type?
+            # Known class?
             #
-            is_enumeration = isEnumeration(el)
-            if is_enumeration:
-                new_enumeration_types.add( '::'.join( getNamespaces(el, include_self=True) ) )
+            is_known_class = isKnownClass(el)
+            if is_known_class:
+                new_known_classes.add(full_name)
+
+
+            # #
+            # # Enumeration type?
+            # #
+            # is_enumeration = isEnumeration(el)
+            # if is_enumeration:
+            #     new_enumeration_types.add( '::'.join( getNamespaces(el, include_self=True) ) )
 
             #
             # Loaded type?
@@ -2277,12 +2319,14 @@ def fillAcceptedTypesList():
             #
             fundamental_types = fundamental_types.union(new_fundamental_types)
             std_types         = std_types.union(new_std_types)
-            enumeration_types = enumeration_types.union(new_enumeration_types)
+            known_classes     = known_classes.union(new_known_classes)
+            # enumeration_types = enumeration_types.union(new_enumeration_types)
             loaded_classes    = loaded_classes.union(new_loaded_classes)
 
 
     # Fill global list
-    gb.accepted_types = list(loaded_classes) + list(fundamental_types) + list(std_types) + list(enumeration_types)
+    gb.accepted_types = list(loaded_classes) + list(known_classes) + list(fundamental_types) + list(std_types)
+    # gb.accepted_types = list(loaded_classes) + list(fundamental_types) + list(std_types) + list(enumeration_types)
 
 # ====== END: fillAcceptedTypesList ========
 
@@ -2307,7 +2351,7 @@ def fillAcceptedTypesList():
 #     #
 #     # Get names of all fundamental, std and enumeration types
 #     #
-#     for current_xml_file in xml_files:
+#     for xml_file in xml_files:
 
 #         # Reset some variables for each new xml file
 #         new_std_types           = set()
@@ -2318,7 +2362,7 @@ def fillAcceptedTypesList():
 
 
 #         # Parse xml file using ElementTree
-#         tree = ET.parse(current_xml_file)
+#         tree = ET.parse(xml_file)
 #         root = tree.getroot()
 
 #         # Set the global xml id dict. (Needed by the functions called in this loop.)
@@ -2480,9 +2524,10 @@ def addParentClasses():
 
     for xml_file in gb.all_id_dict.keys():
 
-        # Set the global dicts for the current xml file
-        gb.id_dict   = gb.all_id_dict[xml_file]
-        gb.name_dict = gb.all_name_dict[xml_file]
+        # If new xml file, initialise global dicts
+        if xml_file != gb.xml_file_name:
+            gb.xml_file_name = xml_file
+            initGlobalXMLdicts(xml_file, id_and_name_only=True)
 
         # Loop over all named elements in the xml file
         for full_name, el in gb.name_dict.items():
@@ -2506,6 +2551,205 @@ def addParentClasses():
                             cfg.loaded_classes.append(class_name['long_templ'])
 
 # ====== END: addParentClasses ========
+
+
+
+# ====== xmlFilesToDicts ========
+
+    #
+    # Read all xml elements of all files and store in two dict of dicts: 
+    #
+    # 1. all_id_dict:    file name --> xml id --> xml element
+    # 2. all_name_dict:  file name --> name   --> xml element
+    #
+
+def xmlFilesToDicts(xml_files):
+
+    for xml_file in xml_files:
+
+        gb.all_id_dict[xml_file]   = OrderedDict()
+        gb.all_name_dict[xml_file] = OrderedDict()
+
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+
+        for el in root.getchildren():
+
+            # Fill id-based dict
+            gb.all_id_dict[xml_file][el.get('id')] = el
+
+            # Determine name
+            if 'demangled' in el.keys():
+                full_name = el.get('demangled')
+            elif 'name' in el.keys():
+                full_name = el.get('name')
+            else:
+                # Skip elements that don't have a name
+                continue
+            
+            # Fill name-based dict
+            gb.all_name_dict[xml_file][full_name] = el
+
+# ====== END: xmlFilesToDicts ========
+
+
+
+# ====== clearGlobalXMLdicts ========
+
+def clearGlobalXMLdicts():
+
+    # Clear a bunch of global dicts
+    gb.id_dict.clear()
+    gb.name_dict.clear()
+
+    gb.file_dict.clear()
+    gb.std_types_dict.clear()
+    gb.typedef_dict.clear()
+    gb.loaded_classes_in_xml.clear()
+    gb.func_dict.clear()
+
+# ====== END: clearGlobalXMLdicts ========
+
+
+
+# ====== initGlobalXMLdicts ========
+
+def initGlobalXMLdicts(xml_path, id_and_name_only=False):
+
+    import modules.classutils as classutils
+
+    # Clear dicts
+    clearGlobalXMLdicts()
+
+    # Set some global dicts directly
+    gb.id_dict   = copy.deepcopy( gb.all_id_dict[xml_path] )
+    gb.name_dict = copy.deepcopy( gb.all_name_dict[xml_path] )
+
+    # Stop here?
+    if id_and_name_only:
+        return
+
+
+    #
+    # Loop over all elements in this xml file
+    # to fill the remaining dicts. (The order is important!)
+    #
+
+    for xml_id, el in gb.id_dict.items():
+
+
+        # Update global dict: file name --> file xml element
+        if el.tag == 'File':
+            gb.file_dict[el.get('name')] = el
+        # gb.file_dict = OrderedDict([ (el.get('name'), el) for el in root.findall('File') ])
+
+
+        # Update global dict: std type --> type xml element
+        if isStdType(el):
+            class_name = classutils.getClassNameDict(el)
+            gb.std_types_dict[class_name['long_templ']] = el
+
+
+        # Update global dict of loaded classes in this xml file: class name --> class xml element
+        if el.tag in ['Class', 'Struct']:
+
+            try:
+                class_name = classutils.getClassNameDict(el)
+            except KeyError:
+                continue
+
+            # Check if we have done this class already
+            if class_name in gb.classes_done:
+                infomsg.ClassAlreadyDone( class_name['long_templ'] ).printMessage()
+                continue
+
+            # Check that class is requested
+            if (class_name['long_templ'] in cfg.loaded_classes):
+
+                # Check that class is complete
+                if isComplete(el):
+
+                    # Store class xml element
+                    gb.loaded_classes_in_xml[class_name['long_templ']] = el
+
+
+        # Update global dict: typedef name --> typedef xml element
+        if el.tag == 'Typedef':
+
+            # Only accept native typedefs:
+            if isNative(el):
+
+                typedef_name = el.get('name')
+
+                type_dict = findType(el)
+                type_el = type_dict['el']
+
+                # If underlying type is a fundamental or standard type, accept it right away
+                if isFundamental(type_el) or isStdType(type_el):
+                    gb.typedef_dict[typedef_name] = el
+                
+                # If underlying type is a class/struct, check if it's acceptable
+                elif type_el.tag in ['Class', 'Struct']:
+                    
+                    type_name = classutils.getClassNameDict(type_el)
+
+                    if type_name['long_templ'] in cfg.loaded_classes:
+                        gb.typedef_dict[typedef_name] = el
+                
+                # If neither fundamental or class/struct, ignore it.
+                else:
+                    pass
+
+
+        # Update global dict: function name --> function xml element
+        if el.tag == 'Function':
+
+            if 'demangled' in el.keys():
+
+                func_name_full = el.get('demangled')
+
+                if func_name_full in cfg.loaded_functions:
+                    gb.func_dict[func_name_full] = el
+
+
+
+
+        # Add entries to global dict: new header files
+        if el in gb.loaded_classes_in_xml.values():
+
+            class_name = classutils.getClassNameDict(el)
+
+            class_name_short = class_name['short']
+            class_name_long  = class_name['long']
+
+            if class_name_long not in gb.new_header_files.keys():
+              
+                abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
+                wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
+                wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
+                wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
+
+                abstract_header_fullpath     = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
+                wrapper_header_fullpath      = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
+                wrapper_decl_header_fullpath = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
+                wrapper_def_header_fullpath  = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
+                
+                gb.new_header_files[class_name_long] = {    'abstract': abstract_header_name, 
+                                                            'wrapper': wrapper_header_name, 
+                                                            'wrapper_decl': wrapper_decl_header_name,
+                                                            'wrapper_def': wrapper_def_header_name,
+                                                            'abstract_fullpath': abstract_header_fullpath, 
+                                                            'wrapper_fullpath': wrapper_header_fullpath, 
+                                                            'wrapper_decl_fullpath': wrapper_decl_header_fullpath,
+                                                            'wrapper_def_fullpath': wrapper_def_header_fullpath    }
+
+    #
+    # END: Loop over all elements in this xml file
+    #
+
+
+# ====== END: initGlobalXMLdicts ========
+
 
 
 

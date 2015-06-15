@@ -41,6 +41,7 @@ class WrapperBase
             return *this;        
         }
 
+
         // Destructor
         virtual ~WrapperBase()
         {
@@ -54,7 +55,7 @@ class WrapperBase
             }
         }
 
-
+ 
     protected:
 
         // Function used to return pointer-to-wrapper

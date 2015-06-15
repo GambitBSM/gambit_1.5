@@ -198,6 +198,10 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
             args = funcutils.getArgs(el)
             w_args = funcutils.constrWrapperArgs(args, add_ref=True)
 
+            # If return type is a known class, add '::' for absolute namespace.
+            if (not return_is_loaded) and utils.isKnownClass(return_el):
+                return_type = '::' + return_type 
+
             # # If this is a function returning a reference to a loaded type, 
             # # we must remove the const keyword from the return type
             # if return_is_loaded and is_ref:
@@ -698,6 +702,11 @@ def constrVariableRefFunction(var_el, virtual=False, indent=cfg.indent, n_indent
         return_type = var_type
 
 
+    # If variable type is a known class, add '::' for absolute namespace.
+    if (not var_is_loaded_class) and utils.isKnownClass(var_el):
+        return_type = '::' + return_type 
+
+
     if (not is_ref) and (not is_array):
         return_type = return_type + '&'
     else:
@@ -1126,6 +1135,7 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
         var_type      = var_type_dict['name'] + '*'*pointerness + '&'*is_ref
 
         var_is_loaded_class = utils.isLoadedClass(var_el)
+        var_is_known_class  = utils.isKnownClass(var_el)
 
         # # FIXME: At the moment there are problems with member variables that are pointer-to-loaded-class. For now, skip them:
         # if var_is_loaded_class and pointerness > 0:
@@ -1139,6 +1149,9 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
             decl_code += 2*indent + var_kw_str + var_type + ' ' + var_name + var_array_limits_str  + ';\n'
     
         else:
+            if var_is_known_class:
+                var_type = '::' + var_type
+
             if is_ref:
                 use_var_type = var_type
             else:
@@ -1205,6 +1218,11 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
         return_is_loaded    = utils.isLoadedClass(return_type_el)
 
         return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
+
+
+        # If return type is a known class, add '::' for absolute namespace.
+        if (not return_is_loaded) and utils.isKnownClass(return_type_el):
+            return_type = '::' + return_type 
 
 
         # If return-by-value, then a const qualifier on the return value is meaningless
@@ -1417,6 +1435,11 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
         return_is_loaded    = utils.isLoadedClass(return_type_el)
 
         return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
+
+
+        # If return type is a known class, add '::' for absolute namespace.
+        if (not return_is_loaded) and utils.isKnownClass(return_type_el):
+            return_type = '::' + return_type 
 
 
         # If return-by-value, then a const qualifier on the return value is meaningless

@@ -39,6 +39,9 @@ def run():
         # Clear all info messages
         infomsg.clearInfoMessages()
 
+        # Number of functions done
+        func_i = len(gb.functions_done)
+
         # Generate dict with different variations of the function name
         func_name = funcutils.getFunctionNameDict(func_el)
 
@@ -54,7 +57,6 @@ def run():
             continue
        
         # Function namespace
-        # namespaces = func_name['long_templ'].split('<',1)[0].split('::')[:-1]
         namespaces = utils.getNamespaces(func_el)
         has_namespace = bool(len(namespaces))
 
@@ -78,7 +80,8 @@ def run():
         #
 
         # New source file name
-        new_source_fname = os.path.join(cfg.extra_output_dir, cfg.function_files_prefix + func_name['short'].lower() + gb.code_suffix + cfg.source_extension)
+        new_source_file_name = cfg.function_files_prefix + func_name['short'].lower() + '_f' + str(func_i) + gb.code_suffix + cfg.source_extension
+        new_source_file_path = os.path.join(cfg.extra_output_dir, new_source_file_name)
 
         # Get include statements
         include_statements = []
@@ -119,18 +122,25 @@ def run():
             n_overloads = 0
 
 
+        #
         # Generate code for wrapper class version
-        # wrapper_code = classutils.constrWrapperFunction(func_el, indent=cfg.indent, n_indents=0, 
-        #                                                         remove_n_args=0, include_full_namespace=False)
-        # wrapper_code = generateFunctionWrapperClassVersion(func_el, func_name, namespaces, n_overloads) 
-        wrapper_code = generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads) 
+        #
+        
+        # Construct a wrapper function name, eg "someFunction_f7__BOSS"
+        wr_func_name = func_el.get('name') + '_f' + str(func_i) + gb.code_suffix
+
+        # Register the wrapper name
+        func_name['wr_name'] = wr_func_name
+
+        # Construct wrapper function code
+        wrapper_code = generateFunctionWrapperClassVersion(func_el, wr_func_name, namespaces, n_overloads) 
         wrapper_code = utils.addIndentation(wrapper_code, len(namespaces)*cfg.indent)
         wrapper_code += '\n'
 
 
         # Prepare element in gb.new_code
-        if new_source_fname not in gb.new_code.keys():
-            gb.new_code[new_source_fname] = {'code_tuples':[], 'add_include_guard':False}
+        if new_source_file_path not in gb.new_code.keys():
+            gb.new_code[new_source_file_path] = {'code_tuples':[], 'add_include_guard':False}
 
         # Define code string
         n_indents = len(namespaces)
@@ -154,19 +164,14 @@ def run():
         new_code += '\n'
 
 
-        print 
-        print '****** CODE ******'
-        print 
-        print new_code
-        print 
-        print '****** CODE END ******'
-        print
-
-
         # Register new code in return_code_dict
         insert_pos = -1   # end of file
-        # return_code_dict[new_source_fname]['code_tuples'].append( (insert_pos, new_code) )
-        gb.new_code[new_source_fname]['code_tuples'].append( (insert_pos, new_code) )
+        # return_code_dict[new_source_file_path]['code_tuples'].append( (insert_pos, new_code) )
+        gb.new_code[new_source_file_path]['code_tuples'].append( (insert_pos, new_code) )
+
+
+        # Register that this function has a source file
+        gb.function_file_dict[func_name['long_templ_args']] = new_source_file_path
 
 
         #
@@ -174,8 +179,6 @@ def run():
         #
         gb.functions_done.append(func_name)
 
-        # Increase class counter
-        gb.n_functions_done += 1
 
         print
 
@@ -193,7 +196,7 @@ def run():
 # Function for generating a source file containing wrapper
 # functions that make use of the wrapper classes.
 
-def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
+def generateFunctionWrapperClassVersion(func_el, wr_func_name, namespaces, n_overloads):
 
     new_code = ''
 
@@ -203,13 +206,9 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
     # Function name
     func_name = func_el.get('name')
 
-    # Name of wrapper function
-    wr_func_name = func_name + gb.code_suffix
-
-
     # Determine return type
     return_type_dict = utils.findType(func_el)
-    return_el = return_type_dict['el']
+    return_el      = return_type_dict['el']
     pointerness    = return_type_dict['pointerness']
     is_ref         = return_type_dict['is_reference']
     return_type_kw = return_type_dict['cv_qualifiers']
@@ -219,6 +218,10 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
     return_is_loaded    = utils.isLoadedClass(return_el)
 
     return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
+
+    # If return type is a known class, add '::' for absolute namespace.
+    if (not return_is_loaded) and utils.isKnownClass(return_el):
+        return_type = '::' + return_type 
 
 
     # If return-by-value, then a const qualifier on the return value is meaningless
@@ -246,7 +249,7 @@ def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
             use_args = args[:-remove_n_args]
 
         # Argument bracket
-        args_bracket = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True, use_wrapper_base_class=False)                
+        args_bracket = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True, use_wrapper_base_class=False)
 
         # Name of original function to call
         call_func_name = func_name
