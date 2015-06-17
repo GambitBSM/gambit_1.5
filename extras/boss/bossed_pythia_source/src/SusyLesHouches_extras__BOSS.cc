@@ -1,6 +1,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "SLHAea/slhaea.h"
 #include <istream>
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
@@ -33,6 +34,18 @@ int Pythia8::SusyLesHouches::readFile__BOSS(std::basic_istream<char,std::char_tr
 int Pythia8::SusyLesHouches::readFile__BOSS(std::basic_istream<char,std::char_traits<char> >& arg_1)
 {
     return readFile(arg_1);
+}
+
+
+int Pythia8::SusyLesHouches::readSLHAea__BOSS(int verboseIn)
+{
+    return readSLHAea(verboseIn);
+}
+
+
+int Pythia8::SusyLesHouches::readSLHAea__BOSS()
+{
+    return readSLHAea();
 }
 
 
