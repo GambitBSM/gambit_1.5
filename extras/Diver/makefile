@@ -27,16 +27,16 @@ FOPT=-extend_source -DMPI -warn all -check all -check noarg-temp_created -fpp
 MODULE=module
 
 # Define C/C++ compilers and options
-CC=mpicc
-COPT=-DMPI
-CPPOPT=
-MIXOPT_C=-nofor-main
-MIXOPT_CPP=-nofor-main
+DIVER_CC=mpicc
+DIVER_COPT=-DMPI
+DIVER_CPPOPT=
+DIVER_MIXOPT_C=-nofor-main
+DIVER_MIXOPT_CPP=-nofor-main
+DIVER_SO_LINK_FLAGS=
 
 # Define some more internal variables
 CLEAN = _clean
 AR = ar r  
-SHAR = ld -shared
 LIBNAME = diver
 EXAMPLENAMES = example_f example_c example_cpp
 EXAMPLECLEAN = $(EXAMPLENAMES:%=%$(CLEAN))
@@ -55,6 +55,7 @@ COPT=$(DIVER_COPT) -O3 -fPIC -I$(INC)
 CPPOPT=$(DIVER_CPPOPT) -lstdc++
 MIXOPT_C=$(DIVER_MIXOPT_C)
 MIXOPT_CPP=$(DIVER_MIXOPT_CPP) -lstdc++
+SO_LINK_FLAGS=$(DIVER_SO_LINK_FLAGS) -shared
 
 # Send compile commands over to example makefiles
 export FF FOPT CC COPT CPPOPT MIXOPT_C MIXOPT_CPP LIBNAME PREFIX LIB INC
@@ -72,7 +73,7 @@ libdiver.a: makefile $(TYPEOBJ) $(OBJ)
 	$(AR) $(LIB)/$@ $(TYPEOBJ) $(OBJ)
 
 libdiver.so: makefile $(TYPEOBJ) $(OBJ) 
-	$(SHAR) -o $(LIB)/$@ $(TYPEOBJ) $(OBJ)  
+	$(FF) $(SO_LINK_FLAGS) -o $(LIB)/$@ $(TYPEOBJ) $(OBJ)  
  
 $(BUILD)/%.o: $(SOURCE)/%.f90 $(TYPEF90)
 	$(FF) $(FOPT) -c $< -o $@
