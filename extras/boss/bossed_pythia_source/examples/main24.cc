@@ -7,7 +7,9 @@
 // It illustrates how to run SUSY processes in Pythia8.
 // All input is specified in the main22.cmnd file.
 
+#include <fstream>
 #include "Pythia8/Pythia.h"
+#include "SLHAea/slhaea.h"
 
 using namespace Pythia8;
 
@@ -25,6 +27,11 @@ int main() {
   int nAbort   = pythia.mode("Main:timesAllowErrors");
   double eCM   = pythia.parm("Beams:eCM");
 
+//// Test SLHAea hack.
+  ifstream ifs(pythia.word("SLHA:file").c_str());
+  const SLHAea::Coll* slhaea = new SLHAea::Coll(ifs);
+  pythia.slhaInterface.slha.setSLHAea(slhaea);
+  
   // Initialize.
   pythia.init();
 
