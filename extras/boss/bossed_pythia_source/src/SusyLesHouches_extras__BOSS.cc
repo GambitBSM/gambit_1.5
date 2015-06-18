@@ -1,6 +1,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "SLHAea/slhaea.h"
 #include <istream>
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"

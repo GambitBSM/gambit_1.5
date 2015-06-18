@@ -98,7 +98,7 @@ known_classes = [
                 ]
 
 known_class_headers = {
-    "SLHAea::Coll'"          : "SLHAea/slhaea.h",
+    "SLHAea::Coll"          : "SLHAea/slhaea.h",
     "std::array"             : "<array>", 
     "std::vector"            : "<vector>", 
     "std::deque"             : "<deque>", 
