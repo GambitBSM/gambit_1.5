@@ -500,14 +500,15 @@ public:
  
   // Destructor.
   ~NNPDF() {
-    if (fPDFGrid) {
-      for (int i = 0; i < fNFL; i++) {
-        for (int j = 0; j < fNX; j++)
-          if (fPDFGrid[i][j]) delete[] fPDFGrid[i][j];
-        if (fPDFGrid[i]) delete[] fPDFGrid[i];
-      }
-      delete[] fPDFGrid;
-    }
+    /* if (fPDFGrid) { */
+    /*   for (int i = 0; i < fNFL; i++) { */
+    /*     for (int j = 0; j < fNX; j++) */
+    /*       if (fPDFGrid[i][j]) delete[] fPDFGrid[i][j]; */
+    /*     if (fPDFGrid[i]) delete[] fPDFGrid[i]; */
+    /*   } */
+    /*   delete[] fPDFGrid; */
+    /* } */
+    if (fPDFGrid) delete[] fPDFGrid;
     if (fXGrid) delete[] fXGrid;
     if (fLogXGrid) delete[] fLogXGrid;
     if (fQ2Grid) delete[] fQ2Grid;
@@ -527,7 +528,8 @@ private:
   
   // Variables to be set during code initialization.
   int iFit, fNX, fNQ2;
-  double ***fPDFGrid;
+  //double ***fPDFGrid;
+  double *fPDFGrid;
   double *fXGrid;
   double *fLogXGrid;
   double *fQ2Grid;
