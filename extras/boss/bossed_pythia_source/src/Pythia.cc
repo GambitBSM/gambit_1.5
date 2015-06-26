@@ -1284,7 +1284,7 @@ bool Pythia::next() {
     if (!physical) {
       info.errorMsg("Abort from Pythia::next: "
         "parton+hadronLevel failed; giving up");
-      return false;
+      //return false;
     }
 
     // Process- and parton-level statistics. Event scale.
