@@ -1,5 +1,5 @@
 // SusyResonanceWidths.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand
+// Copyright (C) 2015 Torbjorn Sjostrand
 // Authors: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -8,409 +8,12 @@
 // SUSY Resonance widths classes.
 
 #include "Pythia8/SusyResonanceWidths.h"
+#include "Pythia8/SusyWidthFunctions.h"
 #include "Pythia8/SusyCouplings.h"
 #include "Pythia8/ParticleData.h"
 #include "Pythia8/PythiaComplex.h"
 
 namespace Pythia8 {
-
-//==========================================================================
-
-// WidthFunctions Class
-
-// Contains functions to be integrated for calculating the 3-body
-// decay widths
-
-//--------------------------------------------------------------------------
-
-void WidthFunction::init( ParticleData* particleDataPtrIn,
-  CoupSUSY* coupSUSYPtrIn) {
-
-  particleDataPtr = particleDataPtrIn;
-  coupSUSYPtr = coupSUSYPtrIn;
-
-}
-
-//--------------------------------------------------------------------------
-
-void WidthFunction::setInternal2(int idResIn, int id1In, int id2In,
-  int id3In, int idIntIn) {
-
-  // Res -> 1,2,3
-  idRes = idResIn;
-  id1 = id1In;
-  id2 = id2In;
-  id3 = id3In;
-  idInt = idIntIn;
-
-  mRes = particleDataPtr->m0(idRes);
-  m1 = particleDataPtr->m0(id1);
-  m2 = particleDataPtr->m0(id2);
-  m3 = particleDataPtr->m0(id3);
-
-  // Internal propagator
-  mInt = particleDataPtr->m0(idInt);
-  gammaInt = particleDataPtr->mWidth(idInt);
-
-  return;
-}
-
-//--------------------------------------------------------------------------
-
-double WidthFunction::function(double) {
-
-  cout<<"Warning using dummy width function"<<endl;
-  return 0.;
-}
-
-//--------------------------------------------------------------------------
-
-double WidthFunction::function(double,double) {
-
-  cout<<"Warning using dummy width function"<<endl;
-  return 0.;
-}
-
-//==========================================================================
-
-// Psi, Upsilon and Phi classes.
-
-//--------------------------------------------------------------------------
-
-void Psi::setInternal (int idResIn, int id1In, int id2In, int id3In,
-  int idIntIn, int) {
-
-  setInternal2(idResIn, id1In, id2In, id3In, idIntIn);
-
-  mInt = particleDataPtr->m0(idInt);
-  gammaInt = particleDataPtr->mWidth(idInt);
-  iX = coupSUSYPtr->typeNeut(idRes);
-  iQ = (id3+1)/2;
-  iSq = (idInt>1000000)? 3 + (idInt%10+1)/2 :  (idInt%10+1)/2;
-  isSqDown = (idInt % 2 == 1)? true : false;
-  m1 = particleDataPtr->m0(id1);
-  m2 = particleDataPtr->m0(id2);
-  m3 = particleDataPtr->m0(id3);
-  return;
-}
-
-//--------------------------------------------------------------------------
-
-void Upsilon::setInternal (int idResIn, int id1In, int id2In, int id3In,
-  int idIntIn, int idInt2In) {
-
-  setInternal2(idResIn, id1In, id2In, id3In, idIntIn);
-
-  idInt2 = idInt2In;
-  mInt = particleDataPtr->m0(idInt);
-  gammaInt = particleDataPtr->mWidth(idInt);
-  mInt2 = particleDataPtr->m0(idInt2);
-  gammaInt2 = particleDataPtr->mWidth(idInt2);
-
-  iX = coupSUSYPtr->typeNeut(idRes);
-  iQ = (id3+1)/2;
-  iSq  = (idInt>1000000)? 3 + (idInt%10+1)/2 :  (idInt%10+1)/2;
-  iSq2 = (idInt2>1000000)? 3 + (idInt2%10+1)/2 :  (idInt2%10+1)/2;
-  isSqDown = (idIntIn % 2 == 1)? true : false;
-  m1 = particleDataPtr->m0(id1);
-  m2 = particleDataPtr->m0(id2);
-  m3 = particleDataPtr->m0(id3);
-  return;
-}
-
-//--------------------------------------------------------------------------
-
-void Phi::setInternal (int idResIn, int id1In, int id2In, int id3In,
-  int idIntIn, int idInt2In) {
-
-  setInternal2(idResIn, id1In, id2In, id3In, idIntIn);
-
-  idInt2 = idInt2In;
-  mInt = particleDataPtr->m0(idInt);
-  gammaInt = particleDataPtr->mWidth(idInt);
-  mInt2 = particleDataPtr->m0(idInt2);
-  gammaInt2 = particleDataPtr->mWidth(idInt2);
-
-  iX = coupSUSYPtr->typeNeut(idRes);
-  iQ = (id3+1)/2;
-  iSq  = (idInt>1000000)? 3 + (idInt%10+1)/2 :  (idInt%10+1)/2;
-  iSq2 = (idInt2>1000000)? 3 + (idInt2%10+1)/2 :  (idInt2%10+1)/2;
-  isSqDown = (idIntIn % 2 == 1)? true : false;
-  m1 = particleDataPtr->m0(id1);
-  m2 = particleDataPtr->m0(id2);
-  m3 = particleDataPtr->m0(id3);
-  return;
-}
-
-//--------------------------------------------------------------------------
-
-double Psi::function(double m12sq) {
-
-  double R, factor1, factor2, value;
-
-  // Check that the propagators are offshell
-  if (m12sq > pow2(mInt) || abs(m12sq - pow2(mInt)) < gammaInt) return 0;
-
-  R = 1.0/(pow2(m12sq-pow2(mInt)) + pow2(gammaInt*mInt));
-  if (isSqDown){
-    factor1 = (norm(coupSUSYPtr->LsddX[iSq][iQ][iX])
-               + norm(coupSUSYPtr->RsddX[iSq][iQ][iX]))*
-      (mRes*mRes + m3*m3 - m12sq);
-    factor2 = 4.0 * real(coupSUSYPtr->LsddX[iSq][iQ][iX]
-                         * conj(coupSUSYPtr->RsddX[iSq][iQ][iX])) * m3 * mRes;
-
-  } else {
-    factor1 = (norm(coupSUSYPtr->LsuuX[iSq][iQ][iX])
-               + norm(coupSUSYPtr->RsuuX[iSq][iQ][iX]))*
-      (mRes*mRes + m3*m3 - m12sq);
-    factor2 = 4.0 * real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                         * conj(coupSUSYPtr->RsuuX[iSq][iQ][iX])) * m3 * mRes;
-  }
-
-  value = R * (m12sq - m1*m1 - m2*m2) * (factor1+factor2);
-
-  return value;
-}
-
-
-//--------------------------------------------------------------------------
-
-double Upsilon::function(double m12sq) {
-
-  double R1,R2, S, factor1, factor2, value;
-
-  // Check that the propagators are offshell
-  if (m12sq > pow2(mInt) || abs(m12sq - pow2(mInt)) < gammaInt) return 0;
-  if (m12sq > pow2(mInt2) || abs(m12sq - pow2(mInt2)) < gammaInt2) return 0;
-  
-  R1 = 1.0/(pow2(m12sq-pow2(mInt)) + pow2(gammaInt*mInt));
-  R2 =  1.0/(pow2(m12sq-pow2(mInt2)) + pow2(gammaInt2*mInt2));
-  S = R1 * R2 * ((m12sq - pow2(mInt)) * (m12sq - pow2(mInt2))
-                 + gammaInt * mInt * gammaInt2 * mInt2);
-
-  if (isSqDown){
-    factor1 = real(coupSUSYPtr->LsddX[iSq][iQ][iX]
-                   * conj(coupSUSYPtr->LsddX[iSq2][iQ][iX]))
-      + real(coupSUSYPtr->RsddX[iSq][iQ][iX]
-             * conj(coupSUSYPtr->RsddX[iSq2][iQ][iX]));
-    factor2 = real(coupSUSYPtr->LsddX[iSq][iQ][iX]
-                   * conj(coupSUSYPtr->RsddX[iSq2][iQ][iX]))
-      + real(coupSUSYPtr->RsddX[iSq][iQ][iX]
-             * conj(coupSUSYPtr->LsddX[iSq2][iQ][iX]));
-  }else{
-    factor1 = real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                   * conj(coupSUSYPtr->LsuuX[iSq2][iQ][iX]))
-      + real(coupSUSYPtr->RsuuX[iSq][iQ][iX]
-             * conj(coupSUSYPtr->RsuuX[iSq2][iQ][iX]));
-    factor2 = real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                   * conj(coupSUSYPtr->RsuuX[iSq2][iQ][iX]))
-      + real(coupSUSYPtr->RsuuX[iSq][iQ][iX]
-             * conj(coupSUSYPtr->LsuuX[iSq2][iQ][iX]));
-  }
-
-  value = S * (m12sq - pow2(m1) - pow2(m2)) *
-    ( factor1 * (pow2(mRes) + pow2(m3) - m12sq) + 2.0 * factor2 * m3 * mRes);
-
-  //  cout<<"I1: "<<idInt<<" I2:"<<idInt2<<" factor1: "<<factor1
-  //        <<" factor2:"<<factor2<<" value:"<<value<<endl;
-
-  return value;
-
-}
-
-//--------------------------------------------------------------------------
-
-double Phi::function(double m12sqIn) {
-
-  m12sq =  m12sqIn;
-  // Check that the propagators are offshell
-  if (m12sq > pow2(mInt) || abs(m12sq - pow2(mInt)) < gammaInt) return 0;
-
-  double m23max, m23min, E2, E3;
-
-  E2 = (m12sq - pow2(m1) - pow2(m2))/(2.0 * sqrt(m12sq));
-  E3 = (pow2(mRes) - m12sq - pow2(m3))/(2.0 * sqrt(m12sq));
-  m23max = pow2(E2+E3) - (sqrt(E2*E2 - m2*m2) - sqrt(E3*E3 - m3*m3)) ;
-  m23min = pow2(E2+E3) - (sqrt(E2*E2 - m2*m2) + sqrt(E3*E3 - m3*m3)) ;
-
-  if (E2 < m2 || E3 < m3){
-    cout <<"Error in Phi:function"<<endl;
-    return 0.;
-  }
-
-  double integral2 = integrateGauss(m23min,m23max,1.0e-4);
-  return integral2;
-}
-
-//--------------------------------------------------------------------------
-
-double Phi::function2(double m23sq) {
-
-  // Check that the propagators are offshell
-  if (m23sq > pow2(mInt2) || abs(m23sq - pow2(mInt2)) < gammaInt2) return 0;
-
-  double R1, R2, S, factor1, factor2, factor3, factor4, value, fac;
-  int iQ2;
-
-  R1 = 1.0/(pow2(m12sq-pow2(mInt)) + pow2(gammaInt*mInt));
-  R2 = 1.0/(pow2(m12sq-pow2(mInt2)) + pow2(gammaInt2*mInt2));
-  S = R1 * R2 * ((m12sq - pow2(mInt)) * (m12sq - pow2(mInt2))
-    + gammaInt * mInt * gammaInt2 * mInt2);
-
-  fac = 1.0;
-
-  if (isSqDown){
-    // Only factor is when both d_i and d_j are near.
-    iQ2 = (id1%2 == 1)? (id1+1)/2 : (id2+1)/2;
-
-    if (mRes > mInt2 + particleDataPtr->m0(iQ2)) fac = 0.;
-
-    factor1 = m1 * m3 * real(coupSUSYPtr->LsddX[iSq][iQ][iX]
-                             * conj(coupSUSYPtr->LsddX[iSq2][iQ2][iX]))
-      * (m12sq + m23sq - pow2(m1) - pow2(m3));
-    factor2 = m1 * mRes * real(coupSUSYPtr->RsddX[iSq][iQ][iX]
-                               * conj(coupSUSYPtr->LsddX[iSq2][iQ2][iX]))
-      * (m23sq - pow2(m2) - pow2(m3));
-    factor3 = m3 * mRes * real(coupSUSYPtr->LsddX[iSq][iQ][iX]
-                               * conj(coupSUSYPtr->RsddX[iSq2][iQ2][iX]))
-      * (m12sq - pow2(m1) - pow2(m2));
-    factor4 = m3 * mRes * real(coupSUSYPtr->RsddX[iSq][iQ][iX]
-                               * conj(coupSUSYPtr->RsddX[iSq2][iQ2][iX]))
-      * (m12sq * m23sq - pow2(m1 * m3) - pow2(m2 * mRes));
-
-  }else{
-    // Factor A: u and d_1
-    iQ2 = (id1+1)/2;
-
-    if (mRes > mInt2 + particleDataPtr->m0(iQ2)) fac = 0.;
-
-    factor1 = m1 * m3 * real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                             * conj(coupSUSYPtr->LsddX[iSq2][iQ2][iX]))
-      * (m12sq + m23sq - pow2(m1) - pow2(m3));
-    factor2 = m1 * mRes * real(coupSUSYPtr->RsuuX[iSq][iQ][iX]
-                               * conj(coupSUSYPtr->LsddX[iSq2][iQ2][iX]))
-      * (m23sq - pow2(m2) - pow2(m3));
-    factor3 = m3 * mRes * real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                               * conj(coupSUSYPtr->RsddX[iSq2][iQ2][iX]))
-      * (m12sq - pow2(m1) - pow2(m2));
-    factor4 = m3 * mRes * real(coupSUSYPtr->RsuuX[iSq][iQ][iX]
-                               * conj(coupSUSYPtr->RsddX[iSq2][iQ2][iX]))
-      * (m12sq * m23sq - pow2(m1 * m3) - pow2(m2 * mRes));
-
-
-    // Factor B: u and d_2; change 1 <=> 2
-    iQ2 = (id2+1)/2;
-
-    if (mRes > mInt2 + particleDataPtr->m0(iQ2)) fac = 0.;
-
-    factor1 += m2 * m3 * real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                              * conj(coupSUSYPtr->LsddX[iSq2][iQ2][iX]))
-      * (m12sq + m23sq - pow2(m2) - pow2(m3));
-    factor2 += m2 * mRes * real(coupSUSYPtr->RsuuX[iSq][iQ][iX]
-                                * conj(coupSUSYPtr->LsddX[iSq2][iQ2][iX]))
-      * (m23sq - pow2(m1) - pow2(m3));
-    factor3 += m3 * mRes * real(coupSUSYPtr->LsuuX[iSq][iQ][iX]
-                                * conj(coupSUSYPtr->RsddX[iSq2][iQ2][iX]))
-      * (m12sq - pow2(m2) - pow2(m1));
-    factor4 += m3 * mRes * real(coupSUSYPtr->RsuuX[iSq][iQ][iX]
-                                * conj(coupSUSYPtr->RsddX[iSq2][iQ2][iX]))
-      * (m12sq * m23sq - pow2(m2 * m3) - pow2(m1 * mRes));
-  }
-
-  value = S * (factor1 + factor2 + factor3 + factor4);
-
-  //  cout<<"I1: "<<idInt<<" I2:"<<idInt2<<" factor1: "<<factor1
-  //      <<" factor2:"<<factor2<<" value:"<<value<<endl;
-
-  return (fac * value);
-}
-
-//--------------------------------------------------------------------------
-
-double Phi::integrateGauss(double xlo, double xhi, double tol) {
-
-  //8-point unweighted
-  static double x8[4]={0.96028985649753623,
-                       0.79666647741362674,
-                       0.52553240991632899,
-                       0.18343464249564980};
-  static double w8[4]={0.10122853629037626,
-                       0.22238103445337447,
-                       0.31370664587788729,
-                       0.36268378337836198};
-  //16-point unweighted
-  static double x16[8]={0.98940093499164993,
-                       0.94457502307323258,
-                       0.86563120238783174,
-                       0.75540440835500303,
-                       0.61787624440264375,
-                       0.45801677765722739,
-                       0.28160355077925891,
-                       0.09501250983763744};
-  static double w16[8]={0.027152459411754095,
-                       0.062253523938647893,
-                       0.095158511682492785,
-                       0.12462897125553387,
-                       0.14959598881657673,
-                       0.16915651939500254,
-                       0.18260341504492359,
-                       0.18945061045506850};
-  //boundary checks
-  if (xlo == xhi) {
-    cerr<<"xlo = xhi"<<endl;
-    return 0.0;
-  }
-  if ( xlo > xhi ) {
-    cerr<<" (integrateGauss:) -> xhi < xlo"<<endl;
-    return 0.0;
-  }
-  //initialize
-  double sum = 0.0;
-  double c = 0.001/abs(xhi-xlo);
-  double zlo = xlo;
-  double zhi = xhi;
-    
-  bool nextbin = true;
-  
-  while ( nextbin ) {
-    
-    double zmi = 0.5*(zhi+zlo); // midpoint
-    double zmr = 0.5*(zhi-zlo); // midpoint, relative to zlo
-    
-    //calculate 8-point and 16-point quadratures
-    double s8=0.0;
-    for (int i=0;i<4;i++) {
-      double dz = zmr * x8[i];
-      s8 += w8[i]*(function2(zmi+dz) + function2(zmi-dz));
-    }
-    s8 *= zmr;
-    double s16=0.0;
-    for (int i=0;i<8;i++) {
-      double dz = zmr * x16[i];
-      s16 += w16[i]*(function2(zmi+dz) + function2(zmi-dz));
-    }
-    s16 *= zmr;
-    if (abs(s16-s8) < tol*(1+abs(s16))) {
-      //precision in this bin OK, add to cumulative and go to next
-      nextbin=true;
-      sum += s16;
-      //next bin: LO = end of current, HI = end of integration region.
-      zlo=zhi;
-      zhi=xhi;
-      if ( zlo == zhi ) nextbin = false;
-    } else {
-      //precision in this bin not OK, subdivide.
-      if (1.0 + c*abs(zmr) == 1.0) {
-        cerr << " (integrateGauss:) too high accuracy required"<<endl;
-        sum = 0.0 ;
-        break;
-      }
-      zhi=zmi;
-      nextbin=true;
-    }
-  }
-  return sum;
-}
 
 //==========================================================================
 
@@ -431,33 +34,209 @@ bool SUSYResonanceWidths::initBSM(){
   return false;
 }
 
-
 //--------------------------------------------------------------------------
 
 bool SUSYResonanceWidths::allowCalc(){
 
   // Check if decay calculations at all possible
   if ( !couplingsPtr->isSUSY ) return false;
+  if ( (idRes == 45 || idRes == 46 || idRes == 1000045)
+       && !coupSUSYPtr->isNMSSM ) return false;
 
-  // Next check if SLHA decay tables are ignored (= always do calculation)
-  if ( !settingsPtr->flag("SLHA:useDecayTable") ) return true;
+  if (settingsPtr->flag("SLHA:useDecayTable") ) {
 
-  // Next check if decay table was read in via SLHA and takes precedence
-  for ( int iDec = 1; iDec < int((coupSUSYPtr->slhaPtr)->decays.size());
-    ++iDec)
-    if ( (coupSUSYPtr->slhaPtr)->decays[iDec].getId() == abs(idRes) ) {
-      if (DBSUSY) cout<<"Using external decay table for:"<<idRes<<endl;
-      return false;
-    }
-  
-  // Else we should do the calculation
-  return true;
+    // Next check if decay table was read in via SLHA and takes precedence
+    for ( int iDec = 1; iDec < int((coupSUSYPtr->slhaPtr)->decays.size());
+          ++iDec)
+      if ( (coupSUSYPtr->slhaPtr)->decays[iDec].getId() == abs(idRes) ) {
+        if (DBSUSY) cout<<"Using external decay table for:"<<idRes<<endl;
+        return false;
+      }
+
+  }
+
+  // Else we should do the calculation; set available channels
+  bool done = getChannels(idRes);
+  stringstream idStream;
+  idStream << "ID = " << idRes ;
+  if (!done)  infoPtr->errorMsg("Error in SusyResonanceWidths::allowcalc: "
+    "unable to reset decay table.", idStream.str(), true);
+  return done;
 }
 
 //==========================================================================
 
 // The ResonanceSquark class
 // Derived class for Squark resonances
+
+//--------------------------------------------------------------------------
+
+// Set up channels
+
+bool ResonanceSquark::getChannels(int idPDG){
+
+  idPDG = abs(idPDG);
+
+  int ksusy = 1000000;
+  if (idPDG < ksusy) return false;
+  if(idPDG % ksusy >= 7 || idPDG % ksusy < 1) return false;
+
+  ParticleDataEntry* squarkEntryPtr
+    = particleDataPtr->particleDataEntryPtr(idPDG);
+
+  // Delete any decay channels read
+  squarkEntryPtr->clearChannels();
+
+  if(idPDG % 2 == 0) { // up-type squarks
+
+    /*
+    // Gravitino
+    squarkEntryPtr->addChannel(1, 0.0, 103, 1000039, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000039, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000039, 6);
+    */
+
+    // Gaugino - quark
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000024, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000024, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000037, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000037, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000037, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000022, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000022, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000022, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000023, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000023, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000023, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000025, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000025, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000025, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000035, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000035, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000035, 6);
+
+    // Squark - Gauge boson
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000001, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000003, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000005, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000001, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000003, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000005, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000001, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000003, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000005, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000001, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000003, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000005, -37);
+
+    // Gluino - quark
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000021, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000021, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000021, 6);
+
+    // lepton - quark via LQD
+    squarkEntryPtr->addChannel(1, 0.0, 0, -11, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -11, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -11, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -13, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -13, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -13, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -15, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -15, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -15, 5);
+
+    // quark - quark via UDD
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1 ,-3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1 ,-5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -3 ,-5);
+
+
+  } else { //down-type squarks
+
+    // Gaugino - quark
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1000024, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1000037, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1000024, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1000037, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1000024, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -1000037, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000022, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000022, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000022,  5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000023, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000023, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000023, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000025, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000025, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000025, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000035, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000035, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000035, 5);
+
+    // Squark - Gauge boson
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000002, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000004, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000006, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000002, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000004, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000006, -24);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000002, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000004, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000006, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000002, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000004, -37);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 2000006, -37);
+
+    // Gluino - quark
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000021, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000021, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 1000021, 5);
+
+    // lepton - quark via LQD
+    squarkEntryPtr->addChannel(1, 0.0, 0, -12, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -12, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -12, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -14, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -14, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -14, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -16, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -16, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -16, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 12 ,1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 11 ,2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 12, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 11, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 12, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 11, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 14, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 13, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 14, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 13, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 14, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 13, 6);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 16, 1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 15, 2);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 16, 3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 15, 4);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 16, 5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, 15, 6);
+
+
+    // quark - quark via UDD
+    squarkEntryPtr->addChannel(1, 0.0, 0, -2, -1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -2, -3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -2, -5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -4, -1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -4, -3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -4, -5);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -6, -1);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -6, -3);
+    squarkEntryPtr->addChannel(1, 0.0, 0, -6, -5);
+  }
+
+  return true;
+
+}
 
 //--------------------------------------------------------------------------
 
@@ -502,22 +281,22 @@ void ResonanceSquark::calcWidth(bool) {
   else{
     // Two-body decays
     kinFac = (mHat * mHat - mf1 * mf1 - mf2 * mf2);
-    
+
     double fac = 0.0 , wid = 0.0;
-  
+
     //RPV decays
     //Case 1a:  UDD-type
     if (id1Abs < 7 && id2Abs < 7){
-      
+
       // Quark generations
       int iq1 = (id1Abs + 1)/2;
       int iq2 = (id2Abs + 1)/2;
-      
+
       // Check for RPV UDD couplings
       if (!coupSUSYPtr->isUDD) {widNow = 0; return;}
-      
+
       // ~q -> q_i + q_j
-      
+
       fac = 2.0 * kinFac / (16.0 * M_PI * pow(mHat,3));
       wid = 0.0;
       if (idown) {
@@ -540,14 +319,14 @@ void ResonanceSquark::calcWidth(bool) {
                  * coupSUSYPtr->Rusq[isq][isq2+3]);
       }
   }
-    
+
     //Case 1b:  LQD-type
     else if (id1Abs < 17 && id2Abs < 7){
       if (!coupSUSYPtr->isLQD) {widNow = 0; return;}
-      
+
       int ilep = (id1Abs - 9)/2;
       int iq = (id2Abs + 1)/2;
-    
+
       fac = kinFac / (16.0 * M_PI * pow(mHat,3));
       wid = 0.0;
       if (idown){
@@ -571,12 +350,12 @@ void ResonanceSquark::calcWidth(bool) {
                * coupSUSYPtr->rvLQD[ilep][isq2][iq]);
       }
     }
-    
+
     //Case 2: quark + gaugino
     else if (id1Abs > ksusy && id2Abs < 7) {
-      
+
       int iq = (id2Abs + 1)/2;
-      
+
       // ~q -> ~g + q
       if (id1Abs == 1000021 && idRes%10 == id2Abs) {
         // Removed factor of s2W in denominator: strong process -- no EW
@@ -608,11 +387,11 @@ void ResonanceSquark::calcWidth(bool) {
                   - 4.0 * mHat * mf2 * real(coupSUSYPtr->LsuuX[isq][iq][i]
                   * conj(coupSUSYPtr->RsuuX[isq][iq][i]));
           }
-          
+
           // ~q -> chi- + q
           else if (i < 3 && coupSUSYPtr->idChar(i)==id1Abs
             && idRes%2 != id2Abs%2){
-            
+
             fac = alpEM *  preFac / (4.0 * (1 - s2W));
             if (idown)
               wid = kinFac * (norm(coupSUSYPtr->LsduX[isq][iq][i])
@@ -627,17 +406,17 @@ void ResonanceSquark::calcWidth(bool) {
           }
         }
     }
-    
+
     //Case 3: ~q_i -> ~q_j + Z/W
     else if (id1Abs > ksusy && id1Abs%100 < 7
       && (id2Abs == 23 || id2Abs == 24)){
-      
+
       // factor of lambda^(3/2) = ps^(3/2) ;
       fac = alpEM * preFac/(16.0 * pow2(particleDataPtr->m0(id2Abs))
           * (1.0 - s2W)) * pow2(ps) ;
-      
+
       int isq2 = (id1Abs/ksusy == 2) ? (id1Abs%10+1)/2 + 3: (id1Abs%10+1)/2;
-      
+
       if (id2Abs == 23 && id1Abs%2 == idRes%2){
         if (idown)
           wid = norm(coupSUSYPtr->LsdsdZ[isq][isq2]
@@ -653,20 +432,107 @@ void ResonanceSquark::calcWidth(bool) {
           wid = norm(coupSUSYPtr->LsusdW[isq][isq2]);
       }
     }
-    
+
     // TODO: Case ~q_i -> ~q_j + h/H
     widNow = fac * wid * ps * pow2(mHat);
     if (DBSUSY) cout<<idRes<<":: id1:"<<id1Abs<<" id2:"<<id2Abs
                   <<" Width: "<<widNow<<endl;
     return;
   }
-        
+
 }
 
 //==========================================================================
 
 // The ResonanceGluino class
 // Derived class for Gluino resonances
+
+//--------------------------------------------------------------------------
+
+// Set up Channels
+
+bool ResonanceGluino::getChannels(int idPDG){
+
+  idPDG = abs(idPDG);
+  if (idPDG != 1000021) return false;
+
+  ParticleDataEntry* gluinoEntryPtr
+    = particleDataPtr->particleDataEntryPtr(idPDG);
+
+  // Delete any decay channels read
+  gluinoEntryPtr->clearChannels();
+
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000001, -1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000001, 1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000001 ,-3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000001, 3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000001 ,-5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000001, 5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000001 ,-1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000001, 1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000001 ,-3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000001, 3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000001 ,-5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000001, 5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000002 ,-2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000002, 2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000002 ,-4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000002, 4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000002 ,-6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000002, 6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000002 ,-2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000002, 2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000002 ,-4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000002, 4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000002 ,-6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000002, 6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000003 ,-1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000003, 1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000003 ,-3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000003, 3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000003 ,-5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000003, 5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000003 ,-1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000003, 1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000003 ,-3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000003, 3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000003 ,-5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000003, 5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000004 ,-2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000004, 2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000004 ,-4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000004, 4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000004 ,-6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000004, 6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000004 ,-2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000004, 2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000004 ,-4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000004, 4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000004 ,-6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000004, 6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000005 ,-1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000005, 1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000005 ,-3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000005, 3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000005 ,-5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000005, 5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000005 ,-1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000005, 1);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000005 ,-3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000005, 3);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000005 ,-5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000005, 5);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000006 ,-6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000006, 6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000006 ,-2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000006, 2);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 1000006 ,-4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -1000006, 4);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, 2000006 ,-6);
+  gluinoEntryPtr->addChannel(1, 0.0, 0, -2000006, 6);
+
+  return true;
+}
 
 //--------------------------------------------------------------------------
 
@@ -688,6 +554,7 @@ void ResonanceGluino::calcPreFac(bool) {
   return;
 
 }
+
 
 //--------------------------------------------------------------------------
 
@@ -735,17 +602,341 @@ void ResonanceGluino::calcWidth(bool) {
 //
 //--------------------------------------------------------------------------
 
+// Set up Channels
+
+bool ResonanceNeut::getChannels(int idPDG){
+
+  idPDG = abs(idPDG);
+
+  int iNeut = coupSUSYPtr->typeNeut(idPDG);
+  if (iNeut < 1) return false;
+
+  ParticleDataEntry* neutEntryPtr
+    = particleDataPtr->particleDataEntryPtr(idPDG);
+
+  // Delete any decay channels read
+  neutEntryPtr->clearChannels();
+
+  // RPV channels
+
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -13, 11);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 13, -11);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -13, 13);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 13, -13);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -13, 15);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 13, -15);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -15, 11);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 15, -11);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -15, 13);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 15, -13);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -15, 15);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 15, -15);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -11, 11);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 11, -11);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -11, 13);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 11, -13);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -11, 15);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 11, -15);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -15, 11);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 15, -11);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -15, 13);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 15, -13);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -15, 15);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 15, -15);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -11, 11);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 11, -11);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -11, 13);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 11, -13);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -11, 15);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 11, -15);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -13, 11);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 13, -11);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -13, 13);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 13, -13);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -13, 15);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 13, -15);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -1, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 1, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -2, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 2, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -1, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 1, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -2, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 2, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -1, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 1, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -2, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 2, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -3, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 3, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -4, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 4, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -3, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 3, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -4, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 4, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -3, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 3, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -4, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 4, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -5, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 5, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -6, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 6, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -12, -5, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 5, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -6, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 6, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12 ,-5 ,5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 12, 5, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -11, -6, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 11, 6, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -1, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 1, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -2, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 2, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -1, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 1, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -2, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 2, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -1, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 1, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -2, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 2, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -3, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 3, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -4, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 4, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -3, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 3, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -4, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 4, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -3, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 3, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -4, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 4, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -5, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 5, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -6, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 6, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -5, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 5, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -6, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 6, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -14, -5, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 14, 5, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -13, -6, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 13, 6, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -1, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 1, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -2, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 2, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -1, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 1, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -2, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 2, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -1, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 1, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -2, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 2, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -3, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 3, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -4, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 4, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -3, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 3, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -4, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 4, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -3, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 3, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -4, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 4, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -5, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 5, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -6, 1);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 6, -1);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -5, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 5, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -6, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 6, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -16, -5, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 16, 5, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -15, -6, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 15, 6, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -2 ,-1 ,-3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 2, 1, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -2, -1, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 2, 1, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -2, -3, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 2, 3, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -4, -1, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 4, 1, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -4, -1, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 4, 1, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -4, -3, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 4, 3, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -6, -1, -3);
+  neutEntryPtr->addChannel(1, 0.0, 0, 6, 1, 3);
+  neutEntryPtr->addChannel(1, 0.0, 0, -6, -1, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 6, 1, 5);
+  neutEntryPtr->addChannel(1, 0.0, 0, -6, -3, -5);
+  neutEntryPtr->addChannel(1, 0.0, 0, 6, 3, 5);
+
+  if (iNeut > 1) {
+
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000022, 22);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000022, 23);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000022, 25);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000022, 35);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000022, 36);
+
+    if ( iNeut > 2) {
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000023, 22);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000023, 23);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000023, 25);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000023, 35);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000023, 36);
+    }
+
+    if (iNeut > 3) {
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000025, 22);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000025, 23);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000025, 25);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000025, 35);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000025, 36);
+    }
+
+    if (iNeut > 4) {
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000035, 22);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000035, 23);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000035, 25);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000035, 35);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000035, 36);
+    }
+
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000024, -24);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000024, 24);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000037, -24);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000037, 24);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000024, -37);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000024, 37);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000037, -37);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000037, 37);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000011, -11);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000011, 11);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000011, -11);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000011, 11);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000012, -12);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000012, 12);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000013, -13);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000013, 13);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000013, -13);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000013, 13);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000014, -14);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000014, 14);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000015, -15);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000015, 15);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000015, -15);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000015, 15);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000016, -16);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000016, 16);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000001, -1);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000001, 1);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000001, -3);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000001, 3);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000001, -5);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000001, 5);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000001, -1);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000001, 1);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000001, -3);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000001, 3);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000001, -5);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000001, 5);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000002, -2);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000002, 2);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000002, -4);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000002, 4);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000002, -6);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000002, 6);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000002, -2);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000002, 2);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000002, -4);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000002, 4);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000002, -6);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000002, 6);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000003, -1);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000003, 1);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000003, -3);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000003, 3);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000003, -5);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000003, 5);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000003, -1);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000003, 1);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000003, -3);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000003, 3);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000003, -5);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000003, 5);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000004, -2);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000004, 2);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000004, -4);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000004, 4);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000004, -6);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000004, 6);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000004, -2);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000004, 2);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000004, -4);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000004, 4);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000004, -6);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000004, 6);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000005, -1);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000005, 1);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000005, -3);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000005, 3);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000005, -5);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000005, 5);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000005, -1);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000005, 1);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000005, -3);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000005, 3);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000005, -5);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000005, 5);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000006, -6);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000006, 6);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000006, -2);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000006, 2);
+    neutEntryPtr->addChannel(1, 0.0, 0, 1000006, -4);
+    neutEntryPtr->addChannel(1, 0.0, 0, -1000006, 4);
+    neutEntryPtr->addChannel(1, 0.0, 0, 2000006, -6);
+    neutEntryPtr->addChannel(1, 0.0, 0, -2000006, 6);
+
+    // Modes involving right-handed sneutrinos are not included by default,
+    // but can be added by hand, by uncommenting the following lines.
+    // neutEntryPtr->addChannel(1, 0.0, 0, 2000012, -12);
+    // neutEntryPtr->addChannel(1, 0.0, 0, -2000012, 12);
+    // neutEntryPtr->addChannel(1, 0.0, 0, 2000014, -14);
+    // neutEntryPtr->addChannel(1, 0.0, 0, -2000014, 14);
+    // neutEntryPtr->addChannel(1, 0.0, 0, 2000016, -16);
+    // neutEntryPtr->addChannel(1, 0.0, 0, -2000016, 16);
+
+
+
+  }
+  return true;
+}
+
+//--------------------------------------------------------------------------
+
 void ResonanceNeut::initConstants() {
-  
+
   s2W = coupSUSYPtr->sin2W;
 
   // Initialize functions for calculating 3-body widths
-  psi.init(particleDataPtr,coupSUSYPtr);
-  phi.init(particleDataPtr,coupSUSYPtr);
-  upsil.init(particleDataPtr,coupSUSYPtr);
+  // psi.setPointers(particleDataPtr,coupSUSYPtr,infoPtr);
+  // phi.setPointers(particleDataPtr,coupSUSYPtr,infoPtr);
+  // upsil.setPointers(particleDataPtr,coupSUSYPtr,infoPtr);
 
 }
- 
+
 //--------------------------------------------------------------------------
 
 // Calculate various common prefactors for the current mass.
@@ -769,20 +960,20 @@ void  ResonanceNeut::calcWidth(bool){
   if (ps == 0.) return;
   else if (mult ==2){
     // Two-body decays
-    
+
     kinFac = mHat * mHat - mf1 * mf1 + mf2 * mf2;
     kinFac2 = pow(mHat,4) + pow(mf1,4) - 2.0 * pow(mf2,4)
             + pow2(mHat) * pow2(mf2) + pow2(mf1) * pow2(mf2)
             - 2.0 * pow2(mHat) * pow2(mf1);
-    
+
     // Stable lightest neutralino
     if (idRes == 1000022) return;
-    
+
     double fac = 0.0;
     int iNeut1 = coupSUSYPtr->typeNeut(idRes);
     int iNeut2 = coupSUSYPtr->typeNeut(id1Abs);
     int iChar1 = coupSUSYPtr->typeChar(id1Abs);
-    
+
     if (iNeut2>0 && id2Abs == 23){
       // ~chi0_i -> chi0_j + Z
       fac = kinFac2 * (norm(coupSUSYPtr->OLpp[iNeut1][iNeut2])
@@ -794,7 +985,7 @@ void  ResonanceNeut::calcWidth(bool){
     }
     else if (iChar1>0 && id2Abs==24){
       // ~chi0_i -> chi+_j + W- (or c.c.)
-      
+
       fac = kinFac2 * (norm(coupSUSYPtr->OL[iNeut1][iChar1])
           + norm(coupSUSYPtr->OR[iNeut1][iChar1]));
       fac -= 12.0 * mHat * mf1 * pow2(mf2)
@@ -808,7 +999,7 @@ void  ResonanceNeut::calcWidth(bool){
       int iq = (id2Abs + 1 )/ 2;
       int isq = (abs(id1Abs)/1000000 == 2) ? (abs(id1Abs)%10+1)/2 + 3
                                            : (abs(id1Abs)%10+1)/2;
-      
+
       if (idown){
         fac  = kinFac * (norm(coupSUSYPtr->LsddX[isq][iq][iNeut1])
              + norm(coupSUSYPtr->RsddX[isq][iq][iNeut1]));
@@ -830,12 +1021,13 @@ void  ResonanceNeut::calcWidth(bool){
     }
     else if (id1Abs > 1000000 && id1Abs%100 > 10 && id1Abs%100 < 17
       && id2Abs < 17){
+
       // ~chi0_k -> ~l + l
       bool idown = id2Abs%2;
       int il = (id2Abs - 9)/ 2;
       int isl = (abs(id1Abs)/1000000 == 2) ? (abs(id1Abs)%10+1)/2 + 3
                                            : (abs(id1Abs)%10+1)/2;
-      
+
       if (idown){
         fac  = kinFac * (norm(coupSUSYPtr->LsllX[isl][il][iNeut1])
              + norm(coupSUSYPtr->RsllX[isl][il][iNeut1]));
@@ -857,186 +1049,15 @@ void  ResonanceNeut::calcWidth(bool){
   }
   else {
     //RPV 3-body decays
-    //Case: UDD-type
 
-    if (!coupSUSYPtr->isUDD) return;
+    //Case: UDD-type (TO BE RE-DONE to fix bug)
+    return;
 
-    if (id1Abs < 7 && id2Abs < 7 && id3Abs < 7){
-
-      // Check that quarks compatible with UDD structure
-      if ((id1Abs+id2Abs+id3Abs)%2 == 1) return;
-      double rvfac,m12min,m12max,integral;
-      int idInt;
-      
-      // Loop over mass eigenstate in actual propagator
-      for (int idIntRes = 1; idIntRes <= 6; idIntRes++){
-        // Right handed field in the UDD coupling
-        for (int iSq = 1; iSq <= 3; iSq++){
-          double m1, m2, m3, mixfac1(0.), mixfac2(0.), mixfac3(0.);
-          int itemp1,itemp2,itemp3;
-          // up/down-type internal lines
-          for (int itype = 1; itype<=3; itype++){
-            //itype = 1: up
-            //itype = 2: down1
-            //itype = 3: down2
-            if (itype ==1 ) idInt = coupSUSYPtr->idSup(idIntRes);
-            else idInt = coupSUSYPtr->idSdown(idIntRes);
-            if (id1Abs%2 == 0){
-              if (itype == 1){
-                itemp3 = id1Abs;
-                itemp1 = id2Abs;
-                itemp2 = id3Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[iSq][(id2Abs+1)/2][(id3Abs+1)/2]);
-              }else if (itype ==2){
-                itemp3 = id2Abs;
-                itemp1 = id1Abs;
-                itemp2 = id3Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[(id1Abs+1)/2][iSq][(id3Abs+1)/2]);
-              } else{
-                itemp3 = id3Abs;
-                itemp1 = id1Abs;
-                itemp2 = id2Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[(id1Abs+1)/2][(id2Abs+1)/2][iSq]);
-              }
-            }else if (id2Abs%2 == 0){
-              if (itype==1){
-                itemp3 = id2Abs;
-                itemp1 = id1Abs;
-                itemp2 = id3Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[iSq][(id1Abs+1)/2][(id3Abs+1)/2]);
-              }else if (itype ==2){
-                itemp3 = id1Abs;
-                itemp1 = id2Abs;
-                itemp2 = id3Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[(id2Abs+1)/2][iSq][(id3Abs+1)/2]);
-              } else{
-                itemp3 = id3Abs;
-                itemp1 = id2Abs;
-                itemp2 = id1Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[(id2Abs+1)/2][(id2Abs+1)/2][iSq]);
-              }
-            }else{
-              if (itype==1){
-                itemp3 = id3Abs;
-                itemp1 = id1Abs;
-                itemp2 = id2Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[iSq][(id1Abs+1)/2][(id2Abs+1)/2]);
-              }else if (itype ==2){
-                itemp3 = id2Abs;
-                itemp1 = id1Abs;
-                itemp2 = id3Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[(id3Abs+1)/2][iSq][(id2Abs+1)/2]);
-              } else{
-                itemp3 = id3Abs;
-                itemp1 = id1Abs;
-                itemp2 = id2Abs;
-                rvfac = pow2(
-                  coupSUSYPtr->rvUDD[(id3Abs+1)/2][(id1Abs+1)/2][iSq]);
-              }
-              
-            }
-            
-            m1 = particleDataPtr->m0(itemp1);
-            m2 = particleDataPtr->m0(itemp2);
-            m3 = particleDataPtr->m0(itemp3);
-
-            m12min = pow2(m1+m2);
-            m12max = pow2(mHat-m3);
-
-            // Ignore mode when 2-body decay is possible
-            if (mRes > particleDataPtr->m0(idInt)
-              + particleDataPtr->m0(itemp3)) continue;
-            
-            // Single diagram squared terms
-            psi.setInternal(idRes, itemp1, itemp2, itemp3, idInt, 0);
-            // Mixing with R-states
-            if (itype == 1)
-              mixfac1 = norm(coupSUSYPtr->Rusq[idIntRes][iSq+3]);
-            else
-              mixfac1 = norm(coupSUSYPtr->Rdsq[idIntRes][iSq+3]);
-            
-            if (abs(rvfac * mixfac1) > 1.0e-8) {
-              integral =  integrateGauss(&psi,m12min,m12max,1.0e-4);
-              widNow += rvfac * mixfac1 * integral;
-            //   if (DBSUSY || idRes == 1000023)
-            //  cout << scientific << setw(10) <<"Psi: intRes: "<<idInt
-            //       <<" integral:"<<integral<<" mixfac:"<<mixfac1
-            //       <<" widNow:"<<widNow<<endl;
-            }
-            
-            // Mixing of diagrams with different internal squarks
-            // of same isospin
-            for (int idIntRes2 = 1; idIntRes2 <= 6; idIntRes2++){
-              if (idIntRes2 == idIntRes) continue;
-              int idInt2;
-              if (itype == 1 ){
-                idInt2 = coupSUSYPtr->idSup(idIntRes2);
-                mixfac2 = 2.0 * real(coupSUSYPtr->Rusq[idIntRes][iSq+3]
-                        * conj(coupSUSYPtr->Rusq[idIntRes2][iSq+3]));
-              } else {
-                idInt2 = coupSUSYPtr->idSdown(idIntRes2);
-                mixfac2 = 2.0 * real(coupSUSYPtr->Rdsq[idIntRes][iSq+3]
-                        * conj(coupSUSYPtr->Rdsq[idIntRes2][iSq+3]));
-              }
-
-              // Ignore mode when 2-body decay is possible
-              if (mRes > particleDataPtr->m0(idInt2)
-                      + particleDataPtr->m0(itemp3)) continue;
-
-              upsil.setInternal(idRes,itemp1, itemp2,itemp3,idInt,idInt2);
-              if (abs(rvfac * mixfac2) > 0.0) {
-                integral =  integrateGauss(&upsil,m12min,m12max,1.0e-4);
-                widNow += rvfac * mixfac2 * integral;
-                // if (DBSUSY || idRes == 1000023)
-                //   cout << scientific << setw(10) <<"Upsilon: intRes: "
-                //        <<idInt<<" intRes2:"<<idInt2<<" integral:"<<integral
-                //        <<" mixfac:"<<mixfac2<<" widNow:"<<widNow<<endl;
-              }
-            }
-            
-            // Interference between two diagrams with quarks
-            // of different isospin
-
-            for (int idIntRes2 = 1; idIntRes2 <= 6; idIntRes2++){
-              if (itype != 1 && idIntRes2 == idIntRes) continue;
-              int idInt2;
-
-              for (int iSq2 = 1; iSq2 <= 3; iSq2++){
-                if (itype == 1 ){
-                  idInt2 = coupSUSYPtr->idSdown(idIntRes2);
-                  mixfac3 = 2.0 * real(coupSUSYPtr->Rusq[idIntRes][iSq+3]
-                          * conj(coupSUSYPtr->Rdsq[idIntRes2][iSq2+3]));
-                } else {
-                  idInt2 = coupSUSYPtr->idSdown(idIntRes2);
-                  mixfac3 = 2.0 * real(coupSUSYPtr->Rdsq[idIntRes][iSq+3]
-                          * conj(coupSUSYPtr->Rdsq[idIntRes2][iSq2+3]));
-                }
-
-                if (abs(rvfac * mixfac3) > 0.0) {
-                  phi.setInternal(idRes,itemp1, itemp2,itemp3,idInt,idInt2);
-                  //integral = 0;
-                  //if (idIntRes == 2 && iSq2 ==4)
-                  integral =  integrateGauss(&phi,m12min,m12max,1.0e-4);
-                  widNow -= rvfac * mixfac2 * integral;
-                }
-              }
-            }
-          }
-        }
-      }
     }
-    // Normalisation.  Extra factor of 2 to account for the fact that
-    // d_i, d_j will always be ordered in ascending order. N_c! = 6
-    widNow *= 12.0 /(pow3(2.0 * M_PI * mHat) * 32.0);
-  }
+
+  // Normalisation.  Extra factor of 2 to account for the fact that
+  // d_i, d_j will always be ordered in ascending order. N_c! = 6
+  widNow *= 12.0 /(pow3(2.0 * M_PI * mHat) * 32.0);
 
   return;
 }
@@ -1049,13 +1070,100 @@ void  ResonanceNeut::calcWidth(bool){
 
 //--------------------------------------------------------------------------
 
+// Set up Channels
+
+bool ResonanceChar::getChannels(int idPDG){
+
+  idPDG = abs(idPDG);
+  int iChar = coupSUSYPtr->typeChar(idPDG);
+  if (iChar < 1) return false;
+
+  ParticleDataEntry* charEntryPtr
+    = particleDataPtr->particleDataEntryPtr(idPDG);
+
+  // Delete any decay channels read
+  charEntryPtr->clearChannels();
+
+  charEntryPtr->addChannel(1, 0.0, 0, 1000022, 24);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000023, 24);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000025, 24);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000035, 24);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000022, 37);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000023, 37);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000025, 37);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000035, 37);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000012, -11);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000011, 12);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000011, 12);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000014, -13);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000013, 14);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000013, 14);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000016, -15);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000015, 16);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000015, 16);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000002, -1);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000002, -3);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000002, -5);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000002, -1);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000002, -3);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000002, -5);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000001, 2);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000001, 4);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000001, 6);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000001, 2);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000001, 4);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000001, 6);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000004, -1);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000004, -3);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000004, -5);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000004, -1);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000004, -3);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000004, -5);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000003, 2);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000003, 4);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000003, 6);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000003, 2);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000003, 4);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000003, 6);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000006, -1);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000006, -3);
+  charEntryPtr->addChannel(1, 0.0, 0, 1000006, -5);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000006, -1);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000006, -3);
+  charEntryPtr->addChannel(1, 0.0, 0, 2000006, -5);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000005, 2);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000005, 4);
+  charEntryPtr->addChannel(1, 0.0, 0, -1000005, 6);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000005, 2);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000005, 4);
+  charEntryPtr->addChannel(1, 0.0, 0, -2000005, 6);
+
+  if (iChar > 1) {
+    charEntryPtr->addChannel(1, 0.0, 0, 1000024, 23);
+    charEntryPtr->addChannel(1, 0.0, 0, 1000024, 25);
+    charEntryPtr->addChannel(1, 0.0, 0, 1000024, 35);
+    charEntryPtr->addChannel(1, 0.0, 0, 1000024, 36);
+  }
+
+  // Modes involving right-handed sneutrinos are not included by default,
+  // but can be added by hand, by uncommenting the following lines.
+  // charEntryPtr->addChannel(1, 0.0, 0, 2000012, -11);
+  // charEntryPtr->addChannel(1, 0.0, 0, 2000014, -13);
+  // charEntryPtr->addChannel(1, 0.0, 0, 2000016, -15);
+
+  return true;
+
+}
+
+//--------------------------------------------------------------------------
+
 void ResonanceChar::initConstants() {
 
   s2W = coupSUSYPtr->sin2W;
   return;
 
 }
- 
+
 //--------------------------------------------------------------------------
 
 // Calculate various common prefactors for the current mass.
@@ -1083,11 +1191,11 @@ void  ResonanceChar::calcWidth(bool) {
     kinFac2 = pow(mHat,4) + pow(mf1,4) - 2.0 * pow(mf2,4)
       + pow2(mHat) * pow2(mf2) + pow2(mf1)
       * pow2(mf2) - 2.0 * pow2(mHat) * pow2(mf1);
-    
+
     int idChar1 = coupSUSYPtr->typeChar(idRes);
     int idChar2 = coupSUSYPtr->typeChar(id1Abs);
     int idNeut1 = coupSUSYPtr->typeNeut(id1Abs);
-    
+
     if (idChar2>0 && id2Abs == 23){
       // ~chi_i -> chi_j + Z
       fac = kinFac2 * (norm(coupSUSYPtr->OLp[idChar1][idChar2])
@@ -1099,7 +1207,7 @@ void  ResonanceChar::calcWidth(bool) {
     }
     else if (idNeut1>0 && id2Abs==24){
       // ~chi_i -> chi0_j + W- (or c.c.)
-      
+
       fac  = kinFac2 * (norm(coupSUSYPtr->OL[idNeut1][idChar1])
            + norm(coupSUSYPtr->OR[idNeut1][idChar1]));
       fac -= 12.0 * mHat * mf1 * pow2(mf2)
@@ -1113,7 +1221,7 @@ void  ResonanceChar::calcWidth(bool) {
       int iq = (id2Abs + 1 )/ 2;
       int isq = (abs(id1Abs)/1000000 == 2) ? (abs(id1Abs)%10+1)/2 + 3
                                            : (abs(id1Abs)%10+1)/2;
-      
+
       if (idown){
         fac  = kinFac * (norm(coupSUSYPtr->LsduX[isq][iq][idChar1])
              + norm(coupSUSYPtr->RsduX[isq][iq][idChar1]));
@@ -1141,7 +1249,7 @@ void  ResonanceChar::calcWidth(bool) {
       int il = (id2Abs - 9)/ 2;
       int isl = (abs(id1Abs)/1000000 == 2) ? (abs(id1Abs)%10+1)/2 + 3
                                            : (abs(id1Abs)%10+1)/2;
-      
+
       if (idown){
         fac  = kinFac * (norm(coupSUSYPtr->LslvX[isl][il][idChar1])
              + norm(coupSUSYPtr->RslvX[isl][il][idChar1]));
@@ -1166,10 +1274,97 @@ void  ResonanceChar::calcWidth(bool) {
   return;
 }
 
-
 //==========================================================================
 // The ResonanceSlepton class
 // Derived class for Slepton (and sneutrino) resonances
+
+//--------------------------------------------------------------------------
+
+// Set up Channels
+
+bool ResonanceSlepton::getChannels(int idPDG){
+
+  idPDG = abs(idPDG);
+
+  int ksusy = 1000000;
+  if (idPDG < ksusy) return false;
+  if(idPDG % ksusy < 7 || idPDG % ksusy > 17) return false;
+
+  ParticleDataEntry* slepEntryPtr
+    = particleDataPtr->particleDataEntryPtr(idPDG);
+
+  // Delete any decay channels read
+  slepEntryPtr->clearChannels();
+
+  if(idPDG % 2 == 1) {
+
+    slepEntryPtr->addChannel(1, 0.0, 0, -1000024, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, -1000037, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000023, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000025, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000035, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000016, -24);
+    slepEntryPtr->addChannel(1, 0.0, 0, 2000016, -24);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000016, -37);
+    slepEntryPtr->addChannel(1, 0.0, 0, 2000016, -37);
+    slepEntryPtr->addChannel(1, 0.0, 0, 12, 13);
+    slepEntryPtr->addChannel(1, 0.0, 0, 12, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 14, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, 14, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 16, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, 16, 13);
+    slepEntryPtr->addChannel(1, 0.0, 0, -12, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, -12, 13);
+    slepEntryPtr->addChannel(1, 0.0, 0, -12, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, -14, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, -14, 13);
+    slepEntryPtr->addChannel(1, 0.0, 0, -14, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, -2, 1);
+    slepEntryPtr->addChannel(1, 0.0, 0, -2, 3);
+    slepEntryPtr->addChannel(1, 0.0, 0, -2, 5);
+    slepEntryPtr->addChannel(1, 0.0, 0, -4, 1);
+    slepEntryPtr->addChannel(1, 0.0, 0, -4, 3);
+    slepEntryPtr->addChannel(1, 0.0, 0, -4, 5);
+    slepEntryPtr->addChannel(1, 0.0, 0, -6, 1);
+    slepEntryPtr->addChannel(1, 0.0, 0, -6, 3);
+    slepEntryPtr->addChannel(1, 0.0, 0, -6, 5);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 111, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 113, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 900111, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 16, 12, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 16, 14, 13);
+
+   } else {
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000024, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000037, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000022, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000023, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000025, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000035, 16);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000015, 24);
+    slepEntryPtr->addChannel(1, 0.0, 0, 2000015, 24);
+    slepEntryPtr->addChannel(1, 0.0, 0, 1000015, 37);
+    slepEntryPtr->addChannel(1, 0.0, 0, 2000015, 37);
+    slepEntryPtr->addChannel(1, 0.0, 0, -11, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, -11, 13);
+    slepEntryPtr->addChannel(1, 0.0, 0, -11, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, -13, 11);
+    slepEntryPtr->addChannel(1, 0.0, 0, -13, 13);
+    slepEntryPtr->addChannel(1, 0.0, 0, -13, 15);
+    slepEntryPtr->addChannel(1, 0.0, 0, -1, 1);
+    slepEntryPtr->addChannel(1, 0.0, 0, -1, 3);
+    slepEntryPtr->addChannel(1, 0.0, 0, -1, 5);
+    slepEntryPtr->addChannel(1, 0.0, 0, -3, 1);
+    slepEntryPtr->addChannel(1, 0.0, 0, -3, 3);
+    slepEntryPtr->addChannel(1, 0.0, 0, -3, 5);
+    slepEntryPtr->addChannel(1, 0.0, 0, -5, 1);
+    slepEntryPtr->addChannel(1, 0.0, 0, -5, 3);
+    slepEntryPtr->addChannel(1, 0.0, 0, -5, 5);
+  }
+
+  return true;
+}
 
 //--------------------------------------------------------------------------
 
@@ -1179,6 +1374,9 @@ void ResonanceSlepton::initConstants() {
 
   // Locally stored properties and couplings.
   s2W = coupSUSYPtr->sin2W;
+
+  // Initialize functions for calculating 3-body widths
+  stauWidths.setPointers(particleDataPtr,coupSUSYPtr,infoPtr);
 
 }
 
@@ -1205,18 +1403,59 @@ void ResonanceSlepton::calcWidth(bool) {
   int isl = (abs(idRes)/ksusy == 2) ? (abs(idRes)%10+1)/2 + 3
                                     : (abs(idRes)%10+1)/2;
   int il = (id2Abs-9)/2;
-  bool islep = idRes%2;
+  bool islep = abs(idRes)%2;
 
   // Check that mass is above threshold.
   if (ps == 0.) return;
-  else{
-    // Two-body decays
-    kinFac = (mHat * mHat - mf1 * mf1 - mf2 * mf2);
-    
-    double fac = 0.0 , wid = 0.0;
+  widNow = 0.0;
 
-    //Case 1: RPV: To be implemented
-    //Case 2: slepton + gaugino
+  double fac = 0.0 , wid = 0.0;
+
+  if (mult == 2) {
+    // Two-body decays
+
+    kinFac = (mHat * mHat - mf1 * mf1 - mf2 * mf2);
+    fac = kinFac / (16.0 * M_PI * pow(mHat,3));
+
+    // Case 1: RPV decays
+    if (id1Abs < 17 && id2Abs < 17)  {
+
+      wid = 0;
+      int il2 = (id1Abs - 9)/2;
+
+      //Case 1a: RPV LLE
+      if(id1Abs > 10 && id2Abs > 10) {
+        if (!coupSUSYPtr->isLLE) { widNow = 0.0; return;}
+
+        if (!islep){ // sneutrino
+          for (int isl2=1; isl2<3; isl2++)
+            wid += norm(coupSUSYPtr->Rsv[isl][isl2]
+                 * coupSUSYPtr->rvLLE[il][isl2][il2]);
+        } else {
+          for (int isl2=1; isl2<3; isl2++)
+            wid += norm(coupSUSYPtr->Rsl[isl][isl2+3]
+                 * coupSUSYPtr->rvLLE[isl2][il][il2]);
+        }
+      }
+      //Case 1b: RPV LQD
+      if(id1Abs < 10 && id2Abs < 10) {
+        if (!coupSUSYPtr->isLQD) { widNow = 0.0; return;}
+        if (!islep){ // sneutrino
+          for (int isl2=1; isl2<3; isl2++)
+            wid += norm(coupSUSYPtr->Rsv[isl][isl2]
+                 * coupSUSYPtr->rvLQD[isl2][id1Abs][id2Abs]);
+          wid *= 3.0; // colour factor
+
+        } else {
+          for (int isl2=1; isl2<3; isl2++)
+            wid += norm(coupSUSYPtr->Rsl[isl][isl2+3]
+                 * coupSUSYPtr->rvLLE[isl2][id1Abs][id2Abs]);
+          wid *= 3.0; // colour factor
+        }
+      }
+    }
+
+    //Case 2: lepton + gaugino
 
     if (id1Abs > ksusy && id2Abs > 10 && id2Abs < 17) {
       for (int i=1; i<6 ; i++){
@@ -1234,11 +1473,11 @@ void ResonanceSlepton::calcWidth(bool) {
                 - 4.0 * mHat * mf2 * real(coupSUSYPtr->LsvvX[isl][il][i]
                 * conj(coupSUSYPtr->RsvvX[isl][il][i]));
         }
-        
+
         // ~ell/~nu -> ~chi- + nu/ell
         else if (i < 3 && coupSUSYPtr->idChar(i)==id1Abs
           && idRes%2 != id2Abs%2){
-          
+
           fac = alpEM *  preFac / (4.0 * (1 - s2W));
           if (islep)
             wid = kinFac * (norm(coupSUSYPtr->LslvX[isl][il][i])
@@ -1253,16 +1492,16 @@ void ResonanceSlepton::calcWidth(bool) {
         }
       }
     }
-    
+
     //Case 3: ~l_i -> ~l_j + Z/W
     else if (id1Abs > ksusy+10 && id1Abs%100 < 17
       && (id2Abs == 23 || id2Abs == 24)){
-      
+
       // factor of lambda^(3/2) = ps^3;
       fac = alpEM * preFac/(16.0 * pow2(mf2) * (1.0 - s2W)) * pow2(ps) ;
-      
+
       int isl2 = (id1Abs/ksusy == 2) ? (id1Abs%10+1)/2 + 3: (id1Abs%10+1)/2;
-      
+
       if (id2Abs == 23 && id1Abs%2 == idRes%2){
         if (islep)
           wid = norm(coupSUSYPtr->LslslZ[isl][isl2]
@@ -1278,111 +1517,36 @@ void ResonanceSlepton::calcWidth(bool) {
           wid = norm(coupSUSYPtr->LslsvW[isl][isl2]);
       }
     }
-    
+
     // TODO: Case ~l_i -> ~l_j + h/H
-    
-    
+
     widNow = fac * wid * ps * pow2(mHat);
+
     if (DBSUSY) cout<<idRes<<":: id1:"<<id1Abs<<" id2:"<<id2Abs
-                  <<" Width: "<<widNow<<endl;
-    return;
+                    <<" Width: "<<widNow<<endl;
   }
-        
+  else { // Case 4: special many-body stau decays
+    // Case 4a: ~tau -> pi0 nu_tau ~chi0
+    // Case 4b: ~tau -> rho/a1 nu_tau ~chi0
+    // Case 4c: ~tau -> l nu_l nu_tau ~chi0
+
+    // Check that there is a stau component
+    double staufac = norm(coupSUSYPtr->Rsl[isl][3])
+                   + norm(coupSUSYPtr->Rsl[isl][6]);
+    if (staufac < 1.0e-6 || abs(mRes - particleDataPtr->m0(15)) > 0.0 ) return;
+    if(id2Abs > 17)
+      widNow = stauWidths.getWidth(idRes, id2Abs);
+    else
+      widNow = stauWidths.getWidth(idRes, id3Abs);
+
+    widNow *= staufac;
+
+  }
+
+  return;
+
 }
 
 //==========================================================================
 
-// Gaussian Integrator for 3-body decay widths
-
-double SUSYResonanceWidths::integrateGauss(WidthFunction* widthFn,
-  double xlo, double xhi, double tol) {
-
-  //8-point unweighted
-  static double x8[4]={0.96028985649753623,
-                       0.79666647741362674,
-                       0.52553240991632899,
-                       0.18343464249564980};
-  static double w8[4]={0.10122853629037626,
-                       0.22238103445337447,
-                       0.31370664587788729,
-                       0.36268378337836198};
-  //16-point unweighted
-  static double x16[8]={0.98940093499164993,
-                       0.94457502307323258,
-                       0.86563120238783174,
-                       0.75540440835500303,
-                       0.61787624440264375,
-                       0.45801677765722739,
-                       0.28160355077925891,
-                       0.09501250983763744};
-  static double w16[8]={0.027152459411754095,
-                       0.062253523938647893,
-                       0.095158511682492785,
-                       0.12462897125553387,
-                       0.14959598881657673,
-                       0.16915651939500254,
-                       0.18260341504492359,
-                       0.18945061045506850};
-  //boundary checks
-  if (xlo == xhi) {
-    cerr<<"xlo = xhi"<<endl;
-    return 0.0;
-  }
-  if (xlo > xhi) {
-    cerr<<" (integrateGauss:) -> xhi < xlo"<<endl;
-    return 0.0;
-  }
-  //initialize
-  double sum = 0.0;
-  double c = 0.001/abs(xhi-xlo);
-  double zlo = xlo;
-  double zhi = xhi;
-    
-  bool nextbin = true;
-  
-  while ( nextbin ) {
-    
-    double zmi = 0.5*(zhi+zlo); // midpoint
-    double zmr = 0.5*(zhi-zlo); // midpoint, relative to zlo
-    
-    //calculate 8-point and 16-point quadratures
-    double s8=0.0;
-    for (int i=0;i<4;i++) {
-      double dz = zmr * x8[i];
-      s8 += w8[i]*(widthFn->function(zmi+dz) + widthFn->function(zmi-dz));
-    }
-    s8 *= zmr;
-    double s16=0.0;
-    for (int i=0;i<8;i++) {
-      double dz = zmr * x16[i];
-      s16 += w16[i]*(widthFn->function(zmi+dz) + widthFn->function(zmi-dz));
-    }
-    s16 *= zmr;
-    if (abs(s16-s8) < tol*(1+abs(s16))) {
-      //precision in this bin OK, add to cumulative and go to next
-      nextbin=true;
-      sum += s16;
-      //next bin: LO = end of current, HI = end of integration region.
-      zlo=zhi;
-      zhi=xhi;
-      if ( zlo == zhi ) nextbin = false;
-    } else {
-      //precision in this bin not OK, subdivide.
-      if (1.0 + c*abs(zmr) == 1.0) {
-        cerr << " (integrateGauss:) too high accuracy required"<<endl;
-        sum = 0.0 ;
-        break;
-      }
-      zhi=zmi;
-      nextbin=true;
-    }
-  }
-
-  return sum;
-}
-
-//======================================================================
-
 } //end namespace Pythia8
-
-

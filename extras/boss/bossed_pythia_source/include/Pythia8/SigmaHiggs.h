@@ -1,5 +1,5 @@
 // SigmaHiggs.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Part of code written by Marc Montull, CERN summer student 2007.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -13,7 +13,7 @@
 #include "Pythia8/SigmaProcess.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> H0 (SM), H1, H2 or A3 (BSM).
@@ -55,7 +55,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> H0 (SM), H1, H2 or A3 (BSM).
@@ -97,7 +97,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for gamma gamma -> H0 (SM Higgs), H1, H2 or A3 (BSM Higgs).
@@ -139,7 +139,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> H Z0.
@@ -183,7 +183,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> H W+- (Standard Model Higgs).
@@ -228,7 +228,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for f f' -> H f f' (Z0 Z0 fusion of SM or BSM Higgs).
@@ -276,7 +276,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for f_1 f_2 -> H f_3 f_4 (W+ W- fusion of SM or BSM Higgs).
@@ -324,7 +324,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> H Q Qbar (Q Qbar fusion of SM or BSM Higgs).
@@ -376,7 +376,7 @@ private:
   string nameSave;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> H Q Qbar (Q Qbar fusion of SM or BSM Higgs).
@@ -428,7 +428,7 @@ private:
   string nameSave;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> H q (SM or BSM Higgs).
@@ -472,7 +472,7 @@ private:
   string nameSave;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> H0 g (SM or BSM Higgs via heavy top loop).
@@ -513,7 +513,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> H q (SM or BSM Higgs via heavy top loop).
@@ -554,7 +554,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> H g (SM or BSM Higgs via heavy top loop).
@@ -595,7 +595,7 @@ private:
   int    higgsType, codeSave, idRes;
   string nameSave;
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar' -> H+-.
@@ -636,7 +636,7 @@ private:
          widthOutPos, widthOutNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> H+- q'.
@@ -679,7 +679,7 @@ private:
   double m2W, thetaWRat, tan2Beta, sigma, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> A0(H_3) h0(H_1) or A0(H_3) H0(H_2).
@@ -721,7 +721,7 @@ private:
   double coupZA3H12, m2Z, mGammaZ, thetaWRat, openFrac, sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> H+- h0(H_1) or H+- H0(H_2).
@@ -764,7 +764,7 @@ private:
          sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> H+ H-.
@@ -804,7 +804,7 @@ private:
   double m2Z, mGammaZ, thetaWRat, eH, lH, openFrac, gamSig, intSig, resSig;
 
 };
-  
+
 //==========================================================================
 
 } // end namespace Pythia8

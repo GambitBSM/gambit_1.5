@@ -1,5 +1,5 @@
 // SigmaSUSY.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -16,7 +16,7 @@
 #include "Pythia8/SusyCouplings.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // An intermediate class for SUSY 2 -> 2 with nontrivial decay angles.
@@ -32,7 +32,7 @@ public:
   virtual double weightDecay( Event& process, int iResBeg, int iResEnd);
 
  };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> neutralino_i neutralino_j.
@@ -116,7 +116,7 @@ public:
 
   // Constructor.
   Sigma2qqbar2charchi0(int id3chiIn, int id4chiIn, int codeIn) {
-    
+
     // Save ordering indices and process code
     id3chi   = id3chiIn;
     id4chi   = id4chiIn;
@@ -136,7 +136,7 @@ public:
 
   // Calculate flavour-independent parts of cross section.
   virtual void sigmaKin();
-  
+
   // Evaluate d(sigmaHat)/d(tHat).
   virtual double sigmaHat();
 
@@ -172,7 +172,7 @@ public:
 
   // Calculate flavour-independent parts of cross section.
   virtual void sigmaKin();
-  
+
   // Evaluate d(sigmaHat)/d(tHat).
   virtual double sigmaHat();
 
@@ -282,6 +282,9 @@ public:
   // Initialize process.
   virtual void initProc();
 
+  // Calculate flavour-independent parts of cross section.
+  virtual void sigmaKin();
+
   // Evaluate d(sigmaHat)/d(tHat).
   virtual double sigmaHat();
 
@@ -344,7 +347,7 @@ private:
   // Basic process information
   int     id3Sav, id4Sav, codeSave, iGen3, iGen4, nNeut;
   string  nameSave;
-  bool    isUD;
+  bool    isUD, onlyQCD;
 
   // Storage of mass squares
   double m2Glu;
@@ -414,7 +417,7 @@ private:
   // Basic process information
   int     id3Sav, id4Sav, codeSave, iGen3, iGen4, nNeut;
   string  nameSave;
-  bool    isUD, isCC;
+  bool    isUD, isCC, onlyQCD;
 
   // Storage of mass squares
   double m2Glu;
@@ -641,7 +644,7 @@ public:
 
   // Constructor.
   Sigma1qq2antisquark() {}
-  
+
 
   Sigma1qq2antisquark(int id3In) {
 
@@ -759,7 +762,7 @@ public:
 
   // Constructor.
   Sigma2qqbar2chargluino(int id4chiIn, int codeIn) {
-    
+
     // Save ordering indices and process code
     id3   = 1000021;
     id4chi   = id4chiIn;
@@ -775,7 +778,7 @@ public:
 
   // Calculate flavour-independent parts of cross section.
   virtual void sigmaKin();
-  
+
   // Evaluate d(sigmaHat)/d(tHat).
   virtual double sigmaHat();
 
@@ -864,4 +867,3 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_SigmaSUSY_H
-

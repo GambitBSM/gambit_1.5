@@ -1,5 +1,5 @@
 // SigmaQCD.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -12,7 +12,7 @@
 #include "Pythia8/SigmaProcess.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // A derived class for minimum-bias (inelastic, nondiffractive) events.
@@ -38,7 +38,7 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for elastic scattering A B -> A B.
@@ -64,7 +64,7 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for single diffractive scattering A B -> X B.
@@ -91,7 +91,7 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for single diffractive scattering A B -> A X.
@@ -118,7 +118,7 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for double diffractive scattering A B -> X X.
@@ -157,10 +157,10 @@ public:
 
   // Constructor.
   Sigma0AB2AXB() {}
-  
+
   // Evaluate sigma.
   virtual double sigmaHat() {return sigmaTotPtr->sigmaAXB();}
-  
+
   // Select flavour, colour and anticolour.
   virtual void setIdColAcol();
 
@@ -245,7 +245,7 @@ private:
   double mNew, m2New, sigTS, sigUS, sigSum, sigma;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> q g (q = u, d, s, c, b).
@@ -278,7 +278,7 @@ private:
   double sigTS, sigTU, sigSum, sigma;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar' -> q qbar' or q q' -> q q'
@@ -311,7 +311,7 @@ public:
   double sigT, sigU, sigTU, sigST, sigSum;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> g g.
@@ -343,7 +343,7 @@ public:
   double sigTS, sigUS, sigSum, sigma;
 
 };
-  
+
 //==========================================================================
 
 // A derived class for q qbar -> q' qbar'.
@@ -382,7 +382,7 @@ public:
   double mNew, m2New, sigS, sigma;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> Q Qbar (Q = c, b or t).
@@ -424,7 +424,7 @@ public:
   double sigTS, sigUS, sigSum, sigma, openFracPair;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> Q Qbar (Q = c, b or t).

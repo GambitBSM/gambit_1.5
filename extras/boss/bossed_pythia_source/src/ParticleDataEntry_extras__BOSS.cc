@@ -1,9 +1,10 @@
 #include <string>
+#include "Pythia8/ResonanceWidths.h"
 #include "Pythia8/ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_DecayChannel.h"
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_DecayChannel.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -211,6 +212,18 @@ Pythia8::Abstract_DecayChannel* Pythia8::ParticleDataEntry::pickChannel__BOSS()
 }
 
 
+void Pythia8::ParticleDataEntry::setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths* resonancePtrIn)
+{
+    setResonancePtr(dynamic_cast< Pythia8::ResonanceWidths* >(resonancePtrIn));
+}
+
+
+Pythia8::Abstract_ResonanceWidths* Pythia8::ParticleDataEntry::getResonancePtr__BOSS()
+{
+    return getResonancePtr();
+}
+
+
 void Pythia8::ParticleDataEntry::resInit__BOSS(Pythia8::Abstract_Info* infoPtrIn, Pythia8::Abstract_Settings* settingsPtrIn, Pythia8::Abstract_ParticleData* particleDataPtrIn, Pythia8::Abstract_Couplings* couplingsPtrIn)
 {
     resInit(dynamic_cast< Pythia8::Info* >(infoPtrIn), dynamic_cast< Pythia8::Settings* >(settingsPtrIn), dynamic_cast< Pythia8::ParticleData* >(particleDataPtrIn), dynamic_cast< Pythia8::Couplings* >(couplingsPtrIn));
@@ -261,7 +274,7 @@ double Pythia8::ParticleDataEntry::resWidthChan__BOSS(double mHat)
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_ParticleDataEntry* Pythia8::ParticleDataEntry::pointerCopy__BOSS()
 {

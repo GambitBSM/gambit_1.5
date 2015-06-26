@@ -41,8 +41,9 @@ class WrapperBase
             return *this;        
         }
 
+
         // Destructor
-        virtual ~WrapperBase()
+        ~WrapperBase()
         {
             if (not skip_delete)
             {
@@ -54,7 +55,7 @@ class WrapperBase
             }
         }
 
-
+ 
     protected:
 
         // Function used to return pointer-to-wrapper

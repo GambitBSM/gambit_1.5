@@ -1,5 +1,5 @@
 // PhaseSpace.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -31,7 +31,7 @@ namespace Pythia8 {
 
 // Forward reference to the UserHooks class.
 class UserHooks;
- 
+
 //==========================================================================
 
 // PhaseSpace is a base class for  phase space generators
@@ -81,7 +81,7 @@ public:
 
   // For Les Houches with negative event weight needs
   virtual double sigmaSumSigned() const {return sigmaMx;}
-  
+
   // Give back constructed four-vectors and known masses.
   Vec4   p(int i)   const {return pH[i];}
   double m(int i)   const {return mH[i];}
@@ -140,7 +140,7 @@ protected:
 
   // Pointer to Standard Model couplings.
   Couplings*         couplingsPtr;
-  
+
   // Pointer to the total/elastic/diffractive cross section object.
   SigmaTotal*   sigmaTotPtr;
 
@@ -155,12 +155,13 @@ protected:
          increaseMaximum;
   int    gmZmodeGlobal;
   double mHatGlobalMin, mHatGlobalMax, pTHatGlobalMin, pTHatGlobalMax,
-         pTHatMinDiverge, minWidthBreitWigners, mRecalculate;
- 
+         pTHatMinDiverge, minWidthBreitWigners;
+
   // Information on incoming beams.
   int    idA, idB;
   double mA, mB, eCM, s;
-  bool   hasLeptonBeams, hasPointLeptons;
+  bool   hasLeptonBeamA, hasLeptonBeamB, hasOneLeptonBeam,
+         hasTwoLeptonBeams, hasOnePointLepton, hasTwoPointLeptons;
 
  // Cross section information.
   bool   newSigmaMx, canModifySigma, canBiasSelection, canBias2Sel;
@@ -175,8 +176,8 @@ protected:
   // Event-specific kinematics properties, almost always available.
   double x1H, x2H, m3, m4, m5, s3, s4, s5, mHat, sH, tH, uH, pAbs, p2Abs,
          pTH, theta, phi, betaZ;
-  Vec4   pH[6];
-  double mH[6];
+  Vec4   pH[12];
+  double mH[12];
 
   // Reselect decay products momenta isotropically in phase space.
   void decayKinematicsStep( Event& process, int iRes);
@@ -249,7 +250,7 @@ protected:
   //  return ((x >= 0.) ? tmp : -tmp); }
 
 };
- 
+
 //==========================================================================
 
 // A derived class with 2 -> 1 kinematics set up in tau, y.
@@ -278,7 +279,7 @@ private:
   bool setupMass();
 
 };
- 
+
 //==========================================================================
 
 // A derived class with 2 -> 2 kinematics set up in tau, y, z = cos(theta).
@@ -316,7 +317,7 @@ private:
   bool constrainedM4();
 
 };
- 
+
 //==========================================================================
 
 // A derived class with 2 -> 2 kinematics set up for elastic scattering.
@@ -350,7 +351,7 @@ private:
  AlphaEM alphaEM;
 
 };
- 
+
 //==========================================================================
 
 // A derived class with 2 -> 2 kinematics set up for diffractive scattering.
@@ -386,11 +387,11 @@ private:
   double m3ElDiff, m4ElDiff, s1, s2, lambda12, lambda34, tLow, tUpp,
          cRes, sResXB, sResAX, sProton, bMin, bSlope, bSlope1, bSlope2,
          probSlope1, xIntPF, xtCorPF, mp24DL, coefDL, tAux, tAux1, tAux2;
-    
+
   // Parameters for MBR model.
   double sdpmax, ddpmax, dymin0, dymax, amx, am1, am2, t;
   double eps, alph, alph2, m2min, dyminSD, dyminDD, dyminSigSD, dyminSigDD;
-  
+
 };
 
 //==========================================================================
@@ -414,11 +415,11 @@ public:
   virtual bool isResolved() const {return false;}
 
  private:
-  
+
   // Constants: could only be changed in the code itself.
   static const int    NTRY, NINTEG2;
   static const double EXPMAX, DIFFMASSMIN, DIFFMASSMARGIN;
-    
+
   // Local variables to calculate DPE kinematics.
   int    PomFlux;
   double epsilonPF, alphaPrimePF, s1, s2, m5min, s5min, tLow[2], tUpp[2],
@@ -429,7 +430,7 @@ public:
   Vec4   p1, p2, p3, p4, p5;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for nondiffractive events. Hardly does anything, since
@@ -451,7 +452,7 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class with 2 -> 3 kinematics 1 + 2 -> 3 + 4 + 5 set up in
@@ -488,7 +489,7 @@ private:
   bool trialMasses();
 
 };
- 
+
 //==========================================================================
 
 // A derived class with 2 -> 3 kinematics 1 + 2 -> 3 + 4 + 5 set up in
@@ -565,4 +566,3 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_PhaseSpace_H
- 

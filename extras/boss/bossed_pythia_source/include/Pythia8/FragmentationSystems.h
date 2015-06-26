@@ -1,5 +1,5 @@
 // FragmentationSystems.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -21,14 +21,14 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The ColSinglet class contains info on an individual singlet.
 // Only to be used inside ColConfig, so no private members.
 
 class ColSinglet {
-  
+
 public:
 
   // Constructors.
@@ -49,9 +49,9 @@ public:
   Vec4   pSum;
   double mass, massExcess;
   bool   hasJunction, isClosed, isCollected;
-  
+
 };
- 
+
 //==========================================================================
 
 // The ColConfig class describes the colour configuration of the whole event.
@@ -104,7 +104,7 @@ private:
 
   // Initialization data, to be read from Settings.
   double mJoin, mJoinJunction, mStringMin;
- 
+
   // List of all separate colour singlets.
   vector<ColSinglet> singlets;
 
@@ -113,7 +113,7 @@ private:
     double massExcessIn);
 
 };
- 
+
 //==========================================================================
 
 // The StringRegion class contains the information related to
@@ -153,7 +153,7 @@ public:
   double py() const {return pyProj;}
 
 };
- 
+
 //==========================================================================
 
 // The StringSystem class contains the complete set of all string regions.
@@ -190,7 +190,7 @@ public:
   double mJoin, m2Join;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

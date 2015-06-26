@@ -1,5 +1,5 @@
 // HelicityMatrixElements.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Philip Ilten, Torbjorn Sjostrand.
+// Copyright (C) 2015 Philip Ilten, Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -30,7 +30,7 @@ public:
   virtual ~HelicityMatrixElement() {};
 
   // Initialize the physics matrices and pointers.
-  virtual void initPointers(ParticleData*, Couplings*);
+  virtual void initPointers(ParticleData*, Couplings*, Settings* = 0);
 
   // Initialize the channel.
   virtual HelicityMatrixElement* initChannel(vector<HelicityParticle>&);
@@ -79,7 +79,7 @@ protected:
 
   // Particle mass vector.
   vector< double > pM;
-  
+
   // Wave functions.
   vector< vector< Wave4 > > u;
 
@@ -95,8 +95,11 @@ protected:
   // Pointer to Standard Model constants.
   Couplings*    couplingsPtr;
 
+  // Pointer to Settings.
+  Settings*     settingsPtr;
+
 private:
-    
+
   // Recursive sub-method to calculate the density matrix for a particle.
   void calculateRho(unsigned int, vector<HelicityParticle>&,
     vector<int>&, vector<int>&, unsigned int);
@@ -121,46 +124,11 @@ private:
 
 //==========================================================================
 
-// Helicity matrix element for the hard process of two fermions -> W ->
+// Helicity matrix element for the hard process of two fermions -> W/W' ->
 // two fermions.
-  
+
 class HMETwoFermions2W2TwoFermions : public HelicityMatrixElement {
 
-public:
-
-  void initWaves(vector<HelicityParticle>&);
-
-  complex calculateME(vector<int>);
-
-};
-
-//==========================================================================
-
-// Helicity matrix element for the hard process of two fermions ->
-// photon -> two fermions.
-
-class HMETwoFermions2Gamma2TwoFermions : public HelicityMatrixElement {
-
-public:
-
-  void initWaves(vector<HelicityParticle>&);
-
-  complex calculateME(vector<int>);
-
-private:
-
-  // Fermion line charge and interaction energy.
-  double p0Q, p2Q, s;
-
-};
-
-//==========================================================================
-
-// Helicity matrix element for the hard process of two fermions ->
-// Z -> two fermions.
-  
-class HMETwoFermions2Z2TwoFermions : public HelicityMatrixElement {
-    
 public:
 
   void initConstants();
@@ -174,57 +142,75 @@ private:
   // Vector and axial couplings.
   double p0CA, p2CA, p0CV, p2CV;
 
-  // Weinberg angle, Z width (on-shell), Z mass (on-shell), and s.
-  double cos2W, sin2W, zG, zM, s;
-
-  // Bool whether the incoming fermions are oriented with the z-axis.
-  bool zaxis;
-
 };
 
 //==========================================================================
 
 // Helicity matrix element for the hard process of two fermions ->
-// photon/Z -> two fermions with full interference.
+// photon/Z/Z' -> two fermions.
 
-// In general the initPointers and initChannel methods should not need to be
-// redeclared, but in this case each matrix element needs to be initialized.
-  
 class HMETwoFermions2GammaZ2TwoFermions : public HelicityMatrixElement {
 
 public:
 
-  HelicityMatrixElement* initChannel(vector<HelicityParticle>&);
+  void initConstants();
 
-  void initPointers(ParticleData*, Couplings*);
-  
   void initWaves(vector<HelicityParticle>&);
 
   complex calculateME(vector<int>);
 
 private:
-  
-  HMETwoFermions2Z2TwoFermions     zHME;
-  HMETwoFermions2Gamma2TwoFermions gHME;
+
+  // Return gamma element for the helicity matrix element.
+  complex calculateGammaME(vector<int>);
+
+  // Return Z/Z' element for helicity matrix element.
+  complex calculateZME(vector<int>, double, double, double, double,
+    double, double);
+
+  // Return the Z' vector or axial coupling for a fermion.
+  double zpCoupling(int id, string type);
+
+  // Vector and axial couplings.
+  double p0CAZ, p2CAZ, p0CVZ, p2CVZ, p0CAZp, p2CAZp, p0CVZp, p2CVZp;
+
+  // Weinberg angle, Z/Z' width (on-shell), Z/Z' mass (on-shell), and s.
+  double cos2W, sin2W, zG, zM, zpG, zpM, s;
+
+  // Fermion line charge.
+  double p0Q, p2Q;
+
+  // Bool whether the incoming fermions are oriented with the z-axis.
+  bool zaxis, includeGamma, includeZ, includeZp;
 
 };
 
 //==========================================================================
 
-// Helicity matrix element for the hard process of Z -> two fermions.
-  
-class HMEZ2TwoFermions : public HelicityMatrixElement {
-    
+// Helicity matrix element for the hard process of X -> two fermions.
+
+class HMEX2TwoFermions : public HelicityMatrixElement {
+
 public:
-  
-  void initConstants();
-  
+
   void initWaves(vector<HelicityParticle>&);
-  
+
+};
+
+//==========================================================================
+
+// Helicity matrix element for the hard process of W/W' -> two fermions.
+
+class HMEW2TwoFermions : public HMEX2TwoFermions {
+
+public:
+
+  void initConstants();
+
   complex calculateME(vector<int>);
 
 private:
-  
+
   // Vector and axial couplings.
   double p2CA, p2CV;
 
@@ -232,14 +218,51 @@ private:
 
 //==========================================================================
 
-// Helicity matrix element for the decay of a CP even Higgs ->  two fermions.
+// Helicity matrix element for the hard process of photon -> two fermions.
+
+class HMEGamma2TwoFermions : public HMEX2TwoFermions {
+
+public:
+
+  complex calculateME(vector<int>);
+
+};
+
+//==========================================================================
+
+// Helicity matrix element for the hard process of Z/Z' -> two fermions.
+
+class HMEZ2TwoFermions : public HMEX2TwoFermions {
+
+public:
+
+  void initConstants();
+
+  complex calculateME(vector<int>);
+
+private:
+
+  // Return the Z' vector or axial coupling for a fermion.
+  double zpCoupling(int id, string type);
+
+  // Vector and axial couplings.
+  double p2CA, p2CV;
+
+};
+
+//==========================================================================
+
+// Helicity matrix element for the decay of a Higgs ->  two fermions.
 
 // Because the Higgs is spin zero the Higgs production mechanism is not
-// needed for calculating helicity density matrices.
- 
-class HMEHiggsEven2TwoFermions : public HelicityMatrixElement {
+// needed for calculating helicity density matrices. However, the CP mixing
+// is needed.
+
+class HMEHiggs2TwoFermions : public HelicityMatrixElement {
 
 public:
+
+  void initConstants();
 
   void initWaves(vector<HelicityParticle>&);
 
@@ -248,65 +271,14 @@ public:
 private:
 
   // Coupling constants of the fermions with the Higgs.
-  double p2CA, p2CV;
-
-};
-
-//==========================================================================
-
-// Helicity matrix element for the decay of a CP odd Higgs ->  two fermions.
- 
-class HMEHiggsOdd2TwoFermions : public HelicityMatrixElement {
-
-public:
-
-  void initWaves(vector<HelicityParticle>&);
-
-  complex calculateME(vector<int>);
-
-private:
-  
-  // Coupling constants of the fermions with the Higgs.
-  double p2CA, p2CV;
-
-};
-
-//==========================================================================
-
-// Helicity matrix element for the decay of a charged Higgs ->  two fermions.
-  
-class HMEHiggsCharged2TwoFermions : public HelicityMatrixElement {
-
-public:
-
-  void initWaves(vector<HelicityParticle>&);
-
-  complex calculateME(vector<int>);
-
-private:
-  
-  // Coupling constants of the fermions with the Higgs.
-  double p2CA, p2CV;
-
-};
-
-//==========================================================================
-
-// Helicity matrix element which provides an unpolarized on-diagonal helicity
-// density matrix. Used for unknown hard processes.
- 
-class HMEUnpolarized : public HelicityMatrixElement {
-
-public:
-
-  void calculateRho(unsigned int, vector<HelicityParticle>&);
+  complex p2CA, p2CV;
 
 };
 
 //==========================================================================
 
 // Base class for all tau decay helicity matrix elements.
-   
+
 class HMETauDecay : public HelicityMatrixElement {
 
 public:
@@ -329,13 +301,13 @@ protected:
 //==========================================================================
 
 // Helicity matrix element for a tau decaying into a single scalar meson.
-  
+
 class HMETau2Meson : public HMETauDecay {
 
 public:
-    
+
   void initConstants();
-    
+
   void initHadronicCurrent(vector<HelicityParticle>&);
 
 };
@@ -343,11 +315,11 @@ public:
 //==========================================================================
 
 // Helicity matrix element for a tau decaying into two leptons.
-  
+
 class HMETau2TwoLeptons : public HMETauDecay {
-    
+
 public:
-    
+
   void initConstants();
 
   void initWaves(vector<HelicityParticle>&);
@@ -360,7 +332,7 @@ public:
 
 // Helicity matrix element for a tau decaying into two mesons through a
 // vector meson resonance.
-  
+
 class HMETau2TwoMesonsViaVector : public HMETauDecay {
 
 public:
@@ -381,13 +353,13 @@ private:
 
 // Helicity matrix element for a tau decay into two mesons through a vector
 // or scalar meson resonance.
-  
+
 class HMETau2TwoMesonsViaVectorScalar : public HMETauDecay {
 
 public:
 
   void initConstants();
-  
+
   void initHadronicCurrent(vector<HelicityParticle>&);
 
 private:
@@ -406,7 +378,7 @@ private:
 // Helicity matrix element for a tau decay into three mesons (base class).
 
 class HMETau2ThreeMesons : public HMETauDecay {
-    
+
 public:
 
   void initConstants();
@@ -430,7 +402,7 @@ protected:
   // Center of mass energies and momenta.
   double s1, s2, s3, s4;
   Wave4  q, q2, q3, q4;
-  
+
   // Stored a1 Breit-Wigner (for speed).
   complex a1BW;
 
@@ -454,7 +426,7 @@ protected:
 //==========================================================================
 
 // Helicity matrix element for a tau decay into three pions.
-   
+
 class HMETau2ThreePions : public HMETau2ThreeMesons {
 
 private:
@@ -482,7 +454,7 @@ private:
 //==========================================================================
 
 // Helicity matrix element for a tau decay into three mesons with kaons.
-   
+
 class HMETau2ThreeMesonsWithKaons : public HMETau2ThreeMesons {
 
 private:
@@ -500,13 +472,13 @@ private:
   complex F1();
   complex F2();
   complex F4();
-  
+
 };
 
 //==========================================================================
 
 // Helicity matrix element for a tau decay into generic three mesons.
-   
+
 class HMETau2ThreeMesonsGeneric : public HMETau2ThreeMesons {
 
 private:
@@ -522,7 +494,7 @@ private:
   complex F1();
   complex F2();
   complex F4();
-  
+
 };
 
 //==========================================================================
@@ -530,7 +502,7 @@ private:
 // Helicity matrix element for a tau decay into two pions and a photon.
 
 class HMETau2TwoPionsGamma : public HMETauDecay {
-    
+
 public:
 
   void initConstants();
@@ -553,7 +525,7 @@ protected:
 //==========================================================================
 
 // Helicity matrix element for a tau decay into four pions.
-  
+
 class HMETau2FourPions : public HMETauDecay {
 
 public:
@@ -583,7 +555,7 @@ private:
   double rhoFormFactor1(double s);
   double rhoFormFactor2(double s);
   double omeFormFactor(double s);
-  
+
   // Masses and widths of the intermediate mesons.
   double a1M, a1G, rhoM, rhoG, sigM, sigG, omeM, omeG;
 
@@ -593,7 +565,7 @@ private:
   // Amplitude, phases, and weights for mixing.
   double  sigA, sigP, omeA, omeP;
   complex sigW, omeW;
-  
+
   // Cut-off for a1 form factor.
   double lambda2;
 
@@ -602,7 +574,7 @@ private:
 //==========================================================================
 
 // Helicity matrix element for a tau decaying into five pions.
-  
+
 class HMETau2FivePions : public HMETauDecay {
 
 public:
@@ -619,7 +591,7 @@ private:
 
   // Simplified s-wave Breit-Wigner assuming massless products.
   complex breitWigner(double s, double M, double G);
-  
+
   // Masses and widths of intermediates.
   double a1M, a1G, rhoM, rhoG, omegaM, omegaG, omegaW, sigmaM, sigmaG, sigmaW;
 
@@ -628,7 +600,7 @@ private:
 //==========================================================================
 
 // Helicity matrix element for a tau decay into flat phase space.
-  
+
 class HMETau2PhaseSpace : public HMETauDecay {
 
 public:
@@ -636,7 +608,7 @@ public:
   void initWaves(vector<HelicityParticle>&) {};
 
   complex calculateME(vector<int>) {return 1;}
-  
+
   void calculateD(vector<HelicityParticle>&) {};
 
   void calculateRho(unsigned int, vector<HelicityParticle>&) {};

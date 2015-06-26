@@ -1,5 +1,5 @@
 // PartonSystems.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -13,14 +13,14 @@
 #include "Pythia8/PythiaStdlib.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The PartonSystem class contains info on an individual singlet.
 // Only to be used inside PartonSystems, so no private members.
 
 class PartonSystem {
-  
+
 public:
 
   // Constructors.
@@ -30,9 +30,9 @@ public:
   int         iInA, iInB;
   vector<int> iOut;
   double      sHat, pTHat;
-  
+
 };
- 
+
 //==========================================================================
 
 // The PartonSystems class describes the whole set of subcollisions.
@@ -85,12 +85,12 @@ public:
   void list(ostream& os = cout) const;
 
 private:
- 
+
   // List of all separate partonic subsystems.
   vector<PartonSystem> systems;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

@@ -1,5 +1,5 @@
 // main80.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -72,7 +72,7 @@ int main() {
     pythia.stat();
     cout << weightNow << pTWnow;
 
-    // Sum up merged cross section of current run.   
+    // Sum up merged cross section of current run.
     sigmaSample *= pythia.info.sigmaGen() / double(pythia.info.nAccepted());
     sigmaTotal  += sigmaSample;
 

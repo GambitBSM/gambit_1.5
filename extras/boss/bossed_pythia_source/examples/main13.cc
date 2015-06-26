@@ -1,5 +1,5 @@
 // main13.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -20,7 +20,7 @@ int main() {
 
   // Read in subrun-independent data from main13.cmnd.
   pythia.readFile( "main13.cmnd", 0);
-                          
+
   // Extract data to be used in main program. Set counters.
   int nSubrun = pythia.mode("Main:numberOfSubruns");
   int nAbort  = pythia.mode("Main:timesAllowErrors");

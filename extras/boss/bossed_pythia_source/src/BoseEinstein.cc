@@ -1,5 +1,5 @@
 // BoseEinstein.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -70,12 +70,12 @@ bool BoseEinstein::init(Info* infoPtrIn, Settings& settings,
   mPair[1] = 2. * mHadron[3];
   mPair[2] = 2. * mHadron[7];
   mPair[3] = 2. * mHadron[8];
-  
+
   // Loop over the four required tables. Local variables.
   double Qnow, Q2now, centerCorr;
   for (int iTab = 0; iTab < 4; ++iTab) {
     m2Pair[iTab]      = mPair[iTab] * mPair[iTab];
-    
+
     // Step size and number of steps in normal table.
     deltaQ[iTab]      = STEPSIZE * min(mPair[iTab], QRef);
     nStep[iTab]       = min( 199, 1 + int(3. * QRef / deltaQ[iTab]) );
@@ -129,11 +129,11 @@ bool BoseEinstein::shiftEvent( Event& event) {
     if (!doPion && iSpecies <= 2) continue;
     if (!doKaon && iSpecies >= 3 && iSpecies <= 6) continue;
     if (!doEta  && iSpecies >= 7) continue;
-   
+
     // Properties of current hadron species.
     int idNow = IDHADRON[ iSpecies ];
     int iTab  = ITABLE[ iSpecies ];
-   
+
     // Loop through event record to store copies of current species.
     for (int i = 0; i < event.size(); ++i)
       if ( event[i].id() == idNow && event[i].isFinal() )
@@ -188,7 +188,7 @@ bool BoseEinstein::shiftEvent( Event& event) {
       "no consistent BE shift topology found, so skip BE");
     return true;
   }
-    
+
   // Store new particle copies with shifted momenta.
   for (int i = 0; i < nStored[9]; ++i) {
     int iNew = event.copy( hadronBE[i].iPos, 99);
@@ -211,7 +211,7 @@ void BoseEinstein::shiftPair( int i1, int i2, int iTab) {
   if (Q2old < Q2MIN) return;
   double Qold  = sqrt(Q2old);
   double psFac = sqrt(Q2old + m2Pair[iTab]) / Q2old;
-     
+
   // Calculate new relative momentum for normal shift.
   double Qmove = 0.;
   if (Qold < deltaQ[iTab]) Qmove = Qold / 3.;
@@ -278,4 +278,3 @@ void BoseEinstein::shiftPair( int i1, int i2, int iTab) {
 //==========================================================================
 
 } // end namespace Pythia8
-

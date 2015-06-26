@@ -4,75 +4,101 @@
 #                                 #
 ###################################
 
-from collections import OrderedDict
 
+# ~~~~~ GCCXML options ~~~~~
+
+gccxml_path     = '/usr/bin'  # If the gccxml executable is globally available, set gccxml_path = ''
+gccxml_compiler = 'g++'       # g++, gcc, icpc, icc, ... (use name of executable)
 
 
 # ~~~~~ GAMBIT-specific options ~~~~~
 
 gambit_backend_name    = 'Pythia'
-gambit_backend_version = '8.186'
+gambit_backend_version = '8.209'
 gambit_base_namespace  = ''
 
 
 # ~~~~~ Information about the external code ~~~~~
 
-include_path = 'pythia8186/include'
-source_path  = 'pythia8186/src'
+include_paths = ['pythia8209/include']
+source_path   = 'pythia8209/src'
 
-additional_include_paths = []
+accepted_paths = ['pythia8209']
 
-accepted_paths     = ['pythia8186']
 
-std_include_paths  = ['/usr/include/']
+loaded_classes = [
+                    'Pythia8::Pythia',
+                    'Pythia8::Hist',
+                    'Pythia8::Event',
+                    'Pythia8::Particle',
+                    'Pythia8::Info',
+                    'Pythia8::Vec4',
+                    'Pythia8::Rndm',
+                    'Pythia8::SlowJet',
+                    'Pythia8::ParticleData',
+                    'Pythia8::ParticleDataEntry',
+                    'Pythia8::Settings',
+                    'Pythia8::SigmaTotal',
+                    'Pythia8::SigmaProcess',
+                    'Pythia8::PartonLevel',
+                    'Pythia8::Couplings',
+                    # 'Pythia8::ResonanceWidths',
+                    'Pythia8::ResonanceGmZ',   # test class
+                    'Pythia8::CoupSUSY',
+                    'Pythia8::SLHAinterface',
+                    'Pythia8::SusyLesHouches',
+                    'Pythia8::LHdecayTable',
+                    'Pythia8::LHdecayChannel',
+                    'Pythia8::ResonanceDecays',
+                    'Pythia8::DecayChannel',
+                    # 'Pythia8::History',       # test class
+                    'Pythia8::CoupSUSY',
+                    'Pythia8::ParticleDecays',
+                    'Pythia8::CoupSM',
+                    'Pythia8::BeamParticle',
+                    'Pythia8::UserHooks',
+                    'Pythia8::Parm',
+                    'Pythia8::PDF',
+                    'Pythia8::AlphaStrong',
+                    'Pythia8::AlphaEM'
+                 ]
 
-loaded_classes     = [
-                      'Pythia8::Pythia',
-                      'Pythia8::Hist',
-                      'Pythia8::Event',
-                      'Pythia8::Particle',
-                      'Pythia8::Info',
-                      'Pythia8::Vec4',
-                      'Pythia8::Rndm',
-                      'Pythia8::SlowJet',
-                      'Pythia8::ParticleData',
-                      'Pythia8::ParticleDataEntry',    # problem?
-                      'Pythia8::Settings',
-                      # 'Pythia8::SigmaTotal',
-                      # 'Pythia8::SigmaProcess',       # problem
-                      'Pythia8::PartonLevel',
-                      'Pythia8::Couplings',
-                      # 'Pythia8::ResonanceWidths',
-                      # 'Pythia8::ResonanceGmZ',       # problem
-                      'Pythia8::CoupSUSY',
-                      'Pythia8::SLHAinterface',
-                     ]
-
-loaded_functions   = []
+loaded_functions = [
+                      # 'Pythia8::m2(Pythia8::Wave4, Pythia8::Wave4)',
+                      # 'Pythia8::m2(Pythia8::Particle const&, Pythia8::Particle const&)',
+                   ]
 
 ditch = [
           'Pythia8::Pythia::initSLHA',
         ]
 
+
 load_parent_classes    = True
 wrap_inherited_members = False
 
-extra_output_dir      = 'pythia_BOSS_output'
-abstr_header_prefix   = 'abstract_'
-wrapper_header_prefix = 'wrapper_'
-factory_file_prefix   = 'factory_'
 
 header_extension = '.h'
 source_extension = '.cc'
 
-add_path_to_includes = 'Pythia8'
-
 indent = 4
 
+extra_output_dir       = 'pythia_BOSS_output_TEMP'
+abstr_header_prefix    = 'abstract_'
+wrapper_header_prefix  = 'wrapper_'
+factory_file_prefix    = 'factory_'
+function_files_prefix  = 'function_'
 
-# ~~~~~ Dictionary standard type headers ~~~~~
+
+# ~~~~~ Information about other known types ~~~~~
+
+std_include_paths  = ['/usr/include/']
+
+known_classes = [
+                   'SLHAea::Coll',
+                ]
 
 known_class_headers = {
+    "SLHAea::Coll"          : "SLHAea/slhaea.h",
     "std::array"             : "<array>", 
     "std::vector"            : "<vector>", 
     "std::deque"             : "<deque>", 

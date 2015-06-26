@@ -1,11 +1,15 @@
 // main82.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 // This program is written by Stefan Prestel.
-// It illustrates how to do CKKW-L merging,
-// see the Matrix Element Merging page in the online manual.
+// It illustrates how to do CKKW-L merging, see the Matrix Element
+// Merging page in the online manual. An example command is
+//     ./main82 main82.cmnd w+_production_lhc_0.lhe histout82.dat
+// where main82.cmnd supplies the commands, w+_production_lhc_0.lhe
+// provides the input LHE events, and histout82.dat is the output
+// file. This example requires FastJet.
 
 #include "Pythia8/Pythia.h"
 
@@ -258,7 +262,7 @@ int main( int argc, char* argv[] ){
   // Input parameters:
   //  1. Input file for settings
   //  2. Path to input LHE file
-  //  3. OUtput histogram path
+  //  3. Output histogram path
   pythia.readFile(argv[1]);
   string iPath = string(argv[2]);
   string oPath = string(argv[3]);
@@ -278,11 +282,9 @@ int main( int argc, char* argv[] ){
   Hist histPTSecond("pT of second jet",100,0.,100.);
 
   // Read in ME configurations
-  pythia.init(iPath,false);
-
-  if(pythia.flag("Main:showChangedSettings")) {
-    pythia.settings.listChanged();
-  }
+  pythia.readString("Beams:frameType = 4");
+  pythia.readString("Beams:LHEF = " + iPath);
+  pythia.init();
 
   // Start generation loop
   for( int iEvent=0; iEvent<nEvent; ++iEvent ){

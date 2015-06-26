@@ -1,8 +1,8 @@
-#ifndef __boss__Event_Pythia_8_186_h__
-#define __boss__Event_Pythia_8_186_h__
+#ifndef __boss__Event_Pythia_8_209_h__
+#define __boss__Event_Pythia_8_209_h__
 
 // Event.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -34,7 +34,7 @@ class Event;
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Particle.h"
+#include "backend_types/Pythia_8_209/abstract_Particle.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -89,7 +89,7 @@ public:
   // Member functions to set the Event and ParticleDataEntry pointers.
   void setEvtPtr(Event* evtPtrIn) { evtPtr = evtPtrIn; setPDEPtr();}
   void setPDEPtr(ParticleDataEntry* pdePtrIn = 0);
-      
+
   // Member functions for input.
   void id(int idIn) {idSave = idIn; setPDEPtr();}
   void status(int statusIn) {statusSave = statusIn;}
@@ -195,16 +195,17 @@ public:
     ? vProdSave.e()  + tauSave * pSave.e()  / mSave : vProdSave.e();}
 
   // Methods that can refer back to the event the particle belongs to.
-  int index()        const;
-  int statusHepMC()  const;
-  int iTopCopy()     const;
-  int iBotCopy()     const;
-  int iTopCopyId()   const;
-  int iBotCopyId()   const;
+  virtual int index() const;
+  int iTopCopy()      const;
+  int iBotCopy()      const;
+  int iTopCopyId(bool simplify = false) const;
+  int iBotCopyId(bool simplify = false) const;
   vector<int> motherList()   const;
   vector<int> daughterList() const;
   vector<int> sisterList(bool traceTopBot = false) const;
   bool isAncestor(int iAncestor) const;
+  int statusHepMC()  const;
+  bool isFinalPartonLevel() const;
   bool undoDecay();
 
   // Further output, based on a pointer to a ParticleDataEntry object.
@@ -287,7 +288,7 @@ public:
     int addDaughter);
   void offsetCol( int addCol);
 
-private:
+protected:
 
   // Constants: could only be changed in the code itself.
   static const double TINY;
@@ -348,6 +349,10 @@ private:
             Pythia8::Abstract_Vec4* vProd__BOSS() const;
 
             Pythia8::Abstract_Vec4* vDec__BOSS() const;
+
+            int iTopCopyId__BOSS() const;
+
+            int iBotCopyId__BOSS() const;
 
             std::vector<int,std::allocator<int> > sisterList__BOSS() const;
 
@@ -413,7 +418,7 @@ public:
   int    col(int j)    const {return colSave[j];}
   int    endCol(int j) const {return endColSave[j];}
   int    status(int j) const {return statusSave[j];}
- 
+
 private:
 
   // Kind, positions of the three ends and their status codes.
@@ -428,17 +433,18 @@ private:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Event.h"
+#include "backend_types/Pythia_8_209/abstract_Event.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Event : public virtual Abstract_Event {
-    
+
 public:
 
   // Constructors.
   Event(int capacity = 100) : startColTag(100), maxColTag(100),
-    savedSize(0), savedJunctionSize(0), scaleSave(0.), scaleSecondSave(0.),
+    savedSize(0), savedJunctionSize(0), savedPartonLevelSize(0),
+    scaleSave(0.), scaleSecondSave(0.),
     headerList("----------------------------------------"),
     particleDataPtr(0) { entry.reserve(capacity); }
   Event& operator=(const Event& oldEvent);
@@ -451,8 +457,9 @@ public:
      particleDataPtr = particleDataPtrIn; startColTag = startColTagIn;}
 
   // Clear event record.
-  void clear() {entry.resize(0); maxColTag = startColTag; scaleSave = 0.;
-    scaleSecondSave = 0.; clearJunctions();}
+  void clear() {entry.resize(0); maxColTag = startColTag;
+    savedPartonLevelSize = 0; scaleSave = 0.; scaleSecondSave = 0.;
+    clearJunctions();}
 
   // Clear event record, and set first particle empty.
   void reset() {clear(); append(90, -11, 0, 0, 0., 0., 0., 0., 0.);}
@@ -520,12 +527,12 @@ public:
   int copy(int iCopy, int newStatus = 0);
 
   // List the particles in an event.
-  void list() const;
-  void list(ostream& os) const;
-  void list(bool showScaleAndVertex, bool showMothersAndDaughters = false)
-    const;
+  void list(int precision = 3) const;
+  void list(ostream& os, int precision = 3) const;
+  void list(bool showScaleAndVertex, bool showMothersAndDaughters = false,
+    int precision = 3) const;
   void list(bool showScaleAndVertex, bool showMothersAndDaughters,
-    ostream& os) const;
+    ostream& os, int precision = 3) const;
 
   // Remove last n entries.
   void popBack(int nRemove = 1) { if (nRemove ==1) entry.pop_back();
@@ -537,9 +544,6 @@ public:
     if (iFirst < 0 || iLast >= int(entry.size()) || iLast < iFirst) return;
     entry.erase( entry.begin() + iFirst, entry.begin() + iLast + 1);
   }
-
-  // Undo the decay of a single particle (where daughters well-defined).
-  bool undoDecay(int i);
 
   // Restore all ParticleDataEntry* pointers in the Particle vector.
   // Useful when a persistent copy of the event record is read back in.
@@ -563,27 +567,9 @@ public:
   void scaleSecond( double scaleSecondIn) {scaleSecondSave = scaleSecondIn;}
   double scaleSecond() const {return scaleSecondSave;}
 
-  // Find complete list of daughters and mothers.
-  vector<int> motherList(int i) const;
-  vector<int> daughterList(int i) const;
-
-  // Convert to HepMC status code conventions.
-  int statusHepMC(int i) const;
-
-  // Trace the first and last copy of one and the same particle.
-  int iTopCopy(int i) const;
-  int iBotCopy(int i) const;
-
-  // Trace the first and last copy of a particle, using flavour match.
-  int iTopCopyId(int i) const;
-  int iBotCopyId(int i) const;
-
-  // Find list of sisters, also tracking up and down identical copies.
-  vector<int> sisterList(int i) const;
-  vector<int> sisterListTopBot(int i, bool widenSearch = true) const;
-
-  // Check whether two particles have a direct mother-daughter relation.
-  bool isAncestor(int i, int iAncestor) const;
+  // Find complete list of daughters.
+  // Note: temporarily retained for CMS compatibility. Do not use!
+  vector<int> daughterList(int i) const {return entry[i].daughterList();}
 
   // Member functions for rotations and boosts of an event.
   void rot(double theta, double phi)
@@ -600,7 +586,7 @@ public:
 
   // Clear the list of junctions.
   void clearJunctions() {junction.resize(0);}
- 
+
   // Add a junction to the list, study it or extra input.
   int appendJunction( int kind, int col0, int col1, int col2)
     { junction.push_back( Junction( kind, col0, col1, col2) );
@@ -630,6 +616,9 @@ public:
   // List any junctions in the event; for debug mainly.
   void listJunctions(ostream& os = cout) const;
 
+  // Save event record size at Parton Level, i.e. before hadronization.
+  void savePartonLevelSize() {savedPartonLevelSize = entry.size();}
+
   // Operator overloading allows to append one event to an existing one.
   // Warning: particles should be OK, but some other information unreliable.
   Event& operator+=(const Event& addEvent);
@@ -657,7 +646,7 @@ private:
   int maxColTag;
 
   // Saved entry and junction list sizes, for simple restoration.
-  int savedSize, savedJunctionSize;
+  int savedSize, savedJunctionSize, savedPartonLevelSize;
 
   // The scale of the event; linear quantity in GeV.
   double scaleSave, scaleSecondSave;
@@ -668,7 +657,7 @@ private:
   // Pointer to the particle data table.
   // The //! below is ROOT notation that this member should not be saved.
   ParticleData* particleDataPtr;  //!
-  
+
 
         public:
             Abstract_Event* pointerCopy__BOSS();
@@ -733,13 +722,19 @@ private:
 
             int copy__BOSS(int);
 
+            void list__BOSS() const;
+
+            void list__BOSS(std::basic_ostream<char,std::char_traits<char> >&) const;
+
+            void list__BOSS(bool, bool) const;
+
             void list__BOSS(bool) const;
+
+            void list__BOSS(bool, bool, std::basic_ostream<char,std::char_traits<char> >&) const;
 
             void popBack__BOSS();
 
             void initColTag__BOSS();
-
-            std::vector<int,std::allocator<int> > sisterListTopBot__BOSS(int) const;
 
             void bst__BOSS(const Pythia8::Abstract_Vec4&);
 
@@ -753,4 +748,4 @@ private:
 
 #endif // end Pythia8_Event_H
 
-#endif /* __boss__Event_Pythia_8_186_h__ */
+#endif /* __boss__Event_Pythia_8_209_h__ */

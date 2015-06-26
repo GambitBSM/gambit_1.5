@@ -56,4 +56,3 @@ MultipartonInteractions:expPow = 1.
 ! 8) Other settings. Can be expanded as desired.
 ! Note: may overwrite some of the values above, so watch out.
 #Tune:pp = 6                         ! use Tune 4Cx
-
