@@ -20,7 +20,7 @@ export FC CC CXX FFLAGS CFLAGS LAPACKLIB
 AR = ar r  
 LINKLIB = ld -shared
  
-NSOBJECTS = utils.o utils1.o priors.o kmeans_clstr.o xmeans_clstr.o posterior.o nested.o
+NSOBJECTS = utils.o utils1.o priors.o kmeans_clstr.o xmeans_clstr.o posterior.o nested.o cwrapper.o
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -c -o $@ $^ 
