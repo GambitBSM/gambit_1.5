@@ -36,7 +36,7 @@ module cnested
 	double precision :: lnew
 
 	interface
-		real(c_double) function loglike_proto(Cube,n_dim,nPar,context)
+		real(c_double) function loglike_proto(Cube,n_dim,nPar,context) bind(c)
 		use iso_c_binding, only: c_int, c_double, c_ptr
 		
 		implicit none
@@ -71,7 +71,7 @@ module cnested
 	double precision :: maxLogLike, logZ, INSlogZ, logZerr
 
 	interface
-		subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context)
+		subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context) bind(c)
 		use iso_c_binding, only: c_int, c_double, c_ptr
 	      
 		implicit none
