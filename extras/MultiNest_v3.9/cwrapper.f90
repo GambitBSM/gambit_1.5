@@ -4,18 +4,18 @@
 !
 ! allows calling multinest with the "natural" C prototype
 !
-! void run(bool nest_IS,bool nest_mmodal,bool nest_ceff, \
-!          int nest_nlive,double nest_tol,double nest_ef,int nest_ndims,int nest_totPar,int nest_nCdims,int maxClst, \
-!          int nest_updInt,double nest_Ztol,char nest_root[],int seed,int nest_pWrap[], \
-!          bool nest_fb,bool nest_resume,bool nest_outfile,bool initMPI,double nest_logZero,int nest_maxIter, \
-!          double (*loglike)(double *,int,int,void *context), \
+! void run(bool nest_IS,bool nest_mmodal,bool nest_ceff, blah
+!          int nest_nlive,double nest_tol,double nest_ef,int nest_ndims,int nest_totPar,int nest_nCdims,int maxClst, blah
+!          int nest_updInt,double nest_Ztol,char nest_root[],int seed,int nest_pWrap[], blah
+!          bool nest_fb,bool nest_resume,bool nest_outfile,bool initMPI,double nest_logZero,int nest_maxIter, blah
+!          double (*loglike)(double *,int,int,void *context), blah
 !          void (*dumper)(int,int,int,double *,double *,double *,double,double,double,void *context),void *context);
 !
 ! as well as
 !
 ! double loglike(double *Cube,int n_dim,int nPar,void *context);
-! void dumper(int nSamples,int nlive,int nPar, \
-!             double *physLive,double *posterior,double *paramConstr, \
+! void dumper(int nSamples,int nlive,int nPar, blah
+!             double *physLive,double *posterior,double *paramConstr, blah
 !             double maxLogLike,double logZ,double INSlogZ,double logZerr,void *context);
 !
 ! note that we are assuming that (void *) is the same size as int, but that's what multinest uses
