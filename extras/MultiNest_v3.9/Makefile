@@ -12,7 +12,7 @@ CFLAGS += -O3 #-DMPI
 
 LAPACKLIB = -llapack
 
-NESTLIBDIR = ./
+NESTLIBDIR = $(PWD)
 
 export FC CC CXX FFLAGS CFLAGS LAPACKLIB
 
@@ -34,7 +34,7 @@ all: libnest3.a obj_detect eggbox eggboxC eggboxC++ gaussian gauss_shell \
 rosenbrock himmelblau ackley
  
 libnest3.so: $(NSOBJECTS) 
-	$(LINKLIB) -o $(LIBS) $@ $^ 
+	$(LINKLIB) -o $(LIBS) $(NESTLIBDIR)/$@ $^ 
  
 libnest3.a: $(NSOBJECTS) 
 	$(AR) $@ $^ 
