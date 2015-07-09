@@ -38,6 +38,10 @@ DDCALC0_VERSION=$(shell grep "VERSION_STRING =" DDCalc0.f90 | cut -d \' -f2)
 # difficulty running this makefile, simply set those two
 # variables and remove everything else.
 
+# Alternate compilation flags intended for debugging can be
+# used by setting DEBUG to any non-empty value, which may be
+# done from the command line with e.g. 'make DEBUG=Y'.
+
 # Intel fortran compiler
 #FC := ifort
 #FFLAGS := -fast
@@ -96,12 +100,25 @@ endif
 
 # Fortran compiler flags.  Update only if not already specified.
 ifneq (,$(findstring "$(origin FFLAGS)","undefined" "default"))
-  ifneq (,$(findstring ifort,$(FC)))
-    FFLAGS := -fast
-  else ifneq (,$(findstring gfortran,$(FC)))
-    FFLAGS := -O3 -fno-range-check
+  # Default flags.
+  ifeq (,$(DEBUG))
+    ifneq (,$(findstring ifort,$(FC)))
+      FFLAGS := -fast
+    else ifneq (,$(findstring gfortran,$(FC)))
+      FFLAGS := -O3 -fno-range-check
+    else
+      $(info WARNING: No default compilation flags for compiler $(FC).)
+    endif
+  # Debugging flags, activated by setting DEBUG non-empty,
+  # e.g. 'make DEBUG=Y'.
   else
-    $(info WARNING: No default compilation flags for compiler $(FC).)
+    ifneq (,$(findstring ifort,$(FC)))
+      FFLAGS := -O0 -g -traceback -check bounds
+    else ifneq (,$(findstring gfortran,$(FC)))
+      FFLAGS := -O0 -g -fbacktrace -fbounds-check -fno-range-check
+    else
+      $(info WARNING: No default compilation flags for compiler $(FC).)
+    endif
   endif
 endif
 
@@ -176,9 +193,6 @@ fprograms := DDCalc0run
 ftestprograms := DDCalc0_exampleF
 ctestprograms := DDCalc0_exampleC
 
-# Module files (lower case as that is usual output filename)
-fmodules := ddcalc0.mod
-
 # Objects to be compiled
 # e.g. file.o
 fobjects := DDCalc0.o
@@ -192,6 +206,9 @@ libraries := $(statlib) $(sharedlib)
 # e.g. file.h
 fincludes := 
 cincludes := DDCalc0.hpp
+
+# Module files (lower case as that is usual output filename)
+fmodules := ddcalc0.mod
 
 # Source files
 fsources := $(fincludes) $(fobjects:.o=.f90) $(fprograms:=.f90) $(ftestprograms:=.f90)
@@ -256,10 +273,9 @@ $(ctestprograms): DDCalc0.o
 # Phony targets
 .PHONY: all bin lib examples doc tar dist FORCE \
         clean cleaner cleanest cleanish \
-        clean-tar clean-dist \
-        ifort gfortran
+        clean-tar clean-dist
 
-# Default is to build programs
+# Build everything (except archives)
 all: $(fobjects) lib bin examples
 #all: $(fobjects) $(libraries) $(fprograms) \
 #     $(ftestprograms) $(ctestprograms)
