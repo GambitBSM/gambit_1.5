@@ -639,7 +639,7 @@ def createFrontendHeader(function_xml_files_dict):
 
     # - Include statement for the identification header
     frontend_content += '\n'
-    frontend_content += '#include "' + os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n'
+    frontend_content += '#include "' + os.path.join(gb.gambit_backend_incl_dir, gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n'
    
     # - LOAD_LIBRARY macro
     frontend_content += '\n'
