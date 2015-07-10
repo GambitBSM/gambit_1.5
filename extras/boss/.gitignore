@@ -1,7 +1,6 @@
 # Files in the BOSSed Pythia source 
 bossed_pythia_source/Makefile.inc
 bossed_pythia_source/examples/Makefile.inc
-bossed_pythia_source/bin/pythia8-config
 
 # BOSS output for Pythia
 pythia_BOSS_output
