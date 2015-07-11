@@ -20,7 +20,7 @@ gambit_base_namespace  = ''
 
 # ~~~~~ Information about the external code ~~~~~
 
-include_paths = ['pythia8209/include']
+include_paths = ['pythia8209/include', '../../modules/contrib/slhaea/include']
 source_path   = 'pythia8209/src'
 
 accepted_paths = ['pythia8209']
@@ -82,7 +82,7 @@ source_extension = '.cc'
 
 indent = 4
 
-extra_output_dir       = 'pythia_BOSS_output_TEMP'
+extra_output_dir       = 'pythia_BOSS_output'
 abstr_header_prefix    = 'abstract_'
 wrapper_header_prefix  = 'wrapper_'
 factory_file_prefix    = 'factory_'
@@ -98,7 +98,7 @@ known_classes = [
                 ]
 
 known_class_headers = {
-    "SLHAea::Coll"          : "SLHAea/slhaea.h",
+    "SLHAea::Coll"           : "SLHAea/slhaea.h",
     "std::array"             : "<array>", 
     "std::vector"            : "<vector>", 
     "std::deque"             : "<deque>", 
