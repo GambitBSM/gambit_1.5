@@ -306,13 +306,16 @@ def constrAbstractClassDecl(class_el, class_name_short, abstr_class_name_short, 
                     # Register variable name so that it can be initialized in the constructor
                     ptr_members_for_init.append(variable_name)
 
-
+        #
+        # Ignore element
+        #
         else:
-            class_decl += ' '*(n_indents+2)*indent
-            if 'name' in el.keys():
-                class_decl += '// IGNORED: ' + el.tag + '  -- Name: ' + el.get('name') + '  -- XML id: ' + el.get('id') + '\n'
-            else:
-                class_decl += '// IGNORED: ' + el.tag + '  -- XML id: ' + el.get('id') + '\n'
+            pass
+            # class_decl += ' '*(n_indents+2)*indent
+            # if 'name' in el.keys():
+            #     class_decl += '// IGNORED: ' + el.tag + '  -- Name: ' + el.get('name') + '  -- XML id: ' + el.get('id') + '\n'
+            # else:
+            #     class_decl += '// IGNORED: ' + el.tag + '  -- XML id: ' + el.get('id') + '\n'
 
     
 
@@ -1354,6 +1357,15 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
     decl_code += 2*indent + '~' + class_name['short'] + '();\n'
 
 
+    #
+    # Add private member function for initialising member variables
+    #
+    decl_code += '\n'
+    decl_code += indent + 'private:\n'
+    decl_code += 2*indent + '// Member variable initialiser: \n'
+    decl_code += 2*indent + 'void _memberVariablesInit();\n'
+
+
     # Close class body
     decl_code += '\n'
     decl_code += '};\n'    
@@ -1487,7 +1499,7 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
 
             # Write declaration line
-            def_code += do_inline*"inline " + return_kw_str + return_type + ' ' + class_name['short'] + '::' + func_name + args_bracket + is_const*' const' + '\n'
+            def_code += do_inline*'inline ' + return_kw_str + return_type + ' ' + class_name['short'] + '::' + func_name + args_bracket + is_const*' const' + '\n'
 
             # Write function body
             def_code += '{\n'
@@ -1543,6 +1555,9 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
     common_constructor_body += indent + 'wrapperbase::BEptr->wrapper' + gb.code_suffix + '(this);\n'
     common_constructor_body += indent + 'wrapperbase::BEptr->can_delete_wrapper(false);  // Override setting in wrapper__BOSS\n'
 
+    mem_var_init_body = ''
+    has_loaded_class_mem_var = False
+    
     for var_el in class_variables:
 
         # Get info
@@ -1579,13 +1594,18 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
         else:
             common_init_list_code += indent + var_name + '(wrapperbase::BEptr->' + var_name + '_ref' + gb.code_suffix + '()),\n'
 
-        # Add line to common constructor body
+        # Add line to the body of the _memberVariablesInit function
         if var_is_loaded_class:
+            has_loaded_class_mem_var = True
             if pointerness > 0:
-                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_wrapper(true);\n'
+                mem_var_init_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_wrapper(true);\n'
             else:
-                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_wrapper(false);\n'
-            common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_me(false);\n'
+                mem_var_init_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_wrapper(false);\n'
+            mem_var_init_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_me(false);\n'
+
+    # If the class has member variables of loaded type, add a call to _memberVariablesInit in the common_constructor_body
+    if has_loaded_class_mem_var:
+        common_constructor_body += indent + '_memberVariablesInit();\n'
 
 
     # Clean up initialization list
@@ -1659,8 +1679,8 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
     # Add special constructor based on abstract pointer (This is needed to allow return-by-value with the wrapper classes.)
     def_code += '// Special pointer-based constructor: \n'
-    def_code += do_inline*"inline " + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* in) :\n'
-    # def_code += do_inline*"inline " + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* const & in) :\n'
+    def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* in) :\n'
+    # def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* const & in) :\n'
     def_code += indent + wrapper_base_class_name + '(in)'  # FIXME: This is not general. Fix argument list.
     for parent_dict in loaded_parent_classes:
         def_code +=',\n'
@@ -1676,8 +1696,8 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
     # reference-to-ptr version...
     def_code += '\n'
-    # def_code += do_inline*"inline " + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* in) :\n'
-    def_code += do_inline*"inline " + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* const & in, bool) :\n'
+    # def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* in) :\n'
+    def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* const & in, bool) :\n'
     def_code += indent + wrapper_base_class_name + '(in, true)'  # FIXME: This is not general. Fix argument list.
     for parent_dict in loaded_parent_classes:
         def_code +=',\n'
@@ -1699,7 +1719,7 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
     if has_copy_constructor:
         def_code += '\n'
         def_code += '// Copy constructor: \n'
-        def_code += do_inline*"inline " + class_name['long'] + '::' + class_name['short'] + '(const ' + class_name['short'] +'& in) :\n'
+        def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(const ' + class_name['short'] +'& in) :\n'
         def_code += indent + wrapper_base_class_name + '(in)'  # FIXME: This is not general. Fix argument list.
         for parent_dict in loaded_parent_classes:
             def_code +=',\n'
@@ -1720,7 +1740,7 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
     #
     def_code += '\n'
     def_code += '// Assignment operator: \n'
-    def_code += do_inline*"inline " + class_name['long'] + '& ' + class_name['short'] + '::operator=(const ' + class_name['short'] +'& in)\n'
+    def_code += do_inline*'inline ' + class_name['long'] + '& ' + class_name['short'] + '::operator=(const ' + class_name['short'] +'& in)\n'
     def_code += '{\n'
     def_code += indent +  wrapper_base_class_name + '::operator=(in);\n'
     for parent_dict in loaded_parent_classes:
@@ -1734,13 +1754,24 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
     #
     def_code += '\n'
     def_code += '// Destructor: \n'
-    def_code += do_inline*"inline " + class_name['long'] + '::~' + class_name['short'] + '()\n'
+    def_code += do_inline*'inline ' + class_name['long'] + '::~' + class_name['short'] + '()\n'
     def_code += '{\n'
     for parent_dict in loaded_parent_classes:
         # def_code += indent + parent_dict['class_name']['short'] + '::skip_delete = true;\n'
         def_code += indent + 'WrapperBase<' + parent_dict['abstr_class_name']['long'] + '>'  + '::skip_delete = true;\n'
     def_code += '}\n\n'
 
+
+    #
+    # Add private member function for initialising member variables
+    #
+    def_code += '\n'
+    def_code += '// Member variable initialiser: \n'
+    def_code += do_inline*'inline ' + 'void ' + class_name['long'] + '::_memberVariablesInit()\n'
+    def_code += '{\n'
+    if has_loaded_class_mem_var:
+        def_code += mem_var_init_body
+    def_code += '}\n\n'
 
     # Add namespace
     namespace, class_name_short = utils.removeNamespace(class_name['long'], return_namespace=True)

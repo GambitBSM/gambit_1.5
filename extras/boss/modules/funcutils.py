@@ -323,9 +323,21 @@ def constrWrapperBody(return_type, func_name, args, return_is_loaded_class, keyw
 
 def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warning=True):
 
-    return_type_accepted   = True
-    arg_types_accepted     = True
-    template_args_accepted = True
+    # TODO: When BOSS starts accepting template functions, add a check for the template arguments
+
+    func_name = getFunctionNameDict(func_el)
+
+    # Should this function be ditched?
+    if func_name['long_templ_args'] in cfg.ditch:
+        return True
+
+    # Ignore templated functions (BOSS cannot deal with that yet...)
+    if utils.isTemplateFunction(func_el):
+        if print_warning:
+            reason = "Templated function. BOSS cannot deal with this yet."
+            infomsg.IgnoredFunction(func_name['long_templ_args'], reason).printMessage()
+        return True
+
 
     # Check if this is an operator function
     is_operator = False
@@ -333,16 +345,6 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warn
         is_operator = True
 
 
-    # # Check function return type
-    # if 'returns' in func_el.keys():
-    #     if not utils.isAcceptedType(func_el):
-    #         return_type_dict = utils.findType(func_el)
-    #         return_type   = return_type_dict['name'] + '*'*return_type_dict['pointerness'] + '&'*return_type_dict['is_reference']
-    #         if print_warning:
-    #             reason = "Non-accepted return type '%s'." % return_type
-    #             infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('name'), reason).printMessage()
-    #         return_type_accepted = False
-    #         return True 
 
     # Check function return type
     if 'returns' in func_el.keys():
@@ -353,10 +355,11 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warn
             if print_warning:
                 reason = "Non-accepted return type '%s'." % return_type
                 infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
-            return_type_accepted = False
             return True 
 
+
     # Check argument types
+    arg_types_accepted = True
     args = getArgs(func_el)
 
     use_n_args = len(args) - remove_n_args
@@ -388,12 +391,11 @@ def ignoreFunction(func_el, limit_pointerness=False, remove_n_args=0, print_warn
                         infomsg.IgnoredFunction(is_operator*'operator'+func_el.get('demangled'), reason).printMessage()
                     arg_types_accepted = False
                     break
-
-    # Return result
-    if (not return_type_accepted) or (not arg_types_accepted) or (not template_args_accepted):
+    if (not arg_types_accepted):
         return True
-    else:
-        return False 
+
+    # Function accepted (i.e. should *not* be ignored)
+    return False 
 
 # ======== END: ignoreFunction ========
 

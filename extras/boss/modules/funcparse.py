@@ -62,10 +62,7 @@ def run():
 
 
         # Check if this is a template function
-        if '<' in func_name['long_templ']:
-            is_template = True
-        else:
-            is_template = False
+        is_template = utils.isTemplateFunction(func_el)
 
 
         # If template function, figure out template variables

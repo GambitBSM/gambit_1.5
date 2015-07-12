@@ -149,6 +149,27 @@ def isTemplateClass(class_el):
 
 
 
+
+# ====== isTemplateFunction ========
+
+def isTemplateFunction(func_el):
+
+    import modules.funcutils as funcutils
+
+    is_template = False
+
+    func_name = funcutils.getFunctionNameDict(func_el)
+
+    if '<' in func_name['long_templ']:
+        is_template = True
+
+    return is_template
+
+# ====== END: isTemplateFunction ========
+
+
+
+
 # ====== isEnumeration ========
 
 def isEnumeration(el):
@@ -248,12 +269,6 @@ def getTemplateBracket(el):
 
     src_file_name = gb.id_dict[el.get('file')].get('name')
     line_number   = int(el.get('line'))
-
-    print
-    print 'ID:       ', el.get('id')
-    print 'SRC_FILE: ', src_file_name
-    print 'LINE:     ', line_number
-    print
 
     f = open(src_file_name, 'r')
     file_content = f.read()
@@ -2617,6 +2632,7 @@ def clearGlobalXMLdicts():
 def initGlobalXMLdicts(xml_path, id_and_name_only=False):
 
     import modules.classutils as classutils
+    import modules.funcutils as funcutils
 
     # Clear dicts
     clearGlobalXMLdicts()
@@ -2704,13 +2720,13 @@ def initGlobalXMLdicts(xml_path, id_and_name_only=False):
         # Update global dict: function name --> function xml element
         if el.tag == 'Function':
 
-            if 'demangled' in el.keys():
+            try:
+                func_name = funcutils.getFunctionNameDict(el)
+            except KeyError:
+                continue
 
-                func_name_full = el.get('demangled')
-
-                if func_name_full in cfg.loaded_functions:
-                    gb.func_dict[func_name_full] = el
-
+            if func_name['long_templ_args'] in cfg.loaded_functions:
+                gb.func_dict[func_name['long_templ_args']] = el
 
 
 
