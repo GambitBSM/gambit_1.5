@@ -2133,17 +2133,10 @@ void NNPDF::init(int iFitIn, string xmlPath, Info* infoPtr) {
   for (int iq = 0; iq < fNQ2; iq++) fLogQ2Grid[iq] = log(fQ2Grid[iq]);
 
   // Prepare grid array.
-  fPDFGrid = new double**[fNFL];
-  for (int i = 0; i < fNFL; i++) {
-    fPDFGrid[i] = new double*[fNX];
-    for (int j = 0; j < fNX; j++) {
-      fPDFGrid[i][j] = new double[fNQ2];
-      for (int z = 0; z < fNQ2; z++) fPDFGrid[i][j][z] = 0.0;
-    }
-  }
-
+    fPDFGrid = new double[fNFL*fNX*fNQ2];
+  
   // Check values of number of grid entries.
-  if (fNX<= 0 || fNX>100 || fNQ2<=0 || fNQ2>50) {
+  if (fNX<4 || fNX>100 || fNQ2<2 || fNQ2>50) {
     cout << "Error in NNPDF::init, Invalid grid values" << endl
          << "fNX = " << fNX << endl << "fNQ2 = " << fNQ2 << endl
          << "fNFL = " <<fNFL << endl;
@@ -2156,46 +2149,210 @@ void NNPDF::init(int iFitIn, string xmlPath, Info* infoPtr) {
   for (int ix = 0; ix < fNX; ix++)
     for (int iq = 0; iq < fNQ2; iq++)
       for (int fl = 0; fl < fNFL; fl++)
-        f >> fPDFGrid[fl][ix][iq];
+      {
+        f >> fPDFGrid[(fl*fNX + ix)*fNQ2 + iq];
+      }
   f.close();
 
   // Other vectors.
   fRes = new double[fNFL];
-
+  
 }
 
 //--------------------------------------------------------------------------
 
-void NNPDF::xfUpdate(int , double x, double Q2) {
+ void NNPDF::xfUpdate(int , double x, double Q2) {
+ 
+ // Update using NNPDF routine, within allowed (x, q) range.
+ xfxevolve(x,Q2);
+ 
+ // Then transfer to Pythia8 notation.
+ xg     = fRes[6];
+ xu     = fRes[8];
+ xd     = fRes[7];
+ xubar  = fRes[4];
+ xdbar  = fRes[5];
+ xs     = fRes[9];
+ xsbar  = fRes[3];
+ xc     = fRes[10];
+ xb     = fRes[11];
+ xgamma = fRes[13];
+ 
+ // Subdivision of valence and sea.
+ xuVal  = xu - xubar;
+ xuSea  = xubar;
+ xdVal  = xd - xdbar;
+ xdSea  = xdbar;
+ 
+ // idSav = 9 to indicate that all flavours reset.
+ idSav  = 9;
+ 
+ }
 
-  // Update using NNPDF routine, within allowed (x, q) range.
-  xfxevolve(x,Q2);
+ 
+//--------------------------------------------------------------------------
+/*
+ *  NNPDF::xfxevolve(double x, double Q2) optimized to improve performance by ~2x
+ *
+ *  Modified by Hrayr Matevosyan on 24/06/15.
+ *  2015 CSSM/CoEPP, University of Adelaide.
+ *
+ */
+void NNPDF::xfxevolve(double x, double Q2) {
 
-  // Then transfer to Pythia8 notation.
-  xg     = fRes[6];
-  xu     = fRes[8];
-  xd     = fRes[7];
-  xubar  = fRes[4];
-  xdbar  = fRes[5];
-  xs     = fRes[9];
-  xsbar  = fRes[3];
-  xc     = fRes[10];
-  xb     = fRes[11];
-  xgamma = fRes[13];
+  // Freeze outside x-Q2 grid.
+  if (x < fXMINGRID)
+    x = fXMINGRID;
+  else if (x > fXGrid[fNX-1])
+    x = fXGrid[fNX-1];
+  
+  if (Q2 < fQ2Grid[0])
+    Q2 = fQ2Grid[0];
+  else if (Q2 > fQ2Grid[fNQ2-1])
+    Q2 = fQ2Grid[fNQ2-1];
+  
+  // Find nearest points in the x-Q2 grid.
+  int min = 0;
+  int max = fNX-1;
+  int mid;
+  while (max-min > 1)
+  {
+    mid = (min+max)/2;
+    if (x < fXGrid[mid]) max = mid;
+    else min = mid;
+  };
+  
+  int ix1 = min-1; //ix-1
+  if (ix1 < 0)
+    ix1=0;
+  else if(ix1 > (fNX-4))
+    ix1 = (fNX-4);
+  
+  // Find nearest points in the Q2 grid.
+  min = 0;
+  max = fNQ2-1;
+  while (max-min > 1)
+  {
+    mid = (min+max)/2;
+    if (Q2 < fQ2Grid[mid]) max = mid;
+    else min = mid;
+  };
+    
+  int ix2 = min;
+  if (ix2 > (fNQ2-2))
+    ix2 = (fNQ2-2);
+ 
+  //x grid values used
+  double x1, *x1a;
+  if (x < static_cast<double>(1e-1))
+  {
+    x1 = log(x);
+    x1a = fLogXGrid + ix1;
+  }
+  else
+  {
+    x1 = x;
+    x1a = fXGrid + ix1;
+  }
+  
+  if(
+     (x1a[0] - x1a[1])*
+     (x1a[0] - x1a[2])*
+     (x1a[0] - x1a[3])*
+     (x1a[1] - x1a[2])*
+     (x1a[1] - x1a[3])*
+     (x1a[2] - x1a[3])
+      == 0
+     )
+  {
+    cout << "NNPDF::polint, failure" << endl;
+    return;
+  }
 
-  // Subdivision of valence and sea.
-  xuVal  = xu - xubar;
-  xuSea  = xubar;
-  xdVal  = xd - xdbar;
-  xdSea  = xdbar;
+  //Q2 grid values used
+  double x2 = log(Q2);
+  double* x2a = fLogQ2Grid+ix2;
+  if ( (x2a[0]-x2a[1]) == 0)
+  {
+    cout << "NNPDF::polint, failure" << endl;
+    return;
+  }
+  
+  //Interpolation Variables
+  int iShift= ( abs(x2-x2a[0]) < abs(x2-x2a[1]) ) ? 0 : 1;
+  
+  double denl = (x2a[iShift]-x2)/(x2a[0]-x2a[1]);
 
-  // idSav = 9 to indicate that all flavours reset.
-  idSav  = 9;
+  int ns0 =0;
+  double dif = abs(x1-x1a[0]);
+  for (int i = 1; i < 4; i++)
+  {
+    double dift = abs(x1-x1a[i]);
+    if (dift < dif)
+    {
+      ns0 = i;
+      dif = dift;
+    }
+  }
 
+  //Loop over flavor index
+  for (int ipdf = 0; ipdf < fNFL; ipdf++)
+  {
+    //
+    //Interpolation in Q2
+    //
+    
+    double ym[4];
+    int iIndPDF = (ipdf*fNX + ix1)*fNQ2 + ix2;
+    ym[0] = fPDFGrid[iIndPDF+iShift] + (fPDFGrid[iIndPDF+1] - fPDFGrid[iIndPDF])*denl;
+    
+    iIndPDF+=fNQ2;
+    ym[1] = fPDFGrid[iIndPDF+iShift] + (fPDFGrid[iIndPDF+1] - fPDFGrid[iIndPDF])*denl;
+    
+    iIndPDF+=fNQ2;
+    ym[2] = fPDFGrid[iIndPDF+iShift] + (fPDFGrid[iIndPDF+1] - fPDFGrid[iIndPDF])*denl;
+    
+    iIndPDF+=fNQ2;
+    ym[3] = fPDFGrid[iIndPDF+iShift] + (fPDFGrid[iIndPDF+1] - fPDFGrid[iIndPDF])*denl;
+    
+    //
+    //Interpolation in x
+    //
+    double c[4]={ym[0],ym[1],ym[2],ym[3]};
+    
+    int ns = ns0;
+    double y = ym[ns];
+    ns--;
+    double den;
+    for (int m = 1; m < 4; m++)
+    {
+      for (int i = 0; i < 4-m; i++)
+      {
+        den = (c[i+1]-ym[i])/(x1a[i]-x1a[i+m]);
+        c[i]  = (x1a[i]   - x1) * den;
+        ym[i] = (x1a[i+m] - x1) * den;
+      }
+      if (2*ns < 2-m)
+      {
+        y+= c[ns+1];
+      }
+      else
+      {
+        y+= ym[ns];
+        ns--;
+      }
+    }
+ 
+    fRes[ipdf] = y;
+  }
 }
 
-//--------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------
+/*
+ *  NNPDF::xfxevolve(double x, double Q2) original code v8209
+ */
+/*
 void NNPDF::xfxevolve(double x, double Q2) {
 
   // Freeze outside x-Q2 grid.
@@ -2278,6 +2435,7 @@ void NNPDF::xfxevolve(double x, double Q2) {
   }
 
 }
+*/
 
 //--------------------------------------------------------------------------
 

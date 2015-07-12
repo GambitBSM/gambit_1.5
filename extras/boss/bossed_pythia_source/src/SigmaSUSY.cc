@@ -34,7 +34,9 @@ double Sigma2SUSY::weightDecay( Event& process, int iResBeg, int iResEnd) {
     return weightTopDecay( process, iResBeg, iResEnd);
 
   // For Neutralino(i) decay hand over to standard routine.
-  if ( settingsPtr->flag("SUSYResonance:3BodyMatrixElement")
+  // MJW hardcode
+  //if ( settingsPtr->flag("SUSYResonance:3BodyMatrixElement")
+  if(false
     && (idMother == 1000023 || idMother == 1000025 || idMother == 1000035) ) {
 
     // Nj -> Ni f fbar
@@ -1070,7 +1072,8 @@ double Sigma2qq2squarksquark::sigmaHat() {
     for (int k=1;k<=2;k++) {
 
       // Skip if only including gluinos
-      if (onlyQCD) continue;
+      //MJW hardcode
+      //if (onlyQCD) continue;
 
       for (int l=1;l<=2;l++) {
 
@@ -1109,6 +1112,7 @@ double Sigma2qq2squarksquark::sigmaHat() {
     }
 
     // Skip if only including gluinos
+    //MJW hardcode
     if (!onlyQCD) {
 
       // u-channel Neutralinos
