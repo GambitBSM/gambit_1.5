@@ -76,10 +76,13 @@ PROGRAM DDCalc0_exampleF
   ! likelihoods.  If .FALSE. is given, a no-background-subtraction
   ! p-value can still be calculated, but a Poisson is used instead
   ! of the maximum gap.  We show some maximum gap results below, so
-  ! we must use .TRUE. here.
+  ! we must use .TRUE. here (the flag is ignored for experiments
+  ! that do not have the event energies necessary for a maximum gap
+  ! analysis).
   CALL XENON100_2012_Init(.TRUE.)
   CALL LUX_2013_Init(.TRUE.)
   CALL SuperCDMS_2014_Init(.TRUE.)
+  CALL SIMPLE_2014_Init(.TRUE.)
   CALL DARWIN_Ar_2015_Init(.TRUE.)
   CALL DARWIN_Xe_2015_Init(.TRUE.)
   
@@ -93,6 +96,7 @@ PROGRAM DDCalc0_exampleF
   !CALL XENON100_2012_SetEmin(3d0)
   !CALL LUX_2013_SetEmin(3d0)
   !CALL SuperCDMS_2014_SetEmin(3d0)
+  !CALL SIMPLE_2014_SetEmin(3d0)
   !CALL DARWIN_Ar_2015_SetEmin(3d0)
   !CALL DARWIN_Xe_2015_SetEmin(3d0)
   
@@ -105,9 +109,13 @@ PROGRAM DDCalc0_exampleF
   ! the examples here are those used for the LUX case, so these
   ! specific calls are not actually necessary.
   ! 
-  ! Set element to use.  Must be one of 14,18,32, or 54.  Spin-
-  ! dependent interactions only implemented for 54 (xenon).
-  CALL DDCalc0_SetDetector(D,Zelem=54)
+  ! Set element(s) to use by their atomic number, along with the
+  ! stoichiometry (assumed to be 1:1 for all elements if not given).
+  ! Spin-dependent interactions only implemented for a limited number
+  ! of isotopes.
+  CALL DDCalc0_SetDetector(D,Nelem=1,Zelem=(/54/),stoich=(/1/))
+  ! Give explicit list of isotopes, along with their mass fractions.
+  !CALL DDCalc0_SetDetector(D,Niso=7,Ziso=(/.../),Aiso=(/.../),fiso=(/.../))
   ! Change parameters from standard DARWIN argon case.
   CALL DDCalc0_SetDetector(D,mass=118d0,time=85.3d0,Nevents=1,background=0.64d0)
   ! Load efficiency curves from file.  First column is recoil energy
@@ -198,54 +206,57 @@ PROGRAM DDCalc0_exampleF
     CALL XENON100_2012_CalcRates()
     CALL LUX_2013_CalcRates()
     CALL SuperCDMS_2014_CalcRates()
+    CALL SIMPLE_2014_CalcRates()
     CALL DARWIN_Ar_2015_CalcRates()
     CALL DARWIN_Xe_2015_CalcRates()
     CALL DDCalc0_CalcRates(D)
     
     ! Header
-    WRITE(*,'(A20,6(2X,A11))') '',' XENON 2012',' LUX 2013  ',          &
-        'SuCDMS 2014',' DARWIN Ar ',' DARWIN Xe ',' (special) '
-    !WRITE(*,'(A20,6(1X,A12))') '','-----------','-----------',          &
-    !    '-----------','-----------','-----------','-----------'
+    WRITE(*,'(A20,7(2X,A11))') '',' XENON 2012',' LUX 2013  ',          &
+        'SuCDMS 2014','SIMPLE 2014',' DARWIN Ar ',' DARWIN Xe ',        &
+        ' (special) '
+    !WRITE(*,'(A20,7(1X,A12))') '','-----------','-----------',          &
+    !    '-----------','-----------','-----------','-----------',        &
+    !    '-----------'
     
     ! Event quantities.
     ! The observed number of events (INTEGER).
-    WRITE(*,'(A20,6(2X,1X,I6,4X))') 'Observed events                 ', &
+    WRITE(*,'(A20,7(2X,1X,I6,4X))') 'Observed events                 ', &
         XENON100_2012_Events(),LUX_2013_Events(),                       &
-        SuperCDMS_2014_Events(),                                        &
+        SuperCDMS_2014_Events(),SIMPLE_2014_Events(),                   &
         DARWIN_Ar_2015_Events(),DARWIN_Xe_2015_Events(),                &
         DDCalc0_Events(D)
     ! The average expected background.
-    WRITE(*,'(A20,6(2X,1PG11.4))')  'Expected background             ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  'Expected background             ', &
         XENON100_2012_Background(),LUX_2013_Background(),               &
-        SuperCDMS_2014_Background(),                                    &
+        SuperCDMS_2014_Background(),SIMPLE_2014_Background(),           &
         DARWIN_Ar_2015_Background(),DARWIN_Xe_2015_Background(),        &
         DDCalc0_Background(D)
     ! The average expected WIMP signal.
-    WRITE(*,'(A20,6(2X,1PG11.4))')  'Expected signal                 ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  'Expected signal                 ', &
         XENON100_2012_Signal(),LUX_2013_Signal(),                       &
-        SuperCDMS_2014_Signal(),                                        &
+        SuperCDMS_2014_Signal(),SIMPLE_2014_Signal(),                   &
         DARWIN_Ar_2015_Signal(),DARWIN_Xe_2015_Signal(),                &
         DDCalc0_Signal(D)
     ! The average expected WIMP spin-independent signal.
-    WRITE(*,'(A20,6(2X,1PG11.4))')  '  spin-independent              ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  '  spin-independent              ', &
         XENON100_2012_SignalSI(),LUX_2013_SignalSI(),                   &
-        SuperCDMS_2014_SignalSI(),                                      &
+        SuperCDMS_2014_SignalSI(),SIMPLE_2014_SignalSI(),               &
         DARWIN_Ar_2015_SignalSI(),DARWIN_Xe_2015_SignalSI(),            &
         DDCalc0_SignalSI(D)
     ! The average expected WIMP spin-dependent signal.
-    WRITE(*,'(A20,6(2X,1PG11.4))')  '  spin-dependent                ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  '  spin-dependent                ', &
         XENON100_2012_SignalSD(),LUX_2013_SignalSD(),                   &
-        SuperCDMS_2014_SignalSD(),                                      &
+        SuperCDMS_2014_SignalSD(),SIMPLE_2014_SignalSD(),               &
         DARWIN_Ar_2015_SignalSD(),DARWIN_Xe_2015_SignalSD(),            &
         DDCalc0_SignalSD(D)
     
     ! The log-likelihoods for the current WIMP; note these are _not_
     ! multiplied by -2.  The likelihood is calculated using a Poisson
     ! given the observed number of events and expected signal+background.
-    WRITE(*,'(A20,6(2X,1PG11.4))')  'Log-likelihood                  ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  'Log-likelihood                  ', &
         XENON100_2012_LogLikelihood(),LUX_2013_LogLikelihood(),         &
-        SuperCDMS_2014_LogLikelihood(),                                 &
+        SuperCDMS_2014_LogLikelihood(),SIMPLE_2014_LogLikelihood(),     &
         DARWIN_Ar_2015_LogLikelihood(),DARWIN_Xe_2015_LogLikelihood(),  &
         DDCalc0_LogLikelihood(D)
     
@@ -257,9 +268,9 @@ PROGRAM DDCalc0_exampleF
     ! WIMP parameters.  However, since it is not a true p-value, it
     ! should not be interpreted as being related to any particular
     ! likelihood.
-    WRITE(*,'(A20,6(2X,1PG11.4))')  'Max gap log(p-value)            ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  'Max gap log(p-value)            ', &
         XENON100_2012_LogPValue(),LUX_2013_LogPValue(),                 &
-        SuperCDMS_2014_LogPValue(),                                     &
+        SuperCDMS_2014_LogPValue(),SIMPLE_2014_LogPValue(),             &
         DARWIN_Ar_2015_LogPValue(),DARWIN_Xe_2015_LogPValue(),          &
         DDCalc0_LogPValue(D)
     
@@ -272,9 +283,9 @@ PROGRAM DDCalc0_exampleF
     ! at a WIMP mass of 100 GeV at which the experiment is excluded at
     ! the 90% CL (p=1-CL).
     lnp = LOG(0.1d0)
-    WRITE(*,'(A20,6(2X,1PG11.4))')  'Max gap x for 90% CL            ', &
+    WRITE(*,'(A20,7(2X,1PG11.4))')  'Max gap x for 90% CL            ', &
         XENON100_2012_ScaleToPValue(lnp),LUX_2013_ScaleToPValue(lnp),   &
-        SuperCDMS_2014_ScaleToPValue(lnp),                              &
+        SuperCDMS_2014_ScaleToPValue(lnp),SIMPLE_2014_ScaleToPValue(lnp), &
         DARWIN_Ar_2015_ScaleToPValue(lnp),DARWIN_Xe_2015_ScaleToPValue(lnp), &
         DDCalc0_ScaleToPValue(D,lnp)
     WRITE(*,'(A60)')  '  * Factor x such that sigma->x*sigma gives desired p-value'
