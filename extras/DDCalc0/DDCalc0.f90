@@ -49,9 +49,15 @@ MODULE DDCALC0
 !    set WIMP parameters.  Meant to provide a simple, basic interface
 !    for external access to the module.
 ! Experiment specific:
+!  * XENON100 2012 ROUTINES
+!    Routines for calculating rates/likelihoods for the XENON100 2012
+!    analysis.
 !  * LUX 2013 ROUTINES
 !    Routines for calculating rates/likelihoods for the LUX 2013
 !    analysis.
+!  * SuperCDMS 2014 ROUTINES
+!    Routines for calculating rates/likelihoods for the SuperCDMS 2014
+!    low-mass WIMP analysis.
 !  * DARWIN ARGON 2015 ROUTINES
 !    Routines for calculating rates/likelihoods for the proposed
 !    DARWIN argon-based detector, using a 2015 parameters estimate.
@@ -114,9 +120,10 @@ MODULE DDCALC0
 !    Various math functions.
 !  * PROBABILITY DISTRIBUTIONS
 !    Various probability related functions for several distributions.
-!    NOTE: _not_ high precision in the case of Poisson and Binomial.
 !  * ARRAY SORT/SEARCH
 !    Routines to sort or search arrays.
+!  * STRING UTILITY FUNCTIONS
+!    Utility functions involving strings.
 !  * TIME UTILITY FUNCTIONS
 !    Utility functions for examining wall or CPU time.
 ! 
@@ -136,7 +143,7 @@ IMPLICIT NONE
 PRIVATE
 
 ! Version of this software
-CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.24'
+CHARACTER*(*), PUBLIC, PARAMETER :: VERSION_STRING = '0.26'
 
 
 
@@ -261,7 +268,8 @@ PUBLIC :: DDCalc0_GetWIMP_mfa,DDCalc0_GetWIMP_mG,DDCalc0_GetWIMP_msigma
 ! performed for analysis sub-intervals (i.e. intervals between
 ! observed events).  This is only necessary for maximum gap
 ! calculations and can be set to .FALSE. for likelihood analyses.
-PUBLIC :: XENON100_2012_Init,LUX_2013_Init,SuperCDMS_2014_Init, &
+PUBLIC :: XENON100_2012_Init,LUX_2013_Init,                             &
+          SuperCDMS_2014_Init,SIMPLE_2014_Init,                         &
           DARWIN_Ar_2015_Init,DARWIN_Xe_2015_Init
 
 ! Set minimum recoil energy Emin to consider [keV] (initially set to
@@ -271,7 +279,8 @@ PUBLIC :: XENON100_2012_Init,LUX_2013_Init,SuperCDMS_2014_Init, &
 ! thresholds regardless of this setting, so setting this to 0 keV (the
 ! default behavior when initialization is performed) does not imply
 ! that very low energy recoils actually contribute to the signal.
-PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin,SuperCDMS_2014_SetEMin, &
+PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin,                       &
+          SuperCDMS_2014_SetEMin,SIMPLE_2014_SetEMin,                   &
           DARWIN_Ar_2015_SetEmin,DARWIN_Xe_2015_SetEmin
 
 ! Rate calculation:
@@ -279,17 +288,20 @@ PUBLIC :: XENON100_2012_SetEmin,LUX_2013_SetEmin,SuperCDMS_2014_SetEMin, &
 ! Performs the rate calculations used for likelihoods/confidence
 ! intervals.  Must be called after any changes to the WIMP parameters.
 ! Actual calculation values are accessed through other routines.
-PUBLIC :: XENON100_2012_CalcRates,LUX_2013_CalcRates,SuperCDMS_2014_CalcRates, &
+PUBLIC :: XENON100_2012_CalcRates,LUX_2013_CalcRates,                   &
+          SuperCDMS_2014_CalcRates,SIMPLE_2014_CalcRates,               &
           DARWIN_Ar_2015_CalcRates,DARWIN_Xe_2015_CalcRates
 
 ! Number of observed events in the analysis:
 !     INTEGER FUNCTION Events()
-PUBLIC :: XENON100_2012_Events,LUX_2013_Events,SuperCDMS_2014_Events, &
+PUBLIC :: XENON100_2012_Events,LUX_2013_Events,                         &
+          SuperCDMS_2014_Events,SIMPLE_2014_Events,                     &
           DARWIN_Ar_2015_Events,DARWIN_Xe_2015_Events
 
 ! Average expected number of background events in the analysis:
 !     REAL*8 FUNCTION Background()
-PUBLIC :: XENON100_2012_Background,LUX_2013_Background,SuperCDMS_2014_Background, &
+PUBLIC :: XENON100_2012_Background,LUX_2013_Background,                 &
+          SuperCDMS_2014_Background,SIMPLE_2014_Background,             &
           DARWIN_Ar_2015_Background,DARWIN_Xe_2015_Background
 
 ! Average expected number of signal events in the analysis:
@@ -297,18 +309,22 @@ PUBLIC :: XENON100_2012_Background,LUX_2013_Background,SuperCDMS_2014_Background
 ! Or the separate spin-independent and spin-dependent contributions:
 !     REAL*8 FUNCTION SignalSI()
 !     REAL*8 FUNCTION SignalSD()
-PUBLIC :: XENON100_2012_Signal,  LUX_2013_Signal, SuperCDMS_2014_Signal,   &
+PUBLIC :: XENON100_2012_Signal,   LUX_2013_Signal,                      &
+          SuperCDMS_2014_Signal,  SIMPLE_2014_Signal,                   &
           DARWIN_Ar_2015_Signal,  DARWIN_Xe_2015_Signal
-PUBLIC :: XENON100_2012_SignalSI,LUX_2013_SignalSI, SuperCDMS_2014_SignalSI, &
+PUBLIC :: XENON100_2012_SignalSI, LUX_2013_SignalSI,                    &
+          SuperCDMS_2014_SignalSI,SIMPLE_2014_SignalSI,                 &
           DARWIN_Ar_2015_SignalSI,DARWIN_Xe_2015_SignalSI
-PUBLIC :: XENON100_2012_SignalSD,LUX_2013_SignalSD, SuperCDMS_2014_SignalSD, &
+PUBLIC :: XENON100_2012_SignalSD, LUX_2013_SignalSD,                    &
+          SuperCDMS_2014_SignalSD,SIMPLE_2014_SignalSD,                 &
           DARWIN_Ar_2015_SignalSD,DARWIN_Xe_2015_SignalSD
 
 ! Log-likelihood for current WIMP:
 !     REAL*8 FUNCTION LogLikelihood()
 ! Based upon a Poisson distribution in the number of observed events
 ! given the expected background+signal.  Calc() must be called first.
-PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood,SuperCDMS_2014_LogLikelihood, &
+PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood,           &
+          SuperCDMS_2014_LogLikelihood,SIMPLE_2014_LogLikelihood,       &
           DARWIN_Xe_2015_LogLikelihood,DARWIN_Ar_2015_LogLikelihood
 
 ! Logarithm of the p-value for current WIMP:
@@ -316,7 +332,8 @@ PUBLIC :: XENON100_2012_LogLikelihood,LUX_2013_LogLikelihood,SuperCDMS_2014_LogL
 ! Based upon the maximum gap method if Init() called with intervals =
 ! .TRUE., a signal-only (no-background) Poisson distribution otherwise.
 ! Calc() must be called first.
-PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue,SuperCDMS_2014_LogPValue, &
+PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue,                   &
+          SuperCDMS_2014_LogPValue,SIMPLE_2014_LogPValue,               &
           DARWIN_Xe_2015_LogPValue,DARWIN_Ar_2015_LogPValue
 
 ! Scale by which the current WIMP cross-sections must be multiplied to
@@ -324,7 +341,8 @@ PUBLIC :: XENON100_2012_LogPValue,LUX_2013_LogPValue,SuperCDMS_2014_LogPValue, &
 !     REAL*8 FUNCTION ScaleToPValue(lnp)
 ! where lnp is the logarithm of the desired p-value (p=1-CL).
 ! Calc() must be called first.
-PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue,SuperCDMS_2014_ScaleToPValue, &
+PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue,           &
+          SuperCDMS_2014_ScaleToPValue,SIMPLE_2014_ScaleToPValue,       &
           DARWIN_Xe_2015_ScaleToPValue,DARWIN_Ar_2015_ScaleToPValue
 
 ! Detector structure initialization (ADVANCED USAGE ONLY):
@@ -334,7 +352,8 @@ PUBLIC :: XENON100_2012_ScaleToPValue,LUX_2013_ScaleToPValue,SuperCDMS_2014_Scal
 ! can be used in the generic routines below.  These routines are
 ! not intended for standard usage, so ignore them unless you are
 ! familiar with the internals of this code.
-PUBLIC :: XENON100_2012_InitTo,LUX_2013_InitTo,SuperCDMS_2014_InitTo, &
+PUBLIC :: XENON100_2012_InitTo,LUX_2013_InitTo,                         &
+          SuperCDMS_2014_InitTo,SIMPLE_2014_InitTo,                     &
           DARWIN_Ar_2015_InitTo,DARWIN_Xe_2015_InitTo
 
 
@@ -502,6 +521,7 @@ END INTERFACE
 REAL*8, PUBLIC, PARAMETER :: PI         = 3.1415926535897932d0   ! Pi
 REAL*8, PUBLIC, PARAMETER :: TWOPI      = 6.2831853071795865d0   ! 2*Pi
 REAL*8, PUBLIC, PARAMETER :: HALFPI     = 1.5707963267948966d0   ! Pi/2
+REAL*8, PUBLIC, PARAMETER :: FOURPI     =12.5663706143591730d0   ! 4*Pi
 REAL*8, PUBLIC, PARAMETER :: SQRTPI     = 1.7724538509055160d0   ! Sqrt(Pi)
 REAL*8, PUBLIC, PARAMETER :: SQRT2PI    = 2.5066282746310005d0   ! Sqrt(2*Pi)
 REAL*8, PUBLIC, PARAMETER :: INVPI      = 0.31830988618379067d0  ! 1/Pi
@@ -1071,6 +1091,7 @@ TYPE(DetectorStruct), TARGET, PRIVATE :: DefaultDetector
 TYPE(DetectorStruct), PRIVATE :: XENON100_2012
 TYPE(DetectorStruct), PRIVATE :: LUX_2013
 TYPE(DetectorStruct), PRIVATE :: SuperCDMS_2014
+TYPE(DetectorStruct), PRIVATE :: SIMPLE_2014
 TYPE(DetectorStruct), PRIVATE :: DARWIN_Ar_2015,DARWIN_Xe_2015
 
 
@@ -1713,7 +1734,7 @@ SUBROUTINE XENON100_2012_InitTo(D,intervals)
      41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
      54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
      72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
-     95.499d0,100.00d0 /)
+     95.499d0, 100.00d0 /)
   ! Efficiency (total)
   REAL*8, PARAMETER :: EFF0(NE)                                         &
       =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
@@ -1833,7 +1854,7 @@ SUBROUTINE XENON100_2012_InitTo(D,intervals)
   ! One call for all settings.
   ! Most of these _must_ be there to ensure everything get initialized.
   CALL SetDetector(D,mass=34d0,time=224.6d0,Nevents=2,                  &
-                   background=1.0d0,Zelem=54,                           &
+                   background=1.0d0,Nelem=1,Zelem=(/54/),               &
                    NEeff=NE,Eeff=E,Neff=NEFF,eff=EFF,                   &
                    intervals=intervals)
   D%eff_file = '[XENON100 2012]'
@@ -2146,7 +2167,7 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
      41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
      54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
      72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
-     95.499d0,100.00d0 /)
+     95.499d0, 100.00d0 /)
   ! LOWER 50% NR BAND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ! Efficiency (total)
   REAL*8, PARAMETER :: EFF0(NE)                                         &
@@ -2326,18 +2347,20 @@ SUBROUTINE LUX_2013_InitTo(D,intervals)
   ! One call for all settings.
   ! Most of these _must_ be there to ensure everything get initialized.
   CALL SetDetector(D,mass=118d0,time=85.3d0,Nevents=1,                  &
-                   background=0.64d0,Zelem=54,                          &
+                   background=0.64d0,Nelem=1,Zelem=(/54/),              &
                    NEeff=NE,Eeff=E,Neff=NEFF,eff=EFF,                   &
                    intervals=intervals)
   D%eff_file = '[LUX 2013]'
   
 END SUBROUTINE
 
+
+
 !=======================================================================
 ! SuperCDMS 2014 ANALYSIS ROUTINES
 ! added by LLH, Jan. 2015
 ! Based upon the SuperCDMS low-mass WIMP search: PRL 112, 241302 (2014)
-! [1402.737].  11 candidate events seen in signal region (consistent
+! [1402.7137].  11 candidate events seen in signal region (consistent
 ! with background).
 ! 
 ! BIND() is used to specify compiler-independent object file symbol
@@ -2345,8 +2368,8 @@ END SUBROUTINE
 !=======================================================================
 
 !-----------------------------------------------------------------------
-! Initializes the module to perform calculations for the LUX 2013
-! analysis.  This must be called if any of the following LUX 2013
+! Initializes the module to perform calculations for the SuperCDMS 2014
+! analysis.  This must be called if any of the following SuperCDMS 2014
 ! routines are to be used.
 ! 
 ! Required input arguments:
@@ -2800,7 +2823,7 @@ SUBROUTINE SuperCDMS_2014_InitTo(D,intervals)
       9.92928d0, 9.93665d0, 9.94401d0, 9.95138d0, 9.95875d0, 9.96612d0, &
       9.97349d0, 9.98086d0, 9.98086d0 /)
   ! Efficiency (total), including T5Z3
-  REAL*8, PARAMETER :: EFF0(NE)                                         &
+  REAL*8, PARAMETER :: EFF0_ALL_TZ(NE)                                  &
       =       (/ 4.21628d-2,4.56586d-2,4.64347d-2,4.72082d-2,4.79792d-2,&
       4.87478d-2,4.95142d-2,5.02783d-2,5.10401d-2,5.17996d-2,5.25568d-2,&
       5.33114d-2,5.41480d-2,5.48988d-2,5.56465d-2,5.63907d-2,5.71493d-2,&
@@ -2987,35 +3010,589 @@ SUBROUTINE SuperCDMS_2014_InitTo(D,intervals)
       5.29415d-1,5.29415d-1,5.29415d-1,5.29802d-1,5.29802d-1,5.29802d-1,&
       5.29802d-1,5.29802d-1,5.29802d-1,5.29802d-1,5.29802d-1,5.29802d-1,&
       5.29802d-1,5.29802d-1,5.29802d-1 /)
-  ! Number of events
-  INTEGER, PARAMETER :: NINTERVALS = 12
+  ! Efficiency (total), excluding T5Z3
+  REAL*8, PARAMETER :: EFF0_NO_T5Z3(NE)                                 &
+      =       (/ 4.03332d-2,4.38198d-2,4.45862d-2,4.53504d-2,4.61127d-2,&
+      4.68732d-2,4.76319d-2,4.83888d-2,4.91439d-2,4.98972d-2,5.06485d-2,&
+      5.13976d-2,5.21445d-2,5.28888d-2,5.36302d-2,5.43685d-2,5.51216d-2,&
+      5.58545d-2,5.65833d-2,5.73079d-2,5.80276d-2,5.87423d-2,5.94514d-2,&
+      6.01547d-2,6.08517d-2,6.18145d-2,6.25019d-2,6.31818d-2,6.38541d-2,&
+      6.45183d-2,6.51741d-2,6.58212d-2,6.64594d-2,6.70882d-2,6.77076d-2,&
+      6.83172d-2,6.89168d-2,6.95063d-2,7.00855d-2,7.06542d-2,7.12123d-2,&
+      7.17597d-2,7.22963d-2,7.28221d-2,7.33370d-2,7.38411d-2,7.43343d-2,&
+      7.48167d-2,7.52882d-2,7.57491d-2,7.63636d-2,7.62879d-2,7.62091d-2,&
+      7.61278d-2,7.60449d-2,7.59614d-2,7.58778d-2,7.57951d-2,7.57138d-2,&
+      7.56348d-2,7.55586d-2,7.54859d-2,7.54173d-2,7.53533d-2,7.52944d-2,&
+      7.52412d-2,7.51941d-2,7.51535d-2,7.51199d-2,7.50936d-2,7.50751d-2,&
+      7.50646d-2,7.50624d-2,7.50689d-2,7.50842d-2,7.52904d-2,7.53255d-2,&
+      7.53703d-2,7.54248d-2,7.54893d-2,7.55639d-2,7.56487d-2,7.57439d-2,&
+      7.58495d-2,7.59657d-2,7.60927d-2,7.62303d-2,7.63787d-2,7.65381d-2,&
+      7.67083d-2,7.68894d-2,7.70815d-2,7.72846d-2,7.74987d-2,7.77238d-2,&
+      7.79599d-2,7.82069d-2,7.84649d-2,7.87339d-2,7.90138d-2,7.94429d-2,&
+      7.97451d-2,8.00580d-2,8.03818d-2,8.07162d-2,8.10613d-2,8.14170d-2,&
+      8.17833d-2,8.21601d-2,8.25473d-2,8.29450d-2,8.33529d-2,8.37711d-2,&
+      8.41995d-2,8.46380d-2,8.50865d-2,8.55451d-2,8.60135d-2,8.64917d-2,&
+      8.69797d-2,8.74773d-2,8.79845d-2,8.85012d-2,8.90274d-2,8.95628d-2,&
+      9.04395d-2,9.09952d-2,9.15600d-2,9.21337d-2,9.27164d-2,9.33079d-2,&
+      9.39080d-2,9.45168d-2,9.51341d-2,9.57598d-2,9.63937d-2,9.70359d-2,&
+      9.76861d-2,9.83443d-2,9.90104d-2,9.96842d-2,1.00366d-1,1.01055d-1,&
+      1.01751d-1,1.02454d-1,1.03165d-1,1.03883d-1,1.04608d-1,1.05339d-1,&
+      1.06077d-1,1.07014d-1,1.07766d-1,1.08524d-1,1.09288d-1,1.10058d-1,&
+      1.10834d-1,1.11616d-1,1.12403d-1,1.13195d-1,1.13993d-1,1.14796d-1,&
+      1.15604d-1,1.16417d-1,1.17235d-1,1.18057d-1,1.18883d-1,1.19714d-1,&
+      1.20549d-1,1.21389d-1,1.22232d-1,1.23078d-1,1.23929d-1,1.24782d-1,&
+      1.25639d-1,1.26500d-1,1.27496d-1,1.28363d-1,1.29232d-1,1.30104d-1,&
+      1.30978d-1,1.31855d-1,1.32734d-1,1.33614d-1,1.34497d-1,1.35382d-1,&
+      1.36268d-1,1.37156d-1,1.38045d-1,1.38935d-1,1.39827d-1,1.40719d-1,&
+      1.41613d-1,1.42507d-1,1.43402d-1,1.44297d-1,1.45192d-1,1.46088d-1,&
+      1.46984d-1,1.47880d-1,1.48776d-1,1.49650d-1,1.50546d-1,1.51442d-1,&
+      1.52338d-1,1.53232d-1,1.54126d-1,1.55019d-1,1.55911d-1,1.56802d-1,&
+      1.57691d-1,1.58579d-1,1.59466d-1,1.60350d-1,1.61233d-1,1.62114d-1,&
+      1.62994d-1,1.63871d-1,1.64745d-1,1.65618d-1,1.66488d-1,1.67355d-1,&
+      1.68220d-1,1.69082d-1,1.69941d-1,1.70797d-1,1.71826d-1,1.72676d-1,&
+      1.73522d-1,1.74366d-1,1.75205d-1,1.76041d-1,1.76873d-1,1.77701d-1,&
+      1.78524d-1,1.79344d-1,1.80159d-1,1.80970d-1,1.81776d-1,1.82578d-1,&
+      1.83374d-1,1.84166d-1,1.84953d-1,1.85734d-1,1.86511d-1,1.87281d-1,&
+      1.88046d-1,1.88806d-1,1.89560d-1,1.90308d-1,1.91049d-1,1.91608d-1,&
+      1.92337d-1,1.93060d-1,1.93776d-1,1.94487d-1,1.95192d-1,1.95890d-1,&
+      1.96583d-1,1.97270d-1,1.97951d-1,1.98626d-1,1.99295d-1,1.99959d-1,&
+      2.00618d-1,2.01270d-1,2.01918d-1,2.02560d-1,2.03196d-1,2.03827d-1,&
+      2.04453d-1,2.05074d-1,2.05690d-1,2.06300d-1,2.06906d-1,2.07507d-1,&
+      2.08857d-1,2.09449d-1,2.10037d-1,2.10620d-1,2.11198d-1,2.11771d-1,&
+      2.12340d-1,2.12904d-1,2.13464d-1,2.14019d-1,2.14570d-1,2.15117d-1,&
+      2.15659d-1,2.16197d-1,2.16731d-1,2.17356d-1,2.17888d-1,2.18416d-1,&
+      2.18940d-1,2.19461d-1,2.19978d-1,2.20492d-1,2.21002d-1,2.21509d-1,&
+      2.22013d-1,2.23162d-1,2.23661d-1,2.24156d-1,2.24648d-1,2.25138d-1,&
+      2.25624d-1,2.26108d-1,2.26589d-1,2.27068d-1,2.27543d-1,2.28017d-1,&
+      2.28488d-1,2.28956d-1,2.29422d-1,2.29886d-1,2.30348d-1,2.30808d-1,&
+      2.31265d-1,2.31721d-1,2.32175d-1,2.32627d-1,2.33077d-1,2.33526d-1,&
+      2.33973d-1,2.34418d-1,2.34752d-1,2.35193d-1,2.35632d-1,2.36071d-1,&
+      2.36508d-1,2.36943d-1,2.37378d-1,2.37812d-1,2.38246d-1,2.38678d-1,&
+      2.39110d-1,2.39541d-1,2.39971d-1,2.40401d-1,2.40831d-1,2.41260d-1,&
+      2.41689d-1,2.42118d-1,2.42547d-1,2.42976d-1,2.43405d-1,2.43834d-1,&
+      2.44263d-1,2.44692d-1,2.45122d-1,2.46053d-1,2.46487d-1,2.46921d-1,&
+      2.47356d-1,2.54565d-1,2.55119d-1,2.55675d-1,2.56232d-1,2.56792d-1,&
+      2.57353d-1,2.57916d-1,2.58482d-1,2.59049d-1,2.59618d-1,2.60189d-1,&
+      2.60762d-1,2.61337d-1,2.61914d-1,2.62493d-1,2.63075d-1,2.63658d-1,&
+      2.64244d-1,2.64832d-1,2.65422d-1,2.66014d-1,2.66774d-1,2.67371d-1,&
+      2.67970d-1,2.68571d-1,2.69175d-1,2.69781d-1,2.70390d-1,2.71000d-1,&
+      2.71613d-1,2.72229d-1,2.72847d-1,2.73467d-1,2.74090d-1,2.74715d-1,&
+      2.75342d-1,2.75972d-1,2.76604d-1,2.77239d-1,2.77876d-1,2.78515d-1,&
+      2.79157d-1,2.79802d-1,2.80449d-1,2.81098d-1,2.81750d-1,2.82328d-1,&
+      2.82986d-1,2.83645d-1,2.84307d-1,2.84972d-1,2.85639d-1,2.86309d-1,&
+      2.86981d-1,2.87655d-1,2.88332d-1,2.89012d-1,2.89694d-1,2.90378d-1,&
+      2.91065d-1,2.91754d-1,2.92446d-1,2.93140d-1,2.93837d-1,2.94536d-1,&
+      2.95237d-1,2.95941d-1,2.96648d-1,2.97357d-1,2.98068d-1,2.98782d-1,&
+      2.99834d-1,3.00553d-1,3.01275d-1,3.02000d-1,3.02727d-1,3.03456d-1,&
+      3.04188d-1,3.04922d-1,3.05659d-1,3.06398d-1,3.07140d-1,3.07884d-1,&
+      3.08631d-1,3.09381d-1,3.10132d-1,3.10887d-1,3.11643d-1,3.12403d-1,&
+      3.13165d-1,3.13929d-1,3.14696d-1,3.15466d-1,3.16238d-1,3.17013d-1,&
+      3.17790d-1,3.18636d-1,3.19419d-1,3.20205d-1,3.20994d-1,3.21785d-1,&
+      3.22578d-1,3.23373d-1,3.24170d-1,3.24970d-1,3.25771d-1,3.26574d-1,&
+      3.27378d-1,3.28184d-1,3.28992d-1,3.29801d-1,3.30611d-1,3.31422d-1,&
+      3.32235d-1,3.33048d-1,3.33863d-1,3.34678d-1,3.35493d-1,3.36310d-1,&
+      3.37127d-1,3.37944d-1,3.38338d-1,3.40542d-1,3.41389d-1,3.42237d-1,&
+      3.43085d-1,3.43934d-1,3.44782d-1,3.45631d-1,3.46479d-1,3.47328d-1,&
+      3.48176d-1,3.49024d-1,3.49871d-1,3.50718d-1,3.51564d-1,3.52410d-1,&
+      3.53254d-1,3.54098d-1,3.54941d-1,3.55782d-1,3.56622d-1,3.57461d-1,&
+      3.58298d-1,3.59133d-1,3.59967d-1,3.61131d-1,3.61964d-1,3.62795d-1,&
+      3.63624d-1,3.64451d-1,3.65276d-1,3.66098d-1,3.66917d-1,3.67734d-1,&
+      3.68548d-1,3.69359d-1,3.70166d-1,3.70971d-1,3.71773d-1,3.72571d-1,&
+      3.73366d-1,3.74157d-1,3.74944d-1,3.75727d-1,3.76507d-1,3.77283d-1,&
+      3.78054d-1,3.78821d-1,3.79584d-1,3.80342d-1,3.81987d-1,3.82737d-1,&
+      3.83483d-1,3.84223d-1,3.84958d-1,3.85688d-1,3.86413d-1,3.87132d-1,&
+      3.87846d-1,3.88554d-1,3.89256d-1,3.89953d-1,3.90643d-1,3.91328d-1,&
+      3.92006d-1,3.92677d-1,3.93343d-1,3.94002d-1,3.94654d-1,3.95299d-1,&
+      3.95937d-1,3.96569d-1,3.97193d-1,3.97810d-1,3.98419d-1,3.97986d-1,&
+      3.98579d-1,3.99165d-1,3.99743d-1,4.00315d-1,4.00878d-1,4.01435d-1,&
+      4.01985d-1,4.02528d-1,4.03063d-1,4.03593d-1,4.04115d-1,4.04631d-1,&
+      4.05141d-1,4.05644d-1,4.06141d-1,4.06632d-1,4.07116d-1,4.07595d-1,&
+      4.08068d-1,4.08535d-1,4.08997d-1,4.09453d-1,4.09903d-1,4.10348d-1,&
+      4.11741d-1,4.12176d-1,4.12607d-1,4.13033d-1,4.13454d-1,4.13870d-1,&
+      4.14281d-1,4.14688d-1,4.15091d-1,4.15489d-1,4.15883d-1,4.16273d-1,&
+      4.16660d-1,4.17042d-1,4.17420d-1,4.17795d-1,4.18167d-1,4.18535d-1,&
+      4.18899d-1,4.19261d-1,4.19619d-1,4.19975d-1,4.20328d-1,4.20678d-1,&
+      4.21025d-1,4.21213d-1,4.21557d-1,4.21898d-1,4.22238d-1,4.22575d-1,&
+      4.22911d-1,4.23245d-1,4.23577d-1,4.23907d-1,4.24237d-1,4.24565d-1,&
+      4.24891d-1,4.25217d-1,4.25542d-1,4.25866d-1,4.26189d-1,4.26512d-1,&
+      4.26834d-1,4.27156d-1,4.27477d-1,4.27799d-1,4.28121d-1,4.28443d-1,&
+      4.28765d-1,4.29087d-1,4.30424d-1,4.30749d-1,4.31074d-1,4.31400d-1,&
+      4.31727d-1,4.32056d-1,4.32385d-1,4.32717d-1,4.33049d-1,4.33384d-1,&
+      4.33720d-1,4.34058d-1,4.34398d-1,4.34741d-1,4.35085d-1,4.35433d-1,&
+      4.35782d-1,4.36135d-1,4.36490d-1,4.36848d-1,4.37210d-1,4.37574d-1,&
+      4.37942d-1,4.38313d-1,4.38688d-1,4.37505d-1,4.37887d-1,4.38273d-1,&
+      4.38662d-1,4.39055d-1,4.39451d-1,4.39850d-1,4.40252d-1,4.40657d-1,&
+      4.41066d-1,4.41477d-1,4.41890d-1,4.42306d-1,4.42724d-1,4.43145d-1,&
+      4.43568d-1,4.43992d-1,4.44419d-1,4.44847d-1,4.45277d-1,4.45708d-1,&
+      4.46141d-1,4.46575d-1,4.47010d-1,4.47446d-1,4.48392d-1,4.48829d-1,&
+      4.49265d-1,4.49702d-1,4.50140d-1,4.50578d-1,4.51016d-1,4.51453d-1,&
+      4.51891d-1,4.52329d-1,4.52766d-1,4.53202d-1,4.53638d-1,4.54073d-1,&
+      4.54508d-1,4.54941d-1,4.55373d-1,4.55804d-1,4.56233d-1,4.56661d-1,&
+      4.57088d-1,4.57512d-1,4.57935d-1,4.58356d-1,4.58774d-1,4.60348d-1,&
+      4.60762d-1,4.61175d-1,4.61584d-1,4.61991d-1,4.62395d-1,4.62795d-1,&
+      4.63193d-1,4.63587d-1,4.63978d-1,4.64365d-1,4.64749d-1,4.65129d-1,&
+      4.65505d-1,4.65877d-1,4.66244d-1,4.66608d-1,4.66967d-1,4.67321d-1,&
+      4.67671d-1,4.68015d-1,4.68355d-1,4.68690d-1,4.69020d-1,4.69344d-1,&
+      4.68767d-1,4.69079d-1,4.69386d-1,4.69686d-1,4.69980d-1,4.70269d-1,&
+      4.70551d-1,4.70827d-1,4.71096d-1,4.71359d-1,4.71614d-1,4.71863d-1,&
+      4.72106d-1,4.72340d-1,4.72568d-1,4.72788d-1,4.73001d-1,4.73206d-1,&
+      4.73404d-1,4.73593d-1,4.73774d-1,4.73948d-1,4.74113d-1,4.74269d-1,&
+      4.74417d-1,4.73115d-1,4.73245d-1,4.73366d-1,4.73480d-1,4.73584d-1,&
+      4.73681d-1,4.73769d-1,4.73849d-1,4.73921d-1,4.73986d-1,4.74043d-1,&
+      4.74092d-1,4.74134d-1,4.74169d-1,4.74196d-1,4.74217d-1,4.74231d-1,&
+      4.74237d-1,4.74238d-1,4.74231d-1,4.74219d-1,4.74200d-1,4.74174d-1,&
+      4.74143d-1,4.74106d-1,4.74698d-1,4.74650d-1,4.74596d-1,4.74537d-1,&
+      4.74473d-1,4.74404d-1,4.74329d-1,4.74250d-1,4.74166d-1,4.74077d-1,&
+      4.73983d-1,4.73885d-1,4.73783d-1,4.73676d-1,4.73566d-1,4.73451d-1,&
+      4.73333d-1,4.73211d-1,4.73086d-1,4.72957d-1,4.72824d-1,4.72689d-1,&
+      4.72550d-1,4.72409d-1,4.72264d-1,4.71711d-1,4.71561d-1,4.71409d-1,&
+      4.71255d-1,4.71099d-1,4.70940d-1,4.70780d-1,4.70618d-1,4.70454d-1,&
+      4.70288d-1,4.70122d-1,4.69953d-1,4.69784d-1,4.69613d-1,4.69441d-1,&
+      4.69269d-1,4.69096d-1,4.68922d-1,4.68748d-1,4.68573d-1,4.68398d-1,&
+      4.68223d-1,4.68049d-1,4.67874d-1,4.67699d-1,4.67890d-1,4.67716d-1,&
+      4.67542d-1,4.67370d-1,4.67198d-1,4.67027d-1,4.66857d-1,4.66689d-1,&
+      4.66522d-1,4.66356d-1,4.66192d-1,4.66030d-1,4.65869d-1,4.65711d-1,&
+      4.65554d-1,4.65400d-1,4.65248d-1,4.65099d-1,4.64952d-1,4.64808d-1,&
+      4.64666d-1,4.64528d-1,4.64393d-1,4.64260d-1,4.64132d-1,4.63422d-1,&
+      4.63300d-1,4.63181d-1,4.63066d-1,4.62955d-1,4.62847d-1,4.62742d-1,&
+      4.62640d-1,4.62542d-1,4.62447d-1,4.62355d-1,4.62266d-1,4.62181d-1,&
+      4.62098d-1,4.62019d-1,4.61942d-1,4.61869d-1,4.61798d-1,4.61731d-1,&
+      4.61666d-1,4.61604d-1,4.61545d-1,4.61488d-1,4.61434d-1,4.61383d-1,&
+      4.61748d-1,4.61702d-1,4.61659d-1,4.61619d-1,4.61580d-1,4.61545d-1,&
+      4.61511d-1,4.61480d-1,4.61452d-1,4.61425d-1,4.61401d-1,4.61378d-1,&
+      4.61358d-1,4.61340d-1,4.61324d-1,4.61310d-1,4.61298d-1,4.61288d-1,&
+      4.61280d-1,4.61273d-1,4.61269d-1,4.61266d-1,4.61265d-1,4.61265d-1,&
+      4.61267d-1,4.60858d-1,4.60864d-1,4.60871d-1,4.60880d-1,4.60890d-1,&
+      4.60902d-1,4.60915d-1,4.60929d-1,4.60945d-1,4.60961d-1,4.60979d-1,&
+      4.60998d-1,4.61019d-1,4.61040d-1,4.61062d-1,4.61086d-1,4.61110d-1,&
+      4.61135d-1,4.61161d-1,4.61188d-1,4.61216d-1,4.61244d-1,4.61273d-1,&
+      4.61303d-1,4.61334d-1,4.61426d-1,4.61457d-1,4.61489d-1,4.61521d-1,&
+      4.61554d-1,4.61587d-1,4.61621d-1,4.61655d-1,4.61689d-1,4.61723d-1,&
+      4.61758d-1,4.61792d-1,4.61827d-1,4.61862d-1,4.61897d-1,4.61932d-1,&
+      4.61967d-1,4.62002d-1,4.62037d-1,4.62071d-1,4.62106d-1,4.62140d-1,&
+      4.62174d-1,4.62207d-1,4.62241d-1,4.62189d-1,4.62221d-1,4.62253d-1,&
+      4.62284d-1,4.62315d-1,4.62345d-1,4.62374d-1,4.62403d-1,4.62431d-1,&
+      4.62459d-1,4.62485d-1,4.62511d-1,4.62536d-1,4.62560d-1,4.62583d-1,&
+      4.62605d-1,4.62626d-1,4.62646d-1,4.62665d-1,4.62682d-1,4.62699d-1,&
+      4.62714d-1,4.62728d-1,4.62741d-1,4.62752d-1,4.63147d-1,4.63157d-1,&
+      4.63165d-1,4.63171d-1,4.63176d-1,4.63180d-1,4.63181d-1,4.63181d-1,&
+      4.63180d-1,4.63177d-1,4.63171d-1,4.63164d-1,4.63156d-1,4.63145d-1,&
+      4.63132d-1,4.63117d-1,4.63101d-1,4.63082d-1,4.63061d-1,4.63038d-1,&
+      4.63013d-1,4.62985d-1,4.62955d-1,4.62923d-1,4.62889d-1,4.60928d-1,&
+      4.60889d-1,4.60847d-1,4.60802d-1,4.60755d-1,4.60706d-1,4.60654d-1,&
+      4.60599d-1,4.60541d-1,4.60481d-1,4.60418d-1,4.60352d-1,4.60284d-1,&
+      4.60212d-1,4.60138d-1,4.60060d-1,4.59980d-1,4.59896d-1,4.59809d-1,&
+      4.59720d-1,4.59627d-1,4.59531d-1,4.59431d-1,4.59329d-1,4.59223d-1,&
+      4.61360d-1,4.61247d-1,4.61131d-1,4.61011d-1,4.60887d-1,4.60760d-1,&
+      4.60629d-1,4.60495d-1,4.60357d-1,4.60215d-1,4.60070d-1,4.59920d-1,&
+      4.59767d-1,4.59610d-1,4.59449d-1,4.59284d-1,4.59115d-1,4.58942d-1,&
+      4.58765d-1,4.58584d-1,4.58398d-1,4.58209d-1,4.58015d-1,4.57817d-1,&
+      4.57614d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,&
+      4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,&
+      4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,&
+      4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,4.57470d-1,&
+      4.57470d-1,4.57470d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,&
+      4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,&
+      4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,&
+      4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,4.56133d-1,&
+      4.56133d-1,4.56133d-1,4.56133d-1,4.56458d-1,4.56458d-1,4.56458d-1,&
+      4.56458d-1,4.56458d-1,4.56458d-1,4.56458d-1,4.56458d-1,4.56458d-1,&
+      4.56458d-1,4.56458d-1,4.56458d-1/)
+  
+  ! Number of events for case of all detectors
+  INTEGER, PARAMETER :: NINTERVALS_ALL_TZ  = 12
+  ! Number of events for case without T5Z3
+  INTEGER, PARAMETER :: NINTERVALS_NO_T5Z3 = 9
+  
   ! Array containing interval bounds [E_k,E_{k+1}]
   ! i.e. list of event energies plus bounds of overall energy range
-  REAL*8, PARAMETER :: E_INTERVALS(0:NINTERVALS)                        &
-      = (/ 1.60867d0,1.7d0,1.8d0,1.9d0,1.9d0,2.3d0,2.7d0,3.0d0,         &
-           5.8d0,7.0d0,7.8d0,9.4d0,9.98086d0 /)
+  ! recoil energies converted from total phonon energy using Lindhard
+  ! rather than SCDMS charge model to be consistent with efficiencies.
+  ! For case of all detectors
+  REAL*8, PARAMETER :: E_INTERVALS_ALL_TZ(0:NINTERVALS_ALL_TZ)          &
+      = (/ 1.60867d0, 1.67648d0, 1.72268d0, 1.84366d0, 1.9301d0,        &
+           2.20435d0, 2.57638d0, 2.82073d0, 5.57222d0, 6.74554d0,       &
+           7.53282d0, 9.16426d0, 9.98086d0 /)
+  ! for case without T5Z3
+  REAL*8, PARAMETER :: E_INTERVALS_NO_T5Z3(0:NINTERVALS_NO_T5Z3)        &
+      = (/ 1.60867d0, 1.67648d0, 1.72268d0, 1.84366d0, 1.9301d0,        &
+           2.20435d0, 2.57638d0, 2.82073d0, 5.57222d0, 9.98086d0 /)
+  
+  ! Include T5Z3?
+  LOGICAL, PARAMETER :: INCLUDE_T5Z3 = .FALSE.
+  
   ! Will build array of efficiencies below
-  REAL*8 :: EFF(NE,0:NINTERVALS)
+  INTEGER :: Nintervals
+  REAL*8, ALLOCATABLE :: eff(:,:)
   
   ! Fill in efficiencies
   ! Interval efficiencies are just total efficiency with interval
-  ! energy range and zero elsewhere (ignoring energy resolution)
-  EFF(:,0) = EFF0
-  DO K=1,NINTERVALS
-    WHERE ((E .GE. E_INTERVALS(K-1)) .AND. (E .LE. E_INTERVALS(K)))
-      EFF(:,K) = EFF0
-    ELSE WHERE
-      EFF(:,K) = 0d0
-    END WHERE
-  END DO
+  ! energy range and zero elsewhere (ignoring energy resolution).
+  IF (INCLUDE_T5Z3) THEN
+    Nintervals = NINTERVALS_ALL_TZ
+    ALLOCATE(eff(NE,0:Nintervals))
+    eff(:,0) = EFF0_ALL_TZ
+    DO K=1,Nintervals
+      WHERE ((E .GE. E_INTERVALS_ALL_TZ(K-1)) .AND. (E .LE. E_INTERVALS_ALL_TZ(K)))
+        eff(:,K) = EFF0_ALL_TZ
+      ELSE WHERE
+        eff(:,K) = 0d0
+      END WHERE
+    END DO
+  ELSE
+    Nintervals = NINTERVALS_NO_T5Z3
+    ALLOCATE(eff(NE,0:Nintervals))
+    eff(:,0) = EFF0_ALL_TZ
+    DO K=1,Nintervals
+      WHERE ((E .GE. E_INTERVALS_NO_T5Z3(K-1)) .AND. (E .LE. E_INTERVALS_NO_T5Z3(K)))
+        eff(:,K) = EFF0_NO_T5Z3
+      ELSE WHERE
+        eff(:,K) = 0d0
+      END WHERE
+    END DO
+  END IF
   
   ! One call for all settings.
   ! Most of these _must_ be there to ensure everything get initialized.
-  CALL SetDetector(D,mass=4.2d0,time=137.4d0,Nevents=11,                &
-                   background=6.1d0,Zelem=32,                           &
-                   NEeff=NE,Eeff=E,Neff=NINTERVALS,eff=EFF,             &
-                   intervals=intervals)
+  IF (INCLUDE_T5Z3) THEN
+    ! These settings are for the analysis with all detectors
+    CALL SetDetector(D,mass=4.2d0,time=137.4d0,Nevents=11,              &
+                     background=6.1d0,Nelem=1,Zelem=(/32/),             &
+                     NEeff=NE,Eeff=E,Neff=Nintervals,eff=eff,           &
+                     intervals=intervals)
+  ELSE
+    ! These settings are for the analysis without t5z3
+    CALL SetDetector(D,mass=3.6d0,time=137.4d0,Nevents=8,               &
+                     background=6.07d0,Nelem=1,Zelem=(/32/),            &
+                     NEeff=NE,Eeff=E,Neff=Nintervals,eff=eff,           &
+                     intervals=intervals)
+  END IF
+  
   D%eff_file = '[SuperCDMS 2014]'
+  
+END SUBROUTINE
+
+
+
+!=======================================================================
+! SIMPLE 2014 ANALYSIS ROUTINES
+! Based upon the SIMPLE Phase II WIMP search: PRD 89, 072013 (2014)
+! [1404.4309].  7+1 candidate events seen with 10.8+1.9 expected
+! background events.
+! 
+! BIND() is used to specify compiler-independent object file symbol
+! names to allow for easier interfacing with C/C++.  
+!=======================================================================
+
+!-----------------------------------------------------------------------
+! Initializes the module to perform calculations for the SIMPLE 2014
+! analysis.  This must be called if any of the following SIMPLE 2014
+! routines are to be used.
+! 
+! Required input arguments:
+!     intervals   Indicates if sub-intervals should be included.
+!                 Only necessary if confidence intervals using the
+!                 maximum gap method are desired.
+! 
+SUBROUTINE SIMPLE_2014_Init(intervals)
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: intervals
+  CALL SIMPLE_2014_InitTo(SIMPLE_2014,intervals)
+END SUBROUTINE
+
+! C++ interface wrapper
+SUBROUTINE C_SIMPLE_2014_Init(intervals) &
+           BIND(C,NAME='C_DDCALC0_simple_2014_init')
+  USE ISO_C_BINDING, only: C_BOOL
+  IMPLICIT NONE
+  LOGICAL(KIND=C_BOOL), INTENT(IN) :: intervals
+  CALL SIMPLE_2014_Init(LOGICAL(intervals))
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Sets the minimum recoil energy to be included in the calculations.
+! Note the efficiency curves already account for detector and analysis
+! thresholds regardless of this setting, so setting this to 0 keV (the
+! default behavior when initialization is performed) does not imply
+! that very low energy recoils actually contribute to the signal.
+! 
+! Required input arguments:
+!     Emin        The minimum recoil energy to consider [keV]
+! 
+SUBROUTINE SIMPLE_2014_SetEmin(Emin)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: Emin
+  CALL SetDetector(SIMPLE_2014,Emin=Emin)
+END SUBROUTINE
+
+! C++ interface wrapper
+SUBROUTINE C_SIMPLE_2014_SetEmin(Emin) &
+           BIND(C,NAME='C_DDCALC0_simple_2014_setemin')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE), INTENT(IN) :: Emin
+  CALL SIMPLE_2014_SetEmin(REAL(Emin,KIND=8))
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Calculates various rate quantities using the current WIMP.
+! Must be called each time the WIMP parameters are modified.
+! 
+SUBROUTINE SIMPLE_2014_CalcRates()
+  IMPLICIT NONE
+  CALL CalcRates(SIMPLE_2014)
+END SUBROUTINE
+
+! C++ interface wrapper
+SUBROUTINE C_SIMPLE_2014_CalcRates() &
+           BIND(C,NAME='C_DDCALC0_simple_2014_calcrates')
+  IMPLICIT NONE
+  CALL SIMPLE_2014_CalcRates()
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Returns the observed number of events.
+! 
+FUNCTION SIMPLE_2014_Events() RESULT(N)
+  IMPLICIT NONE
+  INTEGER :: N
+  CALL GetRates(SIMPLE_2014,Nevents=N)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_Events() RESULT(N) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_events')
+  USE ISO_C_BINDING, only: C_INT
+  IMPLICIT NONE
+  INTEGER(KIND=C_INT) :: N
+  ! Automatic type conversions here
+  N = SIMPLE_2014_Events()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of background events.
+! 
+FUNCTION SIMPLE_2014_Background() RESULT(b)
+  IMPLICIT NONE
+  REAL*8 :: b
+  CALL GetRates(SIMPLE_2014,background=b)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_Background() RESULT(b) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_background')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: b
+  ! Automatic type conversions here
+  b = SIMPLE_2014_Background()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of signal events for the
+! current WIMP.
+! 
+FUNCTION SIMPLE_2014_Signal() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(SIMPLE_2014,signal=s)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_Signal() RESULT(s) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_signal')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: s
+  ! Automatic type conversions here
+  s = SIMPLE_2014_Signal()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-independent signal events
+! for the current WIMP.
+! 
+FUNCTION SIMPLE_2014_SignalSI() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(SIMPLE_2014,signal_si=s)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_SignalSI() RESULT(s) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_signalsi')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: s
+  ! Automatic type conversions here
+  s = SIMPLE_2014_SignalSI()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Returns the average expected number of spin-dependent signal events
+! for the current WIMP.
+! 
+FUNCTION SIMPLE_2014_SignalSD() RESULT(s)
+  IMPLICIT NONE
+  REAL*8 :: s
+  CALL GetRates(SIMPLE_2014,signal_sd=s)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_SignalSD() RESULT(s) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_signalsd')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: s
+  ! Automatic type conversions here
+  s = SIMPLE_2014_SignalSD()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log-likelihood for the current WIMP mass and couplings.
+! Uses a Poisson distribution in the number of observed events N:
+!    P(N|s+b)
+! where s is the average expected signal and b is the average expected
+! background.
+! 
+FUNCTION SIMPLE_2014_LogLikelihood() RESULT(lnlike)
+  IMPLICIT NONE
+  REAL*8 :: lnlike
+  lnlike = LogLikelihood(SIMPLE_2014)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_LogLikelihood() RESULT(lnlike) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_loglikelihood')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: lnlike
+  ! Automatic type conversions here
+  lnlike = SIMPLE_2014_LogLikelihood()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the log of the p-value for the current WIMP mass and
+! couplings (NO BACKGROUND SUBTRACTION).  Uses the maximum gap method
+! if SIMPLE_2014_Init was called with argument intervals=.TRUE.,
+! otherwise uses a Poisson distribution in the number of observed
+! events N:
+!    P(N|s)
+! where s is the average expected signal (background contributions are
+! ignored).
+! 
+FUNCTION SIMPLE_2014_LogPValue() RESULT(lnp)
+  IMPLICIT NONE
+  REAL*8 :: lnp
+  lnp = LogPValue(SIMPLE_2014)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_LogPValue() RESULT(lnp) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_logpvalue')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: lnp
+  ! Automatic type conversions here
+  lnp = SIMPLE_2014_LogPValue()
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Calculates the factor x by which the cross-sections must be scaled
+! (sigma -> x*sigma) to achieve the desired p-value (given as log(p)).
+! See LogPValue() above for a description of the statistics.
+! 
+! Required input argument:
+!   lnp         The logarithm of the desired p-value (p = 1-CL).
+! 
+FUNCTION SIMPLE_2014_ScaleToPValue(lnp) RESULT(x)
+  IMPLICIT NONE
+  REAL*8 :: x
+  REAL*8, INTENT(IN) :: lnp
+  x = ScaleToPValue(SIMPLE_2014,lnp)
+END FUNCTION
+
+! C++ interface wrapper
+FUNCTION C_SIMPLE_2014_ScaleToPValue(lnp) RESULT(x) &
+         BIND(C,NAME='C_DDCALC0_simple_2014_scaletopvalue')
+  USE ISO_C_BINDING, only: C_DOUBLE
+  IMPLICIT NONE
+  REAL(KIND=C_DOUBLE) :: x
+  REAL(KIND=C_DOUBLE), INTENT(IN) :: lnp
+  ! Automatic type conversions here
+  x = SIMPLE_2014_ScaleToPValue(REAL(lnp,KIND=8))
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! INTERNAL ROUTINE.
+! Initializes the given DetectorStruct to the SIMPLE 2014 analysis.
+! This is meant as an internal routine; external access should be
+! through SIMPLE_2014_Init instead.
+! 
+! Required input arguments:
+!     D           The DetectorStruct to initialize
+!     intervals   Indicates if sub-intervals should be included.
+!                 Currently ignored as there is no event energy
+!                 information.
+! 
+SUBROUTINE SIMPLE_2014_InitTo(D,intervals)
+  IMPLICIT NONE
+  TYPE(DetectorStruct), INTENT(OUT) :: D
+  LOGICAL, INTENT(IN) :: intervals
+  INTEGER :: K,Kmin,Kmax,Niso,Niso0
+  INTEGER, ALLOCATABLE :: Ziso(:),Ziso0(:),Aiso(:),Aiso0(:)
+  REAL*8, ALLOCATABLE :: fiso(:),fiso0(:),Miso(:),Miso0(:)
+  
+  ! Will build array of efficiencies below
+  INTEGER :: NE
+  REAL*8 :: Ethresh,Gamma
+  REAL*8, ALLOCATABLE :: E(:),eff(:,:)
+  
+  ! Uses C2ClF5, but C threshold is ~ 100 keV, so we will drop
+  ! the C components.  First get full set of isotopes to get mass
+  ! fractions correct.  C is placed last in the stoichiometry to
+  ! allow easier extraction of F & Cl parts.
+  CALL CompoundIsotopeList(3,(/17,9,6/),(/1,5,2/),                      &
+                           Niso0,Ziso0,Aiso0,fiso0,Miso0)
+  Niso = COUNT(Ziso0 .NE. 6)
+  ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
+  Ziso = Ziso0(1:Niso)
+  Aiso = Aiso0(1:Niso)
+  fiso = fiso0(1:Niso)
+  Miso = Miso0(1:Niso)
+  
+  ! Set efficiencies.
+  ! No event energies, so no intervals for max gap calculations.
+  ! Tabulation set at 100 per decade, up to 1000 keV.
+  Ethresh = 8d0      ! F & Cl only, C is ~ 100 keV
+  Gamma   = 4.2d0    ! 4.2 +/- 0.3
+  Kmin = INT(100*LOG10(Ethresh))
+  Kmax = NINT(100*LOG10(1d3))
+  NE = (Kmax-Kmin)+1
+  ALLOCATE(E(1:NE),eff(1:NE,0:0))
+  DO K=Kmin,Kmax
+    E(K-Kmin+1) = 10**(K/100d0)
+  END DO
+  eff(:,0) = 1d0 - EXP(-Gamma*(1d0-Ethresh/MAX(E,Ethresh)))
+  
+  ! One call for all settings.
+  ! Most of these _must_ be there to ensure everything get initialized.
+  CALL SetDetector(D,exposure=18.24d0,Nevents=8,background=12.7d0,      &
+                   Niso=Niso,Ziso=Ziso,Aiso=Aiso,fiso=fiso,             &
+                   NEeff=NE,Eeff=E,Neff=0,eff=eff,                      &
+                   intervals=.FALSE.)
+  D%eff_file = '[SIMPLE 2014]'
   
 END SUBROUTINE
 
@@ -3024,7 +3601,7 @@ END SUBROUTINE
 !=======================================================================
 ! DARWIN ARGON ANALYSIS ROUTINES
 ! Based upon a DARWIN argon-based analysis (2015 estimated parameters)
-! [15MM.XXXX].  Zero events assumed in the analysis region.
+! [15MM.NNNNN].  Zero events assumed in the analysis region.
 ! 
 ! BIND() is used to specify compiler-independent object file symbol
 ! names to allow for easier interfacing with C/C++.  
@@ -3326,7 +3903,7 @@ SUBROUTINE DARWIN_Ar_2015_InitTo(D,intervals)
      41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
      54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
      72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
-     95.499d0,100.00d0 /)
+     95.499d0, 100.00d0 /)
   ! Efficiency (total)
   REAL*8, PARAMETER :: EFF0(NE)                                         &
       =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
@@ -3364,7 +3941,7 @@ SUBROUTINE DARWIN_Ar_2015_InitTo(D,intervals)
   ! One call for all settings.
   ! Most of these _must_ be there to ensure everything get initialized.
   CALL SetDetector(D,mass=20d3,time=2d0*365d0,Nevents=0,                &
-                   background=0.5d0,Zelem=18,                           &
+                   background=0.5d0,Nelem=1,Zelem=(/18/),               &
                    NEeff=NE,Eeff=E,Neff=NEFF,eff=EFF,                   &
                    intervals=intervals)
   D%eff_file = '[DARWIN Ar 2015]'
@@ -3376,7 +3953,7 @@ END SUBROUTINE
 !=======================================================================
 ! DARWIN XENON ANALYSIS ROUTINES
 ! Based upon a DARWIN xenon-based analysis (2015 estimated parameters)
-! [15MM.XXXX].  Zero events assumed in the analysis region.
+! [15MM.NNNNN].  Zero events assumed in the analysis region.
 !=======================================================================
 
 !-----------------------------------------------------------------------
@@ -3675,7 +4252,7 @@ SUBROUTINE DARWIN_Xe_2015_InitTo(D,intervals)
      41.687d0,  43.652d0,  45.709d0,  47.863d0,  50.119d0,  52.481d0,   &
      54.954d0,  57.544d0,  60.256d0,  63.096d0,  66.069d0,  69.183d0,   &
      72.444d0,  75.858d0,  79.433d0,  83.176d0,  87.096d0,  91.201d0,   &
-     95.499d0,100.00d0 /)
+     95.499d0, 100.00d0 /)
   ! Efficiency (total)
   REAL*8, PARAMETER :: EFF0(NE)                                         &
       =       (/ 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, 0.00000d0, &
@@ -3713,7 +4290,7 @@ SUBROUTINE DARWIN_Xe_2015_InitTo(D,intervals)
   ! One call for all settings.
   ! Most of these _must_ be there to ensure everything get initialized.
   CALL SetDetector(D,mass=12d3,time=2d0*365d0,Nevents=0,                &
-                   background=0.5d0,Zelem=54,                           &
+                   background=0.5d0,Nelem=1,Zelem=(/54/),               &
                    NEeff=NE,Eeff=E,Neff=NEFF,eff=EFF,                   &
                    intervals=intervals)
   D%eff_file = '[DARWIN Xe 2015]'
@@ -4813,9 +5390,9 @@ SUBROUTINE WriteCommandHeader(extra_lines)
   !WRITE(*,'(A)') COMMENT_PREFIX &
   !    // 'DDCalc0 version: ' // TRIM(VERSION_STRING)
   !WRITE(*,'(A)') COMMENT_PREFIX &
-  !    // 'See/cite C. Savage et al., arxiv:15MM.XXXX.'
+  !    // 'See/cite C. Savage et al., arxiv:15MM.NNNNN.'
   WRITE(*,'(A)') COMMENT_PREFIX &
-      // 'DDCalc0 version ' // TRIM(VERSION_STRING) // '.  See/cite C. Savage et al., arxiv:15MM.XXXX.'
+      // 'DDCalc0 version ' // TRIM(VERSION_STRING) // '.  See/cite C. Savage et al., arxiv:15MM.NNNNN.'
   
   WRITE(*,'(A)') COMMENT_PREFIX
   
@@ -7755,16 +8332,7 @@ END FUNCTION
 ! ----------------------------------------------------------------------
 ! For the given element, fills in allocatable arrays containing isotopic
 ! atomic numbers (Z), atomic masses (A), mass fractions (f), and
-! masses (M).  Only selected elements are available, with the arrays
-! being set to zero length for the rest.
-! 
-! Implemented Z:
-!   14  Silicon
-!   18  Argon
-!   32  Germanium
-!   54  Xenon
-! Special cases:
-!   1153  Sodium Iodide (NaI)
+! masses (M).
 ! 
 ! Input argument:
 !     Z          Atomic number of element
@@ -7775,58 +8343,222 @@ END FUNCTION
 !     fiso       Allocatable array of isotopes' mass fractions
 !     Miso       Allocatable array of isotopes' nuclear masses [GeV]
 ! 
-SUBROUTINE IsotopeList(Z,Niso,Ziso,Aiso,fiso,Miso)
+SUBROUTINE ElementIsotopeList(Z,Niso,Ziso,Aiso,fiso,Miso)
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: Z
   INTEGER, INTENT(OUT) :: Niso
   INTEGER, ALLOCATABLE, INTENT(OUT) :: Ziso(:),Aiso(:)
   REAL*8, ALLOCATABLE, INTENT(OUT) :: fiso(:),Miso(:)
-  
-  ! Set Z, A & f.  Nuclear masses will be calculated later.
-  SELECT CASE (Z)
-  ! Silicon
-  CASE (14)
-    Niso = 3
+  INTEGER :: I1,I2
+  ! Isotope data for all elements up to Z=92 (Uranium).
+  ! Data is combined into single arrays; the ELEMENT_INDEX indicates
+  ! where data for a particular element Z begins in those arrays.
+  INTEGER, PARAMETER :: NELEMENTS = 92
+  INTEGER, PARAMETER :: NISOTOPES = 286
+  ! Number of stable isotopes for given element (indexed by Z)
+  INTEGER, PARAMETER :: ELEMENT_NISO(NELEMENTS) =                       &
+    (/  2,  2,  2,  1,  2,  2,  2,  3,  1,  3,  1,  3,  1,  3,  1,  4,  &
+        2,  3,  3,  6,  1,  5,  2,  4,  1,  4,  1,  5,  2,  5,  2,  5,  &
+        1,  6,  2,  6,  2,  4,  1,  5,  1,  7,  0,  7,  1,  6,  2,  8,  &
+        2, 10,  2,  8,  1,  9,  1,  7,  2,  4,  1,  7,  0,  7,  2,  7,  &
+        1,  7,  1,  6,  1,  7,  2,  6,  1,  5,  2,  7,  2,  6,  1,  7,  &
+        2,  4,  1,  0,  0,  0,  0,  0,  0,  1,  0,  3 /)
+  ! First data array index for given element (indexed by Z)
+  INTEGER, PARAMETER :: ELEMENT_INDEX(NELEMENTS) =                      &
+    (/  1,  3,  5,  7,  8, 10, 12, 14, 17, 18, 21, 22, 25, 26, 29, 30,  &
+       34, 36, 39, 42, 48, 49, 54, 56, 60, 61, 65, 66, 71, 73, 78, 80,  &
+       85, 86, 92, 94,100,102,106,107,112,113,120,120,127,128,134,136,  &
+      144,146,156,158,166,167,176,177,184,186,190,191,198,198,205,207,  &
+      214,215,222,223,229,230,237,239,245,246,251,253,260,262,268,269,  &
+      276,278,282,283,283,283,283,283,283,283,284,284 /)
+  ! Atomic number for an isotope
+  INTEGER, PARAMETER :: ISOTOPE_Z(NISOTOPES) =                          &
+    (/  1,  1,  2,  2,  3,  3,  4,  5,  5,  6,  6,  7,  7,  8,  8,  8,  &
+        9, 10, 10, 10, 11, 12, 12, 12, 13, 14, 14, 14, 15, 16, 16, 16,  &
+       16, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 21,  &
+       22, 22, 22, 22, 22, 23, 23, 24, 24, 24, 24, 25, 26, 26, 26, 26,  &
+       27, 28, 28, 28, 28, 28, 29, 29, 30, 30, 30, 30, 30, 31, 31, 32,  &
+       32, 32, 32, 32, 33, 34, 34, 34, 34, 34, 34, 35, 35, 36, 36, 36,  &
+       36, 36, 36, 37, 37, 38, 38, 38, 38, 39, 40, 40, 40, 40, 40, 41,  &
+       42, 42, 42, 42, 42, 42, 42, 44, 44, 44, 44, 44, 44, 44, 45, 46,  &
+       46, 46, 46, 46, 46, 47, 47, 48, 48, 48, 48, 48, 48, 48, 48, 49,  &
+       49, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 51, 51, 52, 52, 52,  &
+       52, 52, 52, 52, 52, 53, 54, 54, 54, 54, 54, 54, 54, 54, 54, 55,  &
+       56, 56, 56, 56, 56, 56, 56, 57, 57, 58, 58, 58, 58, 59, 60, 60,  &
+       60, 60, 60, 60, 60, 62, 62, 62, 62, 62, 62, 62, 63, 63, 64, 64,  &
+       64, 64, 64, 64, 64, 65, 66, 66, 66, 66, 66, 66, 66, 67, 68, 68,  &
+       68, 68, 68, 68, 69, 70, 70, 70, 70, 70, 70, 70, 71, 71, 72, 72,  &
+       72, 72, 72, 72, 73, 74, 74, 74, 74, 74, 75, 75, 76, 76, 76, 76,  &
+       76, 76, 76, 77, 77, 78, 78, 78, 78, 78, 78, 79, 80, 80, 80, 80,  &
+       80, 80, 80, 81, 81, 82, 82, 82, 82, 83, 90, 92, 92, 92 /)
+  ! Atomic mass number for an isotope
+  INTEGER, PARAMETER :: ISOTOPE_A(NISOTOPES) =                          &
+    (/  1,  2,  3,  4,  6,  7,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18,  &
+       19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,  &
+       36, 35, 37, 36, 38, 40, 39, 40, 41, 40, 42, 43, 44, 46, 48, 45,  &
+       46, 47, 48, 49, 50, 50, 51, 50, 52, 53, 54, 55, 54, 56, 57, 58,  &
+       59, 58, 60, 61, 62, 64, 63, 65, 64, 66, 67, 68, 70, 69, 71, 70,  &
+       72, 73, 74, 76, 75, 74, 76, 77, 78, 80, 82, 79, 81, 78, 80, 82,  &
+       83, 84, 86, 85, 87, 84, 86, 87, 88, 89, 90, 91, 92, 94, 96, 93,  &
+       92, 94, 95, 96, 97, 98,100, 96, 98, 99,100,101,102,104,103,102,  &
+      104,105,106,108,110,107,109,106,108,110,111,112,113,114,116,113,  &
+      115,112,114,115,116,117,118,119,120,122,124,121,123,120,122,123,  &
+      124,125,126,128,130,127,124,126,128,129,130,131,132,134,136,133,  &
+      130,132,134,135,136,137,138,138,139,136,138,140,142,141,142,143,  &
+      144,145,146,148,150,144,147,148,149,150,152,154,151,153,152,154,  &
+      155,156,157,158,160,159,156,158,160,161,162,163,164,165,162,164,  &
+      166,167,168,170,169,168,170,171,172,173,174,176,175,176,174,176,  &
+      177,178,179,180,181,180,182,183,184,186,185,187,184,186,187,188,  &
+      189,190,192,191,193,190,192,194,195,196,198,197,196,198,199,200,  &
+      201,202,204,203,205,204,206,207,208,209,232,234,235,238 /)
+  ! Atomic spin for an isotope
+  REAL*8, PARAMETER :: ISOTOPE_J(NISOTOPES) =                           &
+    (/0.5d0,1.0d0,0.5d0,0.0d0,1.0d0,1.5d0,1.5d0,3.0d0,1.5d0,0.0d0,      &
+      0.5d0,1.0d0,0.5d0,0.0d0,2.5d0,0.0d0,0.5d0,0.0d0,1.5d0,0.0d0,      &
+      1.5d0,0.0d0,2.5d0,0.0d0,2.5d0,0.0d0,0.5d0,0.0d0,0.5d0,0.0d0,      &
+      1.5d0,0.0d0,0.0d0,1.5d0,1.5d0,0.0d0,0.0d0,0.0d0,1.5d0,4.0d0,      &
+      1.5d0,0.0d0,0.0d0,3.5d0,0.0d0,0.0d0,0.0d0,3.5d0,0.0d0,2.5d0,      &
+      0.0d0,3.5d0,0.0d0,6.0d0,3.5d0,0.0d0,0.0d0,1.5d0,0.0d0,2.5d0,      &
+      0.0d0,0.0d0,0.5d0,0.0d0,3.5d0,0.0d0,0.0d0,1.5d0,0.0d0,0.0d0,      &
+      1.5d0,1.5d0,0.0d0,0.0d0,2.5d0,0.0d0,0.0d0,1.5d0,1.5d0,0.0d0,      &
+      0.0d0,4.5d0,0.0d0,0.0d0,1.5d0,0.0d0,0.0d0,0.5d0,0.0d0,0.0d0,      &
+      0.0d0,1.5d0,1.5d0,0.0d0,0.0d0,0.0d0,4.5d0,0.0d0,0.0d0,2.5d0,      &
+      1.5d0,0.0d0,0.0d0,4.5d0,0.0d0,0.5d0,0.0d0,2.5d0,0.0d0,0.0d0,      &
+      0.0d0,4.5d0,0.0d0,0.0d0,2.5d0,0.0d0,2.5d0,0.0d0,0.0d0,0.0d0,      &
+      0.0d0,2.5d0,0.0d0,2.5d0,0.0d0,0.0d0,0.5d0,0.0d0,0.0d0,2.5d0,      &
+      0.0d0,0.0d0,0.0d0,0.5d0,0.5d0,0.0d0,0.0d0,0.0d0,0.5d0,0.0d0,      &
+      0.5d0,0.0d0,0.0d0,4.5d0,4.5d0,0.0d0,0.0d0,0.5d0,0.0d0,0.5d0,      &
+      0.0d0,0.5d0,0.0d0,0.0d0,0.0d0,2.5d0,3.5d0,0.0d0,0.0d0,0.5d0,      &
+      0.0d0,0.5d0,0.0d0,0.0d0,0.0d0,2.5d0,0.0d0,0.0d0,0.0d0,0.5d0,      &
+      0.0d0,1.5d0,0.0d0,0.0d0,0.0d0,3.5d0,0.0d0,0.0d0,0.0d0,1.5d0,      &
+      0.0d0,1.5d0,0.0d0,5.0d0,3.5d0,0.0d0,0.0d0,0.0d0,0.0d0,2.5d0,      &
+      0.0d0,3.5d0,0.0d0,3.5d0,0.0d0,0.0d0,0.0d0,0.0d0,3.5d0,0.0d0,      &
+      3.5d0,0.0d0,0.0d0,0.0d0,2.5d0,2.5d0,0.0d0,0.0d0,1.5d0,0.0d0,      &
+      1.5d0,0.0d0,0.0d0,1.5d0,0.0d0,0.0d0,0.0d0,2.5d0,0.0d0,2.5d0,      &
+      0.0d0,3.5d0,0.0d0,0.0d0,0.0d0,3.5d0,0.0d0,0.0d0,0.5d0,0.0d0,      &
+      0.0d0,0.5d0,0.0d0,2.5d0,0.0d0,0.0d0,3.5d0,7.0d0,0.0d0,0.0d0,      &
+      3.5d0,0.0d0,4.5d0,0.0d0,3.5d0,0.0d0,0.0d0,0.5d0,0.0d0,0.0d0,      &
+      2.5d0,2.5d0,0.0d0,0.0d0,0.5d0,0.0d0,1.5d0,0.0d0,0.0d0,1.5d0,      &
+      1.5d0,0.0d0,0.0d0,0.0d0,0.5d0,0.0d0,0.0d0,1.5d0,0.0d0,0.0d0,      &
+      0.5d0,0.0d0,1.5d0,0.0d0,0.0d0,0.5d0,0.5d0,0.0d0,0.0d0,0.5d0,      &
+      0.0d0,4.5d0,0.0d0,0.0d0,3.5d0,0.0d0 /)
+  ! Elemental mass fraction for an isotope
+  REAL*8, PARAMETER :: ISOTOPE_F(NISOTOPES) =                           &
+    (/0.9997d0,   0.0002997d0,1.032d-6,   1.000d0,    0.06578d0,  0.9342d0,   1.000d0,    0.1834d0,    &
+      0.8166d0,   0.9880d0,   0.01202d0,  0.9961d0,   0.003920d0, 0.9973d0,   0.0004037d0,0.002250d0,  &
+      1.000d0,    0.8964d0,   0.002809d0, 0.1008d0,   1.000d0,    0.7795d0,   0.1028d0,   0.1177d0,    &
+      1.000d0,    0.9187d0,   0.04832d0,  0.03295d0,  1.000d0,    0.9475d0,   0.007712d0, 0.04460d0,   &
+      0.0002243d0,0.7474d0,   0.2526d0,   0.003030d0, 0.0006006d0,0.9964d0,   0.9294d0,   0.0001196d0, &
+      0.07051d0,  0.9666d0,   0.006773d0, 0.001447d0, 0.02292d0,  4.586d-5,   0.002237d0, 1.000d0,     &
+      0.07920d0,  0.07298d0,  0.7385d0,   0.05532d0,  0.05405d0,  0.002451d0, 0.9975d0,   0.04174d0,   &
+      0.8370d0,   0.09674d0,  0.02453d0,  1.000d0,    0.05646d0,  0.9190d0,   0.02160d0,  0.002925d0,  &
+      1.000d0,    0.6720d0,   0.2678d0,   0.01183d0,  0.03834d0,  0.01009d0,  0.6850d0,   0.3150d0,    &
+      0.4754d0,   0.2813d0,   0.04196d0,  0.1948d0,   0.006629d0, 0.5942d0,   0.4058d0,   0.1961d0,    &
+      0.2704d0,   0.07790d0,  0.3738d0,   0.08184d0,  1.000d0,    0.008332d0, 0.09009d0,  0.07433d0,   &
+      0.2346d0,   0.5021d0,   0.09057d0,  0.5007d0,   0.4993d0,   0.003254d0, 0.02174d0,  0.1132d0,    &
+      0.1137d0,   0.5708d0,   0.1774d0,   0.7170d0,   0.2830d0,   0.005363d0, 0.09668d0,  0.06943d0,   &
+      0.8285d0,   1.000d0,    0.5071d0,   0.1118d0,   0.1728d0,   0.1789d0,   0.02944d0,  1.000d0,     &
+      0.1422d0,   0.09055d0,  0.1575d0,   0.1668d0,   0.09647d0,  0.2463d0,   0.1003d0,   0.05257d0,   &
+      0.01812d0,  0.1249d0,   0.1246d0,   0.1703d0,   0.3181d0,   0.1914d0,   1.000d0,    0.009768d0,  &
+      0.1088d0,   0.2201d0,   0.2720d0,   0.2683d0,   0.1210d0,   0.5138d0,   0.4862d0,   0.01178d0,   &
+      0.008543d0, 0.1221d0,   0.1263d0,   0.2402d0,   0.1227d0,   0.2911d0,   0.07723d0,  0.04218d0,   &
+      0.9578d0,   0.009144d0, 0.006333d0, 0.003291d0, 0.1420d0,   0.07563d0,  0.2406d0,   0.08604d0,   &
+      0.3291d0,   0.04755d0,  0.06043d0,  0.5681d0,   0.4319d0,   0.0008457d0,0.02436d0,  0.008572d0,  &
+      0.04603d0,  0.06920d0,  0.1859d0,   0.3181d0,   0.3470d0,   1.000d0,    0.0008966d0,0.0008535d0, &
+      0.01861d0,  0.2592d0,   0.04028d0,  0.2117d0,   0.2703d0,   0.1064d0,   0.09168d0,  1.000d0,     &
+      0.001003d0, 0.0009701d0,0.02357d0,  0.06476d0,  0.07773d0,  0.1120d0,   0.7200d0,   0.0008935d0, &
+      0.9991d0,   0.001794d0, 0.002470d0, 0.8832d0,   0.1126d0,   1.000d0,    0.2676d0,   0.1209d0,    &
+      0.2375d0,   0.08339d0,  0.1740d0,   0.05845d0,  0.05821d0,  0.02938d0,  0.1465d0,   0.1106d0,    &
+      0.1369d0,   0.07358d0,  0.2703d0,   0.2329d0,   0.4748d0,   0.5252d0,   0.001932d0, 0.02134d0,   &
+      0.1458d0,   0.2030d0,   0.1562d0,   0.2495d0,   0.2223d0,   1.000d0,    0.0005757d0,0.0009719d0, &
+      0.02303d0,  0.1873d0,   0.2542d0,   0.2497d0,   0.2843d0,   1.000d0,    0.001346d0, 0.01569d0,   &
+      0.3324d0,   0.2282d0,   0.2709d0,   0.1515d0,   1.000d0,    0.001262d0, 0.02985d0,  0.1411d0,    &
+      0.2169d0,   0.1612d0,   0.3200d0,   0.1297d0,   0.9740d0,   0.02604d0,  0.001559d0, 0.05185d0,   &
+      0.1844d0,   0.2720d0,   0.1366d0,   0.3537d0,   1.000d0,    0.001175d0, 0.2623d0,   0.1424d0,    &
+      0.3066d0,   0.2876d0,   0.3715d0,   0.6285d0,   0.0001934d0,0.01554d0,  0.01572d0,  0.1313d0,    &
+      0.1610d0,   0.2632d0,   0.4130d0,   0.3706d0,   0.6294d0,   0.0001363d0,0.007695d0, 0.3278d0,    &
+      0.3381d0,   0.2536d0,   0.07269d0,  1.000d0,    0.001466d0, 0.09840d0,  0.1673d0,   0.2303d0,    &
+      0.1321d0,   0.3007d0,   0.06976d0,  0.2932d0,   0.7068d0,   0.01378d0,  0.2396d0,   0.2207d0,    &
+      0.5259d0,   1.000d0,    1.000d0,    5.310d-5,   0.007114d0, 0.9928d0 /)
+
+  IF (Z .LE. NELEMENTS) THEN
+    Niso = ELEMENT_NISO(Z)
     ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
-    Ziso = (/14,14,14/)
-    Aiso = (/28,29,30/)
-    fiso = (/0.9187d0,0.0483d0,0.0329d0/)
-  ! Argon
-  CASE (18)
-    Niso = 3
-    ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
-    Ziso = (/18,18,18/)
-    Aiso = (/36,38,40/)
-    fiso = (/0.0030d0,0.0006d0,0.9964d0/)
-  ! Germanium
-  CASE (32)
-    Niso = 5
-    ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
-    Ziso = (/32,32,32,32,32/)
-    Aiso = (/70,72,73,74,76/)
-    fiso = (/0.1961d0,0.2704d0,0.0779d0,0.3738d0,0.0818d0/)
-  ! Xenon
-  CASE (54)
-    Niso = 9
-    ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
-    Ziso = (/ 54, 54, 54, 54, 54, 54, 54, 54, 54/)
-    Aiso = (/124,126,128,129,130,131,132,134,136/)
-    fiso = (/0.0009d0,0.0009d0,0.0186d0,0.2592d0,0.0403d0,0.2117d0,0.2703d0,0.1064d0,0.0917d0/)
-  ! Sodium Iodide (NaI)
-  ! For mass fractions: M_Na = 22.9898u, M_I = 126.9045u
-  CASE (1153)
-    Niso = 2
-    ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
-    Ziso = (/11, 53/)
-    Aiso = (/23,127/)
-    fiso = (/0.1534d0,0.8466d0/)
-  CASE DEFAULT
+    I1 = ELEMENT_INDEX(Z)
+    I2 = I1 + Niso - 1
+    Ziso = ISOTOPE_Z(I1:I2)
+    Aiso = ISOTOPE_A(I1:I2)
+    !Jiso = ISOTOPE_J(I1:I2)
+    fiso = ISOTOPE_F(I1:I2)
+    Miso = IsotopeMass(Ziso,Aiso)
+  ELSE
     Niso = 0
+    ! Zero-length arrays (nothing to fill in)
     ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
-  END SELECT
+  END IF
   
-  ! Set nuclear mass
-  Miso = IsotopeMass(Ziso,Aiso)
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! For the given compound, specified by a list of element atomic numbers
+! and the stoichiometry, fills in allocatable arrays containing isotopic
+! atomic numbers (Z), atomic masses (A), mass fractions (f), and
+! masses (M).
+! 
+! Input arguments:
+!     N          Number of compound elements.
+!     Z          Atomic number of elements, array of size [1:N].
+!     stoich     Stoichiometry of the compound elements, array of size
+!                [1:N].  For example, CF3Cl would have Z={6,9,17} and
+!                stoich={1,3,1}.
+! Output arguments:
+!     Niso       Number of isotopes
+!     Ziso       Allocatable array (integer) of isotopes' atomic numbers (Z)
+!     Aiso       Allocatable array (integer) of isotopes' atomic masses (A)
+!     fiso       Allocatable array of isotopes' mass fractions
+!     Miso       Allocatable array of isotopes' nuclear masses [GeV]
+! 
+SUBROUTINE CompoundIsotopeList(N,Z,stoich,Niso,Ziso,Aiso,fiso,Miso)
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: N
+  INTEGER, INTENT(IN) :: Z(N),stoich(N)
+  INTEGER, INTENT(OUT) :: Niso
+  INTEGER, ALLOCATABLE, INTENT(OUT) :: Ziso(:),Aiso(:)
+  REAL*8, ALLOCATABLE, INTENT(OUT) :: fiso(:),Miso(:)
+  INTEGER :: tempNiso,K,I1,I2
+  REAL*8 :: weight(N)
+  INTEGER, ALLOCATABLE :: tempZ(:),tempA(:)
+  REAL*8, ALLOCATABLE :: tempf(:),tempM(:)
+  
+  ! Get number of isotopes.
+  Niso = 0
+  DO K = 1,N
+    CALL ElementIsotopeList(Z(K),tempNiso,tempZ,tempA,tempf,tempM)
+    Niso = Niso + tempNiso
+    weight(K) = stoich(K) * SUM(tempf*tempM)
+  END DO
+  
+  ! Relative weight (by mass) of each element.
+  IF (N .GT. 0) THEN
+    weight = weight / SUM(weight)
+  ELSE
+    weight = 1d0
+  END IF
+  
+  ! Allocate and fill in total arrays.
+  ! Reweight isotopes' mass fractions by element's mass fraction.
+  I1 = 1
+  ALLOCATE(Ziso(Niso),Aiso(Niso),fiso(Niso),Miso(Niso))
+  DO K = 1,N
+    CALL ElementIsotopeList(Z(K),tempNiso,tempZ,tempA,tempf,tempM)
+    I2 = I1 + tempNiso - 1
+    Ziso(I1:I2) = tempZ
+    Aiso(I1:I2) = tempA
+    fiso(I1:I2) = weight(K)*tempf
+    Miso(I1:I2) = tempM
+    I1 = I2 + 1
+  END DO
   
 END SUBROUTINE
 
@@ -7991,8 +8723,8 @@ END SUBROUTINE
 ! 
 ! Xenon form factors implemented by Andre Scaffidi.
 ! 
-! NOTE: NO OTHER SD FORM FACTORS ARE CURRENTLY IMPLEMENTED.
-!       THEY ARE SIMPLY SET TO ZERO.
+! NOTE: ONLY A LIMITED SELECTION OF SD FORM FACTORS ARE CURRENTLY
+!       IMPLEMENTED.  THEY ARE SIMPLY SET TO ZERO.
 ! 
 ! Required input arguments:
 !     Z,A        The atomic number and mass number of the isotope.
@@ -8007,36 +8739,7 @@ PURE SUBROUTINE CalcWSD(Z,A,N,q,W)
   INTEGER, INTENT(IN) :: Z,A,N
   REAL*8, INTENT(IN) :: q(1:N)
   REAL*8, INTENT(OUT) :: W(-1:1,1:N)
-  REAL*8 :: J,u,uk,expu,S00,S11,S01,Spp(1:N),Spn(1:N),Snn(1:N)
-  INTEGER :: I,K
-  
-  ! Stucture constants as calculated by Menendez et al. [1208.1094] Table 1 for
-  ! Xe 129. These were taken from the 1b+2b columns where possible
-  REAL*8, PARAMETER :: B_XE129 = 2.2853d0 / HBARC  ! Harmonic oscillator length [GeV^-1]
-  INTEGER, PARAMETER :: NC_XE129 = 9
-  REAL*8, PARAMETER :: C00_XE129(0:9) = (/ 0.054731d0, -0.146897d0,     &
-      0.182479d0,   -0.128112d0, 0.0539978d0, -0.0133335d0,             &
-      0.00190579d0, -1.48373d-4, 5.11732d-6,  -2.06597d-8  /)
-  REAL*8, PARAMETER :: C11_XE129(0:9) = (/  0.02933d0, -0.0905396d0,    &
-      0.122783d0,   -0.0912046d0, 0.0401076d0, -0.010598d0,             &
-      0.00168737d0, -1.56768d-4,  7.69202d-6,  -1.48874d-7 /)
-  REAL*8, PARAMETER :: C01_XE129(0:9) = (/ -0.0796645d0, 0.231997d0,    &
-      -0.304198d0,   0.222024d0, -0.096693d0, 0.0251835d0,              &
-      -0.00392356d0, 3.53343d-4, -1.65058d-5, 2.88576d-7 /)
-  
-  ! Structure constants as calculated by Menendez et al. [1208.1094] Table 1 for
-  ! Xe 131, again, 1b + 2b currents used
-  REAL*8, PARAMETER :: B_XE131 = 2.2905d0 / HBARC  ! Harmonic oscillator length [GeV^-1]
-  INTEGER, PARAMETER :: NC_XE131 = 9
-  REAL*8, PARAMETER :: C00_XE131(0:9) = (/ 0.0417889d0, -0.111171d0,    &
-      0.171966d0,   -0.133219d0, 0.0633805d0, -0.0178388d0,             &
-      0.00282476d0, -2.31681d-4, 7.78223d-6,  -4.49287d-10 /)
-  REAL*8, PARAMETER :: C11_XE131(0:9) = (/ 0.022446d0, -0.0733931d0,    &
-      0.110509d0,   -0.0868752d0, 0.0405399d0, -0.0113544d0,            &
-      0.00187572d0, -1.75285d-4,  8.40043d-6,  -1.53632d-7 /)
-  REAL*8, PARAMETER :: C01_XE131(0:9) = (/ -0.0608808d0, 0.181473d0,    &
-      -0.272533d0,  0.211776d0, -0.0985956d0, 0.027438d0,               &
-      -0.0044424d0, 3.97619d-4, -1.74758d-5,  2.55979d-7 /)
+  REAL*8 :: J,b,umax,Spp(1:N),Spn(1:N),Snn(1:N)
   
   ! Initialization
   ! Most isotopes have zero spin (=> zero form factor)
@@ -8046,75 +8749,306 @@ PURE SUBROUTINE CalcWSD(Z,A,N,q,W)
   Spn = 0d0
   W   = 0d0
   
+  ! Fluorine ----------------------------------
+  IF (Z .EQ. 9) THEN
+    ! Fluorine 19 --------------
+    ! From Klos et al. [1304.7684]; see Table 6.
+    ! The S11 and S01 (1b+2b) band means are used.
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 19) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      ! NOTE: The length is listed incorrectly in 1304.7684 Table 6.
+      ! Correct number found in caption of Figure 12.
+      b = 1.7608d0 / HBARC
+      ! Nuclear spin
+      J = 0.5d0
+      ! Fits over 0 < u < 5 (probably).  Limit to this range.
+      umax = 5d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,14,   &
+               (/  0.108058d0, -0.143789d0,  0.0680848d0, 4.07415d-4,   &
+                  -0.0314817d0, 0.0385933d0,-0.0293716d0, 0.0152264d0,  &
+                  -5.52655d-3,  1.41965d-3, -2.56989d-4,  3.20688d-5,   &
+                  -2.62562d-6,  1.26950d-7, -2.74719d-9  /),            &
+               (/  0.0660281d0,-0.137668d0,  0.161957d0, -0.166004d0,   &
+                   0.152569d0, -0.111464d0,  0.0609363d0,-0.0246265d0,  &
+                   7.35189d-3, -1.61496d-3,  2.57660d-4, -2.90407d-5,   &
+                   2.19205d-6, -9.94286d-8,  2.04873d-9  /),            &
+               (/  0.167759d0, -0.286581d0,  0.244497d0, -0.176999d0,   &
+                   0.134461d0, -0.0921638d0, 0.0494464d0,-0.0198425d0,  &
+                   5.87500d-3, -1.26970d-3,  1.96948d-4, -2.12790d-5,   &
+                   1.51602d-6, -6.38405d-8,  1.20003d-9  /) )
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
+  
+  ! Sodium ------------------------------------
+  ELSE IF (Z .EQ. 11) THEN
+    ! Sodium 23 ----------------
+    ! From Klos et al. [1304.7684]; see Table 7.
+    ! The S11 and S01 (1b+2b) band means are used.
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 23) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 1.8032d0 / HBARC
+      ! Nuclear spin
+      J = 1.5d0
+      ! Fits over 0 < u < 5 (probably).  Limit to this range.
+      umax = 5d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.0325305d0,-0.0433531d0, 0.0319487d0,-5.68858d-3,   &
+                   2.67783d-4,  2.44643d-5, -4.79620d-6,  5.39846d-7,   &
+                  -3.24691d-8,  8.09358d-10 /),                         &
+               (/  0.0127243d0,-0.0248722d0, 0.0275805d0,-0.0135587d0,  &
+                   3.93910d-3, -7.28827d-4,  8.82003d-5, -6.80402d-6,   &
+                   3.02566d-7, -5.81500d-9  /),                         &
+               (/  0.0404609d0,-0.0677623d0, 0.0660458d0,-0.0269059d0,  &
+                   7.22875d-3, -1.45367d-3,  2.08818d-4, -1.89848d-5,   &
+                   9.43875d-7, -1.93865d-8  /) )
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
+  
+  ! Aluminum ----------------------------------
+  ELSE IF (Z .EQ. 13) THEN
+    ! Aluminum 27 --------------
+    ! From Klos et al. [1304.7684]; see Table 7.
+    ! The S11 and S01 (1b+2b) band means are used.
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 27) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 1.8405d0 / HBARC
+      ! Nuclear spin
+      J = 2.5d0
+      ! Fits over 0 < u < 5 (probably).  Limit to this range.
+      umax = 5d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.0888149d0,-0.117822d0,  0.0631336d0,-9.19554d-3,   &
+                   5.84421d-4,  5.54484d-4, -1.15453d-4,  1.40388d-5,   &
+                  -9.21830d-7,  2.52336d-8  /),                         &
+               (/  0.0334384d0,-0.0710220d0, 0.0805917d0,-0.0514533d0,  &
+                   0.0221406d0,-6.14292d-3,  1.08899d-3, -1.17175d-4,   &
+                   6.93171d-6, -1.71376d-7  /),                         &
+               (/  0.108031d0, -0.182354d0,  0.149131d0, -0.0623283d0,  &
+                   0.0196187d0,-4.07283d-3,  6.05456d-4, -5.96107d-5,   &
+                   3.28620d-6, -7.69545d-8  /) )
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
+  
+  ! Silicon -----------------------------------
+  ELSE IF (Z .EQ. 14) THEN
+    ! Silicon 29 ---------------
+    ! From Klos et al. [1304.7684]; see Table 8.
+    ! The S11 and S01 (1b+2b) band means are used.
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 29) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 1.8575d0 / HBARC
+      ! Nuclear spin
+      J = 0.5d0
+      ! Fits over 0 < u < 5 (probably).  Limit to this range.
+      umax = 5d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.0140647d0,-0.0188522d0, 0.0149891d0,-0.00542122d0, &
+                   1.17173d-3, -1.15932d-4,  2.47182d-5, -3.04480d-6,   &
+                   2.00549d-7, -5.46011d-9  /),                         &
+               (/  5.63416d-3, -0.0121901d0, 0.0156006d0,-0.0110712d0,  &
+                   4.85653d-3, -1.28086d-3,  2.08618d-4, -2.04711d-5,   &
+                   1.10510d-6, -2.47894d-8  /),                         &
+               (/ -0.0176295d0, 0.0301066d0,-0.0308628d0, 0.0175759d0,  &
+                  -6.78176d-3,  1.69859d-3, -3.00595d-4,  3.39713d-5,   &
+                  -2.08093d-6,  5.28653d-8  /) )
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
+  
+  ! Germanium ---------------------------------
+  ELSE IF (Z .EQ. 32) THEN
+    ! Germanium 73 -------------
+    ! From Klos et al. [1304.7684]; see Table 5.
+    ! The S11 and S01 (1b+2b) band means are used.
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 73) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 2.1058d0 / HBARC
+      ! Nuclear spin
+      J = 4.5d0
+      ! Fits over 0 < u < 5 (probably).  Limit to this range.
+      umax = 5d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.215608d0, -0.578786d0,  0.698020d0, -0.372000d0,   &
+                   0.107576d0, -0.0182408d0, 2.17108d-3, -2.07981d-4,   &
+                   1.65907d-5, -5.95664d-7  /),                         &
+               (/  0.0972089d0,-0.308986d0,  0.450727d0, -0.337355d0,   &
+                   0.154809d0, -0.0469625d0, 9.71560d-3, -1.33058d-3,   &
+                   1.09084d-4, -4.02514d-6  /),                         &
+               (/ -0.287562d0,  0.844765d0, -1.133659d0,  0.745494d0,   &
+                  -0.296646d0,  0.0788570d0,-0.0147852d0, 1.87401d-3,   &
+                  -1.42195d-4,  4.72898d-6  /) )
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
+  
+  ! Iodine ------------------------------------
+  ELSE IF (Z .EQ. 53) THEN
+    ! Iodine 127 ---------------
+    ! From Klos et al. [1304.7684]; see Table 5.
+    ! The S11 and S01 (1b+2b) band means are used.
+    ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    ! where u = q^2 b^2 / 2.
+    IF (A .EQ. 127) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 2.2801d0 / HBARC
+      ! Nuclear spin
+      J = 2.5d0
+      ! Fits over 0 < u < 5 (probably).  Limit to this range.
+      umax = 5d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.0928480d0,-0.252496d0,  0.351982d0, -0.260427d0,   &
+                   0.118280d0, -0.0319614d0, 4.92618d-3, -4.06546d-4,   &
+                   1.55818d-5, -1.64934d-7  /),                         &
+               (/  0.0389166d0,-0.119307d0,  0.189835d0, -0.168819d0,   &
+                   0.0952229d0,-0.0343338d0, 7.86014d-3, -1.11341d-3,   &
+                   8.98377d-5, -3.17792d-6  /),                         &
+               (/  0.119382d0, -0.345408d0,  0.515816d0, -0.421111d0,   &
+                   0.215622d0, -0.0691557d0, 0.0137850d0,-1.68267d-3,   &
+                   1.18375d-4, -3.78243d-6  /) )
+      
+    ! --------------------------
+    ! Other isotopes have zero spin
+    ELSE
+      W = 0d0
+      RETURN
+    END IF
+  
   ! Xenon -------------------------------------
-  IF (Z .EQ. 54) THEN
+  ELSE IF (Z .EQ. 54) THEN
     ! Xenon 129 ----------------
-    ! From Menendez et al. [1208.1094].
+    ! From Klos et al. [1304.7684]; see Table 1.
+    ! The S11 and S01 (1b+2b) band means are used.
     ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
     ! where u = q^2 b^2 / 2.
     IF (A .EQ. 129) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 2.2853d0 / HBARC
       ! Nuclear spin
-      J=0.5d0
-      ! Cycle over input momenta
-      DO I=1,N
-        u  = 0.5d0 * (q(I)*B_XE129)**2
-        uk = 1
-        S00 = 0d0
-        S11 = 0d0
-        S01 = 0d0
-        ! Fits over 0 < u < 3 (probably).
-        ! Conservatively set to zero outside this region.
-        IF (u .LE. 3d0) THEN
-          DO K=0,NC_XE129
-            S00 = S00 + uk * C00_XE129(K)
-            S11 = S11 + uk * C11_XE129(K)
-            S01 = S01 + uk * C01_XE129(K)
-            uk = u*uk
-          END DO
-          expu = EXP(-u)
-          S00 = expu * S00
-          S11 = expu * S11
-          S01 = expu * S01
-        END IF
-        ! Basis transformation: a0=ap+an, a1=ap-an
-        Spp(I) = S00 + S11 + S01
-        Snn(I) = S00 + S11 - S01
-        Spn(I) = 2 * (S00 - S11)
-      END DO
+      J = 0.5d0
+      ! Fits over 0 < u < 10 (probably).  Limit to this range.
+      umax = 10d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.0547144d0,-0.146407d0,  0.180603d0, -0.125526d0,   &
+                   0.0521484d0,-0.0126363d0, 1.76284d-3, -1.32501d-4,   &
+                   4.23423d-6, -1.68052d-9  /),                         &
+               (/  0.0289650d0,-0.0867525d0, 0.115723d0, -0.0858610d0,  &
+                   0.0384596d0,-0.0105918d0, 1.80025d-3, -1.83841d-4,   &
+                   1.03293d-5, -2.44338d-7  /),                         &
+               (/ -0.0791167d0, 0.225715d0, -0.293581d0,  0.215439d0,   &
+                  -0.0959137d0, 0.0260514d0,-4.33883d-3,  4.32823d-4,   &
+                  -2.37266d-5,  2.994545d0  /) )
       
     ! Xenon 131 ----------------
-    ! From Menendez et al. [1208.1094].
+    ! From Klos et al. [1304.7684]; see Table 1.
+    ! The S11 and S01 (1b+2b) band means are used.
     ! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
     ! where u = q^2 b^2 / 2.
     ELSE IF (A .EQ. 131) THEN
+      ! Harmonic oscillator length [GeV^-1]
+      b = 2.2905d0 / HBARC
       ! Nuclear spin
-      J=1.5d0
-      ! Cycle over input momenta
-      DO I=1,N
-        u  = 0.5d0 * (q(I)*B_XE131)**2
-        uk = 1
-        S00 = 0d0
-        S11 = 0d0
-        S01 = 0d0
-        ! Fits over 0 < u < 3 (probably).
-        ! Conservatively set to zero outside this region.
-        IF (u .LE. 3d0) THEN
-          DO K=0,NC_XE131
-            S00 = S00 + uk * C00_XE131(K)
-            S11 = S11 + uk * C11_XE131(K)
-            S01 = S01 + uk * C01_XE131(K)
-            uk = u*uk
-          END DO
-          expu = EXP(-u)
-          S00 = expu * S00
-          S11 = expu * S11
-          S01 = expu * S01
-        END IF
-        ! Basis transformation: a0=ap+an, a1=ap-an
-        Spp(I) = S00 + S11 + S01
-        Snn(I) = S00 + S11 - S01
-        Spn(I) = 2 * (S00 - S11)
-      END DO
+      J = 1.5d0
+      ! Fits over 0 < u < 10 (probably).  Limit to this range.
+      umax = 10d0
+      ! Helper routine for exponential-polynomial Sij forms.
+      CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+               (/  0.0417857d0,-0.111132d0,  0.171306d0, -0.132481d0,   &
+                   0.0630161d0,-0.0177684d0, 2.82192d-3, -2.32247d-4,   &
+                   7.81471d-6,  1.25984d-9  /),                         &
+               (/  0.0219206d0,-0.0642919d0, 0.0957262d0,-0.0727452d0,  &
+                   0.0338802d0,-9.86454d-3,  1.75888d-3, -1.83629d-4,   &
+                   1.01679d-5, -2.25247d-7  /),                         &
+               (/ -0.0602463d0, 0.171349d0, -0.265846d0,  0.211589d0,   &
+                  -0.103611d0,  0.0311471d0,-5.60929d-3,  5.81416d-4,   &
+                  -3.16217d-5,  6.82201d-7  /) )
+      
+    !! Xenon 129 ----------------
+    !! From Menendez et al. [1208.1094]; see Table 1.
+    !! The 1b+2b results are taken where possible.
+    !! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    !! where u = q^2 b^2 / 2.
+    !IF (A .EQ. 129) THEN
+    !  ! Harmonic oscillator length [GeV^-1]
+    !  b = 2.2853d0 / HBARC
+    !  ! Nuclear spin
+    !  J = 0.5d0
+    !  ! Fits over 0 < u < 3 (probably).  Limit to this range.
+    !  umax = 3d0
+    !  ! Helper routine for exponential-polynomial Sij forms.
+    !  CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+    !           (/  0.054731d0, -0.146897d0,  0.182479d0,  -0.128112d0,  &
+    !               0.0539978d0,-0.0133335d0, 0.00190579d0,-1.48373d-4,  &
+    !               5.11732d-6, -2.06597d-8 /),                          &
+    !           (/  0.02933d0,  -0.0905396d0, 0.122783d0,  -0.0912046d0, &
+    !               0.0401076d0,-0.010598d0,  0.00168737d0,-1.56768d-4,  &
+    !               7.69202d-6, -1.48874d-7 /),                          &
+    !           (/ -0.0796645d0, 0.231997d0, -0.304198d0,   0.222024d0,  &
+    !              -0.096693d0,  0.0251835d0,-0.00392356d0, 3.53343d-4,  &
+    !              -1.65058d-5,  2.88576d-7 /) )
+      
+    !! Xenon 131 ----------------
+    !! From Menendez et al. [1208.1094]; see Table 1.
+    !! The 1b+2b results are taken where possible.
+    !! Functional form is Sij(u) = e^{-u} \sum_{k=0} C_{ij,k} u^k
+    !! where u = q^2 b^2 / 2.
+    !ELSE IF (A .EQ. 131) THEN
+    !  ! Harmonic oscillator length [GeV^-1]
+    !  b = 2.2905d0 / HBARC
+    !  ! Nuclear spin
+    !  J=1.5d0
+    !  ! Fits over 0 < u < 3 (probably).  Limit to this range.
+    !  umax = 3d0
+    !  ! Helper routine for exponential-polynomial Sij forms.
+    !  CALL ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,1d0,1d0,1d0,9,    &
+    !           (/  0.0417889d0,-0.111171d0,  0.171966d0,  -0.133219d0,  &
+    !               0.0633805d0,-0.0178388d0, 0.00282476d0,-2.31681d-4,  &
+    !               7.78223d-6, -4.49287d-10 /),                         &
+    !           (/  0.022446d0, -0.0733931d0, 0.110509d0,  -0.0868752d0, &
+    !               0.0405399d0,-0.0113544d0, 0.00187572d0,-1.75285d-4,  &
+    !               8.40043d-6, -1.53632d-7  /),                         &
+    !           (/ -0.0608808d0, 0.181473d0, -0.272533d0,   0.211776d0,  &
+    !              -0.0985956d0, 0.027438d0, -0.0044424d0,  3.97619d-4,  &
+    !              -1.74758d-5,  2.55979d-7  /) )
       
     ! --------------------------
     ! Other isotopes have zero spin
@@ -8133,6 +9067,51 @@ PURE SUBROUTINE CalcWSD(Z,A,N,q,W)
   W(+1,:) = (4d0 / (2d0*J + 1d0)) * Spp    ! SD proton
   W( 0,:) = (4d0 / (2d0*J + 1d0)) * Spn    ! SD crossterm
   W(-1,:) = (4d0 / (2d0*J + 1d0)) * Snn    ! SD neutron
+  
+  
+  CONTAINS
+  
+  ! --------------------------------------------
+  ! Calculates form factors of the form:
+  !   Sij(u) = e^{-u} A_ij \sum_{k=0} C_{ij,k} u^k
+  ! where u = q^2 b^2 / 2 and A = (A00,A11,A01).  Sets to zero
+  ! when u > umax.  Fills the arrays S00, S11, & S01 in the
+  ! parent routine.
+  PURE SUBROUTINE ExponentialPolynomial(N,Spp,Spn,Snn,b,umax,           &
+                                        A00,A11,A01,NC,C00,C11,C01)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: N,NC
+    REAL*8, INTENT(IN) :: b,umax,A00,A11,A01,C00(0:NC),C11(0:NC),C01(0:NC)
+    REAL*8, INTENT(OUT) :: Spp(1:N),Spn(1:N),Snn(1:N)
+    INTEGER :: I,K
+    REAL*8 :: u,uk,expu,S00,S11,S01
+    DO I=1,N
+      u  = 0.5d0 * (q(I)*b)**2
+      uk = 1
+      S00 = 0d0
+      S11 = 0d0
+      S01 = 0d0
+      ! Conservatively set to zero outside range of validity.
+      IF (u .LE. umax) THEN
+        DO K=0,NC
+          S00 = S00 + uk * C00(K)
+          S11 = S11 + uk * C11(K)
+          S01 = S01 + uk * C01(K)
+          uk = u*uk
+        END DO
+        expu = EXP(-u)
+        S00 = expu * A00 * S00
+        S11 = expu * A11 * S11
+        S01 = expu * A01 * S01
+      END IF
+      ! Basis transformation: a0=ap+an, a1=ap-an
+      Spp(I) = S00 + S11 + S01
+      Snn(I) = S00 + S11 - S01
+      Spn(I) = 2 * (S00 - S11)
+    END DO
+    
+  END SUBROUTINE ExponentialPolynomial
+  
   
 END SUBROUTINE
 
@@ -8541,9 +9520,15 @@ END SUBROUTINE
 !               mass numbers.
 !   fiso        Array of size [1:Niso] containing isotope mass
 !               fractions.
-! Pre-populated isotopic abundances.
-!   Zelem       If Z = 14, 18, 32, or 54, sets the isotopic composition
-!               to the given element.  Z = 1153 can be used for NaI.
+! Pre-populated isotopic abundances for compounds with given
+! stoichiometry.  The first two of these must be given to take effect
+! (otherwise these inputs are ignored).
+!   Nelem       Number of elements in compound.
+!   Zelem       Integer array of size [1:Nelem] containing atomic
+!               numbers of compound elements.
+!   stoich      Integer array of size [1:Nelem] containing compound
+!               stoichiometry.  For example, CF3Cl would be {1,3,1}.
+!               Default is 1 for each element.
 ! Optional recoil energy tabulation arguments.  Both are required for
 ! changes to take effect.
 !   NE          Number of tabulated recoil energies E
@@ -8585,16 +9570,18 @@ END SUBROUTINE
 !               with Emin.
 ! 
 SUBROUTINE SetDetector(D,mass,time,exposure,Nevents,background,         &
-                       Niso,Ziso,Aiso,fiso,Zelem,NE,E,                  &
+                       Niso,Ziso,Aiso,fiso,Nelem,Zelem,stoich,          &
+                       NE,E,                                            &
                        eff_file,eff_filename,NEeff,Eeff,Neff,eff,       &
                        intervals,Emin,Wsi,Wsd)
   IMPLICIT NONE
   TYPE(DetectorStruct), INTENT(INOUT), TARGET, OPTIONAL :: D
   CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: eff_file,eff_filename
   LOGICAL, INTENT(IN), OPTIONAL :: intervals
-  INTEGER, INTENT(IN), OPTIONAL :: Nevents,Niso,Zelem,NE,NEeff,Neff
-  !INTEGER, INTENT(IN), OPTIONAL :: Ziso(Niso),Aiso(Niso)
-  INTEGER, INTENT(IN), OPTIONAL :: Ziso(:),Aiso(:)
+  INTEGER, INTENT(IN), OPTIONAL :: Nevents,Niso,Nelem,NE,NEeff,Neff
+  !INTEGER, INTENT(IN), OPTIONAL :: Ziso(Niso),Aiso(Niso),Zelem(Nelem), &
+  !                                 stoich(Nstoich)
+  INTEGER, INTENT(IN), OPTIONAL :: Ziso(:),Aiso(:),Zelem(:),stoich(:)
   REAL*8, INTENT(IN), OPTIONAL :: mass,time,exposure,background,Emin
   !REAL*8, INTENT(IN), OPTIONAL :: fiso(Niso),E(NE),eff(NE,0:Neff),      &
   !        Wsi(-1:1,NE,Niso),Wsd(-1:1,NE,Niso)
@@ -8603,11 +9590,12 @@ SUBROUTINE SetDetector(D,mass,time,exposure,Nevents,background,         &
   TYPE(DetectorStruct), POINTER :: DP
   LOGICAL :: iso_change,E_change,eff_change
   INTEGER :: KE,Kiso,Neff0
+  INTEGER, ALLOCATABLE :: stoich0(:)
   REAL*8 :: f,dx
   ! For setting default energy tabulation (logarithmic spacing)
   INTEGER, PARAMETER :: E_PER_DECADE = 100
   REAL*8, PARAMETER :: DEFAULT_EMIN = 0.1d0
-  REAL*8, PARAMETER :: DEFAULT_EMAX = 100d0
+  REAL*8, PARAMETER :: DEFAULT_EMAX = 1000d0
   
   ! Get pointer to detector structure to be used: either an explicitly
   ! provided structure or the default, internally-stored structure.
@@ -8674,8 +9662,15 @@ SUBROUTINE SetDetector(D,mass,time,exposure,Nevents,background,         &
       iso_change = .TRUE.
     END IF
   END IF
-  IF (PRESENT(Zelem)) THEN
-    CALL IsotopeList(Zelem,DP%Niso,DP%Ziso,DP%Aiso,DP%fiso,DP%Miso)
+  IF (PRESENT(Nelem) .AND. PRESENT(Zelem)) THEN
+    ALLOCATE(stoich0(Nelem))
+    IF (PRESENT(stoich)) THEN
+      stoich0 = stoich
+    ELSE
+      stoich0 = 1
+    END IF
+    CALL CompoundIsotopeList(Nelem,Zelem,stoich0,                       &
+                             DP%Niso,DP%Ziso,DP%Aiso,DP%fiso,DP%Miso)
     iso_change = .TRUE.
   END IF
   
@@ -8920,7 +9915,7 @@ SUBROUTINE InitDetector(D,intervals)
   IF (PRESENT(intervals)) intervals0 = intervals
   
   ! Set to LUX 2013 analysis
-  CALL SuperCDMS_2014_InitTo(DP,intervals0)
+  CALL LUX_2013_InitTo(DP,intervals0)
   
 END SUBROUTINE
 
@@ -8941,9 +9936,12 @@ END SUBROUTINE
 !   --isotope-Z=<Z1>,<Z2>,<Z3>,...
 !   --isotope-A=<A1>,<A2>,<A3>,...
 !   --isotope-f=<f1>,<f2>,<f3>,...
-! Shortcuts for specific materials by atomic number (using natural
-! abundances):
-!   --element-Z=<Z>
+! Use naturally occurring isotopes for the elements in the given
+! compound specified by atomic numbers and the stoichiometry.  If
+! stoichiometry is not given, it is assumed to be 1 for each element
+! (equal abundances):
+!   --element-Z=<Z1>,<Z2>,<Z3>,...
+!   --stoichiometry=<stoich1>,<stoich2>,<stoich3>,...
 ! Shortcuts for specific materials by name (using natural abundances):
 !   --argon
 !   --germanium
@@ -8984,8 +9982,8 @@ SUBROUTINE InitDetectorCL(D,eff_file,intervals)
   TYPE(DetectorStruct), POINTER :: DP
   CHARACTER(LEN=1024) :: eff_file0
   LOGICAL :: intervals0
-  INTEGER :: Nevents,Niso,Zelem,N1,N2,N3
-  INTEGER, ALLOCATABLE :: Ziso(:),Aiso(:)
+  INTEGER :: Nevents,Niso,Nelem,N1,N2,N3
+  INTEGER, ALLOCATABLE :: Ziso(:),Aiso(:),Zelem(:),stoich(:)
   REAL*8 :: mass,time,exposure,background,Emin
   REAL*8, ALLOCATABLE :: fiso(:)
   
@@ -9020,6 +10018,9 @@ SUBROUTINE InitDetectorCL(D,eff_file,intervals)
   ! SuperCDMS 2014 result (low-energy analysis)
   ELSE IF (GetLongArg('SuperCDMS-2014')) THEN
     CALL SuperCDMS_2014_InitTo(DP,intervals0)
+  ! SIMPLE 2014 result
+  ELSE IF (GetLongArg('SIMPLE-2014')) THEN
+    CALL SIMPLE_2014_InitTo(DP,intervals0)
   ! DARWIN proposal, xenon-based (as of 2015)
   ELSE IF (GetLongArg('DARWIN-Xe-2015')) THEN
     CALL DARWIN_Xe_2015_InitTo(DP,intervals0)
@@ -9045,18 +10046,27 @@ SUBROUTINE InitDetectorCL(D,eff_file,intervals)
       Niso = N1
       CALL SetDetector(DP,Niso=Niso,Ziso=Ziso,Aiso=Aiso,fiso=fiso)
     END IF
-  ELSE IF (GetLongArgInteger('element-Z',Zelem)) THEN
-    CALL SetDetector(DP,Zelem=Zelem)
+  ELSE IF (GetLongArgIntegers('element-Z',Zelem,Nelem)) THEN
+    IF (GetLongArgIntegers('stoichiometry',stoich,N2)) THEN
+      IF (N2 .EQ. Nelem) THEN
+        CALL SetDetector(DP,Nelem=Nelem,Zelem=Zelem,stoich=stoich)
+      END IF
+    ELSE
+      IF (ALLOCATED(stoich)) DEALLOCATE(stoich)
+      ALLOCATE(stoich(Nelem))
+      stoich = 1
+      CALL SetDetector(DP,Nelem=Nelem,Zelem=Zelem,stoich=stoich)
+    END IF
   ELSE IF (GetLongArg('argon')) THEN
-    CALL SetDetector(DP,Zelem=18)
+    CALL SetDetector(DP,Nelem=1,Zelem=(/18/))
   ELSE IF (GetLongArg('germanium')) THEN
-    CALL SetDetector(DP,Zelem=32)
+    CALL SetDetector(DP,Nelem=1,Zelem=(/32/))
   ELSE IF (GetLongArg('silicon')) THEN
-    CALL SetDetector(DP,Zelem=14)
+    CALL SetDetector(DP,Nelem=1,Zelem=(/14/))
   ELSE IF (GetLongArg('xenon')) THEN
-    CALL SetDetector(DP,Zelem=54)
+    CALL SetDetector(DP,Nelem=1,Zelem=(/54/))
   ELSE IF (GetLongArg('sodium-iodide')) THEN
-    CALL SetDetector(DP,Zelem=1153)
+    CALL SetDetector(DP,Nelem=2,Zelem=(/11,53/),stoich=(/1,1/))
   END IF
   
   ! Update exposures
@@ -10665,6 +11675,35 @@ END FUNCTION GetLongArg
 
 ! ----------------------------------------------------------------------
 ! Checks if the given argument key is given as a command line argument
+! of the form --akey[<suffix>] or --akey[<suffix>]=<val>.
+! This differs from above in that it indicates if there are any command
+! line arguments where the key name begins with the given string.
+! Returns .TRUE. if valid key was found, .FALSE. otherwise.
+! 
+FUNCTION GetLongArgPrefix(prefix) RESULT(status)
+  IMPLICIT NONE
+  LOGICAL :: status
+  CHARACTER*(*), INTENT(IN) :: prefix
+  CHARACTER*256 :: arg
+  INTEGER :: I,Narg,len
+  
+  Narg   = IARGC()
+  len    = LEN_TRIM(prefix)
+  status = .FALSE.
+  
+  DO I=1,Narg
+    CALL GETARG(I,arg)
+    IF (arg(:2+len) .EQ. '--' // prefix) THEN
+      status = .TRUE.
+      RETURN
+    END IF
+  END DO
+  
+END FUNCTION GetLongArgPrefix
+
+
+! ----------------------------------------------------------------------
+! Checks if the given argument key is given as a command line argument
 ! of the form --akey=<aval> and inserts the appropriate string into
 ! aval.
 ! Returns .TRUE. if valid key was found, .FALSE. otherwise.
@@ -11013,7 +12052,7 @@ END FUNCTION GetLongArgComplex
 
 ! ----------------------------------------------------------------------
 ! Returns the full command line used to run the program.
-! This routine is nearly identical to the Intel Fortran routine
+! This routine is nearly identical to the Fortran 2003 routine
 ! GET_COMMAND, but is provided here because some older compilers
 ! do not provide that routine.  White space between arguments will
 ! not be conserved: arguments will be separated by a single space,
@@ -11022,11 +12061,15 @@ END FUNCTION GetLongArgComplex
 SUBROUTINE GetFullCommand(cmd)
   IMPLICIT NONE
   CHARACTER*(*), INTENT(OUT) :: cmd
-  INTEGER :: pos,I,Narg,alen
+  INTEGER :: pos,I,Narg,alen,clen
   CHARACTER*256 :: arg
+  
+  ! Fortran 2003
+  !CALL GET_COMMAND(cmd)
   
   cmd = ''
   pos = 1
+  clen = LEN(cmd)
   
   ! Command
   !CALL GETARG(0,arg,alen)
@@ -11043,8 +12086,13 @@ SUBROUTINE GetFullCommand(cmd)
     alen = LEN_TRIM(arg)
     cmd(pos:pos) = ' '
     pos = pos + 1
-    cmd(pos:pos+alen-1) = arg(1:alen)
+    IF (pos+alen-1 .GT. clen) THEN
+      cmd(pos:) = arg
+    ELSE
+      cmd(pos:pos+alen-1) = arg(1:alen)
+    END IF
     pos = pos + alen
+    IF (pos .GE. clen) EXIT
   END DO
   
   ! Following necessary to terminate/clear string
@@ -11951,7 +12999,12 @@ END FUNCTION
 ! performance issues when using multi-threading through OpenMP (as
 ! opposed to the RANDOM_NUMBER intrinsic, which may lead to _slower_
 ! code in multi-threaded cases due to its serial-only implementation
-! leading to possible thread pile-up).
+! leading to possible thread pile-up).  Upon entering the first OpenMP
+! parallel region, each thread is given its own random seed unless
+! explicit seeds are set by calling rand_init() within that parallel
+! region; per-thread RNG states are then maintained for later parallel
+! regions.  Note the RNG state from the serial region may be replaced
+! with that of the master thread.
 ! 
 ! See:
 !   G. Marsaglia and A. Zaman, "Toward a Universal Random Number
@@ -12100,8 +13153,175 @@ END SUBROUTINE
 
 
 !=======================================================================
-! MATH FUNCTIONS
+! NUMBER FORMATTING
 !=======================================================================
+
+! ----------------------------------------------------------------------
+! Converts the given number to a string of width w, with nl characters
+! to the left of the decimal point, np digits of precision, and ne
+! digits in the exponential (set ne=0 for floating point only).  The
+! number will be printed in floating point format if possible,
+! otherwise exponential notation is used.  Numbers are coerced into
+! a representable range.
+! 
+! Requirements:
+!   nl + np + 2 + ne <= w  [ne > 0]
+! 
+PURE FUNCTION NumberToString(x,w,nl,np,ne) RESULT(s)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: x
+  INTEGER, INTENT(IN) :: w
+  INTEGER, INTENT(IN), OPTIONAL :: nl,np,ne
+  CHARACTER*(w) :: s
+  LOGICAL :: no_precision,use_fixed
+  INTEGER :: nl0,nr0,np0,ne0,xsgn,exponent,expmax,decloc
+  REAL*8 :: x0,eps,mantissa
+  CHARACTER*64 :: XFMT,MFMT,EFMT,t
+  
+  ! Determine number of characters
+  nl0 = 2
+  np0 = 0
+  ne0 = 0
+  IF (PRESENT(nl)) nl0 = nl
+  IF (PRESENT(np)) np0 = np
+  IF (PRESENT(ne)) ne0 = ne
+  nl0 = MAX(nl0,2)
+  nr0 = w - nl0 - 1
+  ne0 = MIN(MAX(ne0,0),9)
+  no_precision = .FALSE.
+  IF (Np0 .LE. 0) THEN
+    no_precision = .TRUE.
+    IF (Ne0 .GT. 0) THEN
+      Np0 = Nr0 - 1 - Ne
+    ELSE
+      Np0 = Nr0 + 1
+    END IF
+  END IF
+  
+  ! Check for bad cases
+  IF ((nr0 .LT. 0) .OR. (Np0 .LE. 0)) THEN
+    s = REPEAT('*',w)
+    RETURN
+  END IF
+  
+  ! Use modifiable variable (x is fixed)
+  x0 = x
+  
+  IF (x0 .GE. 0) THEN
+    xsgn = +1
+  ELSE
+    xsgn = -1
+  END IF
+  eps = 10d0**(-Np0)
+  
+  ! Exponential notation components
+  IF (x0 .NE. 0d0) THEN
+    exponent = FLOOR(LOG10(ABS(x0*(1+0.51d0*eps))))
+  ELSE
+    exponent = 0d0
+  END IF
+  mantissa = x * 10d0**(-exponent)
+  
+  ! Coerce number into representable range
+  IF (Ne0 .GT. 0) THEN
+    expmax = 10**Ne0
+    IF (ABS(exponent) .GE. expmax) THEN
+      IF (exponent .GT. 0) THEN
+        mantissa = xsgn * 10 * (1-eps)
+        exponent = expmax - 1
+      ELSE IF (Np0 - 1 + exponent .GT. -expmax) THEN
+        mantissa = mantissa * 10d0**(exponent+expmax-1)
+        exponent = -expmax + 1
+      ELSE
+        mantissa = 0d0
+        exponent = 0
+        x0       = 0d0
+      END IF
+    END IF
+  ELSE
+    IF ((x0 .GT. 0) .AND. (exponent + 1 .GT. Nl0)) THEN
+      IF (no_precision) eps = MAX(10d0**(-w+2),EPSILON(eps))
+      mantissa = 10 * (1-eps)
+      exponent = Nl0 - 1
+      x0       = mantissa * 10d0**exponent
+    ELSE IF ((x0 .LT. 0) .AND. (exponent + 2 .GT. Nl0)) THEN
+      IF (no_precision) eps = MAX(10d0**(-w+3),EPSILON(eps))
+      mantissa = -10 * (1-eps)
+      exponent = Nl0 - 2
+      x0       = mantissa * 10d0**exponent
+    END IF
+  END IF
+  
+  ! Determine if fixed notation should be used
+  use_fixed = .TRUE.
+  IF (Ne0 .GT. 0) THEN
+    IF (Np0 - 1 - exponent .GT. Nr0) THEN
+      use_fixed = .FALSE.
+    ELSE IF ((x0 .GT. 0) .AND. (exponent + 1 .GT. Nl0)) THEN
+      use_fixed = .FALSE.
+    ELSE IF ((x0 .LT. 0) .AND. (exponent + 2 .GT. Nl0)) THEN
+      use_fixed = .FALSE.
+    END IF
+  END IF
+  
+  ! Construct string
+  ! Fixed format
+  IF (use_fixed) THEN
+    IF (no_precision) THEN
+      WRITE(XFMT,'(A,I2,A,I2,A)') '(F',w,'.',Nr0,')'
+    ELSE
+      WRITE(XFMT,'(A,I2,A,I2,A)') '(F',w,'.',MAX(Np0-exponent-1,0),')'
+    END IF
+    WRITE(t,XFMT) x0
+    t = ADJUSTL(t)
+    decloc = INDEX(t,'.')
+    IF (decloc .EQ. 0) THEN
+      decloc = LEN_TRIM(t) + 1
+      !t = TRIM(t) // '.'
+    END IF
+    IF (decloc .LT. nl0 + 1) THEN
+      s = REPEAT(' ',nl0 + 1 - decloc) // t
+    ELSE IF (decloc .GT. nl0 + 1) THEN
+      ! This should not happen....
+      s = t(decloc-nl0:)
+    ELSE
+      s = t
+    END IF
+  ! Exponential format
+  ELSE
+    ! Mantissa part
+    WRITE(MFMT,'(A,I2,A,I2,A)') '(F',Np0+2,'.',Np0-1,')'
+    WRITE(t,MFMT) mantissa
+    t = ADJUSTL(t)
+    decloc = INDEX(t,'.')
+    IF (decloc .EQ. 0) THEN
+      decloc = LEN_TRIM(t) + 1
+      !t = TRIM(t) // '.'
+    END IF
+    IF (decloc .LT. nl0 + 1) THEN
+      s = REPEAT(' ',nl0 + 1 - decloc) // t
+    ELSE IF (decloc .GT. nl0 + 1) THEN
+      ! This should not happen....
+      s = t(decloc-nl0:)
+    ELSE
+      s = t
+    END IF
+    ! Exponential part
+    WRITE(EFMT,'(A,I1,A)') '(I',Ne0,')'
+    WRITE(t,EFMT) ABS(exponent)
+    t = ADJUSTL(t)
+    IF (LEN_TRIM(t) .LT. Ne0) t = REPEAT('0',Ne0-LEN_TRIM(t)) // TRIM(t)
+    IF (exponent .GE. 0) THEN
+      t = 'E+' // TRIM(t)
+    ELSE
+      t = 'E-' // TRIM(t)
+    END IF
+    ! Combine parts
+    s = TRIM(s) // t
+  END IF
+  
+END FUNCTION
+
 
 ! ----------------------------------------------------------------------
 ! Returns the given number coerced into a range where it can be printed
@@ -12180,6 +13400,11 @@ ELEMENTAL FUNCTION CoerceExponent(x,N,Ns) RESULT(y)
 END FUNCTION
 
 
+
+!=======================================================================
+! MATH FUNCTIONS
+!=======================================================================
+
 !-----------------------------------------------------------------------
 ! Error function between x1 and x2, i.e. erf(x2)-erf(x1).
 ! This routine accounts for the case when x1 and x2 are similar
@@ -12254,6 +13479,62 @@ ELEMENTAL FUNCTION ERF2(x1,x2) RESULT(z)
              + (16*xc**8 - 224*xc**6 + 840*xc**4 - 840*xc**2            &
                          + 105)*delx**8 / 22680                         &
           )
+  
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! The logarithm of the error function.  Requires x > 0.
+! Accounts for large x case to avoid loss of precision.
+! 
+ELEMENTAL FUNCTION LOG_ERF(x) RESULT(z)
+  IMPLICIT NONE
+  REAL*8 :: z
+  REAL*8, INTENT(IN) :: x
+  
+  ! Invalid input
+  IF (x .LE. 0d0) THEN
+    z = -HUGE(z)
+    RETURN
+  END IF
+  
+  ! Negligible loss of precision for smaller x
+  IF (x .LE. 1d0) THEN
+    z = LOG(ERF(x))
+  ! Work with smaller complementary error function
+  ELSE
+    z = LOGp1(-ERFC(x))
+  END IF
+  
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! The logarithm of the complementary error function.
+! Accounts for large x case to avoid loss of precision.
+! 
+ELEMENTAL FUNCTION LOG_ERFC(x) RESULT(z)
+  IMPLICIT NONE
+  REAL*8 :: z
+  REAL*8, INTENT(IN) :: x
+  REAL*8 :: y,w
+  REAL*8, PARAMETER :: SQRTPI = 1.7724538509055160d0  ! Sqrt(Pi)
+  
+  ! Work with smaller error function for smaller |x|
+  IF (ABS(x) .LE. 0.1d0) THEN
+    z = LOGp1(-ERF(x))
+  ! Negligible loss of precision for x not too large
+  ELSE IF (x .LE. 25d0) THEN
+    z = LOG(ERFC(x))
+  ! Use asymptotic expansion:
+  !   w = sqrt(pi) x e^{x^2} erfc(x) - 1
+  !       ->  \sum_{k=1} (-1)^k (2k-1)!!/(2x^2)^k
+  ! For x > 25, double precision in eight terms (k <= 8)
+  ELSE
+    y = 1 / (2*x**2)
+    w = -y*(1-3*y*(1-5*y*(1-7*y*(1-9*y*(1-11*y*(1-13*y*(1-15*y)))))))
+    z = -x**2 - LOGp1(w) - LOG(SQRTPI*x)
+  END IF
   
 END FUNCTION
 
@@ -12484,6 +13765,7 @@ ELEMENTAL FUNCTION LOG_SUM(lna,lnb) RESULT(z)
   REAL*8, INTENT(IN) :: lna,lnb
   REAL*8 :: lnx,r
   
+  ! Write a+b as x(1+r) with x = max(a,b) and r = min(b/a,a/b).
   IF (lna .GE. lnb) THEN
     lnx = lna
     r   = EXP(lnb-lna)
@@ -12522,6 +13804,62 @@ ELEMENTAL FUNCTION LOG_SUM(lna,lnb) RESULT(z)
                  -r*((1d0/2d0)                                          &
                      -r*((1d0/3d0)                                      &
                          -r*(1d0/4d0)                                   &
+                )))
+  END IF
+  
+END FUNCTION
+
+
+! ----------------------------------------------------------------------
+! Function to calculate the quantity ln(a-b) given ln(a) and ln(b).
+! Requires a > b.  Precision is ~ EPSILON.
+! 
+ELEMENTAL FUNCTION LOG_DIFF(lna,lnb) RESULT(z)
+  IMPLICIT NONE
+  REAL*8 :: z
+  REAL*8, INTENT(IN) :: lna,lnb
+  REAL*8 :: lnx,r
+  
+  ! Bad case
+  IF (lnb .GE. lna) THEN
+    z = -HUGE(z)
+    RETURN
+  END IF
+  
+  ! Write a-b as x(1-r) with x = a and r = b/a.
+  lnx = lna
+  r   = EXP(lnb-lna)
+  
+  ! Below, we use an expansion of ln(1-r) if r is small.
+  ! The sum is terminated at approximately double precision.
+  IF (r .EQ. 0d0) THEN
+    z = lnx
+  ELSE IF (r .GT. 0.01d0) THEN
+    z = lnx + LOG(1d0 - r)
+  ELSE IF (r .GT. 0.001d0) THEN
+    z = lnx - r*(1d0                                                    &
+                 +r*((1d0/2d0)                                          &
+                     +r*((1d0/3d0)                                      &
+                         +r*((1d0/4d0)                                  &
+                             +r*((1d0/5d0)                              &
+                                 +r*((1d0/6d0)                          &
+                                     +r*((1d0/7d0)                      &
+                                         +r*((1d0/8d0)                  &
+                                             +r*(1d0/9d0)               &
+                ))))))))
+  ELSE IF (r .GT. 0.00001d0) THEN
+    z = lnx - r*(1d0                                                    &
+                 +r*((1d0/2d0)                                          &
+                     +r*((1d0/3d0)                                      &
+                         +r*((1d0/4d0)                                  &
+                             +r*((1d0/5d0)                              &
+                                 +r*(1d0/6d0)                           &
+                )))))
+  ELSE
+    z = lnx - r*(1d0                                                    &
+                 +r*((1d0/2d0)                                          &
+                     +r*((1d0/3d0)                                      &
+                         +r*(1d0/4d0)                                   &
                 )))
   END IF
   
@@ -12682,6 +14020,110 @@ END FUNCTION
 
 
 !-----------------------------------------------------------------------
+! Gamma function of real argument [double precision]
+! NOTE: Intrinsic routine of real argument available in Fortran 2008.
+! 
+! We make use of the identity:
+!   Gamma(1-z) = pi*z / Gamma(1+z) / sin(pi*z)
+! 
+!ELEMENTAL FUNCTION GAMMA(x) RESULT(z)
+!  IMPLICIT NONE
+!  REAL*8, INTENT(IN) :: x
+!  REAL*8 :: z
+!  REAL*8 :: x0
+!  REAL*8, PARAMETER :: PI = 3.1415926535897932d0
+!  ! We make use of the identity:
+!  !   Gamma(1-z) = pi*z / Gamma(1+z) / sin(pi*z)
+!  IF (x .GE. 1d0) THEN
+!    z = EXP(LOG_GAMMA(x))
+!  ! Gamma is undefined when x=0,-1,-2,...
+!  ELSE IF (MOD(x,1d0) .EQ. 0d0) THEN
+!    z = -HUGE(z)
+!  ELSE
+!    x0 = 1 - x
+!    z = PI*x0 / (SIN(PI*x0) * EXP(LOG_GAMMA(1+x0)))
+!  END IF
+!END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! Logarithm of the gamma function [double precision]
+! NOTE: Intrinsic routine available in Fortran 2008.
+! 
+! Calculated using Lanczos' approximation.  Valid only for x > 0.
+! 
+! Lanczos's approximation:
+!   Gamma(z+1) = (z+r+1/2)^{z+1/2} * EXP[-(z+r+1/2)] * sqrt(2*pi)
+!                * (B_0 + \Sum_{k=0}^{N} B_k/(z+k) + eps)
+! where r is some constant s.t. z+r+1/2 > 0.
+! Coefficients in the series expansion are dependent on r and the
+! number of terms at which the series is truncated.  The determination
+! of these coefficients is too complicated to show here.
+! 
+! Note the formula above is valid for complex cases as well, as long as
+! Re(x) > 1.  The following identity also applies for the complex case:
+!   Gamma(1-z) = pi*z / Gamma(1+z) / sin(pi*z)
+! 
+! The coefficients are calculated as described in Section 6.7 of
+! Glendon Pugh's thesis (2004), which provides an extensive discussion
+! of the Lanczos approximation.  The coefficients are given for the
+! following modified form of the formula:
+!   Gamma(z+1) = 2 * sqrt(e/pi) * ((z+r+1/2)/e)^(z+1/2)
+!                * (D_0 + \Sum_{k=0}^{N} D_k/(z+k) + eps)
+! The quantities N and r are chosen from Table C.1 to achieve the
+! desired precision:
+!   Double precision:  N=10, r=10.900511  (see Table 8.5)
+! 
+!ELEMENTAL FUNCTION LOG_GAMMA(x) RESULT(z)
+!  IMPLICIT NONE
+!  REAL*8, INTENT(IN) :: x
+!  REAL*8 :: z
+!  REAL*8 :: series_sum,x0
+!  INTEGER :: K
+!  REAL*8, PARAMETER :: PI = 3.1415926535897932d0
+!  REAL*8, PARAMETER :: R = 10.900511d0
+!  INTEGER, PARAMETER :: ND = 10
+!  REAL*8, PARAMETER, DIMENSION(0:ND) :: Dk = &
+!    (/ +2.4857408913875357d-5,                          &
+!       +1.0514237858172197d0,  -3.4568709722201624d0,   &
+!       +4.5122770946689482d0,  -2.9828522532357666d0,   &
+!       +1.0563971157712671d0,  -1.9542877319164587d-1,  &
+!       +1.7097054340444122d-2, -5.7192611740430578d-4,  &
+!       +4.6339947335990564d-6, -2.7199490848860770d-9  /)
+!  
+!  IF (x .LE. 0d0) THEN
+!    z = -HUGE(z)
+!    RETURN
+!    !STOP 'ERROR: loggamma cannot be called with non-positive argument'
+!  END IF
+!  ! Error for x>0 should theoretically be smaller than 1e-15,
+!  ! but loss of precision in sum below might make it slightly worse
+!  ! (maybe ~ 1e-14?)
+!  IF (x .GE. 1) THEN
+!    ! Write as Gamma(x) = Gamma(1+x0)
+!    x0 = x-1
+!  ELSE
+!    ! Special case: for 0<x<1, find Gamma(1+(1-x)) = Gamma(1+x0)
+!    ! and use identity Gamma(1-y) = pi*y / Gamma(1+y) / sin(pi*y)
+!    x0 = 1 - x
+!  END IF
+!  series_sum = Dk(0)
+!  DO K = 1,ND
+!    series_sum = series_sum + Dk(K)/(x0+K)
+!  END DO
+!  z = (x0+0.5d0)*(LOG(x0+R+0.5d0) - 1)                                  &
+!      + 0.5d0*(1 + LOG(4d0/PI))                                         &
+!      + LOG(series_sum)
+!  IF (x .LT. 1) THEN
+!    ! Special case: for 0<x<1, we found LogGamma(1+(1-x)).
+!    ! Now use identity Gamma(1-y) = pi*y / Gamma(1+y) / sin(pi*y)
+!    x0 = 1 - x
+!    z = LOG(PI*x0 / SIN(PI*x0)) - z
+!  END IF
+!END FUNCTION
+
+
+!-----------------------------------------------------------------------
 ! Lower gamma function of real arguments [double precision]
 !   \gamma(s,x) = \int_0^x dt t^{s-1} e^{-t}
 ! 
@@ -12710,6 +14152,34 @@ END FUNCTION
 
 
 !-----------------------------------------------------------------------
+! Regularized gamma function P of real arguments [double precision]
+!   P(s,x) = \gamma(s,x) / \Gamma(s)
+! 
+ELEMENTAL FUNCTION GAMMA_P(s,x) RESULT(z)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: s,x
+  REAL*8 :: z
+  REAL*8 :: P,Q
+  CALL GAMMA_PQ(s,x,P,Q)
+  z = P
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! Regularized gamma function Q of real arguments [double precision]
+!   Q(s,x) = \Gamma(s,x) / \Gamma(s)
+! 
+ELEMENTAL FUNCTION GAMMA_Q(s,x) RESULT(z)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: s,x
+  REAL*8 :: z
+  REAL*8 :: P,Q
+  CALL GAMMA_PQ(s,x,P,Q)
+  z = Q
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
 ! Regularized incomplete gamma functions P, Q of real arguments
 ! [double precision].  These are defined as:
 !   P(s,x) = \gamma(s,x) / \Gamma(s)
@@ -12724,7 +14194,7 @@ END FUNCTION
 ! The below routine calculates the approximately smaller of P or Q
 ! and uses P+Q=1 to determine the other.
 ! 
-! NOTE: Valid only for s,x >= 0 and not intended for large s.
+! NOTE: Valid only for s > 0 and x >= 0.
 ! 
 ELEMENTAL SUBROUTINE GAMMA_PQ(s,x,P,Q)
   IMPLICIT NONE
@@ -12745,8 +14215,12 @@ ELEMENTAL SUBROUTINE GAMMA_PQ(s,x,P,Q)
     RETURN
   END IF
   
+  ! Calculate P,Q using uniform asymptotic expansion
+  IF ((s .GE. 10d0) .AND. (x-10d0 .GT. 0.302d0*(s-10d0)) &
+      .AND. (x-10d0 .LT. 2.357d0*(s-10d0))) THEN
+    CALL GAMMA_PQ_UA(s,x,P,Q)
   ! Calculate P using Taylor series
-  IF (x .LE. s) THEN
+  ELSE IF (x .LE. s) THEN
     P = GAMMA_P_TS(s,x)
     Q = 1-P
   ! Calculate Q using continued fraction
@@ -12826,6 +14300,329 @@ ELEMENTAL SUBROUTINE GAMMA_PQ(s,x,P,Q)
     Q = EXP(s*LOG(x) - x - LOG_GAMMA(s)) / fk
   END FUNCTION
   
+  !---------------------------------------------
+  ! Calculates gamma function quantities P(s,x) and Q(s,x)
+  ! using a uniform asymptotic expansion (see 1306.1754).
+  ! Nearly constant evaluation time for any s & x, unlike
+  ! the Taylor series or continued fraction algorithms.
+  ! NOTE: Intended for s not small (larger than ~10) and
+  !       0.30 < x/s < 2.35; accuracy starts to drop
+  !       outside this region.
+  PURE SUBROUTINE GAMMA_PQ_UA(s,x,P,Q)
+    IMPLICIT NONE
+    REAL*8, INTENT(IN) :: s,x
+    REAL*8, INTENT(OUT) :: P,Q
+    INTEGER :: K
+    REAL*8 :: eta,lambda,u,Sa,Ra,sum
+    REAL*8 :: beta(0:32)
+    INTEGER, PARAMETER :: KMAX = 25
+    REAL*8, PARAMETER :: D(0:31) = &
+      (/  1.0000000000000000d+00,-3.3333333333333333d-01, 8.3333333333333333d-02, &
+         -1.4814814814814815d-02, 1.1574074074074074d-03, 3.5273368606701940d-04, &
+         -1.7875514403292181d-04, 3.9192631785224378d-05,-2.1854485106799922d-06, &
+         -1.8540622107151600d-06, 8.2967113409530860d-07,-1.7665952736826079d-07, &
+          6.7078535434014986d-09, 1.0261809784240308d-08,-4.3820360184533532d-09, &
+          9.1476995822367902d-10,-2.5514193994946250d-11,-5.8307721325504251d-11, &
+          2.4361948020667416d-11,-5.0276692801141756d-12, 1.1004392031956135d-13, &
+          3.3717632624009854d-13,-1.3923887224181621d-13, 2.8534893807047443d-14, &
+         -5.1391118342425726d-16,-1.9752288294349443d-15, 8.0995211567045613d-16, &
+         -1.6522531216398162d-16, 2.5305430097478884d-18, 1.1686939738559577d-17, &
+         -4.7700370498204848d-18, 9.6991260590562371d-19 /)
+    REAL*8, PARAMETER :: TWOPI = 6.2831853071795865d0   ! 2*Pi
+    
+    ! Define ratio of x & s
+    lambda = x/s
+    
+    ! eta is defined as 1/2 eta^2 = lambda - 1 - ln(lambda) with
+    ! the same sign as lambda-1.  Use an expansion for lambda ~ 1
+    ! to avoid cancellation issues.  Rapid convergent of below
+    ! series in eta requires |eta| < 1, which corresponds to
+    ! 0.3017 < lambda < 2.3577.
+    u = lambda - 1
+    IF (ABS(u) .GT. 0.01d0) THEN
+      eta = SQRT(2*(lambda-1-LOG(lambda)))
+    ELSE
+      eta = u*(1+u*(-1d0/3d0+u*(7d0/36d0+u*(-73d0/540d0+u*(1331d0/12960d0)))))
+    END IF
+    IF (x .LT. s) eta = -eta
+    
+    ! Use erfc in eta*sqrt{s/2} as first approximation and calculate
+    ! correction term:
+    !   R_a(\eta) = e^{-1/2 s \eta^2} S_a(\eta) / sqrt{2\pi s}
+    ! where Sa(eta) can be given by an expansion in eta:
+    !   S_a(\eta) \approx a/(a+\beta_1) \Sum_{k=0}^N \beta_k \eta^k
+    ! The beta terms are dependent upon s and can be calculated using
+    ! a recursion relation.
+    beta(KMAX+2) = 0d0
+    beta(KMAX+1) = 0d0
+    sum = 0d0
+    DO K = KMAX,0,-1
+      beta(K) = (K+2)/s * beta(K+2) + D(K+1)
+      sum = beta(K) + eta*sum
+    END DO
+    Sa = s/(s+beta(1)) * sum
+    Ra = EXP(-0.5d0*s*eta**2) * Sa / SQRT(TWOPI*s)
+    
+    ! Formulas for P & Q always valid, but just calculate the
+    ! smaller one and use P+Q=1 for the other.
+    IF (x .LE. s) THEN
+      P = 0.5d0*ERFC(-eta*SQRT(0.5d0*s)) - Ra
+      Q = 1-P
+    ELSE
+      Q = 0.5d0*ERFC(+eta*SQRT(0.5d0*s)) + Ra
+      P = 1-Q
+    END IF
+    
+  END SUBROUTINE
+  
+END SUBROUTINE
+
+
+!-----------------------------------------------------------------------
+! Logarithm of regularized gamma function P of real arguments
+! [double precision]
+!   P(s,x) = \gamma(s,x) / \Gamma(s)
+! 
+ELEMENTAL FUNCTION LOG_GAMMA_P(s,x) RESULT(z)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: s,x
+  REAL*8 :: z
+  REAL*8 :: lnP,lnQ
+  CALL LOG_GAMMA_PQ(s,x,lnP,lnQ)
+  z = lnP
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! Logarithm of regularized gamma function Q of real arguments
+! [double precision]
+!   Q(s,x) = \Gamma(s,x) / \Gamma(s)
+! 
+ELEMENTAL FUNCTION LOG_GAMMA_Q(s,x) RESULT(z)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: s,x
+  REAL*8 :: z
+  REAL*8 :: lnP,lnQ
+  CALL LOG_GAMMA_PQ(s,x,lnP,lnQ)
+  z = lnQ
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! Logarithm of regularized incomplete gamma functions P, Q of real
+! arguments [double precision].  These are defined as:
+!   P(s,x) = \gamma(s,x) / \Gamma(s)
+!   Q(s,x) = \Gamma(s,x) / \Gamma(s)
+! where \gamma(s,x) & \Gamma(s,x) are the lower & upper incomplete
+! gamma functions:
+!   \gamma(s,x) = \int_0^x dt t^{s-1} e^{-t}
+!   \Gamma(s,x) = \int_x^\infty dt t^{s-1} e^{-t}
+! The following relations hold:
+!   P(s,x) + Q(s,x) = 1
+!   \gamma(s,x) + \Gamma(s,x) = \Gamma(s)
+! The below routine calculates the approximately smaller of P or Q
+! and uses P+Q=1 to determine the other.
+! 
+! NOTE: Valid only for s > 0 and x >= 0.
+! 
+ELEMENTAL SUBROUTINE LOG_GAMMA_PQ(s,x,lnP,lnQ)
+  IMPLICIT NONE
+  REAL*8, INTENT(IN) :: s,x
+  REAL*8, INTENT(OUT) :: lnP,lnQ
+  
+  ! Special cases
+  IF (x .EQ. 0d0) THEN
+    lnP = -HUGE(1d0)
+    lnQ = 0d0
+    RETURN
+  END IF
+  
+  ! Bad cases
+  IF ((x .LT. 0d0) .OR. (s .LE. 0d0)) THEN
+    lnP = -HUGE(1d0)
+    lnQ = HUGE(1d0)
+    RETURN
+  END IF
+  
+  ! Calculate P,Q using uniform asymptotic expansion
+  IF ((s .GE. 10d0) .AND. (x-10d0 .GT. 0.302d0*(s-10d0)) &
+      .AND. (x-10d0 .LT. 2.357d0*(s-10d0))) THEN
+    CALL LOG_GAMMA_PQ_UA(s,x,lnP,lnQ)
+  ! Calculate P using Taylor series
+  ELSE IF (x .LE. s) THEN
+    lnP = LOG_GAMMA_P_TS(s,x)
+    lnQ = LOGp1(-EXP(lnP))
+  ! Calculate Q using continued fraction
+  ELSE
+    lnQ = LOG_GAMMA_Q_CF(s,x)
+    lnP = LOGp1(-EXP(lnQ))
+  END IF
+  
+  CONTAINS
+  
+  !---------------------------------------------
+  ! Calculates gamma function quantity P(s,x) using a Taylor
+  ! series expansion.
+  !   P(s,x) = \gamma(s,x) / \Gamma(s)
+  !   \gamma(s,x) = \int_0^x dt t^{s-1} e^{-t}
+  ! NOTE: Requires 0 < s, 0 <= x.  Should only be used for x
+  !       not (much) larger than s or convergence may be slow.
+  !       Also best for s not large (timing scales as maybe
+  !       sqrt(s)).
+  PURE FUNCTION LOG_GAMMA_P_TS(s,x) RESULT(lnP)
+    IMPLICIT NONE
+    REAL*8, INTENT(IN) :: s,x
+    REAL*8 :: lnP
+    INTEGER :: K
+    REAL*8 :: zk,sum
+    ! P(s,x) = x^s e^{-x} \Sum_{k=0}^\infty x^k / \Gamma(s+k+1)
+    ! sum here excludes first term (which is 1)
+    K   = 1
+    zk  = x / (s+1)
+    sum = zk
+    DO WHILE (zk .GT. EPSILON(zk))
+      K   = K+1
+      zk  = zk * x / (s+K)
+      sum = sum + zk
+      IF (K .GE. 10000) EXIT
+    END DO
+    lnP = s*LOG(x) - x - LOG_GAMMA(s+1) + LOGp1(sum)
+  END FUNCTION
+  
+  !---------------------------------------------
+  ! Calculates gamma function quantity Q(s,x) using a
+  ! continued fraction.
+  !   Q(s,x) = \Gamma(s,x) / \Gamma(s)
+  !   \Gamma(s,x) = \int_x^{\infty} dt t^{s-1} e^{-t}
+  ! NOTE: Requires 0 < x,s.  Should only be used for x not
+  !       (much) smaller than s or convergence may be slow
+  !       (or simply fail).  Also best for s not large
+  !       (timing scales as maybe sqrt(s)).
+  PURE FUNCTION LOG_GAMMA_Q_CF(s,x) RESULT(lnQ)
+    IMPLICIT NONE
+    REAL*8, INTENT(IN) :: s,x
+    REAL*8 :: lnQ
+    INTEGER :: K
+    REAL*8 :: xs1,fk,Ck,Dk,Deltak
+    ! Continued fraction (see Numerical Recipes):
+    !   Q(s,x) = x^s e^{-x} / \Gamma(s)
+    !            / (x-s+1 + K_k(-k(k-s),-s+2k+x+1)_{1}^{\infty})
+    ! where
+    !   K_k(a_k,b_k)_1 = a_1/b1+ a2/b2+ a3/b3+ ...
+    ! is the Gauss notation for a continued fraction.
+    xs1 = x-s+1
+    K  = 0
+    Ck = xs1
+    Dk = 0
+    fk = xs1
+    Deltak = HUGE(x)
+    DO WHILE (ABS(Deltak-1) .GE. EPSILON(x))
+      K  = K+1
+      Ck = (xs1+2*K) - K*(K-s)/Ck
+      IF (Ck .EQ. 0d0) Ck = 1d-30
+      Dk = (xs1+2*K) - K*(K-s)*Dk
+      IF (Dk .EQ. 0d0) Dk = 1d-30
+      Dk = 1/Dk
+      Deltak = Ck*Dk
+      fk = Deltak*fk
+      IF (K .GE. 10000) EXIT
+    END DO
+    lnQ = s*LOG(x) - x - LOG_GAMMA(s) - LOG(fk)
+  END FUNCTION
+  
+  !---------------------------------------------
+  ! Calculates gamma function quantities P(s,x) and Q(s,x)
+  ! using a uniform asymptotic expansion (see 1306.1754).
+  ! Nearly constant evaluation time for any s & x, unlike
+  ! the Taylor series or continued fraction algorithms.
+  ! NOTE: Intended for s not small (larger than ~10) and
+  !       0.30 < x/s < 2.35; accuracy starts to drop
+  !       outside this region.
+  ! This routine is about ~ 2 slower than the non-
+  ! logarithmic version.
+  PURE SUBROUTINE LOG_GAMMA_PQ_UA(s,x,lnP,lnQ)
+    IMPLICIT NONE
+    REAL*8, INTENT(IN) :: s,x
+    REAL*8, INTENT(OUT) :: lnP,lnQ
+    INTEGER :: K,sgnRa
+    REAL*8 :: eta,lambda,u,lnSa,lnRa,sum
+    REAL*8 :: beta(0:32)
+    INTEGER, PARAMETER :: KMAX = 25
+    REAL*8, PARAMETER :: D(0:31) = &
+      (/  1.0000000000000000d+00,-3.3333333333333333d-01, 8.3333333333333333d-02, &
+         -1.4814814814814815d-02, 1.1574074074074074d-03, 3.5273368606701940d-04, &
+         -1.7875514403292181d-04, 3.9192631785224378d-05,-2.1854485106799922d-06, &
+         -1.8540622107151600d-06, 8.2967113409530860d-07,-1.7665952736826079d-07, &
+          6.7078535434014986d-09, 1.0261809784240308d-08,-4.3820360184533532d-09, &
+          9.1476995822367902d-10,-2.5514193994946250d-11,-5.8307721325504251d-11, &
+          2.4361948020667416d-11,-5.0276692801141756d-12, 1.1004392031956135d-13, &
+          3.3717632624009854d-13,-1.3923887224181621d-13, 2.8534893807047443d-14, &
+         -5.1391118342425726d-16,-1.9752288294349443d-15, 8.0995211567045613d-16, &
+         -1.6522531216398162d-16, 2.5305430097478884d-18, 1.1686939738559577d-17, &
+         -4.7700370498204848d-18, 9.6991260590562371d-19 /)
+    REAL*8, PARAMETER :: TWOPI = 6.2831853071795865d0   ! 2*Pi
+    REAL*8, PARAMETER :: LN2   = 0.69314718055994531d0  ! ln(2)
+    
+    ! Define ratio of x & s
+    lambda = x/s
+    
+    ! eta is defined as 1/2 eta^2 = lambda - 1 - ln(lambda) with
+    ! the same sign as lambda-1.  Use an expansion for lambda ~ 1
+    ! to avoid cancellation issues.  Rapid convergent of below
+    ! series in eta requires |eta| < 1, which corresponds to
+    ! 0.3017 < lambda < 2.3577.
+    u = lambda - 1
+    IF (ABS(u) .GT. 0.01d0) THEN
+      eta = SQRT(2*(lambda-1-LOG(lambda)))
+    ELSE
+      eta = u*(1+u*(-1d0/3d0+u*(7d0/36d0+u*(-73d0/540d0+u*(1331d0/12960d0)))))
+    END IF
+    IF (x .LT. s) eta = -eta
+    
+    ! Use erfc in eta*sqrt{s/2} as first approximation and calculate
+    ! correction term:
+    !   R_a(\eta) = e^{-1/2 s \eta^2} S_a(\eta) / sqrt{2\pi s}
+    ! where Sa(eta) can be given by an expansion in eta:
+    !   S_a(\eta) \approx a/(a+\beta_1) \Sum_{k=0}^N \beta_k \eta^k
+    ! The beta terms are dependent upon s and can be calculated using
+    ! a recursion relation.
+    beta(KMAX+2) = 0d0
+    beta(KMAX+1) = 0d0
+    sum = 0d0
+    DO K = KMAX,0,-1
+      beta(K) = (K+2)/s * beta(K+2) + D(K+1)
+      sum = beta(K) + eta*sum
+    END DO
+    IF (sum .GE. 0d0) THEN
+      sgnRa = +1
+    ELSE
+      sgnRa = -1
+    END IF
+    ! Assuming b_1 > -s, which seems to be the case.
+    ! Have not checked if LOG(sum) loses accuracy here....
+    lnSa = LOG(ABS(sum)) - LOGp1(beta(1)/s)
+    lnRa = -0.5d0*s*eta**2 + lnSa - 0.5d0*LOG(TWOPI*s)
+    
+    ! Formulas for P & Q always valid, but just calculate the
+    ! smaller one and use P+Q=1 for the other.
+    IF (x .LE. s) THEN
+      IF (sgnRa .GT. 0) THEN
+        lnP = LOG_DIFF(LOG_ERFC(-eta*SQRT(0.5d0*s))-LN2,lnRa)
+      ELSE
+        lnP = LOG_SUM(LOG_ERFC(-eta*SQRT(0.5d0*s))-LN2,lnRa)
+      END IF
+      lnQ = LOGp1(-EXP(lnP))
+    ELSE
+      IF (sgnRa .GT. 0) THEN
+        lnQ = LOG_SUM(LOG_ERFC(+eta*SQRT(0.5d0*s))-LN2,lnRa)
+      ELSE
+        lnQ = LOG_DIFF(LOG_ERFC(+eta*SQRT(0.5d0*s))-LN2,lnRa)
+      END IF
+      lnP = LOGp1(-EXP(lnQ))
+    END IF
+    
+  END SUBROUTINE
+  
 END SUBROUTINE
 
 
@@ -12835,53 +14632,121 @@ END SUBROUTINE
 ! different cases, but no check for integer overflow is performed
 ! for the final result.
 ! 
-ELEMENTAL FUNCTION BINOMIAL_COEFF(n,k) RESULT(z)
+ELEMENTAL FUNCTION BINOMIAL_COEFF(N,K) RESULT(Cnk)
   IMPLICIT NONE
-  INTEGER, INTENT(IN) :: n,k
-  INTEGER :: z
+  INTEGER, INTENT(IN) :: N,K
+  INTEGER :: Cnk
   INTEGER :: K0,J
-  ! Array of coefficients indexed by [K,N] for K <= N/2
-  INTEGER, PARAMETER :: BC_ARRAY(0:6,0:12) = RESHAPE(                   &
-    (/ 1,  0,  0,   0,   0,   0,   0,                                   & ! n=0
-       1,  1,  0,   0,   0,   0,   0,                                   & ! n=1
-       1,  2,  1,   0,   0,   0,   0,                                   & ! n=2
-       1,  3,  3,   1,   0,   0,   0,                                   & ! n=3
-       1,  4,  6,   4,   1,   0,   0,                                   & ! n=4
-       1,  5, 10,  10,   5,   1,   0,                                   & ! n=5
-       1,  6, 15,  20,  15,   6,   1,                                   & ! n=6
-       1,  7, 21,  35,  35,  21,   7,                                   & ! n=7
-       1,  8, 28,  56,  70,  56,  28,                                   & ! n=8
-       1,  9, 36,  84, 126, 126,  84,                                   & ! n=9
-       1, 10, 45, 120, 210, 252, 210,                                   & ! n=10
-       1, 11, 55, 165, 330, 462, 462,                                   & ! n=11
-       1, 12, 66, 220, 495, 792, 924  /),                               & ! n=12
-    (/7,13/) )
-  IF ((n .LT. k) .OR. (k .LT. 0)) THEN
-    z = -HUGE(n)
+  ! Array of binomial coefficients C(n,k).
+  ! For k <= n/2, coefficient is at index:
+  !    J = floor[(n+1)/2]*floor[(n+2)/2] + k + 1
+  ! For k > n/2, we will use C(n,k) = C(n,n-k).
+  INTEGER, PARAMETER :: NMAX_TAB = 30    ! Coefficients for N in [0,NMAX_TAB]
+  INTEGER, PARAMETER :: NC       = 256
+  INTEGER, PARAMETER :: BC_ARRAY(1:NC) =                                &
+    (/  1,1,1,2,1,3,1,4,6,1,5,10,1,6,15,20,1,7,21,35,1,8,28,56,70,1,9,  &  ! n=1-9
+        36,84,126,1,10,45,120,210,252,1,11,55,165,330,462,1,12,66,220,  &  ! n=9-12
+        495,792,924,1,13,78,286,715,1287,1716,1,14,91,364,1001,2002,    &  ! n=12-14
+        3003,3432,1,15,105,455,1365,3003,5005,6435,1,16,120,560,1820,   &  ! n=14-16
+        4368,8008,11440,12870,1,17,136,680,2380,6188,12376,19448,24310, &  ! n=16-17
+        1,18,153,816,3060,8568,18564,31824,43758,48620,1,19,171,969,    &  ! n=18-19
+        3876,11628,27132,50388,75582,92378,1,20,190,1140,4845,15504,    &  ! n=19-20
+        38760,77520,125970,167960,184756,1,21,210,1330,5985,20349,      &  ! n=20-21
+        54264,116280,203490,293930,352716,1,22,231,1540,7315,26334,     &  ! n=21-22
+        74613,170544,319770,497420,646646,705432,1,23,253,1771,8855,    &  ! n=22-23
+        33649,100947,245157,490314,817190,1144066,1352078,1,24,276,     &  ! n=23-24
+        2024,10626,42504,134596,346104,735471,1307504,1961256,2496144,  &  ! n=24
+        2704156,1,25,300,2300,12650,53130,177100,480700,1081575,        &  ! n=24-25
+        2042975,3268760,4457400,5200300,1,26,325,2600,14950,65780,      &  ! n=25-26
+        230230,657800,1562275,3124550,5311735,7726160,9657700,10400600, &  ! n=26
+        1,27,351,2925,17550,80730,296010,888030,2220075,4686825,        &  ! n=27
+        8436285,13037895,17383860,20058300,1,28,378,3276,20475,98280,   &  ! n=27-28
+        376740,1184040,3108105,6906900,13123110,21474180,30421755,      &  ! n=28
+        37442160,40116600,1,29,406,3654,23751,118755,475020,1560780,    &  ! n=28-29
+        4292145,10015005,20030010,34597290,51895935,67863915,77558760,  &  ! n=29
+        1,30,435,4060,27405,142506,593775,2035800,5852925,14307150,     &  ! n=30
+        30045015,54627300,86493225,119759850,145422675,155117520 /)        ! n=30
+  ! Largest N at each K0 = min[K,N-K] for which recursive method
+  ! below will not lead to overflow for 4-byte integers.
+  INTEGER, PARAMETER :: K0MAX = 14
+  INTEGER, PARAMETER :: NMAX_AT_K0(0:K0MAX) =                           &
+    (/  HUGE(1),HUGE(1),46341,1626,338,140,82,58,46,39,35,33,31,30,30 /)
+  ! Bad cases
+  IF ((N .LT. K) .OR. (K .LT. 0)) THEN
+    Cnk = -HUGE(N)
     !STOP 'ERROR: invalid binomial coefficient arguments (0 <= k <= n)'
     RETURN
   END IF
   ! Use (n k) = (n n-k)
-  K0 = MIN(k,n-k)
+  K0 = MIN(K,N-K)
   ! Use tabulated values for small n
-  IF (n .LE. 12) THEN
-    z = BC_ARRAY(K0,n)
+  IF (N .LE. NMAX_TAB) THEN
+    ! Parentheses are important: act as floor function
+    J = ((N+1)/2) * ((N+2)/2) + K0 + 1
+    Cnk = BC_ARRAY(J)
+    RETURN
   ! Use recursion: (n k) = n/k (n-1 k-1)
   ! Note overflow for large enough k and/or n.
   ! Below check should avoid all potential overflow cases for
   ! 4-byte integers.
-  ELSE IF (n*K0*K0 .LT. 2842) THEN
-    z = 1d0
-    DO J=1,K0
-      z = (z*(n-K0+J))/J
-    END DO
-  ! Use LogGamma for large arguments.
-  ! Loss of precision for very large N (> 20,000,000) and K = 1.  Other
-  ! cases seem to give full INTEGER*4 precision when not in an overflow
-  ! condition.
-  ELSE
-    z = NINT(EXP(LOG_GAMMA(n+1d0) - LOG_GAMMA(k+1d0) - LOG_GAMMA(n-k+1d0)))
+  ELSE IF (K0 .LE. K0MAX) THEN
+    IF (N .LE. NMAX_AT_K0(K0)) THEN
+      Cnk = 1
+      DO J=1,K0
+        Cnk = (Cnk*(N-K0+J))/J
+      END DO
+      RETURN
+    END IF
   END IF
+  ! Use LogGamma for large arguments.
+  ! Seems to give full INTEGER*4 precision when not in an
+  ! overflow condition.
+  Cnk = NINT(EXP(LOG_GAMMA(N+1d0) - LOG_GAMMA(K+1d0) - LOG_GAMMA(N-K+1d0)))
+END FUNCTION
+
+
+!-----------------------------------------------------------------------
+! Logarithm of binomial coefficient (n k) = n!/k!(n-k)! [double precision]
+! 
+ELEMENTAL FUNCTION LOG_BINOMIAL_COEFF(N,K) RESULT(lnCnk)
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: N,K
+  REAL*8 :: lnCnk
+  INTEGER :: Cnk,K0,J
+  INTEGER, PARAMETER :: NMAX_TAB = 30
+  ! Largest N at each K0 = min[K,N-K] for which recursive method
+  ! below will not lead to overflow for 4-byte integers.
+  INTEGER, PARAMETER :: K0MAX = 14
+  INTEGER, PARAMETER :: NMAX_AT_K0(0:K0MAX) =                           &
+    (/  HUGE(1),HUGE(1),46341,1626,338,140,82,58,46,39,35,33,31,30,30 /)
+  ! Bad cases
+  IF ((N .LT. K) .OR. (K .LT. 0)) THEN
+    lnCnk = -HUGE(N)
+    !STOP 'ERROR: invalid binomial coefficient arguments (0 <= k <= n)'
+    RETURN
+  END IF
+  ! Use (n k) = (n n-k)
+  K0 = MIN(K,N-K)
+  ! Get tabulated value from other routine
+  IF (N .LE. NMAX_TAB) THEN
+    lnCnk = LOG(1d0*BINOMIAL_COEFF(N,K))
+    RETURN
+  ! Use recursion: (n k) = n/k (n-1 k-1)
+  ! Note overflow for large enough k and/or n.
+  ! Below check should avoid all potential overflow cases for
+  ! 4-byte integers.
+  ELSE IF (K0 .LE. K0MAX) THEN
+    IF (N .LE. NMAX_AT_K0(K0)) THEN
+      Cnk = 1
+      DO J=1,K0
+        Cnk = (Cnk*(N-K0+J))/J
+      END DO
+      lnCnk = LOG(1d0*Cnk)
+      RETURN
+    END IF
+  END IF
+  ! Use LogGamma for large arguments.
+  lnCnk = LOG_GAMMA(N+1d0) - LOG_GAMMA(K+1d0) - LOG_GAMMA(N-K+1d0)
 END FUNCTION
 
 
@@ -13215,9 +15080,9 @@ END FUNCTION
 !   x           Value distributed normally
 !   xmin        Minimum of uniform values (optional, default is 0)
 !   xmax        Maximum of uniform values (optional, default is 1)
-ELEMENTAL FUNCTION UniformPDF(x,xmin,xmax)
+ELEMENTAL FUNCTION UniformPDF(x,xmin,xmax) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: UniformPDF
+  REAL*8 :: pdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax
   REAL*8 :: xmin0,xmax0
@@ -13232,9 +15097,9 @@ ELEMENTAL FUNCTION UniformPDF(x,xmin,xmax)
     xmax0 = 1d0
   END IF
   IF ((x .GE. xmin0) .AND. (x .LE. xmax0)) THEN
-    UniformPDF = 1d0 / (xmax0-xmin0)
+    pdf = 1d0 / (xmax0-xmin0)
   ELSE
-    UniformPDF = 0d0
+    pdf = 0d0
   END IF
 END FUNCTION UniformPDF
 
@@ -13243,9 +15108,9 @@ END FUNCTION UniformPDF
 !   x           Value distributed normally
 !   xmin        Minimum of uniform values (optional, default is 0)
 !   xmax        Maximum of uniform values (optional, default is 1)
-ELEMENTAL FUNCTION UniformLogPDF(x,xmin,xmax)
+ELEMENTAL FUNCTION UniformLogPDF(x,xmin,xmax) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: UniformLogPDF
+  REAL*8 :: lnpdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax
   REAL*8 :: xmin0,xmax0
@@ -13260,9 +15125,9 @@ ELEMENTAL FUNCTION UniformLogPDF(x,xmin,xmax)
     xmax0 = 1d0
   END IF
   IF ((x .GE. xmin0) .AND. (x .LE. xmax0)) THEN
-    UniformLogPDF = LOG(1d0 / (xmax0-xmin0))
+    lnpdf = LOG(1d0 / (xmax0-xmin0))
   ELSE
-    UniformLogPDF = -HUGE(1d0)
+    lnpdf = -HUGE(1d0)
   END IF
 END FUNCTION UniformLogPDF
 
@@ -13271,9 +15136,9 @@ END FUNCTION UniformLogPDF
 !   x           Value distributed normally
 !   xmin        Minimum of uniform values (optional, default is 0)
 !   xmax        Maximum of uniform values (optional, default is 1)
-ELEMENTAL FUNCTION UniformCDF(x,xmin,xmax)
+ELEMENTAL FUNCTION UniformCDF(x,xmin,xmax) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: UniformCDF
+  REAL*8 :: cdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax
   REAL*8 :: xmin0,xmax0
@@ -13288,11 +15153,11 @@ ELEMENTAL FUNCTION UniformCDF(x,xmin,xmax)
     xmax0 = 1d0
   END IF
   IF (x .LE. xmin0) THEN
-    UniformCDF = 0d0
+    cdf = 0d0
   ELSE IF (x .GE. xmax0) THEN
-    UniformCDF = 1d0
+    cdf = 1d0
   ELSE
-    UniformCDF = (x-xmin0) / (xmax0-xmin0)
+    cdf = (x-xmin0) / (xmax0-xmin0)
   END IF
 END FUNCTION UniformCDF
 
@@ -13301,9 +15166,9 @@ END FUNCTION UniformCDF
 !   x           Value distributed normally
 !   xmin        Minimum of uniform values (optional, default is 0)
 !   xmax        Maximum of uniform values (optional, default is 1)
-ELEMENTAL FUNCTION Uniform1mCDF(x,xmin,xmax)
+ELEMENTAL FUNCTION Uniform1mCDF(x,xmin,xmax) RESULT(p)
   IMPLICIT NONE
-  REAL*8 :: Uniform1mCDF
+  REAL*8 :: p
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax
   REAL*8 :: xmin0,xmax0
@@ -13318,11 +15183,11 @@ ELEMENTAL FUNCTION Uniform1mCDF(x,xmin,xmax)
     xmax0 = 1d0
   END IF
   IF (x .LE. xmin0) THEN
-    Uniform1mCDF = 1d0
+    p = 1d0
   ELSE IF (x .GE. xmax0) THEN
-    Uniform1mCDF = 0d0
+    p = 0d0
   ELSE
-    Uniform1mCDF = (xmax-x) / (xmax0-xmin0)
+    p = (xmax-x) / (xmax0-xmin0)
   END IF
 END FUNCTION Uniform1mCDF
 
@@ -13330,23 +15195,23 @@ END FUNCTION Uniform1mCDF
 ! Random number for uniform distribution
 !   xmin        Minimum of uniform values (optional, default is 0)
 !   xmax        Maximum of uniform values (optional, default is 1)
-FUNCTION RandUniform(xmin,xmax)
+FUNCTION RandUniform(xmin,xmax) RESULT(x)
   IMPLICIT NONE
-  REAL*8 :: RandUniform
+  REAL*8 :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax
   REAL*8 :: urand
   urand = rand()
   IF (PRESENT(xmin)) THEN
     IF (PRESENT(xmax)) THEN
-      RandUniform = xmin + urand*(xmax-xmin)
+      x = xmin + urand*(xmax-xmin)
     ELSE
-      RandUniform = xmin + urand*(1d0-xmin)
+      x = xmin + urand*(1d0-xmin)
     END IF
   ELSE
     IF (PRESENT(xmax)) THEN
-      RandUniform = urand*xmax
+      x = urand*xmax
     ELSE
-      RandUniform = urand
+      x = urand
     END IF
   END IF
 END FUNCTION RandUniform
@@ -13364,9 +15229,9 @@ END FUNCTION RandUniform
 !   x           Value distributed normally
 !   mu          Average (optional, default is 0)
 !   sigma       Standard deviation (optional, default is 1)
-ELEMENTAL FUNCTION NormalPDF(x,mu,sigma)
+ELEMENTAL FUNCTION NormalPDF(x,mu,sigma) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: NormalPDF
+  REAL*8 :: pdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
@@ -13377,9 +15242,9 @@ ELEMENTAL FUNCTION NormalPDF(x,mu,sigma)
     z = x
   END IF
   IF (PRESENT(sigma)) THEN
-    NormalPDF = EXP(-z**2/(2*sigma**2)) / (SQRT2PI*sigma)
+    pdf = EXP(-z**2/(2*sigma**2)) / (SQRT2PI*sigma)
   ELSE
-    NormalPDF = EXP(-z**2/2) / SQRT2PI
+    pdf = EXP(-z**2/2) / SQRT2PI
   END IF
 END FUNCTION NormalPDF
 
@@ -13388,9 +15253,9 @@ END FUNCTION NormalPDF
 !   x           Value distributed normally
 !   mu          Average (optional, default is 0)
 !   sigma       Standard deviation (optional, default is 1)
-ELEMENTAL FUNCTION NormalLogPDF(x,mu,sigma)
+ELEMENTAL FUNCTION NormalLogPDF(x,mu,sigma) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: NormalLogPDF
+  REAL*8 :: lnpdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
@@ -13401,9 +15266,9 @@ ELEMENTAL FUNCTION NormalLogPDF(x,mu,sigma)
     z = x
   END IF
   IF (PRESENT(sigma)) THEN
-    NormalLogPDF = -z**2/(2*sigma**2) - LOGSQRT2PI - LOG(sigma)
+    lnpdf = -z**2/(2*sigma**2) - LOGSQRT2PI - LOG(sigma)
   ELSE
-    NormalLogPDF = -z**2/2 - LOGSQRT2PI
+    lnpdf = -z**2/2 - LOGSQRT2PI
   END IF
 END FUNCTION NormalLogPDF
 
@@ -13412,9 +15277,9 @@ END FUNCTION NormalLogPDF
 !   x           Value distributed normally
 !   mu          Average (optional, default is 0)
 !   sigma       Standard deviation (optional, default is 1)
-ELEMENTAL FUNCTION NormalCDF(x,mu,sigma)
+ELEMENTAL FUNCTION NormalCDF(x,mu,sigma) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: NormalCDF
+  REAL*8 :: cdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
@@ -13429,7 +15294,7 @@ ELEMENTAL FUNCTION NormalCDF(x,mu,sigma)
   ELSE
     z = z / SQRT2
   END IF
-  NormalCDF = 0.5d0 * ERFC(-z)
+  cdf = 0.5d0 * ERFC(-z)
 END FUNCTION NormalCDF
 
 !----------------------------------------
@@ -13437,9 +15302,9 @@ END FUNCTION NormalCDF
 !   x           Value distributed normally
 !   mu          Average (optional, default is 0)
 !   sigma       Standard deviation (optional, default is 1)
-ELEMENTAL FUNCTION Normal1mCDF(x,mu,sigma)
+ELEMENTAL FUNCTION Normal1mCDF(x,mu,sigma) RESULT(p)
   IMPLICIT NONE
-  REAL*8 :: Normal1mCDF
+  REAL*8 :: p
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
@@ -13454,16 +15319,16 @@ ELEMENTAL FUNCTION Normal1mCDF(x,mu,sigma)
   ELSE
     z = z / SQRT2
   END IF
-  Normal1mCDF = 0.5d0 * ERFC(z)
+  p = 0.5d0 * ERFC(z)
 END FUNCTION Normal1mCDF
 
 !----------------------------------------
 ! Random number for normal distribution
 !   mu          Average (optional, default is 0)
 !   sigma       Standard deviation (optional, default is 1)
-FUNCTION RandNormal(mu,sigma)
+FUNCTION RandNormal(mu,sigma) RESULT(x)
   IMPLICIT NONE
-  REAL*8 :: RandNormal
+  REAL*8 :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: u,v,r2,w,urand(2),rand1
   REAL*8, SAVE :: rand2
@@ -13482,14 +15347,14 @@ FUNCTION RandNormal(mu,sigma)
     w = SQRT(-2d0 * LOG(r2) / r2)
     rand1 = u * w
     rand2 = v * w
-    RandNormal  = rand1
+    x = rand1
     needs_calc = .FALSE.
   ELSE
-    RandNormal = rand2
+    x = rand2
     needs_calc = .TRUE.
   END IF
-  IF (PRESENT(sigma)) RandNormal = sigma*RandNormal
-  IF (PRESENT(mu)) RandNormal = mu + RandNormal
+  IF (PRESENT(sigma)) x = sigma*x
+  IF (PRESENT(mu)) x = mu + x
 END FUNCTION RandNormal
 
 
@@ -13519,16 +15384,16 @@ END FUNCTION RandNormal
 !   x           Value distributed log-normally
 !   mu          Location (optional, default is 0)
 !   sigma       Scale (optional, default is 1)
-ELEMENTAL FUNCTION LogNormalPDF(x,mu,sigma)
+ELEMENTAL FUNCTION LogNormalPDF(x,mu,sigma) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: LogNormalPDF
+  REAL*8 :: pdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
   REAL*8, PARAMETER :: SQRT2PI = 2.5066282746310005d0
   ! Bad case
   IF (x .LE. 0d0) THEN
-    LogNormalPDF = -HUGE(1d0)
+    pdf = 0d0
     RETURN
   END IF
   IF (PRESENT(mu)) THEN
@@ -13537,9 +15402,9 @@ ELEMENTAL FUNCTION LogNormalPDF(x,mu,sigma)
     z = LOG(x)
   END IF
   IF (PRESENT(sigma)) THEN
-    LogNormalPDF = EXP(-z**2/(2*sigma**2)) / (SQRT2PI*sigma*x)
+    pdf = EXP(-z**2/(2*sigma**2)) / (SQRT2PI*sigma*x)
   ELSE
-    LogNormalPDF = EXP(-z**2/2) / (SQRT2PI*x)
+    pdf = EXP(-z**2/2) / (SQRT2PI*x)
   END IF
 END FUNCTION LogNormalPDF
 
@@ -13548,16 +15413,16 @@ END FUNCTION LogNormalPDF
 !   x           Value distributed normally
 !   mu          Average (optional, default is 0)
 !   sigma       Standard deviation (optional, default is 1)
-ELEMENTAL FUNCTION LogNormalLogPDF(x,mu,sigma)
+ELEMENTAL FUNCTION LogNormalLogPDF(x,mu,sigma) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: LogNormalLogPDF
+  REAL*8 :: lnpdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
   REAL*8, PARAMETER :: LOGSQRT2PI = 0.91893853320467274d0
   ! Bad case
   IF (x .LE. 0d0) THEN
-    LogNormalLogPDF = -HUGE(1d0)
+    lnpdf = -HUGE(1d0)
     RETURN
   END IF
   IF (PRESENT(mu)) THEN
@@ -13566,9 +15431,9 @@ ELEMENTAL FUNCTION LogNormalLogPDF(x,mu,sigma)
     z = LOG(x)
   END IF
   IF (PRESENT(sigma)) THEN
-    LogNormalLogPDF = -z**2/(2*sigma**2) - LOGSQRT2PI - LOG(x*sigma)
+    lnpdf = -z**2/(2*sigma**2) - LOGSQRT2PI - LOG(x*sigma)
   ELSE
-    LogNormalLogPDF = -z**2/2 - LOGSQRT2PI - LOG(x)
+    lnpdf = -z**2/2 - LOGSQRT2PI - LOG(x)
   END IF
 END FUNCTION LogNormalLogPDF
 
@@ -13577,16 +15442,16 @@ END FUNCTION LogNormalLogPDF
 !   x           Value distributed log-normally
 !   mu          Location (optional, default is 0)
 !   sigma       Scale (optional, default is 1)
-ELEMENTAL FUNCTION LogNormalCDF(x,mu,sigma)
+ELEMENTAL FUNCTION LogNormalCDF(x,mu,sigma) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: LogNormalCDF
+  REAL*8 :: cdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
   REAL*8, PARAMETER :: SQRT2 = 1.4142135623730950d0
   ! Bad case
   IF (x .LE. 0d0) THEN
-    LogNormalCDF = -HUGE(1d0)
+    cdf = 0d0
     RETURN
   END IF
   IF (PRESENT(mu)) THEN
@@ -13599,7 +15464,7 @@ ELEMENTAL FUNCTION LogNormalCDF(x,mu,sigma)
   ELSE
     z = LOG(z) / SQRT2
   END IF
-  LogNormalCDF = 0.5d0 * ERFC(-z)
+  cdf = 0.5d0 * ERFC(-z)
 END FUNCTION LogNormalCDF
 
 !----------------------------------------
@@ -13607,16 +15472,16 @@ END FUNCTION LogNormalCDF
 !   x           Value distributed log-normally
 !   mu          Location (optional, default is 0)
 !   sigma       Scale (optional, default is 1)
-ELEMENTAL FUNCTION LogNormal1mCDF(x,mu,sigma)
+ELEMENTAL FUNCTION LogNormal1mCDF(x,mu,sigma) RESULT(p)
   IMPLICIT NONE
-  REAL*8 :: LogNormal1mCDF
+  REAL*8 :: p
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: z
   REAL*8, PARAMETER :: SQRT2 = 1.4142135623730950d0
   ! Bad case
   IF (x .LE. 0d0) THEN
-    LogNormal1mCDF = -HUGE(1d0)
+    p = 1d0
     RETURN
   END IF
   IF (PRESENT(mu)) THEN
@@ -13629,22 +15494,22 @@ ELEMENTAL FUNCTION LogNormal1mCDF(x,mu,sigma)
   ELSE
     z = LOG(z) / SQRT2
   END IF
-  LogNormal1mCDF = 0.5d0 * ERFC(z)
+  p = 0.5d0 * ERFC(z)
 END FUNCTION LogNormal1mCDF
 
 !----------------------------------------
 ! Random number for log normal distribution
 !   mu          Location (optional, default is 0)
 !   sigma       Scale (optional, default is 1)
-FUNCTION RandLogNormal(mu,sigma)
+FUNCTION RandLogNormal(mu,sigma) RESULT(x)
   IMPLICIT NONE
-  REAL*8 :: RandLogNormal
-  REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
   REAL*8 :: x
-  x = RandNormal()
-  IF (PRESENT(sigma)) x = sigma*x
-  IF (PRESENT(mu)) x = mu + x
-  RandLogNormal = EXP(x)
+  REAL*8, INTENT(IN), OPTIONAL :: mu,sigma
+  REAL*8 :: xn
+  xn = RandNormal()
+  IF (PRESENT(sigma)) xn = sigma*xn
+  IF (PRESENT(mu)) xn = mu + xn
+  x = EXP(xn)
 END FUNCTION RandLogNormal
 
 
@@ -13663,9 +15528,9 @@ END FUNCTION RandLogNormal
 !   xmin        Minimum value (optional, default is 0)
 !   xmax        Maximum value (optional, default is infinity)
 !   xs          The exponential scale (optional, default is 1)
-ELEMENTAL FUNCTION ExponentialPDF(x,xmin,xmax,xs)
+ELEMENTAL FUNCTION ExponentialPDF(x,xmin,xmax,xs) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: ExponentialPDF
+  REAL*8 :: pdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax,xs
   REAL*8 :: xmin0,xmax0
@@ -13680,19 +15545,17 @@ ELEMENTAL FUNCTION ExponentialPDF(x,xmin,xmax,xs)
     xmax0 = HUGE(1d0)
   END IF
   IF ((x .LT. xmin0) .OR. (x .GT. xmax0)) THEN
-    ExponentialPDF = 0d0
+    pdf = 0d0
     RETURN
   END IF
   IF (PRESENT(xs)) THEN
     IF (xs .EQ. 0d0) THEN
-      ExponentialPDF = 1d0 / (xmax0-xmin0)
+      pdf = 1d0 / (xmax0-xmin0)
     ELSE
-      ExponentialPDF = EXP((xmin0-x)/xs)    &
-                       / (1d0 - EXP((xmin0-xmax0)/xs))    &
-                       / xs
+      pdf = EXP((xmin0-x)/xs) / (1d0 - EXP((xmin0-xmax0)/xs)) / xs
     END IF
   ELSE
-    ExponentialPDF = EXP(xmin0-x) / (1d0 - EXP(xmin0-xmax0))
+    pdf = EXP(xmin0-x) / (1d0 - EXP(xmin0-xmax0))
   END IF
 END FUNCTION ExponentialPDF
 
@@ -13702,9 +15565,9 @@ END FUNCTION ExponentialPDF
 !   xmin        Minimum value (optional, default is 0)
 !   xmax        Maximum value (optional, default is infinity)
 !   xs          The exponential scale (optional, default is 1)
-ELEMENTAL FUNCTION ExponentialLogPDF(x,xmin,xmax,xs)
+ELEMENTAL FUNCTION ExponentialLogPDF(x,xmin,xmax,xs) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: ExponentialLogPDF
+  REAL*8 :: lnpdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax,xs
   REAL*8 :: xmin0,xmax0
@@ -13719,19 +15582,17 @@ ELEMENTAL FUNCTION ExponentialLogPDF(x,xmin,xmax,xs)
     xmax0 = HUGE(1d0)
   END IF
   IF ((x .LT. xmin0) .OR. (x .GT. xmax0)) THEN
-    ExponentialLogPDF = -HUGE(1d0)
+    lnpdf = -HUGE(1d0)
     RETURN
   END IF
   IF (PRESENT(xs)) THEN
     IF (xs .EQ. 0d0) THEN
-      ExponentialLogPDF = LOG(1d0 / (xmax0-xmin0))
+      lnpdf = LOG(1d0 / (xmax0-xmin0))
     ELSE
-      ExponentialLogPDF = EXP((xmin0-x)/xs)    &
-                          - LOG(1d0 - EXP((xmin0-xmax0)/xs))    &
-                          - LOG(xs)
+      lnpdf = (xmin0-x)/xs - LOGp1(-EXP((xmin0-xmax0)/xs)) - LOG(xs)
     END IF
   ELSE
-    ExponentialLogPDF = (xmin0-x) - LOG(1d0 - EXP(xmin0-xmax0))
+    lnpdf = (xmin0-x) - LOGp1(-EXP(xmin0-xmax0))
   END IF
 END FUNCTION ExponentialLogPDF
 
@@ -13741,9 +15602,9 @@ END FUNCTION ExponentialLogPDF
 !   xmin        Minimum value (optional, default is 0)
 !   xmax        Maximum value (optional, default is infinity)
 !   xs          The exponential scale (optional, default is 1)
-ELEMENTAL FUNCTION ExponentialCDF(x,xmin,xmax,xs)
+ELEMENTAL FUNCTION ExponentialCDF(x,xmin,xmax,xs) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: ExponentialCDF
+  REAL*8 :: cdf
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax,xs
   REAL*8 :: xmin0,xmax0
@@ -13758,21 +15619,20 @@ ELEMENTAL FUNCTION ExponentialCDF(x,xmin,xmax,xs)
     xmax0 = HUGE(1d0)
   END IF
   IF (x .LE. xmin0) THEN
-    ExponentialCDF = 0d0
+    cdf = 0d0
   ELSE IF (x .GE. xmax0) THEN
-    ExponentialCDF = 1d0
+    cdf = 1d0
   ELSE
     IF (PRESENT(xs)) THEN
       IF (xs .EQ. 0d0) THEN
-        ExponentialCDF = (x-xmin0) / (xmax0-xmin0)
+        cdf = (x-xmin0) / (xmax0-xmin0)
       ELSE
-        !ExponentialCDF = (1d0 - EXP((xmin0-x)/xs))    &
-        !                 / (1d0 - EXP((xmin0-xmax0)/xs))
-        ExponentialCDF = EXPm1((xmin0-x)/xs) / EXPm1((xmin0-xmax0)/xs)
+        !cdf = (1d0 - EXP((xmin0-x)/xs)) / (1d0 - EXP((xmin0-xmax0)/xs))
+        cdf = EXPm1((xmin0-x)/xs) / EXPm1((xmin0-xmax0)/xs)
       END IF
     ELSE
-      !ExponentialCDF = (1d0 - EXP(xmin0-x)) / (1d0 - EXP(xmin0-xmax0))
-      ExponentialCDF = EXPm1(xmin0-x) / EXPm1(xmin0-xmax0)
+      !cdf = (1d0 - EXP(xmin0-x)) / (1d0 - EXP(xmin0-xmax0))
+      cdf = EXPm1(xmin0-x) / EXPm1(xmin0-xmax0)
     END IF
   END IF
 END FUNCTION ExponentialCDF
@@ -13783,9 +15643,9 @@ END FUNCTION ExponentialCDF
 !   xmin        Minimum value (optional, default is 0)
 !   xmax        Maximum value (optional, default is infinity)
 !   xs          The exponential scale (optional, default is 1)
-ELEMENTAL FUNCTION Exponential1mCDF(x,xmin,xmax,xs)
+ELEMENTAL FUNCTION Exponential1mCDF(x,xmin,xmax,xs) RESULT(p)
   IMPLICIT NONE
-  REAL*8 :: Exponential1mCDF
+  REAL*8 :: p
   REAL*8, INTENT(IN) :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax,xs
   REAL*8 :: xmin0,xmax0
@@ -13800,21 +15660,20 @@ ELEMENTAL FUNCTION Exponential1mCDF(x,xmin,xmax,xs)
     xmax0 = HUGE(1d0)
   END IF
   IF (x .LE. xmin0) THEN
-    Exponential1mCDF = 1d0
+    p = 1d0
   ELSE IF (x .GE. xmax0) THEN
-    Exponential1mCDF = 0d0
+    p = 0d0
   ELSE
     IF (PRESENT(xs)) THEN
       IF (xs .EQ. 0d0) THEN
-        Exponential1mCDF = (xmax0-x) / (xmax0-xmin0)
+        p = (xmax0-x) / (xmax0-xmin0)
       ELSE
-        !Exponential1mCDF = (EXP((xmax0-x)/xs) - 1d0)    &
-        !                 / (EXP((xmax0-xmin0)/xs) - 1d0)
-        Exponential1mCDF = EXPm1((xmax0-x)/xs) / EXPm1((xmax0-xmin0)/xs)
+        !p = (EXP((xmax0-x)/xs) - 1d0) / (EXP((xmax0-xmin0)/xs) - 1d0)
+        p = EXPm1((xmax0-x)/xs) / EXPm1((xmax0-xmin0)/xs)
       END IF
     ELSE
-      !Exponential1mCDF = (EXP(xmax0-x) - 1d0) / (EXP(xmax0-xmin0) - 1d0)
-      Exponential1mCDF = EXPm1(xmax0-x) / EXPm1(xmax0-xmin0)
+      !p = (EXP(xmax0-x) - 1d0) / (EXP(xmax0-xmin0) - 1d0)
+      p = EXPm1(xmax0-x) / EXPm1(xmax0-xmin0)
     END IF
   END IF
 END FUNCTION Exponential1mCDF
@@ -13824,9 +15683,9 @@ END FUNCTION Exponential1mCDF
 !   xmin        Minimum value (optional, default is 0)
 !   xmax        Maximum value (optional, default is infinity)
 !   xs          The exponential scale (optional, default is 1)
-FUNCTION RandExponential(xmin,xmax,xs)
+FUNCTION RandExponential(xmin,xmax,xs) RESULT(x)
   IMPLICIT NONE
-  REAL*8 :: RandExponential
+  REAL*8 :: x
   REAL*8, INTENT(IN), OPTIONAL :: xmin,xmax,xs
   REAL*8 :: xmin0,xmax0
   REAL*8 :: urand
@@ -13843,12 +15702,12 @@ FUNCTION RandExponential(xmin,xmax,xs)
   END IF
   IF (PRESENT(xs)) THEN
     IF (xs .EQ. 0d0) THEN
-      RandExponential = xmin0 + urand*(xmax0-xmin0)
+      x = xmin0 + urand*(xmax0-xmin0)
     ELSE
-      RandExponential = xmin0 - xs*LOG(1d0 - urand*(1d0-EXP((xmin0-xmax0)/xs)))
+      x = xmin0 - xs*LOG(1d0 - urand*(1d0-EXP((xmin0-xmax0)/xs)))
     END IF
   ELSE
-    RandExponential = xmin0 - LOG(1d0 - urand*(1d0-EXP(xmin0-xmax0)))
+    x = xmin0 - LOG(1d0 - urand*(1d0-EXP(xmin0-xmax0)))
   END IF
 END FUNCTION RandExponential
 
@@ -13862,16 +15721,15 @@ END FUNCTION RandExponential
 ! Probability for chi-square distribution
 !   x           Value chi-square distributed
 !   k           Degrees of freedom
-ELEMENTAL FUNCTION ChiSquarePDF(x,k)
+ELEMENTAL FUNCTION ChiSquarePDF(x,k) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: ChiSquarePDF
+  REAL*8 :: pdf
   REAL*8, INTENT(IN) :: x
   INTEGER, INTENT(IN) :: k
   IF (x .GE. 0d0) THEN
-    ChiSquarePDF = x**(0.5d0*k - 1) * EXP(-0.5d0*x)                     &
-                   / ( 2**(0.5d0*k) * GAMMA(0.5d0*k) )
+    pdf = x**(0.5d0*k-1) * EXP(-0.5d0*x) / (2**(0.5d0*k)*GAMMA(0.5d0*k))
   ELSE
-    ChiSquarePDF = 0d0
+    pdf = 0d0
   END IF
 END FUNCTION ChiSquarePDF
 
@@ -13879,17 +15737,17 @@ END FUNCTION ChiSquarePDF
 ! Log of probability for chi-square distribution
 !   x           Value chi-square distributed
 !   k           Degrees of freedom
-ELEMENTAL FUNCTION ChiSquareLogPDF(x,k)
+ELEMENTAL FUNCTION ChiSquareLogPDF(x,k) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: ChiSquareLogPDF
+  REAL*8 :: lnpdf
   REAL*8, INTENT(IN) :: x
   INTEGER, INTENT(IN) :: k
   REAL*8, PARAMETER :: LOG2 = 0.69314718055994531d0
   IF (x .GE. 0d0) THEN
-    ChiSquareLogPDF = (0.5d0*k - 1)*LOG(x) - 0.5d0*x                    &
-                      - (0.5d0*k)*LOG2 - LOG_GAMMA(0.5d0*k)
+    lnpdf = (0.5d0*k-1)*LOG(x) - 0.5d0*x                                &
+            - (0.5d0*k)*LOG2 - LOG_GAMMA(0.5d0*k)
   ELSE
-    ChiSquareLogPDF = 0d0
+    lnpdf = 0d0
   END IF
 END FUNCTION ChiSquareLogPDF
 
@@ -13897,53 +15755,47 @@ END FUNCTION ChiSquareLogPDF
 ! CDF for chi-square distribution
 !   x           Value chi-square distributed
 !   k           Degrees of freedom
-FUNCTION ChiSquareCDF(x,k)
-!ELEMENTAL FUNCTION ChiSquareCDF(x,k)
+ELEMENTAL FUNCTION ChiSquareCDF(x,k) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: ChiSquareCDF
+  REAL*8 :: cdf
   REAL*8, INTENT(IN) :: x
   INTEGER, INTENT(IN) :: k
   IF (x .GE. 0d0) THEN
     ! Regularized gamma function P(k/2,x/2)
-    !ChiSquareCDF = LIGAMMA(0.5d0*k,0.5d0*x) / GAMMA(0.5d0*k)
+    cdf = GAMMA_P(0.5d0*k,0.5d0*x)
   ELSE
-    ChiSquareCDF = 0d0
+    cdf = 0d0
   END IF
-  WRITE(*,*) 'ERROR: ChiSquareCDF not implemented (LIGAMMA)'
-  STOP
 END FUNCTION ChiSquareCDF
 
 !----------------------------------------
 ! 1-CDF for chi-square distribution
 !   x           Value chi-square distributed
 !   k           Degrees of freedom
-FUNCTION ChiSquare1mCDF(x,k)
-!ELEMENTAL FUNCTION ChiSquare1mCDF(x,k)
+ELEMENTAL FUNCTION ChiSquare1mCDF(x,k) RESULT(p)
   IMPLICIT NONE
-  REAL*8 :: ChiSquare1mCDF
+  REAL*8 :: p
   REAL*8, INTENT(IN) :: x
   INTEGER, INTENT(IN) :: k
   IF (x .GE. 0d0) THEN
-    ! Regularized gamma function P(k/2,x/2)
-    !ChiSquare1mCDF = UIGAMMA(0.5d0*k,0.5d0*x) / GAMMA(0.5d0*k)
+    ! Regularized gamma function Q(k/2,x/2)
+    p = GAMMA_Q(0.5d0*k,0.5d0*x)
   ELSE
-    ChiSquare1mCDF = 0d0
+    p = 1d0
   END IF
-  WRITE(*,*) 'ERROR: ChiSquare1mCDF not implemented (UIGAMMA)'
-  STOP
 END FUNCTION ChiSquare1mCDF
 
 !----------------------------------------
 ! Random number for normal distribution
 !   k           Degrees of freedom
-FUNCTION RandChiSquare(k)
+FUNCTION RandChiSquare(k) RESULT(x)
   IMPLICIT NONE
-  REAL*8 :: RandChiSquare
-  INTEGER, INTENT(IN) :: k
   REAL*8 :: x
-  x = rand()
-  !RandChiSquare = REDUCEDGAMMAINV(0.5d0*k,x)
-  RandChiSquare = -1d0
+  INTEGER, INTENT(IN) :: k
+  REAL*8 :: u
+  u = rand()
+  !x = REDUCEDGAMMAINV(0.5d0*k,u)
+  x = -1d0
   WRITE(*,*) 'ERROR: RandChiSquare not implemented (REDUCEDGAMMAINV)'
   STOP
 END FUNCTION RandChiSquare
@@ -13958,200 +15810,161 @@ END FUNCTION RandChiSquare
 ! Probability for Poisson distribution
 !   N           Number Poisson distributed
 !   mu          Average
-ELEMENTAL FUNCTION PoissonPDF(N,mu)
+ELEMENTAL FUNCTION PoissonPDF(N,mu) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: PoissonPDF
+  REAL*8 :: pdf
   INTEGER, INTENT(IN) :: N
   REAL*8, INTENT(IN) :: mu
-  REAL*8, PARAMETER :: MUMAX = 100.0
-  REAL*8, PARAMETER :: SQRT2PI = 2.5066282746310005d0
-  INTEGER :: I
   ! Bad cases
-  IF ((N .LT. 0) .OR. (mu .LT. 0d0)) THEN
-    PoissonPDF = -HUGE(1d0)
+  IF (N .LT. 0) THEN
+    pdf = 0d0
+    RETURN
+  ELSE IF (mu .LT. 0d0) THEN
+    pdf = -HUGE(1d0)
     RETURN
   END IF
   ! Catch special case mu = 0
-  IF (mu .EQ. 0.0) THEN
+  IF (mu .EQ. 0d0) THEN
     IF (N .EQ. 0) THEN
-      PoissonPDF = 1d0
+      pdf = 1d0
     ELSE
-      PoissonPDF = 0d0
+      pdf = 0d0
     END IF
     RETURN
   END IF
-  ! Large mu limit: normal distribution with mean mu and
-  ! variance mu
-  IF (mu .GT. MUMAX) THEN
-    PoissonPDF = NormalPDF(1d0*N,mu,SQRT(mu))
-    RETURN
-  END IF
   ! General case
-  !PoissonPDF = EXP(-mu)
-  !DO I = 1,N
-  !  PoissonPDF = PoissonPDF * mu / I
-  !END DO
-  PoissonPDF = EXP(-mu) * mu**N / EXP(LOG_GAMMA(N+1d0))
+  pdf = EXP(-mu + N*LOG(mu) - LOG_GAMMA(N+1d0))
 END FUNCTION PoissonPDF
 
 !----------------------------------------
 ! Log of probability for Poisson distribution
 !   N           Number Poisson distributed
 !   mu          Average
-ELEMENTAL FUNCTION PoissonLogPDF(N,mu)
+ELEMENTAL FUNCTION PoissonLogPDF(N,mu) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: PoissonLogPDF
+  REAL*8 :: lnpdf
   INTEGER, INTENT(IN) :: N
   REAL*8, INTENT(IN) :: mu
-  REAL*8, PARAMETER :: MUMAX = 100.0
-  REAL*8, PARAMETER :: SQRT2PI = 2.5066282746310005d0
-  INTEGER :: I
-  REAL*8 :: fact
   ! Bad cases
   IF ((N .LT. 0) .OR. (mu .LT. 0d0)) THEN
-    PoissonLogPDF = -HUGE(1d0)
+    lnpdf = -HUGE(1d0)
     RETURN
   END IF
   ! Catch special case mu = 0
-  IF (mu .EQ. 0.0) THEN
+  IF (mu .EQ. 0d0) THEN
     IF (N .EQ. 0) THEN
-      PoissonLogPDF = 0d0
+      lnpdf = 0d0
     ELSE
-      PoissonLogPDF = -HUGE(1d0)
+      lnpdf = -HUGE(1d0)
     END IF
     RETURN
   END IF
-  ! Large mu limit: normal distribution with mean mu and
-  ! variance mu
-  IF (mu .GT. MUMAX) THEN
-    PoissonLogPDF = NormalLogPDF(1d0*N,mu,SQRT(mu))
-    RETURN
-  END IF
   ! General case
-  !fact = 1d0
-  !DO I = 1,N
-  !  fact = fact*I
-  !END DO
-  !PoissonLogPDF = -mu + N*LOG(mu) - LOG(fact)
-  PoissonLogPDF = -mu + N*LOG(mu) - LOG_GAMMA(N+1d0)
+  lnpdf = -mu + N*LOG(mu) - LOG_GAMMA(N+1d0)
 END FUNCTION PoissonLogPDF
 
 !----------------------------------------
 ! CDF for Poisson distribution
 !   N           Number Poisson distributed
 !   mu          Average
-ELEMENTAL FUNCTION PoissonCDF(N,mu)
+ELEMENTAL FUNCTION PoissonCDF(N,mu) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: PoissonCDF
+  REAL*8 :: cdf
   INTEGER, INTENT(IN) :: N
   REAL*8, INTENT(IN) :: mu
-  REAL*8, PARAMETER :: MUMAX = 100.0
-  REAL*8, PARAMETER :: SQRT2PI = 2.5066282746310005d0
-  REAL*8 :: pdf
-  INTEGER :: I
   ! Bad cases
-  IF ((N .LT. 0) .OR. (mu .LT. 0d0)) THEN
-    PoissonCDF = -HUGE(1d0)
+  IF (N .LT. 0) THEN
+    cdf = 0d0
+    RETURN
+  ELSE IF (mu .LT. 0d0) THEN
+    cdf = -HUGE(1d0)
     RETURN
   END IF
   ! Catch special case mu = 0
-  IF (mu .EQ. 0.0) THEN
-    PoissonCDF = 1d0
-    RETURN
-  END IF
-  ! Large mu limit: normal distribution with mean mu and
-  ! variance mu
-  ! Continuity correction applied
-  IF (mu .GT. MUMAX) THEN
-    PoissonCDF = NormalCDF(1d0*N+0.5d0,mu,SQRT(mu))
+  IF (mu .EQ. 0d0) THEN
+    cdf = 1d0
     RETURN
   END IF
   ! General case
-  ! Note cdf = RegularizedGamma[N+1,mu]
-  pdf = EXP(-mu)
-  PoissonCDF = pdf
-  DO I = 1,N
-    pdf = pdf * mu / I
-    PoissonCDF = PoissonCDF + pdf
-  END DO
+  ! Regularized gamma function Q(N+1,mu)
+  cdf = GAMMA_Q(N+1d0,mu)
 END FUNCTION PoissonCDF
 
 !----------------------------------------
 ! 1-CDF for Poisson distribution
 !   N           Number Poisson distributed
 !   mu          Average
-ELEMENTAL FUNCTION Poisson1mCDF(N,mu)
+ELEMENTAL FUNCTION Poisson1mCDF(N,mu) RESULT(p)
   IMPLICIT NONE
-  REAL*8 :: Poisson1mCDF
+  REAL*8 :: p
   INTEGER, INTENT(IN) :: N
   REAL*8, INTENT(IN) :: mu
-  REAL*8, PARAMETER :: MUMAX = 100.0
-  REAL*8, PARAMETER :: SQRT2PI = 2.5066282746310005d0
-  REAL*8 :: pdf
-  INTEGER :: I
   ! Bad cases
-  IF ((N .LT. 0) .OR. (mu .LT. 0d0)) THEN
-    Poisson1mCDF = -HUGE(1d0)
+  IF (N .LT. 0) THEN
+    p = 1d0
+    RETURN
+  ELSE IF (mu .LT. 0d0) THEN
+    p = -HUGE(1d0)
     RETURN
   END IF
   ! Catch special case mu = 0
-  IF (mu .EQ. 0.0) THEN
-    Poisson1mCDF = 0d0
-    RETURN
-  END IF
-  ! Large mu limit: normal distribution with mean mu and
-  ! variance mu
-  ! Continuity correction applied
-  IF (mu .GT. MUMAX) THEN
-    Poisson1mCDF = Normal1mCDF(1d0*N+0.5d0,mu,SQRT(mu))
+  IF (mu .EQ. 0d0) THEN
+    p = 0d0
     RETURN
   END IF
   ! General case
-  ! Note cdf = RegularizedGamma[N+1,mu]
-  pdf = EXP(-mu)
-  Poisson1mCDF = 0
-  DO WHILE (pdf .GE. EPSILON(pdf)*Poisson1mCDF)
-    pdf = pdf * mu / I
-    Poisson1mCDF = Poisson1mCDF + pdf
-  END DO
+  ! Regularized gamma function P(N+1,mu)
+  p = GAMMA_P(N+1d0,mu)
 END FUNCTION Poisson1mCDF
 
 !----------------------------------------
 ! Random number for Poisson distribution
 !   mu          Average
-FUNCTION RandPoisson(mu)
+FUNCTION RandPoisson(mu) RESULT(N)
   IMPLICIT NONE
-  INTEGER :: RandPoisson
+  INTEGER :: N
   REAL*8, INTENT(IN) :: mu
-  REAL*8 x,xsum,y
-  REAL*8, PARAMETER :: MUMAX = 100.0
-  INTEGER :: I
-  ! Large mu limit: normal distribution with mean mu and
-  ! variance mu (continuity correction applied)
-  IF (mu .GT. MUMAX) THEN
-    !x = mu + SQRT(2*mu) * INVERF(2*y-1)
-    x = mu + SQRT(mu) * RandNormal()
-    RandPoisson = NINT(x)
+  REAL*8 :: alpha,beta,k,c,u,u2,x,xsum,z
+  REAL*8, PARAMETER :: PI = 3.1415926535897932d0
+  ! Small mu case: simply iterate over terms.
+  IF (mu .LE. 40d0) THEN
+    u = rand()
+    N = 0
+    x = EXP(-mu)
+    xsum = x
+    DO WHILE (xsum .LT. u)
+      N = N+1
+      x = mu * x / N
+      xsum = xsum + x
+      ! Bad case: start over (can occur for u extremely
+      ! close to 1).  Note 1-CDF(102|mu=40) = 7e-17
+      ! => remaining terms too small.
+      IF (N .GT. 102) THEN
+        u = rand()
+        N = 0
+        x = EXP(-mu)
+        xsum = x
+      END IF
+    END DO
     RETURN
   END IF
-  ! General case
-  y = rand()
-  I = 0
-  x = EXP(-mu)
-  xsum = x
-  DO WHILE (xsum .LT. y)
-    I = I+1
-    x = mu * x / I
-    xsum = xsum + x
-    ! Bad case: start over (can occur for y extremely close to 1)
-    IF (I .GT. 2*MUMAX) THEN
-      y = rand()
-      I = 0
-      x = EXP(-mu)
-      xsum = x
+  ! Larger mu case: use rejection technique.
+  ! See Atkinson, Appl. Statist. 28, 29 (1979).
+  beta  = PI / SQRT(3*mu)
+  alpha = beta*mu
+  c = 0.767d0 - 3.36d0/mu
+  k = LOG(c/beta) - mu
+  DO WHILE (.TRUE.)
+    u = rand()
+    x = (alpha - LOG((1-u)/u)) / beta
+    N = NINT(x)
+    IF (N .LT. 0) CYCLE
+    u2 = rand()
+    z = alpha - beta*x
+    IF (z+LOG(u2/(1+EXP(z))**2) .LE. k+N*LOG(mu)-LOG_GAMMA(N+1d0)) THEN
+      RETURN
     END IF
   END DO
-  RandPoisson = I
 END FUNCTION RandPoisson
 
 
@@ -14165,65 +15978,47 @@ END FUNCTION RandPoisson
 !   k           Number of successful trials
 !   p           Probability of success for each trial
 !   N           Number of trials
-ELEMENTAL FUNCTION BinomialPDF(k,p,N)
+ELEMENTAL FUNCTION BinomialPDF(k,p,N) RESULT(pdf)
   IMPLICIT NONE
-  REAL*8 :: BinomialPDF
+  REAL*8 :: pdf
   INTEGER, INTENT(IN) :: k,N
   REAL*8, INTENT(IN) :: p
-  INTEGER, PARAMETER :: NMAX = 100
-  REAL*8, PARAMETER :: MUMAX = 20.0
-  REAL*8 :: p0,q0,mu,pq
-  INTEGER :: k0,I
-  
+  INTEGER :: k0
+  REAL*8 :: lnCnk
   ! Bad cases
   IF ((k .LT. 0) .OR. (k .GT. N)) THEN
-    BinomialPDF = -HUGE(1d0)
+    !pdf = -HUGE(pdf)
+    pdf = 0d0
     RETURN
   END IF
-  
-  ! Small N case
-  IF (N .LE. NMAX) THEN
-    ! Can write CDF(k|p,N) = CDF(N-k|1-p,N) = CDF(k0,p0,N)
-    ! Choose smaller of k or N-k to work with
-    IF (k .GT. N-k) THEN
-      p0 = 1-p
-      q0 = p
-      k0 = N-k
+  ! Special cases
+  IF (p .LE. 0d0) THEN
+    IF (k .EQ. 0) THEN
+      pdf = 1d0
     ELSE
-      p0 = p
-      q0 = 1-p
-      k0 = k
+      pdf = 0d0
     END IF
-    pq = p0*q0
-    BinomialPDF = 1d0
-    DO I=1,k0
-      BinomialPDF = BinomialPDF * (N-k0+I)*pq/I
-    END DO
-    BinomialPDF = BinomialPDF * q0**(N-2*k0)
-  ! Large N case
+    RETURN
+  ELSE IF (p .GE. 1d0) THEN
+    IF (k .EQ. N) THEN
+      pdf = 1d0
+    ELSE
+      pdf = 0d0
+    END IF
+    RETURN
+  END IF
+  ! General case
+  k0 = MIN(k,N-k)
+  IF (N .LE. 30) THEN
+    ! quick, exact for given condition
+    pdf = BINOMIAL_COEFF(N,k) * p**k * (1-p)**(N-k)
+  !ELSE IF (N .LE. 1000) THEN
+  !  lnCnk = LOG_GAMMA(N+1d0) - LOG_GAMMA(k+1d0) - LOG_GAMMA((N-k)+1d0)
+  !  pdf   = EXP(lnCnk) * p**k * (1-p)**(N-k)
+  ! Overflow/underflow issues for N ~ O(10^3)
   ELSE
-    ! Can write P(k|p,N) = P(N-k|1-p,N) = P(k0,p0,N)
-    ! Choose smaller of p or 1-p to work with
-    IF (p .GT. 0.5d0) THEN
-      p0 = 1-p
-      q0 = p
-      k0 = N-k
-    ELSE
-      p0 = p
-      q0 = 1-p
-      k0 = k
-    END IF
-    mu = N*p0
-    ! Large N, small N*p case:
-    ! Poisson distribution of average mu = N*p
-    IF (mu .LE. MUMAX) THEN
-      BinomialPDF = PoissonPDF(k0,mu)
-    ! Large N, non-small N*p case:
-    ! Normal distribution of average mu = N*p
-    ! and variance N*p*(1-p)
-    ELSE
-      BinomialPDF = NormalPDF(1d0*k0,mu,SQRT(N*p0*q0))
-    END IF
+    lnCnk = LOG_GAMMA(N+1d0) - LOG_GAMMA(k+1d0) - LOG_GAMMA((N-k)+1d0)
+    pdf   = EXP(lnCnk + k*LOG(p) + (N-k)*LOG(1-p))
   END IF
 END FUNCTION BinomialPDF
 
@@ -14232,67 +16027,43 @@ END FUNCTION BinomialPDF
 !   k           Number of successful trials
 !   p           Probability of success for each trial
 !   N           Number of trials
-ELEMENTAL FUNCTION BinomialLogPDF(k,p,N)
+ELEMENTAL FUNCTION BinomialLogPDF(k,p,N) RESULT(lnpdf)
   IMPLICIT NONE
-  REAL*8 :: BinomialLogPDF
+  REAL*8 :: lnpdf
   INTEGER, INTENT(IN) :: k,N
   REAL*8, INTENT(IN) :: p
-  INTEGER, PARAMETER :: NMAX = 100
-  REAL*8, PARAMETER :: MUMAX = 20.0
-  REAL*8 :: p0,q0,mu,pq,x
-  INTEGER :: k0,I
-  
+  INTEGER :: k0
+  REAL*8 :: lnCnk
   ! Bad cases
   IF ((k .LT. 0) .OR. (k .GT. N)) THEN
-    BinomialLogPDF = -HUGE(1d0)
+    lnpdf = -HUGE(1d0)
     RETURN
   END IF
-  
-  ! Small N case
-  IF (N .LE. NMAX) THEN
-    ! Can write CDF(k|p,N) = CDF(N-k|1-p,N) = CDF(k0,p0,N)
-    ! Choose smaller of k or N-k to work with
-    IF (k .GT. N-k) THEN
-      p0 = 1-p
-      q0 = p
-      k0 = N-k
+  ! Special cases
+  IF (p .LE. 0d0) THEN
+    IF (k .EQ. 0) THEN
+      lnpdf = 0d0
     ELSE
-      p0 = p
-      q0 = 1-p
-      k0 = k
+      lnpdf = -HUGE(1d0)
     END IF
-    pq = p0*q0
-    x = 1d0
-    DO I=1,k0
-      x = x * (N-k0+I)*pq/I
-    END DO
-    x = x * q0**(N-2*k0)
-    BinomialLogPDF = LOG(x)
-  ! Large N case
-  ELSE
-    ! Can write P(k|p,N) = P(N-k|1-p,N) = P(k0,p0,N)
-    ! Choose smaller of p or 1-p to work with
-    IF (p .GT. 0.5d0) THEN
-      p0 = 1-p
-      q0 = p
-      k0 = N-k
+    RETURN
+  ELSE IF (p .GE. 1d0) THEN
+    IF (k .EQ. N) THEN
+      lnpdf = 0d0
     ELSE
-      p0 = p
-      q0 = 1-p
-      k0 = k
+      lnpdf = -HUGE(1d0)
     END IF
-    mu = N*p0
-    ! Large N, small N*p case:
-    ! Poisson distribution of average mu = N*p
-    IF (mu .LE. MUMAX) THEN
-      BinomialLogPDF = PoissonLogPDF(k0,mu)
-    ! Large N, non-small N*p case:
-    ! Normal distribution of average mu = N*p
-    ! and variance N*p*(1-p)
-    ELSE
-      BinomialLogPDF = NormalLogPDF(1d0*k0,mu,SQRT(N*p0*q0))
-    END IF
+    RETURN
   END IF
+  ! General case
+  k0 = MIN(k,N-k)
+  IF (N .LE. 30) THEN
+    ! quick, exact for given condition
+    lnCnk = LOG_BINOMIAL_COEFF(N,k)
+  ELSE
+    lnCnk = LOG_GAMMA(N+1d0) - LOG_GAMMA(k+1d0) - LOG_GAMMA((N-k)+1d0)
+  END IF
+  lnpdf = lnCnk + k*LOG(p) +(N-k)*LOG(1-p)
 END FUNCTION BinomialLogPDF
 
 !----------------------------------------
@@ -14300,62 +16071,16 @@ END FUNCTION BinomialLogPDF
 !   k           Number of successful trials
 !   p           Probability of success for each trial
 !   N           Number of trials
-ELEMENTAL FUNCTION BinomialCDF(k,p,N)
+! NOTE: Not optimized for large N (scales as sqrt(N*p*q)).
+ELEMENTAL FUNCTION BinomialCDF(k,p,N) RESULT(cdf)
   IMPLICIT NONE
-  REAL*8 :: BinomialCDF
+  REAL*8 :: cdf
   INTEGER, INTENT(IN) :: k,N
   REAL*8, INTENT(IN) :: p
-  INTEGER, PARAMETER :: NMAX = 100
-  REAL*8, PARAMETER :: MUMAX = 20.0
-  REAL*8 :: p0,q0,mu,xI
-  INTEGER :: k0,I
-
-  ! Bad cases
-  IF (k .LT. 0) THEN
-    BinomialCDF = -HUGE(1d0)
-    RETURN
-  ELSE IF (k .GT. N) THEN
-    BinomialCDF = HUGE(1d0)
-    RETURN
-  END IF
-  
+  REAL*8 :: ltsum,gtsum,pdf
   ! Note cdf = BetaRegularized[1-p,N-k,k+1]
-  
-  ! Can write P(k|p,N) = P(N-k|1-p,N) = P(k0,p0,N)
-  ! Choose smaller of p or 1-p to work with
-  IF (p .GT. 0.5d0) THEN
-    p0 = 1-p
-    q0 = p
-    k0 = N-k
-  ELSE
-    p0 = p
-    q0 = 1-p
-    k0 = k
-  END IF
-  
-  ! Small N case
-  IF (N .LE. NMAX) THEN
-    xI = (1-p0)**N
-    BinomialCDF = xI
-    DO I=1,k0
-      xI = xI * ((N-I+1)*p0) / (I*q0)
-      BinomialCDF = BinomialCDF + xI
-    END DO
-  ! Large N case
-  ELSE
-    mu = N*p0
-    ! Large N, small N*p case:
-    ! Poisson distribution of average mu = N*p
-    IF (mu .LE. MUMAX) THEN
-      BinomialCDF = PoissonCDF(k0,mu)
-    ! Large N, non-small N*p case:
-    ! Normal distribution of average mu = N*p
-    ! and variance N*p*(1-p)
-    ! Continuity correction applied
-    ELSE
-      BinomialCDF = NormalCDF(1d0*k0+0.5d0,mu,SQRT(N*p0*q0))
-    END IF
-  END IF
+  CALL BinomialSums(k,p,N,ltsum,gtsum,pdf)
+  cdf = ltsum + pdf
 END FUNCTION BinomialCDF
 
 !----------------------------------------
@@ -14363,135 +16088,286 @@ END FUNCTION BinomialCDF
 !   k           Number of successful trials
 !   p           Probability of success for each trial
 !   N           Number of trials
-ELEMENTAL FUNCTION Binomial1mCDF(k,p,N)
+! NOTE: Not optimized for large N (scales as sqrt(N*p*q)).
+ELEMENTAL FUNCTION Binomial1mCDF(k,p,N) RESULT(sf)
   IMPLICIT NONE
-  REAL*8 :: Binomial1mCDF
+  REAL*8 :: sf
   INTEGER, INTENT(IN) :: k,N
   REAL*8, INTENT(IN) :: p
-  INTEGER, PARAMETER :: NMAX = 100
-  REAL*8, PARAMETER :: MUMAX = 20.0
-  REAL*8 :: p0,q0,mu,xI
-  INTEGER :: k0,I
+  REAL*8 :: ltsum,gtsum,pdf
+  ! Note cdf = BetaRegularized[1-p,N-k,k+1]
+  CALL BinomialSums(k,p,N,ltsum,gtsum,pdf)
+  sf = gtsum
+END FUNCTION Binomial1mCDF
 
+!----------------------------------------
+! Calculates various sums for binomial distribution.
+! Utility routine for CDF and 1-CDF calculations.
+!   k           Number of successful trials
+!   p           Probability of success for each trial
+!   N           Number of trials
+! Output:
+!   ltsum       Sum of PDFs for j=0,..,k-1
+!   gtsum       Sum of PDFs for j=k+1,..,N
+!   pdf         The PDF for k
+! NOTE: Not optimized for large N (scales as sqrt(N*p*q)).
+ELEMENTAL SUBROUTINE BinomialSums(k,p,N,ltsum,gtsum,pdf)
+  IMPLICIT NONE
+  REAL*8 :: cdf
+  INTEGER, INTENT(IN) :: k,N
+  REAL*8, INTENT(IN) :: p
+  REAL*8, INTENT(OUT) :: ltsum,gtsum,pdf
+  LOGICAL :: flipped
+  INTEGER :: k0,I
+  REAL*8 :: p0,q0,mu,xI,tmp
+  
   ! Bad cases
   IF (k .LT. 0) THEN
-    Binomial1mCDF = HUGE(1d0)
+    ltsum = 0d0
+    gtsum = 1d0
+    pdf   = 0d0
     RETURN
   ELSE IF (k .GT. N) THEN
-    Binomial1mCDF = -HUGE(1d0)
+    ltsum = 1d0
+    gtsum = 0d0
+    pdf   = 0d0
     RETURN
   END IF
   
-  ! Note 1-cdf = BetaRegularized[p,k+1,N-k]
-  
-  ! Can write P(k|p,N) = P(N-k|1-p,N) = P(k0,p0,N)
+  ! Can write CDF(k|p,N) = CDF(N-k|1-p,N) = CDF(k0,p0,N)
   ! Choose smaller of p or 1-p to work with
   IF (p .GT. 0.5d0) THEN
     p0 = 1-p
     q0 = p
     k0 = N-k
+    flipped = .TRUE.
   ELSE
     p0 = p
     q0 = 1-p
     k0 = k
+    flipped = .FALSE.
   END IF
+  mu = N*p0
   
-  ! Small N case
-  IF (N .LE. NMAX) THEN
-    xI = (1-p0)**N
-    Binomial1mCDF = xI
-    xI = EXP(LOG_GAMMA(N+1d0)-LOG_GAMMA(1d0*k0)-LOG_GAMMA(N-1d0*k0)) * p0**k0 * q0**(N-k0)
-    Binomial1mCDF = 0
-    I = k0
-    DO WHILE ((I .LE. N) .AND. (xI .GT. 1d-15*Binomial1mCDF))
-      xI = xI * ((N-I+1)*p0) / (I*q0)
-      Binomial1mCDF = Binomial1mCDF + xI
-    END DO
-  ! Large N case
-  ELSE
-    mu = N*p0
-    ! Large N, small N*p case:
-    ! Poisson distribution of average mu = N*p
-    IF (mu .LE. MUMAX) THEN
-      Binomial1mCDF = Poisson1mCDF(k0,mu)
-    ! Large N, non-small N*p case:
-    ! Normal distribution of average mu = N*p
-    ! and variance N*p*(1-p)
-    ! Continuity correction applied
+  ! Will find approximately smaller sum first.
+  ! Special cases.
+  IF (mu .EQ. 0d0) THEN
+    IF (k0 .EQ. 0) THEN
+      ltsum = 0d0
+      gtsum = 0d0
+      pdf   = 1d0
     ELSE
-      Binomial1mCDF = Normal1mCDF(1d0*k0+0.5d0,mu,SQRT(N*p0*q0))
+      ltsum = 1d0
+      gtsum = 0d0
+      pdf   = 0d0
     END IF
+  ELSE IF (k0 .EQ. 0) THEN
+    ltsum = 0d0
+    pdf   = q0**N
+    gtsum = 1d0 - pdf
+  ELSE IF (k0 .EQ. N) THEN
+    gtsum = 0d0
+    pdf   = p0**N
+    ltsum = 1d0 - pdf
+  ! Work our way down from k0.
+  ELSE IF (k0 .LE. mu) THEN
+    I  = k0
+    xI = EXP(LOG_BINOMIAL_COEFF(N,I) + I*LOG(p0) + (N-I)*LOG(q0))
+    pdf   = xI
+    ltsum = 0d0
+    DO WHILE ((I .GT. 0) .AND. (xI .GT. EPSILON(1d0)*ltsum))
+      I     = I-1
+      xI    = xI * ((I+1)*q0) / ((N-I)*p0)
+      ltsum = ltsum + xI
+    END DO
+    gtsum = 1d0 - pdf - ltsum
+  ! Work our way up from k0.
+  ELSE
+    I  = k0
+    xI = EXP(LOG_BINOMIAL_COEFF(N,I) + I*LOG(p0) + (N-I)*LOG(q0))
+    pdf   = xI
+    gtsum = 0d0
+    DO WHILE ((I .LT. N) .AND. (xI .GT. EPSILON(1d0)*gtsum))
+      I     = I+1
+      xI    = xI * ((N-I+1)*p0) / (I*q0)
+      gtsum = gtsum + xI
+    END DO
+    ltsum = 1d0 - pdf - gtsum
   END IF
-END FUNCTION Binomial1mCDF
+  ! reverse sums if we reversed p & q, k & N-k
+  IF (flipped) THEN
+    tmp   = ltsum
+    ltsum = gtsum
+    gtsum = tmp
+  END IF
+END SUBROUTINE BinomialSums
 
 !----------------------------------------
 ! Random number for binomial distribution
 !   p           Probability of success for each trial
 !   N           Number of trials
-FUNCTION RandBinomial(p,N)
+FUNCTION RandBinomial(p,N) RESULT(K)
   IMPLICIT NONE
-  INTEGER :: RandBinomial
+  INTEGER :: K
   INTEGER, INTENT(IN) :: N
   REAL*8, INTENT(IN) :: p
-  INTEGER, PARAMETER :: NMAX = 100
-  REAL*8, PARAMETER :: MUMAX = 20.0
+  REAL*8, PARAMETER :: MUMAX = 20d0
   LOGICAL :: flipped
-  REAL*8 :: p0,q0,mu,xI,y,sum
-  INTEGER :: I
-  
+  REAL*8 :: p0,mu
+  ! Bad/special cases
+  IF ((N .LT. 0) .OR. (p .LT. 0d0) .OR. (p .GT. 1d0)) THEN
+    K = -HUGE(K)
+    RETURN
+  ELSE IF (N .EQ. 0) THEN
+    K = 0
+    RETURN
+  END IF
   ! Can write P(k|p,N) = P(N-k|1-p,N) = P(k0,p0,N)
   ! Choose smaller of p or 1-p to work with
   IF (p .GT. 0.5d0) THEN
     p0 = 1-p
-    q0 = p
     flipped = .TRUE.
   ELSE
     p0 = p
-    q0 = 1-p
     flipped = .FALSE.
   END IF
-  
-  ! Small N case
-  IF (N .LE. NMAX) THEN
-    y = rand()
-    I  = 0
-    xI = q0**N
-    sum = xI
-    DO WHILE (sum .LT. y)
-      I = I+1
-      ! Bad case: start over (can occur for y extremely close to 1)
-      IF (I .GT. N) THEN
-        y = rand()
-        I = 0
-        xI = q0**N
-        sum = xI
-        CYCLE
-      END IF
-      xI  = xI * ((N-I+1)*p0) / (I*q0)
-      sum = sum + xI
-    END DO
-    RandBinomial = I
-  ! Large N case
+  mu = N*p0
+  ! Special case
+  IF (mu .EQ. 0d0) THEN
+    K = 0
+  ! Small mu case: iterative calculation faster
+  ELSE IF (mu .LE. MUMAX) THEN
+    K = IteratedK(p0,N)
+  ! Otherwise, use ~ constant time rejection algorithm
   ELSE
-    mu = N*p0
-    ! Large N, small N*p case:
-    ! Poisson distribution of average mu = N*p
-    IF (mu .LE. MUMAX) THEN
-      RandBinomial = RandPoisson(mu)
-      DO WHILE ((RandBinomial .LT. 0) .OR. (RandBinomial .GT. N))
-        RandBinomial = RandPoisson(mu)
+    K = RejectionK(p0,N)
+  END IF
+  IF (flipped) K = N - K
+  
+  CONTAINS
+  !-----------------------------
+  ! Use explicit iteration to find random K.
+  ! Assumes 0 < p <= 0.5 and N > 0.
+  FUNCTION IteratedK(p,N) RESULT(K)
+    IMPLICIT NONE
+    INTEGER :: K
+    INTEGER, INTENT(IN) :: N
+    REAL*8, INTENT(IN) :: p
+    REAL*8 :: q,mu,xK,y,sum
+    q  = 1-p
+    mu = N*p
+    y  = rand()
+    ! Work our way up from K=0
+    IF (y .LE. 0.9d0) THEN
+      K = NINT(mu - 9*SQRT(mu*q))
+      IF (K .LE. 0) THEN
+        K  = 0
+        xK = q**N
+      ELSE
+        xK = EXP(LOG_BINOMIAL_COEFF(N,K) + K*LOG(p) + (N-K)*LOG(q))
+      END IF
+      sum = xK
+      DO WHILE (sum .LT. y)
+        K   = K+1
+        xK  = xK * ((N-K+1)*p) / (K*q)
+        sum = sum + xK
       END DO
-    ! Large N, non-small N*p case:
-    ! Normal distribution of average mu = N*p
-    ! and variance N*p*(1-p)
+    ! Work backwards from tail
     ELSE
-      RandBinomial = NINT(RandNormal(mu,SQRT(N*p0*q0)))
-      DO WHILE ((RandBinomial .LT. 0) .OR. (RandBinomial .GT. N))
-        RandBinomial = NINT(RandNormal(mu,SQRT(N*p0*q0)))
+      y = 1-y
+      K = NINT(mu + 9*SQRT(mu*q))
+      IF (K .GE. N) THEN
+        K  = N
+        xK = p**N
+      ELSE
+        xK = EXP(LOG_BINOMIAL_COEFF(N,K) + K*LOG(p) + (N-K)*LOG(q))
+      END IF
+      sum = xk
+      DO WHILE (sum .LT. y)
+        K   = K-1
+        xK  = xK * ((K+1)*q) / ((N-K)*p)
+        sum = sum + xK
       END DO
     END IF
-  END IF
-  IF (flipped) RandBinomial = N - RandBinomial
+  END FUNCTION IteratedK
+  
+  !-----------------------------
+  ! Use rejection technique to find random K, as
+  ! described in Hormann, JSCS 46, 101 (1993).
+  ! Assumes 0 < p <= 0.5 and N > 0.
+  FUNCTION RejectionK(p,N) RESULT(K)
+    IMPLICIT NONE
+    INTEGER :: K
+    INTEGER, INTENT(IN) :: N
+    REAL*8, INTENT(IN) :: p
+    INTEGER :: M
+    REAL*8 :: q,mu,sd,r,a,b,c,alpha,ur,vr,urvr,u,v,lnf,lnf_accept
+    q  = 1-p
+    mu = N*p
+    ! Rejection technique: binomial density is proportional to
+    !   f(x) = Pb(floor(x)) / Pb(M) <= 1
+    ! where Pb is the binomial probability and  M = floor((N+1)*p0)
+    ! is the mode. Use dominating distribution with inverse
+    !   G(u) = (2alpha/(0.5-|u|) + b)*u + c
+    ! with u in [-0.5,0.5].  Appropriate choices of constants
+    ! determined by Hormann, JSCS 46, 101 (1993).
+    sd = SQRT(mu*q)
+    M = INT((N+1)*p)
+    r = p/q
+    c = mu + 0.5d0
+    b = 1.15d0 + 2.53d0*sd
+    a = -0.0873d0 + 0.0248d0*b + 0.01d0*p
+    alpha = (2.83d0 + 5.1d0/b) * sd
+    !ur = 0.43d0
+    vr = 0.92d0 - 4.2d0/b
+    urvr = 0.86d0*vr
+    ! Will generate point in u in [-0.5,0.5], v in [0,1].
+    ! Use a little magic to reduce number of uniform random
+    ! numbers needed (on average).
+    DO WHILE (.TRUE.)
+      v = rand()
+      ! Box: u in [-ur,ur], v in [0,vr].
+      ! Always accepted.  Uniform in [0,ur*vr] converted to
+      ! uniform in [-ur,ur], avoiding second random number.
+      IF (v .LE. urvr) THEN
+        u = v/vr - 0.43d0
+        K = FLOOR((2*a/(0.5d0-ABS(u))+b)*u+c)
+        EXIT
+      END IF
+      ! Outside of above box.  Two regions to consider:
+      ! 1) Point in v > vr.  Need random u (can keep v).
+      IF (v .GE. vr) THEN
+        u = rand() - 0.5d0
+      ! 2) Point in v < vr, u in [-0.5,-ur] or [ur,0.5].
+      ! Uniform in [2ur*vr,vr] converted to uniform in
+      ! [-0.5,-ur]+[ur,0.5].  Need random v in [0,vr].
+      ELSE
+        u = v/vr - 0.93d0
+        u = SIGN(0.5d0,u) - u
+        v = vr*rand()
+      END IF
+      ! Transform U to K = floor(G(U)).
+      K = FLOOR((2*a/(0.5d0-ABS(u))+b)*u+c)
+      IF ((K .LT. 0) .OR. (K .GT. N)) CYCLE
+      ! Acceptance condition: V < f(G(U)) G'(U) / alpha
+      ! where f(G(U)) = f(K).  Rewrite as:
+      !   alpha*V/G'(U) < f(G(U)) = f(K)
+      lnf_accept = LOG(alpha*v / (a/(0.5d0-ABS(u))**2+b))
+      ! Calculate f(K).
+      ! This step not terribly well optimized: could use recursion
+      ! for K ~ M, though LOG_GAMMA is fairly fast as an intrinsic.
+      IF (N .LE. 30) THEN
+        lnf = LOG_BINOMIAL_COEFF(N,K) - LOG_BINOMIAL_COEFF(N,M)         &
+              + (K-M)*LOG(r)
+      ELSE
+        lnf = LOG_GAMMA(M+1d0) + LOG_GAMMA((N-M)+1d0)                   &
+              - LOG_GAMMA(K+1d0) - LOG_GAMMA((N-K)+1d0)                 &
+              + (K-M)*LOG(r)
+      END IF
+      IF (lnf .GE. lnf_accept) EXIT
+    END DO
+  END FUNCTION RejectionK
+  
 END FUNCTION RandBinomial
 
 
@@ -14633,6 +16509,105 @@ PURE FUNCTION BSearch(N,x,x0,Istart) RESULT(index)
   index = Ilow
   
 END FUNCTION BSearch
+
+
+
+!=======================================================================
+! STRING UTILITY FUNCTIONS
+!=======================================================================
+
+! ----------------------------------------------------------------------
+! Changes string to uppercase.
+! 
+PURE SUBROUTINE ToUppercase(string)
+  IMPLICIT NONE
+  CHARACTER*(*), INTENT(INOUT) :: string
+  INTEGER, PARAMETER :: UA = ICHAR('A')
+  INTEGER, PARAMETER :: la = ICHAR('a')
+  INTEGER, PARAMETER :: UZ = ICHAR('Z')
+  INTEGER, PARAMETER :: lz = ICHAR('z')
+  INTEGER :: I,ival
+  
+  DO I = 1, LEN_TRIM(string)
+    ival = ICHAR(string(I:I))
+    IF ((ival .GE. la) .AND. (ival .LE. lz)) THEN
+      string(I:I) = CHAR(ival+UA-la)
+    END IF
+  END DO
+  
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Changes string to lowercase.
+! 
+PURE SUBROUTINE ToLowercase(string)
+  IMPLICIT NONE
+  CHARACTER*(*), INTENT(INOUT) :: string
+  INTEGER, PARAMETER :: UA = ICHAR('A')
+  INTEGER, PARAMETER :: la = ICHAR('a')
+  INTEGER, PARAMETER :: UZ = ICHAR('Z')
+  INTEGER, PARAMETER :: lz = ICHAR('z')
+  INTEGER :: I,ival
+
+  DO I = 1, LEN_TRIM(string)
+    ival = ICHAR(string(I:I))
+    IF ((ival .GE. UA) .AND. (ival .LE. UZ)) THEN
+      string(I:I) = CHAR(ival-UA+la)
+    END IF
+  END DO
+
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Obtain the file suffix or an empty string if there is no suffix.
+! 
+PURE SUBROUTINE FileSuffix(file,suffix)
+  IMPLICIT NONE
+  CHARACTER*(*), INTENT(IN) :: file
+  CHARACTER*(*), INTENT(OUT) :: suffix
+  INTEGER :: len,pos
+  
+  len = LEN_TRIM(file)
+  pos = INDEX(file,'.',back=.TRUE.)
+  
+  ! No suffix
+  IF (pos .EQ. 0) THEN
+    suffix = ''
+    RETURN
+  END IF
+  
+  ! Get suffix
+  suffix = file(pos+1:)
+  
+END SUBROUTINE
+
+
+! ----------------------------------------------------------------------
+! Obtain the file suffix or an empty string if there is no suffix.
+! The file suffix is converted to lower case for easier parsing.
+! 
+PURE SUBROUTINE FileSuffixLC(file,suffix)
+  IMPLICIT NONE
+  CHARACTER*(*), INTENT(IN) :: file
+  CHARACTER*(*), INTENT(OUT) :: suffix
+  INTEGER :: len,pos
+  
+  len = LEN_TRIM(file)
+  pos = INDEX(file,'.',back=.TRUE.)
+  
+  ! No suffix
+  IF (pos .EQ. 0) THEN
+    suffix = ''
+    RETURN
+  END IF
+  
+  ! Get suffix, convert to lower case for easier parsing
+  suffix = file(pos+1:)
+  CALL ToLowercase(suffix)
+  
+END SUBROUTINE
 
 
 
