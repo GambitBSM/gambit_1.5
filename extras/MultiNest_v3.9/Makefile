@@ -7,10 +7,10 @@
 FC = gfortran
 CC = gcc
 CXX = g++
-FFLAGS += -ffree-line-length-none -O3 #-DMPI
-CFLAGS += -O3 #-DMPI
+FFLAGS += -ffree-line-length-none -O3 -DMPI
+CFLAGS += -O3 -DMPI
 
-LAPACKLIB = -llapack
+LAPACKLIB = -llapack -lblas
 
 NESTLIBDIR = ./
 
