@@ -190,10 +190,10 @@ for VAR in "$@"; do
 echo "# PYTHIA configuration file." > $CFG_FILE
 echo "# Generated on" `date` "with the user supplied options:" >> $CFG_FILE
 for VAR in "$@"; do
-    if [[ $OPTIONS =~ (^| )${VAR%=*}($| ) ]]; then echo "# $VAR" >> $CFG_FILE;
+    if [[ $OPTIONS =~ (^| )${VAR%%=*}($| ) ]]; then echo "# $VAR" >> $CFG_FILE;
     else echo "WARNING: Ignoring invalid option \"${VAR%=*}\"."; continue; fi;
     VAR=${VAR#--with-}; VAR=${VAR#--};
-    KEY=${VAR%=*}; VAL=${VAR#$KEY}; VAL=${VAL#*=}; KEY=${KEY//"-"/"_"};
+    KEY=${VAR%%=*}; VAL=${VAR#$KEY}; VAL=${VAL#*=}; KEY=${KEY//"-"/"_"};
     KEY=$(echo $KEY | awk '{print toupper($0)}');  VAL=$(eval echo $VAL)
     eval $KEY=\"$VAL\"; eval ${KEY}_SET=true; done
 
@@ -215,7 +215,7 @@ if [ -z "$CXX_SHARED" ]; then
     if [ "$ARCH" = "DARWIN" ]; then
 	CXX_SHARED="-dynamiclib -flat_namespace"
 	# CXX_SHARED="$CXX_SHARED -undefined suppress -Qunused-arguments"; fi; fi
-	CXX_SHARED="$CXX_SHARED -undefined suppress"; fi; fi
+        CXX_SHARED="$CXX_SHARED -undefined suppress"; fi; fi
 if [ -z "$CXX_SONAME" ]; then
     if [ "$ARCH" = "LINUX" ];  then CXX_SONAME="-Wl,-soname"; fi
     if [ "$ARCH" = "DARWIN" ]; then CXX_SONAME="-Wl,-dylib_install_name"; fi; fi
