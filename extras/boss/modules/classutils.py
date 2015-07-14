@@ -1559,6 +1559,8 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
         var_is_loaded_class = utils.isLoadedClass(var_type_el)
 
         # wrapper_type_name = toWrapperType(var_type, remove_reference=True, remove_pointers=True, include_namespace=True)
+        var_abstr_class_name = getClassNameDict(var_type_el, abstract=True)
+        var_wrapper_base_class_name = 'WrapperBase<' + var_abstr_class_name['long'] + '>'
 
         # # FIXME: At the moment there are problems with member variables that are pointer-to-loaded-class. For now, skip them:
         # if var_is_loaded_class and pointerness > 0:
@@ -1579,13 +1581,11 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
 
         # Add line to common constructor body
         if var_is_loaded_class:
-            # common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '._setMemberVariable(true);\n'
             if pointerness > 0:
-                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.wrapperbase::BEptr->can_delete_wrapper(true);\n'
-                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.wrapperbase::BEptr->can_delete_me(false);\n'
+                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_wrapper(true);\n'
             else:
-                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.wrapperbase::BEptr->can_delete_wrapper(false);\n'
-                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.wrapperbase::BEptr->can_delete_me(false);\n'
+                common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_wrapper(false);\n'
+            common_constructor_body += indent + '(' + '*'*pointerness + var_name + ')' + '.' + var_wrapper_base_class_name + '::BEptr->can_delete_me(false);\n'
 
 
     # Clean up initialization list
