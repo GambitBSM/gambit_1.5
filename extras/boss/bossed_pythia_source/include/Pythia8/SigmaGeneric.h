@@ -1,5 +1,5 @@
 // SigmaGeneric.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Johan Bijnens,Torbjorn Sjostrand.
+// Copyright (C) 2015 Johan Bijnens,Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -14,7 +14,7 @@
 #include "Pythia8/SigmaProcess.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // A derived class for g g -> qG qGbar (generic quark of spin 0, 1/2 or 1).
@@ -56,7 +56,7 @@ private:
   double openFracPair, sigma, sigTS, sigUS, sigSum, kappam1;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> qG qGbar (generic quark of spin 0, 1/2 or 1).
@@ -97,7 +97,7 @@ private:
   double openFracPair, sigma, sigSum, kappa;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> fG fGbar (generic spin 0, 1/2 or 1 particle)
@@ -140,7 +140,7 @@ private:
   double eQHV2, openFracPair, sigma0, sigSum, kappa, colFac;
 
 };
-  
+
 //==========================================================================
 
 // A derived class for f fbar -> Zv, where Zv couples both to the SM and

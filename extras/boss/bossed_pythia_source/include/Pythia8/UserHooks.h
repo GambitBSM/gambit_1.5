@@ -1,5 +1,8 @@
+#ifndef __boss__UserHooks_Pythia_8_209_h__
+#define __boss__UserHooks_Pythia_8_209_h__
+
 // UserHooks.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -26,7 +29,13 @@ class PhaseSpace;
 
 // UserHooks is base class for user access to program execution.
 
-class UserHooks {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_UserHooks.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class UserHooks : public virtual Abstract_UserHooks {
 
 public:
 
@@ -47,7 +56,7 @@ public:
     sigmaTotPtr = sigmaTotPtrIn;
     workEvent.init("(work event)", particleDataPtr);}
 
-  // Initialisation after beams have been set by Pythia::init()
+  // Initialisation after beams have been set by Pythia::init().
   virtual bool initAfterBeams() { return true; }
 
   // Possibility to modify cross section of process.
@@ -116,7 +125,7 @@ public:
   // Decide whether to veto current event or not, based on event record.
   // Usage: doVetoMPIStep( nMPI, event), where nMPI is number of MPI's so far.
   virtual bool doVetoMPIStep( int , const Event& ) {return false;}
-   
+
   // Possibility to veto event after ISR + FSR + MPI in parton level,
   // but before beam remnants and resonance decays.
   virtual bool canVetoPartonLevelEarly() {return false;}
@@ -129,7 +138,7 @@ public:
   // doVetoPT, doVetoStep, doVetoMPIStep or doVetoPartonLevelEarly
   // if you overload this method to return true.
   virtual bool retryPartonLevel() {return false;}
-   
+
   // Possibility to veto event after parton-level selection.
   virtual bool canVetoPartonLevel() {return false;}
 
@@ -178,7 +187,7 @@ public:
   virtual bool canReconnectResonanceSystems() { return false; }
 
   // Do reconnect colours from resonance decay systems.
-  // Usage: doVetoFSREmission( oldSizeEvt, event) 
+  // Usage: doVetoFSREmission( oldSizeEvt, event)
   // where oldSizeEvent is the event size before resonance decays.
   // Should normally return true, while false means serious failure.
   // Value of PartonLevel:earlyResDec determines where method is called.
@@ -230,6 +239,49 @@ protected:
   // User-imposed selection bias.
   double selBias;
 
+
+        public:
+            Abstract_UserHooks* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_UserHooks* in);
+
+
+        public:
+            bool doVetoProcessLevel__BOSS(Pythia8::Abstract_Event&);
+
+            bool doVetoResonanceDecays__BOSS(Pythia8::Abstract_Event&);
+
+            bool doVetoPT__BOSS(int, const Pythia8::Abstract_Event&);
+
+            bool doVetoStep__BOSS(int, int, int, const Pythia8::Abstract_Event&);
+
+            bool doVetoMPIStep__BOSS(int, const Pythia8::Abstract_Event&);
+
+            bool doVetoPartonLevelEarly__BOSS(const Pythia8::Abstract_Event&);
+
+            bool doVetoPartonLevel__BOSS(const Pythia8::Abstract_Event&);
+
+            double scaleResonance__BOSS(int, const Pythia8::Abstract_Event&);
+
+            bool doVetoISREmission__BOSS(int, const Pythia8::Abstract_Event&, int);
+
+            bool doVetoFSREmission__BOSS(int, const Pythia8::Abstract_Event&, int, bool);
+
+            bool doVetoFSREmission__BOSS(int, const Pythia8::Abstract_Event&, int);
+
+            bool doVetoMPIEmission__BOSS(int, const Pythia8::Abstract_Event&);
+
+            bool doReconnectResonanceSystems__BOSS(int, Pythia8::Abstract_Event&);
+
+        protected:
+            void omitResonanceDecays__BOSS(const Pythia8::Abstract_Event&, bool);
+
+            void omitResonanceDecays__BOSS(const Pythia8::Abstract_Event&);
+
+            void subEvent__BOSS(const Pythia8::Abstract_Event&, bool);
+
+            void subEvent__BOSS(const Pythia8::Abstract_Event&);
+
 };
 
 //==========================================================================
@@ -240,7 +292,7 @@ protected:
 // and also modify alpha_strong scale similarly.
 
 class SuppressSmallPT : public UserHooks {
- 
+
 public:
 
   // Constructor.
@@ -274,3 +326,5 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_UserHooks_H
+
+#endif /* __boss__UserHooks_Pythia_8_209_h__ */

@@ -1,5 +1,8 @@
+#ifndef __boss__BeamParticle_Pythia_8_209_h__
+#define __boss__BeamParticle_Pythia_8_209_h__
+
 // BeamParticle.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -90,7 +93,11 @@ public:
   int    col()         const {return colRes;}
   int    acol()        const {return acolRes;}
   double pTfactor()    const {return factorRes;}
- 
+  bool hasCol()        const {return (idRes == 21 || (idRes > 0 && idRes < 9)
+    || (-idRes > 1000 && -idRes < 10000 && (-idRes/10)%10 == 0));}
+  bool hasAcol()       const {return (idRes == 21 || (-idRes > 0 && -idRes < 9)
+    || (idRes > 1000 && idRes < 10000 && (idRes/10)%10 == 0));}
+
 private:
 
   // Properties of a resolved parton.
@@ -112,7 +119,13 @@ private:
 // This class holds info on a beam particle in the evolution of
 // initial-state radiation and multiparton interactions.
 
-class BeamParticle {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_BeamParticle.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class BeamParticle : public virtual Abstract_BeamParticle {
 
 public:
 
@@ -156,7 +169,7 @@ public:
   // Special hard-process parton distributions (can agree with standard ones).
   double xfHard(int idIn, double x, double Q2)
     {return pdfHardBeamPtr->xf(idIn, x, Q2);}
-   
+
   // Standard parton distributions.
   double xf(int idIn, double x, double Q2)
     {return pdfBeamPtr->xf(idIn, x, Q2);}
@@ -173,6 +186,16 @@ public:
     {return xfModified(-1, idIn, x, Q2);}
   double xfISR(int indexMPI, int idIn, double x, double Q2)
     {return xfModified( indexMPI, idIn, x, Q2);}
+
+  // Check whether x and Q2 values fall inside the fit bounds (LHAPDF6 only).
+  bool insideBounds(double x, double Q2)
+    {return pdfBeamPtr->insideBounds(x,Q2);}
+
+  // Access the running alpha_s of a PDF set (LHAPDF6 only).
+  double alphaS(double Q2) {return pdfBeamPtr->alphaS(Q2);}
+
+  // Return quark masses used in the PDF fit (LHAPDF6 only).
+  double mQuarkPDF(int idIn) {return pdfBeamPtr->mQuarkPDF(idIn);}
 
   // Decide whether chosen quark is valence, sea or companion.
   int pickValSeaComp();
@@ -208,7 +231,7 @@ public:
   bool isUnresolvedLepton();
 
   // Add extra remnant flavours to make valence and sea come out right.
-  bool remnantFlavours(Event& event);
+  bool remnantFlavours(Event& event, bool isDIS = false);
 
   // Correlate all initiators and remnants to make a colour singlet.
   bool remnantColours(Event& event, vector<int>& colFrom,
@@ -234,11 +257,26 @@ public:
   double zShare( double mDiff, double m1, double m2);
   double pxShare() const {return pxRel;}
   double pyShare() const {return pyRel;}
- 
+
+  // Add extra remnant flavours to make valence and sea come out right.
+  bool remnantFlavoursNew(Event& event);
+
+  // Find the colour setup of the removed partons from the scatterings.
+  void findColSetup(Event& event);
+
+  // Set initial colours.
+  void setInitialCol(Event & event);
+
+  // Update colours.
+  void updateCol(vector<pair<int,int> > colourChanges);
+
+  vector<pair <int,int> > getColUpdates() {return colUpdates;}
+
 private:
 
   // Constants: could only be changed in the code itself.
-  static const double XMINUNRESOLVED;
+  static const double XMINUNRESOLVED, POMERONMASS;
+  static const int NMAX, NRANDOMTRIES;
 
   // Pointer to various information on the generation.
   Info*         infoPtr;
@@ -248,7 +286,7 @@ private:
 
   // Pointer to the random number generator.
   Rndm*         rndmPtr;
- 
+
   // Pointers to PDF sets.
   PDF*          pdfBeamPtr;
   PDF*          pdfHardBeamPtr;
@@ -257,11 +295,12 @@ private:
   StringFlav*   flavSelPtr;
 
   // Initialization data, normally only set once.
-  bool   allowJunction;
+  bool   allowJunction, beamJunction;
   int    maxValQuark, companionPower;
   double valencePowerMeson, valencePowerUinP, valencePowerDinP,
          valenceDiqEnhance, pickQuarkNorm, pickQuarkPower,
-         diffPrimKTwidth, diffLargeMassSuppress;
+         diffPrimKTwidth, diffLargeMassSuppress, beamSat, gluonPower,
+         xGluonCutoff;
 
   // Basic properties of a beam particle.
   int    idBeam, idBeamAbs;
@@ -284,6 +323,14 @@ private:
   bool   hasJunctionBeam;
   int    junCol[3];
 
+  // Variables for new colour reconnection;
+  pair <int,int> colSetup;
+  vector<int> acols, cols;
+  vector<bool> usedCol,usedAcol;
+  vector< pair<int,int> > colUpdates;
+  int nJuncs, nAjuncs, nDiffJuncs;
+  bool allowBeamJunctions;
+
   // Routine to calculate pdf's given previous interactions.
   double xfModified( int iSkip, int idIn, double x, double Q2);
 
@@ -301,10 +348,55 @@ private:
   int    idVal1, idVal2, idVal3;
   double zRel, pxRel, pyRel;
 
+  // Update a single (anti-) colour of the event.
+  void updateSingleCol(int oldCol, int newCol);
+
+  // Find a single (anti-) colour in the beam,
+  // if a beam remnant is set the new colour.
+  int findSingleCol(Event& event, bool isAcol, bool useHardScatters);
+
+
+        public:
+            Abstract_BeamParticle* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_BeamParticle* in);
+
+        public:
+            Pythia8::ResolvedParton& operator_square_bracket_pair__BOSS(int);
+
+            const Pythia8::ResolvedParton& operator_square_bracket_pair__BOSS(int) const;
+
+
+        public:
+            Pythia8::Abstract_Vec4* p__BOSS() const;
+
+            double xMax__BOSS();
+
+            int append__BOSS(int, int, double);
+
+            void list__BOSS() const;
+
+            bool remnantFlavours__BOSS(Pythia8::Abstract_Event&, bool);
+
+            bool remnantFlavours__BOSS(Pythia8::Abstract_Event&);
+
+            bool remnantColours__BOSS(Pythia8::Abstract_Event&, std::vector<int,std::allocator<int> >&, std::vector<int,std::allocator<int> >&);
+
+            bool remnantFlavoursNew__BOSS(Pythia8::Abstract_Event&);
+
+            void findColSetup__BOSS(Pythia8::Abstract_Event&);
+
+            void setInitialCol__BOSS(Pythia8::Abstract_Event&);
+
+        private:
+            int findSingleCol__BOSS(Pythia8::Abstract_Event&, bool, bool);
+
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_BeamParticle_H
+
+#endif /* __boss__BeamParticle_Pythia_8_209_h__ */

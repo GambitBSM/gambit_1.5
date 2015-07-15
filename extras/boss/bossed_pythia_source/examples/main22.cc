@@ -1,5 +1,5 @@
 // main22.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -15,7 +15,7 @@
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
-  
+
 //==========================================================================
 
 // The ResonanceTheta class handles a toponium resonance.
@@ -31,10 +31,10 @@ private:
 
   // Locally stored properties and couplings.
   double normTheta2qqbar, normTheta2llbar, normTheta2ggg;
- 
+
   // Initialize constants.
   virtual void initConstants();
- 
+
   // Calculate various common prefactors for the current mass.
   // Superfluous here, so skipped.
   //virtual void calcPreFac(bool = false);
@@ -73,7 +73,7 @@ void ResonanceTheta::calcWidth(bool) {
   else if (id1Abs == 21) widNow = 8. * normTheta2ggg * mHat;
 
 }
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> Theta (toponium bound state).
@@ -120,7 +120,7 @@ private:
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1qqbar2Theta::initProc() {
 
   // Store Theta mass and width for propagator.
@@ -135,7 +135,7 @@ void Sigma1qqbar2Theta::initProc() {
 
   // Set pointer to particle properties and decay table.
   particlePtr = particleDataPtr->particleDataEntryPtr(idTheta);
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -204,7 +204,7 @@ double Sigma1qqbar2Theta::weightDecay( Event& process, int iResBeg,
     + pow2( (1. - x2) / (x1 * x3) ) + pow2( (1. - x3) / (x1 * x2) );
   double wtMEmax = 2.;
   return wtME / wtMEmax;
- 
+
 }
 
 //==========================================================================
@@ -276,7 +276,7 @@ int main() {
   // Final statistics. Print histogram.
   pythia.stat();
   cout << mTheta;
-  
+
   // Done.
   delete sigma1Theta;
   return 0;

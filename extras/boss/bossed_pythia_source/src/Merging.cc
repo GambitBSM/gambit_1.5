@@ -1,5 +1,5 @@
 // MergingHooks.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -9,7 +9,7 @@
 #include "Pythia8/Merging.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The Merging class.
@@ -88,6 +88,37 @@ int Merging::mergeProcess(Event& process){
   mergingHooksPtr->processSave = settingsPtr->word("Merging:Process");
   mergingHooksPtr->hardProcess.initOnProcess(
     settingsPtr->word("Merging:Process"), particleDataPtr);
+
+  mergingHooksPtr->doUserMergingSave
+    = settingsPtr->flag("Merging:doUserMerging");
+  mergingHooksPtr->doMGMergingSave
+    = settingsPtr->flag("Merging:doMGMerging");
+  mergingHooksPtr->doKTMergingSave
+    = settingsPtr->flag("Merging:doKTMerging");
+  mergingHooksPtr->doPTLundMergingSave
+    = settingsPtr->flag("Merging:doPTLundMerging");
+  mergingHooksPtr->doCutBasedMergingSave
+    = settingsPtr->flag("Merging:doCutBasedMerging");
+  mergingHooksPtr->doNL3TreeSave
+    = settingsPtr->flag("Merging:doNL3Tree");
+  mergingHooksPtr->doNL3LoopSave
+    = settingsPtr->flag("Merging:doNL3Loop");
+  mergingHooksPtr->doNL3SubtSave
+    = settingsPtr->flag("Merging:doNL3Subt");
+  mergingHooksPtr->doUNLOPSTreeSave
+    = settingsPtr->flag("Merging:doUNLOPSTree");
+  mergingHooksPtr->doUNLOPSLoopSave
+    = settingsPtr->flag("Merging:doUNLOPSLoop");
+  mergingHooksPtr->doUNLOPSSubtSave
+    = settingsPtr->flag("Merging:doUNLOPSSubt");
+  mergingHooksPtr->doUNLOPSSubtNLOSave
+    = settingsPtr->flag("Merging:doUNLOPSSubtNLO");
+  mergingHooksPtr->doUMEPSTreeSave
+    = settingsPtr->flag("Merging:doUMEPSTree");
+  mergingHooksPtr->doUMEPSSubtSave
+    = settingsPtr->flag("Merging:doUMEPSSubt");
+  mergingHooksPtr->nReclusterSave
+    = settingsPtr->mode("Merging:nRecluster");
 
   // Possibility to apply merging scale to an input event.
   bool applyTMSCut = settingsPtr->flag("Merging:doXSectionEstimate");
@@ -677,6 +708,9 @@ int Merging::mergeProcessUNLOPS( Event& process) {
   // removed. In this case, reject this event, since it will be handled in
   // lower-multiplicity samples.
   if (nSteps < nRequested) {
+    string message="Warning in Merging::mergeProcessUNLOPS: Les Houches Event";
+    message+=" after removing decay products does not contain enough partons.";
+    infoPtr->errorMsg(message);
     mergingHooksPtr->setWeightCKKWL(0.);
     mergingHooksPtr->setWeightFIRST(0.);
     return -1;
@@ -732,7 +766,7 @@ int Merging::mergeProcessUNLOPS( Event& process) {
 
   // Discard if the state could not be reclustered to any state above TMS.
   int nPerformed = 0;
-  if ( nSteps > 0
+  if ( nSteps > 0 && !allowIncompleteReal
     && ( doUNLOPSSubt || doUNLOPSSubtNLO || containsRealKin )
     && !FullHistory.getFirstClusteredEventAboveTMS( RN, nRecluster,
           newProcess, nPerformed, false ) ) {
@@ -861,6 +895,7 @@ int Merging::mergeProcessUNLOPS( Event& process) {
     // Subtract the O(\alpha_s)-term from the CKKW-L weight
     // If PDF contributions have not been included, subtract these later
     wgt = wgt - wgtFIRST;
+
   }
 
   // Set QCD 2->2 starting scale different from arbitrary scale in LHEF!

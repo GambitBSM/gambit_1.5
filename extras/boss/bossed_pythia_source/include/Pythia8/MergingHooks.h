@@ -1,5 +1,5 @@
 // MergingHooks.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -623,10 +623,16 @@ protected:
   double muF() { return (muFSave > 0.) ? muFSave : infoPtr->QFac();}
   double muR() { return (muRSave > 0.) ? muRSave : infoPtr->QRen();}
   // Store / get factorisation scale used in matrix element calculation.
-  double muFinME() { return (muFinMESave > 0.) ? muFinMESave
-                       : infoPtr->QFac();}
-  double muRinME() { return (muRinMESave > 0.) ? muRinMESave
-                       : infoPtr->QRen();}
+  double muFinME() {
+    double mu = atof((char*)infoPtr->getEventAttribute("muf2",true).c_str());
+    return (muFinMESave > 0.) ? muFinMESave
+      : (mu > 0.) ? infoPtr->QFac() : sqrt(mu);
+  }
+  double muRinME() {
+    double mu = atof((char*)infoPtr->getEventAttribute("mur2",true).c_str());
+    return (muRinMESave > 0.) ? muRinMESave
+      : (mu > 0.) ? infoPtr->QRen() : sqrt(mu);
+  }
 
   //----------------------------------------------------------------------//
   // Functions to steer shower evolution

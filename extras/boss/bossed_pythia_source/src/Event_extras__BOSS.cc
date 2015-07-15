@@ -2,9 +2,9 @@
 #include "Pythia8/Event.h"
 #include <ostream>
 #include <vector>
-#include "backend_types/Pythia_8_186/wrapper_ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_Particle.h"
-#include "backend_types/Pythia_8_186/wrapper_Vec4.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleData.h"
+#include "backend_types/Pythia_8_209/wrapper_Particle.h"
+#include "backend_types/Pythia_8_209/wrapper_Vec4.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -152,9 +152,33 @@ int Pythia8::Event::copy__BOSS(int iCopy)
 }
 
 
+void Pythia8::Event::list__BOSS() const
+{
+    list();
+}
+
+
+void Pythia8::Event::list__BOSS(std::basic_ostream<char,std::char_traits<char> >& os) const
+{
+    list(os);
+}
+
+
+void Pythia8::Event::list__BOSS(bool showScaleAndVertex, bool showMothersAndDaughters) const
+{
+    list(showScaleAndVertex, showMothersAndDaughters);
+}
+
+
 void Pythia8::Event::list__BOSS(bool showScaleAndVertex) const
 {
     list(showScaleAndVertex);
+}
+
+
+void Pythia8::Event::list__BOSS(bool showScaleAndVertex, bool showMothersAndDaughters, std::basic_ostream<char,std::char_traits<char> >& os) const
+{
+    list(showScaleAndVertex, showMothersAndDaughters, os);
 }
 
 
@@ -167,12 +191,6 @@ void Pythia8::Event::popBack__BOSS()
 void Pythia8::Event::initColTag__BOSS()
 {
     initColTag();
-}
-
-
-std::vector<int,std::allocator<int> > Pythia8::Event::sisterListTopBot__BOSS(int i) const
-{
-    return sisterListTopBot(i);
 }
 
 
@@ -214,7 +232,7 @@ Pythia8::Abstract_Event* Pythia8::Event::operator_plus_equal__BOSS(const Pythia8
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_Event* Pythia8::Event::pointerCopy__BOSS()
 {

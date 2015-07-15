@@ -1,5 +1,5 @@
 // Info.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -147,7 +147,7 @@ void Info::list(ostream& os) const {
     << ", ISR = " << setw(5) << nISRSave << ", FSRproc = " << setw(5)
     << nFSRinProcSave << ", FSRreson = " << setw(5) << nFSRinResSave
     << ".\n";
-       
+
   // Listing finished.
   os << "\n --------  End PYTHIA Info Listing  --------------------"
      << "----------------" << endl;
@@ -161,7 +161,7 @@ void Info::list(ostream& os) const {
 double Info::weight() const { return (abs(lhaStrategySave) == 4)
   ? CONVERTMB2PB * weightSave : weightSave;
 }
-  
+
 double Info::weightSum() const {return (abs(lhaStrategySave) == 4)
   ? CONVERTMB2PB * wtAccSum : wtAccSum;
 }
@@ -179,12 +179,12 @@ vector<int> Info::codesHard() {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Print a message the first few times. Insert in database.
- 
+
   void Info::errorMsg(string messageIn, string extraIn, bool showAlways,
     ostream& os) {
-   
+
   // Recover number of times message occured. Also inserts new string.
   int times = messages[messageIn];
   ++messages[messageIn];
@@ -247,6 +247,205 @@ void Info::errorStatistics(ostream& os) {
      << "  ------------------------------------------------------* "
      << endl;
 
+}
+
+//--------------------------------------------------------------------------
+
+// Return a list of all header key names
+
+vector < string > Info::headerKeys() {
+  vector < string > keys;
+  for (map < string, string >::iterator it = headers.begin();
+      it != headers.end(); it++)
+    keys.push_back(it->first);
+  return keys;
+}
+
+//--------------------------------------------------------------------------
+
+// Set the LHEF3 objects read from the init and header blocks.
+
+void Info::setLHEF3InitInfo() { initrwgt = 0;}
+
+void Info::setLHEF3InitInfo( int LHEFversionIn, LHAinitrwgt *initrwgtIn,
+  vector<LHAgenerator> *generatorsIn,
+  map<string,LHAweightgroup> *weightgroupsIn,
+  map<string,LHAweight> *init_weightsIn ) {
+  LHEFversionSave = LHEFversionIn;
+  initrwgt        = initrwgtIn;
+  generators      = generatorsIn;
+  weightgroups    = weightgroupsIn;
+  init_weights    = init_weightsIn;
+}
+
+//--------------------------------------------------------------------------
+
+// Set the LHEF3 objects read from the event block.
+
+void Info::setLHEF3EventInfo() { scales = 0; weights = 0; rwgt = 0;}
+
+void Info::setLHEF3EventInfo( map<string, string> *eventAttributesIn,
+    map<string,double> *weights_detailedIn,
+    vector<double> *weights_compressedIn,
+    LHAscales *scalesIn, LHAweights *weightsIn,
+    LHArwgt *rwgtIn ) {
+    eventAttributes    = eventAttributesIn;
+    weights_detailed   = weights_detailedIn;
+    weights_compressed = weights_compressedIn;
+    scales             = scalesIn;
+    weights            = weightsIn;
+    rwgt               = rwgtIn;
+  }
+
+//--------------------------------------------------------------------------
+
+// Retrieve events tag information.
+
+string Info::getEventAttribute(string key, bool doRemoveWhitespace) {
+  if (!eventAttributes) return "";
+  if ( eventAttributes->find(key) != eventAttributes->end() ) {
+    string res = (*eventAttributes)[key];
+    if (doRemoveWhitespace)
+      res.erase (remove (res.begin(), res.end(), ' '), res.end());
+    return res;
+  }
+  return "";
+}
+
+//--------------------------------------------------------------------------
+
+// Retrieve LHEF version.
+
+int Info::LHEFversion() { return LHEFversionSave;}
+
+//--------------------------------------------------------------------------
+
+// Retrieve initrwgt tag information.
+
+unsigned int Info::getInitrwgtSize() {
+  if (!initrwgt) return 0;
+  return initrwgt->weights.size();
+}
+
+//--------------------------------------------------------------------------
+
+// Retrieve generator tag information.
+
+unsigned int Info::getGeneratorSize() {
+  if (!generators) return 0;
+  return generators->size();
+}
+
+string Info::getGeneratorValue(unsigned int n) {
+  if (!generators || generators->size() < n+1) return "";
+  return (*generators)[n].contents;
+}
+
+string Info::getGeneratorAttribute( unsigned int n, string key,
+  bool doRemoveWhitespace) {
+  if (!generators || generators->size() < n+1) return "";
+  string res("");
+  if ( key == "name") {
+    res = (*generators)[n].name;
+  } else if ( key == "version") {
+    res = (*generators)[n].version;
+  } else if ( (*generators)[n].attributes.find(key)
+           != (*generators)[n].attributes.end() ) {
+    res = (*generators)[n].attributes[key];
+  }
+  if (doRemoveWhitespace && res != "")
+    res.erase (remove (res.begin(), res.end(), ' '), res.end());
+  return res;
+}
+
+//--------------------------------------------------------------------------
+
+// Retrieve rwgt tag information.
+
+unsigned int Info::getWeightsDetailedSize() {
+  if (!weights_detailed) return 0;
+  return weights_detailed->size();
+}
+
+double Info::getWeightsDetailedValue(string n) {
+  if (weights_detailed->empty()
+    || weights_detailed->find(n) == weights_detailed->end()) return 0./0.;
+  return (*weights_detailed)[n];
+}
+
+string Info::getWeightsDetailedAttribute(string n, string key,
+  bool doRemoveWhitespace) {
+  if (!rwgt || rwgt->wgts.find(n) == rwgt->wgts.end())
+    return "";
+  string res("");
+  if ( key == "id") {
+    res = rwgt->wgts[n].id;
+  } else if ( rwgt->wgts[n].attributes.find(key)
+           != rwgt->wgts[n].attributes.end() ) {
+    res = rwgt->wgts[n].attributes[key];
+  }
+  if (doRemoveWhitespace && res != "")
+    res.erase (remove (res.begin(), res.end(), ' '), res.end());
+  return res;
+}
+
+//--------------------------------------------------------------------------
+
+// Retrieve weights tag information.
+
+unsigned int Info::getWeightsCompressedSize() {
+  if (!weights_compressed) return 0;
+  return weights_compressed->size();
+}
+
+double Info::getWeightsCompressedValue(unsigned int n) {
+  if (weights_compressed->empty()
+    || weights_compressed->size() < n+1) return 0./0.;
+  return (*weights_compressed)[n];
+}
+
+string Info::getWeightsCompressedAttribute(string key,
+  bool doRemoveWhitespace) {
+  if (!weights || weights->attributes.find(key) == weights->attributes.end())
+    return "";
+  string res("");
+  if ( weights->attributes.find(key)
+           != weights->attributes.end() ) {
+    res = weights->attributes[key];
+  }
+  if (doRemoveWhitespace && res != "")
+    res.erase (remove (res.begin(), res.end(), ' '), res.end());
+  return res;
+}
+
+//--------------------------------------------------------------------------
+
+// Retrieve scales tag information.
+
+string Info::getScalesValue(bool doRemoveWhitespace) {
+  if (!scales) return "";
+  string res = scales->contents;
+  if (doRemoveWhitespace && res != "")
+    res.erase (remove (res.begin(), res.end(), ' '), res.end());
+  return res;
+}
+
+double Info::getScalesAttribute(string key) {
+  if (!scales) return 0./0.;
+  double res = 0./0.;
+  if ( key == "muf") {
+    res = scales->muf;
+  } else if ( key == "mur") {
+    res = scales->mur;
+  } else if ( key == "mups") {
+    res = scales->mups;
+  } else if ( key == "SCALUP") {
+    res = scales->SCALUP;
+  } else if ( scales->attributes.find(key)
+           != scales->attributes.end() ) {
+    res = scales->attributes[key];
+  }
+  return res;
 }
 
 //==========================================================================

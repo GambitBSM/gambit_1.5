@@ -1,5 +1,5 @@
 // ProcessContainer.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -41,13 +41,14 @@ public:
 
   // Constructor.
   ProcessContainer(SigmaProcess* sigmaProcessPtrIn = 0,
-    bool externalPtrIn = false) : sigmaProcessPtr(sigmaProcessPtrIn),
-    externalPtr(externalPtrIn), phaseSpacePtr(0) {}
+    bool externalPtrIn = false, PhaseSpace* phaseSpacePtrIn = 0) :
+      sigmaProcessPtr(sigmaProcessPtrIn),
+      externalPtr(externalPtrIn), phaseSpacePtr(phaseSpacePtrIn) {}
 
   // Destructor. Do not destroy external sigmaProcessPtr.
   ~ProcessContainer() {delete phaseSpacePtr;
     if (!externalPtr) delete sigmaProcessPtr;}
-  
+
   // Initialize phase space and counters.
   bool init(bool isFirst, Info* infoPtrIn, Settings& settings,
     ParticleData* particleDataPtrIn, Rndm* rndmPtrIn, BeamParticle* beamAPtr,
@@ -67,13 +68,13 @@ public:
 
   // Generate a trial event; accepted or not.
   bool trialProcess();
-  
+
   // Pick flavours and colour flow of process.
   bool constructState();
-  
+
   // Give the hard subprocess (with option for a second hard subprocess).
   bool constructProcess( Event& process, bool isHardest = true);
-  
+
   // Give the Les Houches decay chain for external resonance.
   bool constructDecays( Event& process);
 
@@ -111,7 +112,7 @@ public:
   double Q2Fac()       const {return sigmaProcessPtr->Q2Fac();}
   double mHat()        const {return sqrtpos(phaseSpacePtr->sHat());}
   double pTHat()       const {return phaseSpacePtr->pTHat();}
- 
+
   // Tell whether container is for Les Houches events.
   bool   isLHAContainer() const {return isLHA;}
   int    lhaStrategy()    const {return lhaStrat;}
@@ -158,12 +159,15 @@ private:
   LHAup*           lhaUpPtr;
 
   // Possibility to modify Les Houches input.
-  int    idRenameBeams, setLifetime;
+  bool   matchInOut;
+  int    idRenameBeams, setLifetime, setLeptonMass, idLep[3];
+  double mRecalculate, mLep[3];
 
   // Info on process.
   bool   isLHA, isNonDiff, isResolved, isDiffA, isDiffB, isDiffC, isQCD3body,
          allowNegSig, isSameSave, increaseMaximum, canVetoResDecay;
   int    lhaStrat, lhaStratAbs;
+  bool   useStrictLHEFscales;
 
   // Statistics on generation process. (Long integers just in case.)
   bool   newSigmaMx;
@@ -179,7 +183,7 @@ private:
   void sigmaDelta();
 
 };
- 
+
 //==========================================================================
 
 // The SetupContainers class turns the list of user-requested processes
@@ -191,11 +195,11 @@ public:
 
   // Constructor.
   SetupContainers() {}
- 
+
   // Initialization assuming all necessary data already read.
   bool init(vector<ProcessContainer*>& containerPtrs, Info* infoPtr,
     Settings& settings, ParticleData* particleDataPtr, Couplings* couplings);
- 
+
   // Initialization of a second hard process.
   bool init2(vector<ProcessContainer*>& container2Ptrs, Settings& settings);
 

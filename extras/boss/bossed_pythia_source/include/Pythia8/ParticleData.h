@@ -1,8 +1,8 @@
-#ifndef __boss__ParticleData_Pythia_8_186_h__
-#define __boss__ParticleData_Pythia_8_186_h__
+#ifndef __boss__ParticleData_Pythia_8_209_h__
+#define __boss__ParticleData_Pythia_8_209_h__
 
 // ParticleData.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -35,7 +35,13 @@ class SUSYResonanceWidths;
 
 // This class holds info on a single decay channel.
 
-class DecayChannel {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_DecayChannel.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class DecayChannel : public virtual Abstract_DecayChannel {
 
 public:
   // Constructor.
@@ -100,6 +106,16 @@ private:
   int    meModeSave, nProd, prod[8];
   bool   hasChangedSave;
 
+
+        public:
+            Abstract_DecayChannel* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_DecayChannel* in);
+
+
+        public:
+            void bRatio__BOSS(double);
+
 };
 
 //==========================================================================
@@ -108,7 +124,7 @@ private:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_ParticleDataEntry.h"
+#include "backend_types/Pythia_8_209/abstract_ParticleDataEntry.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -295,7 +311,7 @@ public:
 private:
 
   // Constants: could only be changed in the code itself.
-  static const int    INVISIBLENUMBER, INVISIBLETABLE[50], KNOWNNOWIDTH[3];
+  static const int    INVISIBLENUMBER, INVISIBLETABLE[52], KNOWNNOWIDTH[3];
   static const double MAXTAU0FORDECAY,MINMASSRESONANCE, NARROWMASS,
                       CONSTITUENTMASSTABLE[10];
 
@@ -396,11 +412,21 @@ private:
 
             void addChannel__BOSS();
 
+            Pythia8::Abstract_DecayChannel* channel__BOSS(int);
+
+            const Pythia8::Abstract_DecayChannel* channel__BOSS(int) const;
+
             void rescaleBR__BOSS();
 
             bool preparePick__BOSS(int, double);
 
             bool preparePick__BOSS(int);
+
+            Pythia8::Abstract_DecayChannel* pickChannel__BOSS();
+
+            void setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths*);
+
+            Pythia8::Abstract_ResonanceWidths* getResonancePtr__BOSS();
 
             void resInit__BOSS(Pythia8::Abstract_Info*, Pythia8::Abstract_Settings*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Couplings*);
 
@@ -426,7 +452,7 @@ private:
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_ParticleData.h"
+#include "backend_types/Pythia_8_209/abstract_ParticleData.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -443,7 +469,7 @@ public:
     Couplings* couplingsPtrIn) {infoPtr = infoPtrIn;
     settingsPtr = settingsPtrIn; rndmPtr = rndmPtrIn;
     couplingsPtr = couplingsPtrIn;}
- 
+
   // Read in database from specific file.
   bool init(string startFile = "../xmldoc/ParticleData.xml") {
     initCommon(); return readXML(startFile);}
@@ -485,7 +511,7 @@ public:
   // Check that table makes sense, especially for decays.
   void checkTable(ostream& os = cout) {checkTable(1, os);};
   void checkTable(int verbosity, ostream& os = cout) ;
- 
+
   // Add new entry.
   void addParticle(int idIn, string nameIn = " ", int spinTypeIn = 0,
     int chargeTypeIn = 0, int colTypeIn = 0, double m0In = 0.,
@@ -554,7 +580,7 @@ public:
     if (isParticle(idIn)) pdt[abs(idIn)].setDoForceWidth(doForceWidthIn); }
   void hasChanged(int idIn, bool hasChangedIn) {
     if (isParticle(idIn)) pdt[abs(idIn)].setHasChanged(hasChangedIn); }
- 
+
   // Give back current values.
   bool hasAnti(int idIn) {
     return isParticle(idIn) ? pdt[abs(idIn)].hasAnti() : false ; }
@@ -656,7 +682,7 @@ public:
   double resWidthChan(int idIn, double mHat, int idAbs1 = 0,
     int idAbs2 = 0) { return isParticle(idIn)
     ? pdt[abs(idIn)].resWidthChan( mHat, idAbs1, idAbs2) : 0.;}
-  
+
   // Return pointer to entry.
   ParticleDataEntry* particleDataEntryPtr(int idIn) {
     return (isParticle(idIn)) ? &pdt[abs(idIn)] : &pdt[0]; }
@@ -802,6 +828,8 @@ private:
 
             void rescaleBR__BOSS(int);
 
+            void setResonancePtr__BOSS(int, Pythia8::Abstract_ResonanceWidths*);
+
             double resWidth__BOSS(int, double, int, bool);
 
             double resWidth__BOSS(int, double, int);
@@ -823,11 +851,11 @@ private:
             Pythia8::Abstract_ParticleDataEntry* particleDataEntryPtr__BOSS(int);
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_ParticleData_H
 
-#endif /* __boss__ParticleData_Pythia_8_186_h__ */
+#endif /* __boss__ParticleData_Pythia_8_209_h__ */

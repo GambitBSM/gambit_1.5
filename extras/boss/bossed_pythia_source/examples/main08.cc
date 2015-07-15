@@ -1,5 +1,5 @@
 // main08.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -23,7 +23,7 @@ int main() {
   int mode = 5;
 
   // Number of events to generate per bin.
-  int nEvent = 100000;
+  int nEvent = 10000;
 
   // One does not need complete events to study pThard spectrum only.
   bool completeEvents = false;
