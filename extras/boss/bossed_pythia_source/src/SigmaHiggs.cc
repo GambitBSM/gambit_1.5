@@ -1,5 +1,5 @@
 // SigmaHiggs.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Part of code written by Marc Montull, CERN summer student 2007.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -19,7 +19,7 @@ namespace Pythia8 {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2H::initProc() {
 
   // Properties specific to Higgs state.
@@ -46,7 +46,7 @@ void Sigma1ffbar2H::initProc() {
 
   // Find pointer to H0, H1, H2 or A3 depending on the value of idRes.
   HResPtr = particleDataPtr->particleDataEntryPtr(idRes);
-  
+
   // Store H0, H1, H2 or A3 mass and width for propagator.
   mRes     = HResPtr->m0();
   GammaRes = HResPtr->mWidth();
@@ -95,7 +95,7 @@ void Sigma1ffbar2H::setIdColAcol() {
 
   // Flavours trivial.
   setId( id1, id2, idRes);
-  
+
   // Colour flow topologies. Swap when antiquarks.
   if (abs(id1) < 9) setColAcol( 1, 0, 0, 1, 0, 0);
   else              setColAcol( 0, 0, 0, 0, 0, 0);
@@ -134,7 +134,7 @@ double Sigma1ffbar2H::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1gg2H::initProc() {
 
   // Properties specific to Higgs state.
@@ -237,7 +237,7 @@ double Sigma1gg2H::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1gmgm2H::initProc() {
 
   // Properties specific to Higgs state.
@@ -340,7 +340,7 @@ double Sigma1gmgm2H::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2HZ::initProc() {
 
   // Properties specific to Higgs state.
@@ -490,7 +490,7 @@ double Sigma2ffbar2HZ::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2HW::initProc() {
 
   // Properties specific to Higgs state.
@@ -633,7 +633,7 @@ double Sigma2ffbar2HW::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3ff2HfftZZ::initProc() {
 
   // Properties specific to Higgs state.
@@ -714,7 +714,7 @@ double Sigma3ff2HfftZZ::sigmaHat() {
 
   // Secondary width for H0, H1, H2 or A3.
   sigma       *= openFrac;
-  
+
   // Answer.
   return sigma;
 
@@ -773,7 +773,7 @@ double Sigma3ff2HfftZZ::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3ff2HfftWW::initProc() {
 
   // Properties specific to Higgs state.
@@ -854,7 +854,7 @@ double Sigma3ff2HfftWW::sigmaHat() {
 
   // Answer.
   return sigma;
- 
+
 }
 
 //--------------------------------------------------------------------------
@@ -912,7 +912,7 @@ double Sigma3ff2HfftWW::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3gg2HQQbar::initProc() {
 
   // Properties specific to Higgs state for the "g g -> H ttbar" process.
@@ -1016,7 +1016,7 @@ void Sigma3gg2HQQbar::sigmaKin() {
   double z8  = pTemp[3] * pTemp[4];
   double z9  = pTemp[3] * pTemp[5];
   double z10 = pTemp[4] * pTemp[5];
-       
+
   // Powers required as shorthand in matriz elements.
   double mQ4  = mQ2 * mQ2;
   double mQ6  = mQ2 * mQ4;
@@ -1276,7 +1276,7 @@ void Sigma3gg2HQQbar::sigmaKin() {
   fm[7][7] -= 2. * fm99;
   fm[7][8] -= 2. * fm910;
   fm[8][8] -= 2. * fm1010;
- 
+
   // Propagators.
   double ss1 = (pTemp[1] + pTemp[3]).m2Calc() - mQ2;
   double ss2 = (pTemp[1] + pTemp[4]).m2Calc() - mQ2;
@@ -1316,7 +1316,7 @@ void Sigma3gg2HQQbar::sigmaKin() {
   for (int i = 1; i < 3; ++i)
   for (int j = 1; j < 3; ++j)
     clr[i+6][j+6] = 12.;
- 
+
   // Produce final result: matrix elements * colours * propagators.
   double wtSum = 0.;
   for (int i = 1; i < 9; ++i)
@@ -1325,7 +1325,7 @@ void Sigma3gg2HQQbar::sigmaKin() {
     wtSum += fm[i][j] * fac * clr[i][j] / (dz[i] * dz[j]);
   }
   wtSum *= -1./256.;
-  
+
   // Combine factors.
   sigma  = prefac * alpEM * pow2(alpS) * mQ2run * wtSum *pow2(coup2Q);
 
@@ -1383,12 +1383,12 @@ double Sigma3gg2HQQbar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3qqbar2HQQbar::initProc() {
 
   // Properties specific to Higgs state for the "q qbar -> H ttbar" process.
   // (H can be H0 SM or H1, H2, A3 from BSM).
-                
+
   if (higgsType == 0 && idNew == 6) {
     nameSave = "q qbar -> H t tbar (SM)";
     codeSave = 909;
@@ -1488,7 +1488,7 @@ void Sigma3qqbar2HQQbar::sigmaKin() {
   double z8  = pTemp[3] * pTemp[4];
   double z9  = pTemp[3] * pTemp[5];
   double z10 = pTemp[4] * pTemp[5];
-       
+
   // Powers required as shorthand in matriz elements.
   double mQ4  = mQ2 * mQ2;
 
@@ -1504,7 +1504,7 @@ void Sigma3qqbar2HQQbar::sigmaKin() {
   double a22 = -8.*mQ4*z10-2.*mQ2*s3*z10-(8.*mQ2)*(z3*z9+z3*
   z7+z4*z8+z4*z6+z10*z5)+2.*s3*(z3*z7+z4*z6)-(4.*z5)*(z3
   *z9+z4*z8);
- 
+
   // Propagators and propagator combinations.
   double ss1 = (pTemp[1] + pTemp[3]).m2Calc() - mQ2;
   double ss4 = (pTemp[2] + pTemp[3]).m2Calc() - mQ2;
@@ -1517,7 +1517,7 @@ void Sigma3qqbar2HQQbar::sigmaKin() {
   a12 /=  (dz7 * dz8);
   a22 /=  (dz8 * dz8);
   double wtSum = -(a11 + a22 + 2.*a12) * (8./9.);
-  
+
   // Combine factors.
   sigma = prefac * alpEM * pow2(alpS) * mQ2run * wtSum * pow2(coup2Q);
 
@@ -1574,7 +1574,7 @@ double Sigma3qqbar2HQQbar::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2Hq::initProc() {
 
   // Properties specific to Higgs state for the "c g -> H c" process.
@@ -1626,11 +1626,11 @@ void Sigma2qg2Hq::initProc() {
   // Standard parameters.
   m2W       = pow2( particleDataPtr->m0(24) );
   thetaWRat = 1. / (24. * couplingsPtr->sin2thetaW());
- 
+
   // Secondary open width fraction.
   openFrac = particleDataPtr->resOpenFrac(idRes);
 
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1661,7 +1661,7 @@ double Sigma2qg2Hq::sigmaHat() {
 
   // Check that specified flavour present.
   if (abs(id1) != idNew && abs(id2) != idNew) return 0.;
- 
+
   // Answer.
   return sigma;
 
@@ -1720,7 +1720,7 @@ double Sigma2qg2Hq::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2Hglt::initProc() {
 
   // Properties specific to Higgs state.
@@ -1744,7 +1744,7 @@ void Sigma2gg2Hglt::initProc() {
     codeSave = 1054;
     idRes    = 36;
   }
-  
+
   // Normalization factor by g g -> H partial width.
   // (H can be H0 SM or H1, H2, A3 from BSM).
   double mHiggs = particleDataPtr->m0(idRes);
@@ -1817,9 +1817,9 @@ double Sigma2gg2Hglt::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2Hqlt::initProc() {
-  
+
   // Properties specific to Higgs state.
   if (higgsType == 0) {
     nameSave = "q g -> H q (SM; top loop)";
@@ -1849,7 +1849,7 @@ void Sigma2qg2Hqlt::initProc() {
 
   // Secondary open width fraction.
   openFrac = particleDataPtr->resOpenFrac(idRes);
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1918,9 +1918,9 @@ double Sigma2qg2Hqlt::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2Hglt::initProc() {
-   
+
   // Properties specific to Higgs state.
   if (higgsType == 0) {
     nameSave = "q qbar -> H g (SM; top loop)";
@@ -1951,7 +1951,7 @@ void Sigma2qqbar2Hglt::initProc() {
   // Secondary open width fraction.
   openFrac = particleDataPtr->resOpenFrac(idRes);
 
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -2014,7 +2014,7 @@ double Sigma2qqbar2Hglt::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2Hchg::initProc() {
 
   // Find pointer to H+-.
@@ -2123,7 +2123,7 @@ double Sigma1ffbar2Hchg::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2Hchgq::initProc() {
 
   // Standard parameters.
@@ -2141,7 +2141,7 @@ void Sigma2qg2Hchgq::initProc() {
                                : particleDataPtr->resOpenFrac(-37,  idNew);
   openFracNeg = (idOld%2 == 0) ? particleDataPtr->resOpenFrac(-37, -idNew)
                                : particleDataPtr->resOpenFrac( 37, -idNew);
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -2171,7 +2171,7 @@ double Sigma2qg2Hchgq::sigmaHat() {
 
   // Check that specified flavour present.
   if (abs(id1) != idOld && abs(id2) != idOld) return 0.;
- 
+
   // Answer.
   return (id1 == idOld || id2 == idOld) ? sigma * openFracPos
                                         : sigma * openFracNeg;
@@ -2232,7 +2232,7 @@ double Sigma2qg2Hchgq::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2A3H12::initProc() {
 
   // Set up whether h0(H_1) or H0(H_2).
@@ -2333,7 +2333,7 @@ double Sigma2ffbar2A3H12::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2HchgH12::initProc() {
 
   // Set up whether h0(H_1) or H0(H_2).
@@ -2432,7 +2432,7 @@ double Sigma2ffbar2HchgH12::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2HposHneg::initProc() {
 
   // Standard parameters.
@@ -2461,7 +2461,7 @@ void Sigma2ffbar2HposHneg::sigmaKin() {
   // Common kinematics factora.
   double preFac = M_PI * pow2(alpEM) * ((uH * tH - s3 * s4) / sH2);
   double propZ  = 1. / ( pow2(sH - m2Z) + pow2(mGammaZ) );
- 
+
   // Separate parts for gamma*, interference and Z0.
   gamSig    = preFac * 2. * pow2(eH) / sH2;
   intSig    = preFac * 2. * eH * lH * thetaWRat * propZ * (sH - m2Z) / sH;

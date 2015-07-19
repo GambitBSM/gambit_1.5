@@ -1,5 +1,5 @@
 // SigmaOnia.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -20,7 +20,7 @@ namespace Pythia8 {
 // The constructor.
 
 SigmaOniaSetup::SigmaOniaSetup(Info* infoPtrIn, Settings* settingsPtrIn,
-  ParticleData* particleDataPtrIn, int flavourIn) 
+  ParticleData* particleDataPtrIn, int flavourIn)
   : valid3S1(true), valid3PJ(true), valid3DJ(true), flavour(flavourIn) {
 
   // Set the pointers and category/key strings and mass splitting.
@@ -105,18 +105,18 @@ void SigmaOniaSetup::setupSigma2gg(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3S1 || oniaFlavour;
       // Colour-singlet.
       if (flag || ggs3S1[0][i])
-	procs.push_back(new Sigma2gg2QQbar3S11g
+        procs.push_back(new Sigma2gg2QQbar3S11g
           (states3S1[i], mes3S1[0][i], flavour*100 + 1));
       // Colour-octet.
       if (flag || ggs3S1[1][i])
-	procs.push_back(new Sigma2gg2QQbarX8g
-	  (states3S1[i], mes3S1[1][i], 0, mSplit, flavour*100+2));
-      if (flag || ggs3S1[2][i]) 
         procs.push_back(new Sigma2gg2QQbarX8g
-	  (states3S1[i], mes3S1[2][i], 1, mSplit, flavour*100+5));
+          (states3S1[i], mes3S1[1][i], 0, mSplit, flavour*100+2));
+      if (flag || ggs3S1[2][i])
+        procs.push_back(new Sigma2gg2QQbarX8g
+          (states3S1[i], mes3S1[2][i], 1, mSplit, flavour*100+5));
       if (flag || ggs3S1[3][i])
-	procs.push_back(new Sigma2gg2QQbarX8g
-	  (states3S1[i], mes3S1[3][i], 2, mSplit, flavour*100+8));
+        procs.push_back(new Sigma2gg2QQbarX8g
+          (states3S1[i], mes3S1[3][i], 2, mSplit, flavour*100+8));
     }
   }
 
@@ -126,13 +126,13 @@ void SigmaOniaSetup::setupSigma2gg(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3PJ || oniaFlavour;
       // Colour-singlet.
       if (flag || ggs3PJ[0][i]) {
-	procs.push_back(new Sigma2gg2QQbar3PJ1g
-	  (states3PJ[i], mes3PJ[0][i], spins3PJ[i], flavour*100 + 11));
+        procs.push_back(new Sigma2gg2QQbar3PJ1g
+          (states3PJ[i], mes3PJ[0][i], spins3PJ[i], flavour*100 + 11));
       }
       // Colour-octet.
       if (flag || ggs3PJ[1][i])
-	procs.push_back(new Sigma2gg2QQbarX8g
-	  (states3PJ[i], mes3PJ[1][i], 0, mSplit, flavour*100+14));
+        procs.push_back(new Sigma2gg2QQbarX8g
+          (states3PJ[i], mes3PJ[1][i], 0, mSplit, flavour*100+14));
     }
   }
 
@@ -142,13 +142,13 @@ void SigmaOniaSetup::setupSigma2gg(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3DJ || oniaFlavour;
       // Colour-singlet.
       if (flag || ggs3DJ[0][i]) {
-	procs.push_back(new Sigma2gg2QQbar3DJ1g
-	  (states3DJ[i], mes3DJ[0][i], spins3DJ[i], flavour*100 + 17));
+        procs.push_back(new Sigma2gg2QQbar3DJ1g
+          (states3DJ[i], mes3DJ[0][i], spins3DJ[i], flavour*100 + 17));
       }
       // Colour-octet.
       if (flag || ggs3DJ[1][i]) {
-	procs.push_back(new Sigma2gg2QQbarX8g
-	  (states3DJ[i], mes3DJ[1][i], 2, mSplit, flavour*100+18));
+        procs.push_back(new Sigma2gg2QQbarX8g
+          (states3DJ[i], mes3DJ[1][i], 2, mSplit, flavour*100+18));
       }
     }
   }
@@ -167,14 +167,14 @@ void SigmaOniaSetup::setupSigma2qg(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3S1 || oniaFlavour;
       // Colour-octet.
       if (flag || qgs3S1[0][i])
-	procs.push_back(new Sigma2qg2QQbarX8q
-	  (states3S1[i], mes3S1[1][i], 0, mSplit, flavour*100+3));
+        procs.push_back(new Sigma2qg2QQbarX8q
+          (states3S1[i], mes3S1[1][i], 0, mSplit, flavour*100+3));
       if (flag || qgs3S1[1][i])
-	procs.push_back(new Sigma2qg2QQbarX8q
-	  (states3S1[i], mes3S1[2][i], 1, mSplit, flavour*100+6));
+        procs.push_back(new Sigma2qg2QQbarX8q
+          (states3S1[i], mes3S1[2][i], 1, mSplit, flavour*100+6));
       if (flag || qgs3S1[2][i])
-	procs.push_back(new Sigma2qg2QQbarX8q
-	  (states3S1[i], mes3S1[3][i], 2, mSplit, flavour*100+9));
+        procs.push_back(new Sigma2qg2QQbarX8q
+          (states3S1[i], mes3S1[3][i], 2, mSplit, flavour*100+9));
     }
   }
 
@@ -184,12 +184,12 @@ void SigmaOniaSetup::setupSigma2qg(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3PJ || oniaFlavour;
       // Colour-singlet.
       if (flag || qgs3PJ[0][i])
-	procs.push_back(new Sigma2qg2QQbar3PJ1q
-	  (states3PJ[i], mes3PJ[0][i], spins3PJ[i], flavour*100 + 12));
+        procs.push_back(new Sigma2qg2QQbar3PJ1q
+          (states3PJ[i], mes3PJ[0][i], spins3PJ[i], flavour*100 + 12));
       // Colour-octet.
       if (flag || qgs3PJ[1][i])
-	procs.push_back(new Sigma2qg2QQbarX8q
-	  (states3PJ[i], mes3PJ[1][i], 0, mSplit, flavour*100+15));
+        procs.push_back(new Sigma2qg2QQbarX8q
+          (states3PJ[i], mes3PJ[1][i], 0, mSplit, flavour*100+15));
     }
   }
 
@@ -199,8 +199,8 @@ void SigmaOniaSetup::setupSigma2qg(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3DJ || oniaFlavour;
       // Colour-octet.
       if (flag || qgs3DJ[0][i])
-	procs.push_back(new Sigma2qg2QQbarX8q
-	  (states3DJ[i], mes3DJ[1][i], 2, mSplit, flavour*100+19));
+        procs.push_back(new Sigma2qg2QQbarX8q
+          (states3DJ[i], mes3DJ[1][i], 2, mSplit, flavour*100+19));
     }
   }
 
@@ -218,14 +218,14 @@ void SigmaOniaSetup::setupSigma2qq(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3S1 || oniaFlavour;
       // Colour-octet.
       if (flag || qqs3S1[0][i])
-	procs.push_back(new Sigma2qqbar2QQbarX8g
-	  (states3S1[i], mes3S1[1][i], 0, mSplit, flavour*100+4));
+        procs.push_back(new Sigma2qqbar2QQbarX8g
+          (states3S1[i], mes3S1[1][i], 0, mSplit, flavour*100+4));
       if (flag || qqs3S1[1][i])
-	procs.push_back(new Sigma2qqbar2QQbarX8g
-	  (states3S1[i], mes3S1[2][i], 1, mSplit, flavour*100+7));
+        procs.push_back(new Sigma2qqbar2QQbarX8g
+          (states3S1[i], mes3S1[2][i], 1, mSplit, flavour*100+7));
       if (flag || qqs3S1[2][i])
-	procs.push_back(new Sigma2qqbar2QQbarX8g
-	  (states3S1[i], mes3S1[3][i], 2, mSplit, flavour*100+10));
+        procs.push_back(new Sigma2qqbar2QQbarX8g
+          (states3S1[i], mes3S1[3][i], 2, mSplit, flavour*100+10));
     }
   }
 
@@ -235,12 +235,12 @@ void SigmaOniaSetup::setupSigma2qq(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3PJ || oniaFlavour;
       // Colour-singlet.
       if (flag || qqs3PJ[0][i])
-	procs.push_back(new Sigma2qqbar2QQbar3PJ1g
-	  (states3PJ[i], mes3PJ[0][i], spins3PJ[i], flavour*100 + 13));
+        procs.push_back(new Sigma2qqbar2QQbar3PJ1g
+          (states3PJ[i], mes3PJ[0][i], spins3PJ[i], flavour*100 + 13));
       // Colour-octet.
       if (flag || qqs3PJ[1][i])
-	procs.push_back(new Sigma2qqbar2QQbarX8g
-	  (states3PJ[i], mes3PJ[1][i], 0, mSplit, flavour*100+16));
+        procs.push_back(new Sigma2qqbar2QQbarX8g
+          (states3PJ[i], mes3PJ[1][i], 0, mSplit, flavour*100+16));
     }
   }
 
@@ -250,8 +250,8 @@ void SigmaOniaSetup::setupSigma2qq(vector<SigmaProcess*> &procs, bool oniaIn) {
       bool flag = oniaIn || onia || onia3DJ || oniaFlavour;
       // Colour-octet.
       if (flag || qqs3DJ[0][i])
-	procs.push_back(new Sigma2qqbar2QQbarX8g
-	  (states3DJ[i], mes3DJ[1][i], 2, mSplit, flavour*100+20));
+        procs.push_back(new Sigma2qqbar2QQbarX8g
+          (states3DJ[i], mes3DJ[1][i], 2, mSplit, flavour*100+20));
     }
   }
 
@@ -261,21 +261,21 @@ void SigmaOniaSetup::setupSigma2qq(vector<SigmaProcess*> &procs, bool oniaIn) {
 
 // Initialise and check the flavour, j-number, and validity of states.
 
-void SigmaOniaSetup::initStates(string wave, const vector<int> &states, 
+void SigmaOniaSetup::initStates(string wave, const vector<int> &states,
   vector<int> &jnums, bool &valid) {
 
   set<int> unique;
   unsigned int nstates(0);
   for (unsigned int i = 0; i < states.size(); ++i) {
-  
+
     // Check state is unique and remove if not.
     stringstream state;
     state << states[i];
     unique.insert(states[i]);
     if (nstates + 1 != unique.size()) {
       infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
-			+ state.str() + " in mvec " + cat + ":states(" 
-			+ wave + ")", "has duplicates");
+                        + state.str() + " in mvec " + cat + ":states("
+                        + wave + ")", "has duplicates");
       valid = false;
     } else ++nstates;
 
@@ -284,7 +284,7 @@ void SigmaOniaSetup::initStates(string wave, const vector<int> &states,
     vector<int> digits;
     while (digits.size() < 7) {
       digits.push_back((states[i]%mod1 - states[i]%mod2) / mod2);
-      mod1 *= 10; 
+      mod1 *= 10;
       mod2 *= 10;
     }
     int s, l, j((digits[0] - 1)/2);
@@ -297,34 +297,34 @@ void SigmaOniaSetup::initStates(string wave, const vector<int> &states,
       if      (digits[4] == 0) {l = 0;  s = 0;}
       else                     {l = 1;  s = 1;}
     }
-    
+
     // Check state validity.
     if (states[i] != 0) {
       if (!particleDataPtr->isParticle(states[i])) {
-	infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
-			  + state.str() + " in mvec " + cat + ":states(" 
-			  + wave + ")", "is unknown");
-	valid = false;
+        infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
+                          + state.str() + " in mvec " + cat + ":states("
+                          + wave + ")", "is unknown");
+        valid = false;
       }
       if (digits[3] != 0) {
-	infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
-			  + state.str() + " in mvec " + cat + ":states(" 
-			  + wave + ")", " is not a meson");
-	valid = false;
+        infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
+                          + state.str() + " in mvec " + cat + ":states("
+                          + wave + ")", " is not a meson");
+        valid = false;
       }
       if (digits[2] != digits[1] || digits[1] != flavour) {
-	infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
-			  + state.str() + " in mvec " + cat + ":states(" 
-			  + wave + ")", "is not a " + key + " state");
-	valid = false;
+        infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
+                          + state.str() + " in mvec " + cat + ":states("
+                          + wave + ")", "is not a " + key + " state");
+        valid = false;
       }
       if ((wave == "3S1" && (s != 1 || l != 0 || j != 1)) ||
-	  (wave == "3PJ" && (s != 1 || l != 1 || j < 0 || j > 2)) ||
-	  (wave == "3DJ" && (s != 1 || l != 2 || j < 1 || j > 3))) {
-	infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
-			  + state.str() + " in mvec " + cat + ":states(" 
-			  + wave + ")", "is not a " + wave + " state");
-	valid = false;
+          (wave == "3PJ" && (s != 1 || l != 1 || j < 0 || j > 2)) ||
+          (wave == "3DJ" && (s != 1 || l != 2 || j < 1 || j > 3))) {
+        infoPtr->errorMsg("Error in SigmaOniaSetup::initStates: particle "
+                          + state.str() + " in mvec " + cat + ":states("
+                          + wave + ")", "is not a " + wave + " state");
+        valid = false;
       }
     } else valid = false;
     jnums.push_back(j);
@@ -337,15 +337,15 @@ void SigmaOniaSetup::initStates(string wave, const vector<int> &states,
 // Initialise and check a group of PVec settings.
 
 void SigmaOniaSetup::initSettings(string wave, unsigned int size,
-  const vector<string> &names, vector< vector<double> > &pvecs, 
+  const vector<string> &names, vector< vector<double> > &pvecs,
   bool &valid) {
 
   for (unsigned int i = 0; i < names.size(); ++i) {
     pvecs.push_back(settingsPtr->pvec(names[i]));
     if (pvecs.back().size() != size) {
       infoPtr->errorMsg("Error in SigmaOniaSetup::initSettings: mvec " + cat
-			+ ":states(" + wave + ")", "is not the same size as"
-			" pvec " + names[i]);
+                        + ":states(" + wave + ")", "is not the same size as"
+                        " pvec " + names[i]);
       valid = false;
     }
   }
@@ -357,15 +357,15 @@ void SigmaOniaSetup::initSettings(string wave, unsigned int size,
 // Initialise and check a group of FVec settings.
 
 void SigmaOniaSetup::initSettings(string wave, unsigned int size,
-  const vector<string> &names, vector< vector<bool> > &fvecs, 
+  const vector<string> &names, vector< vector<bool> > &fvecs,
   bool &valid) {
 
   for (unsigned int i = 0; i < names.size(); ++i) {
     fvecs.push_back(settingsPtr->fvec(names[i]));
     if (fvecs.back().size() != size) {
       infoPtr->errorMsg("Error in SigmaOniaSetup::initSettings: mvec " + cat
-			+ ":states(" + wave + ")", "is not the same size as"
-			" fvec " + names[i]);
+                        + ":states(" + wave + ")", "is not the same size as"
+                        " fvec " + names[i]);
       valid = false;
     }
   }
@@ -380,12 +380,12 @@ void SigmaOniaSetup::initSettings(string wave, unsigned int size,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2QQbar3S11g::initProc() {
 
   // Process name.
-  nameSave = "g g -> " 
-    + string((codeSave - codeSave%100)/100 == 4 ? "ccbar" : "bbbar") 
+  nameSave = "g g -> "
+    + string((codeSave - codeSave%100)/100 == 4 ? "ccbar" : "bbbar")
     + "(3S1)[3S1(1)] g";
 
 }
@@ -431,12 +431,12 @@ void Sigma2gg2QQbar3S11g::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2QQbar3PJ1g::initProc() {
 
   // Process name.
   if (jSave >= 0 && jSave <= 2)
-    nameSave = namePrefix() + " -> " + nameMidfix() + "(3PJ)[3PJ(1)] " 
+    nameSave = namePrefix() + " -> " + nameMidfix() + "(3PJ)[3PJ(1)] "
       + namePostfix();
   else
     nameSave = "illegal process";
@@ -609,16 +609,16 @@ void Sigma2qqbar2QQbar3PJ1g::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2QQbar3DJ1g::initProc() {
 
   // Process name.
   if (jSave >= 1 && jSave <= 3)
-    nameSave = namePrefix() + " -> " + nameMidfix() + "(3DJ)[3DJ(1)] " 
+    nameSave = namePrefix() + " -> " + nameMidfix() + "(3DJ)[3DJ(1)] "
       + namePostfix();
   else
     nameSave = "illegal process";
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -641,9 +641,9 @@ void Sigma2gg2QQbar3DJ1g::sigmaKin() {
     if (i < 8) {
       mpsV[i] = mpsV[i - 1] * (s3 + sH);
       if (i < 6) {
-	mmsV[i] = mmsV[i - 1] * (s3 - sH);
-	mmtV[i] = mmtV[i - 1] * (s3 - tH);
-	sptV[i] = sptV[i - 1] * (sH + tH);
+        mmsV[i] = mmsV[i - 1] * (s3 - sH);
+        mmtV[i] = mmtV[i - 1] * (s3 - tH);
+        sptV[i] = sptV[i - 1] * (sH + tH);
       }
     }
   }
@@ -651,8 +651,8 @@ void Sigma2gg2QQbar3DJ1g::sigmaKin() {
   double sig = 0;
   if (jSave == 1) {
     fac *= 16. / 81.;
-    sig  = -25/(sqrt(m2V[1])*mmsV[5]) + (49*sqrt(m2V[3]))/(mmsV[5]*sHV[2]) 
-      + (48*sqrt(m2V[3])*sHV[2]*(m2V[2] + sHV[2]))/(mmsV[3]*mmtV[5]*mpsV[3]) 
+    sig  = -25/(sqrt(m2V[1])*mmsV[5]) + (49*sqrt(m2V[3]))/(mmsV[5]*sHV[2])
+      + (48*sqrt(m2V[3])*sHV[2]*(m2V[2] + sHV[2]))/(mmsV[3]*mmtV[5]*mpsV[3])
       - (67*sqrt(m2V[1]))/(mmsV[5]*sHV[1]) - (5*sHV[1])/(sqrt(m2V[3])*mmsV[5])
       + (4*sqrt(m2V[1])*(m2V[6] + 97*m2V[4]*sHV[2] - 48*m2V[3]*sHV[3]
       + 105*m2V[2]*sHV[4] + 33*sHV[6] -
@@ -688,7 +688,7 @@ void Sigma2gg2QQbar3DJ1g::sigmaKin() {
       3996*m2V[6]*sHV[4] - 4766*m2V[5]*sHV[5] + 10022*m2V[4]*sHV[6] -
       5212*m2V[3]*sHV[7] + 6124*m2V[2]*sHV[8] - 869*m2V[1]*sHV[9] +
       145*sHV[10] -
-      597*m2V[9]*sHV[1])/(sqrt(m2V[1])*mmsV[5]*mpsV[7]*sHV[2]*sptV[1]); 
+      597*m2V[9]*sHV[1])/(sqrt(m2V[1])*mmsV[5]*mpsV[7]*sHV[2]*sptV[1]);
   } else if (jSave == 2) {
     fac *= 32. / 27.;
     sig  = 16/(sqrt(m2V[1])*mmsV[5]) +
@@ -727,7 +727,7 @@ void Sigma2gg2QQbar3DJ1g::sigmaKin() {
       140*m2V[6]*sHV[4] - 746*m2V[5]*sHV[5] + 226*m2V[4]*sHV[6] -
       486*m2V[3]*sHV[7] + 679*m2V[2]*sHV[8] - 50*m2V[1]*sHV[9] +
       112*sHV[10] -
-      8*m2V[9]*sHV[1]))/(sqrt(m2V[1])*mmsV[5]*mpsV[7]*sHV[2]*sptV[1]); 
+      8*m2V[9]*sHV[1]))/(sqrt(m2V[1])*mmsV[5]*mpsV[7]*sHV[2]*sptV[1]);
   } else if (jSave == 3) {
     fac *= 256. / 189.;
     sig  = 5/(sqrt(m2V[1])*mmsV[5]) + sqrt(m2V[3])/(mmsV[5]*sHV[2]) +
@@ -765,7 +765,7 @@ void Sigma2gg2QQbar3DJ1g::sigmaKin() {
       769*m2V[6]*sHV[4] - 1079*m2V[5]*sHV[5] + 913*m2V[4]*sHV[6] -
       603*m2V[3]*sHV[7] + 601*m2V[2]*sHV[8] - 56*m2V[1]*sHV[9] +
       70*sHV[10] -
-      83*m2V[9]*sHV[1])/(sqrt(m2V[1])*mmsV[5]*mpsV[7]*sHV[2]*sptV[1]); 
+      83*m2V[9]*sHV[1])/(sqrt(m2V[1])*mmsV[5]*mpsV[7]*sHV[2]*sptV[1]);
   }
 
   // Answer.
@@ -781,7 +781,7 @@ void Sigma2gg2QQbar3DJ1g::sigmaKin() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2QQbarX8g::initProc() {
 
   // Return for illegal process.
@@ -790,13 +790,13 @@ void Sigma2gg2QQbarX8g::initProc() {
     nameSave = "illegal process";
     return;
   }
-  
+
   // Determine quark composition and quantum numbers.
   int mod1(10), mod2(1);
   vector<int> digits;
   while (digits.size() < 7) {
     digits.push_back((idHad%mod1 - idHad%mod2) / mod2);
-    mod1 *= 10; 
+    mod1 *= 10;
     mod2 *= 10;
   }
   int s, l, j((digits[0] - 1)/2);
@@ -809,7 +809,7 @@ void Sigma2gg2QQbarX8g::initProc() {
     if      (digits[4] == 0) {l = 0;  s = 0;}
     else                     {l = 1;  s = 1;}
   }
-  
+
   // Set the process name.
   stringstream sName, jName;
   string lName, stateName;
@@ -822,8 +822,8 @@ void Sigma2gg2QQbarX8g::initProc() {
   if (stateSave == 0) stateName = "[3S1(8)]";
   else if (stateSave == 1) stateName = "[1S0(8)]";
   else if (stateSave == 2) stateName = "[3PJ(8)]";
-  nameSave = namePrefix() + " -> " + (digits[1] == 4 ? "ccbar" : "bbbar") 
-    + "(" + sName.str() + lName + jName.str() + ")" + stateName 
+  nameSave = namePrefix() + " -> " + (digits[1] == 4 ? "ccbar" : "bbbar")
+    + "(" + sName.str() + lName + jName.str() + ")" + stateName
     + " " + namePostfix();
 
   // Ensure the dummy particle for the colour-octet state is valid.
@@ -837,18 +837,18 @@ void Sigma2gg2QQbarX8g::initProc() {
     int    chargeType = particleDataPtr->chargeType(idHad);
     int    colType    = 2;
     particleDataPtr->addParticle(idOct, nameOct, spinType, chargeType, colType,
-				 m0, mWidth, m0, m0);
+                                 m0, mWidth, m0, m0);
     ParticleDataEntry* entry = particleDataPtr->particleDataEntryPtr(idOct);
     if (entry) entry->addChannel(1, 1.0, 0, idHad, 21);
-  } else if (mSplit > 0 && abs(particleDataPtr->m0(idOct) - m0) > 1E-15) {
+  } else if (mSplit > 0 && abs(particleDataPtr->m0(idOct) - m0) > 1E-5) {
     particleDataPtr->m0(idOct, m0);
     particleDataPtr->mWidth(idOct, mWidth);
     particleDataPtr->mMin(idOct, m0);
     particleDataPtr->mMax(idOct, m0);
   } else if (particleDataPtr->m0(idOct) <= particleDataPtr->m0(idHad)) {
     infoPtr->errorMsg("Warning in Sigma2gg2QQbarX8g::initProc: mass of "
-		      "intermediate colour-octet state"
-		      "increased to be greater than the physical state");
+                      "intermediate colour-octet state"
+                      "increased to be greater than the physical state");
     particleDataPtr->m0(idOct, m0);
     particleDataPtr->mWidth(idOct, mWidth);
     particleDataPtr->mMin(idOct, m0);
@@ -1075,4 +1075,3 @@ void Sigma2qqbar2QQbarX8g::setIdColAcol() {
 //==========================================================================
 
 } // end namespace Pythia8
-

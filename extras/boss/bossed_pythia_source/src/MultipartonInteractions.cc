@@ -1,11 +1,11 @@
 // MultipartonInteractions.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 // Function definitions (not found in the header) for the
 // SigmaMultiparton and MultipartonInteractions classes.
-  
+
 #include "Pythia8/MultipartonInteractions.h"
 
 // Internal headers for special processes.
@@ -146,7 +146,7 @@ bool SigmaMultiparton::init(int inState, int processLevel, Info* infoPtr,
   sHatMin.resize(nChan);
   sigmaTval.resize(nChan);
   sigmaUval.resize(nChan);
- 
+
   // Initialize the processes.
   for (int i = 0; i < nChan; ++i) {
     sigmaT[i]->init( infoPtr, settingsPtr, particleDataPtr, rndmPtr,
@@ -208,7 +208,7 @@ double SigmaMultiparton::sigma( int id1, int id2, double x1, double x2,
       if (needMasses[i]) sigmaTval[i] *= sigmaT[i]->sHBetaMPI() / sHat;
       sigmaTsum += sigmaTval[i];
     }
-   
+
     // u-channel-sampling contribution.
     if (sHat > sHatMin[i]) {
       sigmaU[i]->set2KinMPI( x1, x2, sHat, uHat, tHat,
@@ -772,7 +772,7 @@ void MultipartonInteractions::pTfirst() {
         if (WTacc > WTACCWARN) infoPtr->errorMsg("Warning in "
             "MultipartonInteractions::pTfirst: weight above unity");
       }
-    
+
     // Loop until acceptable pT and acceptable kinematics.
     } while (WTacc < rndmPtr->flat() || !dSigmaDtSel->final2KinMPI());
 
@@ -782,16 +782,16 @@ void MultipartonInteractions::pTfirst() {
     while (true) {
       do {
         pT2 = pT20min0maxR / (pT20minR + rndmPtr->flat() * pT2maxmin) - pT20R;
-  
+
         // Evaluate upper estimate of cross section for this pT2 choice.
         dSigmaApprox = pT4dSigmaMax / pow2(pT2 + pT20R);
-  
+
         // Pick complete kinematics and evaluate cross-section correction.
         WTacc = sigmaPT2scatter(true) / dSigmaApprox;
-  
+
         // Evaluate and include Sudakov factor.
         if (bProfile != 4) WTacc *= sudakov( pT2, enhanceB);
-      
+
         // Warn for weight above unity
         if (WTacc > WTACCWARN) infoPtr->errorMsg("Warning in "
             "MultipartonInteractions::pTfirst: weight above unity");
@@ -821,7 +821,7 @@ void MultipartonInteractions::pTfirst() {
         // Save accepted kinematics and pointer to SigmaProcess.
         dSigmaDtSel->saveKin();
         dSigmaDtSelSave = dSigmaDtSel;
-       
+
         // Put x1, x2 information into beam pointers to get correct
         // PDF rescaling in trial interaction (for hard process, can
         // be sea or valence, not companion).
@@ -839,7 +839,7 @@ void MultipartonInteractions::pTfirst() {
         double expb2 = rndmPtr->flat();
         b2now  = - fac * log(expb2);
         bNow   = sqrt(b2now);
-      
+
         // Enhancement factor for the hard process and overestimate
         // for fastPT2. Note that existing framework has a (1. / sigmaND)
         // present.
@@ -850,7 +850,7 @@ void MultipartonInteractions::pTfirst() {
         // Trial interaction with dummy event.
         Event evDummy;
         double pTtrial = pTnext(pTmax, pTmin, evDummy);
-  
+
         // Restore beams.
         beamAPtr->clear();
         beamBPtr->clear();
@@ -884,7 +884,7 @@ void MultipartonInteractions::pTfirst() {
 
   // End handling for high b.
   }
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -975,7 +975,9 @@ bool MultipartonInteractions::limitPTmax( Event& event) {
   bool onlyQGP1 = true;
   bool onlyQGP2 = true;
   int  n21      = 0;
-  for (int i = 5; i < event.size(); ++i) {
+  int iBegin = 5;
+  if (infoPtr->isHardDiffractive()) iBegin = 9;
+  for (int i = iBegin; i < event.size(); ++i) {
     if (event[i].status() == -21) ++n21;
     else if (n21 == 0) {
       int idAbs = event[i].idAbs();
@@ -989,7 +991,7 @@ bool MultipartonInteractions::limitPTmax( Event& event) {
   // If two hard interactions then limit if one only contains q/g/gamma.
   bool onlyQGP = (n21 == 2) ? (onlyQGP1 || onlyQGP2) : onlyQGP1;
   return (onlyQGP);
- 
+
 }
 
 //--------------------------------------------------------------------------
@@ -1005,9 +1007,9 @@ double MultipartonInteractions::pTnext( double pTbegAll, double pTendAll,
   double pT2end = pow2( max(pTmin, pTendAll) );
 
   // With the x-dependent matter profile, and minimum bias or diffraction,
-  // it is possible to reuse values that have been stored during the trial 
-  // interactions for a slight speedup. 
-  // bIsSet is false during trial interactions, counter 21 in case partonLevel 
+  // it is possible to reuse values that have been stored during the trial
+  // interactions for a slight speedup.
+  // bIsSet is false during trial interactions, counter 21 in case partonLevel
   // is retried and counter 22 for the first pass through partonLevel.
   if (bProfile == 4 && bIsSet && bSetInFirst && infoPtr->getCounter(21) == 1
     && infoPtr->getCounter(22) == 1) {
@@ -1290,7 +1292,7 @@ void MultipartonInteractions::upperEnvelope() {
   // Initially determine constant in jet cross section upper estimate
   // d(sigma_approx)/d(pT2) < const / (pT2 + r * pT20)^2.
   pT4dSigmaMax = 0.;
-  
+
   // Loop thorough allowed pT range logarithmically evenly.
   for (int iPT = 0; iPT < 100; ++iPT) {
     double pT = pTmin * pow( pTmax/pTmin, 0.01 * (iPT + 0.5) );
@@ -1317,14 +1319,14 @@ void MultipartonInteractions::upperEnvelope() {
       * pow2(alpS / pT2shift);
     double yMax = log(1./xT + sqrt(1./(xT*xT) - 1.));
     double volumePhSp = pow2(2. * yMax);
-  
+
     // Final comparison to determine upper estimate.
     double dSigmaApproxNow = SIGMAFUDGE * xPDF1sumMax * xPDF2sumMax
       * dSigmaPartonApprox * volumePhSp;
     double pT4dSigmaNow = pow2(pT2 + pT20R) * dSigmaApproxNow;
     if ( pT4dSigmaNow > pT4dSigmaMax) pT4dSigmaMax = pT4dSigmaNow;
   }
-  
+
   // Get wanted constant by dividing by the nondiffractive cross section.
   pT4dProbMax = pT4dSigmaMax / sigmaND;
 
@@ -1340,7 +1342,7 @@ void MultipartonInteractions::jetCrossSection() {
 
   // Common factor from bin size in dpT2 / (pT2 + r * pT20)^2 and statistics.
   double sigmaFactor = (1. / pT20minR - 1. / pT20maxR) / (100. * nSample);
- 
+
   // Reset overlap-weighted cross section for x-dependent matter profile.
   if (bProfile == 4) for (int bBin = 0; bBin < XDEP_BBIN; bBin++)
     sigmaIntWgt[bBin] = 0.;
@@ -1356,7 +1358,7 @@ void MultipartonInteractions::jetCrossSection() {
     // Reset pT-binned overlap-weigted integration.
     if (bProfile == 4) for (int bBin = 0; bBin < XDEP_BBIN; bBin++)
       sigmaSumWgt[bBin] = 0.;
-    
+
     // In each pT bin sample a number of random pT values.
     for (int iSample = 0; iSample < nSample; ++iSample) {
       double mappedPT2 = 1. - 0.01 * (iPT + rndmPtr->flat());
@@ -1424,7 +1426,7 @@ double MultipartonInteractions::sudakov(double pT2sud, double enhance) {
   double sudExp = sudExpPT[iBin] + (xBin - iBin)
     * (sudExpPT[iBin + 1] - sudExpPT[iBin]);
   return exp( -enhance * sudExp);
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1453,7 +1455,7 @@ double MultipartonInteractions::fastPT2( double pT2beg) {
 // Slightly different treatment for first interaction and subsequent ones.
 
 double MultipartonInteractions::sigmaPT2scatter(bool isFirst) {
- 
+
   // Derive recormalization and factorization scales, amd alpha_strong/em.
   pT2shift = pT2 + pT20;
   pT2Ren   = pT2shift;
@@ -1472,16 +1474,10 @@ double MultipartonInteractions::sigmaPT2scatter(bool isFirst) {
   double y4 = yMax * (2. * rndmPtr->flat() - 1.);
   y = 0.5 * (y3 + y4);
 
-  // Reject some events at large rapidities to improve efficiency.
-  // (Works for baryons, not pions or Pomerons if they have hard PDF's.)
-  double WTy = (hasBaryonBeams)
-             ? (1. - pow2(y3/yMax)) * (1. - pow2(y4/yMax)) : 1.;
-  if (WTy < rndmPtr->flat()) return 0.;
-
   // Failure if x1 or x2 exceed what is left in respective beam.
   x1 = 0.5 * xT * (exp(y3) + exp(y4));
   x2 = 0.5 * xT * (exp(-y3) + exp(-y4));
-  if (isFirst) {
+  if (isFirst && iDiffSys == 0) {
     if (x1 > 1. || x2 > 1.) return 0.;
   } else {
     if (x1 > beamAPtr->xMax() || x2 > beamBPtr->xMax()) return 0.;
@@ -1506,7 +1502,7 @@ double MultipartonInteractions::sigmaPT2scatter(bool isFirst) {
       else xPDF2[id+10] = beamBPtr->xf(id, x2, pT2Fac);
       xPDF2sum += xPDF2[id+10];
     }
-  
+
   // For subsequent interactions use rescaled densities.
   } else {
     for (int id = -nQuarkIn; id <= nQuarkIn; ++id) {
@@ -1560,7 +1556,7 @@ double MultipartonInteractions::sigmaPT2scatter(bool isFirst) {
     * sigma2Tmp->sigma( id1, id2, x1, x2, sHat, tHat, uHat, alpS, alpEM);
 
   // Combine cross section, pdf's and phase space integral.
-  double volumePhSp = pow2(2. * yMax) / WTy;
+  double volumePhSp = pow2(2. * yMax);
   double dSigmaScat = dSigmaPartonCorr * xPDF1sum * xPDF2sum * volumePhSp;
 
   // Dampen cross section at small pT values; part of formalism.
@@ -1643,7 +1639,7 @@ void MultipartonInteractions::findScatteredPartons( Event& event) {
       probB = 1. / (1. + exp(-2. * (-yTmp - ySepResc) / deltaYResc));
       if (probB > rndmPtr->flat()) scatteredB.push_back( i);
       break;
- 
+
     // Case 4 and undefined values: all partons can rescatter.
     default:
       scatteredA.push_back( i);
@@ -1663,7 +1659,7 @@ void MultipartonInteractions::findScatteredPartons( Event& event) {
 // Select flavours and kinematics for interaction at given pT.
 
 double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
- 
+
   // Derive xT scale from chosen pT2.
   xT       = 2. * sqrt(pT2) / eCM;
   if (xT >= 1.) return 0.;
@@ -1684,7 +1680,7 @@ double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
     if (PREPICKRESCATTER && iScat != iScatA) continue;
     int iA         = scatteredA[iScat];
     int id1Tmp     = event[iA].id();
-    
+
     // Calculate maximum possible sHat and check whether big enough.
     double x1Tmp   = event[iA].pPos() / eCM;
     double sHatMax = x1Tmp * beamBPtr->xMax() * sCM;
@@ -1708,7 +1704,7 @@ double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
     // Begin evaluate parton densities at actual x2.
     double xPDF2[21];
     double xPDF2sum = 0.;
-  
+
     // Use rescaled densities, with preweighting 9/4 for gluons.
     for (int id = -nQuarkIn; id <= nQuarkIn; ++id) {
       if (id == 0) xPDF2[10] = (9./4.) * beamBPtr->xfMPI(21, x2Tmp, pT2Fac);
@@ -1783,7 +1779,7 @@ double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
     if (PREPICKRESCATTER && iScat != iScatB) continue;
     int iB         = scatteredB[iScat];
     int id2Tmp     = event[iB].id();
-    
+
     // Calculate maximum possible sHat and check whether big enough.
     double x2Tmp   = event[iB].pNeg() / eCM;
     double sHatMax = beamAPtr->xMax() * x2Tmp * sCM;
@@ -1807,7 +1803,7 @@ double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
     // Begin evaluate parton densities at actual x1.
     double xPDF1[21];
     double xPDF1sum = 0.;
-  
+
     // Use rescaled densities, with preweighting 9/4 for gluons.
     for (int id = -nQuarkIn; id <= nQuarkIn; ++id) {
       if (id == 0) xPDF1[10] = (9./4.) * beamAPtr->xfMPI(21, x1Tmp, pT2Fac);
@@ -1882,7 +1878,7 @@ double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
         if (PREPICKRESCATTER && iScat2 != iScatB) continue;
         int iB         = scatteredB[iScat2];
         int id2Tmp     = event[iB].id();
-    
+
         // Calculate current sHat and check whether big enough.
         double sHatTmp = (event[iA].p() + event[iB].p()).m2Calc();
         if (sHatTmp < 4. * pT2) continue;
@@ -1912,7 +1908,7 @@ double MultipartonInteractions::sigmaPT2rescatter( Event& event) {
         // Combine cross section and Jacobian tHat -> pT2
         // (with safety minvalue).
         double dSigmaCorr = dSigmaPartonCorr / max(ROOTMIN, root);
-  
+
         // Dampen cross section at small pT values; part of formalism.
         // Use pT2 corrected for massive kinematics at this step.
         //?? double pT2massive = dSigmaDtSel->pT2MPI();
@@ -1964,7 +1960,7 @@ void MultipartonInteractions::overlapInit() {
   double deltaB = BSTEP;
   if (bProfile == 2) deltaB *= min( 0.5, 2.5 * coreRadius);
   if (bProfile == 3) deltaB *= max(1., pow(2. / expPow, 1. / expPow));
-  
+
   // Further variables, with dummy initial values.
   double nNow           = 0.;
   double kLow           = 0.;
@@ -2360,7 +2356,7 @@ void MultipartonInteractions::overlapNext(Event& event, double pTscale) {
 // Printe statistics on number of multiparton-interactions processes.
 
 void MultipartonInteractions::statistics(bool resetStat, ostream& os) {
-    
+
   // Header.
   os << "\n *-------  PYTHIA Multiparton Interactions Statistics  -----"
      << "---*\n"
@@ -2386,7 +2382,7 @@ void MultipartonInteractions::statistics(bool resetStat, ostream& os) {
     int code = iter -> first;
     int number = iter->second;
     numberSum += number;
-  
+
     // Find process name that matches code.
     string name = " ";
     bool foundName = false;

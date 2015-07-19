@@ -1,5 +1,5 @@
 // History.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -106,6 +106,7 @@ History::History( int depth,
 
   // Initialise beam particles
   setupBeams();
+
   // Update probability with PDF ratio
   if (mother && mergingHooksPtr->includeRedundant()) prob *= pdfForSudakov();
 
@@ -145,7 +146,6 @@ History::History( int depth,
   if ( depth > 0 && mergingHooksPtr->doWClustering() )
     clusteringsEW = getAllEWClusterings();
   if ( !clusteringsEW.empty() ) {
-    clusterings.resize(0);
     clusterings.insert( clusterings.end(), clusteringsEW.begin(),
                         clusteringsEW.end() );
   }
@@ -287,17 +287,18 @@ double History::weightTREE(PartonLevel* trial, AlphaStrong * asFSR,
   selected->setScalesInHistory();
 
   // Get weight.
+  double sudakov   = 1.;
   double asWeight  = 1.;
   double pdfWeight = 1.;
 
   // Do trial shower, calculation of alpha_S ratios, PDF ratios
-  double wt    = selected->weightTree( trial, asME, maxScale,
-                   selected->clusterIn.pT(), asFSR, asISR, asWeight,
-                   pdfWeight );
+  sudakov  = selected->weightTree( trial, asME, maxScale,
+               selected->clusterIn.pT(), asFSR, asISR, asWeight,
+               pdfWeight );
 
   // MPI no-emission probability
   int njetsMaxMPI = mergingHooksPtr->nMinMPI();
-  double mpiwt = selected->weightTreeEmissions( trial, -1, njetsMaxMPI,
+  double mpiwt = selected->weightTreeEmissions( trial, -1, 0, njetsMaxMPI,
                    maxScale );
 
   // Set hard process renormalisation scale to default Pythia value.
@@ -326,7 +327,7 @@ double History::weightTREE(PartonLevel* trial, AlphaStrong * asFSR,
   }
 
   // Done
-  return (wt*asWeight*pdfWeight*mpiwt);
+  return (sudakov*asWeight*pdfWeight*mpiwt);
 
 }
 
@@ -355,7 +356,7 @@ double History::weightLOOP(PartonLevel* trial, double RN ) {
   double maxScale = (foundCompletePath) ? infoPtr->eCM()
                   : mergingHooksPtr->muFinME();
   int njetsMaxMPI = mergingHooksPtr->nMinMPI();
-  double mpiwt = selected->weightTreeEmissions( trial, -1, njetsMaxMPI,
+  double mpiwt = selected->weightTreeEmissions( trial, -1, 0, njetsMaxMPI,
                    maxScale );
   wt = mpiwt;
   // Done
@@ -442,17 +443,17 @@ double History::weight_UMEPS_SUBT(PartonLevel* trial, AlphaStrong * asFSR,
   selected->setScalesInHistory();
 
   // Get weight.
+  double sudakov   = 1.;
   double asWeight  = 1.;
   double pdfWeight = 1.;
 
   // Do trial shower, calculation of alpha_S ratios, PDF ratios
-  double sudakov = selected->weightTree(trial, asME, maxScale,
-                     selected->clusterIn.pT(), asFSR, asISR,
-                     asWeight, pdfWeight);
+  sudakov   = selected->weightTree(trial, asME, maxScale,
+                selected->clusterIn.pT(), asFSR,asISR, asWeight, pdfWeight);
 
   // MPI no-emission probability.
   int njetsMaxMPI = mergingHooksPtr->nMinMPI()+1;
-  double mpiwt = selected->weightTreeEmissions( trial, -1, njetsMaxMPI,
+  double mpiwt = selected->weightTreeEmissions( trial, -1, 0, njetsMaxMPI,
                    maxScale );
 
   // Set hard process renormalisation scale to default Pythia value.
@@ -481,7 +482,7 @@ double History::weight_UMEPS_SUBT(PartonLevel* trial, AlphaStrong * asFSR,
   }
 
   // Done
-  return (asWeight*pdfWeight*sudakov*mpiwt);
+  return (sudakov*asWeight*pdfWeight*mpiwt);
 
 }
 
@@ -508,7 +509,7 @@ double History::weight_UNLOPS_TREE(PartonLevel* trial, AlphaStrong * asFSR,
                 selected->clusterIn.pT(), asFSR, asISR, asWeight, pdfWeight);
   // MPI no-emission probability.
   int njetsMaxMPI = mergingHooksPtr->nMinMPI();
-  double mpiwt = selected->weightTreeEmissions( trial, -1, njetsMaxMPI,
+  double mpiwt = selected->weightTreeEmissions( trial, -1, 0, njetsMaxMPI,
                    maxScale );
 
   // Set hard process renormalisation scale to default Pythia value.
@@ -584,7 +585,7 @@ double History::weight_UNLOPS_SUBT(PartonLevel* trial, AlphaStrong * asFSR,
                      asWeight, pdfWeight);
   // MPI no-emission probability.
   int njetsMaxMPI = mergingHooksPtr->nMinMPI()+1;
-  double mpiwt = selected->weightTreeEmissions( trial, -1, njetsMaxMPI,
+  double mpiwt = selected->weightTreeEmissions( trial, -1, 0, njetsMaxMPI,
                    maxScale );
 
   // Set weight
@@ -610,7 +611,7 @@ double History::weight_UNLOPS_SUBTNLO(PartonLevel* trial, double RN ) {
   double maxScale = (foundCompletePath) ? infoPtr->eCM()
                   : mergingHooksPtr->muFinME();
   int njetsMaxMPI = mergingHooksPtr->nMinMPI()+1;
-  double mpiwt = selected->weightTreeEmissions( trial, -1, njetsMaxMPI,
+  double mpiwt = selected->weightTreeEmissions( trial, -1, 0, njetsMaxMPI,
                    maxScale );
   wt = mpiwt;
   // Done
@@ -820,8 +821,10 @@ bool History::getFirstClusteredEventAboveTMS( const double RN, int nDesired,
     // If reclustered event does not exist, exit.
     if ( !getClusteredEvent( RN, nSteps-nTried+1, dummy ) ) return false;
     if ( nTried >= nSteps ) break;
+
     // Continue loop if reclustered event has unresolved partons.
-  } while ( mergingHooksPtr->rhoms( dummy, false) < mergingHooksPtr->tms() );
+  } while ( mergingHooksPtr->getNumberOfClusteringSteps(dummy) > 0
+         && mergingHooksPtr->rhoms( dummy, false) < mergingHooksPtr->tms() );
 
   // Update the hard process.
   if ( doUpdate ) process = dummy;
@@ -1761,14 +1764,14 @@ double History::weightTreePDFs( double maxscale, double pdfScale ) {
 // Function to return the no-emission probability part of the CKKWL weight.
 
 double History::weightTreeEmissions( PartonLevel* trial, int type,
-  int njetMax, double maxscale ) {
+  int njetMin, int njetMax, double maxscale ) {
 
   // Use correct scale
   double newScale = scale;
   // For ME state, just multiply by PDF ratios
   if ( !mother ) return 1.0;
   // Recurse
-  double w = mother->weightTreeEmissions( trial, type, njetMax, newScale );
+  double w = mother->weightTreeEmissions(trial,type,njetMin,njetMax,newScale);
   // Do nothing for empty state
   if (state.size() < 3) return 1.0;
   // If up to now, trial shower was not successful, return zero
@@ -1776,8 +1779,11 @@ double History::weightTreeEmissions( PartonLevel* trial, int type,
   // If this node has too many jets, no not calculate no-emission probability.
   int njetNow = mergingHooksPtr->getNumberOfClusteringSteps( state) ;
   if (njetNow >= njetMax) return 1.0;
+
+  if (njetNow < njetMin ) w *= 1.0;
   // Do trial shower on current state, return zero if not successful
-  w *= doTrialShower(trial, type, maxscale);
+  else w *= doTrialShower(trial, type, maxscale);
+
   if ( w < 1e-12 ) return 0.0;
   // Done
   return w;
@@ -2091,7 +2097,7 @@ double History::hardFacScale(const Event& event) {
     else
       hardscale = sqrt( min( mT[0], mT[1] ) );
   } else {
-    hardscale = infoPtr->QFac();
+    hardscale = mergingHooksPtr->muF();
   }
   // Done
   return hardscale;
@@ -2122,7 +2128,7 @@ double History::hardRenScale(const Event& event) {
     else
       hardscale = sqrt( mT[0]*mT[1] );
   } else {
-    hardscale = infoPtr->QRen();
+    hardscale = mergingHooksPtr->muR();
   }
   // Done
   return hardscale;
@@ -2273,7 +2279,7 @@ bool History::updateind(vector<int> & ind, int i, int N) {
 // Return the expansion of the no-emission probability up to the Nth
 // term. Optionally calculate the the terms using fixed alphaS
 // and/or PDF ratios.
-  
+
 vector<double>
 History::countEmissions(PartonLevel* trial, double maxscale,
                         double minscale, int showerType, double as0,
@@ -2284,7 +2290,7 @@ History::countEmissions(PartonLevel* trial, double maxscale,
   vector<double> result(N+1);
   result[0] = 1.0;
   if ( N < 1 ) return result;
-    
+
   // Copy state to local process
   Event process = state;
 
@@ -2804,7 +2810,7 @@ vector<Clustering> History::findQCDTriple (int EmtTagIn, int colTopIn,
   // Copy input colour topology tag
   // (1: g --> qqbar splitting present, 2:rest)
   int colTop = colTopIn;
-    
+
   // Initialise FinalSize
   int FinalSize = int(PosFinalPartn.size());
   int InitSize = int(PosInitPartn.size());
@@ -3299,7 +3305,6 @@ vector<Clustering> History::getSQCDClusterings( const Event& event) {
   int nInGluon = int(PosInitGluon.size());
   int nInQuark = int(PosInitQuark.size());
   int nInAntiq = int(PosInitAntiq.size());
-
   vector<Clustering> systems;
 
   // Find rad + emt + rec systems:
@@ -3340,6 +3345,7 @@ vector<Clustering> History::getSQCDClusterings( const Event& event) {
       ret.insert(ret.end(), systems.begin(), systems.end());
       systems.resize(0);
     }
+
   }
 
   return ret;
@@ -3371,7 +3377,7 @@ vector<Clustering> History::findSQCDTriple (int EmtTagIn, int colTopIn,
   // PDG numbering offset for squarks
   int offsetL = 1000000;
   int offsetR = 2000000;
-    
+
   // Initialise FinalSize
   int FinalSize = int(PosFinalPartn.size());
   int InitSize = int(PosInitPartn.size());
@@ -3408,21 +3414,22 @@ vector<Clustering> History::findSQCDTriple (int EmtTagIn, int colTopIn,
       // have same flavour (causes problems for gamma->qqbar).
       if (colTop == 1) {
 
+        int radSign = (event[iRad].id() < 0) ? -1 : 1;
         int emtSign = (event[EmtTag].id() < 0) ? -1 : 1;
 
         // Final gluino splitting.
         bool finalSplitting = false;
         if ( abs(radID) < 10
-          && radID == -sign*emtSign*(offsetL + event[EmtTag].idAbs()) )
+          && radSign*(abs(radID)+offsetL) == -sign*event[EmtTag].id() )
           finalSplitting = true;
         if ( abs(radID) < 10
-          && radID == -sign*emtSign*(offsetR + event[EmtTag].idAbs()) )
+          && radSign*(abs(radID)+offsetR) == -sign*event[EmtTag].id() )
           finalSplitting = true;
         if ( abs(radID) > offsetL && abs(radID) < offsetL+10
-          && radID == -sign*emtSign*( event[EmtTag].idAbs() - offsetL) )
+          && radID == -sign*emtSign*( event[EmtTag].idAbs() + offsetL) )
           finalSplitting = true;
         if ( abs(radID) > offsetR && abs(radID) < offsetR+10
-          && radID == -sign*emtSign*( event[EmtTag].idAbs() - offsetR) )
+          && radID == -sign*emtSign*( event[EmtTag].idAbs() + offsetR) )
           finalSplitting = true;
 
         // Initial gluon splitting.
@@ -4267,7 +4274,7 @@ void History::setupBeams() {
   // Get energy of incoming particles
   double Ep = 2. * state[inP].e();
   double Em = 2. * state[inM].e();
-    
+
   // If incoming partons are massive then recalculate to put them massless.
   if (state[inP].m() != 0. || state[inM].m() != 0.) {
     Ep = state[inP].pPos() + state[inM].pPos();
@@ -4641,7 +4648,6 @@ Event History::cluster( const Clustering & inSystem ) {
     double theta = pMother.theta();
     if ( pMother.px() < 0. ) theta *= -1.;
     if (sign == -1) theta += M_PI;
-
 
     // Find rotation by +theta
     RotBstMatrix rot_by_ptheta;
@@ -5870,7 +5876,7 @@ bool History::isFlavSinglet( const Event& event,
 // IN int rad,emt,rec : Positions (in event record) of the three
 //                      particles considered for clustering
 //    Event event     : Reference event
-                 
+
 bool History::allowedClustering( int rad, int emt, int rec, int partner,
                 const Event& event ) {
 
@@ -6556,7 +6562,7 @@ bool History::allowedClustering( int rad, int emt, int rec, int partner,
 // IN int rad,emt,rec : Positions (in event record) of the three
 //                      particles considered for clustering
 //    Event event     : Reference event
-                
+
 bool History::isSinglett( int rad, int emt, int rec, const Event& event ) {
 
   int radCol = event[rad].col();
@@ -7013,7 +7019,7 @@ double History::integrand(int flav, double x, double scaleInt, double z) {
       * z * beamB.xf( 21,x/z,pow(scaleInt,2))
           / beamB.xf( 21,x,  pow(scaleInt,2))
     - 2.*CA;
-    
+
     double integrand2 =
       // G -> G terms
       2.*CA  *((1. -z)/z + z*(1.-z))

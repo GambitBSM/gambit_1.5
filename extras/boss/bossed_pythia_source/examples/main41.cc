@@ -1,5 +1,5 @@
 // main41.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -12,9 +12,7 @@
 // Therefore large event samples may be impractical.
 
 #include "Pythia8/Pythia.h"
-#include "Pythia8/Pythia8ToHepMC.h"
-#include "HepMC/GenEvent.h"
-#include "HepMC/IO_GenEvent.h"
+#include "Pythia8Plugins/HepMC2.h"
 
 using namespace Pythia8;
 

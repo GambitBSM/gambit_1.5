@@ -1,5 +1,5 @@
 // SpaceShower.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -24,13 +24,13 @@
 #include "Pythia8/WeakShowerMEs.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // Data on radiating dipole ends, only used inside SpaceShower.
 
 class SpaceDipoleEnd {
-  
+
 public:
 
   // Constructor.
@@ -43,7 +43,7 @@ public:
     chgType(chgTypeIn), weakType(weakTypeIn), MEtype(MEtypeIn),
     normalRecoil(normalRecoilIn), weakPol(weakPolIn), nBranch(0),
     pT2Old(0.), zOld(0.5) { }
- 
+
   // Store values for trial emission.
   void store( int idDaughterIn, int idMotherIn, int idSisterIn,
     double x1In, double x2In, double m2DipIn, double pT2In, double zIn,
@@ -52,7 +52,7 @@ public:
     idSister = idSisterIn; x1 = x1In; x2 = x2In; m2Dip = m2DipIn;
     pT2 = pT2In; z = zIn; xMo = xMoIn; Q2 = Q2In; mSister = mSisterIn;
     m2Sister = m2SisterIn; pT2corr = pT2corrIn;}
- 
+
   // Basic properties related to evolution and matrix element corrections.
   int    system, side, iRadiator, iRecoiler;
   double pTmax;
@@ -66,7 +66,7 @@ public:
          pT2Old, zOld, asymPol;
 
 } ;
- 
+
 //==========================================================================
 
 // The SpaceShower class does spacelike showers.
@@ -129,7 +129,7 @@ public:
 
   // Tell whether ISR has done a weak emission.
   bool getHasWeaklyRadiated() {return hasWeaklyRadiated;}
-  
+
   // Print dipole list; for debug mainly.
   virtual void list(ostream& os = cout) const;
 
@@ -173,10 +173,10 @@ private:
 
   // Constants: could only be changed in the code itself.
   static const int    MAXLOOPTINYPDF;
-  static const double MCMIN, MBMIN, CTHRESHOLD, BTHRESHOLD, EVALPDFSTEP, 
-         TINYPDF, TINYKERNELPDF, TINYPT2, HEAVYPT2EVOL, HEAVYXEVOL, 
-         EXTRASPACEQ, LAMBDA3MARGIN, PT2MINWARN, LEPTONXMIN, LEPTONXMAX, 
-         LEPTONPT2MIN, LEPTONFUDGE, WEAKPSWEIGHT, HEADROOMQ2Q, HEADROOMQ2G, 
+  static const double MCMIN, MBMIN, CTHRESHOLD, BTHRESHOLD, EVALPDFSTEP,
+         TINYPDF, TINYKERNELPDF, TINYPT2, HEAVYPT2EVOL, HEAVYXEVOL,
+         EXTRASPACEQ, LAMBDA3MARGIN, PT2MINWARN, LEPTONXMIN, LEPTONXMAX,
+         LEPTONPT2MIN, LEPTONFUDGE, WEAKPSWEIGHT, HEADROOMQ2Q, HEADROOMQ2G,
          HEADROOMG2G, HEADROOMG2Q;
 
   // Initialization data, normally only set once.
@@ -191,7 +191,7 @@ private:
          Lambda5flav, Lambda3flav2, Lambda4flav2, Lambda5flav2, pT0Ref,
          ecmRef, ecmPow, pTmin, sCM, eCM, pT0, pTminChgQ, pTminChgL, pT20,
          pT2min, pT2minChgQ, pT2minChgL, pTweakCut, pT2weakCut, pTmaxFudgeMPI,
-         strengthIntAsym, weakEnhancement, mZ, gammaZ, thetaWRat, mW, gammaW, 
+         strengthIntAsym, weakEnhancement, mZ, gammaZ, thetaWRat, mW, gammaW,
          weakMaxWt, vetoWeakDeltaR2;
 
   // alphaStrong and alphaEM calculations.
@@ -214,7 +214,7 @@ private:
   SpaceDipoleEnd* dipEndNow;
   int iDipSel;
   SpaceDipoleEnd* dipEndSel;
- 
+
   // Evolve a QCD dipole end.
   void pT2nextQCD( double pT2begDip, double pT2endDip);
 
@@ -238,7 +238,7 @@ private:
   // Provide actual ME weight for current branching.
   double calcMEcorr(int MEtype, int idMother, int idDaughterIn, double M2,
     double z, double Q2,double m2Sister);
-  
+
   // Provide actual ME weight for t-channel weak emissions.
   double calcMEcorrWeak(int MEtype, double m2, double z,
     double pT2, Vec4 pMother, Vec4 pB, Vec4 pDaughter,
@@ -251,7 +251,7 @@ private:
   MergingHooks* mergingHooksPtr;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

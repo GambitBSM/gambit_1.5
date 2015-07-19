@@ -1,5 +1,5 @@
 // main10.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -39,14 +39,14 @@ public:
 
   // Allow process cross section to be modified...
   virtual bool canModifySigma() {return true;}
-  
+
   // ...which gives access to the event at the trial level, before selection.
   virtual double multiplySigmaBy(const SigmaProcess* sigmaProcessPtr,
     const PhaseSpace* phaseSpacePtr, bool inEvent) {
 
     // All events should be 2 -> 2, but kill them if not.
     if (sigmaProcessPtr->nFinal() != 2) return 0.;
-        
+
     // Extract the pT for 2 -> 2 processes in the event generation chain
     // (inEvent = false for initialization).
     if (inEvent) {
@@ -54,7 +54,7 @@ public:
       // Fill histogram of pT spectrum.
       pTtrial.fill( pTHat );
     }
-    
+
     // Here we do not modify 2 -> 2 cross sections.
     return 1.;
   }
@@ -133,12 +133,12 @@ int main() {
   // Set up to do a user veto and send it in.
   MyUserHooks* myUserHooks = new MyUserHooks();
   pythia.setUserHooksPtr( myUserHooks);
- 
+
   // Tevatron initialization.
   pythia.readString("Beams:idB = -2212");
   pythia.readString("Beams:eCM = 1960.");
   pythia.init();
-   
+
   // Begin event loop.
   for (int iEvent = 0; iEvent < 1000; ++iEvent) {
 

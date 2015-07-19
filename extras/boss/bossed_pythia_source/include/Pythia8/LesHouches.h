@@ -1,5 +1,5 @@
 // LesHouches.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -17,13 +17,14 @@
 #include "Pythia8/Info.h"
 #include "Pythia8/PythiaStdlib.h"
 #include "Pythia8/Settings.h"
+#include "Pythia8/Streams.h"
 
 namespace Pythia8 {
 
 //==========================================================================
 
 // A class for the processes stored in LHAup.
-  
+
 class LHAProcess {
 
 public:
@@ -83,11 +84,11 @@ public:
 
   // Set info pointer.
   void setPtr(Info* infoPtrIn) {infoPtr = infoPtrIn;}
- 
+
   // Method to be used for LHAupLHEF derived class.
   virtual void newEventFile(const char*) {}
   virtual bool fileFound() {return true;}
- 
+
   // A pure virtual method setInit, wherein all initialization information
   // is supposed to be set in the derived class. Can do this by reading a
   // file or some other way, as desired. Returns false if it did not work.
@@ -102,7 +103,7 @@ public:
   int    pdfGroupBeamB() const {return pdfGroupBeamBSave;}
   int    pdfSetBeamA()   const {return pdfSetBeamASave;}
   int    pdfSetBeamB()   const {return pdfSetBeamBSave;}
-    
+
   // Give back weight strategy.
   int    strategy()      const {return strategySave;}
 
@@ -114,7 +115,7 @@ public:
   double xMax(int proc)  const {return processes[proc].xMaxProc;}
   double xSecSum()       const {return xSecSumSave;}
   double xErrSum()       const {return xErrSumSave;}
-   
+
   // Print the initialization info; useful to check that setting it worked.
   void   listInit(ostream& os = cout);
 
@@ -125,7 +126,7 @@ public:
   // The method can find the next event by a runtime interface to another
   // program, or by reading a file, as desired.
   // The method should return false if it did not work.
-  virtual bool setEvent(int idProcIn = 0, double mRecalculate = -1.) = 0;
+  virtual bool setEvent(int idProcIn = 0) = 0;
 
   // Give back process number, weight, scale, alpha_em, alpha_s.
   int    idProcess()       const {return idProc;}
@@ -183,13 +184,13 @@ public:
   bool   closeLHEF(bool updateInit = false);
 
   // Get access to the Les Houches Event file name.
-  string getFileName()     const {return fileName;}  
+  string getFileName()     const {return fileName;}
 
 protected:
 
   // Constructor. Sets default to be that events come with unit weight.
   LHAup(int strategyIn = 3) : fileName("void"), strategySave(strategyIn)
-    { processes.reserve(10); particles.reserve(20); 
+    { processes.reserve(10); particles.reserve(20);
     setBeamA( 0, 0., 0, 0); setBeamB( 0, 0., 0, 0); }
 
   // Allow conversion from mb to pb.
@@ -218,7 +219,7 @@ protected:
   void setXSec(int iP, double xSecIn) {processes[iP].xSecProc = xSecIn;}
   void setXErr(int iP, double xErrIn) {processes[iP].xErrProc = xErrIn;}
   void setXMax(int iP, double xMaxIn) {processes[iP].xMaxProc = xMaxIn;}
- 
+
   // Input info on the selected process.
   void setProcess(int idProcIn = 0, double weightIn = 1., double
     scaleIn = 0., double alphaQEDIn = 0.0073, double alphaQCDIn = 0.12) {
@@ -251,7 +252,7 @@ protected:
 
   // Three routines for LHEF files, but put here for flexibility.
   bool setInitLHEF(istream& is, bool readHeaders = false);
-  bool setNewEventLHEF(istream& is, double mRecalculate = -1.);
+  bool setNewEventLHEF(istream& is);
   bool setOldEventLHEF();
 
   // Helper routines to open and close a file handling GZIPSUPPORT:
@@ -277,7 +278,7 @@ protected:
   int    id1InSave, id2InSave, id1pdfInSave, id2pdfInSave;
   double x1InSave, x2InSave, x1pdfInSave, x2pdfInSave, scalePDFInSave,
          pdf1InSave, pdf2InSave;
- 
+
   // File to which to write Les Houches Event File information.
   string fileName;
   fstream osLHEF;
@@ -322,24 +323,46 @@ class LHAupLHEF : public LHAup {
 public:
 
   // Constructor.
-  LHAupLHEF(const char* fileIn, const char* headerIn = NULL,
-            bool readHeaders = false);
+  LHAupLHEF(Pythia8::Info* infoPtrIn, const char* filenameIn,
+    const char* headerIn = NULL, bool readHeadersIn = false,
+    bool setScalesFromLHEFIn = false ) :
+    infoPtr(infoPtrIn), filename(filenameIn), headerfile(headerIn),
+    is(NULL), is_gz(NULL), isHead(NULL), isHead_gz(NULL),
+    readHeaders(readHeadersIn), reader(filenameIn),
+    setScalesFromLHEF(setScalesFromLHEFIn) {
+
+    is = (openFile(filenameIn, ifs));
+    isHead = (headerfile == NULL) ? is : openFile(headerfile, ifsHead);
+    is_gz = new igzstream(filename);
+    isHead_gz = (headerfile == NULL) ? is_gz : new igzstream(headerfile);
+  }
 
   // Destructor.
-  ~LHAupLHEF();
+  ~LHAupLHEF() {
+     // Close files
+     closeAllFiles();
+  }
 
-  // Helper routine to correctly close files
+  // Helper routine to correctly close files.
   void closeAllFiles() {
-    // Close header file if separate, and close main file
+
+    if (isHead_gz != is_gz) isHead_gz->close();
+    if (isHead_gz != is_gz) delete isHead_gz;
+    is_gz->close();
+    delete is_gz;
+
+    // Close header file if separate, and close main file.
     if (isHead != is) closeFile(isHead, ifsHead);
     closeFile(is, ifs);
   }
 
   // Want to use new file with events, but without reinitialization.
-  void newEventFile(const char* fileIn) {
+  void newEventFile(const char* filenameIn) {
     // Close files and then open new file
     closeAllFiles();
-    is = openFile(fileIn, ifs);
+    is = (openFile(filenameIn, ifs));
+    is_gz = new igzstream(filename);
+    isHead_gz = new igzstream(headerfile);
 
     // Set isHead to is to keep expected behaviour in
     // fileFound() and closeAllFiles()
@@ -350,27 +373,71 @@ public:
   bool fileFound() { return (isHead->good() && is->good()); }
 
   // Routine for doing the job of reading and setting initialization info.
-  bool setInit() {return setInitLHEF(*isHead, readHeaders);}
+  bool setInit() {
+    return setInitLHEF(*isHead, readHeaders);
+  }
+
+  // Routine for doing the job of reading and setting initialization info.
+  bool setInitLHEF( istream & isIn, bool readHead);
 
   // Routine for doing the job of reading and setting info on next event.
-  bool setEvent(int = 0, double mRecalculate = -1.) {
-    if (!setNewEventLHEF(*is, mRecalculate)) return false;
+  bool setEvent(int = 0) {
+    if (!setNewEventLHEF()) return false;
     return setOldEventLHEF();
   }
 
   // Skip ahead a number of events, which are not considered further.
-  bool skipEvent(int nSkip) {for (int iSkip = 0; iSkip < nSkip; ++iSkip)
-    if (!setNewEventLHEF(*is)) return false; return true;}
+  bool skipEvent(int nSkip) {
+    for (int iSkip = 0; iSkip < nSkip; ++iSkip)
+      if (!setNewEventLHEF()) return false;
+     return true;
+  }
+
+  // Routine for doing the job of reading and setting info on next event.
+  bool setNewEventLHEF();
+
+  // Update cross-section information at the end of the run.
+  bool updateSigma();
+
+protected:
+
+  // Used internally to read a single line from the stream.
+  bool getLine(string & line, bool header = true) {
+#ifdef GZIPSUPPORT
+    if      ( header && !getline(*isHead_gz, line)) return false;
+    else if (!header && !getline(*is_gz, line))     return false;
+#else
+    if      (header && !getline(*isHead, line)) return false;
+    else if (!header && !getline(*is, line))    return false;
+#endif
+    // Replace single by double quotes
+    replace(line.begin(),line.end(),'\'','\"');
+    return true;
+  }
 
 private:
 
+  Info*  infoPtr;
+  const char* filename;
+  const char* headerfile;
+
   // File from which to read (or a stringstream).
   // Optionally also a file from which to read the LHEF header.
-  ifstream  ifs,  ifsHead;
-  istream  *is,  *isHead;
+  istream  *is;
+  igzstream  *is_gz;
+  ifstream  ifs;
+  istream  *isHead;
+  igzstream  *isHead_gz;
+  ifstream  ifsHead;
 
   // Flag to read headers or not
   bool readHeaders;
+
+  Reader reader;
+
+  // Flag to set particle production scales or not.
+  bool setScalesFromLHEF;
+
 };
 
 //==========================================================================
@@ -392,7 +459,7 @@ public:
   bool setInit();
 
   // Routine for doing the job of reading and setting info on next event.
-  bool setEvent(int = 0, double = -1.);
+  bool setEvent(int = 0);
 
   // Update cross-section information at the end of the run.
   bool updateSigma();

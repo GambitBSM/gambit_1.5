@@ -1,5 +1,5 @@
 // main28.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Peter Skands, Torbjorn Sjostrand.
+// Copyright (C) 2015 Peter Skands, Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -177,12 +177,12 @@ int main() {
       // End of loop over final R-hadrons.
       }
     }
-   
+
     // If you have set R-hadrons stable above,
     // you can still force them to decay at this stage.
     pythia.forceRHadronDecays();
     if (iEvent < nList) pythia.event.list(true);
- 
+
   // End of event loop.
   }
 

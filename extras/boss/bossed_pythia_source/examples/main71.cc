@@ -1,5 +1,5 @@
 // main71.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Richard Corke.
+// Copyright (C) 2015 Richard Corke.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -39,7 +39,7 @@ int main() {
   // Settings
   int  nEvent = 10000;
   bool doMPI  = true;
-    
+
   // Generator
   Pythia pythia;
 
@@ -123,7 +123,7 @@ int main() {
       vetoCount[1]++;
       continue;
     }
- 
+
     // Reset Fastjet input
     fjInputs.resize(0);
 
@@ -189,7 +189,7 @@ int main() {
                               pythia.event[idxElec].py(),
                               pythia.event[idxElec].pz(),
                               pythia.event[idxElec].e());
- 
+
     for (unsigned int i = 0; i < sortedJets.size(); i++) {
       // Only count jets that have |eta| < 2.0
       if (fabs(sortedJets[i].rap()) > 2.0) continue;
@@ -254,4 +254,3 @@ int main() {
   delete jetDef;
   return 0;
 }
-

@@ -1,5 +1,5 @@
 // FragmentationFlavZpT.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -56,7 +56,7 @@ void StringFlav::init(Settings& settings, Rndm* rndmPtrIn) {
 
   // Spin parameters for combining two quarks to a diquark.
   vector<double> pQQ1tmp = settings.pvec("StringFlav:probQQ1toQQ0join");
-  for (int i = 0; i < 4; ++i) 
+  for (int i = 0; i < 4; ++i)
     probQQ1join[i] = 3. * pQQ1tmp[i] / (1. + 3. * pQQ1tmp[i]);
 
   // Parameters for normal meson production.
@@ -129,7 +129,7 @@ void StringFlav::init(Settings& settings, Rndm* rndmPtrIn) {
   popcornRate    = settings.parm("StringFlav:popcornRate");
   popcornSpair   = settings.parm("StringFlav:popcornSpair");
   popcornSmeson  = settings.parm("StringFlav:popcornSmeson");
-  
+
   // Suppression of leading (= first-rank) baryons.
   suppressLeadingB = settings.flag("StringFlav:suppressLeadingB");
   lightLeadingBSup = settings.parm("StringFlav:lightLeadingBSup");
@@ -245,7 +245,7 @@ void StringFlav::init(Settings& settings, Rndm* rndmPtrIn) {
   dWT[1][4] = qBM[su1] / qBM[su0];
   dWT[1][5] = qBM[us1] / qBM[us0];
   dWT[1][6] = qBM[ud1];
-  
+
   // Case 2: qq -> M B; diquark inside chain.
   dWT[2][0] = (2. * (dMB[su0] + dMB[su1]) + dMB[ss1])
     / (1. + dMB[ud1] + dMB[uu1] + dMB[us0] + dMB[us1]);
@@ -317,7 +317,7 @@ FlavContainer StringFlav::pick(FlavContainer& flavOld) {
     if (rndmFlav > 1.) flavNew.idPop = 2;
     if (rndmFlav > 2.) flavNew.idPop = 3;
   } else flavNew.idPop = flavOld.idPop;
-  
+
   // Flavour of vertex quark.
   double sVtxWT = dWT[iCase][1];
   if (flavNew.idPop >= 3) sVtxWT = dWT[iCase][2];
@@ -363,7 +363,7 @@ int StringFlav::combine(FlavContainer& flav1, FlavContainer& flav2) {
   int id2Abs = abs(flav2.id);
   int idMax = max(id1Abs, id2Abs);
   int idMin = min(id1Abs, id2Abs);
- 
+
   // Construct a meson.
   if (idMax < 9 || idMin > 1000) {
 
@@ -424,7 +424,7 @@ int StringFlav::combine(FlavContainer& flav1, FlavContainer& flav2) {
   int idOrd2 = idMin + idQQ1 + idQQ2 - idOrd1 - idOrd3;
   int spinBar = (baryonCGSum[spinFlav] * rndmPtr->flat()
     < baryonCGOct[spinFlav]) ? 2 : 4;
-  
+
   // Distinguish Lambda- and Sigma-like.
   bool LambdaLike = false;
   if (spinBar == 2 && idOrd1 > idOrd2 && idOrd2 > idOrd3) {
@@ -470,7 +470,7 @@ void StringFlav::assignPopQ(FlavContainer& flav) {
   if (id2 == 3) popWT = popS[2];
   if (idAbs%10 == 1) popWT *= sqrt(probQQ1toQQ0);
   if ((1. + popWT) * rndmPtr->flat() > 1.) flav.nPop = 1;
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -501,7 +501,7 @@ int StringFlav::makeDiquark(int id1, int id2, int idHad) {
   return (id1 > 0) ? idNewAbs : -idNewAbs;
 
 }
- 
+
 //==========================================================================
 
 // The StringZ class.
@@ -587,7 +587,7 @@ double StringZ::zFrag( int idOld, int idNew, double mT2) {
   // Find heaviest quark in fragmenting parton/diquark.
   int idFrag = idOldAbs;
   if (isOldDiquark) idFrag = max( idOldAbs / 1000, (idOldAbs / 100) % 10);
-  
+
   // Use Peterson where explicitly requested for heavy flavours.
   if (idFrag == 4 && usePetersonC) return zPeterson( epsilonC);
   if (idFrag == 5 && usePetersonB) return zPeterson( epsilonB);
@@ -648,7 +648,7 @@ double StringZ::zLund( double a, double b, double c) {
   else if (aIsC) zMax = b / (b + c);
   else { zMax = 0.5 * (b + c - sqrt( pow2(b - c) + 4. * a * b)) / (c - a);
          if (zMax > 0.9999 && b > 100.) zMax = min(zMax, 1. - a / b); }
-        
+
   // Subdivide z range if distribution very peaked near either endpoint.
   bool peakedNearZero = (zMax < 0.1);
   bool peakedNearUnity = (zMax > 0.85 && b > 1.);
@@ -741,7 +741,7 @@ double StringZ::zPeterson( double epsilon) {
     } while (fVal < rndmPtr->flat());
     return z;
   }
-  
+
   // Else split range, using that 4 * epsilon * f(z)
   //   < 4 * epsilon / (1 - z)^2 for 0 < z < 1 - 2 * sqrt(epsilon)
   //   < 1                       for 1 - 2 * sqrt(epsilon) < z < 1
@@ -762,7 +762,7 @@ double StringZ::zPeterson( double epsilon) {
   return z;
 
 }
- 
+
 //==========================================================================
 
 // The StringPT class.
@@ -792,7 +792,7 @@ void StringPT::init(Settings& settings,  ParticleData& , Rndm* rndmPtrIn) {
 
   // Parameter for pT suppression in MiniStringFragmentation.
   sigma2Had        = 2. * pow2( max( SIGMAMIN, sigma) );
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -808,7 +808,7 @@ pair<double, double> StringPT::pxy() {
   return pair<double, double>(sigma * gauss2.first, sigma * gauss2.second);
 
 }
-  
+
 //==========================================================================
 
 } // end namespace Pythia8

@@ -1,5 +1,5 @@
 // MiniStringFragmentation.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -55,7 +55,7 @@ void MiniStringFragmentation::init(Info* infoPtrIn, Settings& settings,
 //--------------------------------------------------------------------------
 
 // Do the fragmentation: driver routine.
-  
+
 bool MiniStringFragmentation::fragment(int iSub, ColConfig& colConfig,
   Event& event, bool isDiff) {
 
@@ -97,7 +97,7 @@ bool MiniStringFragmentation::fragment(int iSub, ColConfig& colConfig,
 //--------------------------------------------------------------------------
 
   // Attempt to produce two particles from the ministring.
-  
+
 bool MiniStringFragmentation::ministring2two( int nTry, Event& event) {
 
   // Properties of the produced hadrons.
@@ -118,7 +118,7 @@ bool MiniStringFragmentation::ministring2two( int nTry, Event& event) {
       flav1 = flavSelPtr->pick( flavStart);
       flav2.anti(flav1);
     } while (flav1.id == 0 || flav1.nPop > 0);
-   
+
     // Create a new q qbar flavour to form two hadrons.
     // Start from a diquark, if any.
     do {
@@ -151,6 +151,20 @@ bool MiniStringFragmentation::ministring2two( int nTry, Event& event) {
       pSum1 += ratio * pNow;
       pSum2 += (1. - ratio) * pNow;
     }
+  }
+
+  // If split did not provide an axis then pick random axis to break tie.
+  // (Needed for low-mass q-g-qbar with q-qbar perfectly parallel.)
+  if (pSum1.mCalc() + pSum2.mCalc() > 0.999999 * mSum) {
+    double cthe = 2. * rndmPtr->flat() - 1.;
+    double sthe = sqrtpos(1. - cthe * cthe);
+    double phi  = 2. * M_PI * rndmPtr->flat();
+    Vec4 delta  = 0.5 * min( pSum1.e(), pSum2.e())
+        * Vec4( sthe * sin(phi), sthe * cos(phi), cthe, 0.);
+    pSum1 += delta;
+    pSum2 -= delta;
+    infoPtr->errorMsg("Warning in MiniStringFragmentation::ministring2two: "
+      "random axis needed to break tie");
   }
 
   // Set up a string region based on the two effective endpoints.
@@ -190,11 +204,26 @@ bool MiniStringFragmentation::ministring2two( int nTry, Event& event) {
   Vec4 pHad1 = region.pHad( xe1 + xpz1, xe1 - xpz1,  px,  py);
   Vec4 pHad2 = region.pHad( xe2 - xpz1, xe2 + xpz1, -px, -py);
 
+  // Mark hadrons from junction fragmentation with different status.
+  int statusHadPos = 82, statusHadNeg = 82;
+  if (abs(idHad1) > 1000 && abs(idHad1) < 10000 &&
+      abs(idHad2) > 1000 && abs(idHad2) < 10000) {
+    if (event[ iParton.front() ].statusAbs() == 74) statusHadPos = 89;
+    if (event[ iParton.back() ].statusAbs() == 74)  statusHadNeg = 89;
+  }
+  else if (abs(idHad1) > 1000 && abs(idHad1) < 10000) {
+    if (event[ iParton.front() ].statusAbs() == 74 ||
+        event[ iParton.back() ].statusAbs() == 74) statusHadPos = 89;
+  }
+  else if (abs(idHad2) > 1000 && abs(idHad2) < 10000) {
+    if (event[ iParton.front() ].statusAbs() == 74 ||
+        event[ iParton.back() ].statusAbs() == 74) statusHadNeg = 89;
+  }
   // Add produced particles to the event record.
-  int iFirst = event.append( idHad1, 82, iParton.front(), iParton.back(),
-    0, 0, 0, 0, pHad1, mHad1);
-  int iLast = event.append( idHad2, 82, iParton.front(), iParton.back(),
-    0, 0, 0, 0, pHad2, mHad2);
+  int iFirst = event.append( idHad1, statusHadPos, iParton.front(),
+    iParton.back(), 0, 0, 0, 0, pHad1, mHad1);
+  int iLast = event.append( idHad2, statusHadNeg, iParton.front(),
+    iParton.back(), 0, 0, 0, 0, pHad2, mHad2);
 
   // Set decay vertex when this is displaced.
   if (event[iParton.front()].hasVertex()) {
@@ -225,7 +254,7 @@ bool MiniStringFragmentation::ministring2two( int nTry, Event& event) {
 // relative to the existing one, and boost that system appropriately.
 // Try more sophisticated alternatives later?? (Z0 mass shifted??)
 // Also, if problems, attempt several times to obtain closer mass match??
-  
+
 bool MiniStringFragmentation::ministring2one( int iSub,
   ColConfig& colConfig, Event& event) {
 
@@ -250,7 +279,7 @@ bool MiniStringFragmentation::ministring2one( int iSub,
 
   // Find mass.
   double mHad = particleDataPtr->mSel(idHad);
-  
+
   // Find the untreated parton system which combines to the largest
   // squared mass above mimimum required.
   int iMax = -1;
@@ -278,9 +307,15 @@ bool MiniStringFragmentation::ministring2one( int iSub,
   double k1      = (coefRec * k2 + 0.5 * deltaM2) / coefOld;
   Vec4 pHad      = (1. + k1) * pSum - k2 * pRec;
   Vec4 pRecNew   = (1. + k2) * pRec - k1 * pSum;
-  
+
+  // Mark hadrons from junction split off with status 89.
+  int statusHad = 81;
+  if (abs(idHad) > 1000 && abs(idHad) < 10000 &&
+      (event[ iParton.front() ].statusAbs() == 74 ||
+       event[ iParton.back() ].statusAbs() == 74)) statusHad = 89;
+
   // Add the produced particle to the event record.
-  int iHad = event.append( idHad, 81, iParton.front(), iParton.back(),
+  int iHad = event.append( idHad, statusHad, iParton.front(), iParton.back(),
     0, 0, 0, 0, pHad, mHad);
 
   // Set decay vertex when this is displaced.
@@ -297,7 +332,7 @@ bool MiniStringFragmentation::ministring2one( int iSub,
     event[ iParton[i] ].statusNeg();
     event[ iParton[i] ].daughters(iHad, iHad);
   }
-   
+
   // Copy down recoiling system, with boosted momentum. Update current partons.
   RotBstMatrix M;
   M.bst(pRec, pRecNew);
@@ -305,7 +340,10 @@ bool MiniStringFragmentation::ministring2one( int iSub,
     int iOld = colConfig[iMax].iParton[i];
     // Do not touch negative iOld = beginning of new junction leg.
     if (iOld >= 0) {
-      int iNew = event.copy(iOld, 72);
+      int iNew;
+      // Keep track of 74 throughout the event.
+      if (event[iOld].status() == 74) iNew = event.copy(iOld, 74);
+      else iNew = event.copy(iOld, 72);
       event[iNew].rotbst(M);
       colConfig[iMax].iParton[i] = iNew;
     }
