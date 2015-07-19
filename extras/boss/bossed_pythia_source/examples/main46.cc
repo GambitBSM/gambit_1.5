@@ -1,5 +1,5 @@
 // main46.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2013 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 //
@@ -10,12 +10,14 @@
 // A makefile can be found in the ProMC  package, in examples/pythia.
 
 #include <map>
-#include "Pythia.h"
-// ProMC file
-#include "ProMCHeader.pb.h"
-#include "ProMC.pb.h"
+
+// ProMC file. Google does not like these warnings.
+#pragma GCC diagnostic ignored "-pedantic"
+#pragma GCC diagnostic ignored "-Wshadow"
 #include "ProMCBook.h"
 
+// Pythia header and namespace.
+#include "Pythia8/Pythia.h"
 using namespace Pythia8;
 
 //--------------------------------------------------------------------------
@@ -31,12 +33,9 @@ void readPDG( ProMCHeader * header  ) {
 
   string temp_string;
   istringstream curstring;
-  string  PdgTableFilename = getEnvVar("PROMC") + "/data/particle.tbl";
-  if (PdgTableFilename.size() < 2) {
-    cout << "**        ERROR: PROMC variable not set. Did you run source.sh"
-         << "      **" << endl;
-    exit(1);
-  }
+  string PdgTableFilename = getEnvVar("PROMC");
+  if (PdgTableFilename.size() < 2) PdgTableFilename = string(PROMC);
+  PdgTableFilename += "/data/particle.tbl";
 
   ifstream file_to_read(PdgTableFilename.c_str());
   if (!file_to_read.good()) {
@@ -82,12 +81,10 @@ int main() {
 
   // Generator. Process selection. LHC initialization.
   Pythia pythia;
-  pythia.readString("WeakSingleBoson:ffbar2gmZ = on");
-  pythia.readString("PhaseSpace:mHatMin = 80.");
-  pythia.readString("PhaseSpace:mHatMax = 120.");
-  pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = 0");
-  pythia.init( 2212, 2212, 14000.);
+  pythia.readString("HardQCD:all = on");
+  pythia.readString("PhaseSpace:pTHatMin = 20.");
+  pythia.readString("Beams:eCM = 14000.");
+  pythia.init();
 
   // ****************  book ProMC file **********************
   ProMCBook* epbook = new ProMCBook("Pythia8.promc","w");
@@ -113,7 +110,7 @@ int main() {
    // Store a map with PDG information (stored in the header).
   readPDG( &header );
   epbook->setHeader(header); // write header
- 
+
   // Begin event loop. Generate event. Skip if error.
   for (int n = 0; n < Ntot; n++) {
     if (!pythia.next()) {
@@ -147,12 +144,13 @@ int main() {
     // Fill truth particle information, looping over all particles in event.
     ProMCEvent_Particles *pa= promc.mutable_particles();
     for (int i = 0; i < pythia.event.size(); i++) {
- 
+
       // Fill information particle by particle.
       pa->add_id( i  );
       pa->add_pdg_id( pythia.event[i].id() );
       // Particle status in HEPMC style.
-      pa->add_status(  pythia.event.statusHepMC(i) );
+      // pa->add_status(  pythia.event.statusHepMC(i) );
+      pa->add_status(  pythia.event[i].status() );
       pa->add_mother1( pythia.event[i].mother1() );
       pa->add_mother2( pythia.event[i].mother2() );
       pa->add_daughter1( pythia.event[i].daughter1() );

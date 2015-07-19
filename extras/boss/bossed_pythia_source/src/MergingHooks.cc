@@ -1,5 +1,5 @@
 // MergingHooks.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -10,7 +10,7 @@
 #include "Pythia8/MergingHooks.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The HardProcess class.
@@ -576,25 +576,25 @@ void HardProcess::translateProcessString( string process){
   int interParticleNumbers[] = {
          // Electroweak gauge bosons
          22,23,-24,24,25,2400,
-         // Top quarks
-         -6,6,
-         // Dummy index as back-up
-         0,
          // All squarks
         -1000001,1000001,-1000002,1000002,-1000003,1000003,-1000004,1000004,
         -1000005,1000005,-1000006,1000006,-2000001,2000001,-2000002,2000002,
-        -2000003,2000003,-2000004,2000004,-2000005,2000005,-2000006,2000006};
+        -2000003,2000003,-2000004,2000004,-2000005,2000005,-2000006,2000006,
+         // Top quarks
+         -6,6,
+         // Dummy index as back-up
+         0};
   // Declare names of intermediate particles
   string interParticleNamesMG[] = {
         // Electroweak gauge bosons
         "a","z","w-","w+","h","W",
+         // All squarks
+         "dl~","dl","ul~","ul","sl~","sl","cl~","cl","b1~","b1","t1~","t1",
+         "dr~","dr","ur~","ur","sr~","sr","cr~","cr","b2~","b2","t2~","t2",
          // Top quarks
          "t~","t",
         // Dummy index as back-up
-        "xx",
-         // All squarks
-         "dl~","dl","ul~","ul","sl~","sl","cl~","cl","b1~","b1","t1~","t1",
-         "dr~","dr","ur~","ur","sr~","sr","cr~","cr","b2~","b2","t2~","t2"};
+        "xx"};
 
   // Declare final state particle identifiers
   int outParticleNumbers[] = {
@@ -602,31 +602,31 @@ void HardProcess::translateProcessString( string process){
         -11,11,-12,12,-13,13,-14,14,-15,15,-16,16,
         // Jet container and lepton containers
         2212,2212,0,0,0,0,1200,1100,5000,
+        // All squarks
+        -1000001,1000001,-1000002,1000002,-1000003,1000003,-1000004,1000004,
+        -1000005,1000005,-1000006,1000006,-2000001,2000001,-2000002,2000002,
+        -2000003,2000003,-2000004,2000004,-2000005,2000005,-2000006,2000006,
         // Quarks
         -1,1,-2,2,-3,3,-4,4,-5,5,-6,6,
         // SM uncoloured bosons
         22,23,-24,24,25,2400,
         // Neutralino in SUSY
-        1000022,
-        // All squarks
-        -1000001,1000001,-1000002,1000002,-1000003,1000003,-1000004,1000004,
-        -1000005,1000005,-1000006,1000006,-2000001,2000001,-2000002,2000002,
-        -2000003,2000003,-2000004,2000004,-2000005,2000005,-2000006,2000006};
+        1000022};
   // Declare names of final state particles
   string outParticleNamesMG[] =  {
         // Leptons
         "e+","e-","ve~","ve","mu+","mu-","vm~","vm","ta+","ta-","vt~","vt",
         // Jet container and lepton containers
         "j~","j","l+","l-","vl~","vl","NEUTRINOS","LEPTONS","BQUARKS",
+        // All squarks
+        "dl~","dl","ul~","ul","sl~","sl","cl~","cl","b1~","b1","t1~","t1",
+        "dr~","dr","ur~","ur","sr~","sr","cr~","cr","b2~","b2","t2~","t2",
         // Quarks
         "d~","d","u~","u","s~","s","c~","c","b~","b","t~","t",
         // SM uncoloured bosons
         "a","z","w-","w+","h","W",
         // Neutralino in SUSY
-        "n1",
-        // All squarks
-        "dl~","dl","ul~","ul","sl~","sl","cl~","cl","b1~","b1","t1~","t1",
-        "dr~","dr","ur~","ur","sr~","sr","cr~","cr","b2~","b2","t2~","t2"};
+        "n1"};
 
   // Declare size of particle name arrays
   int nIn   = 30;
@@ -1234,7 +1234,7 @@ void HardProcess::storeCandidates( const Event& event, string process){
               }
 
             }
- 
+
           // Check if daughter is hard outgoing antiparticle
           for(int l=0; l < int(outgoing1.size()); ++l)
             if ( outgoing1[l] != 99 ){
@@ -1671,6 +1671,24 @@ bool HardProcess::findOtherCandidates(int iPos, const Event& event,
         if ( allowCandidates(i, PosOutgoing1, newPosOutgoing2, state) )
           further2.insert(make_pair(j, i));
       }
+
+  // Remove all hard process particles that would be counted twice.
+  map<int,int>::iterator it2 = further2.begin();
+  while(it2 != further2.end()) {
+    bool remove = false;
+    for(int j=0; j < int(PosOutgoing2.size()); ++j)
+      if (it2->second == PosOutgoing2[j] ) remove = true;
+    if ( remove ) further2.erase(it2++);
+    else ++it2;
+  }
+  map<int,int>::iterator it1 = further1.begin();
+  while(it1 != further1.end()) {
+    bool remove = false;
+    for(int j=0; j < int(PosOutgoing1.size()); ++j)
+      if (it1->second == PosOutgoing1[j] ) remove = true;
+    if ( remove ) further1.erase(it1++);
+    else ++it1;
+  }
 
   // Decide of a replacment candidate has been found.
   foundCopy = (doReplace)
@@ -2724,7 +2742,7 @@ bool MergingHooks::isInHard( int iPos, const Event& event){
       mpiParticlePos.push_back(i);
   // Disregard any parton iPos that has MPI ancestors.
   for ( int i=0; i < int(mpiParticlePos.size()); ++i)
-    if ( event.isAncestor(iPos, mpiParticlePos[i]) )
+    if ( event[iPos].isAncestor( mpiParticlePos[i]) )
       return false;
 
   // Disallow other systems.
@@ -2743,7 +2761,7 @@ bool MergingHooks::isInHard( int iPos, const Event& event){
         return false;
       // Disregard any parton iPos that has MPI ancestors.
       for ( int j=0; j < int(mpiParticlePos.size()); ++j)
-        if ( event.isAncestor(iPosNow, mpiParticlePos[j]) )
+        if ( event[iPosNow].isAncestor( mpiParticlePos[j]) )
           return false;
       // Beam remnants and hadronisation not part of hard process
       if ( event[iPosNow].statusAbs() > 60 )
@@ -3063,7 +3081,7 @@ double MergingHooks::kTms(const Event& event) {
       && checkAgainstCut(event[i]) ){
       bool isDecayProduct = false;
       for(int j=0; j < int(ewResonancePos.size()); ++j)
-        if ( event.isAncestor(i, ewResonancePos[j]) )
+        if ( event[i].isAncestor( ewResonancePos[j]) )
           isDecayProduct = true;
       // Except for e+e- -> jets, do not check radiation in resonance decays.
       if ( !isDecayProduct
@@ -3235,7 +3253,7 @@ double MergingHooks::rhoms( const Event& event, bool withColour){
       && checkAgainstCut(event[i]) ){
       bool isDecayProduct = false;
       for(int j=0; j < int(ewResonancePos.size()); ++j)
-        if ( event.isAncestor(i, ewResonancePos[j]) )
+        if ( event[i].isAncestor( ewResonancePos[j]) )
           isDecayProduct = true;
       // Except for e+e- -> jets, do not check radiation in resonance decays.
       if ( !isDecayProduct

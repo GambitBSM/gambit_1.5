@@ -1,5 +1,5 @@
 // main26.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -123,7 +123,7 @@ int main() {
   }
 
   // Switch off sophisticated tau treatment: not yet matched to SUSY.
-  pythia.readString("ParticleDecays:sophisticatedTau = 0");
+  pythia.readString("TauDecays:mode = 0");
 
   // Initialization for LHC.
   pythia.readString("Beams:eCM = 14000.");
@@ -136,7 +136,7 @@ int main() {
   // Begin event loop.
   int iAbort = 0;
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
-    
+
     // Generate events. Quit if many failures.
     if (!pythia.next()) {
       if (++iAbort < nAbort) continue;
@@ -159,9 +159,9 @@ int main() {
          || pythia.event[iPart].idAbs() == 5100039){
           hMass.fill( pythia.event[iPart].m() );
         }
-        
+
       } else if ( pythia.event[iPart].statusAbs()  == 23 ) {
-        
+
         // Find graviton/unparticle
         if( pythia.event[iPart].idAbs() == 5000039){
           hMass.fill( pythia.event[iPart].m() );
@@ -191,9 +191,9 @@ int main() {
         hEtjet.fill( fabs(tmp_et) );
       }
     }
-    
+
   }
- 
+
   // Final statistics.
   pythia.stat();
   cout << hMass << hEtjet;

@@ -1,138 +1,141 @@
+# Makefile is a part of the PYTHIA event generator.
+# Copyright (C) 2015 Torbjorn Sjostrand.
+# PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
+# Please respect the MCnet Guidelines, see GUIDELINES for details.
+# Author: Philip Ilten, September 2014.
 #
-# Examples Makefile.
-#
-#                  M. Kirsanov 07.04.2006
-#                     Modified 18.11.2006
-#                     26.03.2008 CLHEP dependency removed
+# This is is the Makefile used to build PYTHIA examples on POSIX systems.
+# Example usage is:
+#     make main01
+# For help using the make command please consult the local system documentation,
+# i.e. "man make" or "make --help".
 
-SHELL = /bin/sh
+################################################################################
+# VARIABLES: Definition of the relevant variables from the configuration script.
+################################################################################
 
--include config.mk
-ifeq (x$(PYTHIA8LOCATION),x)
- PYTHIA8LOCATION=..
-endif
--include $(PYTHIA8LOCATION)/config.mk
+# Include the configuration.
+-include Makefile.inc
 
-# Location of directories.
-TOPDIR=$(shell \pwd)
-INCDIR=include
-SRCDIR=src
-LIBDIR=lib
-LIBDIRARCH=lib/archive
-BINDIR=bin
-
-# Libraries to include if GZIP support is enabled
-ifeq (x$(ENABLEGZIP),xyes)
-LIBGZIP=-L$(BOOSTLIBLOCATION) -lboost_iostreams -L$(ZLIBLOCATION) -lz
+# Handle GZIP support.
+ifeq ($(GZIP_USE),true)
+  CXX_COMMON+= -DGZIPSUPPORT -I$(GZIP_INCLUDE)
+  CXX_COMMON+= -L$(GZIP_LIB) -Wl,-rpath $(GZIP_LIB) -lz
 endif
 
-# There is no default behaviour, so remind user.
+# Check distribution (use local version first, then installed version).
+ifneq ("$(wildcard ../lib/libpythia8.a)","")
+  PREFIX_LIB=../lib
+  PREFIX_INCLUDE=../include
+endif
+CXX_COMMON:=-I$(PREFIX_INCLUDE) $(CXX_COMMON) -Wl,-rpath $(PREFIX_LIB) -ldl
+
+################################################################################
+# RULES: Definition of the rules used to build the PYTHIA examples.
+################################################################################
+
+# Rules without physical targets (secondary expansion for specific rules).
+.SECONDEXPANSION:
+.PHONY: all clean
+
+# All targets (no default behavior).
 all:
-	@echo "Usage: for NN = example number: make mainNN"
+	@echo "Usage: make mainXX"
 
-# Create an executable for one of the normal test programs
-main00  main01 main02 main03 main04 main05 main06 main07 main08 main09 main10 \
-	main11 main12 main13 main14 main15 main16 main17 main18 main19 main20 \
-	main21 main22 main23 main24 main25 main26 main27 main28 main29 main30 \
-	main31 main32 main33 main34 main35 main36 main37 main38 main39 main40 \
-	main80: \
-	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) -I$(PYTHIA8LOCATION)/$(INCDIR) $@.cc -o $(BINDIR)/$@.exe \
-	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP)
-	@ln -fs $(BINDIR)/$@.exe $@.exe
+# The Makefile configuration.
+Makefile.inc:
+	$(error Error: PYTHIA must be configured, please run "./configure"\
+                in the top PYTHIA directory)
 
-# Create an executable linked to HepMC (if all goes well).
-# Owing to excessive warning output -Wshadow is not used for HepMC.
-ifneq (x$(HEPMCLOCATION),x)
-  main41 main42: \
-	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
-	$@.cc -o $(BINDIR)/$@.exe \
-	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP) \
-	-lpythia8tohepmc \
-	-L$(HEPMCLOCATION)/lib -lHepMC
-	@ln -fs $(BINDIR)/$@.exe $@.exe
+# PYTHIA libraries.
+$(PREFIX_LIB)/libpythia8.a :
+	$(error Error: PYTHIA must be built, please run "make"\
+                in the top PYTHIA directory)
+
+# Examples without external dependencies.
+main% : main%.cc $(PREFIX_LIB)/libpythia8.a
+	$(CXX) $^ -o $@ $(CXX_COMMON)
+
+# HEPMC2.
+main41 main42 main43 main85 main86 main87 main88 main89: $$@.cc\
+	$(PREFIX_LIB)/libpythia8.a
+ifeq ($(HEPMC2_USE),true)
+	$(CXX) $^ -o $@ -I$(HEPMC2_INCLUDE) $(CXX_COMMON)\
+	 -L$(HEPMC2_LIB) -Wl,-rpath $(HEPMC2_LIB) -lHepMC
 else
-  main41 main42:
-	@echo ERROR, this target needs HepMC, variable HEPMCLOCATION
+	@echo "Error: $@ requires HEPMC2"
 endif
 
-# Create an executable that links to LHAPDF
-main51 main52 main53 main54: $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) -I$(PYTHIA8LOCATION)/$(INCDIR) $@.cc -o $(BINDIR)/$@.exe \
-	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 $(LIBGZIP) \
-	-L$(LHAPDFLOCATION) $(LHAPDFLIBNAME) \
-	$(FLIBS)
-	@ln -fs $(BINDIR)/$@.exe $@.exe
-
-# Create an executable that links to LHAPDF and HepMC
-main61 main62 main85 main86 main87 main88: \
-	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
-	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
-	$@.cc -o $(BINDIR)/$@.exe \
-	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -lpythia8tohepmc $(LIBGZIP) \
-	-L$(LHAPDFLOCATION) $(LHAPDFLIBNAME) \
-	-L$(HEPMCLOCATION)/lib -lHepMC \
-	$(FLIBS)
-	@ln -fs $(BINDIR)/$@.exe $@.exe
-
-# Create an executable that links to Fastjet
-# Owing to excessive warning output -Wshadow is not used for Fastjet.
-# (Fixed as of Fastjet 3.0.1, so will be modified eventually.)
-ifneq (x$(FASTJETLOCATION),x)
-  main71 main72: $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a
-	@mkdir -p $(BINDIR)
-    # Note: $(CXXFLAGS) is after Fastjet flags as Fastjet includes
-    #       optimisation/debug flags which may be unwanted (e.g. -g -O2)
-	$(CXX) -I$(PYTHIA8LOCATION)/$(INCDIR) $@.cc \
-	`$(FASTJETLOCATION)/bin/fastjet-config --cxxflags --plugins` \
-	$(CXXFLAGS) -Wno-shadow \
-	-o $(BINDIR)/$@.exe \
-	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP) \
-	-L$(FASTJETLOCATION)/lib \
-	`$(FASTJETLOCATION)/bin/fastjet-config --libs --plugins`
-	@ln -fs $(BINDIR)/$@.exe $@.exe
-	@rm -f $@.o
+# PROMC.
+main46: $$@.cc $(PREFIX_LIB)/libpythia8.a
+ifeq ($(PROMC_USE),true)
+	$(CXX) $^ -o $@ -I$(PROMC_INCLUDE)/src -I$(PROMC_INCLUDE)/include\
+	 $(CXX_COMMON) -DPROMC=\"$(PROMC_INCLUDE)\" -Wno-long-long\
+	 -L$(PROMC_LIB) -lpromc -lprotoc -lprotobuf -lprotobuf-lite -lcbook
 else
-  main71 main72:
-	@echo ERROR, this target needs Fastjet, variable FASTJETLOCATION
+	@echo "Error: $@ requires PROMC"
 endif
 
-# Create an executable that links to Fastjet, HepMC and LHApdf
-# Owing to excessive warning output -Wshadow is not used for Fastjet.
-# (Fixed as of Fastjet 3.0.1, so will be modified eventually.)
-ifneq (x$(FASTJETLOCATION),x)
-  main81 main82 main83 main84: \
-	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a  $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
-	@mkdir -p $(BINDIR)
-    # Note: $(CXXFLAGS) is after Fastjet flags as Fastjet includes
-    #       optimisation/debug flags which may be unwanted (e.g. -g -O2)
-	$(CXX) -I$(PYTHIA8LOCATION)/$(INCDIR) $@.cc \
-	`$(FASTJETLOCATION)/bin/fastjet-config --cxxflags --plugins` \
-	$(CXXFLAGS) -Wno-shadow \
-	-I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
-	-o $(BINDIR)/$@.exe \
-	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 \
-	-L$(LHAPDFLOCATION) $(LHAPDFLIBNAME) \
-	-lpythia8tohepmc \
-	-L$(HEPMCLOCATION)/lib -lHepMC \
-	-L$(FASTJETLOCATION)/lib \
-	-L$(LHAPDFLOCATION)/lib \
-	`$(FASTJETLOCATION)/bin/fastjet-config --libs --plugins`
-	@ln -fs $(BINDIR)/$@.exe $@.exe
-	@rm -f $@.o
+# EVTGEN (and HEPMC2).
+main48: $$@.cc $(PREFIX_LIB)/libpythia8.so
+ifeq ($(EVTGEN_USE)$(HEPMC2_USE),truetrue)
+	$(CXX) $< -o $@ -I$(EVTGEN_INCLUDE) $(CXX_COMMON)\
+	 -DEVTGEN_PYTHIA -DEVTGEN_EXTERNAL -Wl,-rpath $(HEPMC2_LIB)\
+	 -L$(PREFIX_LIB) -Wl,-rpath $(PREFIX_LIB) -lpythia8\
+	 -L$(EVTGEN_LIB) -Wl,-rpath $(EVTGEN_LIB) -lEvtGenExternal -lEvtGen
 else
-  main81 main82 main83 main84:
-	@echo ERROR, this target needs Fastjet, variable FASTJETLOCATION
+	@echo "Error: $@ requires EVTGEN and HEPMC2"
 endif
 
-# Clean up: remove executables and outdated files.
-.PHONY: clean
+# FASTJET3.
+main71 main72: $$@.cc $(PREFIX_LIB)/libpythia8.a
+ifeq ($(FASTJET3_USE),true)
+	$(CXX) $^ -o $@ -I$(FASTJET3_INCLUDE) $(CXX_COMMON)\
+	 -L$(FASTJET3_LIB) -Wl,-rpath $(FASTJET3_LIB) -lfastjet
+else
+	@echo "Error: $@ requires FASTJET3"
+endif
+
+# FASTJET3 and HEPMC2.
+main81 main82 main83 main84: $$@.cc $(PREFIX_LIB)/libpythia8.a
+ifeq ($(FASTJET3_USE)$(HEPMC2_USE),truetrue)
+	$(CXX) $^ -o $@ -I$(FASTJET3_INCLUDE) -I$(HEPMC2_INCLUDE) $(CXX_COMMON)\
+	 -L$(HEPMC2_LIB) -Wl,-rpath $(HEPMC2_LIB) -lHepMC\
+	 -L$(FASTJET3_LIB) -Wl,-rpath $(FASTJET3_LIB) -lfastjet
+else
+	@echo "Error: $@ requires FASTJET3 and HEPMC2"
+endif
+
+# ROOT (turn off all warnings for readability).
+main91: $$@.cc $(PREFIX_LIB)/libpythia8.a
+ifeq ($(ROOT_USE),true)
+	$(CXX) $^ -o $@ -w -I$(ROOT_INCLUDE) $(CXX_COMMON)\
+	 -Wl,-rpath $(ROOT_LIB) `$(ROOT_BIN)root-config --glibs`
+else
+	@echo "Error: $@ requires ROOT"
+endif
+main92: $$@.cc $$@.h $$@LinkDef.h $(PREFIX_LIB)/libpythia8.a
+ifeq ($(ROOT_USE),true)
+	export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(ROOT_LIB);\
+	 $(ROOT_BIN)rootcint -f $@Dct.cc -c -I$(PREFIX_INCLUDE) $@.h $@LinkDef.h
+	$(CXX) $@Dct.cc $^ -o $@ -w -I$(ROOT_INCLUDE) $(CXX_COMMON)\
+	 -Wl,-rpath $(ROOT_LIB) `$(ROOT_BIN)root-config --glibs`
+else
+	@echo "Error: $@ requires ROOT"
+endif
+
+# User-written examples for tutorials, without external dependencies.
+mymain% : mymain%.cc $(PREFIX_LIB)/libpythia8.a
+	$(CXX) $^ -o $@ $(CXX_COMMON)
+
+# Internally used tests, without external dependencies.
+test% : test%.cc $(PREFIX_LIB)/libpythia8.a
+	$(CXX) $^ -o $@ $(CXX_COMMON)
+
+# Clean.
 clean:
-	rm -rf $(BINDIR)
-	rm -rf *.exe
-	rm -f *~; rm -f \#*; rm -f core*
+	@rm -f main[0-9][0-9]; rm -f out[0-9][0-9];\
+	rm -f mymain[0-9][0-9]; rm -f myout[0-9][0-9];\
+	rm -f test[0-9][0-9][0-9]; rm -f out[0-9][0-9][0-9];\
+	rm -f weakbosons.lhe; rm -f Pythia8.promc; rm -f hist.root;\
+	rm -f *~; rm -f \#*; rm -f core*; rm -f *Dct.*

@@ -1,5 +1,5 @@
 // HadronScatter.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -318,7 +318,7 @@ bool SigmaPartialWave::readFile(string xmlPath, string filename) {
           // Degrees to radians
           if ((input == 0 || input == 1 || input == 3) &&
               dUnit == 0) i2 *= M_PI / 180.;
-          
+
           // Convert to Treal and Timg
           complex T(0., 0.);
           if (input == 0 || input == 1) {
@@ -387,7 +387,7 @@ void SigmaPartialWave::setupSubprocesses() {
     int id1, id2;
     if (process == 1) { id1 = 321;  id2 = 311;  }
     else              { id1 = 2212; id2 = 2112; }
-    
+
     // Map subprocess to incoming
     subprocessMax = 12;
     sp2in[0] = pair < int, int > ( 211, id1);
@@ -505,7 +505,7 @@ double SigmaPartialWave::pickCosTheta(double Wcm) {
   if (WcmBin < 0) WcmBin = 0;
   if (WcmBin >= int(gridMax[subprocess].size()))
     WcmBin = int(gridMax[subprocess].size() - 1);
-  
+
   // Pick a value of cos(theta)
   double ct, wgt;
 

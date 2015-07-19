@@ -26,3 +26,5 @@ FFLAGS="$FCFLAGS"
 # Now run configure script
 ./configure CC="$CC" CFLAGS="$CFLAGS" CXX="$CXX" CXXFLAGS="$CXXFLAGS" FC="$FC" FCFLAGS="$FCFLAGS" FFLAGS="$FFLAGS"
 
+# Patching IB routines
+patch -b src/ib/dsIBffdxdy.f dsIBffdxdy.f.patch

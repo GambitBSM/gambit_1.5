@@ -3,15 +3,20 @@
 #include <istream>
 #include <ostream>
 #include "Pythia8/Pythia.h"
-#include "backend_types/Pythia_8_186/wrapper_Event.h"
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_Rndm.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
-#include "backend_types/Pythia_8_186/wrapper_SLHAinterface.h"
-#include "backend_types/Pythia_8_186/wrapper_Vec4.h"
-#include "backend_types/Pythia_8_186/wrapper_PartonLevel.h"
+#include "backend_types/Pythia_8_209/wrapper_Event.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleData.h"
+#include "backend_types/Pythia_8_209/wrapper_Rndm.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_SLHAinterface.h"
+#include "backend_types/Pythia_8_209/wrapper_Vec4.h"
+#include "backend_types/Pythia_8_209/wrapper_BeamParticle.h"
+#include "backend_types/Pythia_8_209/wrapper_UserHooks.h"
+#include "backend_types/Pythia_8_209/wrapper_PartonLevel.h"
+#include "backend_types/Pythia_8_209/wrapper_SigmaTotal.h"
+#include "backend_types/Pythia_8_209/wrapper_SigmaProcess.h"
+#include "backend_types/Pythia_8_209/wrapper_ResonanceWidths.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -51,9 +56,21 @@ bool Pythia8::Pythia::readFile__BOSS()
 }
 
 
-bool Pythia8::Pythia::init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> > LesHouchesEventFile)
+bool Pythia8::Pythia::setUserHooksPtr__BOSS(Pythia8::Abstract_UserHooks* userHooksPtrIn)
 {
-    return init(LesHouchesEventFile);
+    return setUserHooksPtr(dynamic_cast< Pythia8::UserHooks* >(userHooksPtrIn));
+}
+
+
+bool Pythia8::Pythia::setSigmaPtr__BOSS(Pythia8::Abstract_SigmaProcess* sigmaPtrIn)
+{
+    return setSigmaPtr(dynamic_cast< Pythia8::SigmaProcess* >(sigmaPtrIn));
+}
+
+
+bool Pythia8::Pythia::setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths* resonancePtrIn)
+{
+    return setResonancePtr(dynamic_cast< Pythia8::ResonanceWidths* >(resonancePtrIn));
 }
 
 
@@ -72,18 +89,6 @@ bool Pythia8::Pythia::forceHadronLevel__BOSS()
 void Pythia8::Pythia::LHAeventList__BOSS()
 {
     LHAeventList();
-}
-
-
-void Pythia8::Pythia::statistics__BOSS(bool all)
-{
-    statistics(all);
-}
-
-
-void Pythia8::Pythia::statistics__BOSS()
-{
-    statistics();
 }
 
 
@@ -135,7 +140,7 @@ Pythia8::Abstract_Couplings& Pythia8::Pythia::couplings_ref__BOSS() { return cou
 Pythia8::Abstract_SLHAinterface& Pythia8::Pythia::slhaInterface_ref__BOSS() { return slhaInterface; }
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_Pythia* Pythia8::Pythia::pointerCopy__BOSS()
 {

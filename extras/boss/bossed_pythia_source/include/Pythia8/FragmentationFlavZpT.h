@@ -1,5 +1,5 @@
 // FragmentationFlavZpT.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -59,7 +59,7 @@ public:
 
   // Stored properties.
   int id, rank, nPop, idPop, idVtx;
-  
+
 };
 
 //==========================================================================
@@ -89,6 +89,12 @@ public:
   // Combine two flavours (including diquarks) to produce a hadron.
   virtual int combine(FlavContainer& flav1, FlavContainer& flav2);
 
+  // Ditto, simplified input argument for simple configurations.
+  virtual int combine( int id1, int id2, bool keepTrying = true) {
+    FlavContainer flag1(id1); FlavContainer flag2(id2);
+    for (int i = 0; i < 100; ++i) { int idNew = combine( flag1, flag2);
+      if (idNew != 0 || !keepTrying) return idNew;} return 0;}
+
   // Assign popcorn quark inside an original (= rank 0) diquark.
   void assignPopQ(FlavContainer& flav);
 
@@ -110,13 +116,13 @@ private:
   bool   suppressLeadingB;
   double probQQtoQ, probStoUD, probSQtoQQ, probQQ1toQQ0, probQandQQ,
          probQandS, probQandSinQQ, probQQ1corr, probQQ1corrInv, probQQ1norm,
-         probQQ1join[4], mesonRate[4][6], mesonRateSum[4], mesonMix1[2][6], 
-         mesonMix2[2][6], etaSup, etaPrimeSup, decupletSup, baryonCGSum[6], 
-         baryonCGMax[6], popcornRate, popcornSpair, popcornSmeson, scbBM[3], 
+         probQQ1join[4], mesonRate[4][6], mesonRateSum[4], mesonMix1[2][6],
+         mesonMix2[2][6], etaSup, etaPrimeSup, decupletSup, baryonCGSum[6],
+         baryonCGMax[6], popcornRate, popcornSpair, popcornSmeson, scbBM[3],
          popFrac, popS[3], dWT[3][7], lightLeadingBSup, heavyLeadingBSup;
 
 };
- 
+
 //==========================================================================
 
 // The StringZ class is used to sample the fragmentation function f(z).
@@ -134,7 +140,7 @@ public:
   // Initialize data members.
   virtual void init(Settings& settings, ParticleData& particleData,
     Rndm* rndmPtrIn);
-  
+
   // Fragmentation function: top-level to determine parameters.
   virtual double zFrag( int idOld, int idNew = 0, double mT2 = 1.);
 
@@ -166,7 +172,7 @@ protected:
   Rndm*  rndmPtr;
 
 };
- 
+
 //==========================================================================
 
 // The StringPT class is used to select select transverse momenta.
@@ -203,7 +209,7 @@ protected:
   Rndm*  rndmPtr;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

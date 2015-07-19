@@ -1,5 +1,8 @@
+#ifndef __boss__ParticleDecays_Pythia_8_209_h__
+#define __boss__ParticleDecays_Pythia_8_209_h__
+
 // ParticleDecays.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -21,7 +24,7 @@
 #include "Pythia8/TauDecays.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // DecayHandler is base class for the external handling of decays.
@@ -39,12 +42,18 @@ public:
     vector<Vec4>& pProd, int iDec, const Event& event) = 0;
 
 };
- 
+
 //==========================================================================
 
 // The ParticleDecays class contains the routines to decay a particle.
 
-class ParticleDecays {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_ParticleDecays.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class ParticleDecays : public virtual Abstract_ParticleDecays {
 
 public:
 
@@ -57,7 +66,7 @@ public:
     Couplings* couplingsPtrIn, TimeShower* timesDecPtrIn,
     StringFlav* flavSelPtrIn, DecayHandler* decayHandlePtrIn,
     vector<int> handledParticles);
- 
+
   // Perform a decay of a single particle.
   bool decay(int iDec, Event& event);
 
@@ -94,7 +103,7 @@ private:
   // Initialization data, read from Settings.
   bool   limitTau0, limitTau, limitRadius, limitCylinder, limitDecay,
          mixB, doFSRinDecays, doGammaRad;
-  int    sophisticatedTau;
+  int    tauMode;
   double mSafety, tau0Max, tauMax, rMax, xyMax, zMax, xBdMix, xBsMix,
          sigmaSoft, multIncrease, multIncreaseWeak, multRefMass, multGoffset,
          colRearrange, stopMass, sRhoDal, wRhoDal;
@@ -143,11 +152,40 @@ private:
 
   // Set colour flow and scale in a decay explicitly to partons.
   bool setColours(Event& event);
-  
+
+
+        public:
+            Abstract_ParticleDecays* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_ParticleDecays* in);
+
+
+        public:
+            bool decay__BOSS(int, Pythia8::Abstract_Event&);
+
+        private:
+            bool checkVertex__BOSS(Pythia8::Abstract_Particle&);
+
+            bool oscillateB__BOSS(Pythia8::Abstract_Particle&);
+
+            bool oneBody__BOSS(Pythia8::Abstract_Event&);
+
+            bool twoBody__BOSS(Pythia8::Abstract_Event&);
+
+            bool threeBody__BOSS(Pythia8::Abstract_Event&);
+
+            bool mGenerator__BOSS(Pythia8::Abstract_Event&);
+
+            bool dalitzKinematics__BOSS(Pythia8::Abstract_Event&);
+
+            bool setColours__BOSS(Pythia8::Abstract_Event&);
+
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_ParticleDecays_H
+
+#endif /* __boss__ParticleDecays_Pythia_8_209_h__ */

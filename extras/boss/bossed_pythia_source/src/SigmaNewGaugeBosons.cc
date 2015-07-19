@@ -1,5 +1,5 @@
 // SigmaNewGaugeBosons.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -70,7 +70,7 @@ void Sigma1ffbarZprimeWprime::setupProd( Event& process, int i1, int i2,
 
 complex Sigma1ffbarZprimeWprime::fGK(int j1, int j2, int j3, int j4,
   int j5, int j6) {
- 
+
   return 4. * hA[j1][j3] * hC[j2][j6]
          * ( hA[j1][j5] * hC[j1][j4] + hA[j3][j5] * hC[j3][j4] );
 
@@ -112,7 +112,7 @@ double Sigma1ffbarZprimeWprime::xjGK( double tHnow, double uHnow,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2gmZZprime::initProc() {
 
   // Allow to pick only parts of full gamma*/Z0/Z'0 expression.
@@ -136,7 +136,7 @@ void Sigma1ffbar2gmZZprime::initProc() {
   // Ensure that arrays initially are empty.
   for (int i = 0; i < 20; ++i) afZp[i] = 0.;
   for (int i = 0; i < 20; ++i) vfZp[i] = 0.;
-  
+
   // Store first-generation axial and vector couplings.
   afZp[1]     = settingsPtr->parm("Zprime:ad");
   afZp[2]     = settingsPtr->parm("Zprime:au");
@@ -147,9 +147,15 @@ void Sigma1ffbar2gmZZprime::initProc() {
   vfZp[11]    = settingsPtr->parm("Zprime:ve");
   vfZp[12]    = settingsPtr->parm("Zprime:vnue");
 
-  // Second and third generation could be carbon copy of this...
+  // Determine if the 4th generation should be included
+  bool coupZp2gen4    = settingsPtr->flag("Zprime:coup2gen4");
+
+  maxZpGen = (coupZp2gen4) ? 8 : 6;
+
+  // Second and third (and possibly 4th) generation could be carbon copy
+  // of this...
   if (settingsPtr->flag("Zprime:universality")) {
-    for (int i = 3; i <= 6; ++i) {
+    for (int i = 3; i <= maxZpGen; ++i) {
       afZp[i]    = afZp[i-2];
       vfZp[i]    = vfZp[i-2];
       afZp[i+10] = afZp[i+8];
@@ -174,6 +180,16 @@ void Sigma1ffbar2gmZZprime::initProc() {
     vfZp[14]  = settingsPtr->parm("Zprime:vnumu");
     vfZp[15]  = settingsPtr->parm("Zprime:vtau");
     vfZp[16]  = settingsPtr->parm("Zprime:vnutau");
+    if( coupZp2gen4 ) {
+      afZp[7]   = settingsPtr->parm("Zprime:abPrime");
+      afZp[8]   = settingsPtr->parm("Zprime:atPrime");
+      vfZp[7]   = settingsPtr->parm("Zprime:vbPrime");
+      vfZp[8]   = settingsPtr->parm("Zprime:vtPrime");
+      afZp[17]  = settingsPtr->parm("Zprime:atauPrime");
+      afZp[18]  = settingsPtr->parm("Zprime:anutauPrime");
+      vfZp[17]  = settingsPtr->parm("Zprime:vtauPrime");
+      vfZp[18]  = settingsPtr->parm("Zprime:vnutauPrime");
+    }
   }
 
   // Coupling for Z' -> W+ W- and decay angular admixture.
@@ -211,8 +227,13 @@ void Sigma1ffbar2gmZZprime::sigmaKin() {
     if (onMode != 1 && onMode != 2) continue;
     idAbs = abs( particlePtr->channel(i).product(0) );
 
-    // Contributions from three fermion generations.
-    if ( (idAbs > 0 && idAbs < 7) || ( idAbs > 10 && idAbs < 17) ) {
+    // Contributions from three/four fermion generations,
+    // and optionally also from excited fermions.
+    if ( (idAbs >  0 && idAbs <= maxZpGen)
+      || (idAbs > 10 && idAbs <= maxZpGen+10)
+      || (idAbs > 4000000 && idAbs <= 4000006)
+      || (idAbs > 4000010 && idAbs <= 4000016) ) {
+      int idAbs4 = (idAbs < 4000000) ? idAbs : idAbs - 4000000;
       mf = particleDataPtr->m0(idAbs);
 
       // Check that above threshold.
@@ -221,11 +242,11 @@ void Sigma1ffbar2gmZZprime::sigmaKin() {
         ps        = sqrtpos(1. - 4. * mr);
 
         // Couplings of gamma^*/Z^0/Z'^0  to final flavour
-        ef        = couplingsPtr->ef(idAbs);
-        af        = couplingsPtr->af(idAbs);
-        vf        = couplingsPtr->vf(idAbs);
-        apf       = afZp[idAbs];
-        vpf       = vfZp[idAbs];
+        ef        = couplingsPtr->ef(idAbs4);
+        af        = couplingsPtr->af(idAbs4);
+        vf        = couplingsPtr->vf(idAbs4);
+        apf       = afZp[idAbs4];
+        vpf       = vfZp[idAbs4];
 
         // Combine couplings with kinematical factors.
         kinFacA   = pow3(ps);
@@ -237,9 +258,11 @@ void Sigma1ffbar2gmZZprime::sigmaKin() {
         vafvapf   = vf * vpf * kinFacV + af * apf * kinFacA;
         vapf2     = vpf * vpf * kinFacV + apf * apf * kinFacA;
 
-        // Colour factor. Additionally secondary width for top.
-        colf      = (idAbs < 9) ? colQ : 1.;
-        if (idAbs == 6) colf *= particleDataPtr->resOpenFrac(6, -6);
+        // Colour factor. Additionally secondary width for heavy particles.
+        colf      = (idAbs4 < 9) ? colQ : 1.;
+        if ( (idAbs > 5 && idAbs < 9) || (idAbs > 17 && idAbs < 19)
+          || idAbs > 4000000)
+          colf *= particleDataPtr->resOpenFrac(idAbs, -idAbs);
 
         // Store sum of combinations.
         gamSum   += colf * ef2;
@@ -337,7 +360,7 @@ void Sigma1ffbar2gmZZprime::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for gamma*/Z0/Z'0 decay angle.
-  
+
 double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -348,8 +371,8 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
   int idOutAbs = process[6].idAbs();
 
   // Angular weight for outgoing fermion pair.
-  if (iResBeg == 5 && iResEnd == 5 &&
-    (idOutAbs < 7 || ( idOutAbs > 10 && idOutAbs < 17)) ) {
+  if (iResBeg == 5 && iResEnd == 5 && (idOutAbs <= maxZpGen
+    || (idOutAbs > 10 && idOutAbs <= maxZpGen+10) || idOutAbs > 4000000) ) {
 
     // Couplings for in- and out-flavours.
     double ei  = couplingsPtr->ef(idInAbs);
@@ -357,11 +380,12 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
     double ai  = couplingsPtr->af(idInAbs);
     double vpi = vfZp[idInAbs];
     double api = afZp[idInAbs];
-    double ef  = couplingsPtr->ef(idOutAbs);
-    double vf  = couplingsPtr->vf(idOutAbs);
-    double af  = couplingsPtr->af(idOutAbs);
-    double vpf = vfZp[idOutAbs];
-    double apf = afZp[idOutAbs];
+    int idOutAbs4 = (idOutAbs < 4000000) ? idOutAbs : idOutAbs - 4000000;
+    double ef  = couplingsPtr->ef(idOutAbs4);
+    double vf  = couplingsPtr->vf(idOutAbs4);
+    double af  = couplingsPtr->af(idOutAbs4);
+    double vpf = vfZp[idOutAbs4];
+    double apf = afZp[idOutAbs4];
 
     // Phase space factors. (One power of beta left out in formulae.)
     double mr1 = pow2(process[6].m()) / sH;
@@ -415,7 +439,7 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
 
   // Angular weight for f + fbar -> Z' -> W+ + W- -> 4 fermions.
   else if (iResBeg == 6 && iResEnd == 7 && idOutAbs == 24) {
- 
+
     // Order so that fbar(1) f(2) -> f'(3) fbar'(4) f"(5) fbar"(6).
     // with f' fbar' from W- and f" fbar" from W+.
     int i1 = (process[3].id() < 0) ? 3 : 4;
@@ -425,7 +449,7 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
     int i5 = (process[10].id() > 0) ? 10 : 11;
     int i6 = 21 - i5;
     if (process[6].id() > 0) {swap(i3, i5); swap(i4, i6);}
-  
+
     // Decay distribution like in f fbar -> Z^* -> W+ W-.
     if (rndmPtr->flat() > anglesZpWW) {
 
@@ -454,7 +478,7 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
       wt            = li*li * fGK135 + ri*ri * fGK253;
       wtMax         = 4. * s3now * s4now * (li*li + ri*ri)
                     * (xiT + xiU - xjTU);
-   
+
     // Decay distribution like in f fbar -> h^0 -> W+ W-.
     } else {
       double p35  = 2. * process[i3].p() * process[i5].p();
@@ -468,6 +492,7 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
   else if (process[process[iResBeg].mother1()].idAbs() == 6)
     return weightTopDecay( process, iResBeg, iResEnd);
 
+  // Angular weight for fourth generation or excited fermions not implemented.
 
   // Done.
   return (wt / wtMax);
@@ -482,7 +507,7 @@ double Sigma1ffbar2gmZZprime::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2Wprime::initProc() {
 
   // Store W+- mass and width for propagator.
@@ -562,7 +587,7 @@ void Sigma1ffbar2Wprime::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for W decay angle.
-  
+
 double Sigma1ffbar2Wprime::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -621,7 +646,7 @@ double Sigma1ffbar2Wprime::weightDecay( Event& process, int iResBeg,
   // Angular weight for f + fbar -> W' -> W + Z -> 4 fermions.
   else if (iResBeg == 6 && iResEnd == 7
     && (idOutAbs == 24 || idOutAbs == 23)) {
- 
+
     // Order so that fbar(1) f(2) -> f'(3) fbar'(4) f"(5) fbar"(6).
     // with f' fbar' from W and f" fbar" from Z.
     int i1 = (process[3].id() < 0) ? 3 : 4;
@@ -631,7 +656,7 @@ double Sigma1ffbar2Wprime::weightDecay( Event& process, int iResBeg,
     int i5 = (process[10].id() > 0) ? 10 : 11;
     int i6 = 21 - i5;
     if (process[6].id() == 23) {swap(i3, i5); swap(i4, i6);}
-  
+
     // Decay distribution like in f fbar -> Z^* -> W+ W-.
     if (rndmPtr->flat() > anglesWpWZ) {
 
@@ -660,7 +685,7 @@ double Sigma1ffbar2Wprime::weightDecay( Event& process, int iResBeg,
       wt            = lfZ*lfZ * fGK135 + rfZ*rfZ * fGK136;
       wtMax         = 4. * s3now * s4now * (lfZ*lfZ + rfZ*rfZ)
                     * (xiT + xiU - xjTU);
-   
+
     // Decay distribution like in f fbar -> H^+- -> W+- Z0.
     } else {
       double p35  = 2. * process[i3].p() * process[i5].p();
@@ -673,7 +698,7 @@ double Sigma1ffbar2Wprime::weightDecay( Event& process, int iResBeg,
   // Angular weight in top decay by standard routine.
   else if (process[process[iResBeg].mother1()].idAbs() == 6)
     return weightTopDecay( process, iResBeg, iResEnd);
- 
+
   // Done.
   return (wt / wtMax);
 
@@ -688,7 +713,7 @@ double Sigma1ffbar2Wprime::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2Rhorizontal::initProc() {
 
   // Store R^0 mass and width for propagator.

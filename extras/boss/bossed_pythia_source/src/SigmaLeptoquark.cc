@@ -1,5 +1,5 @@
 // SigmaLeptoquark.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -18,7 +18,7 @@ namespace Pythia8 {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ql2LeptoQuark::initProc() {
 
   // Store LQ mass and width for propagator.
@@ -98,7 +98,7 @@ void Sigma1ql2LeptoQuark::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2LeptoQuarkl::initProc() {
 
   // Store LQ mass and width for propagator.
@@ -179,7 +179,7 @@ void Sigma2qg2LeptoQuarkl::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2LQLQbar::initProc() {
 
   // Store LQ mass and width for propagator.
@@ -238,7 +238,7 @@ void Sigma2gg2LQLQbar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2LQLQbar::initProc() {
 
   // Store LQ mass and width for propagator.

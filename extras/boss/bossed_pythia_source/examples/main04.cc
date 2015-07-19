@@ -1,5 +1,5 @@
 // main04.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -28,7 +28,7 @@ int main() {
   // Extract settings to be used in the main program.
   int    nEvent    = pythia.mode("Main:numberOfEvents");
   int    nAbort    = pythia.mode("Main:timesAllowErrors");
- 
+
   // Initialize.
   pythia.init();
 
@@ -79,7 +79,7 @@ int main() {
   Hist bpT2("b spectrum for 2 < pT < 5",            100, 0., bMax);
   Hist bpT3("b spectrum for 5 < pT < 15",           100, 0., bMax);
   Hist bpT4("b spectrum for 15 < pT",               100, 0., bMax);
- 
+
   // Begin event loop.
   int iAbort = 0;
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
@@ -93,7 +93,7 @@ int main() {
 
     // Extract event classification.
     int code = pythia.info.code();
-    
+
     // Charged multiplicity and mean pT: all and by event class.
     int nch = 0;
     double pTsum = 0.;

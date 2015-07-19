@@ -1,11 +1,12 @@
 #include <string>
 #include <ostream>
 #include <vector>
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Rndm.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleDataEntry.h"
+#include "Pythia8/ResonanceWidths.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Rndm.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleDataEntry.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 #include "Pythia8/ParticleData.h"
@@ -268,6 +269,12 @@ void Pythia8::ParticleData::rescaleBR__BOSS(int idIn)
 }
 
 
+void Pythia8::ParticleData::setResonancePtr__BOSS(int idIn, Pythia8::Abstract_ResonanceWidths* resonancePtrIn)
+{
+    setResonancePtr(idIn, dynamic_cast< Pythia8::ResonanceWidths* >(resonancePtrIn));
+}
+
+
 double Pythia8::ParticleData::resWidth__BOSS(int idIn, double mHat, int idInFlav, bool openOnly)
 {
     return resWidth(idIn, mHat, idInFlav, openOnly);
@@ -330,7 +337,7 @@ Pythia8::Abstract_ParticleDataEntry* Pythia8::ParticleData::particleDataEntryPtr
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_ParticleData* Pythia8::ParticleData::pointerCopy__BOSS()
 {

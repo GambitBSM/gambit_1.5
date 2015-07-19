@@ -1,5 +1,5 @@
 // PartonDistributions.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -48,23 +48,35 @@ public:
   virtual ~PDF() {}
 
   // Confirm that PDF has been set up (important for LHAPDF and H1 Pomeron).
-  bool isSetup() {return isSet;}
+  virtual bool isSetup() {return isSet;}
 
   // Dynamic choice of meson valence flavours for pi0, K0S, K0L, Pomeron.
-  void newValenceContent(int idVal1In, int idVal2In) {
+  virtual void newValenceContent(int idVal1In, int idVal2In) {
     idVal1 = idVal1In; idVal2 = idVal2In;}
 
   // Allow extrapolation beyond boundaries. This is optional.
   virtual void setExtrapolate(bool) {}
 
   // Read out parton density
-  double xf(int id, double x, double Q2);
+  virtual double xf(int id, double x, double Q2);
 
   // Read out valence and sea part of parton densities.
-  double xfVal(int id, double x, double Q2);
-  double xfSea(int id, double x, double Q2);
-  
+  virtual double xfVal(int id, double x, double Q2);
+  virtual double xfSea(int id, double x, double Q2);
+
+  // Check whether x and Q2 values fall inside the fit bounds (LHAPDF6 only).
+  virtual bool insideBounds(double, double) {return true;}
+
+  // Access the running alpha_s of a PDF set (LHAPDF6 only).
+  virtual double alphaS(double) { return 1.;}
+
+  // Return quark masses used in the PDF fit (LHAPDF6 only).
+  virtual double mQuarkPDF(int) { return -1.;}
+
 protected:
+
+  // Allow the LHAPDF class to access these methods.
+  friend class LHAPDF;
 
   // Store relevant quantities.
   int    idBeam, idBeamAbs, idSav, idVal1, idVal2;
@@ -80,50 +92,7 @@ protected:
   virtual void xfUpdate(int id, double x, double Q2) = 0;
 
 };
- 
-//==========================================================================
 
-// Provide interface to the LHAPDF library of parton densities.
-
-class LHAPDF : public PDF {
-
-public:
-
-  // Constructor.
-  LHAPDF(int idBeamIn, string setName, int member,  int nSetIn = 1,
-    Info* infoPtr = 0) : PDF(idBeamIn), nSet(nSetIn)
-    {init( setName, member, infoPtr);}
-
-  // Allow extrapolation beyond boundaries. This is optional.
-  void setExtrapolate(bool extrapol);
- 
-  // Find out the nSet number corresponding to a name and member.
-  // Returns -1 if no such LHAPDF set has been initialized.
-  static int findNSet(string setName, int member);
-  
-  // Return the lowest non-occupied nSet number.
-  static int freeNSet();
-   
-private:
-
-  // Initialization of PDF set.
-  void init(string setName, int member, Info* infoPtr);
-
-  // Update all PDF values.
-  void xfUpdate(int , double x, double Q2);
-
-  // Current set and pdf values.
-  int    nSet;
-  double xfArray[13];
-  bool   hasPhoton;
-  double xPhoton;
-
-  // Keep track of what sets have been initialized in LHAPDFInterface.
-  // The key is the nSet index, the value is a pair (name, member number).
-  static map< int, pair<string, int> > initializedSets;
-
-};
- 
 //==========================================================================
 
 // Gives the GRV 94L (leading order) parton distribution function set
@@ -150,7 +119,7 @@ private:
     double ak, double ag, double b, double d, double e, double es);
 
 };
- 
+
 //==========================================================================
 
 // Gives the CTEQ 5L (leading order) parton distribution function set
@@ -169,7 +138,7 @@ private:
   void xfUpdate(int , double x, double Q2);
 
 };
- 
+
 //==========================================================================
 
 // The MSTWpdf class.
@@ -222,7 +191,7 @@ private:
     double y2, double y3);
 
 };
- 
+
 //==========================================================================
 
 // The CTEQ6pdf class.
@@ -297,7 +266,7 @@ private:
   Info* m_infoPtr;
 
 };
- 
+
 //==========================================================================
 
 // Gives the GRV 1992 pi+ (leading order) parton distribution function set
@@ -348,7 +317,7 @@ private:
   void xfUpdate(int , double x, double);
 
 };
- 
+
 //==========================================================================
 
 // The H1 2006 Fit A and Fit B Pomeron parametrization.
@@ -380,7 +349,7 @@ private:
   void xfUpdate(int , double x, double );
 
 };
- 
+
 //==========================================================================
 
 // The H1 2007 Jets Pomeron parametrization..
@@ -414,11 +383,11 @@ private:
   void xfUpdate(int id, double x, double );
 
 };
- 
+
 //==========================================================================
 
 // Gives electron (or muon, or tau) parton distribution.
- 
+
 class Lepton : public PDF {
 
 public:
@@ -438,11 +407,11 @@ private:
   double m2Lep;
 
 };
- 
+
 //==========================================================================
 
 // Gives electron (or other lepton) parton distribution when unresolved.
- 
+
 class LeptonPoint : public PDF {
 
 public:
@@ -456,12 +425,12 @@ private:
   void xfUpdate(int , double , double ) {xlepton = 1; xgamma = 0.;}
 
 };
- 
+
 //==========================================================================
 
 // Gives neutrino parton distribution when unresolved (only choice for now).
 // Note factor of 2 since only lefthanded implies no spin averaging.
- 
+
 class NeutrinoPoint : public PDF {
 
 public:
@@ -475,7 +444,7 @@ private:
   void xfUpdate(int , double , double ) {xlepton = 2; xgamma = 0.;}
 
 };
- 
+
 //==========================================================================
 
 // The NNPDF class.
@@ -495,19 +464,12 @@ public:
   // Constructor.
   NNPDF(int idBeamIn = 2212, int iFitIn = 1, string xmlPath = "../xmldoc/",
     Info* infoPtr = 0) : PDF(idBeamIn), fPDFGrid(NULL), fXGrid(NULL),
-    fLogXGrid(NULL), fQ2Grid(NULL), fLogQ2Grid(NULL), fRes(NULL) {
+    fLogXGrid(NULL), fQ2Grid(NULL), fLogQ2Grid(NULL), fRes(NULL){
       init( iFitIn, xmlPath, infoPtr); };
- 
+
   // Destructor.
   ~NNPDF() {
-    if (fPDFGrid) {
-      for (int i = 0; i < fNFL; i++) {
-        for (int j = 0; j < fNX; j++)
-          if (fPDFGrid[i][j]) delete[] fPDFGrid[i][j];
-        if (fPDFGrid[i]) delete[] fPDFGrid[i];
-      }
-      delete[] fPDFGrid;
-    }
+    if (fPDFGrid) delete[] fPDFGrid;
     if (fXGrid) delete[] fXGrid;
     if (fLogXGrid) delete[] fLogXGrid;
     if (fQ2Grid) delete[] fQ2Grid;
@@ -519,21 +481,21 @@ private:
 
   // Constants: could only be changed in the code itself.
   static const double fXMINGRID;
- 
+
   // Number of flavors (including photon) and interpolation parameters.
   static const int fNFL = 14;
   static const int fM = 4;
   static const int fN = 2;
-  
+
   // Variables to be set during code initialization.
   int iFit, fNX, fNQ2;
-  double ***fPDFGrid;
+  double *fPDFGrid;
   double *fXGrid;
   double *fLogXGrid;
   double *fQ2Grid;
   double *fLogQ2Grid;
   double *fRes;
-  
+
   // Initialization of data array.
   void init( int iFitIn, string xmlPath, Info* infoPtr);
 
@@ -542,7 +504,7 @@ private:
 
   // Interpolation in the grid for a given PDF flavour.
   void xfxevolve(double x, double Q2);
- 
+
   // 1D and 2D polynomial interpolation.
   void polint(double xa[], double ya[], int n, double x,
     double& y, double& dy);
@@ -550,7 +512,76 @@ private:
     double x1, double x2, double& y, double& dy);
 
 };
- 
+
+//==========================================================================
+
+// LHAPDF plugin interface class.
+
+class LHAPDF : public PDF {
+
+public:
+
+  // Constructor and destructor.
+  LHAPDF(int idIn, string pSet, Info* infoPtrIn);
+  ~LHAPDF();
+
+  // Confirm that PDF has been set up.
+  bool isSetup() {if (pdfPtr) return pdfPtr->isSetup(); return false;}
+
+  // Dynamic choice of meson valence flavours for pi0, K0S, K0L, Pomeron.
+  void newValenceContent(int idVal1In, int idVal2In) {
+    if (pdfPtr) pdfPtr->newValenceContent(idVal1In, idVal2In);}
+
+  // Allow extrapolation beyond boundaries.
+  void setExtrapolate(bool extrapolate) {
+    if (pdfPtr) pdfPtr->setExtrapolate(extrapolate);}
+
+  // Read out parton density
+  double xf(int id, double x, double Q2) {
+    if (pdfPtr) return pdfPtr->xf(id, x, Q2); else return 0;}
+
+  // Read out valence and sea part of parton densities.
+  double xfVal(int id, double x, double Q2) {
+    if (pdfPtr) return pdfPtr->xfVal(id, x, Q2); else return 0;}
+  double xfSea(int id, double x, double Q2) {
+    if (pdfPtr) return pdfPtr->xfSea(id, x, Q2); else return 0;}
+
+  // Check whether x and Q2 values fall inside the fit bounds (LHAPDF6 only).
+  bool insideBounds(double x, double Q2) {
+    if(pdfPtr) return pdfPtr->insideBounds(x, Q2); else return true;}
+
+  // Access the running alpha_s of a PDF set (LHAPDF6 only).
+  double alphaS(double Q2) {
+    if(pdfPtr) return pdfPtr->alphaS(Q2); else return 1.;}
+
+  // Return quark masses used in the PDF fit (LHAPDF6 only).
+  double mQuarkPDF(int idIn) {
+    if(pdfPtr) return pdfPtr->mQuarkPDF(idIn); else return -1.;}
+
+private:
+
+  // Resolve valence content for assumed meson.
+  void setValenceContent() {if (pdfPtr) pdfPtr->setValenceContent();}
+
+  // Update parton densities.
+  void xfUpdate(int id, double x, double Q2) {
+    if (pdfPtr) pdfPtr->xfUpdate(id, x, Q2);}
+
+  // Typedefs of the hooks used to access the plugin.
+  typedef PDF* NewLHAPDF(int, string, int, Info*);
+  typedef void DeleteLHAPDF(PDF*);
+  typedef void (*Symbol)();
+
+  // Acccess a plugin library symbol.
+  Symbol symbol(string symName);
+
+  // The loaded LHAPDF object, info pointer, and plugin library name.
+  PDF   *pdfPtr;
+  Info  *infoPtr;
+  string libName;
+
+};
+
 //==========================================================================
 
 } // end namespace Pythia8

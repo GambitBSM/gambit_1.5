@@ -1,5 +1,5 @@
 // ParticleDecays.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -61,7 +61,7 @@ void ParticleDecays::init(Info* infoPtrIn, Settings& settings,
 
   // Save pointer for external handling of some decays.
   decayHandlePtr  = decayHandlePtrIn;
-  
+
   // Set which particles should be handled externally.
   if (decayHandlePtr != 0)
   for (int i = 0; i < int(handledParticles.size()); ++i)
@@ -109,10 +109,10 @@ void ParticleDecays::init(Info* infoPtrIn, Settings& settings,
   doGammaRad    = settings.flag("ParticleDecays:allowPhotonRadiation");
 
   // Use standard decays or dedicated tau decay package
-  sophisticatedTau = settings.mode("ParticleDecays:sophisticatedTau");
+  tauMode       = settings.mode("TauDecays:mode");
 
   // Initialize the dedicated tau decay handler.
-  if (sophisticatedTau) tauDecayer.init(infoPtr, &settings,
+  if (tauMode) tauDecayer.init(infoPtr, &settings,
     particleDataPtr, rndmPtr, couplingsPtr);
 
 }
@@ -176,9 +176,9 @@ bool ParticleDecays::decay( int iDec, Event& event) {
       event[iDec].daughters( iProd[1], iProd[mult]);
     }
   }
-    
+
   // Check if the particle is tau and let the special tau decayer handle it.
-  if (decayer.idAbs() == 15 && !doneExternally && sophisticatedTau) {
+  if (decayer.idAbs() == 15 && !doneExternally && tauMode) {
     doneExternally = tauDecayer.decay(iDec, event);
     if (doneExternally) return true;
   }
@@ -208,7 +208,7 @@ bool ParticleDecays::decay( int iDec, Event& event) {
         idProd.resize(1);
         mProd.resize(1);
         scale = 0.;
-     
+
         // Extract and store the decay products in local arrays.
         hasPartons = false;
         for (int i = 0; i < mult; ++i) {
@@ -241,13 +241,13 @@ bool ParticleDecays::decay( int iDec, Event& event) {
           for (int i = 1; i <= mult; ++i) mDiff -= mProd[i];
           if (mDiff < mSafety) continue;
         }
-  
+
         // End of inner trial loops. Check if succeeded or not.
         foundMode = true;
         break;
       }
       if (!foundMode) continue;
-    
+
       // Store decay products in the event record.
       int status = (hasOscillated) ? 92 : 91;
       for (int i = 1; i <= mult; ++i) {
@@ -282,7 +282,7 @@ bool ParticleDecays::decay( int iDec, Event& event) {
     if (foundChannel) {
       event[iDec].statusNeg();
       event[iDec].daughters( iProd[1], iProd[mult]);
-  
+
     // Else remove unused daughters and return failure.
     } else {
       if (hasStored) event.popBack(mult);
@@ -303,7 +303,7 @@ bool ParticleDecays::decay( int iDec, Event& event) {
   // Set lifetime of daughters.
   for (int i = 1; i <= mult; ++i)
     event[iProd[i]].tau( event[iProd[i]].tau0() * rndmPtr->exp() );
-  
+
   // In a decay explicitly to partons then optionally do a shower,
   // and always flag that partonic system should be fragmented.
   if (hasPartons && keepPartons && doFSRinDecays)
@@ -371,7 +371,7 @@ bool ParticleDecays::oneBody(Event& event) {
   // References to the particles involved.
   Particle& decayer = event[iProd[0]];
   Particle& prod    = event[iProd[1]];
-   
+
   // Set momentum and expand mother information.
   prod.p( decayer.p() );
   prod.m( decayer.m() );
@@ -636,7 +636,7 @@ bool ParticleDecays::mGenerator(Event& event) {
   for (int i = 2; i <= mult; ++i) mSum += mProd[i];
   double mDiff   = m0 - mSum;
   if (mDiff < mSafety) return false;
-   
+
   // Begin setup of intermediate invariant masses.
   mInv.resize(0);
   for (int i = 0; i <= mult; ++i) mInv.push_back( mProd[i]);
@@ -675,7 +675,7 @@ bool ParticleDecays::mGenerator(Event& event) {
         }
       }
       rndmOrd.push_back(0.);
-  
+
       // Translate into intermediate masses and find weight.
       for (int i = mult - 1; i > 0; --i) {
         mInv[i] = mInv[i+1] + mProd[i] + (rndmOrd[i-1] - rndmOrd[i]) * mDiff;
@@ -708,7 +708,7 @@ bool ParticleDecays::mGenerator(Event& event) {
       event[iProd[i]].p( pX, pY, pZ, eHad);
       pInv[i+1].p( -pX, -pY, -pZ, eInv);
     }
-  
+
     // Boost decay products to the mother rest frame.
     event[iProd[mult]].p( pInv[mult] );
     for (int iFrame = mult - 1; iFrame > 1; --iFrame)
@@ -854,14 +854,14 @@ bool ParticleDecays::dalitzMass() {
 // Do kinematics of gamma* -> l- l+ in Dalitz decay.
 
 bool ParticleDecays::dalitzKinematics(Event& event) {
- 
+
   // Restore multiplicity.
   int nDal = (meMode < 13) ? 1 : 2;
   mult += nDal;
 
   // Loop over one or two lepton pairs.
   for (int iDal = 0; iDal < nDal; ++iDal) {
- 
+
     // References to the particles involved.
     Particle& decayer = event[iProd[0]];
     Particle& prodA = (iDal == 0) ? event[iProd[mult - 1]]
@@ -1081,7 +1081,7 @@ bool ParticleDecays::pickHadrons() {
         flavEnds.push_back( FlavContainer(idPartons[i]) );
         if (abs(idPartons[i]) > 100) flavSelPtr->assignPopQ( flavEnds[i] );
       }
-    
+
       // Fragment off at random, but save nLeft/2 for final recombination.
       if (nNew > nLeft/2) {
         FlavContainer flavNew;
@@ -1099,7 +1099,7 @@ bool ParticleDecays::pickHadrons() {
           flavEnds[iEnd].anti(flavNew);
         }
       }
-      
+
       // When only two quarks left, combine to form final hadron.
       if (nLeft == 2) {
         int idHad;
@@ -1126,7 +1126,7 @@ bool ParticleDecays::pickHadrons() {
         if (relColSign == 1) iEnd2 = 2;
         if (iEnd2 == 2) iEnd3 = 1;
         if (iEnd2 == 3) iEnd4 = 1;
-        
+
         // Then combine to get final two hadrons.
         int idHad;
         if ( abs(flavEnds[iEnd1].id) > 8 && abs(flavEnds[iEnd2].id) > 8)
@@ -1268,7 +1268,7 @@ bool ParticleDecays::setColours(Event& event) {
     acols[iGlu1] = newCol2;
     cols[iGlu2] = newCol2;
     acols[iGlu2] = newCol1;
-   
+
   // Unknown decay mode means failure.
   } else return false;
 
@@ -1277,10 +1277,9 @@ bool ParticleDecays::setColours(Event& event) {
 
   // Done.
   return true;
-     
+
 }
 
 //==========================================================================
 
 } // end namespace Pythia8
-

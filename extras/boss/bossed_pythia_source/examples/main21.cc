@@ -1,5 +1,5 @@
 // main21.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -62,7 +62,7 @@ void fillPartons(int type, double ee, Event& event, ParticleData& pdt,
   event.reset();
 
   // Information on a q qbar system, to be hadronized.
-  if (type == 1) {
+  if (type == 1 || type == 12) {
     int    id = 2;
     double mm = pdt.m0(id);
     double pp = sqrtpos(ee*ee - mm*mm);
@@ -70,7 +70,7 @@ void fillPartons(int type, double ee, Event& event, ParticleData& pdt,
     event.append( -id, 23,   0, 101, 0., 0., -pp, ee, mm);
 
   // Information on a g g system, to be hadronized.
-  } else if (type == 2) {
+  } else if (type == 2 || type == 13) {
     event.append( 21, 23, 101, 102, 0., 0.,  ee, ee);
     event.append( 21, 23, 102, 101, 0., 0., -ee, ee);
 
@@ -106,7 +106,7 @@ void fillPartons(int type, double ee, Event& event, ParticleData& pdt,
 
       // Minimal cos(q-g opening angle), allows more or less nasty events.
       double cosThetaMin =0.;
-      
+
       // Add a few gluons (almost) at random.
       for (int nglu = 0; nglu < 5; ++nglu) {
         int iq = 1 + int( 2.99999 * rndm.flat() );
@@ -128,7 +128,7 @@ void fillPartons(int type, double ee, Event& event, ParticleData& pdt,
       }
       // Update daughter range of mother.
       event[1].daughters(2, event.size() - 1);
- 
+
     }
 
   // Information on a q q qbar qbar dijunction system, to be hadronized.
@@ -194,8 +194,10 @@ int main() {
   // 4 = minimal q q q junction topology.
   // 5 = q q q junction topology with gluons on the strings.
   // 6 = q q qbar qbar dijunction topology, no gluons.
-  // 7 - 10 : ditto, but with 1 - 4 gluons on string between junctions.
-  // 11 : single-resonance gun.
+  // 7 - 10 = ditto, but with 1 - 4 gluons on string between junctions.
+  // 11 = single-resonance gun.
+  // 12 = q qbar plus parton shower.
+  // 13 = g g plus parton shower.
   int type = 11;
 
   // Set particle species and energy for single-particle gun.
@@ -229,7 +231,7 @@ int main() {
   pythia.readString("Next:numberShowInfo = 0");
   pythia.readString("Next:numberShowProcess = 0");
   pythia.readString("Next:numberShowEvent = 0");
- 
+
   // Initialize.
   pythia.init();
 
@@ -248,7 +250,7 @@ int main() {
   Hist dndyAnti("dn/dy primaries antijunction",100, -10., 10.);
   Hist dndyJun("dn/dy primaries junction",100, -10., 10.);
   Hist dndySum("dn/dy all primaries",100, -10., 10.);
-  
+
   // Begin of event loop.
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
 
@@ -259,12 +261,24 @@ int main() {
     // Set up parton-level configuration.
     else fillPartons( type, ee, event, pdt, pythia.rndm);
 
+    // To have partons shower they must be set maximum allowed scale.
+    // (Can be set individually to restrict radiation differently.)
+    if (type == 12 || type == 13) {
+      double scale = ee;
+      event[1].scale( scale);
+      event[2].scale( scale);
+
+      // Now actually do the shower, for range of partons, and max scale.
+      // (Most restrictive of global and individual applied to each parton.)
+      pythia.forceTimeShower( 1, 2, scale);
+    }
+
     // Generate events. Quit if failure.
     if (!pythia.next()) {
       cout << " Event generation aborted prematurely, owing to error!\n";
       break;
     }
- 
+
     // List first few events.
     if (iEvent < nList) {
       event.list();
@@ -282,7 +296,7 @@ int main() {
     int n86 = 0;
     int n83 = 0;
     int n84 = 0;
-                          
+
     // Loop over all particles.
     for (int i = 0; i < event.size(); ++i) {
       int status = event[i].statusAbs();
@@ -317,7 +331,7 @@ int main() {
         double thetaXZ = event[i].thetaXZ();
         dndtheta.fill(thetaXZ);
         dedtheta.fill(thetaXZ, eAbs);
- 
+
         // Rapidity distribution of primary hadrons.
         double y = event[i].y();
         dndySum.fill(y);
@@ -337,7 +351,7 @@ int main() {
         dnparticledp.fill(pAbs);
       }
     }
- 
+
     // Fill histograms once for each event.
     double epDev = abs(pSum.e()) + abs(pSum.px()) + abs(pSum.py())
       + abs(pSum.pz());
@@ -349,7 +363,7 @@ int main() {
     status83.fill(n83);
     status84.fill(n84);
     if (epDev > 1e-3  || abs(chargeSum) > 0.1) event.list();
-                       
+
   // End of event loop.
   }
 
