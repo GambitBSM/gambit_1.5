@@ -1,5 +1,5 @@
 ! Do nested sampling algorithm to calculate Bayesian evidence
-! Oct 2014
+! Jul 2015
 ! Farhan Feroz
 
 module Nested
@@ -215,9 +215,9 @@ contains
 		endif
       
 		write(*,*)"*****************************************************"
-		write(*,*)"MultiNest v3.9"
+		write(*,*)"MultiNest v3.10"
       		write(*,*)"Copyright Farhan Feroz & Mike Hobson"
-      		write(*,*)"Release Oct 2014"
+      		write(*,*)"Release Jul 2015"
 		write(*,*)
       		write(*,'(a,i4)')" no. of live points = ",nest_nlive
       		write(*,'(a,i4)')" dimensionality = ",nest_ndims
@@ -1616,7 +1616,7 @@ contains
 			do i = 1, ic_n
 				IS_V(i) = 0d0
 				if( IS_GetVolInsidePrior ) then
-					do k = nd_i, nd_i+ic_sc(i)
+					do k = nd_i+1, nd_i+ic_sc(i)
 						j1 = max(5, int( ( dble(IS_nMC) * dble(ic_npt(i)) / dble(nlive) ) * ( dble(sc_vol(k)) / dble(totVol(i)) ) ))
 						m = 0
 						do i3 = 1, j1
