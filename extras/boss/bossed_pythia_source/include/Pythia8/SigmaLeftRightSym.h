@@ -1,5 +1,5 @@
 // SigmaLeftRightSym.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -12,7 +12,7 @@
 #include "Pythia8/SigmaProcess.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> Z_R^0 (righthanded gauge boson).
@@ -55,7 +55,7 @@ private:
   ParticleDataEntry* ZRPtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar' -> W_R^+- (righthanded gauge boson).
@@ -98,7 +98,7 @@ private:
   ParticleDataEntry* particlePtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for l l -> H_L^++-- or H_R^++-- (doubly charged Higgs).
@@ -139,7 +139,7 @@ private:
   ParticleDataEntry* particlePtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for l- gamma -> H_(L/R)^-- l+  (doubly charged Higgs).
@@ -178,7 +178,7 @@ private:
   double yukawa[4], openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f_1 f_2 -> H_(L/R)^++-- f_3 f_4 (W+- W+- fusion).
@@ -226,7 +226,7 @@ private:
   double mWS, prefac, sigma0TU, sigma0T, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> H_(L/R)^++ H_(L/R)^--  (doubly charged Higgs).

@@ -1,5 +1,5 @@
 // ProcessContainer.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -62,11 +62,14 @@ bool ProcessContainer::init(bool isFirst, Info* infoPtrIn,
   lhaStratAbs = abs(lhaStrat);
   allowNegSig = sigmaProcessPtr->allowNegativeSigma();
 
+  useStrictLHEFscales = settings.flag("Beams:strictLHEFscale");
+
   // Flag for maximum violation handling.
   increaseMaximum = settings.flag("PhaseSpace:increaseMaximum");
 
   // Pick and create phase space generator. Send pointers where required.
-  if      (isLHA)       phaseSpacePtr = new PhaseSpaceLHA();
+  if (phaseSpacePtr != 0) ;
+  else if (isLHA)       phaseSpacePtr = new PhaseSpaceLHA();
   else if (isNonDiff)   phaseSpacePtr = new PhaseSpace2to2nondiffractive();
   else if (!isResolved && !isDiffA  && !isDiffB  && !isDiffC )
                         phaseSpacePtr = new PhaseSpace2to2elastic();
@@ -137,9 +140,15 @@ bool ProcessContainer::init(bool isFirst, Info* infoPtrIn,
     phaseSpacePtr->setSigmaMax(sigmaMx);
   }
 
-  // Allow Pythia to overwrite incoming beams or Les Houches lifetime input.
+  // Allow Pythia to overwrite incoming beams or parts of Les Houches input.
   idRenameBeams = settings.mode("LesHouches:idRenameBeams");
   setLifetime   = settings.mode("LesHouches:setLifetime");
+  setLeptonMass = settings.mode("LesHouches:setLeptonMass");
+  mRecalculate  = settings.parm("LesHouches:mRecalculate");
+  matchInOut    = settings.flag("LesHouches:matchInOut");
+  idLep[0] = 11; mLep[0] = particleDataPtr->m0(11);
+  idLep[1] = 13; mLep[1] = particleDataPtr->m0(13);
+  idLep[2] = 15; mLep[2] = particleDataPtr->m0(15);
 
   // Done.
   return physical;
@@ -148,7 +157,7 @@ bool ProcessContainer::init(bool isFirst, Info* infoPtrIn,
 //--------------------------------------------------------------------------
 
 // Generate a trial event; selected or not.
- 
+
 bool ProcessContainer::trialProcess() {
 
   // Loop over tries only occurs for Les Houches strategy = +-2.
@@ -221,7 +230,7 @@ bool ProcessContainer::trialProcess() {
     if (lhaStratAbs == 2 || lhaStratAbs == 3) sigmaAdd = sigmaSgn;
     sigmaSum  += sigmaAdd;
     sigma2Sum += pow2(sigmaAdd);
- 
+
     // Check if maximum violated.
     newSigmaMx = phaseSpacePtr->newSigmaMax();
     if (newSigmaMx) sigmaMx = phaseSpacePtr->sigmaMax();
@@ -243,7 +252,7 @@ bool ProcessContainer::trialProcess() {
     if (select || lhaStratAbs != 2) return select;
 
   }
- 
+
 }
 
 //--------------------------------------------------------------------------
@@ -265,7 +274,7 @@ void ProcessContainer::accumulate() {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Pick flavours and colour flow of process.
 
 bool ProcessContainer::constructState() {
@@ -280,7 +289,7 @@ bool ProcessContainer::constructState() {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Give the hard subprocess with kinematics.
 
 bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
@@ -314,7 +323,7 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
   process[2].daughter1(4);
   double scale  = 0.;
   double scalup = 0.;
-  
+
   // For DiffC entries 3 - 5 come jointly from 1 and 2 (to keep HepMC happy).
   if (isDiffC) {
     process[1].daughters(3, 5);
@@ -398,7 +407,7 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
         process.append( idRes, -22, 3, 4,  6, 5 + nFin, col, acol,
           pIntMed, pIntMed.mCalc(), scale);
       }
-      
+
       // Pick lifetime where relevant, else not.
       if (process[iNow].tau0() > 0.) process[iNow].tau(
         process[iNow].tau0() * rndmPtr->exp() );
@@ -451,11 +460,13 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
     process.scale( scalePr);
 
     // Copy over info from LHA event to process, in proper order.
+    Vec4 pSumOut;
     for (int i = 1; i < lhaUpPtr->sizePart(); ++i) {
       int iOld = newPos[i];
       int id = lhaUpPtr->id(iOld);
       if (i == 1 && abs(id) == idRenameBeams) id = 16;
       if (i == 2 && abs(id) == idRenameBeams) id = -16;
+      int idAbs = abs(id);
 
       // Translate from LHA status codes.
       int lhaStatus =  lhaUpPtr->status(iOld);
@@ -502,12 +513,22 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
       int col2   = (colType == -1 || colType == 2 || abs(colType) == 3)
                  ?  lhaUpPtr->col2(iOld) : 0;
 
-      // Momentum trivial.
+      // Copy momentum, ensure lepton masses and consistent (E, p m) set.
       double px  = lhaUpPtr->px(iOld);
       double py  = lhaUpPtr->py(iOld);
       double pz  = lhaUpPtr->pz(iOld);
       double e   = lhaUpPtr->e(iOld);
       double m   = lhaUpPtr->m(iOld);
+      for (int idL = 0; idL < 3; ++idL)
+        if (idAbs == idLep[idL] && setLeptonMass > 0 && (setLeptonMass == 2
+          || m < 0.9 * mLep[idL] || m > 1.1 * mLep[idL])) m = mLep[idL];
+      if (mRecalculate > 0. && m > mRecalculate)
+        m = sqrtpos( e*e - px*px - py*py - pz*pz);
+      else e = sqrt( m*m + px*px + py*py + pz*pz);
+
+      // Momentum sum for outgoing particles.
+      if (matchInOut && i > 2 && lhaStatus == 1)
+        pSumOut += Vec4( px, py, pz, e);
 
       // Polarization.
       double pol = lhaUpPtr->spin(iOld);
@@ -517,7 +538,7 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
 
       // For resonance decay products use resonance mass as scale.
       double scaleNow = scalePr;
-      if (mother1 > 4) scaleNow = process[mother1].m();
+      if (mother1 > 4 && !useStrictLHEFscales) scaleNow = process[mother1].m();
       if (scaleShow >= 0.0) scaleNow = scaleShow;
 
       // Store Les Houches Accord partons.
@@ -526,16 +547,28 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
 
       // Check if need to store lifetime.
       double tau = lhaUpPtr->tau(iOld);
-      if ( (setLifetime == 1 && abs(id) == 15) || setLifetime == 2)
+      if ( (setLifetime == 1 && idAbs == 15) || setLifetime == 2)
          tau = process[iNow].tau0() * rndmPtr->exp();
       if (tau > 0.) process[iNow].tau(tau);
+    }
+
+    // Reassign momenta and masses for incoming partons.
+    if (matchInOut) {
+      double e1 = 0.5 * (pSumOut.e() + pSumOut.pz());
+      double e2 = 0.5 * (pSumOut.e() - pSumOut.pz());
+      process[3].pz( e1);
+      process[3].e(  e1);
+      process[3].m(  0.);
+      process[4].pz(-e2);
+      process[4].e(  e2);
+      process[4].m(  0.);
     }
   }
 
   // Loop through decay chains and set secondary vertices when needed.
   for (int i = 3; i < process.size(); ++i) {
     int iMother  = process[i].mother1();
-    
+
     // If sister to already assigned vertex then assign same.
     if ( process[i - 1].mother1() == iMother && process[i - 1].hasVertex() )
       process[i].vProd( process[i - 1].vProd() );
@@ -658,7 +691,7 @@ bool ProcessContainer::constructProcess( Event& process, bool isHardest) {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Give the hard resonance decay chain from Les Houches input.
 // Note: mildly modified copy of some constructProcess code; to streamline.
 
@@ -752,7 +785,7 @@ bool ProcessContainer::constructDecays( Event& process) {
     // Store Les Houches Accord partons.
     int iNow = process.append( id, status, mother1, mother2, daughter1,
       daughter2, col1, col2, Vec4(px, py, pz, e), m, scaleNow, pol);
-      
+
     // Check if need to store lifetime.
     double tau = lhaUpPtr->tau(iOld);
     if ( (setLifetime == 1 && abs(id) == 15) || setLifetime == 2)
@@ -767,7 +800,7 @@ bool ProcessContainer::constructDecays( Event& process) {
   // Loop through decay chains and set secondary vertices when needed.
   for (int i = 1; i < process.size(); ++i) {
     int iMother  = process[i].mother1();
-    
+
     // If sister to already assigned vertex then assign same.
     if ( process[i - 1].mother1() == iMother && process[i - 1].hasVertex()
       && i > 1) process[i].vProd( process[i - 1].vProd() );
@@ -776,14 +809,14 @@ bool ProcessContainer::constructDecays( Event& process) {
     else if ( process[iMother].hasVertex() || process[iMother].tau() > 0.)
       process[i].vProd( process[iMother].vDec() );
   }
-  
+
   // Done.
   return true;
 
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Handle resonance decays.
 
 bool ProcessContainer::decayResonances( Event& process) {
@@ -895,7 +928,7 @@ void ProcessContainer::sigmaDelta() {
   deltaFin           = sqrtpos(delta2Sum) * sigmaFin;
 
 }
- 
+
 //==========================================================================
 
 // SetupContainer class.
@@ -906,7 +939,7 @@ void ProcessContainer::sigmaDelta() {
 // Main routine to initialize list of processes.
 
 bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
-       Info *infoPtr, Settings& settings, ParticleData* particleDataPtr, 
+       Info *infoPtr, Settings& settings, ParticleData* particleDataPtr,
        Couplings* couplings) {
 
   // Reset process list, if filled in previous subrun.
@@ -942,7 +975,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma0AB2AXB;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for hard QCD processes.
   bool hardQCD = settings.flag("HardQCD:all");
   if (hardQCD || settings.flag("HardQCD:gg2gg")) {
@@ -969,7 +1002,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2qqbar2qqbarNew;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for c cbar and b bbar, also hard QCD.
   bool hardccbar = settings.flag("HardQCD:hardccbar");
   if (hardQCD || hardccbar || settings.flag("HardQCD:gg2ccbar")) {
@@ -989,7 +1022,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2qqbar2QQbar(5, 124);
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
- 
+
   // Set up requested objects for hard QCD 2 -> 3 processes.
   bool hardQCD3parton = settings.flag("HardQCD:3parton");
   if (hardQCD3parton || settings.flag("HardQCD:gg2ggg")) {
@@ -1032,7 +1065,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma3qg2qqqbarSame;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
- 
+
   // Set up requested objects for prompt photon processes.
   bool promptPhotons = settings.flag("PromptPhoton:all");
   if (promptPhotons
@@ -1103,7 +1136,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2ffbar2ffbarsW;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-   
+
   // Set up requested objects for weak gauge boson pair processes.
   bool weakDoubleBosons = settings.flag("WeakDoubleBoson:all");
   if (weakDoubleBosons
@@ -1121,7 +1154,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2ffbar2WW;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for weak gauge boson + parton processes.
   bool weakBosonAndPartons = settings.flag("WeakBosonAndParton:all");
   if (weakBosonAndPartons
@@ -1164,7 +1197,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2fgm2Wf;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for photon collision processes.
   bool photonCollisions = settings.flag("PhotonCollision:all");
   if (photonCollisions || settings.flag("PhotonCollision:gmgm2qqbar")) {
@@ -1191,7 +1224,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2gmgm2ffbar(15, 266);
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for onia production.
   charmonium = SigmaOniaSetup(infoPtr, &settings, particleDataPtr, 4);
   bottomonium = SigmaOniaSetup(infoPtr, &settings, particleDataPtr, 5);
@@ -1233,7 +1266,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2gmgm2ffbar(6, 606);
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for fourth-generation b' production
   bool bPrimes = settings.flag("FourthBottom:all");
   if (bPrimes || settings.flag("FourthBottom:gg2bPrimebPrimebar")) {
@@ -1260,7 +1293,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2ffbar2FfbarsW(7, 6, 806);
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for fourth-generation t' production
   bool tPrimes = settings.flag("FourthTop:all");
   if (tPrimes || settings.flag("FourthTop:gg2tPrimetPrimebar")) {
@@ -1297,7 +1330,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
 
   // Flag for global choice between SM and BSM Higgses.
   bool useBSMHiggses = settings.flag("Higgs:useBSM");
-  
+
   // Set up requested objects for Standard-Model Higgs production.
   if (!useBSMHiggses) {
     bool HiggsesSM = settings.flag("HiggsSM:all");
@@ -1620,7 +1653,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     // MSSM: 4 neutralinos
     int nNeut = 4;
     if (nmssm) nNeut = 5;
-    
+
     // Gluino-gluino
     if (SUSYs || settings.flag("SUSY:gg2gluinogluino")) {
       // Skip if outgoing codes not asked for
@@ -1636,7 +1669,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
       }
     }
-    
+
     // Gluino-squark
     if (SUSYs || settings.flag("SUSY:qg2squarkgluino")) {
       int iproc = 1202;
@@ -1653,7 +1686,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Squark-antisquark (gg initiated)
     if (SUSYs || settings.flag("SUSY:gg2squarkantisquark")) {
       int iproc = 1214;
@@ -1669,7 +1702,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Squark-antisquark (qqbar initiated)
     if (SUSYs || settings.flag("SUSY:qqbar2squarkantisquark")) {
       int iproc = 1230;
@@ -1702,7 +1735,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Squark-squark
     if (SUSYs || settings.flag("SUSY:qq2squarksquark")) {
       int iproc = 1350;
@@ -1725,7 +1758,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Neutralino + squark
     if (SUSYs || settings.flag("SUSY:qg2chi0squark")) {
       int iproc = 1430;
@@ -1746,7 +1779,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Chargino + squark
     if (SUSYs || settings.flag("SUSY:qg2chi+-squark")) {
       int iproc = 1490;
@@ -1767,7 +1800,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Neutralino pairs
     if (SUSYs || settings.flag("SUSY:qqbar2chi0chi0")) {
       int iproc = 1550;
@@ -1782,7 +1815,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Neutralino-Chargino
     if (SUSYs || settings.flag("SUSY:qqbar2chi+-chi0")) {
       int iproc = 1570;
@@ -1799,7 +1832,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Chargino-Chargino
     if (SUSYs || settings.flag("SUSY:qqbar2chi+chi-")) {
       int iproc = 1590;
@@ -1814,7 +1847,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // RPV squark production
     if(SUSYs || settings.flag("SUSY:qq2antisquark")) {
       for (int idx = 1; idx <= 6; ++idx) {
@@ -1827,7 +1860,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         }
       }
     }
-    
+
     // Neutralino-gluino
     if (SUSYs || settings.flag("SUSY:qqbar2chi0gluino")) {
       int iproc = 1600;
@@ -1839,7 +1872,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
       }
     }
-    
+
     // Chargino-Gluino
     if (SUSYs || settings.flag("SUSY:qqbar2chi+-gluino")) {
       int iproc = 1620;
@@ -1851,7 +1884,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
         containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
       }
     }
-    
+
     // Slepton-antislepton (qqbar initiated); Currently no RH sneutrinos
     if (SUSYs || settings.flag("SUSY:qqbar2sleptonantislepton")) {
       int iproc = 1650;
@@ -1867,6 +1900,9 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
               // Update process number counter
               iproc++;
               if (iso == jso && id1 != id2) iproc++;
+              // Exclude RH neutrinos from allowed final states
+              if (abs(id1) >= 2000012 && id1 % 2 == 0) continue;
+              if (abs(id2) >= 2000012 && id2 % 2 == 0) continue;
               // Skip if outgoing codes not asked for
               if (!allowIdVals( id1, id2)) continue;
               if (iso == jso && id1 != id2) {
@@ -1900,7 +1936,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma1ffbar2Rhorizontal();
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-   
+
   // Set up requested objects for Left-Right-Symmetry processes.
   bool leftrights = settings.flag("LeftRightSymmmetry:all");
   if (leftrights || settings.flag("LeftRightSymmmetry:ffbar2ZR")) {
@@ -1959,7 +1995,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2ffbar2HchgchgHchgchg(2);
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for leptoquark LQ processes.
   bool leptoquarks = settings.flag("LeptoQuark:all");
   if (leptoquarks || settings.flag("LeptoQuark:ql2LQ")) {
@@ -1978,7 +2014,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2qqbar2LQLQbar;
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for excited-fermion processes.
   bool excitedfermions = settings.flag("ExcitedFermion:all");
   if (excitedfermions || settings.flag("ExcitedFermion:dg2dStar")) {
@@ -2058,6 +2094,34 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma2qqbar2lStarlbar(16);
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
+  if (excitedfermions || settings.flag("ExcitedFermion:qqbar2eStareStar")) {
+    sigmaPtr = new Sigma2qqbar2lStarlStarBar(11);
+    containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
+  }
+  if (excitedfermions
+    || settings.flag("ExcitedFermion:qqbar2nueStarnueStar")) {
+    sigmaPtr = new Sigma2qqbar2lStarlStarBar(12);
+    containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
+  }
+  if (excitedfermions || settings.flag("ExcitedFermion:qqbar2muStarmuStar")) {
+    sigmaPtr = new Sigma2qqbar2lStarlStarBar(13);
+    containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
+  }
+  if (excitedfermions
+    || settings.flag("ExcitedFermion:qqbar2numuStarnumuStar")) {
+    sigmaPtr = new Sigma2qqbar2lStarlStarBar(14);
+    containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
+  }
+  if (excitedfermions
+    || settings.flag("ExcitedFermion:qqbar2tauStartauStar")) {
+    sigmaPtr = new Sigma2qqbar2lStarlStarBar(15);
+    containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
+  }
+  if (excitedfermions
+    || settings.flag("ExcitedFermion:qqbar2nutauStarnutauStar")) {
+    sigmaPtr = new Sigma2qqbar2lStarlStarBar(16);
+    containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
+  }
 
   // Set up requested objects for contact interaction processes.
   if (settings.flag("ContactInteractions:QCqq2qq")) {
@@ -2097,7 +2161,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     if (particleDataPtr->spinType( 4900101) != 2 * spinqv + 1)
         particleDataPtr->spinType( 4900101,    2 * spinqv + 1);
   }
-  
+
   // Set up requested objects for HiddenValley processes.
   bool hiddenvalleys = settings.flag("HiddenValley:all");
   if (hiddenvalleys || settings.flag("HiddenValley:gg2DvDvbar")) {
@@ -2224,7 +2288,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma1ffbar2Zv();
     containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Set up requested objects for RS extra-dimensional G* processes.
   bool extraDimGstars = settings.flag("ExtraDimensionsG*:all");
   if (extraDimGstars || settings.flag("ExtraDimensionsG*:gg2G*")) {
@@ -2468,7 +2532,7 @@ bool SetupContainers::init2(vector<ProcessContainer*>& container2Ptrs,
     sigmaPtr = new Sigma2gg2gammagamma;
     container2Ptrs.push_back( new ProcessContainer(sigmaPtr) );
   }
- 
+
   // Charmonium.
   if (settings.flag("SecondHard:Charmonium")) {
     vector<SigmaProcess*> charmoniumSigmaPtrs;
@@ -2476,7 +2540,7 @@ bool SetupContainers::init2(vector<ProcessContainer*>& container2Ptrs,
     charmonium.setupSigma2qg(charmoniumSigmaPtrs, true);
     charmonium.setupSigma2qq(charmoniumSigmaPtrs, true);
     for (unsigned int i = 0; i < charmoniumSigmaPtrs.size(); ++i)
-      container2Ptrs.push_back( new ProcessContainer(charmoniumSigmaPtrs[i]) );
+      container2Ptrs.push_back( new ProcessContainer(charmoniumSigmaPtrs[i]));
   }
 
   // Bottomonium.
@@ -2486,7 +2550,7 @@ bool SetupContainers::init2(vector<ProcessContainer*>& container2Ptrs,
     bottomonium.setupSigma2qg(bottomoniumSigmaPtrs, true);
     bottomonium.setupSigma2qq(bottomoniumSigmaPtrs, true);
     for (unsigned int i = 0; i < bottomoniumSigmaPtrs.size(); ++i)
-      container2Ptrs.push_back( new ProcessContainer(bottomoniumSigmaPtrs[i]) );
+      container2Ptrs.push_back( new ProcessContainer(bottomoniumSigmaPtrs[i]));
   }
 
   // A single gamma*/Z0.
@@ -2516,7 +2580,7 @@ bool SetupContainers::init2(vector<ProcessContainer*>& container2Ptrs,
     sigmaPtr = new Sigma2qg2Wq;
     container2Ptrs.push_back( new ProcessContainer(sigmaPtr) );
   }
-  
+
   // Top pair production.
   if (settings.flag("SecondHard:TopPair")) {
     sigmaPtr = new Sigma2gg2QQbar(6, 601);

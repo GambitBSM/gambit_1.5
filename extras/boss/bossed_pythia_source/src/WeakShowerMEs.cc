@@ -1,5 +1,5 @@
 // WeakShowerMEs.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -208,7 +208,7 @@ double WeakShowerMEs::getTchanneluGuGZME(Vec4 p1, Vec4 p2, Vec4 p3,
 
   double dia22 = (-8*p13*p23* (-p12 + p23 + p24))
     / (pow2(p13M)* pow2(p25M));
-  
+
   double dia23 = (-9*(2*pow3(p12) - pow2(p12)* (p44 + 10*p13 + 6*p14)
     + p12* (p44S + 8*pow2(p13) + 4*pow2(p14) + 3*p44*p23 - 2*pow2(p23)
     - p44*p24 - 4*p23 * p24 - 2*pow2(p24) + 2*p13* (6*p14 + 7*p23 + 2*p24)
@@ -316,7 +316,7 @@ double WeakShowerMEs::getTchanneluGuGZME(Vec4 p1, Vec4 p2, Vec4 p3,
 
 double WeakShowerMEs::getTchannelududZME(Vec4 p1,Vec4 p2,Vec4 p3,
   Vec4 p4,Vec4 p5) {
-  
+
   double p12  = p1*p2;
   double p13  = p1*p3;
   double p14  = p1*p4;

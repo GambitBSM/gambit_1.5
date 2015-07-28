@@ -1,5 +1,5 @@
 // main32.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -11,13 +11,13 @@
 
 // Includes and namespace
 #include "Pythia8/Pythia.h"
-#include "CombineMatchingInput.h"
+#include "Pythia8Plugins/CombineMatchingInput.h"
 using namespace Pythia8;
 
 //==========================================================================
 
 int main() {
- 
+
  // Generator and read in commands.
   Pythia pythia;
   pythia.readFile("main32.cmnd");

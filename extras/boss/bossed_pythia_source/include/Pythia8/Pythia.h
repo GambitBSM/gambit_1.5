@@ -1,8 +1,8 @@
-#ifndef __boss__Pythia_Pythia_8_186_h__
-#define __boss__Pythia_Pythia_8_186_h__
+#ifndef __boss__Pythia_Pythia_8_209_h__
+#define __boss__Pythia_Pythia_8_209_h__
 
 // Pythia.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -12,16 +12,24 @@
 #ifndef Pythia8_Pythia_H
 #define Pythia8_Pythia_H
 
+// Version number defined for use in macros and for consistency checks.
+#define PYTHIA_VERSION 8.209
+
+// Header files for the Pythia class and for what else the user may need.
 #include "Pythia8/Analysis.h"
 #include "Pythia8/Basics.h"
 #include "Pythia8/BeamParticle.h"
 #include "Pythia8/BeamShape.h"
+#include "Pythia8/ColourReconnection.h"
 #include "Pythia8/Event.h"
 #include "Pythia8/FragmentationFlavZpT.h"
 #include "Pythia8/HadronLevel.h"
 #include "Pythia8/History.h"
 #include "Pythia8/Info.h"
+#include "Pythia8/JunctionSplitting.h"
 #include "Pythia8/LesHouches.h"
+#include "Pythia8/Merging.h"
+#include "Pythia8/MergingHooks.h"
 #include "Pythia8/PartonLevel.h"
 #include "Pythia8/ParticleData.h"
 #include "Pythia8/PartonDistributions.h"
@@ -37,18 +45,16 @@
 #include "Pythia8/SLHAinterface.h"
 #include "Pythia8/TimeShower.h"
 #include "Pythia8/UserHooks.h"
-#include "Pythia8/MergingHooks.h"
-#include "Pythia8/Merging.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The Pythia class contains the top-level routines to generate an event.
 
 } 
 #define ENUMS_DECLARED
-#include "backend_types/Pythia_8_186/abstract_Pythia.h"
+#include "backend_types/Pythia_8_209/abstract_Pythia.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
@@ -57,14 +63,14 @@ class Pythia : public virtual Abstract_Pythia {
 public:
 
   // Constructor. (See Pythia.cc file.)
-  Pythia(string xmlDir = "../xmldoc", bool printBanner = true);
+  Pythia(string xmlDir = "../share/Pythia8/xmldoc", bool printBanner = true);
 
   // Destructor. (See Pythia.cc file.)
   ~Pythia();
 
   // Read in one update for a setting or particle data from a single line.
   bool readString(string, bool warn = true);
- 
+
   // Read in updates for settings or particle data from user-defined file.
   bool readFile(string fileName, bool warn = true,
     int subrun = SUBRUNDEFAULT);
@@ -105,9 +111,11 @@ public:
   bool setBeamShapePtr( BeamShape* beamShapePtrIn)
     { beamShapePtr = beamShapePtrIn; return true;}
 
-  // Possibility to pass in pointer(s) for external cross section.
-  bool setSigmaPtr( SigmaProcess* sigmaPtrIn)
-    { sigmaPtrs.push_back( sigmaPtrIn); return true;}
+  // Possibility to pass in pointer(s) for external cross section,
+  // with option to include external phase-space generator(s).
+  bool setSigmaPtr( SigmaProcess* sigmaPtrIn, PhaseSpace* phaseSpacePtrIn = 0)
+    { sigmaPtrs.push_back( sigmaPtrIn);
+      phaseSpacePtrs.push_back(phaseSpacePtrIn); return true;}
 
   // Possibility to pass in pointer(s) for external resonance.
   bool setResonancePtr( ResonanceWidths* resonancePtrIn)
@@ -119,24 +127,8 @@ public:
     { timesDecPtr = timesDecPtrIn; timesPtr = timesPtrIn;
     spacePtr = spacePtrIn; return true;}
 
-  // Initialization using the Beams variables.
+  // Initialize.
   bool init();
-
-  // Deprecated: initialization in the CM frame.
-  bool init( int idAin, int idBin, double eCMin);
-
-  // Deprecated: initialization with two collinear beams, e.g. fixed target.
-  bool init( int idAin, int idBin, double eAin, double eBin);
-
-  // Deprecated: initialization with two acollinear beams.
-  bool init( int idAin, int idBin, double pxAin, double pyAin,
-    double pzAin, double pxBin, double pyBin, double pzBin);
-
-  // Deprecated: initialization by a Les Houches Event File.
-  bool init( string LesHouchesEventFile, bool skipInit = false);
-
-  // Deprecated: initialization according to the Les Houches Accord.
-  bool init( LHAup* lhaUpPtrIn);
 
   // Generate the next event.
   bool next();
@@ -166,9 +158,6 @@ public:
   // Main routine to provide final statistics on generation.
   void stat();
 
-  // Deprecated: alternative to provide final statistics on generation.
-  void statistics(bool all = false, bool reset = false);
-
   // Read in settings values: shorthand, not new functionality.
   bool   flag(string key) {return settings.flag(key);}
   int    mode(string key) {return settings.mode(key);}
@@ -176,7 +165,7 @@ public:
   string word(string key) {return settings.word(key);}
 
   // Auxiliary to set parton densities among list of possibilities.
-  PDF* getPDFPtr(int idIn, int sequence = 1);
+  PDF* getPDFPtr(int idIn, int sequence = 1, string beam = "");
 
   // The event record for the parton-level central process.
   Event          process;
@@ -220,22 +209,22 @@ private:
   Pythia& operator=(const Pythia&);
 
   // Constants: could only be changed in the code itself.
-  static const double VERSIONNUMBERCODE;
+  static const double VERSIONNUMBERHEAD, VERSIONNUMBERCODE;
   static const int    NTRY, SUBRUNDEFAULT;
 
   // Initialization data, extracted from database.
   string xmlPath;
   bool   doProcessLevel, doPartonLevel, doHadronLevel, doDiffraction,
-         doResDec, doFSRinRes, decayRHadrons, abortIfVeto, checkEvent,
-         checkHistory;
+         doHardDiff, doResDec, doFSRinRes, decayRHadrons, abortIfVeto,
+         checkEvent, checkHistory;
   int    nErrList;
-  double epTolErr, epTolWarn;
+  double epTolErr, epTolWarn, mTolErr, mTolWarn;
 
   // Initialization data, extracted from init(...) call.
   bool   isConstructed, isInit, isUnresolvedA, isUnresolvedB, showSaV,
-         showMaD;
+         showMaD, doReconnect, forceHadronLevelCR;
   int    idA, idB, frameType, boostType, nCount, nShowLHA, nShowInfo,
-         nShowProc, nShowEvt;
+         nShowProc, nShowEvt, reconnectMode;
   double mA, mB, pxA, pxB, pyA, pyB, pzA, pzB, eA, eB,
          pzAcm, pzBcm, eCM, betaZ, gammaZ;
   Vec4   pAinit, pBinit, pAnow, pBnow;
@@ -287,6 +276,10 @@ private:
   // Pointers to external processes derived from the Pythia base classes.
   vector<SigmaProcess*> sigmaPtrs;
 
+  // Pointers to external phase-space generators derived from Pythia
+  // base classes.
+  vector<PhaseSpace*> phaseSpacePtrs;
+
   // Pointers to external calculation of resonance widths.
   vector<ResonanceWidths*> resonancePtrs;
 
@@ -294,7 +287,7 @@ private:
   TimeShower*  timesDecPtr;
   TimeShower*  timesPtr;
   SpaceShower* spacePtr;
-  bool         useNewTimes, useNewSpace;
+  bool         useNewTimesDec, useNewTimes, useNewSpace;
 
   // The main generator class to define the core process of the event.
   ProcessLevel processLevel;
@@ -307,6 +300,12 @@ private:
 
   // Flags for defining the merging scheme.
   bool        hasMergingHooks, hasOwnMergingHooks, doMerging;
+
+  // The Colour reconnection class.
+  ColourReconnection colourReconnection;
+
+  // The junction spltiting class.
+  JunctionSplitting junctionSplitting;
 
   // The main generator class to produce the hadron level of the event.
   HadronLevel hadronLevel;
@@ -352,7 +351,7 @@ private:
 
   // Initialization of SLHA data.
   bool initSLHA ();
-
+  stringstream particleDataBuffer;
 
         public:
             Abstract_Pythia* pointerCopy__BOSS();
@@ -393,17 +392,17 @@ private:
 
             bool readFile__BOSS();
 
-            bool init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+            bool setUserHooksPtr__BOSS(Pythia8::Abstract_UserHooks*);
+
+            bool setSigmaPtr__BOSS(Pythia8::Abstract_SigmaProcess*);
+
+            bool setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths*);
 
             int forceTimeShower__BOSS(int, int, double);
 
             bool forceHadronLevel__BOSS();
 
             void LHAeventList__BOSS();
-
-            void statistics__BOSS(bool);
-
-            void statistics__BOSS();
 
         private:
             void banner__BOSS();
@@ -415,11 +414,11 @@ private:
             bool check__BOSS();
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_Pythia_H
 
-#endif /* __boss__Pythia_Pythia_8_186_h__ */
+#endif /* __boss__Pythia_Pythia_8_209_h__ */

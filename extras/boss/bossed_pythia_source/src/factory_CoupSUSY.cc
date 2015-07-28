@@ -1,5 +1,5 @@
 #include "Pythia8/SusyCouplings.h"
-#include "backend_types/Pythia_8_186/wrapper_CoupSUSY.h"
+#include "backend_types/Pythia_8_209/wrapper_CoupSUSY.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 

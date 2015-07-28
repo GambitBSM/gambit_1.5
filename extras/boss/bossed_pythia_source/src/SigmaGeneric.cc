@@ -1,5 +1,5 @@
 // SigmaGeneric.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Johan Bijnens, Torbjorn Sjostrand.
+// Copyright (C) 2015 Johan Bijnens, Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -26,7 +26,7 @@ namespace Pythia8 {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2qGqGbar::initProc() {
 
   // Number of colours. Anomalous coupling kappa - 1 used for vector state.
@@ -36,7 +36,7 @@ void Sigma2gg2qGqGbar::initProc() {
 
   // Secondary open width fraction.
   openFracPair = particleDataPtr->resOpenFrac(idNew, -idNew);
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -146,7 +146,7 @@ void Sigma2gg2qGqGbar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2qGqGbar::initProc() {
 
   // Number of colours. Coupling kappa used for vector state.
@@ -226,7 +226,7 @@ void Sigma2qqbar2qGqGbar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2fGfGbar::initProc() {
 
   // Charge and number of colours. Coupling kappa used for vector state.
@@ -338,7 +338,7 @@ void Sigma2ffbar2fGfGbar::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2Zv::initProc() {
 
   // Store Zv mass and width for propagator.
@@ -350,7 +350,7 @@ void Sigma1ffbar2Zv::initProc() {
 
   // Set pointer to particle properties and decay table.
   particlePtr = particleDataPtr->particleDataEntryPtr(idZv);
-  
+
 }
 
 //--------------------------------------------------------------------------

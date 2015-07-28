@@ -1,5 +1,5 @@
 // Analysis.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -17,7 +17,7 @@ namespace Pythia8 {
 // This class finds sphericity-related properties of an event.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -34,7 +34,7 @@ const double Sphericity::P2MIN         = 1e-20;
 const double Sphericity::EIGENVALUEMIN = 1e-10;
 
 //--------------------------------------------------------------------------
- 
+
 // Analyze event.
 
 bool Sphericity::analyze(const Event& event, ostream& os) {
@@ -80,7 +80,7 @@ bool Sphericity::analyze(const Event& event, ostream& os) {
   // Normalize tensor to trace = 1.
   for (int j = 1; j < 4; ++j)
   for (int k = j; k < 4; ++k) tt[j][k] /= denom;
- 
+
   // Find eigenvalues to matrix (third degree equation).
   double qCoef = ( tt[1][1] * tt[2][2] + tt[1][1] * tt[3][3]
     + tt[2][2] * tt[3][3] - pow2(tt[1][2]) - pow2(tt[1][3])
@@ -158,7 +158,7 @@ bool Sphericity::analyze(const Event& event, ostream& os) {
       - dd[jMax][k2] * dd[jMax2][k1]) / dd[jMax][kMax];
     double length = sqrt( pow2(eVec[1]) + pow2(eVec[2])
       + pow2(eVec[3]) );
- 
+
     // Store eigenvectors.
     if (iVal == 0) eVec1 = Vec4( eVec[1] / length,
       eVec[2] / length, eVec[3] / length, 0.);
@@ -177,7 +177,7 @@ bool Sphericity::analyze(const Event& event, ostream& os) {
 //--------------------------------------------------------------------------
 
 // Provide a listing of the info.
-  
+
 void Sphericity::list(ostream& os) const {
 
   // Header.
@@ -207,7 +207,7 @@ void Sphericity::list(ostream& os) const {
 // This class finds thrust-related properties of an event.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -221,7 +221,7 @@ const int    Thrust::TIMESTOPRINT = 1;
 const double Thrust::MAJORMIN     = 1e-10;
 
 //--------------------------------------------------------------------------
- 
+
 // Analyze event.
 
 bool Thrust::analyze(const Event& event, ostream& os) {
@@ -289,7 +289,7 @@ bool Thrust::analyze(const Event& event, ostream& os) {
     pOrder[i].e(pOrder[i].pAbs());
     pAbsSum += pOrder[i].e();
   }
-    
+
   // Simpleminded major and minor axes if too little transverse left.
   if (pAbsSum < MAJORMIN * pSum.e()) {
     if ( abs(eVec1.pz()) > 0.5) eVec2 = Vec4( 1., 0., 0., 0.);
@@ -340,7 +340,7 @@ bool Thrust::analyze(const Event& event, ostream& os) {
 //--------------------------------------------------------------------------
 
 // Provide a listing of the info.
-  
+
 void Thrust::list(ostream& os) const {
 
   // Header.
@@ -367,7 +367,7 @@ void Thrust::list(ostream& os) const {
 // Simple helper class to ClusterJet for a jet and its contents.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -375,7 +375,7 @@ void Thrust::list(ostream& os) const {
 const double SingleClusterJet::PABSMIN  = 1e-10;
 
 //--------------------------------------------------------------------------
- 
+
 // Distance measures between two SingleClusterJet objects.
 
 double dist2Fun(int measure, const SingleClusterJet& j1,
@@ -402,7 +402,7 @@ double dist2Fun(int measure, const SingleClusterJet& j1,
 // distance measures: Lund, JADE or Durham.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -422,7 +422,7 @@ const double ClusterJet::PRECLUSTERFRAC = 0.1;
 const double ClusterJet::PRECLUSTERSTEP = 0.8;
 
 //--------------------------------------------------------------------------
- 
+
 // Analyze event.
 
 bool ClusterJet::analyze(const Event& event, double yScaleIn,
@@ -481,10 +481,10 @@ bool ClusterJet::analyze(const Event& event, double yScaleIn,
     jets.push_back( SingleClusterJet(particles[i]) );
     particles[i].daughter = i;
   }
- 
+
   // Begin iteration towards fewer jets.
   for ( ; ; ) {
- 
+
     // Find the two closest jets.
     double dist2Min = dist2BigMin;
     int jMin = 0;
@@ -502,7 +502,7 @@ bool ClusterJet::analyze(const Event& event, double yScaleIn,
     // Stop if no pair below cut and not more jets than allowed.
     if ( dist2Min > dist2Join
       && (nJetMax < nJetMin || int(jets.size()) <= nJetMax) ) break;
-    
+
     // Stop if reached minimum allowed number of jets. Else continue.
     if (int(jets.size()) <= nJetMin) break;
 
@@ -546,7 +546,7 @@ bool ClusterJet::analyze(const Event& event, double yScaleIn,
 //--------------------------------------------------------------------------
 
 // Precluster nearby particles to save computer time.
-  
+
 void ClusterJet::precluster() {
 
   // Begin iteration over preclustering scale.
@@ -585,7 +585,7 @@ void ClusterJet::precluster() {
         pMax = particles[i].pAbs;
       }
       if (iMax == -1) break;
- 
+
       // Sum up precluster around it according to distance function.
       Vec4 pPre;
       int multPre = 0;
@@ -615,9 +615,9 @@ void ClusterJet::precluster() {
 //--------------------------------------------------------------------------
 
 // Reassign particles to nearest jet to correct misclustering.
-  
+
 void ClusterJet::reassign() {
- 
+
   // Reset clustered momenta.
   for (int j = 0; j < int(jets.size()); ++j) {
     jets[j].pTemp        = 0.;
@@ -682,7 +682,7 @@ void ClusterJet::reassign() {
 //--------------------------------------------------------------------------
 
 // Provide a listing of the info.
-  
+
 void ClusterJet::list(ostream& os) const {
 
   // Header.
@@ -713,7 +713,7 @@ void ClusterJet::list(ostream& os) const {
 // This class performs a cone jet search in (eta, phi, E_T) space.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -721,7 +721,7 @@ void ClusterJet::list(ostream& os) const {
 const int CellJet::TIMESTOPRINT = 1;
 
 //--------------------------------------------------------------------------
- 
+
 // Analyze event.
 
 bool CellJet::analyze(const Event& event, double eTjetMinIn,
@@ -861,7 +861,7 @@ bool CellJet::analyze(const Event& event, double eTjetMinIn,
 //--------------------------------------------------------------------------
 
 // Provide a listing of the info.
-  
+
 void CellJet::list(ostream& os) const {
 
   // Header.
@@ -896,7 +896,7 @@ void CellJet::list(ostream& os) const {
 // This class performs clustering in (y, phi, pT) space.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -910,7 +910,7 @@ const double SlowJet::PIMASS       = 0.13957;
 const double SlowJet::TINY         = 1e-20;
 
 //--------------------------------------------------------------------------
- 
+
 // Set up list of particles to analyze, and initial distances.
 
 bool SlowJet::setup(const Event& event) {
@@ -935,7 +935,7 @@ bool SlowJet::setup(const Event& event) {
 
       // Pseudorapidity cut to describe detector range.
       if (cutInEta    && abs(event[i].eta()) > etaMax) continue;
-     
+
       // Optionally modify mass and energy.
       pTemp = event[i].p();
       mTemp = event[i].m();
@@ -943,7 +943,7 @@ bool SlowJet::setup(const Event& event) {
         mTemp = (massSet == 0 || event[i].id() == 22) ? 0. : PIMASS;
         pTemp.e( sqrt(pTemp.pAbs2() + mTemp*mTemp) );
       }
-    
+
     // Alternatively pass info to SlowJetHook for decision.
     // User can also modify pTemp and mTemp.
     } else {
@@ -1002,7 +1002,7 @@ bool SlowJet::setup(const Event& event) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Do one recombination step, possibly giving a jet.
 
 bool SlowJet::doStep() {
@@ -1069,7 +1069,7 @@ bool SlowJet::doStep() {
     for (int j = iMin + 1; j < clLast; ++j)
       dij[j*(j-1)/2 + iMin] = dij[clLast*(clLast-1)/2 + j];
   }
-    
+
   // Shrink cluster list by one.
   clusters.pop_back();
   --clSize;
@@ -1086,7 +1086,7 @@ bool SlowJet::doStep() {
 //--------------------------------------------------------------------------
 
 // Provide a listing of the info.
-  
+
 void SlowJet::list(bool listAll, ostream& os) const {
 
   // Header.
@@ -1129,7 +1129,7 @@ void SlowJet::list(bool listAll, ostream& os) const {
 //--------------------------------------------------------------------------
 
 // Find next cluster pair to join.
-  
+
 void SlowJet::findNext() {
 
   // Find smallest of diB, dij.
@@ -1162,9 +1162,9 @@ void SlowJet::findNext() {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Use FJcore interface to perform clustering.
-  
+
 bool SlowJet::clusterFJ() {
 
   // Read in input configuration of particles.

@@ -1,5 +1,5 @@
 // SigmaLeptoquark.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -13,7 +13,7 @@
 #include "Pythia8/SigmaProcess.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // A derived class for q l -> LQ (leptoquark).
@@ -53,7 +53,7 @@ private:
   ParticleDataEntry* LQPtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> LQ l (leptoquark).
@@ -91,7 +91,7 @@ private:
          sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> LQ LQbar (leptoquark).
@@ -128,7 +128,7 @@ private:
   double mRes, GammaRes, m2Res, GamMRat, openFrac, sigma;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> LQ LQbar (leptoquark).
@@ -168,7 +168,7 @@ private:
          sigmaSame;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

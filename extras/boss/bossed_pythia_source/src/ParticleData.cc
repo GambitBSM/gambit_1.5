@@ -1,5 +1,5 @@
 // ParticleData.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -26,7 +26,7 @@ namespace Pythia8 {
 // Check whether id1 occurs anywhere in product list.
 
 bool DecayChannel::contains(int id1) const {
-  
+
   bool found1 = false;
   for (int i = 0; i < nProd; ++i) if (prod[i] == id1) found1 = true;
   return found1;
@@ -39,7 +39,7 @@ bool DecayChannel::contains(int id1) const {
 // iF ID1 == ID2 then two copies of this particle must be present.
 
 bool DecayChannel::contains(int id1, int id2) const {
-  
+
   bool found1 = false;
   bool found2 = false;
   for (int i = 0; i < nProd; ++i) {
@@ -56,7 +56,7 @@ bool DecayChannel::contains(int id1, int id2) const {
 // iF ID1 == ID2 then two copies of this particle must be present, etc.
 
 bool DecayChannel::contains(int id1, int id2, int id3) const {
-  
+
   bool found1 = false;
   bool found2 = false;
   bool found3 = false;
@@ -82,14 +82,15 @@ bool DecayChannel::contains(int id1, int id2, int id3) const {
 // A particle is invisible if it has neither strong nor electric charge,
 // and is not made up of constituents that have it. Only relevant for
 // long-lived particles. This list may need to be extended.
-const int ParticleDataEntry::INVISIBLENUMBER = 50;
-const int ParticleDataEntry::INVISIBLETABLE[50] = { 12, 14, 16, 18, 23, 25,
-  32, 33, 35, 36, 39, 41,    1000012, 1000014, 1000016, 1000018, 1000022,
-  1000023, 1000025, 1000035, 1000045, 1000039, 2000012, 2000014, 2000016,
-  2000018, 4900012, 4900014, 4900016, 4900021, 4900022, 4900101, 4900102,
-  4900103, 4900104, 4900105, 4900106, 4900107, 4900108, 4900111, 4900113,
-  4900211, 4900213, 4900991, 5000039, 5100039, 9900012, 9900014, 9900016,
-  9900023 };
+const int ParticleDataEntry::INVISIBLENUMBER = 52;
+const int ParticleDataEntry::INVISIBLETABLE[52] = {
+       12,      14,      16,      18,      23,      25,      32,      33,
+       35,      36,      39,      41,      45,      46, 1000012, 1000014,
+  1000016, 1000018, 1000022, 1000023, 1000025, 1000035, 1000045, 1000039,
+  2000012, 2000014, 2000016, 2000018, 4900012, 4900014, 4900016, 4900021,
+  4900022, 4900101, 4900102, 4900103, 4900104, 4900105, 4900106, 4900107,
+  4900108, 4900111, 4900113, 4900211, 4900213, 4900991, 5000039, 5100039,
+  9900012, 9900014, 9900016, 9900023 };
 
 // For some particles we know it is necessary to switch off width,
 // although they do have one, so do not warn.
@@ -191,7 +192,7 @@ bool ParticleDataEntry::isBaryon() const {
   if (idSave%10 == 0 || (idSave/10)%10 == 0 || (idSave/100)%10 == 0
     || (idSave/1000)%10 == 0) return false;
   return true;
-  
+
 
 }
 
@@ -203,7 +204,7 @@ int ParticleDataEntry::heaviestQuark(int idIn) const {
 
   if (!isHadron()) return 0;
   int hQ = 0;
-  
+
   // Meson.
   if ( (idSave/1000)%10 == 0 ) {
     hQ = (idSave/100)%10;
@@ -229,7 +230,7 @@ int ParticleDataEntry::baryonNumberType(int idIn) const {
 
   // Diquarks
   if (isDiquark()) return (idIn > 0) ? 2 : -2;
-  
+
   // Baryons.
   if (isBaryon()) return (idIn > 0) ? 3 : -3;
 
@@ -327,13 +328,13 @@ double ParticleDataEntry::mSel() {
       runBW = mWidthNow / (pow2(mNow - m0Save) + pow2(0.5 * mWidthNow));
     } while (runBW < particleDataPtr->rndmPtr->flat()
       * particleDataPtr->maxEnhanceBW * fixBW);
-       
+
   // Mass according to a Breit-Wigner quadratic in m.
   } else if (modeBWnow == 3) {
     m2Now = m0Save*m0Save + m0Save * mWidthSave
       * tan( atanLow + atanDif * particleDataPtr->rndmPtr->flat() );
     mNow = sqrtpos( m2Now);
-       
+
   // Ditto, but m_0 Gamma_0 -> m Gamma(m) with threshold factor as above.
   } else {
     double mwNow, fixBW, runBW;
@@ -407,7 +408,7 @@ bool ParticleDataEntry::preparePick(int idSgn, double mHat, int idInFlav) {
     resonancePtr->widthStore(idSgn, mHat, idInFlav);
     for (int i = 0; i < int(channels.size()); ++i)
       currentBRSum += channels[i].currentBR();
-    
+
   // Else use normal fixed branching ratios.
   } else {
     int onMode;
@@ -502,7 +503,7 @@ double ParticleDataEntry::resWidthChan(double mHat, int idAbs1,
 // Hardcoded in CONSTITUENTMASSTABLE so that they are not overwritten
 // by mistake, and separated from the "normal" masses.
 // Called both by setDefaults and setM0 so kept as separate method.
-  
+
 void ParticleDataEntry::setConstituentMass() {
 
   // Equate with the normal masses as default guess.
@@ -511,7 +512,7 @@ void ParticleDataEntry::setConstituentMass() {
   // Quark masses trivial. Also gluon mass.
   if (idSave < 6) constituentMassSave = CONSTITUENTMASSTABLE[idSave];
   if (idSave == 21) constituentMassSave = CONSTITUENTMASSTABLE[9];
- 
+
   // Diquarks as simple sum of constituent quarks.
   if (idSave > 1000 && idSave < 10000 && (idSave/10)%10 == 0) {
     int id1 = idSave/1000;
@@ -542,7 +543,7 @@ void ParticleData::initCommon() {
 
   // Maximum tail enhancement when adding threshold factor to Breit-Wigner.
   maxEnhanceBW    = settingsPtr->parm("ParticleData:maxEnhanceBW");
- 
+
   // Find initial MSbar masses for five light flavours.
   mQRun[1]        = settingsPtr->parm("ParticleData:mdRun");
   mQRun[2]        = settingsPtr->parm("ParticleData:muRun");
@@ -607,6 +608,10 @@ void ParticleData::initWidths( vector<ResonanceWidths*> resonancePtrs) {
     setResonancePtr( 36, resonancePtr);
     resonancePtr = new ResonanceHchg(37);
     setResonancePtr( 37, resonancePtr);
+    resonancePtr = new ResonanceH(4, 45);
+    setResonancePtr( 45, resonancePtr);
+    resonancePtr = new ResonanceH(5, 46);
+    setResonancePtr( 46, resonancePtr);
   }
 
   // A fourth generation: b', t', tau', nu'_tau.
@@ -726,7 +731,7 @@ void ParticleData::initWidths( vector<ResonanceWidths*> resonancePtrs) {
   m0Ordered.push_back(m0(23));
   idOrdered.push_back(24);
   m0Ordered.push_back(m0(24));
-  
+
   // Loop through particle table to find resonances.
   for (map<int, ParticleDataEntry>::iterator pdtEntry = pdt.begin();
     pdtEntry != pdt.end(); ++pdtEntry) {
@@ -758,7 +763,7 @@ void ParticleData::initWidths( vector<ResonanceWidths*> resonancePtrs) {
     ParticleDataEntry* pdtPtrNow = particleDataEntryPtr( idOrdered[i]);
     pdtPtrNow->initBWmass();
   }
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -769,7 +774,7 @@ bool ParticleData::readXML(string inFile, bool reset) {
 
   // Normally reset whole database before beginning.
   if (reset) {pdt.clear(); isInit = false;}
- 
+
   // List of files to be checked.
   vector<string> files;
   files.push_back(inFile);
@@ -795,7 +800,7 @@ bool ParticleData::readXML(string inFile, bool reset) {
       istringstream getfirst(line);
       string word1;
       getfirst >> word1;
-    
+
       // Check for occurence of a particle. Add any continuation lines.
       if (word1 == "<particle") {
         while (line.find(">") == string::npos) {
@@ -825,7 +830,7 @@ bool ParticleData::readXML(string inFile, bool reset) {
         addParticle( idTmp, nameTmp, antiNameTmp, spinTypeTmp, chargeTypeTmp,
           colTypeTmp, m0Tmp, mWidthTmp, mMinTmp, mMaxTmp, tau0Tmp);
         particlePtr = particleDataEntryPtr(idTmp);
- 
+
       // Check for occurence of a decay channel. Add any continuation lines.
       } else if (word1 == "<channel") {
         while (line.find(">") == string::npos) {
@@ -839,7 +844,7 @@ bool ParticleData::readXML(string inFile, bool reset) {
         double bRatio   = doubleAttributeValue( line, "bRatio");
         int meMode      = intAttributeValue( line, "meMode");
         string products = attributeValue( line, "products");
- 
+
         // Read in decay products from stream. Must have at least one.
         istringstream prodStream(products);
         int prod0 = 0; int prod1 = 0; int prod2 = 0; int prod3 = 0;
@@ -860,7 +865,7 @@ bool ParticleData::readXML(string inFile, bool reset) {
         }
         particlePtr->addChannel(onMode, bRatio, meMode, prod0, prod1,
           prod2, prod3, prod4, prod5, prod6, prod7);
-    
+
       // Check for occurence of a file also to be read.
       } else if (word1 == "<file") {
         string file = attributeValue(line, "name");
@@ -888,7 +893,7 @@ bool ParticleData::readXML(string inFile, bool reset) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Print out complete database in numerical order as an XML file.
 
 void ParticleData::listXML(string outFile) {
@@ -946,7 +951,7 @@ void ParticleData::listXML(string outFile) {
         os  << "\"/>\n";
       }
     }
-        
+
     // Finish off existing particle.
     os << "</particle>\n\n";
 
@@ -983,7 +988,7 @@ bool ParticleData::readFF(string inFile, bool reset) {
       readParticle = true;
       continue;
     }
- 
+
     // Prepare to use standard read from line.
     istringstream readLine(line);
 
@@ -1020,14 +1025,14 @@ bool ParticleData::readFF(string inFile, bool reset) {
 
     // Read in a line with decay channel information.
     } else {
-       
+
       // Properties to be read.
       int    onMode = 0;
       double bRatio = 0.;
       int    meMode = 0;
       int prod0 = 0; int prod1 = 0; int prod2 = 0; int prod3 = 0;
       int prod4 = 0; int prod5 = 0; int prod6 = 0; int prod7 = 0;
-  
+
       // Read in data from stream. Need at least one decay product.
       readLine >> onMode >> bRatio >> meMode >> prod0;
       if (!readLine) {
@@ -1056,11 +1061,11 @@ bool ParticleData::readFF(string inFile, bool reset) {
   // Done.
   isInit = true;
   return true;
-   
+
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Print out complete database in numerical order as a free format file.
 
 void ParticleData::listFF(string outFile) {
@@ -1139,7 +1144,7 @@ void ParticleData::listFF(string outFile) {
   istringstream getWord(line);
   getWord >> idTmp >> property;
   property = toLower(property);
-  
+
   // Check that valid particle.
   if ( (!isParticle(idTmp) && property  != "all" && property  != "new")
   || idTmp <= 0) {
@@ -1251,7 +1256,7 @@ void ParticleData::listFF(string outFile) {
     pdt[idTmp].setDoForceWidth(doForceWidthTmp);
     return true;
   }
-   
+
   // Addition or complete replacement of a particle.
   if (property == "all" || property == "new") {
 
@@ -1327,7 +1332,7 @@ void ParticleData::listFF(string outFile) {
       idToMatch.push_back(abs(idRead));
     }
     int nToMatch = idToMatch.size();
-  
+
     // Loop over all decay channels.
     for (int i = 0; i < pdt[idTmp].sizeChannels(); ++i) {
       int multi = pdt[idTmp].channel(i).multiplicity();
@@ -1396,7 +1401,7 @@ void ParticleData::listFF(string outFile) {
 
     // Check that channel exists.
     if (channel < 0 || channel >= pdt[idTmp].sizeChannels()) return false;
-  
+
     // Find decay channel property and value, case by case.
     // At same time also do case where all should be replaced.
     if (property == "onmode" || property == "all") {
@@ -1458,7 +1463,7 @@ void ParticleData::listFF(string outFile) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Print out complete or changed table of database in numerical order.
 
 void ParticleData::list(bool changedOnly, bool changedRes, ostream& os) {
@@ -1495,7 +1500,7 @@ void ParticleData::list(bool changedOnly, bool changedRes, ostream& os) {
       // Print particle properties.
       ++nList;
       os << "\n" << setw(8) << particlePtr->id() << "  " << left;
-      if (particlePtr->name(-1) == "void") 
+      if (particlePtr->name(-1) == "void")
         os << setw(33) << particlePtr->name() << "  ";
       else os << setw(16) << particlePtr->name() << " "
          << setw(16) << particlePtr->name(-1) << "  ";
@@ -1542,7 +1547,7 @@ void ParticleData::list(bool changedOnly, bool changedRes, ostream& os) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Print out partial table of database in input order.
 
 void ParticleData::list(vector<int> idList, ostream& os) {
@@ -1567,7 +1572,7 @@ void ParticleData::list(vector<int> idList, ostream& os) {
 
     // Print particle properties.
     os << "\n" << setw(8) << particlePtr->id() << "  " << left;
-    if (particlePtr->name(-1) == "void") 
+    if (particlePtr->name(-1) == "void")
       os << setw(33) << particlePtr->name() << "  ";
     else os << setw(16) << particlePtr->name() << " "
        << setw(16) << particlePtr->name(-1) << "  ";
@@ -1611,7 +1616,7 @@ void ParticleData::list(vector<int> idList, ostream& os) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Check that table makes sense: e.g. consistent names and mass ranges,
 // that branching ratios sum to unity, that charge is conserved and
 // that phase space is open in each channel.
@@ -1632,7 +1637,7 @@ void ParticleData::checkTable(int verbosity, ostream& os) {
   for (map<int, ParticleDataEntry>::iterator pdtEntry
   = pdt.begin(); pdtEntry != pdt.end(); ++pdtEntry) {
     particlePtr = &pdtEntry->second;
-  
+
     // Extract some particle properties. Set some flags.
     int    idNow          = particlePtr->id();
     bool   hasAntiNow     = particlePtr->hasAnti();
@@ -1731,7 +1736,7 @@ void ParticleData::checkTable(int verbosity, ostream& os) {
 
     // Begin study decay channels.
     if (particlePtr->sizeChannels() > 0) {
- 
+
       // Loop through all decay channels.
       double bRatioSum = 0.;
       double bRatioPos = 0.;
@@ -1952,7 +1957,7 @@ void ParticleData::checkTable(int verbosity, ostream& os) {
            << " while mMin is " << mMinNow << "\n";
         hasPrinted = true;
       }
- 
+
       // Error printout when no acceptable decay channels found.
       if (studyCloser && !openChannel) {
         os << " Error: no acceptable decay channel found for particle "
@@ -1994,13 +1999,13 @@ void ParticleData::checkTable(int verbosity, ostream& os) {
 //--------------------------------------------------------------------------
 
 // Return the id of the sequentially next particle stored in table.
-  
+
 int ParticleData::nextId(int idIn) {
 
   // Return 0 for negative or unknown codes. Return first for 0.
   if (idIn < 0 || (idIn > 0 && !isParticle(idIn))) return 0;
   if (idIn == 0) return pdt.begin()->first;
-  
+
   // Find pointer to current particle and step up. Return 0 if impossible.
   map<int, ParticleDataEntry>::const_iterator pdtIn = pdt.find(idIn);
   if (pdtIn == pdt.end()) return 0;
@@ -2013,18 +2018,18 @@ int ParticleData::nextId(int idIn) {
 //--------------------------------------------------------------------------
 
 // Fractional width associated with open channels of one or two resonances.
-   
+
 double ParticleData::resOpenFrac(int id1In, int id2In, int id3In) {
 
   // Default value.
   double answer = 1.;
- 
+
   // First resonance.
   if (isParticle(id1In)) answer  = pdt[abs(id1In)].resOpenFrac(id1In);
- 
+
   // Possibly second resonance.
   if (isParticle(id2In)) answer *= pdt[abs(id2In)].resOpenFrac(id2In);
- 
+
   // Possibly third resonance.
   if (isParticle(id3In)) answer *= pdt[abs(id2In)].resOpenFrac(id3In);
 

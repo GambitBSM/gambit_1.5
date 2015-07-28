@@ -1,5 +1,5 @@
 // ResonanceWidths.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -18,7 +18,7 @@ namespace Pythia8 {
 // Base class for the various resonances.
 
 //--------------------------------------------------------------------------
- 
+
 // Constants: could be changed here if desired, but normally should not.
 // These are of technical nature, as described for each.
 
@@ -47,7 +47,7 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
 
   // Perform any model dependent initialisations (pure dummy in base class).
   bool isInit = initBSM();
-  
+
   // Minimal decaying-resonance width. Minimal phase space for meMode = 103.
   minWidth     = settingsPtr->parm("ResonanceWidths:minWidth");
   minThreshold = settingsPtr->parm("ResonanceWidths:minThreshold");
@@ -79,7 +79,7 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
       " resonance mass too small", "for id = " + idCode.str(), true);
     return false;
   }
- 
+
   // For very narrow resonances assign fictitious small width.
   if (GammaRes < minWidth) GammaRes = 0.1 * minWidth;
   GamMRat      = (mRes == 0.) ? 0. : GammaRes / mRes;
@@ -91,9 +91,9 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
   // Allow option where on-shell width is forced to current value.
   // Disable for mixes gamma*/Z0/Z'0
   doForceWidth = particlePtr->doForceWidth();
-  if (idRes == 23 && settingsPtr->mode("WeakZ0:gmZmode") != 2) 
+  if (idRes == 23 && settingsPtr->mode("WeakZ0:gmZmode") != 2)
     doForceWidth = false;
-  if (idRes == 33 && settingsPtr->mode("Zprime:gmZmode") != 3) 
+  if (idRes == 33 && settingsPtr->mode("Zprime:gmZmode") != 3)
     doForceWidth = false;
   forceFactor  = 1.;
 
@@ -126,19 +126,21 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
 
     // Warn if not relevant meMode.
     if ( meMode < 0 || meMode > 103 || (isGeneric && meMode < 100) ) {
+      stringstream ssIdRes;
+      ssIdRes << "for " << idRes;
       infoPtr->errorMsg("Error in ResonanceWidths::init:"
-        " resonance meMode not acceptable");
+        " resonance meMode not acceptable", ssIdRes.str());
     }
 
     // Channels with meMode < 100 must be implemented in derived classes.
     if (meMode < 100 && allowCalcWidth) {
-      
+
       // Read out information on channel: primarily use first two.
       id1       = particlePtr->channel(i).product(0);
       id2       = particlePtr->channel(i).product(1);
       id1Abs    = abs(id1);
       id2Abs    = abs(id2);
-       
+
       // Order first two in descending order of absolute values.
       if (id2Abs > id1Abs) {swap( id1, id2); swap( id1Abs, id2Abs);}
 
@@ -146,7 +148,7 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
       if (mult > 2) {
         id3     = particlePtr->channel(i).product(2);
         id3Abs  = abs(id3);
-        
+
         // Also order third into descending order of absolute values.
         if (id3Abs > id2Abs) {swap( id2, id3); swap( id2Abs, id3Abs);}
         if (id2Abs > id1Abs) {swap( id1, id2); swap( id1Abs, id2Abs);}
@@ -170,7 +172,7 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
 
     // Channels with meMode >= 100 are calculated based on stored values.
     else widNow = GammaRes * particlePtr->channel(i).bRatio();
-   
+
     // Find secondary open fractions of partial width.
     openSecPos  = 1.;
     openSecNeg  = 1.;
@@ -247,7 +249,7 @@ bool ResonanceWidths::init(Info* infoPtrIn, Settings* settingsPtrIn,
 
   // Done.
   return true;
-    
+
 }
 
 //--------------------------------------------------------------------------
@@ -293,13 +295,13 @@ double ResonanceWidths::width(int idSgn, double mHatIn, int idInFlavIn,
 
     // Channels with meMode < 100 must be implemented in derived classes.
     if (meMode < 100) {
-           
+
       // Read out information on channel: primarily use first two.
       id1       = particlePtr->channel(i).product(0);
       id2       = particlePtr->channel(i).product(1);
       id1Abs    = abs(id1);
       id2Abs    = abs(id2);
-       
+
       // Order first two in descending order of absolute values.
       if (id2Abs > id1Abs) {swap( id1, id2); swap( id1Abs, id2Abs);}
 
@@ -307,7 +309,7 @@ double ResonanceWidths::width(int idSgn, double mHatIn, int idInFlavIn,
       if (mult > 2) {
         id3     = particlePtr->channel(i).product(2);
         id3Abs  = abs(id3);
-        
+
         // Also order third into descending order of absolute values.
         if (id3Abs > id2Abs) {swap( id2, id3); swap( id2Abs, id3Abs);}
         if (id2Abs > id1Abs) {swap( id1, id2); swap( id1Abs, id2Abs);}
@@ -356,7 +358,7 @@ double ResonanceWidths::width(int idSgn, double mHatIn, int idInFlavIn,
                   sqrtpos( pow2(1.- mr1 - mr2) - 4. * mr1 * mr2) );
       widNow = GammaRes * particlePtr->channel(i).bRatio() * ps / psOnShell;
     }
-    
+
     // Correction by simple threshold factor for multibody decay.
     else if (meMode == 102 || meMode == 103) {
       mfSum  = 0.;
@@ -385,7 +387,7 @@ double ResonanceWidths::width(int idSgn, double mHatIn, int idInFlavIn,
 
   // Done.
   return widSum;
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -394,7 +396,7 @@ double ResonanceWidths::width(int idSgn, double mHatIn, int idInFlavIn,
 // where one particle is described by a Breit-Wigner mass distribution.
 // Normalization to unit integral if matrix element is unity
 // and there are no phase-space restrictions.
- 
+
 double ResonanceWidths::numInt1BW(double mHatIn, double m1, double Gamma1,
   double mMin1, double m2, int psMode) {
 
@@ -440,7 +442,7 @@ double ResonanceWidths::numInt1BW(double mHatIn, double m1, double Gamma1,
   // End of  loop over integration points. Overall normalization.
   }
   sum            *= wtDif1;
- 
+
   // Done.
   return sum;
 }
@@ -451,7 +453,7 @@ double ResonanceWidths::numInt1BW(double mHatIn, double m1, double Gamma1,
 // where both particles are described by Breit-Wigner mass distributions.
 // Normalization to unit integral if matrix element is unity
 // and there are no phase-space restrictions.
- 
+
 double ResonanceWidths::numInt2BW(double mHatIn, double m1, double Gamma1,
   double mMin1, double m2, double Gamma2, double mMin2, int psMode) {
 
@@ -573,7 +575,7 @@ double ResonanceWidths::numInt2BW(double mHatIn, double m1, double Gamma1,
   // Done.
   return sum;
 }
- 
+
 //==========================================================================
 
 // The ResonanceGmZ class.
@@ -647,7 +649,7 @@ void ResonanceGmZ::calcWidth(bool calledFromInit) {
 
   // Only contributions from three fermion generations, except top.
   if ( (id1Abs > 5 && id1Abs < 11) || id1Abs > 16 ) return;
-  
+
   // At initialization only the pure Z0 should be considered.
   if (calledFromInit) {
 
@@ -666,7 +668,7 @@ void ResonanceGmZ::calcWidth(bool calledFromInit) {
     double efvf     = couplingsPtr->efvf(id1Abs) * kinFacV;
     double vf2af2   = couplingsPtr->vf2(id1Abs) * kinFacV
                     + couplingsPtr->af2(id1Abs) * pow3(ps);
-    
+
     // Relative outwidths: combine instate, propagator and outstate.
     widNow = gamNorm * ef2 + intNorm * efvf + resNorm * vf2af2;
 
@@ -675,7 +677,7 @@ void ResonanceGmZ::calcWidth(bool calledFromInit) {
   }
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceW class.
@@ -725,7 +727,7 @@ void ResonanceW::calcWidth(bool) {
   if (id1Abs < 6) widNow *= colQ * couplingsPtr->V2CKMid(id1Abs, id2Abs);
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceTop class.
@@ -745,7 +747,7 @@ void ResonanceTop::initConstants() {
   tanBeta   = settingsPtr->parm("HiggsHchg:tanBeta");
   tan2Beta  = tanBeta * tanBeta;
   mbRun     = particleDataPtr->mRun( 5, particleDataPtr->m0(6) );
- 
+
 }
 
 //--------------------------------------------------------------------------
@@ -788,7 +790,7 @@ void ResonanceTop::calcWidth(bool) {
   }
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceFour class.
@@ -838,7 +840,7 @@ void ResonanceFour::calcWidth(bool) {
   if (idRes < 9) widNow *= colQ * couplingsPtr->V2CKMid(idRes, id2Abs);
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceH class.
@@ -958,7 +960,7 @@ void ResonanceH::calcPreFac(bool) {
   alpS      = couplingsPtr->alphaS(mHat * mHat);
   colQ      = 3. * (1. + alpS / M_PI);
   preFac    = (alpEM / (8. * sin2tW)) * pow3(mHat) / pow2(mW);
-  if (useNLOWidths) rescColQ = 3. * (1. + rescAlpS * alpS / M_PI) / colQ; 
+  if (useNLOWidths) rescColQ = 3. * (1. + rescAlpS * alpS / M_PI) / colQ;
 
 }
 
@@ -1006,11 +1008,11 @@ void ResonanceH::calcWidth(bool) {
   // Widths of decays Higgs -> gamma + gamma.
   else if (id1Abs == 22 && id2Abs == 22)
     widNow = preFac * pow2(alpEM / M_PI) * 0.5 * eta2gaga();
- 
+
   // Widths of decays Higgs -> Z0 + gamma0.
   else if (id1Abs == 23 && id2Abs == 22)
     widNow = preFac * pow2(alpEM / M_PI) * pow3(ps) * eta2gaZ();
-    
+
   // Widths of decays Higgs (h0, H0) -> Z0 + Z0.
   else if (id1Abs == 23 && id2Abs == 23) {
     // If Higgs heavy use on-shell expression, else interpolation in table
@@ -1026,7 +1028,7 @@ void ResonanceH::calcWidth(bool) {
     widNow        = 0.25 * preFac * pow2(coup2Z) * kinFac;
     if (!useCubicWidth) widNow *= pow2(mRes / mHat);
   }
- 
+
   // Widths of decays Higgs (h0, H0) -> W+ + W-.
   else if (id1Abs == 24 && id2Abs == 24) {
     // If Higgs heavy use on-shell expression, else interpolation in table.
@@ -1042,27 +1044,27 @@ void ResonanceH::calcWidth(bool) {
     widNow        = 0.5 * preFac * pow2(coup2W) * kinFac;
     if (!useCubicWidth) widNow *= pow2(mRes / mHat);
   }
- 
+
   // Widths of decays Higgs (H0) -> h0 + h0.
   else if (id1Abs == 25 && id2Abs == 25)
     widNow = 0.25 * preFac * pow4(mZ / mHat) * ps * pow2(coup2H1H1);
-     
+
   // Widths of decays Higgs (H0) -> A0 + A0.
   else if (id1Abs == 36 && id2Abs == 36)
     widNow = 0.5 * preFac * pow4(mZ / mHat) * ps * pow2(coup2A3A3);
- 
+
   // Widths of decays Higgs (A0) -> h0 + Z0.
   else if (id1Abs == 25 && id2Abs == 23)
     widNow = 0.5 * preFac * pow3(ps) * pow2(coup2H1Z);
- 
+
   // Widths of decays Higgs (H0) -> A0 + Z0.
   else if (id1Abs == 36 && id2Abs == 23)
     widNow = 0.5 * preFac * pow3(ps) * pow2(coup2A3Z);
-   
+
   // Widths of decays Higgs (H0) -> A0 + h0.
   else if (id1Abs == 36 && id2Abs == 25)
     widNow = 0.25 * preFac * pow4(mZ / mHat) * ps * pow2(coup2A3H1);
- 
+
   // Widths of decays Higgs -> H+- + W-+.
   else if (id1Abs == 37 && id2Abs == 24)
     widNow = 0.5 * preFac * pow3(ps) * pow2(coup2HchgW);
@@ -1110,14 +1112,14 @@ double ResonanceH::eta2gg() {
                 0.5 * M_PI * rootLog );
     }
     else phi  = complex( pow2( asin(1. / sqrt(epsilon)) ), 0.);
-  
+
     // Factors that depend on Higgs and flavour type.
     if (higgsType < 3) etaNow = -0.5 * epsilon
       * (complex(1., 0.) + (1. - epsilon) * phi);
     else etaNow = -0.5 * epsilon * phi;
     if (idNow%2 == 1) etaNow *= coup2d;
     else              etaNow *= coup2u;
-    
+
     // Sum up contribution and return square of absolute value.
     eta += etaNow;
   }
@@ -1145,7 +1147,7 @@ double ResonanceH::eta2gaga() {
     else if (idLoop < 7) idNow = 24;
     else                 idNow = 37;
     if (idNow == 37 && higgsType == 0) continue;
- 
+
     // Charge and loop integral parameter.
     ef      = (idNow < 20) ? couplingsPtr->ef(idNow) : 1.;
     mLoop   = (useRunLoopMass) ? particleDataPtr->mRun(idNow, mHat)
@@ -1175,11 +1177,11 @@ double ResonanceH::eta2gaga() {
     // Expression for W+-.
     else if (idNow == 24) etaNow = (complex(0.5 + 0.75 * epsilon, 0.)
       + 0.75 * epsilon * (2. - epsilon) * phi) * coup2W;
- 
+
     // Expression for H+-.
    else etaNow = (complex(epsilon, 0.) - epsilon * epsilon * phi)
      * pow2(mW / mHchg) * coup2Hchg;
-    
+
     // Sum up contribution and return square of absolute value.
     eta       += etaNow;
   }
@@ -1268,14 +1270,14 @@ double ResonanceH::eta2gaZ() {
     // Expression for H+-.
     } else etaNow = (1. - 2. * sin2tW) * fXY * pow2(mW / mHchg)
       * coup2Hchg;
-    
+
     // Sum up contribution and return square of absolute value.
     eta += etaNow;
   }
   return ( (pow2(eta.real()) + pow2(eta.imag())) / (sin2tW * cos2tW) );
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceHchg class.
@@ -1339,7 +1341,7 @@ void ResonanceHchg::calcWidth(bool) {
     widNow    = 0.5 * preFac * pow3(ps) * pow2(coup2H1W);
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceZprime class.
@@ -1366,7 +1368,7 @@ void ResonanceZprime::initConstants() {
   // Ensure that arrays initially empty.
   for (int i = 0; i < 20; ++i) afZp[i] = 0.;
   for (int i = 0; i < 20; ++i) vfZp[i] = 0.;
-  
+
   // Store first-generation axial and vector couplings.
   afZp[1]     = settingsPtr->parm("Zprime:ad");
   afZp[2]     = settingsPtr->parm("Zprime:au");
@@ -1377,9 +1379,13 @@ void ResonanceZprime::initConstants() {
   vfZp[11]    = settingsPtr->parm("Zprime:ve");
   vfZp[12]    = settingsPtr->parm("Zprime:vnue");
 
+  // Determine if the 4th generation should be included
+  bool coupZp2gen4    = settingsPtr->flag("Zprime:coup2gen4");
+  maxZpGen = (coupZp2gen4) ? 8 : 6;
+
   // Second and third generation could be carbon copy of this...
   if (settingsPtr->flag("Zprime:universality")) {
-    for (int i = 3; i <= 6; ++i) {
+    for (int i = 3; i <= maxZpGen; ++i) {
       afZp[i]    = afZp[i-2];
       vfZp[i]    = vfZp[i-2];
       afZp[i+10] = afZp[i+8];
@@ -1404,6 +1410,16 @@ void ResonanceZprime::initConstants() {
     vfZp[14]  = settingsPtr->parm("Zprime:vnumu");
     vfZp[15]  = settingsPtr->parm("Zprime:vtau");
     vfZp[16]  = settingsPtr->parm("Zprime:vnutau");
+    if( coupZp2gen4 ) {
+      afZp[7]   = settingsPtr->parm("Zprime:abPrime");
+      afZp[8]   = settingsPtr->parm("Zprime:atPrime");
+      vfZp[7]   = settingsPtr->parm("Zprime:vbPrime");
+      vfZp[8]   = settingsPtr->parm("Zprime:vtPrime");
+      afZp[17]  = settingsPtr->parm("Zprime:atauPrime");
+      afZp[18]  = settingsPtr->parm("Zprime:anutauPrime");
+      vfZp[17]  = settingsPtr->parm("Zprime:vtauPrime");
+      vfZp[18]  = settingsPtr->parm("Zprime:vnutauPrime");
+    }
   }
 
   // Coupling for Z' -> W+ W-.
@@ -1434,7 +1450,8 @@ void ResonanceZprime::calcPreFac(bool calledFromInit) {
     vaivapi   = 0.,
     vapi2     = 1.;
     int idInFlavAbs = abs(idInFlav);
-    if (idInFlavAbs > 0 && idInFlavAbs < 19) {
+    if ( (idInFlavAbs >  0 && idInFlavAbs <= maxZpGen)
+      || (idInFlavAbs > 10 && idInFlavAbs <= maxZpGen + 10) ) {
       double ei  = couplingsPtr->ef(idInFlavAbs);
       double ai  = couplingsPtr->af(idInFlavAbs);
       double vi  = couplingsPtr->vf(idInFlavAbs);
@@ -1482,17 +1499,17 @@ void ResonanceZprime::calcWidth(bool calledFromInit) {
 
   // Check that above threshold.
   if (ps == 0.) return;
-  
+
   // At initialization only the pure Z'0 should be considered.
   if (calledFromInit) {
 
-    // Contributions from three fermion generations.
-    if ( id1Abs < 7 || (id1Abs > 10 && id1Abs < 17) ) {
+    // Contributions from three (4?) fermion generations.
+    if ( id1Abs <= maxZpGen || (id1Abs > 10 && id1Abs <= maxZpGen + 10) ) {
       double apf = afZp[id1Abs];
       double vpf = vfZp[id1Abs];
       widNow = preFac * ps * (vpf*vpf * (1. + 2. * mr1)
              + apf*apf * ps*ps);
-      if (id1Abs < 7) widNow *= colQ;
+      if (id1Abs < 9) widNow *= colQ;
 
     // Contribution from Z'0 -> W^+ W^-.
     } else if (id1Abs == 24) {
@@ -1504,8 +1521,8 @@ void ResonanceZprime::calcWidth(bool calledFromInit) {
   // When call for incoming flavour need to consider full mix.
   else {
 
-    // Contributions from three fermion generations.
-    if ( id1Abs < 7 || (id1Abs > 10 && id1Abs < 17) ) {
+    // Contributions from three (4?) fermion generations.
+    if ( id1Abs <= maxZpGen || (id1Abs > 10 && id1Abs <= maxZpGen + 10) ) {
 
       // Couplings of gamma^*/Z^0/Z'^0  to final flavour
       double ef  = couplingsPtr->ef(id1Abs);
@@ -1523,11 +1540,11 @@ void ResonanceZprime::calcWidth(bool calledFromInit) {
       double efvpf    = ef * vpf * kinFacV;
       double vafvapf  = vf * vpf * kinFacV + af * apf * kinFacA;
       double vapf2    = vpf * vpf * kinFacV + apf * apf * kinFacA;
-    
+
       // Relative outwidths: combine instate, propagator and outstate.
       widNow = gamNorm * ef2 + gamZNorm * efvf + ZNorm * vaf2
              + gamZpNorm * efvpf + ZZpNorm * vafvapf + ZpNorm * vapf2;
-      if (id1Abs < 7) widNow *= colQ;
+      if (id1Abs < 9) widNow *= colQ;
 
     // Contribution from Z'0 -> W^+ W^-.
     } else if (id1Abs == 24) {
@@ -1537,7 +1554,7 @@ void ResonanceZprime::calcWidth(bool calledFromInit) {
   }
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceWprime class.
@@ -1588,14 +1605,14 @@ void ResonanceWprime::calcWidth(bool) {
   if (ps == 0.) return;
 
   // Decay to quarks involves colour factor and CKM matrix.
-  if (id1Abs > 0 && id1Abs < 7) widNow
+  if (id1Abs > 0 && id1Abs < 9) widNow
     = preFac * ps * 0.5 * ((vqWp*vqWp + aqWp * aqWp)
     + 6. * (vqWp*vqWp - aqWp * aqWp) * sqrt(mr1 *mr2))
     * (1. - 0.5 * (mr1 + mr2) - 0.5 * pow2(mr1 - mr2))
     * colQ * couplingsPtr->V2CKMid(id1Abs, id2Abs);
 
   // Decay to leptons simpler.
-  else if (id1Abs > 10 && id1Abs < 17) widNow
+  else if (id1Abs > 10 && id1Abs < 19) widNow
     = preFac * ps * 0.5 * ((vlWp*vqWp + alWp * aqWp)
     + 6. * (vlWp*vqWp - alWp * aqWp) * sqrt(mr1 *mr2))
     * (1. - 0.5 * (mr1 + mr2) - 0.5 * pow2(mr1 - mr2));
@@ -1606,7 +1623,7 @@ void ResonanceWprime::calcWidth(bool) {
     * (1. + mr1*mr1 + mr2*mr2 + 10. * (mr1 + mr2 + mr1 * mr2));
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceRhorizontal class.
@@ -1651,7 +1668,7 @@ void ResonanceRhorizontal::calcWidth(bool) {
   if (id1Abs < 9) widNow *= colQ;
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceExcited class.
@@ -1668,6 +1685,7 @@ void ResonanceExcited::initConstants() {
   coupF         = settingsPtr->parm("ExcitedFermion:coupF");
   coupFprime    = settingsPtr->parm("ExcitedFermion:coupFprime");
   coupFcol      = settingsPtr->parm("ExcitedFermion:coupFcol");
+  contactDec    = settingsPtr->parm("ExcitedFermion:contactDec");
   sin2tW        = couplingsPtr->sin2thetaW();
   cos2tW        = 1. - sin2tW;
 
@@ -1719,8 +1737,20 @@ void ResonanceExcited::calcWidth(bool) {
   else if (id1Abs == 24) widNow  = preFac * (alpEM * pow2(coupF)
                  / (16. * sin2tW)) * ps*ps * (2. + mr1);
 
+  // f^* -> f f' fbar' contact interaction decays (code by Olga Igonkina).
+  else {
+    if (id1Abs < 17 && id2Abs < 17 && id3Abs > 0 && id3Abs < 17 ) {
+      widNow = preFac * pow2(contactDec * mHat) / (pow2(Lambda) * 96. * M_PI);
+      if (id3Abs < 10) widNow *= 3.;
+      if (id1Abs == id2Abs && id1Abs == id3Abs) {
+        if (idRes - 4000000 < 10) widNow *= 4./3.;
+        else                      widNow *= 2.;
+      }
+    }
+  }
+
 }
- 
+
 //==========================================================================
 
 // The ResonanceGraviton class.
@@ -1779,13 +1809,13 @@ void ResonanceGraviton::calcWidth(bool) {
   if (id1Abs < 19) {
      widNow  = preFac * pow3(ps) * (1. + 8. * mr1 / 3.) / 320.;
      if (id1Abs < 9) widNow *= colQ;
-      
+
   // Widths to gluon and photon pair.
   } else if (id1Abs == 21) {
     widNow = preFac / 20.;
   } else if (id1Abs == 22) {
     widNow = preFac / 160.;
-     
+
   // Widths to Z0 Z0 and W+ W- pair.
   } else if (id1Abs == 23 || id1Abs == 24) {
     // Longitudinal W/Z only.
@@ -1955,12 +1985,12 @@ void ResonanceLeptoquark::calcWidth(bool) {
 
   // Check that above threshold.
   if (ps == 0.) return;
-  
+
   // Width into lepton plus quark.
   if (id1Abs > 10 && id1Abs < 17 && id2Abs < 7) widNow = preFac * pow3(ps);
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceNuRight class.
@@ -2016,7 +2046,7 @@ void ResonanceNuRight::calcWidth(bool) {
   widNow   *= fx * fy;
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceZRight class.
@@ -2070,7 +2100,7 @@ void ResonanceZRight::calcWidth(bool) {
   } else if (id1Abs < 19 && id1Abs%2 == 1) {
     af      = -1. + 2. * sin2tW;
     vf      = -1. + 4. * sin2tW;
-       
+
   // Couplings to nu_L nu_Lbar and nu_R nu_Rbar, both assumed Majoranas.
   } else if (id1Abs < 19) {
     af      = -2. * sin2tW;
@@ -2088,7 +2118,7 @@ void ResonanceZRight::calcWidth(bool) {
   if (id1Abs < 9) widNow *= colQ;
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceWRight class.
@@ -2134,7 +2164,7 @@ void ResonanceWRight::calcWidth(bool) {
   if (id1Abs < 9) widNow *= colQ * couplingsPtr->V2CKMid(id1Abs, id2Abs);
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceHchgchgLeft class.
@@ -2153,7 +2183,7 @@ void ResonanceHchgchgLeft::initConstants() {
   yukawa[3][1]  = settingsPtr->parm("LeftRightSymmmetry:coupHtaue");
   yukawa[3][2]  = settingsPtr->parm("LeftRightSymmmetry:coupHtaumu");
   yukawa[3][3]  = settingsPtr->parm("LeftRightSymmmetry:coupHtautau");
-  
+
   // Locally stored properties and couplings.
   gL            = settingsPtr->parm("LeftRightSymmmetry:gL");
   vL            = settingsPtr->parm("LeftRightSymmmetry:vL");
@@ -2186,14 +2216,14 @@ void ResonanceHchgchgLeft::calcWidth(bool) {
     widNow    = preFac * pow2(yukawa[(id1Abs-9)/2][(id2Abs-9)/2]) * ps;
     if (id2Abs != id1Abs) widNow *= 2.;
   }
-      
+
   // H++-- width to a pair of lefthanded W's.
   else if (id1Abs == 24 && id2Abs == 24)
     widNow    = preFac * 0.5 * pow2(gL*gL * vL / mW)
               * (3. * mr1 + 0.25 / mr1 - 1.) * ps;
 
 }
- 
+
 //==========================================================================
 
 // The ResonanceHchgchgRight class.
@@ -2212,7 +2242,7 @@ void ResonanceHchgchgRight::initConstants() {
   yukawa[3][1]  = settingsPtr->parm("LeftRightSymmmetry:coupHtaue");
   yukawa[3][2]  = settingsPtr->parm("LeftRightSymmmetry:coupHtaumu");
   yukawa[3][3]  = settingsPtr->parm("LeftRightSymmmetry:coupHtautau");
-  
+
   // Locally stored properties and couplings.
   idWR          = 9000024;
   gR            = settingsPtr->parm("LeftRightSymmmetry:gR");
@@ -2244,7 +2274,7 @@ void ResonanceHchgchgRight::calcWidth(bool) {
     widNow    = preFac * pow2(yukawa[(id1Abs-9)/2][(id2Abs-9)/2]) * ps;
     if (id2Abs != id1Abs) widNow *= 2.;
   }
-      
+
   // H++-- width to a pair of lefthanded W's.
   else if (id1Abs == idWR && id2Abs == idWR)
     widNow    = preFac * pow2(yukawa[(id1Abs-9)/2][(id2Abs-9)/2]) * ps;
@@ -2252,5 +2282,5 @@ void ResonanceHchgchgRight::calcWidth(bool) {
 }
 
 //==========================================================================
- 
+
 } // end namespace Pythia8
