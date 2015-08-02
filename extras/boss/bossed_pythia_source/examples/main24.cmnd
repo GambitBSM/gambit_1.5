@@ -17,11 +17,12 @@ Next:numberShowEvent = 2           ! print event record n times
 ! 3) Beam parameter settings. Values below agree with default ones.
 Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
 Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
-Beams:eCM = 10000.                 ! CM energy of collision
+Beams:eCM = 13000.                 ! CM energy of collision
 
-! 4) Read SLHA spectrum
-SLHA:file = cmssm.spc              ! Sample SLHA1 spectrum for CMSSM-10.1.1
-#SLHA:file = sps1aWithDecays.spc     ! Older example including DECAY tables
+! 4) Read SLHA spectrum (a few examples are provided by default)
+SLHA:file = slha2-example.spc       ! Sample SLHA2 spectrum
+#SLHA:file = slha1-example.spc       ! Sample SLHA1 spectrum, for CMSSM-10.1.1
+#SLHA:file = sps1aWithDecays.spc     ! Older sample spectrum with DECAY tables
 
 ! 5) Process selection
 SUSY:all = on                      ! Switches on ALL (~400) SUSY processes

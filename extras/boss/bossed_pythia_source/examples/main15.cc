@@ -1,5 +1,5 @@
 // main15.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -23,7 +23,7 @@
 
 #include "Pythia8/Pythia.h"
 using namespace Pythia8;
- 
+
 int main() {
 
   // Main switches: redo B decays only or redo all hadronization, but not both.
@@ -119,7 +119,7 @@ int main() {
       // Repeated decays: switch back on weakly decaying B hadrons.
       for (int iC = 0; iC < nCodes; ++iC)
         pythia.particleData.mayDecay( bCodes[iC], true);
-    
+
     //  Repeated hadronization: copy event into spare position.
     } else if (redoHadrons) {
       savedEvent = event;
@@ -137,7 +137,7 @@ int main() {
           // Repeated decays: mark decayed B hadrons as undecayed.
           for (int iB = 0; iB < nBHad; ++iB) event[ iBHad[iB] ].statusPos();
         }
-  
+
         // Repeated decays: do decays of B hadrons, sequentially for products.
         // Note: modeDecays does not work for bottomonium (or heavier) states,
         // since there decays like Upsilon -> g g g also need hadronization.
@@ -148,12 +148,12 @@ int main() {
       // Repeated hadronization: restore saved event record.
       } else if (redoHadrons) {
         if (iRepeat > 0) event = savedEvent;
-  
+
         // Repeated hadronization: do HadronLevel (repeatedly).
         // Note: argument false needed owing to bug in junction search??
         if (!pythia.forceHadronLevel(false)) continue;
       }
-  
+
       // List last repetition of first few events.
       if ( (redoBDecays || redoHadrons) && iEvent < nListRedo
         && iRepeat == nRepeat - 1) event.list();
@@ -165,7 +165,7 @@ int main() {
         if (id ==  13) iMuNeg.push_back(i);
         if (id == -13) iMuPos.push_back(i);
       }
-      
+
       // Check whether pair(s) present.
       int nMuNeg = iMuNeg.size();
       int nMuPos = iMuPos.size();

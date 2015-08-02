@@ -10,9 +10,82 @@ from operator import itemgetter
 import os
 import warnings
 import subprocess
+import copy
 
 import modules.cfg as cfg
 import modules.gb as gb
+import modules.shelltimeout as shelltimeout
+import modules.exceptions as exceptions
+import modules.infomsg as infomsg
+
+
+
+# ====== isComplete ========
+
+def isComplete(class_el):
+
+    is_complete = True
+
+    # Check that class is complete (not only forward declared):
+    if ('incomplete' in class_el.keys()) and (class_el.get('incomplete') == '1'):
+        is_complete = False
+
+    return is_complete
+
+# ====== END: isComplete ========
+
+
+
+# ====== isLoadable ========
+
+def isLoadable(class_el, print_warning=False):
+
+    import modules.classutils as classutils
+
+    is_loadable = True
+
+    # - Any loadable class should have a "name" XML entry
+    if not 'name' in class_el.keys():
+        is_loadable = False
+        return is_loadable
+    
+    class_name = classutils.getClassNameDict(class_el) 
+
+
+    # - Check if class should be ditched. If yes, return right away.
+    if class_name['long_templ'] in cfg.ditch:
+        is_loadable = False
+        return is_loadable
+
+    # - Check if class is a template class. BOSS cannot handle this yet.
+    if isTemplateClass(class_el):
+        is_loadable = False
+        if print_warning:
+            reason = "This is a template class. BOSS cannot yet handle this."
+            infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
+        return is_loadable
+
+    # - Check that class is complete (not only forward declared).
+    if not isComplete(class_el):
+        is_loadable = False
+        if print_warning:
+            reason = "Class is incomplete, at least based on XML file %s" % (gb.xml_file_name)
+            infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
+        return is_loadable
+
+    # - Check for pure virtual members.
+    pure_virtual_members = classutils.pureVirtualMembers(class_el)
+    if len(pure_virtual_members) > 0:
+        is_loadable = False
+        if print_warning:
+            reason = "Pure virtual member functions: %s." % ', '.join(pure_virtual_members)
+            infomsg.ClassNotLoadable(class_name['long_templ'], reason).printMessage()
+        return is_loadable
+
+    return is_loadable
+
+# ====== END: isLoadable ========
+
 
 
 # ====== isFundamental ========
@@ -27,6 +100,68 @@ def isFundamental(el):
     return is_fundamental
 
 # ====== END: isFundamental ========
+
+
+
+# ====== isKnownClass ========
+
+def isKnownClass(el):
+
+    import modules.classutils as classutils
+    
+    is_known = False
+
+    type_dict = findType(el)
+    type_el = type_dict['el']
+
+    # - Any known class should have a "name" XML entry
+    if not 'name' in type_el.keys():
+        is_known = False
+        return is_known
+
+    class_name = classutils.getClassNameDict(type_el) 
+
+    if class_name['long_templ'] in cfg.known_classes:
+        is_known = True
+
+    return is_known
+
+# ====== END: isKnownClass ========
+
+
+
+# ====== isTemplateClass ========
+
+def isTemplateClass(class_el):
+
+    import modules.classutils as classutils
+
+    is_template = False
+
+    class_name = classutils.getClassNameDict(class_el)
+
+    if '<' in class_name['long_templ']:
+        is_template = True
+
+    return is_template
+
+# ====== END: isTemplateClass ========
+
+
+
+# ====== isEnumeration ========
+
+def isEnumeration(el):
+
+    is_enumeration = False
+
+    if el.tag == 'Enumeration':
+        is_enumeration = True
+
+    return is_enumeration
+
+# ====== END: isEnumeration ========
+
 
 
 # ====== isNative ========
@@ -58,11 +193,6 @@ def isNative(el):
                 is_native = True
                 break
 
-        # if os.path.dirname(check_path) in cfg.accepted_paths:
-        #     is_native = True
-        # else:
-        #     is_native = False
-
     else:
         raise Exception('Cannot check whether XML element with id="%s" and tag "%s" is native.' % (el.get('id'), el.tag))
 
@@ -78,11 +208,6 @@ def isStdType(el):
 
     # Makes use of global variables:  accepted_paths
 
-    # print 'checking:', el.tag
-    # if 'name' in el.keys():
-    #     print ' -- ', el.get('name')
-    # print
-
     is_std = False
     can_check_tags = ['Class', 'Struct', 'Union', 'Enumeration']
 
@@ -93,25 +218,27 @@ def isStdType(el):
             if demangled_name[0:5] == 'std::':
                 is_std = True
 
-        # file_el = gb.id_dict[el.get('file')]
-
-        # check_path = file_el.get('name')
-
-        # for std_path in cfg.std_include_paths:
-        #     if std_path in os.path.dirname(check_path):
-        #         is_std = True
-        #         if check_path not in gb.std_headers_used:
-        #             gb.std_headers_used.append(check_path)
-        #         break
-
     else:
-        pass
-        # warnings.warn('Cannot check whether XML element with id="%s" and tag "%s" is a standard type.' % (el.get('id'), el.tag))
-        # raise Exception('Cannot check whether XML element with id="%s" and tag "%s" is a standard type.' % (el.get('id'), el.tag))
+        is_std = False
 
     return is_std
 
 # ====== END: isStdType ========
+
+
+
+# ====== isConstFunction ========
+
+def isConstFunction(func_el):
+
+    is_const_func = False
+
+    if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
+        is_const_func = True
+
+    return is_const_func
+
+# ====== END: isConstFunction ========
 
 
 
@@ -168,16 +295,6 @@ def getTemplateBracket(el):
         template_bracket = '<>'
 
     print 'TEMPLATE BRACKET: ', template_bracket
-    # # Isolate template variable names (remove keywords 'class' and 'typename')
-    # temp_var_list = template_bracket[1:-1].split(',')
-    # temp_var_list = [ e.strip() for e in temp_var_list]
-    # for i,arg in enumerate(temp_var_list):
-    #     arg_split = arg.split()
-    #     if 'class' in arg_split:
-    #         arg_split.remove('class')
-    #     if 'typename' in arg_split:
-    #         arg_split.remove('typename')
-    #     temp_var_list[i] = ' '.join(arg_split)
 
     # Isolate only the template variable names (last word in each entry)
     if template_bracket == '<>':
@@ -196,15 +313,27 @@ def getTemplateBracket(el):
 
 # ====== getSpecTemplateTypes ========
 
-def getSpecTemplateTypes(el):
+def getSpecTemplateTypes(input_type, byname=False):
 
-    # Classes and functions must be treated differently
-    if el.tag in ['Class', 'Struct']:
-        spec_types = el.get('name').split('<',1)[1].rsplit('>',1)[0].strip()
-    elif el.tag == 'Function':
-        spec_types = el.get('demangled').split('<',1)[1].rsplit('>',1)[0].strip()
+    # If input is a string
+    if byname:
+        input_name = input_type
+
+    # If input is an xml element
     else:
-        raise Exception("Don't know how to get template types from XML element with tag: %s" % el.tag)
+        el = input_type
+
+        # Classes and functions must be treated differently
+        if el.tag in ['Class', 'Struct']:
+            input_name = el.get('name')
+        elif el.tag in ['Function', 'Method', 'OperatorMethod', 'OperatorFunction']:
+            input_name = el.get('demangled')
+        else:
+            raise Exception("Don't know how to get template types from XML element with tag: %s" % el.tag)
+
+    input_name_no_templ, templ_bracket = removeTemplateBracket(input_name, return_bracket=True)
+    spec_types = templ_bracket.strip().lstrip('<').rstrip('>').strip()
+
 
     # Identify the correct commas
     pos = []
@@ -222,15 +351,112 @@ def getSpecTemplateTypes(el):
     spec_types_list = []
     prev_p = 0
     for p in pos:
-        spec_types_list.append(spec_types[prev_p:p])
+        spec_types_list.append(spec_types[prev_p:p].strip())
         prev_p = p+1
-    spec_types_list.append(spec_types[prev_p:])
+    spec_types_list.append(spec_types[prev_p:].strip())
 
     # Return result
-    return spec_types_list
+    if spec_types_list == ['']:
+        return []
+    else:
+        return spec_types_list
 
 # ====== END: getSpecTemplateTypes ========
 
+
+
+# ====== unpackAllSpecTemplateTypes ========
+
+def unpackAllSpecTemplateTypes(input_bracket, result_list):
+
+    spec_types = getSpecTemplateTypes(input_bracket, byname=True)
+
+    for type_name in spec_types:
+        
+        if '<' in type_name:
+            result_list.append(type_name)
+            unpackAllSpecTemplateTypes(type_name, result_list=result_list)            
+        else:
+            result_list.append(type_name)
+
+# ====== END: unpackAllSpecTemplateTypes ========
+
+
+
+# ====== getAllTemplateTypes ========
+
+def getAllTemplateTypes(type_name):
+
+    type_name_parts = []
+    current_type_name = type_name
+    while True:
+
+        namespace, short_type_name = removeNamespace(current_type_name, return_namespace=True)
+        type_name_parts.append(short_type_name)
+        if namespace == "":
+            break
+        else:
+            current_type_name = namespace
+
+    all_template_types = []
+    for type_part in type_name_parts:
+        unpackAllSpecTemplateTypes(type_part, all_template_types)
+
+    return all_template_types
+
+# ====== END: getAllTemplateTypes ========
+
+
+
+# ====== getBasicTypeName ========
+
+def getBasicTypeName(type_name):
+
+    # If type name contains a template brackets
+    if '<' in type_name:
+        type_name_notempl, templ_bracket = removeTemplateBracket(type_name, return_bracket=True)
+        before_bracket, after_bracket = type_name.split(templ_bracket)
+
+        if (len(after_bracket) > 0) and (after_bracket[0] == ' '):
+            space_after_bracket = True
+        else:
+            space_after_bracket = False
+
+        # Remove asterix and/or ampersand
+        before_bracket = before_bracket.replace('*', '').replace('&', '')
+        after_bracket  = after_bracket.replace('*', '').replace('&', '')
+
+        # Remove 'const' and 'volatile'
+        before_bracket_list = before_bracket.split()
+        before_bracket_list = [item for item in before_bracket_list if item != 'const']
+        before_bracket_list = [item for item in before_bracket_list if item != 'volatile']
+        before_bracket = ' '.join(before_bracket_list)
+
+        after_bracket_list = after_bracket.split()
+        after_bracket_list = [item for item in after_bracket_list if item != 'const']
+        after_bracket_list = [item for item in after_bracket_list if item != 'volatile']
+        after_bracket = ' '.join(after_bracket_list)
+
+        basic_type_name = before_bracket + templ_bracket + ' '*space_after_bracket + after_bracket
+
+    # If no template bracket
+    else:
+
+        basic_type_name = type_name
+
+        # Remove asterix and/or ampersand
+        basic_type_name = basic_type_name.replace('*', '').replace('&', '')
+        
+        # Remove 'const' and 'volatile'
+        basic_type_name_list = basic_type_name.split()
+        basic_type_name_list = [item for item in basic_type_name_list if item != 'const']
+        basic_type_name_list = [item for item in basic_type_name_list if item != 'volatile']
+        basic_type_name = ' '.join(basic_type_name_list)
+
+    # Return result
+    return basic_type_name
+
+# ====== END: getBasicTypeName ========
 
 
 # ====== removeComments ========
@@ -337,54 +563,92 @@ def removeComments(content, insert_blanks=False):
 
 def findType(el_input):
 
-    check_keywords = ['const']
-    additional_keywords = []
-    refs_and_pointers = ''
+    # check_keywords = ['const']
+    # additional_keywords = []
+
+    cv_qualifiers = []
+    is_reference = False
+    pointerness = 0
+    found_function_pointer = False
+    is_array = False
+    array_limits = []
 
     el = el_input
     
-    if el.tag in ['FundamentalType', 'Class', 'Struct']:
+    if el.tag in ['FundamentalType', 'Class', 'Struct', 'Enumeration']:
         type_id = el.get('id')
 
     elif el.tag in ['Constructor']:
         type_id = el.get('context')
+        el = gb.id_dict[type_id]
 
     else:
         type_id = el.get('type')
+        prev_tag = ''
         while ('type' in el.keys()) or ('returns' in el.keys()):
 
             # Get xml id to move further through the xml file
             if el.tag in ['FunctionType', 'Function', 'Method', 'OperatorMethod']:
+
+                if (el.tag == 'FunctionType') and (prev_tag == 'PointerType'):
+                    found_function_pointer = True
                 type_id = el.get('returns')
             else:
                 type_id = el.get('type')
 
             # Check for reference or pointer type
             if el.tag == 'ReferenceType':
-                refs_and_pointers = ''.join(['&', refs_and_pointers])
+                is_reference = True
             if el.tag == 'PointerType':
-                refs_and_pointers = ''.join(['*', refs_and_pointers])
+                pointerness += 1
 
-            # Pick up any extra keywords
-            for keyword in check_keywords:
-                if keyword in el.keys():
-                    additional_keywords.append(keyword)
+            # Pick up any extra keywords (e.g. 'const') from non-function xml elements
+            if el.tag == 'CvQualifiedType':
+                if 'const' in el.keys():
+                    if 'const' not in cv_qualifiers:
+                        cv_qualifiers.append('const')
+                if 'volatile' in el.keys():
+                    if 'volatile' not in cv_qualifiers:
+                        cv_qualifiers.append('volatile')
+
+            # Pick up any array indices
+            if el.tag == 'ArrayType':
+                is_array = True
+                if el.get('max') != '':
+                    max_index_str = el.get('max')
+                    max_index = int(max_index_str.strip('u'))
+                    array_limits.append(max_index + 1)
+
+
+            # Store tag (to identify function pointers)
+            prev_tag = el.tag
 
             # change xlm element 'el'
             el = gb.id_dict[type_id]
 
-    # Remove duplicates from the additional_keywords list
-    additional_keywords = list( OrderedDict.fromkeys(additional_keywords) )
-
     # When we exit the loop, 'el' is at the final element.
-    # The typename is in the 'name'/'demangled' attribute
-    if 'demangled' in el.keys():
-        typename = el.get('demangled') + refs_and_pointers    
-    else:
-        typename = el.get('name') + refs_and_pointers
+    # Now get the full name, including any namespaces.
+    name_and_namespaces = getNamespaces(el, include_self=True)
+    typename = '::'.join(name_and_namespaces)
 
-    return typename, additional_keywords, type_id
+    # if check_function_pointer:
+    #     return typename, additional_keywords, type_id, found_function_pointer
+    # else:
+    #     return typename, additional_keywords, type_id
 
+
+    type_dict = {}
+    type_dict['name']                = typename
+    type_dict['cv_qualifiers']       = cv_qualifiers
+    type_dict['is_reference']        = is_reference
+    type_dict['pointerness']         = pointerness
+    type_dict['id']                  = type_id
+    type_dict['el']                  = el
+    type_dict['is_function_pointer'] = found_function_pointer
+    type_dict['is_array']            = is_array
+    type_dict['array_limits']        = tuple(array_limits)
+
+    return type_dict
 
 # ====== END: findType ========
 
@@ -404,21 +668,6 @@ def findNewLinePos(content, line_number):
     return newline_pos
 
 # ====== END: findNewLinePos ========
-
-
-
-# ====== generateAbstractFilePath ========
-
-# def generateAbstractFilePath(el, short_name, prefix='abstract_', suffix='.hpp'):
-
-#     short_abstr_fname  = prefix + short_name.lower() + suffix
-#     src_file_el = gb.id_dict[el.get('file')]
-#     dir_name = os.path.split(src_file_el.get('name'))[0]
-    
-#     return os.path.join(dir_name,short_abstr_fname)
-
-
-# ====== END: generateAbstractFilePath ========
 
 
 
@@ -498,6 +747,50 @@ def addIndentation(content, indent):
 
 
 
+# # ====== getNamespaces ========
+
+# def getNamespaces(xml_el, include_self=False):
+
+#     namespaces = []
+
+#     if include_self:
+
+#         if 'demangled' in xml_el.keys():
+#             short_name = removeNamespace( xml_el.get('demangled') )
+#             namespaces.append(short_name)
+#         elif 'name' in xml_el.keys():
+#             namespaces.append(xml_el.get('name'))
+#         else:
+#             namespaces.append('')
+
+#     current_xml_el = xml_el
+#     while 'context' in current_xml_el.keys():
+#         context_id = current_xml_el.get('context')
+#         context_xml_el = gb.id_dict[context_id]
+
+#         if 'demangled' in current_xml_el.keys():
+#             short_context_name = removeNamespace( current_xml_el.get('demangled') )
+#             namespaces.append(short_context_name)
+#         elif 'name' in current_xml_el.keys():
+#             namespaces.append(current_xml_el.get('name'))
+#         else:
+#             # If no name is found we can't build a longer namespace
+#             break
+
+#         current_xml_el = context_xml_el
+
+#     namespaces.reverse()
+
+#     # If present, remove the first, default namespace in the XML file from the list (with name='::')
+#     if (len(namespaces) > 0) and (namespaces[0] == '::'):
+#         namespaces = namespaces[1:]
+
+#     return namespaces
+
+# # ====== END: getNamespaces ========
+
+
+
 # ====== getNamespaces ========
 
 def getNamespaces(xml_el, include_self=False):
@@ -505,26 +798,29 @@ def getNamespaces(xml_el, include_self=False):
     namespaces = []
 
     if include_self:
-        namespaces.append(xml_el.get('name'))
-
-    # if 'demangled' in xml_el.keys():
-    #     full_name = xml_el.get('demangled')
-    #     modified_name = full_name.split('<')[0]
-
-    #     namespaces = modified_name.split('::')[:-1]
+        if 'name' in xml_el.keys():
+            namespaces.append(xml_el.get('name'))
+        else:
+            namespaces.append('')
 
     current_xml_el = xml_el
     while 'context' in current_xml_el.keys():
         context_id = current_xml_el.get('context')
         context_xml_el = gb.id_dict[context_id]
-        context_name = context_xml_el.get('name')
-        namespaces.append(context_name)
+
+        if 'name' in current_xml_el.keys():
+            context_name = context_xml_el.get('name')
+            namespaces.append(context_name)
+        else:
+            break
+
         current_xml_el = context_xml_el
 
     namespaces.reverse()
 
-    # Remove the first, default namespace in the XML file from the list (with name='::')
-    namespaces = namespaces[1:]
+    # If present, remove the first, default namespace in the XML file from the list (with name='::')
+    if (len(namespaces) > 0) and (namespaces[0] == '::'):
+        namespaces = namespaces[1:]
 
     return namespaces
 
@@ -534,16 +830,47 @@ def getNamespaces(xml_el, include_self=False):
 
 # ====== removeTemplateBracket ========
 
-def removeTemplateBracket(type_name):
+def removeTemplateBracket(type_name, return_bracket=False):
     
-    if '<' in type_name:
-        type_name_notempl = type_name.split('<',1)[0] + type_name.rsplit('>',1)[-1]
+    if '>' in type_name:
+
+        r_pos = type_name.rfind('>')
+
+        if r_pos <= 0:
+            raise Exception("Unbalanced template brackets in type name '%s'" % type_name)
+
+        pos = r_pos-1
+        count = 1
+        while pos > -1:
+            if type_name[pos] == '>':
+                count += 1
+            elif type_name[pos] == '<':
+                count -= 1
+
+            if count == 0:
+                break
+
+            pos -= 1
+
+        if count != 0:
+            raise Exception("Unbalanced template brackets in type name '%s'" % type_name)
+
+        l_pos = pos
+       
+        type_name_notempl = type_name[:l_pos] + type_name[r_pos+1:]
+        template_bracket  = type_name[l_pos:r_pos+1]
+
     else:
         type_name_notempl = type_name
+        template_bracket  = ''
 
-    return type_name_notempl
+    if return_bracket:
+        return type_name_notempl, template_bracket
+    else:
+        return type_name_notempl
 
 # ====== END: removeTemplateBracket ========
+
 
 
 
@@ -569,39 +896,91 @@ def removeNamespace(type_name, return_namespace=False):
 
 
 
+# ====== removeArgumentBracket ========
+
+def removeArgumentBracket(func_signature, return_args_bracket=False):
+
+    args_bracket_start = func_signature.rfind('(')
+    
+    func_signature_noargs = func_signature[:args_bracket_start]
+    args_bracket          = func_signature[args_bracket_start:]
+
+    if return_args_bracket:
+        return func_signature_noargs, args_bracket
+    else:
+        return func_signature_noargs
+
+# ====== END: removeArgumentBracket ========
+
+
+
 # ====== isAcceptedType ========
 
-def isAcceptedType(input_type, byname=False):
+def isAcceptedType(input, byname=False):
     #
-    # By default, input_type is assumed to be an XML element (xml.etree.ElementTree.Element).
-    # If byname=True, input_type is a simple string.
+    # By default, input is assumed to be an XML element (xml.etree.ElementTree.Element).
+    # If byname=True, input is a simple string.
     #
 
     is_accepted_type = False
 
-    # If input_type is a string
+
+    # If input is a string
     if byname:
-        base_input_type = input_type.replace('*', '').replace('&','')
-        if base_input_type in gb.accepted_types:
+
+        base_input_name = getBasicTypeName(input)
+     
+        if base_input_name in gb.accepted_types:
             is_accepted_type = True
 
-    # If input_type is an XML element
+
+    # If input is an XML element
     else:
-        type_name, type_kw, type_id = findType(input_type)
-        type_el = gb.id_dict[type_id]
+
+        type_dict = findType(input)
+        type_el      = type_dict['el']
+        type_name    = type_dict['name']
+        pointerness  = type_dict['pointerness']
+        is_ref       = type_dict['is_reference']
+        is_array     = type_dict['is_array']
+        array_limits = type_dict['array_limits']
+
+
+        # BOSS cannot yet handle delarations of arrays with unspecified length
+        if (is_array) and (len(array_limits) == 0):
+            reason = "BOSS cannot yet handle arrays declared with unspecified length."
+            infomsg.TypeNotAccepted(input.get('name'), reason).printMessage()
+            is_accepted_type = False
+            return is_accepted_type
+
+        # BOSS cannot yet handle arrays of loaded types
+        if isLoadedClass(type_el) and is_array:
+            reason = "BOSS cannot yet handle arrays of a loaded type."
+            infomsg.TypeNotAccepted(input.get('name'), reason).printMessage()
+            is_accepted_type = False
+            return is_accepted_type
+
+        # BOSS cannot yet handle function pointers
+        if type_dict['is_function_pointer']:
+            reason = "BOSS cannot yet handle function pointers."
+            infomsg.TypeNotAccepted(input.get('name'), reason).printMessage()
+            is_accepted_type = False
+            return is_accepted_type
+
 
         if type_el.tag in ['Class', 'Struct']:
             demangled_name = type_el.get('demangled')
             if demangled_name in gb.accepted_types:
                 is_accepted_type = True
 
-        elif type_el.tag=='FundamentalType':
+        elif type_el.tag in ['FundamentalType', 'Enumeration']:
             type_name = type_el.get('name')
             if type_name in gb.accepted_types:
                 is_accepted_type = True
 
         else:
-            warnings.warn('Cannot determine if XML element with id="%s" and tag "%s" corresponds to an accepted type. Assuming it does not.' % (input_type.get('id'), input_type.tag))
+            reason = "Cannot determine if XML element with id='%s' and tag '%s' corresponds to an accepted type. Assuming it does not." % (input.get('id'), input.tag)
+            infomsg.TypeNotAccepted(input.get('id'), reason).printMessage()
             is_accepted_type = False
 
     return is_accepted_type
@@ -630,8 +1009,8 @@ def isLoadedClass(input_type, byname=False):
             is_loaded_class = True
 
     else:
-        type_name, type_kw, type_id = findType(input_type)
-        type_el = gb.id_dict[type_id]
+        type_dict = findType(input_type)
+        type_el = type_dict['el']
 
         if type_el.tag in ['Class', 'Struct']:
             demangled_name = type_el.get('demangled')
@@ -644,80 +1023,28 @@ def isLoadedClass(input_type, byname=False):
 
 
 
-# # ====== constrForwardDecls ========
-
-# def constrForwardDecls():
-
-#     import modules.classutils as classutils
-
-#     code = ''
-#     current_namespaces = []
-
-#     for class_name_long, class_el in gb.class_dict.items():
-
-#         # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
-#         namespaces    = getNamespaces(class_el)
-#         has_namespace = bool(len(namespaces))
-#         namespace_str = '::'.join(namespaces) + '::'*has_namespace
-
-#         class_name       = classutils.getClassNameDict(class_el)
-#         abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
-
-#         if namespaces != current_namespaces:
-#             # close current namespace
-#             code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
-#             # open new namespace
-#             code += constrNamespace(namespaces, 'open', indent=cfg.indent)
-#             # update current namespace
-#             current_namespaces = namespaces
-
-#         # Add forward decls
-#         n_indents   = len(namespaces)
-#         full_indent = ' '*n_indents*cfg.indent
-        
-#         if '<' in class_name['long_templ']:
-#             is_template = True
-#         else:
-#             is_template = False
-
-#         if is_template:
-#             template_bracket = getTemplateBracket(class_el)[0]
-
-#         if is_template:
-#             code += full_indent + 'template ' + template_bracket + '\n'
-#             code += full_indent + 'class ' + abstr_class_name['short'] + ';\n'
-            
-#             code += full_indent + 'template ' + template_bracket + '\n'
-#             code += full_indent + 'class ' + class_name['short'] + ';\n'
-            
-#             code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
-#             code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
-#         else:
-#             code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
-#             code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
-    
-#     # Close current namespace
-#     code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
-#     code += '\n'
-
-#     return code
-
-# # ====== END: constrForwardDecls ========
-
-
-
 # ====== constrAbsForwardDeclHeader ========
 
-def constrAbsForwardDeclHeader():
+def constrAbsForwardDeclHeader(file_output_path):
 
     import modules.classutils as classutils
 
-    code = ''
-    insert_pos = 0
+    # If this is the first time this function is executed, read initial code from header_templates/ folder
+    if file_output_path not in gb.new_code.keys():
+        f = open('header_templates/standard_header_template.hpp')
+        initial_code = f.read()
+        f.close()
+        initial_code_tuple = (0, initial_code)
+        gb.new_code[file_output_path] = {'code_tuples':[initial_code_tuple], 'add_include_guard':True}
+
+
+    current_code = gb.new_code[file_output_path]['code_tuples'][0][1]
+
+    insert_code = ''
+    tag_pos = current_code.find('__INSERT_CODE_HERE__')
 
     current_namespaces = []
-
-    for class_name_long, class_el in gb.class_dict.items():
+    for class_name_long, class_el in gb.loaded_classes_in_xml.items():
 
         # print [class_name_full], [class_name_full.split('<',1)[0]], [class_name_full.split('<',1)[0].rsplit('::',1)[-1]]
         namespaces    = getNamespaces(class_el)
@@ -729,9 +1056,9 @@ def constrAbsForwardDeclHeader():
 
         if namespaces != current_namespaces:
             # close current namespace
-            code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
+            insert_code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
             # open new namespace
-            code += constrNamespace(namespaces, 'open', indent=cfg.indent)
+            insert_code += constrNamespace(namespaces, 'open', indent=cfg.indent)
             # update current namespace
             current_namespaces = namespaces
 
@@ -748,34 +1075,26 @@ def constrAbsForwardDeclHeader():
             template_bracket = getTemplateBracket(class_el)[0]
 
         if is_template:
-            code += full_indent + 'template ' + template_bracket + '\n'
-            code += full_indent + 'class ' + abstr_class_name['short'] + ';\n'
-            
-            # code += full_indent + 'template ' + template_bracket + '\n'
-            # code += full_indent + 'class ' + class_name['short'] + ';\n'
-            
-            code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
-            # code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
+            insert_code += full_indent + 'template ' + template_bracket + '\n'
+            insert_code += full_indent + 'class ' + abstr_class_name['short'] + ';\n'
+            insert_code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
         else:
-            code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
-            # code += full_indent + 'class ' + class_name['short_templ'] + ';\n'
+            insert_code += full_indent + 'class ' + abstr_class_name['short_templ'] + ';\n'
     
     # Close current namespace
-    code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
-    code += '\n'
+    insert_code += constrNamespace(current_namespaces, 'close', indent=cfg.indent)
+    insert_code += '\n'
 
+    new_code = current_code[:tag_pos] + insert_code + current_code[tag_pos:]
+    
+    
+    # Replace other code tags
+    new_code = replaceCodeTags(new_code)
 
-    # Insert tags for the GAMBIT namespace
-    code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
-
-
-    # Insert include statements needed by GAMBIT
-    code = '\n' + '#include "identification.hpp"\n' + code + '\n#include "backend_undefs.hpp"\n'
-
-
-    code_tuple = (insert_pos, code)
-
-    return code_tuple
+    new_code_tuple = (0,new_code)
+    
+    # Overwrite existing code tuple
+    gb.new_code[file_output_path]['code_tuples'] = [(new_code_tuple)]
 
 # ====== END: constrAbsForwardDeclHeader ========
 
@@ -783,17 +1102,25 @@ def constrAbsForwardDeclHeader():
 
 # ====== constrWrpForwardDeclHeader ========
 
-def constrWrpForwardDeclHeader():
+def constrWrpForwardDeclHeader(file_output_path):
 
     import modules.classutils as classutils
 
-    code = ''
-    insert_pos = 0
+    # If this is the first time this function is executed, read initial code from header_templates/ folder
+    if file_output_path not in gb.new_code.keys():
+        f = open('header_templates/standard_header_template.hpp')
+        initial_code = f.read()
+        f.close()
+        initial_code_tuple = (0, initial_code)
+        gb.new_code[file_output_path] = {'code_tuples':[initial_code_tuple], 'add_include_guard':True}
 
-    for class_name in cfg.loaded_classes:
+    current_code = gb.new_code[file_output_path]['code_tuples'][0][1]
 
-        # wrapper_class_name = classutils.toWrapperType(class_name, include_namespace=True)
-        # namespace, wrapper_class_name_short = removeNamespace(wrapper_class_name, return_namespace=True)
+    insert_code = ''
+    tag_pos = current_code.find('__INSERT_CODE_HERE__')
+
+    for class_name in gb.loaded_classes_in_xml.keys():
+
         namespace, class_name_short = removeNamespace(class_name, return_namespace=True)
 
         if namespace == '':
@@ -805,54 +1132,100 @@ def constrWrpForwardDeclHeader():
         
 
         # - Open namespace
-        code += constrNamespace(namespace_list, 'open')
+        insert_code += constrNamespace(namespace_list, 'open')
 
         # - Forward declaration
-        code += ' '*n_indents*cfg.indent + 'class ' + class_name_short + ';\n'
+        insert_code += ' '*n_indents*cfg.indent + 'class ' + class_name_short + ';\n'
 
         # - Close namespace
-        code += constrNamespace(namespace_list, 'close')
+        insert_code += constrNamespace(namespace_list, 'close')
 
 
+    new_code = current_code[:tag_pos] + insert_code + current_code[tag_pos:]
+    
 
-    # Insert tags for the GAMBIT namespace
-    code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
-
-
-    # Insert include statements needed by GAMBIT
-    code = '\n' + '#include "identification.hpp"\n' + code + '\n#include "backend_undefs.hpp"\n'
+    # Replace other code tags
+    new_code = replaceCodeTags(new_code)
 
 
-    code_tuple = (insert_pos, code)
-
-    return code_tuple
+    new_code_tuple = (0,new_code)
+    
+    # Overwrite existing code tuple
+    gb.new_code[file_output_path]['code_tuples'] = [(new_code_tuple)]
 
 # ====== END: constrWrpForwardDeclHeader ========
 
 
 
-# ====== constrTypedefHeader ========
+# # ====== constrWrpForwardDeclHeader ========
 
-def constrTypedefHeader():
+# def constrWrpForwardDeclHeader():
 
-    typedef_code = ''
-    insert_pos   = 0
+#     import modules.classutils as classutils
 
-    # # - Forward declarations
-    # typedef_code += '// Forward declarations:\n'
-    # typedef_code += constrForwardDecls()
+#     code = ''
+#     insert_pos = 0
 
-    # - Typedefs
-    typedef_code += '// Typedefs:\n'
-    for typedef_name, typedef_el in gb.typedef_dict.items():
-        type_name, type_kw, type_id = findType(typedef_el)
-        typedef_code += 'typedef ' + type_name + ' ' + typedef_name + ';\n'
+#     for class_name in cfg.loaded_classes:
 
-    code_tuple = (insert_pos, typedef_code)
+#         namespace, class_name_short = removeNamespace(class_name, return_namespace=True)
 
-    return code_tuple
+#         if namespace == '':
+#             namespace_list = []
+#         else:
+#             namespace_list = namespace.split('::')
 
-# ====== END: constrTypedefHeader ========
+#         n_indents = len(namespace_list)
+        
+
+#         # - Open namespace
+#         code += constrNamespace(namespace_list, 'open')
+
+#         # - Forward declaration
+#         code += ' '*n_indents*cfg.indent + 'class ' + class_name_short + ';\n'
+
+#         # - Close namespace
+#         code += constrNamespace(namespace_list, 'close')
+
+
+
+#     # Insert tags for the GAMBIT namespace
+#     code = '\n__START_GAMBIT_NAMESPACE__\n\n' + code + '\n__END_GAMBIT_NAMESPACE__\n'
+
+
+#     # Insert include statements needed by GAMBIT
+#     code = '\n' + '#include "identification.hpp"\n' + code + '\n#include "backend_undefs.hpp"\n'
+
+
+#     code_tuple = (insert_pos, code)
+
+#     return code_tuple
+
+# # ====== END: constrWrpForwardDeclHeader ========
+
+
+
+# # ====== constrTypedefHeader ========
+
+# def constrTypedefHeader():
+
+#     typedef_code = ''
+#     insert_pos   = 0
+
+#     # - Typedefs
+#     typedef_code += '// Typedefs:\n'
+#     for typedef_name, typedef_el in gb.typedef_dict.items():
+
+#         type_dict = findType(typedef_el)
+#         type_name = type_dict['name'] + '*'*type_dict['pointerness'] + '&'*type_dict['is_reference']
+
+#         typedef_code += 'typedef ' + type_name + ' ' + typedef_name + ';\n'
+
+#     code_tuple = (insert_pos, typedef_code)
+
+#     return code_tuple
+
+# # ====== END: constrTypedefHeader ========
 
 
 
@@ -970,9 +1343,9 @@ def getAllTypesInClass(class_el, include_parents=False):
 
         if ('type' in mem_el.keys()) or ('returns' in mem_el.keys()):
 
-            mem_type, mem_type_kw, mem_type_id = findType(mem_el)
-
-            type_el   = gb.id_dict[mem_type_id]
+            mem_type_dict = findType(mem_el)
+            type_el = mem_type_dict['el'] 
+            
             type_name = classutils.getClassNameDict(type_el)
 
             type_dict = {}
@@ -1008,6 +1381,15 @@ def getMemberElements(el, include_artificial=False):
     if 'members' in el.keys():
         for mem_id in el.get('members').split():
             mem_el = gb.id_dict[mem_id]
+
+            # Check if this member element should be ditched
+            if mem_el.tag in ['Method', 'OperatorMethod', 'Field', 'Variable']:
+                if 'name' in mem_el.keys():
+                    namespaces_list = getNamespaces(mem_el, include_self=True)
+                    full_name = '::'.join(namespaces_list)
+                    if full_name in cfg.ditch:
+                        continue
+
             if include_artificial:
                 member_elements.append(mem_el)
             else:
@@ -1059,9 +1441,9 @@ def getMemberFunctions(class_el, include_artificial=False, include_inherited=Fal
                 method_name = mem_el.get('name')
                 if mem_el.tag=='OperatorMethod':
                     method_name = 'operator' + method_name
-                # warnings.warn('The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (method_name, class_el.get('name')))
-                print 'INFO: ' + 'The member "%s", belonging to (or inherited by) class "%s", makes use of a non-accepted type and will be ignored.' % (method_name, class_el.get('name'))
 
+                reason = "Makes use of a non-accepted type."
+                infomsg.IgnoredFunction(method_name, reason).printMessage()
                 continue
 
             else:
@@ -1099,9 +1481,9 @@ def getAllTypesInFunction(func_el):
 
     if ('type' in func_el.keys()) or ('returns' in func_el.keys()) or (func_el.tag=='Constructor' and 'context' in func_el.keys()):
 
-        mem_type, mem_type_kw, mem_type_id = findType(func_el)
+        mem_type_dict = findType(func_el)
+        type_el = mem_type_dict['el'] 
 
-        type_el   = gb.id_dict[mem_type_id]
         type_name = classutils.getClassNameDict(type_el)
 
         type_dict = {}
@@ -1119,6 +1501,10 @@ def getAllTypesInFunction(func_el):
 # ====== constrNamespace ========
 
 def constrNamespace(namespaces, open_or_close, indent=cfg.indent):
+
+    if len(namespaces) > 0:
+        if namespaces[0] == '::':
+            namespaces = namespaces[1:]
 
     code = ''
 
@@ -1155,18 +1541,22 @@ def pointerAndRefCheck(input_type, byname=False):
 
     if byname:
         type_name = input_type
+
+        # Remove template bracket
+        if '<' in type_name:
+            type_name = type_name.split('<',1)[0] + type_name.rsplit('>',1)[-1]
+
+        # Check pointerness
+        pointerness = type_name.count('*')
+
+        # Check reference
+        is_reference = bool('&' in type_name)
+
     else:
-        type_name, type_kw, type_id = findType(input_type)
+        type_dict = findType(input_type)
+        pointerness  = type_dict['pointerness']
+        is_reference = type_dict['is_reference']
 
-    # Remove template bracket
-    if '<' in type_name:
-        type_name = type_name.split('<',1)[0] + type_name.rsplit('>',1)[-1]
-
-    # Check pointerness
-    pointerness = type_name.count('*')
-
-    # Check reference
-    is_reference = bool('&' in type_name)
 
     return pointerness, is_reference
 
@@ -1176,13 +1566,22 @@ def pointerAndRefCheck(input_type, byname=False):
 
 # ====== addIncludeGuard ========
 
-def addIncludeGuard(code, file_name, extra_string='', uppercase=False):
+def addIncludeGuard(code, file_name, prefix='', suffix='', uppercase=False):
 
-    if extra_string == '':
-        guard_var = '__' + file_name.replace('.','_') + '__'
+    # if suffix == '':
+    #     guard_var = '__' + file_name.replace('.','_') + '__'
+    # else:
+    #     file_name_no_ext, file_ext = os.path.splitext(file_name)
+    #     guard_var = '__' + file_name_no_ext.replace('.','_') + '_' + suffix + file_ext.replace('.','_')  + '__'
+
+    if suffix == '':
+        guard_var = '__' + (prefix + '__')*bool(len(prefix)) + file_name.replace('.','_') + '__'
     else:
         file_name_no_ext, file_ext = os.path.splitext(file_name)
-        guard_var = '__' + file_name_no_ext.replace('.','_') + '_' + extra_string + file_ext.replace('.','_')  + '__'
+        guard_var = '__' + (prefix + '__')*bool(len(prefix)) + file_name_no_ext.replace('.','_') + '_' + suffix + file_ext.replace('.','_')  + '__'
+
+
+
 
     if uppercase:
         guard_var = guard_var.upper()
@@ -1274,21 +1673,27 @@ def isHeader(file_el):
 
 # ====== getIncludeStatements ========
 
-def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_path=False, exclude_types=[], input_element='class', skip_forward_declared=True, use_full_path=False):
+def getIncludeStatements(input_el, convert_loaded_to='none', exclude_types=[],
+                         input_element='class', forward_declared='exclude',
+                         use_full_path=False, include_parents=False):
 
     include_statements = []
 
     # Check string arguments
     convert_loaded_to = convert_loaded_to.lower()
     input_element     = input_element.lower()
+    forward_declared  = forward_declared.lower()
     if convert_loaded_to not in ['none', 'abstract', 'wrapper', 'wrapper_decl', 'wrapper_def']:
         raise Exception("getIncludeStatements: Keyword argument 'convert_loaded_to=' must be either 'none', 'abstract', 'wrapper', 'wrapper_decl' or 'wrapper_def'.")
     if input_element not in ['class', 'function']:
         raise Exception("getIncludeStatements: Keyword argument 'input_element=' must be either 'class' or 'function'.")
+    if forward_declared not in ['include', 'exclude', 'only']:
+        raise Exception("getIncludeStatements: Keyword argument 'forward_declared=' must be either 'include', 'exclude' or 'only'.")
+
 
     # Get list of all types used in this class/function (each entry is a dict)
     if input_element == 'class':
-        all_types = getAllTypesInClass(input_el, include_parents=False)
+        all_types = getAllTypesInClass(input_el, include_parents=include_parents)
     elif input_element == 'function':
         all_types = getAllTypesInFunction(input_el)
 
@@ -1352,35 +1757,10 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
             if isFundamental(type_el):
                 pass
 
+            elif isEnumeration(type_el):
+                pass
+
             elif isLoadedClass(type_el):
-
-                # # ---> Update start here
-
-                # type_file_id = type_el.get('file')
-                # type_line_number = int(type_el.get('line'))
-
-                # if convert_loaded_to == 'none':
-
-                #     type_file_el = gb.id_dict[type_file_id]
-                #     type_file_full_path = type_file_el.get('name')
-
-                #     if isHeader(type_file_el):
-                #         type_file_basename = os.path.basename(type_file_full_path)
-                #         if add_extra_include_path:
-                #             include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, type_file_basename) + '"')
-                #         else:
-                #             include_statements.append('#include "' + type_file_basename + '"')
-                #     else:
-                #         print 'INFO: ' + 'Found declaration of loaded type "%s" in file "%s", but this file is not recognized as a header file. No header file include statement generated.' % (type_name['long_templ'], type_file_full_path)
-
-                # else:
-                #     if add_extra_include_path:
-                #         include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, gb.new_header_files[type_name['long']][convert_loaded_to]) + '"')
-                #     else:
-                #         include_statements.append('#include "' + gb.new_header_files[type_name['long']][convert_loaded_to] + '"')
-
-                # # <--- Update ends here
-
 
                 # For each loaded class used in this class/function, check whether the corresponding class definition can be
                 # found in the current file (above current class/function) or among the included headers. If no such class 
@@ -1396,10 +1776,13 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                 else:
                     type_definition_found = False
 
-                if (not type_definition_found) and (skip_forward_declared):
+                if (not type_definition_found) and (forward_declared=='exclude'):
                     # This must be a case of a type that is only forward declared. Don't include any header (as this will typically lead to a 'header loop').
                     continue
 
+                elif (type_definition_found) and (forward_declared=='only'):
+                    # This must be a case of a type that *is* fully declared, so we ignore it if only_forward:declared=True.
+                    continue
                 else:
                     if convert_loaded_to == 'none':
 
@@ -1407,13 +1790,12 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                         type_file_full_path = type_file_el.get('name')
 
                         if isHeader(type_file_el):
-                            type_file_basename = os.path.basename(type_file_full_path)
-                            if add_extra_include_path:
-                                include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, type_file_basename) + '"')
-                            else:
-                                include_statements.append('#include "' + type_file_basename + '"')
+                            use_path = shortenHeaderPath(type_file_full_path)
+                            include_statements.append( '#include "' + use_path + '"')
+
                         else:
-                            print 'INFO: ' + 'Found declaration of loaded type "%s" in file "%s", but this file is not recognized as a header file. No header file include statement generated.' % (type_name['long_templ'], type_file_full_path)
+                            reason = "Found declaration of loaded type '%s' in file '%s', but this file is not recognized as a header file." % (type_name['long_templ'], type_file_full_path)
+                            infomsg.NoIncludeStatementGenerated(type_name['long_templ'], reason).printMessage()
 
                     else:
                         if use_full_path:
@@ -1421,10 +1803,7 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                         else:
                             header_key = convert_loaded_to
 
-                        if add_extra_include_path:
-                            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, gb.new_header_files[type_name['long']][header_key]) + '"')
-                        else:
-                            include_statements.append('#include "' + gb.new_header_files[type_name['long']][header_key] + '"')
+                        include_statements.append('#include "' + gb.new_header_files[type_name['long']][header_key] + '"')
 
             elif isStdType(type_el):
 
@@ -1435,18 +1814,17 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
                     else:
                         include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
                 else:
-                    # warnings.warn("The standard type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long_templ'])
-                    print 'INFO: ' + 'The standard type "%s" has no specified header file. Please update modules/cfg.py. No header file include statement generated.' % type_name['long_templ']
+                    reason = "The standard type '%s' has no specified header file. Please update modules/cfg.py." % type_name['long_templ']
+                    infomsg.NoIncludeStatementGenerated(type_name['long_templ'], reason).printMessage()
 
             else:
                 if type_name['long'] in cfg.known_class_headers:
                     include_statements.append('#include "' + cfg.known_class_headers[type_name['long']] + '"')
                 else:
-                    # warnings.warn("The type '%s' has no specified header file. Please update modules/cfg.py. No header file included." % type_name['long'])
-                    print 'INFO: ' + 'The type "%s" has no specified header file. Please update modules/cfg.py. No header file include statement generated.' % type_name['long']
+                    reason = "The type '%s' has no specified header file. Please update modules/cfg.py." % type_name['long_templ']
+                    infomsg.NoIncludeStatementGenerated(type_name['long_templ'], reason).printMessage()
         else:
-            # warnings.warn("The type '%s' is unknown. No header file included." % type_name['long'])
-            print 'INFO: ' + 'The type "%s" is unknown. No header file include statement generated.' % type_name['long']
+            infomsg.NoIncludeStatementGenerated( type_name['long_templ'] ).printMessage()
 
     # Remove duplicates and return list
     include_statements = list( OrderedDict.fromkeys(include_statements) )
@@ -1457,41 +1835,97 @@ def getIncludeStatements(input_el, convert_loaded_to='none', add_extra_include_p
 
 
 
+# ====== getOriginalHeaderPath ========
+
+def getOriginalHeaderPath(el, full_path=False):
+
+    file_id = el.get('file')
+    file_el = gb.id_dict[file_id]
+
+    file_full_path = file_el.get('name')
+
+    if isHeader(file_el):
+
+        if full_path:
+            header_path = file_full_path
+        else:
+            header_path = os.path.basename(file_full_path)
+
+    else:
+        raise exceptions.ReturnError("The file %s is not recognized as a header file." % file_full_path)
+
+    return header_path
+
+# ====== END: getOriginalHeaderPath ========
+
+
+
+# ====== shortenHeaderPath ========
+
+def shortenHeaderPath(full_path):
+
+    shorter_path = full_path
+
+    # Split path into individual parts
+    path_parts = pathSplitAll(full_path)
+
+    for incl_path in cfg.include_paths:
+
+        incl_path_parts = pathSplitAll(incl_path)
+        n = len(incl_path_parts)
+
+        if len(path_parts) >= n:
+            if path_parts[0:n] == incl_path_parts:
+                shorter_path = os.path.join(*path_parts[n:])
+                break
+
+    return shorter_path
+
+# ====== END: shortenHeaderPath ========
+
+
+
 # ====== constrNamespaceFromTags ========
 
 def constrNamespaceFromTags(content, new_namespace, open_tag, close_tag):
 
     new_namespace_list = new_namespace.split('::')
 
-    # Find tag positions
-    open_pos  = content.find(open_tag)
-    close_pos = content.find(close_tag)
+    new_content = content
+    while True:
 
-    if (open_pos == -1) and (close_pos == -1):
-        # No tags found. Do nothing.
-        return content
-    elif (open_pos == -1) or (close_pos == -1):
-        raise Exception('Matching pair of namespace tags %s and %s not found in given content.' % (open_tag, close_tag))
-    else:
-        pass
+        prev_content = new_content
 
-    # Split content into three parts
-    content_before = content[:open_pos]
-    content_within = content[open_pos:close_pos]
-    content_after  = content[close_pos:]
+        # Find tag positions
+        open_pos  = prev_content.find(open_tag)
+        close_pos = prev_content.find(close_tag)
 
-    # Remove the namespace tags
-    content_within = content_within.replace(open_tag, '')
-    content_after  = content_after.replace(close_tag, '')
+        if (open_pos == -1) and (close_pos == -1):
+            # No tags found. Do nothing more.
+            # return content
+            break
+        elif (open_pos == -1) or (close_pos == -1):
+            raise Exception('Matching pair of namespace tags %s and %s not found in given content.' % (open_tag, close_tag))
+        else:
+            pass
 
-    # Add indentation to middle part
-    content_within = addIndentation(content_within, cfg.indent*len(new_namespace_list))
+        # Split content into three parts
+        content_before = prev_content[:open_pos]
+        content_within = prev_content[open_pos:close_pos]
+        content_after  = prev_content[close_pos:]
 
-    # Contruct new namespace and combine code
-    open_new_namespace_code  = constrNamespace(new_namespace_list, 'open', indent=cfg.indent)
-    close_new_namespace_code = constrNamespace(new_namespace_list, 'close', indent=cfg.indent)
+        # Remove the namespace tags
+        content_within = content_within.replace(open_tag, '')
+        content_after  = content_after.replace(close_tag, '', 1)
 
-    new_content = content_before + open_new_namespace_code + content_within + close_new_namespace_code + content_after
+        # Add indentation to middle part
+        content_within = addIndentation(content_within, cfg.indent*len(new_namespace_list))
+
+        # Contruct new namespace and combine code
+        open_new_namespace_code  = constrNamespace(new_namespace_list, 'open', indent=cfg.indent)
+        close_new_namespace_code = constrNamespace(new_namespace_list, 'close', indent=cfg.indent)
+
+        new_content = content_before + open_new_namespace_code + content_within + close_new_namespace_code + content_after
 
     return new_content
 
@@ -1501,7 +1935,7 @@ def constrNamespaceFromTags(content, new_namespace, open_tag, close_tag):
 
 # ====== replaceCodeTags ========
 
-def replaceCodeTags(input, file_input=False):
+def replaceCodeTags(input, file_input=False, write_file=False):
 
     # Input is either a file name or a string with content
     if file_input:
@@ -1513,10 +1947,20 @@ def replaceCodeTags(input, file_input=False):
 
     # Replace various tags in template code with code specific for the current backend
     new_content = new_content.replace('__BACKEND_NAME__'         ,  cfg.gambit_backend_name)
-    new_content = new_content.replace('__SHARED_LIB_FILE_NAME__' ,  cfg.shared_lib_file_name)
     new_content = new_content.replace('__BACKEND_VERSION__'      ,  cfg.gambit_backend_version)
     new_content = new_content.replace('__BACKEND_SAFE_VERSION__' ,  gb.gambit_backend_safeversion)
     new_content = new_content.replace('__CODE_SUFFIX__'          ,  gb.code_suffix)
+    
+    new_content = new_content.replace('__PATH_TO_FRWD_DECLS_ABS_CLASSES_HEADER__', os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, gb.frwd_decls_abs_fname + cfg.header_extension))
+    new_content = new_content.replace('__PATH_TO_IDENTIFICATION_HEADER__'        , os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, 'identification.hpp'))
+    new_content = new_content.replace('__PATH_TO_BACKEND_UNDEFS_HEADER__'        , os.path.join(gb.gambit_backend_incl_dir, "backend_undefs.hpp"))
+
+
+    # Should a new file be written?
+    if file_input and write_file:
+        f.open(input,'w')
+        f.write(new_content)
+        f.close()
 
     # Return code
     return new_content
@@ -1525,10 +1969,25 @@ def replaceCodeTags(input, file_input=False):
 
 
 
-# ====== constrLoadedTypesHeader ======
+# ====== removeCodeTags ========
 
-def constrLoadedTypesHeader():
+def removeCodeTags(content, remove_tags_list):
 
+    new_content = content
+    # Remove tags
+    for tag in remove_tags_list:
+        new_content = new_content.replace(tag, '')
+
+    # Return code
+    return new_content
+
+# ====== END: removeCodeTags ========
+
+
+
+# ====== constrLoadedTypesHeaderContent ======
+
+def constrLoadedTypesHeaderContent():
 
     # 
     # Construct the code lines for the loaded classes, containg all the factory symbols and argument brackets for that class
@@ -1538,7 +1997,8 @@ def constrLoadedTypesHeader():
     for class_name in gb.classes_done:
 
         if not class_name['long'] in gb.factory_info.keys():
-            print "WARNING: No factory function has been generated for class '%s'." % class_name['long']
+            reason = "Probably there are no public and accepted constructors."
+            infomsg.NoLoadedTypesEntry(class_name['long'], reason).printMessage()
 
         else:
 
@@ -1576,7 +2036,8 @@ def constrLoadedTypesHeader():
     #
     # Construct include guards with additional  ' 1' appended to the line starting with #define 
     #
-    incl_guard = addIncludeGuard('', 'loaded_types.hpp', extra_string=gb.gambit_backend_name_full)
+    # incl_guard = addIncludeGuard('', 'loaded_types.hpp', extra_string=gb.gambit_backend_name_full)
+    incl_guard = addIncludeGuard('', 'loaded_types.hpp', prefix='', suffix=gb.gambit_backend_name_full)
     incl_guard_lines = incl_guard.split('\n')
 
     incl_guard_start = '\n'.join(incl_guard_lines[:2]) + ' 1\n'
@@ -1592,11 +2053,7 @@ def constrLoadedTypesHeader():
             namespace, class_name_short = removeNamespace(class_name['long'], return_namespace=True)
             incl_statements_code += '#include "' + cfg.wrapper_header_prefix + class_name['short'] + cfg.header_extension + '"\n'
     incl_statements_code += '#include "identification.hpp"\n'
-
-    # for class_name_long in factory_dict.keys():
-    #     namespace, class_name_short = removeNamespace(class_name['long'], return_namespace=True)
-    #     incl_statements_code += '#include "' + cfg.wrapper_header_prefix + class_name['short'] + cfg.header_extension + '"\n'
-    # incl_statements_code += '#include "identification.hpp"\n'
+    # incl_statements_code += '#include "' + os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, 'identification.hpp') + '"\n'
 
 
     #
@@ -1620,177 +2077,713 @@ def constrLoadedTypesHeader():
 
     code += '\n'
     code += '// Undefine macros to avoid conflict with other backends.\n'
-    code += '#include "backend_undefs.hpp"\n'
+    code += '#include "' + os.path.join(gb.gambit_backend_incl_dir, "backend_undefs.hpp") + '"\n'
 
     code += '\n'
     code += incl_guard_end
 
     return code
     
-# ====== END: constrLoadedTypesHeader ======
+# ====== END: constrLoadedTypesHeaderContent ======
 
 
 
+# ====== constrEnumDeclHeader ========
 
-# # ====== constrLoadedTypesHeader ======
+def constrEnumDeclHeader(enum_el_list, file_output_path):
 
-# def constrLoadedTypesHeader(lib_file_path):
+    import modules.classutils as classutils
+
+    # If this is the first time this function is executed, read initial code from header_templates/ folder
+    if file_output_path not in gb.new_code.keys():
+        f = open('header_templates/standard_header_template.hpp')
+        initial_code = f.read()
+        f.close()
+        initial_code_tuple = (0, initial_code)
+        gb.new_code[file_output_path] = {'code_tuples':[initial_code_tuple], 'add_include_guard':True}
+
+
+    current_code = gb.new_code[file_output_path]['code_tuples'][0][1]
+
+    insert_code = ''
+    tag_pos = current_code.find('__INSERT_CODE_HERE__')
+
+    for enum_el in enum_el_list:
+
+        # Skip any enumerated type that is not native to the external code
+        if not isNative(enum_el):
+            continue
+
+        # Get enum names and values
+        enum_members_list = []
+        for sub_el in enum_el.getchildren():
+            if sub_el.tag == 'EnumValue':
+                member_string = sub_el.get('name') + '=' + sub_el.get('init')
+                enum_members_list.append(member_string)
+        all_members_string = ', '.join(enum_members_list)
+
+        # Get namespace list
+        namespace_list = getNamespaces(enum_el)
+        
+        n_indents = len(namespace_list)
+
+        # - Open namespace
+        insert_code += constrNamespace(namespace_list, 'open')
+
+        insert_code += ' '*n_indents*cfg.indent + 'typedef enum {' + all_members_string + '} ' + enum_el.get('name') + ';\n'
+
+        # - Close namespace
+        insert_code += constrNamespace(namespace_list, 'close')
+
+    new_code = current_code[:tag_pos] + insert_code + current_code[tag_pos:]
+   
+
+    # Replace other code tags
+    new_code = replaceCodeTags(new_code)
+
+
+    new_code_tuple = (0,new_code)
+
+    # Overwrite existing code tuple
+    gb.new_code[file_output_path]['code_tuples'] = [(new_code_tuple)]
+
+# ====== END: constrEnumDeclHeader ========
+
+
+
+# ====== gccxmlRunner ========
+
+# Calls gccxml from the shell (via modules.shelltimeout).
+
+def gccxmlRunner(input_file_path, include_paths_list, xml_output_path, timeout_limit=30., poll_interval=0.5):
+
+    # Construct gccxml command to run
+    gccxml_cmd = os.path.join(cfg.gccxml_path, 'gccxml ')
+
+    # - Add include paths
+    for incl_path in include_paths_list:
+        gccxml_cmd += '-I' + incl_path + ' '
+
+    # - Add the input file path (full path)
+    gccxml_cmd += input_file_path + ' '
+
+    # - Add gccxml option that specifies the xml output file: input_file_short_name.xml
+    # gccxml_cmd += '-fxml=' + xml_output_path
+    gccxml_cmd +='--gccxml-compiler ' + cfg.gccxml_compiler + ' -fxml=' + xml_output_path
+
+    # Run gccxml
+    print '  Runing command: ' + gccxml_cmd
+    proc, output, timed_out = shelltimeout.shrun(gccxml_cmd, timeout_limit, use_exec=True, poll_interval=poll_interval)
+
+    did_fail = False
+
+    # Check for timeout or error
+    if timed_out:
+        print '  ERROR: gccxml timed out.'
+        did_fail = True
+    elif proc.returncode != 0:        
+        print '  ERROR: gccxml failed.'
+        did_fail = True
+
+    # Print error report
+    if did_fail:
+        print
+        print 'START GCCXML OUTPUT'
+        print '-------------------'
+        print
+        print output
+        print 'END GCCXML OUTPUT'
+        print '-----------------'
+        print
+        raise Exception('gccxml failed')
+    
+    else:
+        print '  Command finished successfully.'
+    print
+
+# ====== END: gccxmlRunner ========
+
+
+
+# ====== pathSplitAll ========
+
+def pathSplitAll(path):
+
+    all_parts = []
+
+    current_path = path
+    while True:
+        
+        parts = os.path.split(current_path)
+        
+        if parts[0] == current_path:  # Stopping criterion for absolute paths
+            all_parts.insert(0, parts[0])
+            break
+        
+        elif parts[1] == current_path: # Stopping criterion for relative paths
+            all_parts.insert(0, parts[1])
+            break
+        
+        else:
+            current_path = parts[0]
+            all_parts.insert(0, parts[1])
+
+    return all_parts
+
+# ====== pathSplitAll ========
+
+
+
+# ====== fillAcceptedTypesList ========
+
+def fillAcceptedTypesList():
+
+    # Sets to store type names
+    fundamental_types = set()
+    std_types         = set()
+    known_classes     = set()
+    # enumeration_types = set()
+    loaded_classes    = set()
+
+
+    #
+    # Collect names of all fundamental, std, enumeration, known and loaded types that are acceptable
+    #
+    for xml_file in gb.all_id_dict.keys():
+
+        # Reset some variables for each new xml file
+        new_fundamental_types   = set()
+        new_std_types           = set()
+        new_known_classes       = set()
+        # new_enumeration_types   = set()
+        new_loaded_classes      = set()
+
+
+        initGlobalXMLdicts(xml_file)
+
+
+        # Loop over all named elements in the xml file
+        for full_name, el in gb.name_dict.items():
+
+            # Only consider types
+            if el.tag not in ['Class', 'Struct', 'FundamentalType', 'Enumeration']:
+                continue
+
+            # Skip incomplete types
+            if ('incomplete' in el.keys()) and (el.get('incomplete') == '1'):
+                continue
+
+            # Skip problematic types
+            if isProblematicType(el):
+                continue
+
+            #
+            # Fundamental type?
+            #
+            is_fundamental = isFundamental(el)
+            if is_fundamental:
+                new_fundamental_types.add(full_name)
+
+            #
+            # Std type?
+            #
+            is_std_type = isStdType(el)
+            if is_std_type:
+                new_std_types.add(full_name)
+
+            #
+            # Known class?
+            #
+            is_known_class = isKnownClass(el)
+            if is_known_class:
+                new_known_classes.add(full_name)
+
+
+            # #
+            # # Enumeration type?
+            # #
+            # is_enumeration = isEnumeration(el)
+            # if is_enumeration:
+            #     new_enumeration_types.add( '::'.join( getNamespaces(el, include_self=True) ) )
+
+            #
+            # Loaded type?
+            #
+            is_loaded_class = isLoadedClass(el)
+            if is_loaded_class:
+                new_loaded_classes.add(full_name)
+
+
+            #
+            # Update sets of types
+            #
+            fundamental_types = fundamental_types.union(new_fundamental_types)
+            std_types         = std_types.union(new_std_types)
+            known_classes     = known_classes.union(new_known_classes)
+            # enumeration_types = enumeration_types.union(new_enumeration_types)
+            loaded_classes    = loaded_classes.union(new_loaded_classes)
+
+
+    # Fill global list
+    gb.accepted_types = list(loaded_classes) + list(known_classes) + list(fundamental_types) + list(std_types)
+    # gb.accepted_types = list(loaded_classes) + list(fundamental_types) + list(std_types) + list(enumeration_types)
+
+# ====== END: fillAcceptedTypesList ========
+
+
+
+# # ====== fillAcceptedTypesList ========
+
+# def fillAcceptedTypesList(xml_files):
+
+#     # Sets to store type names
+#     fundamental_types = set()
+#     enumeration_types = set()
+#     std_types         = set()
+#     loaded_classes    = set()
+
+#     problematic_types = set()
+
+#     # Dict: type name --> xml element
+#     elements_dict = {}
+
 
 #     #
-#     # Check that the shared library exists
+#     # Get names of all fundamental, std and enumeration types
 #     #
-#     if not os.path.isfile(lib_file_path):
-#         raise IOError("The file '%s' was not found." % lib_file_path)
+#     for xml_file in xml_files:
 
-#     #
-#     # Check that commands 'nm' and 'c++filt' are available
-#     #
-#     nm_check_cmd   = 'which nm'
-#     filt_check_cmd = 'which c++filt'
+#         # Reset some variables for each new xml file
+#         new_std_types           = set()
+#         new_fundamental_types   = set()
+#         new_enumeration_types   = set()
 
-#     nm_check_proc   = subprocess.Popen(nm_check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#     filt_check_proc = subprocess.Popen(filt_check_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
-#     nm_check_output   = nm_check_proc.stdout.read()
-#     filt_check_output = filt_check_proc.stdout.read()
-
-#     if (nm_check_output==''):
-#         raise Exception("The required command 'nm' does not seem to be available.")
-#     elif (filt_check_output==''):
-#         raise Exception("The required command 'c++filt' does not seem to be available.")
+#         new_problematic_types   = set()
 
 
-#     #
-#     # Use 'nm' and 'c++filt' to construct dictionary from class name to factory symbol names and argument brackets
-#     #
-#     cmd_mangled   = 'nm ' + lib_file_path
-#     cmd_demangled = 'nm ' + lib_file_path + ' | c++filt -i'
+#         # Parse xml file using ElementTree
+#         tree = ET.parse(xml_file)
+#         root = tree.getroot()
 
-#     proc_mangled = subprocess.Popen(cmd_mangled, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#     output_mangled = proc_mangled.stdout.readlines()
-
-#     proc_demangled = subprocess.Popen(cmd_demangled, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-#     output_demangled = proc_demangled.stdout.readlines()
-
-#     factory_dict = OrderedDict()
-#     for i in range(len(output_mangled)):
-
-#         mangled_line   = output_mangled[i]
-#         demangled_line = output_demangled[i]
-
-#         if ('Factory_' in mangled_line) and ('Factory_' in demangled_line):
-
-#             args_bracket_start_pos = demangled_line.rfind('(')
-#             args_bracket = demangled_line[args_bracket_start_pos:].replace(' ','').replace('\n','')
-
-#             signature_start_pos = demangled_line[:args_bracket_start_pos].rfind(' ')
-#             factory_name_long   = demangled_line[signature_start_pos+1:args_bracket_start_pos].replace(' ','')
-
-#             class_name_long = factory_name_long.replace('Factory_','')
-
-#             factory_symbol = mangled_line.split(' ')[-1].rstrip('\n')
-
-#             # Add entry to factory_dict
-#             if class_name_long in cfg.loaded_classes:
-
-#                 if class_name_long not in factory_dict.keys():
-#                     factory_dict[class_name_long] = []
-
-#                 factory_dict[class_name_long].append( (factory_symbol, args_bracket) )
-
-#     # If not a single factory function was matched to a loaded class, raise an exception
-#     if len(factory_dict) == 0:
-#         raise Exception("No factory functions matching the classes %s were found in the file '%s'. No header file generated." % (cfg.loaded_classes, lib_file_path))
-
-#     # Print warnings for any loaded class for which no matching factory function was found
-#     for class_name_long in cfg.loaded_classes:
-#         if not class_name_long in factory_dict.keys():
-#             print "WARNING: No factory function detected in '%s' for class '%s'." % (lib_file_path, class_name_long)
+#         # Set the global xml id dict. (Needed by the functions called in this loop.)
+#         gb.id_dict = OrderedDict([ (el.get('id'), el) for el in root.getchildren() ]) 
 
 
-#     # 
-#     # Construct the code lines for the loaded classes, containg all the factory symbols and argument brackets for that class
-#     #
-#     class_lines = []
-#     for class_name_long in factory_dict.keys():
+#         # Loop over all types in current xml file
+#         for el in (   root.findall('Class') 
+#                     + root.findall('Struct') 
+#                     + root.findall('FundamentalType')
+#                     + root.findall('Enumeration') ):
 
-#         class_line = '  (( /*class*/'
+#             # Determine name
+#             if 'demangled' in el.keys():
+#                 full_name = el.get('demangled')
+#             elif 'name' in el.keys():
+#                 full_name = el.get('name')
 
-#         namespace, class_name_short = removeNamespace(class_name_long, return_namespace=True)
+#             if ('incomplete' in el.keys()) and (el.get('incomplete') == '1'):
+#                 continue
 
-#         if namespace == '':
-#             namespace_list = []
+#             #
+#             # Update elements dict: type name --> xml element (all types)
+#             #
+#             elements_dict[full_name] = el
+
+
+#             #
+#             # Get name of all fundamental types
+#             #
+#             is_fundamental = isFundamental(el)
+#             if is_fundamental:
+#                 new_fundamental_types.add(full_name + '__fundamental')
+
+#             #
+#             # Get name of all std types
+#             #
+#             is_std_type = isStdType(el)
+#             if is_std_type:
+#                 new_std_types.add(full_name + '__std_type')
+
+#             #
+#             # Get name of all enumeration types
+#             #
+#             is_enumeration = isEnumeration(el)
+#             if is_enumeration:
+#                 new_enumeration_types.add( '::'.join( getNamespaces(el, include_self=True) )  + '__enumeration' )
+
+#             #
+#             # Update sets of types
+#             #
+#             fundamental_types = fundamental_types.union(new_fundamental_types)
+#             std_types         = std_types.union(new_std_types)
+#             enumeration_types = enumeration_types.union(new_enumeration_types)
+
+
+#     # Fill global list
+#     gb.accepted_types = list(fundamental_types) + list(std_types) + list(enumeration_types) + cfg.loaded_classes
+
+
+#     # Remove from gb.accepted_types all classes that use of native types as template arguments
+#     # (BOSS cannot deal with this yet...)
+#     for i in range(len(gb.accepted_types))[::-1]:
+
+#         type_name = gb.accepted_types[i]
+
+#         # Get list of all template arguments (unpack any nested template arguments)
+#         unpacked_template_args = getAllTemplateTypes(type_name)
+
+#         # If no template arguments, continue
+#         if unpacked_template_args == []:
+#             continue
+
 #         else:
-#             namespace_list = namespace.split('::')
+#             for templ_arg in unpacked_template_args:
 
-#         for ns_part in namespace_list:
-#             class_line += '(' + ns_part + ')'
+#                 # Remove asterix and/or ampersand
+#                 base_templ_arg = getBasicTypeName(templ_arg)
 
-#         class_line += '(' + class_name_short + '),'
+#                 # Check that this type is listed in elements_dict (all native types should be)
+#                 if base_templ_arg in elements_dict.keys():
 
+#                     # Get xml entry for the type
+#                     type_el = elements_dict[base_templ_arg]
 
-#         class_line += '    /*constructors*/'
-#         for symbol, args_bracket in factory_dict[class_name_long]:
-#             class_line += '(("' + symbol + '",' + args_bracket + ')) '
-
-#         class_line += ')) \\'
-#         class_lines.append(class_line)
-
-#     class_lines_code  = ''
-#     class_lines_code += '#define ' + gb.gambit_backend_name_full + '_all_data \\\n'
-#     class_lines_code += '\n'.join(class_lines) + '\n'
-
+#                     # If this is a native type, remove the current entry (i) in gb.accepted_types
+#                     if isNative(type_el):
+                        
+#                         # Remove entry i from gb.accepted_types
+#                         gb.accepted_types.pop(i)
+#                         break
 
 
-    
-#     #
-#     # Construct include guards with additional  ' 1' appended to the line starting with #define 
-#     #
-#     incl_guard = addIncludeGuard('', 'loaded_types.hpp', extra_string=gb.gambit_backend_name_full)
-#     incl_guard_lines = incl_guard.split('\n')
-
-#     incl_guard_start = '\n'.join(incl_guard_lines[:2]) + ' 1\n'
-#     incl_guard_end   = incl_guard_lines[-2] + '\n'
+# # ====== END: fillAcceptedTypesList ========
 
 
-#     #
-#     # Construct include statements
-#     #
-#     incl_statements_code = ''
-#     for class_name_long in factory_dict.keys():
-#         namespace, class_name_short = removeNamespace(class_name_long, return_namespace=True)
-#         incl_statements_code += '#include "' + cfg.wrapper_header_prefix + class_name_short + cfg.header_extension + '"\n'
-#     incl_statements_code += '#include "identification.hpp"\n'
+
+# ====== isProblematicType ========
+
+# Use this to identify types that BOSS currently have problems with,
+# but that (hopefully) should be fixed in the future.
+
+def isProblematicType(el):
+
+    is_problematic = False
+
+    # Determine type name
+    if 'demangled' in el.keys():
+        full_name = el.get('demangled')
+    elif 'name' in el.keys():
+        full_name = el.get('name')
 
 
-#     #
-#     # Combine everything to construct header code
-#     #
-#     code  = ''
-#     code += incl_guard_start
+    #
+    # Check: types that use native types as template arguments
+    #
 
-#     code += '\n'
-#     code += incl_statements_code
+    if el.tag in ['Class', 'Struct', 'FundamentalType']:
 
-#     code += '\n'
-#     code += '// Indicate which types are provided by this backend, and what the symbols of their factories are.\n'
-#     code += class_lines_code
+        # Get list of all template arguments (unpack any nested template arguments)
+        unpacked_template_args = getAllTemplateTypes(full_name)
 
-#     code += '\n'
-#     code += '// If the default version has been loaded, set it as default.\n'
-#     code += '#if ALREADY_LOADED(CAT_3(BACKENDNAME,_,CAT(Default_,BACKENDNAME)))\n'
-#     code += '  SET_DEFAULT_VERSION_FOR_LOADING_TYPES(BACKENDNAME,SAFE_VERSION,CAT(Default_,BACKENDNAME))\n'
-#     code += '#endif\n'
+        # If no template arguments, continue
+        if unpacked_template_args == []:
+            pass
 
-#     code += '\n'
-#     code += '// Undefine macros to avoid conflict with other backends.\n'
-#     code += '#include "backend_undefs.hpp"\n'
+        else:
+            for templ_arg in unpacked_template_args:
 
-#     code += '\n'
-#     code += incl_guard_end
+                # Remove asterix and/or ampersand
+                base_templ_arg = getBasicTypeName(templ_arg)
 
-#     return code
-    
-# # ====== END: constrLoadedTypesHeader ======
+                # Check that this type name is listed in gb.name_dict
+                if base_templ_arg in gb.name_dict.keys():
+
+                    # Get xml entry for the type
+                    type_el = gb.name_dict[base_templ_arg]
+
+                    # If this is a native type, the input type is problematic for BOSS
+                    if isNative(type_el):
+                        
+                        is_problematic = True
+                        return is_problematic
+
+
+    return is_problematic
+
+# ====== END: isProblematicType ========
+
+
+
+# ====== addParentClasses ========
+
+# Adds parent classes to cfg.loaded_classes.
+
+def addParentClasses():
+
+    import modules.classutils as classutils
+
+    for xml_file in gb.all_id_dict.keys():
+
+        # If new xml file, initialise global dicts
+        if xml_file != gb.xml_file_name:
+            gb.xml_file_name = xml_file
+            initGlobalXMLdicts(xml_file, id_and_name_only=True)
+
+        # Loop over all named elements in the xml file
+        for full_name, el in gb.name_dict.items():
+
+            if el.tag in ['Class', 'Struct']:
+
+                if isLoadedClass(el):
+
+                    parents_el_list = getAllParentClasses(el, only_native_classes=True)
+
+                    for parent_el in parents_el_list:
+
+                        # Skip classes that are not loadable (incomplete, abstract, ...)
+                        if not isLoadable(el, print_warning=True):
+                            continue
+
+                        class_name = classutils.getClassNameDict(parent_el)
+
+                        # - Update cfg.loaded_classes
+                        if class_name['long_templ'] not in cfg.loaded_classes:
+                            cfg.loaded_classes.append(class_name['long_templ'])
+
+# ====== END: addParentClasses ========
+
+
+
+# ====== xmlFilesToDicts ========
+
+    #
+    # Read all xml elements of all files and store in two dict of dicts: 
+    #
+    # 1. all_id_dict:    file name --> xml id --> xml element
+    # 2. all_name_dict:  file name --> name   --> xml element
+    #
+
+def xmlFilesToDicts(xml_files):
+
+    for xml_file in xml_files:
+
+        gb.all_id_dict[xml_file]   = OrderedDict()
+        gb.all_name_dict[xml_file] = OrderedDict()
+
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+
+        for el in root.getchildren():
+
+            # Fill id-based dict
+            gb.all_id_dict[xml_file][el.get('id')] = el
+
+            # Determine name
+            if 'demangled' in el.keys():
+                full_name = el.get('demangled')
+            elif 'name' in el.keys():
+                full_name = el.get('name')
+            else:
+                # Skip elements that don't have a name
+                continue
+            
+            # Fill name-based dict
+            gb.all_name_dict[xml_file][full_name] = el
+
+# ====== END: xmlFilesToDicts ========
+
+
+
+# ====== clearGlobalXMLdicts ========
+
+def clearGlobalXMLdicts():
+
+    # Clear a bunch of global dicts
+    gb.id_dict.clear()
+    gb.name_dict.clear()
+
+    gb.file_dict.clear()
+    gb.std_types_dict.clear()
+    gb.typedef_dict.clear()
+    gb.loaded_classes_in_xml.clear()
+    gb.func_dict.clear()
+
+# ====== END: clearGlobalXMLdicts ========
+
+
+
+# ====== initGlobalXMLdicts ========
+
+def initGlobalXMLdicts(xml_path, id_and_name_only=False):
+
+    import modules.classutils as classutils
+
+    # Clear dicts
+    clearGlobalXMLdicts()
+
+    # Set some global dicts directly
+    gb.id_dict   = copy.deepcopy( gb.all_id_dict[xml_path] )
+    gb.name_dict = copy.deepcopy( gb.all_name_dict[xml_path] )
+
+    # Stop here?
+    if id_and_name_only:
+        return
+
+
+    #
+    # Loop over all elements in this xml file
+    # to fill the remaining dicts. (The order is important!)
+    #
+
+    for xml_id, el in gb.id_dict.items():
+
+
+        # Update global dict: file name --> file xml element
+        if el.tag == 'File':
+            gb.file_dict[el.get('name')] = el
+        # gb.file_dict = OrderedDict([ (el.get('name'), el) for el in root.findall('File') ])
+
+
+        # Update global dict: std type --> type xml element
+        if isStdType(el):
+            class_name = classutils.getClassNameDict(el)
+            gb.std_types_dict[class_name['long_templ']] = el
+
+
+        # Update global dict of loaded classes in this xml file: class name --> class xml element
+        if el.tag in ['Class', 'Struct']:
+
+            try:
+                class_name = classutils.getClassNameDict(el)
+            except KeyError:
+                continue
+
+            # Check if we have done this class already
+            if class_name in gb.classes_done:
+                infomsg.ClassAlreadyDone( class_name['long_templ'] ).printMessage()
+                continue
+
+            # Check that class is requested
+            if (class_name['long_templ'] in cfg.loaded_classes):
+
+                # Check that class is complete
+                if isComplete(el):
+
+                    # Store class xml element
+                    gb.loaded_classes_in_xml[class_name['long_templ']] = el
+
+
+        # Update global dict: typedef name --> typedef xml element
+        if el.tag == 'Typedef':
+
+            # Only accept native typedefs:
+            if isNative(el):
+
+                typedef_name = el.get('name')
+
+                type_dict = findType(el)
+                type_el = type_dict['el']
+
+                # If underlying type is a fundamental or standard type, accept it right away
+                if isFundamental(type_el) or isStdType(type_el):
+                    gb.typedef_dict[typedef_name] = el
+                
+                # If underlying type is a class/struct, check if it's acceptable
+                elif type_el.tag in ['Class', 'Struct']:
+                    
+                    type_name = classutils.getClassNameDict(type_el)
+
+                    if type_name['long_templ'] in cfg.loaded_classes:
+                        gb.typedef_dict[typedef_name] = el
+                
+                # If neither fundamental or class/struct, ignore it.
+                else:
+                    pass
+
+
+        # Update global dict: function name --> function xml element
+        if el.tag == 'Function':
+
+            if 'demangled' in el.keys():
+
+                func_name_full = el.get('demangled')
+
+                if func_name_full in cfg.loaded_functions:
+                    gb.func_dict[func_name_full] = el
+
+
+
+
+        # Add entries to global dict: new header files
+        if el in gb.loaded_classes_in_xml.values():
+
+            class_name = classutils.getClassNameDict(el)
+
+            class_name_short = class_name['short']
+            class_name_long  = class_name['long']
+
+            if class_name_long not in gb.new_header_files.keys():
+              
+                abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
+                wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
+                wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
+                wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
+
+                abstract_header_fullpath     = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
+                wrapper_header_fullpath      = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
+                wrapper_decl_header_fullpath = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
+                wrapper_def_header_fullpath  = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
+                
+                gb.new_header_files[class_name_long] = {    'abstract': abstract_header_name, 
+                                                            'wrapper': wrapper_header_name, 
+                                                            'wrapper_decl': wrapper_decl_header_name,
+                                                            'wrapper_def': wrapper_def_header_name,
+                                                            'abstract_fullpath': abstract_header_fullpath, 
+                                                            'wrapper_fullpath': wrapper_header_fullpath, 
+                                                            'wrapper_decl_fullpath': wrapper_decl_header_fullpath,
+                                                            'wrapper_def_fullpath': wrapper_def_header_fullpath    }
+
+    #
+    # END: Loop over all elements in this xml file
+    #
+
+
+# ====== END: initGlobalXMLdicts ========
+
+
+
+
+# # ====== fillNewHeaderFilesDict ========
+
+# def fillNewHeaderFilesDict():
+
+#     # Update global dict: new header files
+#     for class_name_long_templ in cfg.loaded_classes:
+        
+#         class_name_short = class_name.split('<',1)[0].split('::')[-1]
+#         class_name_long  = class_name.split('<',1)[0]
+
+#         if class_name_long not in gb.new_header_files.keys():
+          
+#             abstract_header_name     = cfg.abstr_header_prefix + class_name_short + cfg.header_extension
+#             wrapper_header_name      = cfg.wrapper_header_prefix + class_name_short + cfg.header_extension
+#             wrapper_decl_header_name = cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension
+#             wrapper_def_header_name  = cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension
+
+#             abstract_header_fullpath     = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.abstr_header_prefix + class_name_short + cfg.header_extension )
+#             wrapper_header_fullpath      = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + cfg.header_extension )
+#             wrapper_decl_header_fullpath = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_decl' + cfg.header_extension )
+#             wrapper_def_header_fullpath  = os.path.join(gb.gambit_backend_types_basedir, gb.gambit_backend_name_full, cfg.wrapper_header_prefix + class_name_short + '_def'  + cfg.header_extension )
+            
+#             gb.new_header_files[class_name_long] = {    'abstract': abstract_header_name, 
+#                                                         'wrapper': wrapper_header_name, 
+#                                                         'wrapper_decl': wrapper_decl_header_name,
+#                                                         'wrapper_def': wrapper_def_header_name,
+#                                                         'abstract_fullpath': abstract_header_fullpath, 
+#                                                         'wrapper_fullpath': wrapper_header_fullpath, 
+#                                                         'wrapper_decl_fullpath': wrapper_decl_header_fullpath,
+#                                                         'wrapper_def_fullpath': wrapper_def_header_fullpath    }
+
+# # ====== END: fillNewHeaderFilesDict ========
 
 

@@ -1,5 +1,8 @@
+#ifndef __boss__Basics_Pythia_8_209_h__
+#define __boss__Basics_Pythia_8_209_h__
+
 // Basics.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -16,7 +19,7 @@
 #include "Pythia8/PythiaStdlib.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // RndmEngine is the base class for external random number generators.
@@ -41,7 +44,13 @@ public:
 // This class handles random number generation according to the
 // Marsaglia-Zaman-Tsang algorithm.
 
-class Rndm {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_Rndm.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class Rndm : public virtual Abstract_Rndm {
 
 public:
 
@@ -96,6 +105,16 @@ private:
   bool   useExternalRndm;
   RndmEngine* rndmEngPtr;
 
+
+        public:
+            Abstract_Rndm* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_Rndm* in);
+
+
+        public:
+            void init__BOSS();
+
 };
 
 //==========================================================================
@@ -110,8 +129,10 @@ class RotBstMatrix;
 // (But can equally well be used to hold space-time four-vectors.)
 
 } 
-#include "backend_types/Pythia_8_186/abstract_Vec4.h"
-#include "abstracttypedefs.h"
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_Vec4.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Vec4 : public virtual Abstract_Vec4 {
 
@@ -125,7 +146,7 @@ public:
     zz = v.zz; tt = v.tt; } return *this; }
   Vec4& operator=(double value) { xx = value; yy = value; zz = value;
     tt = value; return *this; }
-      
+
   // Member functions for input.
   void reset() {xx = 0.; yy = 0.; zz = 0.; tt = 0.;}
   void p(double xIn, double yIn, double zIn, double tIn)
@@ -141,6 +162,12 @@ public:
   double py() const {return yy;}
   double pz() const {return zz;}
   double e() const {return tt;}
+  double& operator[](int i) {
+    if      (i == 1) return xx;
+    else if (i == 2) return yy;
+    else if (i == 3) return zz;
+    else             return tt;
+  }
   double mCalc() const {double temp = tt*tt - xx*xx - yy*yy - zz*zz;
     return (temp >= 0.) ? sqrt(temp) : -sqrt(-temp);}
   double m2Calc() const {return tt*tt - xx*xx - yy*yy - zz*zz;}
@@ -216,7 +243,7 @@ public:
   // phi is azimuthal angle between v1 and v2 around n axis.
   friend double phi(const Vec4& v1, const Vec4& v2, const Vec4& n);
   friend double cosphi(const Vec4& v1, const Vec4& v2, const Vec4& n);
- 
+
   // R is distance in cylindrical (y/eta, phi) coordinates.
   friend double RRapPhi(const Vec4& v1, const Vec4& v2);
   friend double REtaPhi(const Vec4& v1, const Vec4& v2);
@@ -235,6 +262,7 @@ private:
 
         public:
             Abstract_Vec4* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Vec4* in);
 
             Pythia8::Abstract_Vec4* operator_equal__BOSS(const Pythia8::Abstract_Vec4&);
@@ -383,8 +411,10 @@ ostream& operator<<(ostream&, const RotBstMatrix&) ;
 // This class handles a single histogram at a time.
 
 } 
-#include "backend_types/Pythia_8_186/abstract_Hist.h"
-#include "abstracttypedefs.h"
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_Hist.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 namespace Pythia8 { 
 class Hist : public virtual Abstract_Hist{
 
@@ -407,11 +437,11 @@ public:
     nBin = h.nBin; nFill = h.nFill; xMin = h.xMin; xMax = h.xMax;
     dx = h.dx;  under = h.under; inside = h.inside; over = h.over;
     res = h.res; } return *this; }
-  
+
   // Book a histogram.
   void book(string titleIn = "  ", int nBinIn = 100, double xMinIn = 0.,
     double xMaxIn = 1.) ;
- 
+
   // Set title of a histogram.
   void name(string titleIn = "  ") {title = titleIn; }
 
@@ -492,6 +522,7 @@ private:
 
         public:
             Abstract_Hist* pointerCopy__BOSS();
+
             void pointerAssign__BOSS(Abstract_Hist* in);
 
             Pythia8::Abstract_Hist* operator_equal__BOSS(const Pythia8::Abstract_Hist&);
@@ -514,11 +545,11 @@ private:
 
 
         public:
-            void book__BOSS(std::string, int, double);
+            void book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, double);
 
-            void book__BOSS(std::string, int);
+            void book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int);
 
-            void book__BOSS(std::string);
+            void book__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
 
             void book__BOSS();
 
@@ -526,15 +557,15 @@ private:
 
             void fill__BOSS(double);
 
-            void table__BOSS(std::ostream&, bool) const;
+            void table__BOSS(std::basic_ostream<char,std::char_traits<char> >&, bool) const;
 
-            void table__BOSS(std::ostream&) const;
+            void table__BOSS(std::basic_ostream<char,std::char_traits<char> >&) const;
 
             void table__BOSS() const;
 
-            void table__BOSS(std::string, bool) const;
+            void table__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool) const;
 
-            void table__BOSS(std::string) const;
+            void table__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >) const;
 
             bool sameSize__BOSS(const Pythia8::Abstract_Hist&) const;
 
@@ -574,3 +605,5 @@ Hist operator/(const Hist& h1, const Hist& h2);
 } // end namespace Pythia8
 
 #endif // end Pythia8_Basics_H
+
+#endif /* __boss__Basics_Pythia_8_209_h__ */

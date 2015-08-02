@@ -5,12 +5,14 @@
 *** Input:	ee	value of the energy estimator (e.g. nchan)
 *** Output:             pdf (units of estimator^-1)
 ***       
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Apr 24, 2011
 *** Modified: Jun 6, 2014
 ***********************************************************************
 
       real*8 function nulike_bgspec(ee,like)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'
@@ -55,6 +57,9 @@
             stop
           endif
           nulike_bgspec = nulike_bgspec_a(1)
+          if (nulike_bgspec .lt. 0.d0) then
+            nulike_bgspec = 0.d0
+          endif
         endif
 
       case default

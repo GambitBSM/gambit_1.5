@@ -1,9 +1,10 @@
-#include "backend_types/Pythia_8_186/abstract_Vec4.h"
+#include "Pythia8/Event.h"
 #include <vector>
 #include <string>
-#include "abstracttypedefs.h"
-#include "wrappertypedefs.h"
-#include "Pythia8/Event.h"
+#include "backend_types/Pythia_8_209/wrapper_Vec4.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleDataEntry.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 
 void Pythia8::Particle::setEvtPtr__BOSS(Pythia8::Abstract_Event* evtPtrIn)
 {
@@ -11,9 +12,15 @@ void Pythia8::Particle::setEvtPtr__BOSS(Pythia8::Abstract_Event* evtPtrIn)
 }
 
 
-Pythia8::Abstract_Event* Pythia8::Particle::getEvtPtr__BOSS()
+void Pythia8::Particle::setPDEPtr__BOSS(Pythia8::Abstract_ParticleDataEntry* pdePtrIn)
 {
-    return getEvtPtr();
+    setPDEPtr(dynamic_cast< Pythia8::ParticleDataEntry* >(pdePtrIn));
+}
+
+
+void Pythia8::Particle::setPDEPtr__BOSS()
+{
+    setPDEPtr();
 }
 
 
@@ -83,15 +90,33 @@ Pythia8::Abstract_Vec4* Pythia8::Particle::vDec__BOSS() const
 }
 
 
-std::vector<int, std::allocator<int> > Pythia8::Particle::sisterList__BOSS() const
+int Pythia8::Particle::iTopCopyId__BOSS() const
+{
+    return iTopCopyId();
+}
+
+
+int Pythia8::Particle::iBotCopyId__BOSS() const
+{
+    return iBotCopyId();
+}
+
+
+std::vector<int,std::allocator<int> > Pythia8::Particle::sisterList__BOSS() const
 {
     return sisterList();
 }
 
 
-std::string Pythia8::Particle::nameWithStatus__BOSS() const
+std::basic_string<char,std::char_traits<char>,std::allocator<char> > Pythia8::Particle::nameWithStatus__BOSS() const
 {
     return nameWithStatus();
+}
+
+
+Pythia8::Abstract_ParticleDataEntry* Pythia8::Particle::particleDataEntry__BOSS() const
+{
+    return &(particleDataEntry());
 }
 
 
@@ -127,5 +152,20 @@ Pythia8::Abstract_Particle* Pythia8::Particle::operator_equal__BOSS(const Pythia
 
 
 
-Pythia8::Abstract_Particle* Pythia8::Particle::pointerCopy__BOSS() { return new Pythia8::Particle(*this); }
-void Pythia8::Particle::pointerAssign__BOSS(Pythia8::Abstract_Particle* in) { *this = *dynamic_cast<Particle*>(in); }
+#include "backend_types/Pythia_8_209/identification.hpp"
+
+Pythia8::Abstract_Particle* Pythia8::Particle::pointerCopy__BOSS()
+{
+    Pythia8::Abstract_Particle* new_ptr = new Pythia8::Particle(*this);
+    new_ptr->can_delete_wrapper(true);
+    return new_ptr;
+}
+
+void Pythia8::Particle::pointerAssign__BOSS(Pythia8::Abstract_Particle* in)
+{
+    CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Particle* wptr_temp = wrapper__BOSS();
+    *this = *dynamic_cast<Particle*>(in);
+    wrapper__BOSS(wptr_temp);
+}
+
+#include "gambit/Backends/backend_undefs.hpp"

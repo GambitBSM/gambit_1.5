@@ -1,5 +1,5 @@
 // SigmaEW.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -14,7 +14,7 @@
 
 namespace Pythia8 {
 
- 
+
 //==========================================================================
 
 // A derived class for q g -> q gamma (q = u, d, s, c, b).
@@ -47,7 +47,7 @@ private:
   double sigUS, sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> g gamma.
@@ -79,7 +79,7 @@ private:
   double sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> g gamma.
@@ -114,7 +114,7 @@ private:
   double chargeSum, sigma;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> gamma gamma.
@@ -146,7 +146,7 @@ private:
   double sigTU, sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for g g -> gamma gamma.
@@ -176,11 +176,11 @@ public:
   virtual string inFlux() const {return "gg";}
 
 private:
-  
+
   double charge2Sum, sigma;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f f' -> f f' via t-channel gamma*/Z0 exchange.
@@ -216,7 +216,7 @@ private:
   double mZ, mZS, thetaWRat, sigmagmgm, sigmagmZ, sigmaZZ;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f_1 f_2 -> f_3 f_4 via t-channel W+- exchange.
@@ -251,7 +251,7 @@ private:
   double mW, mWS, thetaWRat, sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q q' -> Q q" via t-channel W+- exchange.
@@ -293,7 +293,7 @@ private:
   double mW, mWS, thetaWRat, sigma0, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> gamma*/Z0.
@@ -337,7 +337,7 @@ private:
   ParticleDataEntry* particlePtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar' -> W+-.
@@ -601,7 +601,7 @@ private:
          openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // An intermediate class for f fbar -> gamma*/Z0/W+- gamma*/Z0/W-+.
@@ -636,7 +636,7 @@ protected:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> gamma*/Z0 gamma*/Z0.
@@ -686,7 +686,7 @@ private:
   ParticleDataEntry* particlePtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar' -> Z0 W+-. (Here pure Z0, unfortunately.)
@@ -728,7 +728,7 @@ private:
          thetaWpt, thetaWmm, lun, lde, sigma0, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> W+ W-.
@@ -770,7 +770,7 @@ private:
     cfZ, cff, gSS, gTT, gST, gUU, gSU, openFracPair;
 
 };
- 
+
 //==========================================================================
 
 // An intermediate class for f fbar -> gamma*/Z0 g/gamma and permutations.
@@ -807,7 +807,7 @@ private:
   ParticleDataEntry* particlePtr;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar -> gamma*/Z0 g.
@@ -840,7 +840,7 @@ private:
   double sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> gamma*/Z0 q.
@@ -873,7 +873,7 @@ private:
   double sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar' -> gamma*/Z0 gamma.
@@ -906,7 +906,7 @@ private:
   double sigma0;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f gamma -> gamma*/Z0 f.
@@ -939,7 +939,7 @@ private:
   double sigma0;
 
 };
- 
+
 //==========================================================================
 
 // An intermediate class for f fbar -> W+- g/gamma and permutations.
@@ -957,7 +957,7 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q qbar' -> W+- g.
@@ -993,7 +993,7 @@ private:
   double sigma0, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for q g -> W+- q'.
@@ -1029,7 +1029,7 @@ private:
   double sigma0, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar' -> W+- gamma.
@@ -1065,7 +1065,7 @@ private:
   double sigma0, openFracPos, openFracNeg;
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f gamma -> W+- f'.
@@ -1139,7 +1139,7 @@ private:
   double ef4, s34Avg, sigTU, sigma, openFracPair;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

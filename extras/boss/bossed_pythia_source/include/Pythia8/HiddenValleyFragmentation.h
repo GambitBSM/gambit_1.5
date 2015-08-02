@@ -1,5 +1,5 @@
 // HiddenValleyFragmentation.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -51,7 +51,7 @@ private:
   double probVector;
 
 };
- 
+
 //==========================================================================
 
 // The HVStringPT class is used to select select HV transverse momenta.
@@ -70,7 +70,7 @@ public:
   void init(Settings& settings, ParticleData& particleData, Rndm* rndmPtrIn);
 
 };
- 
+
 //==========================================================================
 
 // The HVStringZ class is used to sample the HV fragmentation function f(z).
@@ -87,7 +87,7 @@ public:
 
   // Initialize data members.
   void init(Settings& settings, ParticleData& particleData, Rndm* rndmPtrIn);
-  
+
   // Fragmentation function: top-level to determine parameters.
   double zFrag( int idOld, int idNew = 0, double mT2 = 1.);
 
@@ -172,7 +172,7 @@ private:
   bool insertHVevent(Event& event);
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

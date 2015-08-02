@@ -1,5 +1,8 @@
+#ifndef __boss__SLHAinterface_Pythia_8_209_h__
+#define __boss__SLHAinterface_Pythia_8_209_h__
+
 // SLHAinterface.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -25,7 +28,13 @@ namespace Pythia8 {
 // The SLHAinterface class handles communication between Pythia and
 // SusyLesHouches.
 
-class SLHAinterface {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_SLHAinterface.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class SLHAinterface : public virtual Abstract_SLHAinterface {
 
 public:
 
@@ -37,7 +46,8 @@ public:
 
   // Initialize and switch to SUSY couplings if reading SLHA spectrum
   void init( Settings& settings, Rndm* rndmPtr, Couplings* couplingsPtrIn,
-    ParticleData* particleDataPtr, bool& useSHLAcouplings );
+    ParticleData* particleDataPtr, bool& useSHLAcouplings,
+    stringstream& ParticleDataBuffer );
 
   // Initialize SUSY Les Houches Accord data.
   bool initSLHA(Settings& settings, ParticleData* particleDataPtr);
@@ -60,6 +70,30 @@ public:
   // Internal data members
   int            meMode;
 
+
+        public:
+            Abstract_SLHAinterface* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_SLHAinterface* in);
+
+        public:
+            Pythia8::Abstract_SusyLesHouches& slha_ref__BOSS();
+
+            Pythia8::Abstract_CoupSUSY& coupSUSY_ref__BOSS();
+
+            int& meMode_ref__BOSS();
+
+
+
+        public:
+            void setPtr__BOSS(Pythia8::Abstract_Info*);
+
+            void init__BOSS(Pythia8::Abstract_Settings&, Pythia8::Abstract_Rndm*, Pythia8::Abstract_Couplings*, Pythia8::Abstract_ParticleData*, bool&, std::basic_stringstream<char,std::char_traits<char>,std::allocator<char> >&);
+
+            bool initSLHA__BOSS(Pythia8::Abstract_Settings&, Pythia8::Abstract_ParticleData*);
+
+            void pythia2slha__BOSS(Pythia8::Abstract_ParticleData*);
+
 };
 
 //==========================================================================
@@ -68,6 +102,4 @@ public:
 
 #endif // Pythia8_SLHAinterface_H
 
-
-
-
+#endif /* __boss__SLHAinterface_Pythia_8_209_h__ */

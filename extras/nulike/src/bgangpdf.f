@@ -7,11 +7,13 @@
 *** Input:	cosphi		cos(arrival angle of event)
 *** Output:                     pdf (degrees^-1)
 ***       
-*** Author: Pat Scott (patscott@physics.mcgill.ca)
+*** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Apr 24, 2011
 ***********************************************************************
 
       real*8 function nulike_bgangpdf(cosphi)
+
+      use iso_c_binding, only: c_ptr
 
       implicit none
       include 'nulike_internal.h'

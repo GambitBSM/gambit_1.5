@@ -1,5 +1,8 @@
+#ifndef __boss__PartonLevel_Pythia_8_209_h__
+#define __boss__PartonLevel_Pythia_8_209_h__
+
 // PartonLevel.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -12,8 +15,12 @@
 #include "Pythia8/Basics.h"
 #include "Pythia8/BeamParticle.h"
 #include "Pythia8/BeamRemnants.h"
+#include "Pythia8/ColourReconnection.h"
 #include "Pythia8/Event.h"
+#include "Pythia8/HardDiffraction.h"
 #include "Pythia8/Info.h"
+#include "Pythia8/JunctionSplitting.h"
+#include "Pythia8/MergingHooks.h"
 #include "Pythia8/MultipartonInteractions.h"
 #include "Pythia8/ParticleData.h"
 #include "Pythia8/PartonSystems.h"
@@ -24,24 +31,31 @@
 #include "Pythia8/SigmaTotal.h"
 #include "Pythia8/SpaceShower.h"
 #include "Pythia8/StandardModel.h"
+#include "Pythia8/StringLength.h"
 #include "Pythia8/TimeShower.h"
 #include "Pythia8/UserHooks.h"
-#include "Pythia8/MergingHooks.h"
+
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The PartonLevel class contains the top-level routines to generate
 // the partonic activity of an event.
 
-class PartonLevel {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_PartonLevel.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class PartonLevel : public virtual Abstract_PartonLevel {
 
 public:
 
   // Constructor.
   PartonLevel() : userHooksPtr(0) {}
- 
+
   // Initialization of all classes at the parton level.
   bool init( Info* infoPtrIn, Settings& settings,
     ParticleData* particleDataPtrIn, Rndm* rndmPtrIn,
@@ -52,7 +66,7 @@ public:
     TimeShower* timesPtrIn, SpaceShower* spacePtrIn,
     RHadrons* rHadronsPtrIn, UserHooks* userHooksPtrIn,
     MergingHooks* mergingHooksPtr, bool useAsTrial);
- 
+
   // Generate the next parton-level process.
   bool next( Event& process, Event& event);
 
@@ -65,6 +79,7 @@ public:
 
   // Tell whether failure was due to vetoing.
   bool hasVetoed() const {return doVeto;}
+  bool hasVetoedDiff() const {return doDiffVeto;}
 
   // Accumulate, print and reset statistics.
   void accumulate() {if (isResolved && !isDiff) multiPtr->accumulate();}
@@ -90,22 +105,25 @@ private:
   // Initialization data, mainly read from Settings.
   bool   doNonDiff, doDiffraction, doMPI, doMPIMB, doMPISDA, doMPISDB,
          doMPICD, doMPIinit, doISR, doFSRduringProcess, doFSRafterProcess,
-         doFSRinResonances, doRemnants, doSecondHard, hasLeptonBeams,
-         hasPointLeptons, canVetoPT, canVetoStep, canVetoMPIStep,
-         canVetoEarly, canSetScale, allowRH, earlyResDec, vetoWeakJets,
-         canReconResSys;
+         doFSRinResonances, doRemnants, doSecondHard, hasOneLeptonBeam,
+         hasTwoLeptonBeams, hasPointLeptons, canVetoPT, canVetoStep,
+         canVetoMPIStep, canVetoEarly, canSetScale, allowRH, earlyResDec,
+         vetoWeakJets, canReconResSys, doReconnect, doHardDiff,
+         forceResonanceCR;
   double mMinDiff, mWidthDiff, pMaxDiff, vetoWeakDeltaR2;
 
   // Event generation strategy. Number of steps. Maximum pT scales.
   bool   doVeto;
   int    nMPI, nISR, nFSRinProc, nFSRinRes, nISRhard, nFSRhard,
-         typeLatest, nVetoStep, typeVetoStep, nVetoMPIStep, iSysNow;
+         typeLatest, nVetoStep, typeVetoStep, nVetoMPIStep, iSysNow,
+         reconnectMode, sampleTypeDiff;
   double pTsaveMPI, pTsaveISR, pTsaveFSR, pTvetoPT;
 
   // Current event properties.
   bool   isNonDiff, isDiffA, isDiffB, isDiffC, isDiff, isSingleDiff,
          isDoubleDiff, isCentralDiff, isResolved, isResolvedA,
-         isResolvedB, isResolvedC;
+         isResolvedB, isResolvedC, isHardDiffA, isHardDiffB, isHardDiff,
+         isSetupDiff, doDiffVeto;
   int    sizeProcess, sizeEvent, nHardDone, nHardDoneRHad, iDS;
   double eCMsave;
   vector<bool> inRHadDecay;
@@ -132,7 +150,7 @@ private:
 
   // Pointers to Standard Model couplings.
   Couplings*     couplingsPtr;
-  
+
   // Pointer to information on subcollision parton locations.
   PartonSystems* partonSystemsPtr;
 
@@ -155,14 +173,21 @@ private:
 
   // The generator class to construct beam-remnant kinematics.
   BeamRemnants remnants;
-  // Separate instance for central diffraction.
-  BeamRemnants remnantsCD;
-  
+
   // The RHadrons class is used to fragment off and decay R-hadrons.
   RHadrons*    rHadronsPtr;
 
   // ResonanceDecay object does sequential resonance decays.
   ResonanceDecays resonanceDecays;
+
+  // The Colour reconnection class used to do colour reconnection.
+  ColourReconnection colourReconnection;
+
+  // The Junction splitting class used to split junctions systems.
+  JunctionSplitting junctionSplitting;
+
+  // The Diffraction class is for hard diffraction selection.
+  HardDiffraction hardDiffraction;
 
   // Resolved diffraction: find how many systems should have it.
   int decideResolvedDiff( Event& process);
@@ -179,16 +204,55 @@ private:
   // Resolved diffraction: restore normal behaviour.
   void leaveResolvedDiff( int iHardLoop, Event& process, Event& event);
 
+  // Hard diffraction: set up the process record.
+  void setupHardDiff( Event& process);
+
+  // Hard diffraction: leave the process record.
+  void leaveHardDiff( Event& process, Event& event);
+
   // Pointer to MergingHooks object for user interaction with the merging.
   MergingHooks* mergingHooksPtr;
-  // Parameters to specify trial shower usage
+  // Parameters to specify trial shower usage.
   bool doTrial;
   int nTrialEmissions;
-  // Parameters to store to veto trial showers
+  // Parameters to store to veto trial showers.
   double pTLastBranch;
   int typeLastBranch;
-  // Parameters to specify merging usage
+  // Parameters to specify merging usage.
   bool canRemoveEvent, canRemoveEmission;
+
+
+        public:
+            Abstract_PartonLevel* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_PartonLevel* in);
+
+
+        public:
+            bool next__BOSS(Pythia8::Abstract_Event&, Pythia8::Abstract_Event&);
+
+            void setupShowerSys__BOSS(Pythia8::Abstract_Event&, Pythia8::Abstract_Event&);
+
+            bool resonanceShowers__BOSS(Pythia8::Abstract_Event&, Pythia8::Abstract_Event&, bool);
+
+            bool wzDecayShowers__BOSS(Pythia8::Abstract_Event&);
+
+            void statistics__BOSS();
+
+        private:
+            int decideResolvedDiff__BOSS(Pythia8::Abstract_Event&);
+
+            bool setupUnresolvedSys__BOSS(Pythia8::Abstract_Event&, Pythia8::Abstract_Event&);
+
+            void setupHardSys__BOSS(Pythia8::Abstract_Event&, Pythia8::Abstract_Event&);
+
+            void setupResolvedDiff__BOSS(Pythia8::Abstract_Event&);
+
+            void leaveResolvedDiff__BOSS(int, Pythia8::Abstract_Event&, Pythia8::Abstract_Event&);
+
+            void setupHardDiff__BOSS(Pythia8::Abstract_Event&);
+
+            void leaveHardDiff__BOSS(Pythia8::Abstract_Event&, Pythia8::Abstract_Event&);
 
 };
 
@@ -197,3 +261,5 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_PartonLevel_H
+
+#endif /* __boss__PartonLevel_Pythia_8_209_h__ */

@@ -1,5 +1,5 @@
 // StringFragmentation.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -20,7 +20,7 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The StringEnd class contains the information related to
@@ -39,7 +39,7 @@ public:
     StringPT* pTSelPtrIn, StringZ* zSelPtrIn) {
     particleDataPtr = particleDataPtrIn; flavSelPtr = flavSelPtrIn;
     pTSelPtr = pTSelPtrIn; zSelPtr = zSelPtrIn;}
-   
+
   // Set up initial endpoint values from input.
   void setUp(bool fromPosIn, int iEndIn, int idOldIn, int iMaxIn,
     double pxIn, double pyIn, double GammaIn, double xPosIn, double xNegIn);
@@ -64,7 +64,7 @@ public:
   StringFlav*   flavSelPtr;
   StringPT*     pTSelPtr;
   StringZ*      zSelPtr;
- 
+
   // Data members.
   bool   fromPos;
   int    iEnd, iMax, idHad, iPosOld, iNegOld, iPosNew, iNegNew;
@@ -75,7 +75,7 @@ public:
   Vec4   pHad, pSoFar;
 
 };
-  
+
 //==========================================================================
 
 // The StringFragmentation class contains the top-level routines
@@ -155,7 +155,7 @@ private:
   bool energyUsedUp(bool fromPos);
 
   // Produce the final two partons to complete the system.
-  bool finalTwo(bool fromPos);
+  bool finalTwo(bool fromPos, Event& event, bool usedPosJun, bool usedNegJun);
 
   // Construct a special joining region for the final two hadrons.
   StringRegion finalRegion();
@@ -170,7 +170,7 @@ private:
   int extraJoin(double facExtra, Event& event);
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

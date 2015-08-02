@@ -14,17 +14,21 @@ import modules.gb as gb
 import modules.utils as utils
 import modules.funcutils as funcutils
 import modules.classutils as classutils
-
+import modules.infomsg as infomsg
 
 
 #
+# Module-level globals
+#
+
+
+
+# ====== run ========
+
 # Main function for parsing functions
-#
 
 def run():
 
-    # Prepare returned dict
-    return_code_dict = OrderedDict()
 
     #
     # Loop over all functions 
@@ -32,24 +36,33 @@ def run():
     
     for func_name_full, func_el in gb.func_dict.items():
 
+        # Clear all info messages
+        infomsg.clearInfoMessages()
+
+        # Number of functions done
+        func_i = len(gb.functions_done)
+
+        # Generate dict with different variations of the function name
+        func_name = funcutils.getFunctionNameDict(func_el)
+
+
         # Print current function
         print
-        print '~~~~ Current function: ' + func_name_full + ' ~~~~'
-        print
+        print '  Function: ' + func_name['long_templ_args']
+        print '  ----------' + '-'*len(func_name['long_templ_args'])
 
 
         # Check if this function is accepted
         if funcutils.ignoreFunction(func_el):
             continue
        
-        # Function name and namespace
-        func_name = func_el.get('name')
-        namespaces = func_name_full.split('<',1)[0].split('::')[:-1]
+        # Function namespace
+        namespaces = utils.getNamespaces(func_el)
         has_namespace = bool(len(namespaces))
 
 
         # Check if this is a template function
-        if '<' in func_name_full:
+        if '<' in func_name['long_templ']:
             is_template = True
         else:
             is_template = False
@@ -67,15 +80,16 @@ def run():
         #
 
         # New source file name
-        new_source_fname = os.path.join(cfg.extra_output_dir, func_name.lower() + gb.code_suffix + cfg.source_extension)
+        new_source_file_name = cfg.function_files_prefix + func_name['short'].lower() + '_f' + str(func_i) + gb.code_suffix + cfg.source_extension
+        new_source_file_path = os.path.join(cfg.extra_output_dir, new_source_file_name)
 
         # Get include statements
         include_statements = []
 
         # - Generate include statements based on the types used in the function
-        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='none', input_element='function', add_extra_include_path=True)
-        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_decl', input_element='function', add_extra_include_path=True)
-        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_def', input_element='function', add_extra_include_path=True)
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='none', input_element='function')
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_decl', input_element='function', use_full_path=True)
+        include_statements += utils.getIncludeStatements(func_el, convert_loaded_to='wrapper_def', input_element='function', use_full_path=True)
 
         # - Then check if we have a header file for the function in question.
         #   If not, declare the original function as 'extern'
@@ -83,8 +97,11 @@ def run():
         has_function_header = utils.isHeader(file_el)
         if has_function_header:
             header_full_path = file_el.get('name')
-            header_base_name = os.path.basename(header_full_path)
-            include_statements.append('#include "' + os.path.join(cfg.add_path_to_includes, header_base_name) + '"')
+            use_path = utils.shortenHeaderPath(header_full_path)
+            include_statements.append( '#include "' + use_path + '"')
+
+        # Add include statement for gambit/Backends/function_return_utils.hpp
+        include_statements.append( '#include "' + os.path.join(gb.gambit_backend_incl_dir,'function_return_utils.hpp') + '"')
 
         include_statements = list( OrderedDict.fromkeys(include_statements) )
         include_statements_code = '\n'.join(include_statements) + 2*'\n'
@@ -105,14 +122,25 @@ def run():
             n_overloads = 0
 
 
+        #
         # Generate code for wrapper class version
-        wrapper_code = generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads) 
+        #
+        
+        # Construct a wrapper function name, eg "someFunction_f7__BOSS"
+        wr_func_name = func_el.get('name') + '_f' + str(func_i) + gb.code_suffix
+
+        # Register the wrapper name
+        func_name['wr_name'] = wr_func_name
+
+        # Construct wrapper function code
+        wrapper_code = generateFunctionWrapperClassVersion(func_el, wr_func_name, namespaces, n_overloads) 
         wrapper_code = utils.addIndentation(wrapper_code, len(namespaces)*cfg.indent)
         wrapper_code += '\n'
 
-        # Prepare element in return_code_dict
-        if new_source_fname not in return_code_dict.keys():
-            return_code_dict[new_source_fname] = {'code_tuples':[], 'add_include_guard':False}
+
+        # Prepare element in gb.new_code
+        if new_source_file_path not in gb.new_code.keys():
+            gb.new_code[new_source_file_path] = {'code_tuples':[], 'add_include_guard':False}
 
         # Define code string
         n_indents = len(namespaces)
@@ -138,154 +166,231 @@ def run():
 
         # Register new code in return_code_dict
         insert_pos = -1   # end of file
-        return_code_dict[new_source_fname]['code_tuples'].append( (insert_pos, new_code) )
+        # return_code_dict[new_source_file_path]['code_tuples'].append( (insert_pos, new_code) )
+        gb.new_code[new_source_file_path]['code_tuples'].append( (insert_pos, new_code) )
+
+
+        # Register that this function has a source file
+        gb.function_file_dict[func_name['long_templ_args']] = new_source_file_path
+
+
+        #
+        # Keep track of functions done
+        #
+        gb.functions_done.append(func_name)
+
 
         print
-        print '~~~~ Function ' + func_name_full + ' done ~~~~'
-        print
-        print
-
 
     #
-    # Return result
+    # End loop over functions
     #
 
-    return return_code_dict
+# ====== END: run ========
 
 
 
 
-#
-# Function for generating a source file containing wrapper functions (that make use of the wrapper classes)
-#
-def generateFunctionWrapperClassVersion(func_el, namespaces, n_overloads):
+# ====== generateFunctionWrapperClassVersion ========
+
+# Function for generating a source file containing wrapper
+# functions that make use of the wrapper classes.
+
+def generateFunctionWrapperClassVersion(func_el, wr_func_name, namespaces, n_overloads):
 
     new_code = ''
 
-
-    #
-    # Get info on function
-    #
-
-    # Identify arguments, translate argument type of loaded classes
-    # and construct the argument bracket
-    args = funcutils.getArgs(func_el)
-    w_args = funcutils.constrWrapperArgs(args, add_ref=True)
-
-    # Identify return type 
-    return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
-    return_el = gb.id_dict[return_id]
-
-    return_is_loaded_class = utils.isLoadedClass(return_el)
-    pointerness, is_ref = utils.pointerAndRefCheck(return_type, byname=True)
-
-    # Return keywords
-    return_kw_str = ' '.join(return_kw)        
-    return_kw_str += ' '*bool(len(return_kw))
-
-
-    #
-    # Wrapper function
-    #
-
-    wrapper_code = '// Wrapper function(s)\n'
+    # Check if this function makes use of any loaded types
+    uses_loaded_type = funcutils.usesLoadedType(func_el)
 
     # Function name
-    func_name = func_el.get('name') + gb.code_suffix
+    func_name = func_el.get('name')
 
-    # Check constness
-    if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
-        is_const = True
-    else:
-        is_const = False
+    # Determine return type
+    return_type_dict = utils.findType(func_el)
+    return_el      = return_type_dict['el']
+    pointerness    = return_type_dict['pointerness']
+    is_ref         = return_type_dict['is_reference']
+    return_type_kw = return_type_dict['cv_qualifiers']
+    
+    return_kw_str  = ' '.join(return_type_kw) + ' '*bool(len(return_type_kw))
+    
+    return_is_loaded    = utils.isLoadedClass(return_el)
+
+    return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
+
+    # If return type is a known class, add '::' for absolute namespace.
+    if (not return_is_loaded) and utils.isKnownClass(return_el):
+        return_type = '::' + return_type 
+
+
+    # If return-by-value, then a const qualifier on the return value is meaningless
+    # (will result in a compiler warning)
+    if (pointerness == 0) and (is_ref == False):
+        if 'const' in return_type_kw:
+            return_type_kw.remove('const')
+
+
+    # Arguments
+    args = funcutils.getArgs(func_el)
+
 
     # One function for each set of default arguments
+    n_overloads = funcutils.numberOfDefaultArgs(func_el)
     for remove_n_args in range(n_overloads+1):
 
+        # Check that the function is acceptable
+        if funcutils.ignoreFunction(func_el, limit_pointerness=True, remove_n_args=remove_n_args):
+            continue
+
         if remove_n_args == 0:
-            use_args   = args
-            use_w_args = w_args
+            use_args = args
         else:
-            use_args   = args[:-remove_n_args]
-            use_w_args = w_args[:-remove_n_args]
+            use_args = args[:-remove_n_args]
 
-        args_bracket_wrapper = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
-        args_bracket_wrapper_notypes = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=False, cast_to_original=True, wrapper_to_pointer=True)
+        # Argument bracket
+        args_bracket = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True, use_wrapper_base_class=False)
 
-        # Name of function to call
-        call_func_name = func_el.get('name')
+        # Name of original function to call
+        call_func_name = func_name
 
         # Convert return type if loaded class
-        if return_is_loaded_class:
+        if utils.isLoadedClass(return_el):
             wrapper_return_type = classutils.toWrapperType(return_type, remove_reference=True)
         else:
             wrapper_return_type = return_type
 
         # Write declaration line
-        wrapper_code += return_kw_str + wrapper_return_type + ' ' + func_name + args_bracket_wrapper + is_const*' const' + '\n'
+        new_code += return_kw_str + wrapper_return_type + ' ' + wr_func_name + args_bracket + '\n'
 
         # Write function body
         indent = ' '*cfg.indent
-        wrapper_code += '{\n'
+        new_code += '{\n'
 
         if return_type == 'void':
-            wrapper_code += indent
+            new_code += indent
         else:
-            wrapper_code += indent + 'return '
+            new_code += indent + 'return '
 
-        wrapper_code += call_func_name + args_bracket_wrapper_notypes + ';\n'
+        # args_bracket_notypes = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=False, wrapper_to_pointer=True)
+        args_bracket_notypes = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=False, cast_to_original=True, wrapper_to_pointer=True)
 
-        wrapper_code += '}\n'
-        wrapper_code += '\n'
+        if return_is_loaded: 
 
-    new_code += wrapper_code
+            abs_return_type_simple = classutils.toAbstractType(return_type, include_namespace=True, remove_reference=True, remove_pointers=True)
+            wrapper_return_type_simple = wrapper_return_type.replace('*','').replace('&','')
+
+            if is_ref:  # Return-by-reference
+                new_code += 'reference_returner< ' + wrapper_return_type_simple + ', ' + abs_return_type_simple +  ' >( ' + call_func_name + args_bracket_notypes + ' );\n'
+
+            elif (not is_ref) and (pointerness > 0):  # Return-by-pointer
+                new_code += 'pointer_returner< ' + wrapper_return_type_simple + ', ' + abs_return_type_simple +  ' >( ' + call_func_name + args_bracket_notypes + ' );\n'
+            
+            else:  # Return-by-value
+                new_code += wrapper_return_type + '( ' + call_func_name + args_bracket_notypes + ' );\n'
+        
+        else:                
+            new_code += call_func_name + args_bracket_notypes + ';\n'
+
+        new_code += '}\n'
+        new_code += '\n'
+
 
     return new_code
 
+# ====== END: generateFunctionWrapperClassVersion ========
 
 
-        # # Function return type
-        # return_type, return_kw, return_id = utils.findType( gb.id_dict[func_el.get('returns')] )
-        # return_el = gb.id_dict[return_id]
-        # return_is_native = utils.isNative(return_el)
+
+# # ====== generateFunctionWrapperClassVersion ========
+
+# # Function for generating a source file containing wrapper
+# # functions that make use of the wrapper classes.
+
+# def generateFunctionWrapperClassVersion(func_el, func_name, namespaces, n_overloads):
+
+#     new_code = ''
 
 
-        # # Function arguments (get list of dicts with argument info)
-        # args = funcutils.getArgs(func_el)
+#     #
+#     # Get info on function
+#     #
 
 
-        # # Construct wrapper function name
-        # w_func_name = funcutils.constrWrapperName(func_el)
+#     # Identify arguments, translate argument type of loaded classes
+#     # and construct the argument bracket
+#     args = funcutils.getArgs(func_el)
+#     w_args = funcutils.constrWrapperArgs(args, add_ref=True)
+
+#     # Identify return type 
+#     return_type_dict = utils.findType( gb.id_dict[func_el.get('returns')] )
+#     return_el     = return_type_dict['el']
+#     pointerness   = return_type_dict['pointerness']
+#     is_ref        = return_type_dict['is_reference']
+#     return_kw     = return_type_dict['cv_qualifiers']
+    
+#     return_kw_str = ' '.join(return_kw) + ' '*bool(len(return_kw))
+
+#     return_type   = return_type_dict['name'] + '*'*pointerness + '&'*is_ref
 
 
-        # # Choose wrapper return type
-        # return_type_base = return_type.replace('*','').replace('&','')
-        # if (return_type == 'void') or (return_type.count('*') > 0):
-        #     w_return_type = return_type
-        # else:
-        #     w_return_type = return_type.replace(return_type_base, return_type_base+'*')
-        # # if return_is_native:
-        # #     w_return_type = gb.abstr_class_prefix + return_type
-        # # else:
-        # #     w_return_type = return_type
+#     #
+#     # Wrapper function
+#     #
 
+#     wrapper_code = '// Wrapper function(s)\n'
 
-        # # Construct list of arguments for wrapper function
-        # w_args = funcutils.constrWrapperArgs(args)
+#     # Wrapper function name
+#     wr_func_name = func_name['short'] + gb.code_suffix
 
-        # # Construct bracket with input arguments for wrapper function
-        # w_args_bracket = funcutils.constrArgsBracket(w_args)
+#     # Check constness
+#     if ('const' in func_el.keys()) and (func_el.get('const')=='1'):
+#         is_const = True
+#     else:
+#         is_const = False
 
-        # # Construct declaration line for wrapper function
-        # w_func_line = funcutils.constrDeclLine(w_return_type, w_func_name, w_args_bracket, keywords=return_kw)
+#     # One function for each set of default arguments
+#     for remove_n_args in range(n_overloads+1):
 
+#         if remove_n_args == 0:
+#             use_args   = args
+#             use_w_args = w_args
+#         else:
+#             use_args   = args[:-remove_n_args]
+#             use_w_args = w_args[:-remove_n_args]
 
-        # # Construct function body for wrapper function
-        # w_func_body = funcutils.constrWrapperBody(return_type, func_name, args, return_is_native)
+#         args_bracket_wrapper = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=True, include_namespace=True, use_wrapper_class=True)
+#         args_bracket_wrapper_notypes = funcutils.constrArgsBracket(use_args, include_arg_name=True, include_arg_type=False, cast_to_original=True, wrapper_to_pointer=True)
 
+#         # Name of function to call
+#         call_func_name = func_name['short']
 
-        # Combine new code
+#         # Convert return type if loaded class
+#         if utils.isLoadedClass(return_el):
+#             wrapper_return_type = classutils.toWrapperType(return_type, remove_reference=True)
+#         else:
+#             wrapper_return_type = return_type
 
-        # Get info
-        # source_file_el   = gb.id_dict[func_el.get('file')]
-        # source_file_name = source_file_el.get('name')
+#         # Write declaration line
+#         wrapper_code += return_kw_str + wrapper_return_type + ' ' + wr_func_name + args_bracket_wrapper + is_const*' const' + '\n'
+
+#         # Write function body
+#         indent = ' '*cfg.indent
+#         wrapper_code += '{\n'
+
+#         if return_type == 'void':
+#             wrapper_code += indent
+#         else:
+#             wrapper_code += indent + 'return '
+
+#         wrapper_code += call_func_name + args_bracket_wrapper_notypes + ';\n'
+
+#         wrapper_code += '}\n'
+#         wrapper_code += '\n'
+
+#     new_code += wrapper_code
+
+#     return new_code
+
+# # ====== END: generateFunctionWrapperClassVersion ========
+

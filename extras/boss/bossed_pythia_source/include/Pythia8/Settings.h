@@ -1,5 +1,8 @@
+#ifndef __boss__Settings_Pythia_8_209_h__
+#define __boss__Settings_Pythia_8_209_h__
+
 // Settings.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -48,15 +51,17 @@ public:
 
   // Constructor
   Mode(string nameIn = " ", int defaultIn = 0, bool hasMinIn = false,
-    bool hasMaxIn = false, int minIn = 0,  int maxIn = 0) :  name(nameIn),
-    valNow(defaultIn), valDefault(defaultIn), hasMin(hasMinIn),
-    hasMax(hasMaxIn), valMin(minIn), valMax(maxIn) { }
+    bool hasMaxIn = false, int minIn = 0,  int maxIn = 0,
+    bool optOnlyIn = false) :  name(nameIn), valNow(defaultIn),
+    valDefault(defaultIn), hasMin(hasMinIn), hasMax(hasMaxIn),
+    valMin(minIn), valMax(maxIn), optOnly(optOnlyIn)  { }
 
   // Data members.
   string name;
   int    valNow, valDefault;
   bool   hasMin, hasMax;
   int    valMin, valMax;
+  bool   optOnly;
 
 };
 
@@ -64,7 +69,13 @@ public:
 
 // Class for double parms (where parm is shorthand for parameter).
 
-class Parm {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_Parm.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class Parm : public virtual Abstract_Parm {
 
 public:
 
@@ -80,6 +91,29 @@ public:
   double valNow, valDefault;
   bool   hasMin, hasMax;
   double valMin, valMax;
+
+
+        public:
+            Abstract_Parm* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_Parm* in);
+
+        public:
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> >& name_ref__BOSS();
+
+            double& valNow_ref__BOSS();
+
+            double& valDefault_ref__BOSS();
+
+            bool& hasMin_ref__BOSS();
+
+            bool& hasMax_ref__BOSS();
+
+            double& valMin_ref__BOSS();
+
+            double& valMax_ref__BOSS();
+
+
 
 };
 
@@ -109,7 +143,7 @@ class FVec {
 public:
 
   // Constructor
-  FVec(string nameIn = " ", vector<bool> defaultIn = vector<bool>(1, false)) : 
+  FVec(string nameIn = " ", vector<bool> defaultIn = vector<bool>(1, false)) :
     name(nameIn), valNow(defaultIn) , valDefault(defaultIn) { }
 
   // Data members.
@@ -167,10 +201,16 @@ public:
 //==========================================================================
 
 // This class holds info on flags (bool), modes (int), parms (double),
-// words (string), fvecs (vector of bool), mvecs (vector of int) and pvecs 
+// words (string), fvecs (vector of bool), mvecs (vector of int) and pvecs
 // (vector of double).
 
-class Settings {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_Settings.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class Settings : public virtual Abstract_Settings {
 
 public:
 
@@ -179,7 +219,7 @@ public:
 
   // Initialize Info pointer.
   void initPtr(Info* infoPtrIn) {infoPtr = infoPtrIn;}
- 
+
   // Read in database from specific file.
   bool init(string startFile = "../xmldoc/Index.xml", bool append = false,
     ostream& os = cout) ;
@@ -192,7 +232,7 @@ public:
 
   // Keep track whether any readings have failed, invalidating run setup.
   bool readingFailed() {return readingFailedSave;}
- 
+
   // Write updates or everything to user-defined file.
   bool writeFile(string toFile, bool writeAll = false) ;
   bool writeFile(ostream& os = cout, bool writeAll = false) ;
@@ -205,6 +245,9 @@ public:
     list (false, false, " ", os); }
   void list(string match, ostream& os = cout) {
     list (false, true, match, os); }
+
+  // Give back current value(s) as a string, whatever the type.
+  string output(string keyIn, bool fullLine = true);
 
   // Reset all values to their defaults.
   void resetAll() ;
@@ -224,13 +267,14 @@ public:
     return (mvecs.find(toLower(keyIn)) != mvecs.end()); }
   bool isPVec(string keyIn) {
     return (pvecs.find(toLower(keyIn)) != pvecs.end()); }
- 
+
   // Add new entry.
   void addFlag(string keyIn, bool defaultIn) {
     flags[toLower(keyIn)] = Flag(keyIn, defaultIn); }
   void addMode(string keyIn, int defaultIn, bool hasMinIn,
-    bool hasMaxIn, int minIn, int maxIn) { modes[toLower(keyIn)]
-    = Mode(keyIn, defaultIn, hasMinIn, hasMaxIn, minIn, maxIn); }
+    bool hasMaxIn, int minIn, int maxIn, bool optOnlyIn = false) {
+    modes[toLower(keyIn)] = Mode(keyIn, defaultIn, hasMinIn, hasMaxIn,
+    minIn, maxIn, optOnlyIn); }
   void addParm(string keyIn, double defaultIn, bool hasMinIn,
     bool hasMaxIn, double minIn, double maxIn) { parms[toLower(keyIn)]
     = Parm(keyIn, defaultIn, hasMinIn, hasMaxIn, minIn, maxIn); }
@@ -262,7 +306,7 @@ public:
   vector<bool>   fvecDefault(string keyIn);
   vector<int>    mvecDefault(string keyIn);
   vector<double> pvecDefault(string keyIn);
-    
+
   // Give back a map of all entries whose names match the string "match".
   map<string, Flag> getFlagMap(string match);
   map<string, Mode> getModeMap(string match);
@@ -274,7 +318,7 @@ public:
 
   // Change current value, respecting limits.
   void flag(string keyIn, bool nowIn);
-  void mode(string keyIn, int nowIn);
+  bool mode(string keyIn, int nowIn);
   void parm(string keyIn, double nowIn);
   void word(string keyIn, string nowIn);
   void fvec(string keyIn, vector<bool> nowIn);
@@ -286,7 +330,7 @@ public:
   void forceParm(string keyIn, double nowIn);
   void forceMVec(string keyIn, vector<int> nowIn);
   void forcePVec(string keyIn, vector<double> nowIn);
-     
+
   // Restore current value to default.
   void resetFlag(string keyIn);
   void resetMode(string keyIn);
@@ -351,6 +395,49 @@ private:
   vector<int>    intVectorAttributeValue(string line, string attribute);
   vector<double> doubleVectorAttributeValue(string line, string attribute);
 
+
+        public:
+            Abstract_Settings* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_Settings* in);
+
+
+        public:
+            void initPtr__BOSS(Pythia8::Abstract_Info*);
+
+            bool init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool);
+
+            bool init__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            bool init__BOSS();
+
+            bool reInit__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            bool reInit__BOSS();
+
+            bool readString__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, bool);
+
+            bool readString__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            bool writeFile__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            bool writeFile__BOSS(std::basic_ostream<char,std::char_traits<char> >&);
+
+            bool writeFile__BOSS();
+
+            void listAll__BOSS();
+
+            void listChanged__BOSS();
+
+            void list__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            std::basic_string<char,std::char_traits<char>,std::allocator<char> > output__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
+            void addMode__BOSS(std::basic_string<char,std::char_traits<char>,std::allocator<char> >, int, bool, bool, int, int);
+
+        private:
+            void list__BOSS(bool, bool, std::basic_string<char,std::char_traits<char>,std::allocator<char> >);
+
 };
 
 //==========================================================================
@@ -358,3 +445,5 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_Settings_H
+
+#endif /* __boss__Settings_Pythia_8_209_h__ */

@@ -14,11 +14,11 @@
 *** This routine is used only with the 2014 likelihood.
 *** 
 *** Input:	phi_obs	        observed angle (degrees)
-***             phi_pred        predicted angle (degrees)
-***             sigma           angular error corresponding to 39.3%
+***         phi_pred            predicted angle (degrees)
+***         sigma               angular error corresponding to 39.3%
 ***                             containment angle (degrees)
 ***          
-*** Output:			PSF (degrees^-1)
+*** Output:	PSF (degrees^-1)
 ***       
 *** Author: Pat Scott (p.scott@imperial.ac.uk)
 *** Date: Jan 2, 2015 
@@ -26,31 +26,31 @@
 
       real*8 function nulike_offctrpsf(phi_obs, phi_pred, sigma)
 
+      use iso_c_binding, only: c_ptr
       use MarcumQ
 
       implicit none
       include 'nulike_internal.h'
 
-      real*8 phi_obs, phi_pred, pred2, sigma, sigma2, expo 
-      real*8 bess, p, q, besi0, arg3
+      real*8 phi_obs, phi_pred, sigma, sigma2, expbesi0, expbess  
+      real*8 p, q, arg1, arg3
       integer ierr
-
+      
       sigma2 = sigma*sigma
-      pred2 = phi_pred*phi_pred
-      expo = exp(-(pred2 + phi_obs*phi_obs) / (2.d0 * sigma2))
-      bess = besi0(phi_pred * phi_obs / sigma2)
+      expbess = expbesi0(phi_pred,phi_obs,sigma2)
+      arg1 = 0.5d0*phi_pred*phi_pred/sigma2
       arg3 = 1.62d4/sigma2
-      if (arg3 .lt. 1.d5) then
-        call marcum(1.d0,0.5d0*pred2/sigma2,arg3,p,q,ierr)
-      else
+      if (arg3 .gt. 1.d4 .or. (arg1 .eq. 0.d0 .and. arg3 .gt. 5.d2)) then
         p = 1.d0
+      else
+        call marcum(1.d0,arg1,arg3,p,q,ierr)
+        if (ierr .gt. 1) then
+          write(*,*) 'phi_obs, phi_pred, sigma:',phi_obs, phi_pred, sigma
+          write(*,*) 'ierr = ',ierr
+          stop 'Catastrophic error when calling marcum in nulike_offctrpsf!'
+        endif
       endif
-      nulike_offctrpsf = phi_obs * expo * bess / p
 
-      if (ierr .gt. 1) then
-        write(*,*) 'phi_obs, phi_pred, sigma:',phi_obs, phi_pred, sigma
-        write(*,*) 'ierr = ',ierr
-        stop 'Catastrophic error when calling marcum in nulike_offctrpsf!'
-      endif
+      nulike_offctrpsf = phi_obs * expbess / (p * sigma2)
 
       end function nulike_offctrpsf

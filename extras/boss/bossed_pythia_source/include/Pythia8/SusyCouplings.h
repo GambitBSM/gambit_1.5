@@ -1,5 +1,8 @@
+#ifndef __boss__SusyCouplings_Pythia_8_209_h__
+#define __boss__SusyCouplings_Pythia_8_209_h__
+
 // SusyCouplings.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // Main authors of this file: N. Desai, P. Skands
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
@@ -23,7 +26,13 @@ class ParticleData;
 // CoupSUSY
 // Auxiliary class to compute and store various SM and SUSY couplings.
 
-class CoupSUSY : public Couplings{
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_CoupSUSY.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class CoupSUSY : public virtual Abstract_CoupSUSY, public Couplings{
 
 public:
 
@@ -31,7 +40,7 @@ public:
   CoupSUSY() {isInit=false; isNMSSM = false; isSUSY=true;}
 
   // Initialize
-  void initSUSY(SusyLesHouches* slhaPtrIn, Info* infoPtrIn, 
+  void initSUSY(SusyLesHouches* slhaPtrIn, Info* infoPtrIn,
                 ParticleData* particleDataPtrIn, Settings* settingsPtrIn);
 
   // Status flag. Flag for NMSSM.
@@ -121,7 +130,7 @@ public:
 
   // ~l~vW couplings
   complex LslsvW[7][7], RslsvW[7][7];
- 
+
   // ~ll~chi0 couplings
   complex LsvvX[7][4][6], RsvvX[7][4][6];
   complex LsllX[7][4][6], RsllX[7][4][6];
@@ -137,8 +146,9 @@ public:
   // Flags for RPV couplings
   bool isLLE, isLQD, isUDD;
 
-  //Squark mixing matrix: needed for RPV
+  //Squark and slepton mixing matrix: needed for RPV
   complex Rusq[7][7], Rdsq[7][7];
+  complex Rsl[7][7], Rsv[7][7];
 
   // Return neutralino, chargino, sup, sdown and slepton flavour codes.
   int idNeut(int idChi);
@@ -150,9 +160,6 @@ public:
   //Reverse lookup for neutralinos and charginos
   int typeNeut(int idPDG);
   int typeChar(int idPDG);
-
-  // Return a particle name, given the PDG code.
-  string getName(int pdgCode);
 
   // Pointer to SLHA instance
   // Used in SusyResonanceWidths for checking if decay table exists
@@ -171,6 +178,164 @@ private:
   // Pointer to the particle data table.
   ParticleData*  particleDataPtr;
 
+
+        public:
+            Abstract_CoupSUSY* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_CoupSUSY* in);
+
+        public:
+            bool& isInit_ref__BOSS();
+
+            bool& isNMSSM_ref__BOSS();
+
+            double& mWpole_ref__BOSS();
+
+            double& wWpole_ref__BOSS();
+
+            double& mZpole_ref__BOSS();
+
+            double& wZpole_ref__BOSS();
+
+            double& mW_ref__BOSS();
+
+            double& mZ_ref__BOSS();
+
+            double& sin2W_ref__BOSS();
+
+            double& sinW_ref__BOSS();
+
+            double& cosW_ref__BOSS();
+
+            double& tanb_ref__BOSS();
+
+            double& cosb_ref__BOSS();
+
+            double& sinb_ref__BOSS();
+
+            double& muHiggs_ref__BOSS();
+
+            double& alphaHiggs_ref__BOSS();
+
+            double& mAHiggs_ref__BOSS();
+
+            std::complex<double> (&LsddG_ref__BOSS())[7][4];
+
+            std::complex<double> (&RsddG_ref__BOSS())[7][4];
+
+            std::complex<double> (&LsuuG_ref__BOSS())[7][4];
+
+            std::complex<double> (&RsuuG_ref__BOSS())[7][4];
+
+            std::complex<double> (&OLpp_ref__BOSS())[6][6];
+
+            std::complex<double> (&ORpp_ref__BOSS())[6][6];
+
+            std::complex<double> (&OLp_ref__BOSS())[3][3];
+
+            std::complex<double> (&ORp_ref__BOSS())[3][3];
+
+            std::complex<double> (&OL_ref__BOSS())[6][3];
+
+            std::complex<double> (&OR_ref__BOSS())[6][3];
+
+            double (&LqqZ_ref__BOSS())[7];
+
+            double (&RqqZ_ref__BOSS())[7];
+
+            std::complex<double> (&LsdsdZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&RsdsdZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&LsusuZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&RsusuZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&LudW_ref__BOSS())[4][4];
+
+            std::complex<double> (&RudW_ref__BOSS())[4][4];
+
+            std::complex<double> (&LsusdW_ref__BOSS())[7][7];
+
+            std::complex<double> (&RsusdW_ref__BOSS())[7][7];
+
+            std::complex<double> (&LsddX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&RsddX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&LsuuX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&RsuuX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&LsduX_ref__BOSS())[7][4][3];
+
+            std::complex<double> (&RsduX_ref__BOSS())[7][4][3];
+
+            std::complex<double> (&LsudX_ref__BOSS())[7][4][3];
+
+            std::complex<double> (&RsudX_ref__BOSS())[7][4][3];
+
+            double (&LllZ_ref__BOSS())[7];
+
+            double (&RllZ_ref__BOSS())[7];
+
+            std::complex<double> (&LlvW_ref__BOSS())[4][4];
+
+            std::complex<double> (&RlvW_ref__BOSS())[4][4];
+
+            std::complex<double> (&LslslZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&RslslZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&LsvsvZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&RsvsvZ_ref__BOSS())[7][7];
+
+            std::complex<double> (&LslsvW_ref__BOSS())[7][7];
+
+            std::complex<double> (&RslsvW_ref__BOSS())[7][7];
+
+            std::complex<double> (&LsvvX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&RsvvX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&LsllX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&RsllX_ref__BOSS())[7][4][6];
+
+            std::complex<double> (&LsvlX_ref__BOSS())[7][4][3];
+
+            std::complex<double> (&RsvlX_ref__BOSS())[7][4][3];
+
+            std::complex<double> (&LslvX_ref__BOSS())[7][4][3];
+
+            std::complex<double> (&RslvX_ref__BOSS())[7][4][3];
+
+            double (&rvLLE_ref__BOSS())[4][4][4];
+
+            double (&rvLQD_ref__BOSS())[4][4][4];
+
+            double (&rvUDD_ref__BOSS())[4][4][4];
+
+            bool& isLLE_ref__BOSS();
+
+            bool& isLQD_ref__BOSS();
+
+            bool& isUDD_ref__BOSS();
+
+            std::complex<double> (&Rusq_ref__BOSS())[7][7];
+
+            std::complex<double> (&Rdsq_ref__BOSS())[7][7];
+
+            std::complex<double> (&Rsl_ref__BOSS())[7][7];
+
+            std::complex<double> (&Rsv_ref__BOSS())[7][7];
+
+
+
+        public:
+            void initSUSY__BOSS(Pythia8::Abstract_SusyLesHouches*, Pythia8::Abstract_Info*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Settings*);
+
 };
 
 //==========================================================================
@@ -178,3 +343,5 @@ private:
 } // end namespace Pythia8
 
 #endif // Pythia8_SusyCouplings_H
+
+#endif /* __boss__SusyCouplings_Pythia_8_209_h__ */

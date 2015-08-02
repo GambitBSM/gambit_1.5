@@ -1,11 +1,9 @@
 #include "Pythia8/Event.h"
-#include "backend_types/Pythia_8_186/wrapper_Particle_decl.h"
-#include "backend_types/Pythia_8_186/wrapper_Particle_def.h"
+#include "backend_types/Pythia_8_209/wrapper_Particle.h"
 #include "Pythia8/Basics.h"
-#include "backend_types/Pythia_8_186/wrapper_Vec4_decl.h"
-#include "backend_types/Pythia_8_186/wrapper_Vec4_def.h"
-#include "abstracttypedefs.h"
-#include "wrappertypedefs.h"
+#include "backend_types/Pythia_8_209/wrapper_Vec4.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
 
 namespace Pythia8
 {

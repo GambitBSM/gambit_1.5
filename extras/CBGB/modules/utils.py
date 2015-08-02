@@ -14,9 +14,8 @@ from modules import cfg
 # ====== removeComments ========
 
 # Takes a list of code lines and removes comments.
-# Lines starting with 'c' are replaced by an empty line, 
-# while for lines containing '!' everything after '!'
-# is removed.
+# For fixed format files, any character at position 0 is a comment.
+# For lines containing '!' everything after '!' is removed.
 
 def removeComments(code_lines):
 
@@ -28,7 +27,7 @@ def removeComments(code_lines):
             code_lines_nocomment.append('')
             continue
 
-        if (cfg.format == 'fixed') and (line[0] == 'c'):
+        if (cfg.format == 'fixed') and (line[0] != ' '):
             new_line = ''
 
         elif '!' in line:
@@ -128,17 +127,19 @@ def joinContinuedLines(code_lines):
             # (This assumes that len(line) >= 6 for all lines in code_lines,
             # which should be OK due to prior code formatting.)
 
-            # - If found, append to previous line.
             try:
+                # - If found, append to previous line.
                 if line[5] not in [' ','\t']:
                     joined_code_lines[-1] += line[6:]
+
+                # - If not found, store current_line and start constructing a new.
+                else:
+                    joined_code_lines.append(line)
+
             except:
                 print [line]
                 raise
             
-            # - If not found, store current_line and start constructing a new.
-            else:
-                joined_code_lines.append(line)
 
 
     elif cfg.format == 'free':
@@ -184,67 +185,108 @@ def getCodeParts(code_lines):
     unnamed_part_counter = 1
     start_line  = 0
     end_line    = 0
-    found_start = False
+
+    current_part = 'general'
+
     for i, line in enumerate(code_lines):
 
+
         #
-        # Detect start of a code part
+        # Detect start of program/function/subroutine, end current 'general' part
         #
-        at_start_line = False
 
-        if not found_start:
-            if ('subroutine ' in line) or ('function ' in line) or ('program ' in line) or (line[-7:] == 'program'):
-                found_start = True
-                at_start_line = True
+        if current_part == 'general':
 
-        if at_start_line:
-            
-            start_line = i
-            
-            if 'subroutine' in line:
-                keyword = 'subroutine'
-            elif 'function' in line:
-                keyword = 'function'
-            elif 'program' in line:
-                keyword = 'program'
-            else:
-                print 'WARNING: Neither of "subroutine", "function" nor "program" was found in line %i: %s' % (i+1,line)
+            new_part = ''
+            if 'subroutine ' in line[0:11]:
+                new_part = 'subroutine'
+            elif 'function ' in line[0:9]:
+                new_part = 'function'
+            elif 'program ' in line[0:8]:
+                new_part = 'program'
 
 
-            line_list = line.split()
-            keyword_index = line_list.index(keyword)
+            # If the beginning of a new code part is found:
+            # - store the line numbers for the current 'general' code part
+            # - set start_line for the new code part
+            # - identify a name for the new code part
+            if new_part in ['subroutine', 'function', 'program']:
+    
+    
+                # Store lines (if any) from current 'general' part
+                if (start_line < i):
 
-            if len(line_list) == keyword_index+1:
-                name = 'unnamed_' + keyword + '_' + str(unnamed_part_counter)
-                unnamed_part_counter += 1
+                    if current_part == 'general':
+                        name = 'unnamed_' + current_part + '_' + str(unnamed_part_counter)
+                        unnamed_part_counter += 1
 
-            else:
-                name_item = line_list[line_list.index(keyword)+1]
-                if '(' in name_item:
-                    name = name_item[:name_item.find('(')]
+                    code_parts_dict[name] = { 
+                                              'category'   : current_part,
+                                              'code_lines' : code_lines[start_line:i] 
+                                            }
+
+
+                # Restart line count for new code part
+                start_line = i
+    
+                # Identify name for new code part
+                line_list = line.split()
+                keyword_index = line_list.index(new_part)
+
+                if len(line_list) == keyword_index+1:
+                    name = 'unnamed_' + new_part + '_' + str(unnamed_part_counter)
+                    unnamed_part_counter += 1
+
                 else:
-                    name = name_item
-        
+                    name_item = line_list[line_list.index(new_part)+1]
+                    if '(' in name_item:
+                        name = name_item[:name_item.find('(')]
+                    else:
+                        name = name_item
 
+                # Update current_part
+                current_part = new_part
+
+
+      
         #
-        # Detect end of a code part
+        # Detect end of program/function/subroutine, start new 'general' part
         #
-        elif line.replace(' ','').strip() in ['end','end'+keyword, 'end'+keyword+name]:
 
-            if not found_start:
-                print 'WARNING: Unbalanced "end" statement at line %i' % (i+1)
-                found_start = False
-                continue
+        elif (current_part in ['subroutine', 'function', 'program']) and (line.replace(' ','').strip() in ['end','end'+current_part, 'end'+current_part+name]):
 
-            end_line = i
 
             # Store in dict
-            code_parts_dict[name] = { 
-                                      'category'   : keyword,
-                                      'code_lines' : code_lines[start_line:end_line+1] 
-                                    }
-            # Reset flag
-            found_start = False
+            if (start_line < i):
+
+                if current_part == 'general':
+                    name = 'unnamed_' + current_part + '_' + str(unnamed_part_counter)
+                    unnamed_part_counter += 1
+
+                code_parts_dict[name] = { 
+                                          'category'   : current_part,
+                                          'code_lines' : code_lines[start_line:i+1] 
+                                        }
+
+                # Set variables for the next code part
+                start_line = i+1
+                current_part = 'general'
+
+    #
+    # end loop over code lines
+    #
+
+    # Store final bit:
+    if (start_line < i):
+
+        if current_part == 'general':
+            name = 'unnamed_' + current_part + '_' + str(unnamed_part_counter)
+            unnamed_part_counter += 1
+
+        code_parts_dict[name] = { 
+                                  'category'   : current_part,
+                                  'code_lines' : code_lines[start_line:i+1] 
+                                }
 
     return code_parts_dict
 
@@ -339,6 +381,68 @@ def getImplicitDefs(code_lines):
     return implicit_defs
 
 # ====== END: getImplicitDefs ========
+
+
+
+
+# ====== getParameterDefs ========
+
+# Return a dict with the following structure: 
+#   { 
+#     'some_variable'   : '1234' 
+#     'another_variable': '10'
+#     ...
+#   }
+#
+# Note: Currently, only integer parameters are useful (array dimensions and indices).
+#
+
+def getParameterDefs(code_lines):
+
+    parameter_defs = {}
+
+    for i,line in enumerate(code_lines):
+
+        # Look for 'parameter' statement
+        if line[0:9] == 'parameter':
+
+            # Remove 'parameter'
+            line = line[9:]
+
+            # Remove blanks
+            line = line.replace(' ','')
+
+            # Remove parenthesis
+            line = line.lstrip('(').rstrip(')')
+
+            # Split at comma
+            parameter_entries = line.split(',')
+
+            for entry in parameter_entries:
+
+                # Split at '=' symbol
+                var_name, value_str = entry.split('=')
+
+                try:
+                    value = eval(value_str)
+                except:
+                    print '    -- WARNING: Could not interpret the parameter "%s" with value "%s". Ignoring it.' % (var_name, value_str)
+                    continue
+
+
+                # At the moment, CBGB can only make use of integer parameters. (Their only use is for array dimensions and indices.)
+                if not isinstance( value, ( int, long ) ):
+                    print '    -- INFO: Ignoring parameter "%s" with value "%s" as it was not recognized as an integer.' % (var_name, value_str)
+                    continue
+
+                value = int(value)
+
+                # Adding variable to parameter_defs dictionary
+                parameter_defs[var_name] = value
+
+    return parameter_defs
+
+# ====== END: getParameterDefs ========
 
 
 
@@ -444,7 +548,7 @@ def isDimensionStatement(line_in):
 # Input:  '-2:10,7,1:2'
 # Output: [(-2,7), (1,7), (1,2)]
 
-def getArrayIndicesTuples(dimensions_str):
+def getArrayIndicesTuples(dimensions_str, parameter_defs):
 
     indicies_tuples = []
 
@@ -456,11 +560,27 @@ def getArrayIndicesTuples(dimensions_str):
     for dim_str in dimensions_str.split(','):
 
         if ':' in dim_str:
-            start_index, end_index = [int(s) for s in dim_str.split(':')]
+            # start_index, end_index = [int(s) for s in dim_str.split(':')]
+            start_index_str, end_index_str = [s for s in dim_str.split(':')]
+
+            if start_index_str in parameter_defs.keys():
+                start_index = int( parameter_defs[start_index_str] )
+            else:
+                start_index = int(start_index_str)
+
+            if end_index_str in parameter_defs.keys():
+                end_index = int( parameter_defs[end_index_str] )
+            else:
+                end_index = int(end_index_str)
 
         else:
             start_index = 1
-            end_index   = int(dim_str)
+            end_index_str = dim_str
+            if end_index_str in parameter_defs.keys():
+                end_index = int( parameter_defs[end_index_str] )
+            else:
+                end_index = int(end_index_str)
+
 
         indicies_tuples.append( (start_index,end_index) )
 
@@ -477,7 +597,6 @@ def getVariablesDict(code_lines, get_variables):
     return_var_dicts = OrderedDict.fromkeys(get_variables, value=None)
 
     implicit_defs = getImplicitDefs(code_lines)
-
 
     for line in code_lines:
 
@@ -514,6 +633,7 @@ def getVariablesDict(code_lines, get_variables):
                 # - Use the maximum of the sizes specified in the type name and in the variable sequence
                 #   (Normally one of these should be 1 by default.)
                 var_dicts[var_name]['size'] = max(type_size,var_dicts[var_name]['size'])
+
 
                 # Check for character array type:
                 if (var_dicts[var_name]['type'] == 'character'): 
@@ -691,7 +811,7 @@ def parseVariableSequence(var_seq_str):
 
 # ====== generateGambitCommonBlockDecl ========
 
-def generateGambitCommonBlockDecl(cb_dict, var_info_dict):
+def generateGambitCommonBlockDecl(cb_dict, var_info_dict, parameter_defs):
 
     indent = ' '*4
 
@@ -705,7 +825,7 @@ def generateGambitCommonBlockDecl(cb_dict, var_info_dict):
 
     for var_name, var_dict in var_info_dict.items():
 
-        c_type_name = getCTypeName(var_dict)
+        c_type_name = getCTypeName(var_dict, parameter_defs)
 
         code += indent + c_type_name + ' ' + var_name + ';\n'
 
@@ -755,12 +875,16 @@ def generateGambitFrontendCode(cb_dict):
 
 # ====== getCTypeName ========
 
-def getCTypeName(var_dict):
+def getCTypeName(var_dict, parameter_defs):
 
     fortran_type_name = var_dict['type']
+    
+    if (fortran_type_name != 'character') and (var_dict['size'] > 1):
+        fortran_type_name += '*' + str(var_dict['size'])
+
     c_type_base_name = gb.type_translation_dict[fortran_type_name]
 
-    array_indices_tuples = getArrayIndicesTuples(var_dict['dimension'])
+    array_indices_tuples = getArrayIndicesTuples(var_dict['dimension'], parameter_defs)
 
     # Is this variable an array?
     if (fortran_type_name != 'character') and (len(array_indices_tuples) > 0):
@@ -794,6 +918,7 @@ def getCTypeName(var_dict):
             c_type_name = 'Farray' + template_bracket
         else:
             c_type_name = c_type_base_name
+
 
     # Return result
     return c_type_name

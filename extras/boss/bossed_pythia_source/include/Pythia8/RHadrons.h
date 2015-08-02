@@ -1,5 +1,5 @@
 // RHadrons.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -19,7 +19,7 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The RHadrons class contains the routines for the production and decay
@@ -31,7 +31,7 @@ public:
 
   // Constructor.
   RHadrons() : nRHad(0) {}
- 
+
   // Initialization of R-hadron handling.
   bool init( Info* infoPtrIn, Settings& settings,
     ParticleData* particleDataPtrIn, Rndm* rndmPtrIn);
@@ -118,7 +118,7 @@ private:
   // Construct modified four-vectors to match modified masses.
   bool newKin( Vec4 pOld1, Vec4 pOld2, double mNew1, double mNew2,
     Vec4& pNew1, Vec4& pNew2, bool checkMargin = true);
-  
+
 };
 
 //==========================================================================

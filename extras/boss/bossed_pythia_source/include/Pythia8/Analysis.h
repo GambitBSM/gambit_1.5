@@ -1,5 +1,8 @@
+#ifndef __boss__Analysis_Pythia_8_209_h__
+#define __boss__Analysis_Pythia_8_209_h__
+
 // Analysis.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -34,7 +37,7 @@ public:
     if (abs(power - 1.) < 0.01) powerInt = 1;
     if (abs(power - 2.) < 0.01) powerInt = 2;
     powerMod = 0.5 * power - 1.;}
-  
+
   // Analyze event.
   bool analyze(const Event& event, ostream& os = cout);
 
@@ -83,7 +86,7 @@ public:
 
   // Constructor.
   Thrust(int selectIn = 2) : select(selectIn), nFew(0) {}
-  
+
   // Analyze event.
   bool analyze(const Event& event, ostream& os = cout);
 
@@ -184,7 +187,7 @@ public:
     if (firstChar == 'J') measure = 2;
     if (firstChar == 'D') measure = 3;
   }
-      
+
   // Analyze event.
   bool analyze(const Event& event, double yScaleIn, double pTscaleIn,
     int nJetMinIn = 1, int nJetMaxIn = 0, ostream& os = cout);
@@ -308,7 +311,7 @@ public:
     : etaMax(etaMaxIn), nEta(nEtaIn), nPhi(nPhiIn), select(selectIn),
     smear(smearIn), resolution(resolutionIn), upperCut(upperCutIn),
     threshold(thresholdIn), nFew(0), rndmPtr(rndmPtrIn) { }
-  
+
   // Analyze event.
   bool analyze(const Event& event, double eTjetMinIn = 20.,
     double coneRadiusIn = 0.7, double eTseedIn = 1.5, ostream& os = cout);
@@ -411,7 +414,13 @@ public:
 // SlowJet class.
 // This class performs a recombination jet search in (y, phi, pT) space.
 
-class SlowJet {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_SlowJet.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class SlowJet : public virtual Abstract_SlowJet {
 
 public:
 
@@ -426,7 +435,7 @@ public:
     R2 = R*R; pT2jetMin = pTjetMin*pTjetMin; cutInEta = (etaMax <= 20.);
     chargedOnly = (select > 2); visibleOnly = (select == 2);
     modifyMass = (massSet < 2); noHook = (sjHookPtr == 0);}
-  
+
   // Analyze event, all in one go.
   bool analyze(const Event& event) {
     if ( !setup(event) ) return false;
@@ -536,6 +545,24 @@ private:
   // Use FJcore interface to perform clustering.
   bool clusterFJ();
 
+
+        public:
+            Abstract_SlowJet* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_SlowJet* in);
+
+
+        public:
+            bool analyze__BOSS(const Pythia8::Abstract_Event&);
+
+            bool setup__BOSS(const Pythia8::Abstract_Event&);
+
+            Pythia8::Abstract_Vec4* p__BOSS(int) const;
+
+            void list__BOSS(bool) const;
+
+            void list__BOSS() const;
+
 };
 
 //==========================================================================
@@ -544,3 +571,4 @@ private:
 
 #endif // end Pythia8_Analysis_H
 
+#endif /* __boss__Analysis_Pythia_8_209_h__ */
