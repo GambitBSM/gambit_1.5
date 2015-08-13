@@ -1,5 +1,5 @@
 // Bose-Einstein.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -17,9 +17,9 @@
 #include "Pythia8/Settings.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
- 
+
 // The BoseEinsteinHadron class is a simple container for studied hadrons.
 
 class BoseEinsteinHadron {
@@ -81,12 +81,11 @@ private:
 
   // Calculate shift and (unnormalized) compensation for pair.
   void shiftPair(int i1, int i2, int iHad);
-  
+
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_BoseEinstein_H
-

@@ -4,13 +4,16 @@
 #FFLAGS += -O3 -DMPI
 #CFLAGS += -O3 -DMPI
 
-FC = gfortran
-CC = gcc
-CXX = g++
-FFLAGS += -ffree-line-length-none -O3 #-DMPI
-CFLAGS += -O3 #-DMPI
+#FC = gfortran
+#CC = gcc
+#CXX = g++
+FC = mpif90
+CC = mpicc
+CXX = mpic++
+FFLAGS += -ffree-line-length-none -O3 -DMPI -fPIC -L.
+CFLAGS += -O3 -DMPI -fPIC -L.
 
-LAPACKLIB = -llapack
+LAPACKLIB = -llapack -lblas
 
 NESTLIBDIR = ./
 

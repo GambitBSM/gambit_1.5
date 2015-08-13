@@ -1,5 +1,5 @@
 // SigmaEW.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -115,7 +115,7 @@ void Sigma2qqbar2ggamma::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process, especially parton-flux object.
-  
+
 void Sigma2gg2ggamma::initProc() {
 
   // Maximum quark flavour in loop.
@@ -159,7 +159,7 @@ void Sigma2gg2ggamma::sigmaKin() {
   double sigBox = pow2(b0stuRe) + pow2(b0stuIm) + pow2(b0tsuRe)
     + pow2(b0tsuIm) + pow2(b0utsRe) + pow2(b0utsIm) + 4. * pow2(b1stuRe)
     + 4. * pow2(b1stuIm) + pow2(b2stuRe) + pow2(b2stuIm);
-  
+
   // Answer.
   sigma = (5. / (192. * M_PI * sH2)) * pow2(chargeSum)
     * pow3(alpS) * alpEM * sigBox;
@@ -236,7 +236,7 @@ void Sigma2ffbar2gammagamma::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2gg2gammagamma::initProc() {
 
   // Maximum quark flavour in loop.
@@ -308,7 +308,7 @@ void Sigma2gg2gammagamma::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ff2fftgmZ::initProc() {
 
   // Store Z0 mass for propagator. Common coupling factor.
@@ -353,7 +353,7 @@ double Sigma2ff2fftgmZ::sigmaHat() {
   double  e2 = couplingsPtr->ef(id2Abs);
   double  v2 = couplingsPtr->vf(id2Abs);
   double  a2 = couplingsPtr->af(id2Abs);
-  
+
   // Distinguish same-sign and opposite-sign fermions.
   double epsi = (id1 * id2 > 0) ? 1. : -1.;
 
@@ -367,7 +367,7 @@ double Sigma2ff2fftgmZ::sigmaHat() {
   // Spin-state extra factor 2 per incoming neutrino.
   if (id1Abs == 12 || id1Abs == 14 || id1Abs == 16) sigma *= 2.;
   if (id2Abs == 12 || id2Abs == 14 || id2Abs == 16) sigma *= 2.;
- 
+
   // Answer.
   return sigma;
 
@@ -404,7 +404,7 @@ void Sigma2ff2fftgmZ::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ff2fftW::initProc() {
 
   // Store W+- mass for propagator. Common coupling factor.
@@ -488,7 +488,7 @@ void Sigma2ff2fftW::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qq2QqtW::initProc() {
 
   // Process name.
@@ -632,7 +632,7 @@ double Sigma2qq2QqtW::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2gmZ::initProc() {
 
   // Allow to pick only gamma* or Z0 part of full gamma*/Z0 expression.
@@ -752,7 +752,7 @@ void Sigma1ffbar2gmZ::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for gamma*/Z0 decay angle.
-  
+
 double Sigma1ffbar2gmZ::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -805,7 +805,7 @@ double Sigma1ffbar2gmZ::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2W::initProc() {
 
   // Store W+- mass and width for propagator.
@@ -871,7 +871,7 @@ void Sigma1ffbar2W::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for W decay angle.
-  
+
 double Sigma1ffbar2W::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -882,7 +882,7 @@ double Sigma1ffbar2W::weightDecay( Event& process, int iResBeg,
   double mr1    = pow2(process[6].m()) / sH;
   double mr2    = pow2(process[7].m()) / sH;
   double betaf  = sqrtpos( pow2(1. - mr1 - mr2) - 4. * mr1 * mr2);
-   
+
   // Sign of asymmetry.
   double eps    = (process[3].id() * process[6].id() > 0) ? 1. : -1.;
 
@@ -891,7 +891,7 @@ double Sigma1ffbar2W::weightDecay( Event& process, int iResBeg,
     * (process[7].p() - process[6].p()) / (sH * betaf);
   double wtMax  = 4.;
   double wt     = pow2(1. + betaf * eps * cosThe) - pow2(mr1 - mr2);
- 
+
   // Done.
   return (wt / wtMax);
 
@@ -987,7 +987,7 @@ void Sigma2ffbar2ffbarsgm::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2ffbarsgmZ::initProc() {
 
   // Allow to pick only gamma* or Z0 part of full gamma*/Z0 expression.
@@ -1060,7 +1060,7 @@ void Sigma2ffbar2ffbarsgmZ::sigmaKin() {
         gamTf = colf * ef * ef * betaf;
         gamLf = gamTf * 4. * mr;
         intTf = colf * ef * vf * betaf;
-        intLf = intLf * 4. * mr;
+        intLf = intTf * 4. * mr;
         intAf = colf * ef * af * betaf;
         resTf = colf * (vf * vf * betaf + af * af * pow3(betaf));
         resLf = colf * vf * vf * betaf * 4. * mr;
@@ -1181,7 +1181,7 @@ void Sigma2ffbar2ffbarsgmZ::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2ffbarsW::initProc() {
 
   // Store W+- mass and width for propagator.
@@ -1266,7 +1266,7 @@ void Sigma2ffbar2ffbarsW::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2FFbarsgmZ::initProc() {
 
   // Process name.
@@ -1322,7 +1322,7 @@ void Sigma2ffbar2FFbarsgmZ::sigmaKin() {
 
   // Final-state colour factor.
   double colF    = (idNew < 9) ? 3. * (1. + alpS / M_PI) : 1.;
- 
+
   // Reconstruct decay angle so can reuse 2 -> 1 cross section.
   cosThe         = (tH - uH) / (betaf * sH);
 
@@ -1372,7 +1372,7 @@ double Sigma2ffbar2FFbarsgmZ::sigmaHat() {
   // Initial-state colour factor. Answer.
   if (idAbs < 9) sigma /= 3.;
   return sigma;
-   
+
 }
 
 //--------------------------------------------------------------------------
@@ -1416,7 +1416,7 @@ double Sigma2ffbar2FFbarsgmZ::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2FfbarsW::initProc() {
 
   // Process name.
@@ -1473,10 +1473,10 @@ void Sigma2ffbar2FfbarsW::sigmaKin() {
   double mr1    = s3 / sH;
   double mr2    = s4 / sH;
   double betaf  = sqrtpos( pow2(1. - mr1 - mr2) - 4. * mr1 * mr2);
- 
+
   // Reconstruct decay angle so can reuse 2 -> 1 cross section.
   double cosThe = (tH - uH) / (betaf * sH);
- 
+
   // Set up Breit-Wigner and in- and out-widths.
   double sigBW  = 9. * M_PI * pow2(alpEM * thetaWRat)
                 / ( pow2(sH - m2Res) + pow2(sH * GamMRat) );
@@ -1511,7 +1511,7 @@ double Sigma2ffbar2FfbarsW::sigmaHat() {
 
   // Answer.
   return sigma;
-   
+
 }
 
 //--------------------------------------------------------------------------
@@ -1619,7 +1619,7 @@ void Sigma2ffbargmZWgmZW::setupProd( Event& process, int i1, int i2,
 
 complex Sigma2ffbargmZWgmZW::fGK(int j1, int j2, int j3, int j4, int j5,
   int j6) {
- 
+
   return 4. * hA[j1][j3] * hC[j2][j6]
          * ( hA[j1][j5] * hC[j1][j4] + hA[j3][j5] * hC[j3][j4] );
 
@@ -1659,7 +1659,7 @@ double Sigma2ffbargmZWgmZW::xjGK( double tHnow, double uHnow) {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2gmZgmZ::initProc() {
 
   // Allow to pick only gamma* or Z0 part of full gamma*/Z0 expression.
@@ -1964,7 +1964,7 @@ double Sigma2ffbar2gmZgmZ::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2ZW::initProc() {
 
   // Store W+- mass and width for propagator.
@@ -2142,7 +2142,7 @@ double Sigma2ffbar2ZW::weightDecay( Event& process, int iResBeg, int iResEnd) {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2WW::initProc() {
 
   // Store Z0 mass and width for propagator. Common coupling factor.
@@ -2196,7 +2196,7 @@ void Sigma2ffbar2WW::sigmaKin() {
 // Evaluate d(sigmaHat)/d(tHat), including incoming flavour dependence.
 
 double Sigma2ffbar2WW::sigmaHat() {
- 
+
   // Flavour-specific couplings.
   int idAbs = abs(id1);
   double ei = couplingsPtr->ef(idAbs);
@@ -2240,7 +2240,7 @@ void Sigma2ffbar2WW::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for W+ and W- decay angles.
-  
+
 double Sigma2ffbar2WW::weightDecay( Event& process, int iResBeg, int iResEnd) {
 
   // Two resonance decays, but with common weight.
@@ -2302,7 +2302,7 @@ double Sigma2ffbar2WW::weightDecay( Event& process, int iResBeg, int iResEnd) {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbargmZggm::initProc() {
 
   // Allow to pick only gamma* or Z0 part of full gamma*/Z0 expression.
@@ -2380,7 +2380,7 @@ void Sigma2ffbargmZggm::flavSum() {
 //--------------------------------------------------------------------------
 
 // Calculate common parts of gamma/interference/Z0 propagator terms.
-  
+
 void Sigma2ffbargmZggm::propTerm() {
 
   // Calculate prefactors for gamma/interference/Z0 cross section terms.
@@ -2399,7 +2399,7 @@ void Sigma2ffbargmZggm::propTerm() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for gamma*/Z0 decay angle.
-  
+
 double Sigma2ffbargmZggm::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -2457,7 +2457,7 @@ double Sigma2ffbargmZggm::weightDecay( Event& process, int iResBeg,
                + (clirf + crilf) * (p14*p14 + p23*p23) ;
   double wtMax = (clilf + clirf + crilf + crirf)
                * (pow2(p13 + p14) + pow2(p23 + p24));
- 
+
   // Done.
   return (wt / wtMax);
 
@@ -2721,7 +2721,7 @@ void Sigma2fgm2gmZf::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for W+- decay angle.
-  
+
 double Sigma2ffbarWggm::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -2757,7 +2757,7 @@ double Sigma2ffbarWggm::weightDecay( Event& process, int iResBeg,
   // Calculate weight and its maximum.
   double wt    = pow2(p13) + pow2(p24);
   double wtMax = pow2(p13 + p14) + pow2(p23 + p24);
- 
+
   // Done.
   return (wt / wtMax);
 
@@ -2771,7 +2771,7 @@ double Sigma2ffbarWggm::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qqbar2Wg::initProc() {
 
   // Secondary open width fractions, relevant for top (or heavier).
@@ -2833,7 +2833,7 @@ void Sigma2qqbar2Wg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2qg2Wq::initProc() {
 
   // Secondary open width fractions, relevant for top (or heavier).
@@ -2905,7 +2905,7 @@ void Sigma2qg2Wq::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2Wgm::initProc() {
 
   // Secondary open width fractions, relevant for top (or heavier).
@@ -2976,7 +2976,7 @@ void Sigma2ffbar2Wgm::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2fgm2Wf::initProc() {
 
   // Secondary open width fractions, relevant for top (or heavier).

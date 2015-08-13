@@ -1,6 +1,6 @@
 #include <string>
 #include "Pythia8/Pythia.h"
-#include "backend_types/Pythia_8_186/wrapper_Pythia.h"
+#include "backend_types/Pythia_8_209/wrapper_Pythia.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 

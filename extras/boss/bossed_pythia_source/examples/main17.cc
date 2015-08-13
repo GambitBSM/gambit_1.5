@@ -1,5 +1,5 @@
 // main17.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -52,7 +52,7 @@ bool JpsiDecay::decay(vector<int>& idProd, vector<double>& mProd,
   // Always do decay J/psi -> mu+ mu-; store the muons.
   idProd.push_back(-13);
   idProd.push_back(13);
-  
+
   // Muon mass(es), here from Pythia tables, also stored.
   double mMuon = pdtPtr->m0(13);
   mProd.push_back(mMuon);
@@ -169,7 +169,7 @@ int main() {
       int status = pythia.event[i].statusAbs();
       if (status == 93 || status == 94) {externalDecay = true; break;}
     }
- 
+
     // List first few events with external decay.
     if (externalDecay && ++iList <= nList) {
       pythia.process.list();

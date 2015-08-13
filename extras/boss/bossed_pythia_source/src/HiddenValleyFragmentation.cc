@@ -1,5 +1,5 @@
 // HiddenValleyFragmentation.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -9,7 +9,7 @@
 #include "Pythia8/HiddenValleyFragmentation.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The HVStringFlav class is used to select HV-quark and HV-hadron flavours.
@@ -42,7 +42,7 @@ FlavContainer HVStringFlav::pick(FlavContainer& flavOld) {
   // Pick new HV-flavour at random; keep track of sign.
   flavNew.id = 4900100 + min( 1 + int(nFlav * rndmPtr->flat()), nFlav);
   if (flavOld.id > 0) flavNew.id = -flavNew.id;
-    
+
   // Done.
   return flavNew;
 
@@ -73,7 +73,7 @@ int HVStringFlav::combine(FlavContainer& flav1, FlavContainer& flav2) {
   return idMeson;
 
 }
- 
+
 //==========================================================================
 
 // The HVStringPT class is used to select pT in HV fragmentation.
@@ -99,7 +99,7 @@ void HVStringPT::init(Settings& settings, ParticleData& particleData,
   sigma2Had        = 2. * pow2( max( SIGMAMIN, sigma) );
 
 }
- 
+
 //==========================================================================
 
 // The HVStringZ class is used to select z in HV fragmentation.
@@ -171,7 +171,7 @@ bool HiddenValleyFragmentation::init(Info* infoPtrIn, Settings& settings,
       particleDataPtr->addParticle( 4900100 + iFlav, "qv", "qvbar",
       spinType, 0, 0, m0);
   }
- 
+
   // Hidden Valley meson mass used to choose hadronization mode.
   mhvMeson = particleDataPtr->m0(4900111);
 
@@ -325,7 +325,7 @@ bool HiddenValleyFragmentation::extractHVevent(Event& event) {
     ihvParton.push_back( iHV);
     colNow = hvEvent[iHV].col();
   }
- 
+
   // Trace colour by colour until reached anticolour end.
   while (colNow > 0) {
     for (int iHV = 1; iHV < hvOldSize; ++iHV)
@@ -437,7 +437,7 @@ bool HiddenValleyFragmentation::insertHVevent(Event& event) {
   return true;
 
 }
-  
+
 //==========================================================================
 
 } // end namespace Pythia8

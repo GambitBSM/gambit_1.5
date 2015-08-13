@@ -11,7 +11,7 @@ class Error(Exception):
 
 
 class ReturnError(Error):
-    """Exception raised for when a function cannot return the expected result.
+    """Exception raised when a function cannot return the expected result.
 
     Attributes:
         msg  -- explanation of the error

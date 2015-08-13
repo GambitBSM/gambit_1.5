@@ -1,5 +1,5 @@
 // main51.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -24,7 +24,7 @@ double integrate(PDF* nowPDF, double Q2) {
   double dxLog = log(xLin / xLog) / nLog;
   double sum   = 0.;
   double x, sumNow;
-  
+
   // Integration at large x in linear steps.
   for (int iLin = 0; iLin < nLin; ++iLin) {
     x      = xLin + (iLin + 0.5) * dxLin;
@@ -33,7 +33,7 @@ double integrate(PDF* nowPDF, double Q2) {
       sumNow += nowPDF->xf( i, x, Q2) + nowPDF->xf( -i, x, Q2);
     sum   += dxLin * sumNow;
   }
-  
+
   // Integration at small x in logarithmic steps.
   for (int iLog = 0; iLog < nLog; ++iLog) {
     x      = xLog * pow( xLin / xLog, (iLog + 0.5) / nLog );
@@ -51,21 +51,22 @@ double integrate(PDF* nowPDF, double Q2) {
 //==========================================================================
 
 int main() {
- 
+
   // The Pythia class itself is not used, but some facilities that come along.
   //Pythia pythia;
 
-  // Chosen new PDF set; LHAPDF file name conventions.
-  //string pdfSet = "cteq5l.LHgrid";
-  //string pdfSet = "cteq61.LHpdf";
-  //string pdfSet = "cteq61.LHgrid";
-  //string pdfSet = "MRST2004nlo.LHgrid";
-  //string pdfSet = "MRST2001lo.LHgrid";
-  string pdfSet = "MRST2007lomod.LHgrid";
+  // Chosen new PDF set; LHAPDF5 file name conventions.
+  //string pdfSet = "LHAPDF5:cteq5l.LHgrid";
+  //string pdfSet = "LHAPDF5:cteq61.LHpdf";
+  //string pdfSet = "LHAPDF5:cteq61.LHgrid";
+  //string pdfSet = "LHAPDF5:MRST2004nlo.LHgrid";
+  //string pdfSet = "LHAPDF5:MRST2001lo.LHgrid";
+  string pdfSet = "LHAPDF5:MRST2007lomod.LHgrid";
 
   // Pointers to old default and new tryout PDF sets.
+  Info info;
   PDF* oldPDF = new CTEQ5L(2212);
-  PDF* newPDF = new LHAPDF(2212, pdfSet, 0);
+  PDF* newPDF = new LHAPDF(2212, pdfSet, &info);
 
   // Alternative: compare two Pomeron PDF's. Boost second by factor 2.
   //PDF* oldPDF = new PomFix( 990, -0.2, 2.5, 0., 3., 0.4, 0.5);
@@ -89,7 +90,7 @@ int main() {
   // Loop over the two Q2 values.
   for (int iQ = 0; iQ < 2; ++iQ) {
     double Q2 = (iQ == 0) ? 4. : 100;
-    
+
     // Loop over x values, in a logarithmic scale
     for (int iX = 0; iX < 80; ++iX) {
       double xLog = -(0.1 * iX + 0.05);
@@ -121,7 +122,7 @@ int main() {
   // Histogram momentum sum as a function of Q2 (or rather log10(Q2)).
   Hist oldXSum("momentum sum(log10(Q2)) old", 100, -2., 8.);
   Hist newXSum("momentum sum(log10(Q2)) new", 100, -2., 8.);
- 
+
   // Loop over Q2 values.
   for (int iQ = 0; iQ < 100; ++iQ) {
     double log10Q2 = -2.0 + 0.1 * iQ + 0.05;

@@ -292,7 +292,8 @@ template<class T> void SearchTree<T>::Node::reset_parents_link_to_me(typename Se
 }
 template<class T> class SearchTree<T>::circulator{
 public:
-  template<class U> friend class SearchTree<U>::const_circulator;
+  // Next line commented out, by author agreement, to avoid compiler warning.
+  //template<class U> friend class SearchTree<U>::const_circulator;
   friend class SearchTree<T>;
   circulator() : _node(NULL) {}
   circulator(Node * node) : _node(node) {}
@@ -825,7 +826,8 @@ FJCORE_END_NAMESPACE
 #include<iomanip>
 #include<algorithm>
 FJCORE_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
-const unsigned int huge_unsigned = 4294967295U;
+// Next line commented out, by author agreement, to avoid compiler warning.
+//const unsigned int huge_unsigned = 4294967295U;
 const unsigned int twopow31      = 2147483648U;
 using namespace std;
 void ClosestPair2D::_point2shuffle(Point & point, Shuffle & shuffle,
@@ -2315,7 +2317,7 @@ void ClusterSequence::_initialise_tiles() {
 	for (int idphi = -1; idphi <=+1; idphi++) {
 	  *pptile = & _tiles[_tile_index(ieta-1,iphi+idphi)];
 	  pptile++;
-	}	
+	}
       }
       *pptile = & _tiles[_tile_index(ieta,iphi-1)];
       pptile++;
@@ -2326,7 +2328,7 @@ void ClusterSequence::_initialise_tiles() {
 	for (int idphi = -1; idphi <= +1; idphi++) {
 	  *pptile = & _tiles[_tile_index(ieta+1,iphi+idphi)];
 	  pptile++;
-	}	
+	}
       }
       tile->end_tiles = pptile;
       tile->tagged = false;
@@ -2582,7 +2584,7 @@ void ClusterSequence::_faster_tiled_N2_cluster() {
   jetA = head;
   for (int i = 0; i < n; i++) {
     diJ[i].diJ = _bj_diJ(jetA); // kt distance * R^2
-    diJ[i].jet = jetA;  // our compact diJ table will not be in	
+    diJ[i].jet = jetA;  // our compact diJ table will not be in
     jetA->diJ_posn = i; // one-to-one corresp. with non-compact jets,
     jetA++; // have jetA follow i
   }

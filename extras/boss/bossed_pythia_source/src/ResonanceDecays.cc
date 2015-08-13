@@ -1,5 +1,5 @@
 // ResonanceDecays.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -44,7 +44,7 @@ const double ResonanceDecays::WTCORRECTION[11] = { 1., 1., 1.,
   2., 5., 15., 60., 250., 1250., 7000., 50000. };
 
 //--------------------------------------------------------------------------
-  
+
 bool ResonanceDecays::next( Event& process, int iDecNow) {
 
   // Loop over all entries to find resonances that should decay.
@@ -136,7 +136,7 @@ bool ResonanceDecays::next( Event& process, int iDecNow) {
       // Modify mother status and daughters.
       decayer.status(-22);
       decayer.daughters(iFirst, iLast);
-                 
+
     // End of loop over all entries.
     }
   } while (iDecNow == 0 && ++iDec < process.size());
@@ -149,7 +149,7 @@ bool ResonanceDecays::next( Event& process, int iDecNow) {
 //--------------------------------------------------------------------------
 
 // Select masses of decay products.
- 
+
 bool ResonanceDecays::pickMasses() {
 
   // Arrays with properties of particles. Fill with dummy values for mother.
@@ -190,7 +190,7 @@ bool ResonanceDecays::pickMasses() {
     mSum        += max( m0BW[i], mMinBW[i]);
     mSumMin     += mMinBW[i];
   }
- 
+
   // If sum of minimal masses above mother mass then give up.
   if (mSumMin + MSAFETY > mMother) return false;
 
@@ -243,7 +243,7 @@ bool ResonanceDecays::pickMasses() {
       mMax           = min( mMaxBW[iBWi], mMax );
       double mMin    = min( mMinBW[iBWi], mMax - MSAFETY);
       if (mMin < 0.) return false;
-   
+
       // Parameters for Breit-Wigner choice, with constrained mass range.
       double m2Nom   = pow2( m0BW[iBWi] );
       double m2Max   = mMax * mMax;
@@ -275,7 +275,7 @@ bool ResonanceDecays::pickMasses() {
     }
     if (nBW == 1) return true;
   }
-       
+
   // Left to do two broadest Breit-Wigners correlated, i.e. more realistic.
   int iBW1        = iBW[0];
   int iBW2        = iBW[1];
@@ -298,7 +298,7 @@ bool ResonanceDecays::pickMasses() {
   double mMin1    = min( mMinBW[iBW1], mMax1 - MSAFETY);
   double mMax2    = min( mMaxBW[iBW2], mRem - mMinBW[iBW1] );
   double mMin2    = min( mMinBW[iBW2], mMax2 - MSAFETY);
-   
+
   // At least one range must extend below half remaining mass.
   if (mMin1 + mMin2 > mRem) return false;
   double mMid     = 0.5 * mRem;
@@ -344,12 +344,12 @@ bool ResonanceDecays::pickMasses() {
   else if (psMode == 5) wtMax = psMax
     * (pow2(1. - mr1 - mr2) + 8. * mr1 * mr2);
   else if (psMode == 6) wtMax = pow3(psMax);
-  
+
   // Retry mass according to Breit-Wigners, with simple threshold factor.
   double atanDif1, atanDif2, m2Now1, m2Now2, mNow1, mNow2, ps, wt;
   for (int iTryMasses = 0; iTryMasses <= NTRYMASSES; ++ iTryMasses) {
     if (iTryMasses == NTRYMASSES) return false;
- 
+
     // Pick either below half remaining mass.
     bool pickLow1 = false;
     if (rndmPtr->flat() < probLow1) {
@@ -387,7 +387,7 @@ bool ResonanceDecays::pickMasses() {
   }
   mProd[iBW1] = mNow1;
   mProd[iBW2] = mNow2;
- 
+
   // Done.
   return true;
 
@@ -396,7 +396,7 @@ bool ResonanceDecays::pickMasses() {
 //--------------------------------------------------------------------------
 
 // Select colours of decay products.
-  
+
 bool ResonanceDecays::pickColours(int iDec, Event& process) {
 
   // Reset or create arrays with colour info.
@@ -458,7 +458,7 @@ bool ResonanceDecays::pickColours(int iDec, Event& process) {
     colJun[1] = process.nextColTag();
     colJun[2] = process.nextColTag();
     process.appendJunction( kindJun, colJun[0], colJun[1], colJun[2]);
- 
+
     // Loop over three legs. Remove an incoming anticolour on first leg.
     for (int leg = 0; leg < 3; ++leg) {
       if (leg == 0 && kindJun != 1) acol0 = 0;
@@ -495,7 +495,7 @@ bool ResonanceDecays::pickColours(int iDec, Event& process) {
     acolJun[1] = process.nextColTag();
     acolJun[2] = process.nextColTag();
     process.appendJunction( kindJun, acolJun[0], acolJun[1], acolJun[2]);
- 
+
     // Loop over three legs. Remove an incoming colour on first leg.
     for (int leg = 0; leg < 3; ++leg) {
       if (leg == 0 && kindJun != 2) col0 = 0;
@@ -620,7 +620,7 @@ bool ResonanceDecays::pickColours(int iDec, Event& process) {
     iDipCol.push_back(0);
     iDipAcol.push_back(0);
   }
-  
+
   // Now attach all final-state octets at random to existing dipoles.
   for (int i = 0; i < int(iOctet.size()); ++i) {
     int iOct = iOctet[i];
@@ -669,7 +669,7 @@ bool ResonanceDecays::pickColours(int iDec, Event& process) {
       }
     }
   }
-  
+
   // Must now have at least two dipoles (no 1 -> 8 or 8 -> 1).
   if (iDipCol.size() < 2) {
     infoPtr->errorMsg("Error in ResonanceDecays::pickColours:"
@@ -686,7 +686,7 @@ bool ResonanceDecays::pickColours(int iDec, Event& process) {
 
 // Select decay products momenta isotropically in phase space.
 // Process-dependent angular distributions may be imposed in SigmaProcess.
-  
+
 bool ResonanceDecays::pickKinematics() {
 
   // Description of two-body decays as simple special case.
@@ -799,7 +799,7 @@ bool ResonanceDecays::pickKinematics() {
   double mSum    = mProd[1];
   for (int i = 2; i <= mult; ++i) mSum += mProd[i];
   double mDiff   = m0 - mSum;
-   
+
   // Begin setup of intermediate invariant masses.
   vector<double> mInv;
   for (int i = 0; i <= mult; ++i) mInv.push_back( mProd[i]);
@@ -834,7 +834,7 @@ bool ResonanceDecays::pickKinematics() {
       }
     }
     rndmOrd.push_back(0.);
-  
+
     // Translate into intermediate masses and find weight.
     for (int i = mult - 1; i > 0; --i) {
       mInv[i] = mInv[i+1] + mProd[i] + (rndmOrd[i-1] - rndmOrd[i]) * mDiff;
@@ -869,7 +869,7 @@ bool ResonanceDecays::pickKinematics() {
     pInv[i+1].p( -pX, -pY, -pZ, eInv);
   }
   pProd.push_back( pInv[mult] );
-  
+
   // Boost decay products to the mother rest frame and on to lab frame.
   pInv[1] = pProd[0];
   for (int iFrame = mult - 1; iFrame > 0; --iFrame)

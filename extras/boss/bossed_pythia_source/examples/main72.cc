@@ -1,5 +1,5 @@
 // main72.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -16,10 +16,10 @@
 // and fastjet selectors that make use of the Particle properties.
 // See the extensive comments in the header file for further details
 // and examples.
-#include "Pythia8/FastJet3.h"
+#include "Pythia8Plugins/FastJet3.h"
 
 using namespace Pythia8;
- 
+
 int main() {
 
   // Number of events, generated and listed ones (for jets).
@@ -53,7 +53,7 @@ int main() {
 
   // Set up SlowJet jet finder in native mode.
   SlowJet slowJet( power, R, pTMin, etaMax, select, massSet, 0, false);
-  
+
   // Set up SlowJet jet finder as a wrapper to the fjcore package.
   // Note that this is now the default SlowJet constructor choice.
   SlowJet fjCore( power, R, pTMin, etaMax, select, massSet, 0, true);
@@ -162,10 +162,10 @@ int main() {
       if      (select > 2 &&  event[i].isNeutral() ) continue;
       else if (select == 2 && !event[i].isVisible() ) continue;
       if (etaMax < 20. && abs(event[i].eta()) > etaMax) continue;
-     
+
       // Create a PseudoJet from the complete Pythia particle.
       fastjet::PseudoJet particleTemp = event[i];
-     
+
       // Optionally modify mass and energy.
       pTemp = event[i].p();
       mTemp = event[i].m();
@@ -221,7 +221,7 @@ int main() {
       cout << "\n --------  End FastJet Listing  ------------------"
            << "---------------------------------" << endl;
     }
- 
+
     // Fill distribution of FastJet jets relative to SlowJet ones.
     int nFast = sortedJets.size();
     nJetsF.fill( nFast - nSlow);
@@ -233,7 +233,7 @@ int main() {
         RdistF.fill( sqrt(dist2) );
       }
     }
-    
+
     // Comparison of time consumption by analyzed multiplicity.
     nAna.fill( nAnalyze);
     tGen.fill( nAnalyze, aftGen - befGen);

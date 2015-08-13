@@ -1,5 +1,5 @@
 // TauDecays.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Philip Ilten, Torbjorn Sjostrand.
+// Copyright (C) 2015 Philip Ilten, Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -39,6 +39,10 @@ public:
   // Decay a tau or correlated tau pair.
   bool decay(int iDec, Event& event);
 
+  // Determine internal or external polarization and correlation mechanism.
+  bool internalMechanism(Event &event);
+  bool externalMechanism(Event &event);
+
   // Choose a decay channel for a particle.
   vector<HelicityParticle> createChildren(HelicityParticle parent);
 
@@ -55,13 +59,10 @@ private:
   static const double WTCORRECTION[11];
 
   // Flag whether a correlated tau decay should be performed.
-  bool   correlated;
+  bool correlated;
 
   // User selected mode and mother for tau decays.
-  int    tauMode, tauMother, tauModeSave, tauMotherSave;
-
-  // User selected polarization for tau decays.
-  double polarization, polSave;
+  int tauExt, tauMode, tauMother, tauPol;
 
   // Helicity matrix element pointers.
   HelicityMatrixElement* hardME;
@@ -69,14 +70,11 @@ private:
 
   // Hard process helicity matrix elements.
   HMETwoFermions2W2TwoFermions      hmeTwoFermions2W2TwoFermions;
-  HMETwoFermions2Z2TwoFermions      hmeTwoFermions2Z2TwoFermions;
-  HMETwoFermions2Gamma2TwoFermions  hmeTwoFermions2Gamma2TwoFermions;
   HMETwoFermions2GammaZ2TwoFermions hmeTwoFermions2GammaZ2TwoFermions;
+  HMEW2TwoFermions                  hmeW2TwoFermions;
   HMEZ2TwoFermions                  hmeZ2TwoFermions;
-  HMEHiggsEven2TwoFermions          hmeHiggsEven2TwoFermions;
-  HMEHiggsOdd2TwoFermions           hmeHiggsOdd2TwoFermions;
-  HMEHiggsCharged2TwoFermions       hmeHiggsCharged2TwoFermions;
-  HMEUnpolarized                    hmeUnpolarized;
+  HMEGamma2TwoFermions              hmeGamma2TwoFermions;
+  HMEHiggs2TwoFermions              hmeHiggs2TwoFermions;
 
   // Tau decay helicity matrix elements.
   HMETau2Meson                    hmeTau2Meson;
@@ -113,6 +111,7 @@ private:
   // Parameters to determine if correlated partner should decay.
   double tau0Max, tauMax, rMax, xyMax, zMax;
   bool limitTau0, limitTau, limitRadius, limitCylinder, limitDecay;
+
 };
 
 //==========================================================================

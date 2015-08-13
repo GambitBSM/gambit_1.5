@@ -1,5 +1,5 @@
 // FragmentationSystems.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -147,8 +147,13 @@ bool ColConfig::insert( vector<int>& iPartonIn, Event& event) {
       }
       Vec4 pNew   = event[iJoin1].p() + event[iJoin2].p();
 
+      int statusHad = 73;
+      // Need to keep status as 74 for junctions in order to keep track
+      // of them.
+      if (event[iMoth1].statusAbs() == 74) statusHad = 74;
+
       // Append joined parton to event record.
-      int iNew = event.append( idNew, 73, iMoth1, iMoth2, 0, 0, 
+      int iNew = event.append( idNew, statusHad, iMoth1, iMoth2, 0, 0,
         colNew, acolNew, pNew, pNew.mCalc() );
 
       // Displaced lifetime/vertex; mothers should be same but prefer quark.
@@ -220,7 +225,7 @@ bool ColConfig::joinJunction( vector<int>& iPartonIn, Event& event,
   double m01  = (pLeg[0] + pLeg[1]).mCalc() - mLeg[0] - mLeg[1];
   double m02  = (pLeg[0] + pLeg[2]).mCalc() - mLeg[0] - mLeg[2];
   double m12  = (pLeg[1] + pLeg[2]).mCalc() - mLeg[1] - mLeg[2];
-  
+
   // Find lowest-mass pair not involving diquark.
   double mMin = mJoinJunction + 1.;
   int    legA = -1;
@@ -256,7 +261,7 @@ bool ColConfig::joinJunction( vector<int>& iPartonIn, Event& event,
     else if( leg == legB) iLegB.push_back( iPartonIn[i] );
     else if( leg == legC) iLegC.push_back( iPartonIn[i] );
   }
- 
+
   // First step: successively combine any gluons on the two legs.
   // (Presumably overkill; not likely to be (m)any extra gluons.)
   // (Do as successive binary joinings, so only need two mothers.)
@@ -269,7 +274,7 @@ bool ColConfig::joinJunction( vector<int>& iPartonIn, Event& event,
       int colNew = (event[iQ].id() > 0) ? event[iG].col() : 0;
       int acolNew = (event[iQ].id() < 0) ? event[iG].acol() : 0;
       Vec4 pNew = event[iQ].p() + event[iG].p();
-      int iNew = event.append( event[iQ].id(), 74, iQ, iG, 0, 0, 
+      int iNew = event.append( event[iQ].id(), 74, iQ, iG, 0, 0,
         colNew, acolNew, pNew, pNew.mCalc() );
 
       // Mark joined partons and update iLeg end.
@@ -293,7 +298,7 @@ bool ColConfig::joinJunction( vector<int>& iPartonIn, Event& event,
   Vec4 pNew   = pLeg[legA] + pLeg[legB];
   int iNew    = event.append( idNew, 74, min(iQA, iQB), max( iQA, iQB),
      0, 0, colNew, acolNew, pNew, pNew.mCalc() );
- 
+
   // Mark joined partons and reduce remaining system.
   event[iQA].statusNeg();
   event[iQB].statusNeg();
@@ -346,12 +351,14 @@ void ColConfig::collect(int iSub, Event& event, bool skipTrivial) {
 
   // Normally done if in order, but sometimes may need to copy anyway.
   if (inOrder && skipTrivial) return;
- 
+
   // Copy down system. Update current partons.
   for (int i = 0; i < singlets[iSub].size(); ++i) {
     int iOld = singlets[iSub].iParton[i];
     if (iOld < 0) continue;
-    int iNew = event.copy(iOld, 71);
+    int iNew;
+    if (event[iOld].status() == 74) iNew = event.copy(iOld, 74);
+    else iNew = event.copy(iOld, 71);
     singlets[iSub].iParton[i] = iNew;
   }
 
@@ -392,7 +399,7 @@ void ColConfig::list(ostream& os) const {
   // Done.
   }
 }
- 
+
 //==========================================================================
 
 // The StringRegion class.
@@ -420,7 +427,7 @@ void StringRegion::setUp(Vec4 p1, Vec4 p2, bool isMassless) {
 
   // Simple case: the two incoming four-vectors guaranteed massless.
   if (isMassless) {
- 
+
     // Calculate w2, minimum value. Lightcone directions = input.
     w2 = 2. * (p1 * p2);
     if (w2 < MJOIN*MJOIN) {isSetUp = true; isEmpty = true; return;}
@@ -458,7 +465,7 @@ void StringRegion::setUp(Vec4 p1, Vec4 p2, bool isMassless) {
     pPos = (1. + k1) * p1 - k2 * p2;
     pNeg = (1. + k2) * p2 - k1 * p1;
   }
-  
+
   // Find two spacelike transverse four-vector directions.
   // Begin by picking two sensible trial directions.
   Vec4 eDiff = pPos / pPos.e() - pNeg / pNeg.e();
@@ -507,7 +514,7 @@ void StringRegion::project(Vec4 pIn) {
   pyProj = - (pIn * eY);
 
 }
- 
+
 //==========================================================================
 
 // The StringSystem class.

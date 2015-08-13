@@ -1,5 +1,5 @@
 // Basics.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -142,9 +142,9 @@ int Rndm::pick(const vector<double>& prob) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Save current state of the random number generator to a binary file.
- 
+
 bool Rndm::dumpState(string fileName) {
 
   // Open file as output stream.
@@ -165,7 +165,7 @@ bool Rndm::dumpState(string fileName) {
   ofs.write((char *) &cd,       sizeof(double));
   ofs.write((char *) &cm,       sizeof(double));
   ofs.write((char *) &u,        sizeof(double) * 97);
- 
+
   // Write confirmation on cout.
   cout << " PYTHIA Rndm::dumpState: seed = " << seedSave
        << ", sequence no = " << sequence << endl;
@@ -174,7 +174,7 @@ bool Rndm::dumpState(string fileName) {
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Read in the state of the random number generator from a binary file.
 
 bool Rndm::readState(string fileName) {
@@ -535,7 +535,7 @@ double cosphi(const Vec4& v1, const Vec4& v2, const Vec4& n) {
 //--------------------------------------------------------------------------
 
 // Distance in cylindrical (y, phi) coordinates.
- 
+
 double RRapPhi(const Vec4& v1, const Vec4& v2) {
   double dRap = abs(v1.rap() - v2.rap());
   double dPhi = abs(v1.phi() - v2.phi());
@@ -546,14 +546,14 @@ double RRapPhi(const Vec4& v1, const Vec4& v2) {
 //--------------------------------------------------------------------------
 
 // Distance in cylindrical (eta, phi) coordinates.
- 
+
 double REtaPhi(const Vec4& v1, const Vec4& v2) {
   double dEta = abs(v1.eta() - v2.eta());
   double dPhi = abs(v1.phi() - v2.phi());
   if (dPhi > M_PI) dPhi = 2. * M_PI - dPhi;
   return sqrt(dEta*dEta + dPhi*dPhi);
 }
-  
+
 //--------------------------------------------------------------------------
 
 // Print a four-vector: also operator overloading with friend.
@@ -855,7 +855,7 @@ void Hist::null() {
 // Fill bin with weight.
 
 void Hist::fill(double x, double w) {
-  
+
   ++nFill;
   int iBin = int(floor((x - xMin)/dx));
   if (iBin < 0)          under += w;
@@ -979,7 +979,7 @@ ostream& operator<<(ostream& os, const Hist& h) {
   } else os << "     Histogram not shown since lowest value" << scientific
        << setprecision(4) << setw(12) << yMin << " and highest value"
        << setw(12) << yMax << " are too close \n \n";
- 
+
   // Calculate and print statistics.
   double cSum   = 0.;
   double cxSum  = 0.;
@@ -1020,7 +1020,7 @@ void Hist::table(ostream& os, bool printOverUnder, bool xMidBin) const {
     os << setw(12) << xBeg + ix * dx << setw(12) << res[ix] << "\n";
   if (printOverUnder)
     os << setw(12) << xBeg + nBin * dx << setw(12) << over << "\n";
-   
+
 }
 
 //--------------------------------------------------------------------------
@@ -1038,20 +1038,20 @@ void table(const Hist& h1, const Hist& h2, ostream& os, bool printOverUnder,
   os << scientific << setprecision(4);
   double xBeg = (xMidBin) ? h1.xMin + 0.5 * h1.dx : h1.xMin;
   if (printOverUnder)
-    os << setw(12) << xBeg - h1.dx << setw(12) << h1.under 
+    os << setw(12) << xBeg - h1.dx << setw(12) << h1.under
        << setw(12) << h2.under << "\n";
   for (int ix = 0; ix < h1.nBin; ++ix)
-    os << setw(12) << xBeg + ix * h1.dx << setw(12) << h1.res[ix] 
+    os << setw(12) << xBeg + ix * h1.dx << setw(12) << h1.res[ix]
        << setw(12) << h2.res[ix] << "\n";
   if (printOverUnder)
-    os << setw(12) << xBeg + h1.nBin * h1.dx << setw(12) << h1.over 
+    os << setw(12) << xBeg + h1.nBin * h1.dx << setw(12) << h1.over
        << setw(12) << h2.over << "\n";
-   
+
 }
 
 void table(const Hist& h1, const Hist& h2, string fileName,
   bool printOverUnder, bool xMidBin) {
-  
+
   ofstream streamName(fileName.c_str());
   table( h1, h2, streamName, printOverUnder, xMidBin);
 
@@ -1095,7 +1095,7 @@ void Hist::takeLog(bool tenLog) {
   for (int ix = 0; ix < nBin; ++ix)
     if (res[ix] > Hist::TINY && res[ix] < yMin ) yMin = res[ix];
   yMin *= 0.8;
-  
+
   // Take 10-logarithm bin by bin, but ensure positivity.
   if (tenLog) {
     for (int ix = 0; ix < nBin; ++ix)
@@ -1103,7 +1103,7 @@ void Hist::takeLog(bool tenLog) {
     under  =  log10( max( yMin, under) );
     inside =  log10( max( yMin, inside) );
     over   =  log10( max( yMin, over) );
-  
+
   // Take natural logarithm bin by bin, but ensure positivity.
   } else {
     for (int ix = 0; ix < nBin; ++ix)
@@ -1127,7 +1127,7 @@ void Hist::takeSqrt() {
   over   = sqrtpos(over);
 
 }
- 
+
 //--------------------------------------------------------------------------
 
 // Add histogram to existing one.

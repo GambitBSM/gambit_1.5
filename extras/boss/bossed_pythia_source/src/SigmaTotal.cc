@@ -1,5 +1,5 @@
 // SigmaTotal.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -29,7 +29,7 @@ namespace Pythia8 {
 // For now a neutron is treated like a proton.
 
 //--------------------------------------------------------------------------
- 
+
 // Definitions of static variables.
 // Note that a lot of parameters are hardcoded as const here, rather
 // than being interfaced for public change, since any changes would
@@ -104,7 +104,7 @@ const double SigmaTotal::CDD[10][9] = {
   { 3.18, -8.95, -3.37, 0.057, -0.76, 3.32, -1.12,  55.6, 1472., } ,
   { 4.18, -29.2,  56.2, 0.074, -1.36, 6.67, -1.14, 116.2, 6532.  } };
 const double SigmaTotal::SPROTON = 0.880;
-  
+
 // MBR parameters. Integration of MBR cross section.
 const int    SigmaTotal::NINTEG = 1000;
 const int    SigmaTotal::NINTEG2 = 40;
@@ -158,7 +158,7 @@ void SigmaTotal::init(Info* infoPtrIn, Settings& settings,
   sigmaPomP  = settings.parm("Diffraction:sigmaRefPomP");
   mPomP      = settings.parm("Diffraction:mRefPomP");
   pPomP      = settings.parm("Diffraction:mPowPomP");
-  
+
   // Parameters for MBR model.
   PomFlux     = settings.mode("Diffraction:PomFlux");
   MBReps      = settings.parm("Diffraction:MBRepsilon");
@@ -242,7 +242,7 @@ bool SigmaTotal::calc( int idA, int idB, double eCM) {
     infoPtr->errorMsg("Error in SigmaTotal::calc: too low energy");
     return false;
   }
-  
+
   // Evaluate the total cross section.
   s           = eCM*eCM;
   double sEps = pow( s, EPSILON);
@@ -254,7 +254,7 @@ bool SigmaTotal::calc( int idA, int idB, double eCM) {
   int iHadB = IHADBTABLE[iProc];
   bA        = BHAD[iHadA];
   bB        = BHAD[iHadB];
-   
+
   // Elastic slope parameter and cross section.
   bEl   = 2.*bA + 2.*bB + 4.*sEps - 4.2;
   sigEl = CONVERTEL * pow2(sigTot) / bEl;
@@ -291,7 +291,7 @@ bool SigmaTotal::calc( int idA, int idB, double eCM) {
     / (2.*bA + alP2 * log(s/sMaxAX)) ) / alP2;
   sum2  = CRES * sRMlogAX / (2.*bA + alP2 * log(s/sRMavgAX) + BcorrAX) ;
   sigAX = CONVERTSD * X[iProc] * BETA0[iHadA] * max( 0., sum1 + sum2);
- 
+
   // Order single diffractive correctly.
   if (swapped) {
     swap( bB, bA);
@@ -337,7 +337,7 @@ bool SigmaTotal::calc( int idA, int idB, double eCM) {
     sigXX  = sigXX  * maxXXOwn  / (sigXX  + maxXXOwn);
     sigAXB = sigAXB * maxAXBOwn / (sigAXB + maxAXBOwn);
   }
-  
+
   // Calculate cross sections in MBR model.
   if (PomFlux == 5) calcMBRxsecs(idA, idB, eCM);
 
@@ -363,7 +363,7 @@ bool SigmaTotal::calc( int idA, int idB, double eCM) {
                + alphaEM0 * alphaEM0 / (4. * CONVERTEL * tAbsMin) );
     }
   }
-  
+
   // Inelastic nondiffractive by unitarity.
   sigND = sigTot - sigEl - sigXB - sigAX - sigXX - sigAXB;
   if (sigND < 0.) infoPtr->errorMsg("Error in SigmaTotal::init: "
@@ -388,7 +388,7 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
 
   // Local variables.
   double sigtot, sigel, sigsd, sigdd, sigdpe;
-  
+
   // MBR parameters locally.
   double eps       = MBReps;
   double alph      = MBRalpha;
@@ -400,7 +400,7 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
   double a2        = FFA2;
   double b1        = FFB1;
   double b2        = FFB2;
-  
+
   // Calculate total and elastic cross sections.
   double ratio;
   if (eCM <= 1800.0) {
@@ -418,13 +418,13 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
     ratio  = 0.066 + 0.0119 * log(s);
   }
   sigel=sigtot*ratio;
-  
+
   // Integrate SD, DD and DPE(CD) cross sections.
   // Each cross section is obtained from the ratio of two integrals:
   // the Regge cross section and the renormalized flux.
   double cflux, csig, c1, step, f;
   double dymin0 = 0.;
-  
+
   // Calculate SD cross section.
   double dymaxSD = log(s / m2min);
   cflux          = pow2(beta0gev) / (16. * M_PI);
@@ -478,7 +478,7 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
     fluxdd       = fluxdd + step * c1 * f;
   }
   if (fluxdd < 1.) fluxdd = 1.;
-  
+
   // Regge cross section.
   c1             = csig * pow(s, eps) / (2. * alph);
   ddpmax         = 0.;
@@ -495,13 +495,13 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
   }
   ddpmax        *= 1.01;
   sigdd         /= fluxdd;
-  
+
   // Calculate DPE (CD) cross section.
   double dymaxCD = log(s / m2min);
   cflux          = pow4(beta0gev) / pow2(16. * M_PI);
   csig           = cflux * pow2(sigma0mb / beta0mb);
   double dy1, dy2, f1, f2, step2;
-    
+
   // DPE flux.
   c1             = cflux;
   double fluxdpe = 0.;
@@ -527,7 +527,7 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
     fluxdpe     += step * c1 * f;
   }
   if (fluxdpe < 1.) fluxdpe = 1.;
-  
+
   // Regge cross section.
   c1             = csig * pow(s, eps);
   sigdpe         = 0.;
@@ -556,7 +556,7 @@ bool SigmaTotal::calcMBRxsecs( int idA, int idB, double eCM) {
   }
   dpepmax       *= 1.01;
   sigdpe        /= fluxdpe;
-  
+
   // Diffraction done. Now calculate total inelastic cross section.
   sigND  = sigtot - (2. * sigsd + sigdd + sigel + sigdpe);
   sigTot = sigtot;
