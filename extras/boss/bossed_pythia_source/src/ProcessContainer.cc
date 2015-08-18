@@ -19,12 +19,12 @@
 #include "Pythia8/SigmaNewGaugeBosons.h"
 #include "Pythia8/SigmaQCD.h"
 #include "Pythia8/SigmaSUSY.h"
-#include "Sigma_MC4BSM_2012_UFO_gg_uvuvx.h"
+/*#include "Sigma_MC4BSM_2012_UFO_gg_uvuvx.h"
 #include "Sigma_MC4BSM_2012_UFO_qq_uvuvx.h"
 #include "Sigma_MC4BSM_2012_UFO_qq_evevx.h"
 #include "Sigma_MC4BSM_2012_UFO_qq_p1p2.h"
 #include "Sigma_MC4BSM_2012_UFO_qq_p2p2.h"
-#include "Sigma_MC4BSM_2012_UFO_qq_p1p1.h"
+#include "Sigma_MC4BSM_2012_UFO_qq_p1p1.h"*/
 
 
 namespace Pythia8 {
@@ -2481,7 +2481,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
   }
 
   // MJW adds user model processes (have to add includes above)
-  if (settings.flag("UserModel:all")) {
+  /*if (settings.flag("UserModel:all")) {
     sigmaPtr = new Sigma_MC4BSM_2012_UFO_gg_uvuvx(); containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
     sigmaPtr = new Sigma_MC4BSM_2012_UFO_qq_uvuvx(); containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
     sigmaPtr = new Sigma_MC4BSM_2012_UFO_qq_uvuvx(); containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
@@ -2489,7 +2489,7 @@ bool SetupContainers::init(vector<ProcessContainer*>& containerPtrs,
     sigmaPtr = new Sigma_MC4BSM_2012_UFO_qq_p1p2(); containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
     sigmaPtr = new Sigma_MC4BSM_2012_UFO_qq_p2p2(); containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
     sigmaPtr = new Sigma_MC4BSM_2012_UFO_qq_p1p1(); containerPtrs.push_back( new ProcessContainer(sigmaPtr) );
-  }
+  }*/
   
   // Done.
   return true;
