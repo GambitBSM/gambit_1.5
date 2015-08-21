@@ -1,8 +1,10 @@
 #include <string>
+#include "Pythia8/ResonanceWidths.h"
 #include "Pythia8/ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_Info.h"
-#include "backend_types/Pythia_8_186/wrapper_Settings.h"
-#include "backend_types/Pythia_8_186/wrapper_Couplings.h"
+#include "backend_types/Pythia_8_209/wrapper_DecayChannel.h"
+#include "backend_types/Pythia_8_209/wrapper_Info.h"
+#include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -174,6 +176,18 @@ void Pythia8::ParticleDataEntry::addChannel__BOSS()
 }
 
 
+Pythia8::Abstract_DecayChannel* Pythia8::ParticleDataEntry::channel__BOSS(int i)
+{
+    return &(channel(i));
+}
+
+
+const Pythia8::Abstract_DecayChannel* Pythia8::ParticleDataEntry::channel__BOSS(int i) const
+{
+    return &(channel(i));
+}
+
+
 void Pythia8::ParticleDataEntry::rescaleBR__BOSS()
 {
     rescaleBR();
@@ -189,6 +203,24 @@ bool Pythia8::ParticleDataEntry::preparePick__BOSS(int idSgn, double mHat)
 bool Pythia8::ParticleDataEntry::preparePick__BOSS(int idSgn)
 {
     return preparePick(idSgn);
+}
+
+
+Pythia8::Abstract_DecayChannel* Pythia8::ParticleDataEntry::pickChannel__BOSS()
+{
+    return &(pickChannel());
+}
+
+
+void Pythia8::ParticleDataEntry::setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths* resonancePtrIn)
+{
+    setResonancePtr(dynamic_cast< Pythia8::ResonanceWidths* >(resonancePtrIn));
+}
+
+
+Pythia8::Abstract_ResonanceWidths* Pythia8::ParticleDataEntry::getResonancePtr__BOSS()
+{
+    return getResonancePtr();
 }
 
 
@@ -242,7 +274,7 @@ double Pythia8::ParticleDataEntry::resWidthChan__BOSS(double mHat)
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_ParticleDataEntry* Pythia8::ParticleDataEntry::pointerCopy__BOSS()
 {

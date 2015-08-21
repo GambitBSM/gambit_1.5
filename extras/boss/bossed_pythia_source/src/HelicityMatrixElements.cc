@@ -1,5 +1,5 @@
 // HelicityMatrixElements.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Philip Ilten, Torbjorn Sjostrand.
+// Copyright (C) 2015 Philip Ilten, Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -19,10 +19,11 @@ namespace Pythia8 {
 // Initialize the helicity matrix element.
 
 void HelicityMatrixElement::initPointers(ParticleData* particleDataPtrIn,
-  Couplings* couplingsPtrIn) {
+  Couplings* couplingsPtrIn, Settings* settingsPtrIn) {
 
   particleDataPtr = particleDataPtrIn;
   couplingsPtr    = couplingsPtrIn;
+  settingsPtr     = settingsPtrIn;
   for(int i = 0; i <= 5; i++)
     gamma.push_back(GammaMatrix(i));
 
@@ -51,7 +52,7 @@ HelicityMatrixElement* HelicityMatrixElement::initChannel(
 // Calculate a particle's decay matrix.
 
 void HelicityMatrixElement::calculateD(vector<HelicityParticle>& p) {
-  
+
   // Reset the D matrix to zero.
   for (int i = 0; i < p[0].spinStates(); i++) {
     for (int j = 0; j < p[0].spinStates(); j++) {
@@ -61,11 +62,11 @@ void HelicityMatrixElement::calculateD(vector<HelicityParticle>& p) {
 
   // Initialize the wave functions.
   initWaves(p);
-  
+
   // Create the helicity vectors.
   vector<int> h1(p.size(),0);
   vector<int> h2(p.size(),0);
-  
+
   // Call the recursive sub-method.
   calculateD(p, h1, h2, 0);
 
@@ -169,7 +170,7 @@ double HelicityMatrixElement::decayWeight(vector<HelicityParticle>& p) {
   // Create the helicity vectors.
   vector<int> h1(p.size(),0);
   vector<int> h2(p.size(),0);
-  
+
   // Call the recursive sub-method.
   decayWeight(p, h1, h2, weight, 0);
 
@@ -232,14 +233,14 @@ complex HelicityMatrixElement::calculateProductD(
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Initialize a fermion line.
 
 void HelicityMatrixElement::setFermionLine(int position,
   HelicityParticle& p0, HelicityParticle& p1) {
 
   vector< Wave4 > u0, u1;
-  
+
   // First particle is incoming and particle, or outgoing and anti-particle.
   if (p0.id()*p0.direction < 0) {
     pMap[position] = position; pMap[position+1] = position+1;
@@ -259,15 +260,15 @@ void HelicityMatrixElement::setFermionLine(int position,
 //--------------------------------------------------------------------------
 
 // Return a fixed width Breit-Wigner.
-  
+
 complex HelicityMatrixElement::breitWigner(double s, double M, double G) {
-  
+
   return (-M*M + complex(0, 1) * M * G) / (s - M*M + complex(0, 1) * M * G);
-  
+
 }
 
 //--------------------------------------------------------------------------
- 
+
 // Return an s-wave BreitWigner.
 
 complex HelicityMatrixElement::sBreitWigner(double m0, double m1, double s,
@@ -307,12 +308,44 @@ complex HelicityMatrixElement::dBreitWigner(double m0, double m1, double s,
 
 //==========================================================================
 
-// Helicity matrix element for two fermions -> W -> two fermions. This matrix
-// element handles s-channel hard processes in addition to t-channel, assuming
-// the first two particles are a fermion line and the second two particles
-// are a fermion line. This matrix element is not scaled with respect to W
-// propagator energy as currently this matrix element is used only for
-// calculating helicity density matrices.
+// Helicity matrix element for two fermions -> W/W' -> two
+// fermions. This matrix element handles s-channel hard processes in
+// addition to t-channel, assuming the first two particles are a
+// fermion line and the second two particles are a fermion line. This
+// matrix element is not scaled with respect to W/W' propagator energy as
+// currently this matrix element is used only for calculating helicity
+// density matrices.
+
+//--------------------------------------------------------------------------
+
+// Initialize the constants for the helicity matrix element.
+
+void HMETwoFermions2W2TwoFermions::initConstants() {
+
+  // Set the constants for the W'.
+  if (abs(pID[4]) == 34 && settingsPtr) {
+    if (abs(pID[0]) < 11) {
+      p0CA = settingsPtr->parm("Wprime:aq");
+      p0CV = settingsPtr->parm("Wprime:vq");
+    } else {
+      p0CA = settingsPtr->parm("Wprime:al");
+      p0CV = settingsPtr->parm("Wprime:vl");
+    }
+    if (abs(pID[2]) < 11) {
+      p2CA = settingsPtr->parm("Wprime:aq");
+      p2CV = settingsPtr->parm("Wprime:vq");
+    } else {
+      p2CA = settingsPtr->parm("Wprime:al");
+      p2CV = settingsPtr->parm("Wprime:vl");
+    }
+
+  // The default constants (SM W).
+  } else {
+    p0CA = -1; p0CV = 1;
+    p2CA = -1; p2CV = 1;
+  }
+
+}
 
 //--------------------------------------------------------------------------
 
@@ -335,9 +368,9 @@ complex HMETwoFermions2W2TwoFermions::calculateME(vector<int> h) {
 
   complex answer(0,0);
   for (int mu = 0; mu <= 3; mu++) {
-    answer += (u[1][h[pMap[1]]] * gamma[mu] * (1 - gamma[5])
+    answer += (u[1][h[pMap[1]]] * gamma[mu] * (p0CV + p0CA * gamma[5])
       * u[0][h[pMap[0]]]) * gamma[4](mu,mu) * (u[3][h[pMap[3]]]
-      * gamma[mu] * (1 - gamma[5]) * u[2][h[pMap[2]]]);
+      * gamma[mu] * (p2CV + p2CA * gamma[5]) * u[2][h[pMap[2]]]);
   }
   return answer;
 
@@ -345,57 +378,16 @@ complex HMETwoFermions2W2TwoFermions::calculateME(vector<int> h) {
 
 //==========================================================================
 
-// Helicity matrix element for two fermions -> photon -> two fermions. This
-// matrix element can be combined with the Z matrix element to provide full
-// interference effects.
-    
-// p0Q: charge of the incoming fermion line
-// p2Q: charge of the outgoing fermion line
-// s: center of mass energy
-
-//--------------------------------------------------------------------------
-
-// Initialize wave functions for the helicity matrix element.
-
-void HMETwoFermions2Gamma2TwoFermions::initWaves(
-  vector<HelicityParticle>& p) {
-
-  u.clear();
-  pMap.resize(4);
-  setFermionLine(0, p[0], p[1]);
-  setFermionLine(2, p[2], p[3]);
-  s = max( 1., pow2(p[4].m()));
-  p0Q = p[0].charge(); p2Q = p[2].charge();
-
-}
-
-//--------------------------------------------------------------------------
-
-// Return element for the helicity matrix element.
-
-
-complex HMETwoFermions2Gamma2TwoFermions::calculateME(vector<int> h) {
-
-  complex answer(0,0);
-  for (int mu = 0; mu <= 3; mu++) {
-    answer += (u[1][h[pMap[1]]] * gamma[mu] * u[0][h[pMap[0]]])
-      * gamma[4](mu,mu) * (u[3][h[pMap[3]]] * gamma[mu] * u[2][h[pMap[2]]]);
-  }
-  return p0Q*p2Q * answer / s;
-
-}
-
-//==========================================================================
-
-// Helicity matrix element for two fermions -> Z -> two fermions. This matrix
-// element can be combined with the photon matrix element to provide full
-// interference effects.
+// Helicity matrix element for two fermions -> photon/Z/Z' -> two fermions.
 
 // Note that there is a double contraction in the Z matrix element, which can
 // be very time consuming. If the two incoming fermions are oriented along
 // the z-axis, their helicities must be opposite for a non-zero matrix element
 // term. Consequently, this check is made to help speed up the matrix element.
 
+// p0Q: charge of the incoming fermion line
+// p2Q: charge of the outgoing fermion line
+// s: center of mass energy
 // sin2W: sine of the Weinberg angle
 // cos2W: cosine of the Weinberg angle
 // zM: on-shell mass of the Z
@@ -408,21 +400,61 @@ complex HMETwoFermions2Gamma2TwoFermions::calculateME(vector<int> h) {
 
 //--------------------------------------------------------------------------
 
-// Initialize the constant for the helicity matrix element.
+// Initialize the constants for the helicity matrix element.
 
-void HMETwoFermions2Z2TwoFermions::initConstants() {
+void HMETwoFermions2GammaZ2TwoFermions::initConstants() {
 
   // Set the Weinberg angle.
   sin2W = couplingsPtr->sin2thetaW();
   cos2W = couplingsPtr->cos2thetaW();
-  // Set the on-shell Z mass and width.
-  zG = particleDataPtr->mWidth(23);
-  zM = particleDataPtr->m0(23);
-  // Set the vector and axial couplings to the fermions.
-  p0CA = couplingsPtr->af(abs(pID[0]));
-  p2CA = couplingsPtr->af(abs(pID[2]));
-  p0CV = couplingsPtr->vf(abs(pID[0]));
-  p2CV = couplingsPtr->vf(abs(pID[2]));
+  // Set the on-shell Z/Z' mass and width.
+  zG  = particleDataPtr->mWidth(23);
+  zM  = particleDataPtr->m0(23);
+  zpG = particleDataPtr->mWidth(32);
+  zpM = particleDataPtr->m0(32);
+  // Set the Z vector and axial couplings to the fermions.
+  p0CAZ = couplingsPtr->af(abs(pID[0]));
+  p2CAZ = couplingsPtr->af(abs(pID[2]));
+  p0CVZ = couplingsPtr->vf(abs(pID[0]));
+  p2CVZ = couplingsPtr->vf(abs(pID[2]));
+  // Turn off the gamma/Z/Z' channels.
+  includeGamma = false;
+  includeZ     = false;
+  includeZp    = false;
+  if (settingsPtr) {
+    // Set the Z' vector and axial couplings to the fermions.
+    p0CAZp = zpCoupling(pID[0], "a");
+    p0CVZp = zpCoupling(pID[0], "v");
+    p2CAZp = zpCoupling(pID[2], "a");
+    p2CVZp = zpCoupling(pID[2], "v");
+    // Set the gamma/Z/Z' channels to include.
+    if (abs(pID[4]) == 22) {
+      includeGamma = true;
+    } else if (abs(pID[4]) == 23) {
+      int mode = settingsPtr->mode("WeakZ0:gmZmode");
+      if (mode == 0) {includeGamma = true; includeZ = true;}
+      else if (mode == 1) includeGamma = true;
+      else if (mode == 2) includeZ = true;
+    } else if (abs(pID[4]) == 32) {
+      int mode = settingsPtr->mode("Zprime:gmZmode");
+      if (mode == 0) {includeGamma = true; includeZ = true; includeZp = true;}
+      else if (mode == 1) includeGamma = true;
+      else if (mode == 2) includeZ = true;
+      else if (mode == 3) includeZp = true;
+      else if (mode == 4) {includeGamma = true; includeZ = true;}
+      else if (mode == 5) {includeGamma = true; includeZp = true;}
+      else if (mode == 6) {includeZ = true; includeZp = true;}
+    }
+  // Default behavior without settings pointer.
+  } else {
+    p0CAZp = p0CAZ;
+    p0CVZp = p2CAZ;
+    p2CAZp = p0CVZ;
+    p2CVZp = p2CVZ;
+    if      (abs(pID[4]) == 22) includeGamma = true;
+    else if (abs(pID[4]) == 23) includeZ     = true;
+    else if (abs(pID[4]) == 32) includeZp    = true;
+  }
 
 }
 
@@ -430,7 +462,8 @@ void HMETwoFermions2Z2TwoFermions::initConstants() {
 
 // Initialize wave functions for the helicity matrix element.
 
-void HMETwoFermions2Z2TwoFermions::initWaves(vector<HelicityParticle>& p) {
+void HMETwoFermions2GammaZ2TwoFermions::initWaves(vector<HelicityParticle>& p)
+{
 
   vector< Wave4 > u4;
   u.clear();
@@ -439,6 +472,8 @@ void HMETwoFermions2Z2TwoFermions::initWaves(vector<HelicityParticle>& p) {
   setFermionLine(2, p[2], p[3]);
   u4.push_back(Wave4(p[2].p() + p[3].p()));
   u.push_back(u4);
+  // Fermion line charge.
+  p0Q = p[0].charge(); p2Q = p[2].charge();
   // Center of mass energy.
   s = max( 1., pow2(p[4].m()));
   // Check if incoming fermions are oriented along z-axis.
@@ -449,9 +484,43 @@ void HMETwoFermions2Z2TwoFermions::initWaves(vector<HelicityParticle>& p) {
 
 //--------------------------------------------------------------------------
 
-// Return element for helicity matrix element.
+// Return element for the helicity matrix element.
 
-complex HMETwoFermions2Z2TwoFermions::calculateME(vector<int> h) {
+complex HMETwoFermions2GammaZ2TwoFermions::calculateME(vector<int> h) {
+
+  complex answer(0,0);
+  if (includeGamma)
+    answer += calculateGammaME(h);
+  if (includeZ)
+    answer += calculateZME(h, zM, zG, p0CAZ, p2CAZ, p0CVZ, p2CVZ);
+  if (includeZp)
+    answer += calculateZME(h, zpM, zpG, p0CAZp, p2CAZp, p0CVZp, p2CVZp);
+  return answer;
+
+}
+
+//--------------------------------------------------------------------------
+
+// Return gamma element for the helicity matrix element.
+
+complex HMETwoFermions2GammaZ2TwoFermions::calculateGammaME(vector<int> h) {
+
+  complex answer(0,0);
+  for (int mu = 0; mu <= 3; mu++) {
+    answer += (u[1][h[pMap[1]]] * gamma[mu] * u[0][h[pMap[0]]])
+      * gamma[4](mu,mu) * (u[3][h[pMap[3]]] * gamma[mu] * u[2][h[pMap[2]]]);
+  }
+  return p0Q*p2Q * answer / s;
+
+}
+
+//--------------------------------------------------------------------------
+
+// Return Z/Z' element for helicity matrix element.
+
+complex HMETwoFermions2GammaZ2TwoFermions::calculateZME(
+  vector<int> h, double m, double g, double p0CA, double p2CA, double p0CV,
+  double p2CV) {
 
   complex answer(0,0);
   // Return zero if correct helicity conditions.
@@ -467,98 +536,54 @@ complex HMETwoFermions2Z2TwoFermions::calculateME(vector<int> h) {
            u[2][h[pMap[2]]]);
     }
   }
-  return answer / (16 * pow2(sin2W * cos2W) *
-                     (s - zM*zM + complex(0, s*zG/zM)));
+  return answer / (16 * pow2(sin2W * cos2W) * (s - m*m + complex(0, s*g/m)));
+
+}
+
+//--------------------------------------------------------------------------
+
+// Return the Z' vector or axial coupling for a fermion.
+
+double HMETwoFermions2GammaZ2TwoFermions::zpCoupling(int id, string type) {
+
+  if (!settingsPtr) return 0;
+  id = abs(id);
+  string name;
+  if      (id == 1)  name = "d";
+  else if (id == 2)  name = "u";
+  else if (id == 3)  name = "s";
+  else if (id == 4)  name = "c";
+  else if (id == 5)  name = "b";
+  else if (id == 6)  name = "t";
+  else if (id == 7)  name = "b'";
+  else if (id == 8)  name = "t'";
+  else if (id == 11) name = "e";
+  else if (id == 12) name = "nue";
+  else if (id == 13) name = "mu";
+  else if (id == 14) name = "numu";
+  else if (id == 15) name = "tau";
+  else if (id == 16) name = "nutau";
+  else return 0;
+  return settingsPtr->parm("Zprime:" + type + name);
 
 }
 
 //==========================================================================
 
-// Helicity matrix element for two fermions -> photon/Z -> two fermions. Full
-// interference is obtained by combining the photon and Z helicity matrix
+// Helicity matrix element for X -> two fermions.
+
+// Base class for the W, photon, and Z -> two fermions helicity matrix
 // elements.
 
-// In general the initPointers and initChannel methods should not be
-// redeclared.
-
-//--------------------------------------------------------------------------
-
-// Initialize the matrix element.
-
-void HMETwoFermions2GammaZ2TwoFermions::initPointers(
-  ParticleData* particleDataPtrIn, Couplings* couplingsPtrIn) {
-
-  zHME.initPointers(particleDataPtrIn, couplingsPtrIn);
-  gHME.initPointers(particleDataPtrIn, couplingsPtrIn);
-
-}
-
-//--------------------------------------------------------------------------
-
-// Initialize the channel for the helicity matrix element.
-
-  HelicityMatrixElement* HMETwoFermions2GammaZ2TwoFermions::initChannel(
-    vector<HelicityParticle>& p) {
-
-    zHME.initChannel(p);
-    zHME.initChannel(p);
-    return this;
-
-}
-
 //--------------------------------------------------------------------------
 
 // Initialize wave functions for the helicity matrix element.
 
-void HMETwoFermions2GammaZ2TwoFermions::initWaves(
-  vector<HelicityParticle>& p) {
-
-  zHME.initWaves(p);
-  gHME.initWaves(p);
-
-}
-
-//--------------------------------------------------------------------------
-
-// Return element for the helicity matrix element.
-
-complex HMETwoFermions2GammaZ2TwoFermions::calculateME(vector<int> h) {
-
-  return zHME.calculateME(h) + gHME.calculateME(h);
-
-}
-
-//==========================================================================
-
-// Helicity matrix element for Z -> two fermions.
-
-// Helicity matrix element for Z -> two fermions. This matrix element is used
-// when the production of the Z is from an unknown process.
-
-// p2CA: axial coupling of particle 2 to the Z
-// p2CV: vector coupling of particle 2 to the Z
-
-//--------------------------------------------------------------------------
-
-// Initialize the constant for the helicity matrix element.
-
-void HMEZ2TwoFermions::initConstants() {
-  
-  // Set the vector and axial couplings to the fermions.
-  p2CA = couplingsPtr->af(abs(pID[2]));
-  p2CV = couplingsPtr->vf(abs(pID[2]));
-
-}
-
-//--------------------------------------------------------------------------
-
-// Initialize wave functions for the helicity matrix element.
-
-void HMEZ2TwoFermions::initWaves(vector<HelicityParticle>& p) {
+void HMEX2TwoFermions::initWaves(vector<HelicityParticle>& p) {
 
   u.clear();
   pMap.resize(4);
-  // Initialize Z wave function.
+  // Initialize W wave function.
   vector< Wave4 > u1;
   pMap[1] = 1;
   for (int h = 0; h < p[pMap[1]].spinStates(); h++)
@@ -566,6 +591,99 @@ void HMEZ2TwoFermions::initWaves(vector<HelicityParticle>& p) {
   u.push_back(u1);
   // Initialize fermion wave functions.
   setFermionLine(2, p[2], p[3]);
+
+}
+
+//==========================================================================
+
+// Helicity matrix element for W/W' -> two fermions.
+
+// This matrix element is used when the production of the W is from an
+// unknown process.
+
+//--------------------------------------------------------------------------
+
+// Initialize the constants for the helicity matrix element.
+
+void HMEW2TwoFermions::initConstants() {
+
+  // Set the constants for the W'.
+  if (abs(pID[0]) == 34 && settingsPtr) {
+    if (abs(pID[2]) < 11) {
+      p2CA = settingsPtr->parm("Wprime:aq");
+      p2CV = settingsPtr->parm("Wprime:vq");
+    } else {
+      p2CA = settingsPtr->parm("Wprime:al");
+      p2CV = settingsPtr->parm("Wprime:vl");
+    }
+
+  // The default constants (SM W).
+  } else {
+    p2CA = -1; p2CV = 1;
+  }
+
+}
+
+//--------------------------------------------------------------------------
+
+// Return element for helicity matrix element.
+
+complex HMEW2TwoFermions::calculateME(vector<int> h) {
+
+  complex answer(0,0);
+  for (int mu = 0; mu <= 3; mu++) {
+    answer +=
+      u[0][h[pMap[1]]](mu) * (u[2][h[pMap[3]]] * gamma[mu]
+                              * (p2CV + p2CA * gamma[5]) *  u[1][h[pMap[2]]]);
+  }
+  return answer;
+
+}
+
+//==========================================================================
+
+// Helicity matrix element for photon -> two fermions.
+
+// This matrix element is used when the production of the photon is from an
+// unknown process.
+
+//--------------------------------------------------------------------------
+
+// Return element for helicity matrix element.
+
+complex HMEGamma2TwoFermions::calculateME(vector<int> h) {
+
+  complex answer(0,0);
+  for (int mu = 0; mu <= 3; mu++) {
+    answer +=
+      u[0][h[pMap[1]]](mu) * (u[2][h[pMap[3]]] * gamma[mu] * u[1][h[pMap[2]]]);
+  }
+  return answer;
+}
+
+//==========================================================================
+
+// Helicity matrix element for Z/Z' -> two fermions.
+
+// This matrix element is used when the production of the Z is from an
+// unknown process.
+
+// p2CA: axial coupling of particle 2 to the Z
+// p2CV: vector coupling of particle 2 to the Z
+
+//--------------------------------------------------------------------------
+
+// Initialize the constants for the helicity matrix element.
+
+void HMEZ2TwoFermions::initConstants() {
+
+  // Set the vector and axial couplings to the fermions.
+  p2CA = couplingsPtr->af(abs(pID[2]));
+  p2CV = couplingsPtr->vf(abs(pID[2]));
+  if (settingsPtr && abs(pID[0]) == 32) {
+    p2CA = zpCoupling(abs(pID[2]), "a");
+    p2CV = zpCoupling(abs(pID[2]), "v");
+  }
 
 }
 
@@ -584,140 +702,131 @@ complex HMEZ2TwoFermions::calculateME(vector<int> h) {
   return answer;
 }
 
+//--------------------------------------------------------------------------
+
+// Return the Z' vector or axial coupling for a fermion.
+
+double HMEZ2TwoFermions::zpCoupling(int id, string type) {
+
+  if (!settingsPtr) return 0;
+  id = abs(id);
+  string name;
+  if      (id == 1)  name = "d";
+  else if (id == 2)  name = "u";
+  else if (id == 3)  name = "s";
+  else if (id == 4)  name = "c";
+  else if (id == 5)  name = "b";
+  else if (id == 6)  name = "t";
+  else if (id == 7)  name = "b'";
+  else if (id == 8)  name = "t'";
+  else if (id == 11) name = "e";
+  else if (id == 12) name = "nue";
+  else if (id == 13) name = "mu";
+  else if (id == 14) name = "numu";
+  else if (id == 15) name = "tau";
+  else if (id == 16) name = "nutau";
+  else return 0;
+  return settingsPtr->parm("Zprime:" + type + name);
+
+}
+
 //==========================================================================
- 
-// Helicity matrix element for the decay of a CP even Higgs to two fermions.
+
+// Helicity matrix element for the decay of a Higgs to two fermions.
+
 // All SM and MSSM Higgses couple to fermions with a vertex factor of
 // (pfCV - pfCA * gamma[5]) where pf indicates the type of fermion line. For
 // simplicity for the SM and MSSM CP even Higgses pfCV is set to one, and
 // pfCA to zero, as this matrix element is used only for calculating helicity
 // density matrices.
 
-// p2CA: in the SM and MSSM this coupling is zero
-// p2CV: in the SM and MSSM this coupling is given by:
+// p2CA: in the SM/MSSM this coupling is zero for CP-even and for CP-odd:
+//     -g_w * m_f / (2 * m_W)
+//                            * cot(beta) for A^0 u-type
+//                            * tan(beta) for A^0 d-type
+// p2CA: for the charged Higgs in the MSSM this coupling is given by:
+//     +/- i * g / (sqrt(8.) * m_W) * (m_d * tan(beta) - m_u * cot(beta))
+// p2CV: in the SM/MSSM this coupling is zero for CP-odd and for CP-even:
 //     i * g_w * m_f / (2 * m_W)
 //                               * -1 for the SM H
 //                               * -sin(alpha) / sin(beta) for H^0 u-type
 //                               * -cos(alpha) / cos(beta) for H^0 d-type
 //                               * -cos(alpha) / sin(beta) for h^0 u-type
 //                               *  sin(alpha) / cos(beta) for h^0 d-type
+// p2CV: for the charged Higgs in the MSSM this coupling is given by:
+//     i * g / (sqrt(8.) * m_W) * (m_d * tan(beta) + m_u * cot(beta))
 
 //--------------------------------------------------------------------------
 
-// Initialize wave functions for the helicity matrix element.
+// Initialize the constant for the helicity matrix element.
 
-void HMEHiggsEven2TwoFermions::initWaves(vector<HelicityParticle>& p) {
+void HMEHiggs2TwoFermions::initConstants() {
 
-  u.clear();
-  pMap.resize(4);
-  p2CA = 0; p2CV = 1;
-  setFermionLine(2, p[2], p[3]);
+  // Set the H4 constants.
+  p2CA = 0; p2CV = 0;
+  if (abs(pID[1]) == 37) {
+    p2CA = pID[1] == 37 ? 1 : -1; p2CV = 1;
 
-}
-
-//--------------------------------------------------------------------------
-  
-// Return element for the helicity matrix element.
-
-complex HMEHiggsEven2TwoFermions::calculateME(vector<int> h) {
-
-  return (u[1][h[pMap[3]]] * (p2CV - p2CA * gamma[5]) * u[0][h[pMap[2]]]);
-
-}
-
-//==========================================================================
-
-// Helicity matrix element for the decay of a CP odd Higgs to two fermions.
-// See HMEHiggsEven2TwoFermions for more details. For the MSSM CP odd Higgs
-// pfCA is set to one and pfCV is set to zero.
-
-// p2CA: in the MSSM this coupling is given by:
-//     -g_w * m_f / (2 * m_W)
-//                            * cot(beta) for A^0 u-type
-//                            * tan(beta) for A^0 d-type
-// p2CV: in the MSSM this coupling is zero
-
-//--------------------------------------------------------------------------
-
-// Initialize wave functions for the helicity matrix element.
-
-void HMEHiggsOdd2TwoFermions::initWaves(vector<HelicityParticle>& p) {
-
-  u.clear();
-  pMap.resize(4);
-  p2CA = 1; p2CV = 0;
-  setFermionLine(2, p[2], p[3]);
-
-}
-
-//--------------------------------------------------------------------------
-  
-// Return element for the helicity matrix element.
-
-complex HMEHiggsOdd2TwoFermions::calculateME(vector<int> h) {
-
-  return (u[1][h[pMap[3]]] * (p2CV - p2CA * gamma[5]) * u[0][h[pMap[2]]]);
-
-}
-
-//==========================================================================
-
-// Helicity matrix element for the decay of a charged Higgs to two fermions.
-// See HMEHiggsEven2TwoFermions for more details. For the MSSM charged Higgs
-// pfCA is set to +/- one given an H^+/- and pfCV is set to one.
-
-// p2CA: in the MSSM this coupling is given by:
-//       i * g / (sqrt(8.) * m_W) * (m_d * tan(beta) + m_u * cot(beta))
-// p2CV: in the MSSM this coupling is given by:
-//       +/- i * g / (sqrt(8.) * m_W) * (m_d * tan(beta) - m_u * cot(beta))
-
-//--------------------------------------------------------------------------
-
-// Initialize wave functions for the helicity matrix element.
-
-void HMEHiggsCharged2TwoFermions::initWaves(vector<HelicityParticle>& p) {
-
-  u.clear();
-  pMap.resize(4);
-  p2CV = 1;
-  if (pID[3] == 15 || pID[3] == -16) p2CA = 1;
-  else p2CA = -1;
-  setFermionLine(2, p[2], p[3]);
-
-}
-
-//--------------------------------------------------------------------------
-  
-// Return element for the helicity matrix element.
-
-complex HMEHiggsCharged2TwoFermions::calculateME(vector<int> h) {
-
-  return (u[1][h[pMap[3]]] * (p2CV - p2CA * gamma[5]) * u[0][h[pMap[2]]]);
-
-}
-
-//==========================================================================
-
-// Helicity matrix element which provides an unpolarized helicity
-// density matrix. This matrix element is used for unkown hard processes.
-    
-// Note that calculateRho is redefined for this special case, but that in
-// general calculateRho should not be redefined.
-
-//--------------------------------------------------------------------------
-
-// Calculate a particle's helicity density matrix.
-
-void HMEUnpolarized::calculateRho(unsigned int idx,
-  vector<HelicityParticle>& p) {
-
-  for (int i = 0; i < p[idx].spinStates(); i++ ) {
-    for (int j = 1; j < p[idx].spinStates(); j++) {
-        if (i == j) p[idx].rho[i][j] = 1.0 /
-                      static_cast<double>(p[idx].spinStates());
-        else p[idx].rho[i][j] = 0;
+  // Neutral constants; settings available.
+  } else if (settingsPtr) {
+    int mode;
+    double eta, phi;
+    // Set the H1 mixing.
+    if (abs(pID[1]) == 25) {
+      mode = settingsPtr->mode("HiggsH1:parity");
+      eta  = settingsPtr->parm("HiggsH1:etaParity");
+      phi  = settingsPtr->parm("HiggsH1:phiParity");
+      if      (mode == 2) {p2CA = 1;        p2CV = 0;}
+      else if (mode == 3) {p2CA = eta;      p2CV = complex(0, 1);}
+      else if (mode == 4) {p2CA = cos(phi); p2CV = complex(0, 1) * sin(phi);}
+      else                {p2CA = 0;        p2CV = complex(0, 1);}
+    // Set the H2 mixing.
+    } else if (abs(pID[1]) == 35) {
+      mode = settingsPtr->mode("HiggsH2:parity");
+      eta  = settingsPtr->parm("HiggsH2:etaParity");
+      phi  = settingsPtr->parm("HiggsH2:phiParity");
+      if      (mode == 2) {p2CA = 1;        p2CV = 0;}
+      else if (mode == 3) {p2CA = eta;      p2CV = complex(0, 1);}
+      else if (mode == 4) {p2CA = cos(phi); p2CV = complex(0, 1) * sin(phi);}
+      else                {p2CA = 0;        p2CV = complex(0, 1);}
+    // Set the A3 mixing.
+    } else if (abs(pID[1]) == 36) {
+      mode = settingsPtr->mode("HiggsA3:parity");
+      eta  = settingsPtr->parm("HiggsA3:etaParity");
+      phi  = settingsPtr->parm("HiggsA3:phiParity");
+      if      (mode == 1) {p2CA = 0;        p2CV = complex(0, 1);}
+      else if (mode == 3) {p2CA = eta;      p2CV = complex(0, 1);}
+      else if (mode == 4) {p2CA = cos(phi); p2CV = complex(0, 1) * sin(phi);}
+      else                {p2CA = 1;        p2CV = 0;}
     }
+
+  // Neutral constants; default SM/MSSM.
+  } else {
+    if      (abs(pID[1]) == 25) {p2CA = 0; p2CV = complex(0, 1);}
+    else if (abs(pID[1]) == 35) {p2CA = 0; p2CV = complex(0, 1);}
+    else if (abs(pID[1]) == 36) {p2CA = 1; p2CV = 0;}
   }
+}
+
+//--------------------------------------------------------------------------
+
+// Initialize wave functions for the helicity matrix element.
+
+void HMEHiggs2TwoFermions::initWaves(vector<HelicityParticle>& p) {
+
+  u.clear();
+  pMap.resize(4);
+  setFermionLine(2, p[2], p[3]);
+
+}
+
+//--------------------------------------------------------------------------
+
+// Return element for the helicity matrix element.
+
+complex HMEHiggs2TwoFermions::calculateME(vector<int> h) {
+
+  return (u[1][h[pMap[3]]] * (p2CV + p2CA * gamma[5]) * u[0][h[pMap[2]]]);
 
 }
 
@@ -787,7 +896,7 @@ void HMETauDecay::calculateResonanceWeights(vector<double>& phase,
 }
 
 //==========================================================================
-  
+
 // Tau decay matrix element for tau decay into a single scalar meson.
 
 // The maximum decay weight for this matrix element can be found analytically
@@ -1028,10 +1137,10 @@ void HMETau2TwoMesonsViaVectorScalar::initHadronicCurrent(
 // Initialize constants for the helicity matrix element.
 
 void HMETau2ThreeMesons::initConstants() {
-  
+
   initMode();
   initResonances();
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1103,11 +1212,11 @@ void HMETau2ThreeMesons::initMode() {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Initialize the momenta for the helicity matrix element.
-  
+
 void HMETau2ThreeMesons::initMomenta(vector<HelicityParticle>& p) {
-  
+
   q = Wave4(p[2].p() + p[3].p() + p[4].p());
   // pi-, pi-, pi+ decay and pi0, pi0, pi- decay.
   if (mode == PimPimPip || mode == Pi0Pi0Pim) {
@@ -1152,7 +1261,7 @@ void HMETau2ThreeMesons::initMomenta(vector<HelicityParticle>& p) {
 // Phys. C48 (1990) 445-452.
 
 double HMETau2ThreeMesons::a1PhaseSpace(double s) {
-  
+
   double piM  = 0.13957; // Mass of the charged pion.
   double rhoM = 0.773;   // Mass of the rho.
   if (s < pow2(3 * piM))
@@ -1177,7 +1286,7 @@ complex HMETau2ThreeMesons::a1BreitWigner(double s) {
   double a1G = 0.475; // Width of the a1.
   return a1M * a1M / (a1M * a1M - s - complex(0,1) * a1M * a1G
                       * a1PhaseSpace(s) / a1PhaseSpace(a1M * a1M));
-  
+
 }
 
 //--------------------------------------------------------------------------
@@ -1261,13 +1370,13 @@ void HMETau2ThreePions::initResonances() {
   rhoPp.push_back(0);         rhoPp.push_back(3.11018); rhoPp.push_back(0);
   rhoAp.push_back(1);         rhoAp.push_back(0.12);    rhoAp.push_back(0);
   rhoPd.push_back(-0.471239); rhoPd.push_back(1.66504); rhoPd.push_back(0);
-  rhoAd.push_back(3.7e-07);   rhoAd.push_back(8.7e-07); rhoAd.push_back(0);
+  rhoAd.push_back(0.37);      rhoAd.push_back(0.87);    rhoAd.push_back(0);
 
   // Scalar and tensor parameters.
   f0M  = 1.186;    f2M  = 1.275;   sigM = 0.860;
   f0G  = 0.350;    f2G  = 0.185;   sigG = 0.880;
   f0P  = -1.69646; f2P  = 1.75929; sigP = 0.722566;
-  f0A  = 0.77;     f2A  = 7.1e-07; sigA = 2.1;
+  f0A  = 0.77;     f2A  = 0.71;    sigA = 2.1;
 
   // Calculate the weights from the phases and amplitudes.
   calculateResonanceWeights(rhoPp, rhoAp, rhoWp);
@@ -1449,11 +1558,11 @@ complex HMETau2ThreePions::a1BreitWigner(double s) {
 
   double a1M = 1.331; // Mass of the a1.
   return a1M*a1M/(a1M*a1M - s - complex(0,1)*a1PhaseSpace(s));
-  
+
 }
 
 //==========================================================================
-  
+
 // Tau decay matrix element for tau decay into three mesons with kaons.
 // The form factors are taken from hep-ph/9503474.
 
@@ -1491,7 +1600,7 @@ void HMETau2ThreeMesonsWithKaons::initResonances() {
   else if (mode == PimPipKm) DECAYWEIGHTMAX = 1.8e4;
   // pi-, Kbar0, pi0 decay.
   else if (mode == Pi0PimK0b) DECAYWEIGHTMAX = 3.9e4;
- 
+
   // Clear the vectors from previous decays.
   rhoMa.clear();   rhoGa.clear();   rhoWa.clear();
   rhoMv.clear();   rhoGv.clear();   rhoWv.clear();
@@ -1528,18 +1637,18 @@ void HMETau2ThreeMesonsWithKaons::initResonances() {
   // Omega and phi parameters.
   omegaM.push_back(0.782); omegaG.push_back(0.00843); omegaW.push_back(1);
   omegaM.push_back(1.020); omegaG.push_back(0.00443); omegaW.push_back(0.05);
- 
+
   // Kaon and pion parameters
   kM = 0.49765; piM = 0.13957; piW = 0.0942;
- 
+
 }
-  
+
 //--------------------------------------------------------------------------
 
 // Return the first form factor.
 
 complex HMETau2ThreeMesonsWithKaons::F1() {
-  
+
   complex answer;
   // K-, pi-, K+ decay.
   if (mode == PimKmKp)
@@ -1580,7 +1689,7 @@ complex HMETau2ThreeMesonsWithKaons::F1() {
 // Return the second form factor.
 
 complex HMETau2ThreeMesonsWithKaons::F2() {
-  
+
   complex answer;
   // K-, pi-, K+ decay.
   if (mode == PimKmKp)
@@ -1670,7 +1779,7 @@ complex HMETau2ThreeMesonsWithKaons::F4() {
 }
 
 //==========================================================================
-  
+
 // Tau decay matrix element for tau decay into three mesons. The form
 // factors are taken from Comp. Phys. Com. 76 (1993) 361-380.
 
@@ -1727,13 +1836,13 @@ void HMETau2ThreeMesonsGeneric::initResonances() {
   kM = 0.49765; piM = 0.13957; piW = 0.0942;
 
 }
-  
+
 //--------------------------------------------------------------------------
 
 // Return the first form factor.
 
 complex HMETau2ThreeMesonsGeneric::F1() {
-  
+
   complex answer;
   // pi-, pi-, pi+ decay and pi0, pi0, pi- decay.
   if (mode == PimPimPip || mode == Pi0Pi0Pim)
@@ -1769,7 +1878,7 @@ complex HMETau2ThreeMesonsGeneric::F1() {
 // Return the second form factor.
 
 complex HMETau2ThreeMesonsGeneric::F2() {
-  
+
   complex answer;
   // pi-, pi-, pi+ decay and pi0, pi0, pi- decay.
   if (mode == PimPimPip || mode == Pi0Pi0Pim)
@@ -1868,13 +1977,13 @@ void HMETau2TwoPionsGamma::initConstants() {
   // Clear the vectors from previous decays.
   rhoM.clear();   rhoG.clear();   rhoW.clear();
   omegaM.clear(); omegaG.clear(); omegaW.clear();
-  
+
   // Set parameters.
   rhoM.push_back(0.773);   rhoG.push_back(0.145);    rhoW.push_back(1);
   rhoM.push_back(1.7);     rhoG.push_back(0.26);     rhoW.push_back(-0.1);
   omegaM.push_back(0.782); omegaG.push_back(0.0085); omegaW.push_back(1);
   piM = 0.13957;
- 
+
 }
 
 //--------------------------------------------------------------------------
@@ -2087,7 +2196,7 @@ Wave4 HMETau2FourPions::t3(Wave4 &q, Wave4 &q1, Wave4 &q2,
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Return the D function for the a1(1260).
 
 complex HMETau2FourPions::a1D(double s) {
@@ -2311,7 +2420,7 @@ double HMETau2FourPions::G(int i, double s) {
 // Initialize constants for the helicity matrix element.
 
 void HMETau2FivePions::initConstants() {
-  
+
   // pi-, pi-, pi+, pi+, pi- decay.
   if (abs(pID[2]) == 211 && abs(pID[3]) == 211 && abs(pID[4]) == 211 &&
       abs(pID[5]) == 211 && abs(pID[6]) == 211)
@@ -2368,9 +2477,9 @@ void HMETau2FivePions::initHadronicCurrent(vector<HelicityParticle>& p) {
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Return the omega-rho hadronic current.
-  
+
 Wave4 HMETau2FivePions::Ja(Wave4 &q, Wave4 &q1, Wave4 &q2,
                            Wave4 &q3, Wave4 &q4, Wave4 &q5) {
 
@@ -2386,12 +2495,12 @@ Wave4 HMETau2FivePions::Ja(Wave4 &q, Wave4 &q1, Wave4 &q2,
 }
 
 //--------------------------------------------------------------------------
-  
+
 // Return the a1-sigma hadronic current.
-  
+
 Wave4 HMETau2FivePions::Jb(Wave4 &q, Wave4 &q1, Wave4 &q2,
                            Wave4 &q3, Wave4 &q4, Wave4 &q5) {
-  
+
   double s = m2(q);
   Wave4  a1Q = q1 + q2 + q3;
   double a1S = m2(a1Q);
@@ -2402,7 +2511,7 @@ Wave4 HMETau2FivePions::Jb(Wave4 &q, Wave4 &q1, Wave4 &q2,
   j = (j * gamma[4] * q / s) * q - j;
   return sigmaW * (breitWigner(s, a1M, a1G) * breitWigner(a1S, a1M, a1G)
                    * breitWigner(m2(q4 + q5), sigmaM, sigmaG) * j);
-  
+
 }
 
   complex HMETau2FivePions::breitWigner(double s, double M, double G) {

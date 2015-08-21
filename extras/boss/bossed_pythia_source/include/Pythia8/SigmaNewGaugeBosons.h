@@ -1,5 +1,5 @@
 // SigmaNewGaugeBosons.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -13,7 +13,7 @@
 #include "Pythia8/SigmaProcess.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // An intermediate class for f fbar -> Z'/W' -> WW/WZ -> 4 fermions.
@@ -49,7 +49,7 @@ protected:
 private:
 
 };
- 
+
 //==========================================================================
 
 // A derived class for f fbar -> gamma*/Z0/Z'0.
@@ -86,7 +86,7 @@ public:
 private:
 
   // Parameters set at initialization or for each new event.
-  int    gmZmode;
+  int    gmZmode, maxZpGen;
   double mRes, GammaRes, m2Res, GamMRat, sin2tW, cos2tW, thetaWRat,
          mZ, GammaZ, m2Z, GamMRatZ, afZp[20], vfZp[20], coupZpWW,
          anglesZpWW, gamSum, gamZSum, ZSum, gamZpSum, ZZpSum, ZpSum,
@@ -177,7 +177,7 @@ private:
   ParticleDataEntry* particlePtr;
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

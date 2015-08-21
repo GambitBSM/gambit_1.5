@@ -1,5 +1,5 @@
 // UserHooks.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -10,7 +10,7 @@
 #include "Pythia8/UserHooks.h"
 
 namespace Pythia8 {
- 
+
 //==========================================================================
 
 // The UserHooks class.
@@ -42,18 +42,18 @@ double UserHooks::multiplySigmaBy( const SigmaProcess* sigmaProcessPtr,
   //double Q2Ren   = sigmaProcessPtr->Q2Ren();
   //double alphaS  = sigmaProcessPtr->alphaSRen();
   //double alphaEM = sigmaProcessPtr->alphaEMRen();
-  
+
   // Subprocess mass-square.
   //double sHat = phaseSpacePtr->sHat();
 
   // Now methods only relevant for 2 -> 2.
   //if (nFinal == 2) {
-    
+
     // Mandelstam variables and hard-process pT.
     //double tHat  = phaseSpacePtr->tHat();
     //double uHat  = phaseSpacePtr->uHat();
     //double pTHat = phaseSpacePtr->pTHat();
-  
+
     // Masses of the final-state particles. (Here 0 for light quarks.)
     //double m3    = sigmaProcessPtr->m(3);
     //double m4    = sigmaProcessPtr->m(4);
@@ -94,18 +94,18 @@ double UserHooks::biasSelectionBy( const SigmaProcess* sigmaProcessPtr,
   //double Q2Ren   = sigmaProcessPtr->Q2Ren();
   //double alphaS  = sigmaProcessPtr->alphaSRen();
   //double alphaEM = sigmaProcessPtr->alphaEMRen();
-  
+
   // Subprocess mass-square.
   //double sHat = phaseSpacePtr->sHat();
 
   // Now methods only relevant for 2 -> 2.
   //if (nFinal == 2) {
-    
+
     // Mandelstam variables and hard-process pT.
     //double tHat  = phaseSpacePtr->tHat();
     //double uHat  = phaseSpacePtr->uHat();
     //double pTHat = phaseSpacePtr->pTHat();
-  
+
     // Masses of the final-state particles. (Here 0 for light quarks.)
     //double m3    = sigmaProcessPtr->m(3);
     //double m4    = sigmaProcessPtr->m(4);
@@ -144,7 +144,7 @@ void UserHooks::omitResonanceDecays(const Event& process, bool finalOnly) {
     else {
       int iMother = process[i].mother1();
       if (iMother == 1 || iMother == 2) doCopy = true;
-       
+
       // Granddaughters of beams should normally be copied and are final.
       else if (iMother > 2) {
         int iGrandMother =  process[iMother].mother1();
@@ -157,7 +157,7 @@ void UserHooks::omitResonanceDecays(const Event& process, bool finalOnly) {
 
     // Optionally non-final are not copied.
     if (finalOnly && !isFinal) doCopy = false;
-   
+
     // Do copying and modify status/daughters of final.
     if (doCopy) {
       int iNew = workEvent.append( process[i]);
@@ -216,9 +216,9 @@ void UserHooks::subEvent(const Event& event, bool isHardest) {
       workEvent[iNew].daughters( iOld, iOld);
     }
   }
- 
+
 }
- 
+
 //==========================================================================
 
 // The SuppressSmallPT class, derived from UserHooks.
@@ -232,7 +232,7 @@ double SuppressSmallPT::multiplySigmaBy( const SigmaProcess* sigmaProcessPtr,
 
   // Need to initialize first time this method is called.
   if (!isInit) {
-    
+
     // Calculate pT0 as for multiparton interactions.
     // Fudge factor allows offset relative to MPI framework.
     double eCM    = phaseSpacePtr->ecm();
@@ -241,7 +241,7 @@ double SuppressSmallPT::multiplySigmaBy( const SigmaProcess* sigmaProcessPtr,
     double ecmPow = settingsPtr->parm("MultipartonInteractions:ecmPow");
     double pT0    = pT0timesMPI * pT0Ref * pow(eCM / ecmRef, ecmPow);
     pT20          = pT0 * pT0;
-  
+
     // Initialize alpha_strong object as for multiparton interactions,
     // alternatively as for hard processes.
     double alphaSvalue;
@@ -259,7 +259,7 @@ double SuppressSmallPT::multiplySigmaBy( const SigmaProcess* sigmaProcessPtr,
     // Initialization finished.
     isInit = true;
   }
-        
+
   // Only modify 2 -> 2 processes.
   int nFinal = sigmaProcessPtr->nFinal();
   if (nFinal != 2) return 1.;
@@ -285,7 +285,7 @@ double SuppressSmallPT::multiplySigmaBy( const SigmaProcess* sigmaProcessPtr,
 
 }
 
- 
+
 //==========================================================================
 
 } // end namespace Pythia8

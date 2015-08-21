@@ -1,5 +1,8 @@
+#ifndef __boss__SigmaProcess_Pythia_8_209_h__
+#define __boss__SigmaProcess_Pythia_8_209_h__
+
 // SigmaProcess.h is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -76,12 +79,18 @@ public:
   double pdfA, pdfB, pdfSigma;
 
 };
- 
+
 //==========================================================================
 
 // SigmaProcess is the base class for cross section calculations.
 
-class SigmaProcess {
+} 
+#define ENUMS_DECLARED
+#include "backend_types/Pythia_8_209/abstract_SigmaProcess.h"
+#include "gambit/Backends/abstracttypedefs.h"
+#include "gambit/Backends/wrappertypedefs.h"
+namespace Pythia8 { 
+class SigmaProcess : public virtual Abstract_SigmaProcess {
 
 public:
 
@@ -226,7 +235,7 @@ public:
 
   // Tell whether tHat and uHat are swapped (= same as swap 3 and 4).
   bool swappedTU()          const {return swapTU;}
-  
+
   // Give back particle properties: flavours, colours, masses, or all.
   int    id(int i)          const {return idSave[i];}
   int    col(int i)         const {return colSave[i];}
@@ -252,16 +261,16 @@ public:
 
   // Save and load kinematics for trial interactions
   void saveKin() {
-    for (int i = 0; i < 6; i++) { partonT[i] = parton[i];
+    for (int i = 0; i < 12; i++) { partonT[i] = parton[i];
       mSaveT[i] = mSave[i]; }
     pTFinT = pTFin; phiT = phi; cosThetaT = cosTheta; sinThetaT = sinTheta; }
   void loadKin() {
-    for (int i = 0; i < 6; i++) { parton[i] = partonT[i];
+    for (int i = 0; i < 12; i++) { parton[i] = partonT[i];
     mSave[i] = mSaveT[i]; }
     pTFin = pTFinT; cosTheta = cosThetaT; sinTheta = sinThetaT; phi = phiT;
   }
   void swapKin() {
-    for (int i = 0; i < 6; i++) { swap(parton[i], partonT[i]);
+    for (int i = 0; i < 12; i++) { swap(parton[i], partonT[i]);
                                   swap(mSave[i], mSaveT[i]); }
     swap(pTFin, pTFinT); swap(cosTheta, cosThetaT);
     swap(sinTheta, sinThetaT); swap(phi, phiT); }
@@ -271,7 +280,7 @@ protected:
   // Constructor.
   SigmaProcess() : infoPtr(0), settingsPtr(0), particleDataPtr(0),
     rndmPtr(0), beamAPtr(0), beamBPtr(0), couplingsPtr(0), sigmaTotPtr(0),
-    slhaPtr(0), lhaUpPtr(0) {for (int i = 0; i < 6; ++i) mSave[i] = 0.;
+    slhaPtr(0), lhaUpPtr(0) {for (int i = 0; i < 12; ++i) mSave[i] = 0.;
     Q2RenSave = alpEM = alpS = Q2FacSave = pdf1Save = pdf2Save = 0.; }
 
   // Constants: could only be changed in the code itself.
@@ -280,7 +289,7 @@ protected:
 
   // Pointer to various information on the generation.
   Info*           infoPtr;
- 
+
   // Pointer to the settings database.
   Settings*       settingsPtr;
 
@@ -296,7 +305,7 @@ protected:
 
   // Pointer to Standard Model couplings, including alphaS and alphaEM.
   Couplings*      couplingsPtr;
-  
+
   // Pointer to the total/elastic/diffractive cross section object.
   SigmaTotal*     sigmaTotPtr;
 
@@ -314,7 +323,8 @@ protected:
 
   // CP violation parameters for Higgs sector, normally only set once.
   int    higgsH1parity, higgsH2parity, higgsA3parity;
-  double higgsH1eta, higgsH2eta, higgsA3eta;
+  double higgsH1eta, higgsH2eta, higgsA3eta, higgsH1phi, higgsH2phi,
+         higgsA3phi;
 
   // Information on incoming beams.
   int    idA, idB;
@@ -328,7 +338,7 @@ protected:
   void addBeamB(int idIn) {inBeamB.push_back(InBeam(idIn));}
   int sizeBeamA() const {return inBeamA.size();}
   int sizeBeamB() const {return inBeamB.size();}
- 
+
   // Allowed colliding parton pairs, with pdf's.
   vector<InPair> inPair;
   void addPair(int idAIn, int idBIn) {
@@ -344,21 +354,21 @@ protected:
 
   // Store flavour, colour, anticolour, mass, angles and the whole particle.
   int      id1, id2, id3, id4, id5;
-  int      idSave[6], colSave[6], acolSave[6];
-  double   mSave[6], cosTheta, sinTheta, phi, sHMass, sHBeta, pT2Mass, pTFin;
-  Particle parton[6];
+  int      idSave[12], colSave[12], acolSave[12];
+  double   mSave[12], cosTheta, sinTheta, phi, sHMass, sHBeta, pT2Mass, pTFin;
+  Particle parton[12];
 
   // Minimal set of saved kinematics for trial interactions when
   // using the x-dependent matter profile of multiparton interactions.
-  Particle partonT[6];
-  double   mSaveT[6], pTFinT, cosThetaT, sinThetaT, phiT;
+  Particle partonT[12];
+  double   mSaveT[12], pTFinT, cosThetaT, sinThetaT, phiT;
 
   // Calculate and store all modified masses and four-vectors
   // intended for matrix elements. Return false if failed.
   virtual bool setupForME() {return true;}
   bool     setupForMEin();
-  double   mME[5];
-  Vec4     pME[5];
+  double   mME[12];
+  Vec4     pME[12];
 
   // Store whether tHat and uHat are swapped (= same as swap 3 and 4).
   bool swapTU;
@@ -389,8 +399,87 @@ protected:
   double weightTopDecay( Event& process, int iResBeg, int iResEnd);
   double weightHiggsDecay( Event& process, int iResBeg, int iResEnd);
 
+
+        public:
+            Abstract_SigmaProcess* pointerCopy__BOSS();
+
+            void pointerAssign__BOSS(Abstract_SigmaProcess* in);
+
+
+        public:
+            void init__BOSS(Pythia8::Abstract_Info*, Pythia8::Abstract_Settings*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Rndm*, Pythia8::Abstract_BeamParticle*, Pythia8::Abstract_BeamParticle*, Pythia8::Abstract_Couplings*, Pythia8::Abstract_SigmaTotal*, Pythia8::Abstract_SLHAinterface*);
+
+            void init__BOSS(Pythia8::Abstract_Info*, Pythia8::Abstract_Settings*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Rndm*, Pythia8::Abstract_BeamParticle*, Pythia8::Abstract_BeamParticle*, Pythia8::Abstract_Couplings*, Pythia8::Abstract_SigmaTotal*);
+
+            void init__BOSS(Pythia8::Abstract_Info*, Pythia8::Abstract_Settings*, Pythia8::Abstract_ParticleData*, Pythia8::Abstract_Rndm*, Pythia8::Abstract_BeamParticle*, Pythia8::Abstract_BeamParticle*, Pythia8::Abstract_Couplings*);
+
+            void set3Kin__BOSS(double, double, double, Pythia8::Abstract_Vec4&, Pythia8::Abstract_Vec4&, Pythia8::Abstract_Vec4&, double, double, double, double, double, double);
+
+            double sigmaHatWrap__BOSS(int);
+
+            double sigmaHatWrap__BOSS();
+
+            void pickInState__BOSS(int);
+
+            void pickInState__BOSS();
+
+            bool final2KinMPI__BOSS(int, int, Pythia8::Abstract_Vec4&, Pythia8::Abstract_Vec4&, double, double);
+
+            bool final2KinMPI__BOSS(int, int, Pythia8::Abstract_Vec4&, Pythia8::Abstract_Vec4&, double);
+
+            bool final2KinMPI__BOSS(int, int, Pythia8::Abstract_Vec4&, Pythia8::Abstract_Vec4&);
+
+            bool final2KinMPI__BOSS(int, int, Pythia8::Abstract_Vec4&);
+
+            bool final2KinMPI__BOSS(int, int);
+
+            bool final2KinMPI__BOSS(int);
+
+            bool final2KinMPI__BOSS();
+
+            double weightDecayFlav__BOSS(Pythia8::Abstract_Event&);
+
+            double weightDecay__BOSS(Pythia8::Abstract_Event&, int, int);
+
+            Pythia8::Abstract_Particle* getParton__BOSS(int) const;
+
+        protected:
+            void setId__BOSS(int, int, int, int);
+
+            void setId__BOSS(int, int, int);
+
+            void setId__BOSS(int, int);
+
+            void setId__BOSS(int);
+
+            void setId__BOSS();
+
+            void setColAcol__BOSS(int, int, int, int, int, int, int, int, int);
+
+            void setColAcol__BOSS(int, int, int, int, int, int, int, int);
+
+            void setColAcol__BOSS(int, int, int, int, int, int, int);
+
+            void setColAcol__BOSS(int, int, int, int, int, int);
+
+            void setColAcol__BOSS(int, int, int, int, int);
+
+            void setColAcol__BOSS(int, int, int, int);
+
+            void setColAcol__BOSS(int, int, int);
+
+            void setColAcol__BOSS(int, int);
+
+            void setColAcol__BOSS(int);
+
+            void setColAcol__BOSS();
+
+            double weightTopDecay__BOSS(Pythia8::Abstract_Event&, int, int);
+
+            double weightHiggsDecay__BOSS(Pythia8::Abstract_Event&, int, int);
+
 };
- 
+
 //==========================================================================
 
 // Sigma0Process is the base class for unresolved and minimum-bias processes.
@@ -424,7 +513,7 @@ protected:
   Sigma0Process() {}
 
 };
- 
+
 //==========================================================================
 
 // Sigma1Process is the base class for 2 -> 1 processes.
@@ -464,7 +553,7 @@ protected:
   virtual bool   setupForME();
 
 };
- 
+
 //==========================================================================
 
 // Sigma2Process is the base class for 2 -> 2 processes.
@@ -529,7 +618,7 @@ protected:
   double tH, uH, tH2, uH2, m3, s3, m4, s4, pT2, runBW3, runBW4;
 
 };
- 
+
 //==========================================================================
 
 // Sigma3Process is the base class for 2 -> 3 processes.
@@ -573,7 +662,7 @@ protected:
   Vec4   p3cm, p4cm, p5cm;
 
 };
- 
+
 //==========================================================================
 
 // SigmaLHAProcess is a wrapper class for Les Houches Accord external input.
@@ -607,7 +696,7 @@ public:
 
   // Number of final-state particles depends on current process choice.
   virtual int    nFinal()   const;
- 
+
   // Answer for these processes not in GeV^-2, so do not do this conversion.
   virtual bool   convert2mb() const {return false;}
 
@@ -621,10 +710,11 @@ public:
 private:
 
 };
- 
+
 //==========================================================================
 
 } // end namespace Pythia8
 
 #endif // Pythia8_SigmaProcess_H
- 
+
+#endif /* __boss__SigmaProcess_Pythia_8_209_h__ */

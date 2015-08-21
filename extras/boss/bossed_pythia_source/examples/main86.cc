@@ -1,20 +1,19 @@
 // main86.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2011 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 // This program is written by Stefan Prestel.
-// It illustrates how to do UMEPS merging,
-// see the Matrix Element Merging page in the online manual.
+// It illustrates how to do UMEPS merging, see the Matrix Element
+// Merging page in the online manual. An example command is
+//     ./main86 main86.cmnd w_production hepmcout86.dat
+// where main86.cmnd supplies the commands, w_production provides the
+// input LHE events, and hepmcout86.dat is the output file. This
+// example requires HepMC.
 
 #include "Pythia8/Pythia.h"
-#include "Pythia8/Pythia8ToHepMC.h"
+#include "Pythia8Plugins/HepMC2.h"
 #include <unistd.h>
-
-#include "HepMC/GenEvent.h"
-#include "HepMC/IO_GenEvent.h"
-// Following line to be used with HepMC 2.04 onwards.
-#include "HepMC/Units.h"
 
 using namespace Pythia8;
 
@@ -31,7 +30,7 @@ int main( int argc, char* argv[] ){
          << " 1. Input file for settings" << endl
          << " 2. Name of the input LHE file (with path), up to the '_tree'"
          << " identifier" << endl
-         << " 3. Path for output histogram files" << endl
+         << " 3. Path for output HepMC" << endl
          << " Program stopped. " << endl;
     return 1;
   }
@@ -98,10 +97,10 @@ int main( int argc, char* argv[] ){
 #endif
     string LHEfile = iPathTree + in.str();
 
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Start generation loop
     for( int iEvent=0; iEvent<nEvent; ++iEvent ){
@@ -163,15 +162,15 @@ int main( int argc, char* argv[] ){
     pythia.settings.flag("Merging:doUMEPSTree",true);
     pythia.settings.flag("Merging:doUMEPSSubt",false);
     pythia.settings.mode("Merging:nRecluster",0);
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
 
     cout << endl << endl << endl
          << "Start tree level treatment for " << njetcounterLO << " jets"
          << endl;
 
     pythia.settings.mode("Merging:nRequested", njetcounterLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Remember position in vector of cross section estimates.
     int iNow = sizeLO-1-njetcounterLO;
@@ -191,7 +190,7 @@ int main( int argc, char* argv[] ){
       weight *= evtweight;
       // Do not print zero-weight events.
       if ( weight == 0. ) continue;
-      
+
       // Construct new empty HepMC event.
       HepMC::GenEvent* hepmcevt = new HepMC::GenEvent();
       // Get correct cross section from previous estimate.
@@ -247,15 +246,15 @@ int main( int argc, char* argv[] ){
     pythia.settings.flag("Merging:doUMEPSTree",false);
     pythia.settings.flag("Merging:doUMEPSSubt",true);
     pythia.settings.mode("Merging:nRecluster",1);
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
 
     cout << endl << endl << endl
          << "Start subtractive treatment for " << njetcounterLS << " jets"
          << endl;
 
     pythia.settings.mode("Merging:nRequested", njetcounterLS);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Remember position in vector of cross section estimates.
     int iNow = sizeLO-1-njetcounterLS;

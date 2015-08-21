@@ -1,5 +1,5 @@
 // main18.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -34,7 +34,7 @@ using namespace Pythia8;
 // particlePtr(i) returns a pointer to the i'th kept particle.
 // particleRef(i) returns a reference to the i'th kept particle.
 // list() gives a listing of the kept particles only.
-        
+
 class EventFilter {
 
 public:
@@ -44,7 +44,7 @@ public:
     double pTminChargedIn = 0., double pTminNeutralIn = 0.)
     : select(selectIn), etaMax(etaMaxIn), pTminCharged(pTminChargedIn),
     pTminNeutral(pTminNeutralIn) {}
- 
+
   // Analysis of each new event to find acceptable particles.
   void filter(Event& event);
 
@@ -80,7 +80,7 @@ void EventFilter::filter(Event& event) {
   // Reset arrays in preparation for new event.
   keptIndx.resize(0);
   keptPtrs.resize(0);
-  
+
   // Loop over all particles in the event record.
   for (int i = 0; i < event.size(); ++i) {
 
@@ -169,7 +169,7 @@ int main() {
   pythia.readString("Next:numberShowInfo = 0");
   pythia.readString("Next:numberShowProcess = 0");
   pythia.readString("Next:numberShowEvent = 0");
-   
+
   // Initialization for LHC.
   pythia.init();
 
@@ -199,7 +199,7 @@ int main() {
 
     // Find final charged particles with |eta| < 3 and pT > 1 GeV.
     filter.filter( pythia.event);
- 
+
     // List first few events, both complete and after filtering.
     if (iEvent < nList) {
       pythia.info.list();
@@ -215,7 +215,7 @@ int main() {
       etaCharged.fill( filter.particleRef(i).eta() );
       pTCharged.fill(  filter.particlePtr(i)->pT() );
     }
-    
+
   // End of event loop.
   }
 

@@ -1,8 +1,8 @@
 #include "Pythia8/Event.h"
 #include <vector>
 #include <string>
-#include "backend_types/Pythia_8_186/wrapper_Vec4.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleDataEntry.h"
+#include "backend_types/Pythia_8_209/wrapper_Vec4.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleDataEntry.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
@@ -90,6 +90,18 @@ Pythia8::Abstract_Vec4* Pythia8::Particle::vDec__BOSS() const
 }
 
 
+int Pythia8::Particle::iTopCopyId__BOSS() const
+{
+    return iTopCopyId();
+}
+
+
+int Pythia8::Particle::iBotCopyId__BOSS() const
+{
+    return iBotCopyId();
+}
+
+
 std::vector<int,std::allocator<int> > Pythia8::Particle::sisterList__BOSS() const
 {
     return sisterList();
@@ -140,7 +152,7 @@ Pythia8::Abstract_Particle* Pythia8::Particle::operator_equal__BOSS(const Pythia
 
 
 
-#include "backend_types/Pythia_8_186/identification.hpp"
+#include "backend_types/Pythia_8_209/identification.hpp"
 
 Pythia8::Abstract_Particle* Pythia8::Particle::pointerCopy__BOSS()
 {

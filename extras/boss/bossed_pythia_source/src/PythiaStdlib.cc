@@ -1,5 +1,5 @@
 // PythiaStdlib.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -10,7 +10,7 @@
 namespace Pythia8 {
 
 //==========================================================================
- 
+
 // The Gamma function for real arguments, using the Lanczos approximation.
 // Code based on http://en.wikipedia.org/wiki/Lanczos_approximation
 

@@ -44,17 +44,21 @@ cited:
 If using DDCalc0 for calculations involving the associated
 experimental result, cite the following papers:
 
-  LUX 2013: 118*85.3 kg-days [uses TPCMC/NEST]
-    D.S. Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
-      http://inspirehep.net/record/1262678
-
-  XENON100 2012: 34*224.6 kg-days [uses TPCMC/NEST]
+  XENON100 2012: 34*224.6 kg-days (Xe) [uses TPCMC/NEST]
     E. Aprile et al., PRL 109, 181301 (2012) [arxiv:1207.5988]
       http://inspirehep.net/record/1123760
 
-  SuperCDMS 2014: 577 kg-days
+  LUX 2013: 118*85.3 kg-days (Xe) [uses TPCMC/NEST]
+    D.S. Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
+      http://inspirehep.net/record/1262678
+
+  SuperCDMS 2014: 577 kg-days (Ge)
     R. Agnese et al., PRL 112, 241302 (2014) [arxiv:1402.7137]
       http://inspirehep.net/record/1283158
+
+  SIMPLE 2014: 18.24 kg-days (C2ClF5)
+    M. Felizardo et al., PRD 89, 072013 (2014) [arXiv:1404.4309]
+      http://inspirehep.net/record/1291056
 
   DARWIN: argon & xenon projections [uses TPCMC/NEST]
     J. Conrad et al., in preparation.

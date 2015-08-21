@@ -1,5 +1,5 @@
 // main03.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -61,7 +61,7 @@ int main() {
        // Analyze all particles.
       nFin++;
       pSum += event[i].p();
-       
+
       // Analyze charged particles and fill histograms.
       if (event[i].isCharged()) {
         ++nChg;
@@ -81,7 +81,7 @@ int main() {
 
   // End of event loop.
   }
-   
+
   // Final statistics. Normalize and output histograms.
   pythia.stat();
   dndy   *=  5. / nEvent;

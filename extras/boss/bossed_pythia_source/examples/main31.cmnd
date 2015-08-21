@@ -81,6 +81,14 @@ POWHEG:pTdef = 1
 !      else MPIs with a scale above (pT_1 + pT_2 + pT_3) / 2 are vetoed
 POWHEG:MPIveto = 0
 
+! QED vetoing
+!  0 - No QED vetoing is done for pTemt > 0.
+!  1 - QED vetoing is done for pTemt > 0.
+!  2 - QED vetoing is done for pTemt > 0.   If a photon is found
+!      with pT>pThard from the Born level process, the event is accepted
+!      and no further veto of this event is allowed (for any pTemt).
+POWHEG:QEDveto = 2
+
 ! Further options (optional, for tryout)
 !PartonLevel:MPI = off
 !HadronLevel:All = off

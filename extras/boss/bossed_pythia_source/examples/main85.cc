@@ -1,20 +1,19 @@
 // main85.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2011 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
 // This program is written by Stefan Prestel.
-// It illustrates how to do CKKW-L merging,
-// see the Matrix Element Merging page in the online manual.
+// It illustrates how to do CKKW-L merging, see the Matrix Element
+// Merging page in the online manual. An example command is
+//     ./main85 main85.cmnd w_production hepmcout85.dat
+// where main85.cmnd supplies the commands, w_production provides the
+// input LHE events, and hepmcout85.dat is the output file. This
+// example requires HepMC.
 
 #include "Pythia8/Pythia.h"
-#include "Pythia8/Pythia8ToHepMC.h"
+#include "Pythia8Plugins/HepMC2.h"
 #include <unistd.h>
-
-#include "HepMC/GenEvent.h"
-#include "HepMC/IO_GenEvent.h"
-// Following line to be used with HepMC 2.04 onwards.
-#include "HepMC/Units.h"
 
 using namespace Pythia8;
 
@@ -96,10 +95,10 @@ int main( int argc, char* argv[] ){
     if(access( (iPathTree+in.str()+".gz").c_str(), F_OK) != -1) in << ".gz";
 #endif
     string LHEfile = iPathTree + in.str();
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
     pythia.settings.mode("Merging:nRequested", njetcounterLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Start generation loop
     for( int iEvent=0; iEvent<nEvent; ++iEvent ){
@@ -158,15 +157,15 @@ int main( int argc, char* argv[] ){
     if(access( (iPathTree+in.str()+".gz").c_str(), F_OK) != -1) in << ".gz";
 #endif
     string LHEfile = iPathTree + in.str();
-    LHAupLHEF lhareader((char*)(LHEfile).c_str());
 
     cout << endl << endl << endl
          << "Start tree level treatment for " << njetcounterLO << " jets"
          << endl;
 
     pythia.settings.mode("Merging:nRequested", njetcounterLO);
+    pythia.settings.mode("Beams:frameType", 4);
     pythia.settings.word("Beams:LHEF", LHEfile);
-    pythia.init(&lhareader);
+    pythia.init();
 
     // Remember position in vector of cross section estimates.
     int iNow = sizeLO-1-njetcounterLO;

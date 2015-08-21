@@ -1,5 +1,5 @@
 #include "Pythia8/SLHAinterface.h"
-#include "backend_types/Pythia_8_186/wrapper_SLHAinterface.h"
+#include "backend_types/Pythia_8_209/wrapper_SLHAinterface.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 

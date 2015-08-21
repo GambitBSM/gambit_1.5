@@ -1,5 +1,5 @@
 // SigmaLeftRightSym.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -18,7 +18,7 @@ namespace Pythia8 {
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2ZRight::initProc() {
 
   // Store Z_R mass and width for propagator.
@@ -98,7 +98,7 @@ void Sigma1ffbar2ZRight::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for Z_R decay angle.
-  
+
 double Sigma1ffbar2ZRight::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -166,7 +166,7 @@ double Sigma1ffbar2ZRight::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ffbar2WRight::initProc() {
 
   // Store W_R^+- mass and width for propagator.
@@ -216,7 +216,7 @@ void Sigma1ffbar2WRight::sigmaKin() {
       // Combine kinematics with colour factor and CKM couplings.
       widNow = kinFac;
       if (id1Abs < 9) widNow *= colQ * couplingsPtr->V2CKMid(id1Abs, id2Abs);
- 
+
       // Secondary width from top and righthanded neutrino decay.
       id1Neg    = (id1Abs < 19) ? -id1Now : id1Abs;
       id2Neg    = (id2Abs < 19) ? -id2Now : id2Abs;
@@ -277,7 +277,7 @@ void Sigma1ffbar2WRight::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for W_R decay angle.
-  
+
 double Sigma1ffbar2WRight::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -295,7 +295,7 @@ double Sigma1ffbar2WRight::weightDecay( Event& process, int iResBeg,
   double mr1    = pow2(process[6].m()) / sH;
   double mr2    = pow2(process[7].m()) / sH;
   double betaf  = sqrtpos( pow2(1. - mr1 - mr2) - 4. * mr1 * mr2);
-   
+
   // Sign of asymmetry.
   double eps    = (process[3].id() * process[6].id() > 0) ? 1. : -1.;
 
@@ -304,7 +304,7 @@ double Sigma1ffbar2WRight::weightDecay( Event& process, int iResBeg,
     * (process[7].p() - process[6].p()) / (sH * betaf);
   double wtMax  = 4.;
   double wt     = pow2(1. + betaf * eps * cosThe) - pow2(mr1 - mr2);
- 
+
   // Done.
   return (wt / wtMax);
 
@@ -318,7 +318,7 @@ double Sigma1ffbar2WRight::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma1ll2Hchgchg::initProc() {
 
   // Set process properties: H_L^++-- or H_R^++--.
@@ -394,7 +394,7 @@ void Sigma1ll2Hchgchg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for H_L/R sequential decay angles.
-  
+
 double Sigma1ll2Hchgchg::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -404,7 +404,7 @@ double Sigma1ll2Hchgchg::weightDecay( Event& process, int iResBeg,
   // For top decay hand over to standard routine.
   if (idMother == 6)
     return weightTopDecay( process, iResBeg, iResEnd);
- 
+
   // Else isotropic decay.
   return 1.;
 
@@ -419,7 +419,7 @@ double Sigma1ll2Hchgchg::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2lgm2Hchgchgl::initProc() {
 
   // Set process properties: H_L^++-- or H_R^++-- and e/mu/tau.
@@ -468,7 +468,7 @@ double Sigma2lgm2Hchgchgl::sigmaHat() {
 
   // Incoming squared lepton mass.
   double s1    = pow2( particleDataPtr->m0(idInAbs) );
-  
+
   // Kinematical expressions.
   double smm1  = 8. * (sH + tH - s3) * (sH + tH - 2. * s3 - s1 - s4)
                / pow2(uH - s3);
@@ -520,7 +520,7 @@ void Sigma2lgm2Hchgchgl::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for H_L/R sequential decay angles.
-  
+
 double Sigma2lgm2Hchgchgl::weightDecay( Event& process, int iResBeg,
   int iResEnd) {
 
@@ -530,7 +530,7 @@ double Sigma2lgm2Hchgchgl::weightDecay( Event& process, int iResBeg,
   // For top decay hand over to standard routine.
   if (idMother == 6)
     return weightTopDecay( process, iResBeg, iResEnd);
- 
+
   // Else isotropic decay.
   return 1.;
 
@@ -544,7 +544,7 @@ double Sigma2lgm2Hchgchgl::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma3ff2HchgchgfftWW::initProc() {
 
   // Set process properties: H_L^++-- or H_R^++--.
@@ -627,7 +627,7 @@ double Sigma3ff2HchgchgfftWW::sigmaHat() {
 
   // Answer.
   return sigma;
- 
+
 }
 
 //--------------------------------------------------------------------------
@@ -687,7 +687,7 @@ double Sigma3ff2HchgchgfftWW::weightDecay( Event& process, int iResBeg,
 //--------------------------------------------------------------------------
 
 // Initialize process.
-  
+
 void Sigma2ffbar2HchgchgHchgchg::initProc() {
 
   // Set process properties: H_L^++ H_L^-- or H_R^++ H_R^--.
@@ -788,7 +788,7 @@ void Sigma2ffbar2HchgchgHchgchg::setIdColAcol() {
 //--------------------------------------------------------------------------
 
 // Evaluate weight for H_L/R sequential decay angles.
-  
+
 double Sigma2ffbar2HchgchgHchgchg::weightDecay( Event& process,
   int iResBeg, int iResEnd) {
 
@@ -798,7 +798,7 @@ double Sigma2ffbar2HchgchgHchgchg::weightDecay( Event& process,
   // For top decay hand over to standard routine.
   if (idMother == 6)
     return weightTopDecay( process, iResBeg, iResEnd);
- 
+
   // Else isotropic decay.
   return 1.;
 

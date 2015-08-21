@@ -1,6 +1,6 @@
 #include <string>
 #include "Pythia8/ParticleData.h"
-#include "backend_types/Pythia_8_186/wrapper_ParticleDataEntry.h"
+#include "backend_types/Pythia_8_209/wrapper_ParticleDataEntry.h"
 #include "gambit/Backends/abstracttypedefs.h"
 #include "gambit/Backends/wrappertypedefs.h"
 

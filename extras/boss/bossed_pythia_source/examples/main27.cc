@@ -1,5 +1,5 @@
 // main27.cc is a part of the PYTHIA event generator.
-// Copyright (C) 2014 Torbjorn Sjostrand.
+// Copyright (C) 2015 Torbjorn Sjostrand.
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
@@ -21,7 +21,7 @@ int main() {
   // Pick new random number seed for each run, based on clock.
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = 0");
- 
+
   // Process selection.
   // ANY COMBINATION OF THE PROCESSES FLAGS BELOW IS ALLOWED
   // HERE WE SWITCH ON ONLY THE MU+MU- FINAL STATE.
@@ -88,7 +88,7 @@ int main() {
   Hist pTmuHisto("(dN/dpT)_mu^-", 50, 1., 2501.);
 
   vector<int> moms;
-  
+
   // Measure the cpu runtime.
   clock_t start, stop;
   double t = 0.0;
@@ -97,7 +97,7 @@ int main() {
   //assert((start = clock()) != -1u); // Start timer; clock_t unsigned.
   // Simpler option, not using assert.
   start = clock();
-  
+
   // Begin event loop. Generate event. Skip if error. List first one.
   for (int iEvent = 0 ; iEvent < 500 ; ++iEvent) {
     if (!pythia.next()) continue;
@@ -116,7 +116,7 @@ int main() {
       // find the final muon who's first mother is the Z
       if (pythia.event[i].id() == 13 && pythia.event[i].isFinal()) {
         moms.clear();
-        moms = pythia.event.motherList(i);
+        moms = pythia.event[i].motherList();
         for (int m = 0 ; m < int(moms.size()) ; m++) {
           if( pythia.event[ moms[m] ].id() == 5000023 ) {
             imu = i;
@@ -144,6 +144,6 @@ int main() {
   cout << "\n" << "|----------------------------------------|" << endl;
   cout << "| CPU Runtime = " << t << " sec" << endl;
   cout << "|----------------------------------------|" << "\n" << endl;
-  
+
   return 0;
 }
