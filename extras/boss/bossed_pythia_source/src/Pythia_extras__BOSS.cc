@@ -74,6 +74,12 @@ bool Pythia8::Pythia::setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths* r
 }
 
 
+bool Pythia8::Pythia::init__BOSS()
+{
+    return init();
+}
+
+
 int Pythia8::Pythia::forceTimeShower__BOSS(int iBeg, int iEnd, double pTmax)
 {
     return forceTimeShower(iBeg, iEnd, pTmax);

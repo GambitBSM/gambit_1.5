@@ -5,17 +5,17 @@ void wrapper_deleter(Pythia8::ParticleData__BOSS* wptr)
     delete wptr;
 }
 
-void wrapper_deleter(Pythia8::CoupSUSY__BOSS* wptr)
-{
-    delete wptr;
-}
-
 void wrapper_deleter(Pythia8::Info__BOSS* wptr)
 {
     delete wptr;
 }
 
 void wrapper_deleter(Pythia8::DecayChannel__BOSS* wptr)
+{
+    delete wptr;
+}
+
+void wrapper_deleter(Pythia8::CoupSUSY__BOSS* wptr)
 {
     delete wptr;
 }
@@ -61,11 +61,6 @@ void wrapper_deleter(Pythia8::SigmaProcess__BOSS* wptr)
 }
 
 void wrapper_deleter(Pythia8::Parm__BOSS* wptr)
-{
-    delete wptr;
-}
-
-void wrapper_deleter(Pythia8::LHdecayChannel__BOSS* wptr)
 {
     delete wptr;
 }
@@ -121,6 +116,11 @@ void wrapper_deleter(Pythia8::BeamParticle__BOSS* wptr)
 }
 
 void wrapper_deleter(Pythia8::ResonanceGmZ__BOSS* wptr)
+{
+    delete wptr;
+}
+
+void wrapper_deleter(Pythia8::LHdecayChannel__BOSS* wptr)
 {
     delete wptr;
 }

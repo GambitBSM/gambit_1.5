@@ -16,8 +16,6 @@
 ################################################################################
 
 # Include the configuration and set the local directory structure.
-
-
 ifeq (,$(findstring clean, $(MAKECMDGOALS)))
   -include Makefile.inc
 endif
@@ -31,8 +29,6 @@ LOCAL_SRC=src
 LOCAL_TMP=tmp
 LOCAL_MKDIRS:=$(shell mkdir -p $(LOCAL_TMP) $(LOCAL_LIB))
 CXX_COMMON:=-I$(LOCAL_INCLUDE) $(CXX_COMMON)
-
-CXX=g++ -O3 -ffast-math -march=native -mtune=native -mavx
 
 # PYTHIA.
 OBJECTS=$(patsubst $(LOCAL_SRC)/%.cc,$(LOCAL_TMP)/%.o,\

@@ -8,17 +8,17 @@ namespace Pythia8
 
 namespace Pythia8
 {
-    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_CoupSUSY Abstract_CoupSUSY;
-}
-
-namespace Pythia8
-{
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_Info Abstract_Info;
 }
 
 namespace Pythia8
 {
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_DecayChannel Abstract_DecayChannel;
+}
+
+namespace Pythia8
+{
+    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_CoupSUSY Abstract_CoupSUSY;
 }
 
 namespace Pythia8
@@ -64,11 +64,6 @@ namespace Pythia8
 namespace Pythia8
 {
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_Parm Abstract_Parm;
-}
-
-namespace Pythia8
-{
-    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_LHdecayChannel Abstract_LHdecayChannel;
 }
 
 namespace Pythia8
@@ -124,6 +119,11 @@ namespace Pythia8
 namespace Pythia8
 {
     typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_ResonanceGmZ Abstract_ResonanceGmZ;
+}
+
+namespace Pythia8
+{
+    typedef CAT_3(BACKENDNAME,_,SAFE_VERSION)::Pythia8::Abstract_LHdecayChannel Abstract_LHdecayChannel;
 }
 
 namespace Pythia8

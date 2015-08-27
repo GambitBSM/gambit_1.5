@@ -7,6 +7,7 @@
 #include "backend_types/Pythia_8_209/wrapper_Event.h"
 #include "backend_types/Pythia_8_209/wrapper_Couplings.h"
 #include "backend_types/Pythia_8_209/wrapper_AlphaEM.h"
+#include "backend_types/Pythia_8_209/wrapper_LHdecayChannel.h"
 #include "backend_types/Pythia_8_209/wrapper_ResonanceGmZ.h"
 #include "backend_types/Pythia_8_209/wrapper_BeamParticle.h"
 #include "backend_types/Pythia_8_209/wrapper_CoupSM.h"
@@ -18,7 +19,6 @@
 #include "backend_types/Pythia_8_209/wrapper_PartonLevel.h"
 #include "backend_types/Pythia_8_209/wrapper_Rndm.h"
 #include "backend_types/Pythia_8_209/wrapper_UserHooks.h"
-#include "backend_types/Pythia_8_209/wrapper_LHdecayChannel.h"
 #include "backend_types/Pythia_8_209/wrapper_Parm.h"
 #include "backend_types/Pythia_8_209/wrapper_SigmaProcess.h"
 #include "backend_types/Pythia_8_209/wrapper_LHdecayTable.h"
@@ -28,19 +28,19 @@
 #include "backend_types/Pythia_8_209/wrapper_Hist.h"
 #include "backend_types/Pythia_8_209/wrapper_Vec4.h"
 #include "backend_types/Pythia_8_209/wrapper_Settings.h"
+#include "backend_types/Pythia_8_209/wrapper_CoupSUSY.h"
 #include "backend_types/Pythia_8_209/wrapper_DecayChannel.h"
 #include "backend_types/Pythia_8_209/wrapper_Info.h"
-#include "backend_types/Pythia_8_209/wrapper_CoupSUSY.h"
 #include "backend_types/Pythia_8_209/wrapper_ParticleData.h"
 #include "gambit/Backends/wrappertypedefs.h"
 
 void wrapper_deleter(Pythia8::ParticleData__BOSS*);
 
-void wrapper_deleter(Pythia8::CoupSUSY__BOSS*);
-
 void wrapper_deleter(Pythia8::Info__BOSS*);
 
 void wrapper_deleter(Pythia8::DecayChannel__BOSS*);
+
+void wrapper_deleter(Pythia8::CoupSUSY__BOSS*);
 
 void wrapper_deleter(Pythia8::Settings__BOSS*);
 
@@ -59,8 +59,6 @@ void wrapper_deleter(Pythia8::LHdecayTable__BOSS*);
 void wrapper_deleter(Pythia8::SigmaProcess__BOSS*);
 
 void wrapper_deleter(Pythia8::Parm__BOSS*);
-
-void wrapper_deleter(Pythia8::LHdecayChannel__BOSS*);
 
 void wrapper_deleter(Pythia8::UserHooks__BOSS*);
 
@@ -83,6 +81,8 @@ void wrapper_deleter(Pythia8::CoupSM__BOSS*);
 void wrapper_deleter(Pythia8::BeamParticle__BOSS*);
 
 void wrapper_deleter(Pythia8::ResonanceGmZ__BOSS*);
+
+void wrapper_deleter(Pythia8::LHdecayChannel__BOSS*);
 
 void wrapper_deleter(Pythia8::AlphaEM__BOSS*);
 

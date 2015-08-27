@@ -128,7 +128,7 @@ public:
     spacePtr = spacePtrIn; return true;}
 
   // Initialize.
-  bool init();
+  bool init(ostream& os = cout);
 
   // Generate the next event.
   bool next();
@@ -397,6 +397,8 @@ private:
             bool setSigmaPtr__BOSS(Pythia8::Abstract_SigmaProcess*);
 
             bool setResonancePtr__BOSS(Pythia8::Abstract_ResonanceWidths*);
+
+            bool init__BOSS();
 
             int forceTimeShower__BOSS(int, int, double);
 
