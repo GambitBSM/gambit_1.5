@@ -18,14 +18,20 @@
 ***                                (m^-2 GeV^-1 annihilation^-1)
 ***
 ***        liketype      Sets combination of data to use in likelihood
-***                         calculations
+***                      calculations.  Note that liketype = 2 and 3 only
+***                      have any meaning when using the 2012 likelihood.
 ***                        1 => Number of events only
 ***                        2 => Number of events and event arrival angles
 ***                        3 => Number of events and energy estimator (nchan 
 ***                             = number of lit DOMs)
 ***                        4 => Number of events, event arrival angles and 
 ***                             energy estimator
-***        fastlike      In the case of liketype=4 with the 2014 likelihood, 
+***
+***        theoryError   theoretical error to incorporate into likelihood
+***                      and p-value calculations (given as a fractional
+***                      relative error).
+***
+***        fastlike      In the case of liketype=4 with the 2015 likelihood, 
 ***                      do a faster, less accurate calculation of the spectral-angular
 ***                      part of the likelihood.  
 ***
@@ -53,6 +59,8 @@
 ***
 ***        context       A c_ptr passed in to nuyield when it is called
 ***
+***        threadsafe    Indicate that nulike can treat nuyield as threadsafe.
+***
 ***                              
 *** output: Nsignal_predicted  Predicted number of signal events within 
 ***                      phi_cut (includes solar coronal BG)
@@ -76,10 +84,11 @@
 
       subroutine nulike_bounds(analysis_name_in, mwimp, annrate, 
      & nuyield, Nsignal_predicted, NBG_expected, Ntotal_observed, 
-     & lnlike, pvalue, liketype, fastlike, pvalFromRef, referenceLike,
-     & dof, context) bind(c)
+     & lnlike, pvalue, liketype, theoryError, fastlike, pvalFromRef,
+     & referenceLike, dof, context, threadsafe) bind(c)
 
       use iso_c_binding, only: c_ptr, c_char, c_double, c_int, c_bool
+      use omp_lib
       
       implicit none
       include 'nulike_internal.h'
@@ -87,8 +96,8 @@
       integer(c_int), intent(inout) :: Ntotal_observed
       integer(c_int), intent(in) :: liketype
       real(c_double), intent(inout) :: Nsignal_predicted, NBG_expected, lnlike, pvalue
-      real(c_double), intent(in) :: referenceLike, dof, mwimp, annrate
-      logical(c_bool), intent(in) :: fastlike, pvalFromRef
+      real(c_double), intent(in) :: referenceLike, dof, mwimp, annrate, theoryError
+      logical(c_bool), intent(in) :: fastlike, pvalFromRef, threadsafe
       character(kind=c_char), dimension(nulike_clen), intent(inout) :: analysis_name_in
       type(c_ptr), intent(inout) :: context
 
@@ -148,11 +157,11 @@
         stop
       endif
       
-      !Make sure the user has not tried to use the 2014 like with only angular or only spectral likelihood.
-      if (likelihood_version(analysis) .eq. 2014 .and. 
+      !Make sure the user has not tried to use the 2015 like with only angular or only spectral likelihood.
+      if (likelihood_version(analysis) .eq. 2015 .and. 
      & (liketype .eq. 2 .or. liketype .eq. 3) ) then
         write(*,*) "Analysis '"//trim(analysis_name)//"' requested of nulike_bounds"
-        write(*,*) 'uses the 2014 likelihood, which is incompatible with liketype = ',liketype
+        write(*,*) 'uses the 2015 likelihood, which is incompatible with liketype = ',liketype
         write(*,*) 'Quitting...'
         stop
       endif 
@@ -191,7 +200,7 @@
 
       !Calculate the number likelihood
       nLikelihood = nulike_nlike(nEvents(analysis),
-     & theta_tot,theta_S,EAErr(analysis),theoryErr(analysis))
+     & theta_tot,theta_S,EAErr(analysis),theoryError)
 
       if (doProfiling) then
         call system_clock(counted1,countrate)
@@ -232,15 +241,32 @@
         endif
         specAngLikelihood = angularLikelihood + spectralLikelihood
 
-      !2014 likelihood, as per arXiv:150x.xxxx
-      case (2014)
+      !2015 likelihood, as per arXiv:15xx.xxxx
+      case (2015)
         specAngLikelihood = 0.d0
         if (liketype .eq. 4) then
-          do j = 1, nEvents(analysis)          
-            specAngLikelihood = specAngLikelihood + nulike_specanglike(j,
-     &       theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), 
-     &       nuyield, context, fastlike)
-          enddo
+          if (threadsafe .and. omp_get_max_threads() .gt. max_threads) then
+            write(*,*) "Nulike actually hasn't been configured to deal with"
+            write(*,*) "such a powerhouse machine.  Please increase "
+            write(*,*) "max_threads in nuconst.h."
+            stop
+          endif
+          specAngLikelihood = nulike_specanglike(1,theta_S, f_S, annrate, 
+     &     logmw, sens_logE(1,1,analysis), nuyield, context, fastlike)
+          if (threadsafe) then
+!$omp parallel do reduction(+:specAngLikelihood)
+            do j = 2, nEvents(analysis)
+              specAngLikelihood = specAngLikelihood + nulike_specanglike(j,
+     &         theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), 
+     &         nuyield, context, fastlike)    
+            enddo
+          else
+            do j = 2, nEvents(analysis)
+              specAngLikelihood = specAngLikelihood + nulike_specanglike(j,
+     &         theta_S, f_S, annrate, logmw, sens_logE(1,1,analysis), 
+     &         nuyield, context, fastlike)    
+            enddo
+          endif
         endif
 
       case default
@@ -279,7 +305,7 @@
 
         !p-value from Poissonian statistics
         if (.not. pvalBGPoisComputed(analysis)) call nulike_bglikeprecomp
-        pvalue = nulike_pval(nEvents(analysis), theta_tot, theta_S)
+        pvalue = nulike_pval(nEvents(analysis), theta_tot, theta_S, theoryError)
         pvalue = pvalue / BGpvalPoissonian(analysis)
         
       endif
