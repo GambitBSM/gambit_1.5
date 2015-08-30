@@ -1,8 +1,8 @@
 ***********************************************************************
-*** nulike_specanginit initialises the precomputed effective area and 
-*** partial angular-spectral likelihoods by reading them in from the 
-*** specified directory.
-*** This routine is used only with the 2014 likelihood.
+*** nulike_specanginit initialises the precomputed unbiased effective
+*** areas and partial angular-spectral likelihoods by reading them in
+*** from the specified directory.
+*** This routine is used only with the 2015 likelihood.
 ***
 *** input:  dirname      name of directory containig partial likelihoods.
 ***         nevents      number of events for which partial likelihoods 
@@ -44,34 +44,92 @@
       do while (instring(1:1) .eq. '#' .or. instring(2:2) .eq. '#')
         read(lun, fmt='(A100)'), instring
       enddo
-      read(instring, fmt=*) n_events, n_energies, phi_cut, logE_min, logE_max
+      read(instring, fmt=*) n_events, n_energies, phi_cut, logE_min, logE_max, EAErr(analysis)
       close(lun)
 
       !Use the tabulation bounds in energy to reconstruct the energies
       forall(i=1:n_energies) precomp_log10E(i,analysis) = 
      & logE_min + dble(i-1)/dble(n_energies-1) * (logE_max - logE_min)
 
-      !Open and read in from the effective area file.
+      !Open and read in from the unbiased effective area files.
       precompEA_weights(1:n_energies,:,analysis) = 
-     & nulike_read_weights(lun, trim(dirname)//'/effective_area.dat', n_energies)
+     & nulike_read_weights(lun, trim(dirname)//'/unbiased_effective_area.dat', n_energies)
+      precompEAnoL_weights(1:n_energies,:,analysis) = 
+     & nulike_read_weights(lun, trim(dirname)//'/unbiased_effective_area_noL.dat', n_energies)
 
-      !Set up interpolation in neutrino effective area
-      call TSPSI(n_energies,precomp_log10E(:,analysis),precompEA_weights(:,1,analysis),
-     & 2,0,.false.,.false.,2*n_energies-2,working,precompEA_derivs(:,1,analysis),
+      !Determine the index at which the unbiased effective area actually starts
+      i = 1
+      do 
+        if (precompEA_weights(i,1,analysis) .gt. 0.99d0*logZero .or.
+     &      precompEA_weights(i,2,analysis) .gt. 0.99d0*logZero) then
+          start_index(analysis) = i
+          exit
+        endif
+        i = i + 1
+      enddo
+
+      !Set up interpolation in unbiased neutrino effective area
+      call TSPSI(n_energies-start_index(analysis)+1,
+     & precomp_log10E(start_index(analysis):,analysis),
+     & precompEA_weights(start_index(analysis):,1,analysis),
+     & 2,0,.false.,.false.,2*n_energies-2,working,
+     & precompEA_derivs(:,1,analysis),
      & precompEA_sigma(:,1,analysis),IER)
       if (IER .lt. 0) then
         write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
-        write(*,*) 'code',IER,' in setting up neutrino effective area.'
+        write(*,*) 'code',IER,' in setting up unbiased neutrino effective area.'
         stop
       endif
 
-      !Set up interpolation in anti-neutrino effective area
-      call TSPSI(n_energies,precomp_log10E(:,analysis),precompEA_weights(:,2,analysis),
-     & 2,0,.false.,.false.,2*n_energies-2,working,precompEA_derivs(:,2,analysis),
+      !Set up interpolation in unbiased anti-neutrino effective area
+      call TSPSI(n_energies-start_index(analysis)+1,
+     & precomp_log10E(start_index(analysis):,analysis),
+     & precompEA_weights(start_index(analysis):,2,analysis),
+     & 2,0,.false.,.false.,2*n_energies-2,working,
+     & precompEA_derivs(:,2,analysis),
      & precompEA_sigma(:,2,analysis),IER)
       if (IER .lt. 0) then
         write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
-        write(*,*) 'code',IER,' in setting up nubar effective area.'
+        write(*,*) 'code',IER,' in setting up unbiased nubar effective area.'
+        stop
+      endif
+
+      !Determine the index at which the unbiased effective area without L actually starts
+      i = 1
+      do 
+        if (precompEAnoL_weights(i,1,analysis) .gt. 0.99d0*logZero .or.
+     &      precompEAnoL_weights(i,2,analysis) .gt. 0.99d0*logZero) then
+          start_index_noL(analysis) = i
+          exit
+        endif
+        i = i + 1
+      enddo
+
+      !Set up interpolation in unbiased neutrino effective area without L
+      call TSPSI(n_energies-start_index_noL(analysis)+1,
+     & precomp_log10E(start_index_noL(analysis):,analysis),
+     & precompEAnoL_weights(start_index_noL(analysis):,1,analysis),
+     & 2,0,.false.,.false.,2*n_energies-2,working,
+     & precompEAnoL_derivs(:,1,analysis),
+     & precompEAnoL_sigma(:,1,analysis),IER)
+      if (IER .lt. 0) then
+        write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
+        write(*,*) 'code',IER,' in setting up unbiased neutrino effective '
+        write(*,*) 'area without angular correction.'
+        stop
+      endif
+
+      !Set up interpolation in unbiased anti-neutrino effective area without L
+      call TSPSI(n_energies-start_index_noL(analysis)+1,
+     & precomp_log10E(start_index_noL(analysis):,analysis),
+     & precompEAnoL_weights(start_index_noL(analysis):,2,analysis),
+     & 2,0,.false.,.false.,2*n_energies-2,working,
+     & precompEAnoL_derivs(:,2,analysis),
+     & precompEAnoL_sigma(:,2,analysis),IER)
+      if (IER .lt. 0) then
+        write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
+        write(*,*) 'code',IER,' in setting up unbiased nubar effective '
+        write(*,*) 'area without angular correction.'
         stop
       endif
 
@@ -89,7 +147,7 @@
      &   precomp_sigma(:,i,1,analysis),IER)
         if (IER .lt. 0) then
           write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
-          write(*,*) 'code',IER,' in setting up neutrino effective area.'
+          write(*,*) 'code',IER,' in setting up neutrino partial likelihood.'
           stop
         endif
 
@@ -99,7 +157,7 @@
      &   precomp_sigma(:,i,2,analysis),IER)
         if (IER .lt. 0) then
           write(*,*) 'Error in nulike_specanginit: TSPSI failed with error'
-          write(*,*) 'code',IER,' in setting up neutrino effective area.'
+          write(*,*) 'code',IER,' in setting up nubar partial likelihood.'
           stop
         endif
 

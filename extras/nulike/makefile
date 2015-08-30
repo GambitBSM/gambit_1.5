@@ -3,14 +3,18 @@
 # Author: Pat Scott
 # p.scott@imperial.ac.uk
 #
-# This is a pretty simple program, so just change the
-# makefile by hand to suit your system, or call
-# it from another makefile, overriding the variables
-# FF, FOPT and MODULE.
+# This is a pretty simple program, so just change
+# this makefile by hand to suit your system, or 
+# override the variables FF, FOPT and MODULE
+# from the command line.
 #
-# Note that the test program requires DarkSUSY,
+# Note that the test programs require DarkSUSY,
 # and the preparatory program requires nusigma.
 # Just compiling the library requires neither.
+# As with the compiler options, you can modify
+# the DSLIB* and/or NUSIG* variables below 
+# to suit your installation, either by hand here
+# or via the commandline when calling this makefile.
 
 # Define fortran compiler and options: intel
 #FF=ifort
@@ -27,9 +31,11 @@ MODULE=J
 # in the main makefile of gambit in order to compile.
 
 # Define library-making options
-RANLIB = ranlib
+RANLIB = ranlib 
 AR = ar
 ARFLAGS = rvs
+
+##### Users should not need to modify anything below this line. #####
 
 # Directories
 INC=include
@@ -42,12 +48,7 @@ CUBPACK=contrib/CUBPACK
 
 # Set internal compile commands
 FC=$(FF)
-FFLAGS=$(FOPT) -I$(INC) -$(MODULE) $(BUILD) -fPIC
-
-# Define library-making options
-RANLIB = ranlib
-AR = ar
-ARFLAGS = rvs
+FFLAGS=$(FOPT) -I$(INC) -$(MODULE) $(BUILD) -fPIC -fopenmp
 
 # Headers
 INC_DEP = nulike.h nulike_internal.h nuprep.h nuversion.h nucommon.h nuconst.h constants.h
@@ -64,7 +65,7 @@ edisp.f edispinit.f sens.f eventinit.f init.f nlike.f psf.f pval.f \
 analysis_map.f sigintegrand.f signal.f specintegrand.f speclike.f \
 utils.f partials.f specanglike.f specangintegrand.f specanginit.f \
 tabulated_weight.f preparse_files.f partintegrand.f d1mach.f \
-offctrpsf.f
+offctrpsf.f bias.f biasinit.f
 
 OBJ = $(BUILD)/tspack.o $(patsubst %.f90,$(BUILD)/%.o,$(F90SOURCES)) $(patsubst %.f,$(BUILD)/%.o,$(SOURCES)) 
 
@@ -83,7 +84,7 @@ CUBPACK_OBJ = $(CUBPACK_OBJ_BARE:%.o=$(BUILD)/%.o)
 
 default: libnulike.a
 
-all : libnulike.a libnulike.so nulike_prep nulike_test
+all : libnulike.a libnulike.so nulike_prep nulike_test nulike_test_mssm25 nulike_test_wimp
 
 $(BUILD)/%.o : $(SRC)/%.f $(INC_DEP)
 	$(FC) $(FFLAGS) -c $< -o $@
@@ -105,8 +106,20 @@ libnulike.a : $(CUBPACK_OBJ) $(OBJ)
 libnulike.so : $(CUBPACK_OBJ) $(OBJ)
 	$(FC) -shared -o $(LIB)/$@ $(OBJ) $(CUBPACK_OBJ)
 
+nulike_prep : libnulike.a $(PROGS)/nulike_prep.f
+	$(FC) $(FFLAGS) -I$(NUSIGINC) -o $@ $(PROGS)/nulike_prep.f -L$(NUSIGDIR) -l$(NUSIGNAME) -L$(LIB) -lnulike -lgfortran
+
+nulike_test : libnulike.a $(PROGS)/nulike_test.f
+	$(FF) $(FFLAGS) -I$(DSLIBINC) -o $@ $(PROGS)/nulike_test.f -L$(DSLIBDIR) -l$(DSLIBNAME) -lHB -lFH -L$(LIB) -lnulike
+
+nulike_test_mssm25 : libnulike.a $(PROGS)/nulike_test_mssm25.f
+	$(FF) $(FFLAGS) -I$(DSLIBINC) -o $@ $(PROGS)/nulike_test_mssm25.f -L$(DSLIBDIR) -l$(DSLIBNAME) -lHB -lFH -L$(LIB) -lnulike
+
+nulike_test_wimp : libnulike.a $(PROGS)/nulike_test_wimp.f
+	$(FF) $(FFLAGS) -I$(DSLIBINC) -o $@ $(PROGS)/nulike_test_wimp.f -L$(DSLIBDIR) -l$(DSLIBNAME) -lHB -lFH -L$(LIB) -lnulike
+
 clean : 
-	rm -f $(BUILD)/* tspack.f Key.dat
+	rm -f $(BUILD)/* tspack.f Key.dat nulike_prep nulike_test nulike_test_wimp nulike_test_mssm25 
 
 distclean : clean
 	rm -f $(LIB)/libnulike.a $(LIB)/libnulike.so

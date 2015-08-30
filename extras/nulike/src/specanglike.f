@@ -3,7 +3,7 @@
 *** unbinned likelihood, based on values of the arrival direction and 
 *** the energy estimator for the event, as well as the theoretical 
 *** energy spectrum of incoming neutrinos.
-*** This routine is used only with the 2014 likelihood.
+*** This routine is used only with the 2015 likelihood.
 ***
 *** input:  event_number
 ***         theta_S      total predicted number of signal events
@@ -15,11 +15,6 @@
 ***         logmw        log_10(m_WIMP / GeV)
 ***         logEmin      log_10(Emin/GeV), where Emin is the lower energy
 ***                       boundary of the analysis energy range  
-***         nuyield      external double function that returns
-***                       the differential neutrino flux
-***                       at the detector in units of m^-2 GeV^-1 
-***                       annihilation^-1
-***        context       A c_ptr passed in to nuyield when it is called
 ***
 *** output:              ln(Likelihood / chan^-1)
 ***       
@@ -34,6 +29,7 @@
       use iso_c_binding, only: c_ptr, c_bool
       use Precision_Model
       use CUI
+      use omp_lib
 
       implicit none
       include 'nulike_internal.h'
@@ -47,7 +43,7 @@
       real*8 logEmin_true, logEmax_true
       real*8 sigpartial_accurate, measure
       integer event_number, i, ptype, IER, SRgType
-      parameter (eps =0.5d0, SRgType = Simplex)
+      parameter (SRgType = Simplex)
       logical(c_bool), intent(in) :: fast_likelihood
       logical, save :: revert_to_accurate_likelihood
       type(c_ptr) context
@@ -61,23 +57,32 @@
         end function nulike_specangintegrand
       end interface
 
+      ! Choose eps according to fast likelihood switch
+      if (fast_likelihood) then 
+        eps =0.3d0
+      else
+        eps =1d-2
+      endif
+
       ! Don't bother with energies above or below which there is no estimate of the effective area
       logEmin_true = max(precomp_log10E(1,analysis),logEmin)
       logEmax_true = min(precomp_log10E(nPrecompE(analysis),analysis),logmw)
 
-      ! Reset the likelihood accuracy flag if this is the first event
-      if (event_number .eq. 1) revert_to_accurate_likelihood = .false.
-
-      ! Set the global context pointers unable to be passed through CUBPACK
-      context_shared = context
-      nuyield_ptr => nuyield
+      ! If this is the first event...
+      if (event_number .eq. 1) then
+        ! Reset the likelihood accuracy flag
+        revert_to_accurate_likelihood = .false.
+        ! Set the global context pointers unable to be passed through CUBPACK
+        context_shared = context 
+        nuyield_ptr => nuyield
+      endif
 
       ! Retrieve the event info
       cosphi = events_cosphi(event_number,analysis)
       ee = events_ee(event_number,analysis)
 
       ! Include the background component
-      bgpartial = nulike_bgangpdf(cosphi) * nulike_bgspec(ee,2014)
+      bgpartial = nulike_bgangpdf(cosphi) * nulike_bgspec(ee,2015)
 
       ! Include the signal component
       if (logEmin_true .gt. logEmax_true) then
@@ -95,7 +100,7 @@
             do ptype = 1,2     
               weight = precomp_weights(i,event_number,ptype,analysis)
               if (weight - logZero .gt. epsilon(logZero)) then
-                yvals(i) = yvals(i) + nuyield_ptr(log10E,ptype,context) * 10.d0**weight
+                yvals(i) = yvals(i) + nuyield(log10E,ptype,context) * 10.d0**weight
               endif
             enddo          
             yvals(i) = yvals(i) * 10.d0**log10E
@@ -128,8 +133,8 @@
                     
         ! Do the likelihood calculation using a proper integration
         if (.not. fast_likelihood .or. revert_to_accurate_likelihood .or. event_number == 1) then
-        
-          eventnumshare = event_number
+
+          eventnumshare(omp_get_thread_num()+1) = event_number
           IER = 0
           SVertices(1,:) = (/logEmin_true, logEmax_true/)
           call CUBATR(1,nulike_specangintegrand,SVertices,SRgType,
@@ -141,7 +146,7 @@
           call CUBATR()
 
         else
-        
+
           sigpartial_accurate = 0.d0
 
         endif
@@ -153,8 +158,12 @@
           if (measure .gt. eps) revert_to_accurate_likelihood = .true.
         endif
 
-        if (revert_to_accurate_likelihood .or. .not. fast_likelihood) sigpartial = sigpartial_accurate  
-        sigpartial = exp_time(analysis) / theta_S * annrate * dlog(10.d0) * sigpartial
+        if (theta_S .gt. epsilon(theta_S)) then
+          if (revert_to_accurate_likelihood .or. .not. fast_likelihood) sigpartial = sigpartial_accurate  
+          sigpartial = exp_time(analysis) / theta_S * annrate * dlog(10.d0) * sigpartial
+        else 
+          sigpartial = 0.d0
+        endif
 
       endif
 
