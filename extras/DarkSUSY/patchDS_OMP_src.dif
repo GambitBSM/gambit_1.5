@@ -1,492 +1,82 @@
-diff -rupN src2/an/dsanclearaa.f src/an/dsanclearaa.f
---- src2/an/dsanclearaa.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsanclearaa.f	2015-08-19 13:05:52.880457112 +0200
-@@ -8,12 +8,28 @@ c=======================================
+diff -rupN src/an/dsanclearaa.f src2/an/dsanclearaa.f
+--- src/an/dsanclearaa.f	2006-06-19 08:36:02.000000000 -0600
++++ src2/an/dsanclearaa.f	2015-09-01 22:10:12.566543820 -0600
+@@ -6,11 +6,21 @@ c          paolo gondolo 99-1-15 factor
+ c  called by: dwdcos
+ c=======================================================================
        implicit none
-       include 'dsandiacom.h'
+-      include 'dsandiacom.h'
++c      include 'dsandiacom.h'
  
 -      integer i
--      real*8 aaaa(108)
+       real*8 aaaa(108)
 -      equivalence (aa,aaaa)
++      real*8 mp1,mp2,mk,mp3,mp4,ppl,pmi,epl,emi,mw,mz,pp,kpl,
++     &  kmi,efpl,efmi,kk,e1,e2,e3,e4,s,t,u,wd(2,-2:2,-2:2)
++      common /diacom/ aaaa,
++     &  mp1,mp2,mk,mp3,mp4,ppl,pmi,epl,emi,mw,mz,pp,kpl,kmi,
++     &  Efpl,efmi,kk,e1,e2,e3,e4,s,t,u,wd
++      save /diacom/
++
++*$OMP THREADPRIVATE (/diacom/)
++
++
 +      integer i,j,k,l
-+c      real*8 aaaa(108)
-+c      equivalence (aa,aaaa)
-+
-+c      do i=1,108
-+c         aaaa(i)=0.0d0
-+c      enddo
-+
-+c...TB: same, but avoids issues with equivalence and $OMP 
-+c... -> this slow things down without $OMP, so rather than commenting
-+c...    the above code out, there should be a precompiler switch based
-+c...    on an environemntal variable telleing us whether or not we use OMP
-+       do l=-1,1
-+         do k=-1,1
-+           do j=-1,1
-+             do i=0,1
-+                aa(i,j,k,l)=(0.0d0,0.0d0)
-+             enddo
-+           enddo
-+         enddo
-+       enddo
-+  
++c      equivalence (aa,aaaa) ! TB: not compatible with $OMP !
  
--      do i=1,108
--         aaaa(i)=0.0d0
--      enddo
- 
-       end
-diff -rupN src2/an/dsandwdcoscc.f src/an/dsandwdcoscc.f
---- src2/an/dsandwdcoscc.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsandwdcoscc.f	2015-08-19 13:05:52.444457093 +0200
-@@ -55,8 +55,10 @@ c      p=max(p,0.0001d0)   ! akinvar sta
-       kh(2)=kh2
-       kh(3)=kh3
- 
-+!$OMP PARALLEL SECTIONS
- c********************************************** opposite charge channels
- c=================================================== c c -> hi hii / a a
-+!$OMP SECTION
-       do k=1,4
-         if (k.eq.1) then
-           i=1
-@@ -85,6 +87,7 @@ c hi hii / a a
-       enddo
- 
- c============================================================ c c -> h a
-+!$OMP SECTION
-       do h=1,2
-         call dsanclearaa
-         do c=1,2
-@@ -98,6 +101,7 @@ c h a
-       enddo
- 
- c========================================================== c c -> h+ h-
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffss(p,costheta,kp1,kp2,kn(j),khc,khc)
-@@ -110,6 +114,7 @@ c=======================================
- c h- h+
- 
- c============================================================ c c -> h z
-+!$OMP SECTION
-       do h=1,2
-         call dsanclearaa
-         do c=1,2
-@@ -123,6 +128,7 @@ c h z
-       enddo
- 
- c============================================================ c c -> a z
-+!$OMP SECTION
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvs(p,costheta,kp1,kp2,kcha(c),kz,kh3)
-@@ -136,6 +142,7 @@ c a z
- 
- c============================================================ c c -> h w
- c     h+ w- calculated and the result is multiplied by 2
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffsv(p,costheta,kp1,kp2,kn(j),khc,kw)
-@@ -148,6 +155,7 @@ c h w
- 
- 
- c============================================================ c c -> z z
-+!$OMP SECTION
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvv(p,costheta,kp1,kp2,kcha(c),kz,kz)
-@@ -159,6 +167,7 @@ c=======================================
- c z z
- 
- c============================================================ c c -> w w
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffvvex(p,costheta,kp1,kp2,kn(j),kw,kw)
-@@ -171,6 +180,7 @@ c=======================================
- c w w
- 
- c==================================================== c c -> gamma gamma
-+!$OMP SECTION
-       if (kp1.eq.kp2) then
-         call dsanclearaa
-         call dsantfffvv(p,costheta,kp1,kp2,kp1,kgamma,kgamma)
-@@ -180,6 +190,7 @@ c=======================================
- c gamma gamma
- 
- c======================================================= c c -> z0 gamma
-+!$OMP SECTION
-       call dsanclearaa
-       call dsantfffvv(p,costheta,kp1,kp2,kp2,kz,kgamma)
-       call dsantfffvvex(p,costheta,kp1,kp2,kp1,kz,kgamma)
-@@ -187,6 +198,7 @@ c=======================================
- c z0 gamma
- 
- c======================================================== c c -> f fbar'
-+!$OMP SECTION
-       do f=1,12
-         do g=1,3
-           if (f.eq.1.or.f.eq.3.or.f.eq.5) then          ! nue, numu, nutau
-@@ -238,6 +250,7 @@ c=======================================
- c************************************************* equal charge channels
- 
- c========================================================== c c -> h+ h+
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffssin(p,costheta,kp1,kp2,kn(j),khc,khc)
-@@ -247,6 +260,7 @@ c=======================================
- c h+ h+
- 
- c========================================================== c c -> h+ w+
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffsvin(p,costheta,kp1,kp2,kn(j),khc,kw)
-@@ -256,6 +270,7 @@ c=======================================
- c h+ w+
- 
- c========================================================== c c -> w+ w+
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffvvin(p,costheta,kp1,kp2,kn(j),kw,kw)
-@@ -264,6 +279,9 @@ c=======================================
-       prtial(54)=0.5d0*(kk/sqrt(s))*dsansumaa()/(32.d0*pi)
- c w+ w+
- 
-+!$OMP END PARALLEL SECTIONS 
-+
-+
- c------------------------------------------------------- sum up partials
- c... note that the invariant rate should be
- c... w = 0.5 [sum w(\chi^+ \chi^+ ->...) + sum w(\chi^+ \chi^- ->...)]
-diff -rupN src2/an/dsandwdcoscn.f src/an/dsandwdcoscn.f
---- src2/an/dsandwdcoscn.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsandwdcoscn.f	2015-08-19 13:05:53.496457138 +0200
-@@ -55,7 +55,9 @@ c      p=max(p,0.001d0)     ! akinvar st
-       kh(2)=kh2
-       kh(3)=kh3
- 
-+!$OMP PARALLEL SECTIONS
- c============================================================ c n -> h+ h
-+!$OMP SECTION
-       do h=1,2
-         call dsanclearaa
-         do c=1,2
-@@ -71,6 +73,7 @@ c h+ h
-       enddo
- 
- c============================================================ c n -> h+ a
-+!$OMP SECTION
-       call dsanclearaa
-       do c=1,2
-         call dsantfffssex(p,costheta,kp1,kp2,kcha(c),khc,kh3)
-@@ -83,6 +86,7 @@ c=======================================
- c h+ a
- 
- c============================================================ c n -> w+ h
-+!$OMP SECTION
-       do h=1,2
-         call dsanclearaa
-         do c=1,2
-@@ -98,6 +102,7 @@ c w+ h
-       enddo
- 
- c============================================================ c n -> w+ a
-+!$OMP SECTION
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvsex(p,costheta,kp1,kp2,kcha(c),kw,kh3)
-@@ -110,6 +115,7 @@ c=======================================
- c h+ a
- 
- c============================================================ c n -> z h+
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffvsex(p,costheta,kp1,kp2,kn(j),kz,khc)
-@@ -122,6 +128,7 @@ c=======================================
- c z h+
- 
- c======================================================== c n -> gamma h+
-+!$OMP SECTION
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvs(p,costheta,kp1,kp2,kcha(c),kgamma,khc)
-@@ -131,6 +138,7 @@ c=======================================
- c gamma h+
- 
- c============================================================ c n -> z w+
-+!$OMP SECTION
-       call dsanclearaa
-       do j=1,4
-         call dsantfffvvex(p,costheta,kp1,kp2,kn(j),kz,kw)
-@@ -143,6 +151,7 @@ c=======================================
- c z w+
- 
- c======================================================== c n -> gamma w+
-+!$OMP SECTION
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvv(p,costheta,kp1,kp2,kcha(c),kgamma,kw)
-@@ -152,6 +161,7 @@ c=======================================
- c gamma w+
- 
- c========================================================= c n -> f' fbar
-+!$OMP SECTION
-       do k=1,6
-         f = 2*k-1
-         do g=1,3
-@@ -181,6 +191,8 @@ c... sfermion exchange
-       enddo
- c f fbar
- 
-+!$OMP END PARALLEL SECTIONS 
-+
- c=======================================================================
- c------------------------------------------------------- sum up partials
- c... note that the summed invariant rate should be
-diff -rupN src2/an/dsandwdcos.f src/an/dsandwdcos.f
---- src2/an/dsandwdcos.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsandwdcos.f	2015-08-19 13:05:54.072457163 +0200
-@@ -1,9 +1,9 @@
--      function dsandwdcos(p,costheta)
-+      function dsandwdcos(p,costh)
- c_______________________________________________________________________
- c  annihilation differential invariant rate.
- c  input:
- c    p - initial cm momentum (real) for lsp annihilations
--c    costheta - cosine of c.m. annihilation angle
-+c    costh - cosine of c.m. annihilation angle
- c  Output:
- c  BeginTex
- c   \begin{displaymath}
-@@ -30,10 +30,11 @@ c=======================================
-       implicit none
-       include 'dsandwcom.h'
-       include 'dsrdcom.h'
-+!OMP  include 'dsascom.h'
-       real*8 dsandwdcos,dsandwdcosnn,dsandwdcoscn,dsandwdcoscc,
-      &  dsasdwdcossfsf,dsasdwdcossfchi
-       real*8 mx
--      real*8 w,p,costheta,pnew,s,mp1,mp2,f,tmp
-+      real*8 w,p,costh,pnew,s,mp1,mp2,f,tmp
-       integer i,j,kp1(36),kp2(36),nch,ch,kpn(4),nn,kpcha(2),ncha
-       integer nsl,kpsl(6),nsnu,kpsnu(3),nsqu,kpsqu(6),nsqd,kpsqd(6)
- 
-@@ -46,7 +47,7 @@ c      logical newmodel
- c      common /new/ newmodel
- 
- c      write(*,*) 'dsandwdcos called with p = ',p
--c      write(*,*) '            costheta = ',costheta
-+c      write(*,*) '            costh = ',costh
- c...initialize dsankinvar variables
-       call dsankinvar(0.0d0,0.0d0,0,0,0,0,0)
- 
-@@ -64,13 +65,16 @@ c      enddo
-       mx = mco(1)
-       s = 4.0d0*(mx**2+p**2)
-       w = 0.d0
-+
-+!$OMP PARALLEL DO DEFAULT(SHARED), PRIVATE(dw,kkp1,kkp2,mp1,mp2,tmp,pnew,f)
-       do i=1,nco
-          do j=i,nco
-+!OMP       call dsankinvar(0.0d0,0.0d0,0,0,0,0,0)
-             dw=0.d0
-             kkp1=kcoann(i)
-             kkp2=kcoann(j)
-             if (kkp1.eq.kkx.and.kkp2.eq.kkx) then
--               dw = dsandwdcosij(p,costheta,kkx,kkx)
-+               dw = dsandwdcosij(p,costh,kkx,kkx)
-             else
-                if (p.gt.0.d0) then
-                   mp1 = mco(i)
-@@ -82,20 +86,23 @@ c      enddo
-                      ! f=sum(gi*gj/g1^2) with same mass and wij
-                      if (kkp1.ne.kkp2) f=2.0d0*f
-                      dw=f*pnew/p
--     &                    *dsandwdcosij(pnew,costheta,kkp1,kkp2)
-+     &                    *dsandwdcosij(pnew,costh,kkp1,kkp2)
-                   endif
-                endif
-             endif
-+!$OMP CRITICAL
-             w=w+dw
-+!$OMP END CRITICAL
- c            if (newfirstprint.and.prtlevel.eq.-222) then
- c               write (*,*) 'dsandwdcos: coann ',
--c     &              kkp1,kkp2,p,costheta,dw
-+c     &              kkp1,kkp2,p,costh,dw
- c            endif
-          enddo
-       enddo
-+!$OMP END PARALLEL DO
- c      newfirstprint=.false.
- 
-       dsandwdcos=w
--c      write(33,*) costheta,w    ! je test
-+c      write(33,*) costh,w    ! je test
- 
-       end
-diff -rupN src2/an/dsandwdcosnn.f src/an/dsandwdcosnn.f
---- src2/an/dsandwdcosnn.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsandwdcosnn.f	2015-08-19 13:05:53.684457147 +0200
-@@ -42,6 +42,7 @@ c=======================================
-       real*8 pi
-       parameter (pi=3.141592653589793238d0)
-       save gluons,gammas,zgam
-+!$OMP THREADPRIVATE (gluons,gammas,zgam)
- 
- c-----------------------------------------------------------------------
- 
-@@ -67,7 +68,9 @@ c      p=max(p,0.001d0)  ! akinvar stabl
-       kh(2)=kh2
-       kh(3)=kh3
- 
-+!$OMP PARALLEL SECTIONS
- c=================================================== n n -> hi hii / a a
-+!$OMP SECTION 
-       do k=1,4
-         if (k.eq.1) then
-           i=1
-@@ -96,6 +99,7 @@ c hi hii / a a
-       enddo
- 
- c============================================================ n n -> h a
-+!$OMP SECTION 
-       do h=1,2
-         call dsanclearaa
-         do j=1,4
-@@ -109,6 +113,7 @@ c h a
-       enddo
- 
- c========================================================== n n -> h- h+
-+!$OMP SECTION 
-       call dsanclearaa
-       do c=1,2
-         call dsantfffss(p,costheta,kp1,kp2,kcha(c),khc,khc)
-@@ -121,6 +126,7 @@ c=======================================
- c h- h+
- 
- c============================================================ n n -> h z
-+!$OMP SECTION 
-       do h=1,2
-         call dsanclearaa
-         do j=1,4
-@@ -134,6 +140,7 @@ c h z
-       enddo
- 
- c============================================================ n n -> a z
-+!$OMP SECTION 
-       call dsanclearaa
-       do j=1,4
-         call dsantfffvs(p,costheta,kp1,kp2,kn(j),kz,kh3)
-@@ -147,6 +154,7 @@ c a z
- 
- c============================================================ n n -> h w
- c     h+ w- calculated and the result is multiplied by 2
-+!$OMP SECTION 
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvs(p,costheta,kp1,kp2,kcha(c),kw,khc)
-@@ -160,6 +168,7 @@ c h w
- 
- 
- c============================================================ n n -> z z
-+!$OMP SECTION 
-       call dsanclearaa
-       do j=1,4
-         call dsantfffvv(p,costheta,kp1,kp2,kn(j),kz,kz)
-@@ -172,6 +181,7 @@ c z z
- 
- 
- c============================================================ n n -> w w
-+!$OMP SECTION 
-       call dsanclearaa
-       do c=1,2
-         call dsantfffvv(p,costheta,kp1,kp2,kcha(c),kw,kw)
-@@ -185,6 +195,7 @@ c w w
- 
- 
- c========================================================= n n -> f fbar
-+!$OMP SECTION 
-       do f=1,12
-         call dsanclearaa
- c... sfermion exchange
-@@ -213,6 +224,7 @@ c... call subroutines to calculate ampli
- c f fbar
-       enddo
- 
-+!$OMP SECTION 
-       if (kp1.eq.kn(1).and.kp2.eq.kn(1)) then
- 
- c===================================================== n n -> glue glue
-@@ -316,6 +328,8 @@ c=======================================
-         prtial(29)=0.0d0
-       endif
- c=======================================================================
-+!$OMP END PARALLEL SECTIONS 
-+
- c------------------------------------------------------- sum up partials
-       w=0.d0
-       w=w+prtial(1)             ! h1 h1
-diff -rupN src2/an/dsankinvar.f src/an/dsankinvar.f
---- src2/an/dsankinvar.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsankinvar.f	2015-08-19 13:05:53.872457155 +0200
+       do i=1,108
+          aaaa(i)=0.0d0
+diff -rupN src/an/dsankinvar.f src2/an/dsankinvar.f
+--- src/an/dsankinvar.f	2011-11-04 17:48:05.000000000 -0600
++++ src2/an/dsankinvar.f	2015-09-01 22:10:12.982543830 -0600
 @@ -17,6 +17,7 @@ c=======================================
        data kp1old,kp2old,kp3old,kp4old/4*-1/
        data pold,cthold / -1.0d0,-5.0d0/
        save pold,cthold,kp1old,kp2old,kp3old,kp4old
-+!$OMP THREADPRIVATE (pold,cthold,kp1old,kp2old,kp3old,kp4old)
++*$OMP THREADPRIVATE (pold,cthold,kp1old,kp2old,kp3old,kp4old)
  
  c----------------------------------------- check changes since last call
  
-diff -rupN src2/an/dsansumaa.f src/an/dsansumaa.f
---- src2/an/dsansumaa.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsansumaa.f	2015-08-19 13:05:53.248457128 +0200
-@@ -7,14 +7,29 @@ c  called by: dwdcos
+diff -rupN src/an/dsansumaa.f src2/an/dsansumaa.f
+--- src/an/dsansumaa.f	2006-06-19 08:36:02.000000000 -0600
++++ src2/an/dsansumaa.f	2015-09-01 22:10:13.422543840 -0600
+@@ -6,15 +6,29 @@ c          paolo gondolo 99-1-15 factor
+ c  called by: dwdcos
  c=======================================================================
        implicit none
-       include 'dsandiacom.h'
+-      include 'dsandiacom.h'
 -      real*8 sumf,aaaa(108)
 -      integer i
 -      equivalence (aa,aaaa)
-+      real*8 sumf !,aaaa(108)
-+      integer i,j,k,l
-+c      equivalence (aa,aaaa)
++c     include 'dsandiacom.h'
++
++      real*8 aaaa(108)
++      real*8 mp1,mp2,mk,mp3,mp4,ppl,pmi,epl,emi,mw,mz,pp,kpl,
++     &  kmi,efpl,efmi,kk,e1,e2,e3,e4,s,t,u,wd(2,-2:2,-2:2)
++      common /diacom/ aaaa,
++     &  mp1,mp2,mk,mp3,mp4,ppl,pmi,epl,emi,mw,mz,pp,kpl,kmi,
++     &  Efpl,efmi,kk,e1,e2,e3,e4,s,t,u,wd
++      save /diacom/
++
++*$OMP THREADPRIVATE (/diacom/)
++
++
++      real*8 sumf
++      integer i ,j,k,l
++c      equivalence (aa,aaaa) ! TB: not compatible with !OMP !
  
        sumf=0.0d0
--      do i=1,108
--         sumf = sumf + aaaa(i)**2
--      enddo
-+c      do i=1,108
-+c         sumf = sumf + aaaa(i)**2
-+c      enddo
 +
-+c...TB: same, but avoids issues with equivalence and $OMP 
-+c... -> this slow things down without $OMP, so rather than commenting
-+c...    the above code out, there should be a precompiler switch based
-+c...    on an environemntal variable telleing us whether or not we use OMP
-+       do l=-1,1
-+         do k=-1,1
-+           do j=-1,1
-+             do i=0,1
-+                sumf=sumf+dimag(aa(i,j,k,l))**2+dble(aa(i,j,k,l))**2
-+             enddo
-+           enddo
-+         enddo
-+       enddo
+       do i=1,108
+          sumf = sumf + aaaa(i)**2
+       enddo
 +      
        dsansumaa = sumf
  
        end
-diff -rupN src2/an/dsanwx.f src/an/dsanwx.f
---- src2/an/dsanwx.f	2015-08-19 13:05:31.560456187 +0200
-+++ src/an/dsanwx.f	2015-08-19 13:05:52.632457101 +0200
+diff -rupN src/an/dsanwx.f src2/an/dsanwx.f
+--- src/an/dsanwx.f	2010-08-06 02:27:44.000000000 -0600
++++ src2/an/dsanwx.f	2015-09-01 22:10:22.366544053 -0600
 @@ -98,10 +98,12 @@ c        call dsanalbe2(p,alph,be)
  c        bet=be
          y1=(mco(1)**2+bet*pd**2)**(alph)
@@ -502,11 +92,10 @@ diff -rupN src2/an/dsanwx.f src/an/dsanwx.f
          dsanwx=sum/1.0d15
        endif
  c      write(*,*) rdtag,nr,p,dsanwx
-Binary files src2/.DS_Store and src/.DS_Store differ
-diff -rupN src2/xcern/dgadap.f src/xcern/dgadap.f
---- src2/xcern/dgadap.f	2015-08-19 13:05:31.564456187 +0200
-+++ src/xcern/dgadap.f	2015-08-19 13:05:54.368457176 +0200
-@@ -97,6 +97,115 @@ c  made real*8 by j. edsjo 97-01-17
+diff -rupN src/xcern/dgadap.f src2/xcern/dgadap.f
+--- src/xcern/dgadap.f	2006-06-19 08:36:02.000000000 -0600
++++ src2/xcern/dgadap.f	2015-09-01 22:10:40.634544489 -0600
+@@ -97,6 +97,143 @@ c  made real*8 by j. edsjo 97-01-17
        end
  
  
@@ -536,6 +125,8 @@ diff -rupN src2/xcern/dgadap.f src/xcern/dgadap.f
 +      include 'dsidtag.h'
 +      common/gadap1omp/ num,ifu
 +      real*8 omparg 
++*$    integer nthreads, usedthreads
++*$    integer OMP_get_num_threads, OMP_get_max_threads, OMP_get_num_procs
 +      external f
 +      dimension a(300),b(300),f1(300),f2(300),f3(300),s(300),n(300)
 +    1 format(16h gadap:i too big)
@@ -549,14 +140,30 @@ diff -rupN src2/xcern/dgadap.f src/xcern/dgadap.f
 +      c=sqrt(15.)/5.
 +      a(1)=a0
 +      b(1)=b0
-+!$OMP PARALLEL SECTIONS
-+!$OMP SECTION
++
++*$      usedthreads=OMP_get_max_threads()
++*$      if (usedthreads.gt.8) then
++*$         usedthreads=6
++*$      else
++*$        usedthreads=min(3, usedthreads)
++*$     endif
++
++
++*$OMP PARALLEL NUM_THREADS(usedthreads)
++*$OMP SECTIONS
++
++*$OMP SECTION
 +      f1(1)=f(0.5*(1+c)*a0+0.5*(1-c)*b0)
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f2(1)=f(0.5*(a0+b0))
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f3(1)=f(0.5*(1-c)*a0+0.5*(1+c)*b0)
-+!$OMP END PARALLEL SECTIONS 
++      
++*$OMP END SECTIONS
++*$OMP END PARALLEL
++
 +      ifu=3
 +      s(1)=  dsum(f1(1),f2(1),f3(1),a0,b0)
 +  100 continue
@@ -571,20 +178,30 @@ diff -rupN src2/xcern/dgadap.f src/xcern/dgadap.f
 +      b(i+3)=a(i+2)
 +      w1=a(i)+(b(i)-a(i))/5.
 +      u2=2.*w1-(a(i)+a(i+2))/2.
-+!$OMP PARALLEL SECTIONS
-+!$OMP SECTION 
++
++*$OMP PARALLEL NUM_THREADS(usedthreads)
++*$OMP SECTIONS
++
++*$OMP SECTION 
 +      f1(i+1)=f(a(i)+b(i)-w1)
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f3(i+1)=f(b(i)-a(i+2)+w1)
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f1(i+2)=f(u2)
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f3(i+2)=f(b(i+2)+a(i+2)-u2)
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f1(i+3)=f(a(i)+a(i+2)-w1)
-+!$OMP SECTION
++      
++*$OMP SECTION
 +      f3(i+3)=f(w1)
-+!$OMP END PARALLEL SECTIONS 
++      
++*$OMP END SECTIONS
++*$OMP END PARALLEL
 +
 +      f2(i+1)=f3(i)
 +      f2(i+2)=f2(i)
