@@ -34,6 +34,7 @@ MODULE=J
 RANLIB = ranlib 
 AR = ar
 ARFLAGS = rvs
+SHARFLAGS = -shared -fopenmp
 
 ##### Users should not need to modify anything below this line. #####
 
@@ -104,7 +105,7 @@ libnulike.a : $(CUBPACK_OBJ) $(OBJ)
 	$(AR) $(ARFLAGS) $(LIB)/$@ $(OBJ) $(CUBPACK_OBJ)
 
 libnulike.so : $(CUBPACK_OBJ) $(OBJ)
-	$(FC) -shared -o $(LIB)/$@ $(OBJ) $(CUBPACK_OBJ)
+	$(FC) $(SHARFLAGS) -o $(LIB)/$@ $(OBJ) $(CUBPACK_OBJ)
 
 nulike_prep : libnulike.a $(PROGS)/nulike_prep.f
 	$(FC) $(FFLAGS) -I$(NUSIGINC) -o $@ $(PROGS)/nulike_prep.f -L$(NUSIGDIR) -l$(NUSIGNAME) -L$(LIB) -lnulike -lgfortran
