@@ -1,7 +1,0 @@
-Compile from this directory using the following command:
-
-g++ -I../../modules/Utils/include/ -I../../modules/Backends/include/ backend_tester.cpp -o backend_tester.out -ldl -std=c++0x
-
-
-
-
