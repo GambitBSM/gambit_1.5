@@ -1,6 +1,0 @@
-# Files in the BOSSed Pythia source 
-bossed_pythia_source/Makefile.inc
-bossed_pythia_source/examples/Makefile.inc
-
-# BOSS reset info files
-reset_info.*.boss
