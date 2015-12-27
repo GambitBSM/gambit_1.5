@@ -1,9 +1,0 @@
-# DarkSUSY archive file
-darksusy-5.1.1.tar.gz
-
-# Extracted DarkSUSY files / build directory
-darksusy-5.1.1/
-
-# DarkSUSY library
-libdarksusy.so
-
