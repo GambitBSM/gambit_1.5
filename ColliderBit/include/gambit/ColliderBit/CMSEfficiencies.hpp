@@ -1,6 +1,12 @@
 #pragma once
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  Functions that do super fast CMS detector simulation based on four vector smearing.
 
-/// @file Functions that do super fast CMS detector simulation based on four vector smearing
+#include <random>
+#include <algorithm>
 
 #include "gambit/ColliderBit/Utils.hpp"
 
@@ -8,19 +14,18 @@
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
 
-#include <random>
-#include <algorithm>
-
 namespace Gambit {
   namespace ColliderBit {
-    namespace CMS {
 
+
+    /// CMS-specific efficiency and smearing functions for super fast detector simulation
+    /// @note See also BuckFastSmearCMS
+    namespace CMS {
 
       /// @name CMS detector efficiency functions
       //@{
-
-
-      /// @brief Randomly filter the supplied particle list by parameterised electron tracking efficiency
+        
+      /// Randomly filter the supplied particle list by parameterised electron tracking efficiency
       inline void applyElectronTrackingEff(std::vector<HEPUtils::Particle*>& electrons) {
         static HEPUtils::BinnedFn2D<double> _elTrackEff2d({{0, 1.5, 2.5, 100.}}, //< |eta|
                                                           {{0, 0.1, 1.0, 100000}}, //< pT
@@ -31,11 +36,10 @@ namespace Gambit {
       }
 
 
-      /// @brief Randomly filter the supplied particle list by parameterised electron efficiency
-      ///
+      /// Randomly filter the supplied particle list by parameterised electron efficiency
       /// @note Should be applied after the electron energy smearing
+      /// @note Eff values currently identical to those in ATLAS (AB, 2016-01-24)
       inline void applyElectronEff(std::vector<HEPUtils::Particle*>& electrons) {
-        /// @note Eff values currently identical to those in ATLAS (AB, 2016-01-24)
         static HEPUtils::BinnedFn2D<double> _elEff2d({{0, 1.5, 2.5, 100.}}, //< |eta|
                                                      {{0, 10., 100000.}}, //< pT
                                                      {{0., 0.95, // |eta| 0.1-1.5
@@ -45,9 +49,9 @@ namespace Gambit {
       }
 
 
-      /// @brief Randomly filter the supplied particle list by parameterised muon tracking efficiency
+      /// Randomly filter the supplied particle list by parameterised muon tracking efficiency
+      /// @note Eff values currently identical to those in ATLAS (AB, 2016-01-24)
       inline void applyMuonTrackEff(std::vector<HEPUtils::Particle*>& muons) {
-        /// @note Eff values currently identical to those in ATLAS (AB, 2016-01-24)
         static HEPUtils::BinnedFn2D<double> _muTrackEff2d({{0, 1.5, 2.5, 100.}}, //< |eta|
                                                           {{0, 0.1, 1.0, 100000.}}, //< pT
                                                           {{0, 0.75, 0.99, // |eta| 0.1-1.5
@@ -57,7 +61,7 @@ namespace Gambit {
       }
 
 
-      /// @brief Randomly filter the supplied particle list by parameterised muon efficiency
+      /// Randomly filter the supplied particle list by parameterised muon efficiency
       inline void applyMuonEff(std::vector<HEPUtils::Particle*>& muons) {
         if(muons.empty()) return;
         auto keptMuonsEnd = std::remove_if(muons.begin(), muons.end(),
@@ -67,11 +71,10 @@ namespace Gambit {
                                              const double eff = 0.95 * (p->abseta() < 1.5 ? 1 : exp(0.5 - 5e-4*p->pT()));
                                              return (HEPUtils::rand01() > eff);
                                            } );
-        /// @todo Fix this
+        /// @todo Fix to use remove-erase
         // vectors erase most efficiently from the end...
         // no delete is necessary, because we are only forgetting a pointer owned by the original event.
-        while (keptMuonsEnd != muons.end())
-          muons.pop_back();
+        while (keptMuonsEnd != muons.end()) muons.pop_back();
       }
 
 
