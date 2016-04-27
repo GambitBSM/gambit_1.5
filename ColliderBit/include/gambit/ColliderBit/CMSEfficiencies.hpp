@@ -67,6 +67,7 @@ namespace Gambit {
                                              const double eff = 0.95 * (p->abseta() < 1.5 ? 1 : exp(0.5 - 5e-4*p->pT()));
                                              return (HEPUtils::rand01() > eff);
                                            } );
+        /// @todo Fix this
         // vectors erase most efficiently from the end...
         // no delete is necessary, because we are only forgetting a pointer owned by the original event.
         while (keptMuonsEnd != muons.end())
@@ -160,10 +161,6 @@ namespace Gambit {
           p->set_mom(HEPUtils::P4::mkEtaPhiMPt(p->eta(), p->phi(), p->mass(), smeared_pt));
         }
       }
-
-
-      ///////////////////
-      // AB SO FAR
 
 
       /// @brief Randomly smear the supplied jets' momenta by parameterised resolutions
