@@ -1,18 +1,23 @@
 #pragma once
+#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 
 namespace Gambit {
   namespace ColliderBit {
 
+
     /// Create a new analysis based on a name string
     /// @note The caller is responsible for deleting the returned analysis object.
+    /// @todo Move to a separate file
     HEPUtilsAnalysis* mkAnalysis(const std::string& name);
+
 
     /// More sophisticated than just std::vector<HEPUtilsAnalysis*>
     struct HEPUtilsAnalysisContainer {
+        typedef HEPUtilsAnalysis Analysis;
+
         std::vector<HEPUtilsAnalysis*> analyses;
         bool ready;
 
@@ -21,7 +26,7 @@ namespace Gambit {
         HEPUtilsAnalysisContainer() : ready(false) { }
         ~HEPUtilsAnalysisContainer() { clear(); }
         /// Reset the analyses contained within this instance.
-        void clear(); 
+        void clear();
       //@}
 
       /// @name (Re-)Initialization functions:
@@ -49,12 +54,14 @@ namespace Gambit {
         /// Add the results of all analyses from this instance to the given one.
         void add(const HEPUtilsAnalysisContainer& e) { add(&e); }
         /// Add the results of all analyses from this instance to the given one.
-        void add(const HEPUtilsAnalysisContainer*); 
+        void add(const HEPUtilsAnalysisContainer*);
         /// Set cross-sections and errors for each analysis.
         /// @note If factor is negative (the default), each analysis uses its own nEvents, xsec, and luminosity to scale
         void scale(double factor=-1);
       //@}
+
     };
+
 
   }
 }
