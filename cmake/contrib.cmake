@@ -90,22 +90,14 @@ else()
   add_dependencies(distclean clean-delphes)
 endif()
 
-#contrib/fjcore-3.1.3; compile only if Delphes is ditched and ColliderBit is not.
-set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.1.3/include")
+#contrib/fjcore-3.2.0; compile only if Delphes is ditched and ColliderBit is not.
+set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
 include_directories("${fjcore_INCLUDE_DIR}")
 add_definitions(-DFJCORE)
 add_gambit_library(fjcore OPTION OBJECT
-                          SOURCES ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.1.3/src/fjcore.cc
-                          HEADERS ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.1.3/include/fjcore.hh)
+                          SOURCES ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0/fjcore.cc
+                          HEADERS ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0/fjcore.hh)
 set(GAMBIT_BASIC_COMMON_OBJECTS "${GAMBIT_BASIC_COMMON_OBJECTS}" $<TARGET_OBJECTS:fjcore>)
-
-
-#set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.1.3/include")
-#include_directories("${fjcore_INCLUDE_DIR}")
-#add_gambit_library(fjcore OPTION OBJECT
-#                          SOURCES ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.1.3/src/fjcore.cc
-#                          HEADERS ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.1.3/include/fastjet/fjcore.hh)
-#set(GAMBIT_BASIC_COMMON_OBJECTS "${GAMBIT_BASIC_COMMON_OBJECTS}" $<TARGET_OBJECTS:fjcore>)
 
 #contrib/MassSpectra; include only if SpecBit is in use
 set (FS_DIR "${PROJECT_SOURCE_DIR}/contrib/MassSpectra/flexiblesusy")
@@ -155,7 +147,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
 
 
   set(BUILT_FS_MODELS CMSSM MSSMatMGUT MSSM SingletDMZ3 SingletDM)
- 
+
 
   # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
   string (REPLACE ";" "," BUILT_FS_MODELS_COMMAS "${BUILT_FS_MODELS}")
