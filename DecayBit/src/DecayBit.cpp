@@ -58,31 +58,6 @@ namespace Gambit
       }
     }
 
-    /// Helper function for SM Higgs decays
-    void set_SM_Higgs_decays(double& mh, double& minmass, double& maxmass, DecayTable::Entry& result)
-    {
-      if (mh < minmass or mh > maxmass)
-      {
-        std::stringstream msg;
-        msg << "Requested Higgs virtuality is " << mh << "; allowed range is " << minmass << "--" << maxmass << " GeV.";
-        invalid_point().raise(msg.str());
-      } 
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = virtual_SMHiggs_widths("Gamma",mh);
-      result.set_BF(virtual_SMHiggs_widths("bb",mh), 0.0, "b", "bbar");
-      result.set_BF(virtual_SMHiggs_widths("tautau",mh), 0.0, "tau+", "tau-");
-      result.set_BF(virtual_SMHiggs_widths("mumu",mh), 0.0, "mu+", "mu-");
-      result.set_BF(virtual_SMHiggs_widths("ss",mh), 0.0, "s", "sbar");
-      result.set_BF(virtual_SMHiggs_widths("cc",mh), 0.0, "c", "cbar");
-      result.set_BF(virtual_SMHiggs_widths("tt",mh), 0.0, "t", "tbar");
-      result.set_BF(virtual_SMHiggs_widths("gg",mh), 0.0, "g", "g");
-      result.set_BF(virtual_SMHiggs_widths("gammagamma",mh), 0.0, "gamma", "gamma");
-      result.set_BF(virtual_SMHiggs_widths("Zgamma",mh), 0.0, "Z0", "gamma");
-      result.set_BF(virtual_SMHiggs_widths("WW",mh), 0.0, "W+", "W-");
-      result.set_BF(virtual_SMHiggs_widths("ZZ",mh), 0.0, "Z0", "Z0");
-    }
-
     /// @}
 
     
@@ -267,18 +242,53 @@ namespace Gambit
       //See PDG meson sheet in DecayBit/data/PDG if you want BFs
     }
 
+    /// Reference SM Higgs decays from Dittmaier tables.
+    /// This function is given a different capability to regular decay
+    /// functions, to allow other module functions to specifically depend
+    /// on the SM values for reference, even when scanning another model.
+    void Ref_SM_Higgs_decays_table(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_Higgs_decays_table;
+    
+      // Get the Higgs pole mass
+      double mh = *Dep::mh;
+      
+      // Invalidate the point if m_h is outside the range of the tables of Dittmaier et al. 
+      double minmass = runOptions->getValueOrDef
+                       <double>(90.0, "higgs_minmass");
+      double maxmass = runOptions->getValueOrDef
+                       <double>(160.0, "higgs_maxmass");
+      if (mh < minmass or mh > maxmass)
+      {
+        std::stringstream msg;
+        msg << "Requested Higgs virtuality is " << mh
+            << "; allowed range is " << minmass << "--"
+            << maxmass << " GeV.";
+        invalid_point().raise(msg.str());
+      } 
+    
+      // Set the contents of the Entry
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version;
+      result.width_in_GeV = virtual_SMHiggs_widths("Gamma",mh);
+      result.set_BF(virtual_SMHiggs_widths("bb",mh), 0.0, "b", "bbar");
+      result.set_BF(virtual_SMHiggs_widths("tautau",mh), 0.0, "tau+", "tau-");
+      result.set_BF(virtual_SMHiggs_widths("mumu",mh), 0.0, "mu+", "mu-");
+      result.set_BF(virtual_SMHiggs_widths("ss",mh), 0.0, "s", "sbar");
+      result.set_BF(virtual_SMHiggs_widths("cc",mh), 0.0, "c", "cbar");
+      result.set_BF(virtual_SMHiggs_widths("tt",mh), 0.0, "t", "tbar");
+      result.set_BF(virtual_SMHiggs_widths("gg",mh), 0.0, "g", "g");
+      result.set_BF(virtual_SMHiggs_widths("gammagamma",mh), 0.0, "gamma", "gamma");
+      result.set_BF(virtual_SMHiggs_widths("Zgamma",mh), 0.0, "Z0", "gamma");
+      result.set_BF(virtual_SMHiggs_widths("WW",mh), 0.0, "W+", "W-");
+      result.set_BF(virtual_SMHiggs_widths("ZZ",mh), 0.0, "Z0", "Z0");
+    }
+
     /// SM decays: Higgs
     void SM_Higgs_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::SM_Higgs_decays;
-      double mh = (*Dep::SM_spectrum)->get(Par::Pole_Mass,"h0_1");
-      // Invalidate point if Higgs mass is outside a range acceptable for virtual_SMHiggs_widths (choose a smaller range to speed things up)
-      double minmass = runOptions->getValueOrDef<double>(90.0, "higgs_minmass");
-      double maxmass = runOptions->getValueOrDef<double>(160.0, "higgs_maxmass");
-      set_SM_Higgs_decays(mh, minmass, maxmass, result);
+      result = *Pipes::SM_Higgs_decays::Dep::Reference_SM_Higgs_decay_rates;
     }
-
-
 
 
     //////////// MSSM /////////////////////
@@ -837,10 +847,10 @@ namespace Gambit
       check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: Hplus
-    void Hplus_decays (DecayTable::Entry& result)
+    /// MSSM decays: H_plus
+    void H_plus_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::Hplus_decays;
+      using namespace Pipes::H_plus_decays;
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
       result.calculator = BEreq::cb_widthhc_hdec.origin();
@@ -879,9 +889,9 @@ namespace Gambit
     }
 
     /// FeynHiggs MSSM decays: H+
-    void FH_Hplus_decays (DecayTable::Entry& result)
+    void FH_H_plus_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::FH_Hplus_decays;
+      using namespace Pipes::FH_H_plus_decays;
 
       // Get the mass pseudonyms for the gauge eigenstates
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
@@ -971,10 +981,10 @@ namespace Gambit
       check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: Hminus
-    void Hminus_decays (DecayTable::Entry& result)
+    /// MSSM decays: H_minus
+    void H_minus_decays (DecayTable::Entry& result)
     {
-      result = CP_conjugate(*Pipes::Hminus_decays::Dep::Hplus_decay_rates);
+      result = CP_conjugate(*Pipes::H_minus_decays::Dep::H_plus_decay_rates);
     }
 
     /// MSSM decays: gluino
@@ -1740,10 +1750,10 @@ namespace Gambit
       result = CP_conjugate(*Pipes::snubar_taul_decays::Dep::snu_taul_decay_rates);
     }
 
-    /// MSSM decays: charginoplus_1
-    void charginoplus_1_decays (DecayTable::Entry& result)
+    /// MSSM decays: chargino_plus_1
+    void chargino_plus_1_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::charginoplus_1_decays;
+      using namespace Pipes::chargino_plus_1_decays;
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
       result.calculator = BEreq::cb_sd_charwidth.origin();
@@ -1814,16 +1824,16 @@ namespace Gambit
       check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: charginominus_1
-    void charginominus_1_decays (DecayTable::Entry& result)
+    /// MSSM decays: chargino_minus_1
+    void chargino_minus_1_decays (DecayTable::Entry& result)
     {
-      result = CP_conjugate(*Pipes::charginominus_1_decays::Dep::charginoplus_1_decay_rates);
+      result = CP_conjugate(*Pipes::chargino_minus_1_decays::Dep::chargino_plus_1_decay_rates);
     }
 
-    /// MSSM decays: charginoplus_2
-    void charginoplus_2_decays (DecayTable::Entry& result)
+    /// MSSM decays: chargino_plus_2
+    void chargino_plus_2_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::charginoplus_2_decays;
+      using namespace Pipes::chargino_plus_2_decays;
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
       result.calculator = BEreq::cb_sd_charwidth.origin();
@@ -1910,10 +1920,10 @@ namespace Gambit
       check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: charginominus_2
-    void charginominus_2_decays (DecayTable::Entry& result)
+    /// MSSM decays: chargino_minus_2
+    void chargino_minus_2_decays (DecayTable::Entry& result)
     {
-      result = CP_conjugate(*Pipes::charginominus_2_decays::Dep::charginoplus_2_decay_rates);
+      result = CP_conjugate(*Pipes::chargino_minus_2_decays::Dep::chargino_plus_2_decay_rates);
     }
 
     /// MSSM decays: neutralino_1
@@ -2453,21 +2463,16 @@ namespace Gambit
       double v0 = he->get(Par::mass1,"vev");
       double mhpole = spec->get(Par::Pole_Mass,"h0_1");
 
-      // Invalidate point if Higgs mass is outside a range acceptable for virtual_SMHiggs_widths (choose a smaller range to speed things up)
-      double minmass = runOptions->getValueOrDef<double>(90.0, "higgs_minmass");
-      double maxmass = runOptions->getValueOrDef<double>(160.0, "higgs_maxmass");
-
-      // Get the plain SM Higgs decays
-      set_SM_Higgs_decays(mhpole, minmass, maxmass, result);
+      // Get the reference SM Higgs decays
+      result = *Dep::Reference_SM_Higgs_decay_rates;
 
       // Add the h->SS width to the total
       double massratio2 = pow(mass/mhpole,2);
       double gamma = (2.0*mass <= mhpole) ? pow(lambda*v0,2)/(32.0*pi*mhpole) * sqrt(1.0 - 4.0*massratio2) : 0.0;
-      double oldwidth = result.width_in_GeV;
-      result.width_in_GeV = oldwidth + gamma;
+      result.width_in_GeV = result.width_in_GeV + gamma;
 
-      // Get the SM decays and rescale them
-      double wscaling = oldwidth/result.width_in_GeV;
+      // Rescale the SM decay branching fractions.
+      double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
       for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
       {
         it->second.first  *= wscaling; // rescale BF
@@ -2477,7 +2482,7 @@ namespace Gambit
       // Add the h->SS branching fraction
       result.set_BF(gamma/result.width_in_GeV, 0.0, "S", "S");
       
-      // Make sure the width is cool.
+      // Make sure the width is sensible.
       check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
    }
 
@@ -2525,15 +2530,15 @@ namespace Gambit
 
         decays("h0_2") = *Dep::h0_2_decay_rates;                 // Add the h0_2 decays.
         decays("A0") = *Dep::A0_decay_rates;                     // Add the A0 decays.
-        decays("H+") = *Dep::Hplus_decay_rates;                  // Add the H+ decays.
-        decays("H-") = *Dep::Hminus_decay_rates;                 // Add the H+ decays.
+        decays("H+") = *Dep::H_plus_decay_rates;                 // Add the H+ decays.
+        decays("H-") = *Dep::H_minus_decay_rates;                // Add the H+ decays.
 
         decays("~g") = *Dep::gluino_decay_rates;                 // Add the gluino decays.
 
-        decays("~chi+_1") = *Dep::charginoplus_1_decay_rates;    // Add the ~chi+_1 decays.
-        decays("~chi-_1") = *Dep::charginominus_1_decay_rates;   // Add the ~chi+_1 decays.
-        decays("~chi+_2") = *Dep::charginoplus_2_decay_rates;    // Add the ~chi+_2 decays.
-        decays("~chi-_2") = *Dep::charginominus_2_decay_rates;   // Add the ~chi+_2 decays.
+        decays("~chi+_1") = *Dep::chargino_plus_1_decay_rates;   // Add the ~chi+_1 decays.
+        decays("~chi-_1") = *Dep::chargino_minus_1_decay_rates;  // Add the ~chi+_1 decays.
+        decays("~chi+_2") = *Dep::chargino_plus_2_decay_rates;   // Add the ~chi+_2 decays.
+        decays("~chi-_2") = *Dep::chargino_minus_2_decay_rates;  // Add the ~chi+_2 decays.
         decays("~chi0_1") = *Dep::neutralino_1_decay_rates;      // Add the ~chi0_1 decays.
         decays("~chi0_2") = *Dep::neutralino_2_decay_rates;      // Add the ~chi0_2 decays.
         decays("~chi0_3") = *Dep::neutralino_3_decay_rates;      // Add the ~chi0_3 decays.
