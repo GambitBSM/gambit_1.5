@@ -24,6 +24,7 @@ MEDIUM TERM
 
 4. Need to add a meson level event for potential Belle II simulation, plus implement Belle II simulation (Florian + volunteers)
 
+5. Improve HiggsSignals signal strength treatment (Chris R, James)
 
 How to valgrind to find ColliderBit memory issues:
 valgrind --tool=memcheck --memcheck:leak-check=full --show-reachable=yes --suppressions=valgrindColliderBit.supp ./gambit -f gambit_Collider.yaml
