@@ -56,8 +56,6 @@ namespace Gambit {
     }
 
 
-    /// @name HEPUtilsAnalysisContainer function definitions:
-    //@{
     void HEPUtilsAnalysisContainer::clear() {
       for (Analysis* a : analyses) {
         delete a;
@@ -128,8 +126,6 @@ namespace Gambit {
       assert(ready);
       for (Analysis* a : analyses) a->scale(factor);
     }
-
-    //@}
 
   }
 }
