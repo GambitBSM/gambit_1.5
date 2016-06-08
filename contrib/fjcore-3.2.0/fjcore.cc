@@ -2121,8 +2121,11 @@ void ClusterSequence::add_constituents (
     add_constituents(_jets[_history[parent2].jetp_index], subjet_vector);
   }
 }
+
+namespace { void IGNORE(int) {} } //< AB: to avoid unused-variable warnings without actually anonymising the variable; used below
+
 void ClusterSequence::_add_step_to_history (
-                                            const int /* step_number */, const int parent1, //< AB
+           const int step_number, const int parent1,
 	       const int parent2, const int jetp_index,
 	       const double dij) {
   history_element element;
@@ -2134,6 +2137,7 @@ void ClusterSequence::_add_step_to_history (
   element.max_dij_so_far = max(dij,_history[_history.size()-1].max_dij_so_far);
   _history.push_back(element);
   int local_step = _history.size()-1;
+  IGNORE(step_number); //< AB: get rid of Release-mode unused argument warning, since commenting the name isn't an option
   assert(local_step == step_number);
   assert(parent1 >= 0);
   if (_history[parent1].child != Invalid){
