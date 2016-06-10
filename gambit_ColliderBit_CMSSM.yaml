@@ -50,7 +50,7 @@ Scanner:
 
 
 
-  use_scanner: multinest
+  use_scanner: random
 
   scanners:
     multinest:
@@ -66,13 +66,13 @@ Scanner:
       aux_printer_stats_options:
       aux_printer_live_options:
 
-    #random:
-    #  plugin: random_sampler
-    #  point_number: 1
-    #  output_file:  output
-    #  like:  Likelihood
-    #  files:
-    #    output_file: "weights ..."
+    random:
+      plugin: random_sampler
+      point_number: 10
+      output_file:  output
+      like:  Likelihood
+      files:
+        output_file: "weights ..."
   
 
 ObsLikes:
@@ -214,6 +214,14 @@ Rules:
   - capability: t_decay_rates
     function: FH_t_decays
 
+  # Specify the use of Delphes for the detector simulation (and set the Delphes configuration card file)
+  #- capability: DetectorSim
+  #  type: "Gambit::ColliderBit::DelphesVanilla"
+  #  function: getDelphes
+  #  options:
+  #    # Choose which type of event to use: for parton level, change partonOnly to true
+  #    delphesConfigFile: "ColliderBit/data/delphes_card_ATLAS.tcl"
+
   # Specify the use of BuckFast for the ATLAS simulator (and set the jet radius)
   - capability: SimpleSmearingSim
     type: "Gambit::ColliderBit::BuckFastSmearATLAS"
@@ -232,21 +240,34 @@ Rules:
       partonOnly: false
       antiktR: 0.5
 
-  # Here we specify the list of ATLAS analyses to run
+  # Specify the list of analyses to run after Delphes performs detector simulation
+  #- capability: DetectorSimAnalysisContainer
+  #  function: getDetectorSimAnalysisContainer
+  #  options:  
+  #    #useDetectorSim defaults to false, which ignores all these analyses and disables Delphes
+  #    #  NOTE: you should set useATLAS below to false, otherwise these analyses will run twice
+  #    useDetectorSim: true
+  #    analysisNamesDetectorSim: ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
+  #                               "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
+  #                               "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
+  #                               "ATLAS_3LEPEW_20invfb"]
+
+  # Specify the list of ATLAS analyses to run
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:  
-      #useATLAS defaults to true anyways. Set it to false to ignore all these analyses
+      #useATLAS defaults to true. Set it to false to ignore all these analyses and disable the BuckFast ATLAS simulator
       useATLAS: true
       analysisNamesATLAS: ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
                            "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
                            "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
                            "ATLAS_3LEPEW_20invfb"]
 
+  # Specify the list of CMS analyses to run
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:  
-      #useCMS defaults to true anyways. Set it to false to ignore all these analyses
+      #useCMS defaults to true. Set it to false to ignore all these analyses and disable the BuckFast ATLAS simulator
       useCMS: true
       analysisNamesCMS: ["CMS_1LEPDMTOP_20invfb","CMS_2LEPDMTOP_20invfb",
                          "CMS_3LEPEW_20invfb","CMS_MONOJET_20invfb"]     

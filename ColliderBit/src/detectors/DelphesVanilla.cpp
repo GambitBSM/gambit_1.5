@@ -102,7 +102,8 @@ namespace Gambit {
 
 
     void DelphesVanilla::clear() {
-      delete _impl;
+      if(_impl)
+        delete _impl;
       _impl = nullptr;
     }
 

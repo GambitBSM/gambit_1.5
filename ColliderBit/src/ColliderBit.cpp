@@ -122,6 +122,11 @@ namespace Gambit
     bool useCMS;
     std::vector<std::string> analysisNamesCMS;
     HEPUtilsAnalysisContainer globalAnalysesCMS;
+#ifndef EXCLUDE_DELPHES
+    bool useDetectorSim;
+    std::vector<std::string> analysisNamesDetectorSim;
+    HEPUtilsAnalysisContainer globalAnalysesDetectorSim;
+#endif // not defined EXCLUDE_DELPHES
 
     /// *************************************************
     /// Rollcalled functions properly hooked up to Gambit
@@ -436,7 +441,7 @@ namespace Gambit
     void getDelphes(Gambit::ColliderBit::DelphesVanilla &result) {
       using namespace Pipes::getDelphes;
       std::vector<std::string> delphesOptions;
-      if (*Loop::iteration == INIT)
+      if (*Loop::iteration == INIT and useDetectorSim)
       {
         result.clear();
         // Reset Options
@@ -501,6 +506,48 @@ namespace Gambit
 
 
     /// *** Initialization for analyses ***
+
+#ifndef EXCLUDE_DELPHES
+    void getDetectorSimAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
+      using namespace Pipes::getDetectorSimAnalysisContainer;
+      if (*Loop::iteration == BASE_INIT) {
+        useDetectorSim = runOptions->getValueOrDef<bool>(false, "useDetectorSim");
+        if (!useDetectorSim) return;
+        GET_COLLIDER_RUNOPTION(analysisNamesDetectorSim, std::vector<std::string>);
+        globalAnalysesDetectorSim.clear();
+        globalAnalysesDetectorSim.init(analysisNamesDetectorSim);
+        return;
+      }
+
+      if (!useDetectorSim) return;
+
+      if (*Loop::iteration == START_SUBPROCESS)
+      {
+        // Each thread gets its own Analysis container.
+        // Thus, their initialization is *after* INIT, within omp parallel.
+        result.clear();
+        result.init(analysisNamesDetectorSim);
+        return;
+      }
+
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated)
+      {
+        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
+        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        result.add_xsec(xs_fb, xserr_fb);
+
+        // Combine results from the threads together
+        #pragma omp critical (access_globalAnalyses)
+        {
+          globalAnalysesDetectorSim.add(result);
+          // Use improve_xsec to combine results from the same process type
+          globalAnalysesDetectorSim.improve_xsec(result);
+        }
+        return;
+      }
+
+    }
+#endif // not defined EXCLUDE_DELPHES
 
     void getATLASAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getATLASAnalysisContainer;
@@ -608,12 +655,22 @@ namespace Gambit
 #ifndef EXCLUDE_DELPHES
     void reconstructDelphesEvent(HEPUtils::Event& result) {
       using namespace Pipes::reconstructDelphesEvent;
-      if (*Loop::iteration <= BASE_INIT) return;
+      if (*Loop::iteration <= BASE_INIT or !useDetectorSim) return;
       result.clear();
 
-      #pragma omp critical (Delphes)
+#pragma omp critical (Delphes)
       {
-        (*Dep::DetectorSim).processEvent(*Dep::HardScatteringEvent, result);
+        try {
+          (*Dep::DetectorSim).processEvent(*Dep::HardScatteringEvent, result);
+        } catch (std::domain_error& e) {
+          std::cerr<<"\n== ColliderBit Warning ==";
+          std::cerr<<"\n   Event problem: "<<e.what();
+          std::cerr<<"\n   See ColliderBit log for event details.";
+          std::stringstream ss;
+          Dep::HardScatteringEvent->list(ss, 1);
+          logger() << ss.str() << EOM;
+        throw e;
+        }
       }
     }
 #endif // not defined EXCLUDE_DELPHES
@@ -689,6 +746,29 @@ namespace Gambit
 
     /// *** Analysis Accumulators ***
 
+#ifndef EXCLUDE_DELPHES
+    void runDetectorSimAnalyses(ColliderLogLikes& result)
+    {
+      using namespace Pipes::runDetectorSimAnalyses;
+      if (!useDetectorSim) return;
+      if (*Loop::iteration == FINALIZE && eventsGenerated) {
+        // The final iteration: get log likelihoods for the analyses
+        result.clear();
+        globalAnalysesDetectorSim.scale();
+        for (auto anaPtr = globalAnalysesDetectorSim.analyses.begin();
+                  anaPtr != globalAnalysesDetectorSim.analyses.end(); ++anaPtr)
+          result.push_back((*anaPtr)->get_results());
+        return;
+      }
+
+      if (*Loop::iteration <= BASE_INIT) return;
+
+      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
+      Dep::DetectorSimAnalysisContainer->analyze(*Dep::ReconstructedEvent);
+    }
+#endif // not defined EXCLUDE_DELPHES
+
+
     void runATLASAnalyses(ColliderLogLikes& result)
     {
       using namespace Pipes::runATLASAnalyses;
@@ -709,7 +789,6 @@ namespace Gambit
     }
 
 
-
     void runCMSAnalyses(ColliderLogLikes& result)
     {
       using namespace Pipes::runCMSAnalyses;
@@ -728,6 +807,7 @@ namespace Gambit
       // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
       Dep::CMSAnalysisContainer->analyze(*Dep::CMSSmearedEvent);
     }
+
 
 
 
@@ -753,6 +833,11 @@ namespace Gambit
       if(useCMS)
         analysisResults.insert(analysisResults.end(),
                 Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
+#ifndef EXCLUDE_DELPHES
+      if(useDetectorSim)
+        analysisResults.insert(analysisResults.end(),
+                Dep::DetectorSimAnalysisNumbers->begin(), Dep::DetectorSimAnalysisNumbers->end());
+#endif // not defined EXCLUDE_DELPHES
 
       // Loop over analyses and calculate the total observed dll
       double total_dll_obs = 0;
