@@ -441,6 +441,8 @@ namespace Gambit
     void getDelphes(Gambit::ColliderBit::DelphesVanilla &result) {
       using namespace Pipes::getDelphes;
       std::vector<std::string> delphesOptions;
+      if (*Loop::iteration == BASE_INIT)
+        useDetectorSim = runOptions->getValueOrDef<bool>(false, "useDetectorSim");
       if (*Loop::iteration == INIT and useDetectorSim)
       {
         result.clear();
@@ -461,6 +463,8 @@ namespace Gambit
       using namespace Pipes::getBuckFastATLAS;
       bool partonOnly;
       double antiktR;
+      if (*Loop::iteration == BASE_INIT)
+        useATLAS = runOptions->getValueOrDef<bool>(true, "useATLAS");
       if (*Loop::iteration == INIT and useATLAS)
       {
         result.clear();
@@ -477,6 +481,8 @@ namespace Gambit
       using namespace Pipes::getBuckFastCMS;
       bool partonOnly;
       double antiktR;
+      if (*Loop::iteration == BASE_INIT)
+        useCMS = runOptions->getValueOrDef<bool>(true, "useCMS");
       if (*Loop::iteration == INIT and useCMS)
       {
         result.clear();
@@ -510,16 +516,14 @@ namespace Gambit
 #ifndef EXCLUDE_DELPHES
     void getDetectorSimAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getDetectorSimAnalysisContainer;
+      if (!useDetectorSim) return;
+
       if (*Loop::iteration == BASE_INIT) {
-        useDetectorSim = runOptions->getValueOrDef<bool>(false, "useDetectorSim");
-        if (!useDetectorSim) return;
         GET_COLLIDER_RUNOPTION(analysisNamesDetectorSim, std::vector<std::string>);
         globalAnalysesDetectorSim.clear();
         globalAnalysesDetectorSim.init(analysisNamesDetectorSim);
         return;
       }
-
-      if (!useDetectorSim) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
@@ -551,16 +555,14 @@ namespace Gambit
 
     void getATLASAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getATLASAnalysisContainer;
+      if (!useATLAS) return;
+
       if (*Loop::iteration == BASE_INIT) {
-        useATLAS = runOptions->getValueOrDef<bool>(true, "useATLAS");
-        if (!useATLAS) return;
         GET_COLLIDER_RUNOPTION(analysisNamesATLAS, std::vector<std::string>);
         globalAnalysesATLAS.clear();
         globalAnalysesATLAS.init(analysisNamesATLAS);
         return;
       }
-
-      if (!useATLAS) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
@@ -591,16 +593,14 @@ namespace Gambit
 
     void getCMSAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getCMSAnalysisContainer;
+      if (!useCMS) return;
+
       if (*Loop::iteration == BASE_INIT) {
-        useCMS = runOptions->getValueOrDef<bool>(true, "useCMS");
-        if (!useCMS) return;
         GET_COLLIDER_RUNOPTION(analysisNamesCMS, std::vector<std::string>);
         globalAnalysesCMS.clear();
         globalAnalysesCMS.init(analysisNamesCMS);
         return;
       }
-
-      if (!useCMS) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
