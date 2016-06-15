@@ -215,10 +215,14 @@ Rules:
     function: FH_t_decays
 
   # Specify the use of Delphes for the detector simulation (and set the Delphes configuration card file)
+  # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
   #- capability: DetectorSim
   #  type: "Gambit::ColliderBit::DelphesVanilla"
   #  function: getDelphes
   #  options:
+  #    #useDetectorSim defaults to false, which ignores all "DetectorSim" analyses and disables Delphes
+  #    #  NOTE: you should set useATLAS and/or useCMS below to false, otherwise analyses may run twice
+  #    useDetectorSim: true
   #    # Choose which type of event to use: for parton level, change partonOnly to true
   #    delphesConfigFile: "ColliderBit/data/delphes_card_ATLAS.tcl"
 
@@ -227,6 +231,8 @@ Rules:
     type: "Gambit::ColliderBit::BuckFastSmearATLAS"
     function: getBuckFastATLAS
     options:
+      #useATLAS defaults to true. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
+      useATLAS: false
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: false
       antiktR: 0.4
@@ -236,17 +242,17 @@ Rules:
     type: "Gambit::ColliderBit::BuckFastSmearCMS"
     function: getBuckFastCMS
     options:
+      #useCMS defaults to true. Set it to false to ignore all CMS analyses and disable the BuckFast CMS simulator
+      useCMS: true
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: false
       antiktR: 0.5
 
   # Specify the list of analyses to run after Delphes performs detector simulation
+  # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
   #- capability: DetectorSimAnalysisContainer
   #  function: getDetectorSimAnalysisContainer
   #  options:  
-  #    #useDetectorSim defaults to false, which ignores all these analyses and disables Delphes
-  #    #  NOTE: you should set useATLAS below to false, otherwise these analyses will run twice
-  #    useDetectorSim: true
   #    analysisNamesDetectorSim: ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
   #                               "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
   #                               "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
@@ -256,8 +262,6 @@ Rules:
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:  
-      #useATLAS defaults to true. Set it to false to ignore all these analyses and disable the BuckFast ATLAS simulator
-      useATLAS: true
       analysisNamesATLAS: ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
                            "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
                            "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
@@ -267,8 +271,6 @@ Rules:
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:  
-      #useCMS defaults to true. Set it to false to ignore all these analyses and disable the BuckFast ATLAS simulator
-      useCMS: true
       analysisNamesCMS: ["CMS_1LEPDMTOP_20invfb","CMS_2LEPDMTOP_20invfb",
                          "CMS_3LEPEW_20invfb","CMS_MONOJET_20invfb"]     
 
