@@ -94,6 +94,7 @@ endif()
 set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
 include_directories("${fjcore_INCLUDE_DIR}")
 add_definitions(-DFJCORE)
+add_definitions(-DFJNS=gambit::fjcore)
 add_gambit_library(fjcore OPTION OBJECT
                           SOURCES ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0/fjcore.cc
                           HEADERS ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0/fjcore.hh)
