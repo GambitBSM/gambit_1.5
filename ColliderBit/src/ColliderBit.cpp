@@ -123,9 +123,9 @@ namespace Gambit
     std::vector<std::string> analysisNamesCMS;
     HEPUtilsAnalysisContainer globalAnalysesCMS;
 #ifndef EXCLUDE_DELPHES
-    bool useDetectorSim;
-    std::vector<std::string> analysisNamesDetectorSim;
-    HEPUtilsAnalysisContainer globalAnalysesDetectorSim;
+    bool useDet;
+    std::vector<std::string> analysisNamesDet;
+    HEPUtilsAnalysisContainer globalAnalysesDet;
 #endif // not defined EXCLUDE_DELPHES
 
     /// *************************************************
@@ -442,8 +442,8 @@ namespace Gambit
       using namespace Pipes::getDelphes;
       std::vector<std::string> delphesOptions;
       if (*Loop::iteration == BASE_INIT)
-        useDetectorSim = runOptions->getValueOrDef<bool>(false, "useDetectorSim");
-      if (*Loop::iteration == INIT and useDetectorSim)
+        useDet = runOptions->getValueOrDef<bool>(false, "useDet");
+      if (*Loop::iteration == INIT and useDet)
       {
         result.clear();
         // Reset Options
@@ -514,14 +514,14 @@ namespace Gambit
     /// *** Initialization for analyses ***
 
 #ifndef EXCLUDE_DELPHES
-    void getDetectorSimAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
-      using namespace Pipes::getDetectorSimAnalysisContainer;
-      if (!useDetectorSim) return;
+    void getDetAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
+      using namespace Pipes::getDetAnalysisContainer;
+      if (!useDet) return;
 
       if (*Loop::iteration == BASE_INIT) {
-        GET_COLLIDER_RUNOPTION(analysisNamesDetectorSim, std::vector<std::string>);
-        globalAnalysesDetectorSim.clear();
-        globalAnalysesDetectorSim.init(analysisNamesDetectorSim);
+        GET_COLLIDER_RUNOPTION(analysisNamesDet, std::vector<std::string>);
+        globalAnalysesDet.clear();
+        globalAnalysesDet.init(analysisNamesDet);
         return;
       }
 
@@ -530,7 +530,7 @@ namespace Gambit
         // Each thread gets its own Analysis container.
         // Thus, their initialization is *after* INIT, within omp parallel.
         result.clear();
-        result.init(analysisNamesDetectorSim);
+        result.init(analysisNamesDet);
         return;
       }
 
@@ -543,9 +543,9 @@ namespace Gambit
         // Combine results from the threads together
         #pragma omp critical (access_globalAnalyses)
         {
-          globalAnalysesDetectorSim.add(result);
+          globalAnalysesDet.add(result);
           // Use improve_xsec to combine results from the same process type
-          globalAnalysesDetectorSim.improve_xsec(result);
+          globalAnalysesDet.improve_xsec(result);
         }
         return;
       }
@@ -655,7 +655,7 @@ namespace Gambit
 #ifndef EXCLUDE_DELPHES
     void reconstructDelphesEvent(HEPUtils::Event& result) {
       using namespace Pipes::reconstructDelphesEvent;
-      if (*Loop::iteration <= BASE_INIT or !useDetectorSim) return;
+      if (*Loop::iteration <= BASE_INIT or !useDet) return;
       result.clear();
 
 #pragma omp critical (Delphes)
@@ -747,16 +747,16 @@ namespace Gambit
     /// *** Analysis Accumulators ***
 
 #ifndef EXCLUDE_DELPHES
-    void runDetectorSimAnalyses(ColliderLogLikes& result)
+    void runDetAnalyses(ColliderLogLikes& result)
     {
-      using namespace Pipes::runDetectorSimAnalyses;
-      if (!useDetectorSim) return;
+      using namespace Pipes::runDetAnalyses;
+      if (!useDet) return;
       if (*Loop::iteration == FINALIZE && eventsGenerated) {
         // The final iteration: get log likelihoods for the analyses
         result.clear();
-        globalAnalysesDetectorSim.scale();
-        for (auto anaPtr = globalAnalysesDetectorSim.analyses.begin();
-                  anaPtr != globalAnalysesDetectorSim.analyses.end(); ++anaPtr)
+        globalAnalysesDet.scale();
+        for (auto anaPtr = globalAnalysesDet.analyses.begin();
+                  anaPtr != globalAnalysesDet.analyses.end(); ++anaPtr)
           result.push_back((*anaPtr)->get_results());
         return;
       }
@@ -764,7 +764,7 @@ namespace Gambit
       if (*Loop::iteration <= BASE_INIT) return;
 
       // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::DetectorSimAnalysisContainer->analyze(*Dep::ReconstructedEvent);
+      Dep::DetAnalysisContainer->analyze(*Dep::ReconstructedEvent);
     }
 #endif // not defined EXCLUDE_DELPHES
 
@@ -834,9 +834,9 @@ namespace Gambit
         analysisResults.insert(analysisResults.end(),
                 Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
 #ifndef EXCLUDE_DELPHES
-      if(useDetectorSim)
+      if(useDet)
         analysisResults.insert(analysisResults.end(),
-                Dep::DetectorSimAnalysisNumbers->begin(), Dep::DetectorSimAnalysisNumbers->end());
+                Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
 #endif // not defined EXCLUDE_DELPHES
 
       // Loop over analyses and calculate the total observed dll

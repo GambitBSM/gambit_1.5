@@ -220,9 +220,9 @@ Rules:
   #  type: "Gambit::ColliderBit::DelphesVanilla"
   #  function: getDelphes
   #  options:
-  #    #useDetectorSim defaults to false, which ignores all "DetectorSim" analyses and disables Delphes
+  #    #useDet defaults to false, which ignores all "Det" analyses and disables Delphes
   #    #  NOTE: you should set useATLAS and/or useCMS below to false, otherwise analyses may run twice
-  #    useDetectorSim: true
+  #    useDet: true
   #    # Choose which type of event to use: for parton level, change partonOnly to true
   #    delphesConfigFile: "ColliderBit/data/delphes_card_ATLAS.tcl"
 
@@ -232,7 +232,7 @@ Rules:
     function: getBuckFastATLAS
     options:
       #useATLAS defaults to true. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
-      useATLAS: false
+      useATLAS: true
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: false
       antiktR: 0.4
@@ -250,10 +250,10 @@ Rules:
 
   # Specify the list of analyses to run after Delphes performs detector simulation
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
-  #- capability: DetectorSimAnalysisContainer
-  #  function: getDetectorSimAnalysisContainer
+  #- capability: DetAnalysisContainer
+  #  function: getDetAnalysisContainer
   #  options:  
-  #    analysisNamesDetectorSim: ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
+  #    analysisNamesDet: ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
   #                               "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
   #                               "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
   #                               "ATLAS_3LEPEW_20invfb"]
