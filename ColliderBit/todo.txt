@@ -8,10 +8,7 @@ SHORT TERM (ASAP!)
             Authors to add institute information (all)
             Authors to add any financial acknowledgements required (all)
             Check discussion of --fast-math flag (Martin)
-            Update capability tables and options after Delphes changes (Abram)
     Code to do
-            Add DELPHES instructions (commented out) to gambit_Collider_CMSSM.yaml (Abram)
-              - Done, but changes to the capabilities and options must propagate to the paper.
             Test and cleanup the doxygen comments in the code (Abram).
               - Mostly done, at least for the main ColliderBit files.
 
