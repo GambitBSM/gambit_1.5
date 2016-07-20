@@ -220,13 +220,13 @@ Rules:
   # detector sims and analyses. The user may run BuckFastATLAS with ATLAS
   # analyses, BuckFastCMS with CMS analyses, and Delphes with any analyses.
   #
-  # The main way to turn these features on or off is via the booleans useDet,
-  # useATLAS, and useCMS within the getDelphes, getBuckFastATLAS, and
+  # The way to turn these features on or off is via the booleans useDelphesDetector,
+  # useBuckFastATLASDetector, and useBuckFastCMSDetector within the getDelphes, getBuckFastATLAS, and
   # getBuckFastCMS functions, respectively.
   #
   # For example, in this file the delphesConfigFile is set to an ATLAS config
   # file, and DetAnalysisContainer is set to use ATLAS analyses. Thus, if we set
-  # useDet=true, useATLAS=false, and useCMS=true, then the ATLAS analyses will
+  # useDelphesDetector=true, useBuckFastATLASDetector=false, and useBuckFastCMSDetector=true, then the ATLAS analyses will
   # run on the reconstructed events from Delphes, and the CMS analyses will run
   # on the simply smeared events from BuckFastCMS.
   #
@@ -238,8 +238,8 @@ Rules:
     type: "Gambit::ColliderBit::DelphesVanilla"
     function: getDelphes
     options:
-      #useDet defaults to false, which ignores all "Det" analyses and disables Delphes
-      useDet: true
+      #useDelphesDetector defaults to false, which ignores all "Det" analyses and disables Delphes
+      useDelphesDetector: true
       # Choose which type of event to use: for parton level, change partonOnly to true
       delphesConfigFile: "ColliderBit/data/delphes_card_ATLAS.tcl"
 
@@ -248,8 +248,8 @@ Rules:
     type: "Gambit::ColliderBit::BuckFastSmearATLAS"
     function: getBuckFastATLAS
     options:
-      #useATLAS defaults to true. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
-      useATLAS: false
+      #useBuckFastATLASDetector defaults to true. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
+      useBuckFastATLASDetector: false
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: false
       antiktR: 0.4
@@ -259,8 +259,8 @@ Rules:
     type: "Gambit::ColliderBit::BuckFastSmearCMS"
     function: getBuckFastCMS
     options:
-      #useCMS defaults to true. Set it to false to ignore all CMS analyses and disable the BuckFast CMS simulator
-      useCMS: true
+      #useBuckFastCMSDetector defaults to true. Set it to false to ignore all CMS analyses and disable the BuckFast CMS simulator
+      useBuckFastCMSDetector: true
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: false
       antiktR: 0.5

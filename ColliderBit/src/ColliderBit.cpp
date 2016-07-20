@@ -116,14 +116,14 @@ namespace Gambit
     bool eventsGenerated;
     int nEvents, seedBase;
     /// Analysis stuff
-    bool useATLAS;
+    bool useBuckFastATLASDetector;
     std::vector<std::string> analysisNamesATLAS;
     HEPUtilsAnalysisContainer globalAnalysesATLAS;
-    bool useCMS;
+    bool useBuckFastCMSDetector;
     std::vector<std::string> analysisNamesCMS;
     HEPUtilsAnalysisContainer globalAnalysesCMS;
 #ifndef EXCLUDE_DELPHES
-    bool useDet;
+    bool useDelphesDetector;
     std::vector<std::string> analysisNamesDet;
     HEPUtilsAnalysisContainer globalAnalysesDet;
 #endif // not defined EXCLUDE_DELPHES
@@ -155,7 +155,7 @@ namespace Gambit
       GET_COLLIDER_RUNOPTION(nEvents, int);
 
       // Nicely ask the entire loop to be quiet
-      std::cout.rdbuf(0); 
+      //std::cout.rdbuf(0); 
 
       // For every collider requested in the yaml file:
       for (iter = pythiaNames.cbegin(); iter != pythiaNames.cend(); ++iter)
@@ -442,8 +442,8 @@ namespace Gambit
       using namespace Pipes::getDelphes;
       std::vector<std::string> delphesOptions;
       if (*Loop::iteration == BASE_INIT)
-        useDet = runOptions->getValueOrDef<bool>(false, "useDet");
-      if (*Loop::iteration == INIT and useDet)
+        useDelphesDetector = runOptions->getValueOrDef<bool>(false, "useDelphesDetector");
+      if (*Loop::iteration == INIT and useDelphesDetector)
       {
         result.clear();
         // Reset Options
@@ -464,8 +464,8 @@ namespace Gambit
       bool partonOnly;
       double antiktR;
       if (*Loop::iteration == BASE_INIT)
-        useATLAS = runOptions->getValueOrDef<bool>(true, "useATLAS");
-      if (*Loop::iteration == INIT and useATLAS)
+        useBuckFastATLASDetector = runOptions->getValueOrDef<bool>(true, "useBuckFastATLASDetector");
+      if (*Loop::iteration == INIT and useBuckFastATLASDetector)
       {
         result.clear();
         // Setup new BuckFast:
@@ -482,8 +482,8 @@ namespace Gambit
       bool partonOnly;
       double antiktR;
       if (*Loop::iteration == BASE_INIT)
-        useCMS = runOptions->getValueOrDef<bool>(true, "useCMS");
-      if (*Loop::iteration == INIT and useCMS)
+        useBuckFastCMSDetector = runOptions->getValueOrDef<bool>(true, "useBuckFastCMSDetector");
+      if (*Loop::iteration == INIT and useBuckFastCMSDetector)
       {
         result.clear();
         // Setup new BuckFast
@@ -516,7 +516,7 @@ namespace Gambit
 #ifndef EXCLUDE_DELPHES
     void getDetAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getDetAnalysisContainer;
-      if (!useDet) return;
+      if (!useDelphesDetector) return;
 
       if (*Loop::iteration == BASE_INIT) {
         GET_COLLIDER_RUNOPTION(analysisNamesDet, std::vector<std::string>);
@@ -555,7 +555,7 @@ namespace Gambit
 
     void getATLASAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getATLASAnalysisContainer;
-      if (!useATLAS) return;
+      if (!useBuckFastATLASDetector) return;
 
       if (*Loop::iteration == BASE_INIT) {
         GET_COLLIDER_RUNOPTION(analysisNamesATLAS, std::vector<std::string>);
@@ -593,7 +593,7 @@ namespace Gambit
 
     void getCMSAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getCMSAnalysisContainer;
-      if (!useCMS) return;
+      if (!useBuckFastCMSDetector) return;
 
       if (*Loop::iteration == BASE_INIT) {
         GET_COLLIDER_RUNOPTION(analysisNamesCMS, std::vector<std::string>);
@@ -655,7 +655,7 @@ namespace Gambit
 #ifndef EXCLUDE_DELPHES
     void reconstructDelphesEvent(HEPUtils::Event& result) {
       using namespace Pipes::reconstructDelphesEvent;
-      if (*Loop::iteration <= BASE_INIT or !useDet) return;
+      if (*Loop::iteration <= BASE_INIT or !useDelphesDetector) return;
       result.clear();
 
 #pragma omp critical (Delphes)
@@ -677,7 +677,7 @@ namespace Gambit
 
     void smearEventATLAS(HEPUtils::Event& result) {
       using namespace Pipes::smearEventATLAS;
-      if (*Loop::iteration <= BASE_INIT or !useATLAS) return;
+      if (*Loop::iteration <= BASE_INIT or !useBuckFastATLASDetector) return;
       result.clear();
 
       // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
@@ -699,7 +699,7 @@ namespace Gambit
 
     void smearEventCMS(HEPUtils::Event& result) {
       using namespace Pipes::smearEventCMS;
-      if (*Loop::iteration <= BASE_INIT or !useCMS) return;
+      if (*Loop::iteration <= BASE_INIT or !useBuckFastCMSDetector) return;
       result.clear();
 
       // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
@@ -750,7 +750,7 @@ namespace Gambit
     void runDetAnalyses(ColliderLogLikes& result)
     {
       using namespace Pipes::runDetAnalyses;
-      if (!useDet) return;
+      if (!useDelphesDetector) return;
       if (*Loop::iteration == FINALIZE && eventsGenerated) {
         // The final iteration: get log likelihoods for the analyses
         result.clear();
@@ -772,7 +772,7 @@ namespace Gambit
     void runATLASAnalyses(ColliderLogLikes& result)
     {
       using namespace Pipes::runATLASAnalyses;
-      if (!useATLAS) return;
+      if (!useBuckFastATLASDetector) return;
       if (*Loop::iteration == FINALIZE && eventsGenerated) {
         // The final iteration: get log likelihoods for the analyses
         result.clear();
@@ -792,7 +792,7 @@ namespace Gambit
     void runCMSAnalyses(ColliderLogLikes& result)
     {
       using namespace Pipes::runCMSAnalyses;
-      if (!useCMS) return;
+      if (!useBuckFastCMSDetector) return;
       if (*Loop::iteration == FINALIZE && eventsGenerated) {
         // The final iteration: get log likelihoods for the analyses
         result.clear();
@@ -827,14 +827,14 @@ namespace Gambit
         return;
       }
       ColliderLogLikes analysisResults;
-      if(useATLAS)
+      if(useBuckFastATLASDetector)
         analysisResults.insert(analysisResults.end(),
                 Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
-      if(useCMS)
+      if(useBuckFastCMSDetector)
         analysisResults.insert(analysisResults.end(),
                 Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
 #ifndef EXCLUDE_DELPHES
-      if(useDet)
+      if(useDelphesDetector)
         analysisResults.insert(analysisResults.end(),
                 Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
 #endif // not defined EXCLUDE_DELPHES
