@@ -5,18 +5,23 @@
 ///
 ///  The BaseAnalysis class and SignalRegionData struct.
 
-#include <string>
-#include <sstream>
-#include <vector>
-
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/Utils.hpp"
 
 #include "HEPUtils/MathUtils.h"
 #include "HEPUtils/Event.h"
 
+#include <string>
+#include <sstream>
+#include <vector>
+#include <cmath>
+#include <memory>
+#include <iomanip>
+#include <algorithm>
+
 namespace Gambit {
   namespace ColliderBit {
+
 
     /// A simple container for the result of one signal region from one analysis.
     struct SignalRegionData {
