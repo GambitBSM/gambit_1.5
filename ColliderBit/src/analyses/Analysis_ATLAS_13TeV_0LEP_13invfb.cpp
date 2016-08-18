@@ -228,110 +228,6 @@ namespace Gambit {
 
         }
 
-        // cutFlowVector_str[0] = "No cuts ";
-        // cutFlowVector_str[1] = "2j: MET > 160 GeV and jet pT ";
-        // cutFlowVector_str[2] = "2j: dPhiMin > 0.4 ";
-        // cutFlowVector_str[3] = "2j: met/sqrt(HT) > 15 ";
-        // cutFlowVector_str[4] = "2j: meff_incl > 1200 ";
-        // cutFlowVector_str[5] = "2j: meff_incl > 1600 ";
-        // cutFlowVector_str[6] = "3j: MET > 160 and jet pT ";
-        // cutFlowVector_str[7] = "3j: dPhiMin > 0.4 ";
-        // cutFlowVector_str[8] = "3j: met/meff3j > 0.3 ";
-        // cutFlowVector_str[9] = "3j: met/meff_incl > 2200. ";
-        // cutFlowVector_str[10] = "4jlm: MET > 160 and jet pT ";
-        // cutFlowVector_str[11] = "4jlm: dPhiMin > 0.4 ";
-        // cutFlowVector_str[12] = "4jlm: dPhiMin2 > 0.2 ";
-        // cutFlowVector_str[13] = "4jlm: met/sqrt(HT) > 10 ";
-        // cutFlowVector_str[14] = "4jlm: meff incl > 700 ";
-        // cutFlowVector_str[15] = "4jl: meff incl > 1000 ";
-        // cutFlowVector_str[16] = "4jt: met/meff4j > 0.25 ";
-        // cutFlowVector_str[17] = "4jt: meff incl > 2200 ";
-        // cutFlowVector_str[18] = "5j: MET > 160 and jet pT ";
-        // cutFlowVector_str[19] = "5j: dPhiMin > 0.4 ";
-        // cutFlowVector_str[20] = "5j: dPhiMin2 > 0.2 ";
-        // cutFlowVector_str[21] = "5j: met/meff5j > 0.2 ";
-        // cutFlowVector_str[22] = "5j: meff incl > 1200. ";
-        // cutFlowVector_str[23] = "6jl: MET >  160 and jet pT  ";
-        // cutFlowVector_str[24] = "6jl: dPhiMin > 0.4 ";
-        // cutFlowVector_str[25] = "6jl: dPhiMin2 > 0.2 ";
-        // cutFlowVector_str[26] = "6jl: met/meff6j > 0.2 ";
-        // cutFlowVector_str[27] = "6jl: meff incl > 900. ";
-        // cutFlowVector_str[28] = "6jt: met/meff6j > 0.25 ";
-        // cutFlowVector_str[29] = "6jt: meff incl > 1500. ";
-
-        // for (size_t j=0;j<NCUTS;j++){
-        //   if(
-        //      (j==0) ||
-
-        //      (j==1 && signalJets.size()>1 && signalJets[0]->pT()>130. && signalJets[1]->pT()>60. && metCut && leptonCut) ||
-
-        //      (j==2 && signalJets.size()>1 && signalJets[0]->pT()>130. && signalJets[1]->pT()>60. && metCut && dPhiMin2j>0.4 && leptonCut) ||
-
-        //      (j==3 && signalJets.size()>1 && signalJets[0]->pT()>130. && signalJets[1]->pT()>60. && metCut && dPhiMin2j>0.4 && met/sqrt(HT)>15. && leptonCut) ||
-
-        //      (j==4 && signalJets.size()>1 && signalJets[0]->pT()>130. && signalJets[1]->pT()>60. && metCut && dPhiMin2j>0.4 && met/sqrt(HT)>15. && leptonCut && meff_incl>1200.) ||
-
-        //      (j==5 && signalJets.size()>1 && signalJets[0]->pT()>130. && signalJets[1]->pT()>60. && metCut && dPhiMin2j>0.4 && met/sqrt(HT)>15. && leptonCut && meff_incl>1600.) ||
-
-        //      (j==6 && signalJets.size()>2 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && metCut && leptonCut) ||
-
-        //      (j==7 && signalJets.size()>2 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && metCut && leptonCut && dPhiMin3j > 0.4) ||
-
-        //      (j==8 && signalJets.size()>2 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && metCut && leptonCut && dPhiMin3j > 0.4 && met/meff3j>0.3) ||
-
-        //      (j==9 && signalJets.size()>2 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && metCut && leptonCut && dPhiMin3j > 0.4 && met/meff3j>0.3 && meff_incl>2200.) ||
-
-        //      (j==10 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut) ||
-
-        //      (j==11 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4) ||
-
-        //      (j==12 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2) ||
-
-        //      (j==13 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/sqrt(HT) > 10.) ||
-
-        //      (j==14 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/sqrt(HT) > 10. && meff_incl > 700.) ||
-
-        //      (j==15 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/sqrt(HT) > 10. && meff_incl > 1000.) ||
-
-        //      (j==16 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/meff4j>0.25) ||
-
-        //      (j==17 && signalJets.size() > 3 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/meff4j>0.25 && meff_incl > 2200.) ||
-
-        //      //Start 5j signal regions
-
-        //      (j==18 && signalJets.size() > 4 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && metCut && leptonCut) ||
-
-        //      (j==19 && signalJets.size() > 4 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && metCut && leptonCut && dPhiMin4 > 0.4) ||
-
-        //      (j==20 && signalJets.size() > 4 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && metCut && leptonCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2) ||
-
-        //      (j==21 && signalJets.size() > 4 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && metCut && leptonCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/meff4j > 0.25) ||
-
-        //      (j==22 && signalJets.size() > 4 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && metCut && leptonCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2 && met/meff4j > 0.25 && meff_incl > 1200.) ||
-
-        //      //Start 6jl region
-
-        //      (j==23 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut) ||
-
-        //      (j==24 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut && dPhiMin4>0.4) ||
-
-        //      (j==25 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2 > 0.2) ||
-
-        //      (j==26 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2 > 0.2 && met/meff6j>0.2) ||
-
-        //      (j==27 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2 > 0.2 && met/meff6j>0.2 && meff_incl > 900.) ||
-
-        //      (j==28 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2 > 0.2 && met/meff6j>0.2 && meff_incl > 900. && met/meff6j>0.25) ||
-
-        //      (j==29 && signalJets.size() > 5 && signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60. && leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2 > 0.2 && met/meff6j>0.2 && meff_incl > 900. && met/meff6j>0.25 && meff_incl>1500.)
-
-        //      ){
-
-        //     cutFlowVector[j]++;
-
-        //   }
-        // }
-
       }
 
 
@@ -341,38 +237,27 @@ namespace Gambit {
 
         Analysis_ATLAS_13TeV_0LEP_13invfb* specificOther = dynamic_cast<Analysis_ATLAS_13TeV_0LEP_13invfb*>(other);
 
-        // // Here we will add the subclass member variables:
-        // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-        // for (size_t j = 0; j < NCUTS; j++) {
-        //   cutFlowVector[j] += specificOther->cutFlowVector[j];
-        //   cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
-        // }
-
         for (size_t i = 0; i < NUMSR; ++i)
           _srnums[i] += specificOther->_srnums[i];
       }
 
 
+      /// Register results objects with the results for each SR; obs & bkg numbers from the CONF note
       void collect_results() {
-
-        // cout << "------------------------------------------------------------------------------------------------------------------------------ " << endl;
-        // cout << "CUT FLOW: ATLAS R2 0-lepton paper "<<endl;
-        // cout << "------------------------------------------------------------------------------------------------------------------------------" << endl;
-        // cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-        // const double scale_by = 1;
-        // for (size_t j=0; j<NCUTS; j++) {
-        //   cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) <<
-        //     cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) <<
-        //     cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
-        // }
-        // cout << "------------------------------------------------------------------------------------------------------------------------------ " << endl;
-
-
-        // Now fill a results object with the results for each SR
-        // Numbers are taken from CONF note
         static const string ANAME = "Analysis_ATLAS_13TeV_0LEP_13invfb";
-        add_result(SignalRegionData(ANAME, "meff-2j-800", 650, {_srnums[0], 0.}, {610., 10.}));
-        /// @todo More SRs
+        add_result(SignalRegionData(ANAME, "meff-2j-0800", 650, {_srnums[0],  0.}, {610., 50.}));
+        add_result(SignalRegionData(ANAME, "meff-2j-1200", 270, {_srnums[1],  0.}, {297., 29.}));
+        add_result(SignalRegionData(ANAME, "meff-2j-1600",  96, {_srnums[2],  0.}, {121., 13.}));
+        add_result(SignalRegionData(ANAME, "meff-2j-2000",  29, {_srnums[3],  0.}, { 42.,  6.}));
+        add_result(SignalRegionData(ANAME, "meff-3j-1200", 363, {_srnums[4],  0.}, {355., 33.}));
+        add_result(SignalRegionData(ANAME, "meff-4j-1000",  97, {_srnums[5],  0.}, { 84.,  7.}));
+        add_result(SignalRegionData(ANAME, "meff-4j-1400",  71, {_srnums[6],  0.}, { 66.,  8.}));
+        add_result(SignalRegionData(ANAME, "meff-4j-1800",  37, {_srnums[7],  0.}, { 27.,  3.2}));
+        add_result(SignalRegionData(ANAME, "meff-4j-2200",  10, {_srnums[8],  0.}, {  4.8, 1.1}));
+        add_result(SignalRegionData(ANAME, "meff-4j-2600",   3, {_srnums[9],  0.}, {  2.7, 0.6}));
+        add_result(SignalRegionData(ANAME, "meff-5j-1400",  64, {_srnums[10], 0.}, { 68.,  9.}));
+        add_result(SignalRegionData(ANAME, "meff-6j-1800",  10, {_srnums[11], 0.}, {  5.5, 1.0}));
+        add_result(SignalRegionData(ANAME, "meff-6j-2200",   1, {_srnums[12], 0.}, {  0.82,0.35}));
       }
 
     };
