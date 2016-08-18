@@ -1,12 +1,13 @@
 // -*- C++ -*-
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
-
-using namespace std;
-using namespace HEPUtils;
+#include "Eigen/Eigen"
 
 namespace Gambit {
   namespace ColliderBit {
+
+    using namespace std;
+    using namespace HEPUtils;
 
 
     /// @brief ATLAS Run 2 0-lepton jet+MET SUSY analysis, with 13/fb of data
@@ -71,6 +72,7 @@ namespace Gambit {
 
 
         // Remove any |eta| < 0.2 jet within dR = 0.2 of an electron
+        /// @todo Note says that dR is in rap rather than eta
         /// @todo Unless b-tagged
         vector<const Jet*> signalJets;
         for (const Jet* j : baselineJets)
@@ -80,6 +82,7 @@ namespace Gambit {
             signalJets.push_back(j);
 
         // Remove electrons with dR = 0.4 of surviving |eta| < 2.8 jets
+        /// @todo Note says that dR is in rap rather than eta
         /// @todo Actually only within 0.2--0.4
         vector<const Particle*> signalElectrons;
         for (const Particle* e : baselineElectrons)
@@ -91,6 +94,7 @@ namespace Gambit {
         ATLAS::applyMediumIDElectronSelection(signalElectrons);
 
         // Remove muons with dR = 0.4 of surviving |eta| < 2.8 jets
+        /// @todo Note says that dR is in rap rather than eta
         /// @todo Actually only within 0.2--0.4
         /// @todo Within 0.2, discard the *jet* based on jet track vs. muon criteria
         vector<const Particle*> signalMuons;
@@ -106,20 +110,22 @@ namespace Gambit {
 
 
         ////////////////////////////////
-
-
         // Calculate common variables and cuts
+
+        // Multiplicities
         const size_t nElectrons = signalElectrons.size();
         const size_t nMuons = signalMuons.size();
         const size_t nJets = signalJets.size();
         const size_t nJets50 = signalJets50.size();
 
+        // HT-related quantities (calculated over all >20 GeV jets)
         double sumptj = 0;
         for (const Jet* j : signalJets) sumptj += j->pT();
         const double HT = sumptj;
         const double sqrtHT = sqrt(HT);
         const double met_sqrtHT = met/sqrtHT;
 
+        // Meff-related quantities (calculated over >50 GeV jets only)
         double sumptj50_4 = 0, sumptj50_5 = 0, sumptj50_6 = 0, sumptj50_incl = 0;
         for (size_t i = 0; i < signalJets50.size(); ++i) {
           const Jet* j = signalJets50[i];
@@ -136,6 +142,7 @@ namespace Gambit {
         const double met_meff_5 = met / meff_5;
         const double met_meff_6 = met / meff_6;
 
+        // Jet |eta|s
         double etamax_2 = 0;
         for (size_t i = 0; i < min(2lu,signalJets50.size()); ++i)
           etamax_2 = max(etamax_2, signalJets[i]->abseta());
@@ -146,19 +153,37 @@ namespace Gambit {
         for (size_t i = 4; i < min(6lu,signalJets50.size()); ++i)
           etamax_6 = max(etamax_6, signalJets[i]->abseta());
 
+        // Jet--MET dphis
         double dphimin_123 = DBL_MAX, dphimin_more = DBL_MAX;
         for (size_t i = 0; i < min(3lu,signalJets50.size()); ++i)
           dphimin_123 = min(dphimin_123, acos(cos(signalJets50[i]->phi() - pmiss.phi())));
         for (size_t i = 3; i < signalJets50.size(); ++i)
           dphimin_more = min(dphimin_more, acos(cos(signalJets50[i]->phi() - pmiss.phi())));
 
-        /// @todo Aplanarity
+        // Jet aplanarity
+        /// @todo Computed over all jets, all >50 jets, or 4,5,6 jets? Currently using all (> 20) jets
+        Eigen::Matrix3d momtensor = Eigen::Matrix3d::Zero();
+        double norm = 0;
+        for (const Jet* jet : signalJets) {
+          const P4& p4 = jet->mom();
+          norm += p4.p2();
+          for (size_t i = 0; i < 3; ++i) {
+            const double pi = (i == 0) ? p4.px() : (i == 1) ? p4.py() : p4.pz();
+            for (size_t j = 0; j < 3; ++j) {
+              const double pj = (j == 0) ? p4.px() : (j == 1) ? p4.py() : p4.pz();
+              momtensor(i,j) += pi*pj;
+            }
+          }
+        }
+        momtensor *= norm;
+        const double mineigenvalue = momtensor.eigenvalues().real().minCoeff();
+        const double aplanarity = 1.5 * mineigenvalue;
 
 
         ////////////////////////////////
-
-
         // Fill signal regions
+
+
         const bool leptonCut = (nElectrons == 0 && nMuons == 0);
         const bool metCut = (met > 250.);
         if (nJets50 >= 2 && leptonCut && metCut) {
@@ -183,7 +208,7 @@ namespace Gambit {
           }
 
           // 4 jet regions (note implicit pT[1,2] cuts)
-          if (nJets >= 4 && dphimin_123 > 0.4 && dphimin_more > 0.4 && signalJets[0]->pT() > 200) { /// @todo aplanarity > 0.04
+          if (nJets >= 4 && dphimin_123 > 0.4 && dphimin_more > 0.4 && signalJets[0]->pT() > 200 && aplanarity > 0.04) {
             if (signalJets[3]->pT() > 100 && etamax_4 < 1.2 && met_meff_4 > 0.25 && meff_incl > 1000) _srnums[5] += 1;
             if (signalJets[3]->pT() > 100 && etamax_4 < 2.0 && met_meff_4 > 0.25 && meff_incl > 1400) _srnums[6] += 1;
             if (signalJets[3]->pT() > 100 && etamax_4 < 2.0 && met_meff_4 > 0.20 && meff_incl > 1800) _srnums[7] += 1;
@@ -197,7 +222,7 @@ namespace Gambit {
           }
 
           // 6 jet regions (note implicit pT[1,2,3,4] cuts)
-          if (nJets >= 6 && dphimin_123 > 0.4 && dphimin_more > 0.2 && signalJets[0]->pT() > 200) { /// @todo aplanarity > 0.08
+          if (nJets >= 6 && dphimin_123 > 0.4 && dphimin_more > 0.2 && signalJets[0]->pT() > 200 && aplanarity > 0.08) {
             if (signalJets[5]->pT() >  50 && etamax_6 < 2.0 && met_meff_6 > 0.20 && meff_incl > 1800) _srnums[11] += 1;
             if (signalJets[5]->pT() > 100 &&                   met_meff_6 > 0.15 && meff_incl > 2200) _srnums[12] += 1;
           }
