@@ -72,22 +72,20 @@ namespace Gambit {
 
 
         // Remove any |eta| < 0.2 jet within dR = 0.2 of an electron
-        /// @todo Note says that dR is in rap rather than eta
         /// @todo Unless b-tagged
         vector<const Jet*> signalJets;
         for (const Jet* j : baselineJets)
           if (j->abseta() > 2.8 ||
               all_of(baselineElectrons.begin(), baselineElectrons.end(),
-                     [&](const Particle* e){ return deltaR_eta(*e, *j) > 0.2; }))
+                     [&](const Particle* e){ return deltaR_rap(*e, *j) > 0.2; }))
             signalJets.push_back(j);
 
         // Remove electrons with dR = 0.4 of surviving |eta| < 2.8 jets
-        /// @todo Note says that dR is in rap rather than eta
         /// @todo Actually only within 0.2--0.4
         vector<const Particle*> signalElectrons;
         for (const Particle* e : baselineElectrons)
           if (all_of(signalJets.begin(), signalJets.end(),
-                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_eta(*e, *j) > 0.4; }))
+                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_rap(*e, *j) > 0.4; }))
             signalElectrons.push_back(e);
         // Apply electron ID selection
         /// @todo Use *loose* electron selection
@@ -100,7 +98,7 @@ namespace Gambit {
         vector<const Particle*> signalMuons;
         for (const Particle* m : baselineMuons)
           if (all_of(signalJets.begin(), signalJets.end(),
-                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_eta(*m, *j) > 0.4; }))
+                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_rap(*m, *j) > 0.4; }))
             signalMuons.push_back(m);
 
         // The subset of jets with pT > 50 GeV is used for several calculations
