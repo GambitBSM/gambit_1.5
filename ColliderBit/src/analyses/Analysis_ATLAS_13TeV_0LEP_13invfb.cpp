@@ -135,7 +135,6 @@ namespace Gambit {
         const double met_meff_4 = met / meff_4;
         const double met_meff_5 = met / meff_5;
         const double met_meff_6 = met / meff_6;
-        // const double met_meff_incl = met / meff_incl;
 
         double etamax_2 = 0;
         for (size_t i = 0; i < min(2lu,signalJets50.size()); ++i)
