@@ -6,7 +6,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    /// @todo Move these to a separate file
+    /// @todo Move these to a separate file (and ditch the useless Doxy-comments)
 
     /// Forward declaration using #DECLARE_ANALYSIS_FACTORY(ANAME)
     DECLARE_ANALYSIS_FACTORY(Minimum);
@@ -24,6 +24,10 @@ namespace Gambit {
     DECLARE_ANALYSIS_FACTORY(ATLAS_2LEPStop_20invfb);
     /// Forward declaration using #DECLARE_ANALYSIS_FACTORY(ANAME)
     DECLARE_ANALYSIS_FACTORY(ATLAS_3LEPEW_20invfb);
+
+    /// Forward declaration using #DECLARE_ANALYSIS_FACTORY(ANAME)
+    DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEP_13invfb);
+
     /// Forward declaration using #DECLARE_ANALYSIS_FACTORY(ANAME)
     DECLARE_ANALYSIS_FACTORY(CMS_1LEPDMTOP_20invfb);
     /// Forward declaration using #DECLARE_ANALYSIS_FACTORY(ANAME)
@@ -34,6 +38,7 @@ namespace Gambit {
     DECLARE_ANALYSIS_FACTORY(CMS_MONOJET_20invfb);
     /// Forward declaration using #DECLARE_ANALYSIS_FACTORY(ANAME)
     DECLARE_ANALYSIS_FACTORY(Perf);
+
 
     // Factory definition
     /// @todo Move to a separate file
