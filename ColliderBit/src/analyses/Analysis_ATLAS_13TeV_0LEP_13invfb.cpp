@@ -52,27 +52,28 @@ namespace Gambit {
 
 
         // Get baseline jets
-        vector<Jet*> baselineJets;
-        for (Jet* jet : event->jets())
-          if (jet->pT() > 20. && jet->abseta() < 2.8)
+        /// @todo Drop b-tag if pT < 50 GeV or |eta| > 2.5?
+        vector<const Jet*> baselineJets;
+        for (const Jet* jet : event->jets())
+          if (jet->pT() > 20. && jet->abseta() < 2.8) {
             baselineJets.push_back(jet);
-        /// @todo Drop b-tag if pT < 50 GeV or |eta| > 2.5
+          }
 
         // Get baseline electrons
-        vector<Particle*> baselineElectrons;
-        for (Particle* electron : event->electrons())
+        vector<const Particle*> baselineElectrons;
+        for (const Particle* electron : event->electrons())
           if (electron->pT() > 10. && electron->abseta() < 2.47)
             baselineElectrons.push_back(electron);
 
         // Get baseline muons
-        vector<Particle*> baselineMuons;
-        for (Particle* muon : event->muons())
+        vector<const Particle*> baselineMuons;
+        for (const Particle* muon : event->muons())
           if (muon->pT() > 10. && muon->abseta() < 2.7)
             baselineMuons.push_back(muon);
 
 
         // Remove any |eta| < 0.2 jet within dR = 0.2 of an electron
-        /// @todo Unless b-tagged
+        /// @todo Unless b-tagged (and pT > 50 && abseta < 2.5)
         vector<const Jet*> signalJets;
         for (const Jet* j : baselineJets)
           if (j->abseta() > 2.8 ||
