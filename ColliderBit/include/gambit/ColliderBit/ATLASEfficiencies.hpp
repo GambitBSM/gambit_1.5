@@ -3,9 +3,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Functions that do super fast ATLAS detector simulation based on four vector smearing.
-
-#include <random>
+///  Functions that do super fast ATLAS detector simulation based on four-vector smearing.
 
 #include "gambit/ColliderBit/Utils.hpp"
 
@@ -13,8 +11,11 @@
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
 
+#include <random>
+
 namespace Gambit {
   namespace ColliderBit {
+
 
     /// ATLAS-specific efficiency and smearing functions for super fast detector simulation
     /// @note See also BuckFastSmearATLAS
@@ -144,7 +145,7 @@ namespace Gambit {
           }
         }
 
-        
+
         /// Randomly smear the supplied muons' momenta by parameterised resolutions
         inline void smearMuonMomentum(std::vector<HEPUtils::Particle*>& muons) {
           // Function that mimics the DELPHES muon momentum resolution
@@ -172,7 +173,7 @@ namespace Gambit {
           }
         }
 
-        
+
         /// Randomly smear the supplied jets' momenta by parameterised resolutions
         inline void smearJets(std::vector<HEPUtils::Jet*>& jets) {
           // Function that mimics the DELPHES jet momentum resolution.
@@ -193,7 +194,7 @@ namespace Gambit {
           }
         }
 
-        
+
         /// Randomly smear the supplied taus' momenta by parameterised resolutions
         inline void smearTaus(std::vector<HEPUtils::Particle*>& taus) {
           // We need to smear pT, then recalculate E, then reset the 4-vector.
@@ -214,10 +215,10 @@ namespace Gambit {
           }
         }
 
-        
+
         /// Efficiency function for Medium ID electrons
         /// @note Numbers digitised from 8 TeV note (ATLAS-CONF-2014-032)
-        inline void applyMediumIDElectronSelection(std::vector<HEPUtils::Particle*>& electrons) {
+        inline void applyMediumIDElectronSelection(std::vector<const HEPUtils::Particle*>& electrons) {
           if (electrons.empty()) return;
 
           const static double binedges_E10_15_list[] = {0., 0.0494681, 0.453578, 1.10675, 1.46298, 1.78963, 2.2766, 2.5};
@@ -320,10 +321,16 @@ namespace Gambit {
           electrons.erase(keptElectronsEnd, electrons.end());
         }
 
-        
+
+        /// Alias to allow non-const particle vectors
+        inline void applyMediumIDElectronSelection(std::vector<HEPUtils::Particle*>& electrons) {
+          applyMediumIDElectronSelection(reinterpret_cast<std::vector<const HEPUtils::Particle*>&>(electrons));
+        }
+
+
         /// Efficiency function for Tight ID electrons
         /// @note Numbers digitised from 8 TeV note (ATLAS-CONF-2014-032)
-        inline void applyTightIDElectronSelection(std::vector<HEPUtils::Particle*>& electrons) {
+        inline void applyTightIDElectronSelection(std::vector<const HEPUtils::Particle*>& electrons) {
 
           const static double binedges_E10_15_list[] = {0., 0.0485903, 0.458914, 1.10009, 1.46117, 1.78881, 2.27013, 2.5};
           const static std::vector<double>  binedges_E10_15(binedges_E10_15_list, binedges_E10_15_list+8);
@@ -424,8 +431,16 @@ namespace Gambit {
                                              } );
           electrons.erase(keptElectronsEnd, electrons.end());
         }
-      //@}
 
-    }
-  }
+
+        /// Alias to allow non-const particle vectors
+        inline void applyTightIDElectronSelection(std::vector<HEPUtils::Particle*>& electrons) {
+          applyTightIDElectronSelection(reinterpret_cast<std::vector<const HEPUtils::Particle*>&>(electrons));
+        }
+
+
+        //@}
+
+      }
+   }
 }

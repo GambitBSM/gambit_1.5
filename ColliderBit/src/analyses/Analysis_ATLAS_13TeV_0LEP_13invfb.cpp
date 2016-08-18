@@ -21,9 +21,10 @@ namespace Gambit {
     public:
 
       // Numbers passing cuts
-      double _num2j800  = 0, _num2j1200 = 0, _num2j1600 = 0, _num2j2000 = 0;
-      double _num3j1200 = 0, _num4j1000 = 0, _num4j1400 = 0, _num4j1800 = 0, _num4j2200 = 0, _num4j2600 = 0;
-      double _num5j1400 = 0, _num6j1800 = 0, _num6j2200 = 0;
+      // double _num2j800  = 0, _num2j1200 = 0, _num2j1600 = 0, _num2j2000 = 0;
+      // double _num3j1200 = 0, _num4j1000 = 0, _num4j1400 = 0, _num4j1800 = 0, _num4j2200 = 0, _num4j2600 = 0;
+      // double _num5j1400 = 0, _num6j1800 = 0, _num6j2200 = 0;
+      double _srnums[] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
       // vector<int> cutFlowVector;
       // vector<string> cutFlowVector_str;
@@ -44,120 +45,74 @@ namespace Gambit {
 
         HEPUtilsAnalysis::analyze(event);
 
+
         // Missing energy
-        P4 ptot = event->missingmom();
-        double met = event->met();
+        const P4 pmiss = event->missingmom();
+        const double met = event->met();
 
-        // Now define vectors of baseline objects
+
+        // Get baseline jets
+        vector<Jet*> baselineJets;
+        for (Jet* jet : event->jets())
+          if (jet->pT() > 20. && jet->abseta() < 4.5)
+            baselineJets.push_back(jet);
+        // Get baseline electrons
         vector<Particle*> baselineElectrons;
-        for (HEPUtils::Particle* electron : event->electrons()) {
-          if (electron->pT() > 10. && fabs(electron->eta()) < 2.47) baselineElectrons.push_back(electron);
-        }
-        vector<HEPUtils::Particle*> baselineMuons;
-        for (HEPUtils::Particle* muon : event->muons()) {
-          if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) baselineMuons.push_back(muon);
-        }
-        vector<HEPUtils::Jet*> baselineJets;
-        for (HEPUtils::Jet* jet : event->jets()) {
-          if (jet->pT() > 20. && fabs(jet->eta()) < 4.5) baselineJets.push_back(jet);
-        }
+        for (Particle* electron : event->electrons())
+          if (electron->pT() > 10. && electron->abseta() < 2.47)
+            baselineElectrons.push_back(electron);
+        // Get baseline muons
+        vector<Particle*> baselineMuons;
+        for (Particle* muon : event->muons())
+          if (muon->pT() > 10. && muon->abseta() < 2.4)
+            baselineMuons.push_back(muon);
 
-        // Overlap removal: only applied to jets with |eta| < 2.8
-        vector<HEPUtils::Particle*> signalElectrons, signalMuons;
-        vector<HEPUtils::Jet*> signalJets;
 
-        // Remove any jet within dR=0.2 of an electron
+        // Remove any |eta| < 0.2 jet within dR = 0.2 of an electron
+        vector<const Jet*> signalJets;
         for (const Jet* j : baselineJets)
           if (j->abseta() > 2.8 ||
-              all_of(baselineElectrons.begin(), baselineElectrons.end(), [&](const Particle* e){ return deltaR_eta(e, j) > 0.2; }))
+              all_of(baselineElectrons.begin(), baselineElectrons.end(),
+                     [&](const Particle* e){ return deltaR_eta(*e, *j) > 0.2; }))
             signalJets.push_back(j);
-        //
-        // for (const Jet* j : baselineJets) {
-        //   if (j->abseta() < 2.8) {
-        //     bool overlap = false;
-        //     for (const Particle* e : baselineElectrons) {
-        //       if (e->mom().deltaR_eta(j->mom()) < 0.2) overlap = true;
-        //     }
-        //     if (overlap) continue;
-        //   }
-        //   signalJets.push_back(j);
-        // }
-        //
-        // for (size_t iJet = 0; iJet < baselineJets.size(); iJet++) {
-        //   bool overlap = false;
-        //   HEPUtils::P4 jetVec = baselineJets.at(iJet)->mom();
-        //   if (fabs(jetVec.eta()) < 2.8) {
-        //     for (size_t iEl = 0; iEl < baselineElectrons.size(); iEl++) {
-        //       HEPUtils::P4 elVec=baselineElectrons.at(iEl)->mom();
-        //       if (fabs(elVec.deltaR_eta(jetVec)) < 0.2) overlap = true;
-        //     }
-        //   }
-        //   if (!overlap) signalJets.push_back(baselineJets.at(iJet));
-        // }
-
-        // Remove electrons with dR=0.4 of surviving |eta|<2.8 jets
+        // Remove electrons with dR = 0.4 of surviving |eta| < 2.8 jets
+        vector<const Particle*> signalElectrons;
         for (const Particle* e : baselineElectrons)
           if (all_of(signalJets.begin(), signalJets.end(),
-                     [&](const Jet* j){ return j.abseta() > 2.8 || deltaR_eta(e, j) > 0.4; }))
-            signalElectrons.push_back(j);
-        //
-        // for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
-        //   bool overlap=false;
-        //   HEPUtils::P4 elVec=baselineElectrons.at(iEl)->mom();
-        //   for (size_t iJet=0;iJet<signalJets.size();iJet++) {
-        //     HEPUtils::P4 jetVec=signalJets.at(iJet)->mom();
-        //     if (fabs(elVec.deltaR_eta(jetVec))<0.4 && fabs(jetVec.eta())<2.8)overlap=true;
-        //   }
-        //   if (!overlap)signalElectrons.push_back(baselineElectrons.at(iEl));
-        // }
-
-        // Remove muons with dR=0.4 of surviving |eta|<2.8 jets
+                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_eta(*e, *j) > 0.4; }))
+            signalElectrons.push_back(e);
+        // Remove muons with dR = 0.4 of surviving |eta| < 2.8 jets
+        vector<const Particle*> signalMuons;
         for (const Particle* m : baselineMuons)
           if (all_of(signalJets.begin(), signalJets.end(),
-                     [&](const Jet* j){ return j.abseta() > 2.8 || deltaR_eta(m, j) > 0.4; }))
-            signalElectrons.push_back(j);
-        //
-        // for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
-        //   bool overlap=false;
-        //   HEPUtils::P4 muVec=baselineMuons.at(iMu)->mom();
-        //   for (size_t iJet=0;iJet<signalJets.size();iJet++) {
-        //     HEPUtils::P4 jetVec=signalJets.at(iJet)->mom();
-        //     if (fabs(muVec.deltaR_eta(jetVec))<0.4 && fabs(jetVec.eta())<2.8)overlap=true;
-        //   }
-        //   if (!overlap)signalMuons.push_back(baselineMuons.at(iMu));
-        // }
+                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_eta(*m, *j) > 0.4; }))
+            signalMuons.push_back(m);
 
-
-        // We now have the signal electrons, muons and jets: move on to the 0 lepton 2012 analysis
-
-        // Calculate common variables and cuts first
+        // Apply electron ID selection
         ATLAS::applyMediumIDElectronSelection(signalElectrons);
 
-        int nElectrons = signalElectrons.size();
-        int nMuons = signalMuons.size();
-        int nJets = signalJets.size();
 
-        bool leptonCut = (nElectrons == 0 && nMuons == 0);
-        bool metCut = (met > 160.);
-        double meff_incl = met;
-        double HT=0;
-        for (const HEPUtils::Jet* j : signalJets)
-          if (j->pT() > 40) {
-            meff_incl += j->pT();
-            HT  += j->pT();
-          }
+        // Calculate common variables and cuts
+        const int nElectrons = signalElectrons.size();
+        const int nMuons = signalMuons.size();
+        const int nJets = signalJets.size();
+        const bool leptonCut = (nElectrons == 0 && nMuons == 0);
+        const bool metCut = (met > 160.);
+        double HT = 0;
+        for (const Jet* j : signalJets)
+          if (j->pT() > 40) HT += j->pT();
+        const double meff_incl = met + HT;
+        const double sqrtHT = sqrt(HT);
 
         // Do 2 jet regions
-        //double meff2j = 0;
         double dPhiMin2j = 0;
         if (nJets > 1) {
           if (signalJets[0]->pT()>130. && signalJets[1]->pT()>60.) {
-            dPhiMin2j = SmallestdPhi(signalJets,ptot.phi());
-            //meff2j = met + signalJets[0]->pT() + signalJets[1]->pT();
-            if (leptonCut && metCut && dPhiMin2j>0.4) {
-              if (met/sqrt(HT)>8. && meff_incl>800.) _num2jl += 1;
-              if (met/sqrt(HT)>15. && meff_incl>1200.) _num2jm += 1;
-              if (met/sqrt(HT)>15. && meff_incl>1600.) _num2jt += 1;
+            dPhiMin2j = smallest_dphi(signalJets, pmiss);
+            if (leptonCut && metCut && dPhiMin2j > 0.4) {
+              if (met/sqrtHT > 8. && meff_incl > 800.) _numsr2jl += 1;
+              if (met/sqrtHT > 15. && meff_incl > 1200.) _num2jm += 1;
+              if (met/sqrtHT > 15. && meff_incl > 1600.) _num2jt += 1;
             }
 
           }
@@ -169,7 +124,7 @@ namespace Gambit {
         double meff3j=0;
         if (nJets > 2) {
           if (signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60.) {
-            dPhiMin3j = SmallestdPhi(signalJets,ptot.phi());
+            dPhiMin3j = smallest_dphi(signalJets, pmiss);
             meff3j = met + signalJets.at(0)->pT() + signalJets.at(1)->pT() + signalJets.at(2)->pT();
             if (leptonCut && metCut && dPhiMin3j > 0.4) {
               if (met/meff3j>0.3 && meff_incl>2200.) _num3j += 1;
@@ -184,8 +139,8 @@ namespace Gambit {
 
         if (nJets > 3) {
           if (signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60.) {
-            dPhiMin4 = SmallestdPhi(signalJets,ptot.phi());
-            dPhiMin2 = SmallestRemainingdPhi(signalJets,ptot.phi());
+            dPhiMin4 = smallest_dphi(signalJets, pmiss);
+            dPhiMin2 = smallest_remaining_dphi(signalJets, pmiss);
             meff4j = met + signalJets.at(0)->pT() + signalJets.at(1)->pT() + signalJets.at(2)->pT() + signalJets.at(3)->pT();
             if (leptonCut && metCut && dPhiMin4 > 0.4 && dPhiMin2 > 0.2) {
               if(met/sqrt(HT)>10. && meff_incl>700.)_num4jlm += 1;
@@ -199,8 +154,8 @@ namespace Gambit {
         // Do 5 jet region
         if (nJets > 4) {
           if (signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60.) {
-            dPhiMin4 = SmallestdPhi(signalJets,ptot.phi());
-            dPhiMin2 = SmallestRemainingdPhi(signalJets,ptot.phi());
+            dPhiMin4 = smallest_dphi(signalJets, pmiss);
+            dPhiMin2 = smallest_remaining_dphi(signalJets, pmiss);
             double meff5j = met + signalJets.at(0)->pT() + signalJets.at(1)->pT() + signalJets.at(2)->pT() + signalJets.at(3)->pT() + signalJets.at(4)->pT();
             if (leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2>0.2) {
               if (met/meff5j>0.2 && meff_incl>1200.) _num5j += 1;
@@ -212,8 +167,8 @@ namespace Gambit {
         double meff6j=0.;
         if (nJets > 5) {
           if (signalJets.at(0)->pT()>130. && signalJets.at(1)->pT()>60. && signalJets.at(2)->pT()>60. && signalJets.at(3)->pT()>60. && signalJets.at(4)->pT()>60. && signalJets.at(5)->pT()>60.) {
-            dPhiMin4 = SmallestdPhi(signalJets,ptot.phi());
-            dPhiMin2 = SmallestRemainingdPhi(signalJets,ptot.phi());
+            dPhiMin4 = smallest_dphi(signalJets, pmiss);
+            dPhiMin2 = smallest_remaining_dphi(signalJets, pmiss);
             meff6j = met + signalJets.at(0)->pT() + signalJets.at(1)->pT() + signalJets.at(2)->pT() + signalJets.at(3)->pT() + signalJets.at(4)->pT() + signalJets.at(5)->pT();
             if (leptonCut && metCut && dPhiMin4>0.4 && dPhiMin2>0.2) {
               if (met/meff6j>0.2 && meff_incl>900.) _num6jl += 1;
@@ -361,21 +316,21 @@ namespace Gambit {
 
       void collect_results() {
 
-        double scale_by=1.;
-
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cout << "CUT FLOW: ATLAS 0 lepton paper "<<endl;
-        cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-
-        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+        cout << "------------------------------------------------------------------------------------------------------------------------------ " << endl;
+        cout << "CUT FLOW: ATLAS R2 0-lepton paper "<<endl;
+        cout << "------------------------------------------------------------------------------------------------------------------------------" << endl;
+        cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+        const double scale_by = 1;
         for (size_t j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) <<
+            cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) <<
+            cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
         }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cout << "------------------------------------------------------------------------------------------------------------------------------ " << endl;
 
 
-        //Now fill a results object with the results for each SR
-        //Numbers are taken from CONF note
+        // Now fill a results object with the results for each SR
+        // Numbers are taken from CONF note
         SignalRegionData results_2jl;
         results_2jl.analysis_name = "Analysis_ATLAS_13TeV_0LEP_13invfb";
         results_2jl.sr_label = "2jl";
@@ -511,27 +466,27 @@ namespace Gambit {
       ///////////////////
 
 
-      double SmallestdPhi(vector<HEPUtils::Jet*> jets,double phi_met) {
-        if (jets.size()<2) return 999;
-        double dphi1 = acos(cos(jets.at(0)->phi()-phi_met));
-        double dphi2 = acos(cos(jets.at(1)->phi()-phi_met));
-        double dphi3 = 999;
-        if (jets.size() > 2 && jets[2]->pT() > 40.)
-          dphi3 = acos(cos(jets[2]->phi() - phi_met));
-        double min1 = min(dphi1, dphi2);
-        return min(min1, dphi3);
+      double smallest_dphi(const std::vector<const Jet*>& jets, const P4& vmet) {
+        if (jets.size() < 2) return DBL_MAX;
+        const double phi_met = vmet.phi();
+        const double dphi1 = acos(cos(jets[0]->phi() - phi_met));
+        const double dphi2 = acos(cos(jets[1]->phi() - phi_met));
+        const double dphimin12 = min(dphi1, dphi2);
+        const double dphi3 = (jets.size() > 2 && jets[2]->pT() > 40) ? acos(cos(jets[2]->phi() - phi_met))) : DBL_MAX;
+        return min(dphimin12, dphi3);
       }
 
-      double SmallestRemainingdPhi(const vector<HEPUtils::Jet*> jets,double phi_met) {
-        double remainingDPhi = 999;
-        double dphiMin = 999;
-        for (size_t i = 0; i < jets.size(); i++) {
-          if (i > 2 && jets[i]->pT() > 40.) { //< @todo Just start the loop at i = 3?
-            remainingDPhi = acos(cos((jets[i]->phi() - phi_met)));
-            dphiMin = min(remainingDPhi, dphiMin);
+      double smallest_remaining_dphi(const std::vector<const Jet*>& jets, const P4& vmet) {
+        double dphi_min = DBL_MAX;
+        if (jets.size() > 3) {
+          const double phi_met = vmet.phi();
+          for (size_t i = 3; i < jets.size(); i++) {
+            if (jets[i]->pT() < 40) break;
+            const double dphi_i = acos(cos((jets[i]->phi() - phi_met)));
+            dphi_min = min(dphi_i, dphi_min);
           }
         }
-        return dphiMin;
+        return dphi_min;
       }
 
 
