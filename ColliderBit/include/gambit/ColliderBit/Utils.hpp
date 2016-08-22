@@ -70,15 +70,22 @@ namespace Gambit {
 
     /// Non-iterator version of std::all_of
     template <typename CONTAINER, typename FN>
-    inline bool all_of(const CONTAINER& c, FN& f) {
+    inline bool all_of(const CONTAINER& c, const FN& f) {
       return std::all_of(std::begin(c), std::end(c), f);
     }
 
 
     /// Non-iterator version of std::any_of
     template <typename CONTAINER, typename FN>
-    inline bool any_of(const CONTAINER& c, FN& f) {
+    inline bool any_of(const CONTAINER& c, const FN& f) {
       return std::any_of(std::begin(c), std::end(c), f);
+    }
+
+
+    /// Non-iterator version of std::none_of
+    template <typename CONTAINER, typename FN>
+    inline bool none_of(const CONTAINER& c, const FN& f) {
+      return std::none_of(std::begin(c), std::end(c), f);
     }
 
 
