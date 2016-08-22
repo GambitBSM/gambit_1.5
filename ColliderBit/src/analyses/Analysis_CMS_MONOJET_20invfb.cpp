@@ -4,7 +4,7 @@
 #include <iomanip>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 //#include "gambit/ColliderBit/mt2w.h"
 
 /// @todo Remove the ROOT classes...
@@ -91,8 +91,7 @@ namespace Gambit {
             baselineTaus.push_back(tau);
           }
         }
-        /// @TODO ATLAS? Really?
-        ATLAS::applyTauEfficiencyR1(baselineTaus);
+        CMS::applyTauEfficiency(baselineTaus);
 
         vector<HEPUtils::Jet*> baselineJets;
         vector<HEPUtils::P4> jets;
