@@ -86,11 +86,9 @@ namespace Gambit {
           if (all_of(signalJets, [&](const Jet* j){ return deltaR_rap(*e, *j) > 0.4; }))
             signalElectrons.push_back(e);
         // Apply electron ID selection
-        /// @todo Use *loose* electron selection
-        ATLAS::applyMediumIDElectronSelection(signalElectrons);
+        ATLAS::applyLooseIDElectronSelection(signalElectrons);
 
         // Remove muons with dR = 0.4 of surviving |eta| < 2.8 jets
-        /// @todo Note says that dR is in rap rather than eta
         /// @todo Actually only within 0.2--0.4
         /// @todo Within 0.2, discard the *jet* based on jet track vs. muon criteria
         vector<const Particle*> signalMuons;
@@ -110,8 +108,8 @@ namespace Gambit {
         // Multiplicities
         const size_t nElectrons = signalElectrons.size();
         const size_t nMuons = signalMuons.size();
-        const size_t nJets = signalJets.size();
         const size_t nJets50 = signalJets50.size();
+        //const size_t nJets = signalJets.size();
 
         // HT-related quantities (calculated over all >20 GeV jets)
         double sumptj = 0;
