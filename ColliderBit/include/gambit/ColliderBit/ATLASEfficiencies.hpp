@@ -216,16 +216,46 @@ namespace Gambit {
         }
 
 
+        /// Efficiency function for Loose ID electrons
+        /// @note Numbers digitised from Fig 3 of 13 TeV note (ATL-PHYS-PUB-2015-041)
+        /// @todo What about faking by jets or non-electrons?
+        inline void applyLooseIDElectronSelection(std::vector<const HEPUtils::Particle*>& electrons) {
+          if (electrons.empty()) return;
+
+          // Manually symmetrised eta eff histogram
+          const static std::vector<double> binedges_eta = { 0.0,   0.1,   0.8,   1.37,  1.52,  2.01,  2.37,  2.47 };
+          const static std::vector<double> bineffs_eta  = { 0.950, 0.965, 0.955, 0.885, 0.950, 0.935, 0.90 };
+          const static HEPUtils::BinnedFn1D<double> _eff_eta(binedges_eta, bineffs_eta);
+          // Et eff histogram (10-20 GeV bin added by hand)
+          const static std::vector<double> binedges_et = { 10,   20,   25,   30,   35,   40,    45,    50,   60,  80 };
+          const static std::vector<double> bineffs_et  = { 0.90, 0.91, 0.92, 0.94, 0.95, 0.955, 0.965, 0.97, 0.98 };
+          const static HEPUtils::BinnedFn1D<double> _eff_et(binedges_et, bineffs_et);
+
+          auto keptElectronsEnd = std::remove_if(electrons.begin(), electrons.end(),
+                                                 [](const HEPUtils::Particle* electron) {
+                                                   const double e_pt = electron->pT();
+                                                   const double e_eta = electron->abseta();
+                                                   if (e_eta > 2.47 || e_pt < 10) return true;
+                                                   const double eff1 = _eff_eta.get_at(e_eta), eff2 = _eff_et.get_at(e_pt);
+                                                   const double eff = std::min(eff1 * eff2 / 0.95, 1.0); //< norm factor as approximate double differential
+                                                   return random_bool(1-eff);
+                                                 } );
+          electrons.erase(keptElectronsEnd, electrons.end());
+        }
+
+        /// Alias to allow non-const particle vectors
+        inline void applyLooseIDElectronSelection(std::vector<HEPUtils::Particle*>& electrons) {
+          applyLooseIDElectronSelection(reinterpret_cast<std::vector<const HEPUtils::Particle*>&>(electrons));
+        }
+
+
         /// Efficiency function for Medium ID electrons
         /// @note Numbers digitised from 8 TeV note (ATLAS-CONF-2014-032)
         inline void applyMediumIDElectronSelection(std::vector<const HEPUtils::Particle*>& electrons) {
           if (electrons.empty()) return;
 
-          const static double binedges_E10_15_list[] = {0., 0.0494681, 0.453578, 1.10675, 1.46298, 1.78963, 2.2766, 2.5};
-          const static std::vector<double>  binedges_E10_15(binedges_E10_15_list, binedges_E10_15_list+8);
-          const static double binedgevalues_E10_15_list[] = {0.730435, 0.730435, 0.782609, 0.776812, 0.765217, 0.773913, 0.77971, 0.776812};
-          const static std::vector<double>  binedgevalues_E10_15(binedgevalues_E10_15_list, binedgevalues_E10_15_list+8);
-          const static std::vector<double> binvalues_E10_15 = makeBinValues(binedgevalues_E10_15);
+          const static std::vector<double> binedges_E10_15 = {0., 0.0494681, 0.453578, 1.10675, 1.46298, 1.78963, 2.2766, 2.5};
+          const static std::vector<double> binvalues_E10_15 = makeBinValues({0.730435, 0.730435, 0.782609, 0.776812, 0.765217, 0.773913, 0.77971, 0.776812});
           const static HEPUtils::BinnedFn1D<double> _eff_E10_15(binedges_E10_15, binvalues_E10_15);
 
           const static double binedges_E15_20_list[] = {0., 0.0533175, 0.456161, 1.1019, 1.46327, 1.78318, 2.26303, 2.5};

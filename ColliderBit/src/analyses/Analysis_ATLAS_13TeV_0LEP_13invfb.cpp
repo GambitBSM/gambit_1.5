@@ -72,21 +72,18 @@ namespace Gambit {
             baselineMuons.push_back(muon);
 
 
-        // Remove any |eta| < 0.2 jet within dR = 0.2 of an electron
+        // Remove any |eta| < 2.8 jet within dR = 0.2 of an electron
         /// @todo Unless b-tagged (and pT > 50 && abseta < 2.5)
         vector<const Jet*> signalJets;
         for (const Jet* j : baselineJets)
-          if (j->abseta() > 2.8 ||
-              all_of(baselineElectrons.begin(), baselineElectrons.end(),
-                     [&](const Particle* e){ return deltaR_rap(*e, *j) > 0.2; }))
+          if (all_of(baselineElectrons, [&](const Particle* e){ return deltaR_rap(*e, *j) > 0.2; }))
             signalJets.push_back(j);
 
         // Remove electrons with dR = 0.4 of surviving |eta| < 2.8 jets
         /// @todo Actually only within 0.2--0.4
         vector<const Particle*> signalElectrons;
         for (const Particle* e : baselineElectrons)
-          if (all_of(signalJets.begin(), signalJets.end(),
-                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_rap(*e, *j) > 0.4; }))
+          if (all_of(signalJets, [&](const Jet* j){ return deltaR_rap(*e, *j) > 0.4; }))
             signalElectrons.push_back(e);
         // Apply electron ID selection
         /// @todo Use *loose* electron selection
@@ -98,8 +95,7 @@ namespace Gambit {
         /// @todo Within 0.2, discard the *jet* based on jet track vs. muon criteria
         vector<const Particle*> signalMuons;
         for (const Particle* m : baselineMuons)
-          if (all_of(signalJets.begin(), signalJets.end(),
-                     [&](const Jet* j){ return j->abseta() > 2.8 || deltaR_rap(*m, *j) > 0.4; }))
+          if (all_of(signalJets, [&](const Jet* j){ return deltaR_rap(*m, *j) > 0.4; }))
             signalMuons.push_back(m);
 
         // The subset of jets with pT > 50 GeV is used for several calculations
@@ -143,13 +139,13 @@ namespace Gambit {
 
         // Jet |eta|s
         double etamax_2 = 0;
-        for (size_t i = 0; i < min(2lu,signalJets50.size()); ++i)
+        for (size_t i = 0; i < min(2lu,signalJets.size()); ++i)
           etamax_2 = max(etamax_2, signalJets[i]->abseta());
         double etamax_4 = etamax_2;
-        for (size_t i = 2; i < min(4lu,signalJets50.size()); ++i)
+        for (size_t i = 2; i < min(4lu,signalJets.size()); ++i)
           etamax_4 = max(etamax_4, signalJets[i]->abseta());
         double etamax_6 = etamax_4;
-        for (size_t i = 4; i < min(6lu,signalJets50.size()); ++i)
+        for (size_t i = 4; i < min(6lu,signalJets.size()); ++i)
           etamax_6 = max(etamax_6, signalJets[i]->abseta());
 
         // Jet--MET dphis
@@ -207,7 +203,7 @@ namespace Gambit {
           }
 
           // 4 jet regions (note implicit pT[1,2] cuts)
-          if (nJets >= 4 && dphimin_123 > 0.4 && dphimin_more > 0.4 && signalJets[0]->pT() > 200 && aplanarity > 0.04) {
+          if (nJets50 >= 4 && dphimin_123 > 0.4 && dphimin_more > 0.4 && signalJets[0]->pT() > 200 && aplanarity > 0.04) {
             if (signalJets[3]->pT() > 100 && etamax_4 < 1.2 && met_meff_4 > 0.25 && meff_incl > 1000) _srnums[5] += 1;
             if (signalJets[3]->pT() > 100 && etamax_4 < 2.0 && met_meff_4 > 0.25 && meff_incl > 1400) _srnums[6] += 1;
             if (signalJets[3]->pT() > 100 && etamax_4 < 2.0 && met_meff_4 > 0.20 && meff_incl > 1800) _srnums[7] += 1;
@@ -216,12 +212,12 @@ namespace Gambit {
           }
 
           // 5 jet region (note implicit pT[1,2,3] cuts)
-          if (nJets >= 5 && dphimin_123 > 0.4 && dphimin_more > 0.2 && signalJets[0]->pT() > 500) {
+          if (nJets50 >= 5 && dphimin_123 > 0.4 && dphimin_more > 0.2 && signalJets[0]->pT() > 500) {
             if (signalJets[4]->pT() > 50 && met_meff_5 > 0.3 && meff_incl > 1400) _srnums[10] += 1;
           }
 
           // 6 jet regions (note implicit pT[1,2,3,4] cuts)
-          if (nJets >= 6 && dphimin_123 > 0.4 && dphimin_more > 0.2 && signalJets[0]->pT() > 200 && aplanarity > 0.08) {
+          if (nJets50 >= 6 && dphimin_123 > 0.4 && dphimin_more > 0.2 && signalJets[0]->pT() > 200 && aplanarity > 0.08) {
             if (signalJets[5]->pT() >  50 && etamax_6 < 2.0 && met_meff_6 > 0.20 && meff_incl > 1800) _srnums[11] += 1;
             if (signalJets[5]->pT() > 100 &&                   met_meff_6 > 0.15 && meff_incl > 2200) _srnums[12] += 1;
           }
