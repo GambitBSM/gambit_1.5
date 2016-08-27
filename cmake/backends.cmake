@@ -31,6 +31,10 @@
 #  \author Christoph Weniger
 #          (c.weniger@uva.nl)
 #  \date 2015 Sep
+# 
+#  \author Ankit Beniwal
+#  		   (ankit.beniwal@adelaide.edu.au)
+#  \date 2016 Aug
 #
 #************************************************
 
@@ -245,6 +249,50 @@ ExternalProject_Add(${name}_${model}_${ver}
 add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
 set_as_default_version("backend model" ${name}_${model} ${ver})
 
+# MicrOmegas VectorDM model
+set(model "VectorDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+ExternalProject_Add(${name}_${model}_${ver}
+  DOWNLOAD_COMMAND ""
+  SOURCE_DIR ${dir}
+  PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+  BUILD_IN_SOURCE 1
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+  INSTALL_COMMAND ""
+)
+add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
+set_as_default_version("backend model" ${name}_${model} ${ver})
+
+# MicrOmegas MajoranaDM model
+set(model "MajoranaDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+ExternalProject_Add(${name}_${model}_${ver}
+  DOWNLOAD_COMMAND ""
+  SOURCE_DIR ${dir}
+  PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+  BUILD_IN_SOURCE 1
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+  INSTALL_COMMAND ""
+)
+add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
+set_as_default_version("backend model" ${name}_${model} ${ver})
+
+# MicrOmegas DiracDM model
+set(model "DiracDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+ExternalProject_Add(${name}_${model}_${ver}
+  DOWNLOAD_COMMAND ""
+  SOURCE_DIR ${dir}
+  PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+  BUILD_IN_SOURCE 1
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+  INSTALL_COMMAND ""
+)
+add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
+set_as_default_version("backend model" ${name}_${model} ${ver})
 
 # Pythia
 set(name "pythia")

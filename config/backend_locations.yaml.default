@@ -60,6 +60,15 @@ MicrOmegas_MSSM:
 MicrOmegas_SingletDM:
   3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/SingletDM/libmicromegas.so
 
+MicrOmegas_VectorDM:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/VectorDM/libmicromegas.so
+
+MicrOmegas_MajoranaDM:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/MajoranaDM/libmicromegas.so
+
+MicrOmegas_DiracDM:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/DiracDM/libmicromegas.so
+
 nulike:
   1.0.3:       ./Backends/installed/nulike/1.0.3/lib/libnulike.so
 
