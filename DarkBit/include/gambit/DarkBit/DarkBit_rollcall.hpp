@@ -50,6 +50,10 @@
 ///          (felix.kahlhoefer@desy.de)
 ///  \date 2016 August
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 August
+///
 ///  *********************************************
 
 #ifndef __DarkBit_rollcall_hpp__
@@ -196,7 +200,7 @@ START_MODULE
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
       BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM), double, (double*,int,double))
-      ALLOW_MODELS(MSSM63atQ,SingletDM)
+      ALLOW_MODELS(MSSM63atQ,SingletDM,VectorDM,MajoranaDM,DiracDM)
     #undef FUNCTION
   #undef CAPABILITY
 
