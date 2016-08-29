@@ -2569,6 +2569,47 @@ namespace Gambit
       check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
+    //////////// Dirac fermion DM /////////////////////    
+
+    /// Add the decay of Higgs to Dirac fermions for the DiracDM model (based on arXiv: 1512.06458)
+    void DiracDM_Higgs_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::DiracDM_Higgs_decays;
+
+      // Get the spectrum information
+      const Spectrum& spec = *Dep::DiracDM_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"F");
+      double lambda = he.get(Par::dimensionless,"lF");
+      double cosXI = he.get(Par::dimensionless,"cosXI");
+      double v0 = he.get(Par::mass1,"vev");
+      double mhpole = spec.get(Par::Pole_Mass,"h0_1");
+
+      // Get the reference SM Higgs decays
+      result = *Dep::Reference_SM_Higgs_decay_rates;
+
+      // Add the h->SS width to the total
+      double massratio2 = pow(mass/mhpole,2);
+      double lastfactor = (1 - 4*massratio2*pow(cosXI,2));
+      double gamma = (2.0*mass <= mhpole) ? (mhpole*pow(lambda*v0,2))/(8.0*pi) * sqrt(1.0 - 4.0*massratio2) * lastfactor : 0.0;
+      result.width_in_GeV = result.width_in_GeV + gamma;
+
+      // Rescale the SM decay branching fractions.
+      double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
+      for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
+      {
+        it->second.first  *= wscaling; // rescale BF
+        it->second.second *= wscaling; // rescale error on BF
+      }
+
+      // Add the h->SS branching fraction
+      result.set_BF(gamma/result.width_in_GeV, 0.0, "F", "F");
+      
+      // Make sure the width is sensible.
+      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
+
+
     //////////// Everything ///////////////////
 
     /// Collect all the DecayTable entries into an actual DecayTable
@@ -2788,6 +2829,16 @@ namespace Gambit
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMonly_MDM;
       double BF = Dep::Higgs_decay_rates->BF("X","X");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
+    }
+
+    // Implemented: Belanger et al. 2013, arXiv:1306.2941
+    // Higgs invisible width log-likelihood for the DiracDM model (based on arXiv: 1512.06458)
+    void lnL_Higgs_invWidth_SMonly_DDM(double& result)
+    {
+      using namespace Pipes::lnL_Higgs_invWidth_SMonly_DDM;
+      double BF = Dep::Higgs_decay_rates->BF("F","F");
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }

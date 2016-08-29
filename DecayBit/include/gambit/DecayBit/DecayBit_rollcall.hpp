@@ -104,6 +104,13 @@ START_MODULE
     ALLOW_MODELS(MajoranaDM)
     #undef FUNCTION
 
+    #define FUNCTION DiracDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(DiracDM_spectrum, Spectrum)
+    ALLOW_MODELS(DiracDM)
+    #undef FUNCTION
+
     #define FUNCTION MSSM_h0_1_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
@@ -747,7 +754,7 @@ QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, NEW_CAPABILITY, lnL_Higgs_invWidth_SMonly, double, (SingletDM, SingletDMZ3), (Higgs_decay_rates, DecayTable::Entry)) 
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMonly_VDM, double, (VectorDM), (Higgs_decay_rates, DecayTable::Entry)) 
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMonly_MDM, double, (MajoranaDM), (Higgs_decay_rates, DecayTable::Entry))  
-
+QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMonly_DDM, double, (DiracDM), (Higgs_decay_rates, DecayTable::Entry))  
 
 #endif /* defined(__DecayBit_rollcall_hpp__) */
 
