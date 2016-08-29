@@ -39,7 +39,7 @@ namespace Gambit {
     struct SingletDMZ3     : SubSpectrumContents { SingletDMZ3(); };
     struct VectorDM        : SubSpectrumContents { VectorDM(); };
     struct MajoranaDM      : SubSpectrumContents { MajoranaDM(); }; 
-
+  	struct DiracDM         : SubSpectrumContents { DiracDM(); };
  }
 }
 #endif
