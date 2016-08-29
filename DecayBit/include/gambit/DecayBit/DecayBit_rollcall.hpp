@@ -21,9 +21,14 @@
 ///  \author Pat Scott 
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Aug
+///  
 ///  \author Csaba Balazs
 ///  \date 2015 Jan-May
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Aug 
+///  
 ///  *********************************************
 
 
@@ -83,6 +88,13 @@ START_MODULE
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(SingletDM_spectrum, Spectrum)
     ALLOW_MODELS(SingletDM, SingletDMZ3)
+    #undef FUNCTION
+
+    #define FUNCTION VectorDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(VectorDM_spectrum, Spectrum)
+    ALLOW_MODELS(VectorDM)
     #undef FUNCTION
 
     #define FUNCTION MSSM_h0_1_decays
@@ -726,6 +738,7 @@ QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_
 
 // Likelihoods
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, NEW_CAPABILITY, lnL_Higgs_invWidth_SMonly, double, (SingletDM, SingletDMZ3), (Higgs_decay_rates, DecayTable::Entry)) 
+QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMonly_VDM, double, (VectorDM), (Higgs_decay_rates, DecayTable::Entry)) 
  
 #endif /* defined(__DecayBit_rollcall_hpp__) */
 
