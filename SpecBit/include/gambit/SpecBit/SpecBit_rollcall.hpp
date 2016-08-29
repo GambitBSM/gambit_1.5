@@ -15,6 +15,10 @@
 ///          (benjamin.farmer@fysik.su.se)
 ///    \date 2014 Sep - Dec, 2015 Jan - Mar
 ///  
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///    \date 2016 Aug
+///
 ///  *********************************************
 
 #ifndef __SpecBit_rollcall_hpp__
@@ -40,6 +44,9 @@ START_MODULE
 
   /// Module function declarations for SpecBit_tests.cpp (new tests)
   #include "gambit/SpecBit/SpecBit_tests_rollcall.hpp"
+
+  /// Module function declarations for SpecBit_SingletDM.cpp
+  #include "gambit/SpecBit/SpecBit_VectorDM_rollcall.hpp"
 
   /// For SpecBit testing only
   //#include "gambit/SpecBit/SpecBit_sandbox_rollcall.hpp"

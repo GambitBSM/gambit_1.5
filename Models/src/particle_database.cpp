@@ -28,6 +28,10 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jan
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Aug
+///
 ///  *********************************************
 
 
@@ -166,6 +170,9 @@ namespace Gambit
 
       add_particle("S", (9900001, 0))
 
+      // ---- Vector dark matter ----
+
+      add_particle("V", (9900001, 0)) 
     }
 
   }
