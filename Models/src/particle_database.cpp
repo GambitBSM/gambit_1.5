@@ -172,7 +172,11 @@ namespace Gambit
 
       // ---- Vector dark matter ----
 
-      add_particle("V", (9900001, 0)) 
+      add_particle("V", (9900002, 0))
+
+      // ---- Majorana fermion dark matter ----
+
+       add_particle("X", (9900003, 0)) 
     }
 
   }
