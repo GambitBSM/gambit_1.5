@@ -392,6 +392,15 @@ START_MODULE
       DEPENDENCY(SingletDM_spectrum, Spectrum)
       ALLOW_MODELS(SingletDM)
     #undef FUNCTION
+    #define FUNCTION TH_ProcessCatalog_VectorDM
+      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(decay_rates,DecayTable)
+      DEPENDENCY(VectorDM_spectrum, Spectrum)
+      DEPENDENCY(DarkMatter_ID, std::string)
+      BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))
+      BACKEND_REQ(vSigmaCh, (), MicrOmegas::aChannel*)
+      ALLOW_MODELS(VectorDM)
+    #undef FUNCTION  
   #undef CAPABILITY
 
   #define CAPABILITY lnL_FermiLATdwarfs
@@ -533,6 +542,12 @@ START_MODULE
       DEPENDENCY(SingletDM_spectrum, Spectrum)
       ALLOW_JOINT_MODEL(nuclear_params_fnq, SingletDM)
      #undef FUNCTION
+
+     #define FUNCTION DD_couplings_VectorDM
+      START_FUNCTION(DM_nucleon_couplings)
+      DEPENDENCY(VectorDM_spectrum, Spectrum)
+      ALLOW_JOINT_MODEL(nuclear_params_fnq, VectorDM)
+     #undef FUNCTION 
 
   #undef CAPABILITY
 
@@ -977,6 +992,10 @@ START_MODULE
     #define FUNCTION DarkMatter_ID_SingletDM
     START_FUNCTION(std::string)
     ALLOW_MODELS(SingletDM, SingletDM_running)
+    #undef FUNCTION
+    #define FUNCTION DarkMatter_ID_VectorDM
+    START_FUNCTION(std::string)
+    ALLOW_MODELS(VectorDM)
     #undef FUNCTION
     #define FUNCTION DarkMatter_ID_MSSM
     START_FUNCTION(std::string)
