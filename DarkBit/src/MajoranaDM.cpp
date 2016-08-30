@@ -61,7 +61,7 @@ namespace Gambit
 
     } // function DD_couplings_MajoranaDM
 
-    std::map<std::string, daFunk::Funk> get_f_vs_mass(std::string filename)
+    std::map<std::string, daFunk::Funk> get_f_vs_mass_MDM(std::string filename)
     {
       // Higgs branching ratios and total width Gamma [GeV], as function of
       // mass [GeV] (90 - 150 GeV)
@@ -72,12 +72,12 @@ namespace Gambit
             "WW", "ZZ", "Gamma");
       table.setcolnames(colnames);
 
-      std::map<std::string, daFunk::Funk> f_vs_mass;
+      std::map<std::string, daFunk::Funk> f_vs_mass_MDM;
       for (auto it = colnames.begin(); it != colnames.end(); it++)
       {
-        f_vs_mass[*it] = daFunk::interp("mass", table["mass"], table[*it]);
+        f_vs_mass_MDM[*it] = daFunk::interp("mass", table["mass"], table[*it]);
       }
-      return f_vs_mass;
+      return f_vs_mass_MDM;
     }
 
     /// Set up process catalog for the MajoranaDM model.
@@ -95,8 +95,8 @@ namespace Gambit
       }
 
       // Initialize Higgs decay tables (static, hence only once)
-      static std::map<string, daFunk::Funk> f_vs_mass =
-        get_f_vs_mass("Elements/data/Higgs_decay_1101.0593.dat");
+      static std::map<string, daFunk::Funk> f_vs_mass_MDM =
+        get_f_vs_mass_MDM("Elements/data/Higgs_decay_1101.0593.dat");
 
       // Initialize empty catalog 
       TH_ProcessCatalog catalog;
