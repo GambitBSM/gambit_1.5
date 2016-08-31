@@ -20,7 +20,7 @@
 
 LOAD_LIBRARY
 
-BE_ALLOW_MODELS(MajoranaDM)
+BE_ALLOW_MODELS(MajoranaDM, StandardModel_Higgs)
 
 BE_FUNCTION(assignVal, int, (char*,double),"assignVal","assignVal")
 BE_FUNCTION(vSigma, double, (double, double, int), "vSigma","vSigma")
@@ -66,6 +66,8 @@ namespace Gambit
 
 BE_CONV_FUNCTION(dNdE, double, (double,double,int,int), "dNdE")
 
+BE_INI_DEPENDENCY(SMINPUTS, SMInputs)
+
 BE_INI_FUNCTION
 {
      int error;
@@ -74,15 +76,92 @@ BE_INI_FUNCTION
      // Currently only works correctly in unitary gauge
      *ForceUG=1;
 
+     // Set MajoranaDM model parameters in micrOmegas
      error = assignVal((char*)"mX", *Param["mX"]);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mX mass in"
-             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mX in"
+             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     
+
      error = assignVal((char*)"lX", *Param["lX"]);
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set lX in"
-             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     
+
      error = assignVal((char*)"cosXI", *Param["cosXI"]);
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set cosXI in"
-             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     	
+             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     
+
+     // Set SM + Higgs mass parameters in micrOmegas
+     const SMInputs& sminputs = *Dep::SMINPUTS; 
+
+     // EE = sqrt(4*pi*(1/alphainv))
+     error = assignVal((char*)"EE", sqrt(4*M_PI*1/(sminputs.alphainv)));
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set alphainv in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // GG = sqrt(4*pi*alphaS)
+     // error = assignVal((char*)"GG", sqrt(4*M_PI*sminputs.alphaS));
+     //     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set GG in"
+     //      " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // v0 = 1/sqrt(sqrt(2)*GF)
+     error = assignVal((char*)"v0", 1/sqrt(sqrt(2)*sminputs.GF));
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set GF in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mu(2 GeV) in MSbar scheme
+     error = assignVal((char*)"Mu", sminputs.mU);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mU in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // md(2 GeV) in MSbar scheme
+     error = assignVal((char*)"Md", sminputs.mD);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mD in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // ms(2 GeV) in MSbar scheme
+     error = assignVal((char*)"Ms", sminputs.mS);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mS in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mc(mc) in MSbar scheme
+     error = assignVal((char*)"Mc", sminputs.mCmC);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mCmC in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mb(mb) in MSbar scheme
+     error = assignVal((char*)"Mb", sminputs.mBmB);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mBmB in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mtop(pole)
+     error = assignVal((char*)"Mtop", sminputs.mT);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mT in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mE(pole)
+     error = assignVal((char*)"Me", sminputs.mE);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mE in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+             
+     // mMu(pole)
+     error = assignVal((char*)"Mm", sminputs.mMu);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mMu in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mTau(pole)
+     error = assignVal((char*)"Mtau", sminputs.mTau);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mTau in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
+     // mZ(pole)
+     error = assignVal((char*)"MZ", sminputs.mZ);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mZ in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+        
+     // mh
+     error = assignVal((char*)"MH", *Param["mH"]);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mH in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+        
      error = sortOddParticles(byVal(cdmName));
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "MicrOmegas function "
              "sortOddParticles returned error code: " + std::to_string(error));
