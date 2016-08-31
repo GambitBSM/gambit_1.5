@@ -270,6 +270,10 @@ namespace Gambit
       ImportDecays("h0_1", catalog, importedDecays, tbl, minBranching,
           daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
 
+      // Populate resonance list
+      if ( mH >= mX*2 ) process_ann.resonances_thresholds.resonances.
+          push_back(TH_Resonance(mH, gammaH));
+
       // Add process to previous list
       catalog.processList.push_back(process_ann);
 
