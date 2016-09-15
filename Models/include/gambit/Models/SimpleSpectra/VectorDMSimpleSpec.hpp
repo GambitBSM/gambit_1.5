@@ -13,7 +13,7 @@
 ///   
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Aug
+///  \date 2016 Sep
 ///
 ///  *********************************************
 
@@ -38,7 +38,8 @@ namespace Gambit
          double HiggsVEV;
          double VectorPoleMass;
          double VectorLambda;
-
+         double HiggsPoleMass_1srd_low,HiggsPoleMass_1srd_high;
+		 
          double LambdaH;
          double VectorLambdaS;
          double g1, g2, g3, sinW2;
@@ -80,6 +81,10 @@ namespace Gambit
  
             /// Wrapper-side interface functions to parameter object
             double get_HiggsPoleMass()   const { return params.HiggsPoleMass; } 
+
+            double get_HiggsPoleMass_1srd_low() const  { return params.HiggsPoleMass_1srd_low; }
+            double get_HiggsPoleMass_1srd_high() const  { return params.HiggsPoleMass_1srd_high; }
+
             double get_HiggsVEV()        const { return params.HiggsVEV;      } 
             double get_VectorPoleMass() const { return params.VectorPoleMass; } 
             double get_lambda_hV()       const { return params.VectorLambda; }
@@ -94,6 +99,9 @@ namespace Gambit
             double get_Ye(int i, int j)       const { if (i==j){return params.Ye[i];}else{return 0;} }
            
             void set_HiggsPoleMass(double in)   { params.HiggsPoleMass=in; } 
+            void set_HiggsPoleMass_1srd_low(double in)   { params.HiggsPoleMass_1srd_low=in; }
+            void set_HiggsPoleMass_1srd_high(double in)   { params.HiggsPoleMass_1srd_high=in; }
+
             void set_HiggsVEV(double in)        { params.HiggsVEV=in;      } 
             void set_VectorPoleMass(double in) { params.VectorPoleMass=in; } 
             void set_lambda_hV(double in)       { params.VectorLambda=in; }
@@ -119,14 +127,13 @@ namespace Gambit
 
                getters[mass1]        .map0W["vev"]       = &Self::get_HiggsVEV;
                getters[dimensionless].map0W["lambda_hV"] = &Self::get_lambda_hV;
-
-               getters[Pole_Mass].map0W["h0"]      = &Self::get_HiggsPoleMass;
-               getters[Pole_Mass].map0W["h0_1"]    = &Self::get_HiggsPoleMass;
- 
                getters[Pole_Mass].map0W["V"]       = &Self::get_VectorPoleMass;               
-              
+
+               getters[Pole_Mass].map0W["h0_1"]    = &Self::get_HiggsPoleMass;
+               getters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_high;
+               getters[Pole_Mass_1srd_low].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_low;
                getters[dimensionless].map0W["lambda_h"] = &Self::get_lambda_h;
-              
+
                getters[dimensionless].map0W["g1"] = &Self::get_g1;
                getters[dimensionless].map0W["g2"] = &Self::get_g2;
                getters[dimensionless].map0W["g3"] = &Self::get_g3;
@@ -151,17 +158,17 @@ namespace Gambit
                setters[mass1].map0W["vev"]       = &Self::set_HiggsVEV;
                setters[dimensionless].map0W["lambda_hV"] = &Self::set_lambda_hV;
                setters[dimensionless].map0W["lambda_h"] = &Self::set_lambda_h;
+               setters[Pole_Mass].map0W["V"]       = &Self::set_VectorPoleMass;
 
                setters[dimensionless].map0W["g1"] = &Self::set_g1;
                setters[dimensionless].map0W["g2"] = &Self::set_g2;
                setters[dimensionless].map0W["g3"] = &Self::set_g3;
                setters[dimensionless].map0W["sinW2"] = &Self::set_sinW2;
 
-               setters[Pole_Mass].map0W["h0"]    = &Self::set_HiggsPoleMass;
-               //setters[Pole_Mass].map0W["h0_1"]  = &Self::set_HiggsPoleMass;
- 
-               setters[Pole_Mass].map0W["V"]       = &Self::set_VectorPoleMass;                
-   
+               setters[Pole_Mass].map0W["h0_1"]  = &Self::set_HiggsPoleMass;
+               setters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::set_HiggsPoleMass_1srd_high;
+               setters[Pole_Mass_1srd_low].map0W["h0_1"]    = &Self::set_HiggsPoleMass_1srd_low;
+
                setters[dimensionless].map2W["Yd"]= FInfo2W( &Self::set_Yd, i012, i012);
                setters[dimensionless].map2W["Yu"]= FInfo2W( &Self::set_Yu, i012, i012);
                setters[dimensionless].map2W["Ye"]= FInfo2W( &Self::set_Ye, i012, i012);

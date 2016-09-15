@@ -13,7 +13,7 @@
 ///   
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Aug
+///  \date 2016 Sep
 ///
 ///  *********************************************
 
@@ -41,8 +41,11 @@ namespace Gambit {
      addParameter(Par::dimensionless, "lambda_hV");
      addParameter(Par::dimensionless, "lambda_h");
 
-     addParameter(Par::Pole_Mass, "h0");
+     addParameter(Par::Pole_Mass, "h0_1");
      addParameter(Par::Pole_Mass, "V" );
+
+     addParameter(Par::Pole_Mass_1srd_high, "h0_1");
+     addParameter(Par::Pole_Mass_1srd_low,  "h0_1");
     
      addParameter(Par::dimensionless, "g1", scalar);
      addParameter(Par::dimensionless, "g2", scalar);

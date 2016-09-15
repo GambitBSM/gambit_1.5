@@ -12,7 +12,7 @@
 ///   
 ///  \author Ankit Beniwal  
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Aug
+///  \date 2016 Sep
 ///
 ///  *********************************************
 
@@ -85,9 +85,7 @@ namespace Gambit
         return errormsg;
       }
      
-     
-
-//    
+    
       template <class Model>
       double get_sinthW2_MSbar(const Model& model)
       {
@@ -97,77 +95,6 @@ namespace Gambit
        return sthW2;
       }
       
-//
-//      
-//      template <class Model>
-//      void set_Mhh_pole_slha(Model& model,double mass)
-//      {
-//        model.get_physical_slha().Mhh = mass;
-//      }
-//
-//
-//      template <class Model>
-//      void set_Mss_pole_slha(Model& model, double mass)
-//      {
-//        model.get_physical_slha().Mss = mass;
-//      }
-//
-//      
-//
-//      template <class Model>
-//      void set_neutral_goldstone_pole_slha(Model& model, double mass)
-//      {
-//        model.get_physical_slha().MAh = mass;
-//      }
-//     
-//           template <class Model>
-//      void set_MAh_pole_slha(Model& model, double mass)
-//      {
-//        model.get_physical_slha().MAh = mass;
-//      }
-//     
-//     
-//
-//     //PA:  setting MZ and MW is necessary because we may have them as ouptuts
-//     template <class Model>
-//     void set_MZ_pole_slha(Model& model, double mass)
-//     {
-//        model.get_physical_slha().MVZ = mass;
-//     }
-//
-//     template <class Model>
-//     void set_MW_pole_slha(Model& model, double mass)
-//     {
-//        model.get_physical_slha().MVWp = mass;
-//     }
-//
-//     
-//     template <class Model>
-//     void set_MGluon(Model& model, double mass)
-//     {
-//        model.get_physical().MVG = mass;
-//     }
-//     
-//     template <class Model>
-//     void set_MPhoton(Model& model, double mass)
-//     {
-//        model.get_physical().MVP = mass;
-//     }
-//
-//
-//      template <class Model>
-//      double get_MAh_pole_slha(const Model& model)
-//      {
-//        return model.get_MAh_pole_slha();
-//      }
-//     
-//      template <class Model>
-//      double get_Mss_pole_slha(const Model& model)
-//      {
-//        return model.get_Mss_pole_slha();
-//      }
-
-
 
       template <class MI>
       typename VectorDMSpec<MI>::GetterMaps VectorDMSpec<MI>::fill_getter_maps()
@@ -303,11 +230,8 @@ namespace Gambit
 
             tmp_map["V"] =  &Model::get_Mss_pole_slha;
             tmp_map["Vector"] =  &Model::get_Mss_pole_slha; // alternative naming convention as in VectorDM container
-            tmp_map["h0"] = &Model::get_Mhh_pole_slha;
             tmp_map["h0_1"] = &Model::get_Mhh_pole_slha; //added to match SM Higgs container naming
-
             tmp_map["A0"] = &Model::get_MAh_pole_slha;
-
 
             map_collection[Par::Pole_Mass].map0 = tmp_map;
          }
