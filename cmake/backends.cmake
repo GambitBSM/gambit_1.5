@@ -498,7 +498,6 @@ ExternalProject_Add(${name}_${ver}
   INSTALL_COMMAND ""
 )
 add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-set_as_default_version("backend" ${name} ${ver})
 
 # FeynHiggs
 set(name "feynhiggs")
@@ -528,6 +527,7 @@ ExternalProject_Add(${name}_${ver}
   INSTALL_COMMAND ""
 )
 add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+set_as_default_version("backend" ${name} ${ver})
 
 # FeynHiggs
 set(name "feynhiggs")
