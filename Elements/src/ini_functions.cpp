@@ -176,7 +176,7 @@ namespace Gambit
   }
      
   /// Load a backend library
-  int loadLibrary(str be, str ver, str sv, void*& pHandle, bool with_BOSS)
+  int loadLibrary(str be, str ver, str sv, str lang, void*& pHandle, bool with_BOSS)
   {
     try
     {
@@ -184,6 +184,18 @@ namespace Gambit
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = with_BOSS;
       if (with_BOSS) Backends::backendInfo().classes_OK[be+ver] = true;
+      if(lang == "MATHEMATICA")
+      {
+        #ifdef Mathematica_FOUND
+          cout << "Using Mathematica " << endl;
+          return 0;
+        #else
+          std::ostringstream err;
+          err << "Backend requires Mathematica, but Mathematica is not found in the system. Please install/buy Mathematica before using this backend." << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+          Backends::backendInfo().works[be+ver] = false;
+        #endif
+      }
       pHandle = dlopen(path.c_str(), RTLD_LAZY);
       if (pHandle)
       {

@@ -66,3 +66,6 @@ nulike:
 SUSY_HIT:
   1.5:         ./Backends/installed/susyhit/1.5/libsusyhit.so
 
+libMathematicaTest:
+  1.0:         ./Backends/examples/libMathematicaTest.m
+

@@ -29,6 +29,10 @@
 ///  \date 2014 Jan, Mar
 ///  \date 2015 Jan, Feb
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sep
+///
 ///  *********************************************
 
 #ifndef __BACKEND_MACROS_HPP__
@@ -129,7 +133,8 @@ namespace Gambit                                                            \
       void_voidFptr pSym;                                                   \
       std::vector<str> allowed_models;                                      \
       int load = loadLibrary(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),    \
-                             STRINGIFY(SAFE_VERSION), pHandle,              \
+                             STRINGIFY(SAFE_VERSION),                       \
+                             STRINGIFY(BACKENDLANG), pHandle,               \
                              BOOST_PP_IF(DO_CLASSLOADING,true,false));      \
                                                                             \
       /* Register this backend with the Core if not running in standalone */\

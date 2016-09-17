@@ -13,6 +13,10 @@
 ///          (ben.farmer@gmail.com)
 ///    \date 2015 Aug
 ///  
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sept
+/// 
 ///  *********************************************
 
 #include <string>
@@ -49,6 +53,18 @@ namespace Gambit
        return;
     }
 
+    // Test function for Matematica
+    void Math_test(bool &result)
+    {
+      namespace myPipe = Pipes::Math_test;
+
+      int input = 6;
+
+      int output= myPipe::BEreq::MathematicaTest(input);
+      cout << "Testing Mathematica" << endl;
+      cout << "Result : " << output << endl;
+    }
+  
     /// Verify consistency of the contents of a Spectrum object of capability MSSMspectrum. 
     /// (derived from old 'exampleRead' function)
     void MSSMspectrum_test (bool &result)

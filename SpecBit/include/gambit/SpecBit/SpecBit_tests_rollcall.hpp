@@ -11,6 +11,10 @@
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
 ///  \date 2015 Aug
+///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sept
 ///  
 ///  *********************************************
 
@@ -19,6 +23,16 @@
 
    /// @{ Functions to test Spectrum objects
    
+   #define CAPABILITY Mathematica_test
+   START_CAPABILITY
+
+     #define FUNCTION Math_test
+     START_FUNCTION(bool)
+     BACKEND_REQ(MathematicaTest, (), int, (const int &))
+     #undef FUNCTION
+
+   #undef CAPABILITY
+
    #define CAPABILITY run_MSSMspectrum_test
    START_CAPABILITY                          
    
