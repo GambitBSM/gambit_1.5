@@ -26,10 +26,6 @@
 #  \date 2014 Nov, Dec
 #  \date 2015 May
 #
-#  \author Tomas GOnzalo
-#          (t.e.gonzalo@fys.uio.no)
-#  \date 2016 Sep
-#
 #************************************************
 
 
@@ -125,13 +121,4 @@ if(NOT needs_BOSSing STREQUAL "")
 endif()
 if(NOT needs_BOSSing_failed STREQUAL "")
   message("${Yellow}-- Failed to generate BOSS step for the following cmake targets: ${needs_BOSSing_failed} ${ColourReset}")
-endif()
-
-# Look for a Mathematica installation in the system
-include(cmake/FindMathematica.cmake)
-#find_package(Mathematica 8.0 EXACT)
-if(Mathematica_FOUND)
-  message("${BoldYellow}   Found Mathematica")
-else()
-  message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled")
 endif()

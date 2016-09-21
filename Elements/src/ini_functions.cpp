@@ -23,6 +23,10 @@
 ///          (c.weniger@uva.nl)
 ///  \date 2016 Feb
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sep
+///
 ///  *********************************************
 
 #include <dlfcn.h>
@@ -37,6 +41,10 @@
 #ifdef HAVE_LINK_H
   #include <link.h>
 #endif
+
+#ifdef HAVE_MATHEMATICA
+  //#include MATHEMATICA_WSTP_H
+#endif 
 
 namespace Gambit
 {
@@ -175,6 +183,55 @@ namespace Gambit
     return 0;
   }
      
+  /// load the Wolfram Symbolic Transfer Protocol, to allow the use of Mathematica backends
+  int loadWSTP(str be, str ver)
+  {
+    try
+    {
+      #ifdef HAVE_MATHEMATICA
+       /*
+        WSENV env;
+        WSLINK link;
+        int errno;
+
+        // This initializes WSTP library functions.
+        env = WSInitialize(0);
+        if(env == (WSENV)0)
+        { 
+          std::ostringstream err;
+          err << "Unable to initialize WSTP environemnt." << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+        }
+    
+        // This opens a WSTP connection, using the same arguments as were passed to the main program.  
+        link = WSOpenString(env, "/usr/local/bin/math -mathlink", &errno);
+        // link = WSOpenArgcArgv(env, argc, argv, &errno);
+        if(link == (WSLINK)0 || errno != WSEOK)
+        { 
+          std::ostringstream err;
+          err << "Unable to create link to the Kernel." << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+        }
+
+        //This activates the connection, waiting for the other program to respond.
+        WSActivate(link);
+         */
+        logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
+                 << LogTags::backends << LogTags::info << EOM;
+        Backends::backendInfo().works[be+ver] = true;
+      #else
+        std::ostringstream err;
+        err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. Please install/buy Mathematica and/or WSTP before using this backend." << endl;
+        backend_warning().raise(LOCAL_INFO,err.str());
+        Backends::backendInfo().works[be+ver] = false;
+      #endif
+
+    }
+    catch(std::exception& e) { ini_catch(e); }
+    return 0;
+  }
+ 
+
   /// Load a backend library
   int loadLibrary(str be, str ver, str sv, str lang, void*& pHandle, bool with_BOSS)
   {
@@ -184,18 +241,13 @@ namespace Gambit
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = with_BOSS;
       if (with_BOSS) Backends::backendInfo().classes_OK[be+ver] = true;
+      // If the language of the backends is Mathematica, use WST to load functions rather than dlopen
       if(lang == "MATHEMATICA")
       {
-        #ifdef Mathematica_FOUND
-          cout << "Using Mathematica " << endl;
-          return 0;
-        #else
-          std::ostringstream err;
-          err << "Backend requires Mathematica, but Mathematica is not found in the system. Please install/buy Mathematica before using this backend." << endl;
-          backend_warning().raise(LOCAL_INFO,err.str());
-          Backends::backendInfo().works[be+ver] = false;
-        #endif
+        loadWSTP(be,ver);
+        return 0;
       }
+            
       pHandle = dlopen(path.c_str(), RTLD_LAZY);
       if (pHandle)
       {
