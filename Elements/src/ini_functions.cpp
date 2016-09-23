@@ -189,40 +189,62 @@ namespace Gambit
     try
     {
       #ifdef HAVE_MATHEMATICA
-       
+
         cout << "Using Mathematica" << endl;
 
         int WSerrno;
+        std::ostringstream err;
 
         // This initializes WSTP library functions.
         WSENV WSenv = WSInitialize(0);
-        if(WSenv == (WSENV)0)
-        { 
-          std::ostringstream err;
-          err << "Unable to initialize WSTP environemnt." << endl;
-          backend_warning().raise(LOCAL_INFO,err.str());
+        if(WSenv == (WSENV)0) err << "Unable to initialize WSTP environment" << endl;
+        else
+        {
+          // This opens a WSTP connection 
+          WSLINK WSlink = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
+          if(WSlink == (WSLINK)0 || WSerrno != WSEOK) err << "Unable to create link to the Kernel" << endl;
+          else
+          {
+
+            WSPutFunction(WSlink, "EvaluatePacket",1);
+            WSPutFunction(WSlink, "Solve", 2);
+            WSPutFunction(WSlink, "ToExpression", 1);
+	    WSPutString(WSlink, (const char *)"x^2 - 2x + 1==0");
+            WSPutSymbol(WSlink,"x");
+            WSEndPacket(WSlink);
+
+            int pkt;
+            while((pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT) 
+            {
+                WSNewPacket(WSlink);
+                if(WSError(WSlink)) err << "Error detected by WSTP" << endl;
+            }
+
+            const char *s;
+            WSGetString(WSlink, &s);
+            cout << s << endl;
+
+            WSPutFunction(WSlink, "Exit", 0);
+            cout << "exit" << endl;
+
+
+            logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
+                     << LogTags::backends << LogTags::info << EOM;
+            Backends::backendInfo().works[be+ver] = true;
+
+            WSClose(WSlink);
+          }
+
+          WSDeinitialize(WSenv);
         }
-    
-        // This opens a WSTP connection, using the same arguments as were passed to the main program 
-        WSLINK WSlink = WSOpenString(WSenv, "-linkcreate", &WSerrno);
-        if(WSlink == (WSLINK)0 || WSerrno != WSEOK)
-        { 
-          std::ostringstream err;
-          err << "Unable to create link to the Kernel." << endl;
-          cout << err.str() << endl;
+
+        if(!err.str().empty())
+        {
+          cout << "Some error" << endl;
           backend_warning().raise(LOCAL_INFO,err.str());
+          Backends::backendInfo().works[be+ver] = false;
         }
 
-        //This activates the connection, waiting for the other program to respond.
-        //WSActivate(WSlink);
-
-        WSClose(WSlink);
-
-        WSDeinitialize(WSenv);
-
-        logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
-                 << LogTags::backends << LogTags::info << EOM;
-        Backends::backendInfo().works[be+ver] = true;
       #else
         std::ostringstream err;
         err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. Please install/buy Mathematica and/or WSTP before using this backend." << endl;
