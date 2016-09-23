@@ -43,7 +43,7 @@
 #endif
 
 #ifdef HAVE_MATHEMATICA
-  //#include MATHEMATICA_WSTP_H
+  #include MATHEMATICA_WSTP_H
 #endif 
 
 namespace Gambit
@@ -189,33 +189,37 @@ namespace Gambit
     try
     {
       #ifdef HAVE_MATHEMATICA
-       /*
-        WSENV env;
-        WSLINK link;
-        int errno;
+       
+        cout << "Using Mathematica" << endl;
+
+        int WSerrno;
 
         // This initializes WSTP library functions.
-        env = WSInitialize(0);
-        if(env == (WSENV)0)
+        WSENV WSenv = WSInitialize(0);
+        if(WSenv == (WSENV)0)
         { 
           std::ostringstream err;
           err << "Unable to initialize WSTP environemnt." << endl;
           backend_warning().raise(LOCAL_INFO,err.str());
         }
     
-        // This opens a WSTP connection, using the same arguments as were passed to the main program.  
-        link = WSOpenString(env, "/usr/local/bin/math -mathlink", &errno);
-        // link = WSOpenArgcArgv(env, argc, argv, &errno);
-        if(link == (WSLINK)0 || errno != WSEOK)
+        // This opens a WSTP connection, using the same arguments as were passed to the main program 
+        WSLINK WSlink = WSOpenString(WSenv, "-linkcreate", &WSerrno);
+        if(WSlink == (WSLINK)0 || WSerrno != WSEOK)
         { 
           std::ostringstream err;
           err << "Unable to create link to the Kernel." << endl;
+          cout << err.str() << endl;
           backend_warning().raise(LOCAL_INFO,err.str());
         }
 
         //This activates the connection, waiting for the other program to respond.
-        WSActivate(link);
-         */
+        //WSActivate(WSlink);
+
+        WSClose(WSlink);
+
+        WSDeinitialize(WSenv);
+
         logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                  << LogTags::backends << LogTags::info << EOM;
         Backends::backendInfo().works[be+ver] = true;

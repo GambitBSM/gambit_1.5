@@ -42,7 +42,7 @@
 
 /// Found Mathematica
 #cmakedefine HAVE_MATHEMATICA 1
-#cmakedefine MATHEMATICA_WSTP_H " "
+#cmakedefine MATHEMATICA_WSTP_H "@Mathematica_WSTP_INCLUDE_DIR@/wstp.h"
 
 /// Version info
 /// @{

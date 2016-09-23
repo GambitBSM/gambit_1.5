@@ -22,6 +22,10 @@
 #          (p.scott@imperial.ac.uk)
 #  \date 2014 Nov, Dec
 #
+#  \author Tomas Gonzao
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Sep
+#
 #************************************************
 
 # Require a minimum cmake version of 2.8.5
@@ -190,6 +194,23 @@ if(GSL_FOUND)
   endif()
 else()
   message(FATAL_ERROR "GAMBIT requires the GSL libraries.")
+endif()
+
+# Check for Mathematica
+include(cmake/FindMathematica.cmake)
+if(Mathematica_FOUND)
+  message("${BoldYellow}   Found Mathematica")
+  if(Mathematica_WSTP_FOUND)
+    message("${BoldYellow}   Found Wolfram Symbolic Transfer Protocol. Mathematica backends enabled")
+    set(HAVE_MATHEMATICA 1)
+    set(MATHEMATICA_WSTP_H "${Mathematica_WSTP_INCLUDE_DIR}/wstp.h")
+  else()
+    message("${BoldRed}  WSTP not found. Please make sure it is installed before attempting to use Mathematica backends")
+    set(HAVE_MATHEMATICA 0)
+  endif()
+else()
+  message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled")
+  set(HAVE_MATHEMATICA 0)
 endif()
 
 # Check for DL libraries
