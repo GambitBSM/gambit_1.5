@@ -36,6 +36,10 @@
 #  		   (ankit.beniwal@adelaide.edu.au)
 #  \date 2016 Aug
 #
+#  \author James McKay
+#          (j.mckay14@imperial.ac.uk)
+#  \date 2016 Aug
+#
 #************************************************
 
 
@@ -53,7 +57,7 @@ ExternalProject_Add(${name}_${ver}
   PATCH_COMMAND patch -p1 < ${patch}/patchDS_sharedlib_+_threadsafety.dif
         COMMAND patch -p1 -d src < ${patch}/patchDS.dif
         COMMAND patch -p1 -d contrib/isajet781-for-darksusy < ${patch}/patchISA.dif
-        # FIXME parallel relic density routines don't work yet.  
+        # FIXME parallel relic density routines don't work yet.
         #COMMAND patch -b -p2 -d src < ${patch}/patchDS_OMP_src.dif
         #COMMAND patch -b -p2 -d include < ${patch}/patchDS_OMP_include.dif
  # FIXME DarkSUSY segfaults with -O2 setting
@@ -669,6 +673,7 @@ ExternalProject_Add(${name}_${ver}
 )
 add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 set_as_default_version("backend" ${name} ${ver})
+
 
 
 # gm2calc

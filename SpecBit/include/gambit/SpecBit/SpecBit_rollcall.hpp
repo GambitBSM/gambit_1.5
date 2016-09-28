@@ -4,7 +4,7 @@
 ///
 ///  Rollcall header for module SpecBit
 ///
-///  These functions link ModelParameters to 
+///  These functions link ModelParameters to
 ///  Spectrum objects in various ways.
 ///
 ///  *********************************************
@@ -30,6 +30,11 @@ START_MODULE
   // Capabilities used in more than one of the headers
   // below need to be declared up-front (and then not
   // declared in the header)
+
+  // Generalised Higgs couplings
+  #define CAPABILITY Higgs_Couplings
+  START_CAPABILITY
+  #undef CAPABILITY
 
   /// Module function declarations for SpecBit_SM.cpp
   #include "gambit/SpecBit/SpecBit_SM_rollcall.hpp"
@@ -76,7 +81,7 @@ START_MODULE
   // START_CAPABILITY
 
   //   #define FUNCTION get_LSP_mass                      // Retrieves the LSP mass from a Spectrum object
-  //   START_FUNCTION(double)                  
+  //   START_FUNCTION(double)
   //   DEPENDENCY(particle_spectrum, SpectrumPtr)            // Takes a Spectrum object and returns an SLHAstruct
   //   ALLOW_MODELS(MSSM24, CMSSM)
   //   #undef FUNCTION
