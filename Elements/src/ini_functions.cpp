@@ -183,81 +183,6 @@ namespace Gambit
     return 0;
   }
      
-  /// load the Wolfram Symbolic Transfer Protocol, to allow the use of Mathematica backends
-  int loadWSTP(str be, str ver)
-  {
-    try
-    {
-      #ifdef HAVE_MATHEMATICA
-
-        cout << "Using Mathematica" << endl;
-
-        int WSerrno;
-        std::ostringstream err;
-
-        // This initializes WSTP library functions.
-        WSENV WSenv = WSInitialize(0);
-        if(WSenv == (WSENV)0) err << "Unable to initialize WSTP environment" << endl;
-        else
-        {
-          // This opens a WSTP connection 
-          WSLINK WSlink = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
-          if(WSlink == (WSLINK)0 || WSerrno != WSEOK) err << "Unable to create link to the Kernel" << endl;
-          else
-          {
-
-            WSPutFunction(WSlink, "EvaluatePacket",1);
-            WSPutFunction(WSlink, "Solve", 2);
-            WSPutFunction(WSlink, "ToExpression", 1);
-	    WSPutString(WSlink, (const char *)"x^2 - 2x + 1==0");
-            WSPutSymbol(WSlink,"x");
-            WSEndPacket(WSlink);
-
-            int pkt;
-            while((pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT) 
-            {
-                WSNewPacket(WSlink);
-                if(WSError(WSlink)) err << "Error detected by WSTP" << endl;
-            }
-
-            const char *s;
-            WSGetString(WSlink, &s);
-            cout << s << endl;
-
-            WSPutFunction(WSlink, "Exit", 0);
-            cout << "exit" << endl;
-
-
-            logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
-                     << LogTags::backends << LogTags::info << EOM;
-            Backends::backendInfo().works[be+ver] = true;
-
-            WSClose(WSlink);
-          }
-
-          WSDeinitialize(WSenv);
-        }
-
-        if(!err.str().empty())
-        {
-          cout << "Some error" << endl;
-          backend_warning().raise(LOCAL_INFO,err.str());
-          Backends::backendInfo().works[be+ver] = false;
-        }
-
-      #else
-        std::ostringstream err;
-        err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. Please install/buy Mathematica and/or WSTP before using this backend." << endl;
-        backend_warning().raise(LOCAL_INFO,err.str());
-        Backends::backendInfo().works[be+ver] = false;
-      #endif
-
-    }
-    catch(std::exception& e) { ini_catch(e); }
-    return 0;
-  }
- 
-
   /// Load a backend library
   int loadLibrary(str be, str ver, str sv, str lang, void*& pHandle, bool with_BOSS)
   {
@@ -267,48 +192,135 @@ namespace Gambit
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = with_BOSS;
       if (with_BOSS) Backends::backendInfo().classes_OK[be+ver] = true;
-      // If the language of the backends is Mathematica, use WST to load functions rather than dlopen
+      // If the language of the backends is Mathematica, use WSTP to load functions rather than dlopen
       if(lang == "MATHEMATICA")
       {
-        loadWSTP(be,ver);
-        return 0;
-      }
-            
-      pHandle = dlopen(path.c_str(), RTLD_LAZY);
-      if (pHandle)
-      {
-        // If dlinfo is available, use it to verify the path of the backend that was just loaded.
-        #ifdef HAVE_LINK_H
-          link_map *map;
-          dlinfo(pHandle, RTLD_DI_LINKMAP, &map);
-          if (not map)
+         #ifdef HAVE_MATHEMATICA
+
+          int WSerrno;
+          std::ostringstream err;
+
+          // This initializes WSTP library functions.
+          WSENV WSenv = WSInitialize(0);
+          if(WSenv == (WSENV)0)
           {
-            std::ostringstream err;
-            err << "Problem retrieving library path.  The sought lib is " << path << "." << endl
-                << "The path to this library has not been fully verified.";
+            err << "Unable to initialize WSTP environment" << endl;
             backend_warning().raise(LOCAL_INFO,err.str());
+            Backends::backendInfo().works[be+ver] = false;
           }
           else
           {
-            attempt_backend_path_override(be, ver, map->l_name);
+            // This opens a WSTP connection 
+            WSLINK WSlink = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
+            if(WSlink == (WSLINK)0 || WSerrno != WSEOK)
+            {
+              err << "Unable to create link to the Kernel" << endl;
+              backend_warning().raise(LOCAL_INFO,err.str());
+              Backends::backendInfo().works[be+ver] = false;
+            }
+            else
+            {
+              // Tell WSTP to load up the Mathematica package of the backend
+              if(!WSPutFunction(WSlink, "Once", 1)
+                 or !WSPutFunction(WSlink, "Get", 1)
+                 or !WSPutString(WSlink, path.c_str())
+                 or !WSEndPacket(WSlink))
+              {
+                err << "Error sending packet through WSTP" << endl;
+                backend_warning().raise(LOCAL_INFO,err.str());
+                Backends::backendInfo().works[be+ver] = false;
+              }
+               
+              // Jump to the end of this packet
+              // TODO: Check that the package has been loaded properly
+              int pkt;
+              while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT)   
+                WSNewPacket(WSlink);
+              WSNewPacket(WSlink);
+
+              // Test
+              if(!WSPutFunction(WSlink, "N",1)
+                 or !WSPutFunction(WSlink, "CalculateSquare", 1)
+                 or !WSPutInteger(WSlink, 5)
+                 or !WSEndPacket(WSlink))
+                cout << "Error sending packet" << endl;
+
+              while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT) 
+              {
+                WSNewPacket(WSlink);
+                if (WSError(WSlink)) cout << "Error reading package" << endl;
+              }
+ 
+              double square;
+              if (WSGetReal(WSlink, &square))
+              {
+                cout << "Calculate square of " << 5 << " is " << square << endl; 
+              }
+              else
+              {
+                cout << "Error" << endl;;
+              }
+
+ 
+              logger() << "Connection established with Mathematica through WSTP" << EOM;
+              logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
+                       << LogTags::backends << LogTags::info << EOM;
+              Backends::backendInfo().works[be+ver] = true;
+           //   pHandle = &WSlink;
+
+              WSPutFunction(WSlink, "Exit", 0); 
+              WSClose(WSlink);
+            }
+
+            WSDeinitialize(WSenv);
           }
+
         #else
-          Backends::backendInfo().override_path(be, ver, ".so loaded but path unverified (system lacks dlinfo)");
+          std::ostringstream err;
+          err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. Please install/buy Mathematica and/or WSTP before using this backend." << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+          Backends::backendInfo().works[be+ver] = false;
         #endif
-        logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver) 
-                 << LogTags::backends << LogTags::info << EOM;
-        Backends::backendInfo().works[be+ver] = true;
+
       }
       else
-      {       
-        std::ostringstream err;
-        str error = dlerror();
-        Backends::backendInfo().dlerrors[be+ver] = error;
-        err << "Failed loading library from " << path << " due to: " << endl
-            << error << endl
-            << "All functions in this backend library will be disabled (i.e. given status = -1).";
-        backend_warning().raise(LOCAL_INFO,err.str());
-        Backends::backendInfo().works[be+ver] = false;
+      {            
+        pHandle = dlopen(path.c_str(), RTLD_LAZY);
+        if (pHandle)
+        {
+          // If dlinfo is available, use it to verify the path of the backend that was just loaded.
+          #ifdef HAVE_LINK_H
+            link_map *map;
+            dlinfo(pHandle, RTLD_DI_LINKMAP, &map);
+            if (not map)
+            {
+              std::ostringstream err;
+              err << "Problem retrieving library path.  The sought lib is " << path << "." << endl
+                  << "The path to this library has not been fully verified.";
+              backend_warning().raise(LOCAL_INFO,err.str());
+            }
+            else
+            {
+              attempt_backend_path_override(be, ver, map->l_name);
+            }
+          #else
+            Backends::backendInfo().override_path(be, ver, ".so loaded but path unverified (system lacks dlinfo)");
+          #endif
+          logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver) 
+                   << LogTags::backends << LogTags::info << EOM;
+          Backends::backendInfo().works[be+ver] = true;
+        }
+        else
+        {       
+          std::ostringstream err;
+          str error = dlerror();
+          Backends::backendInfo().dlerrors[be+ver] = error;
+          err << "Failed loading library from " << path << " due to: " << endl
+              << error << endl
+              << "All functions in this backend library will be disabled (i.e. given status = -1).";
+          backend_warning().raise(LOCAL_INFO,err.str());
+          Backends::backendInfo().works[be+ver] = false;
+        }
       }
     }                                                                    
     catch (std::exception& e) { ini_catch(e); }
