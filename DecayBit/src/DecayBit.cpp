@@ -2515,9 +2515,9 @@ namespace Gambit
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
     // Higgs invisible width log-likelihood for the VectorDM model (based on arXiv: 1512.06458)
-    void lnL_Higgs_invWidth_SMonly_VDM(double& result)
+    void lnL_Higgs_invWidth_SMlike_VDM(double& result)
     {
-      using namespace Pipes::lnL_Higgs_invWidth_SMonly_VDM;
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike_VDM;
       double BF = Dep::Higgs_decay_rates->BF("V","V");
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
@@ -2525,9 +2525,9 @@ namespace Gambit
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
     // Higgs invisible width log-likelihood for the MajoranaDM model (based on arXiv: 1512.06458)
-    void lnL_Higgs_invWidth_SMonly_MDM(double& result)
+    void lnL_Higgs_invWidth_SMlike_MDM(double& result)
     {
-      using namespace Pipes::lnL_Higgs_invWidth_SMonly_MDM;
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike_MDM;
       double BF = Dep::Higgs_decay_rates->BF("X","X");
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
@@ -2535,9 +2535,9 @@ namespace Gambit
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
     // Higgs invisible width log-likelihood for the DiracDM model (based on arXiv: 1512.06458)
-    void lnL_Higgs_invWidth_SMonly_DDM(double& result)
+    void lnL_Higgs_invWidth_SMlike_DDM(double& result)
     {
-      using namespace Pipes::lnL_Higgs_invWidth_SMonly_DDM;
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike_DDM;
       double BF = Dep::Higgs_decay_rates->BF("F","F");
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
