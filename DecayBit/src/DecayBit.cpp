@@ -2200,6 +2200,9 @@ namespace Gambit
       double gamma = (2.0*mass <= mhpole) ? (pow(lambda*v0,2)*pow(mhpole,3))/(128.0*pi*pow(mass,4)) * midfactor * sqrt(1.0 - 4.0*massratio2) : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
+      logger() << "mV = " << mass << " GeV, lambda = " << lambda << ", v0 = " << v0 << " GeV, mhpole = " << mhpole << std::endl;
+      logger() << "Gamma (h -> VV) = " << gamma << " GeV" << std::endl;
+
       // Rescale the SM decay branching fractions.
       double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
       for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
@@ -2240,6 +2243,9 @@ namespace Gambit
       double gamma = (2.0*mass <= mhpole) ? (mhpole*pow(lambda*v0,2))/(16.0*pi) * sqrt(1.0 - 4.0*massratio2) * lastfactor : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
+      logger() << "mX = " << mass << " GeV, lambda = " << lambda << ", cosXI = " << cosXI << ", v0 = " << v0 << " GeV, mhpole = " << mhpole << std::endl;
+      logger() << "Gamma (h -> XX) = " << gamma << " GeV" << std::endl;
+
       // Rescale the SM decay branching fractions.
       double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
       for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
@@ -2279,6 +2285,9 @@ namespace Gambit
       double lastfactor = (1 - 4*massratio2*pow(cosXI,2));
       double gamma = (2.0*mass <= mhpole) ? (mhpole*pow(lambda*v0,2))/(8.0*pi) * sqrt(1.0 - 4.0*massratio2) * lastfactor : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
+
+      logger() << "mF = " << mass << " GeV, lambda = " << lambda << ", cosXI = " << cosXI << ", v0 = " << v0 << " GeV, mhpole = " << mhpole << std::endl;
+      logger() << "Gamma (h -> FF) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
       double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
@@ -2514,32 +2523,32 @@ namespace Gambit
     }
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    // Higgs invisible width log-likelihood for the VectorDM model (based on arXiv: 1512.06458)
+    // VectorDM Higgs invisible width expression is based on arXiv: 1512.06458
     void lnL_Higgs_invWidth_SMlike_VDM(double& result)
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_VDM;
       double BF = Dep::Higgs_decay_rates->BF("V","V");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    // Higgs invisible width log-likelihood for the MajoranaDM model (based on arXiv: 1512.06458)
+    // MajoranaDM Higgs invisible width expression is based on arXiv: 1512.06458
     void lnL_Higgs_invWidth_SMlike_MDM(double& result)
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_MDM;
       double BF = Dep::Higgs_decay_rates->BF("X","X");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    // Higgs invisible width log-likelihood for the DiracDM model (based on arXiv: 1512.06458)
+    // DiracDM Higgs invisible width expression is based on arXiv: 1512.06458
     void lnL_Higgs_invWidth_SMlike_DDM(double& result)
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_DDM;
       double BF = Dep::Higgs_decay_rates->BF("F","F");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
