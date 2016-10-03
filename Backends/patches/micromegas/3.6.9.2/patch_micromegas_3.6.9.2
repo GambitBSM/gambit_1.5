@@ -44,3 +44,23 @@ diff -rupN ./sources/spectra.c ../../installed/micromegas/3.6.9.2/sources/spectr
  {  
  //  float mi[NEn]={10,25,50,80.3,91.2,100,150,176,200,250,350,500,750,1000,1500,2000,3000,5000};
     double mi[NEn]={2,5,10,25,50,80.3,85,91.2,92,95,100,110,120,125,130,140,150,176,200,250,350,500,750,1000,1500,2000,3000,5000};
+@@ -1009,8 +1009,8 @@ double calcSpectrum(int key, double *Sg,
+   if(PrintOn )
+   { int i=0;
+     char txt[100];
+-    printf("\n Annihilation cross section %.2E cm^3/s\n",vcs  );
+-    printf("   Channel           Contribution \n");     
++    //printf("\n Annihilation cross section %.2E cm^3/s\n",vcs  );
++    //printf("   Channel           Contribution \n");     
+     for(i=0;vSigmaCh[i].weight>1.E-4;i++)
+     {
+     sprintf(txt,"%s,%s -> %s %s ", vSigmaCh[i].prtcl[0],
+@@ -1018,7 +1018,7 @@ double calcSpectrum(int key, double *Sg,
+                                    vSigmaCh[i].prtcl[2],
+                                    vSigmaCh[i].prtcl[3]);
+     if(vSigmaCh[i].prtcl[4]) strcat(txt,vSigmaCh[i].prtcl[4]);                               
+-    printf("  %-20.20s  %.2E\n",txt,vSigmaCh[i].weight);
++    //printf("  %-20.20s  %.2E\n",txt,vSigmaCh[i].weight);
+     }
+   }     
+    

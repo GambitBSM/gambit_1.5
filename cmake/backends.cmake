@@ -33,7 +33,7 @@
 #  \date 2015 Sep
 # 
 #  \author Ankit Beniwal
-#  		   (ankit.beniwal@adelaide.edu.au)
+#  	   (ankit.beniwal@adelaide.edu.au)
 #  \date 2016 Aug
 #
 #  \author James McKay
