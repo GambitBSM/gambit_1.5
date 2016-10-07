@@ -211,8 +211,10 @@ namespace Gambit
           else
           {
             // This opens a WSTP connection 
-            WSLINK WSlink = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
-            if(WSlink == (WSLINK)0 || WSerrno != WSEOK)
+            //WLINK WSlink = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
+            pHandle = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
+            //if(WSlink == (WSLINK)0 || WSerrno != WSEOK)
+            if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
             {
               err << "Unable to create link to the Kernel" << endl;
               backend_warning().raise(LOCAL_INFO,err.str());
@@ -221,10 +223,14 @@ namespace Gambit
             else
             {
               // Tell WSTP to load up the Mathematica package of the backend
-              if(!WSPutFunction(WSlink, "Once", 1)
-                 or !WSPutFunction(WSlink, "Get", 1)
-                 or !WSPutString(WSlink, path.c_str())
-                 or !WSEndPacket(WSlink))
+              //if(!WSPutFunction(WSlink, "Once", 1)
+                // or !WSPutFunction(WSlink, "Get", 1)
+                // or !WSPutString(WSlink, path.c_str())
+                // or !WSEndPacket(WSlink))
+              if(!WSPutFunction((WSLINK)pHandle, "Once", 1)
+                 or !WSPutFunction((WSLINK)pHandle, "Get", 1)
+                 or !WSPutString((WSLINK)pHandle, path.c_str())
+                 or !WSEndPacket((WSLINK)pHandle))
               {
                 err << "Error sending packet through WSTP" << endl;
                 backend_warning().raise(LOCAL_INFO,err.str());
@@ -234,25 +240,41 @@ namespace Gambit
               // Jump to the end of this packet
               // TODO: Check that the package has been loaded properly
               int pkt;
-              while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT)   
-                WSNewPacket(WSlink);
-              WSNewPacket(WSlink);
+               while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
+                WSNewPacket((WSLINK)pHandle);
+              WSNewPacket((WSLINK)pHandle);
+
+              //while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT)   
+              //  WSNewPacket(WSlink);
+              //WSNewPacket(WSlink);
 
               // Test
-              if(!WSPutFunction(WSlink, "N",1)
-                 or !WSPutFunction(WSlink, "CalculateSquare", 1)
-                 or !WSPutInteger(WSlink, 5)
-                 or !WSEndPacket(WSlink))
+              if(!WSPutFunction((WSLINK)pHandle, "N",1)
+                 or !WSPutFunction((WSLINK)pHandle, "CalculateSquare", 1)
+                 or !WSPutInteger((WSLINK)pHandle, 5)
+                 or !WSEndPacket((WSLINK)pHandle))
                 cout << "Error sending packet" << endl;
 
-              while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT) 
+              while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT) 
               {
-                WSNewPacket(WSlink);
-                if (WSError(WSlink)) cout << "Error reading package" << endl;
+                WSNewPacket((WSLINK)pHandle);
+                if (WSError((WSLINK)pHandle)) cout << "Error reading package" << endl;
               }
+              //if(!WSPutFunction(WSlink, "N",1)
+                 //or !WSPutFunction(WSlink, "CalculateSquare", 1)
+                 //or !WSPutInteger(WSlink, 5)
+                 //or !WSEndPacket(WSlink))
+                //cout << "Error sending packet" << endl;
+
+              //while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT) 
+              //{
+                //WSNewPacket(WSlink);
+                //if (WSError(WSlink)) cout << "Error reading package" << endl;
+              //}
  
               double square;
-              if (WSGetReal(WSlink, &square))
+              if (WSGetReal((WSLINK)pHandle, &square))
+              //if (WSGetReal(WSlink, &square))
               {
                 cout << "Calculate square of " << 5 << " is " << square << endl; 
               }
@@ -261,19 +283,22 @@ namespace Gambit
                 cout << "Error" << endl;;
               }
 
- 
               logger() << "Connection established with Mathematica through WSTP" << EOM;
               logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                        << LogTags::backends << LogTags::info << EOM;
               Backends::backendInfo().works[be+ver] = true;
            //   pHandle = &WSlink;
 
-              WSPutFunction(WSlink, "Exit", 0); 
-              WSClose(WSlink);
+              //WSPutFunction((WSLINK)pHandle, "Exit", 0); 
+              //WSClose((WSLINK)pHandle);
+
+              //WSPutFunction(WSlink, "Exit", 0); 
+              //WSClose(WSlink);
             }
 
             WSDeinitialize(WSenv);
           }
+          
 
         #else
           std::ostringstream err;
