@@ -14,7 +14,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///    \date 2016 Aug
+///    \date 2016 Oct
 ///
 ///  *********************************************
 
@@ -35,16 +35,6 @@
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/DiracDMSpec.hpp"
-
-//#include "gambit/SpecBit/SMskeleton.hpp"
-
-// Flexible SUSY stuff (should not be needed by the rest of gambit)
-// #include "flexiblesusy/src/ew_input.hpp"
-// #include "flexiblesusy/src/lowe.h" // From softsusy; used by flexiblesusy
-// #include "flexiblesusy/src/numerics2.hpp"
-// #include "flexiblesusy/src/two_loop_corrections.hpp"
-// Switch for debug mode
-//#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -69,7 +59,6 @@ namespace Gambit
       double GF = sminputs.GF;
       double sinW2cosW2 = Pi * alpha_em / (pow(2,0.5) * mz2 * GF ) ;
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
-
       double sin2W = pow(2 * sinW2cosW2, 0.5);
       double tW = 0.5* asin( sin2W );
       double sinW2 = pow( sin (tW) , 2);
@@ -92,9 +81,9 @@ namespace Gambit
       if (diracmodel.DiracLambda >= (4*M_PI)/(2*diracmodel.DiracPoleMass))
       {
        std::ostringstream msg;
-       msg << "Model points mF = " << diracmodel.DiracPoleMass
-           << " GeV and lF = " << diracmodel.DiracLambda
-           << " GeV are invalid within the EFT approach!";
+       msg << "Model point [mF, lF] = [" << diracmodel.DiracPoleMass
+           << " GeV, " << diracmodel.DiracLambda
+           << " GeV] is invalid under the EFT validity constraint!";
        invalid_point().raise(msg.str());
       }
 
@@ -106,17 +95,14 @@ namespace Gambit
       diracmodel.g2 = e / cosW2;
       diracmodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
       
-      double sqrt2v = pow(2.0,0.5)/vev;
-
       // Yukawas
+      double sqrt2v = pow(2.0,0.5)/vev;     
       diracmodel.Yu[0] = sqrt2v * sminputs.mU;
       diracmodel.Yu[1] = sqrt2v * sminputs.mCmC;
-      diracmodel.Yu[2] = sqrt2v * sminputs.mT;
-      
+      diracmodel.Yu[2] = sqrt2v * sminputs.mT;      
       diracmodel.Ye[0] = sqrt2v * sminputs.mE;
       diracmodel.Ye[1] = sqrt2v * sminputs.mMu;
-      diracmodel.Ye[2] = sqrt2v * sminputs.mTau;
-      
+      diracmodel.Ye[2] = sqrt2v * sminputs.mTau;   
       diracmodel.Yd[0] = sqrt2v * sminputs.mD;
       diracmodel.Yd[1] = sqrt2v * sminputs.mS;
       diracmodel.Yd[2] = sqrt2v * sminputs.mBmB;
@@ -126,8 +112,7 @@ namespace Gambit
 
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
       result = Spectrum(diracspec,sminputs,&myPipe::Param);
-    }
-    
+    }    
     
     // print spectrum out, stripped down copy from MSSM version with variable names changed
     void fill_map_from_DiracDMspectrum(std::map<std::string,double>&, const Spectrum&);

@@ -52,7 +52,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 August
+///  \date 2016 October
 ///
 ///  *********************************************
 
@@ -394,7 +394,6 @@ START_MODULE
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_VectorDM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(VectorDM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))
@@ -403,7 +402,6 @@ START_MODULE
     #undef FUNCTION  
     #define FUNCTION TH_ProcessCatalog_MajoranaDM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(MajoranaDM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))
@@ -411,8 +409,7 @@ START_MODULE
       ALLOW_MODELS(MajoranaDM)
     #undef FUNCTION  
     #define FUNCTION TH_ProcessCatalog_DiracDM
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(decay_rates,DecayTable)
+      START_FUNCTION(DarkBit::TH_ProcessCatalog)      
       DEPENDENCY(DiracDM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))

@@ -23,7 +23,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Aug
+///  \date 2016 Oct
 ///
 ///  *********************************************
 
@@ -2539,7 +2539,7 @@ namespace Gambit
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_VDM;
       double BF = Dep::Higgs_decay_rates->BF("V","V");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
@@ -2549,7 +2549,7 @@ namespace Gambit
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_MDM;
       double BF = Dep::Higgs_decay_rates->BF("X","X");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
@@ -2559,7 +2559,7 @@ namespace Gambit
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_DDM;
       double BF = Dep::Higgs_decay_rates->BF("F","F");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2("DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 

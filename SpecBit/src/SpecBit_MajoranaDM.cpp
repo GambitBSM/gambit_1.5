@@ -14,7 +14,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///    \date 2016 Aug
+///    \date 2016 Oct
 ///
 ///  *********************************************
 
@@ -35,16 +35,6 @@
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/MajoranaDMSpec.hpp"
-
-//#include "gambit/SpecBit/SMskeleton.hpp"
-
-// Flexible SUSY stuff (should not be needed by the rest of gambit)
-// #include "flexiblesusy/src/ew_input.hpp"
-// #include "flexiblesusy/src/lowe.h" // From softsusy; used by flexiblesusy
-// #include "flexiblesusy/src/numerics2.hpp"
-// #include "flexiblesusy/src/two_loop_corrections.hpp"
-// Switch for debug mode
-//#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -69,7 +59,6 @@ namespace Gambit
       double GF = sminputs.GF;
       double sinW2cosW2 = Pi * alpha_em / (pow(2,0.5) * mz2 * GF ) ;
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
-
       double sin2W = pow(2 * sinW2cosW2, 0.5);
       double tW = 0.5* asin( sin2W );
       double sinW2 = pow( sin (tW) , 2);
@@ -92,9 +81,9 @@ namespace Gambit
       if (majoranamodel.MajoranaLambda >= (4*M_PI)/(2*majoranamodel.MajoranaPoleMass))
       {
        std::ostringstream msg;
-       msg << "Model points mX = " << majoranamodel.MajoranaPoleMass
-           << " GeV and lambdaX = " << majoranamodel.MajoranaLambda
-           << " GeV are invalid within the EFT approach!";
+       msg << "Model point [mX, lX] = [" << majoranamodel.MajoranaPoleMass
+           << " GeV, " << majoranamodel.MajoranaLambda
+           << " GeV] is invalid under the EFT validity constraint!";
        invalid_point().raise(msg.str());
       }
 
@@ -104,19 +93,16 @@ namespace Gambit
       // gauge couplings
       majoranamodel.g1 = e / sinW2;
       majoranamodel.g2 = e / cosW2;
-      majoranamodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
-      
-      double sqrt2v = pow(2.0,0.5)/vev;
+      majoranamodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;      
 
       // Yukawas
+      double sqrt2v = pow(2.0,0.5)/vev;      
       majoranamodel.Yu[0] = sqrt2v * sminputs.mU;
       majoranamodel.Yu[1] = sqrt2v * sminputs.mCmC;
-      majoranamodel.Yu[2] = sqrt2v * sminputs.mT;
-      
+      majoranamodel.Yu[2] = sqrt2v * sminputs.mT;      
       majoranamodel.Ye[0] = sqrt2v * sminputs.mE;
       majoranamodel.Ye[1] = sqrt2v * sminputs.mMu;
-      majoranamodel.Ye[2] = sqrt2v * sminputs.mTau;
-      
+      majoranamodel.Ye[2] = sqrt2v * sminputs.mTau;      
       majoranamodel.Yd[0] = sqrt2v * sminputs.mD;
       majoranamodel.Yd[1] = sqrt2v * sminputs.mS;
       majoranamodel.Yd[2] = sqrt2v * sminputs.mBmB;
@@ -127,8 +113,7 @@ namespace Gambit
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
       result = Spectrum(majoranaspec,sminputs,&myPipe::Param);
     }
-    
-    
+        
     // print spectrum out, stripped down copy from MSSM version with variable names changed
     void fill_map_from_MajoranaDMspectrum(std::map<std::string,double>&, const Spectrum&);
    

@@ -12,7 +12,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date Aug 2016
+///  \date Oct 2016
 ///
 ///  *********************************************
 
@@ -61,25 +61,6 @@ namespace Gambit
 
     } // function DD_couplings_MajoranaDM
 
-    std::map<std::string, daFunk::Funk> get_f_vs_mass_MDM(std::string filename)
-    {
-      // Higgs branching ratios and total width Gamma [GeV], as function of
-      // mass [GeV] (90 - 150 GeV)
-      ASCIItableReader table(filename);
-      std::vector<std::string> colnames =
-        initVector<std::string>("mass", "bb", "tautau", "mumu",
-            "ss", "cc", "tt", "gg", "gammagamma", "Zgamma",
-            "WW", "ZZ", "Gamma");
-      table.setcolnames(colnames);
-
-      std::map<std::string, daFunk::Funk> f_vs_mass_MDM;
-      for (auto it = colnames.begin(); it != colnames.end(); it++)
-      {
-        f_vs_mass_MDM[*it] = daFunk::interp("mass", table["mass"], table[*it]);
-      }
-      return f_vs_mass_MDM;
-    }
-
     /// Set up process catalog for the MajoranaDM model.
     /// Uses micrOmega's functions to compute sigma-v and branching ratios.
     void TH_ProcessCatalog_MajoranaDM(DarkBit::TH_ProcessCatalog &result)
@@ -93,10 +74,6 @@ namespace Gambit
       {
         invalid_point().raise("TH_ProcessCatalog_MajoranaDM requires DMid to be X.");
       }
-
-      // Initialize Higgs decay tables (static, hence only once)
-      static std::map<string, daFunk::Funk> f_vs_mass_MDM =
-        get_f_vs_mass_MDM("Elements/data/Higgs_decay_1101.0593.dat");
 
       // Initialize empty catalog 
       TH_ProcessCatalog catalog;
@@ -177,7 +154,7 @@ namespace Gambit
       // Import two-body annihilation processes from MicrOmegas v3.6.9.2
       ////////////////////////////////////////////////////////////////////
 
-      // Set of possible final state particles. Used to determine which decays to import.
+      // Set of possible final state particles
       std::set<string> annFinalStates;
 
       // Initialize main annihilation process
@@ -248,32 +225,7 @@ namespace Gambit
 
       // Get rid of convenience macro
       #undef SETUP_MO_PROCESS
-
-      /////////////////////////////
-      // Import Decay information
-      /////////////////////////////
-
-      // Import decay table from DecayBit
-      const DecayTable* tbl = &(*Dep::decay_rates);
-
-      // Save Higgs width for later
-      double gammaH = tbl->at("h0_1").width_in_GeV;
-
-      // Set of imported decays
-      std::set<string> importedDecays;
-
-      // Minimum branching ratio to include
-      double minBranching = 0;
-
-      // Import relevant decays (only Higgs and subsequent decays)
-      using DarkBit_utils::ImportDecays;
-      ImportDecays("h0_1", catalog, importedDecays, tbl, minBranching,
-          daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
-
-      // Populate resonance list
-      if ( mH >= mX*2 ) process_ann.resonances_thresholds.resonances.
-          push_back(TH_Resonance(mH, gammaH));
-
+    
       // Add process to previous list
       catalog.processList.push_back(process_ann);
 

@@ -14,7 +14,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///    \date 2016 Aug
+///    \date 2016 Oct
 ///
 ///  *********************************************
 
@@ -35,16 +35,6 @@
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/VectorDMSpec.hpp"
-
-//#include "gambit/SpecBit/SMskeleton.hpp"
-
-// Flexible SUSY stuff (should not be needed by the rest of gambit)
-// #include "flexiblesusy/src/ew_input.hpp"
-// #include "flexiblesusy/src/lowe.h" // From softsusy; used by flexiblesusy
-// #include "flexiblesusy/src/numerics2.hpp"
-// #include "flexiblesusy/src/two_loop_corrections.hpp"
-// Switch for debug mode
-//#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -69,7 +59,6 @@ namespace Gambit
       double GF = sminputs.GF;
       double sinW2cosW2 = Pi * alpha_em / (pow(2,0.5) * mz2 * GF ) ;
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
-
       double sin2W = pow(2 * sinW2cosW2, 0.5);
       double tW = 0.5* asin( sin2W );
       double sinW2 = pow( sin (tW) , 2);
@@ -95,29 +84,24 @@ namespace Gambit
       vectormodel.g2 = e / cosW2;
       vectormodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
       
-      double sqrt2v = pow(2.0,0.5)/vev;
-
       // Yukawas
+      double sqrt2v = pow(2.0,0.5)/vev;
       vectormodel.Yu[0] = sqrt2v * sminputs.mU;
       vectormodel.Yu[1] = sqrt2v * sminputs.mCmC;
       vectormodel.Yu[2] = sqrt2v * sminputs.mT;
-      
       vectormodel.Ye[0] = sqrt2v * sminputs.mE;
       vectormodel.Ye[1] = sqrt2v * sminputs.mMu;
-      vectormodel.Ye[2] = sqrt2v * sminputs.mTau;
-      
+      vectormodel.Ye[2] = sqrt2v * sminputs.mTau;      
       vectormodel.Yd[0] = sqrt2v * sminputs.mD;
       vectormodel.Yd[1] = sqrt2v * sminputs.mS;
-      vectormodel.Yd[2] = sqrt2v * sminputs.mBmB;
-      
+      vectormodel.Yd[2] = sqrt2v * sminputs.mBmB;      
       
       // Create a SubSpectrum object to wrap the EW sector information
       Models::VectorDMSimpleSpec vectorspec(vectormodel);
 
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
       result = Spectrum(vectorspec,sminputs,&myPipe::Param);
-    }
-    
+    }    
     
     // print spectrum out, stripped down copy from MSSM version with variable names changed
     void fill_map_from_VectorDMspectrum(std::map<std::string,double>&, const Spectrum&);
