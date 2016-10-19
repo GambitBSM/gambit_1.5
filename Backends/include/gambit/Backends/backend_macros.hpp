@@ -414,10 +414,14 @@ namespace Gambit                                                                
       /* Define a type NAME_type to be a suitable function pointer. */                          \
       typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
                                                                                                 \
-      /* Get the pointer to the function in the shared library. */                              \
-      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle,pSym,SYMBOLNAME, \
-       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                             \
+      /* Get the pointer to the function. */                                                    \
+      extern const NAME##_type NAME = function_from_backend<NAME##_type>(pHandle,pSym,          \
+       SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), STRINGIFY(BACKENDLANG));         \
                                                                                                 \
+      /* Get the pointer to the function in the shared library. */                              \
+      /*extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle,pSym,SYMBOLNAME, \
+       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                              \
+        */                                                                                        \
       /* Create functor object */                                                               \
       namespace Functown                                                                        \
       {                                                                                         \

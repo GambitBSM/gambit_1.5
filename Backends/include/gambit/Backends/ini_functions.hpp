@@ -16,6 +16,10 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Feb
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Oct
+///
 ///  *********************************************
 
 #ifndef __ini_functions_backends_hpp__
@@ -77,7 +81,42 @@ namespace Gambit
       catch (std::exception& e) { ini_catch(e); }
       return result;
     }
-    
+
+    /// Create a wrapper function that uses WSTP to call the Mathematica equivalent
+    template <typename T>
+    T create_Mathematica_function(void* pHandle, void_voidFptr pSym, str symbol_name)
+    {
+      T result;
+      try
+      {
+        pSym.ptr = new mathematica_function(pHandle, symbol_name);
+        //pSym.ptr->wrapper_function();
+        //result = reinterpret_cast<T>(pSym.fptr);
+      }
+      catch (std::exception& e) {ini_catch(e); }
+      return result;
+    }
+
+    /// Dispatch the source of backend function
+    template <typename T>
+    T function_from_backend(void* pHandle, void_voidFptr pSym, str symbol_name, str be, str ver, str lang)
+    {
+      T result;
+      try
+      {
+        if(lang == "MATHEMATICA")
+        {
+          result = create_Mathematica_function<T>(pHandle, pSym, symbol_name);
+        }
+        else
+        {
+          result = load_backend_symbol<T>(pHandle, pSym, symbol_name, be, ver);
+        }
+      }
+      catch (std::exception& e) {ini_catch(e); }
+      return result;
+    }
+
     /// Provide the factory pointer to a BOSSed type's wrapper constructor.
     template <typename T>
     T handover_factory_pointer(str be, str ver, str name, str barename, 

@@ -211,9 +211,7 @@ namespace Gambit
           else
           {
             // This opens a WSTP connection 
-            //WLINK WSlink = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
             pHandle = WSOpenString(WSenv, "-linkname math -mathlink", &WSerrno);
-            //if(WSlink == (WSLINK)0 || WSerrno != WSEOK)
             if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
             {
               err << "Unable to create link to the Kernel" << endl;
@@ -223,10 +221,6 @@ namespace Gambit
             else
             {
               // Tell WSTP to load up the Mathematica package of the backend
-              //if(!WSPutFunction(WSlink, "Once", 1)
-                // or !WSPutFunction(WSlink, "Get", 1)
-                // or !WSPutString(WSlink, path.c_str())
-                // or !WSEndPacket(WSlink))
               if(!WSPutFunction((WSLINK)pHandle, "Once", 1)
                  or !WSPutFunction((WSLINK)pHandle, "Get", 1)
                  or !WSPutString((WSLINK)pHandle, path.c_str())
@@ -244,10 +238,6 @@ namespace Gambit
                 WSNewPacket((WSLINK)pHandle);
               WSNewPacket((WSLINK)pHandle);
 
-              //while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT)   
-              //  WSNewPacket(WSlink);
-              //WSNewPacket(WSlink);
-
               // Test
               if(!WSPutFunction((WSLINK)pHandle, "N",1)
                  or !WSPutFunction((WSLINK)pHandle, "CalculateSquare", 1)
@@ -260,21 +250,9 @@ namespace Gambit
                 WSNewPacket((WSLINK)pHandle);
                 if (WSError((WSLINK)pHandle)) cout << "Error reading package" << endl;
               }
-              //if(!WSPutFunction(WSlink, "N",1)
-                 //or !WSPutFunction(WSlink, "CalculateSquare", 1)
-                 //or !WSPutInteger(WSlink, 5)
-                 //or !WSEndPacket(WSlink))
-                //cout << "Error sending packet" << endl;
-
-              //while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT) 
-              //{
-                //WSNewPacket(WSlink);
-                //if (WSError(WSlink)) cout << "Error reading package" << endl;
-              //}
  
               double square;
               if (WSGetReal((WSLINK)pHandle, &square))
-              //if (WSGetReal(WSlink, &square))
               {
                 cout << "Calculate square of " << 5 << " is " << square << endl; 
               }
@@ -287,13 +265,10 @@ namespace Gambit
               logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                        << LogTags::backends << LogTags::info << EOM;
               Backends::backendInfo().works[be+ver] = true;
-           //   pHandle = &WSlink;
 
-              //WSPutFunction((WSLINK)pHandle, "Exit", 0); 
-              //WSClose((WSLINK)pHandle);
+              WSPutFunction((WSLINK)pHandle, "Exit", 0); 
+              WSClose((WSLINK)pHandle);
 
-              //WSPutFunction(WSlink, "Exit", 0); 
-              //WSClose(WSlink);
             }
 
             WSDeinitialize(WSenv);
