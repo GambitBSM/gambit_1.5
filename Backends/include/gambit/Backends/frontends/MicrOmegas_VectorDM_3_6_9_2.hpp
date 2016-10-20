@@ -10,7 +10,7 @@
 ///  Authors (add name and date if you modify):
 ///
 /// \author Ankit Beniwal
-/// \date Aug 2016
+/// \date Oct 2016
 ///
 ///  *********************************************
 
@@ -67,6 +67,7 @@ namespace Gambit
 BE_CONV_FUNCTION(dNdE, double, (double,double,int,int), "dNdE")
 
 BE_INI_DEPENDENCY(SMINPUTS, SMInputs)
+BE_INI_DEPENDENCY(VectorDM_spectrum, Spectrum)
 
 BE_INI_FUNCTION
 {
@@ -85,8 +86,8 @@ BE_INI_FUNCTION
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set lambda_hV in"
              "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     
 
-     // Set SM + Higgs mass parameters in micrOmegas
-     const SMInputs& sminputs = *Dep::SMINPUTS;	
+     // Set SM particle masses in micrOmegas_3.6.9.2
+     const SMInputs& sminputs = *Dep::SMINPUTS; 
 
      // EE = sqrt(4*pi*(1/alphainv))
      error = assignVal((char*)"EE", sqrt(4*M_PI*1/(sminputs.alphainv)));
@@ -152,12 +153,20 @@ BE_INI_FUNCTION
      error = assignVal((char*)"MZ", sminputs.mZ);
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mZ in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-     	
-     // mh
+        
+     // Set Higgs boson mass in micrOmegas_3.6.9.2
      error = assignVal((char*)"MH", *Param["mH"]);
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mH in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-		
+     
+     // Set W boson mass in micrOmegas_3.6.9.2
+     const SubSpectrum& LE = Dep::VectorDM_spectrum->get_LE();
+     double mW = LE.get(Par::Pole_Mass, "W+");
+    
+     error = assignVal((char*)"MW", mW);
+     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mW in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
      error = sortOddParticles(byVal(cdmName));
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "MicrOmegas function "
              "sortOddParticles returned error code: " + std::to_string(error));
