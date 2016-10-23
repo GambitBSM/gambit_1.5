@@ -55,20 +55,16 @@ namespace Gambit
       
       // quantities needed to fill container spectrum, intermediate calculations
       double alpha_em = 1.0 / sminputs.alphainv;
-      double mz2 = pow(sminputs.mZ,2);
-      double GF = sminputs.GF;
-      double sinW2cosW2 = Pi * alpha_em / (pow(2,0.5) * mz2 * GF ) ;
+      double C = alpha_em * Pi / (sminputs.GF * pow(2,0.5));
+      double sinW2 = 0.5 - pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
+      double cosW2 = 0.5 + pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
-      double sin2W = pow(2 * sinW2cosW2, 0.5);
-      double tW = 0.5* asin( sin2W );
-      double sinW2 = pow( sin (tW) , 2);
-      double cosW2 = pow( cos (tW) , 2);
       
       // Higgs sector
       double mh   = *myPipe::Param.at("mH");
       diracmodel.HiggsPoleMass   = mh;
       
-      double vev        = 1. / sqrt(sqrt(2.)*GF);
+      double vev        = 1. / sqrt(sqrt(2.)*sminputs.GF);
       diracmodel.HiggsVEV        = vev;
       // diracmodel.LambdaH   = GF*pow(mh,2)/pow(2,0.5) ;
       
@@ -78,7 +74,7 @@ namespace Gambit
       diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");    
       
       // Check if lF >= 4pi/2mF (i.e., where EFT approach breaks down)
-      if (diracmodel.DiracLambda >= (4*M_PI)/(2*diracmodel.DiracPoleMass))
+      if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
       {
        std::ostringstream msg;
        msg << "Model point [mF, lF] = [" << diracmodel.DiracPoleMass
