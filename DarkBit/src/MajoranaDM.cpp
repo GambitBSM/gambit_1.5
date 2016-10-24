@@ -151,7 +151,7 @@ namespace Gambit
       #undef addParticle
 
       ////////////////////////////////////////////////////////////////////
-      // Import two-body annihilation processes from MicrOmegas v3.6.9.2
+      // Import two-body annihilation processes from MicrOmegas_3.6.9.2
       ////////////////////////////////////////////////////////////////////
 
       // Set of possible final state particles
@@ -166,65 +166,65 @@ namespace Gambit
       double *SpNe = NULL, *SpNm = NULL, *SpNl = NULL;
       double m_1, m_2, sigmav_total, min_prop = 1e-6;
          
-      // Calculate the total sigmav using the calcSpectrum function from MicrOmegas
+      // Calculate the total sigmav using the calcSpectrum function in MicrOmegas_3.6.9.2
       sigmav_total = BEreq::calcSpectrum(byVal(key), byVal(SpA), byVal(SpE),
                     byVal(SpP), byVal(SpNe), byVal(SpNm), byVal(SpNl), &err);
-      logger() << "Total sigmav = " << sigmav_total << " cm^3/s" << std::endl;
+      logger() << "Total annihilation cross section (sigmav) = " << sigmav_total << " cm^3/s" << std::endl;
 
-      // A convenience macro for setting up 2-body annihilations using MicrOmega's functions
-      #define SETUP_MO_PROCESS(NAME, MO_PRTCL_NAME, P1, P2)                                     \
-      /* Check if process is kinematically allowed */                                           \
-      m_1 = catalog.getParticleProperty(STRINGIFY(P1)).mass;                                    \
-      m_2 = catalog.getParticleProperty(STRINGIFY(P2)).mass;                                    \
-      if(m_1 + m_2 < 2*mX)                                                                      \
-      {                                                                                         \
-      for (int i = 0; ((*BEreq::vSigmaCh)+i)->weight > min_prop; i++)                         \
-        {                                                                                       \
-          /* Calculate sigmav for the input channel */                                          \
-          if (strcmp(((*BEreq::vSigmaCh)+i)->prtcl[2],STRINGIFY(MO_PRTCL_NAME)) == 0)         \
-          {                                                                                     \
-            double CAT(sigma_,NAME) = (((*BEreq::vSigmaCh)+i)->weight)*sigmav_total;          \
-            logger() << DMid << "," << DMid << " -> " << ((*BEreq::vSigmaCh)+i)->prtcl[2]     \
-               << " " << ((*BEreq::vSigmaCh)+i)->prtcl[3] << "\t"                             \
-               << ((*BEreq::vSigmaCh)+i)->weight << std::endl;                                \
-            /* Create associated kinematical functions */                                       \
-            daFunk::Funk CAT(kinematicFunction_,NAME) = daFunk::cnst(CAT(sigma_,NAME), "v");    \
-            /* Create channel identifier string */                                              \
-            std::vector<std::string> CAT(finalStates_,NAME);                                    \
-            CAT(finalStates_,NAME).push_back(STRINGIFY(P1));                                    \
-            CAT(finalStates_,NAME).push_back(STRINGIFY(P2));                                    \
-            /* Create channel and push it into channel list of process */                       \
-            TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),CAT(kinematicFunction_,NAME)); \
-            process_ann.channelList.push_back(CAT(channel_,NAME));                              \
-            annFinalStates.insert(STRINGIFY(P1));                                               \
-            annFinalStates.insert(STRINGIFY(P2));                                               \
-          }                                                                                     \
-        }                                                                                       \
+      // Convenience macros for setting up 2-body annihilations using MicrOmega's functions      
+      #define SETUP_KINEMATIC_PROCESS_MO(NAME, MO_PRTCL_NAME, P1, P2)                                   \
+      m_1 = catalog.getParticleProperty(STRINGIFY(P1)).mass;                                            \
+      m_2 = catalog.getParticleProperty(STRINGIFY(P2)).mass;                                            \
+      if(2*mX > m_1 + m_2)                                                                              \
+      {                                                                                                 \
+      for (int i = 0; ((*BEreq::vSigmaCh)+i)->weight > min_prop; i++)                                   \
+        {                                                                                               \
+          /* Calculate sigmav for the input channel */                                                  \
+          if (strcmp(((*BEreq::vSigmaCh)+i)->prtcl[2],STRINGIFY(MO_PRTCL_NAME)) == 0)                   \
+          {                                                                                             \
+            double CAT(sigma_,NAME) = (((*BEreq::vSigmaCh)+i)->weight)*sigmav_total;                    \
+            logger() << "BR(" << DMid << " + " << DMid << " -> "                                        \
+                     << ((*BEreq::vSigmaCh)+i)->prtcl[2]                                                \
+                     << " + " << ((*BEreq::vSigmaCh)+i)->prtcl[3] << ") = "                             \
+                     << ((*BEreq::vSigmaCh)+i)->weight << std::endl;                                    \
+            /* Create associated kinematical functions */                                               \
+            daFunk::Funk CAT(kinematicFunction_,NAME) = daFunk::cnst(CAT(sigma_,NAME), "v");            \
+            /* Create channel identifier string */                                                      \
+            std::vector<std::string> CAT(finalStates_,NAME);                                            \
+            CAT(finalStates_,NAME).push_back(STRINGIFY(P1));                                            \
+            CAT(finalStates_,NAME).push_back(STRINGIFY(P2));                                            \
+            /* Create channel and push it into channel list of process */                               \
+            TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),CAT(kinematicFunction_,NAME));         \
+            process_ann.channelList.push_back(CAT(channel_,NAME));                                      \
+            annFinalStates.insert(STRINGIFY(P1));                                                       \
+            annFinalStates.insert(STRINGIFY(P2));                                                       \
+          }                                                                                             \
+        }                                                                                               \
       }
 
       // Include SM final states from DM annihilation
-      SETUP_MO_PROCESS(WW, W+, W+, W-);
-      SETUP_MO_PROCESS(ZZ, Z, Z0, Z0);
-      SETUP_MO_PROCESS(HH, H, h0_1, h0_1);
-      SETUP_MO_PROCESS(AA, A, gamma, gamma);
+      SETUP_KINEMATIC_PROCESS_MO(WW, W+, W+, W-);
+      SETUP_KINEMATIC_PROCESS_MO(ZZ, Z, Z0, Z0);
+      SETUP_KINEMATIC_PROCESS_MO(HH, H, h0_1, h0_1);
+      SETUP_KINEMATIC_PROCESS_MO(AA, A, gamma, gamma);
 
       // down-type quarks
-      SETUP_MO_PROCESS(dD, d, d_1, dbar_1);
-      SETUP_MO_PROCESS(sS, s, d_2, dbar_2);
-      SETUP_MO_PROCESS(bB, b, d_3, dbar_3);
+      SETUP_KINEMATIC_PROCESS_MO(dD, d, d_1, dbar_1);
+      SETUP_KINEMATIC_PROCESS_MO(sS, s, d_2, dbar_2);
+      SETUP_KINEMATIC_PROCESS_MO(bB, b, d_3, dbar_3);
 
       // up-type quarks
-      SETUP_MO_PROCESS(uU, u, u_1, ubar_1);
-      SETUP_MO_PROCESS(cC, c, u_2, ubar_2);
-      SETUP_MO_PROCESS(tT, t, u_3, ubar_3);
+      SETUP_KINEMATIC_PROCESS_MO(uU, u, u_1, ubar_1);
+      SETUP_KINEMATIC_PROCESS_MO(cC, c, u_2, ubar_2);
+      SETUP_KINEMATIC_PROCESS_MO(tT, t, u_3, ubar_3);
 
       // leptons
-      SETUP_MO_PROCESS(eE, e, e+_1, e-_1);
-      SETUP_MO_PROCESS(mM, m, e+_2, e-_2);
-      SETUP_MO_PROCESS(tauTau, l, e+_3, e-_3);
+      SETUP_KINEMATIC_PROCESS_MO(eE, e, e+_1, e-_1);
+      SETUP_KINEMATIC_PROCESS_MO(mM, m, e+_2, e-_2);
+      SETUP_KINEMATIC_PROCESS_MO(tauTau, l, e+_3, e-_3);
 
       // Get rid of convenience macro
-      #undef SETUP_MO_PROCESS
+      #undef SETUP_KINEMATIC_PROCESS_MO
     
       // Add process to previous list
       catalog.processList.push_back(process_ann);
