@@ -158,8 +158,8 @@ namespace Gambit
       TH_Process process_ann(DMid, DMid);
       
       // Helper variables
-      int err, key = 4, NZ = 250;
-      double SpA[NZ], SpE[NZ], SpP[NZ];
+      int err, key = 4;
+      double *SpA = NULL, *SpE = NULL, *SpP = NULL;
       double *SpNe = NULL, *SpNm = NULL, *SpNl = NULL;
       double m_1, m_2, sigmav_total, min_prop = 1e-6;
          
