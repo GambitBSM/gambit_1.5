@@ -34,7 +34,6 @@
 #include "gambit/Utils/exceptions.hpp"
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Backends/backend_singleton.hpp"
-#include "gambit/Backends/mathematica_functions.hpp"
 #include "gambit/Logs/logger.hpp"
 
 /// Define the separator to use instead of "::" when macros get gnarly.

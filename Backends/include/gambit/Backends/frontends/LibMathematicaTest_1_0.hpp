@@ -20,6 +20,8 @@
 
 LOAD_LIBRARY
 
+BE_ALLOW_MODELS(CMSSM)
+
 BE_FUNCTION(CalculateSquare, int, (const int &), "CalculateSquare","MathematicaTest")
 
 

@@ -415,7 +415,8 @@ namespace Gambit                                                                
       typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
                                                                                                 \
       /* Get the pointer to the function. */                                                    \
-      extern const NAME##_type NAME = function_from_backend<NAME##_type>(pHandle,pSym,          \
+      extern const NAME##_type NAME = function_from_backend<NAME##_type, TYPE                   \
+       INSERT_NONEMPTY(STRIP_VARIADIC_ARG(ARGLIST))>(pHandle,pSym,                              \
        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), STRINGIFY(BACKENDLANG));         \
                                                                                                 \
       /* Get the pointer to the function in the shared library. */                              \

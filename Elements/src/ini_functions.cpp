@@ -238,7 +238,7 @@ namespace Gambit
                 WSNewPacket((WSLINK)pHandle);
               WSNewPacket((WSLINK)pHandle);
 
-              // Test
+              /*// Test
               if(!WSPutFunction((WSLINK)pHandle, "N",1)
                  or !WSPutFunction((WSLINK)pHandle, "CalculateSquare", 1)
                  or !WSPutInteger((WSLINK)pHandle, 5)
@@ -260,18 +260,20 @@ namespace Gambit
               {
                 cout << "Error" << endl;;
               }
-
+*/
               logger() << "Connection established with Mathematica through WSTP" << EOM;
               logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                        << LogTags::backends << LogTags::info << EOM;
               Backends::backendInfo().works[be+ver] = true;
 
-              WSPutFunction((WSLINK)pHandle, "Exit", 0); 
-              WSClose((WSLINK)pHandle);
+              //Add this to die functions
+
+              //WSPutFunction((WSLINK)pHandle, "Exit", 0); 
+              //WSClose((WSLINK)pHandle);
 
             }
 
-            WSDeinitialize(WSenv);
+            //WSDeinitialize(WSenv);
           }
           
 

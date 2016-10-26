@@ -30,7 +30,7 @@
 
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Elements/ini_functions.hpp"
-
+#include "gambit/Backends/mathematica_function.hpp"
 
 namespace Gambit
 {
@@ -82,35 +82,28 @@ namespace Gambit
       return result;
     }
 
-    /// Create a wrapper function that uses WSTP to call the Mathematica equivalent
-    template <typename T>
-    T create_Mathematica_function(void* pHandle, void_voidFptr pSym, str symbol_name)
-    {
-      T result;
-      try
-      {
-        pSym.ptr = new mathematica_function(pHandle, symbol_name);
-        //pSym.ptr->wrapper_function();
-        //result = reinterpret_cast<T>(pSym.fptr);
-      }
-      catch (std::exception& e) {ini_catch(e); }
-      return result;
-    }
-
     /// Dispatch the source of backend function
-    template <typename T>
-    T function_from_backend(void* pHandle, void_voidFptr pSym, str symbol_name, str be, str ver, str lang)
+    template <typename F_TYPE, typename TYPE, typename... ARGS>
+    F_TYPE function_from_backend(void* pHandle, void_voidFptr pSym, str symbol_name, str be, str ver, str lang)
     {
-      T result;
+      F_TYPE result;
       try
       {
         if(lang == "MATHEMATICA")
         {
-          result = create_Mathematica_function<T>(pHandle, pSym, symbol_name);
+          //mathematica_function<TYPE, ARGS...> *pointer = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);
+          //result = reinterpret_cast<F_TYPE>(pointer);
+          pSym.ptr = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);
+          if(pSym.ptr != NULL)
+          {
+            cout << (reinterpret_cast<mathematica_function<TYPE, ARGS...> *>(pSym.ptr))->get_function_name() << endl;
+            //F_TYPE func = &(reinterpret_cast<mathematica_function<TYPE, ARGS...>(*pSym.ptr));
+          }
+          //result = reinterpret_cast<F_TYPE>(pSym.fptr);
         }
         else
         {
-          result = load_backend_symbol<T>(pHandle, pSym, symbol_name, be, ver);
+          result = load_backend_symbol<F_TYPE>(pHandle, pSym, symbol_name, be, ver);
         }
       }
       catch (std::exception& e) {ini_catch(e); }

@@ -1,7 +1,6 @@
 # Inifile for testing SpecBit features
 
 Parameters:
-  StandardModel_SLHA2: !import StandardModel_SLHA2_defaults.yaml
 
   CMSSM:
     M0:
