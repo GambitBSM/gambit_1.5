@@ -77,8 +77,11 @@ namespace Gambit
   /// Notify a backend functor of which models it can be used with
   int set_allowed_models(functor&, std::vector<str>&, str);
 
+  /// Load WSTP for Mathematica backends
+  int loadWSTP(str, str, str, void*&);
+
   /// Load a backend library
-  int loadLibrary(str, str, str, str, void*&, bool);
+  int loadLibrary(str, str, str, void*&, bool);
   
   /// Try to resolve a pointer to a partial path to a shared library and use it to override the stored backend path.  
   void attempt_backend_path_override(str&, str&, const char*);

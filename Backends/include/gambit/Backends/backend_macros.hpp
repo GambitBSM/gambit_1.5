@@ -71,6 +71,12 @@
 #include <boost/preprocessor/list/size.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 
+/// Define backend languages
+#define DEFINED_BACKENDLANG ()
+#define UNKNOWN 0
+#define CPP 1
+#define FORTRAN 2
+#define MATHEMATICA 3
 
 /// Declare the backend initialisation module BackendIniBit.
 #define MODULE BackendIniBit
@@ -121,6 +127,10 @@ int CAT(allowed_models_set_,NAME) =                                         \
     }                                                                       \
   }                                                                         \
 
+/// Macro that determines whether the language of the backend is mathematica.
+#define USING_MATHEMATICA IF_ELSE_TOKEN_DEFINED(BACKENDLANG,                \
+        BOOST_PP_EQUAL(BACKENDLANG, MATHEMATICA),0)
+
 /// Macro containing initialization code
 #define LOAD_LIBRARY                                                        \
 namespace Gambit                                                            \
@@ -132,10 +142,13 @@ namespace Gambit                                                            \
       void * pHandle;                                                       \
       void_voidFptr pSym;                                                   \
       std::vector<str> allowed_models;                                      \
-      int load = loadLibrary(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),    \
-                             STRINGIFY(SAFE_VERSION),                       \
-                             STRINGIFY(BACKENDLANG), pHandle,               \
-                             BOOST_PP_IF(DO_CLASSLOADING,true,false));      \
+      BOOST_PP_IF(USING_MATHEMATICA,                                        \
+        int load = loadWSTP(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),     \
+                            STRINGIFY(SAFE_VERSION), pHandle);,             \
+        int load = loadLibrary(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),  \
+                               STRINGIFY(SAFE_VERSION), pHandle,            \
+                               BOOST_PP_IF(DO_CLASSLOADING,true,false));    \
+      );                                                                    \
                                                                             \
       /* Register this backend with the Core if not running in standalone */\
       REGISTER_BACKEND(BACKENDNAME, VERSION, SAFE_VERSION)                  \
@@ -401,6 +414,7 @@ namespace Gambit                                                              \
           BE_FUNCTION_I_SUPP(NAME)
 #endif
 
+#define TEST_MACRO(NAME,STUFF) int NAME##_thingy = print_stuff(STRINGIFY(STUFF));
 
 /// Main actual backend function macro
 #define BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                 \
@@ -414,15 +428,18 @@ namespace Gambit                                                                
       /* Define a type NAME_type to be a suitable function pointer. */                          \
       typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
                                                                                                 \
-      /* Get the pointer to the function. */                                                    \
-      extern const NAME##_type NAME = function_from_backend<NAME##_type, TYPE                   \
-       INSERT_NONEMPTY(STRIP_VARIADIC_ARG(ARGLIST))>(pHandle,pSym,                              \
-       SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), STRINGIFY(BACKENDLANG));         \
                                                                                                 \
-      /* Get the pointer to the function in the shared library. */                              \
-      /*extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle,pSym,SYMBOLNAME, \
-       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                              \
-        */                                                                                        \
+      /*BOOST_PP_IF(USING_MATHEMATICA, TEST_MACRO(NAME,"stuff");,                                 \
+        NAME = function_from_backend<NAME##_type, TYPE                                          \
+          INSERT_NONEMPTY(STRIP_VARIADIC_ARG(ARGLIST))>(pHandle,pSym,                           \
+          SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), STRINGIFY(BACKENDLANG));,     \
+        NAME = load_backend_symbol<NAME##_type>(pHandle,pSym,                                   \
+          SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                              \
+      );*/                                                                                      \
+                                                                                                \
+      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
+        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                \
+                                                                                                \
       /* Create functor object */                                                               \
       namespace Functown                                                                        \
       {                                                                                         \

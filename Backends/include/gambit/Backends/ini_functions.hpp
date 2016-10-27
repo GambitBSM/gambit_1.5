@@ -82,29 +82,23 @@ namespace Gambit
       return result;
     }
 
+    /// Print stuff for testing
+    int print_stuff(str stuff)
+    {
+      cout << stuff << endl;
+      return 0;
+    }
+
     /// Dispatch the source of backend function
     template <typename F_TYPE, typename TYPE, typename... ARGS>
-    F_TYPE function_from_backend(void* pHandle, void_voidFptr pSym, str symbol_name, str be, str ver, str lang)
+    F_TYPE function_from_backend(void* pHandle, void_voidFptr pSym, str symbol_name, str be, str ver)
     {
       F_TYPE result;
       try
       {
-        if(lang == "MATHEMATICA")
-        {
-          //mathematica_function<TYPE, ARGS...> *pointer = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);
-          //result = reinterpret_cast<F_TYPE>(pointer);
-          pSym.ptr = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);
-          if(pSym.ptr != NULL)
-          {
-            cout << (reinterpret_cast<mathematica_function<TYPE, ARGS...> *>(pSym.ptr))->get_function_name() << endl;
-            //F_TYPE func = &(reinterpret_cast<mathematica_function<TYPE, ARGS...>(*pSym.ptr));
-          }
-          //result = reinterpret_cast<F_TYPE>(pSym.fptr);
-        }
-        else
-        {
-          result = load_backend_symbol<F_TYPE>(pHandle, pSym, symbol_name, be, ver);
-        }
+        //pSym.ptr = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);
+        //result = reinterpret_cast<F_TYPE>(pSym.fptr);
+        //result = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);  
       }
       catch (std::exception& e) {ini_catch(e); }
       return result;
