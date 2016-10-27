@@ -94,11 +94,6 @@ BE_INI_FUNCTION
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set alphainv in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
-     // GG = sqrt(4*pi*alphaS)
-     // error = assignVal((char*)"GG", sqrt(4*M_PI*sminputs.alphaS));
-     //     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set GG in"
-     //      " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
      // v0 = 1/sqrt(sqrt(2)*GF)
      error = assignVal((char*)"v0", 1/sqrt(sqrt(2)*sminputs.GF));
      if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set GF in"
