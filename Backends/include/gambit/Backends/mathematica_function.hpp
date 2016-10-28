@@ -31,9 +31,6 @@ namespace Gambit
   namespace Backends
   {
   
-    template<typename TYPE, typename... ARGS>
-    TYPE some_function(ARGS...);
-
     template <typename TYPE, typename... ARGS>
     class mathematica_function : std::function<TYPE(ARGS...)>
     {
@@ -72,13 +69,6 @@ namespace Gambit
 {
   namespace Backends
   {
-
-    // Test
-    template <typename TYPE, typename... ARGS>
-    TYPE some_function(ARGS... args)
-    {
-      cout << "function" << endl;
-    }
 
     // Constructor
     template <typename TYPE, typename... ARGS>

@@ -62,6 +62,7 @@
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Backends/ini_functions.hpp"
 #include "gambit/Backends/common_macros.hpp"
+#include "gambit/Backends/mathematica_macros.hpp"
 #ifndef STANDALONE
   #include "gambit/Core/ini_functions.hpp"
 #endif
@@ -72,7 +73,6 @@
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 
 /// Define backend languages
-#define DEFINED_BACKENDLANG ()
 #define UNKNOWN 0
 #define CPP 1
 #define FORTRAN 2
@@ -126,10 +126,6 @@ int CAT(allowed_models_set_,NAME) =                                         \
       }                                                                     \
     }                                                                       \
   }                                                                         \
-
-/// Macro that determines whether the language of the backend is mathematica.
-#define USING_MATHEMATICA IF_ELSE_TOKEN_DEFINED(BACKENDLANG,                \
-        BOOST_PP_EQUAL(BACKENDLANG, MATHEMATICA),0)
 
 /// Macro containing initialization code
 #define LOAD_LIBRARY                                                        \
@@ -407,14 +403,38 @@ namespace Gambit                                                              \
 // Determine whether to make registration calls to the Core or not in BE_FUNCTION_IMPL2, depending on STANDALONE flag 
 #ifdef STANDALONE
   #define BE_FUNCTION_I(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                    \
+          BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
           BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)
 #else
   #define BE_FUNCTION_I(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                    \
+          BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
           BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)               \
           BE_FUNCTION_I_SUPP(NAME)
 #endif
 
-#define TEST_MACRO(NAME,STUFF) int NAME##_thingy = print_stuff(STRINGIFY(STUFF));
+#define BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                  \
+        BOOST_PP_IF(USING_MATHEMATICA,                                                          \
+        BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS),                \
+        BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS))
+
+/// Backend function macro for other backends (not mathematica)
+#define BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
+namespace Gambit                                                                                \
+{                                                                                               \
+  namespace Backends                                                                            \
+  {                                                                                             \
+    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
+    {                                                                                           \
+                                                                                                \
+      /* Define a type NAME_type to be a suitable function pointer. */                          \
+      typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
+                                                                                                \
+      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
+        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                \
+                                                                                                \
+    }                                                                                           \
+  }                                                                                             \
+}
 
 /// Main actual backend function macro
 #define BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                 \
@@ -426,19 +446,10 @@ namespace Gambit                                                                
     {                                                                                           \
                                                                                                 \
       /* Define a type NAME_type to be a suitable function pointer. */                          \
-      typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
+      /*typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);*/                                \
                                                                                                 \
-                                                                                                \
-      /*BOOST_PP_IF(USING_MATHEMATICA, TEST_MACRO(NAME,"stuff");,                                 \
-        NAME = function_from_backend<NAME##_type, TYPE                                          \
-          INSERT_NONEMPTY(STRIP_VARIADIC_ARG(ARGLIST))>(pHandle,pSym,                           \
-          SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), STRINGIFY(BACKENDLANG));,     \
-        NAME = load_backend_symbol<NAME##_type>(pHandle,pSym,                                   \
-          SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                              \
-      );*/                                                                                      \
-                                                                                                \
-      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
-        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                \
+      /*extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
+        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));*/                                \
                                                                                                 \
       /* Create functor object */                                                               \
       namespace Functown                                                                        \
