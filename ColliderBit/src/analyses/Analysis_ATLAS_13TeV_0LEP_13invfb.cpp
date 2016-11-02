@@ -1,5 +1,6 @@
 // -*- C++ -*-
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "Eigen/Eigen"
 
@@ -71,6 +72,14 @@ namespace Gambit {
           if (muon->pT() > 10. && muon->abseta() < 2.7)
             baselineMuons.push_back(muon);
 
+        /// @todo More detailed
+        // Remove electrons within dR = 0.2 of a b-tagged jet
+        // Remove any |eta| < 2.8 jet within dR = 0.2 of a remaining electron
+        // Remove any electron with dR in [0.2, 0.4] of a remaining jet
+        // Remove any muon with dR close to a remaining jet, via a functional form
+        //   ifilterBy(muons, [&](const Particle& m){ return deltaR(m,j) < min(0.4, 0.04 + 10*GeV/m.pT()); });
+        // Remove any |eta| < 2.8 jet within dR = 0.2 of a remaining muon if (inaccessible) track conditions are met... hmm
+        // Loose electron selection
 
         // Remove any |eta| < 2.8 jet within dR = 0.2 of an electron
         /// @todo Unless b-tagged (and pT > 50 && abseta < 2.5)
@@ -168,7 +177,7 @@ namespace Gambit {
             }
           }
         }
-        momtensor *= norm;
+        momtensor /= norm;
         const double mineigenvalue = momtensor.eigenvalues().real().minCoeff();
         const double aplanarity = 1.5 * mineigenvalue;
 
