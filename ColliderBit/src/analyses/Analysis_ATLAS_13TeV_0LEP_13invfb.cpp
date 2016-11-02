@@ -162,11 +162,10 @@ namespace Gambit {
         for (size_t i = 3; i < signalJets50.size(); ++i)
           dphimin_more = min(dphimin_more, acos(cos(signalJets50[i]->phi() - pmiss.phi())));
 
-        // Jet aplanarity
-        /// @todo Computed over all jets, all >50 jets, or 4,5,6 jets? Currently using all (> 20) jets
+        // Jet aplanarity (on 50 GeV jets only, cf. INT note)
         Eigen::Matrix3d momtensor = Eigen::Matrix3d::Zero();
         double norm = 0;
-        for (const Jet* jet : signalJets) {
+        for (const Jet* jet : signalJets50) {
           const P4& p4 = jet->mom();
           norm += p4.p2();
           for (size_t i = 0; i < 3; ++i) {

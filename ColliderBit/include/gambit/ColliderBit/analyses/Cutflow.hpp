@@ -117,7 +117,7 @@ namespace Gambit {
     };
 
     /// Print a Cutflow to a stream
-    ostream& operator << (ostream& os, const Cutflow& cf) {
+    inline ostream& operator << (ostream& os, const Cutflow& cf) {
       return os << cf.str();
     }
 
@@ -183,7 +183,7 @@ namespace Gambit {
     };
 
     /// Print a Cutflows to a stream
-    ostream& operator << (ostream& os, const Cutflows& cfs) {
+    inline ostream& operator << (ostream& os, const Cutflows& cfs) {
       return os << cfs.str();
     }
 
