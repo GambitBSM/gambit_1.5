@@ -152,22 +152,22 @@ diff -rupN ./DiracDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2
 +s12    |0.2229       |Parameter of C-K-M matrix (PDG2002)
 +s23    |0.0412       |Parameter of C-K-M matrix (PDG2002)
 +s13    |0.0036       |Parameter of C-K-M matrix (PDG2002)
-+v0     |246.22       |Higgs VEV
-+MZ     |91.1876      |Z boson mass
-+wZ     |2.4952       |Z boson width
-+MW     |80.385       |W boson mass
-+wW     |2.085        |W boson width
++v0     |246.22       |Higgs VEV (1/sqrt(sqrt(2)*GF), PDG2014)
++MZ     |91.1876      |Z boson mass (PDG2014)
++wZ     |2.4952       |Z boson width (PDG2014)
++MW     |80.385       |W boson mass (PDG2014)
++wW     |2.085        |W boson width (PDG2014)
 +MH     |125          |Higgs boson mass
-+Mtau   |1.77682      |Tau lepton mass
-+Mm     |0.105658     |Muon mass
-+Me     |0.000510999  |Electron mass
-+Mtop   |173          |Top quark mass
-+wtop   |2            |Top quark width
-+Mb     |4.18         |Bottom quark mass
-+Mc     |1.275        |Charm quark mass
-+Ms     |0.095        |Strange quark mass
-+Md     |0.0048       |Down quark mass
-+Mu     |0.0023       |Up quark mass
++Mtau   |1.77682      |Tau lepton mass (PDG2014)
++Mm     |0.105658     |Muon mass (PDG2014)
++Me     |0.000510999  |Electron mass (PDG2014)
++Mtop   |173          |Top quark mass (Mtop(pole), PDG2014)
++wtop   |2            |Top quark width (PDG2014)
++Mb     |4.18         |Bottom quark mass (Mb(Mb), MSbar scheme, PDG2014)
++Mc     |1.275        |Charm quark mass (Mc(Mc), MSbar scheme, PDG2014)
++Ms     |0.095        |Strange quark mass (Ms(2 GeV), MSbar scheme, PDG2014)
++Md     |0.0048       |Down quark mass (Md(2 GeV), MSbar scheme, PDG2014)
++Mu     |0.0023       |Up quark mass (Mu(2 GeV), MSbar scheme, PDG2014)
 +mF     |140          |Dirac physical mass
 +lF     |0.1          |Dirac-Higgs coupling
 +cosXI  |1            |cos(xi)
