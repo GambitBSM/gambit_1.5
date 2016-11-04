@@ -197,7 +197,8 @@ else()
 endif()
 
 # Check for Mathematica
-include(cmake/FindMathematica.cmake)
+#include(cmake/FindMathematica.cmake)
+find_package(Mathematica 10.0)
 if(Mathematica_FOUND)
   message("${BoldYellow}   Found Mathematica")
   if(Mathematica_WSTP_FOUND)
