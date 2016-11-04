@@ -142,7 +142,7 @@ namespace Gambit                                                            \
         int load = loadWSTP(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),     \
                             STRINGIFY(SAFE_VERSION), pHandle);,             \
         int load = loadLibrary(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),  \
-                               STRINGIFY(SAFE_VERSION), pHandle,            \
+                               STRINGIFY(SAFE_VERSION) ,pHandle,            \
                                BOOST_PP_IF(DO_CLASSLOADING,true,false));    \
       );                                                                    \
                                                                             \
@@ -446,11 +446,11 @@ namespace Gambit                                                                
     {                                                                                           \
                                                                                                 \
       /* Define a type NAME_type to be a suitable function pointer. */                          \
-      /*typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);*/                                \
+      /*typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
                                                                                                 \
-      /*extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
-        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));*/                                \
-                                                                                                \
+      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
+        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                \
+      */                                                                                          \
       /* Create functor object */                                                               \
       namespace Functown                                                                        \
       {                                                                                         \

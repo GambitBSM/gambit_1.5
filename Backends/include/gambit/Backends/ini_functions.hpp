@@ -88,20 +88,10 @@ namespace Gambit
       cout << stuff << endl;
       return 0;
     }
-
-    /// Dispatch the source of backend function
-    template <typename F_TYPE, typename TYPE, typename... ARGS>
-    F_TYPE function_from_backend(void* pHandle, void_voidFptr pSym, str symbol_name, str be, str ver)
+    int print_stuff(double stuff)
     {
-      F_TYPE result;
-      try
-      {
-        //pSym.ptr = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);
-        //result = reinterpret_cast<F_TYPE>(pSym.fptr);
-        //result = new mathematica_function<TYPE, ARGS...>(pHandle, symbol_name);  
-      }
-      catch (std::exception& e) {ini_catch(e); }
-      return result;
+      cout << stuff << endl;
+      return 0;
     }
 
     /// Provide the factory pointer to a BOSSed type's wrapper constructor.

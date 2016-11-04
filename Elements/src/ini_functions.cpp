@@ -190,7 +190,8 @@ namespace Gambit
     {
       const str path = Backends::backendInfo().corrected_path(be,ver);
       Backends::backendInfo().link_versions(be, ver, sv);
-
+      Backends::backendInfo().classloader[be+ver] = false;
+      
       #ifdef HAVE_MATHEMATICA
 
         int WSerrno;
@@ -234,29 +235,6 @@ namespace Gambit
               WSNewPacket((WSLINK)pHandle);
             WSNewPacket((WSLINK)pHandle);
 
-            // Test
-            /*if(!WSPutFunction((WSLINK)pHandle, "N",1)
-               or !WSPutFunction((WSLINK)pHandle, "CalculateSquare", 1)
-               or !WSPutInteger((WSLINK)pHandle, 5)
-               or !WSEndPacket((WSLINK)pHandle))
-              cout << "Error sending packet" << endl;
-             while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT) 
-            {
-              WSNewPacket((WSLINK)pHandle);
-              if (WSError((WSLINK)pHandle)) cout << "Error reading package" << endl;
-            }
-
-            double square;
-            if (WSGetReal((WSLINK)pHandle, &square))
-            {
-              cout << "Calculate square of " << 5 << " is " << square << endl; 
-            }
-            else
-            {
-              cout << "Error" << endl;;
-            }
-            */
-            logger() << "Connection established with Mathematica through WSTP" << EOM;
             logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                      << LogTags::backends << LogTags::info << EOM;
             Backends::backendInfo().works[be+ver] = true;

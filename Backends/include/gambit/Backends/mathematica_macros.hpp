@@ -36,7 +36,7 @@
         BOOST_PP_EQUAL(BACKENDLANG, MATHEMATICA), 0)
 
 /// Macro for testing stuff
-#define TEST(NAME, STUFF) int NAME##_stuff = print_stuff(STRINGIFY(STUFF));
+#define TEST(NAME, STUFF) int NAME##_stuff = print_stuff(STUFF);
 
 /// Macros to give names to an argument list
 #define ARGS_WITH_NAMES(ARGLIST) CONVERT_VARIADIC_ARG(ARGLIST)
@@ -53,36 +53,46 @@ namespace Gambit                                                                
       /* Define a type NAME_type to be a suitable function pointer. */                          \
       typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
                                                                                                 \
-      TYPE NAME_function (const int& val)                                                       \
+      TYPE NAME##_function (const int& val)                                                     \
       {                                                                                         \
         TYPE return_value;                                                                      \
                                                                                                 \
-        if(!WSPutFunction((WSLINK)pHandle, "CalculateSquare", 1)                                \
-            or !WSPutInteger((WSLINK)pHandle, 7)                                                \
-            or !WSEndPacket((WSLINK)pHandle))                                                   \
-          cout << "Error sending packet" << endl;                                               \
+        /* If TYPE is a numeric type, send N first */                                           \
+        if(IS_TYPE(TYPE, int) or IS_TYPE(TYPE, float) or IS_TYPE(TYPE, double))                 \
+          if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                           \
+            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");           \
                                                                                                 \
+        /* Send the symbol name next */                                                         \
+        if(!WSPutFunction((WSLINK)pHandle, SYMBOLNAME, 1))                                      \
+          backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");             \
+                                                                                                \
+        /* Now send all the arguments */                                                        \
+        if(!WSPutInteger((WSLINK)pHandle, val))                                                 \
+          backend_warning().raise(LOCAL_INFO, "Error sending packet throug WSTP");              \
+                                                                                                \
+        /* Last, mark the end of the message */                                                 \
+        if(!WSEndPacket((WSLINK)pHandle))                                                       \
+          backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");             \
+                                                                                                \
+        /* Wait to receive a packet from the kernel */                                          \
         int pkt;                                                                                \
         while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)                  \
         {                                                                                       \
           WSNewPacket((WSLINK)pHandle);                                                         \
-          if (WSError((WSLINK)pHandle)) cout << "Error reading package" << endl;                \
+          if (WSError((WSLINK)pHandle))                                                         \
+            backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");              \
         }                                                                                       \
                                                                                                 \
-        double square;                                                                          \
-        if (WSGetReal((WSLINK)pHandle, &square))                                                \
-        {                                                                                       \
-          cout << "Calculate square of " << 7 << " is " << square << endl;                      \
-        }                                                                                       \
-        else                                                                                    \
-        {                                                                                       \
-          cout << "Error" << endl;                                                              \
-        }                                                                                       \
+        /* Read the received packet into the return value */                                    \
+        if (!WSGetReal((WSLINK)pHandle, &return_value))                                         \
+          backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");                \
                                                                                                 \
         return return_value;                                                                    \
       }                                                                                         \
                                                                                                 \
-      extern const NAME##_type NAME = NAME_function;                                            \
+      extern const NAME##_type NAME = NAME##_function;                                          \
+      TYPE NAME##_thingy = (*NAME)(12);                                                         \
+      TEST(NAME, NAME##_thingy)                                                                 \
                                                                                                 \
     }                                                                                           \
   }                                                                                             \
