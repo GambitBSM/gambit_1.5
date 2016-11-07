@@ -22,7 +22,7 @@ LOAD_LIBRARY
 
 BE_ALLOW_MODELS(CMSSM)
 
-BE_FUNCTION(CalculateSquare, double, (const int &), "CalculateSquare","MathematicaTest")
+BE_FUNCTION(CalculateSquare, double, (), "CalculateSquare","MathematicaTest")
 
 
 namespace Gambit
