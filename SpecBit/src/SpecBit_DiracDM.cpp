@@ -14,7 +14,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///    \date 2016 Oct
+///  \date 2016 Oct, Nov
 ///
 ///  *********************************************
 
@@ -24,7 +24,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 
 #include "gambit/Elements/spectrum.hpp"
-#include "gambit/Utils/stream_overloads.hpp" // Just for more convenient output to logger
+#include "gambit/Utils/stream_overloads.hpp" 
 #include "gambit/Utils/util_macros.hpp"
 
 #include "gambit/SpecBit/SpecBit_rollcall.hpp"
@@ -73,7 +73,7 @@ namespace Gambit
       diracmodel.DiracLambda   = *myPipe::Param.at("lF");    
       diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");    
       
-      // Check if lF >= 4pi/2mF (i.e., where EFT approach breaks down)
+      // Check if lF >= 4*pi/2*mF (i.e., where EFT approach breaks down)
       if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
       {
        std::ostringstream msg;
@@ -106,8 +106,13 @@ namespace Gambit
       // Create a SubSpectrum object to wrap the EW sector information
       Models::DiracDMSimpleSpec diracspec(diracmodel);
 
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
-      result = Spectrum(diracspec,sminputs,&myPipe::Param);
+      result = Spectrum(diracspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
+
     }    
     
     // print spectrum out, stripped down copy from MSSM version with variable names changed

@@ -14,7 +14,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///    \date 2016 Oct
+///  \date 2016 Oct, Nov
 ///
 ///  *********************************************
 
@@ -24,7 +24,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 
 #include "gambit/Elements/spectrum.hpp"
-#include "gambit/Utils/stream_overloads.hpp" // Just for more convenient output to logger
+#include "gambit/Utils/stream_overloads.hpp" 
 #include "gambit/Utils/util_macros.hpp"
 
 #include "gambit/SpecBit/SpecBit_rollcall.hpp"
@@ -95,8 +95,13 @@ namespace Gambit
       // Create a SubSpectrum object to wrap the EW sector information
       Models::VectorDMSimpleSpec vectorspec(vectormodel);
 
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
-      result = Spectrum(vectorspec,sminputs,&myPipe::Param);
+      result = Spectrum(vectorspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
+      
     }    
     
     // print spectrum out, stripped down copy from MSSM version with variable names changed
