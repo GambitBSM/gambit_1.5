@@ -28,7 +28,7 @@
 
      #define FUNCTION Math_test
      START_FUNCTION(bool)
-     BACKEND_REQ(MathematicaTest, (), double, ())
+     BACKEND_REQ(MathematicaTest, (), double, (const int&))
      #undef FUNCTION
 
    #undef CAPABILITY

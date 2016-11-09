@@ -21,6 +21,7 @@
 #include "gambit/Utils/util_macros.hpp"
 #include "gambit/Backends/ini_functions.hpp"
 
+#include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/preprocessor/seq/to_tuple.hpp>
 #include <boost/preprocessor/tuple/to_seq.hpp>
@@ -51,22 +52,30 @@
 #define FUNCTION_ARGS(ARGLIST) BOOST_PP_SEQ_TO_TUPLE(FUNCTION_ARGS_SEQ(ARGLIST))
 
 /// Macros for identifying WSTP types
-#define WSPutDUMMY(...) 1
+#define WSPutVOID(...) 1
 #define WSPutUNKNOWN(...) 0
-#define WSTPTYPE(TYPE) BOOST_PP_IF(IS_TYPE(TYPE, void), DUMMY,                                  \
-                       BOOST_PP_IF(IS_TYPE(TYPE, int), Integer32,                               \
-                       BOOST_PP_IF(IS_TYPE(TYPE, float), Real32,                                \
-                       BOOST_PP_IF(IS_TYPE(TYPE, double), Real64,                               \
-                       BOOST_PP_IF(IS_TYPE(TYPE, bool), Integer8,                               \
-                       BOOST_PP_IF(IS_TYPE(TYPE, char), Integer8,                               \
-                       BOOST_PP_IF(IS_TYPE(TYPE, string), String, UNKNOWN)))))))
-#define STRIP_CONST(TYPE) int 
-#define STRIP_REF(TYPE) TYPE
-#define STRIP_ALL(TYPE) STRIP_REF(STRIP_CONST(TYPE))
+#define WSTPTYPE(TYPE) BOOST_PP_IF(IS_TYPE(void, TYPE), VOID,                                   \
+                       BOOST_PP_IF(IS_TYPE(int, TYPE), Integer32,                               \
+                       BOOST_PP_IF(IS_TYPE(float, TYPE), Real32,                                \
+                       BOOST_PP_IF(IS_TYPE(double, TYPE), Real64,                               \
+                       BOOST_PP_IF(IS_TYPE(bool, TYPE), Integer8,                               \
+                       BOOST_PP_IF(IS_TYPE(char, TYPE), Integer8,                               \
+                       BOOST_PP_IF(IS_TYPE(string, TYPE), String, UNKNOWN)))))))
+
+// Macros for stripping to basic types
+#define STRIP_void void
+#define STRIP_int int
+#define STRIP_float float
+#define STRIP_double double
+#define STRIP_char char
+#define STRIP_string string
+#define STRIP_const DUMMY
+#define STRIP_CONST(TYPE) STRIP_CONST_I(TYPE)
+#define STRIP_CONST_I(TYPE) CAT(STRIP_,TYPE)
 
 /// Macros for sending data through WSTP
 #define WSPUTARG(R, DATA, INDEX, ELEM)                                                          \
-  if(!CAT(WSPut,WSTPTYPE(STRIP_ALL(ELEM))) ((WSLINK)pHandle, CAT(arg,INDEX)))                   \
+  if(!CAT(WSPut,WSTPTYPE(STRIP_CONST(ELEM))) ((WSLINK)pHandle, CAT(arg,INDEX)))                 \
     backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
 
 /// Backend function macro for mathematica
@@ -80,8 +89,6 @@ namespace Gambit                                                                
                                                                                                 \
       /* Define a type NAME_type to be a suitable function pointer. */                          \
       typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
-                                                                                                \
-      TEST(NAME, STRINGIFY(FUNCTION_ARGS(ARGLIST)))                                             \
                                                                                                 \
       TYPE NAME##_function FUNCTION_ARGS(ARGLIST)                                               \
       {                                                                                         \
@@ -97,10 +104,8 @@ namespace Gambit                                                                
           backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");             \
                                                                                                 \
         /* Now send all the arguments */                                                        \
-        /*BOOST_PP_SEQ_FOR_EACH_I(WSPUTARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST))*/                     \
-                                                                                                \
-        if(!WSPutInteger((WSLINK)pHandle, 25))                                                  \
-          backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");             \
+        BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                          \
+          BOOST_PP_SEQ_FOR_EACH_I(WSPUTARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                  \
                                                                                                 \
         /* Last, mark the end of the message */                                                 \
         if(!WSEndPacket((WSLINK)pHandle))                                                       \
@@ -115,11 +120,13 @@ namespace Gambit                                                                
             backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");              \
         }                                                                                       \
                                                                                                 \
-        /* Read the received packet into the return value */                                    \
-        if (!WSGetReal((WSLINK)pHandle, &return_value))                                         \
-          backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");                \
+        /* Read the received packet into the return value, unless it's void */                  \
+        BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY,                                    \
+          if (!CAT(WSGet,WSTPTYPE(STRIP_CONST(TYPE)))((WSLINK)pHandle, &return_value))          \
+            backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");              \
                                                                                                 \
-        return return_value;                                                                    \
+          return return_value;                                                                  \
+        )                                                                                       \
       }                                                                                         \
                                                                                                 \
       extern const NAME##_type NAME = NAME##_function;                                          \

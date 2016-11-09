@@ -22,8 +22,9 @@ LOAD_LIBRARY
 
 BE_ALLOW_MODELS(CMSSM)
 
-BE_FUNCTION(CalculateSquare, double, (), "CalculateSquare","MathematicaTest")
+BE_FUNCTION(CalculateSquare, double, (const int&), "CalculateSquare","MathematicaTest")
 
+//BE_VARIABLE(Number, int, "Number", "MathematicaTest")
 
 namespace Gambit
 {
@@ -33,6 +34,7 @@ namespace Gambit
     {
 
       /* Convenience functions go here */
+      //BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&), "MathematicaTest")
 
     } /* end namespace BACKENDNAME_SAFE_VERSION */
   } /*end namespace Backends */

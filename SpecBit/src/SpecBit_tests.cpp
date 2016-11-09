@@ -58,9 +58,9 @@ namespace Gambit
     {
       namespace myPipe = Pipes::Math_test;
 
-      int input = 6;
+      int input = 51;
 
-      int output= myPipe::BEreq::MathematicaTest();
+      int output= myPipe::BEreq::MathematicaTest(input);
       cout << "Testing Mathematica" << endl;
       cout << "Result : " << output << endl;
     }
