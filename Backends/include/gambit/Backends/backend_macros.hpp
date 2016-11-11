@@ -315,16 +315,23 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
 // Determine whether to make registration calls to the Core or not in BE_VARIABLE_I, depending on STANDALONE flag 
 #ifdef STANDALONE
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
+          BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
           BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)
 #else
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
+          BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
           BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)      \
           BE_VARIABLE_I_SUPP(NAME)
 #endif
 
+#define BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)         \
+        BOOST_PP_IF(USING_MATHEMATICA,                                        \
+          BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS),     \
+          BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)     \
+        ) 
 
-/// Main actual backend variable macro
-#define BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)        \
+/// Backend variable macro for other backends (not mathematica)
+#define BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
 namespace Gambit                                                              \
 {                                                                             \
   namespace Backends                                                          \
@@ -337,6 +344,25 @@ namespace Gambit                                                              \
        load_backend_symbol<TYPE*>(pHandle, pSym, SYMBOLNAME,                  \
        STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                           \
       TYPE* CAT(getptr,NAME)() { return NAME; }                               \
+                                                                              \
+    }                                                                         \
+  }                                                                           \
+}
+
+/// Main actual backend variable macro
+#define BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)        \
+namespace Gambit                                                              \
+{                                                                             \
+  namespace Backends                                                          \
+  {                                                                           \
+    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                               \
+    {                                                                         \
+                                                                              \
+      /* Set the variable pointer and the getptr function. */                 \
+      /*extern TYPE* const NAME =                                             \
+       load_backend_symbol<TYPE*>(pHandle, pSym, SYMBOLNAME,                  \
+       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                           \
+      TYPE* CAT(getptr,NAME)() { return NAME; }*/                             \
                                                                               \
       /* Create functor objects */                                            \
       namespace Functown                                                      \
@@ -414,8 +440,9 @@ namespace Gambit                                                              \
 
 #define BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                  \
         BOOST_PP_IF(USING_MATHEMATICA,                                                          \
-        BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS),                \
-        BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS))
+          BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS),              \
+          BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)              \
+        )
 
 /// Backend function macro for other backends (not mathematica)
 #define BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \

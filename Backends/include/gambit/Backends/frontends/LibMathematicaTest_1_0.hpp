@@ -24,24 +24,10 @@ BE_ALLOW_MODELS(CMSSM)
 
 BE_FUNCTION(CalculateSquare, double, (const int&), "CalculateSquare","MathematicaTest")
 
-//BE_VARIABLE(Number, int, "Number", "MathematicaTest")
+BE_VARIABLE(Var, int, "Var", "MathematicaTest")
 
-namespace Gambit
-{
-  namespace Backends
-  {
-    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)
-    {
-
-      /* Convenience functions go here */
-      //BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&), "MathematicaTest")
-
-    } /* end namespace BACKENDNAME_SAFE_VERSION */
-  } /*end namespace Backends */
-} /* end namespace Gambit */
-
-BE_INI_FUNCTION{}
-END_BE_INI_FUNCTION
+/* Convenience functions (declaratiob) */
+BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&, const int&), "MathematicaTest")
 
 // Undefine macros toa void conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

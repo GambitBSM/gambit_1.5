@@ -5,3 +5,6 @@
 
 
 CalculateSquare[var_] := var^2;
+
+
+Var=42;

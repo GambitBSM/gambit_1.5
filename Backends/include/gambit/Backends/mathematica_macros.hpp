@@ -20,6 +20,7 @@
 
 #include "gambit/Utils/util_macros.hpp"
 #include "gambit/Backends/ini_functions.hpp"
+#include "gambit/Backends/mathematica_variable.hpp"
 
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
@@ -130,6 +131,74 @@ namespace Gambit                                                                
       }                                                                                         \
                                                                                                 \
       extern const NAME##_type NAME = NAME##_function;                                          \
+                                                                                                \
+    }                                                                                           \
+  }                                                                                             \
+}
+
+/// Backend variable macro for Mathematica
+#define BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                          \
+namespace Gambit                                                                                \
+{                                                                                               \
+  namespace Backends                                                                            \
+  {                                                                                             \
+                                                                                                \
+    /* Definitions for the mathematica_variable class */                                        \
+    template <typename T> mathematica_variable<T>::mathematica_variable()                       \
+    {                                                                                           \
+      using namespace CAT_3(BACKENDNAME,_,SAFE_VERSION);                                        \
+      cout << "constructor" << endl; \
+                                                                                                \
+      /* Send the variable symbol */                                                            \
+      if(!WSPutSymbol((WSLINK)pHandle, STRINGIFY(SYMBOLNAME)))                                  \
+        backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");               \
+      cout << "symbol put" << endl;\
+                                                                                                \
+      /* Mark the end of the message */                                                         \
+      if(!WSEndPacket((WSLINK)pHandle))                                                         \
+        backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");               \
+                                                                                                \
+      /* Wait to receive a packet from the kernel */                                            \
+      int pkt;                                                                                  \
+      while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)                    \
+      {                                                                                         \
+        WSNewPacket((WSLINK)pHandle);                                                           \
+        if (WSError((WSLINK)pHandle))                                                           \
+          backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");                \
+      }                                                                                         \
+                                                                                                \
+      /* Read the received packet into the return value, unless it's void */                    \
+      BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY,                                      \
+        if (!CAT(WSGet,WSTPTYPE(STRIP_CONST(TYPE)))((WSLINK)pHandle, this))                     \
+          backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");                \
+      )                                                                                         \
+      cout << *this << endl;                                                                    \
+    }                                                                                           \
+                                                                                                \
+    template <typename T> mathematica_variable<T>& mathematica_variable<T>::operator=           \
+      (const mathematica_variable<T>& var)                                                      \
+    {                                                                                           \
+      T::operator=(var);                                                                         \
+    }                                                                                           \
+                                                                                                \
+    template <typename T> mathematica_variable<T>& mathematica_variable<T>::operator=           \
+      (const T& var)                                                                            \
+    {                                                                                           \
+                                                                                                \
+    }                                                                                           \
+                                                                                                \
+    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
+    {                                                                                           \
+                                                                                                \
+      TEST(NAME, "stuff") \
+      //mathematica_variable<TYPE>  NAME_var;                                                     \
+/*      TEST(NAME,NAME_var)                                                                       \
+  */                                                                                            \
+      extern TYPE* const NAME =                                                                 \
+       load_backend_symbol<TYPE*>(pHandle, pSym, SYMBOLNAME,                                    \
+       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                             \
+                                                                                                \
+      TYPE* CAT(getptr,NAME)() { return NAME; }                                                 \
                                                                                                 \
     }                                                                                           \
   }                                                                                             \
