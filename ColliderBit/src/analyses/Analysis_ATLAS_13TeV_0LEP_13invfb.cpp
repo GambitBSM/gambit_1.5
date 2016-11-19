@@ -72,14 +72,14 @@ namespace Gambit {
           if (muon->pT() > 10. && muon->abseta() < 2.7)
             baselineMuons.push_back(muon);
 
-        /// @todo More detailed
-        // Remove electrons within dR = 0.2 of a b-tagged jet
-        // Remove any |eta| < 2.8 jet within dR = 0.2 of a remaining electron
-        // Remove any electron with dR in [0.2, 0.4] of a remaining jet
-        // Remove any muon with dR close to a remaining jet, via a functional form
-        //   ifilterBy(muons, [&](const Particle& m){ return deltaR(m,j) < min(0.4, 0.04 + 10*GeV/m.pT()); });
-        // Remove any |eta| < 2.8 jet within dR = 0.2 of a remaining muon if (inaccessible) track conditions are met... hmm
-        // Loose electron selection
+        // Full isolation details:
+        //  - Remove electrons within dR = 0.2 of a b-tagged jet
+        //  - Remove any |eta| < 2.8 jet within dR = 0.2 of a remaining electron
+        //  - Remove any electron with dR in [0.2, 0.4] of a remaining jet
+        //  - Remove any muon with dR close to a remaining jet, via a functional form
+        //    ifilterBy(muons, [&](const Particle& m){ return deltaR(m,j) < min(0.4, 0.04 + 10*GeV/m.pT()); });
+        //  - Remove any |eta| < 2.8 jet within dR = 0.2 of a remaining muon if (inaccessible) track conditions are met... hmm
+        //  - Loose electron selection
 
         // Remove any |eta| < 2.8 jet within dR = 0.2 of an electron
         /// @todo Unless b-tagged (and pT > 50 && abseta < 2.5)
@@ -89,7 +89,7 @@ namespace Gambit {
             signalJets.push_back(j);
 
         // Remove electrons with dR = 0.4 of surviving |eta| < 2.8 jets
-        /// @todo Actually only within 0.2--0.4
+        /// @todo Actually only within 0.2--0.4...
         vector<const Particle*> signalElectrons;
         for (const Particle* e : baselineElectrons)
           if (all_of(signalJets, [&](const Jet* j){ return deltaR_rap(*e, *j) > 0.4; }))
@@ -98,8 +98,8 @@ namespace Gambit {
         ATLAS::applyLooseIDElectronSelection(signalElectrons);
 
         // Remove muons with dR = 0.4 of surviving |eta| < 2.8 jets
-        /// @todo Actually only within 0.2--0.4
-        /// @todo Within 0.2, discard the *jet* based on jet track vs. muon criteria
+        /// @todo Actually only within 0.2--0.4...
+        /// @note Within 0.2, discard the *jet* based on jet track vs. muon criteria... can't be done here
         vector<const Particle*> signalMuons;
         for (const Particle* m : baselineMuons)
           if (all_of(signalJets, [&](const Jet* j){ return deltaR_rap(*m, *j) > 0.4; }))
