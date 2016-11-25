@@ -320,7 +320,7 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
 #else
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
           BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
-          BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)      \
+          BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)   \
           BE_VARIABLE_I_SUPP(NAME)
 #endif
 
@@ -329,6 +329,10 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
           BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS),     \
           BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)     \
         ) 
+
+#define AUXTYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,                          \
+        mathematica_variable<TYPE>, TYPE)
+        
 
 /// Backend variable macro for other backends (not mathematica)
 #define BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
@@ -357,12 +361,6 @@ namespace Gambit                                                              \
   {                                                                           \
     namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                               \
     {                                                                         \
-                                                                              \
-      /* Set the variable pointer and the getptr function. */                 \
-      /*extern TYPE* const NAME =                                             \
-       load_backend_symbol<TYPE*>(pHandle, pSym, SYMBOLNAME,                  \
-       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                           \
-      TYPE* CAT(getptr,NAME)() { return NAME; }*/                             \
                                                                               \
       /* Create functor objects */                                            \
       namespace Functown                                                      \

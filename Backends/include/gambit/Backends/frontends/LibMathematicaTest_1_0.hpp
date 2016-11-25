@@ -23,6 +23,7 @@ LOAD_LIBRARY
 BE_ALLOW_MODELS(CMSSM)
 
 BE_FUNCTION(CalculateSquare, double, (const int&), "CalculateSquare","MathematicaTest")
+BE_FUNCTION(PrintVar, int, (), "PrintVar", "MathematicaTest")
 
 BE_VARIABLE(Var, int, "Var", "MathematicaTest")
 

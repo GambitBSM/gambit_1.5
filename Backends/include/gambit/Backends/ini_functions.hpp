@@ -30,7 +30,6 @@
 
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Elements/ini_functions.hpp"
-#include "gambit/Backends/mathematica_function.hpp"
 
 namespace Gambit
 {
