@@ -331,7 +331,7 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
         ) 
 
 #define AUXTYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,                          \
-        mathematica_variable<TYPE>, TYPE)
+        Mvariable<TYPE>, TYPE)
         
 
 /// Backend variable macro for other backends (not mathematica)
