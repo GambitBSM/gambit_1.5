@@ -19,9 +19,7 @@
 #define __MATHEMATICA_MACROS_HPP__
 
 #include "gambit/Utils/util_macros.hpp"
-#include "gambit/Backends/ini_functions.hpp"
 #include "gambit/Backends/mathematica_variable.hpp"
-//#include "gambit/Backends/mathematica_variable_defs.hpp"
 
 #include <boost/preprocessor/seq/seq.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
@@ -40,12 +38,12 @@
 #define DEFINED_BACKENDLANG ()
 #endif
 
+/// Macro to choose between mathematica types and normal types
+#define MATH_TYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,mathematica_variable<TYPE>,TYPE)
+
 /// Macro that determines whether the language of the backend is mathematica
 #define USING_MATHEMATICA IF_ELSE_TOKEN_DEFINED(BACKENDLANG,                                    \
         BOOST_PP_EQUAL(BACKENDLANG, MATHEMATICA), 0)
-
-/// Macro for testing stuff
-#define TEST(NAME, STUFF) int NAME##_stuff = print_stuff(STUFF);
 
 /// Macros to give names to an argument list
 #define ARG_NAME(R,DATA,INDEX,ELEM) (ELEM arg##INDEX)
@@ -147,12 +145,10 @@ namespace Gambit                                                                
     namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
     {                                                                                           \
                                                                                                 \
-      mathematica_variable<TYPE>  NAME_var((WSLINK)pHandle, SYMBOLNAME);                        \
+      extern mathematica_variable<TYPE>* const NAME =                                           \
+        new mathematica_variable<TYPE>((WSLINK)pHandle, SYMBOLNAME);                            \
                                                                                                 \
-      TYPE NAME_2 = NAME_var;                                                        \
-      TYPE* NAME = &NAME_2; \
-                                                                                                \
-      TYPE* CAT(getptr,NAME)() { return NAME; }                                      \
+      mathematica_variable<TYPE>* CAT(getptr,NAME)() { return NAME; }                           \
                                                                                                 \
     }                                                                                           \
   }                                                                                             \

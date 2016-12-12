@@ -15,6 +15,10 @@
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2015 May
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Dec
+///
 ///  *********************************************
 
 #ifndef __FRONTEND_MACROS_HPP__
@@ -22,6 +26,7 @@
 
 #include "gambit/Elements/module_macros_inmodule.hpp"
 #include "gambit/Backends/common_macros.hpp"
+#include "gambit/Backends/mathematica_macros.hpp"
 #include "gambit/Backends/backend_singleton.hpp"
 
 
@@ -83,8 +88,10 @@ namespace Gambit                                                              \
   {                                                                           \
     namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                               \
     {                                                                         \
+      /* Choose the type to define the variable pointer */                    \
+      typedef MATH_TYPE(TYPE) NAME##_type;                                    \
       /* Set the variable pointer and the getptr function. */                 \
-      extern TYPE* const NAME;                                                \
+      extern NAME##_type* const NAME;                                         \
     }                                                                         \
   }                                                                           \
                                                                               \

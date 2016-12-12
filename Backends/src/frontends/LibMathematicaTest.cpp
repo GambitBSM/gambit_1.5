@@ -26,10 +26,16 @@ BE_NAMESPACE
      double result1 = CalculateSquare(val1);
      double result2 = CalculateSquare(val2);
 
-     cout << "Var = " << *Var << endl;
+     cout << "result1 = " << result1 << endl;
+     cout << "restul2 = " << result2 << endl;
+
      cout << "Var = " << PrintVar() << endl;
 
      *Var = 121;
+
+     cout << "Var = " << PrintVar() << endl;
+
+     *Var = *Var + 7;
 
      cout << "Var = " << PrintVar() << endl;
 

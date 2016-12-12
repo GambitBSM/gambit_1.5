@@ -29,10 +29,6 @@
 ///  \date 2014 Jan, Mar
 ///  \date 2015 Jan, Feb
 ///
-///  \author Tomas E. Gonzalo
-///          (t.e.gonzalo@fys.uio.no)
-///  \date 2016 Nov
-///
 ///  *********************************************
 
 #ifndef __util_types_hpp__
@@ -525,28 +521,6 @@ namespace Gambit
   typedef double            Freal8;
   typedef long double       Freal16;
   
-
-/// Mathematica variables
-template <typename T>
-class Mvariable
-{
-  private:
-    T _var;
-
-  public:
-    // Constructor
-    Mvariable ();
-
-    // Assignment operator
-    virtual Mvariable& operator=(const T&);
-
-    // Cast operator of type TYPE
-    virtual operator T const()
-    {
-      return _var;
-    }
-
-};
 
      
 }

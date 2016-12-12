@@ -59,6 +59,7 @@
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Elements/module_macros_incore.hpp"
 #include "gambit/Elements/functors.hpp"
+#include "gambit/Elements/functor_definitions.hpp"
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Backends/ini_functions.hpp"
 #include "gambit/Backends/common_macros.hpp"
@@ -316,11 +317,11 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
 #ifdef STANDALONE
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
           BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
-          BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)
+          BE_VARIABLE_I_MAIN(NAME, MATH_TYPE(TYPE), SYMBOLNAME, CAPABILITY, MODELS)
 #else
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
           BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
-          BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)   \
+          BE_VARIABLE_I_MAIN(NAME, MATH_TYPE(TYPE), SYMBOLNAME, CAPABILITY, MODELS)   \
           BE_VARIABLE_I_SUPP(NAME)
 #endif
 
@@ -329,10 +330,6 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
           BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS),     \
           BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)     \
         ) 
-
-#define AUXTYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,                          \
-        Mvariable<TYPE>, TYPE)
-        
 
 /// Backend variable macro for other backends (not mathematica)
 #define BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
@@ -361,7 +358,6 @@ namespace Gambit                                                              \
   {                                                                           \
     namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                               \
     {                                                                         \
-                                                                              \
       /* Create functor objects */                                            \
       namespace Functown                                                      \
       {                                                                       \

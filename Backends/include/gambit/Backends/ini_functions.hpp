@@ -16,10 +16,6 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Feb
 ///
-///  \author Tomas Gonzalo
-///          (t.e.gonzalo@fys.uio.no)
-///  \date 2016 Oct
-///
 ///  *********************************************
 
 #ifndef __ini_functions_backends_hpp__
@@ -79,18 +75,6 @@ namespace Gambit
       }
       catch (std::exception& e) { ini_catch(e); }
       return result;
-    }
-
-    /// Print stuff for testing
-    int print_stuff(str stuff)
-    {
-      cout << stuff << endl;
-      return 0;
-    }
-    int print_stuff(double stuff)
-    {
-      cout << stuff << endl;
-      return 0;
     }
 
     /// Provide the factory pointer to a BOSSed type's wrapper constructor.
