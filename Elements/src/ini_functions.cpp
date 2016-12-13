@@ -212,7 +212,7 @@ namespace Gambit
           #ifdef __APPLE__
             WSTPflags << "-linkname " << MATHEMATICA_KERNEL << " -mathlink";
           #else
-            WSTPflags << "-linkname math -mathlink"
+            WSTPflags << "-linkname math -mathlink";
           #endif
           pHandle = WSOpenString(WSenv, WSTPflags.str().c_str(), &WSerrno);
           if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
