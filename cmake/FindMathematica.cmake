@@ -34,7 +34,7 @@ cmake_minimum_required(VERSION 2.8.12)
 cmake_policy(POP)
 
 set (Mathematica_CMAKE_MODULE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-set (Mathematica_CMAKE_MODULE_VERSION "3.2.1")
+set (Mathematica_CMAKE_MODULE_VERSION "3.2.2")
 
 # activate select policies
 if (POLICY CMP0025)
@@ -113,8 +113,10 @@ include(CMakeFindFrameworks)
 # file(TO_CMAKE_PATH "C:\Program Files" ...) would result in unworkable "C;/Program Files"
 function (_to_cmake_path _inPath _outPathVariable)
 	if (CYGWIN)
+		find_program(Mathematica_CYGPATH_EXECUTABLE "cygpath")
+		mark_as_advanced(Mathematica_CYGPATH_EXECUTABLE)
 		execute_process(
-			COMMAND cygpath "--unix" "${_inPath}" TIMEOUT 5
+			COMMAND "${Mathematica_CYGPATH_EXECUTABLE}" "--unix" "${_inPath}" TIMEOUT 5
 			OUTPUT_VARIABLE ${_outPathVariable} OUTPUT_STRIP_TRAILING_WHITESPACE)
 	else()
 		file(TO_CMAKE_PATH "${_inPath}" ${_outPathVariable})
@@ -130,8 +132,10 @@ function (_to_native_path _inPath _outPathVariable)
 	# and special characters
 	# under MinGW it produces unworkable paths with forward slashes
 	if (CYGWIN)
+		find_program(Mathematica_CYGPATH_EXECUTABLE "cygpath")
+		mark_as_advanced(Mathematica_CYGPATH_EXECUTABLE)
 		execute_process(
-			COMMAND cygpath "--mixed" "${_inPath}" TIMEOUT 5
+			COMMAND "${Mathematica_CYGPATH_EXECUTABLE}" "--mixed" "${_inPath}" TIMEOUT 5
 			OUTPUT_VARIABLE ${_outPathVariable} OUTPUT_STRIP_TRAILING_WHITESPACE)
 	elseif (CMAKE_HOST_UNIX)
 		# use CMake path literally under UNIX
@@ -1850,9 +1854,11 @@ macro (_find_jlink)
 			if (DEFINED Mathematica_VERSION)
 				if ("${Mathematica_VERSION}" VERSION_LESS "10.0")
 					# use java_home to find path to JVM installed on system
-					if (EXISTS "/usr/libexec/java_home")
+					find_program(Mathematica_JAVA_HOME_EXECUTABLE "java_home" PATHS "/usr/libexec/")
+					mark_as_advanced(Mathematica_JAVA_HOME_EXECUTABLE)
+					if (Mathematica_JAVA_HOME_EXECUTABLE)
 						execute_process(
-							COMMAND "/usr/libexec/java_home" "--version" "1.6"
+							COMMAND "${Mathematica_JAVA_HOME_EXECUTABLE}" "--version" "1.6"
 							TIMEOUT 10 OUTPUT_VARIABLE _mmaJavaHome ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 					endif()
 				endif()
@@ -2709,10 +2715,22 @@ macro (_get_install_name _libraryPath _libraryInstallName _libraryAbsPath)
 			set (_path "${_libraryPath}")
 		endif()
 		if (EXISTS "${_path}")
+			find_program(Mathematica_OTOOL_EXECUTABLE "otool")
+			mark_as_advanced(Mathematica_OTOOL_EXECUTABLE)
 			get_filename_component(${_libraryAbsPath} ${_path} ABSOLUTE)
-			execute_process(
-				COMMAND otool "-D" "-X" "${${_libraryAbsPath}}" TIMEOUT 5
-				OUTPUT_VARIABLE ${_libraryInstallName} OUTPUT_STRIP_TRAILING_WHITESPACE)
+			set (_otoolOutput "")
+			if (Mathematica_OTOOL_EXECUTABLE)
+				execute_process(
+					COMMAND "${Mathematica_OTOOL_EXECUTABLE}" "-D" "-X" "${${_libraryAbsPath}}" TIMEOUT 5
+					OUTPUT_VARIABLE _otoolOutput OUTPUT_STRIP_TRAILING_WHITESPACE)
+				# install name is in last line of otool output
+				string (REPLACE "\n" ";" _otoolOutput "${_otoolOutput}")
+			endif()
+			if (_otoolOutput)
+				list (GET _otoolOutput -1 ${_libraryInstallName})
+			else()
+				set (${_libraryInstallName} "")
+			endif()
 		endif()
 	endif()
 endmacro()

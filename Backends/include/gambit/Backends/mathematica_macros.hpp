@@ -39,7 +39,11 @@
 #endif
 
 /// Macro to choose between mathematica types and normal types
-#define MATH_TYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,mathematica_variable<TYPE>,TYPE)
+#ifdef HAVE_MATHEMATICA
+  #define MATH_TYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,mathematica_variable<TYPE>,TYPE)
+#else
+  #define MATH_TYPE(TYPE) TYPE
+#endif
 
 /// Macro that determines whether the language of the backend is mathematica
 #define USING_MATHEMATICA IF_ELSE_TOKEN_DEFINED(BACKENDLANG,                                    \
@@ -78,80 +82,134 @@
   if(!CAT(WSPut,WSTPTYPE(STRIP_CONST(ELEM))) ((WSLINK)pHandle, CAT(arg,INDEX)))                 \
     backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
 
+/// Dummy macro for arguments to skip compiler warnings
+#define VOIDARG(R, DATA, INDEX, ELEM) (void)CAT(arg,INDEX);
+
 /// Backend function macro for mathematica
-#define BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                 \
-namespace Gambit                                                                                \
-{                                                                                               \
-  namespace Backends                                                                            \
+#ifdef HAVE_MATHEMATICA
+  #define BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)               \
+  namespace Gambit                                                                              \
   {                                                                                             \
-    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
+    namespace Backends                                                                          \
     {                                                                                           \
-                                                                                                \
-      /* Define a type NAME_type to be a suitable function pointer. */                          \
-      typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
-                                                                                                \
-      TYPE NAME##_function FUNCTION_ARGS(ARGLIST)                                               \
+      namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
       {                                                                                         \
-        TYPE return_value;                                                                      \
                                                                                                 \
-        /* If TYPE is a numeric type, send N first */                                           \
-        if(IS_TYPE(TYPE, int) or IS_TYPE(TYPE, float) or IS_TYPE(TYPE, double))                 \
-          if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                           \
+        /* Define a type NAME_type to be a suitable function pointer. */                        \
+        typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                              \
+                                                                                                \
+        TYPE NAME##_function FUNCTION_ARGS(ARGLIST)                                             \
+        {                                                                                       \
+          TYPE return_value;                                                                    \
+                                                                                                \
+          /* If TYPE is a numeric type, send N first */                                         \
+          if(IS_TYPE(TYPE, int) or IS_TYPE(TYPE, float) or IS_TYPE(TYPE, double))               \
+            if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                         \
+              backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");         \
+                                                                                                \
+          /* Send the symbol name next */                                                       \
+          int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));              \
+          if(!WSPutFunction((WSLINK)pHandle, SYMBOLNAME, size))                                 \
             backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");           \
                                                                                                 \
-        /* Send the symbol name next */                                                         \
-        int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));                \
-        if(!WSPutFunction((WSLINK)pHandle, SYMBOLNAME, size))                                    \
-          backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");             \
+          /* Now send all the arguments */                                                      \
+          BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                        \
+            BOOST_PP_SEQ_FOR_EACH_I(WSPUTARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                \
                                                                                                 \
-        /* Now send all the arguments */                                                        \
-        BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                          \
-          BOOST_PP_SEQ_FOR_EACH_I(WSPUTARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                  \
+          /* Last, mark the end of the message */                                               \
+          if(!WSEndPacket((WSLINK)pHandle))                                                     \
+            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");           \
                                                                                                 \
-        /* Last, mark the end of the message */                                                 \
-        if(!WSEndPacket((WSLINK)pHandle))                                                       \
-          backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");             \
+          /* Wait to receive a packet from the kernel */                                        \
+          int pkt;                                                                              \
+          while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)                \
+          {                                                                                     \
+            WSNewPacket((WSLINK)pHandle);                                                       \
+            if (WSError((WSLINK)pHandle))                                                       \
+              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");            \
+          }                                                                                     \
                                                                                                 \
-        /* Wait to receive a packet from the kernel */                                          \
-        int pkt;                                                                                \
-        while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)                  \
-        {                                                                                       \
-          WSNewPacket((WSLINK)pHandle);                                                         \
-          if (WSError((WSLINK)pHandle))                                                         \
-            backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");              \
+          /* Read the received packet into the return value, unless it's void */                \
+          BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY,                                  \
+            if (!CAT(WSGet,WSTPTYPE(STRIP_CONST(TYPE)))((WSLINK)pHandle, &return_value))        \
+              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");            \
+                                                                                                \
+            return return_value;                                                                \
+          )                                                                                     \
         }                                                                                       \
                                                                                                 \
-        /* Read the received packet into the return value, unless it's void */                  \
-        BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY,                                    \
-          if (!CAT(WSGet,WSTPTYPE(STRIP_CONST(TYPE)))((WSLINK)pHandle, &return_value))          \
-            backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");              \
+        extern const NAME##_type NAME = NAME##_function;                                        \
                                                                                                 \
-          return return_value;                                                                  \
-        )                                                                                       \
       }                                                                                         \
-                                                                                                \
-      extern const NAME##_type NAME = NAME##_function;                                          \
-                                                                                                \
     }                                                                                           \
-  }                                                                                             \
-}
+  }
+#else
+  /* If Mathematica is not available in the system return a dummy funtion */
+  #define BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)               \
+  namespace Gambit                                                                              \
+  {                                                                                             \
+    namespace Backends                                                                          \
+    {                                                                                           \
+      namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
+      {                                                                                         \
+                                                                                                \
+        /* Define a type NAME_type to be a suitable function pointer. */                        \
+        typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                              \
+                                                                                                \
+        TYPE NAME##_function FUNCTION_ARGS(ARGLIST)                                             \
+        {                                                                                       \
+                                                                                                \
+          /* Do something inconsequential with the args to skip compiler warnings. */           \
+          BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                        \
+            BOOST_PP_SEQ_FOR_EACH_I(VOIDARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                 \
+                                                                                                \
+          /* Read the received packet into the return value, unless it's void */                \
+          BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY, return TYPE();             \
+          )                                                                                     \
+        }                                                                                       \
+                                                                                                \
+        extern const NAME##_type NAME = NAME##_function;                                        \
+                                                                                                \
+      }                                                                                         \
+    }                                                                                           \
+  }
+#endif
 
 /// Backend variable macro for Mathematica
-#define BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                          \
-namespace Gambit                                                                                \
-{                                                                                               \
-  namespace Backends                                                                            \
+#ifdef HAVE_MATHEMATICA
+  #define BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                        \
+  namespace Gambit                                                                              \
   {                                                                                             \
-    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
+    namespace Backends                                                                          \
     {                                                                                           \
+      namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
+      {                                                                                         \
                                                                                                 \
-      extern mathematica_variable<TYPE>* const NAME =                                           \
-        new mathematica_variable<TYPE>((WSLINK)pHandle, SYMBOLNAME);                            \
+        extern mathematica_variable<TYPE>* const NAME =                                         \
+          new mathematica_variable<TYPE>((WSLINK)pHandle, SYMBOLNAME);                          \
                                                                                                 \
-      mathematica_variable<TYPE>* CAT(getptr,NAME)() { return NAME; }                           \
+        mathematica_variable<TYPE>* CAT(getptr,NAME)() { return NAME; }                         \
                                                                                                 \
+      }                                                                                         \
     }                                                                                           \
-  }                                                                                             \
-}
+  }
+#else
+  /* If Mathematica is not available in the system, define a dummy variable */
+  #define BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                        \
+  namespace Gambit                                                                              \
+  {                                                                                             \
+    namespace Backends                                                                          \
+    {                                                                                           \
+      namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
+      {                                                                                         \
+                                                                                                \
+        extern TYPE* const NAME = new TYPE();                                                   \
+                                                                                                \
+        TYPE* CAT(getptr,NAME)() { return NAME; }                                               \
+                                                                                                \
+      }                                                                                         \
+    }                                                                                           \
+  }
+#endif
 
 #endif // __MATHEMATICA_MACROS_HPP__
