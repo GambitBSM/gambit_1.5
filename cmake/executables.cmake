@@ -46,6 +46,10 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   if (NOT EXCLUDE_DELPHES)
     add_dependencies(gambit delphes)
   endif()
+  # If Mathematica is present and the system is OS X, absolutize paths to avoid dylib errors
+  if (${HAVE_MATHEMATICA} AND ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    Mathematica_ABSOLUTIZE_LIBRARY_DEPENDENCIES(gambit)
+  endif()
 endif()
 
 # Add the ScannerBit standalone executable
