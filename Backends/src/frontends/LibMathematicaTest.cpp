@@ -39,7 +39,13 @@ BE_NAMESPACE
 
      cout << "Var = " << PrintVar() << endl;
 
-     return result1 + result2;
+     cout << "Var2 = " << *Var2 << endl;
+
+     cout << "Sum of Var and Var2 = " << CalculateSum(*Var, *Var2) << endl;
+     cout << PrintVarorVar2(true) << endl;
+     cout << PrintVarorVar2(false) << endl;
+
+     return CalculateSum(result1,result2);
 
   }
 

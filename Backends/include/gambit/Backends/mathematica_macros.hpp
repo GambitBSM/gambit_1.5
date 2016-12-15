@@ -62,9 +62,11 @@
                        BOOST_PP_IF(IS_TYPE(int, TYPE), Integer32,                               \
                        BOOST_PP_IF(IS_TYPE(float, TYPE), Real32,                                \
                        BOOST_PP_IF(IS_TYPE(double, TYPE), Real64,                               \
-                       BOOST_PP_IF(IS_TYPE(bool, TYPE), Integer8,                               \
+                       BOOST_PP_IF(IS_TYPE(bool, TYPE), Symbol,                                 \
                        BOOST_PP_IF(IS_TYPE(char, TYPE), Integer8,                               \
                        BOOST_PP_IF(IS_TYPE(string, TYPE), String, UNKNOWN)))))))
+#define WSARG(TYPE, ARG)                                                                        \
+  BOOST_PP_IF(IS_TYPE(bool, TYPE), ARG ? "True" : "False", ARG)
 
 // Macros for stripping to basic types
 #define STRIP_void void
@@ -77,10 +79,19 @@
 #define STRIP_CONST(TYPE) STRIP_CONST_I(TYPE)
 #define STRIP_CONST_I(TYPE) CAT(STRIP_,TYPE)
 
+/// Macro for handling errors
+#define MATH_ERROR(ERROR)                                                                       \
+  backend_warning().raise(LOCAL_INFO, ERROR);                                                   \
+  backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));                         \
+  WSClearError((WSLINK)pHandle);                                                                \
+  WSNewPacket((WSLINK)pHandle);
+
 /// Macros for sending data through WSTP
 #define WSPUTARG(R, DATA, INDEX, ELEM)                                                          \
-  if(!CAT(WSPut,WSTPTYPE(STRIP_CONST(ELEM))) ((WSLINK)pHandle, CAT(arg,INDEX)))                 \
-    backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
+  if(!CAT(WSPut,WSTPTYPE(STRIP_CONST(ELEM)))                                                    \
+      ((WSLINK)pHandle, WSARG(STRIP_CONST(ELEM),CAT(arg,INDEX))))                               \
+      backend_warning().raise(LOCAL_INFO,"Error sending packet through WSTP");                  \
+  
 
 /// Dummy macro for arguments to skip compiler warnings
 #define VOIDARG(R, DATA, INDEX, ELEM) (void)CAT(arg,INDEX);
@@ -102,40 +113,58 @@
         {                                                                                       \
           TYPE return_value;                                                                    \
                                                                                                 \
-          /* If TYPE is a numeric type, send N first */                                         \
-          if(IS_TYPE(TYPE, int) or IS_TYPE(TYPE, float) or IS_TYPE(TYPE, double))               \
-            if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                         \
-              backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");         \
-                                                                                                \
-          /* Send the symbol name next */                                                       \
-          int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));              \
-          if(!WSPutFunction((WSLINK)pHandle, SYMBOLNAME, size))                                 \
-            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");           \
-                                                                                                \
-          /* Now send all the arguments */                                                      \
-          BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                        \
-            BOOST_PP_SEQ_FOR_EACH_I(WSPUTARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                \
-                                                                                                \
-          /* Last, mark the end of the message */                                               \
-          if(!WSEndPacket((WSLINK)pHandle))                                                     \
-            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");           \
-                                                                                                \
-          /* Wait to receive a packet from the kernel */                                        \
-          int pkt;                                                                              \
-          while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)                \
+          try                                                                                   \
           {                                                                                     \
-            WSNewPacket((WSLINK)pHandle);                                                       \
-            if (WSError((WSLINK)pHandle))                                                       \
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");            \
+            /* If TYPE is a numeric type, send N first */                                       \
+            if(IS_TYPE(TYPE, int) or IS_TYPE(TYPE, float) or IS_TYPE(TYPE, double))             \
+              if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                       \
+              {                                                                                 \
+                MATH_ERROR("Error sending packet throught WSTP")                                \
+                BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), return ;, return return_value;)   \
+              }                                                                                 \
+                                                                                                \
+            /* Send the symbol name next */                                                     \
+            int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));            \
+            if(!WSPutFunction((WSLINK)pHandle, SYMBOLNAME, size))                               \
+            {                                                                                   \
+              MATH_ERROR("Error sending packet through WSTP")                                   \
+              BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), return ;, return return_value;)     \
+            }                                                                                   \
+                                                                                                \
+            /* Now send all the arguments */                                                    \
+            BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                      \
+              BOOST_PP_SEQ_FOR_EACH_I(WSPUTARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))              \
+                                                                                                \
+            /* Last, mark the end of the message */                                             \
+            if(!WSEndPacket((WSLINK)pHandle))                                                   \
+            {                                                                                   \
+              MATH_ERROR("Error sending packet through WSTP")                                   \
+              BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), return ;, return return_value;)     \
+            }                                                                                   \
+                                                                                                \
+            /* Wait to receive a packet from the kernel */                                      \
+            int pkt;                                                                            \
+            while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)              \
+            {                                                                                   \
+              WSNewPacket((WSLINK)pHandle);                                                     \
+              if (WSError((WSLINK)pHandle)) {                                                   \
+                MATH_ERROR("Error reading packet from WSTP")                                    \
+                BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), return ;, return return_value;)   \
+              }                                                                                 \
+            }                                                                                   \
+                                                                                                \
+            /* Read the received packet into the return value, unless it's void */              \
+            BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY,                                \
+              if (!CAT(WSGet,WSTPTYPE(STRIP_CONST(TYPE)))((WSLINK)pHandle, &return_value))      \
+              {                                                                                 \
+                MATH_ERROR("Error reading packet from WSTP")                                    \
+                BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), return ;, return return_value;)   \
+              }                                                                                 \
+            )                                                                                   \
           }                                                                                     \
+          catch (std::exception& e) { ini_catch(e); }                                           \
                                                                                                 \
-          /* Read the received packet into the return value, unless it's void */                \
-          BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY,                                  \
-            if (!CAT(WSGet,WSTPTYPE(STRIP_CONST(TYPE)))((WSLINK)pHandle, &return_value))        \
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");            \
-                                                                                                \
-            return return_value;                                                                \
-          )                                                                                     \
+          BOOST_PP_IF(IS_TYPE(void, STRIP_CONST(TYPE)), DUMMY, return return_value;)            \
         }                                                                                       \
                                                                                                 \
         extern const NAME##_type NAME = NAME##_function;                                        \

@@ -53,15 +53,24 @@ namespace Gambit
              boost::is_same<TYPE, float>::value or
              boost::is_same<TYPE, double>::value)
             if(!WSPutFunction(WSlink, "N", 1))
-              backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
+            {
+              math_error("Error sending packet through WSTP");
+              return ;
+            }
 
           /* Send the variable symbol */
           if(!WSPutSymbol(WSlink, symbol.c_str()))
-            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
+          {
+            math_error("Error sending packet through WSTP");
+            return ;
+          }
 
           /* Mark the end of the message */
           if(!WSEndPacket(WSlink))
-            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
+          {
+            math_error("Error sending packet through WSTP");
+            return ;
+          }
 
           /* Wait to receive a packet from the kernel */
           int pkt;
@@ -69,7 +78,10 @@ namespace Gambit
           {
             WSNewPacket(WSlink);
             if (WSError(WSlink))
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");
+            {
+              math_error("Error reading packet from WSTP");
+              return ;
+            }
           }
 
           /* Read the received packet into the return value, unless it's void */
@@ -83,7 +95,7 @@ namespace Gambit
                !boost::is_same<TYPE, str>::value)
               backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
             else if(!WSGetVariable(WSlink, &_var))
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");
+              math_error("Error reading packet from WSTP");
 
           }
         }
@@ -95,7 +107,10 @@ namespace Gambit
           /* Send the expression SYMBOL = val */
           if(!WSPutFunction(_WSlink, "Set", 2) or
              !WSPutSymbol(_WSlink, _symbol.c_str()))
-            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
+          {
+            math_error("Error sending packet through WSTP");
+            return *this;
+          }
 
           if(!boost::is_same<TYPE, void>::value)
           {
@@ -107,13 +122,19 @@ namespace Gambit
                !boost::is_same<TYPE, str>::value)
               backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
             else if(!WSPutVariable(_WSlink, val))
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");
+            {
+              math_error("Error reading packet from WSTP");
+              return *this;
+            }
 
           }
 
           /* Mark the end of the message */
           if(!WSEndPacket(_WSlink))
-            backend_warning().raise(LOCAL_INFO, "Error sending packet through WSTP");
+          {
+            math_error("Error sending packet through WSTP");
+            return *this;
+          }
 
           /* Wait to receive a packet from the kernel */
           int pkt;
@@ -121,7 +142,10 @@ namespace Gambit
           {
             WSNewPacket(_WSlink);
             if (WSError(_WSlink))
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");
+            {
+              math_error("Error reading packet from WSTP");
+              return *this;
+            }
           }
 
           /* Read the received packet into the return value, unless it's void */
@@ -135,7 +159,10 @@ namespace Gambit
                !boost::is_same<TYPE, str>::value)
               backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
             else if(!WSGetVariable(_WSlink, &_var))
-              backend_warning().raise(LOCAL_INFO, "Error reading packet from WSTP");
+            {
+              math_error("Error reading packet from WSTP");
+              return *this;
+            }
 
           }
 
@@ -143,6 +170,15 @@ namespace Gambit
 
           return *this;
 
+        }
+
+        // Handle errors
+        void math_error(str error)
+        {
+          backend_warning().raise(LOCAL_INFO, error);
+          backend_warning().raise(LOCAL_INFO, WSErrorMessage(_WSlink));
+          WSClearError(_WSlink);
+          WSNewPacket(_WSlink);
         }
 
 
