@@ -32,6 +32,7 @@ namespace Gambit
 
   namespace Backends
   {
+    int print_stuff(str thing) { cout << thing << endl; return 0;}
 
     /// Simplify pointers to void functions
     typedef void(*voidFptr)();

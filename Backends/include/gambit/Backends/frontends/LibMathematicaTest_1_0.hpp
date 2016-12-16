@@ -26,6 +26,8 @@ BE_FUNCTION(CalculateSquare, double, (const int&), "CalculateSquare","Mathematic
 BE_FUNCTION(CalculateSum, double, (const double&, const double&), "CalculateSum", "MathematicaTest")
 BE_FUNCTION(PrintVar, int, (), "PrintVar", "MathematicaTest")
 BE_FUNCTION(PrintVarorVar2, double, (const bool&), "PrintVarorVar2", "MathematicaTest")
+BE_FUNCTION(VarEqualVar2, bool, (), "VarEqualVar2", "MathematicaTest")
+BE_FUNCTION(StringTest, str, (const str&), "StringTest", "MathematicaTest")
 
 BE_VARIABLE(Var, int, "Var", "MathematicaTest")
 BE_VARIABLE(Var2, double, "Var2", "MathematicaTest")

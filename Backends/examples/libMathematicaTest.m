@@ -26,3 +26,9 @@ PrintVar[]:=Var;
 
 
 PrintVarorVar2[check_]:=If[check,Var,Var2];
+
+
+VarEqualVar2[]:=Var==Var2
+
+
+StringTest[var_]:="This is not a test, "<>ToString[var];

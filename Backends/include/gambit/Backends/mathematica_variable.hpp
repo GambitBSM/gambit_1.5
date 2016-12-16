@@ -189,7 +189,13 @@ namespace Gambit
         int WSGetVariable(WSLINK WSlink, int* val) { return WSGetInteger(WSlink, val); }
         int WSGetVariable(WSLINK WSlink, float* val) { return WSGetReal32(WSlink, val); }
         int WSGetVariable(WSLINK WSlink, double* val) { return WSGetReal64(WSlink, val); } 
-        int WSGetVariable(WSLINK WSlink, bool* val) { return WSGetInteger8(WSlink, (char *)val); }
+        int WSGetVariable(WSLINK WSlink, bool* val) 
+        { 
+          str *val2;
+          int ret = WSGetSymbol(WSlink, (char **)val2); 
+          *val = (*val2 == "True");
+          return ret;
+        }
         int WSGetVariable(WSLINK WSlink, char* val) { return WSGetInteger8(WSlink, val); }
         int WSGetVariable(WSLINK WSlink, str* val) {  return WSGetString(WSlink, (char **)val); } 
  
@@ -197,7 +203,13 @@ namespace Gambit
         int WSPutVariable(WSLINK WSlink, int val) { return WSPutInteger32(WSlink, val); }
         int WSPutVariable(WSLINK WSlink, float val) { return WSPutReal32(WSlink, val); }
         int WSPutVariable(WSLINK WSlink, double val) { return WSPutReal64(WSlink, val); }
-        int WSPutVariable(WSLINK WSlink, bool val) { return WSPutInteger8(WSlink, (char)val); }
+        int WSPutVariable(WSLINK WSlink, bool val) 
+        { 
+          if(val)
+            return WSPutSymbol(WSlink, "True");
+          else
+            return WSPutSymbol(WSlink, "False");
+        }
         int WSPutVariable(WSLINK WSlink, char val) {  return WSPutInteger8(WSlink, val); }
         int WSPutVariable(WSLINK WSlink, str val) { return WSPutString(WSlink, (char *)val); }
 

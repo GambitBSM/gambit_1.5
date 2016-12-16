@@ -45,6 +45,12 @@ BE_NAMESPACE
      cout << PrintVarorVar2(true) << endl;
      cout << PrintVarorVar2(false) << endl;
 
+     cout << "Var == Var2? " << VarEqualVar2() << endl;
+     *Var2 = *Var;
+     cout << "Var == Var2? " << VarEqualVar2() << endl;
+
+     cout << StringTest("You") << endl;
+
      return CalculateSum(result1,result2);
 
   }
