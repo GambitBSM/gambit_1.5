@@ -168,7 +168,8 @@
             }                                                                                   \
                                                                                                 \
             /* Read the received packet into the return value, unless it's void */              \
-            BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), DUMMY,                                      \
+            BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)),                                             \
+              WSNewPacket((WSLINK)pHandle);,                                                    \
               BOOST_PP_IF(IS_TYPE(bool, STRIP(TYPE)), const char *val;                          \
                 if(!WSGetString((WSLINK)pHandle, &val)),                                        \
                 BOOST_PP_IF(IS_TYPE(string, STRIP(TYPE)), const char *val;, TYPE val;)          \

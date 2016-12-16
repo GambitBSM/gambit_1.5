@@ -32,3 +32,6 @@ VarEqualVar2[]:=Var==Var2
 
 
 StringTest[var_]:="This is not a test, "<>ToString[var];
+
+
+VoidTest[]:=Var=Var+1;

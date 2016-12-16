@@ -28,6 +28,7 @@ BE_FUNCTION(PrintVar, int, (), "PrintVar", "MathematicaTest")
 BE_FUNCTION(PrintVarorVar2, double, (const bool&), "PrintVarorVar2", "MathematicaTest")
 BE_FUNCTION(VarEqualVar2, bool, (), "VarEqualVar2", "MathematicaTest")
 BE_FUNCTION(StringTest, str, (const str&), "StringTest", "MathematicaTest")
+BE_FUNCTION(VoidTest, void, (), "VoidTest", "MathematicaTest")
 
 BE_VARIABLE(Var, int, "Var", "MathematicaTest")
 BE_VARIABLE(Var2, double, "Var2", "MathematicaTest")

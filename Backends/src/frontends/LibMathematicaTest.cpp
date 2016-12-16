@@ -51,6 +51,11 @@ BE_NAMESPACE
 
      cout << StringTest("You") << endl;
 
+     VoidTest();
+
+     cout << PrintVar() << endl;
+     cout << *Var << endl;
+
      return CalculateSum(result1,result2);
 
   }

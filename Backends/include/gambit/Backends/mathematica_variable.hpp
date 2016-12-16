@@ -20,6 +20,7 @@
 ///  ***********************************************
 
 #include "gambit/Utils/util_types.hpp"
+#include "gambit/Elements/ini_functions.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
 #ifdef HAVE_MATHEMATICA
@@ -48,126 +49,137 @@ namespace Gambit
         mathematica_variable(WSLINK WSlink, str symbol) :  _WSlink(WSlink), _symbol(symbol)
         {
 
-          /* If TYPE is a numeric type, send N first */
-          if(boost::is_same<TYPE, int>::value or
-             boost::is_same<TYPE, float>::value or
-             boost::is_same<TYPE, double>::value)
-            if(!WSPutFunction(WSlink, "N", 1))
+          try
+          {
+            /* If TYPE is a numeric type, send N first */
+            if(boost::is_same<TYPE, int>::value or
+               boost::is_same<TYPE, float>::value or
+               boost::is_same<TYPE, double>::value)
+              if(!WSPutFunction(WSlink, "N", 1))
+              {
+                math_error("Error sending packet through WSTP");
+                return ;
+              }
+
+            /* Send the variable symbol */
+            if(!WSPutSymbol(WSlink, symbol.c_str()))
             {
               math_error("Error sending packet through WSTP");
               return ;
             }
 
-          /* Send the variable symbol */
-          if(!WSPutSymbol(WSlink, symbol.c_str()))
-          {
-            math_error("Error sending packet through WSTP");
-            return ;
-          }
-
-          /* Mark the end of the message */
-          if(!WSEndPacket(WSlink))
-          {
-            math_error("Error sending packet through WSTP");
-            return ;
-          }
-
-          /* Wait to receive a packet from the kernel */
-          int pkt;
-          while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT)
-          {
-            WSNewPacket(WSlink);
-            if (WSError(WSlink))
+            /* Mark the end of the message */
+            if(!WSEndPacket(WSlink))
             {
-              math_error("Error reading packet from WSTP");
+              math_error("Error sending packet through WSTP");
               return ;
             }
-          }
 
-          /* Read the received packet into the return value, unless it's void */
-          if(!boost::is_same<TYPE, void>::value)
-          {
-            if(!boost::is_same<TYPE, int>::value and
-               !boost::is_same<TYPE, float>::value and
-               !boost::is_same<TYPE, double>::value and
-               !boost::is_same<TYPE, bool>::value and
-               !boost::is_same<TYPE, char>::value and
-               !boost::is_same<TYPE, str>::value)
-              backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
-            else if(!WSGetVariable(WSlink, &_var))
-              math_error("Error reading packet from WSTP");
+            /* Wait to receive a packet from the kernel */
+            int pkt;
+            while( (pkt = WSNextPacket(WSlink), pkt) && pkt != RETURNPKT)
+            {
+              WSNewPacket(WSlink);
+              if (WSError(WSlink))
+              {
+                math_error("Error reading packet from WSTP");
+                return ;
+              }
+            }
 
+            /* Read the received packet into the return value, unless it's void */
+            if(!boost::is_same<TYPE, void>::value)
+            {
+              if(!boost::is_same<TYPE, int>::value and
+                 !boost::is_same<TYPE, float>::value and
+                 !boost::is_same<TYPE, double>::value and
+                 !boost::is_same<TYPE, bool>::value and
+                 !boost::is_same<TYPE, char>::value and
+                 !boost::is_same<TYPE, str>::value)
+                backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
+              else if(!WSGetVariable(WSlink, &_var))
+                math_error("Error reading packet from WSTP");
+
+            }
           }
+          catch (std::exception& e) { ini_catch(e); }
+
         }
 
 
         // Assignment operator with TYPE
         mathematica_variable& operator=(const TYPE& val)
         {
-          /* Send the expression SYMBOL = val */
-          if(!WSPutFunction(_WSlink, "Set", 2) or
-             !WSPutSymbol(_WSlink, _symbol.c_str()))
+          try
           {
-            math_error("Error sending packet through WSTP");
-            return *this;
-          }
-
-          if(!boost::is_same<TYPE, void>::value)
-          {
-            if(!boost::is_same<TYPE, int>::value and
-               !boost::is_same<TYPE, float>::value and
-               !boost::is_same<TYPE, double>::value and
-               !boost::is_same<TYPE, bool>::value and
-               !boost::is_same<TYPE, char>::value and
-               !boost::is_same<TYPE, str>::value)
-              backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
-            else if(!WSPutVariable(_WSlink, val))
+            /* Send the expression SYMBOL = val */
+            if(!WSPutFunction(_WSlink, "Set", 2) or
+               !WSPutSymbol(_WSlink, _symbol.c_str()))
             {
-              math_error("Error reading packet from WSTP");
+              math_error("Error sending packet through WSTP");
               return *this;
             }
 
-          }
-
-          /* Mark the end of the message */
-          if(!WSEndPacket(_WSlink))
-          {
-            math_error("Error sending packet through WSTP");
-            return *this;
-          }
-
-          /* Wait to receive a packet from the kernel */
-          int pkt;
-          while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
-          {
-            WSNewPacket(_WSlink);
-            if (WSError(_WSlink))
+            if(!boost::is_same<TYPE, void>::value)
             {
-              math_error("Error reading packet from WSTP");
-              return *this;
+              if(!boost::is_same<TYPE, int>::value and
+                 !boost::is_same<TYPE, float>::value and
+                 !boost::is_same<TYPE, double>::value and
+                 !boost::is_same<TYPE, bool>::value and
+                 !boost::is_same<TYPE, char>::value and
+                 !boost::is_same<TYPE, str>::value)
+                backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
+              else if(!WSPutVariable(_WSlink, val))
+              {
+                math_error("Error reading packet from WSTP");
+                return *this;
+              }
+
             }
-          }
 
-          /* Read the received packet into the return value, unless it's void */
-          if(!boost::is_same<TYPE, void>::value)
-          {
-            if(!boost::is_same<TYPE, int>::value and
-               !boost::is_same<TYPE, float>::value and
-               !boost::is_same<TYPE, double>::value and
-               !boost::is_same<TYPE, bool>::value and
-               !boost::is_same<TYPE, char>::value and
-               !boost::is_same<TYPE, str>::value)
-              backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
-            else if(!WSGetVariable(_WSlink, &_var))
+            /* Mark the end of the message */
+            if(!WSEndPacket(_WSlink))
             {
-              math_error("Error reading packet from WSTP");
+              math_error("Error sending packet through WSTP");
               return *this;
             }
 
+            /* Wait to receive a packet from the kernel */
+            int pkt;
+            while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
+            {
+              WSNewPacket(_WSlink);
+              if (WSError(_WSlink))
+              {
+                math_error("Error reading packet from WSTP");
+                return *this;
+              }
+            }
+
+            /* Read the received packet into the return value, unless it's void */
+            if(!boost::is_same<TYPE, void>::value)
+            {
+              if(!boost::is_same<TYPE, int>::value and
+                 !boost::is_same<TYPE, float>::value and
+                 !boost::is_same<TYPE, double>::value and
+                 !boost::is_same<TYPE, bool>::value and
+                 !boost::is_same<TYPE, char>::value and
+                 !boost::is_same<TYPE, str>::value)
+                backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
+              else if(!WSGetVariable(_WSlink, &_var))
+              {
+                math_error("Error reading packet from WSTP");
+                return *this;
+              }
+
+            }
+
+            _var = val;
+
           }
 
-          _var = val;
-
+          catch (std::exception &e) { ini_catch(e); }
+      
           return *this;
 
         }
@@ -183,7 +195,68 @@ namespace Gambit
 
 
         // Cast operator for type TYPE
-        operator TYPE const() { return _var; }
+        operator TYPE const() 
+        {
+        
+          try
+          {
+            /* If TYPE is a numeric type, send N first */
+            if(boost::is_same<TYPE, int>::value or
+               boost::is_same<TYPE, float>::value or
+               boost::is_same<TYPE, double>::value)
+              if(!WSPutFunction(_WSlink, "N", 1))
+              {
+                math_error("Error sending packet through WSTP");
+                return _var;
+              }
+
+            /* Send the variable symbol */
+            if(!WSPutSymbol(_WSlink, _symbol.c_str()))
+            {
+              math_error("Error sending packet through WSTP");
+              return _var;
+            }
+
+            /* Mark the end of the message */
+            if(!WSEndPacket(_WSlink))
+            {
+              math_error("Error sending packet through WSTP");
+              return _var;
+            }
+
+            /* Wait to receive a packet from the kernel */
+            int pkt;
+            while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
+            {
+              WSNewPacket(_WSlink);
+              if (WSError(_WSlink))
+              {
+                math_error("Error reading packet from WSTP");
+                return _var;
+              }
+            }
+
+            /* Read the received packet into the return value, unless it's void */
+            if(!boost::is_same<TYPE, void>::value)
+            {
+              if(!boost::is_same<TYPE, int>::value and
+                 !boost::is_same<TYPE, float>::value and
+                 !boost::is_same<TYPE, double>::value and
+                 !boost::is_same<TYPE, bool>::value and
+                 !boost::is_same<TYPE, char>::value and
+                 !boost::is_same<TYPE, str>::value)
+                backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
+              else if(!WSGetVariable(_WSlink, &_var))
+                math_error("Error reading packet from WSTP");
+
+            }
+        
+          }
+
+          catch (std::exception &e) { ini_catch(e); }
+
+          return _var; 
+        }
 
         // Overloaded functions to get data through WSTP
         int WSGetVariable(WSLINK WSlink, int* val) { return WSGetInteger(WSlink, val); }
