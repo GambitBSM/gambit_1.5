@@ -82,6 +82,9 @@
 #define STRIP_str string
 #define STRIP_std std
 #define STRIP_const DUMMY
+#define STRIP_long DUMMY
+#define STRIP_short DUMMY
+#define STRIP_unsingned DUMMY
 #define STRIP_CONST(TYPE) STRIP_CONST_I(TYPE)
 #define STRIP_CONST_I(TYPE) CAT(STRIP_,TYPE)
 #define STRIP(TYPE) STRIP_CONST(STRIP_CONST(TYPE))
@@ -111,9 +114,6 @@
 
 /// Dummy macro for arguments to skip compiler warnings
 #define VOIDARG(R, DATA, INDEX, ELEM) (void)CAT(arg,INDEX);
-
-/// Test macro
-#define TEST(NAME,STUFF) int NAME##_stuff = print_stuff(STRINGIFY(STUFF));
 
 /// Backend function macro for mathematica
 #ifdef HAVE_MATHEMATICA
