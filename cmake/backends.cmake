@@ -32,6 +32,10 @@
 #          (c.weniger@uva.nl)
 #  \date 2015 Sep
 #
+#  \author Tomas Gonzalo
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Dec
+#
 #************************************************
 
 
@@ -102,7 +106,7 @@ set(name "superiso")
 set(ver "3.6")
 set(lib "libsuperiso")
 set(dl "http://superiso.in2p3.fr/download/${name}_v${ver}beta.tgz")  # Note "beta" suffix!
-set(md5 "0e1278a88dc2a7838e737edd53525978")
+set(md5 "84771f32a9dfa3957b2c842064adb82f")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 ExternalProject_Add(${name}_${ver}
   DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -381,7 +385,7 @@ set(name "susyhit")
 set(ver "1.5")
 set(lib "libsusyhit")
 set(dl "https://www.itp.kit.edu/~maggie/SUSY-HIT/susyhit.tar.gz")
-set(md5 "493c7ba3a07e192918d3412875fb386a")
+set(md5 "f18e67e0791c63330c39bc3d03f9a565")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 ExternalProject_Add(${name}_${ver}
@@ -649,3 +653,20 @@ ExternalProject_Add(${name}_${ver}
 BOSS_backend(${name} ${ver})
 add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 
+# SUSYHD
+set(name "susyhd")
+set(ver "1.0.2")
+set(dl "http://users.ictp.it/~${name}/v${ver}/SUSYHD.tgz")
+set(md5 "e831c3fa977552ff944e0db44db38e87")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+ExternalProject_Add(${name}_${ver}
+  DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+  SOURCE_DIR ${dir}
+  BUILD_IN_SOURCE 1
+  PATCH_COMMAND ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+set_as_default_version("backend" ${name} ${ver})

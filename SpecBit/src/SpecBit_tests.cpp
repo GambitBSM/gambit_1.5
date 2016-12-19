@@ -63,6 +63,9 @@ namespace Gambit
       int output= myPipe::BEreq::MathematicaTest(input1,input2);
       cout << "Testing Mathematica" << endl;
       cout << "Result : " << output << endl;
+
+      result = true;
+
     }
   
     /// Verify consistency of the contents of a Spectrum object of capability MSSMspectrum. 

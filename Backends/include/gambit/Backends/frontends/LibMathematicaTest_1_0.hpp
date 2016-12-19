@@ -33,7 +33,7 @@ BE_FUNCTION(VoidTest, void, (), "VoidTest", "MathematicaTest")
 BE_VARIABLE(Var, int, "Var", "MathematicaTest")
 BE_VARIABLE(Var2, double, "Var2", "MathematicaTest")
 
-/* Convenience functions (declaratiob) */
+/* Convenience functions (declarations) */
 BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&, const int&), "MathematicaTest")
 
 // Undefine macros toa void conflict with other backends

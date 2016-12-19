@@ -204,56 +204,75 @@ namespace Gambit
           err << "Unable to initialize WSTP environment" << endl;
           backend_warning().raise(LOCAL_INFO,err.str());
           Backends::backendInfo().works[be+ver] = false;
+          return 0;
         }
-        else
+
+        // This opens a WSTP connection 
+        std::stringstream WSTPflags;
+        #ifdef __APPLE__
+          WSTPflags << "-linkname " << MATHEMATICA_KERNEL << " -mathlink";
+        #else
+          WSTPflags << "-linkname math -mathlink";
+        #endif
+        pHandle = WSOpenString(WSenv, WSTPflags.str().c_str(), &WSerrno);
+        if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
         {
-          // This opens a WSTP connection 
-          std::stringstream WSTPflags;
-          #ifdef __APPLE__
-            WSTPflags << "-linkname " << MATHEMATICA_KERNEL << " -mathlink";
-          #else
-            WSTPflags << "-linkname math -mathlink";
-          #endif
-          pHandle = WSOpenString(WSenv, WSTPflags.str().c_str(), &WSerrno);
-          if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
-          {
-            err << "Unable to create link to the Kernel" << endl;
-            backend_warning().raise(LOCAL_INFO,err.str());
-            Backends::backendInfo().works[be+ver] = false;
-          }
-          else
-          {
-            // Tell WSTP to load up the Mathematica package of the backend
-            if(!WSPutFunction((WSLINK)pHandle, "Once", 1)
-               or !WSPutFunction((WSLINK)pHandle, "Get", 1)
-               or !WSPutString((WSLINK)pHandle, path.c_str())
-               or !WSEndPacket((WSLINK)pHandle))
-            {
-              err << "Error sending packet through WSTP" << endl;
-              backend_warning().raise(LOCAL_INFO,err.str());
-              Backends::backendInfo().works[be+ver] = false;
-            }
-             
-            // Jump to the end of this packet
-            // TODO: Check that the package has been loaded properly
-            int pkt;
-             while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
-              WSNewPacket((WSLINK)pHandle);
-            WSNewPacket((WSLINK)pHandle);
-
-            logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
-                     << LogTags::backends << LogTags::info << EOM;
-            Backends::backendInfo().works[be+ver] = true;
-
-            //TODO: Add this to die functions
-
-            //WSPutFunction((WSLINK)pHandle, "Exit", 0); 
-            //WSClose((WSLINK)pHandle);
-
-          }
-
-          //WSDeinitialize(WSenv);
+          err << "Unable to create link to the Kernel" << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+          backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
+          Backends::backendInfo().works[be+ver] = false;
+          WSNewPacket((WSLINK)pHandle);
+          return 0;
         }
+
+        // Tell WSTP to load up the Mathematica package of the backend
+        if(!WSPutFunction((WSLINK)pHandle, "Once", 1)
+             or !WSPutFunction((WSLINK)pHandle, "Get", 1)
+             or !WSPutString((WSLINK)pHandle, path.c_str())
+             or !WSEndPacket((WSLINK)pHandle))
+        {
+          err << "Error sending packet through WSTP" << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+          backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
+          Backends::backendInfo().works[be+ver] = false;
+          WSNewPacket((WSLINK)pHandle);
+          return 0;
+        }
+
+        // Jump to the end of this packet
+        int pkt;
+        while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
+          WSNewPacket((WSLINK)pHandle);
+
+        const char *failed;
+        if(!WSGetString((WSLINK)pHandle, &failed))
+        {
+          err << "Error reading package from WSTP" << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+          backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
+          Backends::backendInfo().works[be+ver] = false;
+          WSNewPacket((WSLINK)pHandle);
+          return 0;
+        }
+
+        if(str(failed) == "$Failed")
+        {
+          err << "Mathematica package could not be loaded" << endl;
+          backend_warning().raise(LOCAL_INFO,err.str());
+          Backends::backendInfo().works[be+ver] = false;
+          return 0;
+        }
+
+        logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
+                 << LogTags::backends << LogTags::info << EOM;
+        Backends::backendInfo().works[be+ver] = true;
+
+       //TODO: Add this to die functions
+
+       //WSPutFunction((WSLINK)pHandle, "Exit", 0); 
+       //WSClose((WSLINK)pHandle);
+
+       //WSDeinitialize(WSenv);
           
       #else
         std::ostringstream err;

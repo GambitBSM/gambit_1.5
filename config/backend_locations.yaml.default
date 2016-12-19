@@ -69,3 +69,5 @@ SUSY_HIT:
 libMathematicaTest:
   1.0:         ./Backends/examples/libMathematicaTest.m
 
+SUSYHD:
+  1.0.2:       ./Backends/installed/susyhd/1.0.2/SUSYHD.m

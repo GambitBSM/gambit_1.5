@@ -264,9 +264,9 @@ namespace Gambit
         int WSGetVariable(WSLINK WSlink, double* val) { return WSGetReal64(WSlink, val); } 
         int WSGetVariable(WSLINK WSlink, bool* val) 
         { 
-          str *val2;
-          int ret = WSGetSymbol(WSlink, (char **)val2); 
-          *val = (*val2 == "True");
+          const char *val2;
+          int ret = WSGetString(WSlink, &val2); 
+          *val = (str(val2) == "True");
           return ret;
         }
         int WSGetVariable(WSLINK WSlink, char* val) { return WSGetInteger8(WSlink, val); }
