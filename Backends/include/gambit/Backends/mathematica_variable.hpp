@@ -34,6 +34,48 @@ namespace Gambit
   namespace Backends
   {
   
+
+    // Overloaded functions to get data through WSTP
+    inline int WSGetVariable(WSLINK WSlink, int* val) { return WSGetInteger(WSlink, val); }
+    inline int WSGetVariable(WSLINK WSlink, float* val) { return WSGetReal32(WSlink, val); }
+    inline int WSGetVariable(WSLINK WSlink, double* val) { return WSGetReal64(WSlink, val); } 
+    inline int WSGetVariable(WSLINK WSlink, bool* val) 
+    { 
+      const char *val2;
+      int ret = WSGetString(WSlink, &val2); 
+      *val = (str(val2) == "True");
+      return ret;
+    }
+    inline int WSGetVariable(WSLINK WSlink, char* val)
+    { 
+      const char *val2;
+      int ret = WSGetString(WSlink, &val2);
+      *val = val2[0];
+      return ret;
+    }
+    inline int WSGetVariable(WSLINK WSlink, str* val) 
+    { 
+      const char *val2;
+      int ret = WSGetString(WSlink, &val2);
+      *val = str(val2);
+      return ret;
+    } 
+ 
+    // Overloaded functions to put data through WSTP
+    inline int WSPutVariable(WSLINK WSlink, int val) { return WSPutInteger32(WSlink, val); }
+    inline int WSPutVariable(WSLINK WSlink, float val) { return WSPutReal32(WSlink, val); }
+    inline int WSPutVariable(WSLINK WSlink, double val) { return WSPutReal64(WSlink, val); }
+    inline int WSPutVariable(WSLINK WSlink, bool val) 
+    { 
+      if(val)
+        return WSPutSymbol(WSlink, "True");
+      else
+        return WSPutSymbol(WSlink, "False");
+    }
+    inline int WSPutVariable(WSLINK WSlink, char val) { return WSPutString(WSlink, str(&val).c_str()); }
+    inline int WSPutVariable(WSLINK WSlink, str val) { return WSPutString(WSlink, val.c_str()); }
+ 
+    // Class mathematica_variable
     template <typename TYPE>
     class mathematica_variable
     {
@@ -257,38 +299,10 @@ namespace Gambit
 
           return _var; 
         }
-
-        // Overloaded functions to get data through WSTP
-        int WSGetVariable(WSLINK WSlink, int* val) { return WSGetInteger(WSlink, val); }
-        int WSGetVariable(WSLINK WSlink, float* val) { return WSGetReal32(WSlink, val); }
-        int WSGetVariable(WSLINK WSlink, double* val) { return WSGetReal64(WSlink, val); } 
-        int WSGetVariable(WSLINK WSlink, bool* val) 
-        { 
-          const char *val2;
-          int ret = WSGetString(WSlink, &val2); 
-          *val = (str(val2) == "True");
-          return ret;
-        }
-        int WSGetVariable(WSLINK WSlink, char* val) { return WSGetInteger8(WSlink, val); }
-        int WSGetVariable(WSLINK WSlink, str* val) {  return WSGetString(WSlink, (char **)val); } 
- 
-        // Overloaded functions to put data through WSTP
-        int WSPutVariable(WSLINK WSlink, int val) { return WSPutInteger32(WSlink, val); }
-        int WSPutVariable(WSLINK WSlink, float val) { return WSPutReal32(WSlink, val); }
-        int WSPutVariable(WSLINK WSlink, double val) { return WSPutReal64(WSlink, val); }
-        int WSPutVariable(WSLINK WSlink, bool val) 
-        { 
-          if(val)
-            return WSPutSymbol(WSlink, "True");
-          else
-            return WSPutSymbol(WSlink, "False");
-        }
-        int WSPutVariable(WSLINK WSlink, char val) {  return WSPutInteger8(WSlink, val); }
-        int WSPutVariable(WSLINK WSlink, str val) { return WSPutString(WSlink, (char *)val); }
-
     };
 
-  }
+
+ }
 }
 #endif /* __mathematica_variable_hpp__ */
 

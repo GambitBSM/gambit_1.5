@@ -29,6 +29,10 @@
 ///  \date 2014 Jan, Mar
 ///  \date 2015 Jan, Feb
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Dec
+///
 ///  *********************************************
 
 #ifndef __util_types_hpp__
@@ -521,6 +525,16 @@ namespace Gambit
   typedef double            Freal8;
   typedef long double       Freal16;
   
+
+  /// Types used for Mathematica backends
+  typedef void        MVoid;
+  typedef int         MInteger;
+  typedef double      MReal;
+  typedef bool        MBool;
+  typedef char        MChar;
+  typedef std::string MString;
+  template <typename T> using MList = std::vector<T>;
+
 
      
 }

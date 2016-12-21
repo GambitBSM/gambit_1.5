@@ -66,6 +66,8 @@
                        BOOST_PP_IF(IS_TYPE(bool, TYPE), Symbol,                                 \
                        BOOST_PP_IF(IS_TYPE(char, TYPE), String,                                 \
                        BOOST_PP_IF(IS_TYPE(string, TYPE), String, Unknown)))))))
+#define WSGET(VAR) WSGetVariable((WSLINK)pHandle, VAR)
+#define WSPUT(VAR) WSPutVariable((WSLINK)pHandle, VAR)
 
 #define WSARG(TYPE, ARG)                                                                        \
   BOOST_PP_IF(IS_TYPE(bool, TYPE), ARG ? "True" : "False",                                      \
@@ -78,13 +80,9 @@
 #define STRIP_double double
 #define STRIP_bool bool
 #define STRIP_char char
-#define STRIP_string string
 #define STRIP_str string
 #define STRIP_std std
 #define STRIP_const DUMMY
-#define STRIP_long DUMMY
-#define STRIP_short DUMMY
-#define STRIP_unsingned DUMMY
 #define STRIP_CONST(TYPE) STRIP_CONST_I(TYPE)
 #define STRIP_CONST_I(TYPE) CAT(STRIP_,TYPE)
 #define STRIP(TYPE) STRIP_CONST(STRIP_CONST(TYPE))
@@ -104,8 +102,9 @@
  
 /// Macros for sending data through WSTP
 #define WSPUTARG(R, TYPE, INDEX, ELEM)                                                          \
-  if(!CAT(WSPut,WSTPTYPE(STRIP(ELEM)))                                                          \
-      ((WSLINK)pHandle, WSARG(STRIP(ELEM),CAT(arg,INDEX))))                                     \
+  /*if(!CAT(WSPut,WSTPTYPE(STRIP(ELEM)))                                                          \
+     ((WSLINK)pHandle, WSARG(STRIP(ELEM),CAT(arg,INDEX)))) */                                     \
+   if(!WSPutVariable((WSLINK)pHandle,CAT(arg,INDEX))) \
   {                                                                                             \
       MATH_ERROR(TYPE,"Error sending packet through WSTP");                                     \
   }                                                                                             \
