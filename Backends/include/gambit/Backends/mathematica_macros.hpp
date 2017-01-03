@@ -56,16 +56,6 @@
 #define FUNCTION_ARGS(ARGLIST) BOOST_PP_SEQ_TO_TUPLE(FUNCTION_ARGS_SEQ(ARGLIST))
 
 /// Macros for identifying WSTP types
-#define WSPutVoid(...) 1
-#define WSPutUnknown(...) 0
-#define WSGetUnknown(...) 0
-#define WSTPTYPE(TYPE) BOOST_PP_IF(IS_TYPE(void, TYPE), Void,                                   \
-                       BOOST_PP_IF(IS_TYPE(int, TYPE), Integer32,                               \
-                       BOOST_PP_IF(IS_TYPE(float, TYPE), Real32,                                \
-                       BOOST_PP_IF(IS_TYPE(double, TYPE), Real64,                               \
-                       BOOST_PP_IF(IS_TYPE(bool, TYPE), Symbol,                                 \
-                       BOOST_PP_IF(IS_TYPE(char, TYPE), String,                                 \
-                       BOOST_PP_IF(IS_TYPE(string, TYPE), String, Unknown)))))))
 #define WSGET(VAR) WSGetVariable((WSLINK)pHandle, VAR)
 #define WSPUT(VAR) WSPutVariable((WSLINK)pHandle, VAR)
 
@@ -102,9 +92,7 @@
  
 /// Macros for sending data through WSTP
 #define WSPUTARG(R, TYPE, INDEX, ELEM)                                                          \
-  /*if(!CAT(WSPut,WSTPTYPE(STRIP(ELEM)))                                                          \
-     ((WSLINK)pHandle, WSARG(STRIP(ELEM),CAT(arg,INDEX)))) */                                     \
-   if(!WSPutVariable((WSLINK)pHandle,CAT(arg,INDEX))) \
+  if(!WSPutVariable((WSLINK)pHandle,CAT(arg,INDEX)))                                            \
   {                                                                                             \
       MATH_ERROR(TYPE,"Error sending packet through WSTP");                                     \
   }                                                                                             \
@@ -169,15 +157,11 @@
             /* Read the received packet into the return value, unless it's void */              \
             BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)),                                             \
               WSNewPacket((WSLINK)pHandle);,                                                    \
-              BOOST_PP_IF(IS_TYPE(bool, STRIP(TYPE)), const char *val;                          \
-                if(!WSGetString((WSLINK)pHandle, &val)),                                        \
-                BOOST_PP_IF(IS_TYPE(string, STRIP(TYPE)), const char *val;, TYPE val;)          \
-                if (!CAT(WSGet,WSTPTYPE(STRIP(TYPE)))((WSLINK)pHandle, &val))                   \
-              )                                                                                 \
+              TYPE val;                                                                         \
+              if(!WSGetVariable((WSLINK)pHandle, &val))                                         \
               {                                                                                 \
                 MATH_ERROR(TYPE,"Error reading packet from WSTP")                               \
               }                                                                                 \
-              BOOST_PP_IF(IS_TYPE(bool, STRIP(TYPE)), return (str(val) == "True");, DUMMY)      \
               BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), return ;, return val;)                    \
             )                                                                                   \
           }                                                                                     \
