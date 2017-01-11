@@ -63,7 +63,17 @@
   BOOST_PP_IF(IS_TYPE(bool, TYPE), ARG ? "True" : "False",                                      \
     BOOST_PP_IF(IS_TYPE(string, TYPE), ARG.c_str(), ARG))
 
+/// Macro for identifying numeric types
+#define IS_NUMERIC(TYPE)                                                                        \
+  IS_TYPE(int, STRIP(TYPE)) || IS_TYPE(float, STRIP(TYPE)) || IS_TYPE(double, STRIP(TYPE)) 
+
 // Macros for stripping to basic types
+#define STRIP_MVoid void
+#define STRIP_MInteger int
+#define STRIP_MReal double
+#define STRIP_MBool bool
+#define STRIP_MChar char
+#define STRIP_MString string
 #define STRIP_void void
 #define STRIP_int int
 #define STRIP_float float
@@ -96,7 +106,7 @@
   {                                                                                             \
       MATH_ERROR(TYPE,"Error sending packet through WSTP");                                     \
   }                                                                                             \
-  else (void)CAT(arg,INDEX);
+//  else (void)CAT(arg,INDEX);
   
 
 /// Dummy macro for arguments to skip compiler warnings
@@ -121,7 +131,7 @@
           try                                                                                   \
           {                                                                                     \
             /* If TYPE is a numeric type, send N first */                                       \
-            if(IS_TYPE(TYPE, int) or IS_TYPE(TYPE, float) or IS_TYPE(TYPE, double))             \
+            if(IS_NUMERIC(TYPE))                                                                \
               if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                       \
               {                                                                                 \
                 MATH_ERROR(TYPE,"Error sending packet throught WSTP")                           \

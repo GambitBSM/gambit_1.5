@@ -60,6 +60,20 @@ namespace Gambit
       *val = str(val2);
       return ret;
     } 
+    template <typename T> inline int WSGetVariable(WSLINK WSlink, std::vector<T>* val)
+    {
+      long int dim;
+      if(!WSCheckFunction(WSlink, "List", &dim))
+        return 0;
+      for(int i=0; i<dim; i++) 
+      {
+        T value;
+        if(!WSGetVariable(WSlink, &value))
+          return 0;
+        val->push_back(value);
+      }
+      return 1;
+    }  
  
     // Overloaded functions to put data through WSTP
     inline int WSPutVariable(WSLINK WSlink, int val) { return WSPutInteger32(WSlink, val); }
@@ -74,6 +88,15 @@ namespace Gambit
     }
     inline int WSPutVariable(WSLINK WSlink, char val) { return WSPutString(WSlink, str(&val).c_str()); }
     inline int WSPutVariable(WSLINK WSlink, str val) { return WSPutString(WSlink, val.c_str()); }
+    template <typename T> inline int WSPutVariable(WSLINK WSlink, std::vector<T> val)
+    {
+      if(!WSPutFunction(WSlink, "List", val.size()))
+        return 0; 
+      for(auto it = val.begin(); it != val.end(); it++)
+        if(!WSPutVariable(WSlink, *it))
+          return 0;
+      return 1;
+    }
  
     // Class mathematica_variable
     template <typename TYPE>

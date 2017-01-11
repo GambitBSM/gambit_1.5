@@ -35,3 +35,9 @@ StringTest[var_]:="This is not a test, "<>ToString[var];
 
 
 VoidTest[]:=Var=Var+1;
+
+
+ExtractElement[list_,i_]:=list[[i]]
+
+
+SquareList[list_]:=Table[list[[i]]^2,{i,Length[list]}]

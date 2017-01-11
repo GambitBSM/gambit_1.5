@@ -22,16 +22,18 @@ LOAD_LIBRARY
 
 BE_ALLOW_MODELS(CMSSM)
 
-BE_FUNCTION(CalculateSquare, double, (const int&), "CalculateSquare","MathematicaTest")
-BE_FUNCTION(CalculateSum, double, (const double&, const double&), "CalculateSum", "MathematicaTest")
-BE_FUNCTION(PrintVar, int, (), "PrintVar", "MathematicaTest")
-BE_FUNCTION(PrintVarorVar2, double, (const bool&), "PrintVarorVar2", "MathematicaTest")
-BE_FUNCTION(VarEqualVar2, bool, (), "VarEqualVar2", "MathematicaTest")
-BE_FUNCTION(StringTest, str, (const str&), "StringTest", "MathematicaTest")
-BE_FUNCTION(VoidTest, void, (), "VoidTest", "MathematicaTest")
+BE_FUNCTION(CalculateSquare, MReal, (const MInteger&), "CalculateSquare","MathematicaTest")
+BE_FUNCTION(CalculateSum, MReal, (const MReal&, const MReal&), "CalculateSum", "MathematicaTest")
+BE_FUNCTION(PrintVar, MInteger, (), "PrintVar", "MathematicaTest")
+BE_FUNCTION(PrintVarorVar2, MReal, (const MBool&), "PrintVarorVar2", "MathematicaTest")
+BE_FUNCTION(VarEqualVar2, MBool, (), "VarEqualVar2", "MathematicaTest")
+BE_FUNCTION(StringTest, MString, (const MString&), "StringTest", "MathematicaTest")
+BE_FUNCTION(VoidTest, MVoid, (), "VoidTest", "MathematicaTest")
+BE_FUNCTION(ExtractElement, MInteger, (const MList<MInteger>&, const MInteger&), "ExtractElement", "MathematicaTest")
+BE_FUNCTION(SquareList, MList<MInteger>, (const MList<MInteger>&), "SquareList", "MathematicaTest")
 
-BE_VARIABLE(Var, int, "Var", "MathematicaTest")
-BE_VARIABLE(Var2, double, "Var2", "MathematicaTest")
+BE_VARIABLE(Var, MInteger, "Var", "MathematicaTest")
+BE_VARIABLE(Var2, MReal, "Var2", "MathematicaTest")
 
 /* Convenience functions (declarations) */
 BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&, const int&), "MathematicaTest")

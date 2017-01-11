@@ -20,8 +20,8 @@
 
 LOAD_LIBRARY
 
-/*BE_FUNCTION(MHiggs, double, (MList), "MHiggs", "")
-BE_FUNCTION(DeltaMHiggs, double, (MList), "\[Delta]MHiggs", "")
+//BE_FUNCTION(MHiggs, double, (MList), "MHiggs", "")
+/*BE_FUNCTION(DeltaMHiggs, double, (MList), "\[Delta]MHiggs", "")
 BE_FUNCTION(SetSMParameters, void, (MReal, MReal), "SetSMParameters", "")
 */
 /* Convenience functions (declarations) */

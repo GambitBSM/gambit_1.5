@@ -56,6 +56,12 @@ BE_NAMESPACE
      cout << PrintVar() << endl;
      cout << *Var << endl;
 
+     MList<MInteger> list = {1,2,3,4,5,6};
+
+     cout << list << endl;
+     cout << ExtractElement(list, 3) << endl;
+     cout << SquareList(list) << endl;
+
      return CalculateSum(result1,result2);
 
   }
