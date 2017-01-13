@@ -16,6 +16,10 @@
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Jan
+///
 ///  *********************************************
 
 #include <algorithm>
@@ -918,6 +922,23 @@ namespace Gambit
       }
       result = 0.1;
       return;
+
+    }
+
+    /// Precision calculation of the Higgs mass by SUSYHD in the MSSM using the EFT approach
+    void SHD_mh(MReal &mh)
+    {
+      using namespace Pipes::SHD_mh;
+      const SubSpectrum& mssm = Dep::MSSM_spectrum->get_HE();
+
+      MList<MReal> parameterList = 
+      {
+        mssm.get(Par::dimensionless,"tanbeta"),
+        mssm.get(Par::mass1,"M0")
+      };
+      //mh = BEreq::SUSYHD_mh(parameterList);
+
+      return ;
 
     }
 

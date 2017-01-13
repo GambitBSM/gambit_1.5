@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend for SUSY.
+///  Frontend for SUSYHD.
 ///
 ///  *********************************************
 ///
@@ -20,10 +20,10 @@
 
 LOAD_LIBRARY
 
-//BE_FUNCTION(MHiggs, double, (MList), "MHiggs", "")
-/*BE_FUNCTION(DeltaMHiggs, double, (MList), "\[Delta]MHiggs", "")
-BE_FUNCTION(SetSMParameters, void, (MReal, MReal), "SetSMParameters", "")
-*/
+BE_FUNCTION(MHiggs, MReal, (const MList<MReal>&), "MHiggs", "SUSYHD_mh")
+BE_FUNCTION(DeltaMHiggs, MReal, (MList<MReal>&), "\[Delta]MHiggs", "SUSYHD_mh")
+BE_FUNCTION(SetSMparameters, MVoid, (const MReal&, const MReal&), "SetSMparameters", "SUSYHD_mh")
+
 /* Convenience functions (declarations) */
 
 BE_INI_FUNCTION {}

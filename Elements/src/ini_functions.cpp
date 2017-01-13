@@ -260,12 +260,14 @@ namespace Gambit
           err << "Mathematica package could not be loaded" << endl;
           backend_warning().raise(LOCAL_INFO,err.str());
           Backends::backendInfo().works[be+ver] = false;
+          WSNewPacket((WSLINK)pHandle);
           return 0;
         }
 
         logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                  << LogTags::backends << LogTags::info << EOM;
         Backends::backendInfo().works[be+ver] = true;
+        WSNewPacket((WSLINK)pHandle);
 
        //TODO: Add this to die functions
 
@@ -284,7 +286,6 @@ namespace Gambit
     catch (std::exception& e) { ini_catch(e); }
     return 0;
   }
-
 
   /// Load a backend library
   int loadLibrary(str be, str ver, str sv, void*& pHandle, bool with_BOSS)
@@ -401,6 +402,65 @@ namespace Gambit
     catch (std::exception& e) { ini_catch(e); }
     return 0;
   }
+
+  /// Disable a mathematica backend functor if the function is not found in the package
+  int set_math_backend_functor_status(functor& be_functor, str symbol_name, void *&pHandle)
+  {
+    bool present = Backends::backendInfo().works.at(be_functor.origin() + be_functor.version());
+    try
+    {
+      if (not present)
+      {
+        be_functor.setStatus(-1);
+      }
+      //else if(!WSCheckFunction((WSLINK)pHandle, symbol_name.c_str(), &dim))
+      else
+      {
+        std::ostringstream err;
+
+        if(!WSPutFunction((WSLINK)pHandle, "NameQ", 1) or 
+           !WSPutString((WSLINK)pHandle, symbol_name.c_str()))
+        {
+          err << "Error sending packet through WSTP." << std::endl;
+          backend_warning().raise(LOCAL_INFO, err.str());
+          be_functor.setStatus(-2);
+          return 1;
+        }
+
+        int pkt;
+        while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)
+        {
+          WSNewPacket((WSLINK)pHandle);
+          if (WSError((WSLINK)pHandle))
+          {
+            err << "Error reading packet from WSTP" << std::endl;
+            backend_warning().raise(LOCAL_INFO, err.str());
+            be_functor.setStatus(-2);
+            return 1;
+          }
+        }
+
+        const char *symbol_exists;
+        if(!WSGetString((WSLINK)pHandle, &symbol_exists))
+        {
+          err << "Error retrieving packet from WSTP." << std::endl;
+          backend_warning().raise(LOCAL_INFO, err.str());
+          be_functor.setStatus(-2);
+          return 1;
+        }
+        if(str(symbol_exists) == "False")
+        {
+          err << "Mathematica function " << symbol_name << " not found."  << std::endl
+              << "The backend function from this symbol will be disabled (i.e. get status = -2)" << std::endl;
+          backend_warning().raise(LOCAL_INFO, err.str());
+          be_functor.setStatus(-2);
+        }
+      }
+    }
+    catch (std::exception& e) { ini_catch(e); }
+    return 0;
+  }
+ 
 
   /// Disable a backend initialisation function if the backend is missing. 
   int set_BackendIniBit_functor_status(functor& ini_functor, str be, str v)

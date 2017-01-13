@@ -95,6 +95,9 @@ namespace Gambit
   /// Disable a backend functor if its library is missing or the symbol cannot be found. 
   int set_backend_functor_status(functor&, str);
 
+  /// Disable a mathematica backend functor if the function is not found in the package
+  int set_math_backend_functor_status(functor&, str, void *&);
+
   /// Disable a backend initialisation function if the backend is missing. 
   int set_BackendIniBit_functor_status(functor&, str, str);
 
