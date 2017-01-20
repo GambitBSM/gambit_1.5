@@ -1033,6 +1033,59 @@ namespace Gambit
 
     }
 
+    void SHD_HiggsMass(MReal& MHiggs)
+    {
+      using namespace Pipes::SHD_HiggsMass;
+
+      const Spectrum& fullspectrum = *Dep::unimproved_MSSM_spectrum;
+      //const SubSpectrum& spec = fullspectrum.get_HE();
+      SLHAea::Coll slhaea = fullspectrum.getSLHAea();
+
+      #ifdef SPECBIT_DEBUG
+        cout << "****** calling SHD_HiggsMass ******" << endl;
+      #endif
+
+      MList<MReal> parameterList = {
+        SLHAea::to<double>(slhaea.at("HMIX").at(2).at(1)), // tanbeta
+        SLHAea::to<double>(slhaea.at("MSOFT").at(1).at(1)), // M1
+        SLHAea::to<double>(slhaea.at("MSOFT").at(2).at(1)), // M2
+        SLHAea::to<double>(slhaea.at("MSOFT").at(3).at(1)), // M3
+        SLHAea::to<double>(slhaea.at("HMIX").at(1).at(1)), // mu
+        SLHAea::to<double>(slhaea.at("AU").at(3).at(2)), // At
+        SLHAea::to<double>(slhaea.at("MSOFT").at(43).at(1)), // mQ3
+        SLHAea::to<double>(slhaea.at("MSOFT").at(46).at(1)), // mU3
+        SLHAea::to<double>(slhaea.at("MSOFT").at(49).at(1)), // mD3
+        SLHAea::to<double>(slhaea.at("MSOFT").at(42).at(1)), // mQ2
+        SLHAea::to<double>(slhaea.at("MSOFT").at(45).at(1)), // mU2
+        SLHAea::to<double>(slhaea.at("MSOFT").at(48).at(1)), // mD2
+        SLHAea::to<double>(slhaea.at("MSOFT").at(41).at(1)), // mQ1
+        SLHAea::to<double>(slhaea.at("MSOFT").at(44).at(1)), // mU1
+        SLHAea::to<double>(slhaea.at("MSOFT").at(47).at(1)), // mD1
+        SLHAea::to<double>(slhaea.at("MSOFT").at(33).at(1)), // mL3
+        SLHAea::to<double>(slhaea.at("MSOFT").at(36).at(1)), // mE3
+        SLHAea::to<double>(slhaea.at("MSOFT").at(32).at(1)), // mL2
+        SLHAea::to<double>(slhaea.at("MSOFT").at(35).at(1)), // mE2
+        SLHAea::to<double>(slhaea.at("MSOFT").at(31).at(1)), // mL1
+        SLHAea::to<double>(slhaea.at("MSOFT").at(34).at(1)), // mE1
+        sqrt(SLHAea::to<double>(slhaea.at("HMIX").at(4).at(1))) // mA
+      };
+
+      cout << parameterList << endl;
+
+      MHiggs = BEreq::SUSYHD_MHiggs(parameterList);
+
+      #ifdef SPECBIT_DEBUG
+        cout << "****** calling SHD_DeltaHiggsMass ******" << endl;
+      #endif
+
+      MReal DeltaMHiggs = BEreq::SUSYHD_DeltaMHiggs(parameterList);
+ 
+      cout << "MHiggs = " << MHiggs << " +- " << DeltaMHiggs << endl; 
+
+      return ;
+
+    }
+
 
     /// @} End Gambit module functions
 

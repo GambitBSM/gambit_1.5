@@ -106,11 +106,13 @@
   {                                                                                             \
       MATH_ERROR(TYPE,"Error sending packet through WSTP");                                     \
   }                                                                                             \
-//  else (void)CAT(arg,INDEX);
-  
 
 /// Dummy macro for arguments to skip compiler warnings
 #define VOIDARG(R, DATA, INDEX, ELEM) (void)CAT(arg,INDEX);
+
+/// Macro for replacing any instances of \[ for \\[ so that names can have non-ASCII characters
+//#define MATH_REPLACE(NAME)                                                                     \
+  boost::replace_all(NAME, "\\[", "\\\\[");
 
 /// Backend function macro for mathematica
 #ifdef HAVE_MATHEMATICA
@@ -139,7 +141,9 @@
                                                                                                 \
             /* Send the symbol name next */                                                     \
             int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));            \
-            if(!WSPutFunction((WSLINK)pHandle, SYMBOLNAME, size))                               \
+            str symbol_name = SYMBOLNAME;                                                       \
+            boost::replace_all(symbol_name, "\\[", "\\\\[");                                    \
+            if(!WSPutFunction((WSLINK)pHandle, symbol_name.c_str(), size))                      \
             {                                                                                   \
               MATH_ERROR(TYPE,"Error sending packet through WSTP")                              \
             }                                                                                   \

@@ -413,12 +413,14 @@ namespace Gambit
       {
         be_functor.setStatus(-1);
       }
-      //else if(!WSCheckFunction((WSLINK)pHandle, symbol_name.c_str(), &dim))
       else
       {
+        // Replace \[ for \\[ so that names can have non-ASCII characters
+        boost::replace_all(symbol_name, "\\[", "\\\\["); 
         std::ostringstream err;
-
         if(!WSPutFunction((WSLINK)pHandle, "NameQ", 1) or 
+           !WSPutFunction((WSLINK)pHandle, "ToString", 1) or
+           !WSPutFunction((WSLINK)pHandle, "ToExpression", 1) or
            !WSPutString((WSLINK)pHandle, symbol_name.c_str()))
         {
           err << "Error sending packet through WSTP." << std::endl;
@@ -448,6 +450,7 @@ namespace Gambit
           be_functor.setStatus(-2);
           return 1;
         }
+
         if(str(symbol_exists) == "False")
         {
           err << "Mathematica function " << symbol_name << " not found."  << std::endl

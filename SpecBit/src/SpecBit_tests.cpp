@@ -64,10 +64,25 @@ namespace Gambit
       cout << "Testing Mathematica" << endl;
       cout << "Result : " << output << endl;
 
+
       result = true;
 
     }
-  
+ 
+    void SUSYHD_test(bool &result)
+    {
+      using namespace Pipes::SUSYHD_test;
+
+      const MReal &mh = *Dep::prec_HiggsMasses;
+
+      cout << "mh = " << mh << endl;
+
+      if(!mh) result = false;
+      else result = true;
+
+      return ;
+    }
+ 
     /// Verify consistency of the contents of a Spectrum object of capability MSSMspectrum. 
     /// (derived from old 'exampleRead' function)
     void MSSMspectrum_test (bool &result)
@@ -796,7 +811,6 @@ namespace Gambit
        std::cout << " light quark test finished, bailing out!" << std::endl;
        exit(0);
     }
-
   }
 
 }

@@ -30,10 +30,6 @@
 ///          (anders.kvellestad@nordita.org)
 ///  \date 2016 Feb
 ///
-///  \author Tomas Gonzalo
-///          (t.e.gonzalo@fys.uio.no)
-///  \date 2017 Jan
-///
 ///  *********************************************
 
 
@@ -201,18 +197,6 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY 
-
-  // Precision calculation of the Higgs mass by SUSYHD in the MSSM using the EFT approach
-  #define CAPABILITY SHD_mh
-  START_CAPABILITY
-    // Higgs mass
-    #define FUNCTION SHD_mh
-    START_FUNCTION(MReal)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
- //   BACKEND_REQ(SUSYHD_mh, (), MReal, (const MList<MReal>&))
-    #undef FUNCTION
-
-  #undef CAPABILITY
 
 #undef MODULE
 

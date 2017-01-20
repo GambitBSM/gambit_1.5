@@ -17,6 +17,10 @@
 ///          (christophersrogan@gmail.com)
 ///  \date 2015 Apr
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Jan
+///
 ///  *********************************************
 
 #ifndef __SpecBit_MSSM_hpp__
@@ -172,6 +176,14 @@
     BACKEND_OPTION( (FeynHiggs), (libfeynhiggs) )
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
+
+    #define FUNCTION SHD_HiggsMass
+    START_FUNCTION(MReal)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    BACKEND_REQ(SUSYHD_MHiggs, (), MReal, (const MList<MReal>&))
+    BACKEND_REQ(SUSYHD_DeltaMHiggs, (), MReal, (const MList<MReal>&))
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION 
   #undef CAPABILITY 
 
   // FeynHiggs Higgs couplings

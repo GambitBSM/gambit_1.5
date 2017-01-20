@@ -31,6 +31,11 @@
      BACKEND_REQ(MathematicaTest, (), double, (const int&,const int&))
      #undef FUNCTION
 
+     #define FUNCTION SUSYHD_test
+     START_FUNCTION(bool)
+     DEPENDENCY(prec_HiggsMasses, MReal)
+     #undef FUNCTION 
+
    #undef CAPABILITY
 
    #define CAPABILITY run_MSSMspectrum_test
@@ -40,7 +45,7 @@
      START_FUNCTION(bool)                  
      DEPENDENCY(unimproved_MSSM_spectrum, /*TAG*/ Spectrum)
      #undef FUNCTION
-   
+
    #undef CAPABILITY
  
    #define CAPABILITY run_light_quark_test

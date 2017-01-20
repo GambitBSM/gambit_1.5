@@ -20,14 +20,17 @@
 
 LOAD_LIBRARY
 
-BE_FUNCTION(MHiggs, MReal, (const MList<MReal>&), "MHiggs", "SUSYHD_mh")
-BE_FUNCTION(DeltaMHiggs, MReal, (MList<MReal>&), "\[Delta]MHiggs", "SUSYHD_mh")
-BE_FUNCTION(SetSMparameters, MVoid, (const MReal&, const MReal&), "SetSMparameters", "SUSYHD_mh")
+BE_ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+
+BE_FUNCTION(MHiggs, MReal, (const MList<MReal>&), "MHiggs", "SUSYHD_MHiggs")
+BE_FUNCTION(DeltaMHiggs, MReal, (const MList<MReal>&), "\\[CapitalDelta]MHiggs", "SUSYHD_DeltaMHiggs")
+BE_FUNCTION(SetSMparameters, MVoid, (const MReal&, const MReal&), "SetSMparameters", "SUSYHD_SetSMparameters")
 
 /* Convenience functions (declarations) */
 
-BE_INI_FUNCTION {}
-END_BE_INI_FUNCTION
+// Initialisation function (dependencies)
+BE_INI_DEPENDENCY(SMINPUTS, SMInputs)
+BE_INI_DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
 
 // Undefine macros toa void conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
