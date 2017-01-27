@@ -178,7 +178,7 @@
     #undef FUNCTION
 
     #define FUNCTION SHD_HiggsMass
-    START_FUNCTION(MReal)
+    START_FUNCTION(shd_HiggsMassObs)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
     BACKEND_REQ(SUSYHD_MHiggs, (), MReal, (const MList<MReal>&))
     BACKEND_REQ(SUSYHD_DeltaMHiggs, (), MReal, (const MList<MReal>&))

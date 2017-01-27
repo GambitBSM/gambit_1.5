@@ -33,7 +33,7 @@
 
      #define FUNCTION SUSYHD_test
      START_FUNCTION(bool)
-     DEPENDENCY(prec_HiggsMasses, MReal)
+     DEPENDENCY(prec_HiggsMasses, shd_HiggsMassObs)
      #undef FUNCTION 
 
    #undef CAPABILITY

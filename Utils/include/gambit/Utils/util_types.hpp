@@ -527,12 +527,12 @@ namespace Gambit
   
 
   /// Types used for Mathematica backends
-  typedef void        MVoid;
-  typedef int         MInteger;
-  typedef double      MReal;
-  typedef bool        MBool;
-  typedef char        MChar;
-  typedef std::string MString;
+  typedef void         MVoid;
+  typedef int          MInteger;
+  typedef double       MReal;
+  typedef bool         MBool;
+  typedef char         MChar;
+  typedef std::string  MString;
   template <typename T> using MList = std::vector<T>;
 
 

@@ -110,10 +110,6 @@
 /// Dummy macro for arguments to skip compiler warnings
 #define VOIDARG(R, DATA, INDEX, ELEM) (void)CAT(arg,INDEX);
 
-/// Macro for replacing any instances of \[ for \\[ so that names can have non-ASCII characters
-//#define MATH_REPLACE(NAME)                                                                     \
-  boost::replace_all(NAME, "\\[", "\\\\[");
-
 /// Backend function macro for mathematica
 #ifdef HAVE_MATHEMATICA
   #define BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)               \
@@ -132,6 +128,24 @@
                                                                                                 \
           try                                                                                   \
           {                                                                                     \
+                                                                                                \
+            /* Modify the symbol to allow for non-ASCII characters */                           \
+            int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));            \
+            str symbol_name = SYMBOLNAME;                                                       \
+            boost::replace_all(symbol_name, "\\[", "\\\\[");                                    \
+            if(symbol_name != SYMBOLNAME)                                                       \
+            {                                                                                   \
+              WSPutFunction((WSLINK)pHandle, "Set", 2);                                         \
+              WSPutSymbol((WSLINK)pHandle, STRINGIFY(NAME));                                    \
+              WSPutFunction((WSLINK)pHandle, "ToExpression",1);                                 \
+              WSPutString((WSLINK)pHandle, symbol_name.c_str());                                \
+              symbol_name = STRINGIFY(NAME);                                                    \
+              int pkt;                                                                          \
+              while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)            \
+               WSNewPacket((WSLINK)pHandle);                                                    \
+              WSNewPacket((WSLINK)pHandle);                                                     \
+            }                                                                                   \
+                                                                                                \
             /* If TYPE is a numeric type, send N first */                                       \
             if(IS_NUMERIC(TYPE))                                                                \
               if(!WSPutFunction((WSLINK)pHandle, "N", 1))                                       \
@@ -139,10 +153,7 @@
                 MATH_ERROR(TYPE,"Error sending packet throught WSTP")                           \
               }                                                                                 \
                                                                                                 \
-            /* Send the symbol name next */                                                     \
-            int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));            \
-            str symbol_name = SYMBOLNAME;                                                       \
-            boost::replace_all(symbol_name, "\\[", "\\\\[");                                    \
+            /* Send the symbol name now */                                                      \
             if(!WSPutFunction((WSLINK)pHandle, symbol_name.c_str(), size))                      \
             {                                                                                   \
               MATH_ERROR(TYPE,"Error sending packet through WSTP")                              \
@@ -174,6 +185,7 @@
               TYPE val;                                                                         \
               if(!WSGetVariable((WSLINK)pHandle, &val))                                         \
               {                                                                                 \
+                cout << WSErrorMessage((WSLINK)pHandle) << endl; \
                 MATH_ERROR(TYPE,"Error reading packet from WSTP")                               \
               }                                                                                 \
               BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), return ;, return val;)                    \

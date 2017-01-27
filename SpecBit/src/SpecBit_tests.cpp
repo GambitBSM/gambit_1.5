@@ -73,11 +73,11 @@ namespace Gambit
     {
       using namespace Pipes::SUSYHD_test;
 
-      const MReal &mh = *Dep::prec_HiggsMasses;
+      const shd_HiggsMassObs &mh = *Dep::prec_HiggsMasses;
 
-      cout << "mh = " << mh << endl;
+      cout << "mh = " << mh.MH << " +- "  << mh.deltaMH << endl;
 
-      if(!mh) result = false;
+      if(!mh.MH) result = false;
       else result = true;
 
       return ;

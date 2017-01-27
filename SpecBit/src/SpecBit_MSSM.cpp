@@ -1033,7 +1033,7 @@ namespace Gambit
 
     }
 
-    void SHD_HiggsMass(MReal& MHiggs)
+    void SHD_HiggsMass(shd_HiggsMassObs& HiggsMass)
     {
       using namespace Pipes::SHD_HiggsMass;
 
@@ -1070,9 +1070,7 @@ namespace Gambit
         sqrt(SLHAea::to<double>(slhaea.at("HMIX").at(4).at(1))) // mA
       };
 
-      cout << parameterList << endl;
-
-      MHiggs = BEreq::SUSYHD_MHiggs(parameterList);
+      MReal MHiggs = BEreq::SUSYHD_MHiggs(parameterList);
 
       #ifdef SPECBIT_DEBUG
         cout << "****** calling SHD_DeltaHiggsMass ******" << endl;
@@ -1081,6 +1079,9 @@ namespace Gambit
       MReal DeltaMHiggs = BEreq::SUSYHD_DeltaMHiggs(parameterList);
  
       cout << "MHiggs = " << MHiggs << " +- " << DeltaMHiggs << endl; 
+
+      HiggsMass.MH = MHiggs;
+      HiggsMass.deltaMH = DeltaMHiggs;
 
       return ;
 
