@@ -1009,5 +1009,13 @@ START_MODULE
     ALLOW_MODELS(Halo_gNFW, Halo_Einasto)
     #undef FUNCTION
   #undef CAPABILITY
+
+  #define CAPABILITY testLike
+  START_CAPABILITY
+    #define FUNCTION lHood
+    START_FUNCTION(double)
+    ALLOW_MODEL(Simple_test)
+    #undef FUNCTION
+  #undef CAPABILITY
 #undef MODULE
 #endif /* defined(__DarkBit_rollcall_hpp__) */
