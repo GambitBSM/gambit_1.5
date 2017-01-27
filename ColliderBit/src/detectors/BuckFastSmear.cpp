@@ -24,13 +24,13 @@ namespace Gambit {
 
       // Electron smearing and efficiency
       /// @todo Run-dependence?
-      ATLAS::applyElectronTrackingEff(eventOut.electrons());
+      //ATLAS::applyElectronTrackingEff(eventOut.electrons());
       ATLAS::smearElectronEnergy(eventOut.electrons());
       ATLAS::applyElectronEff(eventOut.electrons());
 
       // Muon smearing and efficiency
       /// @todo Run-dependence?
-      ATLAS::applyMuonTrackEff(eventOut.muons());
+      //ATLAS::applyMuonTrackEff(eventOut.muons());
       ATLAS::smearMuonMomentum(eventOut.muons());
       ATLAS::applyMuonEff(eventOut.muons());
 
@@ -42,10 +42,9 @@ namespace Gambit {
       // Smear jet momenta
       ATLAS::smearJets(eventOut.jets());
 
-      // Unset b-tags outside |eta|=5
-      /// @todo Same as DELPHES... but surely we can't actually do b-tags outside |eta| < 2.5? (or even less, due to jet radius)
+      // Unset b-tags outside |eta|=2.5
       for (HEPUtils::Jet* j : eventOut.jets()) {
-        if (j->abseta() > 5.0) j->set_btag(false);
+        if (j->abseta() > 2.5) j->set_btag(false);
       }
     }
 
@@ -59,12 +58,12 @@ namespace Gambit {
 
       //MJW debug- make this the same as ATLAS temporarily
       // Electron smearing and efficiency
-      CMS::applyElectronTrackingEff(eventOut.electrons());
+      //CMS::applyElectronTrackingEff(eventOut.electrons());
       CMS::smearElectronEnergy(eventOut.electrons());
       CMS::applyElectronEff(eventOut.electrons());
 
       // Muon smearing and efficiency
-      CMS::applyMuonTrackEff(eventOut.muons());
+      //CMS::applyMuonTrackEff(eventOut.muons());
       CMS::smearMuonMomentum(eventOut.muons());
       CMS::applyMuonEff(eventOut.muons());
 
@@ -76,28 +75,9 @@ namespace Gambit {
       // Smear jet momenta
       CMS::smearJets(eventOut.jets());
 
-      // Electron smearing and efficiency
-      /*ATLAS::applyElectronTrackingEff(eventOut.electrons());
-      ATLAS::smearElectronEnergy(eventOut.electrons());
-      ATLAS::applyElectronEff(eventOut.electrons());
-
-      // Muon smearing and efficiency
-      ATLAS::applyMuonTrackEff(eventOut.muons());
-      ATLAS::smearMuonMomentum(eventOut.muons());
-      ATLAS::applyMuonEff(eventOut.muons());
-
-      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
-      //ATLAS::applyTauEfficiency(eventOut.taus());
-      //Smear taus
-      ATLAS::smearTaus(eventOut.taus());
-
-      // Smear jet momenta
-      ATLAS::smearJets(eventOut.jets());*/
-
-      // Unset b-tags outside |eta|=5
-      /// @todo Same as DELPHES... but surely we can't actually do b-tags outside |eta| < 2.5? (or even less, due to jet radius)
+      // Unset b-tags outside |eta|=2.5
       for (HEPUtils::Jet* j : eventOut.jets()) {
-        if (j->abseta() > 5.0) j->set_btag(false);
+        if (j->abseta() > 2.5) j->set_btag(false);
       }
     }
 
@@ -117,28 +97,24 @@ namespace Gambit {
         const Pythia8::Particle& p = pevt[i];
 
         // Find last b-hadrons in b decay chains as the best proxy for b-tagging
-        if(p.idAbs()==5) {
-          std::vector<int> bDaughterList = p.daughterList();
-          bool isGoodB=true;
-
+        /// @todo Temporarily using quark-based tagging instead -- fix
+        if (p.idAbs() == 5) {
+          bool isGoodB = true;
+          const std::vector<int> bDaughterList = p.daughterList();
           for (size_t daughter = 0; daughter < bDaughterList.size(); daughter++) {
             const Pythia8::Particle& pDaughter = pevt[bDaughterList[daughter]];
             int daughterID = pDaughter.idAbs();
-            if(daughterID == 5)isGoodB=false;
+            if (daughterID == 5) isGoodB = false;
           }
-
-          if(isGoodB){
+          if (isGoodB)
             bpartons.push_back(HEPUtils::Particle(mk_p4(p.p()), p.id()));
-          }
-
         }
 
         // Find tau candidates
         if (p.idAbs() == MCUtils::PID::TAU) {
-          std::vector<int> tauDaughterList = p.daughterList();
           HEPUtils::P4 tmpMomentum;
           bool isGoodTau=true;
-
+          const std::vector<int> tauDaughterList = p.daughterList();
           for (size_t daughter = 0; daughter < tauDaughterList.size(); daughter++) {
             const Pythia8::Particle& pDaughter = pevt[tauDaughterList[daughter]];
             int daughterID = pDaughter.idAbs();
