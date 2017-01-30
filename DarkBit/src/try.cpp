@@ -20,15 +20,42 @@ namespace Gambit
 {
   namespace DarkBit
   {
+    double getSE(double arr[])
+    {
+     int i, size = 40000;
+      double mean = 0.5;
+      double SE = 0, SE_num = 0;
+      for(i=0; i<size; i++)
+      {
+          SE_num += pow((arr[i]-mean),2);
+      }
+      SE = SE_num/(size*(size-1));
+      return SE;
+    }
     void lHood(double& result)
     {
       using namespace Pipes::lHood;
-      double y_mean = 0.5;
-      //double x = *Param["x"];
+      double x = *Param["x"];
       double y = *Param["y"];
-      //ln L = (-(y[i]-y0)^2)/(2*(del_y[i]^2))
-      //ln L = (-(y[i]-y0)^2)/(2*(del_y[i]^2)) + step function
-      result = pow((y-y_mean),2);
+      double y_arr[];
+      double m = 0.5;
+      int j, s = 40000;
+      for(j=0; j<s; j++)
+      {
+          y_arr[j] = y;
+      }
+      double SE;
+      SE = getSE(y_arr);
+//      ln L = (-(y[i]-y0)^2)/(2*(del_y[i]^2))
+//      ln L = (-(y[i]-y0)^2)/(2*(del_y[i]^2)) + step function
+      if(y<m)
+      {
+        result = 0.0;
+      }
+      else
+      {
+        result = -pow((y-m),2)/(2*SE);
+      }
     }
   }
 }

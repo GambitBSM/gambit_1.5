@@ -18,7 +18,7 @@ Scanner:
       plugin: square_grid
       version: ">=1.0"
       like: Observable
-      grid_pts: 10
+      grid_pts: 200
 
 ObsLikes:
   - capability: testLike
