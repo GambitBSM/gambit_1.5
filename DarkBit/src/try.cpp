@@ -37,7 +37,7 @@ namespace Gambit
       using namespace Pipes::lHood;
       double x = *Param["x"];
       double y = *Param["y"];
-      double y_arr[];
+      double y_arr[40000];
       double m = 0.5;
       int j, s = 40000;
       for(j=0; j<s; j++)
