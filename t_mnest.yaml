@@ -19,14 +19,14 @@ Scanner:
       like: LogLike
       nlive: 1000
 
-Obslikes:
+ObsLikes:
   - capability: testLike
     purpose: LogLike
 
 KeyValues:
 
   likelihood:
-    model_invalid_for_lnlike_below: -1e7
+    model_invalid_for_lnlike_below: -1e10
     debug: true
 
   default_output_path: "runs/test/" 
