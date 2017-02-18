@@ -5,14 +5,14 @@
 ///
 ///  Functions that do super fast CMS detector simulation based on four vector smearing.
 
-#include <random>
-#include <algorithm>
-
 #include "gambit/ColliderBit/Utils.hpp"
 
 #include "HEPUtils/MathUtils.h"
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
+
+#include <random>
+#include <algorithm>
 
 namespace Gambit {
   namespace ColliderBit {
