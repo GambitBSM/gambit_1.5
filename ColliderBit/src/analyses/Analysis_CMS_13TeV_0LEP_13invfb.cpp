@@ -36,8 +36,6 @@ namespace Gambit {
         // FinalState cfs(Cuts::abseta < 2.5 && Cuts::abscharge != 0);
 
         // Get baseline jets
-        /// @todo Drop b-tag if pT < 50 GeV or |eta| > 2.5?
-        /// @note b-tag effs: b: 0.55, c: 0.12, l: 0.016
         vector<const Jet*> jets24, jets50;
         for (const Jet* jet : event->jets()) {
           if (jet->pT() < 30) continue;
@@ -140,7 +138,8 @@ namespace Gambit {
         const size_t inj = binIndex(nj, njedges, true);
         size_t nbj = 0;
         for (const Jet* j : jets24)
-          if (j->btag()) nbj += 1;
+          /// @note b-tag effs: b: 0.55, c: 0.12, l: 0.016
+          if (j->btag() && j->pT() > 50 && j->abseta() < 2.5 && rand01() < 0.55) nbj += 1;
         const size_t inbj = binIndex(nbj, njbedges, true);
         // HTmiss vs HT 2D bin
         int iht = 0;

@@ -26,26 +26,14 @@ namespace Gambit {
       static const size_t NUMSR = 13;
       double _srnums[13] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
-
-      // vector<int> cutFlowVector;
-      // vector<string> cutFlowVector_str;
-      // size_t NCUTS; //=16;
-
-
       Analysis_ATLAS_13TeV_0LEP_13invfb() {
         set_luminosity(13.3);
-        // NCUTS=60;
-        // for (size_t i=0;i<NCUTS;i++){
-        //   cutFlowVector.push_back(0);
-        //   cutFlowVector_str.push_back("");
-        // }
       }
 
 
       void analyze(const Event* event) {
 
         HEPUtilsAnalysis::analyze(event);
-
 
         // Missing energy
         const P4 pmiss = event->missingmom();
