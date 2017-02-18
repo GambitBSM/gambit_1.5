@@ -39,11 +39,11 @@ namespace Gambit {
         counts[0] += 1;
       }
 
-      /// @brief Fill the @a {icut}'th post-cut counter
+      /// @brief Fill the @a {icut}'th post-cut counter, starting at icut=1 for first cut
       ///
       /// @note Returns the cut result to allow 'side-effect' cut-flow filling in an if-statement
-      bool fill(size_t icut, bool cutresult) {
-        if (cutresult) counts[icut+1] += 1;
+      bool fill(size_t icut, bool cutresult=true) {
+        if (cutresult) counts[icut] += 1;
         return cutresult;
       }
 
