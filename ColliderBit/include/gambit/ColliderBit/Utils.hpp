@@ -48,6 +48,14 @@ namespace Gambit {
     }
 
 
+    template <typename NUM1, typename NUM2>
+    inline size_t binIndex(NUM1 val, const std::vector<NUM2>& binedges, bool allow_overflow=false) {
+      if (val < binedges.front()) return -1; ///< Below/out of histo range
+      if (val >= binedges.back()) return allow_overflow ? int(binedges.size())-1 : -1; ///< Above/out of histo range
+      return std::distance(binedges.begin(), --std::upper_bound(binedges.begin(), binedges.end(), val));
+    }
+
+
     /// Make a vector of central bin values from a vector of bin edge values using linear interpolation
     inline std::vector<double> makeBinValues(const std::vector<double>& binEdgeValues) {
       std::vector<double> results;
