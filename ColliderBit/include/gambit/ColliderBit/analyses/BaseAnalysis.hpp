@@ -25,6 +25,9 @@ namespace Gambit {
   namespace ColliderBit {
 
 
+    static const double GeV = 1, MeV = 1e-3, TeV = 1e3;
+
+
     /// A simple container for the result of one signal region from one analysis.
     struct SignalRegionData {
 
