@@ -150,9 +150,12 @@ namespace Gambit {
         static const vector<double> njbedges = {0., 1., 2., 3.};
         const size_t inj = binIndex(nj, njedges, true);
         size_t nbj = 0;
-        for (const Jet* j : jets24)
-          /// @note b-tag effs: b: 0.55, c: 0.12, l: 0.016
-          if (j->btag() && j->pT() > 50 && j->abseta() < 2.5 && rand01() < 0.55) nbj += 1;
+        for (const Jet* j : jets24) {
+          if (j->pT() < 50 && j->abseta() > 2.5) continue;
+          // b-tag effs: b: 0.55, c: 0.12, l: 0.016
+          const bool btagged = rand01() < (j->btag() ? 0.55 : j->ctag() ? 0.12 : 0.016);
+          if (btagged) nbj += 1;
+        }
         const size_t inbj = binIndex(nbj, njbedges, true);
         // HTmiss vs HT 2D bin
         int iht = 0;
