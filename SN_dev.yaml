@@ -1,0 +1,65 @@
+# YAML for sterile neutrino scans
+
+Parameters:
+
+  SN_dev:
+    M_1:
+      range: [0, 2]
+    M_2:
+      range: [0, 2]
+    M_3:
+      range: [0, 2]
+    ReOm23:
+      range: [0, 6.2830]
+    ImOm23:
+      range: [-8, 8]
+    ReOm13:
+      range: [0, 6.2830]
+    ImOm13:
+      range: [-8,8]
+    ReOm12:
+      range: [0, 6.2830]
+    ImOm12:
+      range: [-8,8]
+    alpha1:
+      range: [0, 6.2830]
+    alpha2:
+      range: [0, 6.2830]
+    delta:
+      range: [0, 6.2830]
+    ordering:
+      fixed_value: 1
+    min_mass:
+      fixed_value: 0
+
+Priors:
+
+Printer:
+
+  printer: hdf5
+  options:
+    output_file: "SN_dev.hdf5"
+    delete_file_if_exists: true
+
+Scanner:
+
+  use_scanner: multinest
+
+  scanners:
+    multinest:
+      plugin: MultiNest
+      like: Observable
+      nlive: 50
+
+ObsLikes:
+
+  - capability: SN_stuff
+    purpose: Observable
+
+KeyValues:
+
+  likelihood:
+    model_invalid_for_lnlike_below: -1e10
+    debug: true
+
+  default_output_path: "runs/SN_dev/"

@@ -1016,5 +1016,13 @@ START_MODULE
     ALLOW_MODEL(Simple_test)
     #undef FUNCTION
   #undef CAPABILITY
+
+  #define CAPABILITY SN_stuff
+  START_CAPABILITY
+    #define FUNCTION CI_param
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY
 #undef MODULE
 #endif /* defined(__DarkBit_rollcall_hpp__) */
