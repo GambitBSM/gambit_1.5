@@ -8,7 +8,7 @@ Parameters:
 Printer:
   printer: hdf5
   options:
-    output_file: "test_multinest.hdf5"
+    output_file: "test_multinest_2.hdf5"
     delete_file_if_exists: true
 
 Scanner:
@@ -17,7 +17,7 @@ Scanner:
     multinest:
       plugin: MultiNest
       like: LogLike
-      nlive: 1000
+      nlive: 200
 
 ObsLikes:
   - capability: testLike
@@ -29,4 +29,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/test/" 
+  default_output_path: "runs/test_2/" 
