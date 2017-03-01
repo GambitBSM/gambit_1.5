@@ -822,22 +822,22 @@ namespace Gambit
 
       // xsec veto
       if (not eventsGenerated) {
-        logger() << "This point was xsec vetoed." << EOM;
+        logger() << "This point was xsec-vetoed." << EOM;
         result = 0.;
         return;
       }
+
+
       ColliderLogLikes analysisResults;
       if(useBuckFastATLASDetector)
-        analysisResults.insert(analysisResults.end(),
-                Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
+        analysisResults.insert(analysisResults.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
       if(useBuckFastCMSDetector)
-        analysisResults.insert(analysisResults.end(),
-                Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
-#ifndef EXCLUDE_DELPHES
-      if(useDelphesDetector)
-        analysisResults.insert(analysisResults.end(),
-                Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
-#endif // not defined EXCLUDE_DELPHES
+        analysisResults.insert(analysisResults.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
+      #ifndef EXCLUDE_DELPHES
+      if (useDelphesDetector)
+        analysisResults.insert(analysisResults.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
+      #endif
+
 
       // Loop over analyses and calculate the total observed dll
       double total_dll_obs = 0;
@@ -860,14 +860,21 @@ namespace Gambit
           const double n_predicted_exact = 0;
 
           // A contribution to the predicted number of events that is not known exactly
+          const double n_predicted_uncertain_s = srData.n_signal_at_lumi;
           const double n_predicted_uncertain_b = srData.n_background;
-          const double n_predicted_uncertain_sb = srData.n_signal_at_lumi + srData.n_background;
+          const double n_predicted_uncertain_sb = n_predicted_uncertain_s + n_predicted_uncertain_b;
 
-          // Relative error for n_predicted_uncertain
-          const double uncertainty_b = srData.background_sys/srData.n_background;
-          /// @todo Include a scaled statistical uncertainty on the signal count
-          const double uncertainty_sb = sqrt(srData.background_sys*srData.background_sys + srData.signal_sys*srData.signal_sys) / n_predicted_uncertain_sb;
+          // Absolute errors for n_predicted_uncertain_*
+          const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
+          const double abs_uncertainty_s_sys = srData.signal_sys;
+          const double abs_uncertainty_b = srData.background_sys;
+          const double abs_uncertainty_sb = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys, abs_uncertainty_b);
 
+          // Relative errors for n_predicted_uncertain_*
+          const double frac_uncertainty_b = abs_uncertainty_b / n_predicted_uncertain_b;
+          const double frac_uncertainty_sb = abs_uncertainty_sb / n_predicted_uncertain_sb;
+
+          // Predicted total background, as an integer for use in Poisson functions
           const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
 
           #ifdef COLLIDERBIT_DEBUG
@@ -878,24 +885,24 @@ namespace Gambit
             logger() << "  NEvents, scaled  to luminosity :  " << endl;
             logger() << "    " << srData.n_signal_at_lumi << endl;
             logger() << "  NEvents (b [rel err], sb [rel err]):" << endl;
-            logger() << "    " << n_predicted_uncertain_b << " [" << uncertainty_b << "] "
-                     << n_predicted_uncertain_sb << " [" << uncertainty_sb << "]" << EOM;
+            logger() << "    " << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%] "
+                     << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << EOM;
           #endif
 
           double llb_exp = 0, llsb_exp = 0, llb_obs = 0, llsb_obs = 0;
           // Use a log-normal distribution for the nuisance parameter (more correct)
           if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") {
-            llb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, uncertainty_b);
-            llsb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, uncertainty_sb);
-            llb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, uncertainty_b);
-            llsb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, uncertainty_sb);
+            llb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+            llsb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+            llb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+            llsb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
           }
           // Use a Gaussian distribution for the nuisance parameter (marginally faster)
           else if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_gaussian_error") {
-            llb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, uncertainty_b);
-            llsb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, uncertainty_sb);
-            llb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, uncertainty_b);
-            llsb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, uncertainty_sb);
+            llb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+            llsb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+            llb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+            llsb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
           }
 
           // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
