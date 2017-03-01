@@ -38,30 +38,33 @@ namespace Gambit {
         /// Randomly filter the supplied particle list by parameterised electron efficiency
         /// @note Should be applied after the electron energy smearing
         inline void applyElectronEff(std::vector<HEPUtils::Particle*>& electrons) {
-          static HEPUtils::BinnedFn2D<double> _elEff2d({{0,1.5,2.5,DBL_MAX}}, {{0,10.,DBL_MAX}},
+          static HEPUtils::BinnedFn2D<double> _elEff2d({{0,1.5,2.5,DBL_MAX}}, //< |eta|
+                                                       {{0,10.,DBL_MAX}}, //< pT
                                                        {{0., 0.95,
                                                          0., 0.85,
-                                                         0.,0.}});
+                                                         0., 0.}});
           filtereff_etapt(electrons, _elEff2d);
         }
 
 
         /// Randomly filter the supplied particle list by parameterised muon tracking efficiency
         inline void applyMuonTrackEff(std::vector<HEPUtils::Particle*>& muons) {
-          static HEPUtils::BinnedFn2D<double> _muTrackEff2d({{0,1.5,2.5,DBL_MAX}}, {{0,0.1,1.0,DBL_MAX}},
+          static HEPUtils::BinnedFn2D<double> _muTrackEff2d({{0,1.5,2.5,DBL_MAX}}, //< |eta|
+                                                            {{0,0.1,1.0,DBL_MAX}}, //< pT
                                                             {{0., 0.75, 0.99,
-                                                              0.,0.70,0.98,
-                                                              0.,0.,0.}});
+                                                              0., 0.70, 0.98,
+                                                              0., 0.,   0.}});
           filtereff_etapt(muons, _muTrackEff2d);
         }
 
 
         /// Randomly filter the supplied particle list by parameterised muon efficiency
         inline void applyMuonEff(std::vector<HEPUtils::Particle*>& muons) {
-          static HEPUtils::BinnedFn2D<double> _muEff2d({{0,1.5,2.7,DBL_MAX}}, {{0,10.0,DBL_MAX}},
+          static HEPUtils::BinnedFn2D<double> _muEff2d({{0,1.5,2.7,DBL_MAX}}, //< |eta|
+                                                       {{0,10.0,DBL_MAX}}, //< pT
                                                        {{0., 0.95,
-                                                         0.,0.85,
-                                                         0.,0.}});
+                                                         0., 0.85,
+                                                         0., 0.}});
           filtereff_etapt(muons, _muEff2d);
         }
 
