@@ -56,6 +56,8 @@
 #define __DarkBit_rollcall_hpp__
 
 #include "gambit/DarkBit/DarkBit_types.hpp"
+#include <Eigen/Sparse>
+#include <Eigen/Dense>
 
 #define MODULE DarkBit
 START_MODULE
@@ -1019,10 +1021,29 @@ START_MODULE
 
   #define CAPABILITY SN_stuff
   START_CAPABILITY
+
     #define FUNCTION CI_param
-    START_FUNCTION(double)
+    START_FUNCTION(Eigen::Matrix3d)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
+
+    #define FUNCTION printable_CI
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+ 
   #undef CAPABILITY
+
+  #define CAPABILITY lnLikelihood
+  START_CAPABILITY
+
+    #define FUNCTION lnL
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, double)
+
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
 #undef MODULE
 #endif /* defined(__DarkBit_rollcall_hpp__) */

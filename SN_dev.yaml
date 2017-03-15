@@ -28,9 +28,9 @@ Parameters:
     delta:
       range: [0, 6.2830]
     ordering:
-      fixed_value: 1
+      fixed_value: 1  # 1: normal ordering, 0: inverse ordering
     min_mass:
-      fixed_value: 0
+      fixed_value: 0  # 0: massless, 1: 0.23 eV
 
 Priors:
 
@@ -48,13 +48,34 @@ Scanner:
   scanners:
     multinest:
       plugin: MultiNest
-      like: Observable
+      like: LogLike
       nlive: 50
 
 ObsLikes:
 
   - capability: SN_stuff
     purpose: Observable
+    function: printable_CI
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
+  - capability: lnLikelihood
+    purpose: LogLike
+    function: lnL
+    dependencies:
+      - capability: SN_stuff
+        type: double
+
+Rules:
+
+  - capability: SN_stuff
+    type: Matrix3d
+    function: CI_param
+
+  - capability: SN_stuff
+    type: double
+    function: printable_CI
 
 KeyValues:
 

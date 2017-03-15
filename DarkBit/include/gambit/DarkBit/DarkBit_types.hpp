@@ -59,7 +59,6 @@
 #include "gambit/DarkBit/ProcessCatalog.hpp"
 #include "gambit/Elements/daFunk.hpp"
 
-
 namespace Gambit
 {
 

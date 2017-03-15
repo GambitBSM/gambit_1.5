@@ -15,34 +15,28 @@
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/DarkBit/DarkBit_rollcall.hpp"
+#include "gambit/Elements/numerical_constants.hpp"
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <cmath>
 #include <complex>
 #include <iomanip>
+using namespace Eigen;
 
 namespace Gambit
 {
-
   namespace DarkBit
-  {
-
+  { 
     double l_M(double M)
     {
-
-      const double pi = 3.14159265;
       const double m_Z = 91.1876;  // GeV
       const double m_H = 125.09;  // GeV
-      return 1/pow(4*pi,2) * ( (3*log(pow(M/m_Z,2)))/((pow(M/m_Z,2))-1) + (log(pow(M/m_H,2)))/((pow(M/m_H,2))-1));
-    
+      return 1.0/pow(4.0*pi, 2.0) * ( (3.0*log(pow(M/m_Z, 2.0)))/((pow(M/m_Z, 2.0)) - 1.0) + (log(pow(M/m_H, 2.0)))/((pow(M/m_H, 2.0)) - 1.0));
     }
 
-    void CI_param(double& result)
-   
+    void CI_param(Matrix3d& result)   
     {
-
-      using namespace Eigen;
       using namespace Pipes::CI_param;
       typedef std::complex<double> dcomp;
       static double v = 246.0;  // GeV
@@ -53,7 +47,7 @@ namespace Gambit
       static double theta13 = 0.1483;  // rad
       static double theta12 = 0.5843;  // rad
       dcomp I(0.0, 1.0);
-      Matrix3d M_I;  // not complex matrix to avoid type mismatch
+      Matrix3d M_I;  // not complex; circumvents type mismatch in l(M)
       Matrix3cd M_twid_temp;
       Matrix3cd M_twid;
       Matrix3cd R_23;
@@ -68,7 +62,9 @@ namespace Gambit
       Matrix3cd U_nd;
       Matrix3cd Maj_phase;
       Matrix3cd U_nu;
-      Matrix3cd Theta;
+      Matrix3cd t;
+      Matrix3d t_sq;
+      std::vector<double> temp1(3);
       double x23 = *Param["ReOm23"];
       double y23 = *Param["ImOm23"];
       double x13 = *Param["ReOm13"];
@@ -181,10 +177,34 @@ namespace Gambit
                    0.0, 0.0, 1.0;
       U_nu = V_23 * U_pd * V_13 * U_nd* V_12 * Maj_phase;
 
-      Theta = I * U_nu * m_nu.sqrt() * R * M_twid.inverse();
+      t = I * U_nu * m_nu.sqrt() * R * M_twid.inverse();
+      result = t.cwiseAbs2();
+    }
 
-      result = pow(abs(Theta(0,0)),2.0);
+    void lnL(double& lnLike)
+    {
+      static double m = 1e-7;
+      static double s = 2e-18;
+      namespace lnLPipe = Pipes::lnL;
+      double mixing_sq(*lnLPipe::Dep::SN_stuff);
+      lnLike = -(pow((mixing_sq - m), 2.0))/s;
+    }
 
+    void printable_CI(double& Theta_sq)
+    {
+      namespace myPipe = Pipes::printable_CI;
+      std::vector<double> temp1(9);
+      Matrix3d t_sq(*myPipe::Dep::SN_stuff);
+      temp1[0] = t_sq(0,0);
+      temp1[1] = t_sq(0,1);
+      temp1[2] = t_sq(0,2);
+      temp1[3] = t_sq(1,0);
+      temp1[4] = t_sq(1,1);
+      temp1[5] = t_sq(1,2);
+      temp1[6] = t_sq(2,0);
+      temp1[7] = t_sq(2,1);
+      temp1[8] = t_sq(2,2);
+      Theta_sq = temp1[0] + temp1[3] + temp1[6];
     }
 
   }
