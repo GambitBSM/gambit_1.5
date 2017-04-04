@@ -215,7 +215,7 @@ def first_simple_type_equivalent(candidate_in, equivs, nses, existing):
         sys.exit(1)
     return common_elements.pop()+candidate_suffix
 
-# Strips all whitespaces from a string, but re-inserts a single regular space after "const".
+# Strips all whitespaces from a string, but re-inserts a single regular space after "const" or "struct".
 def strip_ws(s, qualifiers):
     for q in qualifiers:
         s = re.sub(q+"\s*", q+"__TEMP_SPACE__", s)
@@ -230,6 +230,8 @@ def addiffunctormacro(line,module,all_modules,typedict,typeheaders,intrinsic_typ
                      "QUICK_FUNCTION":5,
                      "DEPENDENCY":2,
                      "MODEL_CONDITIONAL_DEPENDENCY":2,
+                     "INTERPRET_AS_PARENT_DEPENDENCY":2,
+                     "INTERPRET_AS_X_DEPENDENCY":2,
                      "START_CONDITIONAL_DEPENDENCY":1,
                      "BE_INI_DEPENDENCY":2,
                      "BE_INI_CONDITIONAL_DEPENDENCY":2}
@@ -237,7 +239,7 @@ def addiffunctormacro(line,module,all_modules,typedict,typeheaders,intrinsic_typ
     line = re.sub(";", "", line)
     splitline = neatsplit('\(|\)|,|\s',line)
 
-    qualifier_list = ["const"]
+    qualifier_list = ["const", "struct"]
     typeset = typedict["all"]
 
     if len(splitline)>1 and splitline[0] in command_index.keys():
@@ -313,7 +315,7 @@ def addifbefunctormacro(line,be_typeset,type_pack_set,equiv_classes,equiv_ns,ver
     line = re.sub(";", "", line)
     splitline = neatsplit('\(|\)|,|\s',line)
 
-    qualifier_list = ["const"]
+    qualifier_list = ["const", "struct"]
 
     if len(splitline)>1 and splitline[0] in command_index.keys():
         #This line defines a backend functor and one or more of the arguments defines a candidate type
