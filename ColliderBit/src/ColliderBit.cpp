@@ -2,8 +2,7 @@
 ///  *********************************************
 ///  \file
 ///
-///  Functions of ColliderBit_eventLoop. Based
-///  heavily on the ExampleBit_A Functions
+///  Functions of ColliderBit_eventLoop.
 ///
 ///  *********************************************
 ///
@@ -124,7 +123,7 @@ namespace Gambit
                              BASE_FINALIZE = -6};
 
     /// Pythia stuff
-    std::vector<str> pythiaNames, pythiaCommonOptions;
+    std::vector<str> pythiaNames;
     std::vector<str>::const_iterator iterPythiaNames;
     unsigned int indexPythiaNames;
     bool eventsGenerated;
@@ -176,7 +175,6 @@ namespace Gambit
       // Clear global containers and variables
       // 
       pythiaNames.clear();
-      pythiaCommonOptions.clear();
       iterPythiaNames = pythiaNames.cbegin();
       indexPythiaNames = 0;
 
@@ -294,6 +292,7 @@ namespace Gambit
       static str pythia_doc_path;
       static str default_doc_path;
       static bool pythia_doc_path_needs_setting = true;
+      static std::vector<str> pythiaCommonOptions;
       static SLHAstruct slha;
       static SLHAstruct spectrum;
       static std::vector<double> xsec_vetos;
@@ -346,6 +345,13 @@ namespace Gambit
         pythiaCommonOptions.clear();
         if (runOptions->hasKey(*iterPythiaNames))
           pythiaCommonOptions = runOptions->getValue<std::vector<str>>(*iterPythiaNames);
+
+        // Although we capture all couts, still we tell Pythia to be quiet....
+        pythiaCommonOptions.push_back("Print:quiet = on");
+        // .... except for showProcesses, which we need for the xsec veto.
+        pythiaCommonOptions.push_back("Init:showProcesses = on");
+        pythiaCommonOptions.push_back("SLHA:verbose = 0");
+        pythiaCommonOptions.push_back("SLHA:file = slhaea");
       }
 
       else if (*Loop::iteration == START_SUBPROCESS)
@@ -361,16 +367,11 @@ namespace Gambit
         // Thus, the actual Pythia initialization is
         // *after* COLLIDER_INIT, within omp parallel.
 
-        result = SpecializablePythia();
-        // result.clear();
+        result.clear();
 
+        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
+        // and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
-        // Although we capture all couts, still we tell Pythia to be quiet....
-        pythiaOptions.push_back("Print:quiet = on");
-        // .... except for showProcesses, which we need for the xsec veto.
-        pythiaOptions.push_back("Init:showProcesses = on");
-        pythiaOptions.push_back("SLHA:verbose = 0");
-        pythiaOptions.push_back("SLHA:file = slhaea");
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
@@ -448,6 +449,7 @@ namespace Gambit
       static std::vector<str> filenames;
       static str default_doc_path;
       static str pythia_doc_path;
+      static std::vector<str> pythiaCommonOptions;
       static bool pythia_doc_path_needs_setting = true;
       static unsigned int fileCounter = 0;
       static std::vector<double> xsec_vetos;
@@ -490,6 +492,13 @@ namespace Gambit
         pythiaCommonOptions.clear();
         if (runOptions->hasKey(*iterPythiaNames))
           pythiaCommonOptions = runOptions->getValue<std::vector<str>>(*iterPythiaNames);
+
+        // Although we capture all couts, still we tell Pythia to be quiet....
+        pythiaCommonOptions.push_back("Print:quiet = on");
+        // .... except for showProcesses, which we need for the xsec veto.
+        pythiaCommonOptions.push_back("Init:showProcesses = on");
+        pythiaCommonOptions.push_back("SLHA:verbose = 0");
+        pythiaCommonOptions.push_back("SLHA:file = " + filenames.at(fileCounter));
       }
 
 
@@ -506,18 +515,13 @@ namespace Gambit
         // Thus, the actual Pythia initialization is
         // *after* COLLIDER_INIT, within omp parallel.
 
-        result = SpecializablePythia();
-        // result.clear();
+        result.clear();
 
         if (omp_get_thread_num() == 0) logger() << "Reading SLHA file: " << filenames.at(fileCounter) << EOM;
 
+        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
+        // and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
-        // Although we capture all couts, still we tell Pythia to be quiet....
-        pythiaOptions.push_back("Print:quiet = on");
-        // .... except for showProcesses, which we need for the xsec veto.
-        pythiaOptions.push_back("Init:showProcesses = on");
-        pythiaOptions.push_back("SLHA:verbose = 0");
-        pythiaOptions.push_back("SLHA:file = " + filenames.at(fileCounter));
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
