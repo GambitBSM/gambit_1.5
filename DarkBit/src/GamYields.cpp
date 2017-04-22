@@ -13,6 +13,10 @@
 ///          (c.weniger@uva.nl)
 ///  \date 2013 Jul - 2015 May
 ///
+///  \author Sebastian Wild
+///          (sebastian.wild@ph.tum.de)
+///  \date 2016 Aug
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -445,6 +449,17 @@ namespace Gambit {
             daFunk::var("Ecm")/2);                                    \
         result.addChannel(dNdE, str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);
 
+// the following routine adds an annhilation channel, for which the yields are extrapolated below Ecm_ToScale
+// using the approximation that x*dN/dx is a constant function of the dark matter mass.
+#define ADD_CHANNEL_WITH_SCALING(ch, P1, P2, FINAL, EcmMin, EcmMax, Ecm_ToScale)                \
+        daFunk::Funk Ecm_ToUse = fmax(Ecm_ToScale, daFunk::var("Ecm"));    \
+        daFunk::Funk ScalingFactor = Ecm_ToUse/daFunk::var("Ecm");      \
+        dNdE = ScalingFactor * daFunk::func_fromThreadsafe(                           \
+            BEreq::dshayield.pointer(), daFunk::var("mwimp"),         \
+            ScalingFactor * daFunk::var("E"), ch, yieldk, flag)->set("mwimp",         \
+            Ecm_ToUse/2);                                    \
+        result.addChannel(dNdE, str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);
+
         // specifies also center of mass energy range
         ADD_CHANNEL(12, "Z0", "Z0", "gamma", 2*90.288, 2*mDM_max)
         ADD_CHANNEL(13, "W+", "W-", "gamma", 2*79.4475, 2*mDM_max)
@@ -461,9 +476,10 @@ namespace Gambit {
         ADD_CHANNEL(22, "c", "cbar", "gamma", 2*std::max(mDM_min, 1.35), 2*mDM_max)
         //ADD_CHANNEL(23, "s", "sbar", "gamma", 0., 2*mDM_max)  // Zero
         ADD_CHANNEL(22, "s", "sbar", "gamma", 2*std::max(mDM_min, 1.35), 2*mDM_max)  // approx by cc
-        ADD_CHANNEL(24, "t", "tbar", "gamma", 2*173.25, 2*mDM_max)
+        ADD_CHANNEL_WITH_SCALING(24, "t", "tbar", "gamma", 2*160.0, 2*mDM_max, 2*173.3)
         ADD_CHANNEL(25, "b", "bbar", "gamma", 2*std::max(mDM_min, 5.0), 2*mDM_max)
         ADD_CHANNEL(26, "g", "g", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)
+#undef ADD_CHANNEL_WITH_SCALING
 #undef ADD_CHANNEL
 
         // Add approximations for single-particle cases.
@@ -482,9 +498,15 @@ namespace Gambit {
         dNdE = daFunk::func_fromThreadsafe(BEreq::dshayield.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 19, yieldk, flag);
         result.addChannel(dNdE/2, str_flav_to_mass("tau+"), "gamma", std::max(mDM_min, 1.7841), mDM_max);
         result.addChannel(dNdE/2, str_flav_to_mass("tau-"), "gamma", std::max(mDM_min, 1.7841), mDM_max);
-        dNdE = daFunk::func_fromThreadsafe(BEreq::dshayield.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 24, yieldk, flag);
-        result.addChannel(dNdE/2, str_flav_to_mass("t"),    "gamma", 173.25, mDM_max);
-        result.addChannel(dNdE/2, str_flav_to_mass("tbar"), "gamma", 173.25, mDM_max);
+
+        double Ecm_ToScale_top = 173.3;
+        daFunk::Funk Ecm_ToUse_top = fmax(Ecm_ToScale_top, daFunk::var("Ecm")); 
+        daFunk::Funk ScalingFactor_top = Ecm_ToUse_top/daFunk::var("Ecm");
+        dNdE = ScalingFactor_top * daFunk::func_fromThreadsafe(                           \
+            BEreq::dshayield.pointer(), Ecm_ToUse_top,         \
+            ScalingFactor_top * daFunk::var("E"), 24, yieldk, flag);  
+        result.addChannel(dNdE/2, str_flav_to_mass("t"), "gamma", 160.0, mDM_max);
+        result.addChannel(dNdE/2, str_flav_to_mass("tbar"), "gamma", 160.0, mDM_max);
 
         // add channels with "mixed final states", i.e. final state particles with (potentially) different masses        
         daFunk::Funk Ecm = daFunk::var("Ecm");
@@ -581,18 +603,27 @@ namespace Gambit {
         dNdE = daFunk::func_fromThreadsafe(BEreq::dNdE.pointer(), daFunk::var("Ecm"), daFunk::var("E"), inP, outN)/daFunk::var("E"); \
         result.addChannel(dNdE, str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);  // specifies also center of mass energy range
 
+// the following routine adds an annhilation channel, for which the yields are extrapolated below Ecm_ToScale
+// using the approximation that x*dN/dx is a constant function of the dark matter mass.
+#define ADD_CHANNEL_WITH_SCALING(inP, P1, P2, FINAL, EcmMin, EcmMax, Ecm_ToScale)             \
+        daFunk::Funk Ecm_ToUse = fmax(Ecm_ToScale, daFunk::var("Ecm"));    \
+	daFunk::Funk ScalingFactor = Ecm_ToUse/daFunk::var("Ecm");      \
+        dNdE = ScalingFactor * daFunk::func_fromThreadsafe(BEreq::dNdE.pointer(), Ecm_ToUse, ScalingFactor * daFunk::var("E"), inP, outN)/(ScalingFactor * daFunk::var("E")); \
+        result.addChannel(dNdE, str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);
+
         ADD_CHANNEL(0, "g", "g", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(1, "d", "dbar", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(2, "u", "ubar", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(3, "s", "sbar", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(4, "c", "cbar", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(5, "b", "bbar", "gamma", 2*5., 2*mDM_max)
-        ADD_CHANNEL(6, "t", "tbar", "gamma", 2*174.24, 2*mDM_max)
+	ADD_CHANNEL_WITH_SCALING(6, "t", "tbar", "gamma", 2*160.0, 2*mDM_max, 2.0*176.0)
         ADD_CHANNEL(7, "e+", "e-", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(8, "mu+", "mu-", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(9, "tau+", "tau-", "gamma", 2*2., 2*mDM_max)
         ADD_CHANNEL(10, "Z0", "Z0", "gamma", 2*90.288, 2*mDM_max)
         ADD_CHANNEL(13, "W+", "W-", "gamma", 2*79.497, 2*mDM_max)
+#undef ADD_CHANNEL_WITH_SCALING
 #undef ADD_CHANNEL
         result.addChannel(
             daFunk::zero("Ecm", "E"), "nu_e", "nubar_e", "gamma", 2*2., 2*mDM_max);
@@ -619,10 +650,13 @@ namespace Gambit {
         result.addChannel(dNdE/2, "W-", "gamma", 79.497, mDM_max);
 
         // Add single particle lookup for t tbar to prevent them from being tagged as missing final states for cascades.
-        dNdE = (daFunk::func_fromThreadsafe(BEreq::dNdE.pointer(), daFunk::var("_Ecm"), daFunk::var("E"), 6, outN)
-               /daFunk::var("E"))->set("_Ecm", daFunk::var("Ecm")*2);
-        result.addChannel(dNdE/2, str_flav_to_mass("t"),    "gamma", 174.24, mDM_max);
-        result.addChannel(dNdE/2, str_flav_to_mass("tbar"), "gamma", 174.24, mDM_max);
+	double Ecm_ToScale_top = 176.0;
+        daFunk::Funk Ecm_ToUse_top = fmax(Ecm_ToScale_top, daFunk::var("Ecm")); 
+        daFunk::Funk ScalingFactor_top = Ecm_ToUse_top/daFunk::var("Ecm");
+        dNdE =  ScalingFactor_top * (daFunk::func_fromThreadsafe(BEreq::dNdE.pointer(), daFunk::var("_Ecm"), ScalingFactor_top * daFunk::var("E"), 6, outN)
+               /(ScalingFactor_top * daFunk::var("E")))->set("_Ecm", Ecm_ToUse_top*2.0);
+        result.addChannel(dNdE/2, str_flav_to_mass("t"),    "gamma", 160.0, mDM_max);
+        result.addChannel(dNdE/2, str_flav_to_mass("tbar"), "gamma", 160.0, mDM_max);
 
         // add channels with "mixed final states", i.e. final state particles with (potentially) different masses        
         daFunk::Funk Ecm = daFunk::var("Ecm");
@@ -707,37 +741,6 @@ namespace Gambit {
         initialized = true;
         DarkBit_error().raise(LOCAL_INFO,
             "SimYieldTable_PPPC is not implemented yet.  Use e.g. SimYieldTable_DarkSUSY instead.");
-      }
-    }
-
-    // Dark matter halo profiles
-    double profile_Einasto(double rhos, double rs, double alpha, double r)
-    { return rhos*exp(-1/alpha*(pow(r/rs, alpha)-1)); }
-    double profile_gNFW(double rhos, double rs, double alpha, double beta, double gamma, double r)
-    { return pow(2, (beta-gamma)/alpha)*rhos/pow(r/rs, gamma)/pow(1+pow(r/rs, alpha), (beta-gamma)/alpha); }
-
-    /*! \brief Generates dark matter halo for Milky Way
-     *
-     * This function returns the radial dark matter profile in units GeV/cm3
-     */
-    void GalacticHalo(daFunk::Funk & halo)
-    {
-      using namespace Pipes::GalacticHalo;
-      if (ModelInUse("GalacticHalo_Einasto"))
-      {
-        double rhos  = *Param["rhos"];
-        double rs    = *Param["rs"];
-        double alpha = *Param["alpha"];
-        daFunk::Funk profile = daFunk::func(profile_Einasto, rhos, rs, alpha, daFunk::var("r"));
-      }
-      if (ModelInUse("GalacticHalo_gNFW"))
-      {
-        double rhos  = *Param["rhos"];
-        double rs    = *Param["rs"];
-        double alpha = *Param["alpha"];
-        double beta  = *Param["beta"];
-        double gamma = *Param["gamma"];
-        daFunk::Funk profile = daFunk::func(profile_gNFW, rhos, rs, alpha, beta, gamma, daFunk::var("r"));
       }
     }
   }

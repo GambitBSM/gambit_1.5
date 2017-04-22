@@ -26,9 +26,13 @@
 #include "gambit/Utils/util_functions.hpp"
 
 
-namespace Gambit {
-  namespace DarkBit {
+namespace Gambit
+{
+  namespace DarkBit
+  {
 
+//#define DARKBIT_DEBUG
+//#define DARKBIT_RD_DEBUG
 
     //////////////////////////////////////////////////////////////////////////
     //
@@ -69,21 +73,20 @@ namespace Gambit {
       DS_PACODES *DSpart = &(*BEreq::pacodes);
       DS_MSPCTM *mymspctm= &(*BEreq::mspctm);
       DS_INTDOF *myintdof= &(*BEreq::intdof);
-      DS_WIDTHS *mywidths= &(*BEreq::widths);
 
       // first add neutralino=WIMP=least massive 'coannihilating particle'
       result.coannihilatingParticles.push_back(
           RD_coannihilating_particle(DSpart->kn(1),
           myintdof->kdof(DSpart->kn(1)),mymspctm->mass(DSpart->kn(1))));
 
-#ifdef DARKBIT_DEBUG
-      std::cout << "WIMP : "<< DSpart->kn(1) << " " <<
-          myintdof->kdof(DSpart->kn(1)) << " " << mymspctm->mass(DSpart->kn(1))
-          << std::endl;
-#endif
+      #ifdef DARKBIT_DEBUG
+        std::cout << "WIMP : "<< DSpart->kn(1) << " " <<
+            myintdof->kdof(DSpart->kn(1)) << " " << mymspctm->mass(DSpart->kn(1))
+            << std::endl;
+      #endif
 
       // FIXME: eventually, this function should not be BE-dependent anymore
-      // (i.e. SUSY particle conventions should follow GAMBUT, not DS etc)! 
+      // (i.e. SUSY particle conventions should follow GAMBUT, not DS etc)!
       // The use of any
       // DarkSUSY conventions need thus be moved to RD_annrate_DSprep_func
 
@@ -131,27 +134,28 @@ namespace Gambit {
       if (result.coannihilatingParticles.size() == 1)
         resmax -= 2;
 
-      for (int i=0; i<resmax; i++)
-      {
-        if (mymspctm->mass(reslist[i])/result.coannihilatingParticles[0].mass
-            > 2.)
-        {
+//      for (int i=0; i<resmax; i++)
+//      {
+//        if (mymspctm->mass(reslist[i])/result.coannihilatingParticles[0].mass
+//            > 2.)
+//        {
 
 /////////////////////////////
 /////////////////////////////
-// JONATHAN FIXME : please comment out everything and check whether this induces more 
+// JONATHAN FIXME : please comment out everything and check whether this induces more
 //           "dgdap ..." errros. Comment out from here
-          // DS-specific treatment of narrow Higgs width: is no longer needed here.
-          if (reslist[i]==BEreq::particle_code("h0_2") && mywidths->width(BEreq::particle_code("h0_2")) < 0.1)
-            // wide res treatment adopted in DS
-            result.resonances.push_back(
-                TH_Resonance(mymspctm->mass(reslist[i]), 0.1));
-          else
-            result.resonances.push_back(
-                TH_Resonance(
-                  mymspctm->mass(reslist[i]), mywidths->width(reslist[i])));
-        }
-      }
+//          // DS-specific treatment of narrow Higgs width: is no longer needed here.
+//          DS_WIDTHS *mywidths= &(*BEreq::widths);
+//          if (reslist[i]==BEreq::particle_code("h0_2") && mywidths->width(BEreq::particle_code("h0_2")) < 0.1)
+//            // wide res treatment adopted in DS
+//            result.resonances.push_back(
+//                TH_Resonance(mymspctm->mass(reslist[i]), 0.1));
+//          else
+//            result.resonances.push_back(
+//                TH_Resonance(
+//                  mymspctm->mass(reslist[i]), mywidths->width(reslist[i])));
+//        }
+//      }
 // to here
 /////////////////////////////
 /////////////////////////////
@@ -199,11 +203,11 @@ namespace Gambit {
       // FIXME: coannihilation thresholds have to be added once they are included
       // in the process catalog
 
-#ifdef DARKBIT_DEBUG
-      std::cout << "DM dof = " << 1+ DMproperty.spin2 << std::endl;
-//      std::cout << "Test : " << BEreq::particle_code("d_3")
-//      << " " << BEreq::particle_code("u_3") << std::endl;
-#endif
+      #ifdef DARKBIT_DEBUG
+        std::cout << "DM dof = " << 1+ DMproperty.spin2 << std::endl;
+        // std::cout << "Test : " << BEreq::particle_code("d_3")
+        //           << " " << BEreq::particle_code("u_3") << std::endl;
+      #endif
 
 
     } // function RD_spectrum_from_ProcessCatalog
@@ -316,17 +320,17 @@ namespace Gambit {
             myrdmgev.kcoann(j)=itmp;
           }
         }
-#ifdef DARKBIT_RD_DEBUG
-      std::cout << "co : "<< myrdmgev.kcoann(i) << " " <<
-          myrdmgev.mco(i) << " " << myrdmgev.mdof(i)
-          << std::endl;
-#endif
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "co : "<< myrdmgev.kcoann(i) << " " <<
+            myrdmgev.mco(i) << " " << myrdmgev.mdof(i)
+            << std::endl;
+      #endif
       }
-#ifdef DARKBIT_RD_DEBUG
-      std::cout << "co : "<< myrdmgev.kcoann(myrdmgev.nco) << " " <<
-          myrdmgev.mco(myrdmgev.nco) << " " << myrdmgev.mdof(myrdmgev.nco)
-          << std::endl;
-#endif
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "co : "<< myrdmgev.kcoann(myrdmgev.nco) << " " <<
+            myrdmgev.mco(myrdmgev.nco) << " " << myrdmgev.mdof(myrdmgev.nco)
+            << std::endl;
+      #endif
 
       *BEreq::rdmgev = myrdmgev;
 
@@ -341,20 +345,10 @@ namespace Gambit {
     {
       using namespace Pipes::RD_eff_annrate_SUSY;
 
-      // This is supposed to specify that BE=DS is used to determine Weff
-      if (1==1) {
+      if (BEreq::dsanwx.origin() == "DarkSUSY")
+      {
         result=BEreq::dsanwx.pointer();
       }
-      // similar for other BEs...
-
-      // FIXME: test for m_WIMP/100 instead and then comment in!
-//      double peff = 0.1;
-//      if ( Utils::isnan((*result)(peff)) )
-//      {
-//        DarkBit_warning().raise(LOCAL_INFO, "Weff is nan.");
-//        invalid_point().raise("Weff is nan in RD_eff_annrate_SUSY.");
-//      }
-
     } // function RD_eff_annrate_SUSY
 
 
@@ -438,7 +432,7 @@ namespace Gambit {
         default:
           DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1)");
       }
-      
+
       myrdpars.hstep=0.01;myrdpars.hmin=1.0e-9;myrdpars.compeps=0.01;
       myrdpars.xinit=2.0;myrdpars.xfinal=200.0;myrdpars.umax=10.0;
       myrdpars.cfr=0.5;
@@ -527,41 +521,56 @@ namespace Gambit {
       if (widthheavyHiggs<0.1)
         (*BEreq::widths).width(BEreq::particle_code("h0_2"))=0.1;
 
+      // always check that invariant rate is OK at least at one point
+      double peff = mwimp/100;
+      double weff = (*Dep::RD_eff_annrate)(peff);
+      if (Utils::isnan(weff))
+            DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_Oh2_general. This means that the function\n"
+                                            "pointed to by RD_eff_annrate returned NaN for the invariant rate\n"
+                                            "entering the relic density calculation.");
+
       #ifdef DARKBIT_RD_DEBUG
         // Dump Weff info on screen
         std::cout << "xstart = " << xstart << std::endl;
-        for ( double peff = mwimp/1000;  peff < mwimp; peff = peff*1.5 )
-          std::cout << "Weff(" << peff << ") = " << (*Dep::RD_eff_annrate)(peff) << std::endl;
+        for ( peff = mwimp/1000;  peff < mwimp; peff = peff*1.5 )
+        {
+          weff = (*Dep::RD_eff_annrate)(peff);
+          std::cout << "Weff(" << peff << ") = " << weff << std::endl;
+          // Check that the invariant rate is OK.
+          if (Utils::isnan(weff))
+            DarkBit_error().raise(LOCAL_INFO, "RD debug: Weff is NaN in RD_Oh2_general.");
+        }
         // Set up timing
         std::chrono::time_point<std::chrono::system_clock> start, end;
         start = std::chrono::system_clock::now();
-        logger() << "Tabulating RD_eff_annrate..." << std::endl;
+        logger() << "Tabulating RD_eff_annrate..." << EOM;
         std::cout << "Starting dsrdtab..." << std::endl;
       #endif
-    
-      // Tabulate invariant rate
+
+
+
+      // Tabulate the invariant rate
       BEreq::dsrdtab(byVal(*Dep::RD_eff_annrate),xstart);
 
       #ifdef DARKBIT_RD_DEBUG
-        std::cout << "...done" << std::endl;
-        logger() << "...done!" << std::endl;
-      
+        logger() << LogTags::repeat_to_cout << "...done!" << EOM;
+
         // Get runtime
         end = std::chrono::system_clock::now();
         double runtime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-      
+
         // Check if runtime too long
         if ( runtime > 30. )
         {
           std::cout << "Duration [ms]: " << runtime << std::endl;
-          SLHAstruct mySLHA = Dep::MSSM_spectrum->getSLHAea();
-          std::ofstream ofs("RelicDensity_debug.slha");
-          ofs << mySLHA;
-          ofs.close();
+          //SLHAstruct mySLHA = Dep::MSSM_spectrum->getSLHAea(2);
+          //std::ofstream ofs("RelicDensity_debug.slha");
+          //ofs << mySLHA;
+          //ofs.close();
           tbtest=true;
         }
       #endif
-    
+
       // Check whether piped invalid point was thrown
       piped_invalid_point.check();
 
@@ -580,24 +589,23 @@ namespace Gambit {
       (*BEreq::widths).width(BEreq::particle_code("h0_2"))
          =widthheavyHiggs;
 
-      //capture NAN result and map it to zero RD
-      if (yend!=yend){
-        logger() <<
-          "WARNING: DS returned NAN for relic density. Setting to zero..."
-          << std::endl;
-        yend=0;
-      }
+      //Check for NAN result.
+      if ( Utils::isnan(yend) ) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY returned NaN for relic density!");
 
       result = 0.70365e8*myrddof->fh(myrddof->nf)*mwimp*yend;
 
-      logger() << "RD_oh2_general: oh2 =" << result << std::endl;
+      logger() << LogTags::debug << "RD_oh2_general: oh2 =" << result << EOM;
 
       #ifdef DARKBIT_DEBUG
         std::cout << std::endl << "DM mass = " << mwimp<< std::endl;
         std::cout << "Oh2     = " << result << std::endl << std::endl;
+      #endif
+
+      #ifdef DARKBIT_RD_DEBUG
         if (tbtest) exit(1);
       #endif
-    
+
+
     } // function RD_oh2_general
 
 
@@ -620,12 +628,12 @@ namespace Gambit {
       // Set options via ini-file (MicrOmegas-specific performance options)
       fast = runOptions->getValueOrDef<int>(0, "fast");
       Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
-      logger() << "Using fast: " << fast << " and Beps: " << Beps << endl;
+      logger() << LogTags::debug << "Using fast: " << fast << " and Beps: " << Beps << EOM;
 
       // Output
       double Xf;
       oh2 = BEreq::oh2(&Xf, byVal(fast), byVal(Beps));
-      logger() << "X_f = " << Xf << " Omega h^2 = " << oh2 << endl;
+      logger() << LogTags::debug << "X_f = " << Xf << " Omega h^2 = " << oh2 << EOM;
     }
 
 
@@ -635,30 +643,31 @@ namespace Gambit {
     //
     //////////////////////////////////////////////////////////////////////////
 
-    void RD_fraction_from_oh2(double &result)
+    void RD_fraction_one(double &result)
     {
-      using namespace Pipes::RD_fraction_from_oh2;
-      result = -1;
-      double oh2_theory = *Dep::RD_oh2;
-      /// Option oh2_obs<double>: Set reference dark matter density (Oh2) for this module function (default 0.1188)
-      double oh2_obs = runOptions->getValueOrDef<double>(0.1188, "oh2_obs");
-      /// Option mode<str::string>: Set fraction mode (one, leq_one, any ; default is "one")
-      std::string mode = runOptions->getValueOrDef<std::string>("one", "mode");
-      if (mode ==  "one")
-        result = 1;
-      if (mode == "leq_one")
-        result = std::min(1., oh2_theory/oh2_obs);
-      if (mode == "any")
-        result = oh2_theory/oh2_obs;
-      if (result == -1)
-        DarkBit_error().raise(LOCAL_INFO, "ERROR in RD_fraction: Unknown mode (options: one, leq_one, any)");
-      logger() << "Fraction of dark matter that the scanned model accounts for: " << result << std::endl;
+      result = 1.0;
+      logger() << LogTags::debug << "Fraction of dark matter that the scanned model accounts for: " << result << EOM;
     }
 
-    void RD_fraction_fixed(double &result)
+    void RD_fraction_leq_one(double &result)
     {
-      using namespace Pipes::RD_fraction_fixed;
-      result = 1;
+      using namespace Pipes::RD_fraction_leq_one;
+      /// Option oh2_obs<double>: Set reference dark matter density (Oh2) for this module function (default 0.1188)
+      double oh2_obs = runOptions->getValueOrDef<double>(0.1188, "oh2_obs");
+      double oh2_theory = *Dep::RD_oh2;
+      result = std::min(1., oh2_theory/oh2_obs);
+      logger() << LogTags::debug << "Fraction of dark matter that the scanned model accounts for: " << result << EOM;
     }
+
+    void RD_fraction_rescaled(double &result)
+    {
+      using namespace Pipes::RD_fraction_rescaled;
+      /// Option oh2_obs<double>: Set reference dark matter density (Oh2) for this module function (default 0.1188)
+      double oh2_obs = runOptions->getValueOrDef<double>(0.1188, "oh2_obs");
+      double oh2_theory = *Dep::RD_oh2;
+      result = oh2_theory/oh2_obs;
+      logger() << LogTags::debug << "Fraction of dark matter that the scanned model accounts for: " << result << EOM;
+    }
+
   }
 }

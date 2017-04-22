@@ -28,7 +28,7 @@
 ///  \date 2014 Jan
 ///  \date 2015 Nov
 ///
-///  \author Lars A. Dal  
+///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
 ///  \date 2015 Jan
 ///
@@ -43,7 +43,6 @@
 #include "gambit/Models/models.hpp"
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Logs/logging.hpp"
-#include "gambit/Printers/baseprinter.hpp"
 
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/io/ios_state.hpp>
@@ -51,7 +50,7 @@
 namespace Gambit
 {
   using namespace LogTags;
-  
+
   // Functor class methods
 
     /// Constructor
@@ -145,7 +144,6 @@ namespace Gambit
     /// Getter indicating if the wrapped function's result should to be printed
     bool functor::requiresPrinting() const { if (this == NULL) failBigTime("requiresPrinting"); return false; }
     /// Getter indicating if the timing data for this function's execution should be printed
-    /// (Note; might be good to activate this for ALL functors)
     bool functor::requiresTimingPrinting() const { if (this == NULL) failBigTime("requiresTimingPrinting"); return false; }
     /// Getter for the printer label
     str functor::label()       const { if (this == NULL) failBigTime("label"); return myLabel; }
@@ -193,6 +191,20 @@ namespace Gambit
     str functor::loopManagerCapability()
     {
       utils_error().raise(LOCAL_INFO,"The loopManagerCapability method has not been defined in this class.");
+      return "none";
+    }
+
+    /// Getter for revealing the name of the wrapped function's assigned loop manager
+    str functor::loopManagerName()
+    {
+      utils_error().raise(LOCAL_INFO,"The loopManagerName method has not been defined in this class.");
+      return "none";
+    }
+
+    /// Getter for revealing the module of the wrapped function's assigned loop manager
+    str functor::loopManagerOrigin()
+    {
+      utils_error().raise(LOCAL_INFO,"The loopManagerOrigin method has not been defined in this class.");
       return "none";
     }
 
@@ -319,23 +331,25 @@ namespace Gambit
       utils_error().raise(LOCAL_INFO,"The notifyOfBackends method has not been defined in this class.");
     }
 
-    /// Print function
-    void functor::print(Printers::BasePrinter*, const int, int)
-    {
-      str warn_msg = "This is the functor base class print function! This should not\n";
-      warn_msg += "be used; the print function should be redefined in daughter\n"
-                  "functor classes. If this is running there is a problem somewhere.\n"
-                  "Currently only functors derived from module_functor_common<!=void>\n"
-                  "are allowed to try to print themselves; i.e. backend and void\n"
-                  "functors may not do this (they inherit this default message).";
-      utils_warning().raise(LOCAL_INFO,warn_msg);
-    }
+    #ifndef NO_PRINTERS
+      /// Print function
+      void functor::print(Printers::BasePrinter*, const int, int)
+      {
+        str warn_msg = "This is the functor base class print function! This should not\n";
+        warn_msg += "be used; the print function should be redefined in daughter\n"
+                    "functor classes. If this is running there is a problem somewhere.\n"
+                    "Currently only functors derived from module_functor_common<!=void>\n"
+                    "are allowed to try to print themselves; i.e. backend and void\n"
+                    "functors may not do this (they inherit this default message).";
+        utils_warning().raise(LOCAL_INFO,warn_msg);
+      }
 
-    /// Printer function (no-thread-index short-circuit)
-    void functor::print(Printers::BasePrinter* printer, const int pointID)
-    {
-      print(printer,pointID,0);
-    }
+      /// Printer function (no-thread-index short-circuit)
+      void functor::print(Printers::BasePrinter* printer, const int pointID)
+      {
+        print(printer,pointID,0);
+      }
+    #endif
 
     /// Notify the functor about an instance of the options class that contains
     /// information from its corresponding ini-file entry in the auxiliaries or
@@ -545,7 +559,7 @@ namespace Gambit
       if (candidates.empty()) return "";
       // If found just one, return it with no further questions.
       if (candidates.size() == 1) return candidates[0];
-      // If found more than one, choose the one closest to the model passed in. 
+      // If found more than one, choose the one closest to the model passed in.
       str result = candidates.front();
       for (std::vector<str>::iterator it = candidates.begin()+1; it != candidates.end(); ++it)
       {
@@ -567,6 +581,7 @@ namespace Gambit
                                                  str origin_name,
                                                  Models::ModelFunctorClaw &claw)
     : functor                  (func_name, func_capability, result_type, origin_name, claw),
+      myTimingPrintFlag        (false),
       start                    (NULL),
       end                      (NULL),
       point_exception_raised   (false),
@@ -589,7 +604,7 @@ namespace Gambit
       myLogTag = Logging::str2tag(myOrigin);
       if (not claw.model_exists(origin_name)) check_missing_LogTag();
     }
-            
+
     /// Destructor
     module_functor_common::~module_functor_common()
     {
@@ -619,6 +634,20 @@ namespace Gambit
     double module_functor_common::getRuntimeAverage()
     {
       return runtime_average;
+    }
+
+    /// Setter for indicating if the timing data for this function's execution should be printed
+    void module_functor_common::setTimingPrintRequirement(bool flag)
+    {
+      if (this == NULL) failBigTime("setTimingPrintRequirement");
+      myTimingPrintFlag = flag;
+    }
+
+    /// Getter indicating if the timing data for this function's execution should be printed
+    bool module_functor_common::requiresTimingPrinting() const
+    {
+      if (this == NULL) failBigTime("requiresTimingPrinting");
+      return myTimingPrintFlag;
     }
 
     /// Reset functor for all threads
@@ -1423,7 +1452,7 @@ namespace Gambit
           if (myClaw->downstream_of(model, activation_candidate))
           {
             // Found an activation candidate that the model being scanned can be cast to.
-            // Assume for now that the candidate will indeed be activated. 
+            // Assume for now that the candidate will indeed be activated.
             it->second = true;
             // Compare with models that have already been activated, to avoid activating multiple models of the same lineage.
             for (auto jt = activeModelFlags.begin(); jt != activeModelFlags.end(); ++jt)
@@ -1557,64 +1586,57 @@ namespace Gambit
     /// execution of this functor.
     void module_functor<void>::calculate()
     {
-      if(not emergency_shutdown_begun()) // If emergency shutdown signal has been received, skip everything (does nothing in standalone compile units)
+      if (myStatus == -3)                          // Do an explicit status check to hold standalone writers' hands
       {
-        if (myStatus == -3)                          // Do an explicit status check to hold standalone writers' hands
-        {
-          std::ostringstream ss;
-          ss << "Sorry, the function " << origin() << "::" << name()
-           << " cannot be used" << endl << "because it requires classes from a backend that you do not have installed."
-           << endl << "Missing backends: ";
-          for (auto it = missing_backends.begin(); it != missing_backends.end(); ++it) ss << endl << "  " << *it;
-          backend_error().raise(LOCAL_INFO, ss.str());
-        }
-        else if (myStatus == -4)
-        {
-          std::ostringstream ss;
-          ss << "Sorry, the backend initialisation function " << name()
-          << " cannot be used" << endl << "because it initialises a backend that you do not have installed!";                 
-          backend_error().raise(LOCAL_INFO, ss.str());    
-        }
-        boost::io::ios_flags_saver ifs(cout);        // Don't allow module functions to change the output precision of cout
-        int thread_num = omp_get_thread_num();
-        fill_activeModelFlags();                     // If activeModels hasn't been populated yet, make sure it is.
-        init_memory();                               // Init memory if this is the first run through.
-        if (needs_recalculating[thread_num])
-        {
-          entering_multithreaded_region();
-
-          logger().entering_module(myLogTag);
-          this->startTiming(thread_num);
-          try
-          {
-            this->myFunction();
-          }
-          catch (invalid_point_exception& e)
-          {
-            if (not point_exception_raised) acknowledgeInvalidation(e);
-            if (omp_get_level()==0)                  // If not in an OpenMP parallel block, throw onwards
-            {
-              this->finishTiming(thread_num);
-              leaving_multithreaded_region();
-              throw(e);
-            } 
-          }
-          this->finishTiming(thread_num);
-          logger().leaving_module();         
-          leaving_multithreaded_region();
-        }
-        check_for_shutdown_signal();
+        std::ostringstream ss;
+        ss << "Sorry, the function " << origin() << "::" << name()
+         << " cannot be used" << endl << "because it requires classes from a backend that you do not have installed."
+         << endl << "Missing backends: ";
+        for (auto it = missing_backends.begin(); it != missing_backends.end(); ++it) ss << endl << "  " << *it;
+        backend_error().raise(LOCAL_INFO, ss.str());
       }
-      else
+      else if (myStatus == -4)
       {
-        logger() << "Shutdown in progress! Skipping evaluation of functor " << myName << EOM;
+        std::ostringstream ss;
+        ss << "Sorry, the backend initialisation function " << name()
+        << " cannot be used" << endl << "because it initialises a backend that you do not have installed!";
+        backend_error().raise(LOCAL_INFO, ss.str());
+      }
+      boost::io::ios_flags_saver ifs(cout);        // Don't allow module functions to change the output precision of cout
+      int thread_num = omp_get_thread_num();
+      fill_activeModelFlags();                     // If activeModels hasn't been populated yet, make sure it is.
+      init_memory();                               // Init memory if this is the first run through.
+      if (needs_recalculating[thread_num])
+      {
+        entering_multithreaded_region();
+
+        logger().entering_module(myLogTag);
+        this->startTiming(thread_num);
+        try
+        {
+          this->myFunction();
+        }
+        catch (invalid_point_exception& e)
+        {
+          if (not point_exception_raised) acknowledgeInvalidation(e);
+          if (omp_get_level()==0)                  // If not in an OpenMP parallel block, throw onwards
+          {
+            this->finishTiming(thread_num);
+            leaving_multithreaded_region();
+            throw(e);
+          }
+        }
+        this->finishTiming(thread_num);
+        logger().leaving_module();
+        leaving_multithreaded_region();
       }
     }
 
     /// Blank print methods
-    void module_functor<void>::print(Printers::BasePrinter*, const int, int) {}
-    void module_functor<void>::print(Printers::BasePrinter*, const int) {}
-
+    #ifndef NO_PRINTERS
+      void module_functor<void>::print(Printers::BasePrinter*, const int, int) {}
+      void module_functor<void>::print(Printers::BasePrinter*, const int) {}
+    #endif
 
     /// @{ Model functor class method definitions
 

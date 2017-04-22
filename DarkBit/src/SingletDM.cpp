@@ -106,7 +106,7 @@ namespace Gambit
             double Gamma_s = virtual_SMHiggs_widths("Gamma",sqrt_s);
             double GeV2tocm3s1 = gev2cm2*s2cm;
 
-            // Explicitely close channel for off-shell top quarks
+            // Explicitly close channel for off-shell top quarks
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
             double res = 2*lambda*lambda*v0*v0/
@@ -200,34 +200,35 @@ namespace Gambit
       double lambda = he.get(Par::dimensionless,"lambda_hS");
       double mh = spec.get(Par::Pole_Mass,"h0_1");
 
-      // FIXME: Double check expressions (taken from Cline et al. 2013)
+      // Expressions taken from Cline et al. (2013, PRD 88:055025, arXiv:1306.4710)
       double fp = 2./9. + 7./9.*(*Param["fpu"] + *Param["fpd"] + *Param["fps"]);
       double fn = 2./9. + 7./9.*(*Param["fnu"] + *Param["fnd"] + *Param["fns"]);
 
-      result.gps = lambda*fp*m_neutron/pow(mh,2)/mass/2;
-      result.gns = lambda*fn*m_proton/pow(mh,2)/mass/2;
+      result.gps = lambda*fp*m_proton/pow(mh,2)/mass/2;
+      result.gns = lambda*fn*m_neutron/pow(mh,2)/mass/2;
       result.gpa = 0;  // Only SI cross-section
       result.gna = 0;
 
-      logger() << "Singlet DM DD couplings:" << std::endl;
+      logger() << LogTags::debug << "Singlet DM DD couplings:" << std::endl;
       logger() << " gps = " << result.gps << std::endl;
       logger() << " gns = " << result.gns << std::endl;
       logger() << " gpa = " << result.gpa << std::endl;
-      logger() << " gna = " << result.gna << std::endl;
+      logger() << " gna = " << result.gna << EOM;
 
     } // function DD_couplings_SingletDM
+
 
     std::map<std::string, daFunk::Funk> get_f_vs_mass(std::string filename)
     {
       // Higgs branching ratios and total width Gamma [GeV], as function of
-      // mass [GeV] (90 - 150 GeV)
+      // mass [GeV] (80 - 1000 GeV)
       ASCIItableReader table(filename);
-      std::vector<std::string> colnames =
-        initVector<std::string>("mass", "bb", "tautau", "mumu",
-            "ss", "cc", "tt", "gg", "gammagamma", "Zgamma",
-            "WW", "ZZ", "Gamma");
+      const static std::vector<str> colnames = initVector<std::string>("mass",
+       "bb", "bb+", "bb-", "tautau", "tautau+", "tautau-", "mumu", "mumu+", "mumu-",
+       "ss", "ss+", "ss-", "cc", "cc+", "cc-", "tt", "tt+", "tt-", "gg", "gg+", "gg-",
+       "gammagamma", "gammagamma+", "gammagamma-", "Zgamma", "Zgamma+", "Zgamma-",
+       "WW", "WW+", "WW-", "ZZ", "ZZ+", "ZZ-", "Gamma", "Gamma+", "Gamma-");
       table.setcolnames(colnames);
-
       std::map<std::string, daFunk::Funk> f_vs_mass;
       for (auto it = colnames.begin(); it != colnames.end(); it++)
       {
@@ -245,7 +246,7 @@ namespace Gambit
 
       // Initialize Higgs decay tables (static, hence only once)
       static std::map<string, daFunk::Funk> f_vs_mass =
-        get_f_vs_mass("Elements/data/Higgs_decay_1101.0593.dat");
+        get_f_vs_mass(GAMBIT_DIR "/Elements/data/Higgs_decay_1307.1347.dat");
 
       // Initialize empty catalog and main annihilation process
       TH_ProcessCatalog catalog;
@@ -259,7 +260,7 @@ namespace Gambit
       // Convenience macros
       #define getSMmass(Name, spinX2)                                           \
        catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
-       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));    
+       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
       #define addParticle(Name, Mass, spinX2)                                   \
        catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
        (Name , TH_ParticleProperty(Mass, spinX2)));

@@ -18,7 +18,7 @@
 ///  *********************************************
 
 // Always required in any standalone module main file
-#include "gambit/Utils/standalone_module.hpp"
+#include "gambit/Elements/standalone_module.hpp"
 #include "gambit/ExampleBit_A/ExampleBit_A_rollcall.hpp"
 
 // Only needed here
@@ -141,7 +141,7 @@ int main()
     std::cout << ExampleBit_A::Pipes::exampleCut::Dep::event.name() << std::endl;
 
     // Set some module function options
-    nevents_pred_rounded.setOption<double>("probability_of_validity", 0.1);
+    nevents_pred_rounded.setOption<double>("probability_of_validity", 0.8);
 
     // Start a loop over some low-E points in the primary model parameter space
     std::cout << "Starting model scan..." << std::endl << std::endl;

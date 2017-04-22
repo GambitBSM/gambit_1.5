@@ -30,7 +30,7 @@
     // Create Spectrum object from SMInputs structs, SM Higgs parameters,
     // and the SingletDM parameters
     #define FUNCTION get_SingletDM_spectrum
-    START_FUNCTION(/*TAG*/ Spectrum)
+    START_FUNCTION(Spectrum)
     DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs, SingletDM)
     MODEL_GROUP(higgs,   (StandardModel_Higgs))
@@ -39,7 +39,7 @@
     #undef FUNCTION
 
     #define FUNCTION get_SingletDM_spectrum_pole
-    START_FUNCTION(/*TAG*/ Spectrum)
+    START_FUNCTION(Spectrum)
     DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDM_running)
     MODEL_GROUP(higgs_running,   (StandardModel_Higgs_running))
@@ -48,10 +48,10 @@
     #undef FUNCTION
 
     // Convert spectrum into a standard map so that it can be printed
-    #define FUNCTION get_SingletDM_spectrum_as_map 
+    #define FUNCTION get_SingletDM_spectrum_as_map
     START_FUNCTION(map_str_dbl) // Just a string to double map. Can't have commas in macro input
-    DEPENDENCY(SingletDM_spectrum, /*TAG*/ Spectrum)
-    #undef FUNCTION    
+    DEPENDENCY(SingletDM_spectrum, Spectrum)
+    #undef FUNCTION
 
   #undef CAPABILITY
 
@@ -74,6 +74,20 @@
     START_FUNCTION(map_str_dbl) // Just a string to double map. Can't have commas in macro input
     DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
     #undef FUNCTION*/
+
+  #undef CAPABILITY
+
+
+  // Generalised Higgs couplings
+  #define CAPABILITY Higgs_Couplings
+
+    #define FUNCTION SingletDM_higgs_couplings_pwid
+    START_FUNCTION(HiggsCouplingsTable)
+    DEPENDENCY(SingletDM_spectrum, Spectrum)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SingletDM, SingletDMZ3)
+    #undef FUNCTION
 
   #undef CAPABILITY
 

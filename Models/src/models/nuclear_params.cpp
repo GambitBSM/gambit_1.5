@@ -16,10 +16,9 @@
 //  *********************************************
 
 #include "gambit/Models/model_macros.hpp"
-#include "gambit/Logs/logger.hpp"
-#include "gambit/Elements/numerical_constants.hpp"
-
 #include "gambit/Models/models/nuclear_params.hpp"
+#include "gambit/Logs/logger.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
 #include "gambit/Elements/sminputs.hpp"
 
 #define MODEL nuclear_params_sigma0_sigmal
@@ -59,13 +58,13 @@
         targetP.setValue("fpd", fpd);
         targetP.setValue("fps", fps);
 
-        logger() << "fpu = " << fpu <<"\tfpd = " << fpd << "\tfps = " << fps << endl;
+        logger() << LogTags::debug << "fpu = " << fpu <<"\tfpd = " << fpd << "\tfps = " << fps << EOM;
 
         targetP.setValue("fnu", fnu);
         targetP.setValue("fnd", fnd);
         targetP.setValue("fns", fns);
 
-        logger() << "fnu = " << fnu <<"\tfnd = " << fnd << "\tfns = " << fns << endl;
+        logger() << LogTags::debug << "fnu = " << fnu <<"\tfnd = " << fnd << "\tfns = " << fns << EOM;
 
         targetP.setValue("deltad", myP["deltad"]);
         targetP.setValue("deltau", myP["deltau"]);
@@ -99,7 +98,7 @@
         targetP.setValue("deltau", myP["deltau"]);
         targetP.setValue("deltas", myP["deltas"]);
 
-        logger() << "sigma_0 = "<< sigma0 << endl;
+        logger() << LogTags::debug << "sigma_0 = "<< sigma0 << EOM;
     }
 #undef PARENT
 #undef MODEL

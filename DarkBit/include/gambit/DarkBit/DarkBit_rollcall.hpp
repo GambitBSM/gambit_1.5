@@ -22,7 +22,7 @@
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
 ///  \date 2013 Jun
-///  \date 2014 Mar [RD interface to DS is working]
+///  \date 2014 Mar
 ///
 ///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
@@ -41,6 +41,10 @@
 ///          (pscott@imperial.ac.uk)
 ///  \date 2014 Mar
 ///  \date 2015 Mar, Aug
+///
+///  \author Sebastian Wild
+///          (sebastian.wild@ph.tum.de)
+///  \date 2016 Aug
 ///
 ///  \author Felix Kahlhoefer
 ///          (felix.kahlhoefer@desy.de)
@@ -71,19 +75,14 @@ START_MODULE
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(MSSM63atQ,CMSSM)
-      // CMSSM
+      // For debugging using DarkSUSY native interface to ISASUGRA
       BACKEND_REQ(dsgive_model_isasugra, (), void, (double&,double&,double&,double&,double&))
       BACKEND_REQ(dssusy_isasugra, (), void, (int&,int&))
-      // MSSM7 -- not used at the moment!?
-      BACKEND_REQ(mssmpar, (), DS_MSSMPAR)
-      BACKEND_REQ(dssusy, (), void, (int&,int&))
       // Initialize DarkSUSY with SLHA file
       BACKEND_REQ(dsSLHAread, (), void, (const char*, int&, int))
       BACKEND_REQ(dsprep, (), void, ())
       // Initialize DarkSUSY with SLHA object (convenience function)
       BACKEND_REQ(initFromSLHAeaAndDecayTable, (), int, (const SLHAstruct&, const DecayTable&))
-      // Print higgs widths
-      BACKEND_REQ(dswwidth, (), void, (int&))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -93,7 +92,7 @@ START_MODULE
     #define FUNCTION DarkSUSY_PointInit_LocalHalo_func
       START_FUNCTION(bool)
       DEPENDENCY(RD_fraction, double)
-      ALLOW_MODELS(LocalHalo)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
       BACKEND_REQ(dshmcom,(),DS_HMCOM)
       BACKEND_REQ(dshmisodf,(),DS_HMISODF)
       BACKEND_REQ(dshmframevelcom,(),DS_HMFRAMEVELCOM)
@@ -143,8 +142,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RD_eff_annrate_SUSY
       START_FUNCTION(fptr_dd)
-        DEPENDENCY(RD_eff_annrate_DSprep, int)
-        BACKEND_REQ(dsanwx, (), double, (double&))
+      DEPENDENCY(RD_eff_annrate_DSprep, int)
+      BACKEND_REQ(dsanwx, (), double, (double&))
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_from_ProcessCatalog
       START_FUNCTION(fptr_dd)
@@ -161,9 +160,9 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
       DEPENDENCY(RD_eff_annrate, fptr_dd)
-#ifdef DARKBIT_RD_DEBUG
-      DEPENDENCY(MSSM_spectrum, Spectrum)
-#endif
+      #ifdef DARKBIT_RD_DEBUG
+        DEPENDENCY(MSSM_spectrum, Spectrum)
+      #endif
       BACKEND_REQ(dsrdthlim, (), void, ())
       BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&))
       BACKEND_REQ(dsrdeqn, (), void, (double(*)(double&),double&,double&,double&,double&,int&))
@@ -196,14 +195,19 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Fraction of the relic density constituted by the DM candidate under investigation
   #define CAPABILITY RD_fraction
   START_CAPABILITY
-    #define FUNCTION RD_fraction_from_oh2
+    #define FUNCTION RD_fraction_one
+      START_FUNCTION(double)
+    #undef FUNCTION
+    #define FUNCTION RD_fraction_leq_one
       START_FUNCTION(double)
       DEPENDENCY(RD_oh2, double)
     #undef FUNCTION
-    #define FUNCTION RD_fraction_fixed
+    #define FUNCTION RD_fraction_rescaled
       START_FUNCTION(double)
+      DEPENDENCY(RD_oh2, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -234,10 +238,6 @@ START_MODULE
     #define FUNCTION cascadeMC_LoopManager
       START_FUNCTION(void, CAN_MANAGE_LOOPS)
       DEPENDENCY(GA_missingFinalStates, std::vector<std::string>)
-      // Make sure these capabilities are run before the loop
-      DEPENDENCY(cascadeMC_DecayTable, DarkBit::DecayChain::DecayTable)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -370,17 +370,13 @@ START_MODULE
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(decay_rates,DecayTable)
-//      BACKEND_REQ(mspctm, (), DS_MSPCTM)
+      //BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(dssigmav, (), double, (int&))
       BACKEND_REQ(dsIBffdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBhhdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBwhdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBwwdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(IBintvars, (), DS_IBINTVARS)
-      //PS: commented out for now, as this can't be a backend function in its current form.
-      //BACKEND_REQ(registerMassesForIB, (), void,
-      //    (std::map<std::string, DarkBit::TH_ParticleProperty>&))
-      BACKEND_REQ(setMassesForIB, (), void, (bool))
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_SingletDM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
@@ -390,13 +386,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY set_gamLike_GC_halo
+  START_CAPABILITY
+    #define FUNCTION set_gamLike_GC_halo
+      START_FUNCTION(bool)
+      DEPENDENCY(GalacticHalo, GalacticHaloProperties)
+      BACKEND_REQ(set_halo_profile, (gamLike), void, (int, const std::vector<double> &, const std::vector<double> &, double))
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnL_FermiLATdwarfs
   START_CAPABILITY
-//    #define FUNCTION lnL_FermiLATdwarfsSimple
-//      START_FUNCTION(double)
-//      DEPENDENCY(GA_AnnYield, daFunk::Funk)
-//      DEPENDENCY(RD_fraction, double)
-//    #undef FUNCTION
     #define FUNCTION lnL_FermiLATdwarfs_gamLike
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
@@ -411,6 +411,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -421,6 +422,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -431,6 +433,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -461,7 +464,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_rho0_lognormal
       START_FUNCTION(double)
-      ALLOW_MODELS(LocalHalo)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -469,7 +472,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_vrot_gaussian
       START_FUNCTION(double)
-      ALLOW_MODELS(LocalHalo)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -477,7 +480,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_v0_gaussian
       START_FUNCTION(double)
-      ALLOW_MODELS(LocalHalo)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -485,7 +488,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_vesc_gaussian
       START_FUNCTION(double)
-      ALLOW_MODELS(LocalHalo)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -985,11 +988,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // --- Functions related to the local and global properties of the DM halo ---
+
   #define CAPABILITY GalacticHalo
   START_CAPABILITY
-    #define FUNCTION GalacticHalo
-    START_FUNCTION(daFunk::Funk)
-    ALLOW_MODELS(GalacticHalo_gNFW, GalacticHalo_Einasto)
+    #define FUNCTION GalacticHalo_gNFW
+    START_FUNCTION(GalacticHaloProperties)
+    ALLOW_MODEL(Halo_gNFW)
+    #undef FUNCTION
+    #define FUNCTION GalacticHalo_Einasto
+    START_FUNCTION(GalacticHaloProperties)
+    ALLOW_MODEL(Halo_Einasto)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY LocalHalo
+  START_CAPABILITY
+    #define FUNCTION ExtractLocalMaxwellianHalo
+    START_FUNCTION(LocalMaxwellianHalo)
+    ALLOW_MODELS(Halo_gNFW, Halo_Einasto)
     #undef FUNCTION
   #undef CAPABILITY
 #undef MODULE
