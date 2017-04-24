@@ -1039,8 +1039,38 @@ START_MODULE
 
     #define FUNCTION lnL
     START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
     DEPENDENCY(SN_stuff, double)
+    #undef FUNCTION
 
+  #undef CAPABILITY
+
+  #define CAPABILITY Ue1
+  START_CAPABILITY
+
+    #define FUNCTION printable_Ue1
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Um1
+  START_CAPABILITY
+
+    #define FUNCTION printable_Um1
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Ut1
+  START_CAPABILITY
+
+    #define FUNCTION printable_Ut1
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
     #undef FUNCTION
 
   #undef CAPABILITY
