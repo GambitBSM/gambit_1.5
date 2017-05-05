@@ -158,6 +158,17 @@ else()
   message(FATAL_ERROR "GAMBIT requires Boost v1.41 or greater.\nPlease install a suitable version of Boost and rerun cmake.")
 endif()
 
+# Check for Eigen
+find_package(Eigen3 3.1.0)
+if(EIGEN3_FOUND)
+  include_directories("${EIGEN3_INCLUDE_DIR}")
+  message("-- Eigen version: ${EIGEN3_VERSION}")
+else()
+  message("${BoldRed}   Eigen v3.1.0 or greater not found.  FlexibleSUSY and GM2Calc interfaces will be excluded.${ColourReset}")
+  set(itch "${itch};gm2calc;flexiblesusy")
+  message(FATAL_ERROR "\nFlexibleSUSY is currently included in the GAMBIT distribution, so in fact it cannot be ditched.  Please install Eigen3.\n(Note that this will change in future GAMBIT versions, where FlexibleSUSY will be a 'true' backend.)")
+endif()
+
 # Check for OpenMP
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
@@ -270,8 +281,8 @@ set(MODULE_HARVESTER ${PROJECT_SOURCE_DIR}/Elements/scripts/module_harvester.py)
 set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.py)
 set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
-# Create all_functor_types.hpp, module_rollcall.hpp, module_types_rollcall.hpp, models_rollcall.hpp,
-# model_types_rollcall.hpp, backend_rollcall.hpp, backend_types_rollcall.hpp and printer_rollcall.hpp.
+# Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
+# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp.
 file(GLOB MODEL_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB BACKEND_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"

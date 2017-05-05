@@ -1,7 +1,7 @@
 Parameters:
 
   #SM parameters.
-  StandardModel_SLHA2: !import yaml_files/StandardModel_SLHA2_MSSM_scan.yaml
+  StandardModel_SLHA2: !import StandardModel_SLHA2_scan.yaml
 
   #Nuclear matrix parameters.
   nuclear_params_sigmas_sigmal:
@@ -46,9 +46,11 @@ Parameters:
     beta: 3
     gamma: 1
 
+
 Priors:
 
   # All the priors are simple for this scan, so they are specified directly in the Parameters section.
+
 
 Printer:
 
@@ -57,6 +59,7 @@ Printer:
   options:
     output_file: "CMSSM.hdf5"
     group: "/CMSSM"
+
 
 Scanner:
 
@@ -166,7 +169,7 @@ ObsLikes:
     - capability: LUX_2015_LogLikelihood
       purpose:    LogLike
 
-    - capability: LUX_2016_prelim_LogLikelihood
+    - capability: LUX_2016_LogLikelihood
       purpose:    LogLike
 
     - capability: PandaX_2016_LogLikelihood
@@ -208,8 +211,8 @@ ObsLikes:
     - capability: lnL_t_mass
       purpose:    LogLike
 
-    #- capability: lnL_mbmb
-    #  purpose:    LogLike
+    - capability: lnL_mbmb
+      purpose:    LogLike
 
     #- capability: lnL_light_quark_masses
     #  purpose:    LogLike
