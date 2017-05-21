@@ -436,6 +436,7 @@ namespace Gambit
     return 0;
   }
 
+<<<<<<< HEAD
   /// Disable a mathematica backend functor if the function is not found in the package
   int set_math_backend_functor_status(functor& be_functor, str symbol_name, void *&pHandle)
   {
@@ -499,6 +500,9 @@ namespace Gambit
  
 
   /// Disable a backend initialisation function if the backend is missing. 
+=======
+  /// Disable a backend initialisation function if the backend is missing.
+>>>>>>> master
   int set_BackendIniBit_functor_status(functor& ini_functor, str be, str v)
   {
     bool present = Backends::backendInfo().works.at(be + v);
