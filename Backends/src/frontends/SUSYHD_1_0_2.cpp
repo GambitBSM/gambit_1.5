@@ -33,14 +33,14 @@ BE_INI_FUNCTION
 
   // Run Options
   // TODO: Implement these if they can 
-  str scheme = runOptions->getValueOrDef<str>("DRbar", "scheme");
-  std::vector<int> hiOrd = runOptions->getValueOrDef<std::vector<int> >({1,1,1,1},"hiOrd");
-  MReal Rscale = runOptions->getValueOrDef<MReal>(0,"Rscale");
-  bool split = runOptions->getValueOrDef<bool>(false, "split");
-  MReal RscaleSplit = runOptions->getValueOrDef<MReal>(0, "RscaleSplit");
-  bool numerical = runOptions->getValueOrDef<bool>(false, "numerical");
-  std::vector<int> sources = runOptions->getValueOrDef<std::vector<int> >({1,1,1}, "sources");  
-  bool useMStopYukawa = runOptions->getValueOrDef(false, "useMStopYukawa"); 
+  //str scheme = runOptions->getValueOrDef<str>("DRbar", "scheme");
+  //std::vector<int> hiOrd = runOptions->getValueOrDef<std::vector<int> >({1,1,1,1},"hiOrd");
+  //MReal Rscale = runOptions->getValueOrDef<MReal>(0,"Rscale");
+  //bool split = runOptions->getValueOrDef<bool>(false, "split");
+  //MReal RscaleSplit = runOptions->getValueOrDef<MReal>(0, "RscaleSplit");
+  //bool numerical = runOptions->getValueOrDef<bool>(false, "numerical");
+  //std::vector<int> sources = runOptions->getValueOrDef<std::vector<int> >({1,1,1}, "sources");  
+  //bool useMStopYukawa = runOptions->getValueOrDef(false, "useMStopYukawa"); 
 
   // Set mt and alpha_s @ MZ to the values in sminputs
   SetSMparameters(fullspectrum.get(Par::Pole_Mass,"t"), sminputs.alphaS);

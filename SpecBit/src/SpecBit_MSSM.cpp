@@ -1274,8 +1274,7 @@ namespace Gambit
       using namespace Pipes::SHD_HiggsMass;
 
       const Spectrum& fullspectrum = *Dep::unimproved_MSSM_spectrum;
-      //const SubSpectrum& spec = fullspectrum.get_HE();
-      SLHAea::Coll slhaea = fullspectrum.getSLHAea();
+      SLHAea::Coll slhaea = fullspectrum.getSLHAea(1);
 
       #ifdef SPECBIT_DEBUG
         cout << "****** calling SHD_HiggsMass ******" << endl;
