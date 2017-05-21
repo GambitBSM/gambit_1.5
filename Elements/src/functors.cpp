@@ -28,7 +28,7 @@
 ///  \date 2014 Jan
 ///  \date 2015 Nov
 ///
-///  \author Lars A. Dal  
+///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
 ///  \date 2015 Jan
 ///
@@ -43,7 +43,6 @@
 #include "gambit/Models/models.hpp"
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Logs/logging.hpp"
-#include "gambit/Printers/baseprinter.hpp"
 
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/io/ios_state.hpp>
@@ -51,7 +50,7 @@
 namespace Gambit
 {
   using namespace LogTags;
-  
+
   // Functor class methods
 
     /// Constructor
@@ -91,13 +90,13 @@ namespace Gambit
     void functor::reset_and_calculate() { this->reset(omp_get_thread_num()); this->calculate(); }
 
     /// Setter for purpose (relevant only for next-to-output functors)
-    void functor::setPurpose(str purpose) { if (this == NULL) failBigTime("setPurpose"); myPurpose = purpose; }
+    void functor::setPurpose(str purpose) { myPurpose = purpose; }
 
     /// Setter for vertex ID (used in printer system)
-    void functor::setVertexID(int ID) { if (this == NULL) failBigTime("setVertexID"); myVertexID = ID; }
+    void functor::setVertexID(int ID) { myVertexID = ID; }
 
     /// Acquire ID for timing 'vertex' (used in printer system)
-    void functor::setTimingVertexID(int ID) { if (this == NULL) failBigTime("setTimingVertexID"); myTimingVertexID = ID; }
+    void functor::setTimingVertexID(int ID) { myTimingVertexID = ID; }
 
     /// Setter for status: -4 = required backend absent (backend ini functions)
     ///                    -3 = required classes absent
@@ -108,21 +107,20 @@ namespace Gambit
     ///                     2 = active
     void functor::setStatus(int stat)
     {
-      if (this == NULL) failBigTime("setStatus");
       myStatus = stat;
       setInUse(myStatus == 2);
     }
 
     /// Getter for the wrapped function's name
-    str functor::name()        const { if (this == NULL) failBigTime("name"); return myName; }
+    str functor::name()        const { return myName; }
     /// Getter for the wrapped function's reported capability
-    str functor::capability()  const { if (this == NULL) failBigTime("capability"); return myCapability; }
+    str functor::capability()  const { return myCapability; }
     /// Getter for the wrapped function's reported return type
-    str functor::type()        const { if (this == NULL) failBigTime("type"); return myType; }
+    str functor::type()        const { return myType; }
     /// Getter for the wrapped function's origin (module or backend name)
-    str functor::origin()      const { if (this == NULL) failBigTime("origin"); return myOrigin; }
+    str functor::origin()      const { return myOrigin; }
     /// Getter for the version of the wrapped function's origin (module or backend)
-    str functor::version()     const { if (this == NULL) failBigTime("version"); return myVersion; }
+    str functor::version()     const { return myVersion; }
     /// Getter for the 'safe' incarnation of the version of the wrapped function's origin (module or backend)
     str functor::safe_version()const { utils_error().raise(LOCAL_INFO,"The safe_version method is only defined for backend functors."); return ""; }
     /// Getter for the wrapped function current status:
@@ -133,24 +131,23 @@ namespace Gambit
     ///                     0 = model incompatibility (default)
     ///                     1 = available
     ///                     2 = active
-    int functor::status()      const { if (this == NULL) failBigTime("status"); return myStatus; }
+    int functor::status()      const { return myStatus; }
     /// Getter for the  overall quantity provided by the wrapped function (capability-type pair)
-    sspair functor::quantity() const { if (this == NULL) failBigTime("quantity"); return std::make_pair(myCapability, myType); }
+    sspair functor::quantity() const { return std::make_pair(myCapability, myType); }
     /// Getter for purpose (relevant for output nodes, aka helper structures for the dep. resolution)
-    str functor::purpose()     const { if (this == NULL) failBigTime("purpose"); return myPurpose; }
+    str functor::purpose()     const { return myPurpose; }
     /// Getter for vertex ID
-    int functor::vertexID()    const { if (this == NULL) failBigTime("vertexID"); return myVertexID; }
+    int functor::vertexID()    const { return myVertexID; }
     /// Getter for timing vertex ID
-    int functor::timingVertexID() const { if (this == NULL) failBigTime("timingVertexID"); return myTimingVertexID; }
+    int functor::timingVertexID() const { return myTimingVertexID; }
     /// Getter indicating if the wrapped function's result should to be printed
-    bool functor::requiresPrinting() const { if (this == NULL) failBigTime("requiresPrinting"); return false; }
+    bool functor::requiresPrinting() const { return false; }
     /// Getter indicating if the timing data for this function's execution should be printed
-    /// (Note; might be good to activate this for ALL functors)
-    bool functor::requiresTimingPrinting() const { if (this == NULL) failBigTime("requiresTimingPrinting"); return false; }
+    bool functor::requiresTimingPrinting() const { return false; }
     /// Getter for the printer label
-    str functor::label()       const { if (this == NULL) failBigTime("label"); return myLabel; }
+    str functor::label()       const { return myLabel; }
     /// Getter for the printer timing label
-    str functor::timingLabel() const { if (this == NULL) failBigTime("timingLabel"); return myTimingLabel; }
+    str functor::timingLabel() const { return myTimingLabel; }
 
     /// Setter for indicating if the wrapped function's result should to be printed
     void functor::setPrintRequirement(bool flag)
@@ -193,6 +190,20 @@ namespace Gambit
     str functor::loopManagerCapability()
     {
       utils_error().raise(LOCAL_INFO,"The loopManagerCapability method has not been defined in this class.");
+      return "none";
+    }
+
+    /// Getter for revealing the name of the wrapped function's assigned loop manager
+    str functor::loopManagerName()
+    {
+      utils_error().raise(LOCAL_INFO,"The loopManagerName method has not been defined in this class.");
+      return "none";
+    }
+
+    /// Getter for revealing the module of the wrapped function's assigned loop manager
+    str functor::loopManagerOrigin()
+    {
+      utils_error().raise(LOCAL_INFO,"The loopManagerOrigin method has not been defined in this class.");
       return "none";
     }
 
@@ -319,23 +330,25 @@ namespace Gambit
       utils_error().raise(LOCAL_INFO,"The notifyOfBackends method has not been defined in this class.");
     }
 
-    /// Print function
-    void functor::print(Printers::BasePrinter*, const int, int)
-    {
-      str warn_msg = "This is the functor base class print function! This should not\n";
-      warn_msg += "be used; the print function should be redefined in daughter\n"
-                  "functor classes. If this is running there is a problem somewhere.\n"
-                  "Currently only functors derived from module_functor_common<!=void>\n"
-                  "are allowed to try to print themselves; i.e. backend and void\n"
-                  "functors may not do this (they inherit this default message).";
-      utils_warning().raise(LOCAL_INFO,warn_msg);
-    }
+    #ifndef NO_PRINTERS
+      /// Print function
+      void functor::print(Printers::BasePrinter*, const int, int)
+      {
+        str warn_msg = "This is the functor base class print function! This should not\n";
+        warn_msg += "be used; the print function should be redefined in daughter\n"
+                    "functor classes. If this is running there is a problem somewhere.\n"
+                    "Currently only functors derived from module_functor_common<!=void>\n"
+                    "are allowed to try to print themselves; i.e. backend and void\n"
+                    "functors may not do this (they inherit this default message).";
+        utils_warning().raise(LOCAL_INFO,warn_msg);
+      }
 
-    /// Printer function (no-thread-index short-circuit)
-    void functor::print(Printers::BasePrinter* printer, const int pointID)
-    {
-      print(printer,pointID,0);
-    }
+      /// Printer function (no-thread-index short-circuit)
+      void functor::print(Printers::BasePrinter* printer, const int pointID)
+      {
+        print(printer,pointID,0);
+      }
+    #endif
 
     /// Notify the functor about an instance of the options class that contains
     /// information from its corresponding ini-file entry in the auxiliaries or
@@ -348,7 +361,6 @@ namespace Gambit
     /// Return a safe pointer to the options that this functor is supposed to run with (e.g. from the ini file).
     safe_ptr<Options> functor::getOptions()
     {
-      if (this == NULL) functor::failBigTime("getOptions");
       return safe_ptr<Options>(&myOptions);
     }
 
@@ -545,7 +557,7 @@ namespace Gambit
       if (candidates.empty()) return "";
       // If found just one, return it with no further questions.
       if (candidates.size() == 1) return candidates[0];
-      // If found more than one, choose the one closest to the model passed in. 
+      // If found more than one, choose the one closest to the model passed in.
       str result = candidates.front();
       for (std::vector<str>::iterator it = candidates.begin()+1; it != candidates.end(); ++it)
       {
@@ -567,6 +579,7 @@ namespace Gambit
                                                  str origin_name,
                                                  Models::ModelFunctorClaw &claw)
     : functor                  (func_name, func_capability, result_type, origin_name, claw),
+      myTimingPrintFlag        (false),
       start                    (NULL),
       end                      (NULL),
       point_exception_raised   (false),
@@ -589,7 +602,7 @@ namespace Gambit
       myLogTag = Logging::str2tag(myOrigin);
       if (not claw.model_exists(origin_name)) check_missing_LogTag();
     }
-            
+
     /// Destructor
     module_functor_common::~module_functor_common()
     {
@@ -619,6 +632,18 @@ namespace Gambit
     double module_functor_common::getRuntimeAverage()
     {
       return runtime_average;
+    }
+
+    /// Setter for indicating if the timing data for this function's execution should be printed
+    void module_functor_common::setTimingPrintRequirement(bool flag)
+    {
+      myTimingPrintFlag = flag;
+    }
+
+    /// Getter indicating if the timing data for this function's execution should be printed
+    bool module_functor_common::requiresTimingPrinting() const
+    {
+      return myTimingPrintFlag;
     }
 
     /// Reset functor for all threads
@@ -680,21 +705,18 @@ namespace Gambit
     /// Getter for invalidation rate
     double module_functor_common::getInvalidationRate()
     {
-      if (this == NULL) functor::failBigTime("getInvalidationRate");
       return pInvalidation;
     }
 
     /// Setter for the fade rate
     void module_functor_common::setFadeRate(double new_rate)
     {
-      if (this == NULL) functor::failBigTime("setFadeRate");
       fadeRate = new_rate;
     }
 
     /// Indicate whether or not a known model is activated or not.
     bool module_functor_common::getActiveModelFlag(str model)
     {
-      if (this == NULL) functor::failBigTime("getActiveModelFlag");
       if (activeModelFlags.find(model) == activeModelFlags.end())
       {
         std::ostringstream ss;
@@ -710,7 +732,6 @@ namespace Gambit
     /// Return a safe pointer to a string indicating which backend requirement has been activated for a given backend group.
     safe_ptr<str> module_functor_common::getChosenReqFromGroup(str group)
     {
-      if (this == NULL) functor::failBigTime("getChosenReqFromGroup");
       chosenReqsFromGroups[group] = "none";
       return safe_ptr<str>(&chosenReqsFromGroups[group]);
     }
@@ -785,7 +806,6 @@ namespace Gambit
     /// Return a safe pointer to the flag indicating that a loop managed by this functor should break now.
     safe_ptr<bool> module_functor_common::loopIsDone()
     {
-      if (this == NULL) functor::failBigTime("loopIsDone");
       return safe_ptr<bool>(&myLoopIsDone);
     }
 
@@ -808,7 +828,6 @@ namespace Gambit
     /// Return a safe pointer to the iteration number in the loop in which this functor runs.
     omp_safe_ptr<long long> module_functor_common::iterationPtr()
     {
-      if (this == NULL) functor::failBigTime("iterationPtr");
       init_myCurrentIteration_if_NULL();  // Init memory if this is the first run through.
       return omp_safe_ptr<long long>(myCurrentIteration);
     }
@@ -816,16 +835,16 @@ namespace Gambit
     /// Setter for specifying whether this is permitted to be a manager functor, which runs other functors nested in a loop.
     void module_functor_common::setCanBeLoopManager (bool canManage) { iCanManageLoops = canManage; }
     /// Getter for revealing whether this is permitted to be a manager functor
-    bool module_functor_common::canBeLoopManager() { if (this == NULL) failBigTime("canBeLoopManager"); return iCanManageLoops; }
+    bool module_functor_common::canBeLoopManager() { return iCanManageLoops; }
 
     /// Setter for specifying the capability required of a manager functor, if it is to run this functor nested in a loop.
     void module_functor_common::setLoopManagerCapability (str cap) { iRunNested = true; myLoopManagerCapability = cap; }
     /// Getter for revealing the required capability of the wrapped function's loop manager
-    str module_functor_common::loopManagerCapability() { if (this == NULL) failBigTime("loopManagerCapability"); return myLoopManagerCapability; }
+    str module_functor_common::loopManagerCapability() { return myLoopManagerCapability; }
     /// Getter for revealing the name of the wrapped function's assigned loop manager
-    str module_functor_common::loopManagerName() { if (this == NULL) failBigTime("loopManagerName"); return (myLoopManager == NULL ? "none" : myLoopManager->name()); }
+    str module_functor_common::loopManagerName() { return (myLoopManager == NULL ? "none" : myLoopManager->name()); }
     /// Getter for revealing the module of the wrapped function's assigned loop manager
-    str module_functor_common::loopManagerOrigin() { if (this == NULL) failBigTime("loopManagerOrigin"); return (myLoopManager == NULL ? "none" : myLoopManager->origin()); }
+    str module_functor_common::loopManagerOrigin() { return (myLoopManager == NULL ? "none" : myLoopManager->origin()); }
 
     /// Getter for listing currently activated dependencies
     std::set<sspair> module_functor_common::dependencies() { return myDependencies; }
@@ -1423,7 +1442,7 @@ namespace Gambit
           if (myClaw->downstream_of(model, activation_candidate))
           {
             // Found an activation candidate that the model being scanned can be cast to.
-            // Assume for now that the candidate will indeed be activated. 
+            // Assume for now that the candidate will indeed be activated.
             it->second = true;
             // Compare with models that have already been activated, to avoid activating multiple models of the same lineage.
             for (auto jt = activeModelFlags.begin(); jt != activeModelFlags.end(); ++jt)
@@ -1570,8 +1589,8 @@ namespace Gambit
       {
         std::ostringstream ss;
         ss << "Sorry, the backend initialisation function " << name()
-        << " cannot be used" << endl << "because it initialises a backend that you do not have installed!";                 
-        backend_error().raise(LOCAL_INFO, ss.str());    
+        << " cannot be used" << endl << "because it initialises a backend that you do not have installed!";
+        backend_error().raise(LOCAL_INFO, ss.str());
       }
       boost::io::ios_flags_saver ifs(cout);        // Don't allow module functions to change the output precision of cout
       int thread_num = omp_get_thread_num();
@@ -1595,18 +1614,19 @@ namespace Gambit
             this->finishTiming(thread_num);
             leaving_multithreaded_region();
             throw(e);
-          } 
+          }
         }
         this->finishTiming(thread_num);
-        logger().leaving_module();         
+        logger().leaving_module();
         leaving_multithreaded_region();
       }
     }
 
     /// Blank print methods
-    void module_functor<void>::print(Printers::BasePrinter*, const int, int) {}
-    void module_functor<void>::print(Printers::BasePrinter*, const int) {}
-
+    #ifndef NO_PRINTERS
+      void module_functor<void>::print(Printers::BasePrinter*, const int, int) {}
+      void module_functor<void>::print(Printers::BasePrinter*, const int) {}
+    #endif
 
     /// @{ Model functor class method definitions
 
@@ -1658,7 +1678,6 @@ namespace Gambit
     /// ModelParameters objects)
     ModelParameters* primary_model_functor::getcontentsPtr()
     {
-      if (this == NULL) functor::failBigTime("getcontentsPtr");
       return myValue;
     }
 

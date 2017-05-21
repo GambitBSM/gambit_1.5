@@ -37,26 +37,26 @@ namespace Gambit
   // Methods for Likelihood_Container class.
 
   /// Constructor
-  Likelihood_Container::Likelihood_Container(const std::map<str, primary_model_functor *> &functorMap, 
-   DRes::DependencyResolver &dependencyResolver, IniParser::IniFile &iniFile, 
+  Likelihood_Container::Likelihood_Container(const std::map<str, primary_model_functor *> &functorMap,
+   DRes::DependencyResolver &dependencyResolver, IniParser::IniFile &iniFile,
    const str &purpose, Printers::BaseBasePrinter& printer
   #ifdef WITH_MPI
     , GMPI::Comm& comm
   #endif
-  ) 
-  : dependencyResolver (dependencyResolver), 
+  )
+  : dependencyResolver (dependencyResolver),
     printer            (printer),
     functorMap         (functorMap),
     #ifdef WITH_MPI
-    errorComm          (comm), 
+      errorComm        (comm),
     #endif
-    min_valid_lnlike    (iniFile.getValue<double>("likelihood", "model_invalid_for_lnlike_below")),
-    alt_min_valid_lnlike(iniFile.getValueOrDef<double>(2*min_valid_lnlike, "likelihood", "model_invalid_for_lnlike_below_alt")), 
-    active_min_valid_lnlike(min_valid_lnlike), // can be switched to the alternate value by the scanner
-    intralooptime_label("Runtime(ms) intraloop"),
-    interlooptime_label("Runtime(ms) interloop"),
-    totallooptime_label("Runtime(ms) totalloop"),
-    /* Note, likelihood container should be constructed after dependency 
+    min_valid_lnlike        (iniFile.getValue<double>("likelihood", "model_invalid_for_lnlike_below")),
+    alt_min_valid_lnlike    (iniFile.getValueOrDef<double>(0.5*min_valid_lnlike, "likelihood", "model_invalid_for_lnlike_below_alt")),
+    active_min_valid_lnlike (min_valid_lnlike), // can be switched to the alternate value by the scanner
+    intralooptime_label     ("Runtime(ms) intraloop"),
+    interlooptime_label     ("Runtime(ms) interloop"),
+    totallooptime_label     ("Runtime(ms) totalloop"),
+    /* Note, likelihood container should be constructed after dependency
        resolution, so that new printer IDs can be safely acquired without
        risk of collision with graph vertex IDs */
     intraloopID(Printers::get_main_param_id(intralooptime_label)),
@@ -108,7 +108,7 @@ namespace Gambit
            std::ostringstream err;
            err << "Error! Failed to set parameter '"<<key<<"' following prior transformation! The parameter could not be found in the map returned by the prior. This probably means that the prior you are using contains a bug." << std::endl;
            err << "The parameters and values that *were* returned by the prior were:" <<std::endl;
-           if(parameterMap.size()==0){ err << "None! Size of map was zero." << std::endl; } 
+           if(parameterMap.size()==0){ err << "None! Size of map was zero." << std::endl; }
            else {
              for (auto par_jt = parameterMap.begin(); par_jt != parameterMap.end(); ++par_jt)
              {
@@ -138,7 +138,7 @@ namespace Gambit
   }
 
   /// Evaluate total likelihood function
-  double Likelihood_Container::main (std::unordered_map<std::string, double> &in)
+  double Likelihood_Container::main(std::unordered_map<std::string, double> &in)
   {
     logger() << LogTags::core << LogTags::debug << "Entered Likelihood_Container::main" << EOM;
 
@@ -162,18 +162,21 @@ namespace Gambit
     {
       tell_scanner_early_shutdown_in_progress(); // e.g. sets 'quit' flag in Diver
       logger() << "Informed scanner that early shutdown is in progress and it should secure all its output files if possible." << EOM;
-      if(not scanner_can_quit())
-      {
-        // If the scanner does not have a built-in mechanism for halting the scan early, then we will assume
-        // responsiblity for the process and attempt to shut the scan down from our side.
-        signaldata().attempt_soft_shutdown();
-      }
+    }
+
+    // Decide if we need to skip the likelihood calculation due to shutdown procedure
+    if(signaldata().shutdown_begun() and not scanner_can_quit())
+    {
+      // If the scanner does not have a built-in mechanism for halting the scan early, then we will assume
+      // responsiblity for the process and attempt to shut the scan down from our side.
+      signaldata().attempt_soft_shutdown();
       lnlike = alt_min_valid_lnlike; // Always use this larger value to avoid scanner deadlocks (e.g. MultiNest refuses to progress without a likelihood above its minimum threshold)
       point_invalidated = true; // Will prevent this likelihood value from being flagged as 'valid' by the printer
-      logger() << "Shutdown in progess! Returning min_valid_lnlike to ScannerBit instead of computing likelihood." << EOM;
+      logger() << "Shutdown in progess! The scanner is not flagged as being able to shut itself down, so are managing the shutdown from the likelihood container side. Returning min_valid_lnlike to ScannerBit instead of computing likelihood." << EOM;
     }
     else // Do the normal likelihood calculation
     {
+      // If the shutdown has been triggered but the quit flag is present, then we let the likelihood evaluation proceed as normal.
 
       bool compute_aux = true;
 
@@ -186,7 +189,7 @@ namespace Gambit
 
       // Begin timing of total likelihood evaluation
       std::chrono::time_point<std::chrono::system_clock> startL = std::chrono::system_clock::now();
-  
+
       // Compute time since the previous likelihood evaluation ended
       std::chrono::duration<double> interloop_time = startL - previous_endL;
 
@@ -281,7 +284,7 @@ namespace Gambit
           str aux_tag = "dditional observable from " + dependencyResolver.get_functor(*it)->origin()
                                + "::" + dependencyResolver.get_functor(*it)->name();
           if (debug) logger() << LogTags::core <<  "Calculating a" << aux_tag << "." << EOM;
-         
+
           try
           {
             dependencyResolver.calcObsLike(*it,getPtID());
@@ -297,7 +300,7 @@ namespace Gambit
 
       // End timing of total likelihood evaluation
       std::chrono::time_point<std::chrono::system_clock> endL = std::chrono::system_clock::now();
- 
+
       // Compute time since the previous likelihood evaluation ended
       // I.e. computing time of this likelihood, plus overhead from previous inter-loop time.
       std::chrono::duration<double> true_total_loop_time = endL - previous_endL;
@@ -313,9 +316,13 @@ namespace Gambit
       if(dependencyResolver.printTiming())
       {
         int rank = printer.getRank();
-        printer.print(std::chrono::duration_cast<ms>(runtimeL).count(),            intralooptime_label,intraloopID,rank,getPtID());
-        printer.print(std::chrono::duration_cast<ms>(interloop_time).count(),      interlooptime_label,interloopID,rank,getPtID());
-        printer.print(std::chrono::duration_cast<ms>(true_total_loop_time).count(),totallooptime_label,totalloopID,rank,getPtID());
+        // Convert time counts to doubles (had weird problem with long long ints on some systems)
+        double d_runtime   = std::chrono::duration_cast<ms>(runtimeL).count(); 
+        double d_interloop = std::chrono::duration_cast<ms>(interloop_time).count();     
+        double d_total     = std::chrono::duration_cast<ms>(true_total_loop_time).count();
+        printer.print(d_runtime,   intralooptime_label, intraloopID, rank, getPtID());
+        printer.print(d_interloop, interlooptime_label, interloopID, rank, getPtID());
+        printer.print(d_total,     totallooptime_label, totalloopID, rank, getPtID());
       }
 
     }

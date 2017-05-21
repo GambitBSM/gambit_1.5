@@ -14,7 +14,7 @@
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
-///  \date 2016 Sept
+///  \date 2016 Mar, June, Sept
 ///  
 ///  *********************************************
 
@@ -39,25 +39,30 @@
    #undef CAPABILITY
 
    #define CAPABILITY run_MSSMspectrum_test
-   START_CAPABILITY                          
-   
-     #define FUNCTION MSSMspectrum_test            
-     START_FUNCTION(bool)                  
-     DEPENDENCY(unimproved_MSSM_spectrum, /*TAG*/ Spectrum)
+   START_CAPABILITY
+
+     #define FUNCTION MSSMspectrum_test
+     START_FUNCTION(bool)
+     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+     #undef FUNCTION
+
+     #define FUNCTION SPheno_MSSM_test
+     START_FUNCTION(bool)
+     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
      #undef FUNCTION
 
    #undef CAPABILITY
- 
+
    #define CAPABILITY run_light_quark_test
-   START_CAPABILITY                          
-   
-     #define FUNCTION light_quark_test            
-     START_FUNCTION(bool)                  
+   START_CAPABILITY
+
+     #define FUNCTION light_quark_test
+     START_FUNCTION(bool)
      DEPENDENCY(qedqcd_subspectrum, const SubSpectrum*)
      #undef FUNCTION
-   
+
    #undef CAPABILITY
-  
+
    /// @}
 
 #endif

@@ -22,7 +22,7 @@
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
 ///  \date 2013 Jun
-///  \date 2014 Mar [RD interface to DS is working]
+///  \date 2014 Mar
 ///
 ///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
@@ -75,19 +75,14 @@ START_MODULE
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(MSSM63atQ,CMSSM)
-      // CMSSM
+      // For debugging using DarkSUSY native interface to ISASUGRA
       BACKEND_REQ(dsgive_model_isasugra, (), void, (double&,double&,double&,double&,double&))
       BACKEND_REQ(dssusy_isasugra, (), void, (int&,int&))
-      // MSSM7 -- not used at the moment!?
-      BACKEND_REQ(mssmpar, (), DS_MSSMPAR)
-      BACKEND_REQ(dssusy, (), void, (int&,int&))
       // Initialize DarkSUSY with SLHA file
       BACKEND_REQ(dsSLHAread, (), void, (const char*, int&, int))
       BACKEND_REQ(dsprep, (), void, ())
       // Initialize DarkSUSY with SLHA object (convenience function)
       BACKEND_REQ(initFromSLHAeaAndDecayTable, (), int, (const SLHAstruct&, const DecayTable&))
-      // Print higgs widths
-      BACKEND_REQ(dswwidth, (), void, (int&))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -147,8 +142,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RD_eff_annrate_SUSY
       START_FUNCTION(fptr_dd)
-        DEPENDENCY(RD_eff_annrate_DSprep, int)
-        BACKEND_REQ(dsanwx, (), double, (double&))
+      DEPENDENCY(RD_eff_annrate_DSprep, int)
+      BACKEND_REQ(dsanwx, (), double, (double&))
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_from_ProcessCatalog
       START_FUNCTION(fptr_dd)
@@ -200,14 +195,19 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Fraction of the relic density constituted by the DM candidate under investigation
   #define CAPABILITY RD_fraction
   START_CAPABILITY
-    #define FUNCTION RD_fraction_from_oh2
+    #define FUNCTION RD_fraction_one
+      START_FUNCTION(double)
+    #undef FUNCTION
+    #define FUNCTION RD_fraction_leq_one
       START_FUNCTION(double)
       DEPENDENCY(RD_oh2, double)
     #undef FUNCTION
-    #define FUNCTION RD_fraction_fixed
+    #define FUNCTION RD_fraction_rescaled
       START_FUNCTION(double)
+      DEPENDENCY(RD_oh2, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -238,10 +238,6 @@ START_MODULE
     #define FUNCTION cascadeMC_LoopManager
       START_FUNCTION(void, CAN_MANAGE_LOOPS)
       DEPENDENCY(GA_missingFinalStates, std::vector<std::string>)
-      // Make sure these capabilities are run before the loop
-      DEPENDENCY(cascadeMC_DecayTable, DarkBit::DecayChain::DecayTable)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -390,6 +386,15 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY set_gamLike_GC_halo
+  START_CAPABILITY
+    #define FUNCTION set_gamLike_GC_halo
+      START_FUNCTION(bool)
+      DEPENDENCY(GalacticHalo, GalacticHaloProperties)
+      BACKEND_REQ(set_halo_profile, (gamLike), void, (int, const std::vector<double> &, const std::vector<double> &, double))
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnL_FermiLATdwarfs
   START_CAPABILITY
     #define FUNCTION lnL_FermiLATdwarfs_gamLike
@@ -406,6 +411,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -416,6 +422,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
+      //DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -426,6 +433,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -588,7 +596,7 @@ START_MODULE
   DD_DECLARE_EXPERIMENT(SIMPLE_2014)
   DD_DECLARE_EXPERIMENT(DARWIN_Ar)
   DD_DECLARE_EXPERIMENT(DARWIN_Xe)
-  DD_DECLARE_EXPERIMENT(LUX_2016_prelim)
+  DD_DECLARE_EXPERIMENT(LUX_2016)
   DD_DECLARE_EXPERIMENT(PandaX_2016)
   DD_DECLARE_EXPERIMENT(LUX_2015)
   DD_DECLARE_EXPERIMENT(PICO_2L)

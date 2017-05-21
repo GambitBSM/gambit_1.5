@@ -142,26 +142,68 @@ namespace Gambit
                     scan_err << "\"use_scanner:\" input value not usable in the inifile." << scan_end;
             }
 
+            // Before allowing scan to begin, add a barrier so that some don't start without others
+            // Otherwise, attempting to shut down with only some processes begun will screw up the
+            // output.
+            #ifdef WITH_MPI
+              GMPI::Comm comm;
+              comm.dup(MPI_COMM_WORLD,"ScanRunComm"); // duplicates MPI_COMM_WORLD
+              int rank = comm.Get_rank();
+              if(rank==0)
+              {
+                cout << "ScannerBit is waiting for all MPI processes to join the scan..." << endl;
+              }
+              comm.Barrier();
+              if(rank==0)
+              {
+                cout << "  All processes ready!" << endl;
+              }
+            #else
+              int rank = 0;
+            #endif
+
             unsigned int dim = prior->size();
             
             for(auto &&pluginName : pluginNames)
             {
                 Plugins::Plugin_Interface<int ()> plugin_interface("scanner", pluginName, dim, *factory);
                 plugin_interface();
-                if(Plugins::plugin_info.early_shutdown_in_progress())
-                {
-                  #ifdef WITH_MPI
-                    int rank = GMPI::Comm().Get_rank();
-                  #else
-                    int rank = 0;
-                  #endif
-                  if (rank == 0) cout << "ScannerBit has received a shutdown signal and will terminate early. Finalising resume data..." << endl;
-                  printerInterface->finalise(true); // abnormal (early) termination
-                }
-                else
-                {
-                  printerInterface->finalise();
-                }
+            }
+
+            // Check shutdown flags across all processes (COLLECTIVE OPERATION)
+            #ifdef WITH_MPI
+            if(rank==0) cout << "ScannerBit is waiting for all MPI processes to report their shutdown condition..." << endl;
+            const MPI_Datatype datatype = GMPI::get_mpi_data_type<int>::type(); // datatype for ints
+            int sendbuf = Plugins::plugin_info.early_shutdown_in_progress();
+            std::vector<int> all_vals(comm.Get_size(),0);
+            MPI_Allgather(
+               &sendbuf, /* send buffer */
+               1, /* send count */
+               datatype, /* send datatype */
+               &all_vals[0], /* recv buffer */
+               1, /* recv count */
+               datatype, /* recv datatype */
+               *(comm.get_boundcomm()) /* communicator */
+            );
+            for(auto it=all_vals.begin(); it!=all_vals.end(); ++it)
+            {
+               if(*it!=0)
+               {
+                   // Some process is shutting down early, therefore we should all use the early shutdown mode
+                   Plugins::plugin_info.set_early_shutdown_in_progress();
+                   break;
+               }
+            }
+            #endif
+
+            if(Plugins::plugin_info.early_shutdown_in_progress())
+            {
+              if (rank == 0) cout << "ScannerBit has received a shutdown signal and will terminate early. Finalising resume data..." << endl;
+              printerInterface->finalise(true); // abnormal (early) termination
+            }
+            else
+            {
+              printerInterface->finalise();
             }
 
             return 0;

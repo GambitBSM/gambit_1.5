@@ -385,10 +385,20 @@ namespace Gambit
       initialisePrinter();
 
 #ifdef HAVE_GRAPHVIZ
-      // Generate graphviz plot
-      std::ofstream outf(activeFunctorGraphFile);
-      write_graphviz(outf, masterGraph, labelWriter(&masterGraph), edgeWriter(&masterGraph));
+      // Generate graphviz plot if running in dry-run mode.
+      if (boundCore->show_runorder)
+      {
+        std::ofstream outf(activeFunctorGraphFile);
+        write_graphviz(outf, masterGraph, labelWriter(&masterGraph), edgeWriter(&masterGraph));
+      }
 #endif
+
+      // Pre-compute the individually ordered vertex lists for each of the ObsLike entries.
+      std::vector<VertexID> order = getObsLikeOrder();
+      for(auto it = order.begin(); it != order.end(); ++it)
+      {
+        SortedParentVertices[*it] = getSortedParentVertices(*it, masterGraph, function_order);
+      }
 
       // Done
     }
@@ -610,15 +620,13 @@ namespace Gambit
     // Evaluates ObsLike vertex, and everything it depends on, and prints results
     void DependencyResolver::calcObsLike(VertexID vertex, const int pointID)
     {
-      // pointID supplied by scanner, and is used to tell the printer which model
+      // pointID is supplied by the scanner, and is used to tell the printer which model
       // point the results should be associated with.
-      std::vector<VertexID> order;
-      //typedef property_map<MasterGraphType, vertex_index_t>::type IndexMap;
-      //IndexMap index = get(vertex_index, masterGraph);
-      // TODO: Do I need to do this here? Should be a member variable of dependency resolver.
 
-      // TODO: Should happen only once
-      order = getSortedParentVertices(vertex, masterGraph, function_order);
+      if (SortedParentVertices.find(vertex) == SortedParentVertices.end())
+        core_error().raise(LOCAL_INFO, "Tried to calculate a function not in or not at top of dependency graph.");
+      std::vector<VertexID> order = SortedParentVertices.at(vertex);
+
       for (std::vector<VertexID>::iterator it = order.begin(); it != order.end(); ++it)
       {
         std::ostringstream ss;
@@ -634,13 +642,17 @@ namespace Gambit
         }
         invalid_point_exception* e = masterGraph[*it]->retrieve_invalid_point_exception();
         if (e != NULL) throw(*e);
-        // Ben: may want to do this call elsewhere; I added it here for testing.
-        // Pat: note that this prints from thread index 0 only, i.e. results created by
-        //      threads other than the main one need to be accessed with
-        //        masterGraph[*it]->print(boundPrinter,pointID,index);
-        //      where index is some integer s.t. 0 <= index <= number of hardware threads
-        if (not typeComp(masterGraph[*it]->type(),  "void", *boundTEs, false)) masterGraph[*it]->print(boundPrinter,pointID);
-        //masterGraph[*it]->print(boundPrinter,pointID); // (module) functors now avoid trying to print void types by themselves.
+        if (not typeComp(masterGraph[*it]->type(),  "void", *boundTEs, false))
+        {
+          // Note that this prints from thread index 0 only, i.e. results created by
+          // threads other than the main one need to be accessed with
+          //   masterGraph[*it]->print(boundPrinter,pointID,index);
+          // where index is some integer s.t. 0 <= index <= number of hardware threads.
+          // At the moment GAMBIT only prints results of thread 0, under the expectation
+          // that nested module functions are all designed to gather their results into
+          // thread 0.
+          masterGraph[*it]->print(boundPrinter,pointID);
+        }
       }
       // Reset the cout output precision, in case any backends have messed with it during the ObsLike evaluation.
       cout << std::setprecision(boundCore->get_outprec());
@@ -845,19 +857,21 @@ namespace Gambit
       for (boost::tie(vi, vi_end) = vertices(masterGraph); vi != vi_end; ++vi)
       {
         // Inform the active functors of the vertex ID that the masterGraph has assigned to them
-        // (so that later on they can pass this to the printer object to identify themselves)  
-        masterGraph[*vi]->setVertexID(index[*vi]);  
+        // (so that later on they can pass this to the printer object to identify themselves)
+        //masterGraph[*vi]->setVertexID(index[*vi]); // Ugh cannot do this, needs to be consistent with get_param_id
+        std::string label = masterGraph[*vi]->label();
+        masterGraph[*vi]->setVertexID(Printers::get_param_id(label));
         // Same for timing output ID, but get ID number from printer system
         std::string timing_label = masterGraph[*vi]->timingLabel();
-        masterGraph[*vi]->setTimingVertexID(Printers::get_main_param_id(timing_label));  
+        masterGraph[*vi]->setTimingVertexID(Printers::get_param_id(timing_label));
 
         // Check for non-void type and status==2 (after the dependency resolution) to print only active, printable functors.
         // TODO: this doesn't currently check for non-void type; that is done at the time of printing in calcObsLike.  Not sure if this is
         //       how it should be in the end.
         if( masterGraph[*vi]->requiresPrinting() and (masterGraph[*vi]->status()==2) )
         {
-          functors_to_print.push_back(index[*vi]);
-
+          functors_to_print.push_back(index[*vi]); // TODO: This may be obsolete
+          boundPrinter->addToPrintList(label); // Needed mainly by postprocessor.
           // Trigger a dummy print call for all printable functors. This is used by some printers
           // to set up buffers for each of these output streams.
           //logger() << LogTags::dependency_resolver << "Triggering dummy print for functor '"<<masterGraph[*vi]->capability()<<"' ("<<masterGraph[*vi]->type()<<")..." << EOM;
@@ -879,7 +893,7 @@ namespace Gambit
       // Similarly for extra results, i.e. from any functors not in this
       // initial list, whose "requiresPrinting" flag later gets set to 'true'
       // somehow.)
-      boundPrinter->initialise(functors_to_print);
+      boundPrinter->initialise(functors_to_print); // TODO: May be obsolete
     }
 
     std::vector<DRes::VertexID> DependencyResolver::closestCandidateForModel(std::vector<DRes::VertexID> candidates)
@@ -1472,27 +1486,83 @@ namespace Gambit
             loopManagerMap[fromVertex] = v;
             (*masterGraph[toVertex]).resolveLoopManager(masterGraph[fromVertex]);
 
-            // Add dependencies of loop-managed vertices as "hidden"
-            // dependencies to loopmanager.
-            // TODO: Move somewhere else (make sure that all toVertex
-            // dependencies are resolved before)
-            /*
-            graph_traits<DRes::MasterGraphType>::in_edge_iterator ibegin, iend;
-            for (boost::tie(ibegin, iend) = in_edges(toVertex, masterGraph);
-                ibegin != iend; ++ibegin)
+            // Take any dependencies of loop-managed vertices that have already been resolved,
+            // and add them as "hidden" dependencies to this loop manager.
+            if (edges_to_force_on_manager.find(toVertex) != edges_to_force_on_manager.end())
             {
-              boost::tie(edge, ok) =
-                add_edge(source(*ibegin, masterGraph), fromVertex, masterGraph);
+              for (auto it = edges_to_force_on_manager.at(toVertex).begin();
+                   it != edges_to_force_on_manager.at(toVertex).end(); ++it)
+              {
+                logger() << "Dynamically adding dependency of " << (*masterGraph[fromVertex]).origin()
+                         << "::" << (*masterGraph[fromVertex]).name() << " on "
+                         << (*masterGraph[*it]).origin() << "::" << (*masterGraph[*it]).name() << endl;
+                boost::tie(edge, ok) = add_edge(*it, fromVertex, masterGraph);
+              }
             }
-            */
           }
-          // Default is to resovle dependency on functor level of toVertex
+          // Default is to resolve dependency on functor level of toVertex
           else
           {
             (*masterGraph[toVertex]).resolveDependency(masterGraph[fromVertex]);
           }
           // ...and on masterGraph level.
           boost::tie(edge, ok) = add_edge(fromVertex, toVertex, masterGraph);
+
+          // In the case that toVertex is a nested function, add fromVertex to
+          // the edges of toVertex's loop manager.
+          str cap = (*masterGraph[toVertex]).loopManagerCapability();
+          if (cap != "none")
+          {
+            // This function runs nested.  Check if its loop manager has been resolved yet.
+            if ((*masterGraph[toVertex]).loopManagerName() == "none")
+            {
+              // toVertex's loop manager has not yet been determined.
+              // Add the edge to the list to deal with when the loop manager dependency is resolved,
+              // as long as toVertex and fromVertex don't share the same management requirements.
+              if (cap != (*masterGraph[fromVertex]).loopManagerCapability())
+              {
+                if (edges_to_force_on_manager.find(toVertex) == edges_to_force_on_manager.end())
+                 edges_to_force_on_manager[toVertex] = std::set<DRes::VertexID>();
+                edges_to_force_on_manager.at(toVertex).insert(fromVertex);
+              }
+            }
+            else
+            {
+              // toVertex's loop manager has already been resolved.
+              // If fromVertex is not the manager itself, and is not
+              // itself a nested function with the same management
+              // requirements as toVertex, then add fromVertex as an edge
+              // of the manager.
+              str name = (*masterGraph[toVertex]).loopManagerName();
+              str origin = (*masterGraph[toVertex]).loopManagerOrigin();
+              if (name   != (*masterGraph[fromVertex]).name() and
+                  origin != (*masterGraph[fromVertex]).origin() and
+                  cap    != (*masterGraph[fromVertex]).loopManagerCapability())
+              {
+                // Hunt through the edges of toVertex and find the one that corresponds to its loop manager.
+                graph_traits<DRes::MasterGraphType>::in_edge_iterator ibegin, iend;
+                boost::tie(ibegin, iend) = in_edges(toVertex, masterGraph);
+                if (ibegin != iend)
+                {
+                  DRes::VertexID managerVertex;
+                  for (; ibegin != iend; ++ibegin)
+                  {
+                    managerVertex = source(*ibegin, masterGraph);
+                    if ((*masterGraph[managerVertex]).name() == name and
+                        (*masterGraph[managerVertex]).origin() == origin) break;
+                  }
+                  logger() << "Dynamically adding dependency of " << (*masterGraph[managerVertex]).origin()
+                           << "::" << (*masterGraph[managerVertex]).name() << " on "
+                           << (*masterGraph[fromVertex]).origin() << "::" << (*masterGraph[fromVertex]).name() << endl;
+                  boost::tie(edge, ok) = add_edge(fromVertex, managerVertex, masterGraph);
+                }
+                else
+                {
+                  core_error().raise(LOCAL_INFO, "toVertex has no edges! So its loop manager hasn't been added as a dependency?!");
+                }
+              }
+            }
+          }
         }
         else // if output vertex
         {

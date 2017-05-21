@@ -56,7 +56,7 @@ foreach(p
 endforeach()
 
 # Set the project name, enabling C, C++ and Fortran support
-project(GAMBIT C CXX Fortran)
+project(gambit C CXX Fortran)
 
 # Disable clang support
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -137,8 +137,6 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
 endforeach()
 
-enable_testing()
-
 # Check for C++11 support -- if we use special c++11 features we should check for them too at a later stage...
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -153,26 +151,27 @@ else()
   endif()
 endif()
 
+# Check for C++14 support, just in case any scanner plugin codes want to use it.
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+
 # Check for Boost
 set(Boost_NO_BOOST_CMAKE ON)
-set(required_boost_libs "")  # Don't need these anymore: system filesystem
-find_package(Boost 1.41 REQUIRED ${required_boost_libs})
+find_package(Boost 1.41)
 if(Boost_FOUND)
-  if (NOT Boost_INCLUDE_DIR STREQUAL "")
-    include_directories("${Boost_INCLUDE_DIR}")
-  endif()
+  include_directories("${Boost_INCLUDE_DIR}")
 else()
-  set(err "GAMBIT requires Boost v1.41 or greater")
-  if (NOT "${required_boost_libs}" STREQUAL "")
-    set(err "${err} and compiled libraries:\n")
-    foreach(lib ${required_boost_libs})
-      set(err "${err} boost_${lib}\n")
-    endforeach()
-    set(err "${err}Please install these and rerun cmake.")
-  else()
-    set(err "${err}.\nPlease install a suitable version of Boost and rerun cmake.")
-  endif()
-  message(FATAL_ERROR ${err})
+  message(FATAL_ERROR "GAMBIT requires Boost v1.41 or greater.\nPlease install a suitable version of Boost and rerun cmake.")
+endif()
+
+# Check for Eigen
+find_package(Eigen3 3.1.0)
+if(EIGEN3_FOUND)
+  include_directories("${EIGEN3_INCLUDE_DIR}")
+  message("-- Eigen version: ${EIGEN3_VERSION}")
+else()
+  message("${BoldRed}   Eigen v3.1.0 or greater not found.  FlexibleSUSY and GM2Calc interfaces will be excluded.${ColourReset}")
+  set(itch "${itch};gm2calc;flexiblesusy")
+  message(FATAL_ERROR "\nFlexibleSUSY is currently included in the GAMBIT distribution, so in fact it cannot be ditched.  Please install Eigen3.\n(Note that this will change in future GAMBIT versions, where FlexibleSUSY will be a 'true' backend.)")
 endif()
 
 # Check for OpenMP
@@ -247,7 +246,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
   set(GAMBIT_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_MINSIZEREL}")
   set(GAMBIT_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_MINSIZEREL}")
-  set(GAMBIT_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_MINSIZEREL}")  
+  set(GAMBIT_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_MINSIZEREL}")
 else()
   set(GAMBIT_C_FLAGS "${CMAKE_C_FLAGS}")
   set(GAMBIT_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -257,16 +256,22 @@ endif()
 # Check for optional packages and disable sections of GAMBIT accordingly
 include(cmake/optional.cmake)
 
-# Set the version number (later to come directly from git tag)
-set(GAMBIT_VERSION_MAJOR 1)
-set(GAMBIT_VERSION_MINOR 0)
-set(GAMBIT_VERSION_REVISION 0)
+# Look for the tarball version file; if it is missing, set the version number directly from git tag
+if(EXISTS "${PROJECT_SOURCE_DIR}/cmake/tarball_info.cmake")
+  include(cmake/tarball_info.cmake)
+else()
+  get_version_from_git(GAMBIT_VERSION_MAJOR GAMBIT_VERSION_MINOR GAMBIT_VERSION_REVISION
+                       GAMBIT_VERSION_PATCH GAMBIT_VERSION_FULL)
+endif()
 
 # Add doxygen build as an external project
 add_custom_target(docs WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND doxygen doc/doxygen.conf)
 
 # Work out which modules to include in the compile
 retrieve_bits(GAMBIT_BITS ${PROJECT_SOURCE_DIR} "${itch}" "Loud")
+
+# Set up targets to make standalone tarballs of the different modules
+add_standalone_tarballs("${GAMBIT_BITS}" "${GAMBIT_VERSION_FULL}")
 
 # Include contributed packages
 include(cmake/contrib.cmake)
@@ -300,8 +305,8 @@ set(MODULE_HARVESTER ${PROJECT_SOURCE_DIR}/Elements/scripts/module_harvester.py)
 set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.py)
 set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
-# Create all_functor_types.hpp, module_rollcall.hpp, module_types_rollcall.hpp, models_rollcall.hpp,
-# model_types_rollcall.hpp, backend_rollcall.hpp, backend_types_rollcall.hpp and printer_rollcall.hpp.
+# Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
+# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp.
 file(GLOB MODEL_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB BACKEND_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
@@ -319,12 +324,26 @@ list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//inclu
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")
 set(MODULE_HARVESTER_FILES ${MODULE_HARVESTER_FILES} ${BACKEND_HARVESTER_FILES})
 remove_build_files(models_harvested backends_harvested modules_harvested printers_harvested)
-add_gambit_custom(model_harvest   models_harvested   MODEL_HARVESTER   MODEL_HARVESTER_FILES)
-add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
-add_gambit_custom(module_harvest  modules_harvested  MODULE_HARVESTER  MODULE_HARVESTER_FILES)
-add_gambit_custom(printer_harvest printers_harvested PRINTER_HARVESTER PRINTER_HARVESTER_FILES)
-add_dependencies(module_harvest backend_harvest)
-add_dependencies(printer_harvest module_harvest)
+if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
+ add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
+  add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+  add_gambit_custom(printer_harvest printers_harvested PRINTER_HARVESTER PRINTER_HARVESTER_FILES)
+else()
+  add_definitions(-DNO_PRINTERS)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
+  add_gambit_custom(module_harvest modules_harvested MODULE_HARVESTER  MODULE_HARVESTER_FILES)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
+  add_dependencies(module_harvest backend_harvest)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+  add_dependencies(printer_harvest module_harvest)
+endif()
 
 # Generate the CMakeLists.txt files for GAMBIT modules, Backends, Models and Printers)
 message("${Yellow}-- Updating GAMBIT module, model, backend, and printer CMake files.${ColourReset}")
@@ -356,12 +375,10 @@ foreach(bit ${GAMBIT_BITS})
   set(GAMBIT_BIT_OBJECTS ${GAMBIT_BIT_OBJECTS} "$<TARGET_OBJECTS:${bit}>")
 endforeach()
 
-# MJW adds this to get ColliderBit_standalone compiled
-# It is probably naughty
-set(SPEC_BIT_OBJECTS "$<TARGET_OBJECTS:SpecBit>")
-
 # Add the executables
 include(cmake/executables.cmake)
 
-# Finish setting the link commands and rpath variables
-include(${PROJECT_BINARY_DIR}/linkedout.cmake)
+# Finish setting the link commands and rpath variables for ScannerBit
+if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
+  include(${PROJECT_BINARY_DIR}/linkedout.cmake)
+endif()
