@@ -346,16 +346,13 @@ int main(int argc, char* argv[])
     }
 
     // Calculate DD couplings with DarkSUSY
-//    if (slha_version == 2)
-    {
-      DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
-      DD_couplings_DarkSUSY.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
-      DD_couplings_DarkSUSY.resolveDependency(&DarkSUSY_PointInit_MSSM);
-      DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsddgpgn);
-      DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
-      DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::ddcom);
-      DD_couplings_DarkSUSY.reset_and_calculate();
-    }
+    DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
+    DD_couplings_DarkSUSY.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+    DD_couplings_DarkSUSY.resolveDependency(&DarkSUSY_PointInit_MSSM);
+    DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsddgpgn);
+    DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
+    DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::ddcom);
+    DD_couplings_DarkSUSY.reset_and_calculate();
 
     // Initialize DDCalc backend
     Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
