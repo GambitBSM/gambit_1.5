@@ -277,6 +277,8 @@ namespace Gambit
         while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
           WSNewPacket((WSLINK)pHandle);
 
+// TODO: This does not work, check
+/* 
         const char *failed;
         if(!WSGetString((WSLINK)pHandle, &failed))
         {
@@ -296,7 +298,7 @@ namespace Gambit
           WSNewPacket((WSLINK)pHandle);
           return 0;
         }
-
+*/
         logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                  << LogTags::backends << LogTags::info << EOM;
         Backends::backendInfo().works[be+ver] = true;
