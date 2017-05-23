@@ -226,7 +226,6 @@ namespace Gambit
       Backends::backendInfo().classloader[be+ver] = false;
       
       #ifdef HAVE_MATHEMATICA
-
         int WSerrno;
         std::ostringstream err;
 
@@ -247,6 +246,7 @@ namespace Gambit
         #else
           WSTPflags << "-linkname math -mathlink";
         #endif
+
         pHandle = WSOpenString(WSenv, WSTPflags.str().c_str(), &WSerrno);
         if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
         {
@@ -277,7 +277,7 @@ namespace Gambit
         while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
           WSNewPacket((WSLINK)pHandle);
 
-        const char *failed;
+/*        const char *failed;
         if(!WSGetString((WSLINK)pHandle, &failed))
         {
           err << "Error reading package from WSTP" << endl;
@@ -287,7 +287,6 @@ namespace Gambit
           WSNewPacket((WSLINK)pHandle);
           return 0;
         }
-
         if(str(failed) == "$Failed")
         {
           err << "Mathematica package could not be loaded" << endl;
@@ -296,7 +295,7 @@ namespace Gambit
           WSNewPacket((WSLINK)pHandle);
           return 0;
         }
-
+*/
         logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                  << LogTags::backends << LogTags::info << EOM;
         Backends::backendInfo().works[be+ver] = true;
