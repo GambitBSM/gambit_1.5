@@ -147,7 +147,17 @@ namespace Gambit                                                            \
       extern const str backendDir = backendInfo().                          \
        path_dir(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                \
     }                                                                       \
-  }                                                                         \
+                                                                            \
+    /* TODO: Hacky way of sending handles up,                               \
+             change to backend end function */                              \
+i/*    void CAT_5(BACKENDNAME,_,SAFE_VERSION,_,diefunction)()                  \
+    {                                                                       \
+      BOOST_PP_IF(USING_MATHEMATICA,                                        \
+        WSPutFunction((WSLINK)CAT_3(BACKENDNAME,_,SAFE_VERSION)::pHandle,   \
+                      "Exit", 0)                                           \
+    void *() CAT_5(BACKENDNAME,_,SAFE_VERSION,_,die) =                      \
+       CAT_3(BACKENDNAME,_,SAFE_VERSION)::pHandle;                          \
+*/  }                                                                         \
 }                                                                           \
                                                                             \
 /* Register the factory functions for all classes loaded by this backend. */\

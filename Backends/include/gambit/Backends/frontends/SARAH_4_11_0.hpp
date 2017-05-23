@@ -20,6 +20,8 @@
 
 LOAD_LIBRARY
 
+BE_ALLOW_MODELS(CMSSM)
+
 BE_FUNCTION(Start, void, (const MString&), "Start", "SARAH_Start")
 //BE_FUNCTION(Make_SPheno, void, (), "Make_SPheno", "SARAH_Make_SPheno")
 
