@@ -277,7 +277,9 @@ namespace Gambit
         while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
           WSNewPacket((WSLINK)pHandle);
 
-/*        const char *failed;
+// TODO: This does not work, check
+/* 
+        const char *failed;
         if(!WSGetString((WSLINK)pHandle, &failed))
         {
           err << "Error reading package from WSTP" << endl;

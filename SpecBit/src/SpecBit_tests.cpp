@@ -15,11 +15,8 @@
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no_)
-///     \date 2016 Apr, May, June
+///     \date 2016 Apr - Sep
 ///  
-///  \author Tomas Gonzalo
-///          (t.e.gonzalo@fys.uio.no)
-///  \date 2016 Sept
 /// 
 ///  *********************************************
 
@@ -87,6 +84,20 @@ namespace Gambit
       else result = true;
 
       return ;
+    }
+
+    void SARAH_test(bool &result)
+    {
+      namespace myPipe = Pipes::SARAH_test;
+ 
+      cout << "SARAH test" << endl;
+
+      MString Model = "MSSM";
+
+      myPipe::BEreq::SARAH_Start(Model);
+
+      return ;
+
     }
  
     // Testing function for SPheno

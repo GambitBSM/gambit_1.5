@@ -74,3 +74,8 @@ libMathematicaTest:
 SUSYHD:
   1.0.2:       ./Backends/installed/susyhd/1.0.2/SUSYHD.m
 
+SARAH:
+  4.11.0:      ./Backends/installed/sarah/4.11.0/SARAH.m
+
+FeynRules:
+  2.3:         ./Backends/installed/feynrules/2.3/FeynRules.m

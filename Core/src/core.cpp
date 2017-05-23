@@ -185,6 +185,11 @@ namespace Gambit
             // Argument must contain the ini-filename
             filename = optarg;
             found_inifile = true;
+            break;
+          case 'm':
+            // Argument mus contain the model-filename
+            filename = optarg;
+            found_inifile = true;
         }
       }
       // Set flag telling core object that command line option processing is complete

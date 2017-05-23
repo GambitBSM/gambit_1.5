@@ -1,0 +1,59 @@
+# Inifile for testing SpecBit features
+
+Parameters:
+
+  CMSSM:
+    M0:
+      fixed_value: 1500
+    M12:
+      fixed_value: 1500
+    A0:
+      fixed_value: 2000
+    SignMu:
+      fixed_value: 1
+    TanBeta:
+      fixed_value: 30
+  
+Priors:
+
+Printer:
+  printer: ascii
+  options:
+    output_file: "gambit_output.txt"
+
+Scanner:
+  use_scanner: toy_mcmc
+  
+  scanners:
+    toy_mcmc:
+      plugin: toy_mcmc
+      point_number: 2
+      output_file:  output
+      like:  Likelihood
+
+
+ObsLikes:
+  - purpose:      Test
+    capability:   Mathematica_test
+    type:         bool
+    function:     SARAH_test
+
+Rules:
+
+Logger:
+
+  redirection:
+    [Debug] : "debug.log"
+    [Default] : "default.log"
+    [SpecBit] : "SpecBit.log"
+
+KeyValues:
+
+  default_output_path: "runs/SARAH_tests"
+
+  dependency_resolution:
+    prefer_model_specific_functions: false
+
+  likelihood:
+    model_invalid_for_lnlike_below: -1e6
+ 

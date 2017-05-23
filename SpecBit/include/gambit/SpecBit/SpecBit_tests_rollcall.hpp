@@ -36,6 +36,11 @@
      DEPENDENCY(prec_HiggsMasses, shd_HiggsMassObs)
      #undef FUNCTION 
 
+     #define FUNCTION SARAH_test
+     START_FUNCTION(bool)
+     BACKEND_REQ(SARAH_Start, (), void, (const MString&))
+     #undef FUNCTION
+
    #undef CAPABILITY
 
    #define CAPABILITY run_MSSMspectrum_test
