@@ -63,4 +63,18 @@ diff -rupN ./sources/spectra.c ../../installed/micromegas/3.6.9.2/sources/spectr
 +    //printf("  %-20.20s  %.2E\n",txt,vSigmaCh[i].weight);
      }
    }     
-    
+
+diff -rupN ./CalcHEP_src/c_source/SLHAplus/include/SLHAplus.h ../../installed/micromegas/3.6.9.2/CalcHEP_src/c_source/SLHAplus/include/SLHAplus.h
+--- ./CalcHEP_src/c_source/SLHAplus/include/SLHAplus.h 2014-05-13 13:26:21.000000000 +0200
++++ ../../installed/micromegas/3.6.9.2/CalcHEP_src/c_source/SLHAplus/include/SLHAplus.h 2017-05-21 18:03:50.000000000 +0200
+@@ -18,6 +18,10 @@ extern "C" {
+ 
+ #include "aList.h"
+ 
++#ifndef complex
++#define complex _Complex
++#endif
++
+ extern int FError;
+ extern int slhaBasicReader( int mode, int (*readLn)(int, char*),int * anydate,char * end );
+ extern void cleanSLHAdata(void);
