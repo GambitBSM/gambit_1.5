@@ -85,20 +85,6 @@ namespace Gambit
 
       return ;
     }
-
-    void SARAH_test(bool &result)
-    {
-      namespace myPipe = Pipes::SARAH_test;
- 
-      cout << "SARAH test" << endl;
-
-      MString Model = "MSSM";
-
-      myPipe::BEreq::SARAH_Start(Model);
-
-      return ;
-
-    }
  
     // Testing function for SPheno
     void SPheno_MSSM_test(bool &result)

@@ -3,7 +3,7 @@
 Parameters:
 
   #SM nuisance parameters.
-  StandardModel_SLHA2: !import StandardModel_SLHA2_scan.yaml
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_scan.yaml
 
   CMSSM:
     M0:

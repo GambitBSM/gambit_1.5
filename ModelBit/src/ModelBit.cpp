@@ -30,6 +30,38 @@ namespace Gambit
 
     // Module functions
 
+    // Create the model with SARAH and generate CHep
+    void generate_CHep_SARAH(bool &results)
+    {
+      namespace myPipe = Pipes::generate_CHep_SARAH;
+      
+      cout << "Running SARAH, please be patient" << endl;
+
+      MString Model = "SSDM";
+ 
+      myPipe::BEreq::SARAH_Start(Model);
+
+      cout << "Making CalcHep files, seat back and wait" << endl;
+
+      myPipe::BEreq::SARAH_MakeCHep();
+
+    }
+
+    // Create the model with SARAH and generate SPheno
+    void generate_SPheno_SARAH(bool &results)
+    {
+      namespace myPipe = Pipes::generate_SPheno_SARAH;
+
+      cout << "Running SARAH, please be patient" << endl;
+
+      MString Model = "SSDM";
+
+      myPipe::BEreq::SARAH_Start(Model);
+
+      cout << "Making SPheno files, this will take a while" << endl;
+
+      myPipe::BEreq::SARAH_MakeSPheno();
+    }
 
   }
 }

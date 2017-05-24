@@ -182,10 +182,6 @@ int main(int argc, char* argv[])
            logger() << "GAMBIT run completed successfully." << EOM;
            if (rank == 0) cout << endl << "GAMBIT has finished successfully!" << endl << endl;
         }
-        // Kill Wolfram Kernels
-        #ifdef HAVE_MATHEMATICA
-          cout << "killing Wolfram Kernels" << endl;
-        #endif
       }
 
     }

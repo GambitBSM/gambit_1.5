@@ -174,7 +174,8 @@
             while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)              \
             {                                                                                   \
               WSNewPacket((WSLINK)pHandle);                                                     \
-              if (WSError((WSLINK)pHandle)) {                                                   \
+              if (WSError((WSLINK)pHandle))                                                     \
+              {                                                                                 \
                 MATH_ERROR(TYPE,"Error reading packet from WSTP")                               \
               }                                                                                 \
             }                                                                                   \
@@ -185,7 +186,6 @@
               TYPE val;                                                                         \
               if(!WSGetVariable((WSLINK)pHandle, &val))                                         \
               {                                                                                 \
-                cout << WSErrorMessage((WSLINK)pHandle) << endl; \
                 MATH_ERROR(TYPE,"Error reading packet from WSTP")                               \
               }                                                                                 \
               BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), return ;, return val;)                    \

@@ -374,7 +374,8 @@ namespace Gambit
           }
         }
         msg << "Please add descriptions of these to "<< input_capability_descriptions << endl;
-        core_error().raise(LOCAL_INFO,msg.str());
+        // TODO: uncomment this before push
+        //core_error().raise(LOCAL_INFO,msg.str());
       }
 
       // Write out the centralised database file containing all this information

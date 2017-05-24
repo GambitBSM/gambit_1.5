@@ -34,9 +34,9 @@ Scanner:
 
 ObsLikes:
   - purpose:      Test
-    capability:   Mathematica_test
+    capability:   create_Model
     type:         bool
-    function:     SARAH_test
+    function:     generate_CHep_SARAH
 
 Rules:
 
