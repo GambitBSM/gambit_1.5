@@ -17,10 +17,6 @@
 ///  \date 2014 Mar
 ///  \date 2015 Mar
 ///
-///  \author Tomas Gonzalo
-///          (t.e.gonzalo@fys.uio.no)
-///  \date 2017 May
-///
 ///  *********************************************
 
 #include "gambit/Core/yaml_parser.hpp"
