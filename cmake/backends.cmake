@@ -688,43 +688,6 @@ ExternalProject_Add(${name}_${ver}
 add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 set_as_default_version("backend" ${name} ${ver})
 
-# FeynRules
-set(name "feynrules")
-set(ver "2.3")
-set(dl "http://feynrules.irmp.ucl.ac.be/downloads/${name}-current.tar.gz")
-set(md5 "056c0630fdb059cde3ae868c232be879")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-ExternalProject_Add(${name}_${ver}
-  DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-  SOURCE_DIR ${dir}
-  BUILD_IN_SOURCE 1
-  PATCH_COMMAND ""
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-set_as_default_version("backend" ${name} ${ver})
-
-# SARAH
-set(name "sarah")
-set(ver "4.11.0")
-set(dl "http://www.hepforge.org/archive/sarah/SARAH-4.11.0.tar.gz")
-set(md5 "e8cef704101f7e1c2e400ca49da26c36")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-ExternalProject_Add(${name}_${ver}
-  DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-  SOURCE_DIR ${dir}
-  BUILD_IN_SOURCE 1
-  PATCH_COMMAND ""
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-set_as_default_version("backend" ${name} ${ver})
-
-
 # Alternative download command for getting unreleased things from the gambit_internal repository.
 # If you don't know what that is, you don't need to tinker with these.
 #    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold ${private_code_warning1}

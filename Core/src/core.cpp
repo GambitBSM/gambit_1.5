@@ -183,11 +183,6 @@ namespace Gambit
             // Argument must contain the ini-filename
             filename = optarg;
             found_inifile = true;
-            break;
-          case 'm':
-            // Argument mus contain the model-filename
-            filename = optarg;
-            found_inifile = true;
         }
       }
       // Set flag telling core object that command line option processing is complete
@@ -374,8 +369,7 @@ namespace Gambit
           }
         }
         msg << "Please add descriptions of these to "<< input_capability_descriptions << endl;
-        // TODO: uncomment this before push
-        //core_error().raise(LOCAL_INFO,msg.str());
+        core_error().raise(LOCAL_INFO,msg.str());
       }
 
       // Write out the centralised database file containing all this information
