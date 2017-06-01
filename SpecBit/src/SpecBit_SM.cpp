@@ -33,7 +33,7 @@
 #include "flexiblesusy/src/lowe.h"
 
 // Switch for debug mode
-#define SpecBit_DBUG
+//#define SpecBit_DBUG
 
 namespace Gambit
 {
@@ -73,7 +73,7 @@ namespace Gambit
     }
 
     /// Get a Spectrum object wrapper for Standard-Model-only information
-    void get_SM_spectrum(const Spectrum* &result)
+    void get_SM_spectrum(Spectrum &result)
     {
       namespace myPipe = Pipes::get_SM_spectrum;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
@@ -101,12 +101,24 @@ namespace Gambit
       // Create a SubSpectrum object to wrap the EW sector information
       SMHiggsSimpleSpec higgsspec(higgsmodel);
 
-      // Create full Spectrum object from components above
-      // (SubSpectrum objects will be "cloned" into the Spectrum object)
-      static Spectrum full_spectrum;
-      full_spectrum = Spectrum(qedqcdspec,higgsspec,sminputs,&myPipe::Param);
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
 
-      result = &full_spectrum;
+      // Create full Spectrum object from components above (SubSpectrum objects will be "cloned" into the Spectrum object)
+      result = Spectrum(qedqcdspec,higgsspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
+    }
+
+    /// Put together the SM Higgs couplings
+    void SM_higgs_couplings(HiggsCouplingsTable &result)
+    {
+      using namespace Pipes::SM_higgs_couplings;
+      // Set the CP of the Higgs.
+      result.CP[0] = 1;
+      // Set the decays
+      result.set_neutral_decays_SM(0, "h0_1", *Dep::Higgs_decay_rates);
+      result.set_neutral_decays(0, "h0_1", *Dep::Higgs_decay_rates);
+      // Leave all the effective couplings for all neutral higgses set to unity (done at construction).
     }
 
     /// @} End Gambit module functions

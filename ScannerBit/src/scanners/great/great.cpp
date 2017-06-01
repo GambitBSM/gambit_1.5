@@ -17,14 +17,18 @@
 
 #include <vector>
 #include <limits>
+#include <cstdio>
 
 #include "gambit/ScannerBit/scanners/great/great.hpp"
 #include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Utils/variadic_functions.hpp"
-#include "../../../installed/GreAT/1.0.0/Manager/include/TGreatModel.h"
-#include "../../../installed/GreAT/1.0.0/Manager/include/TGreatManager.h"
-#include "../../../installed/GreAT/1.0.0/MCMC/include/TGreatMCMCAlgorithmCovariance.h"
+#include "gambit/Utils/mpiwrapper.hpp"
+
+#include "TGreatModel.h"
+#include "TGreatManager.h"
+#include "TGreatMCMCAlgorithmCovariance.h"
+
 
 // Set up the global scan data container
 namespace Gambit
@@ -40,7 +44,7 @@ namespace Gambit
 /// Interface to ScannerBit
 /// =================================================
 
-scanner_plugin(GreAT, version(1, 0, 0))
+scanner_plugin(great, version(1, 0, 0))
 {
   // Access GreAT and standard Gambit things
   using namespace Gambit;
@@ -50,16 +54,17 @@ scanner_plugin(GreAT, version(1, 0, 0))
   //  const static PriorTransform prior;
 
   // Error thrown if the following entries are not present in the inifile
-  reqd_inifile_entries(); // None at the momement. Needed to be added later
+  reqd_inifile_entries(); // None at the momement. Might need some later.
 
   // Tell CMake to search for the GreAT library.
   reqd_libraries("great");
-  reqd_headers("fparser.hh", "TGreatManager.h");
+  reqd_headers("fparser.hh", "TGreatModel.h", "TGreatManager.h", "TGreatMCMCAlgorithmCovariance.h");
 
   // Code to execute when the plugin is loaded.
   plugin_constructor
   {
-    std::cout << "\033[1;31mLoading GreAT plugin for ScannerBit.\033[0m" << std::endl;
+    const int  MPIrank = get_printer().get_stream()->getRank();
+    if (MPIrank == 0) std::cout << "\033[1;31mLoading GreAT plugin for ScannerBit.\033[0m" << std::endl;
     // Retrieve the external likelihood calculator
     data.likelihood_function = get_purpose(get_inifile_value<std::string>("like"));
     // Retrieve the external printer
@@ -68,11 +73,39 @@ scanner_plugin(GreAT, version(1, 0, 0))
 
   int plugin_main(void)
   {
-    int nPar        = get_dimension();                            // Dimensionality of the parameter space
-    int nTrialLists = get_inifile_value<int> ("nTrialLists", 10); // Number of trial lists (e.g. Markov chains)
-    int nTrials     = get_inifile_value<int> ("nTrials",  20000); // Number of trials (e.g. Markov steps)
 
-    static const int MPIrank = get_printer().get_stream()->getRank(); // MPI rank of this process
+    // Run parameters
+    const int  nPar        = get_dimension();                            // Dimensionality of the parameter space
+    const int  nTrialLists = get_inifile_value<int> ("nTrialLists", 10); // Number of trial lists (e.g. Markov chains)
+    const int  nTrials     = get_inifile_value<int> ("nTrials",  20000); // Number of trials (e.g. Markov steps)
+    const int  MPIrank     = get_printer().get_stream()->getRank();      // MPI rank of this process
+    const bool resume_mode = get_printer().resume_mode();                // Resuming run or not
+    const str  outpath     = Gambit::Utils::ensure_path_exists(get_inifile_value<std::string>("default_output_path")+"GreAT-native/");
+    data.min_logLike       = get_inifile_value<double>("likelihood: model_invalid_for_lnlike_below");
+
+    // Set up output and MultiRun log filenames
+    std::ostringstream ss1, ss2, ss3;
+    ss1 << outpath << "MCMC_" << MPIrank << ".root";
+    ss2 << outpath << "MultiRun.txt";
+    ss3 << outpath << "MultiRun.txt.lock";
+    std::string outputfilename = ss1.str();
+    std::string multifilename = ss2.str();
+    std::string lockfilename = ss3.str();
+
+    if (resume_mode and MPIrank == 0)
+    {
+      // Clear GreAT lock file
+      remove(lockfilename.c_str());
+    }
+    else
+    {
+      // Wipe entire previous GreAT output if not resuming
+      Utils::remove_all_files_in(outpath);
+    }
+    #ifdef WITH_MPI
+      GMPI::Comm mpi;
+      mpi.Barrier();
+    #endif
 
     // Creating GreAT Model, i.e. parameter space and function to be minimised
     TGreatModel* MyModel = new TGreatModel();
@@ -87,29 +120,24 @@ scanner_plugin(GreAT, version(1, 0, 0))
     }
 
     // Setting up the logarithmic likelihoodfunction
-    // MyModel->SetLogLikelihoodFunction(double (*functionpointer)(TGreatPoint&));
     MyModel->SetLogLikelihoodFunction(LogLikelihoodFunction);
 
     // Setting up the GreAT Manager
-    std::cout << "\033[1;31mCreating GreAT Manager\033[0m" << std::endl;
+    if (MPIrank == 0) std::cout << "\033[1;31mCreating GreAT Manager\033[0m" << std::endl;
     // TGreatManager<typename T> MyManager(TGreatModel*);
     // Using here a multivariate Gaussian distribution (TGreatMCMCAlgorithmCovariance)
     TGreatManager<TGreatMCMCAlgorithmCovariance> MyManager(MyModel);
     // Tell the algorithm to use former points to update its prior
     MyManager.GetAlgorithm()->SetUpdateStatus(true);
     // Set the output path, file name, and name for the TTree
-    std::string defpath = Gambit::Utils::ensure_path_exists(get_inifile_value<std::string>("default_output_path")+"GreAT-native/");
-    std::ostringstream ss; 
-    ss << defpath << "MCMC_" << MPIrank << ".root";
-    std::string filename = ss.str();
-    MyManager.SetOutputFileName(filename);
+    MyManager.SetOutputFileName(outputfilename);
     MyManager.SetTreeName("mcmc");
     // Set number of trials (steps) and triallists (chains)
     MyManager.SetNTrialLists(nTrialLists);
     MyManager.SetNTrials(nTrials);
     // Run GreAT
-    std::cout << "\033[1;31mRunning GreAT...\033[0m" << std::endl;
-    MyManager.ActivateMultiRun();
+    if (MPIrank == 0) std::cout << "\033[1;31mRunning GreAT...\033[0m" << std::endl;
+    //MyManager.ActivateMultiRun(multifilename.c_str());
     MyManager.Run();
 
     // Analyse
@@ -132,7 +160,7 @@ scanner_plugin(GreAT, version(1, 0, 0))
       // Options to desynchronise print streams from the main Gambit iterations. This allows for random access writing, or writing of global scan data.
       ind_samples_options.setValue("synchronised", false);
 
-      std::cout << "\033[1;31mWriting points...\033[0m" << std::endl;
+      if (MPIrank == 0) std::cout << "\033[1;31mWriting points...\033[0m" << std::endl;
       // Initialise auxiliary print stream
       data.printer->new_stream("ind_samples", ind_samples_options);
 
@@ -155,12 +183,14 @@ scanner_plugin(GreAT, version(1, 0, 0))
           multiplicity = 1;
         }
       }
-      // save the last point
+      // Save the last point
       ind_samples_printer->print(multiplicity, "multiplicity", MPIrank, prev_sample->GetID());
       ind_samples_printer->print(prev_sample->GetID(), "Point ID", MPIrank, prev_sample->GetID());
+
+      // Finish.
+      std::cout << "\033[1;31mGreAT finished successfully!\033[0m" << std::endl;
     }
 
-    std::cout << "\033[1;31mGreAT finished successfully!\033[0m" << std::endl;
     return 0;
   }
 }
@@ -171,9 +201,28 @@ namespace Gambit
   {
     double LogLikelihoodFunction(TGreatPoint& point)
     {
+      // check if point is within the unit cube
       std::vector<double> parameter_vector = point.GetPoint();
-      point.SetID(data.likelihood_function->getNextPtID()); // Need to use the *next* PtID because PtID will not move on until the likelihood function is called.
-      return data.likelihood_function(parameter_vector);
+
+      bool outside = false;
+      for (unsigned int i=0;i<parameter_vector.size();i++)
+      {
+        if (parameter_vector[i]<0 || parameter_vector[i]>1)
+        {
+          outside = true;
+        }
+      }
+
+      if (outside)
+      {
+        // at least one dimension is outside the unit cube so return -1e100 for LogLike
+        return data.min_logLike;
+      }
+      else
+      {
+        point.SetID(data.likelihood_function->getNextPtID()); // Need to use the *next* PtID because PtID will not move on until the likelihood function is called.
+        return data.likelihood_function(parameter_vector);
+      }
     }
   }
 }

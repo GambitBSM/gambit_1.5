@@ -31,6 +31,8 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cctype>
+#include <boost/iterator/zip_iterator.hpp>
+#include <boost/range.hpp>
 
 #ifdef __GNUG__
   #include <cstdlib>
@@ -40,16 +42,19 @@
 
 #include "gambit/Utils/exceptions.hpp"
 #include "gambit/Utils/local_info.hpp"
-#include "gambit/Logs/logger.hpp"
 #include "gambit/Utils/factory_registry.hpp"
 #include "gambit/Utils/variadic_functions.hpp"
 #include "gambit/Utils/yaml_options.hpp"
 
+/// Defined to macros to output errors in the form:
+/// scan_err << "error" << scan_end;
+/// scan_warn << "warning" << scan_end;
+/// @{
 #define scan_err        SCAN_ERR
 #define scan_warn       SCAN_WARN
 #define scan_end        SCAN_END
 #define scan_flush      SCAN_FLUSH
-#define scan_for        SCAN_FOR
+///@}
 
 #define SCAN_ERR                                                \
 Gambit::Scanner::Errors::_bool_() = true,                       \
@@ -75,11 +80,7 @@ Gambit::Scanner::Errors::_warn_()                               \
 
 #define SCAN_END std::endl, SCAN_END_INTERNAL
 
-#define SCAN_FLUSH std::flush, SCAN_END_INTERNAL
-
-#define SCAN_FOR(arg, vec)                                                                                      \
-for(auto it = Gambit::Scanner::__scan_for__<decltype(vec.begin())>(vec.begin(), vec.end()); it.notDone(); ++it) \
-for(auto &arg = *it(); it.isDone(); it.setTrue())                                                               \
+#define SCAN_FLUSH std::flush, SCAN_END_INTERNAL                                                             \
 
 namespace Gambit
 {
@@ -114,34 +115,24 @@ namespace Gambit
         /// Scanner warnings
         warning& scan_warning();
             
-        /*****************************************/
-        /****** scan range for loop class ********/
-        /*****************************************/
+        /**********************************/
+        /****** zip for range loop ********/
+        /**********************************/
         
-        template <typename T>
-        class __scan_for__
+        /// Use for combine container in a range loop:  for (auto &&x : zip(a, b)){...}.
+        template <typename... T>
+        inline auto zip(const T&... containers) -> boost::iterator_range<boost::zip_iterator<decltype(boost::make_tuple(std::begin(containers)...))>>
         {
-        private:
-            T it;
-            T end;
-            bool done;
-        public:
-            __scan_for__ (const T& it, const T& end) : it(it), end(end), done(true) {}
-            
-            T operator()() {done = false; return it;}
-            
-            bool notDone() const {return (it != end)&&done;}
-            bool isDone() const {return !done;}
-            void setTrue() {done = true;}
-            
-            void operator ++ () {it++;}
-            void operator ++ (int) {++it;}
-        };
+            return boost::make_iterator_range(
+                boost::make_zip_iterator(boost::make_tuple(std::begin(containers)...)),
+                boost::make_zip_iterator(boost::make_tuple(std::end(containers)...)));
+        }
             
         /*********************************/
         /****** demangle function ********/
         /*********************************/
         
+        /// Demangles gnu c++ name.
         inline std::string demangle(const std::string &in)
         {
 #ifdef __GNUG__
@@ -166,6 +157,10 @@ namespace Gambit
         /****** get_yaml_vector function ********/
         /****************************************/
         
+        /// Input a vector from the yaml file of the following forms:
+        /// vec: [a, b, ...]
+        /// vec: a, b, ...
+        /// vec: a; b; ...
         template <typename T>
         inline std::vector<T> get_yaml_vector(const YAML::Node &node)
         {
@@ -192,6 +187,16 @@ namespace Gambit
                 
                 return ret;
             }
+            else if (node.IsMap())
+            {
+                std::vector<T> ret;
+                for (auto it = node.begin(), end = node.end(); it != end; ++it)
+                {
+                    ret.push_back(it->first.as<T>());
+                }
+                
+                return ret;
+            }
             else
             {
                 scan_err << "\"" << node << "\" input value not usable in the inifile." << scan_end;
@@ -215,6 +220,8 @@ namespace Gambit
         /****** input_variadic_vector ********/
         /*************************************/
         
+        /// Inputs a varibadic pack into a vector
+        /// @{
         inline void input_variadic_vector(std::vector<void *> &){}
         
         template <typename T, typename... args>
@@ -223,11 +230,13 @@ namespace Gambit
             input.push_back((void *)&value);
             input_variadic_vector(input, params...);
         }
+        /// @}
             
         /*****************************/
         /****** String to Int ********/
         /*****************************/
         
+        /// Converts a string to an int
         inline int StringToInt(const std::string &str)
         {
             int ret;
@@ -238,6 +247,7 @@ namespace Gambit
                     return 0;
         }
         
+        /// Converts a int into a string
         inline std::string IntToString(const int &in)
         {
             std::stringstream ss;
@@ -249,12 +259,52 @@ namespace Gambit
         /********* pi function **********/
         /********************************/
         
+        /// Output pi.
         inline double pi() {return 3.14159265358979323846;}
+        
+        /***********************************/
+        /********* convert_to_map **********/
+        /***********************************/
+        
+        /// Turns a vector with enters [model::parameter, ...] into a map with [{model, parameter}, ...].
+        inline std::map<std::string, std::vector<std::string>> convert_to_map(const std::vector<std::string> &vec)
+        {
+            std::map<std::string, std::vector<std::string>> ret;
+            
+            for (auto it = vec.begin(), end = vec.end(); it != end; it++)
+            {
+                std::string::size_type pos = it->find("::");
+                ret[it->substr(0, pos)].push_back(*it);
+            }
+            
+            return ret;
+        }
+        
+        /*******************************************/
+        /********* scanner_plugin_def_ret **********/
+        /*******************************************/
+        
+        /// Turns a type into an object.  If it's a floating point number, it replaces it with a big negative number.
+        /// @{
+        template <typename ret>
+        typename std::enable_if<!std::is_floating_point<ret>::value, ret>::type scanner_plugin_def_ret()
+        {
+            return ret();
+        }
+        
+        template <typename ret>
+        typename std::enable_if<std::is_floating_point<ret>::value, ret>::type scanner_plugin_def_ret()
+        {
+            return -std::pow(10.0, std::numeric_limits<double>::max_exponent10);
+        };
+        /// @}
             
         /********************************/
         /******** pow function **********/
         /********************************/
         
+        /// Outputs a^i
+        /// @{
         template <int i>
         inline double pow(const double &a)
         {
@@ -290,6 +340,7 @@ namespace Gambit
         {
             return a;
         };
+        /// @}
             
         /********************************/
         /****** Remove All Func *********/
@@ -546,35 +597,12 @@ namespace Gambit
             static const bool value = true;
         };
             
-        /****************************/
-        /****** triple class ********/
-        /****************************/
-        
-        template <typename T1, typename T2, typename T3>
-        struct triple
-        {
-            typedef T1 first_type;
-            typedef T1 second_type;
-            typedef T1 third_type;
-            T1 first;
-            T2 second;
-            T3 third;
-            
-            triple(){}
-            triple(const T1 &first, const T2 &second, const T3 &third) : first(first), second(second), third(third) {}
-            triple(const triple &trip) : first(trip.first), second(trip.second), third(trip.third) {}
-            
-            triple &operator = (const triple &trip)
-            {
-                first = trip.first, trip.second = second, trip.third = third; 
-                return *this;
-            }
-        };
-            
         /********************************/
         /****** Stream Operators ********/
         /********************************/
         
+        /// Outputs containers to an output stream
+        /// @{
         template <typename T>
         inline typename std::enable_if <is_container<T>::value, std::ostream &>::type
         operator << (std::ostream &out, const T &in)
@@ -582,16 +610,16 @@ namespace Gambit
             if (in.size() == 0)
                 return out << "[]";
             
-            out << "[";
+            
             auto it = in.begin();
             auto end = in.end();
-            end--;
-            for (; it != end; it++)
+            out << "[" << *it;
+            for (++it; it != end; ++it)
             {
-                out << *it << ", ";
+                out << ", " << *it;
             }
             
-            return out << *it << "]";
+            return out << "]";
         }
         
         template <typename T>
@@ -600,11 +628,14 @@ namespace Gambit
         {
             return out << "{" << in.first << " : " << in.second << "}";
         }
+        /// @}
             
         /********************************/
         /****** Output Functions ********/
         /********************************/
         
+        /// Functions to output data for the plugin resume functions
+        /// @{
         template<typename T>
         inline typename std::enable_if<!is_container<T>::value && !is_pair<T>::value, void>::type
         resume_file_output(std::ofstream &out, T &param)
@@ -692,6 +723,7 @@ namespace Gambit
         {
             return param.length();
         }
+        /// @}
     }
 }
 

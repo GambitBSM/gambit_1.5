@@ -7,9 +7,17 @@
 
 # ~~~~~ CASTXML options ~~~~~
 
-# See CastXML documentation for details on these options: 
+# See CastXML documentation for details on these options:
 #
-#   https://github.com/CastXML/CastXML/blob/master/doc/manual/castxml.1.rst 
+#   https://github.com/CastXML/CastXML/blob/master/doc/manual/castxml.1.rst
+#
+
+#
+# *** Special note for OS X *** 
+# 
+# BOSS will most likely fail if 'g++' points to the Clang compiler.
+# Install GNU g++ and point the castxml_cc variable below the GNU 
+# g++ executable.   
 #
 
 castxml_cc_id  = 'gnu'      # Reference compiler: 'gnu', 'gnu-c', 'msvc', 'msvc-c'
@@ -60,7 +68,7 @@ source_extension = '.cpp'
 
 indent = 4
 
-extra_output_dir       = 'BOSS_output'
+extra_output_dir = 'BOSS_output'
 
 
 # ~~~~~ Information about other known types ~~~~~
@@ -69,7 +77,27 @@ extra_output_dir       = 'BOSS_output'
 # Dictionary value: header file with containing type declaration.
 #
 # Example:
-#   known_classes = {"SomeNamespace::KnownClassOne" : "path_to_header/KnownClassOne.hpp", 
+#   known_classes = {"SomeNamespace::KnownClassOne" : "path_to_header/KnownClassOne.hpp",
 #                    "AnotherNamespace::KnownClassTwo" : "path_to_header/KnownClassTwo.hpp" }
 
 known_classes = {}
+
+
+# ~~~~~ Pragma directives for the inclusion of BOSSed classes in GAMBIT ~~~~~
+
+# The listed pragma directives will be added before/after including the
+# the BOSS-generated headers in GAMBIT.
+#
+# Example:
+#   pragmas_begin = [
+#       '#pragma GCC diagnostic push',
+#       '#pragma GCC diagnostic ignored "-Wdeprecated-declarations"',
+#   ]
+#
+#   pragmas_end = [
+#       '#pragma GCC diagnostic pop'
+#   ]
+
+pragmas_begin = []
+pragmas_end = []
+

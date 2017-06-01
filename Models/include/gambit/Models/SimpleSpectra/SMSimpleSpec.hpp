@@ -18,6 +18,7 @@
 #define __SMSimpleSpec_hpp__
 
 #include "gambit/Elements/spec.hpp"
+#include "gambit/Elements/sminputs.hpp"
 #include "gambit/Models/SimpleSpectra/SLHASimpleSpec.hpp"
 #include "gambit/Models/SpectrumContents/RegisteredSpectra.hpp"
 
@@ -55,6 +56,7 @@ namespace Gambit
            double get_MW_pole()        const; 
 
            double get_sinthW2_pole()   const;
+           double get_MW_unc()         const;
            
            double get_md()             const;
            double get_mu()             const;
@@ -82,16 +84,15 @@ namespace Gambit
             // Constructors/destructors
             SMSimpleSpec();
             SMSimpleSpec(const SLHAea::Coll&);
+            SMSimpleSpec(const SMInputs&);
             SMSimpleSpec(const SMSimpleSpec&);
             virtual ~SMSimpleSpec() {};
 
             virtual double GetScale() const;
-            
+           
             /// Map filler
             /// Used to initialise maps of function pointers
             static GetterMaps fill_getter_maps();
- 
-
       };
 
 } // end Gambit namespace

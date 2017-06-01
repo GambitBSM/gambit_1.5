@@ -1,11 +1,8 @@
-
-
 //   GAMBIT: Global and Modular BSM Inference Tool
-//   *********************************************
+//  *********************************************
 ///  \file
 ///
-///  Functions of ColliderBit_eventLoop. Based
-///  heavily on the ExampleBit_A Functions
+///  Functions of ColliderBit_eventLoop.
 ///
 ///  *********************************************
 ///
@@ -27,6 +24,10 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///
+///  \author Anders Kvellestad
+///          (anders.kvellestad@nordita.org)
+///  \date   2017 March
+///
 ///  *********************************************
 
 #include <cmath>
@@ -39,8 +40,8 @@
 #include <vector>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
+#include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/ColliderBit/lep_mssm_xsecs.hpp"
 #include "HEPUtils/FastJet.h"
 
@@ -53,9 +54,19 @@ namespace Gambit
   {
 
 
-    /// ********************************************
-    /// Non-rollcalled Functions and Local Variables
-    /// ********************************************
+    /// **************************************************
+    /// Non-rollcalled functions and module-wide variables
+    /// **************************************************
+
+
+    #ifdef COLLIDERBIT_DEBUG
+      str debug_prefix()
+      {
+        std::stringstream ss;
+        ss << "DEBUG: OMP thread " << omp_get_thread_num() << ":  ";
+        return ss.str();
+      }
+    #endif
 
     /// LEP limit likelihood function
     double limitLike(double x, double x95, double sigma)
@@ -108,25 +119,49 @@ namespace Gambit
       return true;
     }
 
-    /// Event labels
-    enum specialEvents {BASE_INIT=-1, INIT = -2, START_SUBPROCESS = -3, END_SUBPROCESS = -4, FINALIZE = -5};
+
+    /// Module-wide variables
+
+    // TODO: Get rid of some of these variables by restructuring the code a bit
+
+    /// Special iteration labels for the loop controlled by operateLHCLoop
+    enum specialIterations { BASE_INIT = -1,
+                             COLLIDER_INIT = -2,
+                             START_SUBPROCESS = -3,
+                             END_SUBPROCESS = -4,
+                             COLLIDER_FINALIZE = -5,
+                             BASE_FINALIZE = -6};
+
     /// Pythia stuff
-    std::vector<std::string> pythiaNames, pythiaCommonOptions;
-    std::vector<std::string>::const_iterator iter;
+    std::vector<str> pythiaNames;
+    std::vector<str>::const_iterator iterPythiaNames;
+    unsigned int indexPythiaNames;
     bool eventsGenerated;
-    int nEvents, seedBase;
+    bool tooManyFailedEvents;
+    std::vector<int> nEvents;
+    int seedBase;
+
     /// Analysis stuff
     bool useBuckFastATLASDetector;
-    std::vector<std::string> analysisNamesATLAS;
     HEPUtilsAnalysisContainer globalAnalysesATLAS;
+    bool haveUsedBuckFastATLASDetector;
+
     bool useBuckFastCMSDetector;
-    std::vector<std::string> analysisNamesCMS;
     HEPUtilsAnalysisContainer globalAnalysesCMS;
-#ifndef EXCLUDE_DELPHES
+    bool haveUsedBuckFastCMSDetector;
+
+    #ifndef EXCLUDE_DELPHES
     bool useDelphesDetector;
     std::vector<std::string> analysisNamesDet;
     HEPUtilsAnalysisContainer globalAnalysesDet;
-#endif // not defined EXCLUDE_DELPHES
+    bool haveUsedDelphesDetector;
+    #endif // not defined EXCLUDE_DELPHES
+
+    bool useBuckFastIdentityDetector;
+    HEPUtilsAnalysisContainer globalAnalysesIdentity;
+    bool haveUsedBuckFastIdentityDetector;
+
+
 
     /// *************************************************
     /// Rollcalled functions properly hooked up to Gambit
@@ -134,60 +169,154 @@ namespace Gambit
     /// *** Loop Managers ***
 
     /// @note: Much of the loop below designed for splitting up the subprocesses to be generated.
-    /// @note: For our first run, we will just run all SUSY subprocesses.
 
     void operateLHCLoop()
     {
       using namespace Pipes::operateLHCLoop;
       static std::streambuf *coutbuf = std::cout.rdbuf(); // save cout buffer for running the loop quietly
-      int currentEvent;
-      nEvents = 0;
-      // Pythia random number seed will be set properly during BASE_INIT.
-      seedBase = 0; // This just prevents a warning.
-      // Set eventsGenerated to true once some events are generated.
+
+      #ifdef COLLIDERBIT_DEBUG
+        std::cerr << debug_prefix() << "New point!" << endl;
+      #endif
+
+      //
+      // Clear global containers and variables
+      //
+      pythiaNames.clear();
+      iterPythiaNames = pythiaNames.cbegin();
+      indexPythiaNames = 0;
+
+      nEvents.clear();
+      // - Pythia random number seed base will be set in the loop over colliders below.
+      seedBase = 0;
+      // - Set eventsGenerated to true once some events are generated.
       eventsGenerated = false;
+      // - Set tooManyFailedEvents to true if too many events fail.
+      tooManyFailedEvents = false;
+
+      useBuckFastATLASDetector = false;
+      globalAnalysesATLAS.clear();
+
+      useBuckFastCMSDetector = false;
+      globalAnalysesCMS.clear();
+
+      useBuckFastIdentityDetector = false;
+      globalAnalysesIdentity.clear();
+
+#ifndef EXCLUDE_DELPHES
+      useDelphesDetector = false;
+      globalAnalysesDet.clear();
+#endif
+
+      haveUsedBuckFastATLASDetector = false;
+      haveUsedBuckFastCMSDetector = false;
+      haveUsedBuckFastIdentityDetector = false;
+#ifndef EXCLUDE_DELPHES
+      haveUsedDelphesDetector = false;
+#endif
+
+
+      // Retrieve run options from the YAML file (or standalone code)
+      pythiaNames = runOptions->getValue<std::vector<str> >("pythiaNames");
+      nEvents = runOptions->getValue<std::vector<int> >("nEvents");
+
+      // Check that length of pythiaNames and nEvents agree!
+      if (pythiaNames.size() != nEvents.size())
+      {
+        str errmsg;
+        errmsg  = "The options 'pythiaNames' and 'nEvents' for the function 'operateLHCLoop' must have\n";
+        errmsg += "the same number of entries. Correct your settings and try again.\n";
+        ColliderBit_error().raise(LOCAL_INFO, errmsg);
+      }
+
+      // Should we silence stdout during the loop?
+      bool silenceLoop = runOptions->getValueOrDef<bool>(true, "silenceLoop");
+      if (silenceLoop) std::cout.rdbuf(0);
+
+
 
       // Do the base-level initialisation
       Loop::executeIteration(BASE_INIT);
-      // Retrieve runOptions from the YAML file safely...
-      GET_COLLIDER_RUNOPTION(pythiaNames, std::vector<std::string>);
-      // @todo Subprocess specific nEvents
-      GET_COLLIDER_RUNOPTION(nEvents, int);
-
-      // Nicely ask the entire loop to be quiet
-      //std::cout.rdbuf(0);
 
       // For every collider requested in the yaml file:
-      for (iter = pythiaNames.cbegin(); iter != pythiaNames.cend(); ++iter)
+      for (iterPythiaNames = pythiaNames.cbegin(); iterPythiaNames != pythiaNames.cend(); ++iterPythiaNames)
       {
+
+        // Update the global index indexPythiaNames
+        indexPythiaNames = iterPythiaNames - pythiaNames.cbegin();
+
+        // Update the global Pythia seedBase.
+        // The Pythia random number seed will be this, plus the thread number.
+        seedBase = int(Random::draw() * 899990000);
+
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Current collider: " << *iterPythiaNames << " with index " << indexPythiaNames << endl;
+        #endif
+
         piped_invalid_point.check();
         Loop::reset();
-        Loop::executeIteration(INIT);
-        currentEvent = 0;
+        Loop::executeIteration(COLLIDER_INIT);
+
+        // Any problem during COLLIDER_INIT step?
+        piped_warnings.check(ColliderBit_warning());
+        piped_errors.check(ColliderBit_error());
+
+        //
+        // OMP parallelized loop begins here
+        //
+        int currentEvent = 0;
         #pragma omp parallel
         {
           Loop::executeIteration(START_SUBPROCESS);
-          // main event loop
-          while(currentEvent<nEvents and not *Loop::done) {
+        }
+        // Any problems during the START_SUBPROCESS step?
+        piped_warnings.check(ColliderBit_warning());
+        piped_errors.check(ColliderBit_error());
+
+        // Main event loop
+        #pragma omp parallel
+        {
+          while(currentEvent<nEvents[indexPythiaNames] and not *Loop::done and not piped_errors.inquire())
+          {
             if (!eventsGenerated)
               eventsGenerated = true;
-            try {
+            try
+            {
               Loop::executeIteration(currentEvent);
               currentEvent++;
-            } catch (std::domain_error& e) {
+            }
+            catch (std::domain_error& e)
+            {
               std::cerr<<"\n   Continuing to the next event...\n\n";
             }
           }
+        }
+        // Any problems during the main event loop?
+        piped_warnings.check(ColliderBit_warning());
+        piped_errors.check(ColliderBit_error());
+
+        #pragma omp parallel
+        {
           Loop::executeIteration(END_SUBPROCESS);
         }
+        // Any problems during the END_SUBPROCESS loop?
+        piped_warnings.check(ColliderBit_warning());
+        piped_errors.check(ColliderBit_error());
+
+        //
+        // OMP parallelized loop ends here
+        //
+
+        Loop::executeIteration(COLLIDER_FINALIZE);
       }
+
       // Nicely thank the loop for being quiet, and restore everyone's vocal cords
-      std::cout.rdbuf(coutbuf);
+      if (silenceLoop) std::cout.rdbuf(coutbuf);
 
       // Check for exceptions
       piped_invalid_point.check();
 
-      Loop::executeIteration(FINALIZE);
+      Loop::executeIteration(BASE_FINALIZE);
     }
 
 
@@ -198,21 +327,23 @@ namespace Gambit
     {
       using namespace Pipes::getPythia;
 
-      static std::string pythia_doc_path;
-      static std::string default_doc_path;
+      static str pythia_doc_path;
+      static str default_doc_path;
       static bool pythia_doc_path_needs_setting = true;
+      static std::vector<str> pythiaCommonOptions;
       static SLHAstruct slha;
       static SLHAstruct spectrum;
+      static std::vector<double> xsec_vetos;
 
       if (*Loop::iteration == BASE_INIT)
       {
         // Setup the Pythia documentation path
         if (pythia_doc_path_needs_setting)
         {
-          default_doc_path = "Backends/installed/Pythia/" +
+          default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
                              Backends::backendInfo().default_version("Pythia") +
                              "/share/Pythia8/xmldoc/";
-          pythia_doc_path = runOptions->getValueOrDef<std::string>(default_doc_path, "Pythia_doc_path");
+          pythia_doc_path = runOptions->getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
           // Print the Pythia banner once.
           result.banner(pythia_doc_path);
           pythia_doc_path_needs_setting = false;
@@ -224,8 +355,8 @@ namespace Gambit
         slha = Dep::decay_rates->getSLHAea();
         if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
         {
-          // MSSM-specific
-          spectrum = (*Dep::MSSM_spectrum)->getSLHAea();
+          // MSSM-specific.  SLHAea in SLHA2 format, please.
+          spectrum = Dep::MSSM_spectrum->getSLHAea(2);
           SLHAea::Block block("MODSEL");
           block.push_back("BLOCK MODSEL              # Model selection");
           SLHAea::Line line;
@@ -239,42 +370,60 @@ namespace Gambit
           ColliderBit_error().raise(LOCAL_INFO, "No spectrum object available for this model.");
         }
 
-        // Pythia random number seed will be this, plus the thread number.
-        seedBase = int(Random::draw() * 899990000.);
+        // Read xsec veto values and store in static variable 'xsec_vetos'
+        std::vector<double> default_xsec_vetos(pythiaNames.size(), 0.0);
+        xsec_vetos = runOptions->getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
+        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, pythiaNames)
       }
 
-      if (*Loop::iteration == INIT)
+      else if (*Loop::iteration == COLLIDER_INIT)
       {
-        // Get pythia options
-        // If the SpecializablePythia specialization is hard-coded, okay with no options.
+        // Collect Pythia options that are common across all OMP threads
         pythiaCommonOptions.clear();
-        if (runOptions->hasKey(*iter))
-          pythiaCommonOptions = runOptions->getValue<std::vector<std::string>>(*iter);
+
+        // By default we tell Pythia to be quiet. (Can be overridden from yaml settings)
+        pythiaCommonOptions.push_back("Print:quiet = on");
+        pythiaCommonOptions.push_back("SLHA:verbose = 0");
+
+        // Get options from yaml file. If the SpecializablePythia specialization is hard-coded, okay with no options.
+        if (runOptions->hasKey(*iterPythiaNames))
+        {
+          std::vector<str> addPythiaOptions = runOptions->getValue<std::vector<str>>(*iterPythiaNames);
+          pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
+        }
+
+        // We need showProcesses for the xsec veto.
+        pythiaCommonOptions.push_back("Init:showProcesses = on");
+
+        // We need "SLHA:file = slhaea" for the SLHAea interface.
+        pythiaCommonOptions.push_back("SLHA:file = slhaea");
       }
 
       else if (*Loop::iteration == START_SUBPROCESS)
       {
-        result.clear();
-        // variables for xsec veto
+        // Variables needed for the xsec veto
         std::stringstream processLevelOutput;
-        std::string _junk, readline;
+        str _junk, readline;
         int code, nxsec;
         double xsec, totalxsec;
 
-        // Each thread gets its own Pythia instance.
+        // Each thread needs an independent Pythia instance at the start
+        // of each event generation loop.
         // Thus, the actual Pythia initialization is
-        // *after* INIT, within omp parallel.
-        std::vector<std::string> pythiaOptions = pythiaCommonOptions;
-        // Although we capture all couts, still we tell Pythia to be quiet....
-        pythiaOptions.push_back("Print:quiet = on");
-        // .... except for showProcesses, which we need for the xsec veto.
-        pythiaOptions.push_back("Init:showProcesses = on");
-        pythiaOptions.push_back("SLHA:verbose = 0");
+        // *after* COLLIDER_INIT, within omp parallel.
+
+        result.clear();
+
+        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
+        // and then add the thread-specific seed
+        std::vector<str> pythiaOptions = pythiaCommonOptions;
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
-        result.resetSpecialization(*iter);
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "getPythia: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+        #endif
 
-        pythiaOptions.push_back("SLHA:file = slhaea");
+        result.resetSpecialization(*iterPythiaNames);
 
         try
         {
@@ -282,21 +431,30 @@ namespace Gambit
         }
         catch (SpecializablePythia::InitializationError &e)
         {
-          pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
+          // Append new seed to override the previous one
+          int newSeedBase = int(Random::draw() * 899990000.);
+          pythiaOptions.push_back("Random:seed = " + std::to_string(newSeedBase));
           try
           {
             result.init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
           }
           catch (SpecializablePythia::InitializationError &e)
           {
+            #ifdef COLLIDERBIT_DEBUG
+              std::cerr << debug_prefix() << "SpecializablePythia::InitializationError caught in getPythia. Will discard this point." << endl;
+            #endif
             piped_invalid_point.request("Bad point: Pythia can't initialize");
             Loop::wrapup();
             return;
           }
         }
 
+        // Should we apply the xsec veto and skip event generation?
 
-        // xsec veto
+        // - Get the xsec veto value for the current collider
+        double totalxsec_fb_veto = xsec_vetos[indexPythiaNames];
+
+        // - Get the upper limt xsec as estimated by Pythia
         code = -1;
         nxsec = 0;
         totalxsec = 0.;
@@ -308,93 +466,134 @@ namespace Gambit
           issPtr >> code;
           if (!issPtr.good() && nxsec > 0) break;
           issPtr >> _junk >> xsec;
-          if (issPtr.good()) {
+          if (issPtr.good())
+          {
             totalxsec += xsec;
             nxsec++;
           }
         }
 
-        /// @todo Remove the hard-coded 20.7 inverse femtobarns! This needs to be analysis-specific
-        if (totalxsec * 1e12 * 20.7 < 1.) Loop::wrapup();
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        #endif
 
+        // - Wrap up loop if veto applies
+        if (totalxsec * 1e12 < totalxsec_fb_veto)
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
+          #endif
+          Loop::wrapup();
+        }
       }
     }
+
 
 
     void getPythiaFileReader(Gambit::ColliderBit::SpecializablePythia &result)
     {
       using namespace Pipes::getPythiaFileReader;
 
-      static std::vector<std::string> filenames;
-      static std::string default_doc_path;
-      static std::string pythia_doc_path;
+      static std::vector<str> filenames;
+      static str default_doc_path;
+      static str pythia_doc_path;
+      static std::vector<str> pythiaCommonOptions;
       static bool pythia_doc_path_needs_setting = true;
       static unsigned int fileCounter = 0;
+      static std::vector<double> xsec_vetos;
 
       if (*Loop::iteration == BASE_INIT)
       {
         // Setup the Pythia documentation path
         if (pythia_doc_path_needs_setting)
         {
-          default_doc_path = "Backends/installed/Pythia/" +
+          default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
                              Backends::backendInfo().default_version("Pythia") +
                              "/share/Pythia8/xmldoc/";
-          pythia_doc_path = runOptions->getValueOrDef<std::string>(default_doc_path, "Pythia_doc_path");
+          pythia_doc_path = runOptions->getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
           // Print the Pythia banner once.
           result.banner(pythia_doc_path);
           pythia_doc_path_needs_setting = false;
         }
-        // If there are no debug filenames set, look for them.
+
+        // Get SLHA file(s)
+        filenames = runOptions->getValue<std::vector<str> >("SLHA_filenames");
         if (filenames.empty())
-          filenames = runOptions->getValue<std::vector<str> >("SLHA_filenames");
+        {
+          str errmsg = "No SLHA files are listed for ColliderBit function getPythiaFileReader.\n";
+          errmsg    += "Please correct the option 'SLHA_filenames' or use getPythia instead.";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
         if (filenames.size() <= fileCounter) invalid_point().raise("No more SLHA files. My work is done.");
 
-        // Pythia random number seed will be this, plus the thread number.
-        seedBase = int(Random::draw() * 899990000.);
+        // Read xsec veto values and store in static variable 'xsec_vetos'
+        std::vector<double> default_xsec_vetos(pythiaNames.size(), 0.0);
+        xsec_vetos = runOptions->getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
+        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, pythiaNames)
       }
 
-      if (*Loop::iteration == INIT)
+      if (*Loop::iteration == COLLIDER_INIT)
       {
-        // Get pythia options
-        // If the SpecializablePythia specialization is hard-coded, okay with no options.
+        // Collect Pythia options that are common across all OMP threads
         pythiaCommonOptions.clear();
-        if (runOptions->hasKey(*iter))
-          pythiaCommonOptions = runOptions->getValue<std::vector<std::string>>(*iter);
+
+        // By default we tell Pythia to be quiet. (Can be overridden from yaml settings)
+        pythiaCommonOptions.push_back("Print:quiet = on");
+        pythiaCommonOptions.push_back("SLHA:verbose = 0");
+
+        // Get options from yaml file. If the SpecializablePythia specialization is hard-coded, okay with no options.
+        if (runOptions->hasKey(*iterPythiaNames))
+        {
+          std::vector<str> addPythiaOptions = runOptions->getValue<std::vector<str>>(*iterPythiaNames);
+          pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
+        }
+
+        // We need showProcesses for the xsec veto.
+        pythiaCommonOptions.push_back("Init:showProcesses = on");
+
+        // We need to control "SLHA:file" for the SLHA interface.
+        pythiaCommonOptions.push_back("SLHA:file = " + filenames.at(fileCounter));
       }
+
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        result.clear();
         // variables for xsec veto
         std::stringstream processLevelOutput;
-        std::string _junk, readline;
+        str _junk, readline;
         int code, nxsec;
         double xsec, totalxsec;
 
-        // Each thread gets its own Pythia instance.
+        // Each thread needs an independent Pythia instance at the start
+        // of each event generation loop.
         // Thus, the actual Pythia initialization is
-        // *after* INIT, within omp parallel.
-        std::vector<std::string> pythiaOptions = pythiaCommonOptions;
-        // Although we capture all couts, still we tell Pythia to be quiet....
-        pythiaOptions.push_back("Print:quiet = on");
-        // .... except for showProcesses, which we need for the xsec veto.
-        pythiaOptions.push_back("Init:showProcesses = on");
-        pythiaOptions.push_back("SLHA:verbose = 0");
+        // *after* COLLIDER_INIT, within omp parallel.
+
+        result.clear();
+
+        if (omp_get_thread_num() == 0) logger() << "Reading SLHA file: " << filenames.at(fileCounter) << EOM;
+
+        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
+        // and then add the thread-specific seed
+        std::vector<str> pythiaOptions = pythiaCommonOptions;
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
-        result.resetSpecialization(*iter);
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "getPythiaFileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+        #endif
 
-        // Run Pythia reading an SLHA file.
-        if (omp_get_thread_num() == 0)
-          logger() << "Reading SLHA file: " << filenames.at(fileCounter) << EOM;
-        pythiaOptions.push_back("SLHA:file = " + filenames.at(fileCounter));
+        result.resetSpecialization(*iterPythiaNames);
+
         try
         {
           result.init(pythia_doc_path, pythiaOptions, processLevelOutput);
         }
         catch (SpecializablePythia::InitializationError &e)
         {
-          pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
+          // Append new seed to override the previous one
+          int newSeedBase = int(Random::draw() * 899990000.);
+          pythiaOptions.push_back("Random:seed = " + std::to_string(newSeedBase));
           try
           {
             result.init(pythia_doc_path, pythiaOptions, processLevelOutput);
@@ -407,7 +606,12 @@ namespace Gambit
           }
         }
 
-        // xsec veto
+        // Should we apply the xsec veto and skip event generation?
+
+        // - Get the xsec veto value for the current collider
+        double totalxsec_fb_veto = xsec_vetos[indexPythiaNames];
+
+        // - Get the upper limt xsec as estimated by Pythia
         code = -1;
         nxsec = 0;
         totalxsec = 0.;
@@ -419,18 +623,29 @@ namespace Gambit
           issPtr >> code;
           if (!issPtr.good() && nxsec > 0) break;
           issPtr >> _junk >> xsec;
-          if (issPtr.good()) {
+          if (issPtr.good())
+          {
             totalxsec += xsec;
             nxsec++;
           }
         }
 
-        /// @todo Remove the hard-coded 20.7 inverse femtobarns! This needs to be analysis-specific
-        if (totalxsec * 1e12 * 20.7 < 1.) Loop::wrapup();
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        #endif
+
+        // - Wrap up loop if veto applies
+        if (totalxsec * 1e12 < totalxsec_fb_veto)
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
+          #endif
+          Loop::wrapup();
+        }
 
       }
 
-      if (*Loop::iteration == FINALIZE) fileCounter++;
+      if (*Loop::iteration == BASE_FINALIZE) fileCounter++;
 
     }
 
@@ -440,72 +655,206 @@ namespace Gambit
 #ifndef EXCLUDE_DELPHES
     void getDelphes(Gambit::ColliderBit::DelphesVanilla &result) {
       using namespace Pipes::getDelphes;
-      std::vector<std::string> delphesOptions;
+      static std::vector<bool> useDetector;
+      static std::vector<str> delphesConfigFiles;
+
       if (*Loop::iteration == BASE_INIT)
-        useDelphesDetector = runOptions->getValueOrDef<bool>(false, "useDelphesDetector");
-      if (*Loop::iteration == INIT and useDelphesDetector)
+      {
+        // Read useDetector option
+        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // Delphes is switched off by default
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        // Return if all elements in useDetector are false
+        if (std::find(useDetector.begin(), useDetector.end(), true) == useDetector.end())
+          return;
+
+        // Read delphesConfigFiles option
+        delphesConfigFiles = runOptions->getValue<std::vector<str> >("delphesConfigFiles");
+        CHECK_EQUAL_VECTOR_LENGTH(delphesConfigFiles,pythiaNames)
+
+        // Delphes is not threadsafe (depends on ROOT). Raise error if OMP_NUM_THREADS=1.
+        if(omp_get_max_threads()>1 and std::find(useDetector.begin(), useDetector.end(), true) != useDetector.end())
+        {
+          str errmsg = "Delphes is not threadsafe and cannot be used with OMP_NUM_THREADS>1.\n";
+          errmsg    += "Either set OMP_NUM_THREADS=1 or switch to a threadsafe detector simulator, e.g. BuckFast.";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
+        return;
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT)
       {
         result.clear();
-        // Reset Options
-        delphesOptions.clear();
-        std::string delphesConfigFile;
-        GET_COLLIDER_RUNOPTION(delphesConfigFile, std::string);
-        delphesOptions.push_back(delphesConfigFile);
-        // Setup new Delphes
-        result.init(delphesOptions);
+
+        // Get useDetector setting for the current collider
+        useDelphesDetector = useDetector[indexPythiaNames];
+        if (!useDelphesDetector) return;
+        else haveUsedDelphesDetector = true;
+
+        // Setup new Delphes for the current collider
+        std::vector<str> delphesOptions;
+        delphesOptions.push_back(delphesConfigFiles[indexPythiaNames]);
+
+        try
+        {
+          result.init(delphesOptions);
+        }
+        catch (std::runtime_error& e)
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "DelphesVanilla::InitializationError caught in getDelphes. Will raise ColliderBit_error." << endl;
+          #endif
+          str errmsg = "getDelphes caught the following runtime error: ";
+          errmsg    += e.what();
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
       }
     }
+
 #endif // not defined EXCLUDE_DELPHES
+
 
 
     void getBuckFastATLAS(Gambit::ColliderBit::BuckFastSmearATLAS &result)
     {
       using namespace Pipes::getBuckFastATLAS;
-      bool partonOnly;
-      double antiktR;
+      static std::vector<bool> useDetector;
+      static std::vector<bool> partonOnly;
+      static std::vector<double> antiktR;
+
       if (*Loop::iteration == BASE_INIT)
-        useBuckFastATLASDetector = runOptions->getValueOrDef<bool>(true, "useBuckFastATLASDetector");
-      if (*Loop::iteration == INIT and useBuckFastATLASDetector)
       {
-        result.clear();
-        // Setup new BuckFast:
-        partonOnly = runOptions->getValueOrDef<bool>(false, "partonOnly");
-        antiktR = runOptions->getValueOrDef<double>(0.4, "antiktR");
-        result.init(partonOnly, antiktR);
+        // Read options
+        std::vector<bool> default_useDetector(pythiaNames.size(), true);  // BuckFastATLAS is switched on by default
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+
+        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+
+        return;
       }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        // Get useDetector setting for the current collider
+        useBuckFastATLASDetector = useDetector[indexPythiaNames];
+        if (useBuckFastATLASDetector)
+          haveUsedBuckFastATLASDetector = true;
+
+        return;
+      }
+
+      if (*Loop::iteration == START_SUBPROCESS and useBuckFastATLASDetector)
+      {
+        // Each thread gets its own BuckFastSmearATLAS.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+
+        return;
+      }
+
     }
+
 
 
     void getBuckFastCMS(Gambit::ColliderBit::BuckFastSmearCMS &result)
     {
       using namespace Pipes::getBuckFastCMS;
-      bool partonOnly;
-      double antiktR;
+      static std::vector<bool> useDetector;
+      static std::vector<bool> partonOnly;
+      static std::vector<double> antiktR;
+
       if (*Loop::iteration == BASE_INIT)
-        useBuckFastCMSDetector = runOptions->getValueOrDef<bool>(true, "useBuckFastCMSDetector");
-      if (*Loop::iteration == INIT and useBuckFastCMSDetector)
       {
-        result.clear();
-        // Setup new BuckFast
-        partonOnly = runOptions->getValueOrDef<bool>(false, "partonOnly");
-        antiktR = runOptions->getValueOrDef<double>(0.4, "antiktR");
-        result.init(partonOnly, antiktR);
+        // Read options
+        std::vector<bool> default_useDetector(pythiaNames.size(), true);  // BuckFastCMS is switched on by default
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+
+        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+
+        return;
       }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        // Get useDetector setting for the current collider
+        useBuckFastCMSDetector = useDetector[indexPythiaNames];
+        if (useBuckFastCMSDetector)
+          haveUsedBuckFastCMSDetector = true;
+
+        return;
+      }
+
+      if (*Loop::iteration == START_SUBPROCESS and useBuckFastCMSDetector)
+      {
+        // Each thread gets its own BuckFastSmearCMS.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+
+        return;
+      }
+
     }
+
 
 
     void getBuckFastIdentity(Gambit::ColliderBit::BuckFastIdentity &result)
     {
       using namespace Pipes::getBuckFastIdentity;
-      bool partonOnly;
-      double antiktR;
-      if (*Loop::iteration == INIT)
+      static std::vector<bool> useDetector;
+      static std::vector<bool> partonOnly;
+      static std::vector<double> antiktR;
+
+      if (*Loop::iteration == BASE_INIT)
       {
-        result.clear();
-        // Setup new BuckFast
-        partonOnly = runOptions->getValueOrDef<bool>(false, "partonOnly");
-        antiktR = runOptions->getValueOrDef<double>(0.4, "antiktR");
-        result.init(partonOnly, antiktR);
+        // Read options
+        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // BuckFastIdentity is switched off by default
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+
+        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+
+        return;
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        // Get useDetector setting for the current collider
+        useBuckFastIdentityDetector = useDetector[indexPythiaNames];
+        if (useBuckFastIdentityDetector)
+          haveUsedBuckFastIdentityDetector = true;
+
+        return;
+      }
+
+      if (*Loop::iteration == START_SUBPROCESS and useBuckFastIdentityDetector)
+      {
+        // Each thread gets its own BuckFastSmearIdentity.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+
+        return;
       }
     }
 
@@ -513,32 +862,71 @@ namespace Gambit
 
     /// *** Initialization for analyses ***
 
-#ifndef EXCLUDE_DELPHES
+
+    #ifndef EXCLUDE_DELPHES
     void getDetAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getDetAnalysisContainer;
-      if (!useDelphesDetector) return;
+      static std::vector<std::vector<str> > analyses;
 
-      if (*Loop::iteration == BASE_INIT) {
-        GET_COLLIDER_RUNOPTION(analysisNamesDet, std::vector<std::string>);
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT) {
+
+        if (!useDelphesDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useDelphesDetector)
+        {
+          str errmsg = "The option 'useDetector' for function 'getDelphes' is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'getDetAnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
         globalAnalysesDet.clear();
-        globalAnalysesDet.init(analysisNamesDet);
+        globalAnalysesDet.init(analyses[indexPythiaNames]);
         return;
       }
+
+      if (!useDelphesDetector) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
         // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* INIT, within omp parallel.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
         result.clear();
-        result.init(analysisNamesDet);
+        result.init(analyses[indexPythiaNames]);
+
+        #ifdef COLLIDERBIT_DEBUG
+          if (omp_get_thread_num() == 0)
+          {
+            for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
+            {
+              std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
+            }
+          }
+        #endif
+
         return;
       }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
       {
         const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
         const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
 
         // Combine results from the threads together
         #pragma omp critical (access_globalAnalyses)
@@ -551,33 +939,73 @@ namespace Gambit
       }
 
     }
-#endif // not defined EXCLUDE_DELPHES
+    #endif // not defined EXCLUDE_DELPHES
+
+
 
     void getATLASAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getATLASAnalysisContainer;
-      if (!useBuckFastATLASDetector) return;
+      static std::vector<std::vector<str> > analyses;
 
-      if (*Loop::iteration == BASE_INIT) {
-        GET_COLLIDER_RUNOPTION(analysisNamesATLAS, std::vector<std::string>);
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT) {
+
+        if (!useBuckFastATLASDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useBuckFastATLASDetector)
+        {
+          str errmsg = "The option 'useDetector' for function 'getBuckFastATLAS' is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'getATLASAnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
         globalAnalysesATLAS.clear();
-        globalAnalysesATLAS.init(analysisNamesATLAS);
+        globalAnalysesATLAS.init(analyses[indexPythiaNames]);
         return;
       }
+
+      if (!useBuckFastATLASDetector) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
         // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* INIT, within omp parallel.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
         result.clear();
-        result.init(analysisNamesATLAS);
+        result.init(analyses[indexPythiaNames]);
+
+        #ifdef COLLIDERBIT_DEBUG
+          if (omp_get_thread_num() == 0)
+          {
+            for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
+            {
+              std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
+            }
+          }
+        #endif
+
         return;
       }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
       {
         const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
         const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
 
         // Combine results from the threads together
         #pragma omp critical (access_globalAnalyses)
@@ -591,31 +1019,71 @@ namespace Gambit
 
     }
 
+
+
     void getCMSAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
       using namespace Pipes::getCMSAnalysisContainer;
-      if (!useBuckFastCMSDetector) return;
+      static std::vector<std::vector<str> > analyses;
 
-      if (*Loop::iteration == BASE_INIT) {
-        GET_COLLIDER_RUNOPTION(analysisNamesCMS, std::vector<std::string>);
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT) {
+
+        if (!useBuckFastCMSDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useBuckFastCMSDetector)
+        {
+          str errmsg = "The option 'useDetector' for function 'getBuckFastCMS' is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'getCMSAnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
         globalAnalysesCMS.clear();
-        globalAnalysesCMS.init(analysisNamesCMS);
+        globalAnalysesCMS.init(analyses[indexPythiaNames]);
         return;
       }
+
+      if (!useBuckFastCMSDetector) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
         // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* INIT, within omp parallel.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
         result.clear();
-        result.init(analysisNamesCMS);
+        result.init(analyses[indexPythiaNames]);
+
+        #ifdef COLLIDERBIT_DEBUG
+          if (omp_get_thread_num() == 0)
+          {
+            for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
+            {
+              std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
+            }
+          }
+        #endif
+
         return;
       }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
       {
         const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
         const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
 
         // Combine results from the threads together
         #pragma omp critical (access_globalAnalyses)
@@ -630,19 +1098,113 @@ namespace Gambit
     }
 
 
+
+    void getIdentityAnalysisContainer(Gambit::ColliderBit::HEPUtilsAnalysisContainer& result) {
+      using namespace Pipes::getIdentityAnalysisContainer;
+      static std::vector<std::vector<str> > analyses;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT) {
+
+        if (!useBuckFastIdentityDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useBuckFastIdentityDetector)
+        {
+          str errmsg = "The option 'useDetector' for function 'getBuckFastIdentity' is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'getIdentityAnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
+        globalAnalysesIdentity.clear();
+        globalAnalysesIdentity.init(analyses[indexPythiaNames]);
+        return;
+      }
+
+      if (!useBuckFastIdentityDetector) return;
+
+      if (*Loop::iteration == START_SUBPROCESS)
+      {
+        // Each thread gets its own Analysis container.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+        result.clear();
+        result.init(analyses[indexPythiaNames]);
+
+        #ifdef COLLIDERBIT_DEBUG
+          if (omp_get_thread_num() == 0)
+          {
+            for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
+            {
+              std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
+            }
+          }
+        #endif
+
+        return;
+      }
+
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
+      {
+        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
+        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
+
+        // Combine results from the threads together
+        #pragma omp critical (access_globalAnalyses)
+        {
+          globalAnalysesIdentity.add(result);
+          // Use improve_xsec to combine results from the same process type
+          globalAnalysesIdentity.improve_xsec(result);
+        }
+        return;
+      }
+
+    }
+
+
+
     /// *** Hard Scattering Event Generators ***
 
     void generatePythia8Event(Pythia8::Event& result)
     {
       using namespace Pipes::generatePythia8Event;
+
       if (*Loop::iteration <= BASE_INIT) return;
       result.clear();
 
       /// Get the next event from Pythia8
-      try {
-        (*Dep::HardScatteringSim).nextEvent(result);
-      } catch (SpecializablePythia::EventFailureError &e) {
-        piped_invalid_point.request("Bad point: Pythia can't generate events");
+      try
+      {
+        Dep::HardScatteringSim->nextEvent(result);
+      }
+      catch (SpecializablePythia::EventGenerationError& e)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "SpecializablePythia::EventGenerationError caught in generatePythia8Event. Check the ColliderBit log for event details." << endl;
+        #endif
+        #pragma omp critical (pythia_event_failure)
+        {
+          // Set global flag
+          tooManyFailedEvents = true;
+          // Store Pythia event record in the logs
+          std::stringstream ss;
+          result.list(ss, 1);
+          logger() << LogTags::debug << "SpecializablePythia::EventGenerationError error caught in generatePythia8Event. Pythia record for event that failed:\n" << ss.str() << EOM;
+        }
         Loop::wrapup();
         return;
       }
@@ -652,93 +1214,132 @@ namespace Gambit
 
     /// *** Standard Event Format Functions ***
 
-#ifndef EXCLUDE_DELPHES
-    void reconstructDelphesEvent(HEPUtils::Event& result) {
-      using namespace Pipes::reconstructDelphesEvent;
-      if (*Loop::iteration <= BASE_INIT or !useDelphesDetector) return;
-      result.clear();
-
-#pragma omp critical (Delphes)
+    #ifndef EXCLUDE_DELPHES
+    void reconstructDelphesEvent(HEPUtils::Event& result)
       {
-        try {
-          (*Dep::DetectorSim).processEvent(*Dep::HardScatteringEvent, result);
-        } catch (std::domain_error& e) {
-          std::cerr<<"\n== ColliderBit Warning ==";
-          std::cerr<<"\n   Event problem: "<<e.what();
-          std::cerr<<"\n   See ColliderBit log for event details.";
-          std::stringstream ss;
-          Dep::HardScatteringEvent->list(ss, 1);
-          logger() << ss.str() << EOM;
-        throw e;
+        using namespace Pipes::reconstructDelphesEvent;
+        if (*Loop::iteration <= BASE_INIT or !useDelphesDetector) return;
+        result.clear();
+
+        #pragma omp critical (Delphes)
+        {
+          try
+          {
+            (*Dep::DetectorSim).processEvent(*Dep::HardScatteringEvent, result);
+          }
+          catch (std::runtime_error& e)
+          {
+            #ifdef COLLIDERBIT_DEBUG
+              std::cerr << debug_prefix() << "DelphesVanilla::ProcessEventError caught in reconstructDelphesEvent." << endl;
+            #endif
+
+            // Set global flag
+            tooManyFailedEvents = true;
+            // Store Pythia event record in the logs
+            std::stringstream ss;
+            Dep::HardScatteringEvent->list(ss, 1);
+            logger() << LogTags::debug << "DelphesVanilla::ProcessEventError caught in reconstructDelphesEvent. Pythia record for event that failed:\n" << ss.str() << EOM;
+
+            str errmsg = "Bad point: reconstructDelphesEvent caught the following runtime error: ";
+            errmsg    += e.what();
+            piped_invalid_point.request(errmsg);
+
+            Loop::wrapup();
+          }
         }
       }
-    }
-#endif // not defined EXCLUDE_DELPHES
+    #endif // not defined EXCLUDE_DELPHES
 
-    void smearEventATLAS(HEPUtils::Event& result) {
+
+    void smearEventATLAS(HEPUtils::Event& result)
+    {
       using namespace Pipes::smearEventATLAS;
       if (*Loop::iteration <= BASE_INIT or !useBuckFastATLASDetector) return;
       result.clear();
 
       // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
-      try {
+      try
+      {
         (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      } catch (std::domain_error& e) {
-#pragma omp critical (event_warning)
+      }
+      catch (Gambit::exception& e)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Gambit::exception caught during event conversion in smearEventATLAS. Check the ColliderBit log for details." << endl;
+        #endif
+        #pragma omp critical (event_conversion_error)
         {
-          std::cerr<<"\n== ColliderBit Warning ==";
-          std::cerr<<"\n   Event problem: "<<e.what();
-          std::cerr<<"\n   See ColliderBit log for event details.";
+          // Set global flag
+          tooManyFailedEvents = true;
+          // Store Pythia event record in the logs
           std::stringstream ss;
           Dep::HardScatteringEvent->list(ss, 1);
-          logger() << ss.str() << EOM;
+          logger() << LogTags::debug << "Gambit::exception error caught in smearEventATLAS. Pythia record for event that failed:\n" << ss.str() << EOM;
         }
-        throw e;
+        Loop::wrapup();
+        return;
       }
     }
 
-    void smearEventCMS(HEPUtils::Event& result) {
+
+    void smearEventCMS(HEPUtils::Event& result)
+    {
       using namespace Pipes::smearEventCMS;
       if (*Loop::iteration <= BASE_INIT or !useBuckFastCMSDetector) return;
       result.clear();
 
       // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
-      try {
+      try
+      {
         (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      } catch (std::domain_error& e) {
-#pragma omp critical (event_warning)
+      }
+      catch (Gambit::exception& e)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Gambit::exception caught during event conversion in smearEventCMS. Check the ColliderBit log for details." << endl;
+        #endif
+        #pragma omp critical (event_conversion_error)
         {
-          std::cerr<<"\n== ColliderBit Warning ==";
-          std::cerr<<"\n   Event problem: "<<e.what();
-          std::cerr<<"\n   See ColliderBit log for event details.";
+          // Set global flag
+          tooManyFailedEvents = true;
+          // Store Pythia event record in the logs
           std::stringstream ss;
           Dep::HardScatteringEvent->list(ss, 1);
-          logger() << ss.str() << EOM;
+          logger() << LogTags::debug << "Gambit::exception error caught in smearEventCMS. Pythia record for event that failed:\n" << ss.str() << EOM;
         }
-        throw e;
+        Loop::wrapup();
+        return;
       }
     }
 
 
-    void copyEvent(HEPUtils::Event& result) {
+    void copyEvent(HEPUtils::Event& result)
+    {
       using namespace Pipes::copyEvent;
-      if (*Loop::iteration <= BASE_INIT) return;
+      if (*Loop::iteration <= BASE_INIT or !useBuckFastIdentityDetector) return;
       result.clear();
 
       // Get the next event from Pythia8 and convert to HEPUtils::Event
-      try {
+      try
+      {
         (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      } catch (std::domain_error& e) {
-#pragma omp critical (event_warning)
+      }
+      catch (Gambit::exception& e)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Gambit::exception caught during event conversion in copyEvent. Check the ColliderBit log for details." << endl;
+        #endif
+        #pragma omp critical (event_conversion_error)
         {
-          std::cerr<<"\n== ColliderBit Warning ==";
-          std::cerr<<"\n   Event problem: "<<e.what();
-          std::cerr<<"\n   See ColliderBit log for event details.";
+          // Set global flag
+          tooManyFailedEvents = true;
+          // Store Pythia event record in the logs
           std::stringstream ss;
           Dep::HardScatteringEvent->list(ss, 1);
-          logger() << ss.str() << EOM;
+          logger() << LogTags::debug << "Gambit::exception error caught in copyEvent. Pythia record for event that failed:\n" << ss.str() << EOM;
         }
-        throw e;
+        Loop::wrapup();
+        return;
       }
     }
 
@@ -746,18 +1347,42 @@ namespace Gambit
 
     /// *** Analysis Accumulators ***
 
+
 #ifndef EXCLUDE_DELPHES
-    void runDetAnalyses(ColliderLogLikes& result)
+    void runDetAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runDetAnalyses;
-      if (!useDelphesDetector) return;
-      if (*Loop::iteration == FINALIZE && eventsGenerated) {
-        // The final iteration: get log likelihoods for the analyses
+
+      if (*Loop::iteration == BASE_INIT)
+      {
         result.clear();
+        return;
+      }
+
+      if (!useDelphesDetector) return;
+
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // The final iteration for this collider: collect results
         globalAnalysesDet.scale();
-        for (auto anaPtr = globalAnalysesDet.analyses.begin();
-                  anaPtr != globalAnalysesDet.analyses.end(); ++anaPtr)
+        for (auto anaPtr = globalAnalysesDet.analyses.begin(); anaPtr != globalAnalysesDet.analyses.end(); ++anaPtr)
+        {
+
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+          #endif
+
           result.push_back((*anaPtr)->get_results());
+        }
+        return;
+      }
+
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "runDetAnalyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
         return;
       }
 
@@ -769,16 +1394,41 @@ namespace Gambit
 #endif // not defined EXCLUDE_DELPHES
 
 
-    void runATLASAnalyses(ColliderLogLikes& result)
+
+    void runATLASAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runATLASAnalyses;
-      if (!useBuckFastATLASDetector) return;
-      if (*Loop::iteration == FINALIZE && eventsGenerated) {
-        // The final iteration: get log likelihoods for the analyses
+
+      if (*Loop::iteration == BASE_INIT)
+      {
         result.clear();
+        return;
+      }
+
+      if (!useBuckFastATLASDetector) return;
+
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // The final iteration for this collider: collect results
         globalAnalysesATLAS.scale();
         for (auto anaPtr = globalAnalysesATLAS.analyses.begin(); anaPtr != globalAnalysesATLAS.analyses.end(); ++anaPtr)
+        {
+
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+          #endif
+
           result.push_back((*anaPtr)->get_results());
+        }
+        return;
+      }
+
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "runATLASAnalyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
         return;
       }
 
@@ -789,16 +1439,39 @@ namespace Gambit
     }
 
 
-    void runCMSAnalyses(ColliderLogLikes& result)
+    void runCMSAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runCMSAnalyses;
-      if (!useBuckFastCMSDetector) return;
-      if (*Loop::iteration == FINALIZE && eventsGenerated) {
-        // The final iteration: get log likelihoods for the analyses
+
+      if (*Loop::iteration == BASE_INIT)
+      {
         result.clear();
+        return;
+      }
+
+      if (!useBuckFastCMSDetector) return;
+
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // The final iteration for this collider: collect results
         globalAnalysesCMS.scale();
         for (auto anaPtr = globalAnalysesCMS.analyses.begin(); anaPtr != globalAnalysesCMS.analyses.end(); ++anaPtr)
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+          #endif
+
           result.push_back((*anaPtr)->get_results());
+        }
+        return;
+      }
+
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "runCMSAnalyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
         return;
       }
 
@@ -810,46 +1483,112 @@ namespace Gambit
 
 
 
+    void runIdentityAnalyses(AnalysisNumbers& result)
+    {
+      using namespace Pipes::runIdentityAnalyses;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        result.clear();
+        return;
+      }
+
+      if (!useBuckFastIdentityDetector) return;
+
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // The final iteration for this collider: collect results
+        globalAnalysesIdentity.scale();
+        for (auto anaPtr = globalAnalysesIdentity.analyses.begin(); anaPtr != globalAnalysesIdentity.analyses.end(); ++anaPtr)
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+          #endif
+
+          result.push_back((*anaPtr)->get_results());
+        }
+        return;
+      }
+
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "runIdentityAnalyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
+        return;
+      }
+
+      if (*Loop::iteration <= BASE_INIT) return;
+
+      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
+      Dep::IdentityAnalysisContainer->analyze(*Dep::CopiedEvent);
+    }
+
 
     /// Loop over all analyses (and SRs within one analysis) and fill a vector of observed likelihoods
     void calc_LHC_LogLike(double& result) {
       using namespace Pipes::calc_LHC_LogLike;
-      /* The use of the following requires ALLOW_MODEL(CMSSM) in the rollcall.
-      logger() << "This model:";
-      logger() << "\nm0: " << *Param["M0"];
-      logger() << "\nm1/2: " << *Param["M12"] << EOM;
-      */
 
-      // xsec veto
-      if (not eventsGenerated) {
-        logger() << "This point was xsec-vetoed." << EOM;
-        result = 0.;
+      // If no events have been generated (xsec veto), return delta log-likelihood = 0
+      if (!eventsGenerated)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: No events generated. Will return a delta log-likelihood of 0." << endl;
+        #endif
+        result = 0.0;
         return;
       }
 
+      // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
+      if (tooManyFailedEvents)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;
+        #endif
+        result = 0.0;
+        return;
+      }
 
-      ColliderLogLikes analysisResults;
-      if(useBuckFastATLASDetector)
-        analysisResults.insert(analysisResults.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
-      if(useBuckFastCMSDetector)
-        analysisResults.insert(analysisResults.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
-      #ifndef EXCLUDE_DELPHES
-      if (useDelphesDetector)
-        analysisResults.insert(analysisResults.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
+      AnalysisNumbers analysisResults;
+      #ifdef COLLIDERBIT_DEBUG
+        if (haveUsedBuckFastATLASDetector)
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
+        if (haveUsedBuckFastCMSDetector)
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
+        if (haveUsedBuckFastIdentityDetector)
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
+        #ifndef EXCLUDE_DELPHES
+          if (haveUsedDelphesDetector)
+           std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::DetAnalysisNumbers->size()      = " << Dep::DetAnalysisNumbers->size() << endl;
+        #endif
       #endif
 
-
+      if (haveUsedBuckFastATLASDetector)
+        analysisResults.insert(analysisResults.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
+      if (haveUsedBuckFastCMSDetector)
+        analysisResults.insert(analysisResults.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
+      if (haveUsedBuckFastIdentityDetector)
+        analysisResults.insert(analysisResults.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
+      #ifndef EXCLUDE_DELPHES
+        if (haveUsedDelphesDetector)
+         analysisResults.insert(analysisResults.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
+      #endif
       // Loop over analyses and calculate the total observed dll
       double total_dll_obs = 0;
-      for (size_t analysis = 0; analysis < analysisResults.size(); ++analysis) {
-        // cout << "In analysis loop" << endl;
+      for (size_t analysis = 0; analysis < analysisResults.size(); ++analysis)
+      {
+
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has " << analysisResults[analysis].size() << " signal regions." << endl;
+        #endif
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @note In general each analysis could/should work out its own likelihood so they can handle SR combination if possible.
         /// @note For now we just take the result from the SR *expected* to be most constraining, i.e. with highest expected dll
         double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-        for (size_t SR = 0; SR < analysisResults[analysis].size(); ++SR) {
-          // cout << "In signal region loop" << endl;
+        for (size_t SR = 0; SR < analysisResults[analysis].size(); ++SR)
+        {
           SignalRegionData srData = analysisResults[analysis][SR];
 
           // Actual observed number of events
@@ -877,18 +1616,6 @@ namespace Gambit
           // Predicted total background, as an integer for use in Poisson functions
           const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
 
-          #ifdef COLLIDERBIT_DEBUG
-            logger() << endl;
-            logger() << "COLLIDER_RESULT " << srData.analysis_name << " " << srData.sr_label << endl;
-            logger() << "  NEvents, not scaled to luminosity :" << endl;
-            logger() << "    " << srData.n_signal << endl;
-            logger() << "  NEvents, scaled  to luminosity :  " << endl;
-            logger() << "    " << srData.n_signal_at_lumi << endl;
-            logger() << "  NEvents (b [rel err], sb [rel err]):" << endl;
-            logger() << "    " << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%] "
-                     << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << EOM;
-          #endif
-
           double llb_exp = 0, llsb_exp = 0, llb_obs = 0, llsb_obs = 0;
           // Use a log-normal distribution for the nuisance parameter (more correct)
           if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") {
@@ -912,18 +1639,18 @@ namespace Gambit
             bestexp_dll_obs = llb_obs - llsb_obs;
           }
 
-          // The following was used for some final tests of ColliderBit:
+          // For debuggig: print some useful numbers to the log.
           #ifdef COLLIDERBIT_DEBUG
-            logger() << endl;
-            logger() << "COLLIDER_RESULT " << srData.analysis_name << " " << srData.sr_label << endl;
-            logger() << "  LLikes (b_ex sb_ex b_obs sb_obs):" << endl;
-            logger() << "    " << llb_exp << " " << llsb_exp << " "
-                     << llb_obs << " " << llsb_obs << endl;
-            logger() << "  NEvents, not scaled to luminosity :" << endl;
-            logger() << "    " << srData.n_signal << endl;
-            logger() << "  NEvents (b [rel err], sb [rel err]):" << endl;
-            logger() << "    " << n_predicted_uncertain_b << " [" << uncertainty_b << "] "
-                     << n_predicted_uncertain_sb << " [" << uncertainty_sb << "]" << EOM;
+            cout << endl;
+            cout <<  debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
+            cout <<  debug_prefix() << "  LLikes: b_ex      sb_ex     b_obs     sb_obs    (sb_obs-b_obs)" << endl;
+            cout <<  debug_prefix() << "          " << llb_exp << "  " << llsb_exp << "  "
+                     << llb_obs << "  " << llsb_obs << "  " << llsb_obs-llb_obs << endl;
+            cout <<  debug_prefix() << "  NEvents, not scaled to luminosity: " << srData.n_signal << endl;
+            cout <<  debug_prefix() << "  NEvents, scaled  to luminosity:    " << srData.n_signal_at_lumi << endl;
+            cout <<  debug_prefix() << "  NEvents: b [rel err]      sb [rel err]" << endl;
+            cout <<  debug_prefix() << "           " << n_predicted_uncertain_b << " [" << uncertainty_b << "]   "
+                     << n_predicted_uncertain_sb << " [" << uncertainty_sb << "]" << endl;
           #endif
 
         } // end SR loop
@@ -932,13 +1659,19 @@ namespace Gambit
         /// @note For now we assume that the analyses are fully orthogonal, i.e. no possiblity that the same event appears twice -> straight addition
         total_dll_obs += bestexp_dll_obs;
 
+        #ifdef COLLIDERBIT_DEBUG
+          std::cout.precision(5);
+          cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  calc_LHC_LogLike: Analysis #" << analysis << " contributes with a -LogL = " << bestexp_dll_obs << endl;
+        #endif
+
       } // end ana loop
 
       #ifdef COLLIDERBIT_DEBUG
-        std::cout << "COLLIDERBIT LIKELIHOOD " << -total_dll_obs << std::endl;
+        cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << -total_dll_obs << endl;
       #endif
       // Set the single DLL to be returned (with conversion to more negative dll = more exclusion convention)
       result = -total_dll_obs;
+
     }
 
 
@@ -2033,28 +2766,28 @@ namespace Gambit
     void ALEPH_Selectron_Conservative_LLike(double& result)
     {
       static const ALEPHSelectronLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 115., 0., 100.,
-                                     "lepLimitPlanev2/ALEPHSelectronLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 115., 0., 100., "lepLimitPlanev2/ALEPHSelectronLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::ALEPH_Selectron_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
+      const Spectrum& spec = *Dep::MSSM_spectrum;
 
       double max_mixing;
-      const SubSpectrum* mssm = spec->get_HE();
+      const SubSpectrum& mssm = spec.get_HE();
       str sel_string = slhahelp::mass_es_from_gauge_es("~e_L", max_mixing, mssm);
       str ser_string = slhahelp::mass_es_from_gauge_es("~e_R", max_mixing, mssm);
-      const double mass_seL=spec->get(Par::Pole_Mass,sel_string);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_seR = spec->get(Par::Pole_Mass,ser_string);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_seL=spec.get(Par::Pole_Mass,sel_string);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_seR = spec.get(Par::Pole_Mass,ser_string);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
 
@@ -2100,28 +2833,28 @@ namespace Gambit
     void ALEPH_Smuon_Conservative_LLike(double& result)
     {
       static const ALEPHSmuonLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 115., 0., 100.,
-                                     "lepLimitPlanev2/ALEPHSmuonLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 115., 0., 100., "lepLimitPlanev2/ALEPHSmuonLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::ALEPH_Smuon_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
+      const Spectrum& spec = *Dep::MSSM_spectrum;
 
       double max_mixing;
-      const SubSpectrum* mssm = spec->get_HE();
+      const SubSpectrum& mssm = spec.get_HE();
       str smul_string = slhahelp::mass_es_from_gauge_es("~mu_L", max_mixing, mssm);
       str smur_string = slhahelp::mass_es_from_gauge_es("~mu_R", max_mixing, mssm);
-      const double mass_smuL=spec->get(Par::Pole_Mass,smul_string);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_smuR = spec->get(Par::Pole_Mass,smur_string);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_smuL=spec.get(Par::Pole_Mass,smul_string);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_smuR = spec.get(Par::Pole_Mass,smur_string);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
 
@@ -2167,28 +2900,29 @@ namespace Gambit
     void ALEPH_Stau_Conservative_LLike(double& result)
     {
       static const ALEPHStauLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 115., 0., 100.,
-                                     "lepLimitPlanev2/ALEPHStauLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 115., 0., 100., "lepLimitPlanev2/ALEPHStauLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::ALEPH_Stau_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const SubSpectrum* mssm = spec->get_HE();
-      const static double tol = runOptions->getValueOrDef<double>(1e-5, "family_mixing_tolerance");
-      const static bool pterror = runOptions->getValueOrDef<bool>(false, "family_mixing_tolerance_invalidates_point_only");
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const SubSpectrum& mssm = spec.get_HE();
+      static const double tol = runOptions->getValueOrDef<double>(1e-5, "family_mixing_tolerance");
+      static const bool pterror = runOptions->getValueOrDef<bool>(false, "family_mixing_tolerance_invalidates_point_only");
       str stau1_string = slhahelp::mass_es_closest_to_family("~tau_1", mssm,tol,LOCAL_INFO,pterror);
       str stau2_string = slhahelp::mass_es_closest_to_family("~tau_2", mssm,tol,LOCAL_INFO,pterror);
-      const double mass_stau1=spec->get(Par::Pole_Mass,stau1_string);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_stau2 = spec->get(Par::Pole_Mass,stau2_string);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_stau1=spec.get(Par::Pole_Mass,stau1_string);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_stau2 = spec.get(Par::Pole_Mass,stau2_string);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
 
@@ -2235,28 +2969,28 @@ namespace Gambit
     void L3_Selectron_Conservative_LLike(double& result)
     {
       static const L3SelectronLimitAt205GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 115., 0., 100.,
-                                     "lepLimitPlanev2/L3SelectronLimitAt205GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 115., 0., 100., "lepLimitPlanev2/L3SelectronLimitAt205GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::L3_Selectron_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
+      const Spectrum& spec = *Dep::MSSM_spectrum;
 
       double max_mixing;
-      const SubSpectrum* mssm = spec->get_HE();
+      const SubSpectrum& mssm = spec.get_HE();
       str sel_string = slhahelp::mass_es_from_gauge_es("~e_L", max_mixing, mssm);
       str ser_string = slhahelp::mass_es_from_gauge_es("~e_R", max_mixing, mssm);
-      const double mass_seL=spec->get(Par::Pole_Mass,sel_string);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_seR = spec->get(Par::Pole_Mass,ser_string);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_seL=spec.get(Par::Pole_Mass,sel_string);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_seR = spec.get(Par::Pole_Mass,ser_string);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
 
@@ -2303,27 +3037,28 @@ namespace Gambit
     void L3_Smuon_Conservative_LLike(double& result)
     {
       static const L3SmuonLimitAt205GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 115., 0., 100.,
-                                     "lepLimitPlanev2/L3SmuonLimitAt205GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // static bool dumped=false;
+      // if(!dumped)
+      // {
+      //   limitContainer.dumpPlotData(45., 115., 0., 100., "lepLimitPlanev2/L3SmuonLimitAt205GeV.dump");
+      //   dumped=true;
+      // }
+      // #endif
       using namespace Pipes::L3_Smuon_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
       double max_mixing;
-      const SubSpectrum* mssm = spec->get_HE();
+      const SubSpectrum& mssm = spec.get_HE();
       str smul_string = slhahelp::mass_es_from_gauge_es("~mu_L", max_mixing, mssm);
       str smur_string = slhahelp::mass_es_from_gauge_es("~mu_R", max_mixing, mssm);
-      const double mass_smuL=spec->get(Par::Pole_Mass,smul_string);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_smuR = spec->get(Par::Pole_Mass,smur_string);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_smuL=spec.get(Par::Pole_Mass,smul_string);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_smuR = spec.get(Par::Pole_Mass,smur_string);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
 
@@ -2370,28 +3105,29 @@ namespace Gambit
     void L3_Stau_Conservative_LLike(double& result)
     {
       static const L3StauLimitAt205GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 115., 0., 100.,
-                                     "lepLimitPlanev2/L3StauLimitAt205GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 115., 0., 100., "lepLimitPlanev2/L3StauLimitAt205GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::L3_Stau_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const SubSpectrum* mssm = spec->get_HE();
-      const static double tol = runOptions->getValueOrDef<double>(1e-5, "family_mixing_tolerance");
-      const static bool pterror = runOptions->getValueOrDef<bool>(false, "family_mixing_tolerance_invalidates_point_only");
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const SubSpectrum& mssm = spec.get_HE();
+      static const double tol = runOptions->getValueOrDef<double>(1e-5, "family_mixing_tolerance");
+      static const bool pterror = runOptions->getValueOrDef<bool>(false, "family_mixing_tolerance_invalidates_point_only");
       str stau1_string = slhahelp::mass_es_closest_to_family("~tau_1", mssm,tol,LOCAL_INFO,pterror);
       str stau2_string = slhahelp::mass_es_closest_to_family("~tau_2", mssm,tol,LOCAL_INFO,pterror);
-      const double mass_stau1=spec->get(Par::Pole_Mass,stau1_string);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_stau2 = spec->get(Par::Pole_Mass,stau2_string);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_stau1=spec.get(Par::Pole_Mass,stau1_string);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_stau2 = spec.get(Par::Pole_Mass,stau2_string);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
 
@@ -2441,25 +3177,26 @@ namespace Gambit
     void L3_Neutralino_All_Channels_Conservative_LLike(double& result)
     {
       static const L3NeutralinoAllChannelsLimitAt188pt6GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(0., 200., 0., 100.,
-                                     "lepLimitPlanev2/L3NeutralinoAllChannelsLimitAt188pt6GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(0., 200., 0., 100., "lepLimitPlanev2/L3NeutralinoAllChannelsLimitAt188pt6GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::L3_Neutralino_All_Channels_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const DecayTable *decays = &(*Dep::decay_rates);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_neut2 = spec->get(Par::Pole_Mass,1000023, 0);
-      const double mass_neut3 = spec->get(Par::Pole_Mass,1000025, 0);
-      const double mass_neut4 = spec->get(Par::Pole_Mass,1000035, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const DecayTable& decays = *Dep::decay_rates;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_neut2 = spec.get(Par::Pole_Mass,1000023, 0);
+      const double mass_neut3 = spec.get(Par::Pole_Mass,1000025, 0);
+      const double mass_neut4 = spec.get(Par::Pole_Mass,1000035, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -2473,18 +3210,18 @@ namespace Gambit
       xsecWithError = *Dep::LEP188_xsec_chi00_12;
       // Total up all channels which look like Z* decays
       totalBR = 0;
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "Z0");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "ubar", "u");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "dbar", "d");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "cbar", "c");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "sbar", "s");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "bbar", "b");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "e+", "e-");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "mu+", "mu-");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "tau+", "tau-");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "nubar_e", "nu_e");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "nubar_mu", "nu_mu");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "nubar_tau", "nu_tau");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "Z0");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "ubar", "u");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "dbar", "d");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "cbar", "c");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "sbar", "s");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "bbar", "b");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "e+", "e-");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "mu+", "mu-");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "tau+", "tau-");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "nubar_e", "nu_e");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "nubar_mu", "nu_mu");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "nubar_tau", "nu_tau");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -2504,18 +3241,18 @@ namespace Gambit
       xsecWithError = *Dep::LEP188_xsec_chi00_13;
       // Total up all channels which look like Z* decays
       totalBR = 0;
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "Z0");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "ubar", "u");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "dbar", "d");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "cbar", "c");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "sbar", "s");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "bbar", "b");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "e+", "e-");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "mu+", "mu-");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "tau+", "tau-");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "nubar_e", "nu_e");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "nubar_mu", "nu_mu");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "nubar_tau", "nu_tau");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "Z0");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "ubar", "u");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "dbar", "d");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "cbar", "c");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "sbar", "s");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "bbar", "b");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "e+", "e-");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "mu+", "mu-");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "tau+", "tau-");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "nubar_e", "nu_e");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "nubar_mu", "nu_mu");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "nubar_tau", "nu_tau");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -2535,18 +3272,18 @@ namespace Gambit
       xsecWithError = *Dep::LEP188_xsec_chi00_14;
       // Total up all channels which look like Z* decays
       totalBR = 0;
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "Z0");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "ubar", "u");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "dbar", "d");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "cbar", "c");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "sbar", "s");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "bbar", "b");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "e+", "e-");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "mu+", "mu-");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "tau+", "tau-");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "nubar_e", "nu_e");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "nubar_mu", "nu_mu");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "nubar_tau", "nu_tau");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "Z0");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "ubar", "u");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "dbar", "d");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "cbar", "c");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "sbar", "s");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "bbar", "b");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "e+", "e-");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "mu+", "mu-");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "tau+", "tau-");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "nubar_e", "nu_e");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "nubar_mu", "nu_mu");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "nubar_tau", "nu_tau");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -2565,25 +3302,26 @@ namespace Gambit
     void L3_Neutralino_Leptonic_Conservative_LLike(double& result)
     {
       static const L3NeutralinoLeptonicLimitAt188pt6GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(0., 200., 0., 100.,
-                                     "lepLimitPlanev2/L3NeutralinoLeptonicLimitAt188pt6GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // static bool dumped=false;
+      // if(!dumped)
+      // {
+      //   limitContainer.dumpPlotData(0., 200., 0., 100., "lepLimitPlanev2/L3NeutralinoLeptonicLimitAt188pt6GeV.dump");
+      //   dumped=true;
+      // }
+      // #endif
       using namespace Pipes::L3_Neutralino_Leptonic_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const DecayTable *decays = &(*Dep::decay_rates);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_neut2 = spec->get(Par::Pole_Mass,1000023, 0);
-      const double mass_neut3 = spec->get(Par::Pole_Mass,1000025, 0);
-      const double mass_neut4 = spec->get(Par::Pole_Mass,1000035, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const DecayTable& decays = *Dep::decay_rates;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_neut2 = spec.get(Par::Pole_Mass,1000023, 0);
+      const double mass_neut3 = spec.get(Par::Pole_Mass,1000025, 0);
+      const double mass_neut4 = spec.get(Par::Pole_Mass,1000035, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -2598,14 +3336,14 @@ namespace Gambit
       // Total up all channels which look like leptonic Z* decays
       // Total up the leptonic Z decays first...
       totalBR = 0;
-      totalBR += decays->at("Z0").BF("e+", "e-");
-      totalBR += decays->at("Z0").BF("mu+", "mu-");
-      totalBR += decays->at("Z0").BF("tau+", "tau-");
-      totalBR = decays->at("~chi0_2").BF("~chi0_1", "Z0") * totalBR;
+      totalBR += decays.at("Z0").BF("e+", "e-");
+      totalBR += decays.at("Z0").BF("mu+", "mu-");
+      totalBR += decays.at("Z0").BF("tau+", "tau-");
+      totalBR = decays.at("~chi0_2").BF("~chi0_1", "Z0") * totalBR;
 
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "e+", "e-");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "mu+", "mu-");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "tau+", "tau-");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "e+", "e-");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "mu+", "mu-");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "tau+", "tau-");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -2626,14 +3364,14 @@ namespace Gambit
       // Total up all channels which look like leptonic Z* decays
       // Total up the leptonic Z decays first...
       totalBR = 0;
-      totalBR += decays->at("Z0").BF("e+", "e-");
-      totalBR += decays->at("Z0").BF("mu+", "mu-");
-      totalBR += decays->at("Z0").BF("tau+", "tau-");
-      totalBR = decays->at("~chi0_3").BF("~chi0_1", "Z0") * totalBR;
+      totalBR += decays.at("Z0").BF("e+", "e-");
+      totalBR += decays.at("Z0").BF("mu+", "mu-");
+      totalBR += decays.at("Z0").BF("tau+", "tau-");
+      totalBR = decays.at("~chi0_3").BF("~chi0_1", "Z0") * totalBR;
 
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "e+", "e-");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "mu+", "mu-");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "tau+", "tau-");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "e+", "e-");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "mu+", "mu-");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "tau+", "tau-");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -2654,14 +3392,14 @@ namespace Gambit
       // Total up all channels which look like leptonic Z* decays
       // Total up the leptonic Z decays first...
       totalBR = 0;
-      totalBR += decays->at("Z0").BF("e+", "e-");
-      totalBR += decays->at("Z0").BF("mu+", "mu-");
-      totalBR += decays->at("Z0").BF("tau+", "tau-");
-      totalBR = decays->at("~chi0_4").BF("~chi0_1", "Z0") * totalBR;
+      totalBR += decays.at("Z0").BF("e+", "e-");
+      totalBR += decays.at("Z0").BF("mu+", "mu-");
+      totalBR += decays.at("Z0").BF("tau+", "tau-");
+      totalBR = decays.at("~chi0_4").BF("~chi0_1", "Z0") * totalBR;
 
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "e+", "e-");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "mu+", "mu-");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "tau+", "tau-");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "e+", "e-");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "mu+", "mu-");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "tau+", "tau-");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -2680,24 +3418,25 @@ namespace Gambit
     void L3_Chargino_All_Channels_Conservative_LLike(double& result)
     {
       static const L3CharginoAllChannelsLimitAt188pt6GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 100., 0., 100.,
-                                     "lepLimitPlanev2/L3CharginoAllChannelsLimitAt188pt6GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 100., 0., 100., "lepLimitPlanev2/L3CharginoAllChannelsLimitAt188pt6GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::L3_Chargino_All_Channels_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const DecayTable *decays = &(*Dep::decay_rates);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_char1 = spec->get(Par::Pole_Mass,1000024, 0);
-      const double mass_char2 = spec->get(Par::Pole_Mass,1000037, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const DecayTable& decays = *Dep::decay_rates;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mass_char2 = spec.get(Par::Pole_Mass,1000037, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -2711,12 +3450,12 @@ namespace Gambit
       xsecWithError = *Dep::LEP188_xsec_chipm_11;
       // Total up all channels which look like W* decays
       totalBR = 0;
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "W+");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "c", "sbar");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "W+");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -2736,12 +3475,12 @@ namespace Gambit
       xsecWithError = *Dep::LEP188_xsec_chipm_22;
       // Total up all channels which look like W* decays
       totalBR = 0;
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "W+");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "c", "sbar");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "W+");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -2760,24 +3499,25 @@ namespace Gambit
     void L3_Chargino_Leptonic_Conservative_LLike(double& result)
     {
       static const L3CharginoLeptonicLimitAt188pt6GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(45., 100., 0., 100.,
-                                     "lepLimitPlanev2/L3CharginoLeptonicLimitAt188pt6GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45., 100., 0., 100., "lepLimitPlanev2/L3CharginoLeptonicLimitAt188pt6GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::L3_Chargino_Leptonic_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const DecayTable *decays = &(*Dep::decay_rates);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_char1 = spec->get(Par::Pole_Mass,1000024, 0);
-      const double mass_char2 = spec->get(Par::Pole_Mass,1000037, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const DecayTable& decays = *Dep::decay_rates;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mass_char2 = spec.get(Par::Pole_Mass,1000037, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -2792,14 +3532,14 @@ namespace Gambit
       // Total up all channels which look like leptonic W* decays
       // Total up the leptonic W decays first...
       totalBR = 0;
-      totalBR += decays->at("W+").BF("e+", "nu_e");
-      totalBR += decays->at("W+").BF("mu+", "nu_mu");
-      totalBR += decays->at("W+").BF("tau+", "nu_tau");
-      totalBR = decays->at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
+      totalBR += decays.at("W+").BF("e+", "nu_e");
+      totalBR += decays.at("W+").BF("mu+", "nu_mu");
+      totalBR += decays.at("W+").BF("tau+", "nu_tau");
+      totalBR = decays.at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -2820,14 +3560,14 @@ namespace Gambit
       // Total up all channels which look like leptonic W* decays
       // Total up the leptonic W decays first...
       totalBR = 0;
-      totalBR += decays->at("W+").BF("e+", "nu_e");
-      totalBR += decays->at("W+").BF("mu+", "nu_mu");
-      totalBR += decays->at("W+").BF("tau+", "nu_tau");
-      totalBR = decays->at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
+      totalBR += decays.at("W+").BF("e+", "nu_e");
+      totalBR += decays.at("W+").BF("mu+", "nu_mu");
+      totalBR += decays.at("W+").BF("tau+", "nu_tau");
+      totalBR = decays.at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -2846,24 +3586,25 @@ namespace Gambit
     void OPAL_Chargino_Hadronic_Conservative_LLike(double& result)
     {
       static const OPALCharginoHadronicLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(75., 105., 0., 105.,
-                                     "lepLimitPlanev2/OPALCharginoHadronicLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(75., 105., 0., 105., "lepLimitPlanev2/OPALCharginoHadronicLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::OPAL_Chargino_Hadronic_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const DecayTable *decays = &(*Dep::decay_rates);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_char1 = spec->get(Par::Pole_Mass,1000024, 0);
-      const double mass_char2 = spec->get(Par::Pole_Mass,1000037, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const DecayTable& decays = *Dep::decay_rates;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mass_char2 = spec.get(Par::Pole_Mass,1000037, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -2877,11 +3618,11 @@ namespace Gambit
       xsecWithError = *Dep::LEP208_xsec_chipm_11;
       // Total up all channels which look like hadronic W* decays
       // Total up the hadronic W decays first...
-      totalBR = decays->at("W+").BF("hadron", "hadron");
-      totalBR = decays->at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
+      totalBR = decays.at("W+").BF("hadron", "hadron");
+      totalBR = decays.at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "c", "sbar");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -2901,11 +3642,11 @@ namespace Gambit
       xsecWithError = *Dep::LEP208_xsec_chipm_22;
       // Total up all channels which look like hadronic W* decays
       // Total up the hadronic W decays first...
-      totalBR = decays->at("W+").BF("hadron", "hadron");
-      totalBR = decays->at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
+      totalBR = decays.at("W+").BF("hadron", "hadron");
+      totalBR = decays.at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "c", "sbar");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -2924,31 +3665,31 @@ namespace Gambit
     void OPAL_Chargino_SemiLeptonic_Conservative_LLike(double& result)
     {
       static const OPALCharginoSemiLeptonicLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(75., 105., 0., 105.,
-                                     "lepLimitPlanev2/OPALCharginoSemiLeptonicLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(75., 105., 0., 105., "lepLimitPlanev2/OPALCharginoSemiLeptonicLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::OPAL_Chargino_SemiLeptonic_Conservative_LLike;
-      const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
-      const static bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
-
       using std::pow;
       using std::log;
+      static const double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
+      static const bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const SubSpectrum *mssm = spec->get_HE();
-      const DecayTable *decays = &(*Dep::decay_rates);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const SubSpectrum& mssm = spec.get_HE();
+      const DecayTable& decays = *Dep::decay_rates;
       const str snue = slhahelp::mass_es_from_gauge_es("~nu_e_L", mssm, tol, LOCAL_INFO, pt_error);
       const str snumu = slhahelp::mass_es_from_gauge_es("~nu_mu_L", mssm, tol, LOCAL_INFO, pt_error);
       const str snutau = slhahelp::mass_es_from_gauge_es("~nu_tau_L", mssm, tol, LOCAL_INFO, pt_error);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_char1 = spec->get(Par::Pole_Mass,1000024, 0);
-      const double mass_char2 = spec->get(Par::Pole_Mass,1000037, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mass_char2 = spec.get(Par::Pole_Mass,1000037, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -2963,31 +3704,31 @@ namespace Gambit
       // Total up all channels which look like leptonic W* decays
       // Total up the leptonic W decays first...
       totalBR = 0;
-      totalBR += decays->at("W+").BF("e+", "nu_e");
-      totalBR += decays->at("W+").BF("mu+", "nu_mu");
-      totalBR += decays->at("W+").BF("tau+", "nu_tau");
-      totalBR = decays->at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
+      totalBR += decays.at("W+").BF("e+", "nu_e");
+      totalBR += decays.at("W+").BF("mu+", "nu_mu");
+      totalBR += decays.at("W+").BF("tau+", "nu_tau");
+      totalBR = decays.at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
-      totalBR += decays->at("~chi+_1").BF(snue, "e+")
-               * decays->at(snue).BF("~chi0_1", "nu_e");
-      totalBR += decays->at("~chi+_1").BF(snumu, "mu+")
-               * decays->at(snumu).BF("~chi0_1", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF(snutau, "tau+")
-               * decays->at(snutau).BF("~chi0_1", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF(snue, "e+")
+               * decays.at(snue).BF("~chi0_1", "nu_e");
+      totalBR += decays.at("~chi+_1").BF(snumu, "mu+")
+               * decays.at(snumu).BF("~chi0_1", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF(snutau, "tau+")
+               * decays.at(snutau).BF("~chi0_1", "nu_tau");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
 
       // ALSO, total up all channels which look like hadronic W* decays
       // Total up the hadronic W decays first...
-      totalBR = decays->at("W+").BF("hadron", "hadron");
-      totalBR = decays->at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
+      totalBR = decays.at("W+").BF("hadron", "hadron");
+      totalBR = decays.at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "c", "sbar");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -3008,31 +3749,31 @@ namespace Gambit
       // Total up all channels which look like leptonic W* decays
       // Total up the leptonic W decays first...
       totalBR = 0;
-      totalBR += decays->at("W+").BF("e+", "nu_e");
-      totalBR += decays->at("W+").BF("mu+", "nu_mu");
-      totalBR += decays->at("W+").BF("tau+", "nu_tau");
-      totalBR = decays->at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
+      totalBR += decays.at("W+").BF("e+", "nu_e");
+      totalBR += decays.at("W+").BF("mu+", "nu_mu");
+      totalBR += decays.at("W+").BF("tau+", "nu_tau");
+      totalBR = decays.at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
-      totalBR += decays->at("~chi+_2").BF(snue, "e+")
-               * decays->at(snue).BF("~chi0_1", "nu_e");
-      totalBR += decays->at("~chi+_2").BF(snumu, "mu+")
-               * decays->at(snumu).BF("~chi0_1", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF(snutau, "tau+")
-               * decays->at(snutau).BF("~chi0_1", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF(snue, "e+")
+               * decays.at(snue).BF("~chi0_1", "nu_e");
+      totalBR += decays.at("~chi+_2").BF(snumu, "mu+")
+               * decays.at(snumu).BF("~chi0_1", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF(snutau, "tau+")
+               * decays.at(snutau).BF("~chi0_1", "nu_tau");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
 
       // ALSO, total up all channels which look like hadronic W* decays
       // Total up the hadronic W decays first...
-      totalBR = decays->at("W+").BF("hadron", "hadron");
-      totalBR = decays->at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
+      totalBR = decays.at("W+").BF("hadron", "hadron");
+      totalBR = decays.at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "c", "sbar");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -3051,31 +3792,32 @@ namespace Gambit
     void OPAL_Chargino_Leptonic_Conservative_LLike(double& result)
     {
       static const OPALCharginoLeptonicLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(75., 105., 0., 105.,
-                                     "lepLimitPlanev2/OPALCharginoLeptonicLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(75., 105., 0., 105., "lepLimitPlanev2/OPALCharginoLeptonicLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::OPAL_Chargino_Leptonic_Conservative_LLike;
-      const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
-      const static bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
+      static const double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
+      static const bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
 
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const SubSpectrum *mssm = spec->get_HE();
-      const DecayTable *decays = &(*Dep::decay_rates);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const SubSpectrum& mssm = spec.get_HE();
+      const DecayTable& decays = *Dep::decay_rates;
       const str snue = slhahelp::mass_es_from_gauge_es("~nu_e_L", mssm, tol, LOCAL_INFO, pt_error);
       const str snumu = slhahelp::mass_es_from_gauge_es("~nu_mu_L", mssm, tol, LOCAL_INFO, pt_error);
       const str snutau = slhahelp::mass_es_from_gauge_es("~nu_tau_L", mssm, tol, LOCAL_INFO, pt_error);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_char1 = spec->get(Par::Pole_Mass,1000024, 0);
-      const double mass_char2 = spec->get(Par::Pole_Mass,1000037, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mass_char2 = spec.get(Par::Pole_Mass,1000037, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -3090,20 +3832,20 @@ namespace Gambit
       // Total up all channels which look like leptonic W* decays
       // Total up the leptonic W decays first...
       totalBR = 0;
-      totalBR += decays->at("W+").BF("e+", "nu_e");
-      totalBR += decays->at("W+").BF("mu+", "nu_mu");
-      totalBR += decays->at("W+").BF("tau+", "nu_tau");
-      totalBR = decays->at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
+      totalBR += decays.at("W+").BF("e+", "nu_e");
+      totalBR += decays.at("W+").BF("mu+", "nu_mu");
+      totalBR += decays.at("W+").BF("tau+", "nu_tau");
+      totalBR = decays.at("~chi+_1").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
-      totalBR += decays->at("~chi+_1").BF(snue, "e+")
-               * decays->at(snue).BF("~chi0_1", "nu_e");
-      totalBR += decays->at("~chi+_1").BF(snumu, "mu+")
-               * decays->at(snumu).BF("~chi0_1", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF(snutau, "tau+")
-               * decays->at(snutau).BF("~chi0_1", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF(snue, "e+")
+               * decays.at(snue).BF("~chi0_1", "nu_e");
+      totalBR += decays.at("~chi+_1").BF(snumu, "mu+")
+               * decays.at(snumu).BF("~chi0_1", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF(snutau, "tau+")
+               * decays.at(snutau).BF("~chi0_1", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -3124,20 +3866,20 @@ namespace Gambit
       // Total up all channels which look like leptonic W* decays
       // Total up the leptonic W decays first...
       totalBR = 0;
-      totalBR += decays->at("W+").BF("e+", "nu_e");
-      totalBR += decays->at("W+").BF("mu+", "nu_mu");
-      totalBR += decays->at("W+").BF("tau+", "nu_tau");
-      totalBR = decays->at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
+      totalBR += decays.at("W+").BF("e+", "nu_e");
+      totalBR += decays.at("W+").BF("mu+", "nu_mu");
+      totalBR += decays.at("W+").BF("tau+", "nu_tau");
+      totalBR = decays.at("~chi+_2").BF("~chi0_1", "W+") * totalBR;
 
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
-      totalBR += decays->at("~chi+_2").BF(snue, "e+")
-               * decays->at(snue).BF("~chi0_1", "nu_e");
-      totalBR += decays->at("~chi+_2").BF(snumu, "mu+")
-               * decays->at(snumu).BF("~chi0_1", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF(snutau, "tau+")
-               * decays->at(snutau).BF("~chi0_1", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF(snue, "e+")
+               * decays.at(snue).BF("~chi0_1", "nu_e");
+      totalBR += decays.at("~chi+_2").BF(snumu, "mu+")
+               * decays.at(snumu).BF("~chi0_1", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF(snutau, "tau+")
+               * decays.at(snutau).BF("~chi0_1", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -3156,31 +3898,29 @@ namespace Gambit
     void OPAL_Chargino_All_Channels_Conservative_LLike(double& result)
     {
       static const OPALCharginoAllChannelsLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(75., 105., 0., 105.,
-                                     "lepLimitPlanev2/OPALCharginoAllChannelsLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(75., 105., 0., 105., "lepLimitPlanev2/OPALCharginoAllChannelsLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::OPAL_Chargino_All_Channels_Conservative_LLike;
-      const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
-      const static bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
+      static const double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
+      static const bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
 
-      using std::pow;
-      using std::log;
+      const Spectrum& spec = *Dep::MSSM_spectrum;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const SubSpectrum *mssm = spec->get_HE();
-      const DecayTable *decays = &(*Dep::decay_rates);
+      const SubSpectrum& mssm = spec.get_HE();
+      const DecayTable& decays = *Dep::decay_rates;
       const str snue = slhahelp::mass_es_from_gauge_es("~nu_e_L", mssm, tol, LOCAL_INFO, pt_error);
       const str snumu = slhahelp::mass_es_from_gauge_es("~nu_mu_L", mssm, tol, LOCAL_INFO, pt_error);
       const str snutau = slhahelp::mass_es_from_gauge_es("~nu_tau_L", mssm, tol, LOCAL_INFO, pt_error);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_char1 = spec->get(Par::Pole_Mass,1000024, 0);
-      const double mass_char2 = spec->get(Par::Pole_Mass,1000037, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mass_char2 = spec.get(Par::Pole_Mass,1000037, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -3194,18 +3934,18 @@ namespace Gambit
       xsecWithError = *Dep::LEP208_xsec_chipm_11;
       // Total up all channels which look like W* decays
       totalBR = 0;
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "W+");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "c", "sbar");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
-      totalBR += decays->at("~chi+_1").BF(snue, "e+")
-               * decays->at(snue).BF("~chi0_1", "nu_e");
-      totalBR += decays->at("~chi+_1").BF(snumu, "mu+")
-               * decays->at(snumu).BF("~chi0_1", "nu_mu");
-      totalBR += decays->at("~chi+_1").BF(snutau, "tau+")
-               * decays->at(snutau).BF("~chi0_1", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "W+");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_1").BF(snue, "e+")
+               * decays.at(snue).BF("~chi0_1", "nu_e");
+      totalBR += decays.at("~chi+_1").BF(snumu, "mu+")
+               * decays.at(snumu).BF("~chi0_1", "nu_mu");
+      totalBR += decays.at("~chi+_1").BF(snutau, "tau+")
+               * decays.at(snutau).BF("~chi0_1", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -3225,18 +3965,18 @@ namespace Gambit
       xsecWithError = *Dep::LEP208_xsec_chipm_22;
       // Total up all channels which look like W* decays
       totalBR = 0;
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "W+");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "u", "dbar");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "c", "sbar");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
-      totalBR += decays->at("~chi+_2").BF(snue, "e+")
-               * decays->at(snue).BF("~chi0_1", "nu_e");
-      totalBR += decays->at("~chi+_2").BF(snumu, "mu+")
-               * decays->at(snumu).BF("~chi0_1", "nu_mu");
-      totalBR += decays->at("~chi+_2").BF(snutau, "tau+")
-               * decays->at(snutau).BF("~chi0_1", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "W+");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "u", "dbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "c", "sbar");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "e+", "nu_e");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "mu+", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF("~chi0_1", "tau+", "nu_tau");
+      totalBR += decays.at("~chi+_2").BF(snue, "e+")
+               * decays.at(snue).BF("~chi0_1", "nu_e");
+      totalBR += decays.at("~chi+_2").BF(snumu, "mu+")
+               * decays.at(snumu).BF("~chi0_1", "nu_mu");
+      totalBR += decays.at("~chi+_2").BF(snutau, "tau+")
+               * decays.at(snutau).BF("~chi0_1", "nu_tau");
       xsecWithError.upper *= pow(totalBR, 2);
       xsecWithError.central *= pow(totalBR, 2);
       xsecWithError.lower *= pow(totalBR, 2);
@@ -3255,25 +3995,26 @@ namespace Gambit
     void OPAL_Neutralino_Hadronic_Conservative_LLike(double& result)
     {
       static const OPALNeutralinoHadronicLimitAt208GeV limitContainer;
-#ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped) {
-        limitContainer.dumpPlotData(0., 200., 0., 100.,
-                                     "lepLimitPlanev2/OPALNeutralinoHadronicLimitAt208GeV.dump");
-        dumped=true;
-      }
-#endif
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(0., 200., 0., 100., "lepLimitPlanev2/OPALNeutralinoHadronicLimitAt208GeV.dump");
+      //     dumped=true;
+      //   }
+      // #endif
       using namespace Pipes::OPAL_Neutralino_Hadronic_Conservative_LLike;
       using std::pow;
       using std::log;
 
-      const Spectrum *spec = *Dep::MSSM_spectrum;
-      const DecayTable *decays = &(*Dep::decay_rates);
-      const double mass_neut1 = spec->get(Par::Pole_Mass,1000022, 0);
-      const double mass_neut2 = spec->get(Par::Pole_Mass,1000023, 0);
-      const double mass_neut3 = spec->get(Par::Pole_Mass,1000025, 0);
-      const double mass_neut4 = spec->get(Par::Pole_Mass,1000035, 0);
-      const double mZ = spec->get(Par::Pole_Mass,23, 0);
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+
+      const DecayTable& decays = *Dep::decay_rates;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_neut2 = spec.get(Par::Pole_Mass,1000023, 0);
+      const double mass_neut3 = spec.get(Par::Pole_Mass,1000025, 0);
+      const double mass_neut4 = spec.get(Par::Pole_Mass,1000035, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
 
@@ -3286,13 +4027,13 @@ namespace Gambit
 
       xsecWithError = *Dep::LEP208_xsec_chi00_12;
       // Total up all channels which look like Z* decays
-      totalBR = decays->at("Z0").BF("hadron", "hadron");
-      totalBR = decays->at("~chi0_2").BF("~chi0_1", "Z0") * totalBR;
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "ubar", "u");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "dbar", "d");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "cbar", "c");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "sbar", "s");
-      totalBR += decays->at("~chi0_2").BF("~chi0_1", "bbar", "b");
+      totalBR = decays.at("Z0").BF("hadron", "hadron");
+      totalBR = decays.at("~chi0_2").BF("~chi0_1", "Z0") * totalBR;
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "ubar", "u");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "dbar", "d");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "cbar", "c");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "sbar", "s");
+      totalBR += decays.at("~chi0_2").BF("~chi0_1", "bbar", "b");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -3311,13 +4052,13 @@ namespace Gambit
 
       xsecWithError = *Dep::LEP208_xsec_chi00_13;
       // Total up all channels which look like Z* decays
-      totalBR = decays->at("Z0").BF("hadron", "hadron");
-      totalBR = decays->at("~chi0_3").BF("~chi0_1", "Z0") * totalBR;
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "ubar", "u");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "dbar", "d");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "cbar", "c");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "sbar", "s");
-      totalBR += decays->at("~chi0_3").BF("~chi0_1", "bbar", "b");
+      totalBR = decays.at("Z0").BF("hadron", "hadron");
+      totalBR = decays.at("~chi0_3").BF("~chi0_1", "Z0") * totalBR;
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "ubar", "u");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "dbar", "d");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "cbar", "c");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "sbar", "s");
+      totalBR += decays.at("~chi0_3").BF("~chi0_1", "bbar", "b");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -3336,13 +4077,13 @@ namespace Gambit
 
       xsecWithError = *Dep::LEP208_xsec_chi00_14;
       // Total up all channels which look like Z* decays
-      totalBR = decays->at("Z0").BF("hadron", "hadron");
-      totalBR = decays->at("~chi0_4").BF("~chi0_1", "Z0") * totalBR;
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "ubar", "u");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "dbar", "d");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "cbar", "c");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "sbar", "s");
-      totalBR += decays->at("~chi0_4").BF("~chi0_1", "bbar", "b");
+      totalBR = decays.at("Z0").BF("hadron", "hadron");
+      totalBR = decays.at("~chi0_4").BF("~chi0_1", "Z0") * totalBR;
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "ubar", "u");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "dbar", "d");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "cbar", "c");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "sbar", "s");
+      totalBR += decays.at("~chi0_4").BF("~chi0_1", "bbar", "b");
       xsecWithError.upper *= totalBR;
       xsecWithError.central *= totalBR;
       xsecWithError.lower *= totalBR;
@@ -3358,561 +4099,17 @@ namespace Gambit
 
     }
 
+
+    // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
+    // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to run
+    // ColliderBit on a single point with a custom Pythia version, using Pythia's SLHA interface.
+    void getDummyColliderObservable(double& result)
+    {
+      result = 0.0;
+    }
+
+
     /// @}
-
-
-    // *** Higgs physics ***
-
-    /// FeynHiggs Higgs production cross-sections
-    void FH_HiggsProd(fh_HiggsProd &result)
-    {
-      using namespace Pipes::FH_HiggsProd;
-
-      Farray<fh_real, 1,52> prodxs;
-
-      fh_HiggsProd HiggsProd;
-      int error;
-      fh_real sqrts;
-
-      // Tevatron
-      sqrts = 2.;
-      error = 1;
-      BEreq::FHHiggsProd(error, sqrts, prodxs);
-      if (error != 0)
-      {
-        std::ostringstream err;
-        err << "BEreq::FHHiggsProd raised error flag for Tevatron: " << error << ".";
-        invalid_point().raise(err.str());
-      }
-      for(int i = 0; i < 52; i++) HiggsProd.prodxs_Tev[i] = prodxs(i+1);
-      // LHC7
-      sqrts = 7.;
-      error = 1;
-      BEreq::FHHiggsProd(error, sqrts, prodxs);
-      if (error != 0)
-      {
-        std::ostringstream err;
-        err << "BEreq::FHHiggsProd raised error flag for LHC7: " << error << ".";
-        invalid_point().raise(err.str());
-      }
-      for(int i = 0; i < 52; i++) HiggsProd.prodxs_LHC7[i] = prodxs(i+1);
-      // LHC8
-      sqrts = 8.;
-      error = 1;
-      BEreq::FHHiggsProd(error, sqrts, prodxs);
-      if (error != 0)
-      {
-        std::ostringstream err;
-        err << "BEreq::FHHiggsProd raised error flag for LHC8: " << error << ".";
-        invalid_point().raise(err.str());
-      }
-      for(int i = 0; i < 52; i++) HiggsProd.prodxs_LHC8[i] = prodxs(i+1);
-
-      result = HiggsProd;
-    }
-
-    /// Local function returning a HiggsBounds/Signals ModelParameters object for SM-like Higgs.
-    void set_SMHiggs_ModelParameters(const Spectrum* fullspectrum, const DecayTable::Entry* decays, hb_ModelParameters &result)
-    {
-      const SubSpectrum* spec = fullspectrum->get_HE();
-
-      for(int i = 0; i < 3; i++)
-      {
-        result.Mh[i] = 0.;
-        result.deltaMh[i] = 0.;
-        result.hGammaTot[i] = 0.;
-        result.CP[i] = 0.;
-        result.CS_lep_hjZ_ratio[i] = 0.;
-        result.CS_lep_bbhj_ratio[i] = 0.;
-        result.CS_lep_tautauhj_ratio[i] = 0.;
-        for(int j = 0; j < 3; j++) result.CS_lep_hjhi_ratio[i][j] = 0.;
-        result.CS_gg_hj_ratio[i] = 0.;
-        result.CS_bb_hj_ratio[i] = 0.;
-        result.CS_bg_hjb_ratio[i] = 0.;
-        result.CS_ud_hjWp_ratio[i] = 0.;
-        result.CS_cs_hjWp_ratio[i] = 0.;
-        result.CS_ud_hjWm_ratio[i] = 0.;
-        result.CS_cs_hjWm_ratio[i] = 0.;
-        result.CS_gg_hjZ_ratio[i] = 0.;
-        result.CS_dd_hjZ_ratio[i] = 0.;
-        result.CS_uu_hjZ_ratio[i] = 0.;
-        result.CS_ss_hjZ_ratio[i] = 0.;
-        result.CS_cc_hjZ_ratio[i] = 0.;
-        result.CS_bb_hjZ_ratio[i] = 0.;
-        result.CS_tev_vbf_ratio[i] = 0.;
-        result.CS_tev_tthj_ratio[i] = 0.;
-        result.CS_lhc7_vbf_ratio[i] = 0.;
-        result.CS_lhc7_tthj_ratio[i] = 0.;
-        result.CS_lhc8_vbf_ratio[i] = 0.;
-        result.CS_lhc8_tthj_ratio[i] = 0.;
-        result.BR_hjss[i] = 0.;
-        result.BR_hjcc[i] = 0.;
-        result.BR_hjbb[i] = 0.;
-        result.BR_hjmumu[i] = 0.;
-        result.BR_hjtautau[i] = 0.;
-        result.BR_hjWW[i] = 0.;
-        result.BR_hjZZ[i] = 0.;
-        result.BR_hjZga[i] = 0.;
-        result.BR_hjgaga[i] = 0.;
-        result.BR_hjgg[i] = 0.;
-        result.BR_hjinvisible[i] = 0.;
-        for(int j = 0; j < 3; j++) result.BR_hjhihi[i][j] = 0.;
-      }
-
-      result.MHplus[0] = 0.;
-      result.deltaMHplus[0] = 0.;
-      result.HpGammaTot[0] = 0.;
-      result.CS_lep_HpjHmi_ratio[0] = 0.;
-      result.BR_tWpb = 0.;
-      result.BR_tHpjb[0] = 0.;
-      result.BR_Hpjcs[0] = 0.;
-      result.BR_Hpjcb[0] = 0.;
-      result.BR_Hptaunu[0] = 0.;
-      result.Mh[0] = spec->get(Par::Pole_Mass,25,0);
-      try
-      {
-        double upper = spec->get(Par::Pole_Mass_1srd_high, 25, 0);
-        double lower = spec->get(Par::Pole_Mass_1srd_low, 25, 0);
-        result.deltaMh[0] = std::max(upper,lower);
-      }
-      catch(Gambit::exception)
-      {
-        result.deltaMh[0] = 0.;
-      }
-      result.hGammaTot[0] = decays->width_in_GeV;
-      result.CP[0] = 1;
-      result.CS_lep_hjZ_ratio[0] = 1.;
-      result.CS_lep_bbhj_ratio[0] = 1.;
-      result.CS_lep_tautauhj_ratio[0] = 1.;
-      result.CS_gg_hj_ratio[0] = 1.;
-      result.CS_bb_hj_ratio[0] = 1.;
-      result.CS_bg_hjb_ratio[0] = 1.;
-      result.CS_ud_hjWp_ratio[0] = 1.;
-      result.CS_cs_hjWp_ratio[0] = 1.;
-      result.CS_ud_hjWm_ratio[0] = 1.;
-      result.CS_cs_hjWm_ratio[0] = 1.;
-      result.CS_gg_hjZ_ratio[0] = 1.;
-      result.CS_dd_hjZ_ratio[0] = 1.;
-      result.CS_uu_hjZ_ratio[0] = 1.;
-      result.CS_ss_hjZ_ratio[0] = 1.;
-      result.CS_cc_hjZ_ratio[0] = 1.;
-      result.CS_bb_hjZ_ratio[0] = 1.;
-      result.CS_tev_vbf_ratio[0] = 1.;
-      result.CS_tev_tthj_ratio[0] = 1.;
-      result.CS_lhc7_vbf_ratio[0] = 1.;
-      result.CS_lhc7_tthj_ratio[0] = 1.;
-      result.CS_lhc8_vbf_ratio[0] = 1.;
-      result.CS_lhc8_tthj_ratio[0] = 1.;
-      result.BR_hjss[0] = decays->BF("s", "sbar");
-      result.BR_hjcc[0] = decays->BF("c", "cbar");
-      result.BR_hjbb[0] = decays->BF("b", "bbar");
-      result.BR_hjmumu[0] = decays->BF("mu+", "mu-");
-      result.BR_hjtautau[0] = decays->BF("tau+", "tau-");
-      result.BR_hjWW[0] = decays->BF("W+", "W-");
-      result.BR_hjZZ[0] = decays->BF("Z0", "Z0");
-      result.BR_hjZga[0] = decays->BF("gamma", "Z0");
-      result.BR_hjgaga[0] = decays->BF("gamma", "gamma");
-      result.BR_hjgg[0] = decays->BF("g", "g");
-    }
-
-    /// SM Higgs model parameters for HiggsBounds/Signals
-    void SMHiggs_ModelParameters(hb_ModelParameters &result)
-    {
-      using namespace Pipes::SMHiggs_ModelParameters;
-      const Spectrum* fullspectrum = *Dep::SM_spectrum;
-      const DecayTable::Entry* decays = &(*Dep::Higgs_decay_rates);
-      set_SMHiggs_ModelParameters(fullspectrum,decays,result);
-    }
-
-    /// SM-like Higgs model parameters for HiggsBounds/Signals
-    void SMlikeHiggs_ModelParameters(hb_ModelParameters &result)
-    {
-      using namespace Pipes::SMlikeHiggs_ModelParameters;
-      const Spectrum* fullspectrum;
-      if (ModelInUse("SingletDM") or ModelInUse("SingletDMZ3")) fullspectrum = *Dep::SingletDM_spectrum;
-      const DecayTable::Entry* decays = &(*Dep::Higgs_decay_rates);
-      set_SMHiggs_ModelParameters(fullspectrum,decays,result);
-    }
-
-    /// MSSM Higgs model parameters
-    void MSSMHiggs_ModelParameters(hb_ModelParameters &result)
-    {
-      using namespace Pipes::MSSMHiggs_ModelParameters;
-      #define PDB Models::ParticleDB()
-
-      // unpack FeynHiggs Couplings
-      fh_Couplings FH_input = *Dep::Higgs_Couplings;
-
-      std::vector<std::string> sHneut;
-      sHneut.push_back("h0_1");
-      sHneut.push_back("h0_2");
-      sHneut.push_back("A0");
-
-      const Spectrum* fullspectrum = *Dep::MSSM_spectrum;
-      const SubSpectrum* spec = fullspectrum->get_HE();
-      const DecayTable decaytable = *Dep::decay_rates;
-
-      const DecayTable::Entry* Hneut_decays[3];
-      for(int i = 0; i < 3; i++)
-      {
-        // Higgs masses and errors
-        result.Mh[i] = spec->get(Par::Pole_Mass,sHneut[i]);
-        double upper = spec->get(Par::Pole_Mass_1srd_high,sHneut[i]);
-        double lower = spec->get(Par::Pole_Mass_1srd_low,sHneut[i]);
-        result.deltaMh[i] = std::max(upper,lower);
-      }
-
-      // invisible LSP?
-      double lsp_mass = spec->get(Par::Pole_Mass,"~chi0_1");
-      int i_snu = 0;
-      for(int i = 1; i <= 3; i++)
-      {
-        if(spec->get(Par::Pole_Mass,"~nu",i)  < lsp_mass)
-        {
-          i_snu = i;
-          lsp_mass = spec->get(Par::Pole_Mass,"~nu",i);
-        }
-      }
-
-      bool inv_lsp = true;
-      if(spec->get(Par::Pole_Mass,"~chi+",1) < lsp_mass) inv_lsp = false;
-      if(spec->get(Par::Pole_Mass,"~g") < lsp_mass) inv_lsp = false;
-      if(inv_lsp)
-      {
-        for(int i = 1; i <= 6; i++)
-        {
-          if(spec->get(Par::Pole_Mass,"~d",i) < lsp_mass)
-          {
-            inv_lsp = false;
-            break;
-          }
-          if(spec->get(Par::Pole_Mass,"~u",i) < lsp_mass)
-          {
-            inv_lsp = false;
-            break;
-          }
-          if(spec->get(Par::Pole_Mass,"~e-",i) < lsp_mass)
-          {
-            inv_lsp = false;
-            break;
-          }
-        }
-      }
-
-      for(int i = 0; i < 3; i++)
-      {
-        // Branching ratios and total widths
-        Hneut_decays[i] = &(decaytable(sHneut[i]));
-
-        result.hGammaTot[i] = Hneut_decays[i]->width_in_GeV;
-
-        result.BR_hjss[i] = Hneut_decays[i]->BF("s", "sbar");
-        result.BR_hjcc[i] = Hneut_decays[i]->BF("c", "cbar");
-        result.BR_hjbb[i] = Hneut_decays[i]->BF("b", "bbar");
-        result.BR_hjmumu[i] = Hneut_decays[i]->BF("mu+", "mu-");
-        result.BR_hjtautau[i] = Hneut_decays[i]->BF("tau+", "tau-");
-        result.BR_hjWW[i] = Hneut_decays[i]->BF("W+", "W-");
-        result.BR_hjZZ[i] = Hneut_decays[i]->BF("Z0", "Z0");
-        result.BR_hjZga[i] = Hneut_decays[i]->BF("gamma", "Z0");
-        result.BR_hjgaga[i] = Hneut_decays[i]->BF("gamma", "gamma");
-        result.BR_hjgg[i] = Hneut_decays[i]->BF("g", "g");
-        for(int j = 0; j < 3; j++)
-        {
-          if(2.*result.Mh[j] < result.Mh[i])
-          {
-            result.BR_hjhihi[i][j] = Hneut_decays[i]->BF(sHneut[j],sHneut[j]);
-          }
-          else
-          {
-            result.BR_hjhihi[i][j] = 0.;
-          }
-        }
-        result.BR_hjinvisible[i] = 0.;
-        if(inv_lsp)
-        {
-          // sneutrino is LSP - need to figure out how to get correct invisible BF...
-          if(i_snu > 0)
-          {
-            result.BR_hjinvisible[i] += Hneut_decays[i]->BF(PDB.long_name("~nu",i_snu),PDB.long_name("~nubar",i_snu));
-          }
-          else
-          {
-            result.BR_hjinvisible[i] = Hneut_decays[i]->BF("~chi0_1","~chi0_1");
-          }
-        }
-      }
-
-      result.MHplus[0] = spec->get(Par::Pole_Mass,"H+");
-      double upper = spec->get(Par::Pole_Mass_1srd_high,"H+");
-      double lower = spec->get(Par::Pole_Mass_1srd_low,"H+");
-      result.deltaMHplus[0] = std::max(upper,lower);
-
-      const DecayTable::Entry* Hplus_decays = &(decaytable("H+"));
-      const DecayTable::Entry* top_decays = &(decaytable("t"));
-
-      result.HpGammaTot[0] = Hplus_decays->width_in_GeV;
-      result.BR_tWpb       = top_decays->BF("W+", "b");
-      result.BR_tHpjb[0]   = top_decays->has_channel("H+", "b") ? top_decays->BF("H+", "b") : 0.0;
-      result.BR_Hpjcs[0]   = Hplus_decays->BF("c", "sbar");
-      result.BR_Hpjcb[0]   = Hplus_decays->BF("c", "bbar");
-      result.BR_Hptaunu[0] = Hplus_decays->BF("tau+", "nu_tau");
-
-      // check SM partial width h0_1 -> b bbar
-      // shouldn't be zero...
-      double g2hjbb[3];
-      for(int i = 0; i < 3; i++)
-      {
-        if(FH_input.gammas_sm[H0FF(i,4,3,3)+4] <= 0.)
-          g2hjbb[i] = 0.;
-        else
-          g2hjbb[i] = FH_input.gammas[H0FF(i,4,3,3)+4]/FH_input.gammas_sm[H0FF(i,4,3,3)+4];
-      }
-
-      // using partial width ratio approximation for
-      // h -> b bbar CS ratios
-      for(int i = 0; i < 3; i++)
-      {
-        result.CS_bg_hjb_ratio[i] = g2hjbb[i];
-        result.CS_bb_hj_ratio[i]  = g2hjbb[i];
-      }
-
-      // cross-section ratios for b bbar and tau+ tau- final states
-      for(int i = 0; i < 3; i++)
-      {
-        fh_complex c_g2hjbb_L = FH_input.couplings[H0FF(i,4,3,3)];
-        fh_complex c_g2hjbb_R = FH_input.couplings[H0FF(i,4,3,3)+Roffset];
-        fh_complex c_g2hjbb_SM_L = FH_input.couplings_sm[H0FF(i,4,3,3)];
-        fh_complex c_g2hjbb_SM_R = FH_input.couplings_sm[H0FF(i,4,3,3)+RSMoffset];
-
-        fh_complex c_g2hjtautau_L = FH_input.couplings[H0FF(i,2,3,3)];
-        fh_complex c_g2hjtautau_R = FH_input.couplings[H0FF(i,2,3,3)+Roffset];
-        fh_complex c_g2hjtautau_SM_L = FH_input.couplings_sm[H0FF(i,2,3,3)];
-        fh_complex c_g2hjtautau_SM_R = FH_input.couplings_sm[H0FF(i,2,3,3)+RSMoffset];
-
-        double R_g2hjbb_L = sqrt(c_g2hjbb_L.re*c_g2hjbb_L.re+
-               c_g2hjbb_L.im*c_g2hjbb_L.im)/
-          sqrt(c_g2hjbb_SM_L.re*c_g2hjbb_SM_L.re+
-               c_g2hjbb_SM_L.im*c_g2hjbb_SM_L.im);
-        double R_g2hjbb_R = sqrt(c_g2hjbb_R.re*c_g2hjbb_R.re+
-               c_g2hjbb_R.im*c_g2hjbb_R.im)/
-          sqrt(c_g2hjbb_SM_R.re*c_g2hjbb_SM_R.re+
-               c_g2hjbb_SM_R.im*c_g2hjbb_SM_R.im);
-
-        double R_g2hjtautau_L = sqrt(c_g2hjtautau_L.re*c_g2hjtautau_L.re+
-                   c_g2hjtautau_L.im*c_g2hjtautau_L.im)/
-          sqrt(c_g2hjtautau_SM_L.re*c_g2hjtautau_SM_L.re+
-               c_g2hjtautau_SM_L.im*c_g2hjtautau_SM_L.im);
-        double R_g2hjtautau_R = sqrt(c_g2hjtautau_R.re*c_g2hjtautau_R.re+
-                   c_g2hjtautau_R.im*c_g2hjtautau_R.im)/
-          sqrt(c_g2hjtautau_SM_R.re*c_g2hjtautau_SM_R.re+
-               c_g2hjtautau_SM_R.im*c_g2hjtautau_SM_R.im);
-
-        double g2hjbb_s = (R_g2hjbb_L+R_g2hjbb_R)*(R_g2hjbb_L+R_g2hjbb_R)/4.;
-        double g2hjbb_p = (R_g2hjbb_L-R_g2hjbb_R)*(R_g2hjbb_L-R_g2hjbb_R)/4.;
-        double g2hjtautau_s = (R_g2hjtautau_L+R_g2hjtautau_R)*(R_g2hjtautau_L+R_g2hjtautau_R)/4.;
-        double g2hjtautau_p = (R_g2hjtautau_L-R_g2hjtautau_R)*(R_g2hjtautau_L-R_g2hjtautau_R)/4.;
-
-        // check CP of state
-        if(g2hjbb_p < 1e-10)
-          result.CP[i] = 1;
-        else if(g2hjbb_s < 1e-10)
-          result.CP[i] = -1;
-        else
-          result.CP[i] = 0.;
-
-        result.CS_lep_bbhj_ratio[i]     = g2hjbb_s + g2hjbb_p;
-        result.CS_lep_tautauhj_ratio[i] = g2hjtautau_s + g2hjtautau_p;
-      }
-
-      // cross-section ratios for di-boson final states
-      for(int i = 0; i < 3; i++)
-      {
-        fh_complex c_gWW = FH_input.couplings[H0VV(i,4)];
-        fh_complex c_gWW_SM = FH_input.couplings_sm[H0VV(i,4)];
-        fh_complex c_gZZ = FH_input.couplings[H0VV(i,3)];
-        fh_complex c_gZZ_SM = FH_input.couplings_sm[H0VV(i,3)];
-
-        double g2hjWW = (c_gWW.re*c_gWW.re+c_gWW.im*c_gWW.im)/
-          (c_gWW_SM.re*c_gWW_SM.re+c_gWW_SM.im*c_gWW_SM.im);
-
-        double g2hjZZ = (c_gZZ.re*c_gZZ.re+c_gZZ.im*c_gZZ.im)/
-          (c_gZZ_SM.re*c_gZZ_SM.re+c_gZZ_SM.im*c_gZZ_SM.im);
-
-        result.CS_lep_hjZ_ratio[i] = g2hjZZ;
-
-        result.CS_gg_hjZ_ratio[i] = 0.;
-        result.CS_dd_hjZ_ratio[i] = g2hjZZ;
-        result.CS_uu_hjZ_ratio[i] = g2hjZZ;
-        result.CS_ss_hjZ_ratio[i] = g2hjZZ;
-        result.CS_cc_hjZ_ratio[i] = g2hjZZ;
-        result.CS_bb_hjZ_ratio[i] = g2hjZZ;
-
-        result.CS_ud_hjWp_ratio[i] = g2hjWW;
-        result.CS_cs_hjWp_ratio[i] = g2hjWW;
-        result.CS_ud_hjWm_ratio[i] = g2hjWW;
-        result.CS_cs_hjWm_ratio[i] = g2hjWW;
-
-        result.CS_tev_vbf_ratio[i]  = g2hjWW;
-        result.CS_lhc7_vbf_ratio[i] = g2hjWW;
-        result.CS_lhc8_vbf_ratio[i] = g2hjWW;
-      }
-
-      // higgs to higgs + V xsection ratios
-      // retrive SMINPUTS dependency
-      const SMInputs& sminputs = *Dep::SMINPUTS;
-
-      double norm = sminputs.GF*sqrt(2.)*sminputs.mZ*sminputs.mZ;
-      for(int i = 0; i < 3; i++)
-      for(int j = 0; j < 3; j++)
-      {
-        fh_complex c_gHV = FH_input.couplings[H0HV(i,j)];
-        double g2HV = c_gHV.re*c_gHV.re+c_gHV.im*c_gHV.im;
-        result.CS_lep_hjhi_ratio[i][j] = g2HV/norm;
-      }
-
-      // gluon fusion x-section ratio
-      for(int i = 0; i < 3; i++)
-      {
-        if(FH_input.gammas_sm[H0VV(i,5)] <= 0.)
-          result.CS_gg_hj_ratio[i] = 0.;
-        else
-          result.CS_gg_hj_ratio[i] = FH_input.gammas[H0VV(i,5)]/
-            FH_input.gammas_sm[H0VV(i,5)];
-      }
-
-      // unpack FeynHiggs x-sections
-      fh_HiggsProd FH_prod = *Dep::FH_HiggsProd;
-
-      // h t tbar xsection ratios
-      for(int i = 0; i < 3; i++)
-      {
-        result.CS_tev_tthj_ratio[i] = 0.;
-        result.CS_lhc7_tthj_ratio[i] = 0.;
-        result.CS_lhc8_tthj_ratio[i] = 0.;
-        if(FH_prod.prodxs_Tev[i+30] > 0.)
-          result.CS_tev_tthj_ratio[i]  = FH_prod.prodxs_Tev[i+27]/FH_prod.prodxs_Tev[i+30];
-        if(FH_prod.prodxs_Tev[i+30] > 0.)
-          result.CS_lhc7_tthj_ratio[i] = FH_prod.prodxs_LHC7[i+27]/FH_prod.prodxs_LHC7[i+30];
-        if(FH_prod.prodxs_Tev[i+30] > 0.)
-          result.CS_lhc8_tthj_ratio[i] = FH_prod.prodxs_LHC8[i+27]/FH_prod.prodxs_LHC8[i+30];
-      }
-      // LEP H+ H- x-section ratio
-      result.CS_lep_HpjHmi_ratio[0] = 1.;
-    }
-
-    /// Get a LEP chisq from HiggsBounds
-    void calc_HB_LEP_LogLike(double &result)
-    {
-      using namespace Pipes::calc_HB_LEP_LogLike;
-
-      hb_ModelParameters ModelParam = *Dep::HB_ModelParameters;
-
-      Farray<double, 1,3, 1,3> CS_lep_hjhi_ratio;
-      Farray<double, 1,3, 1,3> BR_hjhihi;
-      for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
-      {
-        CS_lep_hjhi_ratio(i+1,j+1) = ModelParam.CS_lep_hjhi_ratio[i][j];
-        BR_hjhihi(i+1,j+1) = ModelParam.BR_hjhihi[i][j];
-      }
-
-      BEreq::HiggsBounds_neutral_input_part(&ModelParam.Mh[0], &ModelParam.hGammaTot[0], &ModelParam.CP[0],
-              &ModelParam.CS_lep_hjZ_ratio[0], &ModelParam.CS_lep_bbhj_ratio[0],
-              &ModelParam.CS_lep_tautauhj_ratio[0], CS_lep_hjhi_ratio,
-              &ModelParam.CS_gg_hj_ratio[0], &ModelParam.CS_bb_hj_ratio[0],
-              &ModelParam.CS_bg_hjb_ratio[0], &ModelParam.CS_ud_hjWp_ratio[0],
-              &ModelParam.CS_cs_hjWp_ratio[0], &ModelParam.CS_ud_hjWm_ratio[0],
-              &ModelParam.CS_cs_hjWm_ratio[0], &ModelParam.CS_gg_hjZ_ratio[0],
-              &ModelParam.CS_dd_hjZ_ratio[0], &ModelParam.CS_uu_hjZ_ratio[0],
-              &ModelParam.CS_ss_hjZ_ratio[0], &ModelParam.CS_cc_hjZ_ratio[0],
-              &ModelParam.CS_bb_hjZ_ratio[0], &ModelParam.CS_tev_vbf_ratio[0],
-              &ModelParam.CS_tev_tthj_ratio[0], &ModelParam.CS_lhc7_vbf_ratio[0],
-              &ModelParam.CS_lhc7_tthj_ratio[0], &ModelParam.CS_lhc8_vbf_ratio[0],
-              &ModelParam.CS_lhc8_tthj_ratio[0], &ModelParam.BR_hjss[0],
-              &ModelParam.BR_hjcc[0], &ModelParam.BR_hjbb[0],
-              &ModelParam.BR_hjmumu[0], &ModelParam.BR_hjtautau[0],
-              &ModelParam.BR_hjWW[0], &ModelParam.BR_hjZZ[0],
-              &ModelParam.BR_hjZga[0], &ModelParam.BR_hjgaga[0],
-              &ModelParam.BR_hjgg[0], &ModelParam.BR_hjinvisible[0], BR_hjhihi);
-
-      BEreq::HiggsBounds_charged_input(&ModelParam.MHplus[0], &ModelParam.HpGammaTot[0], &ModelParam.CS_lep_HpjHmi_ratio[0],
-               &ModelParam.BR_tWpb, &ModelParam.BR_tHpjb[0], &ModelParam.BR_Hpjcs[0],
-               &ModelParam.BR_Hpjcb[0], &ModelParam.BR_Hptaunu[0]);
-
-      BEreq::HiggsBounds_set_mass_uncertainties(&ModelParam.deltaMh[0],&ModelParam.deltaMHplus[0]);
-
-      // run Higgs bounds 'classic'
-      double obsratio;
-      int HBresult, chan, ncombined;
-      BEreq::run_HiggsBounds_classic(HBresult,chan,obsratio,ncombined);
-
-      // extract the LEP chisq
-      double chisq_withouttheory,chisq_withtheory;
-      int chan2;
-      double theor_unc = 1.5; // theory uncertainty
-      BEreq::HB_calc_stats(theor_unc,chisq_withouttheory,chisq_withtheory,chan2);
-
-      result = -0.5*chisq_withouttheory;
-      //std::cout << "Calculating LEP chisq: " << chisq_withouttheory << " (no theor), " << chisq_withtheory << " (with theor)" << endl;
-
-    }
-
-    /// Get an LHC chisq from HiggsSignals
-    void calc_HS_LHC_LogLike(double &result)
-    {
-      using namespace Pipes::calc_HS_LHC_LogLike;
-
-      hb_ModelParameters ModelParam = *Dep::HB_ModelParameters;
-
-      Farray<double, 1,3, 1,3> CS_lep_hjhi_ratio;
-      Farray<double, 1,3, 1,3> BR_hjhihi;
-      for(int i = 0; i < 3; i++) for(int j = 0; j < 3; j++)
-      {
-        CS_lep_hjhi_ratio(i+1,j+1) = ModelParam.CS_lep_hjhi_ratio[i][j];
-        BR_hjhihi(i+1,j+1) = ModelParam.BR_hjhihi[i][j];
-      }
-
-      BEreq::HiggsBounds_neutral_input_part_HS(&ModelParam.Mh[0], &ModelParam.hGammaTot[0], &ModelParam.CP[0],
-                 &ModelParam.CS_lep_hjZ_ratio[0], &ModelParam.CS_lep_bbhj_ratio[0],
-                 &ModelParam.CS_lep_tautauhj_ratio[0], CS_lep_hjhi_ratio,
-                 &ModelParam.CS_gg_hj_ratio[0], &ModelParam.CS_bb_hj_ratio[0],
-                 &ModelParam.CS_bg_hjb_ratio[0], &ModelParam.CS_ud_hjWp_ratio[0],
-                 &ModelParam.CS_cs_hjWp_ratio[0], &ModelParam.CS_ud_hjWm_ratio[0],
-                 &ModelParam.CS_cs_hjWm_ratio[0], &ModelParam.CS_gg_hjZ_ratio[0],
-                 &ModelParam.CS_dd_hjZ_ratio[0], &ModelParam.CS_uu_hjZ_ratio[0],
-                 &ModelParam.CS_ss_hjZ_ratio[0], &ModelParam.CS_cc_hjZ_ratio[0],
-                 &ModelParam.CS_bb_hjZ_ratio[0], &ModelParam.CS_tev_vbf_ratio[0],
-                 &ModelParam.CS_tev_tthj_ratio[0], &ModelParam.CS_lhc7_vbf_ratio[0],
-                 &ModelParam.CS_lhc7_tthj_ratio[0], &ModelParam.CS_lhc8_vbf_ratio[0],
-                 &ModelParam.CS_lhc8_tthj_ratio[0], &ModelParam.BR_hjss[0],
-                 &ModelParam.BR_hjcc[0], &ModelParam.BR_hjbb[0],
-                 &ModelParam.BR_hjmumu[0], &ModelParam.BR_hjtautau[0],
-                 &ModelParam.BR_hjWW[0], &ModelParam.BR_hjZZ[0],
-                 &ModelParam.BR_hjZga[0], &ModelParam.BR_hjgaga[0],
-                 &ModelParam.BR_hjgg[0], &ModelParam.BR_hjinvisible[0], BR_hjhihi);
-
-      BEreq::HiggsBounds_charged_input_HS(&ModelParam.MHplus[0], &ModelParam.HpGammaTot[0], &ModelParam.CS_lep_HpjHmi_ratio[0],
-            &ModelParam.BR_tWpb, &ModelParam.BR_tHpjb[0], &ModelParam.BR_Hpjcs[0],
-            &ModelParam.BR_Hpjcb[0], &ModelParam.BR_Hptaunu[0]);
-
-      BEreq::HiggsSignals_neutral_input_MassUncertainty(&ModelParam.deltaMh[0]);
-
-      // add uncertainties to cross-sections and branching ratios
-      // double dCS[5] = {0.,0.,0.,0.,0.};
-      // double dBR[5] = {0.,0.,0.,0.,0.};
-      // BEreq::setup_rate_uncertainties(dCS,dBR);
-
-      // run HiggsSignals
-      int mode = 1; // 1- peak-centered chi2 method (recommended)
-      double csqmu, csqmh, csqtot, Pvalue;
-      int nobs;
-      BEreq::run_HiggsSignals(mode, csqmu, csqmh, csqtot, nobs, Pvalue);
-
-      result = -0.5*csqtot;
-      //std::cout << "Calculating LHC chisq: " << csqmu << " (signal strength only), " << csqmh << " (mass only), ";
-      //std::cout << csqtot << " (both), Nobs: " << nobs << ", Pvalue: " << Pvalue << endl;
-
-    }
-
 
   }
 }

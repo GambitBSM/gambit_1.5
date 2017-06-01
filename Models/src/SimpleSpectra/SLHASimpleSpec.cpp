@@ -5,16 +5,20 @@
 //
 ///  *********************************************
 ///
-///  Authors: 
+///  Authors:
 ///  <!-- add name and date if you modify -->
-///   
+///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
-///  \date 2015 Apr 
+///  \date 2015 Apr
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2016 Oct
 ///
 ///  *********************************************
 
-#include "gambit/Models/SimpleSpectra/SLHASimpleSpec.hpp" 
+#include "gambit/Models/SimpleSpectra/SLHASimpleSpec.hpp"
 
 #include <boost/preprocessor/tuple/to_seq.hpp>
 #include <boost/preprocessor/seq/elem.hpp>
@@ -37,28 +41,27 @@ namespace Gambit
 {
 
       /// @{ Member functions for SLHAeaModel class
-           
+
       /// Default Constructor
-      SLHAeaModel::SLHAeaModel() 
+      SLHAeaModel::SLHAeaModel()
         : data()
       {}
 
       /// Constructor via SLHAea object
       SLHAeaModel::SLHAeaModel(const SLHAea::Coll& input)
         : data(input)
-      {}
+      {
+         // No idea what kind of model this is, so cannot set valid slha_version. Use "0" for "unknown" or "n/a"
+         // If you write a model-specific derived class from this, be sure to add a sensible check for this and
+         // overwrite what we set here in the base class.
+         wrapped_slha_version = 0;
+      }
+
+      /// Get the SLHA version of the internal SLHAea object
+      int SLHAeaModel::slha_version() const { return wrapped_slha_version; }
 
       /// Get reference to internal SLHAea object
-      const SLHAea::Coll& SLHAeaModel::getSLHAea() const
-      {
-        return data;
-      }
-
-      /// Add spectrum information to an SLHAea object
-      void SLHAeaModel::add_to_SLHAea(SLHAea::Coll& slha) const
-      {
-        slha.insert(slha.end(), data.cbegin(), data.cend());
-      }
+      const SLHAea::Coll& SLHAeaModel::get_slhaea() const { return data; }
 
       /// PDG code translation map, for special cases where an SLHA file has been read in and the PDG codes changed.
       const std::map<int, int>& SLHAeaModel::PDG_translator() const
@@ -66,21 +69,22 @@ namespace Gambit
         return PDG_translation_map;
       }
 
-
       /// @{ Helper functions to do error checking for SLHAea object contents
 
       /// One index
       double SLHAeaModel::getdata(const std::string& block, int index) const
       {
-         double output;
-         try {
-           output = to<double>(getSLHAea().at(block).at(index).at(1));
+         double output = 0.0;
+         try
+         {
+           output = to<double>(data.at(block).at(index).at(1));
          }
-         catch (const std::out_of_range& e) {
+         catch (const std::out_of_range& e)
+         {
            std::ostringstream errmsg;
            errmsg << "Error accessing data at index "<<index<<" of block "<<block<<". Please check that the SLHAea object was properly filled." << std::endl;
            errmsg  << "(Received out_of_range error from SLHAea class with message: " << e.what() << ")";
-           utils_error().raise(LOCAL_INFO,errmsg.str());    
+           utils_error().raise(LOCAL_INFO,errmsg.str());
          }
          return output;
       }
@@ -88,18 +92,25 @@ namespace Gambit
       /// Two indices
       double SLHAeaModel::getdata(const std::string& block, int i, int j) const
       {
-         double output;
-         try {
-           output = to<double>(getSLHAea().at(block).at(i,j).at(2));
+         double output = 0.0;
+         try
+         {
+           output = to<double>(data.at(block).at(i,j).at(2));
          }
-         catch (const std::out_of_range& e) {
+         catch (const std::out_of_range& e)
+         {
            std::ostringstream errmsg;
            errmsg << "Error accessing data at index "<<i<<","<<j<<" of block "<<block<<". Please check that the SLHAea object was properly filled." << std::endl;
            errmsg  << "(Received out_of_range error from SLHAea class with message: " << e.what() << ")";
-           utils_error().raise(LOCAL_INFO,errmsg.str());    
+           utils_error().raise(LOCAL_INFO,errmsg.str());
          }
          return output;
       }
+
+      /// @}
+
+      /// @}
+
 
 } // end Gambit namespace
 

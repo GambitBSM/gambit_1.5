@@ -7,12 +7,16 @@
 ///
 ///  *********************************************
 ///
-///  Authors: 
+///  Authors:
 ///  <!-- add name and date if you modify -->
-///   
+///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
-///  \date 2015 Apr 
+///  \date 2015 Apr
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2016 Oct
 ///
 ///  *********************************************
 
@@ -30,7 +34,9 @@ namespace Gambit
          protected:
            /// SLHAea object
            SLHAea::Coll data;
-           /// PDG translation map (e.g. from SLHA1 to SLHA2 for MSSMskeleton) 
+           /// SLHA version of SLHAea object
+           int wrapped_slha_version;
+           /// PDG translation map (e.g. from SLHA1 to SLHA2 for MSSMskeleton)
            std::map<int, int> PDG_translation_map;
 
          public:
@@ -39,11 +45,11 @@ namespace Gambit
            SLHAeaModel(const SLHAea::Coll& input);
            /// @}
 
-           /// Get reference to internal SLHAea object
-           const SLHAea::Coll& getSLHAea() const;
+           /// Get the SLHA version of the internal SLHAea object
+           int slha_version() const;
 
-           /// Add spectrum information to an SLHAea object
-           void add_to_SLHAea(SLHAea::Coll&) const;
+           /// Get the internal SLHAea object
+           const SLHAea::Coll& get_slhaea() const;
 
            /// PDG code translation map, for special cases where an SLHA file has been read in and the PDG codes changed.
            const std::map<int, int>& PDG_translator() const;
@@ -53,16 +59,16 @@ namespace Gambit
            double getdata(const std::string& block, int i, int j) const;
       };
 
-      template<class Derived> 
-      class SLHASimpleSpec : public Spec<Derived> 
+      template<class Derived>
+      class SLHASimpleSpec : public Spec<Derived>
       {
          public:
-            // Grab typedefs from derived wrapper traits class 
+            // Grab typedefs from derived wrapper traits class
             // (only needed because this is a template class, and would have to
             // qualify the name all over the place in order to use the equivalent
             // typedef which is inherited from the base class)
-            typedef typename SpecTraits<Derived>::Model Model; 
-            typedef typename SpecTraits<Derived>::Input Input; 
+            typedef typename SpecTraits<Derived>::Model Model;
+            typedef typename SpecTraits<Derived>::Input Input;
 
          protected:
             // Store SLHAea object internally (via wrapper)
@@ -72,10 +78,10 @@ namespace Gambit
             Input dummyinput;
 
          public:
-            typedef MapTypes<Derived,MapTag::Get> MTget; 
+            typedef MapTypes<Derived,MapTag::Get> MTget;
 
             // Constructors/destructors
-            SLHASimpleSpec() 
+            SLHASimpleSpec()
              : slhawrap()
             {}
 
@@ -84,7 +90,7 @@ namespace Gambit
             {}
 
             virtual ~SLHASimpleSpec() {};
- 
+
             // Functions to interface Model and Input objects with the base 'Spec' class
             // Need both const and non-const versions of it, so that wrapped objects cannot be modified
             // if the wrapper is const
@@ -93,20 +99,27 @@ namespace Gambit
             const Model& get_Model() const { return slhawrap; }
             const Input& get_Input() const { return dummyinput; /*unused, but needs to be defined for the interface*/ }
 
+            /// Add spectrum information to an SLHAea object
+            void add_to_SLHAea(int, SLHAea::Coll&) const;
+
+            /// (using bass class version of getSLHAea)
+ 
             /// @{ RunningPars interface overrides
             virtual double GetScale() const
-            { 
+            {
                /// TODO: Currently assumes all blocks at same scale. Should at least check if this
                /// is true in constructor.
-               const SLHAea::Coll& data(slhawrap.getSLHAea());
-               double scale;
-               try {
+               const SLHAea::Coll& data(slhawrap.get_slhaea());
+               double scale = 0.0;
+               try
+               {
                  scale = SLHAea::to<double>(data.at("GAUGE").find_block_def()->at(3));
                }
-               catch (const std::out_of_range& e) {
+               catch (const std::out_of_range& e)
+               {
                  std::ostringstream errmsg;
                  errmsg << "Could not find block \"GAUGE\" in SLHAea object. Received out_of_range error with message: " << e.what();
-                 utils_error().raise(LOCAL_INFO,errmsg.str());    
+                 utils_error().raise(LOCAL_INFO,errmsg.str());
                }
                return scale;
             }
@@ -130,9 +143,66 @@ namespace Gambit
 
          protected:
             /// Map fillers go in derived class
-    
+
       };
+
+      /// @{ Member functions for SLHASimpleSpec class
+
+      /// Add spectrum information to an SLHAea object
+      // NOTE! This is just a kind of catch-all default! Wrappers for particular models
+      // should more carefully extract the model information and perform SLHA2->SLHA1
+      // conversions if required. 
+      template<class Derived>
+      void SLHASimpleSpec<Derived>::add_to_SLHAea(int /*slha_version*/, SLHAea::Coll& slha) const
+      {
+        // Get the internal SLHAea data object
+        const SLHAea::Coll& data = get_Model().get_slhaea();
+
+        // NO version check. Cannot assume that this is required or makes sense for whatever
+        // model this might be. If it does matter, then the wrapper for that model should
+        // replace this function and do the check itself.
+        //int wrapped_slha_version = get_Model().slha_version();
+        //if (slha_version != wrapped_slha_version)
+        //{
+        //  std::stringstream x;
+        //  x << "Wrapped SLHA file is in SLHA" << wrapped_slha_version << ", but something requested to add it to an SLHAea object in SLHA" << slha_version << " format.";
+        //  model_error().raise(LOCAL_INFO, x.str());
+        //}
+
+        // Make a copy of the internal SLHAea object, remove any SM info from it and add the rest to the slhaea object. 
+        // (we will assume that if SM is wanted then it is provided by the SMSimpleSpec wrapper, or similar)
+        SLHAea::Coll data_copy = data;
+        SLHAea::Coll::key_matches target_blocks[4] = { SLHAea::Coll::key_matches("SMINPUTS"), SLHAea::Coll::key_matches("VCKMIN"), SLHAea::Coll::key_matches("UPMNSIN"), SLHAea::Coll::key_matches("MASS") };
+        for (SLHAea::Coll::iterator sblock = slha.begin(); sblock != slha.end(); ++sblock)
+        {
+          for (SLHAea::Coll::iterator dblock = data_copy.begin(); dblock != data_copy.end();)
+          {
+            bool delete_dblock = false;
+            for (int i = 0; i < 3; i++)
+            {
+              if (target_blocks[i](*sblock) and target_blocks[i](*dblock)) delete_dblock = true;
+            }
+            if (delete_dblock) dblock = data_copy.erase(dblock);
+            else ++dblock;
+          }
+        }
+        for (SLHAea::Coll::iterator sblock = slha.begin(); sblock != slha.end();)
+        {
+          if (target_blocks[3](*sblock))
+          {
+            if(slha["MASS"][24].is_data_line()) data_copy["MASS"][24] = slha["MASS"][24];
+            sblock = slha.erase(sblock);
+          }
+          else
+          {
+            ++sblock;
+          }
+        }
+        slha.insert(slha.end(), data_copy.cbegin(), data_copy.cend());
+      }
  
+      /// @}
+  
 
 } // end Gambit namespace
 

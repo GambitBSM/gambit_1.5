@@ -2,20 +2,20 @@
 //   *********************************************
 ///  \file
 ///
-///  Definitions of routines to help users / Bits 
-///  translate between SLHA2 sfermions 
-///  and SLHA1 (or similar) sfermions 
+///  Definitions of routines to help users / Bits
+///  translate between SLHA2 sfermions
+///  and SLHA1 (or similar) sfermions
 ///
 ///  *********************************************
 ///
-///  Authors: 
+///  Authors:
 ///  <!-- add name and date if you modify -->
-///   
-///  \author Peter Athron  
-///          (peter.athron@coepp.org.au)
-///  \date 2015 
 ///
-///  \author Pat Scott  
+///  \author Peter Athron
+///          (peter.athron@coepp.org.au)
+///  \date 2015
+///
+///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///
@@ -23,205 +23,222 @@
 
 #include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/Elements/ini_functions.hpp"
+#include "gambit/Utils/util_functions.hpp"
 
 namespace Gambit
 {
 
    namespace slhahelp
    {
-      
-      /// Known maps filled at initialisation 
-      // FIXME should these be const?
-      std::map<str, p_int_string> gauge_label_to_index_type = init_gauge_label_to_index_type();
-      std::map<str, p_int_string> mass_label_to_index_type = init_mass_label_to_index_type();
-      std::map<str, pair_string_ints> familystate_label = init_familystate_label();
-      std::map<p_int_string, std::vector<str> > type_family_to_gauge_states = init_type_family_to_gauge_states();
-      std::map<str,std::vector<str> > family_state_to_gauge_state = init_family_state_to_gauge_state();
-      std::map<str,std::vector<str> > gauge_es_to_family_states = init_gauge_es_to_family_states() ;
-      std::map<str,std::vector<str> > type_to_vec_of_mass_es = init_type_to_vec_of_mass_es();
-      std::map<str,std::vector<str> > type_to_vec_of_gauge_es = init_type_to_vec_of_gauge_es();
 
-      // FIXME: these two should be switched over to members of the sectrum object itself
-      /// This will simplify things.
-      std::vector<double> get_Pole_Mixing_col(str type, 
-                                              int gauge_index, 
-                                              const SubSpectrum* mssm)
+      /// Known maps filled at initialisation
+      /// @{
+      const std::map<str, p_int_string> gauge_label_to_index_type = init_gauge_label_to_index_type();
+      const std::map<str, p_int_string> mass_label_to_index_type = init_mass_label_to_index_type();
+      const std::map<str, pair_string_ints> familystate_label = init_familystate_label();
+      const std::map<p_int_string, std::vector<str> > type_family_to_gauge_states = init_type_family_to_gauge_states();
+      const std::map<str,std::vector<str> > family_state_to_gauge_state = init_family_state_to_gauge_state();
+      const std::map<str,std::vector<str> > gauge_es_to_family_states = init_gauge_es_to_family_states() ;
+      const std::map<str,std::vector<str> > type_to_vec_of_mass_es = init_type_to_vec_of_mass_es();
+      const std::map<str,std::vector<str> > type_to_vec_of_gauge_es = init_type_to_vec_of_gauge_es();
+      /// @}
+
+      // FIXME: these two should be made members of the spectrum object itself
+      std::vector<double> get_Pole_Mixing_col(str type, int gauge_index, const SubSpectrum& mssm)
       {
          //extract info about indices for type using map
-         std::vector<str> mass_es_strs = type_to_vec_of_mass_es[type];
+         std::vector<str> mass_es_strs = type_to_vec_of_mass_es.at(type);
          double col_length = mass_es_strs.size();
          std::vector<double> mass_state_content(col_length);
-         //iterate over collumn in some way, e..g
-         for(std::vector<int>::size_type i = 1; i <= col_length; i++) 
-            {
-               //Mix_{row, col}
-               /// iterate through row indice with column indice fixed
-               mass_state_content[i - 1] =  
-                  mssm->get(Par::Pole_Mixing,type, i, gauge_index); /// fill 
-           }
+         //iterate over column in some way, e..g
+         for(std::vector<int>::size_type i = 1; i <= col_length; i++)
+         {
+            //Mix_{row, col}. Iterate through row index with column index fixed
+            mass_state_content[i - 1] = mssm.get(Par::Pole_Mixing,type, i, gauge_index);
+         }
          return mass_state_content;
       }
-
-      /// This will simplify things.
-      std::vector<double> get_Pole_Mixing_row(str type, int mass_index, 
-                                              const SubSpectrum* mssm) 
+      std::vector<double> get_Pole_Mixing_row(str type, int mass_index, const SubSpectrum& mssm)
       {
-         std::vector<str> gauge_es_strs = type_to_vec_of_gauge_es[type];
+         std::vector<str> gauge_es_strs = type_to_vec_of_gauge_es.at(type);
          double row_length = gauge_es_strs.size();
-         std::vector<double> gauge_state_content(row_length);   
-         for(std::vector<int>::size_type i = 1; i <= row_length; i++) 
-            {
-               /// Mix_{row, col}
-               /// iterate through column indice with row indice fixed
-               gauge_state_content[i - 1] =  
-                  mssm->get(Par::Pole_Mixing,type, mass_index, i); /// fill
-            }
+         std::vector<double> gauge_state_content(row_length);
+         for(std::vector<int>::size_type i = 1; i <= row_length; i++)
+         {
+            /// Mix_{row, col}. Iterate through column index with row index fixed
+            gauge_state_content.at(i - 1) = mssm.get(Par::Pole_Mixing,type, mass_index, i);
+         }
          return gauge_state_content;
       }
 
-      
-      // FIXME: The rest of these belong here as they are MSSM specific things
-      
+      /// Add a disclaimer about the absence of a MODSEL block in a generated SLHAea object
+      void add_MODSEL_disclaimer(SLHAstruct& slha, const str& object)
+      {
+        slha.push_front("# depend on which calculator you intend this object or file to be used with.");
+        slha.push_front("# Note that block MODSEL is not automatically emitted, as its contents");
+        slha.push_front("# This SLHA(ea) object was created from a GAMBIT "+object+" object.");
+      }
+
+      /// Simple helper function for for adding missing SLHA1 2x2 family mixing matrices to an SLHAea object.
+      void attempt_to_add_SLHA1_mixing(const str& block, SLHAstruct& slha, const str& type,
+                                       const SubSpectrum& spec, double tol, str& s1, str& s2, bool pterror)
+      {
+        if (slha.find(block) == slha.end())
+        {
+          std::vector<double> matmix = slhahelp::family_state_mix_matrix(type, 3, s1, s2, spec, tol, LOCAL_INFO, pterror);
+          SLHAea_add_matrix(slha, block, matmix, 2, 2);
+        }
+        else
+        {
+          std::map<str,str> family_to_3gen; // TODO: make const or something
+          family_to_3gen["~u"] = "~t";
+          family_to_3gen["~d"] = "~b";
+          family_to_3gen["~e-"] = "~tau";
+          s1 = slhahelp::mass_es_closest_to_family(family_to_3gen.at(type)+"_1", spec, tol, LOCAL_INFO, pterror);
+          s2 = slhahelp::mass_es_closest_to_family(family_to_3gen.at(type)+"_2", spec, tol, LOCAL_INFO, pterror);
+        }
+      }
+
       /// returns vector representing composition of requested gauge state
       /// in terms of the slha2 mass eigenstates (~u_1 ...~u_6 etc)
-      /// which is just a column in the mixing matrix 
-      std::vector<double> get_mass_comp_for_gauge(str gauge_es, 
-                                                  const SubSpectrum* mssm)
-      {   
+      /// which is just a column in the mixing matrix
+      std::vector<double> get_mass_comp_for_gauge(str gauge_es,
+                                                  const SubSpectrum& mssm)
+      {
          /// extract info from string via map
-         p_int_string index_type = gauge_label_to_index_type[gauge_es];        
+         p_int_string index_type = gauge_label_to_index_type.at(gauge_es);
          str type = index_type.second;
-         int gauge_index  = index_type.first; 
-         
-         std::vector<double> mass_state_content = 
+         int gauge_index  = index_type.first;
+
+         std::vector<double> mass_state_content =
             get_Pole_Mixing_col(type, gauge_index, mssm);
-         
+
          return mass_state_content;
       }
-      
+
       ///routine to return mass state admixure for given gauge state
       /// in the end this is a trival routine but may help
-      double get_mixing_element(str gauge_es, str mass_es, const SubSpectrum* mssm)
-      { 
+      double get_mixing_element(str gauge_es, str mass_es, const SubSpectrum& mssm)
+      {
          ///extract info from maps
-         p_int_string mass_es_index_type = mass_label_to_index_type[mass_es]; 
-         p_int_string gauge_es_index_type = gauge_label_to_index_type[gauge_es];
+         p_int_string mass_es_index_type = mass_label_to_index_type.at(mass_es);
+         p_int_string gauge_es_index_type = gauge_label_to_index_type.at(gauge_es);
          int gauge_index = gauge_es_index_type.first;
          int mass_index = mass_es_index_type.first;
          /// types should match but getting both allows us to throw error
          str type = mass_es_index_type.second;
          str type_gauge = gauge_es_index_type.second;
-         if(type!=type_gauge) 
+         if(type!=type_gauge)
             {
                /// throw exception in gambit
                utils_error().raise(LOCAL_INFO, "function get_mixing_element "
                "called with types for the gauge eigenstate and mass eigenstate that don't match.");
             }
          /// will need to add mssm object to cal method in gambit
-         double admix = mssm->get(Par::Pole_Mixing,type, mass_index, 
+         double admix = mssm.get(Par::Pole_Mixing,type, mass_index,
                                                    gauge_index);
          return admix;
       }
-      
+
       /// returns vector representing composition of requested mass eigenstate
       /// in terms of the slha2 gauge eigenstates (~u_L,~c_L,...~t_R etc)
-      /// which is just a row in the mixing matrix 
+      /// which is just a row in the mixing matrix
       /// just wraps get_Pole_Mixing_row after extracting info from string
-      std::vector<double> get_gauge_comp_for_mass(str mass_es, const SubSpectrum* mssm)
-      {   
+      std::vector<double> get_gauge_comp_for_mass(str mass_es, const SubSpectrum& mssm)
+      {
          /// extract info using map
-         p_int_string index_type = mass_label_to_index_type[mass_es];
-         int mass_index = index_type.first; 
+         p_int_string index_type = mass_label_to_index_type.at(mass_es);
+         int mass_index = index_type.first;
          str type = index_type.second;
          //fill vector with mixings
-         std::vector<double> mass_state_content = 
+         std::vector<double> mass_state_content =
             get_Pole_Mixing_row(type, mass_index, mssm);
-         
+
          return mass_state_content;
       }
-      
+
       /// indentifies the state with largest gauge_es content
-      /// also fills largest max_mixing and full gauge_composition 
-      str mass_es_from_gauge_es(str gauge_es, double & max_mixing, 
-                                std::vector<double> & gauge_composition, 
-                                const SubSpectrum* mssm)
+      /// also fills largest max_mixing and full gauge_composition
+      str mass_es_from_gauge_es(str gauge_es, double & max_mixing,
+                                std::vector<double> & gauge_composition,
+                                const SubSpectrum& mssm)
       {
          /// passed in massstate to be set
          double temp_admix = 0.0;
          /// make sure this is zero to start
          max_mixing = 0;
          /// retrive type from the gauge_es string
-         str type = (gauge_label_to_index_type[gauge_es]).second;
+         str type = (gauge_label_to_index_type.at(gauge_es)).second;
          str mass_es, temp_mass_es;
-         /// iterate over vector of strings for mass states 
-         std::vector<str> mass_es_set = type_to_vec_of_mass_es[type];
+         /// iterate over vector of strings for mass states
+         std::vector<str> mass_es_set = type_to_vec_of_mass_es.at(type);
          typedef std::vector<str>::iterator iter;
          for(iter it = mass_es_set.begin(); it != mass_es_set.end(); ++it){
-            temp_mass_es = *it;    
-            temp_admix = get_mixing_element(gauge_es, temp_mass_es, 
+            temp_mass_es = *it;
+            temp_admix = get_mixing_element(gauge_es, temp_mass_es,
                                                     mssm);
             gauge_composition.push_back(temp_admix);
-            //select largest 
-            if(fabs(temp_admix) > fabs(max_mixing)) 
+            //select largest
+            if(fabs(temp_admix) > fabs(max_mixing))
                {
-               max_mixing = temp_admix; 
+               max_mixing = temp_admix;
                mass_es = temp_mass_es;
             }
          } //end iteration over temp_mass_es
-         
-         return mass_es; 
+
+         return mass_es;
       }
-      
-      /// as above but doesn't fill a gauge_composition vector 
-      /// would have a slight efficiency saving if we didn't use wrapper and 
+
+      /// as above but doesn't fill a gauge_composition vector
+      /// would have a slight efficiency saving if we didn't use wrapper and
       /// avoided skipped gauge_composition entirely but at the cost of a lot of
       /// code duplication
-      str mass_es_from_gauge_es(str gauge_es, double & max_mixing, 
-                                const SubSpectrum* mssm) 
+      str mass_es_from_gauge_es(str gauge_es, double & max_mixing,
+                                const SubSpectrum& mssm)
       {
          std::vector<double> gauge_composition;
-         str mass_es = mass_es_from_gauge_es(gauge_es, max_mixing, 
+         str mass_es = mass_es_from_gauge_es(gauge_es, max_mixing,
                                              gauge_composition, mssm);
          return mass_es;
-         
+
       }
-   
-      /// as above but doesn't fill max_mixing 
-      /// would have a slight efficiency saving if we didn't use wrapper and 
+
+      /// as above but doesn't fill max_mixing
+      /// would have a slight efficiency saving if we didn't use wrapper and
       /// avoided skipped max_mixing entirely but at the cost of a lot of
       /// code duplication
-      str mass_es_from_gauge_es(str gauge_es, 
-                                std::vector<double> & gauge_composition, 
-                                const SubSpectrum* mssm)
+      str mass_es_from_gauge_es(str gauge_es,
+                                std::vector<double> & gauge_composition,
+                                const SubSpectrum& mssm)
       {
          double max_mixing = 0;
-         str mass_es =  mass_es_from_gauge_es(gauge_es, max_mixing, 
+         str mass_es =  mass_es_from_gauge_es(gauge_es, max_mixing,
                                               gauge_composition, mssm);
-         
-         return mass_es; 
+
+         return mass_es;
       }
 
       /// as above but doesn't fill max_mixing or gauge_composition
-      /// would have a slight efficiency saving if we didn't use wrapper and 
+      /// would have a slight efficiency saving if we didn't use wrapper and
       /// avoided skipped max_mixing entirely but at the cost of a lot of
       /// code duplication
-      str mass_es_from_gauge_es(str gauge_es, 
-                                const SubSpectrum* mssm)
+      str mass_es_from_gauge_es(str gauge_es,
+                                const SubSpectrum& mssm)
       {
          double max_mixing = 0;
          std::vector<double> gauge_composition;
-         str mass_es =  mass_es_from_gauge_es(gauge_es, max_mixing, 
+         str mass_es =  mass_es_from_gauge_es(gauge_es, max_mixing,
                                               gauge_composition, mssm);
-         return mass_es; 
+         return mass_es;
       }
 
       /// as above but do test against tol internally
-      str mass_es_from_gauge_es(str gauge_es, const SubSpectrum* mssm, 
+      str mass_es_from_gauge_es(str gauge_es, const SubSpectrum& mssm,
                                 double tol, str context, bool pterror)
       {
          double max_mixing = 0;
          std::vector<double> gauge_composition;
-         str mass_es = mass_es_from_gauge_es(gauge_es, max_mixing, 
+         str mass_es = mass_es_from_gauge_es(gauge_es, max_mixing,
                                              gauge_composition, mssm);
          if((max_mixing*max_mixing) <= 1-tol)
          {
@@ -230,250 +247,256 @@ namespace Gambit
            str full_context = LOCAL_INFO + " called from " + context;
            if (pterror)
            {
-             invalid_point().raise(errmsg+"  Raised at: "+full_context); 
-           }             
-           else 
+             invalid_point().raise(errmsg+"  Raised at: "+full_context);
+           }
+           else
            {
-             utils_error().raise(full_context, errmsg); 
+             utils_error().raise(full_context, errmsg);
            }
          }
-         return mass_es; 
+         return mass_es;
       }
-      
+
       /// identifies gauge_es with largest mass_es content
-      /// also fills largest max_mixing and full mass_composition 
-      str gauge_es_from_mass_es(str mass_es, double & max_mixing, 
+      /// also fills largest max_mixing and full mass_composition
+      str gauge_es_from_mass_es(str mass_es, double & max_mixing,
                                 std::vector<double> & mass_composition,
-                                const SubSpectrum* mssm)
+                                const SubSpectrum& mssm)
       {
          /// passed in massstate to be set
          double temp_admix = 0.0;
          /// start with zero
          max_mixing = 0;
          /// retrive type from the gauge_es string
-         str type = (mass_label_to_index_type[mass_es]).second;
+         str type = (mass_label_to_index_type.at(mass_es)).second;
          str gauge_es, temp_gauge_es;
-         /// iterate over vector of strings for mass states 
-         std::vector<str> gauge_es_vec = type_to_vec_of_gauge_es[type];
+         /// iterate over vector of strings for mass states
+         std::vector<str> gauge_es_vec = type_to_vec_of_gauge_es.at(type);
          typedef std::vector<str>::iterator iter;
          for(iter it = gauge_es_vec.begin(); it != gauge_es_vec.end(); ++it)
             {
             temp_gauge_es = *it;
             temp_admix = get_mixing_element(temp_gauge_es, mass_es,  mssm);
             mass_composition.push_back(temp_admix);
-            //select largest 
-            if(fabs(temp_admix) > fabs(max_mixing)) 
+            //select largest
+            if(fabs(temp_admix) > fabs(max_mixing))
                {
                max_mixing = temp_admix;
                gauge_es = temp_gauge_es;
                }
          } //end iteration over temp_mass_es
-         
+
          //return string for closest gauge_es
          return gauge_es;
       }
-      
-      /// as above but doesn't fill a gauge_composition vector 
-      /// would have a slight efficiency saving if we didn't use wrapper and 
+
+      /// as above but doesn't fill a gauge_composition vector
+      /// would have a slight efficiency saving if we didn't use wrapper and
       /// avoided skipped gauge_composition entirely but at the cost of a lot of
       /// code duplication
-      str gauge_es_from_mass_es(str mass_es, double & max_mixing, 
-                                const SubSpectrum* mssm) 
+      str gauge_es_from_mass_es(str mass_es, double & max_mixing,
+                                const SubSpectrum& mssm)
       {
          std::vector<double> mass_composition;
-         str gauge_es = gauge_es_from_mass_es(mass_es, max_mixing, 
+         str gauge_es = gauge_es_from_mass_es(mass_es, max_mixing,
                                               mass_composition, mssm);
          return gauge_es;
-         
+
       }
-   
-      /// as above but doesn't fill max_mixing 
-      /// would have a slight efficiency saving if we didn't use wrapper and 
+
+      /// as above but doesn't fill max_mixing
+      /// would have a slight efficiency saving if we didn't use wrapper and
       /// avoided skipped max_mixing entirely but at the cost of a lot of
       /// code duplication
-      str gauge_es_from_mass_es(str mass_es, 
-                                std::vector<double> & mass_composition, 
-                                const SubSpectrum* mssm)
+      str gauge_es_from_mass_es(str mass_es,
+                                std::vector<double> & mass_composition,
+                                const SubSpectrum& mssm)
       {
          double max_mixing;
-         str gauge_es =  gauge_es_from_mass_es(mass_es, max_mixing, 
+         str gauge_es =  gauge_es_from_mass_es(mass_es, max_mixing,
                                            mass_composition, mssm);
-         
-         return gauge_es; 
+
+         return gauge_es;
       }
-      
+
       /// as above but doesn't fill max_mixing or gauge_composition
-      /// would have a slight efficiency saving if we didn't use wrapper and 
+      /// would have a slight efficiency saving if we didn't use wrapper and
       /// avoided skipped max_mixing entirely but at the cost of a lot of
       /// code duplication
-      str gauge_es_from_mass_es(str mass_es, 
-                                const SubSpectrum* mssm)
+      str gauge_es_from_mass_es(str mass_es,
+                                const SubSpectrum& mssm)
       {
          double max_mixing;
          std::vector<double> mass_composition;
-         str gauge_es =  gauge_es_from_mass_es(mass_es, max_mixing, 
+         str gauge_es =  gauge_es_from_mass_es(mass_es, max_mixing,
                                                mass_composition, mssm);
-         
-         return gauge_es; 
+
+         return gauge_es;
       }
 
       /// as above but do test against tol internally
-      str gauge_es_from_mass_es(str mass_es, const SubSpectrum* mssm, 
+      str gauge_es_from_mass_es(str mass_es, const SubSpectrum& mssm,
                                 double tol, str context, bool pterror)
       {
          double max_mixing;
          std::vector<double> mass_composition;
-         str gauge_es = gauge_es_from_mass_es(mass_es, max_mixing, 
+         str gauge_es = gauge_es_from_mass_es(mass_es, max_mixing,
                                               mass_composition, mssm);
          if((max_mixing*max_mixing) <= 1-tol)
          {
            const str errmsg = "Gauge_es from mass_es requested when mxing away "
-                              "from closest mass_es is greater than tol"; 
+                              "from closest mass_es is greater than tol";
            str full_context = LOCAL_INFO + " called from " + context;
            if (pterror)
            {
-             invalid_point().raise(errmsg+"  Raised at: "+full_context); 
-           }             
-           else 
+             invalid_point().raise(errmsg+"  Raised at: "+full_context);
+           }
+           else
            {
-             utils_error().raise(full_context, errmsg); 
+             utils_error().raise(full_context, errmsg);
            }
          }
-         return gauge_es; 
+         return gauge_es;
       }
 
-      /// identify the two mass eigenstate corresponding to the approximate 
-      /// family states, e.g. stops ("~u",3), smuons ("~mu", 2) etc 
-      /// Note: when there is family mixing there's no good definition ~t_1, 
-      /// ~t_2 etc if defined as the states you get from diagonalising a 2by2 
+      /// identify the two mass eigenstate corresponding to the approximate
+      /// family states, e.g. stops ("~u",3), smuons ("~mu", 2) etc
+      /// Note: when there is family mixing there's no good definition ~t_1,
+      /// ~t_2 etc if defined as the states you get from diagonalising a 2by2
       /// mass (sub)matrix then extensive manipulations would be required
-      /// So here we identify the mass eigenstates closest to the family ones 
+      /// So here we identify the mass eigenstates closest to the family ones
       /// which is a better defined question when there is family mixing prsesent
       /// and more useful here anyway
-      /// returns a pair of strings labling the lighter one first 
+      /// returns a pair of strings labling the lighter one first
       sspair identify_mass_ess_for_family(str type,
                                           int family,
-                                          const SubSpectrum* mssm)
+                                          const SubSpectrum& mssm)
       {
          /// need to turn type and family into a string
          /// need to simplify the number of translations we do.
          p_int_string gen_type(family,type);
-         std::vector<str> gauge_states = type_family_to_gauge_states[gen_type];
+         std::vector<str> gauge_states;
+         try { gauge_states = type_family_to_gauge_states.at(gen_type); }
+         catch (std::out_of_range&) { utils_error().raise(LOCAL_INFO, "Sfermion type or generation index not recognised; use type=~u,~d,~e-, gen=1,2,3."); }
          str gauge_esL=gauge_states[0];
          str gauge_esR=gauge_states[1];
-        
+
          /// finds the mass_es with the largets mixing to
          /// passed gauge_es
          str mass_esL = mass_es_from_gauge_es(gauge_esL, mssm);
          str mass_esR = mass_es_from_gauge_es(gauge_esR, mssm);
-         
+
          sspair answer;
-         int mass_index_L = (mass_label_to_index_type[mass_esL]).first;
-         int mass_index_R = (mass_label_to_index_type[mass_esR]).first;
+         int mass_index_L = (mass_label_to_index_type.at(mass_esL)).first;
+         int mass_index_R = (mass_label_to_index_type.at(mass_esR)).first;
          // order pair by mass
-         if(mass_index_L < mass_index_R) 
-            answer = std::make_pair(mass_esL,mass_esR);          
+         if(mass_index_L < mass_index_R)
+            answer = std::make_pair(mass_esL,mass_esR);
          else answer = std::make_pair(mass_esR,mass_esL);
-         
+
          return answer;
       }
 
-      /// identify the mass eigenstate corresponding to family state     
+      /// identify the mass eigenstate corresponding to family state
       /// takes string and returns only requested state
       /// I suspect this is the more useful one
       str mass_es_closest_to_family(str familystate,
-                                    const SubSpectrum* mssm)
+                                    const SubSpectrum& mssm)
       {
-         std::vector<str> family_gauge_states = family_state_to_gauge_state[familystate];
+         std::vector<str> family_gauge_states;
+         try { family_gauge_states = family_state_to_gauge_state.at(familystate); }
+         catch (std::out_of_range&) { utils_error().raise(LOCAL_INFO, "Unrecognised family state. ('"+familystate+"' was requested)"); }
          str gauge_esL = family_gauge_states[0];
          str gauge_esR = family_gauge_states[1];
-        
+
          // finds the mass_es with the largets mixing to
          // passed gauge_es
          str mass_esL = mass_es_from_gauge_es(gauge_esL, mssm);
          str mass_esR = mass_es_from_gauge_es(gauge_esR, mssm);
-         
+
          // extract mass order (1 or 2) from string via map
-         pair_string_ints type_family_massorder = 
-            familystate_label[familystate];
+         pair_string_ints type_family_massorder =
+            familystate_label.at(familystate);
          pair_ints family_massorder = type_family_massorder.second;
          int mass_order = family_massorder.second;
          // if massorder is 1 choose select from masstateL and mass_esR the one
          // with the lowest index else take highest
-         int massorderL = (mass_label_to_index_type[mass_esL]).first;
-         int massorderR = (mass_label_to_index_type[mass_esR]).first;
+         int massorderL = (mass_label_to_index_type.at(mass_esL)).first;
+         int massorderR = (mass_label_to_index_type.at(mass_esR)).first;
          str answer;
-         if( (mass_order == 1 && massorderL < massorderR) ||  
-             (mass_order == 2 && massorderL > massorderR) ) answer = mass_esL; 
+         if( (mass_order == 1 && massorderL < massorderR) ||
+             (mass_order == 2 && massorderL > massorderR) ) answer = mass_esL;
          else answer = mass_esR;
-         
+
          return answer;
       }
-      
-      /// returns vector with composition of closest the mass eigenstate 
+
+      /// returns vector with composition of closest the mass eigenstate
       /// to give family state in terms of gauge eigenstates and stores
       /// mass eigenstate in mass_es
       std::vector<double> get_gauge_comp_for_family_state(str familystate,
                                                           str & mass_es,
-                                                          const SubSpectrum* mssm)
-      {   
+                                                          const SubSpectrum& mssm)
+      {
          //get mass_es using one of our routines
          mass_es = mass_es_closest_to_family(familystate, mssm);
          /// extract info from strings via maps
-         int mass_index = (mass_label_to_index_type[mass_es]).first;
-         pair_string_ints state_info = familystate_label[familystate];
+         int mass_index = (mass_label_to_index_type.at(mass_es)).first;
+         pair_string_ints state_info = familystate_label.at(familystate);
          str type = state_info.first;
-         std::vector<double> gauge_es_content = 
+         std::vector<double> gauge_es_content =
             get_Pole_Mixing_row(type, mass_index,mssm);
-         
+
          return gauge_es_content;
-         
+
       }
 
       /// identifies the mass_es that is closest match to specified family state
       /// and fills mixture of the two gauge states with same family into
       /// std::vector gauge_composition
-      /// also fills remaining off-family mixings into a second vector 
+      /// also fills remaining off-family mixings into a second vector
       str mass_es_closest_to_family(str familystate,
                                     std::vector<double> & gauge_composition,
                                     std::vector<double> & off_family_mixing,
-                                    const SubSpectrum* mssm)
-      {   
+                                    const SubSpectrum& mssm)
+      {
          //get mass_es using one of our routines
          str mass_es = mass_es_closest_to_family(familystate, mssm);
          /// extract info from strings via maps
-         std::vector<str> gauge_states = family_state_to_gauge_state[familystate];
+         std::vector<str> gauge_states;
+         try { gauge_states = family_state_to_gauge_state.at(familystate); }
+         catch (std::out_of_range&) { utils_error().raise(LOCAL_INFO, "Unrecognised family state. ('"+familystate+"' was requested)"); }
          str gauge_state_L = gauge_states[0];
          str gauge_state_R = gauge_states[1];
-       
-         p_int_string gauge_Lindex_type = 
-            gauge_label_to_index_type[gauge_state_L];
+
+         p_int_string gauge_Lindex_type =
+            gauge_label_to_index_type.at(gauge_state_L);
          unsigned int gauge_L_index = gauge_Lindex_type.first;
          str type = gauge_Lindex_type.second;
-         unsigned int gauge_R_index 
-            = (gauge_label_to_index_type[gauge_state_R]).first;  
-         int mass_index = (mass_label_to_index_type[mass_es]).first;   
-         std::vector<str> gauge_es_strs = type_to_vec_of_gauge_es[type];
-         double row_length = gauge_es_strs.size(); 
-         for(std::vector<int>::size_type i = 1; i <= row_length; i++) 
+         unsigned int gauge_R_index
+            = (gauge_label_to_index_type.at(gauge_state_R)).first;
+         int mass_index = (mass_label_to_index_type.at(mass_es)).first;
+         std::vector<str> gauge_es_strs = type_to_vec_of_gauge_es.at(type);
+         double row_length = gauge_es_strs.size();
+         for(std::vector<int>::size_type i = 1; i <= row_length; i++)
             {
-               double temp = mssm->get(Par::Pole_Mixing,type, mass_index, i); 
-               if(i == gauge_L_index || i == gauge_R_index) 
+               double temp = mssm.get(Par::Pole_Mixing,type, mass_index, i);
+               if(i == gauge_L_index || i == gauge_R_index)
                   gauge_composition.push_back(temp);
                else off_family_mixing.push_back(temp);
             }
 
          return mass_es;
-         
+
       }
 
       /// identifies the mass_es that is closest match to specified family state
       /// and fills mixture of the two gauge states with same family into
-      /// std::vector gauge_composition 
+      /// std::vector gauge_composition
       str mass_es_closest_to_family(str familystate,
                                     std::vector<double> & gauge_composition,
-                                    const SubSpectrum* mssm)
-      {   
+                                    const SubSpectrum& mssm)
+      {
          std::vector<double> off_family_mixing;
          str mass_es = mass_es_closest_to_family(familystate, gauge_composition,
                                                  off_family_mixing, mssm);
@@ -482,12 +505,12 @@ namespace Gambit
       }
 
       /// identifies the mass_es that is closest match to specified family state
-      /// and fills sqr_sum_mix with the square sum of each of the two mixings 
+      /// and fills sqr_sum_mix with the square sum of each of the two mixings
       /// into gauge_es of that family
       str mass_es_closest_to_family(str familystate,
                                     double & sqr_sum_mix,
-                                    const SubSpectrum* mssm)
-      {   
+                                    const SubSpectrum& mssm)
+      {
          std::vector<double> off_family_mixing;
          std::vector<double>  gauge_composition;
          str mass_es = mass_es_closest_to_family(familystate, gauge_composition,
@@ -500,9 +523,9 @@ namespace Gambit
 
       /// identifies the mass_es that is closest match to specified family
       /// does tol-test internally to check correctness of assumptions
-      str mass_es_closest_to_family(str familystate, const SubSpectrum* mssm,
+      str mass_es_closest_to_family(str familystate, const SubSpectrum& mssm,
                                     double tol, str context, bool pterror)
-      {   
+      {
         std::vector<double> off_family_mixing;
         std::vector<double>  gauge_composition;
         str mass_es = mass_es_closest_to_family(familystate, gauge_composition,
@@ -516,11 +539,11 @@ namespace Gambit
           str full_context = LOCAL_INFO + " called from " + context;
           if (pterror)
           {
-            invalid_point().raise(errmsg+"  Raised at: "+full_context); 
-          }             
-          else 
+            invalid_point().raise(errmsg+"  Raised at: "+full_context);
+          }
+          else
           {
-            utils_error().raise(full_context, errmsg); 
+            utils_error().raise(full_context, errmsg);
           }
         }
 
@@ -530,40 +553,40 @@ namespace Gambit
 
       /// Get the family mixing matrix and corresponding mass eigenstates, then check for interfamily mixing.
       std::vector<double> family_state_mix_matrix(str type /*"~u", "~d" or "~e-"*/, int generation,
-                                                  str & mass_es1, str & mass_es2, const SubSpectrum* mssm,
+                                                  str & mass_es1, str & mass_es2, const SubSpectrum& mssm,
                                                   double tol, str context, bool pterror)
       {
         std::vector<double> m = family_state_mix_matrix(type, generation, mass_es1, mass_es2, mssm);
         if (m[0]*m[0] + m[1]*m[1] < 1-tol || m[2]*m[2] + m[3]*m[3] < 1-tol)
         {
           const str errmsg = "Too much interfamily mixing to safely determine "
-                             "intrafamily mixing matrix."; 
+                             "intrafamily mixing matrix.";
           str full_context = LOCAL_INFO + " called from " + context;
           if (pterror)
           {
-            invalid_point().raise(errmsg+"  Raised at: "+full_context); 
-          }             
-          else 
+            invalid_point().raise(errmsg+"  Raised at: "+full_context);
+          }
+          else
           {
-            utils_error().raise(full_context, errmsg); 
+            utils_error().raise(full_context, errmsg);
           }
         }
         return m;
-      }  
- 
+      }
+
       /// identifies the two mass_es which best matches specified family state
-      /// storing them in strings and then returns 
+      /// storing them in strings and then returns
       /// the 2by2 mixing matrix for that family state in the form
       /// (Mix_{11}, Mix_{12}, Mix_{21}, Mix_{22})
-      /// It also  stores the mixing elements for the gauge states that don't 
+      /// It also  stores the mixing elements for the gauge states that don't
       /// belong to the correct family for this state in a std::vector
-      /// The latter should have entries which are zero in absense of 
+      /// The latter should have entries which are zero in absense of
       /// family mixing
       std::vector<double> family_state_mix_matrix(str type,
                                                   int family,
                                                   str & mass_es1,
                                                   str & mass_es2,
-                                                  const SubSpectrum* mssm) 
+                                                  const SubSpectrum& mssm)
       {
          /// get mass_es using one of our routines
          sspair mass_ess = identify_mass_ess_for_family(type, family, mssm);
@@ -573,29 +596,31 @@ namespace Gambit
          /// need to turn type and family into a string
          /// should simplify the number of translations we do!
          p_int_string gen_type(family,type);
-         std::vector<str> gauge_states = type_family_to_gauge_states[gen_type];
+         std::vector<str> gauge_states;
+         try { gauge_states = type_family_to_gauge_states.at(gen_type); }
+         catch (std::out_of_range&) { utils_error().raise(LOCAL_INFO, "Sfermion type or generation index not recognised; use type=~u,~d,~e-, gen=1,2,3."); }
          str gauge_es_L=gauge_states[0];
-         str gauge_es_R=gauge_states[1];        
-         /// get index of right family states (ie gauge states with 
+         str gauge_es_R=gauge_states[1];
+         /// get index of right family states (ie gauge states with
          ///same family as requested family state
-         p_int_string gauge_Lindex_type = 
-            gauge_label_to_index_type[gauge_es_L];
+         p_int_string gauge_Lindex_type =
+            gauge_label_to_index_type.at(gauge_es_L);
          unsigned int gauge_L_index = gauge_Lindex_type.first;
-         unsigned int gauge_R_index 
-            = (gauge_label_to_index_type[gauge_es_R]).first;
-        
+         unsigned int gauge_R_index
+            = (gauge_label_to_index_type.at(gauge_es_R)).first;
+
          str type_L = gauge_Lindex_type.second;
-         int mass_index1 = (mass_label_to_index_type[mass_es1]).first;
-         int mass_index2 = (mass_label_to_index_type[mass_es2]).first;
+         int mass_index1 = (mass_label_to_index_type.at(mass_es1)).first;
+         int mass_index2 = (mass_label_to_index_type.at(mass_es2)).first;
          std::vector<double> mix_row_1;
          std::vector<double> mix_row_2;
-         std::vector<str> gauge_es_strs = type_to_vec_of_gauge_es[type];
-         double row_length = gauge_es_strs.size(); 
-         for(std::vector<int>::size_type i = 1; i <= row_length; i++) 
-            {   
-               double temp1 = mssm->get(Par::Pole_Mixing,type, mass_index1, i);
-               double temp2 = mssm->get(Par::Pole_Mixing,type, mass_index2, i);
-               if(i == gauge_L_index || i == gauge_R_index) 
+         std::vector<str> gauge_es_strs = type_to_vec_of_gauge_es.at(type);
+         double row_length = gauge_es_strs.size();
+         for(std::vector<int>::size_type i = 1; i <= row_length; i++)
+            {
+               double temp1 = mssm.get(Par::Pole_Mixing,type, mass_index1, i);
+               double temp2 = mssm.get(Par::Pole_Mixing,type, mass_index2, i);
+               if(i == gauge_L_index || i == gauge_R_index)
                   {
                      mix_row_1.push_back(temp1);
                      mix_row_2.push_back(temp2);
@@ -608,22 +633,23 @@ namespace Gambit
          return mix_row_1;
       }
 
-      /// returns admix of gauge eigenstate in the mass eigenstate 
+      /// returns admix of gauge eigenstate in the mass eigenstate
       /// closest to the given family state and stores
       /// mass eigenstate in mass_es
-      double get_gauge_admix_for_family_state(str familystate, 
+      double get_gauge_admix_for_family_state(str familystate,
                                               str gauge_es,
                                               str & mass_es,
-                                              const SubSpectrum* mssm) 
+                                              const SubSpectrum& mssm)
       {
-         pair_string_ints type_family_massorder 
-            = familystate_label[familystate];
+         pair_string_ints type_family_massorder;
+         try { type_family_massorder = familystate_label.at(familystate); }
+         catch (std::out_of_range&) { utils_error().raise(LOCAL_INFO, "Unrecognised family state."); }
          str family_type = type_family_massorder.first;
-         p_int_string gauge_es_index_type = gauge_label_to_index_type[gauge_es];
+         p_int_string gauge_es_index_type = gauge_label_to_index_type.at(gauge_es);
          int gauge_index = gauge_es_index_type.first;
          /// types should match but getting both allows us to throw error
          str type_gauge = gauge_es_index_type.second;
-         if(family_type!=type_gauge) 
+         if(family_type!=type_gauge)
             { /// throw error in gambit
                utils_error().raise(LOCAL_INFO, "function get_gauge_admix_for_family_state "
                 "called with types for the family state and mass eigenstate that don't match.");
@@ -631,87 +657,87 @@ namespace Gambit
          ///get mass_es using one of our routines
          mass_es = mass_es_closest_to_family(familystate, mssm);
          /// extract info from strings via maps
-         int mass_index = (mass_label_to_index_type[mass_es]).first;   
-         double admix = mssm->get(Par::Pole_Mixing,type_gauge, mass_index, 
-                                                   gauge_index);      
-         return admix;      
+         int mass_index = (mass_label_to_index_type.at(mass_es)).first;
+         double admix = mssm.get(Par::Pole_Mixing,type_gauge, mass_index,
+                                                   gauge_index);
+         return admix;
       }
 
       /// returns family state that best matches the given mass_es
       /// fills a double with the sum of the square mixings to gauge_es
       /// of the matching family
-      /// and fills the mixing of the matching gauge_es into mass eigenstates 
+      /// and fills the mixing of the matching gauge_es into mass eigenstates
       str family_state_closest_to_mass_es(str mass_es, double & sum_sq_mix,
                                           std::vector<double> & mass_comp,
-                                          const SubSpectrum* mssm)
+                                          const SubSpectrum& mssm)
       {
-         /// get gauge_es with largest mixing to this mass_es  
+         /// get gauge_es with largest mixing to this mass_es
          str gauge_es = gauge_es_from_mass_es(mass_es, mass_comp, mssm);
          /// get family states for the same generation as this gauge_es
-         std::vector<str> family_states = gauge_es_to_family_states[gauge_es];
+         std::vector<str> family_states = gauge_es_to_family_states.at(gauge_es);
          str family_state1 = family_states[0];
          str family_state2 = family_states[1];
-         std::vector<str> gauge_states = family_state_to_gauge_state[family_state1];
+         std::vector<str> gauge_states = family_state_to_gauge_state.at(family_state1);
          str gauge_es_L = gauge_states[0];
          str gauge_es_R = gauge_states[1];
-         str mass_es_other;         
-         if(gauge_es == gauge_es_L) 
+         str mass_es_other;
+         if(gauge_es == gauge_es_L)
             mass_es_other = mass_es_from_gauge_es(gauge_es_R, mssm);
          else mass_es_other = mass_es_from_gauge_es(gauge_es_L, mssm);
-         /// extractindex of mass-es and mass_ess_other from strings 
-         int mass_index = (mass_label_to_index_type[mass_es]).first;
-         int mass_index_other = (mass_label_to_index_type[mass_es_other]).first;
-         str fam_state; 
-         /// choose mass ordering for family state which matches  
+         /// extractindex of mass-es and mass_ess_other from strings
+         int mass_index = (mass_label_to_index_type.at(mass_es)).first;
+         int mass_index_other = (mass_label_to_index_type.at(mass_es_other)).first;
+         str fam_state;
+         /// choose mass ordering for family state which matches
          /// mass ordering of mass_es
          if(mass_index < mass_index_other) fam_state = family_state1;
          else fam_state = family_state2;
-         
+
          //get gauge_indices to sum correct mixing elements
-         int gauge_index_L = (gauge_label_to_index_type[gauge_es_L]).first;
-         int gauge_index_R = (gauge_label_to_index_type[gauge_es_R]).first;
+         int gauge_index_L = (gauge_label_to_index_type.at(gauge_es_L)).first;
+         int gauge_index_R = (gauge_label_to_index_type.at(gauge_es_R)).first;
          /// subrtact 1 fgrom indices to deal with different indexing
-         sum_sq_mix = mass_comp[gauge_index_L-1] * mass_comp[gauge_index_L-1];
-         sum_sq_mix += mass_comp[gauge_index_R-1] * mass_comp[gauge_index_R-1];
-         
+         sum_sq_mix = mass_comp.at(gauge_index_L-1) * mass_comp.at(gauge_index_L-1);
+         sum_sq_mix += mass_comp.at(gauge_index_R-1) * mass_comp.at(gauge_index_R-1);
+
          return fam_state;
       }
-      
+
       /// wrapper for overloaded version
       /// returns family state that best matches the given mass_es
       /// fills a double with the sum of the square mixings to gauge_es
       /// of the matching family
       str family_state_closest_to_mass_es(str mass_es, double & sum_sq_mix,
-                                           const SubSpectrum* mssm)
+                                           const SubSpectrum& mssm)
       {
          std::vector<double> mass_comp;
-         str fs = family_state_closest_to_mass_es(mass_es, sum_sq_mix, 
+         str fs = family_state_closest_to_mass_es(mass_es, sum_sq_mix,
                                                   mass_comp, mssm);
          return fs;
       }
-      
+
       /// wrapper for overloaded version
       /// returns family state that best matches the given mass_es
-      /// and fills the mixing of the matching mass_es into gauge eigenstates 
-      str family_state_closest_to_mass_es(str mass_es, 
+      /// and fills the mixing of the matching mass_es into gauge eigenstates
+      str family_state_closest_to_mass_es(str mass_es,
                                            std::vector<double> & mass_comp,
-                                           const SubSpectrum* mssm)
+                                           const SubSpectrum& mssm)
       {
          double sum_sq_mix;
          str fs = family_state_closest_to_mass_es(mass_es, sum_sq_mix, mass_comp,
                                                   mssm);
          return fs;
       }
-      
+
       /// wrapper for overloaded version
       /// returns family state that best matches the given mass_es
-      /// and fills the mixing of the matching mass_es into gauge eigenstates 
-      str family_state_closest_to_mass_es(str mass_es, const SubSpectrum* mssm,
+      /// and fills the mixing of the matching mass_es into gauge eigenstates
+      str family_state_closest_to_mass_es(str mass_es, const SubSpectrum& mssm,
                                           double tol, str context, bool pterror)
       {
          double sum_sq_mix;
          std::vector<double> mass_comp;
-         str fs = family_state_closest_to_mass_es(mass_es, sum_sq_mix, 
+         str fs = family_state_closest_to_mass_es(mass_es, sum_sq_mix,
                                                   mass_comp, mssm);
          if(sum_sq_mix <= 1-tol)
          {
@@ -720,16 +746,242 @@ namespace Gambit
            str full_context = LOCAL_INFO + " called from " + context;
            if (pterror)
            {
-             invalid_point().raise(errmsg+"  Raised at: "+full_context); 
-           }             
-           else 
+             invalid_point().raise(errmsg+"  Raised at: "+full_context);
+           }
+           else
            {
-             utils_error().raise(full_context, errmsg); 
+             utils_error().raise(full_context, errmsg);
            }
          }
          return fs;
       }
-      
+
+      /// Add an entire MSSM spectrum to an SLHAea object
+      // Here we assume that all SM input info comes from the SMINPUT object,
+      // and all low-E stuff (quark pole masses and the like) come from the LE subspectrum.
+      // In other words all those things should be added to the SLHAea object via
+      // different functions to this one. Here we add only MSSM information
+      // NOTE: check the below statement:
+       // Note that the SMINPUT object's dump-to-SLHAea function does not know how to discriminate
+       // between SLHA1 and SLHA2, but that doesn't matter, as the SM parameters defined in SLHA2
+       // just constitute additional blocks/block entries, not replacements for SLHA1 blocks.  In the
+       // MSSM sector, this is not true, and we take care to write version-specific blocks here.
+      //
+      // slha_version - should be 1 or 2. Specifies whether to output closest-matching SLHA1 format
+      // entries, or to maintain SLHA2 as is used internally.
+      void add_MSSM_spectrum_to_SLHAea(const SubSpectrum& mssmspec, SLHAstruct& slha, int slha_version)
+      {
+         std::ostringstream comment;
+
+         // Make sure to overwrite all entries if they exist already (from say a "hurriedly" copied SM subspectrum + unknown extra MSSM junk)
+
+         //SPINFO block should be added separately.
+         // MINPAR block; some programs need tanbeta(mZ), so we should output it here if possible
+         SLHAea_check_block(slha, "MINPAR");
+         if(mssmspec.has(Par::dimensionless,"tanbeta(mZ)"))
+         {
+            SLHAea_add_from_subspec(slha,LOCAL_INFO,mssmspec,Par::dimensionless,"tanbeta(mZ)","MINPAR",3,"# tanbeta(mZ)^DRbar");
+         }
+         int sgnmu = sgn(mssmspec.get(Par::mass1,"Mu")); // Mu isn't at the input scale anymore, but sign(mu) doesn't change with running.
+         SLHAea_add(slha,"MINPAR",4,sgnmu,"# sign(mu)", true);
+
+         // HMIX block
+         SLHAea_delete_block(slha, "HMIX");
+         SLHAea_add_block   (slha, "HMIX", mssmspec.GetScale());
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::mass1,"Mu","HMIX",1,"mu DRbar");
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::dimensionless,"tanbeta","HMIX",2,"tan(beta) = vu/vd DRbar");
+         if (not mssmspec.has(Par::mass1,"vu")) utils_error().raise(LOCAL_INFO, "MSSM subspectrum does not contain vu!");
+         if (not mssmspec.has(Par::mass1,"vd")) utils_error().raise(LOCAL_INFO, "MSSM subspectrum does not contain vd!");
+         double vu = mssmspec.get(Par::mass1,"vu");
+         double vd = mssmspec.get(Par::mass1,"vd");
+         SLHAea_add(slha,"HMIX",3,sqrt(vu*vu + vd*vd),"v = sqrt(vd^2 + vu^2) DRbar", true);
+         SLHAea_add_from_subspec(slha,LOCAL_INFO,mssmspec,Par::mass2,"mA2","HMIX",4,"m^2_A (tree)");
+         SLHAea_add_from_subspec(slha,LOCAL_INFO,mssmspec,Par::mass2,"BMu","HMIX",101,"Bmu DRbar");
+         SLHAea_add(slha,"HMIX",102,vd,"vd DRbar", true);
+         SLHAea_add(slha,"HMIX",103,vu,"vu DRbar", true);
+         // GAUGE block
+         SLHAea_delete_block(slha, "GAUGE");
+         SLHAea_add_block   (slha, "GAUGE", mssmspec.GetScale());
+         // Scale gY is in SU(5)/GUT normalisation internally; convert it to SM normalisation for SLHA output by multiplying by sqrt(3/5).
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::dimensionless,"g1","GAUGE",1,"g'  = g1 = gY DRbar", true, sqrt(3./5.));
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::dimensionless,"g2","GAUGE",2,"g   = g2      DRbar");
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::dimensionless,"g3","GAUGE",3,"g_s = g3      DRbar");
+
+         const int pdg_codes[33] = {24,25,35,37,36,1000021,1000024,1000037,1000022,1000023,1000025,1000035,1000006,2000006,1000005,2000005,1000015,2000015,1000012,1000014,1000016,1000001,1000003,
+                                    2000001,2000003,1000011,1000013,2000011,2000013,1000002,1000004,2000002,2000004,};
+
+         // Here we add the SLHA1-specific stuff, for backwards compatibility with backwards backends.
+         if (slha_version == 1)
+         {
+           const str slha1_sfermions[21] = {"~t_1", "~t_2", "~b_1", "~b_2", "~tau_1", "~tau_2", 
+                                            "~nu_e_L", "~nu_mu_L", "~nu_tau_L", 
+                                             "~d_L", "~s_L", "~d_R", "~s_R", "~e_L", "~mu_L", 
+                                             "~e_R", "~mu_R", "~u_L", "~c_L", "~u_R", "~c_R"};
+           str slha2_sfermions[21];
+
+           // STOPMIX, SBOTMIX and STAUMIX blocks
+           slhahelp::attempt_to_add_SLHA1_mixing("STOPMIX", slha, "~u", mssmspec, 1.0, slha2_sfermions[0], slha2_sfermions[1], true);
+           slhahelp::attempt_to_add_SLHA1_mixing("SBOTMIX", slha, "~d", mssmspec, 1.0, slha2_sfermions[2], slha2_sfermions[3], true);
+           slhahelp::attempt_to_add_SLHA1_mixing("STAUMIX", slha, "~e-", mssmspec, 1.0, slha2_sfermions[4], slha2_sfermions[5], true);
+
+           // MASS block.  Do everything except sfermions the same way as SLHA2.
+           for(int i=0;i<12;i++)
+           {
+             str comment(Models::ParticleDB().long_name(pdg_codes[i], 0));
+             SLHAea_add_from_subspec(slha, LOCAL_INFO, mssmspec, Par::Pole_Mass, std::pair<int, int>(pdg_codes[i],0), "MASS", comment);
+           }
+           for(int i=0;i<21;i++)
+           {
+             if (i > 5)
+             {
+               double max_mixing; // Don't actually care about this; we're going to SLHA1 whether it is a good approximation or not.
+               slha2_sfermions[i] = slhahelp::mass_es_from_gauge_es(slha1_sfermions[i], max_mixing, mssmspec);
+             }
+             SLHAea_add(slha, "MASS", pdg_codes[i+12], mssmspec.get(Par::Pole_Mass, slha2_sfermions[i]), slha1_sfermions[i], true);
+           }
+         }
+         else if (slha_version == 2)
+         {
+           // MASS block
+           for(int i=0;i<33;i++)
+           {
+             str comment(Models::ParticleDB().long_name(pdg_codes[i], 0));
+             SLHAea_add_from_subspec(slha, LOCAL_INFO, mssmspec, Par::Pole_Mass, std::pair<int, int>(pdg_codes[i],0), "MASS", comment);
+           }
+
+           // USQMIX, DSQMIX, SELMIX
+           sspair S[3] = {sspair("USQMIX","~u"), sspair("DSQMIX","~d"), sspair("SELMIX","~e-")};
+           for (int k=0;k<3;k++)
+           {
+             SLHAea_delete_block(slha, S[k].first);
+             SLHAea_add_block   (slha, S[k].first, mssmspec.GetScale());
+             for(int i=1;i<7;i++) for(int j=1;j<7;j++)
+             {
+               comment.str(""); comment << S[k].second << "-type sfermion mixing (" << i << "," << j << ")";
+               SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::Pole_Mixing, S[k].second, i, j, S[k].first, i, j, comment.str());
+             }
+           }
+
+           // SNUMIX block
+           sspair V("SNUMIX","~nu");
+           SLHAea_delete_block(slha, V.first);
+           SLHAea_add_block   (slha, V.first, mssmspec.GetScale());
+           for(int i=1;i<4;i++) for(int j=1;j<4;j++)
+           {
+             comment.str(""); comment << V.second << " mixing matrix (" << i << "," << j << ")";
+             SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::Pole_Mixing, V.second, i, j, V.first, i, j, comment.str());
+           }
+
+         }
+         else
+         {
+           utils_error().raise(LOCAL_INFO, "Unrecognised version of SLHA standard; only SLHA1 and SLHA2 are permitted.");
+         }
+
+         // MSOFT block (SLHA1 and SLHA2) plus MSL2, MSE2, MSQ2, MSU2 and MSD2 blocks (SLHA2 only)
+         if(not SLHAea_block_exists(slha,"MSOFT"))
+         {
+           SLHAea_add_block(slha, "MSOFT", mssmspec.GetScale());
+         }
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::mass1,"M1","MSOFT",1,"bino mass parameter M1");
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::mass1,"M2","MSOFT",2,"wino mass parameter M2");
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::mass1,"M3","MSOFT",3,"gluino mass parameter M3");
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::mass2,"mHd2","MSOFT",21,"d-type Higgs mass parameter mHd2");
+         SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec,Par::mass2,"mHu2","MSOFT",22,"u-type Higgs mass parameter mHu2");
+         sspair M[5] = {sspair("MSL2","ml2"), sspair("MSE2","me2"), sspair("MSQ2","mq2"), sspair("MSU2","mu2"), sspair("MSD2","md2")};
+         for (int k=0;k<5;k++)
+         {
+           SLHAea_delete_block(slha, M[k].first);
+           if (slha_version == 2) SLHAea_add_block(slha, M[k].first, mssmspec.GetScale());
+           for(int i=1;i<4;i++) for(int j=1;j<4;j++)
+           {
+             comment.str(""); comment << M[k].second << "(" << i << "," << j << ")";
+             if (slha_version == 2) SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::mass2, M[k].second, i, j, M[k].first, i, j, comment.str());
+             if (i== j)
+             {
+               double entry = mssmspec.get(Par::mass2, M[k].second, i, j);
+               SLHAea_add(slha,"MSOFT",30+3*k+i+(k>1?4:0),sgn(entry)*sqrt(std::abs(entry)),"sqrt("+comment.str()+")", true);
+             }
+           }
+         }
+
+         // Yukawa and trilinear blocks.  YU, YD and YE, plus [YU, YD and YE; SLHA1 only], or [TU, TD and TE; SLHA2 only].
+         sspair A[3] = {sspair("AU","Au"), sspair("AD","Ad"), sspair("AE","Ae")};
+         sspair Y[3] = {sspair("YU","Yu"), sspair("YD","Yd"), sspair("YE","Ye")};
+         sspair T[3] = {sspair("TU","TYu"), sspair("TD","TYd"), sspair("TE","TYe")};
+         for (int k=0;k<3;k++)
+         {
+           // Erase these blocks if they already exist; we need them in the right format
+           SLHAea_delete_block(slha, Y[k].first);
+           SLHAea_delete_block(slha, A[k].first);
+           SLHAea_delete_block(slha, T[k].first);
+           // Now add them back
+           SLHAea_add_block(slha, Y[k].first, mssmspec.GetScale());
+           if (slha_version == 1) SLHAea_add_block(slha, A[k].first, mssmspec.GetScale());
+           if (slha_version == 2) SLHAea_add_block(slha, T[k].first, mssmspec.GetScale());
+           for(int i=1;i<4;i++)
+           {
+             // SLHA2 says to output only diagonal of Yukawa matrices, since we should be in a basis in which they are diagonal.
+             // SLHA1 says to give only the 3,3 element, but we'll give the whole diagonal anyway, codes will ignore them if not
+             // needed.
+             comment.str(""); comment << Y[k].second << "(" << i << "," << i << ")";
+             SLHAea_add_from_subspec(slha,LOCAL_INFO,mssmspec,Par::dimensionless,Y[k].second, i, i, Y[k].first, i, i, comment.str());
+
+             if (slha_version == 1)
+             {
+               comment.str(""); comment << A[k].second << "(" << i << "," << i << ")";
+               double invTii = 1.0/mssmspec.get(Par::dimensionless,Y[k].second,i,i);
+               SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::mass1, T[k].second, i, i, A[k].first, i, i, comment.str(), true, invTii); // last argument is a rescaling factor
+             }
+             else if (slha_version == 2)
+             {
+                for(int j=1;j<4;j++)
+                {
+                   comment.str(""); comment << T[k].second << "(" << i << "," << j << ")";
+                   SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::mass1, T[k].second, i, j, T[k].first, i, j, comment.str());
+                }
+             }
+             else
+             {
+                std::ostringstream msg;
+                msg << "Tried to ouput SLHA data, but SLHA version requested was invalid (should be 1 or 2, but received "<<slha_version<<")";
+                utils_error().raise(LOCAL_INFO,msg.str());
+             }
+           }
+         }
+
+         // ALPHA block
+         // if this exists already, delete it entirely
+         auto it = slha.find("ALPHA");
+         if(it!=slha.end()) slha.erase(it); // TODO: format of this call is confusing, perhaps write a wrapper for it.
+         // ...and now add it back
+         SLHAea_add_block(slha, "ALPHA", mssmspec.GetScale());
+         slha["ALPHA"][""] << asin(mssmspec.get(Par::Pole_Mixing, "h0", 2, 2)) << "# sin^-1(SCALARMIX(2,2))";
+
+         // UMIX and VMIX blocks, plus some FlexibleSUSY-only extensions: PSEUDOSCALARMIX, SCALARMIX and CHARGEMIX.
+         sspair U[5] = {sspair("UMIX","~chi-"), sspair("VMIX","~chi+"), sspair("PSEUDOSCALARMIX","A0"), sspair("SCALARMIX","h0"), sspair("CHARGEMIX","H+")};
+         for (int k=0;k<5;k++)
+         {
+           SLHAea_delete_block(slha, U[k].first);
+           SLHAea_add_block(slha, U[k].first, mssmspec.GetScale());
+           for(int i=1;i<3;i++) for(int j=1;j<3;j++)
+           {
+             comment.str(""); comment << U[k].second << " mixing matrix (" << i << "," << j << ")";
+             SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::Pole_Mixing, U[k].second, i, j, U[k].first, i, j, comment.str());
+           }
+         }
+
+         // NMIX block
+         sspair N("NMIX","~chi0");
+         SLHAea_delete_block(slha, N.first);
+         SLHAea_add_block(slha, N.first, mssmspec.GetScale());
+         for(int i=1;i<5;i++) for(int j=1;j<5;j++)
+         {
+           comment.str(""); comment << N.second << " mixing matrix (" << i << "," << j << ")";
+           SLHAea_add_from_subspec(slha, LOCAL_INFO,mssmspec, Par::Pole_Mixing, N.second, i, j, N.first, i, j, comment.str());
+         }
+       }
+
    }  // namespace slhahelp
 
 } //namespace gambit

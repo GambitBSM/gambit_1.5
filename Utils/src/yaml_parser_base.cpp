@@ -7,7 +7,7 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Christoph Weniger
 ///          (c.weniger@uva.nl)
 ///  \date 2013 May, June, July
@@ -22,8 +22,10 @@
 
 #include "gambit/Utils/yaml_parser_base.hpp"
 #include "gambit/Utils/util_functions.hpp"
+#include "gambit/Utils/mpiwrapper.hpp"
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Logs/logmaster.hpp"
+
 
 namespace Gambit
 {
@@ -32,25 +34,44 @@ namespace Gambit
   {
 
     /// Recursive import
-    int importRound(YAML::Node node)
+    int importRound(YAML::Node node, const std::string& filename)
     {
       int counter = 0;
       if (node.IsScalar())
       {
         if ( node.Tag() == "!import" )
         {
+          #ifdef WITH_MPI
+            int rank = GMPI::Comm().Get_rank();
+          #else
+            int rank = 0;
+          #endif
           YAML::Node import;
-          std::string filename = node.as<std::string>();
-          std::cout << "Importing: " << filename << std::endl;
+          std::string new_filename = node.as<std::string>();
+          if (rank == 0) std::cout << "Importing: " << new_filename << std::endl;
           try
-          { 
-            import = YAML::LoadFile(filename);
-          } 
+          {
+            // We want to do the import relative to the path in which the YAML file
+            // sits, unless it has a forward slash at the beginning (in which case we
+            // will interpret it as an absolute path)
+            std::string file_location = Utils::dir_name(filename); // "outer" file location
+            if(new_filename.at(0)=='/') // POSIX
+            {
+               // Use the absolute path as given
+               import = YAML::LoadFile(new_filename);        
+            }
+            else
+            {
+               // Append the path of the outer file
+               new_filename = file_location+"/"+new_filename;
+               import = YAML::LoadFile(new_filename);        
+            }
+          }
           catch (YAML::Exception &e)
           {
             std::ostringstream msg;
-            msg << "Error reading Inifile \""<<filename<<"\" recursively! ";
-            msg << "Please check that file exist!" << endl;
+            msg << "Error importing \""<<new_filename<<"\"! ";
+            msg << "Please check that file exists! Error occurred during parsing of YAML file '"<<filename<<"'" << endl;
             msg << "(yaml-cpp error: "<<e.what()<<" )";
             inifile_error().raise(LOCAL_INFO,msg.str());
           }
@@ -63,7 +84,7 @@ namespace Gambit
       {
         for (unsigned int i = 0; i<node.size(); ++i)
         {
-          counter += importRound(node[i]);
+          counter += importRound(node[i],filename);
         }
         return counter;
       }
@@ -71,26 +92,34 @@ namespace Gambit
       {
         for (YAML::const_iterator it = node.begin(); it != node.end(); ++it)
         {
-          counter += importRound(it->second);  // Only values are processed
+          counter += importRound(it->second,filename);  // Only values are processed
         }
         return counter;
       }
       return 0;
     }
 
-    void recursiveImport(YAML::Node node)
+    void recursiveImport(const YAML::Node& node, const std::string& filename)
     {
       int import_counter = 0;
       int last_import_counter = 0;
       for ( int i = 0; i < 10; ++i)
       {
-        last_import_counter = importRound(node);
+        last_import_counter = importRound(node,filename);
         import_counter += last_import_counter;
       }
       if (last_import_counter > 0)
       {
-        std::cout << last_import_counter << std::endl;
-        std::cout << "WARNING: YAML imports were truncated after 10 recursions." << std::endl;
+        #ifdef WITH_MPI
+          int rank = GMPI::Comm().Get_rank();
+        #else
+          int rank = 0;
+        #endif
+        if (rank == 0)
+        {
+          std::cout << last_import_counter << std::endl;
+          std::cout << "WARNING: YAML imports were truncated after 10 recursions." << std::endl;
+        }
       }
     }
 
@@ -108,9 +137,9 @@ namespace Gambit
       YAML::Node root;
       // Read inifile file
       try
-      { 
+      {
         root = YAML::LoadFile(filename);
-      } 
+      }
       catch (YAML::Exception &e)
       {
         std::ostringstream msg;
@@ -124,7 +153,7 @@ namespace Gambit
 
     void Parser::basicParse(YAML::Node root, std::string filename)
     {
-      recursiveImport(root);
+      recursiveImport(root,filename);
       parametersNode = root["Parameters"];
       priorsNode = root["Priors"];
       printerNode = root["Printer"];
@@ -155,19 +184,21 @@ namespace Gambit
       logNode    ["default_output_path"] = Utils::ensure_path_exists(defpath+"/logs/");
       printerNode["options"]["default_output_path"] = Utils::ensure_path_exists(defpath+"/samples/");
 
-      // Pass on minimum recognised lnlike to Scanner
+      // Pass on minimum recognised lnlike and offset to Scanner
       scannerNode["model_invalid_for_lnlike_below"] = getValue<double>("likelihood", "model_invalid_for_lnlike_below");
+      if (hasKey("likelihood", "lnlike_offset"))
+        scannerNode["lnlike_offset"] = getValue<double>("likelihood", "lnlike_offset");
 
       // Set fatality of exceptions
       if (hasKey("exceptions"))
-      {       
+      {
         // Iterate over the map of all recognised exception objects
         std::map<const char*,exception*>::const_iterator iter;
         for (iter = exception::all_exceptions().begin(); iter != exception::all_exceptions().end(); ++iter)
         {
           // Check if the exception has an entry in the YAML file
           if (hasKey("exceptions",iter->first))
-          { 
+          {
             // Retrieve the entry and set the exception's 'fatal' flag accordingly.
             str value = getValue<str>("exceptions",iter->first);
             if (value == "fatal")
@@ -203,18 +234,18 @@ namespace Gambit
       if(logNode["redirection"])
       {
          YAML::Node redir = logNode["redirection"];
-         for(YAML::const_iterator it=redir.begin(); it!=redir.end(); ++it) 
+         for(YAML::const_iterator it=redir.begin(); it!=redir.end(); ++it)
          {
              std::set<std::string> tags;
              std::string filename;
-             // Iterate through tags and add them to the set 
+             // Iterate through tags and add them to the set
              YAML::Node yamltags = it->first;
-             for(YAML::const_iterator it2=yamltags.begin();it2!=yamltags.end();++it2)         
+             for(YAML::const_iterator it2=yamltags.begin();it2!=yamltags.end();++it2)
              {
                tags.insert( it2->as<std::string>() );
              }
              filename = (it->second).as<std::string>();
-    
+
              // Add entry to the loggerinfo map
              if((filename=="stdout") or (filename=="stderr"))
              {
@@ -223,7 +254,7 @@ namespace Gambit
              }
              else
              {
-               // The logger won't be able to create the log files if the prefix 
+               // The logger won't be able to create the log files if the prefix
                // directory doesn't exist, so let us now make sure that it does
                loggerinfo[tags] = Utils::ensure_path_exists(prefix + filename);
              }
@@ -235,12 +266,12 @@ namespace Gambit
          std::set<std::string> tags;
          std::string filename;
          tags.insert("Default");
-         filename = "default.log"; 
+         filename = "default.log";
          loggerinfo[tags] = Utils::ensure_path_exists(prefix + filename);
      }
       // Initialise global LogMaster object
-      bool master_debug = (keyValuePairNode["debug"]) ? keyValuePairNode["debug"].as<bool>() : false; 
-      bool logger_debug = (logNode["debug"])          ? logNode["debug"].as<bool>()          : false; 
+      bool master_debug = (keyValuePairNode["debug"]) ? keyValuePairNode["debug"].as<bool>() : false;
+      bool logger_debug = (logNode["debug"])          ? logNode["debug"].as<bool>()          : false;
       logger().set_log_debug_messages(master_debug or logger_debug);
       logger().initialise(loggerinfo);
 

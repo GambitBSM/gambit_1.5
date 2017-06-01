@@ -17,6 +17,7 @@
 #include <fstream>
 
 #include "gambit/Elements/decay_table.hpp"
+#include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Utils/version.hpp"
 #include "gambit/Utils/file_lock.hpp"
@@ -85,7 +86,14 @@ namespace Gambit
            "SLHAea object has DECAY block with < 3 entries in its block definition.");
           int pdg = SLHAea::to<int>(block_def->at(1));
           // Add an entry containing the info in this block
-          operator()(std::pair<int,int>(pdg,context)) = Entry(*block, block_def, context,
+          int local_context = context;
+          if (force_SM_fermion_gauge_eigenstates)
+          {
+            int abspdg = std::abs(pdg);
+            // Select SM fermions, including 4th gen, and force gauge eigenstates (context = 1).
+            if (abspdg < 19 and abspdg != 9 and abspdg != 10) local_context = 1;
+          }
+          operator()(std::pair<int,int>(pdg,local_context)) = Entry(*block, block_def, context,
            force_SM_fermion_gauge_eigenstates, calculator, calculator_version);
         }
       }
@@ -139,7 +147,7 @@ namespace Gambit
   }
 
   /// Output entire decay table as an SLHA file full of DECAY blocks
-  void DecayTable::getSLHA(str filename, bool include_zero_bfs) const
+  void DecayTable::writeSLHAfile(str filename, bool include_zero_bfs) const
   {
     Utils::FileLock mylock(filename);
     mylock.get_lock();
@@ -155,7 +163,7 @@ namespace Gambit
     SLHAstruct slha;
     std::map<str, std::set<str> > calculator_map;
     str calculators = "GAMBIT, using: ";
-    str versions = gambit_version + ": ";
+    str versions = gambit_version() + ": ";
 
     // Add the decay info
     for (auto particle = particles.begin(); particle != particles.end(); ++particle)
@@ -195,7 +203,7 @@ namespace Gambit
     slha.push_front(DCblock);
 
     // Add a disclaimer about the absence of a MODSEL block
-    add_MODSEL_disclaimer(slha, "DecayTable");
+    slhahelp::add_MODSEL_disclaimer(slha, "DecayTable");
 
     return slha;
   }
@@ -260,10 +268,10 @@ namespace Gambit
           int context_local = context;
           if (force_SM_fermion_gauge_eigenstates)
           {
-            int abspdg = abs(pdg);
+            int abspdg = std::abs(pdg);
             // Select SM fermions, including 4th gen, and force gauge eigenstates (context = 1).
             if (abspdg < 19 and abspdg != 9 and abspdg != 10) context_local = 1;
-          }          
+          }
           std::pair<int,int> pdg_pair(pdg, context_local);
           daughter_pdg_codes.push_back(pdg_pair);
         }

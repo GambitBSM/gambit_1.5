@@ -1,29 +1,35 @@
-// GAMBIT: Global and Modular BSM Inference Tool  
+// GAMBIT: Global and Modular BSM Inference Tool
 //************************************************
-/// \file                                        
-///                                               
-///  Configured options and settings for GAMBIT   
-///                                               
+/// \file
+///
+///  Configured options and settings for GAMBIT
+///
 ///***********************************************
-///                                               
-///  Authors:                                     
-///                                              
+///
+///  Authors:
+///
 ///  \author Antje Putze
-///        (antje.putze@lapth.cnrs.fr)              
+///        (antje.putze@lapth.cnrs.fr)
 ///  \date 2015 Apr, Sep
 ///
 ///  \author Pat Scott
-///        (p.scott@imperial.ac.uk)              
+///        (p.scott@imperial.ac.uk)
 ///  \date 2015 Apr
-///                                             
-///                                               
+///
+///
 ///***********************************************
-                                                  
-#ifndef __cmake_variables_hpp__                   
-#define __cmake_variables_hpp__                   
-                                                  
-/// Gambit source directory                       
-#define GAMBIT_DIR "@PROJECT_SOURCE_DIR@"       
+
+#ifndef __cmake_variables_hpp__
+#define __cmake_variables_hpp__
+
+/// Gambit source directory
+#define GAMBIT_DIR "@PROJECT_SOURCE_DIR@"
+
+/// Name of the gambit executable
+#define GAMBIT_EXECUTABLE "@PROJECT_NAME@"
+
+/// Compiler supports C++14 features
+#cmakedefine COMPILER_SUPPORTS_CXX14 1
 
 /// Found regex in STL
 #cmakedefine HAVE_REGEX_H 1
@@ -37,11 +43,15 @@
 /// Leave Delphes out of the compile
 #cmakedefine EXCLUDE_DELPHES 1
 
+/// Found ROOT version 6 or later
+#cmakedefine ROOT_6_OR_LATER_FOUND 1
+
 /// Version info
 /// @{
-#cmakedefine GAMBIT_VERSION_MAJOR    1
-#cmakedefine GAMBIT_VERSION_MINOR    0
-#cmakedefine GAMBIT_VERSION_REVISION 0
+#define GAMBIT_VERSION_MAJOR    @GAMBIT_VERSION_MAJOR@
+#define GAMBIT_VERSION_MINOR    @GAMBIT_VERSION_MINOR@
+#define GAMBIT_VERSION_REVISION @GAMBIT_VERSION_REVISION@
+#define GAMBIT_VERSION_PATCH    "@GAMBIT_VERSION_PATCH@"
 /// @}
 
 #endif //// #defined__cmake_variables_hpp__

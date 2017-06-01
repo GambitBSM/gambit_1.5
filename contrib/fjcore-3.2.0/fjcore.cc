@@ -288,7 +288,7 @@ template<class T> void SearchTree<T>::Node::reset_parents_link_to_me(typename Se
 }
 template<class T> class SearchTree<T>::circulator{
 public:
-  friend class SearchTree<T>::const_circulator;
+  //friend class SearchTree<T>::const_circulator;
   friend class SearchTree<T>;
   circulator() : _node(NULL) {}
   circulator(Node * node) : _node(node) {}
@@ -1761,9 +1761,8 @@ Strategy ClusterSequence::_best_strategy() const {
       }
     }
   }
-  // bool code_should_never_reach_here = false; //< AB
-  // assert(code_should_never_reach_here); //< AB
-  assert(0 && "code_should_never_reach_here"); //< AB
+  //code should never reach here;
+  assert(false);
   return N2MHTLazy9;
 }
 void ClusterSequence::transfer_from_sequence(const ClusterSequence & from_seq,
@@ -2137,8 +2136,7 @@ void ClusterSequence::_add_step_to_history (
   element.max_dij_so_far = max(dij,_history[_history.size()-1].max_dij_so_far);
   _history.push_back(element);
   int local_step = _history.size()-1;
-  IGNORE(step_number); //< AB: get rid of Release-mode unused argument warning, since commenting the name isn't an option
-  assert(local_step == step_number);
+  if (local_step != step_number) assert(false);
   assert(parent1 >= 0);
   if (_history[parent1].child != Invalid){
     throw InternalError("trying to recomine an object that has previsously been recombined");

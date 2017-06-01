@@ -86,7 +86,9 @@ else()
   foreach(DICT ${DELPHES_DICTS})
     set(clean_files ${clean_files} ${DICT})
   endforeach()
-  add_external_clean(delphes ${DELPHES_DIR} null distclean)
+  set(rmstring "${CMAKE_BINARY_DIR}/delphes-prefix/src/delphes-stamp/delphes")
+  add_custom_target(clean-delphes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
+                                  COMMAND cd ${DELPHES_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
   add_dependencies(distclean clean-delphes)
 endif()
 
@@ -125,9 +127,12 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   message("${BoldYellow}-- Determined FlexibleSUSY compiler library dependencies: ${flexiblesusy_extralibs}${ColourReset}")
   set(flexiblesusy_LDFLAGS "${flexiblesusy_LDFLAGS} ${flexiblesusy_extralibs}")
 
-  # We need to include some stuff from the eigen3 library.  Just ship it until we can get rid of FlexibleSUSY.
-  set(EIGEN3_DIR "${PROJECT_SOURCE_DIR}/contrib/eigen3")
-  include_directories("${EIGEN3_DIR}")
+  # Silence the deprecated-declarations warnings comming from Eigen3
+  set_compiler_warning("no-deprecated-declarations" FS_CXX_FLAGS)
+
+  # Silence the unused parameter and variable warnings comming from FlexibleSUSY
+  set_compiler_warning("no-unused-parameter" FS_CXX_FLAGS)
+  set_compiler_warning("no-unused-variable" FS_CXX_FLAGS)
 
   # FlexibleSUSY configure options
   set(FS_OPTIONS ${FS_OPTIONS}
@@ -136,19 +141,17 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
        --with-ldflags=${OpenMP_CXX_FLAGS}
        --with-fc=${CMAKE_Fortran_COMPILER}
        --with-fflags=${FS_Fortran_FLAGS}
-       --with-eigen-incdir=${EIGEN3_DIR}
+       --with-eigen-incdir=${EIGEN3_INCLUDE_DIR}
        --with-boost-libdir=${Boost_LIBRARY_DIR}
        --with-boost-incdir=${Boost_INCLUDE_DIR}
        --with-lapack-libs=${LAPACK_LINKLIBS}
        --with-blas-libs=${LAPACK_LINKLIBS}
       #--enable-verbose flag causes verbose output at runtime as well. Maybe set it dynamically somehow in future.
      )
+  message("FS OPTIONS = ${FS_OPTIONS}")
 
   # Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need)
-
-
   set(BUILT_FS_MODELS CMSSM MSSMatMGUT MSSM SingletDMZ3 SingletDM)
-
 
   # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
   string (REPLACE ";" "," BUILT_FS_MODELS_COMMAS "${BUILT_FS_MODELS}")
@@ -164,6 +167,9 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
     message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
     message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
   endif()
+  set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)
+
   message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
 
   # Add FlexibleSUSY as an external project
@@ -171,7 +177,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
     SOURCE_DIR ${FS_DIR}
     BUILD_IN_SOURCE 1
     BUILD_COMMAND $(MAKE) alllib
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND ${config_command}
     INSTALL_COMMAND ""
   )
 
@@ -201,9 +207,13 @@ else()
   set (EXCLUDE_FLEXIBLESUSY TRUE)
 
 endif()
+
 # Add clean info
-add_external_clean(flexiblesusy ${FS_DIR} null clean)
-add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean &&
-                                                 ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "To get flexiblesusy to rebuild now, you must call make configure-flexiblesusy or rerun cmake.") || true)
+add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
+                                     COMMAND [ -e ${FS_DIR} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} clean) || true)
+add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+add_custom_target(nuke-flexiblesusy)
 add_dependencies(distclean-flexiblesusy clean-flexiblesusy)
+add_dependencies(nuke-flexiblesusy distclean-flexiblesusy)
 add_dependencies(distclean distclean-flexiblesusy)
+add_dependencies(nuke-all nuke-flexiblesusy)

@@ -15,6 +15,7 @@
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2014 Mar, May
+///        2016 Aug
 ///
 ///  *********************************************
 
@@ -51,9 +52,6 @@ namespace Gambit
     const bool verbose = false;
 
     // If you add to the following message tags, make sure to update the enum in log_tags.hpp that tracks the number of them!
-    // These won't compile in g++ if the LogTags are const, something about how standard containers work...
-
-    // Arg ok, when trying to write log messages from the LogMaster destructor, these containers may have been destructed first. To get around this, the LogMaster will internalise all of these when it is constructed.
 
     // Function to retrieve the 'msgtypes' set of tags
     const std::set<LogTag>& msgtypes()
@@ -69,6 +67,14 @@ namespace Gambit
       static LogTag flags_a[] = {fatal, nonfatal};
       static const std::set<LogTag> flags_set(flags_a, flags_a+sizeof(flags_a)/sizeof(flags_a[0]));
       return flags_set;
+    }
+
+    // Function to retrieve the 'echoes' set of tags
+    const std::set<LogTag>& echoes()
+    {
+      static LogTag echoes_a[] = {repeat_to_cout, repeat_to_cerr};
+      static const std::set<LogTag> echoes_set(echoes_a, echoes_a+sizeof(echoes_a)/sizeof(echoes_a[0]));
+      return echoes_set;
     }
 
     // Function to retrieve the 'components' set of tags (needed by module and backend macros so they can add to it)
@@ -91,6 +97,9 @@ namespace Gambit
        /* Flags */
        m[fatal]   = "Fatal";
        m[nonfatal]= "Non-fatal";
+       /* Repeaters */
+       m[repeat_to_cout]   = "Echo > stout";
+       m[repeat_to_cerr]= "Echo > sterr";
        /* Component tags */
        m[def]     = "Default";
        m[core]    = "Core";
@@ -163,6 +172,11 @@ namespace Gambit
        {
          std::cout<<"  "<<*tag<<" : "<<tag2str()[*tag]<<std::endl;
        }
+       std::cout<<"Checking message echo LogTags..."<<std::endl;
+       for(std::set<LogTag>::iterator tag = echoes().begin(); tag != echoes().end(); ++tag)
+       {
+         std::cout<<"  "<<*tag<<" : "<<tag2str()[*tag]<<std::endl;
+       }
        std::cout<<"Checking Gambit component LogTags..."<<std::endl;
        for(std::set<int>::iterator tag = components().begin(); tag != components().end(); ++tag)
        {
@@ -219,6 +233,12 @@ namespace Gambit
            //std::cout<<"Identified tag '"<<tag2str()[*tag]<<"' as message flag"<<std::endl;
            flag_tags.insert(static_cast<LogTag>(*tag));
          }
+         else if ( echoes().find(static_cast<LogTag>(*tag)) != echoes().end() )
+         {
+           // If tag is a message echo flag, add it to the echo_tags set
+           //std::cout<<"Identified tag '"<<tag2str()[*tag]<<"' as message echo flag"<<std::endl;
+           echo_tags.insert(static_cast<LogTag>(*tag));
+         }
          else
          {
            // If tag was not in of those categories, it shouldn't have been a valid LogTag, and so there should have been a compiler error before now. Since there wasn't, there is something wrong with the LogTag definitions, the tag categories, or this function.
@@ -270,7 +290,7 @@ namespace Gambit
       , MPIsize(1)
     {
       #ifdef WITH_MPI
-      if(GMPI::Is_initialized())
+      if(GMPI::Is_initialized() && !GMPI::Is_finalized())
       {
         GMPI::Comm COMM_WORLD;
         MPIsize = COMM_WORLD.Get_size();

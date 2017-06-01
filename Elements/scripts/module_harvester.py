@@ -5,40 +5,43 @@
 # \file
 #
 #  Module and functor type harvesting script
-#  Generates all_functor_types.hpp,  
-#  module_rollcall.hpp, 
-#  module_types_rollcall.hpp and
-#  *Bit/examples/standalone_functors.cpp
-#  
-#  This script identifies then reads through 
-#  all the module rollcall and frontend headers, 
-#  and harvests the types of every functor that 
+#  Generates:
+#   Backends/include/backend_functor_types.hpp,
+#   Core/include/module_rollcall.hpp
+#   Elements/module_types_rollcall.hpp
+#   Elements/module_functor_types.hpp
+#
+#  This script identifies then reads through
+#  all the module rollcall and frontend headers,
+#  and harvests the types of every functor that
 #  GAMBIT will try to compile. These are needed
-#  to generate the default (virtual) 
+#  to generate the default (virtual)
 #  'print' functions in the base printer class
 #  (see Printers/include/gambit/Printers/
 #  baseprinter.hpp).
 #
 #  It also finds all the module type headers
-#  and includes them in module_types_rollcall.hpp.  
+#  and includes them in module_types_rollcall.hpp.
 #
 #*********************************************
 #
 #  Authors (add name and date if you modify):
-#   
-#  \author Ben Farmer 
+#
+#  \author Ben Farmer
 #          (ben.farmer@gmail.com)
 #    \date 2013 Sep
 #          2014 Jan
 #          2015 Jul
 #
-#  \author Pat Scott 
+#  \author Pat Scott
 #          (patscott@physics.mcgill.ca)
 #    \date 2013 Oct, Nov
 #    \date 2014 Jan, Nov
 #    \date 2015 Feb
 #
 #*********************************************
+
+import pickle
 execfile("./Utils/scripts/harvesting_tools.py")
 
 def main(argv):
@@ -53,8 +56,8 @@ def main(argv):
     except getopt.GetoptError:
         print 'Usage: module_harvestor.py [flags]'
         print ' flags:'
-        print '        -v                     : More verbose output'  
-        print '        -x module1,module2,... : Exclude module1, module2, etc.' 
+        print '        -v                     : More verbose output'
+        print '        -x module1,module2,... : Exclude module1, module2, etc.'
         sys.exit(2)
     for opt, arg in opts:
       if opt in ('-v','--verbose'):
@@ -70,13 +73,14 @@ def main(argv):
     modules=set([])
 
     # List of headers to search
-    rollcall_headers = set(["gambit/Backends/backend_rollcall.hpp"])
+    rollcall_headers = set(["gambit/Backends/backend_rollcall.hpp", "Models/include/gambit/Models/model_rollcall.hpp"])
     type_headers     = set(["gambit/Elements/types_rollcall.hpp"])
 
-    # List of headers NOT to search (things we know are not module rollcall headers or module type headers, 
+    # List of headers NOT to search (things we know are not module rollcall headers or module type headers,
     # but are included in module_rollcall.hpp or types_rollcall.hpp)
     exclude_header.update(["shared_types.hpp", "backend_macros.hpp", "backend_undefs.hpp", "identification.hpp",
-                           "yaml.h"])
+                           "yaml.h", "module_macros_incore.hpp", "module_macros_inmodule.hpp", "module_macros_common.hpp",
+                           "model_macros.hpp"])
 
     # List of types not to bother looking for the definitions of.
     intrinsic_types=set(["char", "bool", "short", "int", "long", "float", "double", "std::string"])
@@ -84,16 +88,17 @@ def main(argv):
     # List of types NOT to return (things we know are not printable, but can appear in START_FUNCTION calls)
     exclude_types=set(["void"])
     # Check if Delphes is on the exclude list, and leave out Delphes types if it is.  FIXME this is only until Delphes is BOSSed.
-    if any(x in exclude_modules for x in ["D","De","Del","Delp","Delph","Delphe","Delphes"]): 
+    if any(x in exclude_modules for x in ["D","De","Del","Delp","Delph","Delphe","Delphes"]):
       exclude_types.add("Gambit::ColliderBit::DelphesVanilla")
       exclude_types.add("ColliderBit::DelphesVanilla")
       exclude_types.add("DelphesVanilla")
 
     # List of directory names to ignore when searching for headers
-    exclude_dirs=set([".git","build","doc","cmake","extras","config","contrib","runs","Logs","Printers","scratch"])
+    exclude_dirs=set([".git","build","doc","cmake","extras","config","contrib","runs","Logs","Printers","scratch","installed","scripts"])
 
-    # Load up the sets of equivalent types
-    equiv_classes = get_type_equivalencies()
+    # Load up the sets of equivalent types and namespaces
+    equiv_ns = get_default_boss_namespaces()
+    equiv_classes = get_type_equivalencies(equiv_ns)
 
     # Get list of rollcall header files to search
     module_rollcall_headers.update(retrieve_rollcall_headers(verbose,".",exclude_header))
@@ -147,7 +152,7 @@ def main(argv):
     for h in module_type_headers:
         towrite+='#include \"{0}\"\n'.format(h)
     towrite+="\n#endif // defined __module_types_rollcall_hpp__\n"
-    
+
     # Don't touch any existing file unless it is actually different from what we will create
     header = "./Elements/include/gambit/Elements/module_types_rollcall.hpp"
     candidate = "./scratch/module_types_rollcall.hpp.candidate"
@@ -156,21 +161,21 @@ def main(argv):
 
     print "Harvesting types from headers..."
 
-    # Recurse through chosen rollcall headers, locating all the included headers therein, and find them all 
-    # in the gambit source tree so that we can parse them for types etc.   
+    # Recurse through chosen rollcall headers, locating all the included headers therein, and find them all
+    # in the gambit source tree so that we can parse them for types etc.
     if verbose: print "  Searching rollcall headers..."
     find_and_harvest_headers(rollcall_headers,full_rollcall_headers,exclude_header,exclude_dirs,verbose=verbose)
     if verbose: print "  Searching type headers..."
     find_and_harvest_headers(type_headers,full_type_headers,exclude_header,exclude_dirs,verbose=verbose)
 
-    # Search through rollcall headers and look for macro calls that create module_functors or safe pointers to them 
+    # Search through rollcall headers and look for macro calls that create module_functors or safe pointers to them
     types=set(["ModelParameters", "double", "float", "std::vector<double>", "std::vector<float>"]) #Manually add these, as they must always be included.
     non_module_types=set(["ModelParameters", "double", "float", "std::vector<double>", "std::vector<float>"])
     returned_types = { "all" : types, "non_module" : non_module_types }
     for header in full_rollcall_headers:
         with open(header) as f:
             if verbose: print "  Scanning header {0} for types used to instantiate module functor class templates".format(header)
-            module = ""
+            module = "__NotAModule__"
             continued_line = ""
             for line in readlines_nocomments(f):
                 continued_line += line
@@ -178,16 +183,16 @@ def main(argv):
                 # If this line defines the module name, update it.
                 module = update_module(continued_line,module)
                 # Check for calls to module functor creation macros, and harvest the types used.
-                addiffunctormacro(continued_line,module,modules,returned_types,full_type_headers,intrinsic_types,exclude_types,equiv_classes,verbose=verbose)
+                addiffunctormacro(continued_line,module,modules,returned_types,full_type_headers,intrinsic_types,exclude_types,equiv_classes,equiv_ns,verbose=verbose)
                 continued_line = ""
-        
+
     print "Found types for module functions:"
     for t in types:
         print ' ',t
-    
-    # Search through rollcall and frontend headers and look for macro calls that create backend_functors or safe pointers to them 
+
+    # Search through rollcall and frontend headers and look for macro calls that create backend_functors or safe pointers to them
     be_types=set()
-    type_packs=set() 
+    type_packs=set()
     for header in full_rollcall_headers:
         with open(header) as f:
             if verbose: print "  Scanning header {0} for types used to instantiate backend functor class templates".format(header)
@@ -196,21 +201,21 @@ def main(argv):
                 continued_line += line
                 if line.strip().endswith(","): continue
                 # Check for calls to backend functor creation macros, and harvest the types used.
-                addifbefunctormacro(continued_line,be_types,type_packs,equiv_classes,verbose=verbose)
+                addifbefunctormacro(continued_line,be_types,type_packs,equiv_classes,equiv_ns,verbose=verbose)
                 continued_line = ""
-        
+
     print "Found types for backend functions and variables:"
     for t in be_types:
         if t != "": print ' ',t
 
-    # Generate a c++ header containing the preprocessor sequence needed by Printers/include/gambit/Printers/printer_rollcall.hpp, containing all the types we have harvested.
+    # Generate a c++ header containing the backend functor template specialisations, using all the backend types we have harvested.
     towrite = "\
 //   GAMBIT: Global and Modular BSM Inference Tool\n\
 //   *********************************************\n\
 ///  \\file                                       \n\
 ///                                               \n\
-///  Automatically generated preprocessor sequence\n\
-///  of functor types.                            \n\
+///  Automatically generated template             \n\
+///  specialisations for backend functors.        \n\
 ///                                               \n\
 ///  This file was automatically generated by     \n\
 ///  module_harvester.py. Do not modify.          \n\
@@ -229,48 +234,43 @@ def main(argv):
 ///                                               \n\
 ///  *********************************************\n\
                                                   \n\
-#ifndef __all_functor_types_hpp__                 \n\
-#define __all_functor_types_hpp__                 \n\
+#ifndef __backend_functor_types_hpp__             \n\
+#define __backend_functor_types_hpp__             \n\
                                                   \n\
 #include \"gambit/Elements/types_rollcall.hpp\"   \n\
+#include \"gambit/Elements/functor_definitions.hpp\"\n\
                                                   \n\
-// Automatically generated preprocessor sequence of module functor types \n\
-#define MODULE_FUNCTOR_TYPES \\\n"
-    for t in types:
-        towrite+='({0})'.format(t)+"\\\n"
-
-    towrite+="\n\
-// Automatically generated preprocessor sequence of backend functor types \n\
-#define BACKEND_FUNCTOR_TYPES \\\n"
+namespace Gambit                                  \n\
+{                                                 "
     for tp in type_packs:
-        towrite+='(({0}))'.format(tp)+"\\\n"
+        towrite+="\n\
+  template class backend_functor_common<{0}>;\n\
+  template class backend_functor<{0}>;".format(tp)+"\n"
+    towrite+="}\n\n#endif // defined __backend_functor_types_hpp__\n"
 
-    towrite+="\n\n#endif // defined __all_functor_types_hpp__\n"
-    
     # Don't touch any existing file unless it is actually different from what we will create
-    header = "./Elements/include/gambit/Elements/all_functor_types.hpp"
-    candidate = "./scratch/all_functor_types.hpp.candidate"
+    header = "./Backends/include/gambit/Backends/backend_functor_types.hpp"
+    candidate = "./scratch/backend_functor_types.hpp.candidate"
     with open(candidate,"w") as f: f.write(towrite)
     update_only_if_different(header, candidate)
 
-    # Generate a c++ source file containing all the explicit functor template specialisations needed by each module in standalone mode.
-    for module in modules:
-        if module == "all" or module == "non_module": continue
-        towrite = "\
+
+    # Generate a c++ source file containing the module functor template specialisations, using all the module types we have harvested.
+    towrite = "\
 //   GAMBIT: Global and Modular BSM Inference Tool\n\
 //   *********************************************\n\
 ///  \\file                                       \n\
 ///                                               \n\
-///  Explicit functor template class              \n\
-///  instantiations needed in standalone mode by  \n\
-///  "+module+".                                  \n\
+///  Automatically generated template             \n\
+///  specialisations for module functors, for     \n\
+///  the full GAMBIT executable.                  \n\
 ///                                               \n\
 ///  This file was automatically generated by     \n\
 ///  module_harvester.py. Do not modify.          \n\
-///  The content is harvested from the rollcall   \n\
-///  headers registered in module_rollcall.hpp    \n\
-///  and the types registered in                  \n\
-///  types_rollcall.hpp.                          \n\
+///                                               \n\
+///  The content is harvested from:               \n\
+///   - rollcall headers in module_rollcall.hpp   \n\
+///   - types registered in types_rollcall.hpp    \n\
 ///                                               \n\
 ///  *********************************************\n\
 ///                                               \n\
@@ -281,48 +281,33 @@ def main(argv):
 ///                                               \n\
 ///  *********************************************\n\
                                                   \n\
-#include \"gambit/Elements/functor_definitions.hpp\"\n\
+#ifndef __module_functor_types_hpp__              \n\
+#define __moduel_functor_types_hpp__              \n\
+                                                  \n\
 #include \"gambit/Elements/types_rollcall.hpp\"   \n\
-#include \"gambit/Elements/all_functor_types.hpp\"\n\
+#include \"gambit/Elements/functor_definitions.hpp\"\n\
                                                   \n\
 namespace Gambit                                  \n\
-{                                                 \n\
-  // Non-module types                             \n\
-  template class module_functor<void>;            \n" 
-        for t in returned_types["non_module"]:
-            towrite += "  template class module_functor<"+t+">;\n"
-        if module in returned_types: 
-            towrite += "  // "+module+" types\n"
-            for t in returned_types[module]: towrite += "  template class module_functor<"+t+">;\n"
-        else:
-            towrite += "  // No module-specific types for "+module+".\n"
-        towrite += "}\n\n\
-// Instantiate the backend functor templates for all required types \n\
-BOOST_PP_SEQ_FOR_EACH(INSTANTIATE_BACKEND_FUNCTOR_TEMPLATE,,BACKEND_FUNCTOR_TYPES)\n\
-\n\
-// Define the functor helper functions for this standalone compilation unit\n\
-// Define standalone version of functor signal helpers (that do nothing)\n\
-namespace Gambit {\n\
-  namespace FunctorHelp {\n\
-    void check_for_shutdown_signal(module_functor_common&) {}\n\
-    bool emergency_shutdown_begun() { return false; }\n\
-    void entering_multithreaded_region(module_functor_common&) {}\n\
-    void leaving_multithreaded_region(module_functor_common&) {}\n\
-  }\n\
-}\n"
+{                                                 \n"
+    for t in types:
+        towrite += '  template class module_functor<{0}>;\n'.format(t)
+    towrite+="}\n\n#endif // defined __module_functor_types_hpp__\n"
 
-        # Don't touch any existing file unless it is actually different from what we will create
-        filename = "./"+module+"/examples/standalone_functors.cpp"
-        candidate = "./scratch/"+module+"_standalone_functors.cpp.candidate"
-        with open(candidate,"w") as f: f.write(towrite)
-        update_only_if_different(filename, candidate)
+    # Don't touch any existing file unless it is actually different from what we will create
+    source = "./Elements/include/gambit/Elements/module_functor_types.hpp"
+    candidate = "./scratch/module_functor_types.hpp.candidate"
+    with open(candidate,"w") as f: f.write(towrite)
+    update_only_if_different(source, candidate)
 
     if verbose:
-        print "\nGenerated module_rollcall.hpp." 
-        print "Generated module_types_rollcall.hpp." 
-        print "Generated all_functor_types.hpp."
-        print "Generated standalone_functors.cpp.\n" 
+        print "\nGenerated Core/module_rollcall.hpp."
+        print "Generated Elements/module_types_rollcall.hpp."
+        print "Generated Elements/module_functor_types.hpp."
+        print "Generated Backends/backend_functor_types.hpp."
 
+    # Pickle the types for later usage by standalone_facilitator.py
+    with open('./scratch/harvested_types.pickle', 'wb') as handle:
+        pickle.dump(returned_types, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Handle command line arguments (verbosity)
 if __name__ == "__main__":

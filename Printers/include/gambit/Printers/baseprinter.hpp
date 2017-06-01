@@ -33,22 +33,18 @@
 #include "gambit/Utils/factory_registry.hpp"
 #include "gambit/Utils/model_parameters.hpp"
 
-// Boost
-#include <boost/preprocessor/seq/for_each.hpp>
-#include <boost/preprocessor/punctuation/comma_if.hpp>
-
 // Printable types
-#ifndef STANDALONE
+#ifndef SCANNER_STANDALONE
    // If we are in a main gambit executable, we need to know all the GAMBIT printable types
    #include "gambit/Elements/printable_types.hpp"
 #else
    // Otherwise, we are in the ScannerBit standalone executable and need only a limited set.
-   //#include "gambit/ScannerBit/printable_types.hpp"
+   #include "gambit/ScannerBit/printable_types.hpp"
 
    // Already dealt with in basebaseprinter? Can possibly do this to deal with
    // lack of new types, rest will be inherited anyway.
-   #define PRINTABLE_TYPES (double)
-   #define RETRIEVABLE_TYPES (double)
+   #define PRINTABLE_TYPES SCANNER_PRINTABLE_TYPES
+   #define RETRIEVABLE_TYPES SCANNER_RETRIEVABLE_TYPES
 #endif
 
 // This macro registers each printer so that they can be constructed automatically from inifile instructions
@@ -62,6 +58,13 @@ namespace Gambit
 {
   namespace Printers
   {
+
+    // Helper function for parsing ModelParameters label strings.
+    bool parse_label_for_ModelParameters(const std::string& fulllabel, const std::string& modelname, std::string& out, std::string& rest);
+
+    /// For debugging; print to stdout all the typeIDs for all types.
+    void printAllTypeIDs(void);
+
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     //% Printer class declarations                          %
@@ -78,12 +81,12 @@ namespace Gambit
         BasePrinter()
           : primary_printer(NULL)
           , is_aux(false)
-        {}
+       {}
 
         BasePrinter(BasePrinter* const primary, bool is_aux_IN)
           : primary_printer(primary)
           , is_aux(is_aux_IN)
-        {}
+       {}
 
         /// Destructor
         virtual ~BasePrinter() {}
@@ -122,10 +125,10 @@ namespace Gambit
         }
         bool is_auxilliary_printer() { return is_aux; }
 
-         
+
         // Printer dispatch function. This is defined already
         // in the BaseBasePrinter class, but I think I need it
-        // here as well so that that BasePrinter version can 
+        // here as well so that that BasePrinter version can
         // detect the new virtual function overloads which exist
         // in this class.
         template<typename T>
@@ -133,14 +136,24 @@ namespace Gambit
                    const int vertexID, const uint rank,
                    const ulong pointID)
         {
-          _print(in, label, vertexID, rank, pointID);
+          if(printer_enabled) _print(in, label, vertexID, rank, pointID);
+        }
+
+        // Overload which automatically determines a unique ID code
+        // based on the label.
+        template<typename T>
+        void print(T const& in, const std::string& label,
+                   const uint rank,
+                   const ulong pointID)
+        {
+          if(printer_enabled) _print(in, label, rank, pointID);
         }
 
       protected:
         using BaseBasePrinter::_print; //unhide the default function in the base class
 
         // We need to have a virtual print method for every type that we want to
-        // be able to print. The list of these types is maintained in 
+        // be able to print. The list of these types is maintained in
         // "gambit/Elements/printable_types.hpp"
         // Run the macro; add all the print functions
         ADD_VIRTUAL_PRINTS(PRINTABLE_TYPES)
@@ -152,26 +165,29 @@ namespace Gambit
     {
       public:
         BaseReader() {}
-    
+
         /// Destructor
         virtual ~BaseReader() {}
 
         // retrieve function dispatch
         template<typename T>
-        void retrieve(T& out, const std::string& label, const uint rank, const ulong pointID)
+        bool retrieve(T& out, const std::string& label, const uint rank, const ulong pointID)
         {
-          _retrieve(out, label, rank, pointID);
+          return _retrieve(out, label, rank, pointID);
         }
-    
+
+        /// Retrieve and directly print data to new output
+        bool retrieve_and_print(const std::string& in_label, const std::string& out_label, BaseBasePrinter& printer, const uint rank, const ulong pointID);
+
       protected:
         using BaseBaseReader::_retrieve; //unhide the default function in the base class
-    
+
         // We need to have a virtual 'retrieve' method for every type that we want to
-        // be able to retrieve. The list of these types is maintained in 
+        // be able to retrieve. The list of these types is maintained in
         // "gambit/Elements/printable_types.hpp"
         // Run the macro; add all the print functions
-        ADD_VIRTUAL_RETRIEVALS(RETRIEVABLE_TYPES) 
-    
+        ADD_VIRTUAL_RETRIEVALS(RETRIEVABLE_TYPES)
+
     };
 
 
@@ -183,9 +199,9 @@ namespace Gambit
     // (this is set up by the typedef)
     registry
     {
-            typedef BasePrinter* create_printer_function(const Options&, BasePrinter* const&); 
+            typedef BasePrinter* create_printer_function(const Options&, BasePrinter* const&);
             reg_elem <create_printer_function> printer_creators;
- 
+
             typedef BaseReader* create_reader_function(const Options&);
             reg_elem <create_reader_function> reader_creators;
     }
