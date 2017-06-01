@@ -4,7 +4,7 @@
 #include <iomanip>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+// #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 /// @todo Remove the ROOT classes...
 

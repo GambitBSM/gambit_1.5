@@ -38,7 +38,6 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/ExampleBit_A/ExampleBit_A_rollcall.hpp"
 
-#include "gambit/Utils/signal_handling.hpp" // temp
 
 namespace Gambit
 {
@@ -164,7 +163,20 @@ namespace Gambit
       {
         for (int i=0; i<N; ++i)
         {
-          loglTotal += logf(samples[i], *Param["mu"], *Param["sigma"]);
+          double mu = *Param["mu"];
+          double sigma = *Param["sigma"];
+          if(Utils::isnan(mu) or Utils::isnan(sigma))
+          {
+            ExampleBit_A_error().raise(LOCAL_INFO,"NaN detected in input parameters for model"
+            " NormalDist! This may indicate a bug in the scanner plugin you are using.");
+          }
+          if(sigma==0.)
+          {
+             // likelihood is nan if sigma=0, so the point is invalid.
+             invalid_point().raise("NormalDist::sigma = 0; likelihood is NaN, point invalid.");
+          }
+
+          loglTotal += logf(samples[i], mu, sigma);
         }
       }
       else
@@ -173,6 +185,15 @@ namespace Gambit
           " NormalDist! There is probably a bug ExampleBit_A_rollcall.hpp; this module "
           " function should have ALLOW_MODELS(NormalDist) defined.");
       }
+
+      // Randomly raise some ficticious alarms about this point, with probability x,
+      // where x is given by the input yaml option or a default of 1.
+      double x = 1.0-runOptions->getValueOrDef<double>(1., "probability_of_validity");
+      if (Random::draw() < x)
+      {
+        invalid_point().raise("I don't like this point.");
+      }
+
       result = loglTotal;
     }
 
@@ -204,18 +225,12 @@ namespace Gambit
 
       logger() << "Running eventLoopManager" << EOM;
 
-      if(not signaldata().inside_multithreaded_region())
-      {
-        std::cerr << "Inside eventLoopManager, but inside_omp_block flag is not set to 1!" << std::endl;
-        exit(EXIT_FAILURE);
-      }
-
       //A simple loop example using OpenMP
       unsigned int it = 0;
       Loop::executeIteration(it);         //Do the zero iteration separately to allow nested functions to self-init.
       #pragma omp parallel
       {
-        while(not *Loop::done and it<nEvents and not piped_errors.inquire()) 
+        while(not *Loop::done and it<nEvents and not piped_errors.inquire())
         { Loop::executeIteration(it++); }
       }
       // Raise any piped exceptions that occurred in the loop functors
@@ -245,27 +260,24 @@ namespace Gambit
     {
       using namespace Pipes::exampleEventGen;
       result = Random::draw()*5.0;                 // Generate and return the random number
+
+      // Print some diagnostic info
       //#pragma omp critical (print)
       //{
       //  cout<<"  Running exampleEventGen in iteration "<<*Loop::iteration<<endl;
       //}
-      if(not signaldata().inside_multithreaded_region())
-      {
-        std::cerr << "Inside exampleEventGen, but inside_omp_block flag is not set to 1!" << std::endl;
-        exit(EXIT_FAILURE);
-      }
- 
-      // Testing MPI shutdown on random failure
+
+      // Test MPI shutdown on random failure
       // if(result<0.0001*5.0) // shut down with 0.01% probability
       // {
       //   // Don't raise errors like this when inside a looped region:
-      //   //   ExampleBit_A_error().raise(LOCAL_INFO,"Error triggered for testing purposes.");  
+      //   //   ExampleBit_A_error().raise(LOCAL_INFO,"Error triggered for testing purposes.");
       //   // Must raise them like this instead:
       //   piped_errors.request(LOCAL_INFO, "Error triggered for testing purposes.");
       // }
 
-      // testing loggers during parallel block...
-      logger() << "thread "<<omp_get_thread_num()<<": Running exampleEventGen in iteration "<<*Loop::iteration<<EOM;
+      // Test loggers during parallel block
+      logger() << "Thread "<<omp_get_thread_num()<<": Running exampleEventGen in iteration "<<*Loop::iteration<<EOM;
 
       //if (result > 2.0) invalid_point().raise("This point is annoying.");
     }
@@ -291,12 +303,6 @@ namespace Gambit
 
       // Do the actual computations in each thread seperately
       int increment = *Dep::event + 1;
-
-      if(not signaldata().inside_multithreaded_region())
-      {
-        std::cerr << "Inside eventAccumulator, but inside_omp_block flag is not set to 1!" << std::endl;
-        exit(EXIT_FAILURE);
-      }
 
       // Only let one thread at a time mess with the accumulator.
       #pragma omp critical (eventAccumulator_update)
@@ -385,23 +391,23 @@ namespace Gambit
       cout << "Playing around with commmonBlock2:" << endl;
 
       cout << "Reading charb(3) with and without trailing spaces. Result:" << endl;
-      std::string trail   = commonBlock2->charb(3).str();
-      std::string noTrail = commonBlock2->charb(3).trimmed_str();
+      std::string trail   = commonBlock2->charb(3)->str();
+      std::string noTrail = commonBlock2->charb(3)->trimmed_str();
       cout << trail   << "<-- string ends here" << endl;
       cout << noTrail << "<-- string ends here" << endl << endl;
 
       cout << "Reading the elements of charc from c++:" << endl;
-      cout << "(1,-1):" << commonBlock2->charc(1,-1).trimmed_str() << "  (1,0):" << commonBlock2->charc(1,0).trimmed_str() << endl;
-      cout << "(2,-1):" << commonBlock2->charc(2,-1).trimmed_str() << "  (2,0):" << commonBlock2->charc(2,0).trimmed_str() << endl << endl;
+      cout << "(1,-1):" << commonBlock2->charc(1,-1)->trimmed_str() << "  (1,0):" << commonBlock2->charc(1,0)->trimmed_str() << endl;
+      cout << "(2,-1):" << commonBlock2->charc(2,-1)->trimmed_str() << "  (2,0):" << commonBlock2->charc(2,0)->trimmed_str() << endl << endl;
 
       cout << "Setting charc(2,0) = chara." << endl;
-      commonBlock2->charc(2,0)=commonBlock2->chara;
+      *commonBlock2->charc(2,0)=commonBlock2->chara;
       cout << "Setting charc(1,-1) = \"WIN!567\", which will be truncated." << endl;
-      commonBlock2->charc(1,-1) = "WIN!567";
+      *commonBlock2->charc(1,-1) = "WIN!567";
       cout << "Setting charb(1) = \"ha!\"." << endl;
-      commonBlock2->charb(1) = "ha!";
+      *commonBlock2->charb(1) = "ha!";
       cout << "Setting charb(2) = chara." << endl;
-      commonBlock2->charb(2) = commonBlock2->chara;
+      *commonBlock2->charb(2) = commonBlock2->chara;
 
       cout << "Calling printStuff..." << endl;
       BEreq::libFarrayTest_printStuff();
@@ -453,7 +459,11 @@ namespace Gambit
       cout << "Testing Pythia backend" << endl;
       cout << "======================" << endl;
 
-      Pythia8::Pythia pythia("../extras/boss/bossed_pythia_source/xmldoc", false);
+      static str default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" + 
+                                    Backends::backendInfo().default_version("Pythia") + 
+                                    "/share/Pythia8/xmldoc/";
+
+      Pythia8::Pythia pythia(default_doc_path, false);
 
       pythia.readString("Beams:eCM = 8000.");
       pythia.readString("HardQCD:all = on");
@@ -510,6 +520,8 @@ namespace Gambit
       result = test3;
     }
 
+    /// Flat test likelihood for checking prior distributions
+    void flat_likelihood(double &result){ result = 1; }
 
     /// @}
   }

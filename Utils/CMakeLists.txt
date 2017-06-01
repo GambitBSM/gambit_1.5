@@ -21,7 +21,6 @@
 #************************************************
 
 set(source_files src/ascii_table_reader.cpp
-                 src/equivalency_singleton.cpp
                  src/exceptions.cpp
                  src/file_lock.cpp
                  src/mpiwrapper.cpp
@@ -31,19 +30,19 @@ set(source_files src/ascii_table_reader.cpp
                  src/signal_handling.cpp
                  src/signal_helpers.cpp
                  src/standalone_error_handlers.cpp
+                 src/standalone_utils.cpp
                  src/statistics.cpp
                  src/stream_overloads.cpp
                  src/table_formatter.cpp
                  src/threadsafe_rng.cpp
-                 src/type_equivalency.cpp
                  src/util_functions.cpp
+                 src/version.cpp
                  src/yaml_parser_base.cpp
-)                 
+)
 
 set(header_files include/gambit/Utils/ascii_table_reader.hpp
                  include/gambit/Utils/boost_fallbacks.hpp
                  include/gambit/Utils/cats.hpp
-                 include/gambit/Utils/equivalency_singleton.hpp
                  include/gambit/Utils/exceptions.hpp
                  include/gambit/Utils/file_lock.hpp
                  include/gambit/Utils/mpiwrapper.hpp
@@ -51,17 +50,18 @@ set(header_files include/gambit/Utils/ascii_table_reader.hpp
                  include/gambit/Utils/factory_registry.hpp
                  include/gambit/Utils/local_info.hpp
                  include/gambit/Utils/model_parameters.hpp
+                 include/gambit/Utils/numerical_constants.hpp
                  include/gambit/Utils/safebool.hpp
                  include/gambit/Utils/screen_print_utils.hpp
                  include/gambit/Utils/signal_handling.hpp
                  include/gambit/Utils/signal_helpers.hpp
                  include/gambit/Utils/standalone_error_handlers.hpp
+                 include/gambit/Utils/standalone_utils.hpp
                  include/gambit/Utils/static_members.hpp
                  include/gambit/Utils/statistics.hpp
-                 include/gambit/Utils/stream_overloads.hpp 
+                 include/gambit/Utils/stream_overloads.hpp
                  include/gambit/Utils/threadsafe_rng.hpp
                  include/gambit/Utils/table_formatter.hpp
-                 include/gambit/Utils/type_equivalency.hpp
                  include/gambit/Utils/type_index.hpp
                  include/gambit/Utils/type_macros.hpp
                  include/gambit/Utils/util_functions.hpp

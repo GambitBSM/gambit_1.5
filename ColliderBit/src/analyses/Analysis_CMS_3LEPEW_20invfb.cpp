@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 /* A simulation of CMS paper PAS SUS-13-006
 
@@ -123,8 +123,7 @@ namespace Gambit {
         for (HEPUtils::Particle* tau : event->taus()) {
           if (tau->pT() > 20. && fabs(tau->eta()) < 2.4) signalTaus.push_back(tau);
         }
-        /// @TODO ATLAS? Really?
-        ATLAS::applyTauEfficiencyR1(signalTaus);
+        CMS::applyTauEfficiency(signalTaus);
 
         vector<HEPUtils::Jet*> signalJets;
         vector<HEPUtils::Jet*> bJets;

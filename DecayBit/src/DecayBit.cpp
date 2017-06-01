@@ -46,230 +46,45 @@ namespace Gambit
     /// \name Helper functions for DecayBit
     /// @{
 
-    /// Helper function to check if a width is negative and raise an error.
-    void check_negative_width(const str& info, double& w, bool raise_invalid_pt)
-    { 
+    /// Check if a width is negative or suspiciously large and raise an error.
+    void check_width(const str& info, double& w, bool raise_invalid_pt_negative_width = false, bool raise_invalid_pt_large_width = false)
+    {
+      if (Utils::isnan(w)) DecayBit_error().raise(info, "Decay width is NaN!");
       if (w < 0)
       {
-        if (raise_invalid_pt)
-          invalid_point().raise("Negative width returned!");
+        str nwiderr("Negative width returned!");
+        if (raise_invalid_pt_negative_width)
+          invalid_point().raise(nwiderr);
         else
-          DecayBit_error().raise(info, "Negative width returned!");
+          DecayBit_error().raise(info, nwiderr);
+      }
+      if (w > 1e7)
+      {
+        str lwiderr("Suspiciously large width returned: "+std::to_string(w)+" GeV");
+        if (raise_invalid_pt_large_width)
+          invalid_point().raise(lwiderr);
+        else
+          DecayBit_error().raise(info, lwiderr);
       }
     }
 
-    /// @}
-
-    
-
-    /// \name DecayBit module functions
-    /// @{
-
-
-    /////////////// Standard Model ///////////////////
-
-    /// SM decays: W+
-    void W_plus_decays (DecayTable::Entry& result)
+    /// Populate SM Higgs decay channels for a higgs mass of m_h
+    void compute_SM_higgs_decays(DecayTable::Entry& result, double mh)
     {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 2.085;
-      result.positive_error = 4.2e-02;
-      result.negative_error = 4.2e-02;
-      result.set_BF(0.1071, 0.0016, "e+", "nu_e");
-      result.set_BF(0.1063, 0.0015, "mu+", "nu_mu");
-      result.set_BF(0.1138, 0.0021, "tau+", "nu_tau");
-      result.set_BF(0.6741, 0.0027, "hadron", "hadron");
-    }
-
-    /// SM decays: W-
-    void W_minus_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::W_minus_decays::Dep::W_plus_decay_rates);
-    }
-
-    /// SM decays: Z
-    void Z_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 2.4952;
-      result.positive_error = 2.3e-03;
-      result.negative_error = 2.3e-03;
-      result.set_BF(0.03363, 0.00004, "e+", "e-");
-      result.set_BF(0.03366, 0.00007, "mu+", "mu-");
-      result.set_BF(0.03370, 0.00008, "tau+", "tau-");
-      result.set_BF(0.6991, 0.0006, "hadron", "hadron");
-    }
-
-    /// SM decays: t
-    void t_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 2.00;
-      result.positive_error = 4.7e-01;
-      result.negative_error = 4.3e-01;
-      result.set_BF(0.91, 0.04, "W+", "b");
-    }
-
-    /// SM decays: tbar
-    void tbar_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::tbar_decays::Dep::t_decay_rates);
-    }
-
-    /// SM decays: mu+
-    void mu_plus_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 2.9959847e-19;
-      result.positive_error = 3.0e-25;
-      result.negative_error = 3.0e-25;
-      result.set_BF(1.0, 0.0, "e+", "nu_e", "nubar_mu");
-    }
-
-    /// SM decays: mu-
-    void mu_minus_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::mu_minus_decays::Dep::mu_plus_decay_rates);
-    }
-
-    /// SM decays: tau+
-    void tau_plus_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 2.267E-12;
-      result.positive_error = 4.0e-15;
-      result.negative_error = 4.0e-15;
-      result.set_BF(0.1741, 0.0004, "mu+", "nu_mu", "nubar_tau");
-      result.set_BF(0.1783, 0.0004, "e+", "nu_e", "nubar_tau");
-      result.set_BF(0.1083, 0.0006, "pi+", "nubar_tau");
-      result.set_BF(0.2552, 0.0009, "pi+", "pi0", "nubar_tau");
-      result.set_BF(0.0930, 0.0011, "pi+", "pi0", "pi0", "nubar_tau");
-      result.set_BF(0.0105, 0.0007, "pi+", "pi0", "pi0", "pi0", "nubar_tau");
-      result.set_BF(0.0931, 0.0006, "pi+", "pi+", "pi-", "nubar_tau");
-      result.set_BF(0.0462, 0.0006, "pi+", "pi+", "pi-", "pi0", "nubar_tau");
-    }
-
-    /// SM decays: tau-
-    void tau_minus_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::tau_minus_decays::Dep::tau_plus_decay_rates);
-    }
-
-    /// SM decays: pi0
-    void pi_0_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 7.73e-09;
-      result.positive_error = 1.7e-10;
-      result.negative_error = 1.7e-10;
-      result.set_BF(0.98823, 0.00034, "gamma", "gamma");
-      result.set_BF(0.01174, 0.00035, "e+", "e-", "gamma");
-      result.set_BF(3.34e-5, 0.16e-5, "e+", "e-", "e+", "e-");
-      result.set_BF(6.46e-8, 0.33e-8, "e+", "e-");
-    }
-
-    /// SM decays: pi+
-    void pi_plus_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 2.5284e-17;
-      result.positive_error = 5.0e-21;
-      result.negative_error = 5.0e-21;
-      result.set_BF(0.9998770, 0.0000004, "mu+", "nu_mu");
-      result.set_BF(1.230e-4, 0.004e-4, "e+", "nu_e");
-    }
-
-    /// SM decays: pi-
-    void pi_minus_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::pi_minus_decays::Dep::pi_plus_decay_rates);
-    }
-
-    /// SM decays: eta
-    void eta_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 1.31e-06;
-      result.positive_error = 5.0e-08;
-      result.negative_error = 5.0e-08;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
-    }
-
-    /// SM decays: rho0
-    void rho_0_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 1.491e-01;
-      result.positive_error = 8.0e-04;
-      result.negative_error = 8.0e-04;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
-    }
-
-    /// SM decays: rho+
-    void rho_plus_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 1.491e-01;
-      result.positive_error = 8.0e-04;
-      result.negative_error = 8.0e-04;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
-    }
-
-    /// SM decays: rho-
-    void rho_minus_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::rho_minus_decays::Dep::rho_plus_decay_rates);
-    }
-
-    /// SM decays: omega
-    void omega_decays (DecayTable::Entry& result)
-    {
-      result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
-      result.width_in_GeV = 8.49e-03;
-      result.positive_error = 8.0e-05;
-      result.negative_error = 8.0e-05;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
-    }
-
-    /// Reference SM Higgs decays from Dittmaier tables.
-    /// This function is given a different capability to regular decay
-    /// functions, to allow other module functions to specifically depend
-    /// on the SM values for reference, even when scanning another model.
-    void Ref_SM_Higgs_decays_table(DecayTable::Entry& result)
-    {
-      using namespace Pipes::Ref_SM_Higgs_decays_table;
-    
-      // Get the Higgs pole mass
-      double mh = *Dep::mh;
-      
-      // Invalidate the point if m_h is outside the range of the tables of Dittmaier et al. 
-      double minmass = runOptions->getValueOrDef
-                       <double>(90.0, "higgs_minmass");
-      double maxmass = runOptions->getValueOrDef
-                       <double>(160.0, "higgs_maxmass");
-      if (mh < minmass or mh > maxmass)
+      // Just kill off the point if the Higgs is < 1 GeV in mass.
+      if (mh < 1.) invalid_point().raise("Neutral higgs with mass < 1 GeV");
+      // If it's more than 16 TeV, just calculate as if it has a mass of 16 TeV.  The BFs will
+      // be the same (2/3 WW, 1/3 Z), the width will just be underestimated.  At this mass though,
+      // that shouldn't impact anything.
+      if (mh > 1.6e4)
       {
         std::stringstream msg;
-        msg << "Computed Higgs mass is " << mh
-            << "; This is outside of the allowed range for tables from Dittmaier et al, which is " << minmass << "--"
-            << maxmass << " GeV.";
-        invalid_point().raise(msg.str());
-      } 
-    
-      // Set the contents of the Entry
+        msg << "Neutral higgs with mass > 16 TeV; calculating SM decays as if m = 16 TeV.  Actual mass: " << mh*1e-3 << " TeV";
+        DecayBit_warning().raise(LOCAL_INFO, msg.str());
+        mh = 1.6e4;
+      }
       result.calculator = "GAMBIT::DecayBit";
-      result.calculator_version = gambit_version;
+      result.calculator_version = gambit_version();
       result.width_in_GeV = virtual_SMHiggs_widths("Gamma",mh);
       result.set_BF(virtual_SMHiggs_widths("bb",mh), 0.0, "b", "bbar");
       result.set_BF(virtual_SMHiggs_widths("tautau",mh), 0.0, "tau+", "tau-");
@@ -284,6 +99,345 @@ namespace Gambit
       result.set_BF(virtual_SMHiggs_widths("ZZ",mh), 0.0, "Z0", "Z0");
     }
 
+    /// Set neutral h decays computed by FeynHiggs
+    void set_FH_neutral_h_decay(DecayTable::Entry& result, int iH, const fh_Couplings& FH_input, const mass_es_pseudonyms& psn, bool invalidate, bool SM)
+    {
+      // Set the array and its offset according to whether we want the SM or BSM decays
+      const fh_real* widths = SM ? FH_input.gammas_sm : FH_input.gammas;
+      const int local_offset = SM ? BRSMoffset-1 : BRoffset-1;
+
+      // Set the calculator info (presumably FeynHiggs...)
+      result.calculator = FH_input.calculator;
+      result.calculator_version = FH_input.calculator_version;
+
+      // Set the total Higgs width
+      result.width_in_GeV = widths[iH-1];
+
+      // vector-boson pair decays
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0VV(iH,1)+local_offset] : 0.0), 0.0, "gamma", "gamma");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0VV(iH,2)+local_offset] : 0.0), 0.0, "gamma", "Z0");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0VV(iH,3)+local_offset] : 0.0), 0.0, "Z0", "Z0");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0VV(iH,4)+local_offset] : 0.0), 0.0, "W+", "W-");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0VV(iH,5)+local_offset] : 0.0), 0.0, "g", "g");
+
+      // SM fermion decays
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,1,1,1)+local_offset] : 0.0), 0.0, "nu_e", "nubar_e");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,1,2,2)+local_offset] : 0.0), 0.0, "nu_mu", "nubar_mu");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,1,3,3)+local_offset] : 0.0), 0.0, "nu_tau", "nubar_tau");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,2,1,1)+local_offset] : 0.0), 0.0, "e+", "e-");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,2,2,2)+local_offset] : 0.0), 0.0, "mu+", "mu-");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,2,3,3)+local_offset] : 0.0), 0.0, "tau+", "tau-");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,3,1,1)+local_offset] : 0.0), 0.0, "u", "ubar");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,3,2,2)+local_offset] : 0.0), 0.0, "c", "cbar");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,3,3,3)+local_offset] : 0.0), 0.0, "t", "tbar");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,4,1,1)+local_offset] : 0.0), 0.0, "d", "dbar");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,4,2,2)+local_offset] : 0.0), 0.0, "s", "sbar");
+      result.set_BF((result.width_in_GeV > 0 ? widths[H0FF(iH,4,3,3)+local_offset] : 0.0), 0.0, "b", "bbar");
+
+      if (not SM)
+      {
+        // chargino decays
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0ChaCha(iH,1,1)+local_offset] : 0.0), 0.0, "~chi-_1", "~chi+_1");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0ChaCha(iH,1,2)+local_offset] : 0.0), 0.0, "~chi-_1", "~chi+_2");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0ChaCha(iH,2,1)+local_offset] : 0.0), 0.0, "~chi-_2", "~chi+_1");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0ChaCha(iH,2,2)+local_offset] : 0.0), 0.0, "~chi-_2", "~chi+_2");
+
+        // neutralino decays
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,1,1)+local_offset] : 0.0), 0.0, "~chi0_1", "~chi0_1");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,2,2)+local_offset] : 0.0), 0.0, "~chi0_2", "~chi0_2");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,3,3)+local_offset] : 0.0), 0.0, "~chi0_3", "~chi0_3");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,4,4)+local_offset] : 0.0), 0.0, "~chi0_4", "~chi0_4");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,1,2)+local_offset] : 0.0), 0.0, "~chi0_1", "~chi0_2");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,1,3)+local_offset] : 0.0), 0.0, "~chi0_1", "~chi0_3");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,1,4)+local_offset] : 0.0), 0.0, "~chi0_1", "~chi0_4");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,2,3)+local_offset] : 0.0), 0.0, "~chi0_2", "~chi0_3");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,2,4)+local_offset] : 0.0), 0.0, "~chi0_2", "~chi0_4");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0NeuNeu(iH,3,4)+local_offset] : 0.0), 0.0, "~chi0_3", "~chi0_4");
+
+        // higgs + Z0 decays
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HV(iH,1)+local_offset] : 0.0), 0.0, "h0_1", "Z0");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HV(iH,2)+local_offset] : 0.0), 0.0, "h0_2", "Z0");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HV(iH,3)+local_offset] : 0.0), 0.0, "A0", "Z0");
+
+        // higgs+higgs decays
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,1,1)+local_offset] : 0.0), 0.0, "h0_1", "h0_1");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,2,2)+local_offset] : 0.0), 0.0, "h0_2", "h0_2");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,3,3)+local_offset] : 0.0), 0.0, "A0", "A0");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,4,4)+local_offset] : 0.0), 0.0, "H+", "H-");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,1,2)+local_offset] : 0.0), 0.0, "h0_1", "h0_2");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,1,3)+local_offset] : 0.0), 0.0, "h0_1", "A0");
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0HH(iH,2,3)+local_offset] : 0.0), 0.0, "h0_2", "A0");
+
+        // FH does not compute h0_1/h0_2/A0 --> H+W- / H-W+
+
+        // sfermion decays
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,1,1)+local_offset] : 0.0), 0.0, psn.isnel, psn.isnelbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,1,2)+local_offset] : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,1,3)+local_offset] : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,2,1)+local_offset] : 0.0), 0.0, psn.isell, psn.isellbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,2,1)+local_offset] : 0.0), 0.0, psn.isell, psn.iselrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,2,1)+local_offset] : 0.0), 0.0, psn.iselr, psn.isellbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,2,1)+local_offset] : 0.0), 0.0, psn.iselr, psn.iselrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,2,2)+local_offset] : 0.0), 0.0, psn.ismul, psn.ismulbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,2,2)+local_offset] : 0.0), 0.0, psn.ismul, psn.ismurbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,2,2)+local_offset] : 0.0), 0.0, psn.ismur, psn.ismulbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,2,2)+local_offset] : 0.0), 0.0, psn.ismur, psn.ismurbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,2,3)+local_offset] : 0.0), 0.0, psn.istau1, psn.istau1bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,2,3)+local_offset] : 0.0), 0.0, psn.istau1, psn.istau2bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,2,3)+local_offset] : 0.0), 0.0, psn.istau2, psn.istau1bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,2,3)+local_offset] : 0.0), 0.0, psn.istau2, psn.istau2bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,3,1)+local_offset] : 0.0), 0.0, psn.isul, psn.isulbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,3,1)+local_offset] : 0.0), 0.0, psn.isul, psn.isurbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,3,1)+local_offset] : 0.0), 0.0, psn.isur, psn.isulbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,3,1)+local_offset] : 0.0), 0.0, psn.isur, psn.isurbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,3,2)+local_offset] : 0.0), 0.0, psn.iscl, psn.isclbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,3,2)+local_offset] : 0.0), 0.0, psn.iscl, psn.iscrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,3,2)+local_offset] : 0.0), 0.0, psn.iscr, psn.isclbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,3,2)+local_offset] : 0.0), 0.0, psn.iscr, psn.iscrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,3,3)+local_offset] : 0.0), 0.0, psn.ist1, psn.ist1bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,3,3)+local_offset] : 0.0), 0.0, psn.ist1, psn.ist2bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,3,3)+local_offset] : 0.0), 0.0, psn.ist2, psn.ist1bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,3,3)+local_offset] : 0.0), 0.0, psn.ist2, psn.ist2bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,3,1)+local_offset] : 0.0), 0.0, psn.isdl, psn.isdlbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,3,1)+local_offset] : 0.0), 0.0, psn.isdl, psn.isdrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,3,1)+local_offset] : 0.0), 0.0, psn.isdr, psn.isdlbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,3,1)+local_offset] : 0.0), 0.0, psn.isdr, psn.isdrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,3,2)+local_offset] : 0.0), 0.0, psn.issl, psn.isslbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,3,2)+local_offset] : 0.0), 0.0, psn.issl, psn.issrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,3,2)+local_offset] : 0.0), 0.0, psn.issr, psn.isslbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,3,2)+local_offset] : 0.0), 0.0, psn.issr, psn.issrbar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,1,3,3)+local_offset] : 0.0), 0.0, psn.isb1, psn.isb1bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,1,2,3,3)+local_offset] : 0.0), 0.0, psn.isb1, psn.isb2bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,1,3,3)+local_offset] : 0.0), 0.0, psn.isb2, psn.isb1bar);
+        result.set_BF((result.width_in_GeV > 0 ? widths[H0SfSf(iH,2,2,3,3)+local_offset] : 0.0), 0.0, psn.isb2, psn.isb2bar);
+      }
+
+      check_width(LOCAL_INFO, result.width_in_GeV, invalidate);
+    }
+    /// @}
+
+
+    /// \name DecayBit module functions
+    /// @{
+
+
+    /////////////// Standard Model ///////////////////
+
+    /// SM decays: W+
+    void W_plus_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 2.085;
+      result.positive_error = 4.2e-02;
+      result.negative_error = 4.2e-02;
+      result.set_BF(0.1071, 0.0016, "e+", "nu_e");
+      result.set_BF(0.1063, 0.0015, "mu+", "nu_mu");
+      result.set_BF(0.1138, 0.0021, "tau+", "nu_tau");
+      result.set_BF(0.6741, 0.0027, "hadron", "hadron");
+    }
+
+    /// SM decays: Z
+    void Z_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 2.4952;
+      result.positive_error = 2.3e-03;
+      result.negative_error = 2.3e-03;
+      result.set_BF(0.03363, 0.00004, "e+", "e-");
+      result.set_BF(0.03366, 0.00007, "mu+", "mu-");
+      result.set_BF(0.03370, 0.00008, "tau+", "tau-");
+      result.set_BF(0.6991, 0.0006, "hadron", "hadron");
+    }
+
+    /// SM decays: t
+    void t_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 2.00;
+      result.positive_error = 4.7e-01;
+      result.negative_error = 4.3e-01;
+      result.set_BF(0.91, 0.04, "W+", "b");
+    }
+
+    /// SM decays: mu+
+    void mu_plus_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 2.9959847e-19;
+      result.positive_error = 3.0e-25;
+      result.negative_error = 3.0e-25;
+      result.set_BF(1.0, 0.0, "e+", "nu_e", "nubar_mu");
+    }
+
+    /// SM decays: tau+
+    void tau_plus_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 2.267E-12;
+      result.positive_error = 4.0e-15;
+      result.negative_error = 4.0e-15;
+      result.set_BF(0.1741, 0.0004, "mu+", "nu_mu", "nubar_tau");
+      result.set_BF(0.1783, 0.0004, "e+", "nu_e", "nubar_tau");
+      result.set_BF(0.1083, 0.0006, "pi+", "nubar_tau");
+      result.set_BF(0.2552, 0.0009, "pi+", "pi0", "nubar_tau");
+      result.set_BF(0.0930, 0.0011, "pi+", "pi0", "pi0", "nubar_tau");
+      result.set_BF(0.0105, 0.0007, "pi+", "pi0", "pi0", "pi0", "nubar_tau");
+      result.set_BF(0.0931, 0.0006, "pi+", "pi+", "pi-", "nubar_tau");
+      result.set_BF(0.0462, 0.0006, "pi+", "pi+", "pi-", "pi0", "nubar_tau");
+    }
+
+    /// SM decays: pi0
+    void pi_0_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 7.73e-09;
+      result.positive_error = 1.7e-10;
+      result.negative_error = 1.7e-10;
+      result.set_BF(0.98823, 0.00034, "gamma", "gamma");
+      result.set_BF(0.01174, 0.00035, "e+", "e-", "gamma");
+      result.set_BF(3.34e-5, 0.16e-5, "e+", "e-", "e+", "e-");
+      result.set_BF(6.46e-8, 0.33e-8, "e+", "e-");
+    }
+
+    /// SM decays: pi+
+    void pi_plus_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 2.5284e-17;
+      result.positive_error = 5.0e-21;
+      result.negative_error = 5.0e-21;
+      result.set_BF(0.9998770, 0.0000004, "mu+", "nu_mu");
+      result.set_BF(1.230e-4, 0.004e-4, "e+", "nu_e");
+    }
+
+    /// SM decays: eta
+    void eta_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 1.31e-06;
+      result.positive_error = 5.0e-08;
+      result.negative_error = 5.0e-08;
+      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
+    }
+
+    /// SM decays: rho0
+    void rho_0_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 1.491e-01;
+      result.positive_error = 8.0e-04;
+      result.negative_error = 8.0e-04;
+      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
+    }
+
+    /// SM decays: rho+
+    void rho_plus_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 1.491e-01;
+      result.positive_error = 8.0e-04;
+      result.negative_error = 8.0e-04;
+      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
+    }
+
+    /// SM decays: omega
+    void omega_decays (DecayTable::Entry& result)
+    {
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+      result.width_in_GeV = 8.49e-03;
+      result.positive_error = 8.0e-05;
+      result.negative_error = 8.0e-05;
+      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
+    }
+
+    /// SM decays: conjugates
+    /// @{
+    void W_minus_decays (DecayTable::Entry& result)   { result = CP_conjugate(*Pipes::W_minus_decays::Dep::W_plus_decay_rates); }
+    void tbar_decays (DecayTable::Entry& result)      { result = CP_conjugate(*Pipes::tbar_decays::Dep::t_decay_rates); }
+    void mu_minus_decays (DecayTable::Entry& result)  { result = CP_conjugate(*Pipes::mu_minus_decays::Dep::mu_plus_decay_rates); }
+    void tau_minus_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::tau_minus_decays::Dep::tau_plus_decay_rates); }
+    void pi_minus_decays (DecayTable::Entry& result)  { result = CP_conjugate(*Pipes::pi_minus_decays::Dep::pi_plus_decay_rates); }
+    void rho_minus_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::rho_minus_decays::Dep::rho_plus_decay_rates); }
+    /// @}
+
+
+    /// \brief Reference SM Higgs decays
+    ///
+    /// These functions are given a different capability to regular decay
+    /// functions, to allow other module functions to specifically depend
+    /// on the SM values for reference, even when scanning another model.
+    /// @{
+
+    /// Reference SM Higgs decays from LHCHiggsXSWG: most SM-like Higgs
+    void Ref_SM_Higgs_decays_table(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_Higgs_decays_table;
+      double mh = Dep::mh->central;
+      double minmass = runOptions->getValueOrDef<double>(90.0, "higgs_minmass");
+      double maxmass = runOptions->getValueOrDef<double>(160.0, "higgs_maxmass");
+      // Invalidate the point if higgs mass is outside the range over which the tables of the LHCHiggsXSWG are most reliable.
+      if (mh < minmass or mh > maxmass)
+      {
+        std::stringstream msg;
+        msg << "Computed Higgs mass is " << mh << "; This is outside of the accurate range for "
+            << "tables from the LHCHiggsXSWG, which is " << minmass << "--" << maxmass << " GeV.";
+        invalid_point().raise(msg.str());
+      }
+      compute_SM_higgs_decays(result, mh);
+    }
+    /// Reference SM Higgs decays from LHCHiggsXSWG: least SM-like Higgs
+    void Ref_SM_other_Higgs_decays_table(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_other_Higgs_decays_table;
+      int other_higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 35 : 25);
+      double m_other = Dep::MSSM_spectrum->get(Par::Pole_Mass, other_higgs, 0);
+      compute_SM_higgs_decays(result, m_other);
+    }
+    /// Reference SM Higgs decays from LHCHiggsXSWG: A0
+    void Ref_SM_A0_decays_table(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_A0_decays_table;
+      double mA0 = Dep::MSSM_spectrum->get(Par::Pole_Mass, "A0");
+      compute_SM_higgs_decays(result, mA0);
+    }
+
+    /// Reference SM Higgs decays from FeynHiggs: h0_1
+    void Ref_SM_Higgs_decays_FH(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_Higgs_decays_FH;
+      int higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 1 : 2);
+      bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
+      set_FH_neutral_h_decay(result, higgs, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, true);
+    }
+    /// Reference SM Higgs decays from FeynHiggs: h0_2
+    void Ref_SM_other_Higgs_decays_FH(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_other_Higgs_decays_FH;
+      int other_higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 2 : 1);
+      bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
+      set_FH_neutral_h_decay(result, other_higgs, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, true);
+    }
+    /// Reference SM Higgs decays from FeynHiggs: A0
+    void Ref_SM_A0_decays_FH(DecayTable::Entry& result)
+    {
+      using namespace Pipes::Ref_SM_A0_decays_FH;
+      bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
+      set_FH_neutral_h_decay(result, 3, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, true);
+    }
+    /// @}
+
+
     /// SM decays: Higgs
     void SM_Higgs_decays (DecayTable::Entry& result)
     {
@@ -297,595 +451,39 @@ namespace Gambit
     void FH_t_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::FH_t_decays;
-      fh_Couplings FH_input = *Pipes::FH_t_decays::Dep::Higgs_Couplings;
-      result.calculator = FH_input.calculator;
-      result.calculator_version = FH_input.calculator_version;
+      fh_Couplings FH_input = *Pipes::FH_t_decays::Dep::FH_Couplings_output;
       result.calculator = FH_input.calculator;
       result.calculator_version = FH_input.calculator_version;
       result.width_in_GeV = 2.0;
       result.positive_error = 4.7e-01;
       result.negative_error = 4.3e-01;
-      result.set_BF(FH_input.gammas[tBF(1)-1], 0.0, "W+", "b");
-      result.set_BF(FH_input.gammas[tBF(2)-1], 0.0, "H+", "b");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-    }
-
-    /// MSSM decays: h0_1
-    void MSSM_h0_1_decays (DecayTable::Entry& result)
-    {
-      using namespace Pipes::MSSM_h0_1_decays;
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      result.calculator = BEreq::cb_widthhl_hdec.origin();
-      result.calculator_version = BEreq::cb_widthhl_hdec.version();
-
-      result.width_in_GeV = BEreq::cb_widthhl_hdec->hlwdth;
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrb : 0.0), 0.0, "b", "bbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrl : 0.0), 0.0, "tau+", "tau-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrm : 0.0), 0.0, "mu+", "mu-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrs : 0.0), 0.0, "s", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrc : 0.0), 0.0, "c", "cbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrt : 0.0), 0.0, "t", "tbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrg : 0.0), 0.0, "g", "g");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrga : 0.0), 0.0, "gamma", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrzga : 0.0), 0.0, "gamma", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrw : 0.0), 0.0, "W+", "W-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrhw/2.0 : 0.0), 0.0, "W+", "H-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrhw/2.0 : 0.0), 0.0, "W-", "H+");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrz : 0.0), 0.0, "Z0", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(1,1) : 0.0), 0.0, "~chi+_1", "~chi-_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(2,2) : 0.0), 0.0, "~chi+_2", "~chi-_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(1,2) : 0.0), 0.0, "~chi+_1", "~chi-_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(2,1) : 0.0), 0.0, "~chi+_2", "~chi-_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,1) : 0.0), 0.0, "~chi0_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(2,2) : 0.0), 0.0, "~chi0_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(3,3) : 0.0), 0.0, "~chi0_3", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(4,4) : 0.0), 0.0, "~chi0_4", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,2)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,3)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,4)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(2,3)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(2,4)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(3,4)*2.0 : 0.0), 0.0, "~chi0_3", "~chi0_4");
-
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqul/2.0 : 0.0), 0.0, psn.isul, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqur/2.0 : 0.0), 0.0, psn.isur, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqul/2.0 : 0.0), 0.0, psn.iscl, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqur/2.0 : 0.0), 0.0, psn.iscr, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(1,1) : 0.0), 0.0, psn.ist1, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(2,2) : 0.0), 0.0, psn.ist2, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(1,2) : 0.0), 0.0, psn.ist1, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(2,1) : 0.0), 0.0, psn.ist2, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdl/2.0 : 0.0), 0.0, psn.isdl, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdr/2.0 : 0.0), 0.0, psn.isdr, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdl/2.0 : 0.0), 0.0, psn.issl, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdr/2.0 : 0.0), 0.0, psn.issr, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(1,1) : 0.0), 0.0, psn.isb1, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(2,2) : 0.0), 0.0, psn.isb2, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(1,2) : 0.0), 0.0, psn.isb1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(2,1) : 0.0), 0.0, psn.isb2, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslel/2.0 : 0.0), 0.0, psn.isell, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsler/2.0 : 0.0), 0.0, psn.iselr, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslel/2.0 : 0.0), 0.0, psn.ismul, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsler/2.0 : 0.0), 0.0, psn.ismur, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(1,1) : 0.0), 0.0, psn.istau1, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(2,2) : 0.0), 0.0, psn.istau2, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(1,2) : 0.0), 0.0, psn.istau1, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(2,1) : 0.0), 0.0, psn.istau2, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslnl/3.0 : 0.0), 0.0, psn.isnel, psn.isnelbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslnl/3.0 : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslnl/3.0 : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      result.set_BF(FH_input.gammas[tBF(1)+BRoffset-1], 0.0, "W+", "b");
+      result.set_BF(FH_input.gammas[tBF(2)+BRoffset-1], 0.0, "H+", "b");
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
     /// FeynHiggs MSSM decays: h0_1
     void FH_MSSM_h0_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::FH_MSSM_h0_1_decays;
-
-      // Get the mass pseudonyms for the gauge eigenstates
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      // unpack FeynHiggs Couplings
-      fh_Couplings FH_input = *Dep::Higgs_Couplings;
-      result.calculator = FH_input.calculator;
-      result.calculator_version = FH_input.calculator_version;
-      // Specify that we're talking about h0_1
-      int iH = 0;
-      // Set the total Higgs width
-      result.width_in_GeV = FH_input.gammas[iH];
-
-      // vector-boson pair decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,1)+BRoffset] : 0.0), 0.0, "gamma", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,2)+BRoffset] : 0.0), 0.0, "gamma", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,3)+BRoffset] : 0.0), 0.0, "Z0", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,4)+BRoffset] : 0.0), 0.0, "W+", "W-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,5)+BRoffset] : 0.0), 0.0, "g", "g");
-
-      // SM fermion decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,1,1)+BRoffset] : 0.0), 0.0, "nu_e", "nubar_e");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,2,2)+BRoffset] : 0.0), 0.0, "nu_mu", "nubar_mu");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,3,3)+BRoffset] : 0.0), 0.0, "nu_tau", "nubar_tau");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,1,1)+BRoffset] : 0.0), 0.0, "e+", "e-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,2,2)+BRoffset] : 0.0), 0.0, "mu+", "mu-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,3,3)+BRoffset] : 0.0), 0.0, "tau+", "tau-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,1,1)+BRoffset] : 0.0), 0.0, "u", "ubar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,2,2)+BRoffset] : 0.0), 0.0, "c", "cbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,3,3)+BRoffset] : 0.0), 0.0, "t", "tbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,1,1)+BRoffset] : 0.0), 0.0, "d", "dbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,2,2)+BRoffset] : 0.0), 0.0, "s", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,3,3)+BRoffset] : 0.0), 0.0, "b", "bbar");
-
-      // chargino decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,1,1)+BRoffset] : 0.0), 0.0, "~chi-_1", "~chi+_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,1,2)+BRoffset] : 0.0), 0.0, "~chi-_1", "~chi+_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,2,1)+BRoffset] : 0.0), 0.0, "~chi-_2", "~chi+_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,2,2)+BRoffset] : 0.0), 0.0, "~chi-_2", "~chi+_2");
-
-      // neutralino decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,1)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,2)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,3,3)+BRoffset] : 0.0), 0.0, "~chi0_3", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,4,4)+BRoffset] : 0.0), 0.0, "~chi0_4", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,2)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,3)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,4)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,3)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,4)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,3,4)+BRoffset] : 0.0), 0.0, "~chi0_3", "~chi0_4");
-
-      // higgs + Z0 decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,1)+BRoffset] : 0.0), 0.0, "h0_1", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,2)+BRoffset] : 0.0), 0.0, "h0_2", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,3)+BRoffset] : 0.0), 0.0, "A0", "Z0");
-
-      // higgs+higgs decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,1)+BRoffset] : 0.0), 0.0, "h0_1", "h0_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,2,2)+BRoffset] : 0.0), 0.0, "h0_2", "h0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,3,3)+BRoffset] : 0.0), 0.0, "A0", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,4,4)+BRoffset] : 0.0), 0.0, "H+", "H-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,2)+BRoffset] : 0.0), 0.0, "h0_1", "h0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,3)+BRoffset] : 0.0), 0.0, "h0_1", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,2,3)+BRoffset] : 0.0), 0.0, "h0_2", "A0");
-
-      // FH does not compute h01 --> H+W- and H-W+
-
-      // sfermion decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,1)+BRoffset] : 0.0), 0.0, psn.isnel, psn.isnelbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,2)+BRoffset] : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,3)+BRoffset] : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,1)+BRoffset] : 0.0), 0.0, psn.isell, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,1)+BRoffset] : 0.0), 0.0, psn.isell, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,1)+BRoffset] : 0.0), 0.0, psn.iselr, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,1)+BRoffset] : 0.0), 0.0, psn.iselr, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,2)+BRoffset] : 0.0), 0.0, psn.ismul, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,2)+BRoffset] : 0.0), 0.0, psn.ismul, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,2)+BRoffset] : 0.0), 0.0, psn.ismur, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,2)+BRoffset] : 0.0), 0.0, psn.ismur, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,3)+BRoffset] : 0.0), 0.0, psn.istau1, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,3)+BRoffset] : 0.0), 0.0, psn.istau1, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,3)+BRoffset] : 0.0), 0.0, psn.istau2, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,3)+BRoffset] : 0.0), 0.0, psn.istau2, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,1)+BRoffset] : 0.0), 0.0, psn.isul, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,1)+BRoffset] : 0.0), 0.0, psn.isul, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,1)+BRoffset] : 0.0), 0.0, psn.isur, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,1)+BRoffset] : 0.0), 0.0, psn.isur, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,2)+BRoffset] : 0.0), 0.0, psn.iscl, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,2)+BRoffset] : 0.0), 0.0, psn.iscl, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,2)+BRoffset] : 0.0), 0.0, psn.iscr, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,2)+BRoffset] : 0.0), 0.0, psn.iscr, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,3)+BRoffset] : 0.0), 0.0, psn.ist1, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,3)+BRoffset] : 0.0), 0.0, psn.ist1, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,3)+BRoffset] : 0.0), 0.0, psn.ist2, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,3)+BRoffset] : 0.0), 0.0, psn.ist2, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,1)+BRoffset] : 0.0), 0.0, psn.isdl, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,1)+BRoffset] : 0.0), 0.0, psn.isdl, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,1)+BRoffset] : 0.0), 0.0, psn.isdr, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,1)+BRoffset] : 0.0), 0.0, psn.isdr, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,2)+BRoffset] : 0.0), 0.0, psn.issl, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,2)+BRoffset] : 0.0), 0.0, psn.issl, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,2)+BRoffset] : 0.0), 0.0, psn.issr, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,2)+BRoffset] : 0.0), 0.0, psn.issr, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,3)+BRoffset] : 0.0), 0.0, psn.isb1, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,3)+BRoffset] : 0.0), 0.0, psn.isb1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,3)+BRoffset] : 0.0), 0.0, psn.isb2, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,3)+BRoffset] : 0.0), 0.0, psn.isb2, psn.isb2bar);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-    }
-
-    /// MSSM decays: h0_2
-    void h0_2_decays (DecayTable::Entry& result)
-    {
-      using namespace Pipes::h0_2_decays;
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      result.calculator = BEreq::cb_widthhh_hdec.origin();
-      result.calculator_version = BEreq::cb_widthhh_hdec.version();
-
-      result.width_in_GeV = BEreq::cb_widthhh_hdec->hhwdth;
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrb : 0.0), 0.0, "b", "bbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrl : 0.0), 0.0, "tau+", "tau-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrm : 0.0), 0.0, "mu+", "mu-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrs : 0.0), 0.0, "s", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrc : 0.0), 0.0, "c", "cbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrt : 0.0), 0.0, "t", "tbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrg : 0.0), 0.0, "g", "g");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrga : 0.0), 0.0, "gamma", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrzga : 0.0), 0.0, "Z0", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrw : 0.0), 0.0, "W+", "W-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrz : 0.0), 0.0, "Z0", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrh : 0.0), 0.0, "h0_1", "h0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbra : 0.0), 0.0, "A0", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbraz : 0.0), 0.0, "Z0", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrhw/2.0 : 0.0), 0.0, "W+", "H-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrhw/2.0 : 0.0), 0.0, "W-", "H+");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(1,1) : 0.0), 0.0, "~chi+_1", "~chi-_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(2,2) : 0.0), 0.0, "~chi+_2", "~chi-_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(1,2) : 0.0), 0.0, "~chi+_1", "~chi-_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(2,1) : 0.0), 0.0, "~chi+_2", "~chi-_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,1) : 0.0), 0.0, "~chi0_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(2,2) : 0.0), 0.0, "~chi0_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(3,3) : 0.0), 0.0, "~chi0_3", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(4,4) : 0.0), 0.0, "~chi0_4", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,2)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,3)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,4)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(2,3)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(2,4)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(3,4)*2.0 : 0.0), 0.0, "~chi0_3", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqul/2.0 : 0.0), 0.0, psn.isul, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqur/2.0 : 0.0), 0.0, psn.isur, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqul/2.0 : 0.0), 0.0, psn.iscl, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqur/2.0 : 0.0), 0.0, psn.iscr, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(1,1) : 0.0), 0.0, psn.ist1, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(2,2) : 0.0), 0.0, psn.ist2, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(1,2) : 0.0), 0.0, psn.ist1, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(2,1) : 0.0), 0.0, psn.ist2, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdl/2.0 : 0.0), 0.0, psn.isdl, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdr/2.0 : 0.0), 0.0, psn.isdr, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdl/2.0 : 0.0), 0.0, psn.issl, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdr/2.0 : 0.0), 0.0, psn.issr, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(1,1) : 0.0), 0.0, psn.isb1, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(2,2) : 0.0), 0.0, psn.isb2, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(1,2) : 0.0), 0.0, psn.isb1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(2,1) : 0.0), 0.0, psn.isb2, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslel/2.0 : 0.0), 0.0, psn.isell, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsler/2.0 : 0.0), 0.0, psn.iselr, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslel/2.0 : 0.0), 0.0, psn.ismul, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsler/2.0 : 0.0), 0.0, psn.ismur, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(1,1) : 0.0), 0.0, psn.istau1, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(2,2) : 0.0), 0.0, psn.istau2, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(1,2) : 0.0), 0.0, psn.istau1, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(2,1) : 0.0), 0.0, psn.istau2, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslnl/3.0 : 0.0), 0.0, psn.isnel, psn.isnelbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslnl/3.0 : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslnl/3.0 : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
+      set_FH_neutral_h_decay(result, 1, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, false);
     }
 
     /// FeynHiggs MSSM decays: h0_2
     void FH_h0_2_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::FH_h0_2_decays;
-
-      // Get the mass pseudonyms for the gauge eigenstates
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      // unpack FeynHiggs Couplings
-      fh_Couplings FH_input = *Dep::Higgs_Couplings;
-      result.calculator = FH_input.calculator;
-      result.calculator_version = FH_input.calculator_version;
-      // Specify that we're talking about h0_2
-      int iH = 1;
-      // Set the total second Higgs width
-      result.width_in_GeV = FH_input.gammas[iH];
-
-      // vector-boson pair decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,1)+BRoffset] : 0.0), 0.0, "gamma", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,2)+BRoffset] : 0.0), 0.0, "gamma", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,3)+BRoffset] : 0.0), 0.0, "Z0", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,4)+BRoffset] : 0.0), 0.0, "W+", "W-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,5)+BRoffset] : 0.0), 0.0, "g", "g");
-
-      // SM fermion decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,1,1)+BRoffset] : 0.0), 0.0, "nu_e", "nubar_e");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,2,2)+BRoffset] : 0.0), 0.0, "nu_mu", "nubar_mu");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,3,3)+BRoffset] : 0.0), 0.0, "nu_tau", "nubar_tau");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,1,1)+BRoffset] : 0.0), 0.0, "e+", "e-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,2,2)+BRoffset] : 0.0), 0.0, "mu+", "mu-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,3,3)+BRoffset] : 0.0), 0.0, "tau+", "tau-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,1,1)+BRoffset] : 0.0), 0.0, "u", "ubar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,2,2)+BRoffset] : 0.0), 0.0, "c", "cbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,3,3)+BRoffset] : 0.0), 0.0, "t", "tbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,1,1)+BRoffset] : 0.0), 0.0, "d", "dbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,2,2)+BRoffset] : 0.0), 0.0, "s", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,3,3)+BRoffset] : 0.0), 0.0, "b", "bbar");
-
-      // chargino decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,1,1)+BRoffset] : 0.0), 0.0, "~chi-_1", "~chi+_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,1,2)+BRoffset] : 0.0), 0.0, "~chi-_1", "~chi+_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,2,1)+BRoffset] : 0.0), 0.0, "~chi-_2", "~chi+_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,2,2)+BRoffset] : 0.0), 0.0, "~chi-_2", "~chi+_2");
-
-      // neutralino decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,1)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,2)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,3,3)+BRoffset] : 0.0), 0.0, "~chi0_3", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,4,4)+BRoffset] : 0.0), 0.0, "~chi0_4", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,2)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,3)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,4)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,3)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,4)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,3,4)+BRoffset] : 0.0), 0.0, "~chi0_3", "~chi0_4");
-
-      // higgs + Z0 decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,1)+BRoffset] : 0.0), 0.0, "h0_1", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,2)+BRoffset] : 0.0), 0.0, "h0_2", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,3)+BRoffset] : 0.0), 0.0, "A0", "Z0");
-
-      // higgs+higgs decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,1)+BRoffset] : 0.0), 0.0, "h0_1", "h0_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,2,2)+BRoffset] : 0.0), 0.0, "h0_2", "h0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,3,3)+BRoffset] : 0.0), 0.0, "A0", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,4,4)+BRoffset] : 0.0), 0.0, "H+", "H-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,2)+BRoffset] : 0.0), 0.0, "h0_1", "h0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,3)+BRoffset] : 0.0), 0.0, "h0_1", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,2,3)+BRoffset] : 0.0), 0.0, "h0_2", "A0");
-
-      // FH does not compute h02 --> H+W- and H-W+
-
-      // sfermion decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,1)+BRoffset] : 0.0), 0.0, psn.isnel, psn.isnelbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,2)+BRoffset] : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,3)+BRoffset] : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,1)+BRoffset] : 0.0), 0.0, psn.isell, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,1)+BRoffset] : 0.0), 0.0, psn.isell, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,1)+BRoffset] : 0.0), 0.0, psn.iselr, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,1)+BRoffset] : 0.0), 0.0, psn.iselr, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,2)+BRoffset] : 0.0), 0.0, psn.ismul, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,2)+BRoffset] : 0.0), 0.0, psn.ismul, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,2)+BRoffset] : 0.0), 0.0, psn.ismur, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,2)+BRoffset] : 0.0), 0.0, psn.ismur, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,3)+BRoffset] : 0.0), 0.0, psn.istau1, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,3)+BRoffset] : 0.0), 0.0, psn.istau1, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,3)+BRoffset] : 0.0), 0.0, psn.istau2, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,3)+BRoffset] : 0.0), 0.0, psn.istau2, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,1)+BRoffset] : 0.0), 0.0, psn.isul, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,1)+BRoffset] : 0.0), 0.0, psn.isul, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,1)+BRoffset] : 0.0), 0.0, psn.isur, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,1)+BRoffset] : 0.0), 0.0, psn.isur, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,2)+BRoffset] : 0.0), 0.0, psn.iscl, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,2)+BRoffset] : 0.0), 0.0, psn.iscl, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,2)+BRoffset] : 0.0), 0.0, psn.iscr, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,2)+BRoffset] : 0.0), 0.0, psn.iscr, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,3)+BRoffset] : 0.0), 0.0, psn.ist1, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,3)+BRoffset] : 0.0), 0.0, psn.ist1, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,3)+BRoffset] : 0.0), 0.0, psn.ist2, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,3)+BRoffset] : 0.0), 0.0, psn.ist2, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,1)+BRoffset] : 0.0), 0.0, psn.isdl, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,1)+BRoffset] : 0.0), 0.0, psn.isdl, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,1)+BRoffset] : 0.0), 0.0, psn.isdr, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,1)+BRoffset] : 0.0), 0.0, psn.isdr, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,2)+BRoffset] : 0.0), 0.0, psn.issl, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,2)+BRoffset] : 0.0), 0.0, psn.issl, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,2)+BRoffset] : 0.0), 0.0, psn.issr, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,2)+BRoffset] : 0.0), 0.0, psn.issr, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,3)+BRoffset] : 0.0), 0.0, psn.isb1, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,3)+BRoffset] : 0.0), 0.0, psn.isb1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,3)+BRoffset] : 0.0), 0.0, psn.isb2, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,3)+BRoffset] : 0.0), 0.0, psn.isb2, psn.isb2bar);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-   }
-
-    /// MSSM decays: A0
-    void A0_decays (DecayTable::Entry& result)
-    {
-      using namespace Pipes::A0_decays;
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      result.calculator = BEreq::cb_widtha_hdec.origin();
-      result.calculator_version = BEreq::cb_widtha_hdec.version();
-
-      result.width_in_GeV = BEreq::cb_widtha_hdec->awdth;
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrb : 0.0), 0.0, "b", "bbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrl : 0.0), 0.0, "tau+", "tau-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrm : 0.0), 0.0, "mu+", "mu-");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrs : 0.0), 0.0, "s", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrc : 0.0), 0.0, "c", "cbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrt : 0.0), 0.0, "t", "tbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrg : 0.0), 0.0, "g", "g");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrga : 0.0), 0.0, "gamma", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrzga : 0.0), 0.0, "Z0", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrz : 0.0), 0.0, "Z0", "h0_1");
-      result.set_BF(0.0, 0.0, "Z0", "Z0");
-      result.set_BF(0.0, 0.0, "W+", "W-");
-      result.set_BF(0.0, 0.0, "h0_1", "h0_1");
-      result.set_BF(0.0, 0.0, "h0_2", "h0_2");
-      result.set_BF(0.0, 0.0, "~nu_1", "~nubar_1");
-      result.set_BF(0.0, 0.0, "~nu_2", "~nubar_2");
-      result.set_BF(0.0, 0.0, "~nu_3", "~nubar_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(1,1) : 0.0), 0.0, "~chi+_1", "~chi-_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(2,2) : 0.0), 0.0, "~chi+_2", "~chi-_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(1,2) : 0.0), 0.0, "~chi+_1", "~chi-_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(2,1) : 0.0), 0.0, "~chi+_2", "~chi-_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,1) : 0.0), 0.0, "~chi0_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(2,2) : 0.0), 0.0, "~chi0_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(3,3) : 0.0), 0.0, "~chi0_3", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(4,4) : 0.0), 0.0, "~chi0_4", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,2)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,3)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,4)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(2,3)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(2,4)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(3,4)*2.0 : 0.0), 0.0, "~chi0_3", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrst/2.0 : 0.0), 0.0, psn.ist1, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrst/2.0 : 0.0), 0.0, psn.ist1bar, psn.ist2);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsb/2.0 : 0.0), 0.0, psn.isb1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsb/2.0 : 0.0), 0.0, psn.isb1bar, psn.isb2);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsl/2.0 : 0.0), 0.0, psn.istau1, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsl/2.0 : 0.0), 0.0, psn.istau1bar, psn.istau2);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
+      set_FH_neutral_h_decay(result, 2, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, false);
     }
 
     /// FeynHiggs MSSM decays: A0
     void FH_A0_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::FH_A0_decays;
-
-      // Get the mass pseudonyms for the gauge eigenstates
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      // unpack FeynHiggs Couplings
-      fh_Couplings FH_input = *Dep::Higgs_Couplings;
-      result.calculator = FH_input.calculator;
-      result.calculator_version = FH_input.calculator_version;
-      // Specify that we're talking about A0
-      int iH = 2;
-      // Set the total A0 Higgs width
-      result.width_in_GeV = FH_input.gammas[iH];
-
-      // vector-boson pair decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,1)+BRoffset] : 0.0), 0.0, "gamma", "gamma");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,2)+BRoffset] : 0.0), 0.0, "gamma", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,3)+BRoffset] : 0.0), 0.0, "Z0", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,4)+BRoffset] : 0.0), 0.0, "W+", "W-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0VV(iH,5)+BRoffset] : 0.0), 0.0, "g", "g");
-
-      // SM fermion decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,1,1)+BRoffset] : 0.0), 0.0, "nu_e", "nubar_e");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,2,2)+BRoffset] : 0.0), 0.0, "nu_mu", "nubar_mu");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,1,3,3)+BRoffset] : 0.0), 0.0, "nu_tau", "nubar_tau");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,1,1)+BRoffset] : 0.0), 0.0, "e+", "e-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,2,2)+BRoffset] : 0.0), 0.0, "mu+", "mu-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,2,3,3)+BRoffset] : 0.0), 0.0, "tau+", "tau-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,1,1)+BRoffset] : 0.0), 0.0, "u", "ubar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,2,2)+BRoffset] : 0.0), 0.0, "c", "cbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,3,3,3)+BRoffset] : 0.0), 0.0, "t", "tbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,1,1)+BRoffset] : 0.0), 0.0, "d", "dbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,2,2)+BRoffset] : 0.0), 0.0, "s", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0FF(iH,4,3,3)+BRoffset] : 0.0), 0.0, "b", "bbar");
-
-      // chargino decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,1,1)+BRoffset] : 0.0), 0.0, "~chi-_1", "~chi+_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,1,2)+BRoffset] : 0.0), 0.0, "~chi-_1", "~chi+_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,2,1)+BRoffset] : 0.0), 0.0, "~chi-_2", "~chi+_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0ChaCha(iH,2,2)+BRoffset] : 0.0), 0.0, "~chi-_2", "~chi+_2");
-
-      // neutralino decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,1)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,2)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,3,3)+BRoffset] : 0.0), 0.0, "~chi0_3", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,4,4)+BRoffset] : 0.0), 0.0, "~chi0_4", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,2)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,3)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,1,4)+BRoffset] : 0.0), 0.0, "~chi0_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,3)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,2,4)+BRoffset] : 0.0), 0.0, "~chi0_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0NeuNeu(iH,3,4)+BRoffset] : 0.0), 0.0, "~chi0_3", "~chi0_4");
-
-      // higgs + Z0 decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,1)+BRoffset] : 0.0), 0.0, "h0_1", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,2)+BRoffset] : 0.0), 0.0, "h0_2", "Z0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HV(iH,3)+BRoffset] : 0.0), 0.0, "A0", "Z0");
-
-      // higgs+higgs decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,1)+BRoffset] : 0.0), 0.0, "h0_1", "h0_1");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,2,2)+BRoffset] : 0.0), 0.0, "h0_2", "h0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,3,3)+BRoffset] : 0.0), 0.0, "A0", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,4,4)+BRoffset] : 0.0), 0.0, "H+", "H-");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,2)+BRoffset] : 0.0), 0.0, "h0_1", "h0_2");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,1,3)+BRoffset] : 0.0), 0.0, "h0_1", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0HH(iH,2,3)+BRoffset] : 0.0), 0.0, "h0_2", "A0");
-
-      // sfermion decays
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,1)+BRoffset] : 0.0), 0.0, psn.isnel, psn.isnelbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,2)+BRoffset] : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,1,3)+BRoffset] : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,1)+BRoffset] : 0.0), 0.0, psn.isell, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,1)+BRoffset] : 0.0), 0.0, psn.isell, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,1)+BRoffset] : 0.0), 0.0, psn.iselr, psn.isellbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,1)+BRoffset] : 0.0), 0.0, psn.iselr, psn.iselrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,2)+BRoffset] : 0.0), 0.0, psn.ismul, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,2)+BRoffset] : 0.0), 0.0, psn.ismul, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,2)+BRoffset] : 0.0), 0.0, psn.ismur, psn.ismulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,2)+BRoffset] : 0.0), 0.0, psn.ismur, psn.ismurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,2,3)+BRoffset] : 0.0), 0.0, psn.istau1, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,2,3)+BRoffset] : 0.0), 0.0, psn.istau1, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,2,3)+BRoffset] : 0.0), 0.0, psn.istau2, psn.istau1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,2,3)+BRoffset] : 0.0), 0.0, psn.istau2, psn.istau2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,1)+BRoffset] : 0.0), 0.0, psn.isul, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,1)+BRoffset] : 0.0), 0.0, psn.isul, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,1)+BRoffset] : 0.0), 0.0, psn.isur, psn.isulbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,1)+BRoffset] : 0.0), 0.0, psn.isur, psn.isurbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,2)+BRoffset] : 0.0), 0.0, psn.iscl, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,2)+BRoffset] : 0.0), 0.0, psn.iscl, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,2)+BRoffset] : 0.0), 0.0, psn.iscr, psn.isclbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,2)+BRoffset] : 0.0), 0.0, psn.iscr, psn.iscrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,3)+BRoffset] : 0.0), 0.0, psn.ist1, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,3)+BRoffset] : 0.0), 0.0, psn.ist1, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,3)+BRoffset] : 0.0), 0.0, psn.ist2, psn.ist1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,3)+BRoffset] : 0.0), 0.0, psn.ist2, psn.ist2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,1)+BRoffset] : 0.0), 0.0, psn.isdl, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,1)+BRoffset] : 0.0), 0.0, psn.isdl, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,1)+BRoffset] : 0.0), 0.0, psn.isdr, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,1)+BRoffset] : 0.0), 0.0, psn.isdr, psn.isdrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,2)+BRoffset] : 0.0), 0.0, psn.issl, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,2)+BRoffset] : 0.0), 0.0, psn.issl, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,2)+BRoffset] : 0.0), 0.0, psn.issr, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,2)+BRoffset] : 0.0), 0.0, psn.issr, psn.issrbar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,1,3,3)+BRoffset] : 0.0), 0.0, psn.isb1, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,1,2,3,3)+BRoffset] : 0.0), 0.0, psn.isb1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,1,3,3)+BRoffset] : 0.0), 0.0, psn.isb2, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[H0SfSf(iH,2,2,3,3)+BRoffset] : 0.0), 0.0, psn.isb2, psn.isb2bar);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-    }
-
-    /// MSSM decays: H_plus
-    void H_plus_decays (DecayTable::Entry& result)
-    {
-      using namespace Pipes::H_plus_decays;
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      result.calculator = BEreq::cb_widthhc_hdec.origin();
-      result.calculator_version = BEreq::cb_widthhc_hdec.version();
-
-      result.width_in_GeV = BEreq::cb_widthhc_hdec->hcwdth;
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrb: 0.0), 0.0, "c", "bbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrl: 0.0), 0.0, "tau+", "nu_tau");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrm: 0.0), 0.0, "mu+", "nu_mu");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrbu: 0.0), 0.0, "u", "bbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrs: 0.0), 0.0, "u", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrc: 0.0), 0.0, "c", "sbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrt: 0.0), 0.0, "t", "bbar");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrw: 0.0), 0.0, "W+", "h0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbra: 0.0), 0.0, "W+", "A0");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,1) : 0.0), 0.0, "~chi+_1", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,2) : 0.0), 0.0, "~chi+_1", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,3) : 0.0), 0.0, "~chi+_1", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,4) : 0.0), 0.0, "~chi+_1", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,1) : 0.0), 0.0, "~chi+_2", "~chi0_1");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,2) : 0.0), 0.0, "~chi+_2", "~chi0_2");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,3) : 0.0), 0.0, "~chi+_2", "~chi0_3");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,4) : 0.0), 0.0, "~chi+_2", "~chi0_4");
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl00/2.0: 0.0), 0.0, psn.isellbar, psn.isnel);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl00/2.0: 0.0), 0.0, psn.ismulbar, psn.isnmul);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl11: 0.0), 0.0, psn.istau1bar, psn.isntaul);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl21: 0.0), 0.0, psn.istau2bar, psn.isntaul);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsq/2.0: 0.0), 0.0, psn.isul, psn.isdlbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsq/2.0: 0.0), 0.0, psn.iscl, psn.isslbar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(1,1) : 0.0), 0.0, psn.ist1, psn.isb1bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(2,2) : 0.0), 0.0, psn.ist2, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(1,2) : 0.0), 0.0, psn.ist1, psn.isb2bar);
-      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(2,1) : 0.0), 0.0, psn.ist2, psn.isb1bar);
-
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
+      set_FH_neutral_h_decay(result, 3, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, false);
     }
 
     /// FeynHiggs MSSM decays: H+
@@ -897,14 +495,12 @@ namespace Gambit
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
       // unpack FeynHiggs Couplings
-      fh_Couplings FH_input = *Dep::Higgs_Couplings;
+      fh_Couplings FH_input = *Dep::FH_Couplings_output;
       result.calculator = FH_input.calculator;
       result.calculator_version = FH_input.calculator_version;
-      // Specify that we're talking about H+
-      int iH = 3;
       // Set the total charged Higgs width
-      result.width_in_GeV = FH_input.gammas[iH];
-
+      result.width_in_GeV = FH_input.gammas[3];
+      // Set the branching ratio offset, subtracting 1 for C array access instead of Fortran (as defined in FH header).
       int offset = BRoffset-1;
 
       // SM fermion decays
@@ -978,16 +574,242 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[HpSfSf(2,1,2,3,3)+offset] : 0.0), 0.0, psn.ist2, psn.isb1bar);
       result.set_BF((result.width_in_GeV > 0 ? FH_input.gammas[HpSfSf(2,2,2,3,3)+offset] : 0.0), 0.0, psn.ist2, psn.isb2bar);
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: H_minus
-    void H_minus_decays (DecayTable::Entry& result)
+    /// SUSY-HIT MSSM decays: h0_1
+    void MSSM_h0_1_decays (DecayTable::Entry& result)
     {
-      result = CP_conjugate(*Pipes::H_minus_decays::Dep::H_plus_decay_rates);
+      using namespace Pipes::MSSM_h0_1_decays;
+      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
+      result.calculator = BEreq::cb_widthhl_hdec.origin();
+      result.calculator_version = BEreq::cb_widthhl_hdec.version();
+
+      result.width_in_GeV = BEreq::cb_widthhl_hdec->hlwdth;
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrb : 0.0), 0.0, "b", "bbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrl : 0.0), 0.0, "tau+", "tau-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrm : 0.0), 0.0, "mu+", "mu-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrs : 0.0), 0.0, "s", "sbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrc : 0.0), 0.0, "c", "cbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrt : 0.0), 0.0, "t", "tbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrg : 0.0), 0.0, "g", "g");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrga : 0.0), 0.0, "gamma", "gamma");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrzga : 0.0), 0.0, "gamma", "Z0");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrw : 0.0), 0.0, "W+", "W-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrhw/2.0 : 0.0), 0.0, "W+", "H-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrhw/2.0 : 0.0), 0.0, "W-", "H+");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhl_hdec->hlbrz : 0.0), 0.0, "Z0", "Z0");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(1,1) : 0.0), 0.0, "~chi+_1", "~chi-_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(2,2) : 0.0), 0.0, "~chi+_2", "~chi-_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(1,2) : 0.0), 0.0, "~chi+_1", "~chi-_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsc(2,1) : 0.0), 0.0, "~chi+_2", "~chi-_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,1) : 0.0), 0.0, "~chi0_1", "~chi0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(2,2) : 0.0), 0.0, "~chi0_2", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(3,3) : 0.0), 0.0, "~chi0_3", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(4,4) : 0.0), 0.0, "~chi0_4", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,2)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,3)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(1,4)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(2,3)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(2,4)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hlbrsn(3,4)*2.0 : 0.0), 0.0, "~chi0_3", "~chi0_4");
+
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqul/2.0 : 0.0), 0.0, psn.isul, psn.isulbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqur/2.0 : 0.0), 0.0, psn.isur, psn.isurbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqul/2.0 : 0.0), 0.0, psn.iscl, psn.isclbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqur/2.0 : 0.0), 0.0, psn.iscr, psn.iscrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(1,1) : 0.0), 0.0, psn.ist1, psn.ist1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(2,2) : 0.0), 0.0, psn.ist2, psn.ist2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(1,2) : 0.0), 0.0, psn.ist1, psn.ist2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlst(2,1) : 0.0), 0.0, psn.ist2, psn.ist1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdl/2.0 : 0.0), 0.0, psn.isdl, psn.isdlbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdr/2.0 : 0.0), 0.0, psn.isdr, psn.isdrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdl/2.0 : 0.0), 0.0, psn.issl, psn.isslbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsqdr/2.0 : 0.0), 0.0, psn.issr, psn.issrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(1,1) : 0.0), 0.0, psn.isb1, psn.isb1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(2,2) : 0.0), 0.0, psn.isb2, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(1,2) : 0.0), 0.0, psn.isb1, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsb(2,1) : 0.0), 0.0, psn.isb2, psn.isb1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslel/2.0 : 0.0), 0.0, psn.isell, psn.isellbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsler/2.0 : 0.0), 0.0, psn.iselr, psn.iselrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslel/2.0 : 0.0), 0.0, psn.ismul, psn.ismulbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlsler/2.0 : 0.0), 0.0, psn.ismur, psn.ismurbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(1,1) : 0.0), 0.0, psn.istau1, psn.istau1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(2,2) : 0.0), 0.0, psn.istau2, psn.istau2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(1,2) : 0.0), 0.0, psn.istau1, psn.istau2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlstau(2,1) : 0.0), 0.0, psn.istau2, psn.istau1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslnl/3.0 : 0.0), 0.0, psn.isnel, psn.isnelbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslnl/3.0 : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhlslnl/3.0 : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"), true);
     }
 
-    /// MSSM decays: gluino
+    /// SUSY-HIT MSSM decays: h0_2
+    void h0_2_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::h0_2_decays;
+      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
+      result.calculator = BEreq::cb_widthhh_hdec.origin();
+      result.calculator_version = BEreq::cb_widthhh_hdec.version();
+
+      result.width_in_GeV = BEreq::cb_widthhh_hdec->hhwdth;
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrb : 0.0), 0.0, "b", "bbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrl : 0.0), 0.0, "tau+", "tau-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrm : 0.0), 0.0, "mu+", "mu-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrs : 0.0), 0.0, "s", "sbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrc : 0.0), 0.0, "c", "cbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrt : 0.0), 0.0, "t", "tbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrg : 0.0), 0.0, "g", "g");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrga : 0.0), 0.0, "gamma", "gamma");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrzga : 0.0), 0.0, "Z0", "gamma");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrw : 0.0), 0.0, "W+", "W-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrz : 0.0), 0.0, "Z0", "Z0");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrh : 0.0), 0.0, "h0_1", "h0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbra : 0.0), 0.0, "A0", "A0");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbraz : 0.0), 0.0, "Z0", "A0");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrhw/2.0 : 0.0), 0.0, "W+", "H-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhh_hdec->hhbrhw/2.0 : 0.0), 0.0, "W-", "H+");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(1,1) : 0.0), 0.0, "~chi+_1", "~chi-_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(2,2) : 0.0), 0.0, "~chi+_2", "~chi-_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(1,2) : 0.0), 0.0, "~chi+_1", "~chi-_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsc(2,1) : 0.0), 0.0, "~chi+_2", "~chi-_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,1) : 0.0), 0.0, "~chi0_1", "~chi0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(2,2) : 0.0), 0.0, "~chi0_2", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(3,3) : 0.0), 0.0, "~chi0_3", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(4,4) : 0.0), 0.0, "~chi0_4", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,2)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,3)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(1,4)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(2,3)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(2,4)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hhbrsn(3,4)*2.0 : 0.0), 0.0, "~chi0_3", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqul/2.0 : 0.0), 0.0, psn.isul, psn.isulbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqur/2.0 : 0.0), 0.0, psn.isur, psn.isurbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqul/2.0 : 0.0), 0.0, psn.iscl, psn.isclbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqur/2.0 : 0.0), 0.0, psn.iscr, psn.iscrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(1,1) : 0.0), 0.0, psn.ist1, psn.ist1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(2,2) : 0.0), 0.0, psn.ist2, psn.ist2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(1,2) : 0.0), 0.0, psn.ist1, psn.ist2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhst(2,1) : 0.0), 0.0, psn.ist2, psn.ist1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdl/2.0 : 0.0), 0.0, psn.isdl, psn.isdlbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdr/2.0 : 0.0), 0.0, psn.isdr, psn.isdrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdl/2.0 : 0.0), 0.0, psn.issl, psn.isslbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsqdr/2.0 : 0.0), 0.0, psn.issr, psn.issrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(1,1) : 0.0), 0.0, psn.isb1, psn.isb1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(2,2) : 0.0), 0.0, psn.isb2, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(1,2) : 0.0), 0.0, psn.isb1, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsb(2,1) : 0.0), 0.0, psn.isb2, psn.isb1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslel/2.0 : 0.0), 0.0, psn.isell, psn.isellbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsler/2.0 : 0.0), 0.0, psn.iselr, psn.iselrbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslel/2.0 : 0.0), 0.0, psn.ismul, psn.ismulbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhsler/2.0 : 0.0), 0.0, psn.ismur, psn.ismurbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(1,1) : 0.0), 0.0, psn.istau1, psn.istau1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(2,2) : 0.0), 0.0, psn.istau2, psn.istau2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(1,2) : 0.0), 0.0, psn.istau1, psn.istau2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhstau(2,1) : 0.0), 0.0, psn.istau2, psn.istau1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslnl/3.0 : 0.0), 0.0, psn.isnel, psn.isnelbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslnl/3.0 : 0.0), 0.0, psn.isnmul, psn.isnmulbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhhslnl/3.0 : 0.0), 0.0, psn.isntaul, psn.isntaulbar);
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"), true);
+    }
+
+    /// SUSY-HIT MSSM decays: A0
+    void A0_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::A0_decays;
+      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
+      result.calculator = BEreq::cb_widtha_hdec.origin();
+      result.calculator_version = BEreq::cb_widtha_hdec.version();
+
+      result.width_in_GeV = BEreq::cb_widtha_hdec->awdth;
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrb : 0.0), 0.0, "b", "bbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrl : 0.0), 0.0, "tau+", "tau-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrm : 0.0), 0.0, "mu+", "mu-");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrs : 0.0), 0.0, "s", "sbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrc : 0.0), 0.0, "c", "cbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrt : 0.0), 0.0, "t", "tbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrg : 0.0), 0.0, "g", "g");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrga : 0.0), 0.0, "gamma", "gamma");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrzga : 0.0), 0.0, "Z0", "gamma");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widtha_hdec->abrz : 0.0), 0.0, "Z0", "h0_1");
+      result.set_BF(0.0, 0.0, "Z0", "Z0");
+      result.set_BF(0.0, 0.0, "W+", "W-");
+      result.set_BF(0.0, 0.0, "h0_1", "h0_1");
+      result.set_BF(0.0, 0.0, "h0_2", "h0_2");
+      result.set_BF(0.0, 0.0, "~nu_1", "~nubar_1");
+      result.set_BF(0.0, 0.0, "~nu_2", "~nubar_2");
+      result.set_BF(0.0, 0.0, "~nu_3", "~nubar_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(1,1) : 0.0), 0.0, "~chi+_1", "~chi-_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(2,2) : 0.0), 0.0, "~chi+_2", "~chi-_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(1,2) : 0.0), 0.0, "~chi+_1", "~chi-_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsc(2,1) : 0.0), 0.0, "~chi+_2", "~chi-_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,1) : 0.0), 0.0, "~chi0_1", "~chi0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(2,2) : 0.0), 0.0, "~chi0_2", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(3,3) : 0.0), 0.0, "~chi0_3", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(4,4) : 0.0), 0.0, "~chi0_4", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,2)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,3)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(1,4)*2.0 : 0.0), 0.0, "~chi0_1", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(2,3)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(2,4)*2.0 : 0.0), 0.0, "~chi0_2", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsn(3,4)*2.0 : 0.0), 0.0, "~chi0_3", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrst/2.0 : 0.0), 0.0, psn.ist1, psn.ist2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrst/2.0 : 0.0), 0.0, psn.ist1bar, psn.ist2);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsb/2.0 : 0.0), 0.0, psn.isb1, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsb/2.0 : 0.0), 0.0, psn.isb1bar, psn.isb2);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsl/2.0 : 0.0), 0.0, psn.istau1, psn.istau2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->habrsl/2.0 : 0.0), 0.0, psn.istau1bar, psn.istau2);
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
+
+    /// SUSY-HIT MSSM decays: H_plus
+    void H_plus_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::H_plus_decays;
+      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
+      result.calculator = BEreq::cb_widthhc_hdec.origin();
+      result.calculator_version = BEreq::cb_widthhc_hdec.version();
+
+      result.width_in_GeV = BEreq::cb_widthhc_hdec->hcwdth;
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrb: 0.0), 0.0, "c", "bbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrl: 0.0), 0.0, "tau+", "nu_tau");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrm: 0.0), 0.0, "mu+", "nu_mu");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrbu: 0.0), 0.0, "u", "bbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrs: 0.0), 0.0, "u", "sbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrc: 0.0), 0.0, "c", "sbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrt: 0.0), 0.0, "t", "bbar");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbrw: 0.0), 0.0, "W+", "h0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_widthhc_hdec->hcbra: 0.0), 0.0, "W+", "A0");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,1) : 0.0), 0.0, "~chi+_1", "~chi0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,2) : 0.0), 0.0, "~chi+_1", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,3) : 0.0), 0.0, "~chi+_1", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(1,4) : 0.0), 0.0, "~chi+_1", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,1) : 0.0), 0.0, "~chi+_2", "~chi0_1");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,2) : 0.0), 0.0, "~chi+_2", "~chi0_2");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,3) : 0.0), 0.0, "~chi+_2", "~chi0_3");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsu(2,4) : 0.0), 0.0, "~chi+_2", "~chi0_4");
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl00/2.0: 0.0), 0.0, psn.isellbar, psn.isnel);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl00/2.0: 0.0), 0.0, psn.ismulbar, psn.isnmul);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl11: 0.0), 0.0, psn.istau1bar, psn.isntaul);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisfer_hdec->bhcsl21: 0.0), 0.0, psn.istau2bar, psn.isntaul);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsq/2.0: 0.0), 0.0, psn.isul, psn.isdlbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrsq/2.0: 0.0), 0.0, psn.iscl, psn.isslbar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(1,1) : 0.0), 0.0, psn.ist1, psn.isb1bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(2,2) : 0.0), 0.0, psn.ist2, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(1,2) : 0.0), 0.0, psn.ist1, psn.isb2bar);
+      result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_wisusy_hdec->hcbrstb(2,1) : 0.0), 0.0, psn.ist2, psn.isb1bar);
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
+
+    /// SUSY-HIT MSSM decays: gluino
     void gluino_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::gluino_decays;
@@ -1066,10 +888,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_glui3body->brhcst1b : 0.0), 0.0, psn.ist1, "bbar", "H-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_glui3body->brhcst1b : 0.0), 0.0, psn.ist1bar, "b", "H+");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: stop_1
+    /// SUSY-HIT MSSM decays: stop_1
     void stop_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::stop_1_decays;
@@ -1125,16 +947,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stop3body->brstelsbnu(1,1) : 0.0), 0.0, psn.isb1, "mu+", "nu_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stop3body->brstelsbnu(1,2) : 0.0), 0.0, psn.isb2, "mu+", "nu_mu");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-   }
-
-    /// MSSM decays: stopbar_1
-    void stopbar_1_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::stopbar_1_decays::Dep::stop_1_decay_rates);
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: stop_2
+    /// SUSY-HIT MSSM decays: stop_2
     void stop_2_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::stop_2_decays;
@@ -1204,16 +1020,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stop3body->brst2st1nunu : 0.0), 0.0, psn.ist1, "nu_mu", "nubar_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stop3body->brst2st1nunu : 0.0), 0.0, psn.ist1, "nu_tau", "nubar_tau");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: stopbar_2
-    void stopbar_2_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::stopbar_2_decays::Dep::stop_2_decay_rates);
-    }
-
-    /// MSSM decays: sbottom_1
+    /// SUSY-HIT MSSM decays: sbottom_1
     void sbottom_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sbottom_1_decays;
@@ -1258,17 +1068,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sbot3body->brsbelstnu(1,1) : 0.0), 0.0, psn.ist1, "mu-", "nubar_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sbot3body->brsbelstnu(1,2) : 0.0), 0.0, psn.ist1, "mu-", "nubar_mu");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: sbottombar_1
-    void sbottombar_1_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::sbottombar_1_decays::Dep::sbottom_1_decay_rates);
-    }
-
-    /// MSSM decays: sbottom_2
+    /// SUSY-HIT MSSM decays: sbottom_2
     void sbottom_2_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sbottom_2_decays;
@@ -1330,16 +1133,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sbot3body->brsb2sb1nunu : 0.0), 0.0, psn.isb1, "nu_mu", "nubar_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sbot3body->brsb2sb1nunu : 0.0), 0.0, psn.isb1, "nu_tau", "nubar_tau");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: sbottombar_2
-    void sbottombar_2_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::sbottombar_2_decays::Dep::sbottom_2_decay_rates);
-    }
-
-    /// MSSM decays: sup_l
+    /// SUSY-HIT MSSM decays: sup_l
     void sup_l_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sup_l_decays;
@@ -1356,16 +1153,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuplcdow(2) : 0.0), 0.0, "~chi+_2", "d");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuplglui : 0.0), 0.0, "~g", "u");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: supbar_l
-    void supbar_l_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::supbar_l_decays::Dep::sup_l_decay_rates);
-    }
-
-    /// MSSM decays: sup_r
+    /// SUSY-HIT MSSM decays: sup_r
     void sup_r_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sup_r_decays;
@@ -1379,16 +1170,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuprcdow(1) : 0.0), 0.0, "~chi+_1", "d");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuprcdow(2) : 0.0), 0.0, "~chi+_2", "d");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuprglui : 0.0), 0.0, "~g", "u");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: supbar_r
-    void supbar_r_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::supbar_r_decays::Dep::sup_r_decay_rates);
-    }
-
-    /// MSSM decays: sdown_l
+    /// SUSY-HIT MSSM decays: sdown_l
     void sdown_l_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sdown_l_decays;
@@ -1402,16 +1187,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowlchup(1) : 0.0), 0.0, "~chi-_1", "u");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowlchup(2) : 0.0), 0.0, "~chi-_2", "u");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowlglui : 0.0), 0.0, "~g", "d");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: sdownbar_l
-    void sdownbar_l_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::sdownbar_l_decays::Dep::sdown_l_decay_rates);
-    }
-
-    /// MSSM decays: sdown_r
+    /// SUSY-HIT MSSM decays: sdown_r
     void sdown_r_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sdown_r_decays;
@@ -1425,16 +1204,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowrchup(1) : 0.0), 0.0, "~chi-_1", "u");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowrchup(2) : 0.0), 0.0, "~chi-_2", "u");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowrglui : 0.0), 0.0, "~g", "d");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: sdownbar_r
-    void sdownbar_r_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::sdownbar_r_decays::Dep::sdown_r_decay_rates);
-    }
-
-    /// MSSM decays: scharm_l
+    /// SUSY-HIT MSSM decays: scharm_l
     void scharm_l_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::scharm_l_decays;
@@ -1448,16 +1221,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuplcdow(1) : 0.0), 0.0, "~chi+_1", "s");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuplcdow(2) : 0.0), 0.0, "~chi+_2", "s");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuplglui : 0.0), 0.0, "~g", "c");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: scharmbar_l
-    void scharmbar_l_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::scharmbar_l_decays::Dep::scharm_l_decay_rates);
-    }
-
-    /// MSSM decays: scharm_r
+    /// SUSY-HIT MSSM decays: scharm_r
     void scharm_r_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::scharm_r_decays;
@@ -1471,16 +1238,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuprcdow(1) : 0.0), 0.0, "~chi+_1", "s");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuprcdow(2) : 0.0), 0.0, "~chi+_2", "s");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sup2body->brsuprglui : 0.0), 0.0, "~g", "c");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: scharmbar_r
-    void scharmbar_r_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::scharmbar_r_decays::Dep::scharm_r_decay_rates);
-    }
-
-    /// MSSM decays: sstrange_l
+    /// SUSY-HIT MSSM decays: sstrange_l
     void sstrange_l_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sstrange_l_decays;
@@ -1494,16 +1255,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowlchup(1) : 0.0), 0.0, "~chi-_1", "c");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowlchup(2) : 0.0), 0.0, "~chi-_2", "c");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowlglui : 0.0), 0.0, "~g", "s");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: sstrangebar_l
-    void sstrangebar_l_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::sstrangebar_l_decays::Dep::sstrange_l_decay_rates);
-    }
-
-    /// MSSM decays: sstrange_r
+    /// SUSY-HIT MSSM decays: sstrange_r
     void sstrange_r_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::sstrange_r_decays;
@@ -1517,16 +1272,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowrchup(1) : 0.0), 0.0, "~chi-_1", "c");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowrchup(2) : 0.0), 0.0, "~chi-_2", "c");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sdown2body->brsdowrglui : 0.0), 0.0, "~g", "s");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: sstrangebar_r
-    void sstrangebar_r_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::sstrangebar_r_decays::Dep::sstrange_r_decay_rates);
-    }
-
-    /// MSSM decays: selectron_l
+    /// SUSY-HIT MSSM decays: selectron_l
     void selectron_l_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::selectron_l_decays;
@@ -1539,16 +1288,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brsellneute(4) : 0.0), 0.0, "~chi0_4", "e-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brsellcharnue(1) : 0.0), 0.0, "~chi-_1", "nu_e");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brsellcharnue(2) : 0.0), 0.0, "~chi-_2", "nu_e");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: selectronbar_l
-    void selectronbar_l_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::selectronbar_l_decays::Dep::selectron_l_decay_rates);
-    }
-
-    /// MSSM decays: selectron_r
+    /// SUSY-HIT MSSM decays: selectron_r
     void selectron_r_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::selectron_r_decays;
@@ -1561,16 +1304,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brselrneute(4) : 0.0), 0.0, "~chi0_4", "e-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brselrcharnue(1) : 0.0), 0.0, "~chi-_1", "nu_e");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brselrcharnue(2) : 0.0), 0.0, "~chi-_2", "nu_e");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: selectronbar_r
-    void selectronbar_r_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::selectronbar_r_decays::Dep::selectron_r_decay_rates);
-    }
-
-    /// MSSM decays: smuon_l
+    /// SUSY-HIT MSSM decays: smuon_l
     void smuon_l_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::smuon_l_decays;
@@ -1583,16 +1320,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brsellneute(4) : 0.0), 0.0, "~chi0_4", "mu-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brsellcharnue(1) : 0.0), 0.0, "~chi-_1", "nu_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brsellcharnue(2) : 0.0), 0.0, "~chi-_2", "nu_mu");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: smuonbar_l
-    void smuonbar_l_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::smuonbar_l_decays::Dep::smuon_l_decay_rates);
-    }
-
-    /// MSSM decays: smuon_r
+    /// SUSY-HIT MSSM decays: smuon_r
     void smuon_r_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::smuon_r_decays;
@@ -1605,16 +1336,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brselrneute(4) : 0.0), 0.0, "~chi0_4", "mu-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brselrcharnue(1) : 0.0), 0.0, "~chi-_1", "nu_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sel2body->brselrcharnue(2) : 0.0), 0.0, "~chi-_2", "nu_mu");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: smuonbar_r
-    void smuonbar_r_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::smuonbar_r_decays::Dep::smuon_r_decay_rates);
-    }
-
-    /// MSSM decays: stau_1
+    /// SUSY-HIT MSSM decays: stau_1
     void stau_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::stau_1_decays;
@@ -1634,16 +1359,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stau2body->brstau1wsn(1) : 0.0), 0.0, psn.isntaul, "W-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stau2bodygrav->brstautaugrav : 0.0), 0.0, "~G", "tau-");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: staubar_1
-    void staubar_1_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::staubar_1_decays::Dep::stau_1_decay_rates);
-    }
-
-    /// MSSM decays: stau_2
+    /// SUSY-HIT MSSM decays: stau_2
     void stau_2_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::stau_2_decays;
@@ -1666,16 +1385,11 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stau2body->brstau2ha : 0.0), 0.0, psn.istau1, "A0");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_stau2body->brstau2ztau : 0.0), 0.0, psn.istau1, "Z0");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-   }
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
 
-    /// MSSM decays: staubar_2
-    void staubar_2_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::staubar_2_decays::Dep::stau_2_decay_rates);
     }
 
-    /// MSSM decays: snu_electronl
+    /// SUSY-HIT MSSM decays: snu_electronl
     void snu_electronl_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::snu_electronl_decays;
@@ -1688,16 +1402,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_snel2body->brsnellneut(4) : 0.0), 0.0, "~chi0_4", "nu_e");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_snel2body->brsnellchar(1) : 0.0), 0.0, "~chi+_1", "e-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_snel2body->brsnellchar(2) : 0.0), 0.0, "~chi+_2", "e-");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: snubar_electronl
-    void snubar_electronl_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::snubar_electronl_decays::Dep::snu_electronl_decay_rates);
-    }
-
-    /// MSSM decays: snu_muonl
+    /// SUSY-HIT MSSM decays: snu_muonl
     void snu_muonl_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::snu_muonl_decays;
@@ -1710,16 +1418,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_snel2body->brsnellneut(4) : 0.0), 0.0, "~chi0_4", "nu_mu");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_snel2body->brsnellchar(1) : 0.0), 0.0, "~chi+_1", "mu-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_snel2body->brsnellchar(2) : 0.0), 0.0, "~chi+_2", "mu-");
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: snubar_muonl
-    void snubar_muonl_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::snubar_muonl_decays::Dep::snu_muonl_decay_rates);
-    }
-
-    /// MSSM decays: snu_taul
+    /// SUSY-HIT MSSM decays: snu_taul
     /// Note that SUSY-HIT calls ~nu_tau_L "snutau1" even though it has no RH (~)nus.
     void snu_taul_decays (DecayTable::Entry& result)
     {
@@ -1741,16 +1443,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sntau2body->brsntau1wstau(1) : 0.0), 0.0, psn.istau1bar, "W-");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_sntau2body->brsntau1wstau(2) : 0.0), 0.0, psn.istau2bar, "W-");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: snubar_taul
-    void snubar_taul_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::snubar_taul_decays::Dep::snu_taul_decay_rates);
-    }
-
-    /// MSSM decays: chargino_plus_1
+    /// SUSY-HIT MSSM decays: chargino_plus_1
     void chargino_plus_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::chargino_plus_1_decays;
@@ -1821,16 +1517,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_char3body->brglchsb(1) : 0.0), 0.0, "~g", "c", "sbar");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_char3body->brgltopbb(1) : 0.0), 0.0, "~g", "t", "bbar");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: chargino_minus_1
-    void chargino_minus_1_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::chargino_minus_1_decays::Dep::chargino_plus_1_decay_rates);
-    }
-
-    /// MSSM decays: chargino_plus_2
+    /// SUSY-HIT MSSM decays: chargino_plus_2
     void chargino_plus_2_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::chargino_plus_2_decays;
@@ -1917,16 +1607,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_char3body->brglchsb(2) : 0.0), 0.0, "~g", "c", "sbar");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_char3body->brgltopbb(2) : 0.0), 0.0, "~g", "t", "bbar");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// MSSM decays: chargino_minus_2
-    void chargino_minus_2_decays (DecayTable::Entry& result)
-    {
-      result = CP_conjugate(*Pipes::chargino_minus_2_decays::Dep::chargino_plus_2_decay_rates);
-    }
-
-    /// MSSM decays: neutralino_1
+    /// SUSY-HIT MSSM decays: neutralino_1
     void neutralino_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::neutralino_1_decays;
@@ -2027,11 +1711,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brgltop(1) : 0.0), 0.0, "~g", "tbar", "t");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brglbot(1) : 0.0), 0.0, "~g", "bbar", "b");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-
-    /// MSSM decays: neutralino_2
+    /// SUSY-HIT MSSM decays: neutralino_2
     void neutralino_2_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::neutralino_2_decays;
@@ -2149,11 +1832,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brgltop(2) : 0.0), 0.0, "~g", "tbar", "t");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brglbot(2) : 0.0), 0.0, "~g", "bbar", "b");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-
-    /// MSSM decays: neutralino_3
+    /// SUSY-HIT MSSM decays: neutralino_3
     void neutralino_3_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::neutralino_3_decays;
@@ -2288,11 +1970,10 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brgltop(3) : 0.0), 0.0, "~g", "tbar", "t");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brglbot(3) : 0.0), 0.0, "~g", "bbar", "b");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-   }
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
 
-
-    /// MSSM decays: neutralino_4
+    /// SUSY-HIT MSSM decays: neutralino_4
     void neutralino_4_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::neutralino_4_decays;
@@ -2444,9 +2125,36 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brgltop(4) : 0.0), 0.0, "~g", "tbar", "t");
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_neut3body->brglbot(4) : 0.0), 0.0, "~g", "bbar", "b");
 
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
+    /// MSSM decays: conjugates
+    /// @{
+    void H_minus_decays (DecayTable::Entry& result)          { result = CP_conjugate(*Pipes::H_minus_decays::Dep::H_plus_decay_rates); }
+    void stopbar_1_decays (DecayTable::Entry& result)        { result = CP_conjugate(*Pipes::stopbar_1_decays::Dep::stop_1_decay_rates); }
+    void stopbar_2_decays (DecayTable::Entry& result)        { result = CP_conjugate(*Pipes::stopbar_2_decays::Dep::stop_2_decay_rates); }
+    void sbottombar_1_decays (DecayTable::Entry& result)     { result = CP_conjugate(*Pipes::sbottombar_1_decays::Dep::sbottom_1_decay_rates); }
+    void sbottombar_2_decays (DecayTable::Entry& result)     { result = CP_conjugate(*Pipes::sbottombar_2_decays::Dep::sbottom_2_decay_rates); }
+    void supbar_l_decays (DecayTable::Entry& result)         { result = CP_conjugate(*Pipes::supbar_l_decays::Dep::sup_l_decay_rates); }
+    void supbar_r_decays (DecayTable::Entry& result)         { result = CP_conjugate(*Pipes::supbar_r_decays::Dep::sup_r_decay_rates); }
+    void sdownbar_l_decays (DecayTable::Entry& result)       { result = CP_conjugate(*Pipes::sdownbar_l_decays::Dep::sdown_l_decay_rates); }
+    void sdownbar_r_decays (DecayTable::Entry& result)       { result = CP_conjugate(*Pipes::sdownbar_r_decays::Dep::sdown_r_decay_rates); }
+    void scharmbar_l_decays (DecayTable::Entry& result)      { result = CP_conjugate(*Pipes::scharmbar_l_decays::Dep::scharm_l_decay_rates); }
+    void scharmbar_r_decays (DecayTable::Entry& result)      { result = CP_conjugate(*Pipes::scharmbar_r_decays::Dep::scharm_r_decay_rates); }
+    void sstrangebar_l_decays (DecayTable::Entry& result)    { result = CP_conjugate(*Pipes::sstrangebar_l_decays::Dep::sstrange_l_decay_rates); }
+    void sstrangebar_r_decays (DecayTable::Entry& result)    { result = CP_conjugate(*Pipes::sstrangebar_r_decays::Dep::sstrange_r_decay_rates); }
+    void selectronbar_l_decays (DecayTable::Entry& result)   { result = CP_conjugate(*Pipes::selectronbar_l_decays::Dep::selectron_l_decay_rates); }
+    void selectronbar_r_decays (DecayTable::Entry& result)   { result = CP_conjugate(*Pipes::selectronbar_r_decays::Dep::selectron_r_decay_rates); }
+    void smuonbar_l_decays (DecayTable::Entry& result)       { result = CP_conjugate(*Pipes::smuonbar_l_decays::Dep::smuon_l_decay_rates); }
+    void smuonbar_r_decays (DecayTable::Entry& result)       { result = CP_conjugate(*Pipes::smuonbar_r_decays::Dep::smuon_r_decay_rates); }
+    void staubar_1_decays (DecayTable::Entry& result)        { result = CP_conjugate(*Pipes::staubar_1_decays::Dep::stau_1_decay_rates); }
+    void staubar_2_decays (DecayTable::Entry& result)        { result = CP_conjugate(*Pipes::staubar_2_decays::Dep::stau_2_decay_rates); }
+    void snubar_electronl_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::snubar_electronl_decays::Dep::snu_electronl_decay_rates); }
+    void snubar_muonl_decays (DecayTable::Entry& result)     { result = CP_conjugate(*Pipes::snubar_muonl_decays::Dep::snu_muonl_decay_rates); }
+    void snubar_taul_decays (DecayTable::Entry& result)      { result = CP_conjugate(*Pipes::snubar_taul_decays::Dep::snu_taul_decay_rates); }
+    void chargino_minus_1_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::chargino_minus_1_decays::Dep::chargino_plus_1_decay_rates); }
+    void chargino_minus_2_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::chargino_minus_2_decays::Dep::chargino_plus_2_decay_rates); }
+    /// @}
 
     //////////// Singlet DM /////////////////////
 
@@ -2456,12 +2164,12 @@ namespace Gambit
       using namespace Pipes::SingletDM_Higgs_decays;
 
       // Get the spectrum information
-      const Spectrum* spec = *Dep::SingletDM_spectrum;
-      const SubSpectrum* he = spec->get_HE();
-      double mass = spec->get(Par::Pole_Mass,"S");
-      double lambda = he->get(Par::dimensionless,"lambda_hS");
-      double v0 = he->get(Par::mass1,"vev");
-      double mhpole = spec->get(Par::Pole_Mass,"h0_1");
+      const Spectrum& spec = *Dep::SingletDM_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"S");
+      double lambda = he.get(Par::dimensionless,"lambda_hS");
+      double v0 = he.get(Par::mass1,"vev");
+      double mhpole = spec.get(Par::Pole_Mass,"h0_1");
 
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
@@ -2481,9 +2189,9 @@ namespace Gambit
 
       // Add the h->SS branching fraction
       result.set_BF(gamma/result.width_in_GeV, 0.0, "S", "S");
-      
+
       // Make sure the width is sensible.
-      check_negative_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
    }
 
 
@@ -2526,12 +2234,26 @@ namespace Gambit
       // MSSM-specific
       if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
       {
-        mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
+        // Make sure that if the user has elected to take Higgs decays from FeynHiggs that
+        // they have elected to take the Higgs mass from FeynHiggs alone.
+        if (Dep::Higgs_decay_rates->calculator == "FeynHiggs" or
+            Dep::h0_2_decay_rates->calculator == "FeynHiggs" or
+            Dep::A0_decay_rates->calculator == "FeynHiggs" or
+            Dep::H_plus_decay_rates->calculator == "FeynHiggs" or
+            Dep::t_decay_rates->calculator == "FeynHiggs")
+        {
+          if (not Dep::MSSM_spectrum->get_HE().has(Par::dimensionless, "h mass from: SpecBit::FH_HiggsMasses"))
+           DecayBit_error().raise(LOCAL_INFO, "You must use Higgs masses from FeynHiggs if you choose to use FeynHiggs "
+                                              "to calculate h or t decays.\nPlease modify your yaml file accordingly.");
+        }
+
+        mass_es_pseudonyms psn = *Dep::SLHA_pseudonyms;
 
         decays("h0_2") = *Dep::h0_2_decay_rates;                 // Add the h0_2 decays.
         decays("A0") = *Dep::A0_decay_rates;                     // Add the A0 decays.
         decays("H+") = *Dep::H_plus_decay_rates;                 // Add the H+ decays.
-        decays("H-") = *Dep::H_minus_decay_rates;                // Add the H+ decays.
+        decays("H-") = *Dep::H_minus_decay_rates;                // Add the H- decays.
 
         decays("~g") = *Dep::gluino_decay_rates;                 // Add the gluino decays.
 
@@ -2562,7 +2284,6 @@ namespace Gambit
         decays(psn.ismur) = *Dep::smuon_r_decay_rates;           // Add the ~mu-_R decays.
         decays(psn.istau1) = *Dep::stau_1_decay_rates;           // Add the ~tau_1 decays.
         decays(psn.istau2) = *Dep::stau_2_decay_rates;           // Add the ~tau_2 decays.
-
         decays(psn.isnel) = *Dep::snu_electronl_decay_rates;     // Add the ~nu_e decays.
         decays(psn.isnmul) = *Dep::snu_muonl_decay_rates;        // Add the ~nu_mu decays.
         decays(psn.isntaul) = *Dep::snu_taul_decay_rates;        // Add the ~nu_tau decays.
@@ -2595,7 +2316,7 @@ namespace Gambit
       if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
       {
         str filename = runOptions->getValueOrDef<str>("GAMBIT_decays.slha", "SLHA_output_filename");
-        decays.getSLHA(filename);
+        decays.writeSLHAfile(filename);
       }
 
     }
@@ -2610,7 +2331,7 @@ namespace Gambit
       }
       static unsigned int counter = 0;
       std::vector<str> filenames = runOptions->getValue<std::vector<str> >("SLHA_decay_filenames");
-      logger() << "Reading SLHA file: " << filenames[counter] << std::endl;
+      logger() << "Reading SLHA file: " << filenames[counter] << EOM;
       std::ifstream ifs(filenames[counter]);
       if(!ifs.good()) backend_error().raise(LOCAL_INFO, "SLHA file not found.");
       SLHAstruct slha(ifs);
@@ -2624,7 +2345,7 @@ namespace Gambit
     void get_mass_es_pseudonyms(mass_es_pseudonyms& result)
     {
       using namespace Pipes::get_mass_es_pseudonyms;
-      const SubSpectrum* mssm = (*Dep::MSSM_spectrum)->get_HE();
+      const SubSpectrum& mssm = (*Dep::MSSM_spectrum).get_HE();
 
       const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
       const static bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
@@ -2643,7 +2364,7 @@ namespace Gambit
       const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
       result = 0;
       double max_mixing;
-      const SubSpectrum* mssm = (*Dep::MSSM_spectrum)->get_HE();
+      const SubSpectrum& mssm = (*Dep::MSSM_spectrum).get_HE();
       str x = slhahelp::mass_es_from_gauge_es("~u_L", max_mixing, mssm);
       if((max_mixing*max_mixing) <= 1-tol) result = 1;
       x = slhahelp::mass_es_from_gauge_es("~u_R", max_mixing, mssm);
@@ -2673,20 +2394,20 @@ namespace Gambit
     /// @}
 
     // Read and interpolate chi2 table
-    Funk::Funk get_Higgs_invWidth_chi2(std::string filename)
+    daFunk::Funk get_Higgs_invWidth_chi2(std::string filename)
     {
       ASCIItableReader table(filename);
       std::vector<std::string> colnames = initVector<std::string>("BR", "Delta_chi2");
       table.setcolnames(colnames);
-      return Funk::interp("BR", table["BR"], table["Delta_chi2"]);
+      return daFunk::interp("BR", table["BR"], table["Delta_chi2"]);
     }
 
-    // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    void lnL_Higgs_invWidth_SMonly(double& result)
+    /// Implemented: Belanger et al. 2013, arXiv:1306.2941
+    void lnL_Higgs_invWidth_SMlike(double& result)
     {
-      using namespace Pipes::lnL_Higgs_invWidth_SMonly;
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike;
       double BF = Dep::Higgs_decay_rates->BF("S","S");
-      static Funk::Funk chi2 = get_Higgs_invWidth_chi2("Elements/data/GammaInv_SM_higgs_DeltaChi2.dat");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/GammaInv_SM_higgs_DeltaChi2.dat");
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 

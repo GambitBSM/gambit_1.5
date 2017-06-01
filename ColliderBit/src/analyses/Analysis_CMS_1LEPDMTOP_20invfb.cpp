@@ -1,13 +1,12 @@
-#include <vector>
-#include <cmath>
-#include <memory>
+// #include <vector>
+// #include <cmath>
+// #include <memory>
+// #include <iostream>
 #include <iomanip>
 
-#include <iostream>
-
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2w.h"
+// #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 using namespace std;
 

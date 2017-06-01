@@ -4,7 +4,7 @@
 #include <iomanip>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 //#include "gambit/ColliderBit/mt2w.h"
 
 /// @todo Remove the ROOT classes...
@@ -17,7 +17,7 @@ using namespace std;
 
 //    Code by Martin White
 //    Known issues:
-//    a) Not validated against a CMS cutflow.
+//    a) No cutflow is available for validation. Other CMS cutflows with similar kinematic variables have been validated however.
 //    b) Overlap removal is not applied (CMS do not use it, but we don't exactly use their particle flow technique either)
 //    c) Jets here need kT radius of 0.5 not 0.4
 
@@ -91,8 +91,7 @@ namespace Gambit {
             baselineTaus.push_back(tau);
           }
         }
-        /// @TODO ATLAS? Really?
-        ATLAS::applyTauEfficiencyR1(baselineTaus);
+        CMS::applyTauEfficiency(baselineTaus);
 
         vector<HEPUtils::Jet*> baselineJets;
         vector<HEPUtils::P4> jets;

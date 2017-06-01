@@ -387,20 +387,21 @@ def constrAbstractClassDecl(class_el, class_name, abstr_class_name, namespaces, 
     class_decl += ' '*(n_indents+2)*indent + abstr_class_name['short'] + '& operator=(const ' + abstr_class_name['short'] + '&) { return *this; }\n'
 
     # - Function init_wrapper() 
-    class_decl += '\n'
-    class_decl += ' '*(n_indents+2)*indent + 'virtual void init_wrapper()\n'
-    class_decl += ' '*(n_indents+2)*indent + '{\n'
     if file_for_gambit:
-        boss_warning = general_boss_warning % (class_name['long'], gb.gambit_backend_name_full, abstr_class_name['short'], 'init_wrapper()')
-        class_decl += ' '*(n_indents+3)*indent + 'std::cerr << "' + boss_warning + '" << std::endl;\n'
+        class_decl += '\n'
+        class_decl += ' '*(n_indents+2)*indent + 'virtual void init_wrapper() =0;\n'
     else:
+        class_decl += '\n'
+        class_decl += ' '*(n_indents+2)*indent + 'virtual void init_wrapper()\n'
+        class_decl += ' '*(n_indents+2)*indent + '{\n'
         class_decl += ' '*(n_indents+3)*indent + 'if (wptr == 0)\n'
         class_decl += ' '*(n_indents+3)*indent + '{\n'
         class_decl += ' '*(n_indents+4)*indent + 'wptr = wrapper_creator(this);\n'
         # class_decl += ' '*(n_indents+4)*indent + 'wrapper_creator(this);\n'
         class_decl += ' '*(n_indents+4)*indent + 'delete_wrapper = true;\n'
         class_decl += ' '*(n_indents+3)*indent + '}\n'
-    class_decl += ' '*(n_indents+2)*indent + '}\n'
+        class_decl += ' '*(n_indents+2)*indent + '}\n'
+
 
     # - Function get_init_wptr()
     class_decl += '\n'
@@ -419,13 +420,13 @@ def constrAbstractClassDecl(class_el, class_name, abstr_class_name, namespaces, 
     class_decl += ' '*(n_indents+2)*indent + '}\n'
 
     # - Destructor
-    class_decl += '\n'
-    class_decl += ' '*(n_indents+2)*indent + 'virtual ~' + abstr_class_name['short'] + '()\n'
-    class_decl += ' '*(n_indents+2)*indent + '{\n'
     if file_for_gambit:
-        boss_warning = general_boss_warning % (class_name['long'], gb.gambit_backend_name_full, abstr_class_name['short'], '~'+abstr_class_name['short'] )
-        class_decl += ' '*(n_indents+3)*indent + 'std::cerr << "' + boss_warning + '" << std::endl;\n'
+        class_decl += '\n'
+        class_decl += ' '*(n_indents+2)*indent + 'virtual ~' + abstr_class_name['short'] + '() =0;\n'
     else:
+        class_decl += '\n'
+        class_decl += ' '*(n_indents+2)*indent + 'virtual ~' + abstr_class_name['short'] + '()\n'
+        class_decl += ' '*(n_indents+2)*indent + '{\n'
         if gb.debug_mode:
             class_decl += ' '*(n_indents+3)*indent + 'std::cerr << "DEBUG: " << this << " ' + abstr_class_name['short'] + ' dtor (BEGIN)" << std::endl;\n' 
         class_decl += ' '*(n_indents+3)*indent + 'if (wptr != 0)\n'
@@ -444,7 +445,7 @@ def constrAbstractClassDecl(class_el, class_name, abstr_class_name, namespaces, 
         class_decl += ' '*(n_indents+3)*indent + '}\n'
         if gb.debug_mode:
             class_decl += ' '*(n_indents+3)*indent + 'std::cerr << "DEBUG: " << this << " ' + abstr_class_name['short'] + ' dtor (END)" << std::endl;\n' 
-    class_decl += ' '*(n_indents+2)*indent + '}\n'
+        class_decl += ' '*(n_indents+2)*indent + '}\n'
 
 
     # - Close the class body
@@ -1151,7 +1152,8 @@ def constrWrapperDecl(class_name, abstr_class_name, loaded_parent_classes, class
 
     # If no other parent classes, add WrapperBase
     if inheritance_line == '':
-        inheritance_line = ' : public virtual WrapperBase'
+        # inheritance_line = ' : public virtual WrapperBase'
+        inheritance_line = ' : public WrapperBase'
     else:
         inheritance_line = ' : ' + inheritance_line
 
@@ -1733,11 +1735,11 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
             temp_code += 'inline ' + class_name['long'] + '::' + class_name['short'] + args_bracket + ' :\n'
 
             parent_class_init_list = ''
-            parent_class_init_list += indent + 'WrapperBase(' + factory_ptr_name + args_bracket_notypes + '),\n'
+            # parent_class_init_list += indent + 'WrapperBase(' + factory_ptr_name + args_bracket_notypes + '),\n'
             for parent_dict in loaded_parent_classes:
                 parent_class_init_list += indent + parent_dict['class_name']['short'] + '(' + factory_ptr_name + args_bracket_notypes + '),\n'
-            # if parent_class_init_list == '':
-            #     parent_class_init_list += indent + 'WrapperBase(' + factory_ptr_name + args_bracket_notypes + '),\n'
+            if parent_class_init_list == '':
+                parent_class_init_list += indent + 'WrapperBase(' + factory_ptr_name + args_bracket_notypes + '),\n'
 
             if common_init_list_code != '':
                 temp_code += parent_class_init_list + common_init_list_code
@@ -1763,11 +1765,11 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
     def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(' + abstr_class_name['long'] +'* in) :\n'
 
     parent_class_init_list = ''
-    parent_class_init_list += indent + 'WrapperBase(in),\n'
+    # parent_class_init_list += indent + 'WrapperBase(in),\n'
     for parent_dict in loaded_parent_classes:
         parent_class_init_list += indent + parent_dict['class_name']['short'] + '(in),\n'
-    # if parent_class_init_list == '':
-    #     parent_class_init_list += indent + 'WrapperBase(in),\n'
+    if parent_class_init_list == '':
+        parent_class_init_list += indent + 'WrapperBase(in),\n'
 
     if common_init_list_code != '':
         def_code += parent_class_init_list + common_init_list_code
@@ -1803,11 +1805,11 @@ def constrWrapperDef(class_name, abstr_class_name, loaded_parent_classes, class_
         def_code += do_inline*'inline ' + class_name['long'] + '::' + class_name['short'] + '(const ' + class_name['short'] +'& in) :\n'
 
         parent_class_init_list = ''
-        parent_class_init_list += indent + 'WrapperBase(in.get_BEptr()->pointer_copy' + gb.code_suffix + '()),\n'
+        # parent_class_init_list += indent + 'WrapperBase(in.get_BEptr()->pointer_copy' + gb.code_suffix + '()),\n'
         for parent_dict in loaded_parent_classes:
             parent_class_init_list += indent + parent_dict['class_name']['short'] + '(in.get_BEptr()->pointer_copy' + gb.code_suffix + '()),\n'
-        # if parent_class_init_list == '':
-        #     parent_class_init_list += indent + 'WrapperBase(in.get_BEptr()->pointer_copy' + gb.code_suffix + '()),\n'
+        if parent_class_init_list == '':
+            parent_class_init_list += indent + 'WrapperBase(in.get_BEptr()->pointer_copy' + gb.code_suffix + '()),\n'
 
         if common_init_list_code != '':
             def_code += parent_class_init_list + common_init_list_code

@@ -20,11 +20,20 @@
 ///          (christophersrogan@gmail.com)
 ///  \date 2015 Apr
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 June
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2015, 2016
+///
 ///  *********************************************
 
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <complex>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/Elements/spectrum_factories.hpp"
@@ -74,7 +83,7 @@ namespace Gambit
     // the below template function.
     // MI for Model Interface, as defined in model_files_and_boxes.hpp
     template <class MI>
-    const Spectrum* run_FS_spectrum_generator
+    Spectrum run_FS_spectrum_generator
         ( const typename MI::InputParameters& input
         , const SMInputs& sminputs
         , const Options& runOptions
@@ -114,30 +123,13 @@ namespace Gambit
       // | higgs_2loop_correction_at_at     | 0, 1                         | 1 (= enabled)   |
       // | higgs_2loop_correction_atau_atau | 0, 1                         | 1 (= enabled)   |
 
-
-      #define SPECGEN_SET(NAME,TYPE,DEFAULTVAL) \
-         CAT_2(spectrum_generator.set_, NAME) BOOST_PP_LPAREN() runOptions.getValueOrDef<TYPE> \
-               BOOST_PP_LPAREN() DEFAULTVAL BOOST_PP_COMMA() STRINGIFY(NAME) \
-               BOOST_PP_RPAREN() BOOST_PP_RPAREN()
-      // Ugly I know. It expands to:
-      // spectrum_generator.set_NAME(runOptions.getValueOrDef<TYPE>(DEFAULTVAL,"NAME"))
-
-      // For debugging only; check expansions
-      // #ifdef SPECBIT_DEBUG
-      //    #define ECHO(COMMAND) std::cout << SAFE_STRINGIFY(COMMAND) << std::endl
-      //    ECHO(  SPECGEN_SET(precision_goal,                 double, 1.0e-4)  );
-      //    #undef ECHO
-      // #endif
-
-      SPECGEN_SET(precision_goal,                    double, 1.0e-4);
-      SPECGEN_SET(max_iterations,                    double, 0 );
-      SPECGEN_SET(calculate_sm_masses,               bool, false );
-      SPECGEN_SET(pole_mass_loop_order,              int, 2 );
-      SPECGEN_SET(ewsb_loop_order,                   int, 2 );
-      SPECGEN_SET(beta_loop_order,                   int, 2 );
-      SPECGEN_SET(threshold_corrections_loop_order,  int, 1 );
-
-      #undef SPECGEN_SET
+      spectrum_generator.set_precision_goal                  (runOptions.getValueOrDef<double>(1.0e-4,"precision_goal"));
+      spectrum_generator.set_max_iterations                  (runOptions.getValueOrDef<double>(0,     "max_iterations"));
+      spectrum_generator.set_calculate_sm_masses             (runOptions.getValueOrDef<bool>  (false, "calculate_sm_masses"));
+      spectrum_generator.set_pole_mass_loop_order            (runOptions.getValueOrDef<int>   (2,     "pole_mass_loop_order"));
+      spectrum_generator.set_ewsb_loop_order                 (runOptions.getValueOrDef<int>   (2,     "ewsb_loop_order"));
+      spectrum_generator.set_beta_loop_order                 (runOptions.getValueOrDef<int>   (2,     "beta_loop_order"));
+      spectrum_generator.set_threshold_corrections_loop_order(runOptions.getValueOrDef<int>   (2,     "threshold_corrections_loop_order"));
 
       // Higgs loop corrections are a little different... sort them out now
       Two_loop_corrections two_loop_settings;
@@ -146,14 +138,10 @@ namespace Gambit
       // alpha_b alpha_s
       // alpha_t^2 + alpha_t alpha_b + alpha_b^2
       // alpha_tau^2
-      two_loop_settings.higgs_at_as
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_at_as");
-      two_loop_settings.higgs_ab_as
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_ab_as");
-      two_loop_settings.higgs_at_at
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_at_at");
-      two_loop_settings.higgs_atau_atau
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_atau_atau");
+      two_loop_settings.higgs_at_as = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_at_as");
+      two_loop_settings.higgs_ab_as = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_ab_as");
+      two_loop_settings.higgs_at_at = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_at_at");
+      two_loop_settings.higgs_atau_atau = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_atau_atau");
 
       spectrum_generator.set_two_loop_corrections(two_loop_settings);
 
@@ -180,16 +168,16 @@ namespace Gambit
       //
       // This object will COPY the interface data members into itself, so it is now the
       // one-stop-shop for all spectrum information, including the model interface object.
-      MSSMSpec<MI> mssmspec(model_interface, "FlexibleSUSY", "1.1.0");
+      MSSMSpec<MI> mssmspec(model_interface, "FlexibleSUSY", "1.5.1");
 
       // Add extra information about the scales used to the wrapper object
-      // (last parameter turns the 'safety' check for the override setter off, which allows
+      // (last parameter turns on the 'allow_new' option for the override setter, which allows
       //  us to set parameters that don't previously exist)
-      mssmspec.set_override(Par::mass1,spectrum_generator.get_high_scale(),"high_scale",false);
-      mssmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",false);
-      mssmspec.set_override(Par::mass1,spectrum_generator.get_low_scale(), "low_scale", false);
+      mssmspec.set_override(Par::mass1,spectrum_generator.get_high_scale(),"high_scale",true);
+      mssmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
+      mssmspec.set_override(Par::mass1,spectrum_generator.get_low_scale(), "low_scale", true);
 
-      /// add theory errors
+      // Add theory errors
       static const MSSM_strs ms;
 
       static const std::vector<int> i12     = initVector(1,2);
@@ -197,30 +185,34 @@ namespace Gambit
       static const std::vector<int> i1234   = initVector(1,2,3,4);
       static const std::vector<int> i123456 = initVector(1,2,3,4,5,6);
 
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_pred, false); // 3% theory "error"
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_pred, false); // 3% theory "error"
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_strs_1_6, i123456, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_strs_1_6, i123456, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, "~chi0", i1234, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, "~chi0", i1234, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_strs_1_3, i123, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_strs_1_3, i123, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_strs_1_2, i12, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_strs_1_2, i12, false);
+      // 3% theory "error"
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_pred, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_pred, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_strs_1_6, i123456, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_strs_1_6, i123456, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, "~chi0", i1234, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, "~chi0", i1234, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_strs_1_3, i123, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_strs_1_3, i123, true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, 0.03, ms.pole_mass_strs_1_2, i12,  true);
+      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  0.03, ms.pole_mass_strs_1_2, i12,  true);
 
-      /// do the Higgs mass seperately
-      /// Default in most codes is 3 GeV,
-      /// seems like an underestimate if the stop masses are heavy enough.
-      /// (TODO: are we happy assigning the same for both higgses?)
-      /// FIXME this does not work for the second higgs
-      double rd_mh = 3.0 / mssmspec.get(Par::Pole_Mass, ms.h0, 1);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_high, rd_mh, "h0", i12, false);
-      mssmspec.set_override_vector(Par::Pole_Mass_1srd_low,  rd_mh, "h0", i12, false);
+      // Do the lightest Higgs mass separately.  The default in most codes is 3 GeV. That seems like
+      // an underestimate if the stop masses are heavy enough, but an overestimate for most points.
+      double rd_mh1 = 2.0 / mssmspec.get(Par::Pole_Mass, ms.h0, 1);
+      mssmspec.set_override(Par::Pole_Mass_1srd_high, rd_mh1, ms.h0, 1, true);
+      mssmspec.set_override(Par::Pole_Mass_1srd_low,  rd_mh1, ms.h0, 1, true);
 
-      /// Save the input value of TanBeta
-      if (input_Param.find("TanBeta") != input_Param.end())
+      // Do the W mass separately.  Here we use 10 MeV based on the size of corrections from two-loop papers and advice from Dominik Stockinger.
+      double rd_mW = 0.01 / mssmspec.get(Par::Pole_Mass, "W+");
+      mssmspec.set_override(Par::Pole_Mass_1srd_high, rd_mW, "W+", true);
+      mssmspec.set_override(Par::Pole_Mass_1srd_low,  rd_mW, "W+", true);
+
+      // Save the input value of TanBeta
+      // Probably need to make it a full requirement of the MSSM SpectrumContents
+      if(input_Param.find("TanBeta") != input_Param.end())
       {
-        mssmspec.set_override(Par::dimensionless, *input_Param.at("TanBeta"), "TanBeta_input", false);
+        mssmspec.set_override(Par::dimensionless, *input_Param.at("TanBeta"), "tanbeta(mZ)", true);
       }
 
       // Create a second SubSpectrum object to wrap the qedqcd object used to initialise the spectrum generator
@@ -234,7 +226,7 @@ namespace Gambit
       #endif
       if( problems.have_problem() )
       {
-         if( runOptions.getValue<bool>("invalid_point_fatal") )
+         if( runOptions.getValueOrDef<bool>(false,"invalid_point_fatal") )
          {
             ///TODO: Need to tell gambit that the spectrum is not viable somehow. For now
             /// just die.
@@ -286,12 +278,12 @@ namespace Gambit
          slha_io.write_to_file("SpecBit/initial_CMSSM_spectrum->slha");
       #endif
 
-      // Package pointer to QedQcd SubSpectrum object along with pointer to MSSM SubSpectrum object,
-      // and SMInputs struct.
-      // Return pointer to this package.
-      static Spectrum matched_spectra;
-      matched_spectra = Spectrum(qedqcdspec,mssmspec,sminputs,&input_Param);
-      return &matched_spectra;
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = runOptions.getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = runOptions.getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
+      // Package QedQcd SubSpectrum object, MSSM SubSpectrum object, and SMInputs struct into a 'full' Spectrum object
+      return Spectrum(qedqcdspec,mssmspec,sminputs,&input_Param,mass_cut,mass_ratio_cut);
     }
 
 
@@ -302,9 +294,7 @@ namespace Gambit
        Eigen::Matrix<double,3,3> output;
        for(int i=0; i<3; ++i) for(int j=0; j<3; ++j)
        {
-         std::stringstream parname;
-         parname << rootname << "_" << (i+1) << (j+1); // Assumes names in 1,2,3 convention
-         output(i,j) = *Param.at(parname.str());
+         output(i,j) = *Param.at(rootname + "_" + to_string(i+1) + to_string(j+1));
        }
        return output;
     }
@@ -313,11 +303,10 @@ namespace Gambit
     Eigen::Matrix<double,3,3> fill_3x3_symmetric_parameter_matrix(const std::string& rootname, const std::map<str, safe_ptr<double> >& Param)
     {
        Eigen::Matrix<double,3,3> output;
-       for(int i=0; i<3; ++i) for(int j=i; j<3; ++j)
+       for(int i=0; i<3; ++i) for(int j=0; j<3; ++j)
        {
-         std::stringstream parname;
-         parname << rootname << "_" << (i+1) << (j+1); // Assumes names in 1,2,3 convention
-         output(i,j) = *Param.at(parname.str());
+         str parname = rootname + "_" + ( i < j ? to_string(i+1) + to_string(j+1) : to_string(j+1) + to_string(i+1));
+         output(i,j) = *Param.at(parname);
        }
        return output;
     }
@@ -385,15 +374,15 @@ namespace Gambit
     }
 
     /// Check that the spectrum has a neutralino LSP.
-    bool has_neutralino_LSP(const Spectrum* &result)
+    bool has_neutralino_LSP(const Spectrum& result)
     {
-      double msqd  = result->get(Par::Pole_Mass, 1000001, 0);
-      double msqu  = result->get(Par::Pole_Mass, 1000002, 0);
-      double msl   = result->get(Par::Pole_Mass, 1000011, 0);
-      double msneu = result->get(Par::Pole_Mass, 1000012, 0);
-      double mglui = result->get(Par::Pole_Mass, 1000021, 0);
-      double mchi0 = std::abs(result->get(Par::Pole_Mass, 1000022, 0));
-      double mchip = std::abs(result->get(Par::Pole_Mass, 1000024, 0));
+      double msqd  = result.get(Par::Pole_Mass, 1000001, 0);
+      double msqu  = result.get(Par::Pole_Mass, 1000002, 0);
+      double msl   = result.get(Par::Pole_Mass, 1000011, 0);
+      double msneu = result.get(Par::Pole_Mass, 1000012, 0);
+      double mglui = result.get(Par::Pole_Mass, 1000021, 0);
+      double mchi0 = std::abs(result.get(Par::Pole_Mass, 1000022, 0));
+      double mchip = std::abs(result.get(Par::Pole_Mass, 1000024, 0));
 
       return mchi0 < mchip &&
              mchi0 < mglui &&
@@ -402,6 +391,12 @@ namespace Gambit
              mchi0 < msqu  &&
              mchi0 < msqd;
     }
+    /// Helper to work with pointer
+    bool has_neutralino_LSP(const Spectrum* result)
+    {
+      return has_neutralino_LSP(*result);
+    }
+
 
     /// @} End module convenience functions
 
@@ -414,13 +409,63 @@ namespace Gambit
     // Functions to changes the capability associated with a Spectrum object to
     // "SM_spectrum"
     //TODO: "temporarily" removed
-    //void convert_MSSM_to_SM   (const Spectrum* &result) {result = *Pipes::convert_MSSM_to_SM::Dep::unimproved_MSSM_spectrum;}
+    //void convert_MSSM_to_SM   (/*TAG*/ Spectrum &result) {result = *Pipes::convert_MSSM_to_SM::Dep::unimproved_MSSM_spectrum;}
 
     //void convert_NMSSM_to_SM  (Spectrum* &result) {result = *Pipes::convert_NMSSM_to_SM::Dep::NMSSM_spectrum;}
     //void convert_E6MSSM_to_SM (Spectrum* &result) {result = *Pipes::convert_E6MSSM_to_SM::Dep::E6MSSM_spectrum;}
 
+    void get_MSSM_spectrum_SPheno (Spectrum& spectrum)
+    {
+      namespace myPipe = Pipes::get_MSSM_spectrum_SPheno;
+      const SMInputs &sminputs = *myPipe::Dep::SMINPUTS;
 
-    void get_CMSSM_spectrum (const Spectrum* &result)
+      // Set up the input structure
+      Finputs inputs;
+      inputs.sminputs = sminputs;
+      inputs.param = myPipe::Param;
+      inputs.options = myPipe::runOptions;
+
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
+      // Get the spectrum from the Backend
+      myPipe::BEreq::SPheno_MSSMspectrum(spectrum, inputs);
+
+      // Get the SLHA struct from the spectrum object
+      SLHAstruct slha = spectrum.getSLHAea(1);
+
+      // Convert into a spectrum object
+      spectrum = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(slha,slha,mass_cut,mass_ratio_cut);
+
+    }
+
+    void most_SMlike_Higgs_MSSM(int &result)
+    {
+      using namespace Pipes::most_SMlike_Higgs_MSSM;
+      const SubSpectrum& mssm_spec = Dep::MSSM_spectrum->get_HE();
+      double sa =  - mssm_spec.get(Par::Pole_Mixing,"h0",1,1);
+      double ca = mssm_spec.get(Par::Pole_Mixing,"h0",1,2);
+      double tb = mssm_spec.get(Par::dimensionless, "tanbeta" );
+      double sb = sin(atan(tb));
+      double cb = cos(atan(tb));
+      //cos (beta - alpha) and sin(beta-alpha)
+      double cbma = cb * ca + sb * sa;
+      double sbma = sb * ca - cb * ca;
+
+      if(sbma > cbma)
+      {
+        result = 25;
+      }
+      else
+      {
+        result = 35;
+      }
+
+      return;
+    }
+
+    void get_CMSSM_spectrum (Spectrum& result)
     {
 
       // Access the pipes for this function to get model and parameter information
@@ -458,17 +503,13 @@ namespace Gambit
       // Only allow neutralino LSPs.
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
 
-      if (myPipe::runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
-      {
-        // Spit out the full spectrum as an SLHA file.
-        str filename = myPipe::runOptions->getValueOrDef<str>("GAMBIT_unimproved_spectrum.slha", "SLHA_output_filename");
-        result->getSLHA(filename);
-      }
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
     }
 
     // Runs MSSM spectrum generator with EWSB scale input
-    void get_MSSMatQ_spectrum (const Spectrum* &result)
+    void get_MSSMatQ_spectrum (Spectrum& result)
     {
       using namespace softsusy;
       namespace myPipe = Pipes::get_MSSMatQ_spectrum;
@@ -478,16 +519,11 @@ namespace Gambit
       fill_MSSM63_input(input,myPipe::Param);
       result = run_FS_spectrum_generator<MSSM_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
-      if (myPipe::runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
-      {
-        // Spit out the full spectrum as an SLHA file.
-        str filename = myPipe::runOptions->getValueOrDef<str>("GAMBIT_unimproved_spectrum.slha", "SLHA_output_filename");
-        result->getSLHA(filename);
-      }
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
 
     // Runs MSSM spectrum generator with GUT scale input
-    void get_MSSMatMGUT_spectrum (const Spectrum* &result)
+    void get_MSSMatMGUT_spectrum (Spectrum& result)
     {
       using namespace softsusy;
       namespace myPipe = Pipes::get_MSSMatMGUT_spectrum;
@@ -496,15 +532,10 @@ namespace Gambit
       fill_MSSM63_input(input,myPipe::Param);
       result = run_FS_spectrum_generator<MSSMatMGUT_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
-      if (myPipe::runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
-      {
-        // Spit out the full spectrum as an SLHA file.
-        str filename = myPipe::runOptions->getValueOrDef<str>("GAMBIT_unimproved_spectrum.slha", "SLHA_output_filename");
-        result->getSLHA(filename);
-      }
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
 
-    void get_GUTMSSMB_spectrum (const Spectrum* &/*result*/)
+    void get_GUTMSSMB_spectrum (Spectrum &/*result*/)
     {
       // Placeholder
     }
@@ -518,21 +549,27 @@ namespace Gambit
     void get_SM_SubSpectrum_from_MSSM_Spectrum (const SubSpectrum* &result)
     {
       namespace myPipe = Pipes::get_SM_SubSpectrum_from_MSSM_Spectrum;
-      const Spectrum* matched_spectra(*myPipe::Dep::unimproved_MSSM_spectrum);
-      result = matched_spectra->get_LE();
+      const Spectrum& matched_spectra(*myPipe::Dep::unimproved_MSSM_spectrum);
+      result = &matched_spectra.get_LE();
     }
 
-    /// Extract an SLHAea version of the spectrum contained in a Spectrum object
-    void get_MSSM_spectrum_as_SLHAea (SLHAstruct &result)
+    /// Extract an SLHAea version of the spectrum contained in a Spectrum object, in SLHA1 format
+    void get_MSSM_spectrum_as_SLHAea_SLHA1(SLHAstruct &result)
     {
-      result = (*Pipes::get_MSSM_spectrum_as_SLHAea::Dep::unimproved_MSSM_spectrum)->getSLHAea();
+      result = Pipes::get_MSSM_spectrum_as_SLHAea_SLHA1::Dep::unimproved_MSSM_spectrum->getSLHAea(1);
+    }
+
+    /// Extract an SLHAea version of the spectrum contained in a Spectrum object, in SLHA2 format
+    void get_MSSM_spectrum_as_SLHAea_SLHA2(SLHAstruct &result)
+    {
+      result = Pipes::get_MSSM_spectrum_as_SLHAea_SLHA2::Dep::unimproved_MSSM_spectrum->getSLHAea(2);
     }
 
     /// Get an MSSMSpectrum object from an SLHA file
     /// Wraps it up in MSSMSimpleSpec; i.e. no RGE running possible.
     /// This is mainly for testing against benchmark points, but may be a useful last
     /// resort for interacting with "difficult" spectrum generators.
-    void get_MSSM_spectrum_from_SLHAfile(const Spectrum* &result)
+    void get_MSSM_spectrum_from_SLHAfile(Spectrum &result)
     {
       // Static counter running in a loop over all filenames
       static unsigned int counter = 0;
@@ -571,13 +608,70 @@ namespace Gambit
         ncycle++;
       }
 
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
       // Create Spectrum object from the slhaea object
-      static Spectrum matched_spectra;
-      matched_spectra = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(input_slha, input_slha);
-      result = &matched_spectra;
+      result = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(input_slha, input_slha, mass_cut, mass_ratio_cut);
 
       // No sneaking in charged LSPs via SLHA, jävlar.
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+    }
+
+    /// Get an MSSMSpectrum object from an SLHAstruct
+    /// Wraps it up in MSSMSimpleSpec; i.e. no RGE running possible.
+    /// This can be used as a poor-man's interface to backend spectrum generators
+    void get_MSSM_spectrum_from_SLHAstruct(Spectrum& result)
+    {
+      namespace myPipe = Pipes::get_MSSM_spectrum_from_SLHAstruct;
+      const SLHAstruct& input_slha_tmp = *myPipe::Dep::unimproved_MSSM_spectrum; // Retrieve dependency on SLHAstruct
+
+      /// @todo FIXME this needs to be fixed -- is it needed any more?  Where is this GAMBIT block supposed to be written?
+      SLHAstruct input_slha(input_slha_tmp); // Copy struct (for demo adding of GAMBIT block only)
+      // For example; add this to your input SLHAstruct:
+      input_slha["GAMBIT"][""] << "BLOCK" << "GAMBIT";
+      input_slha["GAMBIT"][""] <<      1  << 1e99 << "# Input scale";
+      std::cout << input_slha << std::endl; // test.
+
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
+      // Create Spectrum object from the slhaea object
+      result = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(input_slha, input_slha, mass_cut, mass_ratio_cut);
+
+      // No sneaking in charged LSPs via SLHA, jävlar.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // In order to translate from e.g. MSSM63atMGUT to MSSM63atQ, we need
+      // to know that input scale Q. This is generally not stored in SLHA format,
+      // but we need it, so if you want to produce a Spectrum object this way you
+      // will need to add this information to your SLHAstruct:
+      // BLOCK GAMBIT
+      //   1     <high_scale>    # Input scale of (upper) boundary conditions, e.g. GUT scale
+
+      // Need to check if this information exists:
+      SLHAstruct::const_iterator block = input_slha.find("GAMBIT");
+      std::vector<std::string> key(1, "1");
+      if(block == input_slha.end() or block->find(key) == block->end())
+      {
+        // Big problem
+        std::ostringstream errmsg;
+        errmsg << "Error constructing Spectrum object from a pre-existing SLHAstruct!    " << endl
+               << "The supplied SLHAstruct did not have the special GAMBIT block added.  " << endl
+               << "This block carries extra information from the spectrum generator      " << endl
+               << "that is usually thrown away, but which is needed for properly creating" << endl
+               << "a Spectrum object. In whatever module function created the SLHAstruct " << endl
+               << "that you want to use, please add code that adds the following         " << endl
+               << "information to the SLHAstruct (SLHAea::Coll):                         " << endl
+               << "  BLOCK GAMBIT                                                        " << endl
+               << " 1 <high_scale>  # Input scale of (upper) boundary conditions, e.g. GUT scale\n";
+        SpecBit_error().raise(LOCAL_INFO,errmsg.str());
+      }
+
+      // OK the GAMBIT block exists, add the data to the MSSM SubSpectrum object.
+      result.get_HE().set_override(Par::mass1,SLHAea::to<double>(input_slha.at("GAMBIT").at(1).at(1)), "high_scale", false);
     }
 
     /// FeynHiggs SUSY masses and mixings
@@ -770,8 +864,11 @@ namespace Gambit
       result = HiggsMassObs;
     }
 
+////////////////////////
+//// Higgs routines ////
+////////////////////////
 
-    /// FeynHiggs Higgs couplings
+    /// Call FH_Couplings from FeynHiggs and collect the output
     void FH_Couplings(fh_Couplings &result)
     {
       using namespace Pipes::FH_Couplings;
@@ -810,10 +907,10 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      Farray<fh_complex, 1,681> couplings;     // MSSM Higgs couplings
-      Farray<fh_complex, 1,231> couplings_sm;  // SM Higgs couplings
-      Farray<fh_real, 1,978> gammas;           // Higgs decay widths and BR's (MSSM)
-      Farray<fh_real, 1,250> gammas_sm;        // Higgs decay widths and BR's (SM)
+      Farray<fh_complex, 1,ncouplings> couplings;        // MSSM Higgs couplings
+      Farray<fh_complex, 1,ncouplingsms> couplings_sm;  // SM Higgs couplings
+      Farray<fh_real, 1,ngammas> gammas;                // Higgs decay widths and BR's (MSSM)
+      Farray<fh_real, 1,ngammasms> gammas_sm;           // Higgs decay widths and BR's (SM)
       int fast = 1;  // include off-diagonal fermion decays? (1 = no)
 
       #ifdef SPECBIT_DEBUG
@@ -831,39 +928,274 @@ namespace Gambit
       }
 
       fh_Couplings Couplings;
-      for(int i = 0; i < 681; i++) Couplings.couplings[i] = couplings(i+1);
-      for(int i = 0; i < 231; i++) Couplings.couplings_sm[i] = couplings_sm(i+1);
-      for(int i = 0; i < 978; i++) Couplings.gammas[i] = gammas(i+1);
-      for(int i = 0; i < 250; i++) Couplings.gammas_sm[i] = gammas_sm(i+1);
+      for(int i = 0; i < ncouplings; i++) Couplings.couplings[i] = couplings(i+1);
+      for(int i = 0; i < ncouplingsms; i++) Couplings.couplings_sm[i] = couplings_sm(i+1);
+      for(int i = 0; i < ngammas; i++) Couplings.gammas[i] = gammas(i+1);
+      for(int i = 0; i < ngammasms; i++) Couplings.gammas_sm[i] = gammas_sm(i+1);
       Couplings.calculator = BEreq::FHCouplings.origin();
       Couplings.calculator_version = BEreq::FHCouplings.version();
 
       result = Couplings;
     }
 
+
+    /// Helper function to work out if the LSP is invisible, and if so, which particle it is.
+    std::vector<str> get_invisibles(const SubSpectrum& spec)
+    {
+      // Get the lighter of the lightest neutralino and the lightest sneutrino
+      std::pair<str,double> neutralino("~chi0_1", spec.get(Par::Pole_Mass,"~chi0",1));
+      std::pair<str,double> sneutrino("~nu_1", spec.get(Par::Pole_Mass,"~nu",1));
+      std::pair<str,double> lnp = (neutralino.second < sneutrino.second ? neutralino : sneutrino);
+
+      // Work out if this is indeed the LSP, and if decays of at least one neutral higgs to it are kinematically possible.
+      bool inv_lsp = spec.get(Par::Pole_Mass,"~chi+",1) > lnp.second and
+                     spec.get(Par::Pole_Mass,"~g") > lnp.second and
+                     spec.get(Par::Pole_Mass,"~d",1) > lnp.second and
+                     spec.get(Par::Pole_Mass,"~u",1) > lnp.second and
+                     spec.get(Par::Pole_Mass,"~e-",1) > lnp.second and
+                     (spec.get(Par::Pole_Mass,"h0",2) > 2.*lnp.second or
+                      spec.get(Par::Pole_Mass,"A0") > 2.*lnp.second);
+
+      // Create a vector containing all invisible products of higgs decays.
+      if (inv_lsp) return initVector<str>(lnp.first);
+      return std::vector<str>();
+    }
+
+    /// Put together the Higgs couplings for the MSSM, from partial widths only
+    void MSSM_higgs_couplings_pwid(HiggsCouplingsTable &result)
+    {
+      using namespace Pipes::MSSM_higgs_couplings_pwid;
+
+      // Retrieve spectrum contents
+      const SubSpectrum& spec = Dep::MSSM_spectrum->get_HE();
+
+      // Set up neutral Higgses
+      static const std::vector<str> sHneut = initVector<str>("h0_1", "h0_2", "A0");
+
+      // Set the CP of the Higgs states.  Note that this would need to be more sophisticated to deal with the complex MSSM!
+      result.CP[0] = 1;  //h0_1
+      result.CP[1] = 1;  //h0_2
+      result.CP[2] = -1; //A0
+
+      // Work out which SM values correspond to which SUSY Higgs
+      int higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 0 : 1);
+      int other_higgs = (higgs == 0 ? 1 : 0);
+
+      // Set the decays
+      result.set_neutral_decays_SM(higgs, sHneut[higgs], *Dep::Reference_SM_Higgs_decay_rates);
+      result.set_neutral_decays_SM(other_higgs, sHneut[other_higgs], *Dep::Reference_SM_other_Higgs_decay_rates);
+      result.set_neutral_decays_SM(2, sHneut[2], *Dep::Reference_SM_A0_decay_rates);
+      result.set_neutral_decays(0, sHneut[0],  *Dep::Higgs_decay_rates);
+      result.set_neutral_decays(1, sHneut[1], *Dep::h0_2_decay_rates);
+      result.set_neutral_decays(2, sHneut[2], *Dep::A0_decay_rates);
+      result.set_charged_decays(0, "H+", *Dep::H_plus_decay_rates);
+      result.set_t_decays(*Dep::t_decay_rates);
+
+      // Use them to compute effective couplings for all neutral higgses, except for hhZ.
+      for (int i = 0; i < 3; i++)
+      {
+        result.C_WW2[i] = result.compute_effective_coupling(i, std::pair<int,int>(24, 0), std::pair<int,int>(-24, 0));
+        result.C_ZZ2[i] = result.compute_effective_coupling(i, std::pair<int,int>(23, 0), std::pair<int,int>(23, 0));
+        result.C_tt2[i] = result.compute_effective_coupling(i, std::pair<int,int>(6, 1), std::pair<int,int>(-6, 1));
+        result.C_bb2[i] = result.compute_effective_coupling(i, std::pair<int,int>(5, 1), std::pair<int,int>(-5, 1));
+        result.C_cc2[i] = result.compute_effective_coupling(i, std::pair<int,int>(4, 1), std::pair<int,int>(-4, 1));
+        result.C_tautau2[i] = result.compute_effective_coupling(i, std::pair<int,int>(15, 1), std::pair<int,int>(-15, 1));
+        result.C_gaga2[i] = result.compute_effective_coupling(i, std::pair<int,int>(22, 0), std::pair<int,int>(22, 0));
+        result.C_gg2[i] = result.compute_effective_coupling(i, std::pair<int,int>(21, 0), std::pair<int,int>(21, 0));
+        result.C_mumu2[i] = result.compute_effective_coupling(i, std::pair<int,int>(13, 1), std::pair<int,int>(-13, 1));
+        result.C_Zga2[i] = result.compute_effective_coupling(i, std::pair<int,int>(23, 0), std::pair<int,int>(21, 0));
+        result.C_ss2[i] = result.compute_effective_coupling(i, std::pair<int,int>(3, 1), std::pair<int,int>(-3, 1));
+      }
+
+      // Calculate hhZ effective couplings.  Here we scale out the kinematic prefactor
+      // of the decay width, assuming we are well above threshold if the channel is open.
+      // If not, we simply assume SM couplings.
+      const double mZ = Dep::MSSM_spectrum->get(Par::Pole_Mass,23,0);
+      const double scaling = 8.*sqrt(2.)*pi/Dep::MSSM_spectrum->get_SMInputs().GF;
+      for(int i = 0; i < 3; i++)
+      for(int j = 0; j < 3; j++)
+      {
+        double mhi = spec.get(Par::Pole_Mass, sHneut[i]);
+        double mhj = spec.get(Par::Pole_Mass, sHneut[j]);
+        if (mhi > mhj + mZ and result.get_neutral_decays(i).has_channel(sHneut[j], "Z0"))
+        {
+          double gamma = result.get_neutral_decays(i).width_in_GeV*result.get_neutral_decays(i).BF(sHneut[j], "Z0");
+          double k[2] = {(mhj + mZ)/mhi, (mhj - mZ)/mhi};
+          for (int l = 0; l < 2; l++) k[l] = (1.0 - k[l]) * (1.0 + k[l]);
+          double K = mhi*sqrt(k[0]*k[1]);
+          result.C_hiZ2[i][j] = scaling / (K*K*K) * gamma;
+        }
+        else // If the channel is missing from the decays or kinematically disallowed, just return the SM result.
+        {
+          result.C_hiZ2[i][j] = 1.;
+        }
+      }
+
+      // Work out which invisible decays are possible
+      result.invisibles = get_invisibles(spec);
+    }
+
+
+    /// Put together the Higgs couplings for the MSSM, using FeynHiggs
+    void MSSM_higgs_couplings_FH(HiggsCouplingsTable &result)
+    {
+      using namespace Pipes::MSSM_higgs_couplings_FH;
+
+      // Retrieve spectrum contents
+      const SubSpectrum& spec = Dep::MSSM_spectrum->get_HE();
+      const SMInputs& sminputs = Dep::MSSM_spectrum->get_SMInputs();
+
+      // Set up neutral Higgses
+      static const std::vector<str> sHneut = initVector<str>("h0_1", "h0_2", "A0");
+
+      // Work out which SM values correspond to which SUSY Higgs
+      int higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 0 : 1);
+      int other_higgs = (higgs == 0 ? 1 : 0);
+
+      // Set the decays
+      result.set_neutral_decays_SM(higgs, sHneut[higgs], *Dep::Reference_SM_Higgs_decay_rates);
+      result.set_neutral_decays_SM(other_higgs, sHneut[other_higgs], *Dep::Reference_SM_other_Higgs_decay_rates);
+      result.set_neutral_decays_SM(2, sHneut[2], *Dep::Reference_SM_A0_decay_rates);
+      result.set_neutral_decays(0, sHneut[0], *Dep::Higgs_decay_rates);
+      result.set_neutral_decays(1, sHneut[1], *Dep::h0_2_decay_rates);
+      result.set_neutral_decays(2, sHneut[2], *Dep::A0_decay_rates);
+      result.set_charged_decays(0, "H+", *Dep::H_plus_decay_rates);
+      result.set_t_decays(*Dep::t_decay_rates);
+
+      // Use the branching fractions to compute gluon, gamma/Z and second generation fermionic effective couplings
+      for (int i = 0; i < 3; i++)
+      {
+        result.C_gg2[i] = result.compute_effective_coupling(i, std::pair<int,int>(21, 0), std::pair<int,int>(21, 0));
+        result.C_gaga2[i] = result.compute_effective_coupling(i, std::pair<int,int>(22, 0), std::pair<int,int>(22, 0));
+        result.C_Zga2[i] = result.compute_effective_coupling(i, std::pair<int,int>(23, 0), std::pair<int,int>(22, 0));
+        result.C_mumu2[i] = result.compute_effective_coupling(i, std::pair<int,int>(13, 1), std::pair<int,int>(-13, 1));
+        result.C_ss2[i] = result.compute_effective_coupling(i, std::pair<int,int>(3, 1), std::pair<int,int>(-3, 1));
+        result.C_cc2[i] = result.compute_effective_coupling(i, std::pair<int,int>(4, 1), std::pair<int,int>(-4, 1));
+      }
+
+      // Use couplings to get effective third-generation couplings
+      for(int i = 0; i < 3; i++)
+      {
+        // Compute effective couplings
+        double g2_s[3], g2_p[3];
+        for (int j = 0; j < 3; j++) // j=0,1,2 => tau, t, b
+        {
+          fh_complex fh_L = Dep::FH_Couplings_output->couplings[H0FF(i+1,j+2,3,3)-1];
+          fh_complex fh_R = Dep::FH_Couplings_output->couplings[H0FF(i+1,j+2,3,3)+Roffset-1];
+          fh_complex fh_SM_L = Dep::FH_Couplings_output->couplings_sm[H0FF(i+1,j+2,3,3)-1];
+          fh_complex fh_SM_R = Dep::FH_Couplings_output->couplings_sm[H0FF(i+1,j+2,3,3)+RSMoffset-1];
+          std::complex<double> L(fh_L.re,fh_L.im);
+          std::complex<double> R(fh_R.re,fh_R.im);
+          std::complex<double> SM_L(fh_SM_L.re,fh_SM_L.im);
+          std::complex<double> SM_R(fh_SM_R.re,fh_SM_R.im);
+          g2_s[j] = 0.25*pow(std::abs(R/SM_R + L/SM_L), 2.);
+          g2_p[j] = 0.25*pow(std::abs(R/SM_R - L/SM_L), 2.);
+        }
+        result.C_tautau2[i] = g2_s[0] + g2_p[0];
+        result.C_tt2[i]     = g2_s[1] + g2_p[1];
+        result.C_bb2[i]     = g2_s[2] + g2_p[2];
+
+        // Calculate CP of state
+        if(g2_p[2] < 1e-10)
+          result.CP[i] = 1;
+        else if(g2_s[2] < 1e-10)
+          result.CP[i] = -1;
+        else
+          result.CP[i] = 0.;
+      }
+
+      // Use couplings to get di-boson effective couplings
+      for(int i = 0; i < 3; i++)
+      {
+        fh_complex c_gWW = Dep::FH_Couplings_output->couplings[H0VV(i+1,4)-1];
+        fh_complex c_gWW_SM = Dep::FH_Couplings_output->couplings_sm[H0VV(i+1,4)-1];
+        fh_complex c_gZZ = Dep::FH_Couplings_output->couplings[H0VV(i+1,3)-1];
+        fh_complex c_gZZ_SM = Dep::FH_Couplings_output->couplings_sm[H0VV(i+1,3)-1];
+        std::complex<double> WW(c_gWW.re,c_gWW.im);
+        std::complex<double> WW_SM(c_gWW_SM.re,c_gWW_SM.im);
+        std::complex<double> ZZ(c_gZZ.re,c_gZZ.im);
+        std::complex<double> ZZ_SM(c_gZZ_SM.re,c_gZZ_SM.im);
+        result.C_WW2[i] = pow(std::abs(WW/WW_SM), 2.);
+        result.C_ZZ2[i] = pow(std::abs(ZZ/ZZ_SM), 2.);
+      }
+
+      // Use couplings to get hhZ effective couplings
+      double norm = sminputs.GF*sqrt(2.)*sminputs.mZ*sminputs.mZ;
+      for(int i = 0; i < 3; i++)
+      for(int j = 0; j < 3; j++)
+      {
+        fh_complex c_gHV = Dep::FH_Couplings_output->couplings[H0HV(i+1,j+1)-1];
+        double g2HV = c_gHV.re*c_gHV.re+c_gHV.im*c_gHV.im;
+        result.C_hiZ2[i][j] = g2HV/norm;
+      }
+
+      // Work out which invisible decays are possible
+      result.invisibles = get_invisibles(spec);
+    }
+
+
+/////////////////////////////
+//// Map output routines ////
+/////////////////////////////
+
     /// @{ Convert MSSM type Spectrum object into a map, so it can be printed
-    void fill_map_from_MSSMspectrum(std::map<std::string,double>&, const Spectrum*);
+    template<class Contents>
+    void fill_map_from_subspectrum(std::map<std::string,double>&, const SubSpectrum&);
+
+    /// Adds additional information from interesting combinations of MSSM parameters
+    void add_extra_MSSM_parameter_combinations(std::map<std::string,double>& specmap, const SubSpectrum& mssm)
+    {
+      double At = 0;
+      double Yt = mssm.get(Par::dimensionless, "Yu", 3, 3);
+      if(std::abs(Yt) > 1e-12)
+      {
+        At = mssm.get(Par::mass1, "TYu", 3, 3) / Yt;
+      }
+      double MuSUSY = mssm.get(Par::mass1, "Mu");
+      double tb = mssm.get(Par::dimensionless, "tanbeta");
+      specmap["Xt"] = At - MuSUSY / tb;
+      /// Determine which states are the third gens then add them for printing
+      str msf1, msf2;
+      /// Since this is for printing we only want to invalidate the point if this is completely wrong.  We can also plot the mixing if we are suspicious.
+      const static double tol = 0.5;
+      const static bool pt_error = true;
+      slhahelp::family_state_mix_matrix("~u", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      specmap["mstop1"] =  mssm.get(Par::Pole_Mass, msf1);
+      specmap["mstop2"] =  mssm.get(Par::Pole_Mass, msf2);
+      slhahelp::family_state_mix_matrix("~d", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      specmap["msbottom1"] =  mssm.get(Par::Pole_Mass, msf1);
+      specmap["msbottom2"] =  mssm.get(Par::Pole_Mass, msf2);
+      slhahelp::family_state_mix_matrix("~e-", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      specmap["mstau1"] =  mssm.get(Par::Pole_Mass, msf1);
+      specmap["mstau2"] =  mssm.get(Par::Pole_Mass, msf2);
+    }
+
     void get_MSSM_spectrum_as_map (std::map<std::string,double>& specmap)
     {
       namespace myPipe = Pipes::get_MSSM_spectrum_as_map;
-      const Spectrum* mssmspec(*myPipe::Dep::MSSM_spectrum);
-      fill_map_from_MSSMspectrum(specmap, mssmspec);
+      const Spectrum& mssmspec(*myPipe::Dep::MSSM_spectrum);
+      fill_map_from_subspectrum<SpectrumContents::SM>  (specmap, mssmspec.get_LE());
+      fill_map_from_subspectrum<SpectrumContents::MSSM>(specmap, mssmspec.get_HE());
+      add_extra_MSSM_parameter_combinations(specmap, mssmspec.get_HE());
     }
     void get_unimproved_MSSM_spectrum_as_map (std::map<std::string,double>& specmap)
     {
       namespace myPipe = Pipes::get_unimproved_MSSM_spectrum_as_map;
-      const Spectrum* mssmspec(*myPipe::Dep::unimproved_MSSM_spectrum);
-      fill_map_from_MSSMspectrum(specmap, mssmspec);
+      const Spectrum& mssmspec(*myPipe::Dep::unimproved_MSSM_spectrum);
+      fill_map_from_subspectrum<SpectrumContents::SM>  (specmap, mssmspec.get_LE());
+      fill_map_from_subspectrum<SpectrumContents::MSSM>(specmap, mssmspec.get_HE());
+      add_extra_MSSM_parameter_combinations(specmap, mssmspec.get_HE());
     }
     /// @}
 
-    /// Common function to fill the spectrum map from a Spectrum object
-    void fill_map_from_MSSMspectrum(std::map<std::string,double>& specmap, const Spectrum* mssmspec)
+    /// Extract all parameters from a subspectrum and put them into a map
+    template<class Contents>
+    void fill_map_from_subspectrum(std::map<std::string,double>& specmap, const SubSpectrum& subspec)
     {
-      /// Add everything... use spectrum contents routines to automate task
-      static const SpectrumContents::MSSM contents;
+      /// Add everything... use spectrum contents routines to automate task (make sure to use correct template parameter!)
+      static const Contents contents;
       static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters();
-      
+
       for(std::vector<SpectrumParameter>::const_iterator it = required_parameters.begin();
            it != required_parameters.end(); ++it)
       {
@@ -878,7 +1210,16 @@ namespace Gambit
          {
            std::ostringstream label;
            label << name <<" "<< Par::toString.at(tag);
-           specmap[label.str()] = mssmspec->get_HE()->get(tag,name);
+           specmap[label.str()] = subspec.get(tag,name);
+           //std::cout << label.str() <<", " << subspec.has(tag,name,overrides_only) << "," << subspec.has(tag,name,ignore_overrides) << std::endl; // debugging
+           // Check again ignoring overrides (if the value has an override defined)
+           if(subspec.has(tag,name,overrides_only) and
+              subspec.has(tag,name,ignore_overrides))
+           {
+             label << " (unimproved)";
+             specmap[label.str()] = subspec.get(tag,name,ignore_overrides);
+             //std::cout << label.str() << ": " << specmap[label.str()];
+           }
          }
          // Check vector case
          else if(shape.size()==1 and shape[0]>1)
@@ -886,7 +1227,16 @@ namespace Gambit
            for(int i = 1; i<=shape[0]; ++i) {
              std::ostringstream label;
              label << name <<"_"<<i<<" "<< Par::toString.at(tag);
-             specmap[label.str()] = mssmspec->get_HE()->get(tag,name,i);
+             specmap[label.str()] = subspec.get(tag,name,i);
+             //std::cout << label.str() <<", " << subspec.has(tag,name,i,overrides_only) << "," << subspec.has(tag,name,i,ignore_overrides) << std::endl; // debugging
+             // Check again ignoring overrides
+             if(subspec.has(tag,name,i,overrides_only) and
+                subspec.has(tag,name,i,ignore_overrides))
+             {
+               label << " (unimproved)";
+               specmap[label.str()] = subspec.get(tag,name,i,ignore_overrides);
+               //std::cout << label.str() << ": " << specmap[label.str()];
+             }
            }
          }
          // Check matrix case
@@ -896,23 +1246,30 @@ namespace Gambit
              for(int j = 1; j<=shape[0]; ++j) {
                std::ostringstream label;
                label << name <<"_("<<i<<","<<j<<") "<<Par::toString.at(tag);
-               specmap[label.str()] = mssmspec->get_HE()->get(tag,name,i,j);
-             }  
+               specmap[label.str()] = subspec.get(tag,name,i,j);
+               // Check again ignoring overrides
+               if(subspec.has(tag,name,i,j,overrides_only) and
+                  subspec.has(tag,name,i,j,ignore_overrides))
+               {
+                 label << " (unimproved)";
+                 specmap[label.str()] = subspec.get(tag,name,i,j,ignore_overrides);
+               }
+             }
            }
          }
          // Deal with all other cases
          else
          {
            // ERROR
-           std::ostringstream errmsg;           
-           errmsg << "Error, invalid parameter received while converting MSSMspectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
-           errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape; 
-           utils_error().forced_throw(LOCAL_INFO,errmsg.str());
+           std::ostringstream errmsg;
+           errmsg << "Error, invalid parameter received while converting SubSpectrum with contents \""<<contents.getName()<<"\" to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
+           errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape;
+           SpecBit_error().forced_throw(LOCAL_INFO,errmsg.str());
          }
       }
-
+      // add the scale!
+      specmap["scale(Q)"] = subspec.GetScale();
     }
-
 
     /// @} End Gambit module functions
 

@@ -42,9 +42,6 @@ namespace Gambit
   /// Read an SLHA file in to an SLHAea object with some error-checking
   SLHAstruct read_SLHA(str slha); 
 
-  /// Add a disclaimer about the absence of a MODSEL block in a generated SLHAea object
-  void add_MODSEL_disclaimer(SLHAstruct& slha, const str& object);
-
   /// Get an entry from an SLHAea object as a double, with some error checking
   double SLHAea_get(const SLHAstruct& slha, const str& block, const int index);
 
@@ -54,8 +51,19 @@ namespace Gambit
   /// Add a new block to an SLHAea object, with our without a scale
   void SLHAea_add_block(SLHAstruct&, const str& name, const double scale = -1);
 
+  /// Delete an entire block from an SLHAea object, if it exists (actually just the first block matching the given name)
+  void SLHAea_delete_block(SLHAstruct& slha, const std::string& block);
+
+  /// Check if a block exists in an SLHAea object
+  bool SLHAea_block_exists(SLHAstruct& slha, const str& block);
+  /// Check if a block exists in an SLHAea object, add it if not
+  bool SLHAea_check_block(SLHAstruct& slha, const str& block);
   /// Check if a block exists in an SLHAea object, add it if not, and check if it has an entry at a given index
-  bool SLHAea_check_block(SLHAstruct& slha, const str& block, const int index, const bool overwrite);
+  bool SLHAea_check_block(SLHAstruct& slha, const str& block, const int index); /*, const bool overwrite)*/
+  bool SLHAea_check_block(SLHAstruct& slha, const str& block, const int index1, const int index2);
+
+  /// Write the SPINFO block with GAMBIT name and version number
+  void SLHAea_add_GAMBIT_SPINFO(SLHAstruct& slha /*modify*/);
 
   /// Add an entry to an SLHAea object (if overwrite=false, only if it doesn't already exist)
   /// @{
@@ -65,6 +73,9 @@ namespace Gambit
    const str& comment="", const bool overwrite=false);
   void SLHAea_add(SLHAstruct& slha /*modify*/, const str& block, const int index, const int value,
    const str& comment="", const bool overwrite=false);
+  // two index version
+  void SLHAea_add(SLHAstruct& slha /*modify*/, const str& block, const int index1, const int index2,
+   const double& value, const str& comment, const bool overwrite=false);
   /// @}
 
   /// Add a whole matrix to an SLHAea object if it doesn't already exist

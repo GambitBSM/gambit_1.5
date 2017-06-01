@@ -14,8 +14,8 @@
 ///  used except as a local convenience in your new
 ///  module/backend/model, then there is no need to 
 ///  do anything more than put it in a header and 
-///  #include that from wherever you plan to use it,
-///  as per standard programming practice.
+///  \code #include \endcode that from wherever you
+///  plan to use it, as per standard programming practice.
 ///  You should only have to bother with the 
 ///  instructions below if GAMBIT or its other 
 ///  modules/backends/models need to be aware of this
@@ -63,10 +63,10 @@
 ///  If the type will be used by multiple modules, 
 ///  multiple models or multiple backends, or any 
 ///  mixture thereof, make some header 
-///   Utils/include/gambit/Utils/__your_header_name__.hpp
+///   Elements/include/gambit/Elements/__your_header_name__.hpp
 ///  that declares the type, and include
 ///  that header by hand from 
-///   Utils/include/gambit/Utils/shared_types.hpp.
+///   Elements/include/gambit/Utils/shared_types.hpp.
 ///  
 ///  PRINTING
 ///  --------

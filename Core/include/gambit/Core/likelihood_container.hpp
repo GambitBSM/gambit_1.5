@@ -7,7 +7,7 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Christoph Weniger
 ///    (c.weniger@uva.nl)
 ///  \date 2013 May, June, July
@@ -60,11 +60,17 @@ namespace Gambit
 
       /// MPI communicator group for errors
       #ifdef WITH_MPI
-      GMPI::Comm& errorComm;
+        GMPI::Comm& errorComm;
       #endif
 
-      /// Value of the log likelihood at which a point is considered so unlikely that it can be ruled out (invalid).
+      /// Primary value of the log likelihood at which a point is considered so unlikely that it can be ruled out (invalid).
       double min_valid_lnlike;
+
+      /// Alternate value for the minimum log likelihood (scanner can trigger a switch to this in special circumstances)
+      double alt_min_valid_lnlike;
+
+      /// Active value for the minimum log likelihood (one of the above two values, whichever is currently in-use)
+      double active_min_valid_lnlike;
 
       /// Map of return types of target functors
       std::map<DRes::VertexID,str> return_types;
@@ -90,25 +96,25 @@ namespace Gambit
     public:
 
       /// Constructor
-      Likelihood_Container (const std::map<str, primary_model_functor *> &functorMap, 
-       DRes::DependencyResolver &dependencyResolver, IniParser::IniFile &iniFile, 
+      Likelihood_Container (const std::map<str, primary_model_functor *> &functorMap,
+       DRes::DependencyResolver &dependencyResolver, IniParser::IniFile &iniFile,
        const str &purpose, Printers::BaseBasePrinter& printer
        #ifdef WITH_MPI
        , GMPI::Comm& comm
        #endif
       );
 
-      /// Do the prior transformation and populate the parameter map  
-      void setParameters (const std::unordered_map<std::string, double> &); 
-      
+      /// Do the prior transformation and populate the parameter map
+      void setParameters (const std::unordered_map<std::string, double> &);
+
       /// Evaluate total likelihood function
       double main (std::unordered_map<std::string, double> &in);
 
   };
 
   // Register the Likelihood Container as an available target function for ScannerBit.  The first argument
-  // is a tag that gets used later by the Likelihood_Container_Factory to create a new Likelihood_Container 
-  // and return a pointer to it. 
+  // is a tag that gets used later by the Likelihood_Container_Factory to create a new Likelihood_Container
+  // and return a pointer to it.
   LOAD_SCANNER_FUNCTION(GAMBIT_Scanner_Target_Function, Likelihood_Container)
 
 }

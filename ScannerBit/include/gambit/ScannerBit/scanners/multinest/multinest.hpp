@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to Multinest 3.9
+///  ScannerBit interface to Multinest 3.10
 ///
 ///  Header file
 ///
@@ -40,9 +40,11 @@ extern "C"
 //extern "C" void dumper(int, int, int, double*, double*, double*,
 //                       double, double, double, void*);
 
-namespace Gambit {
-   
-   namespace MultiNest {
+namespace Gambit
+{
+
+   namespace MultiNest
+   {
 
       /// Typedef for the ScannerBit pointer to the external loglikelihood function
       typedef Gambit::Scanner::like_ptr scanPtr;
@@ -64,6 +66,9 @@ namespace Gambit {
             /// Number of free parameters
             int my_ndim;
 
+            /// Variable to indicate whether the dumper function has been run at least once
+            bool dumper_runonce;
+
          public:
             /// Constructor
             LogLikeWrapper(scanPtr, printer_interface&, int);
@@ -84,6 +89,7 @@ namespace Gambit {
       ///@}      
 
    } // End Multinest namespace
+
 } // End Gambit namespace
 
 #endif

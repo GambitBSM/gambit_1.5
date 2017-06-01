@@ -12,10 +12,15 @@
 ///          (pscott@imperial.ac.uk)
 ///  \date 2015 Apr
 ///
+///  \author Sebastian Wild
+///          (sebastian.wild@ph.tum.de)
+///  \date 2016 Aug
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/DarkBit/DarkBit_rollcall.hpp"
+#include "gambit/DarkBit/DarkBit_utils.hpp"
 
 //#define DARKBIT_DEBUG
 
@@ -44,7 +49,7 @@ namespace Gambit
 
       // When calculating the solar capture rate, DarkSUSY assumes that the
       // proton and neutron scattering cross-sections are the same; we
-      // assume that whichever backend has been hooked up here does so too. 
+      // assume that whichever backend has been hooked up here does so too.
       result = BEreq::cap_Sun_v0q0_isoscalar(
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
     }
@@ -79,7 +84,7 @@ namespace Gambit
       double Higgs_mass_charged;
 
       // Set annihilation branching fractions
-      // FIXME needs to be fixed once BFs are available directly from TH_Process
+      // TODO: needs to be fixed once BFs are available directly from TH_Process
       std::string DMid = *Dep::DarkMatter_ID;
       TH_Process annProc = Dep::TH_ProcessCatalog->getProcess(DMid, DMid);
       std::vector< std::vector<str> > neutral_channels = BEreq::get_DS_neutral_h_decay_channels();
@@ -131,14 +136,14 @@ namespace Gambit
         Higgs_masses_neutral[1] = Dep::TH_ProcessCatalog->getParticleProperty("h0_1").mass;
       else
         DarkBit_error().raise(LOCAL_INFO, "No SM-like Higgs in ProcessCatalog!");
-      Higgs_masses_neutral[0] = 
-        Dep::TH_ProcessCatalog->hasParticleProperty("h0_2") ?  
+      Higgs_masses_neutral[0] =
+        Dep::TH_ProcessCatalog->hasParticleProperty("h0_2") ?
         Dep::TH_ProcessCatalog->getParticleProperty("h0_2").mass : 0.;
-      Higgs_masses_neutral[2] = 
-        Dep::TH_ProcessCatalog->hasParticleProperty("A0") ?  
+      Higgs_masses_neutral[2] =
+        Dep::TH_ProcessCatalog->hasParticleProperty("A0") ?
         Dep::TH_ProcessCatalog->getParticleProperty("A0").mass : 0.;
-      Higgs_mass_charged = 
-        Dep::TH_ProcessCatalog->hasParticleProperty("H+") ?  
+      Higgs_mass_charged =
+        Dep::TH_ProcessCatalog->hasParticleProperty("H+") ?
         Dep::TH_ProcessCatalog->getParticleProperty("H+").mass : 0.;
 
       // Find out which Higgs exist and have decay data in the process
@@ -155,7 +160,7 @@ namespace Gambit
           LOCAL_INFO, "H- decays exist in process catalog but not H+.");
 
       // Set the neutral Higgs decay branching fractions
-      // FIXME needs to be fixed once BFs are available directly from TH_Process
+      // TODO: needs to be fixed once BFs are available directly from TH_Process
       for (int i=0; i<3; i++)       // Loop over the three neutral Higgs
       {
 
@@ -164,7 +169,7 @@ namespace Gambit
         {
 
           // Get the total decay width, for normalising partial widths to BFs.
-          // FIXME: Replace when BFs become directly available.
+          // TODO: Replace when BFs become directly available.
           double totalwidth = 0.0;
           for (std::vector<TH_Channel>::const_iterator
               it = h0_decays[i]->channelList.begin();
@@ -175,15 +180,19 @@ namespace Gambit
               it->genRate->bind()->eval();
           }
 
+          std::vector<str> neutral_channel;
           // Loop over the decay channels for neutral scalars
           for (int j=0; j<29; j++)
           {
-            const TH_Channel* channel = h0_decays[i]->find(neutral_channels[j]);
+            neutral_channel.clear();
+            neutral_channel.push_back(DarkBit_utils::str_flav_to_mass((neutral_channels[j])[0]));
+            neutral_channel.push_back(DarkBit_utils::str_flav_to_mass((neutral_channels[j])[1]));
+            const TH_Channel* channel = h0_decays[i]->find(neutral_channel);
             // If this Higgs can decay into this channel, set the BF.
             if (channel != NULL)
             {
               Higgs_decay_BFs_neutral[j][i] = channel->genRate->bind()->eval();
-              if (i == 10)          // Add W- H+ for this channel
+              if (j == 10)          // Add W- H+ for this channel
               {
                 channel = h0_decays[i]->find(adhoc_chan);
                 if (channel == NULL) DarkBit_error().raise(LOCAL_INFO,
@@ -193,7 +202,7 @@ namespace Gambit
                   += channel->genRate->bind()->eval();
               }
               // This channel has not been implemented in DarkSUSY.
-              if (i == 26) Higgs_decay_BFs_neutral[j][i] = 0.;
+              if (j == 26) Higgs_decay_BFs_neutral[j][i] = 0.;
               Higgs_decay_BFs_neutral[j][i] /= totalwidth;
             }
             else
@@ -219,10 +228,10 @@ namespace Gambit
       {
 
         // Define the charged Higgs decay channels
-        std::vector< std::vector<str> > charged_channels = BEreq::get_DS_charged_h_decay_channels()
-;
+        std::vector< std::vector<str> > charged_channels = BEreq::get_DS_charged_h_decay_channels();
+
         // Get the total decay width, for normalising partial widths to BFs.
-        // FIXME: Replace when BFs become directly available.
+        // TODO: Replace when BFs become directly available.
         double totalwidth = 0.0;
         for (std::vector<TH_Channel>::const_iterator
             it = Hplus_decays->channelList.begin();
@@ -232,10 +241,14 @@ namespace Gambit
           if (it->nFinalStates == 2) totalwidth += it->genRate->bind()->eval();
         }
 
+        std::vector<str> charged_channel;
         // Loop over the decay channels for charged scalars
         for (int j=0; j<15; j++)
         {
-          const TH_Channel* channel = Hplus_decays->find(charged_channels[j]);
+          charged_channel.clear();
+          charged_channel.push_back(DarkBit_utils::str_flav_to_mass((charged_channels[j])[0]));
+          charged_channel.push_back(DarkBit_utils::str_flav_to_mass((charged_channels[j])[1]));
+          const TH_Channel* channel = Hplus_decays->find(charged_channel);
           // If this Higgs can decay into this channel, set the BF.
           if (channel != NULL)
           {
@@ -306,9 +319,20 @@ namespace Gambit
       // Hand back the pointer to the DarkSUSY neutrino yield function
       result.pointer = BEreq::nuyield.pointer();
 
-      //FIXME change below to >= when version numbers are available as ints
+      //TODO: change below to >= when version numbers are available as ints
       // Treat the yield function as threadsafe only if the loaded version of DarkSUSY supports it.
       result.threadsafe = (BEreq::nuyield.version() == "5.1.3");
+
+      // Avoid OpenMP with gfortran 6.x, as its implementation seems to be buggy (causes stack overflows).
+      #ifdef __GNUC__
+        #define GCC_VERSION (__GNUC__ * 10000 \
+                     + __GNUC_MINOR__ * 100 \
+                     + __GNUC_PATCHLEVEL__)
+        #if GCC_VERSION > 60000
+          result.threadsafe = false;
+        #endif
+        #undef GCC_VERSION
+      #endif
 
     }
 
@@ -333,7 +357,7 @@ namespace Gambit
       char experiment[300] = "IC-22";
       void* context = NULL;
       double theoryError = (*Dep::mwimp > 100.0 ? 0.05*sqrt(*Dep::mwimp*0.01) : 0.05);
-      // FIXME: Add getValue documentation
+      /// Option nulike_speed<int>: Speed setting for nulike backend (default 3)
       int speed = runOptions->getValueOrDef<int>(3,"nulike_speed");
       BEreq::nubounds(experiment[0], *Dep::mwimp, *Dep::annihilation_rate_Sun,
           byVal(Dep::nuyield_ptr->pointer), sigpred, bgpred, totobs, lnLike, pval, 4,
@@ -365,7 +389,7 @@ namespace Gambit
       char experiment[300] = "IC-79 WH";
       void* context = NULL;
       double theoryError = (*Dep::mwimp > 100.0 ? 0.05*sqrt(*Dep::mwimp*0.01) : 0.05);
-      // FIXME: Add getValue documentation
+      /// Option nulike_speed<int>: Speed setting for nulike backend (default 3)
       int speed = runOptions->getValueOrDef<int>(3,"nulike_speed");
       BEreq::nubounds(experiment[0], *Dep::mwimp, *Dep::annihilation_rate_Sun,
           byVal(Dep::nuyield_ptr->pointer), sigpred, bgpred, totobs, lnLike, pval, 4,
@@ -397,7 +421,7 @@ namespace Gambit
       char experiment[300] = "IC-79 WL";
       void* context = NULL;
       double theoryError = (*Dep::mwimp > 100.0 ? 0.05*sqrt(*Dep::mwimp*0.01) : 0.05);
-      // FIXME: Add getValue documentation
+      /// Option nulike_speed<int>: Speed setting for nulike backend (default 3)
       int speed = runOptions->getValueOrDef<int>(3,"nulike_speed");
       BEreq::nubounds(experiment[0], *Dep::mwimp, *Dep::annihilation_rate_Sun,
           byVal(Dep::nuyield_ptr->pointer), sigpred, bgpred, totobs, lnLike, pval, 4,
@@ -429,7 +453,7 @@ namespace Gambit
       char experiment[300] = "IC-79 SL";
       void* context = NULL;
       double theoryError = (*Dep::mwimp > 100.0 ? 0.05*sqrt(*Dep::mwimp*0.01) : 0.05);
-      // FIXME: Add getValue documentation
+      /// Option nulike_speed<int>: Speed setting for nulike backend (default 3)
       int speed = runOptions->getValueOrDef<int>(3,"nulike_speed");
       BEreq::nubounds(experiment[0], *Dep::mwimp, *Dep::annihilation_rate_Sun,
           byVal(Dep::nuyield_ptr->pointer), sigpred, bgpred, totobs, lnLike, pval, 4,
@@ -547,18 +571,19 @@ namespace Gambit
     {
         using namespace Pipes::DarkSUSY_PointInit_LocalHalo_func;
 
-          double rho0 = *Param["rho0"];
-          double rho0_eff = (*Dep::RD_fraction)*(*Param["rho0"]);
-          double vrot = *Param["vrot"];
-          double vearth = *Param["vearth"];
-          double vd_3d = sqrt(3./2.)*(*Param["v0"]);
-          double vesc = *Param["vesc"];
+          LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
 
+          double rho0 = LocalHaloParameters.rho0;
+          double rho0_eff = (*Dep::RD_fraction)*rho0;
+          double vrot = LocalHaloParameters.vrot;
+          double vd_3d = sqrt(3./2.)*LocalHaloParameters.v0;
+          double vesc = LocalHaloParameters.vesc;
+          /// Option v_earth<double>: Keplerian velocity of the Earth around the Sun in km/s (default 29.78)
+          double v_earth = runOptions->getValueOrDef<double>(29.78, "v_earth");
 
           BEreq::dshmcom->rho0 = rho0;
-          BEreq::dshmcom->rhox = rho0;
           BEreq::dshmcom->v_sun = vrot;
-          BEreq::dshmcom->v_earth = vearth;
+          BEreq::dshmcom->v_earth = v_earth;
           BEreq::dshmcom->rhox = rho0_eff;
 
           BEreq::dshmframevelcom->v_obs = vrot;
@@ -572,7 +597,7 @@ namespace Gambit
           logger() << "    rho0 [GeV/cm^3] = " << rho0 << EOM;
           logger() << "    rho0_eff [GeV/cm^3] = " << rho0_eff << EOM;
           logger() << "    v_sun [km/s]  = " << vrot<< EOM;
-          logger() << "    v_earth [km/s]  = " << vearth << EOM;
+          logger() << "    v_earth [km/s]  = " << v_earth << EOM;
           logger() << "    v_obs [km/s]  = " << vrot << EOM;
           logger() << "    vd_3d [km/s]  = " << vd_3d << EOM;
           logger() << "    v_esc [km/s]  = " << vesc << EOM;

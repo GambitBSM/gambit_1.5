@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Wed 28 Oct 2015 11:32:18
+// File generated at Sat 27 Aug 2016 12:48:09
 
 #include "MSSMatMGUT_two_scale_high_scale_constraint.hpp"
 #include "MSSMatMGUT_two_scale_model.hpp"
@@ -36,6 +36,7 @@
 
 namespace flexiblesusy {
 
+#define DERIVEDPARAMETER(p) model->p()
 #define INPUTPARAMETER(p) model->get_input().p
 #define MODELPARAMETER(p) model->get_##p()
 #define PHASE(p) model->get_##p()
@@ -75,27 +76,7 @@ void MSSMatMGUT_high_scale_constraint<Two_scale>::apply()
    assert(model && "Error: MSSMatMGUT_high_scale_constraint::apply():"
           " model pointer must not be zero");
 
-   if (std::fabs(model->get_g1()) > 3.54491) {
-#ifdef ENABLE_VERBOSE
-      ERROR("MSSMatMGUT_high_scale_constraint: Non-perturbative gauge "
-            "coupling g1 = " << model->get_g1());
-#endif
-      model->set_g1(3.54491);
-   }
-   if (std::fabs(model->get_g2()) > 3.54491) {
-#ifdef ENABLE_VERBOSE
-      ERROR("MSSMatMGUT_high_scale_constraint: Non-perturbative gauge "
-            "coupling g2 = " << model->get_g2());
-#endif
-      model->set_g2(3.54491);
-   }
-   if (std::fabs(model->get_g3()) > 3.54491) {
-#ifdef ENABLE_VERBOSE
-      ERROR("MSSMatMGUT_high_scale_constraint: Non-perturbative gauge "
-            "coupling g3 = " << model->get_g3());
-#endif
-      model->set_g3(3.54491);
-   }
+
 
    update_scale();
 
@@ -116,9 +97,9 @@ void MSSMatMGUT_high_scale_constraint<Two_scale>::apply()
    const auto Yd = MODELPARAMETER(Yd);
    const auto Yu = MODELPARAMETER(Yu);
 
-   MODEL->set_TYe((Aeij*Ye).real());
-   MODEL->set_TYd((Adij*Yd).real());
-   MODEL->set_TYu((Auij*Yu).real());
+   MODEL->set_TYe((Aeij.cwiseProduct(Ye)).real());
+   MODEL->set_TYd((Adij.cwiseProduct(Yd)).real());
+   MODEL->set_TYu((Auij.cwiseProduct(Yu)).real());
    MODEL->set_mHd2(Re(mHd2IN));
    MODEL->set_mHu2(Re(mHu2IN));
    MODEL->set_mq2((mq2Input).real());
@@ -129,9 +110,10 @@ void MSSMatMGUT_high_scale_constraint<Two_scale>::apply()
    MODEL->set_MassB(Re(MassBInput));
    MODEL->set_MassWB(Re(MassWBInput));
    MODEL->set_MassG(Re(MassGInput));
-
-
+   
    check_non_perturbative();
+
+
 }
 
 bool MSSMatMGUT_high_scale_constraint<Two_scale>::check_non_perturbative()

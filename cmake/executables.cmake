@@ -1,27 +1,28 @@
-# GAMBIT: Global and Modular BSM Inference Tool  
+# GAMBIT: Global and Modular BSM Inference Tool
 #************************************************
-# \file                                          
-#                                                
+# \file
+#
 #  CMake configuration script for final executables
 #  of GAMBIT.
-#    
+#
 #************************************************
-#                                                
-#  Authors (add name and date if you modify):                                    
-#                                                
+#
+#  Authors (add name and date if you modify):
+#
 #  \author Antje Putze
-#          (antje.putze@lapth.cnrs.fr)              
+#          (antje.putze@lapth.cnrs.fr)
 #  \date 2014 Sep, Oct, Nov
 #        2015 Feb
 #
 #  \author Pat Scott
-#          (p.scott@imperial.ac.uk)              
+#          (p.scott@imperial.ac.uk)
 #  \date 2014 Nov, Dec
-#                                               
+#
 #************************************************
 
-# Indicate which executables need ScannerBit
-set(uses_scannerbit gambit)
+# Add the module standalones
+add_custom_target(standalones)
+include(cmake/standalones.cmake)
 
 # Add the main GAMBIT executable
 if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
@@ -31,13 +32,14 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   if (NOT EXCLUDE_DELPHES)
     set(gambit_XTRA ${gambit_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
   endif()
-  add_gambit_executable(gambit "${gambit_XTRA}"
-                        SOURCES ${PROJECT_SOURCE_DIR}/Core/src/gambit.cpp 
-                                ${GAMBIT_ALL_COMMON_OBJECTS} 
+  add_gambit_executable(${PROJECT_NAME} "${gambit_XTRA}"
+                        SOURCES ${PROJECT_SOURCE_DIR}/Core/src/gambit.cpp
+                                ${GAMBIT_ALL_COMMON_OBJECTS}
                                 ${GAMBIT_BIT_OBJECTS}
                                 $<TARGET_OBJECTS:Core>
                                 $<TARGET_OBJECTS:Printers>
   )
+  set_target_properties(gambit PROPERTIES EXCLUDE_FROM_ALL 0)
   if (NOT EXCLUDE_FLEXIBLESUSY)
     add_dependencies(gambit flexiblesusy)
   endif()
@@ -46,53 +48,9 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   endif()
 endif()
 
-# Add the ExampleBit_A_standalone executable
-if(EXISTS "${PROJECT_SOURCE_DIR}/ExampleBit_A/" AND (";${GAMBIT_BITS};" MATCHES ";ExampleBit_A;"))
-  if (NOT EXCLUDE_FLEXIBLESUSY)
-    set(ExampleBit_A_XTRA ${flexiblesusy_LDFLAGS})
-  endif()
-  if (NOT EXCLUDE_DELPHES)
-    set(ExampleBit_A_XTRA ${ExampleBit_A_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
-  endif()
-  add_gambit_executable(ExampleBit_A_standalone "${ExampleBit_A_XTRA}"
-                        SOURCES ${PROJECT_SOURCE_DIR}/ExampleBit_A/examples/ExampleBit_A_standalone_example.cpp 
-                                ${PROJECT_SOURCE_DIR}/ExampleBit_A/examples/standalone_functors.cpp 
-                                $<TARGET_OBJECTS:ExampleBit_A>
-                                ${GAMBIT_ALL_COMMON_OBJECTS}
-  )
-  if (NOT EXCLUDE_FLEXIBLESUSY)
-    add_dependencies(ExampleBit_A_standalone flexiblesusy)
-  endif()
-  if (NOT EXCLUDE_DELPHES)
-    add_dependencies(ExampleBit_A_standalone delphes)
-  endif()
-endif()
-
-# Add the ColliderBit_standalone executable
-if(EXISTS "${PROJECT_SOURCE_DIR}/ColliderBit/" AND (";${GAMBIT_BITS};" MATCHES ";ColliderBit;"))
-  if (NOT EXCLUDE_FLEXIBLESUSY)
-    set(ColliderBit_XTRA ${flexiblesusy_LDFLAGS})
-  endif()
-  if (NOT EXCLUDE_DELPHES)
-    set(ColliderBit_XTRA ${ColliderBit_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
-  endif()
-  add_gambit_executable(ColliderBit_standalone "${ColliderBit_XTRA}"
-                        SOURCES ${PROJECT_SOURCE_DIR}/ColliderBit/examples/ColliderBit_standalone_example.cpp
-                                ${PROJECT_SOURCE_DIR}/ColliderBit/examples/standalone_functors.cpp
-                                $<TARGET_OBJECTS:ColliderBit>
-                                ${GAMBIT_ALL_COMMON_OBJECTS}
-  )
-  if (NOT EXCLUDE_FLEXIBLESUSY)
-    add_dependencies(ColliderBit_standalone flexiblesusy)
-  endif()
-  if (NOT EXCLUDE_DELPHES)
-    add_dependencies(ColliderBit_standalone delphes)
-  endif()
-endif()
-
 # Add the ScannerBit standalone executable
 if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
-  if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/") 
+  if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
     if (NOT EXCLUDE_FLEXIBLESUSY)
       set(ScannerBit_XTRA ${flexiblesusy_LDFLAGS})
     endif()
@@ -103,11 +61,10 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
   add_gambit_executable(ScannerBit_standalone "${ScannerBit_XTRA}"
                         SOURCES ${PROJECT_SOURCE_DIR}/ScannerBit/examples/ScannerBit_standalone.cpp
                                 $<TARGET_OBJECTS:ScannerBit>
-                                $<TARGET_OBJECTS:Printers>              
+                                $<TARGET_OBJECTS:Printers>
                                 ${GAMBIT_BASIC_COMMON_OBJECTS}
   )
-  set_target_properties(ScannerBit_standalone PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/ScannerBit/bin")
-  if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/") 
+  if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
     if (NOT EXCLUDE_FLEXIBLESUSY)
       add_dependencies(ScannerBit_standalone flexiblesusy)
     endif()
@@ -116,44 +73,21 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
     endif()
   else()
     # Make sure the printers compile OK if the rest of GAMBIT is missing
-    add_definitions(-DSTANDALONE=1)
+    target_compile_definitions(Printers PRIVATE SCANNER_STANDALONE)
   endif()
+  add_dependencies(standalones ScannerBit_standalone)
 endif()
 
-# Add the DarkBit_standalone executable
-if(EXISTS "${PROJECT_SOURCE_DIR}/DarkBit/" AND ";${GAMBIT_BITS};" MATCHES ";DarkBit;")
-  if (NOT EXCLUDE_FLEXIBLESUSY)
-    set(DarkBit_XTRA ${flexiblesusy_LDFLAGS})
-  endif()
-  if (NOT EXCLUDE_DELPHES)
-    set(DarkBit_XTRA ${DarkBit_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
-  endif()
-  add_gambit_executable(DarkBit_standalone_MSSM "${DarkBit_XTRA}"
-                        SOURCES ${PROJECT_SOURCE_DIR}/DarkBit/examples/DarkBit_standalone_MSSM.cpp
-                                ${PROJECT_SOURCE_DIR}/DarkBit/examples/standalone_functors.cpp
-                                $<TARGET_OBJECTS:DarkBit>
-                                ${GAMBIT_ALL_COMMON_OBJECTS}
-  )
-  add_gambit_executable(DarkBit_standalone_SingletDM "${DarkBit_XTRA}"
-                        SOURCES ${PROJECT_SOURCE_DIR}/DarkBit/examples/DarkBit_standalone_SingletDM.cpp
-                                ${PROJECT_SOURCE_DIR}/DarkBit/examples/standalone_functors.cpp
-                                $<TARGET_OBJECTS:DarkBit>
-                                ${GAMBIT_ALL_COMMON_OBJECTS}
-  )
-  add_gambit_executable(DarkBit_standalone_WIMP "${DarkBit_XTRA}"
-                        SOURCES ${PROJECT_SOURCE_DIR}/DarkBit/examples/DarkBit_standalone_WIMP.cpp
-                                ${PROJECT_SOURCE_DIR}/DarkBit/examples/standalone_functors.cpp
-                                $<TARGET_OBJECTS:DarkBit>
-                                ${GAMBIT_ALL_COMMON_OBJECTS}
-  )
-  if (NOT EXCLUDE_FLEXIBLESUSY)
-    add_dependencies(DarkBit_standalone_MSSM flexiblesusy)
-    add_dependencies(DarkBit_standalone_SingletDM flexiblesusy)
-    add_dependencies(DarkBit_standalone_WIMP flexiblesusy)
-  endif()
-  if (NOT EXCLUDE_DELPHES)
-    add_dependencies(DarkBit_standalone_MSSM delphes)
-    add_dependencies(DarkBit_standalone_SingletDM delphes)
-    add_dependencies(DarkBit_standalone_WIMP delphes)
-  endif()
-endif()
+# Add C++ hdf5 combine tool, if we have HDF5 libraries
+#if(HDF5_FOUND)
+#  if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+#    if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
+#       add_gambit_executable(hdf5_combine ${HDF5_LIBRARIES}
+#                        SOURCES ${PROJECT_SOURCE_DIR}/Printers/examples/hdf5_combine_standalone.cpp
+#                                ${GAMBIT_BASIC_COMMON_OBJECTS}
+#       )
+#       set_target_properties(hdf5_combine PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Printers/scripts")
+#    endif()
+#  endif()
+#endif()
+
