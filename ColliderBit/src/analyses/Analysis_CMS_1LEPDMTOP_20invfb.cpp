@@ -6,7 +6,7 @@
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/mt2w.h"
-// #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+// #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 using namespace std;
 
