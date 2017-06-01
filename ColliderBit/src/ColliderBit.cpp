@@ -1,5 +1,5 @@
 //   GAMBIT: Global and Modular BSM Inference Tool
-//  *********************************************
+//   *********************************************
 ///  \file
 ///
 ///  Functions of ColliderBit_eventLoop.
@@ -203,17 +203,17 @@ namespace Gambit
       useBuckFastIdentityDetector = false;
       globalAnalysesIdentity.clear();
 
-#ifndef EXCLUDE_DELPHES
+      #ifndef EXCLUDE_DELPHES
       useDelphesDetector = false;
       globalAnalysesDet.clear();
-#endif
+      #endif
 
       haveUsedBuckFastATLASDetector = false;
       haveUsedBuckFastCMSDetector = false;
       haveUsedBuckFastIdentityDetector = false;
-#ifndef EXCLUDE_DELPHES
+      #ifndef EXCLUDE_DELPHES
       haveUsedDelphesDetector = false;
-#endif
+      #endif
 
 
       // Retrieve run options from the YAML file (or standalone code)
@@ -474,7 +474,7 @@ namespace Gambit
         }
 
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
 
         // - Wrap up loop if veto applies
@@ -580,7 +580,7 @@ namespace Gambit
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "getPythiaFileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+        std::cerr << debug_prefix() << "getPythiaFileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
         #endif
 
         result.resetSpecialization(*iterPythiaNames);
@@ -631,14 +631,14 @@ namespace Gambit
         }
 
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
 
         // - Wrap up loop if veto applies
         if (totalxsec * 1e12 < totalxsec_fb_veto)
         {
           #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
+          std::cerr << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
           #endif
           Loop::wrapup();
         }
@@ -652,7 +652,7 @@ namespace Gambit
 
     /// *** Detector Simulators ***
 
-#ifndef EXCLUDE_DELPHES
+    #ifndef EXCLUDE_DELPHES
     void getDelphes(Gambit::ColliderBit::DelphesVanilla &result) {
       using namespace Pipes::getDelphes;
       static std::vector<bool> useDetector;
@@ -712,8 +712,7 @@ namespace Gambit
         }
       }
     }
-
-#endif // not defined EXCLUDE_DELPHES
+    #endif // not defined EXCLUDE_DELPHES
 
 
 
@@ -1004,7 +1003,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
 
         // Combine results from the threads together
@@ -1082,7 +1081,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
 
         // Combine results from the threads together
@@ -1160,7 +1159,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
 
         // Combine results from the threads together
@@ -1348,7 +1347,7 @@ namespace Gambit
     /// *** Analysis Accumulators ***
 
 
-#ifndef EXCLUDE_DELPHES
+    #ifndef EXCLUDE_DELPHES
     void runDetAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runDetAnalyses;
@@ -1391,7 +1390,7 @@ namespace Gambit
       // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
       Dep::DetAnalysisContainer->analyze(*Dep::ReconstructedEvent);
     }
-#endif // not defined EXCLUDE_DELPHES
+    #endif // not defined EXCLUDE_DELPHES
 
 
 
@@ -1616,6 +1615,18 @@ namespace Gambit
           // Predicted total background, as an integer for use in Poisson functions
           const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
 
+          //#ifdef COLLIDERBIT_DEBUG
+          //  logger() << endl;
+          //  logger() << "COLLIDER_RESULT " << srData.analysis_name << " " << srData.sr_label << endl;
+          //  logger() << "  NEvents, not scaled to luminosity :" << endl;
+          //  logger() << "    " << srData.n_signal << endl;
+          //  logger() << "  NEvents, scaled  to luminosity :  " << endl;
+          //  logger() << "    " << srData.n_signal_at_lumi << endl;
+          //  logger() << "  NEvents (b [rel err], sb [rel err]):" << endl;
+          //  logger() << "    " << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%] "
+          //           << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << EOM;
+          //#endif
+
           double llb_exp = 0, llsb_exp = 0, llb_obs = 0, llsb_obs = 0;
           // Use a log-normal distribution for the nuisance parameter (more correct)
           if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") {
@@ -1639,7 +1650,7 @@ namespace Gambit
             bestexp_dll_obs = llb_obs - llsb_obs;
           }
 
-          // For debuggig: print some useful numbers to the log.
+          // For debugging: print some useful numbers to the log.
           #ifdef COLLIDERBIT_DEBUG
             cout << endl;
             cout <<  debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
@@ -1676,6 +1687,9 @@ namespace Gambit
 
 
     // *** Limits from e+e- colliders ***
+
+    /// @todo Move into a separate source file
+
 
     /// ee --> selectron pair production cross-sections at 208 GeV
     /// @{

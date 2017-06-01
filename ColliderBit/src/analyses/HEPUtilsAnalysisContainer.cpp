@@ -53,15 +53,19 @@ namespace Gambit
 
     void HEPUtilsAnalysisContainer::clear()
     {
-      if (analyses.size() != 0)
-      {
-        for (auto it = analyses.begin(); it != analyses.end(); ++it)
-        {
-          delete *it;
-          *it = nullptr;
-        }
-        analyses.clear();
+      for (Analysis* a : analyses) {
+        delete a;
+        a = nullptr;
       }
+      //if (analyses.size() != 0)
+      //{
+      //  for (auto it = analyses.begin(); it != analyses.end(); ++it)
+      //  {
+      //    delete *it;
+      //    *it = nullptr;
+      //  }
+      //  analyses.clear();
+      //}
       analyses.clear();
       ready = false;
     }
@@ -71,13 +75,9 @@ namespace Gambit
     {
       assert(!analysisNames.empty());
       clear();
-
-      for (auto it = analysisNames.begin(); it != analysisNames.end(); ++it)
-      {
-        analyses.push_back(mkAnalysis(*it));
-      }
-
-      ready=true;
+      for (const string& a : analysisNames)
+        analyses.push_back(mkAnalysis(a));
+      ready = true;
     }
 
 
