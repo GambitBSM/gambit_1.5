@@ -73,6 +73,7 @@ namespace Gambit {
     ///
     /// @todo Access by name?
     /// @todo Guarantee ordering?
+    /// @todo How to combine covariance matrices -- require?
     struct AnalysisData {
 
       /// Default constructor
@@ -82,15 +83,15 @@ namespace Gambit {
       ///
       /// If corrs is a null matrix (the default), this AnalysisData is to be interpreted as having no correlation
       /// information, and hence the likelihood calculation should use the single best-expected-limit SR.
-      AnalysisData(const std::vector<SignalRegionData>& srds, const Eigen::MatrixXd& corrs=Eigen::MatrixXd())
-        : srdata(srds), corrmatrix(corrs) {
+      AnalysisData(const std::vector<SignalRegionData>& srds, const Eigen::MatrixXd& cov=Eigen::MatrixXd())
+        : srdata(srds), srcov(cov) {
         _checkConsistency();
       }
 
-      /// Clear the list of SignalRegionData, and nullify the correlation matrix
+      /// Clear the list of SignalRegionData, and nullify the covariance matrix
       void clear() {
         srdata.clear();
-        corrmatrix = Eigen::MatrixXd();
+        srcov = Eigen::MatrixXd();
       }
 
       /// Number of analyses
@@ -105,7 +106,7 @@ namespace Gambit {
       /// Is there non-null correlation data?
       bool hasCorrs() const {
         _checkConsistency();
-        return corrmatrix.rows() == 0;
+        return srcov.rows() == 0;
       }
 
       /// @brief Add a SignalRegionData
@@ -125,15 +126,15 @@ namespace Gambit {
       std::vector<SignalRegionData>::iterator end() { return srdata.end(); }
       std::vector<SignalRegionData>::const_iterator end() const { return srdata.end(); }
 
-      /// List of signal regions' data sumamries
+      /// List of signal regions' data summaries
       std::vector<SignalRegionData> srdata;
 
-      /// Optional matrix of correlations between SRs (0x0 null matrix = no corr info)
-      Eigen::MatrixXd corrmatrix;
+      /// Optional covariance matrix between SRs (0x0 null matrix = no correlation info)
+      Eigen::MatrixXd srcov;
 
-      /// Check that the size of the SRData list and the correlation matrix are consistent
+      /// Check that the size of the SRData list and the covariance matrix are consistent
       void _checkConsistency() const {
-        assert(corrmatrix.rows() == 0 || corrmatrix.rows() == (int) srdata.size());
+        assert(srcov.rows() == 0 || srcov.rows() == (int) srdata.size());
       }
 
     };

@@ -1314,14 +1314,14 @@ namespace Gambit
       {
         // The final iteration for this collider: collect results
         globalAnalysesDet.scale();
-        for (auto anaPtr = globalAnalysesDet.analyses.begin(); anaPtr != globalAnalysesDet.analyses.end(); ++anaPtr)
+        for (auto anaPtr : globalAnalysesDet.analyses)
         {
 
           #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+            std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
 
-          result.push_back((*anaPtr)->get_results());
+          result.push_back(anaPtr->get_results());
         }
         return;
       }
