@@ -7,6 +7,10 @@ namespace Gambit {
   namespace ColliderBit {
 
 
+    /// Unit conversions (multiply to construct in standard units, divide to decode to that unit)
+    static const double GeV = 1, MeV = 1e-3, TeV = 1e3;
+
+
     /// Return a random true/false at a success rate given by a number
     // inline
     bool random_bool(double eff);

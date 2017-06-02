@@ -1360,14 +1360,14 @@ namespace Gambit
       {
         // The final iteration for this collider: collect results
         globalAnalysesATLAS.scale();
-        for (auto anaPtr = globalAnalysesATLAS.analyses.begin(); anaPtr != globalAnalysesATLAS.analyses.end(); ++anaPtr)
+        for (auto anaPtr : globalAnalysesATLAS.analyses)
         {
 
           #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+            std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
 
-          result.push_back((*anaPtr)->get_results());
+          result.push_back(anaPtr->get_results());
         }
         return;
       }
@@ -1404,13 +1404,13 @@ namespace Gambit
       {
         // The final iteration for this collider: collect results
         globalAnalysesCMS.scale();
-        for (auto anaPtr = globalAnalysesCMS.analyses.begin(); anaPtr != globalAnalysesCMS.analyses.end(); ++anaPtr)
+        for (auto anaPtr : globalAnalysesCMS.analyses)
         {
           #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+            std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
 
-          result.push_back((*anaPtr)->get_results());
+          result.push_back(anaPtr->get_results());
         }
         return;
       }
@@ -1431,7 +1431,6 @@ namespace Gambit
     }
 
 
-
     void runIdentityAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runIdentityAnalyses;
@@ -1448,13 +1447,13 @@ namespace Gambit
       {
         // The final iteration for this collider: collect results
         globalAnalysesIdentity.scale();
-        for (auto anaPtr = globalAnalysesIdentity.analyses.begin(); anaPtr != globalAnalysesIdentity.analyses.end(); ++anaPtr)
+        for (auto anaPtr : globalAnalysesIdentity.analyses)
         {
           #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << (*anaPtr)->get_results().begin()->analysis_name << endl;
+            std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
 
-          result.push_back((*anaPtr)->get_results());
+          result.push_back(anaPtr->get_results());
         }
         return;
       }
@@ -1473,6 +1472,7 @@ namespace Gambit
       // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
       Dep::IdentityAnalysisContainer->analyze(*Dep::CopiedEvent);
     }
+
 
 
     /// Loop over all analyses (and SRs within one analysis) and fill a vector of observed likelihoods
