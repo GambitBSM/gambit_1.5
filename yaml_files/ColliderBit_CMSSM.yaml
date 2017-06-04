@@ -342,7 +342,7 @@ Rules:
       analyses: [ ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
                    "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
                    "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
-                   "ATLAS_3LEPEW_20invfb"],
+                   "ATLAS_3LEPEW_20invfb","ATLAS_1LEPbb_20invfb"],
                   ["ATLAS_13TeV_0LEP_13invfb"] ]
 
   # Specify the list of CMS analyses to run with BuckFast
@@ -352,7 +352,7 @@ Rules:
     options:
       analyses: [ ["CMS_1LEPDMTOP_20invfb","CMS_2LEPDMTOP_20invfb",
                    "CMS_3LEPEW_20invfb","CMS_MONOJET_20invfb"],
-                  [] ]
+                  ["CMS_1LEPbb_13TeV_36invfb","CMS_MultiLEP_13Tev_36invfb"] ]
 
   # Specify the list of identity analyses to run
   # These will be run if the identity simulation is turned on

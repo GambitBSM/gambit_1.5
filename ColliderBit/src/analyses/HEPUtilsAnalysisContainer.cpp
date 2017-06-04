@@ -9,7 +9,7 @@ namespace Gambit
 
     /// Forward declarations using #DECLARE_ANALYSIS_FACTORY(ANAME)
     /// @{
-    DECLARE_ANALYSIS_FACTORY(Minimum);
+    //DECLARE_ANALYSIS_FACTORY(Minimum);
     DECLARE_ANALYSIS_FACTORY(ATLAS_0LEP_20invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEP_13invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_0LEPStop_20invfb);
@@ -23,13 +23,16 @@ namespace Gambit
     DECLARE_ANALYSIS_FACTORY(CMS_2LEPDMTOP_20invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_3LEPEW_20invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_MONOJET_20invfb);
-    DECLARE_ANALYSIS_FACTORY(Perf);
+    DECLARE_ANALYSIS_FACTORY(ATLAS_1LEPbb_20invfb);
+    DECLARE_ANALYSIS_FACTORY(CMS_1LEPbb_13TeV_36invfb);
+    DECLARE_ANALYSIS_FACTORY(CMS_MultiLEP_13Tev_36invfb);
+    //DECLARE_ANALYSIS_FACTORY(Perf);
     /// @}
 
     // Factory definition
     HEPUtilsAnalysis* mkAnalysis(const std::string& name)
     {
-      IF_X_RTN_CREATE_ANA_X(Minimum);
+      //IF_X_RTN_CREATE_ANA_X(Minimum);
       IF_X_RTN_CREATE_ANA_X(ATLAS_0LEP_20invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEP_13invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_0LEPStop_20invfb);
@@ -43,7 +46,10 @@ namespace Gambit
       IF_X_RTN_CREATE_ANA_X(CMS_2LEPDMTOP_20invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_3LEPEW_20invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_MONOJET_20invfb);
-      IF_X_RTN_CREATE_ANA_X(Perf);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_1LEPbb_20invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_1LEPbb_13TeV_36invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_MultiLEP_13Tev_36invfb);
+      //IF_X_RTN_CREATE_ANA_X(Perf);
       throw std::runtime_error(name + " isn't a known collider analysis!");
       return nullptr;
     }
