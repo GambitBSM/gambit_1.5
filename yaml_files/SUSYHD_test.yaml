@@ -37,7 +37,7 @@ Scanner:
 
 ObsLikes:
   - purpose:      Test
-    capability:   Mathematica_test
+    capability:   MathematicaTest
     type:         bool
     function:     SUSYHD_test
 

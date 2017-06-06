@@ -34,7 +34,7 @@ Scanner:
 
 ObsLikes:
   - purpose:      Test
-    capability:   Mathematica_test
+    capability:   MathematicaTest
     type:         bool
     function:     Math_test
 
@@ -49,7 +49,7 @@ Logger:
 
 KeyValues:
 
-  default_output_path: "runs/Mathematica_tests"
+  default_output_path: "runs/MathematicaTests"
 
   dependency_resolution:
     prefer_model_specific_functions: false

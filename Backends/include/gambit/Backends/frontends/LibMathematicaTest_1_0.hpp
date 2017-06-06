@@ -22,21 +22,21 @@ LOAD_LIBRARY
 
 BE_ALLOW_MODELS(CMSSM)
 
-BE_FUNCTION(CalculateSquare, MReal, (const MInteger&), "CalculateSquare","MathematicaTest")
-BE_FUNCTION(CalculateSum, MReal, (const MReal&, const MReal&), "CalculateSum", "MathematicaTest")
-BE_FUNCTION(PrintVar, MInteger, (), "PrintVar", "MathematicaTest")
-BE_FUNCTION(PrintVarorVar2, MReal, (const MBool&), "PrintVarorVar2", "MathematicaTest")
-BE_FUNCTION(VarEqualVar2, MBool, (), "VarEqualVar2", "MathematicaTest")
-BE_FUNCTION(StringTest, MString, (const MString&), "StringTest", "MathematicaTest")
-BE_FUNCTION(VoidTest, MVoid, (), "VoidTest", "MathematicaTest")
-BE_FUNCTION(ExtractElement, MInteger, (const MList<MInteger>&, const MInteger&), "ExtractElement", "MathematicaTest")
-BE_FUNCTION(SquareList, MList<MInteger>, (const MList<MInteger>&), "SquareList", "MathematicaTest")
+BE_FUNCTION(CalculateSquare, MReal, (const MInteger&), "CalculateSquare","MathTest_CalculateSquare")
+BE_FUNCTION(CalculateSum, MReal, (const MReal&, const MReal&), "CalculateSum", "MathTest_CalculateSum")
+BE_FUNCTION(PrintVar, MInteger, (), "PrintVar", "MathTest_PrintVar")
+BE_FUNCTION(PrintVarorVar2, MReal, (const MBool&), "PrintVarorVar2", "MathTest_PrintVarorVar2")
+BE_FUNCTION(VarEqualVar2, MBool, (), "VarEqualVar2", "MathTest_VarEqualVar2")
+BE_FUNCTION(StringTest, MString, (const MString&), "StringTest", "MathTest_StringTest")
+BE_FUNCTION(VoidTest, MVoid, (), "VoidTest", "MathTest_VoidTest")
+BE_FUNCTION(ExtractElement, MInteger, (const MList<MInteger>&, const MInteger&), "ExtractElement", "MathTest_ExtractElement")
+BE_FUNCTION(SquareList, MList<MInteger>, (const MList<MInteger>&), "SquareList", "MathTest_SquareList")
 
-BE_VARIABLE(Var, MInteger, "Var", "MathematicaTest")
-BE_VARIABLE(Var2, MReal, "Var2", "MathematicaTest")
+BE_VARIABLE(Var, MInteger, "Var", "MathTest_Var")
+BE_VARIABLE(Var2, MReal, "Var2", "MathTest_Var2")
 
 /* Convenience functions (declarations) */
-BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&, const int&), "MathematicaTest")
+BE_CONV_FUNCTION(run_Mathematica_Test, double, (const int&, const int&), "MathTest")
 
 // Undefine macros toa void conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

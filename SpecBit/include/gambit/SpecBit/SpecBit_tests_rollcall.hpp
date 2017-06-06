@@ -23,12 +23,12 @@
 
    /// @{ Functions to test Spectrum objects
    
-   #define CAPABILITY Mathematica_test
+   #define CAPABILITY MathematicaTest
    START_CAPABILITY
 
      #define FUNCTION Math_test
      START_FUNCTION(bool)
-     BACKEND_REQ(MathematicaTest, (), double, (const int&,const int&))
+     BACKEND_REQ(MathTest, (), double, (const int&,const int&))
      #undef FUNCTION
 
      #define FUNCTION SUSYHD_test

@@ -195,6 +195,48 @@ run_light_quark_test: |
 ptr_arr_tests: |
    Function that tests array and -> operators on deps and BE vars.
 
+libMathematicaTest_1_0_init: |
+   Initialises the backend for Mathematica tests.
+
+MathematicaTest: |
+   Performs serveral tests of Mathematica backends.
+
+MathTest: |
+   Runs a series of test in libMathematicaTest.
+
+MathTest_CalculateSquare: |
+   Test function for Mathematica backends that calculates the square of a number.
+
+MathTest_CalculateSum: |
+   Test function for Mathematica backends that calculates the sum of two numbers.
+
+MathTest_ExtractElement: |
+   Test function for Mathematica backends that extracts an element from a list.
+
+MathTest_PrintVar: |
+   Test function for Mathematica backends that prints a variable.
+
+MathTest_PrintVarorVar2: |
+   Test function for Mathematica backends that prints a variable depeding on a boolean argument.
+
+MathTest_SquareList: |
+   Test function for Mathematica backends that calculates the square of a list.
+
+MathTest_StringTest: |
+   Test function for Mathematica backends to test strings.
+
+MathTest_Var: |
+   Test integer variable for Mathematica backends.
+
+MathTest_Var2: |
+   Test real variable for Mathematica backends.
+
+MathTest_VarEqualVar2: |
+   Test function for Mathematica backends checks the equality of two variables.
+
+MathTest_VoidTest: |
+   Test function for Mathematica backends for testing void functions
+
 
 #-------------------------------------
 #  SpecBit
@@ -3056,4 +3098,18 @@ calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
 
+#------------------------------
+#  SUSYHD capabilities
+#------------------------------
 
+SUSYHD_1_0_2_init: |
+   Initialises SUSYHD, version 1.0.2
+
+SUSYHD_SetSMparameters: |
+   Sets the SM parameters to be used in SUSYHD
+
+SUSYHD_MHiggs: |
+   Calculates the Higgs mass using SUSYHD
+
+SUSYHD_DeltaMHiggs : |
+   Calculates the uncertainty on the Higgs mass using SUSYHD

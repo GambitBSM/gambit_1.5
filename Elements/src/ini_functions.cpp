@@ -255,6 +255,7 @@ namespace Gambit
           backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
           Backends::backendInfo().works[be+ver] = false;
           WSNewPacket((WSLINK)pHandle);
+          WSDeinitialize(WSenv);
           return 0;
         }
 
@@ -269,6 +270,8 @@ namespace Gambit
           backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
           Backends::backendInfo().works[be+ver] = false;
           WSNewPacket((WSLINK)pHandle);
+          WSClose((WSLINK)pHandle);
+          WSDeinitialize(WSenv);
           return 0;
         }
 
@@ -277,27 +280,32 @@ namespace Gambit
         while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
           WSNewPacket((WSLINK)pHandle);
 
-// TODO: This does not work, check
-/* 
-        const char *failed;
-        if(!WSGetString((WSLINK)pHandle, &failed))
+        if(pkt == RETURNPKT)
         {
-          err << "Error reading package from WSTP" << endl;
-          backend_warning().raise(LOCAL_INFO,err.str());
-          backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
-          Backends::backendInfo().works[be+ver] = false;
-          WSNewPacket((WSLINK)pHandle);
-          return 0;
+          const char *failed;
+          if(!WSGetString((WSLINK)pHandle, &failed))
+          {
+            err << "Error reading package from WSTP" << endl;
+            backend_warning().raise(LOCAL_INFO,err.str());
+            backend_warning().raise(LOCAL_INFO, WSErrorMessage((WSLINK)pHandle));
+            Backends::backendInfo().works[be+ver] = false;
+            WSNewPacket((WSLINK)pHandle);
+            WSClose((WSLINK)pHandle);
+            WSDeinitialize(WSenv);
+            return 0;
+          }
+          if(str(failed) == "$Failed")
+          {
+            err << "Mathematica package could not be loaded" << endl;
+            backend_warning().raise(LOCAL_INFO,err.str());
+            Backends::backendInfo().works[be+ver] = false;
+            WSNewPacket((WSLINK)pHandle);
+            WSClose((WSLINK)pHandle);
+            WSDeinitialize(WSenv);
+            return 0;
+          }
         }
-        if(str(failed) == "$Failed")
-        {
-          err << "Mathematica package could not be loaded" << endl;
-          backend_warning().raise(LOCAL_INFO,err.str());
-          Backends::backendInfo().works[be+ver] = false;
-          WSNewPacket((WSLINK)pHandle);
-          return 0;
-        }
-*/
+
         logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
                  << LogTags::backends << LogTags::info << EOM;
         Backends::backendInfo().works[be+ver] = true;

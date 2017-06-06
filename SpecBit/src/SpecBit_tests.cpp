@@ -63,7 +63,7 @@ namespace Gambit
 
       int input1 = 3, input2 = 4;
 
-      int output= myPipe::BEreq::MathematicaTest(input1,input2);
+      int output= myPipe::BEreq::MathTest(input1,input2);
       cout << "Testing Mathematica" << endl;
       cout << "Result : " << output << endl;
 
