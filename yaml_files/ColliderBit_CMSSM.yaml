@@ -29,7 +29,6 @@ Parameters:
       prior_type: flat
     SignMu: 1
 
-
 Priors:
 
   # All priors simple, so specified in Parameters section
@@ -54,7 +53,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: multinest
+  use_scanner: random
 
   scanners:
 
@@ -66,7 +65,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 1
+      point_number: 10
       output_file:  output
       like:  Likelihood
       files:
@@ -275,7 +274,7 @@ Rules:
       xsec_vetos: [0.048, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
-      # SLHA_filenames: ["path to SLHA file"]
+      #SLHA_filenames: ["ColliderBit/data/susy_msugra_2600_350_0_10_P_softsusy.slha"]
 
 
   # Delphes rules and options (ex. the Delphes configuration card file)

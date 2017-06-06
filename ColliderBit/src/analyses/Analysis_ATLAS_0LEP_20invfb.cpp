@@ -344,15 +344,18 @@ namespace Gambit {
 
       void collect_results() {
 
-	/*cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+	cout << "COLLECT_RESULTS CALLED" << endl;
+	
+
+	cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
         cout << "CUT FLOW: ATLAS 0 lepton paper "<<endl;
         cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
-        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << endl;
         for (size_t j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << endl;
         }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;*/
+        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
 
         //Now fill a results object with the results for each SR

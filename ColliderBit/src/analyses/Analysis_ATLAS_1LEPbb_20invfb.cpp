@@ -43,15 +43,20 @@ namespace Gambit {
           cutFlowVector.push_back(0);
           cutFlowVector_str.push_back("");
         }
+
+	cout<<"HELLO MATTHIAS!!"<<endl;
 	
 //	vector<const char*> variables = {"met","mCT","mbb"};
-//	plots = new Perf_Plot("ATLAS_1LEPbb_20invfb",&variables);
+//	plots = new Perf_Plot("ATLAS_1LEPbb_20invfb.hdf5",&variables);
 
       }
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        
+	cout<< "HI ROSE!!"<<endl;
+
+	HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
         double met = event->met();
@@ -273,15 +278,15 @@ namespace Gambit {
 
       void collect_results() {
 
-	/*cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+	cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
         cout << "CUT FLOW: ATLAS 1 lepton, 2 bjets paper "<<endl;
         cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
-        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << endl;
         for (size_t j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << endl;
         }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;*/
+        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
 
         //Now fill a results object with the results for each SR
@@ -305,7 +310,7 @@ namespace Gambit {
         results_SRB.n_signal = _numSRB;
         add_result(results_SRB);
 
-	//plots->createFile();
+//	plots->createFile();
 
       }
 
