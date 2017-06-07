@@ -54,6 +54,16 @@ namespace Gambit
   {
 
 
+    // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
+    // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to run
+    // ColliderBit on a single point with a custom Pythia version, using Pythia's SLHA interface.
+    void getDummyColliderObservable(double& result)
+    {
+      result = 0.0;
+    }
+
+
+
     /// **************************************************
     /// Non-rollcalled functions and module-wide variables
     /// **************************************************
@@ -1633,15 +1643,6 @@ namespace Gambit
       // Set the single DLL to be returned (with conversion to more negative dll = more exclusion convention)
       result = -total_dll_obs;
 
-    }
-
-
-    // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
-    // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to run
-    // ColliderBit on a single point with a custom Pythia version, using Pythia's SLHA interface.
-    void getDummyColliderObservable(double& result)
-    {
-      result = 0.0;
     }
 
 
