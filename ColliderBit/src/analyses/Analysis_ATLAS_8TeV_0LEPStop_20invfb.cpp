@@ -29,7 +29,7 @@ namespace Gambit {
 
     bool sortByPT(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
 
-    class Analysis_ATLAS_0LEPStop_20invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_8TeV_0LEPStop_20invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -95,7 +95,7 @@ namespace Gambit {
 
     public:
 
-      Analysis_ATLAS_0LEPStop_20invfb() {
+      Analysis_ATLAS_8TeV_0LEPStop_20invfb() {
 
         _numSRA1 = 0 ; _numSRA2 = 0; _numSRA3 = 0; _numSRA4 = 0;
         _numSRC1 = 0 ; _numSRC2 = 0; _numSRC3 = 0;
@@ -652,8 +652,8 @@ namespace Gambit {
         // The base class add function handles the signal region vector and total # events.
         HEPUtilsAnalysis::add(other);
 
-        Analysis_ATLAS_0LEPStop_20invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_0LEPStop_20invfb*>(other);
+        Analysis_ATLAS_8TeV_0LEPStop_20invfb* specificOther
+                = dynamic_cast<Analysis_ATLAS_8TeV_0LEPStop_20invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -674,7 +674,7 @@ namespace Gambit {
       void collect_results() {
 
         SignalRegionData results_SRA1;
-        results_SRA1.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRA1.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRA1.sr_label = "SRA1";
         results_SRA1.n_observed = 11.;
         results_SRA1.n_background = 15.8;
@@ -683,7 +683,7 @@ namespace Gambit {
         results_SRA1.n_signal = _numSRA1;
 
         SignalRegionData results_SRA2;
-        results_SRA2.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRA2.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRA2.sr_label = "SRA2";
         results_SRA2.n_observed = 4.;
         results_SRA2.n_background = 4.1;
@@ -692,7 +692,7 @@ namespace Gambit {
         results_SRA2.n_signal = _numSRA2;
 
         SignalRegionData results_SRA3;
-        results_SRA3.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRA3.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRA3.sr_label = "SRA3";
         results_SRA3.n_observed = 5.;
         results_SRA3.n_background = 4.1;
@@ -701,7 +701,7 @@ namespace Gambit {
         results_SRA3.n_signal = _numSRA3;
 
         SignalRegionData results_SRA4;
-        results_SRA4.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRA4.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRA4.sr_label = "SRA4";
         results_SRA4.n_observed = 4.;
         results_SRA4.n_background = 2.4;
@@ -710,7 +710,7 @@ namespace Gambit {
         results_SRA4.n_signal = _numSRA4;
 
         SignalRegionData results_SRC1;
-        results_SRC1.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRC1.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRC1.sr_label = "SRC1";
         results_SRC1.n_observed = 59.;
         results_SRC1.n_background = 68.;
@@ -719,7 +719,7 @@ namespace Gambit {
         results_SRC1.n_signal = _numSRC1;
 
         SignalRegionData results_SRC2;
-        results_SRC2.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRC2.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRC2.sr_label = "SRC2";
         results_SRC2.n_observed = 30.;
         results_SRC2.n_background = 34.;
@@ -728,7 +728,7 @@ namespace Gambit {
         results_SRC2.n_signal = _numSRC2;
 
         SignalRegionData results_SRC3;
-        results_SRC3.analysis_name = "Analysis_ATLAS_0LEPStop_20invfb";
+        results_SRC3.analysis_name = "Analysis_ATLAS_8TeV_0LEPStop_20invfb";
         results_SRC3.sr_label = "SRC3";
         results_SRC3.n_observed = 15.;
         results_SRC3.n_background = 20.3;
@@ -750,7 +750,7 @@ namespace Gambit {
     };
 
 
-    DEFINE_ANALYSIS_FACTORY(ATLAS_0LEPStop_20invfb)
+    DEFINE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEPStop_20invfb)
 
 
   }

@@ -25,7 +25,7 @@ namespace Gambit {
   namespace ColliderBit {
 
 
-    class Analysis_CMS_2LEPDMTOP_20invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_8TeV_2LEPDMTOP_20invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -39,7 +39,7 @@ namespace Gambit {
 
     public:
 
-      Analysis_CMS_2LEPDMTOP_20invfb()
+      Analysis_CMS_8TeV_2LEPDMTOP_20invfb()
         : _numSR(0),
           NCUTS(6)
       {
@@ -196,8 +196,8 @@ namespace Gambit {
         // The base class add function handles the signal region vector and total # events.
         HEPUtilsAnalysis::add(other);
 
-        Analysis_CMS_2LEPDMTOP_20invfb* specificOther
-                = dynamic_cast<Analysis_CMS_2LEPDMTOP_20invfb*>(other);
+        Analysis_CMS_8TeV_2LEPDMTOP_20invfb* specificOther
+                = dynamic_cast<Analysis_CMS_8TeV_2LEPDMTOP_20invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -216,7 +216,7 @@ namespace Gambit {
 
       void collect_results() {
         SignalRegionData results_SR;
-        results_SR.analysis_name = "Analysis_CMS_2LEPDMTOP_20invfb";
+        results_SR.analysis_name = "Analysis_CMS_8TeV_2LEPDMTOP_20invfb";
         results_SR.sr_label = "SR";
         results_SR.n_observed = 1.;
         results_SR.n_background = 1.89;
@@ -231,7 +231,8 @@ namespace Gambit {
 
     };
 
-    DEFINE_ANALYSIS_FACTORY(CMS_2LEPDMTOP_20invfb)
+
+    DEFINE_ANALYSIS_FACTORY(CMS_8TeV_2LEPDMTOP_20invfb)
 
 
   }

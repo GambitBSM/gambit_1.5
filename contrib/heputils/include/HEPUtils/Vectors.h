@@ -304,7 +304,7 @@ namespace HEPUtils {
       const double px = pt * cos(phi);
       const double py = pt * sin(phi);
       const double pz = p * cos(theta);
-      const double E = sqrt( sqr(p) + sqr(mass) );
+      //const double E = sqrt( sqr(p) + sqr(mass) );
       setPM(px, py, pz, mass);
       return *this;
     }
