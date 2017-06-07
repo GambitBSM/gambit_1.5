@@ -1532,113 +1532,138 @@ namespace Gambit
       #ifndef EXCLUDE_DELPHES
         if (haveUsedDelphesDetector)
          analysisResults.insert(analysisResults.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
-      #endif
-      // Loop over analyses and calculate the total observed dll
+        #endif
+
+
+      // Loop over analyses and calculate the total observed dLL
       double total_dll_obs = 0;
       for (size_t analysis = 0; analysis < analysisResults.size(); ++analysis)
       {
-
+        // AnalysisData for this analysis
+        const AnalysisData& adata = analysisResults[analysis];
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has " << analysisResults[analysis].size() << " signal regions." << endl;
+        std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has " << adata.size() << " signal regions." << endl;
         #endif
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
-        /// @note In general each analysis could/should work out its own likelihood so they can handle SR combination if possible.
-        /// @note For now we just take the result from the SR *expected* to be most constraining, i.e. with highest expected dll
-        double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-        for (size_t SR = 0; SR < analysisResults[analysis].size(); ++SR)
-        {
-          SignalRegionData srData = analysisResults[analysis][SR];
-
-          // Actual observed number of events
-          const int n_obs = (int) round(srData.n_observed);
-
-          // A contribution to the predicted number of events that is known exactly
-          // (e.g. from data-driven background estimate)
-          const double n_predicted_exact = 0;
-
-          // A contribution to the predicted number of events that is not known exactly
-          const double n_predicted_uncertain_s = srData.n_signal_at_lumi;
-          const double n_predicted_uncertain_b = srData.n_background;
-          const double n_predicted_uncertain_sb = n_predicted_uncertain_s + n_predicted_uncertain_b;
-
-          // Absolute errors for n_predicted_uncertain_*
-          const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
-          const double abs_uncertainty_s_sys = srData.signal_sys;
-          const double abs_uncertainty_b = srData.background_sys;
-          const double abs_uncertainty_sb = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys, abs_uncertainty_b);
-
-          // Relative errors for n_predicted_uncertain_*
-          const double frac_uncertainty_b = abs_uncertainty_b / n_predicted_uncertain_b;
-          const double frac_uncertainty_sb = abs_uncertainty_sb / n_predicted_uncertain_sb;
-
-          // Predicted total background, as an integer for use in Poisson functions
-          const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
-
-          //#ifdef COLLIDERBIT_DEBUG
-          //  logger() << endl;
-          //  logger() << "COLLIDER_RESULT " << srData.analysis_name << " " << srData.sr_label << endl;
-          //  logger() << "  NEvents, not scaled to luminosity :" << endl;
-          //  logger() << "    " << srData.n_signal << endl;
-          //  logger() << "  NEvents, scaled  to luminosity :  " << endl;
-          //  logger() << "    " << srData.n_signal_at_lumi << endl;
-          //  logger() << "  NEvents (b [rel err], sb [rel err]):" << endl;
-          //  logger() << "    " << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%] "
-          //           << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << EOM;
-          //#endif
-
-          double llb_exp = 0, llsb_exp = 0, llb_obs = 0, llsb_obs = 0;
-          // Use a log-normal distribution for the nuisance parameter (more correct)
-          if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") {
-            llb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
-            llsb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
-            llb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
-            llsb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
-          }
-          // Use a Gaussian distribution for the nuisance parameter (marginally faster)
-          else if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_gaussian_error") {
-            llb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
-            llsb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
-            llb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
-            llsb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
-          }
-
-          // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
-          const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
-          if (dll_exp > bestexp_dll_exp) {
-            bestexp_dll_exp = dll_exp;
-            bestexp_dll_obs = llb_obs - llsb_obs;
-          }
-
-          // For debugging: print some useful numbers to the log.
-          #ifdef COLLIDERBIT_DEBUG
-            cout << endl;
-            cout <<  debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
-            cout <<  debug_prefix() << "  LLikes: b_ex      sb_ex     b_obs     sb_obs    (sb_obs-b_obs)" << endl;
-            cout <<  debug_prefix() << "          " << llb_exp << "  " << llsb_exp << "  "
-                     << llb_obs << "  " << llsb_obs << "  " << llsb_obs-llb_obs << endl;
-            cout <<  debug_prefix() << "  NEvents, not scaled to luminosity: " << srData.n_signal << endl;
-            cout <<  debug_prefix() << "  NEvents, scaled  to luminosity:    " << srData.n_signal_at_lumi << endl;
-            cout <<  debug_prefix() << "  NEvents: b [rel err]      sb [rel err]" << endl;
-            cout <<  debug_prefix() << "           " << n_predicted_uncertain_b << " [" << uncertainty_b << "]   "
-                     << n_predicted_uncertain_sb << " [" << uncertainty_sb << "]" << endl;
-          #endif
-
-        } // end SR loop
-
-        // Update the total obs dll
         /// @note For now we assume that the analyses are fully orthogonal, i.e. no possiblity that the same event appears twice -> straight addition
-        total_dll_obs += bestexp_dll_obs;
+        /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
+        double ana_dll = 0;
+        if (adata.srcov.rows() > 0) {
 
+          // (Simplified) SR-correlation info is available, so use the covariance matrix to construct composite marginalised likelihood
+
+          /// @todo Construct vectors of SR numbers
+
+          /// @todo Diagonalise the covariance matrix, extracting the eigenvalues and rotation matrix
+
+          /// @todo Rotate the number vectors
+
+          /// @todo For each: Compute the marginalised dLL and add it to ana_dll
+
+        } else {
+
+          // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
+          double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
+          for (size_t SR = 0; SR < adata.size(); ++SR)
+          {
+            SignalRegionData srData = adata[SR];
+
+            // Actual observed number of events
+            const int n_obs = (int) round(srData.n_observed);
+
+            // A contribution to the predicted number of events that is known exactly
+            // (e.g. from data-driven background estimate)
+            const double n_predicted_exact = 0;
+
+            // A contribution to the predicted number of events that is not known exactly
+            const double n_predicted_uncertain_s = srData.n_signal_at_lumi;
+            const double n_predicted_uncertain_b = srData.n_background;
+            const double n_predicted_uncertain_sb = n_predicted_uncertain_s + n_predicted_uncertain_b;
+
+            // Absolute errors for n_predicted_uncertain_*
+            const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
+            const double abs_uncertainty_s_sys = srData.signal_sys;
+            const double abs_uncertainty_b = srData.background_sys;
+            const double abs_uncertainty_sb = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys, abs_uncertainty_b);
+
+            // Relative errors for n_predicted_uncertain_*
+            const double frac_uncertainty_b = abs_uncertainty_b / n_predicted_uncertain_b;
+            const double frac_uncertainty_sb = abs_uncertainty_sb / n_predicted_uncertain_sb;
+
+            // Predicted total background, as an integer for use in Poisson functions
+            const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
+
+            #ifdef COLLIDERBIT_DEBUG
+             logger() << endl;
+             logger() << "COLLIDER_RESULT " << srData.analysis_name << " " << srData.sr_label << endl;
+             logger() << "  NEvents, not scaled to luminosity :" << endl;
+             logger() << "    " << srData.n_signal << endl;
+             logger() << "  NEvents, scaled  to luminosity :  " << endl;
+             logger() << "    " << srData.n_signal_at_lumi << endl;
+             logger() << "  NEvents (b [rel err], sb [rel err]):" << endl;
+             logger() << "    " << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%] "
+                      << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << EOM;
+            #endif
+
+            double llb_exp = 0, llsb_exp = 0, llb_obs = 0, llsb_obs = 0;
+            // Use a log-normal distribution for the nuisance parameter (more correct)
+            if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") {
+              llb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+              llsb_exp = BEreq::lnlike_marg_poisson_lognormal_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+              llb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+              llsb_obs = BEreq::lnlike_marg_poisson_lognormal_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+            }
+            // Use a Gaussian distribution for the nuisance parameter (marginally faster)
+            else if (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_gaussian_error") {
+              llb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+              llsb_exp = BEreq::lnlike_marg_poisson_gaussian_error(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+              llb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+              llsb_obs = BEreq::lnlike_marg_poisson_gaussian_error(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+            }
+
+            // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
+            const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
+            if (dll_exp > bestexp_dll_exp) {
+              bestexp_dll_exp = dll_exp;
+              bestexp_dll_obs = llb_obs - llsb_obs;
+            }
+
+            // For debugging: print some useful numbers to the log.
+            #ifdef COLLIDERBIT_DEBUG
+              cout << endl;
+              cout <<  debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
+              cout <<  debug_prefix() << "  LLikes: b_ex      sb_ex     b_obs     sb_obs    (sb_obs-b_obs)" << endl;
+              cout <<  debug_prefix() << "          " << llb_exp << "  " << llsb_exp << "  "
+                       << llb_obs << "  " << llsb_obs << "  " << llsb_obs-llb_obs << endl;
+              cout <<  debug_prefix() << "  NEvents, not scaled to luminosity: " << srData.n_signal << endl;
+              cout <<  debug_prefix() << "  NEvents, scaled  to luminosity:    " << srData.n_signal_at_lumi << endl;
+              cout <<  debug_prefix() << "  NEvents: b [rel err]      sb [rel err]" << endl;
+              cout <<  debug_prefix() << "           " << n_predicted_uncertain_b << " [" << uncertainty_b << "]   "
+                       << n_predicted_uncertain_sb << " [" << uncertainty_sb << "]" << endl;
+            #endif
+
+          } // end SR loop
+
+          // Set this analysis' total obs dLL to that from the best-expected SR
+          ana_dll = bestexp_dll_obs;
+
+        }
+
+
+        // Update the total obs dLL with the dLL from this analysis
+        total_dll_obs += ana_dll;
         #ifdef COLLIDERBIT_DEBUG
-          std::cout.precision(5);
-          cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  calc_LHC_LogLike: Analysis #" << analysis << " contributes with a -LogL = " << bestexp_dll_obs << endl;
+        std::cout.precision(5);
+        cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  calc_LHC_LogLike: Analysis #" << analysis << " contributes with a -LogL = " << ana_dll << endl;
         #endif
+
 
       } // end ana loop
 
+
       #ifdef COLLIDERBIT_DEBUG
-        cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << -total_dll_obs << endl;
+      cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << -total_dll_obs << endl;
       #endif
       // Set the single DLL to be returned (with conversion to more negative dll = more exclusion convention)
       result = -total_dll_obs;
