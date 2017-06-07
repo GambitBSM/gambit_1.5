@@ -33,20 +33,20 @@ namespace Gambit
     HEPUtilsAnalysis* mkAnalysis(const std::string& name)
     {
       IF_X_RTN_CREATE_ANA_X(Minimum);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_0LEP_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEP_13invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_0LEPStop_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_1LEPStop_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_2bStop_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_2LEPEW_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_2LEPStop_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_3LEPEW_20invfb);
-      IF_X_RTN_CREATE_ANA_X(CMS_13TeV_0LEP_13invfb);
-      IF_X_RTN_CREATE_ANA_X(CMS_1LEPDMTOP_20invfb);
-      IF_X_RTN_CREATE_ANA_X(CMS_2LEPDMTOP_20invfb);
-      IF_X_RTN_CREATE_ANA_X(CMS_3LEPEW_20invfb);
-      IF_X_RTN_CREATE_ANA_X(CMS_MONOJET_20invfb);
       IF_X_RTN_CREATE_ANA_X(Perf);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEP_13invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_0LEP_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_0LEPStop_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_1LEPStop_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_2bStop_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_2LEPEW_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_2LEPStop_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_3LEPEW_20invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_13TeV_0LEP_13invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_8TeV_1LEPDMTOP_20invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_8TeV_2LEPDMTOP_20invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_8TeV_3LEPEW_20invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_8TeV_MONOJET_20invfb);
       throw std::runtime_error(name + " isn't a known collider analysis!");
       return nullptr;
     }
