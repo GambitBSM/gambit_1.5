@@ -65,9 +65,10 @@
 
 /// Define backend languages
 #define UNKNOWN 0
-#define CPP 1
-#define FORTRAN 2
-#define MATHEMATICA 3
+#define CC 1
+#define CXX 2
+#define FORTRAN 3
+#define MATHEMATICA 4
 
 /// Declare the backend initialisation module BackendIniBit.
 #define MODULE BackendIniBit

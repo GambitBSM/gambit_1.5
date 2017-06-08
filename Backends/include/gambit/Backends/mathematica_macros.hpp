@@ -30,7 +30,7 @@
 
 /// If not defined already, define Mathematica
 #ifndef MATHEMATICA
-#define MATHEMATICA 3
+#define MATHEMATICA 4
 #endif
 
 /// Macro to help identifying the language of the backend
