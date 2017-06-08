@@ -1575,7 +1575,7 @@ namespace Gambit
 
           // Diagonalise the covariance matrix, extracting the rotation matrix
           /// @note We have to use the basis of the background-only covariance, to compare apples to apples: add the SR signal uncertainties later
-          // const Eigen::MatrixXd& cov = adata.srcov;
+          /// @todo This is fully-defined by the background-only covariance: no need to recompute the decomposition for every point!
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(adata.srcov);
           const Eigen::MatrixXd V = eig.eigenvectors();
           const Eigen::MatrixXd Vinv = V.inverse();
