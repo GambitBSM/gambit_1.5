@@ -1588,7 +1588,7 @@ namespace Gambit
 
           // Get the variances in the rotated basis, and add the rotated admixture of SR signal uncertainties in quadrature for the sb LL
           const Eigen::VectorXd sigma2_b_prime = eig.eigenvalues();
-          const Eigen::VectorXd sigma2_sb_prime = sigma2_b_prime + abs_unc_s_prime;
+          const Eigen::VectorXd sigma2_sb_prime = sigma2_b_prime + Eigen::VectorXd(abs_unc_s_prime.array().square()); ///< @todo Ick. A better way?
 
           // For each rotated SR, compute the marginalised dLL and add it to ana_dll
           for (size_t SR = 0; SR < adata.size(); ++SR) {
@@ -1603,7 +1603,8 @@ namespace Gambit
 
             // Marginalise over systematic uncertainties on mean rates
             // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
-            auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+            auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+              ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
             const double llb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_b_prime(SR), frac_unc_b);
             const double llsb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_sb_prime(SR), frac_unc_sb);
 
@@ -1647,7 +1648,8 @@ namespace Gambit
 
             // Marginalise over systematic uncertainties on mean rates
             // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
-            auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error") ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+            auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+              ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
             const double llb_exp =  marginaliser(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
             const double llsb_exp = marginaliser(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
             const double llb_obs =  marginaliser(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
