@@ -199,22 +199,22 @@ else()
 endif()
 
 # Check for Mathematica
-#include(cmake/FindMathematica.cmake)
 find_package(Mathematica 10.0)
 if(Mathematica_FOUND)
-  message("${BoldYellow}   Found Mathematica")
+  message("${BoldYellow}   Found Mathematica.${ColourReset}")
   if(Mathematica_WSTP_FOUND)
-    message("${BoldYellow}   Found Wolfram Symbolic Transfer Protocol. Mathematica backends enabled")
+    message("${BoldYellow}   Found Wolfram Symbolic Transfer Protocol. Mathematica backends enabled.${ColourReset}")
     set(HAVE_MATHEMATICA 1)
     set(MATHEMATICA_WSTP_H "${Mathematica_WSTP_INCLUDE_DIR}/wstp.h")
     set(MATHEMATICA_KERNEL "${Mathematica_KERNEL_EXECUTABLE}")
   else()
-    message("${BoldRed}  WSTP not found. Please make sure it is installed before attempting to use Mathematica backends")
+    message("${BoldRed}  WSTP not found. Please make sure it is installed before attempting to use Mathematica backends.${ColourReset}")
     set(HAVE_MATHEMATICA 0)
   endif()
 else()
-  message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled")
+  message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled.${ColourReset}")
   set(HAVE_MATHEMATICA 0)
+  
 endif()
 
 # Check for DL libraries
