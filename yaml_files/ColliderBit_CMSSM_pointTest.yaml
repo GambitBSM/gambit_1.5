@@ -15,19 +15,18 @@ Parameters:
 
   # CMSSM parameter ranges and priors
   CMSSM:
-    M0:
-      range: [100, 5000]
-      prior_type: log
-    M12:
-      range: [100, 5000]
-      prior_type: log
-    A0:
-      range: [-7000, 7000]
-      prior_type: flat
-    TanBeta:
-      range: [3.0, 70]
-      prior_type: flat
+    M0: 70
+    M12: 350
+    A0: 0
+    TanBeta: 10
     SignMu: 1
+
+#  CMSSM:
+#    M0: 100.
+#    M12: 250.
+#    A0: -100.
+#    TanBeta: 10.
+#    SignMu: 1.
 
 Priors:
 
@@ -60,12 +59,12 @@ Scanner:
     multinest:
       plugin: multinest
       like:  LogLike
-      nlive: 4000
+      nlive: 1
       tol: 0.5
 
     random:
       plugin: random
-      point_number: 10
+      point_number: 1
       output_file:  output
       like:  Likelihood
       files:
@@ -241,7 +240,7 @@ Rules:
     options:
       nEvents: [5000, 5000]
       pythiaNames: ["Pythia_SUSY_LHC_8TeV", "Pythia_SUSY_LHC_13TeV"]
-      silenceLoop: true
+      silenceLoop: false
 
 
   # Choose which getPythia to use
@@ -250,7 +249,7 @@ Rules:
   # Note that you must specify the path to the xmldoc
   # Note also that you can use normal Pythia options here
   - capability:  HardScatteringSim
-    function:  getPythia
+    function:  getPythiaFileReader
     options:
       ### Pythia_doc_path defaults to the xmldoc directory of the default Pythia
       ###   backend. So, this must only be set if the user chooses a different Pythia.
@@ -274,7 +273,7 @@ Rules:
       xsec_vetos: [0.048, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
-      #SLHA_filenames: ["ColliderBit/data/susy_msugra_2600_350_0_10_P_softsusy.slha"]
+      SLHA_filenames: ["ColliderBit/data/susy_msugra_2600_350_0_10_P_softsusy.slha"]
 
 
   # Delphes rules and options (ex. the Delphes configuration card file)
@@ -351,7 +350,7 @@ Rules:
     options:
       analyses: [ ["CMS_1LEPDMTOP_20invfb","CMS_2LEPDMTOP_20invfb",
                    "CMS_3LEPEW_20invfb","CMS_MONOJET_20invfb"],
-                  ["CMS_13TeV_1LEPbb_36invfb","CMS_13TeV_MultiLEP_36invfb"] ]
+                  ["CMS_13TeV_0LEP_13invfb","CMS_13TeV_1LEPbb_36invfb","CMS_13TeV_MultiLEP_36invfb"] ]
 
   # Specify the list of identity analyses to run
   # These will be run if the identity simulation is turned on

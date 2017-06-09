@@ -13,13 +13,14 @@
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
+#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
 using namespace std;
 
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_MultiLEP_13Tev_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -28,10 +29,13 @@ namespace Gambit {
       vector<string> cutFlowVector_str1, cutFlowVector_str2, cutFlowVector_str3, cutFlowVector_str4;
       size_t NCUTS1, NCUTS2, NCUTS3, NCUTS4;
 
+      Perf_Plot* plots;
+      ofstream cutflowFile;
+      string analysisRunName;
 
     public:
 
-      Analysis_CMS_MultiLEP_13Tev_36invfb() {
+      Analysis_CMS_13TeV_MultiLEP_36invfb() {
 
         _numSR1=0;
 	_numSR2=0;
@@ -65,15 +69,15 @@ namespace Gambit {
           cutFlowVector_str4.push_back("");
         }
 
-	//Analysis_Plot object???
-	//Creates file
-	//and in analyze(), adds numbers to file in numpy array and saves after each addition
+        analysisRunName = "CMS_13TeV_MultiLEP_36invfb_test";
+        vector<const char*> variables = {"met","mT","mT2"};
+        plots = new Perf_Plot(analysisRunName, &variables);
 
       }
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+	HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
         double met = event->met();
@@ -138,7 +142,8 @@ namespace Gambit {
 	int nSignalMuons = signalMuons.size();
 	int nSignalTaus = signalTaus.size(); 
 	int nSignalLightLeptons = signalLightLeptons.size();
-        //Preselection
+        
+	//Preselection
         bool preselection=false; 
  
 	//Bjet veto
@@ -150,29 +155,34 @@ namespace Gambit {
 	//Low-mass veto
 	bool low_mass_veto=true;
 	bool conversion_veto=true;
+	
 	vector<vector<HEPUtils::Particle*>> OSSFpair_cont = getOSSFpair(signalLeptons);
-	if (OSSFpair_cont.size()!=0) {
+	if (OSSFpair_cont.size()>0) {
 	  for (size_t iPa=0;iPa<OSSFpair_cont.size();iPa++) {
 	    if (OSSFpair_cont.at(iPa).at(0)->mass()+OSSFpair_cont.at(iPa).at(1)->mass()<12)low_mass_veto=false;
-	    if (nSignalLeptons==3 && OSSFpair_cont.at(iPa).at(0)->abspid()!=15 && abs(signalLeptons.at(0)->mass()+signalLeptons.at(1)->mass()+signalLeptons.at(2)->mass()-91.2)<15)conversion_veto=false;
-	 }	
-	  if (nSignalLeptons==2 && abs(signalLeptons.at(0)->mass()+signalLeptons.at(1)->mass()+signalLeptons.at(2)->mass()-91.2)<15)conversion_veto=false;
+	    if (nSignalLeptons==3) {
+	      if (OSSFpair_cont.at(iPa).at(0)->abspid()!=15 && abs(signalLeptons.at(0)->mass()+signalLeptons.at(1)->mass()+signalLeptons.at(2)->mass()-91.2)<15)conversion_veto=false;
+	    }	
+	    if (abs(OSSFpair_cont.at(iPa).at(0)->mass()+OSSFpair_cont.at(iPa).at(1)->mass()-91.2)<15)conversion_veto=false;
+	  }
 	}
-
-        if (bjet_veto && low_mass_veto)preselection=true;
+        
+	if (bjet_veto && low_mass_veto)preselection=true;
 
         //Signal regions
 
 	//2 same-sign leptons
 	bool two_ss_leptons=false;	
-	if (preselection && nSignalLeptons==2 && nSignalTaus==0 && signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()>0 && met>60 && conversion_veto) {
-	  if (signalLeptons.at(0)->abspid()==11 && signalLeptons.at(0)->pT()>25) {
-	    if (signalLeptons.at(1)->abspid()==11 && signalLeptons.at(1)->pT()>15)two_ss_leptons=true;
-	    if (signalLeptons.at(1)->abspid()==13 && signalLeptons.at(1)->pT()>10)two_ss_leptons=true;
-  	  }  	
-          if (signalLeptons.at(0)->abspid()==13 && signalLeptons.at(0)->pT()>20) {
-            if (signalLeptons.at(1)->abspid()==11 && signalLeptons.at(1)->pT()>15)two_ss_leptons=true;
-            if (signalLeptons.at(1)->abspid()==13 && signalLeptons.at(1)->pT()>10)two_ss_leptons=true; 
+	if (preselection && nSignalLeptons==2 && nSignalTaus==0) {
+	  if (signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()>0 && met>60 && conversion_veto) {
+	    if (signalLeptons.at(0)->abspid()==11 && signalLeptons.at(0)->pT()>25) {
+	      if (signalLeptons.at(1)->abspid()==11 && signalLeptons.at(1)->pT()>15)two_ss_leptons=true;
+	      if (signalLeptons.at(1)->abspid()==13 && signalLeptons.at(1)->pT()>10)two_ss_leptons=true;
+  	    }  	
+            if (signalLeptons.at(0)->abspid()==13 && signalLeptons.at(0)->pT()>20) {
+              if (signalLeptons.at(1)->abspid()==11 && signalLeptons.at(1)->pT()>15)two_ss_leptons=true;
+              if (signalLeptons.at(1)->abspid()==13 && signalLeptons.at(1)->pT()>10)two_ss_leptons=true; 
+	    }
 	  }
 	}
 
@@ -181,11 +191,15 @@ namespace Gambit {
           
 	  if (nSignalTaus==2) {
             //2 taus + 1 electron
-            if (nSignalElectrons==1 && signalElectrons.at(0)->pT()>30.)three_more_leptons=true;
+            if (nSignalElectrons==1) {
+	      if (signalElectrons.at(0)->pT()>30.)three_more_leptons=true;
+	    }
 	    //2 taus + 1 muon
-            if (nSignalMuons==1 && signalMuons.at(0)->pT()>25.)three_more_leptons=true;
+            if (nSignalMuons==1) { 
+	      if (signalMuons.at(0)->pT()>25.)three_more_leptons=true;
+	    }
 	    //2 taus + electron(s)/muon(s)
-	    else {
+	    if (nSignalTaus<2) {
               if (signalLightLeptons.at(0)->abspid()==11 && signalLightLeptons.at(0)->pT()>30) {
                 if (signalLightLeptons.at(1)->abspid()==11 && signalLightLeptons.at(1)->pT()>15)three_more_leptons=true;
                 if (signalLightLeptons.at(1)->abspid()==13 && signalLightLeptons.at(1)->pT()>10)three_more_leptons=true;
@@ -219,7 +233,7 @@ namespace Gambit {
 	  }
 	
 	}
-	
+
 	double pT_ll=0;
 	double mT=0;
 	double mT2=0;
@@ -276,6 +290,11 @@ namespace Gambit {
 	  //>3 leptons
 	  if (nSignalLeptons>3 && met>200)_numSR8++;
 	}
+
+        if (preselection) {
+          vector<double> variables = {met, mT, mT2};
+          plots->fill(&variables);
+        }
 
         cutFlowVector_str1[0] = "All events";
         cutFlowVector_str1[1] = "2 light leptons";
@@ -403,16 +422,16 @@ namespace Gambit {
 
           cutFlowVector4[j]++;
         }
-
       }
 
 
       void add(BaseAnalysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        
+	HEPUtilsAnalysis::add(other);
 
-        Analysis_CMS_MultiLEP_13Tev_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_MultiLEP_13Tev_36invfb*>(other);
+        Analysis_CMS_13TeV_MultiLEP_36invfb* specificOther
+                = dynamic_cast<Analysis_CMS_13TeV_MultiLEP_36invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
@@ -448,20 +467,40 @@ namespace Gambit {
 
       void collect_results() {
 
-	/*cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cout << "CUT FLOW: CMS 1 lepton, 2 bjets paper "<<endl;
-        cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-
-        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-        for (size_t j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+        string path = "ColliderBit/results/cutflow_";
+        path.append(analysisRunName);
+        path.append(".txt");
+        cutflowFile.open(path.c_str());
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile << "CUT FLOW: CMS Multi-lepton paper "<<endl;
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
+        for (size_t j=0; j<NCUTS1; j++) {
+          cutflowFile << right << setw(60) << cutFlowVector_str1[j].c_str() << setw(20) << cutFlowVector1[j] << setw(20) << 100.*cutFlowVector1[j]/cutFlowVector1[0] << endl;
         }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;*/
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
+        for (size_t j=0; j<NCUTS2; j++) {
+          cutflowFile << right << setw(60) << cutFlowVector_str2[j].c_str() << setw(20) << cutFlowVector2[j] << setw(20) << 100.*cutFlowVector2[j]/cutFlowVector2[0] << endl;
+        }
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
+        for (size_t j=0; j<NCUTS3; j++) {
+          cutflowFile << right << setw(60) << cutFlowVector_str3[j].c_str() << setw(20) << cutFlowVector3[j] << setw(20) << 100.*cutFlowVector3[j]/cutFlowVector1[0] << endl;
+        }
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
+        for (size_t j=0; j<NCUTS4; j++) {
+          cutflowFile << right << setw(60) << cutFlowVector_str4[j].c_str() << setw(20) << cutFlowVector4[j] << setw(20) << 100.*cutFlowVector4[j]/cutFlowVector4[0] << endl;
+        }
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile.close();
 
+        plots->createFile();
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SR1;
-        results_SR1.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR1.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR1.sr_label = "SR1";
         results_SR1.n_observed = 13.;
         results_SR1.n_background = 12.; 
@@ -471,7 +510,7 @@ namespace Gambit {
 	add_result(results_SR1);
 
 	SignalRegionData results_SR2;
-        results_SR2.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR2.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR2.sr_label = "SR1";
         results_SR2.n_observed = 18.;
         results_SR2.n_background = 18.;
@@ -481,7 +520,7 @@ namespace Gambit {
         add_result(results_SR2);
 
         SignalRegionData results_SR3;
-        results_SR3.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR3.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR3.sr_label = "SR3";
         results_SR3.n_observed = 19.;
         results_SR3.n_background = 19.;
@@ -491,7 +530,7 @@ namespace Gambit {
         add_result(results_SR3);
 
         SignalRegionData results_SR4;
-        results_SR4.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR4.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR4.sr_label = "SR4";
         results_SR4.n_observed = 128.;
         results_SR4.n_background = 142.;
@@ -501,7 +540,7 @@ namespace Gambit {
         add_result(results_SR4);
 
         SignalRegionData results_SR5;
-        results_SR5.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR5.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR5.sr_label = "SR5";
         results_SR5.n_observed = 18.;
         results_SR5.n_background = 22.;
@@ -511,7 +550,7 @@ namespace Gambit {
         add_result(results_SR5);
 
         SignalRegionData results_SR6;
-        results_SR6.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR6.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR6.sr_label = "SR6";
         results_SR6.n_observed = 2;
         results_SR6.n_background = 1.2;
@@ -521,7 +560,7 @@ namespace Gambit {
         add_result(results_SR6);
 
         SignalRegionData results_SR7;
-        results_SR7.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR7.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR7.sr_label = "SR7";
         results_SR7.n_observed = 82.;
         results_SR7.n_background = 109.;
@@ -531,7 +570,7 @@ namespace Gambit {
         add_result(results_SR7);
 
         SignalRegionData results_SR8;
-        results_SR8.analysis_name = "Analysis_CMS_MultiLEP_13Tev_36invfb";
+        results_SR8.analysis_name = "Analysis_CMS_13TeV_MultiLEP_36invfb";
         results_SR8.sr_label = "SR8";
         results_SR8.n_observed = 166.;
         results_SR8.n_background = 197.;
@@ -602,7 +641,7 @@ namespace Gambit {
 
 
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(CMS_MultiLEP_13Tev_36invfb)
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_MultiLEP_36invfb)
 
 
   }

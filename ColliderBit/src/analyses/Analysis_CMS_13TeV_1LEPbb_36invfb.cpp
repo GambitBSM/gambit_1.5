@@ -12,13 +12,14 @@
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
 using namespace std;
 
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_1LEPbb_13TeV_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_1LEPbb_36invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -27,10 +28,13 @@ namespace Gambit {
       vector<string> cutFlowVector_str;
       size_t NCUTS;
 
+      Perf_Plot* plots;
+      ofstream cutflowFile;
+      string analysisRunName;
 
     public:
 
-      Analysis_CMS_1LEPbb_13TeV_36invfb() {
+      Analysis_CMS_13TeV_1LEPbb_36invfb() {
 
         _numSRA=0;
         _numSRB=0;
@@ -43,11 +47,15 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
 
+        analysisRunName = "CMS_13TeV_1LEPbb_36invfb_test";
+        vector<const char*> variables = {"met","mCT","mbb"};
+        plots = new Perf_Plot(analysisRunName, &variables);
+	
       }
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+	HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
         double met = event->met();
@@ -78,20 +86,17 @@ namespace Gambit {
 	// Electrons
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
 	  if (baselineElectrons.at(iEl)->pT() > 30. && fabs(baselineElectrons.at(iEl)->eta()) < 1.44) {
-	    //Did not include invisibles
-	    //
-	    //
-	    double pTsum=0;
-	    for (HEPUtils::Particle* vis_part : event->visible_particles()) {
-	      if (baselineElectrons.at(iEl)->mom().deltaR_eta(vis_part->mom())<0.3)pTsum+=vis_part->pT();
-	    }
-	    for (HEPUtils::Jet* jet : event->jets()) {
-	      if (baselineElectrons.at(iEl)->mom().deltaR_eta(jet->mom())<0.3)pTsum+=jet->pT();
-	    }
-	    if (pTsum<5) {
+//	    double pTsum=0;
+//	    for (HEPUtils::Particle* vis_part : event->visible_particles()) {
+//	      if (baselineElectrons.at(iEl)->mom().deltaR_eta(vis_part->mom())<0.3)pTsum+=vis_part->pT();
+//	    }
+//	    for (HEPUtils::Jet* jet : event->jets()) {
+//	      if (baselineElectrons.at(iEl)->mom().deltaR_eta(jet->mom())<0.3)pTsum+=jet->pT();
+//	    }
+//	    if (pTsum<5) {
 	      signalElectrons.push_back(baselineElectrons.at(iEl));
 	      signalLeptons.push_back(baselineElectrons.at(iEl));
-	    }
+//	    }
 	  }
 	} 
         //ATLAS::applyMediumIDElectronSelection(signalElectrons);
@@ -99,17 +104,17 @@ namespace Gambit {
         //Muons
         for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
           if (baselineMuons.at(iMu)->pT() > 25. && fabs(baselineMuons.at(iMu)->eta()) < 2.1) {
-            double pTsum=0;
-            for (HEPUtils::Particle* vis_part : event->visible_particles()) {
-              if (baselineMuons.at(iMu)->mom().deltaR_eta(vis_part->mom())<0.3)pTsum+=vis_part->pT();
-            }
-            for (HEPUtils::Jet* jet : event->jets()) {
-              if (baselineMuons.at(iMu)->mom().deltaR_eta(jet->mom())<0.3)pTsum+=jet->pT();          
-            }
-            if (pTsum<5) {
+//           double pTsum=0;
+//           for (HEPUtils::Particle* vis_part : event->visible_particles()) {
+//             if (baselineMuons.at(iMu)->mom().deltaR_eta(vis_part->mom())<0.3)pTsum+=vis_part->pT();
+//           }
+//         for (HEPUtils::Jet* jet : event->jets()) {
+//              if (baselineMuons.at(iMu)->mom().deltaR_eta(jet->mom())<0.3)pTsum+=jet->pT();          
+//            }
+//            if (pTsum<5) {
 	      signalMuons.push_back(baselineMuons.at(iMu));
 	      signalLeptons.push_back(baselineMuons.at(iMu));
-	    }
+//	    }
           }
         } 
         //ATLAS::applyLooseIDMuonSelection(signalMuons);
@@ -129,13 +134,15 @@ namespace Gambit {
         }
         int nSignalBJets = signalBJets.size();
 
-        //Preselection
-        bool preselection=false; 
+	//Preselection
+	bool preselection=false;	
  
         //2nd lepton veto
         bool lepton2_veto=true;
-	for (size_t iLe=0;iLe<baselineLeptons.size();iLe++) {
-	  if (baselineLeptons.at(iLe)->pT()>5 && baselineLeptons.at(iLe)!=signalLeptons.at(0))lepton2_veto=false;
+	if (nSignalLeptons>0) {
+	  for (size_t iLe=0;iLe<baselineLeptons.size();iLe++) {
+	    if (baselineLeptons.at(iLe)->pT()>5 && baselineLeptons.at(iLe)!=signalLeptons.at(0))lepton2_veto=false;
+	  }
 	} 
 
 	//Tau veto
@@ -146,22 +153,38 @@ namespace Gambit {
 
         if (nSignalLeptons>=1 && met>=50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2)preselection=true;
 
+	//cout<<"nSignalLeptons: "<<nSignalLeptons<<endl;
+	//cout<<"tau_veto: "<<tau_veto<<endl;
+	//cout<<"lepton2_veto: "<<lepton2_veto<<endl;
+	//cout<<"nSignalBJets: "<<nSignalBJets<<endl;	
+
         //Signal regions
-        double mCT=sqrt(2*signalBJets.at(0)->pT()*signalBJets.at(1)->pT()*(1+cos(signalBJets.at(0)->phi()-signalBJets.at(1)->phi())));
-        double mbb=signalBJets.at(0)->mass() + signalBJets.at(1)->mass();
+        double mCT=0;
+        double mbb=0;
 	double mT=0;
-	if (signalElectrons.size()) {
+	
+	if (nSignalBJets>=2) {
+	  mCT=sqrt(2*signalBJets.at(0)->pT()*signalBJets.at(1)->pT()*(1+cos(signalBJets.at(0)->phi()-signalBJets.at(1)->phi())));
+          mbb=signalBJets.at(0)->mass() + signalBJets.at(1)->mass();
+	}
+	if (signalElectrons.size()>0) {
 	  mT = sqrt(2*signalElectrons.at(0)->pT()*met*(1-cos(signalElectrons.at(0)->phi()-event->missingmom().phi())));
 	}
-        if (signalMuons.size()) {
+        if (signalMuons.size()>0) {
           mT = sqrt(2*signalMuons.at(0)->pT()*met*(1-cos(signalMuons.at(0)->phi()-event->missingmom().phi()))); 
         }
+
         if (preselection && mbb>90 && mbb<150 && mCT>170. && met>125. && mT>150.) {
           //SRA
           if (met>125 && met<200)_numSRA++;
           //SRB
           if (met>200)_numSRB++;   
-        }                      
+	}
+
+        if (preselection) {
+          vector<double> variables = {met, mCT, mbb};
+          plots->fill(&variables);
+        }             
 
         cutFlowVector_str[0] = "All events";
         cutFlowVector_str[1] = ">= 1 signal lepton; > 50 GeV";
@@ -198,6 +221,7 @@ namespace Gambit {
 
             cutFlowVector[j]++;
 	}
+
       }
 
 
@@ -205,8 +229,8 @@ namespace Gambit {
         // The base class add function handles the signal region vector and total # events.
         HEPUtilsAnalysis::add(other);
 
-        Analysis_CMS_1LEPbb_13TeV_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_1LEPbb_13TeV_36invfb*>(other);
+        Analysis_CMS_13TeV_1LEPbb_36invfb* specificOther
+                = dynamic_cast<Analysis_CMS_13TeV_1LEPbb_36invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -221,20 +245,25 @@ namespace Gambit {
 
       void collect_results() {
 
-	/*cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cout << "CUT FLOW: CMS 1 lepton, 2 bjets paper "<<endl;
-        cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+        string path = "ColliderBit/results/cutflow_";
+        path.append(analysisRunName);
+        path.append(".txt");
+        cutflowFile.open(path.c_str()); 
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile << "CUT FLOW: CMS 1 lepton, 2 bjets paper "<<endl;
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
-        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
         for (size_t j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
         }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;*/
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile.close();
 
+        plots->createFile();
 
-        //Now fill a results object with the results for each SR
         SignalRegionData results_SRA;
-        results_SRA.analysis_name = "Analysis_CMS_1LEPbb_13TeV_36invfb";
+        results_SRA.analysis_name = "Analysis_CMS_13TeV_1LEPbb_36invfb";
         results_SRA.sr_label = "SRA";
         results_SRA.n_observed = 11.;
         results_SRA.n_background = 7.5; 
@@ -244,7 +273,7 @@ namespace Gambit {
         add_result(results_SRA);
 
         SignalRegionData results_SRB;
-        results_SRB.analysis_name = "Analysis_CMS_1LEPbb_13TeV_36invfb";
+        results_SRB.analysis_name = "Analysis_CMS_13TeV_1LEPbb_36invfb";
         results_SRB.sr_label = "SRB";
         results_SRB.n_observed = 7.;
         results_SRB.n_background = 8.7; 
@@ -259,7 +288,7 @@ namespace Gambit {
 
 
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(CMS_1LEPbb_13TeV_36invfb)
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_1LEPbb_36invfb)
 
 
   }

@@ -8,10 +8,11 @@
 #include <cmath>
 #include <memory>
 #include <iomanip>
+#include <fstream>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
-//#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
+#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
 using namespace std;
 
@@ -27,7 +28,9 @@ namespace Gambit {
       vector<string> cutFlowVector_str;
       size_t NCUTS;
 
-  //    Perf_Plot* plots;	
+      Perf_Plot* plots;	
+      ofstream cutflowFile;
+      string analysisRunName;
 
     public:
 
@@ -44,18 +47,15 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
 
-	cout<<"HELLO MATTHIAS!!"<<endl;
-	
-//	vector<const char*> variables = {"met","mCT","mbb"};
-//	plots = new Perf_Plot("ATLAS_1LEPbb_20invfb.hdf5",&variables);
+	analysisRunName = "ATLAS_1LEPbb_20invfb_test";
+	vector<const char*> variables = {"met","mCT","mbb"};
+	plots = new Perf_Plot(analysisRunName, &variables);
 
       }
 
 
       void analyze(const HEPUtils::Event* event) {
         
-	cout<< "HI ROSE!!"<<endl;
-
 	HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
@@ -211,10 +211,10 @@ namespace Gambit {
           }
         }                      
 
-//	if (preselection) {
-//	  vector<double> variables = {met, mCT, mbb};
-//	  plots->fill(&variables);
-//	}
+	if (preselection) {
+	  vector<double> variables = {met, mCT, mbb};
+	  plots->fill(&variables);
+	}
 
         cutFlowVector_str[0] = "No cuts ";
         cutFlowVector_str[1] = "1 signal lepton; no additional baseline leptons";
@@ -278,16 +278,22 @@ namespace Gambit {
 
       void collect_results() {
 
-	cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cout << "CUT FLOW: ATLAS 1 lepton, 2 bjets paper "<<endl;
-        cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+	string path = "ColliderBit/results/cutflow_";
+	path.append(analysisRunName);
+	path.append(".txt");
+	cutflowFile.open(path.c_str());	
+	cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile << "CUT FLOW: ATLAS 1 lepton, 2 bjets paper "<<endl;
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
-        cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
         for (size_t j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << endl;
+          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
         }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+	cutflowFile.close();
 
+	plots->createFile();
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SRA;
@@ -310,11 +316,7 @@ namespace Gambit {
         results_SRB.n_signal = _numSRB;
         add_result(results_SRB);
 
-//	plots->createFile();
-
       }
-
-      //bool compareJetPt (const HEPUtils::Jet* i,const HEPUtils::Jet* j) { return (i->pT()>j->pT()); }
 
       struct jetComparison {
   	bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
