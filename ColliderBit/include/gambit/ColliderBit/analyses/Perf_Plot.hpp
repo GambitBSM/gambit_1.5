@@ -9,7 +9,6 @@
 #include <vector>
 #include <string>
 #include <hdf5.h>
-//#include <H5Exception.h>
 
 using namespace std;
 
@@ -20,7 +19,7 @@ namespace Gambit {
     class Perf_Plot {
     private:
 
-      const char* _outfilename;
+      string _outfilename;
       size_t _numvariables;   
       vector<const char*> _variables;
       vector<vector<double>> _values;
@@ -33,26 +32,29 @@ namespace Gambit {
       }
 
 
-      Perf_Plot(const char* outFileName, vector<const char*>* varNames) {
+      Perf_Plot(string outFileName, vector<const char*>* varNames) {
 
-	_outfilename = outFileName;
+	string path = "ColliderBit/results/";
+	path.append(outFileName);
+	path.append(".hdf5");
+	_outfilename = path;
+
 	_variables = *varNames;
 	_numvariables = _variables.size(); 
       }
 
       void fill(vector<double>* varValues) {
 	_values.push_back(*varValues);
-	cout<<"\n \n _values SIZE: "<<_values.size()<<endl<<"\n \n";
       }
 
       void createFile() {
 	
 	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-        file = H5Fcreate(_outfilename, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
-
-	int nvalues = _values.size();
-	cout <<"\n \n \n \n \n nvalues: "<<nvalues<<endl;	 
+	
+	size_t nvalues = _values.size();
+		
+	if (nvalues > 0) {
+        file = H5Fcreate(_outfilename.c_str(), H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
 
         for (size_t iVal=0;iVal<_numvariables;iVal++) { 
 
@@ -67,7 +69,9 @@ namespace Gambit {
           dataset = H5Dcreate2(file, _variables.at(iVal), H5T_NATIVE_DOUBLE, dataspace, H5S_ALL, H5S_ALL, H5P_DEFAULT); 
           
 	  double data[nvalues];
-          for (size_t iVal2=0;iVal2<nvalues;iVal2++)data[iVal2]=_values.at(iVal2).at(iVal);
+          for (size_t iVal2=0;iVal2<nvalues;iVal2++) {
+	    data[iVal2]=_values.at(iVal2).at(iVal);
+	  }
 
           status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
@@ -77,6 +81,8 @@ namespace Gambit {
 	}
 
         H5Fclose(file);	
+	
+	}
 
       }
 
