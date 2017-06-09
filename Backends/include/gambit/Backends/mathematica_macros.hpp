@@ -28,9 +28,18 @@
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/tuple/size.hpp>
 
-/// If not defined already, define Mathematica
+/// If not defined already, define the backend languages
+#ifndef CC
+  #define CC 1
+#endif
+#ifndef CXX
+  #define CXX 2
+#endif
+#ifndef FORTRAN
+  #define FORTRAN 3
+#endif
 #ifndef MATHEMATICA
-#define MATHEMATICA 4
+  #define MATHEMATICA 4
 #endif
 
 /// Macro to help identifying the language of the backend

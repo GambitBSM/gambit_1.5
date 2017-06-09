@@ -12,6 +12,10 @@
 ///  \date 2013 Aug
 ///  \date 2014 Mar, Aug, Dec
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Jun
+///
 ///  *********************************************
 
 #include "gambit/Core/core.hpp"
@@ -323,7 +327,8 @@ namespace Gambit
               const str t = (*kt)->type();
               const int s = (*kt)->status();
               back_table << ("  " + f) << c << t;
-              if (s == -2) back_table.red() << "Function absent";//ss = "Function absent";
+              if(s == -5) back_table.red() << "Mathematica absent"; 
+              else if (s == -2) back_table.red() << "Function absent";//ss = "Function absent";
               else if (s == -1) back_table.red() << "Backend absent";//ss = "Backend absent";
               else if (s >= 0)  back_table.green() << "Available";//ss = "Available";
               else back_table << "";

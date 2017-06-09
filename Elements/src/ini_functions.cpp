@@ -224,10 +224,12 @@ namespace Gambit
       const str path = Backends::backendInfo().corrected_path(be,ver);
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = false;
+      Backends::backendInfo().needsMathematica[be+ver] = true;
 
      #ifdef HAVE_MATHEMATICA
         int WSerrno;
         std::ostringstream err;
+        Backends::backendInfo().Mathematica_OK[be+ver] = true;
 
         // If the file does not exists do not wait for Mathematica to figure it out
         std::ifstream f(path.c_str());
@@ -301,10 +303,12 @@ namespace Gambit
        //WSDeinitialize(WSenv);
           
       #else
+        pHandle = NULL;
         std::ostringstream err;
         err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. Please install/buy Mathematica and/or WSTP before using this backend." << endl;
         backend_warning().raise(LOCAL_INFO,err.str());
         Backends::backendInfo().works[be+ver] = false;
+        Backends::backendInfo().Mathematica_OK[be+ver] = false;
       #endif
     }
     catch (std::exception& e) { ini_catch(e); }
@@ -319,6 +323,8 @@ namespace Gambit
       const str path = Backends::backendInfo().corrected_path(be,ver);
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = with_BOSS;
+      Backends::backendInfo().needsMathematica[be+ver] = false;
+
       if (with_BOSS) Backends::backendInfo().classes_OK[be+ver] = true;
       pHandle = dlopen(path.c_str(), RTLD_LAZY);
       if (pHandle)
@@ -430,59 +436,76 @@ namespace Gambit
   /// Disable a mathematica backend functor if the function is not found in the package
   int set_math_backend_functor_status(functor& be_functor, str symbol_name, void *&pHandle)
   {
-    bool present = Backends::backendInfo().works.at(be_functor.origin() + be_functor.version());
-    try
+   try
     {
-      if (not present)
-      {
-        be_functor.setStatus(-1);
-      }
-      else
-      {
-        // Replace \[ for \\[ so that names can have non-ASCII characters
-        boost::replace_all(symbol_name, "\\[", "\\\\["); 
-        std::ostringstream err;
-        if(!WSPutFunction((WSLINK)pHandle, "NameQ", 1) or 
-           !WSPutFunction((WSLINK)pHandle, "ToString", 1) or
-           !WSPutFunction((WSLINK)pHandle, "ToExpression", 1) or
-           !WSPutString((WSLINK)pHandle, symbol_name.c_str()))
+      #ifdef HAVE_MATHEMATICA
+        bool present = Backends::backendInfo().works.at(be_functor.origin() + be_functor.version());
+        if (not present)
         {
-          err << "Error sending packet through WSTP." << std::endl;
-          backend_warning().raise(LOCAL_INFO, err.str());
-          be_functor.setStatus(-2);
-          return 1;
+          be_functor.setStatus(-1);
         }
-
-        int pkt;
-        while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)
+        else if(symbol_name != "no_symbol")
         {
-          WSNewPacket((WSLINK)pHandle);
-          if (WSError((WSLINK)pHandle))
-          {
-            err << "Error reading packet from WSTP" << std::endl;
+          std::ostringstream err;
+          // Replace \[ for \\[ so that names can have non-ASCII characters
+          boost::replace_all(symbol_name, "\\[", "\\\\["); 
+          if(!WSPutFunction((WSLINK)pHandle, "NameQ", 1) or 
+             !WSPutFunction((WSLINK)pHandle, "StringDrop",2) or
+             !WSPutFunction((WSLINK)pHandle, "StringDrop",2) or
+             !WSPutFunction((WSLINK)pHandle, "ToString", 1) or
+             !WSPutFunction((WSLINK)pHandle, "ToExpression", 3) or
+             !WSPutString((WSLINK)pHandle, symbol_name.c_str()) or
+             !WSPutSymbol((WSLINK)pHandle, "StandardForm") or
+             !WSPutSymbol((WSLINK)pHandle, "Hold") or
+             !WSPutInteger((WSLINK)pHandle, 5) or
+             !WSPutInteger((WSLINK)pHandle, -1))
+         {
+            err << "Error sending packet through WSTP." << std::endl;
             backend_warning().raise(LOCAL_INFO, err.str());
             be_functor.setStatus(-2);
             return 1;
           }
-        }
 
-        const char *symbol_exists;
-        if(!WSGetString((WSLINK)pHandle, &symbol_exists))
-        {
-          err << "Error retrieving packet from WSTP." << std::endl;
-          backend_warning().raise(LOCAL_INFO, err.str());
-          be_functor.setStatus(-2);
-          return 1;
-        }
+          int pkt;
+          while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)
+          {
+            WSNewPacket((WSLINK)pHandle);
+            if (WSError((WSLINK)pHandle))
+            {
+              err << "Error reading packet from WSTP" << std::endl;
+              backend_warning().raise(LOCAL_INFO, err.str());
+              be_functor.setStatus(-2);
+              return 1;
+            }
+          }
 
-        if(str(symbol_exists) == "False")
-        {
-          err << "Mathematica function " << symbol_name << " not found."  << std::endl
-              << "The backend function from this symbol will be disabled (i.e. get status = -2)" << std::endl;
-          backend_warning().raise(LOCAL_INFO, err.str());
-          be_functor.setStatus(-2);
+          const char *symbol_exists;
+          if(!WSGetString((WSLINK)pHandle, &symbol_exists))
+          {
+            err << "Error retrieving packet from WSTP." << std::endl;
+            backend_warning().raise(LOCAL_INFO, err.str());
+            be_functor.setStatus(-2);
+            return 1;
+          }
+
+          if(str(symbol_exists) == "False")
+          {
+            err << "Mathematica function " << symbol_name << " not found."  << std::endl
+                << "The backend function from this symbol will be disabled (i.e. get status = -2)" << std::endl;
+            backend_warning().raise(LOCAL_INFO, err.str());
+            be_functor.setStatus(-2);
+          }
         }
-      }
+        
+      #else
+        pHandle = NULL;
+        std::ostringstream err;
+        err << "Mathematica is not found or it is disabled. " << std::endl
+            << "The backend function for the symbol " << symbol_name << " will be disabled  (i.e. get status = -5)" << endl;
+        backend_warning().raise(LOCAL_INFO, err.str());
+        be_functor.setStatus(-5);
+
+      #endif
     }
     catch (std::exception& e) { ini_catch(e); }
     return 0;

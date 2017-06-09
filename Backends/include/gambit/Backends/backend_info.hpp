@@ -14,6 +14,10 @@
 ///  \date 2014 Aug
 ///  \date 2015 May
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Jun
+///
 ///  *********************************************
 
 #ifndef __backend_info_hpp__
@@ -64,6 +68,12 @@ namespace Gambit
 
         /// Key: backend name + version
         std::map<str,bool> works;
+
+        /// Key: backend name + version
+        std::map<str,bool> needsMathematica;
+
+        /// Key: backend name + version
+        std::map<str,bool> Mathematica_OK;
 
         /// Key: backend name + version
         std::map<str,bool> classloader;

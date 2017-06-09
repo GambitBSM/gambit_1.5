@@ -12,6 +12,10 @@
 ///  \date 2013 Aug
 ///  \date 2014 Mar, Aug, Dec
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Jun
+///
 ///  *********************************************
 
 #include <map>
@@ -561,6 +565,7 @@ namespace Gambit
       const str OK = "OK";
       const str bad = "absent/broken";
       const str badclass = "bad types";
+      const str missingMath = "Mathematica absent";
       str status;
       if (backendData->works.at(be+version))
       {
@@ -569,6 +574,10 @@ namespace Gambit
           status = (backendData->classes_OK.at(be+version) ? OK : badclass);
         }
         else { status = OK; }
+      }
+      else if (backendData->needsMathematica.at(be+version))
+      {
+        status = (backendData->Mathematica_OK.at(be+version) ? bad : missingMath);
       }
       else { status = bad; }
       if (status == bad or status == badclass) no_failures = false;
