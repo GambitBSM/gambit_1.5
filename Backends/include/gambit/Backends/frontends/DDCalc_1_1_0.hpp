@@ -85,7 +85,7 @@ BE_FUNCTION(LUX_2015_Init,       int, (const bool&), "C_DDCalc_lux_2015_init",  
 BE_FUNCTION(PICO_2L_Init,        int, (const bool&), "C_DDCalc_pico_2l_init",        "PICO_2L_Init")
 BE_FUNCTION(PICO_60_F_Init,      int, (const bool&), "C_DDCalc_pico_60_f_init",      "PICO_60_F_Init")
 BE_FUNCTION(PICO_60_I_Init,      int, (const bool&), "C_DDCalc_pico_60_i_init",      "PICO_60_I_Init")
-BE_FUNCTION(PICO_60_2017_Init,      int, (const bool&), "C_DDCalc_pico_60_2017_init",      "PICO_60_2017_Init")
+BE_FUNCTION(PICO_60_2017_Init,   int, (const bool&), "C_DDCalc_pico_60_2017_init",   "PICO_60_2017_Init")
 BE_FUNCTION(SuperCDMS_2014_Init, int, (const bool&), "C_DDCalc_supercdms_2014_init", "SuperCDMS_2014_Init")
 BE_FUNCTION(SIMPLE_2014_Init,    int, (const bool&), "C_DDCalc_simple_2014_init",    "SIMPLE_2014_Init")
 //BE_FUNCTION(DARWIN_Ar_Init,      int, (const bool&), "C_DDCalc_darwin_ar_init", "DARWIN_Ar_Init")
