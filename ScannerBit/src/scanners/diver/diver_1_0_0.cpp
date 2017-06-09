@@ -18,7 +18,7 @@
 #include <limits>
 #include <fstream>
 
-#include "gambit/ScannerBit/scanners/diver/diver.hpp"
+#include "gambit/ScannerBit/scanners/diver/diver_1_0_0.hpp"
 #include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Utils/util_functions.hpp"
@@ -33,7 +33,7 @@ scanner_plugin(diver, version(1, 0, 0))
 
   // Access Diver stuff and standard Gambit things
   using namespace Gambit;
-  using namespace Gambit::Diver;
+  using namespace Gambit::Diver_1_0_0;
 
   // Error thrown if the following entries are not present in the inifile
   reqd_inifile_entries("NP");
@@ -176,7 +176,7 @@ scanner_plugin(diver, version(1, 0, 0))
 namespace Gambit
 {
 
-  namespace Diver
+  namespace Diver_1_0_0
   {
 
     //Function to be minimized.  Corresponds to -ln(Likelihood).  Redirects to the target of context pointer.

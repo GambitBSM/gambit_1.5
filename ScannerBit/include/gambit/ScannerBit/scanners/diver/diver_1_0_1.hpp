@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to Diver 1.0.0
+///  ScannerBit interface to Diver 1.0.1
 ///
 ///  Header file
 ///
@@ -12,7 +12,7 @@
 ///
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
-///  \date 2015 June
+///  \date 2017 June
 ///
 ///  *********************************************
 
@@ -22,17 +22,17 @@
 #include "gambit/ScannerBit/scanner_plugin.hpp"
 
 // C++ prototype of the main run_de function for Diver.
-extern "C" void cdiver(double (*)(double[], const int, int&, bool&, const bool, void*&), int, const double[], const double[], 
-                       const char[], int, int, const int[], bool, const int, const int, int, int, const double[], double, 
-                       double, bool, bool, int, bool, bool, double, int, bool, bool, double(*)(const double[], const int, void*&), 
+extern "C" void cdiver(double (*)(double[], const int, int&, bool&, const bool, void*&), int, const double[], const double[],
+                       const char[], int, int, const int[], bool, const int, const int, int, int, const double[], double,
+                       double, bool, bool, int, bool, bool, double, int, bool, bool, double(*)(const double[], const int, void*&),
                        double, double, int, bool, bool, int, int, double, void*&, int);
 
 namespace Gambit
 {
-   
-  namespace Diver
+
+  namespace Diver_1_0_1
   {
-    
+
     /// Structure for passing likelihood and printer data through Diver to the objective function.
     struct diverScanData
     {
@@ -44,7 +44,7 @@ namespace Gambit
     double objective(double params[], const int param_dim, int &fcall, bool &quit, const bool validvector, void*& context);
 
   }
-   
+
 }
 
 #endif // #defined __diver_hpp__

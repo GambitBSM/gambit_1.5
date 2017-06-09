@@ -33,7 +33,33 @@ set(name "diver")
 set(ver "1.0.0")
 set(lib "libdiver")
 set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
-set(md5 "61c76e948855f19dfa394c14df8c6af2")
+set(md5 "63c0ce102e89cd564291ea6d61fbec0c")
+set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
+set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
+if(MPI_Fortran_FOUND)
+  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS_PLUS_MPI}")
+else()
+  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS}")
+endif()
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_DIR ${scanner_download}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} MODULE=${FMODULE} FOPT=${diverFFLAGS} SO_LINK_FLAGS=${diverSO_LINK_FLAGS}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "diver")
+set(ver "1.0.1")
+set(lib "libdiver")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "ac0e0f7906aa74124966ea27d6544dbb")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
 if(MPI_Fortran_FOUND)
@@ -55,7 +81,6 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("scanner" ${name} ${ver})
 endif()
-
 
 # MultiNest
 set(name "multinest")
