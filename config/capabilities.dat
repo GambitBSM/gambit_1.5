@@ -1031,6 +1031,27 @@ XENON100_2012_SignalSD: |
 XENON100_2012_LogLikelihood: |
    Calculate the log-likelihood for the XENON100 2012 direct detection analysis.
 
+XENON1T_2017_Calculate: |
+   Perform rate and likelihood calculations for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Events: |
+   The number of observed events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Background: |
+   The number of background events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Signal: |
+   The number of signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_SignalSI: |
+   The number of spin-independent signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_SignalSD: |
+   The number of spin-independent signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_LogLikelihood: |
+   Calculate the log-likelihood for the XENON1T 2017 direct detection analysis.
+
 LUX_2013_Calculate: |
    Perform rate and likelihood calculations for the LUX 2013 direct detection analysis.
 
@@ -1219,6 +1240,27 @@ PICO_60_I_SignalSD: |
 
 PICO_60_I_LogLikelihood: |
    Calculate the log-likelihood for the PICO-60 direct detection analysis (iodine only).
+
+PICO_60_2017_Calculate: |
+   Perform rate and likelihood calculations for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Events: |
+   The number of observed events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Background: |
+   The number of background events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Signal: |
+   The number of signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_SignalSI: |
+   The number of spin-independent signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_SignalSD: |
+   The number of spin-independent signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_LogLikelihood: |
+   Calculate the log-likelihood for the PICO-60 2017 direct detection analysis.
 
 DARWIN_Ar_2015_Calculate: |
    Perform rate and likelihood calculations for the DARWIN Ar 2015 direct detection analysis.
@@ -1526,11 +1568,17 @@ PICO_60_F_Init: |
 PICO_60_I_Init: |
    Initialises a direct detection experiment with the properties of the analysis of PICO-60, including only iodine.
 
+PICO_60_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of PICO-60.
+
 PandaX_2016_Init: |
    Initialises a direct detection experiment with the properties of the 2016 analysis of PandaX.
 
 XENON100_2012_Init: |
    Initialises a direct detection experiment with the properties of the 2012 analysis of Xenon100.
+
+XENON1T_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of Xenon1T.
 
 SuperCDMS_2014_Init: |
    Initialises a direct detection experiment with the properties of the 2014 analysis of SuperCDMS.

@@ -253,12 +253,14 @@ namespace Gambit {
     DD_EX(SuperCDMS_2014)       // Agnese et al., PRL 112, 241302 (2014) [arxiv:1402.7137]
     DD_EX(DARWIN_Ar)
     DD_EX(DARWIN_Xe)
-    DD_EX(LUX_2016)
-    DD_EX(PandaX_2016)
-    DD_EX(LUX_2015)
-    DD_EX(PICO_2L)
-    DD_EX(PICO_60_F)
-    DD_EX(PICO_60_I)
+    DD_EX(LUX_2016)             // D.S. Akerib et al., PRL 118, 021303 (2017) [arxiv:1608.07648]
+    DD_EX(PandaX_2016)          // A. Tan et al., PRL 117, 121303 (2016) [arxiv:1607.07400]
+    DD_EX(LUX_2015)             // D.S. Akerib et al., PRL 116, 161301 (2016) [arXiv:1512.03506]
+    DD_EX(PICO_2L)              // C. Amole et al., PRD 93, 061101 (2016) [arXiv:1601.03729] 
+    DD_EX(PICO_60_F)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
+    DD_EX(PICO_60_I)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
+    DD_EX(PICO_60_2017)         // C. Amole et al., arXiv:1702.07666 
+    DD_EX(Xenon1T_2017)         // E. Aprile et al., [arxiv:1705.06655]
 
     // Just in case, to make sure we don't mess with other things elsewhere.
     #undef DD_EX
