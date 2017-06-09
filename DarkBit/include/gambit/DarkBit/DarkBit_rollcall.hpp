@@ -1027,10 +1027,10 @@ START_MODULE
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
 
-    #define FUNCTION printable_CI
-    START_FUNCTION(double)
-    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
-    #undef FUNCTION
+//    #define FUNCTION printable_CI
+//    START_FUNCTION(double)
+//    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+//    #undef FUNCTION
  
   #undef CAPABILITY
 
@@ -1040,7 +1040,7 @@ START_MODULE
     #define FUNCTION lnL
     START_FUNCTION(double)
     ALLOW_MODEL(SN_dev)
-    DEPENDENCY(SN_stuff, double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -1069,6 +1069,66 @@ START_MODULE
   START_CAPABILITY
 
     #define FUNCTION printable_Ut1
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Ue2
+  START_CAPABILITY
+
+    #define FUNCTION printable_Ue2
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Um2
+  START_CAPABILITY
+
+    #define FUNCTION printable_Um2
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Ut2
+  START_CAPABILITY
+
+    #define FUNCTION printable_Ut2
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Ue3
+  START_CAPABILITY
+
+    #define FUNCTION printable_Ue3
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Um3
+  START_CAPABILITY
+
+    #define FUNCTION printable_Um3
+    START_FUNCTION(double)
+    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY Ut3
+  START_CAPABILITY
+
+    #define FUNCTION printable_Ut3
     START_FUNCTION(double)
     DEPENDENCY(SN_stuff, Eigen::Matrix3d)
     #undef FUNCTION

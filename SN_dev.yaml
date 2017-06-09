@@ -4,11 +4,11 @@ Parameters:
 
   SN_dev:
     M_1:
-      range: [2, 80]
+      range: [0.06, 500]
     M_2:
-      range: [2, 80]
+      range: [0.06, 500]
     M_3:
-      range: [2, 80]
+      range: [0.06, 500]
     ReOm23:
       range: [0, 6.283]
     ImOm23:
@@ -49,16 +49,16 @@ Scanner:
     multinest:
       plugin: MultiNest
       like: LogLike
-      nlive: 400
+      nlive: 500
 
 ObsLikes:
 
-  - capability: SN_stuff
-    purpose: Observable
-    function: printable_CI
-    dependencies:
-      - capability: SN_stuff
-        type: Matrix3d
+##  - capability: SN_stuff
+##    purpose: Observable
+##    function: printable_CI
+##    dependencies:
+##      - capability: SN_stuff
+##        type: Matrix3d
 
   - capability: Ue1
     purpose: Observable
@@ -81,12 +81,54 @@ ObsLikes:
       - capability: SN_stuff
         type: Matrix3d
 
+  - capability: Ue2
+    purpose: Observable
+    function: printable_Ue2
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
+  - capability: Um2
+    purpose: Observable
+    function: printable_Um2
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
+  - capability: Ut2
+    purpose: Observable
+    function: printable_Ut2
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
+  - capability: Ue3
+    purpose: Observable
+    function: printable_Ue3
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
+  - capability: Um3
+    purpose: Observable
+    function: printable_Um3
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
+  - capability: Ut3
+    purpose: Observable
+    function: printable_Ut3
+    dependencies:
+      - capability: SN_stuff
+        type: Matrix3d
+
   - capability: lnLikelihood
     purpose: LogLike
     function: lnL
     dependencies:
       - capability: SN_stuff
-        type: double
+        type: Matrix3d
 
 Rules:
 
@@ -94,9 +136,9 @@ Rules:
     type: Matrix3d
     function: CI_param
 
-  - capability: SN_stuff
-    type: double
-    function: printable_CI
+##  - capability: SN_stuff
+##    type: double
+##    function: printable_CI
 
 KeyValues:
 
