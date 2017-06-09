@@ -106,7 +106,7 @@ set(name "ddcalc")
 set(ver "1.0.0")
 set(lib "libDDCalc")
 set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
-set(md5 "36592d81b3e59be24c66322b360c91eb")
+set(md5 "0c0da22b84721fc1d945f8039a4686c9")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(loc "${GAMBIT_INTERNAL}/DDCalc") #FIXME can be deleted when public
 check_ditch_status(${name} ${ver})
@@ -635,7 +635,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}_error.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GM2CALC_CXX_FLAGS} EIGENFLAGS=-I${EIGEN3_INCLUDE_DIR} alllib
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GM2CALC_CXX_FLAGS} EIGENFLAGS=-I${EIGEN3_INCLUDE_DIR} BOOSTFLAGS=-I${Boost_INCLUDE_DIR} alllib
     INSTALL_COMMAND ""
   )
   BOSS_backend(${name} ${ver})
@@ -663,7 +663,7 @@ if(NOT ditched_${name}_${ver})
           COMMAND patch -p1 < ${patch}_module.dif
           COMMAND patch -p1 < ${patch}_error.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GM2CALC_CXX_FLAGS} EIGENFLAGS=-I${EIGEN3_INCLUDE_DIR} sharedlib
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GM2CALC_CXX_FLAGS} EIGENFLAGS=-I${EIGEN3_INCLUDE_DIR} BOOSTFLAGS=-I${Boost_INCLUDE_DIR} sharedlib
     INSTALL_COMMAND ""
   )
   BOSS_backend(${name} ${ver})
