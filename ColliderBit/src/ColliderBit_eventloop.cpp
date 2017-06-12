@@ -1594,7 +1594,7 @@ namespace Gambit
                 const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
 
                 // Marginalise over systematic uncertainties on mean rates
-                // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
+                // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
                 auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
                   ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
                 const double ll_obs = marginaliser(n_obs_int, n_pred_exact, n_pred_inexact, frac_unc);
