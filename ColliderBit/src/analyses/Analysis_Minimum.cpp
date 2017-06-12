@@ -19,16 +19,16 @@ namespace Gambit {
       // Variables that holds the number of events passing
       // signal region cuts
       double _numSR;
-	
+
     public:
 
       Analysis_Minimum() {
 
         // Set number of events passing cuts to zero upon initialisation
 
-	_numSR=0;
+        _numSR=0;
 
-	// Set the LHC luminosity
+        // Set the LHC luminosity
         set_luminosity(20.3);
 
       }
@@ -41,8 +41,8 @@ namespace Gambit {
         double met = event->met();
 
         // Now define vectors of baseline objects,  including:
-	// - retrieval of electron, muon and jets from the event)
-	// - application of basic pT and eta cuts
+        // - retrieval of electron, muon and jets from the event)
+        // - application of basic pT and eta cuts
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 10. && fabs(electron->eta()) < 2.47) baselineElectrons.push_back(electron);
@@ -56,8 +56,8 @@ namespace Gambit {
           if (jet->pT() > 20. && fabs(jet->eta()) < 4.5) baselineJets.push_back(jet);
         }
 
-	// Could add ATLAS style overlap removal here
-	// See Analysis_ATLAS_0LEP_20invfb for example
+        // Could add ATLAS style overlap removal here
+        // See Analysis_ATLAS_0LEP_20invfb for example
 
         // Could add ATLAS or CMS efficiencies here
         // See Analysis_ATLAS_2LEPEW_20invfb.cpp for an example
@@ -66,33 +66,32 @@ namespace Gambit {
         int nMuons = baselineMuons.size();
         int nJets = baselineJets.size();
 
-	std::cerr << "nElectrons " << nElectrons << " nMuons " << nMuons << " nJets " << nJets << " met " << met << std::endl;
+        std::cerr << "nElectrons " << nElectrons << " nMuons " << nMuons << " nJets " << nJets << " met " << met << std::endl;
 
-	// Increment number of events passing signal region cuts
-	// Dummy signal region: need 2 jets, met > 150 and no leptons
+        // Increment number of events passing signal region cuts
+        // Dummy signal region: need 2 jets, met > 150 and no leptons
 
-	if((nElectrons+nMuons)==0 && nJets==2 && met>150.)_numSR++;
+        if((nElectrons+nMuons)==0 && nJets==2 && met>150.)_numSR++;
 
       }
-      
-      
+
+
       void add(BaseAnalysis* other) {
         // The base class add function handles the signal region number and total # events combination across threads
         HEPUtilsAnalysis::add(other);
-	
-        Analysis_Minimum* specificOther
-                = dynamic_cast<Analysis_Minimum*>(other);
+
+        Analysis_Minimum* specificOther = dynamic_cast<Analysis_Minimum*>(other);
 
         // Here we will add the subclass member variables:
         _numSR += specificOther->_numSR;
       }
 
-      
+
       void collect_results() {
-	
+
         // Now fill a results object with the result for our signal region
         // We have made up a number of observed events
-	// We have also made up a number of predicted background events (with a made up uncertainty)
+        // We have also made up a number of predicted background events (with a made up uncertainty)
         SignalRegionData results_SR;
         results_SR.analysis_name = "Analysis_Minimum";
         results_SR.sr_label = "SR"; // label must be unique for each signal region
@@ -102,16 +101,15 @@ namespace Gambit {
         results_SR.signal_sys = 0.; // set signal uncertainty
         results_SR.n_signal = _numSR; // set this to number of signal events incremented in the analysis above
         add_result(results_SR);
-	
+
       }
-      
-      
+
+
       ///////////////////
-      
+
     };
-    
-    DEFINE_ANALYSIS_FACTORY(Minimum) 
-      
+
+    DEFINE_ANALYSIS_FACTORY(Minimum)
+
   }
 }
-

@@ -89,6 +89,7 @@ namespace Gambit {
       }
 
       /// Clear the list of SignalRegionData, and nullify the covariance matrix
+      /// @todo It'd be good to *not* have to re-enter most of the SRData and the covariance on every point: they don't change
       void clear() {
         srdata.clear();
         srcov = Eigen::MatrixXd();

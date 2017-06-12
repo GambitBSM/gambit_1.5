@@ -87,6 +87,17 @@ namespace Gambit {
       //@{
       /// Add the given result to the internal results list.
       void add_result(const SignalRegionData& sr) { _results.add(sr); }
+      /// Set the covariance matrix, expressing SR correlations
+      void set_covariance(const Eigen::MatrixXd& srcov) { _results.srcov = srcov; }
+      /// A convenience function for setting the SR covariance from a nested vector/initialiser list
+      void set_covariance(const std::vector<std::vector<double>>& srcov) {
+        Eigen::MatrixXd cov(srcov.size(), srcov.front().size());
+        for (size_t i = 0; i < srcov.size(); ++i) {
+          for (size_t j = 0; j < srcov.front().size(); ++j) {
+            cov(i,j) = srcov[i][j];
+          }
+        }
+      }
       /// Gather together the info for likelihood calculation.
       virtual void collect_results() = 0;
       //@}
