@@ -125,7 +125,7 @@ namespace Gambit
       static std::streambuf *coutbuf = std::cout.rdbuf(); // save cout buffer for running the loop quietly
 
       #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "New point!" << endl;
+      std::cerr << debug_prefix() << "New point!" << endl;
       #endif
 
       //
@@ -1573,44 +1573,37 @@ namespace Gambit
           const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
           const Eigen::MatrixXd Vsbinv = Vsb.inverse();
 
-          // Rotate the number vectors into the diagonal bases
-          const Eigen::VectorXd n_obs_bprime = Vb * n_obs;
-          const Eigen::VectorXd n_pred_b_bprime = Vb * n_pred_b;
-          const Eigen::VectorXd n_pred_sb_bprime = Vb * n_pred_sb;
-          const Eigen::VectorXd abs_unc_s_bprime = Vb * abs_unc_s;
-          //
-          const Eigen::VectorXd n_obs_sbprime = Vsb * n_obs;
-          const Eigen::VectorXd n_pred_b_sbprime = Vsb * n_pred_b;
-          const Eigen::VectorXd n_pred_sb_sbprime = Vsb * n_pred_sb;
-          const Eigen::VectorXd abs_unc_s_sbprime = Vsb * abs_unc_s;
+          // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
+          const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
+          const Eigen::VectorXd n_pred_prime[2] = { Vb*n_pred_b, Vsb*n_pred_sb };
+          const Eigen::VectorXd abs_unc2_prime[2] = { eig_b.eigenvalues(), eig_sb.eigenvalues() };
 
-          // // Get the variances in the rotated basis, and add the rotated admixture of SR signal uncertainties in quadrature for the sb LL
-          // const Eigen::VectorXd sigma2_b_prime = eig.eigenvalues();
-          // const Eigen::VectorXd sigma2_sb_prime = sigma2_b_prime + abs_unc_s_prime.array().square();
+          // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
+          /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
+          for (size_t i = 0; i < 2; ++i) { // basis: i=0 -> b-only basis, i=1 -> s+b basis
+            for (size_t j = 0; j < adata.size(); ++j) { // dimension/SRindex
 
-          // // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
-          // /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
-          // for (size_t SR = 0; SR < adata.size(); ++SR) {
+              // Observed number as a rounded integer, for use in Poisson functions
+              /// @todo More conservative to always round the observed downward, i.e. floor()?
+              const int n_obs_int = (int) round(n_obs_prime[i](j));
 
-          //   // Relative errors, cf. nulike marginaliser interface
-          //   const double frac_unc_b = sqrt(sigma2_b_prime(SR)) / n_pred_b_prime(SR);
-          //   const double frac_unc_sb = sqrt(sigma2_sb_prime(SR)) / n_pred_sb_prime(SR);
+              // Inexact predicted rate
+              const double n_pred_inexact = n_pred_prime[i](j);
 
-          //   // Observed number as a rounded integer, for use in Poisson functions
-          //   /// @todo More conservative to always round the observed downward, i.e. floor()?
-          //   const int n_obs_prime_int = (int) round(n_obs_prime(SR));
+              // Relative error, for nulike marginaliser interface
+              const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
 
-          //   // Marginalise over systematic uncertainties on mean rates
-          //   // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
-          //   auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
-          //     ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-          //   const double llb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_b_prime(SR), frac_unc_b);
-          //   const double llsb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_sb_prime(SR), frac_unc_sb);
+              // Marginalise over systematic uncertainties on mean rates
+              // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
+              auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+                ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+              const double ll_obs = marginaliser(n_obs_int, n_pred_exact, n_pred_inexact, frac_unc);
 
-          //   // Compute dLL contribution from this rotated SR, and add it to the total analysis dLL
-          //   const double dll_obs = llb_obs - llsb_obs;
-          //   ana_dll += dll_obs;
-          // }
+              // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
+              ana_dll += (i == 0 ? 1 : -1) * ll_obs;
+
+            }
+          }
 
         } else {
 
