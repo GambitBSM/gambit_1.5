@@ -12,6 +12,7 @@ namespace Gambit
     /// Forward declarations using #DECLARE_ANALYSIS_FACTORY(ANAME)
     /// @{
     DECLARE_ANALYSIS_FACTORY(Minimum);
+    DECLARE_ANALYSIS_FACTORY(Covariance);
     DECLARE_ANALYSIS_FACTORY(Perf);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEP_13invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEP_20invfb);
@@ -33,6 +34,7 @@ namespace Gambit
     HEPUtilsAnalysis* mkAnalysis(const std::string& name)
     {
       IF_X_RTN_CREATE_ANA_X(Minimum);
+      IF_X_RTN_CREATE_ANA_X(Covariance);
       IF_X_RTN_CREATE_ANA_X(Perf);
       IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEP_13invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_0LEP_20invfb);
