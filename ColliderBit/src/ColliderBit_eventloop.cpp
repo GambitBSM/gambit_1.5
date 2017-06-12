@@ -4,8 +4,6 @@
 ///
 ///  Functions of ColliderBit event loop.
 ///
-///  @todo Rename file to ColliderBit_eventLoop.cpp or similar
-///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
@@ -51,19 +49,8 @@
 
 namespace Gambit
 {
-
   namespace ColliderBit
   {
-
-
-    // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
-    // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to run
-    // ColliderBit on a single point with a custom Pythia version, using Pythia's SLHA interface.
-    void getDummyColliderObservable(double& result)
-    {
-      result = 0.0;
-    }
-
 
 
     /// **************************************************
@@ -72,19 +59,19 @@ namespace Gambit
 
 
     #ifdef COLLIDERBIT_DEBUG
-      str debug_prefix()
-      {
-        std::stringstream ss;
-        ss << "DEBUG: OMP thread " << omp_get_thread_num() << ":  ";
-        return ss.str();
-      }
+    inline str debug_prefix()
+    {
+      std::stringstream ss;
+      ss << "DEBUG: OMP thread " << omp_get_thread_num() << ":  ";
+      return ss.str();
+    }
     #endif
 
 
 
     /// Module-wide variables
 
-    // TODO: Get rid of some of these variables by restructuring the code a bit
+    // TODO: Get rid of some of these variables by restructuring the code a bit?
 
     /// Special iteration labels for the loop controlled by operateLHCLoop
     enum specialIterations { BASE_INIT = -1,
@@ -125,10 +112,10 @@ namespace Gambit
 
 
 
-    /// *************************************************
-    /// Rollcalled functions properly hooked up to Gambit
-    /// *************************************************
-    /// *** Loop Managers ***
+    // *************************************************
+    // Rollcalled functions properly hooked up to Gambit
+    // *************************************************
+    // *** Loop Managers ***
 
     /// @note: Much of the loop below designed for splitting up the subprocesses to be generated.
 
@@ -283,7 +270,7 @@ namespace Gambit
 
 
 
-    /// *** Hard Scattering Collider Simulators ***
+    // *** Hard Scattering Collider Simulators ***
 
     void getPythia(Gambit::ColliderBit::SpecializablePythia &result)
     {
@@ -612,7 +599,7 @@ namespace Gambit
     }
 
 
-    /// *** Detector Simulators ***
+    // *** Detector Simulators ***
 
     #ifndef EXCLUDE_DELPHES
     void getDelphes(Gambit::ColliderBit::DelphesVanilla &result) {
@@ -821,7 +808,7 @@ namespace Gambit
 
 
 
-    /// *** Initialization for analyses ***
+    // *** Initialization for analyses ***
 
 
     #ifndef EXCLUDE_DELPHES
@@ -1138,7 +1125,7 @@ namespace Gambit
 
 
 
-    /// *** Hard Scattering Event Generators ***
+    // *** Hard Scattering Event Generators ***
 
     void generatePythia8Event(Pythia8::Event& result)
     {
@@ -1147,7 +1134,7 @@ namespace Gambit
       if (*Loop::iteration <= BASE_INIT) return;
       result.clear();
 
-      /// Get the next event from Pythia8
+      // Get the next event from Pythia8
       try
       {
         Dep::HardScatteringSim->nextEvent(result);
@@ -1173,7 +1160,7 @@ namespace Gambit
 
 
 
-    /// *** Standard Event Format Functions ***
+    // *** Standard Event Format Functions ***
 
     #ifndef EXCLUDE_DELPHES
     void reconstructDelphesEvent(HEPUtils::Event& result)
@@ -1306,7 +1293,7 @@ namespace Gambit
 
 
 
-    /// *** Analysis Accumulators ***
+    // *** Analysis Accumulators ***
 
 
     #ifndef EXCLUDE_DELPHES
@@ -1487,7 +1474,7 @@ namespace Gambit
 
 
 
-    /// Loop over all analyses (and SRs within one analysis) and fill a vector of observed likelihoods
+    // Loop over all analyses (and SRs within one analysis) and fill a vector of observed likelihoods
     void calc_LHC_LogLike(double& result) {
       using namespace Pipes::calc_LHC_LogLike;
 
