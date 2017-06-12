@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to Diver 1.0.1
+///  ScannerBit interface to Diver 1.0.2
 ///
 ///  Header file
 ///
@@ -30,7 +30,7 @@ extern "C" void cdiver(double (*)(double[], const int, int&, bool&, const bool, 
 namespace Gambit
 {
 
-  namespace Diver_1_0_1
+  namespace Diver_1_0_2
   {
 
     /// Structure for passing likelihood and printer data through Diver to the objective function.
