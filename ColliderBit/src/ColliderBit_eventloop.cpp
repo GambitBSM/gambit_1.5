@@ -1560,45 +1560,57 @@ namespace Gambit
             abs_unc_s(SR) = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys);
           }
 
-          // Diagonalise the covariance matrix, extracting the rotation matrix
-          /// @note We have to use the basis of the background-only covariance, to compare apples to apples: add the SR signal uncertainties later
-          /// @todo This is fully-defined by the background-only covariance: no need to recompute the decomposition for every point!
-          const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(adata.srcov);
-          const Eigen::MatrixXd V = eig.eigenvectors();
-          const Eigen::MatrixXd Vinv = V.inverse();
+          // Diagonalise the background-only covariance matrix, extracting the rotation matrix
+          /// @todo No need to recompute the background-only covariance decomposition for every point!
+          const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
+          const Eigen::MatrixXd Vb = eig_b.eigenvectors();
+          const Eigen::MatrixXd Vbinv = Vb.inverse();
 
-          // Rotate the number vectors into the diagonal basis
-          const Eigen::VectorXd n_obs_prime = V * n_obs;
-          const Eigen::VectorXd n_pred_b_prime = V * n_pred_b;
-          const Eigen::VectorXd n_pred_sb_prime = V * n_pred_sb;
-          const Eigen::VectorXd abs_unc_s_prime = V * abs_unc_s;
+          // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
+          const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
+          const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
+          const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
+          const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
+          const Eigen::MatrixXd Vsbinv = Vsb.inverse();
 
-          // Get the variances in the rotated basis, and add the rotated admixture of SR signal uncertainties in quadrature for the sb LL
-          const Eigen::VectorXd sigma2_b_prime = eig.eigenvalues();
-          const Eigen::VectorXd sigma2_sb_prime = sigma2_b_prime + Eigen::VectorXd(abs_unc_s_prime.array().square()); ///< @todo Ick. A better way?
+          // Rotate the number vectors into the diagonal bases
+          const Eigen::VectorXd n_obs_bprime = Vb * n_obs;
+          const Eigen::VectorXd n_pred_b_bprime = Vb * n_pred_b;
+          const Eigen::VectorXd n_pred_sb_bprime = Vb * n_pred_sb;
+          const Eigen::VectorXd abs_unc_s_bprime = Vb * abs_unc_s;
+          //
+          const Eigen::VectorXd n_obs_sbprime = Vsb * n_obs;
+          const Eigen::VectorXd n_pred_b_sbprime = Vsb * n_pred_b;
+          const Eigen::VectorXd n_pred_sb_sbprime = Vsb * n_pred_sb;
+          const Eigen::VectorXd abs_unc_s_sbprime = Vsb * abs_unc_s;
 
-          // For each rotated SR, compute the marginalised dLL and add it to ana_dll
-          for (size_t SR = 0; SR < adata.size(); ++SR) {
+          // // Get the variances in the rotated basis, and add the rotated admixture of SR signal uncertainties in quadrature for the sb LL
+          // const Eigen::VectorXd sigma2_b_prime = eig.eigenvalues();
+          // const Eigen::VectorXd sigma2_sb_prime = sigma2_b_prime + abs_unc_s_prime.array().square();
 
-            // Relative errors, cf. nulike marginaliser interface
-            const double frac_unc_b = sqrt(sigma2_b_prime(SR)) / n_pred_b_prime(SR);
-            const double frac_unc_sb = sqrt(sigma2_sb_prime(SR)) / n_pred_sb_prime(SR);
+          // // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
+          // /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
+          // for (size_t SR = 0; SR < adata.size(); ++SR) {
 
-            // Observed number as a rounded integer, for use in Poisson functions
-            /// @todo More conservative to always round the observed downward, i.e. floor()?
-            const int n_obs_prime_int = (int) round(n_obs_prime(SR));
+          //   // Relative errors, cf. nulike marginaliser interface
+          //   const double frac_unc_b = sqrt(sigma2_b_prime(SR)) / n_pred_b_prime(SR);
+          //   const double frac_unc_sb = sqrt(sigma2_sb_prime(SR)) / n_pred_sb_prime(SR);
 
-            // Marginalise over systematic uncertainties on mean rates
-            // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
-            auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
-              ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-            const double llb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_b_prime(SR), frac_unc_b);
-            const double llsb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_sb_prime(SR), frac_unc_sb);
+          //   // Observed number as a rounded integer, for use in Poisson functions
+          //   /// @todo More conservative to always round the observed downward, i.e. floor()?
+          //   const int n_obs_prime_int = (int) round(n_obs_prime(SR));
 
-            // Compute dLL contribution from this rotated SR, and add it to the total analysis dLL
-            const double dll_obs = llb_obs - llsb_obs;
-            ana_dll += dll_obs;
-          }
+          //   // Marginalise over systematic uncertainties on mean rates
+          //   // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
+          //   auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+          //     ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+          //   const double llb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_b_prime(SR), frac_unc_b);
+          //   const double llsb_obs = marginaliser(n_obs_prime_int, n_pred_exact, n_pred_sb_prime(SR), frac_unc_sb);
+
+          //   // Compute dLL contribution from this rotated SR, and add it to the total analysis dLL
+          //   const double dll_obs = llb_obs - llsb_obs;
+          //   ana_dll += dll_obs;
+          // }
 
         } else {
 
