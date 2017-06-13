@@ -21,19 +21,14 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event*) {
-        // HEPUtilsAnalysis::analyze(event);
-        _numSR += 1;
-        if (_numSR % 100 == 0) cout << _numSR << endl;
+      void analyze(const HEPUtils::Event* event) {
+        HEPUtilsAnalysis::analyze(event);
+        // if ((int)num_events() % 100 == 0) cout << num_events() << endl;
       }
 
 
-      // void add(BaseAnalysis* other) {
-      //   //
-      // }
-
-
       void collect_results() {
+        // cout << "$$$ " << num_events() << endl;
 
         // Now fill a results object with the result for two signal regions
         SignalRegionData results_SR1;
