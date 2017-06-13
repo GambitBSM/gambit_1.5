@@ -1,23 +1,16 @@
-#include <vector>
-#include <cmath>
-#include <memory>
-#include <iomanip>
-
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 
-using namespace std;
-
-// Basic analysis code for copying
-
 namespace Gambit {
   namespace ColliderBit {
+    using namespace std;
 
+
+    /// Basic analysis code for copying
     class Analysis_Minimum : public HEPUtilsAnalysis {
     private:
 
-      // Variables that holds the number of events passing
-      // signal region cuts
+      // Variables to hold the number of events passing signal region cuts
       double _numSR;
 
     public:
@@ -25,8 +18,7 @@ namespace Gambit {
       Analysis_Minimum() {
 
         // Set number of events passing cuts to zero upon initialisation
-
-        _numSR=0;
+        _numSR = 0;
 
         // Set the LHC luminosity
         set_luminosity(20.3);

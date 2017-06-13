@@ -1,40 +1,36 @@
-#include <vector>
-#include <cmath>
-#include <memory>
-#include <iomanip>
-
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 
-using namespace std;
-
-// Dummy analysis code with a hard-coded return including a SR covariance matrix
-
 namespace Gambit {
   namespace ColliderBit {
+    using namespace std;
 
+
+    /// Dummy analysis code with a hard-coded return including a SR covariance matrix
     class Analysis_Covariance : public HEPUtilsAnalysis {
     private:
 
       // Variables that holds the number of events passing
       // signal region cuts
-      double _numSR;
+      int _numSR;
 
     public:
 
       Analysis_Covariance() {
-        //
+        set_luminosity(30.); // fb
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
+      void analyze(const HEPUtils::Event*) {
         // HEPUtilsAnalysis::analyze(event);
+        _numSR += 1;
+        if (_numSR % 100 == 0) cout << _numSR << endl;
       }
 
 
-      void add(BaseAnalysis* other) {
-        //
-      }
+      // void add(BaseAnalysis* other) {
+      //   //
+      // }
 
 
       void collect_results() {

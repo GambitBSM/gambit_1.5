@@ -97,6 +97,7 @@ namespace Gambit {
             cov(i,j) = srcov[i][j];
           }
         }
+        set_covariance(cov);
       }
       /// Gather together the info for likelihood calculation.
       virtual void collect_results() = 0;
@@ -114,11 +115,9 @@ namespace Gambit {
       virtual void scale(double factor=-1) {
         if (factor < 0)
           factor = _luminosity * _xsec / _ntot;
-        auto myIter = _results.begin();
-        while (myIter != _results.end()) {
-          (*myIter).n_signal_at_lumi = factor * (*myIter).n_signal;
-          myIter++;
-        }
+        assert(factor >= 0);
+        for (SignalRegionData& sr : _results)
+          sr.n_signal_at_lumi = factor * sr.n_signal;
       }
       //@}
 
