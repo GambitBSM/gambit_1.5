@@ -1540,6 +1540,9 @@ namespace Gambit
           double ana_dll;
           if (adata.srcov.rows() > 0) {
             // (Simplified) SR-correlation info is available, so use the covariance matrix to construct composite marginalised likelihood
+            #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
+            #endif
 
             // Construct vectors of SR numbers
             const double n_pred_exact = 0;
@@ -1557,6 +1560,8 @@ namespace Gambit
               // Absolute errors for n_predicted_uncertain_*
               const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
               const double abs_uncertainty_s_sys = srData.signal_sys;
+              // cout << "!!! " << srData.n_signal << " -> " << sqrt(srData.n_signal) << " -> (" << srData.n_signal_at_lumi
+              //      << ", " << srData.n_signal << ") -> " << abs_uncertainty_s_stat << endl;
               abs_unc_s(SR) = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys);
             }
 
@@ -1564,14 +1569,20 @@ namespace Gambit
             /// @todo No need to recompute the background-only covariance decomposition for every point!
             const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
             const Eigen::MatrixXd Vb = eig_b.eigenvectors();
-            const Eigen::MatrixXd Vbinv = Vb.inverse();
+            //const Eigen::MatrixXd Vbinv = Vb.inverse();
+            #ifdef COLLIDERBIT_DEBUG
+            cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << eig_b.eigenvalues() << endl;
+            #endif
 
             // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
             const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
             const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
             const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
             const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
-            const Eigen::MatrixXd Vsbinv = Vsb.inverse();
+            //const Eigen::MatrixXd Vsbinv = Vsb.inverse();
+            #ifdef COLLIDERBIT_DEBUG
+            cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << eig_sb.eigenvalues() << endl;
+            #endif
 
             // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
             const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
@@ -1593,11 +1604,17 @@ namespace Gambit
                 // Relative error, for nulike marginaliser interface
                 const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
 
+                // We need the positive direction of this rotation
+                /// @todo Guaranteed all +ve or all -ve? Hope so...
+                assert((n_obs_int >= 0 && n_pred_inexact >= 0 && frac_unc >= 0) ||
+                       (n_obs_int <= 0 && n_pred_inexact <= 0 && frac_unc <= 0));
+
                 // Marginalise over systematic uncertainties on mean rates
                 // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
                 auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
                   ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-                const double ll_obs = marginaliser(n_obs_int, n_pred_exact, n_pred_inexact, frac_unc);
+                // cout << "### " << n_obs_int << ", " << n_pred_exact << ", " << n_pred_inexact << ", " << frac_unc << endl;
+                const double ll_obs = marginaliser(abs(n_obs_int), fabs(n_pred_exact), fabs(n_pred_inexact), fabs(frac_unc));
 
                 // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
                 ana_dll += (i == 0 ? 1 : -1) * ll_obs;
@@ -1606,8 +1623,11 @@ namespace Gambit
             }
 
           } else {
-
             // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
+            #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
+            #endif
+
             double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
             for (size_t SR = 0; SR < adata.size(); ++SR)
               {
