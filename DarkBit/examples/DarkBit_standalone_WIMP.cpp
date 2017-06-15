@@ -652,7 +652,7 @@ int main(int argc, char* argv[])
     if (mode==7)
     {
       std::cout << "Producing direct detection test maps." << std::endl;
-      double lnL1, lnL2, lnL3, lnL4, lnL5;
+      double lnL1, lnL2, lnL3, lnL4;
       double g, reduced_mass;
       //int mBins = 300;
       //int sBins = 200;
