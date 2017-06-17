@@ -4,8 +4,7 @@
 ///
 ///  "Header" declarations for DiracDMSpec class
 ///  (definitions in another header file due to
-///  this being a template class) (file format is 
-///  based on SingletDMSpec_head.hpp)
+///  this being a template class)
 ///
 ///  *********************************************
 ///
@@ -14,7 +13,7 @@
 ///   
 ///  \author Ankit Beniwal  
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016, Aug
+///  \date 2016, Aug, 2017, Jun
 ///
 ///  *********************************************
 

@@ -3,14 +3,13 @@
 ///  \file
 ///
 ///  Frontend for MicrOmegas VectorDM backend
-///  (based on MicrOmegas SingletDM backend)
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
 ///
 /// \author Ankit Beniwal
-/// \date Oct 2016
+/// \date Oct 2016, Jun 2017
 ///
 ///  *********************************************
 
@@ -20,154 +19,30 @@
 
 LOAD_LIBRARY
 
-BE_ALLOW_MODELS(VectorDM, StandardModel_Higgs)
-
-BE_FUNCTION(assignVal, int, (char*,double),"assignVal","assignVal")
-BE_FUNCTION(vSigma, double, (double, double, int), "vSigma","vSigma")
-BE_FUNCTION(darkOmega, double, (double*, int, double), "darkOmega", "oh2")
-BE_FUNCTION(sortOddParticles, int, (char*), "sortOddParticles","mass_spectrum")
-BE_FUNCTION(cleanDecayTable, void, (), "cleanDecayTable", "cleanDecayTable")
-BE_FUNCTION(calcSpectrum, double, (int, double*, double*, double*, double*, double*, double*, int*), "calcSpectrum", "calcSpectrum")
-BE_FUNCTION(nucleonAmplitudes, int, (double(*)(double,double,double,double), double*, double*, double*, double*), "nucleonAmplitudes", "nucleonAmplitudes" )
-BE_FUNCTION(FeScLoop, double, (double, double, double, double), "FeScLoop", "FeScLoop")
-BE_FUNCTION(calcScalarQuarkFF, void, (double, double, double, double), "calcScalarQuarkFF", "calcScalarQuarkFF")
+BE_FUNCTION(assignVal, int, (char*,double),"assignVal","assignVal", (VectorDM))
+BE_FUNCTION(vSigma, double, (double, double, int), "vSigma","vSigma", (VectorDM))
+BE_FUNCTION(darkOmega, double, (double*, int, double), "darkOmega", "oh2", (VectorDM))
+BE_FUNCTION(sortOddParticles, int, (char*), "sortOddParticles","mass_spectrum", (VectorDM))
+BE_FUNCTION(cleanDecayTable, void, (), "cleanDecayTable", "cleanDecayTable", (VectorDM))
+BE_FUNCTION(calcSpectrum, double, (int, double*, double*, double*, double*, double*, double*, int*), "calcSpectrum", "calcSpectrum", (VectorDM))
+BE_FUNCTION(nucleonAmplitudes, int, (double(*)(double,double,double,double), double*, double*, double*, double*), "nucleonAmplitudes", "nucleonAmplitudes", (VectorDM))
+BE_FUNCTION(FeScLoop, double, (double, double, double, double), "FeScLoop", "FeScLoop", (VectorDM))
+BE_FUNCTION(calcScalarQuarkFF, void, (double, double, double, double), "calcScalarQuarkFF", "calcScalarQuarkFF", (VectorDM))
 
 BE_FUNCTION(mInterp, int, (double,int,int,double*) , "mInterp", "mInterp")
 BE_FUNCTION(zInterp, double, (double,double*) , "zInterp", "zInterp")
 BE_FUNCTION(readSpectra, int, (), "readSpectra", "readSpectra")
 
-BE_VARIABLE(mocommon_, MicrOmegas::MOcommonSTR, "mocommon_", "MOcommon")
-BE_VARIABLE(vSigmaCh, MicrOmegas::aChannel*, "vSigmaCh", "vSigmaCh")
-BE_VARIABLE(ForceUG, int, "ForceUG", "ForceUG")
-BE_VARIABLE(VZdecay, int, "VZdecay", "VZdecay")
-BE_VARIABLE(VWdecay, int, "VWdecay", "VWdecay")
-
-namespace Gambit
-{
-  namespace Backends
-  {
-    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)
-    {
-      double dNdE(double Ecm, double E, int inP, int outN)
-      {
-        // outN 0-5: gamma, e+, p-, nu_e, nu_mu, nu_tau
-        // inP:  0 - 6: glu, d, u, s, c, b, t
-        //       7 - 9: e, m, l
-        //       10 - 15: Z, ZT, ZL, W, WT, WL
-        double tab[250];  // NZ = 250
-        readSpectra();
-        mInterp(Ecm/2, inP, outN, tab);
-        return zInterp(log(E/Ecm*2), tab);
-      }
-
-    } /* end namespace BACKENDNAME_SAFE_VERSION */
-  } /* end namespace Backends */
-} /* end namespace Gambit */
+BE_VARIABLE(mocommon_, MicrOmegas::MOcommonSTR, "mocommon_", "MOcommon", (VectorDM))
+BE_VARIABLE(vSigmaCh, MicrOmegas::aChannel*, "vSigmaCh", "vSigmaCh", (VectorDM))
+BE_VARIABLE(ForceUG, int, "ForceUG", "ForceUG", (VectorDM))
+BE_VARIABLE(VZdecay, int, "VZdecay", "VZdecay", (VectorDM))
+BE_VARIABLE(VWdecay, int, "VWdecay", "VWdecay", (VectorDM))
 
 BE_CONV_FUNCTION(dNdE, double, (double,double,int,int), "dNdE")
 
-BE_INI_DEPENDENCY(SMINPUTS, SMInputs)
 BE_INI_DEPENDENCY(VectorDM_spectrum, Spectrum)
-
-BE_INI_FUNCTION
-{
-     int error;
-     char cdmName[10];
-
-     // Currently only works correctly in unitary gauge
-     *ForceUG=1;
-
-     // Set VectorDM model parameters in micrOmegas
-     error = assignVal((char*)"mV", *Param["mV"]);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mV in"
-             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     
-
-     error = assignVal((char*)"lhV", *Param["lambda_hV"]);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set lambda_hV in"
-             "MicrOmegas. MicrOmegas error code: " + std::to_string(error));     
-
-     // Set SM particle masses in micrOmegas_3.6.9.2
-     const SMInputs& sminputs = *Dep::SMINPUTS; 
-
-     // EE = sqrt(4*pi*(1/alphainv))
-     error = assignVal((char*)"EE", sqrt(4*M_PI*1/(sminputs.alphainv)));
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set alphainv in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // v0 = 1/sqrt(sqrt(2)*GF)
-     error = assignVal((char*)"v0", 1/sqrt(sqrt(2)*sminputs.GF));
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set GF in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mu(2 GeV) in MSbar scheme
-     error = assignVal((char*)"Mu", sminputs.mU);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mU in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // md(2 GeV) in MSbar scheme
-     error = assignVal((char*)"Md", sminputs.mD);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mD in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // ms(2 GeV) in MSbar scheme
-     error = assignVal((char*)"Ms", sminputs.mS);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mS in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mc(mc) in MSbar scheme
-     error = assignVal((char*)"Mc", sminputs.mCmC);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mCmC in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mb(mb) in MSbar scheme
-     error = assignVal((char*)"Mb", sminputs.mBmB);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mBmB in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mtop(pole)
-     error = assignVal((char*)"Mtop", sminputs.mT);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mT in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mE(pole)
-     error = assignVal((char*)"Me", sminputs.mE);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mE in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-             
-     // mMu(pole)
-     error = assignVal((char*)"Mm", sminputs.mMu);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mMu in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mTau(pole)
-     error = assignVal((char*)"Mtau", sminputs.mTau);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mTau in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     // mZ(pole)
-     error = assignVal((char*)"MZ", sminputs.mZ);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mZ in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-        
-     // Set Higgs boson mass in micrOmegas_3.6.9.2
-     error = assignVal((char*)"MH", *Param["mH"]);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mH in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-     
-     // Set W boson mass in micrOmegas_3.6.9.2
-     const SubSpectrum& LE = Dep::VectorDM_spectrum->get_LE();
-     double mW = LE.get(Par::Pole_Mass, "W+");
-    
-     error = assignVal((char*)"MW", mW);
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "Unable to set mW in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-
-     error = sortOddParticles(byVal(cdmName));
-     if (error != 0) BackendIniBit_error().raise(LOCAL_INFO, "MicrOmegas function "
-             "sortOddParticles returned error code: " + std::to_string(error));
-
-}
-END_BE_INI_FUNCTION
+BE_INI_DEPENDENCY(decay_rates, DecayTable)
 
 #include "gambit/Backends/backend_undefs.hpp"
 

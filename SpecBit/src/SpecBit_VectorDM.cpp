@@ -5,8 +5,7 @@
 ///  Functions of module SpecBit
 ///
 ///  SpecBit module functions related to the
-///  VectorDM model (file format is based on
-///  the SpecBit_SingletDM.cpp)
+///  VectorDM model.
 ///
 ///  *********************************************
 ///
@@ -15,6 +14,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
+///  \date 2017 Jun
 ///
 ///  *********************************************
 
@@ -35,6 +35,9 @@
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/VectorDMSpec.hpp"
+
+// Switch for debug mode
+//#define SPECBIT_DEBUG
 
 namespace Gambit
 {

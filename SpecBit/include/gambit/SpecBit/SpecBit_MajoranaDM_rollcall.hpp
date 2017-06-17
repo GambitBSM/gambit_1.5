@@ -3,8 +3,7 @@
 ///  \file
 ///
 ///  Rollcall declarations for module functions
-///  contained in SpecBit_MajoranaDM.cpp (file format  
-///  is based on SpecBit_SingletDM_rollcall.hpp)
+///  contained in SpecBit_MajoranaDM.cpp
 ///
 ///  *********************************************
 ///
@@ -13,6 +12,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///    \date 2016 Aug, Nov
+///    \date 2017 Jun
 ///
 ///  *********************************************
 
@@ -26,7 +26,7 @@
     // Create Spectrum object from SMInputs structs, SM Higgs parameters,
     // and the MajoranaDM parameters
     #define FUNCTION get_MajoranaDM_spectrum
-    START_FUNCTION(/*TAG*/ Spectrum)
+    START_FUNCTION(Spectrum)
     DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs, MajoranaDM)
     MODEL_GROUP(higgs,   (StandardModel_Higgs))
@@ -37,7 +37,7 @@
     // Convert spectrum into a standard map so that it can be printed
     #define FUNCTION get_MajoranaDM_spectrum_as_map 
     START_FUNCTION(map_str_dbl) // Just a string to double map. Can't have commas in macro input
-    DEPENDENCY(MajoranaDM_spectrum, /*TAG*/ Spectrum)
+    DEPENDENCY(MajoranaDM_spectrum, Spectrum)
     #undef FUNCTION    
 
   #undef CAPABILITY

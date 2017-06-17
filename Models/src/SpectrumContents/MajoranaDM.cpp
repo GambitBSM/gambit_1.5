@@ -4,7 +4,6 @@
 ///
 ///  Class defining the parameters that SubSpectrum 
 ///  objects providing MajoranaDM spectrum data must provide
-///  (file format is based on SingletDM.cpp).
 ///
 ///  *********************************************
 ///
@@ -13,7 +12,7 @@
 ///   
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Aug
+///  \date 2016 Aug, 2017 Jun
 ///
 ///  *********************************************
 
@@ -42,9 +41,12 @@ namespace Gambit {
      addParameter(Par::dimensionless, "lambda_h");
      addParameter(Par::dimensionless, "cosXI");
 
-     addParameter(Par::Pole_Mass, "h0");
+     addParameter(Par::Pole_Mass, "h0_1");
      addParameter(Par::Pole_Mass, "X" );
     
+     // addParameter(Par::Pole_Mass_1srd_high, "h0_1");
+     // addParameter(Par::Pole_Mass_1srd_low,  "h0_1");
+
      addParameter(Par::dimensionless, "g1", scalar);
      addParameter(Par::dimensionless, "g2", scalar);
      addParameter(Par::dimensionless, "g3", scalar);

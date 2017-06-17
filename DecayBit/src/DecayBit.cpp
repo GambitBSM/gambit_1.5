@@ -23,7 +23,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Oct
+///  \date 2016 Oct, 2017 Jun
 ///
 ///  *********************************************
 
@@ -2200,7 +2200,7 @@ namespace Gambit
 
     //////////// Vector DM /////////////////////    
 
-    /// Add the decay of Higgs to vectors for the VectorDM model (based on arXiv: 1512.06458)
+    /// Add the decay of Higgs to vectors for the VectorDM model (see arXiv:1512.06458v4)
     void VectorDM_Higgs_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::VectorDM_Higgs_decays;
@@ -2216,13 +2216,12 @@ namespace Gambit
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
 
-      // Add the h->SS width to the total
+      // Add the h->VV width to the total
       double massratio2 = pow(mass/mhpole,2);
       double midfactor = (1 - 4*massratio2 + 12*pow(massratio2,2));
-      double gamma = (2.0*mass <= mhpole) ? (pow(lambda*v0,2)*pow(mhpole,3))/(128.0*pi*pow(mass,4)) * midfactor * sqrt(1.0 - 4.0*massratio2) : 0.0;
+      double gamma = (2.0*mass <= mhpole) ? ((pow(lambda*v0,2)*pow(mhpole,3))/(128.0*pi*pow(mass,4))) * midfactor * sqrt(1.0 - 4.0*massratio2) : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
-      logger() << "mV = " << mass << " GeV, lambda = " << lambda << ", v0 = " << v0 << " GeV, mhpole = " << mhpole << std::endl;
       logger() << "Gamma (h -> VV) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
@@ -2233,7 +2232,7 @@ namespace Gambit
         it->second.second *= wscaling; // rescale error on BF
       }
 
-      // Add the h->SS branching fraction
+      // Add the h->VV branching fraction
       result.set_BF(gamma/result.width_in_GeV, 0.0, "V", "V");
       
       // Make sure the width is sensible.
@@ -2242,7 +2241,7 @@ namespace Gambit
 
     //////////// Majorana fermion DM /////////////////////    
 
-    /// Add the decay of Higgs to Majorana fermions for the MajoranaDM model (based on arXiv: 1512.06458)
+    /// Add the decay of Higgs to Majorana fermions for the MajoranaDM model (see arXiv:1512.06458v4)
     void MajoranaDM_Higgs_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::MajoranaDM_Higgs_decays;
@@ -2252,20 +2251,19 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"X");
       double lambda = he.get(Par::dimensionless,"lX");
-      double cosXI = he.get(Par::dimensionless,"cosXI");
+      double cxi = he.get(Par::dimensionless,"cosXI");
       double v0 = he.get(Par::mass1,"vev");
       double mhpole = spec.get(Par::Pole_Mass,"h0_1");
 
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
 
-      // Add the h->SS width to the total
+      // Add the h->XX width to the total
       double massratio2 = pow(mass/mhpole,2);
-      double lastfactor = (1 - 4*massratio2*pow(cosXI,2));
-      double gamma = (2.0*mass <= mhpole) ? (mhpole*pow(lambda*v0,2))/(16.0*pi) * sqrt(1.0 - 4.0*massratio2) * lastfactor : 0.0;
+      double lfactor = (1 - 4*massratio2*pow(cxi,2));
+      double gamma = (2.0*mass <= mhpole) ? ((mhpole*pow(v0*lambda,2))/(16.0*pi)) * sqrt(1.0 - 4.0*massratio2) * lfactor : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
-      logger() << "mX = " << mass << " GeV, lambda = " << lambda << ", cosXI = " << cosXI << ", v0 = " << v0 << " GeV, mhpole = " << mhpole << std::endl;
       logger() << "Gamma (h -> XX) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
@@ -2276,7 +2274,7 @@ namespace Gambit
         it->second.second *= wscaling; // rescale error on BF
       }
 
-      // Add the h->SS branching fraction
+      // Add the h->XX branching fraction
       result.set_BF(gamma/result.width_in_GeV, 0.0, "X", "X");
       
       // Make sure the width is sensible.
@@ -2285,7 +2283,7 @@ namespace Gambit
 
     //////////// Dirac fermion DM /////////////////////    
 
-    /// Add the decay of Higgs to Dirac fermions for the DiracDM model (based on arXiv: 1512.06458)
+    /// Add the decay of Higgs to Dirac fermions for the DiracDM model (see arXiv:1512.06458v4)
     void DiracDM_Higgs_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::DiracDM_Higgs_decays;
@@ -2295,20 +2293,19 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"F");
       double lambda = he.get(Par::dimensionless,"lF");
-      double cosXI = he.get(Par::dimensionless,"cosXI");
+      double cxi = he.get(Par::dimensionless,"cosXI");
       double v0 = he.get(Par::mass1,"vev");
       double mhpole = spec.get(Par::Pole_Mass,"h0_1");
 
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
 
-      // Add the h->SS width to the total
+      // Add the h->FF width to the total
       double massratio2 = pow(mass/mhpole,2);
-      double lastfactor = (1 - 4*massratio2*pow(cosXI,2));
-      double gamma = (2.0*mass <= mhpole) ? (mhpole*pow(lambda*v0,2))/(8.0*pi) * sqrt(1.0 - 4.0*massratio2) * lastfactor : 0.0;
+      double lfactor = (1 - 4*massratio2*pow(cxi,2));
+      double gamma = (2.0*mass <= mhpole) ? ((mhpole*pow(v0*lambda,2))/(8.0*pi)) * sqrt(1.0 - 4.0*massratio2) * lfactor : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
-      logger() << "mF = " << mass << " GeV, lambda = " << lambda << ", cosXI = " << cosXI << ", v0 = " << v0 << " GeV, mhpole = " << mhpole << std::endl;
       logger() << "Gamma (h -> FF) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
@@ -2319,7 +2316,7 @@ namespace Gambit
         it->second.second *= wscaling; // rescale error on BF
       }
 
-      // Add the h->SS branching fraction
+      // Add the h->FF branching fraction
       result.set_BF(gamma/result.width_in_GeV, 0.0, "F", "F");
       
       // Make sure the width is sensible.
@@ -2544,7 +2541,6 @@ namespace Gambit
     }
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    // VectorDM Higgs invisible width expression is based on arXiv: 1512.06458
     void lnL_Higgs_invWidth_SMlike_VDM(double& result)
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_VDM;
@@ -2554,7 +2550,6 @@ namespace Gambit
     }
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    // MajoranaDM Higgs invisible width expression is based on arXiv: 1512.06458
     void lnL_Higgs_invWidth_SMlike_MDM(double& result)
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_MDM;
@@ -2564,7 +2559,6 @@ namespace Gambit
     }
 
     // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    // DiracDM Higgs invisible width expression is based on arXiv: 1512.06458
     void lnL_Higgs_invWidth_SMlike_DDM(double& result)
     {
       using namespace Pipes::lnL_Higgs_invWidth_SMlike_DDM;

@@ -5,8 +5,7 @@
 ///  Functions of module SpecBit
 ///
 ///  SpecBit module functions related to the
-///  MajoranaDM model (file format is based on
-///  the SpecBit_SingletDM.cpp)
+///  MajoranaDM model
 ///
 ///  *********************************************
 ///
@@ -15,6 +14,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
+///  \date 2017 Jun
 ///
 ///  *********************************************
 
@@ -35,6 +35,9 @@
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/MajoranaDMSpec.hpp"
+
+// Switch for debug mode
+//#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -73,11 +76,11 @@ namespace Gambit
       majoranamodel.MajoranaLambda   = *myPipe::Param.at("lX");    
       majoranamodel.MajoranacosXI    = *myPipe::Param.at("cosXI");    
       
-      // Check if lX >= 4*pi/2*mX (i.e., where EFT approach breaks down)
+      // Check if the EFT is valid (i.e., lX < 4*pi/2*mX)
       if (majoranamodel.MajoranaLambda >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
       {
        std::ostringstream msg;
-       msg << "Model point [mX, lX] = [" << majoranamodel.MajoranaPoleMass
+       msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass
            << " GeV, " << majoranamodel.MajoranaLambda
            << " GeV] is invalid under the EFT validity constraint!";
        invalid_point().raise(msg.str());

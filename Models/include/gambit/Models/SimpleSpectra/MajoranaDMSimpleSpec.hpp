@@ -3,8 +3,7 @@
 ///  \file
 ///
 ///  A simple SubSpectrum wrapper for the MajoranaDM
-///  model. No RGEs included (file format is based 
-///  on ScalarSingletDMSimpleSpec.hpp).
+///  model. No RGEs included.
 ///
 ///  *********************************************
 ///
@@ -13,7 +12,7 @@
 ///   
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Aug
+///  \date 2016 Aug, 2017 Jun
 ///
 ///  *********************************************
 
@@ -39,6 +38,7 @@ namespace Gambit
          double MajoranaPoleMass;
          double MajoranaLambda;
          double MajoranacosXI;
+         double HiggsPoleMass_1srd_low,HiggsPoleMass_1srd_high;
 
          double LambdaH;
          double g1, g2, g3, sinW2;
@@ -80,6 +80,10 @@ namespace Gambit
  
             /// Wrapper-side interface functions to parameter object
             double get_HiggsPoleMass()   const { return params.HiggsPoleMass; } 
+
+            double get_HiggsPoleMass_1srd_low() const  { return params.HiggsPoleMass_1srd_low; }
+            double get_HiggsPoleMass_1srd_high() const  { return params.HiggsPoleMass_1srd_high; }
+
             double get_HiggsVEV()        const { return params.HiggsVEV;      } 
             double get_MajoranaPoleMass() const { return params.MajoranaPoleMass; } 
             double get_lambda_X()       const { return params.MajoranaLambda; }
@@ -95,6 +99,9 @@ namespace Gambit
             double get_Ye(int i, int j)       const { if (i==j){return params.Ye[i];}else{return 0;} }
            
             void set_HiggsPoleMass(double in)   { params.HiggsPoleMass=in; } 
+            void set_HiggsPoleMass_1srd_low(double in)   { params.HiggsPoleMass_1srd_low=in; }
+            void set_HiggsPoleMass_1srd_high(double in)   { params.HiggsPoleMass_1srd_high=in; }
+
             void set_HiggsVEV(double in)        { params.HiggsVEV=in;      } 
             void set_MajoranaPoleMass(double in) { params.MajoranaPoleMass=in; } 
             void set_lambda_X(double in)       { params.MajoranaLambda=in; }
@@ -123,8 +130,9 @@ namespace Gambit
                getters[dimensionless].map0W["lX"] = &Self::get_lambda_X;
                getters[dimensionless].map0W["cosXI"] = &Self::get_cos_XI;
 
-               getters[Pole_Mass].map0W["h0"]      = &Self::get_HiggsPoleMass;
                getters[Pole_Mass].map0W["h0_1"]    = &Self::get_HiggsPoleMass;
+               getters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_high;
+               getters[Pole_Mass_1srd_low].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_low;
  
                getters[Pole_Mass].map0W["X"]       = &Self::get_MajoranaPoleMass;               
               
@@ -161,8 +169,9 @@ namespace Gambit
                setters[dimensionless].map0W["g3"] = &Self::set_g3;
                setters[dimensionless].map0W["sinW2"] = &Self::set_sinW2;
 
-               setters[Pole_Mass].map0W["h0"]    = &Self::set_HiggsPoleMass;
-               //setters[Pole_Mass].map0W["h0_1"]  = &Self::set_HiggsPoleMass;
+               setters[Pole_Mass].map0W["h0_1"]  = &Self::set_HiggsPoleMass;
+               setters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::set_HiggsPoleMass_1srd_high;
+               setters[Pole_Mass_1srd_low].map0W["h0_1"]    = &Self::set_HiggsPoleMass_1srd_low;
  
                setters[Pole_Mass].map0W["X"]       = &Self::set_MajoranaPoleMass;                
    

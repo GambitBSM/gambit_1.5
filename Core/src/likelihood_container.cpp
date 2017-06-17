@@ -22,10 +22,6 @@
 ///  \date 2013 Aug
 ///  \date 2014 May, June, onwards...
 ///
-///  \author Ankit Beniwal
-///    (ankit.beniwal@adelaide.edu.au)
-///  \date 2017 Feb
-///
 ///  *********************************************
 
 #include "gambit/Core/likelihood_container.hpp"
@@ -54,10 +50,9 @@ namespace Gambit
     #ifdef WITH_MPI
       errorComm        (comm),
     #endif
-    save_invalid_points     (iniFile.getValueOrDef<bool>(false, "likelihood", "save_invalid_points")),
     min_valid_lnlike        (iniFile.getValue<double>("likelihood", "model_invalid_for_lnlike_below")),
     alt_min_valid_lnlike    (iniFile.getValueOrDef<double>(0.5*min_valid_lnlike, "likelihood", "model_invalid_for_lnlike_below_alt")),
-    active_min_valid_lnlike (min_valid_lnlike), // can be switched to the alternate value by the scanner    
+    active_min_valid_lnlike (min_valid_lnlike), // can be switched to the alternate value by the scanner
     intralooptime_label     ("Runtime(ms) intraloop"),
     interlooptime_label     ("Runtime(ms) interloop"),
     totallooptime_label     ("Runtime(ms) totalloop"),
@@ -336,10 +331,7 @@ namespace Gambit
     logger() << "Total lnL: " << lnlike << EOM;
     dependencyResolver.resetAll();
 
-    if (save_invalid_points == false)
-    {
-		if(point_invalidated) printer.disable(); // Disable the printer so that it doesn't try to output the min_valid_lnlike as a valid likelihood value. ScannerBit will re-enable it when needed again.
-	}
+    if(point_invalidated) printer.disable(); // Disable the printer so that it doesn't try to output the min_valid_lnlike as a valid likelihood value. ScannerBit will re-enable it when needed again.
 
     logger() << LogTags::core << LogTags::debug << "Returning control to ScannerBit" << EOM;
 

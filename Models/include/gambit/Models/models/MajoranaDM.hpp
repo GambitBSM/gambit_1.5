@@ -1,8 +1,7 @@
 //  GAMBIT: Global and Modular BSM Inference Tool
 //  *********************************************
 //
-//  Majorana DM (based on arXiv: 1512.06458)
-//  (file format is based on SingletDM.hpp)
+//  Majorana DM 
 //
 //  *********************************************
 //
@@ -12,7 +11,7 @@
 //  (add name and date if you modify)
 //
 //  Ankit Beniwal
-//  2016 August
+//  2016 August, 2017 June
 //
 //  *********************************************
 
@@ -20,7 +19,7 @@
 #define __MajoranaDM_hpp__
 
 #define MODEL MajoranaDM
-START_MODEL
+  START_MODEL
 
   DEFINEPARS(mX, lX, cosXI)
 

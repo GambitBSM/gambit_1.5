@@ -32,10 +32,6 @@
 #  \author Christoph Weniger
 #          (c.weniger@uva.nl)
 #  \date 2015 Sep
-# 
-#  \author Ankit Beniwal
-#  	   (ankit.beniwal@adelaide.edu.au)
-#  \date 2016 Aug
 #
 #  \author Tomas Gonzalo
 #          (t.e.gonzalo@fys.uio.no)
@@ -44,6 +40,11 @@
 #  \author James McKay
 #          (j.mckay14@imperial.ac.uk)
 #  \date 2016 Aug
+#
+#  \author Ankit Beniwal
+#  	   (ankit.beniwal@adelaide.edu.au)
+#  \date 2016 Aug
+#  \date 2017 Jun
 #
 #************************************************
 
@@ -130,31 +131,6 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
-
-
-# DDCalc_q2
-set(name "ddcalc_q2")
-set(ver "1.0.0")
-set(lib "libDDCalc")
-#set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
-set(dl "null")
-set(md5 "FIXME")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}")
-set(loc "${GAMBIT_INTERNAL}/DDCalc") #FIXME can be deleted when public
-ExternalProject_Add(${name}_${ver}
-  DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold ${private_code_warning1}
-           COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${private_code_warning2}
-           COMMAND ${CMAKE_COMMAND} -E copy_directory ${loc} ${dir}
-  SOURCE_DIR ${dir}
-  BUILD_IN_SOURCE 1
-  PATCH_COMMAND cd ${dir}/src && patch -p1 < ${patch}
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${GAMBIT_Fortran_FLAGS} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
-  INSTALL_COMMAND ""
-)
-add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-set_as_default_version("backend" ${name} ${ver})
 
 
 # Gamlike
@@ -267,47 +243,56 @@ endif()
 # MicrOmegas VectorDM model
 set(model "VectorDM")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-ExternalProject_Add(${name}_${model}_${ver}
-  DOWNLOAD_COMMAND ""
-  SOURCE_DIR ${dir}
-  PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
-  BUILD_IN_SOURCE 1
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
-  INSTALL_COMMAND ""
-)
-add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
-set_as_default_version("backend model" ${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
 
 # MicrOmegas MajoranaDM model
 set(model "MajoranaDM")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-ExternalProject_Add(${name}_${model}_${ver}
-  DOWNLOAD_COMMAND ""
-  SOURCE_DIR ${dir}
-  PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
-  BUILD_IN_SOURCE 1
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
-  INSTALL_COMMAND ""
-)
-add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
-set_as_default_version("backend model" ${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
 
 # MicrOmegas DiracDM model
 set(model "DiracDM")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-ExternalProject_Add(${name}_${model}_${ver}
-  DOWNLOAD_COMMAND ""
-  SOURCE_DIR ${dir}
-  PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
-  BUILD_IN_SOURCE 1
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
-  INSTALL_COMMAND ""
-)
-add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
-set_as_default_version("backend model" ${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
 
 # Pythia
 set(name "pythia")

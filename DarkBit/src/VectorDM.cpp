@@ -2,9 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Implementation of VectorDM routines 
-///  (file format is based on SingletDM.cpp and 
-///   MSSM.cpp).
+///  Implementation of VectorDM routines.
 ///
 ///  *********************************************
 ///
@@ -12,7 +10,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date Oct 2016
+///  \date Oct 2016, Jun 2017
 ///
 ///  *********************************************
 
@@ -59,7 +57,6 @@ namespace Gambit
     } // function DD_couplings_VectorDM
 
     /// Set up process catalog for the VectorDM model.
-    /// Uses micrOmega's functions to compute sigma-v and branching ratios.
     void TH_ProcessCatalog_VectorDM(DarkBit::TH_ProcessCatalog &result)
     {
       using namespace Pipes::TH_ProcessCatalog_VectorDM;
@@ -72,7 +69,7 @@ namespace Gambit
         invalid_point().raise("TH_ProcessCatalog_VectorDM requires DMid to be V.");
       }
 
-      // Initialize empty catalog 
+	  // Initialize empty catalog
       TH_ProcessCatalog catalog;
 
       ///////////////////////////////////////
@@ -148,7 +145,7 @@ namespace Gambit
       #undef addParticle
 
       ////////////////////////////////////////////////////////////////////
-      // Import two-body annihilation processes from MicrOmegas_3.6.9.2
+      // Import two-body annihilation processes from micrOmegas_3.6.9.2
       ////////////////////////////////////////////////////////////////////
 
       // Set of possible final state particles
@@ -158,17 +155,17 @@ namespace Gambit
       TH_Process process_ann(DMid, DMid);
       
       // Helper variables
-      int err, key = 4;
+      int err, key = 1;
       double *SpA = NULL, *SpE = NULL, *SpP = NULL;
       double *SpNe = NULL, *SpNm = NULL, *SpNl = NULL;
       double m_1, m_2, sigmav_total, min_prop = 1e-6;
          
-      // Calculate the total sigmav using the calcSpectrum function in MicrOmegas_3.6.9.2
+      // Calculate the total sigmav using the calcSpectrum function in micrOmegas_3.6.9.2
       sigmav_total = BEreq::calcSpectrum(byVal(key), byVal(SpA), byVal(SpE),
                     byVal(SpP), byVal(SpNe), byVal(SpNm), byVal(SpNl), &err);
-      logger() << "Total annihilation cross section (sigmav) = " << sigmav_total << " cm^3/s" << std::endl;
+      logger() << "Total zero-velocity annihilation cross section = " << sigmav_total << " cm^3/s" << std::endl;
 
-      // Convenience macros for setting up 2-body annihilations using MicrOmega's functions      
+      // Convenience macros for setting up 2-body annihilations using micrOmega's functions
       #define SETUP_KINEMATIC_PROCESS_MO(NAME, MO_PRTCL_NAME, P1, P2)                                   \
       m_1 = catalog.getParticleProperty(STRINGIFY(P1)).mass;                                            \
       m_2 = catalog.getParticleProperty(STRINGIFY(P2)).mass;                                            \
@@ -180,7 +177,7 @@ namespace Gambit
           if (strcmp(((*BEreq::vSigmaCh)+i)->prtcl[2],STRINGIFY(MO_PRTCL_NAME)) == 0)                   \
           {                                                                                             \
             double CAT(sigma_,NAME) = (((*BEreq::vSigmaCh)+i)->weight)*sigmav_total;                    \
-            logger() << "BR(" << DMid << " + " << DMid << " -> "                                        \
+            logger() << "  BR(" << DMid << " + " << DMid << " -> "                                      \
                      << ((*BEreq::vSigmaCh)+i)->prtcl[2]                                                \
                      << " + " << ((*BEreq::vSigmaCh)+i)->prtcl[3] << ") = "                             \
                      << ((*BEreq::vSigmaCh)+i)->weight << std::endl;                                    \

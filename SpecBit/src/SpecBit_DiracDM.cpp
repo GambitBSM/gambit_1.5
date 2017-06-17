@@ -5,8 +5,7 @@
 ///  Functions of module SpecBit
 ///
 ///  SpecBit module functions related to the
-///  DiracDM model (file format is based on
-///  the SpecBit_SingletDM.cpp)
+///  DiracDM model
 ///
 ///  *********************************************
 ///
@@ -15,6 +14,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
+///  \date 2017 Jun
 ///
 ///  *********************************************
 
@@ -35,6 +35,9 @@
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/DiracDMSpec.hpp"
+
+// Switch for debug mode
+//#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -73,11 +76,11 @@ namespace Gambit
       diracmodel.DiracLambda   = *myPipe::Param.at("lF");    
       diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");    
       
-      // Check if lF >= 4*pi/2*mF (i.e., where EFT approach breaks down)
+       // Check if the EFT is valid (i.e., lF < 4*pi/2*mF)
       if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
       {
        std::ostringstream msg;
-       msg << "Model point [mF, lF] = [" << diracmodel.DiracPoleMass
+       msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass
            << " GeV, " << diracmodel.DiracLambda
            << " GeV] is invalid under the EFT validity constraint!";
        invalid_point().raise(msg.str());

@@ -2,9 +2,6 @@
 ///  *********************************************
 ///
 ///  VectorDM model source file. 
-///  The vector mass mV is the tree-level mass and 
-///  lambda_hV is the tree-level DM-Higgs coupling
-///  (file format is based on SingletDM.cpp)
 ///
 ///  *********************************************
 ///
@@ -15,7 +12,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.com)
-///  \date 2016 Aug
+///  \date 2016 Aug, 2017 Jun
 ///
 ///  *********************************************
 
@@ -35,6 +32,6 @@ using namespace Gambit::Utils;
 // Need to define MODEL and PARENT in order for helper macros to work correctly
 #define MODEL VectorDM
 
-  // No translation function exist for the model
+  // No translation function is required for the model
 
 #undef MODEL

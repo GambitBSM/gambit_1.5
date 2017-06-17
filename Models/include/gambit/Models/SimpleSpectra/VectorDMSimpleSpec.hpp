@@ -3,8 +3,7 @@
 ///  \file
 ///
 ///  A simple SubSpectrum wrapper for the VectorDM
-///  model. No RGEs included (file format is based 
-///  on ScalarSingletDMSimpleSpec.hpp).
+///  model. No RGEs included.
 ///
 ///  *********************************************
 ///
@@ -13,7 +12,7 @@
 ///   
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Sep
+///  \date 2016 Sep, 2017 Jun
 ///
 ///  *********************************************
 
@@ -132,6 +131,7 @@ namespace Gambit
                getters[Pole_Mass].map0W["h0_1"]    = &Self::get_HiggsPoleMass;
                getters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_high;
                getters[Pole_Mass_1srd_low].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_low;
+               
                getters[dimensionless].map0W["lambda_h"] = &Self::get_lambda_h;
 
                getters[dimensionless].map0W["g1"] = &Self::get_g1;
@@ -168,7 +168,7 @@ namespace Gambit
                setters[Pole_Mass].map0W["h0_1"]  = &Self::set_HiggsPoleMass;
                setters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::set_HiggsPoleMass_1srd_high;
                setters[Pole_Mass_1srd_low].map0W["h0_1"]    = &Self::set_HiggsPoleMass_1srd_low;
-
+               
                setters[dimensionless].map2W["Yd"]= FInfo2W( &Self::set_Yd, i012, i012);
                setters[dimensionless].map2W["Yu"]= FInfo2W( &Self::set_Yu, i012, i012);
                setters[dimensionless].map2W["Ye"]= FInfo2W( &Self::set_Ye, i012, i012);

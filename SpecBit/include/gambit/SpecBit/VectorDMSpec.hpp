@@ -3,7 +3,6 @@
 ///  \file
 ///
 ///  VectorDM derived version of SubSpectrum class.
-///  (file format is based on SingletDMSpec.hpp)
 ///
 ///  *********************************************
 ///
@@ -12,7 +11,7 @@
 ///   
 ///  \author Ankit Beniwal  
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Sep
+///  \date 2016 Sep, 2017 Jun
 ///
 ///  *********************************************
 
@@ -39,10 +38,6 @@ namespace Gambit
       template <class MI>
       const int VectorDMSpec<MI>::_index_offset = MI::index_offset;
 
-      // NOTE!! mi is COPIED into the object, so when we get the reference to the
-      // actual Model object to store in 'model', we need to use the copy inside
-      // the object. So also need to make sure 'model_interface' is initialised first
-      // (i.e. it should be declared first)
       template <class MI>
       VectorDMSpec<MI>::VectorDMSpec(MI mi, str be_name, str be_version)
          : backend_name(be_name)
@@ -121,7 +116,6 @@ namespace Gambit
 
         {
             typename MTget::fmap0 tmp_map;
-            tmp_map["mS2"]  = &Model::get_muS;
             tmp_map["mu2"] = &Model::get_muH;
             map_collection[Par::mass2].map0 = tmp_map;
          }
@@ -178,10 +172,8 @@ namespace Gambit
          {
             typename MTget::fmap1 tmp_map;
 
-            ////    tmp_map["V"] = FInfo1( &Model::get_Mss, i012345 );
-           ////     tmp_map["h0"] = FInfo1( &Model::get_Mhh, i01 );
-            //Here we may access the goldstone boson
-            // and higgs. maybe too dangerous to keep?
+            //tmp_map["V"] = FInfo1( &Model::get_Mss, i012345 );
+            //tmp_map["h0"] = FInfo1( &Model::get_Mhh, i01 );
 
             //Here we may access the goldstone boson
             //and higgs. maybe too dangerous to keep?
@@ -211,25 +203,11 @@ namespace Gambit
             map_collection[Par::Pole_Mass].map0 = tmp_map;
          } 
 
-         // Functions utilising the "extraM" function signature
-         // (Zero index, model object as argument)
-//         {
-//            typename MTget::fmap0_extraM tmp_map;
-//        
-//            // Using wrapper functions defined above
-//            tmp_map["A0"] = &get_MAh_pole_slha<Model>;
-//
-//      
-//            map_collection[Par::Pole_Mass].map0_extraM = tmp_map;
-//         }
-
-         // Functions utilising the one-index "plain-vanilla" function signature
-         // (One-index member functions of model object)
-         {  
+		{
             typename MTget::fmap0 tmp_map;
 
             tmp_map["V"] =  &Model::get_Mss_pole_slha;
-            tmp_map["Vector"] =  &Model::get_Mss_pole_slha; // alternative naming convention as in VectorDM container
+            tmp_map["Vector"] =  &Model::get_Mss_pole_slha;
             tmp_map["h0_1"] = &Model::get_Mhh_pole_slha; //added to match SM Higgs container naming
             tmp_map["A0"] = &Model::get_MAh_pole_slha;
 
@@ -247,7 +225,6 @@ namespace Gambit
          typename VectorDMSpec<MI>::SetterMaps map_collection;
          typedef typename MI::Model Model;
 
-         typedef typename MTset::FInfo1 FInfo1;
          typedef typename MTset::FInfo2 FInfo2;
 
          // Can't use c++11 initialise lists, se have to initialise the index sets like this.
@@ -310,31 +287,6 @@ namespace Gambit
 
             map_collection[Par::dimensionless].map2 = tmp_map;
          }
-
-//        {  
-//          typename MTset::fmap0_extraM tmp_map;
-//          tmp_map["A0"] = &set_MAh_pole_slha<Model>;
-//          tmp_map["Goldstone0"] = &set_neutral_goldstone_pole_slha<Model>;
-//   
-//          /// the getters for these were removed but Pat last meeting
-//          /// we agreed to add setters here unless I misunderstood.
-//          /// need to discuss this
-//          tmp_map["W+"] = &set_MW_pole_slha<Model>;
-//          tmp_map["W-"] = &set_MW_pole_slha<Model>;
-//          tmp_map["Z0"] = &set_MZ_pole_slha<Model>;
-//       
-//          map_collection[Par::Pole_Mass].map0_extraM = tmp_map;
-//        }
-
-//        {  
-//          typename MTset::fmap0_extraM tmp_map;
-//
-//          tmp_map["h0"] = &Model::set_Mhh_pole_slha;// &set_Mhh_pole_slha<Model>;
-//          tmp_map["s0"] = &Model::set_Mss_pole_slha;//&set_Mss_pole_slha<Model>;
-//          
-//          map_collection[Par::Pole_Mass].map0_extraM = tmp_map;
-//        }
-
 
          return map_collection;
       } 

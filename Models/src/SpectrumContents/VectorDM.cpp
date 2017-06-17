@@ -4,7 +4,6 @@
 ///
 ///  Class defining the parameters that SubSpectrum 
 ///  objects providing VectorDM spectrum data must provide
-///  (file format is based on SingletDM.cpp).
 ///
 ///  *********************************************
 ///
@@ -13,7 +12,7 @@
 ///   
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Sep
+///  \date 2016 Sep, 2017 Jun
 ///
 ///  *********************************************
 
@@ -44,8 +43,8 @@ namespace Gambit {
      addParameter(Par::Pole_Mass, "h0_1");
      addParameter(Par::Pole_Mass, "V" );
 
-     addParameter(Par::Pole_Mass_1srd_high, "h0_1");
-     addParameter(Par::Pole_Mass_1srd_low,  "h0_1");
+     // addParameter(Par::Pole_Mass_1srd_high, "h0_1");
+     // addParameter(Par::Pole_Mass_1srd_low,  "h0_1");
     
      addParameter(Par::dimensionless, "g1", scalar);
      addParameter(Par::dimensionless, "g2", scalar);

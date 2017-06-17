@@ -232,6 +232,24 @@ expected_lifetime: |
 print_SingletDM_spectrum: |
     Print the spectrum contents to the output stream.
 
+#####  VectorDM  #####
+
+VectorDM_spectrum: |
+    Create spectrum object for the vector dark matter model, available functions
+    are a simple container spectrum and one produced by a spectrum generator.
+
+#####  MajoranaDM  #####
+
+MajoranaDM_spectrum: |
+    Create spectrum object for the Majorana fermion dark matter model, available functions
+    are a simple container spectrum and one produced by a spectrum generator.
+
+#####  DiracDM  #####
+
+DiracDM_spectrum: |
+    Create spectrum object for the Dirac fermion dark matter model, available functions
+    are a simple container spectrum and one produced by a spectrum generator.
+
 #####   Standard model  #####
 
 SMINPUTS: |
@@ -1933,6 +1951,15 @@ MicrOmegas_MSSM_3_6_9_2_init: |
 MicrOmegas_SingletDM_3_6_9_2_init: |
    Initialise MicrOmegas SingletDM backend.
 
+MicrOmegas_VectorDM_3_6_9_2_init: |
+   Initialise MicrOmegas VectorDM backend.
+
+MicrOmegas_MajoranaDM_3_6_9_2_init: |
+   Initialise MicrOmegas MajoranaDM backend.
+
+MicrOmegas_DiracDM_3_6_9_2_init: |
+   Initialise MicrOmegas DiracDM backend.
+
 assignVal: |
    Assigns a value to a model parameter in MicrOmegas.
 
@@ -1987,6 +2014,13 @@ VWdecay: |
 dNdE: |
    Differential cosmic-ray yield.
 
+calcSpectrum: |
+   MicrOmegas routine for calculating the dark matter annihilation spectrum at rest
+   along with the zero velocity annihilation cross section (sigmav)_0 in cm^3 s^-1.
+
+vSigmaCh: |
+   MicrOmegas array containing the relative contribution and particle names for each
+   annihilation channel. It is filled by the calcSpectrum function in micrOmegas.
 
 #-------------------------------------
 #  DecayBit capabilities
@@ -2942,6 +2976,15 @@ SingletDM_parameters: |
 
 SingletDM_running_parameters: |
    Parameters for the model SingletDM_running (see ./gambit SingletDM_running)
+
+VectorDM_parameters: |
+   Parameters for the model VectorDM (see ./gambit VectorDM)
+
+MajoranaDM_parameters: |
+   Parameters for the model MajoranaDM (see ./gambit MajoranaDM)
+
+DiracDM_parameters: |
+   Parameters for the model DiracDM (see ./gambit DiracDM)
 
 StandardModel_Higgs_parameters: |
    Parameters for the model StandardModel_Higgs (see ./gambit StandardModel_Higgs)

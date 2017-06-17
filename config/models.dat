@@ -379,3 +379,15 @@ SingletDM: |
 SingletDM_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
+
+VectorDM: |
+
+   The vector DM model, with two parameters mV (the mass of the vector DM), and lambda_hV, the strength of the vector DM interaction with the SM Higgs. Note that mV should either be interpreted as the tree level mass or directly as the pole mass for V. This is analogous to the treatment of the SM Higgs mass in the model StandardModel_Higgs.
+
+MajoranaDM: |
+
+   The Majorana fermion DM model, with three parameters mX (the mass of the Majorana fermion DM), lX = lambda_{hX}/Lambda_X where Lambda_X is the EFT cut-off scale, and cosXI is the type of interaction between the Majorana fermion DM and the SM Higgs.
+
+DiracDM: |
+
+   The Dirac fermion DM model, with three parameters mF (the mass of the Dirac fermion DM), lF = lambda_{hF}/Lambda_F where Lambda_F is the EFT cut-off scale, and cosXI is the type of interaction between the Dirac fermion DM and the SM Higgs.

@@ -2,11 +2,6 @@
 ///  *********************************************
 ///
 ///  MajoranaDM model source file. 
-///  The Majorana fermion mass mV is the tree-level mass, 
-///  lambda_hV is the tree-level DM-Higgs coupling and
-///  cosXI = 0 (1) corresponds to scalar (pseudoscalar) 
-///  DM-Higgs interaction.
-///  (file format is based on SingletDM.cpp)
 ///
 ///  *********************************************
 ///
@@ -17,7 +12,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.com)
-///  \date 2016 Aug
+///  \date 2016 Aug, 2017 Jun
 ///
 ///  *********************************************
 
@@ -37,6 +32,6 @@ using namespace Gambit::Utils;
 // Need to define MODEL and PARENT in order for helper macros to work correctly
 #define MODEL MajoranaDM
 
-  // No translation function exist for the model
+  // No translation function is required for the model
 
 #undef MODEL

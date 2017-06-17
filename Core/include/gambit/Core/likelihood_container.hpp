@@ -22,10 +22,6 @@
 ///  \date 2013 Aug
 ///  \date 2014 May, June
 ///
-///  \author Ankit Beniwal
-///    (ankit.beniwal@adelaide.edu.au)
-///  \date 2017 Feb
-///
 ///  *********************************************
 
 #ifndef __likelihood_container_hpp__
@@ -66,9 +62,6 @@ namespace Gambit
       #ifdef WITH_MPI
         GMPI::Comm& errorComm;
       #endif
-
-      // An option to control the printout behavior of the likelihood for an invalidated point
-      bool save_invalid_points;
 
       /// Primary value of the log likelihood at which a point is considered so unlikely that it can be ruled out (invalid).
       double min_valid_lnlike;
