@@ -238,10 +238,9 @@ Rules:
   - capability:  ColliderOperator
     function: operateLHCLoop
     options:
-      nEvents: [5000, 5000]
+      nEvents: [1000000, 1000000]
       pythiaNames: ["Pythia_SUSY_LHC_8TeV", "Pythia_SUSY_LHC_13TeV"]
       silenceLoop: false
-
 
   # Choose which getPythia to use
   # For a scan, we use the one that does not expect an input SLHA file (i.e. do not use getPythiaFileReader)
@@ -273,8 +272,9 @@ Rules:
       xsec_vetos: [0.048, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
-      SLHA_filenames: ["ColliderBit/data/susy_msugra_2600_350_0_10_P_softsusy.slha"]
-
+      #SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177312.slha"] #ATLAS 1LEPbb 250-0
+      SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177282.slha"] #ATLAS 1LEPbb 130-0
+      #SLHA_filenames: ["ColliderBit/data/susy_msugra_2600_350_0_10_P_softsusy.slha"]
 
   # Delphes rules and options (ex. the Delphes configuration card file)
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1

@@ -9,6 +9,7 @@
 #include <memory>
 #include <iomanip>
 #include <fstream>
+#include <ctime>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
@@ -34,12 +35,20 @@ namespace Gambit {
 
     public:
 
+      struct particleComparison {
+  	bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
+      }	compareParticlePt;
+
+      struct jetComparison {
+  	bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
+      }	compareJetPt;
+
       Analysis_ATLAS_1LEPbb_20invfb() {
 
         _numSRA=0;
         _numSRB=0;
 
-        NCUTS=10;
+        NCUTS=8;
         set_luminosity(20.3);
 
         for (size_t i=0;i<NCUTS;i++){
@@ -47,15 +56,18 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
 
-	analysisRunName = "ATLAS_1LEPbb_20invfb_test";
-	vector<const char*> variables = {"met","mCT","mbb"};
-	plots = new Perf_Plot(analysisRunName, &variables);
+	//time_t now = time(0);
+	//tm *ltm = localtime(&now);
+	analysisRunName = "ATLAS_1LEPbb_20invfb_130_0";
+	//analysisRunName.append(to_string(ltm->tm_sec));
+	vector<const char*> variables = {"met","mct","mbb","mt","j0pt","lpt"};
+	plots = new Perf_Plot(analysisRunName+"_mbb", &variables);
 
       }
 
 
       void analyze(const HEPUtils::Event* event) {
-        
+	  
 	HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
@@ -140,116 +152,110 @@ namespace Gambit {
         }
 
 
-        // Signal (baseline) requirements
-        vector<HEPUtils::Particle*> signalElectrons;
-        vector<HEPUtils::Particle*> signalMuons;
+        // Signal requirements
+        vector<HEPUtils::Particle*> signalLeptons;
         vector<HEPUtils::Jet*> signalJets;   
+	vector<HEPUtils::Jet*> signalBJets;
 
 	// Electrons
 	for (size_t iEl=0;iEl<overlapElectrons.size();iEl++) {
-	  if (overlapElectrons.at(iEl)->pT() > 25. && fabs(overlapElectrons.at(iEl)->eta()) < 2.47)signalElectrons.push_back(overlapElectrons.at(iEl));
+	  if (overlapElectrons.at(iEl)->pT() > 25. && fabs(overlapElectrons.at(iEl)->eta()) < 2.47)signalLeptons.push_back(overlapElectrons.at(iEl));
         }
-        //ATLAS::applyMediumIDElectronSelection(signalElectrons);
         
         //Muons
         for (size_t iMu=0;iMu<overlapMuons.size();iMu++) {
-          if (overlapMuons.at(iMu)->pT() > 25. && fabs(overlapMuons.at(iMu)->eta()) < 2.40)signalMuons.push_back(overlapMuons.at(iMu)); 
+          if (overlapMuons.at(iMu)->pT() > 25. && fabs(overlapMuons.at(iMu)->eta()) < 2.40)signalLeptons.push_back(overlapMuons.at(iMu)); 
         } 
-        //ATLAS::applyLooseIDMuonSelection(signalMuons);
-       
-       //Jets
-       for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
-          if (overlapJets.at(iJet)->pT() > 25. && fabs(overlapJets.at(iJet)->eta()) < 2.40)signalJets.push_back(overlapJets.at(iJet));                
-        }
+	       
+        //Jets
+        for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
+          if (overlapJets.at(iJet)->pT() > 25. && fabs(overlapJets.at(iJet)->eta()) < 2.40) {
+	    signalJets.push_back(overlapJets.at(iJet));   
+	    if (overlapJets.at(iJet)->btag())signalBJets.push_back(overlapJets.at(iJet));             
+          }
+	}
 
-       //Variable definitions
-       int nSignalLeptons = signalElectrons.size() + signalMuons.size();
-       int nBaselineLeptons = overlapElectrons.size() + overlapMuons.size();
-       int nSignalJets = signalJets.size();
+        //Variable definitions
+        int nSignalLeptons = signalLeptons.size();
+        int nBaselineLeptons = overlapElectrons.size() + overlapMuons.size();
+        int nSignalJets = signalJets.size();
+        int nSignalBJets = signalBJets.size();
+	sort(signalJets.begin(), signalJets.end(), compareJetPt);
+	sort(signalLeptons.begin(), signalLeptons.end(), compareParticlePt);
 
-       vector<HEPUtils::Jet*> signalBJets;
-       for (size_t iJet=0;iJet<signalJets.size();iJet++) {
-	   if (signalJets.at(iJet)->btag())signalBJets.push_back(signalJets.at(iJet));
-       }
-       int nSignalBJets = signalBJets.size();
+        //Preselection
+        bool leadingBJets = isLeadingBJets(signalJets, signalBJets);
 
-       //Preselection
-       bool leadingBJets = isLeadingBJets(signalJets, signalBJets);
-
-       bool preselection = 0; 
-       if (nSignalLeptons == 1 && nBaselineLeptons == 1) {
+        bool preselection = 0; 
+        if (nSignalLeptons == 1 && nBaselineLeptons == 1) {
 	  if (nSignalBJets == 1 || nSignalBJets == 2) {
             if (leadingBJets) { 
               preselection = 1;
             }
           }
-        }
-
+	}
+	
         //Signal regions
+	double mT=0; 
+	if (nSignalLeptons) {
+          mT = sqrt(2*signalLeptons.at(0)->pT()*met*(1-cos(signalLeptons.at(0)->phi()-event->missingmom().phi())));
+        }
+	
         double mCT=0;
         double mbb=0;
-	double mT=0;
+	if (nSignalJets>1) {
+          mCT = sqrt(2*signalJets.at(0)->pT()*signalJets.at(1)->pT()*(1+cos(signalJets.at(0)->phi()-signalJets.at(1)->phi())));
+          mbb = (signalJets.at(0)->mom()+signalJets.at(1)->mom()).m(); 
+	}	
 
+	bool SRA=false;
+	bool SRB=false;
         if (nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && preselection) {
-          mCT = sqrt(2*signalBJets.at(0)->pT()*signalBJets.at(1)->pT()*(1+cos(signalBJets.at(0)->phi()-signalBJets.at(1)->phi())));
-          mbb = signalBJets.at(0)->mass() + signalBJets.at(1)->mass(); 
-          if (signalElectrons.size()) {
-	    mT = sqrt(2*signalElectrons.at(0)->pT()*met*(1-cos(signalElectrons.at(0)->phi()-event->missingmom().phi())));
-	  }
-          if (signalMuons.size()) {
-            mT = sqrt(2*signalMuons.at(0)->pT()*met*(1-cos(signalMuons.at(0)->phi()-event->missingmom().phi()))); 
-          }
           if (met > 100. && mCT > 160. && mbb > 105. && mbb < 135.) {
             //SRA
             if (mT > 100. && mT < 130.) {
               _numSRA++;
+	      SRA=true;
             }
             //SRB
             if (mT > 130.) {
-              _numSRB++;   
+              _numSRB++;
+	      SRB=true;   
             }
           }
         }                      
-
-	if (preselection) {
-	  vector<double> variables = {met, mCT, mbb};
+	
+	if (preselection &&  met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) {
+	  vector<double> variables = {met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT()};
 	  plots->fill(&variables);
 	}
 
         cutFlowVector_str[0] = "No cuts ";
-        cutFlowVector_str[1] = "1 signal lepton; no additional baseline leptons";
-        cutFlowVector_str[2] = "1 or 2 signal bjet; signal bjets must be leading";
-        cutFlowVector_str[3] = "2 signal bjets";
-        cutFlowVector_str[4] = "2 or 3 signal jets";
-        cutFlowVector_str[5] = "MET > 100 GeV";
-        cutFlowVector_str[6] = "mCT > 160 GeV";
-        cutFlowVector_str[7] = "105 < mbb < 135 GeV";
-        cutFlowVector_str[8] = "SRA: 100 < mT < 130 GeV";
-        cutFlowVector_str[9] = "SRB: mT > 130 GeV";
+        cutFlowVector_str[1] = "1 lepton + 2 bjets";
+        cutFlowVector_str[2] = "met > 100 GeV";
+        cutFlowVector_str[3] = "mCT > 160 GeV";
+        cutFlowVector_str[4] = "mT > 100 GeV";
+        cutFlowVector_str[5] = "45 < mbb < 195 GeV";
+        cutFlowVector_str[6] = "SRA";
+        cutFlowVector_str[7] = "SRB";
 
         for (size_t j=0;j<NCUTS;j++){
           if(
              (j==0) ||
-
-             (j==1 && nSignalLeptons == 1 && nBaselineLeptons == 1) ||
-
-             (j==2 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2)) ||
-            
-             (j==3 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets) ||
-
-             (j==4 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2) ||
-
-             (j==5 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3)) ||
-	 
-             (j==6 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && met > 100.) ||
-
-             (j==7 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && met > 100. && mCT > 160.) ||
              
-             (j==8 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && met > 100. && mCT > 160. && mbb > 105. && mbb < 135.) ||
+	     (j==1 && nSignalLeptons == 1 && nSignalBJets == 2) ||
              
-             (j==9 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && met > 100. && mCT > 160. && mbb > 105. && mbb < 135. && mT > 100. && mT <130.) ||
+             (j==2 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100.) ||
+
+             (j==3 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160.) ||
+ 
+             (j==4 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100.) ||
+             
+	     (j==5 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) ||  
+
+             (j==6 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRA) ||  
             
-             (j==10 && nSignalLeptons == 1 && nBaselineLeptons == 1 && (nSignalBJets == 1 || nSignalBJets == 2) && leadingBJets && nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && met > 100. && mCT > 160. && mbb > 105. && mbb < 135. && mT > 130.) ){
+	     (j==7 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRB) ){
 
             cutFlowVector[j]++;
 
@@ -281,28 +287,29 @@ namespace Gambit {
 	string path = "ColliderBit/results/cutflow_";
 	path.append(analysisRunName);
 	path.append(".txt");
-	cutflowFile.open(path.c_str());	
+	cutflowFile.open(path.c_str());
+	cutflowFile<<"XSEC_PER_EVENT: "<<xsec_per_event()<<endl;
+	cutflowFile<<"XSEC: "<<xsec()<<endl;	
 	cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
         cutflowFile << "CUT FLOW: ATLAS 1 lepton, 2 bjets paper "<<endl;
         cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
+        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << " % " << endl;
         for (size_t j=0; j<NCUTS; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
+          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*xsec_per_event()*1000.*luminosity() << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
         }
         cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 	cutflowFile.close();
 
-	plots->createFile();
+	plots->createFile(luminosity(),xsec_per_event());
 
-        //Now fill a results object with the results for each SR
         SignalRegionData results_SRA;
         results_SRA.analysis_name = "Analysis_ATLAS_1LEPbb_20invfb";
         results_SRA.sr_label = "SRA";
         results_SRA.n_observed = 4.;
-        results_SRA.n_background = 5.69; //table 146 or 148??
+        results_SRA.n_background = 5.69; 
         results_SRA.background_sys = 1.10;
-        results_SRA.signal_sys = 0.; //add from analysis?? 1.29
+        results_SRA.signal_sys = 0.; 
         results_SRA.n_signal = _numSRA;
         add_result(results_SRA);
 
@@ -310,17 +317,13 @@ namespace Gambit {
         results_SRB.analysis_name = "Analysis_ATLAS_1LEPbb_20invfb";
         results_SRB.sr_label = "SRB";
         results_SRB.n_observed = 3.;
-        results_SRB.n_background = 2.67; //table 146 or 148??
+        results_SRB.n_background = 2.67; 
         results_SRB.background_sys = 0.69;
-        results_SRB.signal_sys = 0.; //add from analysis?? 0.79
+        results_SRB.signal_sys = 0.; 
         results_SRB.n_signal = _numSRB;
         add_result(results_SRB);
 
       }
-
-      struct jetComparison {
-  	bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
-      }	compareJetPt;
 
       bool isLeadingBJets(vector<HEPUtils::Jet*> jets, vector<HEPUtils::Jet*> bjets) {
         sort(jets.begin(), jets.end(), compareJetPt);
