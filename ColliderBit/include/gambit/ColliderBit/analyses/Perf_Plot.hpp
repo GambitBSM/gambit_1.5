@@ -47,11 +47,11 @@ namespace Gambit {
 	_values.push_back(*varValues);
       }
 
-      void createFile() {
+      void createFile(double luminosity=0., double xsec_per_event=0.) {
 	
 	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 	
-	size_t nvalues = _values.size();
+	size_t nvalues = _values.size();	
 		
 	if (nvalues > 0) {
         file = H5Fcreate(_outfilename.c_str(), H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
@@ -79,6 +79,39 @@ namespace Gambit {
           H5Dclose(dataset);
 
 	}
+
+	hid_t dataset_lum, dataspace_lum, dataset_xsec, dataspace_xsec;
+        hsize_t dims_lum[2], dims_xsec[2];
+        herr_t status_lum, status_xsec;
+
+        dims_lum[0] = 1;
+        dims_lum[1] = 1;
+        dataspace_lum = H5Screate_simple(2, dims_lum, NULL);
+
+        dataset_lum = H5Dcreate2(file, "luminosity", H5T_NATIVE_DOUBLE, dataspace_lum, H5S_ALL, H5S_ALL, H5P_DEFAULT);
+
+        double data_lum[1];
+	data_lum[0]=luminosity;
+
+        status_lum = H5Dwrite(dataset_lum, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_lum);
+
+        H5Sclose(dataspace_lum);
+        H5Dclose(dataset_lum);
+        
+	dims_xsec[0] = 1;
+        dims_xsec[1] = 1;
+        dataspace_xsec = H5Screate_simple(2, dims_xsec, NULL);
+
+        dataset_xsec = H5Dcreate2(file, "xsec_per_event", H5T_NATIVE_DOUBLE, dataspace_xsec, H5S_ALL, H5S_ALL, H5P_DEFAULT);
+
+        double data_xsec[1];
+	data_xsec[0]=xsec_per_event;
+
+        status_xsec = H5Dwrite(dataset_xsec, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_xsec);
+
+        H5Sclose(dataspace_xsec);
+        H5Dclose(dataset_xsec);
+
 
         H5Fclose(file);	
 	

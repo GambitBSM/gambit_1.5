@@ -2,9 +2,9 @@
 CUT FLOW: CMS Multi-lepton paper 
 ------------------------------------------------------------------------------------------------------------------------------
                                                          CUT                 RAW                  % 
-                                                  All events                 205                 100
-                                             2 light leptons                   6             2.92683
-                                                   Same-sign                   6             2.92683
+                                                  All events               30077                 100
+                                             2 light leptons                 299            0.994115
+                                                   Same-sign                 299            0.994115
                                              3rd lepton veto                   0                   0
                                                Low mass veto                   0                   0
                                                    Bjet veto                   0                   0
@@ -14,25 +14,25 @@ CUT FLOW: CMS Multi-lepton paper
                                              pT_ll > 100 GeV                   0                   0
 ------------------------------------------------------------------------------------------------------------------------------ 
                                                          CUT                 RAW                  % 
-                                                  All events                 205                 100
-                                                   3 leptons                   3             1.46341
-                                 Low mass & conversions veto                   3             1.46341
-                                                   Bjet veto                   1            0.487805
-                                                met > 50 GeV                   1            0.487805
+                                                  All events               30077                 100
+                                                   3 leptons                   4           0.0132992
+                                 Low mass & conversions veto                   4           0.0132992
+                                                   Bjet veto                   4           0.0132992
+                                                met > 50 GeV                   2           0.0066496
                                                 mT > 100 GeV                   0                   0
                                                 mll > 75 GeV                   0                   0
 ------------------------------------------------------------------------------------------------------------------------------ 
                                                          CUT                 RAW                  % 
-                                                  All events                 205                 100
-                                                   3 leptons                   3             1.46341
-                                 Low mass & conversions veto                   3             1.46341
-                                                   Bjet veto                   1            0.487805
-                                                met > 50 GeV                   1            0.487805
-                                               mT2 < 100 GeV                   1            0.487805
-                                                mll < 75 GeV                   1            0.487805
+                                                  All events               30077                 100
+                                                   3 leptons                   4           0.0132992
+                                 Low mass & conversions veto                   4           0.0132992
+                                                   Bjet veto                   4           0.0132992
+                                                met > 50 GeV                   2           0.0066496
+                                               mT2 < 100 GeV                   2           0.0066496
+                                                mll < 75 GeV                   2           0.0066496
 ------------------------------------------------------------------------------------------------------------------------------ 
                                                          CUT                 RAW                  % 
-                                                  All events                 205                 100
+                                                  All events               30077                 100
                                                    4 leptons                   0                   0
                                                Low mass veto                   0                   0
                                                    Bjet veto                   0                   0

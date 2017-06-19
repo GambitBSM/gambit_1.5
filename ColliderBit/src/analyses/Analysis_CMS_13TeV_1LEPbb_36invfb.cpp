@@ -165,7 +165,7 @@ namespace Gambit {
 	
 	if (nSignalBJets>=2) {
 	  mCT=sqrt(2*signalBJets.at(0)->pT()*signalBJets.at(1)->pT()*(1+cos(signalBJets.at(0)->phi()-signalBJets.at(1)->phi())));
-          mbb=signalBJets.at(0)->mass() + signalBJets.at(1)->mass();
+          mbb = (signalBJets.at(0)->mom()+signalBJets.at(1)->mom()).m();
 	}
 	if (signalElectrons.size()>0) {
 	  mT = sqrt(2*signalElectrons.at(0)->pT()*met*(1-cos(signalElectrons.at(0)->phi()-event->missingmom().phi())));
