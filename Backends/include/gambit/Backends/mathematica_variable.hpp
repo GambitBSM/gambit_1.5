@@ -126,8 +126,10 @@ namespace Gambit
                 return ;
               }
 
-            /* Send the variable symbol */
-            if(!WSPutSymbol(WSlink, symbol.c_str()))
+            /* Send the variable symbol, preceeded by functions to parse non-alphanumerical chars */
+            boost::replace_all(_symbol, "\\[", "\\\\[");
+            if(!WSPutFunction(WSlink, "ToExpression",1) or
+               !WSPutString(WSlink, _symbol.c_str()))
             {
               math_error("Error sending packet through WSTP");
               return ;
@@ -167,7 +169,7 @@ namespace Gambit
 
             }
           }
-          catch (std::exception& e) { ini_catch(e); }
+         catch (std::exception& e) { ini_catch(e); }
 
         }
 
@@ -177,39 +179,30 @@ namespace Gambit
         {
           try
           {
-            /* Send the expression SYMBOL = val */
-            if(!WSPutFunction(_WSlink, "Set", 2) or
-               !WSPutSymbol(_WSlink, _symbol.c_str()))
+
+            // Clear the variable that is to be replaced 
+            if(!WSPutFunction(_WSlink, "Clear",1) or
+               !WSPutFunction(_WSlink, "StringDrop", 2) or
+               !WSPutFunction(_WSlink, "StringDrop", 2) or
+               !WSPutFunction(_WSlink, "ToExpression" ,3) or
+               !WSPutString(_WSlink, _symbol.c_str()) or
+               !WSPutSymbol(_WSlink, "StandardForm") or
+               !WSPutSymbol(_WSlink, "Hold") or
+               !WSPutInteger(_WSlink, 5) or
+               !WSPutInteger(_WSlink, -1) )
             {
               math_error("Error sending packet through WSTP");
               return *this;
             }
 
-            if(!boost::is_same<TYPE, void>::value)
-            {
-              if(!boost::is_same<TYPE, int>::value and
-                 !boost::is_same<TYPE, float>::value and
-                 !boost::is_same<TYPE, double>::value and
-                 !boost::is_same<TYPE, bool>::value and
-                 !boost::is_same<TYPE, char>::value and
-                 !boost::is_same<TYPE, str>::value)
-                backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
-              else if(!WSPutVariable(_WSlink, val))
-              {
-                math_error("Error reading packet from WSTP");
-                return *this;
-              }
-
-            }
-
-            /* Mark the end of the message */
+            // Mark the end of the message 
             if(!WSEndPacket(_WSlink))
             {
               math_error("Error sending packet through WSTP");
               return *this;
             }
 
-            /* Wait to receive a packet from the kernel */
+            // Wait to receive a packet from the kernel
             int pkt;
             while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
             {
@@ -220,8 +213,38 @@ namespace Gambit
                 return *this;
               }
             }
+            // Discard it
+            WSNewPacket(_WSlink);
 
-            /* Read the received packet into the return value, unless it's void */
+            // Send the expression SYMBOL = val
+            std::stringstream ss;
+            ss << _symbol << " = " << val;
+            if(!WSPutFunction(_WSlink, "ToExpression", 1) or
+               !WSPutString(_WSlink, ss.str().c_str()))
+            {
+              math_error("Error sending packet through WSTP");
+              return *this;
+            }
+           
+            // Mark the end of the message
+            if(!WSEndPacket(_WSlink))
+            {
+              math_error("Error sending packet through WSTP");
+              return *this;
+            }
+
+            // Wait to receive a packet from the kernel
+            while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
+            {
+              WSNewPacket(_WSlink);
+              if (WSError(_WSlink))
+              {
+                math_error("Error reading packet from WSTP");
+                return *this;
+              }
+            }
+
+            // Read the received packet into the return value, unless it's void
             if(!boost::is_same<TYPE, void>::value)
             {
               if(!boost::is_same<TYPE, int>::value and
@@ -276,7 +299,8 @@ namespace Gambit
               }
 
             /* Send the variable symbol */
-            if(!WSPutSymbol(_WSlink, _symbol.c_str()))
+            if(!WSPutFunction(_WSlink, "ToExpression", 1) or
+               !WSPutString(_WSlink, _symbol.c_str()))
             {
               math_error("Error sending packet through WSTP");
               return _var;

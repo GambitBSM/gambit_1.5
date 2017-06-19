@@ -62,6 +62,13 @@ BE_NAMESPACE
      cout << ExtractElement(list, 3) << endl;
      cout << SquareList(list) << endl;
 
+     cout << "deltavar = " << *deltavar << endl;
+     *deltavar = 1001;
+     cout << "deltavar = " << *deltavar << endl;
+     cout << "deltavar + 2 = " << *deltavar + 2 << endl;
+
+     cout << Gammafunc(*Var) << endl;
+
      return CalculateSum(result1,result2);
 
   }

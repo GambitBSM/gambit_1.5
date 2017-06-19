@@ -41,3 +41,9 @@ ExtractElement[list_,i_]:=list[[i]]
 
 
 SquareList[list_]:=Table[list[[i]]^2,{i,Length[list]}]
+
+
+\[Delta]var = 75;
+
+
+\[CapitalGamma]func[var_] := var + 2;

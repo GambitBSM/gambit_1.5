@@ -237,6 +237,13 @@ MathTest_VarEqualVar2: |
 MathTest_VoidTest: |
    Test function for Mathematica backends for testing void functions
 
+MathTest_Gammafunc: |
+   Test function for Mathematica backends for testing non-alphanumerical characters in function names
+
+MathTest_deltabar: |
+   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names
+
+
 
 #-------------------------------------
 #  SpecBit
