@@ -24,10 +24,10 @@ namespace Gambit {
     private:
 
       // Numbers passing cuts
-      double _numSR2_SF_loose, _numSR2_SF_tight, _numSR2_DF_100, _numSR2_DF_150, _numSR2_DF_200, _numSR2_DF_300, _numSR2_int, _numSR2_high, _numSR2_low_2J, _num_low_3J, _numSR3_slep_a, _numSR3_slep_b, _numSR3_slep_c, _numSR3_slep_d, _numSR3_slep_e, _numSR3_WZ_0Ja, _numSR3_WZ_0Jb, _numSR3_WZ_0Jc, _numSR3_WZ_1Ja, _numSR3_WZ_1Jb, _numSR3_WZ_1Jc; 
-      vector<int> cutFlowVector1, cutFlowVector2, cutFlowVector3, cutFlowVector4;
-      vector<string> cutFlowVector_str1, cutFlowVector_str2, cutFlowVector_str3, cutFlowVector_str4;
-      size_t NCUTS1, NCUTS2, NCUTS3, NCUTS4;
+      double _numSR2_SF_loose, _numSR2_SF_tight, _numSR2_DF_100, _numSR2_DF_150, _numSR2_DF_200, _numSR2_DF_300, _numSR2_int, _numSR2_high, _numSR2_low, _numSR3_slep_a, _numSR3_slep_b, _numSR3_slep_c, _numSR3_slep_d, _numSR3_slep_e, _numSR3_WZ_0Ja, _numSR3_WZ_0Jb, _numSR3_WZ_0Jc, _numSR3_WZ_1Ja, _numSR3_WZ_1Jb, _numSR3_WZ_1Jc; 
+      vector<int> cutFlowVector;
+      vector<string> cutFlowVector_str;
+      size_t NCUTS;
 
       Perf_Plot* plots;
       ofstream cutflowFile;
@@ -46,8 +46,7 @@ namespace Gambit {
 	_numSR2_DF_300=0;
 	_numSR2_int=0;
 	_numSR2_high=0;
-	_numSR2_low_2J=0;
-	_num_low_3J=0;
+	_numSR2_low=0;
 	_numSR3_slep_a=0;
 	_numSR3_slep_b=0;
 	_numSR3_slep_c=0;
@@ -61,27 +60,12 @@ namespace Gambit {
 	_numSR3_WZ_1Jc=0;
 
 
-	NCUTS1=10;
-	NCUTS2=7;
-	NCUTS3=7;
-	NCUTS4=5;
-	set_luminosity(35.9);
+	NCUTS=9;
+	set_luminosity(36.1);
 
-        for (size_t i=0;i<NCUTS1;i++){
-          cutFlowVector1.push_back(0);
-          cutFlowVector_str1.push_back("");
-        }
-        for (size_t i=0;i<NCUTS2;i++){
-          cutFlowVector2.push_back(0);
-          cutFlowVector_str2.push_back("");
-        }
-        for (size_t i=0;i<NCUTS3;i++){
-          cutFlowVector3.push_back(0);
-          cutFlowVector_str3.push_back("");
-        }
-        for (size_t i=0;i<NCUTS4;i++){
-          cutFlowVector4.push_back(0);
-          cutFlowVector_str4.push_back("");
+        for (size_t i=0;i<NCUTS;i++){
+          cutFlowVector.push_back(0);
+          cutFlowVector_str.push_back("");
         }
 
         analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb_test";
@@ -90,6 +74,13 @@ namespace Gambit {
 
       }
 
+      struct ptComparison {
+        bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
+      } comparePt;
+      
+      struct ptJetComparison {
+        bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
+      } compareJetPt;
 
       void analyze(const HEPUtils::Event* event) {
 	HEPUtilsAnalysis::analyze(event);
@@ -109,7 +100,7 @@ namespace Gambit {
 
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
-	  if (muon->pT()>10. &&fabs(muon->eta())<2.5) {
+	  if (muon->pT()>10. &&fabs(muon->eta())<2.4) {
             baselineMuons.push_back(muon);
 	    baselineLeptons.push_back(muon);
           }
@@ -120,13 +111,6 @@ namespace Gambit {
           if (jet->pT()>20. &&fabs(jet->eta())<2.8) {
             baselineJets.push_back(jet);
 	  }
-        }
-
-        vector<HEPUtils::Jet*> baselinePhotons;
-        for (HEPUtils::Jet* photons : event->photons()) {
-          if (photon->pT()>25. && fabs(photon->eta())<2.37 && (fabs(photon->eta())<1.37 || fabs(photon->eta())>1.52)) {
-            baselineJets.push_back(jet);
-          }
         }
 
 	//Overlap Removal + Signal Objects	
@@ -144,14 +128,14 @@ namespace Gambit {
             if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.2)overlapEl.push_back(iEl);
 	  }
 	  if (overlapEl.size()>0 && baselineJets.at(iJet)->btag()) {
-	    overlapJet.push_back(iJet)
+	    overlapJet.push_back(iJet);
 	    for (size_t iO=0;iO<overlapEl.size();iO++) {
 	      baselineElectrons.erase(baselineElectrons.begin()+overlapEl.at(iO));  
 	    }
 	  }
-	 if (overlap.size()==0)overlapJet.push_back(iJet);
+	  if (overlapEl.size()==0)overlapJet.push_back(iJet);
 	}
-	for (size_t iO=0;overlapJet.size();i0++) {
+	for (size_t iO=0;iO<overlapJet.size();iO++) {
 	  baselineJets.erase(baselineJets.begin()+overlapJet.at(iO));
 	}
 
@@ -175,7 +159,9 @@ namespace Gambit {
 	  }
 	  if (!overlap) {
 	    signalJets.push_back(baselineJets.at(iJet));
-	    if (baselineJets.at(iJet)->btag())signalBJets.push_back(baselineJets.at(iJet));
+	    if (baselineJets.at(iJet)->btag()) {
+	      if (fabs(baselineJets.at(iJet)->eta())<2.5 || (fabs(baselineJets.at(iJet)->eta())>2.4 && baselineJets.at(iJet)->pT()>50))signalBJets.push_back(baselineJets.at(iJet));
+	    }
 	    if (!baselineJets.at(iJet)->btag())signalNonBJets.push_back(baselineJets.at(iJet));
 	  }
 	}
@@ -187,16 +173,17 @@ namespace Gambit {
 	    
 	  }
 	  if (!overlap) {
-	    signalMuons.push_back(baselineMuons.at(iEl));
-	    signalLeptons.push_back(baselineMuons.at(iEl));
+	    signalMuons.push_back(baselineMuons.at(iMu));
+	    signalLeptons.push_back(baselineMuons.at(iMu));
 	  }
 	}
 
 	sort(signalJets.begin(),signalJets.end(),compareJetPt);	
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
-        int nSignalLeptons = signalLeptons.size();
-        int nSignalJets = signalJets.size();
-	int nSignalNonBJets = signalNonBJets.size();       
+        size_t nSignalLeptons = signalLeptons.size();
+        size_t nSignalJets = signalJets.size();
+	size_t nSignalNonBJets = signalNonBJets.size();       
+	size_t nSignalBJets = signalBJets.size();
  
 	//Preselection
         bool preselection=false; 
@@ -234,7 +221,7 @@ namespace Gambit {
 
 	//Bjet veto
 	bool bjet_veto=true;
-	for (size_t iJet;iJet<nSignalBJets;iJet++);
+	for (size_t iJet;iJet<nSignalBJets;iJet++) {
 	  if (signalBJets.at(iJet)->pT()>20 && fabs(signalBJets.at(iJet)->eta())<2.4)bjet_veto=false;
 	}
 
@@ -256,7 +243,7 @@ namespace Gambit {
 	if (preselection && nSignalLeptons==2 && OSpairs.size() && mll>40 && bjet_veto) {
 	  if (signalLeptons.at(1)->pT()>25 && nSignalJets>1) {
 	    if (signalJets.at(0)->pT()>30 && signalJets.at(1)->pT()>30) {
-		HEPUtils::P4 Z=signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()
+		HEPUtils::P4 Z=signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom();
 	     	double deltaR_ll=fabs(signalLeptons.at(0)->mom().deltaR_eta(signalLeptons.at(1)->mom()));
 		double deltaR_jj=fabs(signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom()));
 	      //SR2_int + SR2_high
@@ -269,22 +256,23 @@ namespace Gambit {
 		}
 	      }
 	      //SR2_low_2J
-	      if (nSignalNonBJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z_pT>60.) {
+	      if (nSignalNonBJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60.) {
 		HEPUtils::P4 W=signalJets.at(0)->mom()+signalJets.at(1)->mom();
 	        double deltaPhi_met_W=fabs(W.phi()-event->missingmom().phi());
 	        double deltaPhi_met_Z=fabs(Z.phi()-event->missingmom().phi());
-		if (deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low_2J++;
+		if (deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
 	      }	
 	      //SR2_low_3J
 	      if (nSignalNonBJets>2 && nSignalNonBJets<6 && mll>86 && mll<96 && mjj>70 && mjj<90 && met>100 && Z.pT()>40 && deltaR_jj<2.2) {
 		vector<HEPUtils::P4> W_ISR=get_W_ISR(signalJets,Z,event->missingmom());
 		double deltaPhi_met_W=fabs(W_ISR.at(0).phi()-event->missingmom().phi());
 		double deltaPhi_met_ISR=fabs(W_ISR.at(1).phi()-event->missingmom().phi());
-		double deltaPhi_met_jet1=fabs(signalJets.at(0).phi()-event->missingmom().phi());
-		if (deltaPhi_met_W<2.2 && delta_met_ISR>2.4 && deltaPhi_met_jet1>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && fabs(Z.eta())<1.6 && signalJets.at(2)->pT()>30.)_numSR2_low_3J++;
-	    }
+		double deltaPhi_met_jet1=fabs(signalJets.at(0)->phi()-event->missingmom().phi());
+		if (deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet1>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && fabs(Z.eta())<1.6 && signalJets.at(2)->pT()>30.)_numSR2_low++;
+	      }
 
-	  }	
+	    }	
+	  }
 	}
 	
 	//3lep
@@ -314,12 +302,12 @@ namespace Gambit {
 	  if (mSFOS>81.2 && mSFOS<101.2 && nSignalNonBJets==0 && mTmin>110.) {
 	    if (met>60. && met<120.)_numSR3_WZ_0Ja++;
 	    if (met>120. && met<170.)_numSR3_WZ_0Jb++;
-	    if (met>170.)_numSR3_WZ_0Jc;
+	    if (met>170.)_numSR3_WZ_0Jc++;
 	  }
 	  if (mSFOS>81.2 && mSFOS<101.2 && nSignalNonBJets>0) {
-	    if (met>120. && met<200. && mTmin>110. && (signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).pT()<120. && signalJets.at(0)>70.)_numSR3_WZ_1Ja++;
+	    if (met>120. && met<200. && mTmin>110. && (signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).pT()<120. && signalJets.at(0)->pT()>70.)_numSR3_WZ_1Ja++;
 	    if (met>200. && mTmin>110. && mTmin<160.)_numSR3_WZ_1Jb++;
-	    if (met>200. && signalLeptons.at(2)->pT()>35. && mTmin>160.)_numSR3_WZ_1Jc+;
+	    if (met>200. && signalLeptons.at(2)->pT()>35. && mTmin>160.)_numSR3_WZ_1Jc++;
 	  }
 	}
 
@@ -329,116 +317,44 @@ namespace Gambit {
           plots->fill(&variables);
         }
 
-        cutFlowVector_str1[0] = "All events";
-        cutFlowVector_str1[1] = "2 light leptons";
-        cutFlowVector_str1[2] = "Same-sign";
-        cutFlowVector_str1[3] = "3rd lepton veto";
-        cutFlowVector_str1[4] = "Low mass veto";
-        cutFlowVector_str1[5] = "Bjet veto";
-        cutFlowVector_str1[6] = "met > 60 GeV";
-        cutFlowVector_str1[7] = "0 or 1 ISR jet";
-        cutFlowVector_str1[8] = "mT < 100 GeV";
-        cutFlowVector_str1[9] = "pT_ll > 100 GeV";
-
-        cutFlowVector_str2[0] = "All events";
-        cutFlowVector_str2[1] = "3 leptons";
-        cutFlowVector_str2[2] = "Low mass & conversions veto";
-        cutFlowVector_str2[3] = "Bjet veto";
-        cutFlowVector_str2[4] = "met > 50 GeV";
-        cutFlowVector_str2[5] = "mT > 100 GeV";
-        cutFlowVector_str2[6] = "mll > 75 GeV";
-
-        cutFlowVector_str3[0] = "All events";
-        cutFlowVector_str3[1] = "3 leptons";
-        cutFlowVector_str3[2] = "Low mass & conversions veto";
-        cutFlowVector_str3[3] = "Bjet veto";
-        cutFlowVector_str3[4] = "met > 50 GeV";
-        cutFlowVector_str3[5] = "mT2 < 100 GeV";
-        cutFlowVector_str3[6] = "mll < 75 GeV";
-
-        cutFlowVector_str4[0] = "All events";
-        cutFlowVector_str4[1] = "4 leptons";
-        cutFlowVector_str4[2] = "Low mass veto";
-        cutFlowVector_str4[3] = "Bjet veto";
-        cutFlowVector_str4[4] = "met > 100 GeV";
-
-        for (size_t j=0;j<NCUTS1;j++){
-          if(
-             (j==0) ||
-
-	     (j==1 && nSignalLightLeptons==2) ||
-
-	     (j==2 && nSignalLightLeptons==2) ||
-
-	     (j==3 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0) ||
-
-	     (j==4 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2) ||
-
-	     (j==5 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto) ||
-
-	     (j==6 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto)  ||
-
-	     (j==7 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet) ||            
- 
-             (j==8 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet && mT<100) ||
-             
-             (j==9 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet && mT<100 && pT_ll>100) )
-
-	  cutFlowVector1[j]++;
+	bool lepton_pT_veto=false;
+	if (nSignalLeptons==2) {
+	  if (signalLeptons.at(0)->pT()>20. && signalLeptons.at(1)->pT()>20.)lepton_pT_veto=true;
 	}
 
-        for (size_t j=0;j<NCUTS2;j++){
+        cutFlowVector_str[0] = "All events";
+        cutFlowVector_str[1] = "2 baseline leptons";
+        cutFlowVector_str[2] = "2 signal leptons";
+        cutFlowVector_str[3] = "Opposite-sign";
+        cutFlowVector_str[4] = "Lepton pT > 20 GeV";
+        cutFlowVector_str[5] = "mll > 40 GeV";
+        cutFlowVector_str[6] = "b-veto";
+        cutFlowVector_str[7] = "met > 50 GeV";
+        cutFlowVector_str[8] = "mT2 > 75 GeV";
+
+        for (size_t j=0;j<NCUTS;j++){
           if(
              (j==0) ||
 
-             (j==1 && nSignalLeptons==3) ||
+	     (j==1 && baselineLeptons.size()==2) ||
 
-             (j==2 && nSignalLeptons==3 && low_mass_veto && conversion_veto) ||
+	     (j==2 && baselineLeptons.size()==2 && nSignalLeptons==2) ||
 
-             (j==3 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto) ||
+	     (j==3 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size()) ||
 
-             (j==4 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50.) ||
+	     (j==4 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto) ||
 
-             (j==5 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT>100.) ||
+	     (j==5 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40.) ||
 
-             (j==6 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT>100. && mll>75.) )
+	     (j==6 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40. && bjet_veto)  ||
 
-          cutFlowVector2[j]++;
-        }
+	     (j==7 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40. && bjet_veto && met>50.) ||            
+ 
+             (j==8 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40. && bjet_veto && met>50. && mT2>75.) )
 
-        for (size_t j=0;j<NCUTS3;j++){
-          if(
-             (j==0) ||
+	  cutFlowVector[j]++;
+	}
 
-             (j==1 && nSignalLeptons==3) ||
-
-             (j==2 && nSignalLeptons==3 && low_mass_veto && conversion_veto) ||
-
-             (j==3 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto) ||
-
-             (j==4 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50.) ||
-
-             (j==5 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT<100.) ||
-
-             (j==6 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT<100. && mll<75.) )
-
-          cutFlowVector3[j]++;
-        }
-
-        for (size_t j=0;j<NCUTS4;j++){
-          if(
-             (j==0) ||
-        
-             (j==1 && nSignalLeptons==4) ||
-        
-             (j==2 && nSignalLeptons==4 && low_mass_veto) ||
-        
-             (j==3 && nSignalLeptons==4 && low_mass_veto && bjet_veto) ||
-      
-             (j==4 && nSignalLeptons==4 && low_mass_veto && bjet_veto && met>100.) )
-
-          cutFlowVector4[j]++;
-        }
       }
 
 
@@ -451,34 +367,32 @@ namespace Gambit {
                 = dynamic_cast<Analysis_ATLAS_13TeV_MultiLEP_36invfb*>(other);
 
         // Here we will add the subclass member variables:
-        if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
-	if (NCUTS2 != specificOther->NCUTS2) NCUTS2 = specificOther->NCUTS2;
-	if (NCUTS3 != specificOther->NCUTS3) NCUTS3 = specificOther->NCUTS3;
-	if (NCUTS4 != specificOther->NCUTS4) NCUTS4 = specificOther->NCUTS4;
-        for (size_t j = 0; j < NCUTS1; j++) {
-          cutFlowVector1[j] += specificOther->cutFlowVector1[j];
-          cutFlowVector_str1[j] = specificOther->cutFlowVector_str1[j];
+        if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
+        for (size_t j = 0; j < NCUTS; j++) {
+          cutFlowVector[j] += specificOther->cutFlowVector[j];
+          cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
-        for (size_t j = 0; j < NCUTS2; j++) {
-          cutFlowVector2[j] += specificOther->cutFlowVector2[j];
-          cutFlowVector_str2[j] = specificOther->cutFlowVector_str2[j];
-        }
-        for (size_t j = 0; j < NCUTS3; j++) {
-          cutFlowVector3[j] += specificOther->cutFlowVector3[j];
-          cutFlowVector_str3[j] = specificOther->cutFlowVector_str3[j];
-        }
-        for (size_t j = 0; j < NCUTS4; j++) {
-          cutFlowVector4[j] += specificOther->cutFlowVector4[j];
-          cutFlowVector_str4[j] = specificOther->cutFlowVector_str4[j];
-        }
-        _numSR1 += specificOther->_numSR1;
-        _numSR2 += specificOther->_numSR2;
-        _numSR3 += specificOther->_numSR3;
-        _numSR4 += specificOther->_numSR4;
-        _numSR5 += specificOther->_numSR5;
-        _numSR6 += specificOther->_numSR6;
-        _numSR7 += specificOther->_numSR7;
-        _numSR8 += specificOther->_numSR8;
+
+	_numSR2_SF_loose+= specificOther->_numSR2_SF_loose;
+	_numSR2_SF_tight+= specificOther->_numSR2_SF_tight;
+	_numSR2_DF_100+= specificOther->_numSR2_DF_100;
+	_numSR2_DF_150+= specificOther->_numSR2_DF_150;
+	_numSR2_DF_200+= specificOther->_numSR2_DF_200;
+	_numSR2_DF_300+= specificOther->_numSR2_DF_300;
+	_numSR2_int+= specificOther->_numSR2_int;
+	_numSR2_high+= specificOther->_numSR2_high;
+	_numSR2_low+= specificOther->_numSR2_low;
+	_numSR3_slep_a+= specificOther->_numSR3_slep_a;
+	_numSR3_slep_b+= specificOther->_numSR3_slep_b;
+	_numSR3_slep_c+= specificOther->_numSR3_slep_c;
+	_numSR3_slep_d+= specificOther->_numSR3_slep_d;
+	_numSR3_slep_e+= specificOther->_numSR3_slep_e;
+	_numSR3_WZ_0Ja+= specificOther->_numSR3_WZ_0Ja;
+	_numSR3_WZ_0Jb+= specificOther->_numSR3_WZ_0Jb;
+	_numSR3_WZ_0Jc+= specificOther->_numSR3_WZ_0Jc;
+	_numSR3_WZ_1Ja+= specificOther->_numSR3_WZ_1Ja;
+	_numSR3_WZ_1Jb+= specificOther->_numSR3_WZ_1Jb;
+	_numSR3_WZ_1Jc+= specificOther->_numSR3_WZ_1Jc;
       }
 
 
@@ -489,26 +403,11 @@ namespace Gambit {
         path.append(".txt");
         cutflowFile.open(path.c_str());
         cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile << "CUT FLOW: CMS Multi-lepton paper "<<endl;
+        cutflowFile << "CUT FLOW: ATLAS Multi-lepton paper "<<endl;
         cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
         cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS1; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str1[j].c_str() << setw(20) << cutFlowVector1[j] << setw(20) << 100.*cutFlowVector1[j]/cutFlowVector1[0] << endl;
-        }
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS2; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str2[j].c_str() << setw(20) << cutFlowVector2[j] << setw(20) << 100.*cutFlowVector2[j]/cutFlowVector2[0] << endl;
-        }
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS3; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str3[j].c_str() << setw(20) << cutFlowVector3[j] << setw(20) << 100.*cutFlowVector3[j]/cutFlowVector1[0] << endl;
-        }
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS4; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str4[j].c_str() << setw(20) << cutFlowVector4[j] << setw(20) << 100.*cutFlowVector4[j]/cutFlowVector4[0] << endl;
+        for (size_t j=0; j<NCUTS; j++) {
+          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
         }
         cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
         cutflowFile.close();
@@ -516,25 +415,207 @@ namespace Gambit {
         plots->createFile();
 
         //Now fill a results object with the results for each SR
-        SignalRegionData results_SR1;
-        results_SR1.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
-        results_SR1.sr_label = "SR1";
-        results_SR1.n_observed = 13.;
-        results_SR1.n_background = 12.; 
-        results_SR1.background_sys = 3.;
-        results_SR1.signal_sys = 0.; 
-        results_SR1.n_signal = _numSR1;
-	add_result(results_SR1);
+        SignalRegionData results_SR2_SF_loose;
+        results_SR2_SF_loose.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_SF_loose.sr_label = "SR2_SF_loose";
+        results_SR2_SF_loose.n_observed = 133.;
+        results_SR2_SF_loose.n_background = 133.; 
+        results_SR2_SF_loose.background_sys = 22.;
+        results_SR2_SF_loose.signal_sys = 0.; 
+        results_SR2_SF_loose.n_signal = _numSR2_SF_loose;
+	add_result(results_SR2_SF_loose);
+
+        SignalRegionData results_SR2_SF_tight;
+        results_SR2_SF_tight.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_SF_tight.sr_label = "SR2_SF_tight";
+        results_SR2_SF_tight.n_observed = 9.;
+        results_SR2_SF_tight.n_background = 9.8; 
+        results_SR2_SF_tight.background_sys = 2.9;
+        results_SR2_SF_tight.signal_sys = 0.; 
+        results_SR2_SF_tight.n_signal = _numSR2_SF_tight;
+	add_result(results_SR2_SF_tight);
+
+        SignalRegionData results_SR2_DF_100;
+        results_SR2_DF_100.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_DF_100.sr_label = "SR2_DF_100";
+        results_SR2_DF_100.n_observed = 78.;
+        results_SR2_DF_100.n_background = 68.; 
+        results_SR2_DF_100.background_sys = 7.;
+        results_SR2_DF_100.signal_sys = 0.; 
+        results_SR2_DF_100.n_signal = _numSR2_DF_100;
+	add_result(results_SR2_DF_100);
+
+        SignalRegionData results_SR2_DF_150;
+        results_SR2_DF_150.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_DF_150.sr_label = "SR2_DF_150";
+        results_SR2_DF_150.n_observed = 11;
+        results_SR2_DF_150.n_background = 11.5; 
+        results_SR2_DF_150.background_sys = 3.1;
+        results_SR2_DF_150.signal_sys = 0.; 
+        results_SR2_DF_150.n_signal = _numSR2_DF_150;
+	add_result(results_SR2_DF_150);
+
+        SignalRegionData results_SR2_DF_200;
+        results_SR2_DF_200.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_DF_200.sr_label = "SR2_DF_200";
+        results_SR2_DF_200.n_observed = 6.;
+        results_SR2_DF_200.n_background = 2.1; 
+        results_SR2_DF_200.background_sys = 1.9;
+        results_SR2_DF_200.signal_sys = 0.; 
+        results_SR2_DF_200.n_signal = _numSR2_DF_200;
+	add_result(results_SR2_DF_200);
+
+        SignalRegionData results_SR2_DF_300;
+        results_SR2_DF_300.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_DF_300.sr_label = "SR2_DF_300";
+        results_SR2_DF_300.n_observed = 2.;
+        results_SR2_DF_300.n_background = 0.6; 
+        results_SR2_DF_300.background_sys = 0.6;
+        results_SR2_DF_300.signal_sys = 0.; 
+        results_SR2_DF_300.n_signal = _numSR2_DF_300;
+	add_result(results_SR2_DF_300);
+
+        SignalRegionData results_SR2_int;
+        results_SR2_int.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_int.sr_label = "SR2_int";
+        results_SR2_int.n_observed = 2.;
+        results_SR2_int.n_background = 4.1; 
+        results_SR2_int.background_sys = 2.6;
+        results_SR2_int.signal_sys = 0.; 
+        results_SR2_int.n_signal = _numSR2_int;
+	add_result(results_SR2_int);
+
+        SignalRegionData results_SR2_high;
+        results_SR2_high.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_high.sr_label = "SR2_high";
+        results_SR2_high.n_observed = 0.;
+        results_SR2_high.n_background = 1.6; 
+        results_SR2_high.background_sys = 1.6;
+        results_SR2_high.signal_sys = 0.; 
+        results_SR2_high.n_signal = _numSR2_high;
+	add_result(results_SR2_high);
+
+        SignalRegionData results_SR2_low;
+        results_SR2_low.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR2_low.sr_label = "SR2_low";
+        results_SR2_low.n_observed = 11.;
+        results_SR2_low.n_background = 4.2; 
+        results_SR2_low.background_sys = 3.8;
+        results_SR2_low.signal_sys = 0.; 
+        results_SR2_low.n_signal = _numSR2_low;
+	add_result(results_SR2_low);
+
+        SignalRegionData results_SR3_slep_a;
+        results_SR3_slep_a.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_slep_a.sr_label = "SR3_slep_a";
+        results_SR3_slep_a.n_observed = 4.;
+        results_SR3_slep_a.n_background = 2.23; 
+        results_SR3_slep_a.background_sys = 0.79;
+        results_SR3_slep_a.signal_sys = 0.; 
+        results_SR3_slep_a.n_signal = _numSR3_slep_a;
+	add_result(results_SR3_slep_a);
+
+        SignalRegionData results_SR3_slep_b;
+        results_SR3_slep_b.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_slep_b.sr_label = "SR3_slep_b";
+        results_SR3_slep_b.n_observed = 3.;
+        results_SR3_slep_b.n_background = 2.79; 
+        results_SR3_slep_b.background_sys = 0.43;
+        results_SR3_slep_b.signal_sys = 0.; 
+        results_SR3_slep_b.n_signal = _numSR3_slep_b;
+	add_result(results_SR3_slep_b);
+
+        SignalRegionData results_SR3_slep_c;
+        results_SR3_slep_c.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_slep_c.sr_label = "SR3_slep_c";
+        results_SR3_slep_c.n_observed = 9.;
+        results_SR3_slep_c.n_background = 5.42; 
+        results_SR3_slep_c.background_sys = 0.93;
+        results_SR3_slep_c.signal_sys = 0.; 
+        results_SR3_slep_c.n_signal = _numSR3_slep_c;
+	add_result(results_SR3_slep_c);
+
+        SignalRegionData results_SR3_slep_d;
+        results_SR3_slep_d.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_slep_d.sr_label = "SR3_slep_d";
+        results_SR3_slep_d.n_observed = 0.;
+        results_SR3_slep_d.n_background = 1.42; 
+        results_SR3_slep_d.background_sys = 0.38;
+        results_SR3_slep_d.signal_sys = 0.; 
+        results_SR3_slep_d.n_signal = _numSR3_slep_d;
+	add_result(results_SR3_slep_d);
+
+        SignalRegionData results_SR3_slep_e;
+        results_SR3_slep_e.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_slep_e.sr_label = "SR3_slep_e";
+        results_SR3_slep_e.n_observed = 0.;
+        results_SR3_slep_e.n_background = 1.14; 
+        results_SR3_slep_e.background_sys = 0.23;
+        results_SR3_slep_e.signal_sys = 0.; 
+        results_SR3_slep_e.n_signal = _numSR3_slep_e;
+	add_result(results_SR3_slep_e);
+
+        SignalRegionData results_SR3_WZ_0Ja;
+        results_SR3_WZ_0Ja.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_0Ja.sr_label = "SR3_WZ_0Ja";
+        results_SR3_WZ_0Ja.n_observed = 21.;
+        results_SR3_WZ_0Ja.n_background = 21.74; 
+        results_SR3_WZ_0Ja.background_sys = 2.85;
+        results_SR3_WZ_0Ja.signal_sys = 0.; 
+        results_SR3_WZ_0Ja.n_signal = _numSR3_WZ_0Ja;
+	add_result(results_SR3_WZ_0Ja);
+
+        SignalRegionData results_SR3_WZ_0Jb;
+        results_SR3_WZ_0Jb.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_0Jb.sr_label = "SR3_WZ_0Jb";
+        results_SR3_WZ_0Jb.n_observed = 1.;
+        results_SR3_WZ_0Jb.n_background = 2.68; 
+        results_SR3_WZ_0Jb.background_sys = 0.46;
+        results_SR3_WZ_0Jb.signal_sys = 0.; 
+        results_SR3_WZ_0Jb.n_signal = _numSR3_WZ_0Jb;
+	add_result(results_SR3_WZ_0Jb);
+
+        SignalRegionData results_SR3_WZ_0Jc;
+        results_SR3_WZ_0Jc.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_0Jc.sr_label = "SR3_WZ_0Jc";
+        results_SR3_WZ_0Jc.n_observed = 2.;
+        results_SR3_WZ_0Jc.n_background = 1.56; 
+        results_SR3_WZ_0Jc.background_sys = 0.33;
+        results_SR3_WZ_0Jc.signal_sys = 0.; 
+        results_SR3_WZ_0Jc.n_signal = _numSR3_WZ_0Jc;
+	add_result(results_SR3_WZ_0Jc);
+
+        SignalRegionData results_SR3_WZ_1Ja;
+        results_SR3_WZ_1Ja.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_1Ja.sr_label = "SR3_WZ_1Ja";
+        results_SR3_WZ_1Ja.n_observed = 1.;
+        results_SR3_WZ_1Ja.n_background = 2.21; 
+        results_SR3_WZ_1Ja.background_sys = 0.53;
+        results_SR3_WZ_1Ja.signal_sys = 0.; 
+        results_SR3_WZ_1Ja.n_signal = _numSR3_WZ_1Ja;
+	add_result(results_SR3_WZ_1Ja);
+
+        SignalRegionData results_SR3_WZ_1Jb;
+        results_SR3_WZ_1Jb.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_1Jb.sr_label = "SR3_WZ_1Jb";
+        results_SR3_WZ_1Jb.n_observed = 3.;
+        results_SR3_WZ_1Jb.n_background = 1.82; 
+        results_SR3_WZ_1Jb.background_sys = 0.26;
+        results_SR3_WZ_1Jb.signal_sys = 0.; 
+        results_SR3_WZ_1Jb.n_signal = _numSR3_WZ_1Jb;
+	add_result(results_SR3_WZ_1Jb);
+
+        SignalRegionData results_SR3_WZ_1Jc;
+        results_SR3_WZ_1Jb.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_1Jb.sr_label = "SR3_WZ_1Jc";
+        results_SR3_WZ_1Jb.n_observed = 4.;
+        results_SR3_WZ_1Jb.n_background = 1.26; 
+        results_SR3_WZ_1Jb.background_sys = 0.34;
+        results_SR3_WZ_1Jb.signal_sys = 0.; 
+        results_SR3_WZ_1Jb.n_signal = _numSR3_WZ_1Jc;
+	add_result(results_SR3_WZ_1Jc);
 
       }
-
-      struct ptComparison {
-        bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
-      } comparePt;
-      
-      struct ptJetComparison {
-        bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
-      } compareJetPt;
 
       vector<vector<HEPUtils::Particle*>> getOSSFpair(vector<HEPUtils::Particle*> leptons) {
         vector<vector<HEPUtils::Particle*>> OSSFpair_container;
@@ -566,7 +647,7 @@ namespace Gambit {
         return OSpair_container;
       }
 
-    vector<HEPUtils::P4> get_W_ISR(vector<HEPUtils::Jet*> jets, HEPUtils::P4 Z, HEPUtils::P4 met) {
+      vector<HEPUtils::P4> get_W_ISR(vector<HEPUtils::Jet*> jets, HEPUtils::P4 Z, HEPUtils::P4 met) {
 	HEPUtils::P4 Z_met_sys=Z+met;
 	double deltaR_min=999;
 	size_t Wjets_id1;
@@ -587,13 +668,14 @@ namespace Gambit {
 	HEPUtils::P4 W=jets.at(Wjets_id2)->mom()+jets.at(Wjets_id1)->mom();
 	HEPUtils::P4 ISR;
 	for (size_t k=0;k<jets.size();k++) {
-	  if (k=!Wjets_id1 && k!=Wjets_id2)ISR+=jets.at(k)->mom();
+	  if (k=!Wjets_id1 && k!=Wjets_id2)ISR+=(jets.at(k)->mom());
 	}
-	vector<HEPUtils::P4> W_ISR=W+ISR;
+	vector<HEPUtils::P4> W_ISR;
+	W_ISR.push_back(W);
+	W_ISR.push_back(ISR);
 	return W_ISR;
       }
 		 
-
 
     };
 

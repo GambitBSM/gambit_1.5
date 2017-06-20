@@ -284,6 +284,9 @@ namespace Gambit {
 
       void collect_results() {
 
+	cout<<"XSEC_PER_EVENT: "<<xsec_per_event()<<endl;
+        cout<<"XSEC: "<<xsec()<<endl;
+
 	string path = "ColliderBit/results/cutflow_";
 	path.append(analysisRunName);
 	path.append(".txt");
