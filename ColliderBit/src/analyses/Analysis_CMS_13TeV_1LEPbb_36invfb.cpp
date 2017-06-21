@@ -86,40 +86,18 @@ namespace Gambit {
 	// Electrons
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
 	  if (baselineElectrons.at(iEl)->pT() > 30. && fabs(baselineElectrons.at(iEl)->eta()) < 1.44) {
-//	    double pTsum=0;
-//	    for (HEPUtils::Particle* vis_part : event->visible_particles()) {
-//	      if (baselineElectrons.at(iEl)->mom().deltaR_eta(vis_part->mom())<0.3)pTsum+=vis_part->pT();
-//	    }
-//	    for (HEPUtils::Jet* jet : event->jets()) {
-//	      if (baselineElectrons.at(iEl)->mom().deltaR_eta(jet->mom())<0.3)pTsum+=jet->pT();
-//	    }
-//	    if (pTsum<5) {
 	      signalElectrons.push_back(baselineElectrons.at(iEl));
 	      signalLeptons.push_back(baselineElectrons.at(iEl));
-//	    }
 	  }
 	} 
-        //ATLAS::applyMediumIDElectronSelection(signalElectrons);
        
         //Muons
         for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
           if (baselineMuons.at(iMu)->pT() > 25. && fabs(baselineMuons.at(iMu)->eta()) < 2.1) {
-//           double pTsum=0;
-//           for (HEPUtils::Particle* vis_part : event->visible_particles()) {
-//             if (baselineMuons.at(iMu)->mom().deltaR_eta(vis_part->mom())<0.3)pTsum+=vis_part->pT();
-//           }
-//         for (HEPUtils::Jet* jet : event->jets()) {
-//              if (baselineMuons.at(iMu)->mom().deltaR_eta(jet->mom())<0.3)pTsum+=jet->pT();          
-//            }
-//            if (pTsum<5) {
 	      signalMuons.push_back(baselineMuons.at(iMu));
 	      signalLeptons.push_back(baselineMuons.at(iMu));
-//	    }
           }
         } 
-        //ATLAS::applyLooseIDMuonSelection(signalMuons);
-       
-       //Jets
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
            if (baselineJets.at(iJet)->pT() > 30. && fabs(baselineJets.at(iJet)->eta()) < 2.40)signalJets.push_back(baselineJets.at(iJet));                
          }
@@ -152,11 +130,6 @@ namespace Gambit {
 	}	
 
         if (nSignalLeptons>=1 && met>=50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2)preselection=true;
-
-	//cout<<"nSignalLeptons: "<<nSignalLeptons<<endl;
-	//cout<<"tau_veto: "<<tau_veto<<endl;
-	//cout<<"lepton2_veto: "<<lepton2_veto<<endl;
-	//cout<<"nSignalBJets: "<<nSignalBJets<<endl;	
 
         //Signal regions
         double mCT=0;

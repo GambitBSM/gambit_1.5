@@ -35,6 +35,10 @@ namespace Gambit {
 
     public:
 
+      struct ptComparison {
+        bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
+      } comparePt;
+
       Analysis_CMS_13TeV_MultiLEP_36invfb() {
 
         _numSR1=0;
@@ -159,11 +163,13 @@ namespace Gambit {
 	vector<vector<HEPUtils::Particle*>> OSSFpair_cont = getOSSFpair(signalLeptons);
 	if (OSSFpair_cont.size()>0) {
 	  for (size_t iPa=0;iPa<OSSFpair_cont.size();iPa++) {
-	    if (OSSFpair_cont.at(iPa).at(0)->mass()+OSSFpair_cont.at(iPa).at(1)->mass()<12)low_mass_veto=false;
+	    double OSSFpair_mass=(OSSFpair_cont.at(iPa).at(0)->mom()+OSSFpair_cont.at(iPa).at(1)->mom()).m();
+	    if (OSSFpair_mass<12)low_mass_veto=false;
 	    if (nSignalLeptons==3) {
-	      if (OSSFpair_cont.at(iPa).at(0)->abspid()!=15 && abs(signalLeptons.at(0)->mass()+signalLeptons.at(1)->mass()+signalLeptons.at(2)->mass()-91.2)<15)conversion_veto=false;
+	      double leptons_mass=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).m();
+	      if (OSSFpair_cont.at(iPa).at(0)->abspid()!=15 && abs(leptons_mass-91.2)<15)conversion_veto=false;
 	    }	
-	    if (abs(OSSFpair_cont.at(iPa).at(0)->mass()+OSSFpair_cont.at(iPa).at(1)->mass()-91.2)<15)conversion_veto=false;
+	    if (abs(OSSFpair_mass-91.2)<15)conversion_veto=false;
 	  }
 	}
         
@@ -237,57 +243,58 @@ namespace Gambit {
 	double pT_ll=0;
 	double mT=0;
 	double mT2=0;
+	double mll=0;
+	if (OSSFpair_cont.size()!=0)mll = get_mll(OSSFpair_cont);
+	if (OSSFpair_cont.size()==0) {
+	  vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpair(signalLeptons);
+	  mll = get_mll(OSpair_cont);
+	}
+	if (nSignalLeptons>0)mT=get_mT(signalLeptons, event->missingmom());	
+	if (nSignalLeptons>1)pT_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).pT();
+	if (nSignalLightLeptons==2 && nSignalTaus==1) {
+	  double pLep1[3] = {signalLightLeptons.at(0)->mass(), signalLightLeptons.at(0)->mom().px(), signalLightLeptons.at(0)->mom().py()};
+          double pTau[3] = {signalTaus.at(0)->mass(), signalTaus.at(0)->mom().px(), signalTaus.at(0)->mom().py()};
+          double pMiss[3] = {0., event->missingmom().px(), event->missingmom().py() };
+          double mn = 0.;
+
+          mt2_bisect::mt2 mt2_calc;
+          mt2_calc.set_momenta(pLep1,pTau,pMiss);
+          mt2_calc.set_mn(mn);
+          mT2 = mt2_calc.get_mt2();
+	}
+	if (nSignalLightLeptons==1 && nSignalTaus==2) {
+	  sort(signalTaus.begin(),signalTaus.end(),comparePt);
+	  double pLep1[3] = {signalLightLeptons.at(0)->mass(), signalLightLeptons.at(0)->mom().px(), signalLightLeptons.at(0)->mom().py()};
+          double pTau[3] = {signalTaus.at(0)->mass(), signalTaus.at(0)->mom().px(), signalTaus.at(0)->mom().py()};
+          double pMiss[3] = {0., event->missingmom().px(), event->missingmom().py()};
+          double mn = 0.;
+
+          mt2_bisect::mt2 mt2_calc;
+          mt2_calc.set_momenta(pLep1,pTau,pMiss);
+          mt2_calc.set_mn(mn);
+          mT2 = mt2_calc.get_mt2();
+	}
+	  	
+
 	if (two_ss_leptons) {
-         //should I use leading lepton here or not for mT???
-	  pT_ll = signalLeptons.at(0)->pT()+signalLeptons.at(1)->pT();
 	  mT = sqrt(2*signalLeptons.at(1)->pT()*met*(1-cos(signalLeptons.at(1)->phi()-event->missingmom().phi()))); 
 	  if (nSignalJets==0 && met>140 && mT>100)_numSR1++;
 	  if (nSignalJets==1 && met>200 && mT<100 && pT_ll<100)_numSR2++;
 	}
 	
 	if (three_more_leptons) {
-	  //0 taus + 3 electron(s)/muon(s)
 	  if (nSignalLightLeptons==3 && nSignalTaus==0) {
-	    //should I use leading lepton here or not for mT???
 	    mT = sqrt(2*signalLeptons.at(2)->pT()*met*(1-cos(signalLeptons.at(2)->phi()-event->missingmom().phi())));
 	    if (mT>120 && met>200)_numSR3++;
 	    if (met>250)_numSR4++;
 	  }
-	  //1 tau + 2 electron(s)/muon(s)
 	  if (nSignalLightLeptons==2 && nSignalTaus==1) {
-              
-	    //MT2 for leading lepton + tau
-	    double pLep1[3] = {signalLightLeptons.at(0)->mass(), signalLightLeptons.at(0)->mom().px(), signalLightLeptons.at(0)->mom().py()};
-            double pTau[3] = {signalTaus.at(0)->mass(), signalTaus.at(0)->mom().px(), signalTaus.at(0)->mom().py()};
-            double pMiss[3] = {0., event->missingmom().px(), event->missingmom().py() };
-            double mn = 0.;
-
-            mt2_bisect::mt2 mt2_calc;
-            mt2_calc.set_momenta(pLep1,pTau,pMiss);
-            mt2_calc.set_mn(mn);
-            mT2 = mt2_calc.get_mt2();
-
             if (mT2>50 && met>200)_numSR5++;
 	  }
-	  //2 taus + 1 electron/muon
 	  if (nSignalLightLeptons==1 && nSignalTaus==2) {
-	    
-	    //MT2 for lepton + leading tau
-	    sort(signalTaus.begin(),signalTaus.end(),comparePt);
-	    double pLep1[3] = {signalLightLeptons.at(0)->mass(), signalLightLeptons.at(0)->mom().px(), signalLightLeptons.at(0)->mom().py()};
-            double pTau[3] = {signalTaus.at(0)->mass(), signalTaus.at(0)->mom().px(), signalTaus.at(0)->mom().py()};
-            double pMiss[3] = {0., event->missingmom().px(), event->missingmom().py()};
-            double mn = 0.;
-
-            mt2_bisect::mt2 mt2_calc;
-            mt2_calc.set_momenta(pLep1,pTau,pMiss);
-            mt2_calc.set_mn(mn);
-            mT2 = mt2_calc.get_mt2();
-
 	    if (mT2>50 && met>200)_numSR6++;
 	    if (met>75)_numSR7++;
 	  }
-	  //>3 leptons
 	  if (nSignalLeptons>3 && met>200)_numSR8++;
 	}
 
@@ -336,15 +343,6 @@ namespace Gambit {
 	}
 	if (ISRjets.size()==0 || ISRjets.size()==1)ISRjet=true;
 
-	double mll=0;
-	if (OSSFpair_cont.size()!=0) {
-	  mll = get_mll(OSSFpair_cont);
-	}
-	else {
-	  vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpair(signalLeptons);
-	  mll = get_mll(OSpair_cont);
-	}
-   
         for (size_t j=0;j<NCUTS1;j++){
           if(
              (j==0) ||
@@ -615,7 +613,7 @@ namespace Gambit {
 	double mll;
 	vector<double> mll_container;
 	for (size_t iPa=0;iPa<pair_cont.size();iPa++) {
-	  mll_container.push_back(pair_cont.at(iPa).at(0)->mass()+pair_cont.at(iPa).at(1)->mass());
+	  mll_container.push_back((pair_cont.at(iPa).at(0)->mom()+pair_cont.at(iPa).at(1)->mom()).m());
 	}	  
 	sort(mll_container.begin(),mll_container.end());
 	if (mll_container.size()==1)mll=mll_container.at(0);
@@ -633,9 +631,14 @@ namespace Gambit {
 	return mll;
       }
 
-      struct ptComparison {
-        bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
-      } comparePt;
+      double get_mT(vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met) { 
+	vector<double> mT_container;
+	for (size_t iLe=0;iLe<leptons.size();iLe++) {
+	  mT_container.push_back(sqrt(2*met.pT()*leptons.at(iLe)->pT()*(1-cos(leptons.at(iLe)->phi()-met.phi()))));
+	}	  
+	sort(mT_container.begin(),mT_container.end());
+	return mT_container.at(0);
+      }
 
     };
 

@@ -238,7 +238,7 @@ Rules:
   - capability:  ColliderOperator
     function: operateLHCLoop
     options:
-      nEvents: [1000000, 1000000]
+      nEvents: [10000, 10000]
       pythiaNames: ["Pythia_SUSY_LHC_8TeV", "Pythia_SUSY_LHC_13TeV"]
       silenceLoop: false
 
@@ -273,8 +273,11 @@ Rules:
 
       # Option needed if you want to use the getPythiaFileReader
       #SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177312.slha"] #ATLAS 1LEPbb 250-0
-      SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177282.slha"] #ATLAS 1LEPbb 130-0
+      #SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177282.slha"] #ATLAS 1LEPbb 130-0
       #SLHA_filenames: ["ColliderBit/data/susy_msugra_2600_350_0_10_P_softsusy.slha"]
+      #SLHA_filenames:  ["ColliderBit/data/susy_SD_Dr1000_L250.slha"]
+      SLHA_filenames: ["ColliderBit/data/standalone.slha"]
+      #SLHA_filenames: ["ColliderBit/data/martin.slha"]
 
   # Delphes rules and options (ex. the Delphes configuration card file)
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
@@ -340,7 +343,7 @@ Rules:
       analyses: [ ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
                    "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
                    "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
-                   "ATLAS_3LEPEW_20invfb","ATLAS_1LEPbb_20invfb"],
+                   "ATLAS_3LEPEW_20invfb","ATLAS_8TeV_1LEPbb_20invfb"],
                   ["ATLAS_13TeV_0LEP_13invfb"] ]
 
   # Specify the list of CMS analyses to run with BuckFast
