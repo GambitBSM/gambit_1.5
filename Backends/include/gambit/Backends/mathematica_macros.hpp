@@ -142,18 +142,6 @@
             int size = BOOST_PP_IF(ISEMPTY(ARGLIST),0,BOOST_PP_TUPLE_SIZE(ARGLIST));            \
             str symbol_name = SYMBOLNAME;                                                       \
             boost::replace_all(symbol_name, "\\[", "\\\\[");                                    \
-            if(symbol_name != SYMBOLNAME)                                                       \
-            {                                                                                   \
-              WSPutFunction((WSLINK)pHandle, "Set", 2);                                         \
-              WSPutSymbol((WSLINK)pHandle, STRINGIFY(NAME));                                    \
-              WSPutFunction((WSLINK)pHandle, "ToExpression",1);                                 \
-              WSPutString((WSLINK)pHandle, symbol_name.c_str());                                \
-              symbol_name = STRINGIFY(NAME);                                                    \
-              int pkt;                                                                          \
-              while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)            \
-               WSNewPacket((WSLINK)pHandle);                                                    \
-              WSNewPacket((WSLINK)pHandle);                                                     \
-            }                                                                                   \
                                                                                                 \
             /* If TYPE is a numeric type, send N first */                                       \
             if(IS_NUMERIC(TYPE))                                                                \
@@ -163,7 +151,10 @@
               }                                                                                 \
                                                                                                 \
             /* Send the symbol name now */                                                      \
-            if(!WSPutFunction((WSLINK)pHandle, symbol_name.c_str(), size))                      \
+            if(!WSPutFunction((WSLINK)pHandle, "Apply", 2) or                                   \
+               !WSPutFunction((WSLINK)pHandle, "ToExpression",1) or                             \
+               !WSPutString((WSLINK)pHandle, symbol_name.c_str()) or                            \
+               !WSPutFunction((WSLINK)pHandle, "List", size))                                   \
             {                                                                                   \
               MATH_ERROR(TYPE,"Error sending packet through WSTP")                              \
             }                                                                                   \
