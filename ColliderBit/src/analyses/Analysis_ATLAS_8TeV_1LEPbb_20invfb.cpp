@@ -20,7 +20,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_ATLAS_1LEPbb_20invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_8TeV_1LEPbb_20invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -43,7 +43,7 @@ namespace Gambit {
   	bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       }	compareJetPt;
 
-      Analysis_ATLAS_1LEPbb_20invfb() {
+      Analysis_ATLAS_8TeV_1LEPbb_20invfb() {
 
         _numSRA=0;
         _numSRB=0;
@@ -58,7 +58,8 @@ namespace Gambit {
 
 	//time_t now = time(0);
 	//tm *ltm = localtime(&now);
-	analysisRunName = "ATLAS_1LEPbb_20invfb_130_0";
+	analysisRunName = "ATLAS_8TeV_1LEPbb_test";
+	//analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_130_0";
 	//analysisRunName.append(to_string(ltm->tm_sec));
 	vector<const char*> variables = {"met","mct","mbb","mt","j0pt","lpt"};
 	plots = new Perf_Plot(analysisRunName+"_mbb", &variables);
@@ -268,8 +269,8 @@ namespace Gambit {
         // The base class add function handles the signal region vector and total # events.
         HEPUtilsAnalysis::add(other);
 
-        Analysis_ATLAS_1LEPbb_20invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_1LEPbb_20invfb*>(other);
+        Analysis_ATLAS_8TeV_1LEPbb_20invfb* specificOther
+                = dynamic_cast<Analysis_ATLAS_8TeV_1LEPbb_20invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -307,7 +308,7 @@ namespace Gambit {
 	plots->createFile(luminosity(),xsec_per_event());
 
         SignalRegionData results_SRA;
-        results_SRA.analysis_name = "Analysis_ATLAS_1LEPbb_20invfb";
+        results_SRA.analysis_name = "Analysis_ATLAS_8TeV_1LEPbb_20invfb";
         results_SRA.sr_label = "SRA";
         results_SRA.n_observed = 4.;
         results_SRA.n_background = 5.69; 
@@ -317,7 +318,7 @@ namespace Gambit {
         add_result(results_SRA);
 
         SignalRegionData results_SRB;
-        results_SRB.analysis_name = "Analysis_ATLAS_1LEPbb_20invfb";
+        results_SRB.analysis_name = "Analysis_ATLAS_8TeV_1LEPbb_20invfb";
         results_SRB.sr_label = "SRB";
         results_SRB.n_observed = 3.;
         results_SRB.n_background = 2.67; 
@@ -340,7 +341,7 @@ namespace Gambit {
 
 
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(ATLAS_1LEPbb_20invfb)
+    DEFINE_ANALYSIS_FACTORY(ATLAS_8TeV_1LEPbb_20invfb)
 
 
   }
