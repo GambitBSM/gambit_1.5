@@ -181,10 +181,11 @@ namespace Gambit
           {
 
             // Clear the variable that is to be replaced 
-            if(!WSPutFunction(_WSlink, "Clear",1) or
+            if(!WSPutFunction(_WSlink, "Clear", 1) or
                !WSPutFunction(_WSlink, "StringDrop", 2) or
                !WSPutFunction(_WSlink, "StringDrop", 2) or
-               !WSPutFunction(_WSlink, "ToExpression" ,3) or
+               !WSPutFunction(_WSlink, "ToString", 1) or
+               !WSPutFunction(_WSlink, "ToExpression", 3) or
                !WSPutString(_WSlink, _symbol.c_str()) or
                !WSPutSymbol(_WSlink, "StandardForm") or
                !WSPutSymbol(_WSlink, "Hold") or

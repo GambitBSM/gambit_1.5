@@ -29,6 +29,9 @@
 #include <boost/preprocessor/tuple/size.hpp>
 
 /// If not defined already, define the backend languages
+#ifndef UNKNOWN
+  #define UNKNOWN 0
+#endif
 #ifndef CC
   #define CC 1
 #endif

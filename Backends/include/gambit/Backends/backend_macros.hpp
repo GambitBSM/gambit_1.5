@@ -63,13 +63,6 @@
 #include <boost/preprocessor/list/size.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
 
-/// Define backend languages
-#define UNKNOWN 0
-#define CC 1
-#define CXX 2
-#define FORTRAN 3
-#define MATHEMATICA 4
-
 /// Declare the backend initialisation module BackendIniBit.
 #define MODULE BackendIniBit
   START_MODULE
