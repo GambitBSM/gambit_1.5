@@ -58,8 +58,8 @@ namespace Gambit {
 
 	//time_t now = time(0);
 	//tm *ltm = localtime(&now);
-	analysisRunName = "ATLAS_8TeV_1LEPbb_test";
-	//analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_130_0";
+	//analysisRunName = "ATLAS_8TeV_1LEPbb_test";
+	analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_130_0";
 	//analysisRunName.append(to_string(ltm->tm_sec));
 	vector<const char*> variables = {"met","mct","mbb","mt","j0pt","lpt"};
 	plots = new Perf_Plot(analysisRunName+"_mbb", &variables);
@@ -169,10 +169,16 @@ namespace Gambit {
         } 
 	       
         //Jets
+        const vector<double>  a = {0,10.};
+        const vector<double>  b = {0,10000.};
+        const vector<double> c = {0.7};
+        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+
         for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
           if (overlapJets.at(iJet)->pT() > 25. && fabs(overlapJets.at(iJet)->eta()) < 2.40) {
-	    signalJets.push_back(overlapJets.at(iJet));   
-	    if (overlapJets.at(iJet)->btag())signalBJets.push_back(overlapJets.at(iJet));             
+	    signalJets.push_back(overlapJets.at(iJet));  
+            bool hasTag=has_tag(_eff2d, overlapJets.at(iJet)->eta(), overlapJets.at(iJet)->pT());
+	    if (overlapJets.at(iJet)->btag() && hasTag)signalBJets.push_back(overlapJets.at(iJet));             
           }
 	}
 
@@ -227,6 +233,7 @@ namespace Gambit {
         }                      
 	
 	if (preselection &&  met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) {
+	//if (preselection &&  met>50. && mT>40. && mbb>40. && nSignalBJets==2) {
 	  vector<double> variables = {met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT()};
 	  plots->fill(&variables);
 	}
@@ -244,19 +251,19 @@ namespace Gambit {
           if(
              (j==0) ||
              
-	     (j==1 && nSignalLeptons == 1 && nSignalBJets == 2) ||
+	     (j==1 && preselection && nSignalLeptons == 1 && nSignalBJets == 2) ||
              
-             (j==2 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100.) ||
+             (j==2 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100.) ||
 
-             (j==3 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160.) ||
+             (j==3 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160.) ||
  
-             (j==4 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100.) ||
+             (j==4 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100.) ||
              
-	     (j==5 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) ||  
+	     (j==5 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) ||  
 
-             (j==6 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRA) ||  
+             (j==6 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRA) ||  
             
-	     (j==7 && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRB) ){
+	     (j==7 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRB) ){
 
             cutFlowVector[j]++;
 
@@ -300,7 +307,7 @@ namespace Gambit {
 
         cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << " % " << endl;
         for (size_t j=0; j<NCUTS; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*xsec_per_event()*1000.*luminosity() << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
+          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*xsec_per_event()*luminosity() << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
         }
         cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 	cutflowFile.close();

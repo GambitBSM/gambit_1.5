@@ -2,13 +2,13 @@
 CUT FLOW: CMS 1 lepton, 2 bjets paper 
 ------------------------------------------------------------------------------------------------------------------------------
                                                          CUT                 RAW                  % 
-                                                  All events               10000                 100
-                                >= 1 signal lepton; > 50 GeV                2198               21.98
-                                             2nd lepton veto                1579               15.79
-                                                    Tau veto                1356               13.56
-                                                      2 jets                  63                0.63
-                                                     2 bjets                   0                   0
-                                          90 < mbb < 150 GeV                   0                   0
+                                                  All events                5000                 100
+                                >= 1 signal lepton; > 50 GeV                2911               58.22
+                                             2nd lepton veto                1387               27.74
+                                                    Tau veto                 988               19.76
+                                                      2 jets                 255                 5.1
+                                                     2 bjets                   3                0.06
+                                          90 < mbb < 150 GeV                   1                0.02
                                                mCT > 170 GeV                   0                   0
                                                MET > 125 GeV                   0                   0
                                                 mT > 150 GeV                   0                   0
