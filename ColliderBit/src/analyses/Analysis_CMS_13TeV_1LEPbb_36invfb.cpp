@@ -82,6 +82,7 @@ namespace Gambit {
         vector<HEPUtils::Particle*> signalElectrons;
         vector<HEPUtils::Particle*> signalMuons;
         vector<HEPUtils::Jet*> signalJets;   
+        vector<HEPUtils::Jet*> signalBJets;
 
 	// Electrons
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
@@ -97,19 +98,24 @@ namespace Gambit {
 	      signalMuons.push_back(baselineMuons.at(iMu));
 	      signalLeptons.push_back(baselineMuons.at(iMu));
           }
-        } 
-        for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
-           if (baselineJets.at(iJet)->pT() > 30. && fabs(baselineJets.at(iJet)->eta()) < 2.40)signalJets.push_back(baselineJets.at(iJet));                
+        }
+
+	//Jets 
+        const vector<double>  a = {0,10.};
+        const vector<double>  b = {0,10000.};
+        const vector<double> c = {0.65};
+        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+
+	for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
+           if (baselineJets.at(iJet)->pT() > 30. && fabs(baselineJets.at(iJet)->eta()) < 2.40) {
+            bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT()); 
+	    signalJets.push_back(baselineJets.at(iJet));                
+	    if (baselineJets.at(iJet)->btag() && hasTag)signalBJets.push_back(baselineJets.at(iJet));
+	  }
          }
 
-        //Variable definitions
         int nSignalLeptons = signalElectrons.size() + signalMuons.size();
         int nSignalJets = signalJets.size();
- 
-        vector<HEPUtils::Jet*> signalBJets;
-        for (size_t iJet=0;iJet<signalJets.size();iJet++) {
-  	   if (signalJets.at(iJet)->btag())signalBJets.push_back(signalJets.at(iJet));
-        }
         int nSignalBJets = signalBJets.size();
 
 	//Preselection

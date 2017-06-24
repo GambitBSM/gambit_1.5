@@ -119,7 +119,6 @@ namespace Gambit {
 	vector<HEPUtils::Particle*> signalLeptons;
 	vector<HEPUtils::Jet*> signalJets;
 	vector<HEPUtils::Jet*> signalBJets;
-	vector<HEPUtils::Jet*> signalNonBJets;
 
 	vector<size_t> overlapJet;
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
@@ -151,6 +150,12 @@ namespace Gambit {
 	  }
 	}
 
+
+        const vector<double>  a = {0,10.};
+        const vector<double>  b = {0,10000.};
+        const vector<double> c = {0.77};
+        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+
 	for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
 	  bool overlap=false;
 	  for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
@@ -158,11 +163,11 @@ namespace Gambit {
 	    
 	  }
 	  if (!overlap) {
+            bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT());
 	    signalJets.push_back(baselineJets.at(iJet));
-	    if (baselineJets.at(iJet)->btag()) {
+	    if (baselineJets.at(iJet)->btag() && hasTag) {
 	      if (fabs(baselineJets.at(iJet)->eta())<2.5 || (fabs(baselineJets.at(iJet)->eta())>2.4 && baselineJets.at(iJet)->pT()>50))signalBJets.push_back(baselineJets.at(iJet));
 	    }
-	    if (!baselineJets.at(iJet)->btag())signalNonBJets.push_back(baselineJets.at(iJet));
 	  }
 	}
 
@@ -182,8 +187,8 @@ namespace Gambit {
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
         size_t nSignalLeptons = signalLeptons.size();
         size_t nSignalJets = signalJets.size();
-	size_t nSignalNonBJets = signalNonBJets.size();       
 	size_t nSignalBJets = signalBJets.size();
+	size_t nSignalNonBJets = nSignalJets-nSignalBJets;       
  
 	//Preselection
         bool preselection=false; 
@@ -215,13 +220,13 @@ namespace Gambit {
 
 	//Large jet veto
 	bool large_jet_veto=true;
-	for (size_t iJet;iJet<nSignalJets;iJet++) {
+	for (size_t iJet=0;iJet<nSignalJets;iJet++) {
 	  if (signalJets.at(iJet)->pT()>60 && fabs(signalJets.at(iJet)->eta())<2.4 && signalJets.at(iJet)->btag()==false)large_jet_veto=false;
 	}
 
 	//Bjet veto
 	bool bjet_veto=true;
-	for (size_t iJet;iJet<nSignalBJets;iJet++) {
+	for (size_t iJet=0;iJet<nSignalBJets;iJet++) {
 	  if (signalBJets.at(iJet)->pT()>20 && fabs(signalBJets.at(iJet)->eta())<2.4)bjet_veto=false;
 	}
 
@@ -280,7 +285,7 @@ namespace Gambit {
 	  double mTmin=999;
 	  double mSFOS=999;
 	  for (size_t iPa=0;iPa<OSSFpairs.size();iPa++) {
-	    for (size_t iLep;iLep<signalLeptons.size();iLep++) {
+	    for (size_t iLep=0;iLep<signalLeptons.size();iLep++) {
 	      if (signalLeptons.at(iLep)!=OSSFpairs.at(iPa).at(0) && signalLeptons.at(iLep)!=OSSFpairs.at(iPa).at(1)) {
 	        double mT = sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi())));		
 	        if (mT<mTmin) { 
@@ -652,8 +657,8 @@ namespace Gambit {
 	double deltaR_min=999;
 	size_t Wjets_id1;
 	size_t Wjets_id2;
-	for (size_t i;i<jets.size();i++) {
-	  for (size_t j;j<jets.size();j++) {
+	for (size_t i=0;i<jets.size();i++) {
+	  for (size_t j=0;j<jets.size();j++) {
 	    if (i!=j) {
 	      HEPUtils::P4 jj_sys=jets.at(i)->mom()+jets.at(j)->mom();
 	      double deltaR=fabs(jj_sys.deltaR_eta(Z_met_sys));
@@ -668,7 +673,7 @@ namespace Gambit {
 	HEPUtils::P4 W=jets.at(Wjets_id2)->mom()+jets.at(Wjets_id1)->mom();
 	HEPUtils::P4 ISR;
 	for (size_t k=0;k<jets.size();k++) {
-	  if (k=!Wjets_id1 && k!=Wjets_id2)ISR+=(jets.at(k)->mom());
+	  if ((k=!Wjets_id1) && (k!=Wjets_id2))ISR+=(jets.at(k)->mom());
 	}
 	vector<HEPUtils::P4> W_ISR;
 	W_ISR.push_back(W);

@@ -27,6 +27,7 @@ namespace Gambit
     DECLARE_ANALYSIS_FACTORY(CMS_13TeV_1LEPbb_36invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_13TeV_MultiLEP_36invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_MultiLEP_36invfb);
+    DECLARE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb);
     //DECLARE_ANALYSIS_FACTORY(Perf);
     /// @}
     
@@ -51,6 +52,7 @@ namespace Gambit
       IF_X_RTN_CREATE_ANA_X(CMS_13TeV_1LEPbb_36invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_13TeV_MultiLEP_36invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_MultiLEP_36invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_13TeV_2OSLEP_36invfb);
       //IF_X_RTN_CREATE_ANA_X(Perf);
       throw std::runtime_error(name + " isn't a known collider analysis!");
       return nullptr;

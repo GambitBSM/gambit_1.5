@@ -151,9 +151,15 @@ namespace Gambit {
         bool preselection=false; 
  
 	//Bjet veto
+	const vector<double>  a = {0,10.};
+        const vector<double>  b = {0,10000.};
+        const vector<double> c = {0.7};
+        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+
 	bool bjet_veto=true;
 	for (size_t iJet=0;iJet<signalJets.size();iJet++) {
-	  if (signalJets.at(iJet)->btag())bjet_veto=false;
+          bool hasTag=has_tag(_eff2d, signalJets.at(iJet)->eta(), signalJets.at(iJet)->pT());
+	  if (signalJets.at(iJet)->btag() && hasTag)bjet_veto=false;
 	}
 
 	//Low-mass veto
