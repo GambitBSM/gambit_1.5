@@ -104,7 +104,6 @@ namespace Gambit {
 	vector<HEPUtils::Jet*> signalJets;   
 	vector<HEPUtils::Jet*> signalBJets;   
 	
-
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
 	  if (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta())>1.6) {
 	    signalElectrons.push_back(baselineElectrons.at(iEl));
@@ -134,7 +133,9 @@ namespace Gambit {
 	  for (size_t iLe=0;iLe<baselineMuons.size();iLe++) {
 	    if (fabs(baselineMuons.at(iLe)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.4)overlap=true;
 	  }
-	  if (fabs(baselinePhotons.at(0)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.4)overlap=true;
+	  if (baselinePhotons.size()!=0) {
+	    if (fabs(baselinePhotons.at(0)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.4)overlap=true;
+	  }
 	  if (!overlap) {
             bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT());
 	    signalJets.push_back(baselineJets.at(iJet));
