@@ -3,38 +3,38 @@ CUT FLOW: CMS Multi-lepton paper
 ------------------------------------------------------------------------------------------------------------------------------
                                                          CUT                 RAW                  % 
                                                   All events                5000                 100
-                                             2 light leptons                1362               27.24
-                                                   Same-sign                 129                2.58
-                                             3rd lepton veto                  82                1.64
-                                               Low mass veto                  82                1.64
-                                                   Bjet veto                  79                1.58
-                                                met > 60 GeV                  79                1.58
-                                              0 or 1 ISR jet                  27                0.54
-                                                mT < 100 GeV                   8                0.16
-                                             pT_ll > 100 GeV                   6                0.12
+                                             2 light leptons                 316                6.32
+                                                   Same-sign                  73                1.46
+                                             3rd lepton veto                  41                0.82
+                                               Low mass veto                  41                0.82
+                                                   Bjet veto                  18                0.36
+                                                met > 60 GeV                  16                0.32
+                                              0 or 1 ISR jet                   1                0.02
+                                                mT < 100 GeV                   1                0.02
+                                             pT_ll > 100 GeV                   0                   0
 ------------------------------------------------------------------------------------------------------------------------------ 
                                                          CUT                 RAW                  % 
                                                   All events                5000                 100
-                                                   3 leptons                 484                9.68
-                                 Low mass & conversions veto                 459                9.18
-                                                   Bjet veto                 427                8.54
-                                                met > 50 GeV                 421                8.42
-                                                mT > 100 GeV                 287                5.74
-                                                mll > 75 GeV                 234                4.68
+                                                   3 leptons                 458                9.16
+                                 Low mass & conversions veto                 432                8.64
+                                                   Bjet veto                 204                4.08
+                                                met > 50 GeV                 190                 3.8
+                                                mT > 100 GeV                  37                0.74
+                                                mll > 75 GeV                   8                0.16
 ------------------------------------------------------------------------------------------------------------------------------ 
                                                          CUT                 RAW                  % 
                                                   All events                5000                 100
-                                                   3 leptons                 484                9.68
-                                 Low mass & conversions veto                 459                9.18
-                                                   Bjet veto                 427                8.54
-                                                met > 50 GeV                 421                8.42
-                                               mT2 < 100 GeV                 134                2.68
-                                                mll < 75 GeV                  43                0.86
+                                                   3 leptons                 458                9.16
+                                 Low mass & conversions veto                 432                8.64
+                                                   Bjet veto                 204                4.08
+                                                met > 50 GeV                 190                 3.8
+                                               mT2 < 100 GeV                 153                3.06
+                                                mll < 75 GeV                 108                2.16
 ------------------------------------------------------------------------------------------------------------------------------ 
                                                          CUT                 RAW                  % 
                                                   All events                5000                 100
-                                                   4 leptons                  94                1.88
-                                               Low mass veto                  94                1.88
-                                                   Bjet veto                  86                1.72
-                                               met > 100 GeV                  83                1.66
+                                                   4 leptons                 109                2.18
+                                               Low mass veto                 105                 2.1
+                                                   Bjet veto                  47                0.94
+                                               met > 100 GeV                  41                0.82
 ------------------------------------------------------------------------------------------------------------------------------ 

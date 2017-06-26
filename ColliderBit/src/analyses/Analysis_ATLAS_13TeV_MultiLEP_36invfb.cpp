@@ -9,6 +9,7 @@
 #include <cmath>
 #include <memory>
 #include <iomanip>
+#include <algorithm>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
@@ -84,8 +85,6 @@ namespace Gambit {
 
       void analyze(const HEPUtils::Event* event) {
 	HEPUtilsAnalysis::analyze(event);
-
-        // Missing energy
         double met = event->met();
 
         // Baseline objects
@@ -120,22 +119,26 @@ namespace Gambit {
 	vector<HEPUtils::Jet*> signalJets;
 	vector<HEPUtils::Jet*> signalBJets;
 
-	vector<size_t> overlapJet;
+        const vector<double>  a = {0,10.};
+        const vector<double>  b = {0,10000.};
+        const vector<double> c = {0.77};
+        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+	vector<HEPUtils::Jet*> overlapJet;
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
-	  vector<size_t> overlapEl;
+	  vector<HEPUtils::Particle*> overlapEl;
+          bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT());
           for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
-            if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.2)overlapEl.push_back(iEl);
+            if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.2)overlapEl.push_back(baselineElectrons.at(iEl));
 	  }
-	  if (overlapEl.size()>0 && baselineJets.at(iJet)->btag()) {
-	    overlapJet.push_back(iJet);
+	  if (overlapEl.size()>0 && (baselineJets.at(iJet)->btag() && hasTag)) {
 	    for (size_t iO=0;iO<overlapEl.size();iO++) {
-	      baselineElectrons.erase(baselineElectrons.begin()+overlapEl.at(iO));  
+	      baselineElectrons.erase(remove(baselineElectrons.begin(), baselineElectrons.end(), overlapEl.at(iO)), baselineElectrons.end());
 	    }
 	  }
-	  if (overlapEl.size()==0)overlapJet.push_back(iJet);
+	  if (overlapEl.size()>0 && !(baselineJets.at(iJet)->btag() && hasTag))overlapJet.push_back(baselineJets.at(iJet));
 	}
 	for (size_t iO=0;iO<overlapJet.size();iO++) {
-	  baselineJets.erase(baselineJets.begin()+overlapJet.at(iO));
+	  baselineJets.erase(remove(baselineJets.begin(), baselineJets.end(), overlapJet.at(iO)), baselineJets.end());
 	}
 
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
@@ -149,12 +152,6 @@ namespace Gambit {
 	    signalLeptons.push_back(baselineElectrons.at(iEl));
 	  }
 	}
-
-
-        const vector<double>  a = {0,10.};
-        const vector<double>  b = {0,10000.};
-        const vector<double> c = {0.77};
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
 
 	for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
 	  bool overlap=false;
@@ -316,7 +313,6 @@ namespace Gambit {
 	  }
 	}
 
-		
         if (preselection) {
           vector<double> variables = {met};
           plots->fill(&variables);
