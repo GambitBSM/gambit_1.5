@@ -668,7 +668,8 @@ namespace Gambit
     }
 
     /// Simple, naive h boson mass likelihood
-    /// Reference: http://pdg.lbl.gov/2015/tables/rpp2015-sum-gauge-higgs-bosons.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// Reference: D. Aad et al arxiv:1503.07589, Phys.Rev.Lett. 114 (2015) 191803 (ATLAS + CMS combination)
+   /// Also used dierctly in http://pdg.lbl.gov/2016/tables/rpp2016-sum-gauge-higgs-bosons.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_h_mass_chi2(double &result)
     {
       using namespace Pipes::lnL_h_mass_chi2;
@@ -680,7 +681,7 @@ namespace Gambit
 
     /// Effective leptonic sin^2(theta_W) likelihood
     /// sin^2theta_W^leptonic_effective~ sin^2theta_W(mZ)^MSbar + 0.00029 = 0.23155 +/- 0.00005    (1 sigma), Gaussian.  (PDG global SM fit)
-    /// Reference: http://pdg.lbl.gov/2014/reviews/rpp2014-rev-standard-model.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+   ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_sinW2_eff_chi2(double &result)
     {
       using namespace Pipes::lnL_sinW2_eff_chi2;
