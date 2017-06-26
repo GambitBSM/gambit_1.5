@@ -74,6 +74,13 @@ START_MODULE
     DEPENDENCY(prec_HiggsMasses, fh_HiggsMassObs)
     #undef FUNCTION
 
+    #define FUNCTION make_MSSM_precision_spectrum_H_W_SHD
+    START_FUNCTION(Spectrum)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    DEPENDENCY(prec_mw, triplet<double>)
+    DEPENDENCY(prec_HiggsMasses, shd_HiggsMassObs)
+    #undef FUNCTION
+
     #define FUNCTION make_MSSM_precision_spectrum_W
     START_FUNCTION(Spectrum)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)

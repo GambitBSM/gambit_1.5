@@ -1315,8 +1315,6 @@ namespace Gambit
 
       MReal DeltaMHiggs = BEreq::SUSYHD_DeltaMHiggs(parameterList);
  
-      cout << "MHiggs = " << MHiggs << " +- " << DeltaMHiggs << endl; 
-
       HiggsMass.MH = MHiggs;
       HiggsMass.deltaMH = DeltaMHiggs;
 

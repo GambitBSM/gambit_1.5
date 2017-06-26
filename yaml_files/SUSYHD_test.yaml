@@ -7,39 +7,52 @@ Parameters:
 
   CMSSM:
     M0:
-      fixed_value: 1500
+      range: [175, 1e4]
+      prior_type: log
     M12:
-      fixed_value: 1500
+      range: [175, 1e4]
+      prior_type: log
     A0:
-      fixed_value: 2000
-    SignMu:
-      fixed_value: 1
+      range: [-1e4, 1e4]
+      flat_start: -1e2
+      flat_end: 1e2
+      prior_type: double_log_flat_join
     TanBeta:
-      fixed_value: 30
+      range: [3.0, 70]
+    SignMu: 1
+
   
 Priors:
 
 Printer:
-  printer: ascii
+  printer: hdf5
   options:
-    output_file: "gambit_output.txt"
+    output_file: "SUSYHD.hdf5"
 
 Scanner:
-  use_scanner: toy_mcmc
-  
+  use_scanner: de
+
   scanners:
-    toy_mcmc:
-      plugin: toy_mcmc
-      point_number: 2
-      output_file:  output
-      like:  Likelihood
+
+    multinest:
+      plugin: multinest
+      like:  LogLike
+      nlive: 5000
+      tol: 0.1
+      updInt: 1
+
+    de:
+      plugin: diver
+      like: LogLike
+      NP: 100
+      convthresh: 1e-5
+      verbosity: 1
 
 
 ObsLikes:
-  - purpose:      Test
-    capability:   MathematicaTest
-    type:         bool
-    function:     SUSYHD_test
+  - purpose:      LogLike
+    capability:   lnL_h_mass
+    type:         double
 
 Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
@@ -61,37 +74,12 @@ Rules:
       use_higgs_2loop_atau_atau: true
       invalid_point_fatal: false
 
-  # Make sure to use the latest version (2.12.0) of FeynHiggs for everything.
-  # Here is the current clunky way to do this:
-#  - capability: FH_Precision
-#    backends:
-#    - {backend: FeynHiggs, version: 2.12.0}
-#  - capability: prec_HiggsMasses
-#    backends:
-#    - {backend: FeynHiggs, version: 2.12.0}
-#  - capability: Higgs_Couplings
-#    backends:
-#    - {backend: FeynHiggs, version: 2.12.0}
-#  - capability: FH_HiggsProd
-#    backends:
-#    - {backend: FeynHiggs, version: 2.12.0}
-#  - capability: FH_MSSMMasses
-#    backends:
-#    - {backend: FeynHiggs, version: 2.12.0}
-  # Here is the slick version that will be implemented in a future release:
-  #- backend: FeynHiggs
-  #  version: 2.12.0
-  # In practice, the easiest option is just to not install / nuke the versions you don't want to use, e.g.
-  #  make nuke-feynhiggs_2_11_3  
-  #  make nuke-feynhiggs_2_11_2  
-
-  # Choose to take FeynHiggs 2.11.3's prediction for the Higgs mass (rather then FlexibleSUSY's).
-  # Choose to use the difference between the FeynHiggs and spectrum generator predictions, along
-  # with the FH error estimate, to estimate the theoretical error on the prediction.
   - capability: MSSM_spectrum
-    options:
-      Higgs_predictions_source: 1
-      Higgs_predictions_error_method: 4
+    type: Spectrum
+    function: make_MSSM_precision_spectrum_H_W_SHD
+
+  - capability: mh
+    function: mh_from_MSSM_spectrum
 
 
 Logger:
@@ -100,10 +88,11 @@ Logger:
     [Debug] : "debug.log"
     [Default] : "default.log"
     [SpecBit] : "SpecBit.log"
+    [PrecisionBit] : "PrecisionBit.log"
 
 KeyValues:
 
-  default_output_path: "runs/SUSYHD_tests"
+  default_output_path: "runs/SUSYHD/"
 
   dependency_resolution:
     prefer_model_specific_functions: false
