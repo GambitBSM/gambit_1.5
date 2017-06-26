@@ -555,7 +555,7 @@ namespace Gambit
 
     /// Z boson mass likelihood
     /// M_Z (Breit-Wigner mass parameter ~ pole) = 91.1876 +/- 0.0021 GeV (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/listings/rpp2014-list-z-boson.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_Z_mass_chi2(double &result)
     {
       using namespace Pipes::lnL_Z_mass_chi2;
@@ -577,7 +577,7 @@ namespace Gambit
 
     /// b quark mass likelihood
     /// m_b (mb)^MSbar = 4.18 +/- 0.03 GeV (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/listings/rpp2014-list-b-quark.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+   /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_mbmb_chi2(double &result)
     {
       using namespace Pipes::lnL_mbmb_chi2;
@@ -588,21 +588,21 @@ namespace Gambit
 
     /// c quark mass likelihood
     /// m_c (mc)^MSbar = 1.275 +/- 0.025 GeV (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/listings/rpp2014-list-c-quark.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+     ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_mcmc_chi2(double &result)
     {
       using namespace Pipes::lnL_mcmc_chi2;
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->mCmC, 1.275, 0.0, 0.025, profile);
+      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->mCmC, 1.28, 0.0, 0.03, profile);
     }
 
     /// \brief Likelihoods for light quark mass ratios. At the moment, all are just gaussians.
-    /// Default data from PDG http://PDG.LBL.GOV 10/6/2015.
+    /// Default data from PDG http://PDG.LBL.GOV 26/06/2017.
     /// Likelihoods apply to MSbar masses at the scale mu = 2 GeV.
     /// m_u/m_d = 0.38-0.58
-    /// m_s / ((m_u + m_d)/2) = 27.5 +/- 1.0
-    /// m_s = 95 +/- 5 GeV
+    /// m_s / ((m_u + m_d)/2) = 27.3 +/- 0.7
+    /// m_s = (96 +/- 4) MeV
     void lnL_light_quark_masses_chi2 (double &result)
     {
         using namespace Pipes::lnL_light_quark_masses_chi2;
@@ -610,10 +610,10 @@ namespace Gambit
 
         double mud_obs = runOptions->getValueOrDef<double>(0.48, "mud_obs");
         double mud_obserror = runOptions->getValueOrDef<double>(0.10, "mud_obserr");
-        double msud_obs = runOptions->getValueOrDef<double>(27.5, "msud_obs");
-        double msud_obserror = runOptions->getValueOrDef<double>(1.0, "msud_obserr");
-        double ms_obs = runOptions->getValueOrDef<double>(95.E-03, "ms_obs");
-        double ms_obserror = runOptions->getValueOrDef<double>(5.E-03, "ms_obserr");
+        double msud_obs = runOptions->getValueOrDef<double>(27.3, "msud_obs");
+        double msud_obserror = runOptions->getValueOrDef<double>(0.7, "msud_obserr");
+        double ms_obs = runOptions->getValueOrDef<double>(96.E-03, "ms_obs");
+        double ms_obserror = runOptions->getValueOrDef<double>(4.E-03, "ms_obserr");
 
         /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
         bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
