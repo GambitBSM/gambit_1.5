@@ -581,7 +581,7 @@ namespace Gambit {
         results_SR8.background_sys = 42.;
         results_SR8.signal_sys = 0.;
         results_SR8.n_signal = _numSR8;
-        add_result(results_SR4);
+        add_result(results_SR8);
 
       }
 

@@ -347,7 +347,7 @@ Rules:
     options:
       analyses: [ ["CMS_1LEPDMTOP_20invfb","CMS_2LEPDMTOP_20invfb",
                    "CMS_3LEPEW_20invfb","CMS_MONOJET_20invfb"],
-                  ["CMS_13TeV_1LEPbb_36invfb","CMS_13TeV_MultiLEP_36invfb", "CMS_13TeV_2OSLEP_36invfb"] ]
+                  ["CMS_13TeV_1LEPbb_36invfb","CMS_13TeV_MultiLEP_36invfb", "CMS_13TeV_2OSLEP_36invfb", "CMS_13TeV_2LEPsoft_36invfb"] ]
 
   # Specify the list of identity analyses to run
   # These will be run if the identity simulation is turned on
