@@ -6,12 +6,11 @@
 ///  Functions that do super fast ATLAS detector simulation based on four-vector smearing.
 
 #include "gambit/ColliderBit/Utils.hpp"
+#include "gambit/Utils/threadsafe_rng.hpp"
 
 #include "HEPUtils/MathUtils.h"
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
-
-#include <random>
 
 namespace Gambit {
   namespace ColliderBit {
@@ -107,9 +106,6 @@ namespace Gambit {
           // Function that mimics the DELPHES electron energy resolution
           // We need to smear E, then recalculate pT, then reset 4 vector
 
-          std::random_device rd;
-          std::mt19937 gen(rd());
-
           static HEPUtils::BinnedFn2D<double> coeffE2({{0, 2.5, 3., 5.}}, //< |eta|
                                                       {{0, 0.1, 25., DBL_MAX}}, //< pT
                                                       {{0.,          0.015*0.015, 0.005*0.005,
@@ -140,7 +136,7 @@ namespace Gambit {
 
             // Smear by a Gaussian centered on the current energy, with width given by the resolution
             std::normal_distribution<> d(e->E(), resolution);
-            double smeared_E = d(gen);
+            double smeared_E = d(Random::rng());
             if (smeared_E < 0) smeared_E = 0;
             // double smeared_pt = smeared_E/cosh(e->eta()); ///< @todo Should be cosh(|eta|)?
             // std::cout << "BEFORE eta " << electron->eta() << std::endl;
@@ -154,9 +150,6 @@ namespace Gambit {
         inline void smearMuonMomentum(std::vector<HEPUtils::Particle*>& muons) {
           // Function that mimics the DELPHES muon momentum resolution
           // We need to smear pT, then recalculate E, then reset 4 vector
-
-          std::random_device rd;
-          std::mt19937 gen(rd());
 
           static HEPUtils::BinnedFn2D<double> _muEff({{0,1.5,2.5}},
                                                      {{0,0.1,1.,10.,200.,DBL_MAX}},
@@ -172,7 +165,7 @@ namespace Gambit {
 
             // Smear by a Gaussian centered on the current energy, with width given by the resolution
             std::normal_distribution<> d(mu->pT(), resolution*mu->pT());
-            double smeared_pt = d(gen);
+            double smeared_pt = d(Random::rng());
             if (smeared_pt < 0) smeared_pt = 0;
             // const double smeared_E = smeared_pt*cosh(mu->eta()); ///< @todo Should be cosh(|eta|)?
             // std::cout << "Muon pt " << mu_pt << " smeared " << smeared_pt << endl;
@@ -190,12 +183,10 @@ namespace Gambit {
           const double resolution = 0.03;
 
           // Now loop over the jets and smear the 4-vectors
-          std::random_device rd;
-          std::mt19937 gen(rd());
           std::normal_distribution<> d(1., resolution);
           for (HEPUtils::Jet* jet : jets) {
             // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution
-            double smear_factor = d(gen);
+            double smear_factor = d(Random::rng());
             /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?
             jet->set_mom(HEPUtils::P4::mkXYZM(jet->mom().px()*smear_factor, jet->mom().py()*smear_factor, jet->mom().pz()*smear_factor, jet->mass()));
           }
@@ -211,12 +202,10 @@ namespace Gambit {
           const double resolution = 0.03;
 
           // Now loop over the jets and smear the 4-vectors
-          std::random_device rd;
-          std::mt19937 gen(rd());
           std::normal_distribution<> d(1., resolution);
           for (HEPUtils::Particle* p : taus) {
             // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution
-            double smear_factor = d(gen);
+            double smear_factor = d(Random::rng());
             /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?
             p->set_mom(HEPUtils::P4::mkXYZM(p->mom().px()*smear_factor, p->mom().py()*smear_factor, p->mom().pz()*smear_factor, p->mass()));
           }

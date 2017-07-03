@@ -1,4 +1,5 @@
 #include "gambit/ColliderBit/Utils.hpp"
+#include "gambit/Utils/threadsafe_rng.hpp"
 #include <iostream>
 using namespace std;
 
@@ -8,7 +9,7 @@ namespace Gambit {
 
     bool random_bool(double eff) {
       /// @todo Handle out-of-range eff values
-      return HEPUtils::rand01() < eff;
+      return Random::draw() < eff;
     }
 
 

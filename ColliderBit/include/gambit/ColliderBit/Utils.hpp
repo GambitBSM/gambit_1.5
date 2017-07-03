@@ -12,12 +12,7 @@ namespace Gambit {
 
 
     /// Return a random true/false at a success rate given by a number
-    // inline
     bool random_bool(double eff);
-    // {
-    //   /// @todo Handle out-of-range eff values
-    //   return HEPUtils::rand01() < eff;
-    // }
 
 
     /// Return a random true/false at a success rate given by a 1D efficiency map
