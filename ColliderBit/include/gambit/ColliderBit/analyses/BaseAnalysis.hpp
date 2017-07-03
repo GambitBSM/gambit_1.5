@@ -24,7 +24,7 @@
 
 namespace Gambit {
   namespace ColliderBit {
-
+    using namespace std;
 
     /// An abstract base class for collider analyses within ColliderBit.
     template <typename EventT>
@@ -113,11 +113,15 @@ namespace Gambit {
       virtual void init() { }
       /// Scale by number of input events and xsec.
       virtual void scale(double factor=-1) {
-        if (factor < 0)
-          factor = _luminosity * _xsec / _ntot;
+        if (factor < 0) {
+          factor = (luminosity() * xsec()) / num_events();
+          //cout << "*** " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
+        }
         assert(factor >= 0);
-        for (SignalRegionData& sr : _results)
+        for (SignalRegionData& sr : _results) {
           sr.n_signal_at_lumi = factor * sr.n_signal;
+          //cout << "*** " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
+        }
       }
       //@}
 
@@ -153,6 +157,7 @@ namespace Gambit {
           if (xsec() <= 0) {
             set_xsec(xs, xserr);
           } else {
+            /// @todo Probably shouldn't be combined with equal weight?!?
             _xsec = _xsec/2.0 + xs/2.0;
             _xsecerr = HEPUtils::add_quad(xsec_err(), xserr) / 2.0;
           }
