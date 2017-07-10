@@ -379,3 +379,55 @@ SingletDM: |
 SingletDM_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
+
+LCDM: |
+
+   The standard Lambda-CDM model, i.e. the simplest standard contemporary model with six effective parameters including cosmological constant Lambda and cold dark matter. The 6 parameters are chosen as:
+
+   omega_b             - baryon density parameter
+   omega_cdm           - dark matter density parameter
+   H0                  - Hubble constant
+   ln10A_s             - primordial curvature fluctuation amplitude
+   n_s                 - parametrises the primordial scale dependence.
+   tau_reio            - reionization optical depth
+
+LCDMtensor: |
+
+   Simplest extension of the Lambda-CDM model with the addition of a tensor degree of freedom. This parameter is set to zero in the LCDM model.
+
+   omega_b             - baryon density parameter
+   omega_cdm           - dark matter density parameter
+   H0                  - Hubble constant
+   ln10A_s             - primordial curvature fluctuation amplitude
+   n_s                 - parametrises the primordial scale dependence.
+   tau_reio            - reionization optical depth
+   r                   - ratio of tensor primordial power to curvature power
+
+
+lowl_SMW_70_dx11d_2014_10_03_v5c_Ap: |
+
+   Planck likelihood for low-p TT spectrum with a single nuisance parameter.
+
+   A_planck            - the Planck absolute calibration
+
+plik_dx11dr2_HM_v18_TT: |
+
+   Planck likelihood for TT spectrum with a 16 nuisance parameters.
+
+   A_cib_217           - the CIB contamination at l=3000 in the 217-GHz Planck map
+   cib_index           - the effective slope of the CIB spectrum, a parameter that should be set to -1.3
+   xi_sz_cib           - the SZxCIB cross-correlation
+   A_sz                - the tSZ contamination at 143GHz
+   ps_A_100_100        - the point source contribution in 100x100
+   ps_A_143_143        - the point source contribution in 143x143
+   ps_A_143_217        - the point source contribution in 143x217
+   ps_A_217_217        - the point source contribution in 217x217
+   ksz_norm            - the kSZ contamination
+   gal545_A_100        - the dust residual contamination at l=200 in 100x100
+   gal545_A_143        - the dust residual contamination at l=200 in 143x143
+   gal545_A_143_217    - the dust residual contamination at l=200 in 143x217
+   gal545_A_217        - the dust residual contamination at l=200 in 217x217
+   calib_100T          - the relative calibration between the 100 and 143 spectra
+   calib_217T          - the relative calibration between the 217 and 143 spectra
+   A_planck            - the Planck absolute calibration.
+

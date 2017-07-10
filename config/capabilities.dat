@@ -3059,4 +3059,107 @@ calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
 
+#----------------------------
+#  plc
+#----------------------------
 
+plc_2_0_init: |
+
+clik_cleanup: |
+
+clik_compute_loglike: |
+
+clik_get_extra_parameter_names: |
+
+clik_get_list_cls: |
+
+clik_get_lmax: |
+
+clik_get_version: |
+
+clik_initialize: |
+
+clik_initialize_error: |
+
+data_cleanup: |
+
+data_initialize: |
+
+lowl_SMW_70_dx11d_2014_10_03_v5c_Ap_parameters: |
+
+plik_dx11dr2_HM_v18_TT_parameters: |
+
+return_lowp_TT: |
+
+return_high_TT: |
+
+
+#----------------------------
+#  MultiModeCode
+#----------------------------
+
+multimodecode_gambit_driver: |
+
+MultiModeCode_2_0_0_init: |
+
+multimodecode_gambit_driver_test: |
+
+#----------------------------
+#  Class
+#----------------------------
+
+class_2_6_1_init: |
+
+class_background_free: |
+
+class_background_initialize: |
+
+class_input_initialize: |
+
+class_lensing_free: |
+
+class_lensing_initialize: |
+
+class_nonlinear_free: |
+
+class_nonlinear_initialize: |
+
+class_output_initialize: |
+
+class_output_total_cl_at_l: |
+
+class_parser_initialize: |
+
+class_perturb_free: |
+
+class_perturb_initialize: |
+
+class_primordial_free: |
+
+class_primordial_initialize: |
+
+class_spectra_free: |
+
+class_spectra_initialize: |
+
+class_thermodynamics_free: |
+
+class_thermodynamics_initialize: |
+
+class_transfer_free: |
+
+class_transfer_initialize: |
+
+#----------------------------
+#  CosmoBitDEV
+#----------------------------
+
+LCDM_parameters: |
+
+LCDMtensor_parameters: |
+
+compute_LCDMtensor_lowp_TT_loglike: |
+
+compute_vanilla_lowp_TT_loglike: |
+
+compute_LCDMtensor_inflation_lowp_TT_loglike: |
