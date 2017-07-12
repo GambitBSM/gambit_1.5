@@ -52,6 +52,11 @@ namespace Gambit
       static double theta23 = 0.7382;  // rad
       static double theta13 = 0.1483;  // rad
       static double theta12 = 0.5843;  // rad
+      static double conv_fact = 6.58e-16;  // conversion factor from eV^-1 to s, for lifetime
+      static double G_F_sq = 1.3604e-10;  // GeV^-4
+      static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W_sq
+      static double g_R_sq = 0.0494;  // g_R = s_W^2
+      static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
       dcomp I(0.0, 1.0);
       Matrix3d M_I;  // not complex; circumvents type mismatch in l(M)
       Matrix3cd M_twid_temp;
@@ -70,7 +75,8 @@ namespace Gambit
       Matrix3cd U_nu;
       Matrix3cd t;
       Matrix3d t_sq;
-      std::vector<double> temp1(3);
+      Matrix3d result_temp;
+      std::vector<double> lifetime(3);
       double x23 = *Param["ReOm23"];
       double y23 = *Param["ImOm23"];
       double x13 = *Param["ReOm13"];
@@ -184,14 +190,26 @@ namespace Gambit
       U_nu = V_23 * U_pd * V_13 * U_nd* V_12 * Maj_phase;
 
       t = I * U_nu * m_nu.sqrt() * R * M_twid.inverse();
-      result = t.cwiseAbs2();
+      t_sq = t.cwiseAbs2();
+      result_temp << 0.0, 0.0, 0.0,
+                     0.0, 0.0, 0.0,
+                     0.0, 0.0, 0.0;
+      for (int i=0; i<3; i++)
+      {
+        lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M_I(i,i),5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(t_sq(1,i) + t_sq(2,i))) + ((1 + g_L_sq + g_R_sq)*t_sq(0,i)) );
+        if(lifetime[i]<0.1)
+        {
+          result_temp(0,i) = t_sq(0,i);
+          result_temp(1,i) = t_sq(1,i);
+          result_temp(2,i) = t_sq(2,i);
+        }
+      }
+      result = result_temp;
     }
 
     void lnL(double& lnLike)
     {
       namespace myPipe1 = Pipes::lnL;
-//      static double m = 1e-7;
-//      static double s = 2e-18;
       double array_nutev[249][2] = {};
       double array_delphi[180][2] = {};
       double array_pienu[140][2] = {};
@@ -557,23 +575,6 @@ namespace Gambit
 
       lnLike = -(2.44*mixing_sq[0])/U_pienu[0] -(2.44*mixing_sq[1])/U_pienu[1] -(2.44*mixing_sq[2])/U_pienu[2] -(2.44*mixing_ps191_e[0])/pow(U_ps191_e[0], 2.0) -(2.44*mixing_ps191_e[1])/pow(U_ps191_e[1], 2.0) -(2.44*mixing_ps191_e[2])/pow(U_ps191_e[2], 2.0) -(2.44*mixing_ps191_mu[0])/pow(U_ps191_mu[0], 2.0) -(2.44*mixing_ps191_mu[1])/pow(U_ps191_mu[1], 2.0) -(2.44*mixing_ps191_mu[2])/pow(U_ps191_mu[2], 2.0) -(2.44*mixing_charm_e[0])/pow(U_charm_e[0], 2.0) -(2.44*mixing_charm_e[1])/pow(U_charm_e[1], 2.0) -(2.44*mixing_charm_e[2])/pow(U_charm_e[2], 2.0) -(2.44*mixing_charm_mu[0])/pow(U_charm_mu[0], 2.0) -(2.44*mixing_charm_mu[1])/pow(U_charm_mu[1], 2.0) -(2.44*mixing_charm_mu[2])/pow(U_charm_mu[2], 2.0) -(3.09*mixing_sq[0])/U_delphi[0] -(3.09*mixing_sq[1])/U_delphi[1] -(3.09*mixing_sq[2])/U_delphi[2] - (3.09*mixing_sq[3])/U_delphi[0] -(3.09*mixing_sq[4])/U_delphi[1] -(3.09*mixing_sq[5])/U_delphi[2] -(3.09*mixing_sq[6])/U_delphi[0] -(3.09*mixing_sq[7])/U_delphi[1] -(3.09*mixing_sq[8])/U_delphi[2] -(3.09*mixing_sq[0]*mixing_sq[0])/pow(U_atlas_e[0], 2.0) -(3.09*mixing_sq[1]*mixing_sq[1])/pow(U_atlas_e[1], 2.0) -(3.09*mixing_sq[2]*mixing_sq[2])/pow(U_atlas_e[2], 2.0) -(3.09*mixing_sq[3]*mixing_sq[3])/pow(U_atlas_mu[0], 2.0) -(3.09*mixing_sq[4]*mixing_sq[4])/pow(U_atlas_e[1], 2.0) -(3.09*mixing_sq[5]*mixing_sq[5])/pow(U_atlas_e[2], 2.0) -(2.44*mixing_sq[3])/U_e949[0] -(2.44*mixing_sq[4])/U_e949[1] -(2.44*mixing_sq[5])/U_e949[2] -(2.44*mixing_sq[3])/U_nutev[0] -(2.44*mixing_sq[4])/U_nutev[1] -(2.44*mixing_sq[5])/U_nutev[2] - (2.44*mixing_sq[6])/U_tau[0] -(2.44*mixing_sq[7])/U_tau[1] -(2.44*mixing_sq[8])/U_tau[2];
     }
-
-//    void printable_CI(double& Theta_sq)
-//    {
-//      namespace myPipe1 = Pipes::printable_CI;
-//      std::vector<double> temp1(9);
-//      Matrix3d t_sq(*myPipe1::Dep::SN_stuff);
-//      temp1[0] = t_sq(0,0);
-//      temp1[1] = t_sq(0,1);
-//      temp1[2] = t_sq(0,2);
-//      temp1[3] = t_sq(1,0);
-//      temp1[4] = t_sq(1,1);
-//      temp1[5] = t_sq(1,2);
-//      temp1[6] = t_sq(2,0);
-//      temp1[7] = t_sq(2,1);
-//      temp1[8] = t_sq(2,2);
-//      Theta_sq = temp1[0]+temp1[1]+temp1[2];
-//    }
 
     void printable_Ue1(double& Ue1_sq)
     {

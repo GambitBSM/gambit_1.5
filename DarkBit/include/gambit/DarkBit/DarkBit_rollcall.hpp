@@ -1026,11 +1026,6 @@ START_MODULE
     START_FUNCTION(Eigen::Matrix3d)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
-
-//    #define FUNCTION printable_CI
-//    START_FUNCTION(double)
-//    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
-//    #undef FUNCTION
  
   #undef CAPABILITY
 

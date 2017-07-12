@@ -49,16 +49,9 @@ Scanner:
     multinest:
       plugin: MultiNest
       like: LogLike
-      nlive: 500
+      nlive: 300
 
 ObsLikes:
-
-##  - capability: SN_stuff
-##    purpose: Observable
-##    function: printable_CI
-##    dependencies:
-##      - capability: SN_stuff
-##        type: Matrix3d
 
   - capability: Ue1
     purpose: Observable
@@ -136,14 +129,10 @@ Rules:
     type: Matrix3d
     function: CI_param
 
-##  - capability: SN_stuff
-##    type: double
-##    function: printable_CI
-
 KeyValues:
 
   likelihood:
     model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/SN_dev/"
+  default_output_path: "runs/SN_dev_2/"
