@@ -16,6 +16,7 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Dec
+///  \date 2017 Jun
 ///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
@@ -484,7 +485,7 @@ namespace Gambit
 
                 for (auto it = plugin_map.at(type).at(plugin).begin(), end = plugin_map.at(type).at(plugin).end(); it != end; it++)
                 {
-                    if (VersionCompare(version)(*it) && (lib == "" || lib == it->path))
+                    if (VersionCompare(version)(*it) && (lib == "" || lib == it->path) and it->status == "ok")
                         plugins.push_back(*it);
                 }
 
@@ -492,18 +493,20 @@ namespace Gambit
                 {
                     std::sort(plugins.begin(), plugins.end(), Plugin_Version_Supersedes);
                     auto it2 = plugins.begin();
+                    std::vector<Plugin_Details_Ref> matches;
                     for (auto it = it2 + 1, end = plugins.end(); it != end; it++)
                     {
-                        if (*it == *it2)
-                        {
-                            scan_err << "There are two plugins that met the input"
-                                    << " criteria in the inifile:\n" << static_cast<Plugin_Details &>(*it).print()
-                                    << "\n and ... \n\n" << static_cast<Plugin_Details &>(*it).print() << scan_end;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        if (*it == *it2) matches.push_back(*it);
+                    }
+                    if (not matches.empty())
+                    {
+                      scan_err << "More than one plugin met the input criteria in the YAML file:\n\n" << static_cast<Plugin_Details &>(*it2).print() << "\n";
+                      for (auto it = matches.begin(); it != matches.end(); it++)
+                      {
+                        scan_err << static_cast<Plugin_Details &>(*it).print() << "\n";
+                      }
+                      scan_err << "To indicate to ScannerBit which of these plugins should be used, please"
+                               << "\nadd more specific information in the Scanners section of your YAML file." << scan_end;
                     }
                 }
                 else if (plugins.size() == 0)
@@ -622,11 +625,11 @@ namespace Gambit
                 // #endif
                 // std::cout << "Gambit has written resume data to disk, preparing to stop!" << std::endl;
             }
-            
+
             void pluginInfo::dump(const std::string &name)
             {
                 auto it = resume_data.find(name);
-                if (it != resume_data.end()) 
+                if (it != resume_data.end())
                 {
                     std::string path = Gambit::Utils::ensure_path_exists(def_out_path + "/temp_files/" + name);
                     std::ofstream out((path).c_str(), std::ofstream::binary);
