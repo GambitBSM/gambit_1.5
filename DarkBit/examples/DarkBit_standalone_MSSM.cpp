@@ -204,7 +204,6 @@ int main(int argc, char* argv[])
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dssusy_isasugra);
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsSLHAread);
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsprep);
-    //if (decays && slha_version == 2) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
     if (decays) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
     else DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_PointInit_MSSM.reset_and_calculate();
