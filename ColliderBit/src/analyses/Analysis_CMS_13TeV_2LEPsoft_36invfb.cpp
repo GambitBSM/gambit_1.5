@@ -25,9 +25,13 @@ namespace Gambit {
 
       // Numbers passing cuts
       double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8, _numSR9, _numSR10, _numSR11, _numSR12; 
-      vector<int> cutFlowVector1;
-      vector<string> cutFlowVector_str1;
-      size_t NCUTS1;
+      vector<int> cutFlowVector;
+      vector<string> cutFlowVector_str;
+      size_t NCUTS;
+      vector<double> cutFlowVectorCMS_150_143;
+      vector<double> cutFlowVectorCMS_150_130;
+      double xsecCMS_150_143;
+      double xsecCMS_150_130;
 
       Perf_Plot* plots;
       ofstream cutflowFile;
@@ -54,12 +58,16 @@ namespace Gambit {
 	_numSR11=0;
 	_numSR12=0; 
 
-	NCUTS1=1;
+	NCUTS=12;
 	set_luminosity(35.9);
+	xsecCMS_150_143=5.18;
+	xsecCMS_150_130=5.18;
 
-        for (size_t i=0;i<NCUTS1;i++){
-          cutFlowVector1.push_back(0);
-          cutFlowVector_str1.push_back("");
+        for (size_t i=0;i<NCUTS;i++){
+          cutFlowVector.push_back(0);
+          cutFlowVectorCMS_150_143.push_back(0);
+          cutFlowVectorCMS_150_130.push_back(0);
+          cutFlowVector_str.push_back("");
         }
 
         analysisRunName = "CMS_13TeV_2LEPsoft_36invfb_test";
@@ -118,7 +126,7 @@ namespace Gambit {
 	double hT=0;
 	double mTauTau=0;
 	vector<double> mT;
-	
+
 	if (nSignalLeptons>=2) {
 	  m_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).m();
 	  pT_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).pT();
@@ -131,15 +139,23 @@ namespace Gambit {
 
 	for (size_t iJet=0;iJet<nSignalJets;iJet++)hT+=signalJets.at(iJet)->pT();
 
-	for (size_t iLep=0;iLep<nSignalLeptons;iLep++)mT.push_back(sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi()))));
+	for (size_t iLep=0;iLep<nSignalLeptons;iLep++)mT.at(iLep)=sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi())));
+	if (nSignalLeptons==0) {
+	  mT.push_back(999);
+	  mT.push_back(999);
+	}
+	if (nSignalLeptons==1)mT.push_back(999);
         
 
 	//Preselection
         bool preselection=false; 
+	bool OS=false;
+	
+	if (nSignalLeptons==2)OS=signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()<0.;
 
 	if (nSignalLeptons==2 && nSignalBJets==0) {
-	  if (signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()<0. && signalLeptons.at(0)->abspid()==signalLeptons.at(1)->abspid()) {
-  	    if (m_ll<50. && pT_ll>3. && met>125. && met/hT<1.4 && met/hT>0.6 && hT>100. && m_ll>4. && (m_ll<9. || m_ll>0.5) && (mTauTau<0. || mTauTau>160.) && mT.at(0)<70. && mT.at(1)<70.) {
+	  if (OS && signalLeptons.at(0)->abspid()==signalLeptons.at(1)->abspid()) {
+  	    if (m_ll<50. && pT_ll>3. && met>125. && met/hT<1.4 && met/hT>0.6 && hT>100. && m_ll>4. && (m_ll<9. || m_ll>10.5) && (mTauTau<0. || mTauTau>160.) && mT.at(0)<70. && mT.at(1)<70.) {
 	      preselection=true;
 	    }
 	  }
@@ -170,13 +186,72 @@ namespace Gambit {
           plots->fill(&variables);
         }
 
-        cutFlowVector_str1[0] = "All events";
+        cutFlowVector_str[0] = "All events";
+        cutFlowVector_str[1] = "2 $\\mu$ in acceptance";
+        cutFlowVector_str[2] = "Opposite-sign";
+        cutFlowVector_str[3] = "$p_{T}(\\mu\\mu) > 3 GeV$";
+        cutFlowVector_str[4] = "$M(\\mu\\mu) > 3 GeV$";
+        cutFlowVector_str[5] = "$M(\\mu\\mu)$ veto [9,10.5] $GeV$";
+        cutFlowVector_str[6] = "ISR jet";
+        cutFlowVector_str[7] = "$ 125 < E^{miss}_{T} < 200 GeV";
+        cutFlowVector_str[8] = "$ 0.6 < E^{miss}_{T}/H_{T} < 1.4 and H_{T} > 100 GeV";
+        cutFlowVector_str[9] = "B-tag veto";
+        cutFlowVector_str[10] = "M(\\tau\\tau)";
+        cutFlowVector_str[11] = "$M_{T}(\\mu_{x},E^{miss}_{T}), x = 1,2 < 70 GeV$";
 
-        for (size_t j=0;j<NCUTS1;j++){
+        cutFlowVectorCMS_150_143[0] = 220.3;
+        cutFlowVectorCMS_150_143[1] = 53.3;
+        cutFlowVectorCMS_150_143[2] = 49.4;
+        cutFlowVectorCMS_150_143[3] = 48.9;
+        cutFlowVectorCMS_150_143[4] = 23.5;
+        cutFlowVectorCMS_150_143[5] = 23.3;
+        cutFlowVectorCMS_150_143[6] = 21.5;
+        cutFlowVectorCMS_150_143[7] = 5.8;
+        cutFlowVectorCMS_150_143[8] = 3.8;
+        cutFlowVectorCMS_150_143[9] = 3.2;
+        cutFlowVectorCMS_150_143[10] = 2.8;
+        cutFlowVectorCMS_150_143[11] = 2.4;
+
+        cutFlowVectorCMS_150_130[0] = 645.9;
+        cutFlowVectorCMS_150_130[1] = 171.8;
+        cutFlowVectorCMS_150_130[2] = 163.5;
+        cutFlowVectorCMS_150_130[3] = 161.4;
+        cutFlowVectorCMS_150_130[4] = 150.1;
+        cutFlowVectorCMS_150_130[5] = 134.7;
+        cutFlowVectorCMS_150_130[6] = 112.4;
+        cutFlowVectorCMS_150_130[7] = 32.2;
+        cutFlowVectorCMS_150_130[8] = 30.9;
+        cutFlowVectorCMS_150_130[9] = 17.6;
+        cutFlowVectorCMS_150_130[10] = 14.8;
+        cutFlowVectorCMS_150_130[11] = 11.4;
+
+        for (size_t j=0;j<NCUTS;j++){
           if(
-             (j==0) )
+             (j==0) ||
 
-          cutFlowVector1[j]++;
+             (j==1 && nSignalMuons==2) ||
+
+             (j==2 && nSignalMuons==2 && OS) ||
+
+             (j==3 && nSignalMuons==2 && OS && pT_ll>3.) ||
+
+             (j==4 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3.) ||
+
+             (j==5 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5)) ||
+
+             (j==6 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5)) ||
+
+             (j==7 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200.) ||
+
+             (j==8 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100.) ||
+
+             (j==9 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0) ||
+
+             (j==10 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.)) ||
+
+             (j==11 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.) &&mT.at(0)<70. && mT.at(1)<70.) )
+
+          cutFlowVector[j]++;
         }
       }
 
@@ -190,10 +265,10 @@ namespace Gambit {
                 = dynamic_cast<Analysis_CMS_13TeV_2LEPsoft_36invfb*>(other);
 
         // Here we will add the subclass member variables:
-        if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
-        for (size_t j = 0; j < NCUTS1; j++) {
-          cutFlowVector1[j] += specificOther->cutFlowVector1[j];
-          cutFlowVector_str1[j] = specificOther->cutFlowVector_str1[j];
+        if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
+        for (size_t j = 0; j < NCUTS; j++) {
+          cutFlowVector[j] += specificOther->cutFlowVector[j];
+          cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
         _numSR1 += specificOther->_numSR1;
         _numSR2 += specificOther->_numSR2;
@@ -216,14 +291,19 @@ namespace Gambit {
         path.append(analysisRunName);
         path.append(".txt");
         cutflowFile.open(path.c_str());
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile << "CUT FLOW: CMS 2 soft leptons paper "<<endl;
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS1; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str1[j].c_str() << setw(20) << cutFlowVector1[j] << setw(20) << 100.*cutFlowVector1[j]/cutFlowVector1[0] << endl;
+        cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
+        cutflowFile<<"\\hline"<<endl;
+        cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecCMS_150_143<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecCMS_150_143<<" & 1\\\\"<<endl;
+        cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
+        for (size_t i=0; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorCMS_150_143[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_143[i]<<"&"<<(xsecCMS_150_143/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_143[i]<<"\\\\"<< endl;
         }
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        for (size_t i=1; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorCMS_150_143[i]*100./cutFlowVectorCMS_150_143[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+        }
+        cutflowFile<<"\\end{tabular}"<<endl;
         cutflowFile.close();
 
         plots->createFile();

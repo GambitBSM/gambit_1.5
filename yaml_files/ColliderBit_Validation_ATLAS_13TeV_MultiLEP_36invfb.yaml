@@ -231,9 +231,9 @@ Rules:
   - capability:  ColliderOperator
     function: operateLHCLoop
     options:
-      nEvents: [1000000, 100000]
+      nEvents: [0,1000]
       pythiaNames: ["Pythia_SUSY_LHC_8TeV", "Pythia_SUSY_LHC_13TeV"]
-      silenceLoop: true
+      silenceLoop: false
 
   # Choose which getPythia to use
   # For a scan, we use the one that does not expect an input SLHA file (i.e. do not use getPythiaFileReader)
@@ -268,8 +268,7 @@ Rules:
       xsec_vetos: [0.048, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
-      #SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177312.slha"] #ATLAS 1LEPbb 250-0
-      SLHA_filenames: ["ColliderBit/data/susy_simplifiedModel_wA_nosl_WH_177282.slha"] #ATLAS 1LEPbb 130-0
+      SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_200_100.slha"]
 
   # Delphes rules and options (ex. the Delphes configuration card file)
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
@@ -288,7 +287,7 @@ Rules:
     function: getBuckFastATLAS
     options:
       # useDetector defaults to true for getBuckFastATLAS. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
-      useDetector: [true,false]
+      useDetector: [false,true]
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: [false,false]
       antiktR: [0.4,0.4]
@@ -328,7 +327,7 @@ Rules:
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:
-      analyses: [ ["ATLAS_8TeV_1LEPbb_20invfb"], [] ]
+      analyses: [ [], ["ATLAS_13TeV_MultiLEP_36invfb"] ]
 
   # Specify the list of CMS analyses to run with BuckFast
   # These will get run if BuckFast is turned on
@@ -380,4 +379,4 @@ KeyValues:
 
     # Set the default output path
 
-  default_output_path: "runs/ColliderBit_pointTest_ATLAS_8TeV_1LEPbb_20invfb/"
+  default_output_path: "runs/ColliderBit_Validation_ATLAS_13TeV_MultiLEP_36invfb/"

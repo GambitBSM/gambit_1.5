@@ -26,10 +26,19 @@ namespace Gambit {
       // Numbers passing cuts
       double _numSRA, _numSRB; 
       vector<int> cutFlowVector;
+      vector<double> cutFlowVectorATLAS_130_0;
+      vector<double> cutFlowVectorATLAS_250_0;
+      double xsecATLAS_130_0;
+      double xsecATLAS_250_0;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
 
-      Perf_Plot* plots;	
+      Perf_Plot* plots_2bjets;	
+      Perf_Plot* plots_mbb;	
+      Perf_Plot* plots_HEPmct;	
+      Perf_Plot* plots_HEPmt;	
+      Perf_Plot* plots_HEPnbj;	
+      Perf_Plot* plots_HEPmbb;	
       ofstream cutflowFile;
       string analysisRunName;
 
@@ -50,19 +59,25 @@ namespace Gambit {
 
         NCUTS=8;
         set_luminosity(20.3);
+        xsecATLAS_130_0=4240.;
+        xsecATLAS_250_0=320.;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
+          cutFlowVectorATLAS_130_0.push_back(0);
+          cutFlowVectorATLAS_250_0.push_back(0);
           cutFlowVector_str.push_back("");
         }
 
-	//time_t now = time(0);
-	//tm *ltm = localtime(&now);
-	//analysisRunName = "ATLAS_8TeV_1LEPbb_test";
-	analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_130_0";
-	//analysisRunName.append(to_string(ltm->tm_sec));
-	vector<const char*> variables = {"met","mct","mbb","mt","j0pt","lpt"};
-	plots = new Perf_Plot(analysisRunName+"_mbb", &variables);
+	analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_250_0";
+
+	vector<const char*> variablesNames = {"met","mct","mbb","mt","j0pt","lpt","nbj","j1pt","j0eta","j1eta","jjdeltaR"};
+	plots_2bjets = new Perf_Plot(analysisRunName+"_2bjets", &variablesNames);
+	plots_mbb = new Perf_Plot(analysisRunName+"_mbb", &variablesNames);
+	plots_HEPmct = new Perf_Plot(analysisRunName+"_HEPmct", &variablesNames);
+	plots_HEPmt = new Perf_Plot(analysisRunName+"_HEPmt", &variablesNames);
+	plots_HEPnbj = new Perf_Plot(analysisRunName+"_HEPnbj", &variablesNames);
+	plots_HEPmbb = new Perf_Plot(analysisRunName+"_HEPmbb", &variablesNames);
 
       }
 
@@ -75,17 +90,33 @@ namespace Gambit {
         double met = event->met();
 
         // Baseline objects
+        const vector<double>  a = {0,10.};
+        const vector<double>  b = {0,10000.};
+        const vector<double> cEl = {0.95};
+        HEPUtils::BinnedFn2D<double> _eff2dEl(a,b,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
-          if (electron->pT() > 10. && fabs(electron->eta()) < 2.47) baselineElectrons.push_back(electron);
+          bool hasTrig=has_tag(_eff2dEl, electron->eta(), electron->pT());
+          if (electron->pT()>10. && fabs(electron->eta())<2.47 && hasTrig) baselineElectrons.push_back(electron);
         }
+
+        const vector<double> cMu1 = {0.7};
+        const vector<double> cMu2 = {0.85};
+        HEPUtils::BinnedFn2D<double> _eff2dMu1(a,b,cMu1);
+        HEPUtils::BinnedFn2D<double> _eff2dMu2(a,b,cMu2);
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
-          if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) baselineMuons.push_back(muon);
+          if (muon->pT()>10. && fabs(muon->eta())<2.4) {
+            bool hasTrig1=has_tag(_eff2dMu1, muon->eta(), muon->pT());
+            bool hasTrig2=has_tag(_eff2dMu2,muon->eta(), muon->pT());
+	    if (fabs(muon->eta())<1.05 && hasTrig1)baselineMuons.push_back(muon);
+	    if (fabs(muon->eta())>1.05 && hasTrig2)baselineMuons.push_back(muon);
+	  }
         }
+
         vector<HEPUtils::Jet*> baselineJets;
         for (HEPUtils::Jet* jet : event->jets()) {
-          if (jet->pT() > 20. && fabs(jet->eta()) < 4.5) baselineJets.push_back(jet);
+          if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
         }
 
         //Overlap procedure
@@ -93,177 +124,159 @@ namespace Gambit {
 	vector<HEPUtils::Particle*> overlapMuons;
 	vector<HEPUtils::Jet*> overlapJets;
 
-        //Remove any jet within dR=0.2 of an electrons
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
           bool overlap=false;
-          HEPUtils::P4 jetVec=baselineJets.at(iJet)->mom();
           for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
-            HEPUtils::P4 elVec=baselineElectrons.at(iEl)->mom();
-            if (fabs(elVec.deltaR_eta(jetVec))<0.2)overlap=true;
+            if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.2)overlap=true;
           }
           if (!overlap)overlapJets.push_back(baselineJets.at(iJet));
         }
 
-        //Remove electrons with dR=0.4 of surviving jets
         for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
           bool overlap=false;
-          HEPUtils::P4 elVec=baselineElectrons.at(iEl)->mom();
           for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
-            HEPUtils::P4 jetVec=overlapJets.at(iJet)->mom();
-            if (fabs(elVec.deltaR_eta(jetVec))<0.4)overlap=true;
+            if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(overlapJets.at(iJet)->mom()))<0.4)overlap=true;
           }
           if (!overlap)overlapElectrons.push_back(baselineElectrons.at(iEl));
         }
 
-        //Remove muons with dR=0.4 of surviving jets
         for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
           bool overlap=false;
-          HEPUtils::P4 muVec=baselineMuons.at(iMu)->mom();
           for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
-            HEPUtils::P4 jetVec=overlapJets.at(iJet)->mom();
-            if (fabs(muVec.deltaR_eta(jetVec))<0.4)overlap=true;
+            if (fabs(baselineMuons.at(iMu)->mom().deltaR_eta(overlapJets.at(iJet)->mom()))<0.4)overlap=true;
           }
           if (!overlap)overlapMuons.push_back(baselineMuons.at(iMu));
         }
 
-	//Reject events with muons and electrons within dR=0.1
-	for (size_t iEl=0;iEl<overlapElectrons.size();iEl++) {
-	  HEPUtils::P4 elVec=overlapElectrons.at(iEl)->mom();
-	  for (size_t iMu=0;iMu<overlapMuons.size();iMu++) {
-	    HEPUtils::P4 muVec=overlapMuons.at(iMu)->mom();
-	    if(fabs(elVec.deltaR_eta(muVec))<0.1) {
-		overlapElectrons.clear();
-		overlapMuons.clear();
-		overlapJets.clear();
-	    }
-	  }
-	}
-
-  	//Reject events with muons within dR=0.05 of each other
-        for (size_t iMu1=0;iMu1<overlapMuons.size();iMu1++) {
-          HEPUtils::P4 muVec1=overlapMuons.at(iMu1)->mom();
-          for (size_t iMu2=0;iMu2<overlapMuons.size();iMu2++) {
-            HEPUtils::P4 muVec2=overlapMuons.at(iMu2)->mom();
-            if(fabs(muVec1.deltaR_eta(muVec2))<0.05) {
-                overlapElectrons.clear();
-                overlapMuons.clear();
-                overlapJets.clear();
-            }
-          }
-        }
-
-
-        // Signal requirements
+        //Signal objets
         vector<HEPUtils::Particle*> signalLeptons;
         vector<HEPUtils::Jet*> signalJets;   
 	vector<HEPUtils::Jet*> signalBJets;
 
-	// Electrons
 	for (size_t iEl=0;iEl<overlapElectrons.size();iEl++) {
-	  if (overlapElectrons.at(iEl)->pT() > 25. && fabs(overlapElectrons.at(iEl)->eta()) < 2.47)signalLeptons.push_back(overlapElectrons.at(iEl));
+	  if (overlapElectrons.at(iEl)->pT()>25. && fabs(overlapElectrons.at(iEl)->eta())<2.47)signalLeptons.push_back(overlapElectrons.at(iEl));
         }
         
-        //Muons
         for (size_t iMu=0;iMu<overlapMuons.size();iMu++) {
-          if (overlapMuons.at(iMu)->pT() > 25. && fabs(overlapMuons.at(iMu)->eta()) < 2.40)signalLeptons.push_back(overlapMuons.at(iMu)); 
+          if (overlapMuons.at(iMu)->pT()>25. && fabs(overlapMuons.at(iMu)->eta())<2.40)signalLeptons.push_back(overlapMuons.at(iMu)); 
         } 
 	       
-        //Jets
-        const vector<double>  a = {0,10.};
-        const vector<double>  b = {0,10000.};
-        const vector<double> c = {0.7};
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
-
+        const vector<double> cBJet={0.7};
+        HEPUtils::BinnedFn2D<double> _eff2dBJet(a,b,cBJet);
         for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
-          if (overlapJets.at(iJet)->pT() > 25. && fabs(overlapJets.at(iJet)->eta()) < 2.40) {
+          if (overlapJets.at(iJet)->pT()>25. && fabs(overlapJets.at(iJet)->eta())<2.40) {
 	    signalJets.push_back(overlapJets.at(iJet));  
-            bool hasTag=has_tag(_eff2d, overlapJets.at(iJet)->eta(), overlapJets.at(iJet)->pT());
+            bool hasTag=has_tag(_eff2dBJet, overlapJets.at(iJet)->eta(), overlapJets.at(iJet)->pT());
 	    if (overlapJets.at(iJet)->btag() && hasTag)signalBJets.push_back(overlapJets.at(iJet));             
           }
 	}
 
-        //Variable definitions
-        int nSignalLeptons = signalLeptons.size();
-        int nBaselineLeptons = overlapElectrons.size() + overlapMuons.size();
-        int nSignalJets = signalJets.size();
-        int nSignalBJets = signalBJets.size();
+        int nSignalLeptons=signalLeptons.size();
+        int nBaselineLeptons=overlapElectrons.size()+overlapMuons.size();
+        int nSignalJets=signalJets.size();
+        int nSignalBJets=signalBJets.size();
 	sort(signalJets.begin(), signalJets.end(), compareJetPt);
 	sort(signalLeptons.begin(), signalLeptons.end(), compareParticlePt);
 
-        //Preselection
-        bool leadingBJets = isLeadingBJets(signalJets, signalBJets);
+	//Lepton-lepton overlap veto
+	bool lepton_overlap=true;
 
-        bool preselection = 0; 
-        if (nSignalLeptons == 1 && nBaselineLeptons == 1) {
-	  if (nSignalBJets == 1 || nSignalBJets == 2) {
-            if (leadingBJets) { 
-              preselection = 1;
-            }
-          }
+	for (size_t iEl=0;iEl<overlapElectrons.size();iEl++) {
+	  for (size_t iMu=0;iMu<overlapMuons.size();iMu++) {
+	    if(fabs(overlapElectrons.at(iEl)->mom().deltaR_eta(overlapMuons.at(iMu)->mom()))<0.1)lepton_overlap=false;
+	  }
 	}
+        for (size_t iMu1=0;iMu1<overlapMuons.size();iMu1++) {
+          for (size_t iMu2=0;iMu2<overlapMuons.size();iMu2++) {
+            if(fabs(overlapMuons.at(iMu1)->mom().deltaR_eta(overlapMuons.at(iMu2)->mom()))<0.05)lepton_overlap=false;
+          }
+        }
+
+        //Preselection
+        bool leadingBJets=isLeadingBJets(signalJets, signalBJets);
+
+        bool preselection=0; 
+        if (lepton_overlap && nSignalLeptons==1 && nBaselineLeptons==1 && (nSignalJets==2 || nSignalJets==3) && leadingBJets)preselection=1;
 	
         //Signal regions
 	double mT=0; 
 	if (nSignalLeptons) {
-          mT = sqrt(2*signalLeptons.at(0)->pT()*met*(1-cos(signalLeptons.at(0)->phi()-event->missingmom().phi())));
+          mT=sqrt(2*signalLeptons.at(0)->pT()*met*(1-cos(signalLeptons.at(0)->phi()-event->missingmom().phi())));
         }
 	
         double mCT=0;
         double mbb=0;
 	if (nSignalJets>1) {
-          mCT = sqrt(2*signalJets.at(0)->pT()*signalJets.at(1)->pT()*(1+cos(signalJets.at(0)->phi()-signalJets.at(1)->phi())));
-          mbb = (signalJets.at(0)->mom()+signalJets.at(1)->mom()).m(); 
+          mCT=sqrt(2*signalJets.at(0)->pT()*signalJets.at(1)->pT()*(1+cos(signalJets.at(0)->phi()-signalJets.at(1)->phi())));
+          mbb=(signalJets.at(0)->mom()+signalJets.at(1)->mom()).m(); 
 	}	
 
 	bool SRA=false;
 	bool SRB=false;
-        if (nSignalBJets == 2 && (nSignalJets == 2 || nSignalJets == 3) && preselection) {
-          if (met > 100. && mCT > 160. && mbb > 105. && mbb < 135.) {
-            //SRA
-            if (mT > 100. && mT < 130.) {
-              _numSRA++;
-	      SRA=true;
-            }
-            //SRB
-            if (mT > 130.) {
-              _numSRB++;
-	      SRB=true;   
-            }
+        if (preselection && nSignalBJets==2 && met>100. && mCT>160. && mbb>105. && mbb<135.) {
+          if (mT>100. && mT<130.) {
+            _numSRA++;
+            SRA=true;
+          }
+          if (mT>130.) {
+            _numSRB++;
+	    SRB=true;   
           }
         }                      
-	
-	if (preselection &&  met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) {
-	//if (preselection &&  met>50. && mT>40. && mbb>40. && nSignalBJets==2) {
-	  vector<double> variables = {met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT()};
-	  plots->fill(&variables);
+
+	if (preselection) {
+	  vector<double> variables={met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT(), nSignalBJets, signalJets.at(1)->pT(),signalJets.at(0)->eta(), signalJets.at(1)->eta(), signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom())};
+	  if (met>50. && mT>40. && mbb>40. && nSignalBJets==2)plots_2bjets->fill(&variables);
+	  if (met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met>100. && mCT>160. && mT>100. && mbb>45. && mbb<195.)plots_mbb->fill(&variables);
+          if (nSignalBJets==2 && met>100. && mT>100. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmct->fill(&variables);
+          if (nSignalBJets==2 && met>100. && mCT>160. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmt->fill(&variables);
+          if (nSignalBJets==2 && met>100 && mCT>160. && mT>100)plots_HEPmbb->fill(&variables);
+          if (met>100. && mCT>160. && mT>100. && mbb>105. && mbb<135.)plots_HEPnbj->fill(&variables);
 	}
 
-        cutFlowVector_str[0] = "No cuts ";
-        cutFlowVector_str[1] = "1 lepton + 2 bjets";
-        cutFlowVector_str[2] = "met > 100 GeV";
-        cutFlowVector_str[3] = "mCT > 160 GeV";
-        cutFlowVector_str[4] = "mT > 100 GeV";
-        cutFlowVector_str[5] = "45 < mbb < 195 GeV";
+	cutFlowVector_str[1] = "Lepton + 2 b-jets";
+        cutFlowVector_str[2] = "$E_{T}^{miss} > 100 GeV$";
+        cutFlowVector_str[3] = "$m_{CT} > 160 GeV$";
+        cutFlowVector_str[4] = "$m_{T} > 100 GeV$";
+        cutFlowVector_str[5] = "$45 GeV < m_{bb} < 195 GeV$";
         cutFlowVector_str[6] = "SRA";
         cutFlowVector_str[7] = "SRB";
+
+	cutFlowVectorATLAS_130_0[0] = 100000;
+	cutFlowVectorATLAS_130_0[1] = 531.1;
+        cutFlowVectorATLAS_130_0[2] = 163.7;
+        cutFlowVectorATLAS_130_0[3] = 70.4;
+        cutFlowVectorATLAS_130_0[4] = 9.7;
+        cutFlowVectorATLAS_130_0[5] = 9.6;
+        cutFlowVectorATLAS_130_0[6] = 7.2;
+        cutFlowVectorATLAS_130_0[7] = 0.3;
+
+	cutFlowVectorATLAS_250_0[0] = 99000;
+	cutFlowVectorATLAS_250_0[1] = 71.3;
+        cutFlowVectorATLAS_250_0[2] = 45.2;
+        cutFlowVectorATLAS_250_0[3] = 15.0;
+        cutFlowVectorATLAS_250_0[4] = 8.1;
+        cutFlowVectorATLAS_250_0[5] = 8.0;
+        cutFlowVectorATLAS_250_0[6] = 1.3;
+        cutFlowVectorATLAS_250_0[7] = 4.4;
 
         for (size_t j=0;j<NCUTS;j++){
           if(
              (j==0) ||
              
-	     (j==1 && preselection && nSignalLeptons == 1 && nSignalBJets == 2) ||
+	     (j==1 && preselection && nSignalBJets==2) ||
              
-             (j==2 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100.) ||
+             (j==2 && preselection && nSignalBJets==2 && met>100.) ||
 
-             (j==3 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160.) ||
+             (j==3 && preselection && nSignalBJets==2 && met>100. && mCT>160.) ||
  
-             (j==4 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100.) ||
+             (j==4 && preselection && nSignalBJets==2 && met>100. && mCT>160. && mT>100.) ||
              
-	     (j==5 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195.) ||  
+	     (j==5 && preselection && nSignalBJets==2 && met>100. && mCT>160. && mT>100. && mbb>45. && mbb<195.) ||  
 
-             (j==6 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRA) ||  
+             (j==6 && SRA) ||  
             
-	     (j==7 && preselection && nSignalLeptons == 1 && nSignalBJets == 2 && met > 100. && mCT > 160. && mT>100. && mbb > 45. && mbb < 195. && SRB) ){
+	     (j==7 && SRB) ){
 
             cutFlowVector[j]++;
 
@@ -292,29 +305,37 @@ namespace Gambit {
 
       void collect_results() {
 
-	cout<<"XSEC_PER_EVENT: "<<xsec_per_event()<<endl;
-        cout<<"XSEC: "<<xsec()<<endl;
+	if (cutFlowVector[0]>0) {
 
 	string path = "ColliderBit/results/cutflow_";
 	path.append(analysisRunName);
 	path.append(".txt");
 	cutflowFile.open(path.c_str());
-	cutflowFile<<"XSEC_PER_EVENT: "<<xsec_per_event()<<endl;
-	cutflowFile<<"XSEC: "<<xsec()<<endl;	
-	cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile << "CUT FLOW: ATLAS 1 lepton, 2 bjets paper "<<endl;
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*xsec_per_event()*luminosity() << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
+	cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
+	cutflowFile<<"\\hline"<<endl;
+	cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
+	cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecATLAS_250_0<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecATLAS_250_0<<" & 1\\\\"<<endl;
+	cutflowFile<<"Generated Events &"<< cutFlowVectorATLAS_250_0[0]<<"&"<<cutFlowVector[0]<<"& - & -\\\\ \\hline"<<endl;
+	cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
+        for (size_t i=1; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_250_0[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_250_0[i]<<"&"<<(xsecATLAS_250_0/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_250_0[i]<<"\\\\"<< endl;
         }
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+	cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        for (size_t i=1; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_250_0[i]*100./cutFlowVectorATLAS_250_0[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+        }
+	cutflowFile<<"\\end{tabular}"<<endl;
 	cutflowFile.close();
 
-	plots->createFile(luminosity(),xsec_per_event());
+	plots_2bjets->createFile(luminosity(),xsec_per_event());
+	plots_mbb->createFile(luminosity(),xsec_per_event());
+	plots_HEPmct->createFile(luminosity(),xsec_per_event());
+	plots_HEPmt->createFile(luminosity(),xsec_per_event());
+	plots_HEPnbj->createFile(luminosity(),xsec_per_event());
+	plots_HEPmbb->createFile(luminosity(),xsec_per_event());
+	}
 
-        SignalRegionData results_SRA;
+	SignalRegionData results_SRA;
         results_SRA.analysis_name = "Analysis_ATLAS_8TeV_1LEPbb_20invfb";
         results_SRA.sr_label = "SRA";
         results_SRA.n_observed = 4.;

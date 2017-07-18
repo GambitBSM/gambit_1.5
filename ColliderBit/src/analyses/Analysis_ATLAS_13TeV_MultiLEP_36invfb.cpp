@@ -29,6 +29,8 @@ namespace Gambit {
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
+      vector<double> cutFlowVectorATLAS_200_100;
+      double xsecATLAS_200_100; 
 
       Perf_Plot* plots;
       ofstream cutflowFile;
@@ -61,15 +63,17 @@ namespace Gambit {
 	_numSR3_WZ_1Jc=0;
 
 
-	NCUTS=9;
+	NCUTS=22;
 	set_luminosity(36.1);
+	xsecATLAS_200_100=1.;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
+          cutFlowVectorATLAS_200_100.push_back(0);
           cutFlowVector_str.push_back("");
         }
 
-        analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb_test";
+        analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb_200_100";
         vector<const char*> variables = {"met"};
         plots = new Perf_Plot(analysisRunName, &variables);
 
@@ -186,22 +190,44 @@ namespace Gambit {
         size_t nSignalJets = signalJets.size();
 	size_t nSignalBJets = signalBJets.size();
 	size_t nSignalNonBJets = nSignalJets-nSignalBJets;       
- 
-	//Preselection
-        bool preselection=false; 
-	if ((nSignalLeptons==2 || nSignalLeptons==3) && baselineLeptons.size()==nSignalLeptons) {
-	  if (signalLeptons.at(0)->pT()>25 && signalLeptons.at(1)->pT()>20)preselection=true;
-	}
 
-        //Signal regions
 	vector<vector<HEPUtils::Particle*>> OSSFpairs=getOSSFpair(signalLeptons);
 	vector<vector<HEPUtils::Particle*>> OSpairs=getOSpair(signalLeptons);
 
+	//Variables
+	double pT_l0=0.;
+	double pT_l1=0.;
+	double pT_l2=0.;
+	double mlll=0.;
+	double pTlll=0.;
 	double mll=0;
 	double mT2=0;
+	double deltaR_ll;
+
+	double pT_j0=0.;
+	double pT_j1=0.;
 	double mjj=0;
+	double deltaR_jj;
+
+	HEPUtils::P4 Z;
+	double deltaPhi_met_Z;
+
+	HEPUtils::P4 W;
+        double deltaPhi_met_W;
+
+	vector<HEPUtils::P4> W_ISR;
+	double deltaPhi_met_W_ISR;
+	double deltaPhi_met_ISR;
+	double deltaPhi_met_jet1;
+
+	double mTmin=999;
+	double mSFOS=999;
+
+	if (nSignalLeptons>0)pT_l0=pT_l0;
 	if (nSignalLeptons>1) {
+	  pT_l1=signalLeptons.at(1)->pT();	  
 	  mll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).m();
+	  deltaR_ll=fabs(signalLeptons.at(0)->mom().deltaR_eta(signalLeptons.at(1)->mom()));
 
           double pLep1[3] = {signalLeptons.at(0)->mass(), signalLeptons.at(0)->mom().px(), signalLeptons.at(0)->mom().py()};
           double pLep2[3] = {signalLeptons.at(1)->mass(), signalLeptons.at(1)->mom().px(), signalLeptons.at(1)->mom().py()};
@@ -212,21 +238,61 @@ namespace Gambit {
           mt2_calc.set_momenta(pLep1,pLep2,pMiss);
           mt2_calc.set_mn(mn);
           mT2 = mt2_calc.get_mt2();
-	}
-	if (nSignalJets>1)mjj=(signalJets.at(0)->mom()+signalJets.at(1)->mom()).m();
 
-	//Large jet veto
+	  Z=signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom();
+	  deltaPhi_met_Z=fabs(Z.phi()-event->missingmom().phi());
+
+	  for (size_t iPa=0;iPa<OSSFpairs.size();iPa++) {
+	    for (size_t iLep=0;iLep<signalLeptons.size();iLep++) {
+	      if (signalLeptons.at(iLep)!=OSSFpairs.at(iPa).at(0) && signalLeptons.at(iLep)!=OSSFpairs.at(iPa).at(1)) {
+	        double mT = sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi())));		
+	        if (mT<mTmin) { 
+		  mTmin=mT;
+		  mSFOS=(OSSFpairs.at(iPa).at(0)->mom()+OSSFpairs.at(iPa).at(1)->mom()).m();
+		}	
+	      }
+	    }
+	  }
+
+	}
+	if (nSignalLeptons>2) {
+	  pT_l2=signalLeptons.at(2)->pT();
+	  mlll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).m();
+	  pTlll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).pT();
+	}
+
+	if (nSignalJets>0) {
+	  pT_j0=signalJets.at(0)->pT();
+	  deltaPhi_met_jet1=fabs(signalJets.at(0)->phi()-event->missingmom().phi());
+	}
+	if (nSignalJets>1) {
+	  pT_j1=signalJets.at(1)->pT();
+	  mjj=(signalJets.at(0)->mom()+signalJets.at(1)->mom()).m();
+	  deltaR_jj=fabs(signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom()));
+
+	  W=signalJets.at(0)->mom()+signalJets.at(1)->mom();
+	  deltaPhi_met_W=fabs(W.phi()-event->missingmom().phi());
+
+	  if (nSignalLeptons>1) {
+	    W_ISR=get_W_ISR(signalJets,Z,event->missingmom());
+	    deltaPhi_met_W_ISR=fabs(W_ISR.at(0).phi()-event->missingmom().phi());
+	    deltaPhi_met_ISR=fabs(W_ISR.at(1).phi()-event->missingmom().phi());
+	  }
+	}
+
+        bool preselection=false; 
 	bool large_jet_veto=true;
+	bool bjet_veto=true;
+
+	if ((nSignalLeptons==2 || nSignalLeptons==3) && baselineLeptons.size()==nSignalLeptons && pT_l0>25 && pT_l1>20)preselection=true;
 	for (size_t iJet=0;iJet<nSignalJets;iJet++) {
 	  if (signalJets.at(iJet)->pT()>60 && fabs(signalJets.at(iJet)->eta())<2.4 && signalJets.at(iJet)->btag()==false)large_jet_veto=false;
 	}
-
-	//Bjet veto
-	bool bjet_veto=true;
 	for (size_t iJet=0;iJet<nSignalBJets;iJet++) {
 	  if (signalBJets.at(iJet)->pT()>20 && fabs(signalBJets.at(iJet)->eta())<2.4)bjet_veto=false;
 	}
 
+	//Signal Regions
 	//2lep+0jet
 	if (preselection && nSignalLeptons==2 && OSpairs.size()==1 && mll>40 && large_jet_veto && bjet_veto) {
 	  if (OSSFpairs.size()==1) {
@@ -242,64 +308,28 @@ namespace Gambit {
 	}
 	
 	//2lep+jets
-	if (preselection && nSignalLeptons==2 && OSpairs.size() && mll>40 && bjet_veto) {
-	  if (signalLeptons.at(1)->pT()>25 && nSignalJets>1) {
-	    if (signalJets.at(0)->pT()>30 && signalJets.at(1)->pT()>30) {
-		HEPUtils::P4 Z=signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom();
-	     	double deltaR_ll=fabs(signalLeptons.at(0)->mom().deltaR_eta(signalLeptons.at(1)->mom()));
-		double deltaR_jj=fabs(signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom()));
-	      //SR2_int + SR2_high
-	      if (nSignalNonBJets>1 && mll>81. && mll<101. && mjj>70. && mjj<100.) {
-		HEPUtils::P4 W=signalJets.at(0)->mom()+signalJets.at(1)->mom();
-	        double deltaPhi_met_W = fabs(W.phi()-event->missingmom().phi());
-		if (Z.pT()>80. && W.pT()>100. && mT2>100. && deltaR_jj<1.5 && deltaR_ll<1.8 && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) {
-		  if (met>150)_numSR2_int++;
-		  if (met>250)_numSR2_high++;
-		}
-	      }
-	      //SR2_low_2J
-	      if (nSignalNonBJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60.) {
-		HEPUtils::P4 W=signalJets.at(0)->mom()+signalJets.at(1)->mom();
-	        double deltaPhi_met_W=fabs(W.phi()-event->missingmom().phi());
-	        double deltaPhi_met_Z=fabs(Z.phi()-event->missingmom().phi());
-		if (deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
-	      }	
-	      //SR2_low_3J
-	      if (nSignalNonBJets>2 && nSignalNonBJets<6 && mll>86 && mll<96 && mjj>70 && mjj<90 && met>100 && Z.pT()>40 && deltaR_jj<2.2) {
-		vector<HEPUtils::P4> W_ISR=get_W_ISR(signalJets,Z,event->missingmom());
-		double deltaPhi_met_W=fabs(W_ISR.at(0).phi()-event->missingmom().phi());
-		double deltaPhi_met_ISR=fabs(W_ISR.at(1).phi()-event->missingmom().phi());
-		double deltaPhi_met_jet1=fabs(signalJets.at(0)->phi()-event->missingmom().phi());
-		if (deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet1>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && fabs(Z.eta())<1.6 && signalJets.at(2)->pT()>30.)_numSR2_low++;
-	      }
-
-	    }	
+	if (preselection && nSignalLeptons==2 && OSpairs.size() && mll>40 && bjet_veto && pT_l1>25 && nSignalJets>1 && pT_j0>30 && pT_j1>30) {
+	  //SR2_int + SR2_high
+	  if (nSignalNonBJets>1 && mll>81. && mll<101. && mjj>70. && mjj<100. && Z.pT()>80. && W.pT()>100. && mT2>100. && deltaR_jj<1.5 && deltaR_ll<1.8 && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) {
+            if (met>150)_numSR2_int++;
+            if (met>250)_numSR2_high++;
 	  }
+	  //SR2_low_2J
+	  if (nSignalNonBJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
+	  //SR2_low_3J
+	  if (nSignalNonBJets>2 && nSignalNonBJets<6 && mll>86 && mll<96 && mjj>70 && mjj<90 && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W_ISR<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet1>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && fabs(Z.eta())<1.6 && signalJets.at(2)->pT()>30.)_numSR2_low++;
 	}
 	
 	//3lep
 	if (preselection && nSignalLeptons==3 && bjet_veto && OSSFpairs.size()) {
-	  double mTmin=999;
-	  double mSFOS=999;
-	  for (size_t iPa=0;iPa<OSSFpairs.size();iPa++) {
-	    for (size_t iLep=0;iLep<signalLeptons.size();iLep++) {
-	      if (signalLeptons.at(iLep)!=OSSFpairs.at(iPa).at(0) && signalLeptons.at(iLep)!=OSSFpairs.at(iPa).at(1)) {
-	        double mT = sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi())));		
-	        if (mT<mTmin) { 
-		  mTmin=mT;
-		  mSFOS=(OSSFpairs.at(iPa).at(0)->mom()+OSSFpairs.at(iPa).at(1)->mom()).m();
-		}	
-	      }
-	    }
-	  }
 	  if (mSFOS<81.2 && met>130. && mTmin>110.) {
-	    if (signalLeptons.at(2)->pT()>20. && signalLeptons.at(2)->pT()<30.)_numSR3_slep_a++;
-	    if (signalLeptons.at(2)->pT()>30.)_numSR3_slep_b++;
+	    if (pT_l2>20. && pT_l2<30.)_numSR3_slep_a++;
+	    if (pT_l2>30.)_numSR3_slep_b++;
 	  }
 	  if (mSFOS>101.2 && met>130. && mTmin>110.) {
-	    if (signalLeptons.at(2)->pT()>20. && signalLeptons.at(2)->pT()<50.)_numSR3_slep_c++;
-	    if (signalLeptons.at(2)->pT()>50. && signalLeptons.at(2)->pT()<80.)_numSR3_slep_d++;
-	    if (signalLeptons.at(2)->pT()>80.)_numSR3_slep_e++;
+	    if (pT_l2>20. && pT_l2<50.)_numSR3_slep_c++;
+	    if (pT_l2>50. && pT_l2<80.)_numSR3_slep_d++;
+	    if (pT_l2>80.)_numSR3_slep_e++;
 	  }
 	  if (mSFOS>81.2 && mSFOS<101.2 && nSignalNonBJets==0 && mTmin>110.) {
 	    if (met>60. && met<120.)_numSR3_WZ_0Ja++;
@@ -309,7 +339,7 @@ namespace Gambit {
 	  if (mSFOS>81.2 && mSFOS<101.2 && nSignalNonBJets>0) {
 	    if (met>120. && met<200. && mTmin>110. && (signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).pT()<120. && signalJets.at(0)->pT()>70.)_numSR3_WZ_1Ja++;
 	    if (met>200. && mTmin>110. && mTmin<160.)_numSR3_WZ_1Jb++;
-	    if (met>200. && signalLeptons.at(2)->pT()>35. && mTmin>160.)_numSR3_WZ_1Jc++;
+	    if (met>200. && pT_l2>35. && mTmin>160.)_numSR3_WZ_1Jc++;
 	  }
 	}
 
@@ -318,40 +348,98 @@ namespace Gambit {
           plots->fill(&variables);
         }
 
-	bool lepton_pT_veto=false;
-	if (nSignalLeptons==2) {
-	  if (signalLeptons.at(0)->pT()>20. && signalLeptons.at(1)->pT()>20.)lepton_pT_veto=true;
-	}
-
         cutFlowVector_str[0] = "All events";
-        cutFlowVector_str[1] = "2 baseline leptons";
-        cutFlowVector_str[2] = "2 signal leptons";
-        cutFlowVector_str[3] = "Opposite-sign";
-        cutFlowVector_str[4] = "Lepton pT > 20 GeV";
-        cutFlowVector_str[5] = "mll > 40 GeV";
-        cutFlowVector_str[6] = "b-veto";
-        cutFlowVector_str[7] = "met > 50 GeV";
-        cutFlowVector_str[8] = "mT2 > 75 GeV";
+        cutFlowVector_str[1] = "$\\geq$ 2 signal leptons & SFOS";
+        cutFlowVector_str[2] = "3 signal leptons & extra lepton veto";
+        cutFlowVector_str[3] = "B-jet veto";
+        cutFlowVector_str[4] = "$p_{T}^{l0} > 25 GeV$";
+        cutFlowVector_str[5] = "$p_{T}^{l2} > 20 GeV$";
+        cutFlowVector_str[6] = "$m_{lll} > 20 GeV$";
+        cutFlowVector_str[7] = "$| m_{ll} - m_{Z} | < 10 GeV";
+        cutFlowVector_str[8] = "0 jets";
+        cutFlowVector_str[9] = "$60 < E^{miss}_{T} < 120 GeV$";
+        cutFlowVector_str[10] = "$m_{T}^{min} > 110 GeV$";
+        cutFlowVector_str[11] = "$120 < E^{miss}_{T} < 170 GeV$";
+        cutFlowVector_str[12] = "$m_{T}^{min} > 110 GeV$";
+        cutFlowVector_str[13] = "$E^{miss}_{T} > 170 GeV$";
+        cutFlowVector_str[14] = "$m_{T}^{min} > 110 GeV$";
+        cutFlowVector_str[15] = "$\\geq$ 1 jet";
+        cutFlowVector_str[16] = "$120 < E^{miss}_{T} < 200 GeV$";
+        cutFlowVector_str[17] = "$m_{T}^{min} > 110 GeV$";
+        cutFlowVector_str[18] = "$p_{T}^{lll} < 120 GeV$";
+        cutFlowVector_str[19] = "$p_{T}^{j0} < 120 GeV$";
+        cutFlowVector_str[20] = "$E^{miss}_{T} > 200 GeV$";
+        cutFlowVector_str[21] = "$110 < m_{T}^{min} < 160 GeV$";
+
+	cutFlowVectorATLAS_200_100[0]=17682.;
+	cutFlowVectorATLAS_200_100[1]=425.63;
+	cutFlowVectorATLAS_200_100[2]=424.59;
+	cutFlowVectorATLAS_200_100[3]=414.43;
+	cutFlowVectorATLAS_200_100[4]=413.98;
+	cutFlowVectorATLAS_200_100[5]=306.91;
+	cutFlowVectorATLAS_200_100[6]=301.70;
+	cutFlowVectorATLAS_200_100[7]=227.15;
+	cutFlowVectorATLAS_200_100[8]=110.35;
+	cutFlowVectorATLAS_200_100[9]=43.24;
+	cutFlowVectorATLAS_200_100[10]=8.91;
+	cutFlowVectorATLAS_200_100[11]=6.02;
+	cutFlowVectorATLAS_200_100[12]=1.1;
+	cutFlowVectorATLAS_200_100[13]=3.15;
+	cutFlowVectorATLAS_200_100[14]=0.49;
+	cutFlowVectorATLAS_200_100[15]=116.81;
+	cutFlowVectorATLAS_200_100[16]=18.86;
+	cutFlowVectorATLAS_200_100[17]=5.8;
+	cutFlowVectorATLAS_200_100[18]=4.63;
+	cutFlowVectorATLAS_200_100[19]=3.18;
+	cutFlowVectorATLAS_200_100[20]=7.32;
+	cutFlowVectorATLAS_200_100[21]=1.85;
+
 
         for (size_t j=0;j<NCUTS;j++){
           if(
              (j==0) ||
 
-	     (j==1 && baselineLeptons.size()==2) ||
+	     (j==1 && nSignalLeptons>=2 && OSSFpairs.size()>0) ||   
 
-	     (j==2 && baselineLeptons.size()==2 && nSignalLeptons==2) ||
+	     (j==2 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3) ||   
 
-	     (j==3 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size()) ||
+	     (j==3 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto) ||   
 
-	     (j==4 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto) ||
+	     (j==4 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25.) ||   
 
-	     (j==5 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40.) ||
+	     (j==5 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20.) ||   
 
-	     (j==6 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40. && bjet_veto)  ||
+	     (j==6 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20.) ||   
 
-	     (j==7 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40. && bjet_veto && met>50.) ||            
+	     (j==7 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10.) ||   
+
+	     (j==8 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets==0) ||   
+
+	     (j==9 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && met>60. && met<120. && nSignalJets==0) ||   
+
+	     (j==10 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && met>60. && met<120.&& nSignalJets==0 && mTmin>110.) ||   
  
-             (j==8 && baselineLeptons.size()==2 && nSignalLeptons==2 && OSpairs.size() && lepton_pT_veto && mll>40. && bjet_veto && met>50. && mT2>75.) )
+	     (j==11 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets==0 && met>120. && met<170.) ||   
+
+	     (j==12 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets==0 && met>120. && met<170. && mTmin>110.) ||   
+
+	     (j==13 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets==0 && met>170.) ||   
+
+	     (j==14 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets==0 && met>170. && mTmin>110.) ||   
+
+	     (j==15 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0) ||   
+
+	     (j==16 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0 && met>120. && met<200.) ||   
+
+	     (j==17 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110.) ||   
+
+	     (j==18 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120.) ||   
+
+	     (j==19 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j0>70.) ||   
+
+	     (j==20 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0 && met>200.) ||   
+
+	     (j==21 && nSignalLeptons>=2 && OSSFpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mll-91.2)<10. && nSignalJets>0 && met>200. && mTmin>110. && mTmin<160.) )   
 
 	  cutFlowVector[j]++;
 	}
@@ -401,16 +489,20 @@ namespace Gambit {
 
         string path = "ColliderBit/results/cutflow_";
         path.append(analysisRunName);
-        path.append(".txt");
-        cutflowFile.open(path.c_str());
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cutflowFile << "CUT FLOW: ATLAS Multi-lepton paper "<<endl;
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-        cutflowFile<< right << setw(60) << "CUT" << setw(20) << "RAW" << setw(20) << " % " << endl;
-        for (size_t j=0; j<NCUTS; j++) {
-          cutflowFile << right << setw(60) << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << endl;
+        cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
+        cutflowFile<<"\\hline"<<endl;
+        cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
+        cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecATLAS_200_100<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecATLAS_200_100<<" & 1\\\\"<<endl;
+        cutflowFile<<"Generated Events &"<< cutFlowVectorATLAS_200_100[0]<<"&"<<cutFlowVector[0]<<"& - & -\\\\ \\hline"<<endl;
+        cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
+        for (size_t i=1; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_200_100[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_200_100[i]<<"&"<<(xsecATLAS_200_100/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_200_100[i]<<"\\\\"<< endl;
         }
-        cutflowFile << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        for (size_t i=1; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_200_100[i]*100./cutFlowVectorATLAS_200_100[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+        }
+        cutflowFile<<"\\end{tabular}"<<endl;
         cutflowFile.close();
 
         plots->createFile();
