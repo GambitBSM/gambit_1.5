@@ -121,6 +121,10 @@ To run an example GAMBIT MSSM7 scan, do:
 Other examples are provided in the yaml_files folder.  Further readmes and documentation can also be found in the doc folder.
 
 
+Licensing
+--
+The BSD license below applies to all source files in the GAMBIT distribution, except for those contained in the contrib/fjcore-3.1.3 and contrib/MassSpectra directories.  The files in those directories belong to the FastJet and FlexibleSUSY/SOFTSUSY projects respectively, an d are distributed under the GNU General Public License, with special exception (granted by the authors of these packages to GAMBIT) that their inclusion in GAMBIT does not require that the rest of GAMBIT be distributed under the GPL.  Note that all provisions of the GPL continue to apply to any further redistribution of the files in contrib/fjcore-3.1.3 and contrib/MassSpectra.
+
 
 License
 --
