@@ -22,7 +22,7 @@
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
 ///  \date 2013 Jun
-///  \date 2014 Mar [RD interface to DS is working]
+///  \date 2014 Mar
 ///
 ///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
@@ -197,14 +197,19 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Fraction of the relic density constituted by the DM candidate under investigation
   #define CAPABILITY RD_fraction
   START_CAPABILITY
-    #define FUNCTION RD_fraction_from_oh2
+    #define FUNCTION RD_fraction_one
+      START_FUNCTION(double)
+    #undef FUNCTION
+    #define FUNCTION RD_fraction_leq_one
       START_FUNCTION(double)
       DEPENDENCY(RD_oh2, double)
     #undef FUNCTION
-    #define FUNCTION RD_fraction_fixed
+    #define FUNCTION RD_fraction_rescaled
       START_FUNCTION(double)
+      DEPENDENCY(RD_oh2, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -235,10 +240,6 @@ START_MODULE
     #define FUNCTION cascadeMC_LoopManager
       START_FUNCTION(void, CAN_MANAGE_LOOPS)
       DEPENDENCY(GA_missingFinalStates, std::vector<std::string>)
-      // Make sure these capabilities are run before the loop
-      DEPENDENCY(cascadeMC_DecayTable, DarkBit::DecayChain::DecayTable)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -423,7 +424,7 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(GA_AnnYield, daFunk::Funk)
       DEPENDENCY(RD_fraction, double)
-      DEPENDENCY(set_gamLike_GC_halo, bool)
+      //DEPENDENCY(set_gamLike_GC_halo, bool)
       BACKEND_REQ(lnL, (gamLike), double, (int, const std::vector<double> &, const std::vector<double> &))
     #undef FUNCTION
   #undef CAPABILITY
@@ -597,7 +598,7 @@ START_MODULE
   DD_DECLARE_EXPERIMENT(SIMPLE_2014)
   DD_DECLARE_EXPERIMENT(DARWIN_Ar)
   DD_DECLARE_EXPERIMENT(DARWIN_Xe)
-  DD_DECLARE_EXPERIMENT(LUX_2016_prelim)
+  DD_DECLARE_EXPERIMENT(LUX_2016)
   DD_DECLARE_EXPERIMENT(PandaX_2016)
   DD_DECLARE_EXPERIMENT(LUX_2015)
   DD_DECLARE_EXPERIMENT(PICO_2L)

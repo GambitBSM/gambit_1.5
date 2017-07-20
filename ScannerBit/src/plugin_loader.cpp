@@ -16,6 +16,7 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Dec
+///  \date 2017 Jun
 ///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
@@ -29,8 +30,6 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-#include <sys/types.h> // for 'stat' function
-#include <sys/stat.h>  //    "         "
 
 #include "gambit/ScannerBit/scanner_utils.hpp"
 #include "gambit/ScannerBit/plugin_comparators.hpp"
@@ -39,6 +38,7 @@
 #include "gambit/Utils/table_formatter.hpp"
 #include "gambit/Utils/screen_print_utils.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"
+#include "gambit/Utils/util_functions.hpp"
 #include "gambit/ScannerBit/priors_rollcall.hpp"
 
 namespace Gambit
@@ -51,9 +51,6 @@ namespace Gambit
         {
             inline std::string print_plugins(std::map< std::string, std::map<std::string, std::vector<Plugin_Details> > >::const_iterator plugins)
             {
-                typedef std::map<std::string, std::vector<Plugin_Details> > plugin_map;
-                typedef std::map<std::string, plugin_map> plugin_mapmap;
-
                 table_formatter table(plugins->first + " PLUGINS", "VERSION", "STATUS");
                 table.capitalize_title();
                 table.padding(1);
@@ -312,7 +309,7 @@ namespace Gambit
 
                     table.no_newline() << "" << "";
                     out << "\x1b[01m\x1b[04mPRIOR LIST\x1b[0m\n" << std::endl;
-                    out << format_for_screen("For information in a specific prior, see its prior group's dianostic via \"./gambit group_name\".");
+                    out << format_for_screen("For information on a specific prior, see its prior group's diagnostic via \"./gambit group_name\".");
                     out << table.str() << std::endl;
                     out << "\x1b[01m\x1b[04mDESCRIPTION\x1b[0m\n" << std::endl;
                     if (node["priors"])
@@ -488,7 +485,7 @@ namespace Gambit
 
                 for (auto it = plugin_map.at(type).at(plugin).begin(), end = plugin_map.at(type).at(plugin).end(); it != end; it++)
                 {
-                    if (VersionCompare(version)(*it) && (lib == "" || lib == it->path))
+                    if (VersionCompare(version)(*it) && (lib == "" || lib == it->path) and it->status == "ok")
                         plugins.push_back(*it);
                 }
 
@@ -496,18 +493,20 @@ namespace Gambit
                 {
                     std::sort(plugins.begin(), plugins.end(), Plugin_Version_Supersedes);
                     auto it2 = plugins.begin();
+                    std::vector<Plugin_Details_Ref> matches;
                     for (auto it = it2 + 1, end = plugins.end(); it != end; it++)
                     {
-                        if (*it == *it2)
-                        {
-                            scan_err << "There are two plugins that met the input"
-                                    << " criteria in the inifile:\n" << static_cast<Plugin_Details &>(*it).print()
-                                    << "\n and ... \n\n" << static_cast<Plugin_Details &>(*it).print() << scan_end;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        if (*it == *it2) matches.push_back(*it);
+                    }
+                    if (not matches.empty())
+                    {
+                      scan_err << "More than one plugin met the input criteria in the YAML file:\n\n" << static_cast<Plugin_Details &>(*it2).print() << "\n";
+                      for (auto it = matches.begin(); it != matches.end(); it++)
+                      {
+                        scan_err << static_cast<Plugin_Details &>(*it).print() << "\n";
+                      }
+                      scan_err << "To indicate to ScannerBit which of these plugins should be used, please"
+                               << "\nadd more specific information in the Scanners section of your YAML file." << scan_end;
                     }
                 }
                 else if (plugins.size() == 0)
@@ -627,6 +626,20 @@ namespace Gambit
                 // std::cout << "Gambit has written resume data to disk, preparing to stop!" << std::endl;
             }
 
+            void pluginInfo::dump(const std::string &name)
+            {
+                auto it = resume_data.find(name);
+                if (it != resume_data.end())
+                {
+                    std::string path = Gambit::Utils::ensure_path_exists(def_out_path + "/temp_files/" + name);
+                    std::ofstream out((path).c_str(), std::ofstream::binary);
+                    for (auto v_it = it->second.begin(), v_end = it->second.end(); v_it != v_end; ++v_it)
+                    {
+                        (*v_it)->print(out);
+                    }
+                }
+            }
+
             /// Save persistence file to record that the alternative min_LogL value is in use for this scan
             void pluginInfo::save_alt_min_LogL_state() const
             {
@@ -649,22 +662,18 @@ namespace Gambit
             /// Check persistence file to see if we should be using the alternative min_LogL value
             bool pluginInfo::check_alt_min_LogL_state() const
             {
-                //std::ifstream file(def_out_path+"/ALT_MIN_LOGL_IN_USE");
-                //return not file.fail();
-                std::string state_fname(def_out_path+"/ALT_MIN_LOGL_IN_USE");
-                struct stat buffer;
-                return (stat(state_fname.c_str(), &buffer) == 0);
+                return Utils::file_exists(def_out_path+"/ALT_MIN_LOGL_IN_USE");
             }
 
             pluginInfo::~pluginInfo()
             {
-                for (auto it = resume_data.begin(), end = resume_data.end(); it != end; ++it)
+                /*for (auto it = resume_data.begin(), end = resume_data.end(); it != end; ++it)
                 {
                     for (auto v_it = it->second.begin(), v_end = it->second.end(); v_it != v_end; ++v_it)
                     {
                         delete (*v_it);
                     }
-                }
+                }*/
 
                 for (auto it = resume_streams.begin(), end = resume_streams.end(); it != end; ++it)
                 {

@@ -29,11 +29,39 @@
 
 
 # Diver
-set(loc "${GAMBIT_INTERNAL}/Diver") #FIXME delete on release
 set(name "diver")
 set(ver "1.0.0")
 set(lib "libdiver")
-set(dl "null")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "61c76e948855f19dfa394c14df8c6af2")
+set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/ScannerBit/patches/${name}/${ver}/patch_${name}_${ver}.dif")
+set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
+if(MPI_Fortran_FOUND)
+  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS_PLUS_MPI}")
+else()
+  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS}")
+endif()
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_DIR ${scanner_download}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} MODULE=${FMODULE} FOPT=${diverFFLAGS} SO_LINK_FLAGS=${diverSO_LINK_FLAGS}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "diver")
+set(ver "1.0.2")
+set(lib "libdiver")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "28c74db26c573d745383e303f6bece18")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
 if(MPI_Fortran_FOUND)
@@ -41,20 +69,20 @@ if(MPI_Fortran_FOUND)
 else()
   set(diverFFLAGS "${GAMBIT_Fortran_FLAGS}")
 endif()
-ExternalProject_Add(${name}_${ver}
-  DOWNLOAD_DIR ${scanner_download}
-  DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold ${private_code_warning1}
-           COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${private_code_warning2}
-           COMMAND ${CMAKE_COMMAND} -E copy_directory ${loc} ${dir}
-  SOURCE_DIR ${dir}
-  BUILD_IN_SOURCE 1
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} MODULE=${FMODULE} FOPT=${diverFFLAGS} SO_LINK_FLAGS=${diverSO_LINK_FLAGS}
-  INSTALL_COMMAND ""
-)
-add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
-set_as_default_version("scanner" ${name} ${ver})
-
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_DIR ${scanner_download}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} MODULE=${FMODULE} FOPT=${diverFFLAGS} SO_LINK_FLAGS=${diverSO_LINK_FLAGS}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("scanner" ${name} ${ver})
+endif()
 
 # MultiNest
 set(name "multinest")
@@ -77,21 +105,28 @@ if(MPI_Fortran_FOUND)
 else()
   set(mnFFLAGS "${GAMBIT_Fortran_FLAGS}")
 endif()
-ExternalProject_Add(${name}_${ver}
-  DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver} "null" ${login_data} ${dl2}
-  SOURCE_DIR ${dir}
-  BUILD_IN_SOURCE 1
-  CONFIGURE_COMMAND sed ${dashi} -e "s#nested.o[[:space:]]*$#nested.o cwrapper.o#g"
-                                 -e "s#-o[[:space:]]*\\(\\$\\)(LIBS)[[:space:]]*\\$@[[:space:]]*\\$^#-o \\$\\(LIBS\\)\\$@ \\$^ ${mnLAPACK}#g"
-                                 <SOURCE_DIR>/Makefile
-            COMMAND sed ${dashi} -e "s#function[[:space:]]*loglike_proto(Cube,n_dim,nPar,context)[[:space:]]*$#function loglike_proto(Cube,n_dim,nPar,context) bind(c)#g"
-                                 -e "s#subroutine[[:space:]]*dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context)[[:space:]]*$#subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context) bind(c)#g"
-                                 <SOURCE_DIR>/cwrapper.f90
-  BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FFLAGS=${mnFFLAGS} LINKLIB=${mnSO_LINK}$ LIBS=${dir}/
-  INSTALL_COMMAND ""
-)
-add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
-set_as_default_version("scanner" ${name} ${ver})
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver} "null" ${login_data} ${dl2}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND sed ${dashi} -e "s#nested.o[[:space:]]*$#nested.o cwrapper.o#g"
+                                   -e "s#-o[[:space:]]*\\(\\$\\)(LIBS)[[:space:]]*\\$@[[:space:]]*\\$^#-o \\$\\(LIBS\\)\\$@ \\$^ ${mnLAPACK}#g"
+                                   -e "s#default:#.NOTPARALLEL:${nl}${nl}default:#"
+                                   <SOURCE_DIR>/Makefile
+              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/Makefile <SOURCE_DIR>/Makefile.tmp
+              COMMAND awk "{gsub(/${nl}/,${true_nl})}{print}" <SOURCE_DIR>/Makefile.tmp > <SOURCE_DIR>/Makefile
+              COMMAND ${CMAKE_COMMAND} -E remove <SOURCE_DIR>/Makefile.tmp
+              COMMAND sed ${dashi} -e "s#function[[:space:]]*loglike_proto(Cube,n_dim,nPar,context)[[:space:]]*$#function loglike_proto(Cube,n_dim,nPar,context) bind(c)#g"
+                                   -e "s#subroutine[[:space:]]*dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context)[[:space:]]*$#subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context) bind(c)#g"
+                                   <SOURCE_DIR>/cwrapper.f90
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FFLAGS=${mnFFLAGS} LINKLIB=${mnSO_LINK} LIBS=${dir}/
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("scanner" ${name} ${ver})
+endif()
 
 
 # GreAT
@@ -100,16 +135,17 @@ set(ver "1.0.0")
 set(lib "libgreat")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
-ExternalProject_Add(${name}_${ver}
-  GIT_REPOSITORY https://gitlab.in2p3.fr/derome/GreAT.git
-  SOURCE_DIR ${dir}
-  CMAKE_COMMAND ${CMAKE_COMMAND} ..
-  CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-  BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
-  INSTALL_COMMAND ""
-)
-add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
-if (ROOT_FOUND)
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    GIT_REPOSITORY https://gitlab.in2p3.fr/derome/GreAT.git
+    SOURCE_DIR ${dir}
+    CMAKE_COMMAND ${CMAKE_COMMAND} ..
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("scanner" ${name} ${ver})
 endif()
 

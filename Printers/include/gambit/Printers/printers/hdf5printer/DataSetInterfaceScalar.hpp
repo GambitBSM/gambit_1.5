@@ -47,10 +47,13 @@ namespace Gambit {
           static const std::size_t empty_rdims[1]; // just to satisfy base class constructor, not used.
           static const std::size_t DSETRANK=1; 
 
+          std::vector<T> read_buffer; // Buffer to store a chunk of the linked dataset (during read operations)
+          std::size_t    read_buffer_start; // Index of start of read buffer
+
         public: 
           /// Constructors
           DataSetInterfaceScalar(); 
-          DataSetInterfaceScalar(hid_t location_id, const std::string& name, const bool resume); 
+          DataSetInterfaceScalar(hid_t location_id, const std::string& name, const bool resume, const char access); 
  
           /// Select a hyperslab chunk in the hosted dataset
           std::pair<hid_t,hid_t> select_chunk(std::size_t offset, std::size_t length) const;
@@ -70,6 +73,9 @@ namespace Gambit {
          // Extracts the ith chunk of length CHUNKLENGTH from the dataset
          std::vector<T> get_chunk(std::size_t i, std::size_t length) const;
 
+         // Extract entry at given index from dataset
+         T get_entry(std::size_t index);
+
          /// @}
 
       };
@@ -87,8 +93,8 @@ namespace Gambit {
       {}
 
       template<class T, std::size_t CL>
-      DataSetInterfaceScalar<T,CL>::DataSetInterfaceScalar(hid_t location_id, const std::string& name, const bool resume) 
-        : DataSetInterfaceBase<T,0,CL>(location_id, name, empty_rdims, resume)
+      DataSetInterfaceScalar<T,CL>::DataSetInterfaceScalar(hid_t location_id, const std::string& name, const bool resume, const char access) 
+        : DataSetInterfaceBase<T,0,CL>(location_id, name, empty_rdims, resume, access)
       {}
 
       template<class T, std::size_t CHUNKLENGTH>
@@ -183,7 +189,7 @@ namespace Gambit {
 
          // Extend the dataset if needed
          // To do this need to know largest target coordinate
-         ulong max_coord = *std::max_element(coords,coords+npoints);
+         unsigned long max_coord = *std::max_element(coords,coords+npoints);
          
          this->extend_dset(max_coord);
 
@@ -241,62 +247,62 @@ namespace Gambit {
          H5Sclose(dspace_id);
          H5Sclose(dspace);
 
-      ///     hsize_t offsets[DSETRANK];
+      //     hsize_t offsets[DSETRANK];
 
-      ///     // Put data into a length 1 array, for writing as a length 1 "slab"
-      ///     //T data_slice[1];
-      ///     //data_slice[0] = value;
+      //     // Put data into a length 1 array, for writing as a length 1 "slab"
+      //     //T data_slice[1];
+      //     //data_slice[0] = value;
 
-      ///     // Check if dataset needs extending; we may be trying to write to a point that wasn't
-      ///     // yet written to by a buffer. Can write up to 1 chunk-length beyond the current
-      ///     // position              
+      //     // Check if dataset needs extending; we may be trying to write to a point that wasn't
+      //     // yet written to by a buffer. Can write up to 1 chunk-length beyond the current
+      //     // position
 
-      ///     // Extend the dataset. Dataset on disk becomes 1 chunk larger.
-      ///     if( dset_index >= this->dsetdims()[0] )
-      ///     {
-      ///       //if( dset_index >= this->dsetdims()[0] + CHUNKLENGTH )
-      ///       //{
-      ///       //  // Too far; error.
-      ///       //  std::ostringstream errmsg;
-      ///       //  errmsg << "Error writing RA value to dataset (with name: \""<<this->get_myname()<<"\") in HDF5 file. Requested write position ("<<dset_index<<") is more than one chunk-length ("<<CHUNKLENGTH<<") beyond the present end of the dataset ("<<this->dsetdims()[0]<<")";
-      ///       //  printer_error().raise(LOCAL_INFO, errmsg.str());
-      ///       //}
-      ///       //
-      ///       //// Ok to extend.
-      ///       //this->dsetdims()[0] += CHUNKLENGTH; // extend dataset by 1 chunk
+      //     // Extend the dataset. Dataset on disk becomes 1 chunk larger.
+      //     if( dset_index >= this->dsetdims()[0] )
+      //     {
+      //       //if( dset_index >= this->dsetdims()[0] + CHUNKLENGTH )
+      //       //{
+      //       //  // Too far; error.
+      //       //  std::ostringstream errmsg;
+      //       //  errmsg << "Error writing RA value to dataset (with name: \""<<this->get_myname()<<"\") in HDF5 file. Requested write position ("<<dset_index<<") is more than one chunk-length ("<<CHUNKLENGTH<<") beyond the present end of the dataset ("<<this->dsetdims()[0]<<")";
+      //       //  printer_error().raise(LOCAL_INFO, errmsg.str());
+      //       //}
+      //       //
+      //       //// Ok to extend.
+      //       //this->dsetdims()[0] += CHUNKLENGTH; // extend dataset by 1 chunk
 
-      ///       // Extend the dataset to the nearest multiple of CHUNKLENGTH above dset_index
-      ///       std::size_t remainder = dset_index % CHUNKLENGTH; 
-      ///       this->dsetdims()[0] = dset_index - remainder + CHUNKLENGTH;
+      //       // Extend the dataset to the nearest multiple of CHUNKLENGTH above dset_index
+      //       std::size_t remainder = dset_index % CHUNKLENGTH;
+      //       this->dsetdims()[0] = dset_index - remainder + CHUNKLENGTH;
 
-      ///       // newsize[1] = dims[1]; // don't need: only 1D for now.
-      ///       this->my_dataset.extend( this->dsetdims() );  
-      ///     }
+      //       // newsize[1] = dims[1]; // don't need: only 1D for now.
+      //       this->my_dataset.extend( this->dsetdims() );
+      //     }
 
-      ///     // Select hyperslab starting at dset_index
-      ///     H5::DataSpace filespace = this->my_dataset.getSpace();
-      ///     offsets[0] = dset_index;
-      ///     //offsets[1] = 0; // don't need: only 1D for now.
-      ///     filespace.selectHyperslab( H5S_SELECT_SET, this->get_slicedims(), offsets );
-      ///     
-      ///     // Define memory space
-      ///     H5::DataSpace memspace( DSETRANK, this->get_slicedims() );
-      ///    
-      ///     #ifdef HDF5_DEBUG 
-      ///     std::cout << "Debug variables:" << std::endl
-      ///               << "  dsetdims()[0]      = " << this->dsetdims()[0] << std::endl
-      ///               << "  offsets[0]         = " << offsets[0] << std::endl
-      ///               << "  get_slicedims()[0] = " << this->get_slicedims()[0] << std::endl;
-      ///     #endif
+      //     // Select hyperslab starting at dset_index
+      //     H5::DataSpace filespace = this->my_dataset.getSpace();
+      //     offsets[0] = dset_index;
+      //     //offsets[1] = 0; // don't need: only 1D for now.
+      //     filespace.selectHyperslab( H5S_SELECT_SET, this->get_slicedims(), offsets );
+      //
+      //     // Define memory space
+      //     H5::DataSpace memspace( DSETRANK, this->get_slicedims() );
+      //
+      //     #ifdef HDF5_DEBUG
+      //     std::cout << "Debug variables:" << std::endl
+      //               << "  dsetdims()[0]      = " << this->dsetdims()[0] << std::endl
+      //               << "  offsets[0]         = " << offsets[0] << std::endl
+      //               << "  get_slicedims()[0] = " << this->get_slicedims()[0] << std::endl;
+      //     #endif
  
-      ///     // Write the data to the hyperslab.
-      ///     try {
-      ///        this->my_dataset.write( &value, this->hdf_dtype.type(), memspace, filespace );
-      ///     } catch(const H5::Exception& e) {
-      ///        std::ostringstream errmsg;
-      ///        errmsg << "Error writing RA value to dataset (with name: \""<<this->get_myname()<<"\") in HDF5 file. Message was: "<<e.getDetailMsg() << std::endl;
-      ///        printer_error().raise(LOCAL_INFO, errmsg.str());
-      ///     }
+      //     // Write the data to the hyperslab.
+      //     try {
+      //        this->my_dataset.write( &value, this->hdf_dtype.type(), memspace, filespace );
+      //     } catch(const H5::Exception& e) {
+      //        std::ostringstream errmsg;
+      //        errmsg << "Error writing RA value to dataset (with name: \""<<this->get_myname()<<"\") in HDF5 file. Message was: "<<e.getDetailMsg() << std::endl;
+      //        printer_error().raise(LOCAL_INFO, errmsg.str());
+      //     }
 
      }
 
@@ -379,7 +385,7 @@ namespace Gambit {
          // Buffer to receive data
          void* buffer = &chunkdata[0]; // pointer to contiguous memory within the buffer vector
 
-         // Write the data to the hyperslab.
+         // Get the data from the hyperslab.
          herr_t err_read = H5Dread(this->get_dset_id(), this->hdftype_id, memspace_id, dspace_id, H5P_DEFAULT, buffer);
 
          if(err_read<0)
@@ -395,6 +401,40 @@ namespace Gambit {
          H5Sclose(memspace_id);
 
          return chunkdata;
+     }
+
+     /// Extract a single entry from a linked dataset
+     template<class T, std::size_t CHUNKLENGTH>
+     T DataSetInterfaceScalar<T,CHUNKLENGTH>::get_entry(std::size_t index)
+     {
+        // Figure out relevant chunk start index and position of desired entry in the chunk.
+        std::size_t chunk_start = (index / CHUNKLENGTH) * CHUNKLENGTH;
+        std::size_t chunk_relative_index = index % CHUNKLENGTH;
+
+        #ifdef HDF5_DEBUG
+        std::cout << "index      :" << index << std::endl;
+        std::cout << "chunk_start:" << chunk_start << std::endl;
+        std::cout << "chunk_rel  :" << chunk_relative_index << std::endl;
+        #endif
+
+        // Figure out whether entry is already in the read buffer
+        if(read_buffer.size()==0 or read_buffer_start!=chunk_start)
+        {
+           // Nope, don't have it, read in the appropriate chunk
+           #ifdef HDF5_DEBUG
+           std::cout << "extracting new chunk starting from "<<chunk_start<< std::endl;
+           #endif
+           // Make sure we don't try to read past the end of the dataset
+           std::size_t length = CHUNKLENGTH; 
+           if(chunk_start+length > this->dset_length())
+           {
+              length = this->dset_length() - chunk_start;
+           }
+           read_buffer = get_chunk(chunk_start, length);
+           read_buffer_start = chunk_start;
+        }
+
+        return read_buffer.at(chunk_relative_index);
      }
 
      ///   @}

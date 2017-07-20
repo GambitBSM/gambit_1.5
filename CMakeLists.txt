@@ -87,8 +87,15 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(cmake/utilities.cmake)
 
 # Check for Python and required libs
-include(FindPythonInterp)
-find_package(PythonInterp REQUIRED)
+find_package(PythonInterp 2 REQUIRED)
+if (PYTHON_VERSION_MAJOR GREATER 2)
+  message(FATAL_ERROR "\nGAMBIT requires Python 2.  \nIf you need to set the path to the Python interpreter manually, "
+                      "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
+endif()
+if (PYTHON_VERSION_MINOR LESS 6)
+  message("${Red}   Python version < 2.6.  GAMBIT has not been tested with this version; upgrade Python if you experience problems.${ColourReset}")
+endif()
+find_package(PythonLibs)
 foreach(module yaml os re datetime sys getopt shutil itertools)
   find_python_module(${module} REQUIRED)
 endforeach()
@@ -133,19 +140,22 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
 endforeach()
 
-enable_testing()
-
-# Check for C++11 support -- if we use special c++11 features we should check for them too at a later stage...
+# Check for C++11 and C++14 support
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+if(COMPILER_SUPPORTS_CXX14)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 else()
-  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-  if(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   else()
-   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    if(COMPILER_SUPPORTS_CXX0X)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    else()
+      message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    endif()
   endif()
 endif()
 
@@ -156,6 +166,17 @@ if(Boost_FOUND)
   include_directories("${Boost_INCLUDE_DIR}")
 else()
   message(FATAL_ERROR "GAMBIT requires Boost v1.41 or greater.\nPlease install a suitable version of Boost and rerun cmake.")
+endif()
+
+# Check for Eigen
+find_package(Eigen3 3.1.0)
+if(EIGEN3_FOUND)
+  include_directories("${EIGEN3_INCLUDE_DIR}")
+  message("-- Eigen version: ${EIGEN3_VERSION}")
+else()
+  message("${BoldRed}   Eigen v3.1.0 or greater not found.  FlexibleSUSY and GM2Calc interfaces will be excluded.${ColourReset}")
+  set(itch "${itch};gm2calc;flexiblesusy")
+  message(FATAL_ERROR "\nFlexibleSUSY is currently included in the GAMBIT distribution, so in fact it cannot be ditched.  Please install Eigen3.\n(Note that this will change in future GAMBIT versions, where FlexibleSUSY will be a 'true' backend.)")
 endif()
 
 # Check for OpenMP
@@ -221,16 +242,28 @@ endif()
 # Check for optional packages and disable sections of GAMBIT accordingly
 include(cmake/optional.cmake)
 
-# Set the version number (later to come directly from git tag)
-set(GAMBIT_VERSION_MAJOR 1)
-set(GAMBIT_VERSION_MINOR 0)
-set(GAMBIT_VERSION_REVISION 0)
+# Look for the latest tag and use it to set the version number.  If there is no such tag, use the tarball info file.
+find_package(Git)
+if(GIT_FOUND)
+  get_version_from_git(GAMBIT_VERSION_MAJOR GAMBIT_VERSION_MINOR GAMBIT_VERSION_REVISION
+                       GAMBIT_VERSION_PATCH GAMBIT_VERSION_FULL)
+  if (GAMBIT_VERSION_MAJOR)
+    message("${BoldYellow}   GAMBIT version detected from git tag: ${GAMBIT_VERSION_FULL}${ColourReset}")
+  endif()
+endif()
+if(NOT GIT_FOUND OR NOT GAMBIT_VERSION_MAJOR)
+  message("${BoldYellow}   GAMBIT version not detected via git.  Reverting to cmake/tarball_info.cmake.${ColourReset}")
+  include(cmake/tarball_info.cmake)
+endif()
 
 # Add doxygen build as an external project
 add_custom_target(docs WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} COMMAND doxygen doc/doxygen.conf)
 
 # Work out which modules to include in the compile
 retrieve_bits(GAMBIT_BITS ${PROJECT_SOURCE_DIR} "${itch}" "Loud")
+
+# Set up targets to make standalone tarballs of the different modules
+add_standalone_tarballs("${GAMBIT_BITS}" "${GAMBIT_VERSION_FULL}")
 
 # Include contributed packages
 include(cmake/contrib.cmake)
@@ -249,7 +282,7 @@ endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
   message("${Yellow}-- Updating GAMBIT scanner cmake and related files${ColourReset}")
   set(scanner_harvester ${PROJECT_SOURCE_DIR}/ScannerBit/scripts/scanner+_harvester.py ${PROJECT_BINARY_DIR} -x __not_a_real_name__,${itch_with_commas})
-  execute_process(RESULT_VARIABLE result COMMAND python ${scanner_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  execute_process(RESULT_VARIABLE result COMMAND ${PYTHON_EXECUTABLE} ${scanner_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   check_result(${result} ${scanner_harvester})
   message("${Yellow}-- Updating GAMBIT scanner cmake and related files - done.${ColourReset}")
 endif()
@@ -264,8 +297,8 @@ set(MODULE_HARVESTER ${PROJECT_SOURCE_DIR}/Elements/scripts/module_harvester.py)
 set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.py)
 set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
-# Create all_functor_types.hpp, module_rollcall.hpp, module_types_rollcall.hpp, models_rollcall.hpp,
-# model_types_rollcall.hpp, backend_rollcall.hpp, backend_types_rollcall.hpp and printer_rollcall.hpp.
+# Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
+# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp.
 file(GLOB MODEL_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB BACKEND_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
@@ -283,17 +316,31 @@ list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//inclu
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")
 set(MODULE_HARVESTER_FILES ${MODULE_HARVESTER_FILES} ${BACKEND_HARVESTER_FILES})
 remove_build_files(models_harvested backends_harvested modules_harvested printers_harvested)
-add_gambit_custom(model_harvest   models_harvested   MODEL_HARVESTER   MODEL_HARVESTER_FILES)
-add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
-add_gambit_custom(module_harvest  modules_harvested  MODULE_HARVESTER  MODULE_HARVESTER_FILES)
-add_gambit_custom(printer_harvest printers_harvested PRINTER_HARVESTER PRINTER_HARVESTER_FILES)
-add_dependencies(module_harvest backend_harvest)
-add_dependencies(printer_harvest module_harvest)
+if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
+ add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
+  add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+  add_gambit_custom(printer_harvest printers_harvested PRINTER_HARVESTER PRINTER_HARVESTER_FILES)
+else()
+  add_definitions(-DNO_PRINTERS)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
+  add_gambit_custom(module_harvest modules_harvested MODULE_HARVESTER  MODULE_HARVESTER_FILES)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
+  add_dependencies(module_harvest backend_harvest)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+  add_dependencies(printer_harvest module_harvest)
+endif()
 
 # Generate the CMakeLists.txt files for GAMBIT modules, Backends, Models and Printers)
 message("${Yellow}-- Updating GAMBIT module, model, backend, and printer CMake files.${ColourReset}")
 set(update_cmakelists ${PROJECT_SOURCE_DIR}/cmake/scripts/update_cmakelists.py -x __not_a_real_name__,${itch_with_commas})
-execute_process(RESULT_VARIABLE result COMMAND python ${update_cmakelists} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+execute_process(RESULT_VARIABLE result COMMAND ${PYTHON_EXECUTABLE} ${update_cmakelists} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 check_result(${result} ${update_cmakelists})
 message("${Yellow}-- Updating GAMBIT module, backend, and printer CMake files - done.${ColourReset}")
 
@@ -323,5 +370,7 @@ endforeach()
 # Add the executables
 include(cmake/executables.cmake)
 
-# Finish setting the link commands and rpath variables
-include(${PROJECT_BINARY_DIR}/linkedout.cmake)
+# Finish setting the link commands and rpath variables for ScannerBit
+if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
+  include(${PROJECT_BINARY_DIR}/linkedout.cmake)
+endif()

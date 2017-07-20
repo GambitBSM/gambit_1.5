@@ -85,9 +85,6 @@ namespace Gambit
       const str input_capability_descriptions;
       /// Filename of the file from which to harvest model descriptions
       const str input_model_descriptions;
-      /// File stream for 'preliminary report', for telling user about missing descriptions (and perhaps other things)
-      const str report_file;
-      std::ofstream report;
 
       /// Precision to use for cout
       const int outprec;
@@ -147,6 +144,9 @@ namespace Gambit
 
       /// Flag recording whether an inifile has been supplied
       bool found_inifile;
+
+      /// Developer mode (ignore missing capability descriptions)
+      bool developer_mode;
 
       /// Command-line info function
       void bail(int mpirank=-1);
@@ -209,8 +209,13 @@ namespace Gambit
       int get_outprec() const;
 
       /// Check the named database for conflicts and missing descriptions
-      /// Emits a report to log in the case of missing descriptions, and causes an error in the case of conflicts.
       void check_databases();
+
+      /// set to true is capability descriptions missing
+      bool missing_capability_description;
+
+      /// Check for missing capability descriptions (after reading in runtime flags)
+      void check_capability_descriptions();
 
       /// Vector of all capability_info objects
       std::vector<capability_info> capability_dbase;

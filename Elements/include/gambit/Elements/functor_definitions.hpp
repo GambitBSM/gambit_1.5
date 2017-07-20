@@ -42,7 +42,9 @@
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include "gambit/Models/models.hpp"
 #include "gambit/Logs/logger.hpp"
-#include "gambit/Printers/baseprinter.hpp"
+#ifndef NO_PRINTERS
+  #include "gambit/Printers/baseprinter.hpp"
+#endif
 
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/io/ios_state.hpp>
@@ -75,11 +77,11 @@ namespace Gambit
 
     /// Setter for indicating if the wrapped function's result should be printed
     template <typename TYPE>
-    void module_functor<TYPE>::setPrintRequirement(bool flag) { if (this == NULL) failBigTime("setPrintRequirement"); myPrintFlag = flag;}
+    void module_functor<TYPE>::setPrintRequirement(bool flag) { myPrintFlag = flag;}
 
     /// Getter indicating if the wrapped function's result should be printed
     template <typename TYPE>
-    bool module_functor<TYPE>::requiresPrinting() const { if (this == NULL) failBigTime("requiresPrinting"); return myPrintFlag; }
+    bool module_functor<TYPE>::requiresPrinting() const { return myPrintFlag; }
 
     /// Calculate method
     /// (no loop-manager stuff here because only void specialisation can manage loops)
@@ -139,7 +141,6 @@ namespace Gambit
     template <typename TYPE>
     const TYPE& module_functor<TYPE>::operator()(int index)
     {
-      if (this == NULL) functor::failBigTime("operator()");
       init_memory(); // Init memory if this is the first run through.
       return (iRunNested ? myValue[index] : myValue[0]);
     }
@@ -148,46 +149,47 @@ namespace Gambit
     template <typename TYPE>
     safe_ptr<TYPE> module_functor<TYPE>::valuePtr()
     {
-      if (this == NULL) functor::failBigTime("valuePtr");
       init_memory(); // Init memory if this is the first run through.
       return safe_ptr<TYPE>(myValue);
     }
 
-    /// Printer function
-    template <typename TYPE>
-    void module_functor<TYPE>::print(Printers::BasePrinter* printer, const int pointID, int thread_num)
-    {
-      // Only try to print if print flag set to true, and if this functor(+thread) hasn't already been printed
-      // TODO: though actually the printer system will probably cark it if printing from multiple threads is
-      // attempted, because it uses the VertexID to differentiate print streams, and this is shared among threads.
-      // Can fix by requiring a VertexID+thread_num pair, but I am leaving this for later.
-      init_memory();                 // Init memory if this is the first run through.
-      if(myPrintFlag and not already_printed[thread_num] and type()!="void") // myPrintFlag should anyway not be true for void result types
+    #ifndef NO_PRINTERS
+      /// Printer function
+      template <typename TYPE>
+      void module_functor<TYPE>::print(Printers::BasePrinter* printer, const int pointID, int thread_num)
       {
-        if (not iRunNested) thread_num = 0; // Force printing of thread_num=0 if this functor cannot run nested.
-        int rank = printer->getRank();      // This is "first pass" printing, so use the actual rank of this process.
-                                            // In the auxilliary printing system we may tell the printer to overwrite
-                                            // the output of other ranks.
-        logger() << LogTags::debug << "Printing "<<myLabel<<" (vID="<<myVertexID<<", rank="<<rank<<", pID="<<pointID<<")" << EOM;
-        printer->print(myValue[thread_num],myLabel,myVertexID,rank,pointID);
-        already_printed[thread_num] = true;
+        // Only try to print if print flag set to true, and if this functor(+thread) hasn't already been printed
+        // TODO: though actually the printer system will probably cark it if printing from multiple threads is
+        // attempted, because it uses the VertexID to differentiate print streams, and this is shared among threads.
+        // Can fix by requiring a VertexID+thread_num pair, but I am leaving this for later.
+        init_memory();                 // Init memory if this is the first run through.
+        if(myPrintFlag and not already_printed[thread_num] and type()!="void") // myPrintFlag should anyway not be true for void result types
+        {
+          if (not iRunNested) thread_num = 0; // Force printing of thread_num=0 if this functor cannot run nested.
+          int rank = printer->getRank();      // This is "first pass" printing, so use the actual rank of this process.
+                                              // In the auxilliary printing system we may tell the printer to overwrite
+                                              // the output of other ranks.
+          logger() << LogTags::debug << "Printing "<<myLabel<<" (vID="<<myVertexID<<", rank="<<rank<<", pID="<<pointID<<")" << EOM;
+          printer->print(myValue[thread_num],myLabel,myVertexID,rank,pointID);
+          already_printed[thread_num] = true;
+        }
+
+        // Print timing info if requested (independent of whether printing actual result)
+        if(myTimingPrintFlag and not already_printed_timing[thread_num])
+        {
+          if (not iRunNested) thread_num = 0; // Force printing of thread_num=0 if this functor cannot run nested.
+          int rank = printer->getRank();
+          std::chrono::duration<double> runtime = end[thread_num] - start[thread_num];
+          logger() << LogTags::debug << "Printing "<<myTimingLabel<<" (vID="<<myTimingVertexID<<", rank="<<rank<<", pID="<<pointID<<")" << EOM;
+          printer->print(runtime.count(),myTimingLabel,myTimingVertexID,rank,pointID);
+          already_printed_timing[thread_num] = true;
+        }
       }
 
-      // Print timing info if requested (independent of whether printing actual result)
-      if(myTimingPrintFlag and not already_printed_timing[thread_num])
-      {
-        if (not iRunNested) thread_num = 0; // Force printing of thread_num=0 if this functor cannot run nested.
-        int rank = printer->getRank();
-        std::chrono::duration<double> runtime = end[thread_num] - start[thread_num];
-        logger() << LogTags::debug << "Printing "<<myTimingLabel<<" (vID="<<myTimingVertexID<<", rank="<<rank<<", pID="<<pointID<<")" << EOM;
-        printer->print(runtime.count(),myTimingLabel,myTimingVertexID,rank,pointID);
-        already_printed_timing[thread_num] = true;
-      }
-    }
-
-    /// Printer function (no-thread-index short-circuit)
-    template <typename TYPE>
-    void module_functor<TYPE>::print(Printers::BasePrinter* printer, const int pointID) { print(printer,pointID,0); }
+      /// Printer function (no-thread-index short-circuit)
+      template <typename TYPE>
+      void module_functor<TYPE>::print(Printers::BasePrinter* printer, const int pointID) { print(printer,pointID,0); }
+    #endif
 
   // Backend_functor_common class method definitions
 
@@ -240,7 +242,7 @@ namespace Gambit
 
     /// Getter for the 'safe' incarnation of the wrapped function's origin's version (module or backend)
     template <typename PTR_TYPE, typename TYPE, typename... ARGS>
-    str backend_functor_common<PTR_TYPE, TYPE, ARGS...>::safe_version() const { if (this == NULL) failBigTime("safe_version"); return mySafeVersion; }
+    str backend_functor_common<PTR_TYPE, TYPE, ARGS...>::safe_version() const { return mySafeVersion; }
 
     /// Set the inUse flag.
     template <typename PTR_TYPE, typename TYPE, typename... ARGS>
@@ -250,7 +252,6 @@ namespace Gambit
     template <typename PTR_TYPE, typename TYPE, typename... ARGS>
     safe_ptr<bool> backend_functor_common<PTR_TYPE, TYPE, ARGS...>::inUsePtr()
     {
-      if (this == NULL) functor::failBigTime("inUsePtr");
       return safe_ptr<bool>(&inUse);
     }
 
@@ -274,7 +275,6 @@ namespace Gambit
     template <typename TYPE, typename... ARGS>
     TYPE backend_functor<TYPE(*)(ARGS...), TYPE, ARGS...>::operator()(ARGS&&... args)
     {
-      if (this == NULL) functor::failBigTime("operator()");
       logger().entering_backend(this->myLogTag);
       TYPE tmp = this->myFunction(std::forward<ARGS>(args)...);
       logger().leaving_backend();
@@ -301,7 +301,6 @@ namespace Gambit
     template <typename... ARGS>
     void backend_functor<void(*)(ARGS...), void, ARGS...>::operator()(ARGS&&... args)
     {
-      if (this == NULL) functor::functor::failBigTime("operator()");
       logger().entering_backend(this->myLogTag);
       this->myFunction(std::forward<ARGS>(args)...);
       logger().leaving_backend();
@@ -327,18 +326,6 @@ namespace Gambit
     : backend_functor_common<typename variadic_ptr<void,ARGS...>::type, void, ARGS...>(inputFunction, func_name,
       func_capability, result_type, origin_name, origin_version, safe_version, claw) {}
 
-}
-
-/// Instantiate a module functor template for a specific type
-#define INSTANTIATE_MODULE_FUNCTOR_TEMPLATE(r,x,TYPE)             \
-namespace Gambit { template class module_functor<TYPE>; }
-
-/// Instantiate a backend functor template for a specific type
-#define INSTANTIATE_BACKEND_FUNCTOR_TEMPLATE(r,x,TYPE_PACK)       \
-namespace Gambit                                                  \
-{                                                                 \
-  template class backend_functor_common<STRIP_PARENS(TYPE_PACK)>; \
-  template class backend_functor<STRIP_PARENS(TYPE_PACK)>;        \
 }
 
 #endif /* defined(__functor_definitions_hpp__) */
