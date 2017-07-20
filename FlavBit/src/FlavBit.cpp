@@ -32,6 +32,10 @@
 ///  \date 2016 Aug
 ///  \date 2017 March
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 July
+///
 ///  *********************************************
 
 #include <string>
@@ -1435,6 +1439,272 @@ namespace Gambit
 
     }
 
+
+    void muegamma(double &result)
+    {
+      using namespace Pipes::muegamma;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+ 
+      result = 0;
+    }
+
+    void tauegamma(double &result)
+    {
+
+      using namespace Pipes::tauegamma;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void taumugamma(double &result)
+    {
+
+      using namespace Pipes::taumugamma;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void mueee(double &result)
+    {
+    
+      using namespace Pipes::mueee;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void taueee(double &result)
+    {
+
+      using namespace Pipes::taueee;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void taueemu_ss(double &result)
+    {
+
+      using namespace Pipes::taueemu_ss;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void taueemu_os(double &result)
+    {
+    
+      using namespace Pipes::taueemu_os;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+   
+      result = 0;
+    }
+
+    void tauemumu_ss(double &result)
+    {
+
+      using namespace Pipes::tauemumu_ss;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void tauemumu_os(double &result)
+    {
+
+      using namespace Pipes::tauemumu_os;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void taumumumu(double &result)
+    {
+
+      using namespace Pipes::taumumumu;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void mueTi(double &result)
+    {
+
+      using namespace Pipes::mueTi;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void mueS(double &result)
+    {
+
+      using namespace Pipes::mueS;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    void muePb(double &result)
+    {
+
+      using namespace Pipes::muePb;
+      SMINPUTS SMInputs = *Dep::SMinputs;
+  
+      result = 0;
+    }
+
+    /// Likelihood for l -> l gamma processes
+    void l2lgamma_likelihood(double &result)
+    {
+      using namespace Pipes::l2lgamma_likelihood;
+      
+      static bool first = true;
+      static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
+      static double th_error[3];
+
+
+      // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
+      if (first)
+      {
+        // Read in experimental measuremens
+        Flav_reader fread(GAMBIT_DIR  "/FlavBit/data");
+        fread.debug_mode(flav_debug);
+
+        // mu -> e gamma
+        fread.read_yaml_measurement("flav_data.yaml", "BR_muegamma");
+        // tau -> e gamma
+        fread.read_yaml_measurement("flav_data.yaml", "BR_tauegamma");
+        // tau -> mu gamma
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taumugamma");
+
+        fread.initialise_matrices();
+        cov_exp=fread.get_exp_cov();
+        value_exp=fread.get_exp_value();
+
+        for (int i = 0; i < 3; ++i)
+          th_err[i] = fread.get_th_err()(i,0).first;
+
+        // Init over.
+        first = false;
+      }
+
+     theory[0] = *Dep::muegamma;
+     theory[1] = *Dep::tauegamma
+     theory[2] = *Dep::taumugamma;
+
+     result = 0;
+     for (int i = 0; i < 3; ++i)
+       result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
+
+     
+
+    }
+
+    /// Likelihood for l -> l l l processes
+    void l2lll_likelihood(double &result)
+    {
+      using namespace Pipes::l2ll_likelihood;
+       
+      static bool first = true;
+      static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
+      static double theory[7], th_error[7];
+
+
+      // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
+      if (first)
+      {
+        // Read in experimental measuremens
+        Flav_reader fread(GAMBIT_DIR  "/FlavBit/data");
+        fread.debug_mode(flav_debug);
+
+        // mu -> e e e
+        fread.read_yaml_measurement("flav_data.yaml", "BR_mueee");
+        // tau -> e e e
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taueee");
+        // tau- -> e+ e- mu-
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taueemu_ss");
+        // tau- -> e- e- mu+
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taueemu_os");
+        // tau- -> e- mu+ mu- 
+        fread.read_yaml_measurement("flav_data.yaml", "BR_tauemumu_ss");
+        // tau- -> e+ mu- mu-
+        fread.read_yaml_measurement("flav_data.yaml", "BR_tauemumu_os");
+        // tau -> mu mu mu
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taumumumu");
+
+        fread.initialise_matrices();
+        cov_exp=fread.get_exp_cov();
+        value_exp=fread.get_exp_value();
+
+        for (int i = 0; i < 7; ++i)
+          th_err[i] = fread.get_th_err()(i,0).first;
+
+        // Init over.
+        first = false;
+      }
+
+     theory[0] = *Dep::mueee;
+     theory[1] = *Dep::taueee
+     theory[2] = *Dep::taueemu_ss;
+     theory[3] = *Dep::taueemu_os;
+     theory[4] = *Dep::tauemumu_ss;
+     theory[5] = *Dep::tauemumu_os;
+     theory[6] = *Dep::taumumumu;
+
+     result = 0;
+     for (int i = 0; i < 7; ++i)
+       result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
+
+
+   }
+
+    /// Likelihood for mu - e conversion in nucleii
+    void mu2e_likelihood(double &result)
+    {
+      using namespace Pipes::mu2e_likelihood;
+        
+      static bool first = true;
+      static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
+      static double th_error[3];
+
+
+      // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
+      if (first)
+      {
+        // Read in experimental measuremens
+        Flav_reader fread(GAMBIT_DIR  "/FlavBit/data");
+        fread.debug_mode(flav_debug);
+
+        // mu - e (Ti)
+        fread.read_yaml_measurement("flav_data.yaml", "R_mueTi");
+        // mu - e (S)
+        fread.read_yaml_measurement("flav_data.yaml", "R_mueS");
+        // mu - e (Pb)
+        fread.read_yaml_measurement("flav_data.yaml", "R_muePb");
+
+        fread.initialise_matrices();
+        cov_exp=fread.get_exp_cov();
+        value_exp=fread.get_exp_value();
+
+        for (int i = 0; i < 3; ++i)
+          th_err[i] = fread.get_th_err()(i,0).first;
+
+        // Init over.
+        first = false;
+      }
+
+      theory[0] = *Dep::mueTi;
+      theory[1] = *Dep::mueS;
+      theory[2] = *Dep::muePb;
+
+      result = 0;
+      for (int i = 0; i < 3; ++i)
+        result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
+
+  }
 
   }
 

@@ -1558,3 +1558,162 @@
     value: -0.15
   - name: S8_B0Kstar0mumu_17-19
     value: -0.11
+
+################################
+
+- name: BR_muegamma
+  islimit: true
+  exp_value: 5.7e-13
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source:
+  correlation:
+  - name: NONE
+
+- name: BR_tauegamma
+  islimit: true
+  exp_value: 3.3e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M 
+  th_error_source:
+  correlation:
+  - name: NONE
+
+- name: BR_taumugamma
+  islimit: true
+  exp_value: 4.4e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source:
+  correlation:
+  - name: NONE
+
+- name: BR_mueee
+  islimit: true
+  exp_value: 1.0e-12
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: 
+  correlation:
+  - name: NONE
+
+- name: BR_taueee
+  islimit: true
+  exp_value: 2.7e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source:
+  correlation:
+  - name: NONE
+
+- name: BR_taueemu_ss
+  islimit: true
+  exp_value: 1.8e-8
+  exp_stat_error: 0. 
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: 
+  correlation:
+  - name: NONE
+
+- name: BR_taueemu_os
+  islimit: true
+  exp_value: 1.5e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: M
+  th_error_type:
+  th_error_source: 
+  correlation:
+  - name: NONE
+
+- name: BR_tauemumu_ss
+  islimit: true
+  exp_value: 2.7e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M 
+  th_error_source: 
+  correlation:
+  - name: NONE
+
+- name: BR_tauemumu_os
+  islimit: true
+  exp_value: 1.7e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: 
+  correlation:
+  - name: NONE
+
+- name: BR_taumumumu
+  islimit: true
+  exp_value: 2.1e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: 
+  correlation:
+  - name: NONE
+
+- name: R_mueTi
+  islimit: true
+  exp_value: 4.3e-12
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M 
+  th_error_source:
+  correlation:
+  - name: NONE
+
+- name: R_mueS
+  islimit: true
+  exp_value: 7.0e-11
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source:
+  correlation:
+  - name: NONE
+
+- name: R_muePb
+  islimit: true
+  exp_value: 4.6e-11
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: 
+  correlation:
+  - name: NONE
+
