@@ -15,7 +15,7 @@
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/DarkBit/DarkBit_rollcall.hpp"
-#include "gambit/Elements/numerical_constants.hpp"
+//#include "gambit/Elements/numerical_constants.hpp"
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>

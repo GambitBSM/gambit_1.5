@@ -24,6 +24,8 @@ Parameters:
       range: [0, 6.283]
     ImOm12:
       range: [-8, 8]
+
+  StandardModel_Neutrinos:
     alpha1:
       range: [0, 6.283]
     alpha2:
@@ -34,6 +36,18 @@ Parameters:
       fixed_value: 1  # 1: normal ordering, 0: inverse ordering
     min_mass:
       fixed_value: 0  # 0: massless, 1: 0.23 eV
+    theta12:
+      fixed_value: 0.5843
+    theta23:
+      fixed_value: 0.7382
+    theta13:
+      fixed_value: 0.1483
+    md21:
+      fixed_value: 7.5e-23
+    md31:
+      fixed_value: 2.457e-21
+    md23:
+      fixed_value: 2.449e-21
 
 Priors:
 

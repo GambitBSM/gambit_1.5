@@ -1,0 +1,196 @@
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  Function definitions of NuBit.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Juky
+///
+///  *********************************************
+
+#include "gambit/Elements/gambit_module_headers.hpp"
+#include "gambit/NuBit/NuBit_rollcall.hpp"
+#include <unsupported/Eigen/MatrixFunctions>
+
+namespace Gambit
+{
+
+  namespace NuBit
+  {
+
+    using namespace LogTags;
+
+    // Module functions
+
+    // Neutrino mass matrix from true SM neutrino model
+    void M_nu(Eigen::Matrix3cd& m_nu)
+    {
+      using namespace Pipes::M_nu;
+
+      int ordering = *Param.at("ordering");
+      double m_min = *Param.at("min_mass");
+      double md21 = *Param.at("md21");
+      double md31 = *Param.at("md31");
+      double md23 = *Param.at("md23");    
+       
+      m_nu(0,1) = 0.0;
+      m_nu(0,2) = 0.0;
+      m_nu(1,0) = 0.0;
+      m_nu(1,2) = 0.0;
+      m_nu(2,0) = 0.0;
+      m_nu(2,1) = 0.0;
+
+      if(ordering == 1)
+      {
+        if(m_min == 0)
+        {
+          m_nu(0,0) = 0.0;
+          m_nu(1,1) = sqrt(md21);
+          m_nu(2,2) = sqrt(md31);
+        }
+        else if(m_min == 1)
+        {
+          m_nu(0,0) = 2.3e-10;
+          m_nu(1,1) = sqrt(pow(m_nu(0,0), 2.0) + md21);
+          m_nu(2,2) = sqrt(pow(m_nu(0,0), 2.0) + md31);
+        }
+      }
+      else if(ordering == 0)
+      {
+        if(m_min == 0)
+        {
+          m_nu(2,2) = 0.0;
+          m_nu(1,1) = sqrt(md23);
+          m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
+        }
+        else if(m_min == 0.23)
+        {
+          m_nu(2,2) = 2.3e-10;
+          m_nu(1,1) = sqrt(pow(m_nu(2,2), 2.0) + md23);
+          m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
+        }
+      }
+    }
+ 
+    // U_nu matrix in the Casas-Ibarra paramtetrization
+    void UPMNS(Eigen::Matrix3cd& U_nu)
+    {
+      using namespace Pipes::UPMNS;
+     
+      Eigen::Matrix3cd V_23, V_13, V_12, U_pd, U_nd, Maj_phase;
+      double theta23 = *Param.at("theta23");
+      double theta12 = *Param.at("theta12");
+      double theta13 = *Param.at("theta13");
+      double delta = *Param.at("delta");
+      double alpha1 = *Param.at("alpha1");
+      double alpha2 = *Param.at("alpha2");
+      std::complex<double> I(0.0, 1.0);
+
+      V_23 << 1.0, 0.0, 0.0,
+              0.0, cos(theta23), sin(theta23),
+              0.0, -sin(theta23), cos(theta23);
+      V_13 << cos(theta13), 0.0, sin(theta13),
+              0.0, 1.0, 0.0,
+              -sin(theta13), 0.0, cos(theta13);
+      V_12 << cos(theta12), sin(theta12), 0.0,
+              -sin(theta12), cos(theta12), 0.0,
+              0.0, 0.0, 1.0;
+      U_pd << exp(-I*delta/2.0), 0.0, 0.0,
+              0.0, 1.0, 0.0,
+              0.0, 1.0, exp(I*delta/2.0);
+      U_nd << exp(I*delta/2.0), 0.0, 0.0,
+              0.0, 1.0, 0.0,
+              0.0, 1.0, exp(-I*delta/2.0);
+      Maj_phase << exp(I*alpha1/2.0), 0.0, 0.0,
+                   0.0, exp(I*alpha2/2.0), 0.0,
+                   0.0, 0.0, 1.0;
+      U_nu = V_23 * U_pd * V_13 * U_nd* V_12 * Maj_phase;
+
+    }
+
+
+    // Helper function for the heavy neutrino masses
+    double l_M(double M, const double m_Z, const double m_H)
+    {
+      return 1.0/pow(4.0*pi, 2.0) * ( (3.0*log(pow(M/m_Z, 2.0)))/((pow(M/m_Z, 2.0)) - 1.0) + (log(pow(M/m_H, 2.0)))/((pow(M/m_H, 2.0)) - 1.0));
+    }
+
+    // Theta matrix in Seesaw I in the Casas-Ibarra parametrization
+    void CI_Theta(Eigen::Matrix3cd& Theta)
+    {
+      using namespace Pipes::CI_Theta;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      std::complex<double> I(0.0, 1.0);
+
+      Eigen::Matrix3d M_I;  // M_I not complex; circumvents type mismatch in l(M)
+      Eigen::Matrix3cd M_twid_temp, M_twid, R_23, R_13, R_12, R;
+
+      double mZ = sminputs.mZ;
+      double mH = *Param.at("mH");
+      double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
+
+      double x23 = *Param["ReOm23"];
+      double y23 = *Param["ImOm23"];
+      double x13 = *Param["ReOm13"];
+      double y13 = *Param["ImOm13"];
+      double x12 = *Param["ReOm12"];
+      double y12 = *Param["ImOm12"];
+
+      M_I << *Param["M_1"], 0.0, 0.0,
+             0.0, *Param["M_2"], 0.0,
+             0.0, 0.0, *Param["M_3"];
+
+      M_twid_temp(0,0) = M_I(0,0)  * (1.0 - (pow(M_I(0,0),2.0)*l_M(M_I(0,0),mZ,mH)/pow(vev,2.0)));
+      M_twid_temp(0,1) = 0.0;
+      M_twid_temp(0,2) = 0.0;
+      M_twid_temp(1,0) = 0.0;
+      M_twid_temp(1,1) = M_I(1,1)  * (1.0 - (pow(M_I(1,1),2.0)*l_M(M_I(1,1),mZ,mH)/pow(vev,2.0)));
+      M_twid_temp(1,2) = 0.0;
+      M_twid_temp(2,0) = 0.0;
+      M_twid_temp(2,1) = 0.0;
+      M_twid_temp(2,2) = M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2),mZ,mH)/pow(vev,2.0)));
+      M_twid = M_twid_temp.sqrt();
+
+      R_23(0,0) = 1.0;
+      R_23(0,1) = 0.0;
+      R_23(0,2) = 0.0;
+      R_23(1,0) = 0.0;
+      R_23(1,1) = cos(x23)*cosh(y23) - I*sin(x23)*sinh(y23);
+      R_23(1,2) = sin(x23)*cosh(y23) + I*cos(x23)*sinh(y23);
+      R_23(2,0) = 0.0;
+      R_23(2,1) = -sin(x23)*cosh(y23) - I*cos(x23)*sinh(y23);
+      R_23(2,2) = cos(x23)*cosh(y23) - I*sin(x23)*sinh(y23);
+      R_13(0,0) = cos(x13)*cosh(y13) - I*sin(x13)*sinh(y13);;
+      R_13(0,1) = 0.0;
+      R_13(0,2) = sin(x13)*cosh(y13) + I*cos(x13)*sinh(y13);
+      R_13(1,0) = 0.0;
+      R_13(1,1) = 1.0;
+      R_13(1,2) = 0.0;
+      R_13(2,0) = -sin(x13)*cosh(y13) - I*cos(x13)*sinh(y13);
+      R_13(2,1) = 0.0;
+      R_13(2,2) = cos(x13)*cosh(y13) - I*sin(x13)*sinh(y13);
+      R_12(0,0) = cos(x12)*cosh(y12) - I*sin(x12)*sinh(y12);
+      R_12(0,1) = sin(x12)*cosh(y12) + I*cos(x12)*sinh(y12);
+      R_12(0,2) = 0.0;
+      R_12(1,0) = -sin(x12)*cosh(y12) - I*cos(x12)*sinh(y12);
+      R_12(1,1) = cos(x12)*cosh(y12) - I*sin(x12)*sinh(y12);
+      R_12(1,2) = 0.0;
+      R_12(2,0) = 0.0;
+      R_12(2,1) = 0.0;
+      R_12(2,2) = 1.0;
+      R = R_23 * R_13 * R_12;
+
+      Theta = I * *Dep::UPMNS * Dep::m_nu->sqrt() * R * M_twid.inverse();
+      //t_sq = t.cwiseAbs2();
+
+    }
+
+  }
+}

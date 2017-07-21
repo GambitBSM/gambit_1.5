@@ -1439,119 +1439,132 @@ namespace Gambit
 
     }
 
-
-    void muegamma(double &result)
+    double G(const double x)
     {
-      using namespace Pipes::muegamma;
-      SMINPUTS SMInputs = *Dep::SMinputs;
- 
-      result = 0;
+      return (10.0 - 43.0*x + 78.0*pow(x,2) - 49.0*pow(x,3) + 4.0*pow(x,4) + 18.0*pow(x,3)*log(x)) / (3.0*pow(x - 1,4));
     }
 
-    void tauegamma(double &result)
+    void SN_muegamma(double &result)
+    {
+      using namespace Pipes::SN_muegamma;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
+      double V[3][3], Vc[3][3], Thetac[3][3];
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+
+      double Rllgamma = 0;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vc[2][i] * V[1][i] * G(pow(m_nu(i,i).real(),2)/pow(sminputs.mW,2)) + Thetac[2][i] * Theta(1,i).real() * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3 / (32 * M_PI * sminputs.alphainv) * Rllgamma;
+    }
+
+    void SN_tauegamma(double &result)
     {
 
-      using namespace Pipes::tauegamma;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_tauegamma;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void taumugamma(double &result)
+    void SN_taumugamma(double &result)
     {
 
-      using namespace Pipes::taumugamma;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_taumugamma;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void mueee(double &result)
+    void SN_mueee(double &result)
     {
     
-      using namespace Pipes::mueee;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_mueee;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void taueee(double &result)
+    void SN_taueee(double &result)
     {
 
-      using namespace Pipes::taueee;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_taueee;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void taueemu_ss(double &result)
+    void SN_taueemu_ss(double &result)
     {
 
-      using namespace Pipes::taueemu_ss;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_taueemu_ss;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void taueemu_os(double &result)
+    void SN_taueemu_os(double &result)
     {
     
-      using namespace Pipes::taueemu_os;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_taueemu_os;
+      const SMInputs sminputs = *Dep::SMINPUTS;
    
       result = 0;
     }
 
-    void tauemumu_ss(double &result)
+    void SN_tauemumu_ss(double &result)
     {
 
-      using namespace Pipes::tauemumu_ss;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_tauemumu_ss;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void tauemumu_os(double &result)
+    void SN_tauemumu_os(double &result)
     {
 
-      using namespace Pipes::tauemumu_os;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_tauemumu_os;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void taumumumu(double &result)
+    void SN_taumumumu(double &result)
     {
 
-      using namespace Pipes::taumumumu;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_taumumumu;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void mueTi(double &result)
+    void SN_mueTi(double &result)
     {
 
-      using namespace Pipes::mueTi;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_mueTi;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void mueS(double &result)
+    void SN_mueS(double &result)
     {
 
-      using namespace Pipes::mueS;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_mueS;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
-    void muePb(double &result)
+    void SN_muePb(double &result)
     {
 
-      using namespace Pipes::muePb;
-      SMINPUTS SMInputs = *Dep::SMinputs;
+      using namespace Pipes::SN_muePb;
+      const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
@@ -1563,7 +1576,7 @@ namespace Gambit
       
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double th_error[3];
+      static double theory[3], th_err[3];
 
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
@@ -1592,25 +1605,23 @@ namespace Gambit
       }
 
      theory[0] = *Dep::muegamma;
-     theory[1] = *Dep::tauegamma
+     theory[1] = *Dep::tauegamma;
      theory[2] = *Dep::taumugamma;
 
      result = 0;
      for (int i = 0; i < 3; ++i)
        result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
 
-     
-
     }
 
     /// Likelihood for l -> l l l processes
     void l2lll_likelihood(double &result)
     {
-      using namespace Pipes::l2ll_likelihood;
+      using namespace Pipes::l2lll_likelihood;
        
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double theory[7], th_error[7];
+      static double theory[7], th_err[7];
 
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
@@ -1647,7 +1658,7 @@ namespace Gambit
       }
 
      theory[0] = *Dep::mueee;
-     theory[1] = *Dep::taueee
+     theory[1] = *Dep::taueee;
      theory[2] = *Dep::taueemu_ss;
      theory[3] = *Dep::taueemu_os;
      theory[4] = *Dep::tauemumu_ss;
@@ -1658,8 +1669,7 @@ namespace Gambit
      for (int i = 0; i < 7; ++i)
        result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
 
-
-   }
+    }
 
     /// Likelihood for mu - e conversion in nucleii
     void mu2e_likelihood(double &result)
@@ -1668,7 +1678,7 @@ namespace Gambit
         
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double th_error[3];
+      static double theory[3], th_err[3];
 
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
@@ -1704,7 +1714,7 @@ namespace Gambit
       for (int i = 0; i < 3; ++i)
         result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
 
-  }
+    }
 
   }
 

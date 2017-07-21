@@ -443,117 +443,132 @@ START_MODULE
   // Observable: mu -> e gamma
   #define CAPABILITY muegamma
   START_CAPABILITY
-    #define FUNCTION muegamma
+    #define FUNCTION SN_muegamma
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau -> e gamma
   #define CAPABILITY tauegamma
   START_CAPABILITY
-    #define FUNCTION tauegamma
+    #define FUNCTION SN_tauegamma
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau -> mu gamma
   #define CAPABILITY taumugamma
   START_CAPABILITY
-    #define FUNCTION taumugamma
+    #define FUNCTION SN_taumugamma
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: mu -> e e e
   #define CAPABILITY mueee
   START_CAPABILITY
-    #define FUNCTION mueee
+    #define FUNCTION SN_mueee
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau -> e e e
   #define CAPABILITY taueee
   START_CAPABILITY
-    #define FUNCTION taueee
+    #define FUNCTION SN_taueee
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau- -> mu- e+ e-, with muon same sign as tau 
   #define CAPABILITY taueemu_ss
   START_CAPABILITY
-    #define FUNCTION taueemu_ss
+    #define FUNCTION SN_taueemu_ss
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau- -> mu+ e- e-, with muon opposite sign as tau
   #define CAPABILITY taueemu_os
   START_CAPABILITY
-    #define FUNCTION taueemu_os
+    #define FUNCTION SN_taueemu_os
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau- -> e- mu+ mu-, with electron same sign as tau
   #define CAPABILITY tauemumu_ss
   START_CAPABILITY
-    #define FUNCTION tauemumu_ss
+    #define FUNCTION SN_tauemumu_ss
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau- -> e+ mu- mu-, with electron opposite sign as tau
   #define CAPABILITY tauemumu_os
   START_CAPABILITY
-    #define FUNCTION tauemumu_os
+    #define FUNCTION SN_tauemumu_os
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: tau -> mu mu mu
   #define CAPABILITY taumumumu
   START_CAPABILITY
-    #define FUNCTION taumumumu
+    #define FUNCTION SN_taumumumu
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
   // Observable: mu - e (Ti)
   #define CAPABILITY mueTi
   START_CAPABILITY
-    #define FUNCTION mueTi
+    #define FUNCTION SN_mueTi
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
 
   // Observable: mu - e (S)
   #define CAPABILITY mueS
   START_CAPABILITY
-    #define FUNCTION mueS
+    #define FUNCTION SN_mueS
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
 
   // Observable: mu - e (Pb)
   #define CAPABILITY muePb
   START_CAPABILITY
-    #define FUNCTION muePb
+    #define FUNCTION SN_muePb
     START_FUNCTION(double)
-    DEPENDENCY(SMinputs, SMINPUTS)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
 
