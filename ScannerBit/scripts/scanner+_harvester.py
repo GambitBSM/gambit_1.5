@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python
 #
 # GAMBIT: Global and Modular BSM Inference Tool
 #*********************************************
@@ -269,7 +269,7 @@ def main(argv):
                             if (not processed) and (last_plugin_file[3] != "excluded"):
                                 processed = True
                                 plugins += [last_plugin_file]
-                                
+
                         elif find[1] == -4:
                             flags = neatsplit(",", find[2][9:-1]);
                             if len(flags) > 0:
@@ -279,7 +279,7 @@ def main(argv):
                                     scanbit_flags[plug_type[i]][last_plugin][last_version] = dict()
                                     scanbit_flags[plug_type[i]][last_plugin][last_version][flags[0]] = []
                                 scanbit_flags[plug_type[i]][last_plugin][last_version][flags[0]] += flags[1:]
-                                
+
                         elif find[1] == -5:
                             flags = neatsplit(",", find[2][10:-1]);
                             if len(flags) > 0:
@@ -288,7 +288,8 @@ def main(argv):
                                 scanbit_cxx_flags[plug_type[i]][directory] += flags
 
                 # Add plugin source files to CMakeLists.txt.  Only add those for non-excluded plugins.
-                if(last_plugin_file[3] == "excluded"):
+                # bjf> added "!=[]" to the conditional due to error during cmake. Hope it makes sense.
+                if(last_plugin_file!=[] and last_plugin_file[3] == "excluded"):
                     exclude_list += [last_plugin_file[0]+" "+".".join([y for y in last_plugin_file[2] if y != ""])]
                 else:
                     cmakelist_txt_out_tmp += " "*16 + "src/" + source.split('/ScannerBit/src/')[1] + "\n"
@@ -312,7 +313,7 @@ def main(argv):
 
         # Check for the user-defined version of the location file.
         location_files = []
-        if os.path.isfile(config_file): 
+        if os.path.isfile(config_file):
             location_files += [config_file]
 
         # Now make sure the default version of the locations yaml file is present.
@@ -341,7 +342,7 @@ def main(argv):
 
                 # Load the locations yaml file, and work out which libs are present
                 yaml_file = yaml.load(open(current_location_file))
-    
+
                 if yaml_file:
                     if plugin_name in yaml_file and plugin[1] == plugin_type:
                         version_bits = plugin[2]
@@ -363,7 +364,7 @@ def main(argv):
                             ini_version = maj_version
                         elif "any_version" in yaml_file[plugin_name]:
                             ini_version = "any_version"
-                        
+
                         if ini_version != "" and (plugin_name, ini_version) not in detected_plugins:
                             detected_plugins += [(plugin_name, ini_version)]
                             options_list = yaml_file[plugin_name][ini_version]
@@ -388,7 +389,7 @@ def main(argv):
                                                         lib = re.sub(r"^lib|\..*$","",lib)
                                                         linkcommands += "-L" + libdir + " -l" + lib + " "
                                                         linkdirs += [libdir]
-                                                    
+
                                                     linklibs += [[lib, lib_full]]
                                                     scanbit_reqs[plugin[7]][plugin_name][version][3] += [lib]
                                                 elif os.path.isdir(lib):
@@ -407,7 +408,7 @@ def main(argv):
                                                     #lib = re.sub("^lib|\..*$","",lib)
                                                     lib = "\"" + lib + "\""
                                                     scanbit_reqs[plugin[7]][plugin_name][version][4] += [lib]
-                                                
+
                                         elif key in ("inc", "incs", "include", "includes", "include_path", "include_paths", "-inc", "-incs", "-include", "-includes", "-include_path", "-include_paths", "hdr", "hdrs", "header", "headers", "-hdr", "-hdrs", "-header", "-headers"):
                                             incs = neatsplit(',|\s|;', value)
                                             for inc in incs:
@@ -437,7 +438,7 @@ def main(argv):
                                             print "   Unknown infile option \"{0}\" needed for ScannerBit plugin {1} v{2}".format(key,plugin_name,version)
                                 else:
                                     print "   Unknown YAML format in file {0}.".format(currrent_location_file)
-    
+
                             # add links commands to map (keys: {plug_type, directory}) to be linked to later
                             #if staticlinkcommands != "":
                             #    if scanbit_static_links[plugin[7]].has_key(plugin[6]):
@@ -515,11 +516,11 @@ def main(argv):
     if verbose: print "Finished writing ScannerBit/include/gambit/ScannerBit/priors_rollcall.hpp"
 
     # Make a candidate ScannerBit CMakelists.txt file
-    
+
     library_names = []
-    
+
     towrite = """\
-# GAMBIT: Global and Modular BSM Inference Tool  
+# GAMBIT: Global and Modular BSM Inference Tool
 #************************************************
 # \\file
 #
@@ -535,7 +536,7 @@ def main(argv):
 #  \\author The GAMBIT Collaboration
 #  \\date """+datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")+"""
 #
-#************************************************\n"""                                               
+#************************************************\n"""
     towrite += cmakelist_txt_out
     towrite += """\
 # Add the ScannerBit linking flag utility
@@ -602,9 +603,9 @@ endif()
         directories = [ name for name in os.listdir(src_paths[i]) if os.path.isdir(src_paths[i] + "/" + name) ]
         for directory in sorted(directories):
             library_names.append("lib" + plug_type[i] + "_" + directory + ".so")
-            
+
             towrite += "#################### lib" + plug_type[i] + "_" + directory + ".so ####################\n\n"
-            
+
             towrite += "set (" + plug_type[i] + "_compile_flags_" + directory + " \"${PLUGIN_COMPILE_FLAGS}"
             if scanbit_cxx_flags.has_key(plug_type[i]):
                 if scanbit_cxx_flags[plug_type[i]].has_key(directory):
@@ -661,7 +662,7 @@ endif()
             towrite += "set (" + plug_type[i] + "_plugin_lib_full_paths_" + directory + "\n"
             if scanbit_link_libs.has_key(plug_type[i]):
                 if scanbit_link_libs[plug_type[i]].has_key(directory):
-                    for lib in scanbit_link_libs[plug_type[i]][directory]:        
+                    for lib in scanbit_link_libs[plug_type[i]][directory]:
                         towrite += " "*16 + lib[1] + "\n"
             towrite += ")\n\n"
 
@@ -710,7 +711,7 @@ endif()
                             lib_name = plug_type[i] + "_" + directory + "_" + lib + "_LIBRARY"
                             towrite += "find_library( " + lib_name + " " + lib + " HINTS ${" + plug_type[i] + "_plugin_lib_paths_" + directory + "} )\n"
                             towrite += "if( " + lib_name + " STREQUAL \"" + lib_name + "-NOTFOUND\" )\n"
-                            towrite += "    message(\"-- Did not find "+ plug_type[i] + " library " + lib + ". Disabling scanners that depend on this.\")\n"
+                            towrite += "    message(\"-- Did not find "+ plug_type[i] + " library " + lib + " for " + directory + ". Disabling scanners that depend on this.\")\n"
                             towrite += "else()\n"
                             towrite += " "*4 + "get_filename_component(lib_path ${" + lib_name + "} PATH)\n"
                             towrite += " "*4 + "get_filename_component(lib_name ${" + lib_name + "} NAME_WE)\n"
@@ -798,17 +799,17 @@ endif()
     towrite += "set(SCANNERBIT_PLUGINS ${SCANNERBIT_PLUGINS} PARENT_SCOPE)\n"
     towrite += "file( WRITE ${PROJECT_SOURCE_DIR}/scratch/scanbit_excluded_libs.yaml \"${exclude_lib_output}\" )\n"
     towrite += "file( WRITE ${PROJECT_SOURCE_DIR}/scratch/scanbit_linked_libs.yaml \"${reqd_lib_output}\" )\n\n"
-    
+
     towrite += "#################################################################################\n\n"
     towrite += "foreach (plugin ${SCANNERBIT_PLUGINS})\n"
     towrite += " "*4 + "add_dependencies(ScannerBit ${plugin})\n"
     towrite += "endforeach()\n"
-    
+
     cmake = "./ScannerBit/CMakeLists.txt"
     candidate = build_dir+"/ScannerBit_CMakeLists.txt.candidate"
     with open(candidate,"w") as f: f.write(towrite)
     update_only_if_different(cmake, candidate)
-    
+
     towrite = "\n".join(library_names)
     cmake = "./ScannerBit/lib/plugin_libraries.list"
     candidate = build_dir+"/ScannerBit_lib_plugin_libraries.list.candidate"

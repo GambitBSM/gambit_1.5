@@ -23,7 +23,7 @@
 
 #include <stdexcept>
 
-#include "gambit/Utils/standalone_module.hpp"
+#include "gambit/Elements/standalone_module.hpp"
 #include "gambit/Utils/file_lock.hpp"
 #include "gambit/SpecBit/SpecBit_rollcall.hpp"
 #include "gambit/DecayBit/DecayBit_rollcall.hpp"
@@ -37,7 +37,7 @@ using namespace PrecisionBit::Functown;
 using std::cout;
 using std::endl;
 
-const std::string filename_in = "3bithit.in";
+const std::string filename_in = "DecayBit/data/3bithit.in";
 const std::string filename_out[2] = {"3bithit.out.slha1", "3bithit.out.slha2"};
 
 int main()
@@ -237,8 +237,7 @@ int main()
     get_SMINPUTS.notifyOfModel("StandardModel_SLHA2");
     if (model_is_GUT_scale)
     {
-      Models::NUHM2::Functown::MSSM30atMGUT_parameters.notifyOfModel(SUSY_model);
-      Models::MSSM30atMGUT::Functown::MSSM63atMGUT_parameters.notifyOfModel(SUSY_model);
+      Models::NUHM2::Functown::MSSM63atMGUT_parameters.notifyOfModel(SUSY_model);
       get_MSSMatMGUT_spectrum.notifyOfModel(SUSY_model);
     }
     else
@@ -257,9 +256,8 @@ int main()
     // Resolve dependencies 'by hand'.  Ordering is unimportant, but something must be filled by primary parameters.
     if (model_is_GUT_scale)
     {
-      Models::NUHM2::Functown::MSSM30atMGUT_parameters.resolveDependency(&Models::NUHM2::Functown::primary_parameters);
-      Models::MSSM30atMGUT::Functown::MSSM63atMGUT_parameters.resolveDependency(&Models::NUHM2::Functown::MSSM30atMGUT_parameters);
-      get_MSSMatMGUT_spectrum.resolveDependency(&Models::MSSM30atMGUT::Functown::MSSM63atMGUT_parameters);
+      Models::NUHM2::Functown::MSSM63atMGUT_parameters.resolveDependency(&Models::NUHM2::Functown::primary_parameters);
+      get_MSSMatMGUT_spectrum.resolveDependency(&Models::NUHM2::Functown::MSSM63atMGUT_parameters);
       get_MSSMatMGUT_spectrum.resolveDependency(&get_SMINPUTS);
       FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatMGUT_spectrum);
       make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatMGUT_spectrum);
@@ -286,7 +284,6 @@ int main()
     make_MSSM_precision_spectrum_H_W.resolveDependency(&FH_HiggsMasses);
     GM2C_SUSY.resolveDependency(&make_MSSM_precision_spectrum_H_W);
 
-    FeynHiggs_2_11_3_init.resolveDependency(&get_SMINPUTS);
     SUSY_HIT_1_5_init.resolveDependency(&make_MSSM_precision_spectrum_H_W);
     SUSY_HIT_1_5_init.resolveDependency(&W_plus_decays);
     SUSY_HIT_1_5_init.resolveDependency(&W_minus_decays);
@@ -450,8 +447,7 @@ int main()
       get_SMINPUTS.reset_and_calculate();
       if (model_is_GUT_scale)
       {
-        Models::NUHM2::Functown::MSSM30atMGUT_parameters.reset_and_calculate();
-        Models::MSSM30atMGUT::Functown::MSSM63atMGUT_parameters.reset_and_calculate();
+        Models::NUHM2::Functown::MSSM63atMGUT_parameters.reset_and_calculate();
         get_MSSMatMGUT_spectrum.reset_and_calculate();
       }
       else

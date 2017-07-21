@@ -17,6 +17,11 @@
 ///          (christophersrogan@gmail.com)
 ///  \date 2015 Apr
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 June
+///  
+///
 ///  *********************************************
 
 #ifndef __SpecBit_MSSM_hpp__
@@ -34,8 +39,17 @@
   START_CAPABILITY
 
     // ==========================
-    // GUT MSSM parameterisations
-    // (CMSSM and its various non-universal generalisations)
+    // GUT MSSM parameterisations 
+    // (CMSSM and its various non-universal generalisations)    
+
+    /// SPheno spectrum function
+    #define FUNCTION get_MSSM_spectrum_SPheno
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(CMSSM, MSSM63atMGUT, MSSM63atQ)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    BACKEND_REQ(SPheno_MSSMspectrum, (libSPheno), int, (Spectrum&, const Finputs&) )
+    BACKEND_OPTION((SPheno, 3.3.8), (libSPheno))
+    #undef FUNCTION
 
     /// Get MSSM spectrum from CMSSM boundary conditions
     //  The type, (const) Spectrum, is a class containing two SubSpectrum* members and an SMInputs
