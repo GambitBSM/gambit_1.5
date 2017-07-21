@@ -57,26 +57,23 @@ namespace Gambit
       static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W_sq
       static double g_R_sq = 0.0494;  // g_R = s_W^2
       static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
+      static double R_pi_SM = 1.2354e-4;
+      static double R_K_SM = 2.477e-5;
+      static double R_tau_SM = 0.973;
+      static double r_e_pi = 1.3399e-5;  // r_e_pi = m_e^2/m_pi^2
+      static double r_mu_pi = 0.5733;  // r_mu_pi = m_mu^2/m_pi^2
+      static double r_e_K = 1.0713e-6;  // r_e_K = m_e^2/m_K^2
+      static double r_mu_K = 0.0458;  // r_mu_K = m_mu^2/m_K^2
+      static double m_pi = 0.1396; // GeV
+      static double m_K = 0.4937;  // GeV
+      static double m_tau = 1.7768;  // GeV
       dcomp I(0.0, 1.0);
-      Matrix3d M_I;  // not complex; circumvents type mismatch in l(M)
-      Matrix3cd M_twid_temp;
-      Matrix3cd M_twid;
-      Matrix3cd R_23;
-      Matrix3cd R_13;
-      Matrix3cd R_12;
-      Matrix3cd R;
-      Matrix3cd m_nu;
-      Matrix3cd V_23;
-      Matrix3cd V_13;
-      Matrix3cd V_12;
-      Matrix3cd U_pd;
-      Matrix3cd U_nd;
-      Matrix3cd Maj_phase;
-      Matrix3cd U_nu;
-      Matrix3cd t;
-      Matrix3d t_sq;
-      Matrix3d result_temp;
+      Matrix3d M_I, t_sq, result_temp_bbn, result_temp_lepuniv;  // M_I not complex; circumvents type mismatch in l(M)
+      Matrix3cd M_twid_temp, M_twid, m_nu, R_23, R_13, R_12, R, V_23, V_13, V_12, U_pd, U_nd, U_nu, Maj_phase, t;
       std::vector<double> lifetime(3);
+      std::vector<double> r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
+      std::vector<double> r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
+      std::vector<double> e_fac_tau(3), mu_fac_tau(3);
       double x23 = *Param["ReOm23"];
       double y23 = *Param["ImOm23"];
       double x13 = *Param["ReOm13"];
@@ -88,6 +85,8 @@ namespace Gambit
       double d = *Param["delta"];
       int o = *Param["ordering"];
       int m_min = *Param["min_mass"];
+      double e_f_pi, mu_f_pi, e_f_K, mu_f_K, e_f_tau, mu_f_tau;
+      double d_r_pi, d_r_K, d_r_tau, R_pi, R_K, R_tau;
 
       M_I << *Param["M_1"], 0.0, 0.0,
              0.0, *Param["M_2"], 0.0,
@@ -191,7 +190,8 @@ namespace Gambit
 
       t = I * U_nu * m_nu.sqrt() * R * M_twid.inverse();
       t_sq = t.cwiseAbs2();
-      result_temp << 0.0, 0.0, 0.0,
+
+      result_temp_bbn << 0.0, 0.0, 0.0,
                      0.0, 0.0, 0.0,
                      0.0, 0.0, 0.0;
       for (int i=0; i<3; i++)
@@ -199,12 +199,80 @@ namespace Gambit
         lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M_I(i,i),5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(t_sq(1,i) + t_sq(2,i))) + ((1 + g_L_sq + g_R_sq)*t_sq(0,i)) );
         if(lifetime[i]<0.1)
         {
-          result_temp(0,i) = t_sq(0,i);
-          result_temp(1,i) = t_sq(1,i);
-          result_temp(2,i) = t_sq(2,i);
+          result_temp_bbn(0,i) = t_sq(0,i);
+          result_temp_bbn(1,i) = t_sq(1,i);
+          result_temp_bbn(2,i) = t_sq(2,i);
         }
       }
-      result = result_temp;
+
+      result_temp_lepuniv << 0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0,
+                             0.0, 0.0, 0.0;
+      e_f_pi = 0.0;
+      mu_f_pi = 0.0;
+      e_f_K = 0.0;
+      mu_f_K = 0.0;
+      e_f_tau = 0.0;
+      mu_f_tau = 0.0;
+      for (int j=0; j<3; j++)
+      {
+        if(M_I(j,j)<m_K)
+        {
+          if(M_I(j,j)<m_pi)
+          {
+            r_I_pi[j] = pow(M_I(j,j), 2.0)/pow(m_pi, 2.0);
+            G_e_pi[j] = (r_e_pi + r_I_pi[j] - pow((r_e_pi - r_I_pi[j]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_pi + r_I_pi[j]), 2.0)) + pow((r_e_pi - r_I_pi[j]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+            G_mu_pi[j] = (r_mu_pi + r_I_pi[j] - pow((r_mu_pi - r_I_pi[j]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_pi + r_I_pi[j]), 2.0)) + pow((r_mu_pi - r_I_pi[j]), 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
+            e_fac_pi[j] = result_temp_bbn(0,j) * (G_e_pi[j] - 1.0);
+            mu_fac_pi[j] = result_temp_bbn(1,j) * (G_mu_pi[j] - 1.0);
+          }
+          else
+          {
+            r_I_K[j] = pow(M_I(j,j), 2.0)/pow(m_K, 2.0);
+            G_e_K[j] = (r_e_K + r_I_K[j] - pow((r_e_K - r_I_K[j]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[j]), 2.0)) + pow((r_e_K - r_I_K[j]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+            G_mu_K[j] = (r_mu_K + r_I_K[j] - pow((r_mu_K - r_I_K[j]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_K + r_I_K[j]), 2.0)) + pow((r_mu_K - r_I_K[j]), 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
+            e_fac_K[j] = result_temp_bbn(0,j) * (G_e_pi[j] - 1.0);
+            mu_fac_K[j] = result_temp_bbn(1,j) * (G_mu_pi[j] - 1.0);
+          }
+        } 
+        else if(M_I(j,j)>m_tau)
+        {
+          e_fac_tau[j] = result_temp_bbn(0,j);
+          mu_fac_tau[j] = result_temp_bbn(1,j);
+        }
+        else
+        {
+          for (int k=0; k<3; k++)
+          {
+            result_temp_lepuniv(0,k) = result_temp_bbn(0,k);
+            result_temp_lepuniv(1,k) = result_temp_bbn(1,k);
+            result_temp_lepuniv(2,k) = result_temp_bbn(2,k);
+          }
+        }
+        e_f_pi += e_fac_pi[j];
+        mu_f_pi += mu_fac_pi[j];
+        e_f_K += e_fac_K[j];
+        mu_f_K += mu_fac_K[j];
+        e_f_tau += e_fac_tau[j];
+        mu_f_tau += mu_fac_tau[j];
+      }
+      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi)) - 1.0;
+      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K)) - 1.0;
+      d_r_tau = ((1.0 - e_f_tau)/(1.0 - mu_f_tau)) - 1.0;
+      R_pi = R_pi_SM * (1.0 + d_r_pi);
+      R_K = R_K_SM * (1.0 + d_r_K);
+      R_tau = R_tau_SM * (1.0 + d_r_tau);
+      if (((1.226e-4<R_pi) && (R_pi<1.234e-4)) || ((2.478e-5<R_K) && (R_K<2.498e-5)) || ((0.9734<R_tau) && (R_tau<0.9794)))
+      {
+        for (int k=0; k<3; k++)
+        {
+          result_temp_lepuniv(0,k) = result_temp_bbn(0,k);
+          result_temp_lepuniv(1,k) = result_temp_bbn(1,k);
+          result_temp_lepuniv(2,k) = result_temp_bbn(2,k);
+        }
+      }
+
+      result = result_temp_lepuniv;
     }
 
     void lnL(double& lnLike)

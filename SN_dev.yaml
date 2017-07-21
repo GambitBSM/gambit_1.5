@@ -5,10 +5,13 @@ Parameters:
   SN_dev:
     M_1:
       range: [0.06, 500]
+      prior_type: log
     M_2:
       range: [0.06, 500]
+      prior_type: log
     M_3:
       range: [0.06, 500]
+      prior_type: log
     ReOm23:
       range: [0, 6.283]
     ImOm23:
@@ -49,7 +52,7 @@ Scanner:
     multinest:
       plugin: MultiNest
       like: LogLike
-      nlive: 300
+      nlive: 700
 
 ObsLikes:
 
@@ -135,4 +138,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/SN_dev_2/"
+  default_output_path: "runs/SN_dev_lepuniv_700/"
