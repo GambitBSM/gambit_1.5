@@ -366,6 +366,12 @@ Rules:
   # Use DarkSUSY or MicrOmegas for calculating direct detection couplings
   - capability: DD_couplings
     function: DD_couplings_DarkSUSY
+    options: 
+      # If the below is true, 1 loop effects are included as discussed
+      # in Drees Nojiri Phys.Rev. D48 (1993) 3483
+      loop: false 
+      # If the below is false, the squark propagator is approximated as 1/m_sq^2
+      pole: false
     #function: DD_couplings_MicrOmegas
 
   # Nuclear SI Parameter Likelihoods (All values in MeV)

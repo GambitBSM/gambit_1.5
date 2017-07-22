@@ -87,30 +87,6 @@ BE_INI_FUNCTION
 
     scan_level = false;
 
-
-    if (runOptions->hasKey("dddn"))
-    {
-      if (runOptions->getValue<int>("dddn")==1) ddcom->dddn = 1;
-      else if (runOptions->getValue<int>("dddn")==0) ddcom->dddn = 0;
-      else backend_error().raise(LOCAL_INFO, "Invalid value of dddn "
-            "(only 0 or 1 permitted).");
-    }
-
-    if (runOptions->hasKey("ddpole"))
-    {
-      if (runOptions->getValue<int>("ddpole")==1) ddcom->ddpole = 1;
-      else if (runOptions->getValue<int>("ddpole")==0)
-      {
-        ddcom->ddpole = 0;
-        if (runOptions->hasKey("dddn") && runOptions->getValue<int>("dddn")==1)
-          backend_warning().raise(LOCAL_INFO, "ddpole = 0 ignored "
-              "by DarkSUSY because dddn = 1.");
-      }
-      else backend_error().raise(LOCAL_INFO, "Invalid value of ddpole "
-            "(only 0 or 1 permitted).");
-    }
-
-
   }
 }
 END_BE_INI_FUNCTION
