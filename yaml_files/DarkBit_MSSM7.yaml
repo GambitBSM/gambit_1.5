@@ -367,12 +367,17 @@ Rules:
   - capability: DD_couplings
     function: DD_couplings_DarkSUSY
     options: 
-      # If the below is true, 1 loop effects are included as discussed
-      # in Drees Nojiri Phys.Rev. D48 (1993) 3483
-      loop: false 
+      # If the below is true, 1 loop effects as discuseed in 
+      # Drees Nojiri Phys.Rev. D48 (1993) 3483 are included
+      loop: true 
       # If the below is false, the squark propagator is approximated as 1/m_sq^2
-      pole: false
-    #function: DD_couplings_MicrOmegas
+      # (automatically set to true if loop = true)
+      # pole: false
+    # function: DD_couplings_MicrOmegas
+    # options:
+    #   If the below is true, the box diagram for gluon-neutralino as discussed in 
+    #   arXiv:0803.2360 is included in the calculation
+    #   loop: box
 
   # Nuclear SI Parameter Likelihoods (All values in MeV)
   - capability: lnL_SI_nuclear_parameters
