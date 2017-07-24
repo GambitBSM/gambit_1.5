@@ -33,11 +33,11 @@ namespace Gambit
     {
       using namespace Pipes::M_nu;
 
-      int ordering = *Param.at("ordering");
-      double m_min = *Param.at("min_mass");
-      double md21 = *Param.at("md21");
-      double md31 = *Param.at("md31");
-      double md23 = *Param.at("md23");    
+      int ordering = *Param["ordering"];
+      double m_min = *Param["min_mass"];
+      double md21 = *Param["md21"];
+      double md31 = *Param["md31"];
+      double md23 = *Param["md23"];    
        
       m_nu(0,1) = 0.0;
       m_nu(0,2) = 0.0;
@@ -84,12 +84,12 @@ namespace Gambit
       using namespace Pipes::UPMNS;
      
       Eigen::Matrix3cd V_23, V_13, V_12, U_pd, U_nd, Maj_phase;
-      double theta23 = *Param.at("theta23");
-      double theta12 = *Param.at("theta12");
-      double theta13 = *Param.at("theta13");
-      double delta = *Param.at("delta");
-      double alpha1 = *Param.at("alpha1");
-      double alpha2 = *Param.at("alpha2");
+      double theta23 = *Param["theta23"];
+      double theta12 = *Param["theta12"];
+      double theta13 = *Param["theta13"];
+      double delta = *Param["delta"];
+      double alpha1 = *Param["alpha1"];
+      double alpha2 = *Param["alpha2"];
       std::complex<double> I(0.0, 1.0);
 
       V_23 << 1.0, 0.0, 0.0,
@@ -133,7 +133,7 @@ namespace Gambit
       Eigen::Matrix3cd M_twid_temp, M_twid, R_23, R_13, R_12, R;
 
       double mZ = sminputs.mZ;
-      double mH = *Param.at("mH");
+      double mH = *Param["mH"];
       double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
 
       double x23 = *Param["ReOm23"];

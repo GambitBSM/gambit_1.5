@@ -18,8 +18,6 @@
 #ifndef __StandardModel_Neutrinos_hpp__
 #define __StandardModel_Neutrinos_hpp__
 
-#include "gambit/Models/models/StandardModel_SLHA2.hpp"
-
 #define MODEL StandardModel_Neutrinos
 
   START_MODEL

@@ -457,20 +457,7 @@ namespace Gambit
       }
 
       if(missing_flag)
-      {
-        // Warn user of missing descriptions
-        std::ostringstream msg;
-        msg << "Descriptions are missing for the following models:" <<endl;
-        for (std::vector<model_info>::const_iterator it = model_dbase.begin(); it != model_dbase.end(); ++it)
-        {
-          if(not it->has_description)
-          {
-            msg << "   " << it->name << endl;
-          }
-        }
-        msg << "Please add descriptions of these to "<< input_model_descriptions << endl;
-        core_error().raise(LOCAL_INFO,msg.str());
-      }
+        missing_model_description = true;
 
       // Write out the centralised database file containing all this information
       // (we could also keep this in memory for other functions to use; it's probably not that large)
@@ -508,6 +495,27 @@ namespace Gambit
           }
         }
         msg << "Please add descriptions of these to "<< input_capability_descriptions << endl;
+        msg << "or temporarily run in developer mode with the --developer runtime option" << endl;
+        core_error().raise(LOCAL_INFO,msg.str());
+      }
+    }
+
+    void gambit_core::check_model_descriptions()
+    {
+
+      if (missing_model_description && !developer_mode)
+      {
+        // Warn user of missing descriptions
+        std::ostringstream msg;
+        msg << "Descriptions are missing for the following models:" <<endl;
+        for (std::vector<model_info>::const_iterator it = model_dbase.begin(); it != model_dbase.end(); ++it)
+        {
+          if(not it->has_description)
+          {
+            msg << "   " << it->name << endl;
+          }
+        }
+        msg << "Please add descriptions of these to "<< input_model_descriptions << endl;
         msg << "or temporarily run in developer mode with the --developer runtime option" << endl;
         core_error().raise(LOCAL_INFO,msg.str());
       }
@@ -638,6 +646,7 @@ namespace Gambit
           {
             filename = process_primary_options(argc,argv);
             check_capability_descriptions();
+            check_model_descriptions();
             // Check if we indeed received a valid filename (needs the -f option)
             if (found_inifile) return filename;
             // Ok then, report an unrecognised command and bail

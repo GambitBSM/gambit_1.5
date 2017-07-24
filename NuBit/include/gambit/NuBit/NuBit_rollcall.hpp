@@ -60,7 +60,7 @@ START_MODULE
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SMINPUTS, SMInputs)
-    ALLOW_MODELS(StandardModel_Higgs, SN_dev)
+    ALLOW_MODELS(StandardModel_SLHA2, StandardModel_Higgs, SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
 
