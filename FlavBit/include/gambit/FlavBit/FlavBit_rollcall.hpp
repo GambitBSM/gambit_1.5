@@ -448,6 +448,7 @@ START_MODULE
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 

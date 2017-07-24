@@ -1450,15 +1450,16 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
 
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
-      double V[3][3], Vc[3][3], Thetac[3][3];
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      // The term proportional to G(m_nu^2/mW^2) vanishes at second order in theta, so it is enough to use the PMNS matrix
+      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
-      double Rllgamma = 0;
+      std::complex<double> Rllgamma = {0.0, 0.0};
       for(int i=0; i<3; ++i)
-        Rllgamma += Vc[2][i] * V[1][i] * G(pow(m_nu(i,i).real(),2)/pow(sminputs.mW,2)) + Thetac[2][i] * Theta(1,i).real() * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(2,i) * Vnu(1,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(2,i) * Theta(1,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
-      result = 3 / (32 * M_PI * sminputs.alphainv) * Rllgamma;
+      result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
     }
 
     void SN_tauegamma(double &result)
