@@ -1611,7 +1611,7 @@ namespace Gambit
 
      result = 0;
      for (int i = 0; i < 3; ++i)
-       result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
+       result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
 
     }
 
@@ -1668,7 +1668,7 @@ namespace Gambit
 
      result = 0;
      for (int i = 0; i < 7; ++i)
-       result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
+       result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
 
     }
 
@@ -1713,7 +1713,7 @@ namespace Gambit
 
       result = 0;
       for (int i = 0; i < 3; ++i)
-        result += theory[i] < value_exp(i,0) ? 1.0 : 0.0;
+        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
 
     }
 
