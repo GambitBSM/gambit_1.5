@@ -56,8 +56,14 @@ project(gambit C CXX Fortran)
 
 # Disable clang support
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  message(FATAL_ERROR "GAMBIT does not support the Clang compiler. Please choose another compiler.")
+  message(FATAL_ERROR "\nYou seem to have selected the Clang compiler.  Beware that if you are using a mac, Clang may be your default compiler even though you might think it is gcc.  You can thank Apple for that, not GAMBIT/cmake.  \nGAMBIT does not support the Clang compiler. Please choose another compiler.")
 endif()
+
+# Make sure the user hasn't accidentally passed gcc instead of g++.
+if (CMAKE_CXX_COMPILER MATCHES "gcc")
+  message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  I don't think that means what you think it means.  Do you really want to compile C++ with gcc rather than g++?")
+endif()
+
 
 # Use ccache to speed up re-compiling if it is available
 #find_program(CCACHE_FOUND ccache)
