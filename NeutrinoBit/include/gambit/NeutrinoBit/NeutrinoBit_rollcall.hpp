@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Rollcall header for NuBit.
+///  Rollcall header for NeutrinoBit.
 ///
 ///  Compile-time registration of available
 ///  observables and likelihoods for neutrino observables.
@@ -23,10 +23,10 @@
 ///  *********************************************
 
 
-#ifndef __NuBit_rollcall_hpp__
-#define __NuBit_rollcall_hpp__
+#ifndef __NeutrinoBit_rollcall_hpp__
+#define __NeutrinoBit_rollcall_hpp__
 
-#define MODULE NuBit
+#define MODULE NeutrinoBit
 START_MODULE
 
   // Neutrino mass matrix
@@ -68,6 +68,6 @@ START_MODULE
 #undef MODULE
 
 
-#endif /* defined(__NuBit_rollcall_hpp__) */
+#endif /* defined(__NeutrinoBit_rollcall_hpp__) */
 
 

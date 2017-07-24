@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Function definitions of NuBit.
+///  Function definitions of NeutrinoBit.
 ///
 ///  *********************************************
 ///
@@ -15,13 +15,13 @@
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/NuBit/NuBit_rollcall.hpp"
+#include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
 #include <unsupported/Eigen/MatrixFunctions>
 
 namespace Gambit
 {
 
-  namespace NuBit
+  namespace NeutrinoBit
   {
 
     using namespace LogTags;
