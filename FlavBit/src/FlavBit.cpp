@@ -1464,108 +1464,96 @@ namespace Gambit
 
     void SN_tauegamma(double &result)
     {
-
       using namespace Pipes::SN_tauegamma;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_taumugamma(double &result)
     {
-
       using namespace Pipes::SN_taumugamma;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_mueee(double &result)
     {
-    
       using namespace Pipes::SN_mueee;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_taueee(double &result)
     {
-
       using namespace Pipes::SN_taueee;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_taueemu_ss(double &result)
     {
-
       using namespace Pipes::SN_taueemu_ss;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_taueemu_os(double &result)
     {
-    
       using namespace Pipes::SN_taueemu_os;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
    
       result = 0;
     }
 
     void SN_tauemumu_ss(double &result)
     {
-
       using namespace Pipes::SN_tauemumu_ss;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_tauemumu_os(double &result)
     {
-
       using namespace Pipes::SN_tauemumu_os;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_taumumumu(double &result)
     {
-
       using namespace Pipes::SN_taumumumu;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_mueTi(double &result)
     {
-
       using namespace Pipes::SN_mueTi;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_mueS(double &result)
     {
-
       using namespace Pipes::SN_mueS;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
 
     void SN_muePb(double &result)
     {
-
       using namespace Pipes::SN_muePb;
-      const SMInputs sminputs = *Dep::SMINPUTS;
+      //const SMInputs sminputs = *Dep::SMINPUTS;
   
       result = 0;
     }
