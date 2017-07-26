@@ -2782,12 +2782,12 @@ namespace Gambit
 
       static const ALEPHSelectronLimitAt208GeV limitContainer;
       // #ifdef COLLIDERBIT_DEBUG
-      static bool dumped=false;
-      if(!dumped)
-      {
-        limitContainer.dumpPlotData(45., 115., 0., 100., mZ, "lepLimitPlanev2/ALEPHSelectronLimitAt208GeV.dump",10);
-        dumped=true;
-      }
+      //static bool dumped=false;
+      //if(!dumped)
+      //{
+      //  limitContainer.dumpPlotData(45., 115., 0., 100., mZ, "lepLimitPlanev2/ALEPHSelectronLimitAt208GeV.dump");
+      //  dumped=true;
+      //}
       // #endif
       
       result = 0;
@@ -2988,12 +2988,12 @@ namespace Gambit
 
       static const L3SelectronLimitAt205GeV limitContainer;
       // #ifdef COLLIDERBIT_DEBUG
-      //   static bool dumped=false;
-      //   if(!dumped)
-      //   {
-      //     limitContainer.dumpPlotData(45., 115., 0., 100., mZ, "lepLimitPlanev2/L3SelectronLimitAt205GeV.dump");
-      //     dumped=true;
-      //   }
+         static bool dumped=false;
+         if(!dumped)
+         {
+           limitContainer.dumpPlotData(45., 104., 0., 100., mZ, "lepLimitPlanev2/L3SelectronLimitAt205GeV.dump",200);
+           dumped=true;
+         }
       // #endif
 
       result = 0;
