@@ -47,7 +47,7 @@ Scanner:
   # This tag specifies which plugin to use as the scanner.
   # Here the multinest scanner is choosen, but you could
   # choose any scanner defined under the scanners section
-  use_scanner: multinest #twalk
+  use_scanner: twalk
 
   scanners:
 
