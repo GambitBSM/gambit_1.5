@@ -224,6 +224,7 @@ namespace Gambit
     /////////////// Standard Model ///////////////////
 
     /// SM decays: W+
+    /// Reference: 2017 PDG
     void W_plus_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -238,6 +239,7 @@ namespace Gambit
     }
 
     /// SM decays: Z
+    /// Reference: 2017 PDG
     void Z_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -252,14 +254,15 @@ namespace Gambit
     }
 
     /// SM decays: t
+    /// Reference: 2017 PDG
     void t_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
-      result.width_in_GeV = 2.00;
-      result.positive_error = 4.7e-01;
-      result.negative_error = 4.3e-01;
-      result.set_BF(0.91, 0.04, "W+", "b");
+      result.width_in_GeV = 1.41;
+      result.positive_error = 1.9e-01;
+      result.negative_error = 1.5e-01;
+      result.set_BF(0.957, 0.034, "W+", "b"); //(Assuming 100% decay to Wq)
     }
 
     /// SM decays: mu+
@@ -448,15 +451,16 @@ namespace Gambit
     //////////// MSSM /////////////////////
 
     /// FeynHiggs MSSM decays: t
+    /// Reference for total width: 2017 PDG
     void FH_t_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::FH_t_decays;
       fh_Couplings FH_input = *Pipes::FH_t_decays::Dep::FH_Couplings_output;
       result.calculator = FH_input.calculator;
       result.calculator_version = FH_input.calculator_version;
-      result.width_in_GeV = 2.0;
-      result.positive_error = 4.7e-01;
-      result.negative_error = 4.3e-01;
+      result.width_in_GeV = 1.41;
+      result.positive_error = 1.9e-01;
+      result.negative_error = 1.5e-01;
       result.set_BF(FH_input.gammas[tBF(1)+BRoffset-1], 0.0, "W+", "b");
       result.set_BF(FH_input.gammas[tBF(2)+BRoffset-1], 0.0, "H+", "b");
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
