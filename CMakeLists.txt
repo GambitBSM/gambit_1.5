@@ -60,7 +60,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # Make sure the user hasn't accidentally passed gcc instead of g++.
-if (CMAKE_CXX_COMPILER MATCHES "gcc")
+if (CMAKE_CXX_COMPILER MATCHES "gcc$")
   message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  I don't think that means what you think it means.  Do you really want to compile C++ with gcc rather than g++?")
 endif()
 
