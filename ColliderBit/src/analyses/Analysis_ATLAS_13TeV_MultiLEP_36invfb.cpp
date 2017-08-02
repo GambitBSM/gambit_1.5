@@ -129,8 +129,8 @@ namespace Gambit {
         }
 
 	NCUTS5=11;
-	xsec5ATLAS_401_1=1.;
-	xsec5ATLAS_300_150=1.;
+	xsec5ATLAS_401_1=1.31+0.5;
+	xsec5ATLAS_300_150=190.159;
         for (size_t i=0;i<NCUTS5;i++){
           cutFlowVector5.push_back(0);
           cutFlowVector5ATLAS_401_1.push_back(0);
@@ -138,7 +138,7 @@ namespace Gambit {
           cutFlowVector5_str.push_back("");
         }
 
-        analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb_400_200";
+        analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb_800_600";
         vector<const char*> variables = {"met"};
         plots = new Perf_Plot(analysisRunName, &variables);
       }
@@ -156,28 +156,20 @@ namespace Gambit {
         double met = event->met();
 
         // Baseline objects
-        vector<HEPUtils::Particle*> baselineLeptons;
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
-	  if (electron->pT()>10. &&fabs(electron->eta())<2.47) {
-            baselineElectrons.push_back(electron);
-	    baselineLeptons.push_back(electron);
-          }
+	  if (electron->pT()>10. && electron->abseta()<2.47)baselineElectrons.push_back(electron);
 	}
+	ATLAS::applyLooseIDElectronSelectionR2(baselineElectrons);
 
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
-	  if (muon->pT()>10. &&fabs(muon->eta())<2.5) {
-            baselineMuons.push_back(muon);
-	    baselineLeptons.push_back(muon);
-          }
+	  if (muon->pT()>10. && muon->abseta()<2.4)baselineMuons.push_back(muon);
 	}
 
         vector<HEPUtils::Jet*> baselineJets;
         for (HEPUtils::Jet* jet : event->jets()) {
-          if (jet->pT()>20. &&fabs(jet->eta())<2.8) {
-            baselineJets.push_back(jet);
-	  }
+          if (jet->pT()>20. && jet->abseta()<4.5)baselineJets.push_back(jet);
         }
 
 	//Overlap Removal + Signal Objects	
@@ -196,7 +188,7 @@ namespace Gambit {
 	  vector<HEPUtils::Particle*> overlapEl;
           bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT());
           for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
-            if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.2)overlapEl.push_back(baselineElectrons.at(iEl));
+            if (baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom())<0.2)overlapEl.push_back(baselineElectrons.at(iEl));
 	  }
 	  if (overlapEl.size()>0 && (baselineJets.at(iJet)->btag() && hasTag)) {
 	    for (size_t iO=0;iO<overlapEl.size();iO++) {
@@ -212,47 +204,40 @@ namespace Gambit {
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
 	  bool overlap=false;
 	  for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
-            if (fabs(baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.4)overlap=true;
-	    
+            if (baselineElectrons.at(iEl)->mom().deltaR_eta(baselineJets.at(iJet)->mom())<0.4)overlap=true;
 	  }
-	  if (!overlap) {
-	    signalElectrons.push_back(baselineElectrons.at(iEl));
-	    signalLeptons.push_back(baselineElectrons.at(iEl));
-	  }
+	  if (!overlap)signalElectrons.push_back(baselineElectrons.at(iEl));
 	}
+	ATLAS::applyMediumIDElectronSelectionR2(signalElectrons);
 
 	for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
 	  bool overlap=false;
 	  for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
-            if (fabs(baselineMuons.at(iMu)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.2 && baselineMuons.at(iMu)->pT()>0.7*baselineJets.at(iJet)->pT())overlap=true;
-	    
+            if (baselineMuons.at(iMu)->mom().deltaR_eta(baselineJets.at(iJet)->mom())<0.2 && baselineMuons.at(iMu)->pT()>0.7*baselineJets.at(iJet)->pT())overlap=true;
 	  }
 	  if (!overlap) {
             bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT());
 	    signalJets.push_back(baselineJets.at(iJet));
-	    if (baselineJets.at(iJet)->btag() && hasTag) {
-	      if (fabs(baselineJets.at(iJet)->eta())<2.5 || (fabs(baselineJets.at(iJet)->eta())>2.4 && baselineJets.at(iJet)->pT()>50))signalBJets.push_back(baselineJets.at(iJet));
-	    }
+	    if (baselineJets.at(iJet)->btag() && hasTag && baselineJets.at(iJet)->abseta()<2.4)signalBJets.push_back(baselineJets.at(iJet));
 	  }
 	}
 
 	for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
 	  bool overlap=false;
 	  for (size_t iJet=0;iJet<signalJets.size();iJet++) {
-            if (fabs(baselineMuons.at(iMu)->mom().deltaR_eta(signalJets.at(iJet)->mom()))<0.4)overlap=true;
-	    
+            if (baselineMuons.at(iMu)->mom().deltaR_eta(signalJets.at(iJet)->mom())<0.4)overlap=true;
 	  }
-	  if (!overlap) {
-	    signalMuons.push_back(baselineMuons.at(iMu));
-	    signalLeptons.push_back(baselineMuons.at(iMu));
-	  }
+	  if (!overlap)signalMuons.push_back(baselineMuons.at(iMu));
 	}
 
+	signalLeptons=signalElectrons;
+	signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
 	sort(signalJets.begin(),signalJets.end(),compareJetPt);	
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
-        size_t nSignalLeptons = signalLeptons.size();
-        size_t nSignalJets = signalJets.size();
-	size_t nSignalBJets = signalBJets.size();
+	size_t nBaselineLeptons=baselineElectrons.size()+baselineMuons.size();
+        size_t nSignalLeptons=signalLeptons.size();
+        size_t nSignalJets=signalJets.size();
+	size_t nSignalBJets=signalBJets.size();
 
 	vector<vector<HEPUtils::Particle*>> SFOSpairs=getSFOSpair(signalLeptons);
 	vector<vector<HEPUtils::Particle*>> OSpairs=getOSpair(signalLeptons);
@@ -285,11 +270,19 @@ namespace Gambit {
 	double mTmin=999;
 	double mSFOS=999;
 
+	bool central_jet_veto=true;
+	bool bjet_veto=false;
+
+	for (size_t iJet=0;iJet<nSignalJets;iJet++) {
+	  if (signalJets.at(iJet)->pT()>60 && signalJets.at(iJet)->abseta()<2.4)central_jet_veto=false;
+	}
+	if (nSignalBJets==0)bjet_veto=true;
+
 	if (nSignalLeptons>0)pT_l0=signalLeptons.at(0)->pT();
 	if (nSignalLeptons>1) {
 	  pT_l1=signalLeptons.at(1)->pT();	  
 	  mll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).m();
-	  deltaR_ll=fabs(signalLeptons.at(0)->mom().deltaR_eta(signalLeptons.at(1)->mom()));
+	  deltaR_ll=signalLeptons.at(0)->mom().deltaR_eta(signalLeptons.at(1)->mom());
 
           double pLep1[3] = {signalLeptons.at(0)->mass(), signalLeptons.at(0)->mom().px(), signalLeptons.at(0)->mom().py()};
           double pLep2[3] = {signalLeptons.at(1)->mass(), signalLeptons.at(1)->mom().px(), signalLeptons.at(1)->mom().py()};
@@ -302,11 +295,11 @@ namespace Gambit {
           mT2 = mt2_calc.get_mt2();
 
 	  Z=signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom();
-	  deltaPhi_met_Z=fmod(fabs(Z.phi()-event->missingmom().phi()),M_PI);
+	  deltaPhi_met_Z=Z.deltaPhi(event->missingmom());
 	  for (size_t iPa=0;iPa<SFOSpairs.size();iPa++) {
 	    for (size_t iLep=0;iLep<signalLeptons.size();iLep++) {
 	      if (signalLeptons.at(iLep)!=SFOSpairs.at(iPa).at(0) && signalLeptons.at(iLep)!=SFOSpairs.at(iPa).at(1)) {
-	        double mT=sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi())));
+	        double mT=sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->mom().deltaPhi(event->missingmom()))));
 		if (mT<mTmin) {
 		  mTmin=mT;
 		  mSFOS=(SFOSpairs.at(iPa).at(0)->mom()+SFOSpairs.at(iPa).at(1)->mom()).m();
@@ -324,38 +317,29 @@ namespace Gambit {
 
 	if (nSignalJets>0) {
 	  pT_j0=signalJets.at(0)->pT();
-	  deltaPhi_met_jet0=fmod(fabs(signalJets.at(0)->phi()-event->missingmom().phi()),M_PI);
+	  deltaPhi_met_jet0=signalJets.at(0)->mom().deltaPhi(event->missingmom());
 	}
 	if (nSignalJets>1) {
 	  pT_j1=signalJets.at(1)->pT();
-	  if (nSignalJets<3) {
+	  if (nSignalJets<3 && bjet_veto) {
 	    W=signalJets.at(0)->mom()+signalJets.at(1)->mom();
 	    mjj=W.m();
-	    deltaR_jj=fabs(signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom()));
-	    deltaPhi_met_W=fmod(fabs(W.phi()-event->missingmom().phi()),M_PI);
+	    deltaR_jj=signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom());
+	    deltaPhi_met_W=W.deltaPhi(event->missingmom());
 	  }
-	  if (nSignalJets>2 && nSignalJets<6 && nSignalLeptons>1) {
+	  if (nSignalJets>2 && nSignalJets<6 && nSignalLeptons>1 && bjet_veto) {
 	    W_ISR=get_W_ISR(signalJets,Z,event->missingmom());
 	    W=W_ISR.at(0);
 	    mjj=W.m();
-	    deltaR_jj=fabs(W_ISR.at(3).deltaR_eta(W_ISR.at(2)));
-	    deltaPhi_met_W=fmod(fabs(W.phi()-event->missingmom().phi()),M_PI);
-	    deltaPhi_met_ISR=fmod(fabs(W_ISR.at(1).phi()-event->missingmom().phi()),M_PI);
+	    deltaR_jj=W_ISR.at(3).deltaR_eta(W_ISR.at(2));
+	    deltaPhi_met_W=W.deltaPhi(event->missingmom());
+	    deltaPhi_met_ISR=W_ISR.at(1).deltaPhi(event->missingmom());
 	  }
 	}
 	if (nSignalJets>2)pT_j2=signalJets.at(2)->pT();
 
         bool preselection=false; 
-	bool central_jet_veto=true;
-	bool bjet_veto=true;
-
-	if ((nSignalLeptons==2 || nSignalLeptons==3) && baselineLeptons.size()==nSignalLeptons && pT_l0>25 && pT_l1>20)preselection=true;
-	for (size_t iJet=0;iJet<nSignalJets;iJet++) {
-	  if (signalJets.at(iJet)->pT()>60 && fabs(signalJets.at(iJet)->eta())<2.4 && signalJets.at(iJet)->btag()==false)central_jet_veto=false;
-	}
-	for (size_t iJet=0;iJet<nSignalBJets;iJet++) {
-	  if (signalBJets.at(iJet)->pT()>20 && fabs(signalBJets.at(iJet)->eta())<2.4)bjet_veto=false;
-	}
+	if ((nSignalLeptons==2 || nSignalLeptons==3) && nBaselineLeptons==nSignalLeptons && pT_l0>25 && pT_l1>20)preselection=true;
 
 	//Signal Regions
 	//2lep+0jet
@@ -380,9 +364,9 @@ namespace Gambit {
             if (met>250)_numSR2_high++;
 	  }
 	  //SR2_low_2J
-	  if (nSignalBJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
+	  if (nSignalJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
 	  //SR2_low_3J
-	  if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && fabs(Z.eta())<1.6 && pT_j2>30.)_numSR2_low++;
+	  if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && Z.abseta()<1.6 && pT_j2>30.)_numSR2_low++;
 	}
 	
 	//3lep
@@ -468,45 +452,45 @@ namespace Gambit {
 
 	      (j==1 && nSignalLeptons>=2 && SFOSpairs.size()>0) ||   
 
-	      (j==2 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3) ||   
+	      (j==2 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3) ||   
 
-	      (j==3 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto) ||   
+	      (j==3 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto) ||   
 
-	      (j==4 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25.) ||   
+	      (j==4 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25.) ||   
 
-	      (j==5 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20.) ||   
+	      (j==5 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20.) ||   
 
-	      (j==6 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20.) ||   
+	      (j==6 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20.) ||   
 
-	      (j==7 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10.) ||   
+	      (j==7 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10.) ||   
 
-	      (j==8 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0) ||   
+	      (j==8 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0) ||   
 
-	      (j==9 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120. && nSignalJets==0) ||   
+	      (j==9 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120. && nSignalJets==0) ||   
 
-	      (j==10 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120.&& nSignalJets==0 && mTmin>110.) ||   
+	      (j==10 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120.&& nSignalJets==0 && mTmin>110.) ||   
  
-	      (j==11 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170.) ||   
+	      (j==11 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170.) ||   
 
-	      (j==12 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170. && mTmin>110.) ||   
+	      (j==12 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170. && mTmin>110.) ||   
 
-	      (j==13 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170.) ||   
+	      (j==13 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170.) ||   
 
-	      (j==14 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170. && mTmin>110.) ||   
+	      (j==14 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170. && mTmin>110.) ||   
 
-	      (j==15 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0) ||   
+	      (j==15 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0) ||   
 
-	      (j==16 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200.) ||   
+	      (j==16 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200.) ||   
 
-	      (j==17 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110.) ||   
+	      (j==17 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110.) ||   
 
-	      (j==18 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120.) ||   
+	      (j==18 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120.) ||   
 
-	      (j==19 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j0>70.) ||   
+	      (j==19 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j0>70.) ||   
 
-	      (j==20 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200.) ||   
+	      (j==20 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200.) ||   
 
-	      (j==21 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && baselineLeptons.size()==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200. && mTmin>110. && mTmin<160.) )   
+	      (j==21 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200. && mTmin>110. && mTmin<160.) )   
 
 	      cutFlowVector1[j]++;
 	  }
@@ -597,19 +581,19 @@ namespace Gambit {
 
 	      (j==16 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90.) || 
 
-	      (j==17 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6) || 
+	      (j==17 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6) || 
 
-	      (j==18 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6 && Z.pT()>40.) || 
+	      (j==18 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40.) || 
 
-	      (j==19 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4) || 
+	      (j==19 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4) || 
 
-	      (j==20 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6) || 
+	      (j==20 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6) || 
 
-	      (j==21 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2) || 
+	      (j==21 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2) || 
 
-	      (j==22 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8) || 
+	      (j==22 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8) || 
 
-	      (j==23 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && fabs(Z.eta())<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8 && deltaR_jj<2.2) ) 
+	      (j==23 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8 && deltaR_jj<2.2) ) 
 
 	      cutFlowVector3[j]++;
 	  }
@@ -649,19 +633,19 @@ namespace Gambit {
           cutFlowVector2ATLAS_400_200[13]=5.2;
 
           cutFlowVector2ATLAS_500_100[0]=5000.;
-          cutFlowVector2ATLAS_500_100[0]=37.9;
-          cutFlowVector2ATLAS_500_100[0]=33.7;
-          cutFlowVector2ATLAS_500_100[0]=28.9;
-          cutFlowVector2ATLAS_500_100[0]=25.3;
-          cutFlowVector2ATLAS_500_100[0]=20.5;
-          cutFlowVector2ATLAS_500_100[0]=19.4;
-          cutFlowVector2ATLAS_500_100[0]=17.5;
-          cutFlowVector2ATLAS_500_100[0]=15.6;
-          cutFlowVector2ATLAS_500_100[0]=7.4;
-          cutFlowVector2ATLAS_500_100[0]=6.7;
-          cutFlowVector2ATLAS_500_100[0]=5.9;
-          cutFlowVector2ATLAS_500_100[0]=5.9;
-          cutFlowVector2ATLAS_500_100[0]=5.9;
+          cutFlowVector2ATLAS_500_100[1]=37.9;
+          cutFlowVector2ATLAS_500_100[2]=33.7;
+          cutFlowVector2ATLAS_500_100[3]=28.9;
+          cutFlowVector2ATLAS_500_100[4]=25.3;
+          cutFlowVector2ATLAS_500_100[5]=20.5;
+          cutFlowVector2ATLAS_500_100[6]=19.4;
+          cutFlowVector2ATLAS_500_100[7]=17.5;
+          cutFlowVector2ATLAS_500_100[8]=15.6;
+          cutFlowVector2ATLAS_500_100[9]=7.4;
+          cutFlowVector2ATLAS_500_100[10]=6.7;
+          cutFlowVector2ATLAS_500_100[11]=5.9;
+          cutFlowVector2ATLAS_500_100[12]=5.9;
+          cutFlowVector2ATLAS_500_100[13]=5.9;
 	//maybe add pt_l1>25.
           for (size_t j=0;j<NCUTS2;j++){
             if(
@@ -794,25 +778,25 @@ namespace Gambit {
             if(
               (j==0) ||
 
-	      (j==1 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0) ||   
+	      (j==1 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0) ||   
 
-	      (j==2 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25.) ||   
+	      (j==2 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25.) ||   
 
-	      (j==3 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto) ||   
+	      (j==3 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto) ||   
 
-	      (j==4 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40.) ||   
+	      (j==4 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40.) ||   
 
-	      (j==5 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0) ||   
+	      (j==5 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0) ||   
 
-	      (j==6 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111.) ||   
+	      (j==6 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111.) ||   
 
-	      (j==7 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111. && mT2>100.) ||   
+	      (j==7 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111. && mT2>100.) ||   
 
-	      (j==8 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0) ||   
+	      (j==8 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0) ||   
 
-	      (j==9 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111.) ||   
+	      (j==9 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111.) ||   
 
-	      (j==10 && baselineLeptons.size()==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111. && mT2>100.) )   
+	      (j==10 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111. && mT2>100.) )   
 
 	      cutFlowVector5[j]++;
 	  }
@@ -972,9 +956,7 @@ namespace Gambit {
 	}
 
 	if (analysisRunName.find("401_1") != string::npos) {
-	  cutflowFile<<"$\\tilde{l}^{\\pm}\\tilde{l}^{\\mp}$ decay into leptons and $\\tilde{\\chi}_{1}^{0}, [\\tilde{l}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [400.5,1] [GeV]$"<<endl;
-          cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
-          cutflowFile<<"\\hline"<<endl;
+	  cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{l}^{\\pm}\\tilde{l}^{\\mp}$ decay into leptons and $\\tilde{\\chi}_{1}^{0}, [\\tilde{l}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [400.5,1] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
           cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
           cutflowFile<<"$\\sigma (pp\\to \\tilde{l}^{\\pm}\\tilde{l}^{\\mp})$ &"<<setprecision(4)<<xsec5ATLAS_401_1<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec5ATLAS_401_1<<" & 1\\\\"<<endl;
           cutflowFile<<"Generated Events &"<< cutFlowVector5ATLAS_401_1[0]<<"&"<<cutFlowVector5[0]<<"& - & -\\\\ \\hline"<<endl;
@@ -986,13 +968,11 @@ namespace Gambit {
           for (size_t i=1; i<NCUTS5-3; i++) {
             cutflowFile<<cutFlowVector5_str[i]<<"&"<<setprecision(4)<<cutFlowVector5ATLAS_401_1[i]*100./cutFlowVector5ATLAS_401_1[2]<<"&"<<setprecision(4)<<cutFlowVector5[i]*100./cutFlowVector5[2]<<"& - & -\\\\"<< endl;
           }
-          cutflowFile<<"\\end{tabular}"<<endl;
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
 	}
 
 	if (analysisRunName.find("300_150") != string::npos) {
-	  cutflowFile<<"$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{1}^{\\mp}$ decay via $tilde{l}$, $[\\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{1}^{0}]: [300,150] [GeV]$"<<endl;
-          cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
-          cutflowFile<<"\\hline"<<endl;
+	  cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{1}^{\\mp}$ decay via $tilde{l}$, $[\\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{1}^{0}]: [300,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
           cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
           cutflowFile<<"$\\sigma (pp\\to \\tilde{l}^{\\pm}\\tilde{l}^{\\mp})$ &"<<setprecision(4)<<xsec5ATLAS_300_150<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec5ATLAS_300_150<<" & 1\\\\"<<endl;
           cutflowFile<<"Generated Events &"<< cutFlowVector5ATLAS_300_150[0]<<"&"<<cutFlowVector5[0]<<"& - & -\\\\ \\hline"<<endl;
@@ -1004,7 +984,7 @@ namespace Gambit {
           for (size_t i=1; i<NCUTS5; i++) {
             cutflowFile<<cutFlowVector5_str[i]<<"&"<<setprecision(4)<<cutFlowVector5ATLAS_300_150[i]*100./cutFlowVector5ATLAS_300_150[2]<<"&"<<setprecision(4)<<cutFlowVector5[i]*100./cutFlowVector5[2]<<"& - & -\\\\"<< endl;
           }
-          cutflowFile<<"\\end{tabular}"<<endl;
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
 	}
 
         cutflowFile.close();
