@@ -92,6 +92,8 @@ namespace Gambit {
         // Baseline objects
         const vector<double>  a = {0,10.};
         const vector<double>  b = {0,10000.};
+	const vector<double>  a2 = {0,2.1,10.};
+	const vector<double>  b2 = {0,30.,40.,50.,70.,10000.};
         const vector<double> cEl = {0.95};
         HEPUtils::BinnedFn2D<double> _eff2dEl(a,b,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
@@ -115,7 +117,20 @@ namespace Gambit {
         }
 
         vector<HEPUtils::Jet*> baselineJets;
+	// Matthias jet smearing implemented roughly from 
+	// https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/CONFNOTES/ATLAS-CONF-2015-017/
+        //const vector<double>  b3 = {0,50.,70.,100.,150.,200.,1000.,10000.};
+        //const vector<double> cJets = {0.145,0.115,0.095,0.075,0.06,0.04,0.01};
+	//static HEPUtils::BinnedFn2D<double> _resJets2D(a,b3,cJets);                                                                                                                     
         for (HEPUtils::Jet* jet : event->jets()) {
+	  //const double _resJets = _resJets2D.get_at(jet->abseta(), jet->pT());
+	  //std::random_device rd;
+	  //std::mt19937 gen(rd());
+	  //std::normal_distribution<> d(1., _resJets);
+	  // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution                                                                                    
+	  //double smear_factor = d(gen);
+	  /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?                                                                   
+	  //jet->set_mom(HEPUtils::P4::mkXYZM(jet->mom().px()*smear_factor, jet->mom().py()*smear_factor, jet->mom().pz()*smear_factor, jet->mass()));
           if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
         }
 
@@ -161,8 +176,10 @@ namespace Gambit {
           if (overlapMuons.at(iMu)->pT()>25. && fabs(overlapMuons.at(iMu)->eta())<2.40)signalLeptons.push_back(overlapMuons.at(iMu)); 
         } 
 	       
-        const vector<double> cBJet={0.7};
-        HEPUtils::BinnedFn2D<double> _eff2dBJet(a,b,cBJet);
+
+        //const vector<double> cBJet={0.70};
+        const vector<double> cBJet={0.54,0.63,0.67,0.7,0.75,0.35,0.42,0.44,0.46,0.49};
+        HEPUtils::BinnedFn2D<double> _eff2dBJet(a2,b2,cBJet);
         for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
           if (overlapJets.at(iJet)->pT()>25. && fabs(overlapJets.at(iJet)->eta())<2.40) {
 	    signalJets.push_back(overlapJets.at(iJet));  

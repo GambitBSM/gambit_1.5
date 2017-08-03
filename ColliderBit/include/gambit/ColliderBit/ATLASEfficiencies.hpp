@@ -182,15 +182,24 @@ namespace Gambit {
         inline void smearJets(std::vector<HEPUtils::Jet*>& jets) {
           // Function that mimics the DELPHES jet momentum resolution.
           // We need to smear pT, then recalculate E, then reset the 4-vector.
-
           // Const resolution for now
-          const double resolution = 0.03;
+          //const double resolution = 0.03;
+
+	  // Matthias jet smearing implemented roughly from                                   
+          // https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/CONFNOTES/ATLAS-CONF-2015-017/       
+          // Parameterisation can be still improved, but eta dependence is minimal      
+          const std::vector<double>  binedges_eta = {0,10.};
+          const std::vector<double>  binedges_pt = {0,50.,70.,100.,150.,200.,1000.,10000.};
+          const std::vector<double> JetsJER = {0.145,0.115,0.095,0.075,0.07,0.05,0.04};
+          static HEPUtils::BinnedFn2D<double> _resJets2D(binedges_eta,binedges_pt,JetsJER);
 
           // Now loop over the jets and smear the 4-vectors
           std::random_device rd;
           std::mt19937 gen(rd());
-          std::normal_distribution<> d(1., resolution);
+
           for (HEPUtils::Jet* jet : jets) {
+	    const double resolution = _resJets2D.get_at(jet->abseta(), jet->pT());
+	    std::normal_distribution<> d(1., resolution);
             // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution
             double smear_factor = d(gen);
             /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?
@@ -203,7 +212,6 @@ namespace Gambit {
         inline void smearTaus(std::vector<HEPUtils::Particle*>& taus) {
           // We need to smear pT, then recalculate E, then reset the 4-vector.
           // Same as for jets, but on a vector of particles. (?)
-
           // Const resolution for now
           const double resolution = 0.03;
 
