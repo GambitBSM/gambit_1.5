@@ -165,10 +165,10 @@ DECAY         6     1.56194983E+00   # top decays
 #         PDG            Width
 DECAY        25     1.98610799E-03   # h decays
 #          BR         NDA      ID1       ID2
-     1.45642955E-01    2          15       -15   # BR(H1 -> tau- tau+)
-     8.19070713E-01    2           5        -5   # BR(H1 -> b bb)
-     3.36338173E-02    2          24       -24   # BR(H1 -> W+ W-)
-     1.65251528E-03    2          23        23   # BR(H1 -> Z Z)
+     0.00000000E+00    2          15       -15   # BR(H1 -> tau- tau+)
+     1.00000000E+00    2           5        -5   # BR(H1 -> b bb)
+     0.00000000E+00    2          24       -24   # BR(H1 -> W+ W-)
+     0.00000000E+00    2          23        23   # BR(H1 -> Z Z)
 #
 #         PDG            Width
 DECAY        35     5.74801389E-01   # H decays

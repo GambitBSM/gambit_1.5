@@ -146,7 +146,7 @@ namespace Gambit {
 	}
 
         cutFlowVector_str[0] = "All events";
-        cutFlowVector_str[1] = "$\\geq$ 1 signal lepton; $> 50 GeV$";
+        cutFlowVector_str[1] = "$\\geq$ 1 signal lepton; $E_{T}^{miss} > 50 GeV$";
         cutFlowVector_str[2] = "2nd lepton veto";
         cutFlowVector_str[3] = "Tau veto";
         cutFlowVector_str[4] = "2 jets";
