@@ -76,6 +76,22 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
   add_custom_target(scanners)
 endif()
 
+# Add get-pippi target
+set(name "pippi")
+set(dir "${CMAKE_SOURCE_DIR}/${name}")
+ExternalProject_Add(get-${name}
+  GIT_REPOSITORY https://github.com/patscott/pippi.git
+  SOURCE_DIR ${dir}
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+set(rmstring "${CMAKE_BINARY_DIR}/get-${name}-prefix/src/get-${name}-stamp/get-${name}")
+add_custom_target(nuke-pippi COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-download ${rmstring}-download-failed ${rmstring}-mkdir ${rmstring}-patch ${rmstring}-update ${rmstring}-gitclone-lastrun.txt || true
+                             COMMAND ${CMAKE_COMMAND} -E remove_directory ${dir} || true)
+add_dependencies(nuke-all nuke-pippi)
+set_target_properties(get-pippi PROPERTIES EXCLUDE_FROM_ALL 1)
+
 # Macro to clear the build stamp manually for an external project
 macro(enable_auto_rebuild package)
   set(rmstring "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}-build")
@@ -85,15 +101,21 @@ endmacro()
 
 # Macro to add all additional targets for a new backend or scanner
 macro(add_extra_targets type package ver dir dl target)
+  string(REPLACE "|" "| ${CMAKE_MAKE_PROGRAM}" updated_target ${target})
+  string(FIND "${target}" "|" pipe_found)
+  if (pipe_found STREQUAL "-1")
+    set(updated_target "${CMAKE_MAKE_PROGRAM} ${target}")
+  endif()
+  string(REGEX REPLACE " " ";" updated_target "${updated_target}")
   if (${type} STREQUAL "backend model")
     set(pname "${package}_${model}_${ver}")
     add_dependencies(${pname} ${package}_${ver})
-    add_chained_external_clean(${pname} ${dir} ${target} ${package}_${ver})
+    add_chained_external_clean(${pname} ${dir} "${updated_target}" ${package}_${ver})
     add_dependencies(clean-backends clean-${pname})
   else()
     set(pname "${package}_${ver}")
     string(REGEX REPLACE ".*/" "${${type}_download}/" short_dl "${dl}")
-    add_external_clean(${package}_${ver} ${dir} ${short_dl} ${target})
+    add_external_clean(${package}_${ver} ${dir} ${short_dl} "${updated_target}")
     add_dependencies(clean-${type}s clean-${pname})
     add_dependencies(nuke-${type}s nuke-${pname})
   endif()
@@ -114,8 +136,11 @@ function(check_ditch_status name version)
                     RESULT_VARIABLE result
                     OUTPUT_VARIABLE output)
     if (output STREQUAL "True\n")
-      set(ditched_${name}_${version} TRUE PARENT_SCOPE)
-      message("${BoldCyan} X Excluding ${name} ${version} from GAMBIT configuration.${ColourReset}")
+      if(NOT ditched_${name}_${ver})
+        set(ditched_${name}_${version} TRUE)
+        set(ditched_${name}_${version} TRUE PARENT_SCOPE)
+        message("${BoldCyan} X Excluding ${name} ${version} from GAMBIT configuration.${ColourReset}")
+      endif()
     endif()
   endforeach()
 endfunction()

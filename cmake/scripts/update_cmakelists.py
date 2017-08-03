@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python
 #
 # GAMBIT: Global and Modular BSM Inference Tool
 #*********************************************
@@ -171,7 +171,6 @@ set(source_files                                \n"
         for hpp in headers: towrite+='include/{0}\n'.format(hpp)
         towrite+=")\n\n"
         towrite+="add_gambit_library("+mod+" OPTION OBJECT SOURCES ${source_files} HEADERS ${header_files})"
-        for x in excluded_components: towrite+="\n\nmessage(\"${BoldCyan} X Excluding " + x + " from GAMBIT configuration.${ColourReset}\")"
         cmakelist = "./"+mod+"/CMakeLists.txt"
         candidate = "./scratch/"+mod+"_CMakeLists.txt"
         with open(candidate,"w") as f: f.write(towrite)

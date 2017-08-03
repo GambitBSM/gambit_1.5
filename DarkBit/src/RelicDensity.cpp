@@ -85,7 +85,7 @@ namespace Gambit
             << std::endl;
       #endif
 
-      // FIXME: eventually, this function should not be BE-dependent anymore
+      // TODO: eventually, this function should not be BE-dependent anymore
       // (i.e. SUSY particle conventions should follow GAMBUT, not DS etc)!
       // The use of any
       // DarkSUSY conventions need thus be moved to RD_annrate_DSprep_func
@@ -134,32 +134,6 @@ namespace Gambit
       if (result.coannihilatingParticles.size() == 1)
         resmax -= 2;
 
-//      for (int i=0; i<resmax; i++)
-//      {
-//        if (mymspctm->mass(reslist[i])/result.coannihilatingParticles[0].mass
-//            > 2.)
-//        {
-
-/////////////////////////////
-/////////////////////////////
-// JONATHAN FIXME : please comment out everything and check whether this induces more
-//           "dgdap ..." errros. Comment out from here
-//          // DS-specific treatment of narrow Higgs width: is no longer needed here.
-//          DS_WIDTHS *mywidths= &(*BEreq::widths);
-//          if (reslist[i]==BEreq::particle_code("h0_2") && mywidths->width(BEreq::particle_code("h0_2")) < 0.1)
-//            // wide res treatment adopted in DS
-//            result.resonances.push_back(
-//                TH_Resonance(mymspctm->mass(reslist[i]), 0.1));
-//          else
-//            result.resonances.push_back(
-//                TH_Resonance(
-//                  mymspctm->mass(reslist[i]), mywidths->width(reslist[i])));
-//        }
-//      }
-// to here
-/////////////////////////////
-/////////////////////////////
-
 
       // determine thresholds; lowest threshold = 2*WIMP rest mass  (unlike DS
       // convention!)
@@ -200,7 +174,7 @@ namespace Gambit
       // NB: particle code (1st entry) is irrelevant (unless Weff is obtained from DS)
       result.coannihilatingParticles.push_back(
           RD_coannihilating_particle(100,1+DMproperty.spin2,DMproperty.mass));
-      // FIXME: coannihilation thresholds have to be added once they are included
+      // TODO: coannihilation thresholds have to be added once they are included
       // in the process catalog
 
       #ifdef DARKBIT_DEBUG
@@ -291,7 +265,7 @@ namespace Gambit
       // RDspectrum.
       RD_spectrum_type specres = *Dep::RD_spectrum;
 
-      // FIXME: Here goes a translation of GAMBIT particle identifiers
+      // TODO: Here goes a translation of GAMBIT particle identifiers
       // -> DS particle codes (once RD_spectrum_SUSY is backend independent)
 
       //write info about coannihilating particles to DS common blocks
@@ -628,12 +602,39 @@ namespace Gambit
       // Set options via ini-file (MicrOmegas-specific performance options)
       fast = runOptions->getValueOrDef<int>(0, "fast");
       Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
-      logger() << LogTags::debug << "Using fast: " << fast << " and Beps: " << Beps << EOM;
+
+      logger() << LogTags::debug << "Using fast: " << fast << " Beps: " << Beps;
 
       // Output
       double Xf;
       oh2 = BEreq::oh2(&Xf, byVal(fast), byVal(Beps));
       logger() << LogTags::debug << "X_f = " << Xf << " Omega h^2 = " << oh2 << EOM;
+    }
+
+    /*! \brief Relic density directly from a call of initialized DarkSUSY.
+    */
+    void RD_oh2_DarkSUSY(double &result)
+    {
+      using namespace Pipes::RD_oh2_DarkSUSY;
+      // Input
+      int omtype;  // 0: no coann; 1: all coann
+      int fast;  // 0: standard; 1: fast; 2: dirty
+
+      // Set options via ini-file
+      /// Option omtype<int>: 0 no coann, 1 all coann (default 1)
+      omtype = runOptions->getValueOrDef<int>(1, "omtype");
+      /// Option fast<int>: 0 standard, 1 fast, 2 dirty (default 0)
+      fast = runOptions->getValueOrDef<int>(0, "fast");
+
+      // Output
+      double xf;  // freeze-out temperature
+      int ierr;  // error flag
+      int iwar;  // warming flag
+      int nfc;  // number of fnct calls to effective annihilation cross section
+      logger() << LogTags::debug << "Starting DarkSUSY relic density calculation..." << EOM;
+      double oh2 = BEreq::dsrdomega(omtype,fast,xf,ierr,iwar,nfc);
+      result = oh2;
+      logger() << LogTags::debug << "RD_oh2_DarkSUSY: oh2 is " << oh2 << EOM;
     }
 
 

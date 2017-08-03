@@ -34,10 +34,10 @@ namespace Gambit
     //
     //////////////////////////////////////////////////////////////////////////
 
-    // Special events for event loop
+    /// Special events for event loop
     enum cascadeMC_SpecialEvents {MC_INIT=-1, MC_NEXT_STATE=-2, MC_FINALIZE=-3};
 
-    // Function for retrieving list of final states for cascade decays
+    /// Function for retrieving list of final states for cascade decays
     void cascadeMC_FinalStates(std::vector<std::string> &list)
     {
       list.clear();
@@ -54,7 +54,7 @@ namespace Gambit
       #endif
     }
 
-    // Function setting up the decay table used in decay chains
+    /// Function setting up the decay table used in decay chains
     void cascadeMC_DecayTable(DarkBit::DecayChain::DecayTable &table)
     {
       using namespace DecayChain;
@@ -76,7 +76,7 @@ namespace Gambit
 #endif
     }
 
-    // Loop manager for cascade decays
+    /// Loop manager for cascade decays
     void cascadeMC_LoopManager()
     {
       using namespace Pipes::cascadeMC_LoopManager;
@@ -136,7 +136,7 @@ namespace Gambit
       Loop::executeIteration(MC_FINALIZE);
     }
 
-    // Function selecting initial state for decay chain
+    /// Function selecting initial state for decay chain
     void cascadeMC_InitialState(std::string &pID)
     {
       using namespace DecayChain;
@@ -171,7 +171,7 @@ namespace Gambit
 #endif
     }
 
-    // Event counter for cascade decays
+    /// Event counter for cascade decays
     void cascadeMC_EventCount(std::map<std::string, int> &counts)
     {
       using namespace Pipes::cascadeMC_EventCount;
@@ -194,7 +194,7 @@ namespace Gambit
       }
     }
 
-    // Function for generating decay chains
+    /// Function for generating decay chains
     void cascadeMC_GenerateChain(
         DarkBit::DecayChain::ChainContainer &chain)
     {
@@ -229,9 +229,9 @@ namespace Gambit
       chain=ChainContainer(chn);
     }
 
-    // Function for sampling SimYieldTables (tabulated spectra).
-    // This is a convenience function used in cascadeMC_Histograms, and does
-    // not have an associated capability.
+    /** Function for sampling SimYieldTables (tabulated spectra).
+      * This is a convenience function used in cascadeMC_Histograms, and does
+      * not have an associated capability.  */
     void cascadeMC_sampleSimYield( const SimYieldTable &table,
         const DarkBit::DecayChain::ChainParticle* endpoint,
         std::string finalState,
@@ -359,8 +359,7 @@ namespace Gambit
       }
     }
 
-    // Function responsible for histogramming, and evaluating end conditions
-    // for event loop
+    /// Function responsible for histogramming, and evaluating end conditions for event loop
     void cascadeMC_Histograms(std::map<std::string, std::map<std::string,
         SimpleHist> > &result)
     {
@@ -382,21 +381,28 @@ namespace Gambit
       {
         case MC_INIT:
           // Initialization
-          /// Option cMC_numSpecSamples<int>: (default 10)
+          /// Option cMC_numSpecSamples<int>: number of samples to draw from tabulated
+          /// spectra (default 10)
           cMC_numSpecSamples = runOptions->getValueOrDef<int>   (25, "cMC_numSpecSamples");
+          /// Option cMC_endCheckFrequency: number of events to wait between successive
+          /// checks of the convergence criteria (default 25)
           cMC_endCheckFrequency  =
             runOptions->getValueOrDef<int>   (25,     "cMC_endCheckFrequency");
+          /// Option cMC_gammaBGPower: power-law slope to assume for astrophysical
+          /// background (default -2.5)
           cMC_gammaBGPower       =
             runOptions->getValueOrDef<double>(-2.5,   "cMC_gammaBGPower");
+          /// Option cMC_gammaRelError: max allowed relative error in bin with highest
+          /// expected signal-to-background (default 0.20)
           cMC_gammaRelError      =
             runOptions->getValueOrDef<double>(0.20,   "cMC_gammaRelError");
 
           // Note: use same binning for all particle species
           /// Option cMC_NhistBins<int>: Number of histogram bins (default 140)
           cMC_NhistBins = runOptions->getValueOrDef<int>   (140,     "cMC_NhistBins");
-          /// Option cMC_binLow<double>: Histogram min energy in VeV (default 0.001)
+          /// Option cMC_binLow<double>: Histogram min energy in GeV (default 0.001)
           cMC_binLow = runOptions->getValueOrDef<double>(0.001,  "cMC_binLow");
-          /// Option cMC_binHigh<double>: Histogram max energy in VeV (default 10000)
+          /// Option cMC_binHigh<double>: Histogram max energy in GeV (default 10000)
           cMC_binHigh = runOptions->getValueOrDef<double>(10000.0,"cMC_binHigh");
           histList.clear();
           return;
@@ -612,10 +618,10 @@ namespace Gambit
       }
     }
 
-    // Convenience function for getting a daFunk::Funk object of a given spectrum.
-    // This function has no associated capability.
-    // Function retrieving specific spectra (like cascadeMC_gammaSpectra)
-    // should call this function.
+    /** Convenience function for getting a daFunk::Funk object of a given spectrum.
+        This function has no associated capability.
+        Function retrieving specific spectra (like cascadeMC_gammaSpectra)
+        should call this function.*/
     void cascadeMC_fetchSpectra(std::map<std::string, daFunk::Funk> &spectra,
         std::string finalState,
         const std::vector<std::string> &ini,
@@ -677,7 +683,7 @@ namespace Gambit
       }
     }
 
-    // Function requesting and returning gamma ray spectra from cascade decays.
+    /// Function requesting and returning gamma ray spectra from cascade decays.
     void cascadeMC_gammaSpectra(std::map<std::string, daFunk::Funk> &spectra)
     {
       using namespace Pipes::cascadeMC_gammaSpectra;

@@ -209,9 +209,10 @@ namespace Gambit
       mssmspec.set_override(Par::Pole_Mass_1srd_low,  rd_mW, "W+", true);
 
       // Save the input value of TanBeta
-      if (input_Param.find("TanBeta") != input_Param.end())
+      // Probably need to make it a full requirement of the MSSM SpectrumContents
+      if(input_Param.find("TanBeta") != input_Param.end())
       {
-        mssmspec.set_override(Par::dimensionless, *input_Param.at("TanBeta"), "TanBeta_input", true);
+        mssmspec.set_override(Par::dimensionless, *input_Param.at("TanBeta"), "tanbeta(mZ)", true);
       }
 
       // Create a second SubSpectrum object to wrap the qedqcd object used to initialise the spectrum generator
@@ -413,57 +414,23 @@ namespace Gambit
     //void convert_NMSSM_to_SM  (Spectrum* &result) {result = *Pipes::convert_NMSSM_to_SM::Dep::NMSSM_spectrum;}
     //void convert_E6MSSM_to_SM (Spectrum* &result) {result = *Pipes::convert_E6MSSM_to_SM::Dep::E6MSSM_spectrum;}
 
-    void get_CMSSM_spectrum_SPheno (Spectrum& spectrum)
+    void get_MSSM_spectrum_SPheno (Spectrum& spectrum)
     {
-      namespace myPipe = Pipes::get_CMSSM_spectrum_SPheno;
+      namespace myPipe = Pipes::get_MSSM_spectrum_SPheno;
       const SMInputs &sminputs = *myPipe::Dep::SMINPUTS;
+
+      // Set up the input structure
+      Finputs inputs;
+      inputs.sminputs = sminputs;
+      inputs.param = myPipe::Param;
+      inputs.options = myPipe::runOptions;
 
       // Retrieve any mass cuts
       static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
       static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
 
       // Get the spectrum from the Backend
-      myPipe::BEreq::SPheno_MSSMspectrum(spectrum, sminputs, myPipe::Param);
-
-      // Get the SLHA struct from the spectrum object
-      SLHAstruct slha = spectrum.getSLHAea(1);
-
-      // Convert into a spectrum object
-      spectrum = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(slha,slha,mass_cut,mass_ratio_cut);
-
-    }
-
-    void get_MSSMatMGUT_spectrum_SPheno (Spectrum& spectrum)
-    {
-      namespace myPipe = Pipes::get_MSSMatMGUT_spectrum_SPheno;
-      const SMInputs &sminputs = *myPipe::Dep::SMINPUTS;
-
-       // Retrieve any mass cuts
-      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
-      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
-
-      // Get the spectrum from the Backend
-      myPipe::BEreq::SPheno_MSSMspectrum(spectrum, sminputs, myPipe::Param);
-
-      // Get the SLHA struct from the spectrum object
-      SLHAstruct slha = spectrum.getSLHAea(1);
-
-      // Convert into a spectrum object
-      spectrum = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(slha,slha,mass_cut,mass_ratio_cut);
-
-    }
-
-    void get_MSSMatQ_spectrum_SPheno (Spectrum& spectrum)
-    {
-      namespace myPipe = Pipes::get_MSSMatQ_spectrum_SPheno;
-      const SMInputs &sminputs = *myPipe::Dep::SMINPUTS;
-
-      // Retrieve any mass cuts
-      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
-      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
-
-      // Get the spectrum from the Backend
-      myPipe::BEreq::SPheno_MSSMspectrum(spectrum, sminputs, myPipe::Param);
+      myPipe::BEreq::SPheno_MSSMspectrum(spectrum, inputs);
 
       // Get the SLHA struct from the spectrum object
       SLHAstruct slha = spectrum.getSLHAea(1);
@@ -660,7 +627,7 @@ namespace Gambit
       namespace myPipe = Pipes::get_MSSM_spectrum_from_SLHAstruct;
       const SLHAstruct& input_slha_tmp = *myPipe::Dep::unimproved_MSSM_spectrum; // Retrieve dependency on SLHAstruct
 
-      /// @TODO @FIXME this needs to be fixed -- is it needed any more?  Where is this GAMBIT block supposed to be written?
+      /// @todo FIXME this needs to be fixed -- is it needed any more?  Where is this GAMBIT block supposed to be written?
       SLHAstruct input_slha(input_slha_tmp); // Copy struct (for demo adding of GAMBIT block only)
       // For example; add this to your input SLHAstruct:
       input_slha["GAMBIT"][""] << "BLOCK" << "GAMBIT";
@@ -1300,7 +1267,8 @@ namespace Gambit
            SpecBit_error().forced_throw(LOCAL_INFO,errmsg.str());
          }
       }
-
+      // add the scale!
+      specmap["scale(Q)"] = subspec.GetScale();
     }
 
     /// @} End Gambit module functions
