@@ -139,8 +139,6 @@ namespace Gambit {
         }
 
         analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb_800_600";
-        vector<const char*> variables = {"met"};
-        plots = new Perf_Plot(analysisRunName, &variables);
       }
 
       struct ptComparison {
@@ -391,12 +389,6 @@ namespace Gambit {
 	    if (met>200. && pT_l2>35. && mTmin>160.)_numSR3_WZ_1Jc++;
 	  }
 	}
-
-	//Validation
-        if (preselection) {
-          vector<double> variables = {met};
-          plots->fill(&variables);
-        }
 
 	if (analysisRunName.find("200_100") != string::npos) {
 
@@ -713,27 +705,27 @@ namespace Gambit {
             if(
               (j==0) ||
 
-	      (j==1 && nSignalLeptons==2 && SFOSpairs.size()>0) ||   
+	      (j==1 && nSignalLeptons==3 && SFOSpairs.size()>0) ||   
 
-	      (j==2 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto) ||   
+	      (j==2 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto) ||   
 
-	      (j==3 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110.) ||   
+	      (j==3 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110.) ||   
 
-	      (j==4 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130.) ||   
+	      (j==4 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130.) ||   
 
-	      (j==5 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2) ||   
+	      (j==5 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2) ||   
 
-	      (j==6 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<30.) ||   
+	      (j==6 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<30.) ||   
 
-	      (j==7 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>30.) ||   
+	      (j==7 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>30.) ||   
 
-	      (j==8 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2) ||   
+	      (j==8 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2) ||   
 
-	      (j==9 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<50.) ||   
+	      (j==9 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>20. && pT_l2<50.) ||   
 
-	      (j==10 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>50. && pT_l2<80.) ||   
+	      (j==10 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>50. && pT_l2<80.) ||   
 
-	      (j==11 && nSignalLeptons==2 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>80.) ) 
+	      (j==11 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>80.) ) 
 
 	      cutFlowVector4[j]++;
 	  }
@@ -938,9 +930,7 @@ namespace Gambit {
 	}
 
 	if (analysisRunName.find("800_600") != string::npos) {
-	  cutflowFile<<"$$"<<endl;
-          cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
-          cutflowFile<<"\\hline"<<endl;
+	  cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{l}$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [800,600] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
           cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
           cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec4ATLAS_800_600<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec4ATLAS_800_600<<" & 1\\\\"<<endl;
           cutflowFile<<"Generated Events &"<< cutFlowVector4ATLAS_800_600[0]<<"&"<<cutFlowVector4[0]<<"& - & -\\\\ \\hline"<<endl;
@@ -952,7 +942,7 @@ namespace Gambit {
           for (size_t i=1; i<NCUTS4; i++) {
             cutflowFile<<cutFlowVector4_str[i]<<"&"<<setprecision(4)<<cutFlowVector4ATLAS_800_600[i]*100./cutFlowVector4ATLAS_800_600[2]<<"&"<<setprecision(4)<<cutFlowVector4[i]*100./cutFlowVector4[2]<<"& - & -\\\\"<< endl;
           }
-          cutflowFile<<"\\end{tabular}"<<endl;
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
 	}
 
 	if (analysisRunName.find("401_1") != string::npos) {
@@ -988,7 +978,6 @@ namespace Gambit {
 	}
 
         cutflowFile.close();
-        plots->createFile();
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SR2_SF_loose;
