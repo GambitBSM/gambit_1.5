@@ -90,6 +90,8 @@ namespace Gambit {
         // Baseline objects
         const vector<double>  a = {0,10.};
         const vector<double>  b = {0,10000.};
+	const vector<double>  a2 = {0,2.1,10.};
+	const vector<double>  b2 = {0,30.,40.,50.,70.,10000.};
         const vector<double> cEl = {0.95};
         HEPUtils::BinnedFn2D<double> _eff2dEl(a,b,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
@@ -115,7 +117,7 @@ namespace Gambit {
 
         vector<HEPUtils::Jet*> baselineJets;
         for (HEPUtils::Jet* jet : event->jets()) {
-          if (jet->pT()>20. && jet->abseta()<4.5)baselineJets.push_back(jet);
+          if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
         }
 
         //Overlap Removal
@@ -174,8 +176,10 @@ namespace Gambit {
           if (overlapMuons.at(iMu)->pT()>25.)signalMuons.push_back(overlapMuons.at(iMu)); 
         } 
 	       
-        const vector<double> cBJet={0.7};
-        HEPUtils::BinnedFn2D<double> _eff2dBJet(a,b,cBJet);
+
+        //const vector<double> cBJet={0.70};
+        const vector<double> cBJet={0.54,0.63,0.67,0.7,0.75,0.35,0.42,0.44,0.46,0.49};
+        HEPUtils::BinnedFn2D<double> _eff2dBJet(a2,b2,cBJet);
         for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
           if (overlapJets.at(iJet)->pT()>25. && overlapJets.at(iJet)->abseta()<2.40) {
 	    signalJets.push_back(overlapJets.at(iJet));  
