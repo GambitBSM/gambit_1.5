@@ -34,24 +34,24 @@ namespace Gambit
 {
   namespace DarkBit
   { 
-    double l_M(double M)
-    {
-      const double m_Z = 91.1876;  // GeV
-      const double m_H = 125.09;  // GeV
-      return 1.0/pow(4.0*pi, 2.0) * ( (3.0*log(pow(M/m_Z, 2.0)))/((pow(M/m_Z, 2.0)) - 1.0) + (log(pow(M/m_H, 2.0)))/((pow(M/m_H, 2.0)) - 1.0));
-    }
+//    double l_M(double M)
+//    {
+//      const double m_Z = 91.1876;  // GeV
+//      const double m_H = 125.09;  // GeV
+//      return 1.0/pow(4.0*pi, 2.0) * ( (3.0*log(pow(M/m_Z, 2.0)))/((pow(M/m_Z, 2.0)) - 1.0) + (log(pow(M/m_H, 2.0)))/((pow(M/m_H, 2.0)) - 1.0));
+//    }
 
     void CI_param(Matrix3d& result)   
     {
       using namespace Pipes::CI_param;
       typedef std::complex<double> dcomp;
-      static double v = 246.0;  // GeV
-      static double md21 = 7.5e-23;  // GeV^2
-      static double md31 = 2.457e-21;  // GeV^2
-      static double md23 = 2.449e-21;  // GeV^2
-      static double theta23 = 0.7382;  // rad
-      static double theta13 = 0.1483;  // rad
-      static double theta12 = 0.5843;  // rad
+//      static double v = 246.0;  // GeV
+//      static double md21 = 7.5e-23;  // GeV^2
+//      static double md31 = 2.457e-21;  // GeV^2
+//      static double md23 = 2.449e-21;  // GeV^2
+//      static double theta23 = 0.7382;  // rad
+//      static double theta13 = 0.1483;  // rad
+//      static double theta12 = 0.5843;  // rad
       static double conv_fact = 6.58e-16;  // conversion factor from eV^-1 to s, for lifetime
       static double G_F_sq = 1.3604e-10;  // GeV^-4
       static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W_sq
@@ -67,128 +67,133 @@ namespace Gambit
       static double m_pi = 0.1396; // GeV
       static double m_K = 0.4937;  // GeV
       static double m_tau = 1.7768;  // GeV
+      static double m_bb_GERDA = 2e-10;  // GeV
+      static double m_bb_Kam = 1.61e-10;  // GeV
       dcomp I(0.0, 1.0);
-      Matrix3d M_I, t_sq, result_temp_bbn, result_temp_lepuniv;  // M_I not complex; circumvents type mismatch in l(M)
-      Matrix3cd M_twid_temp, M_twid, m_nu, R_23, R_13, R_12, R, V_23, V_13, V_12, U_pd, U_nd, U_nu, Maj_phase, t;
+      Matrix3d M_I, t_sq, result_temp_bbn, result_temp_lepuniv, result_temp_0nubb, U_light_sq;  // M_I not complex; circumvents type mismatch in l(M)
+//      Matrix3cd M_twid_temp, M_twid, m_nu, R_23, R_13, R_12, R, V_23, V_13, V_12, U_pd, U_nd, U_nu, Maj_phase, t;
+      Matrix3cd m_light, U_light ,t;
       std::vector<double> lifetime(3);
       std::vector<double> r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
       std::vector<double> r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
       std::vector<double> e_fac_tau(3), mu_fac_tau(3);
-      double x23 = *Param["ReOm23"];
-      double y23 = *Param["ImOm23"];
-      double x13 = *Param["ReOm13"];
-      double y13 = *Param["ImOm13"];
-      double x12 = *Param["ReOm12"];
-      double y12 = *Param["ImOm12"];
-      double a1 = *Param["alpha1"];
-      double a2 = *Param["alpha2"];
-      double d = *Param["delta"];
-      int o = *Param["ordering"];
-      int m_min = *Param["min_mass"];
+      std::vector<double> m_temp_GERDA(3), m_temp_Kam(3);
+//      double x23 = *Param["ReOm23"];
+//      double y23 = *Param["ImOm23"];
+//      double x13 = *Param["ReOm13"];
+//      double y13 = *Param["ImOm13"];
+//      double x12 = *Param["ReOm12"];
+//      double y12 = *Param["ImOm12"];
+//      double a1 = *Param["alpha1"];
+//      double a2 = *Param["alpha2"];
+//      double d = *Param["delta"];
+//      int o = *Param["ordering"];
+//      int m_min = *Param["min_mass"];
       double e_f_pi, mu_f_pi, e_f_K, mu_f_K, e_f_tau, mu_f_tau;
       double d_r_pi, d_r_K, d_r_tau, R_pi, R_K, R_tau;
+      double m_GERDA, m_Kam;
 
       M_I << *Param["M_1"], 0.0, 0.0,
              0.0, *Param["M_2"], 0.0,
              0.0, 0.0, *Param["M_3"];
-      M_twid_temp(0,0) = M_I(0,0)  * (1.0 - (pow(M_I(0,0),2.0)*l_M(M_I(0,0))/pow(v,2.0)));
-      M_twid_temp(0,1) = 0.0;
-      M_twid_temp(0,2) = 0.0;
-      M_twid_temp(1,0) = 0.0;
-      M_twid_temp(1,1) = M_I(1,1)  * (1.0 - (pow(M_I(1,1),2.0)*l_M(M_I(1,1))/pow(v,2.0)));
-      M_twid_temp(1,2) = 0.0;
-      M_twid_temp(2,0) = 0.0;
-      M_twid_temp(2,1) = 0.0;
-      M_twid_temp(2,2) = M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2))/pow(v,2.0)));
-      M_twid = M_twid_temp.sqrt();
-
-      R_23(0,0) = 1.0;
-      R_23(0,1) = 0.0;
-      R_23(0,2) = 0.0;
-      R_23(1,0) = 0.0;
-      R_23(1,1) = cos(x23)*cosh(y23) - I*sin(x23)*sinh(y23);
-      R_23(1,2) = sin(x23)*cosh(y23) + I*cos(x23)*sinh(y23);
-      R_23(2,0) = 0.0;
-      R_23(2,1) = -sin(x23)*cosh(y23) - I*cos(x23)*sinh(y23);
-      R_23(2,2) = cos(x23)*cosh(y23) - I*sin(x23)*sinh(y23);
-      R_13(0,0) = cos(x13)*cosh(y13) - I*sin(x13)*sinh(y13);;
-      R_13(0,1) = 0.0;
-      R_13(0,2) = sin(x13)*cosh(y13) + I*cos(x13)*sinh(y13);
-      R_13(1,0) = 0.0;
-      R_13(1,1) = 1.0;
-      R_13(1,2) = 0.0;
-      R_13(2,0) = -sin(x13)*cosh(y13) - I*cos(x13)*sinh(y13);
-      R_13(2,1) = 0.0;
-      R_13(2,2) = cos(x13)*cosh(y13) - I*sin(x13)*sinh(y13);
-      R_12(0,0) = cos(x12)*cosh(y12) - I*sin(x12)*sinh(y12);
-      R_12(0,1) = sin(x12)*cosh(y12) + I*cos(x12)*sinh(y12);
-      R_12(0,2) = 0.0;
-      R_12(1,0) = -sin(x12)*cosh(y12) - I*cos(x12)*sinh(y12);
-      R_12(1,1) = cos(x12)*cosh(y12) - I*sin(x12)*sinh(y12);
-      R_12(1,2) = 0.0;
-      R_12(2,0) = 0.0;
-      R_12(2,1) = 0.0;
-      R_12(2,2) = 1.0;
-      R = R_23 * R_13 * R_12;
-
-      m_nu(0,1) = 0.0;
-      m_nu(0,2) = 0.0;
-      m_nu(1,0) = 0.0;
-      m_nu(1,2) = 0.0;
-      m_nu(2,0) = 0.0;
-      m_nu(2,1) = 0.0;
-      if(o == 1)
-      {
-        if(m_min == 0)
-          {
-            m_nu(0,0) = 0.0;
-            m_nu(1,1) = sqrt(md21);
-            m_nu(2,2) = sqrt(md31);
-          }
-        else if(m_min == 1)
-          {
-            m_nu(0,0) = 2.3e-10;
-            m_nu(1,1) = sqrt(pow(m_nu(0,0), 2.0) + md21);
-            m_nu(2,2) = sqrt(pow(m_nu(0,0), 2.0) + md31);
-          }
-      }
-      else if(o == 0)
-      {
-        if(m_min == 0)
-          {
-            m_nu(2,2) = 0.0;
-            m_nu(1,1) = sqrt(md23);
-            m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
-          }
-        else if(m_min == 0.23)
-          {
-            m_nu(2,2) = 2.3e-10;
-            m_nu(1,1) = sqrt(pow(m_nu(2,2), 2.0) + md23);
-            m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
-          }
-      }
-
-      V_23 << 1.0, 0.0, 0.0,
-              0.0, cos(theta23), sin(theta23),
-              0.0, -sin(theta23), cos(theta23);
-      V_13 << cos(theta13), 0.0, sin(theta13),
-              0.0, 1.0, 0.0,
-              -sin(theta13), 0.0, cos(theta13);
-      V_12 << cos(theta12), sin(theta12), 0.0,
-              -sin(theta12), cos(theta12), 0.0,
-              0.0, 0.0, 1.0;
-      U_pd << exp(-I*d/2.0), 0.0, 0.0,
-              0.0, 1.0, 0.0,
-              0.0, 1.0, exp(I*d/2.0);
-      U_nd << exp(I*d/2.0), 0.0, 0.0,
-              0.0, 1.0, 0.0,
-              0.0, 1.0, exp(-I*d/2.0);
-      Maj_phase << exp(I*a1/2.0), 0.0, 0.0,
-                   0.0, exp(I*a2/2.0), 0.0,
-                   0.0, 0.0, 1.0;
-      U_nu = V_23 * U_pd * V_13 * U_nd* V_12 * Maj_phase;
-
-      t = I * U_nu * m_nu.sqrt() * R * M_twid.inverse();
+//      M_twid_temp(0,0) = M_I(0,0)  * (1.0 - (pow(M_I(0,0),2.0)*l_M(M_I(0,0))/pow(v,2.0)));
+//      M_twid_temp(0,1) = 0.0;
+//      M_twid_temp(0,2) = 0.0;
+//      M_twid_temp(1,0) = 0.0;
+//      M_twid_temp(1,1) = M_I(1,1)  * (1.0 - (pow(M_I(1,1),2.0)*l_M(M_I(1,1))/pow(v,2.0)));
+//      M_twid_temp(1,2) = 0.0;
+//      M_twid_temp(2,0) = 0.0;
+//      M_twid_temp(2,1) = 0.0;
+//      M_twid_temp(2,2) = M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2))/pow(v,2.0)));
+//      M_twid = M_twid_temp.sqrt();
+//
+//      R_23(0,0) = 1.0;
+//      R_23(0,1) = 0.0;
+//      R_23(0,2) = 0.0;
+//      R_23(1,0) = 0.0;
+//      R_23(1,1) = cos(x23)*cosh(y23) - I*sin(x23)*sinh(y23);
+//      R_23(1,2) = sin(x23)*cosh(y23) + I*cos(x23)*sinh(y23);
+//      R_23(2,0) = 0.0;
+//      R_23(2,1) = -sin(x23)*cosh(y23) - I*cos(x23)*sinh(y23);
+//      R_23(2,2) = cos(x23)*cosh(y23) - I*sin(x23)*sinh(y23);
+//      R_13(0,0) = cos(x13)*cosh(y13) - I*sin(x13)*sinh(y13);;
+//      R_13(0,1) = 0.0;
+//      R_13(0,2) = sin(x13)*cosh(y13) + I*cos(x13)*sinh(y13);
+//      R_13(1,0) = 0.0;
+//      R_13(1,1) = 1.0;
+//      R_13(1,2) = 0.0;
+//      R_13(2,0) = -sin(x13)*cosh(y13) - I*cos(x13)*sinh(y13);
+//      R_13(2,1) = 0.0;
+//      R_13(2,2) = cos(x13)*cosh(y13) - I*sin(x13)*sinh(y13);
+//      R_12(0,0) = cos(x12)*cosh(y12) - I*sin(x12)*sinh(y12);
+//      R_12(0,1) = sin(x12)*cosh(y12) + I*cos(x12)*sinh(y12);
+//      R_12(0,2) = 0.0;
+//      R_12(1,0) = -sin(x12)*cosh(y12) - I*cos(x12)*sinh(y12);
+//      R_12(1,1) = cos(x12)*cosh(y12) - I*sin(x12)*sinh(y12);
+//      R_12(1,2) = 0.0;
+//      R_12(2,0) = 0.0;
+//      R_12(2,1) = 0.0;
+//      R_12(2,2) = 1.0;
+//      R = R_23 * R_13 * R_12;
+//
+//      m_nu(0,1) = 0.0;
+//      m_nu(0,2) = 0.0;
+//      m_nu(1,0) = 0.0;
+//      m_nu(1,2) = 0.0;
+//      m_nu(2,0) = 0.0;
+//      m_nu(2,1) = 0.0;
+//      if(o == 1)
+//      {
+//        if(m_min == 0)
+//          {
+//            m_nu(0,0) = 0.0;
+//            m_nu(1,1) = sqrt(md21);
+//            m_nu(2,2) = sqrt(md31);
+//          }
+//        else if(m_min == 1)
+//          {
+//            m_nu(0,0) = 2.3e-10;
+//            m_nu(1,1) = sqrt(pow(m_nu(0,0), 2.0) + md21);
+//            m_nu(2,2) = sqrt(pow(m_nu(0,0), 2.0) + md31);
+//          }
+//      }
+//      else if(o == 0)
+//      {
+//        if(m_min == 0)
+//          {
+//            m_nu(2,2) = 0.0;
+//            m_nu(1,1) = sqrt(md23);
+//            m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
+//          }
+//        else if(m_min == 0.23)
+//          {
+//            m_nu(2,2) = 2.3e-10;
+//            m_nu(1,1) = sqrt(pow(m_nu(2,2), 2.0) + md23);
+//            m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
+//          }
+//      }
+//
+//      V_23 << 1.0, 0.0, 0.0,
+//              0.0, cos(theta23), sin(theta23),
+//              0.0, -sin(theta23), cos(theta23);
+//      V_13 << cos(theta13), 0.0, sin(theta13),
+//              0.0, 1.0, 0.0,
+//              -sin(theta13), 0.0, cos(theta13);
+//      V_12 << cos(theta12), sin(theta12), 0.0,
+//              -sin(theta12), cos(theta12), 0.0,
+//              0.0, 0.0, 1.0;
+//      U_pd << exp(-I*d/2.0), 0.0, 0.0,
+//              0.0, 1.0, 0.0,
+//              0.0, 1.0, exp(I*d/2.0);
+//      U_nd << exp(I*d/2.0), 0.0, 0.0,
+//              0.0, 1.0, 0.0,
+//              0.0, 1.0, exp(-I*d/2.0);
+//      Maj_phase << exp(I*a1/2.0), 0.0, 0.0,
+//                   0.0, exp(I*a2/2.0), 0.0,
+//                   0.0, 0.0, 1.0;
+//      U_nu = V_23 * U_pd * V_13 * U_nd* V_12 * Maj_phase;
+//
+      t = *Dep::SeesawI_Theta;
       t_sq = t.cwiseAbs2();
 
       result_temp_bbn << 0.0, 0.0, 0.0,
@@ -272,7 +277,33 @@ namespace Gambit
         }
       }
 
-      result = result_temp_lepuniv;
+      result_temp_0nubb << 0.0, 0.0, 0.0,
+                           0.0, 0.0, 0.0,
+                           0.0, 0.0, 0.0;
+      m_light = *Dep::m_nu;
+      U_light = *Dep::UPMNS;
+      U_light_sq = U_light.cwiseAbs2();
+      m_GERDA = 0.0;
+      m_Kam = 0.0;
+      for (int p=0; p<3; p++)
+      {
+        m_temp_GERDA[p] = U_light_sq(0,p)*abs(m_light(0,p)) + t_sq(0,p)*M_I(p,p)*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M_I(p,p), 2.0)));
+        m_GERDA +=m_temp_GERDA[p];
+        m_temp_Kam[p] = U_light_sq(0,p)*abs(m_light(0,p)) + t_sq(0,p)*M_I(p,p)*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M_I(p,p), 2.0)));
+        m_Kam +=m_temp_Kam[p];
+      }
+      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
+      {
+        for (int q=0; q<3; q++)
+        {
+          result_temp_0nubb(0,q) = result_temp_lepuniv(0,q);
+          result_temp_0nubb(1,q) = result_temp_lepuniv(1,q);
+          result_temp_0nubb(2,q) = result_temp_lepuniv(2,q);
+
+        }
+      }
+
+      result = result_temp_0nubb;
     }
 
     void lnL(double& lnLike)

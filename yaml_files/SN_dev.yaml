@@ -33,6 +33,10 @@ Parameters:
       range: [0, 6.283]
     ImOm12:
       range: [-8, 8]
+    L_Ge:
+      range: [0.159, 0.193]
+    L_Xe:
+      range: [0.178, 0.211]
 
   StandardModel_Neutrinos:
     alpha1:

@@ -21,7 +21,7 @@
 
 #define MODEL SN_dev
   START_MODEL
-  DEFINEPARS(M_1, M_2, M_3, ReOm23, ImOm23, ReOm13, ImOm13, ReOm12, ImOm12)
+  DEFINEPARS(M_1, M_2, M_3, ReOm23, ImOm23, ReOm13, ImOm13, ReOm12, ImOm12, L_Ge, L_Xe)
 #undef MODEL
 
 #endif

@@ -1025,7 +1025,10 @@ START_MODULE
 
     #define FUNCTION CI_param
     START_FUNCTION(Eigen::Matrix3d)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Neutrinos, StandardModel_SLHA2, StandardModel_Higgs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     #undef FUNCTION
  
   #undef CAPABILITY
@@ -1035,7 +1038,7 @@ START_MODULE
 
     #define FUNCTION lnL
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODELS(SN_dev)
     DEPENDENCY(SN_stuff, Eigen::Matrix3d)
     #undef FUNCTION
 
