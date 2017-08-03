@@ -104,7 +104,7 @@ namespace Gambit {
           if (all_of(signalJets, [&](const Jet* j){ return deltaR_rap(*e, *j) > 0.4; }))
             signalElectrons.push_back(e);
         // Apply electron ID selection
-        ATLAS::applyLooseIDElectronSelection(signalElectrons);
+        ATLAS::applyLooseIDElectronSelectionR2(signalElectrons);
 
         // Remove muons with dR = 0.4 of surviving |eta| < 2.8 jets
         /// @todo Actually only within 0.2--0.4...

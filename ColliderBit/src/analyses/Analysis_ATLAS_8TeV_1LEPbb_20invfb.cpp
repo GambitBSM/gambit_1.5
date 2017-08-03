@@ -85,8 +85,6 @@ namespace Gambit {
       void analyze(const HEPUtils::Event* event) {
 	  
 	HEPUtilsAnalysis::analyze(event);
-
-        // Missing energy
         double met = event->met();
 
         // Baseline objects
@@ -99,8 +97,9 @@ namespace Gambit {
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           bool hasTrig=has_tag(_eff2dEl, electron->eta(), electron->pT());
-          if (electron->pT()>10. && fabs(electron->eta())<2.47 && hasTrig) baselineElectrons.push_back(electron);
+          if (electron->pT()>10. && electron->abseta()<2.47 && hasTrig)baselineElectrons.push_back(electron);
         }
+	ATLAS::applyMediumIDElectronSelection(baselineElectrons);
 
         const vector<double> cMu1 = {0.7};
         const vector<double> cMu2 = {0.85};
@@ -108,7 +107,7 @@ namespace Gambit {
         HEPUtils::BinnedFn2D<double> _eff2dMu2(a,b,cMu2);
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
-          if (muon->pT()>10. && fabs(muon->eta())<2.4) {
+          if (muon->pT()>10. && muon->abseta()<2.4) {
             bool hasTrig1=has_tag(_eff2dMu1, muon->eta(), muon->pT());
             bool hasTrig2=has_tag(_eff2dMu2,muon->eta(), muon->pT());
 	    if (fabs(muon->eta())<1.05 && hasTrig1)baselineMuons.push_back(muon);
@@ -131,13 +130,25 @@ namespace Gambit {
 	  //double smear_factor = d(gen);
 	  /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?                                                                   
 	  //jet->set_mom(HEPUtils::P4::mkXYZM(jet->mom().px()*smear_factor, jet->mom().py()*smear_factor, jet->mom().pz()*smear_factor, jet->mass()));
-          if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
+          //if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
+          if (jet->pT()>20. && jet->abseta()<4.5)baselineJets.push_back(jet);
         }
 
-        //Overlap procedure
+        //Overlap Removal
         vector<HEPUtils::Particle*> overlapElectrons;
 	vector<HEPUtils::Particle*> overlapMuons;
 	vector<HEPUtils::Jet*> overlapJets;
+
+        vector<size_t> overlapEl;
+        for (size_t iEl1=0;iEl1<baselineElectrons.size();iEl1++) {
+          for (size_t iEl2=0;iEl2<baselineElectrons.size();iEl2++) {
+            if (baselineElectrons.at(iEl1)->mom().deltaR_eta(baselineElectrons.at(iEl2)->mom())<0.1) {
+                if (baselineElectrons.at(iEl1)->pT()>baselineElectrons.at(iEl2)->pT())overlapEl.push_back(iEl2);
+                if (baselineElectrons.at(iEl1)->pT()<baselineElectrons.at(iEl2)->pT())overlapEl.push_back(iEl1);
+            }
+          }
+        }
+        for (size_t iO=0;iO<overlapEl.size();iO++)baselineElectrons.erase(baselineElectrons.begin()+overlapEl.at(iO));
 
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
           bool overlap=false;
@@ -163,17 +174,20 @@ namespace Gambit {
           if (!overlap)overlapMuons.push_back(baselineMuons.at(iMu));
         }
 
-        //Signal objets
+	//Signal Objects
         vector<HEPUtils::Particle*> signalLeptons;
+        vector<HEPUtils::Particle*> signalElectrons;
+        vector<HEPUtils::Particle*> signalMuons;
         vector<HEPUtils::Jet*> signalJets;   
 	vector<HEPUtils::Jet*> signalBJets;
 
 	for (size_t iEl=0;iEl<overlapElectrons.size();iEl++) {
-	  if (overlapElectrons.at(iEl)->pT()>25. && fabs(overlapElectrons.at(iEl)->eta())<2.47)signalLeptons.push_back(overlapElectrons.at(iEl));
+	  if (overlapElectrons.at(iEl)->pT()>25.)signalElectrons.push_back(overlapElectrons.at(iEl));
         }
+	ATLAS::applyTightIDElectronSelection(signalElectrons);
         
         for (size_t iMu=0;iMu<overlapMuons.size();iMu++) {
-          if (overlapMuons.at(iMu)->pT()>25. && fabs(overlapMuons.at(iMu)->eta())<2.40)signalLeptons.push_back(overlapMuons.at(iMu)); 
+          if (overlapMuons.at(iMu)->pT()>25.)signalMuons.push_back(overlapMuons.at(iMu)); 
         } 
 	       
 
@@ -181,13 +195,15 @@ namespace Gambit {
         const vector<double> cBJet={0.54,0.63,0.67,0.7,0.75,0.35,0.42,0.44,0.46,0.49};
         HEPUtils::BinnedFn2D<double> _eff2dBJet(a2,b2,cBJet);
         for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
-          if (overlapJets.at(iJet)->pT()>25. && fabs(overlapJets.at(iJet)->eta())<2.40) {
+          if (overlapJets.at(iJet)->pT()>25. && overlapJets.at(iJet)->abseta()<2.40) {
 	    signalJets.push_back(overlapJets.at(iJet));  
             bool hasTag=has_tag(_eff2dBJet, overlapJets.at(iJet)->eta(), overlapJets.at(iJet)->pT());
 	    if (overlapJets.at(iJet)->btag() && hasTag)signalBJets.push_back(overlapJets.at(iJet));             
           }
 	}
 
+        signalLeptons=signalElectrons;
+        signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
         int nSignalLeptons=signalLeptons.size();
         int nBaselineLeptons=overlapElectrons.size()+overlapMuons.size();
         int nSignalJets=signalJets.size();
@@ -195,8 +211,13 @@ namespace Gambit {
 	sort(signalJets.begin(), signalJets.end(), compareJetPt);
 	sort(signalLeptons.begin(), signalLeptons.end(), compareParticlePt);
 
-	//Lepton-lepton overlap veto
+	//Variables	
+	double mT=0; 
+        double mCT=0;
+        double mbb=0;
+        bool leadingBJets=isLeadingBJets(signalJets, signalBJets);
 	bool lepton_overlap=true;
+        bool preselection=0; 
 
 	for (size_t iEl=0;iEl<overlapElectrons.size();iEl++) {
 	  for (size_t iMu=0;iMu<overlapMuons.size();iMu++) {
@@ -208,21 +229,9 @@ namespace Gambit {
             if(fabs(overlapMuons.at(iMu1)->mom().deltaR_eta(overlapMuons.at(iMu2)->mom()))<0.05)lepton_overlap=false;
           }
         }
-
-        //Preselection
-        bool leadingBJets=isLeadingBJets(signalJets, signalBJets);
-
-        bool preselection=0; 
         if (lepton_overlap && nSignalLeptons==1 && nBaselineLeptons==1 && (nSignalJets==2 || nSignalJets==3) && leadingBJets)preselection=1;
-	
-        //Signal regions
-	double mT=0; 
-	if (nSignalLeptons) {
-          mT=sqrt(2*signalLeptons.at(0)->pT()*met*(1-cos(signalLeptons.at(0)->phi()-event->missingmom().phi())));
-        }
-	
-        double mCT=0;
-        double mbb=0;
+
+	if (nSignalLeptons)mT=sqrt(2*signalLeptons.at(0)->pT()*met*(1-cos(signalLeptons.at(0)->phi()-event->missingmom().phi())));      
 	if (nSignalJets>1) {
           mCT=sqrt(2*signalJets.at(0)->pT()*signalJets.at(1)->pT()*(1+cos(signalJets.at(0)->phi()-signalJets.at(1)->phi())));
           mbb=(signalJets.at(0)->mom()+signalJets.at(1)->mom()).m(); 
