@@ -178,18 +178,31 @@ namespace Gambit {
         ///   https://cds.cern.ch/record/1339945/files/JME-10-014-pas.pdf
         ///   https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideJetResolution
         ///   https://github.com/adrager/cmssw/blob/CMSSW_7_2_X/CondFormats/JetMETObjects/test/TestCorrections.C
-        const double resolution = 0.03;
+        //const double resolution = 0.03;
 
-        // Now loop over the jets and smear the 4-vectors
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::normal_distribution<> d(1., resolution);
-        for (HEPUtils::Jet* jet : jets) {
-          // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution
-          double smear_factor = d(gen);
-          /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?
-          jet->set_mom(HEPUtils::P4::mkXYZM(jet->mom().px()*smear_factor, jet->mom().py()*smear_factor, jet->mom().pz()*smear_factor, jet->mass()));
-        }
+
+	// Matthias jet smearing implemented roughly from
+        // https://arxiv.org/pdf/1607.03663.pdf 
+	// Parameterisation can be still improved as functional form is given
+	// Pileup of <mu>=25 is taken, as JER depends strongly on mu
+	// CMS does not include information about JER at eta>1.3
+	const std::vector<double>  binedges_eta = {0,10.};
+	const std::vector<double>  binedges_pt = {0,20,30,40,50.,70.,100.,150.,200.,1000.,10000.};
+	const std::vector<double> JetsJER = {0.3,0.2,0.16,0.145,0.12,0.1,0.09,0.08,0.06,0.05};
+	static HEPUtils::BinnedFn2D<double> _resJets2D(binedges_eta,binedges_pt,JetsJER);
+
+	// Now loop over the jets and smear the 4-vectors                                                                                          
+	std::random_device rd;
+	std::mt19937 gen(rd());
+
+	for (HEPUtils::Jet* jet : jets) {
+	  const double resolution = _resJets2D.get_at(jet->abseta(), jet->pT());
+	  std::normal_distribution<> d(1., resolution);
+	  // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution                                                     
+	  double smear_factor = d(gen);
+	  /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?                                    
+	  jet->set_mom(HEPUtils::P4::mkXYZM(jet->mom().px()*smear_factor, jet->mom().py()*smear_factor, jet->mom().pz()*smear_factor, jet->mass()));
+	}
       }
 
 
