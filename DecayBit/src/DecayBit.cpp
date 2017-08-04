@@ -224,6 +224,7 @@ namespace Gambit
     /////////////// Standard Model ///////////////////
 
     /// SM decays: W+
+    /// Reference: 2017 PDG
     void W_plus_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -238,6 +239,7 @@ namespace Gambit
     }
 
     /// SM decays: Z
+    /// Reference: 2017 PDG
     void Z_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -252,53 +254,57 @@ namespace Gambit
     }
 
     /// SM decays: t
+    /// Reference: 2017 PDG
     void t_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
-      result.width_in_GeV = 2.00;
-      result.positive_error = 4.7e-01;
-      result.negative_error = 4.3e-01;
-      result.set_BF(0.91, 0.04, "W+", "b");
+      result.width_in_GeV = 1.41;
+      result.positive_error = 1.9e-01;
+      result.negative_error = 1.5e-01;
+      result.set_BF(0.957, 0.034, "W+", "b"); //(Assuming 100% decay to Wq)
     }
 
     /// SM decays: mu+
+    /// Reference: 2017 PDG
     void mu_plus_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
-      result.width_in_GeV = 2.9959847e-19;
+      result.width_in_GeV = 2.9959837e-19;
       result.positive_error = 3.0e-25;
       result.negative_error = 3.0e-25;
       result.set_BF(1.0, 0.0, "e+", "nu_e", "nubar_mu");
     }
 
     /// SM decays: tau+
+    /// Reference: 2017 PDG
     void tau_plus_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
       result.width_in_GeV = 2.267E-12;
-      result.positive_error = 4.0e-15;
-      result.negative_error = 4.0e-15;
-      result.set_BF(0.1741, 0.0004, "mu+", "nu_mu", "nubar_tau");
-      result.set_BF(0.1783, 0.0004, "e+", "nu_e", "nubar_tau");
-      result.set_BF(0.1083, 0.0006, "pi+", "nubar_tau");
-      result.set_BF(0.2552, 0.0009, "pi+", "pi0", "nubar_tau");
-      result.set_BF(0.0930, 0.0011, "pi+", "pi0", "pi0", "nubar_tau");
-      result.set_BF(0.0105, 0.0007, "pi+", "pi0", "pi0", "pi0", "nubar_tau");
-      result.set_BF(0.0931, 0.0006, "pi+", "pi+", "pi-", "nubar_tau");
-      result.set_BF(0.0462, 0.0006, "pi+", "pi+", "pi-", "pi0", "nubar_tau");
+      result.positive_error = 3.9e-15;
+      result.negative_error = 3.9e-15;
+      result.set_BF(0.1739, 0.0004, "mu+", "nu_mu", "nubar_tau");
+      result.set_BF(0.1782, 0.0004, "e+", "nu_e", "nubar_tau");
+      result.set_BF(0.1082, 0.0005, "pi+", "nubar_tau");
+      result.set_BF(0.2549, 0.0009, "pi+", "pi0", "nubar_tau");
+      result.set_BF(0.0926, 0.0010, "pi+", "pi0", "pi0", "nubar_tau");
+      result.set_BF(0.0104, 0.0007, "pi+", "pi0", "pi0", "pi0", "nubar_tau");
+      result.set_BF(0.0931, 0.0005, "pi+", "pi+", "pi-", "nubar_tau");
+      result.set_BF(0.0462, 0.0005, "pi+", "pi+", "pi-", "pi0", "nubar_tau");
     }
 
     /// SM decays: pi0
+    /// Reference: 2017 PDG
     void pi_0_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
       result.width_in_GeV = 7.73e-09;
-      result.positive_error = 1.7e-10;
-      result.negative_error = 1.7e-10;
+      result.positive_error = 1.6e-10;
+      result.negative_error = 1.6e-10;
       result.set_BF(0.98823, 0.00034, "gamma", "gamma");
       result.set_BF(0.01174, 0.00035, "e+", "e-", "gamma");
       result.set_BF(3.34e-5, 0.16e-5, "e+", "e-", "e+", "e-");
@@ -306,18 +312,20 @@ namespace Gambit
     }
 
     /// SM decays: pi+
+    /// Reference: 2017 PDG
     void pi_plus_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
       result.width_in_GeV = 2.5284e-17;
-      result.positive_error = 5.0e-21;
-      result.negative_error = 5.0e-21;
+      result.positive_error = 4.9e-21;
+      result.negative_error = 4.9e-21;
       result.set_BF(0.9998770, 0.0000004, "mu+", "nu_mu");
       result.set_BF(1.230e-4, 0.004e-4, "e+", "nu_e");
     }
 
     /// SM decays: eta
+    /// Reference: 2017 PDG
     void eta_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -325,21 +333,21 @@ namespace Gambit
       result.width_in_GeV = 1.31e-06;
       result.positive_error = 5.0e-08;
       result.negative_error = 5.0e-08;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
     }
 
     /// SM decays: rho0
+    /// Reference: 2017 PDG
     void rho_0_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
-      result.width_in_GeV = 1.491e-01;
-      result.positive_error = 8.0e-04;
-      result.negative_error = 8.0e-04;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
+      result.width_in_GeV = 1.478e-01;
+      result.positive_error = 9.0e-04;
+      result.negative_error = 9.0e-04;
     }
 
     /// SM decays: rho+
+    /// Reference: 2017 PDG
     void rho_plus_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -347,10 +355,10 @@ namespace Gambit
       result.width_in_GeV = 1.491e-01;
       result.positive_error = 8.0e-04;
       result.negative_error = 8.0e-04;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
     }
 
     /// SM decays: omega
+    /// Reference: 2017 PDG
     void omega_decays (DecayTable::Entry& result)
     {
       result.calculator = "GAMBIT::DecayBit";
@@ -358,7 +366,6 @@ namespace Gambit
       result.width_in_GeV = 8.49e-03;
       result.positive_error = 8.0e-05;
       result.negative_error = 8.0e-05;
-      //See PDG meson sheet in DecayBit/data/PDG if you want BFs
     }
 
     /// SM decays: conjugates
@@ -448,15 +455,16 @@ namespace Gambit
     //////////// MSSM /////////////////////
 
     /// FeynHiggs MSSM decays: t
+    /// Reference for total width: 2017 PDG
     void FH_t_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::FH_t_decays;
       fh_Couplings FH_input = *Pipes::FH_t_decays::Dep::FH_Couplings_output;
       result.calculator = FH_input.calculator;
       result.calculator_version = FH_input.calculator_version;
-      result.width_in_GeV = 2.0;
-      result.positive_error = 4.7e-01;
-      result.negative_error = 4.3e-01;
+      result.width_in_GeV = 1.41;
+      result.positive_error = 1.9e-01;
+      result.negative_error = 1.5e-01;
       result.set_BF(FH_input.gammas[tBF(1)+BRoffset-1], 0.0, "W+", "b");
       result.set_BF(FH_input.gammas[tBF(2)+BRoffset-1], 0.0, "H+", "b");
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
