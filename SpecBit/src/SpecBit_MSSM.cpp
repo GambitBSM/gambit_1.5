@@ -788,9 +788,9 @@ namespace Gambit
 
 
     /// Higgs masses and mixings with theoretical uncertainties
-    void FH_HiggsMasses(fh_HiggsMassObs &result)
+    void FH_AllHiggsMasses(fh_HiggsMassObs &result)
     {
-      using namespace Pipes::FH_HiggsMasses;
+      using namespace Pipes::FH_AllHiggsMasses;
 
       #ifdef SPECBIT_DEBUG
         cout << "****** calling FH_HiggsMasses ******" << endl;
@@ -1271,7 +1271,40 @@ namespace Gambit
       specmap["scale(Q)"] = subspec.GetScale();
     }
 
-    void SHD_HiggsMass(shd_HiggsMassObs& HiggsMass)
+    void FH_HiggsMass(triplet<double>& result)
+    {
+      using namespace Pipes::FH_HiggsMass;
+      //FH indices: 0=h0_1, 1=h0_2
+      int i;
+      if (*Dep::SMlike_Higgs_PDG_code == 25) i = 0;
+      else if (*Dep::SMlike_Higgs_PDG_code == 35) i = 1;
+      else SpecBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      result.central = Dep::FH_HiggsMasses->MH[i];
+      result.upper = Dep::FH_HiggsMasses->deltaMH[i];
+      result.lower = Dep::FH_HiggsMasses->deltaMH[i];
+    }
+
+    void FH_HeavyHiggsMasses(map_int_triplet_dbl& result)
+    {
+      using namespace Pipes::FH_HeavyHiggsMasses;
+      const int neutrals[2] = {25, 35};
+      int i;
+      if (*Dep::SMlike_Higgs_PDG_code == neutrals[0]) i = 1;
+      else if (*Dep::SMlike_Higgs_PDG_code == neutrals[1]) i = 0;
+      else SpecBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      result.clear();
+      result[neutrals[i]].central = Dep::FH_HiggsMasses->MH[i];
+      result[neutrals[i]].upper = Dep::FH_HiggsMasses->deltaMH[i];
+      result[neutrals[i]].lower = Dep::FH_HiggsMasses->deltaMH[i];
+      result[36].central = Dep::FH_HiggsMasses->MH[2];
+      result[36].upper = Dep::FH_HiggsMasses->deltaMH[2];
+      result[36].lower = Dep::FH_HiggsMasses->deltaMH[2];
+      result[37].central = Dep::FH_HiggsMasses->MH[3];
+      result[37].upper = Dep::FH_HiggsMasses->deltaMH[3];
+      result[37].lower = Dep::FH_HiggsMasses->deltaMH[3];
+    }
+
+    void SHD_HiggsMass(triplet<double>& result)
     {
       using namespace Pipes::SHD_HiggsMass;
 
@@ -1314,9 +1347,10 @@ namespace Gambit
       #endif
 
       MReal DeltaMHiggs = BEreq::SUSYHD_DeltaMHiggs(parameterList);
- 
-      HiggsMass.MH = MHiggs;
-      HiggsMass.deltaMH = DeltaMHiggs;
+
+      result.central = MHiggs;
+      result.upper = DeltaMHiggs;
+      result.lower = DeltaMHiggs;
 
       return ;
 

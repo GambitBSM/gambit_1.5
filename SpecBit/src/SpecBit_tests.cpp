@@ -16,8 +16,8 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no_)
 ///     \date 2016 Apr - Sep
-///  
-/// 
+///
+///
 ///  *********************************************
 
 #include <string>
@@ -71,21 +71,21 @@ namespace Gambit
       result = true;
 
     }
- 
+
     void SUSYHD_test(bool &result)
     {
       using namespace Pipes::SUSYHD_test;
 
-      const shd_HiggsMassObs &mh = *Dep::prec_HiggsMasses;
+      const triplet<double> &mh = *Dep::prec_mh;
 
-      cout << "mh = " << mh.MH << " +- "  << mh.deltaMH << endl;
+      cout << "mh = " << mh.central << " + "  << mh.upper << " - "  << mh.lower << endl;
 
-      if(!mh.MH) result = false;
+      if(!mh.central) result = false;
       else result = true;
 
       return ;
     }
- 
+
     // Testing function for SPheno
     void SPheno_MSSM_test(bool &result)
     {
@@ -96,7 +96,7 @@ namespace Gambit
 
       result = 0;
     }
-    
+
     /// Verify consistency of the contents of a Spectrum object of capability MSSMspectrum.
     /// (derived from old 'exampleRead' function)
     void MSSMspectrum_test (bool &result)

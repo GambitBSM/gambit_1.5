@@ -103,6 +103,9 @@ namespace Gambit
     }
   };
 
+  /// Shorthand for an int-to-double triplet map
+  typedef std::map<int,triplet<double> > map_int_triplet_dbl;
+
   // a tuple containg two doubles and a bool
   struct dbl_dbl_bool
   {
@@ -617,7 +620,7 @@ namespace Gambit
   typedef float             Freal4;
   typedef double            Freal8;
   typedef long double       Freal16;
-  
+
 
   /// Types used for Mathematica backends
   typedef void         MVoid;

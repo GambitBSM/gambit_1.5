@@ -38,8 +38,8 @@
   START_CAPABILITY
 
     // ==========================
-    // GUT MSSM parameterisations 
-    // (CMSSM and its various non-universal generalisations)    
+    // GUT MSSM parameterisations
+    // (CMSSM and its various non-universal generalisations)
 
     /// SPheno spectrum function
     #define FUNCTION get_MSSM_spectrum_SPheno
@@ -177,9 +177,9 @@
   #undef CAPABILITY
 
   // Higgs masses and mixings with theoretical uncertainties
-  #define CAPABILITY prec_HiggsMasses
+  #define CAPABILITY FH_HiggsMasses
   START_CAPABILITY
-    #define FUNCTION FH_HiggsMasses
+    #define FUNCTION FH_AllHiggsMasses
     START_FUNCTION(fh_HiggsMassObs)
     BACKEND_REQ(FHHiggsCorr, (libfeynhiggs), void, (int&, Farray< fh_real,1,4>&, fh_complex&,
                 Farray<fh_complex, 1,3, 1,3>&,
@@ -190,15 +190,39 @@
     BACKEND_OPTION( (FeynHiggs), (libfeynhiggs) )
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
+  #undef CAPABILITY
+
+  // SM-like Higgs mass with theoretical uncertainties
+  #define CAPABILITY prec_mh
+  START_CAPABILITY
+
+    #define FUNCTION FH_HiggsMass
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    DEPENDENCY(FH_HiggsMasses, fh_HiggsMassObs)
+    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    #undef FUNCTION
 
     #define FUNCTION SHD_HiggsMass
-    START_FUNCTION(shd_HiggsMassObs)
+    START_FUNCTION(triplet<double>)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
     BACKEND_REQ(SUSYHD_MHiggs, (), MReal, (const MList<MReal>&))
     BACKEND_REQ(SUSYHD_DeltaMHiggs, (), MReal, (const MList<MReal>&))
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION 
-  #undef CAPABILITY 
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  // Non-SM-like, charged and CP-odd Higgs masses with theoretical uncertainties
+  #define CAPABILITY prec_HeavyHiggsMasses
+  START_CAPABILITY
+    #define FUNCTION FH_HeavyHiggsMasses
+    START_FUNCTION(map_int_triplet_dbl)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    DEPENDENCY(FH_HiggsMasses, fh_HiggsMassObs)
+    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   // Higgs couplings information directly computed by FeynHiggs
   #define CAPABILITY FH_Couplings_output

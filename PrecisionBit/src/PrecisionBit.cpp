@@ -174,84 +174,47 @@ namespace Gambit
       LE.set_override(Par::Pole_Mass_1srd_low, prec_mw.lower/prec_mw.central, "W+", true);
     }
 
-    /// Precision MSSM spectrum manufacturer that does nothing but relabel the unimproved spectrum
-    void make_MSSM_precision_spectrum_none(Spectrum& improved_spec /*(result)*/)
+    /// Helper function to set arbitrary number of H masses
+    void update_H_masses(SubSpectrum& HE, int n_higgs, const str* higgses, int central, int error, std::vector<triplet<double> >& MH)
     {
-      using namespace Pipes::make_MSSM_precision_spectrum_none;
-      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
-    }
-
-    /// Precision MSSM spectrum manufacturer with precision W mass only
-    void make_MSSM_precision_spectrum_W(Spectrum& improved_spec /*(result)*/)
-    {
-      using namespace Pipes::make_MSSM_precision_spectrum_W;
-      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw);
-      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
-    }
-
-    /// Precision MSSM spectrum manufacturer with precision H and W masses
-    void make_MSSM_precision_spectrum_H_W(Spectrum& improved_spec /*(result)*/)
-    {
-      using namespace Pipes::make_MSSM_precision_spectrum_H_W;
-      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      SubSpectrum& HE = improved_spec.get_HE();
-      SubSpectrum& LE = improved_spec.get_LE();
-
-      // W mass
-      update_W_masses(HE, LE, *Dep::prec_mw);
-
-      // Higgs masses
-      //-------------
-
       // Central value:
       //  1 = from precision calculator
       //  2 = from spectrum calculator
       //  3 = mean of precision mass and mass from spectrum calculator
-      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
-      // FIXME switch to this once the setters take pdg pairs
-      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
-      //                                 std::pair<int,int>(35,0),
-      //                                 std::pair<int,int>(36,0),
-      //                                 std::pair<int,int>(37,0)};
-      const str higgses[4] = {"h0_1", "h0_2", "A0", "H+"};
-      const double mh_s[4] = {HE.get(Par::Pole_Mass, higgses[0]),
-                              HE.get(Par::Pole_Mass, higgses[1]),
-                              HE.get(Par::Pole_Mass, higgses[2]),
-                              HE.get(Par::Pole_Mass, higgses[3])};
-      double mh[4];
-
+      std::vector<double> mh_s;
+      for (int i = 0; i < n_higgs; ++i) mh_s.push_back(HE.get(Par::Pole_Mass, higgses[i]));
+      double mh[n_higgs];
 
       #ifdef PRECISIONBIT_DEBUG
-        for (int i = 0; i < 4; i++) cout << "h masses, FS: "<< mh_s[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FS error low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FS error high: "<< HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FH: "<< Dep::prec_HiggsMasses->MH[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FH error: "<< Dep::prec_HiggsMasses->deltaMH[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator: "<< mh_s[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator error low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator error high: "<< HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation: "<< MH[i].central << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error low: "<< MH[i].lower[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error high: "<< MH[i].upper[i] << endl;
       #endif
 
       if (central == 1)
       {
-        for (int i = 0; i < 4; i++) mh[i] = Dep::prec_HiggsMasses->MH[i];
+        for (int i = 0; i < n_higgs; i++) mh[i] = MH[i].central;
       }
       else if (central == 2)
       {
-        for (int i = 0; i < 4; i++) mh[i] = mh_s[i];
+        for (int i = 0; i < n_higgs; i++) mh[i] = mh_s[i];
       }
       else if (central == 3)
       {
-        for (int i = 0; i < 4; i++) mh[i] = 0.5*(Dep::prec_HiggsMasses->MH[i] + mh_s[i]);
+        for (int i = 0; i < n_higgs; i++) mh[i] = 0.5*(MH[i].central + mh_s[i]);
       }
       else
       {
         std::stringstream msg;
-        msg << "Unrecognised Higgs_predictions_source option specified for make_MSSM_precision_spectrum: " << central;
+        msg << "Unrecognised Higgs_predictions_source option specified for making MSSM precision spectrum: " << central;
         PrecisionBit_error().raise(LOCAL_INFO,msg.str());
       }
       if (central != 2)
       {
-        for (int i = 0; i < 4; i++) HE.set_override(Par::Pole_Mass, mh[i], higgses[i]);
+        for (int i = 0; i < n_higgs; i++) HE.set_override(Par::Pole_Mass, mh[i], higgses[i]);
       }
 
       // Uncertainties:
@@ -263,44 +226,43 @@ namespace Gambit
       //  3 = RACC, with 1/2 * D_g taken at both edges.
       //  4 = RACC, with 1/2 * D_g taken at the spectrum-generator edge, D_p taken at the other edge.
       //  5 = RACC, with 1/2 * D_g taken at the precision-calculator edge, D_s taken at the other edge.
-      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
-      const double D_g[4] = {Dep::prec_HiggsMasses->MH[0] - mh_s[0],
-                             Dep::prec_HiggsMasses->MH[1] - mh_s[1],
-                             Dep::prec_HiggsMasses->MH[2] - mh_s[2],
-                             Dep::prec_HiggsMasses->MH[3] - mh_s[3]};
-      double mh_low[4], mh_high[4];
+      std::vector<double> D_g;
+      for (int i = 0; i < n_higgs; ++i) D_g.push_back(MH[i].central - mh_s[i]);
+      double mh_low[n_higgs], mh_high[n_higgs];
 
       //  1 = sum in quadrature of D_s, D_p and D_g
       if (error == 1)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           double D_s_low = HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i];
           double D_s_high = HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i];
-          double D_p = Dep::prec_HiggsMasses->deltaMH[i];
-          mh_low[i] = sqrt(D_s_low*D_s_low + D_p*D_p + D_g[i]*D_g[i]);
-          mh_high[i] = sqrt(D_s_high*D_s_high + D_p*D_p + D_g[i]*D_g[i]);
+          double D_p_low = MH[i].lower;
+          double D_p_high = MH[i].upper;
+          mh_low[i] = sqrt(D_s_low*D_s_low + D_p_low*D_p_low + D_g[i]*D_g[i]);
+          mh_high[i] = sqrt(D_s_high*D_s_high + D_p_high*D_p_high + D_g[i]*D_g[i]);
         }
       }
 
       //  2 = range around chosen central (RACC), with D_s and D_p taken at their respective edges.
       else if (error == 2)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           double D_s_low = mh_s[i]*HE.get(Par::Pole_Mass_1srd_low, higgses[i]);
           double D_s_high = mh_s[i]*HE.get(Par::Pole_Mass_1srd_high, higgses[i]);
-          double D_p = Dep::prec_HiggsMasses->deltaMH[i];
+          double D_p_low = MH[i].lower;
+          double D_p_high = MH[i].upper;
           if (central == 1) // Using precision calculator mass as central value
           {
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = D_g[i] + D_s_low;
-              mh_high[i] = D_p;
+              mh_high[i] = D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p;
+              mh_low[i] = D_p_low;
               mh_high[i] = D_s_high-D_g[i];
             }
           }
@@ -309,11 +271,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = D_s_low;
-              mh_high[i] = D_g[i] + D_p;
+              mh_high[i] = D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p-D_g[i];
+              mh_low[i] = D_p_low-D_g[i];
               mh_high[i] = D_s_high;
             }
           }
@@ -322,11 +284,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = 0.5*D_g[i] + D_s_low;
-              mh_high[i] = 0.5*D_g[i] + D_p;
+              mh_high[i] = 0.5*D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p - 0.5*D_g[i];
+              mh_low[i] = D_p_low - 0.5*D_g[i];
               mh_high[i] = D_s_high - 0.5*D_g[i];
             }
           }
@@ -336,7 +298,7 @@ namespace Gambit
       //  3 = RACC, with 1/2 * D_g taken at both edges.
       else if (error == 3)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           if (central == 1) // Using precision calculator mass as central value
           {
@@ -375,19 +337,20 @@ namespace Gambit
       //  4 = RACC, with 1/2 * D_g taken at the spectrum-generator edge, D_p taken at the other edge.
       else if (error == 4)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
-          double D_p = Dep::prec_HiggsMasses->deltaMH[i];
+          double D_p_low = MH[i].lower;
+          double D_p_high = MH[i].upper;
           if (central == 1) // Using precision calculator mass as central value
           {
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = 1.5*D_g[i];
-              mh_high[i] = D_p;
+              mh_high[i] = D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p;
+              mh_low[i] = D_p_low;
               mh_high[i] = -1.5*D_g[i];
             }
           }
@@ -396,11 +359,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = 0.5*D_g[i];
-              mh_high[i] = D_g[i] + D_p;
+              mh_high[i] = D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p-D_g[i];
+              mh_low[i] = D_p_low-D_g[i];
               mh_high[i] = -0.5*D_g[i];
             }
           }
@@ -409,11 +372,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = D_g[i];
-              mh_high[i] = 0.5*D_g[i] + D_p;
+              mh_high[i] = 0.5*D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p - 0.5*D_g[i];
+              mh_low[i] = D_p_low - 0.5*D_g[i];
               mh_high[i] = -D_g[i];
             }
           }
@@ -423,7 +386,7 @@ namespace Gambit
       //  5 = RACC, with 1/2 * D_g taken at the precision-calculator edge, D_s taken at the other edge.
       else if (error == 5)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           double D_s_low = mh_s[i]*HE.get(Par::Pole_Mass_1srd_low, higgses[i]);
           double D_s_high = mh_s[i]*HE.get(Par::Pole_Mass_1srd_high, higgses[i]);
@@ -478,18 +441,62 @@ namespace Gambit
       }
 
       // Finally, set the errors.
-      for (int i = 0; i < 4; i++) HE.set_override(Par::Pole_Mass_1srd_low, mh_low[i]/mh[i], higgses[i], true);
-      for (int i = 0; i < 4; i++) HE.set_override(Par::Pole_Mass_1srd_high, mh_high[i]/mh[i], higgses[i], true);
+      for (int i = 0; i < n_higgs; i++) HE.set_override(Par::Pole_Mass_1srd_low, mh_low[i]/mh[i], higgses[i], true);
+      for (int i = 0; i < n_higgs; i++) HE.set_override(Par::Pole_Mass_1srd_high, mh_high[i]/mh[i], higgses[i], true);
 
       #ifdef PRECISIONBIT_DEBUG
-        for (int i = 0; i < 4; i++) cout << "h masses, central: "<< HE.get(Par::Pole_Mass, higgses[i])<< endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, fractional low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])<< endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, fractional high: " << HE.get(Par::Pole_Mass_1srd_high, higgses[i])<<endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, central: "<< HE.get(Par::Pole_Mass, higgses[i])<< endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, fractional low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])<< endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, fractional high: " << HE.get(Par::Pole_Mass_1srd_high, higgses[i])<<endl;
       #endif
+    }
+
+    /// Precision MSSM spectrum manufacturer that does nothing but relabel the unimproved spectrum
+    void make_MSSM_precision_spectrum_none(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_none;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+    }
+
+    /// Precision MSSM spectrum manufacturer with precision W mass only
+    void make_MSSM_precision_spectrum_W(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_W;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw);
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+    }
+
+    /// Precision MSSM spectrum manufacturer with precision W and SM-like Higgs masses
+    void make_MSSM_precision_spectrum_H_W(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_H_W;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      SubSpectrum& HE = improved_spec.get_HE();
+      SubSpectrum& LE = improved_spec.get_LE();
+
+      // W mass
+      update_W_masses(HE, LE, *Dep::prec_mw);
+
+      // Higgs masses
+      // FIXME switch to this once the setters take pdg pairs
+      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
+      //                                 std::pair<int,int>(35,0),
+      //                                 std::pair<int,int>(36,0),
+      //                                 std::pair<int,int>(37,0)};
+      str higgses[1];
+      std::vector< triplet<double> > MH = {*Dep::prec_mh};
+      if (*Dep::SMlike_Higgs_PDG_code == 25) higgses[0] = "h0_1";
+      else if (*Dep::SMlike_Higgs_PDG_code == 35) higgses[0] = "h0_2";
+      else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
+      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
+      update_H_masses(HE, 1, higgses, central, error, MH);
 
       // Save the identity/identities of the calculator(s) used for the central value.
-      const str& p_calc = Dep::prec_HiggsMasses.name();
-      const str& p_orig = Dep::prec_HiggsMasses.origin();
+      const str& p_calc = Dep::prec_mh.name();
+      const str& p_orig = Dep::prec_mh.origin();
       const str& s_calc = Dep::unimproved_MSSM_spectrum.name();
       const str& s_orig = Dep::unimproved_MSSM_spectrum.origin();
       if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc, true);
@@ -501,10 +508,10 @@ namespace Gambit
 
     }
 
-    /// Precision MSSM spectrum manufacturer with precision H and W masses using SUSYHD Higgs mass
-    void make_MSSM_precision_spectrum_H_W_SHD(Spectrum& improved_spec)
+    /// Precision MSSM spectrum manufacturer with precision W and 2HDM (4x) Higgs masses
+    void make_MSSM_precision_spectrum_4H_W(Spectrum& improved_spec /*(result)*/)
     {
-      using namespace Pipes::make_MSSM_precision_spectrum_H_W_SHD;
+      using namespace Pipes::make_MSSM_precision_spectrum_4H_W;
       improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
       SubSpectrum& HE = improved_spec.get_HE();
       SubSpectrum& LE = improved_spec.get_LE();
@@ -513,279 +520,41 @@ namespace Gambit
       update_W_masses(HE, LE, *Dep::prec_mw);
 
       // Higgs masses
-      //-------------
+      // FIXME switch to this once the setters take pdg pairs
+      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
+      //                                 std::pair<int,int>(35,0),
+      //                                 std::pair<int,int>(36,0),
+      //                                 std::pair<int,int>(37,0)};
+      const str higgses[4] = {"h0_1", "h0_2", "A0", "H+"};
+      std::vector< triplet<double> > MH;
+      if (*Dep::SMlike_Higgs_PDG_code == 25)
+      { //h0_1
+        MH.push_back(*Dep::prec_mh);
+        MH.push_back(Dep::prec_HeavyHiggsMasses->at(35));
+      }
+      else if (*Dep::SMlike_Higgs_PDG_code == 35)
+      { //h0_2
+        MH.push_back(Dep::prec_HeavyHiggsMasses->at(25));
+        MH.push_back(*Dep::prec_mh);
+      }
+      else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      MH.push_back(Dep::prec_HeavyHiggsMasses->at(36)); //A_0
+      MH.push_back(Dep::prec_HeavyHiggsMasses->at(37)); //H+
 
-      // Central value:
-      //  1 = from precision calculator
-      //  2 = from spectrum calculator
-      //  3 = mean of precision mass and mass from spectrum calculator
       static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
-      const double mh_s = HE.get(Par::Pole_Mass, "h0_1");
-      double mh;
-
-      // Check whether the return from SUSYHD is 0, which happens for sparticles < 175 GeV
-      if(Dep::prec_HiggsMasses->MH < 1e-6)
-      {
-        central = 2;
-      }
-
-      #ifdef PRECISIONBIT_DEBUG
-        cout << "h mass, FS: "<< mh_s << endl;
-        cout << "h mass, FS error low: "<< HE.get(Par::Pole_Mass_1srd_low, "h0_1")*mh_s << endl;
-        cout << "h mass, FS error high: "<< HE.get(Par::Pole_Mass_1srd_high, "h0_1")*mh_s << endl;
-        cout << "h mass, SHD: "<< Dep::prec_HiggsMasses->MH << endl;
-        cout << "h mass, SHD error: "<< Dep::prec_HiggsMasses->deltaMH << endl;
-      #endif
-
-      if (central == 1)
-        mh = Dep::prec_HiggsMasses->MH;
-      else if (central == 2)
-        mh = mh_s;
-      else if (central == 3)
-        mh = 0.5*(Dep::prec_HiggsMasses->MH + mh_s);
-      else
-      {
-        std::stringstream msg;
-        msg << "Unrecognised Higgs_predictions_source option specified for make_MSSM_precision_spectrum: " << central;
-        PrecisionBit_error().raise(LOCAL_INFO,msg.str());
-      }
-      if (central != 2)
-      {
-        HE.set_override(Par::Pole_Mass, mh, "h0_1");
-      }
-
-      // Uncertainties:
-      //  Definitions: D_s = error on mass from spectrum calculator
-      //               D_p = error on mass from precision calculator
-      //               D_g = difference between central values from spectrum generator and precision calculator
-      //  1 = sum in quadrature of D_s, D_p and D_g
-      //  2 = range around chosen central (RACC), with D_s and D_p taken at their respective edges.
-      //  3 = RACC, with 1/2 * D_g taken at both edges.
-      //  4 = RACC, with 1/2 * D_g taken at the spectrum-generator edge, D_p taken at the other edge.
-      //  5 = RACC, with 1/2 * D_g taken at the precision-calculator edge, D_s taken at the other edge.
       static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
-      const double D_g = Dep::prec_HiggsMasses->MH - mh_s;
-      double mh_low, mh_high;
-
-      // Check whether the return from SUSYHD is 0, which happens for sparticles < 175 GeV
-      if(Dep::prec_HiggsMasses->deltaMH < 1e-6)
-      {
-        error = 2;
-      }
-
-      //  1 = sum in quadrature of D_s, D_p and D_g
-      if (error == 1)
-      {
-        double D_s_low = HE.get(Par::Pole_Mass_1srd_low, "h0_1")*mh_s;
-        double D_s_high = HE.get(Par::Pole_Mass_1srd_high, "h0_1")*mh_s;
-        double D_p = Dep::prec_HiggsMasses->deltaMH;
-        mh_low = sqrt(D_s_low*D_s_low + D_p*D_p + D_g*D_g);
-        mh_high = sqrt(D_s_high*D_s_high + D_p*D_p + D_g*D_g);
-      }
-
-      //  2 = range around chosen central (RACC), with D_s and D_p taken at their respective edges.
-      else if (error == 2)
-      {
-        double D_s_low = mh_s*HE.get(Par::Pole_Mass_1srd_low, "h0_1");
-        double D_s_high = mh_s*HE.get(Par::Pole_Mass_1srd_high, "h0_1");
-        double D_p = Dep::prec_HiggsMasses->deltaMH;
-        if (central == 1) // Using precision calculator mass as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = D_g + D_s_low;
-            mh_high = D_p;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = D_p;
-            mh_high = D_s_high-D_g;
-          }
-        }
-        else if (central == 2) // Using spectrum generator mass as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = D_s_low;
-            mh_high = D_g + D_p;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = D_p-D_g;
-            mh_high = D_s_high;
-          }
-        }
-        else  // Using mean of spectrum gen and precision calc as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = 0.5*D_g + D_s_low;
-            mh_high = 0.5*D_g + D_p;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = D_p - 0.5*D_g;
-            mh_high = D_s_high - 0.5*D_g;
-          }
-        }
-      }
-       
-      //  3 = RACC, with 1/2 * D_g taken at both edges.
-      else if (error == 3)
-      {
-        for (int i = 0; i < 4; i++)
-        {
-          if (central == 1) // Using precision calculator mass as central value
-          {
-            if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-            {
-              mh_low = 1.5*D_g;
-              mh_high = 0.5*D_g;
-            }
-            else // Precision calculator mass is lower than spectrum generator mass
-            {
-              mh_low = -0.5*D_g;
-              mh_high = -1.5*D_g;
-            }
-          }
-          else if (central == 2) // Using spectrum generator mass as central value
-          {
-            if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-            {
-              mh_low = 0.5*D_g;
-              mh_high = 1.5*D_g;
-            }
-            else // Precision calculator mass is lower than spectrum generator mass
-            {
-              mh_low = -1.5*D_g;
-              mh_high = -0.5*D_g;
-            }
-          }
-          else  // Using mean of spectrum gen and precision calc as central value
-          {
-            mh_low = fabs(D_g);
-            mh_high = mh_low;
-          }
-        }
-      }
-
-      //  4 = RACC, with 1/2 * D_g taken at the spectrum-generator edge, D_p taken at the other edge.
-      else if (error == 4)
-      {
-        double D_p = Dep::prec_HiggsMasses->deltaMH;
-        if (central == 1) // Using precision calculator mass as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = 1.5*D_g;
-            mh_high = D_p;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = D_p;
-            mh_high = -1.5*D_g;
-          }
-        }
-        else if (central == 2) // Using spectrum generator mass as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = 0.5*D_g;
-            mh_high = D_g + D_p;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = D_p-D_g;
-            mh_high = -0.5*D_g;
-          }
-        }
-        else  // Using mean of spectrum gen and precision calc as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = D_g;
-            mh_high = 0.5*D_g + D_p;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = D_p - 0.5*D_g;
-            mh_high = -D_g;
-          }
-        }
-      }
-
-      //  5 = RACC, with 1/2 * D_g taken at the precision-calculator edge, D_s taken at the other edge.
-      else if (error == 5)
-      {
-        double D_s_low = mh_s*HE.get(Par::Pole_Mass_1srd_low, "h0_1");
-        double D_s_high = mh_s*HE.get(Par::Pole_Mass_1srd_high, "h0_1");
-        if (central == 1) // Using precision calculator mass as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = D_g + D_s_low;
-            mh_high = 0.5*D_g;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = -0.5*D_g;
-            mh_high = D_s_high-D_g;
-          }
-        }
-        else if (central == 2) // Using spectrum generator mass as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = D_s_low;
-            mh_high = 1.5*D_g;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = -1.5*D_g;
-            mh_high = D_s_high;
-          }
-        }
-        else  // Using mean of spectrum gen and precision calc as central value
-        {
-          if (D_g >= 0) // Precision calculator mass is higher than spectrum generator mass
-          {
-            mh_low = 0.5*D_g + D_s_low;
-            mh_high = D_g;
-          }
-          else // Precision calculator mass is lower than spectrum generator mass
-          {
-            mh_low = -D_g;
-            mh_high = D_s_high - 0.5*D_g;
-          }
-        }
-      }
-
-      //  >5 = failure
-      else
-      {
-        std::stringstream msg;
-        msg << "Unrecognised Higgs_predictions_error_method specified for make_MSSM_precision_spectrum: " << central;
-        PrecisionBit_error().raise(LOCAL_INFO,msg.str());
-      }
-
-      // Finally, set the errors.
-      HE.set_override(Par::Pole_Mass_1srd_low, mh_low/mh, "h0_1", true);
-      HE.set_override(Par::Pole_Mass_1srd_high, mh_high/mh, "h0_1", true);
-
-      #ifdef PRECISIONBIT_DEBUG
-        cout << "h mass, central: "<< HE.get(Par::Pole_Mass, "h0_1")<< endl;
-        cout << "h mass, fractional low: "<< HE.get(Par::Pole_Mass_1srd_low, "h0_1")<< endl;
-        cout << "h mass, fractional high: " << HE.get(Par::Pole_Mass_1srd_high, "h0_1")<<endl;
-      #endif
+      update_H_masses(HE, 4, higgses, central, error, MH);
 
       // Save the identity/identities of the calculator(s) used for the central value.
-      const str& p_calc = Dep::prec_HiggsMasses.name();
-      const str& p_orig = Dep::prec_HiggsMasses.origin();
+      const str& p1_calc = Dep::prec_mh.name();
+      const str& p1_orig = Dep::prec_mh.origin();
+      const str& p2_calc = Dep::prec_HeavyHiggsMasses.name();
+      const str& p2_orig = Dep::prec_HeavyHiggsMasses.origin();
       const str& s_calc = Dep::unimproved_MSSM_spectrum.name();
       const str& s_orig = Dep::unimproved_MSSM_spectrum.origin();
-      if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc, true);
+      if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p1_orig+"::"+p1_calc+", "+p2_orig+"::"+p2_calc, true);
       if (central == 2) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+s_orig+"::"+s_calc, true);
-      if (central == 3) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc+", "+s_orig+"::"+s_calc, true);
+      if (central == 3) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p1_orig+"::"+p1_calc+", "+p2_orig+"::"+p2_calc+", "+s_orig+"::"+s_calc, true);
 
       // Check if an SLHA file needs to be excreted.
       improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");

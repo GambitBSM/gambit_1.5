@@ -6,23 +6,23 @@
 #
 # Add additional equivalencies/typedefs by hand
 # here if you want them to be considered during
-# dependency resolution.  
+# dependency resolution.
 #
 # A few things to keep in mind:
 #
-# - You can place as many entries as you want 
-#   in each class, just make sure to put them 
+# - You can place as many entries as you want
+#   in each class, just make sure to put them
 #   in the same square-bracket-enclosed list.
 #
 # - Any type with a comma, brackets or other
 #   funky character in it needs to be enclosed
-#   in quotation marks.  
+#   in quotation marks.
 #
 # - Don't add comments except on their own lines,
 #   like these (Python's YAML parser is buggy).
 #
-# - Namespace issues with BOSSed types and the 
-#   Gambit namespace itself both get dealt with 
+# - Namespace issues with BOSSed types and the
+#   Gambit namespace itself both get dealt with
 #   automatically, so there is no need to add
 #   entries to account for those.
 
@@ -36,13 +36,16 @@
 # String-to-double map
 ["std::map<std::string,double>", "std::map<str,double>", map_str_dbl]
 
+# Int to double triplet map
+["std::map<int, triplet<double> >", map_int_triplet_dbl]
+
 # Fortran data types
 [bool, Flogical, Flogical1]
 [char, Fcharacter]
 [int, Finteger]
 [short, Finteger2]
-[long int, Finteger4]  
-[long long, Finteger8]  
+[long int, Finteger4]
+[long long, Finteger8]
 [float, Freal, Freal4]
 [double, Fdouble, Fdouble_precision, Fdoubleprecision, Freal8]
 [long double, Freal16]
