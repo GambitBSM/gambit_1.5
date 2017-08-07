@@ -129,15 +129,6 @@
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  #define CAPABILITY SMlike_Higgs_PDG_code
-  START_CAPABILITY
-    #define FUNCTION most_SMlike_Higgs_MSSM
-    START_FUNCTION(int) // just returns pdg code of most SM-like CP even Higgs
-    DEPENDENCY(MSSM_spectrum, Spectrum)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY SM_subspectrum
   START_CAPABILITY
 
@@ -200,7 +191,7 @@
     START_FUNCTION(triplet<double>)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
     DEPENDENCY(FH_HiggsMasses, fh_HiggsMassObs)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
     #define FUNCTION SHD_HiggsMass
@@ -220,7 +211,6 @@
     START_FUNCTION(map_int_triplet_dbl)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
     DEPENDENCY(FH_HiggsMasses, fh_HiggsMassObs)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -245,7 +235,6 @@
     #define FUNCTION MSSM_higgs_couplings_pwid
     START_FUNCTION(HiggsCouplingsTable)
     DEPENDENCY(MSSM_spectrum, Spectrum)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(Reference_SM_other_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(Reference_SM_A0_decay_rates, DecayTable::Entry)
@@ -260,7 +249,6 @@
     #define FUNCTION MSSM_higgs_couplings_FH
     START_FUNCTION(HiggsCouplingsTable)
     DEPENDENCY(MSSM_spectrum, Spectrum)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(Reference_SM_other_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(Reference_SM_A0_decay_rates, DecayTable::Entry)

@@ -37,6 +37,7 @@
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/Elements/spectrum_factories.hpp"
+#include "gambit/Elements/smlike_higgs.hpp"
 #include "gambit/Models/SimpleSpectra/MSSMSimpleSpec.hpp"
 #include "gambit/Utils/stream_overloads.hpp" // Just for more convenient output to logger
 #include "gambit/Utils/util_macros.hpp"
@@ -440,30 +441,6 @@ namespace Gambit
 
     }
 
-    void most_SMlike_Higgs_MSSM(int &result)
-    {
-      using namespace Pipes::most_SMlike_Higgs_MSSM;
-      const SubSpectrum& mssm_spec = Dep::MSSM_spectrum->get_HE();
-      double sa =  - mssm_spec.get(Par::Pole_Mixing,"h0",1,1);
-      double ca = mssm_spec.get(Par::Pole_Mixing,"h0",1,2);
-      double tb = mssm_spec.get(Par::dimensionless, "tanbeta" );
-      double sb = sin(atan(tb));
-      double cb = cos(atan(tb));
-      //cos (beta - alpha) and sin(beta-alpha)
-      double cbma = cb * ca + sb * sa;
-      double sbma = sb * ca - cb * ca;
-
-      if(sbma > cbma)
-      {
-        result = 25;
-      }
-      else
-      {
-        result = 35;
-      }
-
-      return;
-    }
 
     void get_CMSSM_spectrum (Spectrum& result)
     {
@@ -978,7 +955,7 @@ namespace Gambit
       result.CP[2] = -1; //A0
 
       // Work out which SM values correspond to which SUSY Higgs
-      int higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 0 : 1);
+      int higgs = (SMlike_higgs_PDG_code(spec) == 25 ? 0 : 1);
       int other_higgs = (higgs == 0 ? 1 : 0);
 
       // Set the decays
@@ -1049,7 +1026,7 @@ namespace Gambit
       static const std::vector<str> sHneut = initVector<str>("h0_1", "h0_2", "A0");
 
       // Work out which SM values correspond to which SUSY Higgs
-      int higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 0 : 1);
+      int higgs = (SMlike_higgs_PDG_code(spec) == 25 ? 0 : 1);
       int other_higgs = (higgs == 0 ? 1 : 0);
 
       // Set the decays
@@ -1276,8 +1253,10 @@ namespace Gambit
       using namespace Pipes::FH_HiggsMass;
       //FH indices: 0=h0_1, 1=h0_2
       int i;
-      if (*Dep::SMlike_Higgs_PDG_code == 25) i = 0;
-      else if (*Dep::SMlike_Higgs_PDG_code == 35) i = 1;
+      const SubSpectrum& spec = Dep::unimproved_MSSM_spectrum->get_HE();
+      int higgs = SMlike_higgs_PDG_code(spec);
+      if (higgs == 25) i = 0;
+      else if (higgs == 35) i = 1;
       else SpecBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
       result.central = Dep::FH_HiggsMasses->MH[i];
       result.upper = Dep::FH_HiggsMasses->deltaMH[i];
@@ -1289,8 +1268,10 @@ namespace Gambit
       using namespace Pipes::FH_HeavyHiggsMasses;
       const int neutrals[2] = {25, 35};
       int i;
-      if (*Dep::SMlike_Higgs_PDG_code == neutrals[0]) i = 1;
-      else if (*Dep::SMlike_Higgs_PDG_code == neutrals[1]) i = 0;
+      const SubSpectrum& spec = Dep::unimproved_MSSM_spectrum->get_HE();
+      int higgs = SMlike_higgs_PDG_code(spec);
+      if (higgs == neutrals[0]) i = 1;
+      else if (higgs == neutrals[1]) i = 0;
       else SpecBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
       result.clear();
       result[neutrals[i]].central = Dep::FH_HiggsMasses->MH[i];
@@ -1351,8 +1332,6 @@ namespace Gambit
       result.central = MHiggs;
       result.upper = DeltaMHiggs;
       result.lower = DeltaMHiggs;
-
-      return ;
 
     }
 

@@ -21,12 +21,13 @@
 #include <algorithm>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
+#include "gambit/Elements/smlike_higgs.hpp"
 #include "gambit/PrecisionBit/PrecisionBit_rollcall.hpp"
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
-//#define PRECISIONBIT_DEBUG
+#define PRECISIONBIT_DEBUG
 
 /// EWPO theoretical uncertainties on FeynHiggs calculations; based on hep-ph/0412214 Eq 3.1.
 /// @{
@@ -190,8 +191,8 @@ namespace Gambit
         for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator error low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i] << endl;
         for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator error high: "<< HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i] << endl;
         for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation: "<< MH[i].central << endl;
-        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error low: "<< MH[i].lower[i] << endl;
-        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error high: "<< MH[i].upper[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error low: "<< MH[i].lower << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error high: "<< MH[i].upper << endl;
       #endif
 
       if (central == 1)
@@ -487,8 +488,9 @@ namespace Gambit
       //                                 std::pair<int,int>(37,0)};
       str higgses[1];
       std::vector< triplet<double> > MH = {*Dep::prec_mh};
-      if (*Dep::SMlike_Higgs_PDG_code == 25) higgses[0] = "h0_1";
-      else if (*Dep::SMlike_Higgs_PDG_code == 35) higgses[0] = "h0_2";
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      if (smlike_pdg == 25) higgses[0] = "h0_1";
+      else if (smlike_pdg == 35) higgses[0] = "h0_2";
       else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
       static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
       static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
@@ -527,12 +529,13 @@ namespace Gambit
       //                                 std::pair<int,int>(37,0)};
       const str higgses[4] = {"h0_1", "h0_2", "A0", "H+"};
       std::vector< triplet<double> > MH;
-      if (*Dep::SMlike_Higgs_PDG_code == 25)
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      if (smlike_pdg == 25)
       { //h0_1
         MH.push_back(*Dep::prec_mh);
         MH.push_back(Dep::prec_HeavyHiggsMasses->at(35));
       }
-      else if (*Dep::SMlike_Higgs_PDG_code == 35)
+      else if (smlike_pdg == 35)
       { //h0_2
         MH.push_back(Dep::prec_HeavyHiggsMasses->at(25));
         MH.push_back(*Dep::prec_mh);
@@ -608,9 +611,10 @@ namespace Gambit
     {
       using namespace Pipes::mh_from_MSSM_spectrum;
       const SubSpectrum& HE = Dep::MSSM_spectrum->get_HE();
-      result.central = HE.get(Par::Pole_Mass, *Dep::SMlike_Higgs_PDG_code, 0);
-      result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, *Dep::SMlike_Higgs_PDG_code, 0);
-      result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, *Dep::SMlike_Higgs_PDG_code, 0);
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      result.central = HE.get(Par::Pole_Mass, smlike_pdg, 0);
+      result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, smlike_pdg, 0);
+      result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, smlike_pdg, 0);
     }
     /// @}
 

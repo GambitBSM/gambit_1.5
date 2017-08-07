@@ -73,7 +73,6 @@ START_MODULE
     DEPENDENCY(prec_mw, triplet<double>)
     DEPENDENCY(prec_mh, triplet<double>)
     DEPENDENCY(prec_HeavyHiggsMasses, map_int_triplet_dbl)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     #undef FUNCTION
 
     #define FUNCTION make_MSSM_precision_spectrum_H_W
@@ -81,7 +80,6 @@ START_MODULE
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
     DEPENDENCY(prec_mw, triplet<double>)
     DEPENDENCY(prec_mh, triplet<double>)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     #undef FUNCTION
 
     #define FUNCTION make_MSSM_precision_spectrum_W
@@ -103,7 +101,7 @@ START_MODULE
   QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mh, NEW_CAPABILITY, mh_from_SM_spectrum,   triplet<double>, (), (SM_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_SS_spectrum,   triplet<double>, (SingletDM, SingletDMZ3), (SingletDM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum), (SMlike_Higgs_PDG_code, int))
+  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum))
 
   // SM nuisance likelihoods
   QUICK_FUNCTION(PrecisionBit, lnL_Z_mass,   NEW_CAPABILITY, lnL_Z_mass_chi2,   double, (), (SMINPUTS, SMInputs))
