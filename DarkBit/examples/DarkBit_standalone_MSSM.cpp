@@ -204,7 +204,6 @@ int main(int argc, char* argv[])
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dssusy_isasugra);
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsSLHAread);
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsprep);
-    //if (decays && slha_version == 2) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
     if (decays) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
     else DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_PointInit_MSSM.reset_and_calculate();
@@ -228,6 +227,7 @@ int main(int argc, char* argv[])
     // Relic density calculation with MicrOmegas
     RD_oh2_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::darkOmega);
     RD_oh2_MicrOmegas.setOption<int>("fast", 1);  // 0: accurate; 1: fast
+    RD_oh2_MicrOmegas.setOption<double>("beps", 1e-5); // Beps=1e-5 recommended, Beps=1 switches coannihilation off
     RD_oh2_MicrOmegas.reset_and_calculate();
 
     // Calculate relic density using RD_oh2_DarkSUSY (for checks only)
@@ -327,6 +327,8 @@ int main(int argc, char* argv[])
     DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::nucleonAmplitudes);
     DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::FeScLoop);
     DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::mocommon_);
+    // The below includes neutralino-gluon scattering via a box diagram
+    DD_couplings_MicrOmegas.setOption<bool>("box", true);
     DD_couplings_MicrOmegas.reset_and_calculate();
 
     // Calculate DD couplings with DarkSUSY
@@ -336,6 +338,12 @@ int main(int argc, char* argv[])
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsddgpgn);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::ddcom);
+    // The below calculates the DD couplings using the full 1 loop calculation of
+    // Drees Nojiri Phys.Rev. D48 (1993) 3483
+    DD_couplings_DarkSUSY.setOption<bool>("loop", true);
+    // When the calculation is done at tree level (loop = false), setting the below to false
+    // approximates the squark propagator as 1/m_sq^2 to avoid poles.
+    // DD_couplings_DarkSUSY.setOption<bool>("pole", false);
     DD_couplings_DarkSUSY.reset_and_calculate();
 
     // Initialize DDCalc backend

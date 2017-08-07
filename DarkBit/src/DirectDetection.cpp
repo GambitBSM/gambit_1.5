@@ -87,6 +87,28 @@ namespace Gambit {
       logger() << LogTags::debug << "\tdeld = delta d = " << (*BEreq::ddcom).deld;
       logger() << LogTags::debug << "\tdels = delta s = " << (*BEreq::ddcom).dels << EOM;
 
+      // Option loop<bool>: If true, include 1-loop effects discussed in
+      // Drees Nojiri Phys.Rev. D48 (1993) 3483-3501 (default: false)
+      if (runOptions->hasKey("loop"))
+      {
+        if (runOptions->getValue<bool>("loop")==true) (*BEreq::ddcom).dddn = 1;
+        else (*BEreq::ddcom).dddn = 0;
+      }
+
+      // Option pole<bool>: If false, approximate squark propagator as 1/m_sq^2 (set to
+      // true if loop = true) (default: false)
+      if (runOptions->hasKey("pole"))
+      {
+        if (runOptions->getValue<bool>("pole")==1) (*BEreq::ddcom).ddpole = 1;
+        else
+        {
+          (*BEreq::ddcom).ddpole = 0;
+          if (runOptions->hasKey("loop") && runOptions->getValue<bool>("loop")==true)
+            logger () << LogTags::debug << "pole = false ignored "
+                "by DarkSUSY because loop = true." << EOM;
+        }
+      }
+
       if (*Dep::DarkSUSY_PointInit) {
         // Calling DarkSUSY subroutine dsddgpgn(gps,gns,gpa,gna)
         // to set all four couplings.
@@ -157,8 +179,12 @@ namespace Gambit {
         << (*BEreq::MOcommon).par[7] << EOM;
 
       double p1[2], p2[2], p3[2], p4[2];
-      int error = BEreq::nucleonAmplitudes(byVal(BEreq::FeScLoop.pointer()),
+      int error;
+      if (runOptions->getValueOrDef<bool>(true, "box"))
+        error = BEreq::nucleonAmplitudes(byVal(BEreq::FeScLoop.pointer()),
           byVal(p1), byVal(p2), byVal(p3), byVal(p4));
+      else error = BEreq::nucleonAmplitudes(NULL,
+              byVal(p1), byVal(p2), byVal(p3), byVal(p4));
       if(error!=0)
         DarkBit_error().raise(LOCAL_INFO,
             "micrOMEGAs nucleonAmplitudes function failed with "
