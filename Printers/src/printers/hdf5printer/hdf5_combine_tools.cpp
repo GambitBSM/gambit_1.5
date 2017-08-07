@@ -28,6 +28,9 @@
 #include "gambit/Printers/printers/hdf5printer/hdf5tools.hpp"
 #include "gambit/Printers/printers/hdf5printer/DataSetInterfaceScalar.hpp"
 #include "gambit/Utils/util_functions.hpp"
+
+// flag to trigger debug output
+//#define COMBINE_DEBUG
   
 namespace Gambit 
 {
@@ -133,6 +136,10 @@ namespace Gambit
             
             inline void setup_hdf5_points(hid_t new_group, hid_t type, hid_t type2, unsigned long long size_tot, hid_t &dataset_out, hid_t &dataset2_out, hid_t &dataspace, hid_t &dataspace2, const std::string &name)
             {
+                #ifdef COMBINE_DEBUG
+                std::cerr << "  Creating dataset '"<<name<<"'" << std::endl;
+                #endif
+
                 hsize_t dimsf[1];
                 dimsf[0] = size_tot;
                 dataspace = H5Screate_simple(1, dimsf, NULL); 
@@ -257,7 +264,7 @@ namespace Gambit
                     {
                         for (auto it = aux_names.begin(), end = aux_names.end(); it != end; ++it)
                         {
-                            if (aux_param_set.find(*it) != aux_param_set.end())
+                            if (aux_param_set.find(*it) == aux_param_set.end())
                             {
                                 // New aux parameter name found; add it to the list to be processed.
                                 aux_param_names.push_back(*it);
@@ -625,6 +632,10 @@ namespace Gambit
                        std::vector<hid_t> datasets, datasets2;
                        int valid_dset  = -1; // index of a validly opened dataset (-1 if none)
                       
+                       #ifdef COMBINE_DEBUG
+                       std::cerr << "  Preparing to copy dataset '"<<*it<<"'" << std::endl;
+                       #endif
+
                        for (int i = 0, end = aux_groups.size(); i < end; i++)
                        {
                            // Dataset may not exist, and thus fail to open. We will check its status
@@ -665,6 +676,10 @@ namespace Gambit
                        // dataset for it here. Otherwise one should already exist.
                        if(param_set.find(*it) == param_set.end())
                        {
+                          #ifdef COMBINE_DEBUG
+                          std::cerr << "  No output dataset for '"<<*it<<"' found amongst those created during copying of primary parameters, preparing to create it." << std::endl;
+                          #endif
+
                           hid_t type, type2;
                           if(valid_dset<0)
                           {
