@@ -102,7 +102,7 @@ int main()
     if (not Backends::backendInfo().works["MicrOmegas_SingletDM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for SingletDM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.0"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.0 is missing!");
     if (not Backends::backendInfo().works["DDCalc1.1.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 1.1.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.4"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.4 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.5"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.5 is missing!");
 
 
     // ---- Initialize models ----
