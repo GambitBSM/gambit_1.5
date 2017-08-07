@@ -351,7 +351,7 @@ Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
   # Options set to match benchmark point specified in SpecBit/MSSM_benchmark_points/LesHouches.in.MSSM_1
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatMGUT_spectrum
+    function: get_MSSMatMGUT_spectrum_FS
     options:
       precision_goal:        1.0e-4
       max_iterations:        0

@@ -145,9 +145,9 @@ Rules:
   # i.e. the function specific to the model and spectrum calculator
   - capabilty:    unimproved_MSSM_spectrum
     type:         Spectrum
-    #function:     get_CMSSM_spectrum
-    #function:     get_MSSMatMGUT_spectrum
-    #function:     get_MSSMatQ_spectrum
+    #function:     get_CMSSM_spectrum_FS
+    #function:     get_MSSMatMGUT_spectrum_FS
+    #function:     get_MSSMatQ_spectrum_FS
     function:     get_MSSM_spectrum_SPheno
     options:
     # FlexibleSUSY options
