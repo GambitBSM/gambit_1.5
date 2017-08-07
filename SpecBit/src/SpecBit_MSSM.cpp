@@ -442,11 +442,15 @@ namespace Gambit
     }
 
 
-    void get_CMSSM_spectrum (Spectrum& result)
+    // Runs FlexibleSUSY MSSM spectrum generator with CMSSM (GUT scale) boundary conditions
+    // In principle an identical spectrum can be obtained from the function 
+    // get_MSSMatGUT_spectrum_FS
+    // by setting the input parameters to match the CMSSM assumptions
+    void get_CMSSM_spectrum_FS (Spectrum& result)
     {
 
       // Access the pipes for this function to get model and parameter information
-      namespace myPipe = Pipes::get_CMSSM_spectrum;
+      namespace myPipe = Pipes::get_CMSSM_spectrum_FS;
 
       // Get SLHA2 SMINPUTS values
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
@@ -485,11 +489,11 @@ namespace Gambit
 
     }
 
-    // Runs MSSM spectrum generator with EWSB scale input
-    void get_MSSMatQ_spectrum (Spectrum& result)
+    // Runs FlexibleSUSY MSSM spectrum generator with EWSB scale input (boundary conditions)
+    void get_MSSMatQ_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
-      namespace myPipe = Pipes::get_MSSMatQ_spectrum;
+      namespace myPipe = Pipes::get_MSSMatQ_spectrum_FS;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       MSSM_input_parameters input;
       input.Qin = *myPipe::Param.at("Qin"); // MSSMatQ also requires input scale to be supplied
@@ -499,11 +503,11 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
 
-    // Runs MSSM spectrum generator with GUT scale input
-    void get_MSSMatMGUT_spectrum (Spectrum& result)
+    // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
+    void get_MSSMatMGUT_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
-      namespace myPipe = Pipes::get_MSSMatMGUT_spectrum;
+      namespace myPipe = Pipes::get_MSSMatMGUT_spectrum_FS;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       MSSMatMGUT_input_parameters input;
       fill_MSSM63_input(input,myPipe::Param);

@@ -11,6 +11,14 @@ Feature release.
 - Updated DecayBit decay data to use PDG 2017 values
 - Additional sanity checks in cmake compiler selection
 - Fixed bug preventing proper operation of hdf5 combination with T-walk
+- Renamed SpecBit module functions:
+    get_CMSSM_spectrum
+    get_MSSMatQ_spectrum
+    get_MSSMatMGUT_spectrum
+    ---->
+    get_CMSSM_spectrum_FS
+    get_MSSMatQ_spectrum_FS
+    get_MSSMatMGUT_spectrum_FS
 
 v1.0.1 - June 2017
 Bugfix release.

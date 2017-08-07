@@ -74,7 +74,7 @@ ObsLikes:
 Rules:
 
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatQ_spectrum
+    function: get_MSSMatQ_spectrum_FS
 
   - capability: Higgs_decay_rates
     function: MSSM_h0_1_decays

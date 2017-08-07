@@ -185,10 +185,14 @@ are included with GAMBIT). Because of this, one may re-use the
 the following all connect their corresponding FlexibleSUSY spectrum 
 generators to the MSSMSpec wrapper.
 
-  get_CMSSM_spectrum
-  get_MSSMatQ_spectrum and
-  get_MSSMatMGUT_spectrum
+  get_CMSSM_spectrum_FS
+  get_MSSMatQ_spectrum_FS and
+  get_MSSMatMGUT_spectrum_FS
 
+(note, these function names changed from v1.0.1 to v1.1.0:
+v1.0.1: get_CMSSM_spectrum
+v1.1.0: get_CMSSM_spectrum_FS
+etc.)
 
 ---
 III. Required changes to GAMBIT cmake build system

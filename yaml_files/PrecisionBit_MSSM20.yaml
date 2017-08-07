@@ -119,7 +119,7 @@ ObsLikes:
 Rules:
 
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatQ_spectrum
+    function: get_MSSMatQ_spectrum_FS
 
   - capability: MSSM_spectrum
     function: make_MSSM_precision_spectrum_H_W
