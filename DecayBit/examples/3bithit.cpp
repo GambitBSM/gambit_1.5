@@ -238,14 +238,14 @@ int main()
     if (model_is_GUT_scale)
     {
       Models::NUHM2::Functown::MSSM63atMGUT_parameters.notifyOfModel(SUSY_model);
-      get_MSSMatMGUT_spectrum.notifyOfModel(SUSY_model);
+      get_MSSMatMGUT_spectrum_FS.notifyOfModel(SUSY_model);
     }
     else
     {
       Models::MSSM20atQ::Functown::MSSM25atQ_parameters.notifyOfModel(SUSY_model);
       Models::MSSM25atQ::Functown::MSSM30atQ_parameters.notifyOfModel(SUSY_model);
       Models::MSSM30atQ::Functown::MSSM63atQ_parameters.notifyOfModel(SUSY_model);
-      get_MSSMatQ_spectrum.notifyOfModel(SUSY_model);
+      get_MSSMatQ_spectrum_FS.notifyOfModel(SUSY_model);
     }
     FH_HiggsMasses.notifyOfModel(SUSY_model);
     FH_Couplings.notifyOfModel(SUSY_model);
@@ -257,20 +257,20 @@ int main()
     if (model_is_GUT_scale)
     {
       Models::NUHM2::Functown::MSSM63atMGUT_parameters.resolveDependency(&Models::NUHM2::Functown::primary_parameters);
-      get_MSSMatMGUT_spectrum.resolveDependency(&Models::NUHM2::Functown::MSSM63atMGUT_parameters);
-      get_MSSMatMGUT_spectrum.resolveDependency(&get_SMINPUTS);
-      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatMGUT_spectrum);
-      make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatMGUT_spectrum);
+      get_MSSMatMGUT_spectrum_FS.resolveDependency(&Models::NUHM2::Functown::MSSM63atMGUT_parameters);
+      get_MSSMatMGUT_spectrum_FS.resolveDependency(&get_SMINPUTS);
+      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatMGUT_spectrum_FS);
+      make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatMGUT_spectrum_FS);
     }
     else
     {
       Models::MSSM20atQ::Functown::MSSM25atQ_parameters.resolveDependency(&Models::MSSM20atQ::Functown::primary_parameters);
       Models::MSSM25atQ::Functown::MSSM30atQ_parameters.resolveDependency(&Models::MSSM20atQ::Functown::MSSM25atQ_parameters);
       Models::MSSM30atQ::Functown::MSSM63atQ_parameters.resolveDependency(&Models::MSSM25atQ::Functown::MSSM30atQ_parameters);
-      get_MSSMatQ_spectrum.resolveDependency(&Models::MSSM30atQ::Functown::MSSM63atQ_parameters);
-      get_MSSMatQ_spectrum.resolveDependency(&get_SMINPUTS);
-      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatQ_spectrum);
-      make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatQ_spectrum);
+      get_MSSMatQ_spectrum_FS.resolveDependency(&Models::MSSM30atQ::Functown::MSSM63atQ_parameters);
+      get_MSSMatQ_spectrum_FS.resolveDependency(&get_SMINPUTS);
+      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatQ_spectrum_FS);
+      make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatQ_spectrum_FS);
     }
 
     get_SMINPUTS.resolveDependency(&Models::StandardModel_SLHA2::Functown::primary_parameters);
@@ -448,14 +448,14 @@ int main()
       if (model_is_GUT_scale)
       {
         Models::NUHM2::Functown::MSSM63atMGUT_parameters.reset_and_calculate();
-        get_MSSMatMGUT_spectrum.reset_and_calculate();
+        get_MSSMatMGUT_spectrum_FS.reset_and_calculate();
       }
       else
       {
         Models::MSSM20atQ::Functown::MSSM25atQ_parameters.reset_and_calculate();
         Models::MSSM25atQ::Functown::MSSM30atQ_parameters.reset_and_calculate();
         Models::MSSM30atQ::Functown::MSSM63atQ_parameters.reset_and_calculate();
-        get_MSSMatQ_spectrum.reset_and_calculate();
+        get_MSSMatQ_spectrum_FS.reset_and_calculate();
       }
       FeynHiggs_2_11_3_init.reset_and_calculate();
       FH_HiggsMasses.reset_and_calculate();
