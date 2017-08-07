@@ -21,7 +21,7 @@ Parameters:
       range: [3.0, 70]
     SignMu: 1
 
-  
+
 Priors:
 
 Printer:
@@ -76,7 +76,10 @@ Rules:
 
   - capability: MSSM_spectrum
     type: Spectrum
-    function: make_MSSM_precision_spectrum_H_W_SHD
+    function: make_MSSM_precision_spectrum_H_W
+
+  - capability: prec_mh
+    function: SHD_HiggsMass
 
   - capability: mh
     function: mh_from_MSSM_spectrum
@@ -99,4 +102,4 @@ KeyValues:
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6
- 
+
