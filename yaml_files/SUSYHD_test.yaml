@@ -57,7 +57,7 @@ ObsLikes:
 Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
   - capability: unimproved_MSSM_spectrum
-    function: get_CMSSM_spectrum
+    function: get_CMSSM_spectrum_FS
     options:
       # Set to match benchmark point specified in
       # SpecBit/MSSM_benchmark_points/LesHouches.in.MSSM_1
@@ -75,7 +75,6 @@ Rules:
       invalid_point_fatal: false
 
   - capability: MSSM_spectrum
-    type: Spectrum
     function: make_MSSM_precision_spectrum_H_W
 
   - capability: prec_mh
