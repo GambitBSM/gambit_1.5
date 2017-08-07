@@ -1520,6 +1520,9 @@ DD_SetDetectorEmin: |
 DDCalc_1_0_0_init: |
    Initialises DDCalc 1.0.0.
 
+DDCalc_1_1_0_init: |
+   Initialises DDCalc 1.1.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 

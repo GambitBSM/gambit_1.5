@@ -178,6 +178,9 @@ ObsLikes:
     - capability: XENON100_2012_LogLikelihood
       purpose:    LogLike
 
+    - capability: XENON1T_2017_LogLikelihood
+      purpose:    LogLike
+
     - capability: LUX_2015_LogLikelihood
       purpose:    LogLike
 
@@ -191,6 +194,9 @@ ObsLikes:
       purpose:    LogLike
 
     - capability: PICO_60_F_LogLikelihood
+      purpose:    LogLike
+
+    - capability: PICO_60_2017_LogLikelihood
       purpose:    LogLike
 
     - capability: SuperCDMS_2014_LogLikelihood

@@ -4,17 +4,17 @@
 ///
 ///  Frontend header for the DDCalc backend.
 ///
-///  Compile-time registration of available 
+///  Compile-time registration of available
 ///  functions and variables from this backend.
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
 ///  \date 2014 Jul
-/// 
+///
 ///  \author Christopher Savage
 ///          (chris@savage.name)
 ///  \date 2014 Sept
@@ -66,7 +66,7 @@ LOAD_LIBRARY
      C_DDCalc_<modulename(kinda)>_routinename>
   The 'C' is to signify routines intended for calling from C/C++
   (argument and return types are expressly declared to be type-
-  compatible with the C bool, int, and double types).  
+  compatible with the C bool, int, and double types).
  */
 
 // Default initialisation of three main classes via factory functions
@@ -77,7 +77,7 @@ BE_FUNCTION(DDCalc_InitDetector, int, (const bool&), "C_DDExperiments_ddcalc_ini
 // Initialization (specific experimental factory functions). Single boolean argument indicates if extra calculations
 // should be performed for some no-background-subtraction limits (not necessary for likelihoods).
 BE_FUNCTION(XENON100_2012_Init,  int, (const bool&), "C_DDCalc_xenon100_2012_init",  "XENON100_2012_Init")
-BE_FUNCTION(Xenon1T_2017_Init,   int, (const bool&), "C_DDCalc_xenon1t_2017_init",   "Xenon1T_2017_Init")
+BE_FUNCTION(XENON1T_2017_Init,   int, (const bool&), "C_DDCalc_xenon1t_2017_init",   "XENON1T_2017_Init")
 BE_FUNCTION(LUX_2013_Init,       int, (const bool&), "C_DDCalc_lux_2013_init",       "LUX_2013_Init")
 BE_FUNCTION(LUX_2016_Init,       int, (const bool&), "C_DDCalc_lux_2016_init",       "LUX_2016_Init")
 BE_FUNCTION(PandaX_2016_Init,    int, (const bool&), "C_DDCalc_pandax_2016_init",    "PandaX_2016_Init")

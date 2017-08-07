@@ -76,7 +76,7 @@ BE_INI_FUNCTION
     if (*InUse::DDCalc_Experiment)
     {
       ex_map["XENON100_2012"] = XENON100_2012_Init(false);
-      ex_map["Xenon1T_2017"] = Xenon1T_2017_Init(false);
+      ex_map["XENON1T_2017"] = XENON1T_2017_Init(false);
       ex_map["LUX_2013"] = LUX_2013_Init(false);
       ex_map["SuperCDMS_2014"] = SuperCDMS_2014_Init(false);
       ex_map["SIMPLE_2014"] = SIMPLE_2014_Init(false);
