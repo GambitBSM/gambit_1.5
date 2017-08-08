@@ -165,8 +165,14 @@ namespace Gambit
     /// @}
 
     /// Helper function to set W masses
-    void update_W_masses(SubSpectrum& HE, SubSpectrum& LE, const triplet<double>& prec_mw)
+    void update_W_masses(SubSpectrum& HE, SubSpectrum& LE, const triplet<double>& prec_mw, bool allow_fallback)
     {
+      if (prec_mw.central <= 0.0 or Utils::isnan(prec_mw.central))
+      {
+        if (allow_fallback) return;
+        invalid_point().raise("Precison W mass NaN or <= 0.  To allow fallback to the unimproved value, "
+                              "set option allow_fallback_to_unimproved_masses=true in your YAML file.");
+      }
       HE.set_override(Par::Pole_Mass, prec_mw.central, "W+", true); // "true" flag causes overrides to be written even if no native quantity exists to override.
       HE.set_override(Par::Pole_Mass_1srd_high, prec_mw.upper/prec_mw.central, "W+", true);
       HE.set_override(Par::Pole_Mass_1srd_low, prec_mw.lower/prec_mw.central, "W+", true);
@@ -176,8 +182,19 @@ namespace Gambit
     }
 
     /// Helper function to set arbitrary number of H masses
-    void update_H_masses(SubSpectrum& HE, int n_higgs, const str* higgses, int central, int error, std::vector<triplet<double> >& MH)
+    void update_H_masses(SubSpectrum& HE, int n_higgs, const str* higgses, int central, int error, std::vector<triplet<double> >& MH, bool allow_fallback)
     {
+
+      for (int i = 0; i < n_higgs; ++i)
+      {
+        if (MH[i].central <= 0.0 or Utils::isnan(MH[i].central))
+        {
+          if (allow_fallback) return;
+          invalid_point().raise("Precison "+higgses[i]+" mass NaN or <= 0.  To allow fallback to the unimproved value, "
+                                "set option allow_fallback_to_unimproved_masses=true in your YAML file.");
+        }
+      }
+
       // Central value:
       //  1 = from precision calculator
       //  2 = from spectrum calculator
@@ -465,7 +482,8 @@ namespace Gambit
     {
       using namespace Pipes::make_MSSM_precision_spectrum_W;
       improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw);
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
+      update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw, allow_fallback);
       improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
     }
 
@@ -476,9 +494,10 @@ namespace Gambit
       improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
       SubSpectrum& HE = improved_spec.get_HE();
       SubSpectrum& LE = improved_spec.get_LE();
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
 
       // W mass
-      update_W_masses(HE, LE, *Dep::prec_mw);
+      update_W_masses(HE, LE, *Dep::prec_mw, allow_fallback);
 
       // Higgs masses
       // FIXME switch to this once the setters take pdg pairs
@@ -494,7 +513,7 @@ namespace Gambit
       else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
       static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
       static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
-      update_H_masses(HE, 1, higgses, central, error, MH);
+      update_H_masses(HE, 1, higgses, central, error, MH, allow_fallback);
 
       // Save the identity/identities of the calculator(s) used for the central value.
       const str& p_calc = Dep::prec_mh.name();
@@ -517,9 +536,10 @@ namespace Gambit
       improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
       SubSpectrum& HE = improved_spec.get_HE();
       SubSpectrum& LE = improved_spec.get_LE();
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
 
       // W mass
-      update_W_masses(HE, LE, *Dep::prec_mw);
+      update_W_masses(HE, LE, *Dep::prec_mw, allow_fallback);
 
       // Higgs masses
       // FIXME switch to this once the setters take pdg pairs
@@ -546,7 +566,7 @@ namespace Gambit
 
       static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
       static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
-      update_H_masses(HE, 4, higgses, central, error, MH);
+      update_H_masses(HE, 4, higgses, central, error, MH, allow_fallback);
 
       // Save the identity/identities of the calculator(s) used for the central value.
       const str& p1_calc = Dep::prec_mh.name();
