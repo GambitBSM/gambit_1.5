@@ -1452,7 +1452,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // The term proportional to G(m_nu^2/mW^2) vanishes at second order in theta, so it is enough to use the PMNS matrix
+      // TODO: Here we need Vnu rather than UPMNS, fix this
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1470,7 +1470,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // The term proportional to G(m_nu^2/mW^2) vanishes at second order in theta, so it is enough to use the PMNS matrix
+      // TODO: Here we need Vnu rather than UPMNS, fix this
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1478,6 +1478,11 @@ namespace Gambit
         Rllgamma += Vnu.adjoint()(3,i) * Vnu(1,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(3,i) * Theta(1,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
+
+      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
     void SN_taumugamma(double &result)
@@ -1488,7 +1493,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // The term proportional to G(m_nu^2/mW^2) vanishes at second order in theta, so it is enough to use the PMNS matrix
+      // TODO: Here we need Vnu rather than UPMNS, fix this
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1497,9 +1502,10 @@ namespace Gambit
 
       result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
-      // Multiply by the BR of tau -> e nu nu
-cout << Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau") << endl;
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
 
     void SN_mueee(double &result)
