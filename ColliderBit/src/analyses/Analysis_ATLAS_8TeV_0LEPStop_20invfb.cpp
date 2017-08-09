@@ -141,7 +141,6 @@ namespace Gambit {
 
         // Get b jets
         /// @note We assume that b jets have previously been 100% tagged
-        //  Now we use the new Buckley tagger...   AB: ???!?
         const std::vector<double>  a = {0,10.};
         const std::vector<double>  b = {0,10000.};
         const std::vector<double> c = {0.7};

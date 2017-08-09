@@ -14,8 +14,6 @@
 ///
 ///  *********************************************
 
-
-
 #include <vector>
 #include <algorithm>
 
@@ -23,12 +21,12 @@
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
-// ROOT
+// ROOT (abusing the EXCLUDE_DELPHES macro)
 #ifndef EXCLUDE_DELPHES
-#include <TH1.h>
-#include <TVirtualPad.h>
-#include <TApplication.h>
-#include <TFile.h>
+#include "TH1.h"
+#include "TVirtualPad.h"
+#include "TApplication.h"
+#include "TFile.h"
 #endif
 
 using namespace std;
@@ -68,6 +66,7 @@ namespace Gambit {
       static bool _openTFile;
       bool _hasTFile;
       #endif
+
     public:
 
       ~Analysis_Perf() {
@@ -83,7 +82,7 @@ namespace Gambit {
 
         _output_filename = "SimOutput.root";
         _hasTFile = false;
-        if(!Analysis_Perf::_openTFile) {
+        if (!Analysis_Perf::_openTFile) {
           std::cout << "Opening ROOT file" << _output_filename << endl;
           _ROOToutFile = new TFile(_output_filename.c_str(), "RECREATE");
           Analysis_Perf::_openTFile = true;
@@ -348,7 +347,6 @@ namespace Gambit {
         HEPUtilsAnalysis::add(other);
 
         // Add the subclass member variables
-        /// @todo Why do we require Delphes for these? Analysis_Perf does not require Delphes...
         #ifndef EXCLUDE_DELPHES
         Analysis_Perf* specificOther = dynamic_cast<Analysis_Perf*>(other);
         _hElectron1Pt->Add(specificOther->_hElectron1Pt);
@@ -405,44 +403,12 @@ namespace Gambit {
       void scale(double) {
         // NOTE: previously called finalize, but I got rid of that crap. --Abram
 
-        // std::cout << "Writing histograms " << _hElectron1Pt->GetTitle() << std::endl;
-
-        /// @todo Can delete this? Aren't they automatically all written from the current file?
-        /*_ROOToutFile->cd();
-          _hElectron1Pt->Write();
-          _hElectron1Eta->Write();
-          _hElectron1Phi->Write();
-
-          _hElectron2Pt->Write();
-          _hElectron2Eta->Write();
-          _hElectron2Phi->Write();
-
-          _hNelec->Write();
-          _hNjet->Write();
-          _hmet->Write();
-
-          _hElectronPt->Write();
-          _hElectronEta->Write();
-          _hElectronPhi->Write();
-          _hElectronE->Write();
-          _hMuonPt->Write();
-          _hMuonEta->Write();
-          _hMuonPhi->Write();
-          _hMuonE->Write();
-
-          _hJetPt->Write();
-          _hJetEta->Write();
-          _hJetPhi->Write();
-          _hJetE->Write();
-
-          _hNmuon->Write();*/
         #ifndef EXCLUDE_DELPHES
-
-        if(_hasTFile)
+        if (_hasTFile)
           _ROOToutFile->Write();
         //_ROOToutFile->Close();
-        #endif
         /// @todo We should close the file. Shouldn't we also delete the histo pointers?... or are they owned by the file?
+        #endif
       }
 
 

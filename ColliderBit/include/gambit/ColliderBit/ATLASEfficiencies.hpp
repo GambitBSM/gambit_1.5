@@ -24,6 +24,7 @@ namespace Gambit {
       //@{
 
         /// Randomly filter the supplied particle list by parameterised electron tracking efficiency
+        /// @todo Remove? This is not the electron efficiency
         inline void applyElectronTrackingEff(std::vector<HEPUtils::Particle*>& electrons) {
           static HEPUtils::BinnedFn2D<double> _elTrackEff2d({{0, 1.5, 2.5, DBL_MAX}}, //< |eta|
                                                             {{0, 0.1, 1.0, 100, DBL_MAX}}, //< pT
@@ -47,6 +48,7 @@ namespace Gambit {
 
 
         /// Randomly filter the supplied particle list by parameterised muon tracking efficiency
+        /// @todo Remove? This is not the muon efficiency
         inline void applyMuonTrackEff(std::vector<HEPUtils::Particle*>& muons) {
           static HEPUtils::BinnedFn2D<double> _muTrackEff2d({{0,1.5,2.5,DBL_MAX}}, //< |eta|
                                                             {{0,0.1,1.0,DBL_MAX}}, //< pT
@@ -69,7 +71,8 @@ namespace Gambit {
 
 
         /// Randomly filter the supplied particle list by parameterised Run 1 tau efficiency
-        /// @note From Delphes 3.1.2; https://cds.cern.ch/record/1233743/files/ATL-PHYS-PUB-2010-001.pdf is more accurate and has pT-dependence
+        /// @note From Delphes 3.1.2
+        /// @todo Use https://cds.cern.ch/record/1233743/files/ATL-PHYS-PUB-2010-001.pdf -- it is more accurate and has pT-dependence
         inline void applyTauEfficiencyR1(std::vector<HEPUtils::Particle*>& taus) {
           // No delete, because this should only ever be applied to copies of the Event Particle* vectors in Analysis routines
           filtereff(taus, 0.40, false);
@@ -77,10 +80,10 @@ namespace Gambit {
 
 
         /// Randomly filter the supplied particle list by parameterised Run 2 tau efficiency
-        /// @note From Delphes 3.3.2 & ATL-PHYS-PUB-2015-045, 60% for 1-prong, 70% for 2-prong.
+        /// @note From Delphes 3.3.2 & ATL-PHYS-PUB-2015-045, 60% for 1-prong, 70% for multi-prong: this is *wrong*!!
+        /// @note No delete, because this should only ever be applied to copies of the Event Particle* vectors in Analysis routines
         inline void applyTauEfficiencyR2(std::vector<HEPUtils::Particle*>& taus) {
-          // No delete, because this should only ever be applied to copies of the Event Particle* vectors in Analysis routines
-          filtereff(taus, 0.65, false);
+
           // Delphes 3.3.2 config:
           //   set DeltaR 0.2
           //   set DeltaRTrack 0.2
@@ -98,6 +101,19 @@ namespace Gambit {
           //   add EfficiencyFormula {2} {0.60}
           //   add EfficiencyFormula {-1} {0.02}
           //   add EfficiencyFormula {-2} {0.01}
+          // filtereff(taus, 0.65, false);
+
+          // Distributions from ATL-PHYS-PUB-2015-045, Fig 10
+          const static std::vector<double> binedges_pt    = { 0.,  20.,  40.,   60.,   120.,  160.,   220.,   280.,   380.,    500.,  DBL_MAX };
+          const static std::vector<double> bineffs_pt_1p  = {    0.,  .54,  .55,   .56,    .58,   .57,    .56,    .54,     .51,     0. };
+          const static std::vector<double> bineffs_pt_3p  = {    0.,  .40,  .41,   .42,    .46,   .46,    .43,    .39,     .33,     0. };
+          const static HEPUtils::BinnedFn1D<double> _eff_pt_1p(binedges_pt, bineffs_pt_1p);
+          const static HEPUtils::BinnedFn1D<double> _eff_pt_3p(binedges_pt, bineffs_pt_3p);
+          // 85% 1-prong, 15% >=3-prong
+          const static std::vector<double> bineffs_pt_avg = {    0.,  .52,  .53,   .54,    .56,   .55,    .54,    .52,     .48,     0. };
+          const static HEPUtils::BinnedFn1D<double> _eff_pt_avg(binedges_pt, bineffs_pt_avg);
+          filtereff_pt(taus, _eff_pt_avg, false);
+
         }
 
 

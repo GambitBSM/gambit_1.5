@@ -14,12 +14,10 @@ namespace Gambit {
     /// Return a random true/false at a success rate given by a number
     bool random_bool(double eff);
 
-
     /// Return a random true/false at a success rate given by a 1D efficiency map
     inline bool random_bool(const HEPUtils::BinnedFn1D<double>& effmap, double x) {
       return random_bool( effmap.get_at(x) );
     }
-
 
     /// Return a random true/false at a success rate given by a 2D efficiency map
     inline bool random_bool(const HEPUtils::BinnedFn2D<double>& effmap, double x, double y) {
@@ -27,10 +25,11 @@ namespace Gambit {
     }
 
 
-
     /// Utility function for filtering a supplied particle vector by sampling wrt an efficiency scalar
     void filtereff(std::vector<HEPUtils::Particle*>& particles, double eff, bool do_delete=true);
 
+    /// Utility function for filtering a supplied particle vector by sampling wrt a binned 1D efficiency map in pT
+    void filtereff_pt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn1D<double>& eff_pt, bool do_delete=true);
 
     /// Utility function for filtering a supplied particle vector by sampling wrt a binned 2D efficiency map in |eta| and pT
     void filtereff_etapt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn2D<double>& eff_etapt, bool do_delete=true);

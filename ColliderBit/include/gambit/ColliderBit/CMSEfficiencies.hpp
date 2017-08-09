@@ -166,6 +166,8 @@ namespace Gambit {
       ///
       /// Function that mimics the DELPHES jet momentum resolution.
       /// We need to smear pT, then recalculate E, then reset the 4-vector
+      ///
+      /// @todo Update cf. Matthias study for ATLAS
       inline void smearJets(std::vector<HEPUtils::Jet*>& jets) {
 
         // Const resolution for now
@@ -190,6 +192,8 @@ namespace Gambit {
       ///
       /// We need to smear pT, then recalculate E, then reset the 4-vector.
       /// Same as for jets, but on a vector of particles. (?)
+      ///
+      /// @todo Update cf. Matthias study for ATLAS
       inline void smearTaus(std::vector<HEPUtils::Particle*>& taus) {
 
         // Const resolution for now

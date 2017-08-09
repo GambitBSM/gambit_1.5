@@ -281,8 +281,8 @@ namespace Gambit {
         }
 
         //Make b jet container
-        const std::vector<double>  a = {0,10.};
-        const std::vector<double>  b = {0,10000.};
+        const std::vector<double> a = {0,10.};
+        const std::vector<double> b = {0,10000.};
         const std::vector<double> c = {0.8};
         HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
 

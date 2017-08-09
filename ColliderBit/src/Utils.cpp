@@ -25,6 +25,19 @@ namespace Gambit {
     }
 
 
+    /// Utility function for filtering a supplied particle vector by sampling wrt a binned 1D efficiency map in pT
+    void filtereff_pt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn1D<double>& eff_pt, bool do_delete) {
+      if (particles.empty()) return;
+      auto keptParticlesEnd = std::remove_if(particles.begin(), particles.end(),
+                                             [&](const HEPUtils::Particle* p) {
+                                               const bool rm = !random_bool(eff_etapt, p->pT());
+                                               if (do_delete && rm) delete p;
+                                               return rm;
+                                             } );
+      particles.erase(keptParticlesEnd, particles.end());
+    }
+
+
     /// Utility function for filtering a supplied particle vector by sampling wrt a binned 2D efficiency map in |eta| and pT
     void filtereff_etapt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn2D<double>& eff_etapt, bool do_delete) {
       if (particles.empty()) return;
