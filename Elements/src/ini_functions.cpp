@@ -229,7 +229,6 @@ namespace Gambit
      #ifdef HAVE_MATHEMATICA
         int WSerrno;
         std::ostringstream err;
-        Backends::backendInfo().Mathematica_OK[be+ver] = true;
 
         // If the file does not exists do not wait for Mathematica to figure it out
         std::ifstream f(path.c_str());
@@ -308,7 +307,6 @@ namespace Gambit
         err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. Please install/buy Mathematica and/or WSTP before using this backend." << endl;
         backend_warning().raise(LOCAL_INFO,err.str());
         Backends::backendInfo().works[be+ver] = false;
-        Backends::backendInfo().Mathematica_OK[be+ver] = false;
       #endif
     }
     catch (std::exception& e) { ini_catch(e); }

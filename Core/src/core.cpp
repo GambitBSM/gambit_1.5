@@ -577,7 +577,11 @@ namespace Gambit
       }
       else if (backendData->needsMathematica.at(be+version))
       {
-        status = (backendData->Mathematica_OK.at(be+version) ? bad : missingMath);
+        #ifdef HAVE_MATHEMATICA
+          status = bad;
+        #else
+          status = missingMath;
+        #endif
       }
       else { status = bad; }
       if (status == bad or status == badclass) no_failures = false;

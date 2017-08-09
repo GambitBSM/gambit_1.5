@@ -73,9 +73,6 @@ namespace Gambit
         std::map<str,bool> needsMathematica;
 
         /// Key: backend name + version
-        std::map<str,bool> Mathematica_OK;
-
-        /// Key: backend name + version
         std::map<str,bool> classloader;
 
         /// Key: backend name + version
