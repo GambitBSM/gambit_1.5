@@ -30,7 +30,7 @@ namespace Gambit {
       if (particles.empty()) return;
       auto keptParticlesEnd = std::remove_if(particles.begin(), particles.end(),
                                              [&](const HEPUtils::Particle* p) {
-                                               const bool rm = !random_bool(eff_etapt, p->pT());
+                                               const bool rm = !random_bool(eff_pt, p->pT());
                                                if (do_delete && rm) delete p;
                                                return rm;
                                              } );
