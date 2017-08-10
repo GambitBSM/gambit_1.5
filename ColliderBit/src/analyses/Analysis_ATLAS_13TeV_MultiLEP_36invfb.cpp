@@ -91,7 +91,6 @@ namespace Gambit {
 	_numSR3_WZ_1Jb=0;
 	_numSR3_WZ_1Jc=0;
 
-
 	set_luminosity(36.1);
 
 	NCUTS1=22;
@@ -177,10 +176,11 @@ namespace Gambit {
 	vector<HEPUtils::Jet*> signalJets;
 	vector<HEPUtils::Jet*> signalBJets;
 
-        const vector<double>  a = {0,10.};
-        const vector<double>  b = {0,10000.};
-        const vector<double> c = {0.77};
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+        const vector<double>  aBJet={0,10.};
+        const vector<double>  bBJet={0,30., 40., 50., 70., 80., 90., 100.,150., 200., 10000.};
+        const vector<double> cBJet={0.63, 0.705, 0.745, 0.76, 0.775, 0.79,0.795, 0.805, 0.795, 0.76};
+        HEPUtils::BinnedFn2D<double> _eff2d(aBJet,bBJet,cBJet);
+
 	vector<HEPUtils::Jet*> overlapJet;
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
 	  vector<HEPUtils::Particle*> overlapEl;
@@ -962,7 +962,7 @@ namespace Gambit {
 	}
 
 	if (analysisRunName.find("300_150") != string::npos) {
-	  cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{1}^{\\mp}$ decay via $tilde{l}$, $[\\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{1}^{0}]: [300,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+	  cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{1}^{\\mp}$ decay via $\\tilde{l}$, $[\\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{1}^{0}]: [300,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
           cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
           cutflowFile<<"$\\sigma (pp\\to \\tilde{l}^{\\pm}\\tilde{l}^{\\mp})$ &"<<setprecision(4)<<xsec5ATLAS_300_150<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec5ATLAS_300_150<<" & 1\\\\"<<endl;
           cutflowFile<<"Generated Events &"<< cutFlowVector5ATLAS_300_150[0]<<"&"<<cutFlowVector5[0]<<"& - & -\\\\ \\hline"<<endl;

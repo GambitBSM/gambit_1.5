@@ -251,10 +251,7 @@ Rules:
                              "PartonLevel:ISR = on",
                              "PartonLevel:FSR = off",
                              "HadronLevel:all = on",
-                             "SUSY:all = off",
-                             "SUSY:qqbar2chi+-chi0 = on",
-                             "SUSY:idA = 1000023",
-                             "SUSY:idB = 1000024",
+                             "SUSY:all = on",
                              "TauDecays:mode = 0"]
       Pythia_SUSY_LHC_13TeV: ["Print:quiet = on",
                              "PartonLevel:MPI = off",
@@ -262,16 +259,23 @@ Rules:
                              "PartonLevel:FSR = off",
                              "HadronLevel:all = on",
                              "SUSY:all = off",
-                             "SUSY:qqbar2chi+-chi0 = on",
-                             "SUSY:idA = 1000023",
-                             "SUSY:idB = 1000024",
+                             "SUSY:qqbar2chi+-chi0 = on", 
+                             "SUSY:idA = 1000024", 
+                             "SUSY:idB = 1000023", 
+                            # "SUSY:qqbar2chi+chi- = on",
+                             #"SUSY:qqbar2sleptonantislepton = on",
                              "TauDecays:mode = 0"]
       # Don't bother generating events if the estimated upper limit on the cross-section is below this value [fb].
       # (The cross-section values 0.048 fb and 0.075 fb correspond to ~1 expected event at L = 20.7 fb^-1 and L = 13.3 fb^-1, respectively.)
-      xsec_vetos: [0.048, 0.075]
+      xsec_vetos: [0.00, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_200_100.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_400_200.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_500_100.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_300_150.slha"] 
       SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_800_600.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_401_1.slha"] 
 
   # Delphes rules and options (ex. the Delphes configuration card file)
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
