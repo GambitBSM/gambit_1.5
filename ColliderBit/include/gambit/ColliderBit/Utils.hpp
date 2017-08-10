@@ -13,6 +13,85 @@ namespace Gambit {
     static const double GeV = 1, MeV = 1e-3, TeV = 1e3;
 
 
+    /// @name Deterministic filtering by cuts
+    //@{
+
+    /// Convenience combination of remove_if and erase
+    template <typename CONTAINER, typename RMFN>
+    void iremoveerase(CONTAINER& c, const RMFN& fn) {
+      auto newend = std::remove_if(c.begin(), c.end(), fn);
+      c.erase(newend, c.end());
+    }
+
+    /// In-place filter a supplied particle vector by rejecting those which fail a supplied cut
+    template <typename MOM>
+    inline void ifilter_reject(std::vector<MOM*>& particles,
+                               const std::function<bool(const MOM*)>& rejfn, bool do_delete=true) {
+      iremoveerase(particles, [&](HEPUtils::Particle* p) {
+          const bool rm = rejfn(p);
+          if (rm && do_delete) delete p;
+          return rm;
+        });
+    }
+
+    /// In-place filter a supplied particle vector by keeping those which pass a supplied cut
+    template <typename MOM>
+    void ifilter_select(std::vector<MOM*>& particles,
+                        const std::function<bool(const MOM*)>& selfn, bool do_delete=true) {
+      ifilter_reject(particles, [&](const MOM* p) { return !selfn(p); });
+    }
+
+
+    /// Filter a supplied particle vector by rejecting those which fail a supplied cut
+    /// @todo Optimise by only copying those which are selected (filter_select is canonical)
+    template <typename MOM>
+    std::vector<HEPUtils::Particle*> filter_reject(std::vector<MOM*>& particles,
+                                                   const std::function<bool(const MOM*)>& rejfn, bool do_delete=true) {
+      std::vector<MOM*> rtn = particles;
+      ifilter_reject(rtn, rejfn);
+      return rtn;
+    }
+
+    /// Filter a supplied particle vector by keeping those which pass a supplied cut
+    template <typename MOM>
+    std::vector<HEPUtils::Particle*> filter_select(const std::vector<MOM*>& particles,
+                                                   const std::function<bool(const MOM*)>& selfn, bool do_delete=true) {
+      return filter_reject(particles, [&](const MOM* p) { return !selfn(p); });
+    }
+
+
+
+
+    /// @todo Provide random selection functors from const, 1D map, 2D map, and eff functor
+
+
+
+    // /// In-place filter a supplied particle vector by keeping those which pass a supplied cut
+    // void ifilter_select(std::vector<HEPUtils::Particle*>& particles,
+    //                     const std::function<bool(const HEPUtils::Particle*)>& selfn, bool do_delete=true);
+
+    // /// In-place filter a supplied particle vector by rejecting those which fail a supplied cut
+    // inline void ifilter_reject(std::vector<HEPUtils::Particle*>& particles,
+    //                            const std::function<bool(const HEPUtils::Particle*)>& rejfn, bool do_delete=true) {
+    //   ifilter_select(particles, [](const HEPUtils::Particle* p) { return !rejfn(p); });
+    // }
+
+    // /// Filter a supplied particle vector by keeping those which pass a supplied cut
+    // std::vector<HEPUtils::Particle*> filter_select(const std::vector<HEPUtils::Particle*>& particles,
+    //                                                const std::function<bool(const HEPUtils::Particle*)>& selfn, bool do_delete=true);
+
+    // /// Filter a supplied particle vector by rejecting those which fail a supplied cut
+    // std::vector<HEPUtils::Particle*> filter_reject(std::vector<HEPUtils::Particle*>& particles,
+    //                                                const std::function<bool(const HEPUtils::Particle*)>& rejfn, bool do_delete=true) {
+    //   return filter_select(particles, [](const HEPUtils::Particle* p) { return !rejfn(p); });
+    // }
+
+    //@}
+
+
+    /// @name Random booleans sampled from efficiency maps
+    //@{
+
     /// Return a random true/false at a success rate given by a number
     bool random_bool(double eff);
 
@@ -26,6 +105,11 @@ namespace Gambit {
       return random_bool( effmap.get_at(x, y) );
     }
 
+    //@}
+
+
+    /// @name Random filtering by efficiency
+    //@{
 
     /// Utility function for filtering a supplied particle vector by sampling wrt an efficiency scalar
     void filtereff(std::vector<HEPUtils::Particle*>& particles, double eff, bool do_delete=true);
@@ -39,6 +123,11 @@ namespace Gambit {
     /// Utility function for filtering a supplied particle vector by sampling wrt a binned 2D efficiency map in |eta| and pT
     void filtereff_etapt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn2D<double>& eff_etapt, bool do_delete=true);
 
+    //@}
+
+
+    /// @name Tagging
+    //@{
 
     /// Randomly get a tag result (can be anything) from a 2D |eta|-pT efficiency map
     /// @todo Also need 1D? Sampling in what variable?
@@ -48,6 +137,15 @@ namespace Gambit {
       } catch (...) {
         return false; // No tag if outside lookup range... be careful!
       }
+    }
+    /// Alias
+    inline bool has_tag(double eta, double pt, const HEPUtils::BinnedFn2D<double>& effmap) {
+      return has_tag(eta, pt, effmap);
+    }
+
+    /// Randomly get a tag result (can be anything) from a 2D |eta|-pT efficiency map
+    inline bool has_tag_etapt(const HEPUtils::Jet* j, const HEPUtils::BinnedFn2D<double>& effmap) {
+      return has_tag(j->eta(), j->pT(), effmap);
     }
 
 
