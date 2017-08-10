@@ -25,7 +25,8 @@ namespace Gambit {
     }
 
 
-    void filtereff(std::vector<HEPUtils::Particle*>& particles, std::function<double(HEPUtils::Particle*)> eff_fn, bool do_delete=true) {
+    /// Utility function for filtering a supplied particle vector by sampling wrt a binned 1D efficiency map in pT
+    void filtereff(std::vector<HEPUtils::Particle*>& particles, std::function<double(HEPUtils::Particle*)> eff_fn, bool do_delete) {
       if (particles.empty()) return;
       auto keptParticlesEnd = std::remove_if(particles.begin(), particles.end(),
                                              [&](HEPUtils::Particle* p) {
@@ -38,7 +39,7 @@ namespace Gambit {
     }
 
 
-    /// Utility function for filtering a supplied particle vector by sampling wrt a binned 1D efficiency map in pT
+    // Utility function for filtering a supplied particle vector by sampling wrt a binned 1D efficiency map in pT
     void filtereff_pt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn1D<double>& eff_pt, bool do_delete) {
       if (particles.empty()) return;
       auto keptParticlesEnd = std::remove_if(particles.begin(), particles.end(),
@@ -51,7 +52,7 @@ namespace Gambit {
     }
 
 
-    /// Utility function for filtering a supplied particle vector by sampling wrt a binned 2D efficiency map in |eta| and pT
+    // Utility function for filtering a supplied particle vector by sampling wrt a binned 2D efficiency map in |eta| and pT
     void filtereff_etapt(std::vector<HEPUtils::Particle*>& particles, const HEPUtils::BinnedFn2D<double>& eff_etapt, bool do_delete) {
       if (particles.empty()) return;
       auto keptParticlesEnd = std::remove_if(particles.begin(), particles.end(),
@@ -62,6 +63,7 @@ namespace Gambit {
                                              } );
       particles.erase(keptParticlesEnd, particles.end());
     }
+
 
 
   }

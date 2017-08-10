@@ -2,7 +2,8 @@
 #include "HEPUtils/MathUtils.h"
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
-#include <function>
+#include "HEPUtils/FastJet.h"
+#include <functional>
 
 namespace Gambit {
   namespace ColliderBit {
@@ -59,12 +60,32 @@ namespace Gambit {
 
 
     /// Make a vector of central bin values from a vector of bin edge values using linear interpolation
-    inline std::vector<double> makeBinValues(const std::vector<double>& binEdgeValues) {
+    inline std::vector<double> mk_bin_values(const std::vector<double>& binEdgeValues) {
       std::vector<double> results;
       results.reserve(binEdgeValues.size()-1);
       for (size_t i = 0; i < binEdgeValues.size()-1; ++i)
         results.push_back( (binEdgeValues[i] + binEdgeValues[i+1])/2.0 );
       return results;
+    }
+    /// Alias
+    inline std::vector<double> makeBinValues(const std::vector<double>& binEdgeValues) {
+      return mk_bin_values(binEdgeValues);
+    }
+
+
+    /// Run jet clustering from any P4-compatible momentum type
+    template <typename MOM>
+    inline std::vector<HEPUtils::Jet*> get_jets(const std::vector<MOM*>& moms, double R,
+                                                double ptmin=0*GeV, FJNS::JetAlgorithm alg=FJNS::antikt_algorithm) {
+      // Make PseudoJets
+      std::vector<FJNS::PseudoJet> constituents;
+      for (const MOM* p : moms) constituents.push_back(HEPUtils::mk_pseudojet(*p));
+      // Run clustering
+      std::vector<FJNS::PseudoJet> jets = HEPUtils::get_jets(constituents, R, ptmin, alg);
+      // Make newly-allocated Jets
+      std::vector<HEPUtils::Jet*> rtn;
+      for (const FJNS::PseudoJet* j : jets) rtn.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
+      return rtn;
     }
 
 
@@ -84,19 +105,18 @@ namespace Gambit {
       return std::all_of(std::begin(c), std::end(c), f);
     }
 
-
     /// Non-iterator version of std::any_of
     template <typename CONTAINER, typename FN>
     inline bool any_of(const CONTAINER& c, const FN& f) {
       return std::any_of(std::begin(c), std::end(c), f);
     }
 
-
     /// Non-iterator version of std::none_of
     template <typename CONTAINER, typename FN>
     inline bool none_of(const CONTAINER& c, const FN& f) {
       return std::none_of(std::begin(c), std::end(c), f);
     }
+
 
 
   }
