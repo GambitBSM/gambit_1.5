@@ -69,7 +69,7 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
 
-	analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_250_0";
+	analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb_130_0";
 
 	vector<const char*> variablesNames = {"met","mct","mbb","mt","j0pt","lpt","nbj","j1pt","j0eta","j1eta","jjdeltaR"};
 	plots_2bjets = new Perf_Plot(analysisRunName+"_2bjets", &variablesNames);
@@ -88,12 +88,13 @@ namespace Gambit {
         double met = event->met();
 
         // Baseline objects
-        const vector<double>  a = {0,10.};
-        const vector<double>  b = {0,10000.};
-	const vector<double>  a2 = {0,2.1,10.};
-	const vector<double>  b2 = {0,30.,40.,50.,70.,10000.};
+        const vector<double>  aLep = {0,10.};
+        const vector<double>  bLep = {0,10000.};
+	const vector<double>  aBJet = {0,2.1,10.};
+	const vector<double>  bBJet = {0,30.,40.,50.,70.,10000.};
+
         const vector<double> cEl = {0.95};
-        HEPUtils::BinnedFn2D<double> _eff2dEl(a,b,cEl);
+        HEPUtils::BinnedFn2D<double> _eff2dEl(aLep,bLep,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           bool hasTrig=has_tag(_eff2dEl, electron->eta(), electron->pT());
@@ -103,8 +104,8 @@ namespace Gambit {
 
         const vector<double> cMu1 = {0.7};
         const vector<double> cMu2 = {0.85};
-        HEPUtils::BinnedFn2D<double> _eff2dMu1(a,b,cMu1);
-        HEPUtils::BinnedFn2D<double> _eff2dMu2(a,b,cMu2);
+        HEPUtils::BinnedFn2D<double> _eff2dMu1(aLep,bLep,cMu1);
+        HEPUtils::BinnedFn2D<double> _eff2dMu2(aLep,bLep,cMu2);
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT()>10. && muon->abseta()<2.4) {
@@ -177,9 +178,8 @@ namespace Gambit {
         } 
 	       
 
-        //const vector<double> cBJet={0.70};
         const vector<double> cBJet={0.54,0.63,0.67,0.7,0.75,0.35,0.42,0.44,0.46,0.49};
-        HEPUtils::BinnedFn2D<double> _eff2dBJet(a2,b2,cBJet);
+        HEPUtils::BinnedFn2D<double> _eff2dBJet(aBJet,bBJet,cBJet);
         for (size_t iJet=0;iJet<overlapJets.size();iJet++) {
           if (overlapJets.at(iJet)->pT()>25. && overlapJets.at(iJet)->abseta()<2.40) {
 	    signalJets.push_back(overlapJets.at(iJet));  
@@ -317,26 +317,41 @@ namespace Gambit {
 
       void collect_results() {
 
-	if (cutFlowVector[0]>0) {
-
 	string path = "ColliderBit/results/cutflow_";
 	path.append(analysisRunName);
 	path.append(".txt");
 	cutflowFile.open(path.c_str());
-	cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
-	cutflowFile<<"\\hline"<<endl;
-	cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
-	cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecATLAS_250_0<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecATLAS_250_0<<" & 1\\\\"<<endl;
-	cutflowFile<<"Generated Events &"<< cutFlowVectorATLAS_250_0[0]<<"&"<<cutFlowVector[0]<<"& - & -\\\\ \\hline"<<endl;
-	cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
-        for (size_t i=1; i<NCUTS; i++) {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_250_0[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_250_0[i]<<"&"<<(xsecATLAS_250_0/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_250_0[i]<<"\\\\"<< endl;
-        }
-	cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-        for (size_t i=1; i<NCUTS; i++) {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_250_0[i]*100./cutFlowVectorATLAS_250_0[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
-        }
-	cutflowFile<<"\\end{tabular}"<<endl;
+
+        if (analysisRunName.find("250_0") != string::npos) {
+          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/h$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [250,0] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+	  cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
+	  cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecATLAS_250_0<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecATLAS_250_0<<" & 1\\\\"<<endl;
+	  cutflowFile<<"Generated Events &"<< cutFlowVectorATLAS_250_0[0]<<"&"<<cutFlowVector[0]<<"& - & -\\\\ \\hline"<<endl;
+	  cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
+          for (size_t i=1; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_250_0[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_250_0[i]<<"&"<<(xsecATLAS_250_0/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_250_0[i]<<"\\\\"<< endl;
+          }
+	  cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+          for (size_t i=1; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_250_0[i]*100./cutFlowVectorATLAS_250_0[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+          }
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+	}
+        if (analysisRunName.find("130_0") != string::npos) {
+          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/h$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [130,0] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+	  cutflowFile<<"& ATLAS & GAMBIT & GAMBIT/ATLAS & $\\sigma$-corrected GAMBIT/ATLAS \\\\ \\hline"<<endl;
+	  cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecATLAS_130_0<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecATLAS_130_0<<" & 1\\\\"<<endl;
+	  cutflowFile<<"Generated Events &"<< cutFlowVectorATLAS_130_0[0]<<"&"<<cutFlowVector[0]<<"& - & -\\\\ \\hline"<<endl;
+	  cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
+          for (size_t i=1; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_130_0[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_130_0[i]<<"&"<<(xsecATLAS_130_0/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorATLAS_130_0[i]<<"\\\\"<< endl;
+          }
+	  cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+          for (size_t i=1; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorATLAS_130_0[i]*100./cutFlowVectorATLAS_130_0[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+          }
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+	}
 	cutflowFile.close();
 
 	plots_2bjets->createFile(luminosity(),xsec_per_event());
@@ -345,7 +360,6 @@ namespace Gambit {
 	plots_HEPmt->createFile(luminosity(),xsec_per_event());
 	plots_HEPnbj->createFile(luminosity(),xsec_per_event());
 	plots_HEPmbb->createFile(luminosity(),xsec_per_event());
-	}
 
 	SignalRegionData results_SRA;
         results_SRA.analysis_name = "Analysis_ATLAS_8TeV_1LEPbb_20invfb";

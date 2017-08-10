@@ -196,7 +196,8 @@ Rules:
                              "TauDecays:mode = 0"]
       xsec_vetos: [0.048, 0.075]
 
-      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_Test.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_225_75.slha"] 
+      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_250_1.slha"] 
 
   - capability: DetectorSim
     type: "Gambit::ColliderBit::DelphesVanilla"

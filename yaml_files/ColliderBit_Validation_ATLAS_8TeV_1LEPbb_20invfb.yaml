@@ -268,8 +268,8 @@ Rules:
       xsec_vetos: [0.048, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
-      SLHA_filenames: ["ColliderBit/data/ATLAS_8TeV_1LEPbb_20invfb_250_0.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/ATLAS_8TeV_1LEPbb_20invfb_130_0.slha"]
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_8TeV_1LEPbb_20invfb_250_0.slha"] 
+      SLHA_filenames: ["ColliderBit/data/ATLAS_8TeV_1LEPbb_20invfb_130_0.slha"]
 
   # Delphes rules and options (ex. the Delphes configuration card file)
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
