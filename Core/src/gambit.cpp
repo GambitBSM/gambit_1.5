@@ -31,6 +31,7 @@ void do_cleanup()
 {
   Gambit::Scanner::Plugins::plugin_info.dump(); // Also calls printer finalise() routine
 }
+\
 
 /// Main GAMBIT program
 int main(int argc, char* argv[])
@@ -44,6 +45,29 @@ int main(int argc, char* argv[])
   #ifdef WITH_MPI
     bool allow_finalize(true);
     GMPI::Init();
+  #endif
+
+  /// Idea by Tom Fogal, for optionally preventing execution of code until debugger allows it
+  /// Source: http://www.sci.utah.edu/~tfogal/academic/Fogal-ParallelDebugging.pdf
+  #ifdef WITH_MPI
+  {
+     GMPI::Comm temp_comm;
+     int rank = temp_comm.Get_rank();
+     if( getenv("GAMBIT_MPI_DEBUG") != NULL )
+     {
+        fprintf(stderr, "pid %li (rank %i) waiting for debugger \n", (long)getpid(), rank);
+        if( rank==0 )
+        {
+           volatile int i = 0;
+           while(i == 0) { /* change ’i’ in the debugger */ } 
+           fprintf(stderr, "Variable 'i' changed externally; resuming execution! \n");
+        }
+     }
+     temp_comm.Barrier(); 
+     // All processes wait at the barrier until process 0 is "released" by debugger.
+     // If try/catch etc needs to be set for other processes, do those first before
+     // releasing process zero.
+  }
   #endif
 
   { // Scope to ensure that all MPI communicators get destroyed before Finalize is called.

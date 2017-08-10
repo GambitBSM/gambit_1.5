@@ -56,8 +56,14 @@ project(gambit C CXX Fortran)
 
 # Disable clang support
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  message(FATAL_ERROR "GAMBIT does not support the Clang compiler. Please choose another compiler.")
+  message(FATAL_ERROR "\nYou seem to have selected the Clang compiler.  Beware that if you are using a mac, Clang may be your default compiler even though you might think it is gcc.  You can thank Apple for that, not GAMBIT/cmake.  \nGAMBIT does not support the Clang compiler. Please choose another compiler.")
 endif()
+
+# Make sure the user hasn't accidentally passed gcc instead of g++.
+if (CMAKE_CXX_COMPILER MATCHES "gcc$")
+  message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  I don't think that means what you think it means.  Do you really want to compile C++ with gcc rather than g++?")
+endif()
+
 
 # Use ccache to speed up re-compiling if it is available
 #find_program(CCACHE_FOUND ccache)
@@ -87,8 +93,15 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(cmake/utilities.cmake)
 
 # Check for Python and required libs
-include(FindPythonInterp)
-find_package(PythonInterp REQUIRED)
+find_package(PythonInterp 2 REQUIRED)
+if (PYTHON_VERSION_MAJOR GREATER 2)
+  message(FATAL_ERROR "\nGAMBIT requires Python 2.  \nIf you need to set the path to the Python interpreter manually, "
+                      "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
+endif()
+if (PYTHON_VERSION_MINOR LESS 6)
+  message("${Red}   Python version < 2.6.  GAMBIT has not been tested with this version; upgrade Python if you experience problems.${ColourReset}")
+endif()
+find_package(PythonLibs)
 foreach(module yaml os re datetime sys getopt shutil itertools)
   find_python_module(${module} REQUIRED)
 endforeach()
@@ -133,24 +146,23 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
 endforeach()
 
-# Check for C++11 support -- if we use special c++11 features we should check for them too at a later stage...
+# Check for C++11 and C++14 support
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-  if(COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-  else()
-   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-  endif()
-endif()
-
-# Check for C++14 support, just in case any scanner plugin codes want to use it.
 CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+else()
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  else()
+    CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+    if(COMPILER_SUPPORTS_CXX0X)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    else()
+      message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+    endif()
+  endif()
 endif()
 
 # Check for Boost
@@ -236,12 +248,18 @@ endif()
 # Check for optional packages and disable sections of GAMBIT accordingly
 include(cmake/optional.cmake)
 
-# Look for the tarball version file; if it is missing, set the version number directly from git tag
-if(EXISTS "${PROJECT_SOURCE_DIR}/cmake/tarball_info.cmake")
-  include(cmake/tarball_info.cmake)
-else()
+# Look for the latest tag and use it to set the version number.  If there is no such tag, use the tarball info file.
+find_package(Git)
+if(GIT_FOUND)
   get_version_from_git(GAMBIT_VERSION_MAJOR GAMBIT_VERSION_MINOR GAMBIT_VERSION_REVISION
                        GAMBIT_VERSION_PATCH GAMBIT_VERSION_FULL)
+  if (GAMBIT_VERSION_MAJOR)
+    message("${BoldYellow}   GAMBIT version detected from git tag: ${GAMBIT_VERSION_FULL}${ColourReset}")
+  endif()
+endif()
+if(NOT GIT_FOUND OR NOT GAMBIT_VERSION_MAJOR)
+  message("${BoldYellow}   GAMBIT version not detected via git.  Reverting to cmake/tarball_info.cmake.${ColourReset}")
+  include(cmake/tarball_info.cmake)
 endif()
 
 # Add doxygen build as an external project
@@ -270,7 +288,7 @@ endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
   message("${Yellow}-- Updating GAMBIT scanner cmake and related files${ColourReset}")
   set(scanner_harvester ${PROJECT_SOURCE_DIR}/ScannerBit/scripts/scanner+_harvester.py ${PROJECT_BINARY_DIR} -x __not_a_real_name__,${itch_with_commas})
-  execute_process(RESULT_VARIABLE result COMMAND python ${scanner_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  execute_process(RESULT_VARIABLE result COMMAND ${PYTHON_EXECUTABLE} ${scanner_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   check_result(${result} ${scanner_harvester})
   message("${Yellow}-- Updating GAMBIT scanner cmake and related files - done.${ColourReset}")
 endif()
@@ -328,7 +346,7 @@ endif()
 # Generate the CMakeLists.txt files for GAMBIT modules, Backends, Models and Printers)
 message("${Yellow}-- Updating GAMBIT module, model, backend, and printer CMake files.${ColourReset}")
 set(update_cmakelists ${PROJECT_SOURCE_DIR}/cmake/scripts/update_cmakelists.py -x __not_a_real_name__,${itch_with_commas})
-execute_process(RESULT_VARIABLE result COMMAND python ${update_cmakelists} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+execute_process(RESULT_VARIABLE result COMMAND ${PYTHON_EXECUTABLE} ${update_cmakelists} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 check_result(${result} ${update_cmakelists})
 message("${Yellow}-- Updating GAMBIT module, backend, and printer CMake files - done.${ColourReset}")
 
