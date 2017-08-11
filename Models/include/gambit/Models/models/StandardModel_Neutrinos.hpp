@@ -26,8 +26,9 @@
   DEFINEPARS(min_mass, ordering, md21, md31, md23)
 
   // PMNS parameters
-  DEFINEPARS(theta12, theta23, theta13)
-  DEFINEPARS(delta, alpha1, alpha2)
+  // TODO: Change this names when the conflict with StandardModel_SLHA2 is fixed
+  DEFINEPARS(t12, t23, t13)
+  DEFINEPARS(delta, a1, a2)
 
 #undef MODEL
 
