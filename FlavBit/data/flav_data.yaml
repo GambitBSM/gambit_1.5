@@ -1563,10 +1563,12 @@
 
 - name: BR_muegamma
   islimit: true
-  exp_value: 5.7e-13
+  one_sided: false
+  exp_value: -2.2e-13
+  exp_90_CL: 4.2e-13
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1605.05081
   th_error: 0.
   th_error_type: M
   th_error_source:

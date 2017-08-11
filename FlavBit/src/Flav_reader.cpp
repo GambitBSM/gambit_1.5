@@ -51,9 +51,17 @@ namespace Gambit
       v.name=node["name"].as<std::string>();
       v.is_limit = node["islimit"].as<bool>();
       v.exp_value= node["exp_value"].as<double>();
+      if(node["exp_90_CL"]) v.exp_90_CL = node["exp_90_CL"].as<double>();
+      if(node["exp_95_CL"]) v.exp_95_CL = node["exp_95_CL"].as<double>();
+      if(node["exp_one_sided"]) v.exp_one_sided = node["exp_one_sided"].as<bool>();
       v.exp_source = node["exp_source"].as<std::string>();
       v.exp_stat_error = node["exp_stat_error"].as<double>();
       v.exp_sys_error = node["exp_sys_error"].as<double>();
+      if(v.is_limit and !v.exp_stat_error and (v.exp_90_CL or v.exp_95_CL))
+      {
+        v.exp_stat_error = 
+          Flav_reader::get_error_from_confidence_levels(v.exp_value, v.exp_90_CL, v.exp_95_CL, v.exp_one_sided);
+      }
       v.exp_error=sqrt( v.exp_stat_error*v.exp_stat_error + v.exp_sys_error*v.exp_sys_error );
       v.th_error=node["th_error"].as<double>();
       v.th_error_type=node["th_error_type"].as<std::string>();
@@ -245,5 +253,25 @@ namespace Gambit
       }
     }
 
+    double Flav_reader::get_error_from_confidence_levels(double exp_value, double CL_90, double CL_95, bool one_sided)
+    {
+      double error = 0;
+      if(one_sided)
+      {
+        if(CL_90 != 0)
+          error = fabs(exp_value - CL_90)/1.28;
+        else if (CL_95 != 0)
+          error =fabs(exp_value - CL_95)/1.64;
+      }
+      else
+      {
+        if(CL_90 != 0)
+          error = fabs(exp_value - CL_90)/1.64;
+        else if(CL_95 != 0)
+          error = fabs(exp_value - CL_95)/1.96;
+      }
+      return error;
+
+    }
   }
 }
