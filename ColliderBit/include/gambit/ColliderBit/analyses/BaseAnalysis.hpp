@@ -4,11 +4,13 @@
 ///  \file
 ///
 ///  The BaseAnalysis class.
+///
+/// @todo Move some inlines into .cpp files to minimise rebuilding?
 
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisData.hpp"
-#include "gambit/ColliderBit/Utils.hpp"
 
+#include "gambit/ColliderBit/Utils.hpp"
 #include "HEPUtils/MathUtils.h"
 #include "HEPUtils/Event.h"
 
@@ -24,18 +26,24 @@
 
 namespace Gambit {
   namespace ColliderBit {
+
     using namespace std;
 
+
     /// An abstract base class for collider analyses within ColliderBit.
+    /// @note The templating makes forward declaration / #include decoupling hard :-(
+    /// @todo How is this templating useful? Only if alternative Analysis implementations have the same interface...
     template <typename EventT>
     class BaseAnalysis {
     private:
+
       double _ntot, _xsec, _xsecerr, _luminosity;
       AnalysisData _results;
       typedef EventT EventType;
 
 
     public:
+
       /// @name Construction, Destruction, and Recycling:
       //@{
       BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1) {  }
@@ -48,7 +56,6 @@ namespace Gambit {
       //@}
 
 
-    public:
       /// @name Event analysis, event number, and cross section functions:
       //@{
       /// Analyze the event (accessed by reference).
@@ -83,6 +90,7 @@ namespace Gambit {
 
 
     protected:
+
       /// @name Protected collection functions
       //@{
       /// Add the given result to the internal results list.
@@ -105,6 +113,7 @@ namespace Gambit {
 
 
     public:
+
       /// @name (Re-)initialization functions
       //@{
       /// General init for any analysis of this type.
@@ -126,7 +135,6 @@ namespace Gambit {
       //@}
 
 
-    public:
       /// @name BaseAnalysis combination operations
       //@{
       /// An operator to do xsec-weighted combination of analysis runs.
@@ -140,6 +148,7 @@ namespace Gambit {
         }
         _ntot += other->num_events();
       }
+
       /// Add cross-sections and errors for two different process types.
       void add_xsec(double xs, double xserr) {
         if (xs > 0) {
@@ -169,7 +178,7 @@ namespace Gambit {
 
 
     /// A BaseAnalysis template specialization for the standard event type.
-    typedef BaseAnalysis<HEPUtils::Event> HEPUtilsAnalysis;
+    using HEPUtilsAnalysis = BaseAnalysis<HEPUtils::Event>;
 
   }
 }

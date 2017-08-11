@@ -1,5 +1,6 @@
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
+#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include <stdexcept>
 using namespace std;
 

@@ -41,6 +41,7 @@
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
+#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"

@@ -34,6 +34,7 @@
 #include "gambit/ColliderBit/detectors/DelphesVanilla.hpp"
 #include "gambit/ColliderBit/detectors/BuckFastSmear.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
+#include "gambit/ColliderBit/analyses/AnalysisData.hpp"
 
 #include "gambit/ColliderBit/limits/ALEPHSleptonLimits.hpp"
 #include "gambit/ColliderBit/limits/L3GauginoLimits.hpp"

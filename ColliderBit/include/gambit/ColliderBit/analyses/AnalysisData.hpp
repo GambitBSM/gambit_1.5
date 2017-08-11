@@ -8,9 +8,6 @@
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/Utils.hpp"
 
-#include "HEPUtils/MathUtils.h"
-#include "HEPUtils/Event.h"
-
 #include "Eigen/Core"
 
 #include <string>
