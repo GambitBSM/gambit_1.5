@@ -39,9 +39,9 @@ Parameters:
       range: [0.178, 0.211]
 
   StandardModel_Neutrinos:
-    alpha1:
+    a1:
       range: [0, 6.283]
-    alpha2:
+    a2:
       range: [0, 6.283]
     delta:
       range: [0, 6.283]
@@ -49,11 +49,11 @@ Parameters:
       fixed_value: 1  # 1: normal ordering, 0: inverse ordering
     min_mass:
       fixed_value: 0  # 0: massless, 1: 0.23 eV
-    theta12:
+    t12:
       fixed_value: 0.5843
-    theta23:
+    t23:
       fixed_value: 0.7382
-    theta13:
+    t13:
       fixed_value: 0.1483
     md21:
       fixed_value: 7.5e-23
@@ -79,9 +79,190 @@ Scanner:
     multinest:
       plugin: multinest
       like: LogLike
-      nlive: 700
+      nlive: 200
 
 ObsLikes:
+
+  - capability: lnLpienu
+    purpose: LogLike
+    function: lnL_pienu
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+
+  - capability: lnLps191e
+    purpose: LogLike
+    function: lnL_ps191_e
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+      - capability: Ut1
+        type: double
+      - capability: Ut2
+        type: double
+      - capability: Ut3
+        type: double
+
+  - capability: lnLps191mu
+    purpose: LogLike
+    function: lnL_ps191_mu
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+      - capability: Ut1
+        type: double
+      - capability: Ut2
+        type: double
+      - capability: Ut3
+        type: double
+
+  - capability: lnLcharme
+    purpose: LogLike
+    function: lnL_charm_e
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+      - capability: Ut1
+        type: double
+      - capability: Ut2
+        type: double
+      - capability: Ut3
+        type: double
+
+  - capability: lnLcharmmu
+    purpose: LogLike
+    function: lnL_charm_mu
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+      - capability: Ut1
+        type: double
+      - capability: Ut2
+        type: double
+      - capability: Ut3
+        type: double
+
+  - capability: lnLdelphi
+    purpose: LogLike
+    function: lnL_delphi
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+      - capability: Ut1
+        type: double
+      - capability: Ut2
+        type: double
+      - capability: Ut3
+        type: double
+
+  - capability: lnLatlase
+    purpose: LogLike
+    function: lnL_atlas_e
+    dependencies:
+      - capability: Ue1
+        type: double
+      - capability: Ue2
+        type: double
+      - capability: Ue3
+        type: double
+
+  - capability: lnLatlasmu
+    purpose: LogLike
+    function: lnL_atlas_mu
+    dependencies:
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+
+  - capability: lnLe949
+    purpose: LogLike
+    function: lnL_e949
+    dependencies:
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+
+  - capability: lnLnutev
+    purpose: LogLike
+    function: lnL_nutev
+    dependencies:
+      - capability: Um1
+        type: double
+      - capability: Um2
+        type: double
+      - capability: Um3
+        type: double
+
+  - capability: lnLtau
+    purpose: LogLike
+    function: lnL_tau
+    dependencies:
+      - capability: Ut1
+        type: double
+      - capability: Ut2
+        type: double
+      - capability: Ut3
+        type: double
 
   - capability: Ue1
     purpose: Observable
@@ -150,8 +331,28 @@ ObsLikes:
     purpose: LogLike
     function: lnL
     dependencies:
-      - capability: SN_stuff
-        type: Matrix3d
+      - capability: lnLpienu
+        type: double
+      - capability: lnLps191e
+        type: double
+      - capability: lnLps191mu
+        type: double
+      - capability: lnLcharme
+        type: double
+      - capability: lnLcharmmu
+        type: double
+      - capability: lnLdelphi
+        type: double
+      - capability: lnLatlase
+        type: double
+      - capability: lnLatlasmu
+        type: double
+      - capability: lnLe949
+        type: double
+      - capability: lnLnutev
+        type: double
+      - capability: lnLtau
+        type: double
 
 Rules:
 
@@ -165,4 +366,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/SN_dev_lepuniv_700/"
+  default_output_path: "runs/SN_dev_test/"

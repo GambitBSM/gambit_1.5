@@ -1012,6 +1012,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+// Test function
+
   #define CAPABILITY testLike
   START_CAPABILITY
     #define FUNCTION lHood
@@ -1019,6 +1021,8 @@ START_MODULE
     ALLOW_MODEL(Simple_test)
     #undef FUNCTION
   #undef CAPABILITY
+
+// Functions used in RHN sector
 
   #define CAPABILITY SN_stuff
   START_CAPABILITY
@@ -1029,6 +1033,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(SMINPUTS, SMInputs)
     #undef FUNCTION
  
   #undef CAPABILITY
@@ -1038,8 +1043,18 @@ START_MODULE
 
     #define FUNCTION lnL
     START_FUNCTION(double)
-    ALLOW_MODELS(SN_dev)
-    DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(lnLpienu, double)
+    DEPENDENCY(lnLps191e, double)
+    DEPENDENCY(lnLps191mu, double)
+    DEPENDENCY(lnLcharme, double)
+    DEPENDENCY(lnLcharmmu, double)
+    DEPENDENCY(lnLdelphi, double)
+    DEPENDENCY(lnLatlase, double)
+    DEPENDENCY(lnLatlasmu, double)
+    DEPENDENCY(lnLe949, double)
+    DEPENDENCY(lnLnutev, double)
+    DEPENDENCY(lnLtau, double)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -1130,6 +1145,179 @@ START_MODULE
     #define FUNCTION printable_Ut3
     START_FUNCTION(double)
     DEPENDENCY(SN_stuff, Eigen::Matrix3d)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLpienu
+  START_CAPABILITY
+
+    #define FUNCTION lnL_pienu
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLps191e
+  START_CAPABILITY
+
+    #define FUNCTION lnL_ps191_e
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLps191mu
+  START_CAPABILITY
+
+    #define FUNCTION lnL_ps191_mu
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLcharme
+  START_CAPABILITY
+
+    #define FUNCTION lnL_charm_e
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLcharmmu
+  START_CAPABILITY
+
+    #define FUNCTION lnL_charm_mu
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLdelphi
+  START_CAPABILITY
+
+    #define FUNCTION lnL_delphi
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLatlase
+  START_CAPABILITY
+
+    #define FUNCTION lnL_atlas_e
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLatlasmu
+  START_CAPABILITY
+
+    #define FUNCTION lnL_atlas_mu
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLe949
+  START_CAPABILITY
+
+    #define FUNCTION lnL_e949
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLnutev
+  START_CAPABILITY
+
+    #define FUNCTION lnL_nutev
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLtau
+  START_CAPABILITY
+
+    #define FUNCTION lnL_tau
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
     #undef FUNCTION
 
   #undef CAPABILITY
