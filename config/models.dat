@@ -379,3 +379,9 @@ SingletDM: |
 SingletDM_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
+
+StandardModel_Neutrinos: |
+
+Simple_test: |
+
+SN_dev: |

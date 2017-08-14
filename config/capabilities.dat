@@ -3058,5 +3058,106 @@ calculate_amu_2loop_non_tan_beta_resummed: |
 calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
+#-------------------
+# RHN capabilities
+#-------------------
 
+SN_dev_parameters: |
 
+SN_stuff: |
+
+SeesawI_Theta: |
+
+Simple_test_parameters: |
+
+StandardModel_Neutrinos_parameters: |
+
+UPMNS: |
+
+Ue1: |
+
+Ue2: |
+
+Ue3: |
+
+Um1: |
+
+Um2: |
+
+Um3: |
+
+Ut1: |
+
+Ut2: |
+
+Ut3: |
+
+l2lgamma_lnL: |
+
+l2lll_lnL: |
+
+lnLatlase: |
+
+lnLatlasmu: |
+
+lnLcharme: |
+
+lnLcharmmu: |
+
+lnLdelphi: |
+
+lnLe949: |
+
+lnLikelihood: |
+
+lnLnutev: |
+
+lnLpienu: |
+
+lnLps191e: |
+
+lnLps191mu: |
+
+lnLtau: |
+
+m_nu: |
+
+mu2e_lnL: |
+
+muePb: |
+
+mueS: |
+
+mueTi: |
+
+mueee: |
+
+muegamma: |
+
+taueee: |
+
+taueemu_os: |
+
+taueemu_ss: |
+
+tauegamma: |
+
+tauemumu_os: |
+
+tauemumu_ss: |
+
+taumugamma: |
+
+taumumumu: |
+
+testLike: |
+
+Theta_sq: |
+
+lnL0nubb: |
+
+lnLbbn: |
+
+lnLckm: |
+
+lnLlepuniv: |

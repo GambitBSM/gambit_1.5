@@ -84,12 +84,12 @@ namespace Gambit
       using namespace Pipes::UPMNS;
      
       Eigen::Matrix3cd V_23, V_13, V_12, U_pd, U_nd, Maj_phase;
-      double theta23 = *Param["theta23"];
-      double theta12 = *Param["theta12"];
-      double theta13 = *Param["theta13"];
+      double theta23 = *Param["t23"];
+      double theta12 = *Param["t12"];
+      double theta13 = *Param["t13"];
       double delta = *Param["delta"];
-      double alpha1 = *Param["alpha1"];
-      double alpha2 = *Param["alpha2"];
+      double alpha1 = *Param["a1"];
+      double alpha2 = *Param["a2"];
       std::complex<double> I(0.0, 1.0);
 
       V_23 << 1.0, 0.0, 0.0,
