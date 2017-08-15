@@ -84,6 +84,7 @@ namespace Gambit
       using namespace Pipes::UPMNS;
      
       Eigen::Matrix3cd V_23, V_13, V_12, U_pd, U_nd, Maj_phase;
+      // TODO: change parameter names when the conlfict of models is resolved
       double theta23 = *Param["t23"];
       double theta12 = *Param["t12"];
       double theta13 = *Param["t13"];

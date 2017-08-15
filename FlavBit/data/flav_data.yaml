@@ -1571,31 +1571,35 @@
   exp_source: 1605.05081
   th_error: 0.
   th_error_type: M
-  th_error_source:
+  th_error_source: NONE
   correlation:
   - name: NONE
 
 - name: BR_tauegamma
   islimit: true
-  exp_value: 3.3e-8
+  one_sided: false
+  exp_value: 0.
+  exp_90_CL: 3.3e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
   exp_source: PDG16
   th_error: 0.
   th_error_type: M 
-  th_error_source:
+  th_error_source: NONE
   correlation:
   - name: NONE
 
 - name: BR_taumugamma
   islimit: true
-  exp_value: 4.4e-8
+  one_sided: false
+  exp_value: 0.
+  exp_90_CL: 4.4e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source:
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1607,7 +1611,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source: 
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1619,7 +1623,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source:
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1631,7 +1635,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source: 
+  th_error_source: NONE 
   correlation:
   - name: NONE
 
@@ -1641,9 +1645,9 @@
   exp_stat_error: 0.
   exp_sys_error: 0.
   exp_source: PDG16
-  th_error: M
-  th_error_type:
-  th_error_source: 
+  th_error: 0.
+  th_error_type: M
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1655,7 +1659,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M 
-  th_error_source: 
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1667,7 +1671,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source: 
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1679,7 +1683,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source: 
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1691,7 +1695,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M 
-  th_error_source:
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1703,7 +1707,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source:
+  th_error_source: NONE
   correlation:
   - name: NONE
 
@@ -1715,7 +1719,7 @@
   exp_source: PDG16
   th_error: 0.
   th_error_type: M
-  th_error_source: 
+  th_error_source: NONE
   correlation:
   - name: NONE
 

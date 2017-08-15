@@ -1456,8 +1456,9 @@ namespace Gambit
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
+      int e = 0, mu = 1;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(2,i) * Vnu(1,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(2,i) * Theta(1,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
     }
@@ -1474,8 +1475,9 @@ namespace Gambit
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
+      int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(3,i) * Vnu(1,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(3,i) * Theta(1,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
@@ -1497,8 +1499,9 @@ namespace Gambit
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
+      int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(3,i) * Vnu(2,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(3,i) * Theta(2,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
