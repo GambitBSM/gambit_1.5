@@ -193,5 +193,18 @@ namespace Gambit
 
     }
 
+
+   // Corrected UPMNS for Seesaw type I
+   void V_nu(Eigen::Matrix3cd& Vnu)
+   {
+      using namespace Pipes::V_nu;
+      Eigen::Matrix3d M_I;
+
+      M_I << *Param["M_1"], 0.0, 0.0,
+             0.0, *Param["M_2"], 0.0,
+             0.0, 0.0, *Param["M_3"];
+
+   }
+
   }
 }

@@ -69,7 +69,7 @@ Printer:
   printer: hdf5
   options:
     output_file: "SN_dev.hdf5"
-    delete_file_if_exists: true
+    delete_file_on_restart: true
 
 Scanner:
 
@@ -397,6 +397,15 @@ ObsLikes:
         type: double
       - capability: lnLtau
         type: double
+
+  - capability: l2lgamma_lnL
+    purpose: LogLike
+    function: l2lgamma_likelihood
+
+  - capability: l2lll_lnL
+    purpose: LogLike
+    function: l2lll_likelihood
+   
 
 Rules:
 

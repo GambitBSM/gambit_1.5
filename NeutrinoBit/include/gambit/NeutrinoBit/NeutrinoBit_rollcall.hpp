@@ -64,6 +64,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Corrected UMPNS for Seesaw type I
+  #define CAPABILITY SeesawI_UPMNS
+  START_CAPABILITY
+    #define FUNCTION V_nu
+    START_FUNCTION(Eigen::Matrix3cd)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY
 
 #undef MODULE
 

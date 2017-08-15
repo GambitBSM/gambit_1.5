@@ -487,6 +487,9 @@ START_MODULE
     #define FUNCTION SN_mueee
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -497,6 +500,10 @@ START_MODULE
     #define FUNCTION SN_taueee
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -507,6 +514,10 @@ START_MODULE
     #define FUNCTION SN_taueemu_ss
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -516,7 +527,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION SN_taueemu_os
     START_FUNCTION(double)
-    DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -527,6 +537,10 @@ START_MODULE
     #define FUNCTION SN_tauemumu_ss
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -536,7 +550,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION SN_tauemumu_os
     START_FUNCTION(double)
-    DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -547,6 +560,10 @@ START_MODULE
     #define FUNCTION SN_taumumumu
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 

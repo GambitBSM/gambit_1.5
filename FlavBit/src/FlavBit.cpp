@@ -1460,7 +1460,7 @@ namespace Gambit
       for(int i=0; i<3; ++i)
         Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
-      result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
+      result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
     }
 
     void SN_tauegamma(double &result)
@@ -1479,12 +1479,12 @@ namespace Gambit
       for(int i=0; i<3; ++i)
         Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
-      result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
+      result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
       // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
       double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+      result /= 1. + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
     void SN_taumugamma(double &result)
@@ -1503,68 +1503,148 @@ namespace Gambit
       for(int i=0; i<3; ++i)
         Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
-      result = 3 / (32 * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
+      result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
       double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+      result /= 1. + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
 
+    // Expressions obtained from 1408.0138 henceforth
     void SN_mueee(double &result)
     {
       using namespace Pipes::SN_mueee;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      // TODO: Here we need Vnu rather than UPMNS, fix this
+      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+
+      std::complex<double> Rllgamma = {0.0, 0.0};
+      int e = 0, mu = 1;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
+      result *= 16./3 * log(sminputs.mMu/sminputs.mE) - 22./3.;
+
     }
 
     void SN_taueee(double &result)
     {
       using namespace Pipes::SN_taueee;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      // TODO: Here we need Vnu rather than UPMNS, fix this
+      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+
+      std::complex<double> Rllgamma = {0.0, 0.0};
+      int e = 0, tau = 2;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
+      result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 22./3.;
+
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
     void SN_taueemu_ss(double &result)
     {
       using namespace Pipes::SN_taueemu_ss;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      // TODO: Here we need Vnu rather than UPMNS, fix this
+      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+
+      std::complex<double> Rllgamma = {0.0, 0.0};
+      int mu = 1, tau = 2;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
+      result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 8.;
+
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
     void SN_taueemu_os(double &result)
     {
-      using namespace Pipes::SN_taueemu_os;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-   
+      // There is no dipole contribution to this decay channel
       result = 0;
     }
 
     void SN_tauemumu_ss(double &result)
     {
       using namespace Pipes::SN_tauemumu_ss;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      // TODO: Here we need Vnu rather than UPMNS, fix this
+      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+
+      std::complex<double> Rllgamma = {0.0, 0.0};
+      int e = 0, tau = 2;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
+      result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 8.;
+
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+
       result = 0;
     }
 
     void SN_tauemumu_os(double &result)
     {
-      using namespace Pipes::SN_tauemumu_os;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
+      // There is no dipole contribution to this observable 
       result = 0;
     }
 
     void SN_taumumumu(double &result)
     {
       using namespace Pipes::SN_taumumumu;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      // TODO: Here we need Vnu rather than UPMNS, fix this
+      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+
+      std::complex<double> Rllgamma = {0.0, 0.0};
+      int mu = 1, tau = 2;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
+      result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 22./3.;
+
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
 
     void SN_mueTi(double &result)
