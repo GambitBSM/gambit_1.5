@@ -1,7 +1,9 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  MSSM63 model declaration
+///  MSSM input parameter definition, with A pole
+///  mass and mu as explicit input parameters
+///  instead of mHu2 and mHd2.
 ///
 ///  *********************************************
 ///
@@ -10,18 +12,14 @@
 ///
 ///  (add name and date if you modify)
 ///
-///  Ben Farmer
-///  2013 May
-///  2014 Mar
-///  2015 Jan
-///
-///  Pat Scott
-///  2013 Sep
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2017 Aug
 ///
 ///  *********************************************
 
-#ifndef __MSSM63atMGUT_hpp__
-#define __MSSM63atMGUT_hpp__
+#ifndef __MSSM63atQ_mA_hpp__
+#define __MSSM63atQ_mA_hpp__
 
 #include "gambit/Models/models/MSSM63atQ.hpp" // Must include models which are targets of translation functions
 
@@ -31,25 +29,18 @@ namespace Gambit
    class Spectrum;
 }
 
-// General GUT boundary condition parameterisation of the MSSM
-// There are several of these, compatible with different spectrum generators
-// To use a constrained GUT model like the CMSSM, there needs to be an
-// "interpret_as_X" function which translates the CMSSM parameters into
-// the appropriate general GUT parameterisation for the spectrum generator
-// being used.
-
-/// FlexibleSUSY compatible general (63 parameters plus sign) GUT scale MSSM parameterisation
-#define MODEL  MSSM63atMGUT
+/// FlexibleSUSY compatible general (63 parameters plus sign, plus input scale) MSSM parameterisation
+#define MODEL MSSM63atQ_mA
 #define PARENT MSSM63atQ
   START_MODEL
 
-  /// Can translate this model into MSSM63atQ (where Q will then be set to MGUT)
-  INTERPRET_AS_PARENT_FUNCTION(MSSM63atMGUT_to_MSSM63atQ)
+  /// Can translate this model into MSSM63atQ
+  INTERPRET_AS_PARENT_FUNCTION(MSSM63atQ_mA_to_MSSM63atQ)
   /// Depends on an MSSM spectrum, since RGEs must run in order to determine MGUT
   INTERPRET_AS_PARENT_DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
 
-  DEFINEPARS(TanBeta,SignMu,
-             mHu2,mHd2,M1,M2,M3)
+  DEFINEPARS(Qin,TanBeta,
+             mA,mu,M1,M2,M3)
 
   /// Mass matrices are symmetric (Hermitian, and we are restricted to real entries at the moment)
   /// so only one 'triangle' needed.

@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  MSSM10batQ model definition.
+///  MSSM10batQ_mA model definition.
 ///
 ///  *********************************************
 ///
@@ -10,22 +10,22 @@
 ///
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
-///  \date 2015 Sep
+///  \date 2017 Aug
 ///
 ///  *********************************************
 
-#ifndef __MSSM10batQ_hpp__
-#define __MSSM10batQ_hpp__
+#ifndef __MSSM10batQ_mA_hpp__
+#define __MSSM10batQ_mA_hpp__
 
 // Parent model must be declared first! Include it here to ensure that this happens.
-#include "gambit/Models/models/MSSM11atQ.hpp"
+#include "gambit/Models/models/MSSM11atQ_mA.hpp"
 
-#define MODEL MSSM10batQ
-#define PARENT MSSM11atQ
+#define MODEL MSSM10batQ_mA
+#define PARENT MSSM11atQ_mA
   START_MODEL
 
-  DEFINEPARS(Qin,TanBeta,SignMu,
-             mHu2,mHd2,M1,M2,M3)
+  DEFINEPARS(Qin,TanBeta,
+             mA,mu,M1,M2,M3)
 
   DEFINEPARS(mf2)
 
@@ -35,7 +35,7 @@
 
   DEFINEPARS(Au_3)
 
-  INTERPRET_AS_PARENT_FUNCTION(MSSM10batQ_to_MSSM11atQ)
+  INTERPRET_AS_PARENT_FUNCTION(MSSM10batQ_mA_to_MSSM11atQ_mA)
 
 #undef PARENT
 #undef MODEL
