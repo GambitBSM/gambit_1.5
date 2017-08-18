@@ -866,7 +866,7 @@ namespace Gambit
         masterGraph[*vi]->setTimingVertexID(Printers::get_param_id(timing_label));
 
         // Check for non-void type and status==2 (after the dependency resolution) to print only active, printable functors.
-        // TODO: this doesn't currently check for non-void type; that is done at the time of printing in calcObsLike.  
+        // TODO: this doesn't currently check for non-void type; that is done at the time of printing in calcObsLike.
         if( masterGraph[*vi]->requiresPrinting() and (masterGraph[*vi]->status()==2) )
         {
           functors_to_print.push_back(index[*vi]); // TODO: Probably obsolete
@@ -1224,15 +1224,17 @@ namespace Gambit
       if ( toVertex != OBSLIKE_VERTEXID )
       {
         errmsg += "as a targeted rule (in the Rules section):\n";
-        errmsg += "\n    - capability: "+masterGraph[toVertex]->capability();
-        errmsg += "\n      function: "+masterGraph[toVertex]->name();
-        errmsg += "\n      dependencies:";
-        errmsg += "\n        - capability: " +masterGraph[vertexCandidates[0]]->capability();
-        errmsg += "\n          function: " +masterGraph[vertexCandidates[0]]->name() +"\n\nor ";
+        errmsg += "\n  - capability: "+masterGraph[toVertex]->capability();
+        errmsg += "\n    function: "+masterGraph[toVertex]->name();
+        errmsg += "\n    dependencies:";
+        errmsg += "\n      - capability: " +masterGraph[vertexCandidates[0]]->capability();
+        errmsg += "\n        function: " +masterGraph[vertexCandidates[0]]->name();
+        errmsg += "\n        module: " +masterGraph[vertexCandidates[0]]->origin() +"\n\nor ";
       }
       errmsg += "as an untargeted rule (in the Rules or ObsLike section):\n";
-      errmsg += "\n    - capability: "+masterGraph[vertexCandidates[0]]->capability();
-      errmsg += "\n      function: "+masterGraph[vertexCandidates[0]]->name() + "\n";
+      errmsg += "\n  - capability: "+masterGraph[vertexCandidates[0]]->capability();
+      errmsg += "\n    function: "+masterGraph[vertexCandidates[0]]->name();
+      errmsg += "\n    module: " +masterGraph[vertexCandidates[0]]->origin() +"\n";
       if ( toVertex == OBSLIKE_VERTEXID )
       {
         errmsg += "\n(Note that 1st class rules are not possible for vertices on which the core depends only.)\n";
