@@ -216,7 +216,7 @@ namespace Gambit {
 
       /// Register results objects with the results for each SR; obs & bkg numbers from the CONF note
       void collect_results() {
-        cout << _cutflow << endl;
+//        cout << _cutflow << endl;
 
         static const string ANAME = "Analysis_CMS_13TeV_0LEP_13invfb";
         static const double OBSNUM[NUMSR] = {

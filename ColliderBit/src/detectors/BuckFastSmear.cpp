@@ -204,7 +204,12 @@ namespace Gambit {
         }
 
         // All particles other than invisibles and muons are jet constituents
+	// Matthias added test to keep non-prompt particles
         if (visible && p.idAbs() != MCUtils::PID::MUON) jetparticles.push_back(mk_pseudojet(p.p()));
+	// next case are visible non-prompt muons
+	//if (visible && p.idAbs() == MCUtils::PID::MUON && !prompt) jetparticles.push_back(mk_pseudojet(p.p()));
+	// next case are non-prompt neutrinos
+	//if (!visible && !prompt) jetparticles.push_back(mk_pseudojet(p.p()));
       }
 
       /// Jet finding
