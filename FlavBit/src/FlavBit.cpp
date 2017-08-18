@@ -1452,7 +1452,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1471,7 +1471,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1495,7 +1495,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1520,7 +1520,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1530,7 +1530,8 @@ namespace Gambit
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mMu/sminputs.mE) - 22./3.;
-
+ 
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_taueee(double &result)
@@ -1541,7 +1542,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1556,6 +1557,8 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+ 
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_taueemu_ss(double &result)
@@ -1566,7 +1569,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1581,12 +1584,16 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+ 
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_taueemu_os(double &result)
     {
       // There is no dipole contribution to this decay channel
       result = 0;
+ 
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_tauemumu_ss(double &result)
@@ -1597,7 +1604,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1614,12 +1621,16 @@ namespace Gambit
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
 
       result = 0;
+ 
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_tauemumu_os(double &result)
     {
       // There is no dipole contribution to this observable 
       result = 0;
+
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_taumumumu(double &result)
@@ -1630,7 +1641,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // TODO: Here we need Vnu rather than UPMNS, fix this
+      // Here we neglect theta^2 effects
       Eigen::Matrix3cd Vnu = *Dep::UPMNS;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
@@ -1645,22 +1656,29 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+
+      // TODO: Missing here box diagram contributions
     }
 
     void SN_mueTi(double &result)
     {
       using namespace Pipes::SN_mueTi;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
-    }
+      const SMInputs sminputs = *Dep::SMINPUTS;
 
-    void SN_mueS(double &result)
-    {
-      using namespace Pipes::SN_mueS;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
+      int A, Z;
+      double alphaW;
+      double Zeff, Fp, GammaCapt;
+
+      // From Table 1 in 1209.2679 for Ti
+      A = 18;
+      Z = 22;
+      Zeff = 17.6;
+      Fp = 0.54;
+      GammaCapt = 2.59e-6; // TODO: Check dimensions here
+
+      result = pow(sminputs.GF,2)*pow(alphaW,2)*pow(sminputs.mMu,5);
+      result /= 8*pow(M_PI,4)*pow(sminputs.alphainv,3)*GammaCapt;
+      result *=  pow(Zeff,4) * pow(Fp, 2)/Z;
     }
 
     void SN_muePb(double &result)
@@ -1780,7 +1798,7 @@ namespace Gambit
         
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double theory[3], th_err[3];
+      static double theory[2], th_err[2];
 
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
@@ -1792,8 +1810,6 @@ namespace Gambit
 
         // mu - e (Ti)
         fread.read_yaml_measurement("flav_data.yaml", "R_mueTi");
-        // mu - e (S)
-        fread.read_yaml_measurement("flav_data.yaml", "R_mueS");
         // mu - e (Pb)
         fread.read_yaml_measurement("flav_data.yaml", "R_muePb");
 
@@ -1801,7 +1817,7 @@ namespace Gambit
         cov_exp=fread.get_exp_cov();
         value_exp=fread.get_exp_value();
 
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 2; ++i)
           th_err[i] = fread.get_th_err()(i,0).first;
 
         // Init over.
@@ -1809,11 +1825,10 @@ namespace Gambit
       }
 
       theory[0] = *Dep::mueTi;
-      theory[1] = *Dep::mueS;
-      theory[2] = *Dep::muePb;
+      theory[1] = *Dep::muePb;
 
       result = 0;
-      for (int i = 0; i < 3; ++i)
+      for (int i = 0; i < 2; ++i)
         result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
 
     }

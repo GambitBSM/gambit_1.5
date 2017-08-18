@@ -46,7 +46,7 @@ START_MODULE
     // Neutrino PMNS matrix in a parametrization where the charged Yukawas are diagonal
     #define FUNCTION UPMNS
     START_FUNCTION(Eigen::Matrix3cd)
-    ALLOW_MODELS(StandardModel_Neutrinos)
+    ALLOW_MODELS(StandardModel_SLHA2, StandardModel_Neutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -64,14 +64,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Corrected UMPNS for Seesaw type I
-  #define CAPABILITY SeesawI_UPMNS
-  START_CAPABILITY
-    #define FUNCTION V_nu
-    START_FUNCTION(Eigen::Matrix3cd)
-    ALLOW_MODELS(SN_dev)
-    #undef FUNCTION
-  #undef CAPABILITY
 
 #undef MODULE
 

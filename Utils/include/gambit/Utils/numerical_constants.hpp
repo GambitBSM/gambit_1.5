@@ -49,6 +49,9 @@ namespace Gambit
     static constexpr double rho_plus = 0.775;     // charged rho meson mass (GeV/c^2)
     static constexpr double rho_minus = 0.775;    // charged rho meson mass (GeV/c^2)
     static constexpr double omega = 0.7827;       // omega meson mass (GeV/c^2)
+    static constexpr double kaon_plus = 0.4937;   // charged kaon meson mass (GeV/c^2)
+    static constexpr double kaon_minus = 0.4937;  // charged kaon meson mass (GeV/c^2)
+    static constexpr double kaon0 = 0.4976;       // neutral kaon meson mass (GeV/c^2)
   } meson_masses;
 
   /// M_W (Breit-Wigner mass parameter ~ pole) = 80.385 +/- 0.015  GeV (1 sigma), Gaussian.

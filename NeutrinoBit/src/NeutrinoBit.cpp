@@ -46,7 +46,7 @@ namespace Gambit
       m_nu(2,0) = 0.0;
       m_nu(2,1) = 0.0;
 
-      if(ordering == 1)
+      if(ordering == 1) // Normal hierarchy
       {
         if(m_min == 0)
         {
@@ -61,7 +61,7 @@ namespace Gambit
           m_nu(2,2) = sqrt(pow(m_nu(0,0), 2.0) + md31);
         }
       }
-      else if(ordering == 0)
+      else if(ordering == 0) // Inverted hierarchy
       {
         if(m_min == 0)
         {
@@ -85,12 +85,12 @@ namespace Gambit
      
       Eigen::Matrix3cd V_23, V_13, V_12, U_pd, U_nd, Maj_phase;
       // TODO: change parameter names when the conlfict of models is resolved
-      double theta23 = *Param["t23"];
-      double theta12 = *Param["t12"];
-      double theta13 = *Param["t13"];
-      double delta = *Param["delta"];
-      double alpha1 = *Param["a1"];
-      double alpha2 = *Param["a2"];
+      double theta23 = *Param["theta23"];
+      double theta12 = *Param["theta12"];
+      double theta13 = *Param["theta13"];
+      double delta = *Param["delta13"];
+      double alpha1 = *Param["alpha1"];
+      double alpha2 = *Param["alpha2"];
       std::complex<double> I(0.0, 1.0);
 
       V_23 << 1.0, 0.0, 0.0,
@@ -189,22 +189,10 @@ namespace Gambit
       R = R_23 * R_13 * R_12;
 
       Theta = I * *Dep::UPMNS * Dep::m_nu->sqrt() * R * M_twid.inverse();
-      //t_sq = t.cwiseAbs2();
 
     }
 
 
-   // Corrected UPMNS for Seesaw type I
-   void V_nu(Eigen::Matrix3cd& Vnu)
-   {
-      using namespace Pipes::V_nu;
-      Eigen::Matrix3d M_I;
-
-      M_I << *Param["M_1"], 0.0, 0.0,
-             0.0, *Param["M_2"], 0.0,
-             0.0, 0.0, *Param["M_3"];
-
-   }
 
   }
 }

@@ -578,16 +578,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Observable: mu - e (S)
-  #define CAPABILITY mueS
-  START_CAPABILITY
-    #define FUNCTION SN_mueS
-    START_FUNCTION(double)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    ALLOW_MODELS(SN_dev)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   // Observable: mu - e (Pb)
   #define CAPABILITY muePb
   START_CAPABILITY

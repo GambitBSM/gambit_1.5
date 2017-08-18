@@ -15,7 +15,7 @@
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/DarkBit/DarkBit_rollcall.hpp"
-//#include "gambit/Elements/numerical_constants.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
@@ -88,16 +88,21 @@ namespace Gambit
     void lnL_lepuniv(double& result)
     {
       using namespace Pipes::lnL_lepuniv;
-      static double m_pi = 0.1396; // GeV
-      static double m_K = 0.4937;  // GeV
-      static double m_tau = 1.7768;  // GeV
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double m_pi = meson_masses.pi_plus;
+      static double m_K = meson_masses.kaon_plus; 
+      static double m_tau = sminputs.mTau;  // GeV
       static double R_pi_SM = 1.2354e-4;
       static double R_K_SM = 2.477e-5;
       static double R_tau_SM = 0.973;
-      static double r_e_pi = 1.3399e-5;  // r_e_pi = m_e^2/m_pi^2
-      static double r_mu_pi = 0.5733;  // r_mu_pi = m_mu^2/m_pi^2
-      static double r_e_K = 1.0713e-6;  // r_e_K = m_e^2/m_K^2
-      static double r_mu_K = 0.0458;  // r_mu_K = m_mu^2/m_K^2
+      //static double r_e_pi = 1.3399e-5;  // r_e_pi = m_e^2/m_pi^2
+      //static double r_mu_pi = 0.5733;  // r_mu_pi = m_mu^2/m_pi^2
+      //static double r_e_K = 1.0713e-6;  // r_e_K = m_e^2/m_K^2
+      //static double r_mu_K = 0.0458;  // r_mu_K = m_mu^2/m_K^2
+      static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
+      static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
+      static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
+      static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_pi, mu_f_pi, e_f_K, mu_f_K, e_f_tau, mu_f_tau, d_r_pi, d_r_K, d_r_tau, R_pi, R_K, R_tau, temp;
       std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3), e_fac_tau(3), mu_fac_tau(3);
       Matrix3d t_sq = *Dep::Theta_sq;

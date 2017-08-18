@@ -3,7 +3,47 @@
 Parameters:
 
   # SM parameters.
-  StandardModel_SLHA2: !import include/StandardModel_SLHA2_defaults.yaml
+  StandardModel_SLHA2:
+    # SLHA1
+    alphainv:  1.27940010E+02 # alpha^{-1}(mZ)^MSbar *
+    GF      :  1.16637870E-05 # G_Fermi **
+    alphaS  :  1.18500000E-01 # alpha_s(mZ)^MSbar ^
+    mZ      :  9.11876000E+01 # mZ(pole) !
+    mBmB    :  4.18000000E+00 # mb(mb)^MSbar &
+    mT      :  1.73340000E+02 # mtop(pole) $
+    mTau    :  1.77682000E+00 # mtau(pole) §
+    mNu3    :               0 # mnu3(pole)
+
+    # SLHA2
+    mE      :  5.10998928E-04 # melectron(pole) § **
+    mNu1    :               0 # mnu1(pole)
+    mMu     :  1.05658372E-01 # mmuon(pole) §
+    mNu2    :               0 # mnu2(pole)
+    mD      :  4.80000000E-03 # md(2 GeV)^MSbar @
+    mU      :  2.30000000E-03 # mu(2 GeV)^MSbar @
+    mS      :  9.50000000E-02 # ms(2 GeV)^MSbar @
+    mCmC    :  1.27500000E+00 # mc(mc)^MSbar %
+
+    # CKM
+    # Wolfenstein parameterisation (matches SLHA2 VCKMIN block)
+    # from http://pdg.lbl.gov/2014/reviews/rpp2014-rev-ckm-matrix.pdf
+    CKM_lambda  :  0.22537
+    CKM_A       :  0.814
+    CKM_rhobar  :  0.117
+    CKM_etabar  :  0.353
+
+    alpha1:
+      range: [0, 6.283]
+    alpha2:
+      range: [0, 6.283]
+    delta13:
+      range: [0, 6.283]
+    theta12:
+      fixed_value: 0.5843
+    theta23:
+      fixed_value: 0.7382
+    theta13:
+      fixed_value: 0.1483
 
   # Higgs bosom parameters
   StandardModel_Higgs:
@@ -39,22 +79,10 @@ Parameters:
       range: [0.178, 0.211]
 
   StandardModel_Neutrinos:
-    a1:
-      range: [0, 6.283]
-    a2:
-      range: [0, 6.283]
-    delta:
-      range: [0, 6.283]
     ordering:
       fixed_value: 1  # 1: normal ordering, 0: inverse ordering
     min_mass:
       fixed_value: 0  # 0: massless, 1: 0.23 eV
-    t12:
-      fixed_value: 0.5843
-    t23:
-      fixed_value: 0.7382
-    t13:
-      fixed_value: 0.1483
     md21:
       fixed_value: 7.5e-23
     md31:

@@ -1168,6 +1168,7 @@ START_MODULE
     #define FUNCTION lnL_lepuniv
     START_FUNCTION(double)
     ALLOW_MODEL(SN_dev)
+    DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(Theta_sq, Eigen::Matrix3d)
     #undef FUNCTION
 
