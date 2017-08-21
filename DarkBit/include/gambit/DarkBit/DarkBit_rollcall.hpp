@@ -1035,31 +1035,6 @@ START_MODULE
  
   #undef CAPABILITY
 
-  #define CAPABILITY lnLikelihood
-  START_CAPABILITY
-
-    #define FUNCTION lnL
-    START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
-    DEPENDENCY(lnLbbn, double)
-    DEPENDENCY(lnLlepuniv, double)
-    DEPENDENCY(lnL0nubb, double)
-    DEPENDENCY(lnLckm, double)
-    DEPENDENCY(lnLpienu, double)
-    DEPENDENCY(lnLps191e, double)
-    DEPENDENCY(lnLps191mu, double)
-    DEPENDENCY(lnLcharme, double)
-    DEPENDENCY(lnLcharmmu, double)
-    DEPENDENCY(lnLdelphi, double)
-    DEPENDENCY(lnLatlase, double)
-    DEPENDENCY(lnLatlasmu, double)
-    DEPENDENCY(lnLe949, double)
-    DEPENDENCY(lnLnutev, double)
-    DEPENDENCY(lnLtau, double)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
   #define CAPABILITY Ue1
   START_CAPABILITY
 

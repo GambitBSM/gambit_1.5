@@ -107,324 +107,105 @@ Scanner:
     multinest:
       plugin: multinest
       like: LogLike
-      nlive: 200
+      nlive: 100
 
 ObsLikes:
 
   - capability: lnLbbn
     purpose: LogLike
     function: lnL_bbn
-    dependencies:
-      - capability: SMINPUTS
-        type: SMInputs
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: lnLlepuniv
     purpose: LogLike
     function: lnL_lepuniv
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: lnL0nubb
     purpose: LogLike
     function: lnL_0nubb
-    dependencies:
-      - capability: m_nu
-        type: Maatrix3cd
-      - capability: UPMNS
-        type: Matrix3cd
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: lnLckm
     purpose: LogLike
     function: lnL_ckm
-    dependencies:
-      - capability: SMINPUTS
-        type: SMInputs
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: lnLpienu
     purpose: LogLike
     function: lnL_pienu
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
 
   - capability: lnLps191e
     purpose: LogLike
     function: lnL_ps191_e
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
-      - capability: Ut1
-        type: double
-      - capability: Ut2
-        type: double
-      - capability: Ut3
-        type: double
 
   - capability: lnLps191mu
     purpose: LogLike
     function: lnL_ps191_mu
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
-      - capability: Ut1
-        type: double
-      - capability: Ut2
-        type: double
-      - capability: Ut3
-        type: double
 
   - capability: lnLcharme
     purpose: LogLike
     function: lnL_charm_e
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
-      - capability: Ut1
-        type: double
-      - capability: Ut2
-        type: double
-      - capability: Ut3
-        type: double
 
   - capability: lnLcharmmu
     purpose: LogLike
     function: lnL_charm_mu
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
-      - capability: Ut1
-        type: double
-      - capability: Ut2
-        type: double
-      - capability: Ut3
-        type: double
 
   - capability: lnLdelphi
     purpose: LogLike
     function: lnL_delphi
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
-      - capability: Ut1
-        type: double
-      - capability: Ut2
-        type: double
-      - capability: Ut3
-        type: double
 
   - capability: lnLatlase
     purpose: LogLike
     function: lnL_atlas_e
-    dependencies:
-      - capability: Ue1
-        type: double
-      - capability: Ue2
-        type: double
-      - capability: Ue3
-        type: double
 
   - capability: lnLatlasmu
     purpose: LogLike
     function: lnL_atlas_mu
-    dependencies:
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
 
   - capability: lnLe949
     purpose: LogLike
     function: lnL_e949
-    dependencies:
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
 
   - capability: lnLnutev
     purpose: LogLike
     function: lnL_nutev
-    dependencies:
-      - capability: Um1
-        type: double
-      - capability: Um2
-        type: double
-      - capability: Um3
-        type: double
 
   - capability: lnLtau
     purpose: LogLike
     function: lnL_tau
-    dependencies:
-      - capability: Ut1
-        type: double
-      - capability: Ut2
-        type: double
-      - capability: Ut3
-        type: double
 
   - capability: Ue1
     purpose: Observable
     function: printable_Ue1
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Um1
     purpose: Observable
     function: printable_Um1
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Ut1
     purpose: Observable
     function: printable_Ut1
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Ue2
     purpose: Observable
     function: printable_Ue2
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Um2
     purpose: Observable
     function: printable_Um2
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Ut2
     purpose: Observable
     function: printable_Ut2
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Ue3
     purpose: Observable
     function: printable_Ue3
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Um3
     purpose: Observable
     function: printable_Um3
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
 
   - capability: Ut3
     purpose: Observable
     function: printable_Ut3
-    dependencies:
-      - capability: Theta_sq
-        type: Matrix3d
-
-  - capability: lnLikelihood
-    purpose: LogLike
-    function: lnL
-    dependencies:
-      - capability: lnLbbn
-        type: double
-      - capability: lnLlepuniv
-        type: double
-      - capability: lnL0nubb
-        type: double
-      - capability: lnLckm
-        type: double
-      - capability: lnLpienu
-        type: double
-      - capability: lnLps191e
-        type: double
-      - capability: lnLps191mu
-        type: double
-      - capability: lnLcharme
-        type: double
-      - capability: lnLcharmmu
-        type: double
-      - capability: lnLdelphi
-        type: double
-      - capability: lnLatlase
-        type: double
-      - capability: lnLatlasmu
-        type: double
-      - capability: lnLe949
-        type: double
-      - capability: lnLnutev
-        type: double
-      - capability: lnLtau
-        type: double
 
   - capability: l2lgamma_lnL
     purpose: LogLike
@@ -440,9 +221,6 @@ Rules:
   - capability: Theta_sq
     type: Matrix3d
     function: CI_param
-    dependencies:
-      - capability: SeesawI_Theta
-        type: Matrix3cd
 
 KeyValues:
 
