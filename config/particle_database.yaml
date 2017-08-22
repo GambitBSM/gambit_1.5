@@ -6,6 +6,8 @@ StandardModel:
   
   # add_SM_particle
   Particles:
+  
+    - comment: " ---- Standard Model flavour eigenstates (context = 1) ---- "
       
     - comment: "Quarks"
   
@@ -121,6 +123,8 @@ StandardModel:
   # add_SM_particle_set    
   Sets:
   
+    - comment: " ---- Standard Model mass eigenstates (context = 0) ---- "
+  
     - name: "d"
       PDG_context: [[1, 0], [3, 0], [5, 0]]
       conjugate: "dbar"
@@ -146,6 +150,8 @@ OtherModels:
    
   # add_particle
   Particles:
+  
+    - comment: " ---- MSSM sparticle mass eigenstates (context = 0) ---- (TODO to be extended to NMSSM) \n      // Defined according to SLHA2 (http://arxiv.org/pdf/0801.0045v3.pdf, see eq. 28 - 31) where applicable."
     
     - name: "~g"
       PDG_context: [1000021, 0]
@@ -210,6 +216,8 @@ OtherModels:
   
   # add_generic_particle
   Generic:
+  
+    - comment: "---- GAMBIT generic particle classes (context = 0) ----"
   
     - name: "boson"
       PDG_context: [9900081, 0]

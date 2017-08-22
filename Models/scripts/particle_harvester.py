@@ -72,7 +72,6 @@ def create_entry(macro, particle_list):
               
         output += "))\n      "
         
-  output += "\n"
   return output
 
 def main(argv):
@@ -133,23 +132,13 @@ namespace Gambit                                  \n\
     {                                             \n\
                                                   \n"
                                                   
-                                                  
-  towrite+= "      // ---- Standard Model flavour eigenstates (context = 1) ---- "
-
   towrite+= create_entry("add_SM_particle", SM_particles)  
-  
-  towrite+= "      // ---- Standard Model mass eigenstates (context = 0) ---- "
-  
+    
   towrite+= create_entry("add_SM_particle_set", SM_sets)
-  
-  towrite+= "      // ---- MSSM sparticle mass eigenstates (context = 0) ---- (TODO to be extended to NMSSM) \n\
-      // Defined according to SLHA2 (http://arxiv.org/pdf/0801.0045v3.pdf, see eq. 28 - 31) where applicable."
   
   towrite+= create_entry("add_particle", BSM_particles)
   
   towrite+= create_entry("add_particle_set", BSM_sets)
-  
-  towrite+= "      // ---- GAMBIT generic particle classes (context = 0) ----\n"
 
   towrite+= create_entry("add_generic_particle", Generic)
   
