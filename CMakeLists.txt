@@ -308,8 +308,7 @@ set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 # backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
 file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
                                    "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
-file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/particle_database.yaml"
-                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
+file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/particle_database.yaml")
 file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
                                    "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
 file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"

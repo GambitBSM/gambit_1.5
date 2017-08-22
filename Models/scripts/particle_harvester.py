@@ -36,42 +36,48 @@ def create_entry(macro, particle_list):
   for i in range(0, len(particle_list)):
   
     entry = particle_list[i]
-    PDG = entry['PDG_context']
     
-    # Count how many particles appear in the PDG_context lists.
-    numlists = sum(1 for x in PDG if isinstance(x, list))
+    # If there's a comment -> just post it without the rest of the stuff
+    if 'comment' in entry:
+      output += "\n      // " + entry['comment'] + "\n      "
     
-    # Add description (C++ comment) if it exists
-    if 'description' in entry:
-      output += "\n      // " + str(entry['description']) + "\n      "
+    else:
+      PDG = entry['PDG_context']
       
-    # Add the macro plus the particle name, plus the PDG-context pair. 
-    output += macro + '("' + str(entry['name']) + '", ' + str(entry['PDG_context']).replace("]",")").replace("[","(") + ")\n      " 
-  
-    # If the YAML file says there is a conjugate particle, add the name of it and the negative PDG-context pair
-    if 'conjugate' in entry: 
-      output += macro + '("' + str(entry['conjugate']) + '", ('
+      # Count how many particles appear in the PDG_context lists.
+      numlists = sum(1 for x in PDG if isinstance(x, list))
       
-      # If it is not a particle set.
-      if numlists == 0:
-        output += str(-PDG[0]) + ", " + str(PDG[1])
+      # Add description (C++ comment) if it exists
+      if 'description' in entry:
+        output += "\n      // " + str(entry['description']) + "\n      "
         
-      # If it is a particle set. 
-      else:  
-        for i in range(0, numlists):
-          output += '(' + str(-PDG[i][0]) + ", " + str(PDG[i][1]) + ')'
-          # Comma separate all but the last one
-          if i < numlists-1: 
-            output += ', '
-            
-      output += "))\n      "
-      
+      # Add the macro plus the particle name, plus the PDG-context pair. 
+      output += macro + '("' + str(entry['name']) + '", ' + str(entry['PDG_context']).replace("]",")").replace("[","(") + ")\n      " 
+    
+      # If the YAML file says there is a conjugate particle, add the name of it and the negative PDG-context pair
+      if 'conjugate' in entry: 
+        output += macro + '("' + str(entry['conjugate']) + '", ('
+        
+        # If it is not a particle set.
+        if numlists == 0:
+          output += str(-PDG[0]) + ", " + str(PDG[1])
+          
+        # If it is a particle set. 
+        else:  
+          for i in range(0, numlists):
+            output += '(' + str(-PDG[i][0]) + ", " + str(PDG[i][1]) + ')'
+            # Comma separate all but the last one
+            if i < numlists-1: 
+              output += ', '
+              
+        output += "))\n      "
+        
   output += "\n"
   return output
 
 def main(argv):
     
-  with open("./Models/include/gambit/Models/particle_database.yaml", "r") as f:
+  with open("./config/particle_database.yaml", "r") as f:
 
     try:
       data = yaml.load(f)
@@ -147,8 +153,6 @@ namespace Gambit                                  \n\
 
   towrite+= create_entry("add_generic_particle", Generic)
   
-                                          
-
   towrite+="                                      \n\
     }                                             \n\
                                                   \n\

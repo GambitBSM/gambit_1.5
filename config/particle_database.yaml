@@ -6,78 +6,100 @@ StandardModel:
   
   # add_SM_particle
   Particles:
+      
+    - comment: "Quarks"
   
     - name: "d"
       PDG_context: [1, 1]
       conjugate: "dbar"
-      description: "Quarks"
+      description: "Down quark"
       
     - name: "u"
       PDG_context: [2, 1]
       conjugate: "ubar"
+      description: "Up quark"
       
     - name: "s"
       PDG_context: [3, 1]
       conjugate: "sbar"
+      description: "Strange quark"
       
     - name: "c"
       PDG_context: [4, 1]
       conjugate: "cbar"
+      description: "Charm quark"
       
     - name: "b"
       PDG_context: [5, 1]
       conjugate: "bbar"
+      description: "Bottom quark"
       
     - name: "t"
       PDG_context: [6, 1]
       conjugate: "tbar"
+      description: "Top quark"
+      
+    - comment: "Leptons"
       
     - name: "e-"
       PDG_context: [11, 1]
       conjugate: "e+"
-      description: "Leptons"
+      description: "Electron"
       
     - name: "mu-"
       PDG_context: [13, 1]
       conjugate: "mu+"
+      description: "Muon"
       
     - name: "tau-"
       PDG_context: [15, 1]
       conjugate: "tau+"
+      description: "Tau"
+      
+    - comment: "Neutrinos"
       
     - name: "nu_e"
       PDG_context: [12, 1]
       conjugate: "nubar_e"
-      description: "Neutrinos"
+      description: "Electron neutrino"
       
     - name: "nu_mu"
       PDG_context: [14, 1]
       conjugate: "nubar_mu"
+      description: "Muon neutrino"
       
     - name: "nu_tau"
       PDG_context: [16, 1]
       conjugate: "nubar_tau"
+      description: "Tau neutrino"
+      
+    - comment: " ---- Standard Model gauge bosons [context = 0] ---- "
       
     - name: "g"
       PDG_context: [21, 0]
-      description: " ---- Standard Model gauge/Higgs bosons [context = 0] ---- \n"
+      description: "Gluon"
       
     - name: "gamma"
       PDG_context: [22, 0]
+      description: "Photon"
       
     - name: "Z0"
       PDG_context: [23, 0]
+      description: "Z Boson"
       
     - name: "W+"
       PDG_context: [24, 0]
       conjugate: "W-"
+      description: "W Boson"
       
     - name: "G"
       PDG_context: [39, 0]
+      description: "Graviton"
+      
+    - comment: " ---- Standard Model significant mesons [context = 0] ----"
       
     - name: "pi0"
       PDG_context: [111, 0]
-      description: "---- Standard Model significant mesons [context = 0] ----\n"
     
     - name: "pi+"
       PDG_context: [211, 0]
@@ -124,7 +146,7 @@ OtherModels:
    
   # add_particle
   Particles:
-  
+    
     - name: "~g"
       PDG_context: [1000021, 0]
       description: "Gluino"
