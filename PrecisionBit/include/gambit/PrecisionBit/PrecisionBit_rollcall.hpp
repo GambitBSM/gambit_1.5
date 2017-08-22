@@ -82,6 +82,12 @@ START_MODULE
     DEPENDENCY(prec_mh, triplet<double>)
     #undef FUNCTION
 
+    #define FUNCTION make_MSSM_precision_spectrum_H
+    START_FUNCTION(Spectrum)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    DEPENDENCY(prec_mh, triplet<double>)
+    #undef FUNCTION
+
     #define FUNCTION make_MSSM_precision_spectrum_W
     START_FUNCTION(Spectrum)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)

@@ -27,7 +27,7 @@
 #include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
-#define PRECISIONBIT_DEBUG
+//#define PRECISIONBIT_DEBUG
 
 /// EWPO theoretical uncertainties on FeynHiggs calculations; based on hep-ph/0412214 Eq 3.1.
 /// @{
@@ -485,6 +485,45 @@ namespace Gambit
       static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
       update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw, allow_fallback);
       improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+    }
+
+    /// Precision MSSM spectrum manufacturer with precision SM-like Higgs mass
+    void make_MSSM_precision_spectrum_H(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_H;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      SubSpectrum& HE = improved_spec.get_HE();
+      SubSpectrum& LE = improved_spec.get_LE();
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
+
+      // Higgs masses
+      // FIXME switch to this once the setters take pdg pairs
+      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
+      //                                 std::pair<int,int>(35,0),
+      //                                 std::pair<int,int>(36,0),
+      //                                 std::pair<int,int>(37,0)};
+      str higgses[1];
+      std::vector< triplet<double> > MH = {*Dep::prec_mh};
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      if (smlike_pdg == 25) higgses[0] = "h0_1";
+      else if (smlike_pdg == 35) higgses[0] = "h0_2";
+      else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
+      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
+      update_H_masses(HE, 1, higgses, central, error, MH, allow_fallback);
+
+      // Save the identity/identities of the calculator(s) used for the central value.
+      const str& p_calc = Dep::prec_mh.name();
+      const str& p_orig = Dep::prec_mh.origin();
+      const str& s_calc = Dep::unimproved_MSSM_spectrum.name();
+      const str& s_orig = Dep::unimproved_MSSM_spectrum.origin();
+      if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc, true);
+      if (central == 2) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+s_orig+"::"+s_calc, true);
+      if (central == 3) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc+", "+s_orig+"::"+s_calc, true);
+
+      // Check if an SLHA file needs to be excreted.
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+
     }
 
     /// Precision MSSM spectrum manufacturer with precision W and SM-like Higgs masses
