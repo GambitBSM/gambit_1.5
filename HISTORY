@@ -15,6 +15,7 @@ Feature release.
 - Made MicrOmegas use decays from GAMBIT as default
 - Additional sanity checks in cmake compiler selection
 - Fixed bug preventing proper operation of hdf5 combination with T-walk
+- Improved dependency resolver suggestions for new yaml rules
 
 v1.0.1 - June 2017
 Bugfix release.
