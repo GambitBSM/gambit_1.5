@@ -9,7 +9,7 @@
 ///  Authors (add name and date if you modify):
 ///
 /// \author Ankit Beniwal
-/// \date Jun 2017
+/// \date Jun, Aug 2017
 ///
 ///  *********************************************
 
@@ -64,21 +64,21 @@ BE_INI_FUNCTION
      double mV = spec.get(Par::Pole_Mass,"V");
      double mH = spec.get(Par::Pole_Mass,"h0_1");
      double mW = le.get(Par::Pole_Mass, "W+");
-     double lambda = he.get(Par::dimensionless,"lambda_hV");
+     double lambda_hV = he.get(Par::dimensionless,"lambda_hV");
 
      error = assignVal((char*)"mV", mV);
-     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set DM mass in"
+     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set mV in"
              "MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
-     error = assignVal((char*)"lhV", lambda);
-     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set lambda in"
+     error = assignVal((char*)"lhV", lambda_hV);
+     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set lambda_hV in"
              "MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
      // Set SM particle masses in micrOmegas_3.6.9.2
 
      // EE = sqrt(4*pi*(1/alphainv))
      error = assignVal((char*)"EE", sqrt(4*M_PI*(1/sminputs.alphainv)));
-     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set electric charge in"
+     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set alphainv in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
      // v0 = 1/sqrt(sqrt(2)*GF)
@@ -103,12 +103,12 @@ BE_INI_FUNCTION
 
      // mc(mc) in MSbar scheme
      error = assignVal((char*)"Mc", sminputs.mCmC);
-     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set Mc(Mc) in"
+     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set mCmC in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
      // mb(mb) in MSbar scheme
      error = assignVal((char*)"Mb", sminputs.mBmB);
-     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set Mb(Mb) in"
+     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set mBmB in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
      // mtop(pole)
