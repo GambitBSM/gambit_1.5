@@ -19,6 +19,7 @@ SuperIso:
 
 DDCalc:
   1.0.0:       ./Backends/installed/ddcalc/1.0.0/lib/libDDCalc.so
+  1.1.0:       ./Backends/installed/ddcalc/1.1.0/lib/libDDCalc.so
 
 #DDCalc_HP:
 #  1.0.0:       ./../DDCalc_development/lib/libDDCalc.so

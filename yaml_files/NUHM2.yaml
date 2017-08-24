@@ -185,6 +185,9 @@ ObsLikes:
     - capability: XENON100_2012_LogLikelihood
       purpose:    LogLike
 
+    - capability: XENON1T_2017_LogLikelihood
+      purpose:    LogLike
+
     - capability: LUX_2015_LogLikelihood
       purpose:    LogLike
 
@@ -198,6 +201,9 @@ ObsLikes:
       purpose:    LogLike
 
     - capability: PICO_60_F_LogLikelihood
+      purpose:    LogLike
+
+    - capability: PICO_60_2017_LogLikelihood
       purpose:    LogLike
 
     - capability: SuperCDMS_2014_LogLikelihood
@@ -348,7 +354,7 @@ Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
   # Options set to match benchmark point specified in SpecBit/MSSM_benchmark_points/LesHouches.in.MSSM_1
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatMGUT_spectrum
+    function: get_MSSMatMGUT_spectrum_FS
     options:
       precision_goal:        1.0e-4
       max_iterations:        0

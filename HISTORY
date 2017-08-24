@@ -3,6 +3,19 @@ GAMBIT Revision History
 Full details can be found in the git log.  Only a summary of the
 changes in each new version is given here.
 
+v1.1.0
+Feature release.
+- Added support for Mathematica backends
+- Added support for DDCalc 1.1.0 (featuring XENON-1T and PICO-60 2017)
+- Renamed some SpecBit module functions
+- Rearranged precision mass and precision spectrum module function dependency structure
+- Updated PrecisionBit likelihoods to use PDG 2017 values
+- Updated DecayBit decay data to use PDG 2017 values
+- Added option for turning on loop corrections to direct detection cross-sections computed with DarkSUSY
+- Made MicrOmegas use decays from GAMBIT as default
+- Additional sanity checks in cmake compiler selection
+- Fixed bug preventing proper operation of hdf5 combination with T-walk
+- Improved dependency resolver suggestions for new yaml rules
 
 v1.0.1 - June 2017
 Bugfix release.
