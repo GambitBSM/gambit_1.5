@@ -1441,7 +1441,10 @@ namespace Gambit
 
     double G(const double x)
     {
-      return (10.0 - 43.0*x + 78.0*pow(x,2) - 49.0*pow(x,3) + 4.0*pow(x,4) + 18.0*pow(x,3)*log(x)) / (3.0*pow(x - 1,4));
+      if(x)
+        return (10.0 - 43.0*x + 78.0*pow(x,2) - 49.0*pow(x,3) + 4.0*pow(x,4) + 18.0*pow(x,3)*log(x)) / (3.0*pow(x - 1,4));
+      else
+        return 10.0/3;
     }
 
     void SN_muegamma(double &result)
@@ -1458,8 +1461,10 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, mu = 1;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
-
+      {
+        Rllgamma += /*Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) +*/ Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+cout << "Rllgamma = " << Rllgamma << endl;
+      }
       result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
     }
 
@@ -1477,7 +1482,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
@@ -1501,7 +1506,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
@@ -1526,7 +1531,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, mu = 1;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mMu/sminputs.mE) - 22./3.;
@@ -1548,7 +1553,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 22./3.;
@@ -1575,7 +1580,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 8.;
@@ -1610,7 +1615,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 8.;
@@ -1647,7 +1652,7 @@ namespace Gambit
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 22./3.;
@@ -1689,6 +1694,34 @@ namespace Gambit
       result = 0;
     }
 
+    void SN_edm_e(double &result)
+    {
+      using namespace Pipes::SN_edm_e;
+
+      // At one loop there is no contribution for this because it is proportional to diagonal entries on the neutrino mixing matrix, that have no imaginary part
+
+      result = 0;
+    }
+
+    void SN_edm_mu(double &result)
+    {
+      using namespace Pipes::SN_edm_mu;
+
+      // No 1-loop contribution, same reason as above
+
+      result = 0;
+    }
+
+    void SN_edm_tau(double &result)
+    {
+      using namespace Pipes::SN_edm_tau;
+
+      // No 1-loop contribution, same reason as above
+
+      result = 0;
+    }
+
+
     /// Likelihood for l -> l gamma processes
     void l2lgamma_likelihood(double &result)
     {
@@ -1727,7 +1760,7 @@ namespace Gambit
      theory[0] = *Dep::muegamma;
      theory[1] = *Dep::tauegamma;
      theory[2] = *Dep::taumugamma;
-
+ 
      result = 0;
      for (int i = 0; i < 3; ++i)
        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
@@ -1832,6 +1865,55 @@ namespace Gambit
         result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
 
     }
+
+    /// Likelihood for electric dipole moments
+    void edm_likelihood(double &result)
+    {
+      using namespace Pipes::edm_likelihood;
+      
+      static bool first = true;
+      static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
+      static double theory[3], th_err[3];
+
+
+      // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
+      if (first)
+      {
+        // Read in experimental measuremens
+        Flav_reader fread(GAMBIT_DIR  "/FlavBit/data");
+        fread.debug_mode(flav_debug);
+
+        // d_e
+        fread.read_yaml_measurement("flav_data.yaml", "d_e");
+        // d_mu
+        fread.read_yaml_measurement("flav_data.yaml", "d_mu");
+        // d_tau
+        fread.read_yaml_measurement("flav_data.yaml", "d_tau");
+
+        fread.initialise_matrices();
+        cov_exp=fread.get_exp_cov();
+        value_exp=fread.get_exp_value();
+
+        for (int i = 0; i < 2; ++i)
+          th_err[i] = fread.get_th_err()(i,0).first;
+
+        // Init over.
+        first = false;
+      }
+
+     theory[0] = *Dep::edm_e;
+     theory[1] = *Dep::edm_mu;
+     theory[2] = *Dep::edm_tau;
+
+     result = Stats::gaussian_upper_limit(theory[0], value_exp(0,0), th_err[0], cov_exp(0,0), false);
+     result += Stats::gaussian_loglikelihood(theory[1], value_exp(1,0), th_err[1], cov_exp(1,1), false);
+     result += Stats::gaussian_upper_limit(theory[2], value_exp(2,0), th_err[2], cov_exp(2,2), false);
+
+
+
+    }
+
+
 
   }
 

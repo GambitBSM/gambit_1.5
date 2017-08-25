@@ -1743,3 +1743,46 @@
   correlation:
   - name: NONE
 
+################################
+
+- name: d_e
+  islimit: true
+  one_sided: false
+  exp_value: 0.
+  exp_90_CL: 0.87e-28
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: NONE
+  correlation:
+  - name: NONE
+
+- name: d_mu
+  islimit: false
+  exp_value: -0.1e-19
+  exp_stat_error: 0.9e-19
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M 
+  th_error_source: NONE
+  correlation:
+  - name: NONE
+
+- name: d_tau
+  islimit: true
+  one_sided: false
+  exp_value: 0.
+  exp_95_CL: 0.5e-17
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: NONE
+  correlation:
+  - name: NONE
+
+

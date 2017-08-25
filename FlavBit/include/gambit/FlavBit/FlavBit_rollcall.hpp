@@ -588,6 +588,42 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  //###############################################
+  // Electric Dipole Moments 
+  //###############################################
+
+  // Observable: d_e
+  #define CAPABILITY edm_e
+  START_CAPABILITY
+    #define FUNCTION SN_edm_e
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // Observable: d_mu
+  #define CAPABILITY edm_mu
+  START_CAPABILITY
+    #define FUNCTION SN_edm_mu
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // Observable: d_tau
+  #define CAPABILITY edm_tau
+  START_CAPABILITY
+    #define FUNCTION SN_edm_tau
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
 
   //###############################################
   //  Likelihoods
@@ -710,8 +746,18 @@ START_MODULE
     #define FUNCTION mu2e_likelihood
     START_FUNCTION(double)
     DEPENDENCY(mueTi, double)
-    DEPENDENCY(mueS, double)
     DEPENDENCY(muePb, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // EDM likelihoods
+  #define CAPABILITY edm_lnL
+  START_CAPABILITY
+    #define FUNCTION edm_likelihood
+    START_FUNCTION(double)
+    DEPENDENCY(edm_e, double)
+    DEPENDENCY(edm_mu, double)
+    DEPENDENCY(edm_tau, double)
     #undef FUNCTION
   #undef CAPABILITY
 

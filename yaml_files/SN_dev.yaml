@@ -214,6 +214,14 @@ ObsLikes:
   - capability: l2lll_lnL
     purpose: LogLike
     function: l2lll_likelihood
+
+#  - capability: mu2e_lnL
+#    purpose: LogLike
+#    function: mu2e_likelihood
+
+#  - capability: edm_lnL
+#    purpose: LogLike
+#    function: edm_likelihood
    
 
 Rules:
