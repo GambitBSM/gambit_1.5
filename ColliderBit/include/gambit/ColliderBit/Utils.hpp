@@ -182,7 +182,7 @@ namespace Gambit {
       std::vector<FJNS::PseudoJet> jets = HEPUtils::get_jets(constituents, R, ptmin, alg);
       // Make newly-allocated Jets
       std::vector<HEPUtils::Jet*> rtn;
-      for (const FJNS::PseudoJet* j : jets) rtn.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
+      for (const FJNS::PseudoJet& j : jets) rtn.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
       return rtn;
     }
 
