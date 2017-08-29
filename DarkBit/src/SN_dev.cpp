@@ -255,6 +255,7 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s_pienu;
       static std::vector<double> M_temp_pienu(140), U_temp_pienu(140);
+      double M_1, M_2, M_3;
       std::vector<double> U_pienu(3), mixing_sq_pienu(3);
 
       mixing_sq_pienu[0] = *Dep::Ue1;
@@ -266,7 +267,7 @@ namespace Gambit
 
       if (read_table)
       {
-        double array_pienu[140][2], M_1, M_2, M_3;
+        double array_pienu[140][2];
         std::ifstream f_pienu("DarkBit/data/pienu.csv");
         for (int row=0; row<140; ++row)
         {
