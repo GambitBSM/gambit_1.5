@@ -45,8 +45,7 @@ namespace Gambit
       result = t.cwiseAbs2();
     }
 
-    // BBN constraint: lifetime must be less than 0.1s
-    // TODO (CW): Provide reference
+    // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841]
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
@@ -79,7 +78,7 @@ namespace Gambit
       result_bbn += temp_bbn;
     }
 
-    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits
+    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
     void lnL_lepuniv(double& result_lepuniv)
     {
       using namespace Pipes::lnL_lepuniv;
@@ -162,7 +161,7 @@ namespace Gambit
       result_lepuniv = temp_lepuniv;
     }
 
-    // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen
+    // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
     void lnL_0nubb(double& result_0nubb)
     {
       using namespace Pipes::lnL_0nubb;
@@ -199,7 +198,7 @@ namespace Gambit
       }
     }
 
-    // CKM unitarity constraint: V_ud should lie within 3sigma of the world average
+    // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
     void lnL_ckm(double& result_ckm)
     {
       using namespace Pipes::lnL_ckm;
@@ -306,8 +305,11 @@ namespace Gambit
     void lnL_ps191_e(double& result_ps191e)
     {
       using namespace Pipes::lnL_ps191_e;
-      double array_ps191e[116][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_ps191e(116), U_temp_ps191e(116), U_ps191e(3), mixing_sq_ps191e(3);
+      static bool read_table = true;
+      static tk::spline s_ps191e;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_ps191e, U_temp_ps191e;
+      std::vector<double> U_ps191e(3), mixing_sq_ps191e(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -316,32 +318,36 @@ namespace Gambit
       mixing_sq_ps191e[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_ps191e[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      std::ifstream f_ps191e("DarkBit/data/ps191_e.csv");
-      for (int row=0; row<116; ++row)
+      if (read_table)
       {
-        std::string line_ps191e;
-        getline(f_ps191e, line_ps191e);
-        if (!f_ps191e.good())
-          break;
-        std::stringstream iss_ps191e(line_ps191e);
-        for (int col=0; col<2; ++col)
+        double array_ps191e[116][2];
+        std::ifstream f_ps191e("DarkBit/data/ps191_e.csv");
+        for (int row=0; row<116; ++row)
         {
-          std::string val_ps191e;
-          getline(iss_ps191e, val_ps191e, ',');
-          if (!iss_ps191e)
+          std::string line_ps191e;
+          getline(f_ps191e, line_ps191e);
+          if (!f_ps191e.good())
             break;
-          std::stringstream conv_ps191e(val_ps191e);
-          conv_ps191e >> array_ps191e[row][col];
+          std::stringstream iss_ps191e(line_ps191e);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_ps191e;
+            getline(iss_ps191e, val_ps191e, ',');
+            if (!iss_ps191e)
+              break;
+            std::stringstream conv_ps191e(val_ps191e);
+            conv_ps191e >> array_ps191e[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<116; i++)
-      {
-        M_temp_ps191e[i] = array_ps191e[i][0];
-        U_temp_ps191e[i] = array_ps191e[i][1];
+        for (int i=0; i<116; i++)
+        {
+          M_temp_ps191e[i] = array_ps191e[i][0];
+          U_temp_ps191e[i] = array_ps191e[i][1];
+        }
+        s_ps191e.set_points(M_temp_ps191e, U_temp_ps191e);
+        read_table = false;
       }
-      tk::spline s_ps191e;
-      s_ps191e.set_points(M_temp_ps191e, U_temp_ps191e);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -356,8 +362,11 @@ namespace Gambit
     void lnL_ps191_mu(double& result_ps191mu)
     {
       using namespace Pipes::lnL_ps191_mu;
-      double array_ps191mu[102][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_ps191mu(102), U_temp_ps191mu(102), U_ps191mu(3), mixing_sq_ps191mu(3);
+      static bool read_table = true;
+      static tk::spline s_ps191mu;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_ps191mu(102), U_temp_ps191mu(102);
+      std::vector<double> U_ps191mu(3), mixing_sq_ps191mu(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -366,32 +375,36 @@ namespace Gambit
       mixing_sq_ps191mu[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_ps191mu[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      std::ifstream f_ps191mu("DarkBit/data/ps191_mu.csv");
-      for (int row=0; row<102; ++row)
+      if (read_table)
       {
-        std::string line_ps191mu;
-        getline(f_ps191mu, line_ps191mu);
-        if (!f_ps191mu.good())
-          break;
-        std::stringstream iss_ps191mu(line_ps191mu);
-        for (int col=0; col<2; ++col)
+        double array_ps191mu[102][2];
+        std::ifstream f_ps191mu("DarkBit/data/ps191_mu.csv");
+        for (int row=0; row<102; ++row)
         {
-          std::string val_ps191mu;
-          getline(iss_ps191mu, val_ps191mu, ',');
-          if (!iss_ps191mu)
+          std::string line_ps191mu;
+          getline(f_ps191mu, line_ps191mu);
+          if (!f_ps191mu.good())
             break;
-          std::stringstream conv_ps191mu(val_ps191mu);
-          conv_ps191mu >> array_ps191mu[row][col];
-        }
-      }
+          std::stringstream iss_ps191mu(line_ps191mu);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_ps191mu;
+            getline(iss_ps191mu, val_ps191mu, ',');
+            if (!iss_ps191mu)
+              break;
+            std::stringstream conv_ps191mu(val_ps191mu);
+            conv_ps191mu >> array_ps191mu[row][col];
+          }
+        }  
 
-      for (int i=0; i<102; i++)
-      {
-        M_temp_ps191mu[i] = array_ps191mu[i][0];
-        U_temp_ps191mu[i] = array_ps191mu[i][1];
+        for (int i=0; i<102; i++)
+        {
+          M_temp_ps191mu[i] = array_ps191mu[i][0];
+          U_temp_ps191mu[i] = array_ps191mu[i][1];
+        }
+        s_ps191mu.set_points(M_temp_ps191mu, U_temp_ps191mu);
+        read_table = false;
       }
-      tk::spline s_ps191mu;
-      s_ps191mu.set_points(M_temp_ps191mu, U_temp_ps191mu);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -406,8 +419,11 @@ namespace Gambit
     void lnL_charm_e(double& result_charme)
     {
       using namespace Pipes::lnL_charm_e;
-      double array_charme[56][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_charme(56), U_temp_charme(56), U_charme(3), mixing_sq_charme(3);
+      static bool read_table = true;
+      static tk::spline s_charme;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_charme(56), U_temp_charme(56);
+      std::vector<double> U_charme(3), mixing_sq_charme(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -416,32 +432,36 @@ namespace Gambit
       mixing_sq_charme[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_charme[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      std::ifstream f_charme("DarkBit/data/charm_e.csv");
-      for (int row=0; row<56; ++row)
+      if (read_table)
       {
-        std::string line_charme;
-        getline(f_charme, line_charme);
-        if (!f_charme.good())
-          break;
-        std::stringstream iss_charme(line_charme);
-        for (int col=0; col<2; ++col)
+        double array_charme[56][2];
+        std::ifstream f_charme("DarkBit/data/charm_e.csv");
+        for (int row=0; row<56; ++row)
         {
-          std::string val_charme;
-          getline(iss_charme, val_charme, ',');
-          if (!iss_charme)
+          std::string line_charme;
+          getline(f_charme, line_charme);
+          if (!f_charme.good())
             break;
-          std::stringstream conv_charme(val_charme);
-          conv_charme >> array_charme[row][col];
+          std::stringstream iss_charme(line_charme);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_charme;
+            getline(iss_charme, val_charme, ',');
+            if (!iss_charme)
+              break;
+            std::stringstream conv_charme(val_charme);
+            conv_charme >> array_charme[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<56; i++)
-      {
-        M_temp_charme[i] = array_charme[i][0];
-        U_temp_charme[i] = array_charme[i][1];
+        for (int i=0; i<56; i++)
+        {
+          M_temp_charme[i] = array_charme[i][0];
+          U_temp_charme[i] = array_charme[i][1];
+        }
+        s_charme.set_points(M_temp_charme, U_temp_charme);
+        read_table = false;
       }
-      tk::spline s_charme;
-      s_charme.set_points(M_temp_charme, U_temp_charme);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -456,8 +476,11 @@ namespace Gambit
     void lnL_charm_mu(double& result_charmmu)
     {
       using namespace Pipes::lnL_charm_mu;
-      double array_charmmu[34][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_charmmu(34), U_temp_charmmu(34), U_charmmu(3), mixing_sq_charmmu(3);
+      static bool read_table = true;
+      static tk::spline s_charmmu;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_charmmu(34), U_temp_charmmu(34);
+      std::vector<double> U_charmmu(3), mixing_sq_charmmu(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -466,32 +489,36 @@ namespace Gambit
       mixing_sq_charmmu[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_charmmu[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      std::ifstream f_charmmu("DarkBit/data/charm_mu.csv");
-      for (int row=0; row<34; ++row)
+      if (read_table)
       {
-        std::string line_charmmu;
-        getline(f_charmmu, line_charmmu);
-        if (!f_charmmu.good())
-          break;
-        std::stringstream iss_charmmu(line_charmmu);
-        for (int col=0; col<2; ++col)
+        double array_charmmu[34][2];
+        std::ifstream f_charmmu("DarkBit/data/charm_mu.csv");
+        for (int row=0; row<34; ++row)
         {
-          std::string val_charmmu;
-          getline(iss_charmmu, val_charmmu, ',');
-          if (!iss_charmmu)
+          std::string line_charmmu;
+          getline(f_charmmu, line_charmmu);
+          if (!f_charmmu.good())
             break;
-          std::stringstream conv_charmmu(val_charmmu);
-          conv_charmmu >> array_charmmu[row][col];
+          std::stringstream iss_charmmu(line_charmmu);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_charmmu;
+            getline(iss_charmmu, val_charmmu, ',');
+            if (!iss_charmmu)
+              break;
+            std::stringstream conv_charmmu(val_charmmu);
+            conv_charmmu >> array_charmmu[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<34; i++)
-      {
-        M_temp_charmmu[i] = array_charmmu[i][0];
-        U_temp_charmmu[i] = array_charmmu[i][1];
+        for (int i=0; i<34; i++)
+        {
+          M_temp_charmmu[i] = array_charmmu[i][0];
+          U_temp_charmmu[i] = array_charmmu[i][1];
+        }
+        s_charmmu.set_points(M_temp_charmmu, U_temp_charmmu);
+        read_table = false;
       }
-      tk::spline s_charmmu;
-      s_charmmu.set_points(M_temp_charmmu, U_temp_charmmu);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -506,8 +533,11 @@ namespace Gambit
     void lnL_delphi(double& result_delphi)
     {
       using namespace Pipes::lnL_delphi;
-      double array_delphi[180][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_delphi(180), U_temp_delphi(180), U_delphi(3), mixing_sq_delphi(9);
+      static bool read_table = true;
+      static tk::spline s_delphi;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_delphi(180), U_temp_delphi(180);
+      std::vector<double> U_delphi(3), mixing_sq_delphi(9);
 
       mixing_sq_delphi[0] = *Dep::Ue1;
       mixing_sq_delphi[1] = *Dep::Ue2;
@@ -519,32 +549,36 @@ namespace Gambit
       mixing_sq_delphi[7] = *Dep::Ut2;
       mixing_sq_delphi[8] = *Dep::Ut3;
 
-      std::ifstream f_delphi("DarkBit/data/delphi.csv");
-      for (int row=0; row<180; ++row)
+      if (read_table)
       {
-        std::string line_delphi;
-        getline(f_delphi, line_delphi);
-        if (!f_delphi.good())
-          break;
-        std::stringstream iss_delphi(line_delphi);
-        for (int col=0; col<2; ++col)
+        double array_delphi[180][2];
+        std::ifstream f_delphi("DarkBit/data/delphi.csv");
+        for (int row=0; row<180; ++row)
         {
-          std::string val_delphi;
-          getline(iss_delphi, val_delphi, ',');
-          if (!iss_delphi)
+          std::string line_delphi;
+          getline(f_delphi, line_delphi);
+          if (!f_delphi.good())
             break;
-          std::stringstream conv_delphi(val_delphi);
-          conv_delphi >> array_delphi[row][col];
+          std::stringstream iss_delphi(line_delphi);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_delphi;
+            getline(iss_delphi, val_delphi, ',');
+            if (!iss_delphi)
+              break;
+            std::stringstream conv_delphi(val_delphi);
+            conv_delphi >> array_delphi[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<180; i++)
-      {
-        M_temp_delphi[i] = array_delphi[i][0];
-        U_temp_delphi[i] = array_delphi[i][1];
+        for (int i=0; i<180; i++)
+        {
+          M_temp_delphi[i] = array_delphi[i][0];
+          U_temp_delphi[i] = array_delphi[i][1];
+        }
+        s_delphi.set_points(M_temp_delphi, U_temp_delphi);
+        read_table = false;
       }
-      tk::spline s_delphi;
-      s_delphi.set_points(M_temp_delphi, U_temp_delphi);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -559,39 +593,46 @@ namespace Gambit
     void lnL_atlas_e(double& result_atlase)
     {
       using namespace Pipes::lnL_atlas_e;
-      double array_atlase[87][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_atlase(87), U_temp_atlase(87), U_atlase(3), mixing_sq_atlase(3);
+      static bool read_table = true;
+      static tk::spline s_atlase;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_atlase(87), U_temp_atlase(87);
+      std::vector<double> U_atlase(3), mixing_sq_atlase(3);
 
       mixing_sq_atlase[0] = *Dep::Ue1;
       mixing_sq_atlase[1] = *Dep::Ue2;
       mixing_sq_atlase[2] = *Dep::Ue3;
 
-      std::ifstream f_atlase("DarkBit/data/atlas_e.csv");
-      for (int row=0; row<87; ++row)
+      if (read_table)
       {
-        std::string line_atlase;
-        getline(f_atlase, line_atlase);
-        if (!f_atlase.good())
-          break;
-        std::stringstream iss_atlase(line_atlase);
-        for (int col=0; col<2; ++col)
+        double array_atlase[87][2];
+        std::ifstream f_atlase("DarkBit/data/atlas_e.csv");
+        for (int row=0; row<87; ++row)
         {
-          std::string val_atlase;
-          getline(iss_atlase, val_atlase, ',');
-          if (!iss_atlase)
+          std::string line_atlase;
+          getline(f_atlase, line_atlase);
+          if (!f_atlase.good())
             break;
-          std::stringstream conv_atlase(val_atlase);
-          conv_atlase >> array_atlase[row][col];
+          std::stringstream iss_atlase(line_atlase);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_atlase;
+            getline(iss_atlase, val_atlase, ',');
+            if (!iss_atlase)
+              break;
+            std::stringstream conv_atlase(val_atlase);
+            conv_atlase >> array_atlase[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<87; i++)
-      {
-        M_temp_atlase[i] = array_atlase[i][0];
-        U_temp_atlase[i] = array_atlase[i][1];
+        for (int i=0; i<87; i++)
+        {
+          M_temp_atlase[i] = array_atlase[i][0];
+         U_temp_atlase[i] = array_atlase[i][1];
+        }
+        s_atlase.set_points(M_temp_atlase, U_temp_atlase);
+        read_table = false;
       }
-      tk::spline s_atlase;
-      s_atlase.set_points(M_temp_atlase, U_temp_atlase);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -606,39 +647,46 @@ namespace Gambit
     void lnL_atlas_mu(double& result_atlasmu)
     {
       using namespace Pipes::lnL_atlas_mu;
-      double array_atlasmu[87][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_atlasmu(87), U_temp_atlasmu(87), U_atlasmu(3), mixing_sq_atlasmu(3);
+      static bool read_table = true;
+      static tk::spline s_atlasmu;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_atlasmu(87), U_temp_atlasmu(87);
+      std::vector<double> U_atlasmu(3), mixing_sq_atlasmu(3);
 
       mixing_sq_atlasmu[0] = *Dep::Um1;
       mixing_sq_atlasmu[1] = *Dep::Um2;
       mixing_sq_atlasmu[2] = *Dep::Um3;
 
-      std::ifstream f_atlasmu("DarkBit/data/atlas_mu.csv");
-      for (int row=0; row<87; ++row)
+      if (read_table)
       {
-        std::string line_atlasmu;
-        getline(f_atlasmu, line_atlasmu);
-        if (!f_atlasmu.good())
-          break;
-        std::stringstream iss_atlasmu(line_atlasmu);
-        for (int col=0; col<2; ++col)
+        double array_atlasmu[87][2];
+        std::ifstream f_atlasmu("DarkBit/data/atlas_mu.csv");
+        for (int row=0; row<87; ++row)
         {
-          std::string val_atlasmu;
-          getline(iss_atlasmu, val_atlasmu, ',');
-          if (!iss_atlasmu)
+          std::string line_atlasmu;
+          getline(f_atlasmu, line_atlasmu);
+          if (!f_atlasmu.good())
             break;
-          std::stringstream conv_atlasmu(val_atlasmu);
-          conv_atlasmu >> array_atlasmu[row][col];
+          std::stringstream iss_atlasmu(line_atlasmu);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_atlasmu;
+            getline(iss_atlasmu, val_atlasmu, ',');
+            if (!iss_atlasmu)
+              break;
+            std::stringstream conv_atlasmu(val_atlasmu);
+            conv_atlasmu >> array_atlasmu[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<87; i++)
-      {
-        M_temp_atlasmu[i] = array_atlasmu[i][0];
-        U_temp_atlasmu[i] = array_atlasmu[i][1];
+        for (int i=0; i<87; i++)
+        {
+          M_temp_atlasmu[i] = array_atlasmu[i][0];
+          U_temp_atlasmu[i] = array_atlasmu[i][1];
+        }
+        s_atlasmu.set_points(M_temp_atlasmu, U_temp_atlasmu);
+        read_table = false;
       }
-      tk::spline s_atlasmu;
-      s_atlasmu.set_points(M_temp_atlasmu, U_temp_atlasmu);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -653,39 +701,46 @@ namespace Gambit
     void lnL_e949(double& result_e949)
     {
       using namespace Pipes::lnL_e949;
-      double array_e949[112][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_e949(112), U_temp_e949(112), U_e949(3), mixing_sq_e949(3);
+      static bool read_table = true;
+      static tk::spline s_e949;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_e949(112), U_temp_e949(112);
+      std::vector<double> U_e949(3), mixing_sq_e949(3);
 
       mixing_sq_e949[0] = *Dep::Um1;
       mixing_sq_e949[1] = *Dep::Um2;
       mixing_sq_e949[2] = *Dep::Um3;
 
-      std::ifstream f_e949("DarkBit/data/e949.csv");
-      for (int row=0; row<112; ++row)
+      if (read_table)
       {
-        std::string line_e949;
-        getline(f_e949, line_e949);
-        if (!f_e949.good())
-          break;
-        std::stringstream iss_e949(line_e949);
-        for (int col=0; col<2; ++col)
+        double array_e949[112][2];
+        std::ifstream f_e949("DarkBit/data/e949.csv");
+        for (int row=0; row<112; ++row)
         {
-          std::string val_e949;
-          getline(iss_e949, val_e949, ',');
-          if (!iss_e949)
+          std::string line_e949;
+          getline(f_e949, line_e949);
+          if (!f_e949.good())
             break;
-          std::stringstream conv_e949(val_e949);
-          conv_e949 >> array_e949[row][col];
+          std::stringstream iss_e949(line_e949);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_e949;
+            getline(iss_e949, val_e949, ',');
+            if (!iss_e949)
+              break;
+            std::stringstream conv_e949(val_e949);
+            conv_e949 >> array_e949[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<112; i++)
-      {
-        M_temp_e949[i] = array_e949[i][0];
-        U_temp_e949[i] = array_e949[i][1];
+        for (int i=0; i<112; i++)
+        {
+          M_temp_e949[i] = array_e949[i][0];
+          U_temp_e949[i] = array_e949[i][1];
+        }
+        s_e949.set_points(M_temp_e949, U_temp_e949);
+        read_table = false;
       }
-      tk::spline s_e949;
-      s_e949.set_points(M_temp_e949, U_temp_e949);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -700,39 +755,46 @@ namespace Gambit
     void lnL_nutev(double& result_nutev)
     {
       using namespace Pipes::lnL_nutev;
-      double array_nutev[249][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_nutev(249), U_temp_nutev(249), U_nutev(3), mixing_sq_nutev(3);
+      static bool read_table = true;
+      static tk::spline s_nutev;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_nutev(249), U_temp_nutev(249);
+      std::vector<double> U_nutev(3), mixing_sq_nutev(3);
 
       mixing_sq_nutev[0] = *Dep::Um1;
       mixing_sq_nutev[1] = *Dep::Um2;
       mixing_sq_nutev[2] = *Dep::Um3;
 
-      std::ifstream f_nutev("DarkBit/data/nutev.csv");
-      for (int row=0; row<249; ++row)
+      if (read_table)
       {
-        std::string line_nutev;
-        getline(f_nutev, line_nutev);
-        if (!f_nutev.good())
-          break;
-        std::stringstream iss_nutev(line_nutev);
-        for (int col=0; col<2; ++col)
+        double array_nutev[249][2];
+        std::ifstream f_nutev("DarkBit/data/nutev.csv");
+        for (int row=0; row<249; ++row)
         {
-          std::string val_nutev;
-          getline(iss_nutev, val_nutev, ',');
-          if (!iss_nutev)
+          std::string line_nutev;
+          getline(f_nutev, line_nutev);
+          if (!f_nutev.good())
             break;
-          std::stringstream conv_nutev(val_nutev);
-          conv_nutev >> array_nutev[row][col];
+          std::stringstream iss_nutev(line_nutev);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_nutev;
+            getline(iss_nutev, val_nutev, ',');
+            if (!iss_nutev)
+              break;
+            std::stringstream conv_nutev(val_nutev);
+            conv_nutev >> array_nutev[row][col];
+          }
         }
-      }
 
-      for (int i=0; i<249; i++)
-      {
-        M_temp_nutev[i] = array_nutev[i][0];
-        U_temp_nutev[i] = array_nutev[i][1];
+        for (int i=0; i<249; i++)
+        {
+          M_temp_nutev[i] = array_nutev[i][0];
+          U_temp_nutev[i] = array_nutev[i][1];
+        }
+        s_nutev.set_points(M_temp_nutev, U_temp_nutev);
+        read_table = false;
       }
-      tk::spline s_nutev;
-      s_nutev.set_points(M_temp_nutev, U_temp_nutev);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
@@ -747,39 +809,46 @@ namespace Gambit
     void lnL_tau(double& result_tau)
     {
       using namespace Pipes::lnL_tau;
-      double array_tau[172][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_tau(172), U_temp_tau(172), U_tau(3), mixing_sq_tau(3);
+      static bool read_table = true;
+      static tk::spline s_tau;
+      double M_1, M_2, M_3;
+      static std::vector<double> M_temp_tau(172), U_temp_tau(172);
+      std::vector<double> U_tau(3), mixing_sq_tau(3);
 
       mixing_sq_tau[0] = *Dep::Ut1;
       mixing_sq_tau[1] = *Dep::Ut2;
       mixing_sq_tau[2] = *Dep::Ut3;
 
-      std::ifstream f_tau("DarkBit/data/tau.csv");
-      for (int row=0; row<172; ++row)
+      if (read_table)
       {
-        std::string line_tau;
-        getline(f_tau, line_tau);
-        if (!f_tau.good())
-          break;
-        std::stringstream iss_tau(line_tau);
-        for (int col=0; col<2; ++col)
+        double array_tau[172][2];
+        std::ifstream f_tau("DarkBit/data/tau.csv");
+        for (int row=0; row<172; ++row)
         {
-          std::string val_tau;
-          getline(iss_tau, val_tau, ',');
-          if (!iss_tau)
+          std::string line_tau;
+          getline(f_tau, line_tau);
+          if (!f_tau.good())
             break;
-          std::stringstream conv_tau(val_tau);
-          conv_tau >> array_tau[row][col];
-        }
-      }
+          std::stringstream iss_tau(line_tau);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_tau;
+            getline(iss_tau, val_tau, ',');
+            if (!iss_tau)
+              break;
+            std::stringstream conv_tau(val_tau);
+            conv_tau >> array_tau[row][col];
+          }
+        } 
 
-      for (int i=0; i<172; i++)
-      {
-        M_temp_tau[i] = array_tau[i][0];
-        U_temp_tau[i] = array_tau[i][1];
+        for (int i=0; i<172; i++)
+        {
+          M_temp_tau[i] = array_tau[i][0];
+          U_temp_tau[i] = array_tau[i][1];
+        }
+        s_tau.set_points(M_temp_tau, U_temp_tau);
+        read_table = false;
       }
-      tk::spline s_tau;
-      s_tau.set_points(M_temp_tau, U_temp_tau);
 
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
