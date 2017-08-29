@@ -38,7 +38,7 @@ namespace Gambit
     void CI_param(Matrix3d& result) 
     {
       using namespace Pipes::CI_param;
-      Matrix3d t_sq;
+      //Matrix3d t_sq;
       Matrix3cd t;
 
       t = *Dep::SeesawI_Theta;
@@ -46,12 +46,14 @@ namespace Gambit
     }
 
     // BBN constraint: lifetime must be less than 0.1s
+    // TODO (CW): Provide reference
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
       static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
+      // TODO (CW): Should come from SM input file
       static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W_sq
       static double g_R_sq = 0.0494;  // g_R = s_W^2
       static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
@@ -250,43 +252,49 @@ namespace Gambit
     void lnL_pienu(double& result_pienu)
     {
       using namespace Pipes::lnL_pienu;
-      double array_pienu[140][2], M_1, M_2, M_3;
-      std::vector<double> M_temp_pienu(140), U_temp_pienu(140), U_pienu(3), mixing_sq_pienu(3);
+      static bool read_table = true;
+      static tk::spline s_pienu;
+      static std::vector<double> M_temp_pienu(140), U_temp_pienu(140);
+      std::vector<double> U_pienu(3), mixing_sq_pienu(3);
 
       mixing_sq_pienu[0] = *Dep::Ue1;
       mixing_sq_pienu[1] = *Dep::Ue2;
       mixing_sq_pienu[2] = *Dep::Ue3;
-
-      std::ifstream f_pienu("DarkBit/data/pienu.csv");
-      for (int row=0; row<140; ++row)
-      {
-        std::string line_pienu;
-        getline(f_pienu, line_pienu);
-        if (!f_pienu.good())
-          break;
-        std::stringstream iss_pienu(line_pienu);
-        for (int col=0; col<2; ++col)
-        {
-          std::string val_pienu;
-          getline(iss_pienu, val_pienu, ',');
-          if (!iss_pienu)
-            break;
-          std::stringstream conv_pienu(val_pienu);
-          conv_pienu >> array_pienu[row][col];
-        }
-      }
-
-      for (int i=0; i<140; i++)
-      {
-        M_temp_pienu[i] = array_pienu[i][0];
-        U_temp_pienu[i] = array_pienu[i][1];
-      }
-      tk::spline s_pienu;
-      s_pienu.set_points(M_temp_pienu, U_temp_pienu);
-
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
+
+      if (read_table)
+      {
+        double array_pienu[140][2], M_1, M_2, M_3;
+        std::ifstream f_pienu("DarkBit/data/pienu.csv");
+        for (int row=0; row<140; ++row)
+        {
+          std::string line_pienu;
+          getline(f_pienu, line_pienu);
+          if (!f_pienu.good())
+            break;
+          std::stringstream iss_pienu(line_pienu);
+          for (int col=0; col<2; ++col)
+          {
+            std::string val_pienu;
+            getline(iss_pienu, val_pienu, ',');
+            if (!iss_pienu)
+              break;
+            std::stringstream conv_pienu(val_pienu);
+            conv_pienu >> array_pienu[row][col];
+          }
+        }
+
+        for (int i=0; i<140; i++)
+        {
+          M_temp_pienu[i] = array_pienu[i][0];
+          U_temp_pienu[i] = array_pienu[i][1];
+        }
+        s_pienu.set_points(M_temp_pienu, U_temp_pienu);
+        read_table = false;
+      }
+
       U_pienu[0] = s_pienu(M_1);
       U_pienu[1] = s_pienu(M_2);
       U_pienu[2] = s_pienu(M_3);
@@ -780,7 +788,8 @@ namespace Gambit
       U_tau[2] = s_tau(M_3);
       result_tau = -2.44*((mixing_sq_tau[0]/U_tau[0]) + (mixing_sq_tau[1]/U_tau[1]) + (mixing_sq_tau[2]/U_tau[2]));
     }
-                                                                                                                                                                                                                 void printable_Ue1(double& Ue1_sq)
+
+    void printable_Ue1(double& Ue1_sq)
     {
       namespace myPipe2 = Pipes::printable_Ue1;
       Matrix3d t_1(*myPipe2::Dep::Theta_sq);
