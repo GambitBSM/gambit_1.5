@@ -104,14 +104,14 @@ namespace Gambit
               0.0, 0.0, 1.0;
       U_pd << exp(-I*delta/2.0), 0.0, 0.0,
               0.0, 1.0, 0.0,
-              0.0, 1.0, exp(I*delta/2.0);
+              0.0, 0.0, exp(I*delta/2.0);
       U_nd << exp(I*delta/2.0), 0.0, 0.0,
               0.0, 1.0, 0.0,
-              0.0, 1.0, exp(-I*delta/2.0);
+              0.0, 0.0, exp(-I*delta/2.0);
       Maj_phase << exp(I*alpha1/2.0), 0.0, 0.0,
                    0.0, exp(I*alpha2/2.0), 0.0,
                    0.0, 0.0, 1.0;
-      U_nu = V_23 * U_pd * V_13 * U_nd* V_12 * Maj_phase;
+      U_nu = V_23 * U_pd * V_13 * U_nd * V_12 * Maj_phase;
 
     }
 
