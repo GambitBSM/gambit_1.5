@@ -251,7 +251,7 @@ namespace Gambit
     void lnL_pienu(double& result_pienu)
     {
       using namespace Pipes::lnL_pienu;
-      static bool read_table = true;
+      static bool read_table_pienu = true;
       static tk::spline s_pienu;
       static std::vector<double> M_temp_pienu(140), U_temp_pienu(140);
       double M_1, M_2, M_3;
@@ -264,7 +264,7 @@ namespace Gambit
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
 
-      if (read_table)
+      if (read_table_pienu)
       {
         double array_pienu[140][2];
         std::ifstream f_pienu("DarkBit/data/pienu.csv");
@@ -292,7 +292,7 @@ namespace Gambit
           U_temp_pienu[i] = array_pienu[i][1];
         }
         s_pienu.set_points(M_temp_pienu, U_temp_pienu);
-        read_table = false;
+        read_table_pienu = false;
       }
 
       U_pienu[0] = s_pienu(M_1);
@@ -305,10 +305,10 @@ namespace Gambit
     void lnL_ps191_e(double& result_ps191e)
     {
       using namespace Pipes::lnL_ps191_e;
-      static bool read_table = true;
+      static bool read_table_ps191e = true;
       static tk::spline s_ps191e;
       double M_1, M_2, M_3;
-      static std::vector<double> M_temp_ps191e, U_temp_ps191e;
+      static std::vector<double> M_temp_ps191e(116), U_temp_ps191e(116);
       std::vector<double> U_ps191e(3), mixing_sq_ps191e(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -318,7 +318,7 @@ namespace Gambit
       mixing_sq_ps191e[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_ps191e[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      if (read_table)
+      if (read_table_ps191e)
       {
         double array_ps191e[116][2];
         std::ifstream f_ps191e("DarkBit/data/ps191_e.csv");
@@ -346,7 +346,7 @@ namespace Gambit
           U_temp_ps191e[i] = array_ps191e[i][1];
         }
         s_ps191e.set_points(M_temp_ps191e, U_temp_ps191e);
-        read_table = false;
+        read_table_ps191e = false;
       }
 
       M_1 = *Param["M_1"];
@@ -362,7 +362,7 @@ namespace Gambit
     void lnL_ps191_mu(double& result_ps191mu)
     {
       using namespace Pipes::lnL_ps191_mu;
-      static bool read_table = true;
+      static bool read_table_ps191mu = true;
       static tk::spline s_ps191mu;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_ps191mu(102), U_temp_ps191mu(102);
@@ -375,7 +375,7 @@ namespace Gambit
       mixing_sq_ps191mu[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_ps191mu[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      if (read_table)
+      if (read_table_ps191mu)
       {
         double array_ps191mu[102][2];
         std::ifstream f_ps191mu("DarkBit/data/ps191_mu.csv");
@@ -403,7 +403,7 @@ namespace Gambit
           U_temp_ps191mu[i] = array_ps191mu[i][1];
         }
         s_ps191mu.set_points(M_temp_ps191mu, U_temp_ps191mu);
-        read_table = false;
+        read_table_ps191mu = false;
       }
 
       M_1 = *Param["M_1"];
@@ -419,7 +419,7 @@ namespace Gambit
     void lnL_charm_e(double& result_charme)
     {
       using namespace Pipes::lnL_charm_e;
-      static bool read_table = true;
+      static bool read_table_charme = true;
       static tk::spline s_charme;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_charme(56), U_temp_charme(56);
@@ -432,7 +432,7 @@ namespace Gambit
       mixing_sq_charme[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_charme[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      if (read_table)
+      if (read_table_charme)
       {
         double array_charme[56][2];
         std::ifstream f_charme("DarkBit/data/charm_e.csv");
@@ -460,7 +460,7 @@ namespace Gambit
           U_temp_charme[i] = array_charme[i][1];
         }
         s_charme.set_points(M_temp_charme, U_temp_charme);
-        read_table = false;
+        read_table_charme = false;
       }
 
       M_1 = *Param["M_1"];
@@ -476,7 +476,7 @@ namespace Gambit
     void lnL_charm_mu(double& result_charmmu)
     {
       using namespace Pipes::lnL_charm_mu;
-      static bool read_table = true;
+      static bool read_table_charmmu = true;
       static tk::spline s_charmmu;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_charmmu(34), U_temp_charmmu(34);
@@ -489,7 +489,7 @@ namespace Gambit
       mixing_sq_charmmu[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_charmmu[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
-      if (read_table)
+      if (read_table_charmmu)
       {
         double array_charmmu[34][2];
         std::ifstream f_charmmu("DarkBit/data/charm_mu.csv");
@@ -517,7 +517,7 @@ namespace Gambit
           U_temp_charmmu[i] = array_charmmu[i][1];
         }
         s_charmmu.set_points(M_temp_charmmu, U_temp_charmmu);
-        read_table = false;
+        read_table_charmmu = false;
       }
 
       M_1 = *Param["M_1"];
@@ -533,7 +533,7 @@ namespace Gambit
     void lnL_delphi(double& result_delphi)
     {
       using namespace Pipes::lnL_delphi;
-      static bool read_table = true;
+      static bool read_table_delphi = true;
       static tk::spline s_delphi;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_delphi(180), U_temp_delphi(180);
@@ -549,7 +549,7 @@ namespace Gambit
       mixing_sq_delphi[7] = *Dep::Ut2;
       mixing_sq_delphi[8] = *Dep::Ut3;
 
-      if (read_table)
+      if (read_table_delphi)
       {
         double array_delphi[180][2];
         std::ifstream f_delphi("DarkBit/data/delphi.csv");
@@ -577,7 +577,7 @@ namespace Gambit
           U_temp_delphi[i] = array_delphi[i][1];
         }
         s_delphi.set_points(M_temp_delphi, U_temp_delphi);
-        read_table = false;
+        read_table_delphi = false;
       }
 
       M_1 = *Param["M_1"];
@@ -593,7 +593,7 @@ namespace Gambit
     void lnL_atlas_e(double& result_atlase)
     {
       using namespace Pipes::lnL_atlas_e;
-      static bool read_table = true;
+      static bool read_table_atlase = true;
       static tk::spline s_atlase;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_atlase(87), U_temp_atlase(87);
@@ -603,7 +603,7 @@ namespace Gambit
       mixing_sq_atlase[1] = *Dep::Ue2;
       mixing_sq_atlase[2] = *Dep::Ue3;
 
-      if (read_table)
+      if (read_table_atlase)
       {
         double array_atlase[87][2];
         std::ifstream f_atlase("DarkBit/data/atlas_e.csv");
@@ -628,10 +628,10 @@ namespace Gambit
         for (int i=0; i<87; i++)
         {
           M_temp_atlase[i] = array_atlase[i][0];
-         U_temp_atlase[i] = array_atlase[i][1];
+          U_temp_atlase[i] = array_atlase[i][1];
         }
         s_atlase.set_points(M_temp_atlase, U_temp_atlase);
-        read_table = false;
+        read_table_atlase = false;
       }
 
       M_1 = *Param["M_1"];
@@ -647,7 +647,7 @@ namespace Gambit
     void lnL_atlas_mu(double& result_atlasmu)
     {
       using namespace Pipes::lnL_atlas_mu;
-      static bool read_table = true;
+      static bool read_table_atlasmu = true;
       static tk::spline s_atlasmu;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_atlasmu(87), U_temp_atlasmu(87);
@@ -657,7 +657,7 @@ namespace Gambit
       mixing_sq_atlasmu[1] = *Dep::Um2;
       mixing_sq_atlasmu[2] = *Dep::Um3;
 
-      if (read_table)
+      if (read_table_atlasmu)
       {
         double array_atlasmu[87][2];
         std::ifstream f_atlasmu("DarkBit/data/atlas_mu.csv");
@@ -685,7 +685,7 @@ namespace Gambit
           U_temp_atlasmu[i] = array_atlasmu[i][1];
         }
         s_atlasmu.set_points(M_temp_atlasmu, U_temp_atlasmu);
-        read_table = false;
+        read_table_atlasmu = false;
       }
 
       M_1 = *Param["M_1"];
@@ -701,7 +701,7 @@ namespace Gambit
     void lnL_e949(double& result_e949)
     {
       using namespace Pipes::lnL_e949;
-      static bool read_table = true;
+      static bool read_table_e949 = true;
       static tk::spline s_e949;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_e949(112), U_temp_e949(112);
@@ -711,7 +711,7 @@ namespace Gambit
       mixing_sq_e949[1] = *Dep::Um2;
       mixing_sq_e949[2] = *Dep::Um3;
 
-      if (read_table)
+      if (read_table_e949)
       {
         double array_e949[112][2];
         std::ifstream f_e949("DarkBit/data/e949.csv");
@@ -739,7 +739,7 @@ namespace Gambit
           U_temp_e949[i] = array_e949[i][1];
         }
         s_e949.set_points(M_temp_e949, U_temp_e949);
-        read_table = false;
+        read_table_e949 = false;
       }
 
       M_1 = *Param["M_1"];
@@ -755,7 +755,7 @@ namespace Gambit
     void lnL_nutev(double& result_nutev)
     {
       using namespace Pipes::lnL_nutev;
-      static bool read_table = true;
+      static bool read_table_nutev = true;
       static tk::spline s_nutev;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_nutev(249), U_temp_nutev(249);
@@ -765,7 +765,7 @@ namespace Gambit
       mixing_sq_nutev[1] = *Dep::Um2;
       mixing_sq_nutev[2] = *Dep::Um3;
 
-      if (read_table)
+      if (read_table_nutev)
       {
         double array_nutev[249][2];
         std::ifstream f_nutev("DarkBit/data/nutev.csv");
@@ -793,7 +793,7 @@ namespace Gambit
           U_temp_nutev[i] = array_nutev[i][1];
         }
         s_nutev.set_points(M_temp_nutev, U_temp_nutev);
-        read_table = false;
+        read_table_nutev = false;
       }
 
       M_1 = *Param["M_1"];
@@ -809,7 +809,7 @@ namespace Gambit
     void lnL_tau(double& result_tau)
     {
       using namespace Pipes::lnL_tau;
-      static bool read_table = true;
+      static bool read_table_tau = true;
       static tk::spline s_tau;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_tau(172), U_temp_tau(172);
@@ -819,7 +819,7 @@ namespace Gambit
       mixing_sq_tau[1] = *Dep::Ut2;
       mixing_sq_tau[2] = *Dep::Ut3;
 
-      if (read_table)
+      if (read_table_tau)
       {
         double array_tau[172][2];
         std::ifstream f_tau("DarkBit/data/tau.csv");
@@ -847,7 +847,7 @@ namespace Gambit
           U_temp_tau[i] = array_tau[i][1];
         }
         s_tau.set_points(M_temp_tau, U_temp_tau);
-        read_table = false;
+        read_table_tau = false;
       }
 
       M_1 = *Param["M_1"];
