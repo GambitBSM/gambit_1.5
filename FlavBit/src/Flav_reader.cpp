@@ -116,10 +116,9 @@ namespace Gambit
 
       for (unsigned i=0; i<doc.size(); ++i)
       {
-        Measurement mes_tmp;
+       Measurement mes_tmp;
         doc[i] >> mes_tmp;
         if(mes_tmp.name!=measurement_name.c_str()) continue;
-
         measurements.push_back(mes_tmp);
         number_measurements++;
         if (debug) cout << "Read in " << measurement_name << " " << mes_tmp.name << " " << mes_tmp.exp_value << endl;

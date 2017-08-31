@@ -1460,10 +1460,10 @@ namespace Gambit
 
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, mu = 1;
+
       for(int i=0; i<3; ++i)
       {
-        Rllgamma += /*Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) +*/ Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
-cout << "Rllgamma = " << Rllgamma << endl;
+        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)  + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
       }
       result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
     }
@@ -1482,7 +1482,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
@@ -1506,7 +1506,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
 
@@ -1531,7 +1531,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, mu = 1;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(mu,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mMu/sminputs.mE) - 22./3.;
@@ -1553,7 +1553,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 22./3.;
@@ -1580,7 +1580,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 8.;
@@ -1615,7 +1615,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(e,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 8.;
@@ -1652,7 +1652,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
-        Rllgamma += /*Vnu.adjoint()(tau,i) * Vnu(mu,i) * G(pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)) + */Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 22./3.;
@@ -1763,7 +1763,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
  
      result = 0;
      for (int i = 0; i < 3; ++i)
-       result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
+       result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], sqrt(cov_exp(i,i)), false);
 
     }
 
@@ -1820,7 +1820,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
 
      result = 0;
      for (int i = 0; i < 7; ++i)
-       result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
+       result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], sqrt(cov_exp(i,i)), false);
 
     }
 
@@ -1862,7 +1862,7 @@ cout << "Rllgamma = " << Rllgamma << endl;
 
       result = 0;
       for (int i = 0; i < 2; ++i)
-        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], cov_exp(i,i), false);
+        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], sqrt(cov_exp(i,i)), false);
 
     }
 
@@ -1905,9 +1905,9 @@ cout << "Rllgamma = " << Rllgamma << endl;
      theory[1] = *Dep::edm_mu;
      theory[2] = *Dep::edm_tau;
 
-     result = Stats::gaussian_upper_limit(theory[0], value_exp(0,0), th_err[0], cov_exp(0,0), false);
-     result += Stats::gaussian_loglikelihood(theory[1], value_exp(1,0), th_err[1], cov_exp(1,1), false);
-     result += Stats::gaussian_upper_limit(theory[2], value_exp(2,0), th_err[2], cov_exp(2,2), false);
+     result = Stats::gaussian_upper_limit(theory[0], value_exp(0,0), th_err[0], sqrt(cov_exp(0,0)), false);
+     result += Stats::gaussian_loglikelihood(theory[1], value_exp(1,0), th_err[1], sqrt(cov_exp(1,1)), false);
+     result += Stats::gaussian_upper_limit(theory[2], value_exp(2,0), th_err[2], sqrt(cov_exp(2,2)), false);
 
 
 
