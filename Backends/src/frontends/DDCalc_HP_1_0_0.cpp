@@ -57,6 +57,7 @@ BE_INI_FUNCTION
     if (*InUse::DDCalc_Experiment)
     {
       ex_map["XENON100_2012"] = XENON100_2012_Init(false);
+      ex_map["XENON1T_2017"] = XENON1T_2017_Init(false);
       ex_map["LUX_2013"] = LUX_2013_Init(false);
       ex_map["SuperCDMS_2014"] = SuperCDMS_2014_Init(false);
       ex_map["SIMPLE_2014"] = SIMPLE_2014_Init(false);
@@ -66,6 +67,7 @@ BE_INI_FUNCTION
       ex_map["PICO_2L"] = PICO_2L_Init(false);
       ex_map["PICO_60_F"] = PICO_60_F_Init(false);
       ex_map["PICO_60_I"] = PICO_60_I_Init(false);
+      ex_map["PICO_60_2017"] = PICO_60_2017_Init(false);
       //ex_map["DARWIN_Ar"] = DARWIN_Ar_Init(false);
       //ex_map["DARWIN_Xe"] = DARWIN_Xe_Init(false);
     }
@@ -78,7 +80,7 @@ BE_INI_FUNCTION
   // Point-level initialization ----------------------------
 
   // Change DM parameters
-  // Expected input is: f = G/2 where G is the effective 4 fermion DM-nucleon coupling
+  // Note: f's = G's/2 where G's are the effective DM-nucleon couplings
   DDCalc_SetWIMP_higgsportal(WIMP,*Dep::mwimp,(Dep::DD_couplings->gps)/2,(Dep::DD_couplings->gns)/2,
                     (Dep::DD_couplings->gpa)/2,(Dep::DD_couplings->gna)/2);
 

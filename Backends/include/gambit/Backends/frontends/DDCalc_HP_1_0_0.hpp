@@ -4,13 +4,13 @@
 ///
 ///  Frontend header for the DDCalc_HP backend.
 ///
-///  Compile-time registration of available 
+///  Compile-time registration of available
 ///  functions and variables from this backend.
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2017 Aug
@@ -49,7 +49,7 @@ LOAD_LIBRARY
      C_DDCalc_<modulename(kinda)>_routinename>
   The 'C' is to signify routines intended for calling from C/C++
   (argument and return types are expressly declared to be type-
-  compatible with the C bool, int, and double types).  
+  compatible with the C bool, int, and double types).
  */
 
 // Default initialisation of three main classes via factory functions
@@ -60,6 +60,7 @@ BE_FUNCTION(DDCalc_InitDetector, int, (const bool&), "C_DDExperiments_ddcalc_ini
 // Initialization (specific experimental factory functions). Single boolean argument indicates if extra calculations
 // should be performed for some no-background-subtraction limits (not necessary for likelihoods).
 BE_FUNCTION(XENON100_2012_Init,  int, (const bool&), "C_DDCalc_xenon100_2012_init",  "XENON100_2012_Init")
+BE_FUNCTION(XENON1T_2017_Init,   int, (const bool&), "C_DDCalc_xenon1t_2017_init",   "XENON1T_2017_Init")
 BE_FUNCTION(LUX_2013_Init,       int, (const bool&), "C_DDCalc_lux_2013_init",       "LUX_2013_Init")
 BE_FUNCTION(LUX_2016_Init,       int, (const bool&), "C_DDCalc_lux_2016_init",       "LUX_2016_Init")
 BE_FUNCTION(PandaX_2016_Init,    int, (const bool&), "C_DDCalc_pandax_2016_init",    "PandaX_2016_Init")
@@ -67,6 +68,7 @@ BE_FUNCTION(LUX_2015_Init,       int, (const bool&), "C_DDCalc_lux_2015_init",  
 BE_FUNCTION(PICO_2L_Init,        int, (const bool&), "C_DDCalc_pico_2l_init",        "PICO_2L_Init")
 BE_FUNCTION(PICO_60_F_Init,      int, (const bool&), "C_DDCalc_pico_60_f_init",      "PICO_60_F_Init")
 BE_FUNCTION(PICO_60_I_Init,      int, (const bool&), "C_DDCalc_pico_60_i_init",      "PICO_60_I_Init")
+BE_FUNCTION(PICO_60_2017_Init,   int, (const bool&), "C_DDCalc_pico_60_2017_init",   "PICO_60_2017_Init")
 BE_FUNCTION(SuperCDMS_2014_Init, int, (const bool&), "C_DDCalc_supercdms_2014_init", "SuperCDMS_2014_Init")
 BE_FUNCTION(SIMPLE_2014_Init,    int, (const bool&), "C_DDCalc_simple_2014_init",    "SIMPLE_2014_Init")
 //BE_FUNCTION(DARWIN_Ar_Init,      int, (const bool&), "C_DDCalc_darwin_ar_init", "DARWIN_Ar_Init")
