@@ -42,7 +42,6 @@
 
 #include "gambit/FlavBit/FlavBit_types.hpp"
 
-
 #define MODULE FlavBit
 START_MODULE
 
@@ -447,8 +446,8 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -460,8 +459,8 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
@@ -474,95 +473,105 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
-  // Observable: mu -> e e e
+  // Observable: mu- -> e- e- e+
   #define CAPABILITY mueee
   START_CAPABILITY
     #define FUNCTION SN_mueee
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
-  // Observable: tau -> e e e
+  // Observable: tau- -> e- e- e+
   #define CAPABILITY taueee
   START_CAPABILITY
     #define FUNCTION SN_taueee
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
 
-  // Observable: tau- -> mu- e+ e-, with muon same sign as tau 
-  #define CAPABILITY taueemu_ss
-  START_CAPABILITY
-    #define FUNCTION SN_taueemu_ss
-    START_FUNCTION(double)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
-    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
-    #undef FUNCTION
-  #undef CAPABILITY 
-
-  // Observable: tau- -> mu+ e- e-, with muon opposite sign as tau
-  #define CAPABILITY taueemu_os
-  START_CAPABILITY
-    #define FUNCTION SN_taueemu_os
-    START_FUNCTION(double)
-    ALLOW_MODELS(SN_dev)
-    #undef FUNCTION
-  #undef CAPABILITY 
-
-  // Observable: tau- -> e- mu+ mu-, with electron same sign as tau
-  #define CAPABILITY tauemumu_ss
-  START_CAPABILITY
-    #define FUNCTION SN_tauemumu_ss
-    START_FUNCTION(double)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
-    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
-    #undef FUNCTION
-  #undef CAPABILITY 
-
-  // Observable: tau- -> e+ mu- mu-, with electron opposite sign as tau
-  #define CAPABILITY tauemumu_os
-  START_CAPABILITY
-    #define FUNCTION SN_tauemumu_os
-    START_FUNCTION(double)
-    ALLOW_MODELS(SN_dev)
-    #undef FUNCTION
-  #undef CAPABILITY 
-
-  // Observable: tau -> mu mu mu
+   // Observable: tau- -> mu- mu- mu+
   #define CAPABILITY taumumumu
   START_CAPABILITY
     #define FUNCTION SN_taumumumu
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // Observable: tau- -> mu- e- e+ 
+  #define CAPABILITY taumuee
+  START_CAPABILITY
+    #define FUNCTION SN_taumuee
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // Observable: tau- -> e- e- mu+
+  #define CAPABILITY taueemu
+  START_CAPABILITY
+    #define FUNCTION SN_taueemu
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // Observable: tau- -> e- mu- mu+
+  #define CAPABILITY tauemumu
+  START_CAPABILITY
+    #define FUNCTION SN_tauemumu
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // Observable: tau- -> mu- mu- e+
+  #define CAPABILITY taumumue
+  START_CAPABILITY
+    #define FUNCTION SN_taumumue
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
@@ -732,12 +741,12 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(mueee, double)
     DEPENDENCY(taueee, double)
-    DEPENDENCY(taueemu_ss, double)
-    DEPENDENCY(taueemu_os, double)
-    DEPENDENCY(tauemumu_ss, double)
-    DEPENDENCY(tauemumu_os, double)
     DEPENDENCY(taumumumu, double)
-    #undef FUNCTION
+    DEPENDENCY(taumuee, double)
+    DEPENDENCY(taueemu, double)
+    DEPENDENCY(tauemumu, double)
+    DEPENDENCY(taumumue, double)
+   #undef FUNCTION
   #undef CAPABILITY 
 
   // mu - e conversion likelihood

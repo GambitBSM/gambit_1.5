@@ -49,6 +49,7 @@
 #include "gambit/FlavBit/Flav_reader.hpp"
 #include "gambit/FlavBit/Kstarmumu_theory_err.hpp"
 #include "gambit/FlavBit/flav_utils.hpp"
+#include "gambit/FlavBit/flav_loop_functions.hpp"
 #include "gambit/Elements/spectrum.hpp"
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
@@ -1455,8 +1456,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, mu = 1;
@@ -1476,8 +1476,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
@@ -1500,8 +1499,7 @@ namespace Gambit
       double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
@@ -1522,21 +1520,36 @@ namespace Gambit
       using namespace Pipes::SN_mueee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
+      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      std::complex<double> Rllgamma = {0.0, 0.0};
+/*      std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, mu = 1;
       for(int i=0; i<3; ++i)
         Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
       result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
       result *= 16./3 * log(sminputs.mMu/sminputs.mE) - 22./3.;
- 
-      // TODO: Missing here box diagram contributions
+*/ 
+       // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int e = 0, mu = 1;
+      std::complex<double> fbox = Fbox(mu, e, e, e, Vnu, Theta, x);
+      std::complex<double> fz = FZ(mu, e, Vnu, Theta, x);
+      std::complex<double> fgamma = Fgamma(mu, e, Vnu, Theta, x);
+      std::complex<double> ggamma = Ggamma(mu, e, Vnu, Theta, x);
+     
+      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(16.*pow(M_PI,4)) * std::norm(0.5*fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
+      result += (pow(sminputs.mW,2)*sminputs.GF)/(2.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+0.5*fbox)*std::conj(ggamma));
+      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 12.*std::real((fz-fgamma)*std::conj(ggamma)) + 16.*std::norm(ggamma)*(log(sminputs.mMu/sminputs.mE) - 11./4.));
+      result /= 1. - 8.*pow(sminputs.mE,2)/pow(sminputs.mMu,2);
     }
 
     void SN_taueee(double &result)
@@ -1544,13 +1557,12 @@ namespace Gambit
       using namespace Pipes::SN_taueee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
+      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      std::complex<double> Rllgamma = {0.0, 0.0};
+/*      std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
         Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
@@ -1562,21 +1574,83 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
- 
-      // TODO: Missing here box diagram contributions
+*/ 
+      // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int e = 0, tau = 2;
+      std::complex<double> fbox = Fbox(tau, e, e, e, Vnu, Theta, x);
+      std::complex<double> fz = FZ(tau, e, Vnu, Theta, x);
+      std::complex<double> fgamma = Fgamma(tau, e, Vnu, Theta, x);
+      std::complex<double> ggamma = Ggamma(tau, e, Vnu, Theta, x);
+     
+      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(16.*pow(M_PI,4)) * std::norm(0.5*fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
+      result += (pow(sminputs.mW,2)*sminputs.GF)/(2.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+0.5*fbox)*std::conj(ggamma));
+      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 12.*std::real((fz-fgamma)*std::conj(ggamma)) + 16.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mE) - 11./4.));
+      double eta = 0.013;
+      result /= 1. + 4.*eta*sminputs.mE/sminputs.mTau;
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
     }
 
-    void SN_taueemu_ss(double &result)
+    void SN_taumumumu(double &result)
     {
-      using namespace Pipes::SN_taueemu_ss;
+      using namespace Pipes::SN_taumumumu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
+/*      std::complex<double> Rllgamma = {0.0, 0.0};
+      int mu = 1, tau = 2;
+      for(int i=0; i<3; ++i)
+        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+
+      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
+      result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 22./3.;
+
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+*/
+      // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int mu = 1, tau = 2;
+      std::complex<double> fbox = Fbox(tau, mu, mu, mu, Vnu, Theta, x);
+      std::complex<double> fz = FZ(tau, mu, Vnu, Theta, x);
+      std::complex<double> fgamma = Fgamma(tau, mu, Vnu, Theta, x);
+      std::complex<double> ggamma = Ggamma(tau, mu, Vnu, Theta, x);
+     
+      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(16.*pow(M_PI,4)) * std::norm(0.5*fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
+      result += (pow(sminputs.mW,2)*sminputs.GF)/(2.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+0.5*fbox)*std::conj(ggamma));
+      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 12.*std::real((fz-fgamma)*std::conj(ggamma)) + 16.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mMu) - 11./4.));
+      double eta = 0.013;
+      result /= 1. + 4.*eta*sminputs.mMu/sminputs.mTau;
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+    }
+
+
+    void SN_taumuee(double &result)
+    {
+      using namespace Pipes::SN_taumuee;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+/*
       std::complex<double> Rllgamma = {0.0, 0.0};
       int mu = 1, tau = 2;
       for(int i=0; i<3; ++i)
@@ -1587,31 +1661,69 @@ namespace Gambit
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
+      // TODO: Add eta to decay tables
       double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
- 
-      // TODO: Missing here box diagram contributions
+      result /= 1.0 + 4.0*eta*(sminputs.mE/sminputs.mTau);
+*/ 
+       // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int e = 0, mu = 1, tau = 2;
+      std::complex<double> fbox = Fbox(tau, mu, e, e, Vnu, Theta, x);
+      std::complex<double> fz = FZ(tau, mu, Vnu, Theta, x);
+      std::complex<double> fgamma = Fgamma(tau, mu, Vnu, Theta, x);
+      std::complex<double> ggamma = Ggamma(tau, mu, Vnu, Theta, x);
+     
+      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(32.*pow(M_PI,4)) * std::norm(fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
+      result += (pow(sminputs.mW,2)*sminputs.GF)/(4.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+fbox)*std::conj(ggamma));
+      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 8.*std::real((fz-fgamma)*std::conj(ggamma)) + 8.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mE) - 3.));
+      double eta = 0.013;
+      result /= 1. + 4.*eta*sminputs.mE/sminputs.mTau;
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
     }
 
-    void SN_taueemu_os(double &result)
+    void SN_taueemu(double &result)
     {
+      using namespace Pipes::SN_taueemu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+
       // There is no dipole contribution to this decay channel
       result = 0;
  
-      // TODO: Missing here box diagram contributions
+      // Box diagram contributions
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int e = 0, mu = 1, tau = 2;
+      std::complex<double> fbox = Fbox(tau, e, e, mu, Vnu, Theta, x);
+      result += pow(sminputs.mW,4)*pow(sminputs.GF,2)/(64.0*pow(M_PI,4))*std::norm(fbox);
+       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
+      double eta = 0.013;
+      result /= 1.0 + 4.0*eta*(sminputs.mMu/sminputs.mTau);
+
     }
 
-    void SN_tauemumu_ss(double &result)
+    void SN_tauemumu(double &result)
     {
-      using namespace Pipes::SN_tauemumu_ss;
+      using namespace Pipes::SN_tauemumu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
-
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+/*
       std::complex<double> Rllgamma = {0.0, 0.0};
       int e = 0, tau = 2;
       for(int i=0; i<3; ++i)
@@ -1624,54 +1736,63 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+*/
+ 
+      // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int e = 0, mu = 1, tau = 2;
+      std::complex<double> fbox = Fbox(tau, e, mu, mu, Vnu, Theta, x);
+      std::complex<double> fz = FZ(tau, e, Vnu, Theta, x);
+      std::complex<double> fgamma = Fgamma(tau, e, Vnu, Theta, x);
+      std::complex<double> ggamma = Ggamma(tau, e, Vnu, Theta, x);
+     
+      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(32.*pow(M_PI,4)) * std::norm(fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
+      result += (pow(sminputs.mW,2)*sminputs.GF)/(4.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+fbox)*std::conj(ggamma));
+      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 8.*std::real((fz-fgamma)*std::conj(ggamma)) + 8.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mMu) - 3.));
+      double eta = 0.013;
+      result /= 1. + 4.*eta*sminputs.mMu/sminputs.mTau;
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+    }
 
+    void SN_taumumue(double &result)
+    {
+      using namespace Pipes::SN_taumumue;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+
+      // There is no dipole contribution to this decay channel
       result = 0;
  
-      // TODO: Missing here box diagram contributions
-    }
-
-    void SN_tauemumu_os(double &result)
-    {
-      // There is no dipole contribution to this observable 
-      result = 0;
-
-      // TODO: Missing here box diagram contributions
-    }
-
-    void SN_taumumumu(double &result)
-    {
-      using namespace Pipes::SN_taumumumu;
-      SMInputs sminputs = *Dep::SMINPUTS;
-
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
-      Eigen::Matrix3cd m_nu = *Dep::m_nu;
-      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      // Here we neglect theta^2 effects
-      Eigen::Matrix3cd Vnu = *Dep::UPMNS;
-
-      std::complex<double> Rllgamma = {0.0, 0.0};
-      int mu = 1, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
-
-      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
-      result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 22./3.;
-
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+      // Box diagram contributions
+      std::vector<double> x(6);
+      for(int i = 0; i < 3; i++)
+        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
+      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
+      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
+      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      int e = 0, mu = 1, tau = 2;
+      std::complex<double> fbox = Fbox(tau, mu, mu, e, Vnu, Theta, x);
+      result += pow(sminputs.mW,4)*pow(sminputs.GF,2)/(64.0*pow(M_PI,4))*std::norm(fbox);
+       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
       double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+      result /= 1.0 + 4.0*eta*(sminputs.mE/sminputs.mTau);
 
-      // TODO: Missing here box diagram contributions
     }
-
     void SN_mueTi(double &result)
     {
       using namespace Pipes::SN_mueTi;
       const SMInputs sminputs = *Dep::SMINPUTS;
 
       int A, Z;
-      double alphaW;
+      double alphaW = sqrt(2)/M_PI * pow(sminputs.mW,2) * sminputs.GF;
       double Zeff, Fp, GammaCapt;
 
       // From Table 1 in 1209.2679 for Ti
@@ -1784,20 +1905,20 @@ namespace Gambit
         Flav_reader fread(GAMBIT_DIR  "/FlavBit/data");
         fread.debug_mode(flav_debug);
 
-        // mu -> e e e
+        // mu- -> e- e- e+
         fread.read_yaml_measurement("flav_data.yaml", "BR_mueee");
-        // tau -> e e e
+        // tau- -> e- e- e+
         fread.read_yaml_measurement("flav_data.yaml", "BR_taueee");
-        // tau- -> e+ e- mu-
-        fread.read_yaml_measurement("flav_data.yaml", "BR_taueemu_ss");
-        // tau- -> e- e- mu+
-        fread.read_yaml_measurement("flav_data.yaml", "BR_taueemu_os");
-        // tau- -> e- mu+ mu- 
-        fread.read_yaml_measurement("flav_data.yaml", "BR_tauemumu_ss");
-        // tau- -> e+ mu- mu-
-        fread.read_yaml_measurement("flav_data.yaml", "BR_tauemumu_os");
-        // tau -> mu mu mu
+        // tau- -> mu- mu- mu+
         fread.read_yaml_measurement("flav_data.yaml", "BR_taumumumu");
+        // tau- -> mu- e- e+
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taumuee");
+        // tau- -> e- e- mu+
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taueemu");
+        // tau- -> e- mu- mu+ 
+        fread.read_yaml_measurement("flav_data.yaml", "BR_tauemumu");
+        // tau- -> mu- mu- e+
+        fread.read_yaml_measurement("flav_data.yaml", "BR_taumumue");
 
         fread.initialise_matrices();
         cov_exp=fread.get_exp_cov();
@@ -1811,13 +1932,19 @@ namespace Gambit
       }
 
      theory[0] = *Dep::mueee;
+cout << "mu-  -> e-  e-  e+  = " << theory[0] << endl;
      theory[1] = *Dep::taueee;
-     theory[2] = *Dep::taueemu_ss;
-     theory[3] = *Dep::taueemu_os;
-     theory[4] = *Dep::tauemumu_ss;
-     theory[5] = *Dep::tauemumu_os;
-     theory[6] = *Dep::taumumumu;
-
+cout << "tau- -> e-  e-  e+  = " << theory[1] << endl;
+     theory[2] = *Dep::taumumumu;
+cout << "tau- -> mu- mu- mu+ = " << theory[2] << endl;
+     theory[3] = *Dep::taumuee;
+cout << "tau- -> mu- e-  e-  = " << theory[3] << endl;
+     theory[4] = *Dep::taueemu;
+cout << "tau- -> e-  e-  mu+ = " << theory[4] << endl;
+     theory[5] = *Dep::tauemumu;
+cout << "tau- -> e-  mu- mu+ = " << theory[5] << endl;
+     theory[6] = *Dep::taumumue;
+cout << "tau- -> mu- mu- e+  = " << theory[6] << endl;
      result = 0;
      for (int i = 0; i < 7; ++i)
        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], sqrt(cov_exp(i,i)), false);
