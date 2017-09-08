@@ -1631,7 +1631,21 @@
   correlation:
   - name: NONE
 
-- name: BR_taueemu_ss
+- name: BR_taumumumu
+  islimit: true
+  one_sided: false
+  exp_value: 0.
+  exp_90_CL: 2.1e-8
+  exp_stat_error: 0.
+  exp_sys_error: 0.
+  exp_source: PDG16
+  th_error: 0.
+  th_error_type: M
+  th_error_source: NONE
+  correlation:
+  - name: NONE
+
+- name: BR_taumuee
   islimit: true
   one_sided: false
   exp_value: 0.
@@ -1645,7 +1659,7 @@
   correlation:
   - name: NONE
 
-- name: BR_taueemu_os
+- name: BR_taueemu
   islimit: true
   one_sided: false
   exp_value: 0.
@@ -1659,7 +1673,7 @@
   correlation:
   - name: NONE
 
-- name: BR_tauemumu_ss
+- name: BR_tauemumu
   islimit: true
   one_sided: false
   exp_value: 0.
@@ -1673,25 +1687,11 @@
   correlation:
   - name: NONE
 
-- name: BR_tauemumu_os
+- name: BR_taumumue
   islimit: true
   one_sided: false
   exp_value: 0.
   exp_90_CL: 1.7e-8
-  exp_stat_error: 0.
-  exp_sys_error: 0.
-  exp_source: PDG16
-  th_error: 0.
-  th_error_type: M
-  th_error_source: NONE
-  correlation:
-  - name: NONE
-
-- name: BR_taumumumu
-  islimit: true
-  one_sided: false
-  exp_value: 0.
-  exp_90_CL: 2.1e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
   exp_source: PDG16

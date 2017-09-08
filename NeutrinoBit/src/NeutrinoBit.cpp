@@ -193,6 +193,15 @@ namespace Gambit
     }
 
 
+    void Vnu(Eigen::Matrix3cd &V)
+    {
+      using namespace Pipes::Vnu;
+
+      // TODO: Implement V
+      V = *Dep::UPMNS;
+
+    }
+
 
   }
 }

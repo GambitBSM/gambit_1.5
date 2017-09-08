@@ -64,6 +64,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY SeesawI_Vnu
+  START_CAPABILITY
+    #define FUNCTION Vnu
+    START_FUNCTION(Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    ALLOW_MODELS(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY
 
 #undef MODULE
 
