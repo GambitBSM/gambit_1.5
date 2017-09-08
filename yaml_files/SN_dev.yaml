@@ -59,20 +59,27 @@ Parameters:
       range: [0.06, 500]
       prior_type: log
     M_3:
-      range: [0.06, 500]
-      prior_type: log
+#      range: [0.06, 500]
+#      prior_type: log
+      same_as: SN_dev::M_2
     ReOm23:
-      range: [0, 6.283]
+#      range: [0, 6.283]
+      fixed_value: 0.0
     ImOm23:
-      range: [-8, 8]
+#      range: [-8, 8]
+      fixed_value: [-20.0, 20.0]
     ReOm13:
-      range: [0, 6.283]
+#      range: [0, 6.283]
+      fixed_value: 0.0
     ImOm13:
-      range: [-8, 8]
+#      range: [-8, 8]
+      fixed_value: 0.0
     ReOm12:
-      range: [0, 6.283]
+#      range: [0, 6.283]
+      fixed_value: 0.0
     ImOm12:
-      range: [-8, 8]
+#      range: [-8, 8]
+      fixed_value: 0.0
     L_Ge:
       range: [0.159, 0.193]
     L_Xe:
@@ -107,7 +114,7 @@ Scanner:
     multinest:
       plugin: multinest
       like: LogLike
-      nlive: 100
+      nlive: 10
 
 ObsLikes:
 
@@ -233,7 +240,7 @@ Rules:
 KeyValues:
 
   likelihood:
-    model_invalid_for_lnlike_below: -1e10
+    model_invalid_for_lnlike_below: -1e40
     debug: true
 
-  default_output_path: "runs/SN_dev_test/"
+  default_output_path: "runs/SN_dev_test_2/"
