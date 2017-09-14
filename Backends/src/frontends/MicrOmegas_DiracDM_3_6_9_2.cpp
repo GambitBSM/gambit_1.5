@@ -9,7 +9,7 @@
 ///  Authors (add name and date if you modify):
 ///
 /// \author Ankit Beniwal
-/// \date Jun, Aug 2017
+/// \date Jun, Aug, Sep 2017
 ///
 ///  *********************************************
 
@@ -59,7 +59,7 @@ BE_INI_FUNCTION
      logger() << "VWdecay: " << VWdecay << " VZdecay: " << VZdecay << EOM;
 
      // Uncomment below to force MicrOmegas to do calculations in unitary gauge
-     // *ForceUG=1;
+     *ForceUG=1;
 
      double mF = spec.get(Par::Pole_Mass,"F");
      double mH = spec.get(Par::Pole_Mass,"h0_1");
@@ -90,7 +90,7 @@ BE_INI_FUNCTION
      error = assignVal((char*)"v0", 1/sqrt(sqrt(2)*sminputs.GF));
      if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set GF in"
              " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
-	
+
      // mu(2 GeV) in MSbar scheme
      error = assignVal((char*)"Mu", sminputs.mU);
      if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set mU in"

@@ -14,7 +14,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
-///  \date 2017 Jun
+///  \date 2017 Jun, Sep
 ///
 ///  *********************************************
 
@@ -24,7 +24,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 
 #include "gambit/Elements/spectrum.hpp"
-#include "gambit/Utils/stream_overloads.hpp" 
+#include "gambit/Utils/stream_overloads.hpp"
 #include "gambit/Utils/util_macros.hpp"
 
 #include "gambit/SpecBit/SpecBit_rollcall.hpp"
@@ -55,57 +55,57 @@ namespace Gambit
 
       // Initialise an object to carry the Dirac plus Higgs sector information
       Models::DiracDMModel diracmodel;
-      
+
       // quantities needed to fill container spectrum, intermediate calculations
       double alpha_em = 1.0 / sminputs.alphainv;
       double C = alpha_em * Pi / (sminputs.GF * pow(2,0.5));
       double sinW2 = 0.5 - pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
       double cosW2 = 0.5 + pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
-      
+
       // Higgs sector
       double mh   = *myPipe::Param.at("mH");
       diracmodel.HiggsPoleMass   = mh;
-      
+
       double vev        = 1. / sqrt(sqrt(2.)*sminputs.GF);
       diracmodel.HiggsVEV        = vev;
       // diracmodel.LambdaH   = GF*pow(mh,2)/pow(2,0.5) ;
-      
-      // DiracDM sector    
+
+      // DiracDM sector
       diracmodel.DiracPoleMass = *myPipe::Param.at("mF");
-      diracmodel.DiracLambda   = *myPipe::Param.at("lF");    
-      diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");    
-      
-       // Check if the EFT is valid (i.e., lF < 4*pi/2*mF)
+      diracmodel.DiracLambda   = *myPipe::Param.at("lF");
+      diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");
+
+      // Invalidate point if the EFT validity constraint is not satisfied
+      // See https://arxiv.org/abs/1512.06458 for more details
       if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
       {
-       std::ostringstream msg;
-       msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass
-           << " GeV, " << diracmodel.DiracLambda
-           << " GeV] is invalid under the EFT validity constraint!";
-       invalid_point().raise(msg.str());
+        std::ostringstream msg;
+        msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
+	    << diracmodel.DiracLambda << " GeV] does not satisfy the EFT validity constraint.";
+        invalid_point().raise(msg.str());
       }
 
       // Standard model
       diracmodel.sinW2 = sinW2;
-      
+
       // gauge couplings
       diracmodel.g1 = e / sinW2;
       diracmodel.g2 = e / cosW2;
       diracmodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
-      
+
       // Yukawas
-      double sqrt2v = pow(2.0,0.5)/vev;     
+      double sqrt2v = pow(2.0,0.5)/vev;
       diracmodel.Yu[0] = sqrt2v * sminputs.mU;
       diracmodel.Yu[1] = sqrt2v * sminputs.mCmC;
-      diracmodel.Yu[2] = sqrt2v * sminputs.mT;      
+      diracmodel.Yu[2] = sqrt2v * sminputs.mT;
       diracmodel.Ye[0] = sqrt2v * sminputs.mE;
       diracmodel.Ye[1] = sqrt2v * sminputs.mMu;
-      diracmodel.Ye[2] = sqrt2v * sminputs.mTau;   
+      diracmodel.Ye[2] = sqrt2v * sminputs.mTau;
       diracmodel.Yd[0] = sqrt2v * sminputs.mD;
       diracmodel.Yd[1] = sqrt2v * sminputs.mS;
       diracmodel.Yd[2] = sqrt2v * sminputs.mBmB;
-            
+
       // Create a SubSpectrum object to wrap the EW sector information
       Models::DiracDMSimpleSpec diracspec(diracmodel);
 
@@ -116,24 +116,24 @@ namespace Gambit
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
       result = Spectrum(diracspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
 
-    }    
-    
+    }
+
     // print spectrum out, stripped down copy from MSSM version with variable names changed
     void fill_map_from_DiracDMspectrum(std::map<std::string,double>&, const Spectrum&);
-   
+
     void get_DiracDM_spectrum_as_map (std::map<std::string,double>& specmap)
     {
       namespace myPipe = Pipes::get_DiracDM_spectrum_as_map;
       const Spectrum& diracdmspec(*myPipe::Dep::DiracDM_spectrum);
       fill_map_from_DiracDMspectrum(specmap, diracdmspec);
     }
-    
+
     void fill_map_from_DiracDMspectrum(std::map<std::string,double>& specmap, const Spectrum& diracdmspec)
     {
       /// Add everything... use spectrum contents routines to automate task
       static const SpectrumContents::DiracDM contents;
       static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters();
-      
+
       for(std::vector<SpectrumParameter>::const_iterator it = required_parameters.begin();
            it != required_parameters.end(); ++it)
       {
@@ -167,22 +167,21 @@ namespace Gambit
                std::ostringstream label;
                label << name <<"_("<<i<<","<<j<<") "<<Par::toString.at(tag);
                specmap[label.str()] = diracdmspec.get_HE().get(tag,name,i,j);
-             }  
+             }
            }
          }
          // Deal with all other cases
          else
          {
            // ERROR
-           std::ostringstream errmsg;           
+           std::ostringstream errmsg;
            errmsg << "Error, invalid parameter received while converting DiracDMspectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
-           errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape; 
+           errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape;
            utils_error().forced_throw(LOCAL_INFO,errmsg.str());
          }
       }
 
     }
-    
+
   } // end namespace SpecBit
 } // end namespace Gambit
-

@@ -10,7 +10,8 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date Oct 2016, Jun 2017
+///  \date Oct 2016
+///  \date Jun, Sep 2017
 ///
 ///  *********************************************
 
@@ -36,16 +37,16 @@ namespace Gambit
       const Spectrum& spec = *Dep::MajoranaDM_spectrum;
       const SubSpectrum& he = spec.get_HE();
       //double mass = spec.get(Par::Pole_Mass,"X");
-      double lambda = he.get(Par::dimensionless,"lX");    
+      double lambda = he.get(Par::dimensionless,"lX");
       double cosXI = he.get(Par::dimensionless,"cosXI");
-      double sinXI = sqrt(1-pow(cosXI,2));  
+      double sinXI = sqrt(1-pow(cosXI,2));
       double mh = spec.get(Par::Pole_Mass,"h0_1");
 
       // Expressions taken from Cline et al. (2013, PRD 88:055025, arXiv:1306.4710)
       double fp = 2./9. + 7./9.*(*Param["fpu"] + *Param["fpd"] + *Param["fps"]);
       double fn = 2./9. + 7./9.*(*Param["fnu"] + *Param["fnd"] + *Param["fns"]);
 
-      // Treat the SD couplings as SI pseudoscalar couplings
+      // SI scalar and pseudoscalar couplings
       result.gps = lambda*fp*m_proton*cosXI/pow(mh,2);
       result.gns = lambda*fn*m_neutron*cosXI/pow(mh,2);
       result.gpa = lambda*fp*m_proton*sinXI/pow(mh,2);
@@ -82,7 +83,7 @@ namespace Gambit
       // Convenience macros
       #define getSMmass(Name, spinX2)                                           \
        catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
-       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));    
+       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
       #define addParticle(Name, Mass, spinX2)                                   \
        catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
        (Name , TH_ParticleProperty(Mass, spinX2)));
@@ -92,7 +93,7 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       const SubSpectrum& SM = spec.get_LE();
       const SMInputs& SMI   = spec.get_SMInputs();
-  
+
       // Get SM pole masses
       getSMmass("e-_1",     1)
       getSMmass("e+_1",     1)
@@ -156,13 +157,13 @@ namespace Gambit
 
       // Initialize main annihilation process
       TH_Process process_ann(DMid, DMid);
-      
+
       // Helper variables
       int err, key = 1;
       double *SpA = NULL, *SpE = NULL, *SpP = NULL;
       double *SpNe = NULL, *SpNm = NULL, *SpNl = NULL;
       double m_1, m_2, sigmav_total, min_prop = 1e-6;
-         
+
       // Calculate the total sigmav using the calcSpectrum function in micrOmegas_3.6.9.2
       sigmav_total = BEreq::calcSpectrum(byVal(key), byVal(SpA), byVal(SpE),
                     byVal(SpP), byVal(SpNe), byVal(SpNm), byVal(SpNl), &err);
@@ -222,7 +223,7 @@ namespace Gambit
 
       // Get rid of convenience macro
       #undef SETUP_KINEMATIC_PROCESS_MO
-    
+
       // Add process to previous list
       catalog.processList.push_back(process_ann);
 

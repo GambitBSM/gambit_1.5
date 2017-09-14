@@ -14,7 +14,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
-///  \date 2017 Jun
+///  \date 2017 Jun, Sep
 ///
 ///  *********************************************
 
@@ -24,7 +24,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 
 #include "gambit/Elements/spectrum.hpp"
-#include "gambit/Utils/stream_overloads.hpp" 
+#include "gambit/Utils/stream_overloads.hpp"
 #include "gambit/Utils/util_macros.hpp"
 
 #include "gambit/SpecBit/SpecBit_rollcall.hpp"
@@ -75,6 +75,15 @@ namespace Gambit
       vectormodel.VectorPoleMass = *myPipe::Param.at("mV");
       vectormodel.VectorLambda   = *myPipe::Param.at("lambda_hV");
 
+      // Invalidate point if the perturbative unitarity condition is violated
+      if (vectormodel.VectorLambda > (2*pow(vectormodel.VectorPoleMass,2))/pow(vev,2))
+      {
+        std::ostringstream msg;
+        msg << "Parameter point [mV, lambda_hV] = [" << vectormodel.VectorPoleMass << " GeV, "
+	    << vectormodel.VectorLambda << "] does not satisfy the perturbative unitarity condition.";
+        invalid_point().raise(msg.str());
+      }
+
       // Standard model
       vectormodel.sinW2 = sinW2;
 
@@ -104,25 +113,25 @@ namespace Gambit
 
       // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
       result = Spectrum(vectorspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
-      
-    }    
-    
+
+    }
+
     // print spectrum out, stripped down copy from MSSM version with variable names changed
     void fill_map_from_VectorDMspectrum(std::map<std::string,double>&, const Spectrum&);
-   
+
     void get_VectorDM_spectrum_as_map (std::map<std::string,double>& specmap)
     {
       namespace myPipe = Pipes::get_VectorDM_spectrum_as_map;
       const Spectrum& vectordmspec(*myPipe::Dep::VectorDM_spectrum);
       fill_map_from_VectorDMspectrum(specmap, vectordmspec);
     }
-    
+
     void fill_map_from_VectorDMspectrum(std::map<std::string,double>& specmap, const Spectrum& vectordmspec)
     {
       /// Add everything... use spectrum contents routines to automate task
       static const SpectrumContents::VectorDM contents;
       static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters();
-      
+
       for(std::vector<SpectrumParameter>::const_iterator it = required_parameters.begin();
            it != required_parameters.end(); ++it)
       {
@@ -156,22 +165,21 @@ namespace Gambit
                std::ostringstream label;
                label << name <<"_("<<i<<","<<j<<") "<<Par::toString.at(tag);
                specmap[label.str()] = vectordmspec.get_HE().get(tag,name,i,j);
-             }  
+             }
            }
          }
          // Deal with all other cases
          else
          {
            // ERROR
-           std::ostringstream errmsg;           
+           std::ostringstream errmsg;
            errmsg << "Error, invalid parameter received while converting VectorDMspectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
-           errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape; 
+           errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape;
            utils_error().forced_throw(LOCAL_INFO,errmsg.str());
          }
       }
 
     }
-    
+
   } // end namespace SpecBit
 } // end namespace Gambit
-
