@@ -1347,5 +1347,24 @@ START_MODULE
 
   #undef CAPABILITY
 
+  #define CAPABILITY U_ps191e
+  START_CAPABILITY
+
+    #define FUNCTION printable_ps191e
+    START_FUNCTION(double)
+    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+//    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+//    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+//    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
 #undef MODULE
 #endif /* defined(__DarkBit_rollcall_hpp__) */
