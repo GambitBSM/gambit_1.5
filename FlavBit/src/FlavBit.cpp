@@ -1453,19 +1453,31 @@ namespace Gambit
       using namespace Pipes::SN_muegamma;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), *Param["M_1"], *Param["M_2"], *Param["M_3"]};
+
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix<complex<double>,3,6> U;
+     
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+          U(i,j) = Vnu(i,j);
+          U(i,j+3) = Theta(i,j);
+        }
 
-      std::complex<double> Rllgamma = {0.0, 0.0};
+      // TODO: Perhaps corrections on GF might be important
+      result = (48. * pow(M_PI,3))/(pow(sminputs.GF,2) * sminputs.alphainv);
+
+      // Form factors
       int e = 0, mu = 1;
+      complex<double> k2l = FormFactors::K2L(mu, e, sminputs, U, ml, mnu);
+      complex<double> k2r = FormFactors::K2R(mu, e, sminputs, U, ml, mnu);
 
-      for(int i=0; i<3; ++i)
-      {
-        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2)  + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
-      }
-      result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
+      result *= (norm(k2l) + norm(k2r)) / (1. - 8.* pow(sminputs.mE/sminputs.mMu,2));
+
     }
 
     void SN_tauegamma(double &result)
@@ -1473,22 +1485,35 @@ namespace Gambit
       using namespace Pipes::SN_tauegamma;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), *Param["M_1"], *Param["M_2"], *Param["M_3"]};
+
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix<complex<double>,3,6> U;
+     
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+          U(i,j) = Vnu(i,j);
+          U(i,j+3) = Theta(i,j);
+        }
 
-      std::complex<double> Rllgamma = {0.0, 0.0};
+      // TODO: Perhaps corrections on GF might be important
+      result = (48. * pow(M_PI,3))/(pow(sminputs.GF,2) * sminputs.alphainv);
+
+      // Form factors
       int e = 0, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+      complex<double> k2l = FormFactors::K2L(tau, e, sminputs, U, ml, mnu);
+      complex<double> k2r = FormFactors::K2R(tau, e, sminputs, U, ml, mnu);
 
-      result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
-
-      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
+      // TODO: Add eta to the decay tables
       double eta = 0.013;
-      result /= 1. + 4*eta*(sminputs.mE/sminputs.mTau);
+      result *= (norm(k2l) + norm(k2r)) / (1. + 4.*eta* sminputs.mE/sminputs.mTau);
+
+      // Multiply by the BR of tau -> e nu nu
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
     }
 
     void SN_taumugamma(double &result)
@@ -1496,60 +1521,105 @@ namespace Gambit
       using namespace Pipes::SN_taumugamma;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), *Param["M_1"], *Param["M_2"], *Param["M_3"]};
+
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix<complex<double>,3,6> U;
+     
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+          U(i,j) = Vnu(i,j);
+          U(i,j+3) = Theta(i,j);
+        }
 
-      std::complex<double> Rllgamma = {0.0, 0.0};
+      // TODO: Perhaps corrections on GF might be important
+      result = (48. * pow(M_PI,3))/(pow(sminputs.GF,2) * sminputs.alphainv);
+
+      // Form factors
       int mu = 1, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+      complex<double> k2l = FormFactors::K2L(tau, mu, sminputs, U, ml, mnu);
+      complex<double> k2r = FormFactors::K2R(tau, mu, sminputs, U, ml, mnu);
 
-      result = 3. / (32. * M_PI * sminputs.alphainv) * pow(std::abs(Rllgamma),2);
-
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+      // TODO: Add eta to the decay tables
       double eta = 0.013;
-      result /= 1. + 4*eta*(sminputs.mMu/sminputs.mTau);
+      result *= (norm(k2l) + norm(k2r)) / (1. + 4.*eta*sminputs.mMu/sminputs.mTau);
+
+      // Multiply by the BR of tau -> e nu nu
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
     }
 
-    // Expressions obtained from 1408.0138 henceforth
+    double SN_l2lll(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix3cd Vnu, Eigen::Matrix3cd Theta, Eigen::Matrix3cd m_nu, double M1, double M2, double M3, double mH)
+    {
+      vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), M1, M2, M3};
+
+      Eigen::Matrix<complex<double>,3,6> U;
+     
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+          U(i,j) = Vnu(i,j);
+          U(i,j+3) = Theta(i,j);
+        }
+
+      // Form factors
+      complex<double> k2l = FormFactors::K2L(alpha, beta, sminputs, U, ml, mnu);
+      complex<double> k2r = FormFactors::K2R(alpha, beta, sminputs, U, ml, mnu);
+      complex<double> k1r = FormFactors::K1R(alpha, beta, sminputs, U, mnu);
+      complex<double> asll = FormFactors::ASLL(alpha, beta, gamma, delta, sminputs, U, ml, mnu, mH);
+      complex<double> aslr = FormFactors::ASLR(alpha, beta, gamma, delta, sminputs, U, ml, mnu, mH);
+      complex<double> asrl = FormFactors::ASRL(alpha, beta, gamma, delta, sminputs, U, ml, mnu, mH);
+      complex<double> asrr = FormFactors::ASRR(alpha, beta, gamma, delta, sminputs, U, ml, mnu, mH);
+      complex<double> avll = FormFactors::AVLL(alpha, beta, gamma, delta, sminputs, U, ml, mnu);
+      complex<double> avlr = FormFactors::AVLR(alpha, beta, gamma, delta, sminputs, U, ml, mnu);
+      complex<double> avrl = FormFactors::AVLL(alpha, beta, gamma, delta, sminputs, U, ml, mnu);
+      complex<double> avrr = FormFactors::AVRR(alpha, beta, gamma, delta, sminputs, U, ml, mnu);
+ 
+      complex<double> avhatll = avll;
+      complex<double> avhatlr = avlr;
+      complex<double> avhatrl = avrl + 4. * M_PI / sminputs.alphainv * k1r;
+      complex<double> avhatrr = avrr + 4. * M_PI / sminputs.alphainv * k1r;
+
+      double l2lll = 0;
+ 
+      if(beta == gamma and gamma == delta) // l(alpha)- -> l(beta)- l(beta)- l(beta)+
+      {
+        l2lll = real(16. * pow(M_PI,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[beta]) - 22./3.) + 1./24. * (norm(asll) + norm(asrr) + 2.*norm(aslr) + 2.*norm(asrl)) + 1./3. * (2.*norm(avhatll) + 2.*norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 4.*M_PI/(3.*sminputs.alphainv)*(k2l*conj(asrl - 2.*avhatrl - 4.*avhatrr) + conj(k2l)*(asrl - 2.*avhatrl - 4.*avhatrr) + k2r*conj(aslr - 2.*avhatlr - 4.*avhatll) + conj(k2r)*(aslr - 2.*avhatlr - 4.*avhatll)) - 1./6. * (aslr*conj(avhatlr) + asrl*conj(avhatrl) + conj(aslr)*avhatlr + conj(asrl)*avhatrl));
+
+      }
+      else if(gamma == delta) // l(alpha)- -> l(beta)- l(gamma)- l(gamma)+
+      { 
+        l2lll = real(16. *pow(M_PI,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[gamma]) - 8.) + 1./12. *(norm(asll) + norm(asrr) + norm(aslr) + norm(asrl)) + 1./3. * (norm(avhatll) + norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 8.*M_PI/(3.*sminputs.alphainv) * (k2l*conj(avhatrl + avhatrr) + k2r*conj(avhatlr + avhatll) + conj(k2l)*(avhatrl + avhatrr) + conj(k2r)*(avhatlr + avhatll)));
+      }
+      else if(beta == gamma) // l(alpha)- -> l(beta)- l(beta)- l(delta)+
+      {
+        l2lll = real(1./24. * (norm(asll) + norm(asrr) + 2.*norm(aslr) + 2.*norm(asrl)) + 1./3.*(2.*norm(avhatll) + 2.*norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) - 1./6.*(aslr*conj(avhatlr) + asrl*conj(avhatrl) + conj(aslr)*avhatlr + conj(asrl)*avhatrl));
+      }
+
+      return l2lll;
+
+    }
+
     void SN_mueee(double &result)
     {
       using namespace Pipes::SN_mueee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-/*      std::complex<double> Rllgamma = {0.0, 0.0};
-      int e = 0, mu = 1;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(mu,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(mu,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+      result = 3. / (8. * pow(sminputs.GF,2));
 
-      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
-      result *= 16./3 * log(sminputs.mMu/sminputs.mE) - 22./3.;
-*/ 
-       // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
       int e = 0, mu = 1;
-      std::complex<double> fbox = Fbox(mu, e, e, e, Vnu, Theta, x);
-      std::complex<double> fz = FZ(mu, e, Vnu, Theta, x);
-      std::complex<double> fgamma = Fgamma(mu, e, Vnu, Theta, x);
-      std::complex<double> ggamma = Ggamma(mu, e, Vnu, Theta, x);
-     
-      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(16.*pow(M_PI,4)) * std::norm(0.5*fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
-      result += (pow(sminputs.mW,2)*sminputs.GF)/(2.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+0.5*fbox)*std::conj(ggamma));
-      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 12.*std::real((fz-fgamma)*std::conj(ggamma)) + 16.*std::norm(ggamma)*(log(sminputs.mMu/sminputs.mE) - 11./4.));
-      result /= 1. - 8.*pow(sminputs.mE,2)/pow(sminputs.mMu,2);
+      result *=  SN_l2lll(mu, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+
+      result /= (1. - 8.*pow(sminputs.mE/sminputs.mMu,2));
+ 
     }
 
     void SN_taueee(double &result)
@@ -1557,43 +1627,20 @@ namespace Gambit
       using namespace Pipes::SN_taueee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-/*      std::complex<double> Rllgamma = {0.0, 0.0};
+      result = 3. / (8. * pow(sminputs.GF,2));
+
       int e = 0, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+      result *=  SN_l2lll(tau, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
-      result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 22./3.;
-
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
-*/ 
-      // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
-      int e = 0, tau = 2;
-      std::complex<double> fbox = Fbox(tau, e, e, e, Vnu, Theta, x);
-      std::complex<double> fz = FZ(tau, e, Vnu, Theta, x);
-      std::complex<double> fgamma = Fgamma(tau, e, Vnu, Theta, x);
-      std::complex<double> ggamma = Ggamma(tau, e, Vnu, Theta, x);
-     
-      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(16.*pow(M_PI,4)) * std::norm(0.5*fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
-      result += (pow(sminputs.mW,2)*sminputs.GF)/(2.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+0.5*fbox)*std::conj(ggamma));
-      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 12.*std::real((fz-fgamma)*std::conj(ggamma)) + 16.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mE) - 11./4.));
-      double eta = 0.013;
-      result /= 1. + 4.*eta*sminputs.mE/sminputs.mTau;
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
+ 
     }
 
     void SN_taumumumu(double &result)
@@ -1601,43 +1648,20 @@ namespace Gambit
       using namespace Pipes::SN_taumumumu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]}; 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-/*      std::complex<double> Rllgamma = {0.0, 0.0};
-      int mu = 1, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
+      result = 3. / (8. * pow(sminputs.GF,2));
 
-      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
-      result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 22./3.;
+      int mu = 1, tau = 2;
+      result *=  SN_l2lll(tau, mu, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
       double eta = 0.013;
       result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
-*/
-      // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
-      int mu = 1, tau = 2;
-      std::complex<double> fbox = Fbox(tau, mu, mu, mu, Vnu, Theta, x);
-      std::complex<double> fz = FZ(tau, mu, Vnu, Theta, x);
-      std::complex<double> fgamma = Fgamma(tau, mu, Vnu, Theta, x);
-      std::complex<double> ggamma = Ggamma(tau, mu, Vnu, Theta, x);
-     
-      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(16.*pow(M_PI,4)) * std::norm(0.5*fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
-      result += (pow(sminputs.mW,2)*sminputs.GF)/(2.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+0.5*fbox)*std::conj(ggamma));
-      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 12.*std::real((fz-fgamma)*std::conj(ggamma)) + 16.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mMu) - 11./4.));
-      double eta = 0.013;
-      result /= 1. + 4.*eta*sminputs.mMu/sminputs.mTau;
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+
     }
 
 
@@ -1646,72 +1670,39 @@ namespace Gambit
       using namespace Pipes::SN_taumuee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
-/*
-      std::complex<double> Rllgamma = {0.0, 0.0};
-      int mu = 1, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(mu,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(mu,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
-      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
-      result *= 16./3 * log(sminputs.mTau/sminputs.mE) - 8.;
+      result = 3. / (8. * pow(sminputs.GF,2));
 
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
-      // TODO: Add eta to decay tables
-      double eta = 0.013;
-      result /= 1.0 + 4.0*eta*(sminputs.mE/sminputs.mTau);
-*/ 
-       // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
       int e = 0, mu = 1, tau = 2;
-      std::complex<double> fbox = Fbox(tau, mu, e, e, Vnu, Theta, x);
-      std::complex<double> fz = FZ(tau, mu, Vnu, Theta, x);
-      std::complex<double> fgamma = Fgamma(tau, mu, Vnu, Theta, x);
-      std::complex<double> ggamma = Ggamma(tau, mu, Vnu, Theta, x);
-     
-      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(32.*pow(M_PI,4)) * std::norm(fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
-      result += (pow(sminputs.mW,2)*sminputs.GF)/(4.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+fbox)*std::conj(ggamma));
-      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 8.*std::real((fz-fgamma)*std::conj(ggamma)) + 8.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mE) - 3.));
-      double eta = 0.013;
-      result /= 1. + 4.*eta*sminputs.mE/sminputs.mTau;
+      result *=  SN_l2lll(tau, mu, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+
+      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
     void SN_taueemu(double &result)
     {
       using namespace Pipes::SN_taueemu;
       SMInputs sminputs = *Dep::SMINPUTS;
+
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
-      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      // There is no dipole contribution to this decay channel
-      result = 0;
- 
-      // Box diagram contributions
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      result = 3. / (8. * pow(sminputs.GF,2));
+
       int e = 0, mu = 1, tau = 2;
-      std::complex<double> fbox = Fbox(tau, e, e, mu, Vnu, Theta, x);
-      result += pow(sminputs.mW,4)*pow(sminputs.GF,2)/(64.0*pow(M_PI,4))*std::norm(fbox);
-       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
-      double eta = 0.013;
-      result /= 1.0 + 4.0*eta*(sminputs.mMu/sminputs.mTau);
+      result *=  SN_l2lll(tau, e, e, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
+      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
     void SN_tauemumu(double &result)
@@ -1719,101 +1710,224 @@ namespace Gambit
       using namespace Pipes::SN_tauemumu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      //double M[] = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
-/*
-      std::complex<double> Rllgamma = {0.0, 0.0};
-      int e = 0, tau = 2;
-      for(int i=0; i<3; ++i)
-        Rllgamma += Vnu.adjoint()(tau,i) * Vnu(e,i) * pow(std::abs(m_nu(i,i)),2)/pow(sminputs.mW,2) + Theta.adjoint()(tau,i) * Theta(e,i) * G(pow(M[i],2)/pow(sminputs.mW,2));
 
-      result = 3. / (256. * pow(M_PI,2) * pow(sminputs.alphainv,2)) * pow(std::abs(Rllgamma),2);
-      result *= 16./3 * log(sminputs.mTau/sminputs.mMu) - 8.;
+      result = 3. / (8. * pow(sminputs.GF,2));
+
+      int e = 0, mu = 1, tau = 2;
+      result *=  SN_l2lll(tau, e, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
       double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
-*/
- 
-      // TODO: Full contribution, taken from hep-ph/9403398, make sure it is consistent
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
-      int e = 0, mu = 1, tau = 2;
-      std::complex<double> fbox = Fbox(tau, e, mu, mu, Vnu, Theta, x);
-      std::complex<double> fz = FZ(tau, e, Vnu, Theta, x);
-      std::complex<double> fgamma = Fgamma(tau, e, Vnu, Theta, x);
-      std::complex<double> ggamma = Ggamma(tau, e, Vnu, Theta, x);
-     
-      result = (pow(sminputs.mW,4)*pow(sminputs.GF,2))/(32.*pow(M_PI,4)) * std::norm(fbox + fz - (sqrt(2)*M_PI)/(sminputs.alphainv*pow(sminputs.mW,2)*sminputs.GF)*(fz - fgamma));
-      result += (pow(sminputs.mW,2)*sminputs.GF)/(4.*sqrt(2)*sminputs.alphainv*pow(M_PI,3))*std::real((fz+fbox)*std::conj(ggamma));
-      result += 1./(pow(16.*sminputs.alphainv,2)*pow(M_PI,2))*(std::norm(fz-fgamma) - 8.*std::real((fz-fgamma)*std::conj(ggamma)) + 8.*std::norm(ggamma)*(log(sminputs.mTau/sminputs.mMu) - 3.));
-      double eta = 0.013;
-      result /= 1. + 4.*eta*sminputs.mMu/sminputs.mTau;
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
+      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
 
     void SN_taumumue(double &result)
     {
       using namespace Pipes::SN_taumumue;
       SMInputs sminputs = *Dep::SMINPUTS;
+
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
-      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      // There is no dipole contribution to this decay channel
-      result = 0;
- 
-      // Box diagram contributions
-      std::vector<double> x(6);
-      for(int i = 0; i < 3; i++)
-        x[i] = std::norm(m_nu(i,i))/pow(sminputs.mW,2);
-      x[3] = pow(*Param["M_1"]/sminputs.mW,2);
-      x[4] = pow(*Param["M_2"]/sminputs.mW,2);
-      x[5] = pow(*Param["M_3"]/sminputs.mW,2);
+      result = 3. / (8. * pow(sminputs.GF,2));
+
       int e = 0, mu = 1, tau = 2;
-      std::complex<double> fbox = Fbox(tau, mu, mu, e, Vnu, Theta, x);
-      result += pow(sminputs.mW,4)*pow(sminputs.GF,2)/(64.0*pow(M_PI,4))*std::norm(fbox);
-       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
-      double eta = 0.013;
-      result /= 1.0 + 4.0*eta*(sminputs.mE/sminputs.mTau);
+      result *=  SN_l2lll(tau, mu, mu, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
+      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
+      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
+      double eta = 0.013;
+      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
+
     void SN_mueTi(double &result)
     {
       using namespace Pipes::SN_mueTi;
       const SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
 
-      int A, Z;
-      double alphaW = sqrt(2)/M_PI * pow(sminputs.mW,2) * sminputs.GF;
-      double Zeff, Fp, GammaCapt;
+      vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), *Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      Eigen::Matrix<complex<double>,3,6> U;
+     
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+          U(i,j) = Vnu(i,j);
+          U(i,j+3) = Theta(i,j);
+        }
 
-      // From Table 1 in 1209.2679 for Ti
-      A = 18;
-      Z = 22;
-      Zeff = 17.6;
-      Fp = 0.54;
-      GammaCapt = 2.59e-6; // TODO: Check dimensions here
+      // Form factors
+      int e = 0, mu = 1;
+      complex<double> k1r = FormFactors::K1R(mu, e, sminputs, U, mnu);
+      complex<double> k2l = FormFactors::K2L(mu, e, sminputs, U, ml, mnu);
+      complex<double> k2r = FormFactors::K2R(mu, e, sminputs, U, ml, mnu);
 
-      result = pow(sminputs.GF,2)*pow(alphaW,2)*pow(sminputs.mMu,5);
-      result /= 8*pow(M_PI,4)*pow(sminputs.alphainv,3)*GammaCapt;
-      result *=  pow(Zeff,4) * pow(Fp, 2)/Z;
+      int u = 0, d =0, s = 1;
+      complex<double> CVLLu = FormFactors::CVLL(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVLLd = FormFactors::BVLL(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVLLs = FormFactors::BVLL(mu, e, s, s, sminputs, U, ml, mnu);
+      complex<double> CVLRu = FormFactors::CVLR(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVLRd = FormFactors::BVLR(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVLRs = FormFactors::BVLR(mu, e, s, s, sminputs, U, ml, mnu);
+      complex<double> CVRLu = FormFactors::CVRL(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVRLd = FormFactors::BVRL(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVRLs = FormFactors::BVRL(mu, e, s, s, sminputs, U, ml, mnu);
+      complex<double> CVRRu = FormFactors::CVRR(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVRRd = FormFactors::BVRR(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVRRs = FormFactors::BVRR(mu, e, s, s, sminputs, U, ml, mnu);
+
+      complex<double> CSLLu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLLd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLLs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLRu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLRd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLRs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSRLu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRLd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRLs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRRu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRRd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSRRs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml ,mnu, *Param["mH"]);
+
+      double Qu = 2./3.;
+      complex<double> gVLu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (0. - k2r) - 0.5*(CVLLu + CVLRu));
+      complex<double> gSLu = -1./(sqrt(2)*sminputs.GF)*(CSLLu + CSLRu);
+      complex<double> gVRu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (k1r - k2l) - 0.5*(CVRRu + CVRLu));
+      complex<double> gSRu = -1./(sqrt(2)*sminputs.GF)*(CSRRu + CSRLu);
+
+      double Qd = -1./3.;
+      complex<double> gVLd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (0. - k2r) - 0.5*(CVLLd + CVLRd));
+      complex<double> gSLd = -1./(sqrt(2)*sminputs.GF)*(CSLLd + CSLRd);
+      complex<double> gVRd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (k1r - k2l) - 0.5*(CVRRd + CVRLd));
+      complex<double> gSRd = -1./(sqrt(2)*sminputs.GF)*(CSRRd + CSRLd);
+
+      double Qs = -1./3.;
+      complex<double> gVLs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (0. - k2r) - 0.5*(CVLLs + CVLRs));
+      complex<double> gSLs = -1./(sqrt(2)*sminputs.GF)*(CSLLs + CSLRs);
+      complex<double> gVRs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (k1r - k2l) - 0.5*(CVRRs + CVRLs));
+      complex<double> gSRs = -1./(sqrt(2)*sminputs.GF)*(CSRRs + CSRLs);
+
+      double GVup = 2, GVdn = 2, GVdp = 1, GVun = 1, GVsp = 0, GVsn = 0;
+      double GSup = 5.1, GSdn = 5.1, GSdp = 4.3, GSun = 4.3, GSsp = 2.5, GSsn = 2.5;
+      complex<double> g0SL = 0.5*(gSLu*(GSup + GSun) + gSLd*(GSdp + GSdn) + gSLs*(GSsp + GSsn));
+      complex<double> g0SR = 0.5*(gSRu*(GSup + GSun) + gSRd*(GSdp + GSdn) + gSRs*(GSsp + GSsn));
+      complex<double> g0VL = 0.5*(gVLu*(GVup + GVun) + gVLd*(GVdp + GVdn) + gVLs*(GVsp + GVsn));
+      complex<double> g0VR = 0.5*(gVRu*(GVup + GVun) + gVRd*(GVdp + GVdn) + gVRs*(GVsp + GVsn));
+      complex<double> g1SL = 0.5*(gSLu*(GSup - GSun) + gSLd*(GSdp - GSdn) + gSLs*(GSsp - GSsn));
+      complex<double> g1SR = 0.5*(gSRu*(GSup - GSun) + gSRd*(GSdp - GSdn) + gSRs*(GSsp - GSsn));
+      complex<double> g1VL = 0.5*(gVLu*(GVup - GVun) + gVLd*(GVdp - GVdn) + gVLs*(GVsp - GVsn));
+      complex<double> g1VR = 0.5*(gVRu*(GVup - GVun) + gVRd*(GVdp - GVdn) + gVRs*(GVsp - GVsn));
+
+      
+      // Parameters for Ti, from Table 1 in 1209.2679 for Ti
+      double Z = 22, N = 26;
+      double Zeff = 17.6, Fp = 0.54;
+      double hbar = 6.582119514e-25; // GeV * s
+      double GammaCapt = 2.59e-6 * hbar; 
+
+      result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
+
     }
 
     void SN_muePb(double &result)
     {
       using namespace Pipes::SN_muePb;
-      //const SMInputs sminputs = *Dep::SMINPUTS;
-  
-      result = 0;
-    }
+      const SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+
+      vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), *Param["M_1"], *Param["M_2"], *Param["M_3"]};
+      Eigen::Matrix<complex<double>,3,6> U;
+     
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+        {
+          U(i,j) = Vnu(i,j);
+          U(i,j+3) = Theta(i,j);
+        }
+
+      // Form factors
+      int e = 0, mu = 1;
+      complex<double> k1r = FormFactors::K1R(mu, e, sminputs, U, mnu);
+      complex<double> k2l = FormFactors::K2L(mu, e, sminputs, U, ml, mnu);
+      complex<double> k2r = FormFactors::K2R(mu, e, sminputs, U, ml, mnu);
+
+      int u = 0, d =0, s = 1;
+      complex<double> CVLLu = FormFactors::CVLL(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVLLd = FormFactors::BVLL(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVLLs = FormFactors::BVLL(mu, e, s, s, sminputs, U, ml, mnu);
+      complex<double> CVLRu = FormFactors::CVLR(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVLRd = FormFactors::BVLR(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVLRs = FormFactors::BVLR(mu, e, s, s, sminputs, U, ml, mnu);
+      complex<double> CVRLu = FormFactors::CVRL(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVRLd = FormFactors::BVRL(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVRLs = FormFactors::BVRL(mu, e, s, s, sminputs, U, ml, mnu);
+      complex<double> CVRRu = FormFactors::CVRR(mu, e, u, u, sminputs, U, ml, mnu);
+      complex<double> CVRRd = FormFactors::BVRR(mu, e, d, d, sminputs, U, ml, mnu);
+      complex<double> CVRRs = FormFactors::BVRR(mu, e, s, s, sminputs, U, ml, mnu);
+
+      complex<double> CSLLu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLLd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLLs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLRu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLRd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSLRs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSRLu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRLd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRLs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRRu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml ,mnu, *Param["mH"]);
+      complex<double> CSRRd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
+      complex<double> CSRRs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml ,mnu, *Param["mH"]);
+
+      double Qu = 2./3.;
+      complex<double> gVLu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (0. - k2r) - 0.5*(CVLLu + CVLRu));
+      complex<double> gSLu = -1./(sqrt(2)*sminputs.GF)*(CSLLu + CSLRu);
+      complex<double> gVRu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (k1r - k2l) - 0.5*(CVRRu + CVRLu));
+      complex<double> gSRu = -1./(sqrt(2)*sminputs.GF)*(CSRRu + CSRLu);
+
+      double Qd = -1./3.;
+      complex<double> gVLd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (0. - k2r) - 0.5*(CVLLd + CVLRd));
+      complex<double> gSLd = -1./(sqrt(2)*sminputs.GF)*(CSLLd + CSLRd);
+      complex<double> gVRd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (k1r - k2l) - 0.5*(CVRRd + CVRLd));
+      complex<double> gSRd = -1./(sqrt(2)*sminputs.GF)*(CSRRd + CSRLd);
+
+      double Qs = -1./3.;
+      complex<double> gVLs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (0. - k2r) - 0.5*(CVLLs + CVLRs));
+      complex<double> gSLs = -1./(sqrt(2)*sminputs.GF)*(CSLLs + CSLRs);
+      complex<double> gVRs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (k1r - k2l) - 0.5*(CVRRs + CVRLs));
+      complex<double> gSRs = -1./(sqrt(2)*sminputs.GF)*(CSRRs + CSRLs);
+
+      double GVup = 2, GVdn = 2, GVdp = 1, GVun = 1, GVsp = 0, GVsn = 0;
+      double GSup = 5.1, GSdn = 5.1, GSdp = 4.3, GSun = 4.3, GSsp = 2.5, GSsn = 2.5;
+      complex<double> g0SL = 0.5*(gSLu*(GSup + GSun) + gSLd*(GSdp + GSdn) + gSLs*(GSsp + GSsn));
+      complex<double> g0SR = 0.5*(gSRu*(GSup + GSun) + gSRd*(GSdp + GSdn) + gSRs*(GSsp + GSsn));
+      complex<double> g0VL = 0.5*(gVLu*(GVup + GVun) + gVLd*(GVdp + GVdn) + gVLs*(GVsp + GVsn));
+      complex<double> g0VR = 0.5*(gVRu*(GVup + GVun) + gVRd*(GVdp + GVdn) + gVRs*(GVsp + GVsn));
+      complex<double> g1SL = 0.5*(gSLu*(GSup - GSun) + gSLd*(GSdp - GSdn) + gSLs*(GSsp - GSsn));
+      complex<double> g1SR = 0.5*(gSRu*(GSup - GSun) + gSRd*(GSdp - GSdn) + gSRs*(GSsp - GSsn));
+      complex<double> g1VL = 0.5*(gVLu*(GVup - GVun) + gVLd*(GVdp - GVdn) + gVLs*(GVsp - GVsn));
+      complex<double> g1VR = 0.5*(gVRu*(GVup - GVun) + gVRd*(GVdp - GVdn) + gVRs*(GVsp - GVsn));
+
+      
+      // Parameters for Pb, from Table 1 in 1209.2679 for Pb
+      double Z = 82, N = 126;
+      double Zeff = 34., Fp = 0.15;
+      double hbar = 6.582119514e-25; // GeV * s
+      double GammaCapt = 13.45e-6 * hbar; 
+
+      result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
+
+   }
 
     void SN_edm_e(double &result)
     {
@@ -1879,8 +1993,11 @@ namespace Gambit
       }
 
      theory[0] = *Dep::muegamma;
+//cout << "mu- -> e- gamma = " << theory[0] << endl;
      theory[1] = *Dep::tauegamma;
+//cout << "tau- -> e- gamma = " << theory[1] << endl;
      theory[2] = *Dep::taumugamma;
+//cout << "tau- -> mu- gamma = " << theory[2] << endl;
  
      result = 0;
      for (int i = 0; i < 3; ++i)
@@ -1932,19 +2049,19 @@ namespace Gambit
       }
 
      theory[0] = *Dep::mueee;
-cout << "mu-  -> e-  e-  e+  = " << theory[0] << endl;
+//cout << "mu-  -> e-  e-  e+  = " << theory[0] << endl;
      theory[1] = *Dep::taueee;
-cout << "tau- -> e-  e-  e+  = " << theory[1] << endl;
+//cout << "tau- -> e-  e-  e+  = " << theory[1] << endl;
      theory[2] = *Dep::taumumumu;
-cout << "tau- -> mu- mu- mu+ = " << theory[2] << endl;
+//cout << "tau- -> mu- mu- mu+ = " << theory[2] << endl;
      theory[3] = *Dep::taumuee;
-cout << "tau- -> mu- e-  e-  = " << theory[3] << endl;
+//cout << "tau- -> mu- e-  e-  = " << theory[3] << endl;
      theory[4] = *Dep::taueemu;
-cout << "tau- -> e-  e-  mu+ = " << theory[4] << endl;
+//cout << "tau- -> e-  e-  mu+ = " << theory[4] << endl;
      theory[5] = *Dep::tauemumu;
-cout << "tau- -> e-  mu- mu+ = " << theory[5] << endl;
+//cout << "tau- -> e-  mu- mu+ = " << theory[5] << endl;
      theory[6] = *Dep::taumumue;
-cout << "tau- -> mu- mu- e+  = " << theory[6] << endl;
+//cout << "tau- -> mu- mu- e+  = " << theory[6] << endl;
      result = 0;
      for (int i = 0; i < 7; ++i)
        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], sqrt(cov_exp(i,i)), false);
@@ -1985,7 +2102,10 @@ cout << "tau- -> mu- mu- e+  = " << theory[6] << endl;
       }
 
       theory[0] = *Dep::mueTi;
+//cout << "mu - e (Ti) = " << theory[0] << endl;
+
       theory[1] = *Dep::muePb;
+//cout << "mu - e (Pb) = " << theory[1] << endl;
 
       result = 0;
       for (int i = 0; i < 2; ++i)

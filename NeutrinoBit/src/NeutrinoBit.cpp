@@ -115,7 +115,6 @@ namespace Gambit
 
     }
 
-
     // Helper function for the heavy neutrino masses
     double l_M(double M, const double m_Z, const double m_H)
     {
@@ -202,6 +201,73 @@ namespace Gambit
 
     }
 
+    void Unitarity_UPMNS(bool &unitarity)
+    {
+      using namespace Pipes::Unitarity_UPMNS;
+
+      Eigen::Matrix3cd Id;
+      Id << 1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0;
+      Eigen::Matrix3d Epsilon;
+      Epsilon << 1e-15, 1e-15, 1e-15,
+                 1e-15, 1e-15, 1e-15,
+                 1e-15, 1e-15, 1e-15;
+
+      Eigen::Matrix3cd Norm = Dep::UPMNS->adjoint() * *Dep::UPMNS;
+      unitarity = true;
+      for(int i = 0; i < 3; i++)
+        for(int j = 0; j < 3; j++)
+          if(std::abs(Norm(i,j) - Id(i,j)) > Epsilon(i,j))
+            unitarity = false;
+
+      if(!unitarity)
+        return ;
+
+      for(int i = 0; i < 3; i++)
+        for(int j = 0; j < 3; j++)
+          if(std::real((*Dep::m_nu)(i,j)*pow((*Dep::UPMNS)(i,j),2)) > Epsilon(i,j))
+            unitarity = false;
+
+   
+    }
+
+    void Unitarity_SeesawI(bool &unitarity)
+    {
+      using namespace Pipes::Unitarity_SeesawI;
+
+      Eigen::Matrix3cd Id;
+      Id << 1.0, 0.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 0.0, 1.0;
+      Eigen::Matrix3d Epsilon;
+      Epsilon << 1e-15, 1e-15, 1e-15,
+                 1e-15, 1e-15, 1e-15,
+                 1e-15, 1e-15, 1e-15;
+
+      Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      Eigen::Matrix3cd m_nu = *Dep::m_nu;
+
+      Eigen::Matrix3cd Norm = Vnu.adjoint() * Vnu + Theta.adjoint() * Theta;
+      unitarity = true;
+      for(int i = 0; i < 3; i++)
+        for(int j = 0; j < 3; j++)
+          if(std::abs(Norm(i,j) - Id(i,j)) > Epsilon(i,j))
+            unitarity = false;
+
+      cout << "unitarity = " << unitarity << endl;
+      if(!unitarity)
+       return ;
+
+      std::vector<double> MN = {*Param["M_1"],*Param["M_2"],*Param["M_3"]};
+      for(int i = 0; i < 3; i++)
+        for(int j = 0; j < 3; j++)
+          if(std::real(m_nu(i,j) * pow(Vnu(i,j),2) + MN[j] * pow(Theta(i,j),2)) > Epsilon(i,j))
+            unitarity = false;
+
+ 
+    }
 
   }
 }

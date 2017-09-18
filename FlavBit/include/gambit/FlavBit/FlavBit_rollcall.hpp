@@ -489,7 +489,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -503,7 +503,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -517,7 +517,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -531,7 +531,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -545,7 +545,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -559,7 +559,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -573,7 +573,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -583,7 +583,11 @@ START_MODULE
     #define FUNCTION SN_mueTi
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
-    ALLOW_MODELS(SN_dev)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -593,7 +597,11 @@ START_MODULE
     #define FUNCTION SN_muePb
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
-    ALLOW_MODELS(SN_dev)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SN_dev, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY
 

@@ -50,7 +50,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
   // Construct the neutrino Seesaw I type Theta matrix
   #define CAPABILITY SeesawI_Theta
   START_CAPABILITY
@@ -71,6 +70,27 @@ START_MODULE
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
+  #undef CAPABILITY
+
+  // Unitarity checks for the mixing matrix
+  #define CAPABILITY Unitarity
+  START_CAPABILITY
+    // Unitarity of the PMNS matrix
+    #define FUNCTION Unitarity_UPMNS
+    START_FUNCTION(bool)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    #undef FUNCTION
+
+    // Unitarity of the mixing matrix in seesaw I
+    #define FUNCTION Unitarity_SeesawI
+    START_FUNCTION(bool)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    ALLOW_MODEL(SN_dev)
+    #undef FUNCTION
+    
   #undef CAPABILITY
 
 #undef MODULE
