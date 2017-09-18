@@ -310,6 +310,7 @@ namespace Gambit
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_ps191e(116), U_temp_ps191e(116);
       std::vector<double> U_ps191e(3), mixing_sq_ps191e(3);
+//      double mixing_sq;
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -317,8 +318,9 @@ namespace Gambit
       mixing_sq_ps191e[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
       mixing_sq_ps191e[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_ps191e[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+//      mixing_sq = mixing_sq_ps191e[0] + mixing_sq_ps191e[1];
 
-      if (read_table_ps191e)
+     if (read_table_ps191e)
       {
         double array_ps191e[116][2];
         std::ifstream f_ps191e("DarkBit/data/ps191_e.csv");
@@ -355,7 +357,9 @@ namespace Gambit
       U_ps191e[0] = s_ps191e(M_1);
       U_ps191e[1] = s_ps191e(M_2);
       U_ps191e[2] = s_ps191e(M_3);
-      result_ps191e = -2.44*((mixing_sq_ps191e[0]/pow(U_ps191e[0], 2.0)) + (mixing_sq_ps191e[1]/pow(U_ps191e[1], 2.0)) + (mixing_sq_ps191e[2]/pow(U_ps191e[2], 2.0)));
+//      result_ps191e = -2.44*((mixing_sq_ps191e[0]/pow(U_ps191e[0], 2.0)) + (mixing_sq_ps191e[1]/pow(U_ps191e[1], 2.0)) + (mixing_sq_ps191e[2]/pow(U_ps191e[2], 2.0)));
+//      result_ps191e = -2.44*(mixing_sq/pow(U_ps191e[0], 2.0));
+      result_ps191e = -2.44*((sqrt(mixing_sq_ps191e[0])/U_ps191e[0]) + (sqrt(mixing_sq_ps191e[1])/U_ps191e[1]) + (sqrt(mixing_sq_ps191e[2])/U_ps191e[2]));
     }
 
     // Likelihood contribution from PS191, muon sector. Constrains |U_(mu,i)|^2 in the mass range 20-450 MeV. Description & references above.
@@ -586,7 +590,7 @@ namespace Gambit
       U_delphi[0] = s_delphi(M_1);
       U_delphi[1] = s_delphi(M_2);
       U_delphi[2] = s_delphi(M_3);
-      result_delphi = -3.09*((mixing_sq_delphi[0]/U_delphi[0]) + (mixing_sq_delphi[1]/U_delphi[1]) + (mixing_sq_delphi[2]/U_delphi[2]) + (mixing_sq_delphi[3]/U_delphi[0]) + (mixing_sq_delphi[4]/U_delphi[1]) + (mixing_sq_delphi[5]/U_delphi[2]) + (mixing_sq_delphi[6]/U_delphi[0]) + (mixing_sq_delphi[7]/U_delphi[1]) + (mixing_sq_delphi[8]/U_delphi[2]));
+      result_delphi = -0.1*((mixing_sq_delphi[0]/U_delphi[0]) + (mixing_sq_delphi[1]/U_delphi[1]) + (mixing_sq_delphi[2]/U_delphi[2]) + (mixing_sq_delphi[3]/U_delphi[0]) + (mixing_sq_delphi[4]/U_delphi[1]) + (mixing_sq_delphi[5]/U_delphi[2]) + (mixing_sq_delphi[6]/U_delphi[0]) + (mixing_sq_delphi[7]/U_delphi[1]) + (mixing_sq_delphi[8]/U_delphi[2]));
     }
 
     // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 in the mass range 50-500 GeV. [JHEP, 07:162, 2015]
@@ -920,6 +924,15 @@ namespace Gambit
       namespace myPipe10 = Pipes::printable_Ut3;
       Matrix3d t_9(*myPipe10::Dep::Theta_sq);
       Ut3_sq = t_9(2,2);
+    }
+
+    void printable_ps191e(double& U_ps191e)
+    {
+      using namespace Pipes::printable_ps191e;
+      double c_e = 0.5711;
+      double c_mu = 0.1265;
+      double c_tau = 0.1265;
+      U_ps191e = (*Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1))) + (*Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2)));
     }
 
   }
