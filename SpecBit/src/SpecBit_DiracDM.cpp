@@ -82,7 +82,7 @@ namespace Gambit
       {
         std::ostringstream msg;
         msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
-	    << diracmodel.DiracLambda << " GeV] does not satisfy the EFT validity constraint.";
+	    << diracmodel.DiracLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
         invalid_point().raise(msg.str());
       }
 

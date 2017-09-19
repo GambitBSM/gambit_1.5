@@ -75,12 +75,12 @@ namespace Gambit
       vectormodel.VectorPoleMass = *myPipe::Param.at("mV");
       vectormodel.VectorLambda   = *myPipe::Param.at("lambda_hV");
 
-      // Invalidate point if the perturbative unitarity condition is violated
+      // Invalidate point if the perturbative unitarity constraint is not satisfied
       if (vectormodel.VectorLambda > (2*pow(vectormodel.VectorPoleMass,2))/pow(vev,2))
       {
         std::ostringstream msg;
         msg << "Parameter point [mV, lambda_hV] = [" << vectormodel.VectorPoleMass << " GeV, "
-	    << vectormodel.VectorLambda << "] does not satisfy the perturbative unitarity condition.";
+	    << vectormodel.VectorLambda << "] does not satisfy the perturbative unitarity constraint.";
         invalid_point().raise(msg.str());
       }
 

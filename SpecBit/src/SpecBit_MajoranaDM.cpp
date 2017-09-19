@@ -82,7 +82,7 @@ namespace Gambit
       {
        std::ostringstream msg;
        msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
-	   << majoranamodel.MajoranaLambda << " GeV] does not satisfy the EFT validity constraint.";
+	   << majoranamodel.MajoranaLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
        invalid_point().raise(msg.str());
       }
 
