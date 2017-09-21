@@ -1769,7 +1769,7 @@ namespace Gambit
       complex<double> k1r = FormFactors::K1R(mu, e, sminputs, U, mnu);
       complex<double> k2l = FormFactors::K2L(mu, e, sminputs, U, ml, mnu);
       complex<double> k2r = FormFactors::K2R(mu, e, sminputs, U, ml, mnu);
-
+ 
       int u = 0, d =0, s = 1;
       complex<double> CVLLu = FormFactors::CVLL(mu, e, u, u, sminputs, U, ml, mnu);
       complex<double> CVLLd = FormFactors::BVLL(mu, e, d, d, sminputs, U, ml, mnu);
@@ -1783,7 +1783,7 @@ namespace Gambit
       complex<double> CVRRu = FormFactors::CVRR(mu, e, u, u, sminputs, U, ml, mnu);
       complex<double> CVRRd = FormFactors::BVRR(mu, e, d, d, sminputs, U, ml, mnu);
       complex<double> CVRRs = FormFactors::BVRR(mu, e, s, s, sminputs, U, ml, mnu);
-
+ 
       complex<double> CSLLu = FormFactors::CSLL(mu, e, u, u, sminputs, U, ml, mnu, *Param["mH"]);
       complex<double> CSLLd = FormFactors::BSLL(mu, e, d, d, sminputs, U, ml, mnu, *Param["mH"]);
       complex<double> CSLLs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml, mnu, *Param["mH"]);
@@ -1825,13 +1825,13 @@ namespace Gambit
       complex<double> g1SR = 0.5*(gSRu*(GSup - GSun) + gSRd*(GSdp - GSdn) + gSRs*(GSsp - GSsn));
       complex<double> g1VL = 0.5*(gVLu*(GVup - GVun) + gVLd*(GVdp - GVdn) + gVLs*(GVsp - GVsn));
       complex<double> g1VR = 0.5*(gVRu*(GVup - GVun) + gVRd*(GVdp - GVdn) + gVRs*(GVsp - GVsn));
-
+ 
       
       // Parameters for Ti, from Table 1 in 1209.2679 for Ti
       double Z = 22, N = 26;
       double Zeff = 17.6, Fp = 0.54;
       double hbar = 6.582119514e-25; // GeV * s
-      double GammaCapt = 2.59e-6 * hbar; 
+      double GammaCapt = 2.59e6 * hbar; 
 
       result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
 
@@ -1923,7 +1923,7 @@ namespace Gambit
       double Z = 82, N = 126;
       double Zeff = 34., Fp = 0.15;
       double hbar = 6.582119514e-25; // GeV * s
-      double GammaCapt = 13.45e-6 * hbar; 
+      double GammaCapt = 13.45e6 * hbar; 
 
       result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
 
@@ -1993,11 +1993,11 @@ namespace Gambit
       }
 
      theory[0] = *Dep::muegamma;
-//cout << "mu- -> e- gamma = " << theory[0] << endl;
+     if(flav_debug) cout << "mu- -> e- gamma = " << theory[0] << endl;
      theory[1] = *Dep::tauegamma;
-//cout << "tau- -> e- gamma = " << theory[1] << endl;
+     if(flav_debug) cout << "tau- -> e- gamma = " << theory[1] << endl;
      theory[2] = *Dep::taumugamma;
-//cout << "tau- -> mu- gamma = " << theory[2] << endl;
+     if(flav_debug) cout << "tau- -> mu- gamma = " << theory[2] << endl;
  
      result = 0;
      for (int i = 0; i < 3; ++i)
@@ -2049,19 +2049,20 @@ namespace Gambit
       }
 
      theory[0] = *Dep::mueee;
-//cout << "mu-  -> e-  e-  e+  = " << theory[0] << endl;
+     if(flav_debug) cout << "mu-  -> e-  e-  e+  = " << theory[0] << endl;
      theory[1] = *Dep::taueee;
-//cout << "tau- -> e-  e-  e+  = " << theory[1] << endl;
+     if(flav_debug) cout << "tau- -> e-  e-  e+  = " << theory[1] << endl;
      theory[2] = *Dep::taumumumu;
-//cout << "tau- -> mu- mu- mu+ = " << theory[2] << endl;
+     if(flav_debug) cout << "tau- -> mu- mu- mu+ = " << theory[2] << endl;
      theory[3] = *Dep::taumuee;
-//cout << "tau- -> mu- e-  e-  = " << theory[3] << endl;
+     if(flav_debug) cout << "tau- -> mu- e-  e-  = " << theory[3] << endl;
      theory[4] = *Dep::taueemu;
-//cout << "tau- -> e-  e-  mu+ = " << theory[4] << endl;
+     if(flav_debug) cout << "tau- -> e-  e-  mu+ = " << theory[4] << endl;
      theory[5] = *Dep::tauemumu;
-//cout << "tau- -> e-  mu- mu+ = " << theory[5] << endl;
+     if(flav_debug) cout << "tau- -> e-  mu- mu+ = " << theory[5] << endl;
      theory[6] = *Dep::taumumue;
-//cout << "tau- -> mu- mu- e+  = " << theory[6] << endl;
+     if(flav_debug) cout << "tau- -> mu- mu- e+  = " << theory[6] << endl;
+
      result = 0;
      for (int i = 0; i < 7; ++i)
        result += Stats::gaussian_upper_limit(theory[i], value_exp(i,0), th_err[i], sqrt(cov_exp(i,i)), false);
@@ -2102,10 +2103,9 @@ namespace Gambit
       }
 
       theory[0] = *Dep::mueTi;
-//cout << "mu - e (Ti) = " << theory[0] << endl;
-
+      if(flav_debug) cout << "mu - e (Ti) = " << theory[0] << endl;
       theory[1] = *Dep::muePb;
-//cout << "mu - e (Pb) = " << theory[1] << endl;
+      if(flav_debug) cout << "mu - e (Pb) = " << theory[1] << endl;
 
       result = 0;
       for (int i = 0; i < 2; ++i)

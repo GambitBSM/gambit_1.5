@@ -477,7 +477,9 @@ namespace Gambit
         complex<double> a1r = {0,0};
 
         for(int a=0; a<6; a++)
+        {
           a1r += Vertices::Fw(sminputs) * Vertices::VpL(alpha,a,sminputs,U) * conj(Vertices::VpL(beta,a,sminputs,U)) * LoopFunctions::MFVV(pow(mnu[a],2), pow(sminputs.mW,2));
+        }
 
         return a1r;
       }
@@ -497,9 +499,8 @@ namespace Gambit
       {
          complex<double> a2r = {0,0};
          double mW = sminputs.mW;
-
          for(int a=0; a<6; a++)
-           a2r += -2. * Vertices::Fw(sminputs) * Vertices::VpL(alpha,a,sminputs,U) * conj(Vertices::VpL(beta,a,sminputs,U)) * LoopFunctions::G1(pow(mnu[a],2), mW*mW, mW*mW) * ml[alpha];
+          a2r += -2. * Vertices::Fw(sminputs) * Vertices::VpL(alpha,a,sminputs,U) * conj(Vertices::VpL(beta,a,sminputs,U)) * LoopFunctions::G1(pow(mnu[a],2), mW*mW, mW*mW) * ml[alpha];
 
          return a2r;
       }
@@ -553,9 +554,6 @@ namespace Gambit
         complex<double> vzll = {0,0};
         double mW = sminputs.mW;
 
-        // FIXME: Too large contribution, fix this
-        return 0.;
-
         // Use MZ as the renormalization scale Q
 	for(int a=0; a<6; a++)
           vzll += Vertices::Zww(sminputs) * Vertices::VpL(alpha,a,sminputs,U) * conj(Vertices::VpL(beta,a,sminputs,U)) * (1. - 2.*(LoopFunctions::B0(mW*mW,mW*mW,sminputs.mZ) + 2.*LoopFunctions::C00(pow(mnu[a],2),mW*mW,mW*mW,sminputs.mZ) + LoopFunctions::C0(pow(mnu[a],2),mW*mW,mW*mW)*pow(mnu[a],2)));
@@ -572,9 +570,6 @@ namespace Gambit
       {
         complex<double> vzll = {0,0};
         double mW = sminputs.mW;
-
-        // FIXME: Too large contribution, fix this
-        return 0.;
  
         // Use MZ as the renormalization scale Q
         for(int b=0; b<6; b++)
@@ -769,7 +764,7 @@ namespace Gambit
       {
         double e = sqrt(4. * M_PI / sminputs.alphainv);
  
-        return 1. / e * Penguins::A1R(alpha, beta, sminputs, U, mnu);
+        return 1. / (16*pow(M_PI,2)*e) * Penguins::A1R(alpha, beta, sminputs, U, mnu);
       }
 
       complex<double> K2L(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
