@@ -16,10 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:55
+// File generated at Sun 24 Sep 2017 16:03:35
 
 #include "HSSUSY_observables.hpp"
 #include "HSSUSY_mass_eigenstates.hpp"
+#include "HSSUSY_a_muon.hpp"
+#include "HSSUSY_edm.hpp"
 #include "HSSUSY_effective_couplings.hpp"
 #include "gm2calc_interface.hpp"
 #include "eigen_utils.hpp"
@@ -29,8 +31,12 @@
 #include "physical_input.hpp"
 
 #define MODEL model
+#define AMU a_muon
+#define AMUUNCERTAINTY a_muon_uncertainty
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty
+#define EDM0(p) edm_ ## p
+#define EDM1(p,idx) edm_ ## p ## _ ## idx
 #define EFFCPHIGGSPHOTONPHOTON eff_cp_higgs_photon_photon
 #define EFFCPHIGGSGLUONGLUON eff_cp_higgs_gluon_gluon
 #define EFFCPPSEUDOSCALARPHOTONPHOTON eff_cp_pseudoscalar_photon_photon
@@ -46,7 +52,7 @@
 
 namespace flexiblesusy {
 
-const unsigned HSSUSY_observables::NUMBER_OF_OBSERVABLES;
+const int HSSUSY_observables::NUMBER_OF_OBSERVABLES;
 
 HSSUSY_observables::HSSUSY_observables()
    : eff_cp_higgs_photon_photon(0)
@@ -93,6 +99,19 @@ void HSSUSY_observables::set(const Eigen::ArrayXd& vec)
    eff_cp_higgs_photon_photon = std::complex<double>(vec(0), vec(1));
    eff_cp_higgs_gluon_gluon = std::complex<double>(vec(2), vec(3));
 
+}
+
+HSSUSY_observables calculate_observables(const HSSUSY_mass_eigenstates& model,
+                                              const softsusy::QedQcd& qedqcd,
+                                              const Physical_input& physical_input,
+                                              double scale)
+{
+   auto model_at_scale = model;
+
+   if (scale > 0.)
+      model_at_scale.run_to(scale);
+
+   return calculate_observables(model_at_scale, qedqcd, physical_input);
 }
 
 HSSUSY_observables calculate_observables(const HSSUSY_mass_eigenstates& model,

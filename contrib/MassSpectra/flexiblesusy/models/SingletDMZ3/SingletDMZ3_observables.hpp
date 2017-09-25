@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:45:01
+// File generated at Sun 24 Sep 2017 15:55:24
 
 #ifndef SingletDMZ3_OBSERVABLES_H
 #define SingletDMZ3_OBSERVABLES_H
@@ -35,7 +35,7 @@ class SingletDMZ3_mass_eigenstates;
 class Physical_input;
 
 struct SingletDMZ3_observables {
-   static const unsigned NUMBER_OF_OBSERVABLES = 0;
+   static const int NUMBER_OF_OBSERVABLES = 5;
 
    SingletDMZ3_observables();
    Eigen::ArrayXd get() const; ///< returns vector of all observables
@@ -43,10 +43,19 @@ struct SingletDMZ3_observables {
    void clear(); ///< sets all observables to zero
    void set(const Eigen::ArrayXd&); ///< sets all observables from given vector
 
+   double a_muon; ///< a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)
+   std::complex<double> eff_cp_higgs_photon_photon; ///< effective H-Photon-Photon coupling
+   std::complex<double> eff_cp_higgs_gluon_gluon; ///< effective H-Gluon-Gluon coupling
 
 };
 
-SingletDMZ3_observables calculate_observables(const SingletDMZ3_mass_eigenstates&, const softsusy::QedQcd&, const Physical_input&);
+SingletDMZ3_observables calculate_observables(
+   const SingletDMZ3_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&);
+
+SingletDMZ3_observables calculate_observables(
+   const SingletDMZ3_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&, double scale);
 
 } // namespace flexiblesusy
 

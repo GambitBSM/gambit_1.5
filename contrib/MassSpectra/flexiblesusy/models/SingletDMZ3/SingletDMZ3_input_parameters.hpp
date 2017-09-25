@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:51
+// File generated at Sun 24 Sep 2017 15:55:12
 
 #ifndef SingletDMZ3_INPUT_PARAMETERS_H
 #define SingletDMZ3_INPUT_PARAMETERS_H
@@ -27,19 +27,14 @@
 namespace flexiblesusy {
 
 struct SingletDMZ3_input_parameters {
-   double HiggsIN;
-   double LamSHInput;
-   double LamSInput;
-   double muSInput;
-   double mu3Input;
-   double QEWSB;
-   double Qin;
+   double HiggsIN{};
+   double LamSHInput{};
+   double LamSInput{};
+   double muSInput{};
+   double mu3Input{};
+   double QEWSB{};
+   double Qin{};
 
-   SingletDMZ3_input_parameters()
-      : HiggsIN(0), LamSHInput(0), LamSInput(0), muSInput(0), mu3Input(0), QEWSB(0
-   ), Qin(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

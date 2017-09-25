@@ -16,36 +16,34 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:18
+// File generated at Sun 24 Sep 2017 15:57:19
 
 #include "HSSUSY_slha_io.hpp"
 #include "HSSUSY_input_parameters.hpp"
-#include "HSSUSY_info.hpp"
 #include "logger.hpp"
 #include "wrappers.hpp"
 #include "numerics2.hpp"
 #include "config.h"
 
+#include <array>
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <boost/bind.hpp>
+#include <string>
 
 #define Pole(p) physical.p
 #define PHYSICAL(p) model.get_physical().p
 #define PHYSICAL_SLHA(p) model.get_physical_slha().p
 #define LOCALPHYSICAL(p) physical.p
 #define MODELPARAMETER(p) model.get_##p()
+#define INPUTPARAMETER(p) input.p
+#define EXTRAPARAMETER(p) model.get_##p()
 #define DEFINE_PHYSICAL_PARAMETER(p) decltype(LOCALPHYSICAL(p)) p;
 #define LowEnergyConstant(p) Electroweak_constants::p
 
 using namespace softsusy;
 
 namespace flexiblesusy {
-
-char const * const HSSUSY_slha_io::drbar_blocks[NUMBER_OF_DRBAR_BLOCKS] =
-   { "gauge", "Yu", "Yd", "Ye", "SM", "HMIX" }
-;
 
 HSSUSY_slha_io::HSSUSY_slha_io()
    : slha_io()
@@ -81,10 +79,48 @@ void HSSUSY_slha_io::set_extpar(const HSSUSY_input_parameters& input)
    extpar << FORMAT_ELEMENT(5, input.mAInput, "mAInput");
    extpar << FORMAT_ELEMENT(6, input.MEWSB, "MEWSB");
    extpar << FORMAT_ELEMENT(7, input.AtInput, "AtInput");
+   extpar << FORMAT_ELEMENT(8, input.AbInput, "AbInput");
+   extpar << FORMAT_ELEMENT(9, input.AtauInput, "AtauInput");
    extpar << FORMAT_ELEMENT(25, input.TanBeta, "TanBeta");
    extpar << FORMAT_ELEMENT(100, input.LambdaLoopOrder, "LambdaLoopOrder");
+   extpar << FORMAT_ELEMENT(101, input.TwoLoopAtAs, "TwoLoopAtAs");
+   extpar << FORMAT_ELEMENT(102, input.TwoLoopAbAs, "TwoLoopAbAs");
+   extpar << FORMAT_ELEMENT(103, input.TwoLoopAtAb, "TwoLoopAtAb");
+   extpar << FORMAT_ELEMENT(104, input.TwoLoopAtauAtau, "TwoLoopAtauAtau");
+   extpar << FORMAT_ELEMENT(105, input.TwoLoopAtAt, "TwoLoopAtAt");
+   extpar << FORMAT_ELEMENT(200, input.DeltaEFT, "DeltaEFT");
    slha_io.set_block(extpar);
 
+}
+
+/**
+ * Stores the IMMINPAR input parameters in the SLHA object.
+ *
+ * @param input struct of input parameters
+ */
+void HSSUSY_slha_io::set_imminpar(const HSSUSY_input_parameters& input)
+{
+
+}
+
+/**
+ * Stores the IMEXTPAR input parameters in the SLHA object.
+ *
+ * @param input struct of input parameters
+ */
+void HSSUSY_slha_io::set_imextpar(const HSSUSY_input_parameters& input)
+{
+
+}
+
+/**
+ * Stores the MODSEL input parameters in the SLHA object.
+ *
+ * @param modsel struct of MODSEL parameters
+ */
+void HSSUSY_slha_io::set_modsel(const SLHA_io::Modsel& modsel)
+{
+   slha_io.set_modsel(modsel);
 }
 
 /**
@@ -95,6 +131,47 @@ void HSSUSY_slha_io::set_extpar(const HSSUSY_input_parameters& input)
 void HSSUSY_slha_io::set_minpar(const HSSUSY_input_parameters& input)
 {
 
+}
+
+/**
+ * Stores all input parameters in the SLHA object.
+ *
+ * @param input struct of input parameters
+ */
+void HSSUSY_slha_io::set_input(const HSSUSY_input_parameters& input)
+{
+   set_minpar(input);
+   set_extpar(input);
+   set_imminpar(input);
+   set_imextpar(input);
+
+   slha_io.set_block("MSD2IN", INPUTPARAMETER(msd2), "msd2");
+   slha_io.set_block("MSE2IN", INPUTPARAMETER(mse2), "mse2");
+   slha_io.set_block("MSL2IN", INPUTPARAMETER(msl2), "msl2");
+   slha_io.set_block("MSQ2IN", INPUTPARAMETER(msq2), "msq2");
+   slha_io.set_block("MSU2IN", INPUTPARAMETER(msu2), "msu2");
+
+}
+
+/**
+ * Stores the additional physical input (FlexibleSUSYInput block) in
+ * the SLHA object.
+ *
+ * @param input class of input
+ */
+void HSSUSY_slha_io::set_physical_input(const Physical_input& input)
+{
+   slha_io.set_physical_input(input);
+}
+
+/**
+ * Stores the settings (FlexibleSUSY block) in the SLHA object.
+ *
+ * @param settings class of settings
+ */
+void HSSUSY_slha_io::set_settings(const Spectrum_generator_settings& settings)
+{
+   slha_io.set_settings(settings);
 }
 
 /**
@@ -113,24 +190,43 @@ void HSSUSY_slha_io::set_sminputs(const softsusy::QedQcd& qedqcd)
  *
  * @param problems struct with parameter point problems
  */
-void HSSUSY_slha_io::set_spinfo(const Problems<HSSUSY_info::NUMBER_OF_PARTICLES>& problems)
+void HSSUSY_slha_io::set_spinfo(const Spectrum_generator_problems& problems)
+{
+   set_spinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores the spectrum generator information in the SPINFO block in
+ * the SLHA object.
+ *
+ * @param problems struct with parameter point problems
+ */
+void HSSUSY_slha_io::set_spinfo(const Problems& problems)
+{
+   set_spinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores the given problems and warnings in the SPINFO block in the
+ * SLHA object.
+ *
+ * @param problems vector of problem strings
+ * @param warnings vector of warning strings
+ */
+void HSSUSY_slha_io::set_spinfo(
+   const std::vector<std::string>& problems,
+   const std::vector<std::string>& warnings)
 {
    std::ostringstream spinfo;
    spinfo << "Block SPINFO\n"
           << FORMAT_SPINFO(1, PKGNAME)
           << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
 
-   if (problems.have_warning()) {
-      std::ostringstream warnings;
-      problems.print_warnings(warnings);
-      spinfo << FORMAT_SPINFO(3, warnings.str());
-   }
+   for (const auto& s: warnings)
+      spinfo << FORMAT_SPINFO(3, s);
 
-   if (problems.have_problem()) {
-      std::ostringstream problems_str;
-      problems.print_problems(problems_str);
-      spinfo << FORMAT_SPINFO(4, problems_str.str());
-   }
+   for (const auto& s: problems)
+      spinfo << FORMAT_SPINFO(4, s);
 
    spinfo << FORMAT_SPINFO(5, HSSUSY_info::model_name)
           << FORMAT_SPINFO(9, SARAH_VERSION);
@@ -223,13 +319,18 @@ void HSSUSY_slha_io::set_pmns(
 }
 
 /**
- * Write SLHA object to file.
+ * Write SLHA object to given output.  If output == "-", then the SLHA
+ * object is written to std::cout.  Otherwise, output is interpreted
+ * as a file name
  *
- * @param file_name file name
+ * @param output "-" for cout, or file name
  */
-void HSSUSY_slha_io::write_to_file(const std::string& file_name)
+void HSSUSY_slha_io::write_to(const std::string& output) const
 {
-   slha_io.write_to_file(file_name);
+   if (output == "-")
+      write_to_stream(std::cout);
+   else
+      write_to_file(output);
 }
 
 /**
@@ -248,7 +349,6 @@ double HSSUSY_slha_io::get_parameter_output_scale() const
 void HSSUSY_slha_io::read_from_file(const std::string& file_name)
 {
    slha_io.read_from_file(file_name);
-   slha_io.read_modsel();
 }
 
 /**
@@ -261,7 +361,6 @@ void HSSUSY_slha_io::read_from_file(const std::string& file_name)
 void HSSUSY_slha_io::read_from_source(const std::string& source)
 {
    slha_io.read_from_source(source);
-   slha_io.read_modsel();
 }
 
 /**
@@ -275,20 +374,33 @@ void HSSUSY_slha_io::read_from_stream(std::istream& istr)
 }
 
 /**
- * Fill struct of model input parameters from SLHA object (MINPAR and
- * EXTPAR blocks)
+ * Fill struct of model input parameters from SLHA object (MINPAR,
+ * EXTPAR and IMEXTPAR blocks)
  *
  * @param input struct of model input parameters
  */
 void HSSUSY_slha_io::fill(HSSUSY_input_parameters& input) const
 {
-   SLHA_io::Tuple_processor minpar_processor
-      = boost::bind(&HSSUSY_slha_io::fill_minpar_tuple, boost::ref(input), _1, _2);
-   SLHA_io::Tuple_processor extpar_processor
-      = boost::bind(&HSSUSY_slha_io::fill_extpar_tuple, boost::ref(input), _1, _2);
+   SLHA_io::Tuple_processor minpar_processor = [&input, this] (int key, double value) {
+      return fill_minpar_tuple(input, key, value);
+   };
+
+   SLHA_io::Tuple_processor extpar_processor = [&input, this] (int key, double value) {
+      return fill_extpar_tuple(input, key, value);
+   };
+
+   SLHA_io::Tuple_processor imminpar_processor = [&input, this] (int key, double value) {
+      return fill_imminpar_tuple(input, key, value);
+   };
+
+   SLHA_io::Tuple_processor imextpar_processor = [&input, this] (int key, double value) {
+      return fill_imextpar_tuple(input, key, value);
+   };
 
    slha_io.read_block("MINPAR", minpar_processor);
    slha_io.read_block("EXTPAR", extpar_processor);
+   slha_io.read_block("IMMINPAR", imminpar_processor);
+   slha_io.read_block("IMEXTPAR", imextpar_processor);
 
    slha_io.read_block("MSD2IN", input.msd2);
    slha_io.read_block("MSE2IN", input.mse2);
@@ -300,6 +412,8 @@ void HSSUSY_slha_io::fill(HSSUSY_input_parameters& input) const
 
 /**
  * Reads DR-bar parameters from a SLHA output file.
+ *
+ * @param model model class to be filled
  */
 void HSSUSY_slha_io::fill_drbar_parameters(HSSUSY_mass_eigenstates& model) const
 {
@@ -332,6 +446,8 @@ void HSSUSY_slha_io::fill_drbar_parameters(HSSUSY_mass_eigenstates& model) const
 /**
  * Reads DR-bar parameters, pole masses and mixing matrices (in
  * Haber-Kane convention) from a SLHA output file.
+ *
+ * @param model model class to be filled
  */
 void HSSUSY_slha_io::fill(HSSUSY_mass_eigenstates& model) const
 {
@@ -347,7 +463,7 @@ void HSSUSY_slha_io::fill(HSSUSY_mass_eigenstates& model) const
  * Fill struct of extra physical input parameters from SLHA object
  * (FlexibleSUSYInput block)
  *
- * @param settings struct of physical input parameters
+ * @param input struct of physical non-SLHA input parameters
  */
 void HSSUSY_slha_io::fill(Physical_input& input) const
 {
@@ -358,7 +474,7 @@ void HSSUSY_slha_io::fill(Physical_input& input) const
  * Fill struct of spectrum generator settings from SLHA object
  * (FlexibleSUSY block)
  *
- * @param settings struct of spectrum generator settings
+ * @param settings struct of spectrum generator settings to be filled
  */
 void HSSUSY_slha_io::fill(Spectrum_generator_settings& settings) const
 {
@@ -386,15 +502,41 @@ void HSSUSY_slha_io::fill_extpar_tuple(HSSUSY_input_parameters& input,
    case 5: input.mAInput = value; break;
    case 6: input.MEWSB = value; break;
    case 7: input.AtInput = value; break;
+   case 8: input.AbInput = value; break;
+   case 9: input.AtauInput = value; break;
    case 25: input.TanBeta = value; break;
    case 100: input.LambdaLoopOrder = value; break;
+   case 101: input.TwoLoopAtAs = value; break;
+   case 102: input.TwoLoopAbAs = value; break;
+   case 103: input.TwoLoopAtAb = value; break;
+   case 104: input.TwoLoopAtauAtau = value; break;
+   case 105: input.TwoLoopAtAt = value; break;
+   case 200: input.DeltaEFT = value; break;
    default: WARNING("Unrecognized entry in block EXTPAR: " << key); break;
    }
 
 }
 
+void HSSUSY_slha_io::fill_imminpar_tuple(HSSUSY_input_parameters& input,
+                                                int key, double value)
+{
+   switch (key) {
+   default: WARNING("Unrecognized entry in block IMMINPAR: " << key); break;
+   }
+
+}
+
+void HSSUSY_slha_io::fill_imextpar_tuple(HSSUSY_input_parameters& input,
+                                                int key, double value)
+{
+   switch (key) {
+   default: WARNING("Unrecognized entry in block IMEXTPAR: " << key); break;
+   }
+
+}
+
 /**
- * Reads pole masses and mixing matrices from a SLHA output file.
+ * Reads pole masses and mixing matrices from a SLHA output file to be filled.
  */
 void HSSUSY_slha_io::fill_physical(HSSUSY_physical& physical) const
 {
@@ -458,10 +600,14 @@ void HSSUSY_slha_io::fill_physical(HSSUSY_physical& physical) const
  */
 double HSSUSY_slha_io::read_scale() const
 {
+   static const std::array<std::string, 6> drbar_blocks =
+      { "gauge", "Yu", "Yd", "Ye", "SM", "HMIX" }
+;
+
    double scale = 0.;
 
-   for (unsigned i = 0; i < NUMBER_OF_DRBAR_BLOCKS; i++) {
-      const double block_scale = slha_io.read_scale(drbar_blocks[i]);
+   for (const auto& block: drbar_blocks) {
+      const double block_scale = slha_io.read_scale(block);
       if (!is_zero(block_scale)) {
          if (!is_zero(scale) && !is_equal(scale, block_scale))
             WARNING("DR-bar parameters defined at different scales");

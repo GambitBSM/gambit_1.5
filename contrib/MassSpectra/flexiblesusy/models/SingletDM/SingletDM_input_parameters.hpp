@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:00
+// File generated at Sun 24 Sep 2017 15:55:40
 
 #ifndef SingletDM_INPUT_PARAMETERS_H
 #define SingletDM_INPUT_PARAMETERS_H
@@ -27,17 +27,13 @@
 namespace flexiblesusy {
 
 struct SingletDM_input_parameters {
-   double HiggsIN;
-   double LamSHInput;
-   double LamSInput;
-   double muSInput;
-   double QEWSB;
-   double Qin;
+   double HiggsIN{};
+   double LamSHInput{};
+   double LamSInput{};
+   double muSInput{};
+   double QEWSB{};
+   double Qin{};
 
-   SingletDM_input_parameters()
-      : HiggsIN(0), LamSHInput(0), LamSInput(0), muSInput(0), QEWSB(0), Qin(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

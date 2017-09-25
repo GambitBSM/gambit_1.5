@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:16
+// File generated at Sun 24 Sep 2017 15:57:12
 
 #ifndef HSSUSY_INPUT_PARAMETERS_H
 #define HSSUSY_INPUT_PARAMETERS_H
@@ -27,30 +27,30 @@
 namespace flexiblesusy {
 
 struct HSSUSY_input_parameters {
-   double MSUSY;
-   double M1Input;
-   double M2Input;
-   double M3Input;
-   double MuInput;
-   double mAInput;
-   double MEWSB;
-   double AtInput;
-   double TanBeta;
-   double LambdaLoopOrder;
-   Eigen::Matrix<double,3,3> msq2;
-   Eigen::Matrix<double,3,3> msu2;
-   Eigen::Matrix<double,3,3> msd2;
-   Eigen::Matrix<double,3,3> msl2;
-   Eigen::Matrix<double,3,3> mse2;
+   double MSUSY{};
+   double M1Input{};
+   double M2Input{};
+   double M3Input{};
+   double MuInput{};
+   double mAInput{};
+   double MEWSB{};
+   double AtInput{};
+   double AbInput{};
+   double AtauInput{};
+   double TanBeta{};
+   double LambdaLoopOrder{};
+   double TwoLoopAtAs{};
+   double TwoLoopAbAs{};
+   double TwoLoopAtAb{};
+   double TwoLoopAtauAtau{};
+   double TwoLoopAtAt{};
+   double DeltaEFT{};
+   Eigen::Matrix<double,3,3> msq2{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> msu2{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> msd2{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> msl2{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> mse2{Eigen::Matrix<double,3,3>::Zero()};
 
-   HSSUSY_input_parameters()
-      : MSUSY(0), M1Input(0), M2Input(0), M3Input(0), MuInput(0), mAInput(0),
-   MEWSB(0), AtInput(0), TanBeta(0), LambdaLoopOrder(0), msq2(Eigen::Matrix<
-   double,3,3>::Zero()), msu2(Eigen::Matrix<double,3,3>::Zero()), msd2(
-   Eigen::Matrix<double,3,3>::Zero()), msl2(Eigen::Matrix<double,3,3>::Zero()),
-   mse2(Eigen::Matrix<double,3,3>::Zero())
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

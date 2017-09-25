@@ -39,8 +39,7 @@ Database::Database(const std::string& file_name)
 
 Database::~Database()
 {
-   if (db)
-      sqlite3_close(db);
+   sqlite3_close(db);
 }
 
 /**
@@ -124,7 +123,7 @@ void Database::create_table(
    std::string sql("CREATE TABLE IF NOT EXISTS " + table_name + " (");
 
    for (std::size_t i = 0; i < number_of_elements; i++) {
-      sql += '"' + names[i] + "\" REAL";
+      sql += '"' + names[i] + R"(" REAL)";
       if (i + 1 != number_of_elements)
          sql += ',';
    }
@@ -141,11 +140,8 @@ void Database::create_table(
  */
 void Database::execute(const std::string& cmd)
 {
-   if (!db)
-      return;
-
-   char* zErrMsg = 0;
-   const int rc = sqlite3_exec(db, cmd.c_str(), 0, 0, &zErrMsg);
+   char* zErrMsg = nullptr;
+   const int rc = sqlite3_exec(db, cmd.c_str(), nullptr, nullptr, &zErrMsg);
 
    if (rc != SQLITE_OK) {
       ERROR("SQL error while executing command \"" << cmd << "\": " << zErrMsg);
@@ -164,10 +160,7 @@ void Database::execute(const std::string& cmd)
  */
 void Database::execute(const std::string& cmd, TCallback callback, void* data)
 {
-   if (!db)
-      return;
-
-   char* zErrMsg = 0;
+   char* zErrMsg = nullptr;
    const int rc = sqlite3_exec(db, cmd.c_str(), callback, data, &zErrMsg);
 
    if (rc != SQLITE_OK) {
@@ -187,13 +180,13 @@ void Database::execute(const std::string& cmd, TCallback callback, void* data)
  */
 sqlite3* Database::open(const std::string& file_name)
 {
-   sqlite3* db = 0;
+   sqlite3* db = nullptr;
 
    const int rc = sqlite3_open(file_name.c_str(), &db);
 
    if (rc) {
-      ERROR("Can't open database: " << sqlite3_errmsg(db));
-      db = 0;
+      throw SQLiteReadError("Cannot open sqlite3 database file "
+                            + file_name + ": " + sqlite3_errmsg(db));
    }
 
    return db;
@@ -210,7 +203,11 @@ sqlite3* Database::open(const std::string& file_name)
  *
  * @return 0
  */
+#ifdef ENABLE_VERBOSE
 int Database::extract_callback(void* data, int argc, char** argv, char** col_name)
+#else
+int Database::extract_callback(void* data, int argc, char** argv, char**)
+#endif
 {
    Eigen::ArrayXd* values = static_cast<Eigen::ArrayXd*>(data);
    values->conservativeResize(argc);
@@ -223,8 +220,8 @@ int Database::extract_callback(void* data, int argc, char** argv, char** col_nam
    return 0;
 }
 
-} // namespace flexiblesusy
 } // namespace database
+} // namespace flexiblesusy
 
 #else
 
@@ -232,7 +229,7 @@ namespace flexiblesusy {
 namespace database {
 
 Database::Database(const std::string&)
-   : db(NULL)
+   : db(nullptr)
 {
 }
 
@@ -262,7 +259,7 @@ void Database::execute(const std::string&, TCallback, void*) {}
 
 sqlite3* Database::open(const std::string&)
 {
-   return NULL;
+   return nullptr;
 }
 
 int Database::extract_callback(void*, int, char**, char**)
