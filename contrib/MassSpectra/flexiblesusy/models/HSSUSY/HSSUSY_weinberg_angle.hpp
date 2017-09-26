@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:57:20
+// File generated at Tue 26 Sep 2017 22:36:51
 
 #ifndef HSSUSY_WEINBERG_ANGLE_H
 #define HSSUSY_WEINBERG_ANGLE_H
@@ -75,6 +75,7 @@ private:
    double calculate_delta_vb_sm(double) const;
    double calculate_delta_vb_bsm(double) const;
 
+   std::complex<double> CpbarFeFehhPL(int gI1, int gI2) const;
    std::complex<double> delta_vb_wave_Fv(int gO1) const;
    std::complex<double> delta_vb_wave_Fe(int gO1) const;
    std::complex<double> delta_vb_vertex(int gO1, int gO2) const;

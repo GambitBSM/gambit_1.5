@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 16:03:34
+// File generated at Tue 26 Sep 2017 22:52:56
 
 /**
  * @file HSSUSY_two_scale_ewsb_solver.cpp
  *
  * @brief implementation of EWSB solver for two-scale iteration
  *
- * This file was generated at Sun 24 Sep 2017 16:03:34 with FlexibleSUSY
+ * This file was generated at Tue 26 Sep 2017 22:52:56 with FlexibleSUSY
  * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
  */
 

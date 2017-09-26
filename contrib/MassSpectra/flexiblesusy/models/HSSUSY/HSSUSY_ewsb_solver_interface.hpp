@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:57:19
+// File generated at Tue 26 Sep 2017 22:36:48
 
 /**
  * @file HSSUSY_ewsb_solver_interface.hpp
  *
  * @brief contains interface for EWSB solver
  *
- * This file was generated at Sun 24 Sep 2017 15:57:19 with FlexibleSUSY
+ * This file was generated at Tue 26 Sep 2017 22:36:48 with FlexibleSUSY
  * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
  */
 

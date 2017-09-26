@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:55:51
+// File generated at Tue 26 Sep 2017 22:41:47
 
 #ifndef SingletDM_EFFECTIVE_COUPLINGS_H
 #define SingletDM_EFFECTIVE_COUPLINGS_H
@@ -60,13 +60,13 @@ public:
 
    void calculate_effective_couplings();
 
-   std::complex<double> CpFdhhbarFdPL(int gt1, int gt3) const;
-   std::complex<double> CpFuhhbarFuPL(int gt1, int gt3) const;
-   std::complex<double> CpFehhbarFePL(int gt1, int gt3) const;
-   double CphhVWpconjVWp() const;
-   std::complex<double> CpAhFdbarFdPL(int gt2, int gt3) const;
-   std::complex<double> CpAhFubarFuPL(int gt2, int gt3) const;
-   std::complex<double> CpAhFebarFePL(int gt2, int gt3) const;
+   std::complex<double> CpbarFdFdAhPL(int gI1, int gI2) const;
+   std::complex<double> CpbarFeFeAhPL(int gI1, int gI2) const;
+   std::complex<double> CpbarFuFuAhPL(int gI1, int gI2) const;
+   double CphhconjVWpVWp() const;
+   std::complex<double> CpbarFdFdhhPL(int gI1, int gI2) const;
+   std::complex<double> CpbarFeFehhPL(int gI1, int gI2) const;
+   std::complex<double> CpbarFuFuhhPL(int gI1, int gI2) const;
    void calculate_eff_CphhVPVP();
    void calculate_eff_CphhVGVG();
    void calculate_eff_CpAhVPVP();

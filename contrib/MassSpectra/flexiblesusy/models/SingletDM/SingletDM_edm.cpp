@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:55:52
+// File generated at Tue 26 Sep 2017 22:41:48
 
 /**
  * @file SingletDM_edm.cpp
  *
- * This file was generated at Sun 24 Sep 2017 15:55:52 with FlexibleSUSY
+ * This file was generated at Tue 26 Sep 2017 22:41:48 with FlexibleSUSY
  * 2.0.0-dev and SARAH 4.11.0 .
  */
 
