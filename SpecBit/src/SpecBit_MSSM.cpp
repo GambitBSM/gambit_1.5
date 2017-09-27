@@ -50,7 +50,8 @@
 #include "flexiblesusy/src/ew_input.hpp"
 #include "flexiblesusy/src/lowe.h" // From softsusy; used by flexiblesusy
 #include "flexiblesusy/src/numerics2.hpp"
-#include "flexiblesusy/src/two_loop_corrections.hpp"
+//#include "flexiblesusy/src/mssm_twoloophiggs.hpp"
+#include "flexiblesusy/src/spectrum_generator_settings.hpp"
 
 // Switch for debug mode
 //#define SPECBIT_DEBUG
