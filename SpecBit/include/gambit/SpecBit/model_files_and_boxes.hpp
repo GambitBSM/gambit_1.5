@@ -131,16 +131,39 @@
 
 
 /// All the includes and Model_interface definitions
-
 #define MODELNAME CMSSM
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary CMSSM model headers
 MAKE_INTERFACE  // Creates CMSSM_interface class
+#undef MODELNAME
+
+/// {@ Versions of MSSM spectrum generators that take 
+#define MODELNAME MSSM
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSM model headers etc.
+MAKE_INTERFACE
 #undef MODELNAME
 
 #define MODELNAME MSSMatMGUT
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
 MAKE_INTERFACE
 #undef MODELNAME
+/// @}
+
+/// {@ Versions of MSSM spectrum generators that take mA and mu as inputs
+#define MODELNAME MSSM_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+
+#define MODELNAME MSSMatMSUSY_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+
+#define MODELNAME MSSMatMGUT_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+/// @}
 
 #define MODELNAME SingletDMZ3
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary SingletDMZ3 model headers etc.
@@ -151,11 +174,5 @@ MAKE_INTERFACE
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary SingletDM model headers etc.
 MAKE_INTERFACE
 #undef MODELNAME
-
-#define MODELNAME MSSM
-#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSM model headers etc.
-MAKE_INTERFACE
-#undef MODELNAME
-
 
 #endif

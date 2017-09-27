@@ -1,25 +1,25 @@
-//  GAMBIT: Global and Modular BSM Inference Tool
-//  *********************************************
-//
-//  MSSM63 model declaration
-//
-//
-//  *********************************************
-//
-//  Authors
-//  =======
-//
-//  (add name and date if you modify)
-//
-//  Ben Farmer
-//  2013 May, ???, 2014 Mar, 2015 Jan
-//  Pat Scott
-//  2013 Sep
-//
-//  *********************************************
+///  GAMBIT: Global and Modular BSM Inference Tool
+///  *********************************************
+///
+///  MSSM63 model declaration
+///  (version with boundary conditions at SUSY
+///   scale)
+///
+///  *********************************************
+///
+///  Authors
+///  =======
+///
+///  (add name and date if you modify)
+///
+///  \author Ben Farmer
+///          (benjamin.farmer@fysik.su.se)
+///  \date 2017 Sep
+///
+///  *********************************************
 
-#ifndef __MSSM63atMGUT_hpp__
-#define __MSSM63atMGUT_hpp__
+#ifndef __MSSM63atMSUSY_hpp__
+#define __MSSM63atMSUSY_hpp__
 
 #include "gambit/Models/models/MSSM63atQ.hpp" // Must include models which are targets of translation functions
 
@@ -29,21 +29,14 @@ namespace Gambit
    class Spectrum;
 }
 
-// General GUT boundary condition parameterisation of the MSSM
-// There are several of these, compatible with different spectrum generators
-// To use a constrained GUT model like the CMSSM, there needs to be an
-// "interpret_as_X" function which translates the CMSSM parameters into
-// the appropriate general GUT parameterisation for the spectrum generator
-// being used.
-
-/// FlexibleSUSY compatible general (63 parameters plus sign) GUT scale MSSM parameterisation
-#define MODEL  MSSM63atMGUT
+// General SUSY scale parameterisation of the MSSM
+#define MODEL  MSSM63atMSUSY
 #define PARENT MSSM63atQ
   START_MODEL
 
-  /// Can translate this model into MSSM63atQ (where Q will then be set to MGUT)
-  INTERPRET_AS_PARENT_FUNCTION(MSSM63atMGUT_to_MSSM63atQ)
-  /// Depends on an MSSM spectrum, since RGEs must run in order to determine MGUT
+  /// Can translate this model into MSSM63atQ (where Q will then be set to MSUSY)
+  INTERPRET_AS_PARENT_FUNCTION(MSSM63atMSUSY_to_MSSM63atQ)
+  /// Depends on an MSSM spectrum, since RGEs must run in order to determine MSUSY
   INTERPRET_AS_PARENT_DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
 
   DEFINEPARS(TanBeta,SignMu,

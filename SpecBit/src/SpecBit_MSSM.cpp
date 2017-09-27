@@ -511,14 +511,12 @@ namespace Gambit
     }
 
     /// Helper function for filling MSSM63-compatible input parameter objects
+    /// Leaves out mHu2, mHd2, SignMu, (mA, mu) because we use two different parameterisations of these
     template <class T>
     void fill_MSSM63_input(T& input, const std::map<str, safe_ptr<double> >& Param )
     {
       //double valued parameters
       input.TanBeta     = *Param.at("TanBeta");
-      input.SignMu      = *Param.at("SignMu");
-      input.mHu2IN      = *Param.at("mHu2");
-      input.mHd2IN      = *Param.at("mHd2");
       input.MassBInput  = *Param.at("M1");
       input.MassWBInput = *Param.at("M2");
       input.MassGInput  = *Param.at("M3");
@@ -528,12 +526,6 @@ namespace Gambit
       {
          std::ostringstream msg;
          msg << "Tried to set TanBeta parameter to a negative value ("<<input.TanBeta<<")! This parameter must be positive. Please check your inifile and try again.";
-         SpecBit_error().raise(LOCAL_INFO,msg.str());
-      }
-      if(input.SignMu!=-1 and input.SignMu!=1)
-      {
-         std::ostringstream msg;
-         msg << "Tried to set SignMu parameter to a value that is not a sign! ("<<input.SignMu<<")! This parameter must be set to either 1 or -1. Please check your inifile and try again.";
          SpecBit_error().raise(LOCAL_INFO,msg.str());
       }
 
@@ -552,9 +544,9 @@ namespace Gambit
         #define ostr std::cout
         #define oend std::endl
         ostr << "TanBeta = " << INPUT(TanBeta) << ", " << oend ;
-        ostr << "SignMu = " << INPUT(SignMu) << ", " << oend;
-        ostr << "mHd2IN = " << INPUT(mHd2IN) << ", " << oend;
-        ostr << "mHu2IN = " << INPUT(mHu2IN) << ", " << oend;
+        //ostr << "SignMu = " << INPUT(SignMu) << ", " << oend;
+        //ostr << "mHd2IN = " << INPUT(mHd2IN) << ", " << oend;
+        //ostr << "mHu2IN = " << INPUT(mHu2IN) << ", " << oend;
         ostr << "mq2Input = " << oend << INPUT(mq2Input) << ", " << oend;
         ostr << "ml2Input = " << oend << INPUT(ml2Input) << ", " << oend;
         ostr << "md2Input = " << oend << INPUT(md2Input) << ", " << oend;
@@ -677,7 +669,7 @@ namespace Gambit
       // Get SLHA2 SMINPUTS values
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
 
-      // Get input parameters
+      // Get input parameters (from flexiblesusy namespace)
       CMSSM_input_parameters input;
 
       input.m0      = *myPipe::Param["M0"];
@@ -718,12 +710,40 @@ namespace Gambit
       namespace myPipe = Pipes::get_MSSMatQ_spectrum_FS;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       MSSM_input_parameters input;
-      input.Qin = *myPipe::Param.at("Qin"); // MSSMatQ also requires input scale to be supplied
+      input.Qin    = *myPipe::Param.at("Qin"); // MSSMatQ also requires input scale to be supplied
+      input.mHu2IN = *myPipe::Param.at("mHu2");
+      input.mHd2IN = *myPipe::Param.at("mHd2");
+      input.SignMu = *myPipe::Param.at("SignMu");
+      if(input.SignMu!=-1 and input.SignMu!=1)
+      {
+         std::ostringstream msg;
+         msg << "Tried to set SignMu parameter to a value that is not a sign! ("<<input.SignMu<<")! This parameter must be set to either 1 or -1. Please check your inifile and try again.";
+         SpecBit_error().raise(LOCAL_INFO,msg.str());
+      }
       fill_MSSM63_input(input,myPipe::Param);
       result = run_FS_spectrum_generator<MSSM_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+
+    // Runs FlexibleSUSY MSSM spectrum generator with EWSB scale input (boundary conditions)
+    // but with mA and mu as parameters instead of mHu2 and mHd2
+    void get_MSSMatQ_mA_spectrum_FS (Spectrum& result)
+    {
+      using namespace softsusy;
+      namespace myPipe = Pipes::get_MSSMatQ_mA_spectrum_FS;
+      const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+      MSSM_mAmu_input_parameters input;
+      input.Qin      = *myPipe::Param.at("Qin"); // MSSMatQ also requires input scale to be supplied
+      input.MuInput  = *myPipe::Param.at("mu");
+      double mA = *myPipe::Param.at("mA"); // Peter, did you make this mA rather than mA^2 on purpose?
+      input.mA2Input = mA*mA;              // Oh well we will just square it for now.
+      fill_MSSM63_input(input,myPipe::Param); // Fill the rest
+      result = run_FS_spectrum_generator<MSSM_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+    }
+
 
     // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
     void get_MSSMatMGUT_spectrum_FS (Spectrum& result)
@@ -732,8 +752,51 @@ namespace Gambit
       namespace myPipe = Pipes::get_MSSMatMGUT_spectrum_FS;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       MSSMatMGUT_input_parameters input;
+      input.mHu2IN = *myPipe::Param.at("mHu2");
+      input.mHd2IN = *myPipe::Param.at("mHd2");
+      input.SignMu = *myPipe::Param.at("SignMu");
+      if(input.SignMu!=-1 and input.SignMu!=1)
+      {
+         std::ostringstream msg;
+         msg << "Tried to set SignMu parameter to a value that is not a sign! ("<<input.SignMu<<")! This parameter must be set to either 1 or -1. Please check your inifile and try again.";
+         SpecBit_error().raise(LOCAL_INFO,msg.str());
+      }
       fill_MSSM63_input(input,myPipe::Param);
       result = run_FS_spectrum_generator<MSSMatMGUT_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+    }
+
+    // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
+    // but with mA and mu as parameters instead of mHu2 and mHd2
+    void get_MSSMatMGUT_mA_spectrum_FS (Spectrum& result)
+    {
+      using namespace softsusy;
+      namespace myPipe = Pipes::get_MSSMatMGUT_mA_spectrum_FS;
+      const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+      MSSMatMGUT_mAmu_input_parameters input;
+      input.MuInput  = *myPipe::Param.at("mu");
+      double mA = *myPipe::Param.at("mA"); // Peter, did you make this mA rather than mA^2 on purpose?
+      input.mA2Input = mA*mA;              // Oh well we will just square it for now.
+      fill_MSSM63_input(input,myPipe::Param); // Fill the rest
+      result = run_FS_spectrum_generator<MSSMatMGUT_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+    }
+
+    // Runs FlexibleSUSY MSSM spectrum generator with SUSY scale input (boundary conditions)
+    // but with mA and mu as parameters instead of mHu2 and mHd2
+    void get_MSSMatMSUSY_mA_spectrum_FS (Spectrum& result)
+    {
+      using namespace softsusy;
+      namespace myPipe = Pipes::get_MSSMatMSUSY_mA_spectrum_FS;
+      const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+      MSSMatMSUSY_mAmu_input_parameters input;
+      input.MuInput  = *myPipe::Param.at("mu");
+      double mA = *myPipe::Param.at("mA"); // Peter, did you make this mA rather than mA^2 on purpose?
+      input.mA2Input = mA*mA;              // Oh well we will just square it for now.
+      fill_MSSM63_input(input,myPipe::Param); // Fill the rest
+      result = run_FS_spectrum_generator<MSSMatMSUSY_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
