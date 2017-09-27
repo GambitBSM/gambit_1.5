@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  MSSM10batQ model definition.
+///  MSSM24atQ_mA model definition.
 ///
 ///  *********************************************
 ///
@@ -10,24 +10,32 @@
 ///
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
-///  \date 2015 Sep
+///  \date 2017 Aug
 ///
 ///  *********************************************
 
-#ifndef __MSSM10batQ_hpp__
-#define __MSSM10batQ_hpp__
+#ifndef __MSSM24atQ_mA_hpp__
+#define __MSSM24atQ_mA_hpp__
 
 // Parent model must be declared first! Include it here to ensure that this happens.
-#include "gambit/Models/models/MSSM11atQ.hpp"
+#include "gambit/Models/models/MSSM25atQ_mA.hpp"
 
-#define MODEL MSSM10batQ
-#define PARENT MSSM11atQ
+#define MODEL MSSM24atQ_mA
+#define PARENT MSSM25atQ_mA
   START_MODEL
 
-  DEFINEPARS(Qin,TanBeta,SignMu,
-             mHu2,mHd2,M1,M2,M3)
+  DEFINEPARS(Qin,TanBeta,
+             mA,mu,M1,M2,M3)
 
-  DEFINEPARS(mf2)
+  DEFINEPARS(mq2_1, mq2_2, mq2_3)
+
+  DEFINEPARS(ml2_1, ml2_2, ml2_3)
+
+  DEFINEPARS(md2_1, md2_2, md2_3)
+
+  DEFINEPARS(mu2_1, mu2_2, mu2_3)
+
+  DEFINEPARS(me2_1, me2_2, me2_3)
 
   DEFINEPARS(Ae_3)
 
@@ -35,7 +43,7 @@
 
   DEFINEPARS(Au_3)
 
-  INTERPRET_AS_PARENT_FUNCTION(MSSM10batQ_to_MSSM11atQ)
+  INTERPRET_AS_PARENT_FUNCTION(MSSM24atQ_mA_to_MSSM25atQ_mA)
 
 #undef PARENT
 #undef MODEL
