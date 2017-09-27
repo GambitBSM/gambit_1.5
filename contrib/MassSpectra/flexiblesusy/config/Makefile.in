@@ -1,0 +1,307 @@
+# Package information
+PKGNAME            := @PKGNAME@
+FLEXIBLESUSY_VERSION := @FLEXIBLESUSY_VERSION@
+FLEXIBLESUSY_MAJOR := @FLEXIBLESUSY_MAJOR@
+FLEXIBLESUSY_MINOR := @FLEXIBLESUSY_MINOR@
+FLEXIBLESUSY_PATCH := @FLEXIBLESUSY_PATCH@
+FLEXIBLESUSY_EXTRA := @FLEXIBLESUSY_EXTRA@
+FLEXIBLESUSY_PKG   := $(PKGNAME)-$(FLEXIBLESUSY_VERSION)
+FLEXIBLESUSY_TAG   := v$(FLEXIBLESUSY_VERSION)
+ABSBASEDIR         := @ABSBASEDIR@
+INSTALL_DIR        := @INSTALL_DIR@
+
+# Makefile switches
+ENABLE_COMPILE     := @ENABLE_COMPILE@
+ENABLE_FFLITE      := @ENABLE_FFLITE@
+ENABLE_HIMALAYA    := @ENABLE_HIMALAYA@
+ENABLE_LAPACK      := @ENABLE_LAPACK@
+ENABLE_LIBRARYLINK := @ENABLE_LIBRARYLINK@
+ENABLE_LOOPTOOLS   := @ENABLE_LOOPTOOLS@
+ENABLE_META        := @ENABLE_META@
+ENABLE_SHARED_LIBS := @ENABLE_SHARED_LIBS@
+ENABLE_SQLITE      := @ENABLE_SQLITE@
+ENABLE_STATIC      := @ENABLE_STATIC@
+ENABLE_THREADS     := @ENABLE_THREADS@
+ENABLE_TSIL        := @ENABLE_TSIL@
+
+# C/C++ preprocessor defines
+ENABLE_COLORS         := @ENABLE_COLORS@
+ENABLE_DEBUG          := @ENABLE_DEBUG@
+ENABLE_CHECK_EIGENVALUE_ERROR := @ENABLE_CHECK_EIGENVALUE_ERROR@
+ENABLE_ILP64MKL_WORKAROUND := @ENABLE_ILP64MKL_WORKAROUND@
+ENABLE_SILENT         := @ENABLE_SILENT@
+ENABLE_VERBOSE        := @ENABLE_VERBOSE@
+
+# Makefile modules
+MODELS             := @MODELS@
+ADDONS             := @ADDONS@
+MODULES            := config src fflite slhaea doc
+MODULES            += $(MODELS) $(ADDONS)
+
+# Variables for Mathematica meta code
+MATH               := @MATH@
+SOLVERS            := @SOLVERS@
+
+# Variables for compilation
+CXX                := @CXX@
+CPPFLAGS           := @CPPFLAGS@ $(patsubst %,-I%,$(MODULES)) -I.
+CXXFLAGS           := @CXXFLAGS@
+FC                 := @FC@
+FFLAGS             := @FFLAGS@
+FLIBS              := @FLIBS@
+MODULE_LIBEXT      := @MODULE_LIBEXT@
+MODULE_MAKE_LIB_CMD:= @MODULE_MAKE_LIB_CMD@
+LDFLAGS            := @LDFLAGS@
+LDLIBS             := @LDLIBS@
+LIBLNK_LIBEXT      := @LIBLNK_LIBEXT@
+LIBLNK_MAKE_LIB_CMD:= @LIBLNK_MAKE_LIB_CMD@
+BLASLIBS           := @BLASLIBS@
+BOOSTTESTLIBS      := @BOOSTTESTLIBS@
+BOOSTTHREADLIBS    := @BOOSTTHREADLIBS@
+BOOSTFLAGS         := @BOOSTFLAGS@
+EIGENFLAGS         := @EIGENFLAGS@
+GSLLIBS            := @GSLLIBS@
+GSLFLAGS           := @GSLFLAGS@
+LAPACKLIBS         := @LAPACKLIBS@
+LOOPFUNCFLAGS      := @LOOPFUNCFLAGS@
+LOOPFUNCLIBS       := @LOOPFUNCLIBS@
+HIMALAYAFLAGS      := @HIMALAYAFLAGS@
+HIMALAYALIBS       := @HIMALAYALIBS@
+SQLITEFLAGS        := @SQLITEFLAGS@
+SQLITELIBS         := @SQLITELIBS@
+THREADLIBS         := @THREADLIBS@
+TSILFLAGS          := @TSILFLAGS@
+TSILLIBS           := @TSILLIBS@
+
+# the modules add their dependency files to this variable
+ALLDEP   :=
+# the modules add soucre files to be created to this variable
+ALLSRC   :=
+# the modules add their libraries to this variable
+ALLLIB   :=
+# the modules add executables to this variable
+ALLEXE   :=
+# the modules add LibraryLink libraries to this variable
+ALLLL    :=
+# the modules add test executables to this variable
+ALLTST   :=
+# the addons add libraries to this variable to be linked against executables
+ADDONLIBS:=
+
+# flexiblesusy-config script
+FSCONFIG := @FSCONFIG@
+
+# configure script
+CONFIGURE_SCRIPT := configure
+
+# dependency generator
+DEPGEN = $(DEPGEN_EXE)
+
+# script which lists the SARAH model files
+SARAH_DEP_GEN := @SARAH_DEP_GEN@
+
+# script which installs a file without export markers
+INSTALL_STRIPPED := config/install_stripped.sh
+
+# script which replaces path\like\this with path/like/this
+# thereby enabling FlexibleSUSY to run on Cygwin
+CONVERT_DOS_PATHS := config/convert_dos_paths.sh
+
+# script which finds Mathematica's include paths
+MATH_INC_PATHS := config/mathematica_include_paths.sh
+
+# package information files
+README_FILE    := README
+AUTHORS_FILE   := AUTHORS
+COPYING_FILE   := COPYING
+ChangeLog_FILE := ChangeLog
+
+.PHONY:  all allsrc allexec alllib allll alltest clean clean-dep \
+	 clean-executables clean-generated clean-lib clean-obj \
+	 depend distclean librarylink release-tag release-head \
+	 showbuild tag
+
+all:
+ifeq ($(ENABLE_META),yes)
+all:     allsrc
+endif
+ifeq ($(ENABLE_COMPILE),yes)
+all:     alllib allexec
+endif
+ifeq ($(ENABLE_LIBRARYLINK),yes)
+all:     allll
+endif
+
+ifeq ($(INSTALL_DIR),)
+install-src::
+	$(error Installation directory is not set!  To set in please run: ./configure --with-install-dir=/path/to/install/dir)
+else
+install-src::
+	install -d $(INSTALL_DIR)
+	$(INSTALL_STRIPPED) $(CONFIGURE_SCRIPT) $(INSTALL_DIR) -m u=rwx,g=r,o=r
+	$(INSTALL_STRIPPED) $(README_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(INSTALL_STRIPPED) $(AUTHORS_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(INSTALL_STRIPPED) $(COPYING_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+	$(INSTALL_STRIPPED) $(ChangeLog_FILE) $(INSTALL_DIR) -m u=rw,g=r,o=r
+
+ifeq ($(ENABLE_META),yes)
+install-src:: allsrc
+endif
+endif
+
+include config/abspathx.mk
+include $(patsubst %, %/module.mk, $(MODULES))
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),distclean)
+ifneq ($(MAKECMDGOALS),install-src)
+ifneq ($(MAKECMDGOALS),showbuild)
+ifneq ($(MAKECMDGOALS),tag)
+ifneq ($(MAKECMDGOALS),depend)
+ifneq ($(MAKECMDGOALS),doc)
+ifeq ($(ENABLE_COMPILE),yes)
+ifeq ($(findstring clean-,$(MAKECMDGOALS)),)
+ifeq ($(findstring distclean-,$(MAKECMDGOALS)),)
+ifeq ($(findstring doc-,$(MAKECMDGOALS)),)
+ifeq ($(findstring pack-,$(MAKECMDGOALS)),)
+ifeq ($(findstring print-,$(MAKECMDGOALS)),)
+ifeq ($(findstring release-,$(MAKECMDGOALS)),)
+-include $(ALLDEP)
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+endif
+
+allsrc:   $(ALLSRC)
+allexec:  $(ALLEXE)
+alllib:   $(ALLLIB)
+allll:    $(ALLLL)
+alltest:  $(ALLTST)
+
+clean-dep:
+	-rm -f $(ALLDEP)
+
+clean-executables:
+	-rm -f $(ALLEXE)
+
+clean-lib:
+	-rm -f $(ALLLIB) $(ALLLL)
+
+depend:  clean-dep
+depend:  $(ALLDEP)
+
+%.d: %.cpp | $(DEPGEN)
+	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+
+%.d: %.c | $(DEPGEN)
+	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+
+%.d: %.f | $(DEPGEN)
+	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+
+%.d: %.F | $(DEPGEN)
+	$(DEPGEN) $(CPPFLAGS) -MM -o '$@' -MT '$*.o' $^
+
+distclean::
+	-rm -f Makefile
+	-rm -f $(FSCONFIG)
+	-rm -f $(SARAH_DEP_GEN)
+	-rm -f config.boost config.log config.math config.sarah config.status
+
+librarylink: allll
+	@true
+
+showbuild:
+	@echo "PKGNAME            = $(PKGNAME)"
+	@echo "VERSION            = $(FLEXIBLESUSY_VERSION)"
+	@echo "ABSBASEDIR         = $(ABSBASEDIR)"
+	@echo "INSTALL_DIR        = $(INSTALL_DIR)"
+	@echo ""
+	@echo "MATH               = $(MATH)"
+	@echo "MODELS             = $(MODELS)"
+	@echo "ADDONS             = $(ADDONS)"
+	@echo "SOLVERS            = $(SOLVERS)"
+	@echo ""
+	@echo "CXX                = $(CXX)"
+	@echo "CPPFLAGS           = $(CPPFLAGS)"
+	@echo "CXXFLAGS           = $(CXXFLAGS)"
+	@echo "FC                 = $(FC)"
+	@echo "FFLAGS             = $(FFLAGS)"
+	@echo "FLIBS              = $(FLIBS)"
+	@echo "LDFLAGS            = $(LDFLAGS)"
+	@echo "LDLIBS             = $(LDLIBS)"
+	@echo "BLASLIBS           = $(BLASLIBS)"
+	@echo "BOOSTTESTLIBS      = $(BOOSTTESTLIBS)"
+	@echo "BOOSTTHREADLIBS    = $(BOOSTTHREADLIBS)"
+	@echo "BOOSTFLAGS         = $(BOOSTFLAGS)"
+	@echo "EIGENFLAGS         = $(EIGENFLAGS)"
+	@echo "GSLLIBS            = $(GSLLIBS)"
+	@echo "GSLFLAGS           = $(GSLFLAGS)"
+	@echo "HIMALAYAFLAGS      = $(HIMALAYAFLAGS)"
+	@echo "HIMALAYALIBS       = $(HIMALAYALIBS)"
+	@echo "LAPACKLIBS         = $(LAPACKLIBS)"
+	@echo "LIBLNK_MAKE_LIB_CMD= $(LIBLNK_MAKE_LIB_CMD)"
+	@echo "LIBLNK_LIBEXT      = $(LIBLNK_LIBEXT)"
+	@echo "LOOPFUNCFLAGS      = $(LOOPFUNCFLAGS)"
+	@echo "LOOPFUNCLIBS       = $(LOOPFUNCLIBS)"
+	@echo "MODULE_MAKE_LIB_CMD= $(MODULE_MAKE_LIB_CMD)"
+	@echo "MODULE_LIBEXT      = $(MODULE_LIBEXT)"
+	@echo "SQLITELIBS         = $(SQLITELIBS)"
+	@echo "SQLITEFLAGS        = $(SQLITEFLAGS)"
+	@echo "THREADLIBS         = $(THREADLIBS)"
+	@echo "TSILLIBS           = $(TSILLIBS)"
+	@echo "TSILFLAGS          = $(TSILFLAGS)"
+	@echo ""
+	@echo "ENABLE_COLORS      = $(ENABLE_COLORS)"
+	@echo "ENABLE_COMPILE     = $(ENABLE_COMPILE)"
+	@echo "ENABLE_DEBUG       = $(ENABLE_DEBUG)"
+	@echo "ENABLE_CHECK_EIGENVALUE_ERROR = $(ENABLE_CHECK_EIGENVALUE_ERROR)"
+	@echo "ENABLE_FFLITE      = $(ENABLE_FFLITE)"
+	@echo "ENABLE_HIMALAYA    = $(ENABLE_HIMALAYA)"
+	@echo "ENABLE_LAPACK      = $(ENABLE_LAPACK)"
+	@echo "ENABLE_LIBRARYLINK = $(ENABLE_LIBRARYLINK)"
+	@echo "ENABLE_ILP64MKL_WORKAROUND = $(ENABLE_ILP64MKL_WORKAROUND)"
+	@echo "ENABLE_LOOPTOOLS   = $(ENABLE_LOOPTOOLS)"
+	@echo "ENABLE_META        = $(ENABLE_META)"
+	@echo "ENABLE_SHARED_LIBS = $(ENABLE_SHARED_LIBS)"
+	@echo "ENABLE_SILENT      = $(ENABLE_SILENT)"
+	@echo "ENABLE_SQLITE      = $(ENABLE_SQLITE)"
+	@echo "ENABLE_STATIC      = $(ENABLE_STATIC)"
+	@echo "ENABLE_THREADS     = $(ENABLE_THREADS)"
+	@echo "ENABLE_TSIL        = $(ENABLE_TSIL)"
+	@echo "ENABLE_VERBOSE     = $(ENABLE_VERBOSE)"
+	@echo ""
+	@echo "The list of modules to be built:"
+	@echo "--------------------------------"
+	@echo "$(MODULES)"
+
+print-% : ; @echo $* = $($*)
+
+tag:
+	git tag $(FLEXIBLESUSY_TAG)
+
+release-tag:
+	git archive --worktree-attributes \
+		--prefix=$(FLEXIBLESUSY_PKG)/ \
+		--output=$(FLEXIBLESUSY_PKG).tar.gz $(FLEXIBLESUSY_TAG)
+	md5sum $(FLEXIBLESUSY_PKG).tar.gz \
+		> $(FLEXIBLESUSY_PKG).tar.gz.md5
+
+release-head:
+	$(eval GIT_HEAD_DESCR := $(shell git describe --tags HEAD))
+	$(eval FLEXIBLESUSY_HEAD_PKG := $(PKGNAME)-$(GIT_HEAD_DESCR))
+	git archive --worktree-attributes \
+		--prefix=$(FLEXIBLESUSY_HEAD_PKG)/ \
+		--output=$(FLEXIBLESUSY_HEAD_PKG).tar.gz HEAD
+	md5sum $(FLEXIBLESUSY_HEAD_PKG).tar.gz \
+		> $(FLEXIBLESUSY_HEAD_PKG).tar.gz.md5
