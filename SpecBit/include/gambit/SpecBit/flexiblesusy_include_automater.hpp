@@ -25,8 +25,8 @@
 
 #include INCLUDE_FILE(input_parameters.hpp)
 #include INCLUDE_FILE(slha_io.hpp)
-#include INCLUDE_FILE(spectrum_generator.hpp)
-#include INCLUDE_FILE(model.hpp)
+#include INCLUDE_FILE(CAT(ALGORITHM1l,_spectrum_generator.hpp))
+#include INCLUDE_FILE(CAT(ALGORITHM1l,_model.hpp))
 #include INCLUDE_FILE(model_slha.hpp)
 #include INCLUDE_FILE(physical.hpp)
 #include INCLUDE_FILE(info.hpp)
