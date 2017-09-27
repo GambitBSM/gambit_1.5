@@ -493,7 +493,7 @@ namespace Gambit
        Eigen::Matrix<double,3,3> output;
        for(int i=0; i<3; ++i) for(int j=0; j<3; ++j)
        {
-         output(i,j) = *Param.at(rootname + "_" + to_string(i+1) + to_string(j+1));
+          output(i,j) = *Param.at(rootname + "_" + std::to_string(i+1) + std::to_string(j+1));
        }
        return output;
     }
@@ -504,7 +504,7 @@ namespace Gambit
        Eigen::Matrix<double,3,3> output;
        for(int i=0; i<3; ++i) for(int j=0; j<3; ++j)
        {
-         str parname = rootname + "_" + ( i < j ? to_string(i+1) + to_string(j+1) : to_string(j+1) + to_string(i+1));
+         str parname = rootname + "_" + ( i < j ? std::to_string(i+1) + std::to_string(j+1) : std::to_string(j+1) + std::to_string(i+1));
          output(i,j) = *Param.at(parname);
        }
        return output;
