@@ -202,6 +202,20 @@ clean-$(MODNAME)-obj:
 		-rm -f $(EXEMSSMatMSUSY_mAmu_OBJ)
 		-rm -f $(LLMSSMatMSUSY_mAmu_OBJ)
 
+# BEGIN: NOT EXPORTED ##########################################
+clean-$(MODNAME)-src:
+		-rm -f $(LIBMSSMatMSUSY_mAmu_SRC)
+		-rm -f $(LIBMSSMatMSUSY_mAmu_HDR)
+		-rm -f $(EXEMSSMatMSUSY_mAmu_SRC)
+		-rm -f $(LLMSSMatMSUSY_mAmu_SRC)
+		-rm -f $(LLMSSMatMSUSY_mAmu_MMA)
+		-rm -f $(METACODE_STAMP_MSSMatMSUSY_mAmu)
+		-rm -f $(MSSMatMSUSY_mAmu_INCLUDE_MK)
+		-rm -f $(MSSMatMSUSY_mAmu_SLHA_INPUT)
+		-rm -f $(MSSMatMSUSY_mAmu_GNUPLOT)
+
+distclean-$(MODNAME): clean-$(MODNAME)-src
+# END:   NOT EXPORTED ##########################################
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 		-rm -f $(EXEMSSMatMSUSY_mAmu_EXE)

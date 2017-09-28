@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:44:34
+// File generated at Thu 28 Sep 2017 14:28:09
 
 /**
  * @file MSSMatMSUSY_mAmu_cxx_diagrams.hpp
  *
- * This file was generated at Sun 24 Sep 2017 15:44:34 with FlexibleSUSY
+ * This file was generated at Thu 28 Sep 2017 14:28:09 with FlexibleSUSY
  * 2.0.0-dev and SARAH 4.11.0 .
  */
 

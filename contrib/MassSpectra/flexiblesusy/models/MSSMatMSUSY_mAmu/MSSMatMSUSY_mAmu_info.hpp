@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:44:07
+// File generated at Thu 28 Sep 2017 14:27:46
 
 #ifndef MSSMatMSUSY_mAmu_INFO_H
 #define MSSMatMSUSY_mAmu_INFO_H
@@ -89,21 +89,20 @@ namespace MSSMatMSUSY_mAmu_info {
       ImZUR2_0, ReZUR2_1, ImZUR2_1, ReZUR2_2, ImZUR2_2, ZZ0_0, ZZ0_1, ZZ1_0, ZZ1_1
       , NUMBER_OF_MIXINGS };
 
-   enum Input_parameters : int { TanBeta, MuInput, mA2Input, TYdInput0_0,
-      TYdInput0_1, TYdInput0_2, TYdInput1_0, TYdInput1_1, TYdInput1_2, TYdInput2_0
-      , TYdInput2_1, TYdInput2_2, TYeInput0_0, TYeInput0_1, TYeInput0_2,
-      TYeInput1_0, TYeInput1_1, TYeInput1_2, TYeInput2_0, TYeInput2_1, TYeInput2_2
-      , TYuInput0_0, TYuInput0_1, TYuInput0_2, TYuInput1_0, TYuInput1_1,
-      TYuInput1_2, TYuInput2_0, TYuInput2_1, TYuInput2_2, mq2Input0_0, mq2Input0_1
-      , mq2Input0_2, mq2Input1_0, mq2Input1_1, mq2Input1_2, mq2Input2_0,
-      mq2Input2_1, mq2Input2_2, ml2Input0_0, ml2Input0_1, ml2Input0_2, ml2Input1_0
-      , ml2Input1_1, ml2Input1_2, ml2Input2_0, ml2Input2_1, ml2Input2_2,
-      md2Input0_0, md2Input0_1, md2Input0_2, md2Input1_0, md2Input1_1, md2Input1_2
-      , md2Input2_0, md2Input2_1, md2Input2_2, mu2Input0_0, mu2Input0_1,
-      mu2Input0_2, mu2Input1_0, mu2Input1_1, mu2Input1_2, mu2Input2_0, mu2Input2_1
-      , mu2Input2_2, me2Input0_0, me2Input0_1, me2Input0_2, me2Input1_0,
-      me2Input1_1, me2Input1_2, me2Input2_0, me2Input2_1, me2Input2_2, MassBInput,
-      MassWBInput, MassGInput, NUMBER_OF_INPUT_PARAMETERS };
+   enum Input_parameters : int { TanBeta, MuInput, mA2Input, Aeij0_0, Aeij0_1,
+      Aeij0_2, Aeij1_0, Aeij1_1, Aeij1_2, Aeij2_0, Aeij2_1, Aeij2_2, Adij0_0,
+      Adij0_1, Adij0_2, Adij1_0, Adij1_1, Adij1_2, Adij2_0, Adij2_1, Adij2_2,
+      Auij0_0, Auij0_1, Auij0_2, Auij1_0, Auij1_1, Auij1_2, Auij2_0, Auij2_1,
+      Auij2_2, mq2Input0_0, mq2Input0_1, mq2Input0_2, mq2Input1_0, mq2Input1_1,
+      mq2Input1_2, mq2Input2_0, mq2Input2_1, mq2Input2_2, ml2Input0_0, ml2Input0_1
+      , ml2Input0_2, ml2Input1_0, ml2Input1_1, ml2Input1_2, ml2Input2_0,
+      ml2Input2_1, ml2Input2_2, md2Input0_0, md2Input0_1, md2Input0_2, md2Input1_0
+      , md2Input1_1, md2Input1_2, md2Input2_0, md2Input2_1, md2Input2_2,
+      mu2Input0_0, mu2Input0_1, mu2Input0_2, mu2Input1_0, mu2Input1_1, mu2Input1_2
+      , mu2Input2_0, mu2Input2_1, mu2Input2_2, me2Input0_0, me2Input0_1,
+      me2Input0_2, me2Input1_0, me2Input1_1, me2Input1_2, me2Input2_0, me2Input2_1
+      , me2Input2_2, MassBInput, MassWBInput, MassGInput,
+      NUMBER_OF_INPUT_PARAMETERS };
 
    enum Extra_parameters : int { NUMBER_OF_EXTRA_PARAMETERS };
 

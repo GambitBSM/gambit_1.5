@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:44:16
+// File generated at Thu 28 Sep 2017 14:27:53
 
 #include "MSSMatMSUSY_mAmu_two_scale_susy_scale_constraint.hpp"
 #include "MSSMatMSUSY_mAmu_two_scale_model.hpp"
@@ -72,9 +72,9 @@ void MSSMatMSUSY_mAmu_susy_scale_constraint<Two_scale>::apply()
    // apply user-defined susy scale constraints
    const auto MuInput = INPUTPARAMETER(MuInput);
    const auto mA2Input = INPUTPARAMETER(mA2Input);
-   const auto TYdInput = INPUTPARAMETER(TYdInput);
-   const auto TYeInput = INPUTPARAMETER(TYeInput);
-   const auto TYuInput = INPUTPARAMETER(TYuInput);
+   const auto Aeij = INPUTPARAMETER(Aeij);
+   const auto Adij = INPUTPARAMETER(Adij);
+   const auto Auij = INPUTPARAMETER(Auij);
    const auto mq2Input = INPUTPARAMETER(mq2Input);
    const auto ml2Input = INPUTPARAMETER(ml2Input);
    const auto md2Input = INPUTPARAMETER(md2Input);
@@ -85,13 +85,16 @@ void MSSMatMSUSY_mAmu_susy_scale_constraint<Two_scale>::apply()
    const auto MassGInput = INPUTPARAMETER(MassGInput);
    const auto vd = MODELPARAMETER(vd);
    const auto vu = MODELPARAMETER(vu);
+   const auto Ye = MODELPARAMETER(Ye);
+   const auto Yd = MODELPARAMETER(Yd);
+   const auto Yu = MODELPARAMETER(Yu);
 
    MODEL->set_Mu(Re(MuInput));
    MODEL->set_BMu(Re(mA2Input/(vd/vu + vu/vd)));
+   MODEL->set_TYe(((Aeij).cwiseProduct(Ye)).real());
+   MODEL->set_TYd(((Adij).cwiseProduct(Yd)).real());
+   MODEL->set_TYu(((Auij).cwiseProduct(Yu)).real());
    MODEL->solve_ewsb();
-   MODEL->set_TYd((TYdInput).real());
-   MODEL->set_TYe((TYeInput).real());
-   MODEL->set_TYu((TYuInput).real());
    MODEL->set_mq2((mq2Input).real());
    MODEL->set_ml2((ml2Input).real());
    MODEL->set_md2((md2Input).real());

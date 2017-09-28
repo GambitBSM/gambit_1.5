@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:43:34
+// File generated at Thu 28 Sep 2017 14:27:16
 
 #ifndef MSSMatMSUSY_mAmu_INPUT_PARAMETERS_H
 #define MSSMatMSUSY_mAmu_INPUT_PARAMETERS_H
@@ -30,9 +30,9 @@ struct MSSMatMSUSY_mAmu_input_parameters {
    double TanBeta{};
    double MuInput{};
    double mA2Input{};
-   Eigen::Matrix<double,3,3> TYdInput{Eigen::Matrix<double,3,3>::Zero()};
-   Eigen::Matrix<double,3,3> TYeInput{Eigen::Matrix<double,3,3>::Zero()};
-   Eigen::Matrix<double,3,3> TYuInput{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> Aeij{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> Adij{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> Auij{Eigen::Matrix<double,3,3>::Zero()};
    Eigen::Matrix<double,3,3> mq2Input{Eigen::Matrix<double,3,3>::Zero()};
    Eigen::Matrix<double,3,3> ml2Input{Eigen::Matrix<double,3,3>::Zero()};
    Eigen::Matrix<double,3,3> md2Input{Eigen::Matrix<double,3,3>::Zero()};
