@@ -46,6 +46,17 @@ MSSM63atQ_mA: |
 MSSM63atMGUT: |
    As per the MSSM63atQ, but with Q=MGUT. Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
 
+MSSM63atMGUT_mA: |
+   As per the MSSM63atMGUT, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the pole mass of the A boson) and mu (the SUSY Higgs bilinear).
+   Note that translation to MSSM63atMGUT requires the RGEs to already have been solved (in order to determine the values of mHu2 and mHd2).
+
+MSSM63atMSUSY: |
+   As per the MSSM63atQ, but with Q=MSUSY. Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the value of the SUSY scale).
+
+MSSM63atMSUSY_mA: |
+   As per the MSSM63atMSUSY, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the pole mass of the A boson) and mu (the SUSY Higgs bilinear).
+   Note that translation to MSSM63atMSUSY requires the RGEs to already have been solved (in order to determine the values of mHu2 and mHd2).
+
 MSSM30atQ: |
    As per the MSSM63atQ, but with all off-diagonal elements in the mass squared matrices and the trilinear coupling matrices set to zero. This leaves:
 

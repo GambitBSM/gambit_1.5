@@ -2964,8 +2964,17 @@ MSSM30atQ_parameters: |
 MSSM63atMGUT_parameters: |
    Parameters for the model MSSM63atMGUT (see ./gambit MSSM63atMGUT)
 
+MSSM63atMSUSY_parameters: |
+   Parameters for the model MSSM63atMSUSY (see ./gambit MSSM63atMSUSY)
+
 MSSM63atQ_parameters: |
    Parameters for the model MSSM63atQ (see ./gambit MSSM63atQ)
+
+MSSM63atMGUT_mA_parameters: |
+   Parameters for the model MSSM63atMGUT_mA (see ./gambit MSSM63atMGUT_mA)
+
+MSSM63atMSUSY_mA_parameters: |
+   Parameters for the model MSSM63atMSUSY_mA (see ./gambit MSSM63atMSUSY_mA)
 
 MSSM7atQ_parameters: |
    Parameters for the model MSSM7atQ (see ./gambit MSSM7atQ)
