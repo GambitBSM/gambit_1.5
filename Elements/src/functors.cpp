@@ -1648,6 +1648,12 @@ namespace Gambit
       myValue->_definePar(parname);
     }
 
+    /// Function for setting the model name for a ModelParameters object. Mainly for better error messages.
+    void model_functor::setModelName(str model_name)
+    {
+      myValue->setModelName(model_name);
+    }
+
     /// Function for handing over parameter identities to another model_functor
     void model_functor::donateParameters(model_functor &receiver)
     {
@@ -1657,6 +1663,8 @@ namespace Gambit
       {
         receiver.addParameter(it->first);
       }
+      /// Copy the model name as well
+      receiver.setModelName(myValue->getModelName());
     }
 
     /// @}

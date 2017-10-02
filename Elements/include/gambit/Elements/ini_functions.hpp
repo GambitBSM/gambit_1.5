@@ -61,6 +61,9 @@ namespace Gambit
   /// Add a new parameter to a primary model functor
   int add_parameter(model_functor&, str);
 
+  /// Set the model name in a primary model functor
+  int set_model_name(model_functor&, str);
+
   /// Tell a model functor to take its parameter definition from another model functor.
   int copy_parameters(model_functor&, model_functor&, bool, str="", str="");
 

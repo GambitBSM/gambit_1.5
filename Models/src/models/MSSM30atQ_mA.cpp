@@ -40,18 +40,10 @@ using namespace Gambit::Utils;
   {
      logger()<<"Running interpret_as_parent calculations for MSSM30atQ_mA --> MSSM63atQ_mA..."<<LogTags::info<<EOM;
 
-     targetP.setValue("Qin",     myP["Qin"] );
-     targetP.setValue("TanBeta", myP["TanBeta"] );
-     targetP.setValue("SignMu",  myP["SignMu"] );
-
-     // soft gaugino masses
-     targetP.setValue("M1",  myP["M1"] );
-     targetP.setValue("M2",  myP["M2"] );
-     targetP.setValue("M3",  myP["M3"] );
-
-     // soft Higgs masses
-     targetP.setValue("mHu2",  myP["mHu2"] );
-     targetP.setValue("mHd2",  myP["mHd2"] );
+     // Copy all the common parameters of MSSM30atQ_mA into MSSM63atQ_mA
+     targetP.setValues(myP,false); // Set "missing_is_error" flag to false since some MSSM30atQ_mA parameters are not in MSSM63atQ_mA (or rather they are named differently) 
+     
+     // Manually set the parameters which differ
 
      // RH squark soft masses
      // Off-diagonal elements set to zero

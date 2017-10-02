@@ -43,7 +43,7 @@ namespace Gambit {
   void MSSM_mA_to_MSSM_mhud(const ModelParameters &myP, ModelParameters &targetP, const SubSpectrum& HE)
   {
      // Copy all the common parameters of MSSM63atMGUT into MSSM63atQ
-     targetP.setValues(myP);
+     targetP.setValues(myP,false); // Set "missing_is_error" flag to false since e.g. mA parameter from MSSM63atQ_mA does not exist in MSSM63atQ. Similar for variants at other scales.
   
      // Set the sign of mu
      targetP.setValue("SignMu", Gambit::sgn(myP["mu"]));
