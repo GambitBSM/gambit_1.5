@@ -976,6 +976,14 @@ sigma_SI_n: |
 sigma_SD_n: |
    Spin-dependent WIMP-neutron cross section, in cm^2.
 
+sigma_SIq2_p: |
+   Pseudoscalar-scalar spin-independent WIMP-proton cross section in cm^2,
+   at a referece momentum transfer q0 = 40 MeV.
+
+sigma_SIq2_n: |
+   Pseudoscalar-scalar spin-independent WIMP-neutron cross section in cm^2,
+   at a reference momentum transfer q0 = 40 MeV.
+
 DarkMatter_ID: |
    Contains string ID to identify dark matter particle.
 
