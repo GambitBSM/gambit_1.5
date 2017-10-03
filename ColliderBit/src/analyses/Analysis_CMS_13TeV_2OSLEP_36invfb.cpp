@@ -9,11 +9,11 @@
 #include <cmath>
 #include <memory>
 #include <iomanip>
+#include <fstream>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
-#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
 using namespace std;
 
@@ -31,7 +31,6 @@ namespace Gambit {
       vector<double> cutFlowVectorCMS_550_200;
       double xsecCMS_550_200;
 
-      Perf_Plot* plots;
       ofstream cutflowFile;
       string analysisRunName;
 
@@ -66,39 +65,33 @@ namespace Gambit {
           cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-
-        analysisRunName = "CMS_13TeV_2OSLEP_36invfb_test";
-        vector<const char*> variables = {"met","mT2"};
-        plots = new Perf_Plot(analysisRunName, &variables);
-
+        analysisRunName = "CMS_13TeV_2OSLEP_36invfb_550_200";
       }
 
 
       void analyze(const HEPUtils::Event* event) {
 	HEPUtilsAnalysis::analyze(event);
-
-        // Missing energy
         double met = event->met();
 
         // Baseline objects
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
-	  if (electron->pT()>=10. &&fabs(electron->eta())<2.5)baselineElectrons.push_back(electron);
+	  if (electron->pT()>10. && fabs(electron->eta())<2.5)baselineElectrons.push_back(electron);
 	}
 
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
-	  if (muon->pT()>=10. &&fabs(muon->eta())<2.4)baselineMuons.push_back(muon);
+	  if (muon->pT()>10. &&fabs(muon->eta())<2.4)baselineMuons.push_back(muon);
 	}
 
 	vector<HEPUtils::Particle*> baselinePhotons;
 	for (HEPUtils::Particle* photon : event->photons()) {
-	  if (photon->pT()>25. && fabs(photon->eta())<2.4 && (fabs(photon->eta())<1.4 || fabs(photon->eta())>1.6) && fabs(photon->phi()-event->missingmom().phi())<0.4)baselinePhotons.push_back(photon);
+	  if (photon->pT()>25. && fabs(photon->eta())<2.4 && (fabs(photon->eta())<1.4 || fabs(photon->eta())>1.6) && fabs(photon->phi()-event->missingmom().phi())>0.4)baselinePhotons.push_back(photon);
 	}
 
         vector<HEPUtils::Jet*> baselineJets;
         for (HEPUtils::Jet* jet : event->jets()) {
-          if (jet->pT()>=25. &&fabs(jet->eta())<2.4)baselineJets.push_back(jet);
+          if (jet->pT()>35. &&fabs(jet->eta())<2.4)baselineJets.push_back(jet);
         }
 
         // Signal objects
@@ -108,26 +101,26 @@ namespace Gambit {
 	vector<HEPUtils::Jet*> signalJets;   
 	vector<HEPUtils::Jet*> signalBJets;   
 	
+	//@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_034_ttbar.pdf
+        const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
+        const vector<double> bEl={0.,25.,30.,40.,50.,200.};
+        const vector<double> cEl={0.619,0.669,0.7,0.737,0.79,0.625,0.658,0.72,0.712,0.793,0.338,0.372,0.36,0.365,0.416,0.576,0.531,0.614,0.644,0.712,0.440,0.527,0.585,0.606,0.648};
+        HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
 	for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
-	  if (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta())>1.6) {
-	    signalElectrons.push_back(baselineElectrons.at(iEl));
-	    signalLeptons.push_back(baselineElectrons.at(iEl));
-	  }
+	  bool isEl=has_tag(_eff2dEl, baselineElectrons.at(iEl)->eta(), baselineElectrons.at(iEl)->pT());
+	  if (isEl && baselineElectrons.at(iEl)->pT()>20. && (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta()))>1.6)signalElectrons.push_back(baselineElectrons.at(iEl));
 	}
 
+	//@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_034_ttbar.pdf
+        const vector<double> aMu={0,0.9,1.2,2.1,2.4};
+        const vector<double> bMu={0.,25.,30.,40.,50.,200.};
+        const vector<double> cMu={0.869,0.889,0.91,0.929,0.93,0.857,0.88,0.893,0.937,0.93,0.891,0.894,0.901,0.912,0.927,0.803,0.818,0.817,0.855,0.869};
+        HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
 	for (size_t iMu=0;iMu<baselineMuons.size();iMu++) {
-	  if (fabs(baselineMuons.at(iMu)->eta())<1.4 || fabs(baselineMuons.at(iMu)->eta())>1.6) {
-	    signalMuons.push_back(baselineMuons.at(iMu));
-	    signalLeptons.push_back(baselineMuons.at(iMu));
-	  }
+	  bool isMu=has_tag(_eff2dMu, baselineMuons.at(iMu)->eta(), baselineMuons.at(iMu)->pT());
+	  if (isMu && baselineMuons.at(iMu)->pT()>20. && (fabs(baselineMuons.at(iMu)->eta())<1.4 || fabs(baselineMuons.at(iMu)->eta())>1.6))signalMuons.push_back(baselineMuons.at(iMu));
 	}
 
-	//Jets (overlap removal)
-	const vector<double>  a = {0,10.};
-        const vector<double>  b = {0,10000.};
-        const vector<double> c = {0.67};
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
-	
 	sort(baselinePhotons.begin(),baselinePhotons.end(),comparePt);
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
 	  bool overlap=false;            
@@ -141,12 +134,14 @@ namespace Gambit {
 	    if (fabs(baselinePhotons.at(0)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.4)overlap=true;
 	  }
 	  if (!overlap) {
-            bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT());
 	    signalJets.push_back(baselineJets.at(iJet));
-	    if (baselineJets.at(iJet)->btag() && hasTag)signalBJets.push_back(baselineJets.at(iJet));
+	    if (baselineJets.at(iJet)->btag())signalBJets.push_back(baselineJets.at(iJet));
 	  }
 	}
+	CMS::applyCSVv2MediumBtagEff(signalBJets);
 
+	signalLeptons=signalElectrons;
+	signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
         int nSignalLeptons = signalLeptons.size();
         int nSignalJets = signalJets.size();
 	int nSignalBJets = signalBJets.size();
@@ -154,28 +149,29 @@ namespace Gambit {
 	sort(signalJets.begin(),signalJets.end(),compareJetPt);       
 	sort(signalBJets.begin(),signalBJets.end(),compareJetPt); 
 
-	//Preselection
-        bool preselection=false; 
-	
-	vector<vector<HEPUtils::Particle*>> OSSFpair_cont = getOSSFpair(signalLeptons);
-	for (size_t iPa=0;iPa<OSSFpair_cont.size();iPa++) {
-	  vector<HEPUtils::Particle*> pair = OSSFpair_cont.at(iPa);
-	  sort(pair.begin(),pair.end(),comparePt);
-	  if (pair.at(0)->pT()>25. && pair.at(1)->pT()>20. && fabs(pair.at(0)->mom().deltaR_eta(pair.at(1)->mom()))>0.1 && (pair.at(0)->mom()+pair.at(1)->mom()).pT()>25)preselection=true;
-	}
+	// Variables + Preselection
+        bool preselection=false;
 
-        //Signal regions
 	double mT2=0;
 	double mll=0;
 	double mjj=0;
 	double mbb=0;
+	double pT_j1=0;
 	double deltaPhi_met_j0=0;
 	double deltaPhi_met_j1=0;	
 
+	vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpair(signalLeptons);
+	for (size_t iPa=0;iPa<SFOSpair_cont.size();iPa++) {
+	  vector<HEPUtils::Particle*> pair = SFOSpair_cont.at(iPa);
+	  sort(pair.begin(),pair.end(),comparePt);
+	  if (pair.at(0)->pT()>25. && fabs(pair.at(0)->mom().deltaR_eta(pair.at(1)->mom()))>0.1 && (pair.at(0)->mom()+pair.at(1)->mom()).pT()>25)preselection=true;
+	}
+
 	if (nSignalBJets>1)mbb=(signalBJets.at(0)->mom()+signalBJets.at(1)->mom()).m();
-	if (nSignalJets>0)deltaPhi_met_j0=fmod(fabs(event->missingmom().phi()-signalJets.at(0)->phi()),M_PI);
+	if (nSignalJets>0)deltaPhi_met_j0=event->missingmom().deltaPhi(signalJets.at(0)->mom());
 	if (nSignalJets>1) {
-	  deltaPhi_met_j1=fmod(fabs(event->missingmom().phi()-signalJets.at(1)->phi()),M_PI);
+	  pT_j1=signalJets.at(1)->pT();
+	  deltaPhi_met_j1=event->missingmom().deltaPhi(signalJets.at(1)->mom());
 	  mjj=get_mjj(signalJets);
 	}
 	if (nSignalLeptons>1) {
@@ -183,43 +179,37 @@ namespace Gambit {
 	  mT2=get_mT2(signalLeptons,signalBJets,event->missingmom());
 	}
 
-	if (preselection && mll>86. && mll<96. && met>100. && (nSignalJets==2 || nSignalJets==3)  && (baselineMuons.size()+baselineElectrons.size())==2) {
-	  if (signalJets.at(0)->pT()>35. && signalJets.at(1)->pT()>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4) {
-	    //VZ
-	    if (nSignalBJets==0 && mT2>80. && mjj<110.) {
-	      if (met>100. && met<150.)_numSR1++;
-	      if (met>150. && met<250.)_numSR2++;
-	      if (met>250. && met<350.)_numSR3++;
-	      if (met>350.)_numSR4++;
-	    }
-	    //HZ
-	    if (nSignalBJets==2 && mbb<150. && mT2<200.) {
-	      if (met>50. && met<100.)_numSR5++;
-	      if (met>100. && met<150.)_numSR6++;
-	      if (met>150. && met<250.)_numSR7++;
-	      if (met>250.)_numSR8++;
-	    }
+        //Signal regions
+	if (preselection && mll>86. && mll<96. && met>100. && (nSignalJets==2 || nSignalJets==3)  && (baselineMuons.size()+baselineElectrons.size())==2 && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4) {
+	  //VZ
+	  if (nSignalBJets==0 && mT2>80. && mjj<110.) {
+	    if (met>100. && met<150.)_numSR1++;
+            if (met>150. && met<250.)_numSR2++;
+            if (met>250. && met<350.)_numSR3++;
+            if (met>350.)_numSR4++;
+          }
+          //HZ
+	  if (nSignalBJets==2 && mbb<150. && mT2<200.) {
+	    if (met>50. && met<100.)_numSR5++;
+	    if (met>100. && met<150.)_numSR6++;
+	    if (met>150. && met<250.)_numSR7++;
+	    if (met>250.)_numSR8++;
 	  }
 	}
 
-        if (preselection) {
-          vector<double> variables = {met, mT2};
-          plots->fill(&variables);
-        }
-
         cutFlowVector_str[0] = "All events";
-        cutFlowVector_str[1] = "$\\geq$ 2 Leptons with (sub)leading $p_{T} > 25(20) GeV$";
+        cutFlowVector_str[1] = "$\\geq$ 2 SFOS leptons with (sub)leading $p_{T} > 25(20) GeV$";
         cutFlowVector_str[2] = "Extra lepton vetos";
         cutFlowVector_str[3] = "$86 < m_{ll} < 96 GeV$";
         cutFlowVector_str[4] = "2-3 Jets";
-        cutFlowVector_str[5] = "$\\Delta\\Phi(E^{T}_{miss},j_{0}),\\Delta\\Phi(E^{T}_{miss},j_{1}) > 0.4$";
+        cutFlowVector_str[5] = "$\\Delta\\Phi(E^{miss}_{T},j_{0}),\\Delta\\Phi(E^{miss}_{T},j_{1}) > 0.4$";
         cutFlowVector_str[6] = "Btag veto";
         cutFlowVector_str[7] = "$M_{T2}(ll) > 80 GeV$";
         cutFlowVector_str[8] = "$M_{jj}$ for min $\\Delta\\Phi$ jets $< 150 GeV$";
-        cutFlowVector_str[9] = "$E^{T}_{miss} > 100 GeV$";
-        cutFlowVector_str[10] = "$E^{T}_{miss} > 150 GeV$";
-        cutFlowVector_str[11] = "$E^{T}_{miss} > 250 GeV$";
-        cutFlowVector_str[12] = "$E^{T}_{miss} > 350 GeV$";
+        cutFlowVector_str[9] = "$E^{miss}_{T} > 100 GeV$";
+        cutFlowVector_str[10] = "$E^{miss}_{T} > 150 GeV$";
+        cutFlowVector_str[11] = "$E^{miss}_{T} > 250 GeV$";
+        cutFlowVector_str[12] = "$E^{miss}_{T} > 350 GeV$";
 
         cutFlowVectorCMS_550_200[0] = 109.35;
         cutFlowVectorCMS_550_200[1] = 24.21;
@@ -245,22 +235,22 @@ namespace Gambit {
 
 	     (j==3 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96.) ||
 
-	     (j==4 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3)) ||
+	     (j==4 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35.) ||
 
-	     (j==5 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4) ||
+	     (j==5 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4) ||
 
-	     (j==6 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0) ||
-	     (j==7 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80.) ||
+	     (j==6 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0) ||
+	     (j==7 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80.) ||
 
-	     (j==8 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150.) ||
+	     (j==8 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150.) ||
 
-	     (j==9 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>100.) ||
+	     (j==9 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>100.) ||
 
-	     (j==10 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>150.) ||
+	     (j==10 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>150.) ||
 
-	     (j==11 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>250.) ||
+	     (j==11 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>250.) ||
 
-	     (j==12 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>350.) )
+	     (j==12 && preselection && (baselineMuons.size()+baselineElectrons.size())==2 &&  mll>86. && mll<96. && (nSignalJets==2 || nSignalJets==3) && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4 && nSignalBJets==0 && mT2>80. && mjj<150. && met>350.) )
 
 	  cutFlowVector[j]++;
 	}
@@ -298,22 +288,20 @@ namespace Gambit {
         path.append(analysisRunName);
         path.append(".txt");
         cutflowFile.open(path.c_str());
-        cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
-        cutflowFile<<"\\hline"<<endl;
+
+        cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [550,200] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
         cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-        cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecCMS_550_200<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecCMS_550_200<<" & 1\\\\"<<endl;
-        cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
+        cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_550_200<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<<xsec()/xsecCMS_550_200<<" & 1\\\\ \\hline"<<endl;
+        cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
         for (size_t i=0; i<NCUTS; i++) {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorCMS_550_200[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<(xsecCMS_550_200/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<(xsecCMS_550_200/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
         }
         cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-        for (size_t i=1; i<NCUTS; i++) {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+        for (size_t i=0; i<NCUTS; i++) {
+          cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
         }
-        cutflowFile<<"\\end{tabular}"<<endl;
-        cutflowFile.close();
-
-        plots->createFile();
+        cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+       cutflowFile.close();
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SR1;
@@ -407,19 +395,17 @@ namespace Gambit {
         add_result(results_SR9);
       }
 
-      vector<vector<HEPUtils::Particle*>> getOSSFpair(vector<HEPUtils::Particle*> leptons) {
-	vector<vector<HEPUtils::Particle*>> OSSFpair_container;
+      vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
+	vector<vector<HEPUtils::Particle*>> SFOSpair_container;
 	for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {	
 	  for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
 	    if (leptons.at(iLe1)->abspid()==leptons.at(iLe2)->abspid() && leptons.at(iLe1)->pid()!=leptons.at(iLe2)->pid()) {
-	      vector<HEPUtils::Particle*> OSSFpair;
-	      OSSFpair.push_back(leptons.at(iLe1));
-	      OSSFpair.push_back(leptons.at(iLe2));
-	      OSSFpair_container.push_back(OSSFpair);
-	    }
-	  }
-	}
-	return OSSFpair_container;
+	      vector<HEPUtils::Particle*> SFOSpair;
+	      SFOSpair.push_back(leptons.at(iLe1));
+	      SFOSpair.push_back(leptons.at(iLe2));
+	      SFOSpair_container.push_back(SFOSpair);
+	    } } }
+	return SFOSpair_container;
       }
 
       double get_mjj(vector<HEPUtils::Jet*> jets) {
