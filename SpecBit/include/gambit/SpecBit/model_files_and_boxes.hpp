@@ -27,8 +27,10 @@
 #include "SLHAea/slhaea.h"
 #include "flexiblesusy/src/lowe.h" // From softsusy; used by flexiblesusy
 
-// Abstraction of algorithm name
+// Abstraction of algorithm name. For now everything uses 'Two_scale'.
 #define ALGORITHM1 Two_scale
+// Need a lowercase version for certain file names
+#define ALGORITHM1l two_scale
 
 
 // Make flexiblesusy interface struct for MSSMSpec template class
@@ -55,12 +57,13 @@
           /* Typedefs for accessing FlexibleSUSY classes in a generic way */           \
           typedef CAT_3(MODELNAME,_,input_parameters)                   InputParameters;   \
           typedef CAT_3(MODELNAME,_,spectrum_generator<algorithm_type>) SpectrumGenerator; \
-          typedef CAT_3(MODELNAME,_,slha<algorithm_type>)               Model;             \
+          typedef MODELNAME<algorithm_type>                             BaseModel;         \
+          typedef CAT_3(MODELNAME,_,slha<BaseModel>)                    Model;             \
           typedef CAT_3(MODELNAME,_,physical)                           Physical;          \
           typedef CAT_3(MODELNAME,_,slha_io)                            SlhaIo;            \
           typedef CAT_3(MODELNAME,_,scales)                             Scales;            \
           static const unsigned number_of_particles = CAT_3(MODELNAME,_,info)::NUMBER_OF_PARTICLES; \
-          typedef flexiblesusy::Problems<number_of_particles>           Problems;      \
+          typedef flexiblesusy::Spectrum_generator_problems             Problems;      \
                                                                                        \
           /* Of the above, only the Model typedef is required by the MSSMSpec
              template. The rest are for internal details, and for use in SpecBit */    \
@@ -83,7 +86,7 @@
           : model(spectrum_generator.get_model())                                      \
           , oneset(onesetIN)                                                           \
           , input(inputIN)                                                             \
-          , problems(CAT_3(MODELNAME,_,info)::particle_names)                          \
+          , problems()                                                                 \
           , scales()                                                                   \
           {                                                                            \
             scales.HighScale = spectrum_generator.get_high_scale();                    \
@@ -128,16 +131,39 @@
 
 
 /// All the includes and Model_interface definitions
-
 #define MODELNAME CMSSM
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary CMSSM model headers
 MAKE_INTERFACE  // Creates CMSSM_interface class
+#undef MODELNAME
+
+/// {@ Versions of MSSM spectrum generators that take 
+#define MODELNAME MSSM
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSM model headers etc.
+MAKE_INTERFACE
 #undef MODELNAME
 
 #define MODELNAME MSSMatMGUT
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
 MAKE_INTERFACE
 #undef MODELNAME
+/// @}
+
+/// {@ Versions of MSSM spectrum generators that take mA and mu as inputs
+#define MODELNAME MSSM_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+
+#define MODELNAME MSSMatMSUSY_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+
+#define MODELNAME MSSMatMGUT_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+/// @}
 
 #define MODELNAME SingletDMZ3
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary SingletDMZ3 model headers etc.
@@ -148,11 +174,5 @@ MAKE_INTERFACE
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary SingletDM model headers etc.
 MAKE_INTERFACE
 #undef MODELNAME
-
-#define MODELNAME MSSM
-#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MSSM model headers etc.
-MAKE_INTERFACE
-#undef MODELNAME
-
 
 #endif

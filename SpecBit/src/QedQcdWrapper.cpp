@@ -99,10 +99,10 @@ namespace Gambit
       }
 
       /// Retrieve the current renormalisation scale at which running parameters are defined
-      double QedQcdWrapper::GetScale() const { return qedqcd.displayMu(); }
+      double QedQcdWrapper::GetScale() const { return qedqcd.get_scale(); }
 
       /// Manually define the current renormalisation scale (do this at own risk!)
-      void QedQcdWrapper::SetScale(double scale) { qedqcd.setMu(scale); }
+      void QedQcdWrapper::SetScale(double scale) { qedqcd.set_scale(scale); }
 
       /// @}
 

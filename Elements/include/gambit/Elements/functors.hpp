@@ -933,6 +933,9 @@ namespace Gambit
       /// Destructor
       virtual ~model_functor() {}
 
+      /// Function for setting the model name for a ModelParameters object. Mainly for better error messages.
+      void setModelName(str model_name);
+
       /// Function for adding a new parameter to the map inside the ModelParameters object
       void addParameter(str parname);
 

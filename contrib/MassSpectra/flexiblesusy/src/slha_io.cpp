@@ -19,7 +19,6 @@
 #include "slha_io.hpp"
 #include "wrappers.hpp"
 #include "lowe.h"
-#include "linalg.h"
 #include "ew_input.hpp"
 #include "physical_input.hpp"
 #include "spectrum_generator_settings.hpp"
@@ -27,15 +26,8 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
-#include <boost/bind.hpp>
 
 namespace flexiblesusy {
-
-SLHA_io::SLHA_io()
-   : data()
-   , modsel()
-{
-}
 
 void SLHA_io::clear()
 {
@@ -123,28 +115,28 @@ void SLHA_io::read_from_file(const std::string& file_name)
 {
    std::ifstream ifs(file_name);
    if (ifs.good()) {
-      data.clear();
-      data.read(ifs);
+      read_from_stream(ifs);
    } else {
-      std::ostringstream msg;
-      msg << "cannot read SLHA file: \"" << file_name << "\"";
-      throw ReadError(msg.str());
+      throw ReadError(R"(cannot read SLHA file: ")" + file_name + R"(")");
    }
 }
 
 /**
- * @brief reads SLHA data from a stream
+ * @brief clears stored data and reads SLHA data from a stream
  * @param istr input stream
  */
 void SLHA_io::read_from_stream(std::istream& istr)
 {
+   data.clear();
    data.read(istr);
+   read_modsel();
 }
 
 void SLHA_io::read_modsel()
 {
-   SLHA_io::Tuple_processor modsel_processor
-      = boost::bind(&SLHA_io::process_modsel_tuple, boost::ref(modsel), _1, _2);
+   Tuple_processor modsel_processor = [this] (int key, double value) {
+      return process_modsel_tuple(modsel, key, value);
+   };
 
    read_block("MODSEL", modsel_processor);
 }
@@ -154,21 +146,24 @@ void SLHA_io::fill(softsusy::QedQcd& qedqcd) const
    CKM_wolfenstein ckm_wolfenstein;
    PMNS_parameters pmns_parameters;
 
-   SLHA_io::Tuple_processor sminputs_processor
-      = boost::bind(&SLHA_io::process_sminputs_tuple, boost::ref(qedqcd), _1, _2);
+   Tuple_processor sminputs_processor = [&qedqcd, this] (int key, double value) {
+      return process_sminputs_tuple(qedqcd, key, value);
+   };
 
    read_block("SMINPUTS", sminputs_processor);
 
    if (modsel.quark_flavour_violated) {
-      SLHA_io::Tuple_processor vckmin_processor
-         = boost::bind(&SLHA_io::process_vckmin_tuple, boost::ref(ckm_wolfenstein), _1, _2);
+      Tuple_processor vckmin_processor = [&ckm_wolfenstein, this] (int key, double value) {
+         return process_vckmin_tuple(ckm_wolfenstein, key, value);
+      };
 
       read_block("VCKMIN", vckmin_processor);
    }
 
    if (modsel.lepton_flavour_violated) {
-      SLHA_io::Tuple_processor upmnsin_processor
-         = boost::bind(&SLHA_io::process_upmnsin_tuple, boost::ref(pmns_parameters), _1, _2);
+      Tuple_processor upmnsin_processor = [&pmns_parameters, this] (int key, double value) {
+         return process_upmnsin_tuple(pmns_parameters, key, value);
+      };
 
       read_block("UPMNSIN", upmnsin_processor);
    }
@@ -194,8 +189,9 @@ void SLHA_io::fill(softsusy::QedQcd& qedqcd) const
  */
 void SLHA_io::fill(Physical_input& input) const
 {
-   SLHA_io::Tuple_processor processor
-      = boost::bind(&SLHA_io::process_flexiblesusyinput_tuple, boost::ref(input), _1, _2);
+   Tuple_processor processor = [&input, this] (int key, double value) {
+      return process_flexiblesusyinput_tuple(input, key, value);
+   };
 
    read_block("FlexibleSUSYInput", processor);
 }
@@ -208,8 +204,9 @@ void SLHA_io::fill(Physical_input& input) const
  */
 void SLHA_io::fill(Spectrum_generator_settings& settings) const
 {
-   SLHA_io::Tuple_processor flexiblesusy_processor
-      = boost::bind(&SLHA_io::process_flexiblesusy_tuple, boost::ref(settings), _1, _2);
+   Tuple_processor flexiblesusy_processor = [&settings, this] (int key, double value) {
+      return process_flexiblesusy_tuple(settings, key, value);
+   };
 
    read_block("FlexibleSUSY", flexiblesusy_processor);
 }
@@ -225,25 +222,22 @@ void SLHA_io::fill(Spectrum_generator_settings& settings) const
  */
 double SLHA_io::read_block(const std::string& block_name, const Tuple_processor& processor) const
 {
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
-
+   auto block = data.find(data.cbegin(), data.cend(), block_name);
    double scale = 0.;
 
    while (block != data.cend()) {
-      for (SLHAea::Block::const_iterator line = block->cbegin(),
-              end = block->cend(); line != end; ++line) {
-         if (!line->is_data_line()) {
+      for (const auto& line: *block) {
+         if (!line.is_data_line()) {
             // read scale from block definition
-            if (line->size() > 3 &&
-                to_lower((*line)[0]) == "block" && (*line)[2] == "Q=")
-               scale = convert_to<double>((*line)[3]);
+            if (line.size() > 3 &&
+                to_lower(line[0]) == "block" && line[2] == "Q=")
+               scale = convert_to<double>(line[3]);
             continue;
          }
 
-         if (line->size() >= 2) {
-            const int key = convert_to<int>((*line)[0]);
-            const double value = convert_to<double>((*line)[1]);
+         if (line.size() >= 2) {
+            const int key = convert_to<int>(line[0]);
+            const double value = convert_to<double>(line[1]);
             processor(key, value);
          }
       }
@@ -265,24 +259,21 @@ double SLHA_io::read_block(const std::string& block_name, const Tuple_processor&
  */
 double SLHA_io::read_block(const std::string& block_name, double& entry) const
 {
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
-
+   auto block = data.find(data.cbegin(), data.cend(), block_name);
    double scale = 0.;
 
    while (block != data.cend()) {
-      for (SLHAea::Block::const_iterator line = block->cbegin(),
-              end = block->cend(); line != end; ++line) {
-         if (!line->is_data_line()) {
+      for (const auto& line: *block) {
+         if (!line.is_data_line()) {
             // read scale from block definition
-            if (line->size() > 3 &&
-                to_lower((*line)[0]) == "block" && (*line)[2] == "Q=")
-               scale = convert_to<double>((*line)[3]);
+            if (line.size() > 3 &&
+                to_lower(line[0]) == "block" && line[2] == "Q=")
+               scale = convert_to<double>(line[3]);
             continue;
          }
 
-         if (line->size() >= 1)
-            entry = convert_to<double>((*line)[0]);
+         if (line.size() >= 1)
+            entry = convert_to<double>(line[0]);
       }
 
       ++block;
@@ -294,9 +285,7 @@ double SLHA_io::read_block(const std::string& block_name, double& entry) const
 
 double SLHA_io::read_entry(const std::string& block_name, int key) const
 {
-   SLHAea::Coll::const_iterator block =
-      data.find(data.cbegin(), data.cend(), block_name);
-
+   auto block = data.find(data.cbegin(), data.cend(), block_name);
    double entry = 0.;
    const SLHAea::Block::key_type keys(1, ToString(key));
    SLHAea::Block::const_iterator line;
@@ -328,12 +317,11 @@ double SLHA_io::read_scale(const std::string& block_name) const
 
    double scale = 0.;
 
-   for (SLHAea::Block::const_iterator line = data.at(block_name).cbegin(),
-        end = data.at(block_name).cend(); line != end; ++line) {
-      if (!line->is_data_line()) {
-         if (line->size() > 3 &&
-             to_lower((*line)[0]) == "block" && (*line)[2] == "Q=")
-            scale = convert_to<double>((*line)[3]);
+   for (const auto& line: data.at(block_name)) {
+      if (!line.is_data_line()) {
+         if (line.size() > 3 &&
+             to_lower(line[0]) == "block" && line[2] == "Q=")
+            scale = convert_to<double>(line[3]);
          break;
       }
    }
@@ -359,9 +347,8 @@ void SLHA_io::set_block(const std::string& lines, Position position)
 
 void SLHA_io::set_blocks(const std::vector<std::string>& blocks, Position position)
 {
-   for (std::vector<std::string>::const_iterator it = blocks.begin(),
-           end = blocks.end(); it != end; it++)
-      set_block(*it, position);
+   for (const auto& block: blocks)
+      set_block(block, position);
 }
 
 /**
@@ -382,47 +369,51 @@ void SLHA_io::set_block(const std::string& name, double value,
    set_block(ss);
 }
 
-void SLHA_io::set_block(const std::string& name, const softsusy::DoubleMatrix& matrix,
-                        const std::string& symbol, double scale)
+void SLHA_io::set_modsel(const Modsel& modsel_)
 {
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
+   modsel = modsel_;
+   const int qfv = modsel.quark_flavour_violated;
+   const int lfv = 2 * modsel.lepton_flavour_violated;
 
-   for (int i = 1; i <= matrix.displayRows(); ++i)
-      for (int k = 1; k <= matrix.displayCols(); ++k) {
-         ss << boost::format(mixing_matrix_formatter) % i % k % matrix(i,k)
-            % (symbol + "(" + ToString(i) + "," + ToString(k) + ")");
-      }
+   std::ostringstream ss;
+   ss << "Block MODSEL\n";
+   ss << FORMAT_ELEMENT(6 , qfv | lfv, "quark/lepton flavour violation");
+   ss << FORMAT_ELEMENT(12, modsel.parameter_output_scale, "running parameter output scale (GeV)");
 
    set_block(ss);
 }
 
-void SLHA_io::set_block(const std::string& name, const softsusy::ComplexMatrix& matrix,
-                        const std::string& symbol, double scale)
+void SLHA_io::set_physical_input(const Physical_input& input)
 {
-   std::ostringstream ss;
-   ss << "Block " << name;
-   if (scale != 0.)
-      ss << " Q= " << FORMAT_SCALE(scale);
-   ss << '\n';
+   const auto& names = input.get_names();
 
-   for (int i = 1; i <= matrix.displayRows(); ++i)
-      for (int k = 1; k <= matrix.displayCols(); ++k) {
-         ss << boost::format(mixing_matrix_formatter) % i % k
-            % Re(matrix(i,k))
-            % ("Re(" + symbol + "(" + ToString(i) + "," + ToString(k) + "))");
-      }
+   std::ostringstream ss;
+   ss << "Block FlexibleSUSYInput\n";
+
+   for (std::size_t i = 0; i < names.size(); i++) {
+      ss << FORMAT_ELEMENT(i, input.get(static_cast<Physical_input::Input>(i)),
+                           names[i]);
+   }
 
    set_block(ss);
 }
 
-void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd_)
+void SLHA_io::set_settings(const Spectrum_generator_settings& settings)
+{
+   std::ostringstream ss;
+   ss << "Block FlexibleSUSY\n";
+
+   for (int i = 0; i < Spectrum_generator_settings::NUMBER_OF_OPTIONS; i++) {
+      ss << FORMAT_ELEMENT(i, settings.get(static_cast<Spectrum_generator_settings::Settings>(i)),
+                           settings.get_description(static_cast<Spectrum_generator_settings::Settings>(i)));
+   }
+
+   set_block(ss);
+}
+
+void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd)
 {
    using namespace softsusy;
-   softsusy::QedQcd qedqcd(qedqcd_);
    std::ostringstream ss;
 
    const double alphaEmInv = 1./qedqcd.displayAlpha(ALPHA);
@@ -441,29 +432,98 @@ void SLHA_io::set_sminputs(const softsusy::QedQcd& qedqcd_)
    ss << FORMAT_ELEMENT(12, qedqcd.displayNeutrinoPoleMass(1), "mnu1(pole)");
    ss << FORMAT_ELEMENT(13, qedqcd.displayPoleMmuon()    , "mmuon(pole)");
    ss << FORMAT_ELEMENT(14, qedqcd.displayNeutrinoPoleMass(2), "mnu2(pole)");
-
-   // recalculate mc(mc)^MS-bar
-   double mc = qedqcd.displayMass(mCharm);
-   qedqcd.runto(mc);
-   mc = qedqcd.displayMass(mCharm);
-
-   // recalculate mu(2 GeV)^MS-bar, md(2 GeV)^MS-bar, ms^MS-bar(2 GeV)
-   qedqcd.runto(2.0);
    ss << FORMAT_ELEMENT(21, qedqcd.displayMass(mDown)    , "md");
    ss << FORMAT_ELEMENT(22, qedqcd.displayMass(mUp)      , "mu");
    ss << FORMAT_ELEMENT(23, qedqcd.displayMass(mStrange) , "ms");
-   ss << FORMAT_ELEMENT(24, mc                           , "mc");
+   ss << FORMAT_ELEMENT(24, qedqcd.displayMass(mCharm)   , "mc");
 
    set_block(ss);
 }
 
-void SLHA_io::write_to_file(const std::string& file_name)
+void SLHA_io::set_model_parameters(const standard_model::Standard_model& model)
+{
+   {
+      std::ostringstream block;
+      block << "Block SMGAUGE Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(1, (model.get_g1() * standard_model_info::normalization_g1), "gY")
+            << FORMAT_ELEMENT(2, (model.get_g2()), "g2")
+            << FORMAT_ELEMENT(3, (model.get_g3()), "g3")
+      ;
+      set_block(block);
+   }
+   set_block("SMYu", ToMatrix(model.get_Yu()), "Yu", model.get_scale());
+   set_block("SMYd", ToMatrix(model.get_Yd()), "Yd", model.get_scale());
+   set_block("SMYe", ToMatrix(model.get_Ye()), "Ye", model.get_scale());
+   {
+      std::ostringstream block;
+      block << "Block SMSM Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(1, (model.get_mu2()), "mu2")
+            << FORMAT_ELEMENT(2, (model.get_Lambdax()), "Lambdax")
+      ;
+      set_block(block);
+   }
+   {
+      std::ostringstream block;
+      block << "Block SMHMIX Q= " << FORMAT_SCALE(model.get_scale()) << '\n'
+            << FORMAT_ELEMENT(3, (model.get_v()), "v")
+      ;
+      set_block(block);
+   }
+}
+
+void SLHA_io::set_mass(const standard_model::Standard_model_physical& physical)
+{
+   std::ostringstream mass;
+
+   mass << "Block SMMASS\n"
+      << FORMAT_MASS(24, physical.MVWp, "VWp")
+      << FORMAT_MASS(21, physical.MVG, "VG")
+      << FORMAT_MASS(12, physical.MFv(0), "Fv(1)")
+      << FORMAT_MASS(14, physical.MFv(1), "Fv(2)")
+      << FORMAT_MASS(16, physical.MFv(2), "Fv(3)")
+      << FORMAT_MASS(25, physical.Mhh, "hh")
+      << FORMAT_MASS(1, physical.MFd(0), "Fd(1)")
+      << FORMAT_MASS(3, physical.MFd(1), "Fd(2)")
+      << FORMAT_MASS(5, physical.MFd(2), "Fd(3)")
+      << FORMAT_MASS(2, physical.MFu(0), "Fu(1)")
+      << FORMAT_MASS(4, physical.MFu(1), "Fu(2)")
+      << FORMAT_MASS(6, physical.MFu(2), "Fu(3)")
+      << FORMAT_MASS(11, physical.MFe(0), "Fe(1)")
+      << FORMAT_MASS(13, physical.MFe(1), "Fe(2)")
+      << FORMAT_MASS(15, physical.MFe(2), "Fe(3)")
+      << FORMAT_MASS(22, physical.MVP, "VP")
+      << FORMAT_MASS(23, physical.MVZ, "VZ")
+      ;
+
+   set_block(mass);
+}
+
+void SLHA_io::set_mixing_matrices(const standard_model::Standard_model_physical& physical)
+{
+   set_block("SMUULMIX", physical.Vu, "Vu");
+   set_block("SMUDLMIX", physical.Vd, "Vd");
+   set_block("SMUURMIX", physical.Uu, "Uu");
+   set_block("SMUDRMIX", physical.Ud, "Ud");
+   set_block("SMUELMIX", physical.Ve, "Ve");
+   set_block("SMUERMIX", physical.Ue, "Ue");
+}
+
+void SLHA_io::set_spectrum(const standard_model::Standard_model& model)
+{
+   const auto& physical = model.get_physical();
+
+   set_model_parameters(model);
+   set_mass(physical);
+   set_mixing_matrices(physical);
+}
+
+void SLHA_io::write_to_file(const std::string& file_name) const
 {
    std::ofstream ofs(file_name);
    write_to_stream(ofs);
 }
 
-void SLHA_io::write_to_stream(std::ostream& ostr)
+void SLHA_io::write_to_stream(std::ostream& ostr) const
 {
    if (ostr.good())
       ostr << data;
@@ -534,8 +594,7 @@ void SLHA_io::process_sminputs_tuple(softsusy::QedQcd& qedqcd, int key, double v
       break;
    case 4:
       qedqcd.setPoleMZ(value);
-      qedqcd.setMu(value);
-      softsusy::MZ = value;
+      qedqcd.set_scale(value);
       break;
    case 5:
       qedqcd.setMass(mBottom, value);
@@ -663,6 +722,7 @@ void SLHA_io::process_upmnsin_tuple(PMNS_parameters& pmns_parameters, int key, d
       break;
    case 5:
       pmns_parameters.alpha_1 = value;
+      break;
    case 6:
       pmns_parameters.alpha_2 = value;
       break;

@@ -115,6 +115,7 @@ c     write(*,*) 'cspen:', cspen
 !!    @param c real part of output
 !!    @param d imag part of output
       subroutine dilogc(a, b, c, d)
+     $ bind(C, name="dilogc_")
       
       implicit none
       

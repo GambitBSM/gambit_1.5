@@ -2964,14 +2964,71 @@ MSSM30atQ_parameters: |
 MSSM63atMGUT_parameters: |
    Parameters for the model MSSM63atMGUT (see ./gambit MSSM63atMGUT)
 
+MSSM63atMSUSY_parameters: |
+   Parameters for the model MSSM63atMSUSY (see ./gambit MSSM63atMSUSY)
+
 MSSM63atQ_parameters: |
    Parameters for the model MSSM63atQ (see ./gambit MSSM63atQ)
+
+MSSM63atMGUT_mA_parameters: |
+   Parameters for the model MSSM63atMGUT_mA (see ./gambit MSSM63atMGUT_mA)
+
+MSSM63atMSUSY_mA_parameters: |
+   Parameters for the model MSSM63atMSUSY_mA (see ./gambit MSSM63atMSUSY_mA)
 
 MSSM7atQ_parameters: |
    Parameters for the model MSSM7atQ (see ./gambit MSSM7atQ)
 
 MSSM9atQ_parameters: |
    Parameters for the model MSSM9atQ (see ./gambit MSSM9atQ)
+
+MSSM9batQ_parameters: |
+   Parameters for the model MSSM9batQ (see ./gambit MSSM9batQ)
+
+MSSM10atQ_mA_parameters: |
+   Parameters for the model MSSM10atQ_mA (see ./gambit MSSM10atQ_mA)
+
+MSSM10batQ_mA_parameters: |
+   Parameters for the model MSSM10batQ_mA (see ./gambit MSSM10batQ_mA)
+
+MSSM10catQ_mA_parameters: |
+   Parameters for the model MSSM10catQ_mA (see ./gambit MSSM10catQ_mA)
+
+MSSM11atQ_mA_parameters: |
+   Parameters for the model MSSM11atQ_mA (see ./gambit MSSM11atQ_mA)
+
+MSSM15atQ_mA_parameters: |
+   Parameters for the model MSSM15atQ_mA (see ./gambit MSSM15atQ_mA)
+
+MSSM16atQ_mA_parameters: |
+   Parameters for the model MSSM16atQ_mA (see ./gambit MSSM16atQ_mA)
+
+MSSM19atQ_mA_parameters: |
+   Parameters for the model MSSM19atQ_mA (see ./gambit MSSM19atQ_mA)
+
+MSSM20atQ_mA_parameters: |
+   Parameters for the model MSSM20atQ_mA (see ./gambit MSSM20atQ_mA)
+
+MSSM24atQ_mA_parameters: |
+   Parameters for the model MSSM24atQ_mA (see ./gambit MSSM24atQ_mA)
+
+MSSM25atQ_mA_parameters: |
+   Parameters for the model MSSM25atQ_mA (see ./gambit MSSM25atQ_mA)
+
+MSSM30atQ_mA_parameters: |
+   Parameters for the model MSSM30atQ_mA (see ./gambit MSSM30atQ_mA)
+
+MSSM63atQ_mA_parameters: |
+   Parameters for the model MSSM63atQ_mA (see ./gambit MSSM63atQ_mA)
+
+MSSM7atQ_mA_parameters: |
+   Parameters for the model MSSM7atQ_mA (see ./gambit MSSM7atQ_mA)
+
+MSSM9atQ_mA_parameters: |
+   Parameters for the model MSSM9atQ_mA (see ./gambit MSSM9atQ_mA)
+
+MSSM9batQ_mA_parameters: |
+   Parameters for the model MSSM9batQ_mA (see ./gambit MSSM9batQ_mA)
 
 NUHM1_parameters: |
    Parameters for the model NUHM1 (see ./gambit NUHM1)
