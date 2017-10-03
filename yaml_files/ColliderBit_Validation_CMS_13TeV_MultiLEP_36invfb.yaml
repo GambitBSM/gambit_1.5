@@ -193,14 +193,16 @@ Rules:
                              "SUSY:qqbar2chi+-chi0 = on",
                              "SUSY:idA = 1000023",
                              "SUSY:idB = 1000024",
+                             "SLHA:keepSM = off",
+                             "SLHA:minMassSM = 0",
                              "TauDecays:mode = 0"]
       xsec_vetos: [0.048, 0.075]
 
-      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_225_75.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_250_1.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_350_100.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_500_1.slha"] 
-      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_500_125.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_MultiLEP_36invfb_200_100.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_MultiLEP_36invfb_500_150.slha"] 
+      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_MultiLEP_36invfb_250_150.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_MultiLEP_36invfb_500_350_05.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_MultiLEP_36invfb_500_350_5.slha"] 
 
   - capability: DetectorSim
     type: "Gambit::ColliderBit::DelphesVanilla"
@@ -246,7 +248,7 @@ Rules:
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
-      analyses: [ [], ["CMS_13TeV_1LEPbb_36invfb"] ]
+      analyses: [ [], ["CMS_13TeV_MultiLEP_36invfb"] ]
 
   - capability: IdentityAnalysisContainer
     function: getIdentityAnalysisContainer
@@ -280,4 +282,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -5e5
     debug: true
 
-  default_output_path: "runs/ColliderBit_Validation_CMS_13TeV_1LEPbb_36invfb/"
+  default_output_path: "runs/ColliderBit_Validation_CMS_13TeV_MultiLEP_36invfb/"

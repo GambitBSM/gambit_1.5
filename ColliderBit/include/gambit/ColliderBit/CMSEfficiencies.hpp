@@ -10,9 +10,11 @@
 #include "HEPUtils/MathUtils.h"
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
-
+#include <iomanip>
 #include <random>
 #include <algorithm>
+
+using namespace std;
 
 namespace Gambit {
   namespace ColliderBit {
@@ -227,7 +229,53 @@ namespace Gambit {
         }
       }
 
+      //Apply efficiency function to CSVv2 medium WP b-tagged jets
+      //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/btag_eff_CSVv2_DeepCSV.pdf	
+      inline void applyCSVv2MediumBtagEff(std::vector<const HEPUtils::Jet*>& bjets) {
+        if (bjets.empty()) return;
 
+        const static std::vector<double> binedges_et = {25., 40., 60., 80., 100., 150., 200., 250., 300., 400., 500.,DBL_MAX };
+        const static std::vector<double> bineffs_et  = {0.58, 0.61, 0.63, 0.64, 0.65, 0.62,0.6, 0.58, 0.56, 0.52, 0.48};
+        const static HEPUtils::BinnedFn1D<double> _eff_et(binedges_et, bineffs_et);
+
+        auto keptBjetsEnd = std::remove_if(bjets.begin(), bjets.end(),
+                                              [](const HEPUtils::Jet* bjet) {
+                                                 const double bjet_pt = bjet->pT();
+                                                 const double bjet_aeta = bjet->abseta();
+                                                 if (bjet_aeta > 2.4 || bjet_pt < 25) return true;
+                                                 const double eff = _eff_et.get_at(bjet_pt);
+                                                 return random_bool(1-eff);
+                                               } );
+        bjets.erase(keptBjetsEnd, bjets.end());
+      }
+
+      inline void applyCSVv2MediumBtagEff(std::vector<HEPUtils::Jet*>& bjets) {
+        applyCSVv2MediumBtagEff(reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(bjets));
+      }
+
+      //Apply efficiency function to CSVv2 loose WP b-tagged jets	
+      //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/btag_eff_CSVv2_DeepCSV.pdf
+      inline void applyCSVv2LooseBtagEff(std::vector<const HEPUtils::Jet*>& bjets) {
+        if (bjets.empty()) return;
+
+        const static std::vector<double> binedges_et = {25., 40., 60., 80., 100., 150., 200., 250., 300., 400., 500.,DBL_MAX };
+        const static std::vector<double> bineffs_et  = {0.78, 0.80, 0.82, 0.83, 0.84, 0.825, 0.82, 0.81, 0.8, 0.795, 0.79};
+        const static HEPUtils::BinnedFn1D<double> _eff_et(binedges_et, bineffs_et);
+
+        auto keptBjetsEnd = std::remove_if(bjets.begin(), bjets.end(),
+                                              [](const HEPUtils::Jet* bjet) {
+                                                 const double bjet_pt = bjet->pT();
+                                                 const double bjet_aeta = bjet->abseta();
+                                                 if (bjet_aeta > 2.4 || bjet_pt < 25) return true;
+                                                 const double eff = _eff_et.get_at(bjet_pt);
+                                                 return random_bool(1-eff);
+                                               } );
+        bjets.erase(keptBjetsEnd, bjets.end());
+      }
+
+      inline void applyCSVv2LooseBtagEff(std::vector<HEPUtils::Jet*>& bjets) {
+        applyCSVv2LooseBtagEff(reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(bjets));
+      }
       //@}
 
 
