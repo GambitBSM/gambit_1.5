@@ -44,7 +44,7 @@
 ///
 ///  \author Sebastian Wild
 ///          (sebastian.wild@ph.tum.de)
-///  \date 2016 Aug
+///  \date 2016 Aug, 2017 Oct
 ///
 ///  \author Felix Kahlhoefer
 ///          (felix.kahlhoefer@desy.de)
@@ -591,6 +591,8 @@ START_MODULE
   QUICK_FUNCTION(DarkBit, sigma_SI_n, NEW_CAPABILITY, sigma_SI_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
   QUICK_FUNCTION(DarkBit, sigma_SD_p, NEW_CAPABILITY, sigma_SD_p_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
   QUICK_FUNCTION(DarkBit, sigma_SD_n, NEW_CAPABILITY, sigma_SD_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
+  QUICK_FUNCTION(DarkBit, sigma_SIq2_p, NEW_CAPABILITY, sigma_SIq2_p_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
+  QUICK_FUNCTION(DarkBit, sigma_SIq2_n, NEW_CAPABILITY, sigma_SIq2_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
 
   // Likelihoods for nuclear parameters:
   #define CAPABILITY lnL_SI_nuclear_parameters
