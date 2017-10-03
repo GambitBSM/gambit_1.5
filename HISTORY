@@ -16,6 +16,7 @@ Feature release.
 - Additional sanity checks in cmake compiler selection
 - Fixed bug preventing proper operation of hdf5 combination with T-walk
 - Improved dependency resolver suggestions for new yaml rules
+- Improved printer errors in case of corrupted old hdf5 files
 
 v1.0.1 - June 2017
 Bugfix release.
