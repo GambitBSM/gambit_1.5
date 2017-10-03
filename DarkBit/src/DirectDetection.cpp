@@ -22,6 +22,10 @@
 ///          (felix.kahlhoefer@desy.de)
 ///  \date 2016 August
 ///
+///  \author Sebastian Wild
+///          (sebastian.wild@desy.de)
+///  \date 2017 October
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -242,6 +246,30 @@ namespace Gambit {
       double gna = Dep::DD_couplings->gna;
       double reduced_mass = *Dep::mwimp * m_neutron / (*Dep::mwimp + m_neutron);
       result = 3.0*gev2cm2/pi*pow(reduced_mass*gna,2.0);
+    }
+
+    /// Simple calculator of the scalar-pseudoscalar WIMP-proton cross-section,
+    /// evaluated at a typical momentum transfer q0.
+    /// (for Higgs-portal model) 
+    void sigma_SIq2_p_simple(double &result)
+    {
+      using namespace Pipes::sigma_SIq2_p_simple;
+      double gpa = Dep::DD_couplings->gpa;
+      double reduced_mass = *Dep::mwimp * m_proton / (*Dep::mwimp + m_proton);
+      double q0 = 0.04; // reference momentum transfer: 40 MeV
+      result = gev2cm2/pi*pow(reduced_mass*gpa,2.0)*pow(q0/(*Dep::mwimp)/2.0,2.0);
+    }
+
+    /// Simple calculator of the scalar-pseudoscalar WIMP-neutron cross-section,
+    /// evaluated at a typical momentum transfer q0.
+    /// (for Higgs-portal model) 
+    void sigma_SIq2_n_simple(double &result)
+    {
+      using namespace Pipes::sigma_SIq2_n_simple;
+      double gna = Dep::DD_couplings->gna;
+      double reduced_mass = *Dep::mwimp * m_neutron / (*Dep::mwimp + m_neutron);
+      double q0 = 0.04; // reference momentum transfer: 40 MeV
+      result = gev2cm2/pi*pow(reduced_mass*gna,2.0)*pow(q0/(*Dep::mwimp)/2.0,2.0);
     }
 
 
