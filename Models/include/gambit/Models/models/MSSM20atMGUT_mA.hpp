@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  MSSM20atQ_mA model definition.
+///  MSSM20atMGUT_mA model definition.
 ///
 ///  *********************************************
 ///
@@ -14,18 +14,18 @@
 ///
 ///  *********************************************
 
-#ifndef __MSSM20atQ_mA_hpp__
-#define __MSSM20atQ_mA_hpp__
+#ifndef __MSSM20atMGUT_mA_hpp__
+#define __MSSM20atMGUT_mA_hpp__
 
 // Parent model must be declared first! Include it here to ensure that this happens.
-#include "gambit/Models/models/MSSM25atQ_mA.hpp"
-#include "gambit/Models/models/MSSM20atQ.hpp"
+#include "gambit/Models/models/MSSM25atMGUT_mA.hpp"
+#include "gambit/Models/models/MSSM20atMGUT.hpp"
 
-#define MODEL MSSM20atQ_mA
-#define PARENT MSSM25atQ_mA
+#define MODEL MSSM20atMGUT_mA
+#define PARENT MSSM25atMGUT_mA
   START_MODEL
 
-  DEFINEPARS(Qin,TanBeta,
+  DEFINEPARS(TanBeta,
              mA,mu,M1,M2,M3)
 
   DEFINEPARS(mq2_12, mq2_3)
@@ -44,9 +44,9 @@
 
   DEFINEPARS(Au_3)
 
-  INTERPRET_AS_PARENT_FUNCTION(MSSM20atQ_mA_to_MSSM25atQ_mA)
-  INTERPRET_AS_X_FUNCTION(MSSM20atQ, MSSM20atQ_mA_to_MSSM20atQ)
-  INTERPRET_AS_X_DEPENDENCY(MSSM20atQ, unimproved_MSSM_spectrum, Spectrum)
+  INTERPRET_AS_PARENT_FUNCTION(MSSM20atMGUT_mA_to_MSSM25atMGUT_mA)
+  INTERPRET_AS_X_FUNCTION(MSSM20atMGUT, MSSM20atMGUT_mA_to_MSSM20atMGUT)
+  INTERPRET_AS_X_DEPENDENCY(MSSM20atMGUT, unimproved_MSSM_spectrum, Spectrum)
 
 #undef PARENT
 #undef MODEL

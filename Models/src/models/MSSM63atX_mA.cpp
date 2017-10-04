@@ -5,6 +5,11 @@
 ///  'mA' versions of 63 parameter MSSM, back to
 ///  the corresponding mhu2 mhd2 parameterisations
 ///
+///  Contains translation functions for:
+///   MSSM63atQ_mA     --> MSSM63atQ
+///   MSSM63atMGUT_mA  --> MSSM63atMGUT
+///   MSSM63atMSUSY_mA --> MSSM63atMSUSY
+///
 ///  *********************************************
 ///
 ///  Authors
@@ -18,7 +23,7 @@
 ///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
-///  \date 2017 Sep
+///  \date 2017 Sep, Oct
 ///
 ///  *********************************************
 
@@ -42,7 +47,7 @@
 namespace Gambit { 
   void MSSM_mA_to_MSSM_mhud(const ModelParameters &myP, ModelParameters &targetP, const SubSpectrum& HE)
   {
-     // Copy all the common parameters of MSSM63atMGUT into MSSM63atQ
+     // Copy all the common parameters of MSSM63at<X>_mA into MSSM63at<X>
      targetP.setValues(myP,false); // Set "missing_is_error" flag to false since e.g. mA parameter from MSSM63atQ_mA does not exist in MSSM63atQ. Similar for variants at other scales.
   
      // Set the sign of mu
@@ -58,15 +63,10 @@ namespace Gambit {
      else
      {
         model_error().raise(LOCAL_INFO,"Parameter with name 'mHu2' or 'mHd2' (type Par::mass2) not found in Spectrum object! "
-                                       "Translation from MSSM63*_mA to MSSM63* is not possible without this value. "
+                                       "Translation from MSSM<X>_mA to MSSM<X> is not possible without this value. "
                                        "Please use a Spectrum wrapper that provides it.");
      }
   
-     // Done! Check that everything is ok if desired.
-     #ifdef MSSM63_mA_DBUG
-       std::cout << "MSSM63*_mA parameters:" << myP << std::endl;
-       std::cout << "MSSM63* parameters   :" << targetP << std::endl;
-     #endif
   }
 }
 /// @{ Actual translation function definitions

@@ -2946,17 +2946,50 @@ MSSM16atQ_parameters: |
 MSSM19atQ_parameters: |
    Parameters for the model MSSM19atQ (see ./gambit MSSM19atQ)
 
+MSSM20atMSUSY_parameters: |
+   Parameters for the model MSSM20atMSUSY (see ./gambit MSSM20atMSUSY)
+
+MSSM20atMSUSY_mA_parameters: |
+   Parameters for the model MSSM20atMSUSY_mA (see ./gambit MSSM20atMSUSY_mA)
+
+MSSM20atMGUT_parameters: |
+   Parameters for the model MSSM20atMGUT (see ./gambit MSSM20atMGUT)
+
+MSSM20atMGUT_mA_parameters: |
+   Parameters for the model MSSM20atMGUT_mA (see ./gambit MSSM20atMGUT_mA)
+
 MSSM20atQ_parameters: |
    Parameters for the model MSSM20atQ (see ./gambit MSSM20atQ)
 
 MSSM24atQ_parameters: |
    Parameters for the model MSSM24atQ (see ./gambit MSSM24atQ)
 
+MSSM25atMSUSY_parameters: |
+   Parameters for the model MSSM25atMSUSY (see ./gambit MSSM25atMSUSY)
+
+MSSM25atMSUSY_mA_parameters: |
+   Parameters for the model MSSM25atMSUSY_mA (see ./gambit MSSM25atMSUSY_mA)
+
+MSSM25atMGUT_parameters: |
+   Parameters for the model MSSM25atMGUT (see ./gambit MSSM25atMGUT)
+
+MSSM25atMGUT_mA_parameters: |
+   Parameters for the model MSSM25atMGUT_mA (see ./gambit MSSM25atMGUT_mA)
+
 MSSM25atQ_parameters: |
    Parameters for the model MSSM25atQ (see ./gambit MSSM25atQ)
 
+MSSM30atMSUSY_parameters: |
+   Parameters for the model MSSM30atMSUSY (see ./gambit MSSM30atMSUSY)
+
+MSSM30atMSUSY_mA_parameters: |
+   Parameters for the model MSSM30atMSUSY_mA (see ./gambit MSSM30atMSUSY_mA)
+
 MSSM30atMGUT_parameters: |
    Parameters for the model MSSM30atMGUT (see ./gambit MSSM30atMGUT)
+
+MSSM30atMGUT_mA_parameters: |
+   Parameters for the model MSSM30atMGUT_mA (see ./gambit MSSM30atMGUT_mA)
 
 MSSM30atQ_parameters: |
    Parameters for the model MSSM30atQ (see ./gambit MSSM30atQ)

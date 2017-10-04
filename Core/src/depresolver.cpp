@@ -55,7 +55,7 @@
 #define LOOP_MANAGER_DEPENDENCY 2
 
 // Debug flag
-#define DEPRES_DEBUG
+//#define DEPRES_DEBUG
 
 namespace Gambit
 {
