@@ -1,7 +1,7 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  MSSM30atMGUT model definition
+///  MSSM30atMSUSY model definition
 ///
 ///  Specialisation of MSSM63atQ with all 
 ///  off-diagonal m and A terms set to zero.
@@ -14,18 +14,18 @@
 ///
 ///  \author Ben Farmer
 ///          (ben.farmer@gmail.com)
-///  \date 2015 Aug
+///  \date 2017 Oct
 ///
 ///  *********************************************
 
-#ifndef __MSSM30atMGUT_hpp__
-#define __MSSM30atMGUT_hpp__
+#ifndef __MSSM30atMSUSY_hpp__
+#define __MSSM30atMSUSY_hpp__
 
-#include "gambit/Models/models/MSSM63atMGUT.hpp" // Parent model must be declared first! Include it here to ensure that this happens.
+#include "gambit/Models/models/MSSM63atMSUSY.hpp" // Parent model must be declared first! Include it here to ensure that this happens.
 
 /// FlexibleSUSY compatible general (78 parameters plus sign) MSSM parameterisation
-#define MODEL MSSM30atMGUT
-#define PARENT MSSM63atMGUT
+#define MODEL MSSM30atMSUSY
+#define PARENT MSSM63atMSUSY
   START_MODEL
 
   DEFINEPARS(TanBeta,SignMu,
@@ -47,8 +47,8 @@
 
   DEFINEPARS(Au_1, Au_2, Au_3)
 
-  INTERPRET_AS_PARENT_FUNCTION(MSSM30atMGUT_to_MSSM63atMGUT)
-  INTERPRET_AS_X_FUNCTION(MSSM30atQ, MSSM30atMGUT_to_MSSM30atQ)
+  INTERPRET_AS_PARENT_FUNCTION(MSSM30atMSUSY_to_MSSM63atMSUSY)
+  INTERPRET_AS_X_FUNCTION(MSSM30atQ, MSSM30atMSUSY_to_MSSM30atQ)
   INTERPRET_AS_X_DEPENDENCY(MSSM30atQ, unimproved_MSSM_spectrum, Spectrum)
 
 #undef PARENT

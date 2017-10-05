@@ -1,10 +1,32 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  MSSMD30atQ translation function definitions
+///  MSSM30atX translation function definitions
 ///
-///  Specialisation of MSSM63atQ with all 
+///  Specialisations of MSSM63atQ with all 
 ///  off-diagonal m and A terms set to zero.
+///
+///  Contains the interpret-as-parent translation 
+///  functions for:
+///
+///  MSSM30atQ        --> MSSM63atQ
+///  MSSM30atQ_mA     --> MSSM63atQ_mA
+///  MSSM30atMGUT     --> MSSM63atMGUT
+///  MSSM30atMGUT_mA  --> MSSM63atMGUT_mA
+///  MSSM30atMSUSY    --> MSSM63atMSUSY
+///  MSSM30atMSUSY_mA --> MSSM63atMSUSY_mA
+///
+///  As well as the interpret-as-friend translation
+///  functions for:
+///
+///  MSSM30atQ_mA     --> MSSM30atQ
+///  MSSM30atMGUT_mA  --> MSSM30atMGUT
+///  MSSM30atMSUSY_mA --> MSSM30atMSUSY
+///
+///  and
+///
+///  MSSM30atMGUT  --> MSSM30atQ
+///  MSSM30atMSUSY --> MSSM30atQ
 ///
 ///  *********************************************
 ///
@@ -15,7 +37,7 @@
 ///
 ///  \author Ben Farmer
 ///          (ben.farmer@gmail.com)
-///  \date 2015 Aug
+///  \date 2017 Oct
 ///
 ///  *********************************************
 
@@ -27,31 +49,27 @@
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
+#include "gambit/Models/models/MSSM63atQ.hpp" // Contains declaration of MSSM_mA_to_MSSM_mhud and MSSMatX_to_MSSMatQ functions
 #include "gambit/Models/models/MSSM30atQ.hpp"
+#include "gambit/Models/models/MSSM30atQ_mA.hpp"
+#include "gambit/Models/models/MSSM30atMGUT.hpp"
+#include "gambit/Models/models/MSSM30atMGUT_mA.hpp"
+#include "gambit/Models/models/MSSM30atMSUSY.hpp"
+#include "gambit/Models/models/MSSM30atMSUSY_mA.hpp"
 
-
-// Activate debug output
-//#define MSSM30atQ_DBUG
+#include "gambit/Elements/spectrum.hpp"
 
 using namespace Gambit::Utils;
 
-#define MODEL MSSM30atQ
-  void MODEL_NAMESPACE::MSSM30atQ_to_MSSM63atQ (const ModelParameters &myP, ModelParameters &targetP)
+// General helper translation function definition
+namespace Gambit { 
+  void MSSM30atX_to_MSSM63atX(const ModelParameters &myP, ModelParameters &targetP)
   {
-     logger()<<"Running interpret_as_parent calculations for MSSM30atQ --> MSSM63atQ..."<<LogTags::info<<EOM;
-    
-     targetP.setValue("Qin",     myP["Qin"] );
-     targetP.setValue("TanBeta", myP["TanBeta"] );
-     targetP.setValue("SignMu",  myP["SignMu"] );
 
-     // soft gaugino masses
-     targetP.setValue("M1",  myP["M1"] );
-     targetP.setValue("M2",  myP["M2"] );
-     targetP.setValue("M3",  myP["M3"] );
-  
-     // soft Higgs masses
-     targetP.setValue("mHu2",  myP["mHu2"] );
-     targetP.setValue("mHd2",  myP["mHd2"] );
+     // Copy all common parameters of MSSM30atX into MSSM63atX
+     targetP.setValues(myP,false);
+    
+     // Manually set parameters that differ
 
      // RH squark soft masses
      // Off-diagonal elements set to zero
@@ -172,11 +190,90 @@ using namespace Gambit::Utils;
      targetP.setValue("Au_32",  0. );
      targetP.setValue("Au_33",  myP["Au_3"] );
 
-     // Whew, done!
-     #ifdef MSSM30atQ_DBUG
-       std::cout << "MSSM30atQ parameters:" << myP << std::endl;
-       std::cout << "MSSM63atQ parameters:" << targetP << std::endl;
-     #endif
+     // Done!
   }
+}
 
+/// @{ Interpret-as-parent function definitions
+/// These are particularly repetitive so let's define them with the help of a macro
+#define DEFINE_IAPFUNC(PARENT) \
+void MODEL_NAMESPACE::CAT_3(MODEL,_to_,PARENT) (const ModelParameters &myP, ModelParameters &targetP) \
+{ \
+   logger()<<"Running interpret_as_parent calculations for " STRINGIFY(MODEL) " --> " STRINGIFY(PARENT) "..."<<LogTags::info<<EOM; \
+   MSSM30atX_to_MSSM63atX(myP, targetP); \
+} \
+
+#define MODEL MSSM30atQ
+DEFINE_IAPFUNC(MSSM63atQ)
 #undef MODEL
+#define MODEL MSSM30atQ_mA
+DEFINE_IAPFUNC(MSSM63atQ_mA)
+#undef MODEL
+#define MODEL MSSM30atMGUT
+DEFINE_IAPFUNC(MSSM63atMGUT)
+#undef MODEL
+#define MODEL MSSM30atMGUT_mA
+DEFINE_IAPFUNC(MSSM63atMGUT_mA)
+#undef MODEL
+#define MODEL MSSM30atMSUSY
+DEFINE_IAPFUNC(MSSM63atMSUSY)
+#undef MODEL
+#define MODEL MSSM30atMSUSY_mA
+DEFINE_IAPFUNC(MSSM63atMSUSY_mA)
+#undef MODEL
+/// @}
+
+/// @{ Interpret-as-friend (mA parameterisations to primary parameterisations)
+#define MODEL MSSM30atQ_mA
+void MODEL_NAMESPACE::MSSM30atQ_mA_to_MSSM30atQ(const ModelParameters &myP, ModelParameters &targetP)
+{
+   logger()<<"Running interpret_as_X calculations for MSSM30atQ_mA --> MSSM30atQ."<<LogTags::info<<EOM;
+   USE_MODEL_PIPE(MSSM30atQ) // Need the pipe for the TARGET model
+   const SubSpectrum& HE = Dep::unimproved_MSSM_spectrum->get_HE();
+   MSSM_mA_to_MSSM_mhud(myP, targetP, HE);
+}
+#undef MODEL
+
+#define MODEL MSSM30atMGUT_mA
+void MODEL_NAMESPACE::MSSM30atMGUT_mA_to_MSSM30atMGUT(const ModelParameters &myP, ModelParameters &targetP)
+{
+   logger()<<"Running interpret_as_X calculations for MSSM30atMGUT_mA --> MSSM30atMGUT."<<LogTags::info<<EOM;
+   USE_MODEL_PIPE(MSSM30atMGUT) // Need the pipe for the TARGET model
+   const SubSpectrum& HE = Dep::unimproved_MSSM_spectrum->get_HE();
+   MSSM_mA_to_MSSM_mhud(myP, targetP, HE);
+}
+#undef MODEL
+
+#define MODEL MSSM30atMSUSY_mA
+void MODEL_NAMESPACE::MSSM30atMSUSY_mA_to_MSSM30atMSUSY(const ModelParameters &myP, ModelParameters &targetP)
+{
+   logger()<<"Running interpret_as_X calculations for MSSM30atMSUSY_mA --> MSSM30atMSUSY."<<LogTags::info<<EOM;
+   USE_MODEL_PIPE(MSSM30atMSUSY) // Need the pipe for the TARGET model
+   const SubSpectrum& HE = Dep::unimproved_MSSM_spectrum->get_HE();
+   MSSM_mA_to_MSSM_mhud(myP, targetP, HE);
+}
+#undef MODEL
+/// @}
+
+/// @{ Interpret-as-friend (MGUT and MSUSY to Q, in primary parameterisation only)
+#define MODEL MSSM30atMGUT
+void MODEL_NAMESPACE::MSSM30atMGUT_to_MSSM30atQ (const ModelParameters &myP, ModelParameters &targetP)
+{
+   USE_MODEL_PIPE(MSSM30atQ) // Need pipe for TARGET model
+   logger()<<"Running interpret_as_X calculations for MSSM30atMGUT --> MSSM30atQ..."<<LogTags::info<<EOM;
+   const SubSpectrum& HE = Dep::unimproved_MSSM_spectrum->get_HE();
+   MSSMatX_to_MSSMatQ(myP, targetP, HE);
+}
+#undef MODEL
+
+#define MODEL MSSM30atMSUSY
+void MODEL_NAMESPACE::MSSM30atMSUSY_to_MSSM30atQ (const ModelParameters &myP, ModelParameters &targetP)
+{
+   USE_MODEL_PIPE(MSSM30atQ) // Need pipe for TARGET model
+   logger()<<"Running interpret_as_X calculations for MSSM30atMSUSY --> MSSM30atQ..."<<LogTags::info<<EOM;
+   const SubSpectrum& HE = Dep::unimproved_MSSM_spectrum->get_HE();
+   MSSMatX_to_MSSMatQ(myP, targetP, HE);
+}
+#undef MODEL
+
+/// @}
