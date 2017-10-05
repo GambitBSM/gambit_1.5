@@ -137,7 +137,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set(FS_OPTIONS ${FS_OPTIONS}
        --with-cxx=${CMAKE_CXX_COMPILER}
        --with-cxxflags=${FS_CXX_FLAGS}
-       --with-ldflags=${OpenMP_CXX_FLAGS}
+       --with-shared-ldflags=${OpenMP_CXX_FLAGS}
        --with-fc=${CMAKE_Fortran_COMPILER}
        --with-fflags=${FS_Fortran_FLAGS}
        --with-eigen-incdir=${EIGEN3_INCLUDE_DIR}
@@ -149,7 +149,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
      )
 
   # Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need)
-  set(BUILT_FS_MODELS CMSSM MSSMatMGUT MSSM SingletDMZ3 SingletDM)
+  set(BUILT_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu SingletDMZ3 SingletDM)
 
   # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
   string (REPLACE ";" "," BUILT_FS_MODELS_COMMAS "${BUILT_FS_MODELS}")
@@ -180,7 +180,8 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   )
 
   # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
-  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy -L${FS_DIR}/legacy -llegacy ${flexiblesusy_LDFLAGS}")
+  # for v 1.5.1 add "-L${FS_DIR}/legacy -llegacy"  after "-lflexiblesusy"
+  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
   foreach(_MODEL ${BUILT_FS_MODELS})
     set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
   endforeach()

@@ -115,6 +115,17 @@ namespace Gambit
     return 0;
   }
 
+  /// Set model name string in a primary model functor
+  int set_model_name(model_functor& primary_parameters, str model_name)
+  {
+    try
+    {
+      primary_parameters.setModelName(model_name);
+    }
+    catch (std::exception& e) { ini_catch(e); }
+    return 0;
+  }
+
   /// Tell a model functor to take its parameter definition from another model functor.
   int copy_parameters(model_functor& donor, model_functor& donee, bool add_friend, str model, str model_x)
   {

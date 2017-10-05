@@ -16,35 +16,28 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:43
+// File generated at Sun 24 Sep 2017 15:56:23
 
 /**
  * @file NSM_two_scale_model.cpp
  * @brief implementation of the NSM model class
  *
  * Contains the definition of the NSM model class methods
- * which solve EWSB and calculate pole masses and mixings from DRbar
+ * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Sat 27 Aug 2016 12:40:43 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Sun 24 Sep 2017 15:56:23 with FlexibleSUSY
+ * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
  */
 
 #include "NSM_two_scale_model.hpp"
 
 namespace flexiblesusy {
 
-using namespace NSM_info;
-
 #define CLASSNAME NSM<Two_scale>
 
 CLASSNAME::NSM(const NSM_input_parameters& input_)
-   : Two_scale_model()
-   , NSM_mass_eigenstates(input_)
-{
-}
-
-CLASSNAME::~NSM()
+   : NSM_mass_eigenstates(input_)
 {
 }
 

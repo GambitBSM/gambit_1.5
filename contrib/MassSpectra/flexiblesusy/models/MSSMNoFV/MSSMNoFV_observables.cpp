@@ -16,10 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:22
+// File generated at Sun 24 Sep 2017 16:20:28
 
 #include "MSSMNoFV_observables.hpp"
 #include "MSSMNoFV_mass_eigenstates.hpp"
+#include "MSSMNoFV_a_muon.hpp"
+#include "MSSMNoFV_edm.hpp"
 #include "MSSMNoFV_effective_couplings.hpp"
 #include "gm2calc_interface.hpp"
 #include "eigen_utils.hpp"
@@ -29,8 +31,12 @@
 #include "physical_input.hpp"
 
 #define MODEL model
+#define AMU a_muon
+#define AMUUNCERTAINTY a_muon_uncertainty
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty
+#define EDM0(p) edm_ ## p
+#define EDM1(p,idx) edm_ ## p ## _ ## idx
 #define EFFCPHIGGSPHOTONPHOTON eff_cp_higgs_photon_photon
 #define EFFCPHIGGSGLUONGLUON eff_cp_higgs_gluon_gluon
 #define EFFCPPSEUDOSCALARPHOTONPHOTON eff_cp_pseudoscalar_photon_photon
@@ -46,10 +52,11 @@
 
 namespace flexiblesusy {
 
-const unsigned MSSMNoFV_observables::NUMBER_OF_OBSERVABLES;
+const int MSSMNoFV_observables::NUMBER_OF_OBSERVABLES;
 
 MSSMNoFV_observables::MSSMNoFV_observables()
-   : a_muon_gm2calc(0)
+   : a_muon(0)
+   , a_muon_gm2calc(0)
    , a_muon_gm2calc_uncertainty(0)
 
 {
@@ -59,8 +66,9 @@ Eigen::ArrayXd MSSMNoFV_observables::get() const
 {
    Eigen::ArrayXd vec(MSSMNoFV_observables::NUMBER_OF_OBSERVABLES);
 
-   vec(0) = a_muon_gm2calc;
-   vec(1) = a_muon_gm2calc_uncertainty;
+   vec(0) = a_muon;
+   vec(1) = a_muon_gm2calc;
+   vec(2) = a_muon_gm2calc_uncertainty;
 
    return vec;
 }
@@ -69,14 +77,16 @@ std::vector<std::string> MSSMNoFV_observables::get_names()
 {
    std::vector<std::string> names(MSSMNoFV_observables::NUMBER_OF_OBSERVABLES);
 
-   names[0] = "a_muon_gm2calc";
-   names[1] = "a_muon_gm2calc_uncertainty";
+   names[0] = "a_muon";
+   names[1] = "a_muon_gm2calc";
+   names[2] = "a_muon_gm2calc_uncertainty";
 
    return names;
 }
 
 void MSSMNoFV_observables::clear()
 {
+   a_muon = 0.;
    a_muon_gm2calc = 0.;
    a_muon_gm2calc_uncertainty = 0.;
 
@@ -86,9 +96,23 @@ void MSSMNoFV_observables::set(const Eigen::ArrayXd& vec)
 {
    assert(vec.rows() == MSSMNoFV_observables::NUMBER_OF_OBSERVABLES);
 
-   a_muon_gm2calc = vec(0);
-   a_muon_gm2calc_uncertainty = vec(1);
+   a_muon = vec(0);
+   a_muon_gm2calc = vec(1);
+   a_muon_gm2calc_uncertainty = vec(2);
 
+}
+
+MSSMNoFV_observables calculate_observables(const MSSMNoFV_mass_eigenstates& model,
+                                              const softsusy::QedQcd& qedqcd,
+                                              const Physical_input& physical_input,
+                                              double scale)
+{
+   auto model_at_scale = model;
+
+   if (scale > 0.)
+      model_at_scale.run_to(scale);
+
+   return calculate_observables(model_at_scale, qedqcd, physical_input);
 }
 
 MSSMNoFV_observables calculate_observables(const MSSMNoFV_mass_eigenstates& model,
@@ -124,10 +148,11 @@ MSSMNoFV_observables calculate_observables(const MSSMNoFV_mass_eigenstates& mode
    gm2calc_data.md2   = MODEL.get_md2();
    gm2calc_data.ml2   = MODEL.get_ml2();
    gm2calc_data.me2   = MODEL.get_me2();
-   gm2calc_data.Au    = div_save(MODEL.get_TYu(), MODEL.get_Yu());
-   gm2calc_data.Ad    = div_save(MODEL.get_TYd(), MODEL.get_Yd());
-   gm2calc_data.Ae    = div_save(MODEL.get_TYe(), MODEL.get_Ye());
+   gm2calc_data.Au    = div_safe(MODEL.get_TYu(), MODEL.get_Yu());
+   gm2calc_data.Ad    = div_safe(MODEL.get_TYd(), MODEL.get_Yd());
+   gm2calc_data.Ae    = div_safe(MODEL.get_TYe(), MODEL.get_Ye());
 
+   observables.AMU = MSSMNoFV_a_muon::calculate_a_muon(MODEL);
    observables.AMUGM2CALC = gm2calc_calculate_amu(gm2calc_data);
    observables.AMUGM2CALCUNCERTAINTY = gm2calc_calculate_amu_uncertainty(gm2calc_data);
 
