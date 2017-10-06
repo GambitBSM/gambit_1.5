@@ -13,8 +13,8 @@
 ///  \date 2015 Aug
 ///
 ///  \author Tomas Gonzalo
-///	     (t.e.gonzalo@fys.uio.no)
-///  \date 2016 Mar - June
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Mar, June, Sept
 ///
 ///  *********************************************
 
@@ -22,6 +22,21 @@
 #define __SpecBit_tests_hpp__
 
    /// @{ Functions to test Spectrum objects
+
+   #define CAPABILITY MathematicaTest
+   START_CAPABILITY
+
+     #define FUNCTION Math_test
+     START_FUNCTION(bool)
+     BACKEND_REQ(MathTest, (), double, (const int&,const int&))
+     #undef FUNCTION
+
+     #define FUNCTION SUSYHD_test
+     START_FUNCTION(bool)
+     DEPENDENCY(prec_mh, triplet<double>)
+     #undef FUNCTION
+
+   #undef CAPABILITY
 
    #define CAPABILITY run_MSSMspectrum_test
    START_CAPABILITY
