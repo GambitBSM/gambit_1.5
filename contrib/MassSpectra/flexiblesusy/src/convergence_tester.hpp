@@ -21,8 +21,13 @@
 
 namespace flexiblesusy {
 
-template <class T>
-class Convergence_tester;
+class Convergence_tester {
+public:
+   virtual ~Convergence_tester() = default;
+   virtual bool accuracy_goal_reached() = 0;
+   virtual int max_iterations() const = 0;
+   virtual void restart() = 0;
+};
 
 }
 

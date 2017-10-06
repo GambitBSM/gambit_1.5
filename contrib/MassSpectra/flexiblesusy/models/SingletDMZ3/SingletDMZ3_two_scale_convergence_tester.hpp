@@ -16,14 +16,15 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:51
+// File generated at Tue 26 Sep 2017 22:42:41
 
 #ifndef SingletDMZ3_TWO_SCALE_CONVERGENCE_TESTER_H
 #define SingletDMZ3_TWO_SCALE_CONVERGENCE_TESTER_H
 
 #include "SingletDMZ3_convergence_tester.hpp"
 #include "SingletDMZ3_two_scale_model.hpp"
-#include "two_scale_convergence_tester_drbar.hpp"
+
+#include "convergence_tester_drbar.hpp"
 
 namespace flexiblesusy {
 
@@ -32,8 +33,10 @@ class Two_scale;
 template<>
 class SingletDMZ3_convergence_tester<Two_scale> : public Convergence_tester_DRbar<SingletDMZ3<Two_scale> > {
 public:
-   SingletDMZ3_convergence_tester(SingletDMZ3<Two_scale>*, double);
-   virtual ~SingletDMZ3_convergence_tester();
+   using Scale_getter = Convergence_tester_DRbar<SingletDMZ3<Two_scale>>::Scale_getter;
+
+   SingletDMZ3_convergence_tester(SingletDMZ3<Two_scale>*, double, const Scale_getter& sg = Scale_getter());
+   virtual ~SingletDMZ3_convergence_tester() = default;
 
 protected:
    virtual double max_rel_diff() const;

@@ -19,6 +19,7 @@
 #ifndef SFERMIONS_H
 #define SFERMIONS_H
 
+#include <array>
 #include <Eigen/Core>
 
 namespace flexiblesusy {
@@ -32,14 +33,13 @@ enum Sparticles {
    NUMBER_OF_MSSM_SPARTICLES
 };
 
-extern const double Isospin[NUMBER_OF_MSSM_SPARTICLES];
-extern const double Hypercharge_left[NUMBER_OF_MSSM_SPARTICLES];
-extern const double Hypercharge_right[NUMBER_OF_MSSM_SPARTICLES];
-
+extern const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Isospin;
+extern const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_left;
+extern const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_right;
 
 /**
- * data needed to fill 2 x 2 sfermion mass matrix 
- */ 
+ * parameters needed to fill 2 x 2 sfermion mass matrix
+ */
 struct Mass_data {
    double ml2;    ///< soft mass of left-handed sfermion
    double mr2;    ///< soft mass of right-handed sfermion

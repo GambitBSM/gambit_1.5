@@ -20,11 +20,13 @@
 #define SPLIT_THREELOOPHIGGS_H
 
 namespace flexiblesusy {
+namespace split_threeloophiggs {
 
 /// Higgs self-energy 3-loop, gluino contribution O(alpha_t alpha_s^2)
 double self_energy_higgs_3loop_gluino_split(
    double scale, double mt, double yt, double g3, double mg);
 
+} // namespace split_threeloophiggs
 } // namespace flexiblesusy
 
 #endif

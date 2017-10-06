@@ -16,25 +16,25 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@fysik.su.se)
 ///  \date 2015 May
 ///
 ///  *********************************************
- 
+
 #ifndef __DataSetInterfaceBase_hpp__
 #define __DataSetInterfaceBase_hpp__
 
 // HDF5 C bindings
-#include <hdf5.h> 
- 
+#include <hdf5.h>
+
 // Gambit
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include "gambit/Logs/logger.hpp"
 
 namespace Gambit {
-  
+
   namespace Printers {
 
       /// Wrapper object to manage a single dataset
@@ -44,12 +44,12 @@ namespace Gambit {
       template<class T, std::size_t RECORDRANK, std::size_t CHUNKLENGTH>
       class DataSetInterfaceBase
       {
-        private: 
+        private:
          static const std::size_t DSETRANK = RECORDRANK+1; // Rank of the dataset array
          hid_t mylocation_id; // handle for where this datasets is located in the hdf5 file
-         std::string myname; // name of the dataset in the hdf5 file         
+         std::string myname; // name of the dataset in the hdf5 file
 
-         // Dimension sizes for each record. 
+         // Dimension sizes for each record.
          // This only needs to be RECORDRANK long, however zero-size arrays are not
          // standard compliant so we will use arrays one larger than we need and
          // just ignore the last entry.
@@ -78,7 +78,7 @@ namespace Gambit {
 
          // Safe(r) getter for dataset handle
          hid_t get_dset_id() const
-         { 
+         {
            if(this->dset_id<0)
            {
               std::ostringstream errmsg;
@@ -86,12 +86,12 @@ namespace Gambit {
               printer_error().raise(LOCAL_INFO, errmsg.str());
            }
            return this->dset_id;
-         } 
+         }
 
          // index of the beginning of the next empty slot in the output array
          // i.e. the offset in dimension 0 of the dataset needed to select the
          // next output hyperslab.
-         unsigned long dsetnextemptyslab;       
+         unsigned long dsetnextemptyslab;
 
          // currently targeted index in output dataset
          // "Virtual" because write will not directly go to this position, it
@@ -110,20 +110,20 @@ namespace Gambit {
          unsigned long get_nextemptyslab() const     { return dsetnextemptyslab; }
          unsigned long dset_length() const            { return dims[0]; }
          char access_mode() const            { return access; }
- 
+
          // To point "next write" cursor back at the beginning of a dataset, for overwriting everything
          void reset_nextemptyslab() { dsetnextemptyslab = 0; }
 
-         // Full accessor needed for dataset dimensions 
+         // Full accessor needed for dataset dimensions
          // so that they can be updated when chunks are added
          hsize_t* dsetdims() { return dims; }
 
          /// Constructors
-         DataSetInterfaceBase(); 
+         DataSetInterfaceBase();
          DataSetInterfaceBase(hid_t location_id, const std::string& name, const std::size_t rdims[DSETRANK], const bool resume, const char access);
-         virtual ~DataSetInterfaceBase(); 
+         virtual ~DataSetInterfaceBase();
 
-         /// Create a (chunked) dataset 
+         /// Create a (chunked) dataset
          hid_t createDataSet(hid_t location_id, const std::string& name, const std::size_t rdims[DSETRANK]);
 
          /// Open an existing dataset
@@ -142,11 +142,11 @@ namespace Gambit {
 
       // Define some static members
       template<class T, std::size_t RR, std::size_t CL>
-      const hid_t DataSetInterfaceBase<T,RR,CL>::hdftype_id = get_hdf5_data_type<T>::type(); 
+      const hid_t DataSetInterfaceBase<T,RR,CL>::hdftype_id = get_hdf5_data_type<T>::type();
 
       /// Constructors
       template<class T, std::size_t RR, std::size_t CL>
-      DataSetInterfaceBase<T,RR,CL>::DataSetInterfaceBase() 
+      DataSetInterfaceBase<T,RR,CL>::DataSetInterfaceBase()
         : mylocation_id(-1)
         , myname()
         , record_dims()
@@ -163,7 +163,7 @@ namespace Gambit {
         , record_dims() /* doh have to copy array element by element */
         , resume(r)
         , access(a)
-        , dset_id(-1) 
+        , dset_id(-1)
         , dsetnextemptyslab(0)
       {
         if(resume)
@@ -177,13 +177,13 @@ namespace Gambit {
         if(dset_id<0)
         {
            std::ostringstream errmsg;
-           errmsg << "Error! Failed to attach interface to dataset '"<<this->get_myname()<<"', and problem was not caught during open or create routine! This is a bug, please fix."; 
+           errmsg << "Error! Failed to attach interface to dataset '"<<this->get_myname()<<"', and problem was not caught during open or create routine! This is a bug, please fix.";
            printer_error().raise(LOCAL_INFO, errmsg.str());
         }
         // copy rdims to record_dims
         for(std::size_t i=0; i<DSETRANK; i++) { record_dims[i] = rdims[i]; }
       }
- 
+
       /// Do cleanup (close dataset)
       template<class T, std::size_t RR, std::size_t CL>
       DataSetInterfaceBase<T,RR,CL>::~DataSetInterfaceBase()
@@ -195,7 +195,7 @@ namespace Gambit {
          // Or could explicity tell interface to close datasets before the objects are destroyed.
          //if(this->dset_id>=0)
          //{
-         //  herr_t status = H5Dclose(this->dset_id); 
+         //  herr_t status = H5Dclose(this->dset_id);
          //  if(status<0)
          //  {
          //     logger() << LogTags::printers << LogTags::err << "Error destructing DataSetInterfaceBase! Failed to close wrapped dataset! (H5Dclose failed). No exception thrown because this will behave badly when throw from a destructor. (dataset name: "<<myname<<")"<<EOM;
@@ -209,7 +209,7 @@ namespace Gambit {
       {
          if(this->dset_id>=0)
          {
-           herr_t status = H5Dclose(this->dset_id); 
+           herr_t status = H5Dclose(this->dset_id);
            if(status<0)
            {
             std::ostringstream errmsg;
@@ -219,13 +219,13 @@ namespace Gambit {
          }
       }
 
-      /// Create a (chunked) dataset 
+      /// Create a (chunked) dataset
       template<class T, std::size_t RECORDRANK, std::size_t CHUNKLENGTH>
       hid_t DataSetInterfaceBase<T,RECORDRANK,CHUNKLENGTH>::createDataSet(hid_t location_id, const std::string& name, const std::size_t rdims[DSETRANK])
       {
          // I'd like to declare rdims as rdims[RECORDRANK], but apparantly zero length arrays are not allowed,
          // so this would not compile in the RECORDRANK=0 case, which I need. Irritating.
-         
+
          // Compute initial dataspace and chunk dimensions
          dims[0] = 0; //1*CHUNKLENGTH; // Start off with space for 1 chunk
          maxdims[0] = H5S_UNLIMITED; // No upper limit on number of records allowed in dataset
@@ -234,10 +234,10 @@ namespace Gambit {
          std::size_t loopsize = RECORDRANK; // Just tricking the compiler so it doesn't complain in the RECORDRANK=0 case.
          for(std::size_t i=0; i<loopsize; i++)
          {
-            // Set other dimensions to match record size    
-            dims[i+1]      = rdims[i];             
-            maxdims[i+1]   = rdims[i];             
-            chunkdims[i+1] = rdims[i];             
+            // Set other dimensions to match record size
+            dims[i+1]      = rdims[i];
+            maxdims[i+1]   = rdims[i];
+            chunkdims[i+1] = rdims[i];
             slicedims[i+1] = rdims[i];
          }
 
@@ -252,7 +252,7 @@ namespace Gambit {
          }
 
          // Object containing dataset creation parameters
-         //H5::DSetCreatPropList cparms;   
+         //H5::DSetCreatPropList cparms;
          //cparms.setChunk(DSETRANK, chunkdims);
          hid_t cparms_id = H5Pcreate(H5P_DATASET_CREATE);
          if(cparms_id<0)
@@ -274,10 +274,10 @@ namespace Gambit {
          if(location_id==-1)
          {
             std::ostringstream errmsg;
-            errmsg << "Error! Tried to create hdf5 dataset (with name: \""<<myname<<"\") at undefined location (location_id was -1). Please check that calling code supplied a valid location handle. This is a bug, please report it."; 
-            printer_error().raise(LOCAL_INFO, errmsg.str()); 
+            errmsg << "Error! Tried to create hdf5 dataset (with name: \""<<myname<<"\") at undefined location (location_id was -1). Please check that calling code supplied a valid location handle. This is a bug, please report it.";
+            printer_error().raise(LOCAL_INFO, errmsg.str());
          }
- 
+
          // Create the dataset
          hid_t output_dset_id;
          output_dset_id = H5Dcreate2(location_id, name.c_str(), hdftype_id, dspace_id, H5P_DEFAULT, cparms_id, H5P_DEFAULT);
@@ -291,7 +291,7 @@ namespace Gambit {
          return output_dset_id;
       }
 
-      /// Open an existing dataset 
+      /// Open an existing dataset
       /// It is assumed that we are resuming a run and therefore know what format this dataset should have
       template<class T, std::size_t RECORDRANK, std::size_t CHUNKLENGTH>
       hid_t DataSetInterfaceBase<T,RECORDRANK,CHUNKLENGTH>::openDataSet(hid_t location_id, const std::string& name, const std::size_t rdims[DSETRANK])
@@ -301,7 +301,8 @@ namespace Gambit {
          if(out_dset_id<0)
          {
             std::ostringstream errmsg;
-            errmsg << "Error opening existing dataset (with name: \""<<name<<"\") in HDF5 file. H5Dopen2 failed.";
+            errmsg << "Error opening existing dataset (with name: \""<<name<<"\") in HDF5 file. H5Dopen2 failed." << std::endl
+                   << "You may have a corrupt hdf5 file from a previous run. Try using -r, or deleting the old output.";
             printer_error().raise(LOCAL_INFO, errmsg.str());
          }
 
@@ -314,7 +315,7 @@ namespace Gambit {
             errmsg << "Error opening existing dataset (with name: \""<<name<<"\") in HDF5 file. H5Dget_space failed.";
             printer_error().raise(LOCAL_INFO, errmsg.str());
          }
-        
+
          // Get the number of dimensions in the dataspace.
          //int rank = dataspace.getSimpleExtentNdims();
          int rank = H5Sget_simple_extent_ndims(dspace_id);
@@ -334,7 +335,7 @@ namespace Gambit {
          // Get the dimension size of each dimension in the dataspace
          // now that we know ndims matches DSETRANK.
          hsize_t dims_out[DSETRANK];
-         //int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);  
+         //int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);
          int ndims = H5Sget_simple_extent_dims(dspace_id, dims_out, NULL);
          if(ndims<0)
          {
@@ -352,10 +353,10 @@ namespace Gambit {
          std::size_t loopsize = RECORDRANK; // Just tricking the compiler so it doesn't complain in the RECORDRANK=0 case.
          for(std::size_t i=0; i<loopsize; i++)
          {
-            // Set other dimensions to match record size    
-            dims[i+1]      = rdims[i];             
-            maxdims[i+1]   = rdims[i];             
-            chunkdims[i+1] = rdims[i];             
+            // Set other dimensions to match record size
+            dims[i+1]      = rdims[i];
+            maxdims[i+1]   = rdims[i];
+            chunkdims[i+1] = rdims[i];
             slicedims[i+1] = rdims[i];
 
             // Check that record size matches the existing dataset
@@ -366,11 +367,11 @@ namespace Gambit {
                printer_error().raise(LOCAL_INFO, errmsg.str());
             }
          }
-         
+
          // Update the variables which control where the next write will occur
-         // Index of first element in next target hyperslab (assumes that 
+         // Index of first element in next target hyperslab (assumes that
          // existing dataset has been written up to a complete chunk)
-         dsetnextemptyslab = dims[0];  
+         dsetnextemptyslab = dims[0];
 
          return out_dset_id;
       }
@@ -387,14 +388,14 @@ namespace Gambit {
             // unless min_length is itself a multiple of CHUNKLENGTH.
             std::size_t remainder = min_length % CHUNKLENGTH;
             std::size_t newlength;
-            if(remainder==0) { newlength = min_length; } 
+            if(remainder==0) { newlength = min_length; }
             else             { newlength = min_length - remainder + CHUNKLENGTH; }
             #ifdef HDF5_DEBUG
             std::cout << "Requested min_length ("<<min_length<<") larger than current dataset length ("<<current_length<<") (dset name="<<this->get_myname()<<")" << std::endl
                       << "Extending dataset to newlength="<<newlength<<std::endl;
             #endif
             this->dsetdims()[0] = newlength;
-            //this->my_dataset.extend( this->dsetdims() );  
+            //this->my_dataset.extend( this->dsetdims() );
             herr_t status = H5Dset_extent( this->get_dset_id(), this->dsetdims());
             if(status<0)
             {

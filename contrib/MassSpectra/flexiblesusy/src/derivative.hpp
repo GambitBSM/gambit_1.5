@@ -46,7 +46,7 @@ namespace flexiblesusy {
  * @return derivative
  */
 template <class F, class A>
-auto derivative_forward_fx(F&& f, A x, decltype(f(x)) fx, A eps = std::numeric_limits<A>::epsilon())
+auto derivative_forward_fx(const F& f, A x, decltype(f(x)) fx, A eps = std::numeric_limits<A>::epsilon())
    -> decltype(f(x))
 {
    const A h = std::fabs(x) < eps ? eps : std::sqrt(eps) * x;
@@ -71,7 +71,7 @@ auto derivative_forward_fx(F&& f, A x, decltype(f(x)) fx, A eps = std::numeric_l
  * @return derivative
  */
 template <class F, class A>
-auto derivative_backward_fx(F&& f, A x, decltype(f(x)) fx, A eps = std::numeric_limits<A>::epsilon())
+auto derivative_backward_fx(const F& f, A x, decltype(f(x)) fx, A eps = std::numeric_limits<A>::epsilon())
    -> decltype(f(x))
 {
    const A h = std::fabs(x) < eps ? eps : std::sqrt(eps) * x;
@@ -82,24 +82,28 @@ auto derivative_backward_fx(F&& f, A x, decltype(f(x)) fx, A eps = std::numeric_
 
 /**
  * Calculates the 1st derivative of \f$f(x)\f$ up to order \a Order
- * using the forward finite difference.  This function calls
+ * using the one-sided finite difference.  This function calls
  * \f$f(x)\f$ (Order + 2) times.
  *
  * @param f function
  * @param x point at which derivative is to be calculated
  * @param eps measure for step size \f$h\f$
- * @tparam Order order of accuracy (0, 1, 2, 3, 4, 5)
+ * @tparam Order order of accuracy (0, 1, 2, 3, 4, 5, 6, 7)
+ * @tparam sign direction (-1 = forward, +1 = backward derivative)
+ * @tparam F function type
+ * @tparam A function parameter type
  *
  * @return derivative
  */
-template <int Order, class F, class A>
-auto derivative_forward(F&& f, A x, A eps = std::numeric_limits<A>::epsilon()) -> decltype(f(x))
+template <int Order, int sign, class F, class A>
+auto derivative_one_sided(const F& f, A x, A eps = std::numeric_limits<A>::epsilon()) -> decltype(f(x))
 {
-   static_assert(Order <= 5, "1st forward derivative with order > 5 not implemented");
+   static_assert(Order <= 7, "1st forward derivative with order > 7 not implemented");
+   static_assert(sign == -1 || sign == +1, "sign must be either +1 or -1 for one-sided derivative");
 
-   typedef decltype(f(x)) return_type;
+   using return_type = decltype(f(x));
 
-   // coefficients from Math. Comp. 51 (1988), 699-706
+   // coefficients from Math. Comp. 51 (1988), 699-706, Table 3
    // DOI: http://dx.doi.org/10.1090/S0025-5718-1988-0935077-0
    static const std::vector<std::vector<double> > coeffs = {
       {-1., 1.},
@@ -107,18 +111,38 @@ auto derivative_forward(F&& f, A x, A eps = std::numeric_limits<A>::epsilon()) -
       {-11./6., 3., -3./2., 1./3.},
       {-25./12., 4., -3., 4./3., -1./4.},
       {-137./60., 5., -5., 10./3., -5./4., 1./5.},
-      {-49./20., 6., -15./2., 20./3., -15./4., 6./5., -1./6.}
+      {-49./20., 6., -15./2., 20./3., -15./4., 6./5., -1./6.},
+      {-363./140., 7., -21./2., 35./3., -35./4., 21./5., -7./6., 1./7.},
+      {-761./280., 8., -14., 56./3., -35./2., 56./5., -14./3., 8./7., -1./8.}
    };
 
    const A h = std::fabs(x) < eps ? eps : std::sqrt(eps) * x;
    return_type result = 0;
 
-   for (unsigned i = 0; i < Order + 2; i++) {
-      const double coeff = -coeffs[Order][i];
-      result += coeff * f(x - i*h);
+   for (int i = 0; i < Order + 2; i++) {
+      const double coeff = coeffs[Order][i];
+      result += sign * coeff * f(x + sign*i*h);
    }
 
    return result / h;
+}
+
+/**
+ * Calculates the 1st derivative of \f$f(x)\f$ up to order \a Order
+ * using the forward finite difference.  This function calls
+ * \f$f(x)\f$ (Order + 2) times.
+ *
+ * @param f function
+ * @param x point at which derivative is to be calculated
+ * @param eps measure for step size \f$h\f$
+ * @tparam Order order of accuracy (0, 1, 2, 3, 4, 5, 6, 7)
+ *
+ * @return derivative
+ */
+template <int Order, class F, class A>
+auto derivative_forward(const F& f, A x, A eps = std::numeric_limits<A>::epsilon()) -> decltype(f(x))
+{
+   return derivative_one_sided<Order, -1>(f, x, eps);
 }
 
 /**
@@ -129,43 +153,20 @@ auto derivative_forward(F&& f, A x, A eps = std::numeric_limits<A>::epsilon()) -
  * @param f function
  * @param x point at which derivative is to be calculated
  * @param eps measure for step size \f$h\f$
- * @tparam Order order of accuracy (0, 1, 2, 3, 4, 5)
+ * @tparam Order order of accuracy (0, 1, 2, 3, 4, 5, 6, 7)
  *
  * @return derivative
  */
 template <int Order, class F, class A>
-auto derivative_backward(F&& f, A x, A eps = std::numeric_limits<A>::epsilon()) -> decltype(f(x))
+auto derivative_backward(const F& f, A x, A eps = std::numeric_limits<A>::epsilon()) -> decltype(f(x))
 {
-   static_assert(Order <= 5, "1st backward derivative with order > 5 not implemented");
-
-   typedef decltype(f(x)) return_type;
-
-   // coefficients from Math. Comp. 51 (1988), 699-706
-   // DOI: http://dx.doi.org/10.1090/S0025-5718-1988-0935077-0
-   static const std::vector<std::vector<double> > coeffs = {
-      {-1., 1.},
-      {-3./2., 2., -1./2.},
-      {-11./6., 3., -3./2., 1./3.},
-      {-25./12., 4., -3., 4./3., -1./4.},
-      {-137./60., 5., -5., 10./3., -5./4., 1./5.},
-      {-49./20., 6., -15./2., 20./3., -15./4., 6./5., -1./6.}
-   };
-
-   const A h = std::fabs(x) < eps ? eps : std::sqrt(eps) * x;
-   return_type result = 0;
-
-   for (unsigned i = 0; i < Order + 2; i++) {
-      const double coeff = coeffs[Order][i];
-      result += coeff * f(x + i*h);
-   }
-
-   return result / h;
+   return derivative_one_sided<Order, +1>(f, x, eps);
 }
 
 /**
  * Calculates the 1st derivative of \f$f(x)\f$ up to order \a Order
  * using the central finite difference.  This function calls \f$f\f$
- * (Order + 2) times.
+ * 2 * (Order + 1) times.
  *
  * @param f function
  * @param x point at which derivative is to be calculated
@@ -175,14 +176,14 @@ auto derivative_backward(F&& f, A x, A eps = std::numeric_limits<A>::epsilon()) 
  * @return derivative
  */
 template <int Order, class F, class A>
-auto derivative_central(F&& f, A x, A eps = std::numeric_limits<A>::epsilon())
+auto derivative_central(const F& f, A x, A eps = std::numeric_limits<A>::epsilon())
    -> decltype(f(x))
 {
    static_assert(Order <= 3, "1st central derivative with order > 3 not implemented");
 
-   typedef decltype(f(x)) return_type;
+   using return_type = decltype(f(x));
 
-   // coefficients from Math. Comp. 51 (1988), 699-706
+   // coefficients from Math. Comp. 51 (1988), 699-706, Table 1
    // DOI: http://dx.doi.org/10.1090/S0025-5718-1988-0935077-0
    static const std::vector<std::vector<double> > coeffs = {
       {0.5},
@@ -194,7 +195,7 @@ auto derivative_central(F&& f, A x, A eps = std::numeric_limits<A>::epsilon())
    const A h = std::fabs(x) < eps ? eps : std::sqrt(eps) * x;
    return_type result = 0;
 
-   for (unsigned i = 0; i < Order + 1; i++) {
+   for (int i = 0; i < Order + 1; i++) {
       const double coeff = coeffs[Order][i];
       const A step = (i + 1) * h;
       result += coeff * (f(x + step) - f(x - step));

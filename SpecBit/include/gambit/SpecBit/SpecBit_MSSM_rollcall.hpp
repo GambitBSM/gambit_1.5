@@ -56,14 +56,14 @@
     //  member. The SubSpectrum* members point to a "UV" Spectrum object (the MSSM) and an
     //  "LE" (low energy) Spectrum object (an effective Standard Model description), while SMInputs
     //  contains the information in the SMINPUTS block defined by SLHA2.
-    #define FUNCTION get_CMSSM_spectrum
+    #define FUNCTION get_CMSSM_spectrum_FS
     START_FUNCTION(Spectrum)
     ALLOW_MODELS(CMSSM)
     DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
     #undef FUNCTION
 
     // FlexibleSUSY compatible maximal CMSSM generalisation (MSSM with GUT boundary conditions)
-    #define FUNCTION get_MSSMatMGUT_spectrum
+    #define FUNCTION get_MSSMatMGUT_spectrum_FS
     START_FUNCTION(Spectrum)
     ALLOW_MODELS(MSSM63atMGUT)
     DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
@@ -71,9 +71,33 @@
 
     // ==============================
     // MSSM parameterised with input at (user-defined) scale Q
-    #define FUNCTION get_MSSMatQ_spectrum
+    #define FUNCTION get_MSSMatQ_spectrum_FS
     START_FUNCTION(Spectrum)
     ALLOW_MODELS(MSSM63atQ)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at (user-defined) scale Q
+    #define FUNCTION get_MSSMatQ_mA_spectrum_FS
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atQ_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at GUT scale
+    #define FUNCTION get_MSSMatMGUT_mA_spectrum_FS
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atMGUT_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at SUSY scale
+    #define FUNCTION get_MSSMatMSUSY_mA_spectrum_FS
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atMSUSY_mA)
     DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
     #undef FUNCTION
 

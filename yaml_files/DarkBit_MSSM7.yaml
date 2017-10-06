@@ -173,6 +173,9 @@ ObsLikes:
     - capability: XENON100_2012_LogLikelihood
       purpose:    LogLike
 
+    - capability: XENON1T_2017_LogLikelihood
+      purpose:    LogLike
+
     - capability: LUX_2013_LogLikelihood
       purpose:    LogLike
 
@@ -195,6 +198,9 @@ ObsLikes:
       purpose:    LogLike
 
     - capability: PICO_60_F_LogLikelihood
+      purpose:    LogLike
+
+    - capability: PICO_60_2017_LogLikelihood
       purpose:    LogLike
 
     # Calculate all IceCube likelihoods (including 22 string)
@@ -366,7 +372,18 @@ Rules:
   # Use DarkSUSY or MicrOmegas for calculating direct detection couplings
   - capability: DD_couplings
     function: DD_couplings_DarkSUSY
-    #function: DD_couplings_MicrOmegas
+    options: 
+      # If the below is true, 1 loop effects as discuseed in 
+      # Drees Nojiri Phys.Rev. D48 (1993) 3483 are included
+      loop: true 
+      # If the below is false, the squark propagator is approximated as 1/m_sq^2
+      # (automatically set to true if loop = true)
+      # pole: false
+    function: DD_couplings_MicrOmegas
+    options:
+      # If the below is true, the box diagram for gluon-neutralino scattering as 
+      # discussed in arXiv:0803.2360 is included in the calculation
+      loop: box
 
   # Nuclear SI Parameter Likelihoods (All values in MeV)
   - capability: lnL_SI_nuclear_parameters
@@ -459,7 +476,7 @@ Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
   # Options set to match benchmark point specified in SpecBit/MSSM_benchmark_points/LesHouches.in.MSSM_1
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatQ_spectrum
+    function: get_MSSMatQ_spectrum_FS
     options:
       precision_goal:        1.0e-4
       max_iterations:        0

@@ -45,7 +45,7 @@ diff -rupN ./SingletDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.
 +L    |l    |h    |     |-EE*Ml  /(2*MW*SW)            |1                                                                        
 +U    |u    |h    |     |-EE*Mu/(2*MW*SW)              |1                                                                        
 +D'   |d'   |h    |     |-EE*Md/(2*MW*SW)              |1                                                                        
-+S'   |s'   |h    |     |-EE*Ms/(2*MW*SW)              |1                                                                        +C    |c    |h    |     |-EE*Mc/(2*MW*SW)              |1                                                                        
++S'   |s'   |h    |     |-EE*Ms/(2*MW*SW)              |1                                                                        
 +C    |c    |h    |     |-EE*Mc/(2*MW*SW)              |1                                                                        
 +B    |b    |h    |     |-EE*Mb/(2*MW*SW)              |1                                                                        
 +T    |t    |h    |     |-EE*Mt  /(2*MW*SW)            |1                                                                        
@@ -92,7 +92,7 @@ diff -rupN ./SingletDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.
 +D'   |u    |W-.f |     |-i*EE/(2*Sqrt2*MW*SW)         |Mu*(1+G5)-Md*(1-G5)                                                      
 +C    |s'   |W+.f |     |-i*EE/(2*Sqrt2*MW*SW)         |Ms*(1+G5)-Mc*(1-G5)                                                      
 +T    |b    |W+.f |     |-i*EE/(2*Sqrt2*MW*SW)         |Mb*(1+G5)-Mt*(1-G5)                                                      
-+S'   |c    |W-.f |     |-i*EE/(2*Sqrt2*MW*SW)         |Mc*(1+G5)-Ms*(1-G5)                                                                
++S'   |c    |W-.f |     |-i*EE/(2*Sqrt2*MW*SW)         |Mc*(1+G5)-Ms*(1-G5)                                                      
 +B    |t    |W-.f |     |-i*EE/(2*Sqrt2*MW*SW)         |Mt*(1+G5)-Mb*(1-G5)                                                      
 +U    |u    |Z.f  |     |-i*EE*Mu/(2*MW*SW)            |G5                                                                       
 +D'   |d'   |Z.f  |     |i*EE*Md/(2*MW*SW)             |G5                                                                       

@@ -16,23 +16,26 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:55
+// File generated at Tue 26 Sep 2017 22:36:48
 
 #ifndef HSSUSY_SPECTRUM_GENERATOR_INTERFACE_H
 #define HSSUSY_SPECTRUM_GENERATOR_INTERFACE_H
 
-#include "HSSUSY_two_scale_model.hpp"
+#include "HSSUSY_mass_eigenstates.hpp"
+#include "HSSUSY_model.hpp"
+#include "HSSUSY_model_slha.hpp"
 #include "HSSUSY_utilities.hpp"
 
-#include "spectrum_generator_settings.hpp"
-#include "coupling_monitor.hpp"
-#include "two_loop_corrections.hpp"
 #include "error.hpp"
+#include "coupling_monitor.hpp"
 #include "logger.hpp"
+#include "lowe.h"
+#include "spectrum_generator_problems.hpp"
+#include "spectrum_generator_settings.hpp"
+#include "loop_corrections.hpp"
 
-namespace softsusy {
-   class QedQcd;
-}
+#include <string>
+#include <tuple>
 
 namespace flexiblesusy {
 
@@ -41,76 +44,44 @@ struct HSSUSY_input_parameters;
 template <class T>
 class HSSUSY_spectrum_generator_interface {
 public:
-   HSSUSY_spectrum_generator_interface()
-      : model()
-      , settings()
-      , parameter_output_scale(0.)
-      , reached_precision(std::numeric_limits<double>::infinity())
-   {}
-   virtual ~HSSUSY_spectrum_generator_interface() {}
+   virtual ~HSSUSY_spectrum_generator_interface() = default;
 
-   const HSSUSY<T>& get_model() const { return model; }
-   HSSUSY<T>& get_model() { return model; }
-   const Problems<HSSUSY_info::NUMBER_OF_PARTICLES>& get_problems() const {
-      return model.get_problems();
-   }
-   int get_exit_code() const { return get_problems().have_problem(); }
+   std::tuple<HSSUSY<T>> get_models() const
+   { return std::make_tuple(model); }
+   std::tuple<HSSUSY_slha<HSSUSY<T>>> get_models_slha() const
+   { return std::make_tuple(HSSUSY_slha<HSSUSY<T> >(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
+
+   HSSUSY<T> get_model() const
+   { return model; }
+   HSSUSY_slha<HSSUSY<T>> get_model_slha() const
+   { return HSSUSY_slha<HSSUSY<T>>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.); }
+
+   Spectrum_generator_problems get_problems() const { return problems; }
+   int get_exit_code() const { return problems.have_problem(); }
    double get_reached_precision() const { return reached_precision; }
    const Spectrum_generator_settings& get_settings() const { return settings; }
    void set_parameter_output_scale(double s) { parameter_output_scale = s; }
-   void set_precision_goal(double precision_goal_) {
-      settings.set(Spectrum_generator_settings::precision, precision_goal_);
-   }
-   void set_pole_mass_loop_order(unsigned l) {
-      settings.set(Spectrum_generator_settings::pole_mass_loop_order, l);
-      model.set_pole_mass_loop_order(l);
-   }
-   void set_pole_scale(double q) {
-      settings.set(Spectrum_generator_settings::pole_mass_scale, q);
-   }
-   void set_ewsb_loop_order(unsigned l) {
-      settings.set(Spectrum_generator_settings::ewsb_loop_order, l);
-      model.set_ewsb_loop_order(l);
-   }
-   void set_beta_loop_order(unsigned l) {
-      settings.set(Spectrum_generator_settings::beta_loop_order, l);
-   }
-   void set_beta_zero_threshold(double t) {
-      settings.set(Spectrum_generator_settings::beta_zero_threshold, t);
-   }
-   void set_max_iterations(unsigned n) {
-      settings.set(Spectrum_generator_settings::max_iterations, n);
-   }
-   void set_calculate_sm_masses(bool flag) {
-      settings.set(Spectrum_generator_settings::calculate_sm_masses, flag);
-   }
-   void set_force_output(bool flag) {
-      settings.set(Spectrum_generator_settings::force_output, flag);
-   }
-   void set_threshold_corrections_loop_order(unsigned t) {
-      settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, t);
-   }
-   void set_two_loop_corrections(const Two_loop_corrections& c) {
-      settings.set_two_loop_corrections(c);
-      model.set_two_loop_corrections(c);
-   }
    void set_settings(const Spectrum_generator_settings&);
 
-   virtual void run(const softsusy::QedQcd&, const HSSUSY_input_parameters&) = 0;
+   void run(const softsusy::QedQcd&, const HSSUSY_input_parameters&);
    void write_running_couplings(const std::string& filename, double, double) const;
    void write_spectrum(const std::string& filename = "HSSUSY_spectrum.dat") const;
 
 protected:
    HSSUSY<T> model;
+   Spectrum_generator_problems problems;
    Spectrum_generator_settings settings;
-   double parameter_output_scale; ///< output scale for running parameters
-   double reached_precision; ///< the precision that was reached
+   double parameter_output_scale{0.}; ///< output scale for running parameters
+   double reached_precision{std::numeric_limits<double>::infinity()}; ///< the precision that was reached
+
+   void translate_exception_to_problem(HSSUSY<T>& model);
+   virtual void run_except(const softsusy::QedQcd&, const HSSUSY_input_parameters&) = 0;
 };
 
 /**
  * Setup spectrum generator from a Spectrum_generator_settings object.
  *
- * @param settings spectrum generator settings
+ * @param settings_ spectrum generator settings
  */
 template <class T>
 void HSSUSY_spectrum_generator_interface<T>::set_settings(
@@ -119,7 +90,33 @@ void HSSUSY_spectrum_generator_interface<T>::set_settings(
    settings = settings_;
    model.set_pole_mass_loop_order(settings.get(Spectrum_generator_settings::pole_mass_loop_order));
    model.set_ewsb_loop_order(settings.get(Spectrum_generator_settings::ewsb_loop_order));
-   model.set_two_loop_corrections(settings.get_two_loop_corrections());
+   model.set_loop_corrections(settings.get_loop_corrections());
+   model.set_threshold_corrections(settings.get_threshold_corrections());
+}
+
+/**
+ * @brief Run's the RG solver with the given input parameters
+ *
+ * This function calls run_except() from the derived class and
+ * translates an emitted exception into an problem code.
+ *
+ * @param qedqcd_ Standard Model input parameters
+ * @param input model input parameters
+ */
+template <class T>
+void HSSUSY_spectrum_generator_interface<T>::run(
+   const softsusy::QedQcd& qedqcd_, const HSSUSY_input_parameters& input)
+{
+   softsusy::QedQcd qedqcd = qedqcd_;
+
+   try {
+      qedqcd.to(qedqcd.displayPoleMZ());
+      this->run_except(qedqcd, input);
+   } catch (...) {
+      this->translate_exception_to_problem(model);
+   }
+
+   problems.set_model_problems({ model.get_problems() });
 }
 
 /**
@@ -158,11 +155,44 @@ void HSSUSY_spectrum_generator_interface<T>::write_running_couplings(
  * @param filename output file name
  */
 template <class T>
-void HSSUSY_spectrum_generator_interface<T>::write_spectrum(const std::string& filename) const
+void HSSUSY_spectrum_generator_interface<T>::write_spectrum(
+   const std::string& filename) const
 {
    HSSUSY_spectrum_plotter plotter;
    plotter.extract_spectrum(model);
    plotter.write_to_file(filename);
+}
+
+/**
+ * Flags problems in the given model class from the current pending
+ * exception.
+ *
+ * This function assumes that there is an active exception.
+ *
+ * @param model model class
+ */
+template <class T>
+void HSSUSY_spectrum_generator_interface<T>::translate_exception_to_problem(HSSUSY<T>& model)
+{
+   try {
+      throw;
+   } catch (const NoConvergenceError&) {
+      problems.flag_no_convergence();
+   } catch (const NonPerturbativeRunningError& error) {
+      model.get_problems().flag_no_perturbative();
+      model.get_problems().flag_non_perturbative_parameter(
+         error.get_parameter_index(), error.get_parameter_value(),
+         error.get_scale());
+   } catch (const NonPerturbativeRunningQedQcdError& error) {
+      model.get_problems().flag_no_perturbative();
+      model.get_problems().flag_thrown(error.what());
+   } catch (const NoSinThetaWConvergenceError&) {
+      model.get_problems().flag_no_sinThetaW_convergence();
+   } catch (const Error& error) {
+      model.get_problems().flag_thrown(error.what());
+   } catch (const std::exception& error) {
+      model.get_problems().flag_thrown(error.what());
+   }
 }
 
 } // namespace flexiblesusy

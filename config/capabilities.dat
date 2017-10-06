@@ -1031,6 +1031,27 @@ XENON100_2012_SignalSD: |
 XENON100_2012_LogLikelihood: |
    Calculate the log-likelihood for the XENON100 2012 direct detection analysis.
 
+XENON1T_2017_Calculate: |
+   Perform rate and likelihood calculations for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Events: |
+   The number of observed events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Background: |
+   The number of background events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Signal: |
+   The number of signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_SignalSI: |
+   The number of spin-independent signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_SignalSD: |
+   The number of spin-independent signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_LogLikelihood: |
+   Calculate the log-likelihood for the XENON1T 2017 direct detection analysis.
+
 LUX_2013_Calculate: |
    Perform rate and likelihood calculations for the LUX 2013 direct detection analysis.
 
@@ -1219,6 +1240,27 @@ PICO_60_I_SignalSD: |
 
 PICO_60_I_LogLikelihood: |
    Calculate the log-likelihood for the PICO-60 direct detection analysis (iodine only).
+
+PICO_60_2017_Calculate: |
+   Perform rate and likelihood calculations for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Events: |
+   The number of observed events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Background: |
+   The number of background events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Signal: |
+   The number of signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_SignalSI: |
+   The number of spin-independent signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_SignalSD: |
+   The number of spin-independent signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_LogLikelihood: |
+   Calculate the log-likelihood for the PICO-60 2017 direct detection analysis.
 
 DARWIN_Ar_2015_Calculate: |
    Perform rate and likelihood calculations for the DARWIN Ar 2015 direct detection analysis.
@@ -1478,6 +1520,9 @@ DD_SetDetectorEmin: |
 DDCalc_1_0_0_init: |
    Initialises DDCalc 1.0.0.
 
+DDCalc_1_1_0_init: |
+   Initialises DDCalc 1.1.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -1526,11 +1571,17 @@ PICO_60_F_Init: |
 PICO_60_I_Init: |
    Initialises a direct detection experiment with the properties of the analysis of PICO-60, including only iodine.
 
+PICO_60_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of PICO-60.
+
 PandaX_2016_Init: |
    Initialises a direct detection experiment with the properties of the 2016 analysis of PandaX.
 
 XENON100_2012_Init: |
    Initialises a direct detection experiment with the properties of the 2012 analysis of Xenon100.
+
+XENON1T_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of Xenon1T.
 
 SuperCDMS_2014_Init: |
    Initialises a direct detection experiment with the properties of the 2014 analysis of SuperCDMS.
@@ -2895,17 +2946,50 @@ MSSM16atQ_parameters: |
 MSSM19atQ_parameters: |
    Parameters for the model MSSM19atQ (see ./gambit MSSM19atQ)
 
+MSSM20atMSUSY_parameters: |
+   Parameters for the model MSSM20atMSUSY (see ./gambit MSSM20atMSUSY)
+
+MSSM20atMSUSY_mA_parameters: |
+   Parameters for the model MSSM20atMSUSY_mA (see ./gambit MSSM20atMSUSY_mA)
+
+MSSM20atMGUT_parameters: |
+   Parameters for the model MSSM20atMGUT (see ./gambit MSSM20atMGUT)
+
+MSSM20atMGUT_mA_parameters: |
+   Parameters for the model MSSM20atMGUT_mA (see ./gambit MSSM20atMGUT_mA)
+
 MSSM20atQ_parameters: |
    Parameters for the model MSSM20atQ (see ./gambit MSSM20atQ)
 
 MSSM24atQ_parameters: |
    Parameters for the model MSSM24atQ (see ./gambit MSSM24atQ)
 
+MSSM25atMSUSY_parameters: |
+   Parameters for the model MSSM25atMSUSY (see ./gambit MSSM25atMSUSY)
+
+MSSM25atMSUSY_mA_parameters: |
+   Parameters for the model MSSM25atMSUSY_mA (see ./gambit MSSM25atMSUSY_mA)
+
+MSSM25atMGUT_parameters: |
+   Parameters for the model MSSM25atMGUT (see ./gambit MSSM25atMGUT)
+
+MSSM25atMGUT_mA_parameters: |
+   Parameters for the model MSSM25atMGUT_mA (see ./gambit MSSM25atMGUT_mA)
+
 MSSM25atQ_parameters: |
    Parameters for the model MSSM25atQ (see ./gambit MSSM25atQ)
 
+MSSM30atMSUSY_parameters: |
+   Parameters for the model MSSM30atMSUSY (see ./gambit MSSM30atMSUSY)
+
+MSSM30atMSUSY_mA_parameters: |
+   Parameters for the model MSSM30atMSUSY_mA (see ./gambit MSSM30atMSUSY_mA)
+
 MSSM30atMGUT_parameters: |
    Parameters for the model MSSM30atMGUT (see ./gambit MSSM30atMGUT)
+
+MSSM30atMGUT_mA_parameters: |
+   Parameters for the model MSSM30atMGUT_mA (see ./gambit MSSM30atMGUT_mA)
 
 MSSM30atQ_parameters: |
    Parameters for the model MSSM30atQ (see ./gambit MSSM30atQ)
@@ -2913,14 +2997,71 @@ MSSM30atQ_parameters: |
 MSSM63atMGUT_parameters: |
    Parameters for the model MSSM63atMGUT (see ./gambit MSSM63atMGUT)
 
+MSSM63atMSUSY_parameters: |
+   Parameters for the model MSSM63atMSUSY (see ./gambit MSSM63atMSUSY)
+
 MSSM63atQ_parameters: |
    Parameters for the model MSSM63atQ (see ./gambit MSSM63atQ)
+
+MSSM63atMGUT_mA_parameters: |
+   Parameters for the model MSSM63atMGUT_mA (see ./gambit MSSM63atMGUT_mA)
+
+MSSM63atMSUSY_mA_parameters: |
+   Parameters for the model MSSM63atMSUSY_mA (see ./gambit MSSM63atMSUSY_mA)
 
 MSSM7atQ_parameters: |
    Parameters for the model MSSM7atQ (see ./gambit MSSM7atQ)
 
 MSSM9atQ_parameters: |
    Parameters for the model MSSM9atQ (see ./gambit MSSM9atQ)
+
+MSSM9batQ_parameters: |
+   Parameters for the model MSSM9batQ (see ./gambit MSSM9batQ)
+
+MSSM10atQ_mA_parameters: |
+   Parameters for the model MSSM10atQ_mA (see ./gambit MSSM10atQ_mA)
+
+MSSM10batQ_mA_parameters: |
+   Parameters for the model MSSM10batQ_mA (see ./gambit MSSM10batQ_mA)
+
+MSSM10catQ_mA_parameters: |
+   Parameters for the model MSSM10catQ_mA (see ./gambit MSSM10catQ_mA)
+
+MSSM11atQ_mA_parameters: |
+   Parameters for the model MSSM11atQ_mA (see ./gambit MSSM11atQ_mA)
+
+MSSM15atQ_mA_parameters: |
+   Parameters for the model MSSM15atQ_mA (see ./gambit MSSM15atQ_mA)
+
+MSSM16atQ_mA_parameters: |
+   Parameters for the model MSSM16atQ_mA (see ./gambit MSSM16atQ_mA)
+
+MSSM19atQ_mA_parameters: |
+   Parameters for the model MSSM19atQ_mA (see ./gambit MSSM19atQ_mA)
+
+MSSM20atQ_mA_parameters: |
+   Parameters for the model MSSM20atQ_mA (see ./gambit MSSM20atQ_mA)
+
+MSSM24atQ_mA_parameters: |
+   Parameters for the model MSSM24atQ_mA (see ./gambit MSSM24atQ_mA)
+
+MSSM25atQ_mA_parameters: |
+   Parameters for the model MSSM25atQ_mA (see ./gambit MSSM25atQ_mA)
+
+MSSM30atQ_mA_parameters: |
+   Parameters for the model MSSM30atQ_mA (see ./gambit MSSM30atQ_mA)
+
+MSSM63atQ_mA_parameters: |
+   Parameters for the model MSSM63atQ_mA (see ./gambit MSSM63atQ_mA)
+
+MSSM7atQ_mA_parameters: |
+   Parameters for the model MSSM7atQ_mA (see ./gambit MSSM7atQ_mA)
+
+MSSM9atQ_mA_parameters: |
+   Parameters for the model MSSM9atQ_mA (see ./gambit MSSM9atQ_mA)
+
+MSSM9batQ_mA_parameters: |
+   Parameters for the model MSSM9batQ_mA (see ./gambit MSSM9batQ_mA)
 
 NUHM1_parameters: |
    Parameters for the model NUHM1 (see ./gambit NUHM1)
