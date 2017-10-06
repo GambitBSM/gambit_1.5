@@ -493,7 +493,6 @@ namespace Gambit
       using namespace Pipes::make_MSSM_precision_spectrum_H;
       improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
       SubSpectrum& HE = improved_spec.get_HE();
-      SubSpectrum& LE = improved_spec.get_LE();
       static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
 
       // Higgs masses
