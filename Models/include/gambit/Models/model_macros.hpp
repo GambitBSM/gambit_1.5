@@ -159,6 +159,10 @@
         MAKE_PRIMARY_MODEL_FUNCTOR(primary_parameters, CAT(MODEL,_parameters), \
                                    MODEL)                                      \
                                                                                \
+        /* Ini-function to set the name of the model hosted by the 
+           ModelParameters object  */                                          \
+        int added_model_name =                                                 \
+         set_model_name(Functown::primary_parameters,STRINGIFY(MODEL));        \
       }                                                                        \
                                                                                \
       /* Make the functor exclusive to this model and its descendants */       \

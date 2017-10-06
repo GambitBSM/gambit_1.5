@@ -74,7 +74,7 @@ ObsLikes:
 Rules:
 
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatQ_spectrum
+    function: get_MSSMatQ_spectrum_FS
 
   - capability: Higgs_decay_rates
     function: MSSM_h0_1_decays
@@ -96,6 +96,9 @@ Rules:
     options:
       Higgs_predictions_source: 1
       Higgs_predictions_error_method: 4
+
+  - capability: prec_mh
+    function: FH_HiggsMass
 
   #- function: SUSY_HIT_1_5_init
   #  options:

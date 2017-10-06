@@ -18,6 +18,7 @@
 
 
 #define BACKENDNAME FeynHiggs
+#define BACKENDLANG FORTRAN
 #define VERSION 2.11.3
 #define SAFE_VERSION 2_11_3
 
@@ -25,6 +26,8 @@
  * when this header file is included somewhere. */
 
 LOAD_LIBRARY
+
+BE_ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
 
 /* Next we use macros BE_VARIABLE and BE_FUNCTION to load pointers
  * (using dlsym) to the variables and functions within the library.

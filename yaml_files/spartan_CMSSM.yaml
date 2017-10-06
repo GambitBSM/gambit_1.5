@@ -93,22 +93,22 @@ ObsLikes:
 
 Rules:
 
-  - capability:   "LibFirst_1_1_init"
+  - capability:   LibFirst_1_1_init
     dependencies:
-    - {capability: "nevents", module: "ExampleBit_A"}
+    - {capability: nevents, module: ExampleBit_A}
 
-  - capability:    "nevents_postcuts"
-    type: "int*"
+  - capability:    nevents_postcuts
+    type: int
     dependencies:
-    - {capability: "particle_id", module: "ExampleBit_B"}
+    - {capability: particle_id, module: ExampleBit_B}
 
-  - capability:    "xsection"
+  - capability:    xsection
     options:
       scale: 15.5
 
-  - capability:    "function_pointer"
+  - capability:    function_pointer
     backends:
-    - {function: "externalFunction2"}
+    - {function: externalFunction2}
 
 
 Logger:

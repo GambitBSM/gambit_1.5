@@ -68,7 +68,6 @@ Weinberg_angle::Data::Data()
    , g2(0.)
    , g3(0.)
    , tan_beta(0.)
-   , ymu(0.)
 {
 }
 
@@ -98,10 +97,6 @@ Weinberg_angle::Weinberg_angle()
 {
 }
 
-Weinberg_angle::~Weinberg_angle()
-{
-}
-
 void Weinberg_angle::enable_susy_contributions()
 {
    susy_contributions = true;
@@ -112,12 +107,12 @@ void Weinberg_angle::disable_susy_contributions()
    susy_contributions = false;
 }
 
-void Weinberg_angle::set_number_of_iterations(unsigned n)
+void Weinberg_angle::set_number_of_iterations(int n)
 {
    number_of_iterations = n;
 }
 
-void Weinberg_angle::set_number_of_loops(unsigned n)
+void Weinberg_angle::set_number_of_loops(int n)
 {
    number_of_loops = n;
 }
@@ -162,7 +157,7 @@ int Weinberg_angle::calculate(double rho_start, double sin_start)
    const double mz_pole    = data.mz_pole;
    const double gfermi     = data.fermi_contant;
 
-   unsigned iteration = 0;
+   int iteration = 0;
    bool not_converged = true;
    double rho_old = rho_start, sin_old = sin_start;
    double rho_new = rho_start, sin_new = sin_start;
@@ -219,7 +214,7 @@ int Weinberg_angle::calculate(double rho_start, double sin_start)
       const double precision
          = Abs(rho_old / rho_new - 1.0) + Abs(sin_old / sin_new - 1.0);
 
-      VERBOSE_MSG("Iteration step " << iteration
+      VERBOSE_MSG("\t\tIteration step " << iteration
                   << ": prec=" << precision
                   << " dr=" << deltaR
                   << " drho=" << deltaRho
@@ -258,7 +253,7 @@ double Weinberg_angle::calculate_delta_rho(
    double sinThetaW,
    const Data& data,
    bool add_susy_contributions,
-   unsigned number_of_loops
+   int number_of_loops
 )
 {
    const double mz = data.mz_pole;
@@ -332,7 +327,7 @@ double Weinberg_angle::calculate_delta_r(
    double sinThetaW,
    const Data& data,
    bool add_susy_contributions,
-   unsigned number_of_loops
+   int number_of_loops
 )
 {
    const double outcos = Cos(ArcSin(sinThetaW));
@@ -493,7 +488,6 @@ double Weinberg_angle::calculate_delta_vb_susy(
   const double outcos  = Sqrt(1.0 - sinThetaW2);
   const double q       = data.scale;
   const double alphaDRbar = data.alpha_em_drbar;
-  const double hmu     = data.ymu;
   const double mselL = data.msel_drbar;
   const double msmuL = data.msmul_drbar;
   const double msnue = data.msve_drbar;
@@ -511,7 +505,6 @@ double Weinberg_angle::calculate_delta_vb_susy(
    WARN_IF_ZERO(mz, calculate_delta_vb_susy)
    WARN_IF_ZERO(q, calculate_delta_vb_susy)
    WARN_IF_ZERO(alphaDRbar, calculate_delta_vb_susy)
-   WARN_IF_ZERO(hmu, calculate_delta_vb_susy)
    WARN_IF_ZERO(mselL, calculate_delta_vb_susy)
    WARN_IF_ZERO(msmuL, calculate_delta_vb_susy)
    WARN_IF_ZERO(msnue, calculate_delta_vb_susy)
@@ -568,9 +561,7 @@ double Weinberg_angle::calculate_delta_vb_susy(
   Eigen::VectorXcd bChi0MuSmul, aChicMuSnul;
 
   bPsicNuSmul(0) = g;
-  bPsicNuSmul(1) = -hmu;
   aPsicMuSnul(0) = g;
-  aPsicMuSnul(1) = -hmu;
   bPsi0MuSmul(0) = -gp / ROOT2;
   bPsi0MuSmul(1) = -g * ROOT2 * 0.5;
 

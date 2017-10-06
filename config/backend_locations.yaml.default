@@ -19,6 +19,7 @@ SuperIso:
 
 DDCalc:
   1.0.0:       ./Backends/installed/ddcalc/1.0.0/lib/libDDCalc.so
+  1.1.0:       ./Backends/installed/ddcalc/1.1.0/lib/libDDCalc.so
 
 HiggsBounds:
   4.2.1:       ./Backends/installed/higgsbounds/4.2.1/lib/libhiggsbounds.so
@@ -68,3 +69,10 @@ SUSY_HIT:
 
 SPheno:
   3.3.8:	./Backends/installed/spheno/3.3.8/lib/libSPheno.so
+
+libMathematicaTest:
+  1.0:         ./Backends/examples/libMathematicaTest.m
+
+SUSYHD:
+  1.0.2:       ./Backends/installed/susyhd/1.0.2/SUSYHD.m
+

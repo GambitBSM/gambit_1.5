@@ -35,7 +35,7 @@
 #
 #  \author Tomas Gonzalo
 #          (t.e.gonzalo@fys.uio.no)
-#  \date 2016 Apr
+#  \date 2016 Apr, Dec
 #
 #  \author James McKay
 #          (j.mckay14@imperial.ac.uk)
@@ -119,6 +119,26 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "ddcalc")
+set(ver "1.1.0")
+set(lib "libDDCalc")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "47191564385379dd70aeba4811cd7c3b")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
     INSTALL_COMMAND ""
@@ -704,6 +724,24 @@ if(NOT ditched_${name}_${ver})
   BOSS_backend(${name} ${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
+
+# SUSYHD
+set(name "susyhd")
+set(ver "1.0.2")
+set(dl "http://users.ictp.it/~${name}/v${ver}/SUSYHD.tgz")
+set(md5 "e831c3fa977552ff944e0db44db38e87")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+ExternalProject_Add(${name}_${ver}
+  DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+  SOURCE_DIR ${dir}
+  BUILD_IN_SOURCE 1
+  PATCH_COMMAND ""
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+)
+add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+set_as_default_version("backend" ${name} ${ver})
 
 # Alternative download command for getting unreleased things from the gambit_internal repository.
 # If you don't know what that is, you don't need to tinker with these.

@@ -34,8 +34,7 @@
  * ERROR(message)
  * FATAL(message)        aborts program execution
  *
- * VERBOSE_MSG, DEBUG_MSG and INFO print to std::cout .
- * WARNING, ERROR and FATAL print to std::cerr .
+ * All macros print to std::cerr .
  *
  * All output can be disabled if ENABLE_SILENT is defined.
  *
@@ -73,7 +72,7 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
       do {                                            \
          exit(EXIT_FAILURE);                          \
          assert(false);                               \
-      } while (0)
+      } while (false)
 #else
    #define FATAL(message)                                             \
       do {                                                            \
@@ -81,7 +80,7 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
          std::cerr << "*** abort program execution" << std::endl;     \
          exit(EXIT_FAILURE);                                          \
          assert(false);                                               \
-      } while (0)
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
@@ -96,7 +95,7 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
          default:                                                     \
             break;                                                    \
          }                                                            \
-      } while (0)
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
@@ -112,7 +111,7 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
          default:                                                     \
             break;                                                    \
          }                                                            \
-      } while (0)
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
@@ -121,16 +120,14 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
    #define PRINT_COLOR_CODE(level)                               \
       do {                                                       \
          switch (level) {                                        \
-         case flexiblesusy::kDebug:   std::cout << "\033[0;34m"; break; \
+         case flexiblesusy::kDebug:   std::cerr << "\033[0;34m"; break; \
          case flexiblesusy::kWarning: std::cerr << "\033[0;31m"; break; \
          case flexiblesusy::kError:   std::cerr << "\033[1;31m"; break; \
          case flexiblesusy::kFatal:   std::cerr << "\033[41;1;37m"; break; \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
          default:                                                \
             break;                                               \
          }                                                       \
-      } while (0)
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
@@ -138,21 +135,8 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
 #else
    #define RESET_COLOR(level)                                    \
       do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:                              \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-            std::cout << "\033[0m";                              \
-            break;                                               \
-         case flexiblesusy::kWarning:                            \
-         case flexiblesusy::kError:                              \
-         case flexiblesusy::kFatal:                              \
-            std::cerr << "\033[0m";                              \
-            break;                                               \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
+         std::cerr << "\033[0m";                                 \
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
@@ -160,21 +144,8 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
 #else
    #define PRINT_MESSAGE(level, message)                         \
       do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:                              \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-            std::cout << message;                                \
-            break;                                               \
-         case flexiblesusy::kWarning:                            \
-         case flexiblesusy::kError:                              \
-         case flexiblesusy::kFatal:                              \
-            std::cerr << message;                                \
-            break;                                               \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
+         std::cerr << message;                                   \
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
@@ -182,27 +153,14 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
 #else
    #define PRINT_ENDL(level)                                     \
       do {                                                       \
-         switch (level) {                                        \
-         case flexiblesusy::kDebug:                              \
-         case flexiblesusy::kInfo:                               \
-         case flexiblesusy::kVerbose:                            \
-            std::cout << std::endl;                              \
-            break;                                               \
-         case flexiblesusy::kWarning:                            \
-         case flexiblesusy::kError:                              \
-         case flexiblesusy::kFatal:                              \
-            std::cerr << std::endl;                              \
-            break;                                               \
-         default:                                                \
-            break;                                               \
-         }                                                       \
-      } while (0)
+         std::cerr << std::endl;                                 \
+      } while (false)
 #endif
 
 #ifdef ENABLE_SILENT
    #define LOG(level, message)
 #else
-   #ifdef ENABLE_COLOR_PRINTOUT
+   #ifdef ENABLE_COLORS
       #define LOG(level, message)                                \
       do {                                                       \
          PRINT_COLOR_CODE(level);                                \
@@ -211,7 +169,7 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
          PRINT_MESSAGE(level, message);                          \
          RESET_COLOR(level);                                     \
          PRINT_ENDL(level);                                      \
-      } while (0)
+      } while (false)
    #else
       #define LOG(level, message)                  \
       do {                                         \
@@ -219,7 +177,7 @@ enum ELogLevel { kVerbose, kDebug, kInfo, kWarning, kError, kFatal };
          PRINT_FILE_LINE(level);                   \
          PRINT_MESSAGE(level, message);            \
          PRINT_ENDL(level);                        \
-      } while (0)
+      } while (false)
    #endif
 #endif
 

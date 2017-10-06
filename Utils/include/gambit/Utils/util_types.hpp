@@ -31,7 +31,8 @@
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
-///  \date 2016 May
+///  \date 2016 May, Dec
+///
 ///  *********************************************
 
 #ifndef __util_types_hpp__
@@ -101,6 +102,9 @@ namespace Gambit
       return *this;
     }
   };
+
+  /// Shorthand for an int-to-double triplet map
+  typedef std::map<int,triplet<double> > map_int_triplet_dbl;
 
   // a tuple containg two doubles and a bool
   struct dbl_dbl_bool
@@ -616,6 +620,16 @@ namespace Gambit
   typedef float             Freal4;
   typedef double            Freal8;
   typedef long double       Freal16;
+
+
+  /// Types used for Mathematica backends
+  typedef void         MVoid;
+  typedef int          MInteger;
+  typedef double       MReal;
+  typedef bool         MBool;
+  typedef char         MChar;
+  typedef std::string  MString;
+  template <typename T> using MList = std::vector<T>;
 
 
 }

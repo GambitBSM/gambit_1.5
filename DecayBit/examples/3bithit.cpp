@@ -65,8 +65,8 @@ int main()
     cout << "    SDECAY (via SUSY-HIT)                                " << endl;
     cout <<                                                                endl;
     cout << "  GAMBIT Models Workgroup                                " << endl;
-    cout << "  EPJC 2016 xx:xxxx                                      " << endl;
-    cout << "  (arXiv:1609.xxxxx)                                     " << endl;
+    cout << "  EPJC 2017 xx:xxxx                                      " << endl;
+    cout << "  (arXiv:1705.07936)                                     " << endl;
     cout <<                                                                endl;
     cout << "---------------------------------------------------------" << endl;
     cout <<                                                                endl;
@@ -117,8 +117,8 @@ int main()
                                                        : Models::MSSM20atQ::Functown::primary_parameters.getcontentsPtr();
 
     // Resolve backend requirements 'by hand'.  Must be done before dependencies are resolved.
-    FH_HiggsMasses.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHHiggsCorr);
-    FH_HiggsMasses.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHUncertainties);
+    FH_AllHiggsMasses.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHHiggsCorr);
+    FH_AllHiggsMasses.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHUncertainties);
     FH_Couplings.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHCouplings);
     FH_Couplings.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHSelectUZ);
     FH_PrecisionObs.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHConstraints);
@@ -238,16 +238,16 @@ int main()
     if (model_is_GUT_scale)
     {
       Models::NUHM2::Functown::MSSM63atMGUT_parameters.notifyOfModel(SUSY_model);
-      get_MSSMatMGUT_spectrum.notifyOfModel(SUSY_model);
+      get_MSSMatMGUT_spectrum_FS.notifyOfModel(SUSY_model);
     }
     else
     {
       Models::MSSM20atQ::Functown::MSSM25atQ_parameters.notifyOfModel(SUSY_model);
       Models::MSSM25atQ::Functown::MSSM30atQ_parameters.notifyOfModel(SUSY_model);
       Models::MSSM30atQ::Functown::MSSM63atQ_parameters.notifyOfModel(SUSY_model);
-      get_MSSMatQ_spectrum.notifyOfModel(SUSY_model);
+      get_MSSMatQ_spectrum_FS.notifyOfModel(SUSY_model);
     }
-    FH_HiggsMasses.notifyOfModel(SUSY_model);
+    FH_AllHiggsMasses.notifyOfModel(SUSY_model);
     FH_Couplings.notifyOfModel(SUSY_model);
     SUSY_HIT_1_5_init.notifyOfModel(SUSY_model);
     FeynHiggs_2_11_3_init.notifyOfModel(SUSY_model);
@@ -257,34 +257,41 @@ int main()
     if (model_is_GUT_scale)
     {
       Models::NUHM2::Functown::MSSM63atMGUT_parameters.resolveDependency(&Models::NUHM2::Functown::primary_parameters);
-      get_MSSMatMGUT_spectrum.resolveDependency(&Models::NUHM2::Functown::MSSM63atMGUT_parameters);
-      get_MSSMatMGUT_spectrum.resolveDependency(&get_SMINPUTS);
-      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatMGUT_spectrum);
-      make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatMGUT_spectrum);
+      get_MSSMatMGUT_spectrum_FS.resolveDependency(&Models::NUHM2::Functown::MSSM63atMGUT_parameters);
+      get_MSSMatMGUT_spectrum_FS.resolveDependency(&get_SMINPUTS);
+      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatMGUT_spectrum_FS);
+      make_MSSM_precision_spectrum_4H_W.resolveDependency(&get_MSSMatMGUT_spectrum_FS);
+      FH_HiggsMass.resolveDependency(&get_MSSMatMGUT_spectrum_FS);
+      FH_HeavyHiggsMasses.resolveDependency(&get_MSSMatMGUT_spectrum_FS);
     }
     else
     {
       Models::MSSM20atQ::Functown::MSSM25atQ_parameters.resolveDependency(&Models::MSSM20atQ::Functown::primary_parameters);
       Models::MSSM25atQ::Functown::MSSM30atQ_parameters.resolveDependency(&Models::MSSM20atQ::Functown::MSSM25atQ_parameters);
       Models::MSSM30atQ::Functown::MSSM63atQ_parameters.resolveDependency(&Models::MSSM25atQ::Functown::MSSM30atQ_parameters);
-      get_MSSMatQ_spectrum.resolveDependency(&Models::MSSM30atQ::Functown::MSSM63atQ_parameters);
-      get_MSSMatQ_spectrum.resolveDependency(&get_SMINPUTS);
-      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatQ_spectrum);
-      make_MSSM_precision_spectrum_H_W.resolveDependency(&get_MSSMatQ_spectrum);
+      get_MSSMatQ_spectrum_FS.resolveDependency(&Models::MSSM30atQ::Functown::MSSM63atQ_parameters);
+      get_MSSMatQ_spectrum_FS.resolveDependency(&get_SMINPUTS);
+      FeynHiggs_2_11_3_init.resolveDependency(&get_MSSMatQ_spectrum_FS);
+      make_MSSM_precision_spectrum_4H_W.resolveDependency(&get_MSSMatQ_spectrum_FS);
+      FH_HiggsMass.resolveDependency(&get_MSSMatQ_spectrum_FS);
+      FH_HeavyHiggsMasses.resolveDependency(&get_MSSMatQ_spectrum_FS);
     }
 
     get_SMINPUTS.resolveDependency(&Models::StandardModel_SLHA2::Functown::primary_parameters);
-    get_mass_es_pseudonyms.resolveDependency(&make_MSSM_precision_spectrum_H_W);
+    get_mass_es_pseudonyms.resolveDependency(&make_MSSM_precision_spectrum_4H_W);
 
     FH_PrecisionObs.resolveDependency(&FH_Couplings);
     FH_precision_mw.resolveDependency(&FH_PrecisionObs);
     FH_precision_sinW2.resolveDependency(&FH_PrecisionObs);
     FH_precision_deltarho.resolveDependency(&FH_PrecisionObs);
-    make_MSSM_precision_spectrum_H_W.resolveDependency(&FH_precision_mw);
-    make_MSSM_precision_spectrum_H_W.resolveDependency(&FH_HiggsMasses);
-    GM2C_SUSY.resolveDependency(&make_MSSM_precision_spectrum_H_W);
+    make_MSSM_precision_spectrum_4H_W.resolveDependency(&FH_precision_mw);
+    make_MSSM_precision_spectrum_4H_W.resolveDependency(&FH_HiggsMass);
+    make_MSSM_precision_spectrum_4H_W.resolveDependency(&FH_HeavyHiggsMasses);
+    FH_HiggsMass.resolveDependency(&FH_AllHiggsMasses);
+    FH_HeavyHiggsMasses.resolveDependency(&FH_AllHiggsMasses);
+    GM2C_SUSY.resolveDependency(&make_MSSM_precision_spectrum_4H_W);
 
-    SUSY_HIT_1_5_init.resolveDependency(&make_MSSM_precision_spectrum_H_W);
+    SUSY_HIT_1_5_init.resolveDependency(&make_MSSM_precision_spectrum_4H_W);
     SUSY_HIT_1_5_init.resolveDependency(&W_plus_decays);
     SUSY_HIT_1_5_init.resolveDependency(&W_minus_decays);
     SUSY_HIT_1_5_init.resolveDependency(&Z_decays);
@@ -347,7 +354,7 @@ int main()
     chargino_minus_2_decays.resolveDependency(&chargino_plus_2_decays);
 
     all_decays.resolveDependency(&get_mass_es_pseudonyms);
-    all_decays.resolveDependency(&make_MSSM_precision_spectrum_H_W);
+    all_decays.resolveDependency(&make_MSSM_precision_spectrum_4H_W);
     all_decays.resolveDependency(&FH_MSSM_h0_1_decays);
     all_decays.resolveDependency(&W_minus_decays);
     all_decays.resolveDependency(&W_plus_decays);
@@ -448,21 +455,23 @@ int main()
       if (model_is_GUT_scale)
       {
         Models::NUHM2::Functown::MSSM63atMGUT_parameters.reset_and_calculate();
-        get_MSSMatMGUT_spectrum.reset_and_calculate();
+        get_MSSMatMGUT_spectrum_FS.reset_and_calculate();
       }
       else
       {
         Models::MSSM20atQ::Functown::MSSM25atQ_parameters.reset_and_calculate();
         Models::MSSM25atQ::Functown::MSSM30atQ_parameters.reset_and_calculate();
         Models::MSSM30atQ::Functown::MSSM63atQ_parameters.reset_and_calculate();
-        get_MSSMatQ_spectrum.reset_and_calculate();
+        get_MSSMatQ_spectrum_FS.reset_and_calculate();
       }
       FeynHiggs_2_11_3_init.reset_and_calculate();
-      FH_HiggsMasses.reset_and_calculate();
+      FH_AllHiggsMasses.reset_and_calculate();
+      FH_HiggsMass.reset_and_calculate();
+      FH_HeavyHiggsMasses.reset_and_calculate();
       FH_Couplings.reset_and_calculate();
       FH_PrecisionObs.reset_and_calculate();
       FH_precision_mw.reset_and_calculate();
-      make_MSSM_precision_spectrum_H_W.reset_and_calculate();
+      make_MSSM_precision_spectrum_4H_W.reset_and_calculate();
 
       // Now the decays.
       get_mass_es_pseudonyms.reset_and_calculate();
@@ -549,14 +558,14 @@ int main()
       GM2C_SUSY.reset_and_calculate();
 
       // Dump the final results to SLHA files.
-      SLHAstruct slha[2] = {make_MSSM_precision_spectrum_H_W(0).getSLHAea(1), make_MSSM_precision_spectrum_H_W(0).getSLHAea(2)};
+      SLHAstruct slha[2] = {make_MSSM_precision_spectrum_4H_W(0).getSLHAea(1), make_MSSM_precision_spectrum_4H_W(0).getSLHAea(2)};
       SLHAstruct decays = all_decays(0).getSLHAea();
       for (int i = 0; i < 2; i++) slha[i].insert(slha[i].end(), decays.cbegin(), decays.cend());
       SLHAea::Block ewpo_block("EWPO");
       ewpo_block.push_back("BLOCK EWPO              # Electroweak precision observable predictions");
       ewpo_block.push_back("#       central                 +1sigma                 -1sigma");
       SLHAea::Line line1, line2, line3, line4, line5;
-      const SubSpectrum& HE = make_MSSM_precision_spectrum_H_W(0).get_HE();
+      const SubSpectrum& HE = make_MSSM_precision_spectrum_4H_W(0).get_HE();
       line1 << 1 << HE.get(Par::Pole_Mass, 25, 0)   << "  " << HE.get(Par::Pole_Mass_1srd_high, 25, 0) << "  " << HE.get(Par::Pole_Mass_1srd_low, 25, 0) << "# Precision Higgs mass (GeV)";
       line2 << 2 << FH_precision_mw(0).central       << "  " << FH_precision_mw(0).upper                 << "  " << FH_precision_mw(0).lower                << "# Precision W mass (GeV)";
       line3 << 3 << FH_precision_sinW2(0).central    << "  " << FH_precision_sinW2(0).upper              << "  " << FH_precision_sinW2(0).lower             << "# sin^2 \\theta_W effective (leptonic)";

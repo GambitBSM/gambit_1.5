@@ -13,10 +13,15 @@
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2014 Sep
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sep
+///
 ///  *********************************************
 
 #ifndef BACKEND_SPECIFIC_COMPILE_UNIT
   #undef BACKENDNAME
+  #undef BACKENDLANG
   #undef VERSION
   #undef SAFE_VERSION
   #undef DO_CLASSLOADING
