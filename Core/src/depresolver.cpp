@@ -24,6 +24,10 @@
 ///          (benjamin.farmer@monash.edu)
 ///  \date 2013 Sep
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 June
+///
 ///  *********************************************
 
 #include "gambit/Core/depresolver.hpp"
@@ -1945,6 +1949,12 @@ namespace Gambit
       // Replace the previous list of candidates with the survivors.
       vertexCandidates = survivingVertexCandidates;
 
+      // Only print the status flag -5 if any of the disabled vertex has it
+      bool printMathematicaStatus = false;
+      for(unsigned int j=0; j < disabledVertexCandidates.size(); j++)
+        if(disabledVertexCandidates[j]->status() == -5)
+          printMathematicaStatus = true;
+ 
       // No candidates? Death.
       if (vertexCandidates.size() == 0)
       {
@@ -1962,8 +1972,10 @@ namespace Gambit
                  << " 1: This function is available, but the backend version does not match your request." << endl
                  << " 0: This function is not compatible with any model you are scanning." << endl
                  << "-1: The backend that provides this function is missing." << endl
-                 << "-2: The backend is present, but function is absent or broken." << endl
-                 << endl
+                 << "-2: The backend is present, but function is absent or broken." << endl;
+         if(printMathematicaStatus)
+            errmsg << "-5: The backend requires Mathematica, but Mathematica is absent." << endl;
+          errmsg << endl
                  << "Make sure to check your YAML file, especially the rules" << endl
                  << "pertaining to backends."  << endl
                  << endl
