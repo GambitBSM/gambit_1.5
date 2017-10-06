@@ -792,12 +792,19 @@ set(lib "libmodecode")
 set(dl "http://modecode.org/wp-content/uploads/2014/09/MultiModeCode.2.0.0.tar.gz")
 set(md5 "03f99f02c572ea34383a0888fb0658d6")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(driver "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0")
+
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch < ${patch}/modpk.dif
+          COMMAND patch < ${patch}/modpk_modules.dif
+          #COMMAND patch < ${patch}/modpk_backgrnd.dif
+          COMMAND patch < ${patch}/modpk_potential.dif
+          COMMAND patch < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
 	COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}

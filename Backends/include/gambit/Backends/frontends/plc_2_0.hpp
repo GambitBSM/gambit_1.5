@@ -58,14 +58,14 @@ BE_NAMESPACE
 	
 	void  data_initialize()
 	{
- 	  char clik_hpath[] = "/Users/selimhotinli/Dropbox/plik_dx11dr2_HM_v18_TT.clik";
- 	  char clik_lpath[] = "/Users/selimhotinli/Dropbox/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
+ 	  char clik_hpath[] = "/path/to/plik_dx11dr2_HM_v18_TT.clik";
+ 	  char clik_lpath[] = "/path/to/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
  
 	  _err = initError();
 	  clikid_plik_dx11dr2_HM_v18_TT = clik_init(*&clik_hpath,&_err);
 	  clikid_lowl_SMW_70_dx11d_2014 = clik_init(*&clik_lpath,&_err);
  
- 	  cout << "initialized the data files" << endl;
+ 	  // cout << "initialized the data files" << endl;
  
 	}
 	 
@@ -73,7 +73,8 @@ BE_NAMESPACE
 	{
 	  clik_cleanup(byVal(&clikid_plik_dx11dr2_HM_v18_TT));
 	  clik_cleanup(byVal(&clikid_lowl_SMW_70_dx11d_2014));
-      cout << "cleaned-up the data files" << endl;
+		
+      // cout << "cleaned-up the data files" << endl;
 	}
 	 
 	clik_object * return_clikid_plik_dx11dr2_HM_v18_TT()
