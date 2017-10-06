@@ -19,8 +19,9 @@
 #ifndef EIGEN_UTILS_H
 #define EIGEN_UTILS_H
 
-#include "compare.hpp"
 #include <Eigen/Core>
+#include <cassert>
+#include <complex>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -29,15 +30,31 @@
 namespace flexiblesusy {
 
 template <typename Derived>
-unsigned closest_index(double mass, const Eigen::ArrayBase<Derived>& v)
+int closest_index(double mass, const Eigen::ArrayBase<Derived>& v)
 {
-   unsigned pos;
+   int pos;
    typename Derived::PlainObject tmp;
    tmp.setConstant(mass);
 
    (v - tmp).abs().minCoeff(&pos);
 
    return pos;
+}
+
+template <class BinaryOp, class Derived>
+Derived binary_map(
+   const Eigen::DenseBase<Derived>& a, const Eigen::DenseBase<Derived>& b, BinaryOp op)
+{
+   typename Derived::PlainObject result(a.rows(), b.cols());
+
+   assert(a.rows() == b.rows());
+   assert(a.cols() == b.cols());
+
+   for (int k = 0; k < a.cols(); k++)
+      for (int i = 0; i < a.rows(); i++)
+         result(i,k) = op(a(i,k), b(i,k));
+
+   return result;
 }
 
 /**
@@ -47,38 +64,41 @@ unsigned closest_index(double mass, const Eigen::ArrayBase<Derived>& v)
  * @param a numerator
  * @param b denominator
  */
-template <typename Scalar, int M, int N>
-Eigen::Matrix<Scalar,M,N> div_save(
-   const Eigen::Matrix<Scalar,M,N>& a, const Eigen::Matrix<Scalar,M,N>& b)
+template <class Derived>
+Derived div_safe(
+   const Eigen::DenseBase<Derived>& a, const Eigen::DenseBase<Derived>& b)
 {
-   Eigen::Matrix<Scalar,M,N> result(Eigen::Matrix<Scalar,M,N>::Zero());
+   using Scalar = typename Derived::Scalar;
 
-   for (int i = 0; i < M; i++) {
-      for (int k = 0; k < N; k++) {
-         const double quotient = a(i,k) / b(i,k);
-         if (std::isfinite(quotient))
-            result(i,k) = quotient;
-      }
-   }
-
-   return result;
+   return binary_map(a, b, [](Scalar x, Scalar y){
+         const Scalar q = x / y;
+         return std::isfinite(q) ? q : Scalar{};
+      });
 }
 
-template <class BinaryOp, class Derived>
-Derived binary_map(
-   const Eigen::ArrayBase<Derived>& a, const Eigen::ArrayBase<Derived>& b, BinaryOp op)
+/**
+ * Calls eval() on any Eigen expression.  If the argument is not an
+ * Eigen expression, the argument is returned.
+ *
+ * @param expr expression
+ *
+ * @return evaluated expression or argument
+ */
+template <class Derived>
+auto Eval(const Eigen::DenseBase<Derived>& expr) -> decltype(expr.eval())
 {
-   typename Derived::PlainObject result(a.rows(), b.cols());
-
-   assert(a.rows() == b.rows());
-   assert(a.cols() == b.cols());
-
-   for (int i = 0; i < a.rows(); i++)
-      for (int k = 0; k < a.cols(); k++)
-         result(i,k) = op(a(i,k), b(i,k));
-
-   return result;
+   return expr.eval();
 }
+
+inline char                 Eval(char                        expr) { return expr; }
+inline short                Eval(short                       expr) { return expr; }
+inline int                  Eval(int                         expr) { return expr; }
+inline long                 Eval(long                        expr) { return expr; }
+inline unsigned short       Eval(unsigned short              expr) { return expr; }
+inline unsigned int         Eval(unsigned int                expr) { return expr; }
+inline unsigned long        Eval(unsigned long               expr) { return expr; }
+inline double               Eval(double                      expr) { return expr; }
+inline std::complex<double> Eval(const std::complex<double>& expr) { return expr; }
 
 /**
  * The element of v, which is closest to mass, is moved to the
@@ -110,22 +130,72 @@ void move_goldstone_to(int idx, double mass, Eigen::ArrayBase<DerivedArray>& v,
 }
 
 /**
- * Copies all elements from src to dst which are not close to the
- * elements in cmp.
+ * Normalize each element of the given real matrix to be within the
+ * interval [min, max].  Values < min are set to min.  Values > max
+ * are set to max.
+ *
+ * @param m matrix
+ * @param min minimum
+ * @param max maximum
+ */
+template <int M, int N>
+void normalize_to_interval(Eigen::Matrix<double,M,N>& m, double min = -1., double max = 1.)
+{
+   auto data = m.data();
+   const auto size = m.size();
+
+   for (int i = 0; i < size; i++) {
+      if (data[i] < min)
+         data[i] = min;
+      else if (data[i] > max)
+         data[i] = max;
+   }
+}
+
+/**
+ * Normalize each element of the given complex matrix to have a
+ * magnitude within the interval [0, max].  If the magnitude of a
+ * matrix element is > max, then the magnitude is set to max.  The
+ * phase angles are not modified.
+ *
+ * @param m matrix
+ * @param max_mag maximum magnitude
+ */
+template <int M, int N>
+void normalize_to_interval(Eigen::Matrix<std::complex<double>,M,N>& m, double max_mag = 1.)
+{
+   auto data = m.data();
+   const auto size = m.size();
+
+   for (int i = 0; i < size; i++) {
+      if (std::abs(data[i]) > max_mag)
+         data[i] = std::polar(max_mag, std::arg(data[i]));
+   }
+}
+
+namespace {
+template <class T>
+struct Is_not_finite {
+   bool operator()(T x) const noexcept { return !std::isfinite(x); }
+};
+} // anonymous namespace
+
+/**
+ * Returns all elements from src, which are not close to the elements
+ * in cmp.  The returned vector will have the length (src.size() -
+ * cmp.size()).
  *
  * @param src source vector
  * @param cmp vector with elements to compare against
- * @param dst destination vector
+ * @return vector with elements of src not close to cmp
  */
-template<class Real, int Nsrc, int Ncmp, int Ndst>
-void remove_if_equal(const Eigen::Array<Real,Nsrc,1>& src,
-                     const Eigen::Array<Real,Ncmp,1>& cmp,
-                     Eigen::Array<Real,Ndst,1>& dst)
+template<class Real, int Nsrc, int Ncmp>
+Eigen::Array<Real,Nsrc - Ncmp,1> remove_if_equal(
+   const Eigen::Array<Real,Nsrc,1>& src,
+   const Eigen::Array<Real,Ncmp,1>& cmp)
 {
-   static_assert(Nsrc == Ncmp + Ndst,
-                 "Error: remove_if_equal: vectors have incompatible length!");
-
    Eigen::Array<Real,Nsrc,1> non_equal(src);
+   Eigen::Array<Real,Nsrc - Ncmp,1> dst;
 
    for (int i = 0; i < Ncmp; i++) {
       const int idx = closest_index(cmp(i), non_equal);
@@ -134,6 +204,8 @@ void remove_if_equal(const Eigen::Array<Real,Nsrc,1>& src,
 
    std::remove_copy_if(non_equal.data(), non_equal.data() + Nsrc,
                        dst.data(), Is_not_finite<Real>());
+
+   return dst;
 }
 
 /**
@@ -149,7 +221,7 @@ void reorder_vector(
    Eigen::PermutationMatrix<N> p;
    p.setIdentity();
    std::sort(p.indices().data(), p.indices().data() + p.indices().size(),
-             CompareAbs<Real, N>(v2));
+             [&v2] (int i, int j) { return v2[i] < v2[j]; });
 
 #if EIGEN_VERSION_AT_LEAST(3,1,4)
    v.matrix().transpose() *= p.inverse();
@@ -173,12 +245,12 @@ void reorder_vector(
 
 template<class Derived>
 std::string print_scientific(const Eigen::DenseBase<Derived>& v,
-                             unsigned number_of_digits = std::numeric_limits<typename Derived::Scalar>::digits10 + 1)
+                             int number_of_digits = std::numeric_limits<typename Derived::Scalar>::digits10 + 1)
 {
    std::ostringstream sstr;
 
-   for (std::size_t i = 0; i < v.rows(); i++) {
-      for (std::size_t k = 0; k < v.cols(); k++) {
+   for (int k = 0; k < v.cols(); k++) {
+      for (int i = 0; i < v.rows(); i++) {
          sstr << std::setprecision(number_of_digits)
               << std::scientific << v(i,k) << ' ';
       }

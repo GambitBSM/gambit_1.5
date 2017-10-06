@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:26
+// File generated at Sun 24 Sep 2017 16:14:51
 
 #ifndef CMSSMNoFV_OBSERVABLES_H
 #define CMSSMNoFV_OBSERVABLES_H
@@ -35,7 +35,7 @@ class CMSSMNoFV_mass_eigenstates;
 class Physical_input;
 
 struct CMSSMNoFV_observables {
-   static const unsigned NUMBER_OF_OBSERVABLES = 14;
+   static const int NUMBER_OF_OBSERVABLES = 16;
 
    CMSSMNoFV_observables();
    Eigen::ArrayXd get() const; ///< returns vector of all observables
@@ -43,6 +43,8 @@ struct CMSSMNoFV_observables {
    void clear(); ///< sets all observables to zero
    void set(const Eigen::ArrayXd&); ///< sets all observables from given vector
 
+   double a_muon; ///< a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)
+   double a_muon_uncertainty; ///< uncertainty of a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)
    double a_muon_gm2calc; ///< a_muon = (g-2)/2 of the muon (calculated with GM2Calc)
    double a_muon_gm2calc_uncertainty; ///< uncertainty of (g-2)/2 of the muon (calculated with GM2Calc)
    Eigen::Array<std::complex<double>,2,1> eff_cp_higgs_photon_photon; ///< effective H-Photon-Photon coupling
@@ -52,7 +54,13 @@ struct CMSSMNoFV_observables {
 
 };
 
-CMSSMNoFV_observables calculate_observables(const CMSSMNoFV_mass_eigenstates&, const softsusy::QedQcd&, const Physical_input&);
+CMSSMNoFV_observables calculate_observables(
+   const CMSSMNoFV_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&);
+
+CMSSMNoFV_observables calculate_observables(
+   const CMSSMNoFV_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&, double scale);
 
 } // namespace flexiblesusy
 

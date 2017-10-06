@@ -1,6 +1,9 @@
 /* DO NOT EDIT! GENERATED AUTOMATICALLY! */
 /* generated at @DATE@ */
 
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #define PKGNAME "@PKGNAME@"
 
 #define FLEXIBLESUSY_VERSION  "@FLEXIBLESUSY_VERSION@"
@@ -18,6 +21,7 @@
 #define MATHEMATICA_VERSION   @MATH_VERSION@
 
 #define GM2CALC_VERSION       "@GM2CALC_VERSION@"
+#define HIMALAYA_VERSION      "@HIMALAYA_VERSION@"
 
 /* System information */
 #define OPERATING_SYSTEM      "@OPERATING_SYSTEM@"
@@ -28,21 +32,32 @@
 #define BOOSTFLAGS            "@BOOSTFLAGS@"
 #define BOOSTTESTLIBS         "@BOOSTTESTLIBS@"
 #define BOOSTTHREADLIBS       "@BOOSTTHREADLIBS@"
+#define CPPFLAGS              "@CPPFLAGS@"
 #define CXX                   "@CXX@"
 #define CXXFLAGS              "@CXXFLAGS@"
 #define EIGENFLAGS            "@EIGENFLAGS@"
 #define FC                    "@FC@"
 #define FFLAGS                "@FFLAGS@"
 #define FLIBS                 "@FLIBS@"
+#define HIMALAYAFLAGS         "@HIMALAYAFLAGS@"
+#define HIMALAYALIBS          "@HIMALAYALIBS@"
 #define GSLFLAGS              "@GSLFLAGS@"
 #define GSLLIBS               "@GSLLIBS@"
 #define LAPACKLIBS            "@LAPACKLIBS@"
+#define LDFLAGS               "@LDFLAGS@"
+#define LDLIBS                "@LDLIBS@"
+#define LOOPFUNCFLAGS         "@LOOPFUNCFLAGS@"
+#define LOOPFUNCLIBS          "@LOOPFUNCLIBS@"
+#define SQLITELIBS            "@SQLITELIBS@"
+#define SQLITEFLAGS           "@SQLITEFLAGS@"
 #define THREADLIBS            "@THREADLIBS@"
+#define TSILLIBS              "@TSILLIBS@"
+#define TSILFLAGS             "@TSILFLAGS@"
 
 /* Switches */
 
 /* Enable colored printout */
-@DEFINE_ENABLE_COLOR_PRINTOUT@
+@DEFINE_ENABLE_COLORS@
 
 /* Enable eigenvalues error check */
 @DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR@
@@ -59,8 +74,23 @@
 /* Enable fflite */
 @DEFINE_ENABLE_FFLITE@
 
+/* Enable Himalaya */
+@DEFINE_ENABLE_HIMALAYA@
+
+/* Enable LAPACK */
+@DEFINE_ENABLE_LAPACK@
+
+/* Enable LibraryLink */
+@DEFINE_ENABLE_LIBRARYLINK@
+
+/* Enable MKL ILP64 workaround */
+@DEFINE_ENABLE_ILP64MKL_WORKAROUND@
+
 /* Enable LoopTools */
 @DEFINE_ENABLE_LOOPTOOLS@
+
+/* Enable odeint */
+@DEFINE_ENABLE_ODEINT@
 
 /* Enable sqlite */
 @DEFINE_ENABLE_SQLITE@
@@ -74,5 +104,16 @@
 /* Enable <random> header */
 @DEFINE_ENABLE_RANDOM@
 
+/* Enable two-scale BVP solver */
+@DEFINE_ENABLE_TWO_SCALE_SOLVER@
+
+/* Enable lattice BVP solver */
+@DEFINE_ENABLE_LATTICE_SOLVER@
+
+/* Enable semi-analytic BVP solver */
+@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@
+
 /* Enable statements for addons */
 @DEFINE_ENABLE_ADDONS@
+
+#endif

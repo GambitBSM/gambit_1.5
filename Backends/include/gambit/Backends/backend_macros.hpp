@@ -29,6 +29,10 @@
 ///  \date 2014 Jan, Mar
 ///  \date 2015 Jan, Feb
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sep
+///
 ///  *********************************************
 
 #ifndef __BACKEND_MACROS_HPP__
@@ -45,9 +49,11 @@
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Elements/module_macros_incore.hpp"
 #include "gambit/Elements/functors.hpp"
+#include "gambit/Elements/functor_definitions.hpp"
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Backends/ini_functions.hpp"
 #include "gambit/Backends/common_macros.hpp"
+#include "gambit/Backends/mathematica_macros.hpp"
 #ifndef STANDALONE
   #include "gambit/Core/ini_functions.hpp"
 #endif
@@ -56,7 +62,6 @@
 #include <boost/preprocessor/logical/bitor.hpp>
 #include <boost/preprocessor/list/size.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
-
 
 /// Declare the backend initialisation module BackendIniBit.
 #define MODULE BackendIniBit
@@ -118,9 +123,13 @@ namespace Gambit                                                            \
       void * pHandle;                                                       \
       void_voidFptr pSym;                                                   \
       std::vector<str> allowed_models;                                      \
-      int load = loadLibrary(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),    \
-                             STRINGIFY(SAFE_VERSION), pHandle,              \
-                             BOOST_PP_IF(DO_CLASSLOADING,true,false));      \
+      BOOST_PP_IF(USING_MATHEMATICA,                                        \
+        int load = loadWSTP(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),     \
+                            STRINGIFY(SAFE_VERSION), pHandle);,             \
+        int load = loadLibrary(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),  \
+                               STRINGIFY(SAFE_VERSION) ,pHandle,            \
+                               BOOST_PP_IF(DO_CLASSLOADING,true,false));    \
+      );                                                                    \
                                                                             \
       /* Register this backend with the Core if not running in standalone */\
       REGISTER_BACKEND(BACKENDNAME, VERSION, SAFE_VERSION)                  \
@@ -291,16 +300,23 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
 // Determine whether to make registration calls to the Core or not in BE_VARIABLE_I, depending on STANDALONE flag
 #ifdef STANDALONE
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
-          BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)
+          BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
+          BE_VARIABLE_I_MAIN(NAME, MATH_TYPE(TYPE), SYMBOLNAME, CAPABILITY, MODELS)
 #else
   #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)           \
-          BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)      \
+          BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
+          BE_VARIABLE_I_MAIN(NAME, MATH_TYPE(TYPE), SYMBOLNAME, CAPABILITY, MODELS)   \
           BE_VARIABLE_I_SUPP(NAME)
 #endif
 
+#define BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)         \
+        BOOST_PP_IF(USING_MATHEMATICA,                                        \
+          BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS),     \
+          BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)     \
+        ) 
 
-/// Main actual backend variable macro
-#define BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)        \
+/// Backend variable macro for other backends (not mathematica)
+#define BE_VARIABLE_I_OTHER(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
 namespace Gambit                                                              \
 {                                                                             \
   namespace Backends                                                          \
@@ -314,6 +330,18 @@ namespace Gambit                                                              \
        STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                           \
       TYPE* CAT(getptr,NAME)() { return NAME; }                               \
                                                                               \
+    }                                                                         \
+  }                                                                           \
+}
+
+/// Main actual backend variable macro
+#define BE_VARIABLE_I_MAIN(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)        \
+namespace Gambit                                                              \
+{                                                                             \
+  namespace Backends                                                          \
+  {                                                                           \
+    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                               \
+    {                                                                         \
       /* Create functor objects */                                            \
       namespace Functown                                                      \
       {                                                                       \
@@ -332,8 +360,11 @@ namespace Gambit                                                              \
       SET_ALLOWED_MODELS(NAME, MODELS)                                        \
                                                                               \
       /* Disable the functor if the library is missing or symbol not found. */\
-      int CAT(vstatus_,NAME) =                                                \
-       set_backend_functor_status(Functown::NAME, SYMBOLNAME);                \
+      BOOST_PP_IF(USING_MATHEMATICA,                                          \
+        int CAT(vstatus_,NAME) =                                              \
+          set_math_backend_functor_status(Functown::NAME, SYMBOLNAME, pHandle);,                \
+        int CAT(vstatus_,NAME) = set_backend_functor_status(Functown::NAME, SYMBOLNAME);        \
+      )                                                                       \
                                                                               \
     } /* end namespace BACKENDNAME_SAFE_VERSION */                            \
   } /* end namespace Backends */                                              \
@@ -379,13 +410,38 @@ namespace Gambit                                                              \
 // Determine whether to make registration calls to the Core or not in BE_FUNCTION_IMPL2, depending on STANDALONE flag
 #ifdef STANDALONE
   #define BE_FUNCTION_I(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                    \
+          BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
           BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)
 #else
   #define BE_FUNCTION_I(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                    \
+          BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
           BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)               \
           BE_FUNCTION_I_SUPP(NAME)
 #endif
 
+#define BE_FUNCTION_I_AUX(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                  \
+        BOOST_PP_IF(USING_MATHEMATICA,                                                          \
+          BE_FUNCTION_I_MATH(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS),              \
+          BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)              \
+        )
+
+/// Backend function macro for other backends (not mathematica)
+#define BE_FUNCTION_I_OTHER(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
+namespace Gambit                                                                                \
+{                                                                                               \
+  namespace Backends                                                                            \
+  {                                                                                             \
+    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
+    {                                                                                           \
+      /* Define a type NAME_type to be a suitable function pointer. */                          \
+      typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
+                                                                                                \
+      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle, pSym,           \
+        SYMBOLNAME, STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                \
+                                                                                                \
+    }                                                                                           \
+  }                                                                                             \
+}
 
 /// Main actual backend function macro
 #define BE_FUNCTION_I_MAIN(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                 \
@@ -395,13 +451,6 @@ namespace Gambit                                                                
   {                                                                                             \
     namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
     {                                                                                           \
-                                                                                                \
-      /* Define a type NAME_type to be a suitable function pointer. */                          \
-      typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
-                                                                                                \
-      /* Get the pointer to the function in the shared library. */                              \
-      extern const NAME##_type NAME = load_backend_symbol<NAME##_type>(pHandle,pSym,SYMBOLNAME, \
-       STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                                             \
                                                                                                 \
       /* Create functor object */                                                               \
       namespace Functown                                                                        \
@@ -419,7 +468,11 @@ namespace Gambit                                                                
       } /* end namespace Functown */                                                            \
                                                                                                 \
       /* Disable the functor if the library is not present or the symbol not found. */          \
-      int CAT(fstatus_,NAME) = set_backend_functor_status(Functown::NAME, SYMBOLNAME);          \
+      BOOST_PP_IF(USING_MATHEMATICA,                                                            \
+        int CAT(fstatus_,NAME) =                                                                \
+          set_math_backend_functor_status(Functown::NAME, SYMBOLNAME, pHandle);,                \
+        int CAT(fstatus_,NAME) = set_backend_functor_status(Functown::NAME, SYMBOLNAME);        \
+      )                                                                                         \
                                                                                                 \
       /* Set the allowed model properties of the functor. */                                    \
       SET_ALLOWED_MODELS(NAME, MODELS)                                                          \
@@ -486,7 +539,11 @@ namespace Gambit                                                                
       } /* end namespace Functown */                                                            \
                                                                                                 \
       /* Disable the functor if the library is not present or the symbol not found. */          \
-      int CAT(fstatus_,NAME) = set_backend_functor_status(Functown::NAME, "no_symbol");         \
+      BOOST_PP_IF(USING_MATHEMATICA,                                                            \
+        int CAT(fstatus_,NAME) =                                                                \
+          set_math_backend_functor_status(Functown::NAME, "no_symbol", pHandle);,               \
+        int CAT(fstatus_,NAME) = set_backend_functor_status(Functown::NAME, "no_symbol");       \
+      )                                                                                         \
                                                                                                 \
       /* Set the allowed model properties of the functor. */                                    \
       SET_ALLOWED_MODELS(NAME, MODELS)                                                          \

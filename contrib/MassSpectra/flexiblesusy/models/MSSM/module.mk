@@ -1,21 +1,25 @@
 DIR          := models/MSSM
 MODNAME      := MSSM
 SARAH_MODEL  := MSSM
+WITH_$(MODNAME) := yes
 
 MSSM_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
 
 MSSM_MK     := \
 		$(DIR)/module.mk
 
-MSSM_TWO_SCALE_SUSY_MK := \
-		$(DIR)/two_scale_susy.mk
+MSSM_SUSY_BETAS_MK := \
+		$(DIR)/susy_betas.mk
 
-MSSM_TWO_SCALE_SOFT_MK := \
-		$(DIR)/two_scale_soft.mk
+MSSM_SOFT_BETAS_MK := \
+		$(DIR)/soft_betas.mk
 
-MSSM_TWO_SCALE_MK := \
-		$(MSSM_TWO_SCALE_SUSY_MK) \
-		$(MSSM_TWO_SCALE_SOFT_MK)
+MSSM_FlexibleEFTHiggs_MK := \
+		$(DIR)/FlexibleEFTHiggs.mk
+
+MSSM_INCLUDE_MK := \
+		$(MSSM_SUSY_BETAS_MK) \
+		$(MSSM_SOFT_BETAS_MK)
 
 MSSM_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.MSSM_generated \
@@ -28,77 +32,89 @@ MSSM_GNUPLOT := \
 MSSM_TARBALL := \
 		$(MODNAME).tar.gz
 
-LIBMSSM_SRC :=
-EXEMSSM_SRC :=
-
-LIBMSSM_HDR :=
-
-ifneq ($(findstring two_scale,$(ALGORITHMS)),)
-LIBMSSM_SRC += \
+LIBMSSM_SRC := \
+		$(DIR)/MSSM_a_muon.cpp \
+		$(DIR)/MSSM_edm.cpp \
 		$(DIR)/MSSM_effective_couplings.cpp \
-		$(DIR)/MSSM_mass_eigenstates.cpp \
 		$(DIR)/MSSM_info.cpp \
 		$(DIR)/MSSM_input_parameters.cpp \
+		$(DIR)/MSSM_mass_eigenstates.cpp \
 		$(DIR)/MSSM_observables.cpp \
-		$(DIR)/MSSM_slha_io.cpp \
 		$(DIR)/MSSM_physical.cpp \
+		$(DIR)/MSSM_slha_io.cpp \
+		$(DIR)/MSSM_soft_parameters.cpp \
+		$(DIR)/MSSM_susy_parameters.cpp \
 		$(DIR)/MSSM_utilities.cpp \
-		$(DIR)/MSSM_two_scale_convergence_tester.cpp \
-		$(DIR)/MSSM_two_scale_high_scale_constraint.cpp \
-		$(DIR)/MSSM_two_scale_initial_guesser.cpp \
-		$(DIR)/MSSM_two_scale_low_scale_constraint.cpp \
-		$(DIR)/MSSM_two_scale_model.cpp \
-		$(DIR)/MSSM_two_scale_model_slha.cpp \
-		$(DIR)/MSSM_two_scale_susy_parameters.cpp \
-		$(DIR)/MSSM_two_scale_soft_parameters.cpp \
-		$(DIR)/MSSM_two_scale_susy_scale_constraint.cpp
-EXEMSSM_SRC += \
+		$(DIR)/MSSM_weinberg_angle.cpp
+
+EXEMSSM_SRC := \
 		$(DIR)/run_MSSM.cpp \
 		$(DIR)/run_cmd_line_MSSM.cpp \
 		$(DIR)/scan_MSSM.cpp
-LIBMSSM_HDR += \
+LLMSSM_LIB  :=
+LLMSSM_OBJ  :=
+LLMSSM_SRC  := \
+		$(DIR)/MSSM_librarylink.cpp
+
+LLMSSM_MMA  := \
+		$(DIR)/MSSM_librarylink.m \
+		$(DIR)/run_MSSM.m
+
+LIBMSSM_HDR := \
+		$(DIR)/MSSM_cxx_diagrams.hpp \
+		$(DIR)/MSSM_a_muon.hpp \
 		$(DIR)/MSSM_convergence_tester.hpp \
+		$(DIR)/MSSM_edm.hpp \
 		$(DIR)/MSSM_effective_couplings.hpp \
+		$(DIR)/MSSM_ewsb_solver.hpp \
+		$(DIR)/MSSM_ewsb_solver_interface.hpp \
 		$(DIR)/MSSM_high_scale_constraint.hpp \
-		$(DIR)/MSSM_mass_eigenstates.hpp \
 		$(DIR)/MSSM_info.hpp \
 		$(DIR)/MSSM_initial_guesser.hpp \
 		$(DIR)/MSSM_input_parameters.hpp \
 		$(DIR)/MSSM_low_scale_constraint.hpp \
+		$(DIR)/MSSM_mass_eigenstates.hpp \
 		$(DIR)/MSSM_model.hpp \
 		$(DIR)/MSSM_model_slha.hpp \
 		$(DIR)/MSSM_observables.hpp \
 		$(DIR)/MSSM_physical.hpp \
 		$(DIR)/MSSM_slha_io.hpp \
-		$(DIR)/MSSM_spectrum_generator_interface.hpp \
 		$(DIR)/MSSM_spectrum_generator.hpp \
+		$(DIR)/MSSM_spectrum_generator_interface.hpp \
+		$(DIR)/MSSM_soft_parameters.hpp \
+		$(DIR)/MSSM_susy_parameters.hpp \
 		$(DIR)/MSSM_susy_scale_constraint.hpp \
 		$(DIR)/MSSM_utilities.hpp \
-		$(DIR)/MSSM_two_scale_convergence_tester.hpp \
-		$(DIR)/MSSM_two_scale_high_scale_constraint.hpp \
-		$(DIR)/MSSM_two_scale_initial_guesser.hpp \
-		$(DIR)/MSSM_two_scale_low_scale_constraint.hpp \
-		$(DIR)/MSSM_two_scale_model.hpp \
-		$(DIR)/MSSM_two_scale_model_slha.hpp \
-		$(DIR)/MSSM_two_scale_soft_parameters.hpp \
-		$(DIR)/MSSM_two_scale_susy_parameters.hpp \
-		$(DIR)/MSSM_two_scale_susy_scale_constraint.hpp
+		$(DIR)/MSSM_weinberg_angle.hpp
+
+ifneq ($(findstring two_scale,$(SOLVERS)),)
+-include $(DIR)/two_scale.mk
+endif
+ifneq ($(findstring lattice,$(SOLVERS)),)
+-include $(DIR)/lattice.mk
+endif
+ifneq ($(findstring semi_analytic,$(SOLVERS)),)
+-include $(DIR)/semi_analytic.mk
+endif
 
 ifneq ($(MAKECMDGOALS),showbuild)
 ifneq ($(MAKECMDGOALS),tag)
 ifneq ($(MAKECMDGOALS),release)
 ifneq ($(MAKECMDGOALS),doc)
--include $(MSSM_TWO_SCALE_SUSY_MK)
--include $(MSSM_TWO_SCALE_SOFT_MK)
+-include $(MSSM_SUSY_BETAS_MK)
+-include $(MSSM_SOFT_BETAS_MK)
+-include $(MSSM_FlexibleEFTHiggs_MK)
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),distclean)
 ifneq ($(MAKECMDGOALS),pack-$(MODNAME)-src)
 ifeq ($(findstring clean-,$(MAKECMDGOALS)),)
 ifeq ($(findstring distclean-,$(MAKECMDGOALS)),)
 ifeq ($(findstring doc-,$(MAKECMDGOALS)),)
-$(MSSM_TWO_SCALE_SUSY_MK): run-metacode-$(MODNAME)
+$(MSSM_SUSY_BETAS_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
-$(MSSM_TWO_SCALE_SOFT_MK): run-metacode-$(MODNAME)
+$(MSSM_SOFT_BETAS_MK): run-metacode-$(MODNAME)
+		@$(CONVERT_DOS_PATHS) $@
+$(MSSM_FlexibleEFTHiggs_MK): run-metacode-$(MODNAME)
 		@$(CONVERT_DOS_PATHS) $@
 endif
 endif
@@ -111,9 +127,7 @@ endif
 endif
 endif
 
-endif
-
-# remove duplicates in case all algorithms are used
+# remove duplicates in case all solvers are used
 LIBMSSM_SRC := $(sort $(LIBMSSM_SRC))
 EXEMSSM_SRC := $(sort $(EXEMSSM_SRC))
 
@@ -135,7 +149,13 @@ LIBMSSM_DEP := \
 EXEMSSM_DEP := \
 		$(EXEMSSM_OBJ:.o=.d)
 
-LIBMSSM     := $(DIR)/lib$(MODNAME)$(LIBEXT)
+LLMSSM_DEP  := \
+		$(patsubst %.cpp, %.d, $(filter %.cpp, $(LLMSSM_SRC)))
+
+LLMSSM_OBJ  := $(LLMSSM_SRC:.cpp=.o)
+LLMSSM_LIB  := $(LLMSSM_SRC:.cpp=$(LIBLNK_LIBEXT))
+
+LIBMSSM     := $(DIR)/lib$(MODNAME)$(MODULE_LIBEXT)
 
 METACODE_STAMP_MSSM := $(DIR)/00_DELETE_ME_TO_RERUN_METACODE
 
@@ -158,8 +178,10 @@ install-src::
 		install -m u=rw,g=r,o=r $(LIBMSSM_SRC) $(MSSM_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(LIBMSSM_HDR) $(MSSM_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(EXEMSSM_SRC) $(MSSM_INSTALL_DIR)
+		install -m u=rw,g=r,o=r $(LLMSSM_SRC) $(MSSM_INSTALL_DIR)
+		install -m u=rw,g=r,o=r $(LLMSSM_MMA) $(MSSM_INSTALL_DIR)
 		$(INSTALL_STRIPPED) $(MSSM_MK) $(MSSM_INSTALL_DIR) -m u=rw,g=r,o=r
-		install -m u=rw,g=r,o=r $(MSSM_TWO_SCALE_MK) $(MSSM_INSTALL_DIR)
+		install -m u=rw,g=r,o=r $(MSSM_INCLUDE_MK) $(MSSM_INSTALL_DIR)
 ifneq ($(MSSM_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(MSSM_SLHA_INPUT) $(MSSM_INSTALL_DIR)
 endif
@@ -169,13 +191,16 @@ endif
 clean-$(MODNAME)-dep:
 		-rm -f $(LIBMSSM_DEP)
 		-rm -f $(EXEMSSM_DEP)
+		-rm -f $(LLMSSM_DEP)
 
 clean-$(MODNAME)-lib:
 		-rm -f $(LIBMSSM)
+		-rm -f $(LLMSSM_LIB)
 
 clean-$(MODNAME)-obj:
 		-rm -f $(LIBMSSM_OBJ)
 		-rm -f $(EXEMSSM_OBJ)
+		-rm -f $(LLMSSM_OBJ)
 
 
 clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
@@ -183,6 +208,8 @@ clean-$(MODNAME): clean-$(MODNAME)-dep clean-$(MODNAME)-lib clean-$(MODNAME)-obj
 
 distclean-$(MODNAME): clean-$(MODNAME)
 		@true
+
+clean-generated:: clean-$(MODNAME)-src
 
 clean-obj::     clean-$(MODNAME)-obj
 
@@ -194,10 +221,11 @@ pack-$(MODNAME)-src:
 		tar -czf $(MSSM_TARBALL) \
 		$(LIBMSSM_SRC) $(LIBMSSM_HDR) \
 		$(EXEMSSM_SRC) \
-		$(MSSM_MK) $(MSSM_TWO_SCALE_MK) \
+		$(LLMSSM_SRC) $(LLMSSM_MMA) \
+		$(MSSM_MK) $(MSSM_INCLUDE_MK) \
 		$(MSSM_SLHA_INPUT) $(MSSM_GNUPLOT)
 
-$(LIBMSSM_SRC) $(LIBMSSM_HDR) $(EXEMSSM_SRC) \
+$(LIBMSSM_SRC) $(LIBMSSM_HDR) $(EXEMSSM_SRC) $(LLMSSM_SRC) $(LLMSSM_MMA) \
 : run-metacode-$(MODNAME)
 		@true
 
@@ -217,19 +245,33 @@ $(METACODE_STAMP_MSSM):
 		@true
 endif
 
-$(LIBMSSM_DEP) $(EXEMSSM_DEP) $(LIBMSSM_OBJ) $(EXEMSSM_OBJ): CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(TSILFLAGS)
+$(LIBMSSM_DEP) $(EXEMSSM_DEP) $(LLMSSM_DEP) $(LIBMSSM_OBJ) $(EXEMSSM_OBJ) $(LLMSSM_OBJ) $(LLMSSM_LIB): \
+	CPPFLAGS += $(GSLFLAGS) $(EIGENFLAGS) $(BOOSTFLAGS) $(TSILFLAGS) $(HIMALAYAFLAGS)
 
 ifneq (,$(findstring yes,$(ENABLE_LOOPTOOLS)$(ENABLE_FFLITE)))
-$(LIBMSSM_DEP) $(EXEMSSM_DEP) $(LIBMSSM_OBJ) $(EXEMSSM_OBJ): CPPFLAGS += $(LOOPFUNCFLAGS)
+$(LIBMSSM_DEP) $(EXEMSSM_DEP) $(LLMSSM_DEP) $(LIBMSSM_OBJ) $(EXEMSSM_OBJ) $(LLMSSM_OBJ) $(LLMSSM_LIB): \
+	CPPFLAGS += $(LOOPFUNCFLAGS)
 endif
 
-$(LIBMSSM): $(LIBMSSM_OBJ)
-		$(MAKELIB) $@ $^
+$(LLMSSM_OBJ) $(LLMSSM_LIB): \
+	CPPFLAGS += $(shell $(MATH_INC_PATHS) --math-cmd="$(MATH)" -I --librarylink --mathlink)
 
-$(DIR)/%.x: $(DIR)/%.o $(LIBMSSM) $(LIBFLEXI) $(LIBLEGACY) $(filter-out -%,$(LOOPFUNCLIBS))
-		$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$^ $(ADDONLIBS)) $(filter -%,$(LOOPFUNCLIBS)) $(GSLLIBS) $(BOOSTTHREADLIBS) $(THREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(LDLIBS)
+$(LIBMSSM): $(LIBMSSM_OBJ)
+		$(MODULE_MAKE_LIB_CMD) $@ $^
+
+$(DIR)/%.x: $(DIR)/%.o $(LIBMSSM) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+		$(CXX) $(LDFLAGS) -o $@ $(call abspathx,$^ $(ADDONLIBS)) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
+
+$(LLMSSM_LIB): $(LLMSSM_OBJ) $(LIBMSSM) $(LIBFLEXI) $(filter-out -%,$(LOOPFUNCLIBS))
+		$(LIBLNK_MAKE_LIB_CMD) $@ $(CPPFLAGS) $(CFLAGS) $(call abspathx,$^) $(ADDONLIBS) $(filter -%,$(LOOPFUNCLIBS)) $(HIMALAYALIBS) $(GSLLIBS) $(BOOSTTHREADLIBS) $(LAPACKLIBS) $(BLASLIBS) $(FLIBS) $(SQLITELIBS) $(TSILLIBS) $(THREADLIBS) $(LDLIBS)
 
 ALLDEP += $(LIBMSSM_DEP) $(EXEMSSM_DEP)
 ALLSRC += $(LIBMSSM_SRC) $(EXEMSSM_SRC)
 ALLLIB += $(LIBMSSM)
 ALLEXE += $(EXEMSSM_EXE)
+
+ifeq ($(ENABLE_LIBRARYLINK),yes)
+ALLDEP += $(LLMSSM_DEP)
+ALLSRC += $(LLMSSM_SRC)
+ALLLL  += $(LLMSSM_LIB)
+endif
