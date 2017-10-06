@@ -1,26 +1,26 @@
-//  GAMBIT: Global and Modular BSM Inference Tool
-//  *********************************************
-//
-//  MSSM input parameter definition
-//   
-//  This is a parameterisation of the MSSM for
-//  use running spectrum generators (primarily
-//  flexiblesusy) in a generic way.
-//  Specialisations of this model are used to
-//  define subsets of these parameters which are 
-//  more reasonable for scanning.
-//
-//  *********************************************
-//
-//  Authors
-//  =======
-//
-//  (add name and date if you modify)
-//
-//  Ben Farmer
-//  2015 Jan
-//
-//  *********************************************
+///  GAMBIT: Global and Modular BSM Inference Tool
+///  *********************************************
+///
+///  MSSM input parameter definition
+///
+///  This is a parameterisation of the MSSM for
+///  use running spectrum generators (primarily
+///  flexiblesusy) in a generic way.
+///  Specialisations of this model are used to
+///  define subsets of these parameters which are
+///  more reasonable for scanning.
+///
+///  *********************************************
+///
+///  Authors
+///  =======
+///
+///  (add name and date if you modify)
+///
+///  Ben Farmer
+///  2015 Jan
+///
+///  *********************************************
 
 #ifndef __MSSM63atQ_hpp__
 #define __MSSM63atQ_hpp__
@@ -30,9 +30,9 @@
   START_MODEL
   DEFINEPARS(Qin,TanBeta,SignMu,
              mHu2,mHd2,M1,M2,M3)
- 
-  /// Mass matrices are symmetric (Hermitian, and we are restricted to real entries at the moment) 
-  /// so only one 'triangle' needed. 
+
+  /// Mass matrices are symmetric (Hermitian, and we are restricted to real entries at the moment)
+  /// so only one 'triangle' needed.
   DEFINEPARS(mq2_11, mq2_12, mq2_13,
                      mq2_22, mq2_23,
                              mq2_33)
@@ -56,7 +56,7 @@
   DEFINEPARS(Ae_11, Ae_12, Ae_13,
              Ae_21, Ae_22, Ae_23,
              Ae_31, Ae_32, Ae_33)
-  
+
   DEFINEPARS(Ad_11, Ad_12, Ad_13,
              Ad_21, Ad_22, Ad_23,
              Ad_31, Ad_32, Ad_33)

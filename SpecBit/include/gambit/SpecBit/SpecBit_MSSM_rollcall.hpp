@@ -78,6 +78,30 @@
     #undef FUNCTION
 
     // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at (user-defined) scale Q
+    #define FUNCTION get_MSSMatQ_mA_spectrum_FS
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atQ_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at GUT scale
+    #define FUNCTION get_MSSMatMGUT_mA_spectrum_FS
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atMGUT_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at SUSY scale
+    #define FUNCTION get_MSSMatMSUSY_mA_spectrum_FS
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atMSUSY_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
     // MSSM spectrum retrieved from an SLHA file
     // Wraps it up in MSSMskeleton; i.e. no RGE running possible.
     // This is mainly for testing against benchmark points, but may be a useful last

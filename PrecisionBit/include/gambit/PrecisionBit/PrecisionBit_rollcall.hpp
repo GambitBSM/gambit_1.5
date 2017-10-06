@@ -196,7 +196,7 @@ START_MODULE
     BACKEND_REQ(calculate_amu_2loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
     BACKEND_REQ(calculate_uncertainty_amu_2loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
     BACKEND_OPTION( (gm2calc), (libgm2calc) )
-    ALLOW_MODELS(MSSM30atQ, MSSM30atMGUT, NUHM2)
+    ALLOW_MODELS(MSSM30atQ, MSSM30atQ_mA, MSSM30atMGUT, MSSM30atMGUT_mA, NUHM2)
     #undef FUNCTION
 
   #undef CAPABILITY

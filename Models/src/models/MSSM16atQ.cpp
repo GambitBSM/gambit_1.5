@@ -2,7 +2,12 @@
 //   *********************************************
 ///  \file
 ///
-///  MSSM16atQ translation function definitions. 
+///  MSSM16atX translation function definitions. 
+///
+///  This file contains the interpret-as-parent
+///  function definitions for
+///    MSSM16atQ     --> MSSM19atQ
+///    MSSM16atQ_mA  --> MSSM19atQ_mA
 ///
 ///  *********************************************
 ///
@@ -12,12 +17,18 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Sep
 ///
+///  \author Ben Farmer
+///          (benjamin.farmer@fysik.su.se)
+///  \date 2017 Oct
+///
 ///  *********************************************
 
 #include "gambit/Models/model_macros.hpp"
 #include "gambit/Models/model_helpers.hpp"
 #include "gambit/Logs/logger.hpp"
 
+#include "gambit/Models/models/MSSM16atQ.hpp"
+#include "gambit/Models/models/MSSM16atQ.hpp"
 #include "gambit/Models/models/MSSM16atQ.hpp"
 
 
