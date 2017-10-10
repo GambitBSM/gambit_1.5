@@ -3191,7 +3191,6 @@ function (Mathematica_EXECUTE)
 		# if Mathematica is not registered properly, exit with a fatal error
 		if ("${${_option_OUTPUT_VARIABLE}}" MATCHES "Mathematica cannot find a valid password")
 			# message (FATAL_ERROR "${${_option_OUTPUT_VARIABLE}}")
-	                message (STATUS "Mathematica cannot find a valid password")
                         set(Mathematica_Invalid_License 1)
 		endif()
 	endif()
