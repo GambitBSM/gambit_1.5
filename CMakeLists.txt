@@ -213,7 +213,7 @@ endif()
 
 # Check for Mathematica
 find_package(Mathematica 10.0)
-if(Mathematica_FOUND)
+if(Mathematica_FOUND AND NOT DEFINED Mathematica_Invalid_License)
   find_library(LIBUUID NAMES uuid)
   if(LIBUUID)
     message("   Found library libuuid")
