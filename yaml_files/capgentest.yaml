@@ -101,7 +101,8 @@ ObsLikes:
 #  function: capture_rate_Sun_const_xsec
 #capability: capture_rate_Sun
     #function: capture_rate_Sun_const_xsec
-    function: capture_rate_Sun_const_xsec_capgen
+    #function: capture_rate_Sun_const_xsec_capgen
+    function: capture_rate_Sun_vnqn
 
 
 Rules:

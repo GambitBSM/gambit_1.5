@@ -635,13 +635,13 @@ START_MODULE
     DEPENDENCY(sigma_SD_p, double)
     #undef FUNCTION
 
-//    #define FUNCTION capture_rate_Sun_vnqn
-//    START_FUNCTION(double)
-//    BACKEND_REQ(cap_Sun_vnqn_isoscalar,(CaptnGeneral),void,(double&,double&,int&,int&,int&,double&))
-//    DEPENDENCY(mwimp,double)
-//    DEPENDENCY(sigma_SI_p, double)
-//    DEPENDENCY(sigma_SD_p, double)
-//    #undef FUNCTION
+    #define FUNCTION capture_rate_Sun_vnqn
+    START_FUNCTION(double)
+    BACKEND_REQ(cap_Sun_vnqn_isoscalar,(CaptnGeneral),void,(const double&,const double&,int&,int&,int&,double&))
+    DEPENDENCY(mwimp,double)
+    DEPENDENCY(sigma_SI_p, double)
+    DEPENDENCY(sigma_SD_p, double)
+    #undef FUNCTION
   #undef CAPABILITY
 
   // Equilibration time for capture and annihilation of dark matter in the Sun (s)

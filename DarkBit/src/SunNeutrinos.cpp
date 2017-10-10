@@ -61,14 +61,30 @@ namespace Gambit
           using namespace Pipes::capture_rate_Sun_const_xsec_capgen;
           double resultSD;
           double resultSI;
-//          int nelems= 27;
-          cout << *Dep::mwimp << " " <<  *Dep::sigma_SD_p << " " << *Dep::sigma_SI_p << "\n";
+
           BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
           result = resultSI + resultSD;
-//          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "\n";
-//          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,1,resultSD,resultSI);
-//          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "\n";
-          
+         
+      }
+      
+      void capture_rate_Sun_vnqn(double &result)
+      {
+           using namespace Pipes::capture_rate_Sun_vnqn;
+          double resultSD;
+          double resultSI;
+          int qpow;
+          int vpow;
+          int nelems;
+          qpow = 1;
+          vpow = 0;
+//          SD:
+          nelems = 1;
+          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,nelems,qpow,vpow,resultSD);
+//          SI:
+          nelems = 29;
+          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SI_p,nelems,qpow,vpow,resultSI);
+          result = resultSI;
+          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "\n";
       }
       
     /*! \brief Equilibration time for capture and annihilation of dark matter   
