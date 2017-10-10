@@ -1686,6 +1686,19 @@ setup_rate_uncertainties: |
    Set the rate uncertainties in HiggsSignals.
 
 #-------------------------------------
+#  Capgen capabilities
+#-------------------------------------
+
+CaptnGeneral_1_0_init: |
+    Initialize Captn' general backend.
+
+captn_init: |
+    Actually initialize Captn' general.
+
+cap_Sun_vnqn_isoscalar: |
+    Compute v^n or q^n solar capture rate.
+
+#-------------------------------------
 #  DarkSUSY capabilities
 #-------------------------------------
 

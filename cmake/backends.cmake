@@ -44,6 +44,28 @@
 #************************************************
 
 
+
+# CaptnGeneral
+set(name "capgen")
+set(ver "1.0")
+set(lib "gencaplib")
+set(dl "null")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+ExternalProject_Add(${name}_${ver}
+GIT_REPOSITORY https://github.com/aaronvincent/captngen.git
+SOURCE_DIR ${dir}
+BUILD_IN_SOURCE 1
+CONFIGURE_COMMAND ""
+BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} FOPT=${GAMBIT_Fortran_FLAGS} MODULE=${FMODULE}
+INSTALL_COMMAND ""
+)
+add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} distclean)
+endif()
+
+
+
 # DarkSUSY
 set(name "darksusy")
 set(ver "5.1.3")

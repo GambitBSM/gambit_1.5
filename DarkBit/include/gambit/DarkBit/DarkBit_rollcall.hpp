@@ -50,6 +50,10 @@
 ///          (felix.kahlhoefer@desy.de)
 ///  \date 2016 August
 ///
+/// \author Aaron Vincent
+///     (aaron.vincent@cparc.ca)
+/// \date 2017 Sept
+
 ///  *********************************************
 
 #ifndef __DarkBit_rollcall_hpp__
@@ -621,6 +625,14 @@ START_MODULE
         START_CONDITIONAL_DEPENDENCY(bool)
         ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar, DarkSUSY)
         #undef CONDITIONAL_DEPENDENCY
+    #undef FUNCTION
+
+    #define FUNCTION capture_rate_Sun_const_xsec_capgen
+    START_FUNCTION(double)
+    BACKEND_REQ(cap_Sun_v0q0_isoscalar,(CaptnGeneral),void,(const double&,const double&,const double&,double&,double&))
+    DEPENDENCY(mwimp,double)
+    DEPENDENCY(sigma_SI_p, double)
+    DEPENDENCY(sigma_SD_p, double)
     #undef FUNCTION
   #undef CAPABILITY
 

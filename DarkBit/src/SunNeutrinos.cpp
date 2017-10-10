@@ -52,9 +52,28 @@ namespace Gambit
       // assume that whichever backend has been hooked up here does so too.
       result = BEreq::cap_Sun_v0q0_isoscalar(
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+      cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
     }
-
-    /*! \brief Equilibration time for capture and annihilation of dark matter
+      //Alternative, using capgen
+    void capture_rate_Sun_const_xsec_capgen(double &result)
+      {
+          
+          using namespace Pipes::capture_rate_Sun_const_xsec_capgen;
+          double resultSD;
+          double resultSI;
+//          std::string solarmodel = BEreq::backendDir+"solarmodels/model_gs98_nohead.dat";
+//          std::string bork = BEreq::cap_Sun_v0q0_isoscalar.origin();
+//          std::string bark = BEreq::cap_Sun_v0q0_isoscalar.version();
+//          std::string solarmodel = Backends::backendInfo().path_dir(bork, bark)+"solarmodels/model_gs98_nohead.dat";
+//          BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,solarmodel,resultSD,resultSI);
+          
+          BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
+          result = resultSI + resultSD;
+          cout << "CAPTOR GENRERLAL \n";
+          
+      }
+      
+    /*! \brief Equilibration time for capture and annihilation of dark matter   
      * in the Sun (s)
      */
     void equilibration_time_Sun(double &result)
