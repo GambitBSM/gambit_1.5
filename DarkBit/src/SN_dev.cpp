@@ -76,6 +76,7 @@ namespace Gambit
         }
       }
       result_bbn += temp_bbn;
+//      result_bbn = lifetime[0];
     }
 
     // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
@@ -150,7 +151,7 @@ namespace Gambit
       R_pi = R_pi_SM * (1.0 + d_r_pi);
       R_K = R_K_SM * (1.0 + d_r_K);
       R_tau = R_tau_SM * (1.0 + d_r_tau);
-      if (((1.226e-4<R_pi) && (R_pi<1.234e-4)) || ((2.478e-5<R_K) && (R_K<2.498e-5)) || ((0.9734<R_tau) && (R_tau<0.9794)))
+      if (((1.19e-4<R_pi) && (R_pi<1.27e-4)) || ((2.388e-5<R_K) && (R_K<2.588e-5)) || ((0.9464<R_tau) && (R_tau<1.0064)))
       {
         temp_lepuniv = 0.0;
       }
@@ -159,6 +160,7 @@ namespace Gambit
         temp_lepuniv = -100.0;
       }
       result_lepuniv = temp_lepuniv;
+//      result_lepuniv = R_pi;
     }
 
     // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
@@ -196,6 +198,7 @@ namespace Gambit
       {
         result_0nubb = -100.0;
       }
+//      result_0nubb = m_GERDA;
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
@@ -207,37 +210,38 @@ namespace Gambit
       static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
       static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
       static double G_mu_sq = 1.3605e-10;  // GeV^-4
+      static double V_ud_0 = 0.97427;
+      static double err_0 = 0.00015;
+      static double err_factor = 5.3779e7;
       double V_ud_exp[7], f[7];
-      double total_err, V_ud_sq, chi2;
+      double V_ud_sq, chi2;
       Matrix3d t_sq = *Dep::Theta_sq;
-      total_err = 0.0;
 
-      for (int e=0; e<7; e++)
-      {
-        total_err += pow(err[e], 2.0);
-      }
       for (int i=0;i<7;i++)
       {
         V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
       }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - t_sq(0,0) - t_sq(0,1) - t_sq(0,2));
-      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,0) - t_sq(1,1) - t_sq(1,2));
-      f[5] = 1 + t_sq(1,0) + t_sq(1,1) + t_sq(1,2);
-      f[6] = 1 + t_sq(0,0) + t_sq(0,1) + t_sq(0,2) + t_sq(1,0) + t_sq(1,1) + t_sq(1,2) + t_sq(2,0) + t_sq(2,1) + t_sq(2,2);
+      f[0] = (G_F_sq/G_mu_sq)*(1 - t_sq(0,0));
+      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,1));
+      f[5] = 1 + t_sq(1,1);
+      f[6] = 1 + t_sq(0,0) + t_sq(1,1) + t_sq(2,2);
       f[1] = f[0];
       f[2] = f[0];
       f[4] = f[3];
       V_ud_sq = 0.0;
       for (int j=0; j<7; j++)
       {
-        V_ud_sq += (pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j])) / total_err;
+        V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
       }
+      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + t_sq(0,0)));
+      V_ud_sq /= err_factor;
       chi2 = 0.0;
       for (int k=0; k<7; k++)
       {
-        chi2 += pow((V_ud_exp[k] - V_ud_sq), 2.0) / pow(err[k], 2.0);
+        chi2 += pow(((sqrt((1 - V_ud_sq)*f[k]) - V_us_exp[k])/err[k]), 2.0);
       }
-      if (chi2 < 21.85)
+      chi2 += pow((((sqrt(V_ud_sq)*(1 + t_sq(0,0))) - V_ud_0)/err_0), 2.0);
+      if (chi2 < 23.5744)
       { 
         result_ckm = 0.0;
       }
@@ -245,6 +249,7 @@ namespace Gambit
       {
         result_ckm = -100.0;
       }
+//      result_ckm = V_ud_sq;
     }
 
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
