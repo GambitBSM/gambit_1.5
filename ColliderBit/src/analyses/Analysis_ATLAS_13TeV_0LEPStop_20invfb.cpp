@@ -347,9 +347,14 @@ namespace Gambit {
 	bool cut_mT_bmin_Gt200=false;
         if(mT_bjetmet_min>200.)cut_mT_bmin_Gt200=true;
 
+	bool cut_mT_bmin_Gt250=false;
+        if(mT_bjetmet_min>250.)cut_mT_bmin_Gt250=true;
+	
 	bool cut_mT_bmin_Gt350=false;
         if(mT_bjetmet_min>350.)cut_mT_bmin_Gt350=true;
 
+
+	
 	//Calculate dphi(b,met) for the furthest b-jet in phi to MET
         double dphi_bjetmet_max=0.;
         double maxphi = 0.;
@@ -367,6 +372,9 @@ namespace Gambit {
 	bool cut_mT_bmax_Gt200=false;
         if(mT_bjetmet_max>200.)cut_mT_bmax_Gt200=true;
 
+	bool cut_mT_bmax_Gt300=false;
+        if(mT_bjetmet_max>300.)cut_mT_bmax_Gt300=true;
+	
 	bool cut_mT_bmax_Gt450=false;
         if(mT_bjetmet_max>450.)cut_mT_bmax_Gt450=true;
 	
@@ -716,14 +724,23 @@ namespace Gambit {
 	cutFlowVector_str[66] = "SRD-low: Njets >=5";
 	cutFlowVector_str[67] = "SRD-low: NBjets >=2";
 	cutFlowVector_str[68] = "SRD-low: met > 250 GeV";
-	cutFlowVector_str[69] = "SRD-low: dPhi(jet,MET) > 0.4 ";
-	cutFlowVector_str[70] = "SRD-low: mT(b,MET) min > 250 GeV ";
-	cutFlowVector_str[71] = "SRD-low: mT(b,MET) max > 300 GeV ";
-	cutFlowVector_str[72] = "SRD-low: deltaR(b,b) > 0.8";
-	cutFlowVector_str[73] = "SRD-low: pT jet 1 > 150 GeV ";
-	cutFlowVector_str[74] = "SRD-low: pT jet 3 > 100 GeV ";
-	cutFlowVector_str[75] = "SRD-low: pT jet 4 > 60 GeV ";
-	cutFlowVector_str[76] = "SRD-low: pT0b + pT1b > 300 GeV";
+	cutFlowVector_str[69] = "SRD-low: mT(b,MET) min > 250 GeV ";
+	cutFlowVector_str[70] = "SRD-low: mT(b,MET) max > 300 GeV ";
+	cutFlowVector_str[71] = "SRD-low: deltaR(b,b) > 0.8";
+	cutFlowVector_str[72] = "SRD-low: pT jet 1 > 150 GeV ";
+	cutFlowVector_str[73] = "SRD-low: pT jet 3 > 100 GeV ";
+	cutFlowVector_str[74] = "SRD-low: pT jet 4 > 60 GeV ";
+	cutFlowVector_str[75] = "SRD-low: pT0b + pT1b > 300 GeV";
+	
+	// Cutflow for SRE
+	cutFlowVector_str[76] = "SRE: met > 550 GeV";
+	cutFlowVector_str[77] = "SRE: m jet0, R = 0.8 > 120 GeV";
+	cutFlowVector_str[78] = "SRE: m jet1, R = 0.8 > 80 GeV";
+	cutFlowVector_str[79] = "SRE: HT > 800 GeV";
+	cutFlowVector_str[80] = "SRE: met/sqrt(HT) > 18 GeV^1/2";
+	cutFlowVector_str[81] = "SRE: mT(b,MET) min > 200 GeV";
+	cutFlowVector_str[82] = "SRE: NBjets >=2";
+
 	
         for(int j=0;j<NCUTS;j++){
           if(
@@ -920,22 +937,60 @@ namespace Gambit {
 
 	     (j==65 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>80. && signalJets[4]->pT()>60. && cut_mT_bmin_Gt350 && cut_mT_bmax_Gt450 && cutdRBBGt08 && ( (signalBJets[bjet0]->pT() + signalBJets[bjet1]->pT())>400.)) || 
 	     
-	     /* cutFlowVector_str[66] = "SRD-low: Njets >=5";
+	     /*cutFlowVector_str[66] = "SRD-low: Njets >=5";
 	     cutFlowVector_str[67] = "SRD-low: NBjets >=2";
 	     cutFlowVector_str[68] = "SRD-low: met > 250 GeV";
-	     cutFlowVector_str[69] = "SRD-low: dPhi(jet,MET) > 0.4 ";
-	     cutFlowVector_str[70] = "SRD-low: mT(b,MET) min > 250 GeV ";
-	     cutFlowVector_str[71] = "SRD-low: mT(b,MET) max > 300 GeV ";
-	     cutFlowVector_str[72] = "SRD-low: deltaR(b,b) > 0.8";
-	     cutFlowVector_str[73] = "SRD-low: pT jet 1 > 150 GeV ";
-	     cutFlowVector_str[74] = "SRD-low: pT jet 3 > 100 GeV ";
-	     cutFlowVector_str[75] = "SRD-low: pT jet 4 > 60 GeV ";
-	     cutFlowVector_str[76] = "SRD-low: pT0b + pT1b > 300 GeV";*/
+	     cutFlowVector_str[69] = "SRD-low: mT(b,MET) min > 250 GeV ";
+	     cutFlowVector_str[70] = "SRD-low: mT(b,MET) max > 300 GeV ";
+	     cutFlowVector_str[71] = "SRD-low: deltaR(b,b) > 0.8";
+	     cutFlowVector_str[72] = "SRD-low: pT jet 1 > 150 GeV ";
+	     cutFlowVector_str[73] = "SRD-low: pT jet 3 > 100 GeV ";
+	     cutFlowVector_str[74] = "SRD-low: pT jet 4 > 60 GeV ";
+	     cutFlowVector_str[75] = "SRD-low: pT0b + pT1b > 300 GeV";*/
 	     
-	     (j==66 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>0 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40.  && signalJets.size()>4)  ||
+	     
+	     (j==66 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>0 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40.)  ||
 
-	     (j==67 ) 
+	     (j==67 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40.)  ||
 
+	     (j==68 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40.)  ||
+
+	     (j==69 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && cut_mT_bmin_Gt250)  ||
+
+	     (j==70 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300)  ||
+
+	     (j==71 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300 && cutdRBBGt08)  ||
+
+	     (j==72 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>40. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300 && cutdRBBGt08)  ||
+
+	     (j==73 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>100. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300 && cutdRBBGt08)  ||
+
+	     (j==74 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>100. && signalJets[4]->pT()>60. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300 && cutdRBBGt08)  ||
+	     
+	     (j==75 && devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>100. && signalJets[4]->pT()>60. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300 && cutdRBBGt08 &&  ( (signalBJets[bjet0]->pT() + signalBJets[bjet1]->pT())>300.))  ||
+
+	     /* cutFlowVector_str[76] = "SRE: met > 550 GeV";
+		cutFlowVector_str[77] = "SRE: m jet0, R = 0.8 > 120 GeV";
+		cutFlowVector_str[78] = "SRE: m jet1, R = 0.8 > 80 GeV";
+		cutFlowVector_str[79] = "SRE: HT > 800 GeV";
+		cutFlowVector_str[80] = "SRE: met/sqrt(HT) > 18 GeV^1/2";
+		cutFlowVector_str[81] = "SRE: mT(b,MET) min > 200 GeV";
+		cutFlowVector_str[82] = "SRE: NBjets >=2";*/
+
+	     (j==76 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40.)  ||
+
+	     (j==77 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 0 && signalJets_0_8[0]->mass()>120.)  ||
+
+	     (j==78 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 1 && signalJets_0_8[0]->mass()>120. && signalJets_0_8[0]->mass()>80.)  ||
+
+	     (j==79 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 1 && signalJets_0_8[0]->mass()>120. && signalJets_0_8[0]->mass()>80. && HT > 800.)  ||
+
+	     (j==80 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 1 && signalJets_0_8[0]->mass()>120. && signalJets_0_8[0]->mass()>80. && HT > 800. && metsig > 18.)  ||
+
+	     (j==81 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 1 && signalJets_0_8[0]->mass()>120. && signalJets_0_8[0]->mass()>80. && HT > 800. && metsig > 18. && cut_mT_bmin_Gt200)  ||
+
+	     (j==82 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>1 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 1 && signalJets_0_8[0]->mass()>120. && signalJets_0_8[0]->mass()>80. && HT > 800. && metsig > 18. && cut_mT_bmin_Gt200)
+	     
 	     // Still to do...
 	     
 	     
@@ -973,8 +1028,11 @@ namespace Gambit {
 
 	if(devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>80. && signalJets[4]->pT()>60. && cut_mT_bmin_Gt350 && cut_mT_bmax_Gt450 && cutdRBBGt08 && ( (signalBJets[bjet0]->pT() + signalBJets[bjet1]->pT())>400.))isSRD_high=true;
 
+	if(devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && cut_METGt250 && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>100. && signalJets[4]->pT()>60. && cut_mT_bmin_Gt250 && cut_mT_bmax_Gt300 && cutdRBBGt08 &&  ( (signalBJets[bjet0]->pT() + signalBJets[bjet1]->pT())>300.))isSRD_low=true;  
+
+	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>1 && cut_METGt550 && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && signalJets_0_8.size() > 1 && signalJets_0_8[0]->mass()>120. && signalJets_0_8[0]->mass()>80. && HT > 800. && metsig > 18. && cut_mT_bmin_Gt200)isSRE=true;
 	
-	
+
 	if(isSRA_TT)_numSRA_TT++;
 	if(isSRA_TW)_numSRA_TW++;
 	if(isSRA_T0)_numSRA_T0++;
