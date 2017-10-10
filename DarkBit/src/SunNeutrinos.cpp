@@ -61,15 +61,13 @@ namespace Gambit
           using namespace Pipes::capture_rate_Sun_const_xsec_capgen;
           double resultSD;
           double resultSI;
-//          std::string solarmodel = BEreq::backendDir+"solarmodels/model_gs98_nohead.dat";
-//          std::string bork = BEreq::cap_Sun_v0q0_isoscalar.origin();
-//          std::string bark = BEreq::cap_Sun_v0q0_isoscalar.version();
-//          std::string solarmodel = Backends::backendInfo().path_dir(bork, bark)+"solarmodels/model_gs98_nohead.dat";
-//          BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,solarmodel,resultSD,resultSI);
-          
+//          int nelems= 27;
+          cout << *Dep::mwimp << " " <<  *Dep::sigma_SD_p << " " << *Dep::sigma_SI_p << "\n";
           BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
           result = resultSI + resultSD;
-          cout << "CAPTOR GENRERLAL \n";
+//          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "\n";
+//          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,1,resultSD,resultSI);
+//          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "\n";
           
       }
       

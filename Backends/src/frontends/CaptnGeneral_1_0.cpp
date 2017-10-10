@@ -22,8 +22,10 @@
 // Initialisation function (definition)
 BE_INI_FUNCTION
 {
+    static bool scan_level = true;
+    if (scan_level)
+    {
     cout << "Initializing CapGen, hold on to your hamsters. \n";
-//    cout << strcat(backendDir,"solarmodels/model_gs98_nohead.dat");
     const int clen = 300;
     char solarmodel[clen];
     Utils::strcpy2f(solarmodel, clen, runOptions->getValueOrDef<str>(backendDir +
@@ -32,6 +34,8 @@ BE_INI_FUNCTION
    cout << solarmodel << "\n";
   captn_init(solarmodel[0]);
     cout << "Hamsters held. \n";
+    }
+    scan_level = false;
 }
 END_BE_INI_FUNCTION
 

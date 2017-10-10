@@ -27,7 +27,7 @@ LOAD_LIBRARY
 //solarmodel = backendDir+"solarmodels/model_gs98_nohead.dat";
 
 // Functions
-BE_FUNCTION(captn_init,void,(const char&),"captn_init","captn_init")
+BE_FUNCTION(captn_init,void,(const char&),"captn_init_","captn_init")
 BE_FUNCTION(captn_general, void, (double&,double&,int&,int&,int&,double&), "captn_general_", "cap_Sun_vnqn_isoscalar")
 BE_FUNCTION(captn_specific, void, (const double&,const double&,const double&,double&,double&), "captn_specific_", "cap_Sun_v0q0_isoscalar")
 // Still should add: DM fraction (rho_0);
