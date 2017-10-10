@@ -241,9 +241,9 @@ namespace Gambit
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0;
       Eigen::Matrix3d Epsilon;
-      Epsilon << 1e-15, 1e-15, 1e-15,
-                 1e-15, 1e-15, 1e-15,
-                 1e-15, 1e-15, 1e-15;
+      Epsilon << 1e-10, 1e-10, 1e-10,
+                 1e-10, 1e-10, 1e-10,
+                 1e-10, 1e-10, 1e-10;
 
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
@@ -256,17 +256,22 @@ namespace Gambit
           if(std::abs(Norm(i,j) - Id(i,j)) > Epsilon(i,j))
             unitarity = false;
 
-      cout << "unitarity = " << unitarity << endl;
       if(!unitarity)
-       return ;
+        return ;
 
-      std::vector<double> MN = {*Param["M_1"],*Param["M_2"],*Param["M_3"]};
+      Eigen::Matrix3d MN;
+      MN << *Param["M_1"], 0.0, 0.0,
+            0.0, *Param["M_2"], 0.0,
+            0.0, 0.0, *Param["M_3"];
+      Eigen::Matrix3cd Unit;
       for(int i = 0; i < 3; i++)
+      {
+        Unit(i,i) = 0;
         for(int j = 0; j < 3; j++)
-          if(std::real(m_nu(i,j) * pow(Vnu(i,j),2) + MN[j] * pow(Theta(i,j),2)) > Epsilon(i,j))
-            unitarity = false;
-
- 
+          Unit(i,i) += m_nu(j,j)*pow(Vnu(i,j),2) + MN(j,j) * pow(Theta(i,j),2);
+        if(std::real(Unit(i,i)) > Epsilon(i,i))
+          unitarity = false;
+      }
     }
 
   }
