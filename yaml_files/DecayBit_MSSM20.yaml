@@ -97,6 +97,9 @@ Rules:
       Higgs_predictions_source: 1
       Higgs_predictions_error_method: 4
 
+  - capability: prec_mh
+    function: FH_HiggsMass
+
   #- function: SUSY_HIT_1_5_init
   #  options:
   #    debug_SLHA_filenames:

@@ -67,7 +67,7 @@ START_MODULE
 
     #define FUNCTION Ref_SM_Higgs_decays_FH
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
     DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
@@ -81,14 +81,13 @@ START_MODULE
 
     #define FUNCTION Ref_SM_other_Higgs_decays_table
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
     #define FUNCTION Ref_SM_other_Higgs_decays_FH
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
     DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)

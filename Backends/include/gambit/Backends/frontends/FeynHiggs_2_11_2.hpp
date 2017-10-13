@@ -18,6 +18,7 @@
 
 
 #define BACKENDNAME FeynHiggs
+#define BACKENDLANG FORTRAN
 #define VERSION 2.11.2
 #define SAFE_VERSION 2_11_2
 

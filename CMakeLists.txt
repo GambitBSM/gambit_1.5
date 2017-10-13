@@ -22,6 +22,10 @@
 #          (p.scott@imperial.ac.uk)
 #  \date 2014 Nov, Dec
 #
+#  \author Tomas Gonzao
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Sep
+#
 #************************************************
 
 # Require a minimum cmake version of 2.8.5
@@ -205,6 +209,34 @@ if(GSL_FOUND)
   endif()
 else()
   message(FATAL_ERROR "GAMBIT requires the GSL libraries.")
+endif()
+
+# Check for Mathematica
+find_library(LIBUUID NAMES uuid)
+if(LIBUUID)
+  message("   Found library libuuid")
+  find_package(Mathematica 10.0)
+  if(Mathematica_FOUND AND NOT DEFINED Mathematica_Invalid_License)
+    message("${BoldYellow}   Found Mathematica.${ColourReset}")
+    if(Mathematica_WSTP_FOUND)
+      message("${BoldYellow}   Found Wolfram Symbolic Transfer Protocol. Mathematica backends enabled.${ColourReset}")
+      set(HAVE_MATHEMATICA 1)
+      set(MATHEMATICA_WSTP_H "${Mathematica_WSTP_INCLUDE_DIR}/wstp.h")
+      set(MATHEMATICA_KERNEL "${Mathematica_KERNEL_EXECUTABLE}")
+    else()
+      message("${BoldRed}  WSTP not found. Please make sure it is installed before attempting to use Mathematica backends.${ColourReset}")
+      set(HAVE_MATHEMATICA 0)
+    endif()
+  elseif(DEFINED Mathematica_Invalid_License)
+    message("${BoldRed}   Mathematica found but with an invalid license. Backends using Mathematica will be disabled.${ColourReset}")
+    set(HAVE_MATHEMATICA 0)
+  else()
+    message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled.${ColourReset}")
+    set(HAVE_MATHEMATICA 0)
+  endif()
+else()
+  message("${BoldRed}   Missing library libuuid required for WSTP. Mathematica will be disabled.${ColourReset}")
+  set(HAVE_MATHEMATICA 0)
 endif()
 
 # Check for DL libraries
