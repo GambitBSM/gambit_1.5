@@ -18,7 +18,7 @@
 ///  Authors:                                     
 ///                                               
 ///  \author The GAMBIT Collaboration            
-///  \date 02:26PM on October 14, 2017
+///  \date 04:02PM on October 14, 2017
 ///                                               
 ///  *********************************************
                                                   
@@ -31,14 +31,16 @@
 namespace Gambit                                  
 {                                                 
   template class module_functor<ColliderBit::AnalysisNumbers>;
-  template class module_functor<fh_HiggsProd>;
+  template class module_functor<fh_HiggsMassObs>;
+  template class module_functor<DarkBit::SimYieldTable>;
   template class module_functor<int>;
   template class module_functor<float>;
   template class module_functor<DarkBit::nuyield_info>;
+  template class module_functor<map_int_triplet_dbl>;
   template class module_functor<hb_ModelParameters>;
   template class module_functor<const SubSpectrum*>;
   template class module_functor<std::vector<std::string>>;
-  template class module_functor<fh_HiggsMassObs>;
+  template class module_functor<fh_HiggsProd>;
   template class module_functor<fh_FlavourObs>;
   template class module_functor<std::vector<double>>;
   template class module_functor<SLHAstruct >;
@@ -49,12 +51,11 @@ namespace Gambit
   template class module_functor<DarkBit::stringFunkMap>;
   template class module_functor<HiggsCouplingsTable>;
   template class module_functor<DecayTable::Entry>;
-  template class module_functor<bool>;
   template class module_functor<Pythia8::Event>;
   template class module_functor<DecayBit::mass_es_pseudonyms>;
   template class module_functor<dbl_dbl_bool>;
   template class module_functor<SMInputs>;
-  template class module_functor<DarkBit::SimYieldTable>;
+  template class module_functor<MString>;
   template class module_functor<fh_Couplings>;
   template class module_functor<HEPUtils::Event>;
   template class module_functor<DarkBit::TH_ProcessCatalog>;
@@ -63,6 +64,7 @@ namespace Gambit
   template class module_functor<fh_PrecisionObs>;
   template class module_functor<ColliderBit::HEPUtilsAnalysisContainer>;
   template class module_functor<std::vector<float>>;
+  template class module_functor<MBool>;
   template class module_functor<fptr_dd>;
   template class module_functor<ColliderBit::BuckFastSmearCMS>;
   template class module_functor<fptr>;
@@ -78,7 +80,6 @@ namespace Gambit
   template class module_functor<DarkBit::nudata>;
   template class module_functor<DarkBit::RD_spectrum_type>;
   template class module_functor<ModelParameters>;
-  template class module_functor<str>;
   template class module_functor<DarkBit::DecayChain::ChainContainer>;
   template class module_functor<ColliderBit::BuckFastSmearATLAS>;
   template class module_functor<Flav_KstarMuMu_obs>;
