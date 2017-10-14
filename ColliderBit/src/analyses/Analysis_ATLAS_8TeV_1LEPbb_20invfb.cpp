@@ -100,27 +100,8 @@ namespace Gambit {
         }
 
         vector<HEPUtils::Jet*> baselineJets;
-<<<<<<< HEAD
         for (HEPUtils::Jet* jet : event->jets()) {
           if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
-=======
-	// Matthias jet smearing implemented roughly from 
-	// https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/CONFNOTES/ATLAS-CONF-2015-017/
-        //const vector<double>  b3 = {0,50.,70.,100.,150.,200.,1000.,10000.};
-        //const vector<double> cJets = {0.145,0.115,0.095,0.075,0.06,0.04,0.01};
-	//static HEPUtils::BinnedFn2D<double> _resJets2D(a,b3,cJets);                                                                                                                     
-        for (HEPUtils::Jet* jet : event->jets()) {
-	  //const double _resJets = _resJets2D.get_at(jet->abseta(), jet->pT());
-	  //std::random_device rd;
-	  //std::mt19937 gen(rd());
-	  //std::normal_distribution<> d(1., _resJets);
-	  // Smear by a Gaussian centered on 1 with width given by the (fractional) resolution                                                                                    
-	  //double smear_factor = d(gen);
-	  /// @todo Is this the best way to smear? Should we preserve the mean jet energy, or pT, or direction?                                                                   
-	  //jet->set_mom(HEPUtils::P4::mkXYZM(jet->mom().px()*smear_factor, jet->mom().py()*smear_factor, jet->mom().pz()*smear_factor, jet->mass()));
-          //if (jet->pT()>20. && fabs(jet->eta())<4.5) baselineJets.push_back(jet);
-          if (jet->pT()>20. && jet->abseta()<4.5)baselineJets.push_back(jet);
->>>>>>> 0c3fa664f7d4e1e3744065956b8dd1ca5702a426
         }
 
         //Overlap Removal
