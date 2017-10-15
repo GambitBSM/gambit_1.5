@@ -559,8 +559,8 @@ int main()
 
       // Dump the final results to SLHA files.
       SLHAstruct slha[2] = {make_MSSM_precision_spectrum_4H_W(0).getSLHAea(1), make_MSSM_precision_spectrum_4H_W(0).getSLHAea(2)};
-      SLHAstruct decays = all_decays(0).getSLHAea();
-      for (int i = 0; i < 2; i++) slha[i].insert(slha[i].end(), decays.cbegin(), decays.cend());
+      SLHAstruct decays[2] = {all_decays(0).getSLHAea(1,false,get_mass_es_pseudonyms(0)), all_decays(0).getSLHAea(2,false,get_mass_es_pseudonyms(0))};
+      for (int i = 0; i < 2; i++) slha[i].insert(slha[i].end(), decays[i].cbegin(), decays[i].cend());
       SLHAea::Block ewpo_block("EWPO");
       ewpo_block.push_back("BLOCK EWPO              # Electroweak precision observable predictions");
       ewpo_block.push_back("#       central                 +1sigma                 -1sigma");

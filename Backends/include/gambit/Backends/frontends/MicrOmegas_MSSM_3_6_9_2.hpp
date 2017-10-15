@@ -50,5 +50,6 @@ BE_CONV_FUNCTION(dNdE, double, (double,double,int,int), "dNdE")
 
 BE_INI_DEPENDENCY(MSSM_spectrum, Spectrum)
 BE_INI_DEPENDENCY(decay_rates, DecayTable)
+BE_INI_DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
 
 #include "gambit/Backends/backend_undefs.hpp"
