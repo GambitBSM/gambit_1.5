@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:26:39
+// File generated at Thu 12 Oct 2017 13:42:49
 
 #include "MSSMatMSUSY_mAmu_soft_parameters.hpp"
 #include "wrappers.hpp"

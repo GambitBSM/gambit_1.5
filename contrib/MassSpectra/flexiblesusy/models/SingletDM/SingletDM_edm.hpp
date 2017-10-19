@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:41:48
+// File generated at Thu 12 Oct 2017 14:05:46
 
 /**
  * @file SingletDM_edm.hpp
  *
- * This file was generated at Tue 26 Sep 2017 22:41:48 with FlexibleSUSY
- * 2.0.0-dev and SARAH 4.11.0 .
+ * This file was generated at Thu 12 Oct 2017 14:05:46 with FlexibleSUSY
+ * 2.0.0 and SARAH 4.11.0 .
  */
 
 #ifndef SingletDM_EDM_H

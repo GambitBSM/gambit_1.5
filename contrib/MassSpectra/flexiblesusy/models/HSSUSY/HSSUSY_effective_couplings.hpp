@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:52:58
+// File generated at Thu 12 Oct 2017 14:17:34
 
 #ifndef HSSUSY_EFFECTIVE_COUPLINGS_H
 #define HSSUSY_EFFECTIVE_COUPLINGS_H

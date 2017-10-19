@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:36:15
+// File generated at Thu 12 Oct 2017 14:10:37
 
 #ifndef HSSUSY_susy_parameters_H
 #define HSSUSY_susy_parameters_H

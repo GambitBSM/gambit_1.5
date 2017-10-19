@@ -1,4 +1,4 @@
-FlexibleSUSY 2.0.0 [not released yet]
+FlexibleSUSY 2.0.0 [October, 10 2017]
 
  * Feature: The weak mixing angle can now be calculated from the muon
    decay constant at the full 1-loop level (including flavour mixing
@@ -396,6 +396,20 @@ FlexibleSUSY 2.0.0 [not released yet]
    instabilities during mass matrix diagonalization, which may result
    in eigenvectors with magnitude larger than 1.
 
+FlexibleSUSY-1.7.5 [September, 05 2017]
+
+ * Bugfix (commit 03e9265): Correcting wrong vertex between
+   chargino-smuon-neutrino and chargino-muon-sneutrino in muon decay.
+   Thanks to Markus Bach.
+
+ * Bugfix (commit f3f3850): Correcting coefficient in complex
+   dilogarithm.
+
+ * Bugfix (commit d8d8c0c): Make LibraryLink Set[] functions accept
+   matrix-valued parameters.
+
+ * Bugfix (commit 072be7e): Enable 3-loop RGEs in HSSUSY by default.
+
 FlexibleSUSY-1.7.4 [April, 12 2017]
 
  * Bugfix (commit f434e30): Rename internal IndexSum symbol which
@@ -405,10 +419,6 @@ FlexibleSUSY-1.7.4 [April, 12 2017]
    beta function of SM vacuum expectation value after a corresponding
    bugfix in SARAH 4.11.0.  This bugfix affects the Higgs mass
    prediction with FlexibleEFTHiggs by around 10 MeV.
-
- * Bugfix (commit 03e9265): Correcting wrong vertex between
-   chargino-smuon-neutrino and chargino-muon-sneutrino in muon decay.
-   Thanks to Markus Bach.
 
 FlexibleSUSY-1.7.3 [February, 27 2017]
 

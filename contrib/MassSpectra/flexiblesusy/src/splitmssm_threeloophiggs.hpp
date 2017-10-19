@@ -16,16 +16,17 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:56:19
-
-#ifndef NSM_HIGH_SCALE_CONSTRAINT_H
-#define NSM_HIGH_SCALE_CONSTRAINT_H
+#ifndef SPLIT_THREELOOPHIGGS_H
+#define SPLIT_THREELOOPHIGGS_H
 
 namespace flexiblesusy {
+namespace splitmssm_threeloophiggs {
 
-template <class T>
-class NSM_high_scale_constraint;
+/// Higgs self-energy 3-loop, gluino contribution O(alpha_t alpha_s^2)
+double delta_mh_3loop_gluino_split(
+   double scale, double mt, double yt, double g3, double mg);
 
+} // namespace splitmssm_threeloophiggs
 } // namespace flexiblesusy
 
 #endif

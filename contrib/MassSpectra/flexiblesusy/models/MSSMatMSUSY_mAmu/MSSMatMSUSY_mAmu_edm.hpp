@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:27:58
+// File generated at Thu 12 Oct 2017 13:50:09
 
 /**
  * @file MSSMatMSUSY_mAmu_edm.hpp
  *
- * This file was generated at Thu 28 Sep 2017 14:27:58 with FlexibleSUSY
- * 2.0.0-dev and SARAH 4.11.0 .
+ * This file was generated at Thu 12 Oct 2017 13:50:09 with FlexibleSUSY
+ * 2.0.0 and SARAH 4.11.0 .
  */
 
 #ifndef MSSMatMSUSY_mAmu_EDM_H

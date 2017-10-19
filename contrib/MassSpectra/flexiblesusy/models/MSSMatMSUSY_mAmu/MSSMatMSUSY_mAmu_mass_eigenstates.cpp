@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:27:44
+// File generated at Thu 12 Oct 2017 13:49:55
 
 /**
  * @file MSSMatMSUSY_mAmu_mass_eigenstates.cpp
@@ -26,8 +26,8 @@
  * which solve EWSB and calculate pole masses and mixings from DRbar
  * parameters.
  *
- * This file was generated at Thu 28 Sep 2017 14:27:44 with FlexibleSUSY
- * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
+ * This file was generated at Thu 12 Oct 2017 13:49:55 with FlexibleSUSY
+ * 2.0.0 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #include "MSSMatMSUSY_mAmu_mass_eigenstates.hpp"
@@ -750,7 +750,7 @@ void CLASSNAME::clear_DRbar_parameters()
 
 void CLASSNAME::clear_problems()
 {
-   problems.unflag_all_tachyons();
+   problems.clear();
 }
 
 void CLASSNAME::clear()

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:36:44
+// File generated at Thu 12 Oct 2017 14:11:33
 
 /**
  * @file HSSUSY_mass_eigenstates.cpp
@@ -26,8 +26,8 @@
  * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Tue 26 Sep 2017 22:36:44 with FlexibleSUSY
- * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
+ * This file was generated at Thu 12 Oct 2017 14:11:33 with FlexibleSUSY
+ * 2.0.0 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #include "HSSUSY_mass_eigenstates.hpp"
@@ -656,7 +656,7 @@ void CLASSNAME::clear_DRbar_parameters()
 
 void CLASSNAME::clear_problems()
 {
-   problems.unflag_all_tachyons();
+   problems.clear();
 }
 
 void CLASSNAME::clear()
@@ -3358,11 +3358,11 @@ double CLASSNAME::self_energy_hh_2loop(double p) const
    double self_energy = 0.;
 
    if (HIGGS_2LOOP_CORRECTION_AT_AT) {
-      self_energy += self_energy_higgs_2loop_at_at_sm(p2, scale, mt, yt);
+      self_energy -= delta_mh_2loop_at_at_sm(p2, scale, mt, yt);
    }
 
    if (HIGGS_2LOOP_CORRECTION_AT_AS) {
-      self_energy += self_energy_higgs_2loop_at_as_sm(p2, scale, mt, yt, gs);
+      self_energy -= delta_mh_2loop_at_as_sm(p2, scale, mt, yt, gs);
    }
 
    return self_energy;
@@ -3384,15 +3384,15 @@ double CLASSNAME::self_energy_hh_3loop() const
    double self_energy = 0.;
 
    if (HIGGS_3LOOP_CORRECTION_AT_AT_AT) {
-      self_energy += self_energy_higgs_3loop_at_at_at_sm(scale, mt, yt, mh);
+      self_energy -= delta_mh_3loop_at_at_at_sm(scale, mt, yt, mh);
    }
 
    if (HIGGS_3LOOP_CORRECTION_AT_AT_AS) {
-      self_energy += self_energy_higgs_3loop_at_at_as_sm(scale, mt, yt, gs);
+      self_energy -= delta_mh_3loop_at_at_as_sm(scale, mt, yt, gs);
    }
 
    if (HIGGS_3LOOP_CORRECTION_AT_AS_AS) {
-      self_energy += self_energy_higgs_3loop_at_as_as_sm(scale, mt, yt, gs);
+      self_energy -= delta_mh_3loop_at_as_as_sm(scale, mt, yt, gs);
    }
 
    return self_energy;

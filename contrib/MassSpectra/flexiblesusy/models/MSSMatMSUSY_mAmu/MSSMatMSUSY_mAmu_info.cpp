@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:27:46
+// File generated at Thu 12 Oct 2017 13:49:58
 
 #include "MSSMatMSUSY_mAmu_info.hpp"
 
@@ -121,24 +121,26 @@ namespace MSSMatMSUSY_mAmu_info {
       "ZZ(0,1)", "ZZ(1,0)", "ZZ(1,1)"};
 
    const std::array<std::string, NUMBER_OF_INPUT_PARAMETERS>
-      input_parameter_names = {"TanBeta", "MuInput", "mA2Input", "Aeij(0,0)",
-      "Aeij(0,1)", "Aeij(0,2)", "Aeij(1,0)", "Aeij(1,1)", "Aeij(1,2)", "Aeij(2,0)"
-      , "Aeij(2,1)", "Aeij(2,2)", "Adij(0,0)", "Adij(0,1)", "Adij(0,2)",
-      "Adij(1,0)", "Adij(1,1)", "Adij(1,2)", "Adij(2,0)", "Adij(2,1)", "Adij(2,2)"
-      , "Auij(0,0)", "Auij(0,1)", "Auij(0,2)", "Auij(1,0)", "Auij(1,1)",
-      "Auij(1,2)", "Auij(2,0)", "Auij(2,1)", "Auij(2,2)", "mq2Input(0,0)",
-      "mq2Input(0,1)", "mq2Input(0,2)", "mq2Input(1,0)", "mq2Input(1,1)",
-      "mq2Input(1,2)", "mq2Input(2,0)", "mq2Input(2,1)", "mq2Input(2,2)",
-      "ml2Input(0,0)", "ml2Input(0,1)", "ml2Input(0,2)", "ml2Input(1,0)",
-      "ml2Input(1,1)", "ml2Input(1,2)", "ml2Input(2,0)", "ml2Input(2,1)",
-      "ml2Input(2,2)", "md2Input(0,0)", "md2Input(0,1)", "md2Input(0,2)",
-      "md2Input(1,0)", "md2Input(1,1)", "md2Input(1,2)", "md2Input(2,0)",
-      "md2Input(2,1)", "md2Input(2,2)", "mu2Input(0,0)", "mu2Input(0,1)",
-      "mu2Input(0,2)", "mu2Input(1,0)", "mu2Input(1,1)", "mu2Input(1,2)",
-      "mu2Input(2,0)", "mu2Input(2,1)", "mu2Input(2,2)", "me2Input(0,0)",
-      "me2Input(0,1)", "me2Input(0,2)", "me2Input(1,0)", "me2Input(1,1)",
-      "me2Input(1,2)", "me2Input(2,0)", "me2Input(2,1)", "me2Input(2,2)",
-      "MassBInput", "MassWBInput", "MassGInput"};
+      input_parameter_names = {"TanBeta", "MuInput", "mA2Input", "TYdInput(0,0)",
+      "TYdInput(0,1)", "TYdInput(0,2)", "TYdInput(1,0)", "TYdInput(1,1)",
+      "TYdInput(1,2)", "TYdInput(2,0)", "TYdInput(2,1)", "TYdInput(2,2)",
+      "TYeInput(0,0)", "TYeInput(0,1)", "TYeInput(0,2)", "TYeInput(1,0)",
+      "TYeInput(1,1)", "TYeInput(1,2)", "TYeInput(2,0)", "TYeInput(2,1)",
+      "TYeInput(2,2)", "TYuInput(0,0)", "TYuInput(0,1)", "TYuInput(0,2)",
+      "TYuInput(1,0)", "TYuInput(1,1)", "TYuInput(1,2)", "TYuInput(2,0)",
+      "TYuInput(2,1)", "TYuInput(2,2)", "mq2Input(0,0)", "mq2Input(0,1)",
+      "mq2Input(0,2)", "mq2Input(1,0)", "mq2Input(1,1)", "mq2Input(1,2)",
+      "mq2Input(2,0)", "mq2Input(2,1)", "mq2Input(2,2)", "ml2Input(0,0)",
+      "ml2Input(0,1)", "ml2Input(0,2)", "ml2Input(1,0)", "ml2Input(1,1)",
+      "ml2Input(1,2)", "ml2Input(2,0)", "ml2Input(2,1)", "ml2Input(2,2)",
+      "md2Input(0,0)", "md2Input(0,1)", "md2Input(0,2)", "md2Input(1,0)",
+      "md2Input(1,1)", "md2Input(1,2)", "md2Input(2,0)", "md2Input(2,1)",
+      "md2Input(2,2)", "mu2Input(0,0)", "mu2Input(0,1)", "mu2Input(0,2)",
+      "mu2Input(1,0)", "mu2Input(1,1)", "mu2Input(1,2)", "mu2Input(2,0)",
+      "mu2Input(2,1)", "mu2Input(2,2)", "me2Input(0,0)", "me2Input(0,1)",
+      "me2Input(0,2)", "me2Input(1,0)", "me2Input(1,1)", "me2Input(1,2)",
+      "me2Input(2,0)", "me2Input(2,1)", "me2Input(2,2)", "MassBInput",
+      "MassWBInput", "MassGInput"};
 
    const std::array<std::string, NUMBER_OF_EXTRA_PARAMETERS>
       extra_parameter_names = {};

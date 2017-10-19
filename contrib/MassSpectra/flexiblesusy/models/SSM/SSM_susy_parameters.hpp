@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:56:39
+// File generated at Thu 12 Oct 2017 14:07:49
 
 #ifndef SSM_susy_parameters_H
 #define SSM_susy_parameters_H

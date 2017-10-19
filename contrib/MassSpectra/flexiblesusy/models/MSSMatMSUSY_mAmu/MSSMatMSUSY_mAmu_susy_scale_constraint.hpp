@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:27:47
+// File generated at Thu 12 Oct 2017 13:49:58
 
 #ifndef MSSMatMSUSY_mAmu_SUSY_SCALE_CONSTRAINT_H
 #define MSSMatMSUSY_mAmu_SUSY_SCALE_CONSTRAINT_H

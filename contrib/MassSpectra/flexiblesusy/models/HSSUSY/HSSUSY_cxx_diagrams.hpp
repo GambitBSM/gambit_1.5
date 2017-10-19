@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:53:08
+// File generated at Thu 12 Oct 2017 14:17:38
 
 /**
  * @file HSSUSY_cxx_diagrams.hpp
  *
- * This file was generated at Tue 26 Sep 2017 22:53:08 with FlexibleSUSY
- * 2.0.0-dev and SARAH 4.11.0 .
+ * This file was generated at Thu 12 Oct 2017 14:17:38 with FlexibleSUSY
+ * 2.0.0 and SARAH 4.11.0 .
  */
 
 #ifndef HSSUSY_CXXDIAGRAMS_H

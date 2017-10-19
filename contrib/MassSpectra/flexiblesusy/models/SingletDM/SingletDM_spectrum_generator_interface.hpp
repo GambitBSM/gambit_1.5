@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:41:38
+// File generated at Thu 12 Oct 2017 14:05:42
 
 #ifndef SingletDM_SPECTRUM_GENERATOR_INTERFACE_H
 #define SingletDM_SPECTRUM_GENERATOR_INTERFACE_H
@@ -158,8 +158,7 @@ template <class T>
 void SingletDM_spectrum_generator_interface<T>::write_spectrum(
    const std::string& filename) const
 {
-   SingletDM_spectrum_plotter plotter;
-   plotter.extract_spectrum(model);
+   SingletDM_spectrum_plotter plotter(model);
    plotter.write_to_file(filename);
 }
 

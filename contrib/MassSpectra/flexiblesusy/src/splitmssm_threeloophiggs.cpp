@@ -16,11 +16,11 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-#include "split_threeloophiggs.hpp"
+#include "splitmssm_threeloophiggs.hpp"
 #include "wrappers.hpp"
 
 namespace flexiblesusy {
-namespace split_threeloophiggs {
+namespace splitmssm_threeloophiggs {
 
 /**
  * Split-SUSY Higgs self-energy 3-loop contribution from a gluino,
@@ -29,9 +29,6 @@ namespace split_threeloophiggs {
  *
  * @note The result contains the 3-loop tadpole diagrams.  It is
  * therefore not 1-particle irreducible (1PI).
- *
- * @note The sign of the result is opposite to arxiv:1312.5220,
- * Eq. (4.8).
  *
  * @warning The result is in Landau gauge (\f$\xi = 0\f$).
  *
@@ -43,7 +40,7 @@ namespace split_threeloophiggs {
  *
  * @return real part of 3-loop gluino contribution to Higgs self-energy
  */
-double self_energy_higgs_3loop_gluino_split(
+double delta_mh_3loop_gluino_split(
    double scale, double mt, double yt, double g3, double mg)
 {
    const double yt2 = Sqr(yt);
@@ -56,8 +53,8 @@ double self_energy_higgs_3loop_gluino_split(
 
    const double result = 64*g34*yt2*mt2*LogG3;
 
-   return - result * threeLoop;
+   return result * threeLoop;
 }
 
-} // namespace split_threeloophiggs
+} // namespace splitmssm_threeloophiggs
 } // namespace flexiblesusy

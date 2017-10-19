@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:28:09
+// File generated at Thu 12 Oct 2017 13:50:21
 
 #include "config.h"
 
@@ -439,9 +439,9 @@ void Model_data::put_input_parameters(MLINK link) const
    MLPutRuleTo(link, INPUTPARAMETER(TanBeta), "TanBeta");
    MLPutRuleTo(link, INPUTPARAMETER(MuInput), "MuInput");
    MLPutRuleTo(link, INPUTPARAMETER(mA2Input), "mA2Input");
-   MLPutRuleTo(link, INPUTPARAMETER(Aeij), "Aeij");
-   MLPutRuleTo(link, INPUTPARAMETER(Adij), "Adij");
-   MLPutRuleTo(link, INPUTPARAMETER(Auij), "Auij");
+   MLPutRuleTo(link, INPUTPARAMETER(TYdInput), "TYdInput");
+   MLPutRuleTo(link, INPUTPARAMETER(TYeInput), "TYeInput");
+   MLPutRuleTo(link, INPUTPARAMETER(TYuInput), "TYuInput");
    MLPutRuleTo(link, INPUTPARAMETER(mq2Input), "mq2Input");
    MLPutRuleTo(link, INPUTPARAMETER(ml2Input), "ml2Input");
    MLPutRuleTo(link, INPUTPARAMETER(md2Input), "md2Input");
@@ -1093,33 +1093,33 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    INPUTPARAMETER(TanBeta) = pars[c++];
    INPUTPARAMETER(MuInput) = pars[c++];
    INPUTPARAMETER(mA2Input) = pars[c++];
-   INPUTPARAMETER(Aeij(0,0)) = pars[c++];
-   INPUTPARAMETER(Aeij(0,1)) = pars[c++];
-   INPUTPARAMETER(Aeij(0,2)) = pars[c++];
-   INPUTPARAMETER(Aeij(1,0)) = pars[c++];
-   INPUTPARAMETER(Aeij(1,1)) = pars[c++];
-   INPUTPARAMETER(Aeij(1,2)) = pars[c++];
-   INPUTPARAMETER(Aeij(2,0)) = pars[c++];
-   INPUTPARAMETER(Aeij(2,1)) = pars[c++];
-   INPUTPARAMETER(Aeij(2,2)) = pars[c++];
-   INPUTPARAMETER(Adij(0,0)) = pars[c++];
-   INPUTPARAMETER(Adij(0,1)) = pars[c++];
-   INPUTPARAMETER(Adij(0,2)) = pars[c++];
-   INPUTPARAMETER(Adij(1,0)) = pars[c++];
-   INPUTPARAMETER(Adij(1,1)) = pars[c++];
-   INPUTPARAMETER(Adij(1,2)) = pars[c++];
-   INPUTPARAMETER(Adij(2,0)) = pars[c++];
-   INPUTPARAMETER(Adij(2,1)) = pars[c++];
-   INPUTPARAMETER(Adij(2,2)) = pars[c++];
-   INPUTPARAMETER(Auij(0,0)) = pars[c++];
-   INPUTPARAMETER(Auij(0,1)) = pars[c++];
-   INPUTPARAMETER(Auij(0,2)) = pars[c++];
-   INPUTPARAMETER(Auij(1,0)) = pars[c++];
-   INPUTPARAMETER(Auij(1,1)) = pars[c++];
-   INPUTPARAMETER(Auij(1,2)) = pars[c++];
-   INPUTPARAMETER(Auij(2,0)) = pars[c++];
-   INPUTPARAMETER(Auij(2,1)) = pars[c++];
-   INPUTPARAMETER(Auij(2,2)) = pars[c++];
+   INPUTPARAMETER(TYdInput(0,0)) = pars[c++];
+   INPUTPARAMETER(TYdInput(0,1)) = pars[c++];
+   INPUTPARAMETER(TYdInput(0,2)) = pars[c++];
+   INPUTPARAMETER(TYdInput(1,0)) = pars[c++];
+   INPUTPARAMETER(TYdInput(1,1)) = pars[c++];
+   INPUTPARAMETER(TYdInput(1,2)) = pars[c++];
+   INPUTPARAMETER(TYdInput(2,0)) = pars[c++];
+   INPUTPARAMETER(TYdInput(2,1)) = pars[c++];
+   INPUTPARAMETER(TYdInput(2,2)) = pars[c++];
+   INPUTPARAMETER(TYeInput(0,0)) = pars[c++];
+   INPUTPARAMETER(TYeInput(0,1)) = pars[c++];
+   INPUTPARAMETER(TYeInput(0,2)) = pars[c++];
+   INPUTPARAMETER(TYeInput(1,0)) = pars[c++];
+   INPUTPARAMETER(TYeInput(1,1)) = pars[c++];
+   INPUTPARAMETER(TYeInput(1,2)) = pars[c++];
+   INPUTPARAMETER(TYeInput(2,0)) = pars[c++];
+   INPUTPARAMETER(TYeInput(2,1)) = pars[c++];
+   INPUTPARAMETER(TYeInput(2,2)) = pars[c++];
+   INPUTPARAMETER(TYuInput(0,0)) = pars[c++];
+   INPUTPARAMETER(TYuInput(0,1)) = pars[c++];
+   INPUTPARAMETER(TYuInput(0,2)) = pars[c++];
+   INPUTPARAMETER(TYuInput(1,0)) = pars[c++];
+   INPUTPARAMETER(TYuInput(1,1)) = pars[c++];
+   INPUTPARAMETER(TYuInput(1,2)) = pars[c++];
+   INPUTPARAMETER(TYuInput(2,0)) = pars[c++];
+   INPUTPARAMETER(TYuInput(2,1)) = pars[c++];
+   INPUTPARAMETER(TYuInput(2,2)) = pars[c++];
    INPUTPARAMETER(mq2Input(0,0)) = pars[c++];
    INPUTPARAMETER(mq2Input(0,1)) = pars[c++];
    INPUTPARAMETER(mq2Input(0,2)) = pars[c++];

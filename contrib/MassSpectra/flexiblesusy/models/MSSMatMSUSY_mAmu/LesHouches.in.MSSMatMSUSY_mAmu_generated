@@ -48,7 +48,7 @@ Block SMINPUTS               # Standard Model inputs
     9   80.385               # MW pole
    11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
-   13   1.056583570e-01      # mmuon(pole)
+   13   1.056583715e-01      # mmuon(pole)
    14   0.000000000e+00      # mnu2(pole)
    21   4.750000000e-03      # md(2 GeV) MS-bar
    22   2.400000000e-03      # mu(2 GeV) MS-bar
@@ -59,36 +59,36 @@ Block MINPAR
 Block EXTPAR
    23   0   # MuInput
    24   0   # mA2Input
-Block AEIN
-   1   1   0   # Aeij(1,1)
-   1   2   0   # Aeij(1,2)
-   1   3   0   # Aeij(1,3)
-   2   1   0   # Aeij(2,1)
-   2   2   0   # Aeij(2,2)
-   2   3   0   # Aeij(2,3)
-   3   1   0   # Aeij(3,1)
-   3   2   0   # Aeij(3,2)
-   3   3   0   # Aeij(3,3)
-Block ADIN
-   1   1   0   # Adij(1,1)
-   1   2   0   # Adij(1,2)
-   1   3   0   # Adij(1,3)
-   2   1   0   # Adij(2,1)
-   2   2   0   # Adij(2,2)
-   2   3   0   # Adij(2,3)
-   3   1   0   # Adij(3,1)
-   3   2   0   # Adij(3,2)
-   3   3   0   # Adij(3,3)
-Block AUIN
-   1   1   0   # Auij(1,1)
-   1   2   0   # Auij(1,2)
-   1   3   0   # Auij(1,3)
-   2   1   0   # Auij(2,1)
-   2   2   0   # Auij(2,2)
-   2   3   0   # Auij(2,3)
-   3   1   0   # Auij(3,1)
-   3   2   0   # Auij(3,2)
-   3   3   0   # Auij(3,3)
+Block TdIN
+   1   1   0   # TYdInput(1,1)
+   1   2   0   # TYdInput(1,2)
+   1   3   0   # TYdInput(1,3)
+   2   1   0   # TYdInput(2,1)
+   2   2   0   # TYdInput(2,2)
+   2   3   0   # TYdInput(2,3)
+   3   1   0   # TYdInput(3,1)
+   3   2   0   # TYdInput(3,2)
+   3   3   0   # TYdInput(3,3)
+Block TeIN
+   1   1   0   # TYeInput(1,1)
+   1   2   0   # TYeInput(1,2)
+   1   3   0   # TYeInput(1,3)
+   2   1   0   # TYeInput(2,1)
+   2   2   0   # TYeInput(2,2)
+   2   3   0   # TYeInput(2,3)
+   3   1   0   # TYeInput(3,1)
+   3   2   0   # TYeInput(3,2)
+   3   3   0   # TYeInput(3,3)
+Block TuIN
+   1   1   0   # TYuInput(1,1)
+   1   2   0   # TYuInput(1,2)
+   1   3   0   # TYuInput(1,3)
+   2   1   0   # TYuInput(2,1)
+   2   2   0   # TYuInput(2,2)
+   2   3   0   # TYuInput(2,3)
+   3   1   0   # TYuInput(3,1)
+   3   2   0   # TYuInput(3,2)
+   3   3   0   # TYuInput(3,3)
 Block MSQ2IN
    1   1   0   # mq2Input(1,1)
    1   2   0   # mq2Input(1,2)

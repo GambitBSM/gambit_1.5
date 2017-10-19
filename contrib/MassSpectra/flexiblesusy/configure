@@ -7,7 +7,7 @@ PROGRAM_NAME=FlexibleSUSY
 FLEXIBLESUSY_MAJOR=2
 FLEXIBLESUSY_MINOR=0
 FLEXIBLESUSY_PATCH=0
-FLEXIBLESUSY_EXTRA="-dev"
+FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
 GM2CALC_VERSION="1.3.3"
@@ -211,7 +211,7 @@ cxx_compiler_version="unknown"
 
 # required C++ compiler versions
 required_cxx_compiler_version="unknown"
-required_gpp_compiler_version="4.8.1"
+required_gpp_compiler_version="4.8.5"
 required_clang_compiler_version="3.8.1"
 required_icpc_compiler_version="15.0.0"
 

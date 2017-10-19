@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:27:52
+// File generated at Thu 12 Oct 2017 13:50:03
 
 #include "MSSMatMSUSY_mAmu_mass_eigenstates.hpp"
 #include "MSSMatMSUSY_mAmu_weinberg_angle.hpp"
@@ -685,36 +685,6 @@ std::complex<double> CLASSNAME::CpbarFeChiSePR(int gO1, int gI2, int gI1) const
    return result;
 }
 
-std::complex<double> CLASSNAME::CpbarChaFeconjSvPL(int gt2, int gt1, int gt3) const
-{
-   const auto g2 = MODELPARAMETER(g2);
-   const auto UP = MODELPARAMETER(UP);
-   const auto ZEL = MODELPARAMETER(ZEL);
-   const auto ZV = MODELPARAMETER(ZV);
-
-   const std::complex<double> result = -(g2*Conj(UP(gt2,0))*SUM(j1,0,2,Conj(ZEL
-      (gt1,j1))*ZV(gt3,j1)));
-
-   return result;
-}
-
-std::complex<double> CLASSNAME::CpChiFeconjSePL(int gt1, int gt2, int gt3) const
-{
-   const auto g1 = MODELPARAMETER(g1);
-   const auto g2 = MODELPARAMETER(g2);
-   const auto Ye = MODELPARAMETER(Ye);
-   const auto ZN = MODELPARAMETER(ZN);
-   const auto ZEL = MODELPARAMETER(ZEL);
-   const auto ZE = MODELPARAMETER(ZE);
-
-   const std::complex<double> result = 0.5477225575051661*g1*Conj(ZN(gt1,0))*
-      SUM(j1,0,2,Conj(ZEL(gt2,j1))*ZE(gt3,j1)) + 0.7071067811865475*g2*Conj(ZN(gt1
-      ,1))*SUM(j1,0,2,Conj(ZEL(gt2,j1))*ZE(gt3,j1)) - Conj(ZN(gt1,2))*SUM(j2,0,2,
-      Conj(ZEL(gt2,j2))*SUM(j1,0,2,Ye(j1,j2)*ZE(gt3,3 + j1)));
-
-   return result;
-}
-
 std::complex<double> CLASSNAME::CpChaFvconjSePL(int gI1, int gO1, int gI2) const
 {
    const auto g2 = MODELPARAMETER(g2);
@@ -738,6 +708,36 @@ std::complex<double> CLASSNAME::CpChiFvconjSvPL(int gI1, int gO1, int gI2) const
    const std::complex<double> result = IF(gO1 < 3,0.5477225575051661*g1*Conj(ZN
       (gI1,0))*ZV(gI2,gO1),0) + IF(gO1 < 3,-0.7071067811865475*g2*Conj(ZN(gI1,1))*
       ZV(gI2,gO1),0);
+
+   return result;
+}
+
+std::complex<double> CLASSNAME::CpbarChaFeconjSvPL(int gI1, int gO1, int gI2) const
+{
+   const auto g2 = MODELPARAMETER(g2);
+   const auto UP = MODELPARAMETER(UP);
+   const auto ZEL = MODELPARAMETER(ZEL);
+   const auto ZV = MODELPARAMETER(ZV);
+
+   const std::complex<double> result = -(g2*Conj(UP(gI1,0))*SUM(j1,0,2,Conj(ZEL
+      (gO1,j1))*ZV(gI2,j1)));
+
+   return result;
+}
+
+std::complex<double> CLASSNAME::CpChiFeconjSePL(int gI1, int gO1, int gI2) const
+{
+   const auto g1 = MODELPARAMETER(g1);
+   const auto g2 = MODELPARAMETER(g2);
+   const auto Ye = MODELPARAMETER(Ye);
+   const auto ZN = MODELPARAMETER(ZN);
+   const auto ZEL = MODELPARAMETER(ZEL);
+   const auto ZE = MODELPARAMETER(ZE);
+
+   const std::complex<double> result = 0.5477225575051661*g1*Conj(ZN(gI1,0))*
+      SUM(j1,0,2,Conj(ZEL(gO1,j1))*ZE(gI2,j1)) + 0.7071067811865475*g2*Conj(ZN(gI1
+      ,1))*SUM(j1,0,2,Conj(ZEL(gO1,j1))*ZE(gI2,j1)) - Conj(ZN(gI1,2))*SUM(j2,0,2,
+      Conj(ZEL(gO1,j2))*SUM(j1,0,2,Ye(j1,j2)*ZE(gI2,3 + j1)));
 
    return result;
 }

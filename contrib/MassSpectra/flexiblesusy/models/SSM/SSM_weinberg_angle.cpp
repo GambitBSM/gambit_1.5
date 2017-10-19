@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:56:54
+// File generated at Thu 12 Oct 2017 14:09:03
 
 #include "SSM_mass_eigenstates.hpp"
 #include "SSM_weinberg_angle.hpp"
@@ -450,6 +450,19 @@ double CLASSNAME::calculate_delta_vb_bsm(double sinThetaW) const
  * \f$\delta_{\text{VB}}^{\text{BSM}}\f$
  */
 
+std::complex<double> CLASSNAME::CpbarFeFehhPL(int gO2, int gI2, int gI1) const
+{
+   const auto Ye = MODELPARAMETER(Ye);
+   const auto Ve = MODELPARAMETER(Ve);
+   const auto Ue = MODELPARAMETER(Ue);
+   const auto ZH = MODELPARAMETER(ZH);
+
+   const std::complex<double> result = -0.7071067811865475*SUM(j2,0,2,Conj(Ve(
+      gI2,j2))*SUM(j1,0,2,Conj(Ue(gO2,j1))*Ye(j1,j2)))*ZH(gI1,0);
+
+   return result;
+}
+
 
 std::complex<double> CLASSNAME::delta_vb_wave_Fv(int gO1) const
 {
@@ -463,8 +476,8 @@ std::complex<double> CLASSNAME::delta_vb_wave_Fe(int gO1) const
    const auto MFe = MODELPARAMETER(MFe);
    const auto Mhh = MODELPARAMETER(Mhh);
 
-   const std::complex<double> result = SUM(gI1,0,1,SUM(gI2,0,2,-(AbsSqr(Cp(bar(
-      Fe(gI2)),Fe(gO1),hh(gI1))(PL))*B1(0,Sqr(MFe(gI2)),Sqr(Mhh(gI1))))));
+   const std::complex<double> result = SUM(gI1,0,1,SUM(gI2,0,2,-(AbsSqr(
+      CpbarFeFehhPL(gI2,gO1,gI1))*B1(0,Sqr(MFe(gI2)),Sqr(Mhh(gI1))))));
 
    return result;
 }
