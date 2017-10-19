@@ -75,7 +75,7 @@ namespace Gambit
           temp_bbn = -100.0;
         }
       }
-      result_bbn += temp_bbn;
+      result_bbn = temp_bbn;
 //      result_bbn = lifetime[0];
     }
 
@@ -151,7 +151,7 @@ namespace Gambit
       R_pi = R_pi_SM * (1.0 + d_r_pi);
       R_K = R_K_SM * (1.0 + d_r_K);
       R_tau = R_tau_SM * (1.0 + d_r_tau);
-      if (((1.19e-4<R_pi) && (R_pi<1.27e-4)) || ((2.388e-5<R_K) && (R_K<2.588e-5)) || ((0.9464<R_tau) && (R_tau<1.0064)))
+      if (((1.218e-4<R_pi) && (R_pi<1.242e-4)) || ((2.458e-5<R_K) && (R_K<2.518e-5)) || ((0.9674<R_tau) && (R_tau<0.9854)))
       {
         temp_lepuniv = 0.0;
       }
@@ -167,8 +167,8 @@ namespace Gambit
     void lnL_0nubb(double& result_0nubb)
     {
       using namespace Pipes::lnL_0nubb;
-      static double m_bb_GERDA = 2e-10;  // GeV
-      static double m_bb_Kam = 1.61e-10;  // GeV
+      static double m_bb_GERDA = 4e-10;  // GeV
+      static double m_bb_Kam = 1.65e-10;  // GeV
       Matrix3cd m_light, U_light;
       Matrix3d U_light_sq, t_sq;
       std::vector<double> M(3), m_temp_GERDA(3), m_temp_Kam(3);
@@ -185,20 +185,21 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        m_temp_GERDA[i] = U_light_sq(0,i)*abs(m_light(0,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
+        m_temp_GERDA[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
         m_GERDA += m_temp_GERDA[i];
-        m_temp_Kam[i] = U_light_sq(0,i)*abs(m_light(0,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
+        m_temp_Kam[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
         m_Kam +=m_temp_Kam[i];
       }
-      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
-      {
-        result_0nubb = 0.0;
-      }
-      else
-      {
-        result_0nubb = -100.0;
-      }
-//      result_0nubb = m_GERDA;
+//      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
+//      if (m_Kam < m_bb_Kam)
+//      {
+//        result_0nubb = 0.0;
+//      }
+//      else
+//      {
+//        result_0nubb = -100.0;
+//      }
+      result_0nubb = m_GERDA;
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
