@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "error.hpp"
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <Eigen/Core>
@@ -29,6 +30,8 @@ namespace database {
 class Database {
 public:
    Database(const std::string& file_name);
+   Database(const Database&) = delete;
+   Database(Database&&) = delete;
    ~Database();
 
    /// insert a row of doubles into a table
@@ -38,13 +41,22 @@ public:
    Eigen::ArrayXd extract(const std::string&, long long);
 
 private:
-   typedef int (*TCallback)(void*, int, char**, char**);
+   using TCallback = int (*)(void*, int, char**, char**);
 
    class DisabledSQLiteError : Error {
    public:
-      explicit DisabledSQLiteError(std::string msg_) : msg(msg_) {}
-      virtual ~DisabledSQLiteError() {}
-      virtual std::string what() const { return msg; }
+      explicit DisabledSQLiteError(const std::string& msg_) : msg(msg_) {}
+      virtual ~DisabledSQLiteError() = default;
+      std::string what() const override { return msg; }
+   private:
+      std::string msg;
+   };
+
+   class SQLiteReadError : Error {
+   public:
+      explicit SQLiteReadError(const std::string& msg_) : msg(msg_) {}
+      virtual ~SQLiteReadError() = default;
+      std::string what() const override { return msg; }
    private:
       std::string msg;
    };

@@ -44,21 +44,21 @@ namespace Gambit
    {
      if(_values.count(inkey)!=1) 
      { 
-       model_error().raise(LOCAL_INFO, "ModelParameters object does not contain the requested parameter '"+inkey+"'.");
+       model_error().raise(LOCAL_INFO, "ModelParameters object (with name "+getModelName()+") does not contain the requested parameter '"+inkey+"'.");
      }
    }
 
    /// Default constructor
-   ModelParameters::ModelParameters(): _values(), modelname(), outputname() {}
+   ModelParameters::ModelParameters(): _values(), modelname("None"), outputname("None") {}
 
    /// Constructor using vector of strings
-   ModelParameters::ModelParameters(const std::vector<std::string> &paramlist): _values(), modelname(), outputname() 
+   ModelParameters::ModelParameters(const std::vector<std::string> &paramlist): _values(), modelname("None"), outputname("None") 
    {
      _definePars(paramlist);
    }
    
    /// Constructor using array of char arrays
-   ModelParameters::ModelParameters(const char** paramlist): _values(), modelname(), outputname() 
+   ModelParameters::ModelParameters(const char** paramlist): _values(), modelname("None"), outputname("None") 
    {
      _definePars(paramlist);
    }
@@ -177,8 +177,8 @@ namespace Gambit
    }
 
    /// Getters/setters for model and output names
-   std::string ModelParameters::getModelName()  { return modelname; }
-   std::string ModelParameters::getOutputName() { return outputname; }
+   std::string ModelParameters::getModelName() const  { return modelname; }
+   std::string ModelParameters::getOutputName() const { return outputname; }
    void ModelParameters::setModelName (const std::string& in) { modelname = in; }
    void ModelParameters::setOutputName(const std::string& in) { outputname = in; }
 

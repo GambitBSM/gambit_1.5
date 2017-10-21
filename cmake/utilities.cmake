@@ -22,6 +22,10 @@
 #          (benjamin.farmer@fysik.su.se)
 #  \date 2016 Jan
 #
+#  \author Tomas Gonzalo
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Sep
+#
 #************************************************
 
 include(CMakeParseArguments)
@@ -258,6 +262,9 @@ function(add_gambit_executable executablename LIBRARIES)
       strip_library(m HDF5_LIBRARIES)
     endif()
     set(LIBRARIES ${LIBRARIES} ${HDF5_LIBRARIES})
+  endif()
+  if(Mathematica_FOUND AND Mathematica_WSTP_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${Mathematica_WSTP_LIBRARIES})
   endif()
 
   target_link_libraries(${executablename} ${LIBRARIES} yaml-cpp)

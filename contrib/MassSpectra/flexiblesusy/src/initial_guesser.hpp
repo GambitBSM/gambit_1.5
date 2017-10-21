@@ -21,8 +21,11 @@
 
 namespace flexiblesusy {
 
-template<class T>
-class Initial_guesser;
+class Initial_guesser {
+public:
+   virtual ~Initial_guesser() = default;
+   virtual void guess() = 0;
+};
 
 }
 

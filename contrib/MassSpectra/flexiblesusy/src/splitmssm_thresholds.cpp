@@ -26,30 +26,10 @@
    do {                                         \
       if (is_zero(p))                           \
          FATAL(#fun ": " #p " is zero!");       \
-   } while (0)
+   } while (false)
 
 namespace flexiblesusy {
 namespace splitmssm_thresholds {
-
-Parameters::Parameters()
-   : g1(0.)
-   , g2(0.)
-   , g3(0.)
-   , gt(0.)
-   , At(0.)
-   , mu(0.)
-   , mA(0.)
-   , m1(0.)
-   , m2(0.)
-   , tan_beta(0.)
-   , scale(0.)
-   , mq2(Eigen::Matrix<double,3,3>::Zero())
-   , mu2(Eigen::Matrix<double,3,3>::Zero())
-   , md2(Eigen::Matrix<double,3,3>::Zero())
-   , ml2(Eigen::Matrix<double,3,3>::Zero())
-   , me2(Eigen::Matrix<double,3,3>::Zero())
-{
-}
 
 std::ostream& operator<<(std::ostream& ostr, const Parameters& parameters)
 {
@@ -330,7 +310,7 @@ namespace {
 
       return beta;
    }
-}
+} // anonymous namespace
 
 /**
  * Finite 1-loop threshold correction for quartic Higgs coupling from
@@ -910,7 +890,7 @@ namespace {
 
       return (m12*G(m12,q2) - m22*G(m22,q2)) / (m12 - m22);
    }
-}
+} // anonymous namespace
 
 /**
  * Calculates the finite 1-loop threshold correction \f$\Delta m^2\f$

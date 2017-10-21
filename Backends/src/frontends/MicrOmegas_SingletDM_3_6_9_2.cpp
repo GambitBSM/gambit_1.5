@@ -76,6 +76,11 @@ BE_INI_FUNCTION
 
      // Set SM particle masses in micrOmegas_3.6.9.2
 
+     // MS-BAR alpha-strong at MZ
+     error = assignVal((char*)"alfSMZ", sminputs.alphaS);
+     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set alpha_S in"
+             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+
      // EE = sqrt(4*pi*(1/alphainv))
      error = assignVal((char*)"EE", sqrt(4*M_PI*(1/sminputs.alphainv)));
      if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set electric charge in"

@@ -15,6 +15,7 @@
 ///  *********************************************
 
 #define BACKENDNAME SPheno
+#define BACKENDLANG FORTRAN
 #define VERSION 3.3.8
 #define SAFE_VERSION 3_3_8
 

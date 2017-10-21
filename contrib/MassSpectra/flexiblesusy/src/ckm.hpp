@@ -24,8 +24,6 @@
 namespace flexiblesusy {
 
 struct CKM_parameters {
-   CKM_parameters();
-
    void reset_to_diagonal();
    void reset_to_observation();
 
@@ -54,7 +52,7 @@ struct CKM_parameters {
                                  Eigen::Matrix<std::complex<double>,3,3>&,
                                  Eigen::Matrix<std::complex<double>,3,3>&);
 
-   double theta_12, theta_13, theta_23, delta;
+   double theta_12{0.}, theta_13{0.}, theta_23{0.}, delta{0.};
 };
 
 } // namespace flexiblesusy

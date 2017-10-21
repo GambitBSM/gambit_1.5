@@ -584,7 +584,7 @@ int main(int argc, char* argv[])
     cout << "IceCube 79 lnL: " << IC79_loglike(0) << endl;
     cout << endl;
 
-    cout << "<sigma v> [cm^2/s]: " << sigmav_late_universe(0) << endl;
+    cout << "<sigma v> [cm^3/s]: " << sigmav_late_universe(0) << endl;
     cout << "Fermi LAT dwarf spheroidal lnL: " << lnL_FermiLATdwarfs_gamLike(0) << endl;
 
 
@@ -611,7 +611,7 @@ int main(int argc, char* argv[])
     file << "IceCube 79 lnL: " << IC79_loglike(0) << endl;
     file << endl;
 
-    file << "<sigma v> [cm^2/s]: " << sigmav_late_universe(0) << endl;
+    file << "<sigma v> [cm^3/s]: " << sigmav_late_universe(0) << endl;
     file << "Fermi LAT dwarf spheroidal lnL: " << lnL_FermiLATdwarfs_gamLike(0) << endl;
 
     file.close();

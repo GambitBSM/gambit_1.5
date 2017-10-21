@@ -16,35 +16,28 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:54
+// File generated at Tue 26 Sep 2017 22:52:56
 
 /**
  * @file HSSUSY_two_scale_model.cpp
  * @brief implementation of the HSSUSY model class
  *
  * Contains the definition of the HSSUSY model class methods
- * which solve EWSB and calculate pole masses and mixings from DRbar
+ * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Sat 27 Aug 2016 12:40:54 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Tue 26 Sep 2017 22:52:56 with FlexibleSUSY
+ * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
  */
 
 #include "HSSUSY_two_scale_model.hpp"
 
 namespace flexiblesusy {
 
-using namespace HSSUSY_info;
-
 #define CLASSNAME HSSUSY<Two_scale>
 
 CLASSNAME::HSSUSY(const HSSUSY_input_parameters& input_)
-   : Two_scale_model()
-   , HSSUSY_mass_eigenstates(input_)
-{
-}
-
-CLASSNAME::~HSSUSY()
+   : HSSUSY_mass_eigenstates(input_)
 {
 }
 
