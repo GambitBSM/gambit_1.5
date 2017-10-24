@@ -7,6 +7,8 @@
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
+#include "RestFrames/RestFrames.hh"
+
 using namespace std;
 
 /* The ATLAS 0 lepton direct stop analysis
@@ -81,6 +83,11 @@ namespace Gambit {
         }
         jetvec=Survivors;
 
+	// Recursive jigsaw objects
+
+	RestFrames::LabRecoFrame*       LAB_2L2J;
+
+	
         return;
       }
 
