@@ -16,15 +16,15 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 15:08:56
+// File generated at Wed 25 Oct 2017 18:29:59
 
 /**
  * @file CMSSMNoFV_two_scale_ewsb_solver.hpp
  *
  * @brief contains class for solving EWSB when two-scale algorithm is used
  *
- * This file was generated at Thu 12 Oct 2017 15:08:56 with FlexibleSUSY
- * 2.0.0 (git commit: unknown) and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:29:59 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #ifndef CMSSMNoFV_TWO_SCALE_EWSB_SOLVER_H

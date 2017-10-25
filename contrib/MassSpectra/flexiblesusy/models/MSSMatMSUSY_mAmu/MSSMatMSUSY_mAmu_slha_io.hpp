@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 13:49:58
+// File generated at Wed 25 Oct 2017 17:59:52
 
 #ifndef MSSMatMSUSY_mAmu_SLHA_IO_H
 #define MSSMatMSUSY_mAmu_SLHA_IO_H

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 13:49:58
+// File generated at Wed 25 Oct 2017 17:59:52
 
 #include "MSSMatMSUSY_mAmu_slha_io.hpp"
 #include "MSSMatMSUSY_mAmu_input_parameters.hpp"
@@ -134,6 +134,9 @@ void MSSMatMSUSY_mAmu_slha_io::set_input(const MSSMatMSUSY_mAmu_input_parameters
    set_imminpar(input);
    set_imextpar(input);
 
+   slha_io.set_block("ADIN", INPUTPARAMETER(Adij), "Adij");
+   slha_io.set_block("AEIN", INPUTPARAMETER(Aeij), "Aeij");
+   slha_io.set_block("AUIN", INPUTPARAMETER(Auij), "Auij");
    {
       std::ostringstream block;
       block << "Block MSOFTIN" << '\n'
@@ -148,9 +151,6 @@ void MSSMatMSUSY_mAmu_slha_io::set_input(const MSSMatMSUSY_mAmu_input_parameters
    slha_io.set_block("MSL2IN", INPUTPARAMETER(ml2Input), "ml2Input");
    slha_io.set_block("MSQ2IN", INPUTPARAMETER(mq2Input), "mq2Input");
    slha_io.set_block("MSU2IN", INPUTPARAMETER(mu2Input), "mu2Input");
-   slha_io.set_block("TdIN", INPUTPARAMETER(TYdInput), "TYdInput");
-   slha_io.set_block("TeIN", INPUTPARAMETER(TYeInput), "TYeInput");
-   slha_io.set_block("TuIN", INPUTPARAMETER(TYuInput), "TYuInput");
 
 }
 
@@ -445,6 +445,9 @@ void MSSMatMSUSY_mAmu_slha_io::fill(MSSMatMSUSY_mAmu_input_parameters& input) co
    slha_io.read_block("IMMINPAR", imminpar_processor);
    slha_io.read_block("IMEXTPAR", imextpar_processor);
 
+   slha_io.read_block("ADIN", input.Adij);
+   slha_io.read_block("AEIN", input.Aeij);
+   slha_io.read_block("AUIN", input.Auij);
    input.MassBInput = slha_io.read_entry("MSOFTIN", 1);
    input.MassGInput = slha_io.read_entry("MSOFTIN", 3);
    input.MassWBInput = slha_io.read_entry("MSOFTIN", 2);
@@ -453,9 +456,6 @@ void MSSMatMSUSY_mAmu_slha_io::fill(MSSMatMSUSY_mAmu_input_parameters& input) co
    slha_io.read_block("MSL2IN", input.ml2Input);
    slha_io.read_block("MSQ2IN", input.mq2Input);
    slha_io.read_block("MSU2IN", input.mu2Input);
-   slha_io.read_block("TdIN", input.TYdInput);
-   slha_io.read_block("TeIN", input.TYeInput);
-   slha_io.read_block("TuIN", input.TYuInput);
 
 }
 

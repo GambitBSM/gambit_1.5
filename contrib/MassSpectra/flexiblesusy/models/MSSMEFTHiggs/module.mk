@@ -25,6 +25,9 @@ MSSMEFTHiggs_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.MSSMEFTHiggs_generated \
 		$(DIR)/LesHouches.in.MSSMEFTHiggs
 
+MSSMEFTHiggs_REFERENCES := \
+		$(DIR)/MSSMEFTHiggs_references.tex
+
 MSSMEFTHiggs_GNUPLOT := \
 		$(DIR)/MSSMEFTHiggs_plot_rgflow.gnuplot \
 		$(DIR)/MSSMEFTHiggs_plot_spectrum.gnuplot
@@ -185,6 +188,7 @@ install-src::
 ifneq ($(MSSMEFTHiggs_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(MSSMEFTHiggs_SLHA_INPUT) $(MSSMEFTHiggs_INSTALL_DIR)
 endif
+		install -m u=rw,g=r,o=r $(MSSMEFTHiggs_REFERENCES) $(MSSMEFTHiggs_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(MSSMEFTHiggs_GNUPLOT) $(MSSMEFTHiggs_INSTALL_DIR)
 endif
 
@@ -223,7 +227,8 @@ pack-$(MODNAME)-src:
 		$(EXEMSSMEFTHiggs_SRC) \
 		$(LLMSSMEFTHiggs_SRC) $(LLMSSMEFTHiggs_MMA) \
 		$(MSSMEFTHiggs_MK) $(MSSMEFTHiggs_INCLUDE_MK) \
-		$(MSSMEFTHiggs_SLHA_INPUT) $(MSSMEFTHiggs_GNUPLOT)
+		$(MSSMEFTHiggs_SLHA_INPUT) $(MSSMEFTHiggs_REFERENCES) \
+		$(MSSMEFTHiggs_GNUPLOT)
 
 $(LIBMSSMEFTHiggs_SRC) $(LIBMSSMEFTHiggs_HDR) $(EXEMSSMEFTHiggs_SRC) $(LLMSSMEFTHiggs_SRC) $(LLMSSMEFTHiggs_MMA) \
 : run-metacode-$(MODNAME)

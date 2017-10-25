@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 15:31:39
+// File generated at Wed 25 Oct 2017 19:42:34
 
 #ifndef CMSSM_TWO_SCALE_SPECTRUM_GENERATOR_H
 #define CMSSM_TWO_SCALE_SPECTRUM_GENERATOR_H

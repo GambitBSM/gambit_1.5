@@ -21,7 +21,7 @@
  * @brief contains wrapper class for model class in SLHA convention
  */
 
-// File generated at Thu 12 Oct 2017 14:02:52
+// File generated at Wed 25 Oct 2017 18:10:38
 
 #ifndef SingletDMZ3_SLHA_H
 #define SingletDMZ3_SLHA_H

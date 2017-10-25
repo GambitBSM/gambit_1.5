@@ -25,6 +25,9 @@ MSSMatMGUT_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.MSSMatMGUT_generated \
 		$(DIR)/LesHouches.in.MSSMatMGUT
 
+MSSMatMGUT_REFERENCES := \
+		$(DIR)/MSSMatMGUT_references.tex
+
 MSSMatMGUT_GNUPLOT := \
 		$(DIR)/MSSMatMGUT_plot_rgflow.gnuplot \
 		$(DIR)/MSSMatMGUT_plot_spectrum.gnuplot
@@ -185,6 +188,7 @@ install-src::
 ifneq ($(MSSMatMGUT_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(MSSMatMGUT_SLHA_INPUT) $(MSSMatMGUT_INSTALL_DIR)
 endif
+		install -m u=rw,g=r,o=r $(MSSMatMGUT_REFERENCES) $(MSSMatMGUT_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(MSSMatMGUT_GNUPLOT) $(MSSMatMGUT_INSTALL_DIR)
 endif
 
@@ -223,7 +227,8 @@ pack-$(MODNAME)-src:
 		$(EXEMSSMatMGUT_SRC) \
 		$(LLMSSMatMGUT_SRC) $(LLMSSMatMGUT_MMA) \
 		$(MSSMatMGUT_MK) $(MSSMatMGUT_INCLUDE_MK) \
-		$(MSSMatMGUT_SLHA_INPUT) $(MSSMatMGUT_GNUPLOT)
+		$(MSSMatMGUT_SLHA_INPUT) $(MSSMatMGUT_REFERENCES) \
+		$(MSSMatMGUT_GNUPLOT)
 
 $(LIBMSSMatMGUT_SRC) $(LIBMSSMatMGUT_HDR) $(EXEMSSMatMGUT_SRC) $(LLMSSMatMGUT_SRC) $(LLMSSMatMGUT_MMA) \
 : run-metacode-$(MODNAME)

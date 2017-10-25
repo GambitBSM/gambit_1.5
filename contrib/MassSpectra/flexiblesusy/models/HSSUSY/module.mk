@@ -25,6 +25,9 @@ HSSUSY_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.HSSUSY_generated \
 		$(DIR)/LesHouches.in.HSSUSY
 
+HSSUSY_REFERENCES := \
+		$(DIR)/HSSUSY_references.tex
+
 HSSUSY_GNUPLOT := \
 		$(DIR)/HSSUSY_plot_rgflow.gnuplot \
 		$(DIR)/HSSUSY_plot_spectrum.gnuplot
@@ -185,6 +188,7 @@ install-src::
 ifneq ($(HSSUSY_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(HSSUSY_SLHA_INPUT) $(HSSUSY_INSTALL_DIR)
 endif
+		install -m u=rw,g=r,o=r $(HSSUSY_REFERENCES) $(HSSUSY_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(HSSUSY_GNUPLOT) $(HSSUSY_INSTALL_DIR)
 endif
 
@@ -223,7 +227,8 @@ pack-$(MODNAME)-src:
 		$(EXEHSSUSY_SRC) \
 		$(LLHSSUSY_SRC) $(LLHSSUSY_MMA) \
 		$(HSSUSY_MK) $(HSSUSY_INCLUDE_MK) \
-		$(HSSUSY_SLHA_INPUT) $(HSSUSY_GNUPLOT)
+		$(HSSUSY_SLHA_INPUT) $(HSSUSY_REFERENCES) \
+		$(HSSUSY_GNUPLOT)
 
 $(LIBHSSUSY_SRC) $(LIBHSSUSY_HDR) $(EXEHSSUSY_SRC) $(LLHSSUSY_SRC) $(LLHSSUSY_MMA) \
 : run-metacode-$(MODNAME)

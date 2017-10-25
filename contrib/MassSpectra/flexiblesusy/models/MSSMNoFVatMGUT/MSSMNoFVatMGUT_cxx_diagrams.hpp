@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 15:03:49
+// File generated at Wed 25 Oct 2017 18:24:20
 
 /**
  * @file MSSMNoFVatMGUT_cxx_diagrams.hpp
  *
- * This file was generated at Thu 12 Oct 2017 15:03:49 with FlexibleSUSY
- * 2.0.0 and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:24:20 with FlexibleSUSY
+ * 2.0.1 and SARAH 4.11.0 .
  */
 
 #ifndef MSSMNoFVatMGUT_CXXDIAGRAMS_H

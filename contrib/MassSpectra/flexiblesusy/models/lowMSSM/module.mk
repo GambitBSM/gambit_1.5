@@ -25,6 +25,9 @@ lowMSSM_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.lowMSSM_generated \
 		$(DIR)/LesHouches.in.lowMSSM
 
+lowMSSM_REFERENCES := \
+		$(DIR)/lowMSSM_references.tex
+
 lowMSSM_GNUPLOT := \
 		$(DIR)/lowMSSM_plot_rgflow.gnuplot \
 		$(DIR)/lowMSSM_plot_spectrum.gnuplot
@@ -185,6 +188,7 @@ install-src::
 ifneq ($(lowMSSM_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(lowMSSM_SLHA_INPUT) $(lowMSSM_INSTALL_DIR)
 endif
+		install -m u=rw,g=r,o=r $(lowMSSM_REFERENCES) $(lowMSSM_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(lowMSSM_GNUPLOT) $(lowMSSM_INSTALL_DIR)
 endif
 
@@ -223,7 +227,8 @@ pack-$(MODNAME)-src:
 		$(EXElowMSSM_SRC) \
 		$(LLlowMSSM_SRC) $(LLlowMSSM_MMA) \
 		$(lowMSSM_MK) $(lowMSSM_INCLUDE_MK) \
-		$(lowMSSM_SLHA_INPUT) $(lowMSSM_GNUPLOT)
+		$(lowMSSM_SLHA_INPUT) $(lowMSSM_REFERENCES) \
+		$(lowMSSM_GNUPLOT)
 
 $(LIBlowMSSM_SRC) $(LIBlowMSSM_HDR) $(EXElowMSSM_SRC) $(LLlowMSSM_SRC) $(LLlowMSSM_MMA) \
 : run-metacode-$(MODNAME)

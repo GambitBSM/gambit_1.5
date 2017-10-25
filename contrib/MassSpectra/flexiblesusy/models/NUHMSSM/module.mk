@@ -25,6 +25,9 @@ NUHMSSM_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.NUHMSSM_generated \
 		$(DIR)/LesHouches.in.NUHMSSM
 
+NUHMSSM_REFERENCES := \
+		$(DIR)/NUHMSSM_references.tex
+
 NUHMSSM_GNUPLOT := \
 		$(DIR)/NUHMSSM_plot_rgflow.gnuplot \
 		$(DIR)/NUHMSSM_plot_spectrum.gnuplot
@@ -185,6 +188,7 @@ install-src::
 ifneq ($(NUHMSSM_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(NUHMSSM_SLHA_INPUT) $(NUHMSSM_INSTALL_DIR)
 endif
+		install -m u=rw,g=r,o=r $(NUHMSSM_REFERENCES) $(NUHMSSM_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(NUHMSSM_GNUPLOT) $(NUHMSSM_INSTALL_DIR)
 endif
 
@@ -223,7 +227,8 @@ pack-$(MODNAME)-src:
 		$(EXENUHMSSM_SRC) \
 		$(LLNUHMSSM_SRC) $(LLNUHMSSM_MMA) \
 		$(NUHMSSM_MK) $(NUHMSSM_INCLUDE_MK) \
-		$(NUHMSSM_SLHA_INPUT) $(NUHMSSM_GNUPLOT)
+		$(NUHMSSM_SLHA_INPUT) $(NUHMSSM_REFERENCES) \
+		$(NUHMSSM_GNUPLOT)
 
 $(LIBNUHMSSM_SRC) $(LIBNUHMSSM_HDR) $(EXENUHMSSM_SRC) $(LLNUHMSSM_SRC) $(LLNUHMSSM_MMA) \
 : run-metacode-$(MODNAME)

@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 15:09:05
+// File generated at Wed 25 Oct 2017 18:30:09
 
 /**
  * @file CMSSMNoFV_a_muon.hpp
  *
- * This file was generated at Thu 12 Oct 2017 15:09:05 with FlexibleSUSY
- * 2.0.0 and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:30:09 with FlexibleSUSY
+ * 2.0.1 and SARAH 4.11.0 .
  */
 
 #ifndef CMSSMNoFV_A_MUON_H

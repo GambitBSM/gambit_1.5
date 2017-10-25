@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 14:02:52
+// File generated at Wed 25 Oct 2017 18:10:38
 
 /**
  * @file SingletDMZ3_mass_eigenstates.cpp
@@ -26,8 +26,8 @@
  * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Thu 12 Oct 2017 14:02:52 with FlexibleSUSY
- * 2.0.0 (git commit: unknown) and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:10:38 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #include "SingletDMZ3_mass_eigenstates.hpp"

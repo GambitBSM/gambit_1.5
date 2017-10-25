@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 13:50:05
+// File generated at Wed 25 Oct 2017 18:00:00
 
 /**
  * @file MSSMatMSUSY_mAmu_two_scale_model.hpp
@@ -24,8 +24,8 @@
  *        value problem using the two_scale solver by solving EWSB
  *        and determine the pole masses and mixings
  *
- * This file was generated at Thu 12 Oct 2017 13:50:05 with FlexibleSUSY
- * 2.0.0 (git commit: unknown) and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:00:00 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #ifndef MSSMatMSUSY_mAmu_TWO_SCALE_H

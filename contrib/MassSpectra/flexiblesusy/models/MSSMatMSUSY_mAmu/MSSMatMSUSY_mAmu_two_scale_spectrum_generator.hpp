@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 13:50:05
+// File generated at Wed 25 Oct 2017 18:00:00
 
 #ifndef MSSMatMSUSY_mAmu_TWO_SCALE_SPECTRUM_GENERATOR_H
 #define MSSMatMSUSY_mAmu_TWO_SCALE_SPECTRUM_GENERATOR_H

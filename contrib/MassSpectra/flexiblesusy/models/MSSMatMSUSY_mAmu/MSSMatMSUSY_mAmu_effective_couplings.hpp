@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 13:50:08
+// File generated at Wed 25 Oct 2017 18:00:03
 
 #ifndef MSSMatMSUSY_mAmu_EFFECTIVE_COUPLINGS_H
 #define MSSMatMSUSY_mAmu_EFFECTIVE_COUPLINGS_H

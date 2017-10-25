@@ -25,6 +25,9 @@ MSSM_mAmu_SLHA_INPUT := \
 		$(DIR)/LesHouches.in.MSSM_mAmu_generated \
 		$(DIR)/LesHouches.in.MSSM_mAmu
 
+MSSM_mAmu_REFERENCES := \
+		$(DIR)/MSSM_mAmu_references.tex
+
 MSSM_mAmu_GNUPLOT := \
 		$(DIR)/MSSM_mAmu_plot_rgflow.gnuplot \
 		$(DIR)/MSSM_mAmu_plot_spectrum.gnuplot
@@ -185,6 +188,7 @@ install-src::
 ifneq ($(MSSM_mAmu_SLHA_INPUT),)
 		install -m u=rw,g=r,o=r $(MSSM_mAmu_SLHA_INPUT) $(MSSM_mAmu_INSTALL_DIR)
 endif
+		install -m u=rw,g=r,o=r $(MSSM_mAmu_REFERENCES) $(MSSM_mAmu_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(MSSM_mAmu_GNUPLOT) $(MSSM_mAmu_INSTALL_DIR)
 endif
 
@@ -223,7 +227,8 @@ pack-$(MODNAME)-src:
 		$(EXEMSSM_mAmu_SRC) \
 		$(LLMSSM_mAmu_SRC) $(LLMSSM_mAmu_MMA) \
 		$(MSSM_mAmu_MK) $(MSSM_mAmu_INCLUDE_MK) \
-		$(MSSM_mAmu_SLHA_INPUT) $(MSSM_mAmu_GNUPLOT)
+		$(MSSM_mAmu_SLHA_INPUT) $(MSSM_mAmu_REFERENCES) \
+		$(MSSM_mAmu_GNUPLOT)
 
 $(LIBMSSM_mAmu_SRC) $(LIBMSSM_mAmu_HDR) $(EXEMSSM_mAmu_SRC) $(LLMSSM_mAmu_SRC) $(LLMSSM_mAmu_MMA) \
 : run-metacode-$(MODNAME)

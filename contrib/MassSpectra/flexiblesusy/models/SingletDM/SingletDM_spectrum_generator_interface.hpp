@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 14:05:42
+// File generated at Wed 25 Oct 2017 18:11:11
 
 #ifndef SingletDM_SPECTRUM_GENERATOR_INTERFACE_H
 #define SingletDM_SPECTRUM_GENERATOR_INTERFACE_H

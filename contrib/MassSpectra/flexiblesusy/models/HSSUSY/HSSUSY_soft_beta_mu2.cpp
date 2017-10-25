@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 14:10:41
+// File generated at Wed 25 Oct 2017 18:12:02
 
 #include "HSSUSY_soft_parameters.hpp"
 #include "wrappers.hpp"

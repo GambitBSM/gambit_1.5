@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 12 Oct 2017 14:02:53
+// File generated at Wed 25 Oct 2017 18:10:39
 
 #ifndef SingletDMZ3_SLHA_IO_H
 #define SingletDMZ3_SLHA_IO_H
