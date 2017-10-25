@@ -165,6 +165,12 @@ MAKE_INTERFACE
 #undef MODELNAME
 /// @}
 
+#define MODELNAME MSSMEFTHiggs
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMatMGUT model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+/// @}
+
 #define MODELNAME SingletDMZ3
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary SingletDMZ3 model headers etc.
 MAKE_INTERFACE
