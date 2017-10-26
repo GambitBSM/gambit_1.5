@@ -11,6 +11,7 @@
 
       subroutine effpot(lp,mt,mg,T1,T2,st,ct,q2,tanb,vv,l,xx,as,
      $     DMS,DMP) 
+     $ bind(C, name="effpot_")
 
       implicit none
 

@@ -209,8 +209,8 @@ namespace Gambit
       typedef typename SpecTraits<DerivedSpec>::Model Model;
       typedef typename SpecTraits<DerivedSpec>::Input Input;
       typedef void(Model::*FSptr)(double); /* Function pointer signature for Model object member functions with no arguments */
-      typedef void(Model::*FSptr1)(int,double); /* Function pointer signature for Model object member functions with one argument */
-      typedef void(Model::*FSptr2)(int,int,double); /* Function pointer signature for Model object member functions with two arguments */
+      typedef void(Model::*FSptr1)(int,const double&); /* Function pointer signature for Model object member functions with one argument */
+      typedef void(Model::*FSptr2)(int,int,const double&); /* Function pointer signature for Model object member functions with two arguments */
       typedef void(DerivedSpec::*FSptrW)(double); /* Function pointer signature for DerivedSpec member functions with no arguments */
       typedef void(DerivedSpec::*FSptr1W)(double,int); /* Function pointer signature for DerivedSpec member functions with one argument */
       typedef void(DerivedSpec::*FSptr2W)(double,int,int); /* Function pointer signature for DerivedSpec object member functions with two arguments */

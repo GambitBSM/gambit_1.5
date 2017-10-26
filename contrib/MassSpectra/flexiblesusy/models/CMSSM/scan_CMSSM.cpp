@@ -16,11 +16,17 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:51:01
+// File generated at Sun 24 Sep 2017 16:35:52
+
+#include "config.h"
 
 #include "CMSSM_input_parameters.hpp"
+#include "CMSSM_model_slha.hpp"
 #include "CMSSM_spectrum_generator.hpp"
-#include "CMSSM_two_scale_model_slha.hpp"
+
+#ifdef ENABLE_TWO_SCALE_SOLVER
+#include "CMSSM_two_scale_spectrum_generator.hpp"
+#endif
 
 #include "command_line_options.hpp"
 #include "scan.hpp"
@@ -45,15 +51,18 @@ void print_usage()
       "  --SignMu=<value>\n"
       "  --Azero=<value>\n"
 
+      "  --solver-type=<value>             an integer corresponding\n"
+      "                                    to the solver type to use\n"
       "  --help,-h                         print this help message"
              << std::endl;
 }
 
-void set_command_line_parameters(int argc, char* argv[],
-                                 CMSSM_input_parameters& input)
+void set_command_line_parameters(const Dynamic_array_view<char*>& args,
+                                 CMSSM_input_parameters& input,
+                                 int& solver_type)
 {
-   for (int i = 1; i < argc; ++i) {
-      const char* option = argv[i];
+   for (int i = 1; i < args.size(); ++i) {
+      const auto option = args[i];
 
       if(Command_line_options::get_parameter_value(option, "--m0=", input.m0))
          continue;
@@ -71,6 +80,10 @@ void set_command_line_parameters(int argc, char* argv[],
          continue;
 
       
+      if (Command_line_options::get_parameter_value(
+             option, "--solver-type=", solver_type))
+         continue;
+
       if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
          print_usage();
          exit(EXIT_SUCCESS);
@@ -81,63 +94,89 @@ void set_command_line_parameters(int argc, char* argv[],
    }
 }
 
+struct CMSSM_scan_result {
+   Spectrum_generator_problems problems;
+   double higgs{0.};
+};
+
+template <class solver_type>
+CMSSM_scan_result run_parameter_point(const softsusy::QedQcd& qedqcd,
+   CMSSM_input_parameters& input)
+{
+   Spectrum_generator_settings settings;
+   settings.set(Spectrum_generator_settings::precision, 1.0e-4);
+
+   CMSSM_spectrum_generator<solver_type> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   const auto model = std::get<0>(spectrum_generator.get_models_slha());
+   const auto& pole_masses = model.get_physical_slha();
+
+   CMSSM_scan_result result;
+   result.problems = spectrum_generator.get_problems();
+   result.higgs = pole_masses.Mhh(0);
+
+   return result;
+}
+
+void scan(int solver_type, CMSSM_input_parameters& input,
+          const std::vector<double>& range)
+{
+   softsusy::QedQcd qedqcd;
+
+   for (const auto p: range) {
+      INPUTPARAMETER(m0) = p;
+
+      CMSSM_scan_result result;
+      switch (solver_type) {
+      case 0:
+#ifdef ENABLE_TWO_SCALE_SOLVER
+      case 1:
+         result = run_parameter_point<Two_scale>(qedqcd, input);
+         if (!result.problems.have_problem() || solver_type != 0) break;
+#endif
+
+      default:
+         if (solver_type != 0) {
+            ERROR("unknown solver type: " << solver_type);
+            exit(EXIT_FAILURE);
+         }
+      }
+
+      const int error = result.problems.have_problem();
+      std::cout << "  "
+                << std::setw(12) << std::left << p << ' '
+                << std::setw(12) << std::left << result.higgs << ' '
+                << std::setw(12) << std::left << error;
+      if (error) {
+         std::cout << "\t# " << result.problems;
+      }
+      std::cout << '\n';
+   }
+}
+
 } // namespace flexiblesusy
 
 
 int main(int argc, char* argv[])
 {
    using namespace flexiblesusy;
-   typedef Two_scale algorithm_type;
 
    CMSSM_input_parameters input;
-   set_command_line_parameters(argc, argv, input);
+   int solver_type = 1;
+   set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
+                               solver_type);
 
-   softsusy::QedQcd qedqcd;
-
-   try {
-      qedqcd.to(qedqcd.displayPoleMZ()); // run SM fermion masses to MZ
-   } catch (const std::string& s) {
-      ERROR(s);
-      return EXIT_FAILURE;
-   }
-
-   CMSSM_spectrum_generator<algorithm_type> spectrum_generator;
-   spectrum_generator.set_precision_goal(1.0e-4);
-   spectrum_generator.set_max_iterations(0);         // 0 == automatic
-   spectrum_generator.set_calculate_sm_masses(0);    // 0 == no
-   spectrum_generator.set_parameter_output_scale(0); // 0 == susy scale
+   std::cout << "# "
+             << std::setw(12) << std::left << "m0" << ' '
+             << std::setw(12) << std::left << "Mhh(0)/GeV" << ' '
+             << std::setw(12) << std::left << "error"
+             << '\n';
 
    const std::vector<double> range(float_range(0., 100., 10));
 
-   cout << "# "
-        << std::setw(12) << std::left << "m0" << ' '
-        << std::setw(12) << std::left << "Mhh(0)/GeV" << ' '
-        << std::setw(12) << std::left << "error"
-        << '\n';
-
-   for (std::vector<double>::const_iterator it = range.begin(),
-           end = range.end(); it != end; ++it) {
-      INPUTPARAMETER(m0) = *it;
-
-
-      spectrum_generator.run(qedqcd, input);
-
-      const CMSSM_slha<algorithm_type> model(spectrum_generator.get_model());
-      const CMSSM_physical& pole_masses = model.get_physical_slha();
-      const Problems<CMSSM_info::NUMBER_OF_PARTICLES>& problems
-         = spectrum_generator.get_problems();
-      const double higgs = pole_masses.Mhh(0);
-      const bool error = problems.have_problem();
-
-      cout << "  "
-           << std::setw(12) << std::left << *it << ' '
-           << std::setw(12) << std::left << higgs << ' '
-           << std::setw(12) << std::left << error;
-      if (error) {
-         cout << "\t# " << problems;
-      }
-      cout << '\n';
-   }
+   scan(solver_type, input, range);
 
    return 0;
 }
