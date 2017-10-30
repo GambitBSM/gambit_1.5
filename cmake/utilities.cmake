@@ -22,6 +22,10 @@
 #          (benjamin.farmer@fysik.su.se)
 #  \date 2016 Jan
 #
+#  \author Tomas Gonzalo
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Sep
+#
 #************************************************
 
 include(CMakeParseArguments)
@@ -138,6 +142,7 @@ function(add_gambit_library libraryname)
 
   add_library(${libraryname} ${ARG_OPTION} ${ARG_SOURCES} ${ARG_HEADERS})
   add_dependencies(${libraryname} model_harvest)
+  add_dependencies(${libraryname} particle_harvest)
   add_dependencies(${libraryname} backend_harvest)
   add_dependencies(${libraryname} printer_harvest)
   add_dependencies(${libraryname} module_harvest)
@@ -257,6 +262,9 @@ function(add_gambit_executable executablename LIBRARIES)
       strip_library(m HDF5_LIBRARIES)
     endif()
     set(LIBRARIES ${LIBRARIES} ${HDF5_LIBRARIES})
+  endif()
+  if(Mathematica_FOUND AND Mathematica_WSTP_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${Mathematica_WSTP_LIBRARIES})
   endif()
 
   target_link_libraries(${executablename} ${LIBRARIES} yaml-cpp)

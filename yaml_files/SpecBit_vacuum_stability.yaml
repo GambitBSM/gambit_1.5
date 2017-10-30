@@ -94,13 +94,13 @@ ObsLikes:
       function: get_SingletDM_spectrum_as_map
       dependencies:
          - capability: SingletDM_spectrum
-           type: const Spectrum*
+           type: Spectrum
 
 
 Rules:
 
     - capability: SingletDM_spectrum
-      type: const Spectrum*
+      type: Spectrum
       function: get_SingletDM_spectrum_pole
       options:
         check_perturb: true

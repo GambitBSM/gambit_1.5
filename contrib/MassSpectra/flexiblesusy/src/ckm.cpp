@@ -17,18 +17,11 @@
 // ====================================================================
 
 #include "ckm.hpp"
+#include "error.hpp"
 #include "ew_input.hpp"
 #include "wrappers.hpp"
 
 namespace flexiblesusy {
-
-CKM_parameters::CKM_parameters()
-   : theta_12(0.)
-   , theta_13(0.)
-   , theta_23(0.)
-   , delta(0.)
-{
-}
 
 void CKM_parameters::reset_to_diagonal()
 {
@@ -53,16 +46,16 @@ void CKM_parameters::reset_to_observation()
 void CKM_parameters::set_from_wolfenstein(double lambdaW, double aCkm,
                                           double rhobar, double etabar)
 {
-   assert(Abs(lambdaW) <= 1. && "Error: Wolfenstein lambda out of range!");
-   assert(Abs(aCkm)    <= 1. && "Error: Wolfenstein A parameter out of range!");
-   assert(Abs(rhobar)  <= 1. && "Error: Wolfenstein rho-bar parameter out of range!");
-   assert(Abs(etabar)  <= 1. && "Error: Wolfenstein eta-bar parameter out of range!");
+   if (Abs(lambdaW) > 1.) throw SetupError("Error: Wolfenstein lambda out of range!");
+   if (Abs(aCkm)    > 1.) throw SetupError("Error: Wolfenstein A parameter out of range!");
+   if (Abs(rhobar)  > 1.) throw SetupError("Error: Wolfenstein rho-bar parameter out of range!");
+   if (Abs(etabar)  > 1.) throw SetupError("Error: Wolfenstein eta-bar parameter out of range!");
 
    theta_12 = ArcSin(lambdaW);
    theta_23 = ArcSin(aCkm * Sqr(lambdaW));
 
-   const double lambdaW3 = Power(lambdaW, 3);
-   const double lambdaW4 = Power(lambdaW, 4);
+   const double lambdaW3 = Power3(lambdaW);
+   const double lambdaW4 = Power4(lambdaW);
 
    const std::complex<double> rpe(rhobar, etabar);
    const std::complex<double> V13conj = aCkm * lambdaW3 * rpe
@@ -96,7 +89,7 @@ void CKM_parameters::get_wolfenstein(double& lambdaW, double& aCkm,
    const double c = Sqrt((1.0 - Sqr(sin_23)) / (1.0 - Sqr(lambdaW)));
    const std::complex<double> eid(std::polar(1.0, delta));
    const std::complex<double> r(sin_13 * eid /
-      (c * aCkm * Power(lambdaW,3) + sin_13 * eid * Sqr(sin_23)));
+      (c * aCkm * Power3(lambdaW) + sin_13 * eid * Sqr(sin_23)));
 
    rhobar = std::isfinite(Re(r)) ? Re(r) : 0.;
    etabar = std::isfinite(Im(r)) ? Im(r) : 0.;

@@ -122,8 +122,8 @@ namespace Gambit {
       void _definePars(const char** array);
  
       /// Getters/setters for model and output names
-      std::string getModelName();
-      std::string getOutputName();
+      std::string getModelName() const;
+      std::string getOutputName() const;
       void setModelName (const std::string&);
       void setOutputName(const std::string&);
  
@@ -132,7 +132,7 @@ namespace Gambit {
       /// Internal map representation of parameters and their values
       std::map<std::string,double> _values;
 
-      /// Name of the model; currently not actually used, will always be blank in GAMBIT
+      /// Name of the model; intended mainly for more helpful error messages
       std::string modelname;
 
       /// Output name (string used for labelling in output, related to the model_functor which produced these parameters)

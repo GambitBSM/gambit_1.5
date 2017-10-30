@@ -19,7 +19,11 @@
 #ifndef SPECTRUM_GENERATOR_SETTINGS_H
 #define SPECTRUM_GENERATOR_SETTINGS_H
 
-#include "two_loop_corrections.hpp"
+#include "threshold_corrections.hpp"
+#include "loop_corrections.hpp"
+#include <array>
+#include <iosfwd>
+#include <string>
 
 namespace flexiblesusy {
 
@@ -33,10 +37,10 @@ namespace flexiblesusy {
 class Spectrum_generator_settings {
 public:
    /// Spectrum generator settings
-   enum Settings : unsigned {
+   enum Settings : int {
       precision,             ///< [0] overall precision goal
       max_iterations,        ///< [1] maximum number of iterations (0 = automatic)
-      algorithm,             ///< [2] RG solver algorithm (0 = two-scale)
+      solver,                ///< [2] RG solver algorithm (0 = two-scale)
       calculate_sm_masses,   ///< [3] calculate Standard Model pole masses
       pole_mass_loop_order,  ///< [4] loop-order for calculation of pole masses
       ewsb_loop_order,       ///< [5] loop-order for solving the EWSB eqs.
@@ -47,27 +51,43 @@ public:
       higgs_2loop_correction_at_at,     ///< [10] Higgs 2-loop correction O(alpha_t alpha_t + alpha_t alpha_b + alpha_b alpha_b)
       higgs_2loop_correction_atau_atau, ///< [11] Higgs 2-loop correction O(alpha_tau alpha_tau)
       force_output,          ///< [12] force output
-      top_2loop_corrections_qcd,        ///< [13] Top-quark 2-loop QCD corrections
+      top_pole_qcd_corrections,         ///< [13] Top-quark pole mass QCD corrections
       beta_zero_threshold,   ///< [14] beta function zero threshold
       calculate_observables, ///< [15] calculate observables (a_muon, ...)
       force_positive_masses, ///< [16] force positive masses of majoran fermions
       pole_mass_scale,       ///< [17] renormalization scale at which the pole masses are calculated
+      eft_pole_mass_scale,   ///< [18] renormalization scale at which the pole masses are calculated in the EFT
+      eft_matching_scale,    ///< [19] renormalization scale at which the EFT is matched to the full model
+      eft_matching_loop_order_up, ///< [20] loop order at which the gauge and Yukawa couplings of the full model are calculated from the EFT ones (upwards matching)
+      eft_matching_loop_order_down, ///< [21] loop order at which lambda of the SM is calculated from the full model parameters at the matching scale (downwards matching)
+      eft_higgs_index,       ///< [22] index of SM-Higgs in Higgs multiplet
+      calculate_bsm_masses,  ///< [23] calculate BSM pole masses
+      threshold_corrections, ///< [24] individual threshold correction loop orders
+      higgs_3loop_ren_scheme_atb_as2,///< [25] Renormalization scheme for Higgs 3-loop corrections O(alpha_t alpha_s^2 + alpha_b alpha_s^2)
+      higgs_3loop_correction_at_as2, ///< [26] Higgs 3-loop correction O(alpha_t alpha_s^2)
+      higgs_3loop_correction_ab_as2, ///< [27] Higgs 3-loop correction O(alpha_b alpha_s^2)
+      higgs_3loop_correction_at2_as, ///< [28] Higgs 3-loop correction O(alpha_t^2 alpha_s)
+      higgs_3loop_correction_at3,    ///< [29] Higgs 3-loop correction O(alpha_t^3)
       NUMBER_OF_OPTIONS      ///< number of possible options
    };
 
    Spectrum_generator_settings();
-   ~Spectrum_generator_settings() {}
 
    double get(Settings) const; ///< get value of spectrum generator setting
+   std::string get_description(Settings) const; ///< get description of spectrum generator setting
    void set(Settings, double); ///< set value of spectrum generator setting
    void reset();               ///< resets all settings to their defaults
 
-   Two_loop_corrections get_two_loop_corrections() const;
-   void set_two_loop_corrections(const Two_loop_corrections&);
+   Loop_corrections get_loop_corrections() const;
+   void set_loop_corrections(const Loop_corrections&);
+   Threshold_corrections get_threshold_corrections() const;
+   void set_threshold_corrections(const Threshold_corrections&);
 
 private:
-   double values[NUMBER_OF_OPTIONS]; ///< spectrum generator settings
+   std::array<double, NUMBER_OF_OPTIONS> values; ///< spectrum generator settings
 };
+
+std::ostream& operator<<(std::ostream&, const Spectrum_generator_settings&);
 
 } // namespace flexiblesusy
 

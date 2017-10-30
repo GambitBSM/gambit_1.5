@@ -16,21 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:44
+// File generated at Sun 24 Sep 2017 15:56:50
 
 #ifndef SSM_PHYSICAL_H
 #define SSM_PHYSICAL_H
 
-#include "linalg2.hpp"
 #include <Eigen/Core>
 
 #include <iosfwd>
-#include <string>
 
 namespace flexiblesusy {
 
 struct SSM_physical {
-   SSM_physical();
    void clear();
    void convert_to_hk();   ///< converts pole masses to HK convention
    void convert_to_slha(); ///< converts pole masses to SLHA convention
@@ -40,26 +37,26 @@ struct SSM_physical {
    void set_masses(const Eigen::ArrayXd&); ///< set all masses
    void print(std::ostream&) const;
 
-   double MVG;
-   double MHp;
-   Eigen::Array<double,3,1> MFv;
-   double MAh;
-   Eigen::Array<double,2,1> Mhh;
-   Eigen::Array<double,3,1> MFd;
-   Eigen::Array<double,3,1> MFu;
-   Eigen::Array<double,3,1> MFe;
-   double MVWp;
-   double MVP;
-   double MVZ;
+   double MVG{};
+   double MHp{};
+   Eigen::Array<double,3,1> MFv{Eigen::Array<double,3,1>::Zero()};
+   double MAh{};
+   Eigen::Array<double,2,1> Mhh{Eigen::Array<double,2,1>::Zero()};
+   Eigen::Array<double,3,1> MFd{Eigen::Array<double,3,1>::Zero()};
+   Eigen::Array<double,3,1> MFu{Eigen::Array<double,3,1>::Zero()};
+   Eigen::Array<double,3,1> MFe{Eigen::Array<double,3,1>::Zero()};
+   double MVWp{};
+   double MVP{};
+   double MVZ{};
 
-   Eigen::Matrix<double,2,2> ZH;
-   Eigen::Matrix<std::complex<double>,3,3> Vd;
-   Eigen::Matrix<std::complex<double>,3,3> Ud;
-   Eigen::Matrix<std::complex<double>,3,3> Vu;
-   Eigen::Matrix<std::complex<double>,3,3> Uu;
-   Eigen::Matrix<std::complex<double>,3,3> Ve;
-   Eigen::Matrix<std::complex<double>,3,3> Ue;
-   Eigen::Matrix<double,2,2> ZZ;
+   Eigen::Matrix<double,2,2> ZH{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Vd{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Ud{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Vu{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Uu{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Ve{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Ue{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<double,2,2> ZZ{Eigen::Matrix<double,2,2>::Zero()};
 
 };
 

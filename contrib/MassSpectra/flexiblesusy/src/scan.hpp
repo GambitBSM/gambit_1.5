@@ -20,6 +20,7 @@
 #define SCAN_HPP
 
 #include "config.h"
+#include <cstddef>
 #include <vector>
 
 #ifdef ENABLE_RANDOM
@@ -43,28 +44,22 @@ namespace flexiblesusy {
  * double y = Uniform<std::mt19937>::dice(0., 1.); // uses std::mt19937
  * @endcode
  */
-template <class Generator = std::minstd_rand>
+template <typename Generator = std::minstd_rand, typename RealType = double>
 class Uniform {
 public:
    /// returns random number between start and stop
-   static double dice(double start, double stop) {
-      return start + (stop - start) * distribution(generator);
-   }
-   /// returns random number between 0. and 1.
-   static double dice() {
+   static RealType dice(RealType start, RealType stop) {
+      static Generator generator;
+      static std::uniform_real_distribution<RealType> distribution(start, stop);
       return distribution(generator);
    }
-private:
-   static Generator generator; ///< random number generator
-   static std::uniform_real_distribution<double> distribution;
+   /// returns random number between 0. and 1.
+   static RealType dice() {
+      static Generator generator;
+      static std::uniform_real_distribution<RealType> distribution;
+      return distribution(generator);
+   }
 };
-
-template <class Generator>
-Generator Uniform<Generator>::generator = Generator();
-
-template <class Generator>
-std::uniform_real_distribution<double> Uniform<Generator>::distribution
-   = std::uniform_real_distribution<double>(0., 1.);
 
 } // namespace flexiblesusy
 
@@ -74,11 +69,11 @@ namespace flexiblesusy {
 
 /// returns range of floating point values between start and stop
 std::vector<double> float_range(double start, double stop,
-                                unsigned long number_of_steps);
+                                std::size_t number_of_steps);
 
 /// returns range of floating point values between start and stop with logarithmic spacing
 std::vector<double> float_range_log(double start, double stop,
-                                    unsigned long number_of_steps);
+                                    std::size_t number_of_steps);
 
 } // namespace flexiblesusy
 
