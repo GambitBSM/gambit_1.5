@@ -19,25 +19,33 @@
 
 //#define square(x) ((x) * (x))  // square a number
 
+
+
 // Initialisation function (definition)
 BE_INI_FUNCTION
 {
+    double rho0  = *Param["rho0"];
+    double v0  = *Param["v0"];
+    double vsun  = *Param["vrot"];
+    double vesc  = *Param["vesc"];
+
     static bool scan_level = true;
-    if (scan_level)
-    {
-    cout << "Initializing CapGen, hold on to your hamsters. \n";
+    // if (scan_level)
+    // {
+    // cout << "Initializing CapGen. \n";
     const int clen = 300;
     char solarmodel[clen];
     Utils::strcpy2f(solarmodel, clen, runOptions->getValueOrDef<str>(backendDir +
                                                                     "/solarmodels/model_gs98_nohead.dat", "solarmodel"));
 
-   cout << solarmodel << "\n";
-  captn_init(solarmodel[0]);
-    cout << "Hamsters held. \n";
-    }
+  //  cout << solarmodel << "\n";
+  captn_init(solarmodel[0],rho0,vsun,v0,vesc);
+//     cout << "Solar Model Loaded. \n";
+//     }
     scan_level = false;
+// //Capgen checks whether the arrays are already allocated, so it's fine to do this at point-level
+//   captn_init(*poopypants,rho0,vsun,v0);
 }
 END_BE_INI_FUNCTION
 
 // Convenience functions (definitions)
-

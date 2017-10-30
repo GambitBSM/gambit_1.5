@@ -37,17 +37,16 @@ Parameters:
     SignMu: 1
 
   # Dark matter halo parameters.
-#  Halo_gNFW_rho0:
-#    rho0:
-#      range: [.2, .8]
-#    v0: 235.0
-#    vesc: 550.0
-#    vrot: 235.0
-#    rs: 20.0
-#    r_sun: 8.5
-#    alpha: 1
-#    beta: 3
-#    gamma: 1
+  Halo_gNFW_rho0:
+    rho0: .3
+    v0: 235.0
+    vesc: 550.0
+    vrot: 235.0
+    rs: 20.0
+    r_sun: 8.5
+    alpha: 1
+    beta: 3
+    gamma: 1
 
 
 Priors:
