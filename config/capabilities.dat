@@ -3268,15 +3268,16 @@ SUSYHD_MHiggs: |
 SUSYHD_DeltaMHiggs : |
    Calculates the uncertainty on the Higgs mass using SUSYHD
 
- #-------------------------------------
- #  Capgen capabilities
- #-------------------------------------
 
- CaptnGeneral_1_0_init: |
-   Initialize Captn' general backend.
+#-------------------------------------
+#  Capgen capabilities
+#-------------------------------------
 
- captn_init: |
-   Actually initialize Captn' general.
+CaptnGeneral_1_0_init: |
+  Initialize Captn' general backend.
 
- cap_Sun_vnqn_isoscalar: |
-   Compute v^n or q^n solar capture rate.
+captn_init: |
+  Actually initialize Captn' general.
+
+cap_Sun_vnqn_isoscalar: |
+  Compute v^n or q^n solar capture rate.
