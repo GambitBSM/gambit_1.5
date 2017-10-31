@@ -52,7 +52,7 @@ namespace Gambit
     }
 
     // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
-    void SN_bbn_lifetime(double& result_bbn)
+    void SN_bbn_lifetime(std::vector<double>& result_lifetime)
     {
       using namespace Pipes::SN_bbn_lifetime;
       SMInputs sminputs = *Dep::SMINPUTS;
@@ -69,35 +69,27 @@ namespace Gambit
       M[2] = *Param["M_3"];
       Matrix3d t_sq = *Dep::Theta_sq;
 
-      result_bbn = 0.0;
-
       for (int i=0; i<3; i++)
       {
         lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(t_sq(1,i) + t_sq(2,i))) + ((1 + g_L_sq + g_R_sq)*t_sq(0,i)) );
-/*        if(lifetime[i]<0.1)
-        {
-          temp_bbn = 0.0;
-        }
-        else
-        {
-          temp_bbn = -100.0;
-        }
-*/     
-        result_bbn = std::max(result_bbn, lifetime[i]);  
       }
-//     result_bbn = temp_bbn;
-//      result_bbn = lifetime[0];
+      result_lifetime = lifetime;
     }
  
     // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841] 
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
-      double lifetime = *Dep::bbn_lifetime;
-      if(lifetime < 0.1)
-        result_bbn = 0.0;
-      else
-        result_bbn = -100.0;
+      std::vector<double> lifetime = *Dep::bbn_lifetime;
+      result_bbn = 0.0;
+      for(int i=0; i<3; i++)
+      {
+        if(lifetime[i]>0.1)
+        {
+          result_bbn = -100.0;
+          break;
+        }
+      }
     }
    
     // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
@@ -163,10 +155,6 @@ namespace Gambit
           if(M[i] > m_pi)
           {
             r_I_K[i] = pow(M[i], 2.0)/pow(m_K, 2.0);
-//            G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[i]), 2.0)) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
-//            G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_K + r_I_K[i]), 2.0)) + pow((r_mu_K - r_I_K[i]), 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
-//            e_fac_K[i] = t_sq(0,i) * (G_e_pi[i] - 1.0);
-//            mu_fac_K[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
             G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[i]), 2.0)) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_K * pow((1.0 - r_e_K), 2.0));
             G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_K + r_I_K[i]), 2.0)) + pow((r_mu_K - r_I_K[i]), 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
             e_fac_K[i] = t_sq(0,i) * (G_e_K[i] - 1.0);
@@ -281,29 +269,8 @@ namespace Gambit
       static double m_bb_Kam = 1.65e-10;  // GeV
       double m_GERDA = *Dep::m_GERDA;
       double m_Kam = *Dep::m_Kam;
-/*      Matrix3cd m_light, U_light;
-      Matrix3d U_light_sq, t_sq;
-      std::vector<double> M(3), m_temp_GERDA(3), m_temp_Kam(3);
-      double m_GERDA, m_Kam;
-      m_light = *Dep::m_nu;
-      U_light = *Dep::UPMNS;
-      U_light_sq = U_light.cwiseAbs2();
-      t_sq = *Dep::Theta_sq;
-      m_GERDA = 0.0;
-      m_Kam = 0.0;
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
 
-      for (int i=0; i<3; i++)
-      {
-        m_temp_GERDA[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
-        m_GERDA += m_temp_GERDA[i];
-        m_temp_Kam[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
-        m_Kam +=m_temp_Kam[i];
-      }*/
       if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
-  //    if (m_Kam < m_bb_Kam)
       {
         result_0nubb = 0.0;
       }
@@ -311,7 +278,6 @@ namespace Gambit
       {
         result_0nubb = -100.0;
       }
-//      result_0nubb = m_GERDA;
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
@@ -399,7 +365,6 @@ namespace Gambit
       {
         result_ckm = -100.0;
       }
-//      result_ckm = V_ud_sq;
     }
 
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]

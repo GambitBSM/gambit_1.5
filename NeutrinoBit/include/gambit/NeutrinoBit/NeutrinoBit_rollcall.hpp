@@ -204,7 +204,7 @@ START_MODULE
   #define CAPABILITY bbn_lifetime
   START_CAPABILITY
     #define FUNCTION SN_bbn_lifetime
-    START_FUNCTION(double)
+    START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(Theta_sq, Eigen::Matrix3d)
     ALLOW_MODEL(SN_dev)
@@ -215,8 +215,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_bbn
     START_FUNCTION(double)
-    DEPENDENCY(bbn_lifetime, double)
-    ALLOW_MODEL(SN_dev)
+    DEPENDENCY(bbn_lifetime, std::vector<double>)
     #undef FUNCTION
   #undef CAPABILITY
 
