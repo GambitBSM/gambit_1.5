@@ -1,20 +1,25 @@
-// GAMBIT: Global and Modular BSM Inference Tool
-//
-// *********************************************
-//
-// Sterile neutrino scan; using Casas-Ibarra parameterization
-//
-// *********************************************
-//
-// Authors
-//
-// Suraj Krishnamurthy
-// 2017 February
-//
-// *********************************************
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  Sterile neutrino scan; using Casas-Ibarra parameterization
+///
+///  *********************************************
+/// 
+///  Authors
+/// 
+///  \author Suraj Krishnamurthy
+///          (S.Krishnamurthy@uva.nl) 
+///  \date 2017 February
+///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Oct
+///
+///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/DarkBit/DarkBit_rollcall.hpp"
+#include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
 #include "gambit/Utils/numerical_constants.hpp"
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
@@ -26,13 +31,14 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include "gambit/DarkBit/spline.h"
+#include "gambit/NeutrinoBit/spline.h"
 #include <vector>
+
 using namespace Eigen;
 
 namespace Gambit
 {
-  namespace DarkBit
+  namespace NeutrinoBit
   {
     // Gets the matrix Theta in the C-I parametrization from NeutrinoBit and returns its squared absolute |Theta|^2
     void CI_param(Matrix3d& result) 
@@ -45,10 +51,10 @@ namespace Gambit
       result = t.cwiseAbs2();
     }
 
-    // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841]
-    void lnL_bbn(double& result_bbn)
+    // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
+    void SN_bbn_lifetime(double& result_bbn)
     {
-      using namespace Pipes::lnL_bbn;
+      using namespace Pipes::SN_bbn_lifetime;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
       static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
@@ -56,17 +62,19 @@ namespace Gambit
       static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W_sq
       static double g_R_sq = 0.0494;  // g_R = s_W^2
       static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
-      double temp_bbn;
+      //double temp_bbn;
       std::vector<double> lifetime(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
       Matrix3d t_sq = *Dep::Theta_sq;
 
+      result_bbn = 0.0;
+
       for (int i=0; i<3; i++)
       {
         lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(t_sq(1,i) + t_sq(2,i))) + ((1 + g_L_sq + g_R_sq)*t_sq(0,i)) );
-        if(lifetime[i]<0.1)
+/*        if(lifetime[i]<0.1)
         {
           temp_bbn = 0.0;
         }
@@ -74,36 +82,76 @@ namespace Gambit
         {
           temp_bbn = -100.0;
         }
+*/     
+        result_bbn = std::max(result_bbn, lifetime[i]);  
       }
-      result_bbn = temp_bbn;
+//     result_bbn = temp_bbn;
 //      result_bbn = lifetime[0];
     }
-
-    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
-    void lnL_lepuniv(double& result_lepuniv)
+ 
+    // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841] 
+    void lnL_bbn(double& result_bbn)
     {
-      using namespace Pipes::lnL_lepuniv;
+      using namespace Pipes::lnL_bbn;
+      double lifetime = *Dep::bbn_lifetime;
+      if(lifetime < 0.1)
+        result_bbn = 0.0;
+      else
+        result_bbn = -100.0;
+    }
+   
+    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
+    void SN_R_pi(double& R_pi)
+    {
+      using namespace Pipes::SN_R_pi;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_pi = meson_masses.pi_plus;
-      static double m_K = meson_masses.kaon_plus; 
-      static double m_tau = sminputs.mTau;  // GeV
       static double R_pi_SM = 1.2354e-4;
-      static double R_K_SM = 2.477e-5;
-      static double R_tau_SM = 0.973;
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
-      static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
-      static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
-      double e_f_pi, mu_f_pi, e_f_K, mu_f_K, e_f_tau, mu_f_tau, d_r_pi, d_r_K, d_r_tau, R_pi, R_K, R_tau, temp_lepuniv;
-      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3), e_fac_tau(3), mu_fac_tau(3);
+      double e_f_pi, mu_f_pi, d_r_pi;
+      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
       Matrix3d t_sq = *Dep::Theta_sq;
 
       e_f_pi = 0.0;
       mu_f_pi = 0.0;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      for (int i=0; i<3; i++)
+      {
+        if(M[i] < m_pi)
+        {
+          r_I_pi[i] = pow(M[i], 2.0)/pow(m_pi, 2.0);
+          G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_pi + r_I_pi[i]), 2.0)) + pow((r_e_pi - r_I_pi[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+          G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_pi + r_I_pi[i]), 2.0)) + pow((r_mu_pi - r_I_pi[i]), 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
+          e_fac_pi[i] = t_sq(0,i) * (G_e_pi[i] - 1.0);
+           mu_fac_pi[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
+        } 
+        e_f_pi += e_fac_pi[i];
+        mu_f_pi += mu_fac_pi[i];
+      }
+      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi)) - 1.0;
+      R_pi = R_pi_SM * (1.0 + d_r_pi);
+ 
+    }
+
+    void SN_R_K(double& R_K)
+    {
+      using namespace Pipes::SN_R_K;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double m_pi = meson_masses.pi_plus;
+      static double m_K = meson_masses.kaon_plus; 
+      static double R_K_SM = 2.477e-5;
+      static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
+      static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
+      double e_f_K, mu_f_K, d_r_K;
+      std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
+      Matrix3d t_sq = *Dep::Theta_sq;
+
       e_f_K = 0.0;
       mu_f_K = 0.0;
-      e_f_tau = 0.0;
-      mu_f_tau = 0.0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -112,64 +160,128 @@ namespace Gambit
       {
         if(M[i] < m_K)
         {
-          if(M[i] < m_pi)
-          {
-            r_I_pi[i] = pow(M[i], 2.0)/pow(m_pi, 2.0);
-            G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_pi + r_I_pi[i]), 2.0)) + pow((r_e_pi - r_I_pi[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
-            G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_pi + r_I_pi[i]), 2.0)) + pow((r_mu_pi - r_I_pi[i]), 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
-            e_fac_pi[i] = t_sq(0,i) * (G_e_pi[i] - 1.0);
-            mu_fac_pi[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
-          }
-          else
+          if(M[i] > m_pi)
           {
             r_I_K[i] = pow(M[i], 2.0)/pow(m_K, 2.0);
-            G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[i]), 2.0)) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+//            G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[i]), 2.0)) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+//            G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_K + r_I_K[i]), 2.0)) + pow((r_mu_K - r_I_K[i]), 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
+//            e_fac_K[i] = t_sq(0,i) * (G_e_pi[i] - 1.0);
+//            mu_fac_K[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
+            G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[i]), 2.0)) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_K * pow((1.0 - r_e_K), 2.0));
             G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_K + r_I_K[i]), 2.0)) + pow((r_mu_K - r_I_K[i]), 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
-            e_fac_K[i] = t_sq(0,i) * (G_e_pi[i] - 1.0);
-            mu_fac_K[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
+            e_fac_K[i] = t_sq(0,i) * (G_e_K[i] - 1.0);
+            mu_fac_K[i] = t_sq(1,i) * (G_mu_K[i] - 1.0);
           }
         } 
-        else if(M[i] > m_tau)
+
+        e_f_K += e_fac_K[i];
+        mu_f_K += mu_fac_K[i];
+      }
+      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K)) - 1.0;
+      R_K = R_K_SM * (1.0 + d_r_K);
+    }
+
+    void SN_R_tau(double& R_tau)
+    {
+      using namespace Pipes::SN_R_tau;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double m_tau = sminputs.mTau;  // GeV
+      static double R_tau_SM = 0.973;
+      double e_f_tau, mu_f_tau, d_r_tau;
+      std::vector<double> M(3), e_fac_tau(3), mu_fac_tau(3);
+      Matrix3d t_sq = *Dep::Theta_sq;
+
+      e_f_tau = 0.0;
+      mu_f_tau = 0.0;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      for (int i=0; i<3; i++)
+      {
+        if(M[i] > m_tau)
         {
           e_fac_tau[i] = t_sq(0,i);
           mu_fac_tau[i] = t_sq(1,i);
         }
-        else
-        {
-          temp_lepuniv = 0.0;
-        }
-        e_f_pi += e_fac_pi[i];
-        mu_f_pi += mu_fac_pi[i];
-        e_f_K += e_fac_K[i];
-        mu_f_K += mu_fac_K[i];
         e_f_tau += e_fac_tau[i];
         mu_f_tau += mu_fac_tau[i];
       }
-      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi)) - 1.0;
-      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K)) - 1.0;
       d_r_tau = ((1.0 - e_f_tau)/(1.0 - mu_f_tau)) - 1.0;
-      R_pi = R_pi_SM * (1.0 + d_r_pi);
-      R_K = R_K_SM * (1.0 + d_r_K);
       R_tau = R_tau_SM * (1.0 + d_r_tau);
+    }
+
+    void lnL_lepuniv(double& result_lepuniv)
+    {
+      using namespace Pipes::lnL_lepuniv;
+      double R_pi = *Dep::R_pi;
+      double R_K = *Dep::R_K;
+      double R_tau = *Dep::R_tau;
+
       if (((1.218e-4<R_pi) && (R_pi<1.242e-4)) || ((2.458e-5<R_K) && (R_K<2.518e-5)) || ((0.9674<R_tau) && (R_tau<0.9854)))
       {
-        temp_lepuniv = 0.0;
+        result_lepuniv = 0.0;
       }
       else
       {
-        temp_lepuniv = -100.0;
+        result_lepuniv = -100.0;
       }
-      result_lepuniv = temp_lepuniv;
-//      result_lepuniv = R_pi;
     }
 
+
     // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
+    void SN_m_GERDA(double &m_GERDA)
+    {
+      using namespace Pipes::SN_m_GERDA;
+      Matrix3cd m_light, U_light;
+      Matrix3d U_light_sq, t_sq;
+      std::vector<double> M(3), m_temp_GERDA(3);
+      m_light = *Dep::m_nu;
+      U_light = *Dep::UPMNS;
+      U_light_sq = U_light.cwiseAbs2();
+      t_sq = *Dep::Theta_sq;
+      m_GERDA = 0.0;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      for (int i=0; i<3; i++)
+      {
+        m_temp_GERDA[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
+        m_GERDA += m_temp_GERDA[i];
+      }
+    }
+
+    void SN_m_Kam(double& m_Kam)
+    {
+      using namespace Pipes::SN_m_Kam;
+      Matrix3cd m_light, U_light;
+      Matrix3d U_light_sq, t_sq;
+      std::vector<double> M(3), m_temp_Kam(3);
+      m_light = *Dep::m_nu;
+      U_light = *Dep::UPMNS;
+      U_light_sq = U_light.cwiseAbs2();
+      t_sq = *Dep::Theta_sq;
+      m_Kam = 0.0;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      for (int i=0; i<3; i++)
+      {
+        m_temp_Kam[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
+        m_Kam +=m_temp_Kam[i];
+      }
+    }
+
     void lnL_0nubb(double& result_0nubb)
     {
       using namespace Pipes::lnL_0nubb;
       static double m_bb_GERDA = 4e-10;  // GeV
       static double m_bb_Kam = 1.65e-10;  // GeV
-      Matrix3cd m_light, U_light;
+      double m_GERDA = *Dep::m_GERDA;
+      double m_Kam = *Dep::m_Kam;
+/*      Matrix3cd m_light, U_light;
       Matrix3d U_light_sq, t_sq;
       std::vector<double> M(3), m_temp_GERDA(3), m_temp_Kam(3);
       double m_GERDA, m_Kam;
@@ -189,20 +301,57 @@ namespace Gambit
         m_GERDA += m_temp_GERDA[i];
         m_temp_Kam[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
         m_Kam +=m_temp_Kam[i];
+      }*/
+      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
+  //    if (m_Kam < m_bb_Kam)
+      {
+        result_0nubb = 0.0;
       }
-//      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
-//      if (m_Kam < m_bb_Kam)
-//      {
-//        result_0nubb = 0.0;
-//      }
-//      else
-//      {
-//        result_0nubb = -100.0;
-//      }
-      result_0nubb = m_GERDA;
+      else
+      {
+        result_0nubb = -100.0;
+      }
+//      result_0nubb = m_GERDA;
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
+    void SN_ckm_V_ud(double &V_ud)
+    {
+      using namespace Pipes::SN_ckm_V_ud;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
+      static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
+      static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
+      static double G_mu_sq = 1.3605e-10;  // GeV^-4
+      static double V_ud_0 = 0.97427;
+      static double err_0 = 0.00015;
+      static double err_factor = 5.3779e7;
+      double V_ud_exp[7], f[7];
+      double V_ud_sq;
+      Matrix3d t_sq = *Dep::Theta_sq;
+
+      for (int i=0;i<7;i++)
+      {
+        V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
+      }
+      f[0] = (G_F_sq/G_mu_sq)*(1 - t_sq(0,0));
+      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,1));
+      f[5] = 1 + t_sq(1,1);
+      f[6] = 1 + t_sq(0,0) + t_sq(1,1) + t_sq(2,2);
+      f[1] = f[0];
+      f[2] = f[0];
+      f[4] = f[3];
+      V_ud_sq = 0.0;
+      for (int j=0; j<7; j++)
+      {
+        V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
+      }
+      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + t_sq(0,0)));
+      V_ud_sq /= err_factor;
+
+      V_ud = sqrt(V_ud_sq);
+    }
+
     void lnL_ckm(double& result_ckm)
     {
       using namespace Pipes::lnL_ckm;
@@ -273,7 +422,7 @@ namespace Gambit
       if (read_table_pienu)
       {
         double array_pienu[140][2];
-        std::ifstream f_pienu("DarkBit/data/pienu.csv");
+        std::ifstream f_pienu("NeutrinoBit/data/pienu.csv");
         for (int row=0; row<140; ++row)
         {
           std::string line_pienu;
@@ -304,7 +453,8 @@ namespace Gambit
       U_pienu[0] = s_pienu(M_1);
       U_pienu[1] = s_pienu(M_2);
       U_pienu[2] = s_pienu(M_3);
-      result_pienu = -2.44*((mixing_sq_pienu[0]/U_pienu[0]) + (mixing_sq_pienu[1]/U_pienu[1]) + (mixing_sq_pienu[2]/U_pienu[2]));
+
+     result_pienu = -2.44*((mixing_sq_pienu[0]/U_pienu[0]) + (mixing_sq_pienu[1]/U_pienu[1]) + (mixing_sq_pienu[2]/U_pienu[2]));
     }
 
     // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27]
@@ -329,7 +479,7 @@ namespace Gambit
      if (read_table_ps191e)
       {
         double array_ps191e[116][2];
-        std::ifstream f_ps191e("DarkBit/data/ps191_e.csv");
+        std::ifstream f_ps191e("NeutrinoBit/data/ps191_e.csv");
         for (int row=0; row<116; ++row)
         {
           std::string line_ps191e;
@@ -388,7 +538,7 @@ namespace Gambit
       if (read_table_ps191mu)
       {
         double array_ps191mu[102][2];
-        std::ifstream f_ps191mu("DarkBit/data/ps191_mu.csv");
+        std::ifstream f_ps191mu("NeutrinoBit/data/ps191_mu.csv");
         for (int row=0; row<102; ++row)
         {
           std::string line_ps191mu;
@@ -445,7 +595,7 @@ namespace Gambit
       if (read_table_charme)
       {
         double array_charme[56][2];
-        std::ifstream f_charme("DarkBit/data/charm_e.csv");
+        std::ifstream f_charme("NeutrinoBit/data/charm_e.csv");
         for (int row=0; row<56; ++row)
         {
           std::string line_charme;
@@ -502,7 +652,7 @@ namespace Gambit
       if (read_table_charmmu)
       {
         double array_charmmu[34][2];
-        std::ifstream f_charmmu("DarkBit/data/charm_mu.csv");
+        std::ifstream f_charmmu("NeutrinoBit/data/charm_mu.csv");
         for (int row=0; row<34; ++row)
         {
           std::string line_charmmu;
@@ -562,7 +712,7 @@ namespace Gambit
       if (read_table_delphi)
       {
         double array_delphi[180][2];
-        std::ifstream f_delphi("DarkBit/data/delphi.csv");
+        std::ifstream f_delphi("NeutrinoBit/data/delphi.csv");
         for (int row=0; row<180; ++row)
         {
           std::string line_delphi;
@@ -616,7 +766,7 @@ namespace Gambit
       if (read_table_atlase)
       {
         double array_atlase[87][2];
-        std::ifstream f_atlase("DarkBit/data/atlas_e.csv");
+        std::ifstream f_atlase("NeutrinoBit/data/atlas_e.csv");
         for (int row=0; row<87; ++row)
         {
           std::string line_atlase;
@@ -670,7 +820,7 @@ namespace Gambit
       if (read_table_atlasmu)
       {
         double array_atlasmu[87][2];
-        std::ifstream f_atlasmu("DarkBit/data/atlas_mu.csv");
+        std::ifstream f_atlasmu("NeutrinoBit/data/atlas_mu.csv");
         for (int row=0; row<87; ++row)
         {
           std::string line_atlasmu;
@@ -724,7 +874,7 @@ namespace Gambit
       if (read_table_e949)
       {
         double array_e949[112][2];
-        std::ifstream f_e949("DarkBit/data/e949.csv");
+        std::ifstream f_e949("NeutrinoBit/data/e949.csv");
         for (int row=0; row<112; ++row)
         {
           std::string line_e949;
@@ -778,7 +928,7 @@ namespace Gambit
       if (read_table_nutev)
       {
         double array_nutev[249][2];
-        std::ifstream f_nutev("DarkBit/data/nutev.csv");
+        std::ifstream f_nutev("NeutrinoBit/data/nutev.csv");
         for (int row=0; row<249; ++row)
         {
           std::string line_nutev;
@@ -832,7 +982,7 @@ namespace Gambit
       if (read_table_tau)
       {
         double array_tau[172][2];
-        std::ifstream f_tau("DarkBit/data/tau.csv");
+        std::ifstream f_tau("NeutrinoBit/data/tau.csv");
         for (int row=0; row<172; ++row)
         {
           std::string line_tau;
