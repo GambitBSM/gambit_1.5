@@ -57,16 +57,21 @@ namespace Gambit
       //Alternative, using capgen
     void capture_rate_Sun_const_xsec_capgen(double &result)
       {
-          
+
           using namespace Pipes::capture_rate_Sun_const_xsec_capgen;
           double resultSD;
           double resultSI;
+          double maxcap;
 
           BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
           result = resultSI + resultSD;
-         
+          if (maxcap > result)
+          {
+              result = maxcap;
+          }
+          BEreq::cap_sun_saturation(maxcap); // Run this after the above, or mwimp will not be defined
       }
-      
+
       void capture_rate_Sun_vnqn(double &result)
       {
            using namespace Pipes::capture_rate_Sun_vnqn;
@@ -75,6 +80,8 @@ namespace Gambit
           int qpow;
           int vpow;
           int nelems;
+          double maxcap;
+
           qpow = 1;
           vpow = 0;
 //          SD:
@@ -83,11 +90,16 @@ namespace Gambit
 //          SI:
           nelems = 29;
           BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SI_p,nelems,qpow,vpow,resultSI);
-          result = resultSI;
-          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "\n";
+          result = resultSI+resultSD;
+          BEreq::cap_sun_saturation(maxcap);
+          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "max = " << maxcap << "\n" ;
+          if (maxcap > result)
+          {
+              result = maxcap;
+          }
       }
-      
-    /*! \brief Equilibration time for capture and annihilation of dark matter   
+
+    /*! \brief Equilibration time for capture and annihilation of dark matter
      * in the Sun (s)
      */
     void equilibration_time_Sun(double &result)

@@ -3279,5 +3279,8 @@ CaptnGeneral_1_0_init: |
 captn_init: |
   Actually initialize Captn' general.
 
+cap_sun_saturation: |
+  Compute the saturation value of dark matter capture in the Sun based on halo params.
+
 cap_Sun_vnqn_isoscalar: |
   Compute v^n or q^n solar capture rate.

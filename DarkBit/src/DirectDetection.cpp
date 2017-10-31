@@ -243,8 +243,13 @@ namespace Gambit {
       double reduced_mass = *Dep::mwimp * m_neutron / (*Dep::mwimp + m_neutron);
       result = 3.0*gev2cm2/pi*pow(reduced_mass*gna,2.0);
     }
-
-
+    // Norway
+    // void sigma_DD_SI_vnqn(std::map< std::pair < int, char >, double> &result)
+    // {
+    //   using namespace Pipes::sigma_DD_SI_vnqn
+    //   std::map< std::pair < int, char >, double> &result
+    //
+    // }
     //////////////////////////////////////////////////////////////////////////
     //
     //          Direct detection rate and likelihood routines

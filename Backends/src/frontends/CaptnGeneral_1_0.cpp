@@ -39,6 +39,7 @@ BE_INI_FUNCTION
                                                                     "/solarmodels/model_gs98_nohead.dat", "solarmodel"));
 
   //  cout << solarmodel << "\n";
+  
   captn_init(solarmodel[0],rho0,vsun,v0,vesc);
 //     cout << "Solar Model Loaded. \n";
 //     }
