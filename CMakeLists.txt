@@ -330,8 +330,8 @@ endif()
 include(cmake/preprocessor.cmake)
 
 # Identify the different harvester scripts
-set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
 set(PARTICLE_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/particle_harvester.py)
+set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
 set(BACKEND_HARVESTER ${PROJECT_SOURCE_DIR}/Backends/scripts/backend_harvester.py)
 set(MODULE_HARVESTER ${PROJECT_SOURCE_DIR}/Elements/scripts/module_harvester.py)
 set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.py)
@@ -339,7 +339,8 @@ set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
 # Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
 # backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
-file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/particle_database.yaml")
+file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/particle_database.yaml"
+                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
                                    "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
@@ -357,7 +358,7 @@ list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//inclu
                                         "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//test_function_rollcall.hpp")
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")
 set(MODULE_HARVESTER_FILES ${MODULE_HARVESTER_FILES} ${BACKEND_HARVESTER_FILES})
-remove_build_files(models_harvested particles_harvested backends_harvested modules_harvested printers_harvested)
+remove_build_files(particles_harvested models_harvested backends_harvested modules_harvested printers_harvested)
 if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
  add_gambit_custom(particle_harvest particles_harvested PARTICLE_HARVESTER PARTICLE_HARVESTER_FILES)
  add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
