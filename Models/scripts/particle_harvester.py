@@ -129,9 +129,7 @@ namespace Gambit                                  \n\
   {                                               \n\
                                                   \n\
     void define_particles(partmap* particles)     \n\
-    {                                             \n\
-                                                  \n"
-                                                  
+    {                                             \n"
   towrite+= create_entry("add_SM_particle", SM_particles)  
     
   towrite+= create_entry("add_SM_particle_set", SM_sets)

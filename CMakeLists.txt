@@ -339,9 +339,8 @@ set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
 # Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
 # backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
+file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/particle_database.yaml")
 file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
-                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
-file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/particle_database.yaml"
                                    "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
                                    "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
@@ -349,8 +348,8 @@ file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambi
                                    "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
 file(GLOB MODULE_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
                                    "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
-string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")    # (GLOB creates erroneous double slashes)
-string (REPLACE "//" "/" PARTICLE_HARVESTER_FILES "${PARTICLE_HARVESTER_FILES}")    
+string (REPLACE "//" "/" PARTICLE_HARVESTER_FILES "${PARTICLE_HARVESTER_FILES}") # (GLOB creates erroneous double slashes)
+string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")    
 string (REPLACE "//" "/" BACKEND_HARVESTER_FILES  "${BACKEND_HARVESTER_FILES}")
 string (REPLACE "//" "/" PRINTER_HARVESTER_FILES  "${PRINTER_HARVESTER_FILES}")
 string (REPLACE "//" "/" MODULE_HARVESTER_FILES   "${MODULE_HARVESTER_FILES}")
@@ -360,8 +359,8 @@ list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type
 set(MODULE_HARVESTER_FILES ${MODULE_HARVESTER_FILES} ${BACKEND_HARVESTER_FILES})
 remove_build_files(models_harvested particles_harvested backends_harvested modules_harvested printers_harvested)
 if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
- add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
  add_gambit_custom(particle_harvest particles_harvested PARTICLE_HARVESTER PARTICLE_HARVESTER_FILES)
+ add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
 endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
   add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
