@@ -54,22 +54,20 @@ namespace Gambit
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
       cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
     }
-      //Alternative, using capgen
+      //Alternative to the darkSusy fct, using captn_specific from capgen instead
     void capture_rate_Sun_const_xsec_capgen(double &result)
       {
-
           using namespace Pipes::capture_rate_Sun_const_xsec_capgen;
           double resultSD;
           double resultSI;
           double maxcap;
-
+          BEreq::cap_sun_saturation(*Dep::mwimp,maxcap);
           BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
           result = resultSI + resultSD;
           if (maxcap > result)
           {
               result = maxcap;
           }
-          BEreq::cap_sun_saturation(maxcap); // Run this after the above, or mwimp will not be defined
       }
 
       void capture_rate_Sun_vnqn(double &result)
@@ -77,26 +75,61 @@ namespace Gambit
            using namespace Pipes::capture_rate_Sun_vnqn;
           double resultSD;
           double resultSI;
+          double capped;
           int qpow;
           int vpow;
-          int nelems;
+          const int nelems = 29;
           double maxcap;
 
-          qpow = 1;
-          vpow = 0;
-//          SD:
-          nelems = 1;
-          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,nelems,qpow,vpow,resultSD);
-//          SI:
-          nelems = 29;
-          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,*Dep::sigma_SI_p,nelems,qpow,vpow,resultSI);
+
+          BEreq::cap_sun_saturation(*Dep::mwimp,maxcap);
+
+          resultSI = 0e0;
+          resultSD = 0e0;
+          typedef map_intpair_dbl::const_iterator it_type;
+
+
+          for(it_type iterator = Dep::sigma_SD_p->begin();
+            iterator != Dep::sigma_SD_p->end();
+            iterator++)
+          {
+            cout << "sigma " << iterator->second << " nq: " << (iterator->first).first/2 << " nv: " << (iterator->first).second/2 << '\n';
+             //don't capture anything if cross section is zero or all the DM is already capped
+            if((iterator->second > 1e-90) && (resultSD < maxcap))
+            {
+              qpow = (iterator->first).first/2 ;
+              vpow =  (iterator->first).second/2;
+              //Capture
+              BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,1,qpow,vpow,capped);
+              resultSD = resultSD+capped;
+            }
+          }
+
+          //Spin independent:
+          for(it_type iterator = Dep::sigma_SI_p->begin();
+            iterator != Dep::sigma_SI_p->end();
+            iterator++)
+          {
+            cout << "sigma " << iterator->second << " nq: " << (iterator->first).first/2 << " nv: " << (iterator->first).second/2 << '\n';
+            if((iterator->second > 1e-90) && (resultSI+resultSD < maxcap))
+            {
+              qpow = (iterator->first).first/2 ;
+              vpow =  (iterator->first).second/2;
+              BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,nelems,qpow,vpow,capped);
+              resultSI = resultSI+capped;
+            }
+          }
+
+
+          // }
           result = resultSI+resultSD;
-          BEreq::cap_sun_saturation(maxcap);
-          cout << "Capgen capulated: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "max = " << maxcap << "\n" ;
-          if (maxcap > result)
+
+          cout << "Capgen captured: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "max = " << maxcap << "\n" ;
+          if (maxcap < result)
           {
               result = maxcap;
           }
+          cout << "Capgen finally captures " << result   << "\n" ;
       }
 
     /*! \brief Equilibration time for capture and annihilation of dark matter

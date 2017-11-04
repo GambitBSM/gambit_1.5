@@ -551,14 +551,20 @@ START_MODULE
   QUICK_FUNCTION(DarkBit, sigma_SD_n, NEW_CAPABILITY, sigma_SD_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
 
   // Generalized v^2n, q^2n DM-nucleon cross sections Norway
-  // #define CAPABILITY sigma_DD_vnqn
-  // START_CAPABILITY
-  //   #define FUNCTION sigma_DD_SI_vnqn
-  //   START_FUNCTION(std::map< std::pair < int, char >, double>)
-  //   DEPENDENCY(mwimp,double)
-  //   #undef FUNCTION
-  //
-  //   #undef CAPABILITY
+  #define CAPABILITY sigma_SI_p
+      #define FUNCTION sigma_SI_vnqn
+      START_FUNCTION(map_intpair_dbl)
+      DEPENDENCY(mwimp,double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+    #define CAPABILITY sigma_SD_p
+    //Spin-dependent general v^2n q^2n cross section
+        #define FUNCTION sigma_SD_vnqn
+        START_FUNCTION(map_intpair_dbl)
+        DEPENDENCY(mwimp,double)
+      #undef FUNCTION
+    #undef CAPABILITY
 
   // Likelihoods for nuclear parameters:
   #define CAPABILITY lnL_SI_nuclear_parameters
@@ -642,7 +648,7 @@ START_MODULE
     #define FUNCTION capture_rate_Sun_const_xsec_capgen
     START_FUNCTION(double)
     BACKEND_REQ(cap_Sun_v0q0_isoscalar,(CaptnGeneral),void,(const double&,const double&,const double&,double&,double&))
-    BACKEND_REQ(cap_sun_saturation,(CaptnGeneral),void,(const double&))
+    BACKEND_REQ(cap_sun_saturation,(CaptnGeneral),void,(const double&,double&))
     DEPENDENCY(mwimp,double)
     DEPENDENCY(sigma_SI_p, double)
     DEPENDENCY(sigma_SD_p, double)
@@ -650,11 +656,11 @@ START_MODULE
 
     #define FUNCTION capture_rate_Sun_vnqn
     START_FUNCTION(double)
-    BACKEND_REQ(cap_Sun_vnqn_isoscalar,(CaptnGeneral),void,(const double&,const double&,int&,int&,int&,double&))
-    BACKEND_REQ(cap_sun_saturation,(CaptnGeneral),void,(const double&))
+    BACKEND_REQ(cap_Sun_vnqn_isoscalar,(CaptnGeneral),void,(const double&,const double&,const int&,const int&,const int&,double&))
+    BACKEND_REQ(cap_sun_saturation,(CaptnGeneral),void,(const double&,double&))
     DEPENDENCY(mwimp,double)
-    DEPENDENCY(sigma_SI_p, double)
-    DEPENDENCY(sigma_SD_p, double)
+    DEPENDENCY(sigma_SD_p, map_intpair_dbl)
+    DEPENDENCY(sigma_SI_p,map_intpair_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 

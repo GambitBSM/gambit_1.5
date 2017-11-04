@@ -16,17 +16,17 @@ Parameters:
   StandardModel_SLHA2: !import include/StandardModel_SLHA2_defaults.yaml
 
   # Nuclear matrix parameters.
-  nuclear_params_sigmas_sigmal:
-    sigmas:
-      range:  [19, 67]
-    sigmal:
-      range:  [31, 85]
-    deltau:
-      fixed_value:  0.842
-    deltad:
-      fixed_value: -0.427
-    deltas:
-      fixed_value: -0.085
+  # nuclear_params_sigmas_sigmal:
+  #   sigmas:
+  #     range:  [19, 67]
+  #   sigmal:
+  #     range:  [31, 85]
+  #   deltau:
+  #     fixed_value:  0.842
+  #   deltad:
+  #     fixed_value: -0.427
+  #   deltas:
+  #     fixed_value: -0.085
 
   # SUSY parameters.
   CMSSM:
@@ -38,8 +38,10 @@ Parameters:
 
   # Dark matter halo parameters.
   Halo_gNFW_rho0:
-    rho0: .3
-    v0: 235.0
+    rho0:
+      range: [.3, .4]
+    v0:
+      range: [235.0, 280.0]
     vesc: 550.0
     vrot: 235.0
     rs: 20.0

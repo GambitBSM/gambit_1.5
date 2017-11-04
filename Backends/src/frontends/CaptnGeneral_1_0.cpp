@@ -29,23 +29,17 @@ BE_INI_FUNCTION
     double vsun  = *Param["vrot"];
     double vesc  = *Param["vesc"];
 
-    static bool scan_level = true;
+    // static bool scan_level = true;
     // if (scan_level)
     // {
     // cout << "Initializing CapGen. \n";
     const int clen = 300;
     char solarmodel[clen];
     Utils::strcpy2f(solarmodel, clen, runOptions->getValueOrDef<str>(backendDir +
-                                                                    "/solarmodels/model_gs98_nohead.dat", "solarmodel"));
-
-  //  cout << solarmodel << "\n";
-  
+                                                                    "/solarmodels/struct_b16_agss09_nohead.dat", "solarmodel"));
   captn_init(solarmodel[0],rho0,vsun,v0,vesc);
-//     cout << "Solar Model Loaded. \n";
-//     }
-    scan_level = false;
 // //Capgen checks whether the arrays are already allocated, so it's fine to do this at point-level
-//   captn_init(*poopypants,rho0,vsun,v0);
+
 }
 END_BE_INI_FUNCTION
 
