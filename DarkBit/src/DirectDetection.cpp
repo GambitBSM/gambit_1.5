@@ -243,7 +243,7 @@ namespace Gambit {
       double reduced_mass = *Dep::mwimp * m_neutron / (*Dep::mwimp + m_neutron);
       result = 3.0*gev2cm2/pi*pow(reduced_mass*gna,2.0);
     }
-  // Spin-independent generalized DM-nucleon cross section
+    /// Spin-independent generalized DM-nucleon cross section
     void sigma_SI_vnqn(map_intpair_dbl &result)
     {
       using namespace Pipes::sigma_SI_vnqn;
@@ -256,7 +256,7 @@ namespace Gambit {
       result[std::make_pair(0,2)] =   0e-35;
       result[std::make_pair(0,4)] =   0e-35;
     }
-    // Spin-dependent generalized DM-nucleon cross section
+    /// Spin-dependent generalized DM-nucleon cross section
     void sigma_SD_vnqn(map_intpair_dbl &result)
     {
       using namespace Pipes::sigma_SD_vnqn;

@@ -70,6 +70,10 @@ namespace Gambit
           }
       }
 
+      //Capture rate for v^n and q^n-dependent cross sections.
+      //Isoscalar (same proton/neutron coupling)
+      //SD only couples to Hydrogen.
+      //See DirectDetection.cpp to see how to define the cross sections sigma_SD_p, sigma_SI_pi
       void capture_rate_Sun_vnqn(double &result)
       {
            using namespace Pipes::capture_rate_Sun_vnqn;
@@ -88,12 +92,11 @@ namespace Gambit
           resultSD = 0e0;
           typedef map_intpair_dbl::const_iterator it_type;
 
-
+          //Spin-dependent:
           for(it_type iterator = Dep::sigma_SD_p->begin();
             iterator != Dep::sigma_SD_p->end();
             iterator++)
           {
-            cout << "sigma " << iterator->second << " nq: " << (iterator->first).first/2 << " nv: " << (iterator->first).second/2 << '\n';
              //don't capture anything if cross section is zero or all the DM is already capped
             if((iterator->second > 1e-90) && (resultSD < maxcap))
             {
@@ -110,26 +113,24 @@ namespace Gambit
             iterator != Dep::sigma_SI_p->end();
             iterator++)
           {
-            cout << "sigma " << iterator->second << " nq: " << (iterator->first).first/2 << " nv: " << (iterator->first).second/2 << '\n';
             if((iterator->second > 1e-90) && (resultSI+resultSD < maxcap))
             {
               qpow = (iterator->first).first/2 ;
               vpow =  (iterator->first).second/2;
+              //Capture
               BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,nelems,qpow,vpow,capped);
               resultSI = resultSI+capped;
             }
           }
-
-
-          // }
           result = resultSI+resultSD;
-
+          #ifdef DARKBIT_DEBUG
           cout << "Capgen captured: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "max = " << maxcap << "\n" ;
+          #endif
+          //If capture is above saturation, return saturation value.
           if (maxcap < result)
           {
               result = maxcap;
           }
-          cout << "Capgen finally captures " << result   << "\n" ;
       }
 
     /*! \brief Equilibration time for capture and annihilation of dark matter
