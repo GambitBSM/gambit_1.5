@@ -391,4 +391,5 @@ KeyValues:
 
   default_output_path: "runs/CMSSM/"
 
-  debug: false
+  debug: true
+  DARKBIT_DEBUG: true
