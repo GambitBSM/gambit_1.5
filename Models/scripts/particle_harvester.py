@@ -150,9 +150,6 @@ namespace Gambit                                  \n\
 
   with open("./Models/src/particle_database.cpp","w") as f:
     f.write(towrite)
-  
-  print "Generated particle_database.cpp."
-
 
 # Handle command line arguments (verbosity)
 if __name__ == "__main__":
