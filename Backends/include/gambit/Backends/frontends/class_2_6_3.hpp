@@ -14,12 +14,15 @@
 ///  \author Selim C. Hotinli
 ///          (selim.hotinli14@pimperial.ac.uk)
 ///  \date 2016 Oct
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date 2017 Nov
 ///
 ///  *********************************************
 
 #define BACKENDNAME class
-#define VERSION 2.6.1
-#define SAFE_VERSION 2_6_1
+#define VERSION 2.6.3
+#define SAFE_VERSION 2_6_3
 
 // Load it
 LOAD_LIBRARY

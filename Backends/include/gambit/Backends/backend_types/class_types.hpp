@@ -21,9 +21,9 @@
 
 namespace Gambit
 {
-	namespace class_2_6
+	namespace Class
 	{
-		#include "class_2_6_1/class.h"
+		#include "class_types/class.h"
 	}
 }
 #endif // defined __class_types_hpp__

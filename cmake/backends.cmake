@@ -762,39 +762,74 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} CFITSIOPATH=${PROJECT_SOURCE_DIR}/Backends/installed/cfitsio/3.390 GFORTRANLIBPATH=/usr/local/Cellar/gcc49/4.9.3/lib/gcc/4.9/ LAPACKLIBPATH=${LAPACK_LIBRARIES} SO=${PLC_SO}
-    INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} install GFORTRANLIBPATH=/usr/local/Cellar/gcc49/4.9.3/lib/gcc/4.9/ CFITSIOPATH=${PROJECT_SOURCE_DIR}/Backends/installed/cfitsio/3.390 LAPACKLIBPATH=${LAPACK_LIBRARIES} SO=${PLC_SO}
-    COMMAND ${CMAKE_COMMAND} -E echo "source ${dir}/bin/clik_profile.sh" > msource.sh
-    COMMAND chmod u+x msource.sh
-    COMMAND ./msource.sh
+    CONFIGURE_COMMAND python ${dir}/waf configure --install_all_deps
+    BUILD_COMMAND ""
+    INSTALL_COMMAND python ${dir}/waf install
+    #CONFIGURE_COMMAND ""
+    #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} CFITSIOPATH=${CFITSIO_DIR} GFORTRANLIBPATH=${FORTRAN_LIBRARIES} LAPACKLIBPATH=${LAPACK_DIR} SO=${PLC_SO}
+    #INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} install CFITSIOPATH=${CFITSIO_DIR} GFORTRANLIBPATH=${FORTRAN_LIBRARIES} LAPACKLIBPATH=${LAPACK_DIR} SO=${PLC_SO}
+    #COMMAND ${CMAKE_COMMAND} -E echo "source ${dir}/bin/clik_profile.sh" > msource.sh
+    #COMMAND chmod u+x msource.sh
+    #COMMAND ./msource.sh
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+### class
+#set(name "class")
+#set(ver "2.6.1")
+#set(lib "libclass")
+#set(dl "http://lesgourg.github.io/class_public/class_public-2.6.1.tar.gz")
+#set(md5 "5e4afdd0569f25e26032377885ed267d")
+#set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+#set(CLASS_TOOLS "growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o")
+#set(CLASS_SOURCE "input.o background.o thermodynamics.o perturbations.o primordial.o nonlinear.o transfer.o spectra.o lensing.o")
+#set(CLASS_EXTERNAL "hyrectools.o helium.o hydrogen.o history.o")
+#set(CLASS_OUTPUT "output.o")
+#set(CLASS_CLASS "class.o")
+#set(CLASS_DLL_DIR "build")
+#set(CLASS_IFLAG "-I")
+#set(CLASS_LIBS "${CLASS_DLL_DIR}/growTable.o ${CLASS_DLL_DIR}/dei_rkck.o ${CLASS_DLL_DIR}/sparse.o ${CLASS_DLL_DIR}/evolver_rkck.o  ${CLASS_DLL_DIR}/evolver_ndf15.o ${CLASS_DLL_DIR}/arrays.o ${CLASS_DLL_DIR}/parser.o ${CLASS_DLL_DIR}/quadrature.o ${CLASS_DLL_DIR}/hyperspherical.o ${CLASS_DLL_DIR}/common.o ${CLASS_DLL_DIR}/input.o ${CLASS_DLL_DIR}/background.o ${CLASS_DLL_DIR}/thermodynamics.o ${CLASS_DLL_DIR}/perturbations.o ${CLASS_DLL_DIR}/primordial.o ${CLASS_DLL_DIR}/nonlinear.o ${CLASS_DLL_DIR}/transfer.o ${CLASS_DLL_DIR}/spectra.o ${CLASS_DLL_DIR}/lensing.o ${CLASS_DLL_DIR}/hyrectools.o ${CLASS_DLL_DIR}/helium.o ${CLASS_DLL_DIR}/hydrogen.o ${CLASS_DLL_DIR}/history.o ${CLASS_DLL_DIR}/output.o ${CLASS_DLL_DIR}/class.o")
+#if(NOT ditched_${name}_${ver})
+#  ExternalProject_Add(${name}_${ver}
+#    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+#    SOURCE_DIR ${dir}
+#    BUILD_IN_SOURCE 1
+#    CONFIGURE_COMMAND ""
+#    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} all
+#    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+#    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${CMAKE_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
+#    COMMAND chmod u+x make_so.sh
+#    COMMAND ./make_so.sh
+#    INSTALL_COMMAND ""
+#  )
+#  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+#  set_as_default_version("backend" ${name} ${ver})
+#endif()
+
 # class
 set(name "class")
-set(ver "2.6.1")
+set(ver "2.6.3")
 set(lib "libclass")
-set(dl "http://lesgourg.github.io/class_public/class_public-2.6.1.tar.gz")
-set(md5 "5e4afdd0569f25e26032377885ed267d")
+set(dl "http://lesgourg.github.io/class_public/class_public-2.6.3.tar.gz")
+set(md5 "dfb8652cd5af14d61e677e0f8b96f62f")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(CLASS_TOOLS "growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o")
-set(CLASS_SOURCE "input.o background.o thermodynamics.o perturbations.o primordial.o nonlinear.o transfer.o spectra.o lensing.o")
-set(CLASS_EXTERNAL "hyrectools.o helium.o hydrogen.o history.o")
-set(CLASS_OUTPUT "output.o")
-set(CLASS_CLASS "class.o")
+#set(CLASS_TOOLS "growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o")
+#set(CLASS_SOURCE "input.o background.o thermodynamics.o perturbations.o primordial.o nonlinear.o transfer.o spectra.o lensing.o")
+#set(CLASS_EXTERNAL "hyrectools.o helium.o hydrogen.o history.o")
+#set(CLASS_OUTPUT "output.o")
+#set(CLASS_CLASS "class.o")
 set(CLASS_DLL_DIR "build")
 set(CLASS_IFLAG "-I")
-set(CLASS_LIBS "${CLASS_DLL_DIR}/growTable.o ${CLASS_DLL_DIR}/dei_rkck.o ${CLASS_DLL_DIR}/sparse.o ${CLASS_DLL_DIR}/evolver_rkck.o  ${CLASS_DLL_DIR}/evolver_ndf15.o ${CLASS_DLL_DIR}/arrays.o ${CLASS_DLL_DIR}/parser.o ${CLASS_DLL_DIR}/quadrature.o ${CLASS_DLL_DIR}/hyperspherical.o ${CLASS_DLL_DIR}/common.o ${CLASS_DLL_DIR}/input.o ${CLASS_DLL_DIR}/background.o ${CLASS_DLL_DIR}/thermodynamics.o ${CLASS_DLL_DIR}/perturbations.o ${CLASS_DLL_DIR}/primordial.o ${CLASS_DLL_DIR}/nonlinear.o ${CLASS_DLL_DIR}/transfer.o ${CLASS_DLL_DIR}/spectra.o ${CLASS_DLL_DIR}/lensing.o ${CLASS_DLL_DIR}/hyrectools.o ${CLASS_DLL_DIR}/helium.o ${CLASS_DLL_DIR}/hydrogen.o ${CLASS_DLL_DIR}/history.o ${CLASS_DLL_DIR}/output.o ${CLASS_DLL_DIR}/class.o")
+#set(CLASS_LIBS "${CLASS_DLL_DIR}/growTable.o ${CLASS_DLL_DIR}/dei_rkck.o ${CLASS_DLL_DIR}/sparse.o ${CLASS_DLL_DIR}/evolver_rkck.o  ${CLASS_DLL_DIR}/evolver_ndf15.o ${CLASS_DLL_DIR}/arrays.o ${CLASS_DLL_DIR}/parser.o ${CLASS_DLL_DIR}/quadrature.o ${CLASS_DLL_DIR}/hyperspherical.o ${CLASS_DLL_DIR}/common.o ${CLASS_DLL_DIR}/input.o ${CLASS_DLL_DIR}/background.o ${CLASS_DLL_DIR}/thermodynamics.o ${CLASS_DLL_DIR}/perturbations.o ${CLASS_DLL_DIR}/primordial.o ${CLASS_DLL_DIR}/nonlinear.o ${CLASS_DLL_DIR}/transfer.o ${CLASS_DLL_DIR}/spectra.o ${CLASS_DLL_DIR}/lensing.o ${CLASS_DLL_DIR}/hyrectools.o ${CLASS_DLL_DIR}/helium.o ${CLASS_DLL_DIR}/hydrogen.o ${CLASS_DLL_DIR}/history.o ${CLASS_DLL_DIR}/output.o ${CLASS_DLL_DIR}/class.o")
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${CMAKE_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
@@ -827,7 +862,7 @@ if(NOT ditched_${name}_${ver})
           COMMAND patch < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
-	COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
+    COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh
     COMMAND ./make_so1.sh
