@@ -329,8 +329,14 @@ endif()
 # Generate the cmake_variables.hpp file
 include(cmake/preprocessor.cmake)
 
+# Generate particle_database.cpp from particle_database.yaml.
+if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
+  set(particle_harvester ${PROJECT_SOURCE_DIR}/Models/scripts/particle_harvester.py ${PROJECT_BINARY_DIR} -x __not_a_real_name__,${itch_with_commas})
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${particle_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  message("${Yellow}-- Generated particle_database.cpp from particle_database.yaml.${ColourReset}")
+endif()
+
 # Identify the different harvester scripts
-set(PARTICLE_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/particle_harvester.py)
 set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
 set(BACKEND_HARVESTER ${PROJECT_SOURCE_DIR}/Backends/scripts/backend_harvester.py)
 set(MODULE_HARVESTER ${PROJECT_SOURCE_DIR}/Elements/scripts/module_harvester.py)
@@ -339,8 +345,6 @@ set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
 # Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
 # backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
-file(GLOB PARTICLE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/particle_database.yaml"
-                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
                                    "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
@@ -349,8 +353,7 @@ file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambi
                                    "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
 file(GLOB MODULE_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
                                    "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
-string (REPLACE "//" "/" PARTICLE_HARVESTER_FILES "${PARTICLE_HARVESTER_FILES}") # (GLOB creates erroneous double slashes)
-string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")    
+string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")   # (GLOB creates erroneous double slashes)
 string (REPLACE "//" "/" BACKEND_HARVESTER_FILES  "${BACKEND_HARVESTER_FILES}")
 string (REPLACE "//" "/" PRINTER_HARVESTER_FILES  "${PRINTER_HARVESTER_FILES}")
 string (REPLACE "//" "/" MODULE_HARVESTER_FILES   "${MODULE_HARVESTER_FILES}")
@@ -358,9 +361,8 @@ list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//inclu
                                         "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//test_function_rollcall.hpp")
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")
 set(MODULE_HARVESTER_FILES ${MODULE_HARVESTER_FILES} ${BACKEND_HARVESTER_FILES})
-remove_build_files(particles_harvested models_harvested backends_harvested modules_harvested printers_harvested)
+remove_build_files(models_harvested backends_harvested modules_harvested printers_harvested)
 if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
- add_gambit_custom(particle_harvest particles_harvested PARTICLE_HARVESTER PARTICLE_HARVESTER_FILES)
  add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
 endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
