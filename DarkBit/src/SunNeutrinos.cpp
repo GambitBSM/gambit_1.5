@@ -54,6 +54,7 @@ namespace Gambit
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
       cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
     }
+
     ///Alternative to the darkSusy fct, using captn_specific from capgen instead
     void capture_rate_Sun_const_xsec_capgen(double &result)
     {
@@ -71,9 +72,9 @@ namespace Gambit
     }
 
     ///Capture rate for v^n and q^n-dependent cross sections.
-    //Isoscalar (same proton/neutron coupling)
-    //SD only couples to Hydrogen.
-    //See DirectDetection.cpp to see how to define the cross sections sigma_SD_p, sigma_SI_pi
+    ///Isoscalar (same proton/neutron coupling)
+    ///SD only couples to Hydrogen.
+    ///See DirectDetection.cpp to see how to define the cross sections sigma_SD_p, sigma_SI_pi
     void capture_rate_Sun_vnqn(double &result)
     {
       using namespace Pipes::capture_rate_Sun_vnqn;
