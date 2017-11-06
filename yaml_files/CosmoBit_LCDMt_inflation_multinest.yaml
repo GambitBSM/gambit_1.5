@@ -108,7 +108,7 @@ Scanner:
 ObsLikes:
   - purpose:      Likelihood
     capability:   compute_LCDMtensor_inflation_lowp_TT_loglike
-    module:       CosmoBitDEV
+    module:       CosmoBit
     type:         double
 
 #======== Rule entries ========
@@ -164,13 +164,13 @@ Rules:
 Logger:
   redirection:
     [Default]      : "default.log"
-    [CosmoBitDEV]  : "CosmoBitDEV.log"
+    [CosmoBit]  : "CosmoBit.log"
     [Scanner]      : "Scanner.log"
 
 #======== Generic Name/Value Section ========
 KeyValues:
 
-  default_output_path: "runs/CosmoBitDEV_LCDMt_inflation_multinest"
+  default_output_path: "runs/CosmoBit_LCDMt_inflation_multinest"
 
   rng: ranlux48
 

@@ -1,5 +1,5 @@
 ##########################################################################
-## MultiNest version of minimal - CosmosBitDEV application (in YAML)
+## MultiNest version of minimal - CosmoBit application (in YAML)
 ##
 ## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
 ## 2016-17
@@ -9,7 +9,7 @@
 #======== Input parameter declarations =======
 Parameters:
 
-  LCDMtensor:
+  LCDM:
 
     omega_b:
       prior_type: flat
@@ -29,9 +29,6 @@ Parameters:
     tau_reio:
       prior_type: flat
       range: [0.05,0.10]
-    r_tensor:
-      prior_type: flat
-      range: [0.00,1.00]
 
   plik_dx11dr2_HM_v18_TT:
 
@@ -87,7 +84,7 @@ Priors:
 Printer:
   printer: ascii
   options:
-    output_file: "gambit_LCDMt_output.data"
+    output_file: "gambit_output.data"
     buffer_length: 100
 
 #======== Scanner setup ========
@@ -98,7 +95,7 @@ Scanner:
     multinest:
       plugin: multinest
       like:  Likelihood
-      nlive: 100
+      nlive: 500
       tol: 0.1
       aux_printer_txt_options:
       aux_printer_stats_options:
@@ -107,8 +104,8 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      Likelihood
-    capability:   compute_LCDMtensor_lowp_TT_loglike
-    module:       CosmoBitDEV
+    capability:   compute_vanilla_lowp_TT_loglike
+    module:       CosmoBit
     type:         double
 
 #======== Rule entries ========
@@ -118,13 +115,13 @@ Rules:
 Logger:
   redirection:
     [Default]      : "default.log"
-    [CosmoBitDEV]  : "CosmoBitDEV.log"
+    [CosmoBit]  : "CosmoBit.log"
     [Scanner]      : "Scanner.log"
 
 #======== Generic Name/Value Section ========
 KeyValues:
 
-  default_output_path: "runs/CosmoBitDEV_LCDMt_multinest"
+  default_output_path: "runs/CosmoBit_multinest"
 
   rng: ranlux48
 
