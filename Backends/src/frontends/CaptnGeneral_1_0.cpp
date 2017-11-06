@@ -16,7 +16,7 @@
 #include "gambit/Backends/frontends/CaptnGeneral_1_0.hpp"
 
 
-// Initialisation function (definition)
+// Capgen Initialisation function (definition)
 BE_INI_FUNCTION
 {
     double rho0  = *Param["rho0"];

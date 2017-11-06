@@ -630,7 +630,7 @@ START_MODULE
 
   // Solar capture ------------------------
 
-  // Capture rate of regular dark matter in the Sun (no v-dependent or q-dependent cross-sections) (s^-1).
+  /// Capture rate of regular dark matter in the Sun (no v-dependent or q-dependent cross-sections) (s^-1).
   #define CAPABILITY capture_rate_Sun
   START_CAPABILITY
     #define FUNCTION capture_rate_Sun_const_xsec
@@ -645,7 +645,7 @@ START_MODULE
         #undef CONDITIONAL_DEPENDENCY
     #undef FUNCTION
 
-    //Alternative function for the above: Capture rate of dark matter with a constant cross section (s^-1), using backend Captn' General
+    ///Alternative function for the above: Capture rate of dark matter with a constant cross section (s^-1), using backend Captn' General
     #define FUNCTION capture_rate_Sun_const_xsec_capgen
     START_FUNCTION(double)
     BACKEND_REQ(cap_Sun_v0q0_isoscalar,(CaptnGeneral),void,(const double&,const double&,const double&,double&,double&))
@@ -655,7 +655,7 @@ START_MODULE
     DEPENDENCY(sigma_SD_p, double)
     #undef FUNCTION
 
-    //Capture rate of dark matter with q^n or v^n cross section (s^-1), using backend Captn' General
+    ///Capture rate of dark matter with q^n or v^n cross section (s^-1), using backend Captn' General
     #define FUNCTION capture_rate_Sun_vnqn
     START_FUNCTION(double)
     BACKEND_REQ(cap_Sun_vnqn_isoscalar,(CaptnGeneral),void,(const double&,const double&,const int&,const int&,const int&,double&))
@@ -666,7 +666,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Equilibration time for capture and annihilation of dark matter in the Sun (s)
+  /// Equilibration time for capture and annihilation of dark matter in the Sun (s)
   #define CAPABILITY equilibration_time_Sun
   START_CAPABILITY
     #define FUNCTION equilibration_time_Sun
@@ -677,7 +677,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Annihilation rate of dark matter in the Sun (s^-1)
+  /// Annihilation rate of dark matter in the Sun (s^-1)
   #define CAPABILITY annihilation_rate_Sun
   START_CAPABILITY
     #define FUNCTION annihilation_rate_Sun
