@@ -26,6 +26,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/Elements/virtual_higgs.hpp"
 #include "gambit/Elements/mssm_slhahelp.hpp"
+#include "gambit/Elements/smlike_higgs.hpp"
 #include "gambit/DecayBit/DecayBit_rollcall.hpp"
 #include "gambit/DecayBit/decay_utils.hpp"
 #include "gambit/Utils/version.hpp"
@@ -407,7 +408,8 @@ namespace Gambit
     void Ref_SM_other_Higgs_decays_table(DecayTable::Entry& result)
     {
       using namespace Pipes::Ref_SM_other_Higgs_decays_table;
-      int other_higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 35 : 25);
+      const SubSpectrum& spec = Dep::MSSM_spectrum->get_HE();
+      int other_higgs = (SMlike_higgs_PDG_code(spec) == 25 ? 35 : 25);
       double m_other = Dep::MSSM_spectrum->get(Par::Pole_Mass, other_higgs, 0);
       compute_SM_higgs_decays(result, m_other);
     }
@@ -423,7 +425,8 @@ namespace Gambit
     void Ref_SM_Higgs_decays_FH(DecayTable::Entry& result)
     {
       using namespace Pipes::Ref_SM_Higgs_decays_FH;
-      int higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 1 : 2);
+      const SubSpectrum& spec = Dep::MSSM_spectrum->get_HE();
+      int higgs = (SMlike_higgs_PDG_code(spec) == 25 ? 1 : 2);
       bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
       set_FH_neutral_h_decay(result, higgs, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, true);
     }
@@ -431,7 +434,8 @@ namespace Gambit
     void Ref_SM_other_Higgs_decays_FH(DecayTable::Entry& result)
     {
       using namespace Pipes::Ref_SM_other_Higgs_decays_FH;
-      int other_higgs = (*Dep::SMlike_Higgs_PDG_code == 25 ? 2 : 1);
+      const SubSpectrum& spec = Dep::MSSM_spectrum->get_HE();
+      int other_higgs = (SMlike_higgs_PDG_code(spec) == 25 ? 2 : 1);
       bool invalidate = runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width");
       set_FH_neutral_h_decay(result, other_higgs, *Dep::FH_Couplings_output, *(Dep::SLHA_pseudonyms), invalidate, true);
     }
@@ -2251,7 +2255,7 @@ namespace Gambit
             Dep::H_plus_decay_rates->calculator == "FeynHiggs" or
             Dep::t_decay_rates->calculator == "FeynHiggs")
         {
-          if (not Dep::MSSM_spectrum->get_HE().has(Par::dimensionless, "h mass from: SpecBit::FH_HiggsMasses"))
+          if (not Dep::MSSM_spectrum->get_HE().has(Par::dimensionless, "h mass from: SpecBit::FH_HiggsMass, SpecBit::FH_HeavyHiggsMasses"))
            DecayBit_error().raise(LOCAL_INFO, "You must use Higgs masses from FeynHiggs if you choose to use FeynHiggs "
                                               "to calculate h or t decays.\nPlease modify your yaml file accordingly.");
         }
@@ -2318,18 +2322,34 @@ namespace Gambit
         decays(psn.isnmulbar) = *Dep::snubar_muonl_decay_rates;  // Add the ~nu_mu decays.
         decays(psn.isntaulbar) = *Dep::snubar_taul_decay_rates;  // Add the ~nu_tau decays.
 
+        /// Spit out the full decay table as SLHA1 and SLHA2 files.
+        if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
+        {
+          // Spit out the full decay table in SLHA1 and SLHA2 formats.
+          str filename = runOptions->getValueOrDef<str>("GAMBIT_decays", "SLHA_output_filename");
+          decays.writeSLHAfile(1,filename+".slha1",false,psn);
+          decays.writeSLHAfile(2,filename+".slha2",false,psn);
+        }
+
       }
 
-      /// Spit out the full decay table as an SLHA file.
-      if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
+      else
+
       {
-        str filename = runOptions->getValueOrDef<str>("GAMBIT_decays.slha", "SLHA_output_filename");
-        decays.writeSLHAfile(filename);
+        /// Spit out the full decay table as an SLHA file.
+        if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
+        {
+          // Spit out the full decay table in SLHA1 and SLHA2 formats.
+          str filename = runOptions->getValueOrDef<str>("GAMBIT_decays", "SLHA_output_filename");
+          decays.writeSLHAfile(2,filename+".slha",false);
+        }
+
       }
 
     }
 
-    /// Read an SLHA file in and use it to create a GAMBIT DecayTable
+    /// Read an SLHA2 file in and use it to create a GAMBIT DecayTable.
+    ///  Note that creating a DecayTable from an SLHA1 file is not possible at present.
     void all_decays_from_SLHA(DecayTable& decays)
     {
       using namespace Pipes::all_decays_from_SLHA;

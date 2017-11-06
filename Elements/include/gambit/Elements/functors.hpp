@@ -116,7 +116,8 @@ namespace Gambit
       /// Reset-then-recalculate method
       virtual void reset_and_calculate();
 
-      /// Setter for status: -4 = required backend absent (backend ini functions)
+      /// Setter for status: -5 = required external tool absent (Mathematica)
+      ///                    -4 = required backend absent (backend ini functions)
       ///                    -3 = required classes absent
       ///                    -2 = function absent
       ///                    -1 = origin absent

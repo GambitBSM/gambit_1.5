@@ -195,6 +195,55 @@ run_light_quark_test: |
 ptr_arr_tests: |
    Function that tests array and -> operators on deps and BE vars.
 
+libMathematicaTest_1_0_init: |
+   Initialises the backend for Mathematica tests.
+
+MathematicaTest: |
+   Performs serveral tests of Mathematica backends.
+
+MathTest: |
+   Runs a series of test in libMathematicaTest.
+
+MathTest_CalculateSquare: |
+   Test function for Mathematica backends that calculates the square of a number.
+
+MathTest_CalculateSum: |
+   Test function for Mathematica backends that calculates the sum of two numbers.
+
+MathTest_ExtractElement: |
+   Test function for Mathematica backends that extracts an element from a list.
+
+MathTest_PrintVar: |
+   Test function for Mathematica backends that prints a variable.
+
+MathTest_PrintVarorVar2: |
+   Test function for Mathematica backends that prints a variable depeding on a boolean argument.
+
+MathTest_SquareList: |
+   Test function for Mathematica backends that calculates the square of a list.
+
+MathTest_StringTest: |
+   Test function for Mathematica backends to test strings.
+
+MathTest_Var: |
+   Test integer variable for Mathematica backends.
+
+MathTest_Var2: |
+   Test real variable for Mathematica backends.
+
+MathTest_VarEqualVar2: |
+   Test function for Mathematica backends checks the equality of two variables.
+
+MathTest_VoidTest: |
+   Test function for Mathematica backends for testing void functions
+
+MathTest_Gammafunc: |
+   Test function for Mathematica backends for testing non-alphanumerical characters in function names
+
+MathTest_deltabar: |
+   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names
+
+
 
 #-------------------------------------
 #  SpecBit
@@ -255,14 +304,11 @@ SM_subspectrum: |
 FH_MSSMMasses: |
     SUSY masses and mixings, as computed by FeynHiggs.
 
-prec_HiggsMasses: |
+FH_HiggsMasses: |
     Higgs masses and mixings with theoretical uncertainties, as computed by FeynHiggs.
 
 Higgs_Couplings: |
     Higgs couplings, as computed by FeynHiggs
-
-SMlike_Higgs_PDG_code: |
-    The PDG code of the neutral Higgs boson that is most SM-like in the theory at hand.
 
 SPheno_3_3_8_init: |
     Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
@@ -2337,7 +2383,13 @@ deltarho : |
    Deviation from one (∆ρ) of the ratio of the Fermi effective coupling (G_F) in W and Z-mediated processes.
 
 prec_mw : |
-   Precision value of the W mass in the MSSM.
+   Precision value of the W mass.
+
+prec_mh : |
+   Precision value of the mass of the most SM-like Higgs boson.
+
+prec_HeavyHiggsMasses : |
+   Precision values of the masses of the A^0, H+ and the least SM-like neutral Higgs boson.
 
 prec_sinW2_eff : |
    Precision value of the effective leptonic weak mixing angle sin^2 θ_W,eff.
@@ -3199,7 +3251,6 @@ calculate_amu_2loop_non_tan_beta_resummed: |
 calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
-
 #----------------------------
 #  plc
 #----------------------------
@@ -3293,7 +3344,10 @@ multimodecode_gambit_driver_test: |
 #----------------------------
 
 class_2_6_1_init: |
-   The main initialisation for Class structures.
+   The main initialisation for Class structures (version 2.6.1).
+
+class_2_6_3_init: |
+   The main initialisation for Class structures (version 2.6.3).
 
 class_background_free: |
    Free all memory space allocated by background_init.
@@ -3398,3 +3452,18 @@ compute_LCDMtensor_inflation_lowp_TT_loglike: |
    a yaml file. function then calls class and produces the Cl's
    (power spectrum) and goes on to calculate the planck likelihood.
 
+#------------------------------
+#  SUSYHD capabilities
+#------------------------------
+
+SUSYHD_1_0_2_init: |
+   Initialises SUSYHD, version 1.0.2
+
+SUSYHD_SetSMparameters: |
+   Sets the SM parameters to be used in SUSYHD
+
+SUSYHD_MHiggs: |
+   Calculates the Higgs mass using SUSYHD
+
+SUSYHD_DeltaMHiggs : |
+   Calculates the uncertainty on the Higgs mass using SUSYHD

@@ -17,6 +17,7 @@
 
 
 #define BACKENDNAME HiggsBounds
+#define BACKENDLANG FORTRAN
 #define VERSION 4.2.1
 #define SAFE_VERSION 4_2_1
 

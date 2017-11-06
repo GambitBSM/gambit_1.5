@@ -70,11 +70,17 @@ SUSY_HIT:
 SPheno:
   3.3.8:       ./Backends/installed/spheno/3.3.8/lib/libSPheno.so
 
+libMathematicaTest:
+  1.0:         ./Backends/examples/libMathematicaTest.m
+
+SUSYHD:
+  1.0.2:       ./Backends/installed/susyhd/1.0.2/SUSYHD.m
+
 plc:
   2.0:         ./Backends/installed/plc/2.0/lib/libclik.so
 
 class:
-#  2.6.1:       ./Backends/installed/class/2.6.1/lib/libclass.so
+  2.6.1:       ./Backends/installed/class/2.6.1/lib/libclass.so
   2.6.3:       ./Backends/installed/class/2.6.3/lib/libclass.so
 
 MultiModeCode:
