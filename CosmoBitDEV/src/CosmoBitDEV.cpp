@@ -26,6 +26,7 @@
 #include <stdlib.h>     /* malloc, free, rand */
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBitDEV/CosmoBitDEV_rollcall.hpp"
+#include "gambit/Backends/frontend_macros.hpp"
 
 namespace Gambit
 {
@@ -40,17 +41,17 @@ namespace Gambit
 		{
 			using namespace Pipes::function_vanilla_lowp_TT_loglike;
 			
-			struct class_2_6::precision pr;        /* for precision parameters */
-			struct class_2_6::background ba;       /* for cosmological background */
-			struct class_2_6::thermo th;           /* for thermodynamics */
-			struct class_2_6::perturbs pt;         /* for source functions */
-			struct class_2_6::transfers tr;        /* for transfer functions */
-			struct class_2_6::primordial pm;       /* for primordial spectra */
-			struct class_2_6::spectra sp;          /* for output spectra */
-			struct class_2_6::nonlinear nl;        /* for non-linear spectra */
-			struct class_2_6::lensing le;          /* for lensed spectra */
-			struct class_2_6::output op;           /* for output files */
-			class_2_6::ErrorMsg class_errmsg;      /* for error messages */
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
 			
 			int l,l_max;
 			int num_ct_max=7;
@@ -68,7 +69,7 @@ namespace Gambit
 			for(int i = 0; i < l_max; ++i)
 				cl[i] = new double[num_ct_max];
 			
-			struct class_2_6::file_content fc;
+			struct file_content fc;
 			
 			BEreq::class_parser_initialize(&fc,9,"",class_errmsg);
 			
@@ -114,7 +115,7 @@ namespace Gambit
 			
 			/* for bbn */
 			sprintf(pr.sBBN_file,"");
-			strcat(pr.sBBN_file,"CosmoBitDEV/src/sBBN.dat");
+			strcat(pr.sBBN_file,"Backends/installed/class/2.6.1/bbn/sBBN.dat");
 			
 			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
 			
@@ -193,17 +194,17 @@ namespace Gambit
 		{
 			using namespace Pipes::function_LCDMtensor_lowp_TT_loglike;
 			
-			struct class_2_6::precision pr;        /* for precision parameters */
-			struct class_2_6::background ba;       /* for cosmological background */
-			struct class_2_6::thermo th;           /* for thermodynamics */
-			struct class_2_6::perturbs pt;         /* for source functions */
-			struct class_2_6::transfers tr;        /* for transfer functions */
-			struct class_2_6::primordial pm;       /* for primordial spectra */
-			struct class_2_6::spectra sp;          /* for output spectra */
-			struct class_2_6::nonlinear nl;        /* for non-linear spectra */
-			struct class_2_6::lensing le;          /* for lensed spectra */
-			struct class_2_6::output op;           /* for output files */
-			class_2_6::ErrorMsg class_errmsg;      /* for error messages */
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
 			
 			int l,l_max;
 			int num_ct_max=7;
@@ -221,7 +222,7 @@ namespace Gambit
 			for(int i = 0; i < l_max; ++i)
 				cl[i] = new double[num_ct_max];
 			
-			struct class_2_6::file_content fc;
+			struct file_content fc;
 			
 			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
 			
@@ -275,7 +276,7 @@ namespace Gambit
 			
 			/* for bbn */
 			sprintf(pr.sBBN_file,"");
-			strcat(pr.sBBN_file,"CosmoBitDEV/src/sBBN.dat");
+			strcat(pr.sBBN_file,"Backends/installed/class/2.6.1/bbn/sBBN.dat");
 			
 			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
 			
@@ -354,17 +355,17 @@ namespace Gambit
 		{
 			using namespace Pipes::function_LCDMtensor_inflation_lowp_TT_loglike;
 			
-			struct class_2_6::precision pr;        /* for precision parameters */
-			struct class_2_6::background ba;       /* for cosmological background */
-			struct class_2_6::thermo th;           /* for thermodynamics */
-			struct class_2_6::perturbs pt;         /* for source functions */
-			struct class_2_6::transfers tr;        /* for transfer functions */
-			struct class_2_6::primordial pm;       /* for primordial spectra */
-			struct class_2_6::spectra sp;          /* for output spectra */
-			struct class_2_6::nonlinear nl;        /* for non-linear spectra */
-			struct class_2_6::lensing le;          /* for lensed spectra */
-			struct class_2_6::output op;           /* for output files */
-			class_2_6::ErrorMsg class_errmsg;      /* for error messages */
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
 			
 			int l,l_max;
 			int num_ct_max=7;
@@ -382,7 +383,7 @@ namespace Gambit
 			for(int i = 0; i < l_max; ++i)
 				cl[i] = new double[num_ct_max];
 			
-			struct class_2_6::file_content fc;
+			struct file_content fc;
 			
 			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
 			
@@ -435,7 +436,7 @@ namespace Gambit
 			
 			/* for bbn */
 			sprintf(pr.sBBN_file,"");
-			strcat(pr.sBBN_file,"CosmoBitDEV/src/sBBN.dat");
+			strcat(pr.sBBN_file,"Backends/installed/class/2.6.1/bbn/sBBN.dat");
 			
 			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
 			
