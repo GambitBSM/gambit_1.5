@@ -195,6 +195,55 @@ run_light_quark_test: |
 ptr_arr_tests: |
    Function that tests array and -> operators on deps and BE vars.
 
+libMathematicaTest_1_0_init: |
+   Initialises the backend for Mathematica tests.
+
+MathematicaTest: |
+   Performs serveral tests of Mathematica backends.
+
+MathTest: |
+   Runs a series of test in libMathematicaTest.
+
+MathTest_CalculateSquare: |
+   Test function for Mathematica backends that calculates the square of a number.
+
+MathTest_CalculateSum: |
+   Test function for Mathematica backends that calculates the sum of two numbers.
+
+MathTest_ExtractElement: |
+   Test function for Mathematica backends that extracts an element from a list.
+
+MathTest_PrintVar: |
+   Test function for Mathematica backends that prints a variable.
+
+MathTest_PrintVarorVar2: |
+   Test function for Mathematica backends that prints a variable depeding on a boolean argument.
+
+MathTest_SquareList: |
+   Test function for Mathematica backends that calculates the square of a list.
+
+MathTest_StringTest: |
+   Test function for Mathematica backends to test strings.
+
+MathTest_Var: |
+   Test integer variable for Mathematica backends.
+
+MathTest_Var2: |
+   Test real variable for Mathematica backends.
+
+MathTest_VarEqualVar2: |
+   Test function for Mathematica backends checks the equality of two variables.
+
+MathTest_VoidTest: |
+   Test function for Mathematica backends for testing void functions
+
+MathTest_Gammafunc: |
+   Test function for Mathematica backends for testing non-alphanumerical characters in function names
+
+MathTest_deltabar: |
+   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names
+
+
 
 #-------------------------------------
 #  SpecBit
@@ -255,14 +304,11 @@ SM_subspectrum: |
 FH_MSSMMasses: |
     SUSY masses and mixings, as computed by FeynHiggs.
 
-prec_HiggsMasses: |
+FH_HiggsMasses: |
     Higgs masses and mixings with theoretical uncertainties, as computed by FeynHiggs.
 
 Higgs_Couplings: |
     Higgs couplings, as computed by FeynHiggs
-
-SMlike_Higgs_PDG_code: |
-    The PDG code of the neutral Higgs boson that is most SM-like in the theory at hand.
 
 SPheno_3_3_8_init: |
     Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
@@ -1637,6 +1683,9 @@ nulike_1_0_4_init: |
 nulike_1_0_5_init: |
   Initializes nulike_1_0_5.
 
+nulike_1_0_6_init: |
+  Initializes nulike_1_0_5.
+
 nubounds:
   Counts, likelihoods and p-values from neutrino telescope searches for dark matter annihilation in the Sun.
 
@@ -2337,7 +2386,13 @@ deltarho : |
    Deviation from one (∆ρ) of the ratio of the Fermi effective coupling (G_F) in W and Z-mediated processes.
 
 prec_mw : |
-   Precision value of the W mass in the MSSM.
+   Precision value of the W mass.
+
+prec_mh : |
+   Precision value of the mass of the most SM-like Higgs boson.
+
+prec_HeavyHiggsMasses : |
+   Precision values of the masses of the A^0, H+ and the least SM-like neutral Higgs boson.
 
 prec_sinW2_eff : |
    Precision value of the effective leptonic weak mixing angle sin^2 θ_W,eff.
@@ -3200,62 +3255,79 @@ calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
 
+#------------------------------
+#  SUSYHD capabilities
+#------------------------------
+
+SUSYHD_1_0_2_init: |
+   Initialises SUSYHD, version 1.0.2
+
+SUSYHD_SetSMparameters: |
+   Sets the SM parameters to be used in SUSYHD
+
+SUSYHD_MHiggs: |
+   Calculates the Higgs mass using SUSYHD
+
+SUSYHD_DeltaMHiggs : |
+   Calculates the uncertainty on the Higgs mass using SUSYHD
+
+
 #----------------------------
 #  plc
 #----------------------------
 
 plc_2_0_init: |
-   initialize the planck likelihood from an cldf file.
+initialize the planck likelihood from an cldf file.
 
 clik_cleanup: |
-   cleanup delete allocated pointers to a planck likelihood object.
+cleanup delete allocated pointers to a planck likelihood object.
 
 clik_compute_loglike: |
-   compute a log likelyhood value
-   cl_and_pars is order this way
-   first the powerspectra from l=0 to l=lmax[cli] (included) in the order
-   TT EE BB TE TB EB. Only the one where lmax[cli]!=-1 have to be included
-   then the extra parameters in the order given by clik_get_extra_parameters.
-   The power spectra are in microK^2
-   for example, for a likelihood acting on TT, EE and TE with 3 extra parameters
-   will expect an array ordered this way
-   C_0^TT ... C_lmax[0]^TT C_0^EE ... C_lmax[1]^EE C_0^TE ... C_lmax[3]^T3 extrapar1 extrapar2 extrapar3
+compute a log likelyhood value
+cl_and_pars is order this way
+first the powerspectra from l=0 to l=lmax[cli] (included) in the order
+TT EE BB TE TB EB. Only the one where lmax[cli]!=-1 have to be included
+then the extra parameters in the order given by clik_get_extra_parameters.
+The power spectra are in microK^2
+for example, for a likelihood acting on TT, EE and TE with 3 extra parameters
+will expect an array ordered this way
+C_0^TT ... C_lmax[0]^TT C_0^EE ... C_lmax[1]^EE C_0^TE ... C_lmax[3]^T3 extrapar1 extrapar2 extrapar3
 
 clik_get_extra_parameter_names: |
-   retrieve the number of extra parameters and their names
-   names is allocated by the function. It has to be cleaned after.
+retrieve the number of extra parameters and their names
+names is allocated by the function. It has to be cleaned after.
 
 clik_get_list_cls: |
-   retrieve the list of cls as a list of flags
-   order is  TT EE BB TE TB EB
-   for example for a likelihood acting on TT
-   has_cl = 1 0 0 0 0 0
+retrieve the list of cls as a list of flags
+order is  TT EE BB TE TB EB
+for example for a likelihood acting on TT
+has_cl = 1 0 0 0 0 0
 
 clik_get_lmax: |
-   retrieve the lmax for each power spectrum
-   -1 --> no cl
-   order is TT EE BB TE TB EB
-   for example for a likelihood acting ont TT EE TE with same lmax 2000
-   lmax = 2000 2000 -1 2000 -1 -1 -1
+retrieve the lmax for each power spectrum
+-1 --> no cl
+order is TT EE BB TE TB EB
+for example for a likelihood acting ont TT EE TE with same lmax 2000
+lmax = 2000 2000 -1 2000 -1 -1 -1
 
 clik_get_version: |
-   get the version.
+get the version.
 
 clik_initialize: |
-   initialize the planck likelihood from an cldf file.
+initialize the planck likelihood from an cldf file.
 
 clik_initialize_error: |
-   initialize the error object.
+initialize the error object.
 
 data_cleanup: |
-   free objects plik_dx11dr2_HM_v18_TT and
-   lowl_SMW_70_dx11d_2014 by means of calling
-   backend function clik_cleanup
+free objects plik_dx11dr2_HM_v18_TT and
+lowl_SMW_70_dx11d_2014 by means of calling
+backend function clik_cleanup
 
 data_initialize: |
-   initalize objects plik_dx11dr2_HM_v18_TT and
-   lowl_SMW_70_dx11d_2014 by means of calling
-   backend function clik_init
+initalize objects plik_dx11dr2_HM_v18_TT and
+lowl_SMW_70_dx11d_2014 by means of calling
+backend function clik_init
 
 
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap_parameters: |
@@ -3263,12 +3335,12 @@ lowl_SMW_70_dx11d_2014_10_03_v5c_Ap_parameters: |
 plik_dx11dr2_HM_v18_TT_parameters: |
 
 return_lowp_TT: |
-   return the likelihood result for low-l temperature
-   and polarization Cl's
+return the likelihood result for low-l temperature
+and polarization Cl's
 
 return_high_TT: |
-   return the likelihood result for high-l temperature
-   Cl's (above l=30)
+return the likelihood result for high-l temperature
+Cl's (above l=30)
 
 
 #----------------------------
@@ -3276,125 +3348,124 @@ return_high_TT: |
 #----------------------------
 
 multimodecode_gambit_driver: |
-   multimodecode driver for gambit, takes in all
-   input parameters as well as ode solver and other
-   initialization parameters and solves the inflationary
-   dynamics with multimodecode.
+multimodecode driver for gambit, takes in all
+input parameters as well as ode solver and other
+initialization parameters and solves the inflationary
+dynamics with multimodecode.
 
 MultiModeCode_2_0_0_init: |
-   initializer for multimodecode.
+initializer for multimodecode.
 
 multimodecode_gambit_driver_test: |
-   some test function with less parameters for input.
-   will be deleted.
+some test function with less parameters for input.
+will be deleted.
 
 #----------------------------
 #  Class
 #----------------------------
 
 class_2_6_1_init: |
-   The main initialisation for Class structures.
+The main initialisation for Class structures.
 
 class_background_free: |
-   Free all memory space allocated by background_init.
+Free all memory space allocated by background_init.
 
 class_background_initialize: |
-   Initialize the background structure, and in particular the background interpolation table.
+Initialize the background structure, and in particular the background interpolation table.
 
 class_input_initialize: |
-   Initialize each parameter, first to its default values,
-   and then from what can be interpreted from the values passed
-   in the input 'file_content' structure.
+Initialize each parameter, first to its default values,
+and then from what can be interpreted from the values passed
+in the input 'file_content' structure.
 
 class_lensing_free: |
-   This routine frees all the memory space allocated by lensing_init.
+This routine frees all the memory space allocated by lensing_init.
 
 class_lensing_initialize: |
-   This routine initializes the lensing structure (in particular,
-   computes table of lensed anisotropy spectra).
+This routine initializes the lensing structure (in particular,
+computes table of lensed anisotropy spectra).
 
 class_nonlinear_free: |
-   This routine frees all the memory space allocated by nonlinear_init.
+This routine frees all the memory space allocated by nonlinear_init.
 
 class_nonlinear_initialize: |
-   First deal with the case where non non-linear corrections requested.
+First deal with the case where non non-linear corrections requested.
 
 class_output_initialize: |
-   This routine writes the output in files.
+This routine writes the output in files.
 
 class_output_total_cl_at_l: |
-   This routines writes the output in files for anisotropy power spectra Cl.
+This routines writes the output in files for anisotropy power spectra Cl.
 
 class_parser_initialize: |
-   Contains purely numerical algorithms.
+Contains purely numerical algorithms.
 
 class_perturb_free: |
-   Free all memory space allocated by perturb_init.
+Free all memory space allocated by perturb_init.
 
 class_perturb_initialize: |
-   Initialize the perturbs structure, and in particular the table of source functions.
+Initialize the perturbs structure, and in particular the table of source functions.
 
 class_primordial_free: |
-   This routine frees all the memory space allocated by primordial_init.
+This routine frees all the memory space allocated by primordial_init.
 
 class_primordial_initialize: |
-   This routine initializes the primordial structure
-   (in particular, it computes table of primordial spectrum values)
+This routine initializes the primordial structure
+(in particular, it computes table of primordial spectrum values)
 
 class_spectra_free: |
-   This routine frees all the memory space allocated by spectra_init.
+This routine frees all the memory space allocated by spectra_init.
 
 class_spectra_initialize: |
-   This routine initializes the spectra structure
-   (in particular, computes table of anisotropy and Fourier spectra).
+This routine initializes the spectra structure
+(in particular, computes table of anisotropy and Fourier spectra).
 
 class_thermodynamics_free: |
-   Free all memory space allocated by thermodynamics_init.
+Free all memory space allocated by thermodynamics_init.
 
 class_thermodynamics_initialize: |
-   Initialize the thermo structure, and in particular the thermodynamics interpolation table.
+Initialize the thermo structure, and in particular the thermodynamics interpolation table.
 
 class_transfer_free: |
-   This routine frees all the memory space allocated by transfer_init.
+This routine frees all the memory space allocated by transfer_init.
 
 class_transfer_initialize: |
-   This routine initializes the transfers structure,
-   (in particular, computes table of transfer functions).
+This routine initializes the transfers structure,
+(in particular, computes table of transfer functions).
 
 #----------------------------
 #  CosmoBitDEV
 #----------------------------
 
 LCDM_parameters: |
-   omega_b, baryon density parameter.
-   omega_cdm, dark matter density parameter.
-   H0, Hubble constant.
-   ln10A_s, primordial curvature fluctuation amplitude.
-   n_s, parametrises the primordial scale dependence.
-   tau_reio, reionization optical depth.
+omega_b, baryon density parameter.
+omega_cdm, dark matter density parameter.
+H0, Hubble constant.
+ln10A_s, primordial curvature fluctuation amplitude.
+n_s, parametrises the primordial scale dependence.
+tau_reio, reionization optical depth.
 
 LCDMtensor_parameters: |
-   in addition to the above, r_tensor, amplitute of
-   tensor power spectrum over scalar power spectrum.
+in addition to the above, r_tensor, amplitute of
+tensor power spectrum over scalar power spectrum.
 
 compute_LCDMtensor_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a given
-   set of 7 LCDMtensor input parameteres and nuisance parameters.
-   function first calls class and produces the Cl's
-   (power spectrum) and goes on to calculate the planck likelihood.
+function computes the planck log-likelihood for a given
+set of 7 LCDMtensor input parameteres and nuisance parameters.
+function first calls class and produces the Cl's
+(power spectrum) and goes on to calculate the planck likelihood.
 
 compute_vanilla_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a given
-   set of 6 LCDM input parameteres and nuisance parameters.
-   function first calls class and produces the Cl's
-   (power spectrum) and goes on to calculate the planck likelihood.
+function computes the planck log-likelihood for a given
+set of 6 LCDM input parameteres and nuisance parameters.
+function first calls class and produces the Cl's
+(power spectrum) and goes on to calculate the planck likelihood.
 
 compute_LCDMtensor_inflation_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a given
-   set of 4+2 LCDM input parameteres and nuisance parameters.
-   the two parameters, spectral index n_s and tensor to scalar
-   ratio r is calculated separately with a call to multimodecode
-   for a given model paramteres and further solver specifiers via
-   a yaml file. function then calls class and produces the Cl's
-   (power spectrum) and goes on to calculate the planck likelihood.
-
+function computes the planck log-likelihood for a given
+set of 4+2 LCDM input parameteres and nuisance parameters.
+the two parameters, spectral index n_s and tensor to scalar
+ratio r is calculated separately with a call to multimodecode
+for a given model paramteres and further solver specifiers via
+a yaml file. function then calls class and produces the Cl's
+(power spectrum) and goes on to calculate the planck likelihood.

@@ -22,6 +22,10 @@
 #          (p.scott@imperial.ac.uk)
 #  \date 2014 Nov, Dec
 #
+#  \author Tomas Gonzao
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Sep
+#
 #************************************************
 
 # Require a minimum cmake version of 2.8.5
@@ -207,6 +211,34 @@ else()
   message(FATAL_ERROR "GAMBIT requires the GSL libraries.")
 endif()
 
+# Check for Mathematica
+find_library(LIBUUID NAMES uuid)
+if(LIBUUID)
+  message("   Found library libuuid")
+  find_package(Mathematica 10.0)
+  if(Mathematica_FOUND AND NOT DEFINED Mathematica_Invalid_License)
+    message("${BoldYellow}   Found Mathematica.${ColourReset}")
+    if(Mathematica_WSTP_FOUND)
+      message("${BoldYellow}   Found Wolfram Symbolic Transfer Protocol. Mathematica backends enabled.${ColourReset}")
+      set(HAVE_MATHEMATICA 1)
+      set(MATHEMATICA_WSTP_H "${Mathematica_WSTP_INCLUDE_DIR}/wstp.h")
+      set(MATHEMATICA_KERNEL "${Mathematica_KERNEL_EXECUTABLE}")
+    else()
+      message("${BoldRed}  WSTP not found. Please make sure it is installed before attempting to use Mathematica backends.${ColourReset}")
+      set(HAVE_MATHEMATICA 0)
+    endif()
+  elseif(DEFINED Mathematica_Invalid_License)
+    message("${BoldRed}   Mathematica found but with an invalid license. Backends using Mathematica will be disabled.${ColourReset}")
+    set(HAVE_MATHEMATICA 0)
+  else()
+    message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled.${ColourReset}")
+    set(HAVE_MATHEMATICA 0)
+  endif()
+else()
+  message("${BoldRed}   Missing library libuuid required for WSTP. Mathematica will be disabled.${ColourReset}")
+  set(HAVE_MATHEMATICA 0)
+endif()
+
 # Check for DL libraries
 include(cmake/FindLibDL.cmake)
 
@@ -297,6 +329,13 @@ endif()
 # Generate the cmake_variables.hpp file
 include(cmake/preprocessor.cmake)
 
+# Generate particle_database.cpp from particle_database.yaml.
+if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
+  set(particle_harvester ${PROJECT_SOURCE_DIR}/Models/scripts/particle_harvester.py ${PROJECT_BINARY_DIR} -x __not_a_real_name__,${itch_with_commas})
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${particle_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  message("${Yellow}-- Generated particle_database.cpp from particle_database.yaml.${ColourReset}")
+endif()
+
 # Identify the different harvester scripts
 set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
 set(BACKEND_HARVESTER ${PROJECT_SOURCE_DIR}/Backends/scripts/backend_harvester.py)
@@ -305,19 +344,19 @@ set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.p
 set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
 # Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
-# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp.
-file(GLOB MODEL_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
-                                  "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
-file(GLOB BACKEND_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
-                                  "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
-file(GLOB PRINTER_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"
-                                  "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
-file(GLOB MODULE_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
-                                  "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
-string (REPLACE "//" "/" MODEL_HARVESTER_FILES   "${MODEL_HARVESTER_FILES}")    # (GLOB creates erroneous double slashes)
-string (REPLACE "//" "/" BACKEND_HARVESTER_FILES "${BACKEND_HARVESTER_FILES}")
-string (REPLACE "//" "/" PRINTER_HARVESTER_FILES "${PRINTER_HARVESTER_FILES}")
-string (REPLACE "//" "/" MODULE_HARVESTER_FILES  "${MODULE_HARVESTER_FILES}")
+# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
+file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
+file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
+file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
+file(GLOB MODULE_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
+                                   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
+string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")   # (GLOB creates erroneous double slashes)
+string (REPLACE "//" "/" BACKEND_HARVESTER_FILES  "${BACKEND_HARVESTER_FILES}")
+string (REPLACE "//" "/" PRINTER_HARVESTER_FILES  "${PRINTER_HARVESTER_FILES}")
+string (REPLACE "//" "/" MODULE_HARVESTER_FILES   "${MODULE_HARVESTER_FILES}")
 list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//priors_rollcall.hpp"
                                         "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//test_function_rollcall.hpp")
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")

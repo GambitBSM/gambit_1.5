@@ -35,7 +35,7 @@
 #
 #  \author Tomas Gonzalo
 #          (t.e.gonzalo@fys.uio.no)
-#  \date 2016 Apr
+#  \date 2016 Apr, Dec
 #
 #  \author James McKay
 #          (j.mckay14@imperial.ac.uk)
@@ -365,6 +365,26 @@ set(ver "1.0.5")
 set(lib "libnulike")
 set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
 set(md5 "20cee73a38fb3560298b6a3acdd4d83a")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} FOPT=${GAMBIT_Fortran_FLAGS} MODULE=${FMODULE}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} distclean)
+endif()
+
+# Nulike
+set(name "nulike")
+set(ver "1.0.6")
+set(lib "libnulike")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "fc4c35dc867bb1213d80acd12e5c1169")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
@@ -724,6 +744,24 @@ if(NOT ditched_${name}_${ver})
   BOSS_backend(${name} ${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
+
+# SUSYHD
+set(name "susyhd")
+set(ver "1.0.2")
+set(dl "http://users.ictp.it/~${name}/v${ver}/SUSYHD.tgz")
+set(md5 "e831c3fa977552ff944e0db44db38e87")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+ExternalProject_Add(${name}_${ver}
+DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+SOURCE_DIR ${dir}
+BUILD_IN_SOURCE 1
+PATCH_COMMAND ""
+CONFIGURE_COMMAND ""
+BUILD_COMMAND ""
+INSTALL_COMMAND ""
+)
+add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+set_as_default_version("backend" ${name} ${ver})
 
 # cfitsio
 set(name "cfitsio")

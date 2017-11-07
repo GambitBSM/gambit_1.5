@@ -7,12 +7,12 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
-///  \author Pat Scott 
+///
+///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2014 Mar
 ///
-///  Distantly inspired by SUFIT classes of the 
+///  Distantly inspired by SUFIT classes of the
 ///  same name by Johan Lundberg, Aug 2011.
 ///
 ///  *********************************************
@@ -56,7 +56,7 @@ namespace Gambit
      isFatal               (fatal)
     {
       myLogTags.insert(t1);
-      exception_map()[inikey] = this; 
+      exception_map()[inikey] = this;
     }
 
     /// Constructor with 2 log tags
@@ -70,7 +70,7 @@ namespace Gambit
     {
       myLogTags.insert(t1);
       myLogTags.insert(t2);
-      exception_map()[inikey] = this; 
+      exception_map()[inikey] = this;
     }
 
     /// Constructor with 3 log tags
@@ -186,8 +186,8 @@ namespace Gambit
     }
 
     /// Raise the exception.
-    /// Log the exception and, if it is considered fatal, actually throw it. 
-    /// This is the regular way to trigger a GAMBIT error or warning. 
+    /// Log the exception and, if it is considered fatal, actually throw it.
+    /// This is the regular way to trigger a GAMBIT error or warning.
     void exception::raise(const std::string& origin, const std::string& specific_message)
     {
       str full_message = isFatal ? specific_message+parameters : specific_message;
@@ -247,14 +247,14 @@ namespace Gambit
         logger() << fatal;
         std::ostringstream myLongWhat;
         myLongWhat << myShortWhat << std::endl << msg.str();
-        myWhat = myLongWhat.str(); 
+        myWhat = myLongWhat.str();
       }
       else
       {
         logger() << nonfatal;
-        myWhat = myShortWhat; 
+        myWhat = myShortWhat;
       }
-      for (std::set<LogTag>::iterator it = myLogTags.begin(); it != myLogTags.end(); ++it) { logger() << *it; } 
+      for (std::set<LogTag>::iterator it = myLogTags.begin(); it != myLogTags.end(); ++it) { logger() << *it; }
       logger() << msg.str() << EOM;
     }
 
@@ -276,7 +276,7 @@ namespace Gambit
     {
       #pragma omp critical (GAMBIT_exception)
       {
-        cout << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl
+        cerr << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl
              << "GAMBIT has exited with fatal exception: " << what() << endl
              << "Please note: this error occurred inside an OpenMP parallel " << endl
              << "region and so caused a hard stop. If you are running in MPI " << endl
@@ -296,7 +296,7 @@ namespace Gambit
   /// GAMBIT error class constructors
 
     /// Constructor without log tags
-    error::error(const char* message, const char* inikey) : 
+    error::error(const char* message, const char* inikey) :
      exception("ERROR", "GAMBIT error", message, inikey, true, err) {}
     /// Constructor with 1 log tag
     error::error(const char* message, const char* inikey, LogTag t1)
@@ -318,7 +318,7 @@ namespace Gambit
      : exception("ERROR", "GAMBIT error", message, inikey, true, err, t1, t2, t3, t4, t5, t6) {}
     /// Constructor with log tags as a set
     error::error(const char* message, const char* inikey, std::set<LogTag> tags) :
-     exception("ERROR", "GAMBIT error", message, inikey, true) 
+     exception("ERROR", "GAMBIT error", message, inikey, true)
     {
       myLogTags = tags;
       myLogTags.insert(err);
@@ -327,7 +327,7 @@ namespace Gambit
   /// GAMBIT warning class constructors
 
     /// Constructor without log tags
-    warning::warning(const char* message, const char* inikey) : 
+    warning::warning(const char* message, const char* inikey) :
      exception("WARNING", "GAMBIT warning", message, inikey, false, warn) {}
     /// Constructor with 1 log tag
     warning::warning(const char* message, const char* inikey, LogTag t1)
@@ -389,12 +389,12 @@ namespace Gambit
       }
       throw(*this);
     }
-    
+
 
   /// Gambit invalid point exception class methods.
 
     /// Constructor
-    invalid_point_exception::invalid_point_exception() : special_exception("GAMBIT invalid point."), myThrower(NULL) {}    
+    invalid_point_exception::invalid_point_exception() : special_exception("GAMBIT invalid point."), myThrower(NULL) {}
 
     /// Set the pointer to the functor that threw the invalid point exception.
     void invalid_point_exception::set_thrower(functor* thrown_from)
@@ -438,7 +438,7 @@ namespace Gambit
         #pragma omp critical (GAMBIT_exception)
         {
           myMessage = full_msg.str();
-        }  
+        }
         abort_here_and_now(); // If in an OpenMP parallel block, just abort immediately.
       }
     }
@@ -448,8 +448,8 @@ namespace Gambit
     {
       #pragma omp critical (GAMBIT_invalid_pt_exception)
       {
-        cout << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;
-        cout << "An invalid_point exception is fatal inside an OpenMP block. " << endl << what() << endl << message() << endl;
+        cerr << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;
+        cerr << "An invalid_point exception is fatal inside an OpenMP block. " << endl << what() << endl << message() << endl;
         #ifdef WITH_MPI
           GMPI::Comm().Abort();
         #else
@@ -472,7 +472,7 @@ namespace Gambit
     void Piped_invalid_point::check()
     {
       if (omp_get_level()==0) // If not in an OpenMP parallel block, throw onwards
-      {    
+      {
         if (this->flag)
         {
           this->flag = false;  // Reset...
@@ -482,46 +482,46 @@ namespace Gambit
       else
       {
         #pragma omp critical (GAMBIT_invalid_point)
-        {        
-          cout << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;          
-          cout << "GAMBIT has exited with fatal exception: Piped_invalid_point::check() called inside an OpenMP block." << endl
+        {
+          cerr << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;
+          cerr << "GAMBIT has exited with fatal exception: Piped_invalid_point::check() called inside an OpenMP block." << endl
               << "Piped exceptions may be requested inside OpenMP blocks, but should only be checked outside the block." << endl;
           if (this->flag)
-            cout << "Invalid point message requested: " << endl << this->message;
-          else cout << "No invalid point requested." << endl;
+            cerr << "Invalid point message requested: " << endl << this->message;
+          else cerr << "No invalid point requested." << endl;
           #ifdef WITH_MPI
             GMPI::Comm().Abort();
           #else
             abort();
           #endif
-        }     
+        }
       }
     }
 
-    /// @{ SilentShutdownException member functions 
+    /// @{ SilentShutdownException member functions
     SilentShutdownException::SilentShutdownException() {}
     SilentShutdownException::SilentShutdownException(const std::string& message) : myWhat(message) {}
     const char* SilentShutdownException::what() const throw() { return myWhat.c_str(); }
     /// @}
 
-    /// @{ SoftShutdownException member functions 
+    /// @{ SoftShutdownException member functions
     SoftShutdownException::SoftShutdownException(const std::string& message) : myWhat(message) {}
     const char* SoftShutdownException::what() const throw() { return myWhat.c_str(); }
     /// @}
 
-    /// @{ HardShutdownException member functions 
+    /// @{ HardShutdownException member functions
     HardShutdownException::HardShutdownException(const std::string& message) : myWhat(message) {}
     const char* HardShutdownException::what() const throw() { return myWhat.c_str(); }
     /// @}
 
-    /// @{ MPIShutdownException member functions 
+    /// @{ MPIShutdownException member functions
     MPIShutdownException::MPIShutdownException(const std::string& message) : myWhat(message) {}
     const char* MPIShutdownException::what() const throw() { return myWhat.c_str(); }
     /// @}
 
     /// Global instance of piped invalid point class.
     Piped_invalid_point piped_invalid_point;
-        
+
     /// Request a piped exception.
     void Piped_exceptions::request(std::string origin, std::string message)
     {
@@ -537,13 +537,13 @@ namespace Gambit
     void Piped_exceptions::request(description desc)
     {
       this->request(desc.first, desc.second);
-    }    
+    }
 
     /// Check whether any exceptions were requested, and raise them.
     void Piped_exceptions::check(exception &excep)
     {
       if (omp_get_level()==0) // If not in an OpenMP parallel block, throw onwards
-      {    
+      {
         if (this->flag)
         {
           // Raise all exceptions (only the first if they are fatal)
@@ -552,41 +552,41 @@ namespace Gambit
             excep.raise(exceptions.at(i).first, exceptions.at(i).second);
           }
           // Reset
-          this->flag = false;          
+          this->flag = false;
           exceptions.clear();
         }
       }
       else
       {
         #pragma omp critical (GAMBIT_exception)
-        {        
-          cout << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;          
-          cout << "GAMBIT has exited with fatal exception: Piped_exceptions::check() called inside an OpenMP block." << endl
+        {
+          cerr << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;
+          cerr << "GAMBIT has exited with fatal exception: Piped_exceptions::check() called inside an OpenMP block." << endl
               << "Piped exceptions may be requested inside OpenMP blocks, but should only be checked outside the block." << endl;
           if (this->flag)
           {
-            cout << "Exceptions stored: " << endl << endl;
+            cerr << "Exceptions stored: " << endl << endl;
             for(size_t i= 0; i < std::min(exceptions.size(),maxExceptions); i++)
             {
-              cout << exceptions.at(i).second << endl
+              cerr << exceptions.at(i).second << endl
                    << "\nRaised at: " << exceptions.at(i).first << "." << endl << endl;
             }
           }
-          else cout << "No exceptions stored." << endl;
+          else cerr << "No exceptions stored." << endl;
           #ifdef WITH_MPI
             GMPI::Comm().Abort();
           #else
             abort();
           #endif
-        }     
+        }
       }
     }
-    
+
     /// Check whether any exceptions were requested without handling them.
     bool Piped_exceptions::inquire()
     {
       return this->flag;
-    }    
+    }
 
     /// Global instance of Piped_exceptions class for errors.
     Piped_exceptions piped_errors(1000);
