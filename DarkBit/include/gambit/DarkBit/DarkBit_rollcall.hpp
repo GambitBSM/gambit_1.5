@@ -600,19 +600,21 @@ START_MODULE
 
   // Generalized v^2n, q^2n DM-nucleon cross sections Norway
   #define CAPABILITY sigma_SI_p
-      #define FUNCTION sigma_SI_vnqn
+      #define FUNCTION sigma_SI_vnqn_FermionDMHiggsPortal
       START_FUNCTION(map_intpair_dbl)
       DEPENDENCY(mwimp,double)
+      DEPENDENCY(DD_couplings,DM_nucleon_couplings)
     #undef FUNCTION
   #undef CAPABILITY
 
-    #define CAPABILITY sigma_SD_p
-    //Spin-dependent general v^2n q^2n cross section
-        #define FUNCTION sigma_SD_vnqn
-        START_FUNCTION(map_intpair_dbl)
-        DEPENDENCY(mwimp,double)
-      #undef FUNCTION
-    #undef CAPABILITY
+  #define CAPABILITY sigma_SD_p
+  //Spin-dependent general v^2n q^2n cross section
+      #define FUNCTION sigma_SD_vnqn_FermionDMHiggsPortal
+      START_FUNCTION(map_intpair_dbl)
+      DEPENDENCY(mwimp,double)
+      DEPENDENCY(DD_couplings,DM_nucleon_couplings)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   // Likelihoods for nuclear parameters:
   #define CAPABILITY lnL_SI_nuclear_parameters

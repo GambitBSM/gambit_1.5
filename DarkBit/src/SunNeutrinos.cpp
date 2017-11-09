@@ -53,6 +53,8 @@ namespace Gambit
       result = BEreq::cap_Sun_v0q0_isoscalar(
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
       cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
+      cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
+
     }
 
     ///Alternative to the darkSusy fct, using captn_specific from capgen instead
@@ -69,6 +71,10 @@ namespace Gambit
       {
         result = maxcap;
       }
+
+      cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
+      cout << "capture rate via capture_rate_Sun_const_xsec_capgen = " << result << "\n";
+
     }
 
     ///Capture rate for v^n and q^n-dependent cross sections.
@@ -130,6 +136,9 @@ namespace Gambit
       {
         result = maxcap;
       }
+
+      cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
+
     }
 
     /*! \brief Equilibration time for capture and annihilation of dark matter
