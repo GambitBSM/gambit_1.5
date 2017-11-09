@@ -317,7 +317,7 @@ Rules:
        VZdecay: 1 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations
        VWdecay: 1 # 0 - no 3 body final states, 1 - virtual W in annihilations, 2 - virtual W in coannihilations
 
-  # Use DarkSUSY, MicrOmegas or the DarkBit native calculator (not recommended) for the relic density?
+  # Use DarkSUSY (not recommended), MicrOmegas or the DarkBit native calculator for the relic density?
   # Consult the DarkBit manual for the required options in each case
   - capability: RD_oh2
     function: RD_oh2_general
