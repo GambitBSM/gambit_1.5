@@ -247,6 +247,32 @@ namespace Gambit {
       double reduced_mass = *Dep::mwimp * m_neutron / (*Dep::mwimp + m_neutron);
       result = 3.0*gev2cm2/pi*pow(reduced_mass*gna,2.0);
     }
+    /// Spin-independent generalized DM-nucleon cross section
+    void sigma_SI_vnqn(map_intpair_dbl &result)
+    {
+      using namespace Pipes::sigma_SI_vnqn;
+      //This is where you would stick in your functions
+      result[std::make_pair(0,0)] =   0e-35;
+      result[std::make_pair(-2,0)] =  1e-35;
+      result[std::make_pair(2,0)] =   0e-35;
+      result[std::make_pair(4,0)] =   0e-35;
+      result[std::make_pair(0,-2)] =  1e-35;
+      result[std::make_pair(0,2)] =   0e-35;
+      result[std::make_pair(0,4)] =   0e-35;
+    }
+    /// Spin-dependent generalized DM-nucleon cross section
+    void sigma_SD_vnqn(map_intpair_dbl &result)
+    {
+      using namespace Pipes::sigma_SD_vnqn;
+      //This is where you would stick in your functions
+      result[std::make_pair(0,0)] =   1e-40;
+      result[std::make_pair(-2,0)] =  0e-35;
+      result[std::make_pair(2,0)] =   0e-35;
+      result[std::make_pair(4,0)] =   0e-35;
+      result[std::make_pair(0,-2)] =  0e-35;
+      result[std::make_pair(0,2)] =   0e-35;
+      result[std::make_pair(0,4)] =   0e-35;
+    }
 
     /// Simple calculator of the scalar-pseudoscalar WIMP-proton cross-section,
     /// evaluated at a typical momentum transfer q0.
