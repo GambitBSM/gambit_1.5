@@ -11,19 +11,16 @@
 ///  \author Selim C. Hotinli
 ///          selim.hotinli14@imperial.ac.uk
 ///  \date 2017 Jul
-///
+///  \date 2017 Oct
 ///  *************************
 
 #include "gambit/Utils/util_types.hpp"
 
-#ifndef __class_types_hpp__
-#define __class_types_hpp__
+#ifndef __class__hpp__
+#define __class__hpp__
 
 namespace Gambit
 {
-	namespace class_2_6
-	{
-		#include "class_2_6_1/class.h"
-	}
+	#include "class_types/class.h"
 }
-#endif // defined __class_types_hpp__
+#endif // defined __class_hpp__

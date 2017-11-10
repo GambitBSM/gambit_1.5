@@ -11,13 +11,13 @@
 ///  \author Selim C. Hotinli
 ///          selim.hotinli14@imperial.ac.uk
 ///  \date 2017 June
-///
+///  \date 2017 Oct
 ///  *************************
 
 #include "gambit/Utils/util_types.hpp"
 
-#ifndef __MultiModeCode_types_hpp__
-#define __MultiModeCode_types_hpp__
+#ifndef __MultiModeCode_hpp__
+#define __MultiModeCode_hpp__
 
 namespace Gambit
 {
@@ -44,4 +44,4 @@ namespace Gambit
 
 }
 
-#endif // defined __MultiModeCode_types_hpp__
+#endif // defined __MultiModeCode_hpp__

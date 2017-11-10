@@ -11,13 +11,13 @@
 ///  \author Selim C. Hotinli
 ///          selim.hotinli14@imperial.ac.uk
 ///  \date 2017 Jul
-///
+///  \date 2017 Oct
 ///  *************************
 
 #include "gambit/Utils/util_types.hpp"
 
-#ifndef __plc_types_hpp__
-#define __plc_types_hpp__
+#ifndef __plc_hpp__
+#define __plc_hpp__
 
 namespace Gambit
 {
@@ -49,4 +49,4 @@ namespace Gambit
 	typedef int int_6[6];
 }
 
-#endif // defined __plc_types_hpp__
+#endif // defined __plc_hpp__
