@@ -67,7 +67,7 @@ namespace Gambit
       BEreq::cap_sun_saturation(*Dep::mwimp,maxcap);
       BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
       result = resultSI + resultSD;
-      if (maxcap > result)
+      if (maxcap < result)
       {
         result = maxcap;
       }
