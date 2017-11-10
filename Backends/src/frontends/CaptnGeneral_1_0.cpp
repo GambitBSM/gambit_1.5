@@ -19,8 +19,8 @@
 // Capgen Initialisation function (definition)
 BE_INI_FUNCTION
 {
-    double rho0  = *Param["rho0"];
-    double v0  = *Param["v0"];
+    double rho0  = *Param["rho0"]*(*Dep::RD_fraction);
+    double v0    = *Param["v0"];
     double vsun  = *Param["vrot"];
     double vesc  = *Param["vesc"];
 

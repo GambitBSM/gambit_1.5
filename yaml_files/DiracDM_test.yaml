@@ -40,7 +40,7 @@ Parameters:
     mH: 125
 
   DiracDM:
-    mF: 250
+    mF: 250.
     lF: 1e-2
     cosXI: 1.0
 
@@ -55,7 +55,7 @@ Parameters:
     rho0: 0.4
     v0: 220.0
     vrot: 220.0
-    vesc: 544.0
+    vesc: 540.0
     rs: 20.0
     r_sun: 8.5
     alpha: 1
