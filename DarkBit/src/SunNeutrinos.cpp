@@ -52,8 +52,8 @@ namespace Gambit
       // assume that whichever backend has been hooked up here does so too.
       result = BEreq::cap_Sun_v0q0_isoscalar(
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
-      cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
-      cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
+      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
 
     }
 
@@ -72,8 +72,8 @@ namespace Gambit
         result = maxcap;
       }
 
-      cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
-      cout << "capture rate via capture_rate_Sun_const_xsec_capgen = " << result << "\n";
+      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_const_xsec_capgen = " << result << "\n";
 
     }
 
@@ -137,7 +137,7 @@ namespace Gambit
         result = maxcap;
       }
 
-      cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
 
     }
 

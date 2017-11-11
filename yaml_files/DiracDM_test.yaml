@@ -151,9 +151,9 @@ Rules:
 
   # Choose where to take the capture rate from
   - capability: capture_rate_Sun
-    # function: capture_rate_Sun_const_xsec
-    function: capture_rate_Sun_const_xsec_capgen
-    # function: capture_rate_Sun_vnqn
+    function: capture_rate_Sun_const_xsec
+    #function: capture_rate_Sun_const_xsec_capgen
+    #function: capture_rate_Sun_vnqn
     module: DarkBit
 
 ##############################################################################################
