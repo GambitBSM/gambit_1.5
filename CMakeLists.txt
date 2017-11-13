@@ -212,9 +212,10 @@ else()
 endif()
 
 # Check for Mathematica
-if(itch STREQUAL Mathematica)
+string(REGEX MATCH ";M;|;Ma;|;Mat;|;Math;|;Mathe;|;Mathem;|;Mathema;|;Mathemat;|;Mathemati;|;Mathematic;|;Mathematica" DITCH_MATHEMATICA ";${itch};")
+if(DITCH_MATHEMATICA)
   set(HAVE_MATHEMATICA 0)
-  message("${BoldRed}   Mathematica support ditched. All backends using Mathematica will be disabled${ColourReset}")
+  message("${BoldCyan} X Excluding Mathematica from GAMBIT configuration. All backends using Mathematica will be disabled${ColourReset}")
 else()
   find_library(LIBUUID NAMES uuid)
   if(LIBUUID)
