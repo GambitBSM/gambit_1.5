@@ -3415,6 +3415,21 @@ class_transfer_initialize: |
    This routine initializes the transfers structure,
    (in particular, computes table of transfer functions).
 
+class_free: |
+   This routine is a convenience function to call all class_xxx_free at once.
+   The meory space allocated by the xxx_init-routines are free'd.
+   (Not used as of now)
+
+class_get_spectra: |
+   Returns a pointer to the CMB-spectra C_xx[l], where 
+   xx = [TT, TE, EE, phiphi, ...].
+
+class_run: |
+   This routine runs CLASS (invokes all xxx_init() in the right order.
+
+class_set_parameter: |
+   This routine initializes the input of CLASS.
+
 #----------------------------
 #  CosmoBitDEV
 #----------------------------
