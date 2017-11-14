@@ -3,6 +3,9 @@
 ##
 ## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
 ## 2016-17
+##
+## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
+## 2017, Nov
 ##########################################################################
 
 
@@ -100,7 +103,7 @@ Scanner:
       aux_printer_txt_options:
       aux_printer_stats_options:
       aux_printer_live_options:
-            
+
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      Likelihood
@@ -110,7 +113,17 @@ ObsLikes:
 
 #======== Rule entries ========
 Rules:
-  #no rules at this point
+
+### Use this to use CosmoBit the old way
+#  - capability: compute_vanilla_lowp_TT_loglike
+#    function: function_vanilla_lowp_TT_loglike
+#    module: CosmoBit
+
+### Use this when you want to use CosmoBit the new way
+  - capability: compute_vanilla_lowp_TT_loglike
+    function: function_strawberry_lowp_TT_loglike
+    module: CosmoBit
+
 #======== Logging setup ========
 Logger:
   redirection:
