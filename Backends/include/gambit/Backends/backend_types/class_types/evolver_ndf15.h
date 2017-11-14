@@ -3,7 +3,7 @@
 #include "common.h"
 // #include "perturbations.h"
 #include "sparse.h"
-#define TINY 1e-50
+//#define TINY 1e-50
 /**************************************************************/
 
 struct jacobian{
