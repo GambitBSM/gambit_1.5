@@ -210,9 +210,9 @@ namespace Gambit
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0;
       Eigen::Matrix3d Epsilon;
-      Epsilon << 1e-15, 1e-15, 1e-15,
-                 1e-15, 1e-15, 1e-15,
-                 1e-15, 1e-15, 1e-15;
+      Epsilon << 1e-08, 1e-08, 1e-08,
+                 1e-08, 1e-08, 1e-08,
+                 1e-08, 1e-08, 1e-08;
 
       Eigen::Matrix3cd Norm = Dep::UPMNS->adjoint() * *Dep::UPMNS;
       unitarity = true;
@@ -241,9 +241,9 @@ namespace Gambit
             0.0, 1.0, 0.0,
             0.0, 0.0, 1.0;
       Eigen::Matrix3d Epsilon;
-      Epsilon << 1e-10, 1e-10, 1e-10,
-                 1e-10, 1e-10, 1e-10,
-                 1e-10, 1e-10, 1e-10;
+      Epsilon << 1e-08, 1e-08, 1e-08,
+                 1e-08, 1e-08, 1e-08,
+                 1e-08, 1e-08, 1e-08;
 
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
@@ -253,12 +253,13 @@ namespace Gambit
       unitarity = true;
       for(int i = 0; i < 3; i++)
         for(int j = 0; j < 3; j++)
-          if(std::abs(Norm(i,j) - Id(i,j)) > Epsilon(i,j))
+          if(std::norm(Norm(i,j) - Id(i,j)) > Epsilon(i,j))
             unitarity = false;
 
       if(!unitarity)
         return ;
 
+      unitarity = true;
       Eigen::Matrix3d MN;
       MN << *Param["M_1"], 0.0, 0.0,
             0.0, *Param["M_2"], 0.0,
