@@ -1,0 +1,12 @@
+diff -rupN ./HiggsSignals.F90 ../../installed/higgssignals/1.4.0/HiggsSignals.F90
+--- ./HiggsSignals.F90	2015-07-24 15:23:34.000000000 -0400
++++ ../../installed/higgssignals/1.4.0/HiggsSignals.F90	2017-11-16 13:17:24.000000000 -0500
+@@ -36,7 +36,7 @@ program HiggsSignals
+  elseif(runmode.eq.'both') then
+   mode = 3
+  else
+-  stop"Error: runmode is unknown. Please specify as peak, mass or both." 
++  stop "Error: runmode is unknown. Please specify as peak, mass or both." 
+  endif
+  
+  call run_HiggsSignals( mode, Chisq_mu, Chisq_mh, Chisq, ndf, Pvalue)
