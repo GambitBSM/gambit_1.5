@@ -10,7 +10,7 @@
 ///
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
-///  \date 2013 Apr
+///  \date 2013 Apr++
 ///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@monash.edu)
@@ -63,6 +63,7 @@ namespace Gambit
 
   // Useful unqualified functions
   using std::cout;
+  using std::cerr;
   using std::endl;
 
   // A simple triplet class for holding a central value and aysmmetric +/- variations
