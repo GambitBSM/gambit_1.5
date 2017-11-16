@@ -613,7 +613,6 @@ set(lib "libhiggssignals")
 set(dl "https://www.hepforge.org/archive/higgsbounds/HiggsSignals-${ver}.tar.gz")
 set(md5 "537d3885b1cbddbe1163dbc843ec2beb")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(hb_name "higgsbounds")
 set(hb_ver "4.3.1")
 check_ditch_status(${name} ${ver})
@@ -622,7 +621,6 @@ if(NOT ditched_${name}_${ver})
     DEPENDS higgsbounds_${hb_ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy configure my_configure
               COMMAND sed ${dashi} -e "s|HBLIBS =.*|HBLIBS =-L../../${hb_name}/${hb_ver}|" my_configure
