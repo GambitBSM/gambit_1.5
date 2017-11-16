@@ -18,6 +18,9 @@
 ///  \author Pat Scott
 ///  \date 2016 Nov
 ///
+///  \author Jonathan Cornell
+///  \date 2016-2017
+///
 ///  *********************************************
 
 #include "gambit/Elements/standalone_module.hpp"
@@ -71,7 +74,7 @@ namespace Gambit
     // Create SLHA1 pseudonyms from Spectrum object
     void createSLHA1Names(mass_es_pseudonyms& names)
     {
-      const double gauge_mixing_tol = 1e-2;
+      const double gauge_mixing_tol = 0.5;
       const bool tol_invalidates_pt = true;
       const bool debug = false;
       names.refill(Pipes::createSLHA1Names::Dep::MSSM_spectrum->get_HE(), gauge_mixing_tol, tol_invalidates_pt, debug);
