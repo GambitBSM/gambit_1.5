@@ -209,8 +209,8 @@ MSSM16atQ: |
    SignMu                     - the sign of the mu parameter
    TanBeta                    - the ratio of the up-type to down-type Higgs vevs
    mHd2, mHu2                 - Higgs mass parameters
-   me2_3, ml2_3, mu2_3, md2_3 - third generation diagonal elements of the squark and slepton mass (squared) matrices
-   ml2_12, mq2_12             - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{e,l,q,u,d}2_3            - third generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{l,q}2_12,                - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
 
 MSSM16atQ_mA: |
    As per the MSSM16atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
@@ -226,8 +226,8 @@ MSSM15atQ: |
    SignMu                     - the sign of the mu parameter
    TanBeta                    - the ratio of the up-type to down-type Higgs vevs
    mHd2, mHu2                 - Higgs mass parameters
-   me2_3, ml2_3, mu2_3, md2_3 - third generation diagonal elements of the squark and slepton mass (squared) matrices
-   ml2_12, mq2_12             - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{e,l,q,u,d}2_3            - third generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{l,q}2_12,                - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
 
 MSSM15atQ_mA: |
    As per the MSSM15atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
@@ -318,16 +318,16 @@ MSSM9atQ_mA: |
 
 MSSM9batQ: |
 
-   As per the MSSM11atQ, but with universal sfermion masses and no sleptonic trilinear couplings. This leaves:
+   As per the MSSM15atQ, but with universal sfermion masses except for left-handed 3rd-generation squarks, and only a top-type trilinear coupling. This leaves:
 
-   Ad_3                       - only non-zero element of the A_d trilinear coupling matrix
    Au_3                       - only non-zero element of the A_u trilinear coupling matrix
    M1, M2, M3                 - gaugino masses
    Qin                        - the scale at which the parameters are defined
    SignMu                     - the sign of the mu parameter
    TanBeta                    - the ratio of the up-type to down-type Higgs vevs
    mHd2, mHu2                 - Higgs mass parameters
-   mf2                        - all diagonal elements of squark and slepton mass (squared) matrices
+   mq2_3                      - third-generation diagonal element of mq^2 matrix (left-handed squarks)
+   mf2                        - all other diagonal elements of squark and slepton mass (squared) matrices
 
 MSSM9batQ_mA: |
    As per the MSSM9batQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
