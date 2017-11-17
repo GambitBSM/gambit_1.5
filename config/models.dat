@@ -220,7 +220,7 @@ MSSM15atQ: |
    As per the MSSM16atQ, but with down-type and sleptonic trilinear couplings degenerate. This leaves:
 
    A0                         - Ad_33 = Ae_33 = A0 (diagonal element of trilinear coupling matrices for the down-type squarks and sleptons)
-   At                         - only non-zero element of the A_u trilinear coupling matrix
+   Au_3                       - only non-zero element of the A_u trilinear coupling matrix
    M1, M2, M3                 - gaugino masses
    Qin                        - the scale at which the parameters are defined
    SignMu                     - the sign of the mu parameter
