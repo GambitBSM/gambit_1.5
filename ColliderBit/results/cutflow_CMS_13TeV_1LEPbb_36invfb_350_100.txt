@@ -1,0 +1,33 @@
+\begin{table}[H] 
+\caption{$\tilde{\chi}_{1}^{\pm}\tilde{\chi}_{2}^{0}$ decay via $W/h, [\tilde{\chi}_{2}^{0}\tilde{\chi}_{1}^{\pm},\tilde{\chi}_{1}^{0}]: [350,100] [GeV]$} 
+\makebox[\linewidth]{ 
+\renewcommand{\arraystretch}{0.4} 
+\begin{tabular}{c c c c c} 
+\hline
+& CMS & GAMBIT & GAMBIT/CMS & $\sigma$-corrected GAMBIT/CMS \\ \hline
+$\sigma (pp\to \tilde{\chi}_{1}^{\pm}, \tilde{\chi}_{2}^{0})$ &209.4 $fb$ &160.2$fb$ &0.7648 & 1\\ \hline
+\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\ \hline
+All events&1309&5750&4.392&5.742\\
+$\geq$ 1 signal lepton; $E_{T}^{miss} > 50 GeV$&328.1&604.6&1.843&2.409\\
+2nd lepton veto&316.6&604.6&1.91&2.497\\
+Tau veto&315.3&577.2&1.831&2.394\\
+2 jets&162.9&208&1.277&1.669\\
+2 bjets&74.9&75.21&1.004&1.313\\
+$90 < m_{bb} < 150 GeV$&65.6&64.49&0.9831&1.285\\
+$m_{CT} > 170 GeV$&26.7&21.87&0.819&1.071\\
+$E_{T}^{miss} > 125 GeV$&22.9&18.55&0.8102&1.059\\
+$m_{T} > 150 GeV$&10.7&8.182&0.7647&0.9998\\
+\hline \multicolumn{5}{c}{Percentage (\%)} \\ \hline
+All events&399&951& - & -\\
+$\geq$ 1 signal lepton; $E_{T}^{miss} > 50 GeV$&100&100& - & -\\
+2nd lepton veto&96.49&100& - & -\\
+Tau veto&96.1&95.47& - & -\\
+2 jets&49.65&34.4& - & -\\
+2 bjets&22.83&12.44& - & -\\
+$90 < m_{bb} < 150 GeV$&19.99&10.67& - & -\\
+$m_{CT} > 170 GeV$&8.138&3.617& - & -\\
+$E_{T}^{miss} > 125 GeV$&6.98&3.069& - & -\\
+$m_{T} > 150 GeV$&3.261&1.353& - & -\\
+\end{tabular} 
+} 
+\end{table}

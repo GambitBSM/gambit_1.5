@@ -77,7 +77,7 @@ namespace Gambit
       catch (std::exception& e) { ini_catch(e); }
       return result;
     }
-    
+
     /// Provide the factory pointer to a BOSSed type's wrapper constructor.
     template <typename T>
     T handover_factory_pointer(str be, str ver, str name, str barename, 

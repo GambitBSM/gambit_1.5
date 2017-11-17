@@ -38,6 +38,7 @@
 ///  *********************************************
 
 #define BACKENDNAME DarkSUSY
+#define BACKENDLANG FORTRAN
 #define VERSION 5.1.3
 #define SAFE_VERSION 5_1_3
 

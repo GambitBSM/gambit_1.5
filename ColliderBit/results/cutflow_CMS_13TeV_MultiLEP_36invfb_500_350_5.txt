@@ -1,0 +1,33 @@
+\begin{table}[H] 
+\caption{$\tilde{\chi}_{1}^{\pm}\tilde{\chi}_{2}^{0}$ decay via $\tilde{l}/\tilde{\nu}$ (flavor-democratic), $[\tilde{\chi}_{1}^{\pm}\tilde{\chi}_{2}^{0},\tilde{\chi}_{1}^{0},\tilde{l}]: [500,350,425] [GeV]$} 
+\makebox[\linewidth]{ 
+\renewcommand{\arraystretch}{0.4} 
+\begin{tabular}{c c c c c} 
+\hline
+& CMS & GAMBIT & GAMBIT/CMS & $\sigma$-corrected GAMBIT/CMS \\ \hline
+$\sigma (pp\to \tilde{\chi}_{1}^{\pm}, \tilde{\chi}_{2}^{0})$ &46 $fb$ &35.53$fb$ &0.7723 & 1\\ \hline
+\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\ \hline
+All events&632.2&1275&2.017&2.612\\
+2 light leptons&485.3&220.1&0.4535&0.5872\\
+Same-sign&128.6&56.34&0.4381&0.5673\\
+$3^{rd}$ lepton veto&50.24&52.7&1.049&1.358\\
+Low mass veto&49.86&52.7&1.057&1.369\\
+Bjet veto&48.12&52.7&1.095&1.418\\
+$E_{T}^{miss} > 60 GeV$&38.92&42.11&1.082&1.401\\
+0 or 1 ISR jet&29.72&32.42&1.091&1.413\\
+$m_{T} < 100 GeV$&15.17&15.82&1.043&1.35\\
+$p_{T}^{ll} > 100 GeV$&2.84&2.931&1.032&1.336\\
+\hline \multicolumn{5}{c}{Percentage (\%)} \\ \hline
+All events&130.3&579.5& - & -\\
+2 light leptons&100&100& - & -\\
+Same-sign&26.49&25.6& - & -\\
+$3^{rd}$ lepton veto&10.35&23.95& - & -\\
+Low mass veto&10.27&23.95& - & -\\
+Bjet veto&9.915&23.95& - & -\\
+$E_{T}^{miss} > 60 GeV$&8.019&19.13& - & -\\
+0 or 1 ISR jet&6.124&14.73& - & -\\
+$m_{T} < 100 GeV$&3.126&7.188& - & -\\
+$p_{T}^{ll} > 100 GeV$&0.5852&1.332& - & -\\
+\end{tabular} 
+} 
+\end{table}

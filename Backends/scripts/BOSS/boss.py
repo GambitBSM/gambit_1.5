@@ -193,7 +193,7 @@ def main():
     # If additional include paths are given at the command line,
     # add them to the list given in cfg.
     if options.cmdline_include_paths:
-        cfg.include_paths = options.cmdline_include_paths + cfg.include_paths
+        cfg.include_paths = cfg.include_paths + options.cmdline_include_paths
 
 
     #

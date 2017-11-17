@@ -16,7 +16,7 @@
 \RequirePackage{xstring}%
 \RequirePackage{calc}%
 \RequirePackage{pgfopts}%
-\usetikzlibrary{backgrounds,arrows,shapes,fit,shadows,decorations.markings}%
+\usetikzlibrary{backgrounds,arrows,shapes,fit,shadows,decorations.markings,math}%
 
 \def\tikzumlPackageLayersNum{3}%
 \pgfkeys{/tikzuml/options/.cd, packageLayers/.initial=3}%
@@ -626,7 +626,11 @@
   \setcounter{posT}{100*\real{\positionT}}%
   \setcounter{posStereo}{100*\real{\positionStereotype}}%
   %
-  \pgfmathsetmacro{\weightT}{1-\real{\weight}}%
+  % \pgfmathsetmacro{\weightT}{1-\real{\weight}}%
+  \tikzmath{%
+      real \weightT;%
+      \weightT = 1 - real \weight;%
+  }%
   %
   \def\tikzumlControlNodesNum{0}%
   %

@@ -1,0 +1,39 @@
+\begin{table}[H] 
+\caption{$\tilde{\chi}_{1}^{\pm}\tilde{\chi}_{2}^{0}$ decay via $W/Z, [\tilde{\chi}_{2}^{0}\tilde{\chi}_{1}^{\pm},\tilde{\chi}_{1}^{0}]: [550,200] [GeV]$} 
+\makebox[\linewidth]{ 
+\renewcommand{\arraystretch}{0.4} 
+\begin{tabular}{c c c c c} 
+\hline
+& CMS & GAMBIT & GAMBIT/CMS & $\sigma$-corrected GAMBIT/CMS \\ \hline
+$\sigma (pp\to \tilde{\chi}_{1}^{\pm}, \tilde{\chi}_{2}^{0})$ &30.2 $fb$ &23.14$fb$ &0.7661 & 1\\ \hline
+\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\ \hline
+All events&109.3&830.6&7.596&9.915\\
+$\geq$ 2 SFOS leptons with (sub)leading $p_{T} > 25(20) GeV$&24.21&32.11&1.326&1.731\\
+Extra lepton vetos&18.37&24.6&1.339&1.748\\
+$86 < m_{ll} < 96 GeV$&14.13&18.43&1.304&1.702\\
+2-3 Jets&11.98&10.84&0.9047&1.181\\
+$\Delta\Phi(E^{miss}_{T},j_{0}),\Delta\Phi(E^{miss}_{T},j_{1}) > 0.4$&10.95&10.1&0.9225&1.204\\
+Btag veto&9.92&10.1&1.018&1.329\\
+$M_{T2}(ll) > 80 GeV$&8.04&7.751&0.964&1.258\\
+$M_{jj}$ for min $\Delta\Phi$ jets $< 150 GeV$&5.62&5.619&0.9999&1.305\\
+$E^{miss}_{T} > 100 GeV$&5.41&5.404&0.9989&1.304\\
+$E^{miss}_{T} > 150 GeV$&4.96&4.97&1.002&1.308\\
+$E^{miss}_{T} > 250 GeV$&3.59&3.514&0.979&1.278\\
+$E^{miss}_{T} > 350 GeV$&1.94&1.755&0.9047&1.181\\
+\hline \multicolumn{5}{c}{Percentage (\%)} \\ \hline
+All events&451.7&2587& - & -\\
+$\geq$ 2 SFOS leptons with (sub)leading $p_{T} > 25(20) GeV$&100&100& - & -\\
+Extra lepton vetos&75.88&76.63& - & -\\
+$86 < m_{ll} < 96 GeV$&58.36&57.39& - & -\\
+2-3 Jets&49.48&33.76& - & -\\
+$\Delta\Phi(E^{miss}_{T},j_{0}),\Delta\Phi(E^{miss}_{T},j_{1}) > 0.4$&45.23&31.46& - & -\\
+Btag veto&40.97&31.46& - & -\\
+$M_{T2}(ll) > 80 GeV$&33.21&24.14& - & -\\
+$M_{jj}$ for min $\Delta\Phi$ jets $< 150 GeV$&23.21&17.5& - & -\\
+$E^{miss}_{T} > 100 GeV$&22.35&16.83& - & -\\
+$E^{miss}_{T} > 150 GeV$&20.49&15.48& - & -\\
+$E^{miss}_{T} > 250 GeV$&14.83&10.95& - & -\\
+$E^{miss}_{T} > 350 GeV$&8.013&5.466& - & -\\
+\end{tabular} 
+} 
+\end{table}

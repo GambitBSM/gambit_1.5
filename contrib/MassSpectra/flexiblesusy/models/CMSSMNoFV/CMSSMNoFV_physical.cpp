@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:16
+// File generated at Sun 24 Sep 2017 16:14:32
 
 #include "CMSSMNoFV_physical.hpp"
 #include "slha_io.hpp"
@@ -26,33 +26,6 @@
 #define LOCALPHYSICAL(p) p
 
 namespace flexiblesusy {
-
-CMSSMNoFV_physical::CMSSMNoFV_physical()
-   :
-    MVG(0), MGlu(0), MFd(0), MFs(0), MFb(0), MFu(0), MFc(0), MFt(0), MFve(0),
-       MFvm(0), MFvt(0), MFe(0), MFm(0), MFtau(0), MSveL(0), MSvmL(0), MSvtL(0),
-       MSd(Eigen::Array<double,2,1>::Zero()), MSu(Eigen::Array<double,2,1>::Zero()
-       ), MSe(Eigen::Array<double,2,1>::Zero()), MSm(Eigen::Array<double,2,1>
-       ::Zero()), MStau(Eigen::Array<double,2,1>::Zero()), MSs(Eigen::Array<double
-       ,2,1>::Zero()), MSc(Eigen::Array<double,2,1>::Zero()), MSb(Eigen::Array<
-       double,2,1>::Zero()), MSt(Eigen::Array<double,2,1>::Zero()), Mhh(
-       Eigen::Array<double,2,1>::Zero()), MAh(Eigen::Array<double,2,1>::Zero()),
-       MHpm(Eigen::Array<double,2,1>::Zero()), MChi(Eigen::Array<double,4,1>::Zero
-       ()), MCha(Eigen::Array<double,2,1>::Zero()), MVWm(0), MVP(0), MVZ(0)
-
-   , ZD(Eigen::Matrix<double,2,2>::Zero()), ZU(Eigen::Matrix<double,2,2>::Zero(
-      )), ZE(Eigen::Matrix<double,2,2>::Zero()), ZM(Eigen::Matrix<double,2,2>
-      ::Zero()), ZTau(Eigen::Matrix<double,2,2>::Zero()), ZS(Eigen::Matrix<double,
-      2,2>::Zero()), ZC(Eigen::Matrix<double,2,2>::Zero()), ZB(Eigen::Matrix<
-      double,2,2>::Zero()), ZT(Eigen::Matrix<double,2,2>::Zero()), ZH(
-      Eigen::Matrix<double,2,2>::Zero()), ZA(Eigen::Matrix<double,2,2>::Zero()),
-      ZP(Eigen::Matrix<double,2,2>::Zero()), ZN(Eigen::Matrix<std::complex<double>
-      ,4,4>::Zero()), UM(Eigen::Matrix<std::complex<double>,2,2>::Zero()), UP(
-      Eigen::Matrix<std::complex<double>,2,2>::Zero()), ZZ(Eigen::Matrix<double,2,
-      2>::Zero())
-
-{
-}
 
 void CMSSMNoFV_physical::clear()
 {
@@ -474,6 +447,8 @@ void CMSSMNoFV_physical::print(std::ostream& ostr) const
    ostr << "MChi = " << MChi.transpose() << '\n';
    ostr << "MCha = " << MCha.transpose() << '\n';
    ostr << "MVWm = " << MVWm << '\n';
+   ostr << "MVP = " << MVP << '\n';
+   ostr << "MVZ = " << MVZ << '\n';
 
    ostr << "----------------------------------------\n"
            "pole mass mixing matrices:\n"

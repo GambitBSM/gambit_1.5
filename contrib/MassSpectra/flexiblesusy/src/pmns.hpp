@@ -24,15 +24,14 @@
 namespace flexiblesusy {
 
 struct PMNS_parameters {
-   PMNS_parameters();
-
    void reset_to_diagonal();
    void reset_to_observation();
 
    Eigen::Matrix<double,3,3> get_real_pmns() const;
    Eigen::Matrix<std::complex<double>,3,3> get_complex_pmns() const;
 
-   double theta_12, theta_13, theta_23, delta, alpha_1, alpha_2;
+   double theta_12{0.}, theta_13{0.}, theta_23{0.},
+      delta{0.}, alpha_1{0.}, alpha_2{0.};
 };
 
 } // namespace flexiblesusy
