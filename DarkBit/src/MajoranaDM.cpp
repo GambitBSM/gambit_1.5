@@ -13,6 +13,10 @@
 ///  \date Oct 2016
 ///  \date Jun, Sep 2017
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date Nov 2017
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -27,6 +31,154 @@ namespace Gambit
 
   namespace DarkBit
   {
+  
+    class MajoranaDM
+    {
+      public:
+        /// Initialize SingletDM object (branching ratios etc)
+        MajoranaDM(
+            TH_ProcessCatalog* const catalog,
+            double gammaH,
+            double vev,
+            double alpha_strong)
+        : Gamma_mh(gammaH), v0 (vev),
+          alpha_s (alpha_strong)
+        {
+          mh   = catalog->getParticleProperty("h0_1").mass;
+          mb   = catalog->getParticleProperty("d_3").mass;
+          mc   = catalog->getParticleProperty("u_2").mass;
+          mtau = catalog->getParticleProperty("e-_3").mass;
+          mt   = catalog->getParticleProperty("u_3").mass;
+          mZ0  = catalog->getParticleProperty("Z0").mass;
+          mW   = catalog->getParticleProperty("W+").mass;
+        };
+        ~MajoranaDM() {}
+
+        /// Helper function (Breit-Wigner)
+        double Dh2 (double s)
+        {
+          return 1/((s-mh*mh)*(s-mh*mh)+mh*mh*Gamma_mh*Gamma_mh);
+        }
+
+        /*! \brief Returns <sigma v> in cm3/s for given channel, velocity and
+         *         model parameters.
+         *
+         * channel: bb, tautau, mumu, ss, cc, tt, gg, gammagamma, Zgamma, WW,
+         * ZZ, hh
+         */
+        double sv(std::string channel, double lambda, double mass, double v)
+        {
+          // Note: Valid for mass > 45 GeV
+          double s = 4*mass*mass/(1-v*v/4);
+          double sqrt_s = sqrt(s);
+          if ( sqrt_s < 90 )
+          {
+            piped_invalid_point.request(
+                "MajoranaDM sigmav called with sqrt_s < 90 GeV.");
+            return 0;
+          }
+
+          if ( channel == "hh" )
+          {
+            if ( sqrt_s > mh*2 )
+            {
+              double GeV2tocm3s1 = gev2cm2*s2cm;
+              return sv_hh(lambda, mass, v)*GeV2tocm3s1;
+            }
+            else return 0;
+          }
+
+          if ( channel == "bb" and sqrt_s < mb*2 ) return 0;
+          if ( channel == "cc" and sqrt_s < mc*2  ) return 0;
+          if ( channel == "tautau" and sqrt_s < mtau*2 ) return 0;
+          if ( channel == "tt" and sqrt_s < mt*2 ) return 0;
+          if ( channel == "ZZ" and sqrt_s < mZ0*2) return 0;
+          if ( channel == "WW" and sqrt_s < mW*2) return 0;
+
+          if ( sqrt_s < 300 )
+          {
+            double br = virtual_SMHiggs_widths(channel,sqrt_s);
+            double Gamma_s = virtual_SMHiggs_widths("Gamma",sqrt_s);
+            double GeV2tocm3s1 = gev2cm2*s2cm;
+
+            // Explicitly close channel for off-shell top quarks
+            if ( channel == "tt" and sqrt_s < mt*2) return 0;
+
+            double res = 2*lambda*lambda*v0*v0/
+              sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
+            return res;
+          }
+          else
+          {
+            if ( channel == "bb" ) return sv_ff(lambda, mass, v, mb, true);
+            if ( channel == "cc" ) return sv_ff(lambda, mass, v, mc, false);
+            if ( channel == "tautau" ) return sv_ff(lambda, mass, v, mtau, false);
+            if ( channel == "tt" ) return sv_ff(lambda, mass, v, mt, false);
+            if ( channel == "ZZ" ) return sv_ZZ(lambda, mass, v);
+            if ( channel == "WW" ) return sv_WW(lambda, mass, v);
+          }
+          return 0;
+        }
+
+        // Annihilation into W bosons.
+        double sv_WW(double lambda, double mass, double v)
+        {
+          double s = 4*mass*mass/(1-v*v/4);
+          double x = pow(mW,2)/s;
+          double GeV2tocm3s1 = gev2cm2*s2cm;
+          return pow(lambda,2)*s/8/M_PI*sqrt(1-4*x)*Dh2(s)*(1-4*x+12*pow(x,2))
+            *GeV2tocm3s1;
+        }
+
+        // Annihilation into Z bosons.
+        double sv_ZZ(double lambda, double mass, double v)
+        {
+          double s = 4*mass*mass/(1-v*v/4);
+          double x = pow(mZ0,2)/s;
+          double GeV2tocm3s1 = gev2cm2*s2cm;
+          return pow(lambda,2)*s/16/M_PI*sqrt(1-4*x)*Dh2(s)*(1-4*x+12*pow(x,2))
+            * GeV2tocm3s1;
+        }
+
+        // Annihilation into fermions
+        double sv_ff(
+            double lambda, double mass, double v, double mf, bool is_quark)
+        {
+          double s = 4*mass*mass/(1-v*v/4);
+          double vf = sqrt(1-4*pow(mf,2)/s);
+          double Xf = 1;
+          if ( is_quark ) Xf = 3 *
+            (1+(3/2*log(pow(mf,2)/s)+9/4)*4*alpha_s/3/M_PI);
+          double GeV2tocm3s1 = gev2cm2*s2cm;
+          return pow(lambda,2)*
+            pow(mf,2)/4/M_PI*Xf*pow(vf,3) * Dh2(s) * GeV2tocm3s1;
+        }
+
+        /// Annihilation into hh
+        double sv_hh(double lambda, double mass, double v)
+        {
+          double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
+          double vh = sqrt(1-4*mh*mh/s);  // vh and vs are lab velocities
+          // Hardcoded lower velocity avoids nan results
+          double vs = std::max(v/2, 1e-6);
+          double tp = pow(mass,2)+pow(mh,2)-0.5*s*(1-vs*vh);
+          double tm = pow(mass,2)+pow(mh,2)-0.5*s*(1+vs*vh);
+
+          double aR = 1+3*mh*mh*(s-mh*mh)*Dh2(s);
+          double aI = 3*mh*mh*sqrt(s)*Gamma_mh*Dh2(s);
+
+          return pow(lambda,2)/16/M_PI/pow(s,2)/vs *
+            (
+             (pow(aR,2)+pow(aI,2))*s*vh*vs
+             +4*lambda*pow(v0,2)*(aR-lambda*pow(v0,2)/(s-2*pow(mh,2)))
+             *log(std::abs(pow(mass,2)-tp)/std::abs(pow(mass,2)-tm))
+             +(2*pow(lambda,2)*pow(v0,4)*s*vh*vs)
+             /(pow(mass,2)-tm)/(pow(mass,2)-tp));
+        }
+
+      private:
+        double Gamma_mh, mh, v0, alpha_s, mb, mc, mtau, mt, mZ0, mW;
+    };
 
     void DarkMatter_ID_MajoranaDM(std::string & result) { result = "X"; }
 

@@ -113,9 +113,9 @@ namespace Gambit
           else
           {
             if ( channel == "bb" ) return sv_ff(lambda, mass, v, mb, true);
-            if ( channel == "cc" ) return sv_ff(lambda, mass, v, mc, false);
+            if ( channel == "cc" ) return sv_ff(lambda, mass, v, mc, true);
             if ( channel == "tautau" ) return sv_ff(lambda, mass, v, mtau, false);
-            if ( channel == "tt" ) return sv_ff(lambda, mass, v, mt, false);
+            if ( channel == "tt" ) return sv_ff(lambda, mass, v, mt, true);
             if ( channel == "ZZ" ) return sv_ZZ(lambda, mass, v);
             if ( channel == "WW" ) return sv_WW(lambda, mass, v);
           }

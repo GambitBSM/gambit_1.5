@@ -388,16 +388,14 @@ START_MODULE
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_SingletDM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(decay_rates,DecayTable)
+      DEPENDENCY(decay_rates, DecayTable)
       DEPENDENCY(SingletDM_spectrum, Spectrum)
       ALLOW_MODELS(SingletDM)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_VectorDM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       DEPENDENCY(VectorDM_spectrum, Spectrum)
-      DEPENDENCY(DarkMatter_ID, std::string)
-      BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))
-      BACKEND_REQ(vSigmaCh, (), MicrOmegas::aChannel*)
+      DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(VectorDM)
     #undef FUNCTION  
     #define FUNCTION TH_ProcessCatalog_MajoranaDM
@@ -409,11 +407,9 @@ START_MODULE
       ALLOW_MODELS(MajoranaDM)
     #undef FUNCTION  
     #define FUNCTION TH_ProcessCatalog_DiracDM
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)      
+      START_FUNCTION(DarkBit::TH_ProcessCatalog)    
+      DEPENDENCY(decay_rates, DecayTable)  
       DEPENDENCY(DiracDM_spectrum, Spectrum)
-      DEPENDENCY(DarkMatter_ID, std::string)
-      BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))
-      BACKEND_REQ(vSigmaCh, (), MicrOmegas::aChannel*)
       ALLOW_MODELS(DiracDM)
     #undef FUNCTION    
   #undef CAPABILITY
