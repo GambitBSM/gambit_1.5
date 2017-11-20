@@ -265,7 +265,7 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 
@@ -276,7 +276,7 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY 

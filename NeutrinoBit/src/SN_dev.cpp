@@ -221,45 +221,42 @@ namespace Gambit
     void SN_m_GERDA(double &m_GERDA)
     {
       using namespace Pipes::SN_m_GERDA;
-      Matrix3cd m_light, U_light;
-      Matrix3d U_light_sq, t_sq;
-      std::vector<double> M(3), m_temp_GERDA(3);
+      Matrix3cd m_light, U_light, theta;
+      std::vector<double> M(3);
+      std::complex<double> m_temp_GERDA = {0.0,0.0};
+
       m_light = *Dep::m_nu;
       U_light = *Dep::UPMNS;
-      U_light_sq = U_light.cwiseAbs2();
-      t_sq = *Dep::Theta_sq;
+      theta = *Dep::SeesawI_Theta;
       m_GERDA = 0.0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
       for (int i=0; i<3; i++)
-      {
-        m_temp_GERDA[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
-        m_GERDA += m_temp_GERDA[i];
-      }
+        m_temp_GERDA += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
+
+      m_GERDA = abs(m_temp_GERDA);
     }
 
     void SN_m_Kam(double& m_Kam)
     {
       using namespace Pipes::SN_m_Kam;
-      Matrix3cd m_light, U_light;
-      Matrix3d U_light_sq, t_sq;
-      std::vector<double> M(3), m_temp_Kam(3);
+      Matrix3cd m_light, U_light, theta;
+      std::vector<double> M(3);
+      std::complex<double> m_temp_Kam = {0.0,0.0};
       m_light = *Dep::m_nu;
       U_light = *Dep::UPMNS;
-      U_light_sq = U_light.cwiseAbs2();
-      t_sq = *Dep::Theta_sq;
+      theta = *Dep::SeesawI_Theta;
       m_Kam = 0.0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      for (int i=0; i<3; i++)
-      {
-        m_temp_Kam[i] = U_light_sq(0,i)*abs(m_light(i,i)) + t_sq(0,i)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
-        m_Kam +=m_temp_Kam[i];
-      }
+       for (int i=0; i<3; i++)
+        m_temp_Kam += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
+
+      m_Kam = abs(m_temp_Kam);
     }
 
     void lnL_0nubb(double& result_0nubb)
