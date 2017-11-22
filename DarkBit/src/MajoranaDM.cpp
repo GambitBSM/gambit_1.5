@@ -35,7 +35,7 @@ namespace Gambit
     class MajoranaDM
     {
       public:
-        /// Initialize SingletDM object (branching ratios etc)
+        /// Initialize MajoranaDM object (branching ratios etc)
         MajoranaDM(
             TH_ProcessCatalog* const catalog,
             double gammaH,
@@ -66,7 +66,7 @@ namespace Gambit
          * channel: bb, tautau, mumu, ss, cc, tt, gg, gammagamma, Zgamma, WW,
          * ZZ, hh
          */
-        double sv(std::string channel, double lambda, double mass, double v)
+        double sv(std::string channel, double lambda, double mass, double cosXi, double v)
         {
           // Note: Valid for mass > 45 GeV
           double s = 4*mass*mass/(1-v*v/4);
@@ -74,7 +74,7 @@ namespace Gambit
           if ( sqrt_s < 90 )
           {
             piped_invalid_point.request(
-                "MajoranaDM sigmav called with sqrt_s < 90 GeV.");
+                "Majorana`DM sigmav called with sqrt_s < 90 GeV.");
             return 0;
           }
 
@@ -83,7 +83,7 @@ namespace Gambit
             if ( sqrt_s > mh*2 )
             {
               double GeV2tocm3s1 = gev2cm2*s2cm;
-              return sv_hh(lambda, mass, v)*GeV2tocm3s1;
+              return sv_hh(lambda, mass, v, cosXi)*GeV2tocm3s1;
             }
             else return 0;
           }
@@ -104,81 +104,91 @@ namespace Gambit
             // Explicitly close channel for off-shell top quarks
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
+            // CHECK! Need Xi dependence, surely.
             double res = 2*lambda*lambda*v0*v0/
               sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
             return res;
           }
           else
           {
-            if ( channel == "bb" ) return sv_ff(lambda, mass, v, mb, true);
-            if ( channel == "cc" ) return sv_ff(lambda, mass, v, mc, false);
-            if ( channel == "tautau" ) return sv_ff(lambda, mass, v, mtau, false);
-            if ( channel == "tt" ) return sv_ff(lambda, mass, v, mt, false);
-            if ( channel == "ZZ" ) return sv_ZZ(lambda, mass, v);
-            if ( channel == "WW" ) return sv_WW(lambda, mass, v);
+            if ( channel == "bb" ) return sv_ff(lambda, mass, v, mb, cosXi, true);
+            if ( channel == "cc" ) return sv_ff(lambda, mass, v, mc, cosXi, true);
+            if ( channel == "tautau" ) return sv_ff(lambda, mass, v, mtau, cosXi, false);
+            if ( channel == "tt" ) return sv_ff(lambda, mass, v, mt, cosXi, true);
+            if ( channel == "ZZ" ) return sv_ZZ(lambda, mass, v, cosXi);
+            if ( channel == "WW" ) return sv_WW(lambda, mass, v, cosXi);
           }
           return 0;
         }
 
         // Annihilation into W bosons.
-        double sv_WW(double lambda, double mass, double v)
+        double sv_WW(double lambda, double mass, double v, double cosXi)
         {
           double s = 4*mass*mass/(1-v*v/4);
+          double cos2Xi = cosXi*cosXi;
+          double sin2Xi = 1 - cos2Xi; 
+          double numerator = cos2Xi*v*v/4 + sin2Xi; // Explicit velocity dependence. 
           double x = pow(mW,2)/s;
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*s/8/M_PI*sqrt(1-4*x)*Dh2(s)*(1-4*x+12*pow(x,2))
+          return pow(lambda,2)*pow(s,2)/64/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
             *GeV2tocm3s1;
         }
 
         // Annihilation into Z bosons.
-        double sv_ZZ(double lambda, double mass, double v)
+        double sv_ZZ(double lambda, double mass, double v, double cosXi)
         {
           double s = 4*mass*mass/(1-v*v/4);
+          double cos2Xi = cosXi*cosXi;
+          double sin2Xi = 1 - cos2Xi; 
+          double numerator = cos2Xi*v*v/4 + sin2Xi;
           double x = pow(mZ0,2)/s;
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*s/16/M_PI*sqrt(1-4*x)*Dh2(s)*(1-4*x+12*pow(x,2))
+          return pow(lambda,2)*pow(s,2)/128/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
             * GeV2tocm3s1;
         }
 
         // Annihilation into fermions
         double sv_ff(
-            double lambda, double mass, double v, double mf, bool is_quark)
+            double lambda, double mass, double v, double mf, double cosXi, bool is_quark)
         {
           double s = 4*mass*mass/(1-v*v/4);
+          double cos2Xi = cosXi*cosXi;
+          double sin2Xi = 1 - cos2Xi; 
+          double numerator = cos2Xi*v*v/4 + sin2Xi;
           double vf = sqrt(1-4*pow(mf,2)/s);
           double Xf = 1;
           if ( is_quark ) Xf = 3 *
             (1+(3/2*log(pow(mf,2)/s)+9/4)*4*alpha_s/3/M_PI);
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*
-            pow(mf,2)/4/M_PI*Xf*pow(vf,3) * Dh2(s) * GeV2tocm3s1;
+          return pow(lambda,2)*s*
+            pow(mf,2)/32/M_PI*Xf*pow(vf,3)*Dh2(s)*numerator*GeV2tocm3s1;
         }
 
         /// Annihilation into hh
-        double sv_hh(double lambda, double mass, double v)
+        double sv_hh(double lambda, double mass, double v, double cosXi)
         {
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
-          double vh = sqrt(1-4*mh*mh/s);  // vh and vs are lab velocities
-          // Hardcoded lower velocity avoids nan results
-          double vs = std::max(v/2, 1e-6);
-          double tp = pow(mass,2)+pow(mh,2)-0.5*s*(1-vs*vh);
-          double tm = pow(mass,2)+pow(mh,2)-0.5*s*(1+vs*vh);
-
-          double aR = 1+3*mh*mh*(s-mh*mh)*Dh2(s);
-          double aI = 3*mh*mh*sqrt(s)*Gamma_mh*Dh2(s);
-
-          return pow(lambda,2)/16/M_PI/pow(s,2)/vs *
-            (
-             (pow(aR,2)+pow(aI,2))*s*vh*vs
-             +4*lambda*pow(v0,2)*(aR-lambda*pow(v0,2)/(s-2*pow(mh,2)))
-             *log(std::abs(pow(mass,2)-tp)/std::abs(pow(mass,2)-tm))
-             +(2*pow(lambda,2)*pow(v0,4)*s*vh*vs)
-             /(pow(mass,2)-tm)/(pow(mass,2)-tp));
+          double vh = sqrt(1-4*mh*mh/s);  // vh and vphi are lab velocities
+          // Hardcoded velocities avoid NAN results.
+          double vphi = std::max(sqrt(1-4*mass*mass/s), 1e-6); 
+          double cos2Xi = cosXi*cosXi;
+          double sin2Xi = 1 - cos2Xi; 
+          double mh2s = mh*mh/s;
+          
+          return vh/32/M_PI/s *pow(lambda,2) *(     
+            s/4 * Dh2(s) * (pow((s+2*mh*mh), 2) + pow(Gamma_mh*mh, 2) )* ( cos2Xi*v*v/4 + sin2Xi)
+          + 2*mass*v0*v0*cosXi*lambda*Dh2(s)*((s-mh*mh)*(s+2*mh*mh)+pow((Gamma_mh*mh),2)) *
+            (1 + (1-(8*mass*mass*cos2Xi/s + 2*mh2s*atanh(vphi*vh/(1-2*mh2s)))/vphi/vh))
+          - pow(v0, 4)*pow(lambda, 2) /vphi/vh/(1-2*mh2s) * 
+            (8*pow(mass, 4)*pow(cosXi, 4)/pow(s,2) + mass*mass/s *
+            (1-4*mh2s*(1-cos2Xi)) + 3/2*mh2s/s + (1-4*mh2s + 6*mh2s/s + 16*mass*mass/s*(1-mh2s)*cos2Xi) -
+            32*pow(mass*cos2Xi/s, 2)*atanh(vphi*vh/(1-2*mh2s)))
+            );
         }
 
       private:
         double Gamma_mh, mh, v0, alpha_s, mb, mc, mtau, mt, mZ0, mW;
-    };
+    };  
 
     void DarkMatter_ID_MajoranaDM(std::string & result) { result = "X"; }
 
@@ -219,14 +229,9 @@ namespace Gambit
       using std::vector;
       using std::string;
 
-      std::string DMid = *Dep::DarkMatter_ID;
-      if ( DMid != "X" )
-      {
-        invalid_point().raise("TH_ProcessCatalog_MajoranaDM requires DMid to be X.");
-      }
-
-	    // Initialize empty catalog
+      // Initialize empty catalog
       TH_ProcessCatalog catalog;
+      TH_Process process_ann("X", "X");
 
       ///////////////////////////////////////
       // Import particle masses and couplings
@@ -245,6 +250,12 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       const SubSpectrum& SM = spec.get_LE();
       const SMInputs& SMI   = spec.get_SMInputs();
+      
+      // Import couplings
+      double lambda = he.get(Par::dimensionless,"lX");
+      double v = he.get(Par::mass1,"vev");
+      double alpha_s = SMI.alphaS;      // alpha_s(mZ)^MSbar
+      double cosXi = he.get(Par::dimensionless, "cosXI");
 
       // Get SM pole masses
       getSMmass("e-_1",     1)
@@ -300,81 +311,71 @@ namespace Gambit
       #undef getSMmass
       #undef addParticle
 
-      ////////////////////////////////////////////////////////////////////
-      // Import two-body annihilation processes from micrOmegas_3.6.9.2
-      ////////////////////////////////////////////////////////////////////
+      /////////////////////////////
+      // Import Decay information
+      /////////////////////////////
 
-      // Set of possible final state particles
-      std::set<string> annFinalStates;
+      // Import decay table from DecayBit
+      const DecayTable* tbl = &(*Dep::decay_rates);
 
-      // Initialize main annihilation process
-      TH_Process process_ann(DMid, DMid);
+      // Save Higgs width for later
+      double gammaH = tbl->at("h0_1").width_in_GeV;
 
-      // Helper variables
-      int err, key = 1;
-      double *SpA = NULL, *SpE = NULL, *SpP = NULL;
-      double *SpNe = NULL, *SpNm = NULL, *SpNl = NULL;
-      double m_1, m_2, sigmav_total, min_prop = 1e-6;
+      // Set of imported decays
+      std::set<string> importedDecays;
 
-      // Calculate the total sigmav using the calcSpectrum function in micrOmegas_3.6.9.2
-      sigmav_total = BEreq::calcSpectrum(byVal(key), byVal(SpA), byVal(SpE),
-                    byVal(SpP), byVal(SpNe), byVal(SpNm), byVal(SpNl), &err);
-      logger() << "Total zero-velocity annihilation cross section = " << sigmav_total << " cm^3/s" << std::endl;
+      // Minimum branching ratio to include
+      double minBranching = 0;
 
-      // Convenience macros for setting up 2-body annihilations using micrOmega's functions
-      #define SETUP_KINEMATIC_PROCESS_MO(NAME, MO_PRTCL_NAME, P1, P2)                                   \
-      m_1 = catalog.getParticleProperty(STRINGIFY(P1)).mass;                                            \
-      m_2 = catalog.getParticleProperty(STRINGIFY(P2)).mass;                                            \
-      if(2*mX > m_1 + m_2)                                                                              \
-      {                                                                                                 \
-      for (int i = 0; ((*BEreq::vSigmaCh)+i)->weight > min_prop; i++)                                   \
-        {                                                                                               \
-          /* Calculate sigmav for the input channel */                                                  \
-          if (strcmp(((*BEreq::vSigmaCh)+i)->prtcl[2],STRINGIFY(MO_PRTCL_NAME)) == 0)                   \
-          {                                                                                             \
-            double CAT(sigma_,NAME) = (((*BEreq::vSigmaCh)+i)->weight)*sigmav_total;                    \
-            logger() << "  BR(" << DMid << " + " << DMid << " -> "                                      \
-                     << ((*BEreq::vSigmaCh)+i)->prtcl[2]                                                \
-                     << " + " << ((*BEreq::vSigmaCh)+i)->prtcl[3] << ") = "                             \
-                     << ((*BEreq::vSigmaCh)+i)->weight << std::endl;                                    \
-            /* Create associated kinematical functions */                                               \
-            daFunk::Funk CAT(kinematicFunction_,NAME) = daFunk::cnst(CAT(sigma_,NAME), "v");            \
-            /* Create channel identifier string */                                                      \
-            std::vector<std::string> CAT(finalStates_,NAME);                                            \
-            CAT(finalStates_,NAME).push_back(STRINGIFY(P1));                                            \
-            CAT(finalStates_,NAME).push_back(STRINGIFY(P2));                                            \
-            /* Create channel and push it into channel list of process */                               \
-            TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),CAT(kinematicFunction_,NAME));         \
-            process_ann.channelList.push_back(CAT(channel_,NAME));                                      \
-            annFinalStates.insert(STRINGIFY(P1));                                                       \
-            annFinalStates.insert(STRINGIFY(P2));                                                       \
-          }                                                                                             \
-        }                                                                                               \
+      // Import relevant decays (only Higgs and subsequent decays)
+      using DarkBit_utils::ImportDecays;
+      // Notes: Virtual Higgs decays into offshell W+W- final states are not
+      // imported.  All other channels are correspondingly rescaled.  Decay
+      // into XX final states is accounted for, leading to zero photons.
+      ImportDecays("h0_1", catalog, importedDecays, tbl, minBranching,
+          daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
+
+      // Instantiate new MajoranaDM object
+      auto majoranaDM = boost::make_shared<MajoranaDM>(&catalog, gammaH, v, alpha_s);
+
+      // Populate annihilation channel list and add thresholds to threshold
+      // list.
+      // (remark: the lowest threshold is here = 2*mX, whereas in DS-internal
+      // conventions, this lowest threshold is not listed)
+      process_ann.resonances_thresholds.threshold_energy.push_back(2*mX);
+      auto channel =
+        daFunk::vec<string>("bb", "WW", "cc", "tautau", "ZZ", "tt", "hh");
+      auto p1 =
+        daFunk::vec<string>("d_3",   "W+", "u_2",   "e+_3", "Z0", "u_3",   "h0_1");
+      auto p2 =
+        daFunk::vec<string>("dbar_3","W-", "ubar_2","e-_3", "Z0", "ubar_3","h0_1");
+      {
+        for ( unsigned int i = 0; i < channel.size(); i++ )
+        {
+          double mtot_final =
+            catalog.getParticleProperty(p1[i]).mass +
+            catalog.getParticleProperty(p2[i]).mass;
+          // Include final states that are open for T~m/20
+          if ( mX*2 > mtot_final*0.5 )
+          {
+            daFunk::Funk kinematicFunction = daFunk::funcM(majoranaDM,
+                &MajoranaDM::sv, channel[i], lambda, mX, cosXi, daFunk::var("v"));
+            TH_Channel new_channel(
+                daFunk::vec<string>(p1[i], p2[i]), kinematicFunction
+                );
+            process_ann.channelList.push_back(new_channel);
+          }
+          if ( mX*2 > mtot_final )
+          {
+            process_ann.resonances_thresholds.threshold_energy.
+              push_back(mtot_final);
+          }
+        }
       }
 
-      // Include SM final states from DM annihilation
-      SETUP_KINEMATIC_PROCESS_MO(WW, W+, W+, W-);
-      SETUP_KINEMATIC_PROCESS_MO(ZZ, Z, Z0, Z0);
-      SETUP_KINEMATIC_PROCESS_MO(HH, H, h0_1, h0_1);
-      SETUP_KINEMATIC_PROCESS_MO(AA, A, gamma, gamma);
-
-      // down-type quarks
-      SETUP_KINEMATIC_PROCESS_MO(dD, d, d_1, dbar_1);
-      SETUP_KINEMATIC_PROCESS_MO(sS, s, d_2, dbar_2);
-      SETUP_KINEMATIC_PROCESS_MO(bB, b, d_3, dbar_3);
-
-      // up-type quarks
-      SETUP_KINEMATIC_PROCESS_MO(uU, u, u_1, ubar_1);
-      SETUP_KINEMATIC_PROCESS_MO(cC, c, u_2, ubar_2);
-      SETUP_KINEMATIC_PROCESS_MO(tT, t, u_3, ubar_3);
-
-      // leptons
-      SETUP_KINEMATIC_PROCESS_MO(eE, e, e+_1, e-_1);
-      SETUP_KINEMATIC_PROCESS_MO(mM, m, e+_2, e-_2);
-      SETUP_KINEMATIC_PROCESS_MO(tauTau, l, e+_3, e-_3);
-
-      // Get rid of convenience macro
-      #undef SETUP_KINEMATIC_PROCESS_MO
+      // Populate resonance list
+      if ( mH >= mX*2 ) process_ann.resonances_thresholds.resonances.
+          push_back(TH_Resonance(mH, gammaH));
 
       // Add process to previous list
       catalog.processList.push_back(process_ann);

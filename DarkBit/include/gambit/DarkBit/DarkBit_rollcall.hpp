@@ -401,9 +401,7 @@ START_MODULE
     #define FUNCTION TH_ProcessCatalog_MajoranaDM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       DEPENDENCY(MajoranaDM_spectrum, Spectrum)
-      DEPENDENCY(DarkMatter_ID, std::string)
-      BACKEND_REQ(calcSpectrum, (), double, (int, double*, double*, double*, double*, double*, double*, int*))
-      BACKEND_REQ(vSigmaCh, (), MicrOmegas::aChannel*)
+      DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(MajoranaDM)
     #undef FUNCTION  
     #define FUNCTION TH_ProcessCatalog_DiracDM

@@ -103,6 +103,7 @@ namespace Gambit
             // Explicitly close channel for off-shell top quarks
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
+            // CHECK! Divide by 3...?
             double res = 2*lambda*lambda*v0*v0/
               sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
             return res;
@@ -215,7 +216,7 @@ namespace Gambit
       using std::vector;
       using std::string;
 
-	    // Initialize empty catalog
+      // Initialize empty catalog
       TH_ProcessCatalog catalog;
       TH_Process process_ann("V", "V");
 
