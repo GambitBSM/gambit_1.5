@@ -180,9 +180,8 @@ namespace Gambit
           + 2*mass*v0*v0*cosXi*lambda*Dh2(s)*((s-mh*mh)*(s+2*mh*mh)+pow((Gamma_mh*mh),2)) *
             (1 + (1-(8*mass*mass*cos2Xi/s + 2*mh2s*atanh(vphi*vh/(1-2*mh2s)))/vphi/vh))
           - pow(v0, 4)*pow(lambda, 2) /vphi/vh/(1-2*mh2s) * 
-            (8*pow(mass, 4)*pow(cosXi, 4)/pow(s,2) + mass*mass/s *
-            (1-4*mh2s*(1-cos2Xi)) + 3/2*mh2s/s + (1-4*mh2s + 6*mh2s/s + 16*mass*mass/s*(1-mh2s)*cos2Xi) -
-            32*pow(mass*cos2Xi/s, 2)*atanh(vphi*vh/(1-2*mh2s)))
+            ((8*pow(mass, 4)*pow(cosXi, 4)/pow(s,2) + mass*mass/s *(1-4*mh2s*(1-cos2Xi)) + 3/2*mh2s/s)/(mass*mass/s * vh*vh + mh2s*mh2s)
+            - (1-4*mh2s + 6*mh2s/s + 16*mass*mass/s*(1-mh2s)*cos2Xi) - 32*pow(mass*cos2Xi/s, 2)*atanh(vphi*vh/(1-2*mh2s)))
             );
         }
 
