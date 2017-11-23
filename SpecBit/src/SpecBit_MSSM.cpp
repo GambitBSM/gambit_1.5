@@ -137,7 +137,7 @@ namespace Gambit
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_ab_as"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_at_at"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_atau_atau"));
-            
+
       spectrum_generator.set_settings(settings);
 
       // Generate spectrum
@@ -282,7 +282,7 @@ namespace Gambit
     }
 
   //Version for 1.5.1 commented out because we should make it possible to support FS versions in parallel.
-  
+
   // template <class MI>
   //   Spectrum run_FS1_5_1_spectrum_generator
   //       ( const typename MI::InputParameters& input
@@ -634,7 +634,7 @@ namespace Gambit
 
 
     // Runs FlexibleSUSY MSSM spectrum generator with CMSSM (GUT scale) boundary conditions
-    // In principle an identical spectrum can be obtained from the function 
+    // In principle an identical spectrum can be obtained from the function
     // get_MSSMatGUT_spectrum_FS
     // by setting the input parameters to match the CMSSM assumptions
     void get_CMSSM_spectrum_FS (Spectrum& result)
@@ -1518,7 +1518,7 @@ namespace Gambit
     {
       using namespace Pipes::FH_HiggsMass;
       //FH indices: 0=h0_1, 1=h0_2
-      int i;
+      int i = 0;
       const SubSpectrum& spec = Dep::unimproved_MSSM_spectrum->get_HE();
       int higgs = SMlike_higgs_PDG_code(spec);
       if (higgs == 25) i = 0;

@@ -108,7 +108,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
   # Always use -O2 for flexiblesusy because it's so damn slow otherwise.
-  set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS}")
+  set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS} -Wno-missing-field-initializers")
   set(FS_Fortran_FLAGS "${GAMBIT_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FS_CXX_FLAGS "${FS_CXX_FLAGS} -O2")
@@ -145,6 +145,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
        --with-boost-incdir=${Boost_INCLUDE_DIR}
        --with-lapack-libs=${LAPACK_LINKLIBS}
        --with-blas-libs=${LAPACK_LINKLIBS}
+       --disable-librarylink
       #--enable-verbose flag causes verbose output at runtime as well. Maybe set it dynamically somehow in future.
      )
 
