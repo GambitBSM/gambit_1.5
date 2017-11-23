@@ -30,7 +30,6 @@
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,r_tensor)
 #undef MODEL
 
-
 #define MODEL plik_dx11dr2_HM_v18_TT
   START_MODEL
   DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,calib_100T,calib_217T,A_planck)
@@ -38,6 +37,25 @@
 
 #define MODEL lowl_SMW_70_dx11d_2014_10_03_v5c_Ap
   #define PARENT plik_dx11dr2_HM_v18_TT
+    START_MODEL
+    DEFINEPARS(A_planck)
+  #undef PARENT
+#undef MODEL
+
+#define MODEL Planck_TTTEEE
+  START_MODEL
+    DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,galf_EE_A_100,galf_EE_A_100_143,galf_EE_A_100_217,galf_EE_A_143,galf_EE_A_143_217,galf_EE_A_217,galf_EE_index,galf_TE_A_100,galf_TE_A_100_143,galf_TE_A_100_217,galf_TE_A_143,galf_TE_A_143_217,galf_TE_A_217,galf_TE_index,calib_100T,calib_217T,calib_100P,calib_143P,calib_217P,A_pol,A_planck)
+#undef MODEL
+
+#define MODEL Planck_TT
+  #define PARENT Planck_TTTEEE
+    START_MODEL
+    DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,calib_100T,calib_217T,A_planck)
+  #undef PARENT
+#undef MODEL
+
+#define MODEL Planck_lite
+  #define PARENT Planck_TT
     START_MODEL
     DEFINEPARS(A_planck)
   #undef PARENT

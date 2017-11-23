@@ -3272,6 +3272,10 @@ clik_compute_loglike: |
    will expect an array ordered this way
    C_0^TT ... C_lmax[0]^TT C_0^EE ... C_lmax[1]^EE C_0^TE ... C_lmax[3]^T3 extrapar1 extrapar2 extrapar3
 
+clik_lensing_compute_loglike: |
+   same as clik_compute_loglike but for the use with the lensing likelihood
+   of Planck.
+
 clik_get_extra_parameter_names: |
    retrieve the number of extra parameters and their names
    names is allocated by the function. It has to be cleaned after.
@@ -3295,6 +3299,9 @@ clik_get_version: |
 clik_initialize: |
    initialize the planck likelihood from an cldf file.
 
+clik_lensing_initialize: |
+   initialize the planck lensing likelihood.
+
 clik_initialize_error: |
    initialize the error object.
 
@@ -3308,18 +3315,65 @@ data_initialize: |
    lowl_SMW_70_dx11d_2014 by means of calling
    backend function clik_init
 
+initialize_high_TTTEEE: |
+   Load the TT,TE,EE-likelihood for high-l.
+   Will be executed by plc_2_0_init when this
+   likelihood is wanted.
+
+initialize_high_TT: |
+   Load the TT-likelihood for high-l.
+   Will be executed by plc_2_0_init when this
+   likelihood is wanted.
+
+initialize_high_TT_lite: |
+   Load the marginalized (lite) TT-likelihood for high-l.
+   Will be executed by plc_2_0_init when this
+   likelihood is wanted.
+
+initialize_lensing: |
+   Load the lensing-likelihood.
+   Will be executed by plc_2_0_init when this
+   likelihood is wanted.
+
+initialize_lowp_TT: |
+   Load the TT-likelihood for low-l.
+   Will be executed by plc_2_0_init when this
+   likelihood is wanted.
 
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap_parameters: |
+   See model parameters in config/models.dat
 
 plik_dx11dr2_HM_v18_TT_parameters: |
+  See model parameters in config/models.dat
+
+Planck_TTTEEE_parameters: |
+  See model parameters in config/models.dat
+
+Planck_TT_parameters: |
+  See model parameters in config/models.dat
+
+Planck_lite_parameters: |
+  See model parameters in config/models.dat
 
 return_lowp_TT: |
    return the likelihood result for low-l temperature
    and polarization Cl's
 
+return_lensing: |
+   return the likelihood result for lensing, temperature
+   and polarization Cl's
+
+return_high_TTTEEE: |
+   return the likelihood result for high-l temperature
+   and polarization Cl's (above l=30)
+
 return_high_TT: |
    return the likelihood result for high-l temperature
    Cl's (above l=30)
+
+return_high_TT_lite: |
+   return the (marginalized) likelihood result for
+   high-l temperature Cl's (above l=30)
 
 
 #----------------------------
@@ -3415,11 +3469,6 @@ class_transfer_initialize: |
    This routine initializes the transfers structure,
    (in particular, computes table of transfer functions).
 
-class_free: |
-   This routine is a convenience function to call all class_xxx_free at once.
-   The meory space allocated by the xxx_init-routines are free'd.
-   (Not used as of now)
-
 class_get_spectra: |
    Returns a pointer to the CMB-spectra C_xx[l], where 
    xx = [TT, TE, EE, phiphi, ...].
@@ -3466,6 +3515,18 @@ compute_LCDMtensor_inflation_lowp_TT_loglike: |
    for a given model paramteres and further solver specifiers via
    a yaml file. function then calls class and produces the Cl's
    (power spectrum) and goes on to calculate the planck likelihood.
+
+compute_strawberry_lowp_TT_loglike: |
+   function computes the planck log-likelihood for a  given
+   set of  Cl's for low values of l (below 30).
+
+compute_strawberry_high_TT_loglike: |
+   function computes the planck log-likelihood for a  given
+   set of  Cl's for high values of l (above 30).
+
+compute_strawberry_lensing_loglike: |
+   function computes the planck lensing- log-likelihood for
+   a  given set of  Cl's.
 
 #------------------------------
 #  SUSYHD capabilities

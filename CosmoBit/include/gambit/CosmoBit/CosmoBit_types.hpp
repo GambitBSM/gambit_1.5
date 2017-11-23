@@ -39,7 +39,6 @@ namespace Gambit
     error& CosmoBit_error();
     warning& CosmoBit_warning();
 
-
     // Container for the structs of Class
     struct Class_container
     {
@@ -59,9 +58,7 @@ namespace Gambit
       Class::output op;           /* for output files */
       Class::ErrorMsg class_errmsg;      /* for error messages */
 
-      bool already_calculated;
-      bool is_initialized;
-
+      bool non_free_pointer;
     };
 
     // Generic class for cosmological likelihoods

@@ -37,22 +37,22 @@ namespace Gambit
   namespace CosmoBit
   {
     using namespace LogTags;
-    //safe_ptr(Pipes::function_vanilla_lowp_TT_loglike::      BEreq::class_parser_initialize(&fc,9,"",class_errmsg);
-    //blah = return_vanilla_cls(ob, cdm, ..., *BEreq::class_parser_initializ)
 
-    void class_set_parameter_LCDM(Class_container& cosmo_out)
+    void class_set_parameter_LCDM(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM;
 
-      Class_container cosmo;
-
-      int l_max=3000;
-
+      int l_max=2508;
+      
       BEreq::class_parser_initialize(&cosmo.fc,9,"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl,pCl");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[7],"l_scalar_max");
+      sprintf(cosmo.fc.value[7],"%d",l_max);
+      strcpy(cosmo.fc.name[8],"lensing");
+      strcpy(cosmo.fc.value[8],"yes");
 
       strcpy(cosmo.fc.name[1],"omega_b");
       strcpy(cosmo.fc.name[2],"omega_cdm");
@@ -60,9 +60,6 @@ namespace Gambit
       strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
       strcpy(cosmo.fc.name[5],"n_s");
       strcpy(cosmo.fc.name[6],"tau_reio");
-
-      strcpy(cosmo.fc.name[7],"l_scalar_max");
-      sprintf(cosmo.fc.value[7],"%d",l_max);
 
       sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
       sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
@@ -77,63 +74,210 @@ namespace Gambit
       std::cout << "ln10A_s = " << *Param["ln10A_s"] << std::endl;
       std::cout << "n_s = " << *Param["n_s"] << std::endl;
       std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
-
-      cosmo_out = cosmo;
     }
 
-    void class_run_func(Class_container& cosmo_out)
+    void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
     {
+      //std::cout << "Last seen alive in: class_set_parameter_LCDM_SingletDM" << std::endl;
+      using namespace Pipes::class_set_parameter_LCDM_SingletDM;
+
+      int l_max=2508;
+      double sigmav = *Dep::sigmav; // in cm^3 s^-1
+      double mass = *Dep::mwimp; // in GeV
+      double feff = runOptions->getValueOrDef<double>(1.,"f_eff");
+      double annihilation = (1.0/1.78e-21)*(sigmav/mass)*feff; // in m^3 s^-1 kg^-1
+      
+      BEreq::class_parser_initialize(&cosmo.fc,10,"",cosmo.class_errmsg);
+
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_scalar_max");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"lensing");
+      strcpy(cosmo.fc.value[9],"yes");
+
+      strcpy(cosmo.fc.name[1],"omega_b");
+      strcpy(cosmo.fc.name[2],"omega_cdm");
+      strcpy(cosmo.fc.name[3],"H0");
+      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+      strcpy(cosmo.fc.name[5],"n_s");
+      strcpy(cosmo.fc.name[6],"tau_reio");
+      strcpy(cosmo.fc.name[7],"annihilation");
+
+      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+      sprintf(cosmo.fc.value[4],"%e",*Param["ln10A_s"]);
+      sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
+      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+      sprintf(cosmo.fc.value[7],"%e",annihilation);
+
+      std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
+      std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
+      std::cout << "H0 = " << *Param["H0"] << std::endl;
+      std::cout << "ln10A_s = " << *Param["ln10A_s"] << std::endl;
+      std::cout << "n_s = " << *Param["n_s"] << std::endl;
+      std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
+      std::cout << "annihilation = " << annihilation << "(Resulting from m = " << *Param["mS"] << " and lambda = "<< *Param["lambda_hS"] << ")" << std::endl;
+    }
+
+    void class_set_parameter_LCDMtensor(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_LCDMtensor" << std::endl;
+      using namespace Pipes::class_set_parameter_LCDMtensor;
+
+      int l_max=2508;
+
+      BEreq::class_parser_initialize(&cosmo.fc,11,"",cosmo.class_errmsg);
+
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_scalar_max");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"modes");
+      strcpy(cosmo.fc.value[9],"s,t");
+      strcpy(cosmo.fc.name[10],"lensing");
+      strcpy(cosmo.fc.value[10],"yes");
+
+      strcpy(cosmo.fc.name[1],"omega_b");
+      strcpy(cosmo.fc.name[2],"omega_cdm");
+      strcpy(cosmo.fc.name[3],"H0");
+      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+      strcpy(cosmo.fc.name[5],"n_s");
+      strcpy(cosmo.fc.name[6],"tau_reio");
+      strcpy(cosmo.fc.name[7],"r");
+      
+      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+      sprintf(cosmo.fc.value[4],"%e",*Param["ln10A_s"]);
+      sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
+      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+      sprintf(cosmo.fc.value[7],"%e",*Param["r_tensor"]);
+      
+      std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
+      std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
+      std::cout << "H0 = " << *Param["H0"] << std::endl;
+      std::cout << "ln10A_s = " << *Param["ln10A_s"] << std::endl;
+      std::cout << "n_s = " << *Param["n_s"] << std::endl;
+      std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
+      std::cout << "r_tensor = " << *Param["r_tensor"] << std::endl;
+    }
+
+    void class_run_func(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_run_func" << std::endl;
       using namespace Pipes::class_run_func;
 
-      //std::cout << "Last seen alive in: class_run_func" << std::endl;
-      Class_container cosmo = *Dep::class_set_parameter;
-      BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg);
-      BEreq::class_background_initialize(&cosmo.pr,&cosmo.ba);
-      BEreq::class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th);
-      BEreq::class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt);
-      BEreq::class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm);
-      BEreq::class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl);
-      BEreq::class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr);
-      BEreq::class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp);
-      BEreq::class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le);
-
-      cosmo_out = cosmo;
+      char error_printout[1024];
+      cosmo = *Dep::class_set_parameter;
+      
+      if (BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_background_initialize(&cosmo.pr,&cosmo.ba) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
+	invalid_point().raise(error_printout);
+      }
+      if (BEreq::class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le) == _FAILURE_)
+      {
+	sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
+	invalid_point().raise(error_printout);
+      }
+      cosmo.non_free_pointer = true;
     }
 
     void class_get_spectra_func(double**& clback)
     {
       //std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
       using namespace Pipes::class_get_spectra_func;
+      
       Class_container cosmo = *Dep::class_run;
-      int l_max=3000;
-      int num_ct_max=7;
 
-      double* cl[l_max];
-      for(int i = 0; i < l_max; ++i) cl[i] = new double[num_ct_max];
-      for (int l=2; l < l_max; l++)
+      // Maximal value of l (directly taken from CLASS)
+      int l_max = cosmo.pt.l_scalar_max;
+      // Number of Cl-spectra (columns of the Cl-table).
+      // The order of the spectra is [TT, EE, TE, BB, PhiPhi, TPhi, EPhi] 
+      int num_ct_max=7; 
+      // Each column takes l_max+1 entries (from l=0 to l=l_max) 
+      double* cl[l_max+1];
+      for(int l=0; l < l_max+1; l++) cl[l] = new double[num_ct_max];
+
+      // The entries for l=0 and l=1 are zero per defintion
+      for(int i=0; i < num_ct_max; i++)
       {
-        BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl[l]));
-        cl[l][cosmo.sp.index_ct_tt] = cl[l][cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
-        cl[l][cosmo.sp.index_ct_te] = cl[l][cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
-        cl[l][cosmo.sp.index_ct_ee] = cl[l][cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
-        cl[l][cosmo.sp.index_ct_bb] = cl[l][cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
+	cl[0][i] = 0.;
+	cl[1][i] = 0.;
+      }
+      // Loop through all l >= 2 and ask for the cl-spectra.
+      for (int l=2; l < l_max+1; l++)
+      {
+        if (BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl[l])) == _SUCCESS_)
+	{
+	  cl[l][cosmo.sp.index_ct_tt] = cl[l][cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
+	  cl[l][cosmo.sp.index_ct_te] = cl[l][cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
+	  cl[l][cosmo.sp.index_ct_ee] = cl[l][cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
+	  cl[l][cosmo.sp.index_ct_bb] = cl[l][cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
+	  cl[l][cosmo.sp.index_ct_pp] = cl[l][cosmo.sp.index_ct_pp];
+	  cl[l][cosmo.sp.index_ct_tp] = cl[l][cosmo.sp.index_ct_tp]*pow(cosmo.ba.T_cmb*1.e6,1);
+	  cl[l][cosmo.sp.index_ct_ep] = cl[l][cosmo.sp.index_ct_ep]*pow(cosmo.ba.T_cmb*1.e6,1);
+	}
+	else
+	{
+	  // Failsafe for unexpected behaviour of "class_outpout_at_cl"
+	  for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
+	} 
       }
       clback = cl;
+
+      // Now that all calculations with CLASS are done, free the pointers which were allocated in the meantime.
+      if (cosmo.non_free_pointer)
+      {
+	BEreq::class_lensing_free(&cosmo.le);
+	BEreq::class_spectra_free(&cosmo.sp);
+	BEreq::class_transfer_free(&cosmo.tr);
+	BEreq::class_nonlinear_free(&cosmo.nl);
+	BEreq::class_primordial_free(&cosmo.pm);
+	BEreq::class_perturb_free(&cosmo.pt);
+	BEreq::class_thermodynamics_free(&cosmo.th);
+	BEreq::class_background_free(&cosmo.ba);
+	cosmo.non_free_pointer = false;
+      }
     }
 
-    void class_free_func(Class_container& cosmo)
-    {
-      //std::cout << "Last seen alive in: class_free_func" << std::endl;
-      using namespace Pipes::class_free_func;
-      BEreq::class_lensing_free(&cosmo.le);
-      BEreq::class_spectra_free(&cosmo.sp);
-      BEreq::class_transfer_free(&cosmo.tr);
-      BEreq::class_nonlinear_free(&cosmo.nl);
-      BEreq::class_primordial_free(&cosmo.pm);
-      BEreq::class_perturb_free(&cosmo.pt);
-      BEreq::class_thermodynamics_free(&cosmo.th);
-      BEreq::class_background_free(&cosmo.ba);
-    }
 
     double** return_vanilla_cls(double omega_b,double omega_cdm,double H0,double ln10A_s,double n_s,double tau_reio)
     {
@@ -725,104 +869,309 @@ namespace Gambit
       std::cout << "Log likelihood is : " << result << std::endl;
     }
 
-    void function_strawberry_lowp_TT_loglike(double& result)
+    void function_strawberry_high_TT_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_strawberry_lowp_TT_loglike" << std::endl;
-      using namespace Pipes::function_strawberry_lowp_TT_loglike;
+      //std::cout << "Last seen alive in: function_strawberry_high_TT_loglike" << std::endl;
+      using namespace Pipes::function_strawberry_high_TT_loglike;
 
-      double  highl_TT_cl_and_pars[2525];
-      double  lowp_cl_and_pars[121];
-      int l;
-
+      double  cl_and_pars[2525];
+      int l, idx_tt;
       double** cl;
       cl = *Dep::class_get_spectra;
 
       //--------------------------------------------------------------------------
-      //------high-l likelihood calculation making of Cls-------------------------
+      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
       //--------------------------------------------------------------------------
-
-      highl_TT_cl_and_pars[0] = 0.0;
-      highl_TT_cl_and_pars[1] = 0.0;
-
-      for(int ii = 2; ii < 2509 ; ii++)highl_TT_cl_and_pars[ii] = cl[ii][0];
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+	idx_tt = ii;
+	if (ii >= 2)
+	{
+	  cl_and_pars[idx_tt] = cl[ii][0];
+	}
+	else
+	{
+	  cl_and_pars[idx_tt] = 0.;
+	}	  
+      }
 
       //--------------------------------------------------------------------------
       //------addition of nuisance parameters to Cl array-------------------------
       //--------------------------------------------------------------------------
-      highl_TT_cl_and_pars[2509] = *Param["A_cib_217"];
-      highl_TT_cl_and_pars[2510] = *Param["cib_index"];
-      highl_TT_cl_and_pars[2511] = *Param["xi_sz_cib"];
-      highl_TT_cl_and_pars[2512] = *Param["A_sz"];
-      highl_TT_cl_and_pars[2513] = *Param["ps_A_100_100"];
-      highl_TT_cl_and_pars[2514] = *Param["ps_A_143_143"];
-      highl_TT_cl_and_pars[2515] = *Param["ps_A_143_217"];
-      highl_TT_cl_and_pars[2516] = *Param["ps_A_217_217"];
-      highl_TT_cl_and_pars[2517] = *Param["ksz_norm"];
-      highl_TT_cl_and_pars[2518] = *Param["gal545_A_100"];
-      highl_TT_cl_and_pars[2519] = *Param["gal545_A_143"];
-      highl_TT_cl_and_pars[2520] = *Param["gal545_A_143_217"];
-      highl_TT_cl_and_pars[2521] = *Param["gal545_A_217"];
-      highl_TT_cl_and_pars[2522] = *Param["calib_100T"];
-      highl_TT_cl_and_pars[2523] = *Param["calib_217T"];
-      highl_TT_cl_and_pars[2524] = *Param["A_planck"];
-
-      //--------------------------------------------------------------------------
-      //-------low-l likelihood calculation making of Cls-------------------------
-      //--------------------------------------------------------------------------
-      lowp_cl_and_pars[0] = 0.0;
-      lowp_cl_and_pars[1] = 0.0;
-      for (l=2;l<=29;l++)  {
-        lowp_cl_and_pars[l] = cl[l][0];
-      }
-      int k;
-      lowp_cl_and_pars[30] = 0.0;
-      lowp_cl_and_pars[31] = 0.0;
-      for (l=32;l<=59;l++)  {
-        k = l-30;
-        lowp_cl_and_pars[l] = cl[k][1];
-      }
-      lowp_cl_and_pars[60] = 0.0;
-      lowp_cl_and_pars[61] = 0.0;
-      for (l=62;l<=89;l++)  {
-        k = l-60;
-        lowp_cl_and_pars[l] = cl[k][2];
-      }
-      lowp_cl_and_pars[90] = 0.0;
-      lowp_cl_and_pars[91] = 0.0;
-      for (l=92;l<=119;l++)  {
-        k = l-90;
-        lowp_cl_and_pars[l] = cl[k][3];
-      }
-      //--------------------------------------------------------------------------
-      //------addition of nuisance parameters to Cl array-------------------------
-      //--------------------------------------------------------------------------
-      lowp_cl_and_pars[120] = *Param["A_planck"];
+      cl_and_pars[2509] = *Param["A_cib_217"];
+      cl_and_pars[2510] = *Param["cib_index"];
+      cl_and_pars[2511] = *Param["xi_sz_cib"];
+      cl_and_pars[2512] = *Param["A_sz"];
+      cl_and_pars[2513] = *Param["ps_A_100_100"];
+      cl_and_pars[2514] = *Param["ps_A_143_143"];
+      cl_and_pars[2515] = *Param["ps_A_143_217"];
+      cl_and_pars[2516] = *Param["ps_A_217_217"];
+      cl_and_pars[2517] = *Param["ksz_norm"];
+      cl_and_pars[2518] = *Param["gal545_A_100"];
+      cl_and_pars[2519] = *Param["gal545_A_143"];
+      cl_and_pars[2520] = *Param["gal545_A_143_217"];
+      cl_and_pars[2521] = *Param["gal545_A_217"];
+      cl_and_pars[2522] = *Param["calib_100T"];
+      cl_and_pars[2523] = *Param["calib_217T"];
+      cl_and_pars[2524] = *Param["A_planck"];
 
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
       clik_object* high_clikid;
+      clik_error *_err;
+
+      high_clikid = BEreq::return_high_TT();
+      _err = BEreq::clik_initialize_error();
+      result = BEreq::clik_compute_loglike(byVal(high_clikid),
+					   byVal(cl_and_pars),
+					   &_err);
+
+      std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
+    }
+
+    void function_strawberry_high_TTTEEE_loglike(double& result)
+    {
+      //std::cout << "Last seen alive in: function_strawberry_high_TTTEEE_loglike" << std::endl;
+      using namespace Pipes::function_strawberry_high_TTTEEE_loglike;
+
+      double  cl_and_pars[7621];
+      int l, idx_tt, idx_te, idx_ee;
+      double** cl;
+      cl = *Dep::class_get_spectra;
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, TE and EE to Cl array--------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+	idx_tt = ii;
+	idx_te = ii + 2509;
+	idx_ee = ii + (2 * 2509);
+	if (ii >= 2)
+	{
+	  cl_and_pars[idx_tt] = cl[ii][0];
+	  cl_and_pars[idx_te] = cl[ii][1];
+	  cl_and_pars[idx_ee] = cl[ii][2];
+	}
+	else
+	{
+	  cl_and_pars[idx_tt] = 0.;
+	  cl_and_pars[idx_te] = 0.;
+	  cl_and_pars[idx_ee] = 0.;
+	}	  
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[7527] = *Param["A_cib_217"];
+      cl_and_pars[7528] = *Param["cib_index"];
+      cl_and_pars[7529] = *Param["xi_sz_cib"];
+      cl_and_pars[7530] = *Param["A_sz"];
+      cl_and_pars[7531] = *Param["ps_A_100_100"];
+      cl_and_pars[7532] = *Param["ps_A_143_143"];
+      cl_and_pars[7533] = *Param["ps_A_143_217"];
+      cl_and_pars[7534] = *Param["ps_A_217_217"];
+      cl_and_pars[7535] = *Param["ksz_norm"];
+      cl_and_pars[7536] = *Param["gal545_A_100"];
+      cl_and_pars[7537] = *Param["gal545_A_143"];
+      cl_and_pars[7538] = *Param["gal545_A_143_217"];
+      cl_and_pars[7539] = *Param["gal545_A_217"];
+      cl_and_pars[7540] = *Param["galf_EE_A_100"];
+      cl_and_pars[7541] = *Param["galf_EE_A_100_143"];
+      cl_and_pars[7542] = *Param["galf_EE_A_100_217"];
+      cl_and_pars[7543] = *Param["galf_EE_A_143"];
+      cl_and_pars[7544] = *Param["galf_EE_A_143_217"];
+      cl_and_pars[7545] = *Param["galf_EE_A_217"];
+      cl_and_pars[7546] = *Param["galf_EE_index"];
+      cl_and_pars[7547] = *Param["galf_TE_A_100"];
+      cl_and_pars[7548] = *Param["galf_TE_A_100_143"];
+      cl_and_pars[7549] = *Param["galf_TE_A_100_217"];
+      cl_and_pars[7550] = *Param["galf_TE_A_143"];
+      cl_and_pars[7551] = *Param["galf_TE_A_143_217"];
+      cl_and_pars[7552] = *Param["galf_TE_A_217"];
+      cl_and_pars[7553] = *Param["galf_TE_index"];
+      // set beam-leakage to zero (60 nusissance parameter)
+      for (int i = 0; i < 60; i++) cl_and_pars[(i+7554)] = 0.;
+      cl_and_pars[7614] = *Param["calib_100T"];
+      cl_and_pars[7615] = *Param["calib_217T"];
+      cl_and_pars[7616] = *Param["calib_100P"];
+      cl_and_pars[7617] = *Param["calib_143P"];
+      cl_and_pars[7618] = *Param["calib_217P"];
+      cl_and_pars[7619] = *Param["A_pol"];           
+      cl_and_pars[7620] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      clik_object* high_clikid;
+      clik_error *_err;
+
+      high_clikid = BEreq::return_high_TTTEEE();
+      _err = BEreq::clik_initialize_error();
+      result = BEreq::clik_compute_loglike(byVal(high_clikid),
+					   byVal(cl_and_pars),
+					   &_err);
+
+      std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
+    }
+
+    void function_strawberry_high_TT_lite_loglike(double& result)
+    {
+      //std::cout << "Last seen alive in: function_strawberry_high_TT_lite_loglike" << std::endl;
+      using namespace Pipes::function_strawberry_high_TT_lite_loglike;
+
+      double  cl_and_pars[2510];
+      int l, idx_tt;
+      double** cl;
+      cl = *Dep::class_get_spectra;
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+	idx_tt = ii;
+	if (ii >= 2)
+	{
+	  cl_and_pars[idx_tt] = cl[ii][0];
+	}
+	else
+	{
+	  cl_and_pars[idx_tt] = 0.;
+	}	  
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[2509] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      clik_object* high_clikid;
+      clik_error *_err;
+
+      high_clikid = BEreq::return_high_TT_lite();
+      _err = BEreq::clik_initialize_error();
+      result = BEreq::clik_compute_loglike(byVal(high_clikid),
+					   byVal(cl_and_pars),
+					   &_err);
+
+      std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
+    }
+
+    void function_strawberry_lensing_loglike(double& result)
+    {
+      //std::cout << "Last seen alive in: function_strawberry_lensing_loglike" << std::endl;
+      using namespace Pipes::function_strawberry_lensing_loglike;
+
+      double  cl_and_pars[8197];
+      int l, idx_tt, idx_te, idx_ee, idx_pp;
+      double** cl;
+      cl = *Dep::class_get_spectra;
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for PhiPhi,  TT, TE and EE to Cl array-----------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2049 ; ii++)
+      {
+	idx_pp = ii;
+	idx_tt = ii + 2049;
+	idx_ee = ii + (2 * 2049);
+	idx_te = ii + (3 * 2049);
+	if (ii >= 2)
+	{
+	  cl_and_pars[idx_tt] = cl[ii][0];
+	  cl_and_pars[idx_te] = cl[ii][1];
+	  cl_and_pars[idx_ee] = cl[ii][2];
+	  cl_and_pars[idx_pp] = cl[ii][4];
+	}
+	else
+	{
+	  cl_and_pars[idx_tt] = 0.;
+	  cl_and_pars[idx_te] = 0.;
+	  cl_and_pars[idx_ee] = 0.;
+	  cl_and_pars[idx_pp] = 0.;
+	}	  
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[8196] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      clik_lensing_object* lensing_clikid;
+      clik_error *_err;
+
+      lensing_clikid = BEreq::return_lensing();
+      _err = BEreq::clik_initialize_error();
+      result = BEreq::clik_lensing_compute_loglike(byVal(lensing_clikid),
+						   byVal(cl_and_pars),
+						   &_err);
+
+      std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
+    }
+
+    void function_strawberry_lowp_TT_loglike(double& result)
+    {
+      //std::cout << "Last seen alive in: function_strawberry_lowp_TT_loglike" << std::endl;
+      using namespace Pipes::function_strawberry_lowp_TT_loglike;
+
+      double  cl_and_pars[121];
+      int l, idx_tt, idx_te, idx_ee, idx_bb;
+      double** cl;
+      cl = *Dep::class_get_spectra;
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 30 ; ii++)
+      {
+	idx_tt = ii;
+	idx_ee = ii + 30;
+	idx_bb = ii + (2 * 30);
+	idx_te = ii + (3 * 30);
+	if (ii >= 2)
+	{
+	  cl_and_pars[idx_tt] = cl[ii][0];
+	  cl_and_pars[idx_te] = cl[ii][1];
+	  cl_and_pars[idx_ee] = cl[ii][2];
+	  cl_and_pars[idx_bb] = cl[ii][3];
+	}
+	else
+	{
+	  cl_and_pars[idx_tt] = 0.;
+	  cl_and_pars[idx_te] = 0.;
+	  cl_and_pars[idx_ee] = 0.;
+	  cl_and_pars[idx_bb] = 0.;
+	}	  
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[120] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
       clik_object* lowl_clikid;
       clik_error *_err;
-      double lowp_log;
-      double highl_TT_log;
 
       lowl_clikid = BEreq::return_lowp_TT();
-      high_clikid = BEreq::return_high_TT();
-
       _err = BEreq::clik_initialize_error();
 
-      highl_TT_log = BEreq::clik_compute_loglike(byVal(high_clikid),
-                             byVal(highl_TT_cl_and_pars),
-                             &_err);
-      lowp_log    = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-                             byVal(lowp_cl_and_pars),
-                             &_err);
+      result = BEreq::clik_compute_loglike(byVal(lowl_clikid),
+					   byVal(cl_and_pars),
+					   &_err);
 
-
-      result = highl_TT_log+lowp_log;
-
-      std::cout << "Log likelihood is : " << result << std::endl;
+      std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
 
     void function_LCDMtensor_lowp_TT_loglike(double& result)
@@ -927,13 +1276,13 @@ namespace Gambit
       high_clikid = BEreq::return_high_TT();
 
       _err = BEreq::clik_initialize_error();
-
+      
       highl_TT_log = BEreq::clik_compute_loglike(byVal(high_clikid),
-                             byVal(highl_TT_cl_and_pars),
-                             &_err);
+						 byVal(highl_TT_cl_and_pars),
+						 &_err);
       lowp_log    = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-                             byVal(lowp_cl_and_pars),
-                             &_err);
+						byVal(lowp_cl_and_pars),
+						&_err);
 
 
       result = highl_TT_log+lowp_log;
@@ -1219,18 +1568,16 @@ namespace Gambit
       _err = BEreq::clik_initialize_error();
 
       highl_TT_log = BEreq::clik_compute_loglike(byVal(high_clikid),
-                             byVal(highl_TT_cl_and_pars),
-                             &_err);
+						 byVal(highl_TT_cl_and_pars),
+						 &_err);
       lowp_log    = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-                             byVal(lowp_cl_and_pars),
-                             &_err);
+						byVal(lowp_cl_and_pars),
+						&_err);
 
 
       result = highl_TT_log+lowp_log;
 
       std::cout << "Log likelihood is : " << result << std::endl;
-
-
 
     }
 

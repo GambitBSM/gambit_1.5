@@ -1,5 +1,6 @@
 ##########################################################################
-## MultiNest version of minimal - CosmoBit application (in YAML)
+## Minimal CosmoBit application  (in YAML)
+## (Using the Planck-lite likelihood for high-l)
 ##
 ## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
 ## 2016-17
@@ -33,52 +34,10 @@ Parameters:
       prior_type: flat
       range: [0.05,0.10]
 
-  plik_dx11dr2_HM_v18_TT:
+  Planck_lite:
 
-    A_cib_217:
-      prior_type: flat
-      range: [45.0,75]
-    cib_index:
-      fixed_value: -1.3
-    xi_sz_cib:
-      prior_type: flat
-      range: [0.0,1.0]
-    A_sz:
-      prior_type: flat
-      range: [3.0,11.0]
-    ps_A_100_100:
-      prior_type: flat
-      range: [170.0,270.0]
-    ps_A_143_143:
-      prior_type: flat
-      range: [25.0,50.0]
-    ps_A_143_217:
-      prior_type: flat
-      range: [25.0,45.0]
-    ps_A_217_217:
-      prior_type: flat
-      range: [80.0,120.0]
-    ksz_norm:
-      prior_type: flat
-      range: [8.0,11.0]
-    gal545_A_100:
-      prior_type: flat
-      range: [7.0,11.0]
-    gal545_A_143:
-      prior_type: flat
-      range: [7.0,11.0]
-    gal545_A_143_217:
-      prior_type: flat
-      range: [15.0,26.0]
-    gal545_A_217:
-      prior_type: flat
-      range: [70.0,90.0]
-    calib_100T:
-      fixed_value: 0.999
-    calib_217T:
-      fixed_value: 0.995
     A_planck:
-      fixed_value: 1.0
+      range: [0.95,1.05]
 
 #======== Prior setup ========
 Priors:
@@ -97,8 +56,8 @@ Scanner:
   scanners:
     multinest:
       plugin: multinest
-      like:  Likelihood
-      nlive: 500
+      like:  LogLike
+      nlive: 10
       tol: 0.1
       aux_printer_txt_options:
       aux_printer_stats_options:
@@ -106,16 +65,30 @@ Scanner:
 
 #======== Observables of interest ========
 ObsLikes:
-  - purpose:      Likelihood
-    capability:   compute_vanilla_lowp_TT_loglike
+  - purpose:      LogLike
+    capability:   compute_strawberry_high_TT_loglike
     module:       CosmoBit
     type:         double
+
+  - purpose:      LogLike
+    capability:   compute_strawberry_lensing_loglike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   compute_strawberry_lowp_TT_loglike
+    module:       CosmoBit
+    type:         double
+
 
 #======== Rule entries ========
 Rules:
 
+## So far there are none
+   
+
 #======== Logging setup ========
-Logger:
+Lxogger:
   redirection:
     [Default]      : "default.log"
     [CosmoBit]  : "CosmoBit.log"
@@ -124,7 +97,7 @@ Logger:
 #======== Generic Name/Value Section ========
 KeyValues:
 
-  default_output_path: "runs/CosmoBit_multinest"
+  default_output_path: "runs/CosmoBit_planck_lite"
 
   rng: ranlux48
 

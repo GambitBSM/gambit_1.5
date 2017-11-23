@@ -26,14 +26,14 @@ namespace Gambit
 {
   namespace CosmoBit
   {
-    Class_container::Class_container() : already_calculated(false), is_initialized(false)
+    Class_container::Class_container() : non_free_pointer(false)
     {
-      std::cout << "Hello it's me. I am a Class_container" << std::endl;
+      //std::cout << "Hello it's me. I am a Class_container" << std::endl;
     }
 
     Class_container::~Class_container()
     {
-      std::cout << "And I am out" << std::endl;
+      //std::cout << "And I am out" << std::endl;
     }
   }
 }
