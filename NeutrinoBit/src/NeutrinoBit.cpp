@@ -69,7 +69,7 @@ namespace Gambit
           m_nu(1,1) = sqrt(md23);
           m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
         }
-        else if(m_min == 0.23)
+        else if(m_min == 1)
         {
           m_nu(2,2) = 2.3e-10;
           m_nu(1,1) = sqrt(pow(m_nu(2,2), 2.0) + md23);
