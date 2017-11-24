@@ -210,9 +210,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY compute_strawberry_lowp_TT_loglike
+  #define CAPABILITY compute_Planck_lowp_TT_loglike
   START_CAPABILITY
-    #define FUNCTION function_strawberry_lowp_TT_loglike
+    #define FUNCTION function_Planck_lowp_TT_loglike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,double**)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
@@ -229,9 +229,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY compute_strawberry_high_TT_loglike
+  #define CAPABILITY compute_Planck_high_TT_loglike
   START_CAPABILITY
-    #define FUNCTION function_strawberry_high_TT_loglike
+    #define FUNCTION function_Planck_high_TT_loglike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,double**)
     ALLOW_MODELS(Planck_TT)
@@ -247,7 +247,7 @@ START_MODULE
     BACKEND_REQ(return_high_TT,(clik_tag),clik_object*,())
     #undef FUNCTION
 
-    #define FUNCTION function_strawberry_high_TTTEEE_loglike
+    #define FUNCTION function_Planck_high_TTTEEE_loglike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,double**)
     ALLOW_MODELS(Planck_TTTEEE)
@@ -263,7 +263,7 @@ START_MODULE
     BACKEND_REQ(return_high_TTTEEE,(clik_tag),clik_object*,())
     #undef FUNCTION
 
-    #define FUNCTION function_strawberry_high_TT_lite_loglike
+    #define FUNCTION function_Planck_high_TT_lite_loglike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,double**)
     ALLOW_MODELS(Planck_lite)
@@ -280,9 +280,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY compute_strawberry_lensing_loglike
+  #define CAPABILITY compute_Planck_lensing_loglike
   START_CAPABILITY
-    #define FUNCTION function_strawberry_lensing_loglike
+    #define FUNCTION function_Planck_lensing_loglike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,double**)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)

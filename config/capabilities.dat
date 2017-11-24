@@ -3519,15 +3519,15 @@ compute_LCDMtensor_inflation_lowp_TT_loglike: |
    a yaml file. function then calls class and produces the Cl's
    (power spectrum) and goes on to calculate the planck likelihood.
 
-compute_strawberry_lowp_TT_loglike: |
+compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given
    set of  Cl's for low values of l (below 30).
 
-compute_strawberry_high_TT_loglike: |
+compute_Planck_high_TT_loglike: |
    function computes the planck log-likelihood for a  given
    set of  Cl's for high values of l (above 30).
 
-compute_strawberry_lensing_loglike: |
+compute_Planck_lensing_loglike: |
    function computes the planck lensing- log-likelihood for
    a  given set of  Cl's.
 

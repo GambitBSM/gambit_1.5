@@ -58,7 +58,7 @@ BE_INI_FUNCTION
   {
     if (*InUse::return_clikid_plik_dx11dr2_HM_v18_TTTEEE) initialize_high_TTTEEE();
     if (*InUse::return_clikid_plik_dx11dr2_HM_v18_TT) initialize_high_TT();
-    if (*InUse::return_clikid_plik_lite_v18_TT) initialize_high_TT_lite(); 
+    if (*InUse::return_clikid_plik_lite_v18_TT) initialize_high_TT_lite();
     if (*InUse::return_clikid_lowl_SMW_70_dx11d_2014) initialize_lowp_TT();
     if (*InUse::return_smica_g30_ftl_full_pp) initialize_lensing();
   }
@@ -68,21 +68,21 @@ END_BE_INI_FUNCTION
 
 BE_NAMESPACE
 {
-  
+
   clik_object * clikid_plik_dx11dr2_HM_v18_TT;
   clik_object * clikid_plik_dx11dr2_HM_v18_TTTEEE;
   clik_object * clikid_plik_lite_v18_TT;
   clik_object * clikid_lowl_SMW_70_dx11d_2014;
   clik_lensing_object * smica_g30_ftl_full_pp;
   clik_error *_err;
-	
+
   void initialize_high_TT()
   {
     std::cout << "Loading the high-l TT likelihood" << std::endl; 
     char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik/plik_dx11dr2_HM_v18_TT.clik";
     _err = initError();
     clikid_plik_dx11dr2_HM_v18_TT = clik_init(*&clik_path,&_err);
-  } 
+  }
 
   void initialize_high_TTTEEE()
   {
@@ -90,7 +90,7 @@ BE_NAMESPACE
     char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik";
     _err = initError();
     clikid_plik_dx11dr2_HM_v18_TTTEEE = clik_init(*&clik_path,&_err);
-  } 
+  }
 
   void initialize_high_TT_lite()
   {
@@ -98,7 +98,7 @@ BE_NAMESPACE
     char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik_lite/plik_lite_v18_TT.clik";
     _err = initError();
     clikid_plik_lite_v18_TT = clik_init(*&clik_path,&_err);
-  } 
+  }
 
   void initialize_lowp_TT()
   {
@@ -106,7 +106,7 @@ BE_NAMESPACE
     char clik_path[] = "/PATH/TO/plc_2.0/low_l/bflike/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
     _err = initError();
     clikid_lowl_SMW_70_dx11d_2014 = clik_init(*&clik_path,&_err);
-  } 
+  }
 
   void initialize_lensing()
   {
@@ -114,16 +114,16 @@ BE_NAMESPACE
     char clik_path[] = "/PATH/TO/plc_2.0/lensing/smica_g30_ftl_full_pp.clik_lensing";
     _err = initError();
     smica_g30_ftl_full_pp = clik_lensing_init(*&clik_path,&_err);
-  } 
-  
+  }
+
   void  data_cleanup()
   {
     clik_cleanup(byVal(&clikid_plik_dx11dr2_HM_v18_TT));
     clik_cleanup(byVal(&clikid_lowl_SMW_70_dx11d_2014));
-		
+
     //cout << "cleaned-up the data files" << endl;
   }
-	 
+
   clik_object * return_clikid_plik_dx11dr2_HM_v18_TTTEEE()
   {
     return clikid_plik_dx11dr2_HM_v18_TTTEEE;
@@ -138,7 +138,7 @@ BE_NAMESPACE
   {
     return clikid_plik_lite_v18_TT;
   }
-  
+
   clik_object * return_clikid_lowl_SMW_70_dx11d_2014()
   {
     return clikid_lowl_SMW_70_dx11d_2014;

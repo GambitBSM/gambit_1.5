@@ -44,7 +44,7 @@ namespace Gambit
       using namespace Pipes::class_set_parameter_LCDM;
 
       int l_max=2508;
-      
+
       BEreq::class_parser_initialize(&cosmo.fc,9,"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
@@ -86,7 +86,7 @@ namespace Gambit
       double mass = *Dep::mwimp; // in GeV
       double feff = runOptions->getValueOrDef<double>(1.,"f_eff");
       double annihilation = (1.0/1.78e-21)*(sigmav/mass)*feff; // in m^3 s^-1 kg^-1
-      
+
       BEreq::class_parser_initialize(&cosmo.fc,10,"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
@@ -146,7 +146,7 @@ namespace Gambit
       strcpy(cosmo.fc.name[5],"n_s");
       strcpy(cosmo.fc.name[6],"tau_reio");
       strcpy(cosmo.fc.name[7],"r");
-      
+
       sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
       sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
       sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
@@ -154,7 +154,7 @@ namespace Gambit
       sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
       sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
       sprintf(cosmo.fc.value[7],"%e",*Param["r_tensor"]);
-      
+
       std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
       std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
       std::cout << "H0 = " << *Param["H0"] << std::endl;
@@ -171,7 +171,7 @@ namespace Gambit
 
       char error_printout[1024];
       cosmo = *Dep::class_set_parameter;
-      
+
       if (BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
       {
 	sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
@@ -224,15 +224,15 @@ namespace Gambit
     {
       //std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
       using namespace Pipes::class_get_spectra_func;
-      
+
       Class_container cosmo = *Dep::class_run;
 
       // Maximal value of l (directly taken from CLASS)
       int l_max = cosmo.pt.l_scalar_max;
       // Number of Cl-spectra (columns of the Cl-table).
-      // The order of the spectra is [TT, EE, TE, BB, PhiPhi, TPhi, EPhi] 
-      int num_ct_max=7; 
-      // Each column takes l_max+1 entries (from l=0 to l=l_max) 
+      // The order of the spectra is [TT, EE, TE, BB, PhiPhi, TPhi, EPhi]
+      int num_ct_max=7;
+      // Each column takes l_max+1 entries (from l=0 to l=l_max)
       double* cl[l_max+1];
       for(int l=0; l < l_max+1; l++) cl[l] = new double[num_ct_max];
 
@@ -259,7 +259,7 @@ namespace Gambit
 	{
 	  // Failsafe for unexpected behaviour of "class_outpout_at_cl"
 	  for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
-	} 
+	}
       }
       clback = cl;
 
@@ -869,10 +869,10 @@ namespace Gambit
       std::cout << "Log likelihood is : " << result << std::endl;
     }
 
-    void function_strawberry_high_TT_loglike(double& result)
+    void function_Planck_high_TT_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_strawberry_high_TT_loglike" << std::endl;
-      using namespace Pipes::function_strawberry_high_TT_loglike;
+      //std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
+      using namespace Pipes::function_Planck_high_TT_loglike;
 
       double  cl_and_pars[2525];
       int l, idx_tt;
@@ -892,7 +892,7 @@ namespace Gambit
 	else
 	{
 	  cl_and_pars[idx_tt] = 0.;
-	}	  
+	}
       }
 
       //--------------------------------------------------------------------------
@@ -930,10 +930,10 @@ namespace Gambit
       std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
     }
 
-    void function_strawberry_high_TTTEEE_loglike(double& result)
+    void function_Planck_high_TTTEEE_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_strawberry_high_TTTEEE_loglike" << std::endl;
-      using namespace Pipes::function_strawberry_high_TTTEEE_loglike;
+      //std::cout << "Last seen alive in: function_Planck_high_TTTEEE_loglike" << std::endl;
+      using namespace Pipes::function_Planck_high_TTTEEE_loglike;
 
       double  cl_and_pars[7621];
       int l, idx_tt, idx_te, idx_ee;
@@ -959,7 +959,7 @@ namespace Gambit
 	  cl_and_pars[idx_tt] = 0.;
 	  cl_and_pars[idx_te] = 0.;
 	  cl_and_pars[idx_ee] = 0.;
-	}	  
+	}
       }
 
       //--------------------------------------------------------------------------
@@ -999,7 +999,7 @@ namespace Gambit
       cl_and_pars[7616] = *Param["calib_100P"];
       cl_and_pars[7617] = *Param["calib_143P"];
       cl_and_pars[7618] = *Param["calib_217P"];
-      cl_and_pars[7619] = *Param["A_pol"];           
+      cl_and_pars[7619] = *Param["A_pol"];
       cl_and_pars[7620] = *Param["A_planck"];
 
       //--------------------------------------------------------------------------
@@ -1017,10 +1017,10 @@ namespace Gambit
       std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
     }
 
-    void function_strawberry_high_TT_lite_loglike(double& result)
+    void function_Planck_high_TT_lite_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_strawberry_high_TT_lite_loglike" << std::endl;
-      using namespace Pipes::function_strawberry_high_TT_lite_loglike;
+      //std::cout << "Last seen alive in: function_Planck_high_TT_lite_loglike" << std::endl;
+      using namespace Pipes::function_Planck_high_TT_lite_loglike;
 
       double  cl_and_pars[2510];
       int l, idx_tt;
@@ -1040,7 +1040,7 @@ namespace Gambit
 	else
 	{
 	  cl_and_pars[idx_tt] = 0.;
-	}	  
+	}
       }
 
       //--------------------------------------------------------------------------
@@ -1063,10 +1063,10 @@ namespace Gambit
       std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
     }
 
-    void function_strawberry_lensing_loglike(double& result)
+    void function_Planck_lensing_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_strawberry_lensing_loglike" << std::endl;
-      using namespace Pipes::function_strawberry_lensing_loglike;
+      //std::cout << "Last seen alive in: function_Planck_lensing_loglike" << std::endl;
+      using namespace Pipes::function_Planck_lensing_loglike;
 
       double  cl_and_pars[8197];
       int l, idx_tt, idx_te, idx_ee, idx_pp;
@@ -1095,7 +1095,7 @@ namespace Gambit
 	  cl_and_pars[idx_te] = 0.;
 	  cl_and_pars[idx_ee] = 0.;
 	  cl_and_pars[idx_pp] = 0.;
-	}	  
+	}
       }
 
       //--------------------------------------------------------------------------
@@ -1118,10 +1118,10 @@ namespace Gambit
       std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
     }
 
-    void function_strawberry_lowp_TT_loglike(double& result)
+    void function_Planck_lowp_TT_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_strawberry_lowp_TT_loglike" << std::endl;
-      using namespace Pipes::function_strawberry_lowp_TT_loglike;
+      //std::cout << "Last seen alive in: function_Planck_lowp_TT_loglike" << std::endl;
+      using namespace Pipes::function_Planck_lowp_TT_loglike;
 
       double  cl_and_pars[121];
       int l, idx_tt, idx_te, idx_ee, idx_bb;
@@ -1150,7 +1150,7 @@ namespace Gambit
 	  cl_and_pars[idx_te] = 0.;
 	  cl_and_pars[idx_ee] = 0.;
 	  cl_and_pars[idx_bb] = 0.;
-	}	  
+	}
       }
 
       //--------------------------------------------------------------------------
@@ -1276,7 +1276,7 @@ namespace Gambit
       high_clikid = BEreq::return_high_TT();
 
       _err = BEreq::clik_initialize_error();
-      
+
       highl_TT_log = BEreq::clik_compute_loglike(byVal(high_clikid),
 						 byVal(highl_TT_cl_and_pars),
 						 &_err);

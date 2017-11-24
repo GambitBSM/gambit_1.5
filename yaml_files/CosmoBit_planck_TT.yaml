@@ -107,17 +107,17 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      LogLike
-    capability:   compute_strawberry_high_TT_loglike
+    capability:   compute_Planck_high_TT_loglike
     module:       CosmoBit
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_strawberry_lensing_loglike
+    capability:   compute_Planck_lensing_loglike
     module:       CosmoBit
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_strawberry_lowp_TT_loglike
+    capability:   compute_Planck_lowp_TT_loglike
     module:       CosmoBit
     type:         double
 
