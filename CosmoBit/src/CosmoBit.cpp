@@ -174,48 +174,48 @@ namespace Gambit
 
       if (BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_background_initialize(&cosmo.pr,&cosmo.ba) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
+        invalid_point().raise(error_printout);
       }
       if (BEreq::class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le) == _FAILURE_)
       {
-	sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
-	invalid_point().raise(error_printout);
+        sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
+        invalid_point().raise(error_printout);
       }
       cosmo.non_free_pointer = true;
     }
@@ -239,42 +239,42 @@ namespace Gambit
       // The entries for l=0 and l=1 are zero per defintion
       for(int i=0; i < num_ct_max; i++)
       {
-	cl[0][i] = 0.;
-	cl[1][i] = 0.;
+        cl[0][i] = 0.;
+        cl[1][i] = 0.;
       }
       // Loop through all l >= 2 and ask for the cl-spectra.
       for (int l=2; l < l_max+1; l++)
       {
         if (BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl[l])) == _SUCCESS_)
-	{
-	  cl[l][cosmo.sp.index_ct_tt] = cl[l][cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
-	  cl[l][cosmo.sp.index_ct_te] = cl[l][cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
-	  cl[l][cosmo.sp.index_ct_ee] = cl[l][cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
-	  cl[l][cosmo.sp.index_ct_bb] = cl[l][cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
-	  cl[l][cosmo.sp.index_ct_pp] = cl[l][cosmo.sp.index_ct_pp];
-	  cl[l][cosmo.sp.index_ct_tp] = cl[l][cosmo.sp.index_ct_tp]*pow(cosmo.ba.T_cmb*1.e6,1);
-	  cl[l][cosmo.sp.index_ct_ep] = cl[l][cosmo.sp.index_ct_ep]*pow(cosmo.ba.T_cmb*1.e6,1);
-	}
-	else
-	{
-	  // Failsafe for unexpected behaviour of "class_outpout_at_cl"
-	  for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
-	}
+        {
+          cl[l][cosmo.sp.index_ct_tt] = cl[l][cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
+          cl[l][cosmo.sp.index_ct_te] = cl[l][cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
+          cl[l][cosmo.sp.index_ct_ee] = cl[l][cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
+          cl[l][cosmo.sp.index_ct_bb] = cl[l][cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
+          cl[l][cosmo.sp.index_ct_pp] = cl[l][cosmo.sp.index_ct_pp];
+          cl[l][cosmo.sp.index_ct_tp] = cl[l][cosmo.sp.index_ct_tp]*pow(cosmo.ba.T_cmb*1.e6,1);
+          cl[l][cosmo.sp.index_ct_ep] = cl[l][cosmo.sp.index_ct_ep]*pow(cosmo.ba.T_cmb*1.e6,1);
+        }
+        else
+        {
+        // Failsafe for unexpected behaviour of "class_outpout_at_cl"
+        for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
+        }
       }
       clback = cl;
 
       // Now that all calculations with CLASS are done, free the pointers which were allocated in the meantime.
       if (cosmo.non_free_pointer)
       {
-	BEreq::class_lensing_free(&cosmo.le);
-	BEreq::class_spectra_free(&cosmo.sp);
-	BEreq::class_transfer_free(&cosmo.tr);
-	BEreq::class_nonlinear_free(&cosmo.nl);
-	BEreq::class_primordial_free(&cosmo.pm);
-	BEreq::class_perturb_free(&cosmo.pt);
-	BEreq::class_thermodynamics_free(&cosmo.th);
-	BEreq::class_background_free(&cosmo.ba);
-	cosmo.non_free_pointer = false;
+        BEreq::class_lensing_free(&cosmo.le);
+        BEreq::class_spectra_free(&cosmo.sp);
+        BEreq::class_transfer_free(&cosmo.tr);
+        BEreq::class_nonlinear_free(&cosmo.nl);
+        BEreq::class_primordial_free(&cosmo.pm);
+        BEreq::class_perturb_free(&cosmo.pt);
+        BEreq::class_thermodynamics_free(&cosmo.th);
+        BEreq::class_background_free(&cosmo.ba);
+        cosmo.non_free_pointer = false;
       }
     }
 
@@ -884,15 +884,15 @@ namespace Gambit
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 2509 ; ii++)
       {
-	idx_tt = ii;
-	if (ii >= 2)
-	{
-	  cl_and_pars[idx_tt] = cl[ii][0];
-	}
-	else
-	{
-	  cl_and_pars[idx_tt] = 0.;
-	}
+        idx_tt = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = cl[ii][0];
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+        }
       }
 
       //--------------------------------------------------------------------------
@@ -924,8 +924,8 @@ namespace Gambit
       high_clikid = BEreq::return_high_TT();
       _err = BEreq::clik_initialize_error();
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
-					   byVal(cl_and_pars),
-					   &_err);
+               byVal(cl_and_pars),
+               &_err);
 
       std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
     }
@@ -945,21 +945,21 @@ namespace Gambit
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 2509 ; ii++)
       {
-	idx_tt = ii;
-	idx_te = ii + 2509;
-	idx_ee = ii + (2 * 2509);
-	if (ii >= 2)
-	{
-	  cl_and_pars[idx_tt] = cl[ii][0];
-	  cl_and_pars[idx_te] = cl[ii][1];
-	  cl_and_pars[idx_ee] = cl[ii][2];
-	}
-	else
-	{
-	  cl_and_pars[idx_tt] = 0.;
-	  cl_and_pars[idx_te] = 0.;
-	  cl_and_pars[idx_ee] = 0.;
-	}
+        idx_tt = ii;
+        idx_te = ii + 2509;
+        idx_ee = ii + (2 * 2509);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = cl[ii][0];
+          cl_and_pars[idx_te] = cl[ii][1];
+          cl_and_pars[idx_ee] = cl[ii][2];
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_te] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+        }
       }
 
       //--------------------------------------------------------------------------
@@ -1011,8 +1011,8 @@ namespace Gambit
       high_clikid = BEreq::return_high_TTTEEE();
       _err = BEreq::clik_initialize_error();
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
-					   byVal(cl_and_pars),
-					   &_err);
+               byVal(cl_and_pars),
+               &_err);
 
       std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
     }
@@ -1032,15 +1032,15 @@ namespace Gambit
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 2509 ; ii++)
       {
-	idx_tt = ii;
-	if (ii >= 2)
-	{
-	  cl_and_pars[idx_tt] = cl[ii][0];
-	}
-	else
-	{
-	  cl_and_pars[idx_tt] = 0.;
-	}
+        idx_tt = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = cl[ii][0];
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+        }
       }
 
       //--------------------------------------------------------------------------
@@ -1057,8 +1057,8 @@ namespace Gambit
       high_clikid = BEreq::return_high_TT_lite();
       _err = BEreq::clik_initialize_error();
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
-					   byVal(cl_and_pars),
-					   &_err);
+               byVal(cl_and_pars),
+               &_err);
 
       std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
     }
@@ -1078,24 +1078,24 @@ namespace Gambit
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 2049 ; ii++)
       {
-	idx_pp = ii;
-	idx_tt = ii + 2049;
-	idx_ee = ii + (2 * 2049);
-	idx_te = ii + (3 * 2049);
-	if (ii >= 2)
-	{
-	  cl_and_pars[idx_tt] = cl[ii][0];
-	  cl_and_pars[idx_te] = cl[ii][1];
-	  cl_and_pars[idx_ee] = cl[ii][2];
-	  cl_and_pars[idx_pp] = cl[ii][4];
-	}
-	else
-	{
-	  cl_and_pars[idx_tt] = 0.;
-	  cl_and_pars[idx_te] = 0.;
-	  cl_and_pars[idx_ee] = 0.;
-	  cl_and_pars[idx_pp] = 0.;
-	}
+        idx_pp = ii;
+        idx_tt = ii + 2049;
+        idx_ee = ii + (2 * 2049);
+        idx_te = ii + (3 * 2049);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = cl[ii][0];
+          cl_and_pars[idx_te] = cl[ii][1];
+          cl_and_pars[idx_ee] = cl[ii][2];
+          cl_and_pars[idx_pp] = cl[ii][4];
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_te] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_pp] = 0.;
+        }
       }
 
       //--------------------------------------------------------------------------
@@ -1112,8 +1112,8 @@ namespace Gambit
       lensing_clikid = BEreq::return_lensing();
       _err = BEreq::clik_initialize_error();
       result = BEreq::clik_lensing_compute_loglike(byVal(lensing_clikid),
-						   byVal(cl_and_pars),
-						   &_err);
+               byVal(cl_and_pars),
+               &_err);
 
       std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
     }
@@ -1133,24 +1133,24 @@ namespace Gambit
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 30 ; ii++)
       {
-	idx_tt = ii;
-	idx_ee = ii + 30;
-	idx_bb = ii + (2 * 30);
-	idx_te = ii + (3 * 30);
-	if (ii >= 2)
-	{
-	  cl_and_pars[idx_tt] = cl[ii][0];
-	  cl_and_pars[idx_te] = cl[ii][1];
-	  cl_and_pars[idx_ee] = cl[ii][2];
-	  cl_and_pars[idx_bb] = cl[ii][3];
-	}
-	else
-	{
-	  cl_and_pars[idx_tt] = 0.;
-	  cl_and_pars[idx_te] = 0.;
-	  cl_and_pars[idx_ee] = 0.;
-	  cl_and_pars[idx_bb] = 0.;
-	}
+        idx_tt = ii;
+        idx_ee = ii + 30;
+        idx_bb = ii + (2 * 30);
+        idx_te = ii + (3 * 30);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = cl[ii][0];
+          cl_and_pars[idx_te] = cl[ii][1];
+          cl_and_pars[idx_ee] = cl[ii][2];
+          cl_and_pars[idx_bb] = cl[ii][3];
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_te] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_bb] = 0.;
+        }
       }
 
       //--------------------------------------------------------------------------
@@ -1168,8 +1168,8 @@ namespace Gambit
       _err = BEreq::clik_initialize_error();
 
       result = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-					   byVal(cl_and_pars),
-					   &_err);
+               byVal(cl_and_pars),
+               &_err);
 
       std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
@@ -1278,11 +1278,11 @@ namespace Gambit
       _err = BEreq::clik_initialize_error();
 
       highl_TT_log = BEreq::clik_compute_loglike(byVal(high_clikid),
-						 byVal(highl_TT_cl_and_pars),
-						 &_err);
+             byVal(highl_TT_cl_and_pars),
+             &_err);
       lowp_log    = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-						byVal(lowp_cl_and_pars),
-						&_err);
+            byVal(lowp_cl_and_pars),
+            &_err);
 
 
       result = highl_TT_log+lowp_log;
@@ -1568,11 +1568,11 @@ namespace Gambit
       _err = BEreq::clik_initialize_error();
 
       highl_TT_log = BEreq::clik_compute_loglike(byVal(high_clikid),
-						 byVal(highl_TT_cl_and_pars),
-						 &_err);
+             byVal(highl_TT_cl_and_pars),
+             &_err);
       lowp_log    = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-						byVal(lowp_cl_and_pars),
-						&_err);
+            byVal(lowp_cl_and_pars),
+            &_err);
 
 
       result = highl_TT_log+lowp_log;
