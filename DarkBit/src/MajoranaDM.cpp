@@ -74,7 +74,7 @@ namespace Gambit
           if ( sqrt_s < 90 )
           {
             piped_invalid_point.request(
-                "Majorana`DM sigmav called with sqrt_s < 90 GeV.");
+                "DiracDM sigmav called with sqrt_s < 90 GeV.");
             return 0;
           }
 
@@ -82,8 +82,7 @@ namespace Gambit
           {
             if ( sqrt_s > mh*2 )
             {
-              double GeV2tocm3s1 = gev2cm2*s2cm;
-              return sv_hh(lambda, mass, v, cosXi)*GeV2tocm3s1;
+              return sv_hh(lambda, mass, v, cosXi);
             }
             else return 0;
           }
@@ -100,12 +99,15 @@ namespace Gambit
             double br = virtual_SMHiggs_widths(channel,sqrt_s);
             double Gamma_s = virtual_SMHiggs_widths("Gamma",sqrt_s);
             double GeV2tocm3s1 = gev2cm2*s2cm;
+            double cos2Xi = cosXi*cosXi;
+            double sin2Xi = 1 - cos2Xi; 
+            double numerator = cos2Xi*v*v/4 + sin2Xi;
 
             // Explicitly close channel for off-shell top quarks
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
             // CHECK! Need Xi dependence, surely.
-            double res = 2*lambda*lambda*v0*v0/
+            double res = 2*lambda*lambda*v0*v0*numerator/4/
               sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
             return res;
           }
@@ -130,7 +132,7 @@ namespace Gambit
           double numerator = cos2Xi*v*v/4 + sin2Xi; // Explicit velocity dependence. 
           double x = pow(mW,2)/s;
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*pow(s,2)/64/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
+          return pow(lambda,2)*pow(s,2)/16/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
             *GeV2tocm3s1;
         }
 
@@ -143,7 +145,7 @@ namespace Gambit
           double numerator = cos2Xi*v*v/4 + sin2Xi;
           double x = pow(mZ0,2)/s;
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*pow(s,2)/128/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
+          return pow(lambda,2)*pow(s,2)/32/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
             * GeV2tocm3s1;
         }
 
@@ -161,29 +163,28 @@ namespace Gambit
             (1+(3/2*log(pow(mf,2)/s)+9/4)*4*alpha_s/3/M_PI);
           double GeV2tocm3s1 = gev2cm2*s2cm;
           return pow(lambda,2)*s*
-            pow(mf,2)/32/M_PI*Xf*pow(vf,3)*Dh2(s)*numerator*GeV2tocm3s1;
+            pow(mf,2)/8/M_PI*Xf*pow(vf,3)*Dh2(s)*numerator*GeV2tocm3s1;
         }
 
         /// Annihilation into hh
         double sv_hh(double lambda, double mass, double v, double cosXi)
         {
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
-          double vh = sqrt(1-4*mh*mh/s);  // vh and vphi are lab velocities
-          // Hardcoded velocities avoid NAN results.
-          double vphi = std::max(sqrt(1-4*mass*mass/s), 1e-6); 
-          double cos2Xi = cosXi*cosXi;
-          double sin2Xi = 1 - cos2Xi; 
-          double mh2s = mh*mh/s;
+          double GeV2tocm3s1 = gev2cm2*s2cm;
+          double xh = mh*mh/s;
+          double xpsi = mass*mass/s;
+          double xG = Gamma_mh*mh/s;
           
-          return vh/32/M_PI/s *pow(lambda,2) *(     
-            s/4 * Dh2(s) * (pow((s+2*mh*mh), 2) + pow(Gamma_mh*mh, 2) )* ( cos2Xi*v*v/4 + sin2Xi)
-          + 2*mass*v0*v0*cosXi*lambda*Dh2(s)*((s-mh*mh)*(s+2*mh*mh)+pow((Gamma_mh*mh),2)) *
-            (1 + (1-(8*mass*mass*cos2Xi/s + 2*mh2s*atanh(vphi*vh/(1-2*mh2s)))/vphi/vh))
-          - pow(v0, 4)*pow(lambda, 2) /vphi/vh/(1-2*mh2s) * 
-            (8*pow(mass, 4)*pow(cosXi, 4)/pow(s,2) + mass*mass/s *
-            (1-4*mh2s*(1-cos2Xi)) + 3/2*mh2s/s + (1-4*mh2s + 6*mh2s/s + 16*mass*mass/s*(1-mh2s)*cos2Xi) -
-            32*pow(mass*cos2Xi/s, 2)*atanh(vphi*vh/(1-2*mh2s)))
-            );
+          // Hardcoded lab velocities avoid NAN results.
+          double beta =  std::max(((s - 2*pow(mh,2))/sqrt((s - 4*pow(mh,2))*(s - 4*pow(mass,2)))), 1e-6);
+          
+          return (pow(lambda,2)*sqrt(1 - 4*xh)/(32.*M_PI*s)*(
+          s - 4*pow(cosXi,2)*s*xpsi - 8*cosXi*lambda*pow(v0,2)*mass + 
+          (3*xh*(8*cosXi*lambda*pow(v0,2)*(-1 + xh)*sqrt(s*xpsi) - s*(2 + xh)*(-1 + 4*pow(cosXi,2)*xpsi)))/(pow(xG,2) + pow(-1 + xh,2)) 
+          - (2*pow(lambda,2)*pow(v0,4)*(3*pow(xh,2) - 8*(1 + pow(cosXi,2))*xh*xpsi + 2*xpsi*(1 + 8*pow(cosXi,4)*xpsi)))/(pow(xh,2) + xpsi - 4*xh*xpsi)
+          + (4*beta*lambda*pow(v0,2)*(2*cosXi*(-1 + 2*xh)*(-1 - pow(xG,2) + xh*(-1 + 2*xh))*sqrt(s*xpsi)*(-1 - 2*xh + 8*pow(cosXi,2)*xpsi) + lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xh,2))*
+          (1 - 4*xh + 6*pow(xh,2) - 16*pow(cosXi,2)*(-1 + xh)*xpsi - 32*pow(cosXi,4)*pow(xpsi,2)))*atanh(1/beta))/((pow(xG,2) + pow(-1 + xh,2))*pow(1 - 2*xh,2)))
+          )*GeV2tocm3s1;
         }
 
       private:

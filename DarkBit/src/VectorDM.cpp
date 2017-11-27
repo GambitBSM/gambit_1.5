@@ -99,12 +99,12 @@ namespace Gambit
             double br = virtual_SMHiggs_widths(channel,sqrt_s);
             double Gamma_s = virtual_SMHiggs_widths("Gamma",sqrt_s);
             double GeV2tocm3s1 = gev2cm2*s2cm;
+            double y = s/pow(mass, 2);
 
             // Explicitly close channel for off-shell top quarks
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
-            // CHECK! Divide by 3...?
-            double res = 2*lambda*lambda*v0*v0/
+            double res = 2*lambda*lambda*v0*v0*(1-y/3 + pow(y,2)/12)/9/
               sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
             return res;
           }
@@ -125,9 +125,10 @@ namespace Gambit
         {
           double s = 4*mass*mass/(1-v*v/4);
           double x = pow(mW,2)/s;
+          double y = s/pow(mass, 2);
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*s/24/M_PI*sqrt(1-4*x)*Dh2(s)*(1-4*x+12*pow(x,2))
-            *GeV2tocm3s1;
+          return pow(lambda,2)*s/24/M_PI*sqrt(1-4*x)*(1-y/3 + pow(y,2)/12)*
+          Dh2(s)*(1-4*x+12*pow(x,2))*GeV2tocm3s1;
         }
 
         // Annihilation into Z bosons.
@@ -135,9 +136,10 @@ namespace Gambit
         {
           double s = 4*mass*mass/(1-v*v/4);
           double x = pow(mZ0,2)/s;
+          double y = s/pow(mass, 2);
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*s/48/M_PI*sqrt(1-4*x)*Dh2(s)*(1-4*x+12*pow(x,2))
-            * GeV2tocm3s1;
+          return pow(lambda,2)*s/48/M_PI*sqrt(1-4*x)*(1-y/3 + pow(y,2)/12)*
+          Dh2(s)*(1-4*x+12*pow(x,2))*GeV2tocm3s1;
         }
 
         // Annihilation into fermions
@@ -146,12 +148,13 @@ namespace Gambit
         {
           double s = 4*mass*mass/(1-v*v/4);
           double vf = sqrt(1-4*pow(mf,2)/s);
+          double y = s/pow(mass, 2);
           double Xf = 1;
           if ( is_quark ) Xf = 3 *
             (1+(3/2*log(pow(mf,2)/s)+9/4)*4*alpha_s/3/M_PI);
           double GeV2tocm3s1 = gev2cm2*s2cm;
-          return pow(lambda,2)*
-            pow(mf,2)/12/M_PI*Xf*pow(vf,3) * Dh2(s) * GeV2tocm3s1;
+          return pow(lambda,2)*(1-y/3 + pow(y,2)/12)*
+            pow(mf,2)/12/M_PI*Xf*pow(vf,3) * Dh2(s) *GeV2tocm3s1;
         }
 
         /// Annihilation into hh
@@ -161,13 +164,14 @@ namespace Gambit
           double vh = sqrt(1-4*mh*mh/s);  // vh and vs are lab velocities
           // Hardcoded lower velocity avoids nan results
           double vs = std::max(v/2, 1e-6);
+          double y = s/pow(mass, 2);
           double tp = pow(mass,2)+pow(mh,2)-0.5*s*(1-vs*vh);
           double tm = pow(mass,2)+pow(mh,2)-0.5*s*(1+vs*vh);
 
           double aR = 1+3*mh*mh*(s-mh*mh)*Dh2(s);
           double aI = 3*mh*mh*sqrt(s)*Gamma_mh*Dh2(s);
 
-          return pow(lambda,2)/48/M_PI/pow(s,2)/vs *
+          return pow(lambda,2)*(1-y/3 + pow(y,2)/12)/48/M_PI/pow(s,2)/vs *
             (
              (pow(aR,2)+pow(aI,2))*s*vh*vs
              +4*lambda*pow(v0,2)*(aR-lambda*pow(v0,2)/(s-2*pow(mh,2)))
