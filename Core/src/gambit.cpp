@@ -59,11 +59,11 @@ int main(int argc, char* argv[])
         if( rank==0 )
         {
            volatile int i = 0;
-           while(i == 0) { /* change ’i’ in the debugger */ } 
+           while(i == 0) { /* change ’i’ in the debugger */ }
            fprintf(stderr, "Variable 'i' changed externally; resuming execution! \n");
         }
      }
-     temp_comm.Barrier(); 
+     temp_comm.Barrier();
      // All processes wait at the barrier until process 0 is "released" by debugger.
      // If try/catch etc needs to be set for other processes, do those first before
      // releasing process zero.
@@ -272,8 +272,8 @@ int main(int argc, char* argv[])
     {
       if (not logger().disabled())
       {
-        cout << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;
-        cout << "GAMBIT has exited with fatal exception: " << e.what() << endl;
+        cerr << endl << " \033[00;31;1mFATAL ERROR\033[00m" << endl << endl;
+        cerr << "GAMBIT has exited with fatal exception: " << e.what() << endl;
       }
       #ifdef WITH_MPI
         signaldata().broadcast_shutdown_signal();

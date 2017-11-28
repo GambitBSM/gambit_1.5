@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:46
+// File generated at Sun 24 Sep 2017 15:56:56
 
 #ifndef SSM_EFFECTIVE_COUPLINGS_H
 #define SSM_EFFECTIVE_COUPLINGS_H
@@ -24,6 +24,7 @@
 #include "SSM_mass_eigenstates.hpp"
 #include "lowe.h"
 #include "physical_input.hpp"
+#include "standard_model.hpp"
 
 #include <complex>
 #include <Eigen/Core>
@@ -39,7 +40,6 @@ public:
    SSM_effective_couplings(const SSM_mass_eigenstates&,
                                    const softsusy::QedQcd&,
                                    const Physical_input&);
-   ~SSM_effective_couplings();
 
    void do_run_couplings(bool flag) { rg_improve = flag; }
    bool do_run_couplings() const { return rg_improve; }
@@ -49,26 +49,26 @@ public:
    void set_low_energy_data(const softsusy::QedQcd& qedqcd_) { qedqcd = qedqcd_; }
    void set_model(const SSM_mass_eigenstates& model_);
 
-   double get_hhVPVP_partial_width(unsigned gO1) const;
-   double get_hhVGVG_partial_width(unsigned gO1) const;
+   double get_hhVPVP_partial_width(int gO1) const;
+   double get_hhVGVG_partial_width(int gO1) const;
    double get_AhVPVP_partial_width() const;
    double get_AhVGVG_partial_width() const;
-   std::complex<double> get_eff_CphhVPVP(unsigned gO1) const { return eff_CphhVPVP(gO1); }
-   std::complex<double> get_eff_CphhVGVG(unsigned gO1) const { return eff_CphhVGVG(gO1); }
+   std::complex<double> get_eff_CphhVPVP(int gO1) const { return eff_CphhVPVP(gO1); }
+   std::complex<double> get_eff_CphhVGVG(int gO1) const { return eff_CphhVGVG(gO1); }
    std::complex<double> get_eff_CpAhVPVP() const { return eff_CpAhVPVP; }
    std::complex<double> get_eff_CpAhVGVG() const { return eff_CpAhVGVG; }
 
    void calculate_effective_couplings();
 
-   std::complex<double> CpFdhhbarFdPL(unsigned gt1, unsigned gt2, unsigned gt3) const;
-   std::complex<double> CpFuhhbarFuPL(unsigned gt1, unsigned gt2, unsigned gt3) const;
-   std::complex<double> CpFehhbarFePL(unsigned gt1, unsigned gt2, unsigned gt3) const;
-   std::complex<double> CphhVWpconjVWp(unsigned gt1) const;
-   std::complex<double> CpAhFdbarFdPL(unsigned gt2, unsigned gt3) const;
-   std::complex<double> CpAhFubarFuPL(unsigned gt2, unsigned gt3) const;
-   std::complex<double> CpAhFebarFePL(unsigned gt2, unsigned gt3) const;
-   void calculate_eff_CphhVPVP(unsigned gO1);
-   void calculate_eff_CphhVGVG(unsigned gO1);
+   std::complex<double> CpFdhhbarFdPL(int gt1, int gt2, int gt3) const;
+   std::complex<double> CpFuhhbarFuPL(int gt1, int gt2, int gt3) const;
+   std::complex<double> CpFehhbarFePL(int gt1, int gt2, int gt3) const;
+   std::complex<double> CphhVWpconjVWp(int gt1) const;
+   std::complex<double> CpAhFdbarFdPL(int gt2, int gt3) const;
+   std::complex<double> CpAhFubarFuPL(int gt2, int gt3) const;
+   std::complex<double> CpAhFebarFePL(int gt2, int gt3) const;
+   void calculate_eff_CphhVPVP(int gO1);
+   void calculate_eff_CphhVGVG(int gO1);
    void calculate_eff_CpAhVPVP();
    void calculate_eff_CpAhVGVG();
 
@@ -81,7 +81,8 @@ private:
 
    void copy_mixing_matrices_from_model();
 
-   void run_SM_strong_coupling_to(double m);
+   standard_model::Standard_model initialise_SM() const;
+   void run_SM_strong_coupling_to(standard_model::Standard_model, double m);
 
    // higher order corrections to the amplitudes for
    // effective coupling to photons
@@ -95,14 +96,14 @@ private:
    double scalar_scaling_factor(double) const;
    double pseudoscalar_scaling_factor(double) const;
 
-   Eigen::Matrix<double,2,2> ZH;
-   Eigen::Matrix<std::complex<double>,3,3> Vd;
-   Eigen::Matrix<std::complex<double>,3,3> Ud;
-   Eigen::Matrix<std::complex<double>,3,3> Vu;
-   Eigen::Matrix<std::complex<double>,3,3> Uu;
-   Eigen::Matrix<std::complex<double>,3,3> Ve;
-   Eigen::Matrix<std::complex<double>,3,3> Ue;
-   Eigen::Matrix<double,2,2> ZZ;
+   Eigen::Matrix<double,2,2> ZH{Eigen::Matrix<double,2,2>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Vd{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Ud{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Vu{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Uu{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Ve{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<std::complex<double>,3,3> Ue{Eigen::Matrix<std::complex<double>,3,3>::Zero()};
+   Eigen::Matrix<double,2,2> ZZ{Eigen::Matrix<double,2,2>::Zero()};
 
    Eigen::Array<std::complex<double>,2,1> eff_CphhVPVP;
    Eigen::Array<std::complex<double>,2,1> eff_CphhVGVG;

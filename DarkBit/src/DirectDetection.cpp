@@ -87,25 +87,30 @@ namespace Gambit {
       logger() << LogTags::debug << "\tdeld = delta d = " << (*BEreq::ddcom).deld;
       logger() << LogTags::debug << "\tdels = delta s = " << (*BEreq::ddcom).dels << EOM;
 
+
       // Option loop<bool>: If true, include 1-loop effects discussed in
-      // Drees Nojiri Phys.Rev. D48 (1993) 3483-3501 (default: false)
+      // Drees Nojiri Phys.Rev. D48 (1993) 3483-3501 (default: true)
+
+      // Turn on Drees Nojiri treatment by default:
+      (*BEreq::ddcom).dddn = 1;
+
       if (runOptions->hasKey("loop"))
       {
-        if (runOptions->getValue<bool>("loop")==true) (*BEreq::ddcom).dddn = 1;
-        else (*BEreq::ddcom).dddn = 0;
+        if (runOptions->getValue<bool>("loop")==false) (*BEreq::ddcom).dddn = 0;
       }
 
       // Option pole<bool>: If false, approximate squark propagator as 1/m_sq^2 (set to
       // true if loop = true) (default: false)
       if (runOptions->hasKey("pole"))
       {
-        if (runOptions->getValue<bool>("pole")==1) (*BEreq::ddcom).ddpole = 1;
+        if (runOptions->getValue<bool>("pole")==true) (*BEreq::ddcom).ddpole = 1;
         else
         {
           (*BEreq::ddcom).ddpole = 0;
-          if (runOptions->hasKey("loop") && runOptions->getValue<bool>("loop")==true)
-            logger () << LogTags::debug << "pole = false ignored "
-                "by DarkSUSY because loop = true." << EOM;
+          if ((runOptions->hasKey("loop") && runOptions->getValue<bool>("loop")==true) ||
+             !(runOptions->hasKey("loop")))
+                logger () << LogTags::debug << "pole = false ignored "
+                   "by DarkSUSY because loop = true." << EOM;
         }
       }
 

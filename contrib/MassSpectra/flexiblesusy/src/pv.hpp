@@ -43,9 +43,9 @@ namespace passarino_veltman {
 // mu, lambda, minmass as well as the internal cache) and therefore
 // are not thread-safe
 #ifdef ENABLE_LOOPTOOLS
-#  define PVATTR ATTR(pure)
+#  define PVATTR noexcept ATTR(pure)
 #else
-#  define PVATTR ATTR(const)
+#  define PVATTR noexcept ATTR(const)
 #endif
 
 #if defined(ENABLE_LOOPTOOLS) || defined(ENABLE_FFLITE)
@@ -71,27 +71,27 @@ template<class T> std::complex<double> H0 (T, T, T, double) PVATTR;
 // CHECK: are the following correct complexifications of B22, H0, F0, G0?
 
 template<class T>
-std::complex<double> B22(T p2, T m2a, T m2b, double scl2)
+std::complex<double> B22(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return B00(p2, m2a, m2b, scl2) - A0(m2a, scl2)/4.0 - A0(m2b, scl2)/4.0;
 }
 
 template<class T>
-std::complex<double> F0(T p2, T m2a, T m2b, double scl2)
+std::complex<double> F0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return A0(m2a, scl2) - 2.0*A0(m2b, scl2)
 	   - (2.0*p2 + 2.0*m2a - m2b) * B0(p2, m2a, m2b, scl2);
 }
 
 template<class T>
-std::complex<double> G0(T p2, T m2a, T m2b, double scl2)
+std::complex<double> G0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return (p2 - m2a - m2b) * B0(p2, m2a, m2b, scl2)
 	   - A0(m2a, scl2) - A0(m2b, scl2);
 }
 
 template<class T>
-std::complex<double> H0(T p2, T m2a, T m2b, double scl2)
+std::complex<double> H0(T p2, T m2a, T m2b, double scl2) noexcept
 {
     return 4.0*B00(p2, m2a, m2b, scl2) + G0(p2, m2a, m2b, scl2);
 }
