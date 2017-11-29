@@ -302,7 +302,7 @@ namespace Gambit
           // SLHAea object constructed from dependencies on the spectrum and decays.
           slha.clear();
           spectrum.clear();
-          slha = Dep::decay_rates->getSLHAea();
+          slha = Dep::decay_rates->getSLHAea(2);
           if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
             {
               // MSSM-specific.  SLHAea in SLHA2 format, please.
