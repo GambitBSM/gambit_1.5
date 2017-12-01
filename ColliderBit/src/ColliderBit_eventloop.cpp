@@ -851,6 +851,7 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+          /// @todo Avoid re-constructing the analyses for each event... just clear() them
           result.clear();
           result.init(analyses[indexPythiaNames]);
 
@@ -930,6 +931,7 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+          /// @todo Avoid re-constructing the analyses for each event... just clear() them
           result.clear();
           result.init(analyses[indexPythiaNames]);
 
@@ -1008,6 +1010,7 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+          /// @todo Avoid re-constructing the analyses for each event... just clear() them
           result.clear();
           result.init(analyses[indexPythiaNames]);
 
@@ -1086,6 +1089,7 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+          /// @todo Avoid re-constructing the analyses for each event... just clear() them
           result.clear();
           result.init(analyses[indexPythiaNames]);
 
