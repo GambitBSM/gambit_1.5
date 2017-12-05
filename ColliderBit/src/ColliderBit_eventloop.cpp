@@ -144,7 +144,6 @@ namespace Gambit
       eventsGenerated = false;
       // - Keep track of the number of failed events
       nFailedEvents = 0;
-      // maxFailedEvents = 10;    // Allow this setting to be passed in through the yaml file? 
 
 
       useBuckFastATLASDetector = false;
