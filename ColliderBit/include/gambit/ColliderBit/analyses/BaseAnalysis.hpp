@@ -48,7 +48,15 @@ namespace Gambit {
       //@{
       BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1) {  }
       virtual ~BaseAnalysis() { }
+
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
+      void reset() { clear(); }
+
+      /// @brief Overloadable implementation of the analysis reset.
+      //
+      /// @note Internally, reset() is called clear() -- we avoid this
+      /// externally because of confusion with std::vector::clear(), esp. on
+      /// AnalysisContainer.
       virtual void clear() {
         _ntot = 0; _xsec = -1; _xsecerr = -1; _luminosity = -1;
         _results.clear();

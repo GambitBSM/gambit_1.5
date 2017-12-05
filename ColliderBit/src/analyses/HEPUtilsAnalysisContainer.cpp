@@ -11,16 +11,17 @@ namespace Gambit
 
 
     /// Forward declarations using #DECLARE_ANALYSIS_FACTORY(ANAME)
+    /// @todo Make the declare macro also append to a macro to be used inside mkAnalysis, to avoid repetition
     /// @{
     DECLARE_ANALYSIS_FACTORY(Minimum);
     DECLARE_ANALYSIS_FACTORY(Covariance);
     DECLARE_ANALYSIS_FACTORY(Perf);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEP_13invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_MultiLEP_36invfb);
-    DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEP_20invfb);
-    DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEPStop_20invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEPStop_20invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_lowmass_36invfb);
+    DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEP_20invfb);
+    DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEPStop_20invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_1LEPStop_20invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_2bStop_20invfb);
     DECLARE_ANALYSIS_FACTORY(ATLAS_8TeV_2LEPEW_20invfb);
@@ -47,9 +48,10 @@ namespace Gambit
       IF_X_RTN_CREATE_ANA_X(Perf);
       IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEP_13invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_MultiLEP_36invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEPStop_20invfb);
+      IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_RJ3L_lowmass_36invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_0LEP_20invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_0LEPStop_20invfb);
-      IF_X_RTN_CREATE_ANA_X(ATLAS_13TeV_0LEPStop_20invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_1LEPStop_20invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_2bStop_20invfb);
       IF_X_RTN_CREATE_ANA_X(ATLAS_8TeV_2LEPEW_20invfb);
@@ -73,6 +75,7 @@ namespace Gambit
 
     void HEPUtilsAnalysisContainer::clear()
     {
+      /// @todo Storing smart ptrs to Analysis would make this way easier
       for (Analysis* a : analyses) {
         delete a;
         a = nullptr;
@@ -93,7 +96,7 @@ namespace Gambit
 
     void HEPUtilsAnalysisContainer::init(const std::vector<std::string>& analysisNames)
     {
-      assert(!analysisNames.empty());
+      // assert(!analysisNames.empty()); //< @todo Really necessary? It's immediately emptied!!
       clear();
       for (const string& a : analysisNames)
         analyses.push_back(mkAnalysis(a));
@@ -101,26 +104,34 @@ namespace Gambit
     }
 
 
+    void HEPUtilsAnalysisContainer::reset()
+    {
+      ready = false;
+      for (Analysis* a : analyses) a->reset(event);
+      ready = true;
+    }
+
+
     void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event) const
     {
-      assert(!analyses.empty());
-      assert(ready);
+      // assert(!analyses.empty()); //< @todo Really necessary?
+      assert(ready); //< @todo Really necessary?
       for (Analysis* a : analyses) a->analyze(event);
     }
 
 
     void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr)
     {
-      assert(!analyses.empty());
-      assert(ready);
+      // assert(!analyses.empty()); //< @todo Really necessary?
+      assert(ready); //< @todo Really necessary?
       for (Analysis* a : analyses) a->add_xsec(xs, xserr);
     }
 
 
     void HEPUtilsAnalysisContainer::add_xsec(const HEPUtilsAnalysisContainer* other)
     {
-      assert(other->analyses.size() != 0);
-      assert(ready);
+      assert(other->analyses.size() != 0); //< @todo Really necessary?
+      assert(ready); //< @todo Really necessary?
       const Analysis* otherana = other->analyses.front();
       add_xsec(otherana->xsec(), otherana->xsec_err());
     }
@@ -128,16 +139,16 @@ namespace Gambit
 
     void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr)
     {
-      assert(!analyses.empty());
-      assert(ready);
+      assert(!analyses.empty()); //< @todo Really necessary?
+      assert(ready); //< @todo Really necessary?
       for (Analysis* a : analyses) a->improve_xsec(xs, xserr);
     }
 
 
     void HEPUtilsAnalysisContainer::improve_xsec(const HEPUtilsAnalysisContainer* other)
     {
-      assert(other->analyses.size() != 0);
-      assert(ready);
+      assert(other->analyses.size() != 0); //< @todo Really necessary?
+      assert(ready); //< @todo Really necessary?
       const Analysis* otherana = other->analyses.front();
       improve_xsec(otherana->xsec(), otherana->xsec_err());
     }
@@ -145,9 +156,9 @@ namespace Gambit
 
     void HEPUtilsAnalysisContainer::add(const HEPUtilsAnalysisContainer* other)
     {
-      assert(other->analyses.size() != 0);
+      assert(other->analyses.size() != 0); //< @todo Really necessary?
       assert(analyses.size() == other->analyses.size());
-      assert(ready);
+      assert(ready); //< @todo Really necessary?
       for (size_t i = 0; i < analyses.size(); ++i)
         analyses[i]->add(other->analyses[i]);
       // auto myIter = analyses.begin();
@@ -161,9 +172,10 @@ namespace Gambit
 
     void HEPUtilsAnalysisContainer::scale(double factor)
     {
-      assert(!analyses.empty());
-      assert(ready);
-      for (Analysis* a : analyses) a->scale(factor);
+      assert(!analyses.empty()); //< @todo Really necessary?
+      assert(ready); //< @todo Really necessary?
+      for (Analysis* a : analyses)
+        a->scale(factor);
     }
 
   }
