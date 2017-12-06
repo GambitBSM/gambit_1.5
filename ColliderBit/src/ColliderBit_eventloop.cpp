@@ -851,16 +851,13 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)
             {
-              for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
-                {
-                  std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
-                }
+              for (auto a : analyses[indexPythiaNames])
+                std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             }
           #endif
 
@@ -930,16 +927,13 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)
             {
-              for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
-                {
-                  std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
-                }
+              for (auto a : analyses[indexPythiaNames])
+                std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             }
           #endif
 
@@ -1008,16 +1002,13 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)
             {
-              for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
-                {
-                  std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
-                }
+              for (auto a : analyses[indexPythiaNames])
+                std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             }
           #endif
 
