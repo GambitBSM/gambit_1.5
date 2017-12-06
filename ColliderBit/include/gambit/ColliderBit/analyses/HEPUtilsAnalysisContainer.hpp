@@ -39,6 +39,12 @@ namespace Gambit {
       void clear();
       //@}
 
+      // /// @name Access contents info:
+      // //@{
+      // /// List of contained analysis names
+      // /// Number of contained analyses
+      // //@}
+
       /// @name (Re-)Initialization functions:
       //@{
       /// Initialize analyses by their names.
@@ -47,11 +53,15 @@ namespace Gambit {
       void reset();
       //@}
 
-      /// @name Event analysis and analysis finalization functions:
+      /// @name Event analysis
       //@{
       /// Analyze an event.
       /// @todo Analyze is const?! What about internal counter updates?
       void analyze(const HEPUtils::Event&) const;
+      //@}
+
+      /// @name Analysis post-processing (combination, scaling, etc.):
+      //@{
       /// Add cross-sections and errors for two different process types
       void add_xsec(double, double);
       /// Add cross-sections and errors for two different process types
