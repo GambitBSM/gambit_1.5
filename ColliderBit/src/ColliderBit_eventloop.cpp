@@ -840,8 +840,7 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesDet.clear();
-        globalAnalysesDet.init(analyses[indexPythiaNames]);
+        if (globalAnalysesDet.analyses.empty()) globalAnalysesDet.init(analyses[indexPythiaNames]); else globalAnalysesDet.reset();
         return;
       }
 
@@ -916,8 +915,7 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesATLAS.clear();
-        globalAnalysesATLAS.init(analyses[indexPythiaNames]);
+        if (globalAnalysesATLAS.analyses.empty()) globalAnalysesATLAS.init(analyses[indexPythiaNames]); else globalAnalysesATLAS.reset();
         return;
       }
 
@@ -991,8 +989,7 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesCMS.clear();
-        globalAnalysesCMS.init(analyses[indexPythiaNames]);
+        if (globalAnalysesCMS.analyses.empty()) globalAnalysesCMS.init(analyses[indexPythiaNames]); else globalAnalysesCMS.reset();
         return;
       }
 
