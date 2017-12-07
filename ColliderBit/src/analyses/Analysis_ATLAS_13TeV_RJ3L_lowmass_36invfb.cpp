@@ -34,6 +34,7 @@ namespace Gambit {
   namespace ColliderBit {
 
     bool sortByPT_RJ3L(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
+    bool sortLepByPT_RJ3L(HEPUtils::Particle* lep1, HEPUtils::Particle* lep2) { return (lep1->pT() > lep2->pT());}
     //bool sortByMass(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->mass() > jet2->mass()); }
 
     bool SortLeptons(const pair<TLorentzVector,int> lv1, const pair<TLorentzVector,int> lv2)
@@ -653,6 +654,8 @@ namespace Gambit {
           signalMuons.push_back(muon);
 	  signalLeptons.push_back(muon);
         }
+
+	std::sort(signalLeptons.begin(), signalLeptons.end(), sortLepByPT_RJ3L);
 	
         // We now have the signal electrons, muons, jets and b jets- move on to the analysis
 	bool m_is2Lep=false;
@@ -686,8 +689,8 @@ namespace Gambit {
 	
 	
 	//////Initialize variables
-	double m_nBaselineLeptons = -999;
-	double m_nSignalLeptons   = -999;
+	int m_nBaselineLeptons = -999;
+	int m_nSignalLeptons   = -999;
 	
 	double m_lept1Pt  = -999;
 	double m_lept1Eta = -999;
@@ -746,8 +749,8 @@ namespace Gambit {
 	double m_lept2sign_VR = -999;
 	
 	//Jet Variables
-	double m_nJets =0;
-	double m_nBtagJets=0;
+	int m_nJets=0;
+	int m_nBtagJets=0;
 	
 	double m_jet1Pt =-999;
 	double m_jet1Eta =-999;
@@ -916,10 +919,10 @@ namespace Gambit {
 	double m_mTWComp =-999.;
 	double m_cosZ = -999.;
 	double m_cosJ = -999.;
-	double m_NjS   = 0;
-	double m_NjISR = 0;
-	double m_NbS   = 0;
-	double m_NbISR = 0;
+	int m_NjS   = 0;
+	int m_NjISR = 0;
+	int m_NbS   = 0;
+	int m_NbISR = 0;
 	
 	double m_MZ_VR = -999;
 	double m_MJ_VR = -999;  
@@ -928,8 +931,8 @@ namespace Gambit {
 	double m_PTI_VR = -999;
 	double m_RISR_VR = -999;
 	double m_dphiISRI_VR = -999;
-	double m_NjS_VR = 0;
-	double m_NjISR_VR = 0;
+	int m_NjS_VR = 0;
+	int m_NjISR_VR = 0;
 	
 	
 	double m_H2PP_VR = -999;
@@ -961,9 +964,9 @@ namespace Gambit {
 
 	// Classify events
 
-	m_nJets = (int)signalJets.size();
+	m_nJets = signalJets.size();
 
-	if(signalLeptons.size()==2)std::cout << "m_nJets " << m_nJets << " signalLeptons.size() " << signalLeptons.size() << " pt1 " << signalLeptons[0]->pT() << " pt2 " << signalLeptons[1]->pT() <<  std::endl;
+	//if(signalLeptons.size()==2)std::cout << "m_nJets " << m_nJets << " signalLeptons.size() " << signalLeptons.size() << " pt1 " << signalLeptons[0]->pT() << " pt2 " << signalLeptons[1]->pT() <<  std::endl;
 	
 	if (signalLeptons.size()==2) m_is2Lep = true;
 	else if (signalLeptons.size()==3) {m_is3Lep = true; //cout << "3L here" << endl;
@@ -971,7 +974,7 @@ namespace Gambit {
 	else if (signalLeptons.size()==4) m_is4Lep = true;
 	//else return;
 	
-	if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true;
+	if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true; 
 	if(m_is2Lep && m_nJets>2 ) m_is2L2JInt = true;
 	if(m_is3Lep && m_nJets>0 ) m_is3LInt = true;
 	if(m_is3Lep && m_nJets>1)  m_is3Lep2Jet = true; //
@@ -1023,7 +1026,7 @@ namespace Gambit {
 	    //Creating the Lab Frame
 	    LAB_2L2J->ClearEvent();
 	    
-	    if(myLeptons[0].first.Pt()<25000.0 || myLeptons[1].first.Pt()<25000.0) return;
+	    if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
 	    
 	    //Setting the Standard Variables
 	    //Di-Lepton System:
@@ -1184,7 +1187,7 @@ namespace Gambit {
 	    // set the jet lab frame 4-vector 
 	    TLorentzVector jet1 = J1_2L2J->GetFourVector(*LAB_2L2J);
 	    TLorentzVector jet2 = J2_2L2J->GetFourVector(*LAB_2L2J);
-	    
+
 	    // Some lab frame stuff
 	    m_dphill = lep1.DeltaPhi(lep2);
 	    m_dphilep1MET = fabs(lep1.DeltaPhi(metLV));
@@ -1208,6 +1211,7 @@ namespace Gambit {
 	    TLorentzVector vP_V1bPb = L1_2L2J->GetFourVector(*N2b_2L2J);
 	    TLorentzVector vP_V2bPb = L2_2L2J->GetFourVector(*N2b_2L2J);
 	    TLorentzVector vP_IbPb  = X1b_2L2J->GetFourVector(*N2b_2L2J);
+
 	    
 	    
 	    //Variables w/ 4 objects 
@@ -1230,6 +1234,7 @@ namespace Gambit {
 	    m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
 	    m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
 	    m_R_minH2P_minH3P = m_minH2P/m_minH3P;
+	    std::cout << " m_R_minH2P_minH3P " << m_R_minH2P_minH3P << " " << m_minH2P << " " <<  m_minH3P << std::endl;
 	    double H3PTa = vP_V1aPa.Pt() + vP_V2aPa.Pt() + vP_IaPa.Pt();
 	    
 	    m_minR_pT2i_HT3Pi = std::min(vP_V1aPa.Pt()/H3PTa,vP_V2aPa.Pt()/H3PTa);
@@ -1304,7 +1309,6 @@ namespace Gambit {
 	    
 	    m_sangle =(m_cosPa+(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
 	    m_dangle =(m_cosPa-(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
-	    
 	  }//end is 2L2J event
 
 	if(m_is3Lep){
@@ -1365,7 +1369,7 @@ namespace Gambit {
 	  else {
 	    m_foundSFOS=true;
 	  }
-	  
+		  
 	  if(m_foundSFOS){
 
 	    int Wlep1 = -999;
@@ -1450,7 +1454,7 @@ namespace Gambit {
 	    //Scalar sum of all visible objects + vector sum of invisible momenta 
 	    m_H4PP = vP_V1aPP.P() + vP_V1bPP.P() + vP_V2bPP.P() + (vP_I1aPP + vP_I1bPP).P();//H(3,1)PP
 	    m_HT4PP = vP_V1aPP.Pt() + vP_V1bPP.Pt() + vP_V2bPP.Pt() + (vP_I1aPP + vP_I1bPP).Pt();//HT(3,1)PP
-	    
+	  
 	    // Invisible components again
 	    TLorentzVector vP_IaLAB = X1a_3L->GetFourVector(*LAB_3L);
 	    TLorentzVector vP_IbLAB = X1b_3L->GetFourVector(*LAB_3L);
@@ -1462,6 +1466,23 @@ namespace Gambit {
 	    TVector3 lab_to_pp = C1N2_3L->GetBoostInParentFrame();
 	    
 	    /// Defined in the P-frame    
+	    m_H2Pa = (vP_V1aPa).P() + (vP_I1aPa).P(); //H(1,1)P
+	    m_H2Pb = (vP_V1bPb + vP_V2bPb).P() + vP_I1bPb.P();//H(1,1)P
+	    
+	    m_H3Pa = vP_V1aPa.P() + vP_I1aPa.P();//H(1,1)P
+	    m_H3Pb = vP_V1bPb.P() + vP_V2bPb.P() + vP_I1bPb.P();//H(2,1)P
+	    
+	    m_minH2P = std::min(m_H2Pa,m_H2Pb);
+	    m_minH3P = std::min(m_H3Pa,m_H3Pb);
+	    m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
+	    m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
+	    m_R_minH2P_minH3P = m_H2Pb/m_H3Pb;
+	    
+	    double H1PPa = (vP_V1aPP).P();
+	    double H1PPb = (vP_V1bPP + vP_V2bPP).P();
+	    double H2PPa = vP_V1aPP.P() + vP_I1aPP.P();
+	    double H2PPb = (vP_V1bPP+vP_V2bPP).P() + vP_I1bPP.P();
+	    m_maxR_H1PPi_H2PPi = std::max(H1PPa/H2PPa,H1PPb/H2PPb);
 	    
 	    ////Calculation of dRll_I_PP;
 	    //m_dRll_I_PP = (vP_V1bPP+vP_V1bPP).DeltaR(vP_I1bPP);
@@ -1635,7 +1656,7 @@ namespace Gambit {
 	  TLorentzVector vP_CM;
 	  TLorentzVector vP_ISR;
 	  TLorentzVector vP_I;
-	  
+
 	  if(m_is2L2JInt){
 	    
             vP_CM  = CM_2LNJ->GetFourVector();
@@ -1667,6 +1688,7 @@ namespace Gambit {
             if(myLeptons[0].second+myLeptons[1].second == 0) m_Is_Z = 1;
             m_MZ = Z_2LNJ->GetMass();
             m_MJ = J_2LNJ->GetMass();
+
             m_cosZ = Z_2LNJ->GetCosDecayAngle();
             //if(m_NjS > 1)
             m_cosJ = JSA_2LNJ->GetCosDecayAngle();
@@ -1732,7 +1754,7 @@ namespace Gambit {
 	  m_dphiISRI = fabs(vPt_ISR.Angle(vPt_I));
 	  
 	}//end INTERMEDIATE
-      	
+
 	// Cutflow check
 	
 	cutFlowVector_str[0] = "No cuts ";
@@ -1793,8 +1815,8 @@ namespace Gambit {
 	cutFlowVector_str[55] = "3LINT: HPb(1,1)/HPb(2,1) ";
         cutFlowVector_str[56] = "3LINT: m_H4PP ";
         cutFlowVector_str[57] = "3LINT: pT_PP/(pT_PP + HT_PP(3,1)) ";
-	
-	std::cout << " m_is3Lep " << m_is3Lep <<  " m_is2Lep2Jet " << m_is2Lep2Jet << " m_is2L2JInt " << m_is2L2JInt << " m_is3LInt " << m_is3LInt << " m_is3Lep2Jet " << m_is3Lep2Jet << " m_is3Lep3Jet " << m_is3Lep3Jet << " m_is4Lep2Jet " << m_is4Lep2Jet << " m_is4Lep3Jet " << m_is4Lep3Jet << std::endl;
+      
+	//std::cout << " m_is3Lep " << m_is3Lep <<  " m_is2Lep2Jet " << m_is2Lep2Jet << " m_is2L2JInt " << m_is2L2JInt << " m_is3LInt " << m_is3LInt << " m_is3Lep2Jet " << m_is3Lep2Jet << " m_is3Lep3Jet " << m_is3Lep3Jet << " m_is4Lep2Jet " << m_is4Lep2Jet << " m_is4Lep3Jet " << m_is4Lep3Jet << std::endl;
 
 	//if(m_is3Lep)std::cout << " m_is3Lep " << m_is3Lep << " m_lept1sign " << m_lept1sign << " m_lept2sign " << m_lept2sign << " m_lept1Pt " << m_lept1Pt << " m_lept2Pt " << m_lept2Pt << " m_lept3Pt " << m_lept3Pt << " signalBJets.size() " << signalBJets.size() << " signalJets.size() " << signalJets.size() << std::endl;
 	
@@ -1894,17 +1916,17 @@ namespace Gambit {
 
 	      (j==29 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100.) ||
 
-	      (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>500. && m_MJ<110.) ||
+	      (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110.) ||
 
-	      (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8) ||
+	      (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8) ||
 
-	      (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
+	      (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
 
-	      (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
+	      (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
 
-	      (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
+	      (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
 
-	      (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
+	      (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
 
 
 	      /* cutFlowVector_str[36] = "3LHIGH: Preselection ";
@@ -1989,7 +2011,7 @@ namespace Gambit {
 
 	if(m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05 && m_minDphi>2.4 && m_H5PP>400.)_num2L2JLOW++;
 
-	if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. &&  m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
+	if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. &&  m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
 
 	if(m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_HT4PP/m_H4PP > 0.75 && m_R_minH2P_minH3P>0.8 && m_H4PP > 550. && m_RPT_HT4PP < 0.2)_num3LHIGH++;
 
