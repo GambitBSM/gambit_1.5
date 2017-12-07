@@ -51,35 +51,35 @@ Parameters:
       range: [124.1, 127.3]
 
   # Sterile Neutrino Parameters
-  SN_dev:
+  SN_differential:
     M_1:
       range: [0.06, 500]
       prior_type: log
-    M_2:
-      range: [0.06, 500]
+    delta_M_2:
+      range: [1E-10, 1E2]
       prior_type: log
-    M_3:
-#      range: [0.06, 500]
-#      prior_type: log
-      same_as: SN_dev::M_2
+    delta_M_3:
+      range: [1E-10, 1E2]
+      prior_type: log
+#      same_as: SN_dev::M_2
     ReOm23:
-#      range: [0, 6.283]
-      fixed_value: 0.0
+      range: [0, 6.283]
+#      fixed_value: 0.0
     ImOm23:
-#      range: [-8, 8]
-      fixed_value: [-20.0, 20.0]
+      range: [-8, 8]
+#      fixed_value: [-20.0, 20.0]
     ReOm13:
-#      range: [0, 6.283]
-      fixed_value: 0.0
+      range: [0, 6.283]
+#      fixed_value: 0.0
     ImOm13:
-#      range: [-8, 8]
-      fixed_value: 0.0
+      range: [-8, 8]
+#      fixed_value: 0.0
     ReOm12:
-#      range: [0, 6.283]
-      fixed_value: 0.0
+      range: [0, 6.283]
+#      fixed_value: 0.0
     ImOm12:
-#      range: [-8, 8]
-      fixed_value: 0.0
+      range: [-8, 8]
+#      fixed_value: 0.0
     L_Ge:
       range: [0.159, 0.193]
     L_Xe:
@@ -89,7 +89,7 @@ Parameters:
     ordering:
       fixed_value: 1  # 1: normal ordering, 0: inverse ordering
     min_mass:
-      fixed_value: 0  # 0: massless, 1: 0.23 eV
+      fixed_value: 1  # 0: massless, 1: 0.23 eV
     md21:
       fixed_value: 7.5e-23
     md31:
@@ -105,6 +105,7 @@ Printer:
   options:
     output_file: "SN_dev.hdf5"
     delete_file_on_restart: true
+    group: "/SN_dev"
 
 Scanner:
 
@@ -114,7 +115,7 @@ Scanner:
     multinest:
       plugin: multinest
       like: LogLike
-      nlive: 10
+      nlive: 1000
 
 ObsLikes:
 
@@ -222,20 +223,14 @@ ObsLikes:
     purpose: LogLike
     function: l2lll_likelihood
 
-#  - capability: mu2e_lnL
-#    purpose: LogLike
-#    function: mu2e_likelihood
+  - capability: mu2e_lnL
+    purpose: LogLike
+    function: mu2e_likelihood
 
-#  - capability: edm_lnL
-#    purpose: LogLike
-#    function: edm_likelihood
    
 
 Rules:
 
-  - capability: Theta_sq
-    type: Matrix3d
-    function: CI_param
 
 KeyValues:
 
@@ -243,4 +238,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e40
     debug: true
 
-  default_output_path: "runs/SN_dev_test_2/"
+  default_output_path: "runs/SN_dev/"
