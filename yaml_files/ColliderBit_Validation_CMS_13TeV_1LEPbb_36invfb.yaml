@@ -197,7 +197,10 @@ Rules:
       xsec_vetos: [0.048, 0.075]
 
       #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_225_75.slha"] 
-      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_250_1.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_250_1.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_350_100.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_500_1.slha"] 
+      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_1LEPbb_36invfb_500_125.slha"] 
 
   - capability: DetectorSim
     type: "Gambit::ColliderBit::DelphesVanilla"

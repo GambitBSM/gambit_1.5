@@ -1,0 +1,36 @@
+\begin{table}[H] 
+\caption{$\tilde{\chi}_{1}^{\pm}\tilde{\chi}_{2}^{0}$ decay via $W^{*}/Z^{*}, [\tilde{\chi}_{2}^{0}\tilde{\chi}_{1}^{\pm},\tilde{\chi}_{1}^{0}]: [150,143] [GeV]$} 
+\makebox[\linewidth]{ 
+\renewcommand{\arraystretch}{0.4} 
+\begin{tabular}{c c c c c} 
+\hline
+& CMS & GAMBIT & GAMBIT/CMS & $\sigma$-corrected GAMBIT/CMS \\ \hline
+$\sigma (pp\to \tilde{\chi}_{1}^{\pm}, \tilde{\chi}_{2}^{0})$ &5180 $fb$ &3859$fb$ &0.745 & 1\\ \hline
+\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\ \hline
+All events&220.3&1.385e+05&628.8&844.1\\
+2 $\mu$ in acceptance&53.3&41.42&0.7771&1.043\\
+Opposite-sign&49.4&35.05&0.7095&0.9524\\
+$p_{T}(\mu\mu) > 3 GeV$&48.9&34.22&0.6998&0.9393\\
+$M(\mu\mu) > 4 GeV$&23.5&18.42&0.784&1.052\\
+$M(\mu\mu)$ veto [9,10.5] $GeV$&23.3&18.42&0.7908&1.061\\
+ISR jet&21.5&11.91&0.5541&0.7438\\
+$ 125 < E^{miss}_{T} < 200 GeV$&5.8&1.108&0.1911&0.2565\\
+$ 0.6 < E^{miss}_{T}/H_{T} < 1.4$ and $H_{T} > 100 GeV$&3.8&0.9697&0.2552&0.3426\\
+B-tag veto&3.2&0.9697&0.303&0.4068\\
+$M(\tau\tau)$&2.8&0.9697&0.3463&0.4649\\
+$M_{T}(\mu_{x},E^{miss}_{T}), x = 1,2 < 70 GeV$&2.4&0.8312&0.3463&0.4649\\
+\hline \multicolumn{5}{c}{Percentage (\%)} \\ \hline
+2 $\mu$ in acceptance&100&100& - & -\\
+Opposite-sign&92.68&84.62& - & -\\
+$p_{T}(\mu\mu) > 3 GeV$&91.74&82.61& - & -\\
+$M(\mu\mu) > 4 GeV$&44.09&44.48& - & -\\
+$M(\mu\mu)$ veto [9,10.5] $GeV$&43.71&44.48& - & -\\
+ISR jet&40.34&28.76& - & -\\
+$ 125 < E^{miss}_{T} < 200 GeV$&10.88&2.676& - & -\\
+$ 0.6 < E^{miss}_{T}/H_{T} < 1.4$ and $H_{T} > 100 GeV$&7.129&2.341& - & -\\
+B-tag veto&6.004&2.341& - & -\\
+$M(\tau\tau)$&5.253&2.341& - & -\\
+$M_{T}(\mu_{x},E^{miss}_{T}), x = 1,2 < 70 GeV$&4.503&2.007& - & -\\
+\end{tabular} 
+} 
+\end{table}

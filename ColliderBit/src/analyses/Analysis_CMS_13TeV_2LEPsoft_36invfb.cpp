@@ -9,11 +9,11 @@
 #include <cmath>
 #include <memory>
 #include <iomanip>
+#include <fstream>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
-#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
 using namespace std;
 
@@ -33,7 +33,6 @@ namespace Gambit {
       double xsecCMS_150_143;
       double xsecCMS_150_130;
 
-      Perf_Plot* plots;
       ofstream cutflowFile;
       string analysisRunName;
 
@@ -60,8 +59,8 @@ namespace Gambit {
 
 	NCUTS=12;
 	set_luminosity(35.9);
-	xsecCMS_150_143=5.18;
-	xsecCMS_150_130=5.18;
+	xsecCMS_150_143=5180.;
+	xsecCMS_150_130=5180.;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
@@ -69,65 +68,68 @@ namespace Gambit {
           cutFlowVectorCMS_150_130.push_back(0);
           cutFlowVector_str.push_back("");
         }
-
-        analysisRunName = "CMS_13TeV_2LEPsoft_36invfb_test";
-        vector<const char*> variables = {"met"};
-        plots = new Perf_Plot(analysisRunName, &variables);
-
+        analysisRunName = "CMS_13TeV_2LEPsoft_36invfb_150_130";
       }
 
 
       void analyze(const HEPUtils::Event* event) {
 	HEPUtilsAnalysis::analyze(event);
-
-        // Missing energy
         double met = event->met();
 
         // Signal objects
         vector<HEPUtils::Particle*> signalLeptons;
         vector<HEPUtils::Particle*> signalElectrons;
-        for (HEPUtils::Particle* electron : event->electrons()) {
-	  if (electron->pT()>5. && electron->pT()<30.  &&fabs(electron->eta())<2.5) {
-            signalElectrons.push_back(electron);
-	    signalLeptons.push_back(electron);
-          }
-	}
-
         vector<HEPUtils::Particle*> signalMuons;
-        for (HEPUtils::Particle* muon : event->muons()) {
-	  if (muon->pT()>5. && muon->pT()<30. && fabs(muon->eta())<2.4) {
-            signalMuons.push_back(muon);
-	    signalLeptons.push_back(muon);
-          }
+	vector<HEPUtils::Jet*> signalJets;
+	vector<HEPUtils::Jet*> signalBJets;
+
+	//@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_048_ttbar.pdf
+        const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
+        const vector<double> bEl={5.,10.,15.,20.,25.,30.};
+        const vector<double> cEl={0.336,0.412,0.465,0.496,0.503,0.344,0.402,0.448,0.476,0.482,0.233,0.299,0.25,0.261,0.255,0.309,0.359,0.394,0.408,0.418,0.243,0.287,0.327,0.341,0.352};
+        HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
+        for (HEPUtils::Particle* electron : event->electrons()) {
+          bool isEl=has_tag(_eff2dEl,electron->eta(),electron->pT());
+	  if (electron->pT()>5. && electron->pT()<30. && fabs(electron->eta())<2.5 && isEl)signalElectrons.push_back(electron);
 	}
 
-        size_t nSignalBJets;
-	vector<HEPUtils::Jet*> signalJets;
-	const vector<double>  a = {0,10.};
-        const vector<double>  b = {0,10000.};
-        const vector<double> c = {0.7};
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+	//@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_048_ttbar.pdf
+        const vector<double> aMu={0.,0.9,1.2,2.1,2.4};
+        const vector<double> bMu={3.5,10.,15.,20.,25.,30.};
+        const vector<double> cMu={0.647,0.718,0.739,0.76,0.763,0.627,0.662,0.694,0.725,0.733,0.61,0.66,0.678,0.685,0.723,0.566,0.629,0.655,0.67,0.696};
+        HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
+        for (HEPUtils::Particle* muon : event->muons()) {
+          bool isMu=has_tag(_eff2dMu,muon->eta(),muon->pT());
+	  if (muon->pT()>5. && muon->pT()<30. && fabs(muon->eta())<2.4 && isMu)signalMuons.push_back(muon);
+	}
+
         for (HEPUtils::Jet* jet : event->jets()) {
-          bool hasTag=has_tag(_eff2d, jet->eta(), jet->pT());
           if (jet->pT()>25. && fabs(jet->eta())<2.4) {
 	   signalJets.push_back(jet); 
-	   if (jet->btag() && hasTag)nSignalBJets++;
+	   if (jet->btag())signalBJets.push_back(jet);
 	  }
         }
+	CMS::applyCSVv2LooseBtagEff(signalBJets);
 
+	signalLeptons=signalElectrons;
+	signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
-        size_t nSignalLeptons = signalLeptons.size();
-	size_t nSignalMuons = signalMuons.size();
-	size_t nSignalJets = signalJets.size();
+        size_t nSignalLeptons=signalLeptons.size();
+	size_t nSignalMuons=signalMuons.size();
+	size_t nSignalJets=signalJets.size();
+	size_t nSignalBJets=signalBJets.size();
 
-	//Variable definitions
+	//Variable
 	double m_ll=0;
 	double pT_ll=0;
 	double hT=0;
 	double mTauTau=0;
 	vector<double> mT;
 
-	if (nSignalLeptons>=2) {
+        bool preselection=false; 
+	bool OS=false;
+	
+	if (nSignalLeptons>1) {
 	  m_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).m();
 	  pT_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).pT();
 
@@ -139,21 +141,16 @@ namespace Gambit {
 
 	for (size_t iJet=0;iJet<nSignalJets;iJet++)hT+=signalJets.at(iJet)->pT();
 
-	for (size_t iLep=0;iLep<nSignalLeptons;iLep++)mT.at(iLep)=sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi())));
+	for (size_t iLep=0;iLep<nSignalLeptons;iLep++)mT.push_back(sqrt(2*signalLeptons.at(iLep)->pT()*met*(1-cos(signalLeptons.at(iLep)->phi()-event->missingmom().phi()))));
 	if (nSignalLeptons==0) {
 	  mT.push_back(999);
 	  mT.push_back(999);
 	}
 	if (nSignalLeptons==1)mT.push_back(999);
         
-
-	//Preselection
-        bool preselection=false; 
-	bool OS=false;
-	
 	if (nSignalLeptons==2)OS=signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()<0.;
 
-	if (nSignalLeptons==2 && nSignalBJets==0) {
+	if (nSignalLeptons==2 && nSignalBJets==0 && nSignalJets>0) {
 	  if (OS && signalLeptons.at(0)->abspid()==signalLeptons.at(1)->abspid()) {
   	    if (m_ll<50. && pT_ll>3. && met>125. && met/hT<1.4 && met/hT>0.6 && hT>100. && m_ll>4. && (m_ll<9. || m_ll>10.5) && (mTauTau<0. || mTauTau>160.) && mT.at(0)<70. && mT.at(1)<70.) {
 	      preselection=true;
@@ -161,7 +158,7 @@ namespace Gambit {
 	  }
 	}	
 
-	//SR
+	//Signal Regions
 	if (preselection && met>125. && met<200. && nSignalMuons>0) {
 	  if (m_ll>4. && m_ll<10.)_numSR1++;
 	  if (m_ll>10. && m_ll<20.)_numSR2++;
@@ -181,22 +178,17 @@ namespace Gambit {
 	  if (m_ll>30. && m_ll<50.)_numSR12++;
 	}
 
-        if (preselection) {
-          vector<double> variables = {met};
-          plots->fill(&variables);
-        }
-
         cutFlowVector_str[0] = "All events";
         cutFlowVector_str[1] = "2 $\\mu$ in acceptance";
         cutFlowVector_str[2] = "Opposite-sign";
         cutFlowVector_str[3] = "$p_{T}(\\mu\\mu) > 3 GeV$";
-        cutFlowVector_str[4] = "$M(\\mu\\mu) > 3 GeV$";
+        cutFlowVector_str[4] = "$M(\\mu\\mu) > 4 GeV$";
         cutFlowVector_str[5] = "$M(\\mu\\mu)$ veto [9,10.5] $GeV$";
         cutFlowVector_str[6] = "ISR jet";
-        cutFlowVector_str[7] = "$ 125 < E^{miss}_{T} < 200 GeV";
-        cutFlowVector_str[8] = "$ 0.6 < E^{miss}_{T}/H_{T} < 1.4 and H_{T} > 100 GeV";
+        cutFlowVector_str[7] = "$ 125 < E^{miss}_{T} < 200 GeV$";
+        cutFlowVector_str[8] = "$ 0.6 < E^{miss}_{T}/H_{T} < 1.4$ and $H_{T} > 100 GeV$";
         cutFlowVector_str[9] = "B-tag veto";
-        cutFlowVector_str[10] = "M(\\tau\\tau)";
+        cutFlowVector_str[10] = "$M(\\tau\\tau)$";
         cutFlowVector_str[11] = "$M_{T}(\\mu_{x},E^{miss}_{T}), x = 1,2 < 70 GeV$";
 
         cutFlowVectorCMS_150_143[0] = 220.3;
@@ -235,21 +227,21 @@ namespace Gambit {
 
              (j==3 && nSignalMuons==2 && OS && pT_ll>3.) ||
 
-             (j==4 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3.) ||
+             (j==4 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4.) ||
 
-             (j==5 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5)) ||
+             (j==5 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5)) ||
 
-             (j==6 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5)) ||
+             (j==6 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0) ||
 
-             (j==7 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200.) ||
+             (j==7 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200.) ||
 
-             (j==8 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100.) ||
+             (j==8 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100.) ||
 
-             (j==9 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0) ||
+             (j==9 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0) ||
 
-             (j==10 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.)) ||
+             (j==10 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.)) ||
 
-             (j==11 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>3. && (m_ll<9. || m_ll>10.5) && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.) &&mT.at(0)<70. && mT.at(1)<70.) )
+             (j==11 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.) &&mT.at(0)<70. && mT.at(1)<70.) )
 
           cutFlowVector[j]++;
         }
@@ -291,22 +283,39 @@ namespace Gambit {
         path.append(analysisRunName);
         path.append(".txt");
         cutflowFile.open(path.c_str());
-        cutflowFile<<"\\begin{tabular}{c c c c c}"<<endl;
-        cutflowFile<<"\\hline"<<endl;
-        cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-        cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<xsecCMS_150_143<<" $fb$ &"<<xsec()<<"$fb$ &"<< xsec()/xsecCMS_150_143<<" & 1\\\\"<<endl;
-        cutflowFile<<"\\multicolumn{5}{c}{Expected events at 20.3 $fb^{-1}$} \\\\ \\hline"<<endl;
-        for (size_t i=0; i<NCUTS; i++) {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorCMS_150_143[i]<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_143[i]<<"&"<<(xsecCMS_150_143/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_143[i]<<"\\\\"<< endl;
-        }
-        cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-        for (size_t i=1; i<NCUTS; i++) {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<cutFlowVectorCMS_150_143[i]*100./cutFlowVectorCMS_150_143[1]<<"&"<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
-        }
-        cutflowFile<<"\\end{tabular}"<<endl;
+
+        if (analysisRunName.find("150_143") != string::npos) {
+          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W^{*}/Z^{*}, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [150,143] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_150_143<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<<xsec()/xsecCMS_150_143<<" & 1\\\\ \\hline"<<endl;
+          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+          for (size_t i=0; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_150_143[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_143[i]<<"&"<<setprecision(4)<<(xsecCMS_150_143/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_143[i]<<"\\\\"<< endl;
+          }
+          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+          for (size_t i=1; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_150_143[i]*100./cutFlowVectorCMS_150_143[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+          }
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+	}
+
+        if (analysisRunName.find("150_130") != string::npos) {
+          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W^{*}/Z^{*}, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [150,130] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_150_130<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<<xsec()/xsecCMS_150_130<<" & 1\\\\ \\hline"<<endl;
+          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+          for (size_t i=0; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_150_130[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_130[i]<<"&"<<setprecision(4)<<(xsecCMS_150_130/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_150_130[i]<<"\\\\"<< endl;
+          }
+          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+          for (size_t i=1; i<NCUTS; i++) {
+            cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_150_130[i]*100./cutFlowVectorCMS_150_130[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+          }
+          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+	}
+
         cutflowFile.close();
 
-        plots->createFile();
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SR1;
