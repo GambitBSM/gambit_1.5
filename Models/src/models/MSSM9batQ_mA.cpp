@@ -38,7 +38,7 @@
      set_many_to_one(targetP, initVector<str>("md2_3", "me2_3", "ml2_12", "ml2_3", "mq2_12"), myP["msf2"]);
      // stop soft masses squared
      targetP.setValue("mu2_3", myP["mq2_3"]);
-     // set all trilinear coupling except At to zero
+     // set all trilinear coupling except Au_3 to zero
      targetP.setValue("A0", 0.0);
 
      // Done
