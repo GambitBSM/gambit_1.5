@@ -74,7 +74,7 @@ namespace Gambit
           if ( sqrt_s < 90 )
           {
             piped_invalid_point.request(
-                "DiracDM sigmav called with sqrt_s < 90 GeV.");
+                "MajoranaDM sigmav called with sqrt_s < 90 GeV.");
             return 0;
           }
 
@@ -95,20 +95,19 @@ namespace Gambit
           if ( channel == "WW" and sqrt_s < mW*2) return 0;
 
           if ( sqrt_s < 300 )
-          {
+          {          
             double br = virtual_SMHiggs_widths(channel,sqrt_s);
             double Gamma_s = virtual_SMHiggs_widths("Gamma",sqrt_s);
             double GeV2tocm3s1 = gev2cm2*s2cm;
             double cos2Xi = cosXi*cosXi;
             double sin2Xi = 1 - cos2Xi; 
-            double numerator = cos2Xi*v*v/4 + sin2Xi;
+            double numerator = (cos2Xi*v*v/4 + sin2Xi);
 
             // Explicitly close channel for off-shell top quarks
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
-            // CHECK! Need Xi dependence, surely.
-            double res = 2*lambda*lambda*v0*v0*numerator/4/
-              sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
+            double res = numerator*lambda*lambda*v0*v0*sqrt_s
+            *Dh2(s)*Gamma_s*gev2cm2*br;
             return res;
           }
           else
@@ -129,7 +128,7 @@ namespace Gambit
           double s = 4*mass*mass/(1-v*v/4);
           double cos2Xi = cosXi*cosXi;
           double sin2Xi = 1 - cos2Xi; 
-          double numerator = cos2Xi*v*v/4 + sin2Xi; // Explicit velocity dependence. 
+          double numerator = (cos2Xi*v*v/4 + sin2Xi);
           double x = pow(mW,2)/s;
           double GeV2tocm3s1 = gev2cm2*s2cm;
           return pow(lambda,2)*pow(s,2)/16/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
@@ -142,11 +141,11 @@ namespace Gambit
           double s = 4*mass*mass/(1-v*v/4);
           double cos2Xi = cosXi*cosXi;
           double sin2Xi = 1 - cos2Xi; 
-          double numerator = cos2Xi*v*v/4 + sin2Xi;
+          double numerator = (cos2Xi*v*v/4 + sin2Xi);
           double x = pow(mZ0,2)/s;
           double GeV2tocm3s1 = gev2cm2*s2cm;
           return pow(lambda,2)*pow(s,2)/32/M_PI*sqrt(1-4*x)*Dh2(s)*numerator*(1-4*x+12*pow(x,2))
-            * GeV2tocm3s1;
+            *GeV2tocm3s1;
         }
 
         // Annihilation into fermions
@@ -156,7 +155,7 @@ namespace Gambit
           double s = 4*mass*mass/(1-v*v/4);
           double cos2Xi = cosXi*cosXi;
           double sin2Xi = 1 - cos2Xi; 
-          double numerator = cos2Xi*v*v/4 + sin2Xi;
+          double numerator = (cos2Xi*v*v/4 + sin2Xi);
           double vf = sqrt(1-4*pow(mf,2)/s);
           double Xf = 1;
           if ( is_quark ) Xf = 3 *
@@ -169,15 +168,17 @@ namespace Gambit
         /// Annihilation into hh
         double sv_hh(double lambda, double mass, double v, double cosXi)
         {
+          // Hardcoded velocity avoids NAN results.
+          v = std::max(v, 1e-6);
+        
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
           double GeV2tocm3s1 = gev2cm2*s2cm;
           double xh = mh*mh/s;
           double xpsi = mass*mass/s;
           double xG = Gamma_mh*mh/s;
           
-          // Hardcoded lab velocities avoid NAN results.
-          double beta =  std::max(((s - 2*pow(mh,2))/sqrt((s - 4*pow(mh,2))*(s - 4*pow(mass,2)))), 1e-6);
-          
+          double beta =  (s - 2*pow(mh,2))/sqrt((s - 4*pow(mh,2))*(s - 4*pow(mass,2)));
+                    
           return (pow(lambda,2)*sqrt(1 - 4*xh)/(32.*M_PI*s)*(
           s - 4*pow(cosXi,2)*s*xpsi - 8*cosXi*lambda*pow(v0,2)*mass + 
           (3*xh*(8*cosXi*lambda*pow(v0,2)*(-1 + xh)*sqrt(s*xpsi) - s*(2 + xh)*(-1 + 4*pow(cosXi,2)*xpsi)))/(pow(xG,2) + pow(-1 + xh,2)) 
@@ -185,11 +186,12 @@ namespace Gambit
           + (4*beta*lambda*pow(v0,2)*(2*cosXi*(-1 + 2*xh)*(-1 - pow(xG,2) + xh*(-1 + 2*xh))*sqrt(s*xpsi)*(-1 - 2*xh + 8*pow(cosXi,2)*xpsi) + lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xh,2))*
           (1 - 4*xh + 6*pow(xh,2) - 16*pow(cosXi,2)*(-1 + xh)*xpsi - 32*pow(cosXi,4)*pow(xpsi,2)))*atanh(1/beta))/((pow(xG,2) + pow(-1 + xh,2))*pow(1 - 2*xh,2)))
           )*GeV2tocm3s1;
+                  
         }
 
       private:
         double Gamma_mh, mh, v0, alpha_s, mb, mc, mtau, mt, mZ0, mW;
-    };  
+    };
 
     void DarkMatter_ID_MajoranaDM(std::string & result) { result = "X"; }
 
