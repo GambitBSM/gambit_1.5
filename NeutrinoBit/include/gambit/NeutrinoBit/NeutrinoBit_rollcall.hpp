@@ -501,6 +501,15 @@ START_MODULE
 
   #undef CAPABILITY
 
+  // Perturbativity of the Yukawa couplings (from arXiv:1509.02678)
+  #define CAPABILITY perturbativity_lnL
+  START_CAPABILITY
+    #define FUNCTION perturbativity_likelihood
+    START_FUNCTION(double)
+    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    ALLOW_MODEL(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY
 
 
 #undef MODULE

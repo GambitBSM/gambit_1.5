@@ -66,19 +66,19 @@ Parameters:
       range: [0, 6.283]
 #      fixed_value: 0.0
     ImOm23:
-      range: [-8, 8]
+      range: [-12, 12]
 #      fixed_value: [-20.0, 20.0]
     ReOm13:
       range: [0, 6.283]
 #      fixed_value: 0.0
     ImOm13:
-      range: [-8, 8]
+      range: [-12, 12]
 #      fixed_value: 0.0
     ReOm12:
       range: [0, 6.283]
 #      fixed_value: 0.0
     ImOm12:
-      range: [-8, 8]
+      range: [-12, 12]
 #      fixed_value: 0.0
     L_Ge:
       range: [0.159, 0.193]
@@ -115,7 +115,7 @@ Scanner:
     multinest:
       plugin: multinest
       like: LogLike
-      nlive: 1000
+      nlive: 10000
 
 ObsLikes:
 
@@ -227,6 +227,10 @@ ObsLikes:
     purpose: LogLike
     function: mu2e_likelihood
 
+  - capability: perturbativity_lnL
+    purpose: LogLike
+    function: perturbativity_likelihood
+
    
 
 Rules:
@@ -235,7 +239,7 @@ Rules:
 KeyValues:
 
   likelihood:
-    model_invalid_for_lnlike_below: -1e40
+    model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/SN_dev/"
+  default_output_path: "runs/SN_dev_no_Kamland_2/"

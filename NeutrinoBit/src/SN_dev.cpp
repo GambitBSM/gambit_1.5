@@ -273,7 +273,7 @@ namespace Gambit
       }
       else
       {
-        result_0nubb = -100.0;
+        result_0nubb = -1.0E+05;
       }
     }
 
@@ -1051,6 +1051,20 @@ namespace Gambit
       double c_mu = 0.1265;
       double c_tau = 0.1265;
       U_ps191e = (*Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1))) + (*Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2)));
+    }
+
+    void perturbativity_likelihood(double &lnL)
+    {
+      using namespace Pipes::perturbativity_likelihood;
+      Matrix3d theta = *Dep::Theta_sq;
+      
+      if( *Param["M_1"] and 
+          theta(0,0) < *Param["M_2"] / *Param["M_1"] * theta(0,1) + *Param["M_3"] / *Param["M_1"] * theta(0,2) and
+          theta(1,0) < *Param["M_2"] / *Param["M_1"] * theta(1,1) + *Param["M_3"] / *Param["M_1"] * theta(1,2) and
+          theta(2,0) < *Param["M_2"] / *Param["M_1"] * theta(2,1) + *Param["M_3"] / *Param["M_1"] * theta(2,2) )
+        lnL = 0;
+      else
+        lnL = -1E10;
     }
 
   }
