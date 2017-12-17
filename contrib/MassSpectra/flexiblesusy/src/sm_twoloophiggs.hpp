@@ -20,6 +20,7 @@
 #define SM_TWOLOOPHIGGS_H
 
 namespace flexiblesusy {
+namespace sm_twoloophiggs {
 
 /// SM Higgs self-energy 1-loop
 double self_energy_higgs_1loop_sm(
@@ -32,11 +33,11 @@ double self_energy_higgs_1loop_at_sm(
 
 /// SM Higgs self-energy 2-loop, only O(alpha_t alpha_s)
 double self_energy_higgs_2loop_at_as_sm(
-   double scale, double mt, double yt, double g3);
+   double p2, double scale, double mt, double yt, double g3);
 
 /// SM Higgs self-energy 2-loop, only O(alpha_t^2)
 double self_energy_higgs_2loop_at_at_sm(
-   double scale, double mt, double yt);
+   double p2, double scale, double mt, double yt);
 
 /// SM Higgs self-energy 1-loop from SUSYHD 1.0.2
 double self_energy_higgs_1loop_sm_SUSYHD(
@@ -46,6 +47,7 @@ double self_energy_higgs_1loop_sm_SUSYHD(
 double self_energy_higgs_2loop_sm_SUSYHD(
    double vev, double Mt, double Mh, double g3);
 
+} // namespace sm_twoloophiggs
 } // namespace flexiblesusy
 
 #endif

@@ -20,14 +20,19 @@
 #define ERROR_H
 
 #include <string>
-#include <sstream>
 
 namespace flexiblesusy {
 
 class Error {
 public:
-   virtual ~Error() {}
+   virtual ~Error() = default;
    virtual std::string what() const = 0;
+};
+
+class FatalError : public Error {
+public:
+   virtual ~FatalError() = default;
+   virtual std::string what() const override { return "Fatal error."; };
 };
 
 /**
@@ -37,8 +42,8 @@ public:
 class SetupError : public Error {
 public:
    explicit SetupError(const std::string& message_) : message(message_) {}
-   virtual ~SetupError() {}
-   virtual std::string what() const { return message; }
+   virtual ~SetupError() = default;
+   virtual std::string what() const override { return message; }
 private:
    std::string message;
 };
@@ -49,47 +54,44 @@ private:
  */
 class NoConvergenceError : public Error {
 public:
-   explicit NoConvergenceError(unsigned number_of_iterations_)
-      : number_of_iterations(number_of_iterations_) {}
-   virtual ~NoConvergenceError() {}
-   virtual std::string what() const {
-      std::stringstream message;
-      message << "NoConvergenceError: no convergence"
-              << " after " << number_of_iterations << " iterations";
-      return message.str();
+   explicit NoConvergenceError(int number_of_iterations_, const std::string& msg = "")
+      : message(msg), number_of_iterations(number_of_iterations_) {}
+   virtual ~NoConvergenceError() = default;
+   virtual std::string what() const override {
+      if (!message.empty())
+         return message;
+
+      return "NoConvergenceError: no convergence after "
+         + std::to_string(number_of_iterations) + " iterations";
    }
-   unsigned get_number_of_iterations() const { return number_of_iterations; }
+   int get_number_of_iterations() const { return number_of_iterations; }
 private:
-   unsigned number_of_iterations;
+   std::string message;
+   int number_of_iterations;
 };
 
 /**
- * @class NoRhoConvergenceError
- * @brief No convergence while calculating the rho-hat parameter
+ * @class NoSinThetaWConvergenceError
+ * @brief No convergence while calculating the sinThetaW parameter
  */
-class NoRhoConvergenceError : public Error {
+class NoSinThetaWConvergenceError : public Error {
 public:
-   explicit NoRhoConvergenceError(unsigned number_of_iterations_,
-                                  double sin_theta_, double rho_hat_)
+   NoSinThetaWConvergenceError(int number_of_iterations_,
+                               double sin_theta_)
       : number_of_iterations(number_of_iterations_)
       , sin_theta(sin_theta_)
-      , rho_hat(rho_hat_)
       {}
-   virtual ~NoRhoConvergenceError() {}
-   virtual std::string what() const {
-      std::stringstream message;
-      message << "NoRhoConvergenceError: no convergence"
-              << " after " << number_of_iterations << " iterations "
-              << " (sin(theta)=" << sin_theta << ", rho-hat=" << rho_hat
-              << ")";
-      return message.str();
+   virtual ~NoSinThetaWConvergenceError() = default;
+   virtual std::string what() const override {
+      return "NoSinThetaWConvergenceError: no convergence after "
+         + std::to_string(number_of_iterations) + " iterations (sin(theta)="
+         + std::to_string(sin_theta) + ")";
    }
-   unsigned get_number_of_iterations() const { return number_of_iterations; }
+   int get_number_of_iterations() const { return number_of_iterations; }
    double get_sin_theta() const { return sin_theta; }
-   double get_rho_hat() const { return rho_hat; }
 private:
-   unsigned number_of_iterations;
-   double sin_theta, rho_hat;
+   int number_of_iterations;
+   double sin_theta;
 };
 
 /**
@@ -113,18 +115,18 @@ public:
       , value(value_)
       , parameter_index(parameter_index_)
       {}
-   virtual ~NonPerturbativeRunningError() {}
-   virtual std::string what() const {
-      std::stringstream message;
-      message << "NonPerturbativeRunningError: non-perturbative running"
-         " of parameter " << parameter_index << " to scale " << scale;
-      return message.str();
+   virtual ~NonPerturbativeRunningError() = default;
+   virtual std::string what() const override {
+      if (parameter_index == -1)
+         return "NonPerturbativeRunningError: scale Q = " + std::to_string(value);
+
+      return "NonPerturbativeRunningError: non-perturbative running of parameter "
+         + std::to_string(parameter_index) + " to scale " + std::to_string(scale);
    }
    std::string what(const std::string& parameter_name) const {
-      std::stringstream message;
-      message << "NonPerturbativeRunningError: non-perturbative running"
-         " of " << parameter_name << " = " << value << " to scale " << scale;
-      return message.str();
+      return "NonPerturbativeRunningError: non-perturbative running"
+         " of " + parameter_name + " = " + std::to_string(value)
+         + " to scale " + std::to_string(scale);
    }
    int get_parameter_index() const { return parameter_index; }
    double get_parameter_value() const { return value; }
@@ -135,40 +137,80 @@ private:
    int parameter_index; ///< index of parameter that becomes non-perturbative
 };
 
+class NonPerturbativeRunningQedQcdError : public Error {
+public:
+   explicit NonPerturbativeRunningQedQcdError(const std::string& msg_)
+      : msg(msg_)
+      {}
+   virtual ~NonPerturbativeRunningQedQcdError() = default;
+   virtual std::string what() const override { return msg; }
+private:
+   std::string msg;
+};
+
 /**
  * @class OutOfMemoryError
  * @brief Not enough memory
  */
 class OutOfMemoryError : public Error {
 public:
-   explicit OutOfMemoryError(std::string msg_)
+   explicit OutOfMemoryError(const std::string& msg_)
       : msg(msg_)
       {}
-   virtual ~OutOfMemoryError() {}
-   virtual std::string what() const {
-      std::stringstream message;
-      message << "OutOfMemoryError: Not enought memory: " << msg;
-      return message.str();
+   virtual ~OutOfMemoryError() = default;
+   virtual std::string what() const override {
+      return std::string("OutOfMemoryError: Not enought memory: ") + msg;
    }
 private:
    std::string msg;
 };
 
 /**
- * @class FailedDiagonalizationError
- * @brief Failed diagonalization of a matrix
+ * @class OutOfBoundsError
+ * @brief Out of bounds access
  */
-class FailedDiagonalizationError : public Error {
+class OutOfBoundsError : public Error {
 public:
-   explicit FailedDiagonalizationError()
+   OutOfBoundsError(const std::string& msg_)
+      : msg(msg_)
       {}
-   virtual ~FailedDiagonalizationError() {}
-   virtual std::string what() const {
-      return std::string("FailedDiagonalizationError:"
-                         " Mass matrix diagonalization failed");
-   }
+   virtual ~OutOfBoundsError() = default;
+   virtual std::string what() const override { return msg; }
+private:
+   std::string msg;
 };
 
-}
+class ReadError : public Error {
+public:
+   explicit ReadError(const std::string& message_) : message(message_) {}
+   virtual ~ReadError() = default;
+   virtual std::string what() const override { return message; }
+private:
+   std::string message;
+};
+
+/**
+ * @class PhysicalError
+ * @brief Exception class to be used in the FlexibleSUSY model file
+ */
+class PhysicalError : public Error {
+public:
+   explicit PhysicalError(const std::string& message_) : message(message_) {}
+   virtual ~PhysicalError() = default;
+   virtual std::string what() const override { return message; }
+private:
+   std::string message;
+};
+
+class HimalayaError : public Error {
+public:
+   explicit HimalayaError(const std::string& message_) : message(message_) {}
+   virtual ~HimalayaError() = default;
+   virtual std::string what() const override { return message; }
+private:
+   std::string message;
+};
+
+} // namespace flexiblesusy
 
 #endif

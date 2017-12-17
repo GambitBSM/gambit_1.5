@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:37
+// File generated at Tue 26 Sep 2017 22:52:53
 
 #ifndef HSSUSY_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 #define HSSUSY_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 
 #include "HSSUSY_high_scale_constraint.hpp"
 #include "HSSUSY_input_parameters.hpp"
-#include "two_scale_constraint.hpp"
+#include "single_scale_constraint.hpp"
 
 namespace flexiblesusy {
 
@@ -33,14 +33,15 @@ class HSSUSY;
 class Two_scale;
 
 template<>
-class HSSUSY_high_scale_constraint<Two_scale> : public Constraint<Two_scale> {
+class HSSUSY_high_scale_constraint<Two_scale> : public Single_scale_constraint {
 public:
-   HSSUSY_high_scale_constraint();
+   HSSUSY_high_scale_constraint() = default;
    HSSUSY_high_scale_constraint(HSSUSY<Two_scale>*);
-   virtual ~HSSUSY_high_scale_constraint();
-   virtual void apply();
-   virtual double get_scale() const;
-   virtual void set_model(Two_scale_model*);
+   virtual ~HSSUSY_high_scale_constraint() = default;
+   virtual void apply() override;
+   virtual double get_scale() const override;
+   virtual std::string name() const override { return "HSSUSY high-scale constraint"; }
+   virtual void set_model(Model*) override;
 
    void clear();
    double get_initial_scale_guess() const;
@@ -54,9 +55,11 @@ protected:
    bool check_non_perturbative();
 
 private:
-   double scale;
-   double initial_scale_guess;
-   HSSUSY<Two_scale>* model;
+   double scale{0.};
+   double initial_scale_guess{0.};
+   HSSUSY<Two_scale>* model{nullptr};
+
+   void check_model_ptr() const;
 };
 
 } // namespace flexiblesusy

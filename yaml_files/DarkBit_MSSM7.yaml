@@ -313,11 +313,11 @@ Rules:
   # values from the GAMBIT decay table (internal_decays=false).
   - function: MicrOmegas_MSSM_3_6_9_2_init
     options:
-       internal_decays: true
+       internal_decays: false
        VZdecay: 1 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations
        VWdecay: 1 # 0 - no 3 body final states, 1 - virtual W in annihilations, 2 - virtual W in coannihilations
 
-  # Use DarkSUSY, MicrOmegas or the DarkBit native calculator (not recommended) for the relic density?
+  # Use DarkSUSY (not recommended), MicrOmegas or the DarkBit native calculator for the relic density?
   # Consult the DarkBit manual for the required options in each case
   - capability: RD_oh2
     function: RD_oh2_general
@@ -379,11 +379,11 @@ Rules:
       # If the below is false, the squark propagator is approximated as 1/m_sq^2
       # (automatically set to true if loop = true)
       # pole: false
-    # function: DD_couplings_MicrOmegas
-    # options:
-    #   If the below is true, the box diagram for gluon-neutralino as discussed in 
-    #   arXiv:0803.2360 is included in the calculation
-    #   loop: box
+    #function: DD_couplings_MicrOmegas
+    #options:
+    #  # If the below is true, the box diagram for gluon-neutralino scattering as 
+    #  # discussed in arXiv:0803.2360 is included in the calculation
+    #  loop: box
 
   # Nuclear SI Parameter Likelihoods (All values in MeV)
   - capability: lnL_SI_nuclear_parameters
@@ -494,16 +494,23 @@ Rules:
   # Choose where to get the precision spectrum from
   - capability: MSSM_spectrum
     type: Spectrum
-    function: make_MSSM_precision_spectrum_none
+    #function: make_MSSM_precision_spectrum_none
     #function: make_MSSM_precision_spectrum_W
     #function: make_MSSM_precision_spectrum_H_W
-    # The following options only have an impact when using make_MSSM_precision_spectrum_H_W.
-    # Choose to take FeynHiggs' prediction for the Higgs mass (rather then FlexibleSUSY's).
-    # Choose to use the difference between the FeynHiggs and spectrum generator predictions, along
-    # with the FH error estimate, to estimate the theoretical error on the prediction.
-    #options:
-    #  Higgs_predictions_source: 1
-    #  Higgs_predictions_error_method: 4
+    function: make_MSSM_precision_spectrum_4H_W
+    # The following options only have an impact when using make_MSSM_precision_spectrum_H_W
+    # or make_MSSM_precision_spectrum_H_W.
+    # Choose to take the precision prediction for the Higgs mass(es) (rather then spectrum generator's).
+    # Choose to use the difference between the precision and spectrum generator predictions, along
+    # with the precision error estimate, to estimate the theoretical error on the prediction.
+    options:
+      Higgs_predictions_source: 1
+      Higgs_predictions_error_method: 4
+
+  # Choose to get the precision value of the SM-like Higgs mass from FeynHiggs or SUSYHD
+  - capability: prec_mh
+    function: FH_HiggsMass
+    #function: SHD_HiggsMass
 
   # Choose to get decays from DecayBit proper, not from an SLHA file.
   - capability: decay_rates

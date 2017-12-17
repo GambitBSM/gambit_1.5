@@ -14,6 +14,7 @@
 
 
 #define BACKENDNAME LibFortran
+#define BACKENDLANG FORTRAN
 #define VERSION 1.0
 #define SAFE_VERSION 1_0
 

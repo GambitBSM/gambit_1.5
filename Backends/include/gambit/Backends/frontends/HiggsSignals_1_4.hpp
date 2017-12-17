@@ -17,6 +17,7 @@
 
 
 #define BACKENDNAME HiggsSignals
+#define BACKENDLANG FORTRAN
 #define VERSION 1.4
 #define SAFE_VERSION 1_4
 

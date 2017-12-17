@@ -22,16 +22,6 @@
 
 namespace flexiblesusy {
 
-PMNS_parameters::PMNS_parameters()
-   : theta_12(0.)
-   , theta_13(0.)
-   , theta_23(0.)
-   , delta(0.)
-   , alpha_1(0.)
-   , alpha_2(0.)
-{
-}
-
 void PMNS_parameters::reset_to_diagonal()
 {
    theta_12 = 0.;

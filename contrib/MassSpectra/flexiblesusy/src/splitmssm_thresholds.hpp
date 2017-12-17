@@ -99,18 +99,20 @@ namespace splitmssm_thresholds {
  * arXiv:1407.4081 for the parameter definition.
  */
 struct Parameters {
-   Parameters();
-
-   double g1, g2, g3;  ///< MS-bar gauge couplings in the EFT (GUT normalized)
-   double gt;          ///< MS-bar top Yukawa coupling of the SM or Split-MSSM
-   double At;          ///< DR-bar trilinear coupling for the stops in the MSSM
-   double mu;          ///< bilinear Higgsino coupling
-   double mA;          ///< mass of the heavy Higgs doublett
-   double m1;          ///< bino mass parameter
-   double m2;          ///< wino mass parameter
-   double tan_beta;    ///< mixing angle of the heavy Higgs doublett in the MSSM
-   double scale;       ///< renormalization scale
-   Eigen::Matrix<double,3,3> mq2, mu2, md2, ml2, me2; ///< DR-bar squared soft-breaking sfermion mass parameters in the MSSM
+   double g1{0.}, g2{0.}, g3{0.}; ///< MS-bar gauge couplings in the EFT (GUT normalized)
+   double gt{0.};          ///< MS-bar top Yukawa coupling of the SM or Split-MSSM
+   double At{0.};          ///< DR-bar trilinear coupling for the stops in the MSSM
+   double mu{0.};          ///< bilinear Higgsino coupling
+   double mA{0.};          ///< mass of the heavy Higgs doublett
+   double m1{0.};          ///< bino mass parameter
+   double m2{0.};          ///< wino mass parameter
+   double tan_beta{0.};    ///< mixing angle of the heavy Higgs doublett in the MSSM
+   double scale{0.};       ///< renormalization scale
+   Eigen::Matrix<double,3,3> mq2{Eigen::Matrix<double,3,3>::Zero()}; ///< DR-bar squared soft-breaking left-handed squark mass parameters in the MSSM
+   Eigen::Matrix<double,3,3> mu2{Eigen::Matrix<double,3,3>::Zero()}; ///< DR-bar squared soft-breaking right-handed up-squark mass parameters in the MSSM
+   Eigen::Matrix<double,3,3> md2{Eigen::Matrix<double,3,3>::Zero()}; ///< DR-bar squared soft-breaking right-handed down-squark mass parameters in the MSSM
+   Eigen::Matrix<double,3,3> ml2{Eigen::Matrix<double,3,3>::Zero()}; ///< DR-bar squared soft-breaking left-handed selectron mass parameters in the MSSM
+   Eigen::Matrix<double,3,3> me2{Eigen::Matrix<double,3,3>::Zero()}; ///< DR-bar squared soft-breaking right-handed selectron mass parameters in the MSSM
 };
 
 std::ostream& operator<<(std::ostream&, const Parameters&);

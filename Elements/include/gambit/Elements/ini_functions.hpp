@@ -19,6 +19,10 @@
 ///          (peter.athron@coepp.org.au)
 ///  \date 2015 
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2016 Sep
+///
 ///  *********************************************
 
 #ifndef __ini_functions_hpp__
@@ -61,6 +65,9 @@ namespace Gambit
   /// Add a new parameter to a primary model functor
   int add_parameter(model_functor&, str);
 
+  /// Set the model name in a primary model functor
+  int set_model_name(model_functor&, str);
+
   /// Tell a model functor to take its parameter definition from another model functor.
   int copy_parameters(model_functor&, model_functor&, bool, str="", str="");
 
@@ -72,6 +79,9 @@ namespace Gambit
 
   /// Notify a backend functor of which models it can be used with
   int set_allowed_models(functor&, std::vector<str>&, str);
+
+  /// Load WSTP for Mathematica backends
+  int loadWSTP(str, str, str, void*&);
 
   /// Load a backend library
   int loadLibrary(str, str, str, void*&, bool);
@@ -87,6 +97,9 @@ namespace Gambit
   
   /// Disable a backend functor if its library is missing or the symbol cannot be found. 
   int set_backend_functor_status(functor&, str);
+
+  /// Disable a mathematica backend functor if the function is not found in the package
+  int set_math_backend_functor_status(functor&, str, void *&);
 
   /// Disable a backend initialisation function if the backend is missing. 
   int set_BackendIniBit_functor_status(functor&, str, str);

@@ -134,7 +134,6 @@ namespace Gambit
       if (result.coannihilatingParticles.size() == 1)
         resmax -= 2;
 
-
       // determine thresholds; lowest threshold = 2*WIMP rest mass  (unlike DS
       // convention!)
       result.threshold_energy.push_back(
