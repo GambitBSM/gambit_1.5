@@ -12,6 +12,7 @@ using namespace std;
 /* The ATLAS 2 lepton direct stop analysis (36.1fb^-1) - `heavy stop'.
 
    Based on: arXiv:1708.03247
+   Author: Yang Zhang
  
    Known errors:
         1. Jet overlap removal with muon is not done becasue miss trac imformation
@@ -138,10 +139,18 @@ namespace Gambit {
                 if (electron->pT() > 10. && electron->abseta() < 2.47) blElectrons.push_back(electron);
                 if (electron->pT() > 7. && electron->abseta() < 2.47) baselineElectrons.push_back(electron);
             }
+            ATLAS::applyLooseIDElectronSelectionR2(blElectrons);
+            ATLAS::applyLooseIDElectronSelectionR2(baselineElectrons);
+            
+            const std::vector<double>  a = {0,10.};
+            const std::vector<double>  b = {0,10000.};
+            const vector<double> cMu={0.89};
+            HEPUtils::BinnedFn2D<double> _eff2dMu(a,b,cMu);
             for (HEPUtils::Particle* muon : event->muons()) {
+                bool hasTrig=has_tag(_eff2dMu, muon->eta(), muon->pT());
             // Same with the code snippet, not the experimental report
-                if (muon->pT() > 10. && muon->abseta() < 2.5) blMuons.push_back(muon);
-                if (muon->pT() > 7. && muon->abseta() < 2.5) baselineMuons.push_back(muon);
+                if (muon->pT() > 10. && muon->abseta() < 2.5 && hasTrig) blMuons.push_back(muon);
+                if (muon->pT() > 7. && muon->abseta() < 2.5 && hasTrig) baselineMuons.push_back(muon);
             }
             
             // Jets
@@ -176,18 +185,23 @@ namespace Gambit {
 
 
             //Signal Leptons
-            vector<HEPUtils::Particle*> sgLeptons;      // Used for SR-2body and SR-3body
+            vector<HEPUtils::Particle*> sgElectrons, sgLeptons;          // Used for SR-2body and SR-3body
             vector<HEPUtils::Particle*> signalLeptons;  // Used for SR-4body
             for (HEPUtils::Particle* electron : blElectrons) {
                 if (electron->pT() > 10. && fabs(electron->eta()) < 2.47){
-                    sgLeptons.push_back(electron);
+                    sgElectrons.push_back(electron);
                 }
+            }
+            ATLAS::applyMediumIDElectronSelectionR2(sgElectrons);
+            for (HEPUtils::Particle* electron : sgElectrons) {
+                sgLeptons.push_back(electron);
             }
             for (HEPUtils::Particle* muon : blMuons) {
                 if (muon->pT() > 10. && fabs(muon->eta()) < 2.4){
                     sgLeptons.push_back(muon);
                 }
             }
+            ATLAS::applyMediumIDElectronSelectionR2(baselineElectrons);
             for (HEPUtils::Particle* electron : baselineElectrons) {
                 signalLeptons.push_back(electron);
             }
@@ -205,8 +219,8 @@ namespace Gambit {
             // Function used to get b jets
             vector<HEPUtils::Jet*> sgbJets;                  // Used for SR-2body and SR-3body
             vector<HEPUtils::Jet*> sgJetsGt25;               // Used for SR-2body 
-            const std::vector<double>  a = {0,10.};
-            const std::vector<double>  b = {0,10000.};
+            //const std::vector<double>  a = {0,10.};
+            //const std::vector<double>  b = {0,10000.};
             const std::vector<double> c = {0.77};
             HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
             for (HEPUtils::Jet* jet :sgJets) {
@@ -258,10 +272,8 @@ namespace Gambit {
                 HEPUtils::P4 lepton1=sgLeptons.at(1)->mom();
                 double Mll= (lepton0+lepton1).m();
                 
-                if (sgLeptons[0]->pid()*sgLeptons[1]->pid()>0.) cout<<"SAME Sign!!!!!"<<endl;
                 Savelep1 << sgLeptons[0]->pT() << endl;
                 Savelep2 << sgLeptons[1]->pT() << endl;
-                //cout<<sgLeptons[0]->pT() <<"," << sgLeptons[1]->pT() <<endl;
                 
                 if (sgLeptons[0]->pid()*sgLeptons[1]->pid()<0. && sgLeptons[0]->pT() > 25. && sgLeptons[1]->pT() > 20. && Mll>20.){
                     cABC_TriggerOS              = true;
@@ -513,6 +525,25 @@ namespace Gambit {
 
             }
             // signal region
+            
+            if (   cABC_SF  && cA_mllGt111 && cA_nobjet && CA_R2l2j && cA_deltaX && cA_MT2120 ) _SRASF120++;
+            if ( (!cABC_SF)                && cA_nobjet             && cA_deltaX && cA_MT2120 ) _SRADF120++;
+            if (   cABC_SF  && cA_mllGt111 && cA_nobjet && CA_R2l2j && cA_deltaX && cA_MT2140 ) _SRASF140++;
+            if ( (!cABC_SF)                && cA_nobjet             && cA_deltaX && cA_MT2140 ) _SRADF140++;
+            if (   cABC_SF  && cA_mllGt111 && cA_nobjet && CA_R2l2j && cA_deltaX && cA_MT2160 ) _SRASF160++;
+            if ( (!cABC_SF)                && cA_nobjet             && cA_deltaX && cA_MT2160 ) _SRADF160++;
+            if (   cABC_SF  && cA_mllGt111 && cA_nobjet && CA_R2l2j && cA_deltaX && cA_MT2180 ) _SRASF180++;
+            if ( (!cABC_SF)                && cA_nobjet             && cA_deltaX && cA_MT2180 ) _SRADF180++;
+            
+            if (   cABC_SF  && cBC_mllExMz && cBC_nbnj && cB_DelBoost && cB_MT2120 ) _SRBSF120++;
+            if ( (!cABC_SF)                && cBC_nbnj && cB_DelBoost && cB_MT2120 ) _SRBDF120++;
+            if (   cABC_SF  && cBC_mllExMz && cBC_nbnj && cB_DelBoost && cB_MT2140 ) _SRBSF140++;
+            if ( (!cABC_SF)                && cBC_nbnj && cB_DelBoost && cB_MT2140 ) _SRBDF140++;
+
+            if (   cABC_SF  && cBC_mllExMz && cBC_nbnj && cC_njGt2 && cC_R2lGt1o2 && cC_METGt200 && cC_MT2110 ) _SRCSF110++;
+            if ( (!cABC_SF) &&                cBC_nbnj && cC_njGt2 && cC_R2lGt1o2 && cC_METGt200 && cC_MT2110 ) _SRCDF110++;
+
+
             if (c4_METOSlepton && c4_mllGt10 && c4_SoftLepton && c4_Jet1PtGt150 && c4_Jet3PtMET && c4_R2l4j && c4_R2l && c4_2bjetveto) _SR4b++;
         return;
 
@@ -551,7 +582,152 @@ namespace Gambit {
                 << cutFlowVector[j]*scale_by <<  "," << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
             }
             cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+
+            // signal regin 2-body A 
+            SignalRegionData results_SRASF120;
+            results_SRASF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF120.sr_label = "SRASF120";
+            results_SRASF120.n_observed = 22.;
+            results_SRASF120.n_background = 20.0;
+            results_SRASF120.background_sys = 4.6;
+            results_SRASF120.signal_sys = 0.;
+            results_SRASF120.n_signal = _SRASF120;
+            add_result(results_SRASF120);
+
+            SignalRegionData results_SRADF120;
+            results_SRADF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF120.sr_label = "SRADF120";
+            results_SRADF120.n_observed = 27.;
+            results_SRADF120.n_background = 23.8;
+            results_SRADF120.background_sys = 4.2;
+            results_SRADF120.signal_sys = 0.;
+            results_SRADF120.n_signal = _SRADF120;
+            add_result(results_SRADF120);
+
+            SignalRegionData results_SRASF140;
+            results_SRASF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF140.sr_label = "SRASF140";
+            results_SRASF140.n_observed = 6.;
+            results_SRASF140.n_background = 11.0;
+            results_SRASF140.background_sys = 2.5;
+            results_SRASF140.signal_sys = 0.;
+            results_SRASF140.n_signal = _SRASF140;
+            add_result(results_SRASF140);
+
+            SignalRegionData results_SRADF140;
+            results_SRADF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF140.sr_label = "SRADF140";
+            results_SRADF140.n_observed = 6.;
+            results_SRADF140.n_background = 10.8;
+            results_SRADF140.background_sys = 2.1;
+            results_SRADF140.signal_sys = 0.;
+            results_SRADF140.n_signal = _SRADF140;
+            add_result(results_SRADF140);
             
+            SignalRegionData results_SRASF160;
+            results_SRASF160.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF160.sr_label = "SRASF160";
+            results_SRASF160.n_observed = 10.;
+            results_SRASF160.n_background = 5.6;
+            results_SRASF160.background_sys = 1.8;
+            results_SRASF160.signal_sys = 0.;
+            results_SRASF160.n_signal = _SRASF160;
+            add_result(results_SRASF160);
+
+            SignalRegionData results_SRADF160;
+            results_SRADF160.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF160.sr_label = "SRADF160";
+            results_SRADF160.n_observed = 7.;
+            results_SRADF160.n_background = 6.4;
+            results_SRADF160.background_sys = 1.3;
+            results_SRADF160.signal_sys = 0.;
+            results_SRADF160.n_signal = _SRADF160;
+            add_result(results_SRADF160);
+
+            SignalRegionData results_SRASF180;
+            results_SRASF180.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF180.sr_label = "SRASF180";
+            results_SRASF180.n_observed = 16.;
+            results_SRASF180.n_background = 12.3;
+            results_SRASF180.background_sys = 2.6;
+            results_SRASF180.signal_sys = 0.;
+            results_SRASF180.n_signal = _SRASF180;
+            add_result(results_SRASF180);
+
+            SignalRegionData results_SRADF180;
+            results_SRADF180.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF180.sr_label = "SRADF180";
+            results_SRADF180.n_observed = 8.;
+            results_SRADF180.n_background = 5.4;
+            results_SRADF180.background_sys = 1.7;
+            results_SRADF180.signal_sys = 0.;
+            results_SRADF180.n_signal = _SRADF180;
+            add_result(results_SRADF180);
+
+            // signal regin 2-body B
+            SignalRegionData results_SRBSF120;
+            results_SRBSF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBSF120.sr_label = "SRBSF120";
+            results_SRBSF120.n_observed = 17.;
+            results_SRBSF120.n_background = 16.3;
+            results_SRBSF120.background_sys = 6.2;
+            results_SRBSF120.signal_sys = 0.;
+            results_SRBSF120.n_signal = _SRBSF120;
+            add_result(results_SRBSF120);
+
+            SignalRegionData results_SRBDF120;
+            results_SRBDF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBDF120.sr_label = "SRBDF120";
+            results_SRBDF120.n_observed = 13.;
+            results_SRBDF120.n_background = 16.1;
+            results_SRBDF120.background_sys = 5.3;
+            results_SRBDF120.signal_sys = 0.;
+            results_SRBDF120.n_signal = _SRBDF120;
+            add_result(results_SRBDF120);
+
+            SignalRegionData results_SRBSF140;
+            results_SRBSF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBSF140.sr_label = "SRBSF140";
+            results_SRBSF140.n_observed = 9.;
+            results_SRBSF140.n_background = 7.4;
+            results_SRBSF140.background_sys = 1.1;
+            results_SRBSF140.signal_sys = 0.;
+            results_SRBSF140.n_signal = _SRBSF140;
+            add_result(results_SRBSF140);
+
+            SignalRegionData results_SRBDF140;
+            results_SRBDF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBDF140.sr_label = "SRBDF140";
+            results_SRBDF140.n_observed = 7.;
+            results_SRBDF140.n_background = 4.8;
+            results_SRBDF140.background_sys = 1.0;
+            results_SRBDF140.signal_sys = 0.;
+            results_SRBDF140.n_signal = _SRBDF140;
+            add_result(results_SRBDF140);
+
+            // signal regin 2-body C 
+            SignalRegionData results_SRCSF110;
+            results_SRCSF110.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRCSF110.sr_label = "SRCSF110";
+            results_SRCSF110.n_observed = 11.;
+            results_SRCSF110.n_background = 5.3;
+            results_SRCSF110.background_sys = 1.8;
+            results_SRCSF110.signal_sys = 0.;
+            results_SRCSF110.n_signal = _SRCSF110;
+            add_result(results_SRCSF110);
+
+            SignalRegionData results_SRCDF110;
+            results_SRCDF110.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRCDF110.sr_label = "SRCDF110";
+            results_SRCDF110.n_observed = 7.;
+            results_SRCDF110.n_background = 3.8;
+            results_SRCDF110.background_sys = 1.5;
+            results_SRCDF110.signal_sys = 0.;
+            results_SRCDF110.n_signal = _SRCDF110;
+            add_result(results_SRCDF110);
+
+
+            // signal regin 4-body
             SignalRegionData results_SR4b;
             results_SR4b.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
             results_SR4b.sr_label = "SR4b";
@@ -560,10 +736,7 @@ namespace Gambit {
             results_SR4b.background_sys = 6.;
             results_SR4b.signal_sys = 0.;
             results_SR4b.n_signal = _SR4b;
-
-
             add_result(results_SR4b);
-
             return;
         }
 
