@@ -46,7 +46,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-//#define COLLIDERBIT_DEBUG
+// #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -145,17 +145,17 @@ namespace Gambit
       tooManyFailedEvents = false;
 
       useBuckFastATLASDetector = false;
-      globalAnalysesATLAS.clear();
+      globalAnalysesATLAS.reset();
 
       useBuckFastCMSDetector = false;
-      globalAnalysesCMS.clear();
+      globalAnalysesCMS.reset();
 
       useBuckFastIdentityDetector = false;
-      globalAnalysesIdentity.clear();
+      globalAnalysesIdentity.reset();
 
       #ifndef EXCLUDE_DELPHES
       useDelphesDetector = false;
-      globalAnalysesDet.clear();
+      globalAnalysesDet.reset();
       #endif
 
       haveUsedBuckFastATLASDetector = false;
@@ -1063,9 +1063,9 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesIdentity.clear();
-        globalAnalysesIdentity.init(analyses[indexPythiaNames]);
+        if (globalAnalysesIdentity.analyses.empty()) globalAnalysesIdentity.init(analyses[indexPythiaNames]); else globalAnalysesIdentity.reset();
         return;
+
       }
 
       if (!useBuckFastIdentityDetector) return;
@@ -1074,8 +1074,7 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)

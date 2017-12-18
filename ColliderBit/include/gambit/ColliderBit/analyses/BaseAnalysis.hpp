@@ -47,7 +47,7 @@ namespace Gambit {
       /// @name Construction, Destruction, and Recycling:
       //@{
       BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1) {  }
-      virtual ~BaseAnalysis() { }
+      virtual ~BaseAnalysis() {}
 
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       void reset() { clear(); }
@@ -58,7 +58,7 @@ namespace Gambit {
       /// externally because of confusion with std::vector::clear(), esp. on
       /// AnalysisContainer.
       virtual void clear() {
-        _ntot = 0; _xsec = -1; _xsecerr = -1; _luminosity = -1;
+        _ntot = 0; _xsec = -1; _xsecerr = -1;
         _results.clear();
       }
       //@}
@@ -132,7 +132,6 @@ namespace Gambit {
       virtual void scale(double factor=-1) {
         if (factor < 0) {
           factor = (luminosity() * xsec()) / num_events();
-          //cout << "*** " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
         }
         assert(factor >= 0);
         for (SignalRegionData& sr : _results) {

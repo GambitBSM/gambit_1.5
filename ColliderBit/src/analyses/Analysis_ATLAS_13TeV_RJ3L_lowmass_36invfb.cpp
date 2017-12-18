@@ -1454,24 +1454,58 @@ namespace Gambit {
         results_SRA_TT.n_signal = _numSRA1;
 
         add_result(results_SRA_TT);*/
-	
-	//deletion of RJ 3-lepton pointers
-	delete LAB_3L;
-	delete C1N2_3L;
-	delete C1a_3L;
-	delete N2b_3L;
-	delete L1a_3L;
-	delete L1b_3L;
-	delete L2b_3L;
-	delete X1a_3L;
-	delete X1b_3L;
-	delete INV_3L;
-	delete X1_mass_3L;
-	delete X1_eta_3L;
-	delete X1X1_contra_3L;
-	
-	
+	 
         return;
+      }
+
+
+      void clear() {
+        _num2L2JHIGH=0;
+        _num2L2JINT=0;
+        _num2L2JLOW=0;
+        _num2L2JCOMP=0;
+        _num3LHIGH=0;
+        _num3LINT=0;
+        _num3LLOW=0;
+        _num3LCOMP=0;
+
+        // Run clear() from base class
+        BaseAnalysis::clear();
+      }
+
+
+      ~Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb() 
+      {
+      	//deletion of RJ 3-lepton pointers
+        delete LAB_2L2J;
+        delete C1N2_2L2J;
+        delete C1a_2L2J;
+        delete N2b_2L2J;
+        delete Wa_2L2J;
+        delete Zb_2L2J;
+        delete J1_2L2J;
+        delete J2_2L2J;
+        delete L1_2L2J;
+        delete L2_2L2J;
+        delete X1a_2L2J;
+        delete X1b_2L2J;
+        delete INV_2L2J;
+        delete X1_mass_2L2J;
+        delete X1_eta_2L2J;
+        delete X1X1_contra_2L2J;
+        delete LAB_3L;
+        delete C1N2_3L;
+        delete C1a_3L;
+        delete N2b_3L;
+        delete L1a_3L;
+        delete L1b_3L;
+        delete L2b_3L;
+        delete X1a_3L;
+        delete X1b_3L;
+        delete INV_3L;
+        delete X1_mass_3L;
+        delete X1_eta_3L;
+        delete X1X1_contra_3L;
       }
 
     };
