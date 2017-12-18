@@ -85,7 +85,7 @@ namespace Gambit
     void HEPUtilsAnalysisContainer::reset()
     {
       ready = false;
-      for (Analysis* a : analyses) a->reset(event);
+      for (Analysis* a : analyses) a->reset();
       ready = true;
     }
 
