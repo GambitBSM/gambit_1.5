@@ -34,6 +34,7 @@ namespace Gambit {
   namespace ColliderBit {
 
     bool sortByPT_RJ3L(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
+    bool sortLepByPT_RJ3L(HEPUtils::Particle* lep1, HEPUtils::Particle* lep2) { return (lep1->pT() > lep2->pT());}
     //bool sortByMass(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->mass() > jet2->mass()); }
 
     bool SortLeptons(const pair<TLorentzVector,int> lv1, const pair<TLorentzVector,int> lv2)
@@ -260,7 +261,7 @@ namespace Gambit {
 	_num3LLOW=0;
 	_num3LCOMP=0;
 		
-        NCUTS=10;
+        NCUTS=70;
         set_luminosity(36.);
 
         for(int i=0;i<NCUTS;i++){
@@ -391,9 +392,162 @@ namespace Gambit {
 	X1X1_contra_3L->AddInvisibleFrames(N2b_3L->GetListInvisibleFrames(),1);
 	
 	LAB_3L->InitializeAnalysis();
-    	
-      }
+	
+	/////////////////////////// INTERMEDIATE ///////////////////////////////////
+	// RestFrames stuff
+	
+	// combinatoric (transverse) tree
+	// for jet assignment
+	LAB_comb = new RestFrames::LabRecoFrame("LAB_comb","LAB");
+	CM_comb  = new RestFrames::DecayRecoFrame("CM_comb","CM");
+	S_comb   = new RestFrames::DecayRecoFrame("S_comb","S");
+	ISR_comb = new RestFrames::VisibleRecoFrame("ISR_comb","ISR");
+	J_comb   = new RestFrames::VisibleRecoFrame("J_comb","Jets");
+	L_comb   = new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s");
+	I_comb   = new RestFrames::InvisibleRecoFrame("I_comb","Inv");
+	//cout << "test 5" << endl;
+	LAB_comb->SetChildFrame(*CM_comb);
+	CM_comb->AddChildFrame(*ISR_comb);
+	CM_comb->AddChildFrame(*S_comb);
+	S_comb->AddChildFrame(*L_comb);
+	S_comb->AddChildFrame(*J_comb);
+	S_comb->AddChildFrame(*I_comb);
+	// cout << "test 6" << endl;
+	LAB_comb->InitializeTree();
+	// cout << "test 7" << endl;
+	// 2L+NJ tree (Z->ll + W/Z->qq)
+	LAB_2LNJ = new RestFrames::LabRecoFrame("LAB_2LNJ","LAB");
+	CM_2LNJ  = new RestFrames::DecayRecoFrame("CM_2LNJ","CM");
+	S_2LNJ   = new RestFrames::DecayRecoFrame("S_2LNJ","S");
+	ISR_2LNJ = new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR");
+	Ca_2LNJ  = new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}");
+	Z_2LNJ   = new RestFrames::DecayRecoFrame("Z_2LNJ","Z");
+	L1_2LNJ  = new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}");
+	L2_2LNJ  = new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}");
+	Cb_2LNJ  = new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}");
+	JSA_2LNJ = new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J");
+	J_2LNJ   = new RestFrames::VisibleRecoFrame("J_2LNJ","Jets");
+	Ia_2LNJ  = new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}");
+	Ib_2LNJ  = new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}");
+	
+	LAB_2LNJ->SetChildFrame(*CM_2LNJ);
+	CM_2LNJ->AddChildFrame(*ISR_2LNJ);
+	CM_2LNJ->AddChildFrame(*S_2LNJ);
+	S_2LNJ->AddChildFrame(*Ca_2LNJ);
+	S_2LNJ->AddChildFrame(*Cb_2LNJ);
+	Ca_2LNJ->AddChildFrame(*Z_2LNJ);
+	Ca_2LNJ->AddChildFrame(*Ia_2LNJ);
+	Cb_2LNJ->AddChildFrame(*JSA_2LNJ);
+	Cb_2LNJ->AddChildFrame(*Ib_2LNJ);
+	Z_2LNJ->AddChildFrame(*L1_2LNJ);
+	Z_2LNJ->AddChildFrame(*L2_2LNJ);
+	JSA_2LNJ->AddChildFrame(*J_2LNJ);
+	
+	LAB_2LNJ->InitializeTree();
+	
+	
+	// 2L+1L tree (Z->ll + Z/W->l)
+	LAB_2L1L = new RestFrames::LabRecoFrame("LAB_2L1L","LAB");
+	CM_2L1L  = new RestFrames::DecayRecoFrame("CM_2L1L","CM");
+	S_2L1L   = new RestFrames::DecayRecoFrame("S_2L1L","S");
+	ISR_2L1L = new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR");
+	Ca_2L1L  = new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}");
+	Z_2L1L   = new RestFrames::DecayRecoFrame("Z_2L1L","Z");
+	L1_2L1L  = new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}");
+	L2_2L1L  = new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}");
+	Cb_2L1L  = new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}");
+	Lb_2L1L  = new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}");
+	Ia_2L1L  = new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}");
+	Ib_2L1L  = new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}");
+	
+	LAB_2L1L->SetChildFrame(*CM_2L1L);
+	CM_2L1L->AddChildFrame(*ISR_2L1L);
+	CM_2L1L->AddChildFrame(*S_2L1L);
+	S_2L1L->AddChildFrame(*Ca_2L1L);
+	S_2L1L->AddChildFrame(*Cb_2L1L);
+	Ca_2L1L->AddChildFrame(*Z_2L1L);
+	Ca_2L1L->AddChildFrame(*Ia_2L1L);
+	Z_2L1L->AddChildFrame(*L1_2L1L);
+	Z_2L1L->AddChildFrame(*L2_2L1L);
+	Cb_2L1L->AddChildFrame(*Lb_2L1L);
+	Cb_2L1L->AddChildFrame(*Ib_2L1L);
+	
+	LAB_2L1L->InitializeTree();
 
+	////////////// Jigsaw rules set-up /////////////////
+	
+	// combinatoric (transverse) tree
+	// for jet assignment
+	INV_comb = new RestFrames::InvisibleGroup("INV_comb","Invisible System");
+	INV_comb->AddFrame(*I_comb);
+	
+	InvMass_comb = new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw");
+	INV_comb->AddJigsaw(*InvMass_comb);
+	
+	JETS_comb = new RestFrames::CombinatoricGroup("JETS_comb","Jets System");
+	JETS_comb->AddFrame(*ISR_comb);
+	JETS_comb->SetNElementsForFrame(*ISR_comb, 1);
+	JETS_comb->AddFrame(*J_comb);
+	JETS_comb->SetNElementsForFrame(*J_comb, 0);
+	
+	SplitJETS_comb = new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw");
+	JETS_comb->AddJigsaw(*SplitJETS_comb);
+	SplitJETS_comb->AddCombFrame(*ISR_comb, 0);
+	SplitJETS_comb->AddCombFrame(*J_comb, 1);
+	SplitJETS_comb->AddObjectFrame(*ISR_comb,0);
+	SplitJETS_comb->AddObjectFrame(*S_comb,1);
+	
+	if(!LAB_comb->InitializeAnalysis()){
+	  cout << "Problem initializing \"comb\" analysis" << endl;
+	}
+	
+	// 2L+NJ tree (Z->ll + W/Z->qq)
+	INV_2LNJ = new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System");
+	INV_2LNJ->AddFrame(*Ia_2LNJ);
+	INV_2LNJ->AddFrame(*Ib_2LNJ);
+	
+	InvMass_2LNJ = new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw");
+	INV_2LNJ->AddJigsaw(*InvMass_2LNJ);
+	InvRapidity_2LNJ = new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity");
+	INV_2LNJ->AddJigsaw(*InvRapidity_2LNJ);
+	InvRapidity_2LNJ->AddVisibleFrames(S_2LNJ->GetListVisibleFrames());
+	SplitINV_2LNJ = new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw");
+	INV_2LNJ->AddJigsaw(*SplitINV_2LNJ);
+	SplitINV_2LNJ->AddVisibleFrames(Ca_2LNJ->GetListVisibleFrames(), 0);
+	SplitINV_2LNJ->AddVisibleFrames(Cb_2LNJ->GetListVisibleFrames(), 1);
+	SplitINV_2LNJ->AddInvisibleFrame(*Ia_2LNJ, 0);
+	SplitINV_2LNJ->AddInvisibleFrame(*Ib_2LNJ, 1);
+	
+	JETS_2LNJ = new RestFrames::CombinatoricGroup("JETS_comb","Jets System");
+	JETS_2LNJ->AddFrame(*J_2LNJ);
+	JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
+	
+	if(!LAB_2LNJ->InitializeAnalysis()){
+	  cout << "Problem initializing \"2LNJ\" analysis" << endl;
+	}
+	// 2L+1L tree (Z->ll + Z/W->l)
+	INV_2L1L = new RestFrames::InvisibleGroup("INV_2L1L","Invisible System");
+	INV_2L1L->AddFrame(*Ia_2L1L);
+	INV_2L1L->AddFrame(*Ib_2L1L);
+	
+	InvMass_2L1L = new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw");
+	INV_2L1L->AddJigsaw(*InvMass_2L1L);
+	InvRapidity_2L1L = new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity");
+	INV_2L1L->AddJigsaw(*InvRapidity_2L1L);
+	InvRapidity_2L1L->AddVisibleFrames(S_2L1L->GetListVisibleFrames());
+	SplitINV_2L1L = new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw");
+	INV_2L1L->AddJigsaw(*SplitINV_2L1L);
+	SplitINV_2L1L->AddVisibleFrames(Ca_2L1L->GetListVisibleFrames(), 0);
+	SplitINV_2L1L->AddVisibleFrames(Cb_2L1L->GetListVisibleFrames(), 1);
+	SplitINV_2L1L->AddInvisibleFrame(*Ia_2L1L, 0);
+	SplitINV_2L1L->AddInvisibleFrame(*Ib_2L1L, 1);
+	
+	if(!LAB_2L1L->InitializeAnalysis()){
+	  cout << "Problem initializing \"2L1L\" analysis" << endl;
+	}
+	
+      }
+      
 
 
       void analyze(const HEPUtils::Event* event) {
@@ -500,6 +654,8 @@ namespace Gambit {
           signalMuons.push_back(muon);
 	  signalLeptons.push_back(muon);
         }
+
+	std::sort(signalLeptons.begin(), signalLeptons.end(), sortLepByPT_RJ3L);
 	
         // We now have the signal electrons, muons, jets and b jets- move on to the analysis
 	bool m_is2Lep=false;
@@ -517,304 +673,308 @@ namespace Gambit {
 
 	bool m_foundSFOS=false;
 	
-	bool m_H2PP_visible = -999.;
-	bool m_H2PP_invisible = -999.;
-	bool m_IaPP = -999.;
-	bool m_IbPP = -999.;
-	bool m_IaPa = -999.;
-	bool m_IbPb = -999.;
-	bool m_IaLAB = -999;
-	bool m_IbLAB = -999;
-	bool m_H4PP_Lept1A = -999.;
-	bool m_H4PP_Lept1B = -999.;
-	bool m_H4PP_Lept2B = -999.;
-	bool m_mu = -999;
-	bool m_pileUp_weight = -999;
+	double m_H2PP_visible = -999.;
+	double m_H2PP_invisible = -999.;
+	double m_IaPP = -999.;
+	double m_IbPP = -999.;
+	double m_IaPa = -999.;
+	double m_IbPb = -999.;
+	double m_IaLAB = -999;
+	double m_IbLAB = -999;
+	double m_H4PP_Lept1A = -999.;
+	double m_H4PP_Lept1B = -999.;
+	double m_H4PP_Lept2B = -999.;
+	double m_mu = -999;
+	double m_pileUp_weight = -999;
 	
 	
 	//////Initialize variables
-	bool m_nBaselineLeptons = -999;
-	bool m_nSignalLeptons   = -999;
+	int m_nBaselineLeptons = -999;
+	int m_nSignalLeptons   = -999;
 	
-	bool m_lept1Pt  = -999;
-	bool m_lept1Eta = -999;
-	bool m_lept1Phi =-999;
-	bool m_lept1sign=-999;
-	bool m_lept1origin = -999;
-	bool m_lept1type = -999;
+	double m_lept1Pt  = -999;
+	double m_lept1Eta = -999;
+	double m_lept1Phi =-999;
+	double m_lept1sign=-999;
+	double m_lept1origin = -999;
+	double m_lept1type = -999;
 	
-	bool m_lept2Pt =-999;
-	bool m_lept2Eta=-999;
-	bool m_lept2Phi =-999;
-	bool m_lept2sign =-999;
-	bool m_lept2origin = -999;
-	bool m_lept2type = -999;
+	double m_lept2Pt =-999;
+	double m_lept2Eta=-999;
+	double m_lept2Phi =-999;
+	double m_lept2sign =-999;
+	double m_lept2origin = -999;
+	double m_lept2type = -999;
 	
-	bool m_lept3Pt =-999;
-	bool m_lept3Eta =-999;
-	bool m_lept3Phi =-999;
-	bool m_lept3sign =-999;
-	bool m_lept3origin = -999;
-	bool m_lept3type = -999;
+	double m_lept3Pt =-999;
+	double m_lept3Eta =-999;
+	double m_lept3Phi =-999;
+	double m_lept3sign =-999;
+	double m_lept3origin = -999;
+	double m_lept3type = -999;
 	
-	bool m_lept4Pt =-999;
-	bool m_lept4Eta =-999;
-	bool m_lept4Phi =-999;
-	bool m_lept4sign =-999;
-	bool m_lept4origin = -999;
-	bool m_lept4type = -999;
-	bool m_Zlep1Pt = -999;
-	bool m_Zlep1Phi = -999;
-	bool m_Zlep1Eta = -999;
-	bool m_Zlep1No = -999;
-	bool m_Zlep1sign = -999;
+	double m_lept4Pt =-999;
+	double m_lept4Eta =-999;
+	double m_lept4Phi =-999;
+	double m_lept4sign =-999;
+	double m_lept4origin = -999;
+	double m_lept4type = -999;
+	double m_Zlep1Pt = -999;
+	double m_Zlep1Phi = -999;
+	double m_Zlep1Eta = -999;
+	double m_Zlep1No = -999;
+	double m_Zlep1sign = -999;
 	
-	bool m_Zlep2Pt = -999;
-	bool m_Zlep2sign = -999;
-	bool m_Zlep2Phi = -999;
-	bool m_Zlep2Eta = -999;
-	bool m_Zlep2No = -999;
+	double m_Zlep2Pt = -999;
+	double m_Zlep2sign = -999;
+	double m_Zlep2Phi = -999;
+	double m_Zlep2Eta = -999;
+	double m_Zlep2No = -999;
 	
-	bool m_WlepPt = -999;
-	bool m_WlepPhi = -999;
-	bool m_WlepEta = -999;
-	bool m_WlepNo = -999;
-	bool m_Wlepsign = -999;
+	double m_WlepPt = -999;
+	double m_WlepPhi = -999;
+	double m_WlepEta = -999;
+	double m_WlepNo = -999;
+	double m_Wlepsign = -999;
 	
 	// VR setup
-	bool m_lept1Pt_VR = -999;
-	bool m_lept1Eta_VR = -999;
-	bool m_lept1Phi_VR = -999;
-	bool m_lept1sign_VR = -999;
+	double m_lept1Pt_VR = -999;
+	double m_lept1Eta_VR = -999;
+	double m_lept1Phi_VR = -999;
+	double m_lept1sign_VR = -999;
 	
-	bool m_lept2Pt_VR = -999;
-	bool m_lept2Eta_VR = -999;
-	bool m_lept2Phi_VR = -999;
-	bool m_lept2sign_VR = -999;
+	double m_lept2Pt_VR = -999;
+	double m_lept2Eta_VR = -999;
+	double m_lept2Phi_VR = -999;
+	double m_lept2sign_VR = -999;
 	
 	//Jet Variables
-	bool m_nJets =0;
-	bool m_nBtagJets=0;
+	int m_nJets=0;
+	int m_nBtagJets=0;
 	
-	bool m_jet1Pt =-999;
-	bool m_jet1Eta =-999;
-	bool m_jet1Phi =-999;
-	bool m_jet1M=-999;
-	bool m_jet1origin=-999;
-	bool m_jet1type=-999;
+	double m_jet1Pt =-999;
+	double m_jet1Eta =-999;
+	double m_jet1Phi =-999;
+	double m_jet1M=-999;
+	double m_jet1origin=-999;
+	double m_jet1type=-999;
 	
-	bool m_jet2Pt=-999;
-	bool m_jet2Eta=-999;
-	bool m_jet2Phi=-999;
-	bool m_jet2M=-999;
-	bool m_jet2origin=-999;
-	bool m_jet2type=-999;
+	double m_jet2Pt=-999;
+	double m_jet2Eta=-999;
+	double m_jet2Phi=-999;
+	double m_jet2M=-999;
+	double m_jet2origin=-999;
+	double m_jet2type=-999;
 	
-	bool m_jet3Pt=-999;
-	bool m_jet3Eta=-999;
-	bool m_jet3Phi=-999;
-	bool m_jet3M=-999;
-	bool m_jet3origin=-999;
-	bool m_jet3type=-999;
+	double m_jet3Pt=-999;
+	double m_jet3Eta=-999;
+	double m_jet3Phi=-999;
+	double m_jet3M=-999;
+	double m_jet3origin=-999;
+	double m_jet3type=-999;
 	
-	bool m_jet4Pt=-999;
-	bool m_jet4Eta=-999;
-	bool m_jet4Phi=-999;
-	bool m_jet4M=-999;
-	bool m_jet4origin=-999;
-	bool m_jet4type=-999;
+	double m_jet4Pt=-999;
+	double m_jet4Eta=-999;
+	double m_jet4Phi=-999;
+	double m_jet4M=-999;
+	double m_jet4origin=-999;
+	double m_jet4type=-999;
 	
 	//Di-Lepton System: Calculated for OS Pairs
-	bool m_mll=-999;
-	bool m_mt2=-999;
-	bool m_dRll=-999;
-	bool m_ptll=-999;
-	bool m_Zeta=-999;
+	double m_mll=-999;
+	double m_mt2=-999;
+	double m_dRll=-999;
+	double m_ptll=-999;
+	double m_Zeta=-999;
 	
 	//Tri-Lepton System:
-	bool m_mlll=-999;
-	bool m_ptlll=-999;
-	bool m_mTW=-999;
-	bool m_mTW_alt = -999;
-	bool m_mll_alt = -999;
+	double m_mlll=-999;
+	double m_ptlll=-999;
+	double m_mTW=-999;
+	double m_mTW_alt = -999;
+	double m_mll_alt = -999;
 	//Di-Jet system: Calculated for the Two Leading Jets
-	bool m_mjj=-999;
-	bool m_dRjj=-999;
-	bool m_ptjj=-999;
-	bool m_mj2j3 = -999;
+	double m_mjj=-999;
+	double m_dRjj=-999;
+	double m_ptjj=-999;
+	double m_mj2j3 = -999;
 	//calculation of overall jet mass
-	bool m_mJ=-999;
-	bool m_mjjW=-999;//closest to the W-boson mass
+	double m_mJ=-999;
+	double m_mjjW=-999;//closest to the W-boson mass
 	
 	//Cleaning Variable: If MET is in the same direction as the Jet
-	bool m_minDphi=-999;
+	double m_minDphi=-999;
 	// Some lab frame angles and stuff
-	bool m_dphill = -999;
-	bool m_dphilep1MET = -999;
-	bool m_dphilep2MET = -999;
-	bool m_dphilep3MET = -999;
-	bool m_dphiJMET = -999; 
-	bool m_dphilll = -999;
-	bool m_dphilllMET = -999;
-	bool m_dphillMET = -999;
-	bool m_dphijj = -999;
-	bool m_dphijet1MET = -999;
-	bool m_dphijet2MET = -999;
-	bool m_dphijjMET = -999;
-	bool m_dphil3MET = -999; 
-	bool m_MET=-999;
-	bool m_MET_phi = -999;
-	bool m_METTST = -999;
-	bool m_METTST_phi = -999;
-	bool m_Meff=-999;
-	bool m_LT=-999;
+	double m_dphill = -999;
+	double m_dphilep1MET = -999;
+	double m_dphilep2MET = -999;
+	double m_dphilep3MET = -999;
+	double m_dphiJMET = -999; 
+	double m_dphilll = -999;
+	double m_dphilllMET = -999;
+	double m_dphillMET = -999;
+	double m_dphijj = -999;
+	double m_dphijet1MET = -999;
+	double m_dphijet2MET = -999;
+	double m_dphijjMET = -999;
+	double m_dphil3MET = -999; 
+	double m_MET=-999;
+	double m_MET_phi = -999;
+	double m_METTST = -999;
+	double m_METTST_phi = -999;
+	double m_Meff=-999;
+	double m_LT=-999;
 	
-	bool m_MDR=-999;
-	bool m_PP_VisShape=-999;
-	bool m_gaminvPP=-999;
-	bool m_MP=-999;
+	double m_MDR=-999;
+	double m_PP_VisShape=-999;
+	double m_gaminvPP=-999;
+	double m_MP=-999;
 	
-	bool m_mC1=-999;
-	bool m_mN2=-999;
+	double m_mC1=-999;
+	double m_mN2=-999;
 	
-	bool m_mTW_Pa=-999;
-	bool m_mTW_PP=-999;
+	double m_mTW_Pa=-999;
+	double m_mTW_PP=-999;
 	
-	bool m_mTZ_Pb=-999;
-	bool m_mTZ_PP=-999;
+	double m_mTZ_Pb=-999;
+	double m_mTZ_PP=-999;
 	
 	// 3L CA 
-	bool m_min_mt = -999;
-	bool m_pt_lll = -999;
-	bool m_mTl3 = -999;
+	double m_min_mt = -999;
+	double m_pt_lll = -999;
+	double m_mTl3 = -999;
 	//##############################//
 	//# Recursive Jigsaw Variables #//
 	//##############################//
 	
 	//Scale Variables
-	bool m_H2PP=-999;
-	bool m_HT2PP=-999;
-	bool m_H3PP=-999;
-	bool m_HT3PP=-999;
-	bool m_H4PP=-999;
-	bool m_HT4PP=-999;
-	bool m_H5PP=-999;
-	bool m_HT5PP=-999;
-	bool m_H6PP=-999;
-	bool m_HT6PP=-999;
+	double m_H2PP=-999;
+	double m_HT2PP=-999;
+	double m_H3PP=-999;
+	double m_HT3PP=-999;
+	double m_H4PP=-999;
+	double m_HT4PP=-999;
+	double m_H5PP=-999;
+	double m_HT5PP=-999;
+	double m_H6PP=-999;
+	double m_HT6PP=-999;
 	
-	bool m_H2Pa=-999;
-	bool m_H2Pb=-999;
-	bool m_minH2P=-999;
-	bool m_R_H2Pa_H2Pb=-999;
-	bool m_H3Pa=-999;
-	bool m_H3Pb=-999;
-	bool m_minH3P=-999;
-	bool m_R_H3Pa_H3Pb=-999;
-	bool m_R_minH2P_minH3P=-999;
-	bool m_minR_pT2i_HT3Pi=-999;
-	bool m_maxR_H1PPi_H2PPi=-999;
+	double m_H2Pa=-999;
+	double m_H2Pb=-999;
+	double m_minH2P=-999;
+	double m_R_H2Pa_H2Pb=-999;
+	double m_H3Pa=-999;
+	double m_H3Pb=-999;
+	double m_minH3P=-999;
+	double m_R_H3Pa_H3Pb=-999;
+	double m_R_minH2P_minH3P=-999;
+	double m_minR_pT2i_HT3Pi=-999;
+	double m_maxR_H1PPi_H2PPi=-999;
 	
 	//Anglular Variables
-	bool m_cosPP=-999;
-	bool m_cosPa=-999;
-	bool m_cosPb=-999;
-	bool m_dphiVP=-999;
-	bool m_dphiPPV=-999;
-	bool m_dphiPC1=-999;
-	bool m_dphiPN2=-999;
+	double m_cosPP=-999;
+	double m_cosPa=-999;
+	double m_cosPb=-999;
+	double m_dphiVP=-999;
+	double m_dphiPPV=-999;
+	double m_dphiPC1=-999;
+	double m_dphiPN2=-999;
 	
-	bool m_sangle=-999;
-	bool m_dangle=-999;
+	double m_sangle=-999;
+	double m_dangle=-999;
 	
 	//Ratio Variables
-	bool m_RPZ_HT4PP=-999;
-	bool m_RPT_HT4PP=-999;
-	bool m_R_HT4PP_H4PP=-999;
+	double m_RPZ_HT4PP=-999;
+	double m_RPT_HT4PP=-999;
+	double m_R_HT4PP_H4PP=-999;
 	
-	bool m_RPZ_HT5PP=-999;
-	bool m_RPT_HT5PP=-999;
-	bool m_R_HT5PP_H5PP=-999;
-	bool m_W_PP = -999;
-	bool m_WZ_PP = -999;
+	double m_RPZ_HT5PP=-999;
+	double m_RPT_HT5PP=-999;
+	double m_R_HT5PP_H5PP=-999;
+	double m_W_PP = -999;
+	double m_WZ_PP = -999;
 	///Variables for the compressed/Intermediate tree
-	bool m_PTCM=-999;
-	bool m_PTISR=-999;
-	bool m_PTI=-999;
-	bool m_RISR=-999;
-	bool m_cosCM=-999;
-	bool m_cosS=-999;
-	bool m_MISR=-999;
-	bool m_dphiCMI=-999;
-	bool m_dphiSI=-999;
-	bool m_dphiISRI=-999;
-	bool m_HN2S=-999;
-	bool m_R_Ib_Ia=-999;
-	bool m_H11S = -999.;
-	bool m_HN1Ca = -999.;
-	bool m_HN1Cb = -999.;
-	bool m_H11Ca = -999.;
-	bool m_H11Cb = -999.;
-	bool m_cosC = -999.;
-	bool m_Is_Z = -999.;
-	bool m_Is_OS = -999;
-	bool m_MZ = -999.;
-	bool m_MJ = -999.;
-	bool m_mTWComp =-999.;
-	bool m_cosZ = -999.;
-	bool m_cosJ = -999.;
-	bool m_NjS   = 0;
-	bool m_NjISR = 0;
-	bool m_NbS   = 0;
-	bool m_NbISR = 0;
+	double m_PTCM=-999;
+	double m_PTISR=-999;
+	double m_PTI=-999;
+	double m_RISR=-999;
+	double m_cosCM=-999;
+	double m_cosS=-999;
+	double m_MISR=-999;
+	double m_dphiCMI=-999;
+	double m_dphiSI=-999;
+	double m_dphiISRI=-999;
+	double m_HN2S=-999;
+	double m_R_Ib_Ia=-999;
+	double m_H11S = -999.;
+	double m_HN1Ca = -999.;
+	double m_HN1Cb = -999.;
+	double m_H11Ca = -999.;
+	double m_H11Cb = -999.;
+	double m_cosC = -999.;
+	double m_Is_Z = -999.;
+	double m_Is_OS = -999;
+	double m_MZ = -999.;
+	double m_MJ = -999.;
+	double m_mTWComp =-999.;
+	double m_cosZ = -999.;
+	double m_cosJ = -999.;
+	int m_NjS   = 0;
+	int m_NjISR = 0;
+	int m_NbS   = 0;
+	int m_NbISR = 0;
 	
-	bool m_MZ_VR = -999;
-	bool m_MJ_VR = -999;  
-	bool m_PTCM_VR = -999;
-	bool m_PTISR_VR = -999;
-	bool m_PTI_VR = -999;
-	bool m_RISR_VR = -999;
-	bool m_dphiISRI_VR = -999;
-	bool m_NjS_VR = 0;
-	bool m_NjISR_VR = 0;
+	double m_MZ_VR = -999;
+	double m_MJ_VR = -999;  
+	double m_PTCM_VR = -999;
+	double m_PTISR_VR = -999;
+	double m_PTI_VR = -999;
+	double m_RISR_VR = -999;
+	double m_dphiISRI_VR = -999;
+	int m_NjS_VR = 0;
+	int m_NjISR_VR = 0;
 	
 	
-	bool m_H2PP_VR = -999;
-	bool m_H5PP_VR = -999;
-	bool m_HT5PP_VR = -999;
-	bool m_RPT_HT5PP_VR = -999;
-	bool m_dphiVP_VR = -999;
-	bool m_R_minH2P_minH3P_VR=-999;
+	double m_H2PP_VR = -999;
+	double m_H5PP_VR = -999;
+	double m_HT5PP_VR = -999;
+	double m_RPT_HT5PP_VR = -999;
+	double m_dphiVP_VR = -999;
+	double m_R_minH2P_minH3P_VR=-999;
 	
-	bool m_DPhi_METW = -999;
+	double m_DPhi_METW = -999;
 	//compressed
-	bool m_WmassOnZ = -999;
-	bool m_WptOnZ = -999;
-	bool m_DPhi_METZ = -999;
-	bool m_NonWJet_pT = -999;
-	bool m_DPhi_METJetLeading = -999;
-	bool m_DR_WOnZ2Jet = -999;
-	bool m_DPhi_METNonWJet = -999;
-	bool m_DPhi_METWonZ = -999;
+	double m_WmassOnZ = -999;
+	double m_WptOnZ = -999;
+	double m_DPhi_METZ = -999;
+	double m_NonWJet_pT = -999;
+	double m_DPhi_METJetLeading = -999;
+	double m_DR_WOnZ2Jet = -999;
+	double m_DPhi_METNonWJet = -999;
+	double m_DPhi_METWonZ = -999;
 	
 	// Testing for low mass 3L
-	bool m_M_I = -999;
-	bool m_p_z_I = -999;
-	bool m_p_z_Ia = -999;
-	bool m_p_z_Ib = -999;
-	bool m_boostx = -999;
-	bool m_boosty = -999;
-	bool m_boostz = -999;
+	double m_M_I = -999;
+	double m_p_z_I = -999;
+	double m_p_z_Ia = -999;
+	double m_p_z_Ib = -999;
+	double m_boostx = -999;
+	double m_boosty = -999;
+	double m_boostz = -999;
 
 	// Classify events
+
+	m_nJets = signalJets.size();
+
+	//if(signalLeptons.size()==2)std::cout << "m_nJets " << m_nJets << " signalLeptons.size() " << signalLeptons.size() << " pt1 " << signalLeptons[0]->pT() << " pt2 " << signalLeptons[1]->pT() <<  std::endl;
 	
 	if (signalLeptons.size()==2) m_is2Lep = true;
 	else if (signalLeptons.size()==3) {m_is3Lep = true; //cout << "3L here" << endl;
 	}
 	else if (signalLeptons.size()==4) m_is4Lep = true;
-	else return;
+	//else return;
 	
-	if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true;
+	if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true; 
 	if(m_is2Lep && m_nJets>2 ) m_is2L2JInt = true;
 	if(m_is3Lep && m_nJets>0 ) m_is3LInt = true;
 	if(m_is3Lep && m_nJets>1)  m_is3Lep2Jet = true; //
@@ -860,13 +1020,13 @@ namespace Gambit {
 	
 	sort(myJets.begin(), myJets.end(), SortJets);
 	sort(myLeptons.begin(), myLeptons.end(), SortLeptons);
-	
+
 	if(m_is2Lep2Jet)
 	  {
 	    //Creating the Lab Frame
 	    LAB_2L2J->ClearEvent();
 	    
-	    if(myLeptons[0].first.Pt()<25000.0 || myLeptons[1].first.Pt()<25000.0) return;
+	    if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
 	    
 	    //Setting the Standard Variables
 	    //Di-Lepton System:
@@ -1027,7 +1187,7 @@ namespace Gambit {
 	    // set the jet lab frame 4-vector 
 	    TLorentzVector jet1 = J1_2L2J->GetFourVector(*LAB_2L2J);
 	    TLorentzVector jet2 = J2_2L2J->GetFourVector(*LAB_2L2J);
-	    
+
 	    // Some lab frame stuff
 	    m_dphill = lep1.DeltaPhi(lep2);
 	    m_dphilep1MET = fabs(lep1.DeltaPhi(metLV));
@@ -1051,6 +1211,7 @@ namespace Gambit {
 	    TLorentzVector vP_V1bPb = L1_2L2J->GetFourVector(*N2b_2L2J);
 	    TLorentzVector vP_V2bPb = L2_2L2J->GetFourVector(*N2b_2L2J);
 	    TLorentzVector vP_IbPb  = X1b_2L2J->GetFourVector(*N2b_2L2J);
+
 	    
 	    
 	    //Variables w/ 4 objects 
@@ -1073,6 +1234,7 @@ namespace Gambit {
 	    m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
 	    m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
 	    m_R_minH2P_minH3P = m_minH2P/m_minH3P;
+	    std::cout << " m_R_minH2P_minH3P " << m_R_minH2P_minH3P << " " << m_minH2P << " " <<  m_minH3P << std::endl;
 	    double H3PTa = vP_V1aPa.Pt() + vP_V2aPa.Pt() + vP_IaPa.Pt();
 	    
 	    m_minR_pT2i_HT3Pi = std::min(vP_V1aPa.Pt()/H3PTa,vP_V2aPa.Pt()/H3PTa);
@@ -1147,9 +1309,8 @@ namespace Gambit {
 	    
 	    m_sangle =(m_cosPa+(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
 	    m_dangle =(m_cosPa-(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
-	    
 	  }//end is 2L2J event
-	
+
 	if(m_is3Lep){
 
 	  bool m_pass3L_presel;
@@ -1208,7 +1369,7 @@ namespace Gambit {
 	  else {
 	    m_foundSFOS=true;
 	  }
-	  
+		  
 	  if(m_foundSFOS){
 
 	    int Wlep1 = -999;
@@ -1293,7 +1454,7 @@ namespace Gambit {
 	    //Scalar sum of all visible objects + vector sum of invisible momenta 
 	    m_H4PP = vP_V1aPP.P() + vP_V1bPP.P() + vP_V2bPP.P() + (vP_I1aPP + vP_I1bPP).P();//H(3,1)PP
 	    m_HT4PP = vP_V1aPP.Pt() + vP_V1bPP.Pt() + vP_V2bPP.Pt() + (vP_I1aPP + vP_I1bPP).Pt();//HT(3,1)PP
-	    
+	  
 	    // Invisible components again
 	    TLorentzVector vP_IaLAB = X1a_3L->GetFourVector(*LAB_3L);
 	    TLorentzVector vP_IbLAB = X1b_3L->GetFourVector(*LAB_3L);
@@ -1305,6 +1466,23 @@ namespace Gambit {
 	    TVector3 lab_to_pp = C1N2_3L->GetBoostInParentFrame();
 	    
 	    /// Defined in the P-frame    
+	    m_H2Pa = (vP_V1aPa).P() + (vP_I1aPa).P(); //H(1,1)P
+	    m_H2Pb = (vP_V1bPb + vP_V2bPb).P() + vP_I1bPb.P();//H(1,1)P
+	    
+	    m_H3Pa = vP_V1aPa.P() + vP_I1aPa.P();//H(1,1)P
+	    m_H3Pb = vP_V1bPb.P() + vP_V2bPb.P() + vP_I1bPb.P();//H(2,1)P
+	    
+	    m_minH2P = std::min(m_H2Pa,m_H2Pb);
+	    m_minH3P = std::min(m_H3Pa,m_H3Pb);
+	    m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
+	    m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
+	    m_R_minH2P_minH3P = m_H2Pb/m_H3Pb;
+	    
+	    double H1PPa = (vP_V1aPP).P();
+	    double H1PPb = (vP_V1bPP + vP_V2bPP).P();
+	    double H2PPa = vP_V1aPP.P() + vP_I1aPP.P();
+	    double H2PPb = (vP_V1bPP+vP_V2bPP).P() + vP_I1bPP.P();
+	    m_maxR_H1PPi_H2PPi = std::max(H1PPa/H2PPa,H1PPb/H2PPb);
 	    
 	    ////Calculation of dRll_I_PP;
 	    //m_dRll_I_PP = (vP_V1bPP+vP_V1bPP).DeltaR(vP_I1bPP);
@@ -1342,18 +1520,305 @@ namespace Gambit {
 	    
 	  } // end of if(m_foundSFOS)
 	} // end of m_is3Lep
-	
 
+	if(m_is3LInt || m_is2L2JInt) {
+
+	  //min{d#phi}
+	  double mindphi=100000;
+	  double dphi=0;
+	  TLorentzVector tempjet;
+	  for(unsigned int ijet=0; ijet<signalJets.size();ijet++)
+	    {
+	      tempjet.SetPtEtaPhiM(signalJets[ijet]->pT(),signalJets[ijet]->eta(),signalJets[ijet]->phi(),signalJets[ijet]->mass());
+	      
+	      dphi = fabs(metLV.DeltaPhi(tempjet));
+	      
+	      if(dphi<mindphi) mindphi=dphi;
+	    }
+	  
+	  m_minDphi = mindphi;//cleaning variable for missmeasured jets;
+	  //if( fabs(mindphi)<0.4) return;
+	  
+	  LAB_comb->ClearEvent();
+
+	  
+	  vector<RestFrames::RFKey> jetID;
+	  for(int i = 0; i < int(myJets.size()); i++){
+
+            TLorentzVector jet = myJets[i];
+
+            // transverse view of jet 4-vectors
+            jet.SetPtEtaPhiM(jet.Pt(),0.0,jet.Phi(),jet.M());
+            jetID.push_back(JETS_comb->AddLabFrameFourVector(jet));
+	  }
+
+	  TLorentzVector lepSys(0.,0.,0.,0.);
+	  for(int i = 0; i < int(myLeptons.size()); i++){
+            TLorentzVector lep1;
+            // transverse view of mu 4-vectors
+            lep1.SetPtEtaPhiM(myLeptons[i].first.Pt(),0.0,myLeptons[i].first.Phi(),myLeptons[i].first.M());
+            lepSys = lepSys + lep1;
+	  }
+	  L_comb->SetLabFrameFourVector(lepSys);
+	  
+	  INV_comb->SetLabFrameThreeVector(ETMiss);
+	  if(!LAB_comb->AnalyzeEvent())
+            cout << "Something went wrong with \"INTERMEDIATE\" tree event analysis" << endl;
+
+	  for(int i = 0; i < int(signalJets.size()); i++){
+            if(JETS_comb->GetFrame(jetID[i]) == *J_comb){
+	      m_NjS++;
+	      if(signalJets[i]->btag()) m_NbS++;
+            } else {
+	      m_NjISR++;
+	      if(signalJets[i]->btag()) m_NbISR++;
+            }
+	  }
+
+	  // 2LNJ analysis
+	  if(m_is2L2JInt){
+            LAB_2LNJ->ClearEvent();
+	    
+            // put jets in their place
+            int NJ = jetID.size();
+            TLorentzVector vISR(0.,0.,0.,0.);
+            for(int i = 0; i < NJ; i++){
+	      if(JETS_comb->GetFrame(jetID[i]) == *J_comb){
+		JETS_2LNJ->AddLabFrameFourVector(myJets[i]);
+	      } else {
+		vISR += myJets[i];
+	      }
+            }
+	    
+            ISR_2LNJ->SetLabFrameFourVector(vISR);
+	    
+            // put leptons in their place
+            L1_2LNJ->SetLabFrameFourVector(myLeptons[0].first);
+            L2_2LNJ->SetLabFrameFourVector(myLeptons[1].first);
+	    
+            INV_2LNJ->SetLabFrameThreeVector(ETMiss);
+	    
+            if(!LAB_2LNJ->AnalyzeEvent())
+	      cout << "Something went wrong with \"2LNJ\" tree event analysis" << endl;
+	  }
+
+	  // 2L1L analysis
+	  if(m_is3LInt){
+            LAB_2L1L->ClearEvent();
+	    
+            // put jets in their place
+            int NJ = jetID.size();
+            TLorentzVector vISR(0.,0.,0.,0.);
+            for(int i = 0; i < NJ; i++){
+	      if(JETS_comb->GetFrame(jetID[i]) != *J_comb) vISR += myJets[i];
+            }
+	    
+            ISR_2L1L->SetLabFrameFourVector(vISR);
+	    
+            // put leptons in their place
+            // find min mass OS pair
+            pair<int,int> iSFOS;
+            double        mSFOS = -1.;
+            for(int i = 0; i < 2; i++){
+	      for(int j = i+1; j < 3; j++){
+		if((signbit(myLeptons[i].second) && !signbit(myLeptons[j].second)) || (!signbit(myLeptons[i].second) && signbit(myLeptons[j].second))){
+		  if(mSFOS < 0. ||
+		     (myLeptons[i].first+myLeptons[j].first).M() < mSFOS){
+		    mSFOS = (myLeptons[i].first+myLeptons[j].first).M();
+		    iSFOS.first  = i;
+		    iSFOS.second = j;
+		  }
+		}
+	      }
+            }
+	    
+            for(int i = 0; i < 3; i++){
+	      if(i == iSFOS.first)
+		L1_2L1L->SetLabFrameFourVector(myLeptons[i].first);
+	      if(i == iSFOS.second)
+		L2_2L1L->SetLabFrameFourVector(myLeptons[i].first);
+	      if(i != iSFOS.first && i != iSFOS.second) {
+		Lb_2L1L->SetLabFrameFourVector(myLeptons[i].first);
+		//calculate the mTWComp with the remaining lepton 
+		TLorentzVector themetLV;
+		themetLV.SetPxPyPzE(ETMiss.X(),ETMiss.Y(),0.,sqrt(ETMiss.X()*ETMiss.X()+ETMiss.Y()*ETMiss.Y()));
+		double wlepMetphi = myLeptons[i].first.DeltaPhi(themetLV);
+		m_mTWComp = sqrt(2*myLeptons[i].first.Pt()*themetLV.Pt()*(1-cos(wlepMetphi)));  
+	      }
+            }
+	    
+            INV_2L1L->SetLabFrameThreeVector(ETMiss);
+	    
+            if(!LAB_2L1L->AnalyzeEvent())
+	      cout << "Something went wrong with \"2L1L\" tree event analysis" << endl;
+	  }
+	  
+	  TLorentzVector vP_CM;
+	  TLorentzVector vP_ISR;
+	  TLorentzVector vP_I;
+
+	  if(m_is2L2JInt){
+	    
+            vP_CM  = CM_2LNJ->GetFourVector();
+            vP_ISR = ISR_2LNJ->GetFourVector();
+            vP_I   = (*Ia_2LNJ+*Ib_2LNJ).GetFourVector();
+	    
+            m_cosCM = CM_2LNJ->GetCosDecayAngle();
+            m_cosS  = S_2LNJ->GetCosDecayAngle();
+            m_MISR = ISR_2LNJ->GetMass();
+            m_dphiCMI = acos(-1.)-fabs(CM_2LNJ->GetDeltaPhiBoostVisible());
+            m_dphiSI  = acos(-1.)-fabs(S_2LNJ->GetDeltaPhiBoostVisible());
+	    
+            m_HN2S = //Z_2LNJ->GetFourVector(*S_2LNJ).E() +
+	      L1_2LNJ->GetFourVector(*S_2LNJ).E()+
+	      L2_2LNJ->GetFourVector(*S_2LNJ).E()+
+	      J_2LNJ->GetFourVector(*S_2LNJ).E() +
+	      Ia_2LNJ->GetFourVector(*S_2LNJ).P() +
+	      Ib_2LNJ->GetFourVector(*S_2LNJ).P();
+            m_H11S = 2.*(*Ia_2LNJ+*Ib_2LNJ).GetFourVector(*S_2LNJ).P();
+            m_HN1Ca = Z_2LNJ->GetFourVector(*Ca_2LNJ).E()+
+	      Ia_2LNJ->GetFourVector(*Ca_2LNJ).P();
+            m_HN1Cb = J_2LNJ->GetFourVector(*Cb_2LNJ).E()+
+	      Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
+            m_H11Ca = 2.*Ia_2LNJ->GetFourVector(*Ca_2LNJ).P();
+            m_H11Cb = 2.*Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
+            m_cosC  = Ca_2LNJ->GetCosDecayAngle();
+	    
+            if((signbit(myLeptons[0].second) && !signbit(myLeptons[1].second)) || (!signbit(myLeptons[0].second) && signbit(myLeptons[1].second))) m_Is_OS = 1;
+            if(myLeptons[0].second+myLeptons[1].second == 0) m_Is_Z = 1;
+            m_MZ = Z_2LNJ->GetMass();
+            m_MJ = J_2LNJ->GetMass();
+
+            m_cosZ = Z_2LNJ->GetCosDecayAngle();
+            //if(m_NjS > 1)
+            m_cosJ = JSA_2LNJ->GetCosDecayAngle();
+            m_dphiJMET = fabs(J_2LNJ->GetFourVector(*LAB_2LNJ).DeltaPhi(metLV));
+	  }
+
+	  if(m_is3LInt){
+	    
+            vP_CM  = CM_2L1L->GetFourVector();
+            vP_ISR = ISR_2L1L->GetFourVector();
+            vP_I   = (*Ia_2L1L+*Ib_2L1L).GetFourVector();
+	    
+            m_cosCM = CM_2L1L->GetCosDecayAngle();
+            m_cosS  = S_2L1L->GetCosDecayAngle();
+            m_MISR = ISR_2L1L->GetMass();
+            m_dphiCMI = acos(-1.)-fabs(CM_2L1L->GetDeltaPhiBoostVisible());
+            m_dphiSI  = acos(-1.)-fabs(S_2L1L->GetDeltaPhiBoostVisible());
+	    
+            m_HN2S = //Z_2L1L->GetFourVector(*S_2L1L).E() +
+	      L1_2L1L->GetFourVector(*S_2L1L).E() +
+	      L2_2L1L->GetFourVector(*S_2L1L).E() +
+	      Lb_2L1L->GetFourVector(*S_2L1L).E() +
+	      Ia_2L1L->GetFourVector(*S_2L1L).P() +
+	      Ib_2L1L->GetFourVector(*S_2L1L).P();
+            m_H11S = 2.*(*Ia_2L1L+*Ib_2L1L).GetFourVector(*S_2L1L).P();
+            m_HN1Ca = Z_2L1L->GetFourVector(*Ca_2L1L).E()+
+	      Ia_2L1L->GetFourVector(*Ca_2L1L).P();
+            m_HN1Cb = Lb_2L1L->GetFourVector(*Cb_2L1L).E()+
+	      Ib_2L1L->GetFourVector(*Cb_2L1L).P();
+            m_H11Ca = 2.*Ia_2L1L->GetFourVector(*Ca_2L1L).P();
+            m_H11Cb = 2.*Ib_2L1L->GetFourVector(*Cb_2L1L).P();
+            m_cosC  = Ca_2L1L->GetCosDecayAngle();
+            m_Is_OS = 1;
+            if(myLeptons[0].second+myLeptons[1].second == 0 ||
+	       myLeptons[0].second+myLeptons[2].second == 0 ||
+	       myLeptons[1].second+myLeptons[2].second == 0) m_Is_Z=1;
+            m_MZ = Z_2L1L->GetMass();
+            m_cosZ = Z_2L1L->GetCosDecayAngle();
+	  }
+	  
+	  m_PTCM = vP_CM.Pt();
+	  
+	  TVector3 boostZ = vP_CM.BoostVector();
+	  boostZ.SetX(0.);
+	  boostZ.SetY(0.);
+	  
+	  vP_CM.Boost(-boostZ);
+	  vP_ISR.Boost(-boostZ);
+	  vP_I.Boost(-boostZ);
+	  
+	  TVector3 boostT = vP_CM.BoostVector();
+	  vP_ISR.Boost(-boostT);
+	  vP_I.Boost(-boostT);
+	  
+	  TVector3 vPt_ISR = vP_ISR.Vect();
+	  TVector3 vPt_I   = vP_I.Vect();
+	  vPt_ISR -= vPt_ISR.Dot(boostZ.Unit())*boostZ.Unit();
+	  vPt_I   -= vPt_I.Dot(boostZ.Unit())*boostZ.Unit();
+	  
+	  m_PTISR =  vPt_ISR.Mag();
+	  m_RISR  = -vPt_I.Dot(vPt_ISR.Unit()) / m_PTISR;
+	  m_PTI = vPt_I.Mag();
+	  m_dphiISRI = fabs(vPt_ISR.Angle(vPt_I));
+	  
+	}//end INTERMEDIATE
 
 	// Cutflow check
-
+	
 	cutFlowVector_str[0] = "No cuts ";
-        cutFlowVector_str[1] = "Preselection ";
-        cutFlowVector_str[2] = "75 GeV < mll < 105 GeV ";
-        cutFlowVector_str[3] = "mTW > 100 GeV ";
-        cutFlowVector_str[4] = "m_HT4PP/m_H4PP > 0.9 ";
-        cutFlowVector_str[5] = "m_H4PP > 250 GeV ";
-        cutFlowVector_str[6] = "pT_PP/(pT_PP + HT_PP(3,1)) ";
+        cutFlowVector_str[1] = "3LLOW: Preselection ";
+        cutFlowVector_str[2] = "3LLOW: 75 GeV < mll < 105 GeV ";
+        cutFlowVector_str[3] = "3LLOW: mTW > 100 GeV ";
+        cutFlowVector_str[4] = "3LLOW: m_HT4PP/m_H4PP > 0.9 ";
+        cutFlowVector_str[5] = "3LLOW: m_H4PP > 250 GeV ";
+        cutFlowVector_str[6] = "3LLOW: pT_PP/(pT_PP + HT_PP(3,1)) ";
+	cutFlowVector_str[7] = "2L2JLOW: Preselection ";
+        cutFlowVector_str[8] = "2L2JLOW: mll ";
+        cutFlowVector_str[9] = "2L2JLOW: mjj ";
+        cutFlowVector_str[10] = "2L2JLOW: HT_PP(1,1)/HT_PP(4,1) ";
+        cutFlowVector_str[11] = "2L2JLOW: pT_PP/(pT_PP + HT_PP(4,1)) ";
+	cutFlowVector_str[12] = "2L2JLOW: minDPhi ";
+	cutFlowVector_str[13] = "2L2JLOW: HPP(4,1) ";
+	cutFlowVector_str[14] = "2L2JINT: Preselection ";
+        cutFlowVector_str[15] = "2L2JINT: mll ";
+        cutFlowVector_str[16] = "2L2JINT: mjj ";
+        cutFlowVector_str[17] = "2L2JINT: HT_PP(1,1)/HT_PP(4,1) ";
+        cutFlowVector_str[18] = "2L2JINT: pT_PP/(pT_PP + HT_PP(4,1)) ";
+	cutFlowVector_str[19] = "2L2JINT: minDPhi ";
+	cutFlowVector_str[20] = "2L2JINT: HPP(4,1) ";
+	cutFlowVector_str[21] = "2L2JHIGH: Preselection ";
+        cutFlowVector_str[22] = "2L2JHIGH: mll ";
+        cutFlowVector_str[23] = "2L2JHIGH: mjj ";
+        cutFlowVector_str[24] = "2L2JHIGH: m_R_minH2P_minH3P>0.8";
+        cutFlowVector_str[25] = "2L2JHIGH: m_RPT_HT5PP < 0.05 ";
+	cutFlowVector_str[26] = "2L2JHIGH: 0.3 < minDPhiVP > 2.8 ";
+	cutFlowVector_str[27] = "2L2JHIGH: m_H5PP>800. ";
+	cutFlowVector_str[28] = "2L2JCOMP: Preselection ";
+        cutFlowVector_str[29] = "2L2JCOMP: mZ ";
+        cutFlowVector_str[30] = "2L2JCOMP: mJ ";
+        cutFlowVector_str[31] = "2L2JCOMP: dPhi_ISR_I ";
+        cutFlowVector_str[32] = "2L2JCOMP: R_ISR ";
+	cutFlowVector_str[33] = "2L2JCOMP: p_ISRT ";
+	cutFlowVector_str[34] = "2L2JCOMP: p_IT ";
+	cutFlowVector_str[35] = "2L2JCOMP: pT_CM ";
+	cutFlowVector_str[36] = "3LHIGH: Preselection ";
+        cutFlowVector_str[37] = "3LHIGH: mll  ";
+        cutFlowVector_str[38] = "3LHIGH: mTW  ";
+	cutFlowVector_str[39] = "3LHIGH: m_HT4PP/m_H4PP  ";
+	cutFlowVector_str[40] = "3LHIGH: HPb(1,1)/HPb(2,1) ";
+        cutFlowVector_str[41] = "3LHIGH: m_H4PP  ";
+        cutFlowVector_str[42] = "3LHIGH: pT_PP/(pT_PP + HT_PP(3,1)) ";
+	cutFlowVector_str[43] = "3LCOMP: Preselection ";
+        cutFlowVector_str[44] = "3LCOMP: mll ";
+        cutFlowVector_str[45] = "3LCOMP: mTW  ";
+	cutFlowVector_str[46] = "3LCOMP: dPhi_ISRI ";
+        cutFlowVector_str[47] = "3LCOMP: R_ISR ";
+        cutFlowVector_str[48] = "3LCOMP: p_ISRT ";
+        cutFlowVector_str[49] = "3LCOMP: p_IT ";
+	cutFlowVector_str[50] = "3LCOMP: pT_CM ";
+	cutFlowVector_str[51] = "3LINT: Preselection ";
+        cutFlowVector_str[52] = "3LINT: mll ";
+        cutFlowVector_str[53] = "3LINT: mTW  ";
+	cutFlowVector_str[54] = "3LINT: m_HT4PP/m_H4PP  ";
+	cutFlowVector_str[55] = "3LINT: HPb(1,1)/HPb(2,1) ";
+        cutFlowVector_str[56] = "3LINT: m_H4PP ";
+        cutFlowVector_str[57] = "3LINT: pT_PP/(pT_PP + HT_PP(3,1)) ";
+      
+	//std::cout << " m_is3Lep " << m_is3Lep <<  " m_is2Lep2Jet " << m_is2Lep2Jet << " m_is2L2JInt " << m_is2L2JInt << " m_is3LInt " << m_is3LInt << " m_is3Lep2Jet " << m_is3Lep2Jet << " m_is3Lep3Jet " << m_is3Lep3Jet << " m_is4Lep2Jet " << m_is4Lep2Jet << " m_is4Lep3Jet " << m_is4Lep3Jet << std::endl;
+
+	//if(m_is3Lep)std::cout << " m_is3Lep " << m_is3Lep << " m_lept1sign " << m_lept1sign << " m_lept2sign " << m_lept2sign << " m_lept1Pt " << m_lept1Pt << " m_lept2Pt " << m_lept2Pt << " m_lept3Pt " << m_lept3Pt << " signalBJets.size() " << signalBJets.size() << " signalJets.size() " << signalJets.size() << std::endl;
 	
 	for(int j=0;j<NCUTS;j++){
 	  
@@ -1369,7 +1834,170 @@ namespace Gambit {
 	      
 	      (j==5 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>40. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()==0 && m_mll>75. && m_mll<105. && m_mTW>100. && m_HT4PP/m_H4PP > 0.9 && m_H4PP > 250.) ||
 	      
-	      (j==6 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>40. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()==0 && m_mll>75. && m_mll<105. && m_mTW>100. && m_HT4PP/m_H4PP > 0.9 && m_H4PP > 250. && m_RPT_HT4PP < 0.05)
+	      (j==6 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>40. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()==0 && m_mll>75. && m_mll<105. && m_mTW>100. && m_HT4PP/m_H4PP > 0.9 && m_H4PP > 250. && m_RPT_HT4PP < 0.05) ||
+
+	      /*cutFlowVector_str[7] = "2L2JLOW: Preselection ";
+	      cutFlowVector_str[8] = "2L2JLOW: 80 GeV < mll < 100 GeV";
+	      cutFlowVector_str[9] = "2L2JLOW: 70 GeV < mjj < 90 GeV ";
+	      cutFlowVector_str[10] = "2L2JLOW: HT_PP(1,1)/HT_PP(4,1) ";
+	      cutFlowVector_str[11] = "2L2JLOW: pT_PP/(pT_PP + HT_PP(4,1)) ";
+	      cutFlowVector_str[12] = "2L2JLOW: minDPhi ";
+	      cutFlowVector_str[13] = "2L2JLOW: HPP(4,1) ";*/
+
+	      (j==7 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2) ||
+
+	      (j==8 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100.) ||
+
+	      (j==9 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90.) ||
+
+	      (j==10 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6) ||
+
+	      (j==11 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05) ||
+
+	      (j==12 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05 && m_minDphi>2.4) ||
+
+	      (j==13 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05 && m_minDphi>2.4 && m_H5PP>400.) ||
+
+	      /*cutFlowVector_str[14] = "2L2JINT: Preselection ";
+	      cutFlowVector_str[15] = "2L2JINT: mll ";
+	      cutFlowVector_str[16] = "2L2JINT: mjj ";
+	      cutFlowVector_str[17] = "2L2JINT: HT_PP(1,1)/HT_PP(4,1) ";
+	      cutFlowVector_str[18] = "2L2JINT: pT_PP/(pT_PP + HT_PP(4,1)) ";
+	      cutFlowVector_str[19] = "2L2JINT: minDPhi ";
+	      cutFlowVector_str[20] = "2L2JINT: HPP(4,1) ";*/
+
+	      (j==14 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2) ||
+
+	      (j==15 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100.) ||
+
+	      (j==16 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. &&  m_mjj>60. && m_mjj<100.) ||
+
+	      (j==17 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. &&  m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 ) ||
+
+	      (j==18 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. &&  m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 && m_RPT_HT5PP<0.05) ||
+
+	      (j==19 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. &&  m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 && m_RPT_HT5PP<0.05 && m_dphiVP>0.6) ||
+
+	      (j==20 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. &&  m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 && m_RPT_HT5PP<0.05 && m_dphiVP>0.6 && m_H5PP>600.) ||
+
+	      /* cutFlowVector_str[21] = "2L2JHIGH: Preselection ";
+	      cutFlowVector_str[22] = "2L2JHIGH: mll ";
+	      cutFlowVector_str[23] = "2L2JHIGH: mjj ";
+	      cutFlowVector_str[24] = "2L2JHIGH: m_R_minH2P_minH3P>0.8";
+	      cutFlowVector_str[25] = "2L2JHIGH: m_RPT_HT5PP < 0.05 ";
+	      cutFlowVector_str[26] = "2L2JHIGH: 0.3 < minDPhiVP > 2.8 ";
+	      cutFlowVector_str[27] = "2L2JHIGH: m_H5PP>800. ";*/
+
+	      
+	      (j==21 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2) ||
+
+	      (j==22 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100.) ||
+
+	      (j==23 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. && m_mjj>60. && m_mjj<100.) ||
+
+	      (j==24 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. && m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8) ||
+
+	      (j==25 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. && m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 && m_RPT_HT5PP< 0.05) ||
+
+	      (j==26 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. && m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 && m_RPT_HT5PP< 0.05 && m_dphiVP>0.3 && m_dphiVP<2.8 ) ||
+
+	      (j==27 && m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()>=2 && m_mll>80. && m_mll<100. && m_mjj>60. && m_mjj<100. && m_R_minH2P_minH3P>0.8 && m_RPT_HT5PP< 0.05 && m_dphiVP>0.3 && m_dphiVP<2.8 && m_H5PP>800.) ||
+
+	      /*cutFlowVector_str[28] = "2L2JCOMP: Preselection ";
+	      cutFlowVector_str[29] = "2L2JCOMP: mZ ";
+	      cutFlowVector_str[30] = "2L2JCOMP: mJ ";
+	      cutFlowVector_str[31] = "2L2JCOMP: dPhi_ISR_I ";
+	      cutFlowVector_str[32] = "2L2JCOMP: R_ISR ";
+	      cutFlowVector_str[33] = "2L2JCOMP: p_ISRT ";
+	      cutFlowVector_str[34] = "2L2JCOMP: p_IT ";
+	      cutFlowVector_str[35] = "2L2JCOMP: pT_CM ";*/
+
+	      (j==28 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3) ||
+
+	      (j==29 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100.) ||
+
+	      (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110.) ||
+
+	      (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8) ||
+
+	      (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
+
+	      (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
+
+	      (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
+
+	      (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
+
+
+	      /* cutFlowVector_str[36] = "3LHIGH: Preselection ";
+		 cutFlowVector_str[37] = "3LHIGH: 75 GeV < mll < 105 GeV ";
+		 cutFlowVector_str[38] = "3LHIGH: mTW  ";
+		 cutFlowVector_str[39] = "3LHIGH: m_HT4PP/m_H4PP  ";
+		 cutFlowVector_str[40] = "3LHIGH: HPb(1,1)/HPb(2,1) ";
+		 cutFlowVector_str[41] = "3LHIGH: m_H4PP ";
+		 cutFlowVector_str[42] = "3LHIGH: pT_PP/(pT_PP + HT_PP(3,1)) ";*/
+
+	      
+	      (j==36 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3) ||
+
+	      (j==37 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105.) ||
+
+	      (j==38 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150.) ||
+
+	      (j==39 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_HT4PP/m_H4PP > 0.75) ||
+	      
+	      (j==40 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_HT4PP/m_H4PP > 0.75 && m_R_minH2P_minH3P>0.8) ||
+
+	      (j==41 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_R_minH2P_minH3P>0.8 && m_HT4PP/m_H4PP > 0.75 && m_H4PP > 550. ) ||
+
+	      (j==42 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_R_minH2P_minH3P>0.8 && m_HT4PP/m_H4PP > 0.75 && m_H4PP > 550. && m_RPT_HT4PP < 0.2) ||
+
+	      /*cutFlowVector_str[43] = "3LCOMP: Preselection ";
+	      cutFlowVector_str[44] = "3LCOMP: mll ";
+	      cutFlowVector_str[45] = "3LCOMP: mTW  ";
+	      cutFlowVector_str[46] = "3LCOMP: dPhi_ISRI ";
+	      cutFlowVector_str[47] = "3LCOMP: R_ISR ";
+	      cutFlowVector_str[48] = "3LCOMP: p_ISRT ";
+	      cutFlowVector_str[49] = "3LCOMP: p_IT ";
+	      cutFlowVector_str[50] = "3LCOMP: pT_CM ";*/
+
+	      (j==43 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3) ||
+
+	      (j==44 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105.) ||
+
+	      (j==45 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100.) ||
+
+	      (j==46 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0) ||
+
+	      (j==47 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0) ||
+
+	      (j==48 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100.) ||
+
+	      (j==49 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80.) ||
+
+	      (j==50 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80. && m_PTCM<25.) ||
+
+	      /* cutFlowVector_str[51] = "3LINT: Preselection ";
+		 cutFlowVector_str[52] = "3LINT: mll ";
+		 cutFlowVector_str[53] = "3LINT: mTW  ";
+		 cutFlowVector_str[54] = "3LINT: m_HT4PP/m_H4PP  ";
+		 cutFlowVector_str[55] = "3LINT: HPb(1,1)/HPb(2,1) ";
+		 cutFlowVector_str[56] = "3LINT: m_H4PP ";
+		 cutFlowVector_str[57] = "3LINT: pT_PP/(pT_PP + HT_PP(3,1)) ";*/
+
+	      (j==51 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3) ||
+
+	      (j==52 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105.) ||
+
+	      (j==53 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>130.) ||
+
+	      (j==54 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>130. && m_HT4PP/m_H4PP > 0.8 ) ||
+
+	      (j==55 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>130. && m_HT4PP/m_H4PP > 0.8 && m_R_minH2P_minH3P>0.75) ||
+
+	      (j==56 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>130. && m_HT4PP/m_H4PP > 0.8 && m_R_minH2P_minH3P>0.75 && m_H4PP > 450. ) ||
+
+	      (j==57 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>130. && m_HT4PP/m_H4PP > 0.8 && m_R_minH2P_minH3P>0.75 && m_H4PP > 450. && m_RPT_HT4PP < 0.15)
 	      
 	      )cutFlowVector[j]++;
 	}
@@ -1383,13 +2011,13 @@ namespace Gambit {
 
 	if(m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05 && m_minDphi>2.4 && m_H5PP>400.)_num2L2JLOW++;
 
-	if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. &&  m_MJ>500. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
+	if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. &&  m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
 
 	if(m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_HT4PP/m_H4PP > 0.75 && m_R_minH2P_minH3P>0.8 && m_H4PP > 550. && m_RPT_HT4PP < 0.2)_num3LHIGH++;
 
 	if(m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>130. && m_HT4PP/m_H4PP > 0.8 && m_R_minH2P_minH3P>0.75 && m_H4PP > 450. && m_RPT_HT4PP < 0.15)_num3LINT++;
 
-	if(m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75000 && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 && m_PTISR>100. && m_PTI>80. && m_PTCM<25.)_num3LCOMP++;
+	if(m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 && m_PTISR>100. && m_PTI>80. && m_PTCM<25.)_num3LCOMP++;
 	
 	if(m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>40. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()==0 && m_mll>75. && m_mll<105. && m_mTW>100. && m_HT4PP/m_H4PP > 0.9 && m_H4PP > 250. && m_RPT_HT4PP < 0.05)_num3LLOW++;
 	
