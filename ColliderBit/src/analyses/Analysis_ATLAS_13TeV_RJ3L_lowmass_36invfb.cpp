@@ -86,114 +86,114 @@ namespace Gambit {
       /// 1. Create RJigsaw for C1N2 -> WZN1N1 -> 2L+2J+MET High mass region
       ///////////////////////////////////////////////////////////////////////
       
-      RestFrames::LabRecoFrame*       LAB_2L2J;
-      RestFrames::DecayRecoFrame*     C1N2_2L2J;
-      RestFrames::DecayRecoFrame*     C1a_2L2J;
-      RestFrames::DecayRecoFrame*     N2b_2L2J;
+      unique_ptr<RestFrames::LabRecoFrame>       LAB_2L2J;
+      unique_ptr<RestFrames::DecayRecoFrame>     C1N2_2L2J;
+      unique_ptr<RestFrames::DecayRecoFrame>     C1a_2L2J;
+      unique_ptr<RestFrames::DecayRecoFrame>     N2b_2L2J;
       
-      RestFrames::DecayRecoFrame*     Wa_2L2J;
-      RestFrames::DecayRecoFrame*     Zb_2L2J;
+      unique_ptr<RestFrames::DecayRecoFrame>     Wa_2L2J;
+      unique_ptr<RestFrames::DecayRecoFrame>     Zb_2L2J;
       
-      RestFrames::VisibleRecoFrame*   J1_2L2J;
-      RestFrames::VisibleRecoFrame*   J2_2L2J;
-      RestFrames::VisibleRecoFrame*   L1_2L2J;
-      RestFrames::VisibleRecoFrame*   L2_2L2J;
+      unique_ptr<RestFrames::VisibleRecoFrame>   J1_2L2J;
+      unique_ptr<RestFrames::VisibleRecoFrame>   J2_2L2J;
+      unique_ptr<RestFrames::VisibleRecoFrame>   L1_2L2J;
+      unique_ptr<RestFrames::VisibleRecoFrame>   L2_2L2J;
       
-      RestFrames::InvisibleRecoFrame* X1a_2L2J;
-      RestFrames::InvisibleRecoFrame* X1b_2L2J;
+      unique_ptr<RestFrames::InvisibleRecoFrame> X1a_2L2J;
+      unique_ptr<RestFrames::InvisibleRecoFrame> X1b_2L2J;
       
-      RestFrames::InvisibleGroup*    INV_2L2J;
+      unique_ptr<RestFrames::InvisibleGroup>    INV_2L2J;
       
-      RestFrames::SetMassInvJigsaw*     X1_mass_2L2J;
-      RestFrames::SetRapidityInvJigsaw* X1_eta_2L2J;
+      unique_ptr<RestFrames::SetMassInvJigsaw>     X1_mass_2L2J;
+      unique_ptr<RestFrames::SetRapidityInvJigsaw> X1_eta_2L2J;
       
-      RestFrames::ContraBoostInvJigsaw* X1X1_contra_2L2J;
+      unique_ptr<RestFrames::ContraBoostInvJigsaw> X1X1_contra_2L2J;
 
       ///////////////////////////////////////////////////////////////////////
       /// 2. Create RJigsaw for C1N2 -> WZN1N1 -> 3L + MET High mass region
       ///////////////////////////////////////////////////////////////////////
       
-      RestFrames::LabRecoFrame*       LAB_3L;
-      RestFrames::DecayRecoFrame*     C1N2_3L;
-      RestFrames::DecayRecoFrame*     C1a_3L;
-      RestFrames::DecayRecoFrame*     N2b_3L;
+      unique_ptr<RestFrames::LabRecoFrame>       LAB_3L;
+      unique_ptr<RestFrames::DecayRecoFrame>     C1N2_3L;
+      unique_ptr<RestFrames::DecayRecoFrame>     C1a_3L;
+      unique_ptr<RestFrames::DecayRecoFrame>     N2b_3L;
       
-      RestFrames::DecayRecoFrame*     Wa_3L;
-      RestFrames::DecayRecoFrame*     Zb_3L;
+      unique_ptr<RestFrames::DecayRecoFrame>     Wa_3L;
+      unique_ptr<RestFrames::DecayRecoFrame>     Zb_3L;
       
-      RestFrames::VisibleRecoFrame*   L1a_3L;
-      RestFrames::VisibleRecoFrame*   L1b_3L;
-      RestFrames::VisibleRecoFrame*   L2b_3L;
+      unique_ptr<RestFrames::VisibleRecoFrame>   L1a_3L;
+      unique_ptr<RestFrames::VisibleRecoFrame>   L1b_3L;
+      unique_ptr<RestFrames::VisibleRecoFrame>   L2b_3L;
       
-      RestFrames::InvisibleRecoFrame* X1a_3L;
-      RestFrames::InvisibleRecoFrame* X1b_3L;
+      unique_ptr<RestFrames::InvisibleRecoFrame> X1a_3L;
+      unique_ptr<RestFrames::InvisibleRecoFrame> X1b_3L;
       
-      RestFrames::InvisibleGroup*    INV_3L;
+      unique_ptr<RestFrames::InvisibleGroup>    INV_3L;
       
-      RestFrames::SetMassInvJigsaw*     X1_mass_3L;
-      RestFrames::SetRapidityInvJigsaw* X1_eta_3L;
+      unique_ptr<RestFrames::SetMassInvJigsaw>     X1_mass_3L;
+      unique_ptr<RestFrames::SetRapidityInvJigsaw> X1_eta_3L;
       
-      RestFrames::ContraBoostInvJigsaw* X1X1_contra_3L;
+      unique_ptr<RestFrames::ContraBoostInvJigsaw> X1X1_contra_3L;
       
       // combinatoric (transverse) tree
       // for jet assignment
-      RestFrames::LabRecoFrame*        LAB_comb;
-      RestFrames::DecayRecoFrame*      CM_comb;
-      RestFrames::DecayRecoFrame*      S_comb;
-      RestFrames::VisibleRecoFrame*    ISR_comb;
-      RestFrames::VisibleRecoFrame*    J_comb;
-      RestFrames::VisibleRecoFrame*    L_comb;
-      RestFrames::InvisibleRecoFrame*  I_comb;
-      RestFrames::InvisibleGroup*      INV_comb;
-      RestFrames::SetMassInvJigsaw*    InvMass_comb;
-      RestFrames::CombinatoricGroup*   JETS_comb;
-      RestFrames::MinMassesCombJigsaw* SplitJETS_comb;
+      unique_ptr<RestFrames::LabRecoFrame>        LAB_comb;
+      unique_ptr<RestFrames::DecayRecoFrame>      CM_comb;
+      unique_ptr<RestFrames::DecayRecoFrame>      S_comb;
+      unique_ptr<RestFrames::VisibleRecoFrame>    ISR_comb;
+      unique_ptr<RestFrames::VisibleRecoFrame>    J_comb;
+      unique_ptr<RestFrames::VisibleRecoFrame>    L_comb;
+      unique_ptr<RestFrames::InvisibleRecoFrame>  I_comb;
+      unique_ptr<RestFrames::InvisibleGroup>      INV_comb;
+      unique_ptr<RestFrames::SetMassInvJigsaw>    InvMass_comb;
+      unique_ptr<RestFrames::CombinatoricGroup>   JETS_comb;
+      unique_ptr<RestFrames::MinMassesCombJigsaw> SplitJETS_comb;
       
       // 2L+NJ tree (Z->ll + W/Z->qq)
-      RestFrames::LabRecoFrame*        LAB_2LNJ;
-      RestFrames::DecayRecoFrame*      CM_2LNJ;
-      RestFrames::DecayRecoFrame*      S_2LNJ;
-      RestFrames::VisibleRecoFrame*    ISR_2LNJ;
+      unique_ptr<RestFrames::LabRecoFrame>        LAB_2LNJ;
+      unique_ptr<RestFrames::DecayRecoFrame>      CM_2LNJ;
+      unique_ptr<RestFrames::DecayRecoFrame>      S_2LNJ;
+      unique_ptr<RestFrames::VisibleRecoFrame>    ISR_2LNJ;
       
-      RestFrames::DecayRecoFrame*      Ca_2LNJ;
-      RestFrames::DecayRecoFrame*      Z_2LNJ;
-      RestFrames::VisibleRecoFrame*    L1_2LNJ;
-      RestFrames::VisibleRecoFrame*    L2_2LNJ;
+      unique_ptr<RestFrames::DecayRecoFrame>      Ca_2LNJ;
+      unique_ptr<RestFrames::DecayRecoFrame>      Z_2LNJ;
+      unique_ptr<RestFrames::VisibleRecoFrame>    L1_2LNJ;
+      unique_ptr<RestFrames::VisibleRecoFrame>    L2_2LNJ;
       
-      RestFrames::DecayRecoFrame*          Cb_2LNJ;
-      RestFrames::SelfAssemblingRecoFrame* JSA_2LNJ;
-      RestFrames::VisibleRecoFrame*        J_2LNJ;
+      unique_ptr<RestFrames::DecayRecoFrame>          Cb_2LNJ;
+      unique_ptr<RestFrames::SelfAssemblingRecoFrame> JSA_2LNJ;
+      unique_ptr<RestFrames::VisibleRecoFrame>        J_2LNJ;
       
-      RestFrames::InvisibleRecoFrame*  Ia_2LNJ;
-      RestFrames::InvisibleRecoFrame*  Ib_2LNJ;
+      unique_ptr<RestFrames::InvisibleRecoFrame>  Ia_2LNJ;
+      unique_ptr<RestFrames::InvisibleRecoFrame>  Ib_2LNJ;
       
-      RestFrames::InvisibleGroup*       INV_2LNJ;
-      RestFrames::SetMassInvJigsaw*     InvMass_2LNJ;
-      RestFrames::SetRapidityInvJigsaw* InvRapidity_2LNJ;
-      RestFrames::ContraBoostInvJigsaw* SplitINV_2LNJ;
-      RestFrames::CombinatoricGroup*    JETS_2LNJ;
+      unique_ptr<RestFrames::InvisibleGroup>       INV_2LNJ;
+      unique_ptr<RestFrames::SetMassInvJigsaw>     InvMass_2LNJ;
+      unique_ptr<RestFrames::SetRapidityInvJigsaw> InvRapidity_2LNJ;
+      unique_ptr<RestFrames::ContraBoostInvJigsaw> SplitINV_2LNJ;
+      unique_ptr<RestFrames::CombinatoricGroup>    JETS_2LNJ;
       
       // 2L+1L tree (Z->ll + Z/W->l)
-      RestFrames::LabRecoFrame*        LAB_2L1L;
-      RestFrames::DecayRecoFrame*      CM_2L1L;
-      RestFrames::DecayRecoFrame*      S_2L1L;
-      RestFrames::VisibleRecoFrame*    ISR_2L1L;
+      unique_ptr<RestFrames::LabRecoFrame>        LAB_2L1L;
+      unique_ptr<RestFrames::DecayRecoFrame>      CM_2L1L;
+      unique_ptr<RestFrames::DecayRecoFrame>      S_2L1L;
+      unique_ptr<RestFrames::VisibleRecoFrame>    ISR_2L1L;
       
-      RestFrames::DecayRecoFrame*      Ca_2L1L;
-      RestFrames::DecayRecoFrame*      Z_2L1L;
-      RestFrames::VisibleRecoFrame*    L1_2L1L;
-      RestFrames::VisibleRecoFrame*    L2_2L1L;
+      unique_ptr<RestFrames::DecayRecoFrame>      Ca_2L1L;
+      unique_ptr<RestFrames::DecayRecoFrame>      Z_2L1L;
+      unique_ptr<RestFrames::VisibleRecoFrame>    L1_2L1L;
+      unique_ptr<RestFrames::VisibleRecoFrame>    L2_2L1L;
       
-      RestFrames::DecayRecoFrame*      Cb_2L1L;
-      RestFrames::VisibleRecoFrame*    Lb_2L1L;
+      unique_ptr<RestFrames::DecayRecoFrame>      Cb_2L1L;
+      unique_ptr<RestFrames::VisibleRecoFrame>    Lb_2L1L;
       
-      RestFrames::InvisibleRecoFrame*  Ia_2L1L;
-      RestFrames::InvisibleRecoFrame*  Ib_2L1L;
+      unique_ptr<RestFrames::InvisibleRecoFrame>  Ia_2L1L;
+      unique_ptr<RestFrames::InvisibleRecoFrame>  Ib_2L1L;
       
-      RestFrames::InvisibleGroup*       INV_2L1L;
-      RestFrames::SetMassInvJigsaw*     InvMass_2L1L;
-      RestFrames::SetRapidityInvJigsaw* InvRapidity_2L1L;
-      RestFrames::ContraBoostInvJigsaw* SplitINV_2L1L;
+      unique_ptr<RestFrames::InvisibleGroup>       INV_2L1L;
+      unique_ptr<RestFrames::SetMassInvJigsaw>     InvMass_2L1L;
+      unique_ptr<RestFrames::SetRapidityInvJigsaw> InvRapidity_2L1L;
+      unique_ptr<RestFrames::ContraBoostInvJigsaw> SplitINV_2L1L;
       
       // Debug histos
 
@@ -270,21 +270,21 @@ namespace Gambit {
         }
   
         // Recursive jigsaw stuff
-        LAB_2L2J     = new RestFrames::LabRecoFrame("LAB_2L2J","lab2L2J");
-        C1N2_2L2J    = new RestFrames::DecayRecoFrame("C1N2_2L2J","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}");
-        C1a_2L2J     = new RestFrames::DecayRecoFrame("C1a_2L2J","#tilde{#chi}^{ #pm}_{1}");
-        N2b_2L2J     = new RestFrames::DecayRecoFrame("N2b_2L2J","#tilde{#chi}^{ 0}_{2}");
+        LAB_2L2J.reset(new RestFrames::LabRecoFrame("LAB_2L2J","lab2L2J"));
+        C1N2_2L2J.reset(new RestFrames::DecayRecoFrame("C1N2_2L2J","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
+        C1a_2L2J.reset(new RestFrames::DecayRecoFrame("C1a_2L2J","#tilde{#chi}^{ #pm}_{1}"));
+        N2b_2L2J.reset(new RestFrames::DecayRecoFrame("N2b_2L2J","#tilde{#chi}^{ 0}_{2}"));
         
-        Wa_2L2J      = new RestFrames::DecayRecoFrame("Wa_2L2J","W_{a}");
-        Zb_2L2J      = new RestFrames::DecayRecoFrame("Zb_2L2J","Z_{b}");
+        Wa_2L2J.reset(new RestFrames::DecayRecoFrame("Wa_2L2J","W_{a}"));
+        Zb_2L2J.reset(new RestFrames::DecayRecoFrame("Zb_2L2J","Z_{b}"));
         
-        J1_2L2J      = new RestFrames::VisibleRecoFrame("J1_2L2J","#it{j}_{1}");
-        J2_2L2J      = new RestFrames::VisibleRecoFrame("J2_2L2J","#it{j}_{2}");
-        L1_2L2J      = new RestFrames::VisibleRecoFrame("L1_2L2J","#it{l}_{1}");
-        L2_2L2J      = new RestFrames::VisibleRecoFrame("L2_2L2J","#it{l}_{2}");
+        J1_2L2J.reset(new RestFrames::VisibleRecoFrame("J1_2L2J","#it{j}_{1}"));
+        J2_2L2J.reset(new RestFrames::VisibleRecoFrame("J2_2L2J","#it{j}_{2}"));
+        L1_2L2J.reset(new RestFrames::VisibleRecoFrame("L1_2L2J","#it{l}_{1}"));
+        L2_2L2J.reset(new RestFrames::VisibleRecoFrame("L2_2L2J","#it{l}_{2}"));
         
-        X1a_2L2J     = new RestFrames::InvisibleRecoFrame("X1a_2L2J","#tilde{#chi}^{ 0}_{1 a}");
-        X1b_2L2J     = new RestFrames::InvisibleRecoFrame("X1b_2L2J","#tilde{#chi}^{ 0}_{1 b}");
+        X1a_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1a_2L2J","#tilde{#chi}^{ 0}_{1 a}"));
+        X1b_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1b_2L2J","#tilde{#chi}^{ 0}_{1 b}"));
   
         LAB_2L2J->SetChildFrame(*C1N2_2L2J);
 
@@ -313,21 +313,21 @@ namespace Gambit {
         //////////////////////////////
         //Setting the invisible
         //////////////////////////////
-        INV_2L2J = new RestFrames::InvisibleGroup("INV_2L2J","#tilde{#chi}_{1}^{ 0} Jigsaws");
+        INV_2L2J.reset(new RestFrames::InvisibleGroup("INV_2L2J","#tilde{#chi}_{1}^{ 0} Jigsaws"));
         INV_2L2J->AddFrame(*X1a_2L2J); 
         INV_2L2J->AddFrame(*X1b_2L2J);
 
         // Set di-LSP mass to minimum Lorentz-invariant expression
-        X1_mass_2L2J = new RestFrames::SetMassInvJigsaw("X1_mass_2L2J", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum");
+        X1_mass_2L2J.reset(new RestFrames::SetMassInvJigsaw("X1_mass_2L2J", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
         INV_2L2J->AddJigsaw(*X1_mass_2L2J);
 
         // Set di-LSP rapidity to that of visible particles
-        X1_eta_2L2J = new RestFrames::SetRapidityInvJigsaw("X1_eta_2L2J", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{2jet+2#it{l}}");
+        X1_eta_2L2J.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_2L2J", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{2jet+2#it{l}}"));
         INV_2L2J->AddJigsaw(*X1_eta_2L2J);
         X1_eta_2L2J->AddVisibleFrames(C1N2_2L2J->GetListVisibleFrames());
 
 
-        X1X1_contra_2L2J = new RestFrames::ContraBoostInvJigsaw("X1X1_contra_2L2J","Contraboost invariant Jigsaw");
+        X1X1_contra_2L2J.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_2L2J","Contraboost invariant Jigsaw"));
         INV_2L2J->AddJigsaw(*X1X1_contra_2L2J);
         X1X1_contra_2L2J->AddVisibleFrames(C1a_2L2J->GetListVisibleFrames(), 0);
         X1X1_contra_2L2J->AddVisibleFrames(N2b_2L2J->GetListVisibleFrames(), 1);
@@ -336,17 +336,17 @@ namespace Gambit {
           
         LAB_2L2J->InitializeAnalysis(); 
           
-        LAB_3L     = new RestFrames::LabRecoFrame("LAB_3L","lab");
-        C1N2_3L    = new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}");
-        C1a_3L     = new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}");
-        N2b_3L     = new RestFrames::DecayRecoFrame("N2b_3L","#tilde{#chi}^{ 0}_{2}");
+        LAB_3L.reset(new RestFrames::LabRecoFrame("LAB_3L","lab"));
+        C1N2_3L.reset(new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
+        C1a_3L.reset(new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}"));
+        N2b_3L.reset(new RestFrames::DecayRecoFrame("N2b_3L","#tilde{#chi}^{ 0}_{2}"));
 
-        L1a_3L      = new RestFrames::VisibleRecoFrame("L1a_3L","#it{l}_{1a}");
-        L1b_3L      = new RestFrames::VisibleRecoFrame("L1b_3L","#it{l}_{1b}");
-        L2b_3L      = new RestFrames::VisibleRecoFrame("L2b_3L","#it{l}_{2b}");
+        L1a_3L.reset(new RestFrames::VisibleRecoFrame("L1a_3L","#it{l}_{1a}"));
+        L1b_3L.reset(new RestFrames::VisibleRecoFrame("L1b_3L","#it{l}_{1b}"));
+        L2b_3L.reset(new RestFrames::VisibleRecoFrame("L2b_3L","#it{l}_{2b}"));
 
-        X1a_3L      = new RestFrames::InvisibleRecoFrame("X1a_3L","#tilde{#chi}^{ 0}_{1 a} + #nu_{a}");
-        X1b_3L      = new RestFrames::InvisibleRecoFrame("X1b_3L","#tilde{#chi}^{ 0}_{1 b}");
+        X1a_3L.reset(new RestFrames::InvisibleRecoFrame("X1a_3L","#tilde{#chi}^{ 0}_{1 a} + #nu_{a}"));
+        X1b_3L.reset(new RestFrames::InvisibleRecoFrame("X1b_3L","#tilde{#chi}^{ 0}_{1 b}"));
 
 
         LAB_3L->SetChildFrame(*C1N2_3L);
@@ -368,22 +368,22 @@ namespace Gambit {
           std::cout << "...Constructor::3L Failed initializing reconstruction trees" << std::endl;
         
         //setting the invisible components
-        INV_3L = new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw");
+        INV_3L.reset(new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw"));
         INV_3L->AddFrame(*X1a_3L); 
         INV_3L->AddFrame(*X1b_3L);
         
         
         // Set di-LSP mass to minimum Lorentz-invariant expression
-        X1_mass_3L = new RestFrames::SetMassInvJigsaw("X1_mass_3L", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum");
+        X1_mass_3L.reset(new RestFrames::SetMassInvJigsaw("X1_mass_3L", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
         INV_3L->AddJigsaw(*X1_mass_3L);
         
         // Set di-LSP rapidity to that of visible particles and neutrino
-        X1_eta_3L = new RestFrames::SetRapidityInvJigsaw("X1_eta_3L", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{3#it{l}}");
+        X1_eta_3L.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_3L", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{3#it{l}}"));
         INV_3L->AddJigsaw(*X1_eta_3L);
         X1_eta_3L->AddVisibleFrames(C1N2_3L->GetListVisibleFrames());
   
 
-        X1X1_contra_3L = new RestFrames::ContraBoostInvJigsaw("X1X1_contra_3L","Contraboost invariant Jigsaw");
+        X1X1_contra_3L.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_3L","Contraboost invariant Jigsaw"));
         INV_3L->AddJigsaw(*X1X1_contra_3L);
         X1X1_contra_3L->AddVisibleFrames(C1a_3L->GetListVisibleFrames(),0);
         X1X1_contra_3L->AddVisibleFrames(N2b_3L->GetListVisibleFrames(),1);
@@ -397,13 +397,13 @@ namespace Gambit {
         
         // combinatoric (transverse) tree
         // for jet assignment
-        LAB_comb = new RestFrames::LabRecoFrame("LAB_comb","LAB");
-        CM_comb  = new RestFrames::DecayRecoFrame("CM_comb","CM");
-        S_comb   = new RestFrames::DecayRecoFrame("S_comb","S");
-        ISR_comb = new RestFrames::VisibleRecoFrame("ISR_comb","ISR");
-        J_comb   = new RestFrames::VisibleRecoFrame("J_comb","Jets");
-        L_comb   = new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s");
-        I_comb   = new RestFrames::InvisibleRecoFrame("I_comb","Inv");
+        LAB_comb.reset(new RestFrames::LabRecoFrame("LAB_comb","LAB"));
+        CM_comb.reset(new RestFrames::DecayRecoFrame("CM_comb","CM"));
+        S_comb.reset(new RestFrames::DecayRecoFrame("S_comb","S"));
+        ISR_comb.reset(new RestFrames::VisibleRecoFrame("ISR_comb","ISR"));
+        J_comb.reset(new RestFrames::VisibleRecoFrame("J_comb","Jets"));
+        L_comb.reset(new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s"));
+        I_comb.reset(new RestFrames::InvisibleRecoFrame("I_comb","Inv"));
         //cout << "test 5" << endl;
         LAB_comb->SetChildFrame(*CM_comb);
         CM_comb->AddChildFrame(*ISR_comb);
@@ -415,19 +415,19 @@ namespace Gambit {
         LAB_comb->InitializeTree();
         // cout << "test 7" << endl;
         // 2L+NJ tree (Z->ll + W/Z->qq)
-        LAB_2LNJ = new RestFrames::LabRecoFrame("LAB_2LNJ","LAB");
-        CM_2LNJ  = new RestFrames::DecayRecoFrame("CM_2LNJ","CM");
-        S_2LNJ   = new RestFrames::DecayRecoFrame("S_2LNJ","S");
-        ISR_2LNJ = new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR");
-        Ca_2LNJ  = new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}");
-        Z_2LNJ   = new RestFrames::DecayRecoFrame("Z_2LNJ","Z");
-        L1_2LNJ  = new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}");
-        L2_2LNJ  = new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}");
-        Cb_2LNJ  = new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}");
-        JSA_2LNJ = new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J");
-        J_2LNJ   = new RestFrames::VisibleRecoFrame("J_2LNJ","Jets");
-        Ia_2LNJ  = new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}");
-        Ib_2LNJ  = new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}");
+        LAB_2LNJ.reset(new RestFrames::LabRecoFrame("LAB_2LNJ","LAB"));
+        CM_2LNJ.reset(new RestFrames::DecayRecoFrame("CM_2LNJ","CM"));
+        S_2LNJ.reset(new RestFrames::DecayRecoFrame("S_2LNJ","S"));
+        ISR_2LNJ.reset(new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR"));
+        Ca_2LNJ.reset(new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}"));
+        Z_2LNJ.reset(new RestFrames::DecayRecoFrame("Z_2LNJ","Z"));
+        L1_2LNJ.reset(new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}"));
+        L2_2LNJ.reset(new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}"));
+        Cb_2LNJ.reset(new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}"));
+        JSA_2LNJ.reset(new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J"));
+        J_2LNJ.reset(new RestFrames::VisibleRecoFrame("J_2LNJ","Jets"));
+        Ia_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}"));
+        Ib_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}"));
   
         LAB_2LNJ->SetChildFrame(*CM_2LNJ);
         CM_2LNJ->AddChildFrame(*ISR_2LNJ);
@@ -446,18 +446,18 @@ namespace Gambit {
   
   
         // 2L+1L tree (Z->ll + Z/W->l)
-        LAB_2L1L = new RestFrames::LabRecoFrame("LAB_2L1L","LAB");
-        CM_2L1L  = new RestFrames::DecayRecoFrame("CM_2L1L","CM");
-        S_2L1L   = new RestFrames::DecayRecoFrame("S_2L1L","S");
-        ISR_2L1L = new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR");
-        Ca_2L1L  = new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}");
-        Z_2L1L   = new RestFrames::DecayRecoFrame("Z_2L1L","Z");
-        L1_2L1L  = new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}");
-        L2_2L1L  = new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}");
-        Cb_2L1L  = new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}");
-        Lb_2L1L  = new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}");
-        Ia_2L1L  = new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}");
-        Ib_2L1L  = new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}");
+        LAB_2L1L.reset(new RestFrames::LabRecoFrame("LAB_2L1L","LAB"));
+        CM_2L1L.reset(new RestFrames::DecayRecoFrame("CM_2L1L","CM"));
+        S_2L1L.reset(new RestFrames::DecayRecoFrame("S_2L1L","S"));
+        ISR_2L1L.reset(new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR"));
+        Ca_2L1L.reset(new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}"));
+        Z_2L1L.reset(new RestFrames::DecayRecoFrame("Z_2L1L","Z"));
+        L1_2L1L.reset(new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}"));
+        L2_2L1L.reset(new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}"));
+        Cb_2L1L.reset(new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}"));
+        Lb_2L1L.reset(new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}"));
+        Ia_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}"));
+        Ib_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}"));
         
         LAB_2L1L->SetChildFrame(*CM_2L1L);
         CM_2L1L->AddChildFrame(*ISR_2L1L);
@@ -477,19 +477,19 @@ namespace Gambit {
         
         // combinatoric (transverse) tree
         // for jet assignment
-        INV_comb = new RestFrames::InvisibleGroup("INV_comb","Invisible System");
+        INV_comb.reset(new RestFrames::InvisibleGroup("INV_comb","Invisible System"));
         INV_comb->AddFrame(*I_comb);
         
-        InvMass_comb = new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw");
+        InvMass_comb.reset(new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw"));
         INV_comb->AddJigsaw(*InvMass_comb);
         
-        JETS_comb = new RestFrames::CombinatoricGroup("JETS_comb","Jets System");
+        JETS_comb.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
         JETS_comb->AddFrame(*ISR_comb);
         JETS_comb->SetNElementsForFrame(*ISR_comb, 1);
         JETS_comb->AddFrame(*J_comb);
         JETS_comb->SetNElementsForFrame(*J_comb, 0);
         
-        SplitJETS_comb = new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw");
+        SplitJETS_comb.reset(new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw"));
         JETS_comb->AddJigsaw(*SplitJETS_comb);
         SplitJETS_comb->AddCombFrame(*ISR_comb, 0);
         SplitJETS_comb->AddCombFrame(*J_comb, 1);
@@ -501,23 +501,23 @@ namespace Gambit {
         }
         
         // 2L+NJ tree (Z->ll + W/Z->qq)
-        INV_2LNJ = new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System");
+        INV_2LNJ.reset(new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System"));
         INV_2LNJ->AddFrame(*Ia_2LNJ);
         INV_2LNJ->AddFrame(*Ib_2LNJ);
         
-        InvMass_2LNJ = new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw");
+        InvMass_2LNJ.reset(new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw"));
         INV_2LNJ->AddJigsaw(*InvMass_2LNJ);
-        InvRapidity_2LNJ = new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity");
+        InvRapidity_2LNJ.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity"));
         INV_2LNJ->AddJigsaw(*InvRapidity_2LNJ);
         InvRapidity_2LNJ->AddVisibleFrames(S_2LNJ->GetListVisibleFrames());
-        SplitINV_2LNJ = new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw");
+        SplitINV_2LNJ.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw"));
         INV_2LNJ->AddJigsaw(*SplitINV_2LNJ);
         SplitINV_2LNJ->AddVisibleFrames(Ca_2LNJ->GetListVisibleFrames(), 0);
         SplitINV_2LNJ->AddVisibleFrames(Cb_2LNJ->GetListVisibleFrames(), 1);
         SplitINV_2LNJ->AddInvisibleFrame(*Ia_2LNJ, 0);
         SplitINV_2LNJ->AddInvisibleFrame(*Ib_2LNJ, 1);
         
-        JETS_2LNJ = new RestFrames::CombinatoricGroup("JETS_comb","Jets System");
+        JETS_2LNJ.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
         JETS_2LNJ->AddFrame(*J_2LNJ);
         JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
         
@@ -525,16 +525,16 @@ namespace Gambit {
           cout << "Problem initializing \"2LNJ\" analysis" << endl;
         }
         // 2L+1L tree (Z->ll + Z/W->l)
-        INV_2L1L = new RestFrames::InvisibleGroup("INV_2L1L","Invisible System");
+        INV_2L1L.reset(new RestFrames::InvisibleGroup("INV_2L1L","Invisible System"));
         INV_2L1L->AddFrame(*Ia_2L1L);
         INV_2L1L->AddFrame(*Ib_2L1L);
         
-        InvMass_2L1L = new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw");
+        InvMass_2L1L.reset(new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw"));
         INV_2L1L->AddJigsaw(*InvMass_2L1L);
-        InvRapidity_2L1L = new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity");
+        InvRapidity_2L1L.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity"));
         INV_2L1L->AddJigsaw(*InvRapidity_2L1L);
         InvRapidity_2L1L->AddVisibleFrames(S_2L1L->GetListVisibleFrames());
-        SplitINV_2L1L = new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw");
+        SplitINV_2L1L.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw"));
         INV_2L1L->AddJigsaw(*SplitINV_2L1L);
         SplitINV_2L1L->AddVisibleFrames(Ca_2L1L->GetListVisibleFrames(), 0);
         SplitINV_2L1L->AddVisibleFrames(Cb_2L1L->GetListVisibleFrames(), 1);
@@ -2085,41 +2085,6 @@ namespace Gambit {
         _num3LINT=0;
         _num3LLOW=0;
         _num3LCOMP=0;
-      }
-
-    public:
-      ~Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb() 
-      {
-        //deletion of RJ 3-lepton pointers
-        delete LAB_2L2J;
-        delete C1N2_2L2J;
-        delete C1a_2L2J;
-        delete N2b_2L2J;
-        delete Wa_2L2J;
-        delete Zb_2L2J;
-        delete J1_2L2J;
-        delete J2_2L2J;
-        delete L1_2L2J;
-        delete L2_2L2J;
-        delete X1a_2L2J;
-        delete X1b_2L2J;
-        delete INV_2L2J;
-        delete X1_mass_2L2J;
-        delete X1_eta_2L2J;
-        delete X1X1_contra_2L2J;
-        delete LAB_3L;
-        delete C1N2_3L;
-        delete C1a_3L;
-        delete N2b_3L;
-        delete L1a_3L;
-        delete L1b_3L;
-        delete L2b_3L;
-        delete X1a_3L;
-        delete X1b_3L;
-        delete INV_3L;
-        delete X1_mass_3L;
-        delete X1_eta_3L;
-        delete X1X1_contra_3L;
       }
 
     }; // end class Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb
