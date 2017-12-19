@@ -41,7 +41,6 @@ namespace Gambit {
       AnalysisData _results;
       typedef EventT EventType;
 
-
     public:
 
       /// @name Construction, Destruction, and Recycling:
@@ -49,21 +48,30 @@ namespace Gambit {
       BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1) {  }
       virtual ~BaseAnalysis() {}
 
-      /// Reset this instance for reuse, avoiding the need for "new" or "delete".
-      void reset() { clear(); }
+      /// @brief Public method to reset this instance for reuse, avoiding the need for "new" or "delete".
+      /// @note This method calls _clear() to reset the base class variables, and then the overridden 
+      /// clear() to reset analysis-specific variables.
+      /// @todo For v2.0: Simplify this reset scheme.
+      void reset() { 
+        clear(); 
+        _clear();
+      }
 
-      /// @brief Overloadable implementation of the analysis reset.
+    protected:
+      /// @brief Overloadable method to reset the analysis-specific variables.
       //
       /// @note Internally, reset() is called clear() -- we avoid this
       /// externally because of confusion with std::vector::clear(), esp. on
       /// AnalysisContainer.
-      virtual void clear() {
-        _ntot = 0; _xsec = -1; _xsecerr = -1;
-        _results.clear();
-      }
+      virtual void clear() = 0;
+
+    private:
+      /// @brief Reset the private base class variables.
+      /// @todo For v2.0: Avoid this 'duplication' of reset/clear methods.
+      void _clear() { _ntot = 0; _xsec = -1; _xsecerr = -1; _results.clear(); }
       //@}
 
-
+    public:
       /// @name Event analysis, event number, and cross section functions:
       //@{
       /// Analyze the event (accessed by reference).
@@ -96,9 +104,7 @@ namespace Gambit {
       }
       //@}
 
-
     protected:
-
       /// @name Protected collection functions
       //@{
       /// Add the given result to the internal results list.
@@ -119,9 +125,7 @@ namespace Gambit {
       virtual void collect_results() = 0;
       //@}
 
-
     public:
-
       /// @name (Re-)initialization functions
       //@{
       /// General init for any analysis of this type.
