@@ -118,8 +118,8 @@ namespace Gambit {
       unique_ptr<RestFrames::DecayRecoFrame>     C1a_3L;
       unique_ptr<RestFrames::DecayRecoFrame>     N2b_3L;
       
-      unique_ptr<RestFrames::DecayRecoFrame>     Wa_3L;
-      unique_ptr<RestFrames::DecayRecoFrame>     Zb_3L;
+      // unique_ptr<RestFrames::DecayRecoFrame>     Wa_3L;
+      // unique_ptr<RestFrames::DecayRecoFrame>     Zb_3L;
       
       unique_ptr<RestFrames::VisibleRecoFrame>   L1a_3L;
       unique_ptr<RestFrames::VisibleRecoFrame>   L1b_3L;
