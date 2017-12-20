@@ -1,6 +1,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
+#include <algorithm>
 #include <iomanip>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
@@ -2085,6 +2086,8 @@ namespace Gambit {
         _num3LINT=0;
         _num3LLOW=0;
         _num3LCOMP=0;
+
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 
     }; // end class Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb

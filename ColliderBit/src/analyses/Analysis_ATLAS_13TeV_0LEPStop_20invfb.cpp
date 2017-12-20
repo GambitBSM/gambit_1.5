@@ -1208,6 +1208,17 @@ namespace Gambit {
         return;
       }
 
+
+    protected:
+      void clear() {
+        _numSRA_TT=0; _numSRA_TW=0; _numSRA_T0=0;
+        _numSRB_TT=0; _numSRB_TW=0; _numSRB_T0=0;
+        _numSRC1=0; _numSRC2=0; _numSRC3=0; _numSRC4=0; _numSRC5=0;
+        _numSRD_low=0; _numSRD_high=0; _numSRE=0;
+        
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
     };
 
 

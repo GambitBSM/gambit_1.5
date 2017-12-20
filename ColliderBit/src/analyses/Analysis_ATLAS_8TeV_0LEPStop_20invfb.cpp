@@ -746,8 +746,16 @@ namespace Gambit {
         return;
       }
 
-    };
 
+    protected:
+      void clear() {
+        _numSRA1 = 0 ; _numSRA2 = 0; _numSRA3 = 0; _numSRA4 = 0;
+        _numSRC1 = 0 ; _numSRC2 = 0; _numSRC3 = 0;
+
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
+    };
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_8TeV_0LEPStop_20invfb)
 

@@ -246,6 +246,12 @@ namespace Gambit {
         }
       }
 
+
+    protected:
+      void clear() {
+        for(size_t i=0;i<NUMSR;i++) { _srnums[i]=0; }
+      }
+
     };
 
 

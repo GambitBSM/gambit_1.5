@@ -1060,6 +1060,37 @@ namespace Gambit {
         return;
       }
 
+
+    protected:
+      void clear() {
+        _num_SR0tau_a_bin_1=0;
+        _num_SR0tau_a_bin_2=0;
+        _num_SR0tau_a_bin_3=0;
+        _num_SR0tau_a_bin_4=0;
+        _num_SR0tau_a_bin_5=0;
+        _num_SR0tau_a_bin_6=0;
+        _num_SR0tau_a_bin_7=0;
+        _num_SR0tau_a_bin_8=0;
+        _num_SR0tau_a_bin_9=0;
+        _num_SR0tau_a_bin_10=0;
+        _num_SR0tau_a_bin_11=0;
+        _num_SR0tau_a_bin_12=0;
+        _num_SR0tau_a_bin_13=0;
+        _num_SR0tau_a_bin_14=0;
+        _num_SR0tau_a_bin_15=0;
+        _num_SR0tau_a_bin_16=0;
+        _num_SR0tau_a_bin_17=0;
+        _num_SR0tau_a_bin_18=0;
+        _num_SR0tau_a_bin_19=0;
+        _num_SR0tau_a_bin_20=0;
+        _num_SR0tau_b=0;
+        _num_SR1tau=0;
+        _num_SR2tau_a=0;
+        _num_SR2tau_b=0;
+        
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
     };
 
 

@@ -982,6 +982,26 @@ namespace Gambit {
         return;
       }
 
+
+    protected:
+      void clear() {
+        _num_MT2_90_SF=0;
+        _num_MT2_90_DF=0;
+        _num_MT2_120_SF=0;
+        _num_MT2_120_DF=0;
+        _num_MT2_150_SF=0;
+        _num_MT2_150_DF=0;
+        _num_WWa_SF=0;
+        _num_WWa_DF=0;
+        _num_WWb_SF=0;
+        _num_WWb_DF=0;
+        _num_WWc_SF=0;
+        _num_WWc_DF=0;
+        _num_Zjets=0;
+        
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
     };
 
 

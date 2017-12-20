@@ -518,6 +518,15 @@ namespace Gambit {
       }
 
 
+    protected:
+      void clear() {
+        _num2jl=0; _num2jm=0; _num2jt=0; _num3j=0;
+        _num4jlm=0; _num4jl=0; _num4jm=0; _num4jt=0; _num5j=0; _num6jl=0;
+        _num6jm=0; _num6jt=0; _num6jtp=0;
+
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
     };
 
 

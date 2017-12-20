@@ -288,6 +288,12 @@ namespace Gambit {
         // cout << "CUTFLOWS:\n\n" << _flows << endl;
       }
 
+
+    protected:
+      void clear() {
+        for(size_t i=0;i<NUMSR;i++) { _srnums[i]=0; }
+      }
+
     };
 
 

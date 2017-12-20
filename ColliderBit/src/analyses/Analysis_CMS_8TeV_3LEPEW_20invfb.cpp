@@ -25,7 +25,8 @@ namespace Gambit {
     private:
 
       // Array of signal regions, set to zero
-      int SR [180];
+      static const size_t NUMSR = 180;
+      int SR [NUMSR];
       //int Region45=0;
       //int Region46=0;
       vector<double> boundsMll = {0.,75.,105.,9999.};
@@ -39,7 +40,7 @@ namespace Gambit {
       Analysis_CMS_8TeV_3LEPEW_20invfb() {
         set_luminosity(19.5);
 
-        for(int i=0;i<180;i++){
+        for(size_t i=0;i<NUMSR;i++){
           SR[i]=0;
         }
 
@@ -359,7 +360,7 @@ namespace Gambit {
           = dynamic_cast<Analysis_CMS_8TeV_3LEPEW_20invfb*>(other);
 
         // Here we will add the subclass member variables:
-        for(int i=0;i<180;i++) {
+        for(size_t i=0;i<NUMSR;i++) {
           SR[i] += specificOther->SR[i];
         }
       }
@@ -765,6 +766,12 @@ namespace Gambit {
           add_result(results_tmp);
         }
 
+      }
+
+
+    protected:
+      void clear() {
+        for(size_t i=0;i<NUMSR;i++) { SR[i]=0; }
       }
 
     };
