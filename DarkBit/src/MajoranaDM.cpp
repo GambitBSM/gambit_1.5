@@ -107,7 +107,7 @@ namespace Gambit
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
             double res = numerator*lambda*lambda*v0*v0*sqrt_s
-            *Dh2(s)*Gamma_s*gev2cm2*br;
+            *Dh2(s)*Gamma_s*GeV2tocm3s1*br;
             return res;
           }
           else

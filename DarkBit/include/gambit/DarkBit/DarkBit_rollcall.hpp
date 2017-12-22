@@ -55,8 +55,12 @@
 ///  \date 2016 October
 ///
 /// \author Aaron Vincent
-///     (aaron.vincent@cparc.ca)
+///         (aaron.vincent@cparc.ca)
 /// \date 2017 Sept
+///
+/// \author Sanjay Bloor
+///         (sanjay.bloor12@imperial.ac.uk)
+/// \date 2017 Dec
 ///
 ///  *********************************************
 
@@ -125,7 +129,7 @@ START_MODULE
       START_FUNCTION(DarkBit::RD_spectrum_type)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
-      ALLOW_MODELS(SingletDM)
+      ALLOW_MODELS(SingletDM, DiracDM, MajoranaDM, VectorDM)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -157,7 +161,7 @@ START_MODULE
       START_FUNCTION(fptr_dd)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
-      ALLOW_MODELS(SingletDM)
+      ALLOW_MODELS(SingletDM, DiracDM, MajoranaDM, VectorDM)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -199,7 +203,7 @@ START_MODULE
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
       BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM), double, (double*,int,double))
-      ALLOW_MODELS(MSSM63atQ,SingletDM,VectorDM,MajoranaDM,DiracDM)
+      ALLOW_MODELS(MSSM63atQ, SingletDM)
     #undef FUNCTION
   #undef CAPABILITY
 
