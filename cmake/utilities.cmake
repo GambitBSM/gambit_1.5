@@ -29,6 +29,7 @@
 #************************************************
 
 include(CMakeParseArguments)
+include(ExternalProject)
 
 # Add precompiled header support
 ##include(cmake/PrecompiledHeader.cmake)
@@ -214,6 +215,16 @@ function(remove_build_files)
     endif()
   endforeach()
 endfunction()
+
+# Macro to set up internal variables for contrib version of pybind11
+macro(use_contributed_pybind11)
+  set(pybind11_FOUND TRUE)
+  set(pybind11_DIR "${pybind11_CONTRIB_DIR}")
+  set(pybind11_VERSION "${PREFERRED_pybind11_VERSION}")
+  add_subdirectory("${pybind11_DIR}")
+  add_custom_target(nuke-pybind11 COMMAND ${CMAKE_COMMAND} -E remove_directory "${pybind11_DIR}")
+  add_dependencies(nuke-contrib nuke-pybind11)
+endmacro()
 
 # Function to add GAMBIT executable
 function(add_gambit_executable executablename LIBRARIES)
