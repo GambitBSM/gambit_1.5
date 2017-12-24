@@ -129,10 +129,8 @@ endmacro()
 # Function to check whether or not a given scanner or backend has been ditched
 function(check_ditch_status name version)
   # Check first for optional argument for Mathematica backends
-  if(${ARGN})
-    if ((${ARGN} EQUAL "Mathematica" OR ${ARGN} EQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
-      set (itch "${itch}" "${name}_${version}")
-    endif()
+  if ((ARGN STREQUAL "Mathematica" OR ARGN STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
+    set (itch "${itch}" "${name}_${version}")
   endif()
   foreach(ditch_command ${itch})
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print \"${name}_${version}\".startswith(\"${ditch_command}\")"
