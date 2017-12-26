@@ -83,6 +83,9 @@ namespace Gambit
   /// Load WSTP for Mathematica backends
   int loadWSTP(str, str, str, void*&);
 
+  /// Load a Python backend module
+  int loadPyModule(str, str, str, void *&);
+
   /// Load a backend library
   int loadLibrary(str, str, str, void*&, bool);
 

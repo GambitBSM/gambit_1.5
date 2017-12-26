@@ -324,6 +324,13 @@ namespace Gambit
     return 0;
   }
 
+  /// Load a Python backend module
+  int loadPyModule(str be, str ver, str sv, void *&pHandle)
+  {
+    //FIXME
+    return 0
+  }
+
   /// Load a backend library
   int loadLibrary(str be, str ver, str sv, void*& pHandle, bool with_BOSS)
   {
