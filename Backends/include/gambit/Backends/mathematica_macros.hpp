@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Macros for creating mathematica functions and
+///  Macros for creating Mathematica functions and
 ///  sending and receiving packets through WSTP
 ///
 ///  *********************************************
@@ -28,39 +28,6 @@
 #include <boost/preprocessor/tuple/elem.hpp>
 #include <boost/preprocessor/tuple/size.hpp>
 
-/// If not defined already, define the backend languages
-#ifndef UNKNOWN
-  #define UNKNOWN 0
-#endif
-#ifndef CC
-  #define CC 1
-#endif
-#ifndef CXX
-  #define CXX 2
-#endif
-#ifndef FORTRAN
-  #define FORTRAN 3
-#endif
-#ifndef MATHEMATICA
-  #define MATHEMATICA 4
-#endif
-
-/// Macro to help identifying the language of the backend
-#ifndef DEFINED_BACKENDLANG 
-#define DEFINED_BACKENDLANG ()
-#endif
-
-/// Macro to choose between mathematica types and normal types
-#ifdef HAVE_MATHEMATICA
-  #define MATH_TYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,mathematica_variable<TYPE>,TYPE)
-#else
-  #define MATH_TYPE(TYPE) TYPE
-#endif
-
-/// Macro that determines whether the language of the backend is mathematica
-#define USING_MATHEMATICA IF_ELSE_TOKEN_DEFINED(BACKENDLANG,                                    \
-        BOOST_PP_EQUAL(BACKENDLANG, MATHEMATICA), 0)
-
 /// Macros to give names to an argument list
 #define ARG_NAME(R,DATA,INDEX,ELEM) (ELEM arg##INDEX)
 #define FUNCTION_ARGS_SEQ(ARGLIST) BOOST_PP_IF(ISEMPTY(ARGLIST), (),                            \
@@ -77,7 +44,7 @@
 
 /// Macro for identifying numeric types
 #define IS_NUMERIC(TYPE)                                                                        \
-  IS_TYPE(int, STRIP(TYPE)) || IS_TYPE(float, STRIP(TYPE)) || IS_TYPE(double, STRIP(TYPE)) 
+  IS_TYPE(int, STRIP(TYPE)) || IS_TYPE(float, STRIP(TYPE)) || IS_TYPE(double, STRIP(TYPE))
 
 // Macros for stripping to basic types
 #define STRIP_MVoid void
@@ -111,7 +78,7 @@
   else                                                                                          \
     backend_warning().raise(LOCAL_INFO, "Type unknown or incompatible with WSTP");              \
   BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), return ;, return TYPE();)
- 
+
 /// Macros for sending data through WSTP
 #define WSPUTARG(R, TYPE, INDEX, ELEM)                                                          \
   if(!WSPutVariable((WSLINK)pHandle,CAT(arg,INDEX)))                                            \
@@ -224,9 +191,9 @@
           BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                        \
             BOOST_PP_SEQ_FOR_EACH_I(VOIDARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                 \
                                                                                                 \
-          /* Read the received packet into the return value, unless it's void */                \
+          /* Return a dummy value, unless the function type is void */                          \
           BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), DUMMY, return TYPE();                         \
-          )                                                                                     \
+          )  /*FIXME should this be new TYPE()??*/                                              \
         }                                                                                       \
                                                                                                 \
         extern const NAME##_type NAME = NAME##_function;                                        \

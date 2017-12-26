@@ -19,53 +19,53 @@
 ///
 ///  ***********************************************
 
-#include "gambit/Utils/util_types.hpp"
-#include "gambit/Elements/ini_functions.hpp"
-#include "gambit/cmake/cmake_variables.hpp"
+#ifndef __mathematica_variable_hpp__
+#define __mathematica_variable_hpp__
 
 #ifdef HAVE_MATHEMATICA
 #include MATHEMATICA_WSTP_H
 
-#ifndef __mathematica_variable_hpp__
-#define __mathematica_variable_hpp__
+#include "gambit/Utils/util_types.hpp"
+#include "gambit/Elements/ini_functions.hpp"
+#include "gambit/cmake/cmake_variables.hpp"
 
 namespace Gambit
 {
   namespace Backends
   {
-  
+
 
     // Overloaded functions to get data through WSTP
     inline int WSGetVariable(WSLINK WSlink, int* val) { return WSGetInteger(WSlink, val); }
     inline int WSGetVariable(WSLINK WSlink, float* val) { return WSGetReal32(WSlink, val); }
-    inline int WSGetVariable(WSLINK WSlink, double* val) { return WSGetReal64(WSlink, val); } 
-    inline int WSGetVariable(WSLINK WSlink, bool* val) 
-    { 
+    inline int WSGetVariable(WSLINK WSlink, double* val) { return WSGetReal64(WSlink, val); }
+    inline int WSGetVariable(WSLINK WSlink, bool* val)
+    {
       const char *val2;
-      int ret = WSGetString(WSlink, &val2); 
+      int ret = WSGetString(WSlink, &val2);
       *val = (str(val2) == "True");
       return ret;
     }
     inline int WSGetVariable(WSLINK WSlink, char* val)
-    { 
+    {
       const char *val2;
       int ret = WSGetString(WSlink, &val2);
       *val = val2[0];
       return ret;
     }
-    inline int WSGetVariable(WSLINK WSlink, str* val) 
-    { 
+    inline int WSGetVariable(WSLINK WSlink, str* val)
+    {
       const char *val2;
       int ret = WSGetString(WSlink, &val2);
       *val = str(val2);
       return ret;
-    } 
+    }
     template <typename T> inline int WSGetVariable(WSLINK WSlink, std::vector<T>* val)
     {
       long int dim;
       if(!WSCheckFunction(WSlink, "List", &dim))
         return 0;
-      for(int i=0; i<dim; i++) 
+      for(int i=0; i<dim; i++)
       {
         T value;
         if(!WSGetVariable(WSlink, &value))
@@ -73,14 +73,14 @@ namespace Gambit
         val->push_back(value);
       }
       return 1;
-    }  
- 
+    }
+
     // Overloaded functions to put data through WSTP
     inline int WSPutVariable(WSLINK WSlink, int val) { return WSPutInteger32(WSlink, val); }
     inline int WSPutVariable(WSLINK WSlink, float val) { return WSPutReal32(WSlink, val); }
     inline int WSPutVariable(WSLINK WSlink, double val) { return WSPutReal64(WSlink, val); }
-    inline int WSPutVariable(WSLINK WSlink, bool val) 
-    { 
+    inline int WSPutVariable(WSLINK WSlink, bool val)
+    {
       if(val)
         return WSPutSymbol(WSlink, "True");
       else
@@ -91,13 +91,13 @@ namespace Gambit
     template <typename T> inline int WSPutVariable(WSLINK WSlink, std::vector<T> val)
     {
       if(!WSPutFunction(WSlink, "List", val.size()))
-        return 0; 
+        return 0;
       for(auto it = val.begin(); it != val.end(); it++)
         if(!WSPutVariable(WSlink, *it))
           return 0;
       return 1;
     }
- 
+
     // Class mathematica_variable
     template <typename TYPE>
     class mathematica_variable
@@ -180,7 +180,7 @@ namespace Gambit
           try
           {
 
-            // Clear the variable that is to be replaced 
+            // Clear the variable that is to be replaced
             if(!WSPutFunction(_WSlink, "Clear", 1) or
                !WSPutFunction(_WSlink, "StringDrop", 2) or
                !WSPutFunction(_WSlink, "StringDrop", 2) or
@@ -196,7 +196,7 @@ namespace Gambit
               return *this;
             }
 
-            // Mark the end of the message 
+            // Mark the end of the message
             if(!WSEndPacket(_WSlink))
             {
               math_error("Error sending packet through WSTP");
@@ -226,7 +226,7 @@ namespace Gambit
               math_error("Error sending packet through WSTP");
               return *this;
             }
-           
+
             // Mark the end of the message
             if(!WSEndPacket(_WSlink))
             {
@@ -268,7 +268,7 @@ namespace Gambit
           }
 
           catch (std::exception &e) { ini_catch(e); }
-      
+
           return *this;
 
         }
@@ -284,9 +284,9 @@ namespace Gambit
 
 
         // Cast operator for type TYPE
-        operator TYPE const() 
+        operator TYPE const()
         {
-        
+
           try
           {
             /* If TYPE is a numeric type, send N first */
@@ -340,18 +340,19 @@ namespace Gambit
                 math_error("Error reading packet from WSTP");
 
             }
-        
+
           }
 
           catch (std::exception &e) { ini_catch(e); }
 
-          return _var; 
+          return _var;
         }
     };
 
 
  }
 }
-#endif /* __mathematica_variable_hpp__ */
 
 #endif /* HAVE_MATHEMATICA */
+
+#endif /* __mathematica_variable_hpp__ */

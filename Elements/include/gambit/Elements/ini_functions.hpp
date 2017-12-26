@@ -11,13 +11,13 @@
 ///
 ///  (add name and date if you modify)
 ///
-///  \author Pat Scott 
+///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Feb
 ///
-///  \author Peter Athron  
+///  \author Peter Athron
 ///          (peter.athron@coepp.org.au)
-///  \date 2015 
+///  \date 2015
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
@@ -41,15 +41,15 @@
 
 namespace Gambit
 {
-  /// Forward declarations 
+  /// Forward declarations
   class functor;
   class module_functor_common;
   class model_functor;
   class Options;
-  
+
   /// Catch initialisation exceptions
   void ini_catch(std::exception&);
-    
+
   /// Get back the "::" from things that use NS_SEP instead
   str fixns(str);
 
@@ -74,7 +74,7 @@ namespace Gambit
   /// Register a model functor.
   int register_model_functor(std::map<str, bool(*)()>, std::map<str, str>, bool(*)(), str, str);
 
-  /// Call push back on a vector of strings 
+  /// Call push back on a vector of strings
   int vectorstr_push_back(std::vector<str>&, str);
 
   /// Notify a backend functor of which models it can be used with
@@ -85,8 +85,8 @@ namespace Gambit
 
   /// Load a backend library
   int loadLibrary(str, str, str, void*&, bool);
-  
-  /// Try to resolve a pointer to a partial path to a shared library and use it to override the stored backend path.  
+
+  /// Try to resolve a pointer to a partial path to a shared library and use it to override the stored backend path.
   void attempt_backend_path_override(str&, str&, const char*);
 
   /// Register a backend with the logging system
@@ -94,17 +94,20 @@ namespace Gambit
 
   /// Register a bossed type with the rollcall system
   int register_type(str bever, str classname);
-  
-  /// Disable a backend functor if its library is missing or the symbol cannot be found. 
+
+  /// Disable a backend functor if its library is missing or the symbol cannot be found.
   int set_backend_functor_status(functor&, str);
 
-  /// Disable a mathematica backend functor if the function is not found in the package
+  /// Disable a Mathematica backend functor if the function is not found in the package
   int set_math_backend_functor_status(functor&, str, void *&);
 
-  /// Disable a backend initialisation function if the backend is missing. 
+  /// Disable a Python backend functor if the function is not found in the package
+  int set_py_backend_functor_status(functor&, str, void *&);
+
+  /// Disable a backend initialisation function if the backend is missing.
   int set_BackendIniBit_functor_status(functor&, str, str);
 
-  /// Get the status of a factory pointer to a BOSSed type's wrapper constructor.        
+  /// Get the status of a factory pointer to a BOSSed type's wrapper constructor.
   int get_ctor_status(str, str, str, str, str, str);
 
   /// Create a log tag for a new module.
@@ -115,7 +118,7 @@ namespace Gambit
 
   /// Set a backend rule for one or more models.
   int set_backend_rule_for_model(module_functor_common&, str, str);
-  
+
   /// Set the classloading requirements of a given functor.
   int set_classload_requirements(module_functor_common&, str, str, str);
 
@@ -131,33 +134,33 @@ namespace Gambit
     typedef std::pair<str,pair_ints> pair_string_ints;
     typedef std::pair<str,str> pair_strings;
 
-    /// map from gauge eigenstate strings to string, index pairs  
+    /// map from gauge eigenstate strings to string, index pairs
     std::map<str, p_int_string> init_gauge_label_to_index_type();
-  
+
     /// map from mass eigenstate strings to string, index pairs
     std::map<str, p_int_string> init_mass_label_to_index_type();
-  
-    /// map to extract info from family state   
+
+    /// map to extract info from family state
     std::map<str, pair_string_ints> init_familystate_label();
-    
+
     ///map to obtain left_right gauge_pairs from state info
-    /// helps us reuse other routiones with string arguments 
+    /// helps us reuse other routiones with string arguments
     std::map<p_int_string, std::vector<str> > init_type_family_to_gauge_states();
-  
+
     /// maps directly from family string to left_right gauge_pairs
-    /// helps us reuse other routines that take string arguments 
+    /// helps us reuse other routines that take string arguments
     std::map<str,std::vector<str> > init_family_state_to_gauge_state();
-    
+
     ///maps directly from gauge_es string to familystates
-    /// helps us reuse other routines that take string arguments 
+    /// helps us reuse other routines that take string arguments
     std::map<str,std::vector<str> > init_gauge_es_to_family_states();
-  
-    /// map from string representing type (ie up-squarks, down-squarks or 
-    /// charged sleptons) to appropriate set of mass eigenstates 
+
+    /// map from string representing type (ie up-squarks, down-squarks or
+    /// charged sleptons) to appropriate set of mass eigenstates
     std::map<str,std::vector<str> > init_type_to_vec_of_mass_es();
-    
-    /// map from string representing type (ie up-squarks, down-squarks or 
-    /// charged sleptons) to appropriate set of gauge eigenstates 
+
+    /// map from string representing type (ie up-squarks, down-squarks or
+    /// charged sleptons) to appropriate set of gauge eigenstates
     std::map<str,std::vector<str> > init_type_to_vec_of_gauge_es();
 
   }

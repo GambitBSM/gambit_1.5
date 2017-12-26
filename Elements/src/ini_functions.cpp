@@ -44,7 +44,7 @@
 
 #ifdef HAVE_MATHEMATICA
   #include MATHEMATICA_WSTP_H
-#endif 
+#endif
 
 namespace Gambit
 {
@@ -261,7 +261,7 @@ namespace Gambit
           return 0;
         }
 
-        // This opens a WSTP connection 
+        // This opens a WSTP connection
         std::stringstream WSTPflags;
         #ifdef __APPLE__
           WSTPflags << "-linkname " << MATHEMATICA_KERNEL << " -mathlink";
@@ -270,7 +270,7 @@ namespace Gambit
         #endif
 
         pHandle = WSOpenString(WSenv, WSTPflags.str().c_str(), &WSerrno);
-        if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK) 
+        if((WSLINK)pHandle == (WSLINK)0 || WSerrno != WSEOK)
         {
           err << "Unable to create link to the Kernel" << endl;
           backend_warning().raise(LOCAL_INFO,err.str());
@@ -297,7 +297,7 @@ namespace Gambit
         // Jump to the end of this packet, discarding all output
         // We do not care about errors here because the package exists
         int pkt;
-        while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)   
+        while( (pkt = WSNextPacket((WSLINK)pHandle), pkt) && pkt != RETURNPKT)
           WSNewPacket((WSLINK)pHandle);
 
         logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
@@ -307,11 +307,11 @@ namespace Gambit
 
        //TODO: Add this to die functions
 
-       //WSPutFunction((WSLINK)pHandle, "Exit", 0); 
+       //WSPutFunction((WSLINK)pHandle, "Exit", 0);
        //WSClose((WSLINK)pHandle);
 
        //WSDeinitialize(WSenv);
-          
+
       #else
         pHandle = NULL;
         std::ostringstream err;
@@ -442,7 +442,7 @@ namespace Gambit
     return 0;
   }
 
-  /// Disable a mathematica backend functor if the function is not found in the package
+  /// Disable a Mathematica backend functor if the function is not found in the package
   int set_math_backend_functor_status(functor& be_functor, str symbol_name, void *&pHandle)
   {
    try
@@ -457,8 +457,8 @@ namespace Gambit
         {
           std::ostringstream err;
           // Replace \[ for \\[ so that names can have non-ASCII characters
-          boost::replace_all(symbol_name, "\\[", "\\\\["); 
-          if(!WSPutFunction((WSLINK)pHandle, "NameQ", 1) or 
+          boost::replace_all(symbol_name, "\\[", "\\\\[");
+          if(!WSPutFunction((WSLINK)pHandle, "NameQ", 1) or
              !WSPutFunction((WSLINK)pHandle, "StringDrop",2) or
              !WSPutFunction((WSLINK)pHandle, "StringDrop",2) or
              !WSPutFunction((WSLINK)pHandle, "ToString", 1) or
@@ -505,7 +505,7 @@ namespace Gambit
             be_functor.setStatus(-2);
           }
         }
-        
+
       #else
         pHandle = NULL;
         std::ostringstream err;
@@ -519,9 +519,15 @@ namespace Gambit
     catch (std::exception& e) { ini_catch(e); }
     return 0;
   }
- 
 
-  /// Disable a backend initialisation function if the backend is missing. 
+  /// Disable a Python backend functor if the function is not found in the package
+  int set_py_backend_functor_status(functor& be_functor, str symbol_name, void *&pHandle)
+  {
+    return 0;
+    //FIXME
+  }
+
+  /// Disable a backend initialisation function if the backend is missing.
   int set_BackendIniBit_functor_status(functor& ini_functor, str be, str v)
   {
     bool present = Backends::backendInfo().works.at(be + v);
