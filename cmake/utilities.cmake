@@ -276,8 +276,11 @@ function(add_gambit_executable executablename LIBRARIES)
   if(Mathematica_FOUND AND Mathematica_WSTP_FOUND)
     set(LIBRARIES ${LIBRARIES} ${Mathematica_WSTP_LIBRARIES})
   endif()
+  if(pybind11_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${PYTHON_LIBRARIES})
+  endif()
 
-  target_link_libraries(${executablename} ${LIBRARIES} yaml-cpp)
+  target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp)
   add_dependencies(${executablename} mkpath)
 
   #For checking if all the needed libs are present.  Never add them manually with -lsomelib!!

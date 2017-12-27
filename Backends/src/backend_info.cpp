@@ -27,7 +27,8 @@ namespace Gambit
   /// Constructor
   Backends::backend_info::backend_info() :
    filename(GAMBIT_DIR "/config/backend_locations.yaml"),
-   default_filename(GAMBIT_DIR "/config/backend_locations.yaml.default")
+   default_filename(GAMBIT_DIR "/config/backend_locations.yaml.default"),
+   python_started(false)
   {
     // Attempt to read user yaml configuration file
     try
@@ -58,6 +59,14 @@ namespace Gambit
       msg << "("<<e.what()<<")";
       backend_error().raise(LOCAL_INFO,msg.str());
     }
+  }
+
+  /// Destructor
+  Backends::backend_info::~backend_info()
+  {
+    #ifdef HAVE_PYBIND11
+      if (python_started) delete python_interpreter;
+    #endif
   }
 
   /// Indicate whether a custom backend locations file exists
@@ -155,6 +164,19 @@ namespace Gambit
     return p;
   }
 
+  /// Return the bare name of the library of a backend library, with no path or extension
+  str Backends::backend_info::lib_name(str be, str ver) const
+  {
+    str p = corrected_path(be,ver);
+    int i, end = p.length();
+    for (i = end-1; i >= 0; --i)
+    {
+      if (p[i] == '.') end = i;
+      if (p[i] == '/') break;
+    }
+    return p.substr(i+1,end-i);
+  }
+
   /// Given a backend and a safe version (with no periods), return the true version
   str Backends::backend_info::version_from_safe_version (str be, str sv) const
   {
@@ -189,9 +211,9 @@ namespace Gambit
     {
       std::ostringstream msg;
       msg << "The backend \"" << be << "\" does not contain any classes for loading, "
-          << endl << "and therefore has no default version."; 
+          << endl << "and therefore has no default version.";
       backend_error().raise(LOCAL_INFO, msg.str());
-    } 
+    }
     return version_from_safe_version(be,default_safe_versions.at(be));
   }
 
@@ -203,7 +225,7 @@ namespace Gambit
     if (safe_version_map.find(be) == safe_version_map.end())
     {
       std::ostringstream msg;
-      msg << "The backend \"" << be << "\" is not known to GAMBIT."; 
+      msg << "The backend \"" << be << "\" is not known to GAMBIT.";
       backend_error().raise(LOCAL_INFO, msg.str());
     }
     std::map<str,str> versions = safe_version_map[be].second;
@@ -214,7 +236,7 @@ namespace Gambit
     }
     return working_versions;
   }
-  
+
 
   /// Get all safe versions of a given backend that are successfully loaded.
   std::vector<str> Backends::backend_info::working_safe_versions(const str& be)
@@ -228,6 +250,44 @@ namespace Gambit
     }
     return safe_versions;
   }
+
+
+  #ifdef HAVE_PYBIND11
+
+    /// Attempt to load a Python backend module
+    void* Backends::backend_info::load_python_module(str& be, str& ver)
+    {
+      // Fire up the Python interpreter if it hasn't been started yet.
+      if (not python_started) start_python();
+
+      // Add the path to the backend to the Python system path
+      pybind11::object path = sys.attr("path");
+      pybind11::object path_append = path.attr("append");
+      path_append(path_dir(be, ver));
+
+      // Attempt to import the module
+      loaded_python_backends.emplace_back(pybind11::module::import(lib_name(be, ver).c_str()));
+
+      // Remove the path to the backend from the Python system path
+      pybind11::object path_remove = path.attr("remove");
+      path_remove(path_dir(be, ver));
+
+      // Return a pointer to the module just imported
+      return &loaded_python_backends.back();
+    }
+
+    /// Fire up the Python interpreter
+    void Backends::backend_info::start_python()
+    {
+      // Create an instance of the interpreter.
+      python_interpreter = new pybind11::scoped_interpreter;
+      // Import the sys module, and save a wrapper to it for later.
+      sys = pybind11::module::import("sys");
+      logger() << LogTags::backends << LogTags::debug << "Python interpreter successfully started." << EOM;
+      python_started = true;
+    }
+
+  #endif
 
 
 }

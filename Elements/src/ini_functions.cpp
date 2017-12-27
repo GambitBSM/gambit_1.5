@@ -18,7 +18,7 @@
 ///  \author Peter Athron
 ///          (peter.athron@coepp.org.au)
 ///  \date 2015
-//
+///
 ///  \author Christoph Weniger
 ///          (c.weniger@uva.nl)
 ///  \date 2016 Feb
@@ -44,6 +44,10 @@
 
 #ifdef HAVE_MATHEMATICA
   #include MATHEMATICA_WSTP_H
+#endif
+
+#ifdef HAVE_PYBIND11
+  #include <pybind11/embed.h>
 #endif
 
 namespace Gambit
@@ -236,6 +240,7 @@ namespace Gambit
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = false;
       Backends::backendInfo().needsMathematica[be+ver] = true;
+      Backends::backendInfo().needsPython[be+ver] = false;
 
      #ifdef HAVE_MATHEMATICA
         int WSerrno;
@@ -327,8 +332,31 @@ namespace Gambit
   /// Load a Python backend module
   int loadPyModule(str be, str ver, str sv, void *&pHandle)
   {
-    //FIXME
-    return 0
+    try
+    {
+      const str path = Backends::backendInfo().corrected_path(be,ver);
+      Backends::backendInfo().link_versions(be, ver, sv);
+      Backends::backendInfo().classloader[be+ver] = false;
+      Backends::backendInfo().needsMathematica[be+ver] = false;
+      Backends::backendInfo().needsPython[be+ver] = true;
+
+      #ifdef HAVE_PYBIND11
+        // Attempt to load the module
+        pHandle = Backends::backendInfo().load_python_module(be, ver);
+        logger() << "Succeeded in loading " << Backends::backendInfo().corrected_path(be,ver)
+                 << LogTags::backends << LogTags::info << EOM;
+        Backends::backendInfo().works[be+ver] = true;
+      #else
+        pHandle = NULL;
+        std::ostringstream err;
+        err << "GAMBIT requires pybind11 to interface with Python, but it was not found in the system. Please install it before using this backend." << endl;
+        err << "You can do this with 'make pybind11' from the GAMBIT build directory." << endl;
+        backend_warning().raise(LOCAL_INFO,err.str());
+        Backends::backendInfo().works[be+ver] = false;
+      #endif
+    }
+    catch (std::exception& e) { ini_catch(e); }
+    return 0;
   }
 
   /// Load a backend library
@@ -340,6 +368,7 @@ namespace Gambit
       Backends::backendInfo().link_versions(be, ver, sv);
       Backends::backendInfo().classloader[be+ver] = with_BOSS;
       Backends::backendInfo().needsMathematica[be+ver] = false;
+      Backends::backendInfo().needsPython[be+ver] = false;
 
       if (with_BOSS) Backends::backendInfo().classes_OK[be+ver] = true;
       pHandle = dlopen(path.c_str(), RTLD_LAZY);

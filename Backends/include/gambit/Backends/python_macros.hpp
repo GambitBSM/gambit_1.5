@@ -19,9 +19,11 @@
 #define __python_macros_hpp__
 
 #include "gambit/Utils/util_macros.hpp"
-#ifdef HAVE_PYBIND11
-  #include "pybind11/pybind11.h"
-#endif
+#include "gambit/cmake/cmake_variables.hpp"
+
+//#ifdef HAVE_PYBIND11
+//  #include <pybind11/pybind11.h>
+//#endif
 
 /// Backend function macro for Python backends
 #ifndef HAVE_PYBIND11 //FIXME
@@ -57,8 +59,8 @@
             BOOST_PP_SEQ_FOR_EACH_I(VOIDARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                 \
                                                                                                 \
           /* Return a dummy value, unless the function type is void */                          \
-          BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), DUMMY, return new TYPE();)                    \
-        }      /* FIXME Should this be new?? */                                                 \
+          BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), DUMMY, return TYPE();)                        \
+        }                                                                                       \
                                                                                                 \
         extern const NAME##_type NAME = NAME##_function;                                        \
                                                                                                 \

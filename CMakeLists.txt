@@ -97,7 +97,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # Include cmake utility scripts, including colour definitions.
 include(cmake/utilities.cmake)
 
-# Check for Python and required libs
+# Check for Python interpreter
 find_package(PythonInterp 2 REQUIRED)
 if (PYTHON_VERSION_MAJOR GREATER 2)
   message(FATAL_ERROR "\nGAMBIT requires Python 2.  \nIf you need to set the path to the Python interpreter manually, "
@@ -106,10 +106,6 @@ endif()
 if (PYTHON_VERSION_MINOR LESS 6)
   message("${Red}   Python version < 2.6.  GAMBIT has not been tested with this version; upgrade Python if you experience problems.${ColourReset}")
 endif()
-find_package(PythonLibs)
-foreach(module yaml os re datetime sys getopt shutil itertools)
-  find_python_module(${module} REQUIRED)
-endforeach()
 
 # Check for pybind11
 set(MIN_pybind11_VERSION "2.2.0")
@@ -138,6 +134,17 @@ if(NOT pybind11_FOUND AND NOT EXISTS "${pybind11_CONTRIB_DIR}")
     include_directories("${PYTHON_INCLUDE_DIRS};${PYBIND11_INCLUDE_DIR}")
 endif()
 set(HAVE_PYBIND11 "${pybind11_FOUND}")
+
+# Check for required Python libraries
+if(pybind11_FOUND)
+  find_package(PythonLibs REQUIRED)
+else()
+  find_package(PythonLibs)
+endif()
+foreach(module yaml os re datetime sys getopt shutil itertools)
+  find_python_module(${module} REQUIRED)
+endforeach()
+
 
 # Check for axel
 find_program(axel_FOUND axel)

@@ -193,7 +193,7 @@
                                                                                                 \
           /* Return a dummy value, unless the function type is void */                          \
           BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), DUMMY, return TYPE();                         \
-          )  /*FIXME should this be new TYPE()??*/                                              \
+          )                                                                                     \
         }                                                                                       \
                                                                                                 \
         extern const NAME##_type NAME = NAME##_function;                                        \

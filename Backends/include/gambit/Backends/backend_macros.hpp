@@ -127,7 +127,7 @@ namespace Gambit                                                            \
         USING_MATHEMATICA,                                                  \
          loadWSTP(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),               \
                   STRINGIFY(SAFE_VERSION), pHandle),                        \
-        USING PYTHON,                                                       \
+        USING_PYTHON,                                                       \
          loadPyModule(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION),           \
                       STRINGIFY(SAFE_VERSION), pHandle),                    \
         /* USING SOMETHING ELSE */                                          \
@@ -316,7 +316,7 @@ namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                     
 
 #define BE_VARIABLE_I_AUX(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)              \
         IF_ELSEIF(USING_MATHEMATICA, BE_VARIABLE_I_MATH,                           \
-                  USING PYTHON, BE_VARIABLE_I_PY,                                  \
+                  USING_PYTHON, BE_VARIABLE_I_PY,                                  \
                   BE_VARIABLE_I_OTHER)(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)
 
 /// Backend variable macro for regular backends (C/C++/Fortran)

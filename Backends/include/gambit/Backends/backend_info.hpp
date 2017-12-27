@@ -25,7 +25,12 @@
 
 #include <map>
 #include "gambit/Utils/util_types.hpp"
+#include "gambit/cmake/cmake_variables.hpp"
 #include "yaml-cpp/yaml.h"
+
+#ifdef HAVE_PYBIND11
+  #include <pybind11/embed.h>
+#endif
 
 namespace Gambit
 {
@@ -41,6 +46,9 @@ namespace Gambit
 
         /// Constructor
         backend_info();
+
+        /// Destructor
+        ~backend_info();
 
         /// Indicate whether a custom backend locations file exists
         bool custom_locations_exist() const;
@@ -60,6 +68,9 @@ namespace Gambit
         /// Return the path to the folder in which a backend library resides
         str path_dir(str, str) const;
 
+        /// Return the bare name of the library of a backend library, with no path or extension
+        str lib_name(str, str) const;
+
         /// Key: backend name + version
         std::map<str,str> dlerrors;
 
@@ -71,6 +82,9 @@ namespace Gambit
 
         /// Key: backend name + version
         std::map<str,bool> needsMathematica;
+
+        /// Key: backend name + version
+        std::map<str,bool> needsPython;
 
         /// Key: backend name + version
         std::map<str,bool> classloader;
@@ -108,6 +122,10 @@ namespace Gambit
         /// Get all safe versions of a given backend that are successfully loaded.
         std::vector<str> working_safe_versions(const str&);
 
+        #ifdef HAVE_PYBIND11
+          /// Attempt to load a Python backend module
+          void* load_python_module(str& be, str& ver);
+        #endif
 
       private:
 
@@ -131,6 +149,24 @@ namespace Gambit
 
         /// Flag indicating whether or not the user has a custom backend locations file
         bool custom_bepathfile_exists;
+
+        #ifdef HAVE_PYBIND11
+          /// Python sys modudle
+          pybind11::object sys;
+
+          /// Python backends that have been successfully loaded
+          std::vector<pybind11::object> loaded_python_backends;
+
+          /// Pointer to the Python interpreter
+          pybind11::scoped_interpreter* python_interpreter;
+
+          /// Indicate whether Python has been started or not
+          bool python_started;
+
+          /// Fire up the Python interpreter
+          void start_python();
+        #endif
+
     };
 
   }
