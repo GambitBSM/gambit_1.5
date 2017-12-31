@@ -18,15 +18,21 @@
 #ifndef __python_macros_hpp__
 #define __python_macros_hpp__
 
-#include "gambit/Utils/util_macros.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
-//#ifdef HAVE_PYBIND11
-//  #include <pybind11/pybind11.h>
-//#endif
+#ifdef HAVE_PYBIND11 //FIXME
 
-/// Backend function macro for Python backends
-#ifndef HAVE_PYBIND11 //FIXME
+  // Just use the dummy functions if pybind11 is missing
+  #define BE_FUNCTION_I_PY BE_FUNCTION_I_DUMMY
+  #define BE_VARIABLE_I_PY BE_VARIABLE_I_DUMMY
+
+#else
+
+  #include "gambit/Utils/util_macros.hpp"
+  #include "gambit/Backends/python_function.hpp"
+  #include "gambit/Backends/python_variable.hpp"
+
+  /// Backend function macro for Python backends
   #define BE_FUNCTION_I_PY(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                 \
   namespace Gambit                                                                              \
   {                                                                                             \
@@ -34,56 +40,12 @@
     {                                                                                           \
       namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
       {                                                                                         \
-                                                                                                \
+          /*FIXME*/                                                                             \
       }                                                                                         \
     }                                                                                           \
   }
-#else
-  /* If Python is not available in the system return a dummy funtion */
-  #define BE_FUNCTION_I_PY(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                 \
-  namespace Gambit                                                                              \
-  {                                                                                             \
-    namespace Backends                                                                          \
-    {                                                                                           \
-      namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
-      {                                                                                         \
-                                                                                                \
-        /* Define a type NAME_type to be a suitable function pointer. */                        \
-        typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                              \
-                                                                                                \
-        TYPE NAME##_function FUNCTION_ARGS(ARGLIST)                                             \
-        {                                                                                       \
-                                                                                                \
-          /* Do something inconsequential with the args to skip compiler warnings. */           \
-          BOOST_PP_IF(ISEMPTY(ARGLIST),,                                                        \
-            BOOST_PP_SEQ_FOR_EACH_I(VOIDARG, , BOOST_PP_TUPLE_TO_SEQ(ARGLIST)))                 \
-                                                                                                \
-          /* Return a dummy value, unless the function type is void */                          \
-          BOOST_PP_IF(IS_TYPE(void, STRIP(TYPE)), DUMMY, return TYPE();)                        \
-        }                                                                                       \
-                                                                                                \
-        extern const NAME##_type NAME = NAME##_function;                                        \
-                                                                                                \
-      }                                                                                         \
-    }                                                                                           \
-  }
-#endif
 
-/// Backend variable macro for Python
-#ifndef HAVE_PYBIND11 //FIXME
-  #define BE_VARIABLE_I_MATH(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                        \
-  namespace Gambit                                                                              \
-  {                                                                                             \
-    namespace Backends                                                                          \
-    {                                                                                           \
-      namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
-      {                                                                                         \
-                                                                                                \
-      }                                                                                         \
-    }                                                                                           \
-  }
-#else
-  /* If pybind11 is not available, define a dummy variable */
+  /// Backend variable macro for Python
   #define BE_VARIABLE_I_PY(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                          \
   namespace Gambit                                                                              \
   {                                                                                             \
@@ -91,27 +53,11 @@
     {                                                                                           \
       namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
       {                                                                                         \
-                                                                                                \
-        extern TYPE* const NAME = new TYPE();                                                   \
-                                                                                                \
-        TYPE* CAT(getptr,NAME)() { return NAME; }                                               \
-                                                                                                \
+         /*FIXME*/                                                                              \
       }                                                                                         \
     }                                                                                           \
   }
-#endif
 
-
-namespace Gambit
-{
-  namespace Backends
-  {
-    // Class python_variable
-    template <typename TYPE>
-    class python_variable {};
-  }
-
-}
-
+#endif // HAVE_PYBIND11
 
 #endif // #defined __python_macros_hpp

@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Simple container used for storing info about
+///  Container used for storing info about
 ///  backends during initialisation time.
 ///
 ///  *********************************************
@@ -12,12 +12,26 @@
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2014 Dec
+///  \date 2017 Dec
 ///
 ///  *********************************************
 
+#include "gambit/cmake/cmake_variables.hpp"
 #include "gambit/Backends/backend_info.hpp"
 #include "gambit/Logs/logger.hpp"
-#include "gambit/cmake/cmake_variables.hpp"
+
+#ifdef HAVE_MATHEMATICA
+  #include MATHEMATICA_WSTP_H
+#endif
+
+#ifdef HAVE_PYBIND11
+  #include <pybind11/embed.h>
+#endif
+
+#ifdef HAVE_LINK_H
+  #include <link.h>
+#endif
+
 
 namespace Gambit
 {
@@ -197,7 +211,7 @@ namespace Gambit
   }
 
   /// Override a backend's config file location
-  void Backends::backend_info::override_path(str& be, str& ver, str path)
+  void Backends::backend_info::override_path(const str& be, const str& ver, str path)
   {
     int l = str(GAMBIT_DIR).length();
     if (path.substr(0,l) == GAMBIT_DIR) path.replace(0, l, ".");
@@ -252,28 +266,268 @@ namespace Gambit
   }
 
 
+  /// Try to resolve a pointer to a partial path to a shared library and use it to override the stored backend path.
+  void Backends::backend_info::attempt_backend_path_override(const str& be, const str& ver, const char* name)
+  {
+    char *fullname = realpath(name, NULL);
+    if (not fullname)
+    {
+      std::ostringstream err;
+      err << "Problem retrieving absolute library path for " << be << " v" << ver << "." << endl
+          << "The path to this library has not been fully determined.";
+      backend_warning().raise(LOCAL_INFO,err.str());
+    }
+    else
+    {
+      override_path(be, ver, fullname);
+    }
+    free(fullname);
+  }
+
+
+  /// Attempt to load a backend library.
+  int Backends::backend_info::loadLibrary(const str& be, const str& ver, const str& sv, bool with_BOSS, const str& lang)
+  {
+    try
+    {
+
+      // Now switch according to the language of the backend
+      if (lang == "MATHEMATICA"
+       or lang == "Mathematica")
+      {
+        // And switch according to whether the language has its dependencies met or not
+        #ifdef HAVE_MATHEMATICA
+          loadLibrary_Mathematica(be, ver, sv);
+        #else
+          works[be+ver] = false;
+          std::ostringstream err;
+          err << "Backend requires Mathematica and WSTP, but one of them is not found in the system. "
+              << "Please install/buy Mathematica and/or WSTP before using this backend." << endl;
+          backend_warning().raise(LOCAL_INFO, err.str());
+        #endif
+      }
+      // and so on.
+      else if (lang == "PYTHON"
+            or lang == "Python")
+      {
+        #ifdef HAVE_PYBIND11
+         loadLibrary_Python(be, ver, sv);
+        #else
+          works[be+ver] = false;
+          err << "GAMBIT requires pybind11 to interface with Python, but it was not found in "
+              << "the system. Please install it before using this backend." << endl
+              << "You can do this with 'make pybind11' from the GAMBIT build directory." << endl;
+          backend_warning().raise(LOCAL_INFO, err.str());
+        #endif
+      }
+      else if (lang == "C"
+            or lang == "C++"
+            or lang == "CC"
+            or lang == "CXX"
+            or lang == "CPP"
+            or lang == "F90"
+            or lang == "F95"
+            or lang == "F2003"
+            or lang == "FORTRAN"
+            or lang == "Fortran")
+      {
+        loadLibrary_C_CXX_Fortran(be, ver, sv, with_BOSS);
+      }
+      else
+      {
+        std::ostringstream err;
+        err << "Unrecognised/unsupported backend language: " << lang << endl;
+        err << "Issue comes from " << be << " " << ver << endl;
+        backend_error().raise(LOCAL_INFO, err.str());
+      }
+
+    }
+
+    catch (std::exception& e)
+    {
+      std::cout << "GAMBIT has failed to initialise due to fatal exception when trying to load backends: " << e.what() << std::endl;
+      throw(e);
+    }
+
+    return 0;
+  }
+
+
+  /// Load a backend library written in C, C++ or Fortran.
+  void Backends::backend_info::loadLibrary_C_CXX_Fortran(const str& be, const str& ver, const str& sv, bool with_BOSS)
+  {
+    const str path = corrected_path(be,ver);
+    link_versions(be, ver, sv);
+    classloader[be+ver] = with_BOSS;
+    needsMathematica[be+ver] = false;
+    needsPython[be+ver] = false;
+
+    if (with_BOSS) classes_OK[be+ver] = true;
+    void* pHandle = dlopen(path.c_str(), RTLD_LAZY);
+    if (pHandle)
+    {
+      // If dlinfo is available, use it to verify the path of the backend that was just loaded.
+      #ifdef HAVE_LINK_H
+        link_map *map;
+        dlinfo(pHandle, RTLD_DI_LINKMAP, &map);
+        if (not map)
+        {
+          std::ostringstream err;
+          err << "Problem retrieving library path.  The sought lib is " << path << "." << endl
+              << "The path to this library has not been fully verified.";
+          backend_warning().raise(LOCAL_INFO,err.str());
+        }
+        else
+        {
+          attempt_backend_path_override(be, ver, map->l_name);
+        }
+      #else
+        override_path(be, ver, ".so loaded but path unverified (system lacks dlinfo)");
+      #endif
+      logger() << "Succeeded in loading " << corrected_path(be,ver)
+               << LogTags::backends << LogTags::info << EOM;
+      works[be+ver] = true;
+      loaded_C_CXX_Fortran_backends[be+ver] = pHandle;
+    }
+    else
+    {
+      std::ostringstream err;
+      str error = dlerror();
+      dlerrors[be+ver] = error;
+      err << "Failed loading library from " << path << " due to: " << endl
+          << error << endl
+          << "All functions in this backend library will be disabled (i.e. given status = -1).";
+      backend_warning().raise(LOCAL_INFO,err.str());
+      works[be+ver] = false;
+    }
+  }
+
+
+  #ifdef HAVE_MATHEMATICA
+
+    /// Load WSTP for Mathematica backends
+    void Backends::backend_info::loadLibrary_Mathematica(const str& be, const str& ver, const str& sv)
+    {
+      const str path = corrected_path(be,ver);
+      link_versions(be, ver, sv);
+      classloader[be+ver] = false;
+      needsMathematica[be+ver] = true;
+      needsPython[be+ver] = false;
+
+      int WSerrno;
+      WSLINK pHandle;
+      std::ostringstream err;
+
+      // If the file does not exists do not wait for Mathematica to figure it out
+      std::ifstream f(path.c_str());
+      if(!f.good())
+      {
+        err << "Mathematica package not found" << endl;
+        backend_warning().raise(LOCAL_INFO, err.str());
+        works[be+ver] = false;
+        return;
+      }
+
+      // This initializes WSTP library functions.
+      WSENV WSenv = WSInitialize(0);
+      if(WSenv == NULL)
+      {
+        err << "Unable to initialize WSTP environment" << endl;
+        backend_warning().raise(LOCAL_INFO,err.str());
+        works[be+ver] = false;
+        return;
+      }
+
+      // This opens a WSTP connection
+      std::stringstream WSTPflags;
+      #ifdef __APPLE__
+        WSTPflags << "-linkname " << MATHEMATICA_KERNEL << " -mathlink";
+      #else
+        WSTPflags << "-linkname math -mathlink";
+      #endif
+
+      pHandle = WSOpenString(WSenv, WSTPflags.str().c_str(), &WSerrno);
+      if(pHandle == NULL || WSerrno != WSEOK)
+      {
+        err << "Unable to create link to the Kernel" << endl;
+        backend_warning().raise(LOCAL_INFO,err.str());
+        backend_warning().raise(LOCAL_INFO, WSErrorMessage(pHandle));
+        works[be+ver] = false;
+        WSNewPacket(pHandle);
+        return;
+      }
+
+      // Tell WSTP to load up the Mathematica package of the backend
+      if(!WSPutFunction(pHandle, "Once", 1)
+           or !WSPutFunction(pHandle, "Get", 1)
+           or !WSPutString(pHandle, path.c_str())
+           or !WSEndPacket(pHandle))
+      {
+        err << "Error sending packet through WSTP" << endl;
+        backend_warning().raise(LOCAL_INFO,err.str());
+        backend_warning().raise(LOCAL_INFO, WSErrorMessage(pHandle));
+        works[be+ver] = false;
+        WSNewPacket(pHandle);
+        return;
+      }
+
+      // Jump to the end of this packet, discarding all output
+      // We do not care about errors here because the package exists
+      int pkt;
+      while( (pkt = WSNextPacket(pHandle), pkt) && pkt != RETURNPKT)
+        WSNewPacket(pHandle);
+
+      logger() << "Succeeded in loading " << corrected_path(be,ver)
+               << LogTags::backends << LogTags::info << EOM;
+      works[be+ver] = true;
+      loaded_mathematica_backends[be+ver] = pHandle;
+      WSNewPacket(pHandle);
+
+      //TODO: Add this to die functions
+      //WSPutFunction(pHandle, "Exit", 0);
+      //WSClose(pHandle);
+      //WSDeinitialize(WSenv);
+    }
+
+  #endif
+
+
   #ifdef HAVE_PYBIND11
 
-    /// Attempt to load a Python backend module
-    void* Backends::backend_info::load_python_module(str& be, str& ver)
+    /// Load a Python backend module
+    void Backends::backend_info::loadLibrary_Python(const str& be, const str& ver, const str& sv)
     {
+      // Set the internal info for this backend
+      link_versions(be, ver, sv);
+      classloader[be+ver] = false;
+      needsMathematica[be+ver] = false;
+      needsPython[be+ver] = true;
+
+      // Set up a persistent place to store the wrappers to the modules (we don't want to have to
+      // import the pybind11 headers in the main class declaration, so we make it static here rather than private there.)
+      static std::vector<pybind11::module> local_loaded_python_backends;
+
       // Fire up the Python interpreter if it hasn't been started yet.
       if (not python_started) start_python();
 
       // Add the path to the backend to the Python system path
-      pybind11::object path = sys.attr("path");
+      pybind11::object path = sys->attr("path");
       pybind11::object path_append = path.attr("append");
       path_append(path_dir(be, ver));
 
       // Attempt to import the module
-      loaded_python_backends.emplace_back(pybind11::module::import(lib_name(be, ver).c_str()));
+      //FIXME deal with missing package error
+      local_loaded_python_backends.push_back(pybind11::module::import(lib_name(be, ver).c_str()));
+      loaded_python_backends[be+ver] = &local_loaded_python_backends.back();
 
       // Remove the path to the backend from the Python system path
       pybind11::object path_remove = path.attr("remove");
       path_remove(path_dir(be, ver));
 
-      // Return a pointer to the module just imported
-      return &loaded_python_backends.back();
+      logger() << "Succeeded in loading " << corrected_path(be,ver)
+               << LogTags::backends << LogTags::info << EOM;
+
+      works[be+ver] = true;
     }
 
     /// Fire up the Python interpreter
@@ -282,15 +536,12 @@ namespace Gambit
       // Create an instance of the interpreter.
       python_interpreter = new pybind11::scoped_interpreter;
       // Import the sys module, and save a wrapper to it for later.
-      sys = pybind11::module::import("sys");
+      static pybind11::module local_sys = pybind11::module::import("sys");
+      sys = &local_sys;
       logger() << LogTags::backends << LogTags::debug << "Python interpreter successfully started." << EOM;
       python_started = true;
     }
 
   #endif
 
-
 }
-
-
-
