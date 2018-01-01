@@ -118,6 +118,9 @@ LibFirst_1_0_init: |
 LibFirst_1_1_init: |
    Initialize the C++ testing LibFirst backend, version 1.1.
 
+LibSecond_1_0_init: |
+   Initialize the Python testing LibSecond backend, version 1.0.
+
 LibFirst_initialize_capability: |
    Tester function for the initialization of backends.
 
