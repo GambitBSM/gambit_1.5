@@ -290,7 +290,6 @@ namespace Gambit
   {
     try
     {
-
       // Now switch according to the language of the backend
       if (lang == "MATHEMATICA"
        or lang == "Mathematica")

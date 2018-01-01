@@ -47,7 +47,7 @@
                                                                                                 \
         /* Define a mathematica_function object to hold all the nasty conversion internals. */  \
         mathematica_function<TYPE INSERT_NONEMPTY(STRIP_VARIADIC_ARG(ARGLIST)) >                \
-         NAME##_function(STRINGIFY(BACKEND), STRINGIFY(VERSION), SYMBOLNAME);                   \
+         NAME##_function(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), SYMBOLNAME);               \
                                                                                                 \
         /* Define a regular function wrapper to call the mathematica_function object. */        \
         TYPE NAME##_function_wrapper FUNCTION_ARGS(ARGLIST)                                     \
@@ -73,7 +73,7 @@
       namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
       {                                                                                         \
         extern mathematica_variable<TYPE>* const NAME =                                         \
-          new mathematica_variable<TYPE>(STRINGIFY(BACKEND), STRINGIFY(VERSION), SYMBOLNAME);   \
+          new mathematica_variable<TYPE>(STRINGIFY(BACKENDNAME),STRINGIFY(VERSION),SYMBOLNAME); \
         mathematica_variable<TYPE>* CAT(getptr,NAME)() { return NAME; }                         \
       }                                                                                         \
     }                                                                                           \

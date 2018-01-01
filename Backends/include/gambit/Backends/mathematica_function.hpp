@@ -132,7 +132,7 @@ namespace Gambit
               math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
               return TYPE();
             }
-            return TYPE(val);
+            return static_cast<TYPE>(val);
           }
 
           return TYPE();
