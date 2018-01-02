@@ -70,7 +70,8 @@ LibFirst:
   1.1:         ./Backends/examples/libfirst.so
 
 LibSecond:
-  1.0:         ./Backends/examples/libsecond.py
+  1.0:         ./Backends/examples/libsecond/1.0/libsecond.py
+  1.1:         ./Backends/examples/libsecond/1.1/libsecond.py
 
 LibThird:
   1.0:         ./Backends/examples/libthird.py

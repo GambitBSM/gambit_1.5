@@ -121,6 +121,9 @@ LibFirst_1_1_init: |
 LibSecond_1_0_init: |
    Initialize the Python testing LibSecond backend, version 1.0.
 
+LibSecond_1_1_init: |
+   Initialize the Python testing LibSecond backend, version 1.1.
+
 initialize_capability: |
    Tester function for the initialization of backends.
 

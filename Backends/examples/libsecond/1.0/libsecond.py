@@ -15,7 +15,7 @@ import numpy as np
 array_length = 10
 someVector = []
 isInitialized = False
-prefix = "libsecond: "
+prefix = "libsecond 1.0: "
 
 #
 # Some functions:

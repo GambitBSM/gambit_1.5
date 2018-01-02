@@ -19,8 +19,8 @@
 
 #define BACKENDNAME LibSecond
 #define BACKENDLANG Python
-#define VERSION 1.0
-#define SAFE_VERSION 1_0
+#define VERSION 1.1
+#define SAFE_VERSION 1_1
 
 /* The following macro imports the modudle in the Python interpreter
  * when this header file is included somewhere. */
@@ -85,7 +85,7 @@ BE_NAMESPACE
   /* Convenience functions go here */
   double awesomenessNotByAnders(int a)
   {
-    logger().send("Message from 'awesomenessNotByAnders' backend convenience function in LibSecond v1.0 wrapper",LogTags::info);
+    logger().send("Message from 'awesomenessNotByAnders' backend convenience function in LibSecond v1.1 wrapper",LogTags::info);
     initialize(a);
     someFunction();
     return returnResult();

@@ -60,8 +60,8 @@ Rules:
 
   - capability:  nevents_postcuts
     backends:
-    - {capability: awesomeness, backend: LibSecond}
-    - {capability: someFunction, backend: LibSecond}
+    - {capability: awesomeness, backend: LibSecond, version: 1.1}
+    - {capability: someFunction, backend: LibSecond, version: 1.1}
 
   - capability:  function_pointer
     backends:
