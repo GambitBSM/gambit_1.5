@@ -63,7 +63,11 @@ namespace Gambit
             {
               _WSlink = backendInfo().loaded_mathematica_backends.at(be+ver);
             }
-            else _WSlink = (WSLINK)0;
+            else
+            {
+              _WSlink = (WSLINK)0;
+              return;
+            }
 
             /* If TYPE is a numeric type, send N first */
             if(boost::is_same<TYPE, int>::value or
@@ -126,9 +130,10 @@ namespace Gambit
         // Assignment operator with TYPE
         mathematica_variable& operator=(const TYPE& val)
         {
+          if (_WSlink == (WSLINK)0) backend_error().raise(LOCAL_INFO, "Backend is missing.");
+
           try
           {
-
             // Clear the variable that is to be replaced
             if(!WSPutFunction(_WSlink, "Clear", 1) or
                !WSPutFunction(_WSlink, "StringDrop", 2) or
@@ -226,6 +231,7 @@ namespace Gambit
         // Cast operator for type TYPE
         operator TYPE const()
         {
+          if (_WSlink == (WSLINK)0) backend_error().raise(LOCAL_INFO, "Backend is missing.");
 
           try
           {
@@ -280,9 +286,7 @@ namespace Gambit
                 math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
 
             }
-
           }
-
           catch (std::exception &e) { ini_catch(e); }
 
           return _var;

@@ -36,7 +36,7 @@ namespace Gambit
   namespace Backends
   {
 
-    /// Gets the pointer to a Mathematica backend function, and defines conversion functions.
+    /// Holds the info about a Mathematica backend function, and defines conversion functions.
     template <typename TYPE, typename... ARGS>
     class mathematica_function
     {
@@ -56,7 +56,7 @@ namespace Gambit
         {
           try
           {
-            /* Extract the backend WSLINK pointer from the backendInfo object */
+            // Extract the backend WSLINK pointer from the backendInfo object
             if (backendInfo().works.at(be+ver))
             {
               _WSlink = backendInfo().loaded_mathematica_backends.at(be+ver);

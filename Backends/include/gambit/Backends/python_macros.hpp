@@ -20,7 +20,7 @@
 
 #include "gambit/cmake/cmake_variables.hpp"
 
-#ifdef HAVE_PYBIND11 //FIXME
+#ifndef HAVE_PYBIND11
 
   // Just use the dummy functions if pybind11 is missing
   #define BE_FUNCTION_I_PY BE_FUNCTION_I_DUMMY
@@ -40,11 +40,29 @@
     {                                                                                           \
       namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
       {                                                                                         \
-          /*FIXME*/                                                                             \
+        /* Define a python_function object to hold all the nasty conversion internals. */       \
+        python_function<TYPE INSERT_NONEMPTY(STRIP_VARIADIC_ARG(ARGLIST)) >                     \
+         NAME##_function(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION), SYMBOLNAME);               \
+                                                                                                \
+        /* Define a regular function wrapper to call the python_function object. */             \
+        TYPE NAME##_function_wrapper FUNCTION_ARGS(ARGLIST)                                     \
+        {                                                                                       \
+          return NAME##_function FUNCTION_ARG_NAMES(ARGLIST);                                   \
+        }                                                                                       \
+                                                                                                \
+        /* Define a type NAME_type to be a suitable function pointer. */                        \
+        typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                              \
+                                                                                                \
+        extern const NAME##_type NAME = NAME##_function_wrapper;                                \
       }                                                                                         \
     }                                                                                           \
   }
 
+  // FIXME junk from here
+  #define BE_VARIABLE_I_PY BE_VARIABLE_I_DUMMY
+#endif
+
+#ifdef NOPE_NOPE_NOPE
   /// Backend variable macro for Python
   #define BE_VARIABLE_I_PY(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                          \
   namespace Gambit                                                                              \
@@ -53,7 +71,9 @@
     {                                                                                           \
       namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                               \
       {                                                                                         \
-         /*FIXME*/                                                                              \
+        extern python_variable<TYPE>* const NAME =                                              \
+          new python_variable<TYPE>(STRINGIFY(BACKENDNAME),STRINGIFY(VERSION),SYMBOLNAME);      \
+        python_variable<TYPE>* CAT(getptr,NAME)() { return NAME; }                              \
       }                                                                                         \
     }                                                                                           \
   }

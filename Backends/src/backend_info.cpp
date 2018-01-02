@@ -421,7 +421,7 @@ namespace Gambit
       std::ifstream f(path.c_str());
       if(!f.good())
       {
-        err << "Mathematica package not found" << endl;
+        err << "Failed loading Mathematica package; package not found at " << path << endl;
         backend_warning().raise(LOCAL_INFO, err.str());
         works[be+ver] = false;
         return;
@@ -497,10 +497,22 @@ namespace Gambit
     void Backends::backend_info::loadLibrary_Python(const str& be, const str& ver, const str& sv)
     {
       // Set the internal info for this backend
+      const str path = corrected_path(be,ver);
       link_versions(be, ver, sv);
       classloader[be+ver] = false;
       needsMathematica[be+ver] = false;
       needsPython[be+ver] = true;
+
+      // If the backend is not present, bail now.
+      std::ifstream f(path.c_str());
+      std::ostringstream err;
+      if(!f.good())
+      {
+        err << "Failed loading Python backend; source file not found at " << path << endl;
+        backend_warning().raise(LOCAL_INFO, err.str());
+        works[be+ver] = false;
+        return;
+      }
 
       // Set up a persistent place to store the wrappers to the modules (we don't want to have to
       // import the pybind11 headers in the main class declaration, so we make it static here rather than private there.)
@@ -510,23 +522,32 @@ namespace Gambit
       if (not python_started) start_python();
 
       // Add the path to the backend to the Python system path
-      pybind11::object path = sys->attr("path");
-      pybind11::object path_append = path.attr("append");
-      path_append(path_dir(be, ver));
+      pybind11::object sys_path = sys->attr("path");
+      pybind11::object sys_path_append = sys_path.attr("append");
+      sys_path_append(path_dir(be, ver));
 
       // Attempt to import the module
-      //FIXME deal with missing package error
-      local_loaded_python_backends.push_back(pybind11::module::import(lib_name(be, ver).c_str()));
-      loaded_python_backends[be+ver] = &local_loaded_python_backends.back();
+      const str name = lib_name(be, ver);
+      try
+      {
+        local_loaded_python_backends.push_back(pybind11::module::import(name.c_str()));
+      }
+      catch (std::exception& e)
+      {
+        err << "Failed to import Python module from " << path << "." << endl
+            << "Python error was: " << e.what() << endl;
+        backend_warning().raise(LOCAL_INFO, err.str());
+        works[be+ver] = false;
+        return;
+      }
 
       // Remove the path to the backend from the Python system path
-      pybind11::object path_remove = path.attr("remove");
-      path_remove(path_dir(be, ver));
+      pybind11::object sys_path_remove = sys_path.attr("remove");
+      sys_path_remove(path_dir(be, ver));
 
-      logger() << "Succeeded in loading " << corrected_path(be,ver)
-               << LogTags::backends << LogTags::info << EOM;
-
+      logger() << "Succeeded in loading " << path << LogTags::backends << LogTags::info << EOM;
       works[be+ver] = true;
+      loaded_python_backends[be+ver] = &local_loaded_python_backends.back();
     }
 
     /// Fire up the Python interpreter

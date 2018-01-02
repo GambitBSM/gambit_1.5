@@ -121,10 +121,10 @@ LibFirst_1_1_init: |
 LibSecond_1_0_init: |
    Initialize the Python testing LibSecond backend, version 1.0.
 
-LibFirst_initialize_capability: |
+initialize_capability: |
    Tester function for the initialization of backends.
 
-LibFirst_returnResult_capability: |
+returnResult_capability: |
    Tester function for the return of results from backends.
 
 LibFortran_1_0_init: |

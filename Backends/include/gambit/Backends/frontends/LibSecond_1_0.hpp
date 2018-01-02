@@ -38,9 +38,9 @@ LOAD_LIBRARY
  * BE_FUNCTION([choose function name], [type], [arguement types], "[exact symbol name]", "[choose capability name]")
  */
 
-BE_FUNCTION(initialize, void, (int), "_Z10initializei", "LibFirst_initialize_capability")
-BE_FUNCTION(someFunction, void, (), "_Z12someFunctionv", "someFunction")
-BE_FUNCTION(returnResult, double, (), "_Z12returnResultv","LibFirst_returnResult_capability")
+BE_FUNCTION(initialize, void, (int), "initialize", "initialize_capability")
+BE_FUNCTION(someFunction, void, (), "someFunction", "someFunction")
+BE_FUNCTION(returnResult, double, (), "returnResult","returnResult_capability")
 //BE_FUNCTION(byRefExample, double, (double&), "_Z12byRefExampleRd", "refex")
 //BE_FUNCTION(byRefExample2, void, (double&, double), "_Z13byRefExample2Rdd", "refex2")
 
@@ -85,7 +85,7 @@ BE_NAMESPACE
   /* Convenience functions go here */
   double awesomenessNotByAnders(int a)
   {
-    logger().send("Message from 'awesomenessNotByAnders' backend convenience function in libsecond wrapper",LogTags::info);
+    logger().send("Message from 'awesomenessNotByAnders' backend convenience function in LibSecond wrapper",LogTags::info);
     initialize(a);
     someFunction();
     return returnResult();

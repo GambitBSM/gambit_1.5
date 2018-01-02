@@ -240,13 +240,16 @@ namespace Gambit
   /// Disable a Python backend functor if its module is missing or the function is not found in the module
   void set_backend_functor_status_Python(functor& be_functor, const str& symbol_name)
   {
-    bool present = Backends::backendInfo().works.at(be_functor.origin() + be_functor.version());
+    const str be = be_functor.origin() + be_functor.version();
+    bool present = Backends::backendInfo().works.at(be);
     if (not present)
     {
       be_functor.setStatus(-1);
     }
-    //else if(symbol_name != "no_symbol")
-    //FIXME
+    else if(symbol_name != "no_symbol")
+    {
+      if (Backends::backendInfo().dlerrors[be] == symbol_name) be_functor.setStatus(-2);
+    }
   }
   #endif
 

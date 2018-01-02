@@ -32,9 +32,9 @@ LOAD_LIBRARY
 BE_ALLOW_MODELS(CMSSM,SingletDMZ3,WC)
 
 // Functions
-BE_FUNCTION(initialize, void, (int), "_Z10initializei", "LibFirst_initialize_capability")
+BE_FUNCTION(initialize, void, (int), "_Z10initializei", "initialize_capability")
 BE_FUNCTION(someFunction, void, (), "_Z12someFunctionv", "someFunction", (CMSSM,WC))
-BE_FUNCTION(returnResult, double, (), "_Z12returnResultv","LibFirst_returnResult_capability")
+BE_FUNCTION(returnResult, double, (), "_Z12returnResultv","returnResult_capability")
 BE_FUNCTION(byRefExample, double, (double&), "_Z12byRefExampleRd", "refex")
 BE_FUNCTION(byRefExample2, void, (double&, double), "_Z13byRefExample2Rdd", "refex2")
 BE_FUNCTION(nastyExample, double, (int, etc), "_Z12nastyExampleiz", "varex")
@@ -85,7 +85,7 @@ BE_NAMESPACE
 
   double awesomenessByAnders(int a)
   {
-    logger().send("Message from 'awesomenessByAnders' backend convenience function in libfirst wrapper",LogTags::info);
+    logger().send("Message from 'awesomenessByAnders' backend convenience function in LibFirst v1.1 wrapper",LogTags::info);
     initialize(a);
     someFunction();
     return returnResult();

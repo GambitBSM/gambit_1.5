@@ -26,7 +26,7 @@
 #include "gambit/Backends/backend_singleton.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
-//#include some pybind header
+#include <pybind11/pybind11.h>
 
 namespace Gambit
 {
