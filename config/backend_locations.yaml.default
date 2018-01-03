@@ -83,4 +83,4 @@ LibFarrayTest:
   1.0:         ./Backends/examples/libFarrayTest.so
 
 libMathematicaTest:
-  2.0:         ./Backends/examples/libMathematicaTest.m
+  1.0:         ./Backends/examples/libMathematicaTest.m

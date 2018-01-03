@@ -13,6 +13,8 @@ import numpy as np
 # Some global variables:
 #
 array_length = 10
+someInt = 0
+someDouble = 0
 someVector = []
 isInitialized = False
 prefix = "libsecond 1.0: "

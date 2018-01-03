@@ -58,11 +58,6 @@
     }                                                                                           \
   }
 
-  // FIXME junk from here
-  #define BE_VARIABLE_I_PY BE_VARIABLE_I_DUMMY
-#endif
-
-#ifdef NOPE_NOPE_NOPE
   /// Backend variable macro for Python
   #define BE_VARIABLE_I_PY(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)                          \
   namespace Gambit                                                                              \

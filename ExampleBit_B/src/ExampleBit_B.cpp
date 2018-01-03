@@ -150,7 +150,7 @@ namespace Gambit
 
       // Demonstration of accessing backend requirements via 'BEvariable_bucket'/'BEfunction_bucket' objects
       // living in Pipes::[module function name]::BEreq::[backend capability]
-      if (ModelInUse("demo_B") or ModelInUse("nonexistent_model"))
+      if (ModelInUse("CMSSM") or ModelInUse("demo_B") or ModelInUse("nonexistent_model"))
       {
         logger() << endl;
         logger() << "Will now set backend variable SomeInt=1000." << endl;
@@ -158,8 +158,8 @@ namespace Gambit
         logger() << info <<EOM;
         *BEreq::SomeInt = 1000;
         BEreq::someFunction();
-
-        logger() << "Print some info on the backend requirement 'SomeInt':" << endl;
+        logger() << "SomeInt now equals: " << *BEreq::SomeInt << endl;
+        logger() << "Some extra info on the backend requirement 'SomeInt':" << endl;
         logger() << "Name: " << BEreq::SomeInt.name() << "   Backend: " << BEreq::SomeInt.backend() << "   Version: " << BEreq::SomeInt.version();
         logger() << info <<EOM;
       }

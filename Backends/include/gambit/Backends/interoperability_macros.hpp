@@ -61,14 +61,14 @@
   #ifdef HAVE_PYBIND11
     #define MATH_TYPE(TYPE)                                                                     \
      IF_ELSEIF(USING_MATHEMATICA, mathematica_variable<TYPE>,                                   \
-               USING_PYTHON, /*python_variable<*/TYPE/*>*/,                                             \
+               USING_PYTHON, python_variable<TYPE>,                                             \
                /*USING NONE OF THE ABOVE*/ TYPE)
   #else
-    #define MATH_TYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA,mathematica_variable<TYPE>,TYPE)
+    #define MATH_TYPE(TYPE) BOOST_PP_IF(USING_MATHEMATICA, mathematica_variable<TYPE>, TYPE)
   #endif
 #else
   #ifdef HAVE_PYBIND11
-    #define MATH_TYPE(TYPE) BOOST_PP_IF(USING_PYTHON,/*python_variable<*/TYPE/*>*/,TYPE)
+    #define MATH_TYPE(TYPE) BOOST_PP_IF(USING_PYTHON, python_variable<TYPE>, TYPE)
   #else
     #define MATH_TYPE(TYPE) TYPE
   #endif

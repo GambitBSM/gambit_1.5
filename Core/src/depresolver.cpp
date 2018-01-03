@@ -1648,8 +1648,8 @@ namespace Gambit
     }
 
     /// Find rules entry that matches vertex
-    const IniParser::ObservableType * DependencyResolver::findIniEntry(
-            DRes::VertexID toVertex, const IniParser::ObservablesType &entries, const str & errtag)
+    const IniParser::ObservableType * DependencyResolver::findIniEntry(DRes::VertexID toVertex,
+     const IniParser::ObservablesType &entries, const str & errtag)
     {
       std::vector<const IniParser::ObservableType*> auxEntryCandidates;
       for (IniParser::ObservablesType::const_iterator it =
@@ -1800,7 +1800,7 @@ namespace Gambit
           remaining_groups.clear();
         }
 
-    }
+      }
 
     }
 
@@ -1827,10 +1827,22 @@ namespace Gambit
         if ( auxEntry != NULL ) reqEntry = findIniEntry((*itf)->quantity(), (*auxEntry).backends, "backend");
         if ( reqEntry != NULL) entryExists = true;
 
-        // Without inifile entry, just match any capability-type pair exactly.
-        if ( std::find(reqs.begin(), reqs.end(), (*itf)->quantity()) != reqs.end()
-        // With inifile entry, we also check capability, type, function name and backend name.
-        and ( entryExists ? backendFuncMatchesIniEntry(*itf, *reqEntry, *boundTEs) : true ) )
+        // Look for a match to at least one backend requirement, taking into account type equivalency classes.
+        bool simple_match = false;
+        for (std::set<sspair>::const_iterator
+             itr  = reqs.begin();
+             itr != reqs.end();
+             ++itr)
+        {
+          if ((*itf)->capability() == itr->first and typeComp((*itf)->type(), itr->second, *boundTEs))
+          {
+            simple_match = true;
+            break;
+          }
+        }
+
+        // If there is a relevant inifile entry, we also check for a match to the capability, type, function name and backend name in that entry.
+        if ( simple_match and ( entryExists ? backendFuncMatchesIniEntry(*itf, *reqEntry, *boundTEs) : true ) )
         {
 
           // Has the backend vertex already been disabled by the backend system?

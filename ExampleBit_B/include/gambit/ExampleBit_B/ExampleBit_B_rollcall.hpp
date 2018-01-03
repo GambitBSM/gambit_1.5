@@ -110,7 +110,7 @@ START_MODULE
     BACKEND_REQ(SomeInt, (model_dependent_reqs, libfirst11_or_libsecond_only), int)
     BACKEND_REQ(someFunction, (libfirst11_or_libsecond_only), void, ())
 
-    ACTIVATE_BACKEND_REQ_FOR_MODELS( (demo_B, nonexistent_model), (model_dependent_reqs) )
+    ACTIVATE_BACKEND_REQ_FOR_MODELS( (CMSSM, demo_B, nonexistent_model), (model_dependent_reqs) )
     BACKEND_OPTION( (LibFirst, 1.1), (libfirst11_or_libsecond_only, lib123) )
     BACKEND_OPTION( (LibSecond), (libfirst11_or_libsecond_only, lib123) )
     BACKEND_OPTION( (LibThird, 1.2, 1.3 , 1.5), (lib123) )

@@ -62,6 +62,7 @@ Rules:
     backends:
     - {capability: awesomeness, backend: LibSecond, version: 1.1}
     - {capability: someFunction, backend: LibSecond, version: 1.1}
+    - {capability: SomeInt, backend: LibSecond, version: 1.1}
 
   - capability:  function_pointer
     backends:

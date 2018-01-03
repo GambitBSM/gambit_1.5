@@ -119,10 +119,10 @@ namespace Gambit
                 backend_warning().raise(LOCAL_INFO, "Error, WSTP type not recognised");
               else if(!WSGetVariable(_WSlink, &_var))
                 math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
-
             }
+
           }
-         catch (std::exception& e) { ini_catch(e); }
+          catch (std::exception& e) { ini_catch(e); }
 
         }
 
@@ -132,96 +132,89 @@ namespace Gambit
         {
           if (_WSlink == (WSLINK)0) backend_error().raise(LOCAL_INFO, "Backend is missing.");
 
-          try
+          // Clear the variable that is to be replaced
+          if(!WSPutFunction(_WSlink, "Clear", 1) or
+             !WSPutFunction(_WSlink, "StringDrop", 2) or
+             !WSPutFunction(_WSlink, "StringDrop", 2) or
+             !WSPutFunction(_WSlink, "ToString", 1) or
+             !WSPutFunction(_WSlink, "ToExpression", 3) or
+             !WSPutString(_WSlink, _symbol.c_str()) or
+             !WSPutSymbol(_WSlink, "StandardForm") or
+             !WSPutSymbol(_WSlink, "Hold") or
+             !WSPutInteger(_WSlink, 5) or
+             !WSPutInteger(_WSlink, -1) )
           {
-            // Clear the variable that is to be replaced
-            if(!WSPutFunction(_WSlink, "Clear", 1) or
-               !WSPutFunction(_WSlink, "StringDrop", 2) or
-               !WSPutFunction(_WSlink, "StringDrop", 2) or
-               !WSPutFunction(_WSlink, "ToString", 1) or
-               !WSPutFunction(_WSlink, "ToExpression", 3) or
-               !WSPutString(_WSlink, _symbol.c_str()) or
-               !WSPutSymbol(_WSlink, "StandardForm") or
-               !WSPutSymbol(_WSlink, "Hold") or
-               !WSPutInteger(_WSlink, 5) or
-               !WSPutInteger(_WSlink, -1) )
-            {
-              math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
-              return *this;
-            }
-
-            // Mark the end of the message
-            if(!WSEndPacket(_WSlink))
-            {
-              math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
-              return *this;
-            }
-
-            // Wait to receive a packet from the kernel
-            int pkt;
-            while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
-            {
-              WSNewPacket(_WSlink);
-              if (WSError(_WSlink))
-              {
-                math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
-                return *this;
-              }
-            }
-            // Discard it
-            WSNewPacket(_WSlink);
-
-            // Send the expression SYMBOL = val
-            std::stringstream ss;
-            ss << _symbol << " = " << val;
-            if(!WSPutFunction(_WSlink, "ToExpression", 1) or
-               !WSPutString(_WSlink, ss.str().c_str()))
-            {
-              math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
-              return *this;
-            }
-
-            // Mark the end of the message
-            if(!WSEndPacket(_WSlink))
-            {
-              math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
-              return *this;
-            }
-
-            // Wait to receive a packet from the kernel
-            while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
-            {
-              WSNewPacket(_WSlink);
-              if (WSError(_WSlink))
-              {
-                math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
-                return *this;
-              }
-            }
-
-            // Read the received packet into the return value, unless it's void
-            if(!boost::is_same<TYPE, void>::value)
-            {
-              if(!boost::is_same<TYPE, int>::value and
-                 !boost::is_same<TYPE, float>::value and
-                 !boost::is_same<TYPE, double>::value and
-                 !boost::is_same<TYPE, bool>::value and
-                 !boost::is_same<TYPE, char>::value and
-                 !boost::is_same<TYPE, str>::value)
-                backend_warning().raise(LOCAL_INFO, "Error, WSTP type nor recognised");
-              else if(!WSGetVariable(_WSlink, &_var))
-              {
-                math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
-                return *this;
-              }
-
-            }
-
-            _var = val;
-
+            math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
+            return *this;
           }
 
-          catch (std::exception &e) { ini_catch(e); }
+          // Mark the end of the message
+          if(!WSEndPacket(_WSlink))
+          {
+            math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
+            return *this;
+          }
+
+          // Wait to receive a packet from the kernel
+          int pkt;
+          while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
+          {
+            WSNewPacket(_WSlink);
+            if (WSError(_WSlink))
+            {
+              math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
+              return *this;
+            }
+          }
+          // Discard it
+          WSNewPacket(_WSlink);
+
+          // Send the expression SYMBOL = val
+          std::stringstream ss;
+          ss << _symbol << " = " << val;
+          if(!WSPutFunction(_WSlink, "ToExpression", 1) or
+             !WSPutString(_WSlink, ss.str().c_str()))
+          {
+            math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
+            return *this;
+          }
+
+          // Mark the end of the message
+          if(!WSEndPacket(_WSlink))
+          {
+            math_error(_WSlink, LOCAL_INFO, "Error sending packet through WSTP");
+            return *this;
+          }
+
+          // Wait to receive a packet from the kernel
+          while( (pkt = WSNextPacket(_WSlink), pkt) && pkt != RETURNPKT)
+          {
+            WSNewPacket(_WSlink);
+            if (WSError(_WSlink))
+            {
+              math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
+              return *this;
+            }
+          }
+
+          // Read the received packet into the return value, unless it's void
+          if(!boost::is_same<TYPE, void>::value)
+          {
+            if(!boost::is_same<TYPE, int>::value and
+               !boost::is_same<TYPE, float>::value and
+               !boost::is_same<TYPE, double>::value and
+               !boost::is_same<TYPE, bool>::value and
+               !boost::is_same<TYPE, char>::value and
+               !boost::is_same<TYPE, str>::value)
+              backend_warning().raise(LOCAL_INFO, "Error, WSTP type not recognised");
+            else if(!WSGetVariable(_WSlink, &_var))
+            {
+              math_error(_WSlink, LOCAL_INFO, "Error reading packet from WSTP");
+              return *this;
+            }
+          }
+
+          _var = val;
 
           return *this;
 
@@ -292,7 +285,6 @@ namespace Gambit
           return _var;
         }
     };
-
 
   }
 
