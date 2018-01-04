@@ -13,6 +13,10 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2017 Mar
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Jan
+///
 ///  *********************************************
 
 #ifndef __ASCIITYPES__
@@ -24,6 +28,7 @@
   SCANNER_PRINTABLE_TYPES                   \
   (std::string)                             \
   (triplet<double>)                         \
+  (map_intpair_dbl)                         \
 
 #define ASCII_MODULE_BACKEND_TYPES          \
   (DM_nucleon_couplings)                    \
