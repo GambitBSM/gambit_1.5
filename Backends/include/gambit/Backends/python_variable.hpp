@@ -4,7 +4,7 @@
 ///
 ///  Class python_variable, needed to overload
 ///  constructor and assignment operators to send
-///  messages throught pybind11.
+///  messages through pybind11.
 ///
 ///  ***********************************************
 ///

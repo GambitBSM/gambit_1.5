@@ -34,7 +34,6 @@ namespace Gambit
     str fix_type(str s)
     {
       strip_whitespace_except_after_const(s);
-      strip_backend_variable_wrappers(s);
       s = strip_leading_namespace(s, "Gambit");
       // Loop over all the default versions of BOSSed backends and strip off any corresponding leading namespace.
       for (auto it = Backends::backendInfo().default_safe_versions.begin(); it != Backends::backendInfo().default_safe_versions.end(); ++it)

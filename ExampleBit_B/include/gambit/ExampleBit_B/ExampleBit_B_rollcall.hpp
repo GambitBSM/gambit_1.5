@@ -107,7 +107,7 @@ START_MODULE
     BACKEND_REQ(varex, (common_be), double, (int, etc))
     BACKEND_REQ(varex2, (common_be), double, (int, etc))
     BACKEND_REQ(runMe, (), void, (double (*)(int&), int&))
-    BACKEND_REQ(SomeInt, (model_dependent_reqs, libfirst11_or_libsecond_only), int)
+    BACKEND_REQ(SomeInt, (model_dependent_reqs, libfirst11_or_libsecond_only), python_variable<int>)
     BACKEND_REQ(someFunction, (libfirst11_or_libsecond_only), void, ())
 
     ACTIVATE_BACKEND_REQ_FOR_MODELS( (CMSSM, demo_B, nonexistent_model), (model_dependent_reqs) )
