@@ -32,29 +32,35 @@
 #include "gambit/Backends/mathematica_helpers.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
-#include MATHEMATICA_WSTP_H
+
+#ifdef HAVE_MATHEMATICA
+  #include MATHEMATICA_WSTP_H
+#endif
+
 
 namespace Gambit
 {
 
-  namespace Backends
+  // Class mathematica_variable
+  template <typename TYPE>
+  class mathematica_variable
   {
 
-    // Class mathematica_variable
-    template <typename TYPE>
-    class mathematica_variable
-    {
-
-      private:
+    private:
+      #ifdef HAVE_MATHEMATICA
         TYPE _var;
         WSLINK _WSlink;
         str _symbol;
+      #endif
 
-      public:
+    public:
 
-        // Constructor
-        mathematica_variable(const str& be, const str& ver, const str& symbol) :  _symbol(symbol)
-        {
+      // Constructor
+      mathematica_variable(const str& be, const str& ver, const str& symbol) :  _symbol(symbol)
+      {
+        #ifdef HAVE_MATHEMATICA
+
+          using namespace Backends;
 
           try
           {
@@ -124,12 +130,18 @@ namespace Gambit
           }
           catch (std::exception& e) { ini_catch(e); }
 
-        }
+        #endif
+
+      }
 
 
-        // Assignment operator with TYPE
-        mathematica_variable& operator=(const TYPE& val)
-        {
+      // Assignment operator with TYPE
+      mathematica_variable& operator=(const TYPE& val)
+      {
+        #ifdef HAVE_MATHEMATICA
+
+          using namespace Backends;
+
           if (_WSlink == (WSLINK)0) backend_error().raise(LOCAL_INFO, "Backend is missing.");
 
           // Clear the variable that is to be replaced
@@ -218,12 +230,21 @@ namespace Gambit
 
           return *this;
 
-        }
+        #else
+
+          backend_error().raise(LOCAL_INFO, "Attempted to assign a C++ type to a mathematica_variable without Mathematica.");
+
+        #endif
+      }
 
 
-        // Cast operator for type TYPE
-        operator TYPE const()
-        {
+      // Cast operator for type TYPE
+      operator TYPE const()
+      {
+        #ifdef HAVE_MATHEMATICA
+
+          using namespace Backends;
+
           if (_WSlink == (WSLINK)0) backend_error().raise(LOCAL_INFO, "Backend is missing.");
 
           try
@@ -283,10 +304,15 @@ namespace Gambit
           catch (std::exception &e) { ini_catch(e); }
 
           return _var;
-        }
-    };
 
-  }
+        #else
+
+          backend_error().raise(LOCAL_INFO, "Attempted to assign a C++ type to a mathematica_variable without Mathematica.");
+
+        #endif
+      }
+
+  };
 
 }
 

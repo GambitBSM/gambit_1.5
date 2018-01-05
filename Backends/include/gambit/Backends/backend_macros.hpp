@@ -396,21 +396,6 @@ namespace Gambit                                                              \
   }                                                                           \
 }                                                                             \
 
-/// Dummy backend variable macro
-#define BE_VARIABLE_I_DUMMY(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)       \
-namespace Gambit                                                              \
-{                                                                             \
-  namespace Backends                                                          \
-  {                                                                           \
-    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                               \
-    {                                                                         \
-      extern TYPE* const NAME = new TYPE();                                   \
-      TYPE* CAT(getptr,NAME)() { return NAME; }                               \
-    }                                                                         \
-  }                                                                           \
-}
-
-
 
 /// \name Wrapping macros for backend-defined functions
 ///
@@ -517,28 +502,6 @@ namespace Gambit                                                                
     }                                                                                           \
   }                                                                                             \
 }                                                                                               \
-
-
-/// Dummy backend function macro
-#define BE_FUNCTION_I_DUMMY(NAME, TYPE, ARGLIST, SYMBOLNAME, CAPABILITY, MODELS)                \
-namespace Gambit                                                                                \
-{                                                                                               \
-  namespace Backends                                                                            \
-  {                                                                                             \
-    namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                                                 \
-    {                                                                                           \
-                                                                                                \
-      /* Define a function that just returns a dummy value */                                   \
-      TYPE NAME##_function CONVERT_VARIADIC_ARG(ARGLIST) { return TYPE(); }                     \
-                                                                                                \
-      /* Define a type NAME_type to be a suitable function pointer. */                          \
-      typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                                \
-                                                                                                \
-      extern const NAME##_type NAME = NAME##_function;                                          \
-                                                                                                \
-    }                                                                                           \
-  }                                                                                             \
-}
 
 
 // Determine whether to make registration calls to the Core or not in BE_CONV_FUNCTION, depending on STANDALONE flag
