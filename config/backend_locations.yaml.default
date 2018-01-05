@@ -70,7 +70,7 @@ LibFirst:
   1.1:         ./Backends/examples/libfirst.so
 
 LibSecond:
-  1.0:         ./Backends/examples/libsecond/1.0/libsecond.py.deliberately_broken_for_now
+  1.0:         ./Backends/examples/libsecond/1.0/libsecond.py
   1.1:         ./Backends/examples/libsecond/1.1/libsecond.py
 
 LibThird:
