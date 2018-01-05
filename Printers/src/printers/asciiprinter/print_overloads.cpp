@@ -121,14 +121,14 @@ namespace Gambit
     
     void asciiPrinter::_print(map_intpair_dbl const& value, const std::string& label, const int IDcode, const uint thread, const ulong pointID)
     {
-      std::vector<std::pair<int,int>> channels;
+      std::vector<std::string> channels;
       std::vector<double> vdvalue;
       channels.reserve(value.size());
       vdvalue.reserve(value.size());
       for (map_intpair_dbl::const_iterator it = value.begin(); it != value.end(); it++)
       {
         std::stringstream ss;
-        ss<<label<<"::"<<it->first;
+        ss<<label<<"::"<<it->first.first<<it->first.second;
         channels.push_back( ss.str() );
         vdvalue.push_back( it->second );
       }
