@@ -7,8 +7,8 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
-///  \author Pat Scott 
+///
+///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2015 Jan
 ///
@@ -23,6 +23,7 @@
 #include <sstream>
 
 #include "gambit/Elements/slhaea_helpers.hpp"
+#include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include "gambit/Models/partmap.hpp"
@@ -53,16 +54,16 @@ namespace Gambit
       /// @}
 
       /// Output entire decay table as an SLHAea file full of DECAY blocks
-      SLHAstruct getSLHAea(bool include_zero_bfs=false) const;
-    
+      SLHAstruct getSLHAea(int SLHA_version, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
+
       /// Output entire decay table as an SLHA file full of DECAY blocks
-      void writeSLHAfile(str, bool include_zero_bfs=false) const;
+      void writeSLHAfile(int SLHA_version, const str& filename, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
 
       /// Output a decay table entry as an SLHAea DECAY block, using input parameter to identify the entry.
       /// @{
-      SLHAea::Block getSLHAea_block(std::pair<int,int>, bool include_zero_bfs=false) const;
-      SLHAea::Block getSLHAea_block(str, bool include_zero_bfs=false) const;
-      SLHAea::Block getSLHAea_block(str, int, bool include_zero_bfs=false) const;
+      SLHAea::Block getSLHAea_block(int, std::pair<int,int>, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
+      SLHAea::Block getSLHAea_block(int, str, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
+      SLHAea::Block getSLHAea_block(int, str, int, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
       /// @}
 
       /// Get entry in decay table for a given particle, adding the particle to the table if it is absent.
@@ -86,7 +87,7 @@ namespace Gambit
       const Entry& at(str) const;
       const Entry& at(str, int) const;
       /// @}
-      
+
       /// The actual underlying map.  Just iterate over this directly if you need to iterate over all particles in the table.
       std::map< std::pair<int,int>, Entry > particles;
 
@@ -105,7 +106,7 @@ namespace Gambit
           /// Make sure no NaNs have been passed to the DecayTable by nefarious backends
           void check_BF_validity(double, double, std::multiset< std::pair<int,int> >&) const;
 
-          /// Construct a set of particles from a variadic list of full names or short names and indices 
+          /// Construct a set of particles from a variadic list of full names or short names and indices
           /// @{
           /// Base function version
           static void construct_key(std::multiset< std::pair<int,int> >&) {}
@@ -131,15 +132,15 @@ namespace Gambit
           Entry() :  width_in_GeV(0.0), positive_error(0.0), negative_error(0.0), calculator(""), calculator_version(""), warnings(""), errors("") {}
           /// Constructor taking total width
           Entry(double width) :  width_in_GeV(width), calculator(""), calculator_version(""), warnings(""), errors("") {}
-          /// Constructor creating a DecayTable Entry from an SLHAea DECAY block; full version 
+          /// Constructor creating a DecayTable Entry from an SLHAea DECAY block; full version
           Entry(const SLHAea::Block&, int context = 0, bool force_SM_fermion_gauge_eigenstates = false, str calculator = "", str calculator_version = "");
-          /// Constructor creating a DecayTable Entry from an SLHAea DECAY block; full version; version assuming block def is already known 
+          /// Constructor creating a DecayTable Entry from an SLHAea DECAY block; full version; version assuming block def is already known
           Entry(const SLHAea::Block&, SLHAea::Block::const_iterator, int context = 0, bool force_SM_fermion_gauge_eigenstates = false,
            str calculator = "", str calculator_version = "");
 
           /// Set branching fraction for decay to a given final state.
           /// Supports arbitrarily many final state particles.
-          /// Five ways to specify final states: 
+          /// Five ways to specify final states:
           ///  1. PDG-context integer pairs (vector)
           ///  2. full particle names (vector)
           ///  3. PDG-context integer pairs (arguments)
@@ -171,7 +172,7 @@ namespace Gambit
 
           /// Check if a given final state exists in this DecayTable::Entry.
           /// Supports arbitrarily many final state particles.
-          /// Five ways to specify final states: 
+          /// Five ways to specify final states:
           ///  1. PDG-context integer pairs (vector)
           ///  2. full particle names (vector)
           ///  3. PDG-context integer pairs (arguments)
@@ -200,7 +201,7 @@ namespace Gambit
           /// @}
 
           /// Retrieve branching fraction for decay to a given final state.
-          /// Five ways to specify final states: 
+          /// Five ways to specify final states:
           ///  1. PDG-context integer pairs (vector)
           ///  2. full particle names (vector)
           ///  3. PDG-context integer pairs (arguments)
@@ -222,7 +223,7 @@ namespace Gambit
               err << "No branching fraction exists for the requested final states:";
               for (auto particle = key.begin(); particle != key.end(); ++particle)
               {
-                err << " {" << particle->first << ", " << particle->second << "}"; 
+                err << " {" << particle->first << ", " << particle->second << "}";
               }
               model_error().raise(LOCAL_INFO,err.str());
             }
@@ -240,7 +241,7 @@ namespace Gambit
               err << "No branching fraction exists for the requested final states:";
               for (auto particle = key.begin(); particle != key.end(); ++particle)
               {
-                err << " {" << particle->first << ", " << particle->second << "}"; 
+                err << " {" << particle->first << ", " << particle->second << "}";
               }
               model_error().raise(LOCAL_INFO,err.str());
             }
@@ -263,7 +264,7 @@ namespace Gambit
               err << "No branching fraction exists for the requested final states:";
               for (auto particle = key.begin(); particle != key.end(); ++particle)
               {
-                err << " {" << particle->first << ", " << particle->second << "}"; 
+                err << " {" << particle->first << ", " << particle->second << "}";
               }
               model_error().raise(LOCAL_INFO,err.str());
             }
@@ -281,7 +282,7 @@ namespace Gambit
               err << "No branching fraction exists for the requested final states:";
               for (auto particle = key.begin(); particle != key.end(); ++particle)
               {
-                err << " {" << particle->first << ", " << particle->second << "}"; 
+                err << " {" << particle->first << ", " << particle->second << "}";
               }
               model_error().raise(LOCAL_INFO,err.str());
             }
@@ -304,7 +305,7 @@ namespace Gambit
               err << "No branching fraction exists for the requested final states:";
               for (auto particle = key.begin(); particle != key.end(); ++particle)
               {
-                err << " {" << particle->first << ", " << particle->second << "}"; 
+                err << " {" << particle->first << ", " << particle->second << "}";
               }
               model_error().raise(LOCAL_INFO,err.str());
             }
@@ -322,7 +323,7 @@ namespace Gambit
               err << "No branching fraction exists for the requested final states:";
               for (auto particle = key.begin(); particle != key.end(); ++particle)
               {
-                err << " {" << particle->first << ", " << particle->second << "}"; 
+                err << " {" << particle->first << ", " << particle->second << "}";
               }
               model_error().raise(LOCAL_INFO,err.str());
             }
@@ -332,9 +333,9 @@ namespace Gambit
 
           /// Output this entry as an SLHAea DECAY block, using input parameter to identify the mother particle.
           /// @{
-          SLHAea::Block getSLHAea_block(str, bool include_zero_bfs=false) const;
-          SLHAea::Block getSLHAea_block(str, int, bool include_zero_bfs=false) const;
-          SLHAea::Block getSLHAea_block(std::pair<int,int>, bool include_zero_bfs=false) const;
+          SLHAea::Block getSLHAea_block(int, str, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
+          SLHAea::Block getSLHAea_block(int, str, int, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
+          SLHAea::Block getSLHAea_block(int, std::pair<int,int>, bool include_zero_bfs=false, const mass_es_pseudonyms& psn=mass_es_pseudonyms()) const;
           /// @}
 
           /// Sum up the partial widths and return the result.
@@ -342,7 +343,7 @@ namespace Gambit
 
           /// Total particle width (in GeV)
           double width_in_GeV;
-          
+
           /// Positive error on width
           double positive_error;
 

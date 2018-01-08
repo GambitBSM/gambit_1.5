@@ -69,17 +69,16 @@ namespace Gambit
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
 
       // Higgs sector
-      double mh   = *myPipe::Param.at("mH");
-      singletmodel.HiggsPoleMass   = mh;
+      double mh = *myPipe::Param.at("mH");
+      singletmodel.HiggsPoleMass = mh;
 
-      double vev        = 1. / sqrt(sqrt(2.)*sminputs.GF);
-      singletmodel.HiggsVEV        = vev;
-      //singletmodel.LambdaH   = GF*pow(mh,2)/pow(2,0.5) ;
+      double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
+      singletmodel.HiggsVEV = vev;
 
       // Scalar singlet sector
       singletmodel.SingletPoleMass = *myPipe::Param.at("mS");
-      singletmodel.SingletLambda   = *myPipe::Param.at("lambda_hS");
-      singletmodel.SingletLambdaS   = 0;
+      singletmodel.SingletLambda = *myPipe::Param.at("lambda_hS");
+      singletmodel.SingletLambdaS = 0;
 
       // Standard model
       singletmodel.sinW2 = sinW2;

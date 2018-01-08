@@ -28,6 +28,8 @@ Printer:
   printer: hdf5
   options:
     output_file: "SUSYHD.hdf5"
+    delete_file_on_restart: true
+    group: "/SUSYHD"
 
 Scanner:
   use_scanner: de
@@ -44,7 +46,7 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 100
+      NP: 1
       convthresh: 1e-5
       verbosity: 1
 
@@ -75,7 +77,7 @@ Rules:
       invalid_point_fatal: false
 
   - capability: MSSM_spectrum
-    function: make_MSSM_precision_spectrum_H_W
+    function: make_MSSM_precision_spectrum_H
 
   - capability: prec_mh
     function: SHD_HiggsMass
