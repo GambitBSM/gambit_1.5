@@ -159,6 +159,8 @@ namespace Gambit
         /// Annihilation into hh
         double sv_hh(double lambda, double mass, double v)
         {
+          // Hardcode lower limit for velocity to avoid nan results.
+          v = std::max(v, 1e-6);
           double GeV2tocm3s1 = gev2cm2*s2cm;
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
           double xV = mass*mass/s;
@@ -167,13 +169,13 @@ namespace Gambit
           double beta =  (s - 2*pow(mh,2))/sqrt((s - 4*pow(mh,2))*(s - 4*pow(mass,2)));
           double vh = sqrt(1-4*xH);
           double vv = sqrt(1-4*xV);
-                              
+         
           return GeV2tocm3s1*(vh*pow(lambda,2)*pow(s,-3)*pow(xV,-2)*(3 + (pow(vv,2)*pow(xV,-2))/4.)*pow(pow(xG,2) + pow(-1 + xH,2),-1)*
-          (lambda*s*xV*pow(v0,2)*(1 + xH + pow(xG,2) - 2*pow(xH,2)) + pow(s,2)*(pow(xG,2) + pow(1 + 2*xH,2))*pow(xV,2) + 
+          (lambda*s*xV*pow(v0,2)*(1 + xH + pow(xG,2) - 2*pow(xH,2)) + 2*pow(s,2)*(pow(xG,2) + pow(1 + 2*xH,2))*pow(xV,2) + 
           2*beta*lambda*atanh(pow(beta,-1))*pow(v0,2)*pow(1 - 2*xH,-2)*
           (-3*s*(-1 + 2*xH)*(1 + xH + pow(xG,2) - 2*pow(xH,2))*pow(xV,2) + 
-          16*lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xH,2))*(xV - 4*xH*xV + pow(xH,2) + 3*pow(xV,2))) + 
-          8*pow(lambda,2)*pow(v0,4)*(pow(xG,2) + pow(-1 + xH,2))*(xV - 4*xH*xV + pow(xH,2) + 3*pow(xV,2))*pow(xV - 4*xH*xV + pow(xH,2),-1)))/(144*M_PI);
+          8*lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xH,2))*(xV - 4*xH*xV + pow(xH,2) + 3*pow(xV,2))) + 
+          4*pow(lambda,2)*pow(v0,4)*(pow(xG,2) + pow(-1 + xH,2))*(xV - 4*xH*xV + pow(xH,2) + 3*pow(xV,2))*pow(xV - 4*xH*xV + pow(xH,2),-1)))/(288.*M_PI);
         }
 
       private:
