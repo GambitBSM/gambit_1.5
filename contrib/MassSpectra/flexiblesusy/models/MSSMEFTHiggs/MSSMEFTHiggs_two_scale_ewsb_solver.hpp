@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Wed 25 Oct 2017 18:10:02
+// File generated at Tue 9 Jan 2018 20:02:21
 
 /**
  * @file MSSMEFTHiggs_two_scale_ewsb_solver.hpp
  *
  * @brief contains class for solving EWSB when two-scale algorithm is used
  *
- * This file was generated at Wed 25 Oct 2017 18:10:02 with FlexibleSUSY
+ * This file was generated at Tue 9 Jan 2018 20:02:21 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
