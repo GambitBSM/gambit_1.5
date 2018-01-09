@@ -81,8 +81,7 @@ namespace Gambit
           {
             if ( sqrt_s > mh*2 )
             {
-              double GeV2tocm3s1 = gev2cm2*s2cm;
-              return sv_hh(lambda, mass, v)*gev2cm2;
+              return sv_hh(lambda, mass, v);
             }
             else return 0;
           }
@@ -105,7 +104,7 @@ namespace Gambit
             if ( channel == "tt" and sqrt_s < mt*2) return 0;
 
             double res = 2*lambda*lambda*v0*v0*(1-y/3 + pow(y,2)/12)/3/
-              sqrt_s*Dh2(s)*Gamma_s*gev2cm2*br;
+              sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
             return res;
           }
           else
@@ -128,7 +127,7 @@ namespace Gambit
           double y = s/pow(mass, 2);
           double GeV2tocm3s1 = gev2cm2*s2cm;
           return pow(lambda,2)*s/24/M_PI*sqrt(1-4*x)*(1-y/3 + pow(y,2)/12)*
-          Dh2(s)*(1-4*x+12*pow(x,2))*gev2cm2;
+          Dh2(s)*(1-4*x+12*pow(x,2))*GeV2tocm3s1;
         }
 
         // Annihilation into Z bosons.
@@ -139,7 +138,7 @@ namespace Gambit
           double y = s/pow(mass, 2);
           double GeV2tocm3s1 = gev2cm2*s2cm;
           return pow(lambda,2)*s/48/M_PI*sqrt(1-4*x)*(1-y/3 + pow(y,2)/12)*
-          Dh2(s)*(1-4*x+12*pow(x,2))*gev2cm2;
+          Dh2(s)*(1-4*x+12*pow(x,2))*GeV2tocm3s1;
         }
 
         // Annihilation into fermions
@@ -154,30 +153,27 @@ namespace Gambit
             (1+(3/2*log(pow(mf,2)/s)+9/4)*4*alpha_s/3/M_PI);
           double GeV2tocm3s1 = gev2cm2*s2cm;
           return pow(lambda,2)*(1-y/3 + pow(y,2)/12)*
-            pow(mf,2)/12/M_PI*Xf*pow(vf,3) * Dh2(s) *gev2cm2;
+            pow(mf,2)/12/M_PI*Xf*pow(vf,3) * Dh2(s) *GeV2tocm3s1;
         }
 
         /// Annihilation into hh
         double sv_hh(double lambda, double mass, double v)
         {
+          double GeV2tocm3s1 = gev2cm2*s2cm;
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
-          double vh = sqrt(1-4*mh*mh/s);  // vh and vs are lab velocities
-          // Hardcoded lower velocity avoids nan results
-          double vs = std::max(v/2, 1e-6);
-          double y = s/pow(mass, 2);
-          double tp = pow(mass,2)+pow(mh,2)-0.5*s*(1-vs*vh);
-          double tm = pow(mass,2)+pow(mh,2)-0.5*s*(1+vs*vh);
-
-          double aR = 1+3*mh*mh*(s-mh*mh)*Dh2(s);
-          double aI = 3*mh*mh*sqrt(s)*Gamma_mh*Dh2(s);
-
-          return pow(lambda,2)*(1-y/3 + pow(y,2)/12)/48/M_PI/pow(s,2)/vs *
-            (
-             (pow(aR,2)+pow(aI,2))*s*vh*vs
-             +4*lambda*pow(v0,2)*(aR-lambda*pow(v0,2)/(s-2*pow(mh,2)))
-             *log(std::abs(pow(mass,2)-tp)/std::abs(pow(mass,2)-tm))
-             +(2*pow(lambda,2)*pow(v0,4)*s*vh*vs)
-             /(pow(mass,2)-tm)/(pow(mass,2)-tp));
+          double xV = mass*mass/s;
+          double xH = mh*mh/s;
+          double xG = Gamma_mh*mh/s;
+          double beta =  (s - 2*pow(mh,2))/sqrt((s - 4*pow(mh,2))*(s - 4*pow(mass,2)));
+          double vh = sqrt(1-4*xH);
+          double vv = sqrt(1-4*xV);
+                              
+          return GeV2tocm3s1*(vh*pow(lambda,2)*pow(s,-3)*pow(xV,-2)*(3 + (pow(vv,2)*pow(xV,-2))/4.)*pow(pow(xG,2) + pow(-1 + xH,2),-1)*
+          (lambda*s*xV*pow(v0,2)*(1 + xH + pow(xG,2) - 2*pow(xH,2)) + pow(s,2)*(pow(xG,2) + pow(1 + 2*xH,2))*pow(xV,2) + 
+          2*beta*lambda*atanh(pow(beta,-1))*pow(v0,2)*pow(1 - 2*xH,-2)*
+          (-3*s*(-1 + 2*xH)*(1 + xH + pow(xG,2) - 2*pow(xH,2))*pow(xV,2) + 
+          16*lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xH,2))*(xV - 4*xH*xV + pow(xH,2) + 3*pow(xV,2))) + 
+          8*pow(lambda,2)*pow(v0,4)*(pow(xG,2) + pow(-1 + xH,2))*(xV - 4*xH*xV + pow(xH,2) + 3*pow(xV,2))*pow(xV - 4*xH*xV + pow(xH,2),-1)))/(144*M_PI);
         }
 
       private:
@@ -324,25 +320,6 @@ namespace Gambit
       // into VV final states is accounted for, leading to zero photons.
       ImportDecays("h0_1", catalog, importedDecays, tbl, minBranching,
           daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
-          
-      /* TEST BIT */
-      
-      VectorDM test = VectorDM(&catalog, gammaH, v, alpha_s);
-      std::vector<str> channels = {"tautau", "WW", "ZZ", "bb", "tt", "hh", "cc"};
-      double sigmav;
-      str output = "../Documents/calchep_tests/higgsportal.csv";
-      std::ofstream outfile;
-      
-      outfile.open(output, std::ofstream::app);
-      outfile << mV;
-      for (unsigned int i = 0; i < channels.size(); ++i)
-      {
-        sigmav = test.sv(channels[i], lambda, mV, 1e-3)/1e-3*1e36;
-        outfile << "," << sigmav;
-      }
-      outfile << "\n";
-      
-      /* END TEST BIT */
 
       // Instantiate new VectorDM object
       auto vectorDM = boost::make_shared<VectorDM>(&catalog, gammaH, v, alpha_s);
