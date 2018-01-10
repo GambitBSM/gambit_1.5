@@ -21,6 +21,14 @@
 ///          (peter.athron@coepp.org.au)
 ///  \date 2015 Jun
 ///
+///  \author Are Raklev
+///          (ahye@fys.uio.no)
+///  \date 2018 Jan
+///
+///  \author Anders Kvellestad
+///          (anders.kvellestad@fys.uio.no)
+///  \date 2018 Jan
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -75,10 +83,10 @@ namespace Gambit
     double sqrt_lambda(double a, double b, double c) { return sqrt(pow(a+b-c,2) - 4*a*b); }
 
     /// Breit-Wigner pole (complex)
-    std::complex<double> BW(double q2, double m2, double gamma) 
+    std::complex<double> BW(double q2, double m2, double imag_term) 
     { 
       static const std::complex<double> i(0.0,1.0);
-      return m2 / (m2 - q2 -i*sqrt(q2)*gamma); 
+      return m2 / (m2 - q2 -i*imag_term);
     }
 
 
@@ -1510,19 +1518,16 @@ namespace Gambit
       using namespace Pipes::chargino_plus_1_decays;
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
-      // _Anders
-      // If the chargino--neutralino mass splitting is small,
-      // use the decay calculations in chargino_plus_1_decays_smallsplit
-      const Spectrum& spec = *Dep::MSSM_spectrum;
-      double m_N = abs(spec.get(Par::Pole_Mass,"~chi0_1"));
-      double m_C = abs(spec.get(Par::Pole_Mass,"~chi+_1"));
-      if (m_C - m_N < 1.5)
+      // Collect results from the decay calculation for small chargino--neutralino mass splitting.
+      // If this result is non-empty it should be used.
+      DecayTable::Entry smallsplit_decays = *Dep::chargino_plus_1_decay_rates_smallsplit;
+      if (smallsplit_decays.channels.size() > 0)
       {
-        cout << "DEBUG: Small chargino--neutralino mass splitting. Will use result from chargino_plus_1_decay_rates_smallsplit." << endl;
-        result = *Dep::chargino_plus_1_decay_rates_smallsplit;
+        result = smallsplit_decays;
         return;
       }
 
+      // If the results for small mass splitting does not apply, continue as normal.
       result.calculator = BEreq::cb_sd_charwidth.origin();
       result.calculator_version = BEreq::cb_sd_charwidth.version();
 
@@ -1589,8 +1594,6 @@ namespace Gambit
       result.set_BF((result.width_in_GeV > 0 ? BEreq::cb_sd_char3body->brgltopbb(1) : 0.0), 0.0, "~g", "t", "bbar");
 
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-
-      cout << "DEBUG: total width (not degenerate) = " << result.width_in_GeV << endl;
     }
 
     /// SUSY-HIT MSSM decays: chargino_plus_2
@@ -2204,27 +2207,10 @@ namespace Gambit
 
     /// MSSM decays: chargino decays for small chargino--neutralino mass splitting. 
     /// Using results from hep-ph/9607421.
-    // _Anders
     void chargino_plus_1_decays_smallsplit(DecayTable::Entry& result)
     {
       using namespace Pipes::chargino_plus_1_decays_smallsplit;
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
-
-      // Get SM parameters and other physical constants
-      const double G_F = *Param["GF"];     // [GeV^-2]
-      const double m_el = *Param["mE"];    // [GeV]
-      const double m_mu = *Param["mMu"];   // [GeV]
-
-      static const double m_pi = meson_masses.pi_plus;  // hep-ph/9607421 uses one common pion mass for pi+/- and pi0. We choose the pi+ mass.
-      static const double m_rho_0 = meson_masses.rho0;
-      static const double m_rho_prime = meson_masses.rho1450;
-
-      static const double f_pi = meson_decay_constants.pi_plus / root2;  // Using the sqrt(2) convention of hep-ph/9607421
-
-      const double gamma_rho_0 = Dep::rho_0_decay_rates->width_in_GeV;
-      const double gamma_rho_prime = Dep::rho1450_decay_rates->width_in_GeV;
-
-      const double beta = -0.145;  // Parameter from form factor fit quoted in hep-ph/9607421, referring to https://link.springer.com/content/pdf/10.1007%2FBF01572024.pdf
 
       // Get spectrum objects
       const Spectrum& spec = *Dep::MSSM_spectrum;
@@ -2235,6 +2221,17 @@ namespace Gambit
       const double m_C_signed = spec.get(Par::Pole_Mass,"~chi+_1");
       const double m_N = abs(m_N_signed);
       const double m_C = abs(m_C_signed);
+
+      const double delta_m = m_C - m_N;
+
+      // If the chargino--neutralino mass difference is large, 
+      // the calculations in this module function should not be used.
+      // Return empty result.
+      if (delta_m > 1.5)
+      {
+        result = DecayTable::Entry();
+        return;
+      }
 
       // Get wino/higgsino mixing for the lightest neutralino and chargino.
       // From Eqs. (A.23) -- (A.25) in 1705.07936 (SpecBit/DecayBit/PrecisionBit paper).
@@ -2253,9 +2250,9 @@ namespace Gambit
 
       // We use the convention that keeps the mixing matrices real.
       // This means that the neutralino mass can be negative. 
-      // In that case, we have to deal with relative phase factors on Up12, Up11, N13 and N12 
+      // In that case, we have to deal with relative phase factors 
       // when implementing the calculations from hep-ph/9607421.
-      // @todo: Double check these conventions.
+      // @todo Double check these conventions.
       double O11L  = -1./root2*N14*Up12 + N12*Up11;
       double O11R  =  1./root2*N13*Um12 + N12*Um11;  
       if (m_C_signed < 0.) 
@@ -2264,9 +2261,23 @@ namespace Gambit
         O11R = -O11R;
 
 
-      // Convenient quantities
-      const double delta_m = m_C - m_N;
+      // Get SM parameters and other physical constants
+      const double G_F = *Param["GF"];     // [GeV^-2]
+      const double m_el = *Param["mE"];    // [GeV]
+      const double m_mu = *Param["mMu"];   // [GeV]
 
+      const double m_pi = meson_masses.pi_plus;  // hep-ph/9607421 uses one common pion mass for pi+/- and pi0. We choose the pi+ mass.
+      const double m_rho_0 = meson_masses.rho0;
+      const double m_rho_prime = meson_masses.rho1450;
+
+      const double f_pi = meson_decay_constants.pi_plus / root2;  // Using the sqrt(2) convention of hep-ph/9607421
+
+      const double gamma_rho_0 = Dep::rho_0_decay_rates->width_in_GeV;
+      const double gamma_rho_prime = Dep::rho1450_decay_rates->width_in_GeV;
+
+      const double beta = -0.145;  // Parameter from form factor fit quoted in hep-ph/9607421, referring to https://link.springer.com/content/pdf/10.1007%2FBF01572024.pdf
+
+      // Convenient quantities
       const double m_N2             = pow(m_N,2);
       const double m_C2             = pow(m_C,2);
       const double m_el2            = pow(m_el,2);
@@ -2275,40 +2286,19 @@ namespace Gambit
       const double m_rho_02         = pow(m_rho_0,2);
       const double m_rho_prime2     = pow(m_rho_prime,2);
 
-      const double gamma_rho_02     = pow(gamma_rho_0,2);
-      const double gamma_rho_prime2 = pow(gamma_rho_prime,2);
-
       const double f_pi2            = pow(f_pi,2);
 
       const double G_F2             = pow(G_F,2);
       const double O11L2            = pow(O11L,2);
       const double O11R2            = pow(O11R,2);
 
-
-      // Debug output
-      cout << "DEBUG: mass(~chi0_1) = " << m_N << endl;
-      cout << "DEBUG: mass(~chi+_1) = " << m_C << endl;
-
-      cout << "DEBUG: N12, N13, N14 = " << N12 << ", " << N13 << ", " << N14 << endl;
-      cout << "DEBUG: Up11, Up12 = " << Up11 << ", " << Up12 << endl;
-      cout << "DEBUG: Um11, Um12 = " << Um11 << ", " << Um12 << endl;
-
-      cout << "DEBUG: O11L = " << O11L << endl;
-      cout << "DEBUG: O11R = " << O11R << endl;
-
-      cout << "DEBUG: gamma_rho_0 = " << gamma_rho_0 << endl;
-      cout << "DEBUG: gamma_rho_prime = " << gamma_rho_prime << endl;
-
-      // Initialize decay widths
-      double width_N_el_nu = 0.0;
-      double width_N_mu_nu = 0.0;
-      double width_N_pi = 0.0;
-      double width_N_2pi = 0.0;
-      // @todo: Add 3-pion channels
+      // Map to store partial width results
+      std::map<str,double> partial_widths;
 
       // 
       // Channel: ~chi+_1 --> ~chi0_1 e+ nu_e
       // 
+      partial_widths["N_el+_nu"] = 0.0;
       if (delta_m > m_el)
       {
         // Integrand 1
@@ -2328,14 +2318,13 @@ namespace Gambit
         double N_el_nu_I2 = integrate_cquad(N_el_nu_integrand_2, m_el2, pow(m_C-m_N,2), 0, 1e-2);
 
         // Put everything together
-        width_N_el_nu = (1.*G_F2/pow(2*pi,3)) * ( m_C*(O11L2 + O11R2)*N_el_nu_I1 - 2.*m_N*O11L*O11R*N_el_nu_I2 );
-
-        cout << "DEBUG: width_N_el_nu = " << width_N_el_nu << endl;
+        partial_widths["N_el+_nu"] = (1.*G_F2/pow(2*pi,3)) * ( m_C*(O11L2 + O11R2)*N_el_nu_I1 - 2.*m_N*O11L*O11R*N_el_nu_I2 );
       }
 
       // 
       // Channel: ~chi+_1 --> ~chi0_1 mu+ nu_mu
       // 
+      partial_widths["N_mu+_nu"] = 0.0;
       if (delta_m > m_mu)
       {
         // Integrand 1
@@ -2355,33 +2344,31 @@ namespace Gambit
         double N_mu_nu_I2 = integrate_cquad(N_mu_nu_integrand_2, m_mu2, pow(m_C-m_N,2), 0, 1e-2);
 
         // Put everything together
-        width_N_mu_nu = (1.*G_F2/pow(2*pi,3)) * ( m_C*(O11L2 + O11R2)*N_mu_nu_I1 - 2.*m_N*O11L*O11R*N_mu_nu_I2 );
-
-        cout << "DEBUG: width_N_mu_nu = " << width_N_mu_nu << endl;
+        partial_widths["N_mu+_nu"] = (1.*G_F2/pow(2*pi,3)) * ( m_C*(O11L2 + O11R2)*N_mu_nu_I1 - 2.*m_N*O11L*O11R*N_mu_nu_I2 );
       }
 
       //
       // Channel: ~chi+_1 --> ~chi0_1 pi+
-      // 
+      //
+      partial_widths["N_pi+"] = 0.0;
       if (delta_m > m_pi)
       {
         double k_pi = sqrt_lambda(m_C2,m_N2,m_pi2) / (2*m_C);
-        width_N_pi = ( (f_pi2 * G_F2 * k_pi / (4. * pi * m_C2)) *
-                         (   pow(O11L+O11R,2) * ( pow(m_C2-m_N2,2) - m_pi2*pow(m_C-m_N,2) ) 
+        partial_widths["N_pi+"] = ( (f_pi2 * G_F2 * k_pi / (4. * pi * m_C2)) *
+                          (  pow(O11L+O11R,2) * ( pow(m_C2-m_N2,2) - m_pi2*pow(m_C-m_N,2) ) 
                            + pow(O11L-O11R,2) * ( pow(m_C2-m_N2,2) - m_pi2*pow(m_C+m_N,2) ) ) );
-
-        cout << "DEBUG: width_N_pi = " << width_N_pi << endl;
       }
 
       //
       // Channel: ~chi+_1 --> ~chi0_1 pi+ pi0
       //
+      partial_widths["N_pi+_pi0"] = 0.0;
       if (delta_m > 2*m_pi)
       {
         // Define a helper function
-        std::function<std::complex<double>(double)> F = [&beta,&m_rho_02,&gamma_rho_02,&m_rho_prime2,&gamma_rho_prime2](double q2)
+        std::function<std::complex<double>(double)> F = [&beta,&m_rho_02,&gamma_rho_0,&m_rho_prime2,&gamma_rho_prime](double q2)
         { 
-          return (BW(q2,m_rho_02,gamma_rho_02) + beta*BW(q2,m_rho_prime2,gamma_rho_prime2)) / (1. + beta);
+          return (BW(q2, m_rho_02, sqrt(q2)*gamma_rho_0) + beta*BW(q2, m_rho_prime2, sqrt(q2)*gamma_rho_prime)) / (1. + beta);
         };
 
         // Integrand
@@ -2395,34 +2382,156 @@ namespace Gambit
         double N_2pi_I = integrate_cquad(N_2pi_integrand, 4*m_pi2, pow(delta_m,2), 0, 1e-2);
 
         // Put everything together
-        width_N_2pi = G_F2 / (192. * pow(pi,3) * pow(m_C,3)) * N_2pi_I;
-
-        cout << "DEBUG: width_N_2pi = " << width_N_2pi << endl;
+        partial_widths["N_pi+_pi0"] = G_F2 / (192. * pow(pi,3) * pow(m_C,3)) * N_2pi_I;
       }
 
+      //
+      // Channel: ~chi+_1 --> ~chi0_1 pi+ pi0 pi0  
+      //
+      partial_widths["N_pi+_pi0_pi0"] = 0.0;
+      if (delta_m > 3*m_pi)
+      {
+        // Define a helper function
+        std::function<double(double)> g = [&m_pi,&m_pi2,&m_rho_0](double q2)
+        { 
+          double res = 0.0;
+          if (q2 < pow(m_rho_0 + m_pi,2))
+            res = 4.1 * pow(q2-9*m_pi2,3) * (1. - 3.3*(q2-9*m_pi2) + 5.8*pow(q2-9*m_pi2,2));
+          else
+            res = q2 * (1.623 + 10.38/q2 - 9.32/pow(q2,2) + 0.65/pow(q2,3));
+          return res;
+        };
 
+        // @todo Include this a-meson data properly into the GAMBIT data system
+        double m_a = 1.246;
+        double gamma_a = 0.562;
+
+        // Integrand
+        std::function<double(double)> N_3pi_integrand = [&g,&m_N,&m_C,&m_N2,&m_C2,&O11L,&O11R,&O11L2,&O11R2,&f_pi2,&m_a,&gamma_a](double q2)
+        { 
+          double BW_imag_term = m_a * gamma_a * g(q2)/g(pow(m_a,2));
+
+          return sqrt_lambda(m_C2,m_N2,q2) * pow(std::abs(BW(q2,pow(m_a,2),BW_imag_term)),2) * g(q2) 
+                   * ( (O11L2 + O11R2)*(m_C2 + m_N2 - 2*q2 + pow(m_C2-m_N2,2)/q2 )
+                       - 12*O11L*O11R*m_C*m_N ); 
+        };
+
+        // Perform integration
+        double N_3pi_I = integrate_cquad(N_3pi_integrand, 9*m_pi2, pow(delta_m,2), 0, 1e-2);
+
+        // Put everything together
+        partial_widths["N_pi+_pi0_pi0"] = G_F2 / (6912. * pow(pi,5) * pow(m_C,3) * f_pi2) * N_3pi_I;
+      }
+
+      //
+      // Channel: ~chi+_1 --> ~chi0_1 pi+ pi+ pi-
+      //
+      // When ignoring the tiny mass difference between charged and neutral pions, this
+      // width is identical as the one for ~chi+_1 --> ~chi0_1 pi+ pi0 pi0
+      partial_widths["N_pi+_pi+_pi-"] = partial_widths["N_pi+_pi0_pi0"];
+
+
+      // 
       // Store results
+      // 
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
 
-      result.width_in_GeV = width_N_el_nu + width_N_mu_nu + width_N_pi + width_N_2pi;
-      double lifetime = 1.0e99;
+      // Sum partial widths
+      double total_width = 0.0;
+      for (auto it = partial_widths.begin(); it != partial_widths.end(); it++)
+        total_width += it->second;
+
+      result.width_in_GeV = total_width;
 
       if (result.width_in_GeV > 0)
       {
-        result.set_BF(width_N_el_nu/result.width_in_GeV, 0.0, "~chi0_1", "e+", "nu_e");
-        result.set_BF(width_N_mu_nu/result.width_in_GeV, 0.0, "~chi0_1", "mu+", "nu_mu");
-        result.set_BF(width_N_pi/result.width_in_GeV, 0.0, "~chi0_1", "pi+");
-        result.set_BF(width_N_2pi/result.width_in_GeV, 0.0, "~chi0_1", "pi+", "pi0");
-        // @todo: Add 3-pion channels
-
-        lifetime = hbar / result.width_in_GeV;
+        result.set_BF(partial_widths["N_el+_nu"]/result.width_in_GeV, 0.0, "~chi0_1", "e+", "nu_e");
+        result.set_BF(partial_widths["N_mu+_nu"]/result.width_in_GeV, 0.0, "~chi0_1", "mu+", "nu_mu");
+        result.set_BF(partial_widths["N_pi+"]/result.width_in_GeV, 0.0, "~chi0_1", "pi+");
+        result.set_BF(partial_widths["N_pi+_pi0"]/result.width_in_GeV, 0.0, "~chi0_1", "pi+", "pi0");
+        result.set_BF(partial_widths["N_pi+_pi0_pi0"]/result.width_in_GeV, 0.0, "~chi0_1", "pi+", "pi0", "pi0");
+        result.set_BF(partial_widths["N_pi+_pi+_pi-"]/result.width_in_GeV, 0.0, "~chi0_1", "pi+", "pi+", "pi-");
       }
 
-      cout << "DEBUG: total width = " << result.width_in_GeV << endl;
-      cout << "DEBUG: lifetime = " << lifetime << endl;
+      // Set other branching fractions to 0.
+      result.set_BF(0.0, 0.0, "~chi0_1", "W+");
+      result.set_BF(0.0, 0.0, "~chi0_2", "W+");
+      result.set_BF(0.0, 0.0, "~chi0_3", "W+");
+      result.set_BF(0.0, 0.0, "~chi0_4", "W+");
+      result.set_BF(0.0, 0.0, "~chi0_1", "H+");
+      result.set_BF(0.0, 0.0, "~chi0_2", "H+");
+      result.set_BF(0.0, 0.0, "~chi0_3", "H+");
+      result.set_BF(0.0, 0.0, "~chi0_4", "H+");
+      result.set_BF(0.0, 0.0, "~G", "W+");
+      result.set_BF(0.0, 0.0, "~G", "H+");
+      result.set_BF(0.0, 0.0, "~G", "W+");
+      result.set_BF(0.0, 0.0, "~G", "H+");
+      result.set_BF(0.0, 0.0, "~chi0_1", "u", "dbar");
+      result.set_BF(0.0, 0.0, "~chi0_2", "u", "dbar");
+      result.set_BF(0.0, 0.0, "~chi0_3", "u", "dbar");
+      result.set_BF(0.0, 0.0, "~chi0_4", "u", "dbar");
+      result.set_BF(0.0, 0.0, "~chi0_1", "c", "sbar");
+      result.set_BF(0.0, 0.0, "~chi0_2", "c", "sbar");
+      result.set_BF(0.0, 0.0, "~chi0_3", "c", "sbar");
+      result.set_BF(0.0, 0.0, "~chi0_4", "c", "sbar");
+      result.set_BF(0.0, 0.0, "~chi0_1", "t", "bbar");
+      result.set_BF(0.0, 0.0, "~chi0_2", "t", "bbar");
+      result.set_BF(0.0, 0.0, "~chi0_3", "t", "bbar");
+      result.set_BF(0.0, 0.0, "~chi0_4", "t", "bbar");
+      // (We calculate ~chi_01 e+ nu_e)
+      result.set_BF(0.0, 0.0, "~chi0_2", "e+", "nu_e");
+      result.set_BF(0.0, 0.0, "~chi0_3", "e+", "nu_e");
+      result.set_BF(0.0, 0.0, "~chi0_4", "e+", "nu_e");
+      // (We calculate ~chi_01 mu+ nu_mu)
+      result.set_BF(0.0, 0.0, "~chi0_2", "mu+", "nu_mu");
+      result.set_BF(0.0, 0.0, "~chi0_3", "mu+", "nu_mu");
+      result.set_BF(0.0, 0.0, "~chi0_4", "mu+", "nu_mu");
+      result.set_BF(0.0, 0.0, "~chi0_1", "tau+", "nu_tau");
+      result.set_BF(0.0, 0.0, "~chi0_2", "tau+", "nu_tau");
+      result.set_BF(0.0, 0.0, "~chi0_3", "tau+", "nu_tau");
+      result.set_BF(0.0, 0.0, "~chi0_4", "tau+", "nu_tau");
+      result.set_BF(0.0, 0.0, "~g", "u", "dbar");
+      result.set_BF(0.0, 0.0, "~g", "c", "sbar");
+      result.set_BF(0.0, 0.0, "~g", "t", "bbar");
+    }
+
+
+    /// MSSM decays: stau decays for small stau--neutralino mass splitting. 
+    /// Using results from T. Jittoh, J. Sato, T. Shimomura, M. Yamanaka, Phys. Rev. D73 (2006), hep-ph/0512197
+    // _Anders
+    void stau_1_decays_smallsplit(DecayTable::Entry& result)
+    {
+      using namespace Pipes::stau_1_decays_smallsplit;
+      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
+      // Get spectrum objects
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+      const SubSpectrum& he_spec = spec.get_HE();
+
+      // Get SUSY masses
+      const double m_N = abs(spec.get(Par::Pole_Mass,"~chi0_1"));
+
+      str m_light, m_heavy;
+      const static double ftol = runOptions->getValueOrDef<double>(1e-2, "family_mixing_tolerance");
+      const static bool fpt_error = runOptions->getValueOrDef<bool>(true, "family_mixing_tolerance_invalidates_point_only");
+
+      std::vector<double> slepton4vec = slhahelp::family_state_mix_matrix("~e-", 3, m_light, m_heavy, he_spec, ftol, LOCAL_INFO, fpt_error);
+
+      const double m_stau = spec.safeget(Par::Pole_Mass,m_light);
+
+      cout << "DEBUG: m_stau = " << m_stau << endl;
+      // const double delta_m = m_C - m_N;
+
+      // // Get wino/higgsino mixing for the lightest neutralino and chargino.
+      // // From Eqs. (A.23) -- (A.25) in 1705.07936 (SpecBit/DecayBit/PrecisionBit paper).
+      // const double N12 = he_spec.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
+      // const double N13 = he_spec.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
+      // const double N14 = he_spec.get(Par::Pole_Mixing,"~chi0",1,4);  // ~Hu component
 
     }
+
+
 
 
     /// MSSM decays: conjugates

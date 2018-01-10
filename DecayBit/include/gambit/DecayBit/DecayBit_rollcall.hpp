@@ -446,6 +446,7 @@ START_MODULE
     #define FUNCTION stau_1_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
+    DEPENDENCY(stau_1_decay_rates_smallsplit, DecayTable::Entry)
     BACKEND_REQ(cb_sd_stauwidth, (sh_reqd), sd_stauwidth_type)
     BACKEND_REQ(cb_sd_stau2body, (sh_reqd), sd_stau2body_type)
     BACKEND_REQ(cb_sd_stau2bodygrav, (sh_reqd), sd_stau2bodygrav_type)
@@ -454,6 +455,23 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY
+
+  #define CAPABILITY stau_1_decay_rates_smallsplit
+  START_CAPABILITY
+
+    #define FUNCTION stau_1_decays_smallsplit
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(MSSM63atQ, MSSM63atMGUT, StandardModel_SLHA2)
+    MODEL_GROUP(group1, (StandardModel_SLHA2))
+    MODEL_GROUP(group2, (MSSM63atQ, MSSM63atMGUT))
+    ALLOW_MODEL_COMBINATION(group1,group2)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+
 
   #define CAPABILITY stau_2_decay_rates
   START_CAPABILITY
