@@ -58,6 +58,7 @@ namespace Gambit
     /// @{
 
     /// Unwrapper for passing std::function to GSL integrator
+    /// Based on example from https://martin-ueding.de/articles/cpp-lambda-into-gsl/index.html
     double unwrap(double x, void *p)
     {
       auto fp = static_cast<std::function<double(double)> *>(p);
@@ -2214,7 +2215,7 @@ namespace Gambit
 
       // Get spectrum objects
       const Spectrum& spec = *Dep::MSSM_spectrum;
-      const SubSpectrum& he_spec = spec.get_HE();
+      const SubSpectrum& mssm = spec.get_HE();
 
       // Get SUSY masses
       const double m_N_signed = spec.get(Par::Pole_Mass,"~chi0_1");
@@ -2235,14 +2236,14 @@ namespace Gambit
 
       // Get wino/higgsino mixing for the lightest neutralino and chargino.
       // From Eqs. (A.23) -- (A.25) in 1705.07936 (SpecBit/DecayBit/PrecisionBit paper).
-      const double N12 = he_spec.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
-      const double N13 = he_spec.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
-      const double N14 = he_spec.get(Par::Pole_Mixing,"~chi0",1,4);  // ~Hu component
+      const double N12 = mssm.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
+      const double N13 = mssm.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
+      const double N14 = mssm.get(Par::Pole_Mixing,"~chi0",1,4);  // ~Hu component
 
-      const double Up11 = he_spec.get(Par::Pole_Mixing,"~chi+",1,1); // (~W1 - i*~W2) component
-      const double Up12 = he_spec.get(Par::Pole_Mixing,"~chi+",1,2); // ~Hu+ component
-      const double Um11 = he_spec.get(Par::Pole_Mixing,"~chi-",1,1); // (~W1 + i*~W2) component 
-      const double Um12 = he_spec.get(Par::Pole_Mixing,"~chi-",1,2); // ~Hu- component
+      const double Up11 = mssm.get(Par::Pole_Mixing,"~chi+",1,1); // (~W1 - i*~W2) component
+      const double Up12 = mssm.get(Par::Pole_Mixing,"~chi+",1,2); // ~Hu+ component
+      const double Um11 = mssm.get(Par::Pole_Mixing,"~chi-",1,1); // (~W1 + i*~W2) component 
+      const double Um12 = mssm.get(Par::Pole_Mixing,"~chi-",1,2); // ~Hu- component
 
       // Connection to chargino matrix notation in S. Martin's "A SUSY Primer": 
       // Our 'Up' matrix corresponds to his 'V' matrix, and
@@ -2507,27 +2508,85 @@ namespace Gambit
 
       // Get spectrum objects
       const Spectrum& spec = *Dep::MSSM_spectrum;
-      const SubSpectrum& he_spec = spec.get_HE();
+      const SubSpectrum& mssm = spec.get_HE();
 
-      // Get SUSY masses
+      // Get neutralino mass and mixing
       const double m_N = abs(spec.get(Par::Pole_Mass,"~chi0_1"));
 
+      const double N11 = mssm.get(Par::Pole_Mixing,"~chi0",1,1);  // ~B component
+      const double N12 = mssm.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
+      const double N13 = mssm.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
+
+      // Get lightest stau mass eigenstate and mixing
       str m_light, m_heavy;
       const static double ftol = runOptions->getValueOrDef<double>(1e-2, "family_mixing_tolerance");
       const static bool fpt_error = runOptions->getValueOrDef<bool>(true, "family_mixing_tolerance_invalidates_point_only");
-
-      std::vector<double> slepton4vec = slhahelp::family_state_mix_matrix("~e-", 3, m_light, m_heavy, he_spec, ftol, LOCAL_INFO, fpt_error);
-
+      // Get the stau mixing matrix ((F11,F12),(F21,F22)) as a 4-vector (F11,F12,F21,F22).
+      // Also get the names ("~e-_1", "~e-_2", ..., "~e-_6") that correspond to the light and heavy stau states.
+      std::vector<double> stau_mix_4vec = slhahelp::family_state_mix_matrix("~e-", 3, m_light, m_heavy, mssm, ftol, LOCAL_INFO, fpt_error);
+      // Get the mass of the lightest stau state
       const double m_stau = spec.safeget(Par::Pole_Mass,m_light);
+      // Get the gauge mixing
+      const double F11 = stau_mix_4vec[0];
+      const double F12 = stau_mix_4vec[1];
+      const double F21 = stau_mix_4vec[2];
+      const double F22 = stau_mix_4vec[3];
 
+      // Stau--neutralino mass difference
+      double delta_m = m_stau - m_N;
+
+      // Debug output
+      cout << "DEBUG: m_N = " << m_N << endl;
       cout << "DEBUG: m_stau = " << m_stau << endl;
-      // const double delta_m = m_C - m_N;
+      cout << "DEBUG: delta_m = " << delta_m << endl;
+      cout << "DEBUG: m_light = " << m_light << endl;
+      cout << "DEBUG: m_heavy = " << m_heavy << endl;
+      cout << "DEBUG: F11, F12 = " << F11 << ", " << F12 << endl;
+      cout << "DEBUG: F21, F22 = " << F21 << ", " << F22 << endl;
 
-      // // Get wino/higgsino mixing for the lightest neutralino and chargino.
-      // // From Eqs. (A.23) -- (A.25) in 1705.07936 (SpecBit/DecayBit/PrecisionBit paper).
-      // const double N12 = he_spec.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
-      // const double N13 = he_spec.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
-      // const double N14 = he_spec.get(Par::Pole_Mixing,"~chi0",1,4);  // ~Hu component
+      // // If the stau--neutralino mass difference is large, 
+      // // the calculations in this module function should not be used.
+      // // Return empty result.
+      // if (delta_m > 1.5)
+      // {
+      //   result = DecayTable::Entry();
+      //   return;
+      // }
+
+      // 
+      // Get constants and parameters
+      // 
+
+      // SM parameters
+      const double G_F = *Param["GF"];
+      const double m_el = *Param["mE"];
+      const double m_mu = *Param["mMu"];
+      const double m_tau = *Param["mTau"];
+      const double m_W = spec.safeget(Par::Pole_Mass,24,0);
+      const double g_2 = mssm.safeget(Par::dimensionless,"g2");
+      const double sinW2 = mssm.safeget(Par::dimensionless,"sinW2");
+      const double m_pi = meson_masses.pi_plus;
+      const double f_pi = meson_decay_constants.pi_plus;
+      // @todo Add the Cabibbo angle to the numerical constants in GAMBIT
+      const double costc = 0.974; // Cabibbo angle
+
+      // MSSM parameters
+      const double tanb = mssm.safeget(Par::dimensionless,"tanbeta");
+
+      // Derived constants
+      double sinW = sqrt(sinW2);
+      double cosW = sqrt(1.-sinW2);
+      double cosb = 1./sqrt(1.+pow(tanb,2));
+
+      // Calculate couplings
+      double N11p = N11*cosW+N12*sinW;
+      double N12p = -N11*sinW+N12*cosW;
+      double gL = (root2*g_2*sinW*N11p + root2*g_2*N12p/cosW*(0.5-sinW2))*F11 - g_2*m_tau*N13/root2/m_W/cosb*F12;
+      double gR = -g_2*m_tau*N13/root2/m_W/cosb*F11 + (-root2*g_2*sinW*N11p + root2*g_2*sinW2*N12p/cosW)*F12;
+
+      // Debug output
+      cout << "DEBUG: gL = " << gL << endl;
+      cout << "DEBUG: gR = " << gR << endl;
 
     }
 
