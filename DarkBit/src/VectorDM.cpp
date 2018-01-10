@@ -160,7 +160,7 @@ namespace Gambit
         double sv_hh(double lambda, double mass, double v)
         {
           // Hardcode lower limit for velocity to avoid nan results.
-          v = std::max(v, 1e-3);
+          v = std::max(v, 1e-6);
           double GeV2tocm3s1 = gev2cm2*s2cm;
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
           double xV = mass*mass/s;
