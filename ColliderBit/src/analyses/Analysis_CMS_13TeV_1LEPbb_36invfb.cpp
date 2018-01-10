@@ -405,6 +405,15 @@ namespace Gambit {
 
       }
 
+
+    protected:
+      void clear() {
+        _numSRA=0;
+        _numSRB=0;
+        
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
     };
 
 

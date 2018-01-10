@@ -427,6 +427,69 @@ namespace Gambit {
       }
 
 
+   protected:
+      void clear() {
+        #ifndef EXCLUDE_DELPHES
+        _hElectron1Pt->Reset();
+        _hElectron1Eta->Reset();
+        _hElectron1Phi->Reset();
+        _hElectron2Pt->Reset();
+        _hElectron2Eta->Reset();
+        _hElectron2Phi->Reset();
+        _hMuon1Pt->Reset();
+        _hMuon2Pt->Reset();
+        _hNelec->Reset();
+        _hNelec30->Reset();
+        _hNelec100->Reset();
+        _hNelec500->Reset();
+        _hNtau->Reset();
+        _hNtau30->Reset();
+        _hNtau100->Reset();
+        _hNtau500->Reset();
+        _hNmuon->Reset();
+        _hNmuon30->Reset();
+        _hNmuon100->Reset();
+        _hNmuon500->Reset();
+        _hNjet30->Reset();
+        _hNjet100->Reset();
+        _hNjet500->Reset();
+        _hNcentraljet30->Reset();
+        _hNcentraljet100->Reset();
+        _hNcentraljet500->Reset();
+        _hNbjet30->Reset();
+        _hNbjet100->Reset();
+        _hNbjet500->Reset();
+        _hinv->Reset();
+        _hmet->Reset();
+        _hmet_1_muon->Reset();
+        _hmet_1_electron->Reset();
+        _hinv_truth->Reset();
+        _hmet_truth->Reset();
+        _hElectronPt->Reset();
+        _hElectronEta->Reset();
+        _hElectronPhi->Reset();
+        _hElectronE->Reset();
+        _hTauPt->Reset();
+        _hTauEta->Reset();
+        _hTauPhi->Reset();
+        _hTauE->Reset();
+        _hMuonPt->Reset();
+        _hMuonEta->Reset();
+        _hMuonPhi->Reset();
+        _hMuonE->Reset();
+        _hJetPt->Reset();
+        _hJetEta->Reset();
+        _hJetPhi->Reset();
+        _hJetE->Reset();
+        _hCentralJetPt->Reset();
+        _hCentralJetE->Reset();
+        _hBJetPt->Reset();
+        _hBJetEta->Reset();
+        _hBJetPhi->Reset();
+        _hBJetE->Reset();
+        #endif
+      }
+
     };
 
 

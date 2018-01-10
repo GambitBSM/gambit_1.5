@@ -740,6 +740,24 @@ namespace Gambit {
 	else return -1;
       }
 
+
+    protected:
+      void clear() {
+        _numSR1=0;
+        _numSR2=0;
+        _numSR3=0;
+        _numSR4=0;
+        _numSR5=0; 
+        _numSR6=0;
+        _numSR7=0; 
+        _numSR8=0;
+        
+        std::fill(cutFlowVector1.begin(), cutFlowVector1.end(), 0);
+        std::fill(cutFlowVector2.begin(), cutFlowVector2.end(), 0);
+        std::fill(cutFlowVector3.begin(), cutFlowVector3.end(), 0);
+        std::fill(cutFlowVector4.begin(), cutFlowVector4.end(), 0);
+      }
+
     };
 
 

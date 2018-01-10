@@ -46,7 +46,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-//#define COLLIDERBIT_DEBUG
+// #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -145,17 +145,17 @@ namespace Gambit
       tooManyFailedEvents = false;
 
       useBuckFastATLASDetector = false;
-      globalAnalysesATLAS.clear();
+      globalAnalysesATLAS.reset();
 
       useBuckFastCMSDetector = false;
-      globalAnalysesCMS.clear();
+      globalAnalysesCMS.reset();
 
       useBuckFastIdentityDetector = false;
-      globalAnalysesIdentity.clear();
+      globalAnalysesIdentity.reset();
 
       #ifndef EXCLUDE_DELPHES
       useDelphesDetector = false;
-      globalAnalysesDet.clear();
+      globalAnalysesDet.reset();
       #endif
 
       haveUsedBuckFastATLASDetector = false;
@@ -840,8 +840,7 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesDet.clear();
-        globalAnalysesDet.init(analyses[indexPythiaNames]);
+        if (globalAnalysesDet.analyses.empty()) globalAnalysesDet.init(analyses[indexPythiaNames]); else globalAnalysesDet.reset();
         return;
       }
 
@@ -851,16 +850,13 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)
             {
-              for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
-                {
-                  std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
-                }
+              for (auto a : analyses[indexPythiaNames])
+                std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             }
           #endif
 
@@ -919,8 +915,7 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesATLAS.clear();
-        globalAnalysesATLAS.init(analyses[indexPythiaNames]);
+        if (globalAnalysesATLAS.analyses.empty()) globalAnalysesATLAS.init(analyses[indexPythiaNames]); else globalAnalysesATLAS.reset();
         return;
       }
 
@@ -930,16 +925,13 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)
             {
-              for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
-                {
-                  std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
-                }
+              for (auto a : analyses[indexPythiaNames])
+                std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             }
           #endif
 
@@ -997,8 +989,7 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesCMS.clear();
-        globalAnalysesCMS.init(analyses[indexPythiaNames]);
+        if (globalAnalysesCMS.analyses.empty()) globalAnalysesCMS.init(analyses[indexPythiaNames]); else globalAnalysesCMS.reset();
         return;
       }
 
@@ -1008,16 +999,13 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)
             {
-              for (auto it = analyses[indexPythiaNames].begin(); it != analyses[indexPythiaNames].end(); ++it)
-                {
-                  std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << *it << endl;
-                }
+              for (auto a : analyses[indexPythiaNames])
+                std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             }
           #endif
 
@@ -1075,9 +1063,9 @@ namespace Gambit
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
 
-        globalAnalysesIdentity.clear();
-        globalAnalysesIdentity.init(analyses[indexPythiaNames]);
+        if (globalAnalysesIdentity.analyses.empty()) globalAnalysesIdentity.init(analyses[indexPythiaNames]); else globalAnalysesIdentity.reset();
         return;
+
       }
 
       if (!useBuckFastIdentityDetector) return;
@@ -1086,8 +1074,7 @@ namespace Gambit
         {
           // Each thread gets its own Analysis container.
           // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-          result.clear();
-          result.init(analyses[indexPythiaNames]);
+          if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
 
           #ifdef COLLIDERBIT_DEBUG
           if (omp_get_thread_num() == 0)

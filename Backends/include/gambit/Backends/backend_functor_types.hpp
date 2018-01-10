@@ -18,7 +18,7 @@
 ///  Authors:                                     
 ///                                               
 ///  \author The GAMBIT Collaboration            
-///  \date 04:02PM on October 14, 2017
+///  \date 10:16AM on January 10, 2018
 ///                                               
 ///  *********************************************
                                                   
@@ -45,9 +45,6 @@ namespace Gambit
   template class backend_functor_common<void(*)(const char*),void,const char*>;
   template class backend_functor<void(*)(const char*),void,const char*>;
 
-  template class backend_functor_common<void(*)(int,std::complex<double>*,std::complex<double>*,double,double,const parameters*),void,int,std::complex<double>*,std::complex<double>*,double,double,const parameters*>;
-  template class backend_functor<void(*)(int,std::complex<double>*,std::complex<double>*,double,double,const parameters*),void,int,std::complex<double>*,std::complex<double>*,double,double,const parameters*>;
-
   template class backend_functor_common<double(*)(Farray<Fdouble,1,2,2,3>&),double,Farray<Fdouble,1,2,2,3>&>;
   template class backend_functor<double(*)(Farray<Fdouble,1,2,2,3>&),double,Farray<Fdouble,1,2,2,3>&>;
 
@@ -63,20 +60,20 @@ namespace Gambit
   template class backend_functor_common<double(*)(int,const std::vector<double>&,const std::vector<double>&),double,int,const std::vector<double>&,const std::vector<double>&>;
   template class backend_functor<double(*)(int,const std::vector<double>&,const std::vector<double>&),double,int,const std::vector<double>&,const std::vector<double>&>;
 
-  template class backend_functor_common<sd_sel2body_type*(*)(),sd_sel2body_type*>;
-  template class backend_functor<sd_sel2body_type*(*)(),sd_sel2body_type*>;
+  template class backend_functor_common<sd_stau2bodygrav_type*(*)(),sd_stau2bodygrav_type*>;
+  template class backend_functor<sd_stau2bodygrav_type*(*)(),sd_stau2bodygrav_type*>;
 
   template class backend_functor_common<sd_sdownwidth_type*(*)(),sd_sdownwidth_type*>;
   template class backend_functor<sd_sdownwidth_type*(*)(),sd_sdownwidth_type*>;
+
+  template class backend_functor_common<sd_neut3body_type*(*)(),sd_neut3body_type*>;
+  template class backend_functor<sd_neut3body_type*(*)(),sd_neut3body_type*>;
 
   template class backend_functor_common<Farray_Flogical_1_100*(*)(),Farray_Flogical_1_100*>;
   template class backend_functor<Farray_Flogical_1_100*(*)(),Farray_Flogical_1_100*>;
 
   template class backend_functor_common<void(*)(const MInteger&,const double&),void,const MInteger&,const double&>;
   template class backend_functor<void(*)(const MInteger&,const double&),void,const MInteger&,const double&>;
-
-  template class backend_functor_common<double(*)(double*,double*,double*,double*,double,double,const parameters*),double,double*,double*,double*,double*,double,double,const parameters*>;
-  template class backend_functor<double(*)(double*,double*,double*,double*,double,double,const parameters*),double,double*,double*,double*,double*,double,double,const parameters*>;
 
   template class backend_functor_common<void(*)(int,double*,std::complex<double>*,double,double,const parameters*),void,int,double*,std::complex<double>*,double,double,const parameters*>;
   template class backend_functor<void(*)(int,double*,std::complex<double>*,double,double,const parameters*),void,int,double*,std::complex<double>*,double,double,const parameters*>;
@@ -114,8 +111,8 @@ namespace Gambit
   template class backend_functor_common<void(*)(double&,double),void,double&,double>;
   template class backend_functor<void(*)(double&,double),void,double&,double>;
 
-  template class backend_functor_common<double(*)(double(*)(double&),int&),double,double(*)(double&),int&>;
-  template class backend_functor<double(*)(double(*)(double&),int&),double,double(*)(double&),int&>;
+  template class backend_functor_common<int(*)(char*,double),int,char*,double>;
+  template class backend_functor<int(*)(char*,double),int,char*,double>;
 
   template class backend_functor_common<void(*)(int&,Farray<fh_real,1,4>&,fh_complex&,Farray<fh_complex,1,3,1,3>&,Farray<fh_complex,1,3,1,3>&),void,int&,Farray<fh_real,1,4>&,fh_complex&,Farray<fh_complex,1,3,1,3>&,Farray<fh_complex,1,3,1,3>&>;
   template class backend_functor<void(*)(int&,Farray<fh_real,1,4>&,fh_complex&,Farray<fh_complex,1,3,1,3>&,Farray<fh_complex,1,3,1,3>&),void,int&,Farray<fh_real,1,4>&,fh_complex&,Farray<fh_complex,1,3,1,3>&,Farray<fh_complex,1,3,1,3>&>;
@@ -183,8 +180,8 @@ namespace Gambit
   template class backend_functor_common<Flav_KstarMuMu_obs(*)(const parameters*,double,double),Flav_KstarMuMu_obs,const parameters*,double,double>;
   template class backend_functor<Flav_KstarMuMu_obs(*)(const parameters*,double,double),Flav_KstarMuMu_obs,const parameters*,double,double>;
 
-  template class backend_functor_common<void(*)(int&,fh_real&,Farray<fh_real,1,52>&),void,int&,fh_real&,Farray<fh_real,1,52>&>;
-  template class backend_functor<void(*)(int&,fh_real&,Farray<fh_real,1,52>&),void,int&,fh_real&,Farray<fh_real,1,52>&>;
+  template class backend_functor_common<void(*)(const MInteger&,const MInteger&,const MInteger&),void,const MInteger&,const MInteger&,const MInteger&>;
+  template class backend_functor<void(*)(const MInteger&,const MInteger&,const MInteger&),void,const MInteger&,const MInteger&,const MInteger&>;
 
   template class backend_functor_common<double(*)(const double&,const MInteger&,void*&),double,const double&,const MInteger&,void*&>;
   template class backend_functor<double(*)(const double&,const MInteger&,void*&),double,const double&,const MInteger&,void*&>;
@@ -207,8 +204,8 @@ namespace Gambit
   template class backend_functor_common<double(*)(const double&,const double&,const double&,const double&,const MInteger&),double,const double&,const double&,const double&,const double&,const MInteger&>;
   template class backend_functor<double(*)(const double&,const double&,const double&,const double&,const MInteger&),double,const double&,const double&,const double&,const double&,const MInteger&>;
 
-  template class backend_functor_common<sd_stau2bodygrav_type*(*)(),sd_stau2bodygrav_type*>;
-  template class backend_functor<sd_stau2bodygrav_type*(*)(),sd_stau2bodygrav_type*>;
+  template class backend_functor_common<sd_glui3body_type*(*)(),sd_glui3body_type*>;
+  template class backend_functor<sd_glui3body_type*(*)(),sd_glui3body_type*>;
 
   template class backend_functor_common<void(*)(double,double,double,double),void,double,double,double,double>;
   template class backend_functor<void(*)(double,double,double,double),void,double,double,double,double>;
@@ -228,8 +225,8 @@ namespace Gambit
   template class backend_functor_common<double(*)(const bool&),double,const bool&>;
   template class backend_functor<double(*)(const bool&),double,const bool&>;
 
-  template class backend_functor_common<int(*)(double,int,int,double*),int,double,int,int,double*>;
-  template class backend_functor<int(*)(double,int,int,double*),int,double,int,int,double*>;
+  template class backend_functor_common<double(*)(double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double),double,double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double>;
+  template class backend_functor<double(*)(double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double),double,double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double>;
 
   template class backend_functor_common<DS_RDPARS*(*)(),DS_RDPARS*>;
   template class backend_functor<DS_RDPARS*(*)(),DS_RDPARS*>;
@@ -237,8 +234,8 @@ namespace Gambit
   template class backend_functor_common<void(*)(double*,double*,double*,double,double*,double*,double*,double,const parameters*),void,double*,double*,double*,double,double*,double*,double*,double,const parameters*>;
   template class backend_functor<void(*)(double*,double*,double*,double,double*,double*,double*,double,const parameters*),void,double*,double*,double*,double,double*,double*,double*,double,const parameters*>;
 
-  template class backend_functor_common<void(*)(double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&),void,double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&>;
-  template class backend_functor<void(*)(double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&),void,double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&>;
+  template class backend_functor_common<double(*)(double*,double*,double*,double*,double,double,const parameters*),double,double*,double*,double*,double*,double,double,const parameters*>;
+  template class backend_functor<double(*)(double*,double*,double*,double*,double,double,const parameters*),double,double*,double*,double*,double*,double,double,const parameters*>;
 
   template class backend_functor_common<sd_leshouches1_type*(*)(),sd_leshouches1_type*>;
   template class backend_functor<sd_leshouches1_type*(*)(),sd_leshouches1_type*>;
@@ -249,8 +246,8 @@ namespace Gambit
   template class backend_functor_common<Farray_Freal8_1_100_1_7_1_7*(*)(),Farray_Freal8_1_100_1_7_1_7*>;
   template class backend_functor<Farray_Freal8_1_100_1_7_1_7*(*)(),Farray_Freal8_1_100_1_7_1_7*>;
 
-  template class backend_functor_common<double(*)(double&,double&),double,double&,double&>;
-  template class backend_functor<double(*)(double&,double&),double,double&,double&>;
+  template class backend_functor_common<sd_char2body_type*(*)(),sd_char2body_type*>;
+  template class backend_functor<sd_char2body_type*(*)(),sd_char2body_type*>;
 
   template class backend_functor_common<double(*)(double*,double*,double*,const parameters*,double),double,double*,double*,double*,const parameters*,double>;
   template class backend_functor<double(*)(double*,double*,double*,const parameters*,double),double,double*,double*,double*,const parameters*,double>;
@@ -273,8 +270,8 @@ namespace Gambit
   template class backend_functor_common<void(*)(int&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&),void,int&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&>;
   template class backend_functor<void(*)(int&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&),void,int&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&,fh_real&>;
 
-  template class backend_functor_common<sd_char2body_type*(*)(),sd_char2body_type*>;
-  template class backend_functor<sd_char2body_type*(*)(),sd_char2body_type*>;
+  template class backend_functor_common<sd_sel2body_type*(*)(),sd_sel2body_type*>;
+  template class backend_functor<sd_sel2body_type*(*)(),sd_sel2body_type*>;
 
   template class backend_functor_common<int(*)(const SLHAstruct &,const DecayTable&),int,const SLHAstruct &,const DecayTable&>;
   template class backend_functor<int(*)(const SLHAstruct &,const DecayTable&),int,const SLHAstruct &,const DecayTable&>;
@@ -293,9 +290,6 @@ namespace Gambit
 
   template class backend_functor_common<int(*)(const bool&),int,const bool&>;
   template class backend_functor<int(*)(const bool&),int,const bool&>;
-
-  template class backend_functor_common<int(*)(char*,double),int,char*,double>;
-  template class backend_functor<int(*)(char*,double),int,char*,double>;
 
   template class backend_functor_common<void(*)(),void>;
   template class backend_functor<void(*)(),void>;
@@ -327,8 +321,8 @@ namespace Gambit
   template class backend_functor_common<double(*)(double,double,int),double,double,double,int>;
   template class backend_functor<double(*)(double,double,int),double,double,double,int>;
 
-  template class backend_functor_common<std::vector<double>*(*)(),std::vector<double>*>;
-  template class backend_functor<std::vector<double>*(*)(),std::vector<double>*>;
+  template class backend_functor_common<sd_sup2body_type*(*)(),sd_sup2body_type*>;
+  template class backend_functor<sd_sup2body_type*(*)(),sd_sup2body_type*>;
 
   template class backend_functor_common<void(*)(int&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,Farray<Fdouble,1,4>&,Farray<Fdouble_complex,1,3,1,3>&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,double&,double&),void,int&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,Farray<Fdouble,1,4>&,Farray<Fdouble_complex,1,3,1,3>&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,double&,double&>;
   template class backend_functor<void(*)(int&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,Farray<Fdouble,1,4>&,Farray<Fdouble_complex,1,3,1,3>&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,double&,double&),void,int&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,Farray<Fdouble,1,4>&,Farray<Fdouble_complex,1,3,1,3>&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,FcomplexT<Fdoubleprecision>&,double&,double&,double&,double&,double&>;
@@ -339,8 +333,8 @@ namespace Gambit
   template class backend_functor_common<double(*)(double(*)[10]),double,double(*)[10]>;
   template class backend_functor<double(*)(double(*)[10]),double,double(*)[10]>;
 
-  template class backend_functor_common<Farray_Freal8_1_100_1_5_1_4*(*)(),Farray_Freal8_1_100_1_5_1_4*>;
-  template class backend_functor<Farray_Freal8_1_100_1_5_1_4*(*)(),Farray_Freal8_1_100_1_5_1_4*>;
+  template class backend_functor_common<sd_mbmb_type*(*)(),sd_mbmb_type*>;
+  template class backend_functor<sd_mbmb_type*(*)(),sd_mbmb_type*>;
 
   template class backend_functor_common<Farray_particle23_1_4*(*)(),Farray_particle23_1_4*>;
   template class backend_functor<Farray_particle23_1_4*(*)(),Farray_particle23_1_4*>;
@@ -348,8 +342,8 @@ namespace Gambit
   template class backend_functor_common<particle23*(*)(),particle23*>;
   template class backend_functor<particle23*(*)(),particle23*>;
 
-  template class backend_functor_common<sd_neut3body_type*(*)(),sd_neut3body_type*>;
-  template class backend_functor<sd_neut3body_type*(*)(),sd_neut3body_type*>;
+  template class backend_functor_common<DS_MSPCTM*(*)(),DS_MSPCTM*>;
+  template class backend_functor<DS_MSPCTM*(*)(),DS_MSPCTM*>;
 
   template class backend_functor_common<int(*)(Spectrum&,const Finputs&),int,Spectrum&,const Finputs&>;
   template class backend_functor<int(*)(Spectrum&,const Finputs&),int,Spectrum&,const Finputs&>;
@@ -369,14 +363,14 @@ namespace Gambit
   template class backend_functor_common<sd_neutwidth_type*(*)(),sd_neutwidth_type*>;
   template class backend_functor<sd_neutwidth_type*(*)(),sd_neutwidth_type*>;
 
-  template class backend_functor_common<void(*)(char*,int&,char*,int&),void,char*,int&,char*,int&>;
-  template class backend_functor<void(*)(char*,int&,char*,int&),void,char*,int&,char*,int&>;
+  template class backend_functor_common<void(*)(double*,double*,double*,double*,double*,double*,double*,double*),void,double*,double*,double*,double*,double*,double*,double*,double*>;
+  template class backend_functor<void(*)(double*,double*,double*,double*,double*,double*,double*,double*),void,double*,double*,double*,double*,double*,double*,double*,double*>;
 
   template class backend_functor_common<Farray_particle23_1_3*(*)(),Farray_particle23_1_3*>;
   template class backend_functor<Farray_particle23_1_3*(*)(),Farray_particle23_1_3*>;
 
-  template class backend_functor_common<sd_glui3body_type*(*)(),sd_glui3body_type*>;
-  template class backend_functor<sd_glui3body_type*(*)(),sd_glui3body_type*>;
+  template class backend_functor_common<double(*)(int,...),double,int>;
+  template class backend_functor<double(*)(int,...),double,int>;
 
   template class backend_functor_common<double(*)(double&,double&,int&,int&,int&),double,double&,double&,int&,int&,int&>;
   template class backend_functor<double(*)(double&,double&,int&,int&,int&),double,double&,double&,int&,int&,int&>;
@@ -384,8 +378,8 @@ namespace Gambit
   template class backend_functor_common<sd_glui2body_type*(*)(),sd_glui2body_type*>;
   template class backend_functor<sd_glui2body_type*(*)(),sd_glui2body_type*>;
 
-  template class backend_functor_common<void(*)(const MInteger&),void,const MInteger&>;
-  template class backend_functor<void(*)(const MInteger&),void,const MInteger&>;
+  template class backend_functor_common<void(*)(double*,double*),void,double*,double*>;
+  template class backend_functor<void(*)(double*,double*),void,double*,double*>;
 
   template class backend_functor_common<DS_IBINTVARS*(*)(),DS_IBINTVARS*>;
   template class backend_functor<DS_IBINTVARS*(*)(),DS_IBINTVARS*>;
@@ -444,17 +438,14 @@ namespace Gambit
   template class backend_functor_common<void(*)(int&,int&,int&),void,int&,int&,int&>;
   template class backend_functor<void(*)(int&,int&,int&),void,int&,int&,int&>;
 
-  template class backend_functor_common<sd_mbmb_type*(*)(),sd_mbmb_type*>;
-  template class backend_functor<sd_mbmb_type*(*)(),sd_mbmb_type*>;
+  template class backend_functor_common<Farray_Freal8_1_100_1_5_1_4*(*)(),Farray_Freal8_1_100_1_5_1_4*>;
+  template class backend_functor<Farray_Freal8_1_100_1_5_1_4*(*)(),Farray_Freal8_1_100_1_5_1_4*>;
 
   template class backend_functor_common<double(*)(double,double,double*,double*,double*,const parameters*,double),double,double,double,double*,double*,double*,const parameters*,double>;
   template class backend_functor<double(*)(double,double,double*,double*,double*,const parameters*,double),double,double,double,double*,double*,double*,const parameters*,double>;
 
   template class backend_functor_common<DS_MSSMPAR*(*)(),DS_MSSMPAR*>;
   template class backend_functor<DS_MSSMPAR*(*)(),DS_MSSMPAR*>;
-
-  template class backend_functor_common<susyhitin_type*(*)(),susyhitin_type*>;
-  template class backend_functor<susyhitin_type*(*)(),susyhitin_type*>;
 
   template class backend_functor_common<sd_neut2bodygrav_type*(*)(),sd_neut2bodygrav_type*>;
   template class backend_functor<sd_neut2bodygrav_type*(*)(),sd_neut2bodygrav_type*>;
@@ -467,9 +458,6 @@ namespace Gambit
 
   template class backend_functor_common<sd_stoploop_type*(*)(),sd_stoploop_type*>;
   template class backend_functor<sd_stoploop_type*(*)(),sd_stoploop_type*>;
-
-  template class backend_functor_common<void(*)(double&,double&,double&,int&),void,double&,double&,double&,int&>;
-  template class backend_functor<void(*)(double&,double&,double&,int&),void,double&,double&,double&,int&>;
 
   template class backend_functor_common<DS_SMCUSEFUL*(*)(),DS_SMCUSEFUL*>;
   template class backend_functor<DS_SMCUSEFUL*(*)(),DS_SMCUSEFUL*>;
@@ -501,8 +489,8 @@ namespace Gambit
   template class backend_functor_common<void(*)(const Finputs&),void,const Finputs&>;
   template class backend_functor<void(*)(const Finputs&),void,const Finputs&>;
 
-  template class backend_functor_common<void(*)(int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&),void,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&>;
-  template class backend_functor<void(*)(int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&),void,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&>;
+  template class backend_functor_common<void(*)(int,std::complex<double>*,std::complex<double>*,double,double,const parameters*),void,int,std::complex<double>*,std::complex<double>*,double,double,const parameters*>;
+  template class backend_functor<void(*)(int,std::complex<double>*,std::complex<double>*,double,double,const parameters*),void,int,std::complex<double>*,std::complex<double>*,double,double,const parameters*>;
 
   template class backend_functor_common<DS_RDMGEV*(*)(),DS_RDMGEV*>;
   template class backend_functor<DS_RDMGEV*(*)(),DS_RDMGEV*>;
@@ -510,8 +498,8 @@ namespace Gambit
   template class backend_functor_common<double(*)(int&,double&,double&),double,int&,double&,double&>;
   template class backend_functor<double(*)(int&,double&,double&),double,int&,double&,double&>;
 
-  template class backend_functor_common<double(*)(double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double),double,double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double>;
-  template class backend_functor<double(*)(double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double),double,double*,double*,double*,std::complex<double>*,std::complex<double>*,double*,std::complex<double>*,const parameters*,double>;
+  template class backend_functor_common<int(*)(double,int,int,double*),int,double,int,int,double*>;
+  template class backend_functor<int(*)(double,int,int,double*),int,double,int,int,double*>;
 
   template class backend_functor_common<hd_golddec_type*(*)(),hd_golddec_type*>;
   template class backend_functor<hd_golddec_type*(*)(),hd_golddec_type*>;
@@ -546,9 +534,6 @@ namespace Gambit
   template class backend_functor_common<Farray_Fcomplex16_1_2_1_2*(*)(),Farray_Fcomplex16_1_2_1_2*>;
   template class backend_functor<Farray_Fcomplex16_1_2_1_2*(*)(),Farray_Fcomplex16_1_2_1_2*>;
 
-  template class backend_functor_common<DS_MSPCTM*(*)(),DS_MSPCTM*>;
-  template class backend_functor<DS_MSPCTM*(*)(),DS_MSPCTM*>;
-
   template class backend_functor_common<double(*)(double*,double*,double*,double*,double,double,double,const parameters*),double,double*,double*,double*,double*,double,double,double,const parameters*>;
   template class backend_functor<double(*)(double*,double*,double*,double*,double,double,double,const parameters*),double,double*,double*,double*,double*,double,double,double,const parameters*>;
 
@@ -560,6 +545,9 @@ namespace Gambit
 
   template class backend_functor_common<DS_WIDTHS*(*)(),DS_WIDTHS*>;
   template class backend_functor<DS_WIDTHS*(*)(),DS_WIDTHS*>;
+
+  template class backend_functor_common<void(*)(double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&),void,double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&>;
+  template class backend_functor<void(*)(double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&),void,double&,double&,double&,bool&,bool&,Fstring<20>&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Freal8_1_3&,double&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_6&,Farray_Fcomplex16_1_6_1_6&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_3&,Farray_Fcomplex16_1_3_1_3&,Farray_Freal8_1_6_1_6&,Farray_Freal8_1_3_1_3&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_4&,Farray_Fcomplex16_1_4_1_4&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_4_1_4&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2_1_2&,Farray_Freal8_1_2&,Farray_Fcomplex16_1_2_1_2&,Farray_Freal8_1_2&,Farray_Freal8_1_2&,double&>;
 
   template class backend_functor_common<sd_snel2body_type*(*)(),sd_snel2body_type*>;
   template class backend_functor<sd_snel2body_type*(*)(),sd_snel2body_type*>;
@@ -573,8 +561,8 @@ namespace Gambit
   template class backend_functor_common<void(*)(int&,double&,double&,double&,int&,double&),void,int&,double&,double&,double&,int&,double&>;
   template class backend_functor<void(*)(int&,double&,double&,double&,int&,double&),void,int&,double&,double&,double&,int&,double&>;
 
-  template class backend_functor_common<void(*)(double*,double*,double*,double*,double*,double*,double*,double*),void,double*,double*,double*,double*,double*,double*,double*,double*>;
-  template class backend_functor<void(*)(double*,double*,double*,double*,double*,double*,double*,double*),void,double*,double*,double*,double*,double*,double*,double*,double*>;
+  template class backend_functor_common<void(*)(char*,int&,char*,int&),void,char*,int&,char*,int&>;
+  template class backend_functor<void(*)(char*,int&,char*,int&),void,char*,int&,char*,int&>;
 
   template class backend_functor_common<double*(*)(),double*>;
   template class backend_functor<double*(*)(),double*>;
@@ -606,11 +594,11 @@ namespace Gambit
   template class backend_functor_common<int(*)(const str&),int,const str&>;
   template class backend_functor<int(*)(const str&),int,const str&>;
 
-  template class backend_functor_common<double(*)(int,...),double,int>;
-  template class backend_functor<double(*)(int,...),double,int>;
+  template class backend_functor_common<void(*)(double&,double&,double&,int&),void,double&,double&,double&,int&>;
+  template class backend_functor<void(*)(double&,double&,double&,int&),void,double&,double&,double&,int&>;
 
-  template class backend_functor_common<sd_sup2body_type*(*)(),sd_sup2body_type*>;
-  template class backend_functor<sd_sup2body_type*(*)(),sd_sup2body_type*>;
+  template class backend_functor_common<std::vector<double>*(*)(),std::vector<double>*>;
+  template class backend_functor<std::vector<double>*(*)(),std::vector<double>*>;
 
   template class backend_functor_common<void(*)(const MInteger&,const double&,const double&,const double&,const double&,const double&),void,const MInteger&,const double&,const double&,const double&,const double&,const double&>;
   template class backend_functor<void(*)(const MInteger&,const double&,const double&,const double&,const double&,const double&),void,const MInteger&,const double&,const double&,const double&,const double&,const double&>;
@@ -639,8 +627,8 @@ namespace Gambit
   template class backend_functor_common<double(*)(const MInteger&),double,const MInteger&>;
   template class backend_functor<double(*)(const MInteger&),double,const MInteger&>;
 
-  template class backend_functor_common<void(*)(double*,double*),void,double*,double*>;
-  template class backend_functor<void(*)(double*,double*),void,double*,double*>;
+  template class backend_functor_common<void(*)(const MInteger&),void,const MInteger&>;
+  template class backend_functor<void(*)(const MInteger&),void,const MInteger&>;
 
   template class backend_functor_common<sd_char3body_type*(*)(),sd_char3body_type*>;
   template class backend_functor<sd_char3body_type*(*)(),sd_char3body_type*>;
@@ -669,8 +657,11 @@ namespace Gambit
   template class backend_functor_common<libFarrayTest_CB_type*(*)(),libFarrayTest_CB_type*>;
   template class backend_functor<libFarrayTest_CB_type*(*)(),libFarrayTest_CB_type*>;
 
-  template class backend_functor_common<void(*)(const MInteger&,double&,double&,double&,double&,double&),void,const MInteger&,double&,double&,double&,double&,double&>;
-  template class backend_functor<void(*)(const MInteger&,double&,double&,double&,double&,double&),void,const MInteger&,double&,double&,double&,double&,double&>;
+  template class backend_functor_common<void(*)(const char&),void,const char&>;
+  template class backend_functor<void(*)(const char&),void,const char&>;
+
+  template class backend_functor_common<double(*)(double&,double&),double,double&,double&>;
+  template class backend_functor<double(*)(double&,double&),double,double&,double&>;
 
   template class backend_functor_common<sd_stauwidth_type*(*)(),sd_stauwidth_type*>;
   template class backend_functor<sd_stauwidth_type*(*)(),sd_stauwidth_type*>;
@@ -681,23 +672,32 @@ namespace Gambit
   template class backend_functor_common<double(*)(const parameters*,double),double,const parameters*,double>;
   template class backend_functor<double(*)(const parameters*,double),double,const parameters*,double>;
 
+  template class backend_functor_common<double(*)(double(*)(double&),int&),double,double(*)(double&),int&>;
+  template class backend_functor<double(*)(double(*)(double&),int&),double,double(*)(double&),int&>;
+
   template class backend_functor_common<bool(*)(Fstring<20>),bool,Fstring<20>>;
   template class backend_functor<bool(*)(Fstring<20>),bool,Fstring<20>>;
 
   template class backend_functor_common<Spectrum(*)(const std::map<str,safe_ptr<double>>&),Spectrum,const std::map<str,safe_ptr<double>>&>;
   template class backend_functor<Spectrum(*)(const std::map<str,safe_ptr<double>>&),Spectrum,const std::map<str,safe_ptr<double>>&>;
 
-  template class backend_functor_common<Farray_Finteger_1_3*(*)(),Farray_Finteger_1_3*>;
-  template class backend_functor<Farray_Finteger_1_3*(*)(),Farray_Finteger_1_3*>;
+  template class backend_functor_common<susyhitin_type*(*)(),susyhitin_type*>;
+  template class backend_functor<susyhitin_type*(*)(),susyhitin_type*>;
+
+  template class backend_functor_common<void(*)(int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&),void,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&>;
+  template class backend_functor<void(*)(int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&),void,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&>;
 
   template class backend_functor_common<Farray_Freal8_1_2_1_2*(*)(),Farray_Freal8_1_2_1_2*>;
   template class backend_functor<Farray_Freal8_1_2_1_2*(*)(),Farray_Freal8_1_2_1_2*>;
 
-  template class backend_functor_common<sd_sbotwidth_type*(*)(),sd_sbotwidth_type*>;
-  template class backend_functor<sd_sbotwidth_type*(*)(),sd_sbotwidth_type*>;
+  template class backend_functor_common<sd_neutloop_type*(*)(),sd_neutloop_type*>;
+  template class backend_functor<sd_neutloop_type*(*)(),sd_neutloop_type*>;
 
-  template class backend_functor_common<void(*)(const MInteger&,const MInteger&,const MInteger&),void,const MInteger&,const MInteger&,const MInteger&>;
-  template class backend_functor<void(*)(const MInteger&,const MInteger&,const MInteger&),void,const MInteger&,const MInteger&,const MInteger&>;
+  template class backend_functor_common<MString(*)(const std::string&),MString,const std::string&>;
+  template class backend_functor<MString(*)(const std::string&),MString,const std::string&>;
+
+  template class backend_functor_common<void(*)(int&,fh_real&,Farray<fh_real,1,52>&),void,int&,fh_real&,Farray<fh_real,1,52>&>;
+  template class backend_functor<void(*)(int&,fh_real&,Farray<fh_real,1,52>&),void,int&,fh_real&,Farray<fh_real,1,52>&>;
 
   template class backend_functor_common<MBool(*)(),MBool>;
   template class backend_functor<MBool(*)(),MBool>;
@@ -720,8 +720,8 @@ namespace Gambit
   template class backend_functor_common<DS_VRTXS*(*)(),DS_VRTXS*>;
   template class backend_functor<DS_VRTXS*(*)(),DS_VRTXS*>;
 
-  template class backend_functor_common<void(*)(const char&),void,const char&>;
-  template class backend_functor<void(*)(const char&),void,const char&>;
+  template class backend_functor_common<void(*)(const MInteger&,double&,double&,double&,double&,double&),void,const MInteger&,double&,double&,double&,double&,double&>;
+  template class backend_functor<void(*)(const MInteger&,double&,double&,double&,double&,double&),void,const MInteger&,double&,double&,double&,double&,double&>;
 
   template class backend_functor_common<Farray_Fcomplex16_1_4_1_4*(*)(),Farray_Fcomplex16_1_4_1_4*>;
   template class backend_functor<Farray_Fcomplex16_1_4_1_4*(*)(),Farray_Fcomplex16_1_4_1_4*>;
@@ -768,8 +768,8 @@ namespace Gambit
   template class backend_functor_common<sd_sdown2body_type*(*)(),sd_sdown2body_type*>;
   template class backend_functor<sd_sdown2body_type*(*)(),sd_sdown2body_type*>;
 
-  template class backend_functor_common<MString(*)(const std::string&),MString,const std::string&>;
-  template class backend_functor<MString(*)(const std::string&),MString,const std::string&>;
+  template class backend_functor_common<Farray_Finteger_1_3*(*)(),Farray_Finteger_1_3*>;
+  template class backend_functor<Farray_Finteger_1_3*(*)(),Farray_Finteger_1_3*>;
 
   template class backend_functor_common<sd_gluiloop_type*(*)(),sd_gluiloop_type*>;
   template class backend_functor<sd_gluiloop_type*(*)(),sd_gluiloop_type*>;
@@ -807,8 +807,8 @@ namespace Gambit
   template class backend_functor_common<int(*)(char*),int,char*>;
   template class backend_functor<int(*)(char*),int,char*>;
 
-  template class backend_functor_common<sd_neutloop_type*(*)(),sd_neutloop_type*>;
-  template class backend_functor<sd_neutloop_type*(*)(),sd_neutloop_type*>;
+  template class backend_functor_common<sd_sbotwidth_type*(*)(),sd_sbotwidth_type*>;
+  template class backend_functor<sd_sbotwidth_type*(*)(),sd_sbotwidth_type*>;
 
   template class backend_functor_common<void(*)(double&,double&,double&,double&),void,double&,double&,double&,double&>;
   template class backend_functor<void(*)(double&,double&,double&,double&),void,double&,double&,double&,double&>;

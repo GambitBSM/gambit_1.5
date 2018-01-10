@@ -97,6 +97,11 @@ namespace Gambit {
       }
 
 
+    protected:
+      void clear() {
+        _numSR = 0;
+      }
+
       ///////////////////
 
     };

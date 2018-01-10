@@ -35,20 +35,33 @@ namespace Gambit {
       //@{
       HEPUtilsAnalysisContainer() : ready(false) { }
       ~HEPUtilsAnalysisContainer() { clear(); }
-      /// Reset the analyses contained within this instance.
+      /// Delete and clear the analyses contained within this instance.
       void clear();
       //@}
+
+      // /// @name Access contents info:
+      // //@{
+      // /// List of contained analysis names
+      // /// Number of contained analyses
+      // //@}
 
       /// @name (Re-)Initialization functions:
       //@{
       /// Initialize analyses by their names.
       void init(const std::vector<std::string>& analysisNames);
+      /// Re-initialize/reset already-instantiated analyses.
+      void reset();
       //@}
 
-      /// @name Event analysis and analysis finalization functions:
+      /// @name Event analysis
       //@{
       /// Analyze an event.
+      /// @todo Analyze is const?! What about internal counter updates?
       void analyze(const HEPUtils::Event&) const;
+      //@}
+
+      /// @name Analysis post-processing (combination, scaling, etc.):
+      //@{
       /// Add cross-sections and errors for two different process types
       void add_xsec(double, double);
       /// Add cross-sections and errors for two different process types

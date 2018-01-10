@@ -250,9 +250,9 @@ namespace Gambit {
             bool cC_METGt200    =false;
             bool cC_MT2110      =false;
 
-            //Lepton Num
+	    //Lepton Num
             if(sgLeptons.size() == 2){
-            
+	      
                 // Opposite sign leptons, pT(l1,l2)>25,20GeV, mll>20GeV
                 HEPUtils::P4 lepton0=sgLeptons.at(0)->mom();
                 HEPUtils::P4 lepton1=sgLeptons.at(1)->mom();
@@ -261,7 +261,8 @@ namespace Gambit {
                 if (sgLeptons[0]->pid()*sgLeptons[1]->pid()>0.) cout<<"SAME Sign!!!!!"<<endl;
                 Savelep1 << sgLeptons[0]->pT() << endl;
                 Savelep2 << sgLeptons[1]->pT() << endl;
-                //cout<<sgLeptons[0]->pT() <<"," << sgLeptons[1]->pT() <<endl;
+		
+                cout<< "CHECK " << sgLeptons[0]->pT() <<" " << sgLeptons[1]->pT() << " " << Mll << endl;
                 
                 if (sgLeptons[0]->pid()*sgLeptons[1]->pid()<0. && sgLeptons[0]->pT() > 25. && sgLeptons[1]->pT() > 20. && Mll>20.){
                     cABC_TriggerOS              = true;
@@ -567,8 +568,23 @@ namespace Gambit {
             return;
         }
 
+    protected:
+      void clear() {
+	_SRASF120=0; _SRADF120=0; _SRASF140=0; _SRADF140=0;
+	_SRASF160=0; _SRADF160=0; _SRASF180=0; _SRADF180=0;
+	_SRBSF120=0; _SRBDF120=0; _SRBSF140=0; _SRBDF140=0;
+	_SRCSF110=0; _SRCDF110=0;
+	//_SR3BodyTSF=0; _SR3BodyTDF=0; _SR3BodyWSF=0; _SR3BodyWDF=0;
+	_SR4b=0;
+	
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
+
+      
     };
 
+    
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_2LEPStop_36invfb)
 

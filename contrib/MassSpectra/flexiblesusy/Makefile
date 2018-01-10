@@ -7,7 +7,7 @@ FLEXIBLESUSY_PATCH := 0
 FLEXIBLESUSY_EXTRA := -dev
 FLEXIBLESUSY_PKG   := $(PKGNAME)-$(FLEXIBLESUSY_VERSION)
 FLEXIBLESUSY_TAG   := v$(FLEXIBLESUSY_VERSION)
-ABSBASEDIR         := /mnt/xrootdd/gambit/rose/gambit/contrib/MassSpectra/flexiblesusy
+ABSBASEDIR         := /home/mwhi/gambit_new_repos/gambit/contrib/MassSpectra/flexiblesusy
 INSTALL_DIR        := 
 
 # Makefile switches
@@ -43,11 +43,11 @@ MATH               := math
 SOLVERS            := two_scale semi_analytic
 
 # Variables for compilation
-CXX                := /cvmfs/sft.cern.ch/lcg/releases/LCG_88/gcc/6.2.0/x86_64-slc6/bin/g++
+CXX                := /usr/bin/c++
 CPPFLAGS           :=  $(patsubst %,-I%,$(MODULES)) -I.
-CXXFLAGS           :=  -fPIC -std=c++14 -fopenmp -Wall -Wextra -Wno-misleading-indentation -O2 -DNDEBUG -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-variable
-FC                 := /cvmfs/sft.cern.ch/lcg/releases/LCG_88/gcc/6.2.0/x86_64-slc6/bin/gfortran
-FFLAGS             :=  -fPIC -ffree-line-length-none -ffixed-line-length-none -cpp -fopenmp -O2
+CXXFLAGS           :=  -fPIC -std=c++14 -fopenmp -Wall -Wextra -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-variable
+FC                 := /usr/bin/gfortran
+FFLAGS             :=  -fPIC -ffree-line-length-none -ffixed-line-length-none -cpp -fopenmp
 FLIBS              := 
 MODULE_LIBEXT      := .a
 MODULE_MAKE_LIB_CMD:= ar cru
@@ -55,14 +55,14 @@ LDFLAGS            := -fopenmp
 LDLIBS             := 
 LIBLNK_LIBEXT      := .so
 LIBLNK_MAKE_LIB_CMD:= g++ -shared -o
-BLASLIBS           := /usr/lib64/liblapack.so /usr/lib64/libblas.so
+BLASLIBS           := /usr/lib/liblapack.so /usr/lib/libblas.so
 BOOSTTESTLIBS      := -lboost_unit_test_framework
 BOOSTTHREADLIBS    := 
-BOOSTFLAGS         :=  -I/cvmfs/sft.cern.ch/lcg/releases/LCG_88/Boost/1.62.0/x86_64-slc6-gcc62-opt/include/boost-1_62
-EIGENFLAGS         := -I/mnt/xrootdd/gambit/rose/gambit/build/../eigen-3.3.3
-GSLLIBS            := -L/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/gsl/2.1-x86_64-slc6-gcc62-opt/lib -lgsl -lgslcblas -lm
-GSLFLAGS           := -I/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/gsl/2.1-x86_64-slc6-gcc62-opt/include
-LAPACKLIBS         := /usr/lib64/liblapack.so /usr/lib64/libblas.so
+BOOSTFLAGS         :=  -I/usr/include
+EIGENFLAGS         := -I/usr/include/eigen3
+GSLLIBS            := -L/usr/lib -lgsl -lgslcblas -lm
+GSLFLAGS           := -I/usr/include
+LAPACKLIBS         := /usr/lib/liblapack.so /usr/lib/libblas.so
 LOOPFUNCFLAGS      := 
 LOOPFUNCLIBS       := 
 HIMALAYAFLAGS      := 

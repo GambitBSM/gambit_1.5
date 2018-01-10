@@ -73,16 +73,16 @@ namespace Gambit {
       
       // Define RestFrames objects
 
-      RestFrames::LabRecoFrame* LAB;
-      RestFrames::DecayRecoFrame* CM;
-      RestFrames::DecayRecoFrame* S;
-      RestFrames::VisibleRecoFrame* ISR;
-      RestFrames::VisibleRecoFrame* V;
-      RestFrames::InvisibleRecoFrame* I;
-      RestFrames::InvisibleGroup*  INV;
-      RestFrames::CombinatoricGroup* VIS;
-      RestFrames::SetMassInvJigsaw*   InvMass;
-      RestFrames::MinMassesCombJigsaw* SplitVis;
+      unique_ptr<RestFrames::LabRecoFrame> LAB;
+      unique_ptr<RestFrames::DecayRecoFrame> CM;
+      unique_ptr<RestFrames::DecayRecoFrame> S;
+      unique_ptr<RestFrames::VisibleRecoFrame> ISR;
+      unique_ptr<RestFrames::VisibleRecoFrame> V;
+      unique_ptr<RestFrames::InvisibleRecoFrame> I;
+      unique_ptr<RestFrames::InvisibleGroup>  INV;
+      unique_ptr<RestFrames::CombinatoricGroup> VIS;
+      unique_ptr<RestFrames::SetMassInvJigsaw>   InvMass;
+      unique_ptr<RestFrames::MinMassesCombJigsaw> SplitVis;
       
       void LeptonLeptonOverlapRemoval(vector<HEPUtils::Particle*> &lep1vec, vector<HEPUtils::Particle*> &lep2vec, double DeltaRMax) {
 
@@ -180,12 +180,12 @@ namespace Gambit {
 
 	// RestFrames initialisation
 
-	LAB = new RestFrames::LabRecoFrame("LAB","lab");
-	CM = new RestFrames::DecayRecoFrame("CM","cm");
-	S = new RestFrames::DecayRecoFrame("S","s");
-	ISR = new RestFrames::VisibleRecoFrame("ISR","isr");
-	V = new RestFrames::VisibleRecoFrame("V","v");
-	I = new RestFrames::InvisibleRecoFrame("I","i");
+	LAB.reset(new RestFrames::LabRecoFrame("LAB","lab"));
+	CM.reset(new RestFrames::DecayRecoFrame("CM","cm"));
+	S.reset(new RestFrames::DecayRecoFrame("S","s"));
+	ISR.reset(new RestFrames::VisibleRecoFrame("ISR","isr"));
+	V.reset(new RestFrames::VisibleRecoFrame("V","v"));
+	I.reset(new RestFrames::InvisibleRecoFrame("I","i"));
 
 	// Connect the frames
 	LAB->SetChildFrame(*CM);
@@ -198,20 +198,20 @@ namespace Gambit {
 	LAB->InitializeTree();
 
 	// Define groups
-	INV = new RestFrames::InvisibleGroup("INV","inv");
+	INV.reset(new RestFrames::InvisibleGroup("INV","inv"));
 	INV->AddFrame(*I);
-	VIS = new RestFrames::CombinatoricGroup("VIS","vis");
+	VIS.reset(new RestFrames::CombinatoricGroup("VIS","vis"));
 	VIS->AddFrame(*ISR);
 	VIS->SetNElementsForFrame(*ISR,1,false);
 	VIS->AddFrame(*V);
 	VIS->SetNElementsForFrame(*V,0,false);
 	
 	// set the invisible system mass to zero
-	InvMass = new RestFrames::SetMassInvJigsaw("InvMass","kSetMass");   
+	InvMass.reset(new RestFrames::SetMassInvJigsaw("InvMass","kSetMass")); 
 	INV->AddJigsaw(*InvMass);
 	
 	// define the rule for partitioning objects between "ISR" and "V"
-	SplitVis = new RestFrames::MinMassesCombJigsaw("CombPPJigsaw", "kMinMasses");
+	SplitVis.reset(new RestFrames::MinMassesCombJigsaw("CombPPJigsaw", "kMinMasses"));
 	VIS->AddJigsaw(*SplitVis);
 	// "0" group (ISR)
 	SplitVis->AddFrame(*ISR, 0);
@@ -1206,6 +1206,17 @@ namespace Gambit {
 	add_result(SignalRegionData(ANAME, "SRE", 3, {_numSRE, 0.}, {  3.64,0.79}));
 
         return;
+      }
+
+
+    protected:
+      void clear() {
+        _numSRA_TT=0; _numSRA_TW=0; _numSRA_T0=0;
+        _numSRB_TT=0; _numSRB_TW=0; _numSRB_T0=0;
+        _numSRC1=0; _numSRC2=0; _numSRC3=0; _numSRC4=0; _numSRC5=0;
+        _numSRD_low=0; _numSRD_high=0; _numSRE=0;
+        
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 
     };

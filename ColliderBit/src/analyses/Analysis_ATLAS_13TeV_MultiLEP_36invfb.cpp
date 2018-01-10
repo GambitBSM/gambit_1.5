@@ -1245,6 +1245,36 @@ namespace Gambit {
       }
 		 
 
+    protected:
+      void clear() {
+        _numSR2_SF_loose=0;
+        _numSR2_SF_tight=0;
+        _numSR2_DF_100=0;
+        _numSR2_DF_150=0;
+        _numSR2_DF_200=0;
+        _numSR2_DF_300=0;
+        _numSR2_int=0;
+        _numSR2_high=0;
+        _numSR2_low=0;
+        _numSR3_slep_a=0;
+        _numSR3_slep_b=0;
+        _numSR3_slep_c=0;
+        _numSR3_slep_d=0;
+        _numSR3_slep_e=0;
+        _numSR3_WZ_0Ja=0;
+        _numSR3_WZ_0Jb=0;
+        _numSR3_WZ_0Jc=0;
+        _numSR3_WZ_1Ja=0;
+        _numSR3_WZ_1Jb=0;
+        _numSR3_WZ_1Jc=0;
+        
+        std::fill(cutFlowVector1.begin(), cutFlowVector1.end(), 0);
+        std::fill(cutFlowVector2.begin(), cutFlowVector2.end(), 0);
+        std::fill(cutFlowVector3.begin(), cutFlowVector3.end(), 0);
+        std::fill(cutFlowVector4.begin(), cutFlowVector4.end(), 0);
+        std::fill(cutFlowVector5.begin(), cutFlowVector5.end(), 0);
+      }
+
     };
 
 

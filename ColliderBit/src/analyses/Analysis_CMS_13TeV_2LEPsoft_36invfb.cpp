@@ -439,12 +439,30 @@ namespace Gambit {
         add_result(results_SR12);
       }
 
+
+    protected:
+      void clear() {
+        _numSR1=0;
+        _numSR2=0;
+        _numSR3=0;
+        _numSR4=0;
+        _numSR5=0; 
+        _numSR6=0;
+        _numSR7=0; 
+        _numSR8=0;
+        _numSR9=0;
+        _numSR10=0; 
+        _numSR11=0;
+        _numSR12=0; 
+        
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
     };
 
 
     // Factory fn
     DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2LEPsoft_36invfb)
-
 
   }
 }
