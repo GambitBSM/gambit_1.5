@@ -3,6 +3,13 @@ GAMBIT Revision History
 Full details can be found in the git log.  Only a summary of the
 changes in each new version is given here.
 
+v1.1.2
+Bugfix release
+- Made DecayTable output SLHA1 and SLHA2 format decay tables
+- Added ability to ditch Mathematica support
+- Adjusted checksum and patch for dark update (no version number increment; very bad practice)
+  made by authors of HiggsSignals 1.4.0
+
 v1.1.1
 Bugfix release.
 - Fixed cmake bug preventing compilation on systems with Mathematica installed but without libuuid.

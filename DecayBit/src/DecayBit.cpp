@@ -2451,18 +2451,34 @@ namespace Gambit
         decays(psn.isnmulbar) = *Dep::snubar_muonl_decay_rates;  // Add the ~nu_mu decays.
         decays(psn.isntaulbar) = *Dep::snubar_taul_decay_rates;  // Add the ~nu_tau decays.
 
+        /// Spit out the full decay table as SLHA1 and SLHA2 files.
+        if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
+        {
+          // Spit out the full decay table in SLHA1 and SLHA2 formats.
+          str filename = runOptions->getValueOrDef<str>("GAMBIT_decays", "SLHA_output_filename");
+          decays.writeSLHAfile(1,filename+".slha1",false,psn);
+          decays.writeSLHAfile(2,filename+".slha2",false,psn);
+        }
+
       }
 
-      /// Spit out the full decay table as an SLHA file.
-      if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
+      else
+
       {
-        str filename = runOptions->getValueOrDef<str>("GAMBIT_decays.slha", "SLHA_output_filename");
-        decays.writeSLHAfile(filename);
+        /// Spit out the full decay table as an SLHA file.
+        if (runOptions->getValueOrDef<bool>(false, "drop_SLHA_file"))
+        {
+          // Spit out the full decay table in SLHA1 and SLHA2 formats.
+          str filename = runOptions->getValueOrDef<str>("GAMBIT_decays", "SLHA_output_filename");
+          decays.writeSLHAfile(2,filename+".slha",false);
+        }
+
       }
 
     }
 
-    /// Read an SLHA file in and use it to create a GAMBIT DecayTable
+    /// Read an SLHA2 file in and use it to create a GAMBIT DecayTable.
+    ///  Note that creating a DecayTable from an SLHA1 file is not possible at present.
     void all_decays_from_SLHA(DecayTable& decays)
     {
       using namespace Pipes::all_decays_from_SLHA;
