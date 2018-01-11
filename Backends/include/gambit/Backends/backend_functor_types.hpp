@@ -18,7 +18,7 @@
 ///  Authors:                                     
 ///                                               
 ///  \author The GAMBIT Collaboration            
-///  \date 10:16AM on January 10, 2018
+///  \date 04:37PM on January 10, 2018
 ///                                               
 ///  *********************************************
                                                   

@@ -30,9 +30,9 @@ namespace Gambit {
 
     bool sortByPT13(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
     bool sortByMass(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->mass() > jet2->mass()); }
-
+    
     double calcMT(HEPUtils::P4 jetMom,HEPUtils::P4 metMom){
-
+      
       //std::cout << "metMom.px() " << metMom.px() << " jetMom PT " << jetMom.pT() << std::endl;
       
       double met=sqrt(metMom.px()*metMom.px()+metMom.py()*metMom.py());
@@ -40,7 +40,7 @@ namespace Gambit {
       double mt=sqrt(2*jetMom.pT()*met*(1-std::cos(dphi)));
       
       return mt;
-
+      
     }
     
     // Class to randomly select m elements from an n-d vector
@@ -83,6 +83,8 @@ namespace Gambit {
       unique_ptr<RestFrames::CombinatoricGroup> VIS;
       unique_ptr<RestFrames::SetMassInvJigsaw>   InvMass;
       unique_ptr<RestFrames::MinMassesCombJigsaw> SplitVis;
+
+ 
       
       void LeptonLeptonOverlapRemoval(vector<HEPUtils::Particle*> &lep1vec, vector<HEPUtils::Particle*> &lep2vec, double DeltaRMax) {
 
@@ -1183,7 +1185,7 @@ namespace Gambit {
 
 	/// Register results objects with the results for each SR; obs & bkg numbers from the paper
 
-	static const string ANAME = "Analysis_ATLAS_13TeV_0LEPStop_13invfb";
+	static const string ANAME = "Analysis_ATLAS_13TeV_0LEPStop_20invfb";
 
 	/*int _numSRA_TT, _numSRA_TW, _numSRA_T0;
 	int _numSRB_TT, _numSRB_TW, _numSRB_T0;
