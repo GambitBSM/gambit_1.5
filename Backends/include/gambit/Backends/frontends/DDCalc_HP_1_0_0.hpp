@@ -14,6 +14,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2017 Aug
+///  \date 2018 Jan
 /// 
 ///  *********************************************
 
@@ -80,14 +81,14 @@ BE_FUNCTION(SIMPLE_2014_Init,    int, (const bool&), "C_DDCalc_simple_2014_init"
 // values are already set via DDCalc_InitHalo routine, so it need not be called at all if the default values are to be used.
 BE_FUNCTION(DDCalc_SetSHM, void, (const int&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setshm", "SetSHM")
 
-// Set the WIMP mass and couplings/cross-sections for the Higgs portal models. 
-//    *higgsportal:  mass, fps, fns, aps, ans 
-//  Units: mass [GeV]; f [GeV^-2] = pure scalar SI coupling; a [GeV^-2] = pure pseudoscalar SI coupling
-// Note the convention: f = G/2 where G is the effective 4 fermion DM-nucleon coupling
+// Set the WIMP mass and couplings for the Higgs portal DM models.
+//    *higgsportal:  mass, fsp, fsn, app, apn
+//  Units: mass [GeV]; f [GeV^-2] = pure scalar coupling; a [GeV^-2] = pure pseudoscalar coupling
+// Convention: f = G/2 where G is the effective 4 vertex DM-nucleon coupling.
 BE_FUNCTION(DDCalc_SetWIMP_higgsportal, void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_higgsportal", "SetWIMP_higgsportal")
 
-// Get the WIMP mass and couplings for the Higgs portal models
-BE_FUNCTION(DDCalc_GetWIMP_higgsportal, void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_higgsportal", "GetWIMP_higgsportal")
+// Get the WIMP mass and couplings for the Higgs portal DM models.
+BE_FUNCTION(DDCalc_GetWIMP_higgsportal, void, (const int&, double&, double&, double&, double&, double&), "C_DDCalc_ddcalc_getwimp_higgsportal", "GetWIMP_higgsportal")
 
 // Specify the minimum recoil energy to be included in the rate calculations [keV].  Note the efficiency curves already account for
 // detector and analysis thresholds regardless of this setting, so setting this to 0 keV (the default behavior when initialization is

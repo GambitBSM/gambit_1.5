@@ -23,7 +23,9 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Oct, 2017 Jun
+///  \date 2016 Oct
+///  \date 2017 Jun
+///  \date 2018 Jan
 ///
 ///  *********************************************
 
@@ -2228,12 +2230,13 @@ namespace Gambit
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
 
-      // Add the h->VV width to the total
+      // Add the h -> VV width to the total
       double massratio2 = pow(mass/mhpole,2);
       double midfactor = (1 - 4*massratio2 + 12*pow(massratio2,2));
       double gamma = (2.0*mass <= mhpole) ? ((pow(lambda*v0,2)*pow(mhpole,3))/(128.0*pi*pow(mass,4))) * midfactor * sqrt(1.0 - 4.0*massratio2) : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
+      // Print out the h -> VV width for debugging
       logger() << "Gamma (h -> VV) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
@@ -2270,12 +2273,13 @@ namespace Gambit
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
 
-      // Add the h->XX width to the total
+      // Add the h -> XX width to the total
       double massratio2 = pow(mass/mhpole,2);
       double lfactor = (1 - 4*massratio2*pow(cxi,2));
       double gamma = (2.0*mass <= mhpole) ? ((mhpole*pow(v0*lambda,2))/(16.0*pi)) * sqrt(1.0 - 4.0*massratio2) * lfactor : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
+      // Print out the h -> XX width for debugging
       logger() << "Gamma (h -> XX) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
@@ -2312,12 +2316,13 @@ namespace Gambit
       // Get the reference SM Higgs decays
       result = *Dep::Reference_SM_Higgs_decay_rates;
 
-      // Add the h->FF width to the total
+      // Add the h -> FF width to the total
       double massratio2 = pow(mass/mhpole,2);
       double lfactor = (1 - 4*massratio2*pow(cxi,2));
       double gamma = (2.0*mass <= mhpole) ? ((mhpole*pow(v0*lambda,2))/(8.0*pi)) * sqrt(1.0 - 4.0*massratio2) * lfactor : 0.0;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
+      // Print out the h -> FF width for debugging
       logger() << "Gamma (h -> FF) = " << gamma << " GeV" << std::endl;
 
       // Rescale the SM decay branching fractions.
