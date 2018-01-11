@@ -46,6 +46,10 @@
 #include <functional>
 #include <gsl/gsl_integration.h>
 
+#define pow2(a) ((a)*(a))          // Get speedy
+#define pow3(a) ((a)*(a)*(a))
+#define pow4(a) (pow2(a)*pow2(a)) 
+
 namespace Gambit
 {
 
@@ -81,7 +85,7 @@ namespace Gambit
     }
 
     /// Square root of the standard kinematic function lambda(a,b,c)
-    double sqrt_lambda(double a, double b, double c) { return sqrt(pow(a+b-c,2) - 4*a*b); }
+    double sqrt_lambda(double a, double b, double c) { return sqrt(pow2(a+b-c) - 4*a*b); }
 
     /// Breit-Wigner pole (complex)
     std::complex<double> BW(double q2, double m2, double imag_term) 
@@ -1406,10 +1410,42 @@ namespace Gambit
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// SUSY-HIT MSSM decays: stau_1
+    /// MSSM decays: stau_1 (Uses SUSY-HIT results or dedicated DecayBit calculation for small mass splittings)
     void stau_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::stau_1_decays;
+
+      // Collect results from the decay calculation for small stau--neutralino mass splitting.
+      // If this result is non-empty it should be used.
+      DecayTable::Entry smallsplit_decays = *Dep::stau_1_decay_rates_smallsplit;
+      if (smallsplit_decays.channels.size() > 0)
+        result = smallsplit_decays;
+      // Else, use the SUSY-HIT results
+      else
+        result = *Dep::stau_1_decay_rates_SH;
+
+      // // Debug output
+      // // _Anders DEBUG
+      // DecayTable::Entry SH_decays = *Dep::stau_1_decay_rates_SH;
+      // cout << "DEBUG: BR_N_tau            :  " << SH_decays.BF("~chi0_1", "tau-") << "    " << smallsplit_decays.BF("~chi0_1", "tau-") << endl;
+      // cout << "DEBUG: BR_N_pi_nu          :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "pi-", "nu_tau") << endl;
+      // cout << "DEBUG: BR_N_el_nubar_nu    :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "e-", "nubar_e", "nu_tau") << endl;
+      // cout << "DEBUG: BR_N_mu_nubar_nu    :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "mu-", "nubar_mu", "nu_tau") << endl;
+      // cout << "DEBUG: " << endl;
+      // cout << "DEBUG: width_N_tau         :  " << SH_decays.BF("~chi0_1", "tau-")*SH_decays.width_in_GeV << "    " << smallsplit_decays.BF("~chi0_1", "tau-")*smallsplit_decays.width_in_GeV << endl;
+      // cout << "DEBUG: width_N_pi_nu       :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "pi-", "nu_tau")*smallsplit_decays.width_in_GeV << endl;
+      // cout << "DEBUG: width_N_el_nubar_nu :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "e-", "nubar_e", "nu_tau")*smallsplit_decays.width_in_GeV << endl;
+      // cout << "DEBUG: width_N_mu_nubar_nu :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "mu-", "nubar_mu", "nu_tau")*smallsplit_decays.width_in_GeV << endl;
+
+      // cout << "DEBUG: total_width      :  " << SH_decays.width_in_GeV << "    " << smallsplit_decays.width_in_GeV << endl;
+      // cout << "DEBUG: ------------------  " << endl;
+
+    }
+
+    /// SUSY-HIT MSSM decays: stau_1
+    void stau_1_decays_SH (DecayTable::Entry& result)
+    {
+      using namespace Pipes::stau_1_decays_SH;
       mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
       result.calculator = BEreq::cb_sd_stauwidth.origin();
@@ -1513,22 +1549,27 @@ namespace Gambit
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
-    /// SUSY-HIT MSSM decays: chargino_plus_1
+    /// MSSM decays: chargino_plus_1 (Uses SUSY-HIT results or dedicated DecayBit calculation for small mass splittings)
     void chargino_plus_1_decays (DecayTable::Entry& result)
     {
       using namespace Pipes::chargino_plus_1_decays;
-      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
 
       // Collect results from the decay calculation for small chargino--neutralino mass splitting.
       // If this result is non-empty it should be used.
       DecayTable::Entry smallsplit_decays = *Dep::chargino_plus_1_decay_rates_smallsplit;
       if (smallsplit_decays.channels.size() > 0)
-      {
         result = smallsplit_decays;
-        return;
-      }
+      // Else, use the SUSY-HIT results
+      else
+        result = *Dep::chargino_plus_1_decay_rates_SH;
+    }
 
-      // If the results for small mass splitting does not apply, continue as normal.
+    /// SUSY-HIT MSSM decays: chargino_plus_1
+    void chargino_plus_1_decays_SH (DecayTable::Entry& result)
+    {
+      using namespace Pipes::chargino_plus_1_decays_SH;
+      mass_es_pseudonyms psn = *(Dep::SLHA_pseudonyms);
+
       result.calculator = BEreq::cb_sd_charwidth.origin();
       result.calculator_version = BEreq::cb_sd_charwidth.version();
 
@@ -2279,19 +2320,19 @@ namespace Gambit
       const double beta = -0.145;  // Parameter from form factor fit quoted in hep-ph/9607421, referring to https://link.springer.com/content/pdf/10.1007%2FBF01572024.pdf
 
       // Convenient quantities
-      const double m_N2             = pow(m_N,2);
-      const double m_C2             = pow(m_C,2);
-      const double m_el2            = pow(m_el,2);
-      const double m_mu2            = pow(m_mu,2);
-      const double m_pi2            = pow(m_pi,2);
-      const double m_rho_02         = pow(m_rho_0,2);
-      const double m_rho_prime2     = pow(m_rho_prime,2);
+      const double m_N2             = pow2(m_N);
+      const double m_C2             = pow2(m_C);
+      const double m_el2            = pow2(m_el);
+      const double m_mu2            = pow2(m_mu);
+      const double m_pi2            = pow2(m_pi);
+      const double m_rho_02         = pow2(m_rho_0);
+      const double m_rho_prime2     = pow2(m_rho_prime);
 
-      const double f_pi2            = pow(f_pi,2);
+      const double f_pi2            = pow2(f_pi);
 
-      const double G_F2             = pow(G_F,2);
-      const double O11L2            = pow(O11L,2);
-      const double O11R2            = pow(O11R,2);
+      const double G_F2             = pow2(G_F);
+      const double O11L2            = pow2(O11L);
+      const double O11R2            = pow2(O11R);
 
       // Map to store partial width results
       std::map<str,double> partial_widths;
@@ -2305,21 +2346,21 @@ namespace Gambit
         // Integrand 1
         std::function<double(double)> N_el_nu_integrand_1 = [&m_N2,&m_C2,&m_el2](double q2)
         { 
-          return (1. - (m_N2+m_el2)/q2) * pow(1. - q2/m_C2,2) * sqrt_lambda(q2,m_N2,m_el2);
+          return (1. - (m_N2+m_el2)/q2) * pow2(1. - q2/m_C2) * sqrt_lambda(q2,m_N2,m_el2);
         };
 
         // Integrand 2
         std::function<double(double)> N_el_nu_integrand_2 = [&m_N2,&m_C2,&m_el2](double q2)
         { 
-          return (q2/m_C2) * pow(1. - m_el2/q2,2) * sqrt_lambda(m_C2,m_N2,q2);
+          return (q2/m_C2) * pow2(1. - m_el2/q2) * sqrt_lambda(m_C2,m_N2,q2);
         };
 
         // Perform integrations
-        double N_el_nu_I1 = integrate_cquad(N_el_nu_integrand_1, pow(m_N+m_el,2), m_C2, 0, 1e-2);
-        double N_el_nu_I2 = integrate_cquad(N_el_nu_integrand_2, m_el2, pow(m_C-m_N,2), 0, 1e-2);
+        double N_el_nu_I1 = integrate_cquad(N_el_nu_integrand_1, pow2(m_N+m_el), m_C2, 0, 1e-2);
+        double N_el_nu_I2 = integrate_cquad(N_el_nu_integrand_2, m_el2, pow2(m_C-m_N), 0, 1e-2);
 
         // Put everything together
-        partial_widths["N_el+_nu"] = (1.*G_F2/pow(2*pi,3)) * ( m_C*(O11L2 + O11R2)*N_el_nu_I1 - 2.*m_N*O11L*O11R*N_el_nu_I2 );
+        partial_widths["N_el+_nu"] = (1.*G_F2/pow3(2*pi)) * ( m_C*(O11L2 + O11R2)*N_el_nu_I1 - 2.*m_N*O11L*O11R*N_el_nu_I2 );
       }
 
       // 
@@ -2331,21 +2372,21 @@ namespace Gambit
         // Integrand 1
         std::function<double(double)> N_mu_nu_integrand_1 = [&m_N2,&m_C2,&m_mu2](double q2)
         { 
-          return (1. - (m_N2+m_mu2)/q2) * pow(1. - q2/m_C2,2) * sqrt_lambda(q2,m_N2,m_mu2);
+          return (1. - (m_N2+m_mu2)/q2) * pow2(1. - q2/m_C2) * sqrt_lambda(q2,m_N2,m_mu2);
         };
 
         // Integrand 2
         std::function<double(double)> N_mu_nu_integrand_2 = [&m_N2,&m_C2,&m_mu2](double q2)
         { 
-          return (q2/m_C2) * pow(1. - m_mu2/q2,2) * sqrt_lambda(m_C2,m_N2,q2);
+          return (q2/m_C2) * pow2(1. - m_mu2/q2) * sqrt_lambda(m_C2,m_N2,q2);
         };
 
         // Perform integrations
-        double N_mu_nu_I1 = integrate_cquad(N_mu_nu_integrand_1, pow(m_N+m_mu,2), m_C2, 0, 1e-2);
-        double N_mu_nu_I2 = integrate_cquad(N_mu_nu_integrand_2, m_mu2, pow(m_C-m_N,2), 0, 1e-2);
+        double N_mu_nu_I1 = integrate_cquad(N_mu_nu_integrand_1, pow2(m_N+m_mu), m_C2, 0, 1e-2);
+        double N_mu_nu_I2 = integrate_cquad(N_mu_nu_integrand_2, m_mu2, pow2(m_C-m_N), 0, 1e-2);
 
         // Put everything together
-        partial_widths["N_mu+_nu"] = (1.*G_F2/pow(2*pi,3)) * ( m_C*(O11L2 + O11R2)*N_mu_nu_I1 - 2.*m_N*O11L*O11R*N_mu_nu_I2 );
+        partial_widths["N_mu+_nu"] = (1.*G_F2/pow3(2*pi)) * ( m_C*(O11L2 + O11R2)*N_mu_nu_I1 - 2.*m_N*O11L*O11R*N_mu_nu_I2 );
       }
 
       //
@@ -2356,8 +2397,8 @@ namespace Gambit
       {
         double k_pi = sqrt_lambda(m_C2,m_N2,m_pi2) / (2*m_C);
         partial_widths["N_pi+"] = ( (f_pi2 * G_F2 * k_pi / (4. * pi * m_C2)) *
-                          (  pow(O11L+O11R,2) * ( pow(m_C2-m_N2,2) - m_pi2*pow(m_C-m_N,2) ) 
-                           + pow(O11L-O11R,2) * ( pow(m_C2-m_N2,2) - m_pi2*pow(m_C+m_N,2) ) ) );
+                          (  pow2(O11L+O11R) * ( pow2(m_C2-m_N2) - m_pi2*pow2(m_C-m_N) ) 
+                           + pow2(O11L-O11R) * ( pow2(m_C2-m_N2) - m_pi2*pow2(m_C+m_N) ) ) );
       }
 
       //
@@ -2375,15 +2416,15 @@ namespace Gambit
         // Integrand
         std::function<double(double)> N_2pi_integrand = [&F,&m_N,&m_C,&m_N2,&m_C2,&m_pi2,&O11L,&O11R,&O11L2,&O11R2](double q2)
         { 
-          return pow(std::abs(F(q2)),2) * pow(1. - 4*m_pi2/q2,1.5) * sqrt_lambda(m_C2,m_N2,q2)
-                      * ( (O11L2+O11R2)*( q2*(m_C2+m_N2-2*q2) + pow(m_C2-m_N2,2) ) - (12*O11L*O11R*q2*m_C*m_N) );
+          return pow2(std::abs(F(q2))) * pow(1. - 4*m_pi2/q2,1.5) * sqrt_lambda(m_C2,m_N2,q2)
+                      * ( (O11L2+O11R2)*( q2*(m_C2+m_N2-2*q2) + pow2(m_C2-m_N2) ) - (12*O11L*O11R*q2*m_C*m_N) );
         };
 
         // Perform integration
-        double N_2pi_I = integrate_cquad(N_2pi_integrand, 4*m_pi2, pow(delta_m,2), 0, 1e-2);
+        double N_2pi_I = integrate_cquad(N_2pi_integrand, 4*m_pi2, pow2(delta_m), 0, 1e-2);
 
         // Put everything together
-        partial_widths["N_pi+_pi0"] = G_F2 / (192. * pow(pi,3) * pow(m_C,3)) * N_2pi_I;
+        partial_widths["N_pi+_pi0"] = G_F2 / (192. * pow3(pi) * pow3(m_C)) * N_2pi_I;
       }
 
       //
@@ -2396,10 +2437,10 @@ namespace Gambit
         std::function<double(double)> g = [&m_pi,&m_pi2,&m_rho_0](double q2)
         { 
           double res = 0.0;
-          if (q2 < pow(m_rho_0 + m_pi,2))
-            res = 4.1 * pow(q2-9*m_pi2,3) * (1. - 3.3*(q2-9*m_pi2) + 5.8*pow(q2-9*m_pi2,2));
+          if (q2 < pow2(m_rho_0 + m_pi))
+            res = 4.1 * pow3(q2-9*m_pi2) * (1. - 3.3*(q2-9*m_pi2) + 5.8*pow2(q2-9*m_pi2));
           else
-            res = q2 * (1.623 + 10.38/q2 - 9.32/pow(q2,2) + 0.65/pow(q2,3));
+            res = q2 * (1.623 + 10.38/q2 - 9.32/pow2(q2) + 0.65/pow3(q2));
           return res;
         };
 
@@ -2410,18 +2451,18 @@ namespace Gambit
         // Integrand
         std::function<double(double)> N_3pi_integrand = [&g,&m_N,&m_C,&m_N2,&m_C2,&O11L,&O11R,&O11L2,&O11R2,&f_pi2,&m_a,&gamma_a](double q2)
         { 
-          double BW_imag_term = m_a * gamma_a * g(q2)/g(pow(m_a,2));
+          double BW_imag_term = m_a * gamma_a * g(q2)/g(pow2(m_a));
 
-          return sqrt_lambda(m_C2,m_N2,q2) * pow(std::abs(BW(q2,pow(m_a,2),BW_imag_term)),2) * g(q2) 
-                   * ( (O11L2 + O11R2)*(m_C2 + m_N2 - 2*q2 + pow(m_C2-m_N2,2)/q2 )
+          return sqrt_lambda(m_C2,m_N2,q2) * pow2(std::abs(BW(q2,pow2(m_a),BW_imag_term))) * g(q2) 
+                   * ( (O11L2 + O11R2)*(m_C2 + m_N2 - 2*q2 + pow2(m_C2-m_N2)/q2 )
                        - 12*O11L*O11R*m_C*m_N ); 
         };
 
         // Perform integration
-        double N_3pi_I = integrate_cquad(N_3pi_integrand, 9*m_pi2, pow(delta_m,2), 0, 1e-2);
+        double N_3pi_I = integrate_cquad(N_3pi_integrand, 9*m_pi2, pow2(delta_m), 0, 1e-2);
 
         // Put everything together
-        partial_widths["N_pi+_pi0_pi0"] = G_F2 / (6912. * pow(pi,5) * pow(m_C,3) * f_pi2) * N_3pi_I;
+        partial_widths["N_pi+_pi0_pi0"] = G_F2 / (6912. * pow(pi,5) * pow3(m_C) * f_pi2) * N_3pi_I;
       }
 
       //
@@ -2456,6 +2497,27 @@ namespace Gambit
       }
 
       // Set other branching fractions to 0.
+      result.set_BF(0.0, 0.0, psn.isul, "dbar");
+      result.set_BF(0.0, 0.0, psn.isur, "dbar");
+      result.set_BF(0.0, 0.0, psn.isdlbar, "u");
+      result.set_BF(0.0, 0.0, psn.isdrbar, "u");
+      result.set_BF(0.0, 0.0, psn.iscl, "sbar");
+      result.set_BF(0.0, 0.0, psn.iscr, "sbar");
+      result.set_BF(0.0, 0.0, psn.isslbar, "c");
+      result.set_BF(0.0, 0.0, psn.issrbar, "c");
+      result.set_BF(0.0, 0.0, psn.ist1, "bbar");
+      result.set_BF(0.0, 0.0, psn.ist2, "bbar");
+      result.set_BF(0.0, 0.0, psn.isb1bar, "t");
+      result.set_BF(0.0, 0.0, psn.isb2bar, "t");
+      result.set_BF(0.0, 0.0, psn.isnel, "e+");
+      result.set_BF(0.0, 0.0, psn.isnmul, "mu+");
+      result.set_BF(0.0, 0.0, psn.isntaul, "tau+");
+      result.set_BF(0.0, 0.0, psn.isellbar, "nu_e");
+      result.set_BF(0.0, 0.0, psn.iselrbar, "nu_e");
+      result.set_BF(0.0, 0.0, psn.ismulbar, "nu_mu");
+      result.set_BF(0.0, 0.0, psn.ismurbar, "nu_mu");
+      result.set_BF(0.0, 0.0, psn.istau1bar, "nu_tau");
+      result.set_BF(0.0, 0.0, psn.istau2bar, "nu_tau");
       result.set_BF(0.0, 0.0, "~chi0_1", "W+");
       result.set_BF(0.0, 0.0, "~chi0_2", "W+");
       result.set_BF(0.0, 0.0, "~chi0_3", "W+");
@@ -2481,10 +2543,12 @@ namespace Gambit
       result.set_BF(0.0, 0.0, "~chi0_3", "t", "bbar");
       result.set_BF(0.0, 0.0, "~chi0_4", "t", "bbar");
       // (We calculate ~chi_01 e+ nu_e)
+      // result.set_BF(0.0, 0.0, "~chi0_1", "e+", "nu_e");
       result.set_BF(0.0, 0.0, "~chi0_2", "e+", "nu_e");
       result.set_BF(0.0, 0.0, "~chi0_3", "e+", "nu_e");
       result.set_BF(0.0, 0.0, "~chi0_4", "e+", "nu_e");
       // (We calculate ~chi_01 mu+ nu_mu)
+      // result.set_BF(0.0, 0.0, "~chi0_1", "mu+", "nu_mu");
       result.set_BF(0.0, 0.0, "~chi0_2", "mu+", "nu_mu");
       result.set_BF(0.0, 0.0, "~chi0_3", "mu+", "nu_mu");
       result.set_BF(0.0, 0.0, "~chi0_4", "mu+", "nu_mu");
@@ -2495,12 +2559,13 @@ namespace Gambit
       result.set_BF(0.0, 0.0, "~g", "u", "dbar");
       result.set_BF(0.0, 0.0, "~g", "c", "sbar");
       result.set_BF(0.0, 0.0, "~g", "t", "bbar");
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
 
     /// MSSM decays: stau decays for small stau--neutralino mass splitting. 
     /// Using results from T. Jittoh, J. Sato, T. Shimomura, M. Yamanaka, Phys. Rev. D73 (2006), hep-ph/0512197
-    // _Anders
     void stau_1_decays_smallsplit(DecayTable::Entry& result)
     {
       using namespace Pipes::stau_1_decays_smallsplit;
@@ -2529,29 +2594,19 @@ namespace Gambit
       // Get the gauge mixing
       const double F11 = stau_mix_4vec[0];
       const double F12 = stau_mix_4vec[1];
-      const double F21 = stau_mix_4vec[2];
-      const double F22 = stau_mix_4vec[3];
 
       // Stau--neutralino mass difference
       double delta_m = m_stau - m_N;
+      // cout << "DEBUG: delta_m          :  " << delta_m << endl;
 
-      // Debug output
-      cout << "DEBUG: m_N = " << m_N << endl;
-      cout << "DEBUG: m_stau = " << m_stau << endl;
-      cout << "DEBUG: delta_m = " << delta_m << endl;
-      cout << "DEBUG: m_light = " << m_light << endl;
-      cout << "DEBUG: m_heavy = " << m_heavy << endl;
-      cout << "DEBUG: F11, F12 = " << F11 << ", " << F12 << endl;
-      cout << "DEBUG: F21, F22 = " << F21 << ", " << F22 << endl;
-
-      // // If the stau--neutralino mass difference is large, 
-      // // the calculations in this module function should not be used.
-      // // Return empty result.
-      // if (delta_m > 1.5)
-      // {
-      //   result = DecayTable::Entry();
-      //   return;
-      // }
+      // If the stau--neutralino mass difference is large, 
+      // the calculations in this module function should not be used.
+      // Return empty result.
+      if (delta_m > 2.0)
+      {
+        result = DecayTable::Entry();
+        return;
+      }
 
       // 
       // Get constants and parameters
@@ -2562,6 +2617,8 @@ namespace Gambit
       const double m_el = *Param["mE"];
       const double m_mu = *Param["mMu"];
       const double m_tau = *Param["mTau"];
+      // @todo Get w_tau properly from DecayBit
+      const double w_tau = 2.267e-12;
       const double m_W = spec.safeget(Par::Pole_Mass,24,0);
       const double g_2 = mssm.safeget(Par::dimensionless,"g2");
       const double sinW2 = mssm.safeget(Par::dimensionless,"sinW2");
@@ -2576,7 +2633,7 @@ namespace Gambit
       // Derived constants
       double sinW = sqrt(sinW2);
       double cosW = sqrt(1.-sinW2);
-      double cosb = 1./sqrt(1.+pow(tanb,2));
+      double cosb = 1./sqrt(1.+pow2(tanb));
 
       // Calculate couplings
       double N11p = N11*cosW+N12*sinW;
@@ -2584,10 +2641,149 @@ namespace Gambit
       double gL = (root2*g_2*sinW*N11p + root2*g_2*N12p/cosW*(0.5-sinW2))*F11 - g_2*m_tau*N13/root2/m_W/cosb*F12;
       double gR = -g_2*m_tau*N13/root2/m_W/cosb*F11 + (-root2*g_2*sinW*N11p + root2*g_2*sinW2*N12p/cosW)*F12;
 
-      // Debug output
-      cout << "DEBUG: gL = " << gL << endl;
-      cout << "DEBUG: gR = " << gR << endl;
 
+      // Map to store partial width results
+      std::map<str,double> partial_widths;
+
+      // 
+      // Channel: ~tau_1- --> ~chi0_1 tau-
+      // 
+      std::function<double()> width_N_tau = [&m_stau,&m_N,&m_tau,&gL,&gR]()
+      { 
+        double width = 0.0;
+        if (m_stau > m_N + m_tau)
+        {
+          width = pow4(m_stau) + pow4(m_N) + pow4(m_tau);
+          width = width - 2.*pow2(m_stau)*pow2(m_N) - 2.*pow2(m_stau)*pow2(m_tau) - 2.*pow2(m_N)*pow2(m_tau);
+          width = sqrt(width) * ( (pow2(gL)+pow2(gR))*(pow2(m_stau)-pow2(m_N)-pow2(m_tau)) - 4.*gL*gR*m_tau*m_N );
+          width = width / (16.*pi*pow3(m_stau));
+        }
+        return width;
+      };
+      partial_widths["N_tau-"] = width_N_tau();
+
+
+      // 
+      // Channel: ~tau_1- --> ~chi0_1 pi- nutau
+      // 
+      std::function<double()> width_N_pi_nu = [&m_stau,&m_N,&m_tau,&m_pi,&gL,&gR,&w_tau,&G_F,&f_pi,&costc]()
+      { 
+        double width = 0.0;
+
+        if (m_stau > m_N + m_pi)
+        {
+          // stau--neutralino mass difference
+          double dm = m_stau - m_N;
+
+          // Define 3-body integrand
+          std::function<double(double)> integ_3b = [&dm,&m_N,&m_tau,&m_pi,&gL,&gR,&w_tau](double x)
+          {
+            double integ = 0.0;
+            double qf2 = pow2(dm) - (pow2(dm)-pow2(m_pi))*x;
+            integ = sqrt((pow2(dm)-qf2)*(pow2(dm+2.*m_N)-qf2))/(pow2(qf2-pow2(m_tau))+pow2(m_tau*w_tau));
+            integ *= qf2-pow2(m_pi);
+            integ *= 0.25*(pow2(gL)*qf2+pow2(gR*m_tau))*(pow2(dm)+2.*m_N*dm-qf2)-gL*gR*m_N*m_tau*qf2;
+            return integ;
+          };
+
+          // Split integration by hand to avoid pole
+          double I;
+          if(dm < m_tau) 
+            I = integrate_cquad(integ_3b, 0, 1, 0, 1e-2);
+          else
+          {
+            double pole = (pow2(dm)-pow2(m_tau))/(pow2(dm)-pow2(m_pi));
+            double eps = 1E-15;
+            double I1 = integrate_cquad(integ_3b, 0, pole-eps, 0, 1e-2);
+            double I2 = integrate_cquad(integ_3b, pole-eps, 1, 0, 1e-2);
+            I = I1 + I2;
+          }
+
+          // Put everything together
+          width = pow2(G_F*f_pi*costc) * (pow2(dm)-pow2(m_pi)) / (64.*pow3(pi*m_stau)) * I;
+        }
+        return width;
+      };
+      partial_widths["N_pi-_nutau"] = width_N_pi_nu();
+
+
+      // 
+      // Channel: ~tau_1- --> ~chi0_1 l- nubarl nutau
+      // 
+      std::function<double(double)> width_N_l_nubar_nu = [&m_stau,&m_N,&m_tau,&gL,&gR,&w_tau,&G_F](double m_l)
+      { 
+        double width = 0.0;
+
+        if (m_stau > m_N + m_l)
+        {
+          // stau--neutralino mass difference
+          double dm = m_stau - m_N;
+
+          // Define 4-body integrand
+          std::function<double(double)> integ_4b = [&dm,&m_N,&m_tau,&m_l,&gL,&gR,&w_tau](double x)
+          {
+            double integ = 0.0;
+            double qf2 = pow2(dm) - (pow2(dm)-pow2(m_l))*x;
+            integ = sqrt((pow2(dm)-qf2)*(pow2(dm+2.*m_N)-qf2))/(pow2(qf2-pow2(m_tau))+pow2(m_tau*w_tau));
+            integ *= 0.25*(pow2(gL)*qf2+pow2(gR*m_tau))*(pow2(dm)+2.*m_N*dm-qf2)-gL*gR*m_N*m_tau*qf2;
+            integ *= 12.*pow4(m_l)*log(qf2/pow2(m_l))+(1.-pow4(m_l)/pow2(qf2))*(pow2(qf2)-8.*pow2(m_l)*qf2+pow4(m_l));
+            return integ;
+          };
+
+          // Split integration by hand to avoid pole
+          double I;
+          if(dm < m_tau) 
+            I = integrate_cquad(integ_4b, 0, 1, 0, 1e-2);
+          else
+          {
+            double pole = (pow2(dm)-pow2(m_tau))/(pow2(dm)-pow2(m_l));
+            double eps = 1E-15;
+            double I1 = integrate_cquad(integ_4b, 0, pole-eps, 0, 1e-2);
+            double I2 = integrate_cquad(integ_4b, pole-eps, 1, 0, 1e-2);
+            I = I1 + I2;
+          }
+
+          // Put everything together
+          width = pow2(G_F) * (pow2(dm)-pow2(m_l)) / (24.*pow(2.*pi,5)*pow3(m_stau)) * I;
+        }
+        return width;
+      };
+      partial_widths["N_el-_nubarel_nutau"] = width_N_l_nubar_nu(m_el);
+      partial_widths["N_mu-_nubarmu_nutau"] = width_N_l_nubar_nu(m_mu);
+
+
+      // 
+      // Store results
+      // 
+      result.calculator = "GAMBIT::DecayBit";
+      result.calculator_version = gambit_version();
+
+      // Sum partial widths
+      double total_width = 0.0;
+      for (auto it = partial_widths.begin(); it != partial_widths.end(); it++)
+        total_width += it->second;
+
+      result.width_in_GeV = total_width;
+
+      if (result.width_in_GeV > 0)
+      {
+        result.set_BF(partial_widths["N_tau-"]/result.width_in_GeV, 0.0, "~chi0_1", "tau-");
+        result.set_BF(partial_widths["N_pi-_nutau"]/result.width_in_GeV, 0.0, "~chi0_1", "pi-", "nu_tau");
+        result.set_BF(partial_widths["N_el-_nubarel_nutau"]/result.width_in_GeV, 0.0, "~chi0_1", "e-", "nubar_e", "nu_tau");
+        result.set_BF(partial_widths["N_mu-_nubarmu_nutau"]/result.width_in_GeV, 0.0, "~chi0_1", "mu-", "nubar_mu", "nu_tau");
+      }
+
+      // Set other branching fractions to 0.
+      result.set_BF(0.0, 0.0, "~chi0_2", "tau-");
+      result.set_BF(0.0, 0.0, "~chi0_3", "tau-");
+      result.set_BF(0.0, 0.0, "~chi0_4", "tau-");
+      result.set_BF(0.0, 0.0, "~chi-_1", "nu_tau");
+      result.set_BF(0.0, 0.0, "~chi-_2", "nu_tau");
+      result.set_BF(0.0, 0.0, psn.isntaul, "H-");
+      result.set_BF(0.0, 0.0, psn.isntaul, "W-");
+      result.set_BF(0.0, 0.0, "~G", "tau-");
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
 

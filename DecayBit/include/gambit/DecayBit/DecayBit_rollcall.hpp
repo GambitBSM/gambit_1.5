@@ -445,8 +445,19 @@ START_MODULE
 
     #define FUNCTION stau_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
+    DEPENDENCY(stau_1_decay_rates_SH, DecayTable::Entry)
     DEPENDENCY(stau_1_decay_rates_smallsplit, DecayTable::Entry)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY stau_1_decay_rates_SH
+  START_CAPABILITY
+
+    #define FUNCTION stau_1_decays_SH
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_stauwidth, (sh_reqd), sd_stauwidth_type)
     BACKEND_REQ(cb_sd_stau2body, (sh_reqd), sd_stau2body_type)
     BACKEND_REQ(cb_sd_stau2bodygrav, (sh_reqd), sd_stau2bodygrav_type)
@@ -532,9 +543,20 @@ START_MODULE
 
     #define FUNCTION chargino_plus_1_decays
     START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(chargino_plus_1_decay_rates_SH, DecayTable::Entry)
+    DEPENDENCY(chargino_plus_1_decay_rates_smallsplit, DecayTable::Entry)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY chargino_plus_1_decay_rates_SH
+  START_CAPABILITY
+
+    #define FUNCTION chargino_plus_1_decays_SH
+    START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     DEPENDENCY(MSSM_spectrum, Spectrum)
-    DEPENDENCY(chargino_plus_1_decay_rates_smallsplit, DecayTable::Entry)
     BACKEND_REQ(cb_sd_charwidth, (sh_reqd), sd_charwidth_type)
     BACKEND_REQ(cb_sd_char2body, (sh_reqd), sd_char2body_type)
     BACKEND_REQ(cb_sd_char2bodygrav, (sh_reqd), sd_char2bodygrav_type)
