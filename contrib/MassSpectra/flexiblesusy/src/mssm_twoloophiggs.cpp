@@ -29,7 +29,8 @@
    #define LOCK_MUTEX() std::lock_guard<std::mutex> lg(mtx_mssm)
    namespace flexiblesusy {namespace mssm_twoloophiggs {
       static std::mutex mtx_mssm; /// locks MSSM fortran functions
-   }}
+   } // namespace mssm_twoloophiggs
+} // namespace flexiblesusy
 #else
    #define LOCK_MUTEX()
 #endif

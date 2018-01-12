@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:42:37
+// File generated at Wed 25 Oct 2017 18:10:40
 
 #ifndef SingletDMZ3_SPECTRUM_GENERATOR_INTERFACE_H
 #define SingletDMZ3_SPECTRUM_GENERATOR_INTERFACE_H
@@ -158,8 +158,7 @@ template <class T>
 void SingletDMZ3_spectrum_generator_interface<T>::write_spectrum(
    const std::string& filename) const
 {
-   SingletDMZ3_spectrum_plotter plotter;
-   plotter.extract_spectrum(model);
+   SingletDMZ3_spectrum_plotter plotter(model);
    plotter.write_to_file(filename);
 }
 

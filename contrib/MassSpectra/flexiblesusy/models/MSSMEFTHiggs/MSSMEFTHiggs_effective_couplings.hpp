@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:54:46
+// File generated at Wed 25 Oct 2017 18:10:06
 
 #ifndef MSSMEFTHiggs_EFFECTIVE_COUPLINGS_H
 #define MSSMEFTHiggs_EFFECTIVE_COUPLINGS_H
