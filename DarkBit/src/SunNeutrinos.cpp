@@ -16,6 +16,10 @@
 ///          (sebastian.wild@ph.tum.de)
 ///  \date 2016 Aug
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2018 Jan
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -137,7 +141,7 @@ namespace Gambit
         result = maxcap;
       }
 
-      //cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
+      cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
 
     }
 
@@ -149,6 +153,40 @@ namespace Gambit
       using namespace Pipes::equilibration_time_Sun;
       double ca = *Dep::sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
+    }
+
+    // Equilibration time for capture and annihilation of fermion Higgs portal DM in the Sun (s)
+    // Here sigma-v is calculated at v = sqrt(2*T/mDM) where T = 1.35e-6 GeV (Sun's core temperature)
+    void equilibration_time_Sun_FermionDMHiggsPortal(double &result)
+    {
+      using namespace Pipes::equilibration_time_Sun_FermionDMHiggsPortal;
+
+      double sigmav = 0;
+      double T_Sun_core = 1.35e-6; // Sun's core temperature (GeV)
+
+      std::string DMid = *Dep::DarkMatter_ID;
+      TH_Process annProc = Dep::TH_ProcessCatalog->getProcess(DMid, DMid);
+
+      // Add all the regular channels
+      for (std::vector<TH_Channel>::iterator it = annProc.channelList.begin();
+          it != annProc.channelList.end(); ++it)
+      {
+        if ( it->nFinalStates == 2 )
+        {
+          // (sv)(v = sqrt(2T/mDM)) for two-body final state
+          sigmav += it->genRate->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
+        }
+      }
+      // Add invisible contributions
+      sigmav += annProc.genRateMisc->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
+
+      double ca = sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
+      result = pow(*Dep::capture_rate_Sun * ca, -0.5);
+
+      /***** START OF DEBUGGING CODE ***/
+      std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_FermionDMHiggsPortal = " << sigmav << std::endl;
+      std::cout << "capture_rate_Sun inside equilibration_time_Sun_FermionDMHiggsPortal = " << *Dep::capture_rate_Sun << std::endl;
+      /***** END OF DEBUGGING CODE ***/
     }
 
     /// Annihilation rate of dark matter in the Sun (s^-1)

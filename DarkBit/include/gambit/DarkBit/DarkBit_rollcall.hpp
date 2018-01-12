@@ -52,7 +52,8 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 October
+///  \date 2016 Oct
+///  \date 2018 Jan
 ///
 /// \author Aaron Vincent
 ///         (aaron.vincent@cparc.ca)
@@ -721,6 +722,15 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(sigmav, double)
       DEPENDENCY(mwimp, double)
+      DEPENDENCY(capture_rate_Sun, double)
+    #undef FUNCTION
+
+    /// Equilibration time for capture and annihilation of fermion Higgs portal DM in the Sun (s)
+    #define FUNCTION equilibration_time_Sun_FermionDMHiggsPortal
+      START_FUNCTION(double)
+      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(mwimp, double)
+      DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(capture_rate_Sun, double)
     #undef FUNCTION
   #undef CAPABILITY
