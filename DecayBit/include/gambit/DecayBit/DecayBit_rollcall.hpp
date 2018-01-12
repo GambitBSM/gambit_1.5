@@ -474,6 +474,7 @@ START_MODULE
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     DEPENDENCY(MSSM_spectrum, Spectrum)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODEL_DEPENDENCE(MSSM63atQ, MSSM63atMGUT, StandardModel_SLHA2)
     MODEL_GROUP(group1, (StandardModel_SLHA2))
     MODEL_GROUP(group2, (MSSM63atQ, MSSM63atMGUT))

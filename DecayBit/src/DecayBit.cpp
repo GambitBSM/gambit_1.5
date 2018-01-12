@@ -2602,7 +2602,7 @@ namespace Gambit
       // If the stau--neutralino mass difference is large, 
       // the calculations in this module function should not be used.
       // Return empty result.
-      if (delta_m > 2.0)
+      if (delta_m > 2.5)
       {
         result = DecayTable::Entry();
         return;
@@ -2618,7 +2618,7 @@ namespace Gambit
       const double m_mu = *Param["mMu"];
       const double m_tau = *Param["mTau"];
       // @todo Get w_tau properly from DecayBit
-      const double w_tau = 2.267e-12;
+      const double w_tau = Dep::tau_minus_decay_rates->width_in_GeV;
       const double m_W = spec.safeget(Par::Pole_Mass,24,0);
       const double g_2 = mssm.safeget(Par::dimensionless,"g2");
       const double sinW2 = mssm.safeget(Par::dimensionless,"sinW2");
