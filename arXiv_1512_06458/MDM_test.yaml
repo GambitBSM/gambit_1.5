@@ -1,0 +1,206 @@
+#################################################################################################
+#
+# Example YAML file for testing the MajoranaDM model in GAMBIT.
+# Standard Model, nuclear and DM halo parameter values are same as in arXiv:1512.06458.
+#
+# Author: Ankit Beniwal, University of Adelaide
+# Email : ankit.beniwal@adelaide.edu.au
+# Last modified: Aug, Sep 2017; Jan 2018
+#
+#################################################################################################
+
+Parameters:
+
+  StandardModel_SLHA2:
+    alphainv:  1.279008161E+02 # alpha^{-1}(mZ)^MSbar
+    GF      :  1.1663753920E-05 # G_Fermi
+    alphaS  :  1.18500000E-01 # alpha_s(mZ)^MSbar
+    mZ      :  9.11876000E+01 # mZ(pole)
+    mBmB    :  4.18000000E+00 # mb(mb)^MSbar
+    mT      :  1.730000E+02 # mtop(pole)
+    mTau    :  1.77682000E+00 # mtau(pole)
+    mNu3    :               0 # mnu3(pole)
+    mE      :  5.10998928E-04 # melectron(pole)
+    mNu1    :               0 # mnu1(pole)
+    mMu     :  1.05658E-01 # mmuon(pole)
+    mNu2    :               0 # mnu2(pole)
+    mD      :  4.80000000E-03 # md(2 GeV)^MSbar
+    mU      :  2.30000000E-03 # mu(2 GeV)^MSbar
+    mS      :  9.50000000E-02 # ms(2 GeV)^MSbar
+    mCmC    :  1.27500000E+00 # mc(mc)^MSbar
+    CKM_lambda  :  0.22537
+    CKM_A       :  0.814
+    CKM_rhobar  :  0.117
+    CKM_etabar  :  0.353
+    theta12 :  0.58376 # solar angle
+    theta23 :  0.76958 # atmospheric mixing angle
+    theta13 :  0.15495 #
+    delta13 :  0       # Dirac CP-violating phase
+    alpha1  :  0       # first Majorana CP-violating phase
+    alpha2  :  0
+
+  StandardModel_Higgs:
+    mH: 125
+
+  MajoranaDM:
+    mX: 
+      range: [45, 70]
+    lX: 
+      range: [1e-6, 1]
+      prior_type: log
+    cosXI: 1
+
+  nuclear_params_sigmas_sigmal:
+    sigmas: 40
+    sigmal: 58
+    deltau:  0.842
+    deltad:  -0.427
+    deltas:  -0.085
+
+  Halo_gNFW_rho0:
+    rho0: 0.4
+    v0: 220.0
+    vrot: 220.0
+    vesc: 544.0
+    rs: 20.0
+    r_sun: 8.5
+    alpha: 1
+    beta: 3
+    gamma: 1
+
+##############################################################################################
+Priors:
+
+  # All priors are simple for the scan, so we specify them directly in the Parameters section.
+
+##############################################################################################
+ObsLikes:
+
+    # LHC likelihoods
+    - capability: lnL_Higgs_invWidth
+      purpose:    LogLike
+
+    # Dark matter likelihoods
+    - capability: lnL_oh2
+      purpose:    LogLike
+
+    - capability: lnL_FermiLATdwarfs
+      purpose:    LogLike
+
+    - capability: LUX_2013_LogLikelihood
+      purpose:    LogLike
+
+    - capability: XENON1T_2017_LogLikelihood
+      purpose:    LogLike
+      
+    # Other observables
+    - capability: RD_oh2
+      purpose:    Observable
+
+    - capability: mwimp
+      purpose:    Observable
+      
+    - capability: sigmav
+      purpose:    Observable
+      
+    - capability: sigma_SI_p
+      purpose:    Observable
+      function:   sigma_SI_vnqn_FermionDMHiggsPortal
+
+##############################################################################################
+Rules:
+
+  # Choose to implement the relic density likelihood as an upper bound, not a detection
+  - capability: lnL_oh2
+    function: lnL_oh2_upperlimit
+    options:
+      oh2_obs: 0.1199
+      oh2_obserr: 0.0027
+
+  # Choose to rescale signals in direct and indirect detection by the relic density fraction
+  - capability: RD_fraction
+    function: RD_fraction_rescaled
+
+  # Choose to use detailed Fermi Pass-8 dwarfs likelihoood from gamLike
+  - capability: lnL_FermiLATdwarfs
+    function:  lnL_FermiLATdwarfs_gamLike
+
+  # Choose to use DarkSUSY's yield tables for indirect detection
+  - capability: SimYieldTable
+    function: SimYieldTable_DarkSUSY
+    options:
+      allow_yield_extrapolation: true
+
+  # Use DarkBit's own calculations of the direct detection couplings
+  - capability: DD_couplings
+    function: DD_couplings_MajoranaDM
+
+  # Choose to compute decay rates from the DecayBit module
+  - capability: decay_rates
+    function: all_decays
+
+  # Choose to obtain spectrum from the SpecBit module
+  - capability: MajoranaDM_spectrum
+    function: get_MajoranaDM_spectrum
+
+##############################################################################################
+Printer:
+
+  printer: hdf5
+
+  options:
+    output_file: "MDM_test.hdf5"
+    delete_file_on_restart: true
+    group: "/MDM"    
+
+##############################################################################################
+Scanner:
+
+  use_scanner: de
+
+  scanners:
+
+    mn:
+      plugin: multinest
+      like: LogLike
+      nlive: 1
+      tol: 0.7
+
+    de:
+      plugin: diver
+      like: LogLike
+      NP: 100
+      verbosity: 1
+      convthresh: 0.1
+
+    tw:
+      plugin: twalk
+      sqrtR: 1.001
+      chain_number: 512
+
+##############################################################################################
+Logger:
+
+  debug: false
+
+  redirection:
+    ["Debug"] : "debug.log"
+    [Default] : "default.log"
+    [DecayBit] : "DecayBit.log"
+    [DarkBit] : "DarkBit.log"
+    [PrecisionBit] : "PrecisionBit.log"
+    [SpecBit] : "SpecBit.log"
+    [Dependency Resolver] : "dep_resolver.log"
+
+##############################################################################################
+KeyValues:
+
+  dependency_resolution:
+    prefer_model_specific_functions: true
+
+  likelihood:
+    model_invalid_for_lnlike_below: -5e+5
+    model_invalid_for_lnlike_below_alt: -1e+5
+    debug: false
+
+  default_output_path: "runs/MDM/"
