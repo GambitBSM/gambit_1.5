@@ -1,0 +1,1116 @@
+#include <vector>
+#include <cmath>
+#include <memory>
+#include <iomanip>
+#include <random>
+
+#include "gambit/Utils/threadsafe_rng.hpp"
+#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/mt2_bisect.h"
+#include "TLorentzVector.h"
+#include "TVector3.h"
+#include "HEPUtils/FastJet.h"
+#include "TRandom3.h"
+
+using namespace std;
+
+/* The ATLAS 1 lepton direct stop analysis
+
+   Based on: https://arxiv.org/abs/1711.11520
+  
+   Code by Martin White (based on ATLAS public code snippet on HepData)
+
+   KNOWN ISSUES
+   
+   1) Have not added the BDT signal regions (despite having BDT code from ATLAS). They cover a specific kinematic region where the m_stop - m_chi1 mass difference is m_top, which I already know Pythia does badly with. 
+ 
+   2) We have no equivalent of the ATLAS fakeJER method. Am assuming a 3% JER on every jet for now.
+
+   3) Have used TLorentzVectors for boosting. Could probably be done without ROOT?
+
+*/
+
+namespace Gambit {
+  namespace ColliderBit {
+    
+    bool sortByPT_1l(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
+    bool sortByMass_1l(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->mass() > jet2->mass()); }
+    
+    double calcMT_1l(HEPUtils::P4 jetMom,HEPUtils::P4 metMom){
+      
+      //std::cout << "metMom.px() " << metMom.px() << " jetMom PT " << jetMom.pT() << std::endl;
+      
+      double met=sqrt(metMom.px()*metMom.px()+metMom.py()*metMom.py());
+      double dphi = metMom.deltaPhi(jetMom);
+      double mt=sqrt(2*jetMom.pT()*met*(1-std::cos(dphi)));
+      
+      return mt;
+      
+      }
+
+    
+    class Analysis_ATLAS_13TeV_1LEPStop_36invfb : public HEPUtilsAnalysis {
+    private:
+
+      // Numbers passing cuts
+      //int _numSRA_TT, _numSRA_TW, _numSRA_T0;
+
+      int num_tN_med;
+      int num_tN_high;
+      int num_bWN;
+      int num_bC2x_diag;
+      int num_bC2x_med;
+      int num_bCbv;
+      int num_DM_low_loose;
+      int num_DM_low;
+      int num_DM_high;
+      
+      vector<int> cutFlowVector;
+      vector<string> cutFlowVector_str;
+      int NCUTS; //=16;
+
+ 
+      
+      void LeptonLeptonOverlapRemoval(vector<HEPUtils::Particle*> &lep1vec, vector<HEPUtils::Particle*> &lep2vec, double DeltaRMax) {
+
+	//Routine to do jet-lepton check
+        //Discards jets if they are within DeltaRMax of a lepton
+
+        vector<HEPUtils::Particle*> Survivors;
+
+        for(unsigned int itlep1 = 0; itlep1 < lep1vec.size(); itlep1++) {
+          bool overlap = false;
+          HEPUtils::P4 lep1mom=lep1vec.at(itlep1)->mom();
+          for(unsigned int itlep2 = 0; itlep2 < lep2vec.size(); itlep2++) {
+            HEPUtils::P4 lep2mom=lep2vec.at(itlep2)->mom();
+            double dR;
+	    
+            dR=lep1mom.deltaR_eta(lep2mom);
+	    
+            if(fabs(dR) <= DeltaRMax) overlap=true;
+          }
+          if(overlap) continue;
+          Survivors.push_back(lep1vec.at(itlep1));
+        }
+        lep1vec=Survivors;
+	
+        return;
+      }
+      
+      void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*> &jetvec, vector<HEPUtils::Particle*> &lepvec, double DeltaRMax) {
+        //Routine to do jet-lepton check
+        //Discards jets if they are within DeltaRMax of a lepton
+
+        vector<HEPUtils::Jet*> Survivors;
+
+        for(unsigned int itjet = 0; itjet < jetvec.size(); itjet++) {
+          bool overlap = false;
+          HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
+          for(unsigned int itlep = 0; itlep < lepvec.size(); itlep++) {
+            HEPUtils::P4 lepmom=lepvec.at(itlep)->mom();
+            double dR;
+
+            dR=jetmom.deltaR_eta(lepmom);
+
+            if(fabs(dR) <= DeltaRMax) overlap=true;
+          }
+          if(overlap) continue;
+          Survivors.push_back(jetvec.at(itjet));
+        }
+        jetvec=Survivors;
+
+        return;
+      }
+
+      void LeptonJetOverlapRemoval(vector<HEPUtils::Particle*> &lepvec, vector<HEPUtils::Jet*> &jetvec) {
+        //Routine to do lepton-jet check
+        //Discards leptons if they are within dR of a jet as defined in analysis paper
+
+        vector<HEPUtils::Particle*> Survivors;
+
+        for(unsigned int itlep = 0; itlep < lepvec.size(); itlep++) {
+          bool overlap = false;
+          HEPUtils::P4 lepmom=lepvec.at(itlep)->mom();
+          for(unsigned int itjet= 0; itjet < jetvec.size(); itjet++) {
+            HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
+            double dR;
+	    double DeltaRMax = std::max(0.1,std::min(0.4, 0.04 + 10 / lepmom.pT()));
+            dR=jetmom.deltaR_eta(lepmom);
+
+            if(fabs(dR) <= DeltaRMax) overlap=true;
+          }
+          if(overlap) continue;
+          Survivors.push_back(lepvec.at(itlep));
+        }
+        lepvec=Survivors;
+
+        return;
+      }
+
+
+    public:
+
+      Analysis_ATLAS_13TeV_1LEPStop_36invfb() {
+
+	num_tN_med=0;
+	num_tN_high=0;
+	num_bWN=0;
+	num_bC2x_diag=0;
+	num_bC2x_med=0;
+	num_bCbv=0;
+	num_DM_low_loose=0;
+	num_DM_low=0;
+	num_DM_high=0;
+	
+	
+        NCUTS=120;
+        set_luminosity(36.);
+
+        for(int i=0;i<NCUTS;i++){
+          cutFlowVector.push_back(0);
+          cutFlowVector_str.push_back("");
+        }
+
+      }
+      
+      struct ClusteringHistory : public FJNS::PseudoJet::UserInfoBase {
+	enum Status {
+	  GOOD,
+	  JET_TOO_SMALL,
+	  JET_TOO_LARGE,
+	  TOO_MANY_ITERATIONS,
+	  NONE,
+	};
+	
+	struct Step {
+	  double pt;
+	  double r;
+	  size_t constit;
+	  Status status;
+	};
+	
+	size_t id;  // a per-event unique jet id that is needed for the event dump
+	std::vector<Step> steps;
+	
+	static ClusteringHistory* AddStep(ClusteringHistory& history, const Step& step) {
+	  auto newHistory = new ClusteringHistory(history);
+	  newHistory->steps.push_back(step);
+	  return newHistory;
+	}
+      };
+      
+      // Return the history of a PseudoJet object, handling all the ugly casting.
+      ClusteringHistory& GetHistory(const FJNS::PseudoJet& jet) {
+        auto shared_ptr = jet.user_info_shared_ptr();
+        return *dynamic_cast<ClusteringHistory*>(shared_ptr.get());
+      }
+
+      static std::vector<FJNS::PseudoJet> SortedByNConstit(std::vector<FJNS::PseudoJet> jets) {
+        std::sort(jets.begin(), jets.end(), [](const FJNS::PseudoJet& a, const FJNS::PseudoJet& b) {
+                        if (a.constituents().size() != b.constituents().size())
+                        return a.constituents().size() > b.constituents().size();
+
+                        return a.pt() > b.pt();
+                        });
+	
+        return jets;
+      }
+
+      inline double optimalRadius(const double pT, const double m) { return 2 * m / pT; }
+      inline double minRadius(const double pT, const double m) { return optimalRadius(pT, m) - 0.3; }
+      inline double maxRadius(const double pT, const double m) {
+        return optimalRadius(pT, m) + 0.5;
+      }
+      
+      
+      std::pair<bool, FJNS::PseudoJet> RecursiveRecluster(const FJNS::PseudoJet& candidate, double candRadius,
+							     const double mass, size_t step) {
+        if (minRadius(candidate.pt(), mass) > candRadius) {
+	  GetHistory(candidate).steps.back().status = ClusteringHistory::JET_TOO_SMALL;
+	  return std::make_pair(false, candidate);
+        } else if (maxRadius(candidate.pt(), mass) < candRadius) {
+	  const double newR = std::max(maxRadius(candidate.pt(), mass), candRadius / 2.);
+	  GetHistory(candidate).steps.back().status = ClusteringHistory::JET_TOO_LARGE;
+	  
+	  if (step > 10) {
+	    GetHistory(candidate).steps.back().status = ClusteringHistory::TOO_MANY_ITERATIONS;
+	    return std::make_pair(false, candidate);
+	  }
+	  
+	  FJNS::JetDefinition jetDef(FJNS::antikt_algorithm, newR);
+	  auto cs = new FJNS::ClusterSequence(candidate.constituents(), jetDef);
+	  
+	  std::vector<FJNS::PseudoJet> reclusteredJets;
+	  reclusteredJets = SortedByNConstit(cs->inclusive_jets());
+	  
+	  if (reclusteredJets.size() == 0) {
+	    delete cs;
+	    return std::make_pair(false, FJNS::PseudoJet());
+	  }
+	  
+	  cs->delete_self_when_unused();
+	  auto newCandidate = reclusteredJets[0];
+	  
+	  auto newHistory = ClusteringHistory::AddStep(
+						       GetHistory(candidate),
+						       {newCandidate.pt(), newR, newCandidate.constituents().size(), ClusteringHistory::NONE});
+	  newCandidate.set_user_info(newHistory);
+	  
+	  return RecursiveRecluster(newCandidate, newR, mass, step + 1);
+        } else {
+	  GetHistory(candidate).steps.back().status = ClusteringHistory::GOOD;
+	  return std::make_pair(true, candidate);
+        }
+      }
+      
+      
+      HEPUtils::P4 reclusteredParticle(vector<HEPUtils::Jet*> jets, vector<HEPUtils::Jet*> bjets, const double mass,
+				       const bool useBJets) {
+	
+	
+	//AnalysisObject p = AnalysisObject(0., 0., 0., 0., 0, 0, AnalysisObjectType::JET, 0, 0);
+	HEPUtils::P4 p;
+	double r0 = 3.0;
+
+	vector<HEPUtils::Jet*> usejets;
+	for(HEPUtils::Jet* jet : jets){
+	  usejets.push_back(jet);
+	}
+	
+        if (useBJets && bjets.size()){
+	  for(HEPUtils::Jet* bjet : bjets){
+	    usejets.push_back(bjet);
+	  }
+	}
+	 
+	
+        std::vector<FJNS::PseudoJet> initialJets;
+
+	for (HEPUtils::Jet* jet : usejets) {
+	  FJNS::PseudoJet Pjet(jet->mom().px(), jet->mom().py(), jet->mom().pz(), jet->mom().E());
+	  initialJets.push_back(Pjet);
+        }
+	
+        FJNS::JetDefinition jetDef(FJNS::antikt_algorithm, r0);
+        FJNS::ClusterSequence cs(initialJets, jetDef);
+	
+        auto candidates = FJNS::sorted_by_pt(cs.inclusive_jets());
+	
+        std::vector<FJNS::PseudoJet> selectedJets;
+        selectedJets.reserve(candidates.size());
+        std::vector<FJNS::PseudoJet> badJets;
+        badJets.reserve(candidates.size());
+
+        size_t i = 0;
+        for (auto& cand : candidates) {
+	  auto history = new ClusteringHistory();
+                history->id = i;
+                history->steps.push_back({cand.pt(), r0, cand.constituents().size(), ClusteringHistory::NONE});
+                cand.set_user_info(history);
+                ++i;
+        }
+
+        for (const auto& cand : candidates) {
+	  bool selected = false;
+	  FJNS::PseudoJet jet;
+	  
+	  std::tie(selected, jet) = RecursiveRecluster(cand, r0, mass, 0);
+	  
+	  if (selected)
+	    selectedJets.push_back(jet);
+	  else
+	    badJets.push_back(jet);
+        }
+	
+        if (selectedJets.size() < 1) {
+	  return p;
+        }
+	
+        vector<HEPUtils::Jet*> aoSelectedJets;
+	for (const FJNS::PseudoJet& j : selectedJets) aoSelectedJets.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
+
+	std::sort(aoSelectedJets.begin(), aoSelectedJets.end(), sortByPT_1l);
+	
+        //for (const auto jet : selectedJets)
+	//      aoSelectedJets.push_back(
+	//                               AnalysisObject(jet.px(), jet.py(), jet.pz(), jet.E(), 0, 0, AnalysisObjectType::COMBINED, 0, 0));
+
+	p = aoSelectedJets[0]->mom();
+
+        return p;
+      }
+      
+      
+      void analyze(const HEPUtils::Event* event) {
+        HEPUtilsAnalysis::analyze(event);
+
+        // Missing energy
+        HEPUtils::P4 metVec = event->missingmom();
+        double Met = event->met();
+
+
+        // Baseline lepton objects
+        vector<HEPUtils::Particle*> baselineElectrons, baselineMuons, baselineTaus, baselineLeptons;
+	
+        for (HEPUtils::Particle* electron : event->electrons()) {
+          if (electron->pT() > 5. && electron->abseta() < 2.47) {
+	    baselineElectrons.push_back(electron);
+	    baselineLeptons.push_back(electron);
+	  }
+        }
+        for (HEPUtils::Particle* muon : event->muons()) {
+          if (muon->pT() > 4. && muon->abseta() < 2.7){
+	    baselineMuons.push_back(muon);
+	    baselineLeptons.push_back(muon);
+	  }
+        }
+        for (HEPUtils::Particle* tau : event->taus()) {
+          if (tau->pT() > 20. && fabs(tau->eta()) < 2.5) baselineTaus.push_back(tau);
+        }
+        ATLAS::applyTauEfficiencyR1(baselineTaus);
+
+	// Photons
+	vector<HEPUtils::Particle*> signalPhotons;
+	for (HEPUtils::Particle* photon : event->photons()) {
+	  signalPhotons.push_back(photon);
+        }
+	
+	
+	// Jets
+        vector<HEPUtils::Jet*> bJets;
+        vector<HEPUtils::Jet*> nonBJets;
+        vector<HEPUtils::Jet*> trueBJets; //for debugging
+
+        // Get b jets
+        /// @note We assume that b jets have previously been 100% tagged
+        const std::vector<double>  a = {0,10.};
+        const std::vector<double>  b = {0,10000.};
+        const std::vector<double> c = {0.77}; // set b-tag efficiency to 77%
+        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+        for (HEPUtils::Jet* jet : event->jets()) {
+          bool hasTag=has_tag(_eff2d, jet->eta(), jet->pT());
+          if (jet->pT() > 20. && fabs(jet->eta()) < 4.9) {
+            if(jet->btag() && hasTag && fabs(jet->eta()) < 2.5 && jet->pT() > 20.){
+              bJets.push_back(jet);
+            } else {
+              nonBJets.push_back(jet);
+            }
+          }
+        }
+
+        // Overlap removal
+        vector<HEPUtils::Particle*> signalElectrons;
+	vector<HEPUtils::Particle*> signalSoftElectrons;
+        vector<HEPUtils::Particle*> signalMuons;
+	vector<HEPUtils::Particle*> signalSoftMuons;
+	vector<HEPUtils::Particle*> signalLeptons;
+	vector<HEPUtils::Particle*> signalSoftLeptons;
+        vector<HEPUtils::Particle*> electronsForVeto;
+        vector<HEPUtils::Particle*> muonsForVeto;
+
+        vector<HEPUtils::Jet*> signalJets;
+        vector<HEPUtils::Jet*> signalBJets;
+        vector<HEPUtils::Jet*> signalNonBJets;
+
+	// Note: use paper description instead of code snippet
+	// This is not identical to the overlap removal in the paper
+	// Probably good enough though
+	LeptonLeptonOverlapRemoval(baselineMuons,baselineElectrons,0.01); // mimics shared track requirement
+	JetLeptonOverlapRemoval(nonBJets,baselineElectrons,0.2);
+        LeptonJetOverlapRemoval(baselineElectrons,nonBJets);
+	LeptonJetOverlapRemoval(baselineElectrons,bJets);
+	LeptonJetOverlapRemoval(baselineMuons,nonBJets);
+	LeptonJetOverlapRemoval(baselineMuons,bJets);
+	LeptonLeptonOverlapRemoval(baselineTaus,baselineElectrons,0.1);
+	
+	// Now apply signal jet cuts
+	for (HEPUtils::Jet* jet : bJets) {
+	  if(jet->pT() > 25. && fabs(jet->eta())<2.5){
+	    jet->set_btag(true);
+	    signalJets.push_back(jet);
+	    signalBJets.push_back(jet);
+	  }
+        }
+	
+        for (HEPUtils::Jet* jet : nonBJets) {
+	  if(jet->pT() > 25. && fabs(jet->eta())<2.5){
+	    jet->set_btag(false);
+	    signalJets.push_back(jet);
+	    signalNonBJets.push_back(jet);
+	  }
+	}
+	
+ 
+	std::cout << "Here a" << std::endl;
+	// Note that the isolation requirements and tight selection are currently missing
+	
+	for (HEPUtils::Particle* electron : baselineElectrons) {
+          signalSoftElectrons.push_back(electron);
+	  signalSoftLeptons.push_back(electron);
+	  if(electron->pT() > 25.){
+	    signalElectrons.push_back(electron);
+	    signalLeptons.push_back(electron);
+	  }
+        }
+	
+        for (HEPUtils::Particle* muon : baselineMuons) {
+	  signalSoftMuons.push_back(muon);
+	  signalSoftLeptons.push_back(muon);
+          if(muon->pT() > 25.){
+	    signalMuons.push_back(muon);
+	    signalLeptons.push_back(muon);
+	  }
+        }
+
+        // We now have the signal electrons, muons, jets and b jets- move on to the analysis
+
+	int nJets=signalJets.size();
+	int nBJets = signalBJets.size();
+	
+	// Minimal event selection
+	bool cut_minSelection=false;
+	if((Met > 100. && (baselineElectrons.size()+baselineMuons.size()) == 1 &&
+	    ((signalSoftLeptons.size() == 1 || signalLeptons.size() == 1)) && nJets > 1))cut_minSelection=true;
+
+	vector<HEPUtils::Jet*> mostBjetLike;
+        vector<HEPUtils::Jet*> signalNotBjetLike;
+        vector<HEPUtils::Jet*> signalNotBjet;
+
+	std::cout << "Here b" << std::endl;
+	
+	// create containers with exactly 2 jets being considered to be b-jets and the inverse
+        int bJet1 = -1, bJet2 = -1;
+	
+        for (unsigned int i = 0; i < signalJets.size(); ++i) {
+	  if (!signalJets[i]->btag()) continue;
+	  if (bJet1 == -1)
+	    bJet1 = i;
+	  else if (bJet2 == -1) {
+	    bJet2 = i;
+	    break;
+	  }
+        }
+        if (bJet2 == -1)
+	  for (unsigned int i = 0; i < signalJets.size(); ++i) {
+	    if (signalJets[i]->btag()) continue;
+	    if (bJet1 == -1)
+	      bJet1 = i;
+	    else if (bJet2 == -1) {
+	      bJet2 = i;
+	      break;
+	    }
+	  }
+	std::cout << "signalJets.size() " << signalJets.size() << " bJet1 " << bJet1 << " bJet2 " << bJet2 << std::endl;
+
+	if(signalJets.size()>1){
+	  mostBjetLike.push_back(signalJets.at(bJet1));
+	  mostBjetLike.push_back(signalJets.at(bJet2));
+	}
+	
+	for (int i = 0; i < (int)signalJets.size(); ++i) {
+	  if (!signalJets[i]->btag())
+	    signalNotBjet.push_back(signalJets.at(i));
+	  if (i == bJet1 || i == bJet2) continue;
+	  signalNotBjetLike.push_back(signalJets.at(i));
+        }
+
+	/* ensure object collections to be pT sorted */
+	std::sort(signalJets.begin(), signalJets.end(), sortByPT_1l);
+        //if (baseTaus.size() > 0) sortObjectsByPt(baseTaus);
+
+	// Now make a collection to hold the JER for each jet
+	// Have obtained the values from Matthias' BuckFast code
+	// https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/CONFNOTES/ATLAS-CONF-2015-017/
+	// Parameterisation can be still improved, but eta dependence is minimal
+	const std::vector<double>  binedges_eta = {0,10.};
+	const std::vector<double>  binedges_pt = {0,50.,70.,100.,150.,200.,1000.,10000.};
+	const std::vector<double> JetsJER = {0.145,0.115,0.095,0.075,0.07,0.05,0.04};
+	static HEPUtils::BinnedFn2D<double> _resJets2D(binedges_eta,binedges_pt,JetsJER);
+      
+	vector<double> signalJER;
+	
+	for(unsigned int i = 0; i < signalJets.size(); ++i)signalJER.push_back(_resJets2D.get_at(signalJets[i]->abseta(), signalJets[i]->pT()));
+	
+	float sigmaAbsHtMiss = 0;
+	float Ht = 0;
+        /* calculate vecHtMiss */
+	HEPUtils::P4 vecHtMiss;
+        HEPUtils::P4 leptonHtMiss;
+
+	bool preselLowMet=false;
+	bool preselHighMet=false;
+	double MetPerp = 0.;
+	double HtSigMiss=0.;
+	double absDPhiJMet0 = 0.;
+	double absDPhiJMet1 = 0.;
+	double absDPhiJiMet = 0.;
+	double mT=0.;
+	double topReclM=0.;
+	double WReclM=0.;
+	double amT2=0.;
+	double dRbl=9999.;
+	double mT2Tau=0.;
+	double dPhiMetLep;
+
+	std::cout << "Here c" << std::endl;
+	
+	if(cut_minSelection){
+	  std::cout << "Here cc" << endl;
+	  for (unsigned int i = 0; i < baselineLeptons.size(); ++i) {
+	    vecHtMiss    -= baselineLeptons[i]->mom();
+	    leptonHtMiss -= baselineLeptons[i]->mom();
+	  }
+
+	  for (unsigned int i = 0; i < signalJets.size(); ++i)
+	    vecHtMiss -= signalJets[i]->mom();
+
+	  std::cout << "Here ccc" << endl;
+	  
+	  /* calculate Ht and HtSig */
+	  for (HEPUtils::Jet* jet : signalJets) Ht += jet->pT();
+
+	  TRandom3 myRandom;
+	  myRandom.SetSeed(signalJets[0]->pT());
+	  
+	  int PEs = 100;
+	  double smear_factor, ETmissmean = 0, ETmissRMS = 0;
+	  for (int j = 0; j < PEs; ++j) {
+	    double jetHtx = leptonHtMiss.px();
+	    double jetHty = leptonHtMiss.py();
+	    
+	    for (unsigned int i = 0; i < signalJets.size(); ++i) {
+	      //std::normal_distribution<> dx(signalJets[i]->mom().px(), signalJets[i]->mom().px() * signalJER[i]);
+	      //std::normal_distribution<> dy(signalJets[i]->mom().py(), signalJets[i]->mom().px() * signalJER[i]);
+	      //jetHtx -= dx(Random::rng());
+	      //jetHty -= dy(Random::rng());
+	      jetHtx -= myRandom.Gaus(signalJets[i]->mom().px(), signalJets[i]->mom().px() * signalJER[i]);
+	      jetHty -= myRandom.Gaus(signalJets[i]->mom().py(), signalJets[i]->mom().px() * signalJER[i]);
+	    }
+	    double ETtemp = sqrt(jetHtx * jetHtx + jetHty * jetHty);
+	    ETmissmean += ETtemp;
+	    ETmissRMS  += ETtemp * ETtemp;
+	  }
+	  std::cout << "Here cccc" << endl;
+	  ETmissmean = ETmissmean / PEs;
+	  sigmaAbsHtMiss = sqrt((ETmissRMS / PEs) - ETmissmean * ETmissmean);
+	  
+	  HtSigMiss = (ETmissmean - 100.) / sigmaAbsHtMiss;
+
+	  double absDPhiJMet[4] = {fabs(signalJets[0]->mom().deltaPhi(metVec)), fabs(signalJets[1]->mom().deltaPhi(metVec)),
+				   signalJets.size() > 2 ? fabs(signalJets[2]->mom().deltaPhi(metVec)) : NAN,
+				   signalJets.size() > 3 ? fabs(signalJets[3]->mom().deltaPhi(metVec)) : NAN};
+
+	  if(nJets>0)absDPhiJMet0 = absDPhiJMet[0];
+	  if(nJets>1)absDPhiJMet1 = absDPhiJMet[1];
+	  
+	  for (int i = 1; i < 4; i++)
+	    if (absDPhiJMet[i] < absDPhiJiMet) absDPhiJiMet = absDPhiJMet[i];
+
+	  mT = calcMT_1l(baselineLeptons[0]->mom(), metVec);
+	  dPhiMetLep = fabs(metVec.deltaPhi(baselineLeptons[0]->mom()));
+
+	  // Calculate MT2 tau using the leading tau in the event
+	  std::cout << "Here d" << std::endl;
+	  
+	  mT2Tau = 120.;
+	  if(baselineTaus.size() > 0){
+
+	    double pa_tau[3] = { 0, baselineTaus[0]->mom().px(), baselineTaus[0]->mom().py() };
+	    double pb_tau[3] = { 0, baselineLeptons[0]->mom().px(), baselineLeptons[0]->mom().py() };
+	    double pmiss_tau[3] = { 0, metVec.px(), metVec.py() };
+	    double mn_tau = 0.;
+	    mt2_bisect::mt2 mt2_event_tau;
+	    mt2_event_tau.set_momenta(pa_tau,pb_tau,pmiss_tau);
+	    mt2_event_tau.set_mn(mn_tau);
+	    
+	    mT2Tau = mt2_event_tau.get_mt2();
+
+	  }
+	  
+	  float pTLepOverMet = baselineLeptons[0]->pT() / Met;
+	  preselHighMet = Met > 230 && mT > 30;
+	  preselLowMet  =  baselineLeptons[0]->pT() > 27 && signalBJets.size() > 0 && signalJets[0]->pT() > 50. && Met > 100 && mT > 90;
+
+	  // Apply tight selection if lepton is an electron
+	  // Am using same selection as 8 TeV (probably needs updating)
+	  // Note that we have already applied a 1 lepton cut
+	  if (baselineElectrons.size()==1 && baselineMuons.size()==0){
+
+	    vector<HEPUtils::Particle*> tightElectrons;
+	    tightElectrons.push_back(baselineElectrons[0]);
+	    ATLAS::applyTightIDElectronSelection(tightElectrons);
+	    preselLowMet = preselLowMet && (tightElectrons.size()==1);
+	  }
+	  
+	  // Now calculate amT2 using two different assignments of the b jets and the leptons
+	  std::cout << "Here e" << std::endl;
+	  HEPUtils::P4 lepton_plus_bjet0;
+	  HEPUtils::P4 lepton_plus_bjet1;
+	  
+	  lepton_plus_bjet0 = baselineLeptons[0]->mom()+mostBjetLike[0]->mom();
+	  lepton_plus_bjet1 = baselineLeptons[0]->mom()+mostBjetLike[1]->mom();
+	  
+	  double pa_a[3] = { 0, lepton_plus_bjet0.px(), lepton_plus_bjet0.py() };
+	  double pb_a[3] = { 80, mostBjetLike[1]->mom().px(), mostBjetLike[1]->mom().py() };
+	  double pmiss_a[3] = { 0, metVec.px(), metVec.py() };
+	  double mn_a = 0.;
+
+	  mt2_bisect::mt2 mt2_event_a;
+	  
+	  mt2_event_a.set_momenta(pa_a,pb_a,pmiss_a);
+	  mt2_event_a.set_mn(mn_a);
+	  
+	  double mt2a = mt2_event_a.get_mt2();
+	  
+	  double pa_b[3] = { 0, lepton_plus_bjet1.px(), lepton_plus_bjet1.py() };
+	  double pb_b[3] = { 80, mostBjetLike[0]->mom().px(), mostBjetLike[0]->mom().py() };
+	  double pmiss_b[3] = { 0, metVec.px(), metVec.py() };
+	  double mn_b = 0.;
+	  
+	  mt2_bisect::mt2 mt2_event_b;
+	  
+	  mt2_event_b.set_momenta(pa_b,pb_b,pmiss_b);
+	  mt2_event_b.set_mn(mn_b);
+	  double mt2b = mt2_event_b.get_mt2();
+	  
+	  amT2 = std::min(mt2a,mt2b);
+	  dRbl = baselineLeptons[0]->mom().deltaR_eta(mostBjetLike[0]->mom());
+	  
+	  /* Reconstruct top by a chi2 based method */
+	  float mW = 80.;
+	  float mTop = 170.;
+	  float chi2min = 9e99;
+	  //AnalysisObject* topChi2 = new AnalysisObject(0., 0., 0., 0., 0, 0, AnalysisObjectType::JET, 0, 0);
+	  HEPUtils::P4 topChi2;
+	  int jetComb[3] = {0, 0, 0};
+	  vector<double> signalBJER;
+	  
+	  for(unsigned int i = 0; i < mostBjetLike.size(); ++i)signalBJER.push_back(_resJets2D.get_at(mostBjetLike[i]->abseta(), mostBjetLike[i]->pT()));
+	  float f;
+	  
+	  for (int i = 0; i < (int)signalJets.size(); ++i) {
+                if (i == bJet1 || i == bJet2) continue;
+                for (int j = i + 1; j < (int)signalJets.size(); ++j) {
+                        if (j == bJet1 || j == bJet2) continue;
+                        for (unsigned int k = 0; k < mostBjetLike.size() && k < 2; ++k) {
+			  f = pow((signalJets[i]->mom() + signalJets[j]->mom() + mostBjetLike[k]->mom()).m() - mTop, 2) /
+			    (pow((signalJets[i]->mom() + signalJets[j]->mom() + mostBjetLike[k]->mom()).m(), 2) *
+			     (pow(signalJER[i], 2) + pow(signalJER[j], 2) + pow(signalBJER[k], 2))) +
+			    pow((signalJets[i]->mom() + signalJets[j]->mom()).m() - mW, 2) /
+			    (pow((signalJets[i]->mom() + signalJets[j]->mom()).m(), 2) * (pow(signalJER[i], 2) + pow(signalJER[j], 2)));
+			  if (f < chi2min) {
+			    chi2min = f;
+			    jetComb[0] = i;
+			    jetComb[1] = j;
+			    jetComb[2] = k;
+			  }
+                        }
+                }
+	  }
+	  topChi2 = signalJets[jetComb[0]]->mom() + signalJets[jetComb[1]]->mom() + mostBjetLike[jetComb[2]]->mom();
+	  
+	  std::cout << "Here f topChi2 mass" << topChi2.m() <<  std::endl;
+	  
+	  HEPUtils::P4 top1;
+	  top1 = baselineLeptons[0]->mom() + (jetComb[2] == 0 ? mostBjetLike[1]->mom() : mostBjetLike[0]->mom());
+
+	  std::cout << "Here ff" << std::endl;
+	  
+	  /* calculate MetPerp */
+	  
+	  TLorentzVector ttbar;
+	  ttbar.SetPxPyPzE((topChi2 + top1).px(),(topChi2 + top1).py(),(topChi2 + top1).pz(),(topChi2 + top1).E());
+	  TLorentzVector top1Rest;
+	  top1Rest.SetPxPyPzE(top1.px(),top1.py(),top1.pz(),top1.E());
+	  TLorentzVector metRest;
+	  metRest.SetPxPyPzE(metVec.px(),metVec.py(),metVec.pz(),metVec.E());
+
+	  std::cout << "ttbar " << ttbar.Px() << " " << ttbar.Py() << " " << ttbar.Pz() << " " << ttbar.E() << std::endl;
+	  ttbar.Boost(-ttbar.Px() / ttbar.E(), -ttbar.Py() / ttbar.E(), -ttbar.Pz() / ttbar.E());
+	  std::cout << "ttbar boosted " << ttbar.Px() << " " << ttbar.Py() << " " << ttbar.Pz() << " " << ttbar.E() << std::endl;
+	  
+	  top1Rest.Boost(-ttbar.Px() / ttbar.E(), -ttbar.Py() / ttbar.E(), -ttbar.Pz() / ttbar.E());
+	  metRest.Boost(-ttbar.Px() / ttbar.E(), -ttbar.Py() / ttbar.E(), -ttbar.Pz() / ttbar.E());
+	  MetPerp = metRest.Vect().XYvector().Norm(top1Rest.Vect().XYvector()).Mod();
+	  
+	  // Now we have to do the fancy jet reclustering to get reconstructed W and top particles
+	  std::cout << "Here MetPerp" << MetPerp << std::endl;
+	  HEPUtils::P4 WRecl = reclusteredParticle(signalNotBjet, mostBjetLike, mW, false); //signalNotBjet+mostBjetLike is inconsistent but bjets are not used anyway
+	  HEPUtils::P4 topRecl = reclusteredParticle(signalNotBjetLike, mostBjetLike, 175., true);
+	  std::cout << "Here fffff" << std::endl;
+	  topReclM=0;
+	  
+	  if (nBJets > 0 && nJets > 3 && preselHighMet)topReclM=topRecl.m();
+	  WReclM = WRecl.m();
+	  
+	}
+
+	std::cout << "Here g" << std::endl;
+	
+	// Should now be ready to do signal selections
+
+	bool is_tN_med=false;
+	bool is_tN_high=false;
+	bool is_bWN=false;
+	bool is_bC2x_diag=false;
+	bool is_bC2x_med=false;
+	bool is_bCbv=false;
+	bool is_DM_low_loose=false;
+	bool is_DM_low=false;
+	bool is_DM_high=false;
+
+	bool is_bffN=false;
+	bool is_bCsoft_diag=false;
+	bool is_bCsoft_med=false;
+	bool is_bCsoft_high=false;
+
+	// non-soft lepton selections
+	if (signalLeptons.size() == 1) {
+
+	  //tN_med
+	  if (nJets > 3 && nBJets > 0 && preselLowMet && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 50 &&
+	      signalJets[3]->pT() > 40 && Met > 250 && MetPerp > 230 && HtSigMiss > 14 && mT > 160 && amT2 > 175 &&
+	      topReclM > 150 && dRbl < 2.0 && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80)
+	    is_tN_med=true;
+
+	  //tN_high
+	  if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 &&
+	      signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550 && HtSigMiss > 27 && mT > 160 &&
+	      amT2 > 175 && topReclM > 130 && dRbl < 2.0 && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 &&
+	      mT2Tau > 80)
+	    is_tN_high=true;
+
+	  //bWN
+	  if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[0]->pT() > 50 && Met > 300 && mT > 130 &&
+	      amT2 < 110 && dPhiMetLep < 2.5 && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80)
+	    is_bWN=true;
+
+	  //bC2x_diag
+	  if (nJets > 3 && nBJets > 1 && preselHighMet && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 &&
+	      signalBJets[1]->pT() > 30 && Met > 230 && HtSigMiss > 13 && mT > 180 && amT2 > 175 &&
+	      absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7 && WReclM > 50 && mT2Tau > 80)
+	    is_bC2x_diag=true;
+
+	  //bC2x_med
+	  if (nJets > 3 && nBJets > 1 && preselHighMet && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 &&
+	      signalBJets[1]->pT() > 140 && Met > 230 && HtSigMiss > 10 && mT > 120 && amT2 > 300 &&
+	      absDPhiJMet0 > 0.9 && absDPhiJMet1 > 0.9 && WReclM > 50 && mT2Tau > 80)
+	    is_bC2x_med=true;
+	  
+	  //bCbv
+	  if (nJets > 1 && nBJets == 0 && preselHighMet && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 &&
+	      Met > 360 && HtSigMiss > 16 && mT > 200 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8 &&
+	      WReclM >= 70 && WReclM <= 100 && dPhiMetLep > 1.2 && baselineLeptons[0]->pT() > 60)
+	    is_bCbv=true;
+
+	  //DM_low_loose
+	  if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 &&
+	      Met > 300 && mT > 120 && HtSigMiss > 14 && amT2 > 140 && dPhiMetLep > 0.8 && absDPhiJiMet > 1.4)
+	    is_DM_low_loose=true;
+	  
+	  //DM_low
+	  if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 85 &&
+	      signalJets[2]->pT() > 65 && signalBJets[0]->pT() > 60 && Met > 320 && mT > 170 && HtSigMiss > 14 &&
+	      amT2 > 160 && topReclM > 130 && dPhiMetLep > 1.2 && absDPhiJiMet > 1.0 && mT2Tau > 80)
+	    is_DM_low=true;
+	  
+	  //DM_high
+	  if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[0]->pT() > 125 && signalJets[1]->pT() > 75 &&
+	      signalJets[2]->pT() > 65 && Met > 380 && mT > 225 && amT2 > 190 && topReclM > 130 &&
+	      dPhiMetLep > 1.2 && absDPhiJiMet > 1.0)
+	    is_DM_high=true;
+	  
+	}
+
+	
+
+	
+      	//bool isSRD_high=false;
+	
+	cutFlowVector_str[0] = "No cuts ";
+	cutFlowVector_str[1] = "Derivation skim";
+        cutFlowVector_str[2] = ">=1 baseline lepton ";
+        cutFlowVector_str[3] = ">=1 signal lepton ";
+        cutFlowVector_str[4] = "==1 signal lepton ";
+        cutFlowVector_str[5] = "==1 baseline lepton ";
+        cutFlowVector_str[6] = "XE trigger, >=4 jets, met > 230 GeV ";
+        cutFlowVector_str[7] = "deltaPhi(j1,met) > 0.4 ";
+        cutFlowVector_str[8] = "deltaPhi(j2,met) > 0.4 ";
+	cutFlowVector_str[9] = "mT2tau > 80 GeV ";
+	cutFlowVector_str[10] = "tN_med: j0 pT > 60 GeV";
+	cutFlowVector_str[11] = "tN_med: j1 pT > 50 GeV";	
+	cutFlowVector_str[12] = "tN_med: j2 pT > 40 GeV ";
+        cutFlowVector_str[13] = "tN_med: j3 pT > 40 GeV ";
+        cutFlowVector_str[14] = "tN_med: met > 250 GeV ";
+        cutFlowVector_str[15] = "tN_med: metPerp > 230 GeV";
+	cutFlowVector_str[16] = "tN_med: HTmissSig > 14 ";
+        cutFlowVector_str[17] = "tN_med: mT > 160 GeV";
+	cutFlowVector_str[18] = "tN_med: amt2 > 175 GeV";
+	cutFlowVector_str[19] = "tN_med: >=1 b jet ";
+	cutFlowVector_str[20] = "tN_med: deltaR(b,l) < 2.0";
+	cutFlowVector_str[21] = "tN_med: mtop_recl > 150 GeV";
+	cutFlowVector_str[22] = "tN_high: j0 pT > 100 GeV ";
+	cutFlowVector_str[23] = "tN_high: j1 pT > 80 GeV ";
+	cutFlowVector_str[24] = "tN_high: j2 pT > 50 GeV";
+	cutFlowVector_str[25] = "tN_high: j3 pT > 30 GeV";
+	cutFlowVector_str[26] = "tN_high: met > 550 GeV ";
+	cutFlowVector_str[27] = "tN_high: HTmissSig > 27";
+	cutFlowVector_str[28] = "tN_high: mT > 160 GeV ";
+	cutFlowVector_str[29] = "tN_high: amT2 > 175 GeV ";
+	cutFlowVector_str[30] = "tN_high: >= 1 b jet";
+	cutFlowVector_str[31] = "tN_high: deltaR(b,l) < 2.0";
+	cutFlowVector_str[32] = "tN_high: mtop_recl > 130 GeV";
+	cutFlowVector_str[33] = "SRB-TT: mT(b,MET) min > 200 GeV";
+	cutFlowVector_str[34] = "SRB-TT: Nbjets >=2 ";
+	cutFlowVector_str[35] = "SRB-TW: m jet1, R=1.2 < 120 GeV";
+	cutFlowVector_str[36] = "SRB-TW: m jet1, R=1.2 > 60 GeV";
+	cutFlowVector_str[37] = "SRB-TW: deltaR(b,b) > 1.2";
+	cutFlowVector_str[38] = "SRB-TW: mT(b,MET) max > 200 GeV";
+	cutFlowVector_str[39] = "SRB-TW: mT(b,MET) min > 200 GeV";
+	cutFlowVector_str[40] = "SRB-TW: Nbjets >=2 ";
+	cutFlowVector_str[41] = "SRB-T0: m jet1, R=1.2 < 60 GeV";
+	cutFlowVector_str[42] = "SRB-T0: mT(b,MET) min > 200 GeV";
+	cutFlowVector_str[43] = "SRB-T0: deltaR(b,b) > 1.2";
+	cutFlowVector_str[44] = "SRB-T0: mT(b,MET) max > 200 GeV";
+	cutFlowVector_str[45] = "SRB-T0: met > 250 GeV ";
+	cutFlowVector_str[46] = "SRB-T0: Nbjets >=2 ";
+
+	// Cutflow for SRD
+	cutFlowVector_str[47] = "SRD-high: No cuts ";
+	cutFlowVector_str[48] = "SRD-high: Derivation skim";
+        cutFlowVector_str[49] = "SRD-high: Lepton veto ";
+        cutFlowVector_str[50] = "SRD-high: Njets >= 4 ";
+        cutFlowVector_str[51] = "SRD-high: Nbjets >= 1 ";
+        cutFlowVector_str[52] = "SRD-high: met > 250 GeV ";
+        cutFlowVector_str[53] = "SRD-high: dPhi(jet,MET) > 0.4 ";
+        cutFlowVector_str[54] = "SRD-high: pT jet 1 > 80 GeV ";
+        cutFlowVector_str[55] = "SRD-high: pT jet 3 > 40 GeV ";
+	cutFlowVector_str[56] = "SRD-high: Njets >= 5 ";
+	cutFlowVector_str[57] = "SRD-high: pT jet 1 > 150 ";
+	cutFlowVector_str[58] = "SRD-high: pT jet 3 > 80 ";
+	cutFlowVector_str[59] = "SRD-high: pT jet 4 > 60 ";
+	cutFlowVector_str[60] = "SRD-high: mT(b,MET) min > 350 GeV ";
+	cutFlowVector_str[61] = "SRD-high: mT(b,MET) max > 450 GeV ";
+	cutFlowVector_str[62] = "SRD-high: Nbjets >=2 ";
+	cutFlowVector_str[63] = "SRD-high: met > 250 GeV ";
+	cutFlowVector_str[64] = "SRD-high: deltaR(b,b) > 0.8";
+	cutFlowVector_str[65] = "SRD-high: pT0b + pT1b > 400 GeV";
+	cutFlowVector_str[66] = "SRD-low: Njets >=5";
+	cutFlowVector_str[67] = "SRD-low: NBjets >=2";
+	cutFlowVector_str[68] = "SRD-low: met > 250 GeV";
+	cutFlowVector_str[69] = "SRD-low: mT(b,MET) min > 250 GeV ";
+	cutFlowVector_str[70] = "SRD-low: mT(b,MET) max > 300 GeV ";
+	cutFlowVector_str[71] = "SRD-low: deltaR(b,b) > 0.8";
+	cutFlowVector_str[72] = "SRD-low: pT jet 1 > 150 GeV ";
+	cutFlowVector_str[73] = "SRD-low: pT jet 3 > 100 GeV ";
+	cutFlowVector_str[74] = "SRD-low: pT jet 4 > 60 GeV ";
+	cutFlowVector_str[75] = "SRD-low: pT0b + pT1b > 300 GeV";
+	
+	// Cutflow for SRE
+	cutFlowVector_str[76] = "SRE: met > 550 GeV";
+	cutFlowVector_str[77] = "SRE: m jet0, R = 0.8 > 120 GeV";
+	cutFlowVector_str[78] = "SRE: m jet1, R = 0.8 > 80 GeV";
+	cutFlowVector_str[79] = "SRE: HT > 800 GeV";
+	cutFlowVector_str[80] = "SRE: met/sqrt(HT) > 18 GeV^1/2";
+	cutFlowVector_str[81] = "SRE: mT(b,MET) min > 200 GeV";
+	cutFlowVector_str[82] = "SRE: NBjets >=2";
+
+	// Cutflow for SRC1
+
+	cutFlowVector_str[83] = "SRC: Derivation skim";
+        cutFlowVector_str[84] = "SRC: Lepton veto ";
+        cutFlowVector_str[85] = "SRC: Njets >= 4 ";
+        cutFlowVector_str[86] = "SRC: Nbjets >= 1 ";
+        cutFlowVector_str[87] = "SRC: met > 250 GeV ";
+        cutFlowVector_str[88] = "SRC: dPhi(jet,MET) > 0.4 ";
+        cutFlowVector_str[89] = "SRC: pT jet 1 > 80 GeV ";
+        cutFlowVector_str[90] = "SRC: pT jet 3 > 40 GeV ";
+	cutFlowVector_str[91] = "SRC: NSbjet >=1";
+	cutFlowVector_str[92] = "SRC: NSjet >=5";
+	cutFlowVector_str[93] = "SRC: pT0sb > 40";
+	cutFlowVector_str[94] = "SRC: mS > 300";
+	cutFlowVector_str[95] = "SRC: dPhi(ISR,met) > 3";
+	cutFlowVector_str[96] = "SRC: pTISR > 400";
+	cutFlowVector_str[97] = "SRC: pT4S > 50";
+	cutFlowVector_str[98] = "SRC1: 0.30 <= R_ISR <= 0.40";
+	cutFlowVector_str[99] = "SRC2: 0.40 <= R_ISR <= 0.50";
+	cutFlowVector_str[100] = "SRC3: 0.50 <= R_ISR <= 0.60";
+	cutFlowVector_str[101] = "SRC4: 0.60 <= R_ISR <= 0.70";
+	cutFlowVector_str[102] = "SRC5: 0.70 <= R_ISR <= 0.80";
+
+	      	
+
+  
+
+	
+	for(int j=0;j<NCUTS;j++){
+          if(
+             (j==0) ||
+
+	     (j==1 ) ||
+
+	     (j==2 && baselineLeptons.size()>0) ||
+
+	     (j==3 && baselineLeptons.size()>0 && signalLeptons.size()>0) ||
+
+	     (j==4 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1) ||
+
+	     (j==5 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1) ||
+
+	     (j==6 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230.) ||
+
+	     (j==7 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4) ||
+
+	     (j==8 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4) ||
+
+	     (j==9 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80) ||
+
+	     (j==10 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 ) ||
+
+	     (j==11 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60) ||
+
+	     (j==12 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40) ||
+
+	     (j==13 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40) ||
+
+	     (j==14 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250.) ||
+
+	     (j==15 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230) ||
+
+	     (j==16 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14) ||
+
+	     (j==17 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14 && mT > 160) ||
+
+	     (j==18 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14 && mT > 160 && amT2 > 175) ||
+
+	     (j==19 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14 && mT > 160 && amT2 > 175 && nBJets >=1) ||
+
+	     (j==20 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14 && mT > 160 && amT2 > 175 && nBJets >=1 &&  dRbl < 2.0) ||
+
+	     (j==21 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14 && mT > 160 && amT2 > 175 && nBJets >=1 &&  dRbl < 2.0 && topReclM > 150) ||
+
+	     (j==22 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100) ||
+
+	     (j==23 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80) ||
+
+	     (j==24 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50) ||
+
+	     (j==25 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30) ||
+
+	     (j==26 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550.) ||
+
+	     (j==27 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27) ||
+
+	     (j==28 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160) ||
+
+	     (j==29 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175.) ||
+
+	     (j==30 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1) ||
+	     
+	     (j==31 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1 && dRbl < 2.0) ||
+
+	     (j==32 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1 && dRbl < 2.0 && topReclM > 130.) 
+
+
+	     ){
+	    
+	    cutFlowVector[j]++;
+	  }
+	    
+	}
+	
+	
+	if(is_tN_med)num_tN_med++;
+	if(is_tN_high)num_tN_high++;
+	if(is_bWN)num_bWN++;
+	if(is_bC2x_diag)num_bC2x_diag++;
+	if(is_bC2x_med)num_bC2x_med++;
+	if(is_bCbv)num_bCbv++;
+	if(is_DM_low)num_DM_low_loose++;
+	if(is_DM_low)num_DM_low++;
+	if(is_DM_high)num_DM_high++;
+	
+        return;
+
+      }
+
+      
+      void add(BaseAnalysis* other) {
+        // The base class add function handles the signal region vector and total # events.
+        HEPUtilsAnalysis::add(other);
+
+        Analysis_ATLAS_13TeV_1LEPStop_36invfb* specificOther
+                = dynamic_cast<Analysis_ATLAS_13TeV_1LEPStop_36invfb*>(other);
+
+        // Here we will add the subclass member variables:
+        if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
+        for (int j=0; j<NCUTS; j++) {
+          cutFlowVector[j] += specificOther->cutFlowVector[j];
+          cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
+        }
+
+	num_tN_med += specificOther->num_tN_med;
+	num_tN_high += specificOther->num_tN_high;
+	num_bWN += specificOther->num_bWN;
+	num_bC2x_diag += specificOther->num_bC2x_diag;
+	num_bC2x_med += specificOther->num_bC2x_med;
+	num_bCbv += specificOther->num_bCbv;
+	num_DM_low_loose += specificOther->num_DM_low_loose;
+	num_DM_low += specificOther->num_DM_low;
+	num_DM_high += specificOther->num_DM_high;
+	
+	
+      }
+
+
+      void collect_results() {
+
+	double scale_by=1.;
+	cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+	cout << "CUT FLOW: ATLAS 13 TeV 0 lep stop paper "<<endl;
+	cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+	cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
+	    << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+	for (unsigned int j=0; j<NCUTS; j++) {
+	  cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
+	       << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
+	       << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
+	       << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+	}
+	cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+
+	/// Register results objects with the results for each SR; obs & bkg numbers from the paper
+
+	static const string ANAME = "Analysis_ATLAS_13TeV_1LEPStop_36invfb";
+
+
+
+        return;
+      }
+
+
+    protected:
+      void clear() {
+
+	num_tN_med=0;
+	num_tN_high=0;
+	num_bWN=0;
+	num_bC2x_diag=0;
+	num_bC2x_med=0;
+	num_bCbv=0;
+	num_DM_low_loose=0;
+	num_DM_low=0;
+	num_DM_high=0;
+	
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+      }
+
+    };
+
+
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_1LEPStop_36invfb)
+
+
+  }
+}
