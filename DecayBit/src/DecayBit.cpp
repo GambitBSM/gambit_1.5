@@ -2624,8 +2624,8 @@ namespace Gambit
       const double sinW2 = mssm.safeget(Par::dimensionless,"sinW2");
       const double m_pi = meson_masses.pi_plus;
       const double f_pi = meson_decay_constants.pi_plus;
-      // @todo Add the Cabibbo angle to the numerical constants in GAMBIT
-      const double costc = 0.974; // Cabibbo angle
+      const double CKM_lambda = *Param["CKM_lambda"];
+      const double costc = 1. - 0.5*pow2(CKM_lambda); // cos(theta_Cabibbo) 
 
       // MSSM parameters
       const double tanb = mssm.safeget(Par::dimensionless,"tanbeta");
