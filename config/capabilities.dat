@@ -2178,6 +2178,12 @@ sbottom_1_decay_rates : |
 stau_1_decay_rates : |
    Decays of the τ_1 sleptons.
 
+stau_1_decay_rates_SH : |
+   Decays of the τ_1 sleptons calculated with SUSY-HIT.
+
+stau_1_decay_rates_smallsplit : |
+   Decays of the τ_1 sleptons for small stau--neutralino mass splittings.
+
 stop_2_decay_rates : |
    Decays of the t_2 squarks.
 
@@ -2268,6 +2274,12 @@ H_plus_decay_rates : |
 chargino_plus_1_decay_rates : |
    Decays of the chargino+ 1.
 
+chargino_plus_1_decay_rates_SH : |
+   Decays of the chargino+ 1 calculated using SUSY-HIT.
+
+chargino_plus_1_decay_rates_smallsplit : |
+   Decays of the chargino+ 1 at small chargino--neutralino mass splittings.
+
 chargino_plus_2_decay_rates : |
    Decays of the chargino+ 2.
 
@@ -2306,6 +2318,9 @@ piminus_decay_rates : |
 
 rhominus_decay_rates : |
   All decays of the ρ- meson.
+
+rho1450_decay_rates : |
+  Decays of the ρ(1450) meson.
 
 neutralino_1_decay_rates : |
    Decays of the neutralino 1.
