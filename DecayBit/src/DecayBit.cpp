@@ -1424,22 +1424,6 @@ namespace Gambit
       else
         result = *Dep::stau_1_decay_rates_SH;
 
-      // // Debug output
-      // // _Anders DEBUG
-      // DecayTable::Entry SH_decays = *Dep::stau_1_decay_rates_SH;
-      // cout << "DEBUG: BR_N_tau            :  " << SH_decays.BF("~chi0_1", "tau-") << "    " << smallsplit_decays.BF("~chi0_1", "tau-") << endl;
-      // cout << "DEBUG: BR_N_pi_nu          :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "pi-", "nu_tau") << endl;
-      // cout << "DEBUG: BR_N_el_nubar_nu    :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "e-", "nubar_e", "nu_tau") << endl;
-      // cout << "DEBUG: BR_N_mu_nubar_nu    :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "mu-", "nubar_mu", "nu_tau") << endl;
-      // cout << "DEBUG: " << endl;
-      // cout << "DEBUG: width_N_tau         :  " << SH_decays.BF("~chi0_1", "tau-")*SH_decays.width_in_GeV << "    " << smallsplit_decays.BF("~chi0_1", "tau-")*smallsplit_decays.width_in_GeV << endl;
-      // cout << "DEBUG: width_N_pi_nu       :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "pi-", "nu_tau")*smallsplit_decays.width_in_GeV << endl;
-      // cout << "DEBUG: width_N_el_nubar_nu :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "e-", "nubar_e", "nu_tau")*smallsplit_decays.width_in_GeV << endl;
-      // cout << "DEBUG: width_N_mu_nubar_nu :  " << 0.0 << "    " << smallsplit_decays.BF("~chi0_1", "mu-", "nubar_mu", "nu_tau")*smallsplit_decays.width_in_GeV << endl;
-
-      // cout << "DEBUG: total_width      :  " << SH_decays.width_in_GeV << "    " << smallsplit_decays.width_in_GeV << endl;
-      // cout << "DEBUG: ------------------  " << endl;
-
     }
 
     /// SUSY-HIT MSSM decays: stau_1
@@ -2597,7 +2581,6 @@ namespace Gambit
 
       // Stau--neutralino mass difference
       double delta_m = m_stau - m_N;
-      // cout << "DEBUG: delta_m          :  " << delta_m << endl;
 
       // If the stau--neutralino mass difference is large, 
       // the calculations in this module function should not be used.
