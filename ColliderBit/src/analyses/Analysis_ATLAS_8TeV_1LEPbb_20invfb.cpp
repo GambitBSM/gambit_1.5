@@ -243,7 +243,7 @@ namespace Gambit {
         }                      
 
 	if (preselection) {
-	  vector<double> variables={met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT(), nSignalBJets, signalJets.at(1)->pT(),signalJets.at(0)->eta(), signalJets.at(1)->eta(), signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom())};
+	  vector<double> variables={met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT(), (double)nSignalBJets, signalJets.at(1)->pT(),signalJets.at(0)->eta(), signalJets.at(1)->eta(), signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom())};
 	  if (met>50. && mT>40. && mbb>40. && nSignalBJets==2)plots_2bjets->fill(&variables);
 	  if (met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met>100. && mCT>160. && mT>100. && mbb>45. && mbb<195.)plots_mbb->fill(&variables);
           if (nSignalBJets==2 && met>100. && mT>100. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmct->fill(&variables);

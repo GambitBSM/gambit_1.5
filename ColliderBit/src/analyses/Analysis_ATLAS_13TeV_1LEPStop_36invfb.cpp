@@ -65,6 +65,11 @@ namespace Gambit {
       int num_DM_low_loose;
       int num_DM_low;
       int num_DM_high;
+
+      int num_bffN;
+      int num_bCsoft_diag;
+      int num_bCsoft_med;
+      int num_bCsoft_high;
       
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
@@ -162,7 +167,11 @@ namespace Gambit {
 	num_DM_low_loose=0;
 	num_DM_low=0;
 	num_DM_high=0;
-	
+
+	num_bffN=0;
+	num_bCsoft_diag=0;
+	num_bCsoft_med=0;
+	num_bCsoft_high=0;
 	
         NCUTS=120;
         set_luminosity(36.);
@@ -441,8 +450,6 @@ namespace Gambit {
 	  }
 	}
 	
- 
-	std::cout << "Here a" << std::endl;
 	// Note that the isolation requirements and tight selection are currently missing
 	
 	for (HEPUtils::Particle* electron : baselineElectrons) {
@@ -477,8 +484,6 @@ namespace Gambit {
         vector<HEPUtils::Jet*> signalNotBjetLike;
         vector<HEPUtils::Jet*> signalNotBjet;
 
-	std::cout << "Here b" << std::endl;
-	
 	// create containers with exactly 2 jets being considered to be b-jets and the inverse
         int bJet1 = -1, bJet2 = -1;
 	
@@ -501,7 +506,6 @@ namespace Gambit {
 	      break;
 	    }
 	  }
-	std::cout << "signalJets.size() " << signalJets.size() << " bJet1 " << bJet1 << " bJet2 " << bJet2 << std::endl;
 
 	if(signalJets.size()>1){
 	  mostBjetLike.push_back(signalJets.at(bJet1));
@@ -527,7 +531,7 @@ namespace Gambit {
 	const std::vector<double>  binedges_pt = {0,50.,70.,100.,150.,200.,1000.,10000.};
 	const std::vector<double> JetsJER = {0.145,0.115,0.095,0.075,0.07,0.05,0.04};
 	static HEPUtils::BinnedFn2D<double> _resJets2D(binedges_eta,binedges_pt,JetsJER);
-      
+	std::cout << "Here a" << std::endl;
 	vector<double> signalJER;
 	
 	for(unsigned int i = 0; i < signalJets.size(); ++i)signalJER.push_back(_resJets2D.get_at(signalJets[i]->abseta(), signalJets[i]->pT()));
@@ -552,11 +556,10 @@ namespace Gambit {
 	double dRbl=9999.;
 	double mT2Tau=0.;
 	double dPhiMetLep;
-
-	std::cout << "Here c" << std::endl;
+	double pTLepOverMet=999.;
 	
 	if(cut_minSelection){
-	  std::cout << "Here cc" << endl;
+
 	  for (unsigned int i = 0; i < baselineLeptons.size(); ++i) {
 	    vecHtMiss    -= baselineLeptons[i]->mom();
 	    leptonHtMiss -= baselineLeptons[i]->mom();
@@ -565,8 +568,6 @@ namespace Gambit {
 	  for (unsigned int i = 0; i < signalJets.size(); ++i)
 	    vecHtMiss -= signalJets[i]->mom();
 
-	  std::cout << "Here ccc" << endl;
-	  
 	  /* calculate Ht and HtSig */
 	  for (HEPUtils::Jet* jet : signalJets) Ht += jet->pT();
 
@@ -591,7 +592,7 @@ namespace Gambit {
 	    ETmissmean += ETtemp;
 	    ETmissRMS  += ETtemp * ETtemp;
 	  }
-	  std::cout << "Here cccc" << endl;
+
 	  ETmissmean = ETmissmean / PEs;
 	  sigmaAbsHtMiss = sqrt((ETmissRMS / PEs) - ETmissmean * ETmissmean);
 	  
@@ -611,8 +612,6 @@ namespace Gambit {
 	  dPhiMetLep = fabs(metVec.deltaPhi(baselineLeptons[0]->mom()));
 
 	  // Calculate MT2 tau using the leading tau in the event
-	  std::cout << "Here d" << std::endl;
-	  
 	  mT2Tau = 120.;
 	  if(baselineTaus.size() > 0){
 
@@ -628,7 +627,7 @@ namespace Gambit {
 
 	  }
 	  
-	  float pTLepOverMet = baselineLeptons[0]->pT() / Met;
+	  pTLepOverMet = baselineLeptons[0]->pT() / Met;
 	  preselHighMet = Met > 230 && mT > 30;
 	  preselLowMet  =  baselineLeptons[0]->pT() > 27 && signalBJets.size() > 0 && signalJets[0]->pT() > 50. && Met > 100 && mT > 90;
 
@@ -644,7 +643,7 @@ namespace Gambit {
 	  }
 	  
 	  // Now calculate amT2 using two different assignments of the b jets and the leptons
-	  std::cout << "Here e" << std::endl;
+
 	  HEPUtils::P4 lepton_plus_bjet0;
 	  HEPUtils::P4 lepton_plus_bjet1;
 	  
@@ -710,13 +709,11 @@ namespace Gambit {
 	  }
 	  topChi2 = signalJets[jetComb[0]]->mom() + signalJets[jetComb[1]]->mom() + mostBjetLike[jetComb[2]]->mom();
 	  
-	  std::cout << "Here f topChi2 mass" << topChi2.m() <<  std::endl;
+
 	  
 	  HEPUtils::P4 top1;
 	  top1 = baselineLeptons[0]->mom() + (jetComb[2] == 0 ? mostBjetLike[1]->mom() : mostBjetLike[0]->mom());
 
-	  std::cout << "Here ff" << std::endl;
-	  
 	  /* calculate MetPerp */
 	  
 	  TLorentzVector ttbar;
@@ -726,19 +723,19 @@ namespace Gambit {
 	  TLorentzVector metRest;
 	  metRest.SetPxPyPzE(metVec.px(),metVec.py(),metVec.pz(),metVec.E());
 
-	  std::cout << "ttbar " << ttbar.Px() << " " << ttbar.Py() << " " << ttbar.Pz() << " " << ttbar.E() << std::endl;
+
 	  ttbar.Boost(-ttbar.Px() / ttbar.E(), -ttbar.Py() / ttbar.E(), -ttbar.Pz() / ttbar.E());
-	  std::cout << "ttbar boosted " << ttbar.Px() << " " << ttbar.Py() << " " << ttbar.Pz() << " " << ttbar.E() << std::endl;
+
 	  
 	  top1Rest.Boost(-ttbar.Px() / ttbar.E(), -ttbar.Py() / ttbar.E(), -ttbar.Pz() / ttbar.E());
 	  metRest.Boost(-ttbar.Px() / ttbar.E(), -ttbar.Py() / ttbar.E(), -ttbar.Pz() / ttbar.E());
 	  MetPerp = metRest.Vect().XYvector().Norm(top1Rest.Vect().XYvector()).Mod();
 	  
 	  // Now we have to do the fancy jet reclustering to get reconstructed W and top particles
-	  std::cout << "Here MetPerp" << MetPerp << std::endl;
+
 	  HEPUtils::P4 WRecl = reclusteredParticle(signalNotBjet, mostBjetLike, mW, false); //signalNotBjet+mostBjetLike is inconsistent but bjets are not used anyway
 	  HEPUtils::P4 topRecl = reclusteredParticle(signalNotBjetLike, mostBjetLike, 175., true);
-	  std::cout << "Here fffff" << std::endl;
+	
 	  topReclM=0;
 	  
 	  if (nBJets > 0 && nJets > 3 && preselHighMet)topReclM=topRecl.m();
@@ -746,8 +743,6 @@ namespace Gambit {
 	  
 	}
 
-	std::cout << "Here g" << std::endl;
-	
 	// Should now be ready to do signal selections
 
 	bool is_tN_med=false;
@@ -823,9 +818,56 @@ namespace Gambit {
 	  
 	}
 
-	
+	// Soft-lepton selections
+	bool preselSoftLep=false;
+	double Wpt = 0.;
+
+	double minDPhiMetBJet = 99999.;
+	for(int i=0;i<signalBJets.size();i++){
+	  double dPhi_tmp = fabs(signalBJets[i]->mom().deltaPhi(metVec));
+	  if(dPhi_tmp<minDPhiMetBJet)minDPhiMetBJet=dPhi_tmp;
+	}
+
+	double dRbb;
+	if(nJets>1)mostBjetLike[0]->mom().deltaR_eta(mostBjetLike[1]->mom());  
 
 	
+	if (signalSoftLeptons.size() == 1) {
+	  preselSoftLep = Met > 230;
+	  
+	  // Apply tight selection if lepton is an electron
+	  // Am using same selection as 8 TeV (probably needs updating)
+	  // Note that we have already applied a 1 lepton cut
+	  if (signalSoftElectrons.size()==1 && signalSoftMuons.size()==0){
+	    vector<HEPUtils::Particle*> tightElectrons;
+	    tightElectrons.push_back(signalSoftElectrons[0]);
+	    ATLAS::applyTightIDElectronSelection(tightElectrons);
+	    preselSoftLep = preselSoftLep && (tightElectrons.size()==1);
+	  }
+
+	  Wpt = (signalSoftLeptons[0]->mom()+metVec).pT();    
+	}
+	//bffN
+	if (nJets > 1 && nBJets > 0 && preselSoftLep && signalJets[0]->pT() > 400 && Met > 300 && mT < 160 &&
+	    pTLepOverMet < 0.02 && minDPhiMetBJet < 1.5 && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 &&
+	    topReclM < 150 && !signalJets[0]->btag())is_bffN=true;
+
+	//bCsoft_diag
+	if (nJets > 1 && nBJets > 0 && preselSoftLep && signalJets[0]->pT() > 400 && Met > 300 && mT < 50 &&
+	    pTLepOverMet < 0.02 && minDPhiMetBJet < 1.5 && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 &&
+	    topReclM < 150 && !signalJets[0]->btag())is_bCsoft_diag=true;
+
+	//bCsoft_med
+	if (nJets > 2 && nBJets > 1 && preselSoftLep && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 &&
+	    signalJets[2]->pT() > 40 && signalBJets[0]->pT() > 120 && signalBJets[1]->pT() > 60 && Met > 230 &&
+	    mT < 160 && pTLepOverMet < 0.03 && amT2 > 200 && minDPhiMetBJet > 0.8 && absDPhiJMet0 > 0.4 &&
+	    absDPhiJMet1 > 0.4 && Wpt > 400)is_bCsoft_med=true;
+
+	//bCsoft_high
+	if (nJets > 1 && nBJets > 1 && preselSoftLep && signalJets[1]->pT() > 100 && signalBJets[1]->pT() > 100 &&
+	    Met > 230 && mT < 160 && pTLepOverMet < 0.03 && amT2 > 300 && minDPhiMetBJet > 0.4 &&
+	    absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && Wpt > 500 && dRbb > 0.8)is_bCsoft_high=true;
+      	
       	//bool isSRD_high=false;
 	
 	cutFlowVector_str[0] = "No cuts ";
@@ -861,23 +903,21 @@ namespace Gambit {
 	cutFlowVector_str[30] = "tN_high: >= 1 b jet";
 	cutFlowVector_str[31] = "tN_high: deltaR(b,l) < 2.0";
 	cutFlowVector_str[32] = "tN_high: mtop_recl > 130 GeV";
-	cutFlowVector_str[33] = "SRB-TT: mT(b,MET) min > 200 GeV";
-	cutFlowVector_str[34] = "SRB-TT: Nbjets >=2 ";
-	cutFlowVector_str[35] = "SRB-TW: m jet1, R=1.2 < 120 GeV";
-	cutFlowVector_str[36] = "SRB-TW: m jet1, R=1.2 > 60 GeV";
-	cutFlowVector_str[37] = "SRB-TW: deltaR(b,b) > 1.2";
-	cutFlowVector_str[38] = "SRB-TW: mT(b,MET) max > 200 GeV";
-	cutFlowVector_str[39] = "SRB-TW: mT(b,MET) min > 200 GeV";
-	cutFlowVector_str[40] = "SRB-TW: Nbjets >=2 ";
-	cutFlowVector_str[41] = "SRB-T0: m jet1, R=1.2 < 60 GeV";
-	cutFlowVector_str[42] = "SRB-T0: mT(b,MET) min > 200 GeV";
-	cutFlowVector_str[43] = "SRB-T0: deltaR(b,b) > 1.2";
-	cutFlowVector_str[44] = "SRB-T0: mT(b,MET) max > 200 GeV";
-	cutFlowVector_str[45] = "SRB-T0: met > 250 GeV ";
-	cutFlowVector_str[46] = "SRB-T0: Nbjets >=2 ";
-
-	// Cutflow for SRD
-	cutFlowVector_str[47] = "SRD-high: No cuts ";
+	cutFlowVector_str[33] = "bWN: jet0 pT > 50 GeV";
+	cutFlowVector_str[34] = "bWN: Met > 300 GeV ";
+	cutFlowVector_str[35] = "bWN: mT > 130 GeV";
+	cutFlowVector_str[36] = "bWN: amT2 < 110 GeV";
+	cutFlowVector_str[37] = "bWN: >=1 b jet";
+	cutFlowVector_str[38] = "bWN: deltaPhi(l,ptmiss) < 2.5";
+	cutFlowVector_str[39] = "bffN: Soft lepton preselection";
+	cutFlowVector_str[40] = "bffN: Met > 300 GeV";
+	cutFlowVector_str[41] = "bffN: jet0 pT > 400 GeV";
+	cutFlowVector_str[42] = "bffN: mT < 160 GeV";
+	cutFlowVector_str[43] = "bffN: leading jet not b-tagged";
+	cutFlowVector_str[44] = "bffN: min(DPhi(ptmiss, b-jet)) < 1.5";
+	cutFlowVector_str[45] = "bffN: pTl/Met < 0.05 ";
+	cutFlowVector_str[46] = "bffN: top veto (or mtop_recl < 150 GeV) ";
+	cutFlowVector_str[47] = "bffN:: pTl/met < 0.02 ";
 	cutFlowVector_str[48] = "SRD-high: Derivation skim";
         cutFlowVector_str[49] = "SRD-high: Lepton veto ";
         cutFlowVector_str[50] = "SRD-high: Njets >= 4 ";
@@ -1010,8 +1050,37 @@ namespace Gambit {
 	     
 	     (j==31 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1 && dRbl < 2.0) ||
 
-	     (j==32 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1 && dRbl < 2.0 && topReclM > 130.) 
+	     (j==32 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1 && dRbl < 2.0 && topReclM > 130.) ||
 
+	     (j==33 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50.) ||
+
+	     (j==34 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300) ||
+
+	     (j==35 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300 && mT > 130) ||
+
+	     (j==36 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300 && mT > 130 && amT2 < 110) ||
+
+	     (j==37 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300 && mT > 130 && amT2 < 110 && nBJets>=1) ||
+
+	     (j==38 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300 && mT > 130 && amT2 < 110 && nBJets>=1 && dPhiMetLep < 2.5 ) ||
+
+	     (j==39 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep) ||
+
+	     (j==40 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300.) ||
+
+	     (j==41 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400.) ||
+
+	     (j==42 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160.) ||
+
+	     (j==43 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag()) ||
+
+	     (j==44 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5) ||
+
+	     (j==45 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05) ||
+
+	     (j==46 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05 && topReclM < 150) ||
+
+	     (j==47 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05 && topReclM < 150 && pTLepOverMet < 0.02) 
 
 	     ){
 	    
@@ -1030,6 +1099,11 @@ namespace Gambit {
 	if(is_DM_low)num_DM_low_loose++;
 	if(is_DM_low)num_DM_low++;
 	if(is_DM_high)num_DM_high++;
+
+	if(is_bffN)num_bffN++;
+	if(is_bCsoft_diag)num_bCsoft_diag++;
+	if(is_bCsoft_med)num_bCsoft_med++;
+	if(is_bCsoft_high)num_bCsoft_high++;
 	
         return;
 
@@ -1102,6 +1176,11 @@ namespace Gambit {
 	num_DM_low_loose=0;
 	num_DM_low=0;
 	num_DM_high=0;
+
+	num_bffN=0;
+	num_bCsoft_diag=0;
+	num_bCsoft_med=0;
+	num_bCsoft_high=0;
 	
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
