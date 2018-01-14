@@ -9,10 +9,10 @@
 #include <cmath>
 #include <memory>
 #include <iomanip>
+#include <fstream>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
-#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 using namespace std;
 
@@ -38,7 +38,6 @@ namespace Gambit {
       double xsecCMS_500_125;
       size_t NCUTS;
 
-      Perf_Plot* plots;
       ofstream cutflowFile;
       string analysisRunName;
 
@@ -67,7 +66,7 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
 
-        analysisRunName = "CMS_13TeV_1LEPbb_36invfb_250_1";
+        analysisRunName = "CMS_13TeV_1LEPbb_36invfb_500_125";
       }
 
 
@@ -76,22 +75,26 @@ namespace Gambit {
         double met = event->met();
 
         // Baseline objects
-        const vector<double> a={0,10.};
-        const vector<double> b={0,10000.};
-        const vector<double> cEl={0.83};
-        HEPUtils::BinnedFn2D<double> _eff2dEl(a,b,cEl);
+        //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_043_ttbar.pdf 
+        const vector<double> aEl={0,0.8,10.};
+        const vector<double> bEl={0,40.,50.,10000.};
+	const vector<double> cEl={0.654,0.705,0.731,0.665,0.655,0.722};
+        HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
-          bool hasTrig=has_tag(_eff2dEl, electron->eta(), electron->pT());
-          if (electron->pT()>5. && electron->abseta()<2.5 && hasTrig)baselineElectrons.push_back(electron);
+          bool isEl=has_tag(_eff2dEl, electron->eta(), electron->pT()); 
+          if (electron->pT()>5. && electron->abseta()<2.5 && isEl)baselineElectrons.push_back(electron);
         }
 
-        const vector<double> cMu={0.89};
-        HEPUtils::BinnedFn2D<double> _eff2dMu(a,b,cMu);
+	//@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_043_ttbar.pdf
+        const vector<double> aMu={0,0.9,1.2,10.};
+        const vector<double> bMu={0,30.,40.,50.,10000.};
+        const vector<double> cMu={0.761,0.804,0.814,0.805,0.769,0.813,0.846,0.82,0.819,0.847,0.834,0.852};
+        HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
-          bool hasTrig=has_tag(_eff2dMu, muon->eta(), muon->pT());
-          if (muon->pT()>5. && muon->abseta()<2.4 && hasTrig)baselineMuons.push_back(muon);
+          bool isMu=has_tag(_eff2dMu, muon->eta(), muon->pT()); 
+          if (muon->pT()>5. && muon->abseta()<2.4 && isMu)baselineMuons.push_back(muon);
         }
 
         vector<HEPUtils::Particle*> baselineTaus;
@@ -119,19 +122,27 @@ namespace Gambit {
           if (baselineMuons.at(iMu)->pT()>25. && baselineMuons.at(iMu)->abseta()<2.1)signalMuons.push_back(baselineMuons.at(iMu));
         }
 
-        const vector<double> c={0.65};
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
 	for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
-           if (baselineJets.at(iJet)->pT()>30.) {
+          if (baselineJets.at(iJet)->pT()>30.) {
 	    signalJets.push_back(baselineJets.at(iJet));                
-            bool hasTag=has_tag(_eff2d, baselineJets.at(iJet)->eta(), baselineJets.at(iJet)->pT()); 
-	    if (baselineJets.at(iJet)->btag() && hasTag)signalBJets.push_back(baselineJets.at(iJet));
+	    if (baselineJets.at(iJet)->btag())signalBJets.push_back(baselineJets.at(iJet));
 	  }
         }
+        vector<HEPUtils::Jet*> signalBJets_temp=signalBJets;
+	CMS::applyCSVv2MediumBtagEff(signalBJets_temp);
+	if (signalBJets_temp.size()>0) {
+	  CMS::applyCSVv2LooseBtagEff(signalBJets_temp);	
+	  for (size_t iJet=0;iJet<signalBJets_temp.size();iJet++) {
+	    if (find(signalBJets.begin(),signalBJets.end(),signalBJets_temp.at(iJet))==signalBJets.end())signalBJets.push_back(signalBJets_temp.at(iJet));
+	  }
+	}
+	if (signalBJets_temp.size()==0)signalBJets.clear();
 
 	signalLeptons=signalElectrons;
 	signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
         int nSignalLeptons=signalLeptons.size();
+	int nSignalElectrons=signalElectrons.size();
+	int nSignalMuons=signalMuons.size();
         int nSignalJets=signalJets.size();
         int nSignalBJets=signalBJets.size();
 
@@ -143,10 +154,26 @@ namespace Gambit {
         double mbb=0;
 	double mT=0;
 
+        const vector<double> aLep={0,10.};
+        const vector<double> bLep={0,10000.};
+        const vector<double> cEl_Trig={0.825};
+        const vector<double> cMu_Trig={0.885};
+        HEPUtils::BinnedFn2D<double> _eff2dEl_Trig(aLep,bLep,cEl_Trig);
+        HEPUtils::BinnedFn2D<double> _eff2dMu_Trig(aLep,bLep,cMu_Trig);
+
 	if ((baselineMuons.size()+baselineElectrons.size())>1)lepton2_veto=false;
 	if (baselineTaus.size()>0)tau_veto=false;
-        if (nSignalLeptons>0 && met>50. && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2)preselection=true;
-	
+        if (nSignalLeptons>0 && met>50. && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2) {
+	  if (nSignalMuons==1) {
+            bool hasTrig=has_tag(_eff2dMu_Trig, signalMuons.at(0)->eta(), signalMuons.at(0)->pT());
+	    if (hasTrig)preselection=true;
+	  }
+	  if (nSignalElectrons==1) {
+            bool hasTrig=has_tag(_eff2dEl_Trig, signalElectrons.at(0)->eta(), signalElectrons.at(0)->pT());
+	    if (hasTrig)preselection=true;
+	  }
+	}
+
 	if (nSignalBJets>1) {
 	  mCT=sqrt(2*signalBJets.at(0)->pT()*signalBJets.at(1)->pT()*(1+cos(signalBJets.at(0)->mom().deltaPhi(signalBJets.at(1)->mom()))));
           mbb=(signalBJets.at(0)->mom()+signalBJets.at(1)->mom()).m();
@@ -217,15 +244,15 @@ namespace Gambit {
 	cutFlowVectorCMS_500_1[9]=7.1;	
 
 	cutFlowVectorCMS_500_125[0]=290.3;	
-	cutFlowVectorCMS_500_125[0]=86.9;	
-	cutFlowVectorCMS_500_125[0]=84.1;	
-	cutFlowVectorCMS_500_125[0]=83.9;	
-	cutFlowVectorCMS_500_125[0]=41.1;	
-	cutFlowVectorCMS_500_125[0]=19.5;	
-	cutFlowVectorCMS_500_125[0]=17.6;	
-	cutFlowVectorCMS_500_125[0]=10.9;	
-	cutFlowVectorCMS_500_125[0]=9.9;	
-	cutFlowVectorCMS_500_125[0]=6.5;	
+	cutFlowVectorCMS_500_125[1]=86.9;	
+	cutFlowVectorCMS_500_125[2]=84.1;	
+	cutFlowVectorCMS_500_125[3]=83.9;	
+	cutFlowVectorCMS_500_125[4]=41.1;	
+	cutFlowVectorCMS_500_125[5]=19.5;	
+	cutFlowVectorCMS_500_125[6]=17.6;	
+	cutFlowVectorCMS_500_125[7]=10.9;	
+	cutFlowVectorCMS_500_125[8]=9.9;	
+	cutFlowVectorCMS_500_125[9]=6.5;	
 
         for (size_t j=0;j<NCUTS;j++){
           if(
@@ -239,15 +266,15 @@ namespace Gambit {
 
 	     (j==4 && nSignalLeptons>=1 && met>50 && lepton2_veto && tau_veto && nSignalJets==2) ||
 
-	     (j==5 && nSignalLeptons>=1 && met>50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2) ||
+	     (j==5 && preselection) ||
 
-	     (j==6 && nSignalLeptons>=1 && met>50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2 && mbb>90 && mbb<150) ||
+	     (j==6 && preselection && mbb>90 && mbb<150) ||
 
-	     (j==7 && nSignalLeptons>=1 && met>50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2 && mbb>90 && mbb<150 && mCT>170.) ||            
+	     (j==7 && preselection && mbb>90 && mbb<150 && mCT>170.) ||            
  
-             (j==8 && nSignalLeptons>=1 && met>50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2 && mbb>90 && mbb<150 && mCT>170. && met>125.) ||
+             (j==8 && preselection && mbb>90 && mbb<150 && mCT>170. && met>125.) ||
              
-             (j==9 && nSignalLeptons>=1 && met>50 && lepton2_veto && tau_veto && nSignalJets==2 && nSignalBJets==2 && mbb>90 && mbb<150 && mCT>170. && met>125. && mT>150.) )
+             (j==9 && preselection && mbb>90 && mbb<150 && mCT>170. && met>125. && mT>150.) )
 
             cutFlowVector[j]++;
 	}

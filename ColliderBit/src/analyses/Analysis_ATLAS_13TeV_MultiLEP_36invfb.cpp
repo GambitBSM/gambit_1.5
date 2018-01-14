@@ -10,11 +10,11 @@
 #include <memory>
 #include <iomanip>
 #include <algorithm>
+#include <fstream>
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
-#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
 using namespace std;
 
@@ -61,7 +61,6 @@ namespace Gambit {
       vector<double> cutFlowVector5ATLAS_300_150;
       double xsec5ATLAS_300_150; 
 
-      Perf_Plot* plots;
       ofstream cutflowFile;
       string analysisRunName;
 
@@ -128,7 +127,7 @@ namespace Gambit {
         }
 
 	NCUTS5=11;
-	xsec5ATLAS_401_1=1.31+0.5;
+	xsec5ATLAS_401_1=5.43;
 	xsec5ATLAS_300_150=190.159;
         for (size_t i=0;i<NCUTS5;i++){
           cutFlowVector5.push_back(0);
@@ -176,8 +175,8 @@ namespace Gambit {
 	vector<HEPUtils::Jet*> signalJets;
 	vector<HEPUtils::Jet*> signalBJets;
 
-        const vector<double>  aBJet={0,10.};
-        const vector<double>  bBJet={0,30., 40., 50., 70., 80., 90., 100.,150., 200., 10000.};
+        const vector<double> aBJet={0,10.};
+        const vector<double> bBJet={0,30., 40., 50., 70., 80., 90., 100.,150., 200., 10000.};
         const vector<double> cBJet={0.63, 0.705, 0.745, 0.76, 0.775, 0.79,0.795, 0.805, 0.795, 0.76};
         HEPUtils::BinnedFn2D<double> _eff2d(aBJet,bBJet,cBJet);
 
