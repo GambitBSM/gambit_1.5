@@ -25,14 +25,12 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
 #include <cmath>
-#include <complex>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
 #include "gambit/NeutrinoBit/spline.h"
-#include <vector>
+#include "gambit/Utils/statistics.hpp"
 
 using namespace Eigen;
 
@@ -113,14 +111,20 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if(M[i] < m_pi)
+        e_fac_pi[i] = 0;
+        mu_fac_pi[i] = 0;
+        r_I_pi[i] = pow(M[i], 2.0)/pow(m_pi, 2.0);
+ 
+        if(M[i] + sminputs.mMu < m_pi)
         {
-          r_I_pi[i] = pow(M[i], 2.0)/pow(m_pi, 2.0);
-          G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_pi + r_I_pi[i]), 2.0)) + pow((r_e_pi - r_I_pi[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
-          G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_pi + r_I_pi[i]), 2.0)) + pow((r_mu_pi - r_I_pi[i]), 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
-          e_fac_pi[i] = t_sq(0,i) * (G_e_pi[i] - 1.0);
-           mu_fac_pi[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
+        G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
+          mu_fac_pi[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
         } 
+        if(M[i] + sminputs.mE < m_pi)
+        {
+          G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+          e_fac_pi[i] = t_sq(0,i) * (G_e_pi[i] - 1.0); 
+        }
         e_f_pi += e_fac_pi[i];
         mu_f_pi += mu_fac_pi[i];
       }
@@ -150,18 +154,21 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if(M[i] < m_K)
-        {
-          if(M[i] > m_pi)
-          {
-            r_I_K[i] = pow(M[i], 2.0)/pow(m_K, 2.0);
-            G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_e_K + r_I_K[i]), 2.0)) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_K * pow((1.0 - r_e_K), 2.0));
-            G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - (2.0*pow((r_mu_K + r_I_K[i]), 2.0)) + pow((r_mu_K - r_I_K[i]), 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
-            e_fac_K[i] = t_sq(0,i) * (G_e_K[i] - 1.0);
-            mu_fac_K[i] = t_sq(1,i) * (G_mu_K[i] - 1.0);
-          }
-        } 
+        e_fac_K[i] = 0;
+        mu_fac_K[i] = 0;
+        r_I_K[i] = pow(M[i], 2.0)/pow(m_K,2.0);
 
+        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
+        {
+         G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
+          mu_fac_K[i] = t_sq(1,i) * (G_mu_K[i] - 1.0);
+        } 
+        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
+        {
+          G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_K * pow((1.0 - r_e_K), 2.0));
+          e_fac_K[i] = t_sq(0,i) * (G_e_K[i] - 1.0);
+        }
+          
         e_f_K += e_fac_K[i];
         mu_f_K += mu_fac_K[i];
       }
@@ -187,11 +194,11 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if(M[i] > m_tau)
-        {
+        if(M[i] + sminputs.mE > m_tau)
           e_fac_tau[i] = t_sq(0,i);
+        if(M[i] + sminputs.mMu > m_tau)
           mu_fac_tau[i] = t_sq(1,i);
-        }
+
         e_f_tau += e_fac_tau[i];
         mu_f_tau += mu_fac_tau[i];
       }
@@ -206,16 +213,18 @@ namespace Gambit
       double R_K = *Dep::R_K;
       double R_tau = *Dep::R_tau;
 
-      if (((1.218e-4<R_pi) && (R_pi<1.242e-4)) || ((2.458e-5<R_K) && (R_K<2.518e-5)) || ((0.9674<R_tau) && (R_tau<0.9854)))
-      {
-        result_lepuniv = 0.0;
-      }
-      else
-      {
-        result_lepuniv = -100.0;
-      }
-    }
+      double R_pi_exp = 1.23e-4;
+      double R_pi_err = 0.012e-4;
+      double R_K_exp = 2.488e-5;
+      double R_K_err = 0.03e-5;
+      double R_tau_exp = 0.9764;
+      double R_tau_err = 0.009;
 
+      result_lepuniv = 0.0;
+      result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
+      result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
+      result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
+    }
 
     // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
     void SN_m_GERDA(double &m_GERDA)
@@ -362,6 +371,7 @@ namespace Gambit
       {
         result_ckm = -100.0;
       }
+//result_ckm = chi2;
     }
 
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
