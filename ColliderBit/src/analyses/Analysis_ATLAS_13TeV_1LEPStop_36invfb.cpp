@@ -173,7 +173,7 @@ namespace Gambit {
 	num_bCsoft_med=0;
 	num_bCsoft_high=0;
 	
-        NCUTS=120;
+        NCUTS=150;
         set_luminosity(36.);
 
         for(int i=0;i<NCUTS;i++){
@@ -785,7 +785,7 @@ namespace Gambit {
 	  if (nJets > 3 && nBJets > 1 && preselHighMet && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 &&
 	      signalBJets[1]->pT() > 30 && Met > 230 && HtSigMiss > 13 && mT > 180 && amT2 > 175 &&
 	      absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7 && WReclM > 50 && mT2Tau > 80)
-	    is_bC2x_diag=true;
+	    is_bC2x_diag=true; 
 
 	  //bC2x_med
 	  if (nJets > 3 && nBJets > 1 && preselHighMet && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 &&
@@ -917,72 +917,78 @@ namespace Gambit {
 	cutFlowVector_str[44] = "bffN: min(DPhi(ptmiss, b-jet)) < 1.5";
 	cutFlowVector_str[45] = "bffN: pTl/Met < 0.05 ";
 	cutFlowVector_str[46] = "bffN: top veto (or mtop_recl < 150 GeV) ";
-	cutFlowVector_str[47] = "bffN:: pTl/met < 0.02 ";
-	cutFlowVector_str[48] = "SRD-high: Derivation skim";
-        cutFlowVector_str[49] = "SRD-high: Lepton veto ";
-        cutFlowVector_str[50] = "SRD-high: Njets >= 4 ";
-        cutFlowVector_str[51] = "SRD-high: Nbjets >= 1 ";
-        cutFlowVector_str[52] = "SRD-high: met > 250 GeV ";
-        cutFlowVector_str[53] = "SRD-high: dPhi(jet,MET) > 0.4 ";
-        cutFlowVector_str[54] = "SRD-high: pT jet 1 > 80 GeV ";
-        cutFlowVector_str[55] = "SRD-high: pT jet 3 > 40 GeV ";
-	cutFlowVector_str[56] = "SRD-high: Njets >= 5 ";
-	cutFlowVector_str[57] = "SRD-high: pT jet 1 > 150 ";
-	cutFlowVector_str[58] = "SRD-high: pT jet 3 > 80 ";
-	cutFlowVector_str[59] = "SRD-high: pT jet 4 > 60 ";
-	cutFlowVector_str[60] = "SRD-high: mT(b,MET) min > 350 GeV ";
-	cutFlowVector_str[61] = "SRD-high: mT(b,MET) max > 450 GeV ";
-	cutFlowVector_str[62] = "SRD-high: Nbjets >=2 ";
-	cutFlowVector_str[63] = "SRD-high: met > 250 GeV ";
-	cutFlowVector_str[64] = "SRD-high: deltaR(b,b) > 0.8";
-	cutFlowVector_str[65] = "SRD-high: pT0b + pT1b > 400 GeV";
-	cutFlowVector_str[66] = "SRD-low: Njets >=5";
-	cutFlowVector_str[67] = "SRD-low: NBjets >=2";
-	cutFlowVector_str[68] = "SRD-low: met > 250 GeV";
-	cutFlowVector_str[69] = "SRD-low: mT(b,MET) min > 250 GeV ";
-	cutFlowVector_str[70] = "SRD-low: mT(b,MET) max > 300 GeV ";
-	cutFlowVector_str[71] = "SRD-low: deltaR(b,b) > 0.8";
-	cutFlowVector_str[72] = "SRD-low: pT jet 1 > 150 GeV ";
-	cutFlowVector_str[73] = "SRD-low: pT jet 3 > 100 GeV ";
-	cutFlowVector_str[74] = "SRD-low: pT jet 4 > 60 GeV ";
-	cutFlowVector_str[75] = "SRD-low: pT0b + pT1b > 300 GeV";
-	
-	// Cutflow for SRE
-	cutFlowVector_str[76] = "SRE: met > 550 GeV";
-	cutFlowVector_str[77] = "SRE: m jet0, R = 0.8 > 120 GeV";
-	cutFlowVector_str[78] = "SRE: m jet1, R = 0.8 > 80 GeV";
-	cutFlowVector_str[79] = "SRE: HT > 800 GeV";
-	cutFlowVector_str[80] = "SRE: met/sqrt(HT) > 18 GeV^1/2";
-	cutFlowVector_str[81] = "SRE: mT(b,MET) min > 200 GeV";
-	cutFlowVector_str[82] = "SRE: NBjets >=2";
-
-	// Cutflow for SRC1
-
-	cutFlowVector_str[83] = "SRC: Derivation skim";
-        cutFlowVector_str[84] = "SRC: Lepton veto ";
-        cutFlowVector_str[85] = "SRC: Njets >= 4 ";
-        cutFlowVector_str[86] = "SRC: Nbjets >= 1 ";
-        cutFlowVector_str[87] = "SRC: met > 250 GeV ";
-        cutFlowVector_str[88] = "SRC: dPhi(jet,MET) > 0.4 ";
-        cutFlowVector_str[89] = "SRC: pT jet 1 > 80 GeV ";
-        cutFlowVector_str[90] = "SRC: pT jet 3 > 40 GeV ";
-	cutFlowVector_str[91] = "SRC: NSbjet >=1";
-	cutFlowVector_str[92] = "SRC: NSjet >=5";
-	cutFlowVector_str[93] = "SRC: pT0sb > 40";
-	cutFlowVector_str[94] = "SRC: mS > 300";
-	cutFlowVector_str[95] = "SRC: dPhi(ISR,met) > 3";
-	cutFlowVector_str[96] = "SRC: pTISR > 400";
-	cutFlowVector_str[97] = "SRC: pT4S > 50";
-	cutFlowVector_str[98] = "SRC1: 0.30 <= R_ISR <= 0.40";
-	cutFlowVector_str[99] = "SRC2: 0.40 <= R_ISR <= 0.50";
-	cutFlowVector_str[100] = "SRC3: 0.50 <= R_ISR <= 0.60";
-	cutFlowVector_str[101] = "SRC4: 0.60 <= R_ISR <= 0.70";
-	cutFlowVector_str[102] = "SRC5: 0.70 <= R_ISR <= 0.80";
-
-	      	
-
-  
-
+	cutFlowVector_str[47] = "bffN: pTl/met < 0.02 ";
+	cutFlowVector_str[48] = "bC2x_diag: jet0 pT > 75 GeV";
+        cutFlowVector_str[49] = "bC2x_diag: jet2 pT > 75 GeV ";
+        cutFlowVector_str[50] = "bC2x_diag: jet3 pT > 75 GeV ";
+        cutFlowVector_str[51] = "bC2x_diag: jet4 pT > 30 GeC ";
+        cutFlowVector_str[52] = "bC2x_diag: >=2 b jet ";
+        cutFlowVector_str[53] = "bC2x_diag: bjet1 pT > 30 GeV ";
+        cutFlowVector_str[54] = "bC2x_diag: dPhi(j1,ptmiss) > 0.7 ";
+        cutFlowVector_str[55] = "bC2x_diag: dPhi(j2,ptmiss) > 0.7 ";
+	cutFlowVector_str[56] = "bC2x_diag: HTmissSig > 13 ";
+	cutFlowVector_str[57] = "bC2x_diag: mT > 180 GeV ";
+	cutFlowVector_str[58] = "bC2x_diag: amT2 > 175 GeV ";
+	cutFlowVector_str[59] = "bC2x_diag: mWrecl > 50 GeV ";
+	cutFlowVector_str[60] = "bC2x_med: jet0 pT > 200 GeV ";
+	cutFlowVector_str[61] = "bC2x_med: jet1 pT > 140 GeV ";
+	cutFlowVector_str[62] = "bC2x_med: >=2 b jet ";
+	cutFlowVector_str[63] = "bC2x_med: bjet0 pT > 140 GeV ";
+	cutFlowVector_str[64] = "bC2x_med: bjet1 pT > 140 GeV";
+	cutFlowVector_str[65] = "bC2x_med: dPhi(j1,ptmiss) > 0.9 ";
+	cutFlowVector_str[66] = "bC2x_med: dPhi(j2,ptmiss) > 0.9 " ;
+	cutFlowVector_str[67] = "bC2x_med: HTmissSig > 10";
+	cutFlowVector_str[68] = "bC2x_med: mT > 120 GeV";
+	cutFlowVector_str[69] = "bC2x_med: amT2 > 300 GeV ";
+	cutFlowVector_str[70] = "bC2x_med: mWrecl > 50 GeV ";
+	cutFlowVector_str[71] = "bCbv: jet0 pT > 120 GeV";
+	cutFlowVector_str[72] = "bCbv: jet1 pT > 80 GeV ";
+	cutFlowVector_str[73] = "bCbv: ==0 b jets ";
+	cutFlowVector_str[74] = "bCbv: lepton pt > 60 GeV ";
+	cutFlowVector_str[75] = "bCbv: dPhi(j1,ptmiss) > 2.0 ";
+	cutFlowVector_str[76] = "bCbv: dPhi(j2,ptmiss) > 0.8 ";
+	cutFlowVector_str[77] = "bCbv: Met > 360 GeV ";
+	cutFlowVector_str[78] = "bCbv: HtmissSig > 16";
+	cutFlowVector_str[79] = "bCbv: mT > 200 GeV";
+	cutFlowVector_str[80] = "bCbv: mWrecl in [70,100] GeV";
+	cutFlowVector_str[81] = "bCbv: dPhi(l,ptmiss) > 1.2";
+	cutFlowVector_str[82] = "bCsoft_diag: Soft lepton preselection";
+	cutFlowVector_str[83] = "bCsoft_diag: Met > 300 GeV";
+        cutFlowVector_str[84] = "bCsoft_diag: jet0 pT > 400 GeV ";
+        cutFlowVector_str[85] = "bCsoft_diag: mT < 160 GeV ";
+        cutFlowVector_str[86] = "bCsoft_diag: leading jet not b-tagged ";
+        cutFlowVector_str[87] = "bCsoft_diag: mT < 50 GeV ";
+        cutFlowVector_str[88] = "bCsoft_diag: min(dPhi(ptmiss, b-jet)) < 1.5 ";
+        cutFlowVector_str[89] = "bCsoft_diag: pTl/Met < 0.05 ";
+        cutFlowVector_str[90] = "bCsoft_diag: top veto (or mtop_recl < 150 GeV) ";
+	cutFlowVector_str[91] = "bCsoft_diag: pTl/Met < 0.02";
+	cutFlowVector_str[92] = "bCsoft_med: Soft lepton preselection ";
+	cutFlowVector_str[93] = "bCsoft_med: >=3 jets";
+	cutFlowVector_str[94] = "bCsoft_med: pTW > 400 GeV";
+	cutFlowVector_str[95] = "bCsoft_med: jet0 pT > 120 GeV";
+	cutFlowVector_str[96] = "bCsoft_med: jet1 pT > 60 GeV";
+	cutFlowVector_str[97] = "bCsoft_med: jet2 pT > 40 GeV";
+	cutFlowVector_str[98] = "bCsoft_med: mT < 160 GeV";
+	cutFlowVector_str[99] = "bCsoft_med: amT2 > 200 GeV";
+	cutFlowVector_str[100] = "bCsoft_med: >=2 b jet";
+	cutFlowVector_str[101] = "bCsoft_med: bjet0 pT > 120 GeV ";
+	cutFlowVector_str[102] = "bCsoft_med: bjet1 pT > 60 GeV";
+	cutFlowVector_str[103] = "bCsoft_med: min(dPhi(ptmiss, b-jet)) > 0.8 ";
+	cutFlowVector_str[104] = "bCsoft_med: pTl/Met < 0.1";
+	cutFlowVector_str[105] = "bCsoft_med: pTl/Met < 0.03";
+	cutFlowVector_str[106] = "bCsoft_high: XE trigger, >=2 jets, Met > 230 GeV";
+	cutFlowVector_str[107] = "bCsoft_high: dPhi(j1,ptmiss) > 0.4";
+	cutFlowVector_str[108] = "bCsoft_high: dPhi(j2,ptmiss) > 0.4";
+	cutFlowVector_str[109] = "bCsoft_high: jet0 pt > 100 GeV";
+	cutFlowVector_str[110] = "bCsoft_high: jet1 pt > 100 GeV";
+	cutFlowVector_str[111] = "bCsoft_high: mT < 160 GeV";
+	cutFlowVector_str[112] = "bCsoft_high: pTW > 500 GeV";
+	cutFlowVector_str[113] = "bCsoft_high: dRbb > 0.8";
+	cutFlowVector_str[114] = "bCsoft_high: min(dPhi(ptmiss, b-jet))";
+	cutFlowVector_str[115] = "bCsoft_high: >=2 b jet";
+	cutFlowVector_str[116] = "bCsoft_high: bjet0 pT > 100 GeV";
+	cutFlowVector_str[117] = "bCsoft_high: bjet1 pT > 100 GeV";
+	cutFlowVector_str[118] = "bCsoft_high: amT2 > 300 GeV";
 	
 	for(int j=0;j<NCUTS;j++){
           if(
@@ -1006,6 +1012,8 @@ namespace Gambit {
 
 	     (j==9 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80) ||
 
+	     //tN_med cutflow
+	     
 	     (j==10 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 ) ||
 
 	     (j==11 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60) ||
@@ -1030,6 +1038,8 @@ namespace Gambit {
 
 	     (j==21 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 60 && signalJets[1]->pT() > 60 &&  signalJets[2]->pT() > 40 && signalJets[3]->pT() > 40 && Met > 250. && MetPerp > 230 && HtSigMiss > 14 && mT > 160 && amT2 > 175 && nBJets >=1 &&  dRbl < 2.0 && topReclM > 150) ||
 
+	     // tN_high cutflow
+	     
 	     (j==22 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100) ||
 
 	     (j==23 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80) ||
@@ -1052,6 +1062,8 @@ namespace Gambit {
 
 	     (j==32 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 80 && signalJets[2]->pT() > 50 && signalJets[3]->pT() > 30 && Met > 550. &&  HtSigMiss > 27 && mT > 160 && amT2 > 175. && nBJets >=1 && dRbl < 2.0 && topReclM > 130.) ||
 
+	     // bWN cutflow
+	     
 	     (j==33 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50.) ||
 
 	     (j==34 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300) ||
@@ -1064,32 +1076,184 @@ namespace Gambit {
 
 	     (j==38 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 50. && Met > 300 && mT > 130 && amT2 < 110 && nBJets>=1 && dPhiMetLep < 2.5 ) ||
 
-	     (j==39 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep) ||
+	     // bffN cutflow
+	     
+	     (j==39 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep) ||
 
-	     (j==40 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300.) ||
+	     (j==40 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300.) ||
 
-	     (j==41 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400.) ||
+	     (j==41 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400.) ||
 
-	     (j==42 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160.) ||
+	     (j==42 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160.) ||
 
-	     (j==43 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag()) ||
+	     (j==43 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag()) ||
 
-	     (j==44 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5) ||
+	     (j==44 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5) ||
 
-	     (j==45 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05) ||
+	     (j==45 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05) ||
 
-	     (j==46 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05 && topReclM < 150) ||
+	     (j==46 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05 && topReclM < 150) ||
 
-	     (j==47 && baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05 && topReclM < 150 && pTLepOverMet < 0.02) 
+	     (j==47 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && nJets > 0 && signalJets[0]->pT() > 400. && mT < 160. &&  !signalJets[0]->btag() && minDPhiMetBJet < 1.5 && pTLepOverMet < 0.05 && topReclM < 150 && pTLepOverMet < 0.02) ||
 
+	     // bC2x_diag cutflow
+	     
+	     (j==48 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75) ||
+
+	     (j==49 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75) ||
+
+	     (j==50 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75) ||
+
+	     (j==51 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30) ||
+
+	     (j==52 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2) ||
+
+	     (j==53 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30) ||
+
+	     (j==54 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30 && absDPhiJMet0 > 0.7) ||
+
+	     (j==55 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30 && absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7) ||
+
+	     (j==56 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30 && absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7 && HtSigMiss > 13) ||
+	     
+	     (j==57 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30 && absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7 && HtSigMiss > 13 && mT > 180) ||
+
+	     (j==58 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30 && absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7 && HtSigMiss > 13 && mT > 180 && amT2 > 175) ||
+
+	     (j==59 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 75 && signalJets[1]->pT() > 75 && signalJets[2]->pT() > 75 && signalJets[3]->pT() > 30 && nBJets>=2 && signalBJets[1]->pT() > 30 && absDPhiJMet0 > 0.7 && absDPhiJMet1 > 0.7 && HtSigMiss > 13 && mT > 180 && amT2 > 175 && WReclM > 50) ||
+
+	     // bC2x_med
+	     
+	     (j==60 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200) ||
+
+	     (j==61 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140) ||
+
+	     (j==62 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2) ||
+
+	     (j==63 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140) ||
+
+	     (j==64 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140) ||
+
+	     (j==65 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140 && absDPhiJMet0 > 0.9) ||
+
+	     (j==66 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140 && absDPhiJMet0 > 0.9 && absDPhiJMet1 > 0.9) ||
+
+	     (j==67 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140 && absDPhiJMet0 > 0.9 && absDPhiJMet1 > 0.9 && HtSigMiss > 10) ||
+
+	     (j==68 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140 && absDPhiJMet0 > 0.9 && absDPhiJMet1 > 0.9 && HtSigMiss > 10 && mT > 120) ||
+
+	     (j==69 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140 && absDPhiJMet0 > 0.9 && absDPhiJMet1 > 0.9 && HtSigMiss > 10 && mT > 120 && amT2 > 300) ||
+
+	     (j==70 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=4 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && mT2Tau > 80 && signalJets[0]->pT() > 200 && signalJets[1]->pT() > 140 && nBJets >=2 && signalBJets[0]->pT() > 140 && signalBJets[1]->pT() > 140 && absDPhiJMet0 > 0.9 && absDPhiJMet1 > 0.9 && HtSigMiss > 10 && mT > 120 && amT2 > 300 && WReclM > 50) ||
+
+	     // bCbv cutflow
+
+	     (j==71 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120) ||
+
+	     (j==72 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80) ||
+
+	     (j==73 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0) ||
+
+	     (j==74 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60) ||
+
+	     (j==75 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 ) ||
+
+	     (j==76 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8) ||
+
+	     (j==77 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8 && Met > 360) ||
+
+	     (j==78 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8 && Met > 360 && HtSigMiss > 16) ||
+
+	     (j==79 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8 && Met > 360 && HtSigMiss > 16 && mT > 200) ||
+
+	     (j==80 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8 && Met > 360 && HtSigMiss > 16 && mT > 200 && WReclM >= 70 && WReclM <= 100) ||
+
+	     (j==81 &&  baselineLeptons.size()>0 && signalLeptons.size()>0 && signalLeptons.size()==1 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 80 && nBJets==0 &&  baselineLeptons[0]->pT() > 60 && absDPhiJMet0 > 2.0 && absDPhiJMet1 > 0.8 && Met > 360 && HtSigMiss > 16 && mT > 200 && WReclM >= 70 && WReclM <= 100 && dPhiMetLep > 1.2 ) || 
+
+	     // bCsoft_diag
+
+	     (j==82 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep) ||
+
+	     (j==83 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300.) ||
+
+	     (j==84 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400) ||
+
+	     (j==85 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160) ||
+
+	     (j==86 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160 && !signalJets[0]->btag()) ||
+
+	     (j==87 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160 && !signalJets[0]->btag() && mT < 50) ||
+
+	     (j==88 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160 && !signalJets[0]->btag() && mT < 50 && minDPhiMetBJet < 1.5) ||
+
+	     (j==89 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160 && !signalJets[0]->btag() && mT < 50 && minDPhiMetBJet < 1.5 &&  pTLepOverMet < 0.05) ||
+
+	     (j==90 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160 && !signalJets[0]->btag() && mT < 50 && minDPhiMetBJet < 1.5 &&  pTLepOverMet < 0.05 && topReclM < 150 ) ||
+
+	     (j==91 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && Met > 300. && signalJets[0]->pT() > 400 && mT < 160 && !signalJets[0]->btag() && mT < 50 && minDPhiMetBJet < 1.5 &&  pTLepOverMet < 0.05 && topReclM < 150 &&  pTLepOverMet < 0.02) ||	     
+
+	     // bCsoft_med cutflow
+
+	     (j==92 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep) ||
+
+	     (j==93 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3) ||
+
+	     (j==94 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400) ||
+
+	     (j==95 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120) ||
+
+	     (j==96 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60) ||
+
+	     (j==97 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40) ||
+	     (j==98 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160) ||
+
+	     (j==99 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200) ||
+
+	     (j==100 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200 && nBJets > 1) ||
+
+	     (j==101 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200 && nBJets > 1 &&  signalBJets[0]->pT() > 120) ||
+
+	     (j==102 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200 && nBJets > 1 &&  signalBJets[0]->pT() > 120 && signalBJets[1]->pT() > 60) ||
+
+	     (j==103 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200 && nBJets > 1 &&  signalBJets[0]->pT() > 120 && signalBJets[1]->pT() > 60 && minDPhiMetBJet > 0.8) ||
+
+	     (j==104 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200 && nBJets > 1 &&  signalBJets[0]->pT() > 120 && signalBJets[1]->pT() > 60 && minDPhiMetBJet > 0.8 && pTLepOverMet < 0.1) ||
+
+	     (j==105 && baselineLeptons.size()==1 && nJets > 1 && nBJets > 0 && preselSoftLep && nJets >=3 && Wpt > 400 && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 && mT < 160 && amT2 > 200 && nBJets > 1 &&  signalBJets[0]->pT() > 120 && signalBJets[1]->pT() > 60 && minDPhiMetBJet > 0.8 && pTLepOverMet < 0.1 && pTLepOverMet < 0.03) ||
+
+	     // bCsoft_high cutflow
+
+	     (j==106 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230.) ||
+
+	     (j==107 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4) ||
+
+	     (j==108 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4) ||
+	     (j==109 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100) ||
+
+	     (j==110 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100) ||
+	     
+	     (j==111 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160) ||
+
+	     (j==112 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500) ||
+
+	     (j==113 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500 && dRbb > 0.8) ||
+
+	     (j==114 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500 && dRbb > 0.8 && minDPhiMetBJet > 0.4) ||
+
+	     (j==115 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500 && dRbb > 0.8 && minDPhiMetBJet > 0.4 && nBJets>=2 ) ||
+
+	     (j==116 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500 && dRbb > 0.8 && minDPhiMetBJet > 0.4 && nBJets>=2 && signalBJets[0]->pT() > 100) ||
+
+	     (j==117 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500 && dRbb > 0.8 && minDPhiMetBJet > 0.4 && nBJets>=2 && signalBJets[0]->pT() > 100 && signalBJets[1]->pT() > 100) ||
+
+	     (j==118 && baselineLeptons.size()>0 && baselineLeptons.size()==1 && nJets >=2 && Met > 230. && absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && signalJets[0]->pT() > 100 && signalJets[1]->pT() > 100 && mT < 160 && Wpt > 500 && dRbb > 0.8 && minDPhiMetBJet > 0.4 && nBJets>=2 && signalBJets[0]->pT() > 100 && signalBJets[1]->pT() > 100 && amT2 > 300)	     
 	     ){
 	    
 	    cutFlowVector[j]++;
 	  }
 	    
 	}
-	
-	
+		
 	if(is_tN_med)num_tN_med++;
 	if(is_tN_high)num_tN_high++;
 	if(is_bWN)num_bWN++;
@@ -1158,8 +1322,123 @@ namespace Gambit {
 
 	static const string ANAME = "Analysis_ATLAS_13TeV_1LEPStop_36invfb";
 
+	SignalRegionData results_tN_med;
+	results_tN_med.analysis_name = ANAME;
+	results_tN_med.sr_label = "tN_med";
+        results_tN_med.n_observed = 50;
+        results_tN_med.n_background = 36.3;
+        results_tN_med.background_sys = 6.6;
+        results_tN_med.signal_sys = 0.;
+        results_tN_med.n_signal = num_tN_med;
 
+	SignalRegionData results_tN_high;
+	results_tN_high.analysis_name = ANAME;
+	results_tN_high.sr_label = "tN_med";
+        results_tN_high.n_observed = 8;
+        results_tN_high.n_background = 3.8;
+        results_tN_high.background_sys = 1.0;
+        results_tN_high.signal_sys = 0.;
+        results_tN_high.n_signal = num_tN_high;
+	
+	SignalRegionData results_bWN;
+	results_bWN.analysis_name = ANAME;
+	results_bWN.sr_label = "tN_med";
+        results_bWN.n_observed = 68;
+        results_bWN.n_background = 71;
+        results_bWN.background_sys = 16;
+        results_bWN.signal_sys = 0.;
+        results_bWN.n_signal = num_bWN;
 
+	SignalRegionData results_bC2x_diag;
+	results_bC2x_diag.analysis_name = ANAME;
+	results_bC2x_diag.sr_label = "bC2x_diag";
+	results_bC2x_diag.n_observed = 22;
+	results.bC2x_diag.n_background = 21.3;
+	results.bC2x_diag.background_sys = 5.0;
+        results_bC2x_diag.signal_sys = 0.;
+        results_bC2x_diag.n_signal = num_bC2x_diag;
+	
+	SignalRegionData results_bC2x_med;
+	results_bC2x_med.analysis_name = ANAME;
+	results_bC2x_med.sr_label = "bC2x_med";
+	results_bC2x_med.n_observed = 4;
+	results.bC2x_med.n_background = 5.8;
+	results.bC2x_med.background_sys = 1.6;
+        results_bC2x_med.signal_sys = 0.;
+        results_bC2x_med.n_signal = num_bC2x_med;
+
+	SignalRegionData results_bCbv;
+	results_bCbv.analysis_name = ANAME;
+	results_bCbv.sr_label = "bCbv";
+	results_bCbv.n_observed = 25;
+	results.bCbv.n_background = 25.1;
+	results.bCbv.background_sys = 3.8;
+        results_bCbv.signal_sys = 0.;
+        results_bCbv.n_signal = num_bCbv;
+
+	SignalRegionData results_DM_low_loose;
+	results_DM_low_loose.analysis_name = ANAME;
+	results_DM_low_loose.sr_label = "DM_low_loose";
+	results_DM_low_loose.n_observed = 65;
+	results.DM_low_loose.n_background = 48.3;
+	results.DM_low_loose.background_sys = 8.2;
+        results_DM_low_loose.signal_sys = 0.;
+        results_DM_low_loose.n_signal = num_DM_low_loose;
+
+	SignalRegionData results_DM_low;
+	results_DM_low.analysis_name = ANAME;
+	results_DM_low.sr_label = "DM_low";
+	results_DM_low.n_observed = 13;
+	results.DM_low.n_background = 13.8;
+	results.DM_low.background_sys = 3.6;
+        results_DM_low.signal_sys = 0.;
+        results_DM_low.n_signal = num_DM_low;
+
+	SignalRegionData results_DM_high;
+	results_DM_high.analysis_name = ANAME;
+	results_DM_high.sr_label = "DM_high";
+	results_DM_high.n_observed = 5;
+	results.DM_high.n_background = 7.4;
+	results.DM_high.background_sys = 2.1;
+        results_DM_high.signal_sys = 0.;
+        results_DM_high.n_signal = num_DM_high;
+
+	SignalRegionData results_bffN;
+	results_bffN.analysis_name = ANAME;
+	results_bffN.sr_label = "bffN";
+	results_bffN.n_observed = 70;
+	results.bffN.n_background = 60.5;
+	results.bffN.background_sys = 6.1;
+        results_bffN.signal_sys = 0.;
+        results_bffN.n_signal = num_bffN;
+
+	SignalRegionData results_bCsoft_diag;
+	results_bCsoft_diag.analysis_name = ANAME;
+	results_bCsoft_diag.sr_label = "bCsoft_diag";
+	results_bCsoft_diag.n_observed = 33;
+	results.bCsoft_diag.n_background = 24.7;
+	results.bCsoft_diag.background_sys = 3.1;
+        results_bCsoft_diag.signal_sys = 0.;
+        results_bCsoft_diag.n_signal = num_bCsoft_diag;
+
+	SignalRegionData results_bCsoft_med;
+	results_bCsoft_med.analysis_name = ANAME;
+	results_bCsoft_med.sr_label = "bCsoft_med";
+	results_bCsoft_med.n_observed = 19;
+	results.bCsoft_med.n_background = 13.7;
+	results.bCsoft_med.background_sys = 2.1;
+        results_bCsoft_med.signal_sys = 0.;
+        results_bCsoft_med.n_signal = num_bCsoft_med;
+
+	SignalRegionData results_bCsoft_high;
+	results_bCsoft_high.analysis_name = ANAME;
+	results_bCsoft_high.sr_label = "bCsoft_high";
+	results_bCsoft_high.n_observed = 2;
+	results.bCsoft_high.n_background = 1.8;
+	results.bCsoft_high.background_sys = 0.3;
+        results_bCsoft_high.signal_sys = 0.;
+        results_bCsoft_high.n_signal = num_bCsoft_high;
+	
         return;
       }
 
