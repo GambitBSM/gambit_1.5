@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:36:23
+// File generated at Wed 25 Oct 2017 18:12:01
 
 #ifndef HSSUSY_soft_parameters_H
 #define HSSUSY_soft_parameters_H

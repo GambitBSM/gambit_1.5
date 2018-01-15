@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 28 Sep 2017 14:25:51
+// File generated at Wed 25 Oct 2017 17:57:51
 
 #ifndef MSSMatMSUSY_mAmu_susy_parameters_H
 #define MSSMatMSUSY_mAmu_susy_parameters_H
