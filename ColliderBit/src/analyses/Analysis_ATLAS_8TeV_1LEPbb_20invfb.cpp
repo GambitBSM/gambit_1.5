@@ -26,10 +26,10 @@ namespace Gambit {
       // Numbers passing cuts
       double _numSRA, _numSRB; 
       vector<int> cutFlowVector;
-      vector<double> cutFlowVectorATLAS_130_0;
-      vector<double> cutFlowVectorATLAS_250_0;
-      double xsecATLAS_130_0;
-      double xsecATLAS_250_0;
+      // vector<double> cutFlowVectorATLAS_130_0;
+      // vector<double> cutFlowVectorATLAS_250_0;
+      // double xsecATLAS_130_0;
+      // double xsecATLAS_250_0;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
 
@@ -59,13 +59,13 @@ namespace Gambit {
 
         NCUTS=8;
         set_luminosity(20.3);
-        xsecATLAS_130_0=4240.;
-        xsecATLAS_250_0=320.;
+        // xsecATLAS_130_0=4240.;
+        // xsecATLAS_250_0=320.;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
-          cutFlowVectorATLAS_130_0.push_back(0);
-          cutFlowVectorATLAS_250_0.push_back(0);
+          // cutFlowVectorATLAS_130_0.push_back(0);
+          // cutFlowVectorATLAS_250_0.push_back(0);
           cutFlowVector_str.push_back("");
         }
 
@@ -260,23 +260,23 @@ namespace Gambit {
         cutFlowVector_str[6] = "SRA";
         cutFlowVector_str[7] = "SRB";
 
-	cutFlowVectorATLAS_130_0[0] = 100000;
-	cutFlowVectorATLAS_130_0[1] = 531.1;
-        cutFlowVectorATLAS_130_0[2] = 163.7;
-        cutFlowVectorATLAS_130_0[3] = 70.4;
-        cutFlowVectorATLAS_130_0[4] = 9.7;
-        cutFlowVectorATLAS_130_0[5] = 9.6;
-        cutFlowVectorATLAS_130_0[6] = 7.2;
-        cutFlowVectorATLAS_130_0[7] = 0.3;
+	// cutFlowVectorATLAS_130_0[0] = 100000;
+	// cutFlowVectorATLAS_130_0[1] = 531.1;
+ //        cutFlowVectorATLAS_130_0[2] = 163.7;
+ //        cutFlowVectorATLAS_130_0[3] = 70.4;
+ //        cutFlowVectorATLAS_130_0[4] = 9.7;
+ //        cutFlowVectorATLAS_130_0[5] = 9.6;
+ //        cutFlowVectorATLAS_130_0[6] = 7.2;
+ //        cutFlowVectorATLAS_130_0[7] = 0.3;
 
-	cutFlowVectorATLAS_250_0[0] = 99000;
-	cutFlowVectorATLAS_250_0[1] = 71.3;
-        cutFlowVectorATLAS_250_0[2] = 45.2;
-        cutFlowVectorATLAS_250_0[3] = 15.0;
-        cutFlowVectorATLAS_250_0[4] = 8.1;
-        cutFlowVectorATLAS_250_0[5] = 8.0;
-        cutFlowVectorATLAS_250_0[6] = 1.3;
-        cutFlowVectorATLAS_250_0[7] = 4.4;
+	// cutFlowVectorATLAS_250_0[0] = 99000;
+	// cutFlowVectorATLAS_250_0[1] = 71.3;
+ //        cutFlowVectorATLAS_250_0[2] = 45.2;
+ //        cutFlowVectorATLAS_250_0[3] = 15.0;
+ //        cutFlowVectorATLAS_250_0[4] = 8.1;
+ //        cutFlowVectorATLAS_250_0[5] = 8.0;
+ //        cutFlowVectorATLAS_250_0[6] = 1.3;
+ //        cutFlowVectorATLAS_250_0[7] = 4.4;
 
         for (size_t j=0;j<NCUTS;j++){
           if(

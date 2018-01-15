@@ -28,8 +28,8 @@ namespace Gambit {
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
-      vector<double> cutFlowVectorCMS_550_200;
-      double xsecCMS_550_200;
+      // vector<double> cutFlowVectorCMS_550_200;
+      // double xsecCMS_550_200;
 
       ofstream cutflowFile;
       string analysisRunName;
@@ -58,11 +58,11 @@ namespace Gambit {
 
 	NCUTS=13;
 	set_luminosity(35.9);
-	xsecCMS_550_200=30.2;
+	// xsecCMS_550_200=30.2;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
-          cutFlowVectorCMS_550_200.push_back(0);
+          // cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
         analysisRunName = "CMS_13TeV_2OSLEP_36invfb";
@@ -211,19 +211,19 @@ namespace Gambit {
         cutFlowVector_str[11] = "$E^{miss}_{T} > 250 GeV$";
         cutFlowVector_str[12] = "$E^{miss}_{T} > 350 GeV$";
 
-        cutFlowVectorCMS_550_200[0] = 109.35;
-        cutFlowVectorCMS_550_200[1] = 24.21;
-        cutFlowVectorCMS_550_200[2] = 18.37;
-        cutFlowVectorCMS_550_200[3] = 14.13;
-        cutFlowVectorCMS_550_200[4] = 11.98;
-        cutFlowVectorCMS_550_200[5] = 10.95;
-        cutFlowVectorCMS_550_200[6] = 9.92;
-        cutFlowVectorCMS_550_200[7] = 8.04;
-        cutFlowVectorCMS_550_200[8] = 5.62;
-        cutFlowVectorCMS_550_200[9] = 5.41;
-        cutFlowVectorCMS_550_200[10] = 4.96;
-        cutFlowVectorCMS_550_200[11] = 3.59;
-        cutFlowVectorCMS_550_200[12] = 1.94;
+        // cutFlowVectorCMS_550_200[0] = 109.35;
+        // cutFlowVectorCMS_550_200[1] = 24.21;
+        // cutFlowVectorCMS_550_200[2] = 18.37;
+        // cutFlowVectorCMS_550_200[3] = 14.13;
+        // cutFlowVectorCMS_550_200[4] = 11.98;
+        // cutFlowVectorCMS_550_200[5] = 10.95;
+        // cutFlowVectorCMS_550_200[6] = 9.92;
+        // cutFlowVectorCMS_550_200[7] = 8.04;
+        // cutFlowVectorCMS_550_200[8] = 5.62;
+        // cutFlowVectorCMS_550_200[9] = 5.41;
+        // cutFlowVectorCMS_550_200[10] = 4.96;
+        // cutFlowVectorCMS_550_200[11] = 3.59;
+        // cutFlowVectorCMS_550_200[12] = 1.94;
 
         for (size_t j=0;j<NCUTS;j++){
           if(

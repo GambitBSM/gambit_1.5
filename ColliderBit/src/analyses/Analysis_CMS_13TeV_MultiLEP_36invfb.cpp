@@ -27,8 +27,8 @@ namespace Gambit {
       double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8; 
       vector<int> cutFlowVector1, cutFlowVector2, cutFlowVector3, cutFlowVector4;
       vector<string> cutFlowVector_str1, cutFlowVector_str2, cutFlowVector_str3, cutFlowVector_str4;
-      double xsec2CMS_200_100, xsec2CMS_500_150, xsec3CMS_250_150, xsec3CMS_600_1, xsec1CMS_500_350_05,xsec1CMS_500_350_5, xsec4CMS_100_1, xsec4CMS_800_1;
-      vector<double> cutFlowVector2CMS_200_100, cutFlowVector2CMS_500_150, cutFlowVector3CMS_250_150, cutFlowVector3CMS_600_1, cutFlowVector1CMS_500_350_05, cutFlowVector1CMS_500_350_5, cutFlowVector4CMS_100_1, cutFlowVector4CMS_800_1;
+      // double xsec2CMS_200_100, xsec2CMS_500_150, xsec3CMS_250_150, xsec3CMS_600_1, xsec1CMS_500_350_05,xsec1CMS_500_350_5, xsec4CMS_100_1, xsec4CMS_800_1;
+      // vector<double> cutFlowVector2CMS_200_100, cutFlowVector2CMS_500_150, cutFlowVector3CMS_250_150, cutFlowVector3CMS_600_1, cutFlowVector1CMS_500_350_05, cutFlowVector1CMS_500_350_5, cutFlowVector4CMS_100_1, cutFlowVector4CMS_800_1;
       size_t NCUTS1, NCUTS2, NCUTS3, NCUTS4;
 
       ofstream cutflowFile;
@@ -57,37 +57,37 @@ namespace Gambit {
 	NCUTS4=5;
 	set_luminosity(35.9);
 
-       xsec2CMS_200_100=1800.;
-       xsec2CMS_500_150=46.;
-       xsec3CMS_250_150=780.;
-       xsec3CMS_600_1=20.;
-       xsec1CMS_500_350_05=46.;
-       xsec1CMS_500_350_5=46.;
-       xsec4CMS_100_1=16800.;
-       xsec4CMS_800_1=3.5;
+       // xsec2CMS_200_100=1800.;
+       // xsec2CMS_500_150=46.;
+       // xsec3CMS_250_150=780.;
+       // xsec3CMS_600_1=20.;
+       // xsec1CMS_500_350_05=46.;
+       // xsec1CMS_500_350_5=46.;
+       // xsec4CMS_100_1=16800.;
+       // xsec4CMS_800_1=3.5;
 
         for (size_t i=0;i<NCUTS1;i++){
           cutFlowVector1.push_back(0);
-          cutFlowVector1CMS_500_350_05.push_back(0);
-          cutFlowVector1CMS_500_350_5.push_back(0);
+          // cutFlowVector1CMS_500_350_05.push_back(0);
+          // cutFlowVector1CMS_500_350_5.push_back(0);
           cutFlowVector_str1.push_back("");
         }
         for (size_t i=0;i<NCUTS2;i++){
           cutFlowVector2.push_back(0);
-          cutFlowVector2CMS_200_100.push_back(0);
-          cutFlowVector2CMS_500_150.push_back(0);
+          // cutFlowVector2CMS_200_100.push_back(0);
+          // cutFlowVector2CMS_500_150.push_back(0);
           cutFlowVector_str2.push_back("");
         }
         for (size_t i=0;i<NCUTS3;i++){
           cutFlowVector3.push_back(0);
-          cutFlowVector3CMS_600_1.push_back(0);
-          cutFlowVector3CMS_250_150.push_back(0);
+          // cutFlowVector3CMS_600_1.push_back(0);
+          // cutFlowVector3CMS_250_150.push_back(0);
           cutFlowVector_str3.push_back("");
         }
         for (size_t i=0;i<NCUTS4;i++){
           cutFlowVector4.push_back(0);
-          cutFlowVector4CMS_100_1.push_back(0);
-          cutFlowVector4CMS_800_1.push_back(0);
+          // cutFlowVector4CMS_100_1.push_back(0);
+          // cutFlowVector4CMS_800_1.push_back(0);
           cutFlowVector_str4.push_back("");
         }
 

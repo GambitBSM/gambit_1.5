@@ -26,16 +26,16 @@ namespace Gambit {
 
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
-      vector<double> cutFlowVectorCMS_225_75;
-      vector<double> cutFlowVectorCMS_250_1;
-      vector<double> cutFlowVectorCMS_350_100;
-      vector<double> cutFlowVectorCMS_500_1;
-      vector<double> cutFlowVectorCMS_500_125;
-      double xsecCMS_225_75;
-      double xsecCMS_250_1;
-      double xsecCMS_350_100;
-      double xsecCMS_500_1;
-      double xsecCMS_500_125;
+      // vector<double> cutFlowVectorCMS_225_75;
+      // vector<double> cutFlowVectorCMS_250_1;
+      // vector<double> cutFlowVectorCMS_350_100;
+      // vector<double> cutFlowVectorCMS_500_1;
+      // vector<double> cutFlowVectorCMS_500_125;
+      // double xsecCMS_225_75;
+      // double xsecCMS_250_1;
+      // double xsecCMS_350_100;
+      // double xsecCMS_500_1;
+      // double xsecCMS_500_125;
       size_t NCUTS;
 
       ofstream cutflowFile;
@@ -51,18 +51,18 @@ namespace Gambit {
         NCUTS=10;
         set_luminosity(35.9);
 
-	xsecCMS_225_75=1165;
-	xsecCMS_250_1=782.5;
-	xsecCMS_350_100=209.4;
-	xsecCMS_500_1=46.35;
-	xsecCMS_500_125=46.35;
+	// xsecCMS_225_75=1165;
+	// xsecCMS_250_1=782.5;
+	// xsecCMS_350_100=209.4;
+	// xsecCMS_500_1=46.35;
+	// xsecCMS_500_125=46.35;
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
-	  cutFlowVectorCMS_225_75.push_back(0);
-	  cutFlowVectorCMS_250_1.push_back(0);
-	  cutFlowVectorCMS_350_100.push_back(0);
-	  cutFlowVectorCMS_500_1.push_back(0);
-	  cutFlowVectorCMS_500_125.push_back(0);
+	  // cutFlowVectorCMS_225_75.push_back(0);
+	  // cutFlowVectorCMS_250_1.push_back(0);
+	  // cutFlowVectorCMS_350_100.push_back(0);
+	  // cutFlowVectorCMS_500_1.push_back(0);
+	  // cutFlowVectorCMS_500_125.push_back(0);
           cutFlowVector_str.push_back("");
         }
 
@@ -199,60 +199,60 @@ namespace Gambit {
         cutFlowVector_str[8] = "$E_{T}^{miss} > 125 GeV$";
         cutFlowVector_str[9] = "$m_{T} > 150 GeV$";
 
-	cutFlowVectorCMS_225_75[0]=7297.6;	
-	cutFlowVectorCMS_225_75[1]=1320.5;	
-	cutFlowVectorCMS_225_75[2]=1265.3;	
-	cutFlowVectorCMS_225_75[3]=1259.0;	
-	cutFlowVectorCMS_225_75[4]=680.8;	
-	cutFlowVectorCMS_225_75[5]=299.0;	
-	cutFlowVectorCMS_225_75[6]=258.4;	
-	cutFlowVectorCMS_225_75[7]=50.9;	
-	cutFlowVectorCMS_225_75[8]=38.4;	
-	cutFlowVectorCMS_225_75[9]=4.7;	
+	// cutFlowVectorCMS_225_75[0]=7297.6;	
+	// cutFlowVectorCMS_225_75[1]=1320.5;	
+	// cutFlowVectorCMS_225_75[2]=1265.3;	
+	// cutFlowVectorCMS_225_75[3]=1259.0;	
+	// cutFlowVectorCMS_225_75[4]=680.8;	
+	// cutFlowVectorCMS_225_75[5]=299.0;	
+	// cutFlowVectorCMS_225_75[6]=258.4;	
+	// cutFlowVectorCMS_225_75[7]=50.9;	
+	// cutFlowVectorCMS_225_75[8]=38.4;	
+	// cutFlowVectorCMS_225_75[9]=4.7;	
 
-	cutFlowVectorCMS_250_1[0]=4901.0;	
-	cutFlowVectorCMS_250_1[1]=1035.1;	
-	cutFlowVectorCMS_250_1[2]=994.3;	
-	cutFlowVectorCMS_250_1[3]=989.6;	
-	cutFlowVectorCMS_250_1[4]=542.3;	
-	cutFlowVectorCMS_250_1[5]=242.6;	
-	cutFlowVectorCMS_250_1[6]=214.4;	
-	cutFlowVectorCMS_250_1[7]=67.2;	
-	cutFlowVectorCMS_250_1[8]=54.8;	
-	cutFlowVectorCMS_250_1[9]=17.6;	
+	// cutFlowVectorCMS_250_1[0]=4901.0;	
+	// cutFlowVectorCMS_250_1[1]=1035.1;	
+	// cutFlowVectorCMS_250_1[2]=994.3;	
+	// cutFlowVectorCMS_250_1[3]=989.6;	
+	// cutFlowVectorCMS_250_1[4]=542.3;	
+	// cutFlowVectorCMS_250_1[5]=242.6;	
+	// cutFlowVectorCMS_250_1[6]=214.4;	
+	// cutFlowVectorCMS_250_1[7]=67.2;	
+	// cutFlowVectorCMS_250_1[8]=54.8;	
+	// cutFlowVectorCMS_250_1[9]=17.6;	
 
-	cutFlowVectorCMS_350_100[0]=1309.1;	
-	cutFlowVectorCMS_350_100[1]=328.1;	
-	cutFlowVectorCMS_350_100[2]=316.6;	
-	cutFlowVectorCMS_350_100[3]=315.3;	
-	cutFlowVectorCMS_350_100[4]=162.9;	
-	cutFlowVectorCMS_350_100[5]=74.9;	
-	cutFlowVectorCMS_350_100[6]=65.6;	
-	cutFlowVectorCMS_350_100[7]=26.7;	
-	cutFlowVectorCMS_350_100[8]=22.9;	
-	cutFlowVectorCMS_350_100[9]=10.7;	
+	// cutFlowVectorCMS_350_100[0]=1309.1;	
+	// cutFlowVectorCMS_350_100[1]=328.1;	
+	// cutFlowVectorCMS_350_100[2]=316.6;	
+	// cutFlowVectorCMS_350_100[3]=315.3;	
+	// cutFlowVectorCMS_350_100[4]=162.9;	
+	// cutFlowVectorCMS_350_100[5]=74.9;	
+	// cutFlowVectorCMS_350_100[6]=65.6;	
+	// cutFlowVectorCMS_350_100[7]=26.7;	
+	// cutFlowVectorCMS_350_100[8]=22.9;	
+	// cutFlowVectorCMS_350_100[9]=10.7;	
 
-	cutFlowVectorCMS_500_1[0]=290.2;	
-	cutFlowVectorCMS_500_1[1]=89;	
-	cutFlowVectorCMS_500_1[2]=85.8;	
-	cutFlowVectorCMS_500_1[3]=85.5;	
-	cutFlowVectorCMS_500_1[4]=42.3;	
-	cutFlowVectorCMS_500_1[5]=19.7;	
-	cutFlowVectorCMS_500_1[6]=17.5;	
-	cutFlowVectorCMS_500_1[7]=11.9;	
-	cutFlowVectorCMS_500_1[8]=10.9;	
-	cutFlowVectorCMS_500_1[9]=7.1;	
+	// cutFlowVectorCMS_500_1[0]=290.2;	
+	// cutFlowVectorCMS_500_1[1]=89;	
+	// cutFlowVectorCMS_500_1[2]=85.8;	
+	// cutFlowVectorCMS_500_1[3]=85.5;	
+	// cutFlowVectorCMS_500_1[4]=42.3;	
+	// cutFlowVectorCMS_500_1[5]=19.7;	
+	// cutFlowVectorCMS_500_1[6]=17.5;	
+	// cutFlowVectorCMS_500_1[7]=11.9;	
+	// cutFlowVectorCMS_500_1[8]=10.9;	
+	// cutFlowVectorCMS_500_1[9]=7.1;	
 
-	cutFlowVectorCMS_500_125[0]=290.3;	
-	cutFlowVectorCMS_500_125[1]=86.9;	
-	cutFlowVectorCMS_500_125[2]=84.1;	
-	cutFlowVectorCMS_500_125[3]=83.9;	
-	cutFlowVectorCMS_500_125[4]=41.1;	
-	cutFlowVectorCMS_500_125[5]=19.5;	
-	cutFlowVectorCMS_500_125[6]=17.6;	
-	cutFlowVectorCMS_500_125[7]=10.9;	
-	cutFlowVectorCMS_500_125[8]=9.9;	
-	cutFlowVectorCMS_500_125[9]=6.5;	
+	// cutFlowVectorCMS_500_125[0]=290.3;	
+	// cutFlowVectorCMS_500_125[1]=86.9;	
+	// cutFlowVectorCMS_500_125[2]=84.1;	
+	// cutFlowVectorCMS_500_125[3]=83.9;	
+	// cutFlowVectorCMS_500_125[4]=41.1;	
+	// cutFlowVectorCMS_500_125[5]=19.5;	
+	// cutFlowVectorCMS_500_125[6]=17.6;	
+	// cutFlowVectorCMS_500_125[7]=10.9;	
+	// cutFlowVectorCMS_500_125[8]=9.9;	
+	// cutFlowVectorCMS_500_125[9]=6.5;	
 
         for (size_t j=0;j<NCUTS;j++){
           if(

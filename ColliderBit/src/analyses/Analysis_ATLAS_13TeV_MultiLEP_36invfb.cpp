@@ -30,36 +30,36 @@ namespace Gambit {
       vector<int> cutFlowVector1;
       vector<string> cutFlowVector1_str;
       size_t NCUTS1;
-      vector<double> cutFlowVector1ATLAS_200_100;
-      double xsec1ATLAS_200_100; 
+      // vector<double> cutFlowVector1ATLAS_200_100;
+      // double xsec1ATLAS_200_100; 
 
       vector<int> cutFlowVector2;
       vector<string> cutFlowVector2_str;
       size_t NCUTS2;
-      vector<double> cutFlowVector2ATLAS_400_200;
-      double xsec2ATLAS_400_200; 
-      vector<double> cutFlowVector2ATLAS_500_100;
-      double xsec2ATLAS_500_100; 
+      // vector<double> cutFlowVector2ATLAS_400_200;
+      // double xsec2ATLAS_400_200; 
+      // vector<double> cutFlowVector2ATLAS_500_100;
+      // double xsec2ATLAS_500_100; 
 
       vector<int> cutFlowVector3;
       vector<string> cutFlowVector3_str;
       size_t NCUTS3;
-      vector<double> cutFlowVector3ATLAS_200_100;
-      double xsec3ATLAS_200_100; 
+      // vector<double> cutFlowVector3ATLAS_200_100;
+      // double xsec3ATLAS_200_100; 
 
       vector<int> cutFlowVector4;
       vector<string> cutFlowVector4_str;
       size_t NCUTS4;
-      vector<double> cutFlowVector4ATLAS_800_600;
-      double xsec4ATLAS_800_600; 
+      // vector<double> cutFlowVector4ATLAS_800_600;
+      // double xsec4ATLAS_800_600; 
 
       vector<int> cutFlowVector5;
       vector<string> cutFlowVector5_str;
       size_t NCUTS5;
-      vector<double> cutFlowVector5ATLAS_401_1;
-      double xsec5ATLAS_401_1; 
-      vector<double> cutFlowVector5ATLAS_300_150;
-      double xsec5ATLAS_300_150; 
+      // vector<double> cutFlowVector5ATLAS_401_1;
+      // double xsec5ATLAS_401_1; 
+      // vector<double> cutFlowVector5ATLAS_300_150;
+      // double xsec5ATLAS_300_150; 
 
       ofstream cutflowFile;
       string analysisRunName;
@@ -93,46 +93,46 @@ namespace Gambit {
 	set_luminosity(36.1);
 
 	NCUTS1=22;
-	xsec1ATLAS_200_100=1807.4;
+	// xsec1ATLAS_200_100=1807.4;
         for (size_t i=0;i<NCUTS1;i++){
           cutFlowVector1.push_back(0);
-          cutFlowVector1ATLAS_200_100.push_back(0);
+          // cutFlowVector1ATLAS_200_100.push_back(0);
           cutFlowVector1_str.push_back("");
         }
 
 	NCUTS2=14;
-	xsec2ATLAS_400_200=121.0269;
-	xsec2ATLAS_500_100=46.3576;
+	// xsec2ATLAS_400_200=121.0269;
+	// xsec2ATLAS_500_100=46.3576;
         for (size_t i=0;i<NCUTS2;i++){
           cutFlowVector2.push_back(0);
-          cutFlowVector2ATLAS_400_200.push_back(0);
-          cutFlowVector2ATLAS_500_100.push_back(0);
+          // cutFlowVector2ATLAS_400_200.push_back(0);
+          // cutFlowVector2ATLAS_500_100.push_back(0);
           cutFlowVector2_str.push_back("");
         }
 
 	NCUTS3=24;
-	xsec3ATLAS_200_100=1807.4;
+	// xsec3ATLAS_200_100=1807.4;
         for (size_t i=0;i<NCUTS3;i++){
           cutFlowVector3.push_back(0);
-          cutFlowVector3ATLAS_200_100.push_back(0);
+          // cutFlowVector3ATLAS_200_100.push_back(0);
           cutFlowVector3_str.push_back("");
         }
 
 	NCUTS4=12;
-	xsec4ATLAS_800_600=3.803;
+	// xsec4ATLAS_800_600=3.803;
         for (size_t i=0;i<NCUTS4;i++){
           cutFlowVector4.push_back(0);
-          cutFlowVector4ATLAS_800_600.push_back(0);
+          // cutFlowVector4ATLAS_800_600.push_back(0);
           cutFlowVector4_str.push_back("");
         }
 
 	NCUTS5=11;
-	xsec5ATLAS_401_1=5.43;
-	xsec5ATLAS_300_150=190.159;
+	// xsec5ATLAS_401_1=5.43;
+	// xsec5ATLAS_300_150=190.159;
         for (size_t i=0;i<NCUTS5;i++){
           cutFlowVector5.push_back(0);
-          cutFlowVector5ATLAS_401_1.push_back(0);
-          cutFlowVector5ATLAS_300_150.push_back(0);
+          // cutFlowVector5ATLAS_401_1.push_back(0);
+          // cutFlowVector5ATLAS_300_150.push_back(0);
           cutFlowVector5_str.push_back("");
         }
 
@@ -687,18 +687,18 @@ namespace Gambit {
   	  cutFlowVector4_str[10] = "$50 < p_{T}^{l2} < 80 GeV$";
   	  cutFlowVector4_str[11] = "$p_{T}^{l2} > 80 GeV$";
 
-          cutFlowVector4ATLAS_800_600[0]=9291.;
-          cutFlowVector4ATLAS_800_600[1]=25.13;
-          cutFlowVector4ATLAS_800_600[2]=23.54;
-          cutFlowVector4ATLAS_800_600[3]=14.43;
-          cutFlowVector4ATLAS_800_600[4]=10.22;
-          cutFlowVector4ATLAS_800_600[5]=2.10;
-          cutFlowVector4ATLAS_800_600[6]=0.11;
-          cutFlowVector4ATLAS_800_600[7]=1.99;
-          cutFlowVector4ATLAS_800_600[8]=6.8;
-          cutFlowVector4ATLAS_800_600[9]=2.53;
-          cutFlowVector4ATLAS_800_600[10]=3.01;
-          cutFlowVector4ATLAS_800_600[11]=1.25;
+          // cutFlowVector4ATLAS_800_600[0]=9291.;
+          // cutFlowVector4ATLAS_800_600[1]=25.13;
+          // cutFlowVector4ATLAS_800_600[2]=23.54;
+          // cutFlowVector4ATLAS_800_600[3]=14.43;
+          // cutFlowVector4ATLAS_800_600[4]=10.22;
+          // cutFlowVector4ATLAS_800_600[5]=2.10;
+          // cutFlowVector4ATLAS_800_600[6]=0.11;
+          // cutFlowVector4ATLAS_800_600[7]=1.99;
+          // cutFlowVector4ATLAS_800_600[8]=6.8;
+          // cutFlowVector4ATLAS_800_600[9]=2.53;
+          // cutFlowVector4ATLAS_800_600[10]=3.01;
+          // cutFlowVector4ATLAS_800_600[11]=1.25;
 
           for (size_t j=0;j<NCUTS4;j++){
             if(
