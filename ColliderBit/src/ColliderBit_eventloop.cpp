@@ -1603,7 +1603,7 @@ namespace Gambit
             n_pred_sb(SR) = srData.n_signal_at_lumi + srData.n_background;
 
             // Absolute errors for n_predicted_uncertain_*
-            const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
+            const double abs_uncertainty_s_stat = (srData.n_signal == 0 ? 0 : sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal));
             const double abs_uncertainty_s_sys = srData.signal_sys;
             // cout << "!!! " << srData.n_signal << " -> " << sqrt(srData.n_signal) << " -> (" << srData.n_signal_at_lumi
             //      << ", " << srData.n_signal << ") -> " << abs_uncertainty_s_stat << endl;
