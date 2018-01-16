@@ -1353,8 +1353,8 @@ namespace Gambit {
 	results_bC2x_diag.analysis_name = ANAME;
 	results_bC2x_diag.sr_label = "bC2x_diag";
 	results_bC2x_diag.n_observed = 22;
-	results.bC2x_diag.n_background = 21.3;
-	results.bC2x_diag.background_sys = 5.0;
+	results_bC2x_diag.n_background = 21.3;
+	results_bC2x_diag.background_sys = 5.0;
         results_bC2x_diag.signal_sys = 0.;
         results_bC2x_diag.n_signal = num_bC2x_diag;
 	
@@ -1362,8 +1362,8 @@ namespace Gambit {
 	results_bC2x_med.analysis_name = ANAME;
 	results_bC2x_med.sr_label = "bC2x_med";
 	results_bC2x_med.n_observed = 4;
-	results.bC2x_med.n_background = 5.8;
-	results.bC2x_med.background_sys = 1.6;
+	results_bC2x_med.n_background = 5.8;
+	results_bC2x_med.background_sys = 1.6;
         results_bC2x_med.signal_sys = 0.;
         results_bC2x_med.n_signal = num_bC2x_med;
 
@@ -1371,8 +1371,8 @@ namespace Gambit {
 	results_bCbv.analysis_name = ANAME;
 	results_bCbv.sr_label = "bCbv";
 	results_bCbv.n_observed = 25;
-	results.bCbv.n_background = 25.1;
-	results.bCbv.background_sys = 3.8;
+	results_bCbv.n_background = 25.1;
+	results_bCbv.background_sys = 3.8;
         results_bCbv.signal_sys = 0.;
         results_bCbv.n_signal = num_bCbv;
 
@@ -1380,8 +1380,8 @@ namespace Gambit {
 	results_DM_low_loose.analysis_name = ANAME;
 	results_DM_low_loose.sr_label = "DM_low_loose";
 	results_DM_low_loose.n_observed = 65;
-	results.DM_low_loose.n_background = 48.3;
-	results.DM_low_loose.background_sys = 8.2;
+	results_DM_low_loose.n_background = 48.3;
+	results_DM_low_loose.background_sys = 8.2;
         results_DM_low_loose.signal_sys = 0.;
         results_DM_low_loose.n_signal = num_DM_low_loose;
 
@@ -1389,8 +1389,8 @@ namespace Gambit {
 	results_DM_low.analysis_name = ANAME;
 	results_DM_low.sr_label = "DM_low";
 	results_DM_low.n_observed = 13;
-	results.DM_low.n_background = 13.8;
-	results.DM_low.background_sys = 3.6;
+	results_DM_low.n_background = 13.8;
+	results_DM_low.background_sys = 3.6;
         results_DM_low.signal_sys = 0.;
         results_DM_low.n_signal = num_DM_low;
 
@@ -1398,8 +1398,8 @@ namespace Gambit {
 	results_DM_high.analysis_name = ANAME;
 	results_DM_high.sr_label = "DM_high";
 	results_DM_high.n_observed = 5;
-	results.DM_high.n_background = 7.4;
-	results.DM_high.background_sys = 2.1;
+	results_DM_high.n_background = 7.4;
+	results_DM_high.background_sys = 2.1;
         results_DM_high.signal_sys = 0.;
         results_DM_high.n_signal = num_DM_high;
 
@@ -1407,8 +1407,8 @@ namespace Gambit {
 	results_bffN.analysis_name = ANAME;
 	results_bffN.sr_label = "bffN";
 	results_bffN.n_observed = 70;
-	results.bffN.n_background = 60.5;
-	results.bffN.background_sys = 6.1;
+	results_bffN.n_background = 60.5;
+	results_bffN.background_sys = 6.1;
         results_bffN.signal_sys = 0.;
         results_bffN.n_signal = num_bffN;
 
@@ -1416,8 +1416,8 @@ namespace Gambit {
 	results_bCsoft_diag.analysis_name = ANAME;
 	results_bCsoft_diag.sr_label = "bCsoft_diag";
 	results_bCsoft_diag.n_observed = 33;
-	results.bCsoft_diag.n_background = 24.7;
-	results.bCsoft_diag.background_sys = 3.1;
+	results_bCsoft_diag.n_background = 24.7;
+	results_bCsoft_diag.background_sys = 3.1;
         results_bCsoft_diag.signal_sys = 0.;
         results_bCsoft_diag.n_signal = num_bCsoft_diag;
 
@@ -1425,8 +1425,8 @@ namespace Gambit {
 	results_bCsoft_med.analysis_name = ANAME;
 	results_bCsoft_med.sr_label = "bCsoft_med";
 	results_bCsoft_med.n_observed = 19;
-	results.bCsoft_med.n_background = 13.7;
-	results.bCsoft_med.background_sys = 2.1;
+	results_bCsoft_med.n_background = 13.7;
+	results_bCsoft_med.background_sys = 2.1;
         results_bCsoft_med.signal_sys = 0.;
         results_bCsoft_med.n_signal = num_bCsoft_med;
 
@@ -1434,8 +1434,8 @@ namespace Gambit {
 	results_bCsoft_high.analysis_name = ANAME;
 	results_bCsoft_high.sr_label = "bCsoft_high";
 	results_bCsoft_high.n_observed = 2;
-	results.bCsoft_high.n_background = 1.8;
-	results.bCsoft_high.background_sys = 0.3;
+	results_bCsoft_high.n_background = 1.8;
+	results_bCsoft_high.background_sys = 0.3;
         results_bCsoft_high.signal_sys = 0.;
         results_bCsoft_high.n_signal = num_bCsoft_high;
 	
