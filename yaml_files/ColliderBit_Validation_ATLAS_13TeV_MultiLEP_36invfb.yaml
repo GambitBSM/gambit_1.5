@@ -259,9 +259,9 @@ Rules:
                              "PartonLevel:FSR = off",
                              "HadronLevel:all = on",
                              "SUSY:all = off",
-                             "SUSY:qqbar2chi+-chi0 = on", 
-                             "SUSY:idA = 1000024", 
-                             "SUSY:idB = 1000023", 
+                             "SUSY:qqbar2chi+-chi0 = on",
+                             "SUSY:idA = 1000024",
+                             "SUSY:idB = 1000023",
                             # "SUSY:qqbar2chi+chi- = on",
                              #"SUSY:qqbar2sleptonantislepton = on",
                              "TauDecays:mode = 0"]
@@ -270,12 +270,12 @@ Rules:
       xsec_vetos: [0.00, 0.075]
 
       # Option needed if you want to use the getPythiaFileReader
-      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_200_100.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_400_200.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_500_100.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_300_150.slha"] 
-      SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_800_600.slha"] 
-      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_401_1.slha"] 
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_200_100.slha"]
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_400_200.slha"]
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_500_100.slha"]
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_300_150.slha"]
+      SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_800_600.slha"]
+      #SLHA_filenames: ["ColliderBit/data/ATLAS_13TeV_MultiLEP_36invfb_401_1.slha"]
 
   # Delphes rules and options (ex. the Delphes configuration card file)
   # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
@@ -353,7 +353,7 @@ Rules:
 
     # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
     # Can change "_lognormal_" to "_gaussian_" if you prefer
-  - capability: LHC_Combined_LogLike
+  - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
 
