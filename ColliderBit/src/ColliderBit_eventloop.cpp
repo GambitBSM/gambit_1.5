@@ -87,7 +87,8 @@ namespace Gambit
     std::vector<str>::const_iterator iterPythiaNames;
     unsigned int indexPythiaNames;
     bool eventsGenerated;
-    bool tooManyFailedEvents;
+    int nFailedEvents;
+    int maxFailedEvents;
     std::vector<int> nEvents;
     int seedBase;
 
@@ -139,10 +140,11 @@ namespace Gambit
       nEvents.clear();
       // - Pythia random number seed base will be set in the loop over colliders below.
       seedBase = 0;
-      // - Set eventsGenerated to true once some events are generated.
+      // - Set eventsGenerated to true once event generation is underway.
       eventsGenerated = false;
-      // - Set tooManyFailedEvents to true if too many events fail.
-      tooManyFailedEvents = false;
+      // - Keep track of the number of failed events
+      nFailedEvents = 0;
+
 
       useBuckFastATLASDetector = false;
       globalAnalysesATLAS.reset();
@@ -169,6 +171,7 @@ namespace Gambit
       // Retrieve run options from the YAML file (or standalone code)
       pythiaNames = runOptions->getValue<std::vector<str> >("pythiaNames");
       nEvents = runOptions->getValue<std::vector<int> >("nEvents");
+      maxFailedEvents = runOptions->getValueOrDef<int>(1, "maxFailedEvents");
 
       // Check that length of pythiaNames and nEvents agree!
       if (pythiaNames.size() != nEvents.size())
@@ -226,7 +229,7 @@ namespace Gambit
           // Main event loop
           #pragma omp parallel
           {
-            while(currentEvent<nEvents[indexPythiaNames] and not *Loop::done and not piped_errors.inquire())
+            while(currentEvent<nEvents[indexPythiaNames] and not *Loop::done and not piped_errors.inquire() and nFailedEvents <= maxFailedEvents)
               {
                 if (!eventsGenerated)
                   eventsGenerated = true;
@@ -244,6 +247,14 @@ namespace Gambit
           // Any problems during the main event loop?
           piped_warnings.check(ColliderBit_warning());
           piped_errors.check(ColliderBit_error());
+
+          // Break collider loop if too many events fail
+          if(nFailedEvents > maxFailedEvents)
+          {
+            logger() << LogTags::debug << "Too many failed events during event generation." << EOM;
+            break;
+          }
+
 
           #pragma omp parallel
           {
@@ -302,7 +313,7 @@ namespace Gambit
           // SLHAea object constructed from dependencies on the spectrum and decays.
           slha.clear();
           spectrum.clear();
-          slha = Dep::decay_rates->getSLHAea();
+          slha = Dep::decay_rates->getSLHAea(2);
           if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
             {
               // MSSM-specific.  SLHAea in SLHA2 format, please.
@@ -863,7 +874,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
           const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
@@ -938,7 +949,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
           const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
@@ -1012,7 +1023,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
           const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
@@ -1089,7 +1100,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
           const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
@@ -1122,28 +1133,36 @@ namespace Gambit
       if (*Loop::iteration <= BASE_INIT) return;
       result.clear();
 
-      // Get the next event from Pythia8
-      try
+      while(nFailedEvents <= maxFailedEvents)
+      {
+        try
         {
           Dep::HardScatteringSim->nextEvent(result);
+          break;
         }
-      catch (SpecializablePythia::EventGenerationError& e)
+        catch (SpecializablePythia::EventGenerationError& e)
         {
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "SpecializablePythia::EventGenerationError caught in generatePythia8Event. Check the ColliderBit log for event details." << endl;
           #endif
           #pragma omp critical (pythia_event_failure)
           {
-            // Set global flag
-            tooManyFailedEvents = true;
+            // Update global counter
+            nFailedEvents += 1;
             // Store Pythia event record in the logs
             std::stringstream ss;
             result.list(ss, 1);
             logger() << LogTags::debug << "SpecializablePythia::EventGenerationError error caught in generatePythia8Event. Pythia record for event that failed:\n" << ss.str() << EOM;
           }
-          Loop::wrapup();
-          return;
         }
+      }
+      // Wrap up event loop if too many events fail.
+      if(nFailedEvents > maxFailedEvents)
+      {
+        Loop::wrapup();
+        return;
+      }
+
     }
 
 
@@ -1169,8 +1188,6 @@ namespace Gambit
             std::cerr << debug_prefix() << "DelphesVanilla::ProcessEventError caught in reconstructDelphesEvent." << endl;
             #endif
 
-            // Set global flag
-            tooManyFailedEvents = true;
             // Store Pythia event record in the logs
             std::stringstream ss;
             Dep::HardScatteringEvent->list(ss, 1);
@@ -1179,7 +1196,6 @@ namespace Gambit
             str errmsg = "Bad point: reconstructDelphesEvent caught the following runtime error: ";
             errmsg    += e.what();
             piped_invalid_point.request(errmsg);
-
             Loop::wrapup();
           }
       }
@@ -1205,13 +1221,14 @@ namespace Gambit
           #endif
           #pragma omp critical (event_conversion_error)
           {
-            // Set global flag
-            tooManyFailedEvents = true;
             // Store Pythia event record in the logs
             std::stringstream ss;
             Dep::HardScatteringEvent->list(ss, 1);
             logger() << LogTags::debug << "Gambit::exception error caught in smearEventATLAS. Pythia record for event that failed:\n" << ss.str() << EOM;
           }
+          str errmsg = "Bad point: smearEventATLAS caught the following runtime error: ";
+          errmsg    += e.what();
+          piped_invalid_point.request(errmsg);
           Loop::wrapup();
           return;
         }
@@ -1236,13 +1253,14 @@ namespace Gambit
           #endif
           #pragma omp critical (event_conversion_error)
           {
-            // Set global flag
-            tooManyFailedEvents = true;
             // Store Pythia event record in the logs
             std::stringstream ss;
             Dep::HardScatteringEvent->list(ss, 1);
             logger() << LogTags::debug << "Gambit::exception error caught in smearEventCMS. Pythia record for event that failed:\n" << ss.str() << EOM;
           }
+          str errmsg = "Bad point: smearEventCMS caught the following runtime error: ";
+          errmsg    += e.what();
+          piped_invalid_point.request(errmsg);
           Loop::wrapup();
           return;
         }
@@ -1267,13 +1285,14 @@ namespace Gambit
           #endif
           #pragma omp critical (event_conversion_error)
           {
-            // Set global flag
-            tooManyFailedEvents = true;
             // Store Pythia event record in the logs
             std::stringstream ss;
             Dep::HardScatteringEvent->list(ss, 1);
             logger() << LogTags::debug << "Gambit::exception error caught in copyEvent. Pythia record for event that failed:\n" << ss.str() << EOM;
           }
+          str errmsg = "Bad point: copyEvent caught the following runtime error: ";
+          errmsg    += e.what();
+          piped_invalid_point.request(errmsg);
           Loop::wrapup();
           return;
         }
@@ -1297,7 +1316,7 @@ namespace Gambit
 
       if (!useDelphesDetector) return;
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // The final iteration for this collider: collect results
           globalAnalysesDet.scale();
@@ -1313,7 +1332,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // Final iteration. Just return.
           #ifdef COLLIDERBIT_DEBUG
@@ -1343,7 +1362,7 @@ namespace Gambit
 
       if (!useBuckFastATLASDetector) return;
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // The final iteration for this collider: collect results
           globalAnalysesATLAS.scale();
@@ -1359,7 +1378,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // Final iteration. Just return.
           #ifdef COLLIDERBIT_DEBUG
@@ -1387,7 +1406,7 @@ namespace Gambit
 
       if (!useBuckFastCMSDetector) return;
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // The final iteration for this collider: collect results
           globalAnalysesCMS.scale();
@@ -1402,7 +1421,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // Final iteration. Just return.
           #ifdef COLLIDERBIT_DEBUG
@@ -1430,7 +1449,7 @@ namespace Gambit
 
       if (!useBuckFastIdentityDetector) return;
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // The final iteration for this collider: collect results
           globalAnalysesIdentity.scale();
@@ -1445,7 +1464,7 @@ namespace Gambit
           return;
         }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && !tooManyFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
         {
           // Final iteration. Just return.
           #ifdef COLLIDERBIT_DEBUG
@@ -1477,7 +1496,7 @@ namespace Gambit
         }
 
       // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
-      if (tooManyFailedEvents)
+      if (nFailedEvents > maxFailedEvents)
         {
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "calc_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;

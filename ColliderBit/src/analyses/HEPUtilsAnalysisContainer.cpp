@@ -44,7 +44,6 @@ namespace Gambit
     MAP_ANALYSES(DECLARE_ANALYSIS_FACTORY)
 
 
-
     // Factory definition
     HEPUtilsAnalysis* mkAnalysis(const std::string& name)
     {

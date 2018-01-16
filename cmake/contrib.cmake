@@ -134,7 +134,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
   # Always use -O2 for flexiblesusy because it's so damn slow otherwise.
-  set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS}")
+  set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS} -Wno-missing-field-initializers")
   set(FS_Fortran_FLAGS "${GAMBIT_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FS_CXX_FLAGS "${FS_CXX_FLAGS} -O2")
@@ -176,7 +176,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
      )
 
   # Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need)
-  set(BUILT_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu SingletDMZ3 SingletDM)
+  set(BUILT_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs MSSMEFTHiggs_mAmu MSSMatMSUSYEFTHiggs_mAmu SingletDMZ3 SingletDM)
 
   # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
   string (REPLACE ";" "," BUILT_FS_MODELS_COMMAS "${BUILT_FS_MODELS}")

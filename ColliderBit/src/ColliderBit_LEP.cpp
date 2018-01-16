@@ -1210,7 +1210,7 @@ namespace Gambit
       //  dumped=true;
       //}
       // #endif
-      
+
       result = 0;
       // Due to the nature of the analysis details of the model independent limit in
       // the paper, the best we can do is to try these two processes individually:
@@ -1337,7 +1337,7 @@ namespace Gambit
       const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
-      
+
       static const ALEPHStauLimitAt208GeV limitContainer;
       // #ifdef COLLIDERBIT_DEBUG
       //   static bool dumped=false;
@@ -2441,7 +2441,7 @@ namespace Gambit
       const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
-      
+
       static const OPALNeutralinoHadronicLimitAt208GeV limitContainer;
       // #ifdef COLLIDERBIT_DEBUG
       //   static bool dumped=false;

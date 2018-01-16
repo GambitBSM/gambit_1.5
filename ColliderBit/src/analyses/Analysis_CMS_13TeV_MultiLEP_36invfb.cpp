@@ -27,8 +27,8 @@ namespace Gambit {
       double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8; 
       vector<int> cutFlowVector1, cutFlowVector2, cutFlowVector3, cutFlowVector4;
       vector<string> cutFlowVector_str1, cutFlowVector_str2, cutFlowVector_str3, cutFlowVector_str4;
-      double xsec2CMS_200_100, xsec2CMS_500_150, xsec3CMS_250_150, xsec3CMS_600_1, xsec1CMS_500_350_05,xsec1CMS_500_350_5, xsec4CMS_100_1, xsec4CMS_800_1;
-      vector<double> cutFlowVector2CMS_200_100, cutFlowVector2CMS_500_150, cutFlowVector3CMS_250_150, cutFlowVector3CMS_600_1, cutFlowVector1CMS_500_350_05, cutFlowVector1CMS_500_350_5, cutFlowVector4CMS_100_1, cutFlowVector4CMS_800_1;
+      // double xsec2CMS_200_100, xsec2CMS_500_150, xsec3CMS_250_150, xsec3CMS_600_1, xsec1CMS_500_350_05,xsec1CMS_500_350_5, xsec4CMS_100_1, xsec4CMS_800_1;
+      // vector<double> cutFlowVector2CMS_200_100, cutFlowVector2CMS_500_150, cutFlowVector3CMS_250_150, cutFlowVector3CMS_600_1, cutFlowVector1CMS_500_350_05, cutFlowVector1CMS_500_350_5, cutFlowVector4CMS_100_1, cutFlowVector4CMS_800_1;
       size_t NCUTS1, NCUTS2, NCUTS3, NCUTS4;
 
       ofstream cutflowFile;
@@ -57,41 +57,41 @@ namespace Gambit {
 	NCUTS4=5;
 	set_luminosity(35.9);
 
-       xsec2CMS_200_100=1800.;
-       xsec2CMS_500_150=46.;
-       xsec3CMS_250_150=780.;
-       xsec3CMS_600_1=20.;
-       xsec1CMS_500_350_05=46.;
-       xsec1CMS_500_350_5=46.;
-       xsec4CMS_100_1=16800.;
-       xsec4CMS_800_1=3.5;
+       // xsec2CMS_200_100=1800.;
+       // xsec2CMS_500_150=46.;
+       // xsec3CMS_250_150=780.;
+       // xsec3CMS_600_1=20.;
+       // xsec1CMS_500_350_05=46.;
+       // xsec1CMS_500_350_5=46.;
+       // xsec4CMS_100_1=16800.;
+       // xsec4CMS_800_1=3.5;
 
         for (size_t i=0;i<NCUTS1;i++){
           cutFlowVector1.push_back(0);
-          cutFlowVector1CMS_500_350_05.push_back(0);
-          cutFlowVector1CMS_500_350_5.push_back(0);
+          // cutFlowVector1CMS_500_350_05.push_back(0);
+          // cutFlowVector1CMS_500_350_5.push_back(0);
           cutFlowVector_str1.push_back("");
         }
         for (size_t i=0;i<NCUTS2;i++){
           cutFlowVector2.push_back(0);
-          cutFlowVector2CMS_200_100.push_back(0);
-          cutFlowVector2CMS_500_150.push_back(0);
+          // cutFlowVector2CMS_200_100.push_back(0);
+          // cutFlowVector2CMS_500_150.push_back(0);
           cutFlowVector_str2.push_back("");
         }
         for (size_t i=0;i<NCUTS3;i++){
           cutFlowVector3.push_back(0);
-          cutFlowVector3CMS_600_1.push_back(0);
-          cutFlowVector3CMS_250_150.push_back(0);
+          // cutFlowVector3CMS_600_1.push_back(0);
+          // cutFlowVector3CMS_250_150.push_back(0);
           cutFlowVector_str3.push_back("");
         }
         for (size_t i=0;i<NCUTS4;i++){
           cutFlowVector4.push_back(0);
-          cutFlowVector4CMS_100_1.push_back(0);
-          cutFlowVector4CMS_800_1.push_back(0);
+          // cutFlowVector4CMS_100_1.push_back(0);
+          // cutFlowVector4CMS_800_1.push_back(0);
           cutFlowVector_str4.push_back("");
         }
 
-        analysisRunName = "CMS_13TeV_MultiLEP_36invfb_250_150";
+        analysisRunName = "CMS_13TeV_MultiLEP_36invfb";
       }
 
 
@@ -256,195 +256,195 @@ namespace Gambit {
 	  }
 	}
 
-        if (analysisRunName.find("500_350") != string::npos){
+ //        if (analysisRunName.find("500_350") != string::npos){
 
-          cutFlowVector_str1[0] = "All events";
-          cutFlowVector_str1[1] = "2 light leptons";
-          cutFlowVector_str1[2] = "Same-sign";
-          cutFlowVector_str1[3] = "$3^{rd}$ lepton veto";
-          cutFlowVector_str1[4] = "Low mass veto";
-          cutFlowVector_str1[5] = "Bjet veto";
-          cutFlowVector_str1[6] = "$E_{T}^{miss} > 60 GeV$";
-          cutFlowVector_str1[7] = "0 or 1 ISR jet";
-          cutFlowVector_str1[8] = "$m_{T} < 100 GeV$";
-          cutFlowVector_str1[9] = "$p_{T}^{ll} > 100 GeV$";
+ //          cutFlowVector_str1[0] = "All events";
+ //          cutFlowVector_str1[1] = "2 light leptons";
+ //          cutFlowVector_str1[2] = "Same-sign";
+ //          cutFlowVector_str1[3] = "$3^{rd}$ lepton veto";
+ //          cutFlowVector_str1[4] = "Low mass veto";
+ //          cutFlowVector_str1[5] = "Bjet veto";
+ //          cutFlowVector_str1[6] = "$E_{T}^{miss} > 60 GeV$";
+ //          cutFlowVector_str1[7] = "0 or 1 ISR jet";
+ //          cutFlowVector_str1[8] = "$m_{T} < 100 GeV$";
+ //          cutFlowVector_str1[9] = "$p_{T}^{ll} > 100 GeV$";
 
-          cutFlowVector1CMS_500_350_05[0]=485.36;
-          cutFlowVector1CMS_500_350_05[1]=214.24;
-          cutFlowVector1CMS_500_350_05[2]=91.09;
-          cutFlowVector1CMS_500_350_05[3]=75.82;
-          cutFlowVector1CMS_500_350_05[4]=73.61;
-          cutFlowVector1CMS_500_350_05[5]=71.27;
-          cutFlowVector1CMS_500_350_05[6]=62.79;
-          cutFlowVector1CMS_500_350_05[7]=54.85;
-          cutFlowVector1CMS_500_350_05[8]=18.3;
-          cutFlowVector1CMS_500_350_05[9]=10.01;
+ //          cutFlowVector1CMS_500_350_05[0]=485.36;
+ //          cutFlowVector1CMS_500_350_05[1]=214.24;
+ //          cutFlowVector1CMS_500_350_05[2]=91.09;
+ //          cutFlowVector1CMS_500_350_05[3]=75.82;
+ //          cutFlowVector1CMS_500_350_05[4]=73.61;
+ //          cutFlowVector1CMS_500_350_05[5]=71.27;
+ //          cutFlowVector1CMS_500_350_05[6]=62.79;
+ //          cutFlowVector1CMS_500_350_05[7]=54.85;
+ //          cutFlowVector1CMS_500_350_05[8]=18.3;
+ //          cutFlowVector1CMS_500_350_05[9]=10.01;
 
-          cutFlowVector1CMS_500_350_5[0]=632.16;
-          cutFlowVector1CMS_500_350_5[1]=485.34;
-          cutFlowVector1CMS_500_350_5[2]=128.59;
-          cutFlowVector1CMS_500_350_5[3]=50.24;
-          cutFlowVector1CMS_500_350_5[4]=49.86;
-          cutFlowVector1CMS_500_350_5[5]=48.12;
-          cutFlowVector1CMS_500_350_5[6]=38.92;
-          cutFlowVector1CMS_500_350_5[7]=29.72;
-          cutFlowVector1CMS_500_350_5[8]=15.17;
-          cutFlowVector1CMS_500_350_5[9]=2.84;
+ //          cutFlowVector1CMS_500_350_5[0]=632.16;
+ //          cutFlowVector1CMS_500_350_5[1]=485.34;
+ //          cutFlowVector1CMS_500_350_5[2]=128.59;
+ //          cutFlowVector1CMS_500_350_5[3]=50.24;
+ //          cutFlowVector1CMS_500_350_5[4]=49.86;
+ //          cutFlowVector1CMS_500_350_5[5]=48.12;
+ //          cutFlowVector1CMS_500_350_5[6]=38.92;
+ //          cutFlowVector1CMS_500_350_5[7]=29.72;
+ //          cutFlowVector1CMS_500_350_5[8]=15.17;
+ //          cutFlowVector1CMS_500_350_5[9]=2.84;
 
-          for (size_t j=0;j<NCUTS1;j++){
-            if(
-              (j==0) ||
+ //          for (size_t j=0;j<NCUTS1;j++){
+ //            if(
+ //              (j==0) ||
 
-  	      (j==1 && nSignalLightLeptons==2) ||
+ //  	      (j==1 && nSignalLightLeptons==2) ||
 
-	      (j==2 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0) ||
+	//       (j==2 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0) ||
 
-	      (j==3 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2) ||
+	//       (j==3 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2) ||
 
-	      (j==4 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto) ||
+	//       (j==4 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto) ||
 
-	      (j==5 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto)  ||
+	//       (j==5 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto)  ||
 	     
-	      (j==6 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60) ||            
+	//       (j==6 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60) ||            
 
-	      (j==7 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet) ||            
+	//       (j==7 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet) ||            
  
-              (j==8 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet && mT<100) ||
+ //              (j==8 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet && mT<100) ||
              
-              (j==9 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet && mT<100 && pT_ll>100) )
+ //              (j==9 && nSignalLightLeptons==2 && signalLightLeptons.at(0)->pid()*signalLightLeptons.at(1)->pid()>0 && nSignalLeptons==2 && low_mass_veto && bjet_veto && met>60 && ISRjet && mT<100 && pT_ll>100) )
 
-	    cutFlowVector1[j]++;
-    	  }
+	//     cutFlowVector1[j]++;
+ //    	  }
 	
-	}
+	// }
 
-        if ((analysisRunName.find("200_100") != string::npos) || (analysisRunName.find("500_150") != string::npos)){
+ //        if ((analysisRunName.find("200_100") != string::npos) || (analysisRunName.find("500_150") != string::npos)){
 
-          cutFlowVector_str2[0] = "All events";
-          cutFlowVector_str2[1] = "3 leptons";
-          cutFlowVector_str2[2] = "Low mass \\& conversions veto";
-          cutFlowVector_str2[3] = "Bjet veto";
-          cutFlowVector_str2[4] = "$E_{T}^{miss} > 50 GeV$";
-          cutFlowVector_str2[5] = "$m_{T} > 100 GeV$";
-          cutFlowVector_str2[6] = "$m_{ll} > 75 GeV$";
+ //          cutFlowVector_str2[0] = "All events";
+ //          cutFlowVector_str2[1] = "3 leptons";
+ //          cutFlowVector_str2[2] = "Low mass \\& conversions veto";
+ //          cutFlowVector_str2[3] = "Bjet veto";
+ //          cutFlowVector_str2[4] = "$E_{T}^{miss} > 50 GeV$";
+ //          cutFlowVector_str2[5] = "$m_{T} > 100 GeV$";
+ //          cutFlowVector_str2[6] = "$m_{ll} > 75 GeV$";
 
-          cutFlowVector2CMS_200_100[0] =3630.;
-          cutFlowVector2CMS_200_100[1] =481.49;
-          cutFlowVector2CMS_200_100[2] =463.71;
-          cutFlowVector2CMS_200_100[3] =456.68;
-          cutFlowVector2CMS_200_100[4] =317.;
-          cutFlowVector2CMS_200_100[5] =111.97;
-          cutFlowVector2CMS_200_100[6] =103.49;
+ //          cutFlowVector2CMS_200_100[0] =3630.;
+ //          cutFlowVector2CMS_200_100[1] =481.49;
+ //          cutFlowVector2CMS_200_100[2] =463.71;
+ //          cutFlowVector2CMS_200_100[3] =456.68;
+ //          cutFlowVector2CMS_200_100[4] =317.;
+ //          cutFlowVector2CMS_200_100[5] =111.97;
+ //          cutFlowVector2CMS_200_100[6] =103.49;
 
-          cutFlowVector2CMS_500_150[0] =115.79;
-          cutFlowVector2CMS_500_150[1] =18.03;
-          cutFlowVector2CMS_500_150[2] =17.79;
-          cutFlowVector2CMS_500_150[3] =17.47;
-          cutFlowVector2CMS_500_150[4] =16.98;
-          cutFlowVector2CMS_500_150[5] =12.74;
-          cutFlowVector2CMS_500_150[6] =11.71;
+ //          cutFlowVector2CMS_500_150[0] =115.79;
+ //          cutFlowVector2CMS_500_150[1] =18.03;
+ //          cutFlowVector2CMS_500_150[2] =17.79;
+ //          cutFlowVector2CMS_500_150[3] =17.47;
+ //          cutFlowVector2CMS_500_150[4] =16.98;
+ //          cutFlowVector2CMS_500_150[5] =12.74;
+ //          cutFlowVector2CMS_500_150[6] =11.71;
 
-          for (size_t j=0;j<NCUTS2;j++){
-            if(
-              (j==0) ||
+ //          for (size_t j=0;j<NCUTS2;j++){
+ //            if(
+ //              (j==0) ||
 
-              (j==1 && nSignalLeptons==3) ||
+ //              (j==1 && nSignalLeptons==3) ||
 
-              (j==2 && nSignalLeptons==3 && low_mass_veto && conversion_veto) ||
+ //              (j==2 && nSignalLeptons==3 && low_mass_veto && conversion_veto) ||
 
-              (j==3 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto) ||
+ //              (j==3 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto) ||
 
-              (j==4 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50.) ||
+ //              (j==4 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50.) ||
 
-              (j==5 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT>100.) ||
+ //              (j==5 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT>100.) ||
 
-              (j==6 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT>100. && mll>75.) )
+ //              (j==6 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT>100. && mll>75.) )
 
-              cutFlowVector2[j]++;
-          }
-	}
+ //              cutFlowVector2[j]++;
+ //          }
+	// }
 
-        if ((analysisRunName.find("250_150") != string::npos) || (analysisRunName.find("600_1") != string::npos)){
+ //        if ((analysisRunName.find("250_150") != string::npos) || (analysisRunName.find("600_1") != string::npos)){
 
-          cutFlowVector_str3[0] = "All events";
-          cutFlowVector_str3[1] = "3 leptons";
-          cutFlowVector_str3[2] = "Low mass \\& conversion veto";
-          cutFlowVector_str3[3] = "Bjet veto";
-          cutFlowVector_str3[4] = "$E_{T}^{miss} > 50 GeV$";
-          cutFlowVector_str3[5] = "$m_{T2} < 100 GeV$";
-          cutFlowVector_str3[6] = "$m_{ll} < 75 GeV$";
+ //          cutFlowVector_str3[0] = "All events";
+ //          cutFlowVector_str3[1] = "3 leptons";
+ //          cutFlowVector_str3[2] = "Low mass \\& conversion veto";
+ //          cutFlowVector_str3[3] = "Bjet veto";
+ //          cutFlowVector_str3[4] = "$E_{T}^{miss} > 50 GeV$";
+ //          cutFlowVector_str3[5] = "$m_{T2} < 100 GeV$";
+ //          cutFlowVector_str3[6] = "$m_{ll} < 75 GeV$";
 
-          cutFlowVector3CMS_250_150[0] =5304.;
-          cutFlowVector3CMS_250_150[1] =188.58;
-          cutFlowVector3CMS_250_150[2] =168.19;
-          cutFlowVector3CMS_250_150[3] =166.26;
-          cutFlowVector3CMS_250_150[4] =117.09;
-          cutFlowVector3CMS_250_150[5] =112.26;
-          cutFlowVector3CMS_250_150[6] =93.07;
+ //          cutFlowVector3CMS_250_150[0] =5304.;
+ //          cutFlowVector3CMS_250_150[1] =188.58;
+ //          cutFlowVector3CMS_250_150[2] =168.19;
+ //          cutFlowVector3CMS_250_150[3] =166.26;
+ //          cutFlowVector3CMS_250_150[4] =117.09;
+ //          cutFlowVector3CMS_250_150[5] =112.26;
+ //          cutFlowVector3CMS_250_150[6] =93.07;
 
-          cutFlowVector3CMS_600_1[0] =220.23;
-          cutFlowVector3CMS_600_1[1] =28.62;
-          cutFlowVector3CMS_600_1[2] =28.31;
-          cutFlowVector3CMS_600_1[3] =27.78;
-          cutFlowVector3CMS_600_1[4] =25.67;
-          cutFlowVector3CMS_600_1[5] =15.74;
-          cutFlowVector3CMS_600_1[6] =3.85;
+ //          cutFlowVector3CMS_600_1[0] =220.23;
+ //          cutFlowVector3CMS_600_1[1] =28.62;
+ //          cutFlowVector3CMS_600_1[2] =28.31;
+ //          cutFlowVector3CMS_600_1[3] =27.78;
+ //          cutFlowVector3CMS_600_1[4] =25.67;
+ //          cutFlowVector3CMS_600_1[5] =15.74;
+ //          cutFlowVector3CMS_600_1[6] =3.85;
 
-          for (size_t j=0;j<NCUTS3;j++){
-            if(
-              (j==0) ||
+ //          for (size_t j=0;j<NCUTS3;j++){
+ //            if(
+ //              (j==0) ||
 
-              (j==1 && nSignalLeptons==3) ||
+ //              (j==1 && nSignalLeptons==3) ||
 
-              (j==2 && nSignalLeptons==3 && low_mass_veto && conversion_veto) ||
+ //              (j==2 && nSignalLeptons==3 && low_mass_veto && conversion_veto) ||
 
-              (j==3 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto) ||
+ //              (j==3 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto) ||
 
-              (j==4 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50.) ||
+ //              (j==4 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50.) ||
 
-              (j==5 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT2<100.) ||
+ //              (j==5 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT2<100.) ||
 
-              (j==6 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT2<100. && mll<75.) )
+ //              (j==6 && nSignalLeptons==3 && low_mass_veto && conversion_veto && bjet_veto && met>50. && mT2<100. && mll<75.) )
 
-              cutFlowVector3[j]++;
-          }
-	}
+ //              cutFlowVector3[j]++;
+ //          }
+	// }
 
-        if ((analysisRunName.find("100_1") != string::npos) || (analysisRunName.find("800_1") != string::npos)){
+ //        if ((analysisRunName.find("100_1") != string::npos) || (analysisRunName.find("800_1") != string::npos)){
 
-          cutFlowVector_str4[0] = "All events";
-          cutFlowVector_str4[1] = "4 leptons";
-          cutFlowVector_str4[2] = "Low mass veto";
-          cutFlowVector_str4[3] = "Bjet veto";
-          cutFlowVector_str4[4] = "$E_{T}^{miss} > 100 GeV$";
+ //          cutFlowVector_str4[0] = "All events";
+ //          cutFlowVector_str4[1] = "4 leptons";
+ //          cutFlowVector_str4[2] = "Low mass veto";
+ //          cutFlowVector_str4[3] = "Bjet veto";
+ //          cutFlowVector_str4[4] = "$E_{T}^{miss} > 100 GeV$";
 
-          cutFlowVector4CMS_100_1[0] =5497.;
-          cutFlowVector4CMS_100_1[1] =869.14;
-          cutFlowVector4CMS_100_1[2] =868.6;
-          cutFlowVector4CMS_100_1[3] =855.41;
-          cutFlowVector4CMS_100_1[4] =34.27;
+ //          cutFlowVector4CMS_100_1[0] =5497.;
+ //          cutFlowVector4CMS_100_1[1] =869.14;
+ //          cutFlowVector4CMS_100_1[2] =868.6;
+ //          cutFlowVector4CMS_100_1[3] =855.41;
+ //          cutFlowVector4CMS_100_1[4] =34.27;
 
-          cutFlowVector4CMS_800_1[0] =1.14;
-          cutFlowVector4CMS_800_1[1] =0.36;
-          cutFlowVector4CMS_800_1[2] =0.36;
-          cutFlowVector4CMS_800_1[0] =0.35;
-          cutFlowVector4CMS_800_1[4] =0.34;
+ //          cutFlowVector4CMS_800_1[0] =1.14;
+ //          cutFlowVector4CMS_800_1[1] =0.36;
+ //          cutFlowVector4CMS_800_1[2] =0.36;
+ //          cutFlowVector4CMS_800_1[0] =0.35;
+ //          cutFlowVector4CMS_800_1[4] =0.34;
 
-          for (size_t j=0;j<NCUTS4;j++){
-            if(
-              (j==0) ||
+ //          for (size_t j=0;j<NCUTS4;j++){
+ //            if(
+ //              (j==0) ||
         
-              (j==1 && nSignalLeptons==4) ||
+ //              (j==1 && nSignalLeptons==4) ||
         
-              (j==2 && nSignalLeptons==4 && low_mass_veto) ||
+ //              (j==2 && nSignalLeptons==4 && low_mass_veto) ||
         
-              (j==3 && nSignalLeptons==4 && low_mass_veto && bjet_veto) ||
+ //              (j==3 && nSignalLeptons==4 && low_mass_veto && bjet_veto) ||
       
-              (j==4 && nSignalLeptons==4 && low_mass_veto && bjet_veto && met>100.) )
+ //              (j==4 && nSignalLeptons==4 && low_mass_veto && bjet_veto && met>100.) )
 
-              cutFlowVector4[j]++;
-          }
-	}
+ //              cutFlowVector4[j]++;
+ //          }
+	// }
       }
 
 
@@ -490,102 +490,102 @@ namespace Gambit {
 
       void collect_results() {
 
-        string path = "ColliderBit/results/cutflow_";
-        path.append(analysisRunName);
-        path.append(".txt");
-        cutflowFile.open(path.c_str());
+        // string path = "ColliderBit/results/cutflow_";
+        // path.append(analysisRunName);
+        // path.append(".txt");
+        // cutflowFile.open(path.c_str());
 
-        if (analysisRunName.find("500_350_05") != string::npos) {
-          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{l}/\\tilde{\\nu}$ (flavor-democratic), $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0},\\tilde{l}]: [500,350,357.5] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec1CMS_500_350_05<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec1CMS_500_350_05<<" & 1\\\\"<<endl;
-          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS1; i++) {
-            cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_05[i]<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_05[i]<<"&"<<setprecision(4)<<(xsec1CMS_500_350_05/xsec())*cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_05[i]<<"\\\\"<< endl;
-          }
-          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS1; i++) {
-            cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_05[i]*100./cutFlowVector1CMS_500_350_05[1]<<"&"<<setprecision(4)<<cutFlowVector1[i]*100./cutFlowVector1[1]<<"& - & -\\\\"<< endl;
-          }
-          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        }
+        // if (analysisRunName.find("500_350_05") != string::npos) {
+        //   cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{l}/\\tilde{\\nu}$ (flavor-democratic), $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0},\\tilde{l}]: [500,350,357.5] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        //   cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        //   cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec1CMS_500_350_05<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec1CMS_500_350_05<<" & 1\\\\"<<endl;
+        //   cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS1; i++) {
+        //     cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_05[i]<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_05[i]<<"&"<<setprecision(4)<<(xsec1CMS_500_350_05/xsec())*cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_05[i]<<"\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS1; i++) {
+        //     cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_05[i]*100./cutFlowVector1CMS_500_350_05[1]<<"&"<<setprecision(4)<<cutFlowVector1[i]*100./cutFlowVector1[1]<<"& - & -\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // }
 
-        if (analysisRunName.find("500_350_5") != string::npos) {
-          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{l}/\\tilde{\\nu}$ (flavor-democratic), $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0},\\tilde{l}]: [500,350,425] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec1CMS_500_350_5<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec1CMS_500_350_5<<" & 1\\\\ \\hline"<<endl;
-          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS1; i++) {
-            cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_5[i]<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_5[i]<<"&"<<setprecision(4)<<(xsec1CMS_500_350_5/xsec())*cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_5[i]<<"\\\\"<< endl;
-          }
-          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS1; i++) {
-            cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_5[i]*100./cutFlowVector1CMS_500_350_5[1]<<"&"<<setprecision(4)<<cutFlowVector1[i]*100./cutFlowVector1[1]<<"& - & -\\\\"<< endl;
-          }
-          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        }
+        // if (analysisRunName.find("500_350_5") != string::npos) {
+        //   cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{l}/\\tilde{\\nu}$ (flavor-democratic), $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0},\\tilde{l}]: [500,350,425] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        //   cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        //   cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec1CMS_500_350_5<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec1CMS_500_350_5<<" & 1\\\\ \\hline"<<endl;
+        //   cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS1; i++) {
+        //     cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_5[i]<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_5[i]<<"&"<<setprecision(4)<<(xsec1CMS_500_350_5/xsec())*cutFlowVector1[i]*xsec_per_event()*luminosity()/cutFlowVector1CMS_500_350_5[i]<<"\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS1; i++) {
+        //     cutflowFile<<cutFlowVector_str1[i]<<"&"<<setprecision(4)<<cutFlowVector1CMS_500_350_5[i]*100./cutFlowVector1CMS_500_350_5[1]<<"&"<<setprecision(4)<<cutFlowVector1[i]*100./cutFlowVector1[1]<<"& - & -\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // }
 
-        if (analysisRunName.find("200_100") != string::npos) {
-          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [200,100] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec2CMS_200_100<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec2CMS_200_100<<" & 1\\\\ \\hline"<<endl;
-          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS2; i++) {
-            cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_200_100[i]<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_200_100[i]<<"&"<<setprecision(4)<<(xsec2CMS_200_100/xsec())*cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_200_100[i]<<"\\\\"<< endl;
-          }
-          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS2; i++) {
-            cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_200_100[i]*100./cutFlowVector2CMS_200_100[1]<<"&"<<setprecision(4)<<cutFlowVector2[i]*100./cutFlowVector2[1]<<"& - & -\\\\"<< endl;
-          }
-          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        }
+        // if (analysisRunName.find("200_100") != string::npos) {
+        //   cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [200,100] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        //   cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        //   cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec2CMS_200_100<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec2CMS_200_100<<" & 1\\\\ \\hline"<<endl;
+        //   cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS2; i++) {
+        //     cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_200_100[i]<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_200_100[i]<<"&"<<setprecision(4)<<(xsec2CMS_200_100/xsec())*cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_200_100[i]<<"\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS2; i++) {
+        //     cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_200_100[i]*100./cutFlowVector2CMS_200_100[1]<<"&"<<setprecision(4)<<cutFlowVector2[i]*100./cutFlowVector2[1]<<"& - & -\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // }
 
-        if (analysisRunName.find("500_150") != string::npos) {
-          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [500,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec2CMS_500_150<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec2CMS_500_150<<" & 1\\\\"<<endl;
-          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS2; i++) {
-            cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_500_150[i]<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_500_150[i]<<"&"<<setprecision(4)<<(xsec2CMS_500_150/xsec())*cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_500_150[i]<<"\\\\"<< endl;
-          }
-          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS2; i++) {
-            cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_500_150[i]*100./cutFlowVector2CMS_500_150[1]<<"&"<<setprecision(4)<<cutFlowVector2[i]*100./cutFlowVector2[1]<<"& - & -\\\\"<< endl;
-          }
-          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        }
+        // if (analysisRunName.find("500_150") != string::npos) {
+        //   cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [500,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        //   cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        //   cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec2CMS_500_150<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec2CMS_500_150<<" & 1\\\\"<<endl;
+        //   cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS2; i++) {
+        //     cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_500_150[i]<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_500_150[i]<<"&"<<setprecision(4)<<(xsec2CMS_500_150/xsec())*cutFlowVector2[i]*xsec_per_event()*luminosity()/cutFlowVector2CMS_500_150[i]<<"\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS2; i++) {
+        //     cutflowFile<<cutFlowVector_str2[i]<<"&"<<setprecision(4)<<cutFlowVector2CMS_500_150[i]*100./cutFlowVector2CMS_500_150[1]<<"&"<<setprecision(4)<<cutFlowVector2[i]*100./cutFlowVector2[1]<<"& - & -\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // }
 
-        if (analysisRunName.find("250_150") != string::npos) {
-          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{\\tau}$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [250,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec3CMS_250_150<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec3CMS_250_150<<" & 1\\\\ \\hline"<<endl;
-          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS3; i++) {
-            cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_250_150[i]<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_250_150[i]<<"&"<<setprecision(4)<<(xsec3CMS_250_150/xsec())*cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_250_150[i]<<"\\\\"<< endl;
-          }
-          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS3; i++) {
-            cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_250_150[i]*100./cutFlowVector3CMS_250_150[1]<<"&"<<setprecision(4)<<cutFlowVector3[i]*100./cutFlowVector3[1]<<"& - & -\\\\"<< endl;
-          }
-          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        }
+        // if (analysisRunName.find("250_150") != string::npos) {
+        //   cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{\\tau}$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [250,150] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        //   cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        //   cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec3CMS_250_150<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec3CMS_250_150<<" & 1\\\\ \\hline"<<endl;
+        //   cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS3; i++) {
+        //     cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_250_150[i]<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_250_150[i]<<"&"<<setprecision(4)<<(xsec3CMS_250_150/xsec())*cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_250_150[i]<<"\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS3; i++) {
+        //     cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_250_150[i]*100./cutFlowVector3CMS_250_150[1]<<"&"<<setprecision(4)<<cutFlowVector3[i]*100./cutFlowVector3[1]<<"& - & -\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // }
 
-        if (analysisRunName.find("600_1") != string::npos) {
-          cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{\\tau}$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [600,1] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-          cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-          cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec3CMS_600_1<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec3CMS_600_1<<" & 1\\\\"<<endl;
-          cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS3; i++) {
-            cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_600_1[i]<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_600_1[i]<<"&"<<setprecision(4)<<(xsec3CMS_600_1/xsec())*cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_600_1[i]<<"\\\\"<< endl;
-          }
-          cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-          for (size_t i=0; i<NCUTS3; i++) {
-            cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_600_1[i]*100./cutFlowVector3CMS_600_1[1]<<"&"<<setprecision(4)<<cutFlowVector3[i]*100./cutFlowVector3[1]<<"& - & -\\\\"<< endl;
-          }
-          cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        }
+        // if (analysisRunName.find("600_1") != string::npos) {
+        //   cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $\\tilde{\\tau}$, $[\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0},\\tilde{\\chi}_{1}^{0}]: [600,1] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        //   cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        //   cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsec3CMS_600_1<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<< xsec()/xsec3CMS_600_1<<" & 1\\\\"<<endl;
+        //   cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS3; i++) {
+        //     cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_600_1[i]<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_600_1[i]<<"&"<<setprecision(4)<<(xsec3CMS_600_1/xsec())*cutFlowVector3[i]*xsec_per_event()*luminosity()/cutFlowVector3CMS_600_1[i]<<"\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        //   for (size_t i=0; i<NCUTS3; i++) {
+        //     cutflowFile<<cutFlowVector_str3[i]<<"&"<<setprecision(4)<<cutFlowVector3CMS_600_1[i]*100./cutFlowVector3CMS_600_1[1]<<"&"<<setprecision(4)<<cutFlowVector3[i]*100./cutFlowVector3[1]<<"& - & -\\\\"<< endl;
+        //   }
+        //   cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // }
 
-        cutflowFile.close();
+        // cutflowFile.close();
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SR1;

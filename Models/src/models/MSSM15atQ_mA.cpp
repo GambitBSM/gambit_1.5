@@ -37,7 +37,7 @@
      // 3rd gen trilinear couplings.
      targetP.setValue("Ae_3", myP["A0"]);
      targetP.setValue("Ad_3", myP["A0"]);
-     targetP.setValue("Au_3", myP["At"]);
+     targetP.setValue("Au_3", myP["Au_3"]);
 
      // Done
      #ifdef MSSM15atQ_mA_DBUG

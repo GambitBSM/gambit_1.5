@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 16:24:41
+// File generated at Wed 25 Oct 2017 18:40:02
 
 /**
  * @file NUHMSSM_cxx_diagrams.hpp
  *
- * This file was generated at Sun 24 Sep 2017 16:24:41 with FlexibleSUSY
- * 2.0.0-dev and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:40:02 with FlexibleSUSY
+ * 2.0.1 and SARAH 4.11.0 .
  */
 
 #ifndef NUHMSSM_CXXDIAGRAMS_H

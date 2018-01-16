@@ -19,7 +19,8 @@
 ///
 ///  \author James McKay
 ///          (j.mckay14@imperial.ac.uk)
-//   \date 2015 Dec
+///   \date 2015 Dec
+///
 ///  *********************************************
 
 #include <string>
@@ -46,29 +47,18 @@ using namespace Gambit::Utils;
 // Translation function definition
 void MODEL_NAMESPACE::SingletDM_to_SingletDM_running (const ModelParameters &myP, ModelParameters &targetP)
 {
-   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-   logger()<<"Running interpret_as_parent calculations for SingletDM --> SingletDM_.."<<LogTags::info<<EOM;
-  
-
-  double Lambda_hS;
-  //tree_level_S_mass=myP.getValue("mS");
-  Lambda_hS=myP.getValue("lambda_hS");
-  
-  //ms2=pow(tree_level_S_mass,2)-0.5*Lambda_hS*pow(246.2,2);
-  
-  targetP.setValue("lambda_hS",Lambda_hS);
-  
-  targetP.setValue("lambda_S", 0 );
+  USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
+  logger()<<"Running interpret_as_parent calculations for SingletDM --> SingletDM_running..."<<LogTags::info<<EOM;
 
   targetP.setValue("mS", myP.getValue("mS") );
+  targetP.setValue("lambda_hS",myP.getValue("lambda_hS"));
+  targetP.setValue("lambda_S", 0 );
 
-
-  
-   // Done! Check that everything is ok if desired.
-   #ifdef SingletDM_DBUG
-     std::cout << "SingletDM parameters:" << myP << std::endl;
-     std::cout << "SingletDM_running parameters   :" << targetP << std::endl;
-   #endif
+  // Done! Check that everything is ok if desired.
+  #ifdef SingletDM_DBUG
+    std::cout << "SingletDM parameters:" << myP << std::endl;
+    std::cout << "SingletDM_running parameters   :" << targetP << std::endl;
+  #endif
 }
 
 #undef PARENT
@@ -81,31 +71,20 @@ void MODEL_NAMESPACE::SingletDM_to_SingletDM_running (const ModelParameters &myP
 // Translation function definition
 void MODEL_NAMESPACE::SingletDM_running_to_SingletDMZ3 (const ModelParameters &myP, ModelParameters &targetP)
 {
-   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-   logger()<<"Running interpret_as_parent calculations for SingletDM --> SingletDM_running..."<<LogTags::info<<EOM;
-  
-
-//  double ms2=myP.getValue("mS2");
-  double Lambda_hS=myP.getValue("lambda_hS");
-  double Lambda_S=myP.getValue("lambda_S");
-  
-  
-  targetP.setValue("lambda_hS",Lambda_hS);
-  
-  targetP.setValue("lambda_S", Lambda_S );
+  USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
+  logger()<<"Running interpret_as_parent calculations for SingletDM_running --> SingletDMZ3..."<<LogTags::info<<EOM;
 
   targetP.setValue("mS", myP.getValue("mS") );
-  
+  targetP.setValue("lambda_hS", myP.getValue("lambda_hS"));
+  targetP.setValue("lambda_S", myP.getValue("lambda_S"));
   targetP.setValue("mu3", 0 );
 
-   // Done! Check that everything is ok if desired.
-   #ifdef SingletDM_DBUG
-     std::cout << "SingletDM_running parameters:" << myP << std::endl;
-     std::cout << "SingletDMZ3 parameters   :" << targetP << std::endl;
-   #endif
+  // Done! Check that everything is ok if desired.
+  #ifdef SingletDM_DBUG
+    std::cout << "SingletDM_running parameters:" << myP << std::endl;
+    std::cout << "SingletDMZ3 parameters   :" << targetP << std::endl;
+  #endif
 }
-
-
 
 #undef PARENT
 #undef MODEL
