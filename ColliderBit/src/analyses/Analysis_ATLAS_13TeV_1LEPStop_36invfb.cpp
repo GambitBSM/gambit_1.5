@@ -823,7 +823,7 @@ namespace Gambit {
 	double Wpt = 0.;
 
 	double minDPhiMetBJet = 99999.;
-	for(int i=0;i<signalBJets.size();i++){
+	for(size_t i=0;i<signalBJets.size();i++){
 	  double dPhi_tmp = fabs(signalBJets[i]->mom().deltaPhi(metVec));
 	  if(dPhi_tmp<minDPhiMetBJet)minDPhiMetBJet=dPhi_tmp;
 	}
@@ -1310,7 +1310,7 @@ namespace Gambit {
 	cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 	cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
 	    << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-	for (unsigned int j=0; j<NCUTS; j++) {
+	for (int j=0; j<NCUTS; j++) {
 	  cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
 	       << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
 	       << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
