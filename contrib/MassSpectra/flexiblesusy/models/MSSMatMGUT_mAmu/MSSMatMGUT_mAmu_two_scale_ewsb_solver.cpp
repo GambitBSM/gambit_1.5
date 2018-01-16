@@ -16,15 +16,15 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:48:25
+// File generated at Wed 25 Oct 2017 18:03:58
 
 /**
  * @file MSSMatMGUT_mAmu_two_scale_ewsb_solver.cpp
  *
  * @brief implementation of EWSB solver for two-scale iteration
  *
- * This file was generated at Sun 24 Sep 2017 15:48:25 with FlexibleSUSY
- * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:03:58 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #include "MSSMatMGUT_mAmu_two_scale_ewsb_solver.hpp"

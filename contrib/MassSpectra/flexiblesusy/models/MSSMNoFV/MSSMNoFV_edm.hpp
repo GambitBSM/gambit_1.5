@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 16:20:32
+// File generated at Wed 25 Oct 2017 18:35:39
 
 /**
  * @file MSSMNoFV_edm.hpp
  *
- * This file was generated at Sun 24 Sep 2017 16:20:32 with FlexibleSUSY
- * 2.0.0-dev and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 18:35:39 with FlexibleSUSY
+ * 2.0.1 and SARAH 4.11.0 .
  */
 
 #ifndef MSSMNoFV_EDM_H

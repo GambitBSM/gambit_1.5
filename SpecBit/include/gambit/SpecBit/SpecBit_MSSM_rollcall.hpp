@@ -101,6 +101,37 @@
     #undef FUNCTION
 
     // ==============================
+    // MSSM parameterised by mA and mu (instead of mHu2 and mHd2) at SUSY scale
+    // via FlexibleEFTHiggs (FlexibleSUSY hybrid EFT / Fixed order calculation)
+    #define FUNCTION get_MSSMatMSUSY_mA_spectrum_FlexibleEFTHiggs
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atMSUSY_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+
+     // ==============================
+    // MSSM parameterised by mHu2 and mHd2 (instead of mu and Bmu) at
+    // user chosen scale via FlexibleEFTHiggs (FlexibleSUSY hybrid
+    // EFT / Fixed order calculation)
+    #define FUNCTION get_MSSMatQ_spectrum_FlexibleEFTHiggs
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atQ)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+
+    // ============================== MSSM parameterised by mA and mu
+    // (instead of mHu2 and mHd2) at user chosen scale via
+    // FlexibleEFTHiggs (FlexibleSUSY hybrid EFT / Fixed order
+    // calculation)
+    #define FUNCTION get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs
+    START_FUNCTION(Spectrum)
+    ALLOW_MODELS(MSSM63atQ_mA)
+    DEPENDENCY(SMINPUTS, SMInputs) // Need SLHA2 SMINPUTS to set up spectrum generator
+    #undef FUNCTION
+
+    // ==============================
     // MSSM spectrum retrieved from an SLHA file
     // Wraps it up in MSSMskeleton; i.e. no RGE running possible.
     // This is mainly for testing against benchmark points, but may be a useful last
