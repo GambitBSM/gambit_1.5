@@ -27,7 +27,13 @@ namespace Gambit {
     private:
     
         // Numbers passing cuts
-        int _SRSF[13], _SRDF[13], _SRALL[13],_SRA[3];
+        // int _SRSF[13], _SRDF[13], _SRALL[13],_SRA[3];
+        const size_t _SR_size = 13;
+        const size_t _SRA_size = 3;
+        std::vector<int> _SRSF;
+        std::vector<int> _SRDF;
+        std::vector<int> _SRALL;
+        std::vector<int> _SRA;
 
         // Cut Flow
         vector<int> cutFlowVector;
@@ -92,7 +98,7 @@ namespace Gambit {
 
         Analysis_CMS_13TeV_2LEPStop_36invfb() {
 
-            for(int i=0;i<13;i++){
+            for(size_t i=0;i<_SR_size;i++){
                 _SRSF[i]=0;
                 _SRDF[i]=0;
                 _SRALL[i]=0;
@@ -333,7 +339,7 @@ namespace Gambit {
             }
             bool pre_cut= cut_2OSLep && cut_mllGt20 && cut_mllMZ && cut_Njet && cut_Nbjet && cut_PTmis && cut_SGt5 && cut_csj1 && cut_csj2 ;
             // signal region          
-            for(int j=0;j<13;j++){
+            for(size_t j=0;j<_SR_size;j++){
                 // same flavour
                 if(
                    (j==0 && pre_cut && flg_SF && sig_MT2ll_100 && sig_MT2bl_0   && sig_MET_80 )||
@@ -383,7 +389,7 @@ namespace Gambit {
                    (j==12 && pre_cut && sig_MT2ll_240)
                    )_SRALL[j]++;
             }
-            for(int j=0;j<3;j++){
+            for(size_t j=0;j<_SRA_size;j++){
                 if(
                    (j==0  && pre_cut && sig_MT2ll_100 && sig_MET_200) ||
                    (j==1  && pre_cut && sig_MT2ll_140 && sig_MET_200)||
@@ -407,12 +413,12 @@ namespace Gambit {
                 cutFlowVector[j] += specificOther->cutFlowVector[j];
                 cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
             }
-            for (int j=0; j<13; j++) {
+            for (size_t j=0; j<_SR_size; j++) {
                 _SRSF[j] += specificOther->_SRSF[j];
                 _SRDF[j] += specificOther->_SRDF[j];
                 _SRALL[j] += specificOther->_SRALL[j];
             }
-            for (int j=0; j<3; j++) {
+            for (size_t j=0; j<_SRA_size; j++) {
                 _SRA[j] += specificOther->_SRA[j];
             }
            
@@ -427,31 +433,31 @@ namespace Gambit {
             cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
             cout<< right << setw(40) << "CUT" <<  "," << setw(20) << "RAW" <<  "," << setw(20) << "SCALED"
             <<  "," << setw(20) << "%" <<  "," << setw(20) << "clean adj RAW"<<  "," << setw(20) << "clean adj %" << endl;
-            for (size_t j=0; j<NCUTS; j++) {
+            for (int j=0; j<NCUTS; j++) {
                 cout << right <<  setw(40) << cutFlowVector_str[j].c_str() <<  "," << setw(20)
                 << cutFlowVector[j] <<  "," << setw(20) << cutFlowVector[j]*scale_by <<  "," << setw(20)
                 << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" <<  "," << setw(20)
                 << cutFlowVector[j]*scale_by <<  "," << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
             }
-            for (size_t j=0; j<13; j++) {
+            for (size_t j=0; j<_SR_size; j++) {
                 cout << right <<  setw(40) << "SR_SF_"<<j <<  "," << setw(20)
                 << _SRSF[j] <<  "," << setw(20) << _SRSF[j]*scale_by <<  "," << setw(20)
                 << 100.*_SRSF[j]/cutFlowVector[0] << "%" <<  "," << setw(20)
                 << _SRSF[j]*scale_by <<  "," << setw(20) << 100.*_SRSF[j]/cutFlowVector[0]<< "%" << endl;
             }
-           for (size_t j=0; j<13; j++) {
+           for (size_t j=0; j<_SR_size; j++) {
                 cout << right <<  setw(40) << "SR_DF_"<<j <<  "," << setw(20)
                 << _SRDF[j] <<  "," << setw(20) << _SRDF[j]*scale_by <<  "," << setw(20)
                 << 100.*_SRDF[j]/cutFlowVector[0] << "%" <<  "," << setw(20)
                 << _SRDF[j]*scale_by <<  "," << setw(20) << 100.*_SRDF[j]/cutFlowVector[0]<< "%" << endl;
             }
-           for (size_t j=0; j<13; j++) {
+           for (size_t j=0; j<_SR_size; j++) {
                 cout << right <<  setw(40) << "SR_ALL_"<<j <<  "," << setw(20)
                 << _SRALL[j] <<  "," << setw(20) << _SRALL[j]*scale_by <<  "," << setw(20)
                 << 100.*_SRALL[j]/cutFlowVector[0] << "%" <<  "," << setw(20)
                 << _SRALL[j]*scale_by <<  "," << setw(20) << 100.*_SRALL[j]/cutFlowVector[0]<< "%" << endl;
             }
-           for (size_t j=0; j<3; j++) {
+           for (size_t j=0; j<_SRA_size; j++) {
                 cout << right <<  setw(40) << "SR_A_"<<j <<  "," << setw(20)
                 << _SRA[j] <<  "," << setw(20) << _SRA[j]*scale_by <<  "," << setw(20)
                 << 100.*_SRA[j]/cutFlowVector[0] << "%" <<  "," << setw(20)
@@ -883,10 +889,21 @@ namespace Gambit {
             results_SRA2.n_signal = _SRA[2];
             add_result(results_SRA2);
 
-
-
             return;
         }
+
+
+    protected:
+      void clear() {
+
+        std::fill(_SRSF.begin(), _SRSF.end(), 0);
+        std::fill(_SRDF.begin(), _SRDF.end(), 0);
+        std::fill(_SRALL.begin(), _SRALL.end(), 0);
+        std::fill(_SRA.begin(), _SRA.end(), 0);
+
+        std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+
+      }
 
     };
 
