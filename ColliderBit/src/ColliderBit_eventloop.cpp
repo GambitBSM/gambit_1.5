@@ -46,7 +46,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-// #define COLLIDERBIT_DEBUG
+//#define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -1480,32 +1480,11 @@ namespace Gambit
     }
 
 
+    // Loop over all analyses and fill a map of predicted counts
+    void CollectAnalyses(AnalysisNumbers& result)
+    {
+      using namespace Pipes::CollectAnalyses;
 
-    // Loop over all analyses (and SRs within one analysis) and fill a vector of observed likelihoods
-    void calc_LHC_LogLike(double& result) {
-      using namespace Pipes::calc_LHC_LogLike;
-
-      // If no events have been generated (xsec veto), return delta log-likelihood = 0
-      if (!eventsGenerated)
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: No events generated. Will return a delta log-likelihood of 0." << endl;
-          #endif
-          result = 0.0;
-          return;
-        }
-
-      // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
-      if (nFailedEvents > maxFailedEvents)
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;
-          #endif
-          result = 0.0;
-          return;
-        }
-
-      AnalysisNumbers analysisResults;
       #ifdef COLLIDERBIT_DEBUG
       if (haveUsedBuckFastATLASDetector)
         std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
@@ -1520,208 +1499,287 @@ namespace Gambit
       #endif
 
       if (haveUsedBuckFastATLASDetector)
-        analysisResults.insert(analysisResults.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
+        result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
       if (haveUsedBuckFastCMSDetector)
-        analysisResults.insert(analysisResults.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
+        result.insert(result.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
       if (haveUsedBuckFastIdentityDetector)
-        analysisResults.insert(analysisResults.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
+        result.insert(result.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
       #ifndef EXCLUDE_DELPHES
       if (haveUsedDelphesDetector)
-        analysisResults.insert(analysisResults.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
+        result.insert(result.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
       #endif
+    }
 
 
-      // Loop over analyses and calculate the total observed dLL
-      double total_dll_obs = 0;
-      for (size_t analysis = 0; analysis < analysisResults.size(); ++analysis)
+    // Loop over all analyses and fill a map of predictions
+    void calc_LHC_signals(map_str_dbl& result)
+    {
+      using namespace Pipes::calc_LHC_signals;
+
+      // Clear the result map
+      result.clear();
+
+      // If no events have been generated (xsec veto) or too many events have failed, return an empty map
+      if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
+
+      // Loop over analyses and collect the predicted events into the map
+      for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
+      {
+        // AnalysisData for this analysis
+        const AnalysisData& adata = Dep::AllAnalysisNumbers->at(analysis);
+
+        // Loop over the signal regions inside the analysis, and save the predicted number of events for each.
+        for (size_t SR = 0; SR < adata.size(); ++SR)
         {
-          // AnalysisData for this analysis
-          const AnalysisData& adata = analysisResults[analysis];
+          // Save SR numbers and absolute uncertainties
+          const SignalRegionData srData = adata[SR];
+          const str key = srData.analysis_name + "_" + srData.sr_label + "_signal";
+          result[key] = srData.n_signal_at_lumi;
+          const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
+          const double abs_uncertainty_s_sys = srData.signal_sys;
+          result[key + "_uncert"] = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys);
+        }
+      }
+    }
+
+
+    // Loop over all analyses (and SRs within one analysis) and fill a map of per-analysis likelihoods
+    void calc_LHC_LogLike_per_analysis(map_str_dbl& result)
+    {
+      using namespace Pipes::calc_LHC_LogLike_per_analysis;
+
+      // Clear the result map
+      result.clear();
+
+      // If no events have been generated (xsec veto) or too many events have failed, return an empty map
+      if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
+
+      // Loop over analyses and calculate the observed dLL for each
+      for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
+      {
+        // AnalysisData for this analysis
+        const AnalysisData& adata = Dep::AllAnalysisNumbers->at(analysis);
+
+        // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
+        /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
+        if (adata.srcov.rows() > 0)
+        {
+          // (Simplified) SR-correlation info is available, so use the covariance matrix to construct composite marginalised likelihood
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has " << adata.size() << " signal regions." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
           #endif
 
-          // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
-          /// @note For now we assume that the analyses are fully orthogonal, i.e. no possiblity that the same event appears twice -> straight addition
-          /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
           double ana_dll;
-          if (adata.srcov.rows() > 0) {
-            // (Simplified) SR-correlation info is available, so use the covariance matrix to construct composite marginalised likelihood
-            #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
-            #endif
 
-            // Construct vectors of SR numbers
-            const double n_pred_exact = 0;
-            Eigen::VectorXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
-            for (size_t SR = 0; SR < adata.size(); ++SR) {
-              const SignalRegionData srData = adata[SR];
+          // Construct vectors of SR numbers
+          const double n_pred_exact = 0;
+          Eigen::VectorXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
+          for (size_t SR = 0; SR < adata.size(); ++SR)
+          {
+            const SignalRegionData srData = adata[SR];
 
-              // Actual observed number of events
-              n_obs(SR) = srData.n_observed;
+            // Actual observed number of events
+            n_obs(SR) = srData.n_observed;
 
-              // A contribution to the predicted number of events that is not known exactly
-              n_pred_b(SR) = srData.n_background;
-              n_pred_sb(SR) = srData.n_signal_at_lumi + srData.n_background;
+            // A contribution to the predicted number of events that is not known exactly
+            n_pred_b(SR) = srData.n_background;
+            n_pred_sb(SR) = srData.n_signal_at_lumi + srData.n_background;
 
-              // Absolute errors for n_predicted_uncertain_*
-              const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
-              const double abs_uncertainty_s_sys = srData.signal_sys;
-              // cout << "!!! " << srData.n_signal << " -> " << sqrt(srData.n_signal) << " -> (" << srData.n_signal_at_lumi
-              //      << ", " << srData.n_signal << ") -> " << abs_uncertainty_s_stat << endl;
-              abs_unc_s(SR) = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys);
+            // Absolute errors for n_predicted_uncertain_*
+            const double abs_uncertainty_s_stat = (srData.n_signal == 0 ? 0 : sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal));
+            const double abs_uncertainty_s_sys = srData.signal_sys;
+            // cout << "!!! " << srData.n_signal << " -> " << sqrt(srData.n_signal) << " -> (" << srData.n_signal_at_lumi
+            //      << ", " << srData.n_signal << ") -> " << abs_uncertainty_s_stat << endl;
+            abs_unc_s(SR) = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys);
+          }
+
+          // Diagonalise the background-only covariance matrix, extracting the rotation matrix
+          /// @todo No need to recompute the background-only covariance decomposition for every point!
+          const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
+          const Eigen::MatrixXd Vb = eig_b.eigenvectors();
+          //const Eigen::MatrixXd Vbinv = Vb.inverse();
+          #ifdef COLLIDERBIT_DEBUG
+          cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << eig_b.eigenvalues() << endl;
+          #endif
+
+          // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
+          const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
+          const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
+          const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
+          const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
+          //const Eigen::MatrixXd Vsbinv = Vsb.inverse();
+          #ifdef COLLIDERBIT_DEBUG
+          cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << eig_sb.eigenvalues() << endl;
+          #endif
+
+          // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
+          const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
+          const Eigen::VectorXd n_pred_prime[2] = { Vb*n_pred_b, Vsb*n_pred_sb };
+          const Eigen::VectorXd abs_unc2_prime[2] = { eig_b.eigenvalues(), eig_sb.eigenvalues() };
+
+          // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
+          /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
+          for (size_t i = 0; i < 2; ++i) // basis: i=0 -> b-only basis, i=1 -> s+b basis
+          {
+            for (size_t j = 0; j < adata.size(); ++j) // dimension/SRindex
+            {
+
+              // Observed number as a rounded integer, for use in Poisson functions
+              /// @todo More conservative to always round the observed downward, i.e. floor()?
+              const int n_obs_int = (int) round(n_obs_prime[i](j));
+
+              // Inexact predicted rate
+              const double n_pred_inexact = n_pred_prime[i](j);
+
+              // Relative error, for nulike marginaliser interface
+              const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
+
+              // We need the positive direction of this rotation
+              /// @todo Guaranteed all +ve or all -ve? Hope so...
+              assert((n_obs_int >= 0 && n_pred_inexact >= 0 && frac_unc >= 0) ||
+                     (n_obs_int <= 0 && n_pred_inexact <= 0 && frac_unc <= 0));
+
+              // Marginalise over systematic uncertainties on mean rates
+              // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
+              auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+                ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+              // cout << "### " << n_obs_int << ", " << n_pred_exact << ", " << n_pred_inexact << ", " << frac_unc << endl;
+              const double ll_obs = marginaliser(abs(n_obs_int), fabs(n_pred_exact), fabs(n_pred_inexact), fabs(frac_unc));
+
+              // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
+              ana_dll += (i == 0 ? 1 : -1) * ll_obs;
+
+            }
+          }
+
+          // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
+          result[adata.begin()->analysis_name + "_DeltaLogLike"] = -ana_dll;
+
+        }
+
+        else
+        {
+          // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
+          #endif
+
+          double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
+          str* bestexp_sr_label;
+
+          for (size_t SR = 0; SR < adata.size(); ++SR)
+          {
+            SignalRegionData srData = adata[SR];
+
+            // Actual observed number of events
+            const int n_obs = (int) round(srData.n_observed);
+
+            // A contribution to the predicted number of events that is known exactly
+            // (e.g. from data-driven background estimate)
+            const double n_predicted_exact = 0;
+
+            // A contribution to the predicted number of events that is not known exactly
+            const double n_predicted_uncertain_s = srData.n_signal_at_lumi;
+            const double n_predicted_uncertain_b = srData.n_background;
+            const double n_predicted_uncertain_sb = n_predicted_uncertain_s + n_predicted_uncertain_b;
+
+            // Absolute errors for n_predicted_uncertain_*
+            const double abs_uncertainty_s_stat = (srData.n_signal == 0 ? 0 : sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal));
+            const double abs_uncertainty_s_sys = srData.signal_sys;
+            const double abs_uncertainty_b = srData.background_sys;
+            const double abs_uncertainty_sb = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys, abs_uncertainty_b);
+
+            // Relative errors for n_predicted_uncertain_*
+            const double frac_uncertainty_b = abs_uncertainty_b / n_predicted_uncertain_b;
+            const double frac_uncertainty_sb = abs_uncertainty_sb / n_predicted_uncertain_sb;
+
+            // Predicted total background, as an integer for use in Poisson functions
+            const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
+
+            // Marginalise over systematic uncertainties on mean rates
+            // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
+            auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+              ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+            const double llb_exp =  marginaliser(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+            const double llsb_exp = marginaliser(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+            const double llb_obs =  marginaliser(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
+            const double llsb_obs = marginaliser(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
+
+            // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
+            const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
+            if (dll_exp > bestexp_dll_exp)
+            {
+              bestexp_dll_exp = dll_exp;
+              bestexp_dll_obs = llb_obs - llsb_obs;
+              bestexp_sr_label = &(srData.sr_label);
             }
 
-            // Diagonalise the background-only covariance matrix, extracting the rotation matrix
-            /// @todo No need to recompute the background-only covariance decomposition for every point!
-            const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
-            const Eigen::MatrixXd Vb = eig_b.eigenvectors();
-            //const Eigen::MatrixXd Vbinv = Vb.inverse();
+            // For debugging: print some useful numbers to the log.
             #ifdef COLLIDERBIT_DEBUG
-            cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << eig_b.eigenvalues() << endl;
+            cout << endl;
+            cout << debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
+            cout << debug_prefix() << "  LLikes: b_ex      sb_ex     b_obs     sb_obs    (sb_obs-b_obs)" << endl;
+            cout << debug_prefix() << "          " << llb_exp << "  " << llsb_exp << "  " << llb_obs << "  " << llsb_obs << "  " << llsb_obs-llb_obs << endl;
+            cout << debug_prefix() << "  NEvents, not scaled to luminosity: " << srData.n_signal << endl;
+            cout << debug_prefix() << "  NEvents, scaled  to luminosity:    " << srData.n_signal_at_lumi << endl;
+            cout << debug_prefix() << "  NEvents: b [rel err]      sb [rel err]" << endl;
+            cout << debug_prefix() << "           "
+                 << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%]  "
+                 << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << endl;
             #endif
-
-            // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
-            const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
-            const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
-            const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
-            const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
-            //const Eigen::MatrixXd Vsbinv = Vsb.inverse();
-            #ifdef COLLIDERBIT_DEBUG
-            cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << eig_sb.eigenvalues() << endl;
-            #endif
-
-            // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
-            const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
-            const Eigen::VectorXd n_pred_prime[2] = { Vb*n_pred_b, Vsb*n_pred_sb };
-            const Eigen::VectorXd abs_unc2_prime[2] = { eig_b.eigenvalues(), eig_sb.eigenvalues() };
-
-            // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
-            /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
-            for (size_t i = 0; i < 2; ++i) { // basis: i=0 -> b-only basis, i=1 -> s+b basis
-              for (size_t j = 0; j < adata.size(); ++j) { // dimension/SRindex
-
-                // Observed number as a rounded integer, for use in Poisson functions
-                /// @todo More conservative to always round the observed downward, i.e. floor()?
-                const int n_obs_int = (int) round(n_obs_prime[i](j));
-
-                // Inexact predicted rate
-                const double n_pred_inexact = n_pred_prime[i](j);
-
-                // Relative error, for nulike marginaliser interface
-                const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
-
-                // We need the positive direction of this rotation
-                /// @todo Guaranteed all +ve or all -ve? Hope so...
-                assert((n_obs_int >= 0 && n_pred_inexact >= 0 && frac_unc >= 0) ||
-                       (n_obs_int <= 0 && n_pred_inexact <= 0 && frac_unc <= 0));
-
-                // Marginalise over systematic uncertainties on mean rates
-                // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
-                auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
-                  ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-                // cout << "### " << n_obs_int << ", " << n_pred_exact << ", " << n_pred_inexact << ", " << frac_unc << endl;
-                const double ll_obs = marginaliser(abs(n_obs_int), fabs(n_pred_exact), fabs(n_pred_inexact), fabs(frac_unc));
-
-                // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
-                ana_dll += (i == 0 ? 1 : -1) * ll_obs;
-
-              }
-            }
-
-          } else {
-            // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
-            #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
-            #endif
-
-            double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-            for (size_t SR = 0; SR < adata.size(); ++SR)
-              {
-                SignalRegionData srData = adata[SR];
-
-                // Actual observed number of events
-                const int n_obs = (int) round(srData.n_observed);
-
-                // A contribution to the predicted number of events that is known exactly
-                // (e.g. from data-driven background estimate)
-                const double n_predicted_exact = 0;
-
-                // A contribution to the predicted number of events that is not known exactly
-                const double n_predicted_uncertain_s = srData.n_signal_at_lumi;
-                const double n_predicted_uncertain_b = srData.n_background;
-                const double n_predicted_uncertain_sb = n_predicted_uncertain_s + n_predicted_uncertain_b;
-
-                // Absolute errors for n_predicted_uncertain_*
-                const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
-                const double abs_uncertainty_s_sys = srData.signal_sys;
-                const double abs_uncertainty_b = srData.background_sys;
-                const double abs_uncertainty_sb = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys, abs_uncertainty_b);
-
-                // Relative errors for n_predicted_uncertain_*
-                const double frac_uncertainty_b = abs_uncertainty_b / n_predicted_uncertain_b;
-                const double frac_uncertainty_sb = abs_uncertainty_sb / n_predicted_uncertain_sb;
-
-                // Predicted total background, as an integer for use in Poisson functions
-                const int n_predicted_total_b_int = (int) round(n_predicted_exact + n_predicted_uncertain_b);
-
-                // Marginalise over systematic uncertainties on mean rates
-                // Use a log-normal/Gaussia distribution for the nuisance parameter, as requested
-                auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
-                  ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-                const double llb_exp =  marginaliser(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
-                const double llsb_exp = marginaliser(n_predicted_total_b_int, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
-                const double llb_obs =  marginaliser(n_obs, n_predicted_exact, n_predicted_uncertain_b, frac_uncertainty_b);
-                const double llsb_obs = marginaliser(n_obs, n_predicted_exact, n_predicted_uncertain_sb, frac_uncertainty_sb);
-
-                // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
-                const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
-                if (dll_exp > bestexp_dll_exp) {
-                  bestexp_dll_exp = dll_exp;
-                  bestexp_dll_obs = llb_obs - llsb_obs;
-                }
-
-                // For debugging: print some useful numbers to the log.
-                #ifdef COLLIDERBIT_DEBUG
-                cout << endl;
-                cout << debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
-                cout << debug_prefix() << "  LLikes: b_ex      sb_ex     b_obs     sb_obs    (sb_obs-b_obs)" << endl;
-                cout << debug_prefix() << "          " << llb_exp << "  " << llsb_exp << "  " << llb_obs << "  " << llsb_obs << "  " << llsb_obs-llb_obs << endl;
-                cout << debug_prefix() << "  NEvents, not scaled to luminosity: " << srData.n_signal << endl;
-                cout << debug_prefix() << "  NEvents, scaled  to luminosity:    " << srData.n_signal_at_lumi << endl;
-                cout << debug_prefix() << "  NEvents: b [rel err]      sb [rel err]" << endl;
-                cout << debug_prefix() << "           "
-                     << n_predicted_uncertain_b << " [" << 100*frac_uncertainty_b << "%]  "
-                     << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << endl;
-                #endif
-
-              } // end SR loop
-
-            // Set this analysis' total obs dLL to that from the best-expected SR
-            ana_dll = bestexp_dll_obs;
 
           }
 
+          // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
+          result[adata.begin()->analysis_name + "_" + *bestexp_sr_label + "_DeltaLogLike"] = -bestexp_dll_obs;
 
-          // Update the total obs dLL with the dLL from this analysis
-          total_dll_obs += ana_dll;
-          #ifdef COLLIDERBIT_DEBUG
-          std::cout.precision(5);
-          cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  calc_LHC_LogLike: Analysis #" << analysis << " contributes with a -LogL = " << ana_dll << endl;
-          #endif
+        }
 
-
-        } // end ana loop
-
-
-      #ifdef COLLIDERBIT_DEBUG
-      cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << -total_dll_obs << endl;
-      #endif
-      // Set the single DLL to be returned (with conversion to more negative dll = more exclusion convention)
-      result = -total_dll_obs;
+      }
 
     }
 
+
+    // Compute the total likelihood for all analyses
+    void calc_LHC_LogLike(double& result)
+    {
+      using namespace Pipes::calc_LHC_LogLike;
+
+      // If no events have been generated (xsec veto), return delta log-likelihood = 0
+      if (!eventsGenerated)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: No events generated. Will return a delta log-likelihood of 0." << endl;
+        #endif
+        result = 0.0;
+        return;
+      }
+
+      // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
+      if (nFailedEvents > maxFailedEvents)
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            std::cerr << debug_prefix() << "calc_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;
+          #endif
+          result = 0.0;
+          return;
+        }
+
+      // Loop over likelihood components and calculate the total observed dLL
+      for (auto const &it : *Dep::LHC_LogLikes)
+      {
+        result += it.second;
+        #ifdef COLLIDERBIT_DEBUG
+          std::cout.precision(5);
+          cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  calc_LHC_LogLike: Analysis #" << it.first << " contributes with a -LogL = " << it.second << endl;
+        #endif
+      }
+
+      #ifdef COLLIDERBIT_DEBUG
+        cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << result << endl;
+      #endif
+
+    }
 
   }
 }

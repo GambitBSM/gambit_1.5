@@ -72,6 +72,11 @@ Printer:
     output_file: "CMSSM.hdf5"
     group: "/CMSSM"
 
+  #printer: ascii
+  #options:
+  #  buffer_length: 1
+  #  delete_file_on_restart: true
+  #  output_file: "gambit_output.txt"
 
 Scanner:
 
@@ -243,6 +248,12 @@ ObsLikes:
       purpose:    LogLike
 
     # Other observables
+    - purpose:    likelihood_details
+      capability: LHC_LogLikes
+
+    - purpose:    Observable
+      capability: LHC_signals
+
     - purpose:    Observable
       capability: RD_oh2
 
@@ -447,7 +458,7 @@ Rules:
       rho0_obserr: 0.15
 
   # Choose which type of marginalised Poisson likelihood to use for LHC likelihoods
-  - capability: LHC_Combined_LogLike
+  - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
 
@@ -507,17 +518,17 @@ Rules:
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:
-      analyses: [ ["ATLAS_0LEP_20invfb","ATLAS_0LEPStop_20invfb",
-                   "ATLAS_1LEPStop_20invfb","ATLAS_2bStop_20invfb",
-                   "ATLAS_2LEPEW_20invfb","ATLAS_2LEPStop_20invfb",
-                   "ATLAS_3LEPEW_20invfb"] ]
+      analyses: [ ["ATLAS_8TeV_0LEP_20invfb","ATLAS_8TeV_0LEPStop_20invfb",
+                   "ATLAS_8TeV_1LEPStop_20invfb","ATLAS_8TeV_2bStop_20invfb",
+                   "ATLAS_8TeV_2LEPEW_20invfb","ATLAS_8TeV_2LEPStop_20invfb",
+                   "ATLAS_8TeV_3LEPEW_20invfb"] ]
 
   # CMS analysis setup
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
-      analyses: [ ["CMS_1LEPDMTOP_20invfb","CMS_2LEPDMTOP_20invfb",
-                   "CMS_3LEPEW_20invfb","CMS_MONOJET_20invfb"] ]
+      analyses: [ ["CMS_8TeV_1LEPDMTOP_20invfb","CMS_8TeV_2LEPDMTOP_20invfb",
+                   "CMS_8TeV_3LEPEW_20invfb","CMS_8TeV_MONOJET_20invfb"] ]
 
   # Choose Monte Carlo event simulator and number of events to run.
   - capability:  ColliderOperator

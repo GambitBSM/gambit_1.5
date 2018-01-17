@@ -249,22 +249,50 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Calculate the log likelihood from the analysis numbers
-  #define CAPABILITY LHC_Combined_LogLike
+  // Collect all the analysis numbers in one place
+  #define CAPABILITY AllAnalysisNumbers
   START_CAPABILITY
-    #define FUNCTION calc_LHC_LogLike
-    START_FUNCTION(double)
+    #define FUNCTION CollectAnalyses
+    START_FUNCTION(AnalysisNumbers)
     DEPENDENCY(ATLASAnalysisNumbers, AnalysisNumbers)
     DEPENDENCY(CMSAnalysisNumbers, AnalysisNumbers)
     DEPENDENCY(IdentityAnalysisNumbers, AnalysisNumbers)
     #ifndef EXCLUDE_DELPHES
-    DEPENDENCY(DetAnalysisNumbers, AnalysisNumbers)
-    #endif // not defined EXCLUDE_DELPHES
+      DEPENDENCY(DetAnalysisNumbers, AnalysisNumbers)
+    #endif
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // Extract the signal predictions and uncertainties for all analyses
+  #define CAPABILITY LHC_signals
+  START_CAPABILITY
+    #define FUNCTION calc_LHC_signals
+    START_FUNCTION(map_str_dbl)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // Calculate the log likelihood for each analysis from the analysis numbers
+  #define CAPABILITY LHC_LogLikes
+  START_CAPABILITY
+    #define FUNCTION calc_LHC_LogLike_per_analysis
+    START_FUNCTION(map_str_dbl)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers)
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_lognormal_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_gaussian_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_GROUP(lnlike_marg_poisson)
     #undef FUNCTION
   #undef CAPABILITY
+
+  // Calculate the total log likelihood
+  #define CAPABILITY LHC_Combined_LogLike
+  START_CAPABILITY
+    #define FUNCTION calc_LHC_LogLike
+    START_FUNCTION(double)
+    DEPENDENCY(LHC_LogLikes, map_str_dbl)
+    #undef FUNCTION
+  #undef CAPABILITY
+
 
   // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
   // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to test

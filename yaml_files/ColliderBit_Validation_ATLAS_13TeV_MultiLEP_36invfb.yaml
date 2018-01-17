@@ -353,7 +353,7 @@ Rules:
 
     # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
     # Can change "_lognormal_" to "_gaussian_" if you prefer
-  - capability: LHC_Combined_LogLike
+  - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
 
