@@ -334,9 +334,15 @@ ColliderOperator: |
    Controls the parallelization and execution of the entire
    event loop of the collider simulation.
 
+LHC_signals: |
+   Extract the signal predictions and uncertainties for all LHC analyses.
+
+LHC_LogLikes: |
+   Calculate the log likelihood for each LHC analysis from the 
+   analysis numbers.
+
 LHC_Combined_LogLike: |
-   Combines the results from AnalysisNumbers together into
-   a single delta-log-likelihood value.
+   Calculate the total log likelihood for the LHC searches.
 
 HardScatteringSim: |
    Provides a Pythia 8 instance within a container which is
@@ -404,6 +410,10 @@ IdentityAnalysisNumbers: |
    Uses the given IdentityAnalysisContainer
    to perform all its analyses upon the given
    CopiedEvent.
+
+AllAnalysisNumbers: |
+   Collect all the LHC analysis numbers in from ATLASAnalysisNumbers,
+   CMSAnalysisNumbers, DetAnalysisNumbers and DetAnalysisNumbers.
 
 ALEPH_Selectron_LLike: |
    Compares the cross section times branching ratio
