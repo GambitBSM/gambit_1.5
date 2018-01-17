@@ -82,7 +82,7 @@ namespace Gambit
       {
        std::ostringstream msg;
        msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
-	   << majoranamodel.MajoranaLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
+         << majoranamodel.MajoranaLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
        invalid_point().raise(msg.str());
       }
 
@@ -90,8 +90,8 @@ namespace Gambit
       majoranamodel.sinW2 = sinW2;
 
       // gauge couplings
-      majoranamodel.g1 = e / sinW2;
-      majoranamodel.g2 = e / cosW2;
+      majoranamodel.g1 = e / sqrt(sinW2);
+      majoranamodel.g2 = e / sqrt(cosW2);
       majoranamodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
 
       // Yukawas

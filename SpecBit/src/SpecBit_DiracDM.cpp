@@ -82,7 +82,7 @@ namespace Gambit
       {
         std::ostringstream msg;
         msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
-	    << diracmodel.DiracLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
+          << diracmodel.DiracLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
         invalid_point().raise(msg.str());
       }
 
@@ -90,8 +90,8 @@ namespace Gambit
       diracmodel.sinW2 = sinW2;
 
       // gauge couplings
-      diracmodel.g1 = e / sinW2;
-      diracmodel.g2 = e / cosW2;
+      diracmodel.g1 = e / sqrt(sinW2);
+      diracmodel.g2 = e / sqrt(cosW2);
       diracmodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
 
       // Yukawas
