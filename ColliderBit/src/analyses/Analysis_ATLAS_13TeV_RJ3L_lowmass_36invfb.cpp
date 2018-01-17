@@ -664,304 +664,304 @@ namespace Gambit {
         
         bool m_is3Lep=false;
         bool m_is3LInt=false;
-        bool m_is3Lep2Jet=false;
-        bool m_is3Lep3Jet=false;
+        // bool m_is3Lep2Jet=false;
+        // bool m_is3Lep3Jet=false;
         
-        bool m_is4Lep=false;
-        bool m_is4Lep2Jet=false;
-        bool m_is4Lep3Jet=false;
+        // bool m_is4Lep=false;
+        // bool m_is4Lep2Jet=false;
+        // bool m_is4Lep3Jet=false;
 
         bool m_foundSFOS=false;
         
-        double m_H2PP_visible = -999.;
-        double m_H2PP_invisible = -999.;
-        double m_IaPP = -999.;
-        double m_IbPP = -999.;
-        double m_IaPa = -999.;
-        double m_IbPb = -999.;
-        double m_IaLAB = -999;
-        double m_IbLAB = -999;
-        double m_H4PP_Lept1A = -999.;
-        double m_H4PP_Lept1B = -999.;
-        double m_H4PP_Lept2B = -999.;
-        double m_mu = -999;
-        double m_pileUp_weight = -999;
+        // double m_H2PP_visible = -999.;
+        // double m_H2PP_invisible = -999.;
+        // double m_IaPP = -999.;
+        // double m_IbPP = -999.;
+        // double m_IaPa = -999.;
+        // double m_IbPb = -999.;
+        // double m_IaLAB = -999;
+        // double m_IbLAB = -999;
+        // double m_H4PP_Lept1A = -999.;
+        // double m_H4PP_Lept1B = -999.;
+        // double m_H4PP_Lept2B = -999.;
+        // double m_mu = -999;
+        // double m_pileUp_weight = -999;
   
   
         //////Initialize variables
-        int m_nBaselineLeptons = -999;
-        int m_nSignalLeptons   = -999;
+        // int m_nBaselineLeptons = -999;
+        // int m_nSignalLeptons   = -999;
         
         double m_lept1Pt  = -999;
-        double m_lept1Eta = -999;
-        double m_lept1Phi =-999;
+        // double m_lept1Eta = -999;
+        // double m_lept1Phi =-999;
         double m_lept1sign=-999;
-        double m_lept1origin = -999;
-        double m_lept1type = -999;
+        // double m_lept1origin = -999;
+        // double m_lept1type = -999;
         
         double m_lept2Pt =-999;
-        double m_lept2Eta=-999;
-        double m_lept2Phi =-999;
+        // double m_lept2Eta=-999;
+        // double m_lept2Phi =-999;
         double m_lept2sign =-999;
-        double m_lept2origin = -999;
-        double m_lept2type = -999;
+        // double m_lept2origin = -999;
+        // double m_lept2type = -999;
         
         double m_lept3Pt =-999;
-        double m_lept3Eta =-999;
-        double m_lept3Phi =-999;
+        // double m_lept3Eta =-999;
+        // double m_lept3Phi =-999;
         double m_lept3sign =-999;
-        double m_lept3origin = -999;
-        double m_lept3type = -999;
+        // double m_lept3origin = -999;
+        // double m_lept3type = -999;
         
-        double m_lept4Pt =-999;
-        double m_lept4Eta =-999;
-        double m_lept4Phi =-999;
-        double m_lept4sign =-999;
-        double m_lept4origin = -999;
-        double m_lept4type = -999;
-        double m_Zlep1Pt = -999;
-        double m_Zlep1Phi = -999;
-        double m_Zlep1Eta = -999;
-        double m_Zlep1No = -999;
-        double m_Zlep1sign = -999;
+        // double m_lept4Pt =-999;
+        // double m_lept4Eta =-999;
+        // double m_lept4Phi =-999;
+        // double m_lept4sign =-999;
+        // double m_lept4origin = -999;
+        // double m_lept4type = -999;
+        // double m_Zlep1Pt = -999;
+        // double m_Zlep1Phi = -999;
+        // double m_Zlep1Eta = -999;
+        // double m_Zlep1No = -999;
+        // double m_Zlep1sign = -999;
         
-        double m_Zlep2Pt = -999;
-        double m_Zlep2sign = -999;
-        double m_Zlep2Phi = -999;
-        double m_Zlep2Eta = -999;
-        double m_Zlep2No = -999;
+        // double m_Zlep2Pt = -999;
+        // double m_Zlep2sign = -999;
+        // double m_Zlep2Phi = -999;
+        // double m_Zlep2Eta = -999;
+        // double m_Zlep2No = -999;
         
-        double m_WlepPt = -999;
-        double m_WlepPhi = -999;
-        double m_WlepEta = -999;
-        double m_WlepNo = -999;
-        double m_Wlepsign = -999;
+        // double m_WlepPt = -999;
+        // double m_WlepPhi = -999;
+        // double m_WlepEta = -999;
+        // double m_WlepNo = -999;
+        // double m_Wlepsign = -999;
         
         // VR setup
-        double m_lept1Pt_VR = -999;
-        double m_lept1Eta_VR = -999;
-        double m_lept1Phi_VR = -999;
-        double m_lept1sign_VR = -999;
+        // double m_lept1Pt_VR = -999;
+        // double m_lept1Eta_VR = -999;
+        // double m_lept1Phi_VR = -999;
+        // double m_lept1sign_VR = -999;
         
-        double m_lept2Pt_VR = -999;
-        double m_lept2Eta_VR = -999;
-        double m_lept2Phi_VR = -999;
-        double m_lept2sign_VR = -999;
+        // double m_lept2Pt_VR = -999;
+        // double m_lept2Eta_VR = -999;
+        // double m_lept2Phi_VR = -999;
+        // double m_lept2sign_VR = -999;
         
         //Jet Variables
         int m_nJets=0;
-        int m_nBtagJets=0;
+        // int m_nBtagJets=0;
         
         double m_jet1Pt =-999;
-        double m_jet1Eta =-999;
-        double m_jet1Phi =-999;
-        double m_jet1M=-999;
-        double m_jet1origin=-999;
-        double m_jet1type=-999;
+        // double m_jet1Eta =-999;
+        // double m_jet1Phi =-999;
+        // double m_jet1M=-999;
+        // double m_jet1origin=-999;
+        // double m_jet1type=-999;
         
         double m_jet2Pt=-999;
-        double m_jet2Eta=-999;
-        double m_jet2Phi=-999;
-        double m_jet2M=-999;
-        double m_jet2origin=-999;
-        double m_jet2type=-999;
+        // double m_jet2Eta=-999;
+        // double m_jet2Phi=-999;
+        // double m_jet2M=-999;
+        // double m_jet2origin=-999;
+        // double m_jet2type=-999;
   
-        double m_jet3Pt=-999;
-        double m_jet3Eta=-999;
-        double m_jet3Phi=-999;
-        double m_jet3M=-999;
-        double m_jet3origin=-999;
-        double m_jet3type=-999;
+        // double m_jet3Pt=-999;
+        // double m_jet3Eta=-999;
+        // double m_jet3Phi=-999;
+        // double m_jet3M=-999;
+        // double m_jet3origin=-999;
+        // double m_jet3type=-999;
         
-        double m_jet4Pt=-999;
-        double m_jet4Eta=-999;
-        double m_jet4Phi=-999;
-        double m_jet4M=-999;
-        double m_jet4origin=-999;
-        double m_jet4type=-999;
+        // double m_jet4Pt=-999;
+        // double m_jet4Eta=-999;
+        // double m_jet4Phi=-999;
+        // double m_jet4M=-999;
+        // double m_jet4origin=-999;
+        // double m_jet4type=-999;
         
         //Di-Lepton System: Calculated for OS Pairs
         double m_mll=-999;
-        double m_mt2=-999;
-        double m_dRll=-999;
-        double m_ptll=-999;
-        double m_Zeta=-999;
+        // double m_mt2=-999;
+        // double m_dRll=-999;
+        // double m_ptll=-999;
+        // double m_Zeta=-999;
   
         //Tri-Lepton System:
-        double m_mlll=-999;
-        double m_ptlll=-999;
+        // double m_mlll=-999;
+        // double m_ptlll=-999;
         double m_mTW=-999;
-        double m_mTW_alt = -999;
-        double m_mll_alt = -999;
+        // double m_mTW_alt = -999;
+        // double m_mll_alt = -999;
         //Di-Jet system: Calculated for the Two Leading Jets
         double m_mjj=-999;
-        double m_dRjj=-999;
-        double m_ptjj=-999;
-        double m_mj2j3 = -999;
+        // double m_dRjj=-999;
+        // double m_ptjj=-999;
+        // double m_mj2j3 = -999;
         //calculation of overall jet mass
-        double m_mJ=-999;
-        double m_mjjW=-999;//closest to the W-boson mass
+        // double m_mJ=-999;
+        // double m_mjjW=-999;//closest to the W-boson mass
         
         //Cleaning Variable: If MET is in the same direction as the Jet
         double m_minDphi=-999;
         // Some lab frame angles and stuff
-        double m_dphill = -999;
-        double m_dphilep1MET = -999;
-        double m_dphilep2MET = -999;
-        double m_dphilep3MET = -999;
-        double m_dphiJMET = -999; 
-        double m_dphilll = -999;
-        double m_dphilllMET = -999;
-        double m_dphillMET = -999;
-        double m_dphijj = -999;
-        double m_dphijet1MET = -999;
-        double m_dphijet2MET = -999;
-        double m_dphijjMET = -999;
-        double m_dphil3MET = -999; 
-        double m_MET=-999;
-        double m_MET_phi = -999;
-        double m_METTST = -999;
-        double m_METTST_phi = -999;
-        double m_Meff=-999;
-        double m_LT=-999;
+        // double m_dphill = -999;
+        // double m_dphilep1MET = -999;
+        // double m_dphilep2MET = -999;
+        // double m_dphilep3MET = -999;
+        // double m_dphiJMET = -999; 
+        // double m_dphilll = -999;
+        // double m_dphilllMET = -999;
+        // double m_dphillMET = -999;
+        // double m_dphijj = -999;
+        // double m_dphijet1MET = -999;
+        // double m_dphijet2MET = -999;
+        // double m_dphijjMET = -999;
+        // double m_dphil3MET = -999; 
+        // double m_MET=-999;
+        // double m_MET_phi = -999;
+        // double m_METTST = -999;
+        // double m_METTST_phi = -999;
+        // double m_Meff=-999;
+        // double m_LT=-999;
   
-        double m_MDR=-999;
-        double m_PP_VisShape=-999;
-        double m_gaminvPP=-999;
-        double m_MP=-999;
+        // double m_MDR=-999;
+        // double m_PP_VisShape=-999;
+        // double m_gaminvPP=-999;
+        // double m_MP=-999;
         
-        double m_mC1=-999;
-        double m_mN2=-999;
+        // double m_mC1=-999;
+        // double m_mN2=-999;
         
-        double m_mTW_Pa=-999;
-        double m_mTW_PP=-999;
+        // double m_mTW_Pa=-999;
+        // double m_mTW_PP=-999;
         
-        double m_mTZ_Pb=-999;
-        double m_mTZ_PP=-999;
+        // double m_mTZ_Pb=-999;
+        // double m_mTZ_PP=-999;
         
         // 3L CA 
-        double m_min_mt = -999;
-        double m_pt_lll = -999;
-        double m_mTl3 = -999;
+        // double m_min_mt = -999;
+        // double m_pt_lll = -999;
+        // double m_mTl3 = -999;
         //##############################//
         //# Recursive Jigsaw Variables #//
         //##############################//
   
         //Scale Variables
         double m_H2PP=-999;
-        double m_HT2PP=-999;
-        double m_H3PP=-999;
-        double m_HT3PP=-999;
+        // double m_HT2PP=-999;
+        // double m_H3PP=-999;
+        // double m_HT3PP=-999;
         double m_H4PP=-999;
         double m_HT4PP=-999;
         double m_H5PP=-999;
         double m_HT5PP=-999;
-        double m_H6PP=-999;
-        double m_HT6PP=-999;
+        // double m_H6PP=-999;
+        // double m_HT6PP=-999;
         
         double m_H2Pa=-999;
         double m_H2Pb=-999;
         double m_minH2P=-999;
-        double m_R_H2Pa_H2Pb=-999;
+        // double m_R_H2Pa_H2Pb=-999;
         double m_H3Pa=-999;
         double m_H3Pb=-999;
         double m_minH3P=-999;
-        double m_R_H3Pa_H3Pb=-999;
+        // double m_R_H3Pa_H3Pb=-999;
         double m_R_minH2P_minH3P=-999;
-        double m_minR_pT2i_HT3Pi=-999;
-        double m_maxR_H1PPi_H2PPi=-999;
+        // double m_minR_pT2i_HT3Pi=-999;
+        // double m_maxR_H1PPi_H2PPi=-999;
         
         //Anglular Variables
-        double m_cosPP=-999;
-        double m_cosPa=-999;
-        double m_cosPb=-999;
+        // double m_cosPP=-999;
+        // double m_cosPa=-999;
+        // double m_cosPb=-999;
         double m_dphiVP=-999;
-        double m_dphiPPV=-999;
-        double m_dphiPC1=-999;
-        double m_dphiPN2=-999;
+        // double m_dphiPPV=-999;
+        // double m_dphiPC1=-999;
+        // double m_dphiPN2=-999;
   
-        double m_sangle=-999;
-        double m_dangle=-999;
+        // double m_sangle=-999;
+        // double m_dangle=-999;
         
         //Ratio Variables
-        double m_RPZ_HT4PP=-999;
+        // double m_RPZ_HT4PP=-999;
         double m_RPT_HT4PP=-999;
-        double m_R_HT4PP_H4PP=-999;
+        // double m_R_HT4PP_H4PP=-999;
         
-        double m_RPZ_HT5PP=-999;
+        // double m_RPZ_HT5PP=-999;
         double m_RPT_HT5PP=-999;
-        double m_R_HT5PP_H5PP=-999;
-        double m_W_PP = -999;
-        double m_WZ_PP = -999;
+        // double m_R_HT5PP_H5PP=-999;
+        // double m_W_PP = -999;
+        // double m_WZ_PP = -999;
 
         ///Variables for the compressed/Intermediate tree
         double m_PTCM=-999;
         double m_PTISR=-999;
         double m_PTI=-999;
         double m_RISR=-999;
-        double m_cosCM=-999;
-        double m_cosS=-999;
-        double m_MISR=-999;
-        double m_dphiCMI=-999;
-        double m_dphiSI=-999;
+        // double m_cosCM=-999;
+        // double m_cosS=-999;
+        // double m_MISR=-999;
+        // double m_dphiCMI=-999;
+        // double m_dphiSI=-999;
         double m_dphiISRI=-999;
-        double m_HN2S=-999;
-        double m_R_Ib_Ia=-999;
-        double m_H11S = -999.;
-        double m_HN1Ca = -999.;
-        double m_HN1Cb = -999.;
-        double m_H11Ca = -999.;
-        double m_H11Cb = -999.;
-        double m_cosC = -999.;
-        double m_Is_Z = -999.;
-        double m_Is_OS = -999;
+        // double m_HN2S=-999;
+        // double m_R_Ib_Ia=-999;
+        // double m_H11S = -999.;
+        // double m_HN1Ca = -999.;
+        // double m_HN1Cb = -999.;
+        // double m_H11Ca = -999.;
+        // double m_H11Cb = -999.;
+        // double m_cosC = -999.;
+        // double m_Is_Z = -999.;
+        // double m_Is_OS = -999;
         double m_MZ = -999.;
         double m_MJ = -999.;
-        double m_mTWComp =-999.;
-        double m_cosZ = -999.;
-        double m_cosJ = -999.;
+        // double m_mTWComp =-999.;
+        // double m_cosZ = -999.;
+        // double m_cosJ = -999.;
         int m_NjS   = 0;
         int m_NjISR = 0;
         int m_NbS   = 0;
         int m_NbISR = 0;
   
-        double m_MZ_VR = -999;
-        double m_MJ_VR = -999;  
-        double m_PTCM_VR = -999;
-        double m_PTISR_VR = -999;
-        double m_PTI_VR = -999;
-        double m_RISR_VR = -999;
-        double m_dphiISRI_VR = -999;
-        int m_NjS_VR = 0;
-        int m_NjISR_VR = 0;
+        // double m_MZ_VR = -999;
+        // double m_MJ_VR = -999;  
+        // double m_PTCM_VR = -999;
+        // double m_PTISR_VR = -999;
+        // double m_PTI_VR = -999;
+        // double m_RISR_VR = -999;
+        // double m_dphiISRI_VR = -999;
+        // int m_NjS_VR = 0;
+        // int m_NjISR_VR = 0;
         
         
-        double m_H2PP_VR = -999;
-        double m_H5PP_VR = -999;
-        double m_HT5PP_VR = -999;
-        double m_RPT_HT5PP_VR = -999;
-        double m_dphiVP_VR = -999;
-        double m_R_minH2P_minH3P_VR=-999;
+        // double m_H2PP_VR = -999;
+        // double m_H5PP_VR = -999;
+        // double m_HT5PP_VR = -999;
+        // double m_RPT_HT5PP_VR = -999;
+        // double m_dphiVP_VR = -999;
+        // double m_R_minH2P_minH3P_VR=-999;
         
-        double m_DPhi_METW = -999;
+        // double m_DPhi_METW = -999;
         //compressed
-        double m_WmassOnZ = -999;
-        double m_WptOnZ = -999;
-        double m_DPhi_METZ = -999;
-        double m_NonWJet_pT = -999;
-        double m_DPhi_METJetLeading = -999;
-        double m_DR_WOnZ2Jet = -999;
-        double m_DPhi_METNonWJet = -999;
-        double m_DPhi_METWonZ = -999;
+        // double m_WmassOnZ = -999;
+        // double m_WptOnZ = -999;
+        // double m_DPhi_METZ = -999;
+        // double m_NonWJet_pT = -999;
+        // double m_DPhi_METJetLeading = -999;
+        // double m_DR_WOnZ2Jet = -999;
+        // double m_DPhi_METNonWJet = -999;
+        // double m_DPhi_METWonZ = -999;
         
         // Testing for low mass 3L
-        double m_M_I = -999;
-        double m_p_z_I = -999;
-        double m_p_z_Ia = -999;
-        double m_p_z_Ib = -999;
-        double m_boostx = -999;
-        double m_boosty = -999;
-        double m_boostz = -999;
+        // double m_M_I = -999;
+        // double m_p_z_I = -999;
+        // double m_p_z_Ia = -999;
+        // double m_p_z_Ib = -999;
+        // double m_boostx = -999;
+        // double m_boosty = -999;
+        // double m_boostz = -999;
 
         // Classify events
 
@@ -972,16 +972,16 @@ namespace Gambit {
         if (signalLeptons.size()==2) m_is2Lep = true;
         else if (signalLeptons.size()==3) {m_is3Lep = true; //cout << "3L here" << endl;
         }
-        else if (signalLeptons.size()==4) m_is4Lep = true;
+        // else if (signalLeptons.size()==4) m_is4Lep = true;
         //else return;
   
         if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true; 
         if(m_is2Lep && m_nJets>2 ) m_is2L2JInt = true;
         if(m_is3Lep && m_nJets>0 ) m_is3LInt = true;
-        if(m_is3Lep && m_nJets>1)  m_is3Lep2Jet = true; //
-        if(m_is3Lep && m_nJets>2)  m_is3Lep3Jet = true; //
-        if(m_is4Lep && m_nJets>1)  m_is4Lep2Jet = true; //
-        if(m_is4Lep && m_nJets>2)  m_is4Lep3Jet = true; //
+        // if(m_is3Lep && m_nJets>1)  m_is3Lep2Jet = true; //
+        // if(m_is3Lep && m_nJets>2)  m_is3Lep3Jet = true; //
+        // if(m_is4Lep && m_nJets>1)  m_is4Lep2Jet = true; //
+        // if(m_is4Lep && m_nJets>2)  m_is4Lep3Jet = true; //
         
         if(signalLeptons.size()==3)m_is3Lep=true;
         
@@ -1032,19 +1032,19 @@ namespace Gambit {
           //Setting the Standard Variables
           //Di-Lepton System:
           m_lept1Pt   = myLeptons[0].first.Pt();
-          m_lept1Eta  = myLeptons[0].first.Eta();
-          m_lept1Phi  = myLeptons[0].first.Phi();
+          // m_lept1Eta  = myLeptons[0].first.Eta();
+          // m_lept1Phi  = myLeptons[0].first.Phi();
           m_lept1sign = myLeptons[0].second;
       
           m_lept2Pt   = myLeptons[1].first.Pt();
-          m_lept2Eta  = myLeptons[1].first.Eta();
-          m_lept2Phi  = myLeptons[1].first.Phi();
+          // m_lept2Eta  = myLeptons[1].first.Eta();
+          // m_lept2Phi  = myLeptons[1].first.Phi();
           m_lept2sign = myLeptons[1].second;
       
           m_mll  = (myLeptons[0].first+myLeptons[1].first).M();
-          m_ptll = (myLeptons[0].first+myLeptons[1].first).Pt();
-          m_dRll = myLeptons[0].first.DeltaR(myLeptons[1].first);
-          m_Zeta = fabs(myLeptons[0].first.Eta() - myLeptons[1].first.Eta());
+          // m_ptll = (myLeptons[0].first+myLeptons[1].first).Pt();
+          // m_dRll = myLeptons[0].first.DeltaR(myLeptons[1].first);
+          // m_Zeta = fabs(myLeptons[0].first.Eta() - myLeptons[1].first.Eta());
       
           vector<TLorentzVector> vleptons;
           vleptons.push_back(myLeptons[0].first);
@@ -1073,78 +1073,78 @@ namespace Gambit {
           //Di-Jet System: Here we decide which jets to use as output. The leading and sub-leading jet pair, or the jet pair with invariant mass closest to the W-Mass
           //jet closest to the W-boson mass
           m_jet1Pt  = myJets[indexJ1].Pt();
-          m_jet1Eta = myJets[indexJ1].Eta();
-          m_jet1Phi = myJets[indexJ1].Phi();
-          m_jet1M   = myJets[indexJ1].M();
+          // m_jet1Eta = myJets[indexJ1].Eta();
+          // m_jet1Phi = myJets[indexJ1].Phi();
+          // m_jet1M   = myJets[indexJ1].M();
           
           m_jet2Pt  = myJets[indexJ2].Pt();
-          m_jet2Eta = myJets[indexJ2].Eta();
-          m_jet2Phi = myJets[indexJ2].Phi();
-          m_jet2M   = myJets[indexJ2].M();
+          // m_jet2Eta = myJets[indexJ2].Eta();
+          // m_jet2Phi = myJets[indexJ2].Phi();
+          // m_jet2M   = myJets[indexJ2].M();
       
-          if(m_nJets>2) {
-            m_jet3Pt  = myJets[2].Pt();
-            m_jet3Eta = myJets[2].Eta();
-            m_jet3Phi = myJets[2].Phi();
-            m_jet3M   = myJets[2].M();
-            m_mj2j3 = (myJets[1] + myJets[2]).M();
-            if(m_nJets>3) {
-                    m_jet4Pt  = myJets[3].Pt();
-                    m_jet4Eta = myJets[3].Eta();
-                    m_jet4Phi = myJets[3].Phi();
-                    m_jet4M   = myJets[3].M();    
-            }
-          }
+          // if(m_nJets>2) {
+          //   // m_jet3Pt  = myJets[2].Pt();
+          //   // m_jet3Eta = myJets[2].Eta();
+          //   // m_jet3Phi = myJets[2].Phi();
+          //   // m_jet3M   = myJets[2].M();
+          //   // m_mj2j3 = (myJets[1] + myJets[2]).M();
+          //   if(m_nJets>3) {
+          //           // m_jet4Pt  = myJets[3].Pt();
+          //           // m_jet4Eta = myJets[3].Eta();
+          //           // m_jet4Phi = myJets[3].Phi();
+          //           // m_jet4M   = myJets[3].M();    
+          //   }
+          // }
       
           m_mjj  = (myJets[indexJ1]+myJets[indexJ2]).M();
-          m_ptjj = (myJets[indexJ1]+myJets[indexJ2]).Pt();
-          m_dRjj = myJets[indexJ1].DeltaR(myJets[indexJ2]);
+          // m_ptjj = (myJets[indexJ1]+myJets[indexJ2]).Pt();
+          // m_dRjj = myJets[indexJ1].DeltaR(myJets[indexJ2]);
       
       
           //////////////////////////////////////////////////////////////////////////////
           //Variables for the conventional approach
-          m_DPhi_METW = fabs((myJets[indexJ1]+myJets[indexJ2]).DeltaPhi(metLV));
+          // m_DPhi_METW = fabs((myJets[indexJ1]+myJets[indexJ2]).DeltaPhi(metLV));
           //for the comrpessed tree
-          double min_dPhi = 1000;
-          int WindexJ1 = -999;
-          int WindexJ2 = -999;
-          for (int j0=0;j0<myJets.size();j0++) {
+          // double min_dPhi = 1000;
+          // int WindexJ1 = -999;
+          // int WindexJ2 = 999;
+          // for (int j0=0;j0<myJets.size();j0++) {
         
-            double my_min_dphi= fabs(myJets[j0].DeltaPhi(metLV+myLeptons[0].first+myLeptons[1].first));
-            if (min_dPhi>my_min_dphi) {       
-              min_dPhi = my_min_dphi;
-              WindexJ1 = j0;    
-            } 
-          }
+          //   double my_min_dphi= fabs(myJets[j0].DeltaPhi(metLV+myLeptons[0].first+myLeptons[1].first));
+          //   if (min_dPhi>my_min_dphi) {       
+          //     min_dPhi = my_min_dphi;
+          //     WindexJ1 = j0;    
+          //   } 
+          // }
       
-          min_dPhi = 1000;
-          for (int j1=0;j1<myJets.size();j1++) {
-            double my_min_dphi= fabs(myJets[j1].DeltaPhi(metLV+myLeptons[0].first+myLeptons[1].first));
+          // min_dPhi = 1000;
+          // for (int j1=0;j1<myJets.size();j1++) {
+          //   double my_min_dphi= fabs(myJets[j1].DeltaPhi(metLV+myLeptons[0].first+myLeptons[1].first));
         
-            if (min_dPhi>my_min_dphi) {
-              if (j1!=WindexJ1) {
-                min_dPhi = my_min_dphi;
-                WindexJ2 = j1;
-              }   
-            } 
-          }
+          //   if (min_dPhi>my_min_dphi) {
+          //     if (j1!=WindexJ1) {
+          //       min_dPhi = my_min_dphi;
+          //       WindexJ2 = j1;
+          //     }   
+          //   } 
+          // }
       
-          m_WmassOnZ=(myJets[WindexJ1]+myJets[WindexJ2]).M();
-          m_WptOnZ=(myJets[WindexJ1]+myJets[WindexJ2]).Pt();
-          m_DPhi_METZ=fabs((myLeptons[0].first+myLeptons[1].first).DeltaPhi(metLV));
-          TLorentzVector nonWjetsLV;
-          for(int kjet=0;kjet<myJets.size();kjet++) {
-            if(kjet!=WindexJ1 && kjet!=WindexJ2) {
-              nonWjetsLV+=myJets[kjet];
-            }
-          }
-          if(m_nJets>2) {
-            m_NonWJet_pT=nonWjetsLV.Pt();
-            m_DPhi_METJetLeading = fabs(myJets[0].DeltaPhi(metLV));
-            m_DR_WOnZ2Jet = myJets[WindexJ1].DeltaR(myJets[WindexJ2]);
-            m_DPhi_METNonWJet = fabs(nonWjetsLV.DeltaPhi(metLV));
-            m_DPhi_METWonZ = fabs((myJets[WindexJ1]+myJets[WindexJ2]).DeltaPhi(metLV));
-          }
+          // m_WmassOnZ=(myJets[WindexJ1]+myJets[WindexJ2]).M();
+          // m_WptOnZ=(myJets[WindexJ1]+myJets[WindexJ2]).Pt();
+          // m_DPhi_METZ=fabs((myLeptons[0].first+myLeptons[1].first).DeltaPhi(metLV));
+          // TLorentzVector nonWjetsLV;
+          // for(int kjet=0;kjet<myJets.size();kjet++) {
+          //   if(kjet!=WindexJ1 && kjet!=WindexJ2) {
+          //     nonWjetsLV+=myJets[kjet];
+          //   }
+          // }
+          // if(m_nJets>2) {
+          //   // m_NonWJet_pT=nonWjetsLV.Pt();
+          //   // m_DPhi_METJetLeading = fabs(myJets[0].DeltaPhi(metLV));
+          //   // m_DR_WOnZ2Jet = myJets[WindexJ1].DeltaR(myJets[WindexJ2]);
+          //   // m_DPhi_METNonWJet = fabs(nonWjetsLV.DeltaPhi(metLV));
+          //   // m_DPhi_METWonZ = fabs((myJets[WindexJ1]+myJets[WindexJ2]).DeltaPhi(metLV));
+          // }
           //////////////////////////////////////////////////////////////////////////////
       
      
@@ -1163,22 +1163,22 @@ namespace Gambit {
           LAB_2L2J->AnalyzeEvent();                               //analyze the event
           //cout << L1_2L2J->GetFourVector(*LAB_2L2J).Pt() << endl;
           if (L1_2L2J->GetFourVector(*LAB_2L2J).Pt() > L2_2L2J->GetFourVector(*LAB_2L2J).Pt()){
-            m_Zlep1Pt = L1_2L2J->GetFourVector(*LAB_2L2J).Pt();
-            m_Zlep1sign = myLeptons[0].second;
-            m_Zlep1No = 0;
-            m_Zlep2Pt = L2_2L2J->GetFourVector(*LAB_2L2J).Pt();
-            m_Zlep2sign = myLeptons[1].second;
-            m_Zlep2No = 1;
+            // m_Zlep1Pt = L1_2L2J->GetFourVector(*LAB_2L2J).Pt();
+            // m_Zlep1sign = myLeptons[0].second;
+            // m_Zlep1No = 0;
+            // m_Zlep2Pt = L2_2L2J->GetFourVector(*LAB_2L2J).Pt();
+            // m_Zlep2sign = myLeptons[1].second;
+            // m_Zlep2No = 1;
             lep1 = L1_2L2J->GetFourVector(*LAB_2L2J);
             lep2 = L2_2L2J->GetFourVector(*LAB_2L2J);
           }
           else {
-            m_Zlep1Pt = L2_2L2J->GetFourVector(*LAB_2L2J).Pt();
-            m_Zlep1sign = myLeptons[1].second;
-            m_Zlep1No = 1;
-            m_Zlep2Pt = L1_2L2J->GetFourVector(*LAB_2L2J).Pt();
-            m_Zlep2sign = myLeptons[0].second;
-            m_Zlep2No = 0;
+            // m_Zlep1Pt = L2_2L2J->GetFourVector(*LAB_2L2J).Pt();
+            // m_Zlep1sign = myLeptons[1].second;
+            // m_Zlep1No = 1;
+            // m_Zlep2Pt = L1_2L2J->GetFourVector(*LAB_2L2J).Pt();
+            // m_Zlep2sign = myLeptons[0].second;
+            // m_Zlep2No = 0;
             
             lep1 = L2_2L2J->GetFourVector(*LAB_2L2J);
             lep2 = L1_2L2J->GetFourVector(*LAB_2L2J);
@@ -1188,14 +1188,14 @@ namespace Gambit {
           TLorentzVector jet2 = J2_2L2J->GetFourVector(*LAB_2L2J);
 
           // Some lab frame stuff
-          m_dphill = lep1.DeltaPhi(lep2);
-          m_dphilep1MET = fabs(lep1.DeltaPhi(metLV));
-          m_dphilep2MET = fabs(lep2.DeltaPhi(metLV));
-          m_dphillMET = fabs((lep1 + lep2).DeltaPhi(metLV));
-          m_dphijet1MET = fabs(jet1.DeltaPhi(metLV));
-          m_dphijet2MET = fabs(jet2.DeltaPhi(metLV));
-          m_dphijj = fabs(jet1.DeltaPhi(jet2));
-          m_dphijjMET = fabs((jet1 + jet2).DeltaPhi(metLV));
+          // m_dphill = lep1.DeltaPhi(lep2);
+          // m_dphilep1MET = fabs(lep1.DeltaPhi(metLV));
+          // m_dphilep2MET = fabs(lep2.DeltaPhi(metLV));
+          // m_dphillMET = fabs((lep1 + lep2).DeltaPhi(metLV));
+          // m_dphijet1MET = fabs(jet1.DeltaPhi(metLV));
+          // m_dphijet2MET = fabs(jet2.DeltaPhi(metLV));
+          // m_dphijj = fabs(jet1.DeltaPhi(jet2));
+          // m_dphijjMET = fabs((jet1 + jet2).DeltaPhi(metLV));
           //... then by setting the Variables
           TLorentzVector vP_V1aPP = J1_2L2J->GetFourVector(*C1N2_2L2J);
           TLorentzVector vP_V2aPP = J2_2L2J->GetFourVector(*C1N2_2L2J);
@@ -1215,13 +1215,13 @@ namespace Gambit {
           //Variables w/ 4 objects 
           //Four vector sum of all visible objets + four vector sum of inv objects
           m_H2PP = (vP_V1aPP + vP_V2aPP + vP_V1bPP + vP_V2bPP).P() + (vP_IaPP+vP_IbPP).P();//H(1,1)PP
-          m_HT2PP = (vP_V1aPP + vP_V2aPP + vP_V1bPP + vP_V2bPP).Pt() + (vP_IaPP+vP_IbPP).Pt();//HT(1,1)PP
+          // m_HT2PP = (vP_V1aPP + vP_V2aPP + vP_V1bPP + vP_V2bPP).Pt() + (vP_IaPP+vP_IbPP).Pt();//HT(1,1)PP
           //Scalar sum of all visible objects + vector sum of invisible momenta 
           m_H5PP = vP_V1aPP.P() + vP_V2aPP.P() + vP_V1bPP.P() + vP_V2bPP.P() + (vP_IaPP + vP_IbPP).P();//H(4,1)PP
           m_HT5PP = vP_V1aPP.Pt() + vP_V2aPP.Pt() + vP_V1bPP.Pt() + vP_V2bPP.Pt() + (vP_IaPP + vP_IbPP).Pt();//HT(4,1)PP
           //scalar sum of all objects 
-          m_H6PP = vP_V1aPP.P() + vP_V2aPP.P() + vP_V1bPP.P() + vP_V2bPP.P() + vP_IaPP.P() + vP_IbPP.P();//H(4,2)PP
-          m_HT6PP = vP_V1aPP.Pt() + vP_V2aPP.Pt() + vP_V1bPP.Pt() + vP_V2bPP.Pt() + vP_IaPP.Pt() + vP_IbPP.Pt();
+          // m_H6PP = vP_V1aPP.P() + vP_V2aPP.P() + vP_V1bPP.P() + vP_V2bPP.P() + vP_IaPP.P() + vP_IbPP.P();//H(4,2)PP
+          // m_HT6PP = vP_V1aPP.Pt() + vP_V2aPP.Pt() + vP_V1bPP.Pt() + vP_V2bPP.Pt() + vP_IaPP.Pt() + vP_IbPP.Pt();
           
           m_H2Pa = (vP_V1aPa + vP_V2aPa).P() + vP_IaPa.P();
           m_H2Pb = (vP_V1bPb + vP_V2bPb).P() + vP_IbPb.P();
@@ -1229,96 +1229,96 @@ namespace Gambit {
           m_H3Pb = vP_V1bPb.P() + vP_V2bPb.P() + vP_IbPb.P();
           m_minH2P = std::min(m_H2Pa,m_H2Pb);
           m_minH3P = std::min(m_H3Pa,m_H3Pb);
-          m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
-          m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
+          // m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
+          // m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
           m_R_minH2P_minH3P = m_minH2P/m_minH3P;
           std::cout << " m_R_minH2P_minH3P " << m_R_minH2P_minH3P << " " << m_minH2P << " " <<  m_minH3P << std::endl;
-          double H3PTa = vP_V1aPa.Pt() + vP_V2aPa.Pt() + vP_IaPa.Pt();
+          // double H3PTa = vP_V1aPa.Pt() + vP_V2aPa.Pt() + vP_IaPa.Pt();
           
-          m_minR_pT2i_HT3Pi = std::min(vP_V1aPa.Pt()/H3PTa,vP_V2aPa.Pt()/H3PTa);
+          // m_minR_pT2i_HT3Pi = std::min(vP_V1aPa.Pt()/H3PTa,vP_V2aPa.Pt()/H3PTa);
       
       
-          m_R_HT5PP_H5PP = m_HT5PP/m_H5PP;
+          // m_R_HT5PP_H5PP = m_HT5PP/m_H5PP;
           
           // Invisible in the PP frame, Px frames and lab frame
           TLorentzVector vP_IaLAB = X1a_2L2J->GetFourVector(*LAB_2L2J);
           TLorentzVector vP_IbLAB = X1b_2L2J->GetFourVector(*LAB_2L2J);
-          m_IaLAB = vP_IaLAB.P();
-          m_IbLAB = vP_IbLAB.P();
-          m_IaPP = vP_IaPP.P();
-          m_IbPP = vP_IbPP.P();
-          m_IaPa = vP_IaPa.P();
-          m_IbPb = vP_IbPb.P();
+          // m_IaLAB = vP_IaLAB.P();
+          // m_IbLAB = vP_IbLAB.P();
+          // m_IaPP = vP_IaPP.P();
+          // m_IbPP = vP_IbPP.P();
+          // m_IaPa = vP_IaPa.P();
+          // m_IbPb = vP_IbPb.P();
           
-          double jetMetphiP = (vP_V1aPa+vP_V2aPa).DeltaPhi(vP_IaPa);
-          m_mTW_Pa = sqrt(2*(vP_V1aPa+vP_V2aPa).Pt()*vP_IaPa.Pt()*(1-cos(jetMetphiP)));
+          // double jetMetphiP = (vP_V1aPa+vP_V2aPa).DeltaPhi(vP_IaPa);
+          // m_mTW_Pa = sqrt(2*(vP_V1aPa+vP_V2aPa).Pt()*vP_IaPa.Pt()*(1-cos(jetMetphiP)));
           
-          double jetMetphiPP = (vP_V1aPP+vP_V2aPP).DeltaPhi(vP_IaPP+vP_IbPP);
-          m_mTW_PP = sqrt(2*(vP_V1aPP+vP_V2aPP).Pt()*(vP_IaPP+vP_IbPP).Pt()*(1-cos(jetMetphiPP)));  
+          // double jetMetphiPP = (vP_V1aPP+vP_V2aPP).DeltaPhi(vP_IaPP+vP_IbPP);
+          // m_mTW_PP = sqrt(2*(vP_V1aPP+vP_V2aPP).Pt()*(vP_IaPP+vP_IbPP).Pt()*(1-cos(jetMetphiPP)));  
           
-          double dilepMetphiP = (vP_V1bPb+vP_V2bPb).DeltaPhi(vP_IbPb);
-          m_mTZ_Pb = sqrt(2*(vP_V1bPb+vP_V2bPb).Pt()*vP_IbPb.Pt()*(1-cos(dilepMetphiP)));
+          // double dilepMetphiP = (vP_V1bPb+vP_V2bPb).DeltaPhi(vP_IbPb);
+          // m_mTZ_Pb = sqrt(2*(vP_V1bPb+vP_V2bPb).Pt()*vP_IbPb.Pt()*(1-cos(dilepMetphiP)));
           
-          double dilepMetphiPP = (vP_V1bPP+vP_V2bPP).DeltaPhi(vP_IaPP+vP_IbPP);
-          m_mTZ_PP = sqrt(2*(vP_V1bPP+vP_V2bPP).Pt()*(vP_IaPP+vP_IbPP).Pt()*(1-cos(dilepMetphiPP)));  
+          // double dilepMetphiPP = (vP_V1bPP+vP_V2bPP).DeltaPhi(vP_IaPP+vP_IbPP);
+          // m_mTZ_PP = sqrt(2*(vP_V1bPP+vP_V2bPP).Pt()*(vP_IaPP+vP_IbPP).Pt()*(1-cos(dilepMetphiPP)));  
 
           
-          double H1PPa = (vP_V1aPP + vP_V2aPP).P();
-          double H1PPb = (vP_V1bPP + vP_V2bPP).P();
-          double H2PPa = vP_V1aPP.P() + vP_V2aPP.P();
-          double H2PPb = vP_V1bPP.P() + vP_V2bPP.P();
-          m_maxR_H1PPi_H2PPi = std::max(H1PPa/H2PPa,H1PPb/H2PPb);
+          // double H1PPa = (vP_V1aPP + vP_V2aPP).P();
+          // double H1PPb = (vP_V1bPP + vP_V2bPP).P();
+          // double H2PPa = vP_V1aPP.P() + vP_V2aPP.P();
+          // double H2PPb = vP_V1bPP.P() + vP_V2bPP.P();
+          // m_maxR_H1PPi_H2PPi = std::max(H1PPa/H2PPa,H1PPb/H2PPb);
           
           // signal variables
           TLorentzVector vP_Va = C1a_2L2J->GetVisibleFourVector(*C1a_2L2J);
           TLorentzVector vP_Vb = N2b_2L2J->GetVisibleFourVector(*N2b_2L2J);
-          m_MP = (vP_Va.M2()-vP_Vb.M2())/(2.*(vP_Va.E()-vP_Vb.E()));
+          // m_MP = (vP_Va.M2()-vP_Vb.M2())/(2.*(vP_Va.E()-vP_Vb.E()));
           
-          double P_P = C1a_2L2J->GetMomentum(*C1N2_2L2J);
+          // double P_P = C1a_2L2J->GetMomentum(*C1N2_2L2J);
       
-          double MPP = 2.*sqrt(P_P*P_P + m_MP*m_MP);
+          // double MPP = 2.*sqrt(P_P*P_P + m_MP*m_MP);
           TVector3 vP_PP = C1N2_2L2J->GetFourVector(*LAB_2L2J).Vect();
           double Pt_PP = vP_PP.Pt();
-          double Pz_PP = fabs(vP_PP.Pz());
+          // double Pz_PP = fabs(vP_PP.Pz());
           m_RPT_HT5PP = Pt_PP / (Pt_PP + m_HT5PP);
-          m_RPZ_HT5PP = Pz_PP / (Pz_PP + m_HT5PP);
+          // m_RPZ_HT5PP = Pz_PP / (Pz_PP + m_HT5PP);
           
-          m_PP_VisShape = C1N2_2L2J->GetVisibleShape();
+          // m_PP_VisShape = C1N2_2L2J->GetVisibleShape();
           
-          m_gaminvPP = 2.*m_MP/MPP;
-          m_MDR = m_PP_VisShape*C1N2_2L2J->GetMass();
+          // m_gaminvPP = 2.*m_MP/MPP;
+          // m_MDR = m_PP_VisShape*C1N2_2L2J->GetMass();
           
-          m_mC1 = C1a_2L2J->GetMass();
-          m_mN2 = N2b_2L2J->GetMass();
+          // m_mC1 = C1a_2L2J->GetMass();
+          // m_mN2 = N2b_2L2J->GetMass();
       
       
           //Angular properties of the sparticles system
-          m_cosPP = C1N2_2L2J->GetCosDecayAngle(); //decay angle of the PP system
-          m_cosPa = C1a_2L2J->GetCosDecayAngle(*X1a_2L2J);//decay angle of the C1a system
-          m_cosPb = N2b_2L2J->GetCosDecayAngle(*X1b_2L2J);//decay angle of the N2b system
+          // m_cosPP = C1N2_2L2J->GetCosDecayAngle(); //decay angle of the PP system
+          // m_cosPa = C1a_2L2J->GetCosDecayAngle(*X1a_2L2J);//decay angle of the C1a system
+          // m_cosPb = N2b_2L2J->GetCosDecayAngle(*X1b_2L2J);//decay angle of the N2b system
           
           //difference in azimuthal angle between the total sum of visible ojects in the C1N2 frame
-          m_dphiPPV = C1N2_2L2J->GetDeltaPhiBoostVisible();
+          // m_dphiPPV = C1N2_2L2J->GetDeltaPhiBoostVisible();
           m_dphiVP = C1N2_2L2J->GetDeltaPhiDecayVisible();
           
           //hemisphere variables
-          m_dphiPC1 = C1a_2L2J->GetDeltaPhiDecayPlanes(*Wa_2L2J);
-          m_dphiPN2 = N2b_2L2J->GetDeltaPhiDecayPlanes(*Zb_2L2J);
+          // m_dphiPC1 = C1a_2L2J->GetDeltaPhiDecayPlanes(*Wa_2L2J);
+          // m_dphiPN2 = N2b_2L2J->GetDeltaPhiDecayPlanes(*Zb_2L2J);
           
-          m_sangle =(m_cosPa+(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
-          m_dangle =(m_cosPa-(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
+          // m_sangle =(m_cosPa+(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
+          // m_dangle =(m_cosPa-(m_dphiVP-acos(-1.)/2.)/(acos(-1.)/2.))/2.;
         }//end is 2L2J event
 
         if(m_is3Lep){
 
-          bool m_pass3L_presel;
+          // bool m_pass3L_presel;
     
-          if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0 || myLeptons[2].first.Pt()<20.0) {
-            m_pass3L_presel=false;
-          }
-          else {
-            m_pass3L_presel=true;
-          }
+          // if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0 || myLeptons[2].first.Pt()<20.0) {
+          //   m_pass3L_presel=false;
+          // }
+          // else {
+          //   m_pass3L_presel=true;
+          // }
     
           //if(!m_pass3L_presel)return;
           
@@ -1465,15 +1465,15 @@ namespace Gambit {
             
             m_minH2P = std::min(m_H2Pa,m_H2Pb);
             m_minH3P = std::min(m_H3Pa,m_H3Pb);
-            m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
-            m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
+            // m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
+            // m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
             m_R_minH2P_minH3P = m_H2Pb/m_H3Pb;
             
-            double H1PPa = (vP_V1aPP).P();
-            double H1PPb = (vP_V1bPP + vP_V2bPP).P();
-            double H2PPa = vP_V1aPP.P() + vP_I1aPP.P();
-            double H2PPb = (vP_V1bPP+vP_V2bPP).P() + vP_I1bPP.P();
-            m_maxR_H1PPi_H2PPi = std::max(H1PPa/H2PPa,H1PPb/H2PPb);
+            // double H1PPa = (vP_V1aPP).P();
+            // double H1PPb = (vP_V1bPP + vP_V2bPP).P();
+            // double H2PPa = vP_V1aPP.P() + vP_I1aPP.P();
+            // double H2PPb = (vP_V1bPP+vP_V2bPP).P() + vP_I1bPP.P();
+            // m_maxR_H1PPi_H2PPi = std::max(H1PPa/H2PPa,H1PPb/H2PPb);
             
             ////Calculation of dRll_I_PP;
             //m_dRll_I_PP = (vP_V1bPP+vP_V1bPP).DeltaR(vP_I1bPP);
@@ -1632,8 +1632,8 @@ namespace Gambit {
                 //calculate the mTWComp with the remaining lepton 
                 TLorentzVector themetLV;
                 themetLV.SetPxPyPzE(ETMiss.X(),ETMiss.Y(),0.,sqrt(ETMiss.X()*ETMiss.X()+ETMiss.Y()*ETMiss.Y()));
-                double wlepMetphi = myLeptons[i].first.DeltaPhi(themetLV);
-                m_mTWComp = sqrt(2*myLeptons[i].first.Pt()*themetLV.Pt()*(1-cos(wlepMetphi)));  
+                // double wlepMetphi = myLeptons[i].first.DeltaPhi(themetLV);
+                // m_mTWComp = sqrt(2*myLeptons[i].first.Pt()*themetLV.Pt()*(1-cos(wlepMetphi)));  
               }
             }
       
@@ -1653,36 +1653,36 @@ namespace Gambit {
             vP_ISR = ISR_2LNJ->GetFourVector();
             vP_I   = (*Ia_2LNJ+*Ib_2LNJ).GetFourVector();
       
-            m_cosCM = CM_2LNJ->GetCosDecayAngle();
-            m_cosS  = S_2LNJ->GetCosDecayAngle();
-            m_MISR = ISR_2LNJ->GetMass();
-            m_dphiCMI = acos(-1.)-fabs(CM_2LNJ->GetDeltaPhiBoostVisible());
-            m_dphiSI  = acos(-1.)-fabs(S_2LNJ->GetDeltaPhiBoostVisible());
+            // m_cosCM = CM_2LNJ->GetCosDecayAngle();
+            // m_cosS  = S_2LNJ->GetCosDecayAngle();
+            // m_MISR = ISR_2LNJ->GetMass();
+            // m_dphiCMI = acos(-1.)-fabs(CM_2LNJ->GetDeltaPhiBoostVisible());
+            // m_dphiSI  = acos(-1.)-fabs(S_2LNJ->GetDeltaPhiBoostVisible());
       
-            m_HN2S = //Z_2LNJ->GetFourVector(*S_2LNJ).E() +
-            L1_2LNJ->GetFourVector(*S_2LNJ).E()+
-            L2_2LNJ->GetFourVector(*S_2LNJ).E()+
-            J_2LNJ->GetFourVector(*S_2LNJ).E() +
-            Ia_2LNJ->GetFourVector(*S_2LNJ).P() +
-            Ib_2LNJ->GetFourVector(*S_2LNJ).P();
-            m_H11S = 2.*(*Ia_2LNJ+*Ib_2LNJ).GetFourVector(*S_2LNJ).P();
-            m_HN1Ca = Z_2LNJ->GetFourVector(*Ca_2LNJ).E()+
+            // m_HN2S = //Z_2LNJ->GetFourVector(*S_2LNJ).E() +
+            //   L1_2LNJ->GetFourVector(*S_2LNJ).E()+
+            //   L2_2LNJ->GetFourVector(*S_2LNJ).E()+
+            //   J_2LNJ->GetFourVector(*S_2LNJ).E() +
+            //   Ia_2LNJ->GetFourVector(*S_2LNJ).P() +
+            //   Ib_2LNJ->GetFourVector(*S_2LNJ).P();
+            // m_H11S = 2.*(*Ia_2LNJ+*Ib_2LNJ).GetFourVector(*S_2LNJ).P();
+            // m_HN1Ca = Z_2LNJ->GetFourVector(*Ca_2LNJ).E()+
             Ia_2LNJ->GetFourVector(*Ca_2LNJ).P();
-            m_HN1Cb = J_2LNJ->GetFourVector(*Cb_2LNJ).E()+
-            Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
-            m_H11Ca = 2.*Ia_2LNJ->GetFourVector(*Ca_2LNJ).P();
-            m_H11Cb = 2.*Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
-            m_cosC  = Ca_2LNJ->GetCosDecayAngle();
+            // m_HN1Cb = J_2LNJ->GetFourVector(*Cb_2LNJ).E()+
+            //   Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
+            // m_H11Ca = 2.*Ia_2LNJ->GetFourVector(*Ca_2LNJ).P();
+            // m_H11Cb = 2.*Ib_2LNJ->GetFourVector(*Cb_2LNJ).P();
+            // m_cosC  = Ca_2LNJ->GetCosDecayAngle();
       
-            if((signbit(myLeptons[0].second) && !signbit(myLeptons[1].second)) || (!signbit(myLeptons[0].second) && signbit(myLeptons[1].second))) m_Is_OS = 1;
-            if(myLeptons[0].second+myLeptons[1].second == 0) m_Is_Z = 1;
+            // if((signbit(myLeptons[0].second) && !signbit(myLeptons[1].second)) || (!signbit(myLeptons[0].second) && signbit(myLeptons[1].second))) m_Is_OS = 1;
+            // if(myLeptons[0].second+myLeptons[1].second == 0) m_Is_Z = 1;
             m_MZ = Z_2LNJ->GetMass();
             m_MJ = J_2LNJ->GetMass();
 
-            m_cosZ = Z_2LNJ->GetCosDecayAngle();
+            // m_cosZ = Z_2LNJ->GetCosDecayAngle();
             //if(m_NjS > 1)
-            m_cosJ = JSA_2LNJ->GetCosDecayAngle();
-            m_dphiJMET = fabs(J_2LNJ->GetFourVector(*LAB_2LNJ).DeltaPhi(metLV));
+            // m_cosJ = JSA_2LNJ->GetCosDecayAngle();
+            // m_dphiJMET = fabs(J_2LNJ->GetFourVector(*LAB_2LNJ).DeltaPhi(metLV));
           }
 
           if(m_is3LInt){
@@ -1691,32 +1691,32 @@ namespace Gambit {
             vP_ISR = ISR_2L1L->GetFourVector();
             vP_I   = (*Ia_2L1L+*Ib_2L1L).GetFourVector();
       
-            m_cosCM = CM_2L1L->GetCosDecayAngle();
-            m_cosS  = S_2L1L->GetCosDecayAngle();
-            m_MISR = ISR_2L1L->GetMass();
-            m_dphiCMI = acos(-1.)-fabs(CM_2L1L->GetDeltaPhiBoostVisible());
-            m_dphiSI  = acos(-1.)-fabs(S_2L1L->GetDeltaPhiBoostVisible());
+            // m_cosCM = CM_2L1L->GetCosDecayAngle();
+            // m_cosS  = S_2L1L->GetCosDecayAngle();
+            // m_MISR = ISR_2L1L->GetMass();
+            // m_dphiCMI = acos(-1.)-fabs(CM_2L1L->GetDeltaPhiBoostVisible());
+            // m_dphiSI  = acos(-1.)-fabs(S_2L1L->GetDeltaPhiBoostVisible());
       
-            m_HN2S = //Z_2L1L->GetFourVector(*S_2L1L).E() +
-            L1_2L1L->GetFourVector(*S_2L1L).E() +
-            L2_2L1L->GetFourVector(*S_2L1L).E() +
-            Lb_2L1L->GetFourVector(*S_2L1L).E() +
-            Ia_2L1L->GetFourVector(*S_2L1L).P() +
-            Ib_2L1L->GetFourVector(*S_2L1L).P();
-            m_H11S = 2.*(*Ia_2L1L+*Ib_2L1L).GetFourVector(*S_2L1L).P();
-            m_HN1Ca = Z_2L1L->GetFourVector(*Ca_2L1L).E()+
+            // m_HN2S = //Z_2L1L->GetFourVector(*S_2L1L).E() +
+            //   L1_2L1L->GetFourVector(*S_2L1L).E() +
+            //   L2_2L1L->GetFourVector(*S_2L1L).E() +
+            //   Lb_2L1L->GetFourVector(*S_2L1L).E() +
+            //   Ia_2L1L->GetFourVector(*S_2L1L).P() +
+            //   Ib_2L1L->GetFourVector(*S_2L1L).P();
+            // m_H11S = 2.*(*Ia_2L1L+*Ib_2L1L).GetFourVector(*S_2L1L).P();
+            // m_HN1Ca = Z_2L1L->GetFourVector(*Ca_2L1L).E()+
             Ia_2L1L->GetFourVector(*Ca_2L1L).P();
-            m_HN1Cb = Lb_2L1L->GetFourVector(*Cb_2L1L).E()+
-            Ib_2L1L->GetFourVector(*Cb_2L1L).P();
-            m_H11Ca = 2.*Ia_2L1L->GetFourVector(*Ca_2L1L).P();
-            m_H11Cb = 2.*Ib_2L1L->GetFourVector(*Cb_2L1L).P();
-            m_cosC  = Ca_2L1L->GetCosDecayAngle();
-            m_Is_OS = 1;
-            if(myLeptons[0].second+myLeptons[1].second == 0 ||
-              myLeptons[0].second+myLeptons[2].second == 0 ||
-              myLeptons[1].second+myLeptons[2].second == 0) m_Is_Z=1;
+            // m_HN1Cb = Lb_2L1L->GetFourVector(*Cb_2L1L).E()+
+            //   Ib_2L1L->GetFourVector(*Cb_2L1L).P();
+            // m_H11Ca = 2.*Ia_2L1L->GetFourVector(*Ca_2L1L).P();
+            // m_H11Cb = 2.*Ib_2L1L->GetFourVector(*Cb_2L1L).P();
+            // m_cosC  = Ca_2L1L->GetCosDecayAngle();
+            // m_Is_OS = 1;
+            // if(myLeptons[0].second+myLeptons[1].second == 0 ||
+            //   myLeptons[0].second+myLeptons[2].second == 0 ||
+            //   myLeptons[1].second+myLeptons[2].second == 0) m_Is_Z=1;
             m_MZ = Z_2L1L->GetMass();
-            m_cosZ = Z_2L1L->GetCosDecayAngle();
+            // m_cosZ = Z_2L1L->GetCosDecayAngle();
           }
     
           m_PTCM = vP_CM.Pt();
