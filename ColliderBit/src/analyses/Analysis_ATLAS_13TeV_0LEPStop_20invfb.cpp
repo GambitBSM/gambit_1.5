@@ -347,7 +347,7 @@ namespace Gambit {
 	float AntiKt8M_1 = 0;
 	float AntiKt12M_0 = 0;
 	float AntiKt12M_1 = 0;
-	float MtTauCand = -1 ;
+	// float MtTauCand = -1 ;
 	float MtBMin = 0 ;
 	float MtBMax = 0 ;
 	
@@ -551,7 +551,7 @@ namespace Gambit {
 	  
 	  std::vector<RestFrames::RFKey> jetID;
 	  
-	  for(int i=0;i<signalJets.size();i++){
+	  for(size_t i=0;i<signalJets.size();i++){
 	    
 	    TLorentzVector tmpJet;
 	    tmpJet.SetPtEtaPhiM(signalJets[i]->pT(),0.,signalJets[i]->phi(),signalJets[i]->mass());
@@ -566,7 +566,7 @@ namespace Gambit {
 	  
 	  if(!LAB->AnalyzeEvent()) std::cout << "Something went wrong..." << std::endl;
 	  
-	  for(int i = 0; i < int(signalJets.size()); i++){
+	  for(size_t i = 0; i < signalJets.size(); i++){
 	    if (VIS->GetFrame(jetID[i]) == *V){ // sparticle group
 	      m_NjV++;
 	      if (m_NjV == 4) m_pTjV4 = signalJets[i]->pT();
@@ -740,7 +740,7 @@ namespace Gambit {
 
 	double Ht=0;
 		
-        for(int jet=0;jet<signalJets.size();jet++)Ht+=signalJets[jet]->pT();
+        for(size_t jet=0;jet<signalJets.size();jet++)Ht+=signalJets[jet]->pT();
 	
 	double HtSig = Met/sqrt(Ht);
 	
@@ -1175,7 +1175,7 @@ namespace Gambit {
 	cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
 	cout<< right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
 	    << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-	for (unsigned int j=0; j<NCUTS; j++) {
+	for (int j=0; j<NCUTS; j++) {
 	  cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
 	       << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
 	       << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)

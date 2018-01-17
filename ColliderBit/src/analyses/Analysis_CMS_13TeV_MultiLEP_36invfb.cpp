@@ -165,19 +165,19 @@ namespace Gambit {
 	}
 	CMS::applyCSVv2MediumBtagEff(signalBJets);
 
-	int nSignalElectrons=signalElectrons.size();
+	// int nSignalElectrons=signalElectrons.size();
 	int nSignalMuons=signalMuons.size();
 	int nSignalTaus=signalTaus.size(); 
 	int nSignalLightLeptons = signalLightLeptons.size();
         int nSignalLeptons=signalLeptons.size();
-        int nSignalJets=signalJets.size();
+        // int nSignalJets=signalJets.size();
         
 	//Variables
         bool preselection=false; 
 	bool bjet_veto=(signalBJets.size()==0);
 	bool low_mass_veto=true;
 	bool conversion_veto=true;
-	bool ISRjet=(num_ISRjets<2);
+	// bool ISRjet=(num_ISRjets<2);
 
 	double pT_ll=0;
 	double mT=0;

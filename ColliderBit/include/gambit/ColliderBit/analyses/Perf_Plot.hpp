@@ -60,7 +60,7 @@ namespace Gambit {
 
           hid_t dataset, dataspace;
           hsize_t dims[2];
-          herr_t status;
+          // herr_t status;
 
           dims[0] = 1;
 	  dims[1] = nvalues;
@@ -73,7 +73,8 @@ namespace Gambit {
 	    data[iVal2]=_values.at(iVal2).at(iVal);
 	  }
 
-          status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+          // status = H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+          H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
           H5Sclose(dataspace);
           H5Dclose(dataset);
@@ -82,7 +83,7 @@ namespace Gambit {
 
 	hid_t dataset_lum, dataspace_lum, dataset_xsec, dataspace_xsec;
         hsize_t dims_lum[2], dims_xsec[2];
-        herr_t status_lum, status_xsec;
+        // herr_t status_lum, status_xsec;
 
         dims_lum[0] = 1;
         dims_lum[1] = 1;
@@ -93,7 +94,8 @@ namespace Gambit {
         double data_lum[1];
 	data_lum[0]=luminosity;
 
-        status_lum = H5Dwrite(dataset_lum, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_lum);
+        // status_lum = H5Dwrite(dataset_lum, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_lum);
+        H5Dwrite(dataset_lum, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_lum);
 
         H5Sclose(dataspace_lum);
         H5Dclose(dataset_lum);
@@ -107,7 +109,8 @@ namespace Gambit {
         double data_xsec[1];
 	data_xsec[0]=xsec_per_event;
 
-        status_xsec = H5Dwrite(dataset_xsec, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_xsec);
+        // status_xsec = H5Dwrite(dataset_xsec, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_xsec);
+        H5Dwrite(dataset_xsec, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_xsec);
 
         H5Sclose(dataspace_xsec);
         H5Dclose(dataset_xsec);

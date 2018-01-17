@@ -243,7 +243,7 @@ namespace Gambit {
 	double pT_l0=0.;
 	double pT_l1=0.;
 	double pT_l2=0.;
-	double mlll=0.;
+	// double mlll=0.;
 	double pTlll=999.;
 	double mll=999.;
 	double mT2=0;
@@ -308,7 +308,7 @@ namespace Gambit {
 
 	if (nSignalLeptons>2) {
 	  pT_l2=signalLeptons.at(2)->pT();
-	  mlll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).m();
+	  // mlll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).m();
 	  pTlll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).pT();
 	}
 
