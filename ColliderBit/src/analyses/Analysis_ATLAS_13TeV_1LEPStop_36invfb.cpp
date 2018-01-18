@@ -828,9 +828,9 @@ namespace Gambit {
 	  if(dPhi_tmp<minDPhiMetBJet)minDPhiMetBJet=dPhi_tmp;
 	}
 
-	double dRbb;
-	if(nJets>1)mostBjetLike[0]->mom().deltaR_eta(mostBjetLike[1]->mom());  
-
+	double dRbb=0;
+	if(nBJets>1)dRbb=mostBjetLike[0]->mom().deltaR_eta(mostBjetLike[1]->mom());  
+	
 	
 	if (signalSoftLeptons.size() == 1) {
 	  preselSoftLep = Met > 230;
@@ -867,7 +867,7 @@ namespace Gambit {
 	if (nJets > 1 && nBJets > 1 && preselSoftLep && signalJets[1]->pT() > 100 && signalBJets[1]->pT() > 100 &&
 	    Met > 230 && mT < 160 && pTLepOverMet < 0.03 && amT2 > 300 && minDPhiMetBJet > 0.4 &&
 	    absDPhiJMet0 > 0.4 && absDPhiJMet1 > 0.4 && Wpt > 500 && dRbb > 0.8)is_bCsoft_high=true;
-      	
+      
       	//bool isSRD_high=false;
 	
 	cutFlowVector_str[0] = "No cuts ";
