@@ -25,24 +25,24 @@ namespace Gambit {
 
 
     /// A simple container for the result of one signal region from one analysis.
-    struct SignalRegionData {
+    struct SignalRegionData
+    {
 
       /// Constructor with {n,nsys} pair args
       SignalRegionData(const std::string& name, const std::string& sr,
                        double nobs, const std::pair<double,double>& nsig, const std::pair<double,double>& nbkg,
                        double nsigatlumi=-1)
-        : SignalRegionData(name, sr, nobs, nsig.first, nbkg.first,
-                           nsig.second, nbkg.second, nsigatlumi)
-      {    }
+       : SignalRegionData(name, sr, nobs, nsig.first, nbkg.first, nsig.second, nbkg.second, nsigatlumi)
+      {}
 
       /// Constructor with separate n & nsys args
       SignalRegionData(const std::string& name, const std::string& sr,
                        double nobs, double nsig, double nbkg,
                        double syssig, double sysbkg, double nsigatlumi=-1)
-        : analysis_name(name), sr_label(sr),
-          n_observed(nobs), n_signal(nsig), n_signal_at_lumi(nsigatlumi), n_background(nbkg),
-          signal_sys(syssig), background_sys(sysbkg)
-      {    }
+       : analysis_name(name), sr_label(sr),
+         n_observed(nobs), n_signal(nsig), n_signal_at_lumi(nsigatlumi), n_background(nbkg),
+         signal_sys(syssig), background_sys(sysbkg)
+      {}
 
       /// Default constructor
       SignalRegionData() {}
@@ -71,7 +71,8 @@ namespace Gambit {
     /// @todo Access by name?
     /// @todo Guarantee ordering?
     /// @todo How to combine covariance matrices -- require?
-    struct AnalysisData {
+    struct AnalysisData
+    {
 
       /// Default constructor
       AnalysisData() { clear(); }
@@ -81,19 +82,22 @@ namespace Gambit {
       /// If corrs is a null matrix (the default), this AnalysisData is to be interpreted as having no correlation
       /// information, and hence the likelihood calculation should use the single best-expected-limit SR.
       AnalysisData(const std::vector<SignalRegionData>& srds, const Eigen::MatrixXd& cov=Eigen::MatrixXd())
-        : srdata(srds), srcov(cov) {
+        : srdata(srds), srcov(cov)
+      {
         _checkConsistency();
       }
 
       /// Clear the list of SignalRegionData, and nullify the covariance matrix
       /// @todo It'd be good to *not* have to re-enter most of the SRData and the covariance on every point: they don't change
-      void clear() {
+      void clear()
+      {
         srdata.clear();
         srcov = Eigen::MatrixXd();
       }
 
       /// Number of analyses
-      size_t size() const {
+      size_t size() const
+      {
         _checkConsistency();
         return srdata.size();
       }
@@ -102,15 +106,29 @@ namespace Gambit {
       bool empty() const { return size() == 0; }
 
       /// Is there non-null correlation data?
-      bool hasCorrs() const {
+      bool hasCorrs() const
+      {
         _checkConsistency();
         return srcov.rows() == 0;
       }
 
       /// @brief Add a SignalRegionData
       /// @todo Allow naming the SRs?
-      void add(const SignalRegionData& srd) {
-        srdata.push_back(srd);
+      void add(const SignalRegionData& srd)
+      {
+        std::string key = srd.analysis_name + srd.sr_label;
+        auto loc = srdata_identifiers.find(key);
+        if (loc == srdata_identifiers.end())
+        {
+          // If the signal region doesn't exist in this object yet, add it
+          srdata.push_back(srd);
+          srdata_identifiers[key] = srdata.size();
+        }
+        else
+        {
+          // If it does, just update the signal count in the existing SignalRegionData object
+          srdata[loc->second].n_signal = srd.n_signal;
+        }
       }
 
       /// Access the i'th signal region's data
@@ -127,11 +145,15 @@ namespace Gambit {
       /// List of signal regions' data summaries
       std::vector<SignalRegionData> srdata;
 
+      /// Map of names and indices of all entries in srdata, for easy lookup
+      std::map<std::string, int> srdata_identifiers;
+
       /// Optional covariance matrix between SRs (0x0 null matrix = no correlation info)
       Eigen::MatrixXd srcov;
 
       /// Check that the size of the SRData list and the covariance matrix are consistent
-      void _checkConsistency() const {
+      void _checkConsistency() const
+      {
         assert(srcov.rows() == 0 || srcov.rows() == (int) srdata.size());
       }
 

@@ -20,6 +20,7 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
+///  \date 2018 Jan
 ///
 ///  \author Andy Buckley
 ///          (andy.buckley@cern.ch)
@@ -45,11 +46,20 @@ START_MODULE
   #include "ColliderBit_Higgs_rollcall.hpp"
   #include "ColliderBit_LEP_rollcall.hpp"
 
+  /// Sets the options for establishing convergence of Monte Carlo simulations
+  #define CAPABILITY MC_ConvergenceSettings
+  START_CAPABILITY
+    #define FUNCTION MC_ConvergenceSettings_from_YAML
+    START_FUNCTION(convergence_settings)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   /// Controls looping of Collider simulations
   #define CAPABILITY ColliderOperator
   START_CAPABILITY
     #define FUNCTION operateLHCLoop
     START_FUNCTION(void, CAN_MANAGE_LOOPS)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -209,6 +219,7 @@ START_MODULE
     #define FUNCTION runDetAnalyses
     START_FUNCTION(AnalysisNumbers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ReconstructedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(DetAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -221,6 +232,7 @@ START_MODULE
     #define FUNCTION runATLASAnalyses
     START_FUNCTION(AnalysisNumbers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -232,6 +244,7 @@ START_MODULE
     #define FUNCTION runCMSAnalyses
     START_FUNCTION(AnalysisNumbers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -243,6 +256,7 @@ START_MODULE
     #define FUNCTION runIdentityAnalyses
     START_FUNCTION(AnalysisNumbers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)

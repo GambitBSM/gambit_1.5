@@ -21,6 +21,10 @@
 ///  \author Abram Krislock
 ///          (a.m.b.krislock@fys.uio.no)
 ///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2018 Jan
+///
 ///  *********************************************
 
 
@@ -29,6 +33,8 @@
 
 #include <vector>
 #include <chrono>
+
+#include "gambit/ColliderBit/MC_convergence.hpp"
 
 #include "gambit/ColliderBit/colliders/SpecializablePythia.hpp"
 #include "gambit/ColliderBit/detectors/DelphesVanilla.hpp"

@@ -38,6 +38,7 @@ namespace Gambit {
     private:
 
       double _ntot, _xsec, _xsecerr, _luminosity;
+      bool _needs_collection;
       AnalysisData _results;
       typedef EventT EventType;
 
@@ -46,11 +47,11 @@ namespace Gambit {
 
       /// @name Construction, Destruction, and Recycling:
       //@{
-      BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1) {  }
+      BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1), _needs_collection(true) {  }
       virtual ~BaseAnalysis() { }
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       virtual void clear() {
-        _ntot = 0; _xsec = -1; _xsecerr = -1; _luminosity = -1;
+        _ntot = 0; _xsec = -1; _xsecerr = -1; _luminosity = -1; _needs_collection = true;
         _results.clear();
       }
       //@}
@@ -59,10 +60,9 @@ namespace Gambit {
       /// @name Event analysis, event number, and cross section functions:
       //@{
       /// Analyze the event (accessed by reference).
-      void analyze(const EventT& e) { analyze(&e); }
+      void do_analysis(const EventT& e) { do_analysis(&e); }
       /// Analyze the event (accessed by pointer).
-      /// @note Needs to be called from Derived::analyze().
-      virtual void analyze(const EventT*) { _ntot += 1; }
+      void do_analysis(const EventT* e) { _needs_collection = true; analyze(e); }
 
       /// Return the total number of events seen so far.
       double num_events() const { return _ntot; }
@@ -82,8 +82,13 @@ namespace Gambit {
       void set_luminosity(double lumi) { _luminosity = lumi; }
 
       /// Get the collection of SignalRegionData for likelihood computation.
-      const AnalysisData& get_results() {
-        if (_results.empty()) collect_results();
+      const AnalysisData& get_results()
+      {
+        if (_needs_collection)
+        {
+          collect_results();
+          _needs_collection = false;
+        }
         return _results;
       }
       //@}
@@ -93,6 +98,9 @@ namespace Gambit {
 
       /// @name Protected collection functions
       //@{
+      /// Analyze the event (accessed by pointer).
+      /// @note Needs to be called from Derived::analyze().
+      virtual void analyze(const EventT*) { _ntot += 1; }
       /// Add the given result to the internal results list.
       void add_result(const SignalRegionData& sr) { _results.add(sr); }
       /// Set the covariance matrix, expressing SR correlations
