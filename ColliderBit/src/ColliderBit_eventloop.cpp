@@ -135,6 +135,7 @@ namespace Gambit
         result.max_nEvents = runOptions->getValue<std::vector<int> >("max_nEvents");
         result.target_stat = runOptions->getValue<std::vector<double> >("target_fractional_uncert");
         result.stop_at_sys = runOptions->getValueOrDef<bool>(true, "halt_when_systematic_dominated");
+        result.all_SR_must_converge = runOptions->getValueOrDef<bool>(true, "all_SR_must_converge");
         result.stoppingres = runOptions->getValueOrDef<std::vector<int> >(std::vector<int>(result.target_stat.size(), 200), "events_between_convergence_checks");
         if (result.min_nEvents.size() != result.max_nEvents.size() or result.min_nEvents.size() != result.target_stat.size())
         {
@@ -301,7 +302,7 @@ namespace Gambit
           if(nFailedEvents > maxFailedEvents) break;
 
           // Don't bother with convergence stuff if we haven't passed the minimum number of events yet
-          if (false)//currentEvent > min_nEvents)
+          if (currentEvent >= min_nEvents)
           {
             #pragma omp parallel
             {

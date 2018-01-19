@@ -70,7 +70,7 @@ namespace Gambit
     {
       if (omp_get_thread_num() > 0) utils_error().raise(LOCAL_INFO, "Cannot call this function from inside an OpenMP block.");
       converged = false;
-      convergence_map.clear();
+      convergence_map[this] = false;
       for (int i = 0; i != n_threads; ++i)
       {
         n_signals[i].clear();
@@ -112,6 +112,7 @@ namespace Gambit
 
       // Work through the results for all the signal regions in all analyses, combining them
       // across threads and checking if the totals get the statistical error below the target.
+      bool done;
       for (unsigned int i = 0; i != n_signals[0].size(); ++i)
       {
         int total_counts = 0;
@@ -122,16 +123,24 @@ namespace Gambit
         }
         double fractional_stat_uncert = (total_counts == 0 ? 1.0 : 1.0/sqrt(total_counts));
         double absolute_stat_uncert = total_counts * fractional_stat_uncert;
-        bool done = (_settings->stop_at_sys and total_counts > 0 and absolute_stat_uncert <= n_signals_sys[i]) or
-                    (fractional_stat_uncert <= _settings->target_stat[_collider]);
+        done = (_settings->stop_at_sys and total_counts > 0 and absolute_stat_uncert <= n_signals_sys[i]) or
+               (fractional_stat_uncert <= _settings->target_stat[_collider]);
         #ifdef COLLIDERBIT_DEBUG
-          cerr << endl << "SIGNAL REGION " << i << endl;
+          cerr << endl << "SIGNAL REGION " << i << " of " << n_signals[0].size() << endl;
           cerr << "absolute_stat_uncert vs sys: " << absolute_stat_uncert << " vs " << n_signals_sys[i] << endl;
           cerr << "fractional_stat_uncert vs target: " << fractional_stat_uncert << " vs " << _settings->target_stat[_collider] << endl;
           cerr << "Is this SR done? " << done << endl;
         #endif
-        if (not done) return false;
+        if (_settings->all_SR_must_converge)
+        {
+          if (not done) return false;
+        }
+        else
+        {
+          if (done) break;
+        }
       }
+      if (not done) return false;
       converged = true;
       convergence_map[this] = true;
 

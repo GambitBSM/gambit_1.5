@@ -33,6 +33,7 @@ namespace Gambit
       std::vector<int> stoppingres;
       std::vector<double> target_stat;
       bool stop_at_sys;
+      bool all_SR_must_converge;
     };
 
     /// Helper class for testing for convergence of analyses
