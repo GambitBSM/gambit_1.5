@@ -263,7 +263,9 @@ namespace Gambit
         {
           int eventCountBetweenConvergenceChecks = 0;
 
-          std::cerr << "Starting main event loop.  Will run for " << stoppingres << " events before testing convergence." << endl;
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Starting main event loop.  Will do " << stoppingres << " events before testing convergence." << endl;
+          #endif
 
           // Main event loop
           #pragma omp parallel
@@ -291,7 +293,9 @@ namespace Gambit
           piped_warnings.check(ColliderBit_warning());
           piped_errors.check(ColliderBit_error());
 
-          std::cerr << "Did " << eventCountBetweenConvergenceChecks << " events of " << currentEvent << " total." << endl;
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Did " << eventCountBetweenConvergenceChecks << " events of " << currentEvent << " simulated so far." << endl;
+          #endif
 
           // Break convergence loop if too many events fail
           if(nFailedEvents > maxFailedEvents) break;
@@ -299,7 +303,6 @@ namespace Gambit
           // Don't bother with convergence stuff if we haven't passed the minimum number of events yet
           if (false)//currentEvent > min_nEvents)
           {
-            std::cerr << "collecting data" << endl;
             #pragma omp parallel
             {
               Loop::executeIteration(COLLECT_CONVERGENCE_DATA);
@@ -308,7 +311,6 @@ namespace Gambit
             piped_warnings.check(ColliderBit_warning());
             piped_errors.check(ColliderBit_error());
 
-            std::cerr << "checking convergence" << endl;
             Loop::executeIteration(CHECK_CONVERGENCE);
             // Any problems during the CHECK_CONVERGENCE step?
             piped_warnings.check(ColliderBit_warning());
@@ -1391,7 +1393,7 @@ namespace Gambit
     void runDetAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runDetAnalyses;
-      //static MC_convergence_checker convergence;
+      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1403,21 +1405,21 @@ namespace Gambit
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-        //convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
+        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
         return;
       }
 
       if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
       {
         // Update the convergence tracker with the new results
-        //convergence.update(*Dep::DetAnalysisContainer);
+        convergence.update(*Dep::DetAnalysisContainer);
         return;
       }
 
       if (*Loop::iteration == CHECK_CONVERGENCE)
       {
         // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        //if (convergence.achieved(*Dep::DetAnalysisContainer)) Loop::wrapup();
+        if (convergence.achieved(*Dep::DetAnalysisContainer)) Loop::wrapup();
         return;
       }
 
@@ -1457,7 +1459,7 @@ namespace Gambit
     void runATLASAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runATLASAnalyses;
-      //static MC_convergence_checker convergence;
+      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1469,21 +1471,21 @@ namespace Gambit
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-        //convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
+        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
         return;
       }
 
       if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
       {
         // Update the convergence tracker with the new results
-        //convergence.update(*Dep::ATLASAnalysisContainer);
+        convergence.update(*Dep::ATLASAnalysisContainer);
         return;
       }
 
       if (*Loop::iteration == CHECK_CONVERGENCE)
       {
         // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        //if (convergence.achieved(*Dep::ATLASAnalysisContainer)) Loop::wrapup();
+        if (convergence.achieved(*Dep::ATLASAnalysisContainer)) Loop::wrapup();
         return;
       }
 
@@ -1521,7 +1523,7 @@ namespace Gambit
     void runCMSAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runCMSAnalyses;
-      //static MC_convergence_checker convergence;
+      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1533,21 +1535,21 @@ namespace Gambit
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-        //convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
+        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
         return;
       }
 
       if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
       {
         // Update the convergence tracker with the new results
-        //convergence.update(*Dep::CMSAnalysisContainer);
+        convergence.update(*Dep::CMSAnalysisContainer);
         return;
       }
 
       if (*Loop::iteration == CHECK_CONVERGENCE)
       {
         // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        //if (convergence.achieved(*Dep::CMSAnalysisContainer)) Loop::wrapup();
+        if (convergence.achieved(*Dep::CMSAnalysisContainer)) Loop::wrapup();
         return;
       }
 
@@ -1585,7 +1587,7 @@ namespace Gambit
     void runIdentityAnalyses(AnalysisNumbers& result)
     {
       using namespace Pipes::runIdentityAnalyses;
-      //static MC_convergence_checker convergence;
+      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1597,21 +1599,21 @@ namespace Gambit
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-        //convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
+        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
         return;
       }
 
       if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
       {
         // Update the convergence tracker with the new results
-        //convergence.update(*Dep::IdentityAnalysisContainer);
+        convergence.update(*Dep::IdentityAnalysisContainer);
         return;
       }
 
       if (*Loop::iteration == CHECK_CONVERGENCE)
       {
         // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        //if (convergence.achieved(*Dep::IdentityAnalysisContainer)) Loop::wrapup();
+        if (convergence.achieved(*Dep::IdentityAnalysisContainer)) Loop::wrapup();
         return;
       }
 
