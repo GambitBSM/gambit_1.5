@@ -1704,7 +1704,7 @@ namespace Gambit
           const SignalRegionData srData = adata[SR];
           const str key = srData.analysis_name + "_" + srData.sr_label + "_signal";
           result[key] = srData.n_signal_at_lumi;
-          const double abs_uncertainty_s_stat = sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal);
+          const double abs_uncertainty_s_stat = (srData.n_signal == 0 ? 0 : sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal));
           const double abs_uncertainty_s_sys = srData.signal_sys;
           result[key + "_uncert"] = HEPUtils::add_quad(abs_uncertainty_s_stat, abs_uncertainty_s_sys);
         }
