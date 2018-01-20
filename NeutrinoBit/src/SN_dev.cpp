@@ -344,12 +344,12 @@ namespace Gambit
         V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
       }
       f[0] = (G_F_sq/G_mu_sq)*(1 - t_sq(0,0));
-      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,1));
-      f[5] = 1 + t_sq(1,1);
-      f[6] = 1 + t_sq(0,0) + t_sq(1,1) + t_sq(2,2);
       f[1] = f[0];
       f[2] = f[0];
+      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,1));
       f[4] = f[3];
+      f[5] = 1 + t_sq(1,1);
+      f[6] = 1 + t_sq(0,0) + t_sq(1,1) + t_sq(2,2);
       V_ud_sq = 0.0;
       for (int j=0; j<7; j++)
       {

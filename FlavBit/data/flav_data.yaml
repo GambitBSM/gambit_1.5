@@ -1582,7 +1582,7 @@
   exp_90_CL: 3.3e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 0908.2381
   th_error: 0.
   th_error_type: M 
   th_error_source: NONE
@@ -1596,7 +1596,7 @@
   exp_90_CL: 4.4e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 0908.2381
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1610,7 +1610,7 @@
   exp_90_CL: 1.0e-12
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: Nucl. Phys. B299 (1988) 1–6.
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1624,7 +1624,7 @@
   exp_90_CL: 2.7e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1001.3221
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1638,7 +1638,7 @@
   exp_90_CL: 2.1e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1001.3221
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1652,7 +1652,7 @@
   exp_90_CL: 1.8e-8
   exp_stat_error: 0. 
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1001.3221
   th_error: 0.
   th_error_type: M
   th_error_source: NONE 
@@ -1666,7 +1666,7 @@
   exp_90_CL: 1.5e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1001.3221
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1680,7 +1680,7 @@
   exp_90_CL: 2.7e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1001.3221
   th_error: 0.
   th_error_type: M 
   th_error_source: NONE
@@ -1694,7 +1694,7 @@
   exp_90_CL: 1.7e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: 1001.3221
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1705,10 +1705,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 4.3e-12
+  exp_90_CL: 1.7e-12
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: Phys. Lett. B422 (1998) 334–338
   th_error: 0.
   th_error_type: M 
   th_error_source: NONE
@@ -1722,7 +1722,7 @@
   exp_90_CL: 4.6e-11
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: PDG16
+  exp_source: Phys. Rev. Lett. 76 (1996) 200–203
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
