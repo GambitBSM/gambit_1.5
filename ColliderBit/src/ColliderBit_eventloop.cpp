@@ -1688,8 +1688,8 @@ namespace Gambit
       // Clear the result map
       result.clear();
 
-      // If no events have been generated (xsec veto) or too many events have failed, return an empty map
-      if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
+      // // If no events have been generated (xsec veto) or too many events have failed, return an empty map
+      // if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
 
       // Loop over analyses and collect the predicted events into the map
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
@@ -1720,8 +1720,8 @@ namespace Gambit
       // Clear the result map
       result.clear();
 
-      // If no events have been generated (xsec veto) or too many events have failed, return an empty map
-      if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
+      // // If no events have been generated (xsec veto) or too many events have failed, return an empty map
+      // if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
 
       // Loop over analyses and calculate the observed dLL for each
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
