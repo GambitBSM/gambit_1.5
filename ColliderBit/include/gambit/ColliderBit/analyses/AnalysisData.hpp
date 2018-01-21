@@ -122,7 +122,7 @@ namespace Gambit {
         {
           // If the signal region doesn't exist in this object yet, add it
           srdata.push_back(srd);
-          srdata_identifiers[key] = srdata.size();
+          srdata_identifiers[key] = srdata.size() - 1;
         }
         else
         {
