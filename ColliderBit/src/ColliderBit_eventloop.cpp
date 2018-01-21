@@ -1424,7 +1424,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
         globalAnalysesDet.scale();
@@ -1490,7 +1490,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
         globalAnalysesATLAS.scale();
@@ -1554,7 +1554,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
         globalAnalysesCMS.scale();
@@ -1618,7 +1618,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == COLLIDER_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
         globalAnalysesIdentity.scale();
@@ -1688,9 +1688,6 @@ namespace Gambit
       // Clear the result map
       result.clear();
 
-      // // If no events have been generated (xsec veto) or too many events have failed, return an empty map
-      // if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
-
       // Loop over analyses and collect the predicted events into the map
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
       {
@@ -1719,9 +1716,6 @@ namespace Gambit
 
       // Clear the result map
       result.clear();
-
-      // // If no events have been generated (xsec veto) or too many events have failed, return an empty map
-      // if (!eventsGenerated or nFailedEvents > maxFailedEvents) return;
 
       // Loop over analyses and calculate the observed dLL for each
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
