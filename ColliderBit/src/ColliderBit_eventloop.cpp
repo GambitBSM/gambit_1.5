@@ -48,7 +48,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-//#define COLLIDERBIT_DEBUG
+// #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -90,6 +90,7 @@ namespace Gambit
     /// Pythia stuff
     std::vector<str> pythiaNames;
     std::vector<str>::const_iterator iterPythiaNames;
+    std::map< str,std::map<str,int> > colliderInfo;
     unsigned int indexPythiaNames;
     bool eventsGenerated;
     int nFailedEvents;
@@ -170,6 +171,7 @@ namespace Gambit
       pythiaNames.clear();
       iterPythiaNames = pythiaNames.cbegin();
       indexPythiaNames = 0;
+      colliderInfo.clear();
 
       // - Pythia random number seed base will be set in the loop over colliders below.
       seedBase = 0;
@@ -229,6 +231,10 @@ namespace Gambit
         // Update the global Pythia seedBase.
         // The Pythia random number seed will be this, plus the thread number.
         seedBase = int(Random::draw() * 899990000);
+
+        // Store some collider info
+        colliderInfo[*iterPythiaNames]["seed_base"] = seedBase;
+        colliderInfo[*iterPythiaNames]["final_event_count"] = 0;  // Will be updated later
 
         // Get the minimum and maximum number of events to run for this collider, and the convergence step
         int min_nEvents = Dep::MC_ConvergenceSettings->min_nEvents[indexPythiaNames];
@@ -318,6 +324,9 @@ namespace Gambit
             piped_errors.check(ColliderBit_error());
           }
         }
+
+        // Store the number of generated events
+        colliderInfo[*iterPythiaNames]["final_event_count"] = currentEvent;  // Will be updated later
 
         // Break collider loop if too many events have failed
         if(nFailedEvents > maxFailedEvents)
@@ -1720,6 +1729,7 @@ namespace Gambit
       // Loop over analyses and calculate the observed dLL for each
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
       {
+
         // AnalysisData for this analysis
         const AnalysisData& adata = Dep::AllAnalysisNumbers->at(analysis);
 
@@ -1729,7 +1739,7 @@ namespace Gambit
         {
           // (Simplified) SR-correlation info is available, so use the covariance matrix to construct composite marginalised likelihood
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
           #endif
 
           double ana_dll;
@@ -1822,7 +1832,7 @@ namespace Gambit
         {
           // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
@@ -1868,7 +1878,7 @@ namespace Gambit
 
             // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
             const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
-            if (dll_exp > bestexp_dll_exp)
+            if (dll_exp > bestexp_dll_exp || SR == 0)
             {
               bestexp_dll_exp = dll_exp;
               bestexp_dll_obs = llb_obs - llsb_obs;
@@ -1938,6 +1948,27 @@ namespace Gambit
       #ifdef COLLIDERBIT_DEBUG
         cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << result << endl;
       #endif
+
+    }
+
+
+    // Store some information about the event generation
+    void getLHCEventLoopInfo(map_str_dbl& result)
+    {
+      using namespace Pipes::getLHCEventLoopInfo;
+
+      // Clear the result map
+      result.clear();
+
+      result["did_event_generation"] = double(eventsGenerated);
+      result["too_many_failed_events"] = double(nFailedEvents > maxFailedEvents);
+
+      assert(pythiaNames.size() == colliderInfo.size());
+      for (auto& name : pythiaNames)
+      {        
+        result["seed_base_" + name] = colliderInfo[name]["seed_base"];
+        result["final_event_count_" + name] = colliderInfo[name]["final_event_count"];
+      }
 
     }
 

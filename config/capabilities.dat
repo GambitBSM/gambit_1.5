@@ -334,6 +334,9 @@ ColliderOperator: |
    Controls the parallelization and execution of the entire
    event loop of the collider simulation.
 
+LHCEventLoopInfo: |
+   Info about the event loop.
+
 LHC_signals: |
    Signal predictions and uncertainties in all LHC analyses.
 

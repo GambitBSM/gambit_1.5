@@ -307,6 +307,15 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Output some info about the event loop
+  #define CAPABILITY LHCEventLoopInfo
+  START_CAPABILITY
+    #define FUNCTION getLHCEventLoopInfo
+    START_FUNCTION(map_str_dbl)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers) // This is just to ensure that the loop is done
+    #undef FUNCTION
+  #undef CAPABILITY
+
 
   // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
   // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to test
