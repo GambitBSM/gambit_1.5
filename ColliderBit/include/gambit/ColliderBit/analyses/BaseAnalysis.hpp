@@ -47,11 +47,11 @@ namespace Gambit {
 
       /// @name Construction, Destruction, and Recycling:
       //@{
-      BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1), _needs_collection(true) {  }
+      BaseAnalysis() : _ntot(0), _xsec(0), _xsecerr(0), _luminosity(0), _needs_collection(true) {  }
       virtual ~BaseAnalysis() { }
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       virtual void clear() {
-        _ntot = 0; _xsec = -1; _xsecerr = -1; _luminosity = -1; _needs_collection = true;
+        _ntot = 0; _xsec = 0; _xsecerr = 0; _luminosity = 0; _needs_collection = true;
         _results.clear();
       }
       //@}
@@ -71,9 +71,9 @@ namespace Gambit {
       /// Return the cross-section error (in pb).
       double xsec_err() const { return _xsecerr; }
       /// Return the cross-section relative error.
-      double xsec_relerr() const { return xsec() > 0 ? xsec_err()/xsec() : -1; }
+      double xsec_relerr() const { return xsec() > 0 ? xsec_err()/xsec() : 0; }
       /// Return the cross-section per event seen (in pb).
-      double xsec_per_event() const { return (xsec() > 0) ? xsec()/num_events() : -1; }
+      double xsec_per_event() const { return (xsec() >= 0 && num_events() > 0) ? xsec()/num_events() : 0; }
       /// Return the integrated luminosity (in inverse pb).
       double luminosity() const { return _luminosity; }
       /// Set the cross-section and its error (in pb).
@@ -131,13 +131,13 @@ namespace Gambit {
       /// Scale by number of input events and xsec.
       virtual void scale(double factor=-1) {
         if (factor < 0) {
-          factor = (luminosity() * xsec()) / num_events();
-          //cout << "*** " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
+          factor = (num_events() == 0 ? 0 : (luminosity() * xsec()) / num_events());
+          // cout << "DEBUG: " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
         }
         assert(factor >= 0);
         for (SignalRegionData& sr : _results) {
           sr.n_signal_at_lumi = factor * sr.n_signal;
-          //cout << "*** " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
+          //cout << "DEBUG: " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
         }
       }
       //@}

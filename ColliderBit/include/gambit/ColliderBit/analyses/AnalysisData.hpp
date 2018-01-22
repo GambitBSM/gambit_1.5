@@ -31,14 +31,14 @@ namespace Gambit {
       /// Constructor with {n,nsys} pair args
       SignalRegionData(const std::string& name, const std::string& sr,
                        double nobs, const std::pair<double,double>& nsig, const std::pair<double,double>& nbkg,
-                       double nsigatlumi=-1)
+                       double nsigatlumi=0)
        : SignalRegionData(name, sr, nobs, nsig.first, nbkg.first, nsig.second, nbkg.second, nsigatlumi)
       {}
 
       /// Constructor with separate n & nsys args
       SignalRegionData(const std::string& name, const std::string& sr,
                        double nobs, double nsig, double nbkg,
-                       double syssig, double sysbkg, double nsigatlumi=-1)
+                       double syssig, double sysbkg, double nsigatlumi=0)
        : analysis_name(name), sr_label(sr),
          n_observed(nobs), n_signal(nsig), n_signal_at_lumi(nsigatlumi), n_background(nbkg),
          signal_sys(syssig), background_sys(sysbkg)
@@ -57,7 +57,7 @@ namespace Gambit {
       //@{
       double n_observed = 0; ///< The number of events passing selection for this signal region as reported by the experiment
       double n_signal = 0; ///< The number of simulated model events passing selection for this signal region
-      double n_signal_at_lumi = -1; ///< n_signal, scaled to the experimental luminosity
+      double n_signal_at_lumi = 0; ///< n_signal, scaled to the experimental luminosity
       double n_background = 0; ///< The number of standard model events expected to pass the selection for this signal region, as reported by the experiment.
       double signal_sys = 0; ///< The absolute systematic error of n_signal
       double background_sys = 0; ///< The absolute systematic error of n_background

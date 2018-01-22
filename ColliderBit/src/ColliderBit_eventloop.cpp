@@ -1438,7 +1438,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE)
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
@@ -1504,7 +1504,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE)
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
@@ -1568,7 +1568,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE)
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
@@ -1632,7 +1632,7 @@ namespace Gambit
         return;
       }
 
-      if (*Loop::iteration == BASE_FINALIZE && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (*Loop::iteration == BASE_FINALIZE)
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
