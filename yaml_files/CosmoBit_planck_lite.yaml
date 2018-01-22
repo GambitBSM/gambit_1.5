@@ -7,37 +7,16 @@
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
 ## 2017, Nov
+## 2018, Jan
 ##########################################################################
 
 
 #======== Input parameter declarations =======
 Parameters:
 
-  LCDM:
+  LCDM: !import include/LCDM_scan.yaml
 
-    omega_b:
-      prior_type: flat
-      range: [0.020,0.024]
-    omega_cdm:
-      prior_type: flat
-      range: [0.010,0.13]
-    H0:
-      prior_type: flat
-      range: [66,74]
-    ln10A_s:
-      prior_type: flat
-      range: [2.9,3.2]
-    n_s:
-      prior_type: flat
-      range: [0.9,1.10]
-    tau_reio:
-      prior_type: flat
-      range: [0.05,0.10]
-
-  Planck_lite:
-
-    A_planck:
-      range: [0.95,1.05]
+  Planck_lite: !import include/Planck_lite_scan.yaml
 
 #======== Prior setup ========
 Priors:
@@ -57,11 +36,16 @@ Scanner:
     multinest:
       plugin: multinest
       like:  LogLike
-      nlive: 10
-      tol: 0.1
+      nlive: 1000
+      tol: 0.01
       aux_printer_txt_options:
       aux_printer_stats_options:
       aux_printer_live_options:
+
+    random:
+      plugin: random
+      point_number: 5
+      like:  LogLike
 
 #======== Observables of interest ========
 ObsLikes:
@@ -75,17 +59,15 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
-#  - purpose:      LogLike
-#    capability:   compute_Planck_lowp_TT_loglike
-#    module:       CosmoBit
-#    type:         double
-
+  - purpose:      LogLike
+    capability:   compute_Planck_lowp_TT_loglike
+    module:       CosmoBit
+    type:         double
 
 #======== Rule entries ========
 Rules:
 
 ## So far there are none
-   
 
 #======== Logging setup ========
 Lxogger:

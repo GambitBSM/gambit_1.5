@@ -19,6 +19,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
+///  \date 2018 Jan
 ///
 ///  *********************************************
 #include <string>
@@ -49,7 +50,7 @@ namespace Gambit
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[7],"l_scalar_max");
+      strcpy(cosmo.fc.name[7],"l_max_scalars");
       sprintf(cosmo.fc.value[7],"%d",l_max);
       strcpy(cosmo.fc.name[8],"lensing");
       strcpy(cosmo.fc.value[8],"yes");
@@ -67,13 +68,14 @@ namespace Gambit
       sprintf(cosmo.fc.value[4],"%e",*Param["ln10A_s"]);
       sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
       sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-
+      /*
       std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
       std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
       std::cout << "H0 = " << *Param["H0"] << std::endl;
       std::cout << "ln10A_s = " << *Param["ln10A_s"] << std::endl;
       std::cout << "n_s = " << *Param["n_s"] << std::endl;
       std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
+      */
     }
 
     void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
@@ -91,7 +93,7 @@ namespace Gambit
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_scalar_max");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
       sprintf(cosmo.fc.value[8],"%d",l_max);
       strcpy(cosmo.fc.name[9],"lensing");
       strcpy(cosmo.fc.value[9],"yes");
@@ -111,7 +113,7 @@ namespace Gambit
       sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
       sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
       sprintf(cosmo.fc.value[7],"%e",annihilation);
-
+      /*
       std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
       std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
       std::cout << "H0 = " << *Param["H0"] << std::endl;
@@ -119,6 +121,7 @@ namespace Gambit
       std::cout << "n_s = " << *Param["n_s"] << std::endl;
       std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
       std::cout << "annihilation = " << annihilation << "(Resulting from m = " << *Param["mS"] << " and lambda = "<< *Param["lambda_hS"] << ")" << std::endl;
+      */
     }
 
     void class_set_parameter_LCDMtensor(Class_container& cosmo)
@@ -132,7 +135,7 @@ namespace Gambit
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_scalar_max");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
       sprintf(cosmo.fc.value[8],"%d",l_max);
       strcpy(cosmo.fc.name[9],"modes");
       strcpy(cosmo.fc.value[9],"s,t");
@@ -154,7 +157,7 @@ namespace Gambit
       sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
       sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
       sprintf(cosmo.fc.value[7],"%e",*Param["r_tensor"]);
-
+      /*
       std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
       std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
       std::cout << "H0 = " << *Param["H0"] << std::endl;
@@ -162,6 +165,7 @@ namespace Gambit
       std::cout << "n_s = " << *Param["n_s"] << std::endl;
       std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
       std::cout << "r_tensor = " << *Param["r_tensor"] << std::endl;
+      */
     }
 
     void class_run_func(Class_container& cosmo)
@@ -227,7 +231,9 @@ namespace Gambit
 
       Class_container cosmo = *Dep::class_run;
 
-      // Maximal value of l (directly taken from CLASS)
+      // Maximal value of l (directly taken from CLASS).
+      // This is actually l_max (from the input) + delta_l
+      // if lensing=yes
       int l_max = cosmo.pt.l_scalar_max;
       // Number of Cl-spectra (columns of the Cl-table).
       // The order of the spectra is [TT, EE, TE, BB, PhiPhi, TPhi, EPhi]
@@ -251,14 +257,15 @@ namespace Gambit
           cl[l][cosmo.sp.index_ct_te] = cl[l][cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
           cl[l][cosmo.sp.index_ct_ee] = cl[l][cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
           cl[l][cosmo.sp.index_ct_bb] = cl[l][cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
-          cl[l][cosmo.sp.index_ct_pp] = cl[l][cosmo.sp.index_ct_pp];
-          cl[l][cosmo.sp.index_ct_tp] = cl[l][cosmo.sp.index_ct_tp]*pow(cosmo.ba.T_cmb*1.e6,1);
-          cl[l][cosmo.sp.index_ct_ep] = cl[l][cosmo.sp.index_ct_ep]*pow(cosmo.ba.T_cmb*1.e6,1);
+          //cl[l][cosmo.sp.index_ct_tp] = cl[l][cosmo.sp.index_ct_tp]*pow(cosmo.ba.T_cmb*1.e6,1);
+          //cl[l][cosmo.sp.index_ct_ep] = cl[l][cosmo.sp.index_ct_ep]*pow(cosmo.ba.T_cmb*1.e6,1);
+          cl[l][cosmo.sp.index_ct_tp] = 0.;
+          cl[l][cosmo.sp.index_ct_ep] = 0.;
         }
         else
         {
-        // Failsafe for unexpected behaviour of "class_outpout_at_cl"
-        for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
+	  // Failsafe for unexpected behaviour of "class_outpout_at_cl"
+	  for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
         }
       }
       clback = cl;
@@ -326,7 +333,8 @@ namespace Gambit
       strcpy(fc.name[5],"n_s");
       strcpy(fc.name[6],"tau_reio");
 
-      strcpy(fc.name[7],"l_scalar_max");
+      //strcpy(fc.name[7],"l_scalar_max");
+      strcpy(fc.name[7],"l_max_scalars");
       sprintf(fc.value[7],"%d",3000);
 
       sprintf(fc.value[1],"%e",omega_b);
@@ -479,7 +487,8 @@ namespace Gambit
       strcpy(fc.name[5],"n_s");
       strcpy(fc.name[6],"tau_reio");
 
-      strcpy(fc.name[8],"l_scalar_max");
+      //strcpy(fc.name[8],"l_scalar_max");
+      strcpy(fc.name[8],"l_max_scalars");
       sprintf(fc.value[8],"%d",3000);
 
       strcpy(fc.name[7],"modes");
@@ -640,7 +649,8 @@ namespace Gambit
       strcpy(fc.name[5],"n_s");
       strcpy(fc.name[6],"tau_reio");
 
-      strcpy(fc.name[8],"l_scalar_max");
+      //strcpy(fc.name[8],"l_scalar_max");
+      strcpy(fc.name[8],"l_max_scalars");
       sprintf(fc.value[8],"%d",3000);
 
       strcpy(fc.name[7],"modes");
@@ -829,13 +839,15 @@ namespace Gambit
       lowp_cl_and_pars[61] = 0.0;
       for (l=62;l<=89;l++)  {
         k = l-60;
-        lowp_cl_and_pars[l] = cl[k][2];
+        //lowp_cl_and_pars[l] = cl[k][2];
+	lowp_cl_and_pars[l] = cl[k][3];
       }
       lowp_cl_and_pars[90] = 0.0;
       lowp_cl_and_pars[91] = 0.0;
       for (l=92;l<=119;l++)  {
         k = l-90;
-        lowp_cl_and_pars[l] = cl[k][3];
+	//lowp_cl_and_pars[l] = cl[k][3];
+        lowp_cl_and_pars[l] = cl[k][2];
       }
       //--------------------------------------------------------------------------
       //------addition of nuisance parameters to Cl array-------------------------
@@ -946,19 +958,19 @@ namespace Gambit
       for(int ii = 0; ii < 2509 ; ii++)
       {
         idx_tt = ii;
-        idx_te = ii + 2509;
-        idx_ee = ii + (2 * 2509);
+        idx_ee = ii + 2509;
+        idx_te = ii + (2 * 2509);
         if (ii >= 2)
         {
           cl_and_pars[idx_tt] = cl[ii][0];
-          cl_and_pars[idx_te] = cl[ii][1];
-          cl_and_pars[idx_ee] = cl[ii][2];
+          cl_and_pars[idx_ee] = cl[ii][1];
+          cl_and_pars[idx_te] = cl[ii][2];
         }
         else
         {
           cl_and_pars[idx_tt] = 0.;
-          cl_and_pars[idx_te] = 0.;
           cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_te] = 0.;
         }
       }
 
@@ -1083,17 +1095,17 @@ namespace Gambit
         idx_ee = ii + (2 * 2049);
         idx_te = ii + (3 * 2049);
         if (ii >= 2)
-        {
+	{
           cl_and_pars[idx_tt] = cl[ii][0];
-          cl_and_pars[idx_te] = cl[ii][1];
-          cl_and_pars[idx_ee] = cl[ii][2];
+          cl_and_pars[idx_ee] = cl[ii][1];
+	  cl_and_pars[idx_te] = cl[ii][2];
           cl_and_pars[idx_pp] = cl[ii][4];
         }
         else
-        {
+	{
           cl_and_pars[idx_tt] = 0.;
-          cl_and_pars[idx_te] = 0.;
           cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_te] = 0.;
           cl_and_pars[idx_pp] = 0.;
         }
       }
@@ -1140,16 +1152,16 @@ namespace Gambit
         if (ii >= 2)
         {
           cl_and_pars[idx_tt] = cl[ii][0];
-          cl_and_pars[idx_te] = cl[ii][1];
-          cl_and_pars[idx_ee] = cl[ii][2];
+          cl_and_pars[idx_ee] = cl[ii][1];
           cl_and_pars[idx_bb] = cl[ii][3];
+          cl_and_pars[idx_te] = cl[ii][2];
         }
         else
         {
           cl_and_pars[idx_tt] = 0.;
           cl_and_pars[idx_te] = 0.;
-          cl_and_pars[idx_ee] = 0.;
           cl_and_pars[idx_bb] = 0.;
+          cl_and_pars[idx_te] = 0.;
         }
       }
 
@@ -1250,13 +1262,15 @@ namespace Gambit
       lowp_cl_and_pars[61] = 0.0;
       for (l=62;l<=89;l++)  {
         k = l-60;
-        lowp_cl_and_pars[l] = cl[k][2];
+        //lowp_cl_and_pars[l] = cl[k][2];
+	lowp_cl_and_pars[l] = cl[k][3];
       }
       lowp_cl_and_pars[90] = 0.0;
       lowp_cl_and_pars[91] = 0.0;
       for (l=92;l<=119;l++)  {
         k = l-90;
-        lowp_cl_and_pars[l] = cl[k][3];
+	//lowp_cl_and_pars[l] = cl[k][3];
+        lowp_cl_and_pars[l] = cl[k][2];
       }
       //--------------------------------------------------------------------------
       //------addition of nuisance parameters to Cl array-------------------------
@@ -1540,13 +1554,15 @@ namespace Gambit
       lowp_cl_and_pars[61] = 0.0;
       for (l=62;l<=89;l++)  {
         k = l-60;
-        lowp_cl_and_pars[l] = cl[k][2];
+        //lowp_cl_and_pars[l] = cl[k][2];
+	lowp_cl_and_pars[l] = cl[k][3];
       }
       lowp_cl_and_pars[90] = 0.0;
       lowp_cl_and_pars[91] = 0.0;
       for (l=92;l<=119;l++)  {
         k = l-90;
-        lowp_cl_and_pars[l] = cl[k][3];
+        //lowp_cl_and_pars[l] = cl[k][3];
+	lowp_cl_and_pars[l] = cl[k][2];
       }
       //--------------------------------------------------------------------------
       //------addition of nuisance parameters to Cl array-------------------------
