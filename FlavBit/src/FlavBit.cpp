@@ -1565,7 +1565,7 @@ namespace Gambit
           U(i,j) = Vnu(i,j);
           U(i,j+3) = Theta(i,j);
         }
-
+ 
       // Form factors
       complex<double> k2l = FormFactors::K2L(alpha, beta, sminputs, U, ml, mnu);
       complex<double> k2r = FormFactors::K2R(alpha, beta, sminputs, U, ml, mnu);
@@ -1585,11 +1585,9 @@ namespace Gambit
       complex<double> avhatrr = avrr + 4. * M_PI / sminputs.alphainv * k1r;
 
       double l2lll = 0;
- 
       if(beta == gamma and gamma == delta) // l(alpha)- -> l(beta)- l(beta)- l(beta)+
       {
         l2lll = real(16. * pow(M_PI,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[beta]) - 22./3.) + 1./24. * (norm(asll) + norm(asrr) + 2.*norm(aslr) + 2.*norm(asrl)) + 1./3. * (2.*norm(avhatll) + 2.*norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 4.*M_PI/(3.*sminputs.alphainv)*(k2l*conj(asrl - 2.*avhatrl - 4.*avhatrr) + conj(k2l)*(asrl - 2.*avhatrl - 4.*avhatrr) + k2r*conj(aslr - 2.*avhatlr - 4.*avhatll) + conj(k2r)*(aslr - 2.*avhatlr - 4.*avhatll)) - 1./6. * (aslr*conj(avhatlr) + asrl*conj(avhatrl) + conj(aslr)*avhatlr + conj(asrl)*avhatrl));
-
       }
       else if(gamma == delta) // l(alpha)- -> l(beta)- l(gamma)- l(gamma)+
       { 
@@ -1599,7 +1597,6 @@ namespace Gambit
       {
         l2lll = real(1./24. * (norm(asll) + norm(asrr) + 2.*norm(aslr) + 2.*norm(asrl)) + 1./3.*(2.*norm(avhatll) + 2.*norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) - 1./6.*(aslr*conj(avhatlr) + asrl*conj(avhatrl) + conj(aslr)*avhatlr + conj(asrl)*avhatrl));
       }
-
       return l2lll;
 
     }

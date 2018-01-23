@@ -55,6 +55,7 @@ Parameters:
     M_1:
       range: [0.06, 500]
       prior_type: log
+#      fixed_value: 100
     delta_M_2:
       range: [1E-10, 1E2]
       prior_type: log
@@ -66,19 +67,19 @@ Parameters:
       range: [0, 6.283]
 #      fixed_value: 0.0
     ImOm23:
-      range: [-12, 12]
-#      fixed_value: [-20.0, 20.0]
+      range: [-5, 5]
+#      fixed_value: 5
     ReOm13:
       range: [0, 6.283]
 #      fixed_value: 0.0
     ImOm13:
-      range: [-12, 12]
+      range: [-5, 5]
 #      fixed_value: 0.0
     ReOm12:
       range: [0, 6.283]
 #      fixed_value: 0.0
     ImOm12:
-      range: [-12, 12]
+      range: [-5, 5]
 #      fixed_value: 0.0
     L_Ge:
       range: [0.159, 0.193]
@@ -89,7 +90,7 @@ Parameters:
     ordering:
       fixed_value: 1  # 1: normal ordering, 0: inverse ordering
     min_mass:
-      fixed_value: 1  # 0: massless, 1: 0.23 eV
+      fixed_value: 0  # 0: massless, 1: 0.23 eV
     md21:
       fixed_value: 7.5e-23
     md31:
@@ -103,81 +104,86 @@ Printer:
 
   printer: hdf5
   options:
-    output_file: "SN_dev.hdf5"
+    output_file: "SN_dev_min_mass_test_0.hdf5"
     delete_file_on_restart: true
-    group: "/SN_dev"
+    group: "/SN_dev_min_mass_test_0"
 
 Scanner:
 
-  use_scanner: multinest
+  use_scanner: de
 
   scanners:
+    de:
+      plugin: diver
+      like: LogLike
+      NP: 10000
+
     multinest:
       plugin: multinest
       like: LogLike
-      nlive: 100
+      nlive: 1000
 
 ObsLikes:
 
-  - capability: lnLbbn
-    purpose: LogLike
-    function: lnL_bbn
+# - capability: lnLbbn
+#    purpose: LogLike
+#    function: lnL_bbn
 
-  - capability: lnLlepuniv
-    purpose: LogLike
-    function: lnL_lepuniv
+#  - capability: lnLlepuniv
+#    purpose: LogLike
+#    function: lnL_lepuniv
 
-  - capability: lnL0nubb
-    purpose: LogLike
-    function: lnL_0nubb
+#  - capability: lnL0nubb
+#    purpose: LogLike
+#    function: lnL_0nubb
 
-  - capability: lnLckm
-    purpose: LogLike
-    function: lnL_ckm
+#  - capability: lnLckm
+#    purpose: LogLike
+#    function: lnL_ckm
 
-  - capability: lnLpienu
-    purpose: LogLike
-    function: lnL_pienu
+#  - capability: lnLpienu
+#    purpose: LogLike
+#    function: lnL_pienu
 
-  - capability: lnLps191e
-    purpose: LogLike
-    function: lnL_ps191_e
+#  - capability: lnLps191e
+#    purpose: LogLike
+#    function: lnL_ps191_e
 
-  - capability: lnLps191mu
-    purpose: LogLike
-    function: lnL_ps191_mu
+#  - capability: lnLps191mu
+#    purpose: LogLike
+#    function: lnL_ps191_mu
 
-  - capability: lnLcharme
-    purpose: LogLike
-    function: lnL_charm_e
+#  - capability: lnLcharme
+#    purpose: LogLike
+#    function: lnL_charm_e
 
-  - capability: lnLcharmmu
-    purpose: LogLike
-    function: lnL_charm_mu
+#  - capability: lnLcharmmu
+#    purpose: LogLike
+#    function: lnL_charm_mu
 
-  - capability: lnLdelphi
-    purpose: LogLike
-    function: lnL_delphi
+#  - capability: lnLdelphi
+#    purpose: LogLike
+#    function: lnL_delphi
 
-  - capability: lnLatlase
-    purpose: LogLike
-    function: lnL_atlas_e
+#  - capability: lnLatlase
+#    purpose: LogLike
+#    function: lnL_atlas_e
 
-  - capability: lnLatlasmu
-    purpose: LogLike
-    function: lnL_atlas_mu
+#  - capability: lnLatlasmu
+#    purpose: LogLike
+#    function: lnL_atlas_mu
 
-  - capability: lnLe949
-    purpose: LogLike
-    function: lnL_e949
+#  - capability: lnLe949
+#    purpose: LogLike
+#    function: lnL_e949
 
-  - capability: lnLnutev
-    purpose: LogLike
-    function: lnL_nutev
+#  - capability: lnLnutev
+#    purpose: LogLike
+#    function: lnL_nutev
 
-  - capability: lnLtau
-    purpose: LogLike
-    function: lnL_tau
+#  - capability: lnLtau
+#    purpose: LogLike
+#    function: lnL_tau
 
   - capability: Ue1
     purpose: Observable
@@ -215,17 +221,65 @@ ObsLikes:
     purpose: Observable
     function: printable_Ut3
 
-  - capability: l2lgamma_lnL
-    purpose: LogLike
-    function: l2lgamma_likelihood
+#  - capability: l2lgamma_lnL
+#    purpose: LogLike
+#    function: l2lgamma_likelihood
 
-  - capability: l2lll_lnL
-    purpose: LogLike
-    function: l2lll_likelihood
+#  - capability: l2lll_lnL
+#    purpose: LogLike
+#    function: l2lll_likelihood
 
-  - capability: mu2e_lnL
-    purpose: LogLike
-    function: mu2e_likelihood
+#  - capability: mu2e_lnL
+#    purpose: LogLike
+#    function: mu2e_likelihood
+
+  - capability: muegamma
+    purpose: Observable
+    function: SN_muegamma
+
+  - capability: tauegamma
+    purpose: Observable
+    function: SN_tauegamma
+
+  - capability: taumugamma
+    purpose: Observable
+    function: SN_taumugamma
+
+  - capability: mueee
+    purpose: Observable
+    function: SN_mueee
+
+  - capability: taueee
+    purpose: Observable
+    function: SN_taueee
+
+  - capability: taumumumu
+    purpose: Observable
+    function: SN_taumumumu
+
+  - capability: taumuee
+    purpose: Observable
+    function: SN_taumuee
+
+  - capability: taueemu
+    purpose: Observable
+    function: SN_taueemu
+
+  - capability: tauemumu
+    purpose: Observable
+    function: SN_tauemumu
+
+  - capability: taumumue
+    purpose: Observable
+    function: SN_taumumue
+
+  - capability: mueTi
+    purpose: Observable
+    function: SN_mueTi
+
+  - capability: muePb
+    purpose: Observable
+    function: SN_muePb
 
   - capability: perturbativity_lnL
     purpose: LogLike
@@ -242,4 +296,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/SN_dev/"
+  default_output_path: "runs/SN_dev_min_mass_test_0/"

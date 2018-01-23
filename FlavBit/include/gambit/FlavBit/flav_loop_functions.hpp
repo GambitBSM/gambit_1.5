@@ -83,7 +83,13 @@ namespace Gambit
       double C0(const double a, const double b, const double c)
       {
         // TODO: behaviour when two paramers are 0 undefined, set it to zero
-        if((a == 0 and b == 0) or (a == 0 and c == 0) or (b == 0 and c == 0))
+        if(a == 0 and b == 0 and c == 0)
+          return 0;
+        if(a == 0 and b == 0) 
+          return 0;
+        else if(a == 0 and c == 0) 
+          return 0;
+        else if(b == 0 and c == 0)
           return 0;
         else if(c == 0)
           return C0(a,c,b);
@@ -113,9 +119,9 @@ namespace Gambit
         if(a == 0 and b == 0 and c == 0)
           return 0;
         else if(b == 0 and c == 0)
-          return 1.25*(3. - 2.*log(a/pow(Q,2)));
+          return 0.125*(3. - 2.*log(a/pow(Q,2)));
         else if(a == 0 and b == 0)
-          return 1.25*(3. - 2.*log(c) - 2.*log(1./pow(Q,2)));
+          return 0.125*(3. - 2.*log(c) - 2.*log(1./pow(Q,2)));
         else if(c == 0)
           return C00(a,c,b,Q);
         else if(a == b and b == c)
@@ -125,17 +131,26 @@ namespace Gambit
         else if(a == c and b != 0)
           return C00(a,c,b,Q);
         else if(a == c and b == 0)
-          return 1.25*(1. - 2.*log(c/pow(Q,2)));
+          return 0.125*(1. - 2.*log(c/pow(Q,2)));
         else if(b == c and a != 0)
           return (2.*(2.*a-c)*c*log(c/a)-(a-c)*(-3.*a+c+2.*(a-c)*log(a/pow(Q,2))))/(8.*pow(a-c,2));
         else if(b == c and a == 0)
-          return 1.25*(1. - 2.*log(c) - 2.*log(1./pow(Q,2)));
+          return 0.125*(1. - 2.*log(c) - 2.*log(1./pow(Q,2)));
         else if(a == 0)
           return -(2.*b*log(b) - 2.*c*log(c) + (b-c)*(-3.+2.*log(1./pow(Q,2))))/(8.*(b-c));
         else if(b == 0)
           return (2.*c*log(c/a) - (a-c)*(-3. + 2.*log(a/pow(Q,2))))/(8.*(a-c));
         else
           return 1. / (8.*(a-b)*(a-c)*(b-c)) * ( (c-a)*((a-b)*(2.*log(a/pow(Q,2))-3.)*(b-c) - 2.*b*b*log(b/a)) + 2.*c*c*(b-a)*log(c/a));
+      }
+
+      // Finite combination of loop functions that appears in VZw10
+      double B02C00C0(const double a, const double b, const double c, const double Q)
+      {
+        if(a == 0 and b == 0)
+          return 0.25*(1.0 - 2.0*log(c) - 2.0*log(1 / pow(Q,2)));
+        else
+          return B0(a,b,Q) - 2*C00(a,b,c,Q) + C0(a,b,c)*c;
       }
 
       double D0(const double a, const double b, const double c, const double d)
@@ -573,7 +588,13 @@ namespace Gambit
  
         // Use MZ as the renormalization scale Q
         for(int b=0; b<6; b++)
+        {
+          // Use different loop function in case that mnu[b] 0
+          if(mnu[b])
             vzll += - Vertices::VpL(alpha,b,sminputs,U) * conj(Vertices::VpL(beta,b,sminputs,U)) * (2.* Vertices::VR(b,b,sminputs) * LoopFunctions::C0(pow(mnu[b],2),pow(mnu[b],2),mW*mW) * mnu[b] * mnu[b] + Vertices::VL(b,b,sminputs) * (1. - 2.*(LoopFunctions::B0(pow(mnu[b],2),pow(mnu[b],2),sminputs.mZ) - 2.*LoopFunctions::C00(pow(mnu[b],2),pow(mnu[b],2),mW*mW,sminputs.mZ) + LoopFunctions::C0(pow(mnu[b],2),pow(mnu[b],2),mW*mW)*mW*mW)));
+          else
+            vzll += - Vertices::VpL(alpha,b,sminputs,U) * conj(Vertices::VpL(beta,b,sminputs,U)) * Vertices::VL(b,b,sminputs) * (1. - 2.*(LoopFunctions::B02C00C0(pow(mnu[b],2),pow(mnu[b],2),mW*mW,sminputs.mZ)));
+        }
 
         return vzll;
       }
@@ -783,7 +804,7 @@ namespace Gambit
 
       complex<double> AVLL(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return Penguins::VZsumLL(alpha,beta,sminputs,U,ml,mnu)*Vertices::EL(gamma,delta,sminputs) / pow(sminputs.mZ,2) + Boxes::VsumlLL(alpha,beta,gamma,delta,sminputs,U,mnu);
+      return Penguins::VZsumLL(alpha,beta,sminputs,U,ml,mnu)*Vertices::EL(gamma,delta,sminputs) / pow(sminputs.mZ,2) + Boxes::VsumlLL(alpha,beta,gamma,delta,sminputs,U,mnu);
       }
 
       complex<double> AVLR(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
