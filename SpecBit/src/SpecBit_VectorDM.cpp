@@ -88,8 +88,8 @@ namespace Gambit
       vectormodel.sinW2 = sinW2;
 
       // gauge couplings
-      vectormodel.g1 = e / (sinW2);
-      vectormodel.g2 = e / (cosW2);
+      vectormodel.g1 = e / sqrt(sinW2);
+      vectormodel.g2 = e / sqrt(cosW2);
       vectormodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
 
       // Yukawas
