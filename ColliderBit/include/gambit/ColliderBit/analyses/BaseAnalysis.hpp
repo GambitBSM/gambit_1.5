@@ -27,9 +27,6 @@
 namespace Gambit {
   namespace ColliderBit {
 
-    using namespace std;
-
-
     /// An abstract base class for collider analyses within ColliderBit.
     /// @note The templating makes forward declaration / #include decoupling hard :-(
     /// @todo How is this templating useful? Only if alternative Analysis implementations have the same interface...
@@ -38,6 +35,8 @@ namespace Gambit {
     private:
 
       double _ntot, _xsec, _xsecerr, _luminosity;
+      bool _xsec_is_set, _luminosity_is_set, _is_scaled;
+      bool _needs_collection;
       AnalysisData _results;
       typedef EventT EventType;
 
@@ -46,11 +45,15 @@ namespace Gambit {
 
       /// @name Construction, Destruction, and Recycling:
       //@{
-      BaseAnalysis() : _ntot(0), _xsec(-1), _xsecerr(-1), _luminosity(-1) {  }
+      BaseAnalysis() : _ntot(0), _xsec(0), _xsecerr(0), _luminosity(0),
+                       _xsec_is_set(false), _luminosity_is_set(false),
+                       _is_scaled(false), _needs_collection(true) {  }
       virtual ~BaseAnalysis() { }
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       virtual void clear() {
-        _ntot = 0; _xsec = -1; _xsecerr = -1; _luminosity = -1;
+        _ntot = 0; _xsec = 0; _xsecerr = 0; _luminosity = 0; 
+        _xsec_is_set = false; _luminosity_is_set = false;
+        _is_scaled = false; _needs_collection = true;
         _results.clear();
       }
       //@}
@@ -59,10 +62,9 @@ namespace Gambit {
       /// @name Event analysis, event number, and cross section functions:
       //@{
       /// Analyze the event (accessed by reference).
-      void analyze(const EventT& e) { analyze(&e); }
+      void do_analysis(const EventT& e) { do_analysis(&e); }
       /// Analyze the event (accessed by pointer).
-      /// @note Needs to be called from Derived::analyze().
-      virtual void analyze(const EventT*) { _ntot += 1; }
+      void do_analysis(const EventT* e) { _needs_collection = true; analyze(e); }
 
       /// Return the total number of events seen so far.
       double num_events() const { return _ntot; }
@@ -71,21 +73,47 @@ namespace Gambit {
       /// Return the cross-section error (in pb).
       double xsec_err() const { return _xsecerr; }
       /// Return the cross-section relative error.
-      double xsec_relerr() const { return xsec() > 0 ? xsec_err()/xsec() : -1; }
+      double xsec_relerr() const { return xsec() > 0 ? xsec_err()/xsec() : 0; }
       /// Return the cross-section per event seen (in pb).
-      double xsec_per_event() const { return (xsec() > 0) ? xsec()/num_events() : -1; }
+      double xsec_per_event() const { return (xsec() >= 0 && num_events() > 0) ? xsec()/num_events() : 0; }
       /// Return the integrated luminosity (in inverse pb).
       double luminosity() const { return _luminosity; }
       /// Set the cross-section and its error (in pb).
-      void set_xsec(double xs, double xserr) { _xsec = xs; _xsecerr = xserr; }
+      void set_xsec(double xs, double xserr) { _xsec_is_set = true; _xsec = xs; _xsecerr = xserr; }
       /// Set the integrated luminosity (in inverse pb).
-      void set_luminosity(double lumi) { _luminosity = lumi; }
+      void set_luminosity(double lumi) { _luminosity_is_set = true; _luminosity = lumi; }
 
       /// Get the collection of SignalRegionData for likelihood computation.
-      const AnalysisData& get_results() {
-        if (_results.empty()) collect_results();
+      const AnalysisData& get_results()
+      {
+        if (_needs_collection)
+        {
+          collect_results();
+          _needs_collection = false;
+        }
         return _results;
       }
+
+      /// An overload of get_results() with some additional consistency checks.
+      const AnalysisData& get_results(std::string& warning)
+      {
+        warning = "";
+        if (not _xsec_is_set)
+          warning += "Cross section has not been set. ";
+        if (not _luminosity_is_set)
+          warning += "Luminosity has not been set. ";
+        if (not _is_scaled)
+          warning += "Results have not been scaled. ";
+        if (_ntot < 1)
+          warning += "No events have been analyzed. ";
+
+        /// @todo We need to shift the 'analysis_name' property from class SignalRegionData 
+        ///       to this class. Then we can add the class name to this error message.
+        // warning = "Ooops! In analysis " + analysis_name + ": " + warning
+
+        return get_results();
+      }
+
       //@}
 
 
@@ -93,6 +121,9 @@ namespace Gambit {
 
       /// @name Protected collection functions
       //@{
+      /// Analyze the event (accessed by pointer).
+      /// @note Needs to be called from Derived::analyze().
+      virtual void analyze(const EventT*) { _ntot += 1; }
       /// Add the given result to the internal results list.
       void add_result(const SignalRegionData& sr) { _results.add(sr); }
       /// Set the covariance matrix, expressing SR correlations
@@ -123,14 +154,15 @@ namespace Gambit {
       /// Scale by number of input events and xsec.
       virtual void scale(double factor=-1) {
         if (factor < 0) {
-          factor = (luminosity() * xsec()) / num_events();
-          //cout << "*** " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
+          factor = (num_events() == 0 ? 0 : (luminosity() * xsec()) / num_events());
+          // cout << "DEBUG: " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
         }
         assert(factor >= 0);
         for (SignalRegionData& sr : _results) {
           sr.n_signal_at_lumi = factor * sr.n_signal;
-          //cout << "*** " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
+          //cout << "DEBUG: " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
         }
+        _is_scaled = true;
       }
       //@}
 

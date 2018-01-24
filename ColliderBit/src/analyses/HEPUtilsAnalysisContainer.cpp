@@ -107,7 +107,7 @@ namespace Gambit
     {
       assert(!analyses.empty());
       assert(ready);
-      for (Analysis* a : analyses) a->analyze(event);
+      for (Analysis* a : analyses) a->do_analysis(event);
     }
 
 
