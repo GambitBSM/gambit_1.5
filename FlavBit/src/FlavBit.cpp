@@ -887,10 +887,10 @@ namespace Gambit
     #undef DEFINE_BKSTARMUMU
 
     /// RK* in low q^2
-    void SI_RKstar_45_11(double &result)
+    void SI_RKstar_0045_11(double &result)
     {
-      using namespace Pipes::SI_RKstar_45_11;
-      if (flav_debug) cout<<"Starting SI_RKstar_45_11"<<endl;
+      using namespace Pipes::SI_RKstar_0045_11;
+      if (flav_debug) cout<<"Starting SI_RKstar_0045_11"<<endl;
 
       parameters const& param = *Dep::SuperIso_modelinfo;
       result=BEreq::RKstar_CONV(&param,0.045,1.1);
