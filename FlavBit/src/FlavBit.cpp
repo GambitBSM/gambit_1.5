@@ -13,6 +13,7 @@
 ///  \date 2014
 ///  \date 2015 Feb
 ///  \date 2016 Jul
+///  \date 2018 Jan
 ///
 ///  \author Marcin Chrzaszcz
 ///  \date 2015 May
@@ -885,7 +886,32 @@ namespace Gambit
     /// @}
     #undef DEFINE_BKSTARMUMU
 
+    /// RK* in low q^2
+    void SI_RKstar_45_11(double &result)
+    {
+      using namespace Pipes::SI_RKstar_45_11;
+      if (flav_debug) cout<<"Starting SI_RKstar_45_11"<<endl;
 
+      parameters const& param = *Dep::SuperIso_modelinfo;
+      result=BEreq::RKstar_CONV(&param,0.045,1.1);
+
+      if (flav_debug) printf("RK*_lowq2=%.3e\n",result);
+      if (flav_debug) cout<<"Finished SI_RKstar_45_11"<<endl;
+    }
+
+    /// RK* in intermediate q^2
+    void SI_RKstar_11_60(double &result)
+    {
+      using namespace Pipes::SI_RKstar_11_60;
+      if (flav_debug) cout<<"Starting SI_RKstar_11_60"<<endl;
+
+      parameters const& param = *Dep::SuperIso_modelinfo;
+      result=BEreq::RKstar_CONV(&param,1.1,6.0);
+
+      if (flav_debug) printf("RK*_intermq2=%.3e\n",result);
+      if (flav_debug) cout<<"Finished SI_RKstar_11_60"<<endl;
+    }
+    
     /// Isospin asymmetry of B-> K* mu mu
     void SI_AI_BKstarmumu(double &result)
     {

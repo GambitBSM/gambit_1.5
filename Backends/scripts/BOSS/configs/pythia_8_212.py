@@ -12,6 +12,14 @@
 #   https://github.com/CastXML/CastXML/blob/master/doc/manual/castxml.1.rst
 #
 
+#
+# *** Special note for OS X *** 
+# 
+# BOSS will most likely fail if 'g++' points to the Clang compiler.
+# Install GNU g++ and point the castxml_cc variable below the GNU 
+# g++ executable.   
+#
+
 castxml_cc_id  = 'gnu'         # Reference compiler: 'gnu', 'gnu-c', 'msvc', 'msvc-c'
 castxml_cc     = 'g++'         # Name a specific compiler: 'g++', 'cl', ...
 castxml_cc_opt = '-std=c++11'  # Additional option string passed to the compiler in castxml_cc (e.g. '-m32')
@@ -88,8 +96,6 @@ header_extension = '.h'
 source_extension = '.cc'
 
 indent = 4
-
-extra_output_dir = 'BOSS_output'
 
 
 # ~~~~~ Information about other known types ~~~~~

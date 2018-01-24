@@ -38,8 +38,6 @@
 #include "flexiblesusy/src/ew_input.hpp"
 #include "flexiblesusy/src/lowe.h" // From softsusy; used by flexiblesusy
 #include "flexiblesusy/src/numerics2.hpp"
-#include "flexiblesusy/src/two_loop_corrections.hpp"
-
 
 
 // Switch for debug mode
@@ -53,14 +51,6 @@ namespace Gambit
     using namespace LogTags;
     using namespace flexiblesusy;
     
-    
-    void swap(double &a, double &b, double &c, const double d) // subroutine used to rearrange points in minimisation algorithm
-    {
-      a=b;
-      b=c;
-      c=d;
-    }
-    
     bool check_perturb_to_min_lambda(const Spectrum& spec,double scale,int pts)
     {
       using namespace flexiblesusy;
@@ -71,7 +61,7 @@ namespace Gambit
       double step = log10(scale) / pts;
       double runto;
       
-      double ul=3.5449077018110318; // sqrt(4*Pi), maximum value for perturbative couplings, same perturbativity bound that FlexibleSUSY uses
+      double ul=3.5449077018110318; // sqrt(4*Pi)
       for (int i=0;i<pts;i++)
       {
         runto = pow(10,step*float(i+1.0)); // scale to run spectrum to

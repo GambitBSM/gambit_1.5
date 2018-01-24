@@ -16,36 +16,34 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:25
+// File generated at Wed 25 Oct 2017 18:11:41
 
 #include "SSM_slha_io.hpp"
 #include "SSM_input_parameters.hpp"
-#include "SSM_info.hpp"
 #include "logger.hpp"
 #include "wrappers.hpp"
 #include "numerics2.hpp"
 #include "config.h"
 
+#include <array>
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <boost/bind.hpp>
+#include <string>
 
 #define Pole(p) physical.p
 #define PHYSICAL(p) model.get_physical().p
 #define PHYSICAL_SLHA(p) model.get_physical_slha().p
 #define LOCALPHYSICAL(p) physical.p
 #define MODELPARAMETER(p) model.get_##p()
+#define INPUTPARAMETER(p) input.p
+#define EXTRAPARAMETER(p) model.get_##p()
 #define DEFINE_PHYSICAL_PARAMETER(p) decltype(LOCALPHYSICAL(p)) p;
 #define LowEnergyConstant(p) Electroweak_constants::p
 
 using namespace softsusy;
 
 namespace flexiblesusy {
-
-char const * const SSM_slha_io::drbar_blocks[NUMBER_OF_DRBAR_BLOCKS] =
-   { "gauge", "Yu", "Yd", "Ye", "SM", "HMIX" }
-;
 
 SSM_slha_io::SSM_slha_io()
    : slha_io()
@@ -77,11 +75,42 @@ void SSM_slha_io::set_extpar(const SSM_input_parameters& input)
    extpar << FORMAT_ELEMENT(1, input.QEWSB, "QEWSB");
    extpar << FORMAT_ELEMENT(2, input.Lambdainput, "Lambdainput");
    extpar << FORMAT_ELEMENT(3, input.LambdaSinput, "LambdaSinput");
-   extpar << FORMAT_ELEMENT(4, input.MSinput, "MSinput");
+   extpar << FORMAT_ELEMENT(4, input.Kappainput, "Kappainput");
    extpar << FORMAT_ELEMENT(5, input.K1input, "K1input");
    extpar << FORMAT_ELEMENT(6, input.K2input, "K2input");
+   extpar << FORMAT_ELEMENT(7, input.vSInput, "vSInput");
    slha_io.set_block(extpar);
 
+}
+
+/**
+ * Stores the IMMINPAR input parameters in the SLHA object.
+ *
+ * @param input struct of input parameters
+ */
+void SSM_slha_io::set_imminpar(const SSM_input_parameters& input)
+{
+
+}
+
+/**
+ * Stores the IMEXTPAR input parameters in the SLHA object.
+ *
+ * @param input struct of input parameters
+ */
+void SSM_slha_io::set_imextpar(const SSM_input_parameters& input)
+{
+
+}
+
+/**
+ * Stores the MODSEL input parameters in the SLHA object.
+ *
+ * @param modsel struct of MODSEL parameters
+ */
+void SSM_slha_io::set_modsel(const SLHA_io::Modsel& modsel)
+{
+   slha_io.set_modsel(modsel);
 }
 
 /**
@@ -92,6 +121,42 @@ void SSM_slha_io::set_extpar(const SSM_input_parameters& input)
 void SSM_slha_io::set_minpar(const SSM_input_parameters& input)
 {
 
+}
+
+/**
+ * Stores all input parameters in the SLHA object.
+ *
+ * @param input struct of input parameters
+ */
+void SSM_slha_io::set_input(const SSM_input_parameters& input)
+{
+   set_minpar(input);
+   set_extpar(input);
+   set_imminpar(input);
+   set_imextpar(input);
+
+
+}
+
+/**
+ * Stores the additional physical input (FlexibleSUSYInput block) in
+ * the SLHA object.
+ *
+ * @param input class of input
+ */
+void SSM_slha_io::set_physical_input(const Physical_input& input)
+{
+   slha_io.set_physical_input(input);
+}
+
+/**
+ * Stores the settings (FlexibleSUSY block) in the SLHA object.
+ *
+ * @param settings class of settings
+ */
+void SSM_slha_io::set_settings(const Spectrum_generator_settings& settings)
+{
+   slha_io.set_settings(settings);
 }
 
 /**
@@ -110,24 +175,43 @@ void SSM_slha_io::set_sminputs(const softsusy::QedQcd& qedqcd)
  *
  * @param problems struct with parameter point problems
  */
-void SSM_slha_io::set_spinfo(const Problems<SSM_info::NUMBER_OF_PARTICLES>& problems)
+void SSM_slha_io::set_spinfo(const Spectrum_generator_problems& problems)
+{
+   set_spinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores the spectrum generator information in the SPINFO block in
+ * the SLHA object.
+ *
+ * @param problems struct with parameter point problems
+ */
+void SSM_slha_io::set_spinfo(const Problems& problems)
+{
+   set_spinfo(problems.get_problem_strings(), problems.get_warning_strings());
+}
+
+/**
+ * Stores the given problems and warnings in the SPINFO block in the
+ * SLHA object.
+ *
+ * @param problems vector of problem strings
+ * @param warnings vector of warning strings
+ */
+void SSM_slha_io::set_spinfo(
+   const std::vector<std::string>& problems,
+   const std::vector<std::string>& warnings)
 {
    std::ostringstream spinfo;
    spinfo << "Block SPINFO\n"
           << FORMAT_SPINFO(1, PKGNAME)
           << FORMAT_SPINFO(2, FLEXIBLESUSY_VERSION);
 
-   if (problems.have_warning()) {
-      std::ostringstream warnings;
-      problems.print_warnings(warnings);
-      spinfo << FORMAT_SPINFO(3, warnings.str());
-   }
+   for (const auto& s: warnings)
+      spinfo << FORMAT_SPINFO(3, s);
 
-   if (problems.have_problem()) {
-      std::ostringstream problems_str;
-      problems.print_problems(problems_str);
-      spinfo << FORMAT_SPINFO(4, problems_str.str());
-   }
+   for (const auto& s: problems)
+      spinfo << FORMAT_SPINFO(4, s);
 
    spinfo << FORMAT_SPINFO(5, SSM_info::model_name)
           << FORMAT_SPINFO(9, SARAH_VERSION);
@@ -150,6 +234,8 @@ void SSM_slha_io::set_mass(const SSM_physical& physical,
 
    mass << "Block MASS\n"
       << FORMAT_MASS(24, LOCALPHYSICAL(MVWp), "VWp")
+      << FORMAT_MASS(25, LOCALPHYSICAL(Mhh(0)), "hh(1)")
+      << FORMAT_MASS(35, LOCALPHYSICAL(Mhh(1)), "hh(2)")
    ;
 
    if (write_sm_masses) {
@@ -158,8 +244,6 @@ void SSM_slha_io::set_mass(const SSM_physical& physical,
          << FORMAT_MASS(12, LOCALPHYSICAL(MFv(0)), "Fv(1)")
          << FORMAT_MASS(14, LOCALPHYSICAL(MFv(1)), "Fv(2)")
          << FORMAT_MASS(16, LOCALPHYSICAL(MFv(2)), "Fv(3)")
-         << FORMAT_MASS(25, LOCALPHYSICAL(Mhh(0)), "hh(1)")
-         << FORMAT_MASS(35, LOCALPHYSICAL(Mhh(1)), "hh(2)")
          << FORMAT_MASS(1, LOCALPHYSICAL(MFd(0)), "Fd(1)")
          << FORMAT_MASS(3, LOCALPHYSICAL(MFd(1)), "Fd(2)")
          << FORMAT_MASS(5, LOCALPHYSICAL(MFd(2)), "Fd(3)")
@@ -189,9 +273,9 @@ void SSM_slha_io::set_mass(const SSM_physical& physical,
 void SSM_slha_io::set_mixing_matrices(const SSM_physical& physical,
                                               bool write_sm_mixing_matrics)
 {
-   
+   slha_io.set_block("SCALARMIX", LOCALPHYSICAL(ZH), "ZH");
+
    if (write_sm_mixing_matrics) {
-      slha_io.set_block("SCALARMIX", LOCALPHYSICAL(ZH), "ZH");
       slha_io.set_block("UULMIX", LOCALPHYSICAL(Vu), "Vu");
       slha_io.set_block("UDLMIX", LOCALPHYSICAL(Vd), "Vd");
       slha_io.set_block("UURMIX", LOCALPHYSICAL(Uu), "Uu");
@@ -222,13 +306,18 @@ void SSM_slha_io::set_pmns(
 }
 
 /**
- * Write SLHA object to file.
+ * Write SLHA object to given output.  If output == "-", then the SLHA
+ * object is written to std::cout.  Otherwise, output is interpreted
+ * as a file name
  *
- * @param file_name file name
+ * @param output "-" for cout, or file name
  */
-void SSM_slha_io::write_to_file(const std::string& file_name)
+void SSM_slha_io::write_to(const std::string& output) const
 {
-   slha_io.write_to_file(file_name);
+   if (output == "-")
+      write_to_stream(std::cout);
+   else
+      write_to_file(output);
 }
 
 /**
@@ -247,7 +336,6 @@ double SSM_slha_io::get_parameter_output_scale() const
 void SSM_slha_io::read_from_file(const std::string& file_name)
 {
    slha_io.read_from_file(file_name);
-   slha_io.read_modsel();
 }
 
 /**
@@ -260,7 +348,6 @@ void SSM_slha_io::read_from_file(const std::string& file_name)
 void SSM_slha_io::read_from_source(const std::string& source)
 {
    slha_io.read_from_source(source);
-   slha_io.read_modsel();
 }
 
 /**
@@ -274,26 +361,41 @@ void SSM_slha_io::read_from_stream(std::istream& istr)
 }
 
 /**
- * Fill struct of model input parameters from SLHA object (MINPAR and
- * EXTPAR blocks)
+ * Fill struct of model input parameters from SLHA object (MINPAR,
+ * EXTPAR and IMEXTPAR blocks)
  *
  * @param input struct of model input parameters
  */
 void SSM_slha_io::fill(SSM_input_parameters& input) const
 {
-   SLHA_io::Tuple_processor minpar_processor
-      = boost::bind(&SSM_slha_io::fill_minpar_tuple, boost::ref(input), _1, _2);
-   SLHA_io::Tuple_processor extpar_processor
-      = boost::bind(&SSM_slha_io::fill_extpar_tuple, boost::ref(input), _1, _2);
+   SLHA_io::Tuple_processor minpar_processor = [&input, this] (int key, double value) {
+      return fill_minpar_tuple(input, key, value);
+   };
+
+   SLHA_io::Tuple_processor extpar_processor = [&input, this] (int key, double value) {
+      return fill_extpar_tuple(input, key, value);
+   };
+
+   SLHA_io::Tuple_processor imminpar_processor = [&input, this] (int key, double value) {
+      return fill_imminpar_tuple(input, key, value);
+   };
+
+   SLHA_io::Tuple_processor imextpar_processor = [&input, this] (int key, double value) {
+      return fill_imextpar_tuple(input, key, value);
+   };
 
    slha_io.read_block("MINPAR", minpar_processor);
    slha_io.read_block("EXTPAR", extpar_processor);
+   slha_io.read_block("IMMINPAR", imminpar_processor);
+   slha_io.read_block("IMEXTPAR", imextpar_processor);
 
 
 }
 
 /**
  * Reads DR-bar parameters from a SLHA output file.
+ *
+ * @param model model class to be filled
  */
 void SSM_slha_io::fill_drbar_parameters(SSM_mass_eigenstates& model) const
 {
@@ -332,6 +434,8 @@ void SSM_slha_io::fill_drbar_parameters(SSM_mass_eigenstates& model) const
 /**
  * Reads DR-bar parameters, pole masses and mixing matrices (in
  * Haber-Kane convention) from a SLHA output file.
+ *
+ * @param model model class to be filled
  */
 void SSM_slha_io::fill(SSM_mass_eigenstates& model) const
 {
@@ -347,7 +451,7 @@ void SSM_slha_io::fill(SSM_mass_eigenstates& model) const
  * Fill struct of extra physical input parameters from SLHA object
  * (FlexibleSUSYInput block)
  *
- * @param settings struct of physical input parameters
+ * @param input struct of physical non-SLHA input parameters
  */
 void SSM_slha_io::fill(Physical_input& input) const
 {
@@ -358,7 +462,7 @@ void SSM_slha_io::fill(Physical_input& input) const
  * Fill struct of spectrum generator settings from SLHA object
  * (FlexibleSUSY block)
  *
- * @param settings struct of spectrum generator settings
+ * @param settings struct of spectrum generator settings to be filled
  */
 void SSM_slha_io::fill(Spectrum_generator_settings& settings) const
 {
@@ -382,16 +486,35 @@ void SSM_slha_io::fill_extpar_tuple(SSM_input_parameters& input,
    case 1: input.QEWSB = value; break;
    case 2: input.Lambdainput = value; break;
    case 3: input.LambdaSinput = value; break;
-   case 4: input.MSinput = value; break;
+   case 4: input.Kappainput = value; break;
    case 5: input.K1input = value; break;
    case 6: input.K2input = value; break;
+   case 7: input.vSInput = value; break;
    default: WARNING("Unrecognized entry in block EXTPAR: " << key); break;
    }
 
 }
 
+void SSM_slha_io::fill_imminpar_tuple(SSM_input_parameters& input,
+                                                int key, double value)
+{
+   switch (key) {
+   default: WARNING("Unrecognized entry in block IMMINPAR: " << key); break;
+   }
+
+}
+
+void SSM_slha_io::fill_imextpar_tuple(SSM_input_parameters& input,
+                                                int key, double value)
+{
+   switch (key) {
+   default: WARNING("Unrecognized entry in block IMEXTPAR: " << key); break;
+   }
+
+}
+
 /**
- * Reads pole masses and mixing matrices from a SLHA output file.
+ * Reads pole masses and mixing matrices from a SLHA output file to be filled.
  */
 void SSM_slha_io::fill_physical(SSM_physical& physical) const
 {
@@ -461,10 +584,14 @@ void SSM_slha_io::fill_physical(SSM_physical& physical) const
  */
 double SSM_slha_io::read_scale() const
 {
+   static const std::array<std::string, 6> drbar_blocks =
+      { "gauge", "Yu", "Yd", "Ye", "SM", "HMIX" }
+;
+
    double scale = 0.;
 
-   for (unsigned i = 0; i < NUMBER_OF_DRBAR_BLOCKS; i++) {
-      const double block_scale = slha_io.read_scale(drbar_blocks[i]);
+   for (const auto& block: drbar_blocks) {
+      const double block_scale = slha_io.read_scale(block);
       if (!is_zero(block_scale)) {
          if (!is_zero(scale) && !is_equal(scale, block_scale))
             WARNING("DR-bar parameters defined at different scales");

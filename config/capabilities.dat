@@ -27,9 +27,6 @@
 test_vector: |
    An example vector.
 
-widths: |
-   The width of some make-believe particle.
-
 charge: |
    The charge of some make-believe particle.
 
@@ -132,60 +129,60 @@ LibFortran_1_0_init: |
 
 average: |
    Test Fortran function that supposedly calculates an average.
-  
+
 externalFunction: |
    Simple example external function that output a double in inputs an integer.
-   
+
 externalComplicatedFunction: |
    Simple example external function that output a double in inputs an integer and a double.
-  
+
 example_be_array_1D: |
    Example 1D backend array.
-   
+
 example_be_array_2D: |
    Example 2D backend array.
-   
+
 example_be_array_3D: |
    Example 3D backend array.
-  
+
 funcGauss: |
    Test Fortran function that supposedly calculates a Gaussian function.
-  
+
 awesomeness: |
    Awesome example function by Anders that returns an awesome double and inputs
    an awesome integer.  It runs an awesome example initalize function and some other
-   awesome function, and returns some awesome result.  It also send an awesome message from 
+   awesome function, and returns some awesome result.  It also send an awesome message from
    "awesomenessByAnders" to the logger.
-   
+
 SomeArray: |
    Example double array in libfirst.
-   
+
 SomeDouble: |
    Example double in libfirst.
-   
+
 SomeInt: |
    Example integer in libfirst.
-   
+
 funcBE: |
    Example Fortran backend function that simulates a backend function
    in a Fortran library.
-   
+
 runMe: |
    Example fortran subroutine that simulated a main functionality.
-   
+
 refex: |
    Example function in libfirst that inputs a variable by refernce.
-   
+
 refex2: |
    Example function in libfirst that inputs a variable by refernce
    and another variable to value.
-   
+
 someFunction: |
    Example void function that does nothing.
-   
+
 varex: |
    Return value of a nasty example variadic function in libfirst.
-   
+
 varex2: |
    Return value of a nasty variadic convenience function in libfirst.
 
@@ -198,6 +195,55 @@ run_light_quark_test: |
 ptr_arr_tests: |
    Function that tests array and -> operators on deps and BE vars.
 
+libMathematicaTest_1_0_init: |
+   Initialises the backend for Mathematica tests.
+
+MathematicaTest: |
+   Performs serveral tests of Mathematica backends.
+
+MathTest: |
+   Runs a series of test in libMathematicaTest.
+
+MathTest_CalculateSquare: |
+   Test function for Mathematica backends that calculates the square of a number.
+
+MathTest_CalculateSum: |
+   Test function for Mathematica backends that calculates the sum of two numbers.
+
+MathTest_ExtractElement: |
+   Test function for Mathematica backends that extracts an element from a list.
+
+MathTest_PrintVar: |
+   Test function for Mathematica backends that prints a variable.
+
+MathTest_PrintVarorVar2: |
+   Test function for Mathematica backends that prints a variable depeding on a boolean argument.
+
+MathTest_SquareList: |
+   Test function for Mathematica backends that calculates the square of a list.
+
+MathTest_StringTest: |
+   Test function for Mathematica backends to test strings.
+
+MathTest_Var: |
+   Test integer variable for Mathematica backends.
+
+MathTest_Var2: |
+   Test real variable for Mathematica backends.
+
+MathTest_VarEqualVar2: |
+   Test function for Mathematica backends checks the equality of two variables.
+
+MathTest_VoidTest: |
+   Test function for Mathematica backends for testing void functions
+
+MathTest_Gammafunc: |
+   Test function for Mathematica backends for testing non-alphanumerical characters in function names
+
+MathTest_deltabar: |
+   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names
+
+
 
 #-------------------------------------
 #  SpecBit
@@ -207,7 +253,7 @@ ptr_arr_tests: |
 
 SingletDM_spectrum: |
     Create spectrum object for scalar singlet dark matter model, available functions
-    are a simple container spectrum and one produced by a spectrum generator
+    are a simple container spectrum and one produced by a spectrum generator.
 
 SingletDMZ3_spectrum: |
     Create spectrum object for scalar singlet dark matter model with a Z3 symmetry.
@@ -258,14 +304,11 @@ SM_subspectrum: |
 FH_MSSMMasses: |
     SUSY masses and mixings, as computed by FeynHiggs.
 
-prec_HiggsMasses: |
+FH_HiggsMasses: |
     Higgs masses and mixings with theoretical uncertainties, as computed by FeynHiggs.
 
 Higgs_Couplings: |
     Higgs couplings, as computed by FeynHiggs
-
-SMlike_Higgs_PDG_code: |
-    The PDG code of the neutral Higgs boson that is most SM-like in the theory at hand.
 
 SPheno_3_3_8_init: |
     Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
@@ -275,11 +318,6 @@ SPheno_MSSMspectrum: |
 
 SPheno_internal: |
     Exclusively used for internal variables and function for the SPheno backend.
-
-
-#-------------------------------------
-#  PrecisionBit
-#-------------------------------------
 
 
 #-------------------------------------
@@ -341,7 +379,7 @@ CMSAnalysisContainer: |
    Provides a list of CMS analyses within a container which is ready
    to apply each analysis to an event.
 
-DETAnalysisContainer: |
+DetAnalysisContainer: |
    Provides a list of Delphes analyses within a container which is ready
    to apply each analysis to an event.
 
@@ -1039,6 +1077,27 @@ XENON100_2012_SignalSD: |
 XENON100_2012_LogLikelihood: |
    Calculate the log-likelihood for the XENON100 2012 direct detection analysis.
 
+XENON1T_2017_Calculate: |
+   Perform rate and likelihood calculations for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Events: |
+   The number of observed events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Background: |
+   The number of background events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_Signal: |
+   The number of signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_SignalSI: |
+   The number of spin-independent signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_SignalSD: |
+   The number of spin-independent signal events for the XENON1T 2017 direct detection analysis.
+
+XENON1T_2017_LogLikelihood: |
+   Calculate the log-likelihood for the XENON1T 2017 direct detection analysis.
+
 LUX_2013_Calculate: |
    Perform rate and likelihood calculations for the LUX 2013 direct detection analysis.
 
@@ -1227,6 +1286,27 @@ PICO_60_I_SignalSD: |
 
 PICO_60_I_LogLikelihood: |
    Calculate the log-likelihood for the PICO-60 direct detection analysis (iodine only).
+
+PICO_60_2017_Calculate: |
+   Perform rate and likelihood calculations for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Events: |
+   The number of observed events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Background: |
+   The number of background events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_Signal: |
+   The number of signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_SignalSI: |
+   The number of spin-independent signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_SignalSD: |
+   The number of spin-independent signal events for the PICO-60 2017 direct detection analysis.
+
+PICO_60_2017_LogLikelihood: |
+   Calculate the log-likelihood for the PICO-60 2017 direct detection analysis.
 
 DARWIN_Ar_2015_Calculate: |
    Perform rate and likelihood calculations for the DARWIN Ar 2015 direct detection analysis.
@@ -1486,6 +1566,9 @@ DD_SetDetectorEmin: |
 DDCalc_1_0_0_init: |
    Initialises DDCalc 1.0.0.
 
+DDCalc_1_1_0_init: |
+   Initialises DDCalc 1.1.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -1534,11 +1617,17 @@ PICO_60_F_Init: |
 PICO_60_I_Init: |
    Initialises a direct detection experiment with the properties of the analysis of PICO-60, including only iodine.
 
+PICO_60_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of PICO-60.
+
 PandaX_2016_Init: |
    Initialises a direct detection experiment with the properties of the 2016 analysis of PandaX.
 
 XENON100_2012_Init: |
    Initialises a direct detection experiment with the properties of the 2012 analysis of Xenon100.
+
+XENON1T_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of Xenon1T.
 
 SuperCDMS_2014_Init: |
    Initialises a direct detection experiment with the properties of the 2014 analysis of SuperCDMS.
@@ -1591,15 +1680,21 @@ nulike_init: |
 nulike_1_0_4_init: |
   Initializes nulike_1_0_4.
 
+nulike_1_0_5_init: |
+  Initializes nulike_1_0_5.
+
+nulike_1_0_6_init: |
+  Initializes nulike_1_0_5.
+
 nubounds:
   Counts, likelihoods and p-values from neutrino telescope searches for dark matter annihilation in the Sun.
 
 Example_lnL_B: |
   Example log likelihood in ExampleBit B.
-  
+
 lnlike_marg_poisson_gaussian_error: |
   log of the convolution of a Poisson and Gausian distributions.
-  
+
 lnlike_marg_poisson_lognormal_error: |
   log of the convolution of a poisson and log-normal distributions.
 
@@ -1615,7 +1710,7 @@ HiggsBounds_4_2_1_init:
 
 HiggsBounds_4_3_1_init:
    Initialises HiggsBounds backend, version 4.3.1.
-   
+
 finish_HiggsBounds: |
    Finishes HiggsBound.
 
@@ -1670,10 +1765,10 @@ initialize_HiggsBounds_int_HS: |
    Initialises HiggsBounds for library linking from HiggsSignals.
 
 finish_HiggsBounds_HS: |
-   Finishes HiggsBounds from HiggsSignals.      
+   Finishes HiggsBounds from HiggsSignals.
 
 finish_HiggsSignals: |
-   Finishes HiggsSignal Backend.   
+   Finishes HiggsSignal Backend.
 
 initialize_HiggsSignals: |
    Initializes HiggsSignals.
@@ -1835,8 +1930,8 @@ mssmiuseful: |
 mspctm: |
    DarkSUSY mass spectrum.
 
-#widths: |
-#   DarkSUSY particle widths. (Capability is defined twice.)
+widths: |
+   DarkSUSY particle widths. (Capability is defined twice.)
 
 intdof: |
    Number of spin and color states for each particle for DarkSUSY.
@@ -2083,6 +2178,12 @@ sbottom_1_decay_rates : |
 stau_1_decay_rates : |
    Decays of the τ_1 sleptons.
 
+stau_1_decay_rates_SH : |
+   Decays of the τ_1 sleptons calculated with SUSY-HIT.
+
+stau_1_decay_rates_smallsplit : |
+   Decays of the τ_1 sleptons for small stau--neutralino mass splittings.
+
 stop_2_decay_rates : |
    Decays of the t_2 squarks.
 
@@ -2173,6 +2274,12 @@ H_plus_decay_rates : |
 chargino_plus_1_decay_rates : |
    Decays of the chargino+ 1.
 
+chargino_plus_1_decay_rates_SH : |
+   Decays of the chargino+ 1 calculated using SUSY-HIT.
+
+chargino_plus_1_decay_rates_smallsplit : |
+   Decays of the chargino+ 1 at small chargino--neutralino mass splittings.
+
 chargino_plus_2_decay_rates : |
    Decays of the chargino+ 2.
 
@@ -2211,6 +2318,9 @@ piminus_decay_rates : |
 
 rhominus_decay_rates : |
   All decays of the ρ- meson.
+
+rho1450_decay_rates : |
+  Decays of the ρ(1450) meson.
 
 neutralino_1_decay_rates : |
    Decays of the neutralino 1.
@@ -2291,7 +2401,13 @@ deltarho : |
    Deviation from one (∆ρ) of the ratio of the Fermi effective coupling (G_F) in W and Z-mediated processes.
 
 prec_mw : |
-   Precision value of the W mass in the MSSM.
+   Precision value of the W mass.
+
+prec_mh : |
+   Precision value of the mass of the most SM-like Higgs boson.
+
+prec_HeavyHiggsMasses : |
+   Precision values of the masses of the A^0, H+ and the least SM-like neutral Higgs boson.
 
 prec_sinW2_eff : |
    Precision value of the effective leptonic weak mixing angle sin^2 θ_W,eff.
@@ -2584,7 +2700,7 @@ alphas_running : |
    Computes the alphas running coupling at a given energy.
 
 slha_adjust : |
-   Adjusts the SLHA parameters to the SuperIso standard. 
+   Adjusts the SLHA parameters to the SuperIso standard.
 
 #-------------------------------------
 #  SUSY-HIT capabilities
@@ -2607,7 +2723,7 @@ cb_susyhitin: |
 
 cb_sd_leshouches1: |
    SLHA1 values for SDecay.
-   
+
 cb_sd_leshouches2: |
    SLHA2 values for SDecay
 
@@ -2757,7 +2873,7 @@ cb_sd_selectron: |
 
 susy_hit_backend_level_init: |
    Runs SUSY-HIT decay calculations.
-   
+
 H_minus_decay_rates: |
    Decay rate of the negative chared higgs.
 
@@ -2766,88 +2882,88 @@ scharm_l_decay_rates: |
 
 scharm_r_decay_rates: |
    Decay rate of the right-handed scharm.
-   
+
 scharmbar_l_decay_rates: |
    Decay rate of the left-handed anti-scharm.
-   
+
 scharmbar_r_decay_rates: |
    Decay rate of the right-handed anti-scharm.
-   
+
 sdown_l_decay_rates: |
    Decay rate of the left-handed sdown.
-   
+
 sdown_r_decay_rates: |
    Decay rate of the right-handed sdown.
-   
+
 sdownbar_l_decay_rates: |
    Decay rate of the left-handed anti-sdown.
-   
+
 sdownbar_r_decay_rates: |
    Decay rate of the right-handed auti-sdown.
-   
+
 selectron_l_decay_rates: |
    Decay rate of the left-handed selectron.
-   
+
 selectron_r_decay_rates: |
    Decay rate of the right-handed selectron.
-   
+
 selectronbar_l_decay_rates: |
    Decay rate of the left-handed anti-selectron.
-   
+
 selectronbar_r_decay_rates: |
    Decay rate of the right-handed anti-selectron.
-   
+
 pi_0_decay_rates: |
    Decay rate of the pi_0 meson.
-   
+
 pi_minus_decay_rates: |
    Decay rate of the pi minus mesaon.
-   
+
 pi_plus_decay_rates: |
    Decay rate of the pi plus meson.
-   
+
 rho_0_decay_rates: |
    Decay rate of the rho_0 meson.
-   
+
 rho_minus_decay_rates: |
    Decay rate of the rho minus meson.
-   
+
 rho_plus_decay_rates: |
    Decay rate of the rho plus meson.
-   
+
 smuon_l_decay_rates: |
    Decay rate of the left-handed smuon.
-   
+
 smuon_r_decay_rates: |
    Decay rate of the right-handed smuon.
-   
+
 smuonbar_l_decay_rates: |
    Decay rate of the left-handed anti-smuon.
-   
+
 smuonbar_r_decay_rates: |
    Decay rate of the right-handed anti-smuon.
-   
+
 sstrange_l_decay_rates: |
    Decay rate of the left-handed sstrang.
-   
+
 sstrange_r_decay_rates: |
    Decay rate of the right-handed sstrang.
-   
+
 sstrangebar_l_decay_rates: |
    Decay rate of the left-handed anti-sstrang.
-   
+
 sstrangebar_r_decay_rates: |
    Decay rate of the right-handed anti-sstrang.
-   
+
 sup_l_decay_rates: |
    Decay rate of the left-handed sup.
-   
+
 sup_r_decay_rates: |
    Decay rate of the right-handed sup.
-   
+
 supbar_l_decay_rates: |
    Decay rate of the left-handed anti-sup.
-   
+
 supbar_r_decay_rates: |
    Decay rate of the right-handed anti-sup.
 
@@ -2900,17 +3016,50 @@ MSSM16atQ_parameters: |
 MSSM19atQ_parameters: |
    Parameters for the model MSSM19atQ (see ./gambit MSSM19atQ)
 
+MSSM20atMSUSY_parameters: |
+   Parameters for the model MSSM20atMSUSY (see ./gambit MSSM20atMSUSY)
+
+MSSM20atMSUSY_mA_parameters: |
+   Parameters for the model MSSM20atMSUSY_mA (see ./gambit MSSM20atMSUSY_mA)
+
+MSSM20atMGUT_parameters: |
+   Parameters for the model MSSM20atMGUT (see ./gambit MSSM20atMGUT)
+
+MSSM20atMGUT_mA_parameters: |
+   Parameters for the model MSSM20atMGUT_mA (see ./gambit MSSM20atMGUT_mA)
+
 MSSM20atQ_parameters: |
    Parameters for the model MSSM20atQ (see ./gambit MSSM20atQ)
 
 MSSM24atQ_parameters: |
    Parameters for the model MSSM24atQ (see ./gambit MSSM24atQ)
 
+MSSM25atMSUSY_parameters: |
+   Parameters for the model MSSM25atMSUSY (see ./gambit MSSM25atMSUSY)
+
+MSSM25atMSUSY_mA_parameters: |
+   Parameters for the model MSSM25atMSUSY_mA (see ./gambit MSSM25atMSUSY_mA)
+
+MSSM25atMGUT_parameters: |
+   Parameters for the model MSSM25atMGUT (see ./gambit MSSM25atMGUT)
+
+MSSM25atMGUT_mA_parameters: |
+   Parameters for the model MSSM25atMGUT_mA (see ./gambit MSSM25atMGUT_mA)
+
 MSSM25atQ_parameters: |
    Parameters for the model MSSM25atQ (see ./gambit MSSM25atQ)
 
+MSSM30atMSUSY_parameters: |
+   Parameters for the model MSSM30atMSUSY (see ./gambit MSSM30atMSUSY)
+
+MSSM30atMSUSY_mA_parameters: |
+   Parameters for the model MSSM30atMSUSY_mA (see ./gambit MSSM30atMSUSY_mA)
+
 MSSM30atMGUT_parameters: |
    Parameters for the model MSSM30atMGUT (see ./gambit MSSM30atMGUT)
+
+MSSM30atMGUT_mA_parameters: |
+   Parameters for the model MSSM30atMGUT_mA (see ./gambit MSSM30atMGUT_mA)
 
 MSSM30atQ_parameters: |
    Parameters for the model MSSM30atQ (see ./gambit MSSM30atQ)
@@ -2918,14 +3067,71 @@ MSSM30atQ_parameters: |
 MSSM63atMGUT_parameters: |
    Parameters for the model MSSM63atMGUT (see ./gambit MSSM63atMGUT)
 
+MSSM63atMSUSY_parameters: |
+   Parameters for the model MSSM63atMSUSY (see ./gambit MSSM63atMSUSY)
+
 MSSM63atQ_parameters: |
    Parameters for the model MSSM63atQ (see ./gambit MSSM63atQ)
+
+MSSM63atMGUT_mA_parameters: |
+   Parameters for the model MSSM63atMGUT_mA (see ./gambit MSSM63atMGUT_mA)
+
+MSSM63atMSUSY_mA_parameters: |
+   Parameters for the model MSSM63atMSUSY_mA (see ./gambit MSSM63atMSUSY_mA)
 
 MSSM7atQ_parameters: |
    Parameters for the model MSSM7atQ (see ./gambit MSSM7atQ)
 
 MSSM9atQ_parameters: |
    Parameters for the model MSSM9atQ (see ./gambit MSSM9atQ)
+
+MSSM9batQ_parameters: |
+   Parameters for the model MSSM9batQ (see ./gambit MSSM9batQ)
+
+MSSM10atQ_mA_parameters: |
+   Parameters for the model MSSM10atQ_mA (see ./gambit MSSM10atQ_mA)
+
+MSSM10batQ_mA_parameters: |
+   Parameters for the model MSSM10batQ_mA (see ./gambit MSSM10batQ_mA)
+
+MSSM10catQ_mA_parameters: |
+   Parameters for the model MSSM10catQ_mA (see ./gambit MSSM10catQ_mA)
+
+MSSM11atQ_mA_parameters: |
+   Parameters for the model MSSM11atQ_mA (see ./gambit MSSM11atQ_mA)
+
+MSSM15atQ_mA_parameters: |
+   Parameters for the model MSSM15atQ_mA (see ./gambit MSSM15atQ_mA)
+
+MSSM16atQ_mA_parameters: |
+   Parameters for the model MSSM16atQ_mA (see ./gambit MSSM16atQ_mA)
+
+MSSM19atQ_mA_parameters: |
+   Parameters for the model MSSM19atQ_mA (see ./gambit MSSM19atQ_mA)
+
+MSSM20atQ_mA_parameters: |
+   Parameters for the model MSSM20atQ_mA (see ./gambit MSSM20atQ_mA)
+
+MSSM24atQ_mA_parameters: |
+   Parameters for the model MSSM24atQ_mA (see ./gambit MSSM24atQ_mA)
+
+MSSM25atQ_mA_parameters: |
+   Parameters for the model MSSM25atQ_mA (see ./gambit MSSM25atQ_mA)
+
+MSSM30atQ_mA_parameters: |
+   Parameters for the model MSSM30atQ_mA (see ./gambit MSSM30atQ_mA)
+
+MSSM63atQ_mA_parameters: |
+   Parameters for the model MSSM63atQ_mA (see ./gambit MSSM63atQ_mA)
+
+MSSM7atQ_mA_parameters: |
+   Parameters for the model MSSM7atQ_mA (see ./gambit MSSM7atQ_mA)
+
+MSSM9atQ_mA_parameters: |
+   Parameters for the model MSSM9atQ_mA (see ./gambit MSSM9atQ_mA)
+
+MSSM9batQ_mA_parameters: |
+   Parameters for the model MSSM9batQ_mA (see ./gambit MSSM9batQ_mA)
 
 NUHM1_parameters: |
    Parameters for the model NUHM1 (see ./gambit NUHM1)
@@ -3015,7 +3221,7 @@ FHSetPara: |
 FHSetSMPara: |
 
 FHUncertainties: |
-   
+
 FH_Couplings_output: |
 
 FH_FlavourObs: |
@@ -3064,4 +3270,18 @@ calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
 
+#------------------------------
+#  SUSYHD capabilities
+#------------------------------
 
+SUSYHD_1_0_2_init: |
+   Initialises SUSYHD, version 1.0.2
+
+SUSYHD_SetSMparameters: |
+   Sets the SM parameters to be used in SUSYHD
+
+SUSYHD_MHiggs: |
+   Calculates the Higgs mass using SUSYHD
+
+SUSYHD_DeltaMHiggs : |
+   Calculates the uncertainty on the Higgs mass using SUSYHD

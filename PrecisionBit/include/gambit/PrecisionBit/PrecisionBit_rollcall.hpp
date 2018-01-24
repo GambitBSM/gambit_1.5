@@ -33,8 +33,8 @@
 ///  *********************************************
 
 
-#ifndef __EWPOBit_rollcall_hpp__
-#define __EWPOBit_rollcall_hpp__
+#ifndef __PrecisionBit_rollcall_hpp__
+#define __PrecisionBit_rollcall_hpp__
 
 
 #define MODULE PrecisionBit
@@ -67,11 +67,25 @@ START_MODULE
   #define CAPABILITY MSSM_spectrum
   START_CAPABILITY
 
+    #define FUNCTION make_MSSM_precision_spectrum_4H_W
+    START_FUNCTION(Spectrum)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    DEPENDENCY(prec_mw, triplet<double>)
+    DEPENDENCY(prec_mh, triplet<double>)
+    DEPENDENCY(prec_HeavyHiggsMasses, map_int_triplet_dbl)
+    #undef FUNCTION
+
     #define FUNCTION make_MSSM_precision_spectrum_H_W
     START_FUNCTION(Spectrum)
     DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
     DEPENDENCY(prec_mw, triplet<double>)
-    DEPENDENCY(prec_HiggsMasses, fh_HiggsMassObs)
+    DEPENDENCY(prec_mh, triplet<double>)
+    #undef FUNCTION
+
+    #define FUNCTION make_MSSM_precision_spectrum_H
+    START_FUNCTION(Spectrum)
+    DEPENDENCY(unimproved_MSSM_spectrum, Spectrum)
+    DEPENDENCY(prec_mh, triplet<double>)
     #undef FUNCTION
 
     #define FUNCTION make_MSSM_precision_spectrum_W
@@ -93,7 +107,7 @@ START_MODULE
   QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mh, NEW_CAPABILITY, mh_from_SM_spectrum,   triplet<double>, (), (SM_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_SS_spectrum,   triplet<double>, (SingletDM, SingletDMZ3), (SingletDM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum), (SMlike_Higgs_PDG_code, int))
+  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum))
 
   // SM nuisance likelihoods
   QUICK_FUNCTION(PrecisionBit, lnL_Z_mass,   NEW_CAPABILITY, lnL_Z_mass_chi2,   double, (), (SMINPUTS, SMInputs))
@@ -189,7 +203,7 @@ START_MODULE
     BACKEND_REQ(calculate_amu_2loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
     BACKEND_REQ(calculate_uncertainty_amu_2loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
     BACKEND_OPTION( (gm2calc), (libgm2calc) )
-    ALLOW_MODELS(MSSM30atQ, MSSM30atMGUT, NUHM2)
+    ALLOW_MODELS(MSSM30atQ, MSSM30atQ_mA, MSSM30atMGUT, MSSM30atMGUT_mA, NUHM2)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -209,7 +223,6 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY
-
 
 #undef MODULE
 

@@ -16,10 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:49:19
+// File generated at Wed 25 Oct 2017 18:48:22
 
 #include "MSSMatMGUT_observables.hpp"
 #include "MSSMatMGUT_mass_eigenstates.hpp"
+#include "MSSMatMGUT_a_muon.hpp"
+#include "MSSMatMGUT_edm.hpp"
 #include "MSSMatMGUT_effective_couplings.hpp"
 #include "gm2calc_interface.hpp"
 #include "eigen_utils.hpp"
@@ -29,8 +31,12 @@
 #include "physical_input.hpp"
 
 #define MODEL model
+#define AMU a_muon
+#define AMUUNCERTAINTY a_muon_uncertainty
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty
+#define EDM0(p) edm_ ## p
+#define EDM1(p,idx) edm_ ## p ## _ ## idx
 #define EFFCPHIGGSPHOTONPHOTON eff_cp_higgs_photon_photon
 #define EFFCPHIGGSGLUONGLUON eff_cp_higgs_gluon_gluon
 #define EFFCPPSEUDOSCALARPHOTONPHOTON eff_cp_pseudoscalar_photon_photon
@@ -46,7 +52,7 @@
 
 namespace flexiblesusy {
 
-const unsigned MSSMatMGUT_observables::NUMBER_OF_OBSERVABLES;
+const int MSSMatMGUT_observables::NUMBER_OF_OBSERVABLES;
 
 MSSMatMGUT_observables::MSSMatMGUT_observables()
 
@@ -79,6 +85,19 @@ void MSSMatMGUT_observables::clear()
 void MSSMatMGUT_observables::set(const Eigen::ArrayXd& vec)
 {
 
+}
+
+MSSMatMGUT_observables calculate_observables(const MSSMatMGUT_mass_eigenstates& model,
+                                              const softsusy::QedQcd& qedqcd,
+                                              const Physical_input& physical_input,
+                                              double scale)
+{
+   auto model_at_scale = model;
+
+   if (scale > 0.)
+      model_at_scale.run_to(scale);
+
+   return calculate_observables(model_at_scale, qedqcd, physical_input);
 }
 
 MSSMatMGUT_observables calculate_observables(const MSSMatMGUT_mass_eigenstates& model,

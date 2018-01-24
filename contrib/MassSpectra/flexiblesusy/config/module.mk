@@ -48,6 +48,7 @@ install-src::
 		install -m u=rw,g=r,o=r $(CONFIG_TMPL) $(CONFIG_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(CONFIG_MK) $(CONFIG_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(DEPGEN_SRC) $(CONFIG_INSTALL_DIR)
+		install -m u=rwx,g=r,o=r $(MATH_INC_PATHS) $(CONFIG_INSTALL_DIR)
 		$(INSTALL_STRIPPED) $(MAKEFILE_IN) $(CONFIG_INSTALL_DIR) -m u=rw,g=r,o=r
 		$(INSTALL_STRIPPED) $(REMOVE_EXPORT_MARKERS) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r
 		$(INSTALL_STRIPPED) $(INSTALL_STRIPPED) $(CONFIG_INSTALL_DIR) -m u=rwx,g=r,o=r

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:31
+// File generated at Wed 25 Oct 2017 19:41:57
 
 #ifndef CMSSM_INPUT_PARAMETERS_H
 #define CMSSM_INPUT_PARAMETERS_H
@@ -27,16 +27,12 @@
 namespace flexiblesusy {
 
 struct CMSSM_input_parameters {
-   double m0;
-   double m12;
-   double TanBeta;
-   int SignMu;
-   double Azero;
+   double m0{};
+   double m12{};
+   double TanBeta{};
+   int SignMu{1};
+   double Azero{};
 
-   CMSSM_input_parameters()
-      : m0(0), m12(0), TanBeta(0), SignMu(1), Azero(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

@@ -32,10 +32,9 @@ Two_scale_constant_precision::Two_scale_constant_precision(double precision_)
 }
 
 Two_scale_constant_precision::~Two_scale_constant_precision()
-{
-}
+= default;
 
-double Two_scale_constant_precision::get_precision(unsigned)
+double Two_scale_constant_precision::get_precision(int)
 {
    return precision;
 }
@@ -51,13 +50,12 @@ Two_scale_increasing_precision::Two_scale_increasing_precision(double decreasing
 }
 
 Two_scale_increasing_precision::~Two_scale_increasing_precision()
-{
-}
+= default;
 
-double Two_scale_increasing_precision::get_precision(unsigned iteration)
+double Two_scale_increasing_precision::get_precision(int iteration)
 {
    return std::max(exp(- static_cast<double>(iteration + 1) * log(decreasing_factor)),
                    minimum_precision);
 }
 
-}
+} // namespace flexiblesusy

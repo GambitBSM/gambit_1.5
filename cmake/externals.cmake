@@ -130,14 +130,21 @@ endmacro()
 
 # Function to check whether or not a given scanner or backend has been ditched
 function(check_ditch_status name version)
+  # Check first for optional argument for Mathematica backends
+  if(${ARGN} AND ${ARGN} EQUAL 1 AND NOT HAVE_MATHEMATICA)
+    set (itch "${itch}" "${name}_${version}")
+  endif()
   foreach(ditch_command ${itch})
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print \"${name}_${version}\".startswith(\"${ditch_command}\")"
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                     RESULT_VARIABLE result
                     OUTPUT_VARIABLE output)
     if (output STREQUAL "True\n")
-      set(ditched_${name}_${version} TRUE PARENT_SCOPE)
-      message("${BoldCyan} X Excluding ${name} ${version} from GAMBIT configuration.${ColourReset}")
+      if(NOT ditched_${name}_${ver})
+        set(ditched_${name}_${version} TRUE)
+        set(ditched_${name}_${version} TRUE PARENT_SCOPE)
+        message("${BoldCyan} X Excluding ${name} ${version} from GAMBIT configuration.${ColourReset}")
+      endif()
     endif()
   endforeach()
 endfunction()

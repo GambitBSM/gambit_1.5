@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:48:06
+// File generated at Wed 25 Oct 2017 18:22:39
 
 #ifndef MSSMNoFVatMGUT_INPUT_PARAMETERS_H
 #define MSSMNoFVatMGUT_INPUT_PARAMETERS_H
@@ -27,46 +27,38 @@
 namespace flexiblesusy {
 
 struct MSSMNoFVatMGUT_input_parameters {
-   double TanBeta;
-   int SignMu;
-   double M1;
-   double M2;
-   double M3;
-   double AtIN;
-   double AbIN;
-   double AtauIN;
-   double AcIN;
-   double AsIN;
-   double AmuonIN;
-   double AuIN;
-   double AdIN;
-   double AeIN;
-   double mHd2IN;
-   double mHu2IN;
-   double ml11IN;
-   double ml22IN;
-   double ml33IN;
-   double me11IN;
-   double me22IN;
-   double me33IN;
-   double mq11IN;
-   double mq22IN;
-   double mq33IN;
-   double mu11IN;
-   double mu22IN;
-   double mu33IN;
-   double md11IN;
-   double md22IN;
-   double md33IN;
+   double TanBeta{};
+   int SignMu{1};
+   double M1{};
+   double M2{};
+   double M3{};
+   double AtIN{};
+   double AbIN{};
+   double AtauIN{};
+   double AcIN{};
+   double AsIN{};
+   double AmuonIN{};
+   double AuIN{};
+   double AdIN{};
+   double AeIN{};
+   double mHd2IN{};
+   double mHu2IN{};
+   double ml11IN{};
+   double ml22IN{};
+   double ml33IN{};
+   double me11IN{};
+   double me22IN{};
+   double me33IN{};
+   double mq11IN{};
+   double mq22IN{};
+   double mq33IN{};
+   double mu11IN{};
+   double mu22IN{};
+   double mu33IN{};
+   double md11IN{};
+   double md22IN{};
+   double md33IN{};
 
-   MSSMNoFVatMGUT_input_parameters()
-      : TanBeta(0), SignMu(1), M1(0), M2(0), M3(0), AtIN(0), AbIN(0), AtauIN(0),
-   AcIN(0), AsIN(0), AmuonIN(0), AuIN(0), AdIN(0), AeIN(0), mHd2IN(0), mHu2IN(0
-   ), ml11IN(0), ml22IN(0), ml33IN(0), me11IN(0), me22IN(0), me33IN(0), mq11IN(
-   0), mq22IN(0), mq33IN(0), mu11IN(0), mu22IN(0), mu33IN(0), md11IN(0), md22IN
-   (0), md33IN(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

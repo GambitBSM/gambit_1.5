@@ -67,14 +67,14 @@ namespace Gambit
       // Extract SLHAea object
       // This copies the data out. Could possible change it to pass out a
       // reference instead, or have another function to do that.
-      SLHAea::Coll slhaea = fullspectrum->getSLHAea();
+      SLHAea::Coll slhaea = fullspectrum->getSLHAea(2);
       // for testing, write this to file
       std::ofstream out1;
       out1.open("SpecBit/exampleRead_test.slha");
       out1 << slhaea;
       out1.close();
 
-      // SLHAea::Coll slhaea = spec->getSLHAea(); // The above is just a wrapper for this.
+      // SLHAea::Coll slhaea = spec->getSLHAea(2); // The above is just a wrapper for this.
 
       // If this is a valid model point, return true and dump information, else false
 
@@ -94,7 +94,7 @@ namespace Gambit
 
          // Write to file so we can check it
          std::string filename(myPipe::runOptions->getValue<std::string>("output_slha_filename"));
-         spec->getSLHA(filename);
+         spec->writeSLHAfile(2,filename);
 
          // ---------------------------------------------------------
          // BEGIN DEMO OF SPECTRUM OBJECT AND PARTICLE DATABASE
