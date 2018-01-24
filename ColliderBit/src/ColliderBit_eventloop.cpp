@@ -1442,7 +1442,13 @@ namespace Gambit
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
-          result.push_back(anaPtr->get_results());
+
+          str warning;
+          result.push_back(anaPtr->get_results(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
         }
         return;
       }
@@ -1508,7 +1514,13 @@ namespace Gambit
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
-          result.push_back(anaPtr->get_results());
+
+          str warning;
+          result.push_back(anaPtr->get_results(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
         }
         return;
       }
@@ -1572,7 +1584,13 @@ namespace Gambit
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
-          result.push_back(anaPtr->get_results());
+
+          str warning;
+          result.push_back(anaPtr->get_results(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
         }
         return;
       }
@@ -1636,7 +1654,13 @@ namespace Gambit
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
-          result.push_back(anaPtr->get_results());
+
+          str warning;
+          result.push_back(anaPtr->get_results(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
         }
         return;
       }

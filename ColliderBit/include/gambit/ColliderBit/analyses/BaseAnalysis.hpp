@@ -27,9 +27,6 @@
 namespace Gambit {
   namespace ColliderBit {
 
-    using namespace std;
-
-
     /// An abstract base class for collider analyses within ColliderBit.
     /// @note The templating makes forward declaration / #include decoupling hard :-(
     /// @todo How is this templating useful? Only if alternative Analysis implementations have the same interface...
@@ -38,6 +35,7 @@ namespace Gambit {
     private:
 
       double _ntot, _xsec, _xsecerr, _luminosity;
+      bool _xsec_is_set, _luminosity_is_set, _is_scaled;
       bool _needs_collection;
       AnalysisData _results;
       typedef EventT EventType;
@@ -47,11 +45,15 @@ namespace Gambit {
 
       /// @name Construction, Destruction, and Recycling:
       //@{
-      BaseAnalysis() : _ntot(0), _xsec(0), _xsecerr(0), _luminosity(0), _needs_collection(true) {  }
+      BaseAnalysis() : _ntot(0), _xsec(0), _xsecerr(0), _luminosity(0),
+                       _xsec_is_set(false), _luminosity_is_set(false),
+                       _is_scaled(false), _needs_collection(true) {  }
       virtual ~BaseAnalysis() { }
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       virtual void clear() {
-        _ntot = 0; _xsec = 0; _xsecerr = 0; _luminosity = 0; _needs_collection = true;
+        _ntot = 0; _xsec = 0; _xsecerr = 0; _luminosity = 0; 
+        _xsec_is_set = false; _luminosity_is_set = false;
+        _is_scaled = false; _needs_collection = true;
         _results.clear();
       }
       //@}
@@ -77,9 +79,9 @@ namespace Gambit {
       /// Return the integrated luminosity (in inverse pb).
       double luminosity() const { return _luminosity; }
       /// Set the cross-section and its error (in pb).
-      void set_xsec(double xs, double xserr) { _xsec = xs; _xsecerr = xserr; }
+      void set_xsec(double xs, double xserr) { _xsec_is_set = true; _xsec = xs; _xsecerr = xserr; }
       /// Set the integrated luminosity (in inverse pb).
-      void set_luminosity(double lumi) { _luminosity = lumi; }
+      void set_luminosity(double lumi) { _luminosity_is_set = true; _luminosity = lumi; }
 
       /// Get the collection of SignalRegionData for likelihood computation.
       const AnalysisData& get_results()
@@ -91,6 +93,27 @@ namespace Gambit {
         }
         return _results;
       }
+
+      /// An overload of get_results() with some additional consistency checks.
+      const AnalysisData& get_results(std::string& warning)
+      {
+        warning = "";
+        if (not _xsec_is_set)
+          warning += "Cross section has not been set. ";
+        if (not _luminosity_is_set)
+          warning += "Luminosity has not been set. ";
+        if (not _is_scaled)
+          warning += "Results have not been scaled. ";
+        if (_ntot < 1)
+          warning += "No events have been analyzed. ";
+
+        /// @todo We need to shift the 'analysis_name' property from class SignalRegionData 
+        ///       to this class. Then we can add the class name to this error message.
+        // warning = "Ooops! In analysis " + analysis_name + ": " + warning
+
+        return get_results();
+      }
+
       //@}
 
 
@@ -139,6 +162,7 @@ namespace Gambit {
           sr.n_signal_at_lumi = factor * sr.n_signal;
           //cout << "DEBUG: " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
         }
+        _is_scaled = true;
       }
       //@}
 
