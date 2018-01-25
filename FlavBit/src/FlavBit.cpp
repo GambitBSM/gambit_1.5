@@ -896,7 +896,7 @@ namespace Gambit
       result=BEreq::RKstar_CONV(&param,0.045,1.1);
 
       if (flav_debug) printf("RK*_lowq2=%.3e\n",result);
-      if (flav_debug) cout<<"Finished SI_RKstar_45_11"<<endl;
+      if (flav_debug) cout<<"Finished SI_RKstar_0045_11"<<endl;
     }
 
     /// RK* in intermediate q^2
@@ -910,6 +910,19 @@ namespace Gambit
 
       if (flav_debug) printf("RK*_intermq2=%.3e\n",result);
       if (flav_debug) cout<<"Finished SI_RKstar_11_60"<<endl;
+    }
+
+    /// RK between 1 and 6 GeV^2
+    void SI_RK(double &result)
+    {
+      using namespace Pipes::SI_RK;
+      if (flav_debug) cout<<"Starting SI_RK"<<endl;
+
+      parameters const& param = *Dep::SuperIso_modelinfo;
+      result=BEreq::RK_CONV(&param,1.0,6.0);
+
+      if (flav_debug) printf("RK=%.3e\n",result);
+      if (flav_debug) cout<<"Finished SI_RK"<<endl;
     }
     
     /// Isospin asymmetry of B-> K* mu mu

@@ -422,9 +422,9 @@ START_MODULE
     BACKEND_REQ(RKstar_CONV, (libsuperiso), double, (const parameters*, double, double))
 
  // Observable: RK* in q^2 bin from 0.045 GeV^2 to 1.1 GeV^2
-  #define CAPABILITY RKstar_45_11
+  #define CAPABILITY RKstar_0045_11
   START_CAPABILITY
-    #define FUNCTION SI_RKstar_45_11
+    #define FUNCTION SI_RKstar_0045_11
     RKSTAR_BINS
     #undef FUNCTION
   #undef CAPABILITY
@@ -434,6 +434,21 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION SI_RKstar_11_60
     RKSTAR_BINS
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // Helper macro to make the following declarations quicker
+  #define RK_BINS                                                                                   \
+    START_FUNCTION(double)                                                                     \
+    DEPENDENCY(SuperIso_modelinfo, parameters)                                                             \
+    BACKEND_OPTION( (SuperIso, 3.6), (libsuperiso) )                                                       \
+    BACKEND_REQ(RK_CONV, (libsuperiso), double, (const parameters*, double, double))
+
+ // Observable: RK in q^2 bin from 1 GeV^2 to 6 GeV^2
+  #define CAPABILITY RK
+  START_CAPABILITY
+    #define FUNCTION SI_RK
+    RK_BINS
     #undef FUNCTION
   #undef CAPABILITY
 
