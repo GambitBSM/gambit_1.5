@@ -48,12 +48,13 @@ namespace Gambit {
       BaseAnalysis() : _ntot(0), _xsec(0), _xsecerr(0), _luminosity(0),
                        _xsec_is_set(false), _luminosity_is_set(false),
                        _is_scaled(false), _needs_collection(true) {  }
+
       virtual ~BaseAnalysis() { }
+
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       virtual void clear() {
-        _ntot = 0; _xsec = 0; _xsecerr = 0; _luminosity = 0; 
-        _xsec_is_set = false; _luminosity_is_set = false;
-        _is_scaled = false; _needs_collection = true;
+        _ntot = 0; _xsec = 0; _xsecerr = 0; 
+        _xsec_is_set = false; _is_scaled = false; _needs_collection = true;
         _results.clear();
       }
       //@}
