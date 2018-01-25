@@ -25,7 +25,10 @@ namespace Gambit {
 
 
     /// More sophisticated than just std::vector<HEPUtilsAnalysis*>
-    struct HEPUtilsAnalysisContainer {
+    struct HEPUtilsAnalysisContainer
+    {
+      /// @todo Really need to make our minds up about wtf this type is to be called -- it has 3 different names.
+      ///       Just pick one and delete the typedefs, they make things messier and harder, not easier.
       typedef HEPUtilsAnalysis Analysis;
 
       std::vector<HEPUtilsAnalysis*> analyses;

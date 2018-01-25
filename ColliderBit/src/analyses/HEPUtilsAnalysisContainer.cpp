@@ -98,7 +98,7 @@ namespace Gambit
     {
       // assert(!analyses.empty()); //< @todo Really necessary?
       assert(ready); //< @todo Really necessary?
-      for (Analysis* a : analyses) a->analyze(event);
+      for (Analysis* a : analyses) a->do_analysis(event);
     }
 
 
