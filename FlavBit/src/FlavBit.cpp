@@ -1481,9 +1481,7 @@ namespace Gambit
     void LUV_measurements(predictions_measurements_covariances &pmc)
     {
       using namespace Pipes::LUV_measurements;
-      const int n_experiments=3;
-      static bool th_err_absolute[n_experiments], first = true;
-      static double th_err[n_experiments];
+      static bool first = true;
       
       static double theory_RKstar_0045_11_err, theory_RKstar_11_60_err, theory_RK_err;
       if (flav_debug) cout<<"Starting LUV_measurements"<<endl;
