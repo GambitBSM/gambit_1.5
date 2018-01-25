@@ -20,7 +20,6 @@ SuperIso:
 DDCalc:
   1.0.0:       ./Backends/installed/ddcalc/1.0.0/lib/libDDCalc.so
   1.1.0:       ./Backends/installed/ddcalc/1.1.0/lib/libDDCalc.so
-  2.0.0:       ./../DDCalc_development/lib/libDDCalc.so
 
 HiggsBounds:
   4.2.1:       ./Backends/installed/higgsbounds/4.2.1/lib/libhiggsbounds.so
