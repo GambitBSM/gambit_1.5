@@ -32,6 +32,7 @@ namespace Gambit
     DECLARE_ANALYSIS_FACTORY(CMS_13TeV_MultiLEP_36invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_13TeV_2LEPsoft_36invfb);
+    DECLARE_ANALYSIS_FACTORY(CMS_13TeV_1LEPStop_36invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_13TeV_2LEPStop_36invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_8TeV_1LEPDMTOP_20invfb);
     DECLARE_ANALYSIS_FACTORY(CMS_8TeV_2LEPDMTOP_20invfb);
@@ -63,6 +64,7 @@ namespace Gambit
       IF_X_RTN_CREATE_ANA_X(CMS_13TeV_MultiLEP_36invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_13TeV_2OSLEP_36invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_13TeV_2LEPsoft_36invfb);
+      IF_X_RTN_CREATE_ANA_X(CMS_13TeV_1LEPStop_36invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_13TeV_2LEPStop_36invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_8TeV_1LEPDMTOP_20invfb);
       IF_X_RTN_CREATE_ANA_X(CMS_8TeV_2LEPDMTOP_20invfb);
@@ -107,7 +109,7 @@ namespace Gambit
     {
       assert(!analyses.empty());
       assert(ready);
-      for (Analysis* a : analyses) a->do_analysis(event);
+      for (Analysis* a : analyses) a->analyze(event);
     }
 
 
