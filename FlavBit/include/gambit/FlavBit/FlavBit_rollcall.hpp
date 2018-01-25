@@ -561,7 +561,28 @@ START_MODULE
     DEPENDENCY(SL_M, FlavBit::predictions_measurements_covariances)
     #undef FUNCTION
   #undef CAPABILITY
+   
+  // Tree-level leptonic and semi-leptonic B & D decay measurements
+  #define CAPABILITY LUV_M
+  START_CAPABILITY
+    #define FUNCTION LUV_M_measurements
+    START_FUNCTION(FlavBit::predictions_measurements_covariances)
+    DEPENDENCY(RK, double)
+    DEPENDENCY(RKstar_0045_11, double)
+    DEPENDENCY(RKstar_11_60, double)
+    #undef FUNCTION
+  #undef CAPABILITY
 
+  #define CAPABILITY LUV_LL
+  START_CAPABILITY
+    #define FUNCTION LUV_likelihood
+    START_FUNCTION(double)
+    DEPENDENCY(LUV_M, FlavBit::predictions_measurements_covariances)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  
+   
 
 #undef MODULE
 
