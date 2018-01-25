@@ -26,8 +26,13 @@ namespace Gambit
 {
   namespace CosmoBit
   {
-    Class_container::Class_container() : non_free_pointer(false)
+    Class_container::Class_container() : non_free_pointer(false), lmax(2508)
     {
+      Cl_TT.resize(lmax+1, 0.);
+      Cl_TE.resize(lmax+1, 0.);
+      Cl_EE.resize(lmax+1, 0.);
+      Cl_BB.resize(lmax+1, 0.);
+      Cl_PhiPhi.resize(lmax+1, 0.);
       //std::cout << "Hello it's me. I am a Class_container" << std::endl;
     }
 

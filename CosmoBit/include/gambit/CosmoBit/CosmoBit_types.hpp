@@ -59,6 +59,13 @@ namespace Gambit
       Class::ErrorMsg class_errmsg;      /* for error messages */
 
       bool non_free_pointer;
+
+      int lmax;
+      std::vector<double> Cl_TT;
+      std::vector<double> Cl_TE;
+      std::vector<double> Cl_EE;
+      std::vector<double> Cl_BB;
+      std::vector<double> Cl_PhiPhi;
     };
 
     // Generic class for cosmological likelihoods

@@ -196,7 +196,7 @@ START_MODULE
   #define CAPABILITY class_get_spectra
   START_CAPABILITY
     #define FUNCTION class_get_spectra_func
-    START_FUNCTION(double**)
+    START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(class_run,CosmoBit::Class_container)
     BACKEND_REQ(class_output_total_cl_at_l,(class_tag),int, (struct Class::spectra*, struct Class::lensing* , struct Class::output*, int, double* ))
     BACKEND_REQ(class_lensing_free,(class_tag),int, (struct Class::lensing*))
@@ -214,7 +214,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION function_Planck_lowp_TT_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,double**)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize, (clik_tag), clik_object* ,(char*,clik_error**))
@@ -233,7 +233,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION function_Planck_high_TT_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,double**)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODELS(Planck_TT)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize, (clik_tag), clik_object* ,(char*,clik_error**))
@@ -249,7 +249,7 @@ START_MODULE
 
     #define FUNCTION function_Planck_high_TTTEEE_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,double**)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODELS(Planck_TTTEEE)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize, (clik_tag), clik_object* ,(char*,clik_error**))
@@ -265,7 +265,7 @@ START_MODULE
 
     #define FUNCTION function_Planck_high_TT_lite_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,double**)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODELS(Planck_lite)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize, (clik_tag), clik_object* ,(char*,clik_error**))
@@ -284,7 +284,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION function_Planck_lensing_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,double**)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
     BACKEND_REQ(clik_lensing_compute_loglike, (clik_tag), double ,(clik_lensing_object*,double*,clik_error**))
     BACKEND_REQ(clik_lensing_initialize, (clik_tag), clik_lensing_object* ,(char*,clik_error**))

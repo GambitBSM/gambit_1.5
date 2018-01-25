@@ -44,7 +44,7 @@ namespace Gambit
       //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM;
 
-      int l_max=2508;
+      int l_max=cosmo.lmax;
 
       BEreq::class_parser_initialize(&cosmo.fc,9,"",cosmo.class_errmsg);
 
@@ -83,7 +83,7 @@ namespace Gambit
       //std::cout << "Last seen alive in: class_set_parameter_LCDM_SingletDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM_SingletDM;
 
-      int l_max=2508;
+      int l_max=cosmo.lmax;
       double sigmav = *Dep::sigmav; // in cm^3 s^-1
       double mass = *Dep::mwimp; // in GeV
       double feff = runOptions->getValueOrDef<double>(1.,"f_eff");
@@ -129,7 +129,7 @@ namespace Gambit
       //std::cout << "Last seen alive in: class_set_parameter_LCDMtensor" << std::endl;
       using namespace Pipes::class_set_parameter_LCDMtensor;
 
-      int l_max=2508;
+      int l_max=cosmo.lmax;;
 
       BEreq::class_parser_initialize(&cosmo.fc,11,"",cosmo.class_errmsg);
 
@@ -224,51 +224,61 @@ namespace Gambit
       cosmo.non_free_pointer = true;
     }
 
-    void class_get_spectra_func(double**& clback)
+    void class_get_spectra_func(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
       using namespace Pipes::class_get_spectra_func;
 
-      Class_container cosmo = *Dep::class_run;
+      cosmo = *Dep::class_run;
 
-      // Maximal value of l (directly taken from CLASS).
-      // This is actually l_max (from the input) + delta_l
-      // if lensing=yes
-      int l_max = cosmo.pt.l_scalar_max;
+      // Maximal value of l.
+      int l_max = cosmo.lmax;
+
       // Number of Cl-spectra (columns of the Cl-table).
       // The order of the spectra is [TT, EE, TE, BB, PhiPhi, TPhi, EPhi]
       int num_ct_max=7;
-      // Each column takes l_max+1 entries (from l=0 to l=l_max)
-      double* cl[l_max+1];
-      for(int l=0; l < l_max+1; l++) cl[l] = new double[num_ct_max];
 
-      // The entries for l=0 and l=1 are zero per defintion
-      for(int i=0; i < num_ct_max; i++)
+      // Define an array which takes the values of Cl of the different
+      // spectra at a given value of l
+      double* cl = new double[num_ct_max];
+
+      // Loop through all l from 0 to l_max (including) and ask for the cl-spectra.
+      for (int l=0; l <= l_max; l++)
       {
-        cl[0][i] = 0.;
-        cl[1][i] = 0.;
-      }
-      // Loop through all l >= 2 and ask for the cl-spectra.
-      for (int l=2; l < l_max+1; l++)
-      {
-        if (BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl[l])) == _SUCCESS_)
+        if (l < 2)
         {
-          cl[l][cosmo.sp.index_ct_tt] = cl[l][cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
-          cl[l][cosmo.sp.index_ct_te] = cl[l][cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
-          cl[l][cosmo.sp.index_ct_ee] = cl[l][cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
-          cl[l][cosmo.sp.index_ct_bb] = cl[l][cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
-          //cl[l][cosmo.sp.index_ct_tp] = cl[l][cosmo.sp.index_ct_tp]*pow(cosmo.ba.T_cmb*1.e6,1);
-          //cl[l][cosmo.sp.index_ct_ep] = cl[l][cosmo.sp.index_ct_ep]*pow(cosmo.ba.T_cmb*1.e6,1);
-          cl[l][cosmo.sp.index_ct_tp] = 0.;
-          cl[l][cosmo.sp.index_ct_ep] = 0.;
+          // The entries for l=0 and l=1 are zero per defintion
+          cosmo.Cl_TT.at(l) = 0.;
+          cosmo.Cl_TE.at(l) = 0.;
+          cosmo.Cl_EE.at(l) = 0.;
+          cosmo.Cl_BB.at(l) = 0.;
+          cosmo.Cl_PhiPhi.at(l) = 0.;
         }
         else
         {
-	  // Failsafe for unexpected behaviour of "class_outpout_at_cl"
-	  for(int i=0; i < num_ct_max; i++) cl[l][i] = 0.;
+          // For l >= 2 ask for the cl-spectra.
+          if (BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl)) == _SUCCESS_)
+          {
+            cosmo.Cl_TT.at(l) = cl[cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
+            cosmo.Cl_TE.at(l) = cl[cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
+            cosmo.Cl_EE.at(l) = cl[cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
+            cosmo.Cl_BB.at(l) = cl[cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
+            cosmo.Cl_PhiPhi.at(l) = cl[cosmo.sp.index_ct_pp];
+          }
+          else
+          {
+            // Failsafe for unexpected behaviour of "class_outpout_at_cl"
+            cosmo.Cl_TT.at(l) = 0.;
+            cosmo.Cl_TE.at(l) = 0.;
+            cosmo.Cl_EE.at(l) = 0.;
+            cosmo.Cl_BB.at(l) = 0.;
+            cosmo.Cl_PhiPhi.at(l) = 0.;
+          }
         }
       }
-      clback = cl;
+
+      // We do not need "cl" anymore
+      delete cl;
 
       // Now that all calculations with CLASS are done, free the pointers which were allocated in the meantime.
       if (cosmo.non_free_pointer)
@@ -284,7 +294,6 @@ namespace Gambit
         cosmo.non_free_pointer = false;
       }
     }
-
 
     double** return_vanilla_cls(double omega_b,double omega_cdm,double H0,double ln10A_s,double n_s,double tau_reio)
     {
@@ -840,13 +849,13 @@ namespace Gambit
       for (l=62;l<=89;l++)  {
         k = l-60;
         //lowp_cl_and_pars[l] = cl[k][2];
-	lowp_cl_and_pars[l] = cl[k][3];
+        lowp_cl_and_pars[l] = cl[k][3];
       }
       lowp_cl_and_pars[90] = 0.0;
       lowp_cl_and_pars[91] = 0.0;
       for (l=92;l<=119;l++)  {
         k = l-90;
-	//lowp_cl_and_pars[l] = cl[k][3];
+        //lowp_cl_and_pars[l] = cl[k][3];
         lowp_cl_and_pars[l] = cl[k][2];
       }
       //--------------------------------------------------------------------------
@@ -887,9 +896,8 @@ namespace Gambit
       using namespace Pipes::function_Planck_high_TT_loglike;
 
       double  cl_and_pars[2525];
-      int l, idx_tt;
-      double** cl;
-      cl = *Dep::class_get_spectra;
+      int idx_tt;
+      Class_container cosmo = *Dep::class_get_spectra;
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
@@ -899,7 +907,7 @@ namespace Gambit
         idx_tt = ii;
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cl[ii][0];
+          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
         }
         else
         {
@@ -948,9 +956,8 @@ namespace Gambit
       using namespace Pipes::function_Planck_high_TTTEEE_loglike;
 
       double  cl_and_pars[7621];
-      int l, idx_tt, idx_te, idx_ee;
-      double** cl;
-      cl = *Dep::class_get_spectra;
+      int idx_tt, idx_te, idx_ee;
+      Class_container cosmo = *Dep::class_get_spectra;
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE and EE to Cl array--------------------
@@ -962,9 +969,9 @@ namespace Gambit
         idx_te = ii + (2 * 2509);
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cl[ii][0];
-          cl_and_pars[idx_ee] = cl[ii][1];
-          cl_and_pars[idx_te] = cl[ii][2];
+          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
+          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
         }
         else
         {
@@ -1022,11 +1029,12 @@ namespace Gambit
 
       high_clikid = BEreq::return_high_TTTEEE();
       _err = BEreq::clik_initialize_error();
+
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
                byVal(cl_and_pars),
                &_err);
 
-      std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
+      //std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
     }
 
     void function_Planck_high_TT_lite_loglike(double& result)
@@ -1034,10 +1042,9 @@ namespace Gambit
       //std::cout << "Last seen alive in: function_Planck_high_TT_lite_loglike" << std::endl;
       using namespace Pipes::function_Planck_high_TT_lite_loglike;
 
-      double  cl_and_pars[2510];
-      int l, idx_tt;
-      double** cl;
-      cl = *Dep::class_get_spectra;
+      double cl_and_pars[2510];
+      int idx_tt;
+      Class_container cosmo = *Dep::class_get_spectra;
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
@@ -1047,7 +1054,7 @@ namespace Gambit
         idx_tt = ii;
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cl[ii][0];
+          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
         }
         else
         {
@@ -1072,7 +1079,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
+      //std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
     }
 
     void function_Planck_lensing_loglike(double& result)
@@ -1081,9 +1088,8 @@ namespace Gambit
       using namespace Pipes::function_Planck_lensing_loglike;
 
       double  cl_and_pars[8197];
-      int l, idx_tt, idx_te, idx_ee, idx_pp;
-      double** cl;
-      cl = *Dep::class_get_spectra;
+      int idx_pp, idx_tt, idx_te, idx_ee;
+      Class_container cosmo = *Dep::class_get_spectra;
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for PhiPhi,  TT, TE and EE to Cl array-----------
@@ -1095,18 +1101,18 @@ namespace Gambit
         idx_ee = ii + (2 * 2049);
         idx_te = ii + (3 * 2049);
         if (ii >= 2)
-	{
-          cl_and_pars[idx_tt] = cl[ii][0];
-          cl_and_pars[idx_ee] = cl[ii][1];
-	  cl_and_pars[idx_te] = cl[ii][2];
-          cl_and_pars[idx_pp] = cl[ii][4];
+        {
+          cl_and_pars[idx_pp] = cosmo.Cl_PhiPhi.at(ii);
+          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
+          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
         }
         else
-	{
+        {
+          cl_and_pars[idx_pp] = 0.;
           cl_and_pars[idx_tt] = 0.;
           cl_and_pars[idx_ee] = 0.;
           cl_and_pars[idx_te] = 0.;
-          cl_and_pars[idx_pp] = 0.;
         }
       }
 
@@ -1127,7 +1133,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
+      //std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
     }
 
     void function_Planck_lowp_TT_loglike(double& result)
@@ -1136,9 +1142,8 @@ namespace Gambit
       using namespace Pipes::function_Planck_lowp_TT_loglike;
 
       double  cl_and_pars[121];
-      int l, idx_tt, idx_te, idx_ee, idx_bb;
-      double** cl;
-      cl = *Dep::class_get_spectra;
+      int idx_tt, idx_te, idx_ee, idx_bb;
+      Class_container cosmo = *Dep::class_get_spectra;
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
@@ -1151,10 +1156,10 @@ namespace Gambit
         idx_te = ii + (3 * 30);
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cl[ii][0];
-          cl_and_pars[idx_ee] = cl[ii][1];
-          cl_and_pars[idx_bb] = cl[ii][3];
-          cl_and_pars[idx_te] = cl[ii][2];
+          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
+          cl_and_pars[idx_bb] = cosmo.Cl_BB.at(ii);
+          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
         }
         else
         {
@@ -1183,7 +1188,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
+      //std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
 
     void function_LCDMtensor_lowp_TT_loglike(double& result)
@@ -1263,13 +1268,13 @@ namespace Gambit
       for (l=62;l<=89;l++)  {
         k = l-60;
         //lowp_cl_and_pars[l] = cl[k][2];
-	lowp_cl_and_pars[l] = cl[k][3];
+        lowp_cl_and_pars[l] = cl[k][3];
       }
       lowp_cl_and_pars[90] = 0.0;
       lowp_cl_and_pars[91] = 0.0;
       for (l=92;l<=119;l++)  {
         k = l-90;
-	//lowp_cl_and_pars[l] = cl[k][3];
+        //lowp_cl_and_pars[l] = cl[k][3];
         lowp_cl_and_pars[l] = cl[k][2];
       }
       //--------------------------------------------------------------------------
@@ -1555,14 +1560,14 @@ namespace Gambit
       for (l=62;l<=89;l++)  {
         k = l-60;
         //lowp_cl_and_pars[l] = cl[k][2];
-	lowp_cl_and_pars[l] = cl[k][3];
+        lowp_cl_and_pars[l] = cl[k][3];
       }
       lowp_cl_and_pars[90] = 0.0;
       lowp_cl_and_pars[91] = 0.0;
       for (l=92;l<=119;l++)  {
         k = l-90;
         //lowp_cl_and_pars[l] = cl[k][3];
-	lowp_cl_and_pars[l] = cl[k][2];
+        lowp_cl_and_pars[l] = cl[k][2];
       }
       //--------------------------------------------------------------------------
       //------addition of nuisance parameters to Cl array-------------------------
