@@ -82,6 +82,7 @@ BE_INI_FUNCTION
       ex_map["SIMPLE_2014"] = SIMPLE_2014_Init(false);
       ex_map["LUX_2016"] = LUX_2016_Init(false);
       ex_map["PandaX_2016"] = PandaX_2016_Init(false);
+      ex_map["PandaX_2017"] = PandaX_2017_Init(false);
       ex_map["LUX_2015"] = LUX_2015_Init(false);
       ex_map["PICO_2L"] = PICO_2L_Init(false);
       ex_map["PICO_60_F"] = PICO_60_F_Init(false);
