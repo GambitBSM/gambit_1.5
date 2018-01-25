@@ -32,6 +32,7 @@
 ///  \date 2015 May
 ///  \date 2016 Aug
 ///  \date 2016 Oct
+///  \date 2018 Jan
 ///
 ///  *********************************************
 
@@ -565,7 +566,7 @@ START_MODULE
   // Tree-level leptonic and semi-leptonic B & D decay measurements
   #define CAPABILITY LUV_M
   START_CAPABILITY
-    #define FUNCTION LUV_M_measurements
+    #define FUNCTION LUV_measurements
     START_FUNCTION(FlavBit::predictions_measurements_covariances)
     DEPENDENCY(RK, double)
     DEPENDENCY(RKstar_0045_11, double)

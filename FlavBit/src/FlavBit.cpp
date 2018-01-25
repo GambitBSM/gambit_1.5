@@ -22,6 +22,7 @@
 ///  \date 2016 July
 ///  \date 2016 August
 ///  \date 2016 October
+///  \date 2018 Jan  
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -1480,8 +1481,11 @@ namespace Gambit
     void LUV_measurements(predictions_measurements_covariances &pmc)
     {
       using namespace Pipes::LUV_measurements;
-
-
+      const int n_experiments=3;
+      static bool th_err_absolute[n_experiments], first = true;
+      static double th_err[n_experiments];
+      
+      static double theory_RKstar_0045_11_err, theory_RKstar_11_60_err, theory_RK_err;
       if (flav_debug) cout<<"Starting LUV_measurements"<<endl;
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
@@ -1504,10 +1508,6 @@ namespace Gambit
           theory_RKstar_0045_11_err = fread.get_th_err()(0,0).first;
           theory_RKstar_11_60_err = fread.get_th_err()(1,0).first;
           theory_RK_err = fread.get_th_err()(2,0).first;
-        
-          theory_RKstar_0045_11_absolute = fread.get_th_err()(0,0).second;
-          theory_RKstar_11_60_absolute = fread.get_th_err()(1,0).second;
-          theory_RK_absolute= fread.get_th_err()(2,0).second;                 
         
           pmc.value_exp=fread.get_exp_value();
           pmc.cov_exp=fread.get_exp_cov();
@@ -1546,7 +1546,7 @@ namespace Gambit
           pmc.diff.push_back(pmc.value_exp(i,0)-pmc.value_th(i,0));
         }
 
-      if (flav_debug) cout<<"Finished b2ll_measurements"<<endl;
+      if (flav_debug) cout<<"Finished LUV_measurements"<<endl;
     
 
     }
