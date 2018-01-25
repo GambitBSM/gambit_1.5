@@ -36,7 +36,7 @@
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/DDCalc_1_0_0.hpp"
+#include "gambit/Backends/frontends/DDCalc_1_2_0.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 
 #include <map>
@@ -76,16 +76,17 @@ BE_INI_FUNCTION
     if (*InUse::DDCalc_Experiment)
     {
       ex_map["XENON100_2012"] = XENON100_2012_Init(false);
+      ex_map["XENON1T_2017"] = XENON1T_2017_Init(false);
       ex_map["LUX_2013"] = LUX_2013_Init(false);
       ex_map["SuperCDMS_2014"] = SuperCDMS_2014_Init(false);
       ex_map["SIMPLE_2014"] = SIMPLE_2014_Init(false);
       ex_map["LUX_2016"] = LUX_2016_Init(false);
       ex_map["PandaX_2016"] = PandaX_2016_Init(false);
-      ex_map["PandaX_2017"] = PandaX_2017_Init(false);
       ex_map["LUX_2015"] = LUX_2015_Init(false);
       ex_map["PICO_2L"] = PICO_2L_Init(false);
       ex_map["PICO_60_F"] = PICO_60_F_Init(false);
       ex_map["PICO_60_I"] = PICO_60_I_Init(false);
+      ex_map["PICO_60_2017"] = PICO_60_2017_Init(false);
       //ex_map["DARWIN_Ar"] = DARWIN_Ar_Init(false);
       //ex_map["DARWIN_Xe"] = DARWIN_Xe_Init(false);
     }
