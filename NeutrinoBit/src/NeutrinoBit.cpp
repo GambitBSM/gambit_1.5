@@ -195,7 +195,6 @@ namespace Gambit
       for(int i=1; i<3; i++)
         for(int j=1; j<3; j++)
         {
-          cout << ThetaNorm(i,j) << endl;
           if(ThetaNorm(i,j) > 1 or ThetaNorm2(i,j) > 1 or abs(Theta(i,j)) > 1)
           {
             std::ostringstream msg;

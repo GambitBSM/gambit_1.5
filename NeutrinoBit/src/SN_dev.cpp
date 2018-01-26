@@ -282,6 +282,7 @@ namespace Gambit
     {
       using namespace Pipes::SN_ckm_V_ud;
       SMInputs sminputs = *Dep::SMINPUTS;
+      Matrix3cd Theta = *Dep::SeesawI_Theta;
       static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
       static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
       static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
@@ -291,17 +292,17 @@ namespace Gambit
       static double err_factor = 5.3779e7;
       double V_ud_exp[7], f[7];
       double V_ud_sq;
-/*
-      Matrix3d t_sq = *Dep::Theta_sq;
+
+      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       for (int i=0;i<7;i++)
       {
         V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
       }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - t_sq(0,0));
-      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,1));
-      f[5] = 1 + t_sq(1,1);
-      f[6] = 1 + t_sq(0,0) + t_sq(1,1) + t_sq(2,2);
+      f[0] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(0,0));
+      f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
+      f[5] = 1 + ThetaNorm(1,1);
+      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) + ThetaNorm(2,2);
       f[1] = f[0];
       f[2] = f[0];
       f[4] = f[3];
@@ -310,11 +311,10 @@ namespace Gambit
       {
         V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
       }
-      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + t_sq(0,0)));
+      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
       V_ud_sq /= err_factor;
 
       V_ud = sqrt(V_ud_sq);
-*/
     }
 
     void lnL_ckm(double& result_ckm)
@@ -344,7 +344,7 @@ namespace Gambit
       f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
       f[4] = f[3];
       f[5] = 1 + ThetaNorm(1,1);
-      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) + ThetaNorm(2,2);
+      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
       V_ud_sq = 0.0;
       for (int j=0; j<7; j++)
       {
@@ -352,15 +352,10 @@ namespace Gambit
       }
       V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
       V_ud_sq /= err_factor;
-      if(V_ud_sq > 1)
-        invalid_point().raise("CKM entry positive");
+
       chi2 = 0.0;
       for (int k=0; k<7; k++)
-      {
-        cout << "V_ud_sq = " << V_ud_sq << endl;
-        cout << "f[k] = " << f[k] << endl;
         chi2 += pow(((sqrt((1 - V_ud_sq)*f[k]) - V_us_exp[k])/err[k]), 2.0);
-      }
       chi2 += pow((((sqrt(V_ud_sq)*(1 + ThetaNorm(0,0))) - V_ud_0)/err_0), 2.0);
       result_ckm = chi2;
     }
