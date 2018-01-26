@@ -99,106 +99,76 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  #define CAPABILITY Theta_sq
-  START_CAPABILITY
-
-    #define FUNCTION CI_param
-    START_FUNCTION(Eigen::Matrix3d)
-    ALLOW_MODEL(SN_dev)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    #undef FUNCTION
- 
-  #undef CAPABILITY
-
   #define CAPABILITY Ue1
   START_CAPABILITY
-
-    #define FUNCTION printable_Ue1
+    #define FUNCTION Ue1
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Um1
   START_CAPABILITY
-
-    #define FUNCTION printable_Um1
+    #define FUNCTION Um1
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Ut1
   START_CAPABILITY
-
-    #define FUNCTION printable_Ut1
+    #define FUNCTION Ut1
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Ue2
   START_CAPABILITY
-
-    #define FUNCTION printable_Ue2
+    #define FUNCTION Ue2
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Um2
   START_CAPABILITY
-
-    #define FUNCTION printable_Um2
+    #define FUNCTION Um2
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Ut2
   START_CAPABILITY
-
-    #define FUNCTION printable_Ut2
+    #define FUNCTION Ut2
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Ue3
   START_CAPABILITY
-
-    #define FUNCTION printable_Ue3
+    #define FUNCTION Ue3
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Um3
   START_CAPABILITY
-
-    #define FUNCTION printable_Um3
+    #define FUNCTION Um3
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY Ut3
   START_CAPABILITY
-
-    #define FUNCTION printable_Ut3
+    #define FUNCTION Ut3
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY bbn_lifetime
@@ -206,7 +176,7 @@ START_MODULE
     #define FUNCTION SN_bbn_lifetime
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
@@ -224,7 +194,7 @@ START_MODULE
     #define FUNCTION SN_R_pi
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODELS(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
@@ -234,7 +204,7 @@ START_MODULE
     #define FUNCTION SN_R_K
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
@@ -244,7 +214,7 @@ START_MODULE
     #define FUNCTION SN_R_tau
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY
@@ -296,7 +266,7 @@ START_MODULE
     START_FUNCTION(double)
     ALLOW_MODEL(SN_dev)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3d)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -306,7 +276,7 @@ START_MODULE
     START_FUNCTION(double)
     ALLOW_MODEL(SN_dev)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -506,7 +476,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION perturbativity_likelihood
     START_FUNCTION(double)
-    DEPENDENCY(Theta_sq, Eigen::Matrix3d)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(SN_dev)
     #undef FUNCTION
   #undef CAPABILITY

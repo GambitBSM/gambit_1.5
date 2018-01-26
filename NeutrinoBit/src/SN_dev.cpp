@@ -38,16 +38,6 @@ namespace Gambit
 {
   namespace NeutrinoBit
   {
-    // Gets the matrix Theta in the C-I parametrization from NeutrinoBit and returns its squared absolute |Theta|^2
-    void CI_param(Matrix3d& result) 
-    {
-      using namespace Pipes::CI_param;
-      //Matrix3d t_sq;
-      Matrix3cd t;
-
-      t = *Dep::SeesawI_Theta;
-      result = t.cwiseAbs2();
-    }
 
     // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
     void SN_bbn_lifetime(std::vector<double>& result_lifetime)
@@ -65,11 +55,11 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-      Matrix3d t_sq = *Dep::Theta_sq;
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       for (int i=0; i<3; i++)
       {
-        lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(t_sq(1,i) + t_sq(2,i))) + ((1 + g_L_sq + g_R_sq)*t_sq(0,i)) );
+        lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(Usq(1,i) + Usq(2,i))) + ((1 + g_L_sq + g_R_sq)*Usq(0,i)) );
       }
       result_lifetime = lifetime;
     }
@@ -101,7 +91,7 @@ namespace Gambit
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi, mu_f_pi, d_r_pi;
       std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
-      Matrix3d t_sq = *Dep::Theta_sq;
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_pi = 0.0;
       mu_f_pi = 0.0;
@@ -117,13 +107,13 @@ namespace Gambit
  
         if(M[i] + sminputs.mMu < m_pi)
         {
-        G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
-          mu_fac_pi[i] = t_sq(1,i) * (G_mu_pi[i] - 1.0);
+          G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
+          mu_fac_pi[i] = Usq(1,i) * (G_mu_pi[i] - 1.0);
         } 
         if(M[i] + sminputs.mE < m_pi)
         {
           G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
-          e_fac_pi[i] = t_sq(0,i) * (G_e_pi[i] - 1.0); 
+          e_fac_pi[i] = Usq(0,i) * (G_e_pi[i] - 1.0); 
         }
         e_f_pi += e_fac_pi[i];
         mu_f_pi += mu_fac_pi[i];
@@ -144,7 +134,7 @@ namespace Gambit
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K, mu_f_K, d_r_K;
       std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
-      Matrix3d t_sq = *Dep::Theta_sq;
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_K = 0.0;
       mu_f_K = 0.0;
@@ -160,13 +150,13 @@ namespace Gambit
 
         if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
         {
-         G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
-          mu_fac_K[i] = t_sq(1,i) * (G_mu_K[i] - 1.0);
+          G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
+          mu_fac_K[i] = Usq(1,i) * (G_mu_K[i] - 1.0);
         } 
         if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
         {
           G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_K * pow((1.0 - r_e_K), 2.0));
-          e_fac_K[i] = t_sq(0,i) * (G_e_K[i] - 1.0);
+          e_fac_K[i] = Usq(0,i) * (G_e_K[i] - 1.0);
         }
           
         e_f_K += e_fac_K[i];
@@ -184,7 +174,7 @@ namespace Gambit
       static double R_tau_SM = 0.973;
       double e_f_tau, mu_f_tau, d_r_tau;
       std::vector<double> M(3), e_fac_tau(3), mu_fac_tau(3);
-      Matrix3d t_sq = *Dep::Theta_sq;
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_tau = 0.0;
       mu_f_tau = 0.0;
@@ -195,9 +185,9 @@ namespace Gambit
       for (int i=0; i<3; i++)
       {
         if(M[i] + sminputs.mE > m_tau)
-          e_fac_tau[i] = t_sq(0,i);
+          e_fac_tau[i] = Usq(0,i);
         if(M[i] + sminputs.mMu > m_tau)
-          mu_fac_tau[i] = t_sq(1,i);
+          mu_fac_tau[i] = Usq(1,i);
 
         e_f_tau += e_fac_tau[i];
         mu_f_tau += mu_fac_tau[i];
@@ -230,13 +220,13 @@ namespace Gambit
     void SN_m_GERDA(double &m_GERDA)
     {
       using namespace Pipes::SN_m_GERDA;
-      Matrix3cd m_light, U_light, theta;
       std::vector<double> M(3);
       std::complex<double> m_temp_GERDA = {0.0,0.0};
 
-      m_light = *Dep::m_nu;
-      U_light = *Dep::UPMNS;
-      theta = *Dep::SeesawI_Theta;
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+
       m_GERDA = 0.0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -251,12 +241,13 @@ namespace Gambit
     void SN_m_Kam(double& m_Kam)
     {
       using namespace Pipes::SN_m_Kam;
-      Matrix3cd m_light, U_light, theta;
       std::vector<double> M(3);
       std::complex<double> m_temp_Kam = {0.0,0.0};
-      m_light = *Dep::m_nu;
-      U_light = *Dep::UPMNS;
-      theta = *Dep::SeesawI_Theta;
+
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+
       m_Kam = 0.0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -300,6 +291,7 @@ namespace Gambit
       static double err_factor = 5.3779e7;
       double V_ud_exp[7], f[7];
       double V_ud_sq;
+/*
       Matrix3d t_sq = *Dep::Theta_sq;
 
       for (int i=0;i<7;i++)
@@ -322,12 +314,14 @@ namespace Gambit
       V_ud_sq /= err_factor;
 
       V_ud = sqrt(V_ud_sq);
+*/
     }
 
     void lnL_ckm(double& result_ckm)
     {
       using namespace Pipes::lnL_ckm;
       SMInputs sminputs = *Dep::SMINPUTS;
+      Matrix3cd Theta = *Dep::SeesawI_Theta;
       static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
       static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
       static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
@@ -337,41 +331,38 @@ namespace Gambit
       static double err_factor = 5.3779e7;
       double V_ud_exp[7], f[7];
       double V_ud_sq, chi2;
-      Matrix3d t_sq = *Dep::Theta_sq;
+
+      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       for (int i=0;i<7;i++)
       {
         V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
       }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - t_sq(0,0));
+      f[0] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(0,0));
       f[1] = f[0];
       f[2] = f[0];
-      f[3] = (G_F_sq/G_mu_sq)*(1 - t_sq(1,1));
+      f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
       f[4] = f[3];
-      f[5] = 1 + t_sq(1,1);
-      f[6] = 1 + t_sq(0,0) + t_sq(1,1) + t_sq(2,2);
+      f[5] = 1 + ThetaNorm(1,1);
+      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) + ThetaNorm(2,2);
       V_ud_sq = 0.0;
       for (int j=0; j<7; j++)
       {
         V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
       }
-      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + t_sq(0,0)));
+      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
       V_ud_sq /= err_factor;
+      if(V_ud_sq > 1)
+        invalid_point().raise("CKM entry positive");
       chi2 = 0.0;
       for (int k=0; k<7; k++)
       {
+        cout << "V_ud_sq = " << V_ud_sq << endl;
+        cout << "f[k] = " << f[k] << endl;
         chi2 += pow(((sqrt((1 - V_ud_sq)*f[k]) - V_us_exp[k])/err[k]), 2.0);
       }
-      chi2 += pow((((sqrt(V_ud_sq)*(1 + t_sq(0,0))) - V_ud_0)/err_0), 2.0);
-      if (chi2 < 23.5744)
-      { 
-        result_ckm = 0.0;
-      }
-      else
-      {
-        result_ckm = -100.0;
-      }
-//result_ckm = chi2;
+      chi2 += pow((((sqrt(V_ud_sq)*(1 + ThetaNorm(0,0))) - V_ud_0)/err_0), 2.0);
+      result_ckm = chi2;
     }
 
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
@@ -991,67 +982,58 @@ namespace Gambit
       result_tau = -2.44*((mixing_sq_tau[0]/U_tau[0]) + (mixing_sq_tau[1]/U_tau[1]) + (mixing_sq_tau[2]/U_tau[2]));
     }
 
-    void printable_Ue1(double& Ue1_sq)
+    void Ue1(double& Ue1_sq)
     {
-      namespace myPipe2 = Pipes::printable_Ue1;
-      Matrix3d t_1(*myPipe2::Dep::Theta_sq);
-      Ue1_sq = t_1(0,0);
+      using namespace Pipes::Ue1;
+      Ue1_sq = ((*Dep::SeesawI_Theta).cwiseAbs2())(0,0);
     }
 
-    void printable_Um1(double& Um1_sq)
+    void Um1(double& Um1_sq)
     {
-      namespace myPipe3 = Pipes::printable_Um1;
-      Matrix3d t_2(*myPipe3::Dep::Theta_sq);
-      Um1_sq = t_2(1,0);
+      using namespace Pipes::Um1;
+      Um1_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,0);
     }
 
-    void printable_Ut1(double& Ut1_sq)
+    void Ut1(double& Ut1_sq)
     {
-      namespace myPipe4 = Pipes::printable_Ut1;
-      Matrix3d t_3(*myPipe4::Dep::Theta_sq);
-      Ut1_sq = t_3(2,0);
+      using namespace Pipes::Ut1;
+      Ut1_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,0);
     }
 
-    void printable_Ue2(double& Ue2_sq)
+    void Ue2(double& Ue2_sq)
     {
-      namespace myPipe5 = Pipes::printable_Ue2;
-      Matrix3d t_4(*myPipe5::Dep::Theta_sq);
-      Ue2_sq = t_4(0,1);
+      using namespace Pipes::Ue2;
+      Ue2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(0,1);
     }
 
-    void printable_Um2(double& Um2_sq)
+    void Um2(double& Um2_sq)
     {
-      namespace myPipe6 = Pipes::printable_Um2;
-      Matrix3d t_5(*myPipe6::Dep::Theta_sq);
-      Um2_sq = t_5(1,1);
+      using namespace Pipes::Um2;
+      Um2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,1);
     }
 
-    void printable_Ut2(double& Ut2_sq)
+    void Ut2(double& Ut2_sq)
     {
-      namespace myPipe7 = Pipes::printable_Ut2;
-      Matrix3d t_6(*myPipe7::Dep::Theta_sq);
-      Ut2_sq = t_6(2,1);
+      using namespace Pipes::Ut2;
+      Ut2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,1);
     }
 
-    void printable_Ue3(double& Ue3_sq)
+    void Ue3(double& Ue3_sq)
     {
-      namespace myPipe8 = Pipes::printable_Ue3;
-      Matrix3d t_7(*myPipe8::Dep::Theta_sq);
-      Ue3_sq = t_7(0,2);
+      using namespace Pipes::Ue3;
+      Ue3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(0,2);
     }
 
-    void printable_Um3(double& Um3_sq)
+    void Um3(double& Um3_sq)
     {
-      namespace myPipe9 = Pipes::printable_Um3;
-      Matrix3d t_8(*myPipe9::Dep::Theta_sq);
-      Um3_sq = t_8(1,2);
+      using namespace Pipes::Um3;
+      Um3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,2);
     }
 
-    void printable_Ut3(double& Ut3_sq)
+    void Ut3(double& Ut3_sq)
     {
-      namespace myPipe10 = Pipes::printable_Ut3;
-      Matrix3d t_9(*myPipe10::Dep::Theta_sq);
-      Ut3_sq = t_9(2,2);
+      using namespace Pipes::Ut3;
+      Ut3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,2);
     }
 
     void printable_ps191e(double& U_ps191e)
@@ -1066,12 +1048,12 @@ namespace Gambit
     void perturbativity_likelihood(double &lnL)
     {
       using namespace Pipes::perturbativity_likelihood;
-      Matrix3d theta = *Dep::Theta_sq;
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
       
       if( *Param["M_1"] and 
-          theta(0,0) < *Param["M_2"] / *Param["M_1"] * theta(0,1) + *Param["M_3"] / *Param["M_1"] * theta(0,2) and
-          theta(1,0) < *Param["M_2"] / *Param["M_1"] * theta(1,1) + *Param["M_3"] / *Param["M_1"] * theta(1,2) and
-          theta(2,0) < *Param["M_2"] / *Param["M_1"] * theta(2,1) + *Param["M_3"] / *Param["M_1"] * theta(2,2) )
+          Usq(0,0) < *Param["M_2"] / *Param["M_1"] * Usq(0,1) + *Param["M_3"] / *Param["M_1"] * Usq(0,2) and
+          Usq(1,0) < *Param["M_2"] / *Param["M_1"] * Usq(1,1) + *Param["M_3"] / *Param["M_1"] * Usq(1,2) and
+          Usq(2,0) < *Param["M_2"] / *Param["M_1"] * Usq(2,1) + *Param["M_3"] / *Param["M_1"] * Usq(2,2) )
         lnL = 0;
       else
         lnL = -1E10;

@@ -189,6 +189,21 @@ namespace Gambit
 
       Theta = I * *Dep::UPMNS * Dep::m_nu->sqrt() * R * M_twid.inverse();
 
+      // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
+      Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();
+      Eigen::Matrix3d ThetaNorm2 = (Theta * Theta.adjoint()).real();
+      for(int i=1; i<3; i++)
+        for(int j=1; j<3; j++)
+        {
+          cout << ThetaNorm(i,j) << endl;
+          if(ThetaNorm(i,j) > 1 or ThetaNorm2(i,j) > 1 or abs(Theta(i,j)) > 1)
+          {
+            std::ostringstream msg;
+            msg << "Casas-Ibarra parametrization breaks down for parameter point";
+            logger() << msg.str() << EOM;
+            invalid_point().raise(msg.str());
+          }
+        }
     }
 
 

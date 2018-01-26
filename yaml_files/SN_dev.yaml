@@ -187,39 +187,39 @@ ObsLikes:
 
   - capability: Ue1
     purpose: Observable
-    function: printable_Ue1
+    function: Ue1
 
   - capability: Um1
     purpose: Observable
-    function: printable_Um1
+    function: Um1
 
   - capability: Ut1
     purpose: Observable
-    function: printable_Ut1
+    function: Ut1
 
   - capability: Ue2
     purpose: Observable
-    function: printable_Ue2
+    function: Ue2
 
   - capability: Um2
     purpose: Observable
-    function: printable_Um2
+    function: Um2
 
   - capability: Ut2
     purpose: Observable
-    function: printable_Ut2
+    function: Ut2
 
   - capability: Ue3
     purpose: Observable
-    function: printable_Ue3
+    function: Ue3
 
   - capability: Um3
     purpose: Observable
-    function: printable_Um3
+    function: Um3
 
   - capability: Ut3
     purpose: Observable
-    function: printable_Ut3
+    function: Ut3
 
 #  - capability: l2lgamma_lnL
 #    purpose: LogLike
