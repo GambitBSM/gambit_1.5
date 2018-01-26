@@ -591,9 +591,9 @@ namespace Gambit
 
     /*! \brief Relic density directly from a call of initialized MicrOmegas.
     */
-    void RD_oh2_MicrOmegas(double &oh2)
+    void RD_oh2_Xf_MicrOmegas(ddpair &result)
     {
-      using namespace Pipes::RD_oh2_MicrOmegas;
+      using namespace Pipes::RD_oh2_Xf_MicrOmegas;
       // Input
       int fast;     // fast: 1, accurate: 0
       double Beps;  // Beps=1e-5 recommended, Beps=1 switches coannihilation off
@@ -606,7 +606,12 @@ namespace Gambit
 
       // Output
       double Xf;
-      oh2 = BEreq::oh2(&Xf, byVal(fast), byVal(Beps));
+      double oh2 = BEreq::oh2(&Xf,byVal(fast), byVal(Beps));
+      
+      result.first = oh2;
+      result.second = Xf;
+      
+      
       logger() << LogTags::debug << "X_f = " << Xf << " Omega h^2 = " << oh2 << EOM;
     }
 
@@ -635,6 +640,63 @@ namespace Gambit
       result = oh2;
       logger() << LogTags::debug << "RD_oh2_DarkSUSY: oh2 is " << oh2 << EOM;
     }
+
+
+
+    void RD_oh2_MicrOmegas(double &result)
+    {
+      using namespace Pipes::RD_oh2_MicrOmegas;
+      
+      ddpair oh2_Xf = *Dep::RD_oh2_Xf_MicrOmegas;
+      result = oh2_Xf.first;
+    }
+    
+    void Xf_MicrOmegas(double &result)
+    {
+      using namespace Pipes::Xf_MicrOmegas;
+      
+      ddpair oh2_Xf = *Dep::RD_oh2_Xf_MicrOmegas;
+      result = oh2_Xf.second;
+    }
+    
+        
+    void print_channels_MicrOmegas(double &result)
+    {
+      using namespace Pipes::print_channels_MicrOmegas;
+      
+      double Beps;  // Beps=1e-5 recommended, Beps=1 switches coannihilation off
+      Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
+      
+      double Xf = *Dep::Xf_MicrOmegas;
+      
+      double cut = runOptions->getValueOrDef<double>(1e-5, "cut");
+      
+      result = BEreq::momegas_print_channels(byVal(Xf),byVal(cut),byVal(Beps),byVal(1),byVal(stdout));
+    }
+    
+            
+    void get_channel_MicrOmegas(double &result)
+    {
+      using namespace Pipes::get_channel_MicrOmegas;
+      
+      double Beps;  // Beps=1e-5 recommended, Beps=1 switches coannihilation off
+      Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
+      
+      double Xf = *Dep::Xf_MicrOmegas;
+      
+      char*n1 =  (char *)"~SS";
+      char*n2 = (char *)"~SS";
+      char*n3 = (char *)"h";
+      char*n4 = (char *)"~ss";
+      
+      result = BEreq::get_oneChannel(byVal(Xf),byVal(Beps),byVal(n1),byVal(n2),byVal(n3),byVal(n4));
+      
+    }
+    
+
+
+
+
 
 
     //////////////////////////////////////////////////////////////////////////

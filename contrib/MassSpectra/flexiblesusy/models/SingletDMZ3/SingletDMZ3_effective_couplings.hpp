@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:42:46
+// File generated at Mon 1 Jan 2018 12:22:16
 
 #ifndef SingletDMZ3_EFFECTIVE_COUPLINGS_H
 #define SingletDMZ3_EFFECTIVE_COUPLINGS_H

@@ -665,6 +665,14 @@ namespace Gambit
       result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
       result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);
     }
+    void mh_from_SSZ3_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mh_from_SSZ3_spectrum;
+      const SubSpectrum& HE = Dep::SingletDMZ3_spectrum->get_HE();
+      result.central = HE.get(Par::Pole_Mass, 25, 0);
+      result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
+      result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);
+    }
     void mh_from_MSSM_spectrum(triplet<double> &result)
     {
       using namespace Pipes::mh_from_MSSM_spectrum;

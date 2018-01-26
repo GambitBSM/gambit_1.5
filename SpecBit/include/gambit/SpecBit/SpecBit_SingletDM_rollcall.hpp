@@ -91,5 +91,23 @@
 
   #undef CAPABILITY
 
+  // Find scale at which spectrum becomes non-perturbative
+  #define CAPABILITY find_non_perturb_scale
+	START_CAPABILITY
+    #define FUNCTION find_non_perturb_scale_SingletDMZ3
+    START_FUNCTION(double)
+    DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(SingletDMZ3)
+    #undef FUNCTION
+    
+    #define FUNCTION find_non_perturb_scale_SingletDM
+    START_FUNCTION(double)
+    DEPENDENCY(SingletDM_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(SingletDM)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+
 #endif
 

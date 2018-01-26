@@ -2027,6 +2027,10 @@ get_DS_charged_h_decay_channels: |
 #  MicrOmegas capabilities
 #-------------------------------------
 
+
+get_oneChannel: |
+   Get the contribution to the relic density from one channel
+
 MicrOmegas_MSSM_3_6_9_2_init: |
    Initialise MicrOmegas MSSM backend.
 

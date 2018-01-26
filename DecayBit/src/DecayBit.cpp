@@ -2206,6 +2206,43 @@ namespace Gambit
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
    }
 
+//////////// Singlet DMZ3 /////////////////////
+
+    /// Add the decay of Higgs to singlets for the SingletDM model
+    void SingletDMZ3_Higgs_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::SingletDMZ3_Higgs_decays;
+
+      // Get the spectrum information
+      const Spectrum& spec = *Dep::SingletDMZ3_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"S");
+      double lambda = he.get(Par::dimensionless,"lambda_hS");
+      double v0 = he.get(Par::mass1,"vev");
+      double mhpole = spec.get(Par::Pole_Mass,"h0_1");
+
+      // Get the reference SM Higgs decays
+      result = *Dep::Reference_SM_Higgs_decay_rates;
+
+      // Add the h->SS width to the total
+      double massratio2 = pow(mass/mhpole,2);
+      double gamma = (2.0*mass <= mhpole) ? pow(lambda*v0,2)/(32.0*pi*mhpole) * sqrt(1.0 - 4.0*massratio2) : 0.0;
+      result.width_in_GeV = result.width_in_GeV + gamma;
+
+      // Rescale the SM decay branching fractions.
+      double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
+      for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
+      {
+        it->second.first  *= wscaling; // rescale BF
+        it->second.second *= wscaling; // rescale error on BF
+      }
+
+      // Add the h->SS branching fraction
+      result.set_BF(gamma/result.width_in_GeV, 0.0, "S", "S");
+
+      // Make sure the width is sensible.
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+   }
 
     //////////// Everything ///////////////////
 

@@ -83,9 +83,6 @@ ObsLikes:
     - capability: VS_likelihood
       purpose: LogLike
 
-    - capability: check_perturb_min_lambda
-      purpose: LogLike
-
     - capability: expected_lifetime
       purpose: Observable
 
@@ -104,7 +101,7 @@ Rules:
       function: get_SingletDM_spectrum_pole
       options:
         check_perturb: true
-        check_high_scale: 200
+        check_high_scale: 1000
         check_perturb_pts: 10
 
 

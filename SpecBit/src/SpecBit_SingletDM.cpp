@@ -224,20 +224,42 @@ namespace Gambit
 
 
     template <class T>
-    void fill_SingletDM_input(T& input, const std::map<str, safe_ptr<double> >& Param,SMInputs sminputs,double scale)
+    void fill_SingletDM_input(T& input, const std::map<str, safe_ptr<double> >& Param,SMInputs sminputs)//,double scale)
     {
       double mH = *Param.at("mH");
       double mS = *Param.at("mS");
       double lambda_hs = *Param.at("lambda_hS");
       double lambda_s  = *Param.at("lambda_S");
-      double QEWSB  = *Param.at("QEWSB");
-      input.HiggsIN=-0.5*pow(mH,2);
-      double vev=1. / sqrt(sqrt(2.)*sminputs.GF);
-      input.muSInput=pow(mS,2)-0.5*lambda_hs*pow(vev,2);
-      input.LamSHInput=lambda_hs;
-      input.LamSInput=lambda_s;
-      input.QEWSB=QEWSB;  // scale where EWSB conditions are applied
-      input.Qin=scale;  // highest scale at which model is run to
+      
+      double QEWSB  = mS; //*Param.at("QEWSB");
+			/*
+      if (QEWSB < mH)
+      {
+				QEWSB = mH;
+			}
+			*/
+      
+      input.HiggsIN = -0.5*pow(mH,2);
+      double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
+      
+      input.muSInput = pow(mS,2)-0.5*lambda_hs*pow(vev,2);
+      input.LamSHInput = lambda_hs;
+      input.LamSInput = lambda_s;
+      input.QEWSB = QEWSB;  // scale where EWSB conditions are applied
+      input.Qin = QEWSB; //scale;  // highest scale at which model is run to
+      /*
+      cout.precision(15);
+		  cout << "Input parameters " << endl;
+		  cout << "vev = " << vev << endl;
+		  cout << "Lambda_hs = " << lambda_hs << endl;
+		  cout << "Lambda_s = " << lambda_s << endl;
+		  cout << "mu2_in = " << -0.5*pow(mH,2) << endl;
+		  cout << "ms2_in = " << input.muSInput << endl;
+      
+      
+      cout << "QEWSB = " << QEWSB << endl;
+      */
+      
     }
 
     template <class T>
@@ -255,11 +277,12 @@ namespace Gambit
       double step = log10(scale) / pts;
       double runto;
 
-      const double ul = std::sqrt(4.0 * Pi); // Maximum value for perturbative couplings, same perturbativity bound that FlexibleSUSY uses
+      //const double ul = std::sqrt(4.0 * Pi); // Maximum value for perturbative couplings, same perturbativity bound that FlexibleSUSY uses
+      double ul = 4.0 * Pi;
       for (int i=0;i<pts;i++)
       {
         runto = pow(10,step*float(i+1.0)); // scale to run spectrum to
-        if (runto<100){runto=200.0;}// avoid running to low scales
+        if (runto<100){runto=100.0;}// avoid running to low scales
 
         SingletDM -> RunToScale(runto);
 
@@ -274,9 +297,20 @@ namespace Gambit
           const std::vector<int> shape = it->shape();
           std::ostringstream label;
           label << name <<" "<< Par::toString.at(tag);
+          
+          if (name == "lambda_S"){ul =  Pi;}
+          else if (name == "lambda_h"){ul =  2*Pi;}
+          else if (name == "lambda_hS"){ul =  4*Pi;}
+          else {ul = 100;}
+          
+          
+          
           if(shape.size()==1 and shape[0]==1)
           {
-            if (abs(SingletDM->get(tag,name))>ul) return false;
+            if (abs(SingletDM->get(tag,name))>ul)
+            {
+							return false;
+						}
           }
           else if(shape.size()==1 and shape[0]>1)
           {
@@ -295,6 +329,19 @@ namespace Gambit
               }
             }
           }
+          
+          // check stability condition
+          
+          double lamhs = SingletDM->get(Par::dimensionless,"lambda_hS");
+          double lams = SingletDM->get(Par::dimensionless,"lambda_S");
+          double lamh = SingletDM->get(Par::dimensionless,"lambda_h");
+          
+          double stability_condition = 2.0 * pow(0.5* 0.25 *  lamh*lams,0.5) + 0.5*lamhs;
+          if (!(stability_condition > 0))
+					{
+						return false;
+					}
+          
 
         }
       }
@@ -309,9 +356,9 @@ namespace Gambit
       namespace myPipe = Pipes::get_SingletDM_spectrum_pole;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       const Options& runOptions=*myPipe::runOptions;
-      double scale = runOptions.getValueOrDef<double>(173.34,"FS_high_scale");
+      //double scale = runOptions.getValueOrDef<double>(173.34,"FS_high_scale");
       SingletDM_input_parameters input;
-      fill_SingletDM_input(input,myPipe::Param,sminputs,scale);
+      fill_SingletDM_input(input,myPipe::Param,sminputs);
       result = run_FS_spectrum_generator<SingletDM_interface<ALGORITHM1>,SingletDMSpec<SingletDM_interface<ALGORITHM1>>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
 
       int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
@@ -340,9 +387,9 @@ namespace Gambit
       namespace myPipe = Pipes::get_SingletDMZ3_spectrum;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       const Options& runOptions=*myPipe::runOptions;
-      double scale = runOptions.getValueOrDef<double>(173.34,"FS_high_scale");
+      //double scale = runOptions.getValueOrDef<double>(173.34,"FS_high_scale");
       SingletDMZ3_input_parameters input;
-      fill_SingletDM_input(input,myPipe::Param,sminputs,scale);
+      fill_SingletDM_input(input,myPipe::Param,sminputs);
       fill_extra_input(input,myPipe::Param);
       result = run_FS_spectrum_generator<SingletDMZ3_interface<ALGORITHM1>,SingletDMZ3Spec<SingletDMZ3_interface<ALGORITHM1>>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
 
@@ -366,6 +413,80 @@ namespace Gambit
       }
 
     }
+    
+    
+		
+		void find_non_perturb_scale_SingletDM(double &result)
+		{
+			using namespace flexiblesusy;
+      using namespace softsusy;
+      namespace myPipe = Pipes::find_non_perturb_scale_SingletDM;
+      using namespace Gambit;
+      using namespace SpecBit;
+      
+      const Spectrum& fullspectrum = *myPipe::Dep::SingletDM_spectrum;
+			
+		  // bound x by (a,b)
+		  // do all this is log space please
+		  double a=2.0;
+		  double b=20.0;
+		  double x=10.0;
+		  
+		  
+		  
+		  while (abs(a-b)>1e-10)
+		  {
+		    //cout<< "\r" << "(a,b) = " << a << "  " << b << endl;
+		    //std::cout << std::flush;
+		    
+		    x=0.5*(b-a)+a;
+		    
+		    
+		    if (!check_perturb(fullspectrum,pow(10,x),3))
+		    {
+		      b=x;
+		    }
+		    else
+		    {
+		      a=x;
+		    }
+		  }
+		  result = pow(10,0.5*(a+b));
+		}
+		
+		void find_non_perturb_scale_SingletDMZ3(double &result)
+		{
+			using namespace flexiblesusy;
+      using namespace softsusy;
+      namespace myPipe = Pipes::find_non_perturb_scale_SingletDMZ3;
+      using namespace Gambit;
+      using namespace SpecBit;
+      const Spectrum& fullspectrum = *myPipe::Dep::SingletDMZ3_spectrum;
+			
+		  // bound x by (a,b)
+		  // do all this is log space please
+		  double a=2.0;
+		  double b=20.0;
+		  double x=10.0;
+		  while (abs(a-b)>1e-10)
+		  {
+		    //cout<< "\r" << "(a,b) = " << a << "  " << b << endl;
+		    //std::cout << std::flush;
+		    
+		    x=0.5*(b-a)+a;
+		    
+		    if (!check_perturb(fullspectrum,pow(10,x),3))
+		    {
+		      b=x;
+		    }
+		    else
+		    {
+		      a=x;
+		    }
+		  }
+		  result = pow(10,0.5*(a+b));
+		}
+    
 
     /// Put together the Higgs couplings for the SingletDM, from partial widths only
     void SingletDM_higgs_couplings_pwid(HiggsCouplingsTable &result)

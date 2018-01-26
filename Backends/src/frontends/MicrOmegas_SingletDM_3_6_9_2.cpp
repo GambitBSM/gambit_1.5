@@ -65,6 +65,7 @@ BE_INI_FUNCTION
      double mH = spec.get(Par::Pole_Mass,"h0_1");
      double mW = le.get(Par::Pole_Mass, "W+");
      double lambda = he.get(Par::dimensionless,"lambda_hS");
+     //double lambdaS = he.get(Par::dimensionless,"lambda_S");
 
      error = assignVal((char*)"MS", mS);
      if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set DM mass in"
@@ -73,13 +74,12 @@ BE_INI_FUNCTION
      error = assignVal((char*)"lambda", lambda);
      if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set lambda in"
              "MicrOmegas. MicrOmegas error code: " + std::to_string(error));
+  
+     //error = assignVal((char*)"lamS", lambdaS);
+     //if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set lamS in"
+     //        "MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
      // Set SM particle masses in micrOmegas_3.6.9.2
-
-     // MS-BAR alpha-strong at MZ
-     error = assignVal((char*)"alfSMZ", sminputs.alphaS);
-     if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set alpha_S in"
-             " MicrOmegas. MicrOmegas error code: " + std::to_string(error));
 
      // EE = sqrt(4*pi*(1/alphainv))
      error = assignVal((char*)"EE", sqrt(4*M_PI*(1/sminputs.alphainv)));
@@ -151,7 +151,7 @@ BE_INI_FUNCTION
      // default values are used.
 
      const DecayTable* tbl = &(*Dep::decay_rates);
-     double width = 0.0;
+     double width;
      bool present = true;
 
      try {width = tbl->at("h0_1").width_in_GeV;}

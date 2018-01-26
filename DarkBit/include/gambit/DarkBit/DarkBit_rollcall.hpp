@@ -187,13 +187,59 @@ START_MODULE
       BACKEND_REQ(dsrdomega, (), double, (int&,int&,double&,int&,int&,int&))
     #undef FUNCTION
 
+
     // Routine for cross checking RD density results
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
-      BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM), double, (double*,int,double))
-      ALLOW_MODELS(MSSM63atQ,SingletDM)
+      DEPENDENCY(RD_oh2_Xf_MicrOmegas, ddpair)
+    #undef FUNCTION
+    
+  #undef CAPABILITY
+
+
+  // get oh2 and Xf from MicrOmegas
+  #define CAPABILITY RD_oh2_Xf_MicrOmegas
+  START_CAPABILITY
+    #define FUNCTION RD_oh2_Xf_MicrOmegas
+      START_FUNCTION(ddpair)
+      BACKEND_REQ(oh2, () , double,  (double*, int, double))
+      //ALLOW_MODELS(MSSM63atQ,SingletDM,SingletDMZ3)
     #undef FUNCTION
   #undef CAPABILITY
+  
+  
+  // get Xf from MicrOmegas
+  #define CAPABILITY Xf_MicrOmegas
+  START_CAPABILITY
+    #define FUNCTION Xf_MicrOmegas
+      START_FUNCTION(double)
+      DEPENDENCY(RD_oh2_Xf_MicrOmegas, ddpair)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
+  #define CAPABILITY print_channels_MicrOmegas
+  START_CAPABILITY
+    #define FUNCTION print_channels_MicrOmegas
+      START_FUNCTION(double)
+      DEPENDENCY(Xf_MicrOmegas, double)
+      BACKEND_REQ(momegas_print_channels, () , double,  (double, double, double, int, FILE*))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
+  #define CAPABILITY get_channel_MicrOmegas
+  START_CAPABILITY
+    #define FUNCTION get_channel_MicrOmegas
+      START_FUNCTION(double)
+      DEPENDENCY(Xf_MicrOmegas, double)
+      BACKEND_REQ(get_oneChannel, () , double,  (double,double,char*,char*,char*,char*))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
+
+
 
   // Fraction of the relic density constituted by the DM candidate under investigation
   #define CAPABILITY RD_fraction

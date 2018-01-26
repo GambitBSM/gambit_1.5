@@ -51,6 +51,28 @@ namespace Gambit
     using namespace LogTags;
     using namespace flexiblesusy;
     
+    void check_EW_stability_SingletDMZ3(double &result)
+    {
+      // check that the electroweak scale stability conditions are satisfied
+      namespace myPipe = Pipes::check_EW_stability_SingletDMZ3;
+      
+      const Spectrum& fullspectrum = *myPipe::Dep::SingletDMZ3_spectrum;
+    
+      double lambda_h = fullspectrum.get(Par::dimensionless,"lambda_h");
+      double lambda_s = fullspectrum.get(Par::dimensionless,"lambda_S");
+      double lambda_hs = fullspectrum.get(Par::dimensionless,"lambda_hS");
+      
+      double check = 2 * pow( lambda_h * lambda_s , 0.5) + lambda_hs;
+      
+      result = 0;
+      
+      // if any condition not satisfied set bad likelihood
+      if ( lambda_hs <= 0 || lambda_s <= 0 || check <= 0 )
+      {
+        result += -1e100;
+      }
+    }
+    
     bool check_perturb_to_min_lambda(const Spectrum& spec,double scale,int pts)
     {
       using namespace flexiblesusy;
@@ -121,33 +143,47 @@ namespace Gambit
       using namespace flexiblesusy;
       using namespace Gambit;
       using namespace SpecBit;
+      
       std::unique_ptr<SubSpectrum>* spec=(std::unique_ptr<SubSpectrum>* )params;
-      
-      if (scale>1.0e21){scale=1.0e21;}// avoid running to high scales
-      
-      if (scale<1.0){scale=1.0;}// avoid running to very low scales
+      SubSpectrum& speccloned = **spec;
       
       // clone the original spectrum incase the running takes the spectrum
       // into a non-perturbative scale and thus the spectrum is no longer reliable
+      std::unique_ptr<SubSpectrum> speccloned2 =  speccloned.clone();
       
-      (*spec)->RunToScale(scale);
+      if (scale>1.0e21){scale=1.0e21;}// avoid running to high scales
       
-      return (*spec)->get(Par::dimensionless,"lambda_h");
+      if (scale<100.0){scale=100.0;}// avoid running to very low scales
+      
+
+      
+      //cout << "scale = " << scale << " requested " << endl;
+      
+      
+      double lambda;
+      try
+      {
+        speccloned2->RunToScale(scale);
+        lambda = speccloned2->get(Par::dimensionless,"lambda_h");
+      }
+      catch (const Error& error)
+      {
+        //   ERROR(error.what());
+        //cout << "error encountered" << endl;
+        lambda = 0;
+        // return EXIT_FAILURE;
+      }
+      
+      //cout << "lambda = " << lambda << endl;
+      return lambda;
     }
     
-    void find_min_lambda(dbl_dbl_bool& vs_tuple)
-    {
-      using namespace flexiblesusy;
-      using namespace softsusy;
-      namespace myPipe = Pipes::find_min_lambda;
-      const Options& runOptions=*myPipe::runOptions;
-      double high_energy_limit = runOptions.getValueOrDef<double>(1.22e19,"set_high_scale");
-      int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
-      using namespace Gambit;
-      using namespace SpecBit;
       
-      const Spectrum& fullspectrum = *myPipe::Dep::SingletDM_spectrum;
-      std::unique_ptr<SubSpectrum> speccloned = fullspectrum.clone_HE();
+      
+     void find_min_lambda_Helper( dbl_dbl_bool& vs_tuple, const Spectrum& fullspectrum,
+     double high_energy_limit, int check_perturb_pts)
+     {
+			 std::unique_ptr<SubSpectrum> speccloned = fullspectrum.clone_HE();
       
       // three scales at which we choose to run the quartic coupling up to, and then use a Lagrange interpolating polynomial
       // to get an estimate for the location of the minimum, this is an efficient way to narrow down over a huge energy range
@@ -169,7 +205,7 @@ namespace Gambit
       if (min_exists)
       {
         // fit parabola (in log space) to the 3 trial points and use this to estimate the minimum
-        for (int i=1;i<3;i++)
+        for (int i=1;i<2;i++)
         {
           
           lambda_1 = run_lambda(pow(10,u_1),&speccloned);
@@ -186,9 +222,14 @@ namespace Gambit
           
         }
         // run downhill minimization routine to find exact minimum
+        
+        
+        
         double mu_lower = pow(10,u_1);
         double mu_upper = pow(10,u_3);
         mu_min = pow(10,u_2);
+        
+        //cout << "mu_lower, min, upper = " << mu_lower << " " << mu_min << " " << mu_upper << endl;
         
         gsl_function F;
         F.function = &run_lambda;
@@ -214,6 +255,7 @@ namespace Gambit
           mu_upper = gsl_min_fminimizer_x_upper (s);
           
           status = gsl_min_test_interval (mu_lower, mu_upper, 0.0001, 0.0001);
+          //  cout << "mu_lower = " << mu_lower << " mu_upper = " << mu_upper << endl;
         }
         while (status == GSL_CONTINUE && iteration < max_iteration);
         
@@ -270,6 +312,39 @@ namespace Gambit
     }
     
     
+    void find_min_lambda_SingletDM(dbl_dbl_bool& vs_tuple)
+    {
+      using namespace flexiblesusy;
+      using namespace softsusy;
+      namespace myPipe = Pipes::find_min_lambda_SingletDM;
+      const Options& runOptions=*myPipe::runOptions;
+      double high_energy_limit = runOptions.getValueOrDef<double>(1.22e19,"set_high_scale");
+      int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
+      using namespace Gambit;
+      using namespace SpecBit;
+      
+      const Spectrum& fullspectrum = *myPipe::Dep::SingletDM_spectrum;
+      
+      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts);
+     }
+     
+    void find_min_lambda_SingletDMZ3(dbl_dbl_bool& vs_tuple)
+    {
+      using namespace flexiblesusy;
+      using namespace softsusy;
+      namespace myPipe = Pipes::find_min_lambda_SingletDMZ3;
+      const Options& runOptions=*myPipe::runOptions;
+      double high_energy_limit = runOptions.getValueOrDef<double>(1.22e19,"set_high_scale");
+      int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
+      using namespace Gambit;
+      using namespace SpecBit;
+      
+      const Spectrum& fullspectrum = *myPipe::Dep::SingletDMZ3_spectrum;
+      
+      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts);
+     }
+    
+    
     // the functions below are used to extract the desired outputs from find_min_lambda
     
     // gives expected lifetime in units of years, if stable give extremly large number (1e300)
@@ -296,6 +371,14 @@ namespace Gambit
       using namespace Gambit;
       dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
       result=((- ( 1 / ( vs_tuple.first ) ) * exp(140) * (1/ (1.2e19) ) )  );
+    }
+    
+    // get the scale of the minimum
+    void get_lambdaB(double &result)
+    {
+      namespace myPipe = Pipes::get_lambdaB;
+      dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
+      result=vs_tuple.second;
     }
     
     

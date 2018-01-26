@@ -19,23 +19,40 @@
 #ifndef __SpecBit_SingletDMZ3_hpp__
 #define __SpecBit_SingletDMZ3_hpp__
 
-
+  #define CAPABILITY check_EW_stability_SingletDMZ3
+  START_CAPABILITY
+    #define FUNCTION check_EW_stability_SingletDMZ3
+    START_FUNCTION(double)
+    DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(SingletDMZ3)
+    MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
+    MODEL_GROUP(singlet, (SingletDMZ3))
+    ALLOW_MODEL_COMBINATION(higgs, singlet)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY vacuum_stability
   START_CAPABILITY
 
-    #define FUNCTION find_min_lambda
+    #define FUNCTION find_min_lambda_SingletDM
     START_FUNCTION(dbl_dbl_bool)
     DEPENDENCY(SMINPUTS, SMInputs)
-    //DEPENDENCY(SingletDM_pole_mh, double)
     DEPENDENCY(SingletDM_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDM_running,SingletDMZ3)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDM_running)
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
     MODEL_GROUP(singlet, (SingletDM_running,SingletDMZ3))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
 
-
+		#define FUNCTION find_min_lambda_SingletDMZ3
+    START_FUNCTION(dbl_dbl_bool)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDMZ3)
+    MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
+    MODEL_GROUP(singlet, (SingletDMZ3))
+    ALLOW_MODEL_COMBINATION(higgs, singlet)
+    #undef FUNCTION
 
   #undef CAPABILITY
 
@@ -62,6 +79,14 @@
   #define CAPABILITY check_perturb_min_lambda
     START_CAPABILITY
     #define FUNCTION get_check_perturb_min_lambda
+    START_FUNCTION(double)
+    DEPENDENCY(vacuum_stability, dbl_dbl_bool)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY get_lambdaB
+    START_CAPABILITY
+    #define FUNCTION get_lambdaB
     START_FUNCTION(double)
     DEPENDENCY(vacuum_stability, dbl_dbl_bool)
     #undef FUNCTION

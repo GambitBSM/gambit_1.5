@@ -38,7 +38,7 @@ LIBSingletDM_HDR += \
 		$(DIR)/SingletDM_two_scale_susy_scale_constraint.hpp
 
 LIBSingletDM_SRC += \
-
+		models/SingletDM/SingletDM_standard_model_two_scale_matching.cpp
 
 LIBSingletDM_HDR += \
-
+		models/SingletDM/SingletDM_standard_model_two_scale_matching.hpp

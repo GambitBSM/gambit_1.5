@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:39:56
+// File generated at Mon 1 Jan 2018 12:20:58
 
 #include "SingletDMZ3_susy_parameters.hpp"
 #include "config.h"

@@ -19,7 +19,7 @@
 SingletDM_INCLUDE_MK += $(DIR)/FlexibleEFTHiggs.mk
 
 LIBSingletDM_SRC += \
-
+		models/SingletDM/SingletDM_standard_model_matching.cpp
 
 LIBSingletDM_HDR += \
-
+		models/SingletDM/SingletDM_standard_model_matching.hpp

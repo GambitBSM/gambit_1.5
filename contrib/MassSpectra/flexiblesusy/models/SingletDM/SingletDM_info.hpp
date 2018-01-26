@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:41:37
+// File generated at Mon 1 Jan 2018 11:36:44
 
 #ifndef SingletDM_INFO_H
 #define SingletDM_INFO_H
@@ -77,7 +77,7 @@ namespace SingletDM_info {
    extern const std::string model_name;
    constexpr bool is_low_energy_model = false;
    constexpr bool is_supersymmetric_model = false;
-   constexpr bool is_FlexibleEFTHiggs = false;
+   constexpr bool is_FlexibleEFTHiggs = true;
 
    void print(std::ostream&);
 

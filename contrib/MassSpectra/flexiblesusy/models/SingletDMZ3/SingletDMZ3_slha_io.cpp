@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:42:36
+// File generated at Mon 1 Jan 2018 12:22:12
 
 #include "SingletDMZ3_slha_io.hpp"
 #include "SingletDMZ3_input_parameters.hpp"

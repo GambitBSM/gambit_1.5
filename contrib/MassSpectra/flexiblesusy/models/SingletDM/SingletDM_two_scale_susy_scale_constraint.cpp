@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:41:43
+// File generated at Mon 1 Jan 2018 11:36:47
 
 #include "SingletDM_two_scale_susy_scale_constraint.hpp"
 #include "SingletDM_two_scale_model.hpp"
@@ -70,6 +70,15 @@ void SingletDM_susy_scale_constraint<Two_scale>::apply()
    update_scale();
 
    // apply user-defined susy scale constraints
+   const auto HiggsIN = INPUTPARAMETER(HiggsIN);
+   const auto LamSHInput = INPUTPARAMETER(LamSHInput);
+   const auto LamSInput = INPUTPARAMETER(LamSInput);
+   const auto muSInput = INPUTPARAMETER(muSInput);
+
+   MODEL->set_muH(Re(HiggsIN));
+   MODEL->set_LamSH(Re(LamSHInput));
+   MODEL->set_LamS(Re(LamSInput));
+   MODEL->set_muS(Re(muSInput));
    MODEL->solve_ewsb();
 
 }

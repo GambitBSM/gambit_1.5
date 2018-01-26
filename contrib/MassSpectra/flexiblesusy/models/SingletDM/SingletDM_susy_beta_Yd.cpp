@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:39:08
+// File generated at Mon 1 Jan 2018 11:35:22
 
 #include "SingletDM_susy_parameters.hpp"
 #include "wrappers.hpp"

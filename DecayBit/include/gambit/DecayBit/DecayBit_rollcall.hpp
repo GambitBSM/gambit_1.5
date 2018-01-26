@@ -120,8 +120,15 @@ START_MODULE
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(SingletDM_spectrum, Spectrum)
-    ALLOW_MODELS(SingletDM, SingletDMZ3)
+    ALLOW_MODELS(SingletDM)
     #undef FUNCTION
+    
+		#define FUNCTION SingletDMZ3_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+    ALLOW_MODELS(SingletDMZ3)
+    #undef FUNCTION    
 
     #define FUNCTION MSSM_h0_1_decays
     START_FUNCTION(DecayTable::Entry)

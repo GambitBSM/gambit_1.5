@@ -59,6 +59,9 @@ MicrOmegas_MSSM:
 
 MicrOmegas_SingletDM:
   3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/SingletDM/libmicromegas.so
+  
+MicrOmegas_SingletDMZ3:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/SingletDMZ3/libmicromegas.so  
 
 nulike:
   1.0.4:       ./Backends/installed/nulike/1.0.4/lib/libnulike.so

@@ -16,48 +16,56 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 26 Sep 2017 22:41:45
+// File generated at Mon 1 Jan 2018 11:36:48
 
-#ifndef SingletDM_TWO_SCALE_INITIAL_GUESSER_H
-#define SingletDM_TWO_SCALE_INITIAL_GUESSER_H
+#ifndef SingletDM_STANDARD_MODEL_TWO_SCALE_INITIAL_GUESSER_H
+#define SingletDM_STANDARD_MODEL_TWO_SCALE_INITIAL_GUESSER_H
 
 #include "SingletDM_initial_guesser.hpp"
-#include "SingletDM_two_scale_low_scale_constraint.hpp"
 #include "SingletDM_two_scale_susy_scale_constraint.hpp"
 #include "SingletDM_two_scale_high_scale_constraint.hpp"
+#include "standard_model_two_scale_low_scale_constraint.hpp"
 #include "initial_guesser.hpp"
+#include "lowe.h"
 
 #include <sstream>
 
 namespace flexiblesusy {
 
+class Two_scale;
+
 template <class T>
 class SingletDM;
 
-class Two_scale;
+template <class T>
+class StandardModel;
+
+template <class T>
+class SingletDM_standard_model_initial_guesser;
 
 /**
- * @class SingletDM_initial_guesser<Two_scale>
- * @brief initial guesser for the SingletDM
+ * @class SingletDM_standard_model_initial_guesser<Two_scale>
+ * @brief initial guesser for the SingletDM tower
  */
 
 template<>
-class SingletDM_initial_guesser<Two_scale> : public Initial_guesser {
+class SingletDM_standard_model_initial_guesser<Two_scale> : public Initial_guesser {
 public:
-   SingletDM_initial_guesser(SingletDM<Two_scale>*,
+   SingletDM_standard_model_initial_guesser(SingletDM<Two_scale>*,
+                               standard_model::StandardModel<Two_scale>*,
                                const softsusy::QedQcd&,
-                               const SingletDM_low_scale_constraint<Two_scale>&,
+                               const standard_model::Standard_model_low_scale_constraint<Two_scale>&,
                                const SingletDM_susy_scale_constraint<Two_scale>&,
                                const SingletDM_high_scale_constraint<Two_scale>&);
-   virtual ~SingletDM_initial_guesser() = default;
-
-   virtual void guess() override; ///< initial guess
+   virtual ~SingletDM_standard_model_initial_guesser();
+   virtual void guess(); ///< initial guess
 
    void set_running_precision(double p) { running_precision = p; }
 
 private:
    SingletDM<Two_scale>* model{nullptr}; ///< pointer to model class
-   softsusy::QedQcd qedqcd{};       ///< Standard Model low-energy data
+   standard_model::StandardModel<Two_scale>* eft{nullptr}; ///< pointer to effective low energy model
+   softsusy::QedQcd qedqcd{}; ///< Standard Model low-energy data
    double mu_guess{0.}; ///< guessed DR-bar mass of up-quark
    double mc_guess{0.}; ///< guessed DR-bar mass of charm-quark
    double mt_guess{0.}; ///< guessed DR-bar mass of top-quark
@@ -68,12 +76,12 @@ private:
    double mm_guess{0.}; ///< guessed DR-bar mass of muon
    double mtau_guess{0.}; ///< guessed DR-bar mass of tau
    double running_precision{1.0e-3}; ///< Runge-Kutta RG running precision
-   SingletDM_low_scale_constraint<Two_scale> low_constraint{};
+   standard_model::Standard_model_low_scale_constraint<Two_scale> low_constraint{};
    SingletDM_susy_scale_constraint<Two_scale> susy_constraint{};
    SingletDM_high_scale_constraint<Two_scale> high_constraint{};
 
-   void guess_susy_parameters();
-   void guess_soft_parameters();
+   void guess_eft_parameters();
+   void guess_model_parameters();
    void calculate_DRbar_yukawa_couplings();
    void calculate_Yu_DRbar();
    void calculate_Yd_DRbar();
