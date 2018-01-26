@@ -36,8 +36,8 @@
 
 // Identify backend
 #define BACKENDNAME DDCalc
-#define VERSION 1.1.0
-#define SAFE_VERSION 1_1_0
+#define VERSION 2.0.0
+#define SAFE_VERSION 2_0_0
 
 // Load it
 LOAD_LIBRARY
