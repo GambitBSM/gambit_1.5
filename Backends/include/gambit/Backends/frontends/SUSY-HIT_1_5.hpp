@@ -16,6 +16,7 @@
 ///  *********************************************
 
 #define BACKENDNAME SUSY_HIT
+#define BACKENDLANG FORTRAN
 #define VERSION 1.5
 #define SAFE_VERSION 1_5
 

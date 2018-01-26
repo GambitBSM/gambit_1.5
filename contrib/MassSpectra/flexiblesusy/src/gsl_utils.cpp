@@ -17,6 +17,7 @@
 // ====================================================================
 
 #include "gsl_utils.hpp"
+#include "gsl_vector.hpp"
 #include <cstddef>
 #include <cmath>
 
@@ -41,6 +42,24 @@ bool is_finite(const gsl_vector* x)
 }
 
 /**
+ * Returns true if GSL_vector contains only finite elements (neither
+ * nan nor inf), false otherwise.
+ *
+ * @param v GSL vector
+ * @return true if vector contains only finite elements, false otherwise.
+ */
+bool is_finite(const GSL_vector& v)
+{
+   const std::size_t length = v.size();
+   bool finite = true;
+
+   for (std::size_t i = 0; i < length; i++)
+      finite = finite && std::isfinite(v[i]);
+
+   return finite;
+}
+
+/**
  * Returns an Eigen array which contains the elements of the given GSL
  * vector.
  *
@@ -49,45 +68,53 @@ bool is_finite(const gsl_vector* x)
  */
 Eigen::ArrayXd to_eigen_array(const gsl_vector* v)
 {
-   const std::size_t dim = v->size;
-   Eigen::ArrayXd xa(dim);
-
-   for (std::size_t i = 0; i < dim; i++)
-      xa(i) = gsl_vector_get(v, i);
-
-   return xa;
+   return to_eigen_vector(v);
 }
 
 /**
- * Allocates a new GSL vector and fills it with the values of the
- * given Eigen array.
+ * Returns an Eigen array which contains the elements of the given GSL
+ * vector.
  *
- * @param v Eigen arry
- * @return new allocated GSL vector
+ * @param v GSL vector
+ * @return Eigen array
  */
-gsl_vector* to_gsl_vector(const Eigen::ArrayXd& v)
+Eigen::ArrayXd to_eigen_array(const GSL_vector& v)
 {
-   gsl_vector* result = gsl_vector_alloc(v.rows());
-
-   copy(v, result);
-
-   return result;
+   return to_eigen_vector(v);
 }
 
 /**
- * Copies values from an Eigen array to a GSL vector.
+ * Returns an Eigen array which contains the elements of the given GSL
+ * vector.
  *
- * @param src Eigen array
- * @param dst GSL vector
+ * @param v GSL vector
+ * @return Eigen vector
  */
-void copy(const Eigen::ArrayXd& src, gsl_vector* dst)
+Eigen::VectorXd to_eigen_vector(const gsl_vector* v)
 {
-   const std::size_t dim = src.rows();
-
-   assert(dim == dst->size);
-
-   for (std::size_t i = 0; i < dim; i++)
-      gsl_vector_set(dst, i, src(i));
+   return to_eigen_vector(GSL_vector(v));
 }
 
+/**
+ * Returns an Eigen array which contains the elements of the given GSL
+ * vector.
+ *
+ * @param v GSL vector
+ * @return Eigen vector
+ */
+Eigen::VectorXd to_eigen_vector(const GSL_vector& v)
+{
+   Eigen::VectorXd v2(v.size());
+
+   for (std::size_t i = 0; i < v.size(); i++)
+      v2(i) = v[i];
+
+   return v2;
 }
+
+GSL_vector to_GSL_vector(const gsl_vector* v)
+{
+   return GSL_vector(v);
+}
+
+} // namespace flexiblesusy

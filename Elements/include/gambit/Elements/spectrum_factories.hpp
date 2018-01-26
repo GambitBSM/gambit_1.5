@@ -26,6 +26,26 @@ namespace Gambit
    template <typename HE, typename HEmod>
    Spectrum spectrum_from_SLHAea(HEmod hemod, SLHAstruct slhaea, const Spectrum::mc_info& mci, const Spectrum::mr_info& mri)
    {
+     // Start by stripping out any DECAY and DCINFO blocks, as we're only
+     // interested in holding spectrum information internally in the
+     // spectrum object, not decay info.
+     SLHAstruct::key_matches is_dcinfo("DCINFO");
+     for (SLHAstruct::iterator block = slhaea.begin(); block != slhaea.end();)
+     {
+       bool delete_block = false;
+       if (is_dcinfo(*block)) delete_block = true;
+       else
+       {
+         auto block_def = block->find_block_def();
+         if (block_def != block->end())
+         {
+           if (block_def->at(0) == "DECAY") delete_block = true;
+         }
+       }
+       if (delete_block) slhaea.erase(block);
+       else ++block;
+     }
+
      // Create HE simple SubSpectrum object from the SLHAea object
      // (interacts with MSSM blocks in MSSM case)
      HE he(hemod);

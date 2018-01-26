@@ -16,35 +16,28 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:44:59
+// File generated at Wed 25 Oct 2017 18:10:44
 
 /**
  * @file SingletDMZ3_two_scale_model.cpp
  * @brief implementation of the SingletDMZ3 model class
  *
  * Contains the definition of the SingletDMZ3 model class methods
- * which solve EWSB and calculate pole masses and mixings from DRbar
+ * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Sat 27 Aug 2016 12:44:59 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Wed 25 Oct 2017 18:10:44 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #include "SingletDMZ3_two_scale_model.hpp"
 
 namespace flexiblesusy {
 
-using namespace SingletDMZ3_info;
-
 #define CLASSNAME SingletDMZ3<Two_scale>
 
 CLASSNAME::SingletDMZ3(const SingletDMZ3_input_parameters& input_)
-   : Two_scale_model()
-   , SingletDMZ3_mass_eigenstates(input_)
-{
-}
-
-CLASSNAME::~SingletDMZ3()
+   : SingletDMZ3_mass_eigenstates(input_)
 {
 }
 

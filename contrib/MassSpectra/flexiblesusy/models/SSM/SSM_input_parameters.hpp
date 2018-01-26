@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:23
+// File generated at Wed 25 Oct 2017 18:11:32
 
 #ifndef SSM_INPUT_PARAMETERS_H
 #define SSM_INPUT_PARAMETERS_H
@@ -27,19 +27,15 @@
 namespace flexiblesusy {
 
 struct SSM_input_parameters {
-   double Qin;
-   double QEWSB;
-   double Lambdainput;
-   double LambdaSinput;
-   double MSinput;
-   double K1input;
-   double K2input;
+   double Qin{};
+   double QEWSB{};
+   double Lambdainput{};
+   double LambdaSinput{};
+   double Kappainput{};
+   double K1input{};
+   double K2input{};
+   double vSInput{};
 
-   SSM_input_parameters()
-      : Qin(0), QEWSB(0), Lambdainput(0), LambdaSinput(0), MSinput(0), K1input(0),
-   K2input(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

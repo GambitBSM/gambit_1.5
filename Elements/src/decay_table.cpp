@@ -23,6 +23,7 @@
 #include "gambit/Utils/file_lock.hpp"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/assign.hpp>
 
 namespace Gambit
 {
@@ -147,18 +148,18 @@ namespace Gambit
   }
 
   /// Output entire decay table as an SLHA file full of DECAY blocks
-  void DecayTable::writeSLHAfile(str filename, bool include_zero_bfs) const
+  void DecayTable::writeSLHAfile(int SLHA_version, const str& filename, bool include_zero_bfs, const mass_es_pseudonyms& psn) const
   {
     Utils::FileLock mylock(filename);
     mylock.get_lock();
     std::ofstream ofs(filename);
-    ofs << getSLHAea(include_zero_bfs);
+    ofs << getSLHAea(SLHA_version, include_zero_bfs, psn);
     ofs.close();
     mylock.release_lock();
   }
 
   /// Output entire decay table as an SLHAea file full of DECAY blocks
-  SLHAstruct DecayTable::getSLHAea(bool include_zero_bfs) const
+  SLHAstruct DecayTable::getSLHAea(int SLHA_version, bool include_zero_bfs, const mass_es_pseudonyms& psn) const
   {
     SLHAstruct slha;
     std::map<str, std::set<str> > calculator_map;
@@ -170,7 +171,7 @@ namespace Gambit
     {
       auto entry = particle->second;
       if (entry.calculator != "") calculator_map[entry.calculator].insert(entry.calculator_version);
-      slha.push_back(entry.getSLHAea_block(particle->first, include_zero_bfs));
+      slha.push_back(entry.getSLHAea_block(SLHA_version, particle->first, include_zero_bfs, psn));
     }
 
     // Construct the calculator info
@@ -210,9 +211,12 @@ namespace Gambit
 
   /// Output a decay table entry as an SLHAea DECAY block
   /// @{
-  SLHAea::Block DecayTable::getSLHAea_block(std::pair<int,int> p, bool z) const { return particles.at(p).getSLHAea_block(Models::ParticleDB().long_name(p), z); }
-  SLHAea::Block DecayTable::getSLHAea_block(str p, bool z)                const { return particles.at(Models::ParticleDB().pdg_pair(p)).getSLHAea_block(p, z); }
-  SLHAea::Block DecayTable::getSLHAea_block(str p, int i, bool z)         const { return particles.at(Models::ParticleDB().pdg_pair(p,i)).getSLHAea_block(Models::ParticleDB().long_name(p,i), z); }
+  SLHAea::Block DecayTable::getSLHAea_block(int v, std::pair<int,int> p, bool z, const mass_es_pseudonyms& psn) const
+  { return particles.at(p).getSLHAea_block(v, Models::ParticleDB().long_name(p), z, psn); }
+  SLHAea::Block DecayTable::getSLHAea_block(int v, str p, bool z, const mass_es_pseudonyms& psn)                const
+  { return particles.at(Models::ParticleDB().pdg_pair(p)).getSLHAea_block(v, p, z, psn); }
+  SLHAea::Block DecayTable::getSLHAea_block(int v, str p, int i, bool z, const mass_es_pseudonyms& psn)         const
+  { return particles.at(Models::ParticleDB().pdg_pair(p,i)).getSLHAea_block(v, Models::ParticleDB().long_name(p,i), z, psn); }
   /// @}
 
 
@@ -371,10 +375,56 @@ namespace Gambit
 
   /// Output a decay table entry as an SLHAea DECAY block
   /// @{
-  SLHAea::Block DecayTable::Entry::getSLHAea_block(str p, bool z)         const { return getSLHAea_block(Models::ParticleDB().pdg_pair(p), z); }
-  SLHAea::Block DecayTable::Entry::getSLHAea_block(str p, int i, bool z)  const { return getSLHAea_block(Models::ParticleDB().pdg_pair(p,i), z); }
-  SLHAea::Block DecayTable::Entry::getSLHAea_block(std::pair<int,int> p, bool include_zero_bfs) const
+  SLHAea::Block DecayTable::Entry::getSLHAea_block(int v, str p, bool z, const mass_es_pseudonyms& psn)         const
+  { return getSLHAea_block(v, Models::ParticleDB().pdg_pair(p), z, psn); }
+  SLHAea::Block DecayTable::Entry::getSLHAea_block(int v, str p, int i, bool z, const mass_es_pseudonyms& psn)  const
+  { return getSLHAea_block(v, Models::ParticleDB().pdg_pair(p,i), z, psn); }
+  SLHAea::Block DecayTable::Entry::getSLHAea_block(int v, std::pair<int,int> p, bool include_zero_bfs, const mass_es_pseudonyms& psn) const
   {
+    const std::map<str, int> slha1_pdgs = boost::assign::map_list_of
+     ("~t_1"     , 1000006)
+     ("~t_2"	   , 2000006)
+     ("~b_1"	   , 1000005)
+     ("~b_2"	   , 2000005)
+     ("~tau_1"   , 1000015)
+     ("~tau_2"   , 2000015)
+     ("~nu_e_L"  , 1000012)
+     ("~nu_mu_L" , 1000014)
+     ("~nu_tau_L", 1000016)
+     ("~d_L"	   , 1000001)
+     ("~s_L"	   , 1000003)
+     ("~d_R"	   , 2000001)
+     ("~s_R"	   , 2000003)
+     ("~e_L"	   , 1000011)
+     ("~mu_L"	   , 1000013)
+     ("~e_R"	   , 2000011)
+     ("~mu_R"	   , 2000013)
+     ("~u_L"	   , 1000002)
+     ("~c_L"	   , 1000004)
+     ("~u_R"	   , 2000002)
+     ("~c_R"	   , 2000004)
+     ("~tbar_1"     , -1000006)
+     ("~tbar_2"	    , -2000006)
+     ("~bbar_1"	    , -1000005)
+     ("~bbar_2"	    , -2000005)
+     ("~taubar_1"   , -1000015)
+     ("~taubar_2"   , -2000015)
+     ("~nu_ebar_L"  , -1000012)
+     ("~nu_mubar_L" , -1000014)
+     ("~nu_taubar_L", -1000016)
+     ("~dbar_L"	    , -1000001)
+     ("~sbar_L"	    , -1000003)
+     ("~dbar_R"	    , -2000001)
+     ("~sbar_R"	    , -2000003)
+     ("~ebar_L"	    , -1000011)
+     ("~mubar_L"	  , -1000013)
+     ("~ebar_R"	    , -2000011)
+     ("~mubar_R"	  , -2000013)
+     ("~ubar_L"	    , -1000002)
+     ("~cbar_L"	    , -1000004)
+     ("~ubar_R"	    , -2000002)
+     ("~cbar_R"	    , -2000004);
+
     // Make sure the particle actually exists in the database
     if (not Models::ParticleDB().has_particle(p))
     {
@@ -384,9 +434,21 @@ namespace Gambit
     }
 
     // Add the info about the decay in general
+    int pdg = p.first;
     str long_name = Models::ParticleDB().long_name(p);
     SLHAea::Line line;
-    line << "DECAY" << p.first << this->width_in_GeV << "# " + long_name + " decays";
+    if (v == 1)
+    {
+      if (not psn.filled) utils_error().raise(LOCAL_INFO, "Non-empty mass_es_pseudonyms must be provided for SLHA1 DecayTable output.");
+      if (psn.gauge_family_eigenstates.find(long_name) != psn.gauge_family_eigenstates.end())
+      {
+        long_name = psn.gauge_family_eigenstates.at(long_name);
+
+        pdg = slha1_pdgs.at(long_name);
+      }
+    }
+    else if (v != 2) utils_error().raise(LOCAL_INFO, "Unrecognised SLHA version requested.  Expected 1 or 2.");
+    line << "DECAY" << pdg << this->width_in_GeV << "# " + long_name + " decays";
     SLHAea::Block block(std::to_string(p.first));
     block.push_back(line);
     block.insert(block.begin(),SLHAea::Line("#     PDG         Width (GeV)"));
@@ -409,8 +471,18 @@ namespace Gambit
           // Get the PDG code for each daughter particle
           for (auto daughter = daughters.begin(); daughter != daughters.end(); ++daughter)
           {
-            line << daughter->first;
-            comment += Models::ParticleDB().long_name(*daughter) + " ";
+            int daughter_pdg = daughter->first;
+            str daughter_long_name = Models::ParticleDB().long_name(*daughter);
+            if (v == 1)
+            {
+              if (psn.gauge_family_eigenstates.find(daughter_long_name) != psn.gauge_family_eigenstates.end())
+              {
+                daughter_long_name = psn.gauge_family_eigenstates.at(daughter_long_name);
+                daughter_pdg = slha1_pdgs.at(daughter_long_name);
+              }
+            }
+            line << daughter_pdg;
+            comment += daughter_long_name + " ";
           }
           comment[comment.size()-1] = ')';
           line << comment;

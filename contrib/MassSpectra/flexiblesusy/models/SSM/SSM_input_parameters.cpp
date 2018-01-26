@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:23
+// File generated at Wed 25 Oct 2017 18:11:32
 
 #include "SSM_input_parameters.hpp"
 #include "wrappers.hpp"
@@ -27,15 +27,16 @@ namespace flexiblesusy {
 
 Eigen::ArrayXd SSM_input_parameters::get() const
 {
-   Eigen::ArrayXd pars(7);
+   Eigen::ArrayXd pars(8);
 
    pars(0) = Qin;
    pars(1) = QEWSB;
    pars(2) = Lambdainput;
    pars(3) = LambdaSinput;
-   pars(4) = MSinput;
+   pars(4) = Kappainput;
    pars(5) = K1input;
    pars(6) = K2input;
+   pars(7) = vSInput;
 
    return pars;
 }
@@ -46,9 +47,10 @@ void SSM_input_parameters::set(const Eigen::ArrayXd& pars)
    QEWSB = pars(1);
    Lambdainput = pars(2);
    LambdaSinput = pars(3);
-   MSinput = pars(4);
+   Kappainput = pars(4);
    K1input = pars(5);
    K2input = pars(6);
+   vSInput = pars(7);
 
 }
 
@@ -58,9 +60,10 @@ std::ostream& operator<<(std::ostream& ostr, const SSM_input_parameters& input)
    ostr << "QEWSB = " << INPUT(QEWSB) << ", ";
    ostr << "Lambdainput = " << INPUT(Lambdainput) << ", ";
    ostr << "LambdaSinput = " << INPUT(LambdaSinput) << ", ";
-   ostr << "MSinput = " << INPUT(MSinput) << ", ";
+   ostr << "Kappainput = " << INPUT(Kappainput) << ", ";
    ostr << "K1input = " << INPUT(K1input) << ", ";
    ostr << "K2input = " << INPUT(K2input) << ", ";
+   ostr << "vSInput = " << INPUT(vSInput) << ", ";
 
    return ostr;
 }

@@ -1,6 +1,6 @@
 
-#ifndef MSSM_TWOLOOPHIGGS_H
-#define MSSM_TWOLOOPHIGGS_H
+#ifndef _MSSM_TWOLOOPHIGGS_H_
+#define _MSSM_TWOLOOPHIGGS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -214,21 +214,6 @@ int tausqtad_(double * t, double * A0, double * BL, double * T1,
 			 double * T2, double * st, double * ct, double * q, 
 			 double * mu, double * tanb, double * vv,  
 			 double * s1, double * s2);
-
-#define tadpole_higgs_2loop_at_as_mssm                ewsb2loop_
-#define tadpole_higgs_2loop_ab_as_mssm                ewsb2loop_
-#define tadpole_higgs_2loop_at_at_mssm                ddstad_
-#define tadpole_higgs_2loop_atau_atau_mssm            tausqtad_
-
-#define self_energy_higgs_2loop_at_as_mssm            dszhiggs_
-#define self_energy_higgs_2loop_ab_as_mssm            dszhiggs_
-#define self_energy_higgs_2loop_at_at_mssm            ddshiggs_
-#define self_energy_higgs_2loop_atau_atau_mssm        tausqhiggs_
-
-#define self_energy_pseudoscalar_2loop_at_as_mssm     dszodd_
-#define self_energy_pseudoscalar_2loop_ab_as_mssm     dszodd_
-#define self_energy_pseudoscalar_2loop_at_at_mssm     ddsodd_
-#define self_energy_pseudoscalar_2loop_atau_atau_mssm tausqodd_
 
 #ifdef __cplusplus
 }

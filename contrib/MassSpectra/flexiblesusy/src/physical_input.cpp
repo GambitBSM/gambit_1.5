@@ -17,8 +17,7 @@
 // ====================================================================
 
 #include "physical_input.hpp"
-
-#include <cassert>
+#include "error.hpp"
 
 namespace flexiblesusy {
 
@@ -35,40 +34,38 @@ Physical_input::Physical_input()
 
 double Physical_input::get(Input o) const
 {
-   assert(o < NUMBER_OF_INPUT_PARAMETERS && "Input parameter index out of range");
-   return values[o];
+   return values.at(o);
 }
 
 Eigen::ArrayXd Physical_input::get() const
 {
-   Eigen::ArrayXd vec(static_cast<unsigned>(NUMBER_OF_INPUT_PARAMETERS));
+   Eigen::ArrayXd vec(values.size());
 
-   for (std::size_t i = 0; i < NUMBER_OF_INPUT_PARAMETERS; i++)
-      vec(i) = values[i];
+   std::copy(values.cbegin(), values.cend(), vec.data());
 
    return vec;
 }
 
-std::vector<std::string> Physical_input::get_names()
+const std::array<std::string, Physical_input::NUMBER_OF_INPUT_PARAMETERS>& Physical_input::get_names()
 {
-   std::vector<std::string> names(NUMBER_OF_INPUT_PARAMETERS);
-   names[0] = "alpha_em(0)";
-   names[1] = "mh_pole";
+   static const std::array<std::string, NUMBER_OF_INPUT_PARAMETERS> names = {
+      "alpha_em(0)",
+      "mh_pole"
+   };
    return names;
 }
 
 void Physical_input::set(Input o, double value)
 {
-   assert(o < NUMBER_OF_INPUT_PARAMETERS && "Input parameter index out of range");
-   values[o] = value;
+   values.at(o) = value;
 }
 
 void Physical_input::set(const Eigen::ArrayXd& vec)
 {
-   assert(vec.rows() >= NUMBER_OF_INPUT_PARAMETERS && "Parameters array too small");
+   if (vec.size() != static_cast<decltype(vec.size())>(values.size()))
+      throw SetupError("Parameters array has wrong size");
 
-   for (std::size_t i = 0; i < NUMBER_OF_INPUT_PARAMETERS; i++)
-      values[i] = vec(i);
+   std::copy(vec.data(), vec.data() + vec.size(), values.begin());
 }
 
 /**

@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:58
+// File generated at Wed 25 Oct 2017 18:10:43
 
 #ifndef SingletDMZ3_TWO_SCALE_LOW_SCALE_CONSTRAINT_H
 #define SingletDMZ3_TWO_SCALE_LOW_SCALE_CONSTRAINT_H
 
 #include "SingletDMZ3_low_scale_constraint.hpp"
 #include "SingletDMZ3_input_parameters.hpp"
-#include "two_scale_constraint.hpp"
+#include "single_scale_constraint.hpp"
 #include "lowe.h"
 #include <Eigen/Core>
 
@@ -35,14 +35,15 @@ class SingletDMZ3;
 class Two_scale;
 
 template<>
-class SingletDMZ3_low_scale_constraint<Two_scale> : public Constraint<Two_scale> {
+class SingletDMZ3_low_scale_constraint<Two_scale> : public Single_scale_constraint {
 public:
-   SingletDMZ3_low_scale_constraint();
+   SingletDMZ3_low_scale_constraint() = default;
    SingletDMZ3_low_scale_constraint(SingletDMZ3<Two_scale>*, const softsusy::QedQcd&);
-   virtual ~SingletDMZ3_low_scale_constraint();
-   virtual void apply();
-   virtual double get_scale() const;
-   virtual void set_model(Two_scale_model*);
+   virtual ~SingletDMZ3_low_scale_constraint() = default;
+   virtual void apply() override;
+   virtual double get_scale() const override;
+   virtual std::string name() const override { return "SingletDMZ3 low-scale constraint"; }
+   virtual void set_model(Model*) override;
 
    void clear();
    const Eigen::Matrix<std::complex<double>,3,3>& get_ckm();
@@ -51,26 +52,23 @@ public:
    void initialize();
    const softsusy::QedQcd& get_sm_parameters() const;
    void set_sm_parameters(const softsusy::QedQcd&);
-   void set_threshold_corrections_loop_order(unsigned); ///< threshold corrections loop order
 
 private:
-   double scale;
-   double initial_scale_guess;
-   SingletDMZ3<Two_scale>* model;
-   softsusy::QedQcd qedqcd;
-   Eigen::Matrix<std::complex<double>,3,3> ckm;
-   Eigen::Matrix<std::complex<double>,3,3> pmns;
-   Eigen::Matrix<double,3,3> neutrinoDRbar;
-   double MWDRbar;
-   double MZDRbar;
-   double AlphaS;
-   double EDRbar;
-   double ThetaWDRbar;
-   double new_g1, new_g2, new_g3;
-   double self_energy_w_at_mw;
-   unsigned threshold_corrections_loop_order; ///< threshold corrections loop order
+   double scale{0.};
+   double initial_scale_guess{0.};
+   SingletDMZ3<Two_scale>* model{nullptr};
+   softsusy::QedQcd qedqcd{};
+   Eigen::Matrix<std::complex<double>,3,3> ckm{Eigen::Matrix<std::complex<double>,3,3>::Identity()};
+   Eigen::Matrix<std::complex<double>,3,3> pmns{Eigen::Matrix<std::complex<double>,3,3>::Identity()};
+   Eigen::Matrix<double,3,3> neutrinoDRbar{Eigen::Matrix<double,3,3>::Zero()};
+   double mW_run{0.};
+   double mZ_run{0.};
+   double AlphaS{0.};
+   double e_run{0.};
+   double ThetaWDRbar{0.};
+   double new_g1{0.}, new_g2{0.}, new_g3{0.};
 
-   double calculate_theta_w(double);
+   double calculate_theta_w();
    void calculate_threshold_corrections();
    void calculate_DRbar_gauge_couplings();
    void calculate_DRbar_yukawa_couplings();
@@ -80,7 +78,8 @@ private:
    void calculate_MNeutrino_DRbar();
    double calculate_delta_alpha_em(double) const;
    double calculate_delta_alpha_s(double) const;
-   void recalculate_mw_pole();
+   double calculate_alpha_s_SM5_at(softsusy::QedQcd, double) const;
+   void check_model_ptr() const;
    void update_scale();
 };
 

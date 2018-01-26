@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:22
+// File generated at Wed 25 Oct 2017 18:35:36
 
 #ifndef MSSMNoFV_OBSERVABLES_H
 #define MSSMNoFV_OBSERVABLES_H
@@ -35,7 +35,7 @@ class MSSMNoFV_mass_eigenstates;
 class Physical_input;
 
 struct MSSMNoFV_observables {
-   static const unsigned NUMBER_OF_OBSERVABLES = 2;
+   static const int NUMBER_OF_OBSERVABLES = 3;
 
    MSSMNoFV_observables();
    Eigen::ArrayXd get() const; ///< returns vector of all observables
@@ -43,12 +43,19 @@ struct MSSMNoFV_observables {
    void clear(); ///< sets all observables to zero
    void set(const Eigen::ArrayXd&); ///< sets all observables from given vector
 
+   double a_muon; ///< a_muon = (g-2)/2 of the muon (calculated with FlexibleSUSY)
    double a_muon_gm2calc; ///< a_muon = (g-2)/2 of the muon (calculated with GM2Calc)
    double a_muon_gm2calc_uncertainty; ///< uncertainty of (g-2)/2 of the muon (calculated with GM2Calc)
 
 };
 
-MSSMNoFV_observables calculate_observables(const MSSMNoFV_mass_eigenstates&, const softsusy::QedQcd&, const Physical_input&);
+MSSMNoFV_observables calculate_observables(
+   const MSSMNoFV_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&);
+
+MSSMNoFV_observables calculate_observables(
+   const MSSMNoFV_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&, double scale);
 
 } // namespace flexiblesusy
 

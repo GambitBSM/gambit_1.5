@@ -16,11 +16,17 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:55
+// File generated at Wed 25 Oct 2017 18:18:49
+
+#include "config.h"
 
 #include "HSSUSY_input_parameters.hpp"
+#include "HSSUSY_model_slha.hpp"
 #include "HSSUSY_spectrum_generator.hpp"
-#include "HSSUSY_two_scale_model_slha.hpp"
+
+#ifdef ENABLE_TWO_SCALE_SOLVER
+#include "HSSUSY_two_scale_spectrum_generator.hpp"
+#endif
 
 #include "command_line_options.hpp"
 #include "scan.hpp"
@@ -47,18 +53,29 @@ void print_usage()
       "  --mAInput=<value>\n"
       "  --MEWSB=<value>\n"
       "  --AtInput=<value>\n"
+      "  --AbInput=<value>\n"
+      "  --AtauInput=<value>\n"
       "  --TanBeta=<value>\n"
       "  --LambdaLoopOrder=<value>\n"
+      "  --TwoLoopAtAs=<value>\n"
+      "  --TwoLoopAbAs=<value>\n"
+      "  --TwoLoopAtAb=<value>\n"
+      "  --TwoLoopAtauAtau=<value>\n"
+      "  --TwoLoopAtAt=<value>\n"
+      "  --DeltaEFT=<value>\n"
 
+      "  --solver-type=<value>             an integer corresponding\n"
+      "                                    to the solver type to use\n"
       "  --help,-h                         print this help message"
              << std::endl;
 }
 
-void set_command_line_parameters(int argc, char* argv[],
-                                 HSSUSY_input_parameters& input)
+void set_command_line_parameters(const Dynamic_array_view<char*>& args,
+                                 HSSUSY_input_parameters& input,
+                                 int& solver_type)
 {
-   for (int i = 1; i < argc; ++i) {
-      const char* option = argv[i];
+   for (int i = 1; i < args.size(); ++i) {
+      const auto option = args[i];
 
       if(Command_line_options::get_parameter_value(option, "--MSUSY=", input.MSUSY))
          continue;
@@ -84,13 +101,41 @@ void set_command_line_parameters(int argc, char* argv[],
       if(Command_line_options::get_parameter_value(option, "--AtInput=", input.AtInput))
          continue;
 
+      if(Command_line_options::get_parameter_value(option, "--AbInput=", input.AbInput))
+         continue;
+
+      if(Command_line_options::get_parameter_value(option, "--AtauInput=", input.AtauInput))
+         continue;
+
       if(Command_line_options::get_parameter_value(option, "--TanBeta=", input.TanBeta))
          continue;
 
       if(Command_line_options::get_parameter_value(option, "--LambdaLoopOrder=", input.LambdaLoopOrder))
          continue;
 
+      if(Command_line_options::get_parameter_value(option, "--TwoLoopAtAs=", input.TwoLoopAtAs))
+         continue;
+
+      if(Command_line_options::get_parameter_value(option, "--TwoLoopAbAs=", input.TwoLoopAbAs))
+         continue;
+
+      if(Command_line_options::get_parameter_value(option, "--TwoLoopAtAb=", input.TwoLoopAtAb))
+         continue;
+
+      if(Command_line_options::get_parameter_value(option, "--TwoLoopAtauAtau=", input.TwoLoopAtauAtau))
+         continue;
+
+      if(Command_line_options::get_parameter_value(option, "--TwoLoopAtAt=", input.TwoLoopAtAt))
+         continue;
+
+      if(Command_line_options::get_parameter_value(option, "--DeltaEFT=", input.DeltaEFT))
+         continue;
+
       
+      if (Command_line_options::get_parameter_value(
+             option, "--solver-type=", solver_type))
+         continue;
+
       if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
          print_usage();
          exit(EXIT_SUCCESS);
@@ -101,63 +146,89 @@ void set_command_line_parameters(int argc, char* argv[],
    }
 }
 
+struct HSSUSY_scan_result {
+   Spectrum_generator_problems problems;
+   double higgs{0.};
+};
+
+template <class solver_type>
+HSSUSY_scan_result run_parameter_point(const softsusy::QedQcd& qedqcd,
+   HSSUSY_input_parameters& input)
+{
+   Spectrum_generator_settings settings;
+   settings.set(Spectrum_generator_settings::precision, 1.0e-4);
+
+   HSSUSY_spectrum_generator<solver_type> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   const auto model = std::get<0>(spectrum_generator.get_models_slha());
+   const auto& pole_masses = model.get_physical_slha();
+
+   HSSUSY_scan_result result;
+   result.problems = spectrum_generator.get_problems();
+   result.higgs = pole_masses.Mhh;
+
+   return result;
+}
+
+void scan(int solver_type, HSSUSY_input_parameters& input,
+          const std::vector<double>& range)
+{
+   softsusy::QedQcd qedqcd;
+
+   for (const auto p: range) {
+      INPUTPARAMETER(MSUSY) = p;
+
+      HSSUSY_scan_result result;
+      switch (solver_type) {
+      case 0:
+#ifdef ENABLE_TWO_SCALE_SOLVER
+      case 1:
+         result = run_parameter_point<Two_scale>(qedqcd, input);
+         if (!result.problems.have_problem() || solver_type != 0) break;
+#endif
+
+      default:
+         if (solver_type != 0) {
+            ERROR("unknown solver type: " << solver_type);
+            exit(EXIT_FAILURE);
+         }
+      }
+
+      const int error = result.problems.have_problem();
+      std::cout << "  "
+                << std::setw(12) << std::left << p << ' '
+                << std::setw(12) << std::left << result.higgs << ' '
+                << std::setw(12) << std::left << error;
+      if (error) {
+         std::cout << "\t# " << result.problems;
+      }
+      std::cout << '\n';
+   }
+}
+
 } // namespace flexiblesusy
 
 
 int main(int argc, char* argv[])
 {
    using namespace flexiblesusy;
-   typedef Two_scale algorithm_type;
 
    HSSUSY_input_parameters input;
-   set_command_line_parameters(argc, argv, input);
+   int solver_type = 1;
+   set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
+                               solver_type);
 
-   softsusy::QedQcd qedqcd;
-
-   try {
-      qedqcd.to(qedqcd.displayPoleMZ()); // run SM fermion masses to MZ
-   } catch (const std::string& s) {
-      ERROR(s);
-      return EXIT_FAILURE;
-   }
-
-   HSSUSY_spectrum_generator<algorithm_type> spectrum_generator;
-   spectrum_generator.set_precision_goal(1.0e-4);
-   spectrum_generator.set_max_iterations(0);         // 0 == automatic
-   spectrum_generator.set_calculate_sm_masses(0);    // 0 == no
-   spectrum_generator.set_parameter_output_scale(0); // 0 == susy scale
+   std::cout << "# "
+             << std::setw(12) << std::left << "MSUSY" << ' '
+             << std::setw(12) << std::left << "Mhh/GeV" << ' '
+             << std::setw(12) << std::left << "error"
+             << '\n';
 
    const std::vector<double> range(float_range(0., 100., 10));
 
-   cout << "# "
-        << std::setw(12) << std::left << "MSUSY" << ' '
-        << std::setw(12) << std::left << "Mhh/GeV" << ' '
-        << std::setw(12) << std::left << "error"
-        << '\n';
-
-   for (std::vector<double>::const_iterator it = range.begin(),
-           end = range.end(); it != end; ++it) {
-      INPUTPARAMETER(MSUSY) = *it;
-
-
-      spectrum_generator.run(qedqcd, input);
-
-      const HSSUSY_slha<algorithm_type> model(spectrum_generator.get_model());
-      const HSSUSY_physical& pole_masses = model.get_physical_slha();
-      const Problems<HSSUSY_info::NUMBER_OF_PARTICLES>& problems
-         = spectrum_generator.get_problems();
-      const double higgs = pole_masses.Mhh;
-      const bool error = problems.have_problem();
-
-      cout << "  "
-           << std::setw(12) << std::left << *it << ' '
-           << std::setw(12) << std::left << higgs << ' '
-           << std::setw(12) << std::left << error;
-      if (error) {
-         cout << "\t# " << problems;
-      }
-      cout << '\n';
-   }
+   scan(solver_type, input, range);
 
    return 0;
 }
