@@ -291,8 +291,10 @@ namespace Gambit {
     DD_EX(PICO_2L)              // C. Amole et al., PRD 93, 061101 (2016) [arXiv:1601.03729]
     DD_EX(PICO_60_F)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
     DD_EX(PICO_60_I)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
+    DD_EX(PICO_60)              // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
     DD_EX(PICO_60_2017)         // C. Amole et al., arXiv:1702.07666
     DD_EX(XENON1T_2017)         // E. Aprile et al., [arxiv:1705.06655]
+    DD_EX(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
 
     // Just in case, to make sure we don't mess with other things elsewhere.
     #undef DD_EX
