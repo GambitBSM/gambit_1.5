@@ -59,7 +59,7 @@
   #define CAPABILITY SingletDMZ3_spectrum
   START_CAPABILITY
 
-    #define FUNCTION get_SingletDMZ3_spectrum
+    #define FUNCTION get_SingletDMZ3_spectrum_pole
     START_FUNCTION(Spectrum)
     DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDMZ3)
@@ -68,6 +68,15 @@
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
     // ==============================
+    
+    #define FUNCTION get_SingletDMZ3_spectrum
+    START_FUNCTION(Spectrum)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs, SingletDMZ3)
+    MODEL_GROUP(higgs,   (StandardModel_Higgs))
+    MODEL_GROUP(singlet, (SingletDMZ3))
+    ALLOW_MODEL_COMBINATION(higgs, singlet)
+    #undef FUNCTION    
 
     // Convert spectrum into a standard map so that it can be printed
  /*   #define FUNCTION get_SingletDM_spectrum_as_map

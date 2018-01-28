@@ -111,6 +111,68 @@ namespace Gambit
       result = Spectrum(singletspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
 
     }
+    
+    /// Get a (simple) Spectrum object wrapper for the SingletDM model
+    void get_SingletDMZ3_spectrum(Spectrum& result)
+    {
+      namespace myPipe = Pipes::get_SingletDMZ3_spectrum;
+      const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+      // Initialise an object to carry the Singlet plus Higgs sector information
+      Models::SingletDMZ3Model singletmodel;
+
+      // quantities needed to fill container spectrum, intermediate calculations
+      double alpha_em = 1.0 / sminputs.alphainv;
+      double C = alpha_em * Pi / (sminputs.GF * pow(2,0.5));
+      double sinW2 = 0.5 - pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
+      double cosW2 = 0.5 + pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
+      double e = pow( 4*Pi*( alpha_em ),0.5) ;
+
+      // Higgs sector
+      double mh = *myPipe::Param.at("mH");
+      singletmodel.HiggsPoleMass = mh;
+
+      double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
+      singletmodel.HiggsVEV = vev;
+
+      // Scalar singlet sector
+      singletmodel.SingletPoleMass = *myPipe::Param.at("mS");
+      singletmodel.SingletLambda = *myPipe::Param.at("lambda_hS");
+      singletmodel.SingletLambdaS = 0;
+
+      // Standard model
+      singletmodel.sinW2 = sinW2;
+
+      // gauge couplings
+      singletmodel.g1 = e / sinW2;
+      singletmodel.g2 = e / cosW2;
+      singletmodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
+
+      // Yukawas
+      double sqrt2v = pow(2.0,0.5)/vev;
+      singletmodel.Yu[0] = sqrt2v * sminputs.mU;
+      singletmodel.Yu[1] = sqrt2v * sminputs.mCmC;
+      singletmodel.Yu[2] = sqrt2v * sminputs.mT;
+      singletmodel.Ye[0] = sqrt2v * sminputs.mE;
+      singletmodel.Ye[1] = sqrt2v * sminputs.mMu;
+      singletmodel.Ye[2] = sqrt2v * sminputs.mTau;
+      singletmodel.Yd[0] = sqrt2v * sminputs.mD;
+      singletmodel.Yd[1] = sqrt2v * sminputs.mS;
+      singletmodel.Yd[2] = sqrt2v * sminputs.mBmB;
+
+      // Create a SubSpectrum object to wrap the EW sector information
+      Models::ScalarSingletDMZ3SimpleSpec singletspec(singletmodel);
+
+      // Retrieve any mass cuts
+      static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
+      static const Spectrum::mr_info mass_ratio_cut = myPipe::runOptions->getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
+
+      // We don't supply a LE subspectrum here; an SMSimpleSpec will therefore be automatically created from 'sminputs'
+      result = Spectrum(singletspec,sminputs,&myPipe::Param,mass_cut,mass_ratio_cut);
+
+    }
+    
+    
 
 
     template<class MI,class SI>
@@ -381,10 +443,10 @@ namespace Gambit
 
     }
 
-    void get_SingletDMZ3_spectrum(Spectrum& result)
+    void get_SingletDMZ3_spectrum_pole(Spectrum& result)
     {
       using namespace softsusy;
-      namespace myPipe = Pipes::get_SingletDMZ3_spectrum;
+      namespace myPipe = Pipes::get_SingletDMZ3_spectrum_pole;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       const Options& runOptions=*myPipe::runOptions;
       //double scale = runOptions.getValueOrDef<double>(173.34,"FS_high_scale");

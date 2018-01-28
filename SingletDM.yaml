@@ -89,11 +89,13 @@ ObsLikes:
       purpose: LogLike
 
     # check if model is perturbitive up to the high energy minimum of lambda (or Planck scale if no minimum with lambda < 0)
-    #- capability: check_perturb_min_lambda
-    #  purpose: LogLike
+    - capability: check_perturb_min_lambda
+      purpose: LogLike
 
     # get highest scale to which model is perturbitive
-    - capability: get_non_perturb_scale
+    - capability: find_non_perturb_scale
+      function: find_non_perturb_scale_SingletDM
+      module: SpecBit
       purpose: Observable
 
     # get the scale of high energy vacuum state (if one exists, other M_plank)
@@ -117,6 +119,10 @@ ObsLikes:
 
 Rules:
        
+  - capability: vacuum_stability
+    function: find_min_lambda_SingletDM
+    module: SpecBit
+
 
   - function: TH_Process_Catalog_SingletDM
     options:
