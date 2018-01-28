@@ -1759,17 +1759,31 @@ namespace Gambit
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
+        /// @todo Come up with a good treatment of zero and negative predictions
         if (adata.srcov.rows() > 0)
         {
-          // (Simplified) SR-correlation info is available, so use the covariance matrix to construct composite marginalised likelihood
+          /// If (simplified) SR-correlation info is available, so use the
+          /// covariance matrix to construct composite marginalised likelihood
+          /// Despite initial thoughts, we can't just do independent LL
+          /// calculations in a rotated basis, but have to sample from the
+          /// covariance matrix.
+          ///
+          /// @note This means we can't use the nulike LL functions, which
+          /// operate in 1D only.  Also, log-normal sampling in the diagonal
+          /// basis is not helpful, since the rotation will re-generate negative
+          /// rates.
+          ///
+          /// @todo How about Gaussian sampling in the log(rate) space? Would
+          /// protect against negatives in any SR. Requires care with the
+          /// explicit transformation of widths.
+          ///
+          /// @todo Support skewness correction to the pdf.
+
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
           #endif
 
-          double ana_dll;
-
           // Construct vectors of SR numbers
-          const double n_pred_exact = 0;
           Eigen::VectorXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
@@ -1791,64 +1805,107 @@ namespace Gambit
           // Diagonalise the background-only covariance matrix, extracting the rotation matrix
           /// @todo No need to recompute the background-only covariance decomposition for every point!
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
+          const Eigen::ArrayXd Eb = eig_b.eigenvalues();
+          const Eigen::ArrayXd sqrtEb = Eb.sqrt();
           const Eigen::MatrixXd Vb = eig_b.eigenvectors();
-          //const Eigen::MatrixXd Vbinv = Vb.inverse();
+          const Eigen::MatrixXd Vbinv = Vb.inverse();
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << eig_b.eigenvalues() << endl;
+          cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << Eb << endl;
           #endif
 
           // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
           const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
           const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
+          const Eigen::ArrayXd Esb = eig_sb.eigenvalues();
+          const Eigen::ArrayXd sqrtEsb = Esb.sqrt();
           const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
-          //const Eigen::MatrixXd Vsbinv = Vsb.inverse();
+          const Eigen::MatrixXd Vsbinv = Vsb.inverse();
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << eig_sb.eigenvalues() << endl;
+          cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << Esb << endl;
           #endif
 
-          // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
-          const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
-          const Eigen::VectorXd n_pred_prime[2] = { Vb*n_pred_b, Vsb*n_pred_sb };
-          const Eigen::VectorXd abs_unc2_prime[2] = { eig_b.eigenvalues(), eig_sb.eigenvalues() };
 
-          // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
-          /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
-          for (size_t i = 0; i < 2; ++i) // basis: i=0 -> b-only basis, i=1 -> s+b basis
-          {
-            for (size_t j = 0; j < adata.size(); ++j) // dimension/SRindex
-            {
+          ///////////////////
+          /// @todo Split this whole chunk off into a lnlike-style utility function?
 
-              // Observed number as a rounded integer, for use in Poisson functions
-              /// @todo More conservative to always round the observed downward, i.e. floor()?
-              const int n_obs_int = (int) round(n_obs_prime[i](j));
-
-              // Inexact predicted rate
-              const double n_pred_inexact = n_pred_prime[i](j);
-
-              // Relative error, for nulike marginaliser interface
-              const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
-
-              // We need the positive direction of this rotation
-              /// @todo Guaranteed all +ve or all -ve? Hope so...
-              assert((n_obs_int >= 0 && n_pred_inexact >= 0 && frac_unc >= 0) ||
-                     (n_obs_int <= 0 && n_pred_inexact <= 0 && frac_unc <= 0));
-
-              // Marginalise over systematic uncertainties on mean rates
-              // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
-              auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
-                ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-              // cout << "### " << n_obs_int << ", " << n_pred_exact << ", " << n_pred_inexact << ", " << frac_unc << endl;
-              const double ll_obs = marginaliser(abs(n_obs_int), fabs(n_pred_exact), fabs(n_pred_inexact), fabs(frac_unc));
-
-              // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
-              ana_dll += (i == 0 ? 1 : -1) * ll_obs;
-
+          // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
+          const size_t NSAMPLE = 10000; ///< @todo TWEAK!!!
+          std::normal_distribution<> unitnormdbn{0,1};
+          Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
+          for (size_t i = 0; i < NSAMPLE; ++i) {
+            Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
+            for (size_t j = 0; j < adata.size(); ++j) {
+              norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
+              norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
             }
-          }
 
-          // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
-          result[adata.begin()->analysis_name + "_DeltaLogLike"] = -ana_dll;
+            // Rotate rate deltas into the SR basis and shift by SR mean rates
+            const Eigen::VectorXd n_pred_b_sample = n_pred_b + Vb*norm_sample_b;
+            const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + Vsb*norm_sample_sb;
+
+            // Calculate Poisson LLR and add to aggregated LL calculation
+            for (size_t j = 0; j < adata.size(); ++j) {
+              /// @todo How to correct negative rates? Discard (scales badly), set to zero (= discontinuous & unphysical pdf), transform to log-space, or something else (skew term)?
+              const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3);
+              const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3);
+              const double llr_j = n_obs(j)*(log(lambda_sb_j) - log(lambda_b_j)) - (lambda_sb_j - lambda_b_j);
+              llrsums(j) += llr_j;
+            }
+
+          }
+          // Calculate sum of expected LLRs
+          const double ana_dll = llrsums.sum() / (double)NSAMPLE;
+          result[adata.begin()->analysis_name + "_DeltaLogLike"] = ana_dll;
+
+
+          ////////////////////
+
+
+          // const double n_pred_exact = 0;
+
+          // // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
+          // const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
+          // const Eigen::VectorXd n_pred_prime[2] = { Vb*n_pred_b, Vsb*n_pred_sb };
+          // const Eigen::VectorXd abs_unc2_prime[2] = { eig_b.eigenvalues(), eig_sb.eigenvalues() };
+
+          // // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
+          // /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
+          // for (size_t i = 0; i < 2; ++i) // basis: i=0 -> b-only basis, i=1 -> s+b basis
+          // {
+          //   for (size_t j = 0; j < adata.size(); ++j) // dimension/SRindex
+          //   {
+
+          //     // Observed number as a rounded integer, for use in Poisson functions
+          //     /// @todo More conservative to always round the observed downward, i.e. floor()?
+          //     const int n_obs_int = (int) round(n_obs_prime[i](j));
+
+          //     // Inexact predicted rate
+          //     const double n_pred_inexact = n_pred_prime[i](j);
+
+          //     // Relative error, for nulike marginaliser interface
+          //     const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
+
+          //     // We need the positive direction of this rotation
+          //     /// @todo Guaranteed all +ve or all -ve? Hope so...
+          //     assert((n_obs_int >= 0 && n_pred_inexact >= 0 && frac_unc >= 0) ||
+          //            (n_obs_int <= 0 && n_pred_inexact <= 0 && frac_unc <= 0));
+
+          //     // Marginalise over systematic uncertainties on mean rates
+          //     // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
+          //     auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
+          //       ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
+          //     // cout << "### " << n_obs_int << ", " << n_pred_exact << ", " << n_pred_inexact << ", " << frac_unc << endl;
+          //     const double ll_obs = marginaliser(abs(n_obs_int), fabs(n_pred_exact), fabs(n_pred_inexact), fabs(frac_unc));
+
+          //     // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
+          //     ana_dll += (i == 0 ? 1 : -1) * ll_obs;
+
+          //   }
+          // }
+
+          // // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
+          // result[adata.begin()->analysis_name + "_DeltaLogLike"] = -ana_dll;
 
         }
 
@@ -1989,7 +2046,7 @@ namespace Gambit
 
       assert(pythiaNames.size() == colliderInfo.size());
       for (auto& name : pythiaNames)
-      {        
+      {
         result["seed_base_" + name] = colliderInfo[name]["seed_base"];
         result["final_event_count_" + name] = colliderInfo[name]["final_event_count"];
       }
