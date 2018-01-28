@@ -117,7 +117,7 @@ START_MODULE
       START_FUNCTION(DarkBit::RD_spectrum_type)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
-      ALLOW_MODELS(SingletDM)
+      ALLOW_MODELS(SingletDM,SingletDM_running,SingletDMZ3)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -428,7 +428,7 @@ START_MODULE
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(SingletDM_spectrum, Spectrum)
-      ALLOW_MODELS(SingletDM)
+      ALLOW_MODELS(SingletDM,SingletDM_running)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -581,8 +581,13 @@ START_MODULE
     #define FUNCTION DD_couplings_SingletDM
       START_FUNCTION(DM_nucleon_couplings)
       DEPENDENCY(SingletDM_spectrum, Spectrum)
-      ALLOW_JOINT_MODEL(nuclear_params_fnq, SingletDM)
+      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, SingletDM_running, SingletDM)
+      MODEL_GROUP(group1, (nuclear_params_fnq))
+      MODEL_GROUP(group2, (SingletDM_running, SingletDM))
+      ALLOW_MODEL_COMBINATION(group1, group2)
      #undef FUNCTION
+     
+     #undef FUNCTION     
 
   #undef CAPABILITY
 
