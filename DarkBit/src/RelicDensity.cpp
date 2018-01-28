@@ -683,7 +683,7 @@ namespace Gambit
       Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
       
       double Xf = *Dep::Xf_MicrOmegas;
-      
+
       char*n1 =  (char *)"~SS";
       char*n2 = (char *)"~SS";
       char*n3 = (char *)"h";

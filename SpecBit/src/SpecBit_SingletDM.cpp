@@ -138,7 +138,9 @@ namespace Gambit
       // Scalar singlet sector
       singletmodel.SingletPoleMass = *myPipe::Param.at("mS");
       singletmodel.SingletLambda = *myPipe::Param.at("lambda_hS");
-      singletmodel.SingletLambdaS = 0;
+      singletmodel.SingletLambdaS = *myPipe::Param.at("lambda_S");
+      
+      singletmodel.mu3 = *myPipe::Param.at("mu3");
 
       // Standard model
       singletmodel.sinW2 = sinW2;

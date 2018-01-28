@@ -46,8 +46,7 @@ Parameters:
     lambda_hS:
       range: [0.0001,2]
       prior_type: log
-    lambda_S:
-      range: [0,4]
+    lambda_S: 0
 
 
 Printer:
@@ -83,36 +82,53 @@ ObsLikes:
       purpose:    LogLike
 
     # Vacuum stability and perturbitivity
-
-    # compute likelihood of EW vacuum decay
     - capability: VS_likelihood
       purpose: LogLike
 
-    # check if model is perturbitive up to the high energy minimum of lambda (or Planck scale if no minimum with lambda < 0)
     - capability: check_perturb_min_lambda
       purpose: LogLike
 
-    # get highest scale to which model is perturbitive
+    # Dark matter likelihoods
+    - capability: lnL_oh2
+      purpose:    LogLike
+
+    - capability: lnL_FermiLATdwarfs
+      purpose:    LogLike
+
+    - capability: XENON100_2012_LogLikelihood
+      purpose:    LogLike
+
+    - capability: XENON1T_2017_LogLikelihood
+      purpose:    LogLike
+
+    - capability: LUX_2015_LogLikelihood
+      purpose:    LogLike
+
+    - capability: LUX_2016_LogLikelihood
+      purpose:    LogLike
+
+    - capability: PandaX_2016_LogLikelihood
+      purpose:    LogLike
+
+    - capability: SuperCDMS_2014_LogLikelihood
+      purpose:    LogLike
+
+    - capability: IC79_loglike
+      purpose:    LogLike
+
+
+    # Observables
     - capability: find_non_perturb_scale
       function: find_non_perturb_scale_SingletDM
       module: SpecBit
       purpose: Observable
 
-    # get the scale of high energy vacuum state (if one exists, other M_plank)
     - capability: get_lambdaB
       purpose: Observable
 
-    # get the expected lifetime of the universe
     - capability: expected_lifetime
       purpose: Observable
 
-    # Relic density
-
-    # Calculate the relic density likelihood
-    - capability: lnL_oh2
-      purpose:    LogLike
-
-    # Provide the actual relic density in the output (not just the likelihood)
     - purpose:    Observable
       capability: RD_oh2
 
@@ -172,6 +188,23 @@ Rules:
     backends:
     - {backend: MicrOmegas_SingletDM}
 
+  # Choose to use detailed Fermi Pass 8 dwarf likelihoood from gamlike
+  - capability: lnL_FermiLATdwarfs
+    function:  lnL_FermiLATdwarfs_gamLike
+
+  # Choose to use DarkSUSY yield tables for indirect detection
+  - capability: SimYieldTable
+    function: SimYieldTable_DarkSUSY
+    options:
+      allow_yield_extrapolation: true
+
+  # Use DarkBit's own calculations of the direct detection couplings
+  - capability: DD_couplings
+    function: DD_couplings_SingletDM
+
+  # Choose to get decays from DecayBit proper, not from an SLHA file.
+  - capability: decay_rates
+    function: all_decays
 
 
 Logger:
