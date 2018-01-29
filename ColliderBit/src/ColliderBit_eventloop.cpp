@@ -1846,9 +1846,10 @@ namespace Gambit
 
             // Calculate Poisson LLR and add to aggregated LL calculation
             for (size_t j = 0; j < adata.size(); ++j) {
-              /// @todo How to correct negative rates? Discard (scales badly), set to zero (= discontinuous & unphysical pdf), transform to log-space, or something else (skew term)?
-              const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3);
-              const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3);
+              /// @note How to correct negative rates? Discard (scales badly), set to zero (= discontinuous & unphysical pdf), transform to log-space, or something else (skew term)?
+              /// @todo Add option for sampling in log(rate) and transform back to positive-definite rates
+              const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
+              const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
               const double llr_j = n_obs(j)*(log(lambda_sb_j) - log(lambda_b_j)) - (lambda_sb_j - lambda_b_j);
               llrsums(j) += llr_j;
             }
