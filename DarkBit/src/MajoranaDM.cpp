@@ -69,6 +69,10 @@ namespace Gambit
         double sv(std::string channel, double lambda, double mass, double cosXi, double v)
         {
           // Note: Valid for mass > 45 GeV
+          
+          // Hardcoded velocity avoids NaN results.
+          v = std::max(v, 1e-6);
+        
           double s = 4*mass*mass/(1-v*v/4);
           double sqrt_s = sqrt(s);
           if ( sqrt_s < 90 )
