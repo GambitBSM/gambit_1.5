@@ -2729,6 +2729,30 @@ alphas_running : |
 slha_adjust : |
    Adjusts the SLHA parameters to the SuperIso standard.
 
+LUV_LL :  |
+   Claculate the likelihood function of the b->sll LUV observables (RK, RK*)
+
+LUV_M :  |
+   Measurements related to LUV in b->sll
+
+RK :  |
+   Calculation R_K in 1-6GeVGeV
+
+RK_CONV:  |
+   Conv function from SuperIso to calculate the R_K
+
+RKstar_0045_11:  |
+   Calculation R_K* in 0.045-1.1GeVGeV
+
+RKstar_11_60:  |
+   Calculation R_K* in 1.1 -  6.0 GeVGeV
+
+RKstar_CONV:  |
+   Conv function from SuperIso to calculate the R_K*
+
+
+
+
 #-------------------------------------
 #  SUSY-HIT capabilities
 #-------------------------------------
