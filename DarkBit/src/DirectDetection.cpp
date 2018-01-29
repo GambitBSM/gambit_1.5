@@ -260,9 +260,8 @@ namespace Gambit {
     }
 
     #define DDCALC_BIN(EXPERIMENT, TYPE, NAME)                                     \
-    void CAT_3(EXPERIMENT,_Get,NAME)(int &bin, TYPE &result)                       \
+    void CAT_3(EXPERIMENT,_Get,NAME)(TYPE &result)                                 \
     {                                                                              \
-      using namespace Pipes::CAT_3(EXPERIMENT,_Get,NAME);                          \
       int nbins = BEreq::DD_Bins(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT));      \
       TYPE temp [nbins];                                                           \
       for (int i = 0; i <= nbins; i++) {                                           \
