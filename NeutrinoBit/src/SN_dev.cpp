@@ -370,9 +370,9 @@ namespace Gambit
       double M_1, M_2, M_3;
       std::vector<double> U_pienu(3), mixing_sq_pienu(3);
 
-      mixing_sq_pienu[0] = *Dep::Ue1;
-      mixing_sq_pienu[1] = *Dep::Ue2;
-      mixing_sq_pienu[2] = *Dep::Ue3;
+      mixing_sq[0] = *Dep::Ue1;
+      mixing_sq[1] = *Dep::Ue2;
+      mixing_sq[2] = *Dep::Ue3;
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
@@ -412,7 +412,8 @@ namespace Gambit
       U_pienu[1] = s_pienu(M_2);
       U_pienu[2] = s_pienu(M_3);
 
-     result_pienu = -2.44*((mixing_sq_pienu[0]/U_pienu[0]) + (mixing_sq_pienu[1]/U_pienu[1]) + (mixing_sq_pienu[2]/U_pienu[2]));
+      //TODO: Replace with Gaussian likelihood
+      result_pienu = -2.44*((mixing_sq[0]/U_pienu[0]) + (mixing_sq[1]/U_pienu[1]) + (mixing_sq[2]/U_pienu[2]));
     }
 
     // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27]
@@ -541,14 +542,14 @@ namespace Gambit
       static tk::spline s_charme;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_charme(56), U_temp_charme(56);
-      std::vector<double> U_charme(3), mixing_sq_charme(3);
+      std::vector<double> U_charme(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
 
-      mixing_sq_charme[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
-      mixing_sq_charme[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
-      mixing_sq_charme[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      mixing_sq[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
+      mixing_sq[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
+      mixing_sq[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
       if (read_table_charme)
       {
@@ -587,7 +588,7 @@ namespace Gambit
       U_charme[0] = s_charme(M_1);
       U_charme[1] = s_charme(M_2);
       U_charme[2] = s_charme(M_3);
-      result_charme = -2.44*((mixing_sq_charme[0]/pow(U_charme[0], 2.0)) + (mixing_sq_charme[1]/pow(U_charme[1], 2.0)) + (mixing_sq_charme[2]/pow(U_charme[2], 2.0)));
+      result_charme = -2.44*((mixing_sq[0]/pow(U_charme[0], 2.0)) + (mixing_sq[1]/pow(U_charme[1], 2.0)) + (mixing_sq[2]/pow(U_charme[2], 2.0)));
     }
 
     // Likelihood contribution from CHARM, muon sector. Constrains |U_(mu,i)|^2 in the mass range 0.5-2.8 GeV. Description & references above.
@@ -598,14 +599,14 @@ namespace Gambit
       static tk::spline s_charmmu;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_charmmu(34), U_temp_charmmu(34);
-      std::vector<double> U_charmmu(3), mixing_sq_charmmu(3);
+      std::vector<double> U_charmmu(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
 
-      mixing_sq_charmmu[0] = *Dep::Um1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
-      mixing_sq_charmmu[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
-      mixing_sq_charmmu[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      mixing_sq[0] = *Dep::Um1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
+      mixing_sq[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
+      mixing_sq[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
       if (read_table_charmmu)
       {
@@ -644,7 +645,7 @@ namespace Gambit
       U_charmmu[0] = s_charmmu(M_1);
       U_charmmu[1] = s_charmmu(M_2);
       U_charmmu[2] = s_charmmu(M_3);
-      result_charmmu = -2.44*((mixing_sq_charmmu[0]/pow(U_charmmu[0], 2.0)) + (mixing_sq_charmmu[1]/pow(U_charmmu[1], 2.0)) + (mixing_sq_charmmu[2]/pow(U_charmmu[2], 2.0)));
+      result_charmmu = -2.44*((mixing_sq[0]/pow(U_charmmu[0], 2.0)) + (mixing_sq[1]/pow(U_charmmu[1], 2.0)) + (mixing_sq[2]/pow(U_charmmu[2], 2.0)));
     }
 
     // Likelihood contribution from DELPHI; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
@@ -655,17 +656,17 @@ namespace Gambit
       static tk::spline s_delphi;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_delphi(180), U_temp_delphi(180);
-      std::vector<double> U_delphi(3), mixing_sq_delphi(9);
+      std::vector<double> U_delphi(3), mixing_sq(9);
 
-      mixing_sq_delphi[0] = *Dep::Ue1;
-      mixing_sq_delphi[1] = *Dep::Ue2;
-      mixing_sq_delphi[2] = *Dep::Ue3;
-      mixing_sq_delphi[3] = *Dep::Um1;
-      mixing_sq_delphi[4] = *Dep::Um2;
-      mixing_sq_delphi[5] = *Dep::Um3;
-      mixing_sq_delphi[6] = *Dep::Ut1;
-      mixing_sq_delphi[7] = *Dep::Ut2;
-      mixing_sq_delphi[8] = *Dep::Ut3;
+      mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
+      mixing_sq[1] = *Dep::Ue2;
+      mixing_sq[2] = *Dep::Ue3;
+      mixing_sq[3] = *Dep::Um1;
+      mixing_sq[4] = *Dep::Um2;
+      mixing_sq[5] = *Dep::Um3;
+      mixing_sq[6] = *Dep::Ut1;
+      mixing_sq[7] = *Dep::Ut2;
+      mixing_sq[8] = *Dep::Ut3;
 
       if (read_table_delphi)
       {
@@ -704,13 +705,24 @@ namespace Gambit
       U_delphi[0] = s_delphi(M_1);
       U_delphi[1] = s_delphi(M_2);
       U_delphi[2] = s_delphi(M_3);
-      result_delphi = -0.1*((mixing_sq_delphi[0]/U_delphi[0]) + (mixing_sq_delphi[1]/U_delphi[1]) + (mixing_sq_delphi[2]/U_delphi[2]) + (mixing_sq_delphi[3]/U_delphi[0]) + (mixing_sq_delphi[4]/U_delphi[1]) + (mixing_sq_delphi[5]/U_delphi[2]) + (mixing_sq_delphi[6]/U_delphi[0]) + (mixing_sq_delphi[7]/U_delphi[1]) + (mixing_sq_delphi[8]/U_delphi[2]));
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
+      result_delphi = -3.09*
+         (pow(mixing_sq[0]/U_delphi[0], 2.0) +
+          pow(mixing_sq[1]/U_delphi[1], 2.0) + pow(mixing_sq[2]/U_delphi[2], 2.0) +
+          pow(mixing_sq[3]/U_delphi[0], 2.0) + pow(mixing_sq[4]/U_delphi[1], 2.0) +
+          pow(mixing_sq[5]/U_delphi[2], 2.0) + pow(mixing_sq[6]/U_delphi[0], 2.0) +
+          pow(mixing_sq[7]/U_delphi[1], 2.0) + pow(mixing_sq[8]/U_delphi[2], 2.0));
+
     }
 
     // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 in the mass range 50-500 GeV. [JHEP, 07:162, 2015]
     void lnL_atlas_e(double& result_atlase)
     {
       using namespace Pipes::lnL_atlas_e;
+
       static bool read_table_atlase = true;
       static tk::spline s_atlase;
       double M_1, M_2, M_3;
@@ -881,7 +893,7 @@ namespace Gambit
 
       mixing_sq_nutev[0] = *Dep::Um1;
       mixing_sq_nutev[1] = *Dep::Um2;
-      mixing_sq_nutev[2] = *Dep::Um3;
+      mixing_sq[2] = *Dep::Um3;
 
       if (read_table_nutev)
       {
@@ -920,22 +932,22 @@ namespace Gambit
       U_nutev[0] = s_nutev(M_1);
       U_nutev[1] = s_nutev(M_2);
       U_nutev[2] = s_nutev(M_3);
-      result_nutev = -2.44*((mixing_sq_nutev[0]/U_nutev[0]) + (mixing_sq_nutev[1]/U_nutev[1]) + (mixing_sq_nutev[2]/U_nutev[2]));
+      result_nutev = -2.44*(pow(mixing_sq[0]/U_nutev[0], 2.0) + pow(mixing_sq[1]/U_nutev[1], 2.0) + pow(mixing_sq[2]/U_nutev[2], 2.0));
     }
 
     // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002]
-    void lnL_tau(double& result_tau)
+    void lnL_charm_tau(double& result_tau)
     {
-      using namespace Pipes::lnL_tau;
+      using namespace Pipes::lnL_charm_tau;
       static bool read_table_tau = true;
       static tk::spline s_tau;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_tau(172), U_temp_tau(172);
-      std::vector<double> U_tau(3), mixing_sq_tau(3);
+      std::vector<double> U_tau(3), mixing_sq(3);
 
-      mixing_sq_tau[0] = *Dep::Ut1;
-      mixing_sq_tau[1] = *Dep::Ut2;
-      mixing_sq_tau[2] = *Dep::Ut3;
+      mixing_sq[0] = *Dep::Ut1;
+      mixing_sq[1] = *Dep::Ut2;
+      mixing_sq[2] = *Dep::Ut3;
 
       if (read_table_tau)
       {
@@ -974,7 +986,7 @@ namespace Gambit
       U_tau[0] = s_tau(M_1);
       U_tau[1] = s_tau(M_2);
       U_tau[2] = s_tau(M_3);
-      result_tau = -2.44*((mixing_sq_tau[0]/U_tau[0]) + (mixing_sq_tau[1]/U_tau[1]) + (mixing_sq_tau[2]/U_tau[2]));
+      result_tau = -2.44*((mixing_sq[0]/U_tau[0]) + (mixing_sq[1]/U_tau[1]) + (mixing_sq[2]/U_tau[2]));
     }
 
     void Ue1(double& Ue1_sq)

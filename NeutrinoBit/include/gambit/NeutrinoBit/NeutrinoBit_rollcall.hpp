@@ -442,7 +442,7 @@ START_MODULE
   #define CAPABILITY lnLtau
   START_CAPABILITY
 
-    #define FUNCTION lnL_tau
+    #define FUNCTION lnL_charm_tau
     START_FUNCTION(double)
     ALLOW_MODEL(SN_dev)
     DEPENDENCY(Ut1, double)
