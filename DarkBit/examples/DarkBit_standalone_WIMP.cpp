@@ -481,7 +481,7 @@ int main(int argc, char* argv[])
     PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
 
     // Provide bin number in CRESST_II
-    CRESST_II_GetBins.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+    CRESST_II_GetBins.resolveBackendReq(&CRESST_II_Calc);
     CRESST_II_GetBins.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     CRESST_II_GetBins.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
 
