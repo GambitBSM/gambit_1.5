@@ -2,10 +2,8 @@ Parameters:
 
   # Nuclear matrix parameters.
   nuclear_params_sigmas_sigmal:
-    sigmas:
-      range: [19, 67]
-    sigmal:
-      range: [31, 85]
+    sigmas: 43.0
+    sigmal: 58.0
     deltau:  0.842
     deltad:  -0.427
     deltas:  -0.085
@@ -59,8 +57,7 @@ Parameters:
     lambda_S: 0
 
   Halo_gNFW_rho0:
-    rho0:
-      range: [0.2, 0.8]
+    rho0: 0.4
     v0: 235.0
     vesc: 550.0
     vrot: 235.0
@@ -260,8 +257,8 @@ KeyValues:
   likelihood:
     model_invalid_for_lnlike_below: -1e4
 
-  debug: true
+  debug: false
 
   # Set the output path for the log files (relative to working directory unless absolute path is specified)
-  default_output_path: "runs/SingletDM-DarkBit/"
-  #default_output_path: "/home/mmm0290/Scratch/gambit/SingletDM"
+  #default_output_path: "runs/SingletDM-DarkBit/"
+  default_output_path: "/home/mmm0290/Scratch/gambit/SingletDM"
