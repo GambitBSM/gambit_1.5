@@ -259,6 +259,14 @@ namespace Gambit {
       result = BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));  \
     }
 
+    #define DDCALC_BIN(EXPERIMENT, TYPE, NAME)                                     \
+    void CAT_3(EXPERIMENT,_Get,NAME)(int &bin, TYPE &result)                       \
+    {                                                                              \
+      using namespace Pipes::CAT_3(EXPERIMENT,_Get,NAME);                          \
+      result = BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)),   \
+      bin);                                                                        \
+    }
+
     /// Defines functions to perform the DDCalc internal rate calculations,
     /// and extract the results and log likelihoods, for the designated experiment.
     #define DD_EX(EXPERIMENT)                                                      \
@@ -275,8 +283,12 @@ namespace Gambit {
       DDCALC_RESULT(EXPERIMENT, double, Signal)                                    \
       DDCALC_RESULT(EXPERIMENT, double, SignalSI)                                  \
       DDCALC_RESULT(EXPERIMENT, double, SignalSD)                                  \
+      DDCALC_RESULT(EXPERIMENT, int,    Bins)                                      \
       DDCALC_RESULT(EXPERIMENT, double, LogLikelihood)                             \
-
+      DDCALC_BIN(EXPERIMENT, int,    BinEvents)                                    \
+      DDCALC_BIN(EXPERIMENT, double, BinBackground)                                \
+      DDCALC_BIN(EXPERIMENT, double, BinSignal)                                    \
+  
     // Experiments
     DD_EX(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
     DD_EX(LUX_2013)             // Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]

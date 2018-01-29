@@ -128,8 +128,6 @@ BE_FUNCTION(DDCalc_CalcRates,  void, (const int&, const int&, const int&), "C_DD
 //   Events:        observed events
 //   Background:    average background expectation
 //   Signal:        average signal expectation
-//   SignalSI:      average signal expectation (spin-independent only)
-//   SignalSD:      average signal expectation (spin-dependent only)
 //   LogLikelihood: log of the likelihood (not -2lnL)
 //   LogPValue:     log of the p value
 //   Factor x by which sigma -> x*sigma would yield given p-value (given as log(p))
