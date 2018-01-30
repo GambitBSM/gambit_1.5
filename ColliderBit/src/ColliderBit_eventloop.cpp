@@ -1850,7 +1850,8 @@ namespace Gambit
               /// @todo Add option for sampling in log(rate) and transform back to positive-definite rates
               const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
               const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
-              const double llr_j = n_obs(j)*(log(lambda_sb_j) - log(lambda_b_j)) - (lambda_sb_j - lambda_b_j);
+              const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+              /// @todo Need to multiply by -2 in our definition?
               llrsums(j) += llr_j;
             }
 
