@@ -139,8 +139,6 @@ BE_FUNCTION(DDCalc_BinEvents,     int,    (const int&, const int&),    "C_DDRate
 BE_FUNCTION(DDCalc_BinBackground, double, (const int&, const int&),    "C_DDRates_ddcalc_binbackground", "DD_BinBackground")
 BE_FUNCTION(DDCalc_BinSignal,     double, (const int&, const int&),    "C_DDRates_ddcalc_binsignal",     "DD_BinSignal")
 BE_FUNCTION(DDCalc_LogLikelihood, double, (const int&),                "C_DDStats_ddcalc_loglikelihood", "DD_LogLikelihood")
-BE_FUNCTION(DDCalc_LogPValue,     double, (const int&),                "C_DDStats_ddcalc_logpvalue",     "DD_LogPValue")
-BE_FUNCTION(DDCalc_ScaleToPValue, double, (const int&, const double&), "C_DDStats_ddcalc_scaletopvalue", "DD_SignalSD")
 
 // Do memory cleanup (nowhere to actually use these in GAMBIT proper, but they could be useful in standalones that hammer DDCalc).
 BE_FUNCTION(DDCalc_FreeWIMPs,     void, (), "C_DDUtils_ddcalc_freewimps",     "FreeWIMPs")

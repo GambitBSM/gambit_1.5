@@ -585,6 +585,8 @@ START_MODULE
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
    CAT_3(EXPERIMENT,_Get,NAME), DD_Experiment, (DDCalc), int, (const str&))   \
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_Bins, (DDCalc), int, (const int&))         \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
    CAT_3(EXPERIMENT,_Get,NAME), CAT(DD_,NAME), (DDCalc), TYPE, (const int&,   \
    const int&))
 
