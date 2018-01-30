@@ -20,6 +20,9 @@
 #include <iomanip>
 #include <algorithm>
 
+// _Anders
+#include <iostream>
+
 namespace Gambit {
   namespace ColliderBit {
 
@@ -75,7 +78,27 @@ namespace Gambit {
     {
 
       /// Default constructor
-      AnalysisData() { clear(); }
+      // _Anders
+      AnalysisData() 
+      { 
+        std::cout << "DEBUG: AnalysisData: " << this << " - Constructed (default ctor)" << std::endl;
+        clear(); 
+      }
+
+      // _Anders
+      AnalysisData(const AnalysisData& copy) : 
+        srdata(copy.srdata),
+        srdata_identifiers(copy.srdata_identifiers),
+        srcov(copy.srcov)
+      { 
+        std::cout << "DEBUG: AnalysisData: " << this << " - Copy-constructed from " << &copy << std::endl;
+      }
+
+      // _Anders
+      ~AnalysisData()
+      {
+        std::cout << "DEBUG: AnalysisData: " << this << " - Destructed" << std::endl;
+      }
 
       /// @brief Constructor from a list of SignalRegionData and an optional correlation (or covariance?) matrix
       ///
@@ -84,6 +107,8 @@ namespace Gambit {
       AnalysisData(const std::vector<SignalRegionData>& srds, const Eigen::MatrixXd& cov=Eigen::MatrixXd())
         : srdata(srds), srcov(cov)
       {
+        // _Anders
+        std::cout << "DEBUG: AnalysisData: " << this << " - Constructed (special ctor)" << std::endl;
         _checkConsistency();
       }
 
@@ -91,8 +116,10 @@ namespace Gambit {
       /// @todo It'd be good to *not* have to re-enter most of the SRData and the covariance on every point: they don't change
       void clear()
       {
-        srdata.clear();
+        // _Anders
+        // srdata.clear();
         srcov = Eigen::MatrixXd();
+        std::cout << "DEBUG: AnalysisData: " << this << " - Cleared" << std::endl;
       }
 
       /// Number of analyses

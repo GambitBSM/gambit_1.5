@@ -73,9 +73,9 @@ namespace Gambit {
       /// @todo For v2.0: Avoid this 'duplication' of reset/clear methods.
       void _clear() 
       { 
-        _ntot = 0; _xsec = 0; _xsecerr = 0; _luminosity = 0; 
-        _xsec_is_set = false; _luminosity_is_set = false;
-        _is_scaled = false; _needs_collection = true;
+        _ntot = 0; _xsec = 0; _xsecerr = 0;
+        _xsec_is_set = false; _is_scaled = false;
+        _needs_collection = true;
         _results.clear();
       }
       //@}
@@ -134,6 +134,18 @@ namespace Gambit {
         // warning = "Ooops! In analysis " + analysis_name + ": " + warning
 
         return get_results();
+      }
+
+      // _Anders
+      const AnalysisData* get_results_ptr()
+      {
+        return &get_results();
+      }
+
+      // _Anders
+      const AnalysisData* get_results_ptr(std::string& warning)
+      {
+        return &get_results(warning);
       }
 
       //@}
