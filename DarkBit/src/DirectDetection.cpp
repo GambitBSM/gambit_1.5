@@ -262,13 +262,8 @@ namespace Gambit {
     #define DDCALC_BIN(EXPERIMENT, TYPE, NAME)                                     \
     void CAT_3(EXPERIMENT,_Get,NAME)(TYPE &result)                                 \
     {                                                                              \
-      int nbins = BEreq::DD_Bins(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT));      \
-      TYPE temp [nbins];                                                           \
-      for (int i = 0; i <= nbins; i++) {                                           \
-        temp[i] = BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)),\
-        bin);                                                                      \
-      }                                                                            \
-      result = temp                                                                \
+      using namespace Pipes::CAT_3(EXPERIMENT,_Get,NAME);                          \
+      result = BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)),0);\
     }
 
     /// Defines functions to perform the DDCalc internal rate calculations,
