@@ -1,7 +1,9 @@
 #pragma once
+#include "gambit/Utils/util_types.hpp"
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <map>
 
 // Forward declarations, to avoid header-chaining into CB_types.hpp
 namespace HEPUtils { class Event; }
@@ -17,18 +19,21 @@ namespace Gambit {
 namespace Gambit {
   namespace ColliderBit {
 
+    // Typedefs
+    typedef std::string string;
 
     /// Create a new analysis based on a name string
     /// @note The caller is responsible for deleting the returned analysis object.
     /// @todo Move to a separate file
-    HEPUtilsAnalysis* mkAnalysis(const std::string& name);
+    // _Anders
+    // HEPUtilsAnalysis* mkAnalysis(const string& name);
 
 
     /// A class for managing collections of HEPUtilsAnalysis instances.
     class NewHEPUtilsAnalysisContainer
     {
 
-      private:
+      public:
 
         /// A map of maps of pointer-to-HEPUtilsAnalysis. 
         /// First key is the collider name, second key is the analysis name.
@@ -37,9 +42,11 @@ namespace Gambit {
         /// String identifying the currently active collider
         string current_collider;
 
+      private:
+
         // /// A map indicating if a group of analyses has been properly initialized.
         // /// The key is the collider name.
-        // std::map<string,bool> is_ready;
+        // map<string,bool> is_ready;
 
         /// Has this class instance been initialized?
         bool ready; //< @todo Currently not used for anything. Do we need it?
@@ -61,6 +68,9 @@ namespace Gambit {
         /// Destructor
         ~NewHEPUtilsAnalysisContainer();
 
+        /// Add container to instances map
+        void register_thread();
+
         /// Delete and clear the analyses contained within this instance.
         void clear();
 
@@ -69,6 +79,11 @@ namespace Gambit {
 
         /// Get name of current collider
         string get_current_collider() const;
+
+        /// Does this instance contain analyses for the given collider
+        bool has_analyses(string) const;
+        /// Does this instance contain analyses for the current collider
+        bool has_analyses() const;
 
         /// Initialize analyses (by names) for a specified collider
         void init(const std::vector<std::string>&, string);
@@ -85,24 +100,24 @@ namespace Gambit {
         void reset_all();
 
         /// Get pointer to specific analysis
-        HEPUtilsAnalysis* get_analysis_pointer(string, string) const;
+        const HEPUtilsAnalysis* get_analysis_pointer(string, string) const;
         /// Get analyses map for a specific collider
-        std::map<string,HEPUtilsAnalysis*>& get_collider_analyses_map(string) const;
+        const std::map<string,HEPUtilsAnalysis*>& get_collider_analyses_map(string) const;
         /// Get analyses map for the current collider
-        std::map<string,HEPUtilsAnalysis*>& get_current_analyses_map() const;
+        const std::map<string,HEPUtilsAnalysis*>& get_current_analyses_map() const;
         /// Get the full analyses map
-        std::map<string,std::map<string,HEPUtilsAnalysis*> >& get_full_analyses_map() const;
+        const std::map<string,std::map<string,HEPUtilsAnalysis*> >& get_full_analyses_map() const;
 
         /// Pass event through specific analysis
-        void analyze(const HEPUtils::Event&, string, string);
+        void analyze(const HEPUtils::Event&, string, string) const;
         /// Pass event through all analysis for a specific collider
-        void analyze(const HEPUtils::Event&, string);
+        void analyze(const HEPUtils::Event&, string) const;
         /// Pass event through all analysis for the current collider
-        void analyze(const HEPUtils::Event&);
+        void analyze(const HEPUtils::Event&) const;
 
         /// Add cross-sections and errors for two different processes, 
         /// for a specific analysis
-        void add_xsec(double, double, string collider_name);
+        void add_xsec(double, double, string, string);
         /// Add cross-sections and errors for two different processes, 
         /// for all analyses for a given collider
         void add_xsec(double, double, string);
@@ -112,7 +127,7 @@ namespace Gambit {
 
         /// Weighted combination of xsecs and errors for the same process,
         /// for a specific analysis
-        void improve_xsec(double, double, string collider_name);
+        void improve_xsec(double, double, string, string);
         /// Weighted combination of xsecs and errors for the same process,
         /// for all analyses for a given collider
         void improve_xsec(double, double, string);
@@ -141,9 +156,9 @@ namespace Gambit {
         void collect_and_improve_xsec();
 
         /// Scale results for specific analysis
-        void scale(double factor=-1, string, string);
+        void scale(string, string, double factor=-1);
         /// Scale results for all analyses for given collider
-        void scale(double factor=-1, string);
+        void scale(string, double factor=-1);
         /// Scale results for all analyses for the current collider
         void scale(double factor=-1);
         /// Scale results for all analyses across all colliders

@@ -19,6 +19,7 @@
 
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
+#include "gambit/ColliderBit/analyses/NewHEPUtilsAnalysisContainer.hpp"
 
 namespace Gambit
 {
@@ -81,9 +82,13 @@ namespace Gambit
 
         /// Update the convergence data.  This is the only routine meant to be called in parallel.
         void update(const HEPUtilsAnalysisContainer&);
+        // _Anders
+        void update(const NewHEPUtilsAnalysisContainer&);
 
         /// Check if convergence has been achieved across threads, and across all instances of this class
         bool achieved(const HEPUtilsAnalysisContainer& ac);
+        // _Anders
+        bool achieved(const NewHEPUtilsAnalysisContainer& ac);
     };
 
 

@@ -987,7 +987,7 @@ namespace Gambit
       // static std::map<int,std::map<int,HEPUtilsAnalysisContainer*> > containers;
       // static std::map<int,std::map<int,bool> > containers_initialized;
       static bool first = true;
-      static int n_threads = omp_get_max_threads();
+      // static int n_threads = omp_get_max_threads();
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1044,23 +1044,33 @@ namespace Gambit
       if (*Loop::iteration == START_SUBPROCESS)
       {
 
-        std::cout << "DEBUG: getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
         int my_thread = omp_get_thread_num();
 
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
+
+        // Register analysis container
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.register_thread " << endl;
+        result.register_thread();
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
+
         // Set current collider
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.set_current_collider " << endl;
         result.set_current_collider(*iterPythiaNames);
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
 
         // Initialize analysis container or reset all the contained analyses
-        if (result.get_current_analyses().empty()) result.init(analyses[indexPythiaNames]); 
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run get_current_analyses_map" << endl;
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
         else result.reset();
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done " << endl;
 
         // _Anders
         // #ifdef COLLIDERBIT_DEBUG
         if (my_thread == 0)
         {
-          for (auto& apair : result.get_current_analyses())
+          for (auto& apair : result.get_current_analyses_map())
           {
-            std::cout << "DEBUG: getATLASAnalysisContainer: The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
+            std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
           }
             // std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             // std::cout << "DEBUG: OMP thread " << omp_get_thread_num() << ": getATLASAnalysisContainer: The run with with " << *iterPythiaNames << " will include the analysis " << a << endl;
@@ -1068,7 +1078,7 @@ namespace Gambit
         // #endif
 
         // return;
-        std::cout << "DEBUG: getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
+        std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
       }
 
       if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
@@ -1085,23 +1095,15 @@ namespace Gambit
       // _Anders
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
-        std::cout << "DEBUG: getATLASAnalysisContainer: Starting COLLIDER_FINALIZE. "  << endl;
-        // Only OMP thread 0 will run this
-        if (n_threads > 0)
-        {
-          for (int i = 1; i < n_threads; ++i)
-          {
-            // Add result from the thread-i container to the thread-0 container 
-            result.add();
+        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": getATLASAnalysisContainer: Starting COLLIDER_FINALIZE. "  << endl;
 
-            // Combine cross-sections and errors 
-            result.improve_xsec();
-          }          
-        }
+        result.collect_and_add_signal();
 
-        // Scale all results in thread-0 container with cross-section x luminosity
-        result.scale();
-        std::cout << "DEBUG: getATLASAnalysisContainer: Ending COLLIDER_FINALIZE. "  << endl;
+        result.collect_and_improve_xsec();
+
+        result.scale();        
+
+        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": getATLASAnalysisContainer: Ending COLLIDER_FINALIZE. "  << endl;
       }
 
     }
@@ -1548,9 +1550,13 @@ namespace Gambit
 
       if (*Loop::iteration == END_SUBPROCESS)
       {
-        for (auto anaPtr : Dep::ATLASAnalysisContainer->analyses)
+        // _Anders
+        // for (auto anaPtr : Dep::ATLASAnalysisContainer->analyses)
+        for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
         {
-          for (auto& sr : anaPtr->get_results().srdata)
+          // _Anders
+          // for (auto& sr : anaPtr->get_results().srdata)
+          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
           {
             std::cout << "DEBUG: OMP thread " << omp_get_thread_num() << ": runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
           }
@@ -1561,15 +1567,20 @@ namespace Gambit
       {
         // The final iteration for this collider: collect results
         // _Anders
-        for (auto anaPtr : Dep::ATLASAnalysisContainer->analyses)
+
+        // _Anders
+        // for (auto anaPtr : Dep::ATLASAnalysisContainer->analyses)
+        for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
+          std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          // std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
           #endif
 
           // _Anders
           str warning;
-          result.push_back(anaPtr->get_results_ptr(warning));
+          // result.push_back(anaPtr->get_results_ptr(warning));
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
           if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
           {
             ColliderBit_error().raise(LOCAL_INFO, warning);
