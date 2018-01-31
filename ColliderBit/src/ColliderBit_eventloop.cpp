@@ -979,13 +979,13 @@ namespace Gambit
 
 
 
-    void getATLASAnalysisContainer(HEPUtilsAnalysisContainers& result)
+    void getATLASAnalysisContainer(NewHEPUtilsAnalysisContainer& result)
     {
       using namespace Pipes::getATLASAnalysisContainer;
       static std::vector<std::vector<str> > analyses;
       // _Anders
-      static std::map<int,std::map<int,HEPUtilsAnalysisContainer*> > containers;
-      static std::map<int,std::map<int,bool> > containers_initialized;
+      // static std::map<int,std::map<int,HEPUtilsAnalysisContainer*> > containers;
+      // static std::map<int,std::map<int,bool> > containers_initialized;
       static bool first = true;
       static int n_threads = omp_get_max_threads();
 
@@ -994,16 +994,16 @@ namespace Gambit
         // Only run this once
         if (first)
         {
-          // Initialize all entries in containers_initialized to false
-          for (size_t i = 0; i < pythiaNames.size(); ++i)
-          {
-            // containers_initialized[i] = std::map<int,bool>();
-            for (int j = 0; j < n_threads; ++j)
-            {
-              containers_initialized[i][j] = false;
-            }
-          }
-  
+          // // Initialize all entries in containers_initialized to false
+          // for (size_t i = 0; i < pythiaNames.size(); ++i)
+          // {
+          //   // containers_initialized[i] = std::map<int,bool>();
+          //   for (int j = 0; j < n_threads; ++j)
+          //   {
+          //     containers_initialized[i][j] = false;
+          //   }
+          // }
+ 
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
@@ -1045,58 +1045,22 @@ namespace Gambit
       {
 
         std::cout << "DEBUG: getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
-
-        std::cout << "DEBUG: getATLASAnalysisContainer: will call result.resize(pythiaNames.size());" << endl;
-        result.resize(pythiaNames.size());
-        std::cout << "DEBUG: getATLASAnalysisContainer: ...done" << endl;
-
-        // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        // _Anders
         int my_thread = omp_get_thread_num();
-        if (not containers_initialized[indexPythiaNames][my_thread])
-        {
-          std::cout << "DEBUG: getATLASAnalysisContainer: entering if block" << endl;
 
+        // Set current collider
+        result.set_current_collider(*iterPythiaNames);
 
-          // std::cout << "DEBUG: getATLASAnalysisContainer: will call result.push_back(HEPUtilsAnalysisContainer())" << endl;
-          // result.push_back(HEPUtilsAnalysisContainer());
-          // std::cout << "DEBUG: getATLASAnalysisContainer: ...done" << endl;
-          // assert(result.size()==indexPythiaNames+1);
-
-          assert(result.size() == pythiaNames.size());
-          std::cout << "DEBUG: getATLASAnalysisContainer: will call result[indexPythiaNames].init(analyses[indexPythiaNames])" << endl;
-          result[indexPythiaNames].init(analyses[indexPythiaNames]);
-          std::cout << "DEBUG: getATLASAnalysisContainer: ...done" << endl;
-          std::cout << "DEBUG: getATLASAnalysisContainer: will store pointer to result[indexPythiaNames]" << endl;
-          containers[indexPythiaNames][my_thread] = &(result[indexPythiaNames]);
-          std::cout << "DEBUG: getATLASAnalysisContainer: ...done" << endl;
-          containers_initialized[indexPythiaNames][my_thread] = true;
-
-          std::cout << "DEBUG: getATLASAnalysisContainer: leaving if block" << endl;
-        }
-        else
-        {
-          std::cout << "DEBUG: getATLASAnalysisContainer: entered else block" << endl;
-          assert(result.size() == pythiaNames.size());
-          result[indexPythiaNames].reset();
-          std::cout << "DEBUG: getATLASAnalysisContainer: leaving else block" << endl;
-        }
-        std::cout << "DEBUG: getATLASAnalysisContainer: Passed if-else-block." << endl;
-
-        // if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
-
-        // _Anders
-        // Register this thread's container in the containers array
-        // containers[my_thread] = &result;  // This looks dangerous...
+        // Initialize analysis container or reset all the contained analyses
+        if (result.get_current_analyses().empty()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
 
         // _Anders
         // #ifdef COLLIDERBIT_DEBUG
         if (my_thread == 0)
         {
-          for (auto& ap : result[indexPythiaNames].analyses)
+          for (auto& apair : result.get_current_analyses())
           {
-            std::cout << "DEBUG: getATLASAnalysisContainer: The run with " << *iterPythiaNames << " will include the analysis " << ap->get_results().srdata[0].analysis_name << endl;
+            std::cout << "DEBUG: getATLASAnalysisContainer: The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
           }
             // std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
             // std::cout << "DEBUG: OMP thread " << omp_get_thread_num() << ": getATLASAnalysisContainer: The run with with " << *iterPythiaNames << " will include the analysis " << a << endl;
@@ -1111,7 +1075,7 @@ namespace Gambit
       {
         const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
         const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
-        result[indexPythiaNames].add_xsec(xs_fb, xserr_fb);
+        result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
         std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
@@ -1128,15 +1092,15 @@ namespace Gambit
           for (int i = 1; i < n_threads; ++i)
           {
             // Add result from the thread-i container to the thread-0 container 
-            result[indexPythiaNames].add(containers[indexPythiaNames][i]);
+            result.add();
 
             // Combine cross-sections and errors 
-            result[indexPythiaNames].improve_xsec(containers[indexPythiaNames][i]);
+            result.improve_xsec();
           }          
         }
 
         // Scale all results in thread-0 container with cross-section x luminosity
-        result[indexPythiaNames].scale();
+        result.scale();
         std::cout << "DEBUG: getATLASAnalysisContainer: Ending COLLIDER_FINALIZE. "  << endl;
       }
 
@@ -1571,20 +1535,20 @@ namespace Gambit
       if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
       {
         // Update the convergence tracker with the new results
-        convergence.update(Dep::ATLASAnalysisContainer->at(indexPythiaNames));
+        convergence.update(*Dep::ATLASAnalysisContainer);
         return;
       }
 
       if (*Loop::iteration == CHECK_CONVERGENCE)
       {
         // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(Dep::ATLASAnalysisContainer->at(indexPythiaNames))) Loop::wrapup();
+        if (convergence.achieved(*Dep::ATLASAnalysisContainer)) Loop::wrapup();
         return;
       }
 
       if (*Loop::iteration == END_SUBPROCESS)
       {
-        for (auto anaPtr : Dep::ATLASAnalysisContainer->at(indexPythiaNames).analyses)
+        for (auto anaPtr : Dep::ATLASAnalysisContainer->analyses)
         {
           for (auto& sr : anaPtr->get_results().srdata)
           {
@@ -1597,7 +1561,7 @@ namespace Gambit
       {
         // The final iteration for this collider: collect results
         // _Anders
-        for (auto anaPtr : Dep::ATLASAnalysisContainer->at(indexPythiaNames).analyses)
+        for (auto anaPtr : Dep::ATLASAnalysisContainer->analyses)
         {
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
@@ -1626,7 +1590,7 @@ namespace Gambit
       if (*Loop::iteration <= BASE_INIT) return;
 
       // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::ATLASAnalysisContainer->at(indexPythiaNames).analyze(*Dep::ATLASSmearedEvent);
+      Dep::ATLASAnalysisContainer->analyze(*Dep::ATLASSmearedEvent);
 
     }
 

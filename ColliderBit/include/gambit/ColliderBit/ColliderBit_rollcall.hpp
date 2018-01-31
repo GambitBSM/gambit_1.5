@@ -119,7 +119,7 @@ START_MODULE
   #define CAPABILITY ATLASAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getATLASAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainers)
+    START_FUNCTION(NewHEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -235,7 +235,7 @@ START_MODULE
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainers)
+    DEPENDENCY(ATLASAnalysisContainer, NewHEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
