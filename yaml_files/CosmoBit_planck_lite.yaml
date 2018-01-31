@@ -67,8 +67,22 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-## So far there are none
+#####
+##  Since the "Planck_lite" model fits to be used by 
+##  the marginalized (lite) versions of both, the TT
+##  and the TTTEEE, likelihoods, we need to resolve
+##  this ambiguity manually.
+#####
 
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
+
+#  - capability: compute_Planck_high_TT_loglike
+#    function: function_Planck_high_TTTEEE_lite_loglike
+#    module: CosmoBit
+
+ 
 #======== Logging setup ========
 Lxogger:
   redirection:

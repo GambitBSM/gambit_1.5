@@ -947,7 +947,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
+      //std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
     }
 
     void function_Planck_high_TTTEEE_loglike(double& result)
@@ -1080,6 +1080,58 @@ namespace Gambit
                &_err);
 
       //std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
+    }
+
+    void function_Planck_high_TTTEEE_lite_loglike(double& result)
+    {
+      //std::cout << "Last seen alive in: function_Planck_high_TTTEEE_lite_loglike" << std::endl;
+      using namespace Pipes::function_Planck_high_TTTEEE_lite_loglike;
+
+      double  cl_and_pars[7528];
+      int idx_tt, idx_te, idx_ee;
+      Class_container cosmo = *Dep::class_get_spectra;
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, TE and EE to Cl array--------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+        idx_tt = ii;
+        idx_ee = ii + 2509;
+        idx_te = ii + (2 * 2509);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
+          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_te] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[7527] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      clik_object* high_clikid;
+      clik_error *_err;
+      
+      high_clikid = BEreq::return_high_TTTEEE_lite();
+      _err = BEreq::clik_initialize_error();
+
+      result = BEreq::clik_compute_loglike(byVal(high_clikid),
+               byVal(cl_and_pars),
+               &_err);
+
+      //std::cout << "Log likelihood (of high_TTTEEE_lite) is : " << result << std::endl;
     }
 
     void function_Planck_lensing_loglike(double& result)

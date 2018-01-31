@@ -3333,6 +3333,11 @@ initialize_high_TT_lite: |
    Will be executed by plc_2_0_init when this
    likelihood is wanted.
 
+initialize_high_TTTEEE_lite: |
+   Load the marginalized (lite) TTTEEE-likelihood for high-l.
+   Will be executed by plc_2_0_init when this
+   likelihood is wanted.
+
 initialize_lensing: |
    Load the lensing-likelihood.
    Will be executed by plc_2_0_init when this
@@ -3378,6 +3383,9 @@ return_high_TT_lite: |
    return the (marginalized) likelihood result for
    high-l temperature Cl's (above l=30)
 
+return_high_TTTEEE_lite: |
+   return the (marginalized) likelihood result for
+   high-l temperature and polarization Cl's (above l=30)
 
 #----------------------------
 #  MultiModeCode

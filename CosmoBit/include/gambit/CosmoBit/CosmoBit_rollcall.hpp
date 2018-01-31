@@ -278,6 +278,22 @@ START_MODULE
 //   BACKEND_REQ(data_initialize, (clik_tag), void, ())
     BACKEND_REQ(return_high_TT_lite,(clik_tag),clik_object*,())
     #undef FUNCTION
+
+    #define FUNCTION function_Planck_high_TTTEEE_lite_loglike
+    START_FUNCTION(double)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    ALLOW_MODELS(Planck_lite)
+    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
+    BACKEND_REQ(clik_initialize, (clik_tag), clik_object* ,(char*,clik_error**))
+    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
+    BACKEND_REQ(clik_get_list_cls, (clik_tag), void , (clik_object*,int,clik_error**))
+    BACKEND_REQ(clik_get_extra_parameter_names, (clik_tag), int ,(clik_object*,parname**,clik_error**))
+    BACKEND_REQ(clik_get_lmax, (clik_tag), void ,(clik_object*,int,clik_error**))
+    BACKEND_REQ(clik_cleanup, (clik_tag), void ,(clik_object**))
+    BACKEND_REQ(clik_get_version, (clik_tag), char* , (clik_object*,clik_error**))
+//   BACKEND_REQ(data_initialize, (clik_tag), void, ())
+    BACKEND_REQ(return_high_TTTEEE_lite,(clik_tag),clik_object*,())
+    #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY compute_Planck_lensing_loglike

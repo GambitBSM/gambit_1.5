@@ -42,11 +42,13 @@ BE_FUNCTION(clik_get_version, char*, (clik_object*,clik_error**), "clik_get_vers
 BE_CONV_FUNCTION(return_clikid_plik_dx11dr2_HM_v18_TTTEEE, clik_object*, (), "return_high_TTTEEE", ())
 BE_CONV_FUNCTION(return_clikid_plik_dx11dr2_HM_v18_TT, clik_object*, (), "return_high_TT", ())
 BE_CONV_FUNCTION(return_clikid_plik_lite_v18_TT, clik_object*, (), "return_high_TT_lite", ())
+BE_CONV_FUNCTION(return_clikid_plik_lite_v18_TTTEEE, clik_object*, (), "return_high_TTTEEE_lite", ())
 BE_CONV_FUNCTION(return_clikid_lowl_SMW_70_dx11d_2014, clik_object*, (), "return_lowp_TT", ())
 BE_CONV_FUNCTION(return_smica_g30_ftl_full_pp, clik_lensing_object*, (), "return_lensing", ())
 BE_CONV_FUNCTION(initialize_high_TTTEEE,void,(),"initialize_high_TTTEEE",())
 BE_CONV_FUNCTION(initialize_high_TT,void,(),"initialize_high_TT",())
 BE_CONV_FUNCTION(initialize_high_TT_lite,void,(),"initialize_high_TT_lite",())
+BE_CONV_FUNCTION(initialize_high_TTTEEE_lite,void,(),"initialize_high_TTTEEE_lite",())
 BE_CONV_FUNCTION(initialize_lowp_TT,void,(),"initialize_lowp_TT",())
 BE_CONV_FUNCTION(initialize_lensing,void,(),"initialize_lensing",())
 BE_CONV_FUNCTION(data_cleanup,void,(),"data_cleanup",())
@@ -59,6 +61,7 @@ BE_INI_FUNCTION
     if (*InUse::return_clikid_plik_dx11dr2_HM_v18_TTTEEE) initialize_high_TTTEEE();
     if (*InUse::return_clikid_plik_dx11dr2_HM_v18_TT) initialize_high_TT();
     if (*InUse::return_clikid_plik_lite_v18_TT) initialize_high_TT_lite();
+    if (*InUse::return_clikid_plik_lite_v18_TTTEEE) initialize_high_TTTEEE_lite();
     if (*InUse::return_clikid_lowl_SMW_70_dx11d_2014) initialize_lowp_TT();
     if (*InUse::return_smica_g30_ftl_full_pp) initialize_lensing();
   }
@@ -72,6 +75,7 @@ BE_NAMESPACE
   clik_object * clikid_plik_dx11dr2_HM_v18_TT;
   clik_object * clikid_plik_dx11dr2_HM_v18_TTTEEE;
   clik_object * clikid_plik_lite_v18_TT;
+  clik_object * clikid_plik_lite_v18_TTTEEE;
   clik_object * clikid_lowl_SMW_70_dx11d_2014;
   clik_lensing_object * smica_g30_ftl_full_pp;
   clik_error *_err;
@@ -98,6 +102,14 @@ BE_NAMESPACE
     char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik_lite/plik_lite_v18_TT.clik";
     _err = initError();
     clikid_plik_lite_v18_TT = clik_init(*&clik_path,&_err);
+  }
+
+  void initialize_high_TTTEEE_lite()
+  {
+    std::cout << "Loading the high-l TTTEEE-lite likelihood" << std::endl;
+    char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik_lite/plik_lite_v18_TTTEEE.clik";
+    _err = initError();
+    clikid_plik_lite_v18_TTTEEE = clik_init(*&clik_path,&_err);
   }
 
   void initialize_lowp_TT()
@@ -137,6 +149,11 @@ BE_NAMESPACE
   clik_object * return_clikid_plik_lite_v18_TT()
   {
     return clikid_plik_lite_v18_TT;
+  }
+
+  clik_object * return_clikid_plik_lite_v18_TTTEEE()
+  {
+    return clikid_plik_lite_v18_TTTEEE;
   }
 
   clik_object * return_clikid_lowl_SMW_70_dx11d_2014()
