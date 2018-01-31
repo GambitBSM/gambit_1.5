@@ -137,7 +137,13 @@ namespace Gambit
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_ab_as"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_at_at"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_atau_atau"));
+      settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, runOptions.getValueOrDef<int>(1,"top_pole_qcd_corrections"));
+      settings.set(Spectrum_generator_settings::beta_zero_threshold, runOptions.getValueOrDef<int>(1.000000000e-14,"beta_zero_threshold"));
+      settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_up"));
+      settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_down"));
+      settings.set(Spectrum_generator_settings::threshold_corrections, runOptions.getValueOrDef<int>(123111321,"threshold_corrections"));
 
+      
       spectrum_generator.set_settings(settings);
 
       // Generate spectrum
@@ -699,6 +705,7 @@ namespace Gambit
 
      // Get input parameters (from flexiblesusy namespace)
      MSSMatMSUSYEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
      // This FS spectrum generator has mA as the parameter
      input.mAInput = *myPipe::Param.at("mA");
      fill_MSSM63_input_EFTHiggs(input,myPipe::Param); // Fill the rest
@@ -726,7 +733,7 @@ namespace Gambit
      // Get input parameters (from flexiblesusy namespace)
      MSSMEFTHiggs_input_parameters input;
      // MSSMatQ also requires input scale to be supplied with name MSUSY
-     input.MSUSY    = *myPipe::Param.at("Qin"); 
+     input.MSUSY  = *myPipe::Param.at("Qin"); 
      input.mHu2IN = *myPipe::Param.at("mHu2");
      input.mHd2IN = *myPipe::Param.at("mHd2");
      input.SignMu = *myPipe::Param.at("SignMu");
@@ -756,6 +763,7 @@ namespace Gambit
 
      // Get input parameters (from flexiblesusy namespace)
      MSSMEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
      // This FS spectrum generator has mA as the parameter
      input.mAInput = *myPipe::Param.at("mA");
      // Note: Qin has been named MSUSY inside the spectrum generator
