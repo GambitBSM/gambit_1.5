@@ -116,7 +116,7 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 10000
+      NP: 100
 
     multinest:
       plugin: multinest
@@ -125,65 +125,65 @@ Scanner:
 
 ObsLikes:
 
-# - capability: lnLbbn
-#    purpose: LogLike
-#    function: lnL_bbn
+  - capability: lnLbbn
+    purpose: LogLike
+    function: lnL_bbn
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
-#    function: lnL_lepuniv
+  - capability: lnLlepuniv
+    purpose: LogLike
+    function: lnL_lepuniv
 
-#  - capability: lnL0nubb
-#    purpose: LogLike
-#    function: lnL_0nubb
+  - capability: lnL0nubb
+    purpose: LogLike
+    function: lnL_0nubb
 
-#  - capability: lnLckm
-#    purpose: LogLike
-#    function: lnL_ckm
+  - capability: lnLckm
+    purpose: LogLike
+    function: lnL_ckm
 
-#  - capability: lnLpienu
-#    purpose: LogLike
-#    function: lnL_pienu
+  - capability: lnLpienu
+    purpose: LogLike
+    function: lnL_pienu
 
-#  - capability: lnLps191e
-#    purpose: LogLike
-#    function: lnL_ps191_e
+  - capability: lnLps191e
+    purpose: LogLike
+    function: lnL_ps191_e
 
-#  - capability: lnLps191mu
-#    purpose: LogLike
-#    function: lnL_ps191_mu
+  - capability: lnLps191mu
+    purpose: LogLike
+    function: lnL_ps191_mu
 
-#  - capability: lnLcharme
-#    purpose: LogLike
-#    function: lnL_charm_e
+  - capability: lnLcharme
+    purpose: LogLike
+    function: lnL_charm_e
 
-#  - capability: lnLcharmmu
-#    purpose: LogLike
-#    function: lnL_charm_mu
+  - capability: lnLcharmmu
+    purpose: LogLike
+    function: lnL_charm_mu
 
-#  - capability: lnLdelphi
-#    purpose: LogLike
-#    function: lnL_delphi
+  - capability: lnLdelphi
+    purpose: LogLike
+    function: lnL_delphi
 
-#  - capability: lnLatlase
-#    purpose: LogLike
-#    function: lnL_atlas_e
+  - capability: lnLatlase
+    purpose: LogLike
+    function: lnL_atlas_e
 
-#  - capability: lnLatlasmu
-#    purpose: LogLike
-#    function: lnL_atlas_mu
+  - capability: lnLatlasmu
+    purpose: LogLike
+    function: lnL_atlas_mu
 
-#  - capability: lnLe949
-#    purpose: LogLike
-#    function: lnL_e949
+  - capability: lnLe949
+    purpose: LogLike
+    function: lnL_e949
 
-#  - capability: lnLnutev
-#    purpose: LogLike
-#    function: lnL_nutev
+  - capability: lnLnutev
+    purpose: LogLike
+    function: lnL_nutev
 
-#  - capability: lnLtau
-#    purpose: LogLike
-#    function: lnL_tau
+  - capability: lnLtau
+    purpose: LogLike
+    function: lnL_tau
 
   - capability: Ue1
     purpose: Observable
@@ -221,65 +221,17 @@ ObsLikes:
     purpose: Observable
     function: Ut3
 
-#  - capability: l2lgamma_lnL
-#    purpose: LogLike
-#    function: l2lgamma_likelihood
+  - capability: l2lgamma_lnL
+    purpose: LogLike
+    function: l2lgamma_likelihood
 
-#  - capability: l2lll_lnL
-#    purpose: LogLike
-#    function: l2lll_likelihood
+  - capability: l2lll_lnL
+    purpose: LogLike
+    function: l2lll_likelihood
 
-#  - capability: mu2e_lnL
-#    purpose: LogLike
-#    function: mu2e_likelihood
-
-  - capability: muegamma
-    purpose: Observable
-    function: SN_muegamma
-
-  - capability: tauegamma
-    purpose: Observable
-    function: SN_tauegamma
-
-  - capability: taumugamma
-    purpose: Observable
-    function: SN_taumugamma
-
-  - capability: mueee
-    purpose: Observable
-    function: SN_mueee
-
-  - capability: taueee
-    purpose: Observable
-    function: SN_taueee
-
-  - capability: taumumumu
-    purpose: Observable
-    function: SN_taumumumu
-
-  - capability: taumuee
-    purpose: Observable
-    function: SN_taumuee
-
-  - capability: taueemu
-    purpose: Observable
-    function: SN_taueemu
-
-  - capability: tauemumu
-    purpose: Observable
-    function: SN_tauemumu
-
-  - capability: taumumue
-    purpose: Observable
-    function: SN_taumumue
-
-  - capability: mueTi
-    purpose: Observable
-    function: SN_mueTi
-
-  - capability: muePb
-    purpose: Observable
-    function: SN_muePb
+  - capability: mu2e_lnL
+    purpose: LogLike
+    function: mu2e_likelihood
 
   - capability: perturbativity_lnL
     purpose: LogLike

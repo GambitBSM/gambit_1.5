@@ -260,23 +260,14 @@ START_MODULE
    #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ckm_V_ud 
-  START_CAPABILITY
-    #define FUNCTION SN_ckm_V_ud
-    START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3d)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY lnLckm
   START_CAPABILITY
     #define FUNCTION lnL_ckm
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODELS(SN_dev, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+//TODO:  DEPENDENCY(Gmu, double)
     #undef FUNCTION
 
   #undef CAPABILITY

@@ -278,86 +278,52 @@ namespace Gambit
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
-    void SN_ckm_V_ud(double &V_ud)
-    {
-      using namespace Pipes::SN_ckm_V_ud;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      Matrix3cd Theta = *Dep::SeesawI_Theta;
-      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
-      static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
-      static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
-      static double G_mu_sq = 1.3605e-10;  // GeV^-4
-      static double V_ud_0 = 0.97427;
-      static double err_0 = 0.00015;
-      static double err_factor = 5.3779e7;
-      double V_ud_exp[7], f[7];
-      double V_ud_sq;
-
-      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
-
-      for (int i=0;i<7;i++)
-      {
-        V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
-      }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(0,0));
-      f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
-      f[5] = 1 + ThetaNorm(1,1);
-      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) + ThetaNorm(2,2);
-      f[1] = f[0];
-      f[2] = f[0];
-      f[4] = f[3];
-      V_ud_sq = 0.0;
-      for (int j=0; j<7; j++)
-      {
-        V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
-      }
-      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
-      V_ud_sq /= err_factor;
-
-      V_ud = sqrt(V_ud_sq);
-    }
-
     void lnL_ckm(double& result_ckm)
     {
       using namespace Pipes::lnL_ckm;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
-      static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
-      static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
-      static double G_mu_sq = 1.3605e-10;  // GeV^-4
-      static double V_ud_0 = 0.97427;
-      static double err_0 = 0.00015;
-      static double err_factor = 5.3779e7;
-      double V_ud_exp[7], f[7];
-      double V_ud_sq, chi2;
+      static double G_mu_sq = 1.3605e-10;  // GeV^-4 //TODO: Change this for the actual calculation of Gmu in EWPO
+      double V_us = *Param["CKM_lambda"];
+ 
+      // Experimental values determined for K and tau decays. From table 1 in 1502.00477
+      double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
+      double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
+      double f_plus = 0.959;
+      double err_f_plus = 0.005;
+      for(int i=0; i<5; i++)
+      {
+        V_us_exp[i] /= f_plus;
+        err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
+      }  
 
+      // Superallowed beta decays and more, from 1509.0474
+      // TODO: Wait for Marcin to check these out
+      //static double V_ud_exp[] = {0.97417, 0.9754, 0.9734, 0.9718, 0.9749};
+      //static double err_V_ud_exp[] = {0.00021, 0.0014, 0.0027, 0.0017, 0.0026};
+      static double V_ud_exp = 0.97417;
+      static double err_V_ud_exp = 0.00021;
+
+      double f[8];
       Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
-      for (int i=0;i<7;i++)
-      {
-        V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
-      }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(0,0));
+      f[0] = pow(sminputs.GF,2)/G_mu_sq*(1 - ThetaNorm(0,0));
       f[1] = f[0];
       f[2] = f[0];
-      f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
+      f[3] = pow(sminputs.GF,2)/G_mu_sq*(1 - ThetaNorm(1,1));
       f[4] = f[3];
       f[5] = 1 + ThetaNorm(1,1);
       f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
-      V_ud_sq = 0.0;
-      for (int j=0; j<7; j++)
-      {
-        V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
-      }
-      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
-      V_ud_sq /= err_factor;
+      f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
 
-      chi2 = 0.0;
-      for (int k=0; k<7; k++)
-        chi2 += pow(((sqrt((1 - V_ud_sq)*f[k]) - V_us_exp[k])/err[k]), 2.0);
-      chi2 += pow((((sqrt(V_ud_sq)*(1 + ThetaNorm(0,0))) - V_ud_0)/err_0), 2.0);
-      result_ckm = chi2;
+      double chi2 = 0.0;
+      for (int i=0; i<7; i++)
+        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2.0);
+
+      // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
+      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2.0);
+
+      result_ckm = -0.5*chi2;
     }
 
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
