@@ -203,6 +203,7 @@ namespace Gambit
       double R_K = *Dep::R_K;
       double R_tau = *Dep::R_tau;
 
+      // TODO: change to 1sigma
       double R_pi_exp = 1.23e-4;
       double R_pi_err = 0.012e-4;
       double R_K_exp = 2.488e-5;
@@ -283,7 +284,7 @@ namespace Gambit
       using namespace Pipes::lnL_ckm;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      static double G_mu_sq = 1.3605e-10;  // GeV^-4 //TODO: Change this for the actual calculation of Gmu in EWPO
+      double G_mu = *Dep::Gmu;
       double V_us = *Param["CKM_lambda"];
  
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
@@ -298,19 +299,19 @@ namespace Gambit
       }  
 
       // Superallowed beta decays and more, from 1509.0474
-      // TODO: Wait for Marcin to check these out
+      // TODO: Wait for Marcin to check these out, only include pion beta decays for now
       //static double V_ud_exp[] = {0.97417, 0.9754, 0.9734, 0.9718, 0.9749};
       //static double err_V_ud_exp[] = {0.00021, 0.0014, 0.0027, 0.0017, 0.0026};
-      static double V_ud_exp = 0.97417;
-      static double err_V_ud_exp = 0.00021;
+      static double V_ud_exp = 0.9749;
+      static double err_V_ud_exp = 0.0026;
 
       double f[8];
       Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
-      f[0] = pow(sminputs.GF,2)/G_mu_sq*(1 - ThetaNorm(0,0));
+      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
       f[1] = f[0];
       f[2] = f[0];
-      f[3] = pow(sminputs.GF,2)/G_mu_sq*(1 - ThetaNorm(1,1));
+      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
       f[4] = f[3];
       f[5] = 1 + ThetaNorm(1,1);
       f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);

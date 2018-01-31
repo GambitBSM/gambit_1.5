@@ -27,7 +27,8 @@ Parameters:
     # CKM
     # Wolfenstein parameterisation (matches SLHA2 VCKMIN block)
     # from http://pdg.lbl.gov/2014/reviews/rpp2014-rev-ckm-matrix.pdf
-    CKM_lambda  :  0.22537
+#    CKM_lambda  :  0.22537
+    CKM_lambda: [0.2151, 0.2275] 
     CKM_A       :  0.814
     CKM_rhobar  :  0.117
     CKM_etabar  :  0.353
@@ -125,6 +126,22 @@ Scanner:
 
 ObsLikes:
 
+  # EWPO constraints
+
+  - capability: lnL_Gmu
+    purpose: LogLike
+    function: lnL_Gmu_chi2
+
+  - capability: lnL_W_mass
+    purpose: LogLike
+    function: lnL_W_mass_chi2
+
+  - capability: lnL_sinW2_eff
+    purpose: LogLike
+    function: lnL_sinW2_eff_chi2
+
+  # Indirecte searches
+
   - capability: lnLbbn
     purpose: LogLike
     function: lnL_bbn
@@ -140,6 +157,20 @@ ObsLikes:
   - capability: lnLckm
     purpose: LogLike
     function: lnL_ckm
+
+  - capability: l2lgamma_lnL
+    purpose: LogLike
+    function: l2lgamma_likelihood
+
+  - capability: l2lll_lnL
+    purpose: LogLike
+    function: l2lll_likelihood
+
+  - capability: mu2e_lnL
+    purpose: LogLike
+    function: mu2e_likelihood
+
+  # Direct searches
 
   - capability: lnLpienu
     purpose: LogLike
@@ -185,6 +216,14 @@ ObsLikes:
     purpose: LogLike
     function: lnL_tau
 
+  # Theoretical constraints
+
+  - capability: perturbativity_lnL
+    purpose: LogLike
+    function: perturbativity_likelihood
+
+  # Observables
+
   - capability: Ue1
     purpose: Observable
     function: Ue1
@@ -220,24 +259,6 @@ ObsLikes:
   - capability: Ut3
     purpose: Observable
     function: Ut3
-
-  - capability: l2lgamma_lnL
-    purpose: LogLike
-    function: l2lgamma_likelihood
-
-  - capability: l2lll_lnL
-    purpose: LogLike
-    function: l2lll_likelihood
-
-  - capability: mu2e_lnL
-    purpose: LogLike
-    function: mu2e_likelihood
-
-  - capability: perturbativity_lnL
-    purpose: LogLike
-    function: perturbativity_likelihood
-
-   
 
 Rules:
 

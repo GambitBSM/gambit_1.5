@@ -1068,5 +1068,59 @@ namespace Gambit
 
     }
 
+    // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
+    void RHN_Gmu(double &result)
+    {
+      using namespace Pipes::RHN_Gmu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      result = sminputs.GF*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+    }
+
+    void lnL_Gmu_chi2(double &result)
+    {
+      using namespace Pipes::lnL_Gmu_chi2;
+      /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
+      bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
+      result = Stats::gaussian_loglikelihood(*Dep::Gmu, 1.1663787E-05, 0.0, 0.0000006E-05, profile);
+    }
+
+    //TODO: values seem a bit off, check this
+    void RHN_sinW2_eff(triplet<double> &result)
+    {
+      using namespace Pipes::RHN_sinW2_eff;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      double Gmu = *Dep::Gmu;
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      // Radiative corrections, from Marco's paper
+      double deltar = -0.03244;
+
+      result.central = 0.5*(1.0 - sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1.0+deltar))/(Gmu*sminputs.alphainv*sminputs.mZ*sminputs.mZ) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))));
+      result.upper = 0.0;
+      result.lower = 0.0;
+    }
+
+    void RHN_mw(triplet<double> &result)
+    {
+      using namespace Pipes::RHN_mw;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      double Gmu = *Dep::Gmu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      // Radiative corrections, form Marco's paper
+      double deltar = -0.03244;
+
+      result.central = sqrt(pow(sminputs.mZ, 2)/2.0 * (1.0 + sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1+deltar))/(sminputs.alphainv*Gmu*pow(sminputs.mZ,2))*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))))); 
+      result.upper = 0.0;
+      result.lower = 0.0;
+
+
+    }
+
   }
 }

@@ -267,7 +267,7 @@ START_MODULE
     ALLOW_MODELS(SN_dev, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-//TODO:  DEPENDENCY(Gmu, double)
+    DEPENDENCY(Gmu, double)
     #undef FUNCTION
 
   #undef CAPABILITY

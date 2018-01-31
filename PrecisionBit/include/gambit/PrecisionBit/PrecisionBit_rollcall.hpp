@@ -208,7 +208,6 @@ START_MODULE
 
   #undef CAPABILITY
 
-
   // Observable: SM contribution to (g-2)_mu
   #define CAPABILITY muon_gm2_SM
 
@@ -222,6 +221,45 @@ START_MODULE
     START_FUNCTION(triplet<double>)
     #undef FUNCTION
 
+  #undef CAPABILITY
+
+  // EWPO corrections from heavy neutrinos
+  #define CAPABILITY Gmu
+  START_CAPABILITY
+    #define FUNCTION RHN_Gmu
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_Gmu
+  START_CAPABILITY
+    #define FUNCTION lnL_Gmu_chi2
+    START_FUNCTION(double)
+    DEPENDENCY(Gmu, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY prec_sinW2_eff
+    #define FUNCTION RHN_sinW2_eff
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(Gmu, double)
+    ALLOW_MODEL(SN_dev)
+    #undef FUNCTION
+  #undef CAPABILITY
+ 
+  #define CAPABILITY mw
+    #define FUNCTION RHN_mw
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(Gmu, double)
+    ALLOW_MODEL(SN_dev)
+    #undef FUNCTION
   #undef CAPABILITY
 
 #undef MODULE
