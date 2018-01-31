@@ -2,7 +2,6 @@
 #include "gambit/ColliderBit/analyses/NewHEPUtilsAnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include <stdexcept>
-// _Anders
 #include <omp.h>
 using namespace std;
 
@@ -59,28 +58,18 @@ namespace Gambit
 
 
     /// A map with pointers to all instances of this class. The key is the thread number.
-    std::map<int,NewHEPUtilsAnalysisContainer*> NewHEPUtilsAnalysisContainer::instances_map;
+    std::map<string,std::map<int,NewHEPUtilsAnalysisContainer*> > NewHEPUtilsAnalysisContainer::instances_map;
 
     /// Constructor
     NewHEPUtilsAnalysisContainer::NewHEPUtilsAnalysisContainer() : 
       current_collider(""),
       ready(false),
+      is_registered(false),
       n_threads(omp_get_max_threads()),
-      my_thread(0) //< remove
+      base_key("")
     { 
-      // #pragma omp critical
-      // {
-        // Check that no other instances exist for the current OMP thread
-        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::ctor: instances_map.count(omp_get_thread_num()) = " << instances_map.count(omp_get_thread_num()) << std::endl;
-        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::ctor: created at " << this << std::endl;
-        // if (instances_map.count(omp_get_thread_num()) > 0)
-        // {
-        //   utils_error().raise(LOCAL_INFO, "Only one instance of NewHEPUtilsAnalysisContainer allowed per OpenMP thread.");
-        // }
-
-        // // Add this instance to the instances map
-        // instances_map[omp_get_thread_num()] = this;
-      // }
+      // std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::ctor: instances_map.count(omp_get_thread_num()) = " << instances_map.count(omp_get_thread_num()) << std::endl;
+      std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::ctor: created at " << this << std::endl;
     }
 
 
@@ -92,20 +81,30 @@ namespace Gambit
 
 
     /// Add container to instances map
-    void NewHEPUtilsAnalysisContainer::register_thread()
+    void NewHEPUtilsAnalysisContainer::register_thread(string base_key_in)
     {
-      if (instances_map.count(omp_get_thread_num()) == 0)
+      base_key = base_key_in;
+
+      #pragma omp critical
       {
-        #pragma omp critical
+        if (instances_map.count(base_key) == 0 || instances_map[base_key].count(omp_get_thread_num()) == 0)
         {
           // Add this instance to the instances map
-          instances_map[omp_get_thread_num()] = this;
-          std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::register_thread: added " << this << " to instances_map" << std::endl;
+          instances_map[base_key][omp_get_thread_num()] = this;
+          is_registered = true;
+          std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::register_thread: added " << this << " to instances_map with key " << base_key << "-" << omp_get_thread_num() << std::endl;
         }
-      }
-      else
-      {
-        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::register_thread: my thread already in instances_map?" << std::endl;
+        else
+        {
+          if (not is_registered)
+          {
+            utils_error().raise(LOCAL_INFO, "There is already an entry with this key in instances_map, but it's not this one! Something has gone wrong...");
+          }
+          else
+          {
+            std::cout << "DEBUG: thread " << omp_get_thread_num() << ": NewHEPUtilsAnalysisContainer::register_thread: this instance is already in instances_map" << std::endl;
+          }
+        }
       }
     }
 
@@ -329,7 +328,7 @@ namespace Gambit
     /// for specific analysis
     void NewHEPUtilsAnalysisContainer::collect_and_add_signal(string collider_name, string analysis_name)
     {
-      for (auto& thread_container_pair : instances_map)
+      for (auto& thread_container_pair : instances_map.at(base_key))
       {
         if (thread_container_pair.first == omp_get_thread_num()) continue;
 
@@ -364,7 +363,7 @@ namespace Gambit
     /// for specific analysis
     void NewHEPUtilsAnalysisContainer::collect_and_improve_xsec(string collider_name, string analysis_name)
     {
-      for (auto& thread_container_pair : instances_map)
+      for (auto& thread_container_pair : instances_map.at(base_key))
       {
         if (thread_container_pair.first == omp_get_thread_num()) continue;
 

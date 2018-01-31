@@ -33,7 +33,7 @@ namespace Gambit {
     class NewHEPUtilsAnalysisContainer
     {
 
-      public:
+      private:
 
         /// A map of maps of pointer-to-HEPUtilsAnalysis. 
         /// First key is the collider name, second key is the analysis name.
@@ -42,22 +42,21 @@ namespace Gambit {
         /// String identifying the currently active collider
         string current_collider;
 
-      private:
-
-        // /// A map indicating if a group of analyses has been properly initialized.
-        // /// The key is the collider name.
-        // map<string,bool> is_ready;
-
         /// Has this class instance been initialized?
         bool ready; //< @todo Currently not used for anything. Do we need it?
 
+        /// Has this instance been registered in the instances_map?
+        bool is_registered;
+
         /// OpenMP info
         int n_threads;
-        int my_thread;
+
+        /// Key for the instances_map
+        string base_key;
 
         /// A vector with pointers to all instances of this class. The key is the OMP thread number.
         /// (There should only be one instance of this class per OMP thread.)
-        static std::map<int,NewHEPUtilsAnalysisContainer*> instances_map;
+        static std::map<string,std::map<int,NewHEPUtilsAnalysisContainer*> > instances_map;
 
 
       public:
@@ -69,7 +68,7 @@ namespace Gambit {
         ~NewHEPUtilsAnalysisContainer();
 
         /// Add container to instances map
-        void register_thread();
+        void register_thread(string);
 
         /// Delete and clear the analyses contained within this instance.
         void clear();

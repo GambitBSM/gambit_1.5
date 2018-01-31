@@ -128,7 +128,7 @@ START_MODULE
   #define CAPABILITY CMSAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getCMSAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainer)
+    START_FUNCTION(NewHEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -242,12 +242,12 @@ START_MODULE
   #define CAPABILITY CMSAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runCMSAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(CMSAnalysisContainer, NewHEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -269,7 +269,7 @@ START_MODULE
     #define FUNCTION CollectAnalyses
     START_FUNCTION(AnalysisDataPointers)
     DEPENDENCY(ATLASAnalysisNumbers, AnalysisDataPointers)
-    DEPENDENCY(CMSAnalysisNumbers, AnalysisNumbers)
+    DEPENDENCY(CMSAnalysisNumbers, AnalysisDataPointers)
     DEPENDENCY(IdentityAnalysisNumbers, AnalysisNumbers)
     #ifndef EXCLUDE_DELPHES
       DEPENDENCY(DetAnalysisNumbers, AnalysisNumbers)
