@@ -153,6 +153,12 @@ namespace Gambit
         _print(m, label, vID, mpirank, pointID);
       }
 
+      void HDF5Printer::_print(DD_bin_counts const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned 
+long pointID)
+      {
+        _print(value.bincounts, label, vID, mpirank, pointID);
+      }
+
       void HDF5Printer::_print(Flav_KstarMuMu_obs const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
       {
         std::map<std::string, double> m;

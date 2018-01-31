@@ -36,5 +36,6 @@
 #define HDF5_MODULE_BACKEND_TYPES \
   (DM_nucleon_couplings)    \
   (Flav_KstarMuMu_obs)      \
+  (DD_bin_counts)           \
 
 #endif

@@ -167,6 +167,7 @@ namespace Gambit
             std::vector<SimYieldChannel> channel_list;
             int findChannel(std::string p1, std::string p2, std::string finalState) const;
     };
+
   }
 }
 

@@ -575,11 +575,10 @@ START_MODULE
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
    CAT_3(EXPERIMENT,_Get,NAME), CAT(DD_,NAME), (DDCalc), TYPE, (const int&))
 
-  // FK: How do I return an array?
   #define DD_DECLARE_BIN_FUNCTION(EXPERIMENT,TYPE,NAME)                       \
   LONG_START_CAPABILITY(MODULE, CAT_3(EXPERIMENT,_,NAME))                     \
   LONG_DECLARE_FUNCTION(MODULE, CAT_3(EXPERIMENT,_,NAME),                     \
-   CAT_3(EXPERIMENT,_Get,NAME), TYPE, 0)                                      \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_bin_counts, 0)                             \
   LONG_DEPENDENCY(MODULE, CAT_3(EXPERIMENT,_Get,NAME),                        \
    CAT(EXPERIMENT,_Calculate), bool)                                          \
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \

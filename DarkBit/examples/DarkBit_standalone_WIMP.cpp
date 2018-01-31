@@ -481,9 +481,6 @@ int main(int argc, char* argv[])
     PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
 
     // Provide bin number in CRESST_II
-    CRESST_II_GetBins.resolveDependency(&CRESST_II_Calc);
-    CRESST_II_GetBins.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    CRESST_II_GetBins.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
     CRESST_II_GetBinEvents.resolveDependency(&CRESST_II_Calc);
     CRESST_II_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     CRESST_II_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
@@ -683,13 +680,16 @@ int main(int argc, char* argv[])
 
       DDCalc_2_0_0_init.reset_and_calculate();
       CRESST_II_Calc.reset_and_calculate();
-      CRESST_II_GetBins.reset_and_calculate();
-      nbins = CRESST_II_GetBins(0);
-      int events[nbins+1];         
+      DD_bin_counts events;
       CRESST_II_GetBinEvents.reset_and_calculate();
-      CRESST_II_GetBinEvents(events);         
+      events = CRESST_II_GetBinEvents(0);
+      nbins = events.nbins;
       std::cout << "Number of CRESST-II bins: " << nbins << std::endl;
-      std::cout << "Observed events in last bin: " << events[nbins] << std::endl;
+      std::cout << "Observed events: ";
+      for (int ibin=1;ibin<=nbins;ibin++) {
+        std::cout << events.bincounts[ibin] << " ";
+      }
+      std::cout << std::endl;
 
       std::cout << "Calculating tables of SI likelihoods." << std::endl;
       for (size_t i = 0; i < m_list.size(); i++)
