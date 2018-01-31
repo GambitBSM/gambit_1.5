@@ -267,19 +267,27 @@ namespace Gambit
       double m_GERDA = *Dep::m_GERDA;
       double m_Kam = *Dep::m_Kam;
 
+      result_0nubb += 
+        Stats::gaussian_loglikelihood(m_GERDA, 0., 0., m_bb_GERDA, false)+
+        Stats::gaussian_loglikelihood(m_Kam, 0., 0., m_bb_Kam, false);
+
+      /*
       if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
       {
         result_0nubb = 0.0;
+
       }
       else
       {
         result_0nubb = -1.0E+05;
       }
+      */
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
     void SN_ckm_V_ud(double &V_ud)
     {
+      /*
       using namespace Pipes::SN_ckm_V_ud;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
@@ -314,7 +322,7 @@ namespace Gambit
       V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
       V_ud_sq /= err_factor;
 
-      V_ud = sqrt(V_ud_sq);
+      V_ud = sqrt(V_ud_sq);*/
     }
 
     void lnL_ckm(double& result_ckm)
@@ -368,7 +376,7 @@ namespace Gambit
       static tk::spline s_pienu;
       static std::vector<double> M_temp_pienu(140), U_temp_pienu(140);
       double M_1, M_2, M_3;
-      std::vector<double> U_pienu(3), mixing_sq_pienu(3);
+      std::vector<double> U_pienu(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
       mixing_sq[1] = *Dep::Ue2;
@@ -889,10 +897,10 @@ namespace Gambit
       static tk::spline s_nutev;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_nutev(249), U_temp_nutev(249);
-      std::vector<double> U_nutev(3), mixing_sq_nutev(3);
+      std::vector<double> U_nutev(3), mixing_sq(3);
 
-      mixing_sq_nutev[0] = *Dep::Um1;
-      mixing_sq_nutev[1] = *Dep::Um2;
+      mixing_sq[0] = *Dep::Um1;
+      mixing_sq[1] = *Dep::Um2;
       mixing_sq[2] = *Dep::Um3;
 
       if (read_table_nutev)
