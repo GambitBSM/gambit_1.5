@@ -137,7 +137,7 @@ START_MODULE
   #define CAPABILITY IdentityAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getIdentityAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainer)
+    START_FUNCTION(NewHEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -147,7 +147,7 @@ START_MODULE
   #define CAPABILITY DetAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getDetAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainer)
+    START_FUNCTION(NewHEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -217,12 +217,12 @@ START_MODULE
   #define CAPABILITY DetAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runDetAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ReconstructedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(DetAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(DetAnalysisContainer, NewHEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
   #endif // not defined EXCLUDE_DELPHES
@@ -254,12 +254,12 @@ START_MODULE
   #define CAPABILITY IdentityAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runIdentityAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(IdentityAnalysisContainer, NewHEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -270,9 +270,9 @@ START_MODULE
     START_FUNCTION(AnalysisDataPointers)
     DEPENDENCY(ATLASAnalysisNumbers, AnalysisDataPointers)
     DEPENDENCY(CMSAnalysisNumbers, AnalysisDataPointers)
-    DEPENDENCY(IdentityAnalysisNumbers, AnalysisNumbers)
+    DEPENDENCY(IdentityAnalysisNumbers, AnalysisDataPointers)
     #ifndef EXCLUDE_DELPHES
-      DEPENDENCY(DetAnalysisNumbers, AnalysisNumbers)
+      DEPENDENCY(DetAnalysisNumbers, AnalysisDataPointers)
     #endif
     #undef FUNCTION
   #undef CAPABILITY
