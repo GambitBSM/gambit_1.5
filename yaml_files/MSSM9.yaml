@@ -601,6 +601,15 @@ Rules:
                              "SUSY:all = on",
                              "TauDecays:mode = 0",
                              "TimeShower:pTmin = 20"]
+      Pythia_SUSY_LHC_13TeV: ["Print:quiet = on",
+                             "PartonLevel:MPI = off",
+                             "PartonLevel:ISR = on",
+                             "PartonLevel:FSR = on",
+                             "HadronLevel:all = on",
+                             "SUSY:all = on",
+                             "TauDecays:mode = 0",
+                             "TimeShower:pTmin = 20"]
+
       xsec_vetos: [0.048]  # 0.048 fb correspond to ~1 expected event at L = 20.7 fb^-1.
 
 
