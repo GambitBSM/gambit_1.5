@@ -335,8 +335,8 @@ namespace Gambit
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
-    void SN_ckm_V_ud(double &V_ud)
-    {
+//    void SN_ckm_V_ud(double &V_ud)
+//    {
       /*
       using namespace Pipes::SN_ckm_V_ud;
       SMInputs sminputs = *Dep::SMINPUTS;
@@ -373,7 +373,7 @@ namespace Gambit
       V_ud_sq /= err_factor;
 
       V_ud = sqrt(V_ud_sq);*/
-    }
+//    }
 
     void lnL_ckm(double& result_ckm)
     {

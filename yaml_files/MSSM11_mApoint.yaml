@@ -457,7 +457,7 @@ Rules:
       rho0_obserr: 0.15
 
   # Choose which type of marginalised Poisson likelihood to use for LHC likelihoods
-  - capability: LHC_Combined_LogLike
+  - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
 
