@@ -59,6 +59,10 @@ namespace Gambit
 
     /// @brief Container for data from multiple analyses and SRs
     typedef std::vector<AnalysisData> AnalysisNumbers;
+    typedef std::vector<const AnalysisData*> AnalysisDataPointers;
+
+    /// Container for multiple analysis containers
+    typedef std::vector<HEPUtilsAnalysisContainer> HEPUtilsAnalysisContainers;
 
     // typedefs specifically for timing (see ColliderBit_macros.hpp)
     typedef std::chrono::milliseconds ms;

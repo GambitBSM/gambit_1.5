@@ -77,6 +77,7 @@ namespace Gambit
       }
     }
 
+
     /// Update the convergence data.  This is the only routine meant to be called in parallel.
     void MC_convergence_checker::update(const HEPUtilsAnalysisContainer& ac)
     {
@@ -88,10 +89,10 @@ namespace Gambit
 
       // Loop over all the analyses and populate their current signal predictions
       n_signals[my_thread].clear();
-      for (auto& analysis : ac.analyses)
+      for (auto& analysis_pointer_pair : ac.get_current_analyses_map())
       {
         // Loop over all the signal regions in this analysis
-        for (auto& sr : analysis->get_results())
+        for (auto& sr : analysis_pointer_pair.second->get_results())
         {
           // Update the number of accepted events in this signal region
           n_signals[my_thread].push_back(sr.n_signal);
@@ -99,15 +100,16 @@ namespace Gambit
       }
     }
 
+
     /// Check if convergence has been achieved across threads, and across all instances of this class
     bool MC_convergence_checker::achieved(const HEPUtilsAnalysisContainer& ac)
     {
       // Loop over all the analyses and get their systematic errors
       std::vector<int> n_signals_sys;
-      for (auto& analysis : ac.analyses)
+      for (auto& analysis_pointer_pair : ac.get_current_analyses_map())
       {
         // Loop over all the signal regions in this analysis and get their systematics
-        for (auto& sr : analysis->get_results()) n_signals_sys.push_back(sr.signal_sys);
+        for (auto& sr : analysis_pointer_pair.second->get_results()) n_signals_sys.push_back(sr.signal_sys);
       }
 
       // Work through the results for all the signal regions in all analyses, combining them

@@ -26,8 +26,9 @@
 ///  \date 2018 Jan
 ///
 ///  \author Anders Kvellestad
-///          (anders.kvellestad@nordita.org)
+///          (anders.kvellestad@fys.uio.no)
 ///  \date   2017 March
+///  \date   2018 Jan
 ///
 ///  *********************************************
 
@@ -99,22 +100,18 @@ namespace Gambit
 
     /// Analysis stuff
     bool useBuckFastATLASDetector;
-    HEPUtilsAnalysisContainer globalAnalysesATLAS;
     bool haveUsedBuckFastATLASDetector;
 
     bool useBuckFastCMSDetector;
-    HEPUtilsAnalysisContainer globalAnalysesCMS;
     bool haveUsedBuckFastCMSDetector;
 
     #ifndef EXCLUDE_DELPHES
     bool useDelphesDetector;
     std::vector<std::string> analysisNamesDet;
-    HEPUtilsAnalysisContainer globalAnalysesDet;
     bool haveUsedDelphesDetector;
     #endif
 
     bool useBuckFastIdentityDetector;
-    HEPUtilsAnalysisContainer globalAnalysesIdentity;
     bool haveUsedBuckFastIdentityDetector;
 
     /// @}
@@ -181,17 +178,10 @@ namespace Gambit
       nFailedEvents = 0;
 
       useBuckFastATLASDetector = false;
-      globalAnalysesATLAS.reset();
-
       useBuckFastCMSDetector = false;
-      globalAnalysesCMS.reset();
-
       useBuckFastIdentityDetector = false;
-      globalAnalysesIdentity.reset();
-
       #ifndef EXCLUDE_DELPHES
       useDelphesDetector = false;
-      globalAnalysesDet.reset();
       #endif
 
       haveUsedBuckFastATLASDetector = false;
@@ -242,11 +232,14 @@ namespace Gambit
         int stoppingres = Dep::MC_ConvergenceSettings->stoppingres[indexPythiaNames];
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "Current collider: " << *iterPythiaNames << " with index " << indexPythiaNames << endl;
+        std::cerr << debug_prefix() << "operateLHCLoop: Current collider is " << *iterPythiaNames << " with index " << indexPythiaNames << endl;
         #endif
 
         piped_invalid_point.check();
         Loop::reset();
+        #ifdef COLLIDERBIT_DEBUG
+        std::cerr << debug_prefix() << "operateLHCLoop: Will execute COLLIDER_INIT" << std::endl;
+        #endif
         Loop::executeIteration(COLLIDER_INIT);
 
         // Any problem during COLLIDER_INIT step?
@@ -256,6 +249,9 @@ namespace Gambit
         //
         // OMP parallelized sections begin here
         //
+        #ifdef COLLIDERBIT_DEBUG
+        std::cerr << debug_prefix() << "operateLHCLoop: Will execute START_SUBPROCESS";
+        #endif
         int currentEvent = 0;
         #pragma omp parallel
         {
@@ -899,17 +895,22 @@ namespace Gambit
     {
       using namespace Pipes::getDetAnalysisContainer;
       static std::vector<std::vector<str> > analyses;
+      static bool first = true;
 
       if (*Loop::iteration == BASE_INIT)
       {
-        // Read options
-        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+          first = false;
+        }
       }
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-
         if (!useDelphesDetector) return;
 
         // Check that there are some analyses to run if the detector is switched on
@@ -924,7 +925,6 @@ namespace Gambit
           ColliderBit_error().raise(LOCAL_INFO, errmsg);
         }
 
-        if (globalAnalysesDet.analyses.empty()) globalAnalysesDet.init(analyses[indexPythiaNames]); else globalAnalysesDet.reset();
         return;
       }
 
@@ -932,17 +932,11 @@ namespace Gambit
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
+        result.register_thread("DetAnalysisContainer");
+        result.set_current_collider(*iterPythiaNames);
 
-        #ifdef COLLIDERBIT_DEBUG
-        if (omp_get_thread_num() == 0)
-        {
-          for (auto a : analyses[indexPythiaNames])
-            std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
-        }
-        #endif
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
 
         return;
       }
@@ -956,17 +950,16 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
-
-        // Combine results from the threads together
-        #pragma omp critical (access_globalAnalyses)
-        {
-          globalAnalysesDet.add(result);
-          // Use improve_xsec to combine results from the same process type
-          globalAnalysesDet.improve_xsec(result);
-        }
         return;
       }
 
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();        
+        return;
+      }
     }
     #endif // not defined EXCLUDE_DELPHES
 
@@ -976,17 +969,22 @@ namespace Gambit
     {
       using namespace Pipes::getATLASAnalysisContainer;
       static std::vector<std::vector<str> > analyses;
+      static bool first = true;
 
       if (*Loop::iteration == BASE_INIT)
       {
-        // Read options
-        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+          first = false;
+        }
       }
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-
         if (!useBuckFastATLASDetector) return;
 
         // Check that there are some analyses to run if the detector is switched on
@@ -1001,7 +999,6 @@ namespace Gambit
           ColliderBit_error().raise(LOCAL_INFO, errmsg);
         }
 
-        if (globalAnalysesATLAS.analyses.empty()) globalAnalysesATLAS.init(analyses[indexPythiaNames]); else globalAnalysesATLAS.reset();
         return;
       }
 
@@ -1009,18 +1006,35 @@ namespace Gambit
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
 
-        #ifdef COLLIDERBIT_DEBUG
-        if (omp_get_thread_num() == 0)
-        {
-          for (auto a : analyses[indexPythiaNames])
-            std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
-        }
-        #endif
+        // Register analysis container
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.register_thread " << endl;
+        result.register_thread("ATLASAnalysisContainer");
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
 
+        // Set current collider
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.set_current_collider " << endl;
+        result.set_current_collider(*iterPythiaNames);
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
+
+        // Initialize analysis container or reset all the contained analyses
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run get_current_analyses_map" << endl;
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done " << endl;
+
+        // #ifdef COLLIDERBIT_DEBUG
+        // if (my_thread == 0)
+        // {
+        //   for (auto& apair : result.get_current_analyses_map())
+        //   {
+        //     std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
+        //   }
+        // }
+        // #endif
+
+        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
         return;
       }
 
@@ -1033,14 +1047,14 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
+        return;
+      }
 
-        // Combine results from the threads together
-        #pragma omp critical (access_globalAnalyses)
-        {
-          globalAnalysesATLAS.add(result);
-          // Use improve_xsec to combine results from the same process type
-          globalAnalysesATLAS.improve_xsec(result);
-        }
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();        
         return;
       }
 
@@ -1052,17 +1066,22 @@ namespace Gambit
     {
       using namespace Pipes::getCMSAnalysisContainer;
       static std::vector<std::vector<str> > analyses;
+      static bool first = true;
 
       if (*Loop::iteration == BASE_INIT)
       {
-        // Read options
-        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+          first = false;
+        }
       }
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-
         if (!useBuckFastCMSDetector) return;
 
         // Check that there are some analyses to run if the detector is switched on
@@ -1077,7 +1096,6 @@ namespace Gambit
           ColliderBit_error().raise(LOCAL_INFO, errmsg);
         }
 
-        if (globalAnalysesCMS.analyses.empty()) globalAnalysesCMS.init(analyses[indexPythiaNames]); else globalAnalysesCMS.reset();
         return;
       }
 
@@ -1085,17 +1103,15 @@ namespace Gambit
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
+        // Register analysis container
+        result.register_thread("CMSAnalysisContainer");
 
-        #ifdef COLLIDERBIT_DEBUG
-        if (omp_get_thread_num() == 0)
-        {
-          for (auto a : analyses[indexPythiaNames])
-            std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
-        }
-        #endif
+        // Set current collider
+        result.set_current_collider(*iterPythiaNames);
+
+        // Initialize analysis container or reset all the contained analyses
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
 
         return;
       }
@@ -1109,36 +1125,41 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
+        return;
+      }
 
-        // Combine results from the threads together
-        #pragma omp critical (access_globalAnalyses)
-        {
-          globalAnalysesCMS.add(result);
-          // Use improve_xsec to combine results from the same process type
-          globalAnalysesCMS.improve_xsec(result);
-        }
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();        
         return;
       }
 
     }
 
 
-
     void getIdentityAnalysisContainer(HEPUtilsAnalysisContainer& result)
     {
       using namespace Pipes::getIdentityAnalysisContainer;
       static std::vector<std::vector<str> > analyses;
+      static bool first = true;
 
       if (*Loop::iteration == BASE_INIT)
       {
-        // Read options
-        std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-        analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+          first = false;
+        }
       }
+
 
       if (*Loop::iteration == COLLIDER_INIT)
       {
-
         if (!useBuckFastIdentityDetector) return;
 
         // Check that there are some analyses to run if the detector is switched on
@@ -1153,26 +1174,22 @@ namespace Gambit
           ColliderBit_error().raise(LOCAL_INFO, errmsg);
         }
 
-        if (globalAnalysesIdentity.analyses.empty()) globalAnalysesIdentity.init(analyses[indexPythiaNames]); else globalAnalysesIdentity.reset();
         return;
-
       }
 
       if (!useBuckFastIdentityDetector) return;
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // Each thread gets its own Analysis container.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        if (result.analyses.empty()) result.init(analyses[indexPythiaNames]); else result.reset();
+        // Register analysis container
+        result.register_thread("IdentityAnalysisContainer");
 
-        #ifdef COLLIDERBIT_DEBUG
-        if (omp_get_thread_num() == 0)
-        {
-          for (auto a : analyses[indexPythiaNames])
-            std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << a << endl;
-        }
-        #endif
+        // Set current collider
+        result.set_current_collider(*iterPythiaNames);
+
+        // Initialize analysis container or reset all the contained analyses
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
 
         return;
       }
@@ -1186,19 +1203,18 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
+        return;
+      }
 
-        // Combine results from the threads together
-        #pragma omp critical (access_globalAnalyses)
-        {
-          globalAnalysesIdentity.add(result);
-          // Use improve_xsec to combine results from the same process type
-          globalAnalysesIdentity.improve_xsec(result);
-        }
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();        
         return;
       }
 
     }
-
 
 
     // *** Hard Scattering Event Generators ***
@@ -1381,7 +1397,7 @@ namespace Gambit
 
 
     #ifndef EXCLUDE_DELPHES
-    void runDetAnalyses(AnalysisNumbers& result)
+    void runDetAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runDetAnalyses;
       static MC_convergence_checker convergence;
@@ -1414,18 +1430,30 @@ namespace Gambit
         return;
       }
 
+      #ifdef COLLIDERBIT_DEBUG
+      if (*Loop::iteration == END_SUBPROCESS)
+      {
+        for (auto& analysis_pointer_pair : Dep::DetAnalysisContainer->get_current_analyses_map())
+        {
+          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+          {
+            std::cerr << debug_prefix() << "runDetAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+          }
+        }
+      }
+      #endif
+
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
-        globalAnalysesDet.scale();
-        for (auto anaPtr : globalAnalysesDet.analyses)
+        for (auto& analysis_pointer_pair : Dep::DetAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
+          std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
-          result.push_back(anaPtr->get_results(warning));
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
           if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
           {
             ColliderBit_error().raise(LOCAL_INFO, warning);
@@ -1453,7 +1481,7 @@ namespace Gambit
 
 
 
-    void runATLASAnalyses(AnalysisNumbers& result)
+    void runATLASAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runATLASAnalyses;
       static MC_convergence_checker convergence;
@@ -1486,18 +1514,30 @@ namespace Gambit
         return;
       }
 
+      #ifdef COLLIDERBIT_DEBUG
+      if (*Loop::iteration == END_SUBPROCESS)
+      {
+        for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
+        {
+          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+          {
+            std::cerr << debug_prefix() << "runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+          }
+        }
+      }
+      #endif
+
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
-        globalAnalysesATLAS.scale();
-        for (auto anaPtr : globalAnalysesATLAS.analyses)
+        for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
+          std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
-          result.push_back(anaPtr->get_results(warning));
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
           if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
           {
             ColliderBit_error().raise(LOCAL_INFO, warning);
@@ -1523,7 +1563,7 @@ namespace Gambit
     }
 
 
-    void runCMSAnalyses(AnalysisNumbers& result)
+    void runCMSAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runCMSAnalyses;
       static MC_convergence_checker convergence;
@@ -1556,18 +1596,30 @@ namespace Gambit
         return;
       }
 
+      #ifdef COLLIDERBIT_DEBUG
+      if (*Loop::iteration == END_SUBPROCESS)
+      {
+        for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
+        {
+          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+          {
+            std::cerr << debug_prefix() << "runCMSAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+          }
+        }
+      }
+      #endif
+
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
-        globalAnalysesCMS.scale();
-        for (auto anaPtr : globalAnalysesCMS.analyses)
+        for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
+          std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
-          result.push_back(anaPtr->get_results(warning));
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
           if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
           {
             ColliderBit_error().raise(LOCAL_INFO, warning);
@@ -1593,7 +1645,7 @@ namespace Gambit
     }
 
 
-    void runIdentityAnalyses(AnalysisNumbers& result)
+    void runIdentityAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runIdentityAnalyses;
       static MC_convergence_checker convergence;
@@ -1626,18 +1678,30 @@ namespace Gambit
         return;
       }
 
+      #ifdef COLLIDERBIT_DEBUG
+      if (*Loop::iteration == END_SUBPROCESS)
+      {
+        for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
+        {
+          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+          {
+            std::cerr << debug_prefix() << "runIdentityAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+          }
+        }
+      }
+      #endif
+
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
-        globalAnalysesIdentity.scale();
-        for (auto anaPtr : globalAnalysesIdentity.analyses)
+        for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << anaPtr->get_results().begin()->analysis_name << endl;
+          std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
-          result.push_back(anaPtr->get_results(warning));
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
           if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
           {
             ColliderBit_error().raise(LOCAL_INFO, warning);
@@ -1664,23 +1728,27 @@ namespace Gambit
 
 
     // Loop over all analyses and fill a map of predicted counts
-    void CollectAnalyses(AnalysisNumbers& result)
+    void CollectAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::CollectAnalyses;
 
+      // Start with an empty vector
+      result.clear();
+
       #ifdef COLLIDERBIT_DEBUG
       if (haveUsedBuckFastATLASDetector)
-        std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
+        std::cerr << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastCMSDetector)
-        std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
+        std::cerr << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastIdentityDetector)
-        std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
+        std::cerr << debug_prefix() << "CollectAnalyses: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
       #ifndef EXCLUDE_DELPHES
       if (haveUsedDelphesDetector)
-        std::cerr << debug_prefix() << "calc_LHC_LogLike: Dep::DetAnalysisNumbers->size()      = " << Dep::DetAnalysisNumbers->size() << endl;
+        std::cerr << debug_prefix() << "CollectAnalyses: Dep::DetAnalysisNumbers->size()      = " << Dep::DetAnalysisNumbers->size() << endl;
       #endif
       #endif
 
+      // Add results 
       if (haveUsedBuckFastATLASDetector)
         result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
       if (haveUsedBuckFastCMSDetector)
@@ -1690,6 +1758,25 @@ namespace Gambit
       #ifndef EXCLUDE_DELPHES
       if (haveUsedDelphesDetector)
         result.insert(result.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
+      #endif
+
+      #ifdef COLLIDERBIT_DEBUG
+      std::cerr << debug_prefix() << "CollectAnalyses: Current size of 'result': " << result.size() << endl;        
+      if (result.size() > 0)
+      {
+        std::cerr << debug_prefix() << "CollectAnalyses: Will loop through 'result'..." << endl;        
+        for (auto& adp : result)
+        {
+          std::cerr << debug_prefix() << "CollectAnalyses: 'result' contains AnalysisData pointer to " << adp << endl;        
+          std::cerr << debug_prefix() << "CollectAnalyses: -- Will now loop over all signal regions in " << adp << endl;        
+          for (auto& sr : adp->srdata)
+          {
+            std::cerr << debug_prefix() << "CollectAnalyses: -- " << adp << " contains signal region: " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;        
+          }
+          std::cerr << debug_prefix() << "CollectAnalyses: -- Done looping over signal regions in " << adp << endl;        
+        }
+        std::cerr << debug_prefix() << "CollectAnalyses: ...Done looping through 'result'." << endl;        
+      }
       #endif
     }
 
@@ -1706,7 +1793,7 @@ namespace Gambit
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
       {
         // AnalysisData for this analysis
-        const AnalysisData& adata = Dep::AllAnalysisNumbers->at(analysis);
+        const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
         // Loop over the signal regions inside the analysis, and save the predicted number of events for each.
         for (size_t SR = 0; SR < adata.size(); ++SR)
@@ -1735,7 +1822,7 @@ namespace Gambit
       for (size_t analysis = 0; analysis < Dep::AllAnalysisNumbers->size(); ++analysis)
       {
         // AnalysisData for this analysis
-        const AnalysisData& adata = Dep::AllAnalysisNumbers->at(analysis);
+        const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
@@ -1908,6 +1995,9 @@ namespace Gambit
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
           result[adata.begin()->analysis_name + "_" + *bestexp_sr_label + "_DeltaLogLike"] = -bestexp_dll_obs;
 
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_" << *bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << std::endl;
+          #endif
         }
 
       }
@@ -1947,12 +2037,12 @@ namespace Gambit
         result += it.second;
         #ifdef COLLIDERBIT_DEBUG
           std::cout.precision(5);
-          cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  calc_LHC_LogLike: Analysis #" << it.first << " contributes with a -LogL = " << it.second << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis #" << it.first << " contributes with a -LogL = " << it.second << endl;
         #endif
       }
 
       #ifdef COLLIDERBIT_DEBUG
-        cout << "DEBUG: OMP Thread " << omp_get_thread_num() << ":  COLLIDERBIT LIKELIHOOD: " << result << endl;
+        std::cerr << debug_prefix() << "COLLIDERBIT LIKELIHOOD: " << result << endl;
       #endif
 
     }

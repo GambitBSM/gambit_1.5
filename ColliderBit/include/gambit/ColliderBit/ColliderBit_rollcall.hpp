@@ -217,7 +217,7 @@ START_MODULE
   #define CAPABILITY DetAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runDetAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ReconstructedEvent, HEPUtils::Event)
@@ -230,7 +230,7 @@ START_MODULE
   #define CAPABILITY ATLASAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runATLASAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
@@ -242,7 +242,7 @@ START_MODULE
   #define CAPABILITY CMSAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runCMSAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
@@ -254,7 +254,7 @@ START_MODULE
   #define CAPABILITY IdentityAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runIdentityAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
@@ -267,12 +267,12 @@ START_MODULE
   #define CAPABILITY AllAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION CollectAnalyses
-    START_FUNCTION(AnalysisNumbers)
-    DEPENDENCY(ATLASAnalysisNumbers, AnalysisNumbers)
-    DEPENDENCY(CMSAnalysisNumbers, AnalysisNumbers)
-    DEPENDENCY(IdentityAnalysisNumbers, AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
+    DEPENDENCY(ATLASAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(CMSAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(IdentityAnalysisNumbers, AnalysisDataPointers)
     #ifndef EXCLUDE_DELPHES
-      DEPENDENCY(DetAnalysisNumbers, AnalysisNumbers)
+      DEPENDENCY(DetAnalysisNumbers, AnalysisDataPointers)
     #endif
     #undef FUNCTION
   #undef CAPABILITY
@@ -282,7 +282,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_LHC_signals
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -291,7 +291,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_LHC_LogLike_per_analysis
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers)
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_lognormal_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_gaussian_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_GROUP(lnlike_marg_poisson)
@@ -312,7 +312,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getLHCEventLoopInfo
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers) // This is just to ensure that the loop is done
+    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers) // This is just to ensure that the loop is done
     #undef FUNCTION
   #undef CAPABILITY
 
