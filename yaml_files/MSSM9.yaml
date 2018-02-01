@@ -1,5 +1,5 @@
 ##########################################################################
-## GAMBIT configuration for running a scan of the CMSSM using Diver.
+## GAMBIT configuration for running a scan of the MSSM9 using Diver.
 ##
 ## Includes likelihoods for LHC and LEP particle searches, LHC and LEP Higgs
 ## searches (and LHC signal strengths), flavour physics, indirect and
@@ -29,21 +29,38 @@ Parameters:
       fixed_value: -0.085
 
   # SUSY parameters.
-  CMSSM:
-    M0:
-      range: [50, 1e4]
-      prior_type: log
-    M12:
-      range: [50, 1e4]
-      prior_type: log
-    A0:
-      range: [-1e4, 1e4]
-      flat_start: -1e2
-      flat_end: 1e2
+  MSSM9atQ:
+    Qin:
+      fixed_value: 1000.0
+    SignMu:
+      fixed_value: 1
+    Ad_3:
       prior_type: double_log_flat_join
+      ranges: [-1e4, -1e2, 1e2, 1e4]
+    Au_3:
+      prior_type: double_log_flat_join
+      ranges: [-1e4, -1e2, 1e2, 1e4]
+    M1:
+      prior_type: double_log_flat_join
+      ranges: [-1e4, -1e2, 1e2, 1e4]
+    M2:
+      prior_type: double_log_flat_join
+      ranges: [-1e4, -1e2, 1e2, 1e4]
+    M3:
+      prior_type: double_log_flat_join
+      ranges: [-1e4, -1e2, 1e2, 1e4]
     TanBeta:
-      range: [3.0, 70]
-    SignMu: 1
+      range: [3.0, 70.0]
+      prior_type: flat
+    mHd2:
+      prior_type: double_log_flat_join
+      ranges: [-1e8, -1e4, 1e4, 1e8]
+    mHu2:
+      prior_type: double_log_flat_join
+      ranges: [-1e8, -1e4, 1e4, 1e8]
+    mf2:
+      prior_type: double_log_flat_join
+      ranges: [0, 0, 1e4, 1e8]
 
   # Dark matter halo parameters.
   Halo_gNFW_rho0:
@@ -69,14 +86,9 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "CMSSM.hdf5"
-    group: "/CMSSM"
+    output_file: "MSSM9.hdf5"
+    group: "/MSSM9"
 
-  #printer: ascii
-  #options:
-  #  buffer_length: 1
-  #  delete_file_on_restart: true
-  #  output_file: "gambit_output.txt"
 
 Scanner:
 
@@ -185,9 +197,6 @@ ObsLikes:
       purpose:    LogLike
 
     - capability: XENON1T_2017_LogLikelihood
-      purpose:    LogLike
-
-    - capability: LUX_2015_LogLikelihood
       purpose:    LogLike
 
     - capability: LUX_2016_LogLikelihood
@@ -365,7 +374,7 @@ Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
   # Options set to match benchmark point specified in SpecBit/MSSM_benchmark_points/LesHouches.in.MSSM_1
   - capability: unimproved_MSSM_spectrum
-    function: get_CMSSM_spectrum_FS
+    function: get_MSSMatQ_spectrum_FS
     options:
       precision_goal:        1.0e-4
       max_iterations:        0
@@ -507,18 +516,18 @@ Rules:
     type: "ColliderBit::BuckFastSmearATLAS"
     function: getBuckFastATLAS
     options:
-      partonOnly: [false,false]
-      antiktR: [0.4,0.4]
-      useDetector: [true,true]
+      partonOnly: [false]
+      antiktR: [0.4]
+      useDetector: [true]
 
   # CMS detector simulation
   - capability: SimpleSmearingSim
     type: "ColliderBit::BuckFastSmearCMS"
     function: getBuckFastCMS
     options:
-      partonOnly: [false,false]
-      antiktR: [0.5,0.4]
-      useDetector: [true,true]
+      partonOnly: [false]
+      antiktR: [0.5]
+      useDetector: [true]
 
   # ATLAS analysis setup.
   - capability: ATLASAnalysisContainer
@@ -537,7 +546,7 @@ Rules:
                    "ATLAS_13TeV_0LEPStop_20invfb",
                    "ATLAS_13TeV_2LEPStop_36invfb",
                    "ATLAS_13TeV_RJ3L_lowmass_36invfb",
-                   "Analysis_ATLAS_13TeV_2bMET_36invfb"] ]
+                   "ATLAS_13TeV_2bMET_36invfb"] ]
 
                    # "ATLAS_13TeV_1LEPStop_36invfb",
 
@@ -559,11 +568,11 @@ Rules:
                    # "CMS_13TeV_2LEPStop_36invfb",
                    # "CMS_13TeV_MONOJET_36invfb",
 
-  # Choose Monte Carlo event simulator.
+  # Choose Monte Carlo event simulator and number of events to run.
   - capability:  ColliderOperator
     function: operateLHCLoop
     options:
-      pythiaNames: ["Pythia_SUSY_LHC_8TeV", "Pythia_SUSY_LHC_13TeV"]
+      pythiaNames: ["Pythia_SUSY_LHC_8TeV"]
       silenceLoop: true
 
   # Choose statistical settings for Monte Carlo event generator
@@ -575,6 +584,7 @@ Rules:
       target_fractional_uncert: [0.3,0.3]
       halt_when_systematic_dominated: true
       all_SR_must_converge: false
+
 
   # Define Monte Carlo event simulator and associated options.
   - capability:  HardScatteringSim
@@ -591,16 +601,8 @@ Rules:
                              "SUSY:all = on",
                              "TauDecays:mode = 0",
                              "TimeShower:pTmin = 20"]
-      Pythia_SUSY_LHC_13TeV: ["Print:quiet = on",
-                             "PartonLevel:MPI = off",
-                             "PartonLevel:ISR = on",
-                             "PartonLevel:FSR = on",
-                             "HadronLevel:all = on",
-                             "SUSY:all = on",
-                             "TauDecays:mode = 0",
-                             "TimeShower:pTmin = 20"]
+      xsec_vetos: [0.048]  # 0.048 fb correspond to ~1 expected event at L = 20.7 fb^-1.
 
-      xsec_vetos: [0.048,0.075]  # 0.048 fb correspond to ~1 expected event at L = 20.7 fb^-1.
 
 Logger:
 
@@ -625,6 +627,6 @@ KeyValues:
     model_invalid_for_lnlike_below: -5e5
     model_invalid_for_lnlike_below_alt: -1e5
 
-  default_output_path: "runs/CMSSM/"
+  default_output_path: "runs/MSSM9/"
 
-  debug: true
+  debug: false
