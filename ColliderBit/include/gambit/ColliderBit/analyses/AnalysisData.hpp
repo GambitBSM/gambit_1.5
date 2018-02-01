@@ -20,8 +20,11 @@
 #include <iomanip>
 #include <algorithm>
 
-// _Anders
+// #define ANALYSISDATA_DEBUG
+
+#ifdef ANALYSISDATA_DEBUG
 #include <iostream>
+#endif
 
 namespace Gambit {
   namespace ColliderBit {
@@ -78,27 +81,32 @@ namespace Gambit {
     {
 
       /// Default constructor
-      // _Anders
       AnalysisData() 
       { 
-        std::cout << "DEBUG: AnalysisData: " << this << " - Constructed (default ctor)" << std::endl;
+        #ifdef ANALYSISDATA_DEBUG
+          std::cerr << "DEBUG: AnalysisData: " << this << " - Constructed (default ctor)" << std::endl;
+        #endif
         clear(); 
       }
 
-      // _Anders
+      // A copy constructor only used for debugging
+      #ifdef ANALYSISDATA_DEBUG
       AnalysisData(const AnalysisData& copy) : 
         srdata(copy.srdata),
         srdata_identifiers(copy.srdata_identifiers),
         srcov(copy.srcov)
       { 
-        std::cout << "DEBUG: AnalysisData: " << this << " - Copy-constructed from " << &copy << std::endl;
+          std::cerr << "DEBUG: AnalysisData: " << this << " - Copy-constructed from " << &copy << std::endl;
       }
+      #endif
 
-      // _Anders
+      // A destructor only used for debugging
+      #ifdef ANALYSISDATA_DEBUG
       ~AnalysisData()
       {
-        std::cout << "DEBUG: AnalysisData: " << this << " - Destructed" << std::endl;
+        std::cerr << "DEBUG: AnalysisData: " << this << " - Destructed" << std::endl;
       }
+      #endif
 
       /// @brief Constructor from a list of SignalRegionData and an optional correlation (or covariance?) matrix
       ///
@@ -107,8 +115,9 @@ namespace Gambit {
       AnalysisData(const std::vector<SignalRegionData>& srds, const Eigen::MatrixXd& cov=Eigen::MatrixXd())
         : srdata(srds), srcov(cov)
       {
-        // _Anders
-        std::cout << "DEBUG: AnalysisData: " << this << " - Constructed (special ctor)" << std::endl;
+        #ifdef ANALYSISDATA_DEBUG
+          std::cerr << "DEBUG: AnalysisData: " << this << " - Constructed (special ctor)" << std::endl;
+        #endif
         _checkConsistency();
       }
 
@@ -116,10 +125,16 @@ namespace Gambit {
       /// @todo It'd be good to *not* have to re-enter most of the SRData and the covariance on every point: they don't change
       void clear()
       {
-        // _Anders
-        // srdata.clear();
+        for (auto& sr : srdata)
+        {
+          sr.n_signal = 0;
+          sr.n_signal_at_lumi = 0;
+          sr.signal_sys = 0;
+        }
         srcov = Eigen::MatrixXd();
-        std::cout << "DEBUG: AnalysisData: " << this << " - Cleared" << std::endl;
+        #ifdef ANALYSISDATA_DEBUG
+          std::cerr << "DEBUG: AnalysisData: " << this << " - Cleared" << std::endl;
+        #define
       }
 
       /// Number of analyses

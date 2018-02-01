@@ -119,7 +119,7 @@ START_MODULE
   #define CAPABILITY ATLASAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getATLASAnalysisContainer
-    START_FUNCTION(NewHEPUtilsAnalysisContainer)
+    START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -128,7 +128,7 @@ START_MODULE
   #define CAPABILITY CMSAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getCMSAnalysisContainer
-    START_FUNCTION(NewHEPUtilsAnalysisContainer)
+    START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -137,7 +137,7 @@ START_MODULE
   #define CAPABILITY IdentityAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getIdentityAnalysisContainer
-    START_FUNCTION(NewHEPUtilsAnalysisContainer)
+    START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -147,7 +147,7 @@ START_MODULE
   #define CAPABILITY DetAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getDetAnalysisContainer
-    START_FUNCTION(NewHEPUtilsAnalysisContainer)
+    START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     #undef FUNCTION
@@ -222,7 +222,7 @@ START_MODULE
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ReconstructedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(DetAnalysisContainer, NewHEPUtilsAnalysisContainer)
+    DEPENDENCY(DetAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
   #endif // not defined EXCLUDE_DELPHES
@@ -235,7 +235,7 @@ START_MODULE
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(ATLASAnalysisContainer, NewHEPUtilsAnalysisContainer)
+    DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -247,7 +247,7 @@ START_MODULE
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(CMSAnalysisContainer, NewHEPUtilsAnalysisContainer)
+    DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -259,7 +259,7 @@ START_MODULE
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
-    DEPENDENCY(IdentityAnalysisContainer, NewHEPUtilsAnalysisContainer)
+    DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 

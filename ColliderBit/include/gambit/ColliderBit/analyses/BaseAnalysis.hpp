@@ -76,7 +76,7 @@ namespace Gambit {
         _ntot = 0; _xsec = 0; _xsecerr = 0;
         _xsec_is_set = false; _is_scaled = false;
         _needs_collection = true;
-        _results.clear();
+        _results.clear(); //< _Anders HERE
       }
       //@}
 
