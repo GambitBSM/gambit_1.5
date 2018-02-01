@@ -382,6 +382,11 @@ namespace Gambit {
             return;
         }
 
+    protected:
+        void clear() {
+            for(size_t i=0;i<NUM_SR;i++) { _SR[i]=0; }
+        }
+
     };
 
 
