@@ -134,7 +134,7 @@ namespace Gambit {
         srcov = Eigen::MatrixXd();
         #ifdef ANALYSISDATA_DEBUG
           std::cerr << "DEBUG: AnalysisData: " << this << " - Cleared" << std::endl;
-        #define
+        #endif
       }
 
       /// Number of analyses
