@@ -5,6 +5,8 @@
 #include <omp.h>
 using namespace std;
 
+// #define ANALYSISCONTAINER_DEBUG
+
 namespace Gambit
 {
   namespace ColliderBit
@@ -67,8 +69,9 @@ namespace Gambit
       n_threads(omp_get_max_threads()),
       base_key("")
     { 
-      // std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::ctor: instances_map.count(omp_get_thread_num()) = " << instances_map.count(omp_get_thread_num()) << std::endl;
-      std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::ctor: created at " << this << std::endl;
+      #ifdef ANALYSISCONTAINER_DEBUG
+        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::ctor: created at " << this << std::endl;
+      #endif
     }
 
 
@@ -91,7 +94,10 @@ namespace Gambit
           // Add this instance to the instances map
           instances_map[base_key][omp_get_thread_num()] = this;
           is_registered = true;
-          std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::register_thread: added " << this << " to instances_map with key " << base_key << "-" << omp_get_thread_num() << std::endl;
+
+          #ifdef ANALYSISCONTAINER_DEBUG
+            std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::register_thread: added " << this << " to instances_map with key " << base_key << "-" << omp_get_thread_num() << std::endl;
+          #endif
         }
         else
         {
@@ -101,7 +107,9 @@ namespace Gambit
           }
           else
           {
-            std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::register_thread: this instance is already in instances_map" << std::endl;
+            #ifdef ANALYSISCONTAINER_DEBUG
+              std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::register_thread: this instance is already in instances_map" << std::endl;
+            #endif
           }
         }
       }
