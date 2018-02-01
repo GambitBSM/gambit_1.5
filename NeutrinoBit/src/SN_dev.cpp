@@ -55,7 +55,7 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
 
       for (int i=0; i<3; i++)
       {
@@ -64,7 +64,9 @@ namespace Gambit
       result_lifetime = lifetime;
     }
  
-    // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841] 
+    // BBN constraint likelihood : lifetime must be less than 0.1s
+    // [arXiv:1202.2841] Since the limit is approximate, we simply implement it
+    // as a hard ~5 sigma cut.
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
@@ -74,7 +76,7 @@ namespace Gambit
       {
         if(lifetime[i]>0.1)
         {
-          result_bbn = -100.0;
+          result_bbn = -12.5;
           break;
         }
       }
@@ -203,6 +205,7 @@ namespace Gambit
       double R_K = *Dep::R_K;
       double R_tau = *Dep::R_tau;
 
+      // TODO: change to 1sigma
       double R_pi_exp = 1.23e-4;
       double R_pi_err = 0.012e-4;
       double R_K_exp = 2.488e-5;
@@ -236,6 +239,53 @@ namespace Gambit
         m_temp_GERDA += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
 
       m_GERDA = abs(m_temp_GERDA);
+    }
+
+    // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for sterile
+    // neutrino model
+    void Gamma_0nubb_Xe_SN(double& result)
+    {
+      using namespace Pipes::Gamma_0nubb_Xe_SN;
+      double mp, Gamma_0nu, A_0nubb_Xe, p2_0nubb_Xe, prefactor;
+      std::vector<double> M(3);
+      std::complex<double> sum = {0.0,0.0};
+
+      // Relevant model parameters
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
+      // A_0nubb_Xe = *Param["A_0nubb_Xe"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
+      // p2_0nubb_Xe = pow(*Param["p_0nubb_Xe"], 2.0);  // Range: 178.0 - 211.0 [MeV]
+
+      // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
+      A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
+      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2.0);
+      p2_0nubb_Xe *= 1e-3;  // MeV --> GeV
+      mp = 0.938;  // [GeV] (PDG 2014)
+
+      // Lifetime equation is adopted from Faessler+14, Eq. (13)
+      prefactor = A_0nubb_Xe*mp*mp/p2_0nubb_Xe/p2_0nubb_Xe;
+        for (int i=0; i<3; i++)
+        {
+          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
+        }
+      result = prefactor * abs(sum) * abs(sum);
+    }
+
+    void lnL_0nubb_KamLAND_Zen(double& result)
+    {
+      using namespace Pipes::lnL_0nubb_KamLAND_Zen;
+      double tau_limit = 1.07e26*3.156e7;  // [s] 90% CL
+
+      double Gamma = *Dep::Gamma_0nubb_Xe;
+
+      // Factor 1.28155 corresponds to one-sided UL at 90% CL
+      result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
     }
 
     void SN_m_Kam(double& m_Kam)
@@ -330,42 +380,47 @@ namespace Gambit
       using namespace Pipes::lnL_ckm;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
-      static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
-      static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
-      static double G_mu_sq = 1.3605e-10;  // GeV^-4
-      static double V_ud_0 = 0.97427;
-      static double err_0 = 0.00015;
-      static double err_factor = 5.3779e7;
-      double V_ud_exp[7], f[7];
-      double V_ud_sq, chi2;
+      double G_mu = *Dep::Gmu;
+      double V_us = *Param["CKM_lambda"];
+ 
+      // Experimental values determined for K and tau decays. From table 1 in 1502.00477
+      double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
+      double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
+      double f_plus = 0.959;
+      double err_f_plus = 0.005;
+      for(int i=0; i<5; i++)
+      {
+        V_us_exp[i] /= f_plus;
+        err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
+      }  
 
+      // Superallowed beta decays and more, from 1509.0474
+      // TODO: Wait for Marcin to check these out, only include pion beta decays for now
+      //static double V_ud_exp[] = {0.97417, 0.9754, 0.9734, 0.9718, 0.9749};
+      //static double err_V_ud_exp[] = {0.00021, 0.0014, 0.0027, 0.0017, 0.0026};
+      static double V_ud_exp = 0.9749;
+      static double err_V_ud_exp = 0.0026;
+
+      double f[8];
       Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
-      for (int i=0;i<7;i++)
-      {
-        V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
-      }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(0,0));
+      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
       f[1] = f[0];
       f[2] = f[0];
-      f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
+      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
       f[4] = f[3];
       f[5] = 1 + ThetaNorm(1,1);
       f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
-      V_ud_sq = 0.0;
-      for (int j=0; j<7; j++)
-      {
-        V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
-      }
-      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
-      V_ud_sq /= err_factor;
+      f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
 
-      chi2 = 0.0;
-      for (int k=0; k<7; k++)
-        chi2 += pow(((sqrt((1 - V_ud_sq)*f[k]) - V_us_exp[k])/err[k]), 2.0);
-      chi2 += pow((((sqrt(V_ud_sq)*(1 + ThetaNorm(0,0))) - V_ud_0)/err_0), 2.0);
-      result_ckm = chi2;
+      double chi2 = 0.0;
+      for (int i=0; i<7; i++)
+        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2.0);
+
+      // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
+      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2.0);
+
+      result_ckm = -0.5*chi2;
     }
 
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]

@@ -56,8 +56,6 @@
 #define __DarkBit_rollcall_hpp__
 
 #include "gambit/DarkBit/DarkBit_types.hpp"
-#include <Eigen/Sparse>
-#include <Eigen/Dense>
 
 #define MODULE DarkBit
 START_MODULE
@@ -1013,17 +1011,5 @@ START_MODULE
     ALLOW_MODELS(Halo_gNFW, Halo_Einasto)
     #undef FUNCTION
   #undef CAPABILITY
-
-// Test function
-
-  #define CAPABILITY testLike
-  START_CAPABILITY
-    #define FUNCTION lHood
-    START_FUNCTION(double)
-    ALLOW_MODEL(Simple_test)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-// Functions used in RHN sector
 #undef MODULE
 #endif /* defined(__DarkBit_rollcall_hpp__) */
