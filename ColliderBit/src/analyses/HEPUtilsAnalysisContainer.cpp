@@ -19,6 +19,7 @@ namespace Gambit
       F(ATLAS_13TeV_0LEPStop_20invfb)                \
       F(ATLAS_13TeV_1LEPStop_36invfb)                \
       F(ATLAS_13TeV_RJ3L_lowmass_36invfb)            \
+      F(ATLAS_13TeV_2bMET_36invfb)                   \
       F(ATLAS_8TeV_0LEP_20invfb)                     \
       F(ATLAS_8TeV_0LEPStop_20invfb)                 \
       F(ATLAS_8TeV_1LEPStop_20invfb)                 \
