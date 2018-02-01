@@ -530,11 +530,12 @@ Rules:
                    "ATLAS_8TeV_2LEPStop_20invfb",
                    "ATLAS_8TeV_3LEPEW_20invfb"],
                   ["ATLAS_13TeV_0LEP_13invfb",
-                   "ATLAS_13TeV_0LEPStop_20invfb",
-                   "ATLAS_13TeV_1LEPStop_36invfb",
-                   "ATLAS_13TeV_2LEPStop_36invfb",
                    "ATLAS_13TeV_MultiLEP_36invfb",
+                   "ATLAS_13TeV_0LEPStop_20invfb",
+                   "ATLAS_13TeV_2LEPStop_36invfb",
                    "ATLAS_13TeV_RJ3L_lowmass_36invfb"] ]
+
+                   # "ATLAS_13TeV_1LEPStop_36invfb",
 
   # CMS analysis setup
   - capability: CMSAnalysisContainer
@@ -546,12 +547,13 @@ Rules:
                    "CMS_8TeV_MONOJET_20invfb"],
                   ["CMS_13TeV_0LEP_13invfb",
                    "CMS_13TeV_1LEPbb_36invfb",
-                   "CMS_13TeV_1LEPStop_36invfb",
                    "CMS_13TeV_2LEPsoft_36invfb",
-                   "CMS_13TeV_2LEPStop_36invfb",
                    "CMS_13TeV_2OSLEP_36invfb",
-                   "CMS_13TeV_MONOJET_36invfb",
+                   "CMS_13TeV_1LEPStop_36invfb",
                    "CMS_13TeV_MultiLEP_36invfb"] ]
+
+                   # "CMS_13TeV_2LEPStop_36invfb",
+                   # "CMS_13TeV_MONOJET_36invfb",
 
   # Choose Monte Carlo event simulator.
   - capability:  ColliderOperator
