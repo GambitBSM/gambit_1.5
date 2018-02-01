@@ -20,6 +20,7 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
+///  \date 2018 Jan
 ///
 ///  \author Andy Buckley
 ///          (andy.buckley@cern.ch)
@@ -45,11 +46,20 @@ START_MODULE
   #include "ColliderBit_Higgs_rollcall.hpp"
   #include "ColliderBit_LEP_rollcall.hpp"
 
+  /// Sets the options for establishing convergence of Monte Carlo simulations
+  #define CAPABILITY MC_ConvergenceSettings
+  START_CAPABILITY
+    #define FUNCTION MC_ConvergenceSettings_from_YAML
+    START_FUNCTION(convergence_settings)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   /// Controls looping of Collider simulations
   #define CAPABILITY ColliderOperator
   START_CAPABILITY
     #define FUNCTION operateLHCLoop
     START_FUNCTION(void, CAN_MANAGE_LOOPS)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -207,8 +217,9 @@ START_MODULE
   #define CAPABILITY DetAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runDetAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ReconstructedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(DetAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -219,8 +230,9 @@ START_MODULE
   #define CAPABILITY ATLASAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runATLASAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -230,8 +242,9 @@ START_MODULE
   #define CAPABILITY CMSAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runCMSAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -241,8 +254,9 @@ START_MODULE
   #define CAPABILITY IdentityAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runIdentityAnalyses
-    START_FUNCTION(AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -253,12 +267,12 @@ START_MODULE
   #define CAPABILITY AllAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION CollectAnalyses
-    START_FUNCTION(AnalysisNumbers)
-    DEPENDENCY(ATLASAnalysisNumbers, AnalysisNumbers)
-    DEPENDENCY(CMSAnalysisNumbers, AnalysisNumbers)
-    DEPENDENCY(IdentityAnalysisNumbers, AnalysisNumbers)
+    START_FUNCTION(AnalysisDataPointers)
+    DEPENDENCY(ATLASAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(CMSAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(IdentityAnalysisNumbers, AnalysisDataPointers)
     #ifndef EXCLUDE_DELPHES
-      DEPENDENCY(DetAnalysisNumbers, AnalysisNumbers)
+      DEPENDENCY(DetAnalysisNumbers, AnalysisDataPointers)
     #endif
     #undef FUNCTION
   #undef CAPABILITY
@@ -268,7 +282,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_LHC_signals
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -277,7 +291,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_LHC_LogLike_per_analysis
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(AllAnalysisNumbers, AnalysisNumbers)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers)
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_lognormal_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_gaussian_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_GROUP(lnlike_marg_poisson)
@@ -290,6 +304,15 @@ START_MODULE
     #define FUNCTION calc_LHC_LogLike
     START_FUNCTION(double)
     DEPENDENCY(LHC_LogLikes, map_str_dbl)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // Output some info about the event loop
+  #define CAPABILITY LHCEventLoopInfo
+  START_CAPABILITY
+    #define FUNCTION getLHCEventLoopInfo
+    START_FUNCTION(map_str_dbl)
+    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers) // This is just to ensure that the loop is done
     #undef FUNCTION
   #undef CAPABILITY
 

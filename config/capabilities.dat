@@ -334,15 +334,21 @@ ColliderOperator: |
    Controls the parallelization and execution of the entire
    event loop of the collider simulation.
 
+LHCEventLoopInfo: |
+   Info about the event loop.
+
 LHC_signals: |
-   Extract the signal predictions and uncertainties for all LHC analyses.
+   Signal predictions and uncertainties in all LHC analyses.
 
 LHC_LogLikes: |
-   Calculate the log likelihood for each LHC analysis from the 
-   analysis numbers.
+   Computes analysis-specific log-likelihood values,
+   from AllAnalysisNumbers.
 
 LHC_Combined_LogLike: |
-   Calculate the total log likelihood for the LHC searches.
+   A final, single delta-log-likelihood value for LHC searches.
+
+MC_ConvergenceSettings : |
+   Convergence settings to be used for terminating Monte Carlo event generation.
 
 HardScatteringSim: |
    Provides a Pythia 8 instance within a container which is
@@ -412,8 +418,7 @@ IdentityAnalysisNumbers: |
    CopiedEvent.
 
 AllAnalysisNumbers: |
-   Collect all the LHC analysis numbers in from ATLASAnalysisNumbers,
-   CMSAnalysisNumbers, DetAnalysisNumbers and DetAnalysisNumbers.
+   Combined analysis numbers from all LHC analyses used in a scan.
 
 ALEPH_Selectron_LLike: |
    Compares the cross section times branching ratio
@@ -1192,6 +1197,27 @@ PandaX_2016_SignalSD: |
 PandaX_2016_LogLikelihood: |
    Calculate the log-likelihood for the PandaX 2016 direct detection analysis.
 
+PandaX_2017_Calculate: |
+   Perform rate and likelihood calculations for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_Events: |
+   The number of observed events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_Background: |
+   The number of background events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_Signal: |
+   The number of signal events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_SignalSI: |
+   The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_SignalSD: |
+   The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_LogLikelihood: |
+   Calculate the log-likelihood for the PandaX 2017 direct detection analysis.
+
 SuperCDMS_2014_Calculate: |
    Perform rate and likelihood calculations for the SuperCDMS 2014 direct detection analysis.
 
@@ -1579,6 +1605,9 @@ DDCalc_1_0_0_init: |
 DDCalc_1_1_0_init: |
    Initialises DDCalc 1.1.0.
 
+DDCalc_1_2_0_init: |
+   Initialises DDCalc 1.2.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -1632,6 +1661,9 @@ PICO_60_2017_Init: |
 
 PandaX_2016_Init: |
    Initialises a direct detection experiment with the properties of the 2016 analysis of PandaX.
+
+PandaX_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of PandaX.
 
 XENON100_2012_Init: |
    Initialises a direct detection experiment with the properties of the 2012 analysis of Xenon100.
@@ -2711,6 +2743,30 @@ alphas_running : |
 
 slha_adjust : |
    Adjusts the SLHA parameters to the SuperIso standard.
+
+LUV_LL :  |
+   Claculate the likelihood function of the b->sll LUV observables (RK, RK*)
+
+LUV_M :  |
+   Measurements related to LUV in b->sll
+
+RK :  |
+   Calculation R_K in 1-6GeVGeV
+
+RK_CONV:  |
+   Conv function from SuperIso to calculate the R_K
+
+RKstar_0045_11:  |
+   Calculation R_K* in 0.045-1.1GeVGeV
+
+RKstar_11_60:  |
+   Calculation R_K* in 1.1 -  6.0 GeVGeV
+
+RKstar_CONV:  |
+   Conv function from SuperIso to calculate the R_K*
+
+
+
 
 #-------------------------------------
 #  SUSY-HIT capabilities

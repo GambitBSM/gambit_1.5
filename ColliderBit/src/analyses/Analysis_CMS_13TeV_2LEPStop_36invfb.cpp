@@ -13,9 +13,9 @@ using namespace std;
 
    Based on: arXiv:1711.00752
    Yang Zhang
- 
+
    Known errors:
-        
+
    Known features:
 
 */
@@ -25,7 +25,7 @@ namespace Gambit {
 
     class Analysis_CMS_13TeV_2LEPStop_36invfb : public HEPUtilsAnalysis {
     private:
-    
+
         // Numbers passing cuts
         // int _SRSF[13], _SRDF[13], _SRALL[13],_SRA[3];
         const size_t _SR_size = 13;
@@ -39,8 +39,8 @@ namespace Gambit {
         vector<int> cutFlowVector;
         vector<string> cutFlowVector_str;
         int NCUTS;
-       
-            
+
+
         // Jet overlap removal
         void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*> &jetvec, vector<HEPUtils::Particle*> &lepvec, double DeltaRMax) {
             //Routine to do jet-lepton check
@@ -66,7 +66,7 @@ namespace Gambit {
 
             return;
         }
-        
+
         // Lepton overlap removal
         void LeptonJetOverlapRemoval(vector<HEPUtils::Particle*> &lepvec, vector<HEPUtils::Jet*> &jetvec, double DeltaRMax) {
             //Routine to do lepton-jet check
@@ -104,7 +104,7 @@ namespace Gambit {
                 _SRALL[i]=0;
             }
             _SRA[0]=0;_SRA[1]=0;_SRA[2]=0;
-            NCUTS= 11;  
+            NCUTS= 11;
             set_luminosity(35.9);
 
             for(int i=0;i<NCUTS;i++){
@@ -128,7 +128,7 @@ namespace Gambit {
             HEPUtils::BinnedFn2D<double> _eff2dEl(a,b,cEl);
             const vector<double> cMu={0.89};
             HEPUtils::BinnedFn2D<double> _eff2dMu(a,b,cMu);
-            vector<HEPUtils::Particle*> baselineElectrons, baselineMuons; 
+            vector<HEPUtils::Particle*> baselineElectrons, baselineMuons;
             for (HEPUtils::Particle* electron : event->electrons()) {
                 bool hasTrig=has_tag(_eff2dEl, electron->eta(), electron->pT());
                 if (electron->pT() > 15. && electron->abseta() < 2.4 && hasTrig) baselineElectrons.push_back(electron);
@@ -139,11 +139,11 @@ namespace Gambit {
             }
             ATLAS::applyLooseIDElectronSelectionR2(baselineElectrons);
             // Jets
-            vector<HEPUtils::Jet*> baselineJets;  
+            vector<HEPUtils::Jet*> baselineJets;
             for (HEPUtils::Jet* jet : event->jets()) {
                 if (jet->pT() > 30. && fabs(jet->eta()) < 2.4) baselineJets.push_back(jet);
             }
-            
+
             // Overlap removal
             JetLeptonOverlapRemoval(baselineJets,baselineElectrons,0.4);
             JetLeptonOverlapRemoval(baselineJets,baselineMuons,0.4);
@@ -152,14 +152,14 @@ namespace Gambit {
             int LooseLepNum = baselineElectrons.size()+baselineMuons.size();
             //Signal Leptons
             ATLAS::applyMediumIDElectronSelectionR2(baselineElectrons);
-            vector<HEPUtils::Particle*> signalLeptons; 
+            vector<HEPUtils::Particle*> signalLeptons;
             for (HEPUtils::Particle* electron : baselineElectrons) {
                 signalLeptons.push_back(electron);
             }
             for (HEPUtils::Particle* muon : baselineMuons) {
                 signalLeptons.push_back(muon);
             }
-            
+
             //Put signal jets／leptons in pT order
             //std::sort(signalJets.begin(), signalJets.end(), sortByPT_j);
             //std::sort(signalLeptons.begin(), signalLeptons.end(), sortByPT_l);
@@ -167,7 +167,7 @@ namespace Gambit {
             //std::sort(sgLeptons.begin(), sgLeptons.end(), sortByPT_l);
 
             // Function used to get b jets
-            vector<HEPUtils::Jet*> bJets;   
+            vector<HEPUtils::Jet*> bJets;
             vector<HEPUtils::Jet*> nobJets;
             //const std::vector<double>  a = {0,10.};
             //const std::vector<double>  b = {0,10000.};
@@ -180,11 +180,11 @@ namespace Gambit {
                     }else{
                         nobJets.push_back(jet);
                     }
-                    
-                    
+
+
             }
             int nbjet = bJets.size();
-            int njet  = nobJets.size(); 
+            int njet  = nobJets.size();
 
             // We now have the signal electrons, muons, jets and b jets- move on to the analysis
             /*********************************************************/
@@ -220,13 +220,13 @@ namespace Gambit {
                     HEPUtils::P4 lepton0=signalLeptons.at(0)->mom();
                     HEPUtils::P4 lepton1=signalLeptons.at(1)->mom();
                     double Mll= (lepton0+lepton1).m();
-                    // S=MET/sqrt(HT) 
+                    // S=MET/sqrt(HT)
                     double HT = 0.;
                     for (HEPUtils::Jet* jet :baselineJets) {
                         HT += jet->pT();
                     }
                     double S=met/sqrt(HT);
-                    
+
                     // Set flags
                     cut_mllGt20 = Mll>20.;
                     flg_SF      = signalLeptons[0]->pid()+signalLeptons[1]->pid()==0;
@@ -235,16 +235,16 @@ namespace Gambit {
                     cut_Nbjet   = nbjet>=1;
                     cut_PTmis   = met>80.;
                     cut_SGt5    = S>5.;
-                    
+
                     // Angular speration of P_T^{miss} and (sub-)leading jet
-                    if (cut_Njet) { 
+                    if (cut_Njet) {
                         double cosj1 = cos(baselineJets[0]->phi() - ptot.phi());
                         double cosj2 = cos(baselineJets[1]->phi() - ptot.phi());
                         cut_csj1    = cosj1<0.80;
                         cut_csj2    = cosj2<0.96;
                     }
                     // only calculate mt2 after pass these cuts, to save time
-                    if(cut_mllGt20 && cut_mllMZ && cut_Njet && cut_Nbjet && cut_PTmis && cut_SGt5 && cut_csj1 && cut_csj2){     
+                    if(cut_mllGt20 && cut_mllMZ && cut_Njet && cut_Nbjet && cut_PTmis && cut_SGt5 && cut_csj1 && cut_csj2){
                         // MT2
                         double pmiss[3] = { 0, ptot.px(), ptot.py() };
                         mt2_bisect::mt2 mt2_event_bl,mt2_event_ll;
@@ -265,10 +265,10 @@ namespace Gambit {
                         }else{
                             bj2 = bJets.at(1)->mom();
                         }
-                        
+
                         HEPUtils::P4 l1b1 = lepton0+bj1;
                         HEPUtils::P4 l2b2 = lepton1+bj2;
-                        
+
                         HEPUtils::P4 l1b2 = lepton0+bj2;
                         HEPUtils::P4 l2b1 = lepton1+bj1;
                         double pa_bl[3];
@@ -290,17 +290,17 @@ namespace Gambit {
                         mt2_event_bl.set_mn(0.);
                         mt2blbl = mt2_event_bl.get_mt2();
                         cut_MT2ll140   = mt2ll>140.;
-                        
+
                         sig_MET_80     = met<200.;
                         sig_MET_200    = met>200.;
-                        
+
                         sig_MT2bl_0    = (mt2blbl<100)&&(mt2blbl>0);
                         sig_MT2bl_100  = (mt2blbl>100)&& (mt2blbl<200);
                         sig_MT2bl_200  = mt2blbl>200;
 
                         sig_MT2ll_100  = (mt2ll>100.)&&(mt2ll<140.);
                         sig_MT2ll_140  = (mt2ll>140.)&&(mt2ll<240.);
-                        sig_MT2ll_240  = (mt2ll>240.);         
+                        sig_MT2ll_240  = (mt2ll>240.);
                     }
                 }
 
@@ -321,7 +321,7 @@ namespace Gambit {
             cutFlowVector_str[8] = "cosPhi(MET,j1)<0.80";
             cutFlowVector_str[9] = "cosPhi(MET,j2)<0.96";
             cutFlowVector_str[10] = "MT2(ll)>140";
-            
+
             for(int j=0;j<NCUTS;j++){
                 if(
                    (j==0) ||
@@ -421,7 +421,7 @@ namespace Gambit {
             for (size_t j=0; j<_SRA_size; j++) {
                 _SRA[j] += specificOther->_SRA[j];
             }
-           
+
         }
 
 
@@ -464,8 +464,8 @@ namespace Gambit {
                 << _SRA[j]*scale_by <<  "," << setw(20) << 100.*_SRA[j]/cutFlowVector[0]<< "%" << endl;
             }
             cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-            
-            // Same falvor
+
+            // Same flavour
             SignalRegionData results_SRSF0;
             results_SRSF0.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRSF0.sr_label = "SRSF0";
@@ -495,7 +495,7 @@ namespace Gambit {
             results_SRSF2.signal_sys = 0.;
             results_SRSF2.n_signal = _SRSF[2];
             add_result(results_SRSF2);
-            
+
             SignalRegionData results_SRSF3;
             results_SRSF3.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRSF3.sr_label = "SRSF3";
@@ -596,7 +596,7 @@ namespace Gambit {
             results_SRSF12.n_signal = _SRSF[12];
             add_result(results_SRSF12);
 
-            // Different falvor 
+            // Different falvor
             SignalRegionData results_SRDF0;
             results_SRDF0.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRDF0.sr_label = "SRDF0";
@@ -626,7 +626,7 @@ namespace Gambit {
             results_SRDF2.signal_sys = 0.;
             results_SRDF2.n_signal = _SRDF[2];
             add_result(results_SRDF2);
-            
+
             SignalRegionData results_SRDF3;
             results_SRDF3.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRDF3.sr_label = "SRDF3";
@@ -726,7 +726,7 @@ namespace Gambit {
             results_SRDF12.signal_sys = 0.;
             results_SRDF12.n_signal = _SRDF[12];
             add_result(results_SRDF12);
-            
+
             // DF+SF
             SignalRegionData results_SRALL0;
             results_SRALL0.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
@@ -757,7 +757,7 @@ namespace Gambit {
             results_SRALL2.signal_sys = 0.;
             results_SRALL2.n_signal = _SRALL[2];
             add_result(results_SRALL2);
-            
+
             SignalRegionData results_SRALL3;
             results_SRALL3.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRALL3.sr_label = "SRALL3";
@@ -878,7 +878,7 @@ namespace Gambit {
             results_SRA1.signal_sys = 0.;
             results_SRA1.n_signal = _SRA[1];
             add_result(results_SRA1);
-            
+
             SignalRegionData results_SRA2;
             results_SRA2.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRA2.sr_label = "SRA2";
