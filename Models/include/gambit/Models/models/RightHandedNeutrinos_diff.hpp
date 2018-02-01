@@ -2,7 +2,7 @@
 //
 // *********************************************
 //
-// Sterile RH Neutrino Model with differential masses
+// RH Neutrino Model with differential masses
 //
 // *********************************************
 //
@@ -17,16 +17,16 @@
 //
 // *********************************************
 
-#ifndef __SN_differential_hpp__
-#define __SN_differential_hpp__
+#ifndef __RightHandedNeutrinos_diff_hpp__
+#define __RightHandedNeutrinos_diff_hpp__
 
-#include "gambit/Models/models/SN_dev.hpp"
+#include "gambit/Models/models/RightHandedNeutrinos.hpp"
 
-#define MODEL SN_differential
-#define PARENT SN_dev
+#define MODEL RightHandedNeutrinos_diff
+#define PARENT RightHandedNeutrinos
   START_MODEL
   DEFINEPARS(M_1, delta_M_2, delta_M_3, ReOm23, ImOm23, ReOm13, ImOm13, ReOm12, ImOm12, L_Ge, L_Xe)
-  INTERPRET_AS_PARENT_FUNCTION(SN_differential_to_SN_dev)
+  INTERPRET_AS_PARENT_FUNCTION(RightHandedNeutrinos_diff_to_RightHandedNeutrinos)
 #undef PARENT
 #undef MODEL
 

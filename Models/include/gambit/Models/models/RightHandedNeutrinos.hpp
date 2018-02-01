@@ -2,7 +2,7 @@
 //
 // *********************************************
 //
-// Sterile RH Neutrino Model
+// RH Neutrino Model
 //
 // *********************************************
 //
@@ -14,12 +14,16 @@
 // \author Suraj Krishnamurthy
 // \date 2017 February
 //
+// \author Tomas Gonzalo
+//         (t.e.gonzalo@fys.uio.no)
+// \date 2018 Jan
+//
 // *********************************************
 
-#ifndef __SN_dev_hpp__
-#define __SN_dev_hpp__
+#ifndef __RightHandedNeutrinos_hpp__
+#define __RightHandedNeutrinos_hpp__
 
-#define MODEL SN_dev
+#define MODEL RightHandedNeutrinos
   START_MODEL
   DEFINEPARS(M_1, M_2, M_3, ReOm23, ImOm23, ReOm13, ImOm13, ReOm12, ImOm12, L_Ge, L_Xe)
 #undef MODEL

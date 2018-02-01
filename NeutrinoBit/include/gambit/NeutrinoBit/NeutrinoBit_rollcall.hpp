@@ -66,7 +66,7 @@ START_MODULE
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SMINPUTS, SMInputs)
-    ALLOW_MODELS(StandardModel_SLHA2, StandardModel_Higgs, SN_dev)
+    ALLOW_MODELS(StandardModel_SLHA2, StandardModel_Higgs, RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -75,7 +75,8 @@ START_MODULE
     #define FUNCTION Vnu
     START_FUNCTION(Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
-    ALLOW_MODELS(SN_dev)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODELS(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -95,7 +96,7 @@ START_MODULE
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -173,11 +174,11 @@ START_MODULE
 
   #define CAPABILITY bbn_lifetime
   START_CAPABILITY
-    #define FUNCTION SN_bbn_lifetime
+    #define FUNCTION RHN_bbn_lifetime
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -191,31 +192,31 @@ START_MODULE
 
   #define CAPABILITY R_pi
   START_CAPABILITY
-    #define FUNCTION SN_R_pi
+    #define FUNCTION RHN_R_pi
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(SN_dev)
+    ALLOW_MODELS(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY R_K
   START_CAPABILITY
-    #define FUNCTION SN_R_K
+    #define FUNCTION RHN_R_K
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY R_tau
   START_CAPABILITY
-    #define FUNCTION SN_R_tau
+    #define FUNCTION RHN_R_tau
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -231,23 +232,23 @@ START_MODULE
 
   #define CAPABILITY m_GERDA
   START_CAPABILITY
-    #define FUNCTION SN_m_GERDA
+    #define FUNCTION RHN_m_GERDA
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY 
 
   #define CAPABILITY m_Kam
   START_CAPABILITY
-    #define FUNCTION SN_m_Kam
+    #define FUNCTION RHN_m_Kam
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY 
 
@@ -264,7 +265,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_ckm
     START_FUNCTION(double)
-    ALLOW_MODELS(SN_dev, StandardModel_SLHA2)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(Gmu, double)
@@ -276,7 +277,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_pienu
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -288,7 +289,7 @@ START_MODULE
 
     #define FUNCTION lnL_ps191_e
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -307,7 +308,7 @@ START_MODULE
 
     #define FUNCTION lnL_ps191_mu
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -326,7 +327,7 @@ START_MODULE
 
     #define FUNCTION lnL_charm_e
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -345,7 +346,7 @@ START_MODULE
 
     #define FUNCTION lnL_charm_mu
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -364,7 +365,7 @@ START_MODULE
 
     #define FUNCTION lnL_delphi
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -383,7 +384,7 @@ START_MODULE
 
     #define FUNCTION lnL_atlas_e
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
@@ -396,7 +397,7 @@ START_MODULE
 
     #define FUNCTION lnL_atlas_mu
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Um1, double)
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
@@ -409,7 +410,7 @@ START_MODULE
 
     #define FUNCTION lnL_e949
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Um1, double)
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
@@ -422,7 +423,7 @@ START_MODULE
 
     #define FUNCTION lnL_nutev
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Um1, double)
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
@@ -435,7 +436,7 @@ START_MODULE
 
     #define FUNCTION lnL_charm_tau
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ut1, double)
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
@@ -448,7 +449,7 @@ START_MODULE
 
     #define FUNCTION printable_ps191e
     START_FUNCTION(double)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
     DEPENDENCY(Ue2, double)
 //    DEPENDENCY(Ue3, double)
@@ -468,19 +469,19 @@ START_MODULE
     #define FUNCTION perturbativity_likelihood
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
 
   #define CAPABILITY Gamma_0nubb_Xe
   START_CAPABILITY
-    #define FUNCTION Gamma_0nubb_Xe_SN
+    #define FUNCTION RHN_Gamma_0nubb_Xe
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(SN_dev)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 

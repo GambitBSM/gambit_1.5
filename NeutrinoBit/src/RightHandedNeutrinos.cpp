@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Sterile neutrino scan; using Casas-Ibarra parameterization
+///  Right handed neutrino scan; using Casas-Ibarra parameterization
 ///
 ///  *********************************************
 /// 
@@ -40,9 +40,9 @@ namespace Gambit
   {
 
     // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
-    void SN_bbn_lifetime(std::vector<double>& result_lifetime)
+    void RHN_bbn_lifetime(std::vector<double>& result_lifetime)
     {
-      using namespace Pipes::SN_bbn_lifetime;
+      using namespace Pipes::RHN_bbn_lifetime;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
       static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
@@ -63,7 +63,7 @@ namespace Gambit
       }
       result_lifetime = lifetime;
     }
- 
+
     // BBN constraint likelihood : lifetime must be less than 0.1s
     // [arXiv:1202.2841] Since the limit is approximate, we simply implement it
     // as a hard ~5 sigma cut.
@@ -83,9 +83,9 @@ namespace Gambit
     }
    
     // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
-    void SN_R_pi(double& R_pi)
+    void RHN_R_pi(double& R_pi)
     {
-      using namespace Pipes::SN_R_pi;
+      using namespace Pipes::RHN_R_pi;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_pi = meson_masses.pi_plus;
       static double R_pi_SM = 1.2354e-4;
@@ -125,9 +125,9 @@ namespace Gambit
  
     }
 
-    void SN_R_K(double& R_K)
+    void RHN_R_K(double& R_K)
     {
-      using namespace Pipes::SN_R_K;
+      using namespace Pipes::RHN_R_K;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_pi = meson_masses.pi_plus;
       static double m_K = meson_masses.kaon_plus; 
@@ -168,9 +168,9 @@ namespace Gambit
       R_K = R_K_SM * (1.0 + d_r_K);
     }
 
-    void SN_R_tau(double& R_tau)
+    void RHN_R_tau(double& R_tau)
     {
-      using namespace Pipes::SN_R_tau;
+      using namespace Pipes::RHN_R_tau;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_tau = sminputs.mTau;  // GeV
       static double R_tau_SM = 0.973;
@@ -220,9 +220,9 @@ namespace Gambit
     }
 
     // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
-    void SN_m_GERDA(double &m_GERDA)
+    void RHN_m_GERDA(double &m_GERDA)
     {
-      using namespace Pipes::SN_m_GERDA;
+      using namespace Pipes::RHN_m_GERDA;
       std::vector<double> M(3);
       std::complex<double> m_temp_GERDA = {0.0,0.0};
 
@@ -241,11 +241,11 @@ namespace Gambit
       m_GERDA = abs(m_temp_GERDA);
     }
 
-    // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for sterile
+    // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for right-handed
     // neutrino model
-    void Gamma_0nubb_Xe_SN(double& result)
+    void RHN_Gamma_0nubb_Xe(double& result)
     {
-      using namespace Pipes::Gamma_0nubb_Xe_SN;
+      using namespace Pipes::RHN_Gamma_0nubb_Xe;
       double mp, Gamma_0nu, A_0nubb_Xe, p2_0nubb_Xe, prefactor;
       std::vector<double> M(3);
       std::complex<double> sum = {0.0,0.0};
@@ -288,9 +288,9 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
     }
 
-    void SN_m_Kam(double& m_Kam)
+    void RHN_m_Kam(double& m_Kam)
     {
-      using namespace Pipes::SN_m_Kam;
+      using namespace Pipes::RHN_m_Kam;
       std::vector<double> M(3);
       std::complex<double> m_temp_Kam = {0.0,0.0};
 
@@ -321,60 +321,9 @@ namespace Gambit
         Stats::gaussian_loglikelihood(m_GERDA, 0., 0., m_bb_GERDA, false)+
         Stats::gaussian_loglikelihood(m_Kam, 0., 0., m_bb_Kam, false);
 
-      /*
-      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
-      {
-        result_0nubb = 0.0;
-
-      }
-      else
-      {
-        result_0nubb = -1.0E+05;
-      }
-      */
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
-//    void SN_ckm_V_ud(double &V_ud)
-//    {
-      /*
-      using namespace Pipes::SN_ckm_V_ud;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      Matrix3cd Theta = *Dep::SeesawI_Theta;
-      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
-      static double V_us_exp[7] = {0.2235,0.2227,0.2244,0.2238,0.2242,0.2262,0.2214};
-      static double err[7] = {0.0006,0.0013,0.0008,0.0006,0.0011,0.0013,0.0022};
-      static double G_mu_sq = 1.3605e-10;  // GeV^-4
-      static double V_ud_0 = 0.97427;
-      static double err_0 = 0.00015;
-      static double err_factor = 5.3779e7;
-      double V_ud_exp[7], f[7];
-      double V_ud_sq;
-
-      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
-
-      for (int i=0;i<7;i++)
-      {
-        V_ud_exp[i] = sqrt(1 - pow(V_us_exp[i], 2.0));
-      }
-      f[0] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(0,0));
-      f[3] = (G_F_sq/G_mu_sq)*(1 - ThetaNorm(1,1));
-      f[5] = 1 + ThetaNorm(1,1);
-      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) + ThetaNorm(2,2);
-      f[1] = f[0];
-      f[2] = f[0];
-      f[4] = f[3];
-      V_ud_sq = 0.0;
-      for (int j=0; j<7; j++)
-      {
-        V_ud_sq += pow(V_ud_exp[j], 2.0)/(pow(err[j], 2.0)*f[j]);
-      }
-      V_ud_sq += pow(V_ud_0, 2.0)/(pow(err_0, 2.0)*(1 + ThetaNorm(0,0)));
-      V_ud_sq /= err_factor;
-
-      V_ud = sqrt(V_ud_sq);*/
-//    }
-
     void lnL_ckm(double& result_ckm)
     {
       using namespace Pipes::lnL_ckm;
@@ -785,7 +734,6 @@ namespace Gambit
     void lnL_atlas_e(double& result_atlase)
     {
       using namespace Pipes::lnL_atlas_e;
-
       static bool read_table_atlase = true;
       static tk::spline s_atlase;
       double M_1, M_2, M_3;
@@ -996,6 +944,7 @@ namespace Gambit
       U_nutev[1] = s_nutev(M_2);
       U_nutev[2] = s_nutev(M_3);
       result_nutev = -2.44*(pow(mixing_sq[0]/U_nutev[0], 2.0) + pow(mixing_sq[1]/U_nutev[1], 2.0) + pow(mixing_sq[2]/U_nutev[2], 2.0));
+
     }
 
     // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002]

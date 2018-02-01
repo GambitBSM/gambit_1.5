@@ -1489,9 +1489,9 @@ namespace Gambit
         return 10.0/3;
     }
 
-    void SN_muegamma(double &result)
+    void RHN_muegamma(double &result)
     {
-      using namespace Pipes::SN_muegamma;
+      using namespace Pipes::RHN_muegamma;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1521,9 +1521,9 @@ namespace Gambit
 
     }
 
-    void SN_tauegamma(double &result)
+    void RHN_tauegamma(double &result)
     {
-      using namespace Pipes::SN_tauegamma;
+      using namespace Pipes::RHN_tauegamma;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1557,9 +1557,9 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
     }
 
-    void SN_taumugamma(double &result)
+    void RHN_taumugamma(double &result)
     {
-      using namespace Pipes::SN_taumugamma;
+      using namespace Pipes::RHN_taumugamma;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1593,7 +1593,7 @@ namespace Gambit
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
     }
 
-    double SN_l2lll(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix3cd Vnu, Eigen::Matrix3cd Theta, Eigen::Matrix3cd m_nu, double M1, double M2, double M3, double mH)
+    double RHN_l2lll(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix3cd Vnu, Eigen::Matrix3cd Theta, Eigen::Matrix3cd m_nu, double M1, double M2, double M3, double mH)
     {
       vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
       vector<double> mnu = {real(m_nu(0,0)), real(m_nu(1,1)), real(m_nu(2,2)), M1, M2, M3};
@@ -1642,9 +1642,9 @@ namespace Gambit
 
     }
 
-    void SN_mueee(double &result)
+    void RHN_mueee(double &result)
     {
-      using namespace Pipes::SN_mueee;
+      using namespace Pipes::RHN_mueee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1654,15 +1654,15 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int e = 0, mu = 1;
-      result *=  SN_l2lll(mu, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(mu, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       result /= (1. - 8.*pow(sminputs.mE/sminputs.mMu,2));
  
     }
 
-    void SN_taueee(double &result)
+    void RHN_taueee(double &result)
     {
-      using namespace Pipes::SN_taueee;
+      using namespace Pipes::RHN_taueee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1672,7 +1672,7 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int e = 0, tau = 2;
-      result *=  SN_l2lll(tau, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(tau, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
@@ -1681,9 +1681,9 @@ namespace Gambit
  
     }
 
-    void SN_taumumumu(double &result)
+    void RHN_taumumumu(double &result)
     {
-      using namespace Pipes::SN_taumumumu;
+      using namespace Pipes::RHN_taumumumu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1693,7 +1693,7 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int mu = 1, tau = 2;
-      result *=  SN_l2lll(tau, mu, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(tau, mu, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
@@ -1703,9 +1703,9 @@ namespace Gambit
     }
 
 
-    void SN_taumuee(double &result)
+    void RHN_taumuee(double &result)
     {
-      using namespace Pipes::SN_taumuee;
+      using namespace Pipes::RHN_taumuee;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1715,7 +1715,7 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int e = 0, mu = 1, tau = 2;
-      result *=  SN_l2lll(tau, mu, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(tau, mu, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
@@ -1723,9 +1723,9 @@ namespace Gambit
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
-    void SN_taueemu(double &result)
+    void RHN_taueemu(double &result)
     {
-      using namespace Pipes::SN_taueemu;
+      using namespace Pipes::RHN_taueemu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1735,7 +1735,7 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int e = 0, mu = 1, tau = 2;
-      result *=  SN_l2lll(tau, e, e, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(tau, e, e, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
@@ -1743,9 +1743,9 @@ namespace Gambit
       result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
     }
 
-    void SN_tauemumu(double &result)
+    void RHN_tauemumu(double &result)
     {
-      using namespace Pipes::SN_tauemumu;
+      using namespace Pipes::RHN_tauemumu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1755,7 +1755,7 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int e = 0, mu = 1, tau = 2;
-      result *=  SN_l2lll(tau, e, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(tau, e, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
@@ -1763,9 +1763,9 @@ namespace Gambit
       result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
 
-    void SN_taumumue(double &result)
+    void RHN_taumumue(double &result)
     {
-      using namespace Pipes::SN_taumumue;
+      using namespace Pipes::RHN_taumumue;
       SMInputs sminputs = *Dep::SMINPUTS;
 
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
@@ -1775,7 +1775,7 @@ namespace Gambit
       result = 3. / (8. * pow(sminputs.GF,2));
 
       int e = 0, mu = 1, tau = 2;
-      result *=  SN_l2lll(tau, mu, mu, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
+      result *=  RHN_l2lll(tau, mu, mu, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
       // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
       result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
@@ -1783,9 +1783,9 @@ namespace Gambit
       result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
     }
 
-    void SN_mueTi(double &result)
+    void RHN_mueTi(double &result)
     {
-      using namespace Pipes::SN_mueTi;
+      using namespace Pipes::RHN_mueTi;
       const SMInputs sminputs = *Dep::SMINPUTS;
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
@@ -1875,9 +1875,9 @@ namespace Gambit
 
     }
 
-    void SN_muePb(double &result)
+    void RHN_muePb(double &result)
     {
-      using namespace Pipes::SN_muePb;
+      using namespace Pipes::RHN_muePb;
       const SMInputs sminputs = *Dep::SMINPUTS;
       Eigen::Matrix3cd m_nu = *Dep::m_nu;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
@@ -1965,35 +1965,7 @@ namespace Gambit
 
       result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
 
-   }
-
-    void SN_edm_e(double &result)
-    {
-      using namespace Pipes::SN_edm_e;
-
-      // At one loop there is no contribution for this because it is proportional to diagonal entries on the neutrino mixing matrix, that have no imaginary part
-
-      result = 0;
     }
-
-    void SN_edm_mu(double &result)
-    {
-      using namespace Pipes::SN_edm_mu;
-
-      // No 1-loop contribution, same reason as above
-
-      result = 0;
-    }
-
-    void SN_edm_tau(double &result)
-    {
-      using namespace Pipes::SN_edm_tau;
-
-      // No 1-loop contribution, same reason as above
-
-      result = 0;
-    }
-
 
     /// Likelihood for l -> l gamma processes
     void l2lgamma_likelihood(double &result)

@@ -209,9 +209,10 @@ namespace Gambit
     void Vnu(Eigen::Matrix3cd &V)
     {
       using namespace Pipes::Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      Eigen::Matrix3cd U = *Dep::UPMNS;
 
-      // TODO: Implement V
-      V = *Dep::UPMNS;
+      V = U - 0.5*Theta*Theta.adjoint()*U;
 
     }
 
