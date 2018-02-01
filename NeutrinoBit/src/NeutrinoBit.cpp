@@ -78,7 +78,7 @@ namespace Gambit
       }
     }
  
-    // U_nu matrix in the Casas-Ibarra paramtetrization
+    // PMNS matrix in the Casas-Ibarra paramtetrization
     void UPMNS(Eigen::Matrix3cd& U_nu)
     {
       using namespace Pipes::UPMNS;
@@ -122,7 +122,7 @@ namespace Gambit
     }
 
     // Theta matrix in Seesaw I in the Casas-Ibarra parametrization
-    void CI_Theta(Eigen::Matrix3cd& Theta)
+    void CI_Theta(Eigen::Matrix3cd& Theta)  // capability: SeesawI_Theta
     {
       using namespace Pipes::CI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
