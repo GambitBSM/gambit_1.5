@@ -15,6 +15,7 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
 ///  \date 2017 Jun, Sep
+///  \date 2018 Feb
 ///
 ///  *********************************************
 
@@ -75,14 +76,18 @@ namespace Gambit
       vectormodel.VectorPoleMass = *myPipe::Param.at("mV");
       vectormodel.VectorLambda   = *myPipe::Param.at("lambda_hV");
 
-      // Invalidate point if the perturbative unitarity constraint is not satisfied
-      if (vectormodel.VectorLambda > (2*pow(vectormodel.VectorPoleMass,2))/pow(vev,2))
+      if (myPipe::runOptions->getValueOrDef<bool>(false,"apply_pert_unitarity"))
       {
-        std::ostringstream msg;
-        msg << "Parameter point [mV, lambda_hV] = [" << vectormodel.VectorPoleMass << " GeV, "
-          << vectormodel.VectorLambda << "] does not satisfy the perturbative unitarity constraint.";
-        invalid_point().raise(msg.str());
+        // Invalidate point if the perturbative unitarity constraint is not satisfied
+        if (vectormodel.VectorLambda > (2*pow(vectormodel.VectorPoleMass,2))/pow(vev,2))
+        {
+          std::ostringstream msg;
+          msg << "Parameter point [mV, lambda_hV] = [" << vectormodel.VectorPoleMass << " GeV, "
+            << vectormodel.VectorLambda << "] does not satisfy the perturbative unitarity constraint.";
+          invalid_point().raise(msg.str());
+        }
       }
+      else {}
 
       // Standard model
       vectormodel.sinW2 = sinW2;
