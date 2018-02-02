@@ -434,7 +434,7 @@ START_MODULE
   #define CAPABILITY lnLtau
   START_CAPABILITY
 
-    #define FUNCTION lnL_charm_tau
+    #define FUNCTION lnL_tau
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ut1, double)
