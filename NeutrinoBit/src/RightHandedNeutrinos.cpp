@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Sterile neutrino scan; using Casas-Ibarra parameterization
+///  Right handed neutrino scan; using Casas-Ibarra parameterization
 ///
 ///  *********************************************
 /// 
@@ -40,9 +40,9 @@ namespace Gambit
   {
 
     // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
-    void SN_bbn_lifetime(std::vector<double>& result_lifetime)
+    void RHN_bbn_lifetime(std::vector<double>& result_lifetime)
     {
-      using namespace Pipes::SN_bbn_lifetime;
+      using namespace Pipes::RHN_bbn_lifetime;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
       static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
@@ -55,7 +55,7 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
 
       for (int i=0; i<3; i++)
       {
@@ -63,8 +63,10 @@ namespace Gambit
       }
       result_lifetime = lifetime;
     }
- 
-    // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841] 
+
+    // BBN constraint likelihood : lifetime must be less than 0.1s
+    // [arXiv:1202.2841] Since the limit is approximate, we simply implement it
+    // as a hard ~5 sigma cut.
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
@@ -74,16 +76,16 @@ namespace Gambit
       {
         if(lifetime[i]>0.1)
         {
-          result_bbn = -100.0;
+          result_bbn = -12.5;
           break;
         }
       }
     }
    
     // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
-    void SN_R_pi(double& R_pi)
+    void RHN_R_pi(double& R_pi)
     {
-      using namespace Pipes::SN_R_pi;
+      using namespace Pipes::RHN_R_pi;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_pi = meson_masses.pi_plus;
       static double R_pi_SM = 1.2354e-4;
@@ -123,9 +125,9 @@ namespace Gambit
  
     }
 
-    void SN_R_K(double& R_K)
+    void RHN_R_K(double& R_K)
     {
-      using namespace Pipes::SN_R_K;
+      using namespace Pipes::RHN_R_K;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_pi = meson_masses.pi_plus;
       static double m_K = meson_masses.kaon_plus; 
@@ -166,9 +168,9 @@ namespace Gambit
       R_K = R_K_SM * (1.0 + d_r_K);
     }
 
-    void SN_R_tau(double& R_tau)
+    void RHN_R_tau(double& R_tau)
     {
-      using namespace Pipes::SN_R_tau;
+      using namespace Pipes::RHN_R_tau;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_tau = sminputs.mTau;  // GeV
       static double R_tau_SM = 0.973;
@@ -218,9 +220,9 @@ namespace Gambit
     }
 
     // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
-    void SN_m_GERDA(double &m_GERDA)
+    void RHN_m_GERDA(double &m_GERDA)
     {
-      using namespace Pipes::SN_m_GERDA;
+      using namespace Pipes::RHN_m_GERDA;
       std::vector<double> M(3);
       std::complex<double> m_temp_GERDA = {0.0,0.0};
 
@@ -239,9 +241,56 @@ namespace Gambit
       m_GERDA = abs(m_temp_GERDA);
     }
 
-    void SN_m_Kam(double& m_Kam)
+    // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for right-handed
+    // neutrino model
+    void RHN_Gamma_0nubb_Xe(double& result)
     {
-      using namespace Pipes::SN_m_Kam;
+      using namespace Pipes::RHN_Gamma_0nubb_Xe;
+      double mp, Gamma_0nu, A_0nubb_Xe, p2_0nubb_Xe, prefactor;
+      std::vector<double> M(3);
+      std::complex<double> sum = {0.0,0.0};
+
+      // Relevant model parameters
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
+      // A_0nubb_Xe = *Param["A_0nubb_Xe"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
+      // p2_0nubb_Xe = pow(*Param["p_0nubb_Xe"], 2.0);  // Range: 178.0 - 211.0 [MeV]
+
+      // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
+      A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
+      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2.0);
+      p2_0nubb_Xe *= 1e-3;  // MeV --> GeV
+      mp = 0.938;  // [GeV] (PDG 2014)
+
+      // Lifetime equation is adopted from Faessler+14, Eq. (13)
+      prefactor = A_0nubb_Xe*mp*mp/p2_0nubb_Xe/p2_0nubb_Xe;
+        for (int i=0; i<3; i++)
+        {
+          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
+        }
+      result = prefactor * abs(sum) * abs(sum);
+    }
+
+    void lnL_0nubb_KamLAND_Zen(double& result)
+    {
+      using namespace Pipes::lnL_0nubb_KamLAND_Zen;
+      double tau_limit = 1.07e26*3.156e7;  // [s] 90% CL
+
+      double Gamma = *Dep::Gamma_0nubb_Xe;
+
+      // Factor 1.28155 corresponds to one-sided UL at 90% CL
+      result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
+    }
+
+    void RHN_m_Kam(double& m_Kam)
+    {
+      using namespace Pipes::RHN_m_Kam;
       std::vector<double> M(3);
       std::complex<double> m_temp_Kam = {0.0,0.0};
 
@@ -268,14 +317,10 @@ namespace Gambit
       double m_GERDA = *Dep::m_GERDA;
       double m_Kam = *Dep::m_Kam;
 
-      if ((m_GERDA < m_bb_GERDA) && (m_Kam < m_bb_Kam))
-      {
-        result_0nubb = 0.0;
-      }
-      else
-      {
-        result_0nubb = -1.0E+05;
-      }
+      result_0nubb += 
+        Stats::gaussian_loglikelihood(m_GERDA, 0., 0., m_bb_GERDA, false)+
+        Stats::gaussian_loglikelihood(m_Kam, 0., 0., m_bb_Kam, false);
+
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
@@ -335,11 +380,11 @@ namespace Gambit
       static tk::spline s_pienu;
       static std::vector<double> M_temp_pienu(140), U_temp_pienu(140);
       double M_1, M_2, M_3;
-      std::vector<double> U_pienu(3), mixing_sq_pienu(3);
+      std::vector<double> U_pienu(3), mixing_sq(3);
 
-      mixing_sq_pienu[0] = *Dep::Ue1;
-      mixing_sq_pienu[1] = *Dep::Ue2;
-      mixing_sq_pienu[2] = *Dep::Ue3;
+      mixing_sq[0] = *Dep::Ue1;
+      mixing_sq[1] = *Dep::Ue2;
+      mixing_sq[2] = *Dep::Ue3;
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
@@ -379,8 +424,8 @@ namespace Gambit
       U_pienu[1] = s_pienu(M_2);
       U_pienu[2] = s_pienu(M_3);
 
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result_pienu = 0;
-//     result_pienu = -2.44*((mixing_sq_pienu[0]/U_pienu[0]) + (mixing_sq_pienu[1]/U_pienu[1]) + (mixing_sq_pienu[2]/U_pienu[2]));
       for(int i=0; i<3; i++)
         result_pienu += Stats::gaussian_upper_limit(mixing_sq_pienu[i]/U_pienu[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
@@ -394,7 +439,6 @@ namespace Gambit
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_ps191e(116), U_temp_ps191e(116);
       std::vector<double> U_ps191e(3), mixing_sq_ps191e(3);
-//      double mixing_sq;
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -402,7 +446,6 @@ namespace Gambit
       mixing_sq_ps191e[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
       mixing_sq_ps191e[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq_ps191e[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
-//      mixing_sq = mixing_sq_ps191e[0] + mixing_sq_ps191e[1];
 
      if (read_table_ps191e)
       {
@@ -429,7 +472,7 @@ namespace Gambit
         for (int i=0; i<116; i++)
         {
           M_temp_ps191e[i] = array_ps191e[i][0];
-          U_temp_ps191e[i] = array_ps191e[i][1];
+          U_temp_ps191e[i] = array_ps191e[i][1]/sqrt(2);  // division by sqrt(2) to correct for Majorana nature of RHNs.
         }
         s_ps191e.set_points(M_temp_ps191e, U_temp_ps191e);
         read_table_ps191e = false;
@@ -441,6 +484,10 @@ namespace Gambit
       U_ps191e[0] = s_ps191e(M_1);
       U_ps191e[1] = s_ps191e(M_2);
       U_ps191e[2] = s_ps191e(M_3);
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
       result_ps191e = -2.44*((mixing_sq_ps191e[0]/pow(U_ps191e[0], 2.0)) + (mixing_sq_ps191e[1]/pow(U_ps191e[1], 2.0)) + (mixing_sq_ps191e[2]/pow(U_ps191e[2], 2.0)));
     }
 
@@ -486,7 +533,7 @@ namespace Gambit
         for (int i=0; i<102; i++)
         {
           M_temp_ps191mu[i] = array_ps191mu[i][0];
-          U_temp_ps191mu[i] = array_ps191mu[i][1];
+          U_temp_ps191mu[i] = array_ps191mu[i][1]/sqrt(2);  // division by sqrt(2) to correct for Majorana nature of RHNs.
         }
         s_ps191mu.set_points(M_temp_ps191mu, U_temp_ps191mu);
         read_table_ps191mu = false;
@@ -498,6 +545,10 @@ namespace Gambit
       U_ps191mu[0] = s_ps191mu(M_1);
       U_ps191mu[1] = s_ps191mu(M_2);
       U_ps191mu[2] = s_ps191mu(M_3);
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
       result_ps191mu = -2.44*((mixing_sq_ps191mu[0]/pow(U_ps191mu[0], 2.0)) + (mixing_sq_ps191mu[1]/pow(U_ps191mu[1], 2.0)) + (mixing_sq_ps191mu[2]/pow(U_ps191mu[2], 2.0)));
     }
 
@@ -509,14 +560,14 @@ namespace Gambit
       static tk::spline s_charme;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_charme(56), U_temp_charme(56);
-      std::vector<double> U_charme(3), mixing_sq_charme(3);
+      std::vector<double> U_charme(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
 
-      mixing_sq_charme[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
-      mixing_sq_charme[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
-      mixing_sq_charme[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      mixing_sq[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
+      mixing_sq[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
+      mixing_sq[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
       if (read_table_charme)
       {
@@ -555,7 +606,11 @@ namespace Gambit
       U_charme[0] = s_charme(M_1);
       U_charme[1] = s_charme(M_2);
       U_charme[2] = s_charme(M_3);
-      result_charme = -2.44*((mixing_sq_charme[0]/pow(U_charme[0], 2.0)) + (mixing_sq_charme[1]/pow(U_charme[1], 2.0)) + (mixing_sq_charme[2]/pow(U_charme[2], 2.0)));
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
+      result_charme = -2.44*((mixing_sq[0]/pow(U_charme[0], 2.0)) + (mixing_sq[1]/pow(U_charme[1], 2.0)) + (mixing_sq[2]/pow(U_charme[2], 2.0)));
     }
 
     // Likelihood contribution from CHARM, muon sector. Constrains |U_(mu,i)|^2 at 90% in the mass range 0.5-2.8 GeV. Description & references above.
@@ -566,14 +621,14 @@ namespace Gambit
       static tk::spline s_charmmu;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_charmmu(34), U_temp_charmmu(34);
-      std::vector<double> U_charmmu(3), mixing_sq_charmmu(3);
+      std::vector<double> U_charmmu(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
 
-      mixing_sq_charmmu[0] = *Dep::Um1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
-      mixing_sq_charmmu[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
-      mixing_sq_charmmu[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      mixing_sq[0] = *Dep::Um1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
+      mixing_sq[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
+      mixing_sq[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
 
       if (read_table_charmmu)
       {
@@ -612,7 +667,11 @@ namespace Gambit
       U_charmmu[0] = s_charmmu(M_1);
       U_charmmu[1] = s_charmmu(M_2);
       U_charmmu[2] = s_charmmu(M_3);
-      result_charmmu = -2.44*((mixing_sq_charmmu[0]/pow(U_charmmu[0], 2.0)) + (mixing_sq_charmmu[1]/pow(U_charmmu[1], 2.0)) + (mixing_sq_charmmu[2]/pow(U_charmmu[2], 2.0)));
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
+      result_charmmu = -2.44*((mixing_sq[0]/pow(U_charmmu[0], 2.0)) + (mixing_sq[1]/pow(U_charmmu[1], 2.0)) + (mixing_sq[2]/pow(U_charmmu[2], 2.0)));
     }
 
     // Likelihood contribution from DELPHI; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 at 95% in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
@@ -623,17 +682,17 @@ namespace Gambit
       static tk::spline s_delphi;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_delphi(180), U_temp_delphi(180);
-      std::vector<double> U_delphi(3), mixing_sq_delphi(9);
+      std::vector<double> U_delphi(3), mixing_sq(9);
 
-      mixing_sq_delphi[0] = *Dep::Ue1;
-      mixing_sq_delphi[1] = *Dep::Ue2;
-      mixing_sq_delphi[2] = *Dep::Ue3;
-      mixing_sq_delphi[3] = *Dep::Um1;
-      mixing_sq_delphi[4] = *Dep::Um2;
-      mixing_sq_delphi[5] = *Dep::Um3;
-      mixing_sq_delphi[6] = *Dep::Ut1;
-      mixing_sq_delphi[7] = *Dep::Ut2;
-      mixing_sq_delphi[8] = *Dep::Ut3;
+      mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
+      mixing_sq[1] = *Dep::Ue2;
+      mixing_sq[2] = *Dep::Ue3;
+      mixing_sq[3] = *Dep::Um1;
+      mixing_sq[4] = *Dep::Um2;
+      mixing_sq[5] = *Dep::Um3;
+      mixing_sq[6] = *Dep::Ut1;
+      mixing_sq[7] = *Dep::Ut2;
+      mixing_sq[8] = *Dep::Ut3;
 
       if (read_table_delphi)
       {
@@ -672,7 +731,16 @@ namespace Gambit
       U_delphi[0] = s_delphi(M_1);
       U_delphi[1] = s_delphi(M_2);
       U_delphi[2] = s_delphi(M_3);
-      result_delphi = -3.09*(pow((mixing_sq_delphi[0]/U_delphi[0]), 2.0) + pow((mixing_sq_delphi[1]/U_delphi[1]), 2.0) + pow((mixing_sq_delphi[2]/U_delphi[2]), 2.0) + pow((mixing_sq_delphi[3]/U_delphi[0]), 2.0) + pow((mixing_sq_delphi[4]/U_delphi[1]), 2.0) + pow((mixing_sq_delphi[5]/U_delphi[2]), 2.0) + pow((mixing_sq_delphi[6]/U_delphi[0]), 2.0) + pow((mixing_sq_delphi[7]/U_delphi[1]), 2.0) + pow((mixing_sq_delphi[8]/U_delphi[2]), 2.0));
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
+      result_delphi = -3.09*
+         (pow(mixing_sq[0]/U_delphi[0], 2.0) +
+          pow(mixing_sq[1]/U_delphi[1], 2.0) + pow(mixing_sq[2]/U_delphi[2], 2.0) +
+          pow(mixing_sq[3]/U_delphi[0], 2.0) + pow(mixing_sq[4]/U_delphi[1], 2.0) +
+          pow(mixing_sq[5]/U_delphi[2], 2.0) + pow(mixing_sq[6]/U_delphi[0], 2.0) +
+          pow(mixing_sq[7]/U_delphi[1], 2.0) + pow(mixing_sq[8]/U_delphi[2], 2.0));
     }
 
     // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 at 95% in the mass range 50-500 GeV. [JHEP, 07:162, 2015]
@@ -727,8 +795,8 @@ namespace Gambit
       U_atlase[1] = s_atlase(M_2);
       U_atlase[2] = s_atlase(M_3);
 
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result_atlase = 0;
-//      result_atlase = -3.09*(pow((mixing_sq_atlase[0]/U_atlase[0]), 2.0) + pow((mixing_sq_atlase[1]/U_atlase[1]), 2.0) + pow((mixing_sq_atlase[2]/U_atlase[2]), 2.0));
       for(int i=0; i<3; i++)
         result_atlase += Stats::gaussian_upper_limit(pow((mixing_sq_atlase[i]/U_atlase[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
     }
@@ -785,8 +853,8 @@ namespace Gambit
       U_atlasmu[1] = s_atlasmu(M_2);
       U_atlasmu[2] = s_atlasmu(M_3);
 
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result_atlasmu = 0;
-//      result_atlasmu = -3.09*(pow((mixing_sq_atlasmu[0]/U_atlasmu[0]), 2.0) + pow((mixing_sq_atlasmu[1]/U_atlasmu[1]), 2.0) + pow((mixing_sq_atlasmu[2]/U_atlasmu[2]), 2.0));
       for(int i=0; i<3; i++)
         result_atlasmu += Stats::gaussian_upper_limit(pow((mixing_sq_atlasmu[i]/U_atlasmu[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_digitized)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
     }
@@ -830,7 +898,7 @@ namespace Gambit
         for (int i=0; i<112; i++)
         {
           M_temp_e949[i] = array_e949[i][0];
-          U_temp_e949[i] = array_e949[i][1];
+          U_temp_e949[i] = array_e949[i][1]/sqrt(2);  // division by sqrt(2) to correct for Majorana nature of RHNs.
         }
         s_e949.set_points(M_temp_e949, U_temp_e949);
         read_table_e949 = false;
@@ -843,8 +911,8 @@ namespace Gambit
       U_e949[1] = s_e949(M_2);
       U_e949[2] = s_e949(M_3);
 
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result_e949 = 0;
-//      result_e949 = -2.44*((mixing_sq_e949[0]/U_e949[0]) + (mixing_sq_e949[1]/U_e949[1]) + (mixing_sq_e949[2]/U_e949[2]));
       for(int i=0; i<3; i++)
         result_e949 += Stats::gaussian_upper_limit(mixing_sq_e949[i]/U_e949[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
@@ -857,11 +925,11 @@ namespace Gambit
       static tk::spline s_nutev;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_nutev(249), U_temp_nutev(249);
-      std::vector<double> U_nutev(3), mixing_sq_nutev(3);
+      std::vector<double> U_nutev(3), mixing_sq(3);
 
-      mixing_sq_nutev[0] = *Dep::Um1;
-      mixing_sq_nutev[1] = *Dep::Um2;
-      mixing_sq_nutev[2] = *Dep::Um3;
+      mixing_sq[0] = *Dep::Um1;
+      mixing_sq[1] = *Dep::Um2;
+      mixing_sq[2] = *Dep::Um3;
 
       if (read_table_nutev)
       {
@@ -900,22 +968,26 @@ namespace Gambit
       U_nutev[0] = s_nutev(M_1);
       U_nutev[1] = s_nutev(M_2);
       U_nutev[2] = s_nutev(M_3);
-      result_nutev = -2.44*(pow((mixing_sq_nutev[0]/U_nutev[0]), 2.0) + pow((mixing_sq_nutev[1]/U_nutev[1]), 2.0) + pow((mixing_sq_nutev[2]/U_nutev[2]), 2.0));
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
+      result_nutev = -2.44*(pow(mixing_sq[0]/U_nutev[0], 2.0) + pow(mixing_sq[1]/U_nutev[1], 2.0) + pow(mixing_sq[2]/U_nutev[2], 2.0));
     }
 
     // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 at 90% CL in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002]
     void lnL_tau(double& result_tau)
     {
-      using namespace Pipes::lnL_tau;
+      using namespace Pipes::lnL_charm_tau;
       static bool read_table_tau = true;
       static tk::spline s_tau;
       double M_1, M_2, M_3;
       static std::vector<double> M_temp_tau(172), U_temp_tau(172);
-      std::vector<double> U_tau(3), mixing_sq_tau(3);
+      std::vector<double> U_tau(3), mixing_sq(3);
 
-      mixing_sq_tau[0] = *Dep::Ut1;
-      mixing_sq_tau[1] = *Dep::Ut2;
-      mixing_sq_tau[2] = *Dep::Ut3;
+      mixing_sq[0] = *Dep::Ut1;
+      mixing_sq[1] = *Dep::Ut2;
+      mixing_sq[2] = *Dep::Ut3;
 
       if (read_table_tau)
       {
@@ -955,8 +1027,8 @@ namespace Gambit
       U_tau[1] = s_tau(M_2);
       U_tau[2] = s_tau(M_3);
 
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result_tau = 0;
-//      result_tau = -2.44*((mixing_sq_tau[0]/U_tau[0]) + (mixing_sq_tau[1]/U_tau[1]) + (mixing_sq_tau[2]/U_tau[2]));
       for(int i=0; i<3; i++)
         result_tau += Stats::gaussian_upper_limit(pow((mixing_sq_tau[i]/U_tau[i]), 2.0), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, but exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }

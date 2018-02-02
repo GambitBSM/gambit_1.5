@@ -51,8 +51,8 @@ Parameters:
     mH:
       range: [124.1, 127.3]
 
-  # Sterile Neutrino Parameters
-  SN_differential:
+  # Right Handed Neutrino Parameters
+  RightHandedNeutrinos_diff:
     M_1:
       range: [0.06, 500]
       prior_type: log
@@ -105,9 +105,9 @@ Printer:
 
   printer: hdf5
   options:
-    output_file: "SN_dev_min_mass_test_0.hdf5"
+    output_file: "RHN.hdf5"
     delete_file_on_restart: true
-    group: "/SN_dev_min_mass_test_0"
+    group: "/RHN"
 
 Scanner:
 
@@ -130,135 +130,110 @@ ObsLikes:
 
   - capability: lnL_Gmu
     purpose: LogLike
-    function: lnL_Gmu_chi2
 
   - capability: lnL_W_mass
     purpose: LogLike
-    function: lnL_W_mass_chi2
 
-  - capability: lnL_sinW2_eff
+  - capability: lnL_sinW2
     purpose: LogLike
-    function: lnL_sinW2_eff_chi2
+
+  - capability: lnL_Z_inv_width
+    purpose: LogLike
+
+  - capability: lnL_W_decays
+    purpose: LogLike
 
   # Indirecte searches
 
   - capability: lnLbbn
     purpose: LogLike
-    function: lnL_bbn
 
   - capability: lnLlepuniv
     purpose: LogLike
-    function: lnL_lepuniv
 
   - capability: lnL0nubb
     purpose: LogLike
-    function: lnL_0nubb
 
   - capability: lnLckm
     purpose: LogLike
-    function: lnL_ckm
 
   - capability: l2lgamma_lnL
     purpose: LogLike
-    function: l2lgamma_likelihood
 
   - capability: l2lll_lnL
     purpose: LogLike
-    function: l2lll_likelihood
 
   - capability: mu2e_lnL
     purpose: LogLike
-    function: mu2e_likelihood
 
   # Direct searches
 
   - capability: lnLpienu
     purpose: LogLike
-    function: lnL_pienu
 
   - capability: lnLps191e
     purpose: LogLike
-    function: lnL_ps191_e
 
   - capability: lnLps191mu
     purpose: LogLike
-    function: lnL_ps191_mu
 
   - capability: lnLcharme
     purpose: LogLike
-    function: lnL_charm_e
 
   - capability: lnLcharmmu
     purpose: LogLike
-    function: lnL_charm_mu
 
   - capability: lnLdelphi
     purpose: LogLike
-    function: lnL_delphi
 
   - capability: lnLatlase
     purpose: LogLike
-    function: lnL_atlas_e
 
   - capability: lnLatlasmu
     purpose: LogLike
-    function: lnL_atlas_mu
 
   - capability: lnLe949
     purpose: LogLike
-    function: lnL_e949
 
   - capability: lnLnutev
     purpose: LogLike
-    function: lnL_nutev
 
   - capability: lnLtau
     purpose: LogLike
-    function: lnL_tau
 
   # Theoretical constraints
 
   - capability: perturbativity_lnL
     purpose: LogLike
-    function: perturbativity_likelihood
 
   # Observables
 
   - capability: Ue1
     purpose: Observable
-    function: Ue1
 
   - capability: Um1
     purpose: Observable
-    function: Um1
 
   - capability: Ut1
     purpose: Observable
-    function: Ut1
 
   - capability: Ue2
     purpose: Observable
-    function: Ue2
 
   - capability: Um2
     purpose: Observable
-    function: Um2
 
   - capability: Ut2
     purpose: Observable
-    function: Ut2
 
   - capability: Ue3
     purpose: Observable
-    function: Ue3
 
   - capability: Um3
     purpose: Observable
-    function: Um3
 
   - capability: Ut3
     purpose: Observable
-    function: Ut3
 
 Rules:
 
@@ -269,4 +244,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: true
 
-  default_output_path: "runs/SN_dev_min_mass_test_0/"
+  default_output_path: "runs/RHN/"

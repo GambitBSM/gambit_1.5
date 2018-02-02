@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Sterile RH Neutrino Model with differential masses
+///  RH Neutrino Model with differential masses
 ///
 ///  *********************************************
 ///
@@ -18,14 +18,14 @@
 #include "gambit/Models/model_helpers.hpp"
 #include "gambit/Logs/logger.hpp"
 
-#include "gambit/Models/models/SN_differential.hpp"
+#include "gambit/Models/models/RightHandedNeutrinos_diff.hpp"
 
 
-#define MODEL SN_differential 
-  void MODEL_NAMESPACE::SN_differential_to_SN_dev (const ModelParameters &myP, ModelParameters &targetP)
+#define MODEL RightHandedNeutrinos_diff 
+  void MODEL_NAMESPACE::RightHandedNeutrinos_diff_to_RightHandedNeutrinos (const ModelParameters &myP, ModelParameters &targetP)
   {
 
-     logger()<<"Running interpret_as_parent calculations for SN_differential --> SN_dev."<<LogTags::info<<EOM;
+     logger()<<"Running interpret_as_parent calculations for RightHandedNeutrinos_diff --> RightHandedNeutrinos."<<LogTags::info<<EOM;
      
      // Send all parameter values upstream to matching parameters in parent.
      // Ignore that some parameters don't exist in the parent, as these are set below.

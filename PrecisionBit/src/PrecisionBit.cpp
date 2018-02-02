@@ -1069,6 +1069,8 @@ namespace Gambit
     }
 
     // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
+
+    // Muon Fermi coupling, calculation from 1502.00477
     void RHN_Gmu(double &result)
     {
       using namespace Pipes::RHN_Gmu;
@@ -1087,10 +1089,11 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(*Dep::Gmu, 1.1663787E-05, 0.0, 0.0000006E-05, profile);
     }
 
+    // Weak mixing angle sinW2, calculation from 1502.00477
     //TODO: values seem a bit off, check this
-    void RHN_sinW2_eff(triplet<double> &result)
+    void RHN_sinW2(triplet<double> &result)
     {
-      using namespace Pipes::RHN_sinW2_eff;
+      using namespace Pipes::RHN_sinW2;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
       double Gmu = *Dep::Gmu;
@@ -1104,6 +1107,16 @@ namespace Gambit
       result.lower = 0.0;
     }
 
+    void lnL_sinW2_chi2(double &result)
+    {
+      using namespace Pipes::lnL_sinW2_chi2;
+      double theory_uncert = std::max(Dep::sinW2->upper, Dep::sinW2->lower);
+      /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
+      bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
+      result = Stats::gaussian_loglikelihood(Dep::sinW2->central, 0.23129, theory_uncert, 0.00005, profile);
+    }
+
+    // Mass of W boson, calculation from 1502.00477
     void RHN_mw(triplet<double> &result)
     {
       using namespace Pipes::RHN_mw;
@@ -1118,9 +1131,84 @@ namespace Gambit
       result.central = sqrt(pow(sminputs.mZ, 2)/2.0 * (1.0 + sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1+deltar))/(sminputs.alphainv*Gmu*pow(sminputs.mZ,2))*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))))); 
       result.upper = 0.0;
       result.lower = 0.0;
-
-
     }
+
+    // Z invisible width, calculation from 1407.6607
+    void RHN_Z_inv_width(double &result)
+    {
+      using namespace Pipes::RHN_Z_inv_width;
+      Eigen::Matrix3cd V = *Dep::SeesawI_Vnu;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      double Gmu = *Dep::Gmu;
+
+      Eigen::Matrix3d VNorm = (V.adjoint() * V).real();
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      result = 0.0;
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+          result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+    }
+
+    void lnL_Z_inv_width_chi2(double &result)
+    {
+      using namespace Pipes::lnL_Z_inv_width_chi2;
+      double Zinvwidth = *Dep::Z_inv_width;
+      DecayTable::Entry decays = *Dep::Z_decay_rates;
+
+      double BF = 1.0;
+      double BF_error_sq = 0.0;
+
+      for(auto it = decays.channels.begin(); it != decays.channels.end(); it++)
+      {
+        BF -= it->second.first;
+        BF_error_sq += pow(it->second.second,2);
+      }
+
+      double Zinvwidth_exp = BF*decays.width_in_GeV;
+      double Zinvwidth_error = sqrt(pow(BF*std::max(decays.positive_error,decays.negative_error),2) + pow(decays.width_in_GeV,2)*BF_error_sq);
+
+      result = Stats::gaussian_loglikelihood(Zinvwidth, Zinvwidth_exp, 0.0, Zinvwidth_error, false);
+    }
+
+    // W decays, calculation from 1407.6607
+    void RHN_W_to_l_decays(std::vector<double> &result)
+    {
+      using namespace Pipes::RHN_W_to_l_decays;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      double Gmu = *Dep::Gmu;
+      double mw = Dep::mw->central;
+
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+      std::vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+
+      result.clear();
+      for(int i=0; i<3; i++)
+        result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
+     }
+
+     void lnL_W_decays_chi2(double &result)
+     {
+       using namespace Pipes::lnL_W_decays_chi2;
+       std::vector<double> Wtoldecays = *Dep::W_to_l_decays;
+       DecayTable::Entry decays = *Dep::W_plus_decay_rates;
+
+       std::vector<double> Wwidth;
+       std::vector<double> Wwidth_error;
+
+       Wwidth.push_back(decays.width_in_GeV * decays.BF("e+","nu_e"));
+       Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("e+","nu_e"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("e+","nu_e"),2)));
+       Wwidth.push_back(decays.width_in_GeV * decays.BF("mu+","nu_mu"));
+       Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("mu+","nu_mu"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("mu+","nu_mu"),2)));
+       Wwidth.push_back(decays.width_in_GeV * decays.BF("tau+","nu_tau"));
+       Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("tau+","nu_tau"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("tau+","nu_tau"),2)));
+
+       result = Stats::gaussian_loglikelihood(Wtoldecays[0], Wwidth[0], 0.0, Wwidth_error[0], false);
+       result += Stats::gaussian_loglikelihood(Wtoldecays[1], Wwidth[1], 0.0, Wwidth_error[1], false);
+       result += Stats::gaussian_loglikelihood(Wtoldecays[2], Wwidth[2], 0.0, Wwidth_error[2], false);
+     }
 
   }
 }
