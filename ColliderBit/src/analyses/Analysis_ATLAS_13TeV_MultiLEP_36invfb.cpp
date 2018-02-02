@@ -4,6 +4,7 @@
 ///
 ///  *********************************************
 
+// Based on https://cds.cern.ch/record/2267406
 
 #include <vector>
 #include <cmath>
@@ -982,7 +983,7 @@ namespace Gambit {
         SignalRegionData results_SR2_SF_loose;
         results_SR2_SF_loose.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
         results_SR2_SF_loose.sr_label = "SR2_SF_loose";
-        results_SR2_SF_loose.n_observed = 133.;
+        results_SR2_SF_loose.n_observed = 153.;
         results_SR2_SF_loose.n_background = 133.; 
         results_SR2_SF_loose.background_sys = 22.;
         results_SR2_SF_loose.signal_sys = 0.; 
@@ -1093,7 +1094,7 @@ namespace Gambit {
         results_SR3_slep_c.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
         results_SR3_slep_c.sr_label = "SR3_slep_c";
         results_SR3_slep_c.n_observed = 9.;
-        results_SR3_slep_c.n_background = 5.42; 
+        results_SR3_slep_c.n_background = 5.41; 
         results_SR3_slep_c.background_sys = 0.93;
         results_SR3_slep_c.signal_sys = 0.; 
         results_SR3_slep_c.n_signal = _numSR3_slep_c;
