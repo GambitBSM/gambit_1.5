@@ -327,7 +327,7 @@ namespace Gambit
       result_ckm = -0.5*chi2;
     }
 
-    // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
+    // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 at 90% in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
     void lnL_pienu(double& result_pienu)
     {
       using namespace Pipes::lnL_pienu;
@@ -379,10 +379,13 @@ namespace Gambit
       U_pienu[1] = s_pienu(M_2);
       U_pienu[2] = s_pienu(M_3);
 
-     result_pienu = -2.44*((mixing_sq_pienu[0]/U_pienu[0]) + (mixing_sq_pienu[1]/U_pienu[1]) + (mixing_sq_pienu[2]/U_pienu[2]));
+      result_pienu = 0;
+//     result_pienu = -2.44*((mixing_sq_pienu[0]/U_pienu[0]) + (mixing_sq_pienu[1]/U_pienu[1]) + (mixing_sq_pienu[2]/U_pienu[2]));
+      for(int i=0; i<3; i++)
+        result_pienu += Stats::gaussian_upper_limit(mixing_sq_pienu[i]/U_pienu[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27]
+    // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 at 90% in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27]
     void lnL_ps191_e(double& result_ps191e)
     {
       using namespace Pipes::lnL_ps191_e;
@@ -438,12 +441,10 @@ namespace Gambit
       U_ps191e[0] = s_ps191e(M_1);
       U_ps191e[1] = s_ps191e(M_2);
       U_ps191e[2] = s_ps191e(M_3);
-//      result_ps191e = -2.44*((mixing_sq_ps191e[0]/pow(U_ps191e[0], 2.0)) + (mixing_sq_ps191e[1]/pow(U_ps191e[1], 2.0)) + (mixing_sq_ps191e[2]/pow(U_ps191e[2], 2.0)));
-//      result_ps191e = -2.44*(mixing_sq/pow(U_ps191e[0], 2.0));
-      result_ps191e = -2.44*((sqrt(mixing_sq_ps191e[0])/U_ps191e[0]) + (sqrt(mixing_sq_ps191e[1])/U_ps191e[1]) + (sqrt(mixing_sq_ps191e[2])/U_ps191e[2]));
+      result_ps191e = -2.44*((mixing_sq_ps191e[0]/pow(U_ps191e[0], 2.0)) + (mixing_sq_ps191e[1]/pow(U_ps191e[1], 2.0)) + (mixing_sq_ps191e[2]/pow(U_ps191e[2], 2.0)));
     }
 
-    // Likelihood contribution from PS191, muon sector. Constrains |U_(mu,i)|^2 in the mass range 20-450 MeV. Description & references above.
+    // Likelihood contribution from PS191, muon sector. Constrains |U_(mu,i)|^2 at 90% in the mass range 20-450 MeV. Description & references above.
     void lnL_ps191_mu(double& result_ps191mu)
     {
       using namespace Pipes::lnL_ps191_mu;
@@ -500,7 +501,7 @@ namespace Gambit
       result_ps191mu = -2.44*((mixing_sq_ps191mu[0]/pow(U_ps191mu[0], 2.0)) + (mixing_sq_ps191mu[1]/pow(U_ps191mu[1], 2.0)) + (mixing_sq_ps191mu[2]/pow(U_ps191mu[2], 2.0)));
     }
 
-    // Likelihood contribution from CHARM, electron sector; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2 in the mass range 0.5-2.8 GeV. [Phys. Lett. B, 166(4):473-478, 1986]
+    // Likelihood contribution from CHARM, electron sector; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2 at 90% in the mass range 0.5-2.8 GeV. [Phys. Lett. B, 166(4):473-478, 1986]
     void lnL_charm_e(double& result_charme)
     {
       using namespace Pipes::lnL_charm_e;
@@ -557,7 +558,7 @@ namespace Gambit
       result_charme = -2.44*((mixing_sq_charme[0]/pow(U_charme[0], 2.0)) + (mixing_sq_charme[1]/pow(U_charme[1], 2.0)) + (mixing_sq_charme[2]/pow(U_charme[2], 2.0)));
     }
 
-    // Likelihood contribution from CHARM, muon sector. Constrains |U_(mu,i)|^2 in the mass range 0.5-2.8 GeV. Description & references above.
+    // Likelihood contribution from CHARM, muon sector. Constrains |U_(mu,i)|^2 at 90% in the mass range 0.5-2.8 GeV. Description & references above.
     void lnL_charm_mu(double& result_charmmu)
     {
       using namespace Pipes::lnL_charm_mu;
@@ -614,7 +615,7 @@ namespace Gambit
       result_charmmu = -2.44*((mixing_sq_charmmu[0]/pow(U_charmmu[0], 2.0)) + (mixing_sq_charmmu[1]/pow(U_charmmu[1], 2.0)) + (mixing_sq_charmmu[2]/pow(U_charmmu[2], 2.0)));
     }
 
-    // Likelihood contribution from DELPHI; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
+    // Likelihood contribution from DELPHI; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 at 95% in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
     void lnL_delphi(double& result_delphi)
     {
       using namespace Pipes::lnL_delphi;
@@ -671,10 +672,10 @@ namespace Gambit
       U_delphi[0] = s_delphi(M_1);
       U_delphi[1] = s_delphi(M_2);
       U_delphi[2] = s_delphi(M_3);
-      result_delphi = -0.1*((mixing_sq_delphi[0]/U_delphi[0]) + (mixing_sq_delphi[1]/U_delphi[1]) + (mixing_sq_delphi[2]/U_delphi[2]) + (mixing_sq_delphi[3]/U_delphi[0]) + (mixing_sq_delphi[4]/U_delphi[1]) + (mixing_sq_delphi[5]/U_delphi[2]) + (mixing_sq_delphi[6]/U_delphi[0]) + (mixing_sq_delphi[7]/U_delphi[1]) + (mixing_sq_delphi[8]/U_delphi[2]));
+      result_delphi = -3.09*(pow((mixing_sq_delphi[0]/U_delphi[0]), 2.0) + pow((mixing_sq_delphi[1]/U_delphi[1]), 2.0) + pow((mixing_sq_delphi[2]/U_delphi[2]), 2.0) + pow((mixing_sq_delphi[3]/U_delphi[0]), 2.0) + pow((mixing_sq_delphi[4]/U_delphi[1]), 2.0) + pow((mixing_sq_delphi[5]/U_delphi[2]), 2.0) + pow((mixing_sq_delphi[6]/U_delphi[0]), 2.0) + pow((mixing_sq_delphi[7]/U_delphi[1]), 2.0) + pow((mixing_sq_delphi[8]/U_delphi[2]), 2.0));
     }
 
-    // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 in the mass range 50-500 GeV. [JHEP, 07:162, 2015]
+    // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 at 95% in the mass range 50-500 GeV. [JHEP, 07:162, 2015]
     void lnL_atlas_e(double& result_atlase)
     {
       using namespace Pipes::lnL_atlas_e;
@@ -725,10 +726,14 @@ namespace Gambit
       U_atlase[0] = s_atlase(M_1);
       U_atlase[1] = s_atlase(M_2);
       U_atlase[2] = s_atlase(M_3);
-      result_atlase = -3.09*(pow((mixing_sq_atlase[0]/U_atlase[0]), 2.0) + pow((mixing_sq_atlase[1]/U_atlase[1]), 2.0) + pow((mixing_sq_atlase[2]/U_atlase[2]), 2.0));
+
+      result_atlase = 0;
+//      result_atlase = -3.09*(pow((mixing_sq_atlase[0]/U_atlase[0]), 2.0) + pow((mixing_sq_atlase[1]/U_atlase[1]), 2.0) + pow((mixing_sq_atlase[2]/U_atlase[2]), 2.0));
+      for(int i=0; i<3; i++)
+        result_atlase += Stats::gaussian_upper_limit(pow((mixing_sq_atlase[i]/U_atlase[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from ATLAS, muon sector. Constrains |U_(mu,i)|^2 in the mass range 50-500 GeV. Description & references above.
+    // Likelihood contribution from ATLAS, muon sector. Constrains |U_(mu,i)|^2 at 95% in the mass range 50-500 GeV. Description & references above.
     void lnL_atlas_mu(double& result_atlasmu)
     {
       using namespace Pipes::lnL_atlas_mu;
@@ -779,10 +784,14 @@ namespace Gambit
       U_atlasmu[0] = s_atlasmu(M_1);
       U_atlasmu[1] = s_atlasmu(M_2);
       U_atlasmu[2] = s_atlasmu(M_3);
-      result_atlasmu = -3.09*(pow((mixing_sq_atlasmu[0]/U_atlasmu[0]), 2.0) + pow((mixing_sq_atlasmu[1]/U_atlasmu[1]), 2.0) + pow((mixing_sq_atlasmu[2]/U_atlasmu[2]), 2.0));
+
+      result_atlasmu = 0;
+//      result_atlasmu = -3.09*(pow((mixing_sq_atlasmu[0]/U_atlasmu[0]), 2.0) + pow((mixing_sq_atlasmu[1]/U_atlasmu[1]), 2.0) + pow((mixing_sq_atlasmu[2]/U_atlasmu[2]), 2.0));
+      for(int i=0; i<3; i++)
+        result_atlasmu += Stats::gaussian_upper_limit(pow((mixing_sq_atlasmu[i]/U_atlasmu[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_digitized)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from E949; used the kaon decay: K(+) -> mu(+) + nu_r. Constrains |U_(mu,i)|^2 in the mass range 175-300 MeV. [Phys. Rev. D, 91, 2015]
+    // Likelihood contribution from E949; used the kaon decay: K(+) -> mu(+) + nu_r. Constrains |U_(mu,i)|^2 at 90% in the mass range 175-300 MeV. [Phys. Rev. D, 91, 2015]
     void lnL_e949(double& result_e949)
     {
       using namespace Pipes::lnL_e949;
@@ -833,10 +842,14 @@ namespace Gambit
       U_e949[0] = s_e949(M_1);
       U_e949[1] = s_e949(M_2);
       U_e949[2] = s_e949(M_3);
-      result_e949 = -2.44*((mixing_sq_e949[0]/U_e949[0]) + (mixing_sq_e949[1]/U_e949[1]) + (mixing_sq_e949[2]/U_e949[2]));
+
+      result_e949 = 0;
+//      result_e949 = -2.44*((mixing_sq_e949[0]/U_e949[0]) + (mixing_sq_e949[1]/U_e949[1]) + (mixing_sq_e949[2]/U_e949[2]));
+      for(int i=0; i<3; i++)
+        result_e949 += Stats::gaussian_upper_limit(mixing_sq_e949[i]/U_e949[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from NuTeV; used RHN decays into muonic final states (mu + mu + nu / mu + e + nu / mu + pi / mu + rho). Constrains |U_(mu,i)|^2 in the mass range 0.25-2 GeV. [Phys. Rev. Lett., 83:4943-4946, 1999]
+    // Likelihood contribution from NuTeV; used RHN decays into muonic final states (mu + mu + nu / mu + e + nu / mu + pi / mu + rho). Constrains |U_(mu,i)|^2 at 90% CL in the mass range 0.25-2 GeV. [Phys. Rev. Lett., 83:4943-4946, 1999]
     void lnL_nutev(double& result_nutev)
     {
       using namespace Pipes::lnL_nutev;
@@ -887,10 +900,10 @@ namespace Gambit
       U_nutev[0] = s_nutev(M_1);
       U_nutev[1] = s_nutev(M_2);
       U_nutev[2] = s_nutev(M_3);
-      result_nutev = -2.44*((mixing_sq_nutev[0]/U_nutev[0]) + (mixing_sq_nutev[1]/U_nutev[1]) + (mixing_sq_nutev[2]/U_nutev[2]));
+      result_nutev = -2.44*(pow((mixing_sq_nutev[0]/U_nutev[0]), 2.0) + pow((mixing_sq_nutev[1]/U_nutev[1]), 2.0) + pow((mixing_sq_nutev[2]/U_nutev[2]), 2.0));
     }
 
-    // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002]
+    // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 at 90% CL in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002]
     void lnL_tau(double& result_tau)
     {
       using namespace Pipes::lnL_tau;
@@ -929,7 +942,7 @@ namespace Gambit
         for (int i=0; i<172; i++)
         {
           M_temp_tau[i] = array_tau[i][0];
-          U_temp_tau[i] = array_tau[i][1];
+          U_temp_tau[i] = array_tau[i][1]/sqrt(2);  // division by sqrt(2) to correct for Majorana nature of RHNs.
         }
         s_tau.set_points(M_temp_tau, U_temp_tau);
         read_table_tau = false;
@@ -941,7 +954,11 @@ namespace Gambit
       U_tau[0] = s_tau(M_1);
       U_tau[1] = s_tau(M_2);
       U_tau[2] = s_tau(M_3);
-      result_tau = -2.44*((mixing_sq_tau[0]/U_tau[0]) + (mixing_sq_tau[1]/U_tau[1]) + (mixing_sq_tau[2]/U_tau[2]));
+
+      result_tau = 0;
+//      result_tau = -2.44*((mixing_sq_tau[0]/U_tau[0]) + (mixing_sq_tau[1]/U_tau[1]) + (mixing_sq_tau[2]/U_tau[2]));
+      for(int i=0; i<3; i++)
+        result_tau += Stats::gaussian_upper_limit(pow((mixing_sq_tau[i]/U_tau[i]), 2.0), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, but exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
 
     void Ue1(double& Ue1_sq)
