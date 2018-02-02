@@ -15,6 +15,8 @@
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
+// Based on http://cms-results.web.cern.ch/cms-results/public-results/superseded/SUS-16-039/index.html
+
 using namespace std;
 
 namespace Gambit {
