@@ -32,9 +32,12 @@ namespace Gambit {
     private:
     
         // Numbers passing cuts
-        static const size_t NUM_SR = 31; 
-        double _SR[NUM_SR];
+//        static const size_t NUM_SR = 31; 
+//        double _SR[NUM_SR];
 
+        static const size_t NUM_aggregateSR = 6;
+        double _aggregateSR[NUM_aggregateSR];
+        
         // Cut Flow
         Cutflow _cutflow;
         
@@ -81,7 +84,8 @@ namespace Gambit {
             "**Mlb>175"}) {
             set_luminosity(35.9);
             
-            for (size_t i = 0; i < NUM_SR; ++i) _SR[i] = 0;
+//            for (size_t i = 0; i < NUM_SR; ++i) _SR[i] = 0;
+            for (size_t i = 0; i < NUM_aggregateSR; ++i) _aggregateSR[i] = 0;
         }
 
         void analyze(const HEPUtils::Event* event) {
@@ -262,84 +266,93 @@ namespace Gambit {
             /*                                                       */
             /*********************************************************/
             
-            bool MET_250_350= met>250 and met<350;
-            bool MET_350_450= met>350 and met<450;
-            bool MET_450_600= met>450 and met<600;
-            bool MET_600= met>=600;
-            bool MET_250_450= met>250 and met<450;
-            bool MET_450_550= met>450 and met<550;
-            bool MET_550_650= met>550 and met<650;
-            bool MET_650= met>=650;
-            bool MET_550= met>=550;
-            bool MET_350_550= met>350 and met<550;
-            bool MET_450= met>=450;
+//            bool MET_250_350= met>250 and met<350;
+//            bool MET_350_450= met>350 and met<450;
+//            bool MET_450_600= met>450 and met<600;
+//            bool MET_600= met>=600;
+//            bool MET_250_450= met>250 and met<450;
+//            bool MET_450_550= met>450 and met<550;
+//            bool MET_550_650= met>550 and met<650;
+//            bool MET_650= met>=650;
+//            bool MET_550= met>=550;
+//            bool MET_350_550= met>350 and met<550;
+//            bool MET_450= met>=450;
 
-            if (baselineJets.size()<=3){
-                if(tmod>10){
-                    if(Mlb<175){
-                        if( MET_250_350)_SR[0]+=1;
-                        if( MET_350_450)_SR[1]+=1;
-                        if( MET_450_600)_SR[2]+=1;
-                        if( MET_600    )_SR[3]+=1;
-                    }else{//Mlb>175
-                      if(N_tight_bJets>0){
-                        if( MET_250_450)_SR[4]+=1;
-                        if( MET_450_600)_SR[5]+=1;
-                        if( MET_600    )_SR[6]+=1;
-                      }
-                    }
-                }
-            }
-            else{ // N_j>=4
-                if(tmod<=0){
-                    if(Mlb<175){
-                        if( MET_250_350)_SR[7]+=1;
-                        if( MET_350_450)_SR[8]+=1;
-                        if( MET_450_550)_SR[9]+=1;
-                        if( MET_550_650)_SR[10]+=1;
-                        if( MET_650    )_SR[11]+=1;
-                    }else{//Mlb>175
-                      if(N_tight_bJets>0){
-                        if( MET_250_350)_SR[12]+=1;
-                        if( MET_350_450)_SR[13]+=1;
-                        if( MET_450_550)_SR[14]+=1;
-                        if( MET_550    )_SR[15]+=1;
-                      }
-                    }
-                }else if (tmod<=10){
-                    if(Mlb<175){
-                        if( MET_250_350)_SR[16]+=1;
-                        if( MET_350_550)_SR[17]+=1;
-                        if( MET_550    )_SR[18]+=1;
-                    }else{//Mlb>175
-                      if(N_tight_bJets>0){
-                        if( MET_250_450)_SR[19]+=1;
-                        if( MET_450    )_SR[20]+=1;
-                      }
-                    }
-                }else{ //tmod>10
-                    if(Mlb<175){
-                        if( MET_250_350)_SR[21]+=1;
-                        if( MET_350_450)_SR[22]+=1;
-                        if( MET_450_600)_SR[23]+=1;
-                        if( MET_600    )_SR[24]+=1;
-                    }else{//Mlb>175
-                      if(N_tight_bJets>0){
-                        if( MET_250_450)_SR[25]+=1;
-                        if( MET_450    )_SR[26]+=1;
-                      }
-                    }
-                }
-            }
-            
-            // compressed region
+//            if (baselineJets.size()<=3){
+//                if(tmod>10){
+//                    if(Mlb<175){
+//                        if( MET_250_350)_SR[0]+=1;
+//                        if( MET_350_450)_SR[1]+=1;
+//                        if( MET_450_600)_SR[2]+=1;
+//                        if( MET_600    )_SR[3]+=1;
+//                    }else{//Mlb>175
+//                      if(N_tight_bJets>0){
+//                        if( MET_250_450)_SR[4]+=1;
+//                        if( MET_450_600)_SR[5]+=1;
+//                        if( MET_600    )_SR[6]+=1;
+//                      }
+//                    }
+//                }
+//            }
+//            else{ // N_j>=4
+//                if(tmod<=0){
+//                    if(Mlb<175){
+//                        if( MET_250_350)_SR[7]+=1;
+//                        if( MET_350_450)_SR[8]+=1;
+//                        if( MET_450_550)_SR[9]+=1;
+//                        if( MET_550_650)_SR[10]+=1;
+//                        if( MET_650    )_SR[11]+=1;
+//                    }else{//Mlb>175
+//                      if(N_tight_bJets>0){
+//                        if( MET_250_350)_SR[12]+=1;
+//                        if( MET_350_450)_SR[13]+=1;
+//                        if( MET_450_550)_SR[14]+=1;
+//                        if( MET_550    )_SR[15]+=1;
+//                      }
+//                    }
+//                }else if (tmod<=10){
+//                    if(Mlb<175){
+//                        if( MET_250_350)_SR[16]+=1;
+//                        if( MET_350_550)_SR[17]+=1;
+//                        if( MET_550    )_SR[18]+=1;
+//                    }else{//Mlb>175
+//                      if(N_tight_bJets>0){
+//                        if( MET_250_450)_SR[19]+=1;
+//                        if( MET_450    )_SR[20]+=1;
+//                      }
+//                    }
+//                }else{ //tmod>10
+//                    if(Mlb<175){
+//                        if( MET_250_350)_SR[21]+=1;
+//                        if( MET_350_450)_SR[22]+=1;
+//                        if( MET_450_600)_SR[23]+=1;
+//                        if( MET_600    )_SR[24]+=1;
+//                    }else{//Mlb>175
+//                      if(N_tight_bJets>0){
+//                        if( MET_250_450)_SR[25]+=1;
+//                        if( MET_450    )_SR[26]+=1;
+//                      }
+//                    }
+//                }
+//            }
+//            
+//            // compressed region
+//            if(baselineJets.size()>=5 and leadjet_nob and deltaPhi_j12 >0.5 and Leptons.at(0)->pT() < 150 and Leptons.at(0)->mom().deltaPhi(ptot)<2. ){
+//                if( MET_250_350)_SR[27]+=1;
+//                if( MET_350_450)_SR[28]+=1;
+//                if( MET_450_550)_SR[29]+=1;
+//                if( MET_550    )_SR[30]+=1;
+//            }
+
+            // aggregate signal region
+            if (baselineJets.size()<=3 and tmod>10              and met>=600) _aggregateSR[0]+=1;
+            if (baselineJets.size()>=4 and tmod<=0 and Mlb<=175 and met>=550) _aggregateSR[1]+=1;
+            if (baselineJets.size()>=4 and tmod>10 and Mlb<=175 and met>=450) _aggregateSR[2]+=1;
+            if (baselineJets.size()>=4 and tmod<=0 and Mlb> 175 and met>=450) _aggregateSR[3]+=1;
+            if (baselineJets.size()>=4 and tmod> 0 and Mlb> 175 and met>=450) _aggregateSR[4]+=1;
             if(baselineJets.size()>=5 and leadjet_nob and deltaPhi_j12 >0.5 and Leptons.at(0)->pT() < 150 and Leptons.at(0)->mom().deltaPhi(ptot)<2. ){
-                if( MET_250_350)_SR[27]+=1;
-                if( MET_350_450)_SR[28]+=1;
-                if( MET_450_550)_SR[29]+=1;
-                if( MET_550    )_SR[30]+=1;
+                if( met>=450 ) _aggregateSR[5]+=1;
             }
-
         return;
 
         }
@@ -351,8 +364,11 @@ namespace Gambit {
             Analysis_CMS_13TeV_1LEPStop_36invfb* specificOther 
                 = dynamic_cast<Analysis_CMS_13TeV_1LEPStop_36invfb*>(other);
 
-            for (size_t i = 0; i < NUM_SR; ++i)
-                _SR[i] += specificOther->_SR[i];
+//            for (size_t i = 0; i < NUM_SR; ++i)
+//                _SR[i] += specificOther->_SR[i];
+                
+            for (size_t i = 0; i < NUM_aggregateSR; ++i)
+                _aggregateSR[i] += specificOther->_aggregateSR[i];
         }
 
 
@@ -360,23 +376,35 @@ namespace Gambit {
 
             cout << _cutflow << endl;
             static const string ANAME = "Analysis_CMS_13TeV_0LEP_stop_36invfb";
-            static const double OBSNUM[NUM_SR] = {72.,      24.,    6.,     2.,     6.,     3.,     2.,
-                                                  343.,     68.,    13.,    6.,     2.,     38.,    8.,     2.,     1.,
-                                                  65.,      23.,    1.,     9.,     0.,     12.,    9.,     3.,     0.,
-                                                  0.,       2.,     72.,    30.,    2.,     2.};
-            static const double BKGNUM[NUM_SR] = {65.8,     20.5,   6.4,    2.4,    8.9,    1.9,    1.,
-                                                  383.,     75.5,   15.0,   4.1,    6.6,    39.7,   13.7,   3.1,    2.2,
-                                                  58.7,     14.7,   1.5,    8.9,    0.6,    14.3,   10.,    6.3,    2.4,
-                                                  1.9,      1.3,    82.,    18.9,   3.7,    4.8};
-            static const double BKGERR[NUM_SR] = {6.8,      2.9,    1.3,    0.8,    2.4,    0.7,    0.5,
-                                                  34.,      8.5,    2.9,    1.5,    2.9,    6.2,    2.8,    1.1,    1.0,
-                                                  7.2,      2.4,    0.6,    1.9,    0.2,    2.7,    2.1,    1.5,    1.0,
-                                                  0.7,      0.4,    11.,    3.7,    1.4,    2.0};
+            
+//            // binned signal region
+//            static const double OBSNUM[NUM_SR] = {72.,      24.,    6.,     2.,     6.,     3.,     2.,
+//                                                  343.,     68.,    13.,    6.,     2.,     38.,    8.,     2.,     1.,
+//                                                  65.,      23.,    1.,     9.,     0.,     12.,    9.,     3.,     0.,
+//                                                  0.,       2.,     72.,    30.,    2.,     2.};
+//            static const double BKGNUM[NUM_SR] = {65.8,     20.5,   6.4,    2.4,    8.9,    1.9,    1.,
+//                                                  383.,     75.5,   15.0,   4.1,    6.6,    39.7,   13.7,   3.1,    2.2,
+//                                                  58.7,     14.7,   1.5,    8.9,    0.6,    14.3,   10.,    6.3,    2.4,
+//                                                  1.9,      1.3,    82.,    18.9,   3.7,    4.8};
+//            static const double BKGERR[NUM_SR] = {6.8,      2.9,    1.3,    0.8,    2.4,    0.7,    0.5,
+//                                                  34.,      8.5,    2.9,    1.5,    2.9,    6.2,    2.8,    1.1,    1.0,
+//                                                  7.2,      2.4,    0.6,    1.9,    0.2,    2.7,    2.1,    1.5,    1.0,
+//                                                  0.7,      0.4,    11.,    3.7,    1.4,    2.0};
 
-            for (size_t ibin = 0; ibin < NUM_SR; ++ibin) {
-                stringstream ss; ss << "sr-" << ibin;
-                add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
-                //cout << ss.str() << ":  "<< _SR[ibin] << endl;
+//            for (size_t ibin = 0; ibin < NUM_SR; ++ibin) {
+//                stringstream ss; ss << "sr-" << ibin;
+//                add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+//                //cout << ss.str() << ":  "<< _SR[ibin] << endl;
+//            }
+            
+            // aggregate signal region
+            static const double aggregateOBSNUM[NUM_aggregateSR] = {4.,     8.,     3.,     3.,     2.,     4.};
+            static const double aggregateBKGNUM[NUM_aggregateSR] = {3.4,    10.7,   8.8,    5.3,    1.9,    8.6};
+            static const double aggregateBKGERR[NUM_aggregateSR] = {0.9,    3.2,    1.8,    1.5,    0.5,    2.5};
+            for (size_t ibin = 0; ibin < NUM_aggregateSR; ++ibin) {
+                stringstream ass; ass << "aggregate_sr-" << ibin;
+                add_result(SignalRegionData(ANAME, ass.str(), aggregateOBSNUM[ibin], {_aggregateSR[ibin],  0.}, {aggregateBKGNUM[ibin], aggregateBKGERR[ibin]}));
+                cout << ass.str() << ":  "<< _aggregateSR[ibin] << endl;
             }
             
             return;
@@ -384,7 +412,7 @@ namespace Gambit {
 
     protected:
         void clear() {
-            for(size_t i=0;i<NUM_SR;i++) { _SR[i]=0; }
+            for(size_t i=0;i<NUM_aggregateSR;i++) { _aggregateSR[i]=0; }
         }
 
     };
