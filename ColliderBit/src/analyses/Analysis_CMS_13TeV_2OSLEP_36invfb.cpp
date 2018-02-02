@@ -2,8 +2,11 @@
 ///  \author Rose Kudzman-Blais
 ///  \date 2017 May
 ///
+///  Checked and minor bug fixes by Martin White
+///  Feb 2018
 ///  *********************************************
 
+// Based on http://cms-results.web.cern.ch/cms-results/public-results/superseded/SUS-16-034/index.html
 
 #include <vector>
 #include <cmath>
@@ -24,7 +27,7 @@ namespace Gambit {
     private:
 
       // Numbers passing cuts
-      double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8, _numSR9; 
+      double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8;
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
@@ -54,7 +57,6 @@ namespace Gambit {
 	_numSR6=0;
 	_numSR7=0; 
 	_numSR8=0; 
-	_numSR9=0;	
 
 	NCUTS=13;
 	set_luminosity(35.9);
@@ -189,7 +191,7 @@ namespace Gambit {
             if (met>350.)_numSR4++;
           }
           //HZ
-	  if (nSignalBJets==2 && mbb<150. && mT2<200.) {
+	  if (nSignalBJets==2 && mbb<150. && mT2>200.) {
 	    if (met>50. && met<100.)_numSR5++;
 	    if (met>100. && met<150.)_numSR6++;
 	    if (met>150. && met<250.)_numSR7++;
@@ -279,6 +281,7 @@ namespace Gambit {
         _numSR5 += specificOther->_numSR5;
         _numSR6 += specificOther->_numSR6;
         _numSR7 += specificOther->_numSR7;
+	_numSR8 += specificOther->_numSR8;
       }
 
 
@@ -379,20 +382,12 @@ namespace Gambit {
         results_SR8.sr_label = "SR8";
         results_SR8.n_observed = 5.;
         results_SR8.n_background = 5.6;
-        results_SR8.background_sys = 2.8;
+        results_SR8.background_sys = 1.6;
         results_SR8.signal_sys = 0.;
         results_SR8.n_signal = _numSR8;
         add_result(results_SR8);
 
-        SignalRegionData results_SR9;
-        results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR9.sr_label = "SR9";
-        results_SR9.n_observed = 1.;
-        results_SR9.n_background = 1.3;
-        results_SR9.background_sys = 0.4;
-        results_SR9.signal_sys = 0.;
-        results_SR9.n_signal = _numSR9;
-        add_result(results_SR9);
+       
       }
 
       vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
@@ -469,8 +464,7 @@ namespace Gambit {
         _numSR6=0;
         _numSR7=0; 
         _numSR8=0; 
-        _numSR9=0;  
-        
+              
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 

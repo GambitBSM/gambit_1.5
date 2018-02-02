@@ -4,6 +4,7 @@
 ///
 ///  *********************************************
 
+// Based on http://cms-results.web.cern.ch/cms-results/public-results/preliminary-results/SUS-16-048/index.html
 
 #include <vector>
 #include <cmath>
@@ -393,7 +394,7 @@ namespace Gambit {
         results_SR8.sr_label = "SR8";
         results_SR8.n_observed = 1.;
         results_SR8.n_background = 0.51;
-        results_SR8.background_sys = 0.51;
+        results_SR8.background_sys = 0.52;
         results_SR8.signal_sys = 0.;
         results_SR8.n_signal = _numSR8;
         add_result(results_SR8);

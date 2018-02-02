@@ -376,7 +376,7 @@ namespace Gambit {
             for (size_t ibin = 0; ibin < NUM_SR; ++ibin) {
                 stringstream ss; ss << "sr-" << ibin;
                 add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
-                cout << ss.str() << ":  "<< _SR[ibin] << endl;
+                //cout << ss.str() << ":  "<< _SR[ibin] << endl;
             }
             
             return;

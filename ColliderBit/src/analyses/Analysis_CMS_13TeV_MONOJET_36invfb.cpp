@@ -4,6 +4,8 @@
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 // #include "Eigen/Eigen"
 
+// Based on http://cms-results.web.cern.ch/cms-results/public-results/publications/EXO-16-048/index.html
+
 namespace Gambit {
   namespace ColliderBit {
 

@@ -466,7 +466,7 @@ namespace Gambit {
             cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
             // Same flavour
-            SignalRegionData results_SRSF0;
+            /*SignalRegionData results_SRSF0;
             results_SRSF0.analysis_name = "Analysis_CMS_13TeV_2LEPStop_36invfb";
             results_SRSF0.sr_label = "SRSF0";
             results_SRSF0.n_observed = 112.;
@@ -856,7 +856,7 @@ namespace Gambit {
             results_SRALL12.background_sys = 0.4;
             results_SRALL12.signal_sys = 0.;
             results_SRALL12.n_signal = _SRALL[12];
-            add_result(results_SRALL12);
+            add_result(results_SRALL12);*/
 
             //Signal region A
             SignalRegionData results_SRA0;
