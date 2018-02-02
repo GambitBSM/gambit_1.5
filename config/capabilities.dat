@@ -258,10 +258,6 @@ SingletDM_spectrum: |
 SingletDMZ3_spectrum: |
     Create spectrum object for scalar singlet dark matter model with a Z3 symmetry.
 
-check_perturb: |
-    Compute the spectrum with the spectrum generator and return a
-    likelihood corresponding to the validity of the spectrum up to the chosen high scale.
-
 vacuum_stability: |
     Run the quartic Higgs coupling to high scales, in order to determine
     the expected lifetime of the electroweak vacuum, the instability scale, and
@@ -277,9 +273,6 @@ VS_likelihood: |
 
 expected_lifetime: |
     Return the expected lifetime of the electroweak vacuum.
-
-print_SingletDM_spectrum: |
-    Print the spectrum contents to the output stream.
 
 #####   Standard model  #####
 
@@ -497,11 +490,6 @@ LHC_Higgs_LogLike: |
 HB_ModelParameters: |
    Provides SM and MSSM input parameters for LEP and LHC Higgs
    likelihood calculations.
-
-FH_HiggsProd: |
-   Provides estimated MSSM Higgs production cross sections through
-   an interface to FeynHiggs.
-
 
 # LEP cross-section capabilities
 
@@ -1308,48 +1296,6 @@ PICO_60_2017_SignalSD: |
 PICO_60_2017_LogLikelihood: |
    Calculate the log-likelihood for the PICO-60 2017 direct detection analysis.
 
-DARWIN_Ar_2015_Calculate: |
-   Perform rate and likelihood calculations for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Ar_2015_Events: |
-   The number of observed events for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Ar_2015_Background: |
-   The number of background events for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Ar_2015_Signal: |
-   The number of signal events for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Ar_2015_SignalSI: |
-   The number of spin-independent signal events for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Ar_2015_SignalSD: |
-   The number of spin-independent signal events for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Ar_2015_LogLikelihood: |
-   Calculate the log-likelihood for the DARWIN Ar 2015 direct detection analysis.
-
-DARWIN_Xe_2015_Calculate: |
-   Perform rate and likelihood calculations for the DARWIN Xe 2015 direct detection analysis.
-
-DARWIN_Xe_2015_Events: |
-   The number of observed events for the DARWIN Xe 2015 direct detection analysis.
-
-DARWIN_Xe_2015_Background: |
-   The number of background events for the DARWIN Xe 2015 direct detection analysis.
-
-DARWIN_Xe_2015_Signal: |
-   The number of signal events for the DARWIN Xe 2015 direct detection analysis.
-
-DARWIN_Xe_2015_SignalSI: |
-   The number of spin-independent signal events for the DARWIN Xe 2015 direct detection analysis.
-
-DARWIN_Xe_2015_SignalSD: |
-   The number of spin-independent signal events for the DARWIN Xe 2015 direct detection analysis.
-
-DARWIN_Xe_2015_LogLikelihood: |
-   Calculate the log-likelihood for the DARWIN Xe 2015 direct detection analysis.
-
 DARWIN_Ar_Calculate: |
    Perform rate and likelihood calculations for the DARWIN Ar 2015 direct detection analysis.
 
@@ -2134,41 +2080,6 @@ snu_muonl_decay_rates : |
 snu_taul_decay_rates : |
    Decays of the ν_τL sneutrinos.
 
-sup_ C _decay_rates : |
-   Decays of the u_L squarks.
-
-sdown_ C _decay_rates : |
-   Decays of the d_L squarks.
-
-scharm_ C _decay_rates : |
-   Decays of the c_L squarks.
-
-sstrange_ C _decay_rates : |
-   Decays of the s_L squarks.
-
-electron_ C _decay_rates : |
-   Decays of the e_L sleptons.
-
-smuon_ C _decay_rates : |
-   Decays of the mu_L sleptons.
-sup_ C _decay_rates : |
-   Decays of the u_R squarks.
-
-sdown_ C _decay_rates : |
-   Decays of the d_R squarks.
-
-scharm_ C _decay_rates : |
-   Decays of the c_R squarks.
-
-sstrange_ C _decay_rates : |
-   Decays of the s_R squarks.
-
-electron_ C _decay_rates : |
-   Decays of the e_R sleptons.
-
-smuon_ C _decay_rates : |
-   Decays of the μ_R sleptons.
-
 stop_1_decay_rates : |
    Decays of the t_1 squarks.
 
@@ -2204,42 +2115,6 @@ snubar_muonl_decay_rates : |
 
 snubar_taul_decay_rates : |
    Decays of the anti-ν_τL sneutrinos.
-
-supbar_ C _decay_rates : |
-   Decays of the anti-u_L squarks.
-
-sdownbar_ C _decay_rates : |
-   Decays of the anti-d_L squarks.
-
-scharmbar_ C _decay_rates : |
-   Decays of the anti-c_L squarks.
-
-sstrangebar_ C _decay_rates : |
-   Decays of the anti-s_L squarks.
-
-electronbar_ C _decay_rates : |
-   Decays of the anti-e_L sleptons.
-
-smuonbar_ C _decay_rates : |
-   Decays of the anti-μ_L sleptons.
-
-supbar_ C _decay_rates : |
-   Decays of the anti-u_R squarks.
-
-sdownbar_ C _decay_rates : |
-   Decays of the anti-d_R squarks.
-
-scharmbar_ C _decay_rates : |
-   Decays of the anti-c_R squarks.
-
-sstrangebar_ C _decay_rates : |
-   Decays of the anti-s_R squarks.
-
-electronbar_ C _decay_rates : |
-   Decays of the anti-e_R sleptons.
-
-smuonbar_ C _decay_rates : |
-   Decays of the anti-μ_R sleptons.
 
 stopbar_1_decay_rates : |
    Decays of the anti-t_1 squarks.
@@ -2292,32 +2167,11 @@ tau_minus_decay_rates : |
 W_minus_decay_rates : |
   All decays of the W- gauge boson.
 
-Hminus_decay_rates : |
-   Decays of the MSSM H-.
-
 chargino_minus_1_decay_rates : |
    Decays of the chargino- 1.
 
 chargino_minus_2_decay_rates : |
    Decays of the chargino- 2.
-
-pi0_decay_rates : |
-  All decays of the π0 meson.
-
-rho0_decay_rates : |
-  All decays of the ρ0 meson.
-
-piplus_decay_rates : |
-  All decays of the π+ meson.
-
-rhoplus_decay_rates : |
-  All decays of the ρ+ meson.
-
-piminus_decay_rates : |
-  All decays of the π- meson.
-
-rhominus_decay_rates : |
-  All decays of the ρ- meson.
 
 rho1450_decay_rates : |
   Decays of the ρ(1450) meson.
