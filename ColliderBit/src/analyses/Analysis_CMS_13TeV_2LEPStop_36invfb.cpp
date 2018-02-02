@@ -99,11 +99,13 @@ namespace Gambit {
         Analysis_CMS_13TeV_2LEPStop_36invfb() {
 
             for(size_t i=0;i<_SR_size;i++){
-                _SRSF[i]=0;
-                _SRDF[i]=0;
-                _SRALL[i]=0;
+                _SRSF.push_back(0);
+                _SRDF.push_back(0);
+                _SRALL.push_back(0);
             }
-            _SRA[0]=0;_SRA[1]=0;_SRA[2]=0;
+            for(size_t i=0;i<_SRA_size;i++){
+                _SRA.push_back(0);
+            }
             NCUTS= 11;
             set_luminosity(35.9);
 
