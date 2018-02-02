@@ -398,7 +398,6 @@ namespace Gambit {
 
 	double metCorr = metVecCorr.pT();
 
-	std::cout << "Here a" << std::endl;
 	
 	//Common Selection 
 	int nJets20  = signalJets20.size();
@@ -438,8 +437,7 @@ namespace Gambit {
 	double mblmin = 0;
 	bool  bjetsLeading = false;
       
-	std::cout << "Here c" << std::endl;
-	
+
 	if(nJets35>=2) {
 	  mjj_35 = (signalJets35[0]->mom() + signalJets35[1]->mom()).m();   // = mbb for leading-bjets events
 
@@ -460,10 +458,10 @@ namespace Gambit {
 	  bjetsLeading = (signalJets35[0]->btag() && signalJets35[1]->btag());
 	}
 
-	cout << "Here dd" << endl;
+
 	double mt = 0.;
 	if(oneLep)mt =  sqrt(2.*signalLeptons[0]->pT()*met*(1. - cos(signalLeptons[0]->mom().deltaPhi(metVec))));
-	cout << "Here ddd" << endl;
+
 	// Calculate minimum mT with any of the leading four jets and the met
 
 	double mtmin = 9999.;
@@ -480,7 +478,7 @@ namespace Gambit {
 	  if(mt_tmp<mtminb && jet<=1)mtminb=mt_tmp;
 	}
 
-	cout << "Here ddd" << endl;
+
 	
 	double amt2 = 0; //need to identify the two bjets here
 	double mbb  = 0;
@@ -499,7 +497,7 @@ namespace Gambit {
 
 	// Scrap the ATLAS identification of b jets and simply use the signal b jets instead
 
-	cout << "Here dddd" << endl;
+
 	//cout << "nBjets35 " << nBjets35 << " bj2 " << bj2 << endl;
 	
 	if(nBjets35==2){
@@ -530,7 +528,7 @@ namespace Gambit {
 
 	      double amt2_new = asymm_mt2_lester_bisect::get_mT2((signalLeptons[0]->mom()+signalJets35[bj2]->mom()).m(), (signalLeptons[0]->mom()+signalJets35[bj2]->mom()).px(), (signalLeptons[0]->mom()+signalJets35[bj2]->mom()).py(), signalJets35[bj1]->mom().m(), signalJets35[bj1]->mom().px(), signalJets35[bj1]->mom().py(), metVec.px(), metVec.py(), 0., 0.);
 
-	      cout << "MT2 original " << amt2 << " amt2_new " << amt2_new << endl;
+	      //cout << "MT2 original " << amt2 << " amt2_new " << amt2_new << endl;
 	      
 	      //amt2 = calcMT2(signalLeptons[0]+myjets[bj1], myjets[bj1], metVec);
 
@@ -575,7 +573,7 @@ namespace Gambit {
 	  }
 	}
 
-	cout << "Here ddddd" << endl;
+
 	
 	// Define variables using 20 GeV jets
 	
@@ -932,7 +930,9 @@ namespace Gambit {
         results_b0L_SRC.n_signal = _numb0L_SRC;
         add_result(results_b0L_SRC);
 
-        SignalRegionData results_b1L_SRA600;
+	// MJW removes these regions for the Feb 2018 MareNostrum scans, since the aMT2 variable is not well-described.
+	
+        /*SignalRegionData results_b1L_SRA600;
         results_b1L_SRA600.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
         results_b1L_SRA600.sr_label = "b1L-SRA600";
         results_b1L_SRA600.n_observed = 21.;
@@ -970,7 +970,7 @@ namespace Gambit {
         results_b1L_SRB.background_sys = 12.;
         results_b1L_SRB.signal_sys = 0.;
         results_b1L_SRB.n_signal = _numb1L_SRB;
-        add_result(results_b1L_SRB);
+        add_result(results_b1L_SRB);*/
 
         return;
       }

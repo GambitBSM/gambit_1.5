@@ -23,6 +23,8 @@ using namespace std;
    b) Cannot apply requirement that the ETmiss calculated from tracking information is aligned in phi with that calculated from the calo system.
    c) We do not apply the tau veto. Could approximate by removing events with tagged taus in?
 
+Note: have removed RJ code for now to save time (the cutflows are too divergent to make this code usable, probably due to the Pythia ISR modelling). 
+
 */
 
 namespace Gambit {
@@ -58,7 +60,7 @@ namespace Gambit {
     }
     
     
-    class Analysis_ATLAS_13TeV_0LEPStop_20invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_0LEPStop_36invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -73,7 +75,7 @@ namespace Gambit {
       
       // Define RestFrames objects
 
-      unique_ptr<RestFrames::LabRecoFrame> LAB;
+      /*unique_ptr<RestFrames::LabRecoFrame> LAB;
       unique_ptr<RestFrames::DecayRecoFrame> CM;
       unique_ptr<RestFrames::DecayRecoFrame> S;
       unique_ptr<RestFrames::VisibleRecoFrame> ISR;
@@ -82,7 +84,7 @@ namespace Gambit {
       unique_ptr<RestFrames::InvisibleGroup>  INV;
       unique_ptr<RestFrames::CombinatoricGroup> VIS;
       unique_ptr<RestFrames::SetMassInvJigsaw>   InvMass;
-      unique_ptr<RestFrames::MinMassesCombJigsaw> SplitVis;
+      unique_ptr<RestFrames::MinMassesCombJigsaw> SplitVis;*/
 
  
       
@@ -165,7 +167,7 @@ namespace Gambit {
 
     public:
 
-      Analysis_ATLAS_13TeV_0LEPStop_20invfb() {
+      Analysis_ATLAS_13TeV_0LEPStop_36invfb() {
 
 	_numSRA_TT=0;  _numSRA_TW=0; _numSRA_T0=0;
 	_numSRB_TT=0; _numSRB_TW=0; _numSRB_T0=0;
@@ -182,7 +184,7 @@ namespace Gambit {
 
 	// RestFrames initialisation
 
-	LAB.reset(new RestFrames::LabRecoFrame("LAB","lab"));
+	/*LAB.reset(new RestFrames::LabRecoFrame("LAB","lab"));
 	CM.reset(new RestFrames::DecayRecoFrame("CM","cm"));
 	S.reset(new RestFrames::DecayRecoFrame("S","s"));
 	ISR.reset(new RestFrames::VisibleRecoFrame("ISR","isr"));
@@ -221,7 +223,7 @@ namespace Gambit {
 	SplitVis->AddFrame(*V,1);
 	SplitVis->AddFrame(*I,1);
 	
-	LAB->InitializeAnalysis();
+	LAB->InitializeAnalysis();*/
 	
       }
 
@@ -526,7 +528,7 @@ namespace Gambit {
 
 	// RestFrames stuff
 
-	double CA_PTISR=0;
+	/*double CA_PTISR=0;
 	double CA_MS=0;
 	double CA_NbV=0;
 	double CA_NjV=0;
@@ -602,7 +604,7 @@ namespace Gambit {
 	      CA_pTjV4=m_pTjV4;
 	      CA_pTbV1=m_pTbV1;
 	    }
-	}
+	    }*/
 	
 	
 	bool isSRA_TT=false;
@@ -1015,7 +1017,7 @@ namespace Gambit {
 
              (j==81 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 550. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && AntiKt8M_0 > 120. && AntiKt8M_1 > 80. && Ht > 800. && HtSig > 18. && MtBMin > 200.)  ||
 
-             (j==82 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>1 && Met > 550. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && AntiKt8M_0 > 120. && AntiKt8M_1 > 80. && Ht > 800. && HtSig > 18. && MtBMin > 200.) ||
+             (j==82 && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>1 && Met > 550. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && AntiKt8M_0 > 120. && AntiKt8M_1 > 80. && Ht > 800. && HtSig > 18. && MtBMin > 200.) 
 
 	     /*cutFlowVector_str[83] = "SRC: Derivation skim";
 	       cutFlowVector_str[84] = "SRC: Lepton veto ";
@@ -1038,7 +1040,7 @@ namespace Gambit {
 	       cutFlowVector_str[101] = "SRC4: 0.60 <= R_ISR <= 0.70";
 	       cutFlowVector_str[102] = "SRC5: 0.70 <= R_ISR <= 0.80";*/
 	     
-             (j==83 && devSkim) ||
+             /*(j==83 && devSkim) ||
              
              (j==84 && devSkim && cut_LeptonVeto) ||
              
@@ -1076,7 +1078,7 @@ namespace Gambit {
 
 	     (j==101  && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.60 && CA_RISR <= 0.7) ||
 
-	     (j==102  && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.70 && CA_RISR <= 0.8) 
+	     (j==102  && devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.70 && CA_RISR <= 0.8) */
 	     
 	     
 	     ){
@@ -1099,7 +1101,7 @@ namespace Gambit {
 	
 	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>1 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && AntiKt12M_0>120. && AntiKt12M_1<60. && MtBMin > 200. && DRBB > 1.2 && MtBMax > 200.)isSRB_T0=true;
 	
-	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.30 && CA_RISR <= 0.4)isSRC1=true;
+	/*if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.30 && CA_RISR <= 0.4)isSRC1=true;
 
 	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.40 && CA_RISR <= 0.5)isSRC2=true;
 
@@ -1107,7 +1109,7 @@ namespace Gambit {
 
 	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.60 && CA_RISR <= 0.7)isSRC4=true;
 
-	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.70 && CA_RISR <= 0.8)isSRC5=true;
+	if(devSkim && cut_LeptonVeto && signalJets.size()>3 && signalBJets.size()>0 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>80. && signalJets[3]->pT()>40. && CA_NbV >= 1 && CA_NjV >= 5 && CA_pTbV1 > 40 && CA_MS > 300 && CA_dphiISRI > 3.00 && CA_PTISR > 400 && CA_pTjV4 > 50 && CA_RISR >= 0.70 && CA_RISR <= 0.8)isSRC5=true;*/
       
 	if( devSkim && cut_LeptonVeto && signalJets.size()>4 && signalBJets.size()>1 && Met > 250. && cut_dPhiJets_AB && signalJets[1]->pT()>150. && signalJets[3]->pT()>80. && signalJets[4]->pT()>60. && MtBMin > 350. && MtBMax > 450. && DRBB > 0.8 && ( (signalBJets[0]->pT() + signalBJets[1]->pT())>400.))isSRD_high=true;
 
@@ -1140,8 +1142,8 @@ namespace Gambit {
         // The base class add function handles the signal region vector and total # events.
         HEPUtilsAnalysis::add(other);
 
-        Analysis_ATLAS_13TeV_0LEPStop_20invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_0LEPStop_20invfb*>(other);
+        Analysis_ATLAS_13TeV_0LEPStop_36invfb* specificOther
+                = dynamic_cast<Analysis_ATLAS_13TeV_0LEPStop_36invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -1185,7 +1187,7 @@ namespace Gambit {
 
 	/// Register results objects with the results for each SR; obs & bkg numbers from the paper
 
-	static const string ANAME = "Analysis_ATLAS_13TeV_0LEPStop_20invfb";
+	static const string ANAME = "Analysis_ATLAS_13TeV_0LEPStop_36invfb";
 
 	/*int _numSRA_TT, _numSRA_TW, _numSRA_T0;
 	int _numSRB_TT, _numSRB_TW, _numSRB_T0;
@@ -1198,11 +1200,15 @@ namespace Gambit {
         add_result(SignalRegionData(ANAME, "SRB-TT",  38, {_numSRB_TT,  0.}, { 39.3,  7.6}));
         add_result(SignalRegionData(ANAME, "SRB-TW", 53, {_numSRB_TW,  0.}, {52.4, 7.4}));
         add_result(SignalRegionData(ANAME, "SRB-T0", 206, {_numSRB_T0,  0.}, { 179.,  26.}));
-        add_result(SignalRegionData(ANAME, "SRC1", 20, {_numSRC1,  0.}, { 20.6,  6.5}));
+
+	// MJW removes the recursive jigsaw signal regions for the Feb 2018 SUSY scans
+	// The ISR modelling in Pythia does not give reliable answers
+        /* add_result(SignalRegionData(ANAME, "SRC1", 20, {_numSRC1,  0.}, { 20.6,  6.5}));
         add_result(SignalRegionData(ANAME, "SRC2", 22, {_numSRC2,  0.}, { 27.6,  4.9}));
         add_result(SignalRegionData(ANAME, "SRC3", 22, {_numSRC3,  0.}, {  18.9, 3.4}));
         add_result(SignalRegionData(ANAME, "SRC4", 1, {_numSRC4,  0.}, {  7.7, 1.2}));
-        add_result(SignalRegionData(ANAME, "SRC5", 0, {_numSRC5, 0.}, { 0.91,  0.73}));
+        add_result(SignalRegionData(ANAME, "SRC5", 0, {_numSRC5, 0.}, { 0.91,  0.73}));*/
+	
         add_result(SignalRegionData(ANAME, "SRD-low", 27, {_numSRD_low, 0.}, {  25.1, 6.2}));
         add_result(SignalRegionData(ANAME, "SRD-high", 11, {_numSRD_high, 0.}, {  8.5,1.5}));
 	add_result(SignalRegionData(ANAME, "SRE", 3, {_numSRE, 0.}, {  3.64,0.79}));
@@ -1224,7 +1230,7 @@ namespace Gambit {
     };
 
 
-    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEPStop_20invfb)
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_0LEPStop_36invfb)
 
 
   }

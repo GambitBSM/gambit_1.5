@@ -23,7 +23,7 @@ using namespace std;
 
    KNOWN ISSUES
    
-   1) Have not added the BDT signal regions (despite having BDT code from ATLAS). They cover a specific kinematic region where the m_stop - m_chi1 mass difference is m_top, which I already know Pythia does badly with. 
+   1) Have not added the BDT signal regions (despite having BDT code from ATLAS). They cover a specific kinematic region where the m_stop - m_chi1 mass difference is m_top, which we already know Pythia does badly with. 
  
    2) We have no equivalent of the ATLAS fakeJER method. Am assuming a 3% JER on every jet for now.
 
@@ -626,7 +626,7 @@ namespace Gambit {
 	    mT2Tau = mt2_event_tau.get_mt2();
 
 	  }
-	  
+	
 	  pTLepOverMet = baselineLeptons[0]->pT() / Met;
 	  preselHighMet = Met > 230 && mT > 30;
 	  preselLowMet  =  baselineLeptons[0]->pT() > 27 && signalBJets.size() > 0 && signalJets[0]->pT() > 50. && Met > 100 && mT > 90;
