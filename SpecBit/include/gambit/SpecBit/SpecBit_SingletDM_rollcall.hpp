@@ -112,7 +112,7 @@
     #define FUNCTION find_non_perturb_scale_SingletDM
     START_FUNCTION(double)
     DEPENDENCY(SingletDM_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(SingletDM)
+    ALLOW_MODEL_DEPENDENCE(SingletDM,SingletDM_running)
     #undef FUNCTION
 
   #undef CAPABILITY

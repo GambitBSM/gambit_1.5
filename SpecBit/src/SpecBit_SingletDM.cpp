@@ -401,8 +401,11 @@ namespace Gambit
           double lamh = SingletDM->get(Par::dimensionless,"lambda_h");
           
           double stability_condition = 2.0 * pow(0.5* 0.25 *  lamh*lams,0.5) + 0.5*lamhs;
-          if (!(stability_condition > 0))
+          
+          if (!(stability_condition > 0) && (lams>0) && (lamh>0))
 					{
+						//cout << "EW stability condition violated at Q = " << scale <<" , lambda_hs = "<< lamhs << "lamh = " << lamh << " lams = " << lams << endl;
+						
 						return false;
 					}
           
@@ -478,8 +481,7 @@ namespace Gambit
 
     }
     
-    
-		
+				
 		void find_non_perturb_scale_SingletDM(double &result)
 		{
 			using namespace flexiblesusy;
@@ -492,11 +494,20 @@ namespace Gambit
 			
 		  // bound x by (a,b)
 		  // do all this is log space please
-		  double a=2.0;
-		  double b=20.0;
-		  double x=10.0;
 		  
+		  double ms = *myPipe::Param.at("mS");
 		  
+		  double a = log10(ms);
+		  
+		  if (a > 20.0)
+		  {
+			  std::ostringstream msg;
+        msg << "Scalar mass larger than 10^20 GeV " << std::endl;
+        invalid_point().raise(msg.str());
+      }
+		  
+		  double b = 20.0;
+		  double x = 0.5 * ( b + ms );
 		  
 		  while (abs(a-b)>1e-10)
 		  {

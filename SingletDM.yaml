@@ -43,18 +43,22 @@ Parameters:
 
 
   StandardModel_Higgs_running:
-    mH:
-      range: [100,200]
+    mH: 107 #range: [100,200]
     QEWSB: 173
 
+  #SingletDM_running:
+  #  mS:
+  #    range: [45., 10000.]
+  #    prior_type: log
+  #  lambda_hS:
+  #    range: [0.0001, 10.00]
+  #    prior_type: log
+  #  lambda_S: 0
+    
   SingletDM_running:
-    mS:
-      range: [45., 10000.]
-      prior_type: log
-    lambda_hS:
-      range: [0.0001, 10.00]
-      prior_type: log
     lambda_S: 0
+    lambda_hS: 0.31
+    mS: 794  
 
   Halo_gNFW_rho0:
     rho0: 0.4
@@ -78,7 +82,7 @@ Printer:
 
 Scanner:
 
- use_scanner: diver
+ use_scanner: random
 
  scanners:
 
@@ -88,6 +92,12 @@ Scanner:
       NP: 50000
       verbosity: 1
       convthresh: 0.0001
+      
+      
+    random:
+      plugin: random
+      point_number: 1
+      like: LogLike        
 
 ObsLikes:
 
@@ -160,6 +170,13 @@ ObsLikes:
     # Other observables
     - purpose:    Observable
       capability: RD_oh2
+      
+    - capability: SingletDM_spectrum
+      purpose: Observable
+      function: get_SingletDM_spectrum_as_map
+      dependencies:
+         - capability: SingletDM_spectrum
+           type: Spectrum      
 
 
 Rules:
@@ -257,8 +274,8 @@ KeyValues:
   likelihood:
     model_invalid_for_lnlike_below: -1e4
 
-  debug: false
+  debug: true
 
   # Set the output path for the log files (relative to working directory unless absolute path is specified)
-  #default_output_path: "runs/SingletDM-DarkBit/"
-  default_output_path: "/home/mmm0290/Scratch/gambit/SingletDM"
+  default_output_path: "runs/SingletDM-DarkBit/"
+  #default_output_path: "/home/mmm0290/Scratch/gambit/SingletDM"
