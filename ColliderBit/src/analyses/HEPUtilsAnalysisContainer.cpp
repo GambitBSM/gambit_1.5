@@ -18,6 +18,7 @@ namespace Gambit
       F(Covariance)                                  \
       F(Perf)                                        \
       F(ATLAS_13TeV_0LEP_13invfb)                    \
+      F(ATLAS_13TeV_0LEP_36invfb)                    \
       F(ATLAS_13TeV_0LEPStop_36invfb)                \
       F(ATLAS_13TeV_1LEPStop_36invfb)                \
       F(ATLAS_13TeV_2LEPStop_36invfb)                \
