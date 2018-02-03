@@ -1731,6 +1731,7 @@ namespace Gambit
     void CollectAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::CollectAnalyses;
+      static bool first = true;
 
       // Start with an empty vector
       result.clear();
@@ -1759,6 +1760,24 @@ namespace Gambit
       if (haveUsedDelphesDetector)
         result.insert(result.end(), Dep::DetAnalysisNumbers->begin(), Dep::DetAnalysisNumbers->end());
       #endif
+
+      // When first called, check that all analyses contain at least one signal region.
+      if (first)
+      {
+        // Loop over all AnalysisData pointers
+        for (auto& adp : result)
+        {
+          // Check number of signal regions
+          // @todo The AnalysisData object really should hold the analysis name, so that we can output it here...
+          //       Currently, the analysis name is stored in the SignalRegionData class. 
+          if (adp->size() == 0)
+          {
+            ColliderBit_error().raise(LOCAL_INFO, "ColliderBit encountered an analysis with 0 signal regions.");
+          }
+        }
+        first = false;
+      }
+
 
       #ifdef COLLIDERBIT_DEBUG
       std::cerr << debug_prefix() << "CollectAnalyses: Current size of 'result': " << result.size() << endl;        
