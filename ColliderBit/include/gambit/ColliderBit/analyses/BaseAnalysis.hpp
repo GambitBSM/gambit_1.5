@@ -53,7 +53,7 @@ namespace Gambit {
 
       /// Reset this instance for reuse, avoiding the need for "new" or "delete".
       virtual void clear() {
-        _ntot = 0; _xsec = 0; _xsecerr = 0; 
+        _ntot = 0; _xsec = 0; _xsecerr = 0;
         _xsec_is_set = false; _is_scaled = false; _needs_collection = true;
         _results.clear();
       }
@@ -108,7 +108,7 @@ namespace Gambit {
         if (_ntot < 1)
           warning += "No events have been analyzed. ";
 
-        /// @todo We need to shift the 'analysis_name' property from class SignalRegionData 
+        /// @todo We need to shift the 'analysis_name' property from class SignalRegionData
         ///       to this class. Then we can add the class name to this error message.
         // warning = "Ooops! In analysis " + analysis_name + ": " + warning
 

@@ -47,6 +47,13 @@ namespace Gambit {
       /// Default constructor
       SignalRegionData() {}
 
+      /// Consistency check
+      bool check() const {
+        bool consistent = true;
+        /// @todo Add SR consistency checks
+        return consistent;
+      }
+
       /// @name Analysis and signal region specification
       //@{
       std::string analysis_name; ///< The name of the analysis common to all signal regions
@@ -84,7 +91,7 @@ namespace Gambit {
       AnalysisData(const std::vector<SignalRegionData>& srds, const Eigen::MatrixXd& cov=Eigen::MatrixXd())
         : srdata(srds), srcov(cov)
       {
-        _checkConsistency();
+        check();
       }
 
       /// Clear the list of SignalRegionData, and nullify the covariance matrix
@@ -98,7 +105,7 @@ namespace Gambit {
       /// Number of analyses
       size_t size() const
       {
-        _checkConsistency();
+        // check();
         return srdata.size();
       }
 
@@ -108,7 +115,7 @@ namespace Gambit {
       /// Is there non-null correlation data?
       bool hasCorrs() const
       {
-        _checkConsistency();
+        // check();
         return srcov.rows() == 0;
       }
 
@@ -129,7 +136,21 @@ namespace Gambit {
           // If it does, just update the signal count in the existing SignalRegionData object
           srdata[loc->second].n_signal = srd.n_signal;
         }
+        check();
       }
+
+      /// Check that the SRData list and the covariance matrix are consistent
+      bool check() const
+      {
+        for (const SignalRegionData& srd : srdata) srd.check();
+        assert(srcov.rows() == 0 || srcov.rows() == (int) srdata.size());
+        for (int isr = 0; isr < srcov.rows(); ++isr) {
+          const double& srbg = srdata[isr].background_sys;
+          assert(fabs(srcov(isr,isr) - srbg*srbg) < 1e-2);
+        }
+        return true;
+      }
+
 
       /// Access the i'th signal region's data
       SignalRegionData& operator[] (size_t i) { return srdata[i]; }
@@ -150,12 +171,6 @@ namespace Gambit {
 
       /// Optional covariance matrix between SRs (0x0 null matrix = no correlation info)
       Eigen::MatrixXd srcov;
-
-      /// Check that the size of the SRData list and the covariance matrix are consistent
-      void _checkConsistency() const
-      {
-        assert(srcov.rows() == 0 || srcov.rows() == (int) srdata.size());
-      }
 
     };
 
