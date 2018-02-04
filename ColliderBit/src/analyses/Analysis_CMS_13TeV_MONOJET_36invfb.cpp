@@ -32,11 +32,6 @@ namespace Gambit {
         set_luminosity(35.9);
       }
 
-      void clear() {
-        for (double& n : _srnums) n = 0;
-        /// @todo Need to also clear/reset cutflow, but it currently has no method for that
-      }
-
       void analyze(const Event* event) {
 
         HEPUtilsAnalysis::analyze(event);
@@ -150,7 +145,8 @@ namespace Gambit {
 
     protected:
       void clear() {
-        for(size_t i=0;i<NUMSR;i++) { _srnums[i]=0; }
+        for (double& n : _srnums) n = 0;
+        /// @todo Need to also clear/reset cutflow, but it currently has no method for that
       }
 
     };
