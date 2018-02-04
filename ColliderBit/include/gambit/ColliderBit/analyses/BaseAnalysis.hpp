@@ -129,7 +129,7 @@ namespace Gambit {
         if (_ntot < 1)
           warning += "No events have been analyzed. ";
 
-        /// @todo We need to shift the 'analysis_name' property from class SignalRegionData 
+        /// @todo We need to shift the 'analysis_name' property from class SignalRegionData
         ///       to this class. Then we can add the class name to this error message.
         // warning = "Ooops! In analysis " + analysis_name + ": " + warning
 
