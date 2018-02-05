@@ -1949,6 +1949,10 @@ namespace Gambit
           const double ana_dll = llrsums.sum() / (double)NSAMPLE;
           result[adata.begin()->analysis_name + "_DeltaLogLike"] = ana_dll;
 
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_DeltaLogLike : " << ana_dll << std::endl;
+          #endif
+
 
           ////////////////////
 
