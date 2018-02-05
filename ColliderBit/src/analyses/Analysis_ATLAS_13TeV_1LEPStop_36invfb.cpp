@@ -585,7 +585,6 @@ namespace Gambit {
         const std::vector<double>  binedges_pt = {0,50.,70.,100.,150.,200.,1000.,10000.};
         const std::vector<double> JetsJER = {0.145,0.115,0.095,0.075,0.07,0.05,0.04};
         static HEPUtils::BinnedFn2D<double> _resJets2D(binedges_eta,binedges_pt,JetsJER);
-        std::cout << "Here a" << std::endl;
         vector<double> signalJER;
   
         for(unsigned int i = 0; i < signalJets.size(); ++i)signalJER.push_back(_resJets2D.get_at(signalJets[i]->abseta(), signalJets[i]->pT()));

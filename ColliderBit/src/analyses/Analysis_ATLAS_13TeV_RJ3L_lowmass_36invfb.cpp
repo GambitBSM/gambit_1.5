@@ -2036,19 +2036,19 @@ namespace Gambit {
 
       void collect_results() {
 
-        double scale_by=1.;
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
-        cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-        cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
-             << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-        for (int j=0; j<NCUTS; j++) {
-          cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
-               << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
-               << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
-               << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
-        }
-        cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        // double scale_by=1.;
+        // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+        // cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
+        // cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+        // cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
+        //      << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+        // for (int j=0; j<NCUTS; j++) {
+        //   cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
+        //        << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
+        //        << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
+        //        << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+        // }
+        // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
         /// Register results objects with the results for each SR; obs & bkg numbers from the paper
 

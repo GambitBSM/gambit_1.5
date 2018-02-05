@@ -865,17 +865,17 @@ namespace Gambit {
 
       void collect_results() {
 
-        double scale_by=1.;
+        // double scale_by=1.;
 
-        cout << "-------------------------------------------------------------------------------------------------------------------------------------------------"<<endl;
-        cout << "CUT FLOW: ATLAS multi lepton paper "<<endl;
-        cout << "-------------------------------------------------------------------------------------------------------------------------------------------------"<<endl;
+        // cout << "-------------------------------------------------------------------------------------------------------------------------------------------------"<<endl;
+        // cout << "CUT FLOW: ATLAS multi lepton paper "<<endl;
+        // cout << "-------------------------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
-        cout << left << setw(45) << "CUT" << right << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << std::endl;
-        for (int j=0; j<NCUTS; j++) {
-          cout << left << setw(45) << right << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << std::endl;
-        }
-        cout << "-------------------------------------------------------------------------------------------------------------------------------------------------"<<endl;
+        // cout << left << setw(45) << "CUT" << right << setw(20) << "RAW" << setw(20) << "SCALED" << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << std::endl;
+        // for (int j=0; j<NCUTS; j++) {
+        //   cout << left << setw(45) << right << cutFlowVector_str[j].c_str() << setw(20) << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20) << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << std::endl;
+        // }
+        // cout << "-------------------------------------------------------------------------------------------------------------------------------------------------"<<endl;
 
 
 

@@ -374,7 +374,7 @@ namespace Gambit {
 
         void collect_results() {
 
-            cout << _cutflow << endl;
+            // cout << _cutflow << endl;
             static const string ANAME = "Analysis_CMS_13TeV_0LEP_stop_36invfb";
             
 //            // binned signal region
@@ -404,7 +404,7 @@ namespace Gambit {
             for (size_t ibin = 0; ibin < NUM_aggregateSR; ++ibin) {
                 stringstream ass; ass << "aggregate_sr-" << ibin;
                 add_result(SignalRegionData(ANAME, ass.str(), aggregateOBSNUM[ibin], {_aggregateSR[ibin],  0.}, {aggregateBKGNUM[ibin], aggregateBKGERR[ibin]}));
-                cout << ass.str() << ":  "<< _aggregateSR[ibin] << endl;
+                // cout << ass.str() << ":  "<< _aggregateSR[ibin] << endl;
             }
             
             return;

@@ -403,7 +403,7 @@ namespace Gambit {
 	
         // const double sf = 13.3*crossSection()/femtobarn/sumOfWeights();
         // _flows.scale(sf);
-        cout << "CUTFLOWS:\n\n" << _flows << endl;
+        // cout << "CUTFLOWS:\n\n" << _flows << endl;
       }
 
 
