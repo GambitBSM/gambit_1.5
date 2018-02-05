@@ -42,7 +42,7 @@
 #include "flexiblesusy/src/numerics2.hpp"
 #include "flexiblesusy/src/spectrum_generator_settings.hpp"
 // Switch for debug mode
-//#define SPECBIT_DEBUG
+#define SPECBIT_DEBUG
 
 namespace Gambit
 {

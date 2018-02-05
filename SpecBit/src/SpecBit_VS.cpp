@@ -41,7 +41,7 @@
 
 
 // Switch for debug mode
-//#define SPECBIT_DEBUG
+#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -306,7 +306,7 @@ namespace Gambit
       double perturb=float(!perturbative);
 #ifdef SPECBIT_DEBUG
       cout << "perturbativity checked up to " << LB << " result = " << perturbative << endl;
-      cout << "Higgs pole mass = " << fullspectrum.get(Par::Pole_Mass, "h0_1");
+      cout << "Higgs pole mass = " << fullspectrum.get(Par::Pole_Mass, "h0_1") << endl;
 #endif
       
       vs_tuple = dbl_dbl_bool(lifetime,LB,perturb);
