@@ -1844,6 +1844,19 @@ namespace Gambit
         // AnalysisData for this analysis
         const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
+        // Output map key
+        string analysis_key = adata.begin()->analysis_name + "_DeltaLogLike";
+
+        // If no events have been generated (xsec veto), short-circut the loop and
+        // return delta log-likelihood = 0 for each analysis.
+        /// @todo This must be made more sophisticated once we add analyses that
+        ///       don't rely on event generation.
+        if (!eventsGenerated)
+        {
+          result[analysis_key] = 0.0;
+          continue;
+        }
+
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
         /// @todo Come up with a good treatment of zero and negative predictions
@@ -1969,7 +1982,7 @@ namespace Gambit
 
           // Calculate sum of expected LLRs
           const double ana_dll = llrsums.sum() / (double)NSAMPLE;
-          result[adata.begin()->analysis_name + "_DeltaLogLike"] = ana_dll;
+          result[analysis_key] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_DeltaLogLike : " << ana_dll << std::endl;
@@ -2034,7 +2047,9 @@ namespace Gambit
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
+          #ifdef COLLIDERBIT_DEBUG
           str* bestexp_sr_label;
+          #endif
 
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
@@ -2080,7 +2095,9 @@ namespace Gambit
             {
               bestexp_dll_exp = dll_exp;
               bestexp_dll_obs = llb_obs - llsb_obs;
+              #ifdef COLLIDERBIT_DEBUG
               bestexp_sr_label = &(srData.sr_label);
+              #endif
             }
 
             // // For debugging: print some useful numbers to the log.
@@ -2100,7 +2117,7 @@ namespace Gambit
           }
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
-          result[adata.begin()->analysis_name + "_" + *bestexp_sr_label + "_DeltaLogLike"] = -bestexp_dll_obs;
+          result[analysis_key] = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
           std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_" << *bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << std::endl;
@@ -2117,17 +2134,6 @@ namespace Gambit
     {
       using namespace Pipes::calc_LHC_LogLike;
       result = 0.0;
-
-      // If no events have been generated (xsec veto), return delta log-likelihood = 0
-      /// @todo This must be made more sophisticated once we add analyses that
-      ///       don't rely on event generation.
-      if (!eventsGenerated)
-      {
-        #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: No events generated. Will return a delta log-likelihood of 0." << endl;
-        #endif
-        return;
-      }
 
       // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
       if (nFailedEvents > maxFailedEvents)
