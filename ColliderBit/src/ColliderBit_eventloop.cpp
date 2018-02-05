@@ -1430,18 +1430,18 @@ namespace Gambit
         return;
       }
 
-      #ifdef COLLIDERBIT_DEBUG
-      if (*Loop::iteration == END_SUBPROCESS)
-      {
-        for (auto& analysis_pointer_pair : Dep::DetAnalysisContainer->get_current_analyses_map())
-        {
-          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-          {
-            std::cerr << debug_prefix() << "runDetAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-          }
-        }
-      }
-      #endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (*Loop::iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : Dep::DetAnalysisContainer->get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       std::cerr << debug_prefix() << "runDetAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
 
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
@@ -1514,18 +1514,18 @@ namespace Gambit
         return;
       }
 
-      #ifdef COLLIDERBIT_DEBUG
-      if (*Loop::iteration == END_SUBPROCESS)
-      {
-        for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
-        {
-          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-          {
-            std::cerr << debug_prefix() << "runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-          }
-        }
-      }
-      #endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (*Loop::iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       std::cerr << debug_prefix() << "runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
 
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
@@ -1596,18 +1596,18 @@ namespace Gambit
         return;
       }
 
-      #ifdef COLLIDERBIT_DEBUG
-      if (*Loop::iteration == END_SUBPROCESS)
-      {
-        for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
-        {
-          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-          {
-            std::cerr << debug_prefix() << "runCMSAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-          }
-        }
-      }
-      #endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (*Loop::iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       std::cerr << debug_prefix() << "runCMSAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
 
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
@@ -1678,18 +1678,18 @@ namespace Gambit
         return;
       }
 
-      #ifdef COLLIDERBIT_DEBUG
-      if (*Loop::iteration == END_SUBPROCESS)
-      {
-        for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
-        {
-          for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-          {
-            std::cerr << debug_prefix() << "runIdentityAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-          }
-        }
-      }
-      #endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (*Loop::iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       std::cerr << debug_prefix() << "runIdentityAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
 
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
@@ -1833,6 +1833,7 @@ namespace Gambit
     void calc_LHC_LogLike_per_analysis(map_str_dbl& result)
     {
       using namespace Pipes::calc_LHC_LogLike_per_analysis;
+      static bool first = true;
 
       // Clear the result map
       result.clear();
@@ -1916,7 +1917,13 @@ namespace Gambit
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          const size_t NSAMPLE = 10000 ; ///< @todo TWEAK!!!
+          static size_t NSAMPLE; 
+          if (first)
+          {
+            NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
+            first = false;
+          }
+
           // std::normal_distribution<> unitnormdbn{0,1};
           Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
 
