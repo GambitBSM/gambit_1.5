@@ -309,99 +309,142 @@ namespace Gambit {
        //  cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
        // cutflowFile.close();
 
-        //Now fill a results object with the results for each SR
-        SignalRegionData results_SR1;
-        results_SR1.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR1.sr_label = "SR1";
-        results_SR1.n_observed = 793.;
-        results_SR1.n_background = 793.; 
-        results_SR1.background_sys = 32.2;
-        results_SR1.signal_sys = 0.; 
-        results_SR1.n_signal = _numSR1;
-        add_result(results_SR1);
+        static const string ANAME = "CMS_13TeV_2OSLEP_36invfb";
 
-        SignalRegionData results_SR2;
-        results_SR2.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR2.sr_label = "SR2";
-        results_SR2.n_observed = 57.;
-        results_SR2.n_background = 54.9;
-        results_SR2.background_sys = 7.;
-        results_SR2.signal_sys = 0.;
-        results_SR2.n_signal = _numSR2;
-        add_result(results_SR2);
+        // Only 7 of the 9 signal regions are included in the covariance matrix
+        // (SR1 and SR6 are left out)
+        static const size_t SR_size_cov = 7;
+        const int SR_labels_cov[SR_size_cov] = {2, 3, 4, 5, 7, 8, 9};
+        const double SR_nums_cov[SR_size_cov] = {
+          _numSR2, _numSR3, _numSR4, _numSR5, _numSR7, _numSR8, _numSR9,
+        };
 
-        SignalRegionData results_SR3;
-        results_SR3.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR3.sr_label = "SR3";
-        results_SR3.n_observed = 29.;
-        results_SR3.n_background = 21.6;
-        results_SR3.background_sys = 5.6;
-        results_SR3.signal_sys = 0.;
-        results_SR3.n_signal = _numSR3;
-        add_result(results_SR3);
+        // Observed event counts
+        static const double OBSNUM[SR_size_cov] = {
+          57., 29., 2., 0., 9., 5., 1.
+        };
+        // Background estimates
+        static const double BKGNUM[SR_size_cov] = {
+          54.9, 21.6, 6., 2.5, 7.6, 5.6, 1.3
+        };
+        // Background uncertainties, same-flavor signal regions
+        static const double BKGERR[SR_size_cov] = {
+          7., 5.6, 1.9, 0.9, 2.8, 1.6, 0.4,
+        };
 
-        SignalRegionData results_SR4;
-        results_SR4.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR4.sr_label = "SR4";
-        results_SR4.n_observed = 2.;
-        results_SR4.n_background = 6.;
-        results_SR4.background_sys = 1.9;
-        results_SR4.signal_sys = 0.;
-        results_SR4.n_signal = _numSR4;
-        add_result(results_SR4);
+        for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
+          stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
+          add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+        }
 
-        SignalRegionData results_SR5;
-        results_SR5.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR5.sr_label = "SR5";
-        results_SR5.n_observed = 0.;
-        results_SR5.n_background = 2.5;
-        results_SR5.background_sys = 0.9;
-        results_SR5.signal_sys = 0.;
-        results_SR5.n_signal = _numSR5;
-        add_result(results_SR5);
+        // Covariance matrix
+        static const vector< vector<double> > BKGCOV = {
+          { 52.8, 12.7,  3.0,  1.2,  4.5,  5.1,  1.2 },
+          { 12.7, 41.4,  3.6,  2.0,  2.5,  2.0,  0.7 },
+          {  3.0,  3.6,  1.6,  0.6,  0.4,  0.3,  0.1},
+          {  1.2,  2.0,  0.6,  1.1,  0.3,  0.1,  0.1},
+          {  4.5,  2.5,  0.4,  0.3,  6.5,  1.8,  0.4},
+          {  5.1,  2.0,  0.3,  0.1,  1.8,  2.4,  0.4},
+          {  1.2,  0.7,  0.1,  0.1,  0.4,  0.4,  0.2},
+        };        
 
-        SignalRegionData results_SR6;
-        results_SR6.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR6.sr_label = "SR6";
-        results_SR6.n_observed = 82;
-        results_SR6.n_background = 82.;
-        results_SR6.background_sys = 9.5;
-        results_SR6.signal_sys = 0.;
-        results_SR6.n_signal = _numSR6;
-        add_result(results_SR6);
+        set_covariance(BKGCOV);
 
-        SignalRegionData results_SR7;
-        results_SR7.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR7.sr_label = "SR7";
-        results_SR7.n_observed = 9.;
-        results_SR7.n_background = 7.6;
-        results_SR7.background_sys = 2.8;
-        results_SR7.signal_sys = 0.;
-        results_SR7.n_signal = _numSR7;
-        add_result(results_SR7);
-
-        SignalRegionData results_SR8;
-        results_SR8.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR8.sr_label = "SR8";
-        results_SR8.n_observed = 5.;
-        results_SR8.n_background = 5.6;
-        results_SR8.background_sys = 1.6;
-        results_SR8.signal_sys = 0.;
-        results_SR8.n_signal = _numSR8;
-        add_result(results_SR8);
-
-        SignalRegionData results_SR9;
-        results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        results_SR9.sr_label = "SR9";
-        results_SR9.n_observed = 1.;
-        results_SR9.n_background = 1.3;
-        results_SR9.background_sys = 0.4;
-        results_SR9.signal_sys = 0.;
-        results_SR9.n_signal = _numSR9;
-        add_result(results_SR9);
-
-       
       }
+
+        // //Now fill a results object with the results for each SR
+        // SignalRegionData results_SR1;
+        // results_SR1.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR1.sr_label = "SR1";
+        // results_SR1.n_observed = 793.;
+        // results_SR1.n_background = 793.; 
+        // results_SR1.background_sys = 32.2;
+        // results_SR1.signal_sys = 0.; 
+        // results_SR1.n_signal = _numSR1;
+        // add_result(results_SR1);
+
+        // SignalRegionData results_SR2;
+        // results_SR2.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR2.sr_label = "SR2";
+        // results_SR2.n_observed = 57.;
+        // results_SR2.n_background = 54.9;
+        // results_SR2.background_sys = 7.;
+        // results_SR2.signal_sys = 0.;
+        // results_SR2.n_signal = _numSR2;
+        // add_result(results_SR2);
+
+        // SignalRegionData results_SR3;
+        // results_SR3.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR3.sr_label = "SR3";
+        // results_SR3.n_observed = 29.;
+        // results_SR3.n_background = 21.6;
+        // results_SR3.background_sys = 5.6;
+        // results_SR3.signal_sys = 0.;
+        // results_SR3.n_signal = _numSR3;
+        // add_result(results_SR3);
+
+        // SignalRegionData results_SR4;
+        // results_SR4.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR4.sr_label = "SR4";
+        // results_SR4.n_observed = 2.;
+        // results_SR4.n_background = 6.;
+        // results_SR4.background_sys = 1.9;
+        // results_SR4.signal_sys = 0.;
+        // results_SR4.n_signal = _numSR4;
+        // add_result(results_SR4);
+
+        // SignalRegionData results_SR5;
+        // results_SR5.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR5.sr_label = "SR5";
+        // results_SR5.n_observed = 0.;
+        // results_SR5.n_background = 2.5;
+        // results_SR5.background_sys = 0.9;
+        // results_SR5.signal_sys = 0.;
+        // results_SR5.n_signal = _numSR5;
+        // add_result(results_SR5);
+
+        // SignalRegionData results_SR6;
+        // results_SR6.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR6.sr_label = "SR6";
+        // results_SR6.n_observed = 82;
+        // results_SR6.n_background = 82.;
+        // results_SR6.background_sys = 9.5;
+        // results_SR6.signal_sys = 0.;
+        // results_SR6.n_signal = _numSR6;
+        // add_result(results_SR6);
+
+        // SignalRegionData results_SR7;
+        // results_SR7.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR7.sr_label = "SR7";
+        // results_SR7.n_observed = 9.;
+        // results_SR7.n_background = 7.6;
+        // results_SR7.background_sys = 2.8;
+        // results_SR7.signal_sys = 0.;
+        // results_SR7.n_signal = _numSR7;
+        // add_result(results_SR7);
+
+        // SignalRegionData results_SR8;
+        // results_SR8.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR8.sr_label = "SR8";
+        // results_SR8.n_observed = 5.;
+        // results_SR8.n_background = 5.6;
+        // results_SR8.background_sys = 1.6;
+        // results_SR8.signal_sys = 0.;
+        // results_SR8.n_signal = _numSR8;
+        // add_result(results_SR8);
+
+        // SignalRegionData results_SR9;
+        // results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR9.sr_label = "SR9";
+        // results_SR9.n_observed = 1.;
+        // results_SR9.n_background = 1.3;
+        // results_SR9.background_sys = 0.4;
+        // results_SR9.signal_sys = 0.;
+        // results_SR9.n_signal = _numSR9;
+        // add_result(results_SR9);
+
+      // }
+
 
       vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
         vector<vector<HEPUtils::Particle*>> SFOSpair_container;
