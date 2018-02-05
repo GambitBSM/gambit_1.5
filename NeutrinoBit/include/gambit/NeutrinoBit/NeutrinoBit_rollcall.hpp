@@ -53,7 +53,7 @@ START_MODULE
     // Neutrino PMNS matrix in a parametrization where the charged Yukawas are diagonal
     #define FUNCTION UPMNS
     START_FUNCTION(Eigen::Matrix3cd)
-    ALLOW_MODELS(StandardModel_SLHA2, StandardModel_Neutrinos)
+    ALLOW_MODELS(StandardModel_Neutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -66,7 +66,7 @@ START_MODULE
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SMINPUTS, SMInputs)
-    ALLOW_MODELS(StandardModel_SLHA2, StandardModel_Higgs, RightHandedNeutrinos)
+    ALLOW_MODELS(StandardModel_Higgs, RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -431,10 +431,10 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY lnLtau
+  #define CAPABILITY lnLcharmtau
   START_CAPABILITY
 
-    #define FUNCTION lnL_tau
+    #define FUNCTION lnL_charm_tau
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ut1, double)

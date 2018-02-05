@@ -33,18 +33,18 @@ Parameters:
     CKM_rhobar  :  0.117
     CKM_etabar  :  0.353
 
-    alpha1:
-      range: [0, 6.283]
-    alpha2:
-      range: [0, 6.283]
-    delta13:
-      range: [0, 6.283]
-    theta12:
-      fixed_value: 0.5843
-    theta23:
-      fixed_value: 0.7382
-    theta13:
-      fixed_value: 0.1483
+#    alpha1:
+#      range: [0, 6.283]
+#    alpha2:
+#      range: [0, 6.283]
+#    delta13:
+#      range: [0, 6.283]
+#    theta12:
+#      fixed_value: 0.5843
+#    theta23:
+#     fixed_value: 0.7382
+#    theta13:
+#      fixed_value: 0.1483
 
   # Higgs bosom parameters
   StandardModel_Higgs:
@@ -88,16 +88,35 @@ Parameters:
       range: [0.178, 0.211]
 
   StandardModel_Neutrinos:
-    ordering:
-      fixed_value: 1  # 1: normal ordering, 0: inverse ordering
-    min_mass:
-      fixed_value: 0  # 0: massless, 1: 0.23 eV
-    md21:
-      fixed_value: 7.5e-23
-    md31:
-      fixed_value: 2.457e-21
-    md23:
-      fixed_value: 2.449e-21
+#    ordering:
+#      fixed_value: 1  # 1: normal ordering, 0: inverse ordering
+#    min_mass:
+#      fixed_value: 0  # 0: massless, 1: 0.23 eV
+#    md21:
+#      fixed_value: 7.5e-23
+#    md31:
+#      fixed_value: 2.457e-21
+#    md23:
+#      fixed_value: 2.449e-21
+    alpha1:
+      range: [0, 6.283]
+    alpha2:
+      range: [0, 6.283]
+    delta13:
+      range: [0, 6.283]
+    theta12:
+      fixed_value: 0.5843
+    theta23:
+      fixed_value: 0.7382
+    theta13:
+      fixed_value: 0.1483
+    mnu1:
+      fixed_value: 2.300E-10
+    mnu2:
+      fixed_value: 2.30163E-10
+    mnu3:
+      fixed_value: 2.35281E-10
+
 
 Priors:
 
@@ -198,7 +217,7 @@ ObsLikes:
   - capability: lnLnutev
     purpose: LogLike
 
-  - capability: lnLtau
+  - capability: lnLcharmtau
     purpose: LogLike
 
   # Theoretical constraints

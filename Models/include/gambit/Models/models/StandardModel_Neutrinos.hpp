@@ -22,10 +22,13 @@
 
   START_MODEL
 
-  // Mass parameters
-  DEFINEPARS(min_mass, ordering, md21, md31, md23)
+  // Mass parameters (correspoding to the SLHA2 entries 12, 14 and 8 respectively)
+  //DEFINEPARS(min_mass, ordering, md21, md31, md23)
+  DEFINEPARS(mnu1, mnu2, mnu3)
 
-  // PMNS parameters are in the StandardModel_SLHA2 model
+  // PMNS parameters
+  DEFINEPARS(theta12, theta23, theta13)
+  DEFINEPARS(delta13, alpha1, alpha2)
 
 #undef MODEL
 

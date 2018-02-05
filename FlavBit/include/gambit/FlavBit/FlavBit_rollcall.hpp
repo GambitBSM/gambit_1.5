@@ -789,17 +789,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // EDM likelihoods
-  #define CAPABILITY edm_lnL
-  START_CAPABILITY
-    #define FUNCTION edm_likelihood
-    START_FUNCTION(double)
-    DEPENDENCY(edm_e, double)
-    DEPENDENCY(edm_mu, double)
-    DEPENDENCY(edm_tau, double)
-    #undef FUNCTION
-  #undef CAPABILITY
-
 #undef MODULE
 
 

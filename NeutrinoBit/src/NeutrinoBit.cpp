@@ -33,11 +33,15 @@ namespace Gambit
     {
       using namespace Pipes::M_nu;
 
-      int ordering = *Param["ordering"];
-      double m_min = *Param["min_mass"];
-      double md21 = *Param["md21"];
-      double md31 = *Param["md31"];
-      double md23 = *Param["md23"];    
+//      int ordering = *Param["ordering"];
+//      double m_min = *Param["min_mass"];
+//      double md21 = *Param["md21"];
+//      double md31 = *Param["md31"];
+//      double md23 = *Param["md23"];    
+
+      double mnu1 = *Param["mnu1"];
+      double mnu2 = *Param["mnu2"];
+      double mnu3 = *Param["mnu3"];
        
       m_nu(0,1) = 0.0;
       m_nu(0,2) = 0.0;
@@ -46,7 +50,7 @@ namespace Gambit
       m_nu(2,0) = 0.0;
       m_nu(2,1) = 0.0;
 
-      if(ordering == 1) // Normal hierarchy
+/*      if(ordering == 1) // Normal hierarchy
       {
         if(m_min == 0)
         {
@@ -76,7 +80,12 @@ namespace Gambit
           m_nu(0,0) = sqrt(pow(m_nu(1,1), 2.0) - md21);
         }
       }
+*/
+      m_nu(0,0) = mnu1;
+      m_nu(1,1) = mnu2;
+      m_nu(2,2) = mnu3;
     }
+
  
     // PMNS matrix in the Casas-Ibarra paramtetrization
     void UPMNS(Eigen::Matrix3cd& U_nu)

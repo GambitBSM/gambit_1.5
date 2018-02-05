@@ -68,8 +68,8 @@
   DEFINEPARS(CKM_lambda, CKM_A, CKM_rhobar, CKM_etabar)
 
   // PMNS parameters
-  DEFINEPARS(theta12, theta23, theta13)
-  DEFINEPARS(delta13, alpha1, alpha2)
+//  DEFINEPARS(theta12, theta23, theta13)
+//  DEFINEPARS(delta13, alpha1, alpha2)
 
  #undef MODEL
 #endif 
