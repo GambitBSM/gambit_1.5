@@ -42,7 +42,7 @@
 #include "flexiblesusy/src/numerics2.hpp"
 #include "flexiblesusy/src/spectrum_generator_settings.hpp"
 // Switch for debug mode
-#define SPECBIT_DEBUG
+//#define SPECBIT_DEBUG
 
 namespace Gambit
 {
@@ -236,13 +236,9 @@ namespace Gambit
       // Generate spectrum
       spectrum_generator.run(oneset, input);
       const typename MI::Problems& problems = spectrum_generator.get_problems();
-
       MI model_interface(spectrum_generator,oneset,input);
       SI singletdmspec(model_interface, "FlexibleSUSY", "1.5.1");
       
-			double QEWSB  = *input_Param.at("QEWSB");
-			singletdmspec.RunToScaleOverride(QEWSB);
-			
 
       singletdmspec.set_override(Par::mass1,spectrum_generator.get_high_scale(),"high_scale",true);
       singletdmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
@@ -281,7 +277,9 @@ namespace Gambit
             invalid_point().raise(msg.str()); //TODO: This message isn't ending up in the logs.
          }
       }
-
+			double QEWSB  = *input_Param.at("QEWSB");
+			singletdmspec.RunToScaleOverride(QEWSB);
+			
       // Retrieve any mass cuts
       static const Spectrum::mc_info mass_cut = runOptions.getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
       static const Spectrum::mr_info mass_ratio_cut = runOptions.getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");

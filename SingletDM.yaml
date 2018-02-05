@@ -44,7 +44,7 @@ Parameters:
 
   StandardModel_Higgs_running:
     QEWSB: 173
-    mH: 117.277
+    mH: 61.7093
 
   #SingletDM_running:
   #  mS:
@@ -56,9 +56,9 @@ Parameters:
   #  lambda_S: 0
     
   SingletDM_running:
-    lambda_S: 1.20195
-    lambda_hS: 2.54196
-    mS: 2165.07
+    lambda_S: 0.0518738
+    lambda_hS: 7.41575
+    mS: 9244.08
 
   Halo_gNFW_rho0:
     rho0: 0.4
