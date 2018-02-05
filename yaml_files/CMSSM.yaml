@@ -470,6 +470,8 @@ Rules:
   - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
+    options:
+      covariance_samples: 100000
 
   # Values to be used in local disk rotation speed likelihood (all values in km/s)
   - capability: lnL_vrot
