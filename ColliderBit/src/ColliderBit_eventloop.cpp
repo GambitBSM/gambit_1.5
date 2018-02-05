@@ -1916,38 +1916,57 @@ namespace Gambit
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          const size_t NSAMPLE = 10000; ///< @todo TWEAK!!!
-          std::normal_distribution<> unitnormdbn{0,1};
+          const size_t NSAMPLE = 10000 ; ///< @todo TWEAK!!!
+          // std::normal_distribution<> unitnormdbn{0,1};
           Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
-          for (size_t i = 0; i < NSAMPLE; ++i) {
-            Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
-            for (size_t j = 0; j < adata.size(); ++j) {
-              norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
-              norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+
+          #pragma omp parallel
+          {
+            std::normal_distribution<> unitnormdbn{0,1};
+            Eigen::VectorXd llrsums_private = Eigen::VectorXd::Zero(adata.size());
+
+            #pragma omp for nowait
+            for (size_t i = 0; i < NSAMPLE; ++i) {
+
+              Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
+              for (size_t j = 0; j < adata.size(); ++j) {
+                norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
+                norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+              }
+
+              // Rotate rate deltas into the SR basis and shift by SR mean rates
+              const Eigen::VectorXd n_pred_b_sample = n_pred_b + Vb*norm_sample_b;
+              const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + Vsb*norm_sample_sb;
+
+              // Calculate Poisson LLR and add to aggregated LL calculation
+              for (size_t j = 0; j < adata.size(); ++j) {
+                /// @note How to correct negative rates? Discard (scales badly), set to
+                /// epsilon (= discontinuous & unphysical pdf), transform to log-space
+                /// (distorts the pdf quite badly), or something else (skew term)?
+                /// We're using the "set to epsilon" version for now.
+                ///
+                /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
+                const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
+                const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
+                const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                llrsums_private(j) += llr_j;
+              }
+
             }
 
-            // Rotate rate deltas into the SR basis and shift by SR mean rates
-            const Eigen::VectorXd n_pred_b_sample = n_pred_b + Vb*norm_sample_b;
-            const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + Vsb*norm_sample_sb;
-
-            // Calculate Poisson LLR and add to aggregated LL calculation
-            for (size_t j = 0; j < adata.size(); ++j) {
-              /// @note How to correct negative rates? Discard (scales badly), set to
-              /// epsilon (= discontinuous & unphysical pdf), transform to log-space
-              /// (distorts the pdf quite badly), or something else (skew term)?
-              /// We're using the "set to epsilon" version for now.
-              ///
-              /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
-              const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
-              const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
-              const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-              llrsums(j) += llr_j;
+            #pragma omp critical
+            {
+              for (size_t j = 0; j < adata.size(); ++j) { llrsums(j) += llrsums_private(j); }
             }
+          } // End: omp parallel
 
-          }
           // Calculate sum of expected LLRs
           const double ana_dll = llrsums.sum() / (double)NSAMPLE;
           result[adata.begin()->analysis_name + "_DeltaLogLike"] = ana_dll;
+
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_DeltaLogLike : " << ana_dll << std::endl;
+          #endif
 
 
           ////////////////////
