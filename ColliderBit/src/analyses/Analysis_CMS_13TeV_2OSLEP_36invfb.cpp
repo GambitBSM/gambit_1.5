@@ -27,7 +27,7 @@ namespace Gambit {
     private:
 
       // Numbers passing cuts
-      double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8;
+      double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8, _numSR9;
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
@@ -57,6 +57,7 @@ namespace Gambit {
         _numSR6=0;
         _numSR7=0; 
         _numSR8=0; 
+        _numSR9=0; 
 
         NCUTS=13;
         set_luminosity(35.9);
@@ -185,17 +186,18 @@ namespace Gambit {
         if (preselection && mll>86. && mll<96. && met>100. && (nSignalJets==2 || nSignalJets==3)  && (baselineMuons.size()+baselineElectrons.size())==2 && pT_j1>35. && deltaPhi_met_j0>0.4 && deltaPhi_met_j1>0.4) {
           //VZ
           if (nSignalBJets==0 && mT2>80. && mjj<110.) {
-            if (met>100. && met<150.)_numSR1++;
-            if (met>150. && met<250.)_numSR2++;
-            if (met>250. && met<350.)_numSR3++;
-            if (met>350.)_numSR4++;
+            if (met>50. && met<100.)_numSR1++;
+            if (met>100. && met<150.)_numSR2++;
+            if (met>150. && met<250.)_numSR3++;
+            if (met>250. && met<350.)_numSR4++;
+            if (met>350.)_numSR5++;
           }
           //HZ
           if (nSignalBJets==2 && mbb<150. && mT2>200.) {
-            if (met>50. && met<100.)_numSR5++;
-            if (met>100. && met<150.)_numSR6++;
-            if (met>150. && met<250.)_numSR7++;
-            if (met>250.)_numSR8++;
+            if (met>50. && met<100.)_numSR6++;
+            if (met>100. && met<150.)_numSR7++;
+            if (met>150. && met<250.)_numSR8++;
+            if (met>250.)_numSR9++;
           }
         }
 
@@ -282,6 +284,7 @@ namespace Gambit {
         _numSR6 += specificOther->_numSR6;
         _numSR7 += specificOther->_numSR7;
         _numSR8 += specificOther->_numSR8;
+        _numSR9 += specificOther->_numSR9;
       }
 
 
@@ -386,6 +389,16 @@ namespace Gambit {
         results_SR8.signal_sys = 0.;
         results_SR8.n_signal = _numSR8;
         add_result(results_SR8);
+
+        SignalRegionData results_SR9;
+        results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        results_SR9.sr_label = "SR9";
+        results_SR9.n_observed = 1.;
+        results_SR9.n_background = 1.3;
+        results_SR9.background_sys = 0.4;
+        results_SR9.signal_sys = 0.;
+        results_SR9.n_signal = _numSR9;
+        add_result(results_SR9);
 
        
       }
