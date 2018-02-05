@@ -14,6 +14,10 @@
 ///          (ankit.beniwal@adelaide.edu.com)
 ///  \date 2016 Aug, 2017 Jun
 ///
+///  \author Sebastian Wild
+///          (sebastian.wild@desy.de)
+///  \date 2018, Feb
+///
 ///  *********************************************
 
 #include <string>
@@ -29,9 +33,18 @@
 
 using namespace Gambit::Utils;
 
-// Need to define MODEL and PARENT in order for helper macros to work correctly
-#define MODEL DiracDM
-
-  // No translation function is required for the model
-
+#define MODEL DiracDM_sps
+#define PARENT DiracDM
+    void MODEL_NAMESPACE::DiracDM_sps_to_DiracDM (const ModelParameters &myparams, ModelParameters &parentparams)
+    {
+        double mF = myparams["mF"];
+        double lF_s = myparams["lF_s"];
+        double lF_ps = myparams["lF_ps"];
+        double lF = sqrt(lF_s*lF_s + lF_ps*lF_ps);
+        double cosXI = lF_s/lF;
+        parentparams.setValue("mF", mF);
+        parentparams.setValue("lF", lF);
+        parentparams.setValue("cosXI", cosXI);
+    }
+#undef PARENT
 #undef MODEL
