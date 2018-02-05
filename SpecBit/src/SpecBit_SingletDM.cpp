@@ -239,6 +239,10 @@ namespace Gambit
 
       MI model_interface(spectrum_generator,oneset,input);
       SI singletdmspec(model_interface, "FlexibleSUSY", "1.5.1");
+      
+			double QEWSB  = *input_Param.at("QEWSB");
+			singletdmspec.RunToScaleOverride(QEWSB);
+			
 
       singletdmspec.set_override(Par::mass1,spectrum_generator.get_high_scale(),"high_scale",true);
       singletdmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
@@ -295,13 +299,13 @@ namespace Gambit
       double lambda_hs = *Param.at("lambda_hS");
       double lambda_s  = *Param.at("lambda_S");
       
-      double QEWSB  = mS; //*Param.at("QEWSB");
-			/*
-      if (QEWSB < mH)
+      double QEFT  = mS;
+			
+      if (QEFT < sminputs.mT)
       {
-				QEWSB = mH;
+				//QEFT = *Param.at("mZ");
+				QEFT = sminputs.mT;
 			}
-			*/
       
       input.HiggsIN = -0.5*pow(mH,2);
       double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
@@ -309,20 +313,8 @@ namespace Gambit
       input.muSInput = pow(mS,2)-0.5*lambda_hs*pow(vev,2);
       input.LamSHInput = lambda_hs;
       input.LamSInput = lambda_s;
-      input.QEWSB = QEWSB;  // scale where EWSB conditions are applied
-      input.Qin = QEWSB; //scale;  // highest scale at which model is run to
-      /*
-      cout.precision(15);
-		  cout << "Input parameters " << endl;
-		  cout << "vev = " << vev << endl;
-		  cout << "Lambda_hs = " << lambda_hs << endl;
-		  cout << "Lambda_s = " << lambda_s << endl;
-		  cout << "mu2_in = " << -0.5*pow(mH,2) << endl;
-		  cout << "ms2_in = " << input.muSInput << endl;
-      
-      
-      cout << "QEWSB = " << QEWSB << endl;
-      */
+      input.QEWSB = QEFT;  // scale where EWSB conditions are applied
+      input.Qin = QEFT; //scale;  // highest scale at which model is run to
       
     }
 
@@ -445,6 +437,7 @@ namespace Gambit
           invalid_point().raise(msg.str());
         }
       }
+      
 
     }
 
