@@ -7,8 +7,8 @@
 ## 2016-17
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
-## 2017, Nov
-## 2018, Jan
+## 2017 Nov
+## 2018 Jan,Feb
 ##########################################################################
 
 
@@ -68,7 +68,22 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-## So far there are none
+#####
+##  To reproduce the LCDM results of Planck it is
+##  apparently needed to include one massive neutrino
+##  species with a mass of 0.06 eV. To include this
+##  the following optional inputs must be given to
+##  CLASS. (k_pivot = 0.05 is needed for the right
+##  value of A_s, according to J. Lesgourgues)
+####
+
+  - capability: class_set_parameter
+    options:
+      N_ur: 2.0328
+      N_ncdm: 1.
+      m_ncdm: 0.06
+      T_ncdm: 0.71611
+      k_pivot: 0.05
 
 #======== Logging setup ========
 Lxogger:
