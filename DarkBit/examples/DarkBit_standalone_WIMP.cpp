@@ -481,10 +481,10 @@ int main(int argc, char* argv[])
     PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
 
     // Provide bin number in LZ
-    LZ_GetBinEvents.resolveDependency(&LZ_Calc);
-    LZ_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    LZ_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
-    LZ_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_BinEvents);
+    LZ_GetBinBackground.resolveDependency(&LZ_Calc);
+    LZ_GetBinBackground.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+    LZ_GetBinBackground.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
+    LZ_GetBinBackground.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_BinBackground);
 
     // Set generic WIMP mass object
     mwimp_generic.resolveDependency(&TH_ProcessCatalog_WIMP);
@@ -681,7 +681,7 @@ int main(int argc, char* argv[])
       DDCalc_2_0_0_init.reset_and_calculate();
       LZ_Calc.reset_and_calculate();
       DD_bin_counts events;
-      LZ_GetBinEvents.reset_and_calculate();
+      LZ_GetBinBackground.reset_and_calculate();
       events = LZ_GetBinBackground(0);
       nbins = events.nbins;
       std::cout << "Number of LZ bins: " << nbins << std::endl;

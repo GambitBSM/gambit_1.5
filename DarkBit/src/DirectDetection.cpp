@@ -260,13 +260,13 @@ namespace Gambit {
     }
 
     #define DDCALC_BIN(EXPERIMENT, TYPE, NAME)                                     \
-    void CAT_3(EXPERIMENT,_Get,NAME)(DD_bin_counts &result)                        \
+    void CAT_3(EXPERIMENT,_GetBin,NAME)(DD_bin_counts &result)                     \
     {                                                                              \
-      using namespace Pipes::CAT_3(EXPERIMENT,_Get,NAME);                          \
+      using namespace Pipes::CAT_3(EXPERIMENT,_GetBin,NAME);                       \
       result.nbins = BEreq::DD_Bins(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));  \
       for (int ibin=0;ibin<=result.nbins;ibin++) {                                 \
         result.bincounts.push_back(                                                \
-        BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)),ibin)); } \
+        BEreq::CAT(DD_Bin,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)),ibin)); } \
     }
 
     /// Defines functions to perform the DDCalc internal rate calculations,
@@ -287,9 +287,9 @@ namespace Gambit {
       DDCALC_RESULT(EXPERIMENT, double, SignalSD)                                  \
       DDCALC_RESULT(EXPERIMENT, int,    Bins)                                      \
       DDCALC_RESULT(EXPERIMENT, double, LogLikelihood)                             \
-      DDCALC_BIN(EXPERIMENT, int,    BinEvents)                                    \
-      DDCALC_BIN(EXPERIMENT, double, BinBackground)                                \
-      DDCALC_BIN(EXPERIMENT, double, BinSignal)                                    \
+      DDCALC_BIN(EXPERIMENT, int,    Events)                                       \
+      DDCALC_BIN(EXPERIMENT, double, Background)                                   \
+      DDCALC_BIN(EXPERIMENT, double, Signal)                                       \
   
     // Experiments
     DD_EX(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
