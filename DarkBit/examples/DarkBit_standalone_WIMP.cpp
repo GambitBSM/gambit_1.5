@@ -456,9 +456,9 @@ int main(int argc, char* argv[])
 
     // ---- Calculate direct detection constraints ----
 
-    // Calculate direct detection rates for CRESST-II, PandaX 2017, Xenon 1T and PICO-60
-    CRESST_II_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    CRESST_II_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
+    // Calculate direct detection rates for LZ, PandaX 2017, Xenon 1T and PICO-60
+    LZ_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+    LZ_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
     PandaX_2017_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     PandaX_2017_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
     PICO_60_2017_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
@@ -466,10 +466,10 @@ int main(int argc, char* argv[])
     XENON1T_2017_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     XENON1T_2017_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
 
-    // Calculate direct detection likelihood for CRESST-II, PandaX 2017, Xenon 1T and PICO-60
-    CRESST_II_GetLogLikelihood.resolveDependency(&CRESST_II_Calc);
-    CRESST_II_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    CRESST_II_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
+    // Calculate direct detection likelihood for LZ, PandaX 2017, Xenon 1T and PICO-60
+    LZ_GetLogLikelihood.resolveDependency(&LZ_Calc);
+    LZ_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+    LZ_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
     PandaX_2017_GetLogLikelihood.resolveDependency(&PandaX_2017_Calc);
     PandaX_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     PandaX_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
@@ -480,11 +480,11 @@ int main(int argc, char* argv[])
     PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
 
-    // Provide bin number in CRESST_II
-    CRESST_II_GetBinEvents.resolveDependency(&CRESST_II_Calc);
-    CRESST_II_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    CRESST_II_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
-    CRESST_II_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_BinEvents);
+    // Provide bin number in LZ
+    LZ_GetBinEvents.resolveDependency(&LZ_Calc);
+    LZ_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+    LZ_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
+    LZ_GetBinEvents.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_BinEvents);
 
     // Set generic WIMP mass object
     mwimp_generic.resolveDependency(&TH_ProcessCatalog_WIMP);
@@ -675,17 +675,17 @@ int main(int argc, char* argv[])
       TH_ProcessCatalog_WIMP.setOption<std::vector<double>>("brList", daFunk::vec<double>(1., 0., 0., 0., 0., 0., 0., 0.));
 
       s_list = daFunk::logspace(-47., -40., sBins);
-      // Calculate array of sigma_SI and lnL values for CRESST-II, PandaX, XENON1T and PICO-60
+      // Calculate array of sigma_SI and lnL values for LZ, PandaX, XENON1T and PICO-60
       // assuming gps=gns
 
       DDCalc_2_0_0_init.reset_and_calculate();
-      CRESST_II_Calc.reset_and_calculate();
+      LZ_Calc.reset_and_calculate();
       DD_bin_counts events;
-      CRESST_II_GetBinEvents.reset_and_calculate();
-      events = CRESST_II_GetBinEvents(0);
+      LZ_GetBinEvents.reset_and_calculate();
+      events = LZ_GetBinBackground(0);
       nbins = events.nbins;
-      std::cout << "Number of CRESST-II bins: " << nbins << std::endl;
-      std::cout << "Observed events: ";
+      std::cout << "Number of LZ bins: " << nbins << std::endl;
+      std::cout << "Expected backgrounds: ";
       for (int ibin=1;ibin<=nbins;ibin++) {
         std::cout << events.bincounts[ibin] << " ";
       }
@@ -696,7 +696,7 @@ int main(int argc, char* argv[])
       {
         for (size_t j = 0; j < s_list.size(); j++)
         {
-          // Re-initialize DDCalc with CRESST-II/Xenon/PandaX halo parameters
+          // Re-initialize DDCalc with LZ/Xenon/PandaX halo parameters
           Halo_primary_parameters->setValue("rho0", 0.3);
           Halo_primary_parameters->setValue("vrot", 232.7); // v_Earth = 245 km/s
           Halo_primary_parameters->setValue("v0", 220.);
@@ -720,13 +720,13 @@ int main(int argc, char* argv[])
           mwimp_generic.reset_and_calculate();
 
           DDCalc_2_0_0_init.reset_and_calculate();
-          CRESST_II_Calc.reset_and_calculate();
-          CRESST_II_GetLogLikelihood.reset_and_calculate();
+          LZ_Calc.reset_and_calculate();
+          LZ_GetLogLikelihood.reset_and_calculate();
           XENON1T_2017_Calc.reset_and_calculate();
           XENON1T_2017_GetLogLikelihood.reset_and_calculate();
           PandaX_2017_Calc.reset_and_calculate();
           PandaX_2017_GetLogLikelihood.reset_and_calculate();
-          lnL1 = CRESST_II_GetLogLikelihood(0);
+          lnL1 = LZ_GetLogLikelihood(0);
           lnL2 = PandaX_2017_GetLogLikelihood(0);
           lnL3 = XENON1T_2017_GetLogLikelihood(0);
 
@@ -742,7 +742,7 @@ int main(int argc, char* argv[])
           PICO_60_2017_GetLogLikelihood.reset_and_calculate();
           lnL4 = PICO_60_2017_GetLogLikelihood(0);
 
-          //std::cout << "CRESST_II SI lnL = " << lnL1 << std::endl;
+          //std::cout << "LZ SI lnL = " << lnL1 << std::endl;
           //std::cout << "PandaX_2017 SI lnL = " << lnL2 << std::endl;
           //std::cout << "XENON1T_2017 SI lnL = " << lnL3 << std::endl;
           //std::cout << "PICO_60_2017 SI lnL = " << lnL4 << std::endl;
@@ -754,13 +754,13 @@ int main(int argc, char* argv[])
         }
       }
 
-      dump_array_to_file("CRESST_II_SI_table.dat", lnL_array1, m_list, s_list);
+      dump_array_to_file("LZ_SI_table.dat", lnL_array1, m_list, s_list);
       dump_array_to_file("PandaX_2017_SI_table.dat", lnL_array2, m_list, s_list);
       dump_array_to_file("XENON1T_2017_SI_table.dat", lnL_array3, m_list, s_list);
       dump_array_to_file("PICO_60_2017_SI_table.dat", lnL_array4, m_list, s_list);
 
       s_list = daFunk::logspace(-42., -35., sBins);
-      // Calculate array of sigma_SI and lnL values for CRESST-II, PandaX, XENON1T and PICO-60
+      // Calculate array of sigma_SI and lnL values for LZ, PandaX, XENON1T and PICO-60
       // assuming gna=0 (proton-only)
 
       std::cout << "Calculating tables of SD likelihoods." << std::endl;
@@ -768,7 +768,7 @@ int main(int argc, char* argv[])
       {
         for (size_t j = 0; j < s_list.size(); j++)
         {
-          // Re-initialize DDCalc with CRESST-II/Xenon/PandaX halo parameters
+          // Re-initialize DDCalc with LZ/Xenon/PandaX halo parameters
           Halo_primary_parameters->setValue("rho0", 0.3);
           Halo_primary_parameters->setValue("vrot", 232.7); // v_Earth = 245 km/s
           Halo_primary_parameters->setValue("v0", 220.);
@@ -790,13 +790,13 @@ int main(int argc, char* argv[])
           mwimp_generic.reset_and_calculate();
 
           DDCalc_2_0_0_init.reset_and_calculate();
-          CRESST_II_Calc.reset_and_calculate();
-          CRESST_II_GetLogLikelihood.reset_and_calculate();
+          LZ_Calc.reset_and_calculate();
+          LZ_GetLogLikelihood.reset_and_calculate();
           XENON1T_2017_Calc.reset_and_calculate();
           XENON1T_2017_GetLogLikelihood.reset_and_calculate();
           PandaX_2017_Calc.reset_and_calculate();
           PandaX_2017_GetLogLikelihood.reset_and_calculate();
-          lnL1 = CRESST_II_GetLogLikelihood(0);
+          lnL1 = LZ_GetLogLikelihood(0);
           lnL2 = PandaX_2017_GetLogLikelihood(0);
           lnL3 = XENON1T_2017_GetLogLikelihood(0);
 
@@ -812,7 +812,7 @@ int main(int argc, char* argv[])
           PICO_60_2017_GetLogLikelihood.reset_and_calculate();
           lnL4 = PICO_60_2017_GetLogLikelihood(0);
 
-          //std::cout << "CRESST_II SD lnL = " << lnL1 << std::endl;
+          //std::cout << "LZ SD lnL = " << lnL1 << std::endl;
           //std::cout << "PandaX_2017 SD lnL = " << lnL2 << std::endl;
           //std::cout << "XENON1T_2017 SD lnL = " << lnL3 << std::endl;
           //std::cout << "PICO_60_2017 SD lnL = " << lnL4 << std::endl;
@@ -824,7 +824,7 @@ int main(int argc, char* argv[])
         }
       }
 
-      dump_array_to_file("CRESST_II_SD_table.dat", lnL_array1, m_list, s_list);
+      dump_array_to_file("LZ_SD_table.dat", lnL_array1, m_list, s_list);
       dump_array_to_file("PandaX_2017_SD_table.dat", lnL_array2, m_list, s_list);
       dump_array_to_file("XENON1T_2017_SD_table.dat", lnL_array3, m_list, s_list);
       dump_array_to_file("PICO_60_2017_SD_table.dat", lnL_array4, m_list, s_list);

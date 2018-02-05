@@ -309,6 +309,10 @@ namespace Gambit {
     DD_EX(PICO_60_2017)         // C. Amole et al., arXiv:1702.07666
     DD_EX(XENON1T_2017)         // E. Aprile et al., [arxiv:1705.06655]
     DD_EX(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
+    DD_EX(LZ)                   // LZ TDR, [arXiv:1509.02910]
+    DD_EX(PICO_500)             // S. Fallows, talk at TAUP 2017
+    DD_EX(DarkSide)             // C.E. Aalseth et al., [arXiv:1707.08145]
+    DD_EX(DARWIN)               // M. Schumann et al., [arXiv:1506.08309]
 
     // Just in case, to make sure we don't mess with other things elsewhere.
     #undef DD_EX
