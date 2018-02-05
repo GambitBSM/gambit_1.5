@@ -29,9 +29,18 @@
 
 using namespace Gambit::Utils;
 
-// Need to define MODEL and PARENT in order for helper macros to work correctly
-#define MODEL MajoranaDM
-
-  // No translation function is required for the model
-
+#define MODEL MajoranaDM_sps
+#define PARENT MajoranaDM
+    void MODEL_NAMESPACE::MajoranaDM_sps_to_MajoranaDM (const ModelParameters &myparams, ModelParameters &parentparams)
+    {
+        double mX = myparams["mX"];
+        double lX_s = myparams["lX_s"];
+        double lX_ps = myparams["lX_ps"];
+        double lX = sqrt(lX_s*lX_s + lX_ps*lX_ps);
+        double cosXI = lX_s/lX;
+        parentparams.setValue("mX", mX);
+        parentparams.setValue("lX", lX);
+        parentparams.setValue("cosXI", cosXI);
+    }
+#undef PARENT
 #undef MODEL
