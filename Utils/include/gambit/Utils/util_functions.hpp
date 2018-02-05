@@ -187,6 +187,19 @@ namespace Gambit
     /// From: http://stackoverflow.com/a/2845275/1447953
     bool isInteger(const std::string&);
 
+    // Dummy functions for variadic variables to avoid compiler warnings
+    template<typename... T> void dummy_function() {}
+    template<typename T> void dummy_function(T one)
+    {
+      (void)one;
+    }
+
+    template<typename T1, typename... T> void dummy_function(T1 first, T... args)
+    {
+     (void)first;
+     dummy_function(args...);
+    }
+
   }
 
 }

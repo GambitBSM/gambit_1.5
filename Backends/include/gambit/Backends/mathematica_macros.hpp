@@ -45,12 +45,11 @@ namespace Gambit                                                                
       {                                                                                       \
         return NAME##_function FUNCTION_ARG_NAMES(ARGLIST);                                   \
       }                                                                                       \
-                                                                                              \
+                                                                                             \
       /* Define a type NAME_type to be a suitable function pointer. */                        \
       typedef TYPE (*NAME##_type) CONVERT_VARIADIC_ARG(ARGLIST);                              \
                                                                                               \
       extern const NAME##_type NAME = NAME##_function_wrapper;                                \
-                                                                                              \
     }                                                                                         \
   }                                                                                           \
 }

@@ -262,7 +262,6 @@ namespace Gambit
 
     try
     {
-
       // Now switch according to the language of the backend
       if (Backends::backendInfo().needsMathematica.at(be))
       {

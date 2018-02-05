@@ -290,7 +290,11 @@ namespace Gambit
   {
     try
     {
-      // Now switch according to the language of the backend
+      // Initialize variable to avoid issues later
+      needsMathematica[be+ver] = false;
+      needsPython[be+ver] = false;
+
+     // Now switch according to the language of the backend
       if (lang == "MATHEMATICA"
        or lang == "Mathematica")
       {

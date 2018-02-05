@@ -29,12 +29,11 @@
 #include "gambit/Elements/ini_catch.hpp"
 #include "gambit/Backends/backend_singleton.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
-#include "gambit/Backends/mathematica_helpers.hpp"
-
 #include <boost/algorithm/string/replace.hpp>
 
 #ifdef HAVE_MATHEMATICA
-  #include MATHEMATICA_WSTP_H
+ #include "gambit/Backends/mathematica_helpers.hpp"
+ #include MATHEMATICA_WSTP_H
 #endif
 
 
@@ -48,10 +47,10 @@ namespace Gambit
 
     private:
       #ifdef HAVE_MATHEMATICA
-        TYPE _var;
         WSLINK _WSlink;
-        str _symbol;
       #endif
+      TYPE _var;
+      str _symbol;
 
     public:
 
@@ -129,6 +128,12 @@ namespace Gambit
 
           }
           catch (std::exception& e) { ini_catch(e); }
+
+        #else
+
+          // Avoid compiler warnings
+          (void)be;
+          (void)ver;
 
         #endif
 
@@ -226,15 +231,16 @@ namespace Gambit
             }
           }
 
-          _var = val;
-
-          return *this;
-
         #else
 
           backend_error().raise(LOCAL_INFO, "Attempted to assign a C++ type to a mathematica_variable without Mathematica.");
 
         #endif
+
+        _var = val;
+
+        return *this;
+
       }
 
 
@@ -310,6 +316,8 @@ namespace Gambit
           backend_error().raise(LOCAL_INFO, "Attempted to assign a C++ type to a mathematica_variable without Mathematica.");
 
         #endif
+
+        return _var;
       }
 
   };
