@@ -166,10 +166,23 @@ MAKE_INTERFACE
 /// @}
 
 #define MODELNAME MSSMEFTHiggs
-#include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMatMGUT model headers etc.
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMEFTHiggs model headers etc.
 MAKE_INTERFACE
 #undef MODELNAME
 /// @}
+
+#define MODELNAME MSSMEFTHiggs_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMEFTHiggs_mAmu model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+/// @}
+
+#define MODELNAME MSSMatMSUSYEFTHiggs_mAmu
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMatMSUSYEFTHiggs_mAmu model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+/// @}
+
 
 #define MODELNAME SingletDMZ3
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary SingletDMZ3 model headers etc.

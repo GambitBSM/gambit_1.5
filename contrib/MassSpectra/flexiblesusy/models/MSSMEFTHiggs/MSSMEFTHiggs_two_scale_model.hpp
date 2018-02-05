@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Wed 25 Oct 2017 18:10:02
+// File generated at Tue 9 Jan 2018 20:02:21
 
 /**
  * @file MSSMEFTHiggs_two_scale_model.hpp
@@ -24,7 +24,7 @@
  *        value problem using the two_scale solver by solving EWSB
  *        and determine the pole masses and mixings
  *
- * This file was generated at Wed 25 Oct 2017 18:10:02 with FlexibleSUSY
+ * This file was generated at Tue 9 Jan 2018 20:02:21 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 

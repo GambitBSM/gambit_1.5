@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Wed 25 Oct 2017 18:10:03
+// File generated at Tue 9 Jan 2018 20:02:21
 
 #ifndef MSSMEFTHiggs_STANDARD_MODEL_TWO_SCALE_SPECTRUM_GENERATOR_H
 #define MSSMEFTHiggs_STANDARD_MODEL_TWO_SCALE_SPECTRUM_GENERATOR_H

@@ -137,7 +137,13 @@ namespace Gambit
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_ab_as"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_at_at"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_atau_atau"));
+      settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, runOptions.getValueOrDef<int>(1,"top_pole_qcd_corrections"));
+      settings.set(Spectrum_generator_settings::beta_zero_threshold, runOptions.getValueOrDef<int>(1.000000000e-14,"beta_zero_threshold"));
+      settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_up"));
+      settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_down"));
+      settings.set(Spectrum_generator_settings::threshold_corrections, runOptions.getValueOrDef<int>(123111321,"threshold_corrections"));
 
+      
       spectrum_generator.set_settings(settings);
 
       // Generate spectrum
@@ -563,7 +569,7 @@ namespace Gambit
     }
 
 
-  // Similar to above, except this is for MSSMEFTHiggs spectyrum
+  // Similar to above, except this is for MSSMEFTHiggs spectrum
   // generator This uses different names for inputs for many
   // parameters.
 
@@ -698,10 +704,39 @@ namespace Gambit
      const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
 
      // Get input parameters (from flexiblesusy namespace)
-     MSSMEFTHiggs_input_parameters input;
-     double mA = *myPipe::Param.at("mA");
+     MSSMatMSUSYEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
      // This FS spectrum generator has mA as the parameter
-     input.mAInput = mA;
+     input.mAInput = *myPipe::Param.at("mA");
+     fill_MSSM63_input_EFTHiggs(input,myPipe::Param); // Fill the rest
+     result = run_FS_spectrum_generator<MSSMatMSUSYEFTHiggs_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+  }
+
+  // Runs FlexibleSUSY MSSMEFTHiggs model spectrum generator
+   // and has m3^2 and mu as EWSB outputs, so it is for the
+   // MSSMatQ_model.
+  void get_MSSMatQ_spectrum_FlexibleEFTHiggs (Spectrum& result)
+  {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatQ_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMEFTHiggs_input_parameters input;
+     // MSSMatQ also requires input scale to be supplied with name MSUSY
+     input.MSUSY  = *myPipe::Param.at("Qin"); 
+     input.mHu2IN = *myPipe::Param.at("mHu2");
+     input.mHd2IN = *myPipe::Param.at("mHd2");
+     input.SignMu = *myPipe::Param.at("SignMu");
      fill_MSSM63_input_EFTHiggs(input,myPipe::Param); // Fill the rest
      result = run_FS_spectrum_generator<MSSMEFTHiggs_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
 
@@ -712,6 +747,39 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
   }
+
+
+   // Runs FlexibleSUSY MSSMEFTHiggs_mAmu spectrum generator with
+   // boundary conditions at a user specified scale, ie accepts MSSM
+   // parameters at Q, and has DRbar mA and mu as an input and mHu2
+   // and mHd2 as EWSB outputs, so it is for the MSSMatMSUSY_mA model.
+   void get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs (Spectrum& result)
+   {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
+     // This FS spectrum generator has mA as the parameter
+     input.mAInput = *myPipe::Param.at("mA");
+     // Note: Qin has been named MSUSY inside the spectrum generator
+     // but it is a user-input scale in this case.
+     input.MSUSY = *myPipe::Param.at("Qin");
+     fill_MSSM63_input_EFTHiggs(input,myPipe::Param); // Fill the rest
+     result = run_FS_spectrum_generator<MSSMEFTHiggs_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+   }
+  
 
     // Runs FlexibleSUSY MSSM spectrum generator with CMSSM (GUT scale) boundary conditions
     // In principle an identical spectrum can be obtained from the function

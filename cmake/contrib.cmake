@@ -107,7 +107,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
 
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
-  # Always use -O2 for flexiblesusy because it's so damn slow otherwise.
+  # Always use -O2 for flexiblesusy to ensure fast spectrum generation.
   set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS} -Wno-missing-field-initializers")
   set(FS_Fortran_FLAGS "${GAMBIT_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -150,21 +150,22 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
      )
 
   # Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need)
-  set(BUILT_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs SingletDMZ3 SingletDM)
+  set(BUILT_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs MSSMEFTHiggs_mAmu MSSMatMSUSYEFTHiggs_mAmu SingletDMZ3 SingletDM)
 
   # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
   string (REPLACE ";" "," BUILT_FS_MODELS_COMMAS "${BUILT_FS_MODELS}")
   set(config_command ./configure ${FS_OPTIONS} --with-models=${BUILT_FS_MODELS_COMMAS})
   add_custom_target(configure-flexiblesusy COMMAND cd ${FS_DIR} && ${config_command})
   message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILT_FS_MODELS_COMMAS}${ColourReset}")
+  message("${Yellow}-- Using configure command \n${config_command}\n${output}${ColourReset}" )
   execute_process(COMMAND ${config_command}
                   WORKING_DIRECTORY ${FS_DIR}
                   RESULT_VARIABLE result
                   OUTPUT_VARIABLE output
                  )
   if (NOT "${result}" STREQUAL "0")
-    message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
     message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
+    message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
   endif()
   set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
   execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)

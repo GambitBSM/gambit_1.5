@@ -643,6 +643,21 @@ START_MODULE
    CAT_3(EXPERIMENT,_Get,NAME), DD_Experiment, (DDCalc), int, (const str&))   \
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
    CAT_3(EXPERIMENT,_Get,NAME), CAT(DD_,NAME), (DDCalc), TYPE, (const int&))
+
+  #define DD_DECLARE_BIN_FUNCTION(EXPERIMENT,TYPE,NAME)                       \
+  LONG_START_CAPABILITY(MODULE, CAT_3(EXPERIMENT,_,NAME))                     \
+  LONG_DECLARE_FUNCTION(MODULE, CAT_3(EXPERIMENT,_,NAME),                     \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_bin_counts, 0)                             \
+  LONG_DEPENDENCY(MODULE, CAT_3(EXPERIMENT,_Get,NAME),                        \
+   CAT(EXPERIMENT,_Calculate), bool)                                          \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_Experiment, (DDCalc), int, (const str&))   \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_Bins, (DDCalc), int, (const int&))         \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), CAT(DD_,NAME), (DDCalc), TYPE, (const int&,   \
+   const int&))
+
   #define DD_DECLARE_EXPERIMENT(EXPERIMENT)                                   \
   LONG_START_CAPABILITY(MODULE, CAT(EXPERIMENT,_Calculate))                   \
   LONG_DECLARE_FUNCTION(MODULE, CAT(EXPERIMENT,_Calculate),                   \
@@ -656,7 +671,11 @@ START_MODULE
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,Signal)                        \
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,SignalSI)                      \
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,SignalSD)                      \
+  DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,int,Bins)                             \
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,LogLikelihood)                 \
+  DD_DECLARE_BIN_FUNCTION(EXPERIMENT,int,BinEvents)                           \
+  DD_DECLARE_BIN_FUNCTION(EXPERIMENT,double,BinBackground)                    \
+  DD_DECLARE_BIN_FUNCTION(EXPERIMENT,double,BinSignal)                        \
 
   // Declare different DD experiments that exist in DDCalc.
   DD_DECLARE_EXPERIMENT(XENON100_2012)
@@ -668,11 +687,18 @@ START_MODULE
   DD_DECLARE_EXPERIMENT(DARWIN_Xe)
   DD_DECLARE_EXPERIMENT(LUX_2016)
   DD_DECLARE_EXPERIMENT(PandaX_2016)
+  DD_DECLARE_EXPERIMENT(PandaX_2017)
   DD_DECLARE_EXPERIMENT(LUX_2015)
   DD_DECLARE_EXPERIMENT(PICO_2L)
-  DD_DECLARE_EXPERIMENT(PICO_60_F)
+  DD_DECLARE_EXPERIMENT(PICO_60)
   DD_DECLARE_EXPERIMENT(PICO_60_I)
+  DD_DECLARE_EXPERIMENT(PICO_60_F)
   DD_DECLARE_EXPERIMENT(PICO_60_2017)
+  DD_DECLARE_EXPERIMENT(CRESST_II)
+  DD_DECLARE_EXPERIMENT(LZ)
+  DD_DECLARE_EXPERIMENT(PICO_500)
+  DD_DECLARE_EXPERIMENT(DarkSide)
+  DD_DECLARE_EXPERIMENT(DARWIN)
 
 
   // INDIRECT DETECTION: NEUTRINOS =====================================

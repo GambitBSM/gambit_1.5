@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Wed 25 Oct 2017 18:09:55
+// File generated at Tue 9 Jan 2018 20:02:14
 
 /**
  * @file MSSMEFTHiggs_ewsb_solver_interface.hpp
  *
  * @brief contains interface for EWSB solver
  *
- * This file was generated at Wed 25 Oct 2017 18:09:55 with FlexibleSUSY
+ * This file was generated at Tue 9 Jan 2018 20:02:14 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
