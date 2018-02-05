@@ -42,7 +42,7 @@ START_MODULE
     // Neutrino masss matrix
     #define FUNCTION M_nu
     START_FUNCTION(Eigen::Matrix3cd)
-    ALLOW_MODELS(StandardModel_Neutrinos)
+    ALLOW_MODELS(StandardModel_SLHA2)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -53,7 +53,7 @@ START_MODULE
     // Neutrino PMNS matrix in a parametrization where the charged Yukawas are diagonal
     #define FUNCTION UPMNS
     START_FUNCTION(Eigen::Matrix3cd)
-    ALLOW_MODELS(StandardModel_Neutrinos)
+    ALLOW_MODELS(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
