@@ -62,6 +62,61 @@ namespace Gambit
 
     }
 
+    void md21(double &m21)
+    {
+      using namespace Pipes::md21;
+      Eigen::Matrix3cd mnu = *Dep::m_nu;
+
+      if(*Dep::ordering == 1) // Normal ordering
+        m21 = pow(mnu(1,1) - mnu(0,0), 2).real();
+      else  // Inverted ordering
+        m21 = pow(mnu(0,0) - mnu(2,2), 2).real();
+    }
+
+    void md31(double &m31)
+    {
+      using namespace Pipes::md31;
+      Eigen::Matrix3cd mnu = *Dep::m_nu;
+
+      if(*Dep::ordering == 1) // Normal ordering
+        m31 = pow(mnu(2,2) - mnu(0,0), 2).real();
+      else // Inverted ordering
+        m31 = pow(mnu(1,1) - mnu(2,2), 2).real();
+    }
+
+    void md32(double &m32)
+    {
+      using namespace Pipes::md32;
+      Eigen::Matrix3cd mnu = *Dep::m_nu;
+
+      if(*Dep::ordering == 1) // Normal ordering
+        m32 = pow(mnu(2,2) - mnu(1,1), 2).real();
+      else // Inverted ordering
+        m32 = pow(mnu(1,1) - mnu(0,0), 2).real();
+    }
+
+
+    void ordering(bool &ord)
+    {
+      using namespace Pipes::ordering;
+      Eigen::Matrix3cd mnu = *Dep::m_nu;
+
+      if(mnu(2,2).real() < mnu(0,0).real())
+        ord = 0; // Inverted ordering
+      else
+        ord = 1; // Normal ordering
+    }
+
+    void min_mass(double &minmass)
+    {
+      using namespace Pipes::min_mass;
+      Eigen::Matrix3cd mnu = *Dep::m_nu;
+
+      if(*Dep::ordering == 1) // Normal ordering
+        minmass = mnu(0,0).real();
+      else // Inverted ordering
+        minmass = mnu(2,2).real();
+    }
  
     // PMNS matrix in the Casas-Ibarra paramtetrization
     void UPMNS(Eigen::Matrix3cd& U_nu)

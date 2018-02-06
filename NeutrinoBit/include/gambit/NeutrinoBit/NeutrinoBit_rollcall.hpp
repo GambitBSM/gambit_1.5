@@ -47,6 +47,50 @@ START_MODULE
 
   #undef CAPABILITY
 
+  #define CAPABILITY ordering
+  START_CAPABILITY
+    #define FUNCTION ordering
+    START_FUNCTION(bool)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY md21
+  START_CAPABILITY
+    #define FUNCTION md21
+    START_FUNCTION(double)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(ordering, bool)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY md31
+  START_CAPABILITY
+    #define FUNCTION md31
+    START_FUNCTION(double)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(ordering, bool)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY md32
+  START_CAPABILITY
+    #define FUNCTION md32
+    START_FUNCTION(double)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(ordering, bool)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY min_mass
+  START_CAPABILITY
+    #define FUNCTION min_mass
+    START_FUNCTION(double)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(ordering, bool)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   // Construct the neutrino PMNS matrix
   #define CAPABILITY UPMNS
   START_CAPABILITY

@@ -144,8 +144,8 @@ ObsLikes:
   - capability: lnLlepuniv
     purpose: LogLike
 
-  - capability: lnL0nubb
-    purpose: LogLike
+#  - capability: lnL0nubb
+#    purpose: LogLike
 
   - capability: lnLckm
     purpose: LogLike
@@ -200,6 +200,21 @@ ObsLikes:
     purpose: LogLike
 
   # Observables
+
+  - capability: ordering
+    purpose: Observable
+
+  - capability: md21
+    purpose: Observable
+
+  - capability: md31
+    purpose: Observable
+
+  - capability: md32
+    purpose: Observable
+
+  - capability: min_mass
+    purpose: Observable
 
   - capability: Ue1
     purpose: Observable
