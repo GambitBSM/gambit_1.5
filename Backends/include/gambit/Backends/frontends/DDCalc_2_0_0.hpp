@@ -101,24 +101,14 @@ BE_FUNCTION(DARWIN_Init,         int, (), "C_DDCalc_darwin_init",         "DARWI
 // values are already set via DDCalc_InitHalo routine, so it need not be called at all if the default values are to be used.
 BE_FUNCTION(DDCalc_SetSHM, void, (const int&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setshm", "SetSHM")
 
-// Set the WIMP mass and couplings/cross-sections. There are three versions, depending on how the couplings are specified:
-//   * mfa:    mass, fp, fn, ap, an
-//   * mG:     mass, Gp_SI, Gn_SI, Gp_SD, Gn_SD
-//   * msigma: mass, sigmapSI, sigmanSI, sigmapSD, sigmanSD
-//  Units: mass [GeV]; f, G [GeV^-2]; a [unitless]; sigma [pb]
-// Here, f & a are the typical WIMP-nucleon couplings for spin-independent (SI) and spin-dependent (SD) interactions.
-// The G's are the effective 4 fermion vertex couplings, related to f & a by a normalization factor.  The sigmas are WIMP-
-// nucleon scattering cross-sections; a negative value can be used to indicated the corresponding coupling should be taken
-// to be negative.
-BE_FUNCTION(DDCalc_SetWIMP_mfa,    void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_mfa",    "SetWIMP_mfa")
-BE_FUNCTION(DDCalc_SetWIMP_mG,     void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_mg",     "SetWIMP_mG")
-BE_FUNCTION(DDCalc_SetWIMP_msigma, void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_msigma", "SetWIMP_msigma")
+// Set the WIMP mass and couplings for the Higgs portal DM models.
+//    *higgsportal:  mass, fsp, fsn, app, apn
+//  Units: mass [GeV]; f [GeV^-2] = pure scalar coupling; a [GeV^-2] = pure pseudoscalar coupling
+// Convention: f = G/2 where G is the effective 4 vertex DM-nucleon coupling.
+BE_FUNCTION(DDCalc_SetWIMP_higgsportal, void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_higgsportal", "SetWIMP_higgsportal")
 
-// Get the WIMP mass and couplings/cross-sections. Same signature and units as above for setters.  The only difference is
-// that the WIMP-nucleon cross-sections are always positive (physical) values.
-BE_FUNCTION(DDCalc_GetWIMP_mfa,    void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_mfa",    "GetWIMP_mfa")
-BE_FUNCTION(DDCalc_GetWIMP_mG,     void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_mg",     "GetWIMP_mG")
-BE_FUNCTION(DDCalc_GetWIMP_msigma, void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_msigma", "GetWIMP_msigma")
+// Get the WIMP mass and couplings for the Higgs portal DM models.
+BE_FUNCTION(DDCalc_GetWIMP_higgsportal, void, (const int&, double&, double&, double&, double&, double&), "C_DDCalc_ddcalc_getwimp_higgsportal", "GetWIMP_higgsportal")
 
 // Specify the minimum recoil energy to be included in the rate calculations [keV].  Note the efficiency curves already account for
 // detector and analysis thresholds regardless of this setting, so setting this to 0 keV (the default behavior when initialization is
