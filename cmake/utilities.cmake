@@ -29,6 +29,7 @@
 #************************************************
 
 include(CMakeParseArguments)
+include(ExternalProject)
 
 # Add precompiled header support
 ##include(cmake/PrecompiledHeader.cmake)
@@ -215,6 +216,16 @@ function(remove_build_files)
   endforeach()
 endfunction()
 
+# Macro to set up internal variables for contrib version of pybind11
+macro(use_contributed_pybind11)
+  set(pybind11_FOUND TRUE)
+  set(pybind11_DIR "${pybind11_CONTRIB_DIR}")
+  set(pybind11_VERSION "${PREFERRED_pybind11_VERSION}")
+  add_subdirectory("${pybind11_DIR}")
+  add_custom_target(nuke-pybind11 COMMAND ${CMAKE_COMMAND} -E remove_directory "${pybind11_DIR}")
+  add_dependencies(nuke-contrib nuke-pybind11)
+endmacro()
+
 # Function to add GAMBIT executable
 function(add_gambit_executable executablename LIBRARIES)
   cmake_parse_arguments(ARG "" "" "SOURCES;HEADERS;" ${ARGN})
@@ -265,8 +276,11 @@ function(add_gambit_executable executablename LIBRARIES)
   if(Mathematica_FOUND AND Mathematica_WSTP_FOUND)
     set(LIBRARIES ${LIBRARIES} ${Mathematica_WSTP_LIBRARIES})
   endif()
+  if(pybind11_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${PYTHON_LIBRARIES})
+  endif()
 
-  target_link_libraries(${executablename} ${LIBRARIES} yaml-cpp)
+  target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp)
   add_dependencies(${executablename} mkpath)
 
   #For checking if all the needed libs are present.  Never add them manually with -lsomelib!!
