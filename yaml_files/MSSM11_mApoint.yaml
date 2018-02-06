@@ -1,5 +1,5 @@
 ##########################################################################
-## GAMBIT configuration for running a scan of the CMSSM using Diver.
+## GAMBIT configuration for running a scan of the MSSM11 using Diver.
 ##
 ## Includes likelihoods for LHC and LEP particle searches, LHC and LEP Higgs
 ## searches (and LHC signal strengths), flavour physics, indirect and
@@ -78,8 +78,8 @@ Printer:
 
   printer: hdf5
   options:
-    output_file: "CMSSM.hdf5"
-    group: "/CMSSM"
+    output_file: "MSSM11.hdf5"
+    group: "/MSSM11"
 
 
 Scanner:
@@ -172,6 +172,9 @@ ObsLikes:
 
     - purpose:    LogLike
       capability: b2sgamma_LL
+
+    - purpose:    LogLike
+      capability: LUV_LL
 
     # Precision physics likelihoods
     - capability: lnL_W_mass
@@ -529,40 +532,26 @@ Rules:
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:
-      analyses: [ ["ATLAS_8TeV_0LEP_20invfb",
-                   "ATLAS_8TeV_0LEPStop_20invfb",
-                   "ATLAS_8TeV_1LEPbb_20invfb",
-                   "ATLAS_8TeV_1LEPStop_20invfb",
-                   "ATLAS_8TeV_2bStop_20invfb",
-                   "ATLAS_8TeV_2LEPEW_20invfb",
-                   "ATLAS_8TeV_2LEPStop_20invfb",
-                   "ATLAS_8TeV_3LEPEW_20invfb"],
-                  ["ATLAS_13TeV_0LEP_13invfb",
+      analyses: [ ["ATLAS_13TeV_0LEP_36invfb",
                    "ATLAS_13TeV_MultiLEP_36invfb",
-                   "ATLAS_13TeV_0LEPStop_20invfb",
+                   "ATLAS_13TeV_0LEPStop_36invfb",
+                   "ATLAS_13TeV_1LEPStop_36invfb",
                    "ATLAS_13TeV_2LEPStop_36invfb",
                    "ATLAS_13TeV_RJ3L_lowmass_36invfb",
                    "ATLAS_13TeV_2bMET_36invfb"] ]
-
-                   # "ATLAS_13TeV_1LEPStop_36invfb",
 
   # CMS analysis setup
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
-      analyses: [ ["CMS_8TeV_1LEPDMTOP_20invfb",
-                   "CMS_8TeV_2LEPDMTOP_20invfb",
-                   "CMS_8TeV_3LEPEW_20invfb",
-                   "CMS_8TeV_MONOJET_20invfb"],
-                  ["CMS_13TeV_0LEP_13invfb",
+      analyses: [ ["CMS_13TeV_0LEP_36invfb",
                    "CMS_13TeV_1LEPbb_36invfb",
-                   "CMS_13TeV_2LEPsoft_36invfb",
                    "CMS_13TeV_2OSLEP_36invfb",
+                   "CMS_13TeV_2LEPsoft_36invfb",
                    "CMS_13TeV_1LEPStop_36invfb",
-                   "CMS_13TeV_MultiLEP_36invfb"] ]
-
-                   # "CMS_13TeV_2LEPStop_36invfb",
-                   # "CMS_13TeV_MONOJET_36invfb",
+                   "CMS_13TeV_2LEPStop_36invfb",
+                   "CMS_13TeV_MultiLEP_36invfb",
+                   "CMS_13TeV_MONOJET_36invfb" ] ]
 
   # Choose Monte Carlo event simulator and number of events to run.
   - capability:  ColliderOperator
@@ -574,10 +563,10 @@ Rules:
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
-      min_nEvents: [5000,5000]
-      max_nEvents: [50000,50000]
-      events_between_convergence_checks: [5000,5000]
-      target_fractional_uncert: [0.3,0.3]
+      min_nEvents: [5000]
+      max_nEvents: [50000]
+      events_between_convergence_checks: [5000]
+      target_fractional_uncert: [0.3]
       halt_when_systematic_dominated: true
       all_SR_must_converge: false
 
