@@ -82,7 +82,7 @@ namespace Gambit
       }
     }
    
-    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
+    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; R_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
     void RHN_R_pi(double& R_pi)
     {
       using namespace Pipes::RHN_R_pi;
@@ -194,7 +194,7 @@ namespace Gambit
         e_f_tau += e_fac_tau[i];
         mu_f_tau += mu_fac_tau[i];
       }
-      d_r_tau = ((1.0 - e_f_tau)/(1.0 - mu_f_tau)) - 1.0;
+      d_r_tau = ((1.0 - mu_f_tau)/(1.0 - e_f_tau)) - 1.0;
       R_tau = R_tau_SM * (1.0 + d_r_tau);
     }
 
@@ -205,13 +205,12 @@ namespace Gambit
       double R_K = *Dep::R_K;
       double R_tau = *Dep::R_tau;
 
-      // TODO: change to 1sigma
-      double R_pi_exp = 1.23e-4;
-      double R_pi_err = 0.012e-4;
-      double R_K_exp = 2.488e-5;
-      double R_K_err = 0.03e-5;
-      double R_tau_exp = 0.9764;
-      double R_tau_err = 0.009;
+      double R_pi_exp = 1.23e-4; // Phys.Rev.Lett. 70 (1993) 17-20  
+      double R_pi_err = 0.005e-4;
+      double R_K_exp = 2.488e-5; // 1212.4012
+      double R_K_err = 0.010e-5;
+      double R_tau_exp = 0.9762; // 1612.07233 
+      double R_tau_err = 0.0028;
 
       result_lepuniv = 0.0;
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
