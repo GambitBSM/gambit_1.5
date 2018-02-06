@@ -264,6 +264,15 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY R_W
+  START_CAPABILITY
+    #define FUNCTION RHN_R_W
+    START_FUNCTION(std::vector<double>)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnLlepuniv
   START_CAPABILITY
     #define FUNCTION lnL_lepuniv
@@ -271,6 +280,7 @@ START_MODULE
     DEPENDENCY(R_pi, double)
     DEPENDENCY(R_K, double)
     DEPENDENCY(R_tau, double)
+    DEPENDENCY(R_W, std::vector<double>)
     #undef FUNCTION
   #undef CAPABILITY
 
