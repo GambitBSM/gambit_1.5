@@ -396,7 +396,7 @@ namespace Gambit {
 	  metVecCorr+=lep->mom();
 	}
 
-	double metCorr = metVecCorr.pT();
+	// double metCorr = metVecCorr.pT();
 
 	
 	//Common Selection 
@@ -407,7 +407,7 @@ namespace Gambit {
 	
 	bool zeroLep = (signalLeptons.size()==0);
 	bool oneLep  = (signalLeptons.size()==1);
-	bool twoLep  = ((signalElectrons.size()==2 && muons.size()==0) || (signalMuons.size()==2 && electrons.size()==0)); //DF
+	// bool twoLep  = ((signalElectrons.size()==2 && muons.size()==0) || (signalMuons.size()==2 && electrons.size()==0)); //DF
 
 	double meff2j = met;
 	double meff = met;
@@ -466,14 +466,14 @@ namespace Gambit {
 
 	double mtmin = 9999.;
 	
-	for(int jet=0;jet<signalJets35.size();jet++){
+	for(size_t jet=0;jet<signalJets35.size();jet++){
 	  double mt_tmp = sqrt(2.*signalJets35[jet]->pT()*met*(1. - cos(signalJets35[jet]->mom().deltaPhi(metVec))));
 	  if(mt_tmp<mtmin && jet<=3)mtmin=mt_tmp;
 	}
 
 	double mtminb = 9999.;
 	
-	for(int jet=0;jet<signalBJets35.size();jet++){
+	for(size_t jet=0;jet<signalBJets35.size();jet++){
 	  double mt_tmp = sqrt(2.*signalBJets35[jet]->pT()*met*(1. - cos(signalBJets35[jet]->mom().deltaPhi(metVec))));
 	  if(mt_tmp<mtminb && jet<=1)mtminb=mt_tmp;
 	}
@@ -481,7 +481,7 @@ namespace Gambit {
 
 	
 	double amt2 = 0; //need to identify the two bjets here
-	double mbb  = 0;
+	// double mbb  = 0;
 
 	/*int bj1=-1; int bj2=-1;
 	for(unsigned int ij=0; ij < signalJets35.size() ; ij++){
@@ -501,7 +501,7 @@ namespace Gambit {
 	//cout << "nBjets35 " << nBjets35 << " bj2 " << bj2 << endl;
 	
 	if(nBjets35==2){
-	  mbb = (signalBJets35[0]->mom() + signalBJets35[1]->mom()).m();
+	  // mbb = (signalBJets35[0]->mom() + signalBJets35[1]->mom()).m();
 	  int bj1=0;
 	  int bj2=1;
 	  if(oneLep){
@@ -522,11 +522,11 @@ namespace Gambit {
 	      mt2_event_a.set_momenta(pa_a,pb_a,pmiss_a);
 	      mt2_event_a.set_mn(mn_a);
 	      
-	      double amt2 = mt2_event_a.get_mt2();
+	      // double amt2 = mt2_event_a.get_mt2();
 
 	      // Now try new Lester method
 
-	      double amt2_new = asymm_mt2_lester_bisect::get_mT2((signalLeptons[0]->mom()+signalJets35[bj2]->mom()).m(), (signalLeptons[0]->mom()+signalJets35[bj2]->mom()).px(), (signalLeptons[0]->mom()+signalJets35[bj2]->mom()).py(), signalJets35[bj1]->mom().m(), signalJets35[bj1]->mom().px(), signalJets35[bj1]->mom().py(), metVec.px(), metVec.py(), 0., 0.);
+	      // double amt2_new = asymm_mt2_lester_bisect::get_mT2((signalLeptons[0]->mom()+signalJets35[bj2]->mom()).m(), (signalLeptons[0]->mom()+signalJets35[bj2]->mom()).px(), (signalLeptons[0]->mom()+signalJets35[bj2]->mom()).py(), signalJets35[bj1]->mom().m(), signalJets35[bj1]->mom().px(), signalJets35[bj1]->mom().py(), metVec.px(), metVec.py(), 0., 0.);
 
 	      //cout << "MT2 original " << amt2 << " amt2_new " << amt2_new << endl;
 	      
@@ -545,7 +545,7 @@ namespace Gambit {
 	      mt2_event_a.set_momenta(pa_a,pb_a,pmiss_a);
 	      mt2_event_a.set_mn(mn_a);
 	      
-	      double amt2 = mt2_event_a.get_mt2();
+	      // double amt2 = mt2_event_a.get_mt2();
 
 	    }
 	    //amt2 = calcMT2(myjets[bj1], signalLeptons[0]+myjets[bj1], metVec);
@@ -579,7 +579,7 @@ namespace Gambit {
 	
 	double ht4=0;
 	double meff4j = met;
-	for(int jet=0;jet<signalJets20.size();jet++){
+	for(size_t jet=0;jet<signalJets20.size();jet++){
 	  if(jet<3)continue;
 	  ht4 += signalJets20[jet]->pT();
 	  meff4j += signalJets20[jet]->pT();

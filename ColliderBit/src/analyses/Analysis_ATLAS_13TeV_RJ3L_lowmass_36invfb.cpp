@@ -1232,7 +1232,7 @@ namespace Gambit {
           // m_R_H2Pa_H2Pb = m_H2Pa/m_H2Pb;
           // m_R_H3Pa_H3Pb = m_H3Pa/m_H3Pb;
           m_R_minH2P_minH3P = m_minH2P/m_minH3P;
-          std::cout << " m_R_minH2P_minH3P " << m_R_minH2P_minH3P << " " << m_minH2P << " " <<  m_minH3P << std::endl;
+          // std::cout << " m_R_minH2P_minH3P " << m_R_minH2P_minH3P << " " << m_minH2P << " " <<  m_minH3P << std::endl;
           // double H3PTa = vP_V1aPa.Pt() + vP_V2aPa.Pt() + vP_IaPa.Pt();
           
           // m_minR_pT2i_HT3Pi = std::min(vP_V1aPa.Pt()/H3PTa,vP_V2aPa.Pt()/H3PTa);

@@ -630,7 +630,8 @@ namespace Gambit {
           myRandom.SetSeed(signalJets[0]->pT());
           
           int PEs = 100;
-          double smear_factor, ETmissmean = 0, ETmissRMS = 0;
+          // double smear_factor;
+          double ETmissmean = 0, ETmissRMS = 0;
           for (int j = 0; j < PEs; ++j) 
           {
             double jetHtx = leptonHtMiss.px();
@@ -810,7 +811,7 @@ namespace Gambit {
         bool is_bC2x_diag=false;
         bool is_bC2x_med=false;
         bool is_bCbv=false;
-        bool is_DM_low_loose=false;
+        // bool is_DM_low_loose=false;  // <-- We currently don't use this
         bool is_DM_low=false;
         bool is_DM_high=false;
 
@@ -858,10 +859,11 @@ namespace Gambit {
               WReclM >= 70 && WReclM <= 100 && dPhiMetLep > 1.2 && baselineLeptons[0]->pT() > 60)
             is_bCbv=true;
 
-          //DM_low_loose
-          if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 &&
-              Met > 300 && mT > 120 && HtSigMiss > 14 && amT2 > 140 && dPhiMetLep > 0.8 && absDPhiJiMet > 1.4)
-            is_DM_low_loose=true;
+          // We currently don't use this.
+          // //DM_low_loose
+          // if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[1]->pT() > 60 && signalJets[2]->pT() > 40 &&
+          //     Met > 300 && mT > 120 && HtSigMiss > 14 && amT2 > 140 && dPhiMetLep > 0.8 && absDPhiJiMet > 1.4)
+          //   is_DM_low_loose=true;
           
           //DM_low
           if (nJets > 3 && nBJets > 0 && preselHighMet && signalJets[0]->pT() > 120 && signalJets[1]->pT() > 85 &&
