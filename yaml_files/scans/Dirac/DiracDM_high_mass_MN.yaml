@@ -142,21 +142,28 @@ Rules:
       
   # Set v0 to 240 +/- 8 km/s based on Reid et al [arXiv:1401.5377]
   - capability: lnL_v0
-    function: lnL_v0_gassian
+    function: lnL_v0_gaussian
     options:
       v0_obs: 240
       v0_obserr: 8
       
   # Set vesc to 533 +/- 32 km/s based on RAVE survey [arXiv:1309.4293]
   - capability: lnL_vesc
-    function: lnL_vesc_gassian
+    function: lnL_vesc_gaussian
     options:
       v0_obs: 533
       v0_obserr: 31.9
 
+  # Choose to use capgen for solar capture
+  - capability: capture_rate_Sun
+    function: capture_rate_Sun_vnqn
+    
+  - capability: equilibration_time_Sun
+    function: equilibration_time_Sun_FermionDMHiggsPortal
+
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
-    function: RD_fraction_rescaled
+    function: RD_fraction_leq_one
 
   # Choose to use detailed Fermi Pass-8 dwarfs likelihoood from gamLike
   - capability: lnL_FermiLATdwarfs
