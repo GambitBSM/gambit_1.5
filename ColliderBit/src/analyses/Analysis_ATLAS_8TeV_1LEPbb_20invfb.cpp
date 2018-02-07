@@ -33,14 +33,14 @@ namespace Gambit {
       vector<string> cutFlowVector_str;
       size_t NCUTS;
 
-      Perf_Plot* plots_2bjets;	
-      Perf_Plot* plots_mbb;	
-      Perf_Plot* plots_HEPmct;	
-      Perf_Plot* plots_HEPmt;	
-      Perf_Plot* plots_HEPnbj;	
-      Perf_Plot* plots_HEPmbb;	
-      ofstream cutflowFile;
-      string analysisRunName;
+      // Perf_Plot* plots_2bjets;	
+      // Perf_Plot* plots_mbb;	
+      // Perf_Plot* plots_HEPmct;	
+      // Perf_Plot* plots_HEPmt;	
+      // Perf_Plot* plots_HEPnbj;	
+      // Perf_Plot* plots_HEPmbb;	
+      // ofstream cutflowFile;
+      // string analysisRunName;
 
     public:
 
@@ -69,15 +69,15 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
 
-	analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb";
+	// analysisRunName = "ATLAS_8TeV_1LEPbb_20invfb";
 
-	vector<const char*> variablesNames = {"met","mct","mbb","mt","j0pt","lpt","nbj","j1pt","j0eta","j1eta","jjdeltaR"};
-	plots_2bjets = new Perf_Plot(analysisRunName+"_2bjets", &variablesNames);
-	plots_mbb = new Perf_Plot(analysisRunName+"_mbb", &variablesNames);
-	plots_HEPmct = new Perf_Plot(analysisRunName+"_HEPmct", &variablesNames);
-	plots_HEPmt = new Perf_Plot(analysisRunName+"_HEPmt", &variablesNames);
-	plots_HEPnbj = new Perf_Plot(analysisRunName+"_HEPnbj", &variablesNames);
-	plots_HEPmbb = new Perf_Plot(analysisRunName+"_HEPmbb", &variablesNames);
+	// vector<const char*> variablesNames = {"met","mct","mbb","mt","j0pt","lpt","nbj","j1pt","j0eta","j1eta","jjdeltaR"};
+	// plots_2bjets = new Perf_Plot(analysisRunName+"_2bjets", &variablesNames);
+	// plots_mbb = new Perf_Plot(analysisRunName+"_mbb", &variablesNames);
+	// plots_HEPmct = new Perf_Plot(analysisRunName+"_HEPmct", &variablesNames);
+	// plots_HEPmt = new Perf_Plot(analysisRunName+"_HEPmt", &variablesNames);
+	// plots_HEPnbj = new Perf_Plot(analysisRunName+"_HEPnbj", &variablesNames);
+	// plots_HEPmbb = new Perf_Plot(analysisRunName+"_HEPmbb", &variablesNames);
 
       }
 
@@ -242,15 +242,15 @@ namespace Gambit {
           }
         }                      
 
-	if (preselection) {
-	  vector<double> variables={met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT(), (double)nSignalBJets, signalJets.at(1)->pT(),signalJets.at(0)->eta(), signalJets.at(1)->eta(), signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom())};
-	  if (met>50. && mT>40. && mbb>40. && nSignalBJets==2)plots_2bjets->fill(&variables);
-	  if (met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met>100. && mCT>160. && mT>100. && mbb>45. && mbb<195.)plots_mbb->fill(&variables);
-          if (nSignalBJets==2 && met>100. && mT>100. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmct->fill(&variables);
-          if (nSignalBJets==2 && met>100. && mCT>160. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmt->fill(&variables);
-          if (nSignalBJets==2 && met>100 && mCT>160. && mT>100)plots_HEPmbb->fill(&variables);
-          if (met>100. && mCT>160. && mT>100. && mbb>105. && mbb<135.)plots_HEPnbj->fill(&variables);
-	}
+	// if (preselection) {
+	//   vector<double> variables={met, mCT, mbb, mT, signalJets.at(0)->pT(), signalLeptons.at(0)->pT(), (double)nSignalBJets, signalJets.at(1)->pT(),signalJets.at(0)->eta(), signalJets.at(1)->eta(), signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom())};
+	//   if (met>50. && mT>40. && mbb>40. && nSignalBJets==2)plots_2bjets->fill(&variables);
+	//   if (met>50. && mT>40. && mbb>40. && nSignalBJets==2 && met>100. && mCT>160. && mT>100. && mbb>45. && mbb<195.)plots_mbb->fill(&variables);
+ //          if (nSignalBJets==2 && met>100. && mT>100. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmct->fill(&variables);
+ //          if (nSignalBJets==2 && met>100. && mCT>160. && mbb>45. && mbb<195. && (mbb<105. || mbb>135.))plots_HEPmt->fill(&variables);
+ //          if (nSignalBJets==2 && met>100 && mCT>160. && mT>100)plots_HEPmbb->fill(&variables);
+ //          if (met>100. && mCT>160. && mT>100. && mbb>105. && mbb<135.)plots_HEPnbj->fill(&variables);
+	// }
 
 	cutFlowVector_str[1] = "Lepton + 2 b-jets";
         cutFlowVector_str[2] = "$E_{T}^{miss} > 100 GeV$";

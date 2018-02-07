@@ -62,8 +62,8 @@ namespace Gambit {
       // vector<double> cutFlowVector5ATLAS_300_150;
       // double xsec5ATLAS_300_150; 
 
-      ofstream cutflowFile;
-      string analysisRunName;
+      // ofstream cutflowFile;
+      // string analysisRunName;
 
 
     public:
@@ -137,7 +137,7 @@ namespace Gambit {
           cutFlowVector5_str.push_back("");
         }
 
-        analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb";
+        // analysisRunName = "ATLAS_13TeV_MultiLEP_36invfb";
       }
 
       struct ptComparison {
@@ -673,63 +673,63 @@ namespace Gambit {
 	//   }
 	// }
 
-	if (analysisRunName.find("800_600") != string::npos){
+	// if (analysisRunName.find("800_600") != string::npos){
 
-  	  cutFlowVector4_str[0] = "All events";
-  	  cutFlowVector4_str[1] = "3 signal leptons \\& SFOS";
-  	  cutFlowVector4_str[2] = "Pass event cleaning";
-  	  cutFlowVector4_str[3] = "$m_{T}^{min} > 110 GeV$";
-  	  cutFlowVector4_str[4] = "$E_{T}^{miss} > 130 GeV$";
-  	  cutFlowVector4_str[5] = "$m^{min}_{SFOS} < 81.2 GeV$";
-  	  cutFlowVector4_str[6] = "$20 < p_{T}^{l2} < 30 GeV$";
-  	  cutFlowVector4_str[7] = "$p_{T}^{l2} > 30 GeV$";
-  	  cutFlowVector4_str[8] = "$m^{min}_{SFOS} > 101.2 GeV$";
-  	  cutFlowVector4_str[9] = "$20 < p_{T}^{l2} < 50 GeV$";
-  	  cutFlowVector4_str[10] = "$50 < p_{T}^{l2} < 80 GeV$";
-  	  cutFlowVector4_str[11] = "$p_{T}^{l2} > 80 GeV$";
+ //  	  cutFlowVector4_str[0] = "All events";
+ //  	  cutFlowVector4_str[1] = "3 signal leptons \\& SFOS";
+ //  	  cutFlowVector4_str[2] = "Pass event cleaning";
+ //  	  cutFlowVector4_str[3] = "$m_{T}^{min} > 110 GeV$";
+ //  	  cutFlowVector4_str[4] = "$E_{T}^{miss} > 130 GeV$";
+ //  	  cutFlowVector4_str[5] = "$m^{min}_{SFOS} < 81.2 GeV$";
+ //  	  cutFlowVector4_str[6] = "$20 < p_{T}^{l2} < 30 GeV$";
+ //  	  cutFlowVector4_str[7] = "$p_{T}^{l2} > 30 GeV$";
+ //  	  cutFlowVector4_str[8] = "$m^{min}_{SFOS} > 101.2 GeV$";
+ //  	  cutFlowVector4_str[9] = "$20 < p_{T}^{l2} < 50 GeV$";
+ //  	  cutFlowVector4_str[10] = "$50 < p_{T}^{l2} < 80 GeV$";
+ //  	  cutFlowVector4_str[11] = "$p_{T}^{l2} > 80 GeV$";
 
-          // cutFlowVector4ATLAS_800_600[0]=9291.;
-          // cutFlowVector4ATLAS_800_600[1]=25.13;
-          // cutFlowVector4ATLAS_800_600[2]=23.54;
-          // cutFlowVector4ATLAS_800_600[3]=14.43;
-          // cutFlowVector4ATLAS_800_600[4]=10.22;
-          // cutFlowVector4ATLAS_800_600[5]=2.10;
-          // cutFlowVector4ATLAS_800_600[6]=0.11;
-          // cutFlowVector4ATLAS_800_600[7]=1.99;
-          // cutFlowVector4ATLAS_800_600[8]=6.8;
-          // cutFlowVector4ATLAS_800_600[9]=2.53;
-          // cutFlowVector4ATLAS_800_600[10]=3.01;
-          // cutFlowVector4ATLAS_800_600[11]=1.25;
+ //          // cutFlowVector4ATLAS_800_600[0]=9291.;
+ //          // cutFlowVector4ATLAS_800_600[1]=25.13;
+ //          // cutFlowVector4ATLAS_800_600[2]=23.54;
+ //          // cutFlowVector4ATLAS_800_600[3]=14.43;
+ //          // cutFlowVector4ATLAS_800_600[4]=10.22;
+ //          // cutFlowVector4ATLAS_800_600[5]=2.10;
+ //          // cutFlowVector4ATLAS_800_600[6]=0.11;
+ //          // cutFlowVector4ATLAS_800_600[7]=1.99;
+ //          // cutFlowVector4ATLAS_800_600[8]=6.8;
+ //          // cutFlowVector4ATLAS_800_600[9]=2.53;
+ //          // cutFlowVector4ATLAS_800_600[10]=3.01;
+ //          // cutFlowVector4ATLAS_800_600[11]=1.25;
 
-          for (size_t j=0;j<NCUTS4;j++){
-            if(
-              (j==0) ||
+ //          for (size_t j=0;j<NCUTS4;j++){
+ //            if(
+ //              (j==0) ||
 
-	      (j==1 && nSignalLeptons==3 && SFOSpairs.size()>0) ||   
+	//       (j==1 && nSignalLeptons==3 && SFOSpairs.size()>0) ||   
 
-	      (j==2 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto) ||   
+	//       (j==2 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto) ||   
 
-	      (j==3 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110.) ||   
+	//       (j==3 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110.) ||   
 
-	      (j==4 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130.) ||   
+	//       (j==4 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130.) ||   
 
-	      (j==5 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2) ||   
+	//       (j==5 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2) ||   
 
-	      (j==6 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<30.) ||   
+	//       (j==6 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<30.) ||   
 
-	      (j==7 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>30.) ||   
+	//       (j==7 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>30.) ||   
 
-	      (j==8 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2) ||   
+	//       (j==8 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2) ||   
 
-	      (j==9 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>20. && pT_l2<50.) ||   
+	//       (j==9 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>20. && pT_l2<50.) ||   
 
-	      (j==10 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>50. && pT_l2<80.) ||   
+	//       (j==10 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>50. && pT_l2<80.) ||   
 
-	      (j==11 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>80.) ) 
+	//       (j==11 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>80.) ) 
 
-	      cutFlowVector4[j]++;
-	  }
-	}
+	//       cutFlowVector4[j]++;
+	//   }
+	// }
 
 	// if ((analysisRunName.find("401_1") != string::npos) || (analysisRunName.find("300_150") != string::npos)){
 

@@ -42,9 +42,9 @@ namespace Gambit {
         vector<string> cutFlowVector_str;
         int NCUTS;
 
-        // debug
-        ofstream Savelep1;
-        ofstream Savelep2;
+        // // debug
+        // ofstream Savelep1;
+        // ofstream Savelep2;
         
         // Jet overlap removal
         void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*> &jetvec, vector<HEPUtils::Particle*> &lepvec, double DeltaRMax) {
@@ -113,9 +113,9 @@ namespace Gambit {
             NCUTS= 66;  
             set_luminosity(36.1);
 
-            //debug
-            Savelep1.open("lep1.txt");
-            Savelep2.open("lep2.txt");
+            // //debug
+            // Savelep1.open("lep1.txt");
+            // Savelep2.open("lep2.txt");
 
             for(int i=0;i<NCUTS;i++){
                 cutFlowVector.push_back(0);
@@ -272,8 +272,8 @@ namespace Gambit {
                 HEPUtils::P4 lepton1=sgLeptons.at(1)->mom();
                 double Mll= (lepton0+lepton1).m();
                 
-                Savelep1 << sgLeptons[0]->pT() << endl;
-                Savelep2 << sgLeptons[1]->pT() << endl;
+                // Savelep1 << sgLeptons[0]->pT() << endl;
+                // Savelep2 << sgLeptons[1]->pT() << endl;
                 
                 if (sgLeptons[0]->pid()*sgLeptons[1]->pid()<0. && sgLeptons[0]->pT() > 25. && sgLeptons[1]->pT() > 20. && Mll>20.){
                     cABC_TriggerOS              = true;
@@ -296,6 +296,7 @@ namespace Gambit {
                     double pb_a[3] = { 0, sgLeptons[1]->mom().px(), sgLeptons[1]->mom().py() };
                     double pmiss_a[3] = { 0, ptot.px(), ptot.py() };
                     double mn_a = 0.;
+
                     mt2_bisect::mt2 mt2_event_a;
                     mt2_event_a.set_momenta(pa_a,pb_a,pmiss_a);
                     mt2_event_a.set_mn(mn_a);
@@ -343,6 +344,7 @@ namespace Gambit {
             
             //MET trigger and Lepton Num
             if(signalLeptons.size() == 2 && met>200 ){
+
                 // Opposite sign leptons
                 if (signalLeptons[0]->pid()*signalLeptons[1]->pid()<0) c4_METOSlepton=true;
                 

@@ -33,8 +33,8 @@ namespace Gambit {
       // vector<double> cutFlowVector2CMS_200_100, cutFlowVector2CMS_500_150, cutFlowVector3CMS_250_150, cutFlowVector3CMS_600_1, cutFlowVector1CMS_500_350_05, cutFlowVector1CMS_500_350_5, cutFlowVector4CMS_100_1, cutFlowVector4CMS_800_1;
       size_t NCUTS1, NCUTS2, NCUTS3, NCUTS4;
 
-      ofstream cutflowFile;
-      string analysisRunName;
+      // ofstream cutflowFile;
+      // string analysisRunName;
 
     public:
 
@@ -93,7 +93,7 @@ namespace Gambit {
           cutFlowVector_str4.push_back("");
         }
 
-        analysisRunName = "CMS_13TeV_MultiLEP_36invfb";
+        // analysisRunName = "CMS_13TeV_MultiLEP_36invfb";
       }
 
 
@@ -184,7 +184,7 @@ namespace Gambit {
 	double pT_ll=0;
 	double mT=0;
 	double mT2=0;
-	double mll=0;
+	// double mll=0;
 	vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpair(signalLeptons);
 	vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpair(signalLeptons);
 
@@ -203,12 +203,12 @@ namespace Gambit {
 	if (nSignalLeptons==2 || (SFOSpair_cont.size()==0 && OSpair_cont.size()==0))mT=get_mTmin(signalLeptons, event->missingmom());	
 	if (SFOSpair_cont.size()>0) {
 	  vector<double> mll_mT= get_mll_mT(SFOSpair_cont,signalLeptons,event->missingmom(),0);
-	  mll=mll_mT.at(0);
+	  // mll=mll_mT.at(0);
 	  mT=mll_mT.at(1);
 	}
 	if (SFOSpair_cont.size()==0 && OSpair_cont.size()>0) {
 	  vector<double> mll_mT= get_mll_mT(OSpair_cont,signalLeptons,event->missingmom(),1);
-	  mll=mll_mT.at(0);
+	  // mll=mll_mT.at(0);
 	  mT=mll_mT.at(1);
 	}
 	for (size_t iPa=0;iPa<SFOSpair_cont.size();iPa++) {

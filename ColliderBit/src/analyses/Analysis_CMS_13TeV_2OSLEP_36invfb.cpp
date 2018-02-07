@@ -34,8 +34,8 @@ namespace Gambit {
       // vector<double> cutFlowVectorCMS_550_200;
       // double xsecCMS_550_200;
 
-      ofstream cutflowFile;
-      string analysisRunName;
+      // ofstream cutflowFile;
+      // string analysisRunName;
 
     public:
 
@@ -68,7 +68,7 @@ namespace Gambit {
           // cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        analysisRunName = "CMS_13TeV_2OSLEP_36invfb";
+        // analysisRunName = "CMS_13TeV_2OSLEP_36invfb";
       }
 
 
