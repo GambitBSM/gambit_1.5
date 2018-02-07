@@ -79,6 +79,7 @@ BE_INI_FUNCTION
       ex_map["XENON1T_2017"] = XENON1T_2017_Init();
       ex_map["LUX_2013"] = LUX_2013_Init();
       ex_map["SuperCDMS_2014"] = SuperCDMS_2014_Init();
+      ex_map["CDMSlite"] = CDMSlite_Init();
       ex_map["SIMPLE_2014"] = SIMPLE_2014_Init();
       ex_map["LUX_2016"] = LUX_2016_Init();
       ex_map["PandaX_2016"] = PandaX_2016_Init();

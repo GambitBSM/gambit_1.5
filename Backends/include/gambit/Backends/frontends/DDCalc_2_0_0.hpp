@@ -86,6 +86,7 @@ BE_FUNCTION(PICO_2L_Init,        int, (), "C_DDCalc_pico_2l_init",        "PICO_
 BE_FUNCTION(PICO_60_Init,        int, (), "C_DDCalc_pico_60_init",        "PICO_60_Init")
 BE_FUNCTION(PICO_60_2017_Init,   int, (), "C_DDCalc_pico_60_2017_init",   "PICO_60_2017_Init")
 BE_FUNCTION(SuperCDMS_2014_Init, int, (), "C_DDCalc_supercdms_2014_init", "SuperCDMS_2014_Init")
+BE_FUNCTION(CDMSlite_Init,       int, (), "C_DDCalc_cdmslite_init",       "CDMSlite_Init")
 BE_FUNCTION(SIMPLE_2014_Init,    int, (), "C_DDCalc_simple_2014_init",    "SIMPLE_2014_Init")
 BE_FUNCTION(CRESST_II_Init,      int, (), "C_DDCalc_cresst_ii_init",      "CRESST_II_Init")
 BE_FUNCTION(LZ_Init,             int, (), "C_DDCalc_lz_init",             "LZ_Init")
