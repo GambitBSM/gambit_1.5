@@ -1784,7 +1784,7 @@ namespace Gambit
           #endif
 
           // Construct vectors of SR numbers
-          Eigen::VectorXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
+          Eigen::ArrayXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
             const SignalRegionData srData = adata[SR];
@@ -1814,6 +1814,7 @@ namespace Gambit
           #endif
 
           // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
+          /// @todo Is this the best way, or should we just sample the s numbers independently and then be able to completely cache the cov matrix diagonalisation?
           const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
           const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
@@ -1829,36 +1830,73 @@ namespace Gambit
           ///////////////////
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
-          // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
           const size_t NSAMPLE = 10000; ///< @todo TWEAK!!!
           std::normal_distribution<> unitnormdbn{0,1};
-          Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
-          for (size_t i = 0; i < NSAMPLE; ++i) {
-            Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
-            for (size_t j = 0; j < adata.size(); ++j) {
-              norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
-              norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+          Eigen::ArrayXd llrsums = Eigen::ArrayXd::Zero(adata.size());
+
+          /// @note How to correct negative rates? Discard (scales badly), set to
+          /// epsilon (= discontinuous & unphysical pdf), transform to log-space
+          /// (distorts the pdf quite badly), or something else (skew term)?
+          /// We're using the "set to epsilon" version for now.
+          ///
+          /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
+          const bool COVLOGNORMAL = false;
+
+          if (!COVLOGNORMAL) {
+
+            // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
+            for (size_t i = 0; i < NSAMPLE; ++i) {
+              Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
+              for (size_t j = 0; j < adata.size(); ++j) {
+                norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
+                norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+              }
+
+              // Rotate rate deltas into the SR basis and shift by SR mean rates
+              const Eigen::ArrayXd n_pred_b_sample = n_pred_b + (Vb*norm_sample_b).array();
+              const Eigen::ArrayXd n_pred_sb_sample = n_pred_sb + (Vsb*norm_sample_sb).array();
+
+              // Calculate Poisson LLR and add to aggregated LL calculation
+              for (size_t j = 0; j < adata.size(); ++j) {
+                const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
+                const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
+                const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                llrsums(j) += llr_j;
+              }
             }
 
-            // Rotate rate deltas into the SR basis and shift by SR mean rates
-            const Eigen::VectorXd n_pred_b_sample = n_pred_b + Vb*norm_sample_b;
-            const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + Vsb*norm_sample_sb;
+          } else { // COVLOGNORMAL
 
-            // Calculate Poisson LLR and add to aggregated LL calculation
-            for (size_t j = 0; j < adata.size(); ++j) {
-              /// @note How to correct negative rates? Discard (scales badly), set to
-              /// epsilon (= discontinuous & unphysical pdf), transform to log-space
-              /// (distorts the pdf quite badly), or something else (skew term)?
-              /// We're using the "set to epsilon" version for now.
-              ///
-              /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
-              const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
-              const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
-              const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-              llrsums(j) += llr_j;
+            const Eigen::ArrayXd ln_n_pred_b = n_pred_b.log();
+            const Eigen::ArrayXd ln_n_pred_sb = n_pred_sb.log();
+            const Eigen::ArrayXd ln_sqrtEb = (n_pred_b + sqrtEb).log() - ln_n_pred_b;
+            const Eigen::ArrayXd ln_sqrtEsb = (n_pred_sb + sqrtEsb).log() - ln_n_pred_sb;
+
+            // Sample correlated SR rates from a rotated Gaussian in log(rate) space, then exponentiate
+            for (size_t i = 0; i < NSAMPLE; ++i) {
+              Eigen::VectorXd ln_norm_sample_b(adata.size()), ln_norm_sample_sb(adata.size());
+              for (size_t j = 0; j < adata.size(); ++j) {
+                ln_norm_sample_b(j) = ln_sqrtEb(j) * unitnormdbn(Random::rng());
+                ln_norm_sample_sb(j) = ln_sqrtEsb(j) * unitnormdbn(Random::rng());
+              }
+
+              // Rotate rate deltas into the SR basis and shift by SR mean rates
+              const Eigen::ArrayXd delta_ln_n_pred_b_sample = Vb*ln_norm_sample_b;
+              const Eigen::ArrayXd delta_ln_n_pred_sb_sample = Vsb*ln_norm_sample_sb;
+              const Eigen::ArrayXd n_pred_b_sample = (ln_n_pred_b + delta_ln_n_pred_b_sample).exp();
+              const Eigen::ArrayXd n_pred_sb_sample = (ln_n_pred_sb + delta_ln_n_pred_sb_sample).exp();
+
+              // Calculate Poisson LLR and add to aggregated LL calculation
+              for (size_t j = 0; j < adata.size(); ++j) {
+                const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
+                const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
+                const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                llrsums(j) += llr_j;
+              }
             }
 
           }
+
           // Calculate sum of expected LLRs
           const double ana_dll = llrsums.sum() / (double)NSAMPLE;
           result[adata.begin()->analysis_name + "_DeltaLogLike"] = ana_dll;
