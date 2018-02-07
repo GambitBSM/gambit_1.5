@@ -15,7 +15,7 @@
     In these cases, the discriminating power of the topness variable 
     is reduced when a light-flavour jet is used instead in the calculation.*/
 
-using namespace std;
+// using namespace std;
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // >>>>>> topness_struct.cpp & topness_struct.h in "topness" <<<<<<<
 const double mt=172.;  // top quark mass
@@ -77,7 +77,7 @@ struct my_func
 
     // pW_z                                                                                                                                                                                           
     double pWz=points[3];
-    // cout << "points=" << pvx << ", " << pvy << ", " << pvz << ", " << pWz << endl;                                                                                                                 
+    // std::cout << "points=" << pvx << ", " << pvy << ", " << pvz << ", " << pWz << std::endl;                                                                                                                 
     // W momenta from neutrino and MET                                                                                                                                                                
     double pW[]={-pvx+pMET[0],-pvy+pMET[1],pWz,sqrt(pow(-pvx+pMET[0],2)+pow(-pvy+pMET[1],2)+pow(pWz,2) + pow(mW,2))};
 
@@ -92,7 +92,7 @@ struct my_func
     // ***Modified by Yang Zhang 23.1.2018
     fsum= pow(my_lp(pb1W,pb1W)-pow(mt,2),2)/pow(sigmat,4)+pow(my_lp(plv,plv)-pow(mW,2),2)/pow(sigmaW,4);
     //+pow(my_lp(pb2lv,pb2lv)-pow(mt,2),2)/pow(sigmat,4)+pow(my_lp(plv,plv)-pow(mW,2),2)/pow(sigmaW,4);
-    //cout << "fsum = " << fsum << endl;                                                                                                                                                              
+    //std::cout << "fsum = " << fsum << std::endl;                                                                                                                                                              
     return sign*fsum;
   }
 };
@@ -106,10 +106,10 @@ double my_dot(double p1[], double p2[], int d)   // d is size of arrays
   double value=0.;  
   for (int i=0; i<d; i++)
     {
-      //      cout << "p1: " << p1[i] <<", p2:" << p2[i] << endl;  
+      //      std::cout << "p1: " << p1[i] <<", p2:" << p2[i] << std::endl;  
       value+=p1[i]*p2[i]; 
     }
-  //cout << "dp value is " << value << endl;
+  //std::cout << "dp value is " << value << std::endl;
   return value; 
 }
 double my_dot(double p1[], double p2[], double a[], int d)   // d is size of arrays                       
@@ -212,7 +212,7 @@ my_simplex::my_simplex(int dd, double aalpha, double bbeta, double ggamma,  my_f
 void my_simplex::my_SetUp(double xin[DMAX*(DMAX+1)]) 
 {
   int D=d*(d+1);
-  copy(xin,xin+D,xstart);
+  std::copy(xin,xin+D,xstart);
   for (int i=0; i<D; i++)
     {
       x[i]=xstart[i];
@@ -221,7 +221,7 @@ void my_simplex::my_SetUp(double xin[DMAX*(DMAX+1)])
   for (int i=0; i<d+1; i++)
     {
       double xi[d];
-      copy(x+d*i,x+d*i+d,xi);  // get coordinates of i'th point and copy into xi 
+      std::copy(x+d*i,x+d*i+d,xi);  // get coordinates of i'th point and copy into xi 
            y[i]=(*f)(xi,d);
     }
 }
@@ -231,7 +231,7 @@ void my_simplex::set_y()
   for (int i=0; i<d+1; i++)
     {
       double xi[d];
-      copy(x+d*i,x+d*i+d,xi);  // get coordinates of i'th point and copy into xi                            
+      std::copy(x+d*i,x+d*i+d,xi);  // get coordinates of i'th point and copy into xi                            
       y[i]=(*f)(xi,d); 
     }
 }
@@ -377,26 +377,26 @@ double my_simplex::get_sigma()
 void my_simplex::print_Centroid() 
 {
 
-  cout << "Current xCentroid is : " << endl;
+  std::cout << "Current xCentroid is : " << std::endl;
   for (int k=0;k<d; k++)
     {
-      cout << xCentroid[k];
+      std::cout << xCentroid[k];
       if (k==d-1)
-	cout << endl;
-      else cout<< ", ";
+	std::cout << std::endl;
+      else std::cout<< ", ";
 
     }
 }
 
 void my_simplex::print_Reflect() 
 {
-  cout << "Current xReflect and y value are : " << endl;
+  std::cout << "Current xReflect and y value are : " << std::endl;
   for (int k=0;k<d; k++)
     {
-      cout << xReflect[k];
+      std::cout << xReflect[k];
       if (k==d-1)
-	cout <<", " << yReflect << endl;
-      else cout<< ", ";
+	std::cout <<", " << yReflect << std::endl;
+      else std::cout<< ", ";
 
     }
 }
@@ -404,26 +404,26 @@ void my_simplex::print_Reflect()
 void my_simplex::print_Expand() 
 {
 
-  cout << "Current xExpand and y value are : " << endl;
+  std::cout << "Current xExpand and y value are : " << std::endl;
   for (int k=0;k<d; k++)
     {
-      cout << xExpand[k];
+      std::cout << xExpand[k];
       if (k==d-1)
-	cout << ", " << yExpand << endl;
-      else cout<< ", ";
+	std::cout << ", " << yExpand << std::endl;
+      else std::cout<< ", ";
 
     }
 } 
 
 void my_simplex::print_Contract() 
 {
-  cout << "Current xContract and y value are : " << endl; 
+  std::cout << "Current xContract and y value are : " << std::endl; 
   for (int k=0; k<d; k++) 
     {
-      cout << xContract[k]; 
+      std::cout << xContract[k]; 
       if (k==d-1) 
-	cout << ", " << yContract << endl; 
-      else cout << ", "; 
+	std::cout << ", " << yContract << std::endl; 
+      else std::cout << ", "; 
 
     }
 
@@ -431,47 +431,47 @@ void my_simplex::print_Contract()
 
 void my_simplex::print_max()
 {
-  cout << "Printing imax and inmax and their values " << endl; 
-  cout << "imax = " << imax << ", y[imax] = " << yh << endl; 
-  cout << "inmax = " << inmax << ", y[inmax] = " << ynh << endl;
+  std::cout << "Printing imax and inmax and their values " << std::endl; 
+  std::cout << "imax = " << imax << ", y[imax] = " << yh << std::endl; 
+  std::cout << "inmax = " << inmax << ", y[inmax] = " << ynh << std::endl;
 }
 
 void my_simplex::print_min() 
 {
-  cout << "Printing imin and its value " << endl;
-  cout << "imin = " << imin << ", y[imin] = " << yl << endl;
+  std::cout << "Printing imin and its value " << std::endl;
+  std::cout << "imin = " << imin << ", y[imin] = " << yl << std::endl;
 }
 
 void my_simplex::print_xyh() 
 {
-  cout << "The highest value is " << endl;
+  std::cout << "The highest value is " << std::endl;
   for (int i=0; i<d; i++)
     {
-      cout << xh[i];
+      std::cout << xh[i];
       if ((i+1)% d !=0)
         {
-          cout << ", " ;
+          std::cout << ", " ;
         }
       else
         {
-          cout << ", " << yh << endl;
+          std::cout << ", " << yh << std::endl;
         }
     }
 }
 
 void my_simplex::print_xyl()
 {
-  cout << "The lowest value is " << endl;
+  std::cout << "The lowest value is " << std::endl;
   for (int i=0; i<d; i++)
     {
-      cout << xl[i];
+      std::cout << xl[i];
       if ((i+1)% d !=0)
         {
-          cout << ", " ;
+          std::cout << ", " ;
         }
       else
         {
-          cout << ", " << yl << endl;
+          std::cout << ", " << yl << std::endl;
         }
     }
 
@@ -480,19 +480,19 @@ void my_simplex::print_xyl()
 void my_simplex::print_xy()
 {
   // print current x and y                                                                                                                           
-  cout << "Current x and y values are: " << endl;
+  std::cout << "Current x and y values are: " << std::endl;
   for (int i=0; i< d*(d+1); i++)
     {
-      cout << x[i];
+      std::cout << x[i];
       if ((i+1) % d !=0)
         {
-          cout << ", ";
+          std::cout << ", ";
         }
       else
         {
           div_t ratio;
           ratio=div(i,d);
-	  cout << ", " << y[ratio.quot] << endl;
+	  std::cout << ", " << y[ratio.quot] << std::endl;
         }
     }
 
@@ -500,104 +500,104 @@ void my_simplex::print_xy()
 void my_simplex::print_all() 
 { 
 // print current x 
-  cout << "Current x values are: " << endl; 
+  std::cout << "Current x values are: " << std::endl; 
   for (int i=0; i< d*(d+1); i++) 
     { 
-      cout << x[i]; 
+      std::cout << x[i]; 
       if ((i+1) % d !=0)
 	{ 
-	  cout << ", "; 
+	  std::cout << ", "; 
 	} 
       else 
 	{ 
 	  div_t ratio; 
 	  ratio=div(i,d);
-	  cout << ", " << y[ratio.quot]<<endl; 
+	  std::cout << ", " << y[ratio.quot]<<std::endl; 
 	}
     }
-  cout << "Current centroid: " << endl; 
+  std::cout << "Current centroid: " << std::endl; 
   for (int i=0; i< d; i++)
       {
-	cout << xCentroid[i];
+	std::cout << xCentroid[i];
           if ((i+1) % d !=0)
           {
-	      cout << ", ";
+	      std::cout << ", ";
            }
           else
           {
-	    cout << endl;
+	    std::cout << std::endl;
           }
      }
-  cout << "Current Reflection: " << endl;
+  std::cout << "Current Reflection: " << std::endl;
   for (int i=0; i< d; i++)
      {
-         cout << xReflect[i];
+         std::cout << xReflect[i];
 	 if ((i+1) % d !=0)
 	 {
-	     cout << ", ";
+	     std::cout << ", ";
 	 }
 	 else
 	 {
-	   cout << ", " << yReflect << endl;
+	   std::cout << ", " << yReflect << std::endl;
 	 }
     }
-  cout << "Current Expansion: " << endl;
+  std::cout << "Current Expansion: " << std::endl;
   for (int i=0; i< d; i++)
       {
-	cout << xExpand[i];
+	std::cout << xExpand[i];
 	  if ((i+1) % d !=0)
 	  {
-	      cout << ", ";
+	      std::cout << ", ";
 	  }
 	  else
 	  {
-	    cout << ", " << yExpand << endl;
+	    std::cout << ", " << yExpand << std::endl;
 	  }
       }
-  cout << "Current Contraction: " << endl;
+  std::cout << "Current Contraction: " << std::endl;
   for (int i=0; i< d; i++)
       {
-	cout << xContract[i];
+	std::cout << xContract[i];
 	  if ((i+1) % d !=0)
 	  {
-	      cout << ", ";
+	      std::cout << ", ";
 	  }
 	  else
 	  {
-	    cout << ", " << yContract << endl;
+	    std::cout << ", " << yContract << std::endl;
 	  }
      }
-  cout << "The highest value is " << endl; 
+  std::cout << "The highest value is " << std::endl; 
   for (int i=0; i<d; i++) 
     { 
-      cout << xh[i]; 
+      std::cout << xh[i]; 
       if ((i+1)% d !=0) 
 	{ 
-	  cout << ", " ; 
+	  std::cout << ", " ; 
 	} 
       else 
 	{ 
-	  cout << ", " << yh << endl; 
+	  std::cout << ", " << yh << std::endl; 
 	}
     }
-  cout << "The lowest value is " << endl;
+  std::cout << "The lowest value is " << std::endl;
   for (int i=0; i<d; i++)
     {
-      cout << xl[i];
+      std::cout << xl[i];
       if ((i+1)% d !=0)
         {
-          cout << ", " ;
+          std::cout << ", " ;
         }
       else
         {
-          cout << ", " << yl << endl;
+          std::cout << ", " << yl << std::endl;
         }
     }
-    cout << "The lowest point is imin=" << imin << endl;
+    std::cout << "The lowest point is imin=" << imin << std::endl;
 
-    cout << "The highest point is imax=" << imax << endl;
+    std::cout << "The highest point is imax=" << imax << std::endl;
 
-    cout << "The next highest point is inmax=" << inmax << endl;
+    std::cout << "The next highest point is inmax=" << inmax << std::endl;
 }
  
 
@@ -618,14 +618,14 @@ bool my_Nelder_Mead::one_cycle(my_simplex *s)
       if ((*s).yExpand < (*s).yl) 
 	{
 	  // replace P_h with P_** 
-	  copy((*s).xExpand,(*s).xExpand+d, (*s).x+d*((*s).imax));
+	  std::copy((*s).xExpand,(*s).xExpand+d, (*s).x+d*((*s).imax));
 	  (*s).set_y();
 	  return false; 
 	}
       else 
 	{
 	  // replace P_h with P_*                                                                               
-	  copy((*s).xReflect,(*s).xReflect+d, (*s).x+d*((*s).imax));
+	  std::copy((*s).xReflect,(*s).xReflect+d, (*s).x+d*((*s).imax));
 	  (*s).set_y();
 	  return true; 
 	}
@@ -634,7 +634,7 @@ bool my_Nelder_Mead::one_cycle(my_simplex *s)
     {     
       if (((*s).yReflect) < (*s).yh) 
 	{
-	  copy((*s).xReflect,(*s).xReflect+d, (*s).x+d*((*s).imax));
+	  std::copy((*s).xReflect,(*s).xReflect+d, (*s).x+d*((*s).imax));
 	  (*s).set_y();
 	  (*s).find_max();
 	}
@@ -642,7 +642,7 @@ bool my_Nelder_Mead::one_cycle(my_simplex *s)
       //    (*s).print_Contract(); 
       if ((*s).yContract < (*s).yh) 
 	{ 
-	  copy((*s).xContract,(*s).xContract+d, (*s).x+d*((*s).imax));
+	  std::copy((*s).xContract,(*s).xContract+d, (*s).x+d*((*s).imax));
 	  (*s).set_y();
 	  return false;
       
@@ -656,7 +656,7 @@ bool my_Nelder_Mead::one_cycle(my_simplex *s)
      }
   else {
     // replace P_h with P_*                                                                                            
-    copy((*s).xReflect,(*s).xReflect+d, (*s).x+d*((*s).imax));
+    std::copy((*s).xReflect,(*s).xReflect+d, (*s).x+d*((*s).imax));
     (*s).set_y();
     return true;
   }
@@ -692,14 +692,14 @@ minimum  */
       simplex.find_min();
       double ynewmin=simplex.yl;
       double ynewmax=simplex.yh;
-      //     cout << "i=" << i << endl; 
-      //cout << endl << endl << endl;
+      //     std::cout << "i=" << i << std::endl; 
+      //std::cout << std::endl << std::endl << std::endl;
       //simplex.print_xy();
       //simplex.print_xyh();
       //simplex.print_xyl();
       //simplex.print_max();
       //simplex.print_min();
-      //cout << endl << endl << endl;
+      //std::cout << std::endl << std::endl << std::endl;
       // double yavg=simplex.get_yavg(); 
       //  double sigma=simplex.get_sigma(); 
       if (abs(ynewmax -ynewmin)/(abs(ynewmax)+abs(ynewmin)+eps) < eps)
@@ -709,9 +709,9 @@ minimum  */
 	    // save old xi, generate new xstarti = xbest/rndm + rndm*step                             
 	    if (ynewmin< yfinal)
 	      {
-		copy(simplex.x,simplex.x+d*(d+1),xfinal);
+		std::copy(simplex.x,simplex.x+d*(d+1),xfinal);
 		yfinal=ynewmin;
-		//		cout << "final i=" << i << ", ymin = " << ynewmin << ", ymax = " << ynewmax << endl; 
+		//		std::cout << "final i=" << i << ", ymin = " << ynewmin << ", ymax = " << ynewmax << std::endl; 
 		break;
 	      }
 	    // create new starting point using best minimum
@@ -811,7 +811,7 @@ double topnesscompute(double pb1[4], double pl[4], double MET[4], double sigmat,
                   xin[i][j]=xin[0][j]+Deltastep*edir[d*(i-1)+j];
                 }
             }
-          copy(xin[i],xin[i]+d, xstart+d*i);  // copy initial data into xstart          
+          std::copy(xin[i],xin[i]+d, xstart+d*i);  // copy initial data into xstart          
         }
       // now first combination 
       converge1=my_check1.find_global_min(xstart);
@@ -822,12 +822,12 @@ double topnesscompute(double pb1[4], double pl[4], double MET[4], double sigmat,
           if (yl < ybest1)
             {
               ybest1=yl;
-              copy(my_check1.xfinal,my_check1.xfinal+d,xbest1);
+              std::copy(my_check1.xfinal,my_check1.xfinal+d,xbest1);
             }
         }
       else
         {
-          cout << " Minimum not found...exiting " << endl;
+          std::cout << " Minimum not found...exiting " << std::endl;
         }
 //      // now do second combination                                                      
 //      converge2=my_check2.find_global_min(xstart);
@@ -837,12 +837,12 @@ double topnesscompute(double pb1[4], double pl[4], double MET[4], double sigmat,
 //          if (yl < ybest2)
 //            {
 //              ybest2=yl;
-//              copy(my_check2.xfinal,my_check2.xfinal+d,xbest2);
+//              std::copy(my_check2.xfinal,my_check2.xfinal+d,xbest2);
 //            }
 //        }
 //      else
 //	    {
-//          cout << " Minimum not found...exiting " << endl;
+//          std::cout << " Minimum not found...exiting " << std::endl;
 //        }
 
     }
@@ -850,12 +850,12 @@ double topnesscompute(double pb1[4], double pl[4], double MET[4], double sigmat,
 //  if (ybest1 < ybest2)
 //    {
     ybest=ybest1;
-//    copy(xbest1,xbest1+d,xbest);
+//    std::copy(xbest1,xbest1+d,xbest);
 //    }
 //   else
 //   {
 //     ybest=ybest2;
-//     copy(xbest2,xbest2+d,xbest);
+//     std::copy(xbest2,xbest2+d,xbest);
 //   }
 
   return ybest; 
