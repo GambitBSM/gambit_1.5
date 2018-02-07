@@ -15,6 +15,7 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
 ///  \date 2017 Jun, Sep
+///  \date 2018 Feb
 ///
 ///  *********************************************
 
@@ -76,15 +77,19 @@ namespace Gambit
       majoranamodel.MajoranaLambda   = *myPipe::Param.at("lX");
       majoranamodel.MajoranacosXI    = *myPipe::Param.at("cosXI");
 
-      // Invalidate point if the EFT validity constraint is not satisfied
-      // See https://arxiv.org/abs/1512.06458 for more details
-      if (majoranamodel.MajoranaLambda >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+      if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
       {
-       std::ostringstream msg;
-       msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
-         << majoranamodel.MajoranaLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
-       invalid_point().raise(msg.str());
+        // Invalidate point if the EFT validity constraint is not satisfied
+        // See https://arxiv.org/abs/1512.06458v4 for more details
+        if (majoranamodel.MajoranaLambda >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+        {
+          std::ostringstream msg;
+          msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
+              << majoranamodel.MajoranaLambda << "/GeV] does not satisfy the EFT validity constraint.";
+          invalid_point().raise(msg.str());
+        }
       }
+      else {}
 
       // Standard model
       majoranamodel.sinW2 = sinW2;

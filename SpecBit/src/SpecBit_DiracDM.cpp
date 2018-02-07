@@ -15,6 +15,7 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct, Nov
 ///  \date 2017 Jun, Sep
+///  \date 2018 Feb
 ///
 ///  *********************************************
 
@@ -76,15 +77,19 @@ namespace Gambit
       diracmodel.DiracLambda   = *myPipe::Param.at("lF");
       diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");
 
-      // Invalidate point if the EFT validity constraint is not satisfied
-      // See https://arxiv.org/abs/1512.06458 for more details
-      if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
+      if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
       {
-        std::ostringstream msg;
-        msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
-          << diracmodel.DiracLambda << " GeV^-1] does not satisfy the EFT validity constraint.";
-        invalid_point().raise(msg.str());
+        // Invalidate point if the EFT validity constraint is not satisfied
+        // See https://arxiv.org/abs/1512.06458v4 for more details
+        if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
+        {
+          std::ostringstream msg;
+          msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
+              << diracmodel.DiracLambda << "/GeV] does not satisfy the EFT validity constraint.";
+          invalid_point().raise(msg.str());
+        }
       }
+      else {}
 
       // Standard model
       diracmodel.sinW2 = sinW2;
