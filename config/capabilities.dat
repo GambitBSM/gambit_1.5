@@ -1565,9 +1565,6 @@ DDCalc_1_0_0_init: |
 DDCalc_1_1_0_init: |
    Initialises DDCalc 1.1.0.
 
-DDCalc_HP_1_0_0_init: |
-   Initialises DDCalc_HP 1.0.0.
-
 DDCalc_1_2_0_init: |
    Initialises DDCalc 1.2.0.
 
@@ -1659,7 +1656,7 @@ GetWIMP_msigma: |
   Gets the WIMP parameters m, sigmapSI, sigmanSI, sigmapSD, sigmanSD (used in DDCalc)
 
 GetWIMP_higgsportal: |
-  Gets the WIMP parameters m, fps, fns, aps, ans (used in DDCalc_HP)
+  Gets the WIMP parameters m, fsp, fsn, app, apn (used in DDCalc_2_0_0)
 
 SetWIMP_mG: |
   Sets the WIMP parameters m, GpSI, GnSI, GpSD, GnSD (used in DDCalc)
@@ -1671,7 +1668,7 @@ SetWIMP_msigma: |
   Sets the WIMP parameters m, sigmapSI, sigmanSI, sigmapSD, sigmanSD (used in DDCalc)
 
 SetWIMP_higgsportal: |
-  Sets the WIMP parameters m, fps, fns, aps, ans (used in DDCalc_HP)
+  Sets the WIMP parameters m, fsp, fsn, app, apn (used in DDCalc_2_0_0)
 
 InitDetector: |
   Default detector setup used in DDCalc
