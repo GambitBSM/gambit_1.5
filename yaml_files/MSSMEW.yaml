@@ -122,6 +122,32 @@ ObsLikes:
     - purpose:    LogLike
       capability: LHC_Combined_LogLike
 
+    # LEP likelihoods
+    - purpose:    LogLike
+      capability: L3_Neutralino_Leptonic_LLike
+
+    - purpose:    LogLike
+      capability: L3_Chargino_Leptonic_LLike
+
+    - purpose:    LogLike
+      capability: OPAL_Chargino_Hadronic_LLike
+
+    - purpose:    LogLike
+      capability: OPAL_Chargino_SemiLeptonic_LLike
+
+    - purpose:    LogLike
+      capability: OPAL_Chargino_Leptonic_LLike
+
+    # Other observables
+    - purpose:    likelihood_details
+      capability: LHC_LogLikes
+
+    - purpose:    Observable
+      capability: LHC_signals
+
+    - purpose:    Observable
+      capability: LHCEventLoopInfo
+
     - purpose:    Observable
       capability: SLHA1_violation
 
@@ -217,6 +243,7 @@ Rules:
     options:
       pythiaNames: ["Pythia_SUSY_LHC_13TeV"]
       silenceLoop: false
+      maxFailedEvents: 20
 
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
