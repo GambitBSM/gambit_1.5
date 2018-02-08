@@ -25,7 +25,7 @@ Parameters:
       ranges: [-1e4, -1, 1, 1e4]
     M2:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1, 1, 1e4]
+      ranges: [0, 0, 1, 1e4]
     M3:
       fixed_value: 5000
     Qin:
