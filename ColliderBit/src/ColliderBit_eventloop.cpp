@@ -1847,11 +1847,11 @@ namespace Gambit
         // Output map key
         string analysis_key = adata.begin()->analysis_name + "_DeltaLogLike";
 
-        // If no events have been generated (xsec veto), short-circut the loop and
-        // return delta log-likelihood = 0 for each analysis.
+        // If no events have been generated (xsec veto) or too many events have failed, 
+        /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
         /// @todo This must be made more sophisticated once we add analyses that
         ///       don't rely on event generation.
-        if (!eventsGenerated)
+        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
         {
           result[analysis_key] = 0.0;
           continue;
