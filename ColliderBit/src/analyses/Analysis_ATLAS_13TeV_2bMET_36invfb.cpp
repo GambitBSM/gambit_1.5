@@ -466,14 +466,14 @@ namespace Gambit {
 
 	double mtmin = 9999.;
 	
-	for(size_t jet=0;jet<signalJets35.size();jet++){
+	for(unsigned int jet=0;jet<signalJets35.size();jet++){
 	  double mt_tmp = sqrt(2.*signalJets35[jet]->pT()*met*(1. - cos(signalJets35[jet]->mom().deltaPhi(metVec))));
 	  if(mt_tmp<mtmin && jet<=3)mtmin=mt_tmp;
 	}
 
 	double mtminb = 9999.;
 	
-	for(size_t jet=0;jet<signalBJets35.size();jet++){
+	for(unsigned int jet=0;jet<signalBJets35.size();jet++){
 	  double mt_tmp = sqrt(2.*signalBJets35[jet]->pT()*met*(1. - cos(signalBJets35[jet]->mom().deltaPhi(metVec))));
 	  if(mt_tmp<mtminb && jet<=1)mtminb=mt_tmp;
 	}
