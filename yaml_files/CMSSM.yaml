@@ -528,8 +528,11 @@ Rules:
                    "ATLAS_13TeV_0LEPStop_36invfb",
                    "ATLAS_13TeV_1LEPStop_36invfb",
                    "ATLAS_13TeV_2LEPStop_36invfb",
-                   "ATLAS_13TeV_RJ3L_lowmass_36invfb",
                    "ATLAS_13TeV_2bMET_36invfb"] ]
+
+                   # "ATLAS_13TeV_RJ3L_lowmass_36invfb",
+                   # The RJ3L_lowmass is not yet public and the
+                   # analysis code currently contains dummy numbers.
 
   # CMS analysis setup
   - capability: CMSAnalysisContainer
