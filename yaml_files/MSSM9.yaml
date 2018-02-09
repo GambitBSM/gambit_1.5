@@ -106,8 +106,8 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 19200
-      convthresh: 1e-5
+      NP: 6000
+      convthresh: 1e-3
       verbosity: 1
 
 
