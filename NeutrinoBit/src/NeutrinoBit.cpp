@@ -10,7 +10,7 @@
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
-///  \date 2017 Juky
+///  \date 2017 July
 ///
 ///  *********************************************
 
