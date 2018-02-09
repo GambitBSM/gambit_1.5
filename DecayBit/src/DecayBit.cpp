@@ -81,6 +81,13 @@ namespace Gambit
 
       gsl_integration_cquad(&F, a, b, abseps, releps, gsl_ws, &result, NULL, NULL);
       gsl_integration_cquad_workspace_free(gsl_ws);
+
+      // Check result
+      if (Utils::isnan(result))
+      {
+        invalid_point().raise("Integration returned NaN.");
+      }
+
       return result;
     }
 
@@ -1424,6 +1431,7 @@ namespace Gambit
       else
         result = *Dep::stau_1_decay_rates_SH;
 
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
     /// SUSY-HIT MSSM decays: stau_1
@@ -1546,6 +1554,8 @@ namespace Gambit
       // Else, use the SUSY-HIT results
       else
         result = *Dep::chargino_plus_1_decay_rates_SH;
+
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
     }
 
     /// SUSY-HIT MSSM decays: chargino_plus_1
@@ -2968,7 +2978,6 @@ namespace Gambit
         /// Invalidate MSSM points that have a stable charged particle?
         if (not allow_stable_charged_particles)
         {
-          // _Anders
           static const double lifetime_universe = 4.35e17; // [seconds]
 
           // Create vector with names of all charged partices
@@ -2985,7 +2994,7 @@ namespace Gambit
             psn.istau1, psn.istau2
           };
 
-          // Loop over vector, decays(__name__).get width_in_GeV, calculate lifetime, compare to lifetime_universe
+          // Check lifetime for each charged particle
           for (auto& particle_name : charged_particle_names)
           {
             double width = decays(particle_name).width_in_GeV;
@@ -2995,6 +3004,18 @@ namespace Gambit
               msg << "Charged particle " << particle_name << " is stable. Decay width = " << width << " GeV.";
               invalid_point().raise(msg.str());
             }
+          }
+        }
+
+        /// Check all particles for negative decay width
+        for (auto& map_entry : decays.particles)
+        {
+          double width = map_entry.second.width_in_GeV;
+          if (width < 0)
+          {
+              std::stringstream msg;
+              msg << "Particle " << map_entry.first.first << " has a negative width = " << width << " GeV.";
+              invalid_point().raise(msg.str());
           }
         }
 
