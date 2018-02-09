@@ -1,5 +1,5 @@
 ##########################################################################
-## GAMBIT configuration for running a MultiNest scan of the 4DEW using
+## GAMBIT configuration for running a MultiNest scan of the MSSMEW using
 ## only ColliderBit likelihoods (LHC and LEP particle searches, LHC and LEP
 ## Higgs data).
 ##
@@ -56,8 +56,8 @@ Printer:
 
   printer: hdf5
   options:
-    output_file: "4DEW.hdf5"
-    group: "/4DEW"
+    output_file: "MSSMEW.hdf5"
+    group: "/MSSMEW"
     delete_file_on_restart: false
 
   #printer: ascii
@@ -370,4 +370,4 @@ KeyValues:
 
     # Set the default output path
 
-  default_output_path: "runs/4DEW/"
+  default_output_path: "runs/MSSMEW/"
