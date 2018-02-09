@@ -49,7 +49,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-// #define COLLIDERBIT_DEBUG
+#define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -1833,7 +1833,6 @@ namespace Gambit
     void calc_LHC_LogLike_per_analysis(map_str_dbl& result)
     {
       using namespace Pipes::calc_LHC_LogLike_per_analysis;
-      static bool first = true;
 
       // Clear the result map
       result.clear();
@@ -1851,11 +1850,12 @@ namespace Gambit
         /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
         /// @todo This must be made more sophisticated once we add analyses that
         ///       don't rely on event generation.
-        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
-        {
-          result[analysis_key] = 0.0;
-          continue;
-        }
+        // // _Anders
+        // if (!eventsGenerated || nFailedEvents > maxFailedEvents)
+        // {
+        //   result[analysis_key] = 0.0;
+        //   continue;
+        // }
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
@@ -1930,12 +1930,7 @@ namespace Gambit
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          static size_t NSAMPLE; 
-          if (first)
-          {
-            NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
-            first = false;
-          }
+          static size_t NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
 
           // std::normal_distribution<> unitnormdbn{0,1};
           Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());

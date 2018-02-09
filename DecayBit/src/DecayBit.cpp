@@ -2879,6 +2879,8 @@ namespace Gambit
       if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
       {
 
+        static bool allow_stable_charged_particles = runOptions->getValueOrDef<bool>(false, "allow_stable_charged_particles");
+
         // Make sure that if the user has elected to take Higgs decays from FeynHiggs that
         // they have elected to take the Higgs mass from FeynHiggs alone.
         if (Dep::Higgs_decay_rates->calculator == "FeynHiggs" or
@@ -2961,6 +2963,39 @@ namespace Gambit
           str filename = runOptions->getValueOrDef<str>("GAMBIT_decays", "SLHA_output_filename");
           decays.writeSLHAfile(1,filename+".slha1",false,psn);
           decays.writeSLHAfile(2,filename+".slha2",false,psn);
+        }
+
+        /// Invalidate MSSM points that have a stable charged particle?
+        if (not allow_stable_charged_particles)
+        {
+          // _Anders
+          static const double lifetime_universe = 4.35e17; // [seconds]
+
+          // Create vector with names of all charged partices
+          static const std::vector<str> charged_particle_names = {
+            "H+", "~chi+_1", "~chi+_2", 
+            psn.ist1, psn.ist2, 
+            psn.isb1, psn.isb2, 
+            psn.isul, psn.isur, 
+            psn.isdl, psn.isdr, 
+            psn.iscl, psn.iscr, 
+            psn.issl, psn.issr, 
+            psn.isell, psn.iselr, 
+            psn.ismul, psn.ismur,
+            psn.istau1, psn.istau2
+          };
+
+          // Loop over vector, decays(__name__).get width_in_GeV, calculate lifetime, compare to lifetime_universe
+          for (auto& particle_name : charged_particle_names)
+          {
+            double width = decays(particle_name).width_in_GeV;
+            if (width <= 0 || hbar/width > lifetime_universe)
+            {
+              std::stringstream msg;
+              msg << "Charged particle " << particle_name << " is stable. Decay width = " << width << " GeV.";
+              invalid_point().raise(msg.str());
+            }
+          }
         }
 
       }
