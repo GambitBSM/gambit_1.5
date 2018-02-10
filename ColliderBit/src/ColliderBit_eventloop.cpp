@@ -1879,7 +1879,7 @@ namespace Gambit
           /// @todo Support skewness correction to the pdf.
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite loglike." << endl;
           #endif
 
           // Construct vectors of SR numbers
@@ -1908,9 +1908,9 @@ namespace Gambit
           const Eigen::ArrayXd sqrtEb = Eb.sqrt();
           const Eigen::MatrixXd Vb = eig_b.eigenvectors();
           const Eigen::MatrixXd Vbinv = Vb.inverse();
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << Eb << endl;
-          #endif
+          // #ifdef COLLIDERBIT_DEBUG
+          // cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << Eb << endl;
+          // #endif
 
           // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
           const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
@@ -1920,16 +1920,16 @@ namespace Gambit
           const Eigen::ArrayXd sqrtEsb = Esb.sqrt();
           const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
           const Eigen::MatrixXd Vsbinv = Vsb.inverse();
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << Esb << endl;
-          #endif
+          // #ifdef COLLIDERBIT_DEBUG
+          // cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << Esb << endl;
+          // #endif
 
 
           ///////////////////
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          static size_t NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
+          static const size_t NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
 
           // std::normal_distribution<> unitnormdbn{0,1};
           Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
@@ -1976,6 +1976,16 @@ namespace Gambit
 
           // Calculate sum of expected LLRs
           const double ana_dll = llrsums.sum() / (double)NSAMPLE;
+
+          // Check for problem
+          if (Utils::isnan(ana_dll))
+          {
+            sstream msg;
+            msg << "Computation of composite loglike for analysis " << adata.begin()->analysis_name << " returned NaN.";
+            invalid_point().raise(msg.str());
+          }
+
+          // Store result
           result[analysis_key] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
@@ -2037,7 +2047,7 @@ namespace Gambit
         {
           // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
@@ -2108,6 +2118,14 @@ namespace Gambit
             //      << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << endl;
             // #endif
 
+          }
+
+          // Check for problem
+          if (Utils::isnan(bestexp_dll_obs))
+          {
+            sstream msg;
+            msg << "Computation of loglike for analysis " << adata.begin()->analysis_name << " returned NaN. Signal region: " << *bestexp_sr_label;
+            invalid_point().raise(msg.str());
           }
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
