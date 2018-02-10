@@ -1846,16 +1846,15 @@ namespace Gambit
         // Output map key
         string analysis_key = adata.begin()->analysis_name + "_DeltaLogLike";
 
-        // If no events have been generated (xsec veto) or too many events have failed, 
+        /// If no events have been generated (xsec veto) or too many events have failed, 
         /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
         /// @todo This must be made more sophisticated once we add analyses that
         ///       don't rely on event generation.
-        // // _Anders
-        // if (!eventsGenerated || nFailedEvents > maxFailedEvents)
-        // {
-        //   result[analysis_key] = 0.0;
-        //   continue;
-        // }
+        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
+        {
+          result[analysis_key] = 0.0;
+          continue;
+        }
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
