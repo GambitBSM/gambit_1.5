@@ -91,6 +91,7 @@ Scanner:
       NP: 6000
       convthresh: 1e-3
       verbosity: 1
+      lambdajDE: false
 
 
 ObsLikes:
