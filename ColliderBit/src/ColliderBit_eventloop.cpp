@@ -2066,9 +2066,7 @@ namespace Gambit
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-          #ifdef COLLIDERBIT_DEBUG
           str* bestexp_sr_label;
-          #endif
 
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
@@ -2114,9 +2112,7 @@ namespace Gambit
             {
               bestexp_dll_exp = dll_exp;
               bestexp_dll_obs = llb_obs - llsb_obs;
-              #ifdef COLLIDERBIT_DEBUG
               bestexp_sr_label = &(srData.sr_label);
-              #endif
             }
 
             // // For debugging: print some useful numbers to the log.
