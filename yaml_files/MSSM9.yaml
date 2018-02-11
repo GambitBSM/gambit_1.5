@@ -618,6 +618,8 @@ Logger:
 
 KeyValues:
 
+  debug: false
+
   dependency_resolution:
     prefer_model_specific_functions: true
 
@@ -627,4 +629,3 @@ KeyValues:
 
   default_output_path: "runs/MSSM9/"
 
-  debug: false

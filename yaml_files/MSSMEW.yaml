@@ -359,11 +359,9 @@ KeyValues:
     prefer_model_specific_functions: true
 
   # Choose a lower cutoff for the likelihood
-
   likelihood:
     model_invalid_for_lnlike_below: -5e5
-    debug: true
+    model_invalid_for_lnlike_below_alt: -1e5
 
-    # Set the default output path
-
+  # Set the default output path
   default_output_path: "runs/MSSMEW/"
