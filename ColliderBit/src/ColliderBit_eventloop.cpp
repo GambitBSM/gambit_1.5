@@ -194,6 +194,9 @@ namespace Gambit
       // Retrieve run options from the YAML file (or standalone code)
       pythiaNames = runOptions->getValue<std::vector<str> >("pythiaNames");
       maxFailedEvents = runOptions->getValueOrDef<int>(1, "maxFailedEvents");
+      // Allow the user to specify the Pythia seed base (for debugging). If the default value -1
+      // is used, a new seed is generated for every new Pythia configuration and parameter point.
+      int yaml_seedBase = runOptions->getValueOrDef<int>(-1, "pythiaSeedBase");
 
       // Check that length of pythiaNames and nEvents agree!
       if (pythiaNames.size() != Dep::MC_ConvergenceSettings->min_nEvents.size())
@@ -220,7 +223,8 @@ namespace Gambit
 
         // Update the global Pythia seedBase.
         // The Pythia random number seed will be this, plus the thread number.
-        seedBase = int(Random::draw() * 899990000);
+        if (yaml_seedBase == -1) { seedBase = int(Random::draw() * 899990000); }
+        else { seedBase = yaml_seedBase; }
 
         // Store some collider info
         colliderInfo[*iterPythiaNames]["seed_base"] = seedBase;
