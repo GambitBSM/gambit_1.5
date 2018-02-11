@@ -1980,7 +1980,7 @@ namespace Gambit
           // Check for problem
           if (Utils::isnan(ana_dll))
           {
-            sstream msg;
+            std::stringstream msg;
             msg << "Computation of composite loglike for analysis " << adata.begin()->analysis_name << " returned NaN.";
             invalid_point().raise(msg.str());
           }
@@ -2123,7 +2123,7 @@ namespace Gambit
           // Check for problem
           if (Utils::isnan(bestexp_dll_obs))
           {
-            sstream msg;
+            std::stringstream msg;
             msg << "Computation of loglike for analysis " << adata.begin()->analysis_name << " returned NaN. Signal region: " << *bestexp_sr_label;
             invalid_point().raise(msg.str());
           }
