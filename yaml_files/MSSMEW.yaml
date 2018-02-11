@@ -240,9 +240,10 @@ Rules:
   - capability:  ColliderOperator
     function: operateLHCLoop
     options:
-      pythiaNames: ["Pythia_SUSY_LHC_13TeV"]
+      pythiaNames: ["Pythia_SUSY_LHC_13TeV_EWonly"]
       silenceLoop: false
       maxFailedEvents: 20
+      pythiaSeedBase: -1    # If -1, a new seed is generated for every Pythia configuration and parameter point 
 
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
@@ -261,14 +262,20 @@ Rules:
       # Pythia_doc_path defaults to the xmldoc directory of the default Pythia
       # backend. So, this must only be set if the user chooses a different Pythia.
       # Pythia_doc_path: "Backends/installed/Pythia/8.212/share/Pythia8/xmldoc/"
-      Pythia_SUSY_LHC_13TeV: ["Print:quiet = on",
-                             "PartonLevel:MPI = off",
-                             "PartonLevel:ISR = on",
-                             "PartonLevel:FSR = on",
-                             "HadronLevel:all = on",
-                             "SUSY:all = on",
-                             "TauDecays:mode = 0",
-                             "TimeShower:pTmin = 20"]
+      Pythia_SUSY_LHC_13TeV_EWonly: ["Print:quiet = off",
+                                     "Next:numberCount = 0",
+                                     "Random:setSeed = on",
+                                     "Beams:eCM = 13000",
+                                     "PartonLevel:MPI = off",
+                                     "PartonLevel:ISR = on",
+                                     "PartonLevel:FSR = on",
+                                     "HadronLevel:all = on",
+                                     "SUSY:all = off",
+                                     "SUSY:qqbar2chi0chi0 = on",
+                                     "SUSY:qqbar2chi+-chi0 = on",
+                                     "SUSY:qqbar2chi+chi- = on",
+                                     "TauDecays:mode = 0",
+                                     "TimeShower:pTmin = 20"]
 
       xsec_vetos: [0.028]  # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
 
