@@ -262,7 +262,7 @@ Rules:
       # Pythia_doc_path defaults to the xmldoc directory of the default Pythia
       # backend. So, this must only be set if the user chooses a different Pythia.
       # Pythia_doc_path: "Backends/installed/Pythia/8.212/share/Pythia8/xmldoc/"
-      Pythia_SUSY_LHC_13TeV_EWonly: ["Print:quiet = off",
+      Pythia_SUSY_LHC_13TeV_EWonly: ["Print:quiet = on",
                                      "Next:numberCount = 0",
                                      "Random:setSeed = on",
                                      "Beams:eCM = 13000",

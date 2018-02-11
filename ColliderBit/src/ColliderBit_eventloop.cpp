@@ -517,6 +517,17 @@ namespace Gambit
         std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
 
+        // - Check for NaN xsed
+        if (Utils::isnan(totalxsec))
+        {
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Got NaN cross-section estimate from Pythia." << endl;
+          #endif
+          piped_invalid_point.request("Got NaN cross-section estimate from Pythia.");
+          Loop::wrapup();
+          return;
+        }
+
         // - Wrap up loop if veto applies
         if (totalxsec * 1e12 < totalxsec_fb_veto)
         {
