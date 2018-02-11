@@ -22,10 +22,10 @@ Parameters:
       fixed_value: 0
     M1:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1e1, 1e1, 1e4]
+      ranges: [-5e3, -1e1, 1e1, 5e3]
     M2:
       prior_type: double_log_flat_join
-      ranges: [0, 0, 1e1, 1e4]
+      ranges: [0, 0, 1e1, 5e3]
     M3:
       fixed_value: 5000
     Qin:
@@ -39,7 +39,7 @@ Parameters:
       fixed_value: 9000000
     mu:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1e1, 1e1, 1e4]
+      ranges: [-5e3, -1e1, 1e1, 5e3]
     mA:
       fixed_value: 5000
 
