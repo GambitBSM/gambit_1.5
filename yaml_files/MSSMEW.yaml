@@ -11,7 +11,7 @@
 Parameters:
 
   # SM nuisance parameters fixed for now.
-  StandardModel_SLHA2: !import include/StandardModel_SLHA2_defaults.yaml
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_scan.yaml
 
   MSSM11atQ_mA:
     Ad_3:
@@ -22,14 +22,14 @@ Parameters:
       fixed_value: 0
     M1:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1, 1, 1e4]
+      ranges: [0, 0, 1e1, 5e3]
     M2:
       prior_type: double_log_flat_join
-      ranges: [0, 0, 1, 1e4]
+      ranges: [-5e3, -1e1, 1e1, 5e3]
     M3:
       fixed_value: 5000
     Qin:
-      fixed_value: 10000
+      fixed_value: 3000  # 3000 = sqrt(mQL3*mUR3) = mSUSY, since we have mQL3 = mUR3 = mq2 = (3000)^2
     TanBeta:
       range: [3.0, 50.0]
       prior_type: flat
@@ -39,7 +39,7 @@ Parameters:
       fixed_value: 9000000
     mu:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1e1, 1e1, 1e4]
+      ranges: [-5e3, -1e1, 1e1, 5e3]
     mA:
       fixed_value: 5000
 
@@ -91,34 +91,19 @@ Scanner:
       NP: 6000
       convthresh: 1e-3
       verbosity: 1
+      lambdajDE: false
 
 
 ObsLikes:
 
-    # Calculate SM quantities
+    # Likelihoods for SM nuisance parameters
+    - purpose:    LogLike
+      capability: lnL_t_mass
 
-    - capability: lnL_t_mass
-      purpose:    LogLike
+    - purpose:    LogLike
+      capability: lnL_alpha_s
 
-    #- capability: lnL_mbmb
-    #  purpose:    LogLike
-
-    #- capability: lnL_alpha_em
-    #  purpose:    LogLike
-
-    - capability: lnL_alpha_s
-      purpose:    LogLike
-
-    #- capability: lnL_W_mass
-    #  purpose:    LogLike
-
-    #- capability: lnL_sinW2_eff
-    #  purpose:    LogLike
-
-    #- capability: lnL_deltarho
-    #  purpose:    LogLike
-
-    # Calculate the LHC likelihood
+    # Combined LHC likelihood
     - purpose:    LogLike
       capability: LHC_Combined_LogLike
 
@@ -138,6 +123,9 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Chargino_Leptonic_LLike
 
+    - purpose:    LogLike
+      capability: OPAL_Neutralino_Hadronic_LLike
+
     # Other observables
     - purpose:    likelihood_details
       capability: LHC_LogLikes
@@ -147,6 +135,15 @@ ObsLikes:
 
     - purpose:    Observable
       capability: LHCEventLoopInfo
+
+    - purpose:    Observable
+      capability: mw
+
+    - purpose:    Observable
+      capability: deltarho
+
+    - purpose:    Observable
+      capability: prec_sinW2_eff
 
     - purpose:    Observable
       capability: SLHA1_violation
@@ -243,16 +240,17 @@ Rules:
   - capability:  ColliderOperator
     function: operateLHCLoop
     options:
-      pythiaNames: ["Pythia_SUSY_LHC_13TeV"]
+      pythiaNames: ["Pythia_SUSY_LHC_13TeV_EWonly"]
       silenceLoop: false
       maxFailedEvents: 20
+      pythiaSeedBase: -1    # If -1, a new seed is generated for every Pythia configuration and parameter point 
 
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
-      min_nEvents: [5000]
-      max_nEvents: [50000]
-      events_between_convergence_checks: [5000]
+      min_nEvents: [20000]
+      max_nEvents: [100000]
+      events_between_convergence_checks: [20000]
       target_fractional_uncert: [0.3]
       halt_when_systematic_dominated: true
       all_SR_must_converge: false
@@ -264,27 +262,23 @@ Rules:
       # Pythia_doc_path defaults to the xmldoc directory of the default Pythia
       # backend. So, this must only be set if the user chooses a different Pythia.
       # Pythia_doc_path: "Backends/installed/Pythia/8.212/share/Pythia8/xmldoc/"
-      Pythia_SUSY_LHC_13TeV: ["Print:quiet = on",
-                             "PartonLevel:MPI = off",
-                             "PartonLevel:ISR = on",
-                             "PartonLevel:FSR = on",
-                             "HadronLevel:all = on",
-                             "SUSY:all = on",
-                             "TauDecays:mode = 0",
-                             "TimeShower:pTmin = 20"]
+      Pythia_SUSY_LHC_13TeV_EWonly: ["Print:quiet = on",
+                                     "Next:numberCount = 0",
+                                     "Random:setSeed = on",
+                                     "Beams:eCM = 13000",
+                                     "PartonLevel:MPI = off",
+                                     "PartonLevel:ISR = on",
+                                     "PartonLevel:FSR = on",
+                                     "HadronLevel:all = on",
+                                     "SUSY:all = off",
+                                     "SUSY:qqbar2chi0chi0 = on",
+                                     "SUSY:qqbar2chi+-chi0 = on",
+                                     "SUSY:qqbar2chi+chi- = on",
+                                     "TauDecays:mode = 0",
+                                     "TimeShower:pTmin = 20"]
 
       xsec_vetos: [0.028]  # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
 
-
-  # NOTE: The use of Delphes currently only works when running with OMP_NUM_THREADS=1
-  - capability: DetectorSim
-    type: "Gambit::ColliderBit::DelphesVanilla"
-    function: getDelphes
-    options:
-      # useDetector defaults to false for getDelphes, which ignores all "Det" analyses and disables Delphes
-      useDetector: [false]
-      # Specify the location of the Delphes cards for the two Pythia instances (we assume ATLAS in both cases here)
-      delphesConfigFiles: ["ColliderBit/data/delphes_card_ATLAS.tcl"]
 
   # BuckFast for ATLAS rules and options
   - capability: SimpleSmearingSim
@@ -294,7 +288,7 @@ Rules:
       # useDetector defaults to true for getBuckFastATLAS. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
       useDetector: [true]
       # Choose which type of event to use: for parton level, change partonOnly to true
-      partonOnly: [true]
+      partonOnly: [false]
       antiktR: [0.4]
 
   # BuckFast for CMS rules and options
@@ -305,7 +299,7 @@ Rules:
       # useDetector defaults to true for getBuckFastCMS. Set it to false to ignore all CMS analyses and disable the BuckFast CMS simulator
       useDetector: [true]
       # Choose which type of event to use: for parton level, change partonOnly to true
-      partonOnly: [true]
+      partonOnly: [false]
       antiktR: [0.4]
 
   # ATLAS analysis setup.
@@ -335,17 +329,15 @@ Rules:
                    #"CMS_13TeV_1LEPStop_36invfb"
                    #"CMS_13TeV_2LEPStop_36invfb"
 
-
-
-    # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
-    # Can change "_lognormal_" to "_gaussian_" if you prefer
+  # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
+  # Can change "_lognormal_" to "_gaussian_" if you prefer
   - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
 
 
-    # Set the names of key log files
 
+# Set the names of key log files
 Logger:
 
   redirection:
@@ -361,15 +353,15 @@ Logger:
 
 KeyValues:
 
+  debug: false
+
   dependency_resolution:
     prefer_model_specific_functions: true
 
   # Choose a lower cutoff for the likelihood
-
   likelihood:
     model_invalid_for_lnlike_below: -5e5
-    debug: true
+    model_invalid_for_lnlike_below_alt: -1e5
 
-    # Set the default output path
-
+  # Set the default output path
   default_output_path: "runs/MSSMEW/"

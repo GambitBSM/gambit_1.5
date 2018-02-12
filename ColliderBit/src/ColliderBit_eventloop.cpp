@@ -49,7 +49,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-#define COLLIDERBIT_DEBUG
+// #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -194,6 +194,9 @@ namespace Gambit
       // Retrieve run options from the YAML file (or standalone code)
       pythiaNames = runOptions->getValue<std::vector<str> >("pythiaNames");
       maxFailedEvents = runOptions->getValueOrDef<int>(1, "maxFailedEvents");
+      // Allow the user to specify the Pythia seed base (for debugging). If the default value -1
+      // is used, a new seed is generated for every new Pythia configuration and parameter point.
+      int yaml_seedBase = runOptions->getValueOrDef<int>(-1, "pythiaSeedBase");
 
       // Check that length of pythiaNames and nEvents agree!
       if (pythiaNames.size() != Dep::MC_ConvergenceSettings->min_nEvents.size())
@@ -220,7 +223,8 @@ namespace Gambit
 
         // Update the global Pythia seedBase.
         // The Pythia random number seed will be this, plus the thread number.
-        seedBase = int(Random::draw() * 899990000);
+        if (yaml_seedBase == -1) { seedBase = int(Random::draw() * 899990000); }
+        else { seedBase = yaml_seedBase; }
 
         // Store some collider info
         colliderInfo[*iterPythiaNames]["seed_base"] = seedBase;
@@ -512,6 +516,17 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
+
+        // - Check for NaN xsed
+        if (Utils::isnan(totalxsec))
+        {
+          #ifdef COLLIDERBIT_DEBUG
+          std::cerr << debug_prefix() << "Got NaN cross-section estimate from Pythia." << endl;
+          #endif
+          piped_invalid_point.request("Got NaN cross-section estimate from Pythia.");
+          Loop::wrapup();
+          return;
+        }
 
         // - Wrap up loop if veto applies
         if (totalxsec * 1e12 < totalxsec_fb_veto)
@@ -1846,16 +1861,15 @@ namespace Gambit
         // Output map key
         string analysis_key = adata.begin()->analysis_name + "_DeltaLogLike";
 
-        // If no events have been generated (xsec veto) or too many events have failed, 
+        /// If no events have been generated (xsec veto) or too many events have failed, 
         /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
         /// @todo This must be made more sophisticated once we add analyses that
         ///       don't rely on event generation.
-        // // _Anders
-        // if (!eventsGenerated || nFailedEvents > maxFailedEvents)
-        // {
-        //   result[analysis_key] = 0.0;
-        //   continue;
-        // }
+        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
+        {
+          result[analysis_key] = 0.0;
+          continue;
+        }
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
@@ -1880,7 +1894,7 @@ namespace Gambit
           /// @todo Support skewness correction to the pdf.
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite llike." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite loglike." << endl;
           #endif
 
           // Construct vectors of SR numbers
@@ -1909,9 +1923,9 @@ namespace Gambit
           const Eigen::ArrayXd sqrtEb = Eb.sqrt();
           const Eigen::MatrixXd Vb = eig_b.eigenvectors();
           const Eigen::MatrixXd Vbinv = Vb.inverse();
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << Eb << endl;
-          #endif
+          // #ifdef COLLIDERBIT_DEBUG
+          // cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << Eb << endl;
+          // #endif
 
           // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
           const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
@@ -1921,16 +1935,16 @@ namespace Gambit
           const Eigen::ArrayXd sqrtEsb = Esb.sqrt();
           const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
           const Eigen::MatrixXd Vsbinv = Vsb.inverse();
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << Esb << endl;
-          #endif
+          // #ifdef COLLIDERBIT_DEBUG
+          // cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << Esb << endl;
+          // #endif
 
 
           ///////////////////
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          static size_t NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
+          static const size_t NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
 
           // std::normal_distribution<> unitnormdbn{0,1};
           Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
@@ -1977,6 +1991,16 @@ namespace Gambit
 
           // Calculate sum of expected LLRs
           const double ana_dll = llrsums.sum() / (double)NSAMPLE;
+
+          // Check for problem
+          if (Utils::isnan(ana_dll))
+          {
+            std::stringstream msg;
+            msg << "Computation of composite loglike for analysis " << adata.begin()->analysis_name << " returned NaN.";
+            invalid_point().raise(msg.str());
+          }
+
+          // Store result
           result[analysis_key] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
@@ -2038,13 +2062,11 @@ namespace Gambit
         {
           // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected llike." << endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-          #ifdef COLLIDERBIT_DEBUG
           str* bestexp_sr_label;
-          #endif
 
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
@@ -2090,9 +2112,7 @@ namespace Gambit
             {
               bestexp_dll_exp = dll_exp;
               bestexp_dll_obs = llb_obs - llsb_obs;
-              #ifdef COLLIDERBIT_DEBUG
               bestexp_sr_label = &(srData.sr_label);
-              #endif
             }
 
             // // For debugging: print some useful numbers to the log.
@@ -2109,6 +2129,14 @@ namespace Gambit
             //      << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << endl;
             // #endif
 
+          }
+
+          // Check for problem
+          if (Utils::isnan(bestexp_dll_obs))
+          {
+            std::stringstream msg;
+            msg << "Computation of loglike for analysis " << adata.begin()->analysis_name << " returned NaN. Signal region: " << *bestexp_sr_label;
+            invalid_point().raise(msg.str());
           }
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)

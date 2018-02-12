@@ -42,10 +42,10 @@ Parameters:
       ranges: [-1e4, -1e2, 1e2, 1e4]
     M1:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1e2, 1e2, 1e4]
+      ranges: [0, 0, 1e2, 1e4]
     M2:
       prior_type: double_log_flat_join
-      ranges: [0, 0, 1e2, 1e4]
+      ranges: [-1e4, -1e2, 1e2, 1e4]
     M3:
       prior_type: double_log_flat_join
       ranges: [-1e4, -1e2, 1e2, 1e4]
@@ -109,6 +109,7 @@ Scanner:
       NP: 6000
       convthresh: 1e-3
       verbosity: 1
+      lambdajDE: false
 
 
 ObsLikes:
@@ -617,6 +618,8 @@ Logger:
 
 KeyValues:
 
+  debug: false
+
   dependency_resolution:
     prefer_model_specific_functions: true
 
@@ -626,4 +629,3 @@ KeyValues:
 
   default_output_path: "runs/MSSM9/"
 
-  debug: false
