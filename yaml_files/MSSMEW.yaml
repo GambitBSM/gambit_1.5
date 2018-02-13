@@ -88,8 +88,8 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 6000
-      convthresh: 1e-3
+      NP: 19200
+      convthresh: 1e-5
       verbosity: 1
       lambdajDE: false
 
@@ -126,7 +126,7 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Neutralino_Hadronic_LLike
 
-    # Other observables
+    # Observables (not included in likelihood)
     - purpose:    likelihood_details
       capability: LHC_LogLikes
 
@@ -242,7 +242,7 @@ Rules:
     options:
       pythiaNames: ["Pythia_SUSY_LHC_13TeV_EWonly"]
       silenceLoop: false
-      maxFailedEvents: 20
+      maxFailedEvents: 1000
       pythiaSeedBase: -1    # If -1, a new seed is generated for every Pythia configuration and parameter point 
 
   # Choose statistical settings for Monte Carlo event generator
