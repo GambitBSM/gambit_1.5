@@ -520,7 +520,8 @@ namespace Gambit {
         _numSR6=0;
         _numSR7=0; 
         _numSR8=0; 
-              
+	_numSR9=0;
+	
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 
