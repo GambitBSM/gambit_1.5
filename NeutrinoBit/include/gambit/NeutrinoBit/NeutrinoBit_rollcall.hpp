@@ -269,6 +269,7 @@ START_MODULE
     #define FUNCTION RHN_R_W
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(mw, triplet<double>)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY

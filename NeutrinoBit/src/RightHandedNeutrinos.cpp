@@ -205,12 +205,18 @@ namespace Gambit
     void RHN_R_W(std::vector<double> &R_W)
     {
       using namespace Pipes::RHN_R_W;
-
       Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
 
-      R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
-      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
-      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
+      if(*Param["M_1"] < Dep::mw->central)
+      {
+        R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
+        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
+        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
+      }
+      else
+      {
+        R_W = {1.0, 1.0, 1.0};
+      }
     }
 
     void lnL_lepuniv(double& result_lepuniv)
