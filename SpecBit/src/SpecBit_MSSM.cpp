@@ -883,7 +883,7 @@ namespace Gambit
     #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
-    #if(FS_MODEL_MSSMatMGUT_mAmu_IS_BUILT)
+    #if(FS_MODEL_MSSMatMGUT_IS_BUILT)
     void get_MSSMatMGUT_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
