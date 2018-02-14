@@ -31,7 +31,7 @@ Parameters:
     Qin:
       fixed_value: 3000  # 3000 = sqrt(mQL3*mUR3) = mSUSY, since we have mQL3 = mUR3 = mq2 = (3000)^2
     TanBeta:
-      range: [3.0, 70.0]
+      range: [1.0, 70.0]
       prior_type: flat
     ml2:
       fixed_value: 9000000
