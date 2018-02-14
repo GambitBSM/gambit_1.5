@@ -136,14 +136,14 @@ ObsLikes:
     - purpose:    Observable
       capability: LHCEventLoopInfo
 
-    - purpose:    Observable
-      capability: mw
+    # - purpose:    Observable
+    #   capability: mw
 
-    - purpose:    Observable
-      capability: deltarho
+    # - purpose:    Observable
+    #   capability: deltarho
 
-    - purpose:    Observable
-      capability: prec_sinW2_eff
+    # - purpose:    Observable
+    #   capability: prec_sinW2_eff
 
     - purpose:    Observable
       capability: SLHA1_violation
