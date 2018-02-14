@@ -166,6 +166,7 @@ namespace Gambit
     {
       using namespace Pipes::CI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd mnu = *Dep::m_nu;
 
       std::complex<double> I(0.0, 1.0);
 
@@ -196,7 +197,9 @@ namespace Gambit
       M_twid_temp(2,0) = 0.0;
       M_twid_temp(2,1) = 0.0;
       M_twid_temp(2,2) = M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2),mZ,mH)/pow(vev,2.0)));
-      M_twid = M_twid_temp.sqrt();
+      if(M_twid != Eigen::Matrix3cd::Zero())
+        M_twid = M_twid_temp.sqrt();
+
 
       R_23(0,0) = 1.0;
       R_23(0,1) = 0.0;
@@ -227,7 +230,8 @@ namespace Gambit
       R_12(2,2) = 1.0;
       R = R_23 * R_13 * R_12;
 
-      Theta = I * *Dep::UPMNS * Dep::m_nu->sqrt() * R * M_twid.inverse();
+     if(mnu != Eigen::Matrix3cd::Zero())
+      Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
 
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
       Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();

@@ -104,9 +104,15 @@ Printer:
 
 Scanner:
 
-  use_scanner: de
+  use_scanner: random
 
   scanners:
+
+    random:
+      plugin: random
+      point_number: 1
+      like: LogLike
+
     de:
       plugin: diver
       like: LogLike
@@ -127,8 +133,8 @@ ObsLikes:
   - capability: lnL_W_mass
     purpose: LogLike
 
-  - capability: lnL_sinW2
-    purpose: LogLike
+#  - capability: lnL_sinW2
+#    purpose: LogLike
 
   - capability: lnL_Z_inv_width
     purpose: LogLike
