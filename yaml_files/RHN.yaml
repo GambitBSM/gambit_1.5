@@ -86,11 +86,6 @@ Parameters:
     ImOm12:
       range: [-5, 5]
 #      fixed_value: 0.0
-    L_Ge:
-      range: [0.159, 0.193]
-    L_Xe:
-      range: [0.178, 0.211]
-
 
 Priors:
 
@@ -150,8 +145,8 @@ ObsLikes:
   - capability: lnLlepuniv
     purpose: LogLike
 
-#  - capability: lnL0nubb
-#    purpose: LogLike
+  - capability: lnL0nubb
+    purpose: LogLike
 
   - capability: lnLckm
     purpose: LogLike

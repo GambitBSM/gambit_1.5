@@ -341,6 +341,13 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
     }
 
+    // Unified 0nubb likelihood
+    void lnL_0nubb(double &result)
+    {
+      using namespace Pipes::lnL_0nubb;
+      result = *Dep::lnL_0nubb_KamLAND_ZEN + *Dep::lnL_0nubb_GERDA;
+    }
+
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
     void lnL_ckm(double& result_ckm)
     {
