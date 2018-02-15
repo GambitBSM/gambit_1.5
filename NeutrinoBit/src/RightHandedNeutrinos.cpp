@@ -219,28 +219,6 @@ namespace Gambit
       result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
     }
 
-    // Neutrinoless double-beta decay constraint: m_bb should be less than the experimentally determined limits in GERDA and KamLAND-Zen [GERDA: Phys. Rev. Lett. 111 (2013) 122503; KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503]
-    void RHN_m_GERDA(double &m_GERDA)
-    {
-      using namespace Pipes::RHN_m_GERDA;
-      std::vector<double> M(3);
-      std::complex<double> m_temp_GERDA = {0.0,0.0};
-
-      Matrix3cd m_light = *Dep::m_nu;
-      Matrix3cd U_light = *Dep::UPMNS;
-      Matrix3cd theta = *Dep::SeesawI_Theta;
-
-      m_GERDA = 0.0;
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-
-      for (int i=0; i<3; i++)
-        m_temp_GERDA += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*(pow(*Param["L_Ge"], 2.0)/(pow(*Param["L_Ge"], 2.0)+pow(M[i], 2.0)));
-
-      m_GERDA = abs(m_temp_GERDA);
-    }
-
     // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for right-handed
     // neutrino model
     void RHN_Gamma_0nubb_Xe(double& result)
@@ -277,6 +255,43 @@ namespace Gambit
       result = prefactor * abs(sum) * abs(sum);
     }
 
+    // Calculate 0nubb decay rate [1/s] for 76Ge 0nubb detector, for right-handed
+    // neutrino model
+    void RHN_Gamma_0nubb_Ge(double& result)
+    {
+      using namespace Pipes::RHN_Gamma_0nubb_Ge;
+      double mp, Gamma_0nu, A_0nubb_Ge, p2_0nubb_Ge, prefactor;
+      std::vector<double> M(3);
+      std::complex<double> sum = {0.0,0.0};
+
+      // Relevant model parameters
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
+      // A_0nubb_Ge = *Param["A_0nubb_Ge"];  // Range: 2.55 - 11.5 [1e-10 1/yr]
+      // p2_0nubb_Ge = pow(*Param["p_0nubb_Ge"], 2.0);  // Range: 159.0 - 193.0 [MeV]
+
+      // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
+      A_0nubb_Ge = runOptions->getValueOrDef<double>(5.05, "A");
+      p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(163.0, "p"), 2.0);
+      p2_0nubb_Ge *= 1e-3;  // MeV --> GeV
+      mp = 0.938;  // [GeV] (PDG 2014)
+
+      // Lifetime equation is adopted from Faessler+14, Eq. (13)
+      prefactor = A_0nubb_Ge*mp*mp/p2_0nubb_Ge/p2_0nubb_Ge;
+        for (int i=0; i<3; i++)
+        {
+          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
+        }
+      result = prefactor * abs(sum) * abs(sum);
+    }
+
+    // KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503
     void lnL_0nubb_KamLAND_Zen(double& result)
     {
       using namespace Pipes::lnL_0nubb_KamLAND_Zen;
@@ -288,39 +303,16 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
     }
 
-    void RHN_m_Kam(double& m_Kam)
+    // GERDA: Phys. Rev. Lett. 111 (2013) 122503
+    void lnL_0nubb_GERDA(double& result)
     {
-      using namespace Pipes::RHN_m_Kam;
-      std::vector<double> M(3);
-      std::complex<double> m_temp_Kam = {0.0,0.0};
+      using namespace Pipes::lnL_0nubb_GERDA;
+      double tau_limit = 2.1e25*3.156e7;  // [s] 90% CL
 
-      Matrix3cd m_light = *Dep::m_nu;
-      Matrix3cd U_light = *Dep::UPMNS;
-      Matrix3cd theta = *Dep::SeesawI_Theta;
+      double Gamma = *Dep::Gamma_0nubb_Ge;
 
-      m_Kam = 0.0;
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-
-       for (int i=0; i<3; i++)
-        m_temp_Kam += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*(pow(*Param["L_Xe"], 2.0)/(pow(*Param["L_Xe"], 2.0)+pow(M[i], 2.0)));
-
-      m_Kam = abs(m_temp_Kam);
-    }
-
-    void lnL_0nubb(double& result_0nubb)
-    {
-      using namespace Pipes::lnL_0nubb;
-      static double m_bb_GERDA = 4e-10;  // GeV
-      static double m_bb_Kam = 1.65e-10;  // GeV
-      double m_GERDA = *Dep::m_GERDA;
-      double m_Kam = *Dep::m_Kam;
-
-      result_0nubb += 
-        Stats::gaussian_loglikelihood(m_GERDA, 0., 0., m_bb_GERDA, false)+
-        Stats::gaussian_loglikelihood(m_Kam, 0., 0., m_bb_Kam, false);
-
+      // Factor 1.28155 corresponds to one-sided UL at 90% CL
+      result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
@@ -410,6 +402,9 @@ namespace Gambit
       using namespace Pipes::lnL_pienu;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.0606;  // GeV
+      static double upp_lim = 0.1293;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
 
@@ -425,16 +420,23 @@ namespace Gambit
         s = fill_spline("NeutrinoBit/data/pienu.csv");
         read_table = false;
       }
-
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result = 0;
       for(int i=0; i<3; i++)
         result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
-
     }
 
     // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 at 90% in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27]
@@ -443,6 +445,9 @@ namespace Gambit
       using namespace Pipes::lnL_ps191_e;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.0118;  // GeV
+      static double upp_lim = 0.4492;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
       double c_e = 0.5711;
@@ -463,9 +468,18 @@ namespace Gambit
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
       // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      U[0] = s(M_1)/sqrt(2);
-      U[1] = s(M_2)/sqrt(2);
-      U[2] = s(M_3)/sqrt(2);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1)/sqrt(2);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2)/sqrt(2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3)/sqrt(2);
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -479,6 +493,9 @@ namespace Gambit
       using namespace Pipes::lnL_ps191_mu;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.0103;  // GeV
+      static double upp_lim = 0.3611;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
       double c_e = 0.5711;
@@ -499,9 +516,18 @@ namespace Gambit
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
       // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      U[0] = s(M_1)/sqrt(2);
-      U[1] = s(M_2)/sqrt(2);
-      U[2] = s(M_3)/sqrt(2);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1)/sqrt(2);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2)/sqrt(2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3)/sqrt(2);
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -515,6 +541,9 @@ namespace Gambit
       using namespace Pipes::lnL_charm_e;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.1595;  // GeV
+      static double upp_lim = 2.0815;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
       double c_e = 0.5711;
@@ -534,9 +563,18 @@ namespace Gambit
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -550,6 +588,9 @@ namespace Gambit
       using namespace Pipes::lnL_charm_mu;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.4483;  // GeV
+      static double upp_lim = 1.9232;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
       double c_e = 0.5711;
@@ -569,9 +610,18 @@ namespace Gambit
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -585,6 +635,9 @@ namespace Gambit
       using namespace Pipes::lnL_delphi;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 1.8102;  // GeV
+      static double upp_lim = 80.0;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(9);
 
@@ -607,9 +660,18 @@ namespace Gambit
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -626,6 +688,9 @@ namespace Gambit
       using namespace Pipes::lnL_atlas_e;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 103.3352;  // GeV
+      static double upp_lim = 473.2829;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
 
@@ -642,9 +707,18 @@ namespace Gambit
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -658,6 +732,9 @@ namespace Gambit
       using namespace Pipes::lnL_atlas_mu;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 101.8909;  // GeV
+      static double upp_lim = 500.7691;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
 
@@ -674,9 +751,18 @@ namespace Gambit
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -690,6 +776,9 @@ namespace Gambit
       using namespace Pipes::lnL_e949;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.1794;  // GeV
+      static double upp_lim = 0.2996;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
 
@@ -707,9 +796,18 @@ namespace Gambit
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
       // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      U[0] = s(M_1)/sqrt(2);
-      U[1] = s(M_2)/sqrt(2);
-      U[2] = s(M_3)/sqrt(2);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1)/sqrt(2);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2)/sqrt(2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3)/sqrt(2);
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result = 0;
@@ -723,6 +821,9 @@ namespace Gambit
       using namespace Pipes::lnL_nutev;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.2116;  // GeV
+      static double upp_lim = 2.0162;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
 
@@ -739,9 +840,18 @@ namespace Gambit
       M_1 = *Param["M_1"];
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
-      U[0] = s(M_1);
-      U[1] = s(M_2);
-      U[2] = s(M_3);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3);
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -755,6 +865,9 @@ namespace Gambit
       using namespace Pipes::lnL_charm_tau;
       static bool read_table = true;
       static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.0106;  // GeV
+      static double upp_lim = 0.2888;  // GeV
       double M_1, M_2, M_3;
       std::vector<double> U(3), mixing_sq(3);
 
@@ -772,9 +885,18 @@ namespace Gambit
       M_2 = *Param["M_2"];
       M_3 = *Param["M_3"];
       // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      U[0] = s(M_1)/sqrt(2);
-      U[1] = s(M_2)/sqrt(2);
-      U[2] = s(M_3)/sqrt(2);
+      if ((M_1 < low_lim) || (M_1 > upp_lim))
+        U[0] = 1e10;
+      else
+        U[0] = s(M_1)/sqrt(2);
+      if ((M_2 < low_lim) || (M_2 > upp_lim))
+        U[1] = 1e10;
+      else
+        U[1] = s(M_2)/sqrt(2);
+      if ((M_3 < low_lim) || (M_3 > upp_lim))
+        U[2] = 1e10;
+      else
+        U[2] = s(M_3)/sqrt(2);
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;

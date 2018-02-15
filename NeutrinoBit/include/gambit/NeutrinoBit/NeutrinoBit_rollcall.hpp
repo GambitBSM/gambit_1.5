@@ -274,35 +274,42 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY m_GERDA
+  #define CAPABILITY Gamma_0nubb_Xe
   START_CAPABILITY
-    #define FUNCTION RHN_m_GERDA
+    #define FUNCTION RHN_Gamma_0nubb_Xe
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
-  #undef CAPABILITY 
+  #undef CAPABILITY
 
-  #define CAPABILITY m_Kam
+  #define CAPABILITY lnL_0nubb_KamLAND_Zen
   START_CAPABILITY
-    #define FUNCTION RHN_m_Kam
+    #define FUNCTION lnL_0nubb_KamLAND_Zen
+    START_FUNCTION(double)
+    DEPENDENCY(Gamma_0nubb_Xe, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Gamma_0nubb_Ge
+  START_CAPABILITY
+    #define FUNCTION RHN_Gamma_0nubb_Ge
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
-  #undef CAPABILITY 
+  #undef CAPABILITY
 
-  #define CAPABILITY lnL0nubb
+  #define CAPABILITY lnL_0nubb_GERDA
   START_CAPABILITY
-    #define FUNCTION lnL_0nubb
+    #define FUNCTION lnL_0nubb_GERDA
     START_FUNCTION(double)
-    DEPENDENCY(m_GERDA, double)
-    DEPENDENCY(m_Kam, double)
-   #undef FUNCTION
+    DEPENDENCY(Gamma_0nubb_Ge, double)
+    #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY lnLckm
@@ -517,29 +524,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  #define CAPABILITY Gamma_0nubb_Xe
-  START_CAPABILITY
-    #define FUNCTION RHN_Gamma_0nubb_Xe
-    START_FUNCTION(double)
-    DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(RightHandedNeutrinos)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY lnL_0nubb_KamLAND_Zen
-  START_CAPABILITY
-    #define FUNCTION lnL_0nubb_KamLAND_Zen
-    START_FUNCTION(double)
-    DEPENDENCY(Gamma_0nubb_Xe, double)
-    #undef FUNCTION
-  #undef CAPABILITY
-
 #undef MODULE
 
 
 #endif /* defined(__NeutrinoBit_rollcall_hpp__) */
-
-
