@@ -82,7 +82,7 @@ namespace Gambit
       }
     }
    
-    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; iR_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
+    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; R_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
     void RHN_R_pi(double& R_pi)
     {
       using namespace Pipes::RHN_R_pi;
@@ -194,8 +194,29 @@ namespace Gambit
         e_f_tau += e_fac_tau[i];
         mu_f_tau += mu_fac_tau[i];
       }
-      d_r_tau = ((1.0 - e_f_tau)/(1.0 - mu_f_tau)) - 1.0;
+      d_r_tau = ((1.0 - mu_f_tau)/(1.0 - e_f_tau)) - 1.0;
       R_tau = R_tau_SM * (1.0 + d_r_tau);
+    }
+
+    // Lepton universality from W decays
+    // 0: R(W->mu nu/W->e nu) from LHCb 1608.01484
+    // 1: R(W->tau nu/W->e nu) from LEP 1302.3415
+    // 2: R(W->tau nu/W->mu nu) from LEP 1302.3415
+    void RHN_R_W(std::vector<double> &R_W)
+    {
+      using namespace Pipes::RHN_R_W;
+      Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
+
+      if(*Param["M_1"] < Dep::mw->central)
+      {
+        R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
+        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
+        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
+      }
+      else
+      {
+        R_W = {1.0, 1.0, 1.0};
+      }
     }
 
     void lnL_lepuniv(double& result_lepuniv)
@@ -204,19 +225,24 @@ namespace Gambit
       double R_pi = *Dep::R_pi;
       double R_K = *Dep::R_K;
       double R_tau = *Dep::R_tau;
+      std::vector<double> R_W = *Dep::R_W;
 
-      // TODO: change to 1sigma
-      double R_pi_exp = 1.23e-4;
-      double R_pi_err = 0.012e-4;
-      double R_K_exp = 2.488e-5;
-      double R_K_err = 0.03e-5;
-      double R_tau_exp = 0.9764;
-      double R_tau_err = 0.009;
+      double R_pi_exp = 1.23e-4; // Phys.Rev.Lett. 70 (1993) 17-20  
+      double R_pi_err = 0.005e-4;
+      double R_K_exp = 2.488e-5; // 1212.4012
+      double R_K_err = 0.010e-5;
+      double R_tau_exp = 0.9762; // 1612.07233 
+      double R_tau_err = 0.0028;
+      std::vector<double> R_W_exp = {0.980, 1.063, 1.070};
+      std::vector<double> R_W_err = {0.018, 0.027, 0.026};
 
       result_lepuniv = 0.0;
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
+      result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
+      result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
+      result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
     }
 
     // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for right-handed
