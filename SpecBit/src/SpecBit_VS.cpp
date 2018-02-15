@@ -371,7 +371,21 @@ namespace Gambit
       namespace myPipe = Pipes::get_likelihood;
       using namespace Gambit;
       dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
-      result=((- ( 1 / ( vs_tuple.first ) ) * exp(140) * (1/ (1.2e19) ) )  );
+      
+      
+      const Options& runOptions=*myPipe::runOptions;
+      bool demand_stable = runOptions.getValueOrDef<bool>(false,"demand_stable");
+      double stability_scale = runOptions.getValueOrDef<double>(1.22e19,"set_stability_scale");
+      
+      if (demand_stable && (vs_tuple.second < stability_scale))
+      { 
+				result = -1e100;
+			}
+			else
+			{
+				result=((- ( 1 / ( vs_tuple.first ) ) * exp(140) * (1/ (1.2e19) ) )  );
+			}
+			
     }
     
     // get the scale of the minimum
@@ -400,7 +414,6 @@ namespace Gambit
         result = 0;
       }
     }
-    
     
     
   } // end namespace SpecBit

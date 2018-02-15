@@ -118,6 +118,19 @@ ObsLikes:
 
 Rules:
 
+    - capability: VS_likelihood
+      function: get_likelihood
+      options:
+        demand_stable: true
+        set_stability_scale: 1e19
+
+
+    - capability: vacuum_stability
+      function: find_min_lambda_SingletDM
+      module: SpecBit
+      options:
+        set_high_scale: 1e19
+
     - capability: SingletDM_spectrum
       type: Spectrum
       function: get_SingletDM_spectrum_pole
@@ -143,6 +156,8 @@ Logger:
 KeyValues:
 
   default_output_path: "runs/SpecBit_tests"
+  
+  debug: true
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6

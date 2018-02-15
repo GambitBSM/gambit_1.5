@@ -57,7 +57,7 @@ Parameters:
     
   SingletDM_running:
     lambda_S: 0.0518738
-    lambda_hS: 7.41575
+    lambda_hS: 0.41575
     mS: 9244.08
 
   Halo_gNFW_rho0:
