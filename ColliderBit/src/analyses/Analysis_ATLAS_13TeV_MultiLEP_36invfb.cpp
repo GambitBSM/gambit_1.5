@@ -1171,13 +1171,13 @@ namespace Gambit {
 	add_result(results_SR3_WZ_1Jb);
 
         SignalRegionData results_SR3_WZ_1Jc;
-        results_SR3_WZ_1Jb.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
-        results_SR3_WZ_1Jb.sr_label = "SR3_WZ_1Jc";
-        results_SR3_WZ_1Jb.n_observed = 4.;
-        results_SR3_WZ_1Jb.n_background = 1.26; 
-        results_SR3_WZ_1Jb.background_sys = 0.34;
-        results_SR3_WZ_1Jb.signal_sys = 0.; 
-        results_SR3_WZ_1Jb.n_signal = _numSR3_WZ_1Jc;
+        results_SR3_WZ_1Jc.analysis_name = "Analysis_ATLAS_13TeV_MultiLEP_36invfb";
+        results_SR3_WZ_1Jc.sr_label = "SR3_WZ_1Jc";
+        results_SR3_WZ_1Jc.n_observed = 4.;
+        results_SR3_WZ_1Jc.n_background = 1.26; 
+        results_SR3_WZ_1Jc.background_sys = 0.34;
+        results_SR3_WZ_1Jc.signal_sys = 0.; 
+        results_SR3_WZ_1Jc.n_signal = _numSR3_WZ_1Jc;
 	add_result(results_SR3_WZ_1Jc);
 
       }

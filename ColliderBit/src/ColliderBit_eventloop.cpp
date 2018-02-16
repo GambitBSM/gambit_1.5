@@ -159,7 +159,8 @@ namespace Gambit
       static std::streambuf *coutbuf = std::cout.rdbuf(); // save cout buffer for running the loop quietly
 
       #ifdef COLLIDERBIT_DEBUG
-      std::cerr << debug_prefix() << "New point!" << endl;
+      cout << debug_prefix() << endl;
+      cout << debug_prefix() << "~~~~ New point! ~~~~" << endl;
       #endif
 
       //
@@ -236,13 +237,13 @@ namespace Gambit
         int stoppingres = Dep::MC_ConvergenceSettings->stoppingres[indexPythiaNames];
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "operateLHCLoop: Current collider is " << *iterPythiaNames << " with index " << indexPythiaNames << endl;
+        cout << debug_prefix() << "operateLHCLoop: Current collider is " << *iterPythiaNames << " with index " << indexPythiaNames << endl;
         #endif
 
         piped_invalid_point.check();
         Loop::reset();
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "operateLHCLoop: Will execute COLLIDER_INIT" << std::endl;
+        cout << debug_prefix() << "operateLHCLoop: Will execute COLLIDER_INIT" << endl;
         #endif
         Loop::executeIteration(COLLIDER_INIT);
 
@@ -254,7 +255,7 @@ namespace Gambit
         // OMP parallelized sections begin here
         //
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "operateLHCLoop: Will execute START_SUBPROCESS";
+        cout << debug_prefix() << "operateLHCLoop: Will execute START_SUBPROCESS";
         #endif
         int currentEvent = 0;
         #pragma omp parallel
@@ -271,7 +272,7 @@ namespace Gambit
           int eventCountBetweenConvergenceChecks = 0;
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "Starting main event loop.  Will do " << stoppingres << " events before testing convergence." << endl;
+          cout << debug_prefix() << "Starting main event loop.  Will do " << stoppingres << " events before testing convergence." << endl;
           #endif
 
           // Main event loop
@@ -292,7 +293,7 @@ namespace Gambit
               }
               catch (std::domain_error& e)
               {
-                std::cerr << "\n   Continuing to the next event...\n\n";
+                cout << "\n   Continuing to the next event...\n\n";
               }
             }
           }
@@ -301,7 +302,7 @@ namespace Gambit
           piped_errors.check(ColliderBit_error());
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "Did " << eventCountBetweenConvergenceChecks << " events of " << currentEvent << " simulated so far." << endl;
+          cout << debug_prefix() << "Did " << eventCountBetweenConvergenceChecks << " events of " << currentEvent << " simulated so far." << endl;
           #endif
 
           // Break convergence loop if too many events fail
@@ -460,7 +461,7 @@ namespace Gambit
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "getPythia: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+        cout << debug_prefix() << "getPythia: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
         #endif
 
         result.resetSpecialization(*iterPythiaNames);
@@ -481,7 +482,7 @@ namespace Gambit
           catch (SpecializablePythia::InitializationError &e)
           {
             #ifdef COLLIDERBIT_DEBUG
-            std::cerr << debug_prefix() << "SpecializablePythia::InitializationError caught in getPythia. Will discard this point." << endl;
+            cout << debug_prefix() << "SpecializablePythia::InitializationError caught in getPythia. Will discard this point." << endl;
             #endif
             piped_invalid_point.request("Bad point: Pythia can't initialize");
             Loop::wrapup();
@@ -514,14 +515,14 @@ namespace Gambit
         }
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
 
         // - Check for NaN xsed
         if (Utils::isnan(totalxsec))
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "Got NaN cross-section estimate from Pythia." << endl;
+          cout << debug_prefix() << "Got NaN cross-section estimate from Pythia." << endl;
           #endif
           piped_invalid_point.request("Got NaN cross-section estimate from Pythia.");
           Loop::wrapup();
@@ -532,7 +533,7 @@ namespace Gambit
         if (totalxsec * 1e12 < totalxsec_fb_veto)
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
+          cout << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
           #endif
           Loop::wrapup();
         }
@@ -630,7 +631,7 @@ namespace Gambit
         pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "getPythiaFileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+        cout << debug_prefix() << "getPythiaFileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
         #endif
 
         result.resetSpecialization(*iterPythiaNames);
@@ -681,14 +682,14 @@ namespace Gambit
         }
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
 
         // - Wrap up loop if veto applies
         if (totalxsec * 1e12 < totalxsec_fb_veto)
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
+          cout << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
           #endif
           Loop::wrapup();
         }
@@ -754,7 +755,7 @@ namespace Gambit
         catch (std::runtime_error& e)
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "DelphesVanilla::InitializationError caught in getDelphes. Will raise ColliderBit_error." << endl;
+          cout << debug_prefix() << "DelphesVanilla::InitializationError caught in getDelphes. Will raise ColliderBit_error." << endl;
           #endif
           str errmsg = "getDelphes caught the following runtime error: ";
           errmsg    += e.what();
@@ -963,7 +964,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
         return;
       }
@@ -1021,35 +1022,35 @@ namespace Gambit
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
 
         // Register analysis container
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.register_thread " << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.register_thread " << endl;
         result.register_thread("ATLASAnalysisContainer");
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
 
         // Set current collider
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.set_current_collider " << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.set_current_collider " << endl;
         result.set_current_collider(*iterPythiaNames);
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
 
         // Initialize analysis container or reset all the contained analyses
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run get_current_analyses_map" << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run get_current_analyses_map" << endl;
         if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
         else result.reset();
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done " << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done " << endl;
 
         // #ifdef COLLIDERBIT_DEBUG
         // if (my_thread == 0)
         // {
         //   for (auto& apair : result.get_current_analyses_map())
         //   {
-        //     std::cerr << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
+        //     cout << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
         //   }
         // }
         // #endif
 
-        // std::cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
+        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
         return;
       }
 
@@ -1060,7 +1061,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
         return;
       }
@@ -1138,7 +1139,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
         return;
       }
@@ -1216,7 +1217,7 @@ namespace Gambit
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
         return;
       }
@@ -1251,7 +1252,7 @@ namespace Gambit
         catch (SpecializablePythia::EventGenerationError& e)
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "SpecializablePythia::EventGenerationError caught in generatePythia8Event. Check the ColliderBit log for event details." << endl;
+          cout << debug_prefix() << "SpecializablePythia::EventGenerationError caught in generatePythia8Event. Check the ColliderBit log for event details." << endl;
           #endif
           #pragma omp critical (pythia_event_failure)
           {
@@ -1293,7 +1294,7 @@ namespace Gambit
         catch (std::runtime_error& e)
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "DelphesVanilla::ProcessEventError caught in reconstructDelphesEvent." << endl;
+          cout << debug_prefix() << "DelphesVanilla::ProcessEventError caught in reconstructDelphesEvent." << endl;
           #endif
 
           // Store Pythia event record in the logs
@@ -1325,7 +1326,7 @@ namespace Gambit
       catch (Gambit::exception& e)
       {
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "Gambit::exception caught during event conversion in smearEventATLAS. Check the ColliderBit log for details." << endl;
+        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventATLAS. Check the ColliderBit log for details." << endl;
         #endif
         #pragma omp critical (event_conversion_error)
         {
@@ -1357,7 +1358,7 @@ namespace Gambit
       catch (Gambit::exception& e)
       {
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "Gambit::exception caught during event conversion in smearEventCMS. Check the ColliderBit log for details." << endl;
+        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventCMS. Check the ColliderBit log for details." << endl;
         #endif
         #pragma omp critical (event_conversion_error)
         {
@@ -1389,7 +1390,7 @@ namespace Gambit
       catch (Gambit::exception& e)
       {
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "Gambit::exception caught during event conversion in copyEvent. Check the ColliderBit log for details." << endl;
+        cout << debug_prefix() << "Gambit::exception caught during event conversion in copyEvent. Check the ColliderBit log for details." << endl;
         #endif
         #pragma omp critical (event_conversion_error)
         {
@@ -1452,7 +1453,7 @@ namespace Gambit
       //   {
       //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
       //     {
-      //       std::cerr << debug_prefix() << "runDetAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //       cout << debug_prefix() << "runDetAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
       //     }
       //   }
       // }
@@ -1464,7 +1465,7 @@ namespace Gambit
         for (auto& analysis_pointer_pair : Dep::DetAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runDetAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          cout << debug_prefix() << "runDetAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
@@ -1481,7 +1482,7 @@ namespace Gambit
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "runDetAnalyses: 'result' contains " << result.size() << " results." << endl;
+        cout << debug_prefix() << "runDetAnalyses: 'result' contains " << result.size() << " results." << endl;
         #endif
         return;
       }
@@ -1536,7 +1537,7 @@ namespace Gambit
       //   {
       //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
       //     {
-      //       std::cerr << debug_prefix() << "runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //       cout << debug_prefix() << "runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
       //     }
       //   }
       // }
@@ -1548,7 +1549,7 @@ namespace Gambit
         for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runATLASAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          cout << debug_prefix() << "runATLASAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
@@ -1565,7 +1566,7 @@ namespace Gambit
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "runATLASAnalyses: 'result' contains " << result.size() << " results." << endl;
+        cout << debug_prefix() << "runATLASAnalyses: 'result' contains " << result.size() << " results." << endl;
         #endif
         return;
       }
@@ -1618,7 +1619,7 @@ namespace Gambit
       //   {
       //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
       //     {
-      //       std::cerr << debug_prefix() << "runCMSAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //       cout << debug_prefix() << "runCMSAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
       //     }
       //   }
       // }
@@ -1630,7 +1631,7 @@ namespace Gambit
         for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runCMSAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          cout << debug_prefix() << "runCMSAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
@@ -1647,7 +1648,7 @@ namespace Gambit
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "runCMSAnalyses: 'result' contains " << result.size() << " results." << endl;
+        cout << debug_prefix() << "runCMSAnalyses: 'result' contains " << result.size() << " results." << endl;
         #endif
         return;
       }
@@ -1700,7 +1701,7 @@ namespace Gambit
       //   {
       //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
       //     {
-      //       std::cerr << debug_prefix() << "runIdentityAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //       cout << debug_prefix() << "runIdentityAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
       //     }
       //   }
       // }
@@ -1712,7 +1713,7 @@ namespace Gambit
         for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "runIdentityAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          cout << debug_prefix() << "runIdentityAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
@@ -1729,7 +1730,7 @@ namespace Gambit
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "runIdentityAnalyses: 'result' contains " << result.size() << " results." << endl;
+        cout << debug_prefix() << "runIdentityAnalyses: 'result' contains " << result.size() << " results." << endl;
         #endif
         return;
       }
@@ -1753,14 +1754,14 @@ namespace Gambit
 
       #ifdef COLLIDERBIT_DEBUG
       if (haveUsedBuckFastATLASDetector)
-        std::cerr << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
+        cout << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastCMSDetector)
-        std::cerr << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
+        cout << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastIdentityDetector)
-        std::cerr << debug_prefix() << "CollectAnalyses: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
+        cout << debug_prefix() << "CollectAnalyses: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
       #ifndef EXCLUDE_DELPHES
       if (haveUsedDelphesDetector)
-        std::cerr << debug_prefix() << "CollectAnalyses: Dep::DetAnalysisNumbers->size()      = " << Dep::DetAnalysisNumbers->size() << endl;
+        cout << debug_prefix() << "CollectAnalyses: Dep::DetAnalysisNumbers->size()      = " << Dep::DetAnalysisNumbers->size() << endl;
       #endif
       #endif
 
@@ -1794,24 +1795,24 @@ namespace Gambit
       }
 
 
-      #ifdef COLLIDERBIT_DEBUG
-      std::cerr << debug_prefix() << "CollectAnalyses: Current size of 'result': " << result.size() << endl;        
-      if (result.size() > 0)
-      {
-        std::cerr << debug_prefix() << "CollectAnalyses: Will loop through 'result'..." << endl;        
-        for (auto& adp : result)
-        {
-          std::cerr << debug_prefix() << "CollectAnalyses: 'result' contains AnalysisData pointer to " << adp << endl;        
-          std::cerr << debug_prefix() << "CollectAnalyses: -- Will now loop over all signal regions in " << adp << endl;        
-          for (auto& sr : adp->srdata)
-          {
-            std::cerr << debug_prefix() << "CollectAnalyses: -- " << adp << " contains signal region: " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;        
-          }
-          std::cerr << debug_prefix() << "CollectAnalyses: -- Done looping over signal regions in " << adp << endl;        
-        }
-        std::cerr << debug_prefix() << "CollectAnalyses: ...Done looping through 'result'." << endl;        
-      }
-      #endif
+      // #ifdef COLLIDERBIT_DEBUG
+      // cout << debug_prefix() << "CollectAnalyses: Current size of 'result': " << result.size() << endl;        
+      // if (result.size() > 0)
+      // {
+      //   cout << debug_prefix() << "CollectAnalyses: Will loop through 'result'..." << endl;        
+      //   for (auto& adp : result)
+      //   {
+      //     cout << debug_prefix() << "CollectAnalyses: 'result' contains AnalysisData pointer to " << adp << endl;        
+      //     cout << debug_prefix() << "CollectAnalyses: -- Will now loop over all signal regions in " << adp << endl;        
+      //     for (auto& sr : adp->srdata)
+      //     {
+      //       cout << debug_prefix() << "CollectAnalyses: -- " << adp << " contains signal region: " << sr.sr_label << ", n_signal = " << sr.n_signal << ", n_signal_at_lumi = " << n_signal_at_lumi << endl;        
+      //     }
+      //     cout << debug_prefix() << "CollectAnalyses: -- Done looping over signal regions in " << adp << endl;        
+      //   }
+      //   cout << debug_prefix() << "CollectAnalyses: ...Done looping through 'result'." << endl;        
+      // }
+      // #endif
     }
 
 
@@ -1859,7 +1860,29 @@ namespace Gambit
         const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
         // Output map key
-        string analysis_key = adata.begin()->analysis_name + "_DeltaLogLike";
+        string analysis_name = adata.begin()->analysis_name;
+        string analysis_key = analysis_name + "_DeltaLogLike";
+
+        #ifdef COLLIDERBIT_DEBUG
+        std::streamsize stream_precision = cout.precision();  // get current precision
+        cout.precision(1);  // set precision
+        cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << "Will print content of " << analysis_name << " signal regions:" << endl;
+        for (size_t SR = 0; SR < adata.size(); ++SR)
+        {
+          const SignalRegionData& srData = adata[SR];
+          cout << std::fixed << debug_prefix() 
+                                 << "calc_LHC_LogLike_per_analysis: " << analysis_name 
+                                 << ", " << srData.sr_label 
+                                 << ",  n_b = " << srData.n_background << " +/- " << srData.background_sys
+                                 << ",  n_obs = " << srData.n_observed 
+                                 << ",  excess = " << srData.n_observed - srData.n_background << " +/- " << srData.background_sys
+                                 << ",  n_s = " << srData.n_signal_at_lumi
+                                 << ",  (excess-n_s) = " << (srData.n_observed-srData.n_background) - srData.n_signal_at_lumi << " +/- " << srData.background_sys
+                                 << endl; 
+        }
+        cout.precision(stream_precision); // restore previous precision
+        #endif
+
 
         /// If no events have been generated (xsec veto) or too many events have failed, 
         /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
@@ -1894,7 +1917,7 @@ namespace Gambit
           /// @todo Support skewness correction to the pdf.
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite loglike." << endl;
+          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite loglike." << endl;
           #endif
 
           // Construct vectors of SR numbers
@@ -1996,7 +2019,7 @@ namespace Gambit
           if (Utils::isnan(ana_dll))
           {
             std::stringstream msg;
-            msg << "Computation of composite loglike for analysis " << adata.begin()->analysis_name << " returned NaN.";
+            msg << "Computation of composite loglike for analysis " << analysis_name << " returned NaN.";
             invalid_point().raise(msg.str());
           }
 
@@ -2004,7 +2027,7 @@ namespace Gambit
           result[analysis_key] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_DeltaLogLike : " << ana_dll << std::endl;
+          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_DeltaLogLike : " << ana_dll << endl;
           #endif
 
 
@@ -2054,7 +2077,7 @@ namespace Gambit
           // }
 
           // // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
-          // result[adata.begin()->analysis_name + "_DeltaLogLike"] = -ana_dll;
+          // result[analysis_name + "_DeltaLogLike"] = -ana_dll;
 
         }
 
@@ -2062,15 +2085,15 @@ namespace Gambit
         {
           // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
+          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-          str* bestexp_sr_label;
+          str bestexp_sr_label;
 
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
-            SignalRegionData srData = adata[SR];
+            const SignalRegionData &srData = adata[SR];
 
             // Actual observed number of events
             const int n_obs = (int) round(srData.n_observed);
@@ -2108,11 +2131,17 @@ namespace Gambit
 
             // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
             const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
+            #ifdef COLLIDERBIT_DEBUG
+            cout << debug_prefix() << analysis_name << ", " << srData.sr_label << ",  llsb_exp-llb_exp = " << llsb_exp-llb_exp << ",  llsb_obs-llb_obs= " << llsb_obs - llb_obs << endl;
+            #endif
             if (dll_exp > bestexp_dll_exp || SR == 0)
             {
               bestexp_dll_exp = dll_exp;
               bestexp_dll_obs = llb_obs - llsb_obs;
-              bestexp_sr_label = &(srData.sr_label);
+              bestexp_sr_label = srData.sr_label;
+              // #ifdef COLLIDERBIT_DEBUG
+              // cout << debug_prefix() << "Setting bestexp_sr_label to: " << bestexp_sr_label << ", LogL_exp = " << -bestexp_dll_exp << ", LogL_obs = " << -bestexp_dll_obs << endl;
+              // #endif
             }
 
             // // For debugging: print some useful numbers to the log.
@@ -2135,7 +2164,7 @@ namespace Gambit
           if (Utils::isnan(bestexp_dll_obs))
           {
             std::stringstream msg;
-            msg << "Computation of loglike for analysis " << adata.begin()->analysis_name << " returned NaN. Signal region: " << *bestexp_sr_label;
+            msg << "Computation of loglike for analysis " << analysis_name << " returned NaN. Signal region: " << bestexp_sr_label;
             invalid_point().raise(msg.str());
           }
 
@@ -2143,7 +2172,7 @@ namespace Gambit
           result[analysis_key] = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_" << *bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << std::endl;
+          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
           #endif
         }
 
@@ -2162,7 +2191,7 @@ namespace Gambit
       if (nFailedEvents > maxFailedEvents)
       {
         #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;
+          cout << debug_prefix() << "calc_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;
         #endif
         return;
       }
@@ -2172,13 +2201,13 @@ namespace Gambit
       {
         result += it.second;
         #ifdef COLLIDERBIT_DEBUG
-          std::cout.precision(5);
-          std::cerr << debug_prefix() << "calc_LHC_LogLike: Analysis #" << it.first << " contributes with a -LogL = " << it.second << endl;
+          cout.precision(5);
+          cout << debug_prefix() << "calc_LHC_LogLike: Analysis #" << it.first << " contributes with a -LogL = " << it.second << endl;
         #endif
       }
 
       #ifdef COLLIDERBIT_DEBUG
-        std::cerr << debug_prefix() << "COLLIDERBIT LIKELIHOOD: " << result << endl;
+        cout << debug_prefix() << "COLLIDERBIT LIKELIHOOD: " << result << endl;
       #endif
 
     }
