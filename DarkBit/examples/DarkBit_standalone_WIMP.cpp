@@ -680,14 +680,14 @@ int main(int argc, char* argv[])
 
       DDCalc_2_0_0_init.reset_and_calculate();
       LZ_Calc.reset_and_calculate();
-      DD_bin_counts events;
+      std::vector<double> events;
       LZ_GetBinBackground.reset_and_calculate();
       events = LZ_GetBinBackground(0);
-      nbins = events.nbins;
+      nbins = events.size();
       std::cout << "Number of LZ bins: " << nbins << std::endl;
       std::cout << "Expected backgrounds: ";
-      for (int ibin=1;ibin<=nbins;ibin++) {
-        std::cout << events.bincounts[ibin] << " ";
+      for (int ibin=0;ibin<=nbins-1;ibin++) {
+        std::cout << events[ibin] << " ";
       }
       std::cout << std::endl;
 

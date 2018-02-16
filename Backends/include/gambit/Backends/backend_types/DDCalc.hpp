@@ -29,15 +29,6 @@ namespace Gambit
     double gna;
   };
 
-  struct DD_bin_counts
-  {
-    DD_bin_counts() {}
-    DD_bin_counts(const std::vector<double> & counts, const unsigned int & n) : bincounts(counts), nbins(n) {}
-
-    std::vector<double> bincounts;
-    int nbins;
-  };
-
 }
 
 #endif /* defined __DDCalc_types_hpp__ */

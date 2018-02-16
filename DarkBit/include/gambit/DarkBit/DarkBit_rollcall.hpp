@@ -578,7 +578,7 @@ START_MODULE
   #define DD_DECLARE_BIN_FUNCTION(EXPERIMENT,TYPE,NAME)                       \
   LONG_START_CAPABILITY(MODULE, CAT_3(EXPERIMENT,_,NAME))                     \
   LONG_DECLARE_FUNCTION(MODULE, CAT_3(EXPERIMENT,_,NAME),                     \
-   CAT_3(EXPERIMENT,_Get,NAME), DD_bin_counts, 0)                             \
+   CAT_3(EXPERIMENT,_Get,NAME), std::vector<double>, 0)                       \
   LONG_DEPENDENCY(MODULE, CAT_3(EXPERIMENT,_Get,NAME),                        \
    CAT(EXPERIMENT,_Calculate), bool)                                          \
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \

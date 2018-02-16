@@ -260,12 +260,13 @@ namespace Gambit {
     }
 
     #define DDCALC_BIN(EXPERIMENT, TYPE, NAME)                                     \
-    void CAT_3(EXPERIMENT,_GetBin,NAME)(DD_bin_counts &result)                     \
+    void CAT_3(EXPERIMENT,_GetBin,NAME)(std::vector<double> &result)               \
     {                                                                              \
       using namespace Pipes::CAT_3(EXPERIMENT,_GetBin,NAME);                       \
-      result.nbins = BEreq::DD_Bins(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));  \
-      for (int ibin=0;ibin<=result.nbins;ibin++) {                                 \
-        result.bincounts.push_back(                                                \
+      int nbins;                                                                   \
+      nbins = BEreq::DD_Bins(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));         \
+      for (int ibin=1;ibin<=nbins;ibin++) {                                        \
+        result.push_back(                                                          \
         BEreq::CAT(DD_Bin,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)),ibin)); } \
     }
 
