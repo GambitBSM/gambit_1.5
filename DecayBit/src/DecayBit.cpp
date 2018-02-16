@@ -29,6 +29,10 @@
 ///          (anders.kvellestad@fys.uio.no)
 ///  \date 2018 Jan
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2018 Feb
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -39,6 +43,7 @@
 #include "gambit/DecayBit/decay_utils.hpp"
 #include "gambit/Utils/version.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
+#include "gambit/Utils/statistics.hpp"
 
 #include <string>
 #include <map>
@@ -49,6 +54,8 @@
 #define pow2(a) ((a)*(a))          // Get speedy
 #define pow3(a) ((a)*(a)*(a))
 #define pow4(a) (pow2(a)*pow2(a)) 
+
+//#define DECAYBIT_DEBUG
 
 namespace Gambit
 {
@@ -2809,6 +2816,156 @@ namespace Gambit
     void chargino_minus_1_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::chargino_minus_1_decays::Dep::chargino_plus_1_decay_rates); }
     void chargino_minus_2_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::chargino_minus_2_decays::Dep::chargino_plus_2_decay_rates); }
     /// @}
+
+
+    //////////// Z decay table for the MSSM ///////////////////////
+    void Z_decays_MSSM (DecayTable::Entry& result)
+    {
+      using namespace Pipes::Z_decays_MSSM;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      // Setup decay table info from the Standard Model
+      Z_decays(result);
+
+      // Get spectrum objects
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+      const SubSpectrum& mssm = spec.get_HE();
+
+      const double mZ = spec.get(Par::Pole_Mass,"Z0");
+
+      // Get sneutrino mass
+      const double m_sNu1 = spec.get(Par::Pole_Mass,"~nu_1");
+      const double m_sNu2 = spec.get(Par::Pole_Mass,"~nu_2");
+      const double m_sNu3 = spec.get(Par::Pole_Mass,"~nu_3");
+      const std::vector<double> m_sNu = {m_sNu1, m_sNu2, m_sNu3};
+
+      // Get neutralino mass and mixing
+      const double m_N1 = abs(spec.get(Par::Pole_Mass,"~chi0_1"));
+      const double m_N2 = abs(spec.get(Par::Pole_Mass,"~chi0_2"));
+      const double m_N3 = abs(spec.get(Par::Pole_Mass,"~chi0_3"));
+      const double m_N4 = abs(spec.get(Par::Pole_Mass,"~chi0_4"));
+      const std::vector<double> m_N = {m_N1, m_N2, m_N3, m_N4};
+
+      const double N11 = mssm.get(Par::Pole_Mixing,"~chi0",1,1);  // ~B component
+      const double N12 = mssm.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
+      const double N13 = mssm.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
+      const double N14 = mssm.get(Par::Pole_Mixing,"~chi0",1,4);  // ~Hu component
+      const double N21 = mssm.get(Par::Pole_Mixing,"~chi0",2,1);
+      const double N22 = mssm.get(Par::Pole_Mixing,"~chi0",2,2);
+      const double N23 = mssm.get(Par::Pole_Mixing,"~chi0",2,3);
+      const double N24 = mssm.get(Par::Pole_Mixing,"~chi0",2,4);
+      const double N31 = mssm.get(Par::Pole_Mixing,"~chi0",3,1);
+      const double N32 = mssm.get(Par::Pole_Mixing,"~chi0",3,2);
+      const double N33 = mssm.get(Par::Pole_Mixing,"~chi0",3,3);
+      const double N34 = mssm.get(Par::Pole_Mixing,"~chi0",3,4);
+      const double N41 = mssm.get(Par::Pole_Mixing,"~chi0",4,1);
+      const double N42 = mssm.get(Par::Pole_Mixing,"~chi0",4,2);
+      const double N43 = mssm.get(Par::Pole_Mixing,"~chi0",4,3);
+      const double N44 = mssm.get(Par::Pole_Mixing,"~chi0",4,4);
+      Eigen::Matrix4d NN;
+      NN << N11, N12, N13, N14,
+            N21, N22, N23, N24,
+            N31, N32, N33, N34,
+            N41, N42, N43, N44;
+ 
+      double Z_decay_width = result.width_in_GeV;
+      double Z_decay_error = result.positive_error; // Error is symmetric
+
+      // Useful definitions
+      double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
+      double cw = sminputs.mW / sminputs.mZ;
+ 
+      // Tree level code stolen from DarkSUSY
+
+      // Neutrinos
+      double Z_to_neutrinos = pow(g2/(2.0*cw),2) * mZ/(24.0*M_PI);
+      result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_e", "nubar_e");
+      result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_mu", "nubar_mu");
+      result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_tau", "nubar_tau");
+
+      // Sneutrinos
+      for(int i=0; i<3; i++)
+      {
+        double temp = 1.0 - 4.0*pow(m_sNu[i]/mZ,2);
+        if (temp > 0.0)
+        {
+          double Z_to_sneutrinos = pow(temp, 1.5) * pow(g2/(2*cw),2) * mZ/(48.0*M_PI);
+          result.set_BF(Z_to_sneutrinos/Z_decay_width, Z_to_sneutrinos/pow(Z_decay_width,2)*Z_decay_error, "~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
+        }
+        else
+          result.set_BF(0.0, 0.0, "~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
+ 
+      }
+
+      // Neutralinos
+      for(int i=0; i<4; i++)
+        for(int j=i; j<4; j++)
+        {
+           double p2 = (pow(mZ,2) - pow(m_N[i] + m_N[j],2)) * (pow(mZ,2) - pow(m_N[i] - m_N[j],2)) / (4.0*pow(mZ,2));
+           double ei = (pow(mZ,2) - pow(m_N[j],2) + pow(m_N[i],2)) / (2*mZ);
+           double ej = (pow(mZ,2) - pow(m_N[i],2) + pow(m_N[j],2)) / (2*mZ);
+
+           if (p2 > 0.0 and ei > 0.0 and ej > 0.0)
+           {
+             // TODO: Check the i,3 and i,4 component are the correct ones to use
+             double gzij = g2/(2.0*cw) * (NN(i,3)*NN(j,3) - NN(i,4)*NN(j,5));
+             double Z_to_neutralinos = sqrt(p2)/(2.0*M_PI*pow(mZ,2)) *  pow(gzij,2)*(ei*ej + p2/3.0 - m_N[i]*m_N[j]);
+
+             if (i == j) Z_to_neutralinos = 0.5*Z_to_neutralinos;
+             result.set_BF(Z_to_neutralinos/Z_decay_width, Z_to_neutralinos/pow(Z_decay_width,2)*Z_decay_error, "~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
+           }
+           else
+             result.set_BF(0.0, 0.0, "~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
+
+        }
+
+    }
+
+    void lnL_Z_invisible_width(double &result)
+    {
+      using namespace Pipes::lnL_Z_invisible_width;
+
+      // Inivisible Z width, PDG 2017
+      double Z_inv_BF_exp = 0.2000;
+      double Z_inv_BF_exp_error = 0.0006;
+
+      double Z_total_width = Dep::Z_decay_rates->width_in_GeV;
+      double Z_width_error = Dep::Z_decay_rates->positive_error; // Error is symmetric 
+
+      double Z_inv_BF = 0.0;
+      double Z_inv_BF_err2 = 0.0;
+
+      // MSSM-specific
+      if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
+      {
+        Z_inv_BF += Dep::Z_decay_rates->BF("nu_e", "nubar_e");
+        Z_inv_BF += Dep::Z_decay_rates->BF("nu_mu", "nubar_mu");
+        Z_inv_BF += Dep::Z_decay_rates->BF("nu_tau", "nubar_tau");
+        Z_inv_BF_err2 += 3.0 * pow(Dep::Z_decay_rates->BF_error("nu_e", "nubar_e"),2);
+
+        for(int i=0; i<3; i++)
+        {
+          Z_inv_BF += Dep::Z_decay_rates->BF("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
+          Z_inv_BF_err2 += pow(Dep::Z_decay_rates->BF_error("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1)),2);
+        }
+
+        for(int i=0; i<4; i++)
+          for(int j=i; j<4; j++)
+          {
+            Z_inv_BF += Dep::Z_decay_rates->BF("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
+            Z_inv_BF_err2 += pow(Dep::Z_decay_rates->BF_error("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1)),2);
+          }
+      }
+
+      result = Stats::gaussian_loglikelihood(Z_inv_BF, Z_inv_BF_exp, sqrt(Z_inv_BF_err2), Z_inv_BF_exp_error, false);
+
+      #ifdef DECAYBIT_DEBUG
+        cout << "Z invisible width = " << Z_inv_BF << " +- " <<sqrt(Z_inv_BF_err2) << endl;
+        cout << "LogLike = " << result << endl;
+      #endif
+
+
+    }
 
     //////////// Singlet DM /////////////////////
 
