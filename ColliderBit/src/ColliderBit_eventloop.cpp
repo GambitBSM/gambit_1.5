@@ -159,7 +159,8 @@ namespace Gambit
       static std::streambuf *coutbuf = std::cout.rdbuf(); // save cout buffer for running the loop quietly
 
       #ifdef COLLIDERBIT_DEBUG
-      std::cerr << debug_prefix() << "New point!" << endl;
+      std::cerr << debug_prefix() << endl;
+      std::cerr << debug_prefix() << "~~~~ New point! ~~~~" << endl;
       #endif
 
       //
@@ -1859,7 +1860,8 @@ namespace Gambit
         const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
         // Output map key
-        string analysis_key = adata.begin()->analysis_name + "_DeltaLogLike";
+        string analysis_name = adata.begin()->analysis_name;
+        string analysis_key = analysis_name + "_DeltaLogLike";
 
         /// If no events have been generated (xsec veto) or too many events have failed, 
         /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
@@ -1996,7 +1998,7 @@ namespace Gambit
           if (Utils::isnan(ana_dll))
           {
             std::stringstream msg;
-            msg << "Computation of composite loglike for analysis " << adata.begin()->analysis_name << " returned NaN.";
+            msg << "Computation of composite loglike for analysis " << analysis_name << " returned NaN.";
             invalid_point().raise(msg.str());
           }
 
@@ -2004,7 +2006,7 @@ namespace Gambit
           result[analysis_key] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_DeltaLogLike : " << ana_dll << std::endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_DeltaLogLike : " << ana_dll << std::endl;
           #endif
 
 
@@ -2054,7 +2056,7 @@ namespace Gambit
           // }
 
           // // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
-          // result[adata.begin()->analysis_name + "_DeltaLogLike"] = -ana_dll;
+          // result[analysis_name + "_DeltaLogLike"] = -ana_dll;
 
         }
 
@@ -2066,11 +2068,11 @@ namespace Gambit
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
-          str* bestexp_sr_label;
+          str bestexp_sr_label;
 
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
-            SignalRegionData srData = adata[SR];
+            const SignalRegionData &srData = adata[SR];
 
             // Actual observed number of events
             const int n_obs = (int) round(srData.n_observed);
@@ -2108,11 +2110,17 @@ namespace Gambit
 
             // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
             const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
+            #ifdef COLLIDERBIT_DEBUG
+            cout << debug_prefix() << analysis_name << ", " << srData.sr_label << ",  llsb_exp-llb_exp = " << llsb_exp-llb_exp << ",  llsb_obs-llb_obs= " << llsb_obs - llb_obs << endl;
+            #endif
             if (dll_exp > bestexp_dll_exp || SR == 0)
             {
               bestexp_dll_exp = dll_exp;
               bestexp_dll_obs = llb_obs - llsb_obs;
-              bestexp_sr_label = &(srData.sr_label);
+              bestexp_sr_label = srData.sr_label;
+              // #ifdef COLLIDERBIT_DEBUG
+              // cout << debug_prefix() << "Setting bestexp_sr_label to: " << bestexp_sr_label << ", LogL_exp = " << -bestexp_dll_exp << ", LogL_obs = " << -bestexp_dll_obs << endl;
+              // #endif
             }
 
             // // For debugging: print some useful numbers to the log.
@@ -2135,7 +2143,7 @@ namespace Gambit
           if (Utils::isnan(bestexp_dll_obs))
           {
             std::stringstream msg;
-            msg << "Computation of loglike for analysis " << adata.begin()->analysis_name << " returned NaN. Signal region: " << *bestexp_sr_label;
+            msg << "Computation of loglike for analysis " << analysis_name << " returned NaN. Signal region: " << bestexp_sr_label;
             invalid_point().raise(msg.str());
           }
 
@@ -2143,7 +2151,7 @@ namespace Gambit
           result[analysis_key] = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
-          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.begin()->analysis_name << "_" << *bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << std::endl;
+          std::cerr << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << std::endl;
           #endif
         }
 
