@@ -1861,11 +1861,10 @@ namespace Gambit
 
         // Output map key
         string analysis_name = adata.begin()->analysis_name;
-        string analysis_key = analysis_name + "_DeltaLogLike";
 
         #ifdef COLLIDERBIT_DEBUG
         std::streamsize stream_precision = cout.precision();  // get current precision
-        cout.precision(1);  // set precision
+        cout.precision(2);  // set precision
         cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << "Will print content of " << analysis_name << " signal regions:" << endl;
         for (size_t SR = 0; SR < adata.size(); ++SR)
         {
@@ -1890,7 +1889,7 @@ namespace Gambit
         ///       don't rely on event generation.
         if (!eventsGenerated || nFailedEvents > maxFailedEvents)
         {
-          result[analysis_key] = 0.0;
+          result[analysis_name] = 0.0;
           continue;
         }
 
@@ -2024,7 +2023,7 @@ namespace Gambit
           }
 
           // Store result
-          result[analysis_key] = ana_dll;
+          result[analysis_name] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_DeltaLogLike : " << ana_dll << endl;
@@ -2169,7 +2168,7 @@ namespace Gambit
           }
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
-          result[analysis_key] = -bestexp_dll_obs;
+          result[analysis_name] = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
@@ -2187,6 +2186,10 @@ namespace Gambit
       using namespace Pipes::calc_LHC_LogLike;
       result = 0.0;
 
+      // Read analysis names from the yaml file
+      std::vector<str> default_skip_analyses;  // The default is empty lists of analyses to skip
+      static const std::vector<str> skip_analyses = runOptions->getValueOrDef<std::vector<str> >(default_skip_analyses, "skip_analyses");
+
       // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
       if (nFailedEvents > maxFailedEvents)
       {
@@ -2196,18 +2199,33 @@ namespace Gambit
         return;
       }
 
-      // Loop over likelihood components and calculate the total observed dLL
-      for (auto const &it : *Dep::LHC_LogLikes)
+      // Loop over analyses and calculate the total observed dLL
+      for (auto const& analysis_loglike_pair : *Dep::LHC_LogLikes)
       {
-        result += it.second;
+        const string& analysis_name = analysis_loglike_pair.first;
+        const double& analysis_loglike = analysis_loglike_pair.second;
+
+        // If the analysis name is in skip_analyses, don't add its loglike to the total loglike.
+        if (std::find(skip_analyses.begin(), skip_analyses.end(), analysis_name) != skip_analyses.end())
+        {
+          #ifdef COLLIDERBIT_DEBUG
+            cout.precision(5);
+            cout << debug_prefix() << "calc_LHC_LogLike: Leaving out analysis " << analysis_name << " with LogL = " << analysis_loglike << endl;
+          #endif
+          continue;
+        }
+
+        // Add analysis loglike
+        result += analysis_loglike;
+
         #ifdef COLLIDERBIT_DEBUG
           cout.precision(5);
-          cout << debug_prefix() << "calc_LHC_LogLike: Analysis #" << it.first << " contributes with a -LogL = " << it.second << endl;
+          cout << debug_prefix() << "calc_LHC_LogLike: Analysis " << analysis_name << " contributes with a LogL = " << analysis_loglike << endl;
         #endif
       }
 
       #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "COLLIDERBIT LIKELIHOOD: " << result << endl;
+        cout << debug_prefix() << "COLLIDERBIT LOGLIKELIHOOD: " << result << endl;
       #endif
 
     }

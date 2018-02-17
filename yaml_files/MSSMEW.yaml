@@ -248,6 +248,8 @@ Rules:
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
+      # min_nEvents: [200]
+      # max_nEvents: [1000]
       min_nEvents: [20000]
       max_nEvents: [100000]
       events_between_convergence_checks: [20000]
@@ -308,26 +310,24 @@ Rules:
     options:
       analyses: [ ["ATLAS_13TeV_MultiLEP_36invfb"] ]
 
-                   #"ATLAS_13TeV_0LEP_36invfb"
-                   #"ATLAS_13TeV_0LEPStop_36invfb"
-                   #"ATLAS_13TeV_1LEPStop_36invfb"
-                   #"ATLAS_13TeV_2LEPStop_36invfb"
-                   #"ATLAS_13TeV_RJ3L_lowmass_36invfb"
-                   #"ATLAS_13TeV_2bMET_36invfb"
-
   # CMS analysis setup
+  # NOTE: Don't blindly copy this analysis list without also checking the
+  #       "skip_analyses" list for "LHC_Combined_LogLike" below.
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
       analyses: [ ["CMS_13TeV_1LEPbb_36invfb",
-                   "CMS_13TeV_2OSLEP_36invfb",
                    "CMS_13TeV_2LEPsoft_36invfb",
                    "CMS_13TeV_MultiLEP_36invfb",
-                   "CMS_13TeV_MONOJET_36invfb" ] ]
+                   "CMS_13TeV_MONOJET_36invfb", 
+                   "CMS_13TeV_2OSLEP_36invfb",
+                   "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE"] ]
 
-                   #"CMS_13TeV_0LEP_36invfb"
-                   #"CMS_13TeV_1LEPStop_36invfb"
-                   #"CMS_13TeV_2LEPStop_36invfb"
+  # List any analyses that should *NOT* be included in the total log-likelihood!
+  - capability: LHC_Combined_LogLike
+    function: calc_LHC_LogLike
+    options:
+      skip_analyses: ["CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE"]
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
   # Can change "_lognormal_" to "_gaussian_" if you prefer

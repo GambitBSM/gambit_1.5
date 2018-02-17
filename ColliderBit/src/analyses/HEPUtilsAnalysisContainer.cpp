@@ -40,6 +40,7 @@ namespace Gambit
       F(CMS_13TeV_2LEPStop_36invfb)                  \
       F(CMS_13TeV_2LEPsoft_36invfb)                  \
       F(CMS_13TeV_2OSLEP_36invfb)                    \
+      F(CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE)     \
       F(CMS_13TeV_MultiLEP_36invfb)                  \
       F(CMS_13TeV_MONOJET_36invfb)                   \
       F(CMS_8TeV_1LEPDMTOP_20invfb)                  \

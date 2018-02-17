@@ -136,13 +136,12 @@ namespace Gambit {
         return get_results();
       }
 
-      // _Anders
+      /// Get a pointer to _results.
       const AnalysisData* get_results_ptr()
       {
         return &get_results();
       }
 
-      // _Anders
       const AnalysisData* get_results_ptr(std::string& warning)
       {
         return &get_results(warning);
