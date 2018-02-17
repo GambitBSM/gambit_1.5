@@ -44,6 +44,7 @@
 #include "gambit/Utils/version.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
 #include "gambit/Utils/statistics.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
 
 #include <string>
 #include <map>
@@ -2862,12 +2863,14 @@ namespace Gambit
       const double N42 = mssm.get(Par::Pole_Mixing,"~chi0",4,2);
       const double N43 = mssm.get(Par::Pole_Mixing,"~chi0",4,3);
       const double N44 = mssm.get(Par::Pole_Mixing,"~chi0",4,4);
+
       Eigen::Matrix4d NN;
       NN << N11, N12, N13, N14,
             N21, N22, N23, N24,
             N31, N32, N33, N34,
             N41, N42, N43, N44;
- 
+
+
       double Z_decay_width = result.width_in_GeV;
       double Z_decay_error = result.positive_error; // Error is symmetric
 
@@ -2878,7 +2881,7 @@ namespace Gambit
       // Tree level code stolen from DarkSUSY
 
       // Neutrinos
-      double Z_to_neutrinos = pow(g2/(2.0*cw),2) * mZ/(24.0*M_PI);
+      double Z_to_neutrinos = pow(g2/(2.0*cw),2) * mZ/(24.0*pi);
       result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_e", "nubar_e");
       result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_mu", "nubar_mu");
       result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_tau", "nubar_tau");
@@ -2889,7 +2892,7 @@ namespace Gambit
         double temp = 1.0 - 4.0*pow(m_sNu[i]/mZ,2);
         if (temp > 0.0)
         {
-          double Z_to_sneutrinos = pow(temp, 1.5) * pow(g2/(2*cw),2) * mZ/(48.0*M_PI);
+          double Z_to_sneutrinos = pow(temp, 1.5) * pow(g2/(2*cw),2) * mZ/(48.0*pi);
           result.set_BF(Z_to_sneutrinos/Z_decay_width, Z_to_sneutrinos/pow(Z_decay_width,2)*Z_decay_error, "~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
         }
         else
@@ -2907,9 +2910,9 @@ namespace Gambit
 
            if (p2 > 0.0 and ei > 0.0 and ej > 0.0)
            {
-             // TODO: Check the i,3 and i,4 component are the correct ones to use
-             double gzij = g2/(2.0*cw) * (NN(i,3)*NN(j,3) - NN(i,4)*NN(j,5));
-             double Z_to_neutralinos = sqrt(p2)/(2.0*M_PI*pow(mZ,2)) *  pow(gzij,2)*(ei*ej + p2/3.0 - m_N[i]*m_N[j]);
+             // Notation 3-1 and 4-1 is just to remind ourselves that these are the higgsino components
+             double gzij = g2/(2.0*cw) * (NN(i,3-1)*NN(j,3-1) - NN(i,4-1)*NN(j,4-1));
+             double Z_to_neutralinos = sqrt(p2)/(2.0*pi*pow(mZ,2)) *  pow(gzij,2)*(ei*ej + p2/3.0 - m_N[i]*m_N[j]);
 
              if (i == j) Z_to_neutralinos = 0.5*Z_to_neutralinos;
              result.set_BF(Z_to_neutralinos/Z_decay_width, Z_to_neutralinos/pow(Z_decay_width,2)*Z_decay_error, "~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
