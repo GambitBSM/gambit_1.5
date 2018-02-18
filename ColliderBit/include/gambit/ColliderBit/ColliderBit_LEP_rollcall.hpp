@@ -17,6 +17,10 @@
 ///          (christophersrogan@gmail.com)
 ///  \date 2015 Apr
 ///
+///  \author Are Raklev
+///          (ahye@fys.uio.no)
+///  \date 2018 Feb
+///
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
@@ -189,6 +193,7 @@
   QUICK_FUNCTION(ColliderBit, OPAL_Chargino_SemiLeptonic_LLike, NEW_CAPABILITY, OPAL_Chargino_SemiLeptonic_Conservative_LLike, double, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (LEP208_xsec_chipm_11, triplet<double>), (LEP208_xsec_chipm_22, triplet<double>), (decay_rates, DecayTable))
   QUICK_FUNCTION(ColliderBit, OPAL_Chargino_Leptonic_LLike, NEW_CAPABILITY, OPAL_Chargino_Leptonic_Conservative_LLike, double, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (LEP208_xsec_chipm_11, triplet<double>), (LEP208_xsec_chipm_22, triplet<double>), (decay_rates, DecayTable))
   QUICK_FUNCTION(ColliderBit, OPAL_Chargino_All_Channels_LLike, NEW_CAPABILITY, OPAL_Chargino_All_Channels_Conservative_LLike, double, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (LEP208_xsec_chipm_11, triplet<double>), (LEP208_xsec_chipm_22, triplet<double>), (decay_rates, DecayTable))
+QUICK_FUNCTION(ColliderBit, OPAL_Degenerate_Chargino_LLike, NEW_CAPABILITY, OPAL_Degenerate_Chargino_Conservative_LLike, double, (MSSM30atQ, NUHM2), (MSSM_spectrum, Spectrum), (LEP208_xsec_chipm_11, triplet<double>))
   // Due to the nature of the analysis details in the OPAL paper, we can't tell
   // which of the following two limits is appropriate for our use. Thus, we will
   // be conservative and choose only the weaker of the two limits.

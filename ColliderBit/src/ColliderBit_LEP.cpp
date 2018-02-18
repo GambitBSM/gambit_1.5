@@ -13,6 +13,14 @@
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@nordita.org)
 ///
+///  \author Are Raklev
+///          (ahye@fys.uio.no)
+///  \date   2018 Feb
+///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date   2018 Feb
+///
 ///  *********************************************
 
 #include <cmath>
@@ -2327,6 +2335,49 @@ namespace Gambit
 
     }
 
+    // OPAL limit on degenerate chargino--neutralino scenario at 208 GeV
+    // Sensitive to mass differences between 320 MeV and 5 GeV
+    // Based on hep-ex/0210043
+    void OPAL_Degenerate_Chargino_Conservative_LLike(double& result)
+    {
+      using namespace Pipes::OPAL_Degenerate_Chargino_Conservative_LLike;
+      
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+      const double mass_neut1 = spec.get(Par::Pole_Mass,1000022, 0);
+      const double mass_char1 = spec.get(Par::Pole_Mass,1000024, 0);
+      const double mZ = spec.get(Par::Pole_Mass,23, 0);
+      triplet<double> xsecWithError;
+      double xsecLimit;
+      
+      static const OPALDegenerateCharginoLimitAt208GeV limitContainer;
+      // #ifdef COLLIDERBIT_DEBUG
+      //   static bool dumped=false;
+      //   if(!dumped)
+      //   {
+      //     limitContainer.dumpPlotData(45.0, 95., 0.320, 5., mZ, "lepLimitPlanev2/OPALDegenerateCharginoLimitAt208GeV.dump");
+      //     
+      //     dumped=true;
+      //   }
+      // #endif
+      
+      result = 0;
+      
+      // char1, neut1
+      xsecLimit = limitContainer.limitAverage(mass_char1, mass_char1-abs(mass_neut1), mZ);
+      xsecWithError = *Dep::LEP208_xsec_chipm_11;
+      
+      if (xsecWithError.central < xsecLimit)
+      {
+        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+      }
+      else
+      {
+        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+      }
+      
+    }
+
+    
     void OPAL_Chargino_All_Channels_Conservative_LLike(double& result)
     {
       using namespace Pipes::OPAL_Chargino_All_Channels_Conservative_LLike;
