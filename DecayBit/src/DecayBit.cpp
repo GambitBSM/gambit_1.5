@@ -306,6 +306,8 @@ namespace Gambit
     /// Reference: 2017 PDG
     void Z_decays (DecayTable::Entry& result)
     {
+      using namespace Pipes::Z_decays;
+
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
       result.width_in_GeV = 2.4952;
@@ -315,6 +317,21 @@ namespace Gambit
       result.set_BF(0.03366, 0.00007, "mu+", "mu-");
       result.set_BF(0.03370, 0.00008, "tau+", "tau-");
       result.set_BF(0.6991, 0.0006, "hadron", "hadron");
+
+      // Neutrinos
+      // FIXME: It doesn't work because SMINPUTS it's not satisfied yet
+      /*const SMInputs sminputs = *Dep::SMINPUTS;
+
+      const double cosW = sminputs.mW/sminputs.mZ;
+      const double sinW2 = 1 - cosW*cosW;
+      const double g2 = sqrt(4*pi/sminputs.alphainv/sinW2);
+      const double mZ = sminputs.mZ;
+ 
+      double Z_to_neutrinos = pow(g2/(2.0*cosW),2) * mZ/(24.0*pi);
+      result.set_BF(Z_to_neutrinos/result.width_in_GeV, Z_to_neutrinos/pow(result.width_in_GeV,2)*result.positive_error, "nu_e", "nubar_e");
+      result.set_BF(Z_to_neutrinos/result.width_in_GeV, Z_to_neutrinos/pow(result.width_in_GeV,2)*result.positive_error, "nu_mu", "nubar_mu");
+      result.set_BF(Z_to_neutrinos/result.width_in_GeV, Z_to_neutrinos/pow(result.width_in_GeV,2)*result.positive_error, "nu_tau", "nubar_tau");
+      */
     }
 
     /// SM decays: t
@@ -2820,19 +2837,17 @@ namespace Gambit
 
 
     //////////// Z decay table for the MSSM ///////////////////////
-    void Z_decays_MSSM (DecayTable::Entry& result)
+    void Z_invisible_width_MSSM (DecayTable::Entry& result)
     {
-      using namespace Pipes::Z_decays_MSSM;
-      SMInputs sminputs = *Dep::SMINPUTS;
+      using namespace Pipes::Z_invisible_width_MSSM;
 
       // Setup decay table info from the Standard Model
-      Z_decays(result);
+      //Z_decays(result);
+      
 
       // Get spectrum objects
       const Spectrum& spec = *Dep::MSSM_spectrum;
       const SubSpectrum& mssm = spec.get_HE();
-
-      const double mZ = spec.get(Par::Pole_Mass,"Z0");
 
       // Get sneutrino mass
       const double m_sNu1 = spec.get(Par::Pole_Mass,"~nu_1");
@@ -2871,28 +2886,32 @@ namespace Gambit
             N41, N42, N43, N44;
 
 
-      double Z_decay_width = result.width_in_GeV;
-      double Z_decay_error = result.positive_error; // Error is symmetric
+      //double Z_decay_width = result.width_in_GeV;
+      //double Z_decay_error = result.positive_error; // Error is symmetric
+      double Z_decay_width = Dep::Z_decay_rates->width_in_GeV;
+      double Z_decay_error = Dep::Z_decay_rates->positive_error;
 
-      // Useful definitions
-      double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
-      double cw = sminputs.mW / sminputs.mZ;
+      // Useful quantities
+      const double g2 = mssm.safeget(Par::dimensionless,"g2");
+      const double sinW2 = mssm.safeget(Par::dimensionless,"sinW2");
+      const double cosW = sqrt(1.0 - sinW2);
+      const double mZ = spec.get(Par::Pole_Mass,"Z0");
  
       // Tree level code stolen from DarkSUSY
 
-      // Neutrinos
-      double Z_to_neutrinos = pow(g2/(2.0*cw),2) * mZ/(24.0*pi);
+      // Neutrinos, redo cause sinW2 and g2 may have changed
+      double Z_to_neutrinos = pow(g2/(2.0*cosW),2) * mZ/(24.0*pi);
       result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_e", "nubar_e");
       result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_mu", "nubar_mu");
       result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_tau", "nubar_tau");
-
+ 
       // Sneutrinos
       for(int i=0; i<3; i++)
       {
         double temp = 1.0 - 4.0*pow(m_sNu[i]/mZ,2);
         if (temp > 0.0)
         {
-          double Z_to_sneutrinos = pow(temp, 1.5) * pow(g2/(2*cw),2) * mZ/(48.0*pi);
+          double Z_to_sneutrinos = pow(temp, 1.5) * pow(g2/(2*cosW),2) * mZ/(48.0*pi);
           result.set_BF(Z_to_sneutrinos/Z_decay_width, Z_to_sneutrinos/pow(Z_decay_width,2)*Z_decay_error, "~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
         }
         else
@@ -2911,7 +2930,7 @@ namespace Gambit
            if (p2 > 0.0 and ei > 0.0 and ej > 0.0)
            {
              // Notation 3-1 and 4-1 is just to remind ourselves that these are the higgsino components
-             double gzij = g2/(2.0*cw) * (NN(i,3-1)*NN(j,3-1) - NN(i,4-1)*NN(j,4-1));
+             double gzij = g2/(2.0*cosW) * (NN(i,3-1)*NN(j,3-1) - NN(i,4-1)*NN(j,4-1));
              double Z_to_neutralinos = sqrt(p2)/(2.0*pi*pow(mZ,2)) *  pow(gzij,2)*(ei*ej + p2/3.0 - m_N[i]*m_N[j]);
 
              if (i == j) Z_to_neutralinos = 0.5*Z_to_neutralinos;
@@ -2934,6 +2953,7 @@ namespace Gambit
 
       double Z_total_width = Dep::Z_decay_rates->width_in_GeV;
       double Z_width_error = Dep::Z_decay_rates->positive_error; // Error is symmetric 
+      DecayTable::Entry Z_inv = *Dep::Z_invisible_width;
 
       double Z_inv_BF = 0.0;
       double Z_inv_BF_err2 = 0.0;
@@ -2941,22 +2961,22 @@ namespace Gambit
       // MSSM-specific
       if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
       {
-        Z_inv_BF += Dep::Z_decay_rates->BF("nu_e", "nubar_e");
-        Z_inv_BF += Dep::Z_decay_rates->BF("nu_mu", "nubar_mu");
-        Z_inv_BF += Dep::Z_decay_rates->BF("nu_tau", "nubar_tau");
-        Z_inv_BF_err2 += 3.0 * pow(Dep::Z_decay_rates->BF_error("nu_e", "nubar_e"),2);
+        Z_inv_BF += Z_inv.BF("nu_e", "nubar_e");
+        Z_inv_BF += Z_inv.BF("nu_mu", "nubar_mu");
+        Z_inv_BF += Z_inv.BF("nu_tau", "nubar_tau");
+        Z_inv_BF_err2 += 3.0 * pow(Z_inv.BF_error("nu_e", "nubar_e"),2);
 
         for(int i=0; i<3; i++)
         {
-          Z_inv_BF += Dep::Z_decay_rates->BF("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
-          Z_inv_BF_err2 += pow(Dep::Z_decay_rates->BF_error("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1)),2);
+          Z_inv_BF += Z_inv.BF("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
+          Z_inv_BF_err2 += pow(Z_inv.BF_error("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1)),2);
         }
 
         for(int i=0; i<4; i++)
           for(int j=i; j<4; j++)
           {
-            Z_inv_BF += Dep::Z_decay_rates->BF("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
-            Z_inv_BF_err2 += pow(Dep::Z_decay_rates->BF_error("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1)),2);
+            Z_inv_BF += Z_inv.BF("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
+            Z_inv_BF_err2 += pow(Z_inv.BF_error("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1)),2);
           }
       }
 

@@ -673,12 +673,12 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY Z_decay_rates
+  #define CAPABILITY Z_invisible_width
   START_CAPABILITY
 
-    #define FUNCTION Z_decays_MSSM
+    #define FUNCTION Z_invisible_width_MSSM
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(Z_decay_rates, DecayTable::Entry)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
@@ -691,6 +691,7 @@ START_MODULE
     #define FUNCTION lnL_Z_invisible_width
     START_FUNCTION(double)
     DEPENDENCY(Z_decay_rates, DecayTable::Entry)
+    DEPENDENCY(Z_invisible_width, DecayTable::Entry)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
