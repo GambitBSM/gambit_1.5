@@ -126,6 +126,13 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Neutralino_Hadronic_LLike
 
+    - purpose:    LogLike
+      capability: OPAL_Degenerate_Chargino_LLike
+
+    # Other likelihoods
+    - purpose:    LogLike
+      capability: lnL_Z_invisible_width
+
     # Observables (not included in likelihood)
     - purpose:    likelihood_details
       capability: LHC_LogLikes
