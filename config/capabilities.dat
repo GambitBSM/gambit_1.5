@@ -501,6 +501,12 @@ OPAL_Chargino_SemiLeptonic_LLike: |
    to the model-independent limit according to the OPAL collaboration.
    Returns a log likelihood value.
 
+OPAL_Degenerate_Chargino_LLike: |
+   Compares the cross section times branching ratio for chargino
+   pair production to the limit on degenerate charginos and neutralinos
+   according to the OPAL collaboration.
+   Returns a likelihood value
+
 LEP_Higgs_LogLike: |
     Provides log-likelihood for combined model-independent LEP
     neutral Higgs searches.
