@@ -60,8 +60,8 @@ Printer:
     group: "/MSSMEW"
     delete_file_on_restart: false
 
-  #printer: ascii
-  #options:
+  # printer: ascii
+  # options:
   #  output_file: "gambit_output.txt"
 
 
@@ -154,6 +154,12 @@ ObsLikes:
 
 Rules:
 
+  # Set any pole masses by hand?
+  # NOTE: This will break the internal spectrum consistency -- use at your own risk!
+  - options:
+      override_FS_pole_masses:
+        h0_1: 125.09
+
   # Choose to get decays from DecayBit proper, not from an SLHA file.
   - capability: decay_rates
     function: all_decays
@@ -185,11 +191,13 @@ Rules:
     function: make_MSSM_precision_spectrum_4H_W
     # The following options only have an impact when using make_MSSM_precision_spectrum_H_W
     # or make_MSSM_precision_spectrum_H_W.
-    # Choose to take the precision prediction for the Higgs mass(es) (rather then spectrum generator's).
-    # Choose to use the difference between the precision and spectrum generator predictions, along
-    # with the precision error estimate, to estimate the theoretical error on the prediction.
+    #
+    # --- NOTE FOR THE MSSMEW ---
+    # By setting Higgs_predictions_source: 2 we choose to take Higgs mass predictions 
+    # from the spectrum generator, not the precision calculation. We do this to force the 
+    # lightest Higgs mass to be 125 GeV for all points (via the option "override_FS_pole_masses")
     options:
-      Higgs_predictions_source: 1
+      Higgs_predictions_source: 2
       Higgs_predictions_error_method: 4
 
   - capability: prec_mh
@@ -241,15 +249,13 @@ Rules:
     function: operateLHCLoop
     options:
       pythiaNames: ["Pythia_SUSY_LHC_13TeV_EWonly"]
-      silenceLoop: false
+      silenceLoop: true
       maxFailedEvents: 1000
       pythiaSeedBase: -1    # If -1, a new seed is generated for every Pythia configuration and parameter point 
 
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
-      # min_nEvents: [200]
-      # max_nEvents: [1000]
       min_nEvents: [20000]
       max_nEvents: [100000]
       events_between_convergence_checks: [20000]

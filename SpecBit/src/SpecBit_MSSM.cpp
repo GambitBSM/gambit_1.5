@@ -178,6 +178,19 @@ namespace Gambit
       mssmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
       mssmspec.set_override(Par::mass1,spectrum_generator.get_low_scale(), "low_scale", true);
 
+
+      // Has the user chosen to override any pole mass values?
+      // This will typically break consistency, but may be useful in some special cases
+      if (runOptions.hasKey("override_FS_pole_masses"))
+      {
+        std::vector<str> particle_names = runOptions.getNames("override_FS_pole_masses");
+        for (auto& name : particle_names)
+        {
+          double mass = runOptions.getValue<double>("override_FS_pole_masses", name);
+          mssmspec.set_override(Par::Pole_Mass, mass, name);
+        }
+      }
+
       // Add theory errors
       static const MSSM_strs ms;
 
