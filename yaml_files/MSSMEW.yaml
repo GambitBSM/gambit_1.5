@@ -184,24 +184,11 @@ Rules:
       use_higgs_2loop_atau_atau: true
       invalid_point_fatal: false
 
-
-  # Choose where to get the precision spectrum from
-  - capability: MSSM_spectrum
+  # This simply relables the "unimproved_MSSM_spectrum" to "MSSM_spectrum",
+  # so that things depending on "MSSM_spectrum" will be happy.
+  - capability: MSSM_spectrum 
     type: Spectrum
-    function: make_MSSM_precision_spectrum_4H_W
-    # The following options only have an impact when using make_MSSM_precision_spectrum_H_W
-    # or make_MSSM_precision_spectrum_H_W.
-    #
-    # --- NOTE FOR THE MSSMEW ---
-    # By setting Higgs_predictions_source: 2 we choose to take Higgs mass predictions 
-    # from the spectrum generator, not the precision calculation. We do this to force the 
-    # lightest Higgs mass to be 125 GeV for all points (via the option "override_FS_pole_masses")
-    options:
-      Higgs_predictions_source: 2
-      Higgs_predictions_error_method: 4
-
-  - capability: prec_mh
-    function: FH_HiggsMass
+    function: make_MSSM_precision_spectrum_none
 
   # These options set various tolerances in the spectrum generation
   - options:
