@@ -345,7 +345,7 @@ namespace Gambit
     void lnL_0nubb(double &result)
     {
       using namespace Pipes::lnL_0nubb;
-      result = *Dep::lnL_0nubb_KamLAND_ZEN + *Dep::lnL_0nubb_GERDA;
+      result = *Dep::lnL_0nubb_KamLAND_Zen + *Dep::lnL_0nubb_GERDA;
     }
 
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]

@@ -99,7 +99,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: random
+  use_scanner: de
 
   scanners:
 
@@ -145,7 +145,7 @@ ObsLikes:
   - capability: lnLlepuniv
     purpose: LogLike
 
-  - capability: lnL0nubb
+  - capability: lnL_0nubb
     purpose: LogLike
 
   - capability: lnLckm

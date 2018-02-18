@@ -217,12 +217,6 @@ namespace Gambit
       /// Check for missing capability descriptions (after reading in runtime flags)
       void check_capability_descriptions();
 
-      /// set to true if model descriptions missing
-      bool missing_model_description;
-
-      /// Check for missing model descriptions (after reading in runtime flags)
-      void check_model_descriptions();
-
       /// Vector of all capability_info objects
       std::vector<capability_info> capability_dbase;
 

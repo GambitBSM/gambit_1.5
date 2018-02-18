@@ -644,7 +644,6 @@ namespace Gambit
           {
             filename = process_primary_options(argc,argv);
             check_capability_descriptions();
-            check_model_descriptions();
             // Check if we indeed received a valid filename (needs the -f option)
             if (found_inifile) return filename;
             // Ok then, report an unrecognised command and bail

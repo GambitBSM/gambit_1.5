@@ -188,6 +188,7 @@ namespace Gambit
              0.0, *Param["M_2"], 0.0,
              0.0, 0.0, *Param["M_3"];
 
+
       M_twid_temp(0,0) = M_I(0,0)  * (1.0 - (pow(M_I(0,0),2.0)*l_M(M_I(0,0),mZ,mH)/pow(vev,2.0)));
       M_twid_temp(0,1) = 0.0;
       M_twid_temp(0,2) = 0.0;
@@ -197,7 +198,7 @@ namespace Gambit
       M_twid_temp(2,0) = 0.0;
       M_twid_temp(2,1) = 0.0;
       M_twid_temp(2,2) = M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2),mZ,mH)/pow(vev,2.0)));
-      if(M_twid != Eigen::Matrix3cd::Zero())
+      if(M_twid_temp != Eigen::Matrix3cd::Zero())
         M_twid = M_twid_temp.sqrt();
 
 
@@ -230,7 +231,7 @@ namespace Gambit
       R_12(2,2) = 1.0;
       R = R_23 * R_13 * R_12;
 
-     if(mnu != Eigen::Matrix3cd::Zero())
+     if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
       Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
 
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points

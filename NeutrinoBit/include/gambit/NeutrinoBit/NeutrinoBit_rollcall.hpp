@@ -327,7 +327,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_0nubb
     START_FUNCTION(double) 
-    DEPENDENCY(lnL_0nubb_KamLAND_ZEN, double)
+    DEPENDENCY(lnL_0nubb_KamLAND_Zen, double)
     DEPENDENCY(lnL_0nubb_GERDA, double)
     #undef FUNCTION
   #undef CAPABILITY
