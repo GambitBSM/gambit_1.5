@@ -430,6 +430,12 @@ START_MODULE
       DEPENDENCY(SingletDM_spectrum, Spectrum)
       ALLOW_MODELS(SingletDM,SingletDM_running)
     #undef FUNCTION
+    #define FUNCTION TH_ProcessCatalog_SingletDMZ3
+      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(decay_rates,DecayTable)
+      DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+      ALLOW_MODELS(SingletDMZ3)
+    #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY set_gamLike_GC_halo
@@ -587,7 +593,14 @@ START_MODULE
       ALLOW_MODEL_COMBINATION(group1, group2)
      #undef FUNCTION
      
-     #undef FUNCTION     
+    #define FUNCTION DD_couplings_SingletDMZ3
+      START_FUNCTION(DM_nucleon_couplings)
+      DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, SingletDMZ3)
+      MODEL_GROUP(group1, (nuclear_params_fnq))
+      MODEL_GROUP(group2, (SingletDMZ3, SingletDM))
+      ALLOW_MODEL_COMBINATION(group1, group2)
+     #undef FUNCTION  
 
   #undef CAPABILITY
 
@@ -1033,7 +1046,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION DarkMatter_ID_SingletDM
     START_FUNCTION(std::string)
-    ALLOW_MODELS(SingletDM, SingletDM_running)
+    ALLOW_MODELS(SingletDM,SingletDMZ3, SingletDM_running)
     #undef FUNCTION
     #define FUNCTION DarkMatter_ID_MSSM
     START_FUNCTION(std::string)

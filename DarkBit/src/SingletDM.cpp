@@ -211,6 +211,33 @@ namespace Gambit
 
     } // function DD_couplings_SingletDM
 
+    /// Direct detection couplings for Singlet DM.
+    void DD_couplings_SingletDMZ3(DM_nucleon_couplings &result)
+    {
+      using namespace Pipes::DD_couplings_SingletDMZ3;
+      const Spectrum& spec = *Dep::SingletDMZ3_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"S");
+      double lambda = he.get(Par::dimensionless,"lambda_hS");
+      double mh = spec.get(Par::Pole_Mass,"h0_1");
+
+      // Expressions taken from Cline et al. (2013, PRD 88:055025, arXiv:1306.4710)
+      double fp = 2./9. + 7./9.*(*Param["fpu"] + *Param["fpd"] + *Param["fps"]);
+      double fn = 2./9. + 7./9.*(*Param["fnu"] + *Param["fnd"] + *Param["fns"]);
+
+      result.gps = lambda*fp*m_proton/pow(mh,2)/mass/2;
+      result.gns = lambda*fn*m_neutron/pow(mh,2)/mass/2;
+      result.gpa = 0;  // Only SI cross-section
+      result.gna = 0;
+
+      logger() << LogTags::debug << "Singlet DM DD couplings:" << std::endl;
+      logger() << " gps = " << result.gps << std::endl;
+      logger() << " gns = " << result.gns << std::endl;
+      logger() << " gpa = " << result.gpa << std::endl;
+      logger() << " gna = " << result.gna << EOM;
+
+    } // function DD_couplings_SingletDM
+
 
     /// Set up process catalog for Singlet DM.
     void TH_ProcessCatalog_SingletDM(DarkBit::TH_ProcessCatalog &result)
@@ -375,5 +402,174 @@ namespace Gambit
 
       result = catalog;
     } // function TH_ProcessCatalog_SingletDM
+    
+    
+    
+    /// Set up process catalog for Singlet DM Z3.
+    void TH_ProcessCatalog_SingletDMZ3(DarkBit::TH_ProcessCatalog &result)
+    {
+      using namespace Pipes::TH_ProcessCatalog_SingletDMZ3;
+      using std::vector;
+      using std::string;
+
+      // Initialize empty catalog and main annihilation process
+      TH_ProcessCatalog catalog;
+      TH_Process process_ann("S", "S");
+
+
+      ///////////////////////////////////////
+      // Import particle masses and couplings
+      ///////////////////////////////////////
+
+      // Convenience macros
+      #define getSMmass(Name, spinX2)                                           \
+       catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
+       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
+      #define addParticle(Name, Mass, spinX2)                                   \
+       catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
+       (Name , TH_ParticleProperty(Mass, spinX2)));
+
+      // Import Spectrum objects
+      const Spectrum& spec = *Dep::SingletDMZ3_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      const SubSpectrum& SM = spec.get_LE();
+      const SMInputs& SMI   = spec.get_SMInputs();
+
+      // Import couplings
+      double lambda = he.get(Par::dimensionless,"lambda_hS");
+      double v = he.get(Par::mass1,"vev");
+
+      // Get SM pole masses
+      getSMmass("e-_1",     1)
+      getSMmass("e+_1",     1)
+      getSMmass("e-_2",     1)
+      getSMmass("e+_2",     1)
+      getSMmass("e-_3",     1)
+      getSMmass("e+_3",     1)
+      getSMmass("Z0",     2)
+      getSMmass("W+",     2)
+      getSMmass("W-",     2)
+      getSMmass("g",      2)
+      getSMmass("gamma",  2)
+      getSMmass("u_3",      1)
+      getSMmass("ubar_3",   1)
+      getSMmass("d_3",      1)
+      getSMmass("dbar_3",   1)
+
+      // Pole masses not available for the light quarks.
+      addParticle("u_1"   , SMI.mU,  1) // mu(2 GeV)^MS-bar, not pole mass
+      addParticle("ubar_1", SMI.mU,  1) // mu(2 GeV)^MS-bar, not pole mass
+      addParticle("d_1"   , SMI.mD,  1) // md(2 GeV)^MS-bar, not pole mass
+      addParticle("dbar_1", SMI.mD,  1) // md(2 GeV)^MS-bar, not pole mass
+      addParticle("u_2"   , SMI.mCmC,1) // mc(mc)^MS-bar, not pole mass
+      addParticle("ubar_2", SMI.mCmC,1) // mc(mc)^MS-bar, not pole mass
+      addParticle("d_2"   , SMI.mS,  1) // ms(2 GeV)^MS-bar, not pole mass
+      addParticle("dbar_2", SMI.mS,  1) // ms(2 GeV)^MS-bar, not pole mass
+      double alpha_s = SMI.alphaS;      // alpha_s(mZ)^MSbar
+
+      // Masses for neutrino flavour eigenstates. Set to zero.
+      // (presently not required)
+      addParticle("nu_e",     0.0, 1)
+      addParticle("nubar_e",  0.0, 1)
+      addParticle("nu_mu",    0.0, 1)
+      addParticle("nubar_mu", 0.0, 1)
+      addParticle("nu_tau",   0.0, 1)
+      addParticle("nubar_tau",0.0, 1)
+
+      // Higgs-sector masses
+      double mS = spec.get(Par::Pole_Mass,"S");
+      double mH = spec.get(Par::Pole_Mass,"h0_1");
+      addParticle("S",        mS, 0)  // Singlet DM
+      addParticle("h0_1",     mH, 0)  // SM-like Higgs
+      addParticle("pi0",   meson_masses.pi0,       0)
+      addParticle("pi+",   meson_masses.pi_plus,   0)
+      addParticle("pi-",   meson_masses.pi_minus,  0)
+      addParticle("eta",   meson_masses.eta,       0)
+      addParticle("rho0",  meson_masses.rho0,      1)
+      addParticle("rho+",  meson_masses.rho_plus,  1)
+      addParticle("rho-",  meson_masses.rho_minus, 1)
+      addParticle("omega", meson_masses.omega,     1)
+
+      // Get rid of convenience macros
+      #undef getSMmass
+      #undef addParticle
+
+
+      /////////////////////////////
+      // Import Decay information
+      /////////////////////////////
+
+      // Import decay table from DecayBit
+      const DecayTable* tbl = &(*Dep::decay_rates);
+
+      // Save Higgs width for later
+      double gammaH = tbl->at("h0_1").width_in_GeV;
+
+      // Set of imported decays
+      std::set<string> importedDecays;
+
+      // Minimum branching ratio to include
+      double minBranching = 0;
+
+      // Import relevant decays (only Higgs and subsequent decays)
+      using DarkBit_utils::ImportDecays;
+      // Notes: Virtual Higgs decays into offshell W+W- final states are not
+      // imported.  All other channels are correspondingly rescaled.  Decay
+      // into SS final states is accounted for, leading to zero photons.
+      ImportDecays("h0_1", catalog, importedDecays, tbl, minBranching,
+          daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
+
+      // Instantiate new SingletDM object
+      auto singletDM = boost::make_shared<SingletDM>(&catalog, gammaH, v, alpha_s);
+
+      // Populate annihilation channel list and add thresholds to threshold
+      // list.
+      // (remark: the lowest threshold is here = 2*mS, whereas in DS-internal
+      // conventions, this lowest threshold is not listed)
+      process_ann.resonances_thresholds.threshold_energy.push_back(2*mS);
+      auto channel =
+        daFunk::vec<string>("bb", "WW", "cc", "tautau", "ZZ", "tt", "hh");
+      auto p1 =
+        daFunk::vec<string>("d_3",   "W+", "u_2",   "e+_3", "Z0", "u_3",   "h0_1");
+      auto p2 =
+        daFunk::vec<string>("dbar_3","W-", "ubar_2","e-_3", "Z0", "ubar_3","h0_1");
+      {
+        for ( unsigned int i = 0; i < channel.size(); i++ )
+        {
+          double mtot_final =
+            catalog.getParticleProperty(p1[i]).mass +
+            catalog.getParticleProperty(p2[i]).mass;
+          // Include final states that are open for T~m/20
+          if ( mS*2 > mtot_final*0.5 )
+          {
+            daFunk::Funk kinematicFunction = daFunk::funcM(singletDM,
+                &SingletDM::sv, channel[i], lambda, mS, daFunk::var("v"));
+            TH_Channel new_channel(
+                daFunk::vec<string>(p1[i], p2[i]), kinematicFunction
+                );
+            process_ann.channelList.push_back(new_channel);
+          }
+          if ( mS*2 > mtot_final )
+          {
+            process_ann.resonances_thresholds.threshold_energy.
+              push_back(mtot_final);
+          }
+        }
+      }
+
+      // Populate resonance list
+      if ( mH >= mS*2 ) process_ann.resonances_thresholds.resonances.
+          push_back(TH_Resonance(mH, gammaH));
+
+      catalog.processList.push_back(process_ann);
+
+      // Validate
+      catalog.validate();
+
+      result = catalog;
+    } // function TH_ProcessCatalog_SingletDMZ3
+    
+    
+    
   }
 }
