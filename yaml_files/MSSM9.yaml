@@ -629,3 +629,16 @@ KeyValues:
 
   default_output_path: "runs/MSSM9/"
 
+  # We set the errors from the physics modules to be non-fatal
+  # to avoid crashing the entire scan due to a rare problem point.
+  # This means we should pay close attention to the log files...
+  exceptions:
+    ColliderBit_error: non-fatal
+    DarkBit_error: non-fatal
+    DecayBit_error: non-fatal
+    FlavBit_error: non-fatal
+    PrecisionBit_error: non-fatal
+    SpecBit_error: non-fatal
+
+
+
