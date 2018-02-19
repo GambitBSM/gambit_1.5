@@ -918,6 +918,19 @@ namespace Gambit
       if (flav_debug) cout<<"Finished SI_RKstar_11_60"<<endl;
     }
 
+    // RK* for RHN
+    void RHN_RKstar_0045_11(double &result)
+    {
+      using namespace Pipes::RHN_RKstar_0045_11;
+      result = 0.66;
+    }
+ 
+    void RHN_RKstar_11_60(double &result)
+    {
+      using namespace Pipes::RHN_RKstar_11_60;
+      result = 0.69;
+    }
+
     /// RK between 1 and 6 GeV^2
     void SI_RK(double &result)
     {
@@ -929,6 +942,42 @@ namespace Gambit
 
       if (flav_debug) printf("RK=%.3e\n",result);
       if (flav_debug) cout<<"Finished SI_RK"<<endl;
+    }
+
+    /// RK for RHN
+    void RHN_RK(double &result)
+    {
+      using namespace Pipes::RHN_RK;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      std::vector<double> mN = {*Param["M_1"],*Param["M_2"],*Param["M_3"]};
+      double mt = *Param["mT"];
+
+      if (flav_debug) cout << "Starting RHN_RK" << endl;
+
+      // TODO: change for EWPO
+      const double mW = sminputs.mW;
+      const double sinW2 = sqrt(1.0 - pow(sminputs.mW/sminputs.mZ,2));
+
+      // NNLL calculation of SM Wilson coefficients from 1712.01593 and 0811.1214
+      const double C10_SM = -4.103;
+      const double C9_SM = 4.211;
+
+      // Wilson coefficients for the RHN model, from 1706.07570
+      std::complex<double> C10_mu = {0.0, 0.0}, C10_e = {0.0, 0.0};
+      for(int i=0; i<3; i++)
+      {
+        C10_mu += 1.0/(4.0*sinW2)*Theta.adjoint()(i,1)*Theta(1,i) * LoopFunctions::E(pow(mt/mW,2),pow(mN[i]/mW,2)); 
+        C10_e += 1.0/(4.0*sinW2)*Theta.adjoint()(i,0)*Theta(0,i) * LoopFunctions::E(pow(mt/mW,2),pow(mN[i]/mW,2)); 
+      }
+      std::complex<double> C9_mu = - C10_mu, C9_e = -C10_e;
+
+      // Aproximated solution from eq A.3 in 1408.4097
+      result =  std::norm(C10_SM + C10_mu) + std::norm(C9_SM + C9_mu);
+      result /= std::norm(C10_SM + C10_e) + std::norm(C9_SM + C9_e);
+  
+      if (flav_debug) cout << "RK = " << result << endl;
+      if (flav_debug) cout << "Finished RHN_RK" << endl;
     }
     
     /// Isospin asymmetry of B-> K* mu mu

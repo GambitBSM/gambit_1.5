@@ -3,6 +3,7 @@
 ///  \file
 ///
 ///  Loop functions for flavour violating decays of charged leptons (from hep-ph/9403398)
+///  And for RK from 1706.07570
 ///
 ///  *********************************************
 ///
@@ -10,7 +11,7 @@
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
-///  \date 2017 Aug
+///  \date 2017 Aug, 2018 Feb
 ///
 ///  *********************************************
 
@@ -271,6 +272,20 @@ namespace Gambit
       {
         return C0(a,b,c) + d*D0(a,b,c,d);
       }
+    }
+
+    // Loop function for RK
+    namespace LoopFunctions
+    {
+      double E(const double x, const double y)
+      {
+        if(x == 0 or y == 0)
+          return 0.0;
+        if(x == y)
+          return (x*(-4.0 + 15.0*x - 12.0*pow(x,2) + pow(x,3) + 6.0*pow(x,2)*log(x)))/ (4.*pow(-1.0 + x,3));
+        return x*y*(-3.0/(4.0*(1.0-x)*(1.0 - y)) + ((0.25 - 3.0/(4.0*pow(-1.0 + x,2)) - 3.0/(2.0*(-1.0 + x)))*log(x))/(x - y) + ((0.25 - 3.0/(4.0*pow(-1.0 + y,2)) - 3.0/(2.0*(-1 + y)))*log(y))/(-x + y));
+      }
+
     }
 
     // Vertices for LFV diagrams

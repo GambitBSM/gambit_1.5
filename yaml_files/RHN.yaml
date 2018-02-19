@@ -145,6 +145,9 @@ ObsLikes:
   - capability: lnLlepuniv
     purpose: LogLike
 
+  - capability: LUV_LL
+    purpose: LogLike
+
   - capability: lnL_0nubb
     purpose: LogLike
 

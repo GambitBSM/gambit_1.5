@@ -430,6 +430,13 @@ START_MODULE
     #define FUNCTION SI_RKstar_0045_11
     RKSTAR_BINS
     #undef FUNCTION
+
+    // Function to calcualte RK* for RHN
+    #define FUNCTION RHN_RKstar_0045_11
+    START_FUNCTION(double)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
  // Observable: RK* in q^2 bin from 1.1 GeV^2 to 6 GeV^2
@@ -438,6 +445,13 @@ START_MODULE
     #define FUNCTION SI_RKstar_11_60
     RKSTAR_BINS
     #undef FUNCTION
+
+    // Function to calculate RK* for RHN
+    #define FUNCTION RHN_RKstar_11_60
+    START_FUNCTION(double)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   // Helper macro to make the following declarations quicker
@@ -453,6 +467,15 @@ START_MODULE
     #define FUNCTION SI_RK
     RK_BINS
     #undef FUNCTION
+
+    // Function to calculate RK for RHN
+    #define FUNCTION RHN_RK
+    START_FUNCTION(double)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(StandardModel_SLHA2,RightHandedNeutrinos)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   // All FeynHiggs flavour observables
