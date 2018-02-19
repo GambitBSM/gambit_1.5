@@ -2018,7 +2018,19 @@ namespace Gambit
           if (Utils::isnan(ana_dll))
           {
             std::stringstream msg;
-            msg << "Computation of composite loglike for analysis " << analysis_name << " returned NaN.";
+            msg << "Computation of composite loglike for analysis " << analysis_name << " returned NaN. Will now print the signal region data for this analysis:" << endl;
+            for (size_t SR = 0; SR < adata.size(); ++SR)
+            {
+              const SignalRegionData& srData = adata[SR];
+              msg << srData.sr_label 
+                  << ",  n_background = " << srData.n_background 
+                  << ",  background_sys = " << srData.background_sys
+                  << ",  n_observed = " << srData.n_observed 
+                  << ",  n_signal_at_lumi = " << srData.n_signal_at_lumi
+                  << ",  n_signal = " << srData.n_signal
+                  << ",  signal_sys = " << srData.signal_sys
+                  << endl; 
+            }
             invalid_point().raise(msg.str());
           }
 
@@ -2163,7 +2175,20 @@ namespace Gambit
           if (Utils::isnan(bestexp_dll_obs))
           {
             std::stringstream msg;
-            msg << "Computation of loglike for analysis " << analysis_name << " returned NaN. Signal region: " << bestexp_sr_label;
+            msg << "Computation of single-SR loglike for analysis " << analysis_name << " returned NaN, from signal region: " << bestexp_sr_label << endl;
+            msg << "Will now print the signal region data for this analysis:" << endl;
+            for (size_t SR = 0; SR < adata.size(); ++SR)
+            {
+              const SignalRegionData& srData = adata[SR];
+              msg << srData.sr_label 
+                  << ",  n_background = " << srData.n_background 
+                  << ",  background_sys = " << srData.background_sys
+                  << ",  n_observed = " << srData.n_observed 
+                  << ",  n_signal_at_lumi = " << srData.n_signal_at_lumi
+                  << ",  n_signal = " << srData.n_signal
+                  << ",  signal_sys = " << srData.signal_sys
+                  << endl; 
+            }
             invalid_point().raise(msg.str());
           }
 
