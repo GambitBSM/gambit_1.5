@@ -66,7 +66,7 @@ namespace Gambit
       
       double check = 2 * pow( lambda_h * lambda_s , 0.5) + lambda_hs;
       
-      double check_2 = mu3 - 2.*pow(abs(lambda_s),0.5)*ms;
+      double check_2 =  2.*pow(abs(lambda_s),0.5)*ms - mu3;
 			
 
       result = 0;
