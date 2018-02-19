@@ -161,6 +161,9 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Neutralino_Hadronic_LLike
 
+    - purpose:    LogLike
+      capability: OPAL_Degenerate_Chargino_LLike
+
     # Flavour physics likelihoods
     - purpose:    LogLike
       capability: b2ll_LL
@@ -251,8 +254,8 @@ ObsLikes:
     - capability: lnL_t_mass
       purpose:    LogLike
 
-    - capability: lnL_mbmb
-      purpose:    LogLike
+    #- capability: lnL_mbmb
+    #  purpose:    LogLike
 
     #- capability: lnL_light_quark_masses
     #  purpose:    LogLike
@@ -345,9 +348,9 @@ Rules:
 
   # Use DarkSUSY, MicrOmegas or the DarkBit native calculator for the relic density?
   - capability: RD_oh2
-    function: RD_oh2_general
+    #function: RD_oh2_general
     #function: RD_oh2_DarkSUSY
-    #function: RD_oh2_MicrOmegas
+    function: RD_oh2_MicrOmegas
     options:
       # for all calculations
       fast: 1
@@ -500,17 +503,17 @@ Rules:
       vesc_obserr: 35
 
   # Values to be used in PrecisionBit likelihood function for light quark masses
-  - capability: lnL_light_quark_masses
-    options:
-      # m_u/m_d
-      mud_central: 0.48
-      mud_error: 0.10
-      # m_s / ((m_u + m_d)/2)
-      msud_central: 27.5
-      msud_error: 1.0
-      # m_s
-      ms_central: 95.E-03
-      ms_error: 5.E-03
+  #- capability: lnL_light_quark_masses
+  #  options:
+  #    # m_u/m_d
+  #    mud_central: 0.48
+  #    mud_error: 0.10
+  #    # m_s / ((m_u + m_d)/2)
+  #    msud_central: 27.5
+  #    msud_error: 1.0
+  #    # m_s
+  #    ms_central: 95.E-03
+  #    ms_error: 5.E-03
 
 
   # ATLAS detector simulation
@@ -569,9 +572,9 @@ Rules:
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
-      min_nEvents: [5000]
+      min_nEvents: [20000]
       max_nEvents: [50000]
-      events_between_convergence_checks: [5000]
+      events_between_convergence_checks: [20000]
       target_fractional_uncert: [0.3]
       halt_when_systematic_dominated: true
       all_SR_must_converge: false
