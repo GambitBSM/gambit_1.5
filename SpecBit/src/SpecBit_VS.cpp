@@ -61,13 +61,18 @@ namespace Gambit
       double lambda_h = fullspectrum.get(Par::dimensionless,"lambda_h");
       double lambda_s = fullspectrum.get(Par::dimensionless,"lambda_S");
       double lambda_hs = fullspectrum.get(Par::dimensionless,"lambda_hS");
+      double mu3 = fullspectrum.get(Par::mass1,"mu3");
+      double ms = fullspectrum.get(Par::Pole_Mass,"S");
       
       double check = 2 * pow( lambda_h * lambda_s , 0.5) + lambda_hs;
       
+      double check_2 = mu3 - 2.*pow(abs(lambda_s),0.5)*ms;
+			
+
       result = 0;
       
       // if any condition not satisfied set bad likelihood
-      if ( lambda_hs <= 0 || lambda_s <= 0 || check <= 0 )
+      if ( lambda_hs <= 0 || lambda_s <= 0 || check <= 0 || check_2 <= 0)
       {
         result += -1e100;
       }
