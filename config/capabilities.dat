@@ -3256,6 +3256,21 @@ SeesawI_Vnu: |
 m_nu: |
   Matrix of active neutrinos
 
+md21: |
+  Squared mass difference between the first and second neutrino masses
+
+md31: |
+  Squared mass difference between the first and third neutrino masses
+
+md32: |
+  Squared mass difference between the second and third neutrino masses
+
+min_mass: |
+  Minimum mass of the active neutrinos
+
+ordering: |
+  Ordering of the neutrino mass eigenstates: 1 = normal, 0 = inverted
+
 Unitarity: |
   Test for unitarity of the full mixing matrix
 
@@ -3298,9 +3313,68 @@ R_pi: |
 R_tau: |
   Lepton universality ratio of tau decays to leptons
 
+R_W: |
+  Lepton universality ratio of W decays to leptons
+
 lnLlepuniv: |
   Log-likelihood for lepton universality
  
 lnLckm: |
   Log-likelihood for CKM unitarity
  
+Gamma_0nubb_Ge: |
+  Neutrinoless double beta decay rate for 76Ge detector
+
+Gamma_0nubb_Xe: |
+  Neutrinoless double beta decay rate for 136Xe detector
+
+lnL_0nubb_GERDA: |
+  Log-likelihood for the neutrinoless double beta decay rate for the 76Ge detector
+
+lnL_0nubb_KamLAND_Zen: |
+  Log-likelihood for the neutrinoless double beta decay rate for the 136Xe detector
+
+lnL_0nubb: |
+  Log-likelihood for all neutrinoless double beta decay experiments
+
+bbn_lifetime: |
+  Lifetime of the right handed-neutrinos in BBN
+
+lnLbbn: |
+  Log-likelihood for the lifetime of right-handed neutrinos in BBN
+ 
+lnLatlase: |
+  Log-likelihood for direct searches of right-handed neutrinos in the ATLAS experiment in the electron sector
+
+lnLatlasmu: |
+  Log-likelihood for direct searches of right-handed neutrinos in the ATLAS experiment in the muon sector
+
+lnLcharme: |
+  Log-likelihood for direct searches of right-handed neutrinos in the CHARM experiment in the electron sector
+
+lnLcharmmu: |
+  Log-likelihood for direct searches of right-handed neutrinos in the CHARM experiment in the muon sector
+
+lnLcharmtau: |
+  Log-likelihood for direct searches of right-handed neutrinos in the CHARM experiment in the tau sector
+
+lnLdelphi: |
+  Log-likelihood for direct searches of right-handed neutrinos in the Delphi experiment
+
+lnLe949: |
+  Log-likelihood for direct searches of right-handed neutrinos in the E949 experiment
+
+lnLnutev: |
+  Log-likelihood for direct searches of right-handed neutrinos in the NuTeV experiment
+
+lnLpienu: |
+  Log-likelihood for direct searches of right-handed neutrinos in the PieNu experiment
+
+lnLps191e: |
+  Log-likelihood for direct searches of right-handed neutrinos in the PS191 experiment in the electron sector
+
+lnLps191mu: |
+  Log-likelihood for direct searches of right-handed neutrinos in the PS191 experiment in the muon sector
+
+
+

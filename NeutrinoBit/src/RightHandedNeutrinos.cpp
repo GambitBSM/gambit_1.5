@@ -250,7 +250,7 @@ namespace Gambit
     void RHN_Gamma_0nubb_Xe(double& result)
     {
       using namespace Pipes::RHN_Gamma_0nubb_Xe;
-      double mp, Gamma_0nu, A_0nubb_Xe, p2_0nubb_Xe, prefactor;
+      double mp, A_0nubb_Xe, p2_0nubb_Xe, prefactor;
       std::vector<double> M(3);
       std::complex<double> sum = {0.0,0.0};
 
@@ -286,7 +286,7 @@ namespace Gambit
     void RHN_Gamma_0nubb_Ge(double& result)
     {
       using namespace Pipes::RHN_Gamma_0nubb_Ge;
-      double mp, Gamma_0nu, A_0nubb_Ge, p2_0nubb_Ge, prefactor;
+      double mp, A_0nubb_Ge, p2_0nubb_Ge, prefactor;
       std::vector<double> M(3);
       std::complex<double> sum = {0.0,0.0};
 
@@ -989,15 +989,6 @@ namespace Gambit
     {
       using namespace Pipes::Ut3;
       Ut3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,2);
-    }
-
-    void printable_ps191e(double& U_ps191e)
-    {
-      using namespace Pipes::printable_ps191e;
-      double c_e = 0.5711;
-      double c_mu = 0.1265;
-      double c_tau = 0.1265;
-      U_ps191e = (*Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1))) + (*Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2)));
     }
 
     void perturbativity_likelihood(double &lnL)
