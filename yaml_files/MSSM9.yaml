@@ -65,10 +65,7 @@ Parameters:
       range: [.2, .8]
     v0: 240.0
     vesc: 533.0
-    vrot:
-      same_as: Halo_gNFW_rho0::v0
-      scale: 1.0
-      shift: 0.0
+    vrot: 240.0    # Set to same value as v0
     rs: 20.0
     r_sun: 8.5
     alpha: 1
