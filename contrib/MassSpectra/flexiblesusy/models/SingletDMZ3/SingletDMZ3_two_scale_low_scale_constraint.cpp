@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:15
+// File generated at Tue 20 Feb 2018 16:02:39
 
 #include "SingletDMZ3_two_scale_low_scale_constraint.hpp"
 #include "SingletDMZ3_two_scale_model.hpp"
@@ -88,23 +88,6 @@ void SingletDMZ3_low_scale_constraint<Two_scale>::apply()
    qedqcd.run_to(scale, 1.0e-5);
    calculate_DRbar_gauge_couplings();
 
-   const auto HiggsIN = INPUTPARAMETER(HiggsIN);
-   const auto LamSHInput = INPUTPARAMETER(LamSHInput);
-   const auto LamSInput = INPUTPARAMETER(LamSInput);
-   const auto muSInput = INPUTPARAMETER(muSInput);
-   const auto mu3Input = INPUTPARAMETER(mu3Input);
-   const auto g1 = MODELPARAMETER(g1);
-   const auto g2 = MODELPARAMETER(g2);
-
-   MODEL->set_v(Re((2*MZDRbar)/Sqrt(0.6*Sqr(g1) + Sqr(g2))));
-   calculate_Yu_DRbar();
-   calculate_Yd_DRbar();
-   calculate_Ye_DRbar();
-   MODEL->set_muH(Re(HiggsIN));
-   MODEL->set_LamSH(Re(LamSHInput));
-   MODEL->set_LamS(Re(LamSInput));
-   MODEL->set_muS(Re(muSInput));
-   MODEL->set_mu3(Re(mu3Input));
    MODEL->set_g1(new_g1);
    MODEL->set_g2(new_g2);
    MODEL->set_g3(new_g3);
@@ -371,8 +354,6 @@ void SingletDMZ3_low_scale_constraint<Two_scale>::calculate_Yu_DRbar()
       upQuarksDRbar(2,2) = MODEL->calculate_MFu_DRbar(qedqcd.displayPoleMt(), 2);
    }
 
-   const auto v = MODELPARAMETER(v);
-   MODEL->set_Yu((-((1.4142135623730951*upQuarksDRbar)/v).transpose()).real());
 
 }
 
@@ -389,9 +370,6 @@ void SingletDMZ3_low_scale_constraint<Two_scale>::calculate_Yd_DRbar()
       downQuarksDRbar(2,2) = MODEL->calculate_MFd_DRbar(qedqcd.displayMass(softsusy::mBottom), 2);
    }
 
-   const auto v = MODELPARAMETER(v);
-   MODEL->set_Yd((((1.4142135623730951*downQuarksDRbar)/v).transpose()).real())
-      ;
 
 }
 
@@ -413,9 +391,6 @@ void SingletDMZ3_low_scale_constraint<Two_scale>::calculate_Ye_DRbar()
       downLeptonsDRbar(2,2) = MODEL->calculate_MFe_DRbar(qedqcd.displayMass(softsusy::mTau), 2);
    }
 
-   const auto v = MODELPARAMETER(v);
-   MODEL->set_Ye((((1.4142135623730951*downLeptonsDRbar)/v).transpose()).real()
-      );
 
 }
 

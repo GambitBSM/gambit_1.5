@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:22
+// File generated at Tue 20 Feb 2018 16:02:46
 
 #include "config.h"
 
@@ -175,7 +175,7 @@ public:
    virtual void calculate_model_observables(const softsusy::QedQcd&, const Physical_input&) override;
 
 private:
-   std::tuple<SingletDMZ3_slha<SingletDMZ3<Solver_type>>> models{};        ///< running parameters and pole masses
+   std::tuple<SingletDMZ3_slha<SingletDMZ3<Solver_type>>, standard_model::StandardModel<Two_scale>> models{};        ///< running parameters and pole masses
    Spectrum_generator_problems problems{};   ///< spectrum generator problems
    SingletDMZ3_scales scales{};              ///< scale information
    SingletDMZ3_observables observables{};    ///< observables

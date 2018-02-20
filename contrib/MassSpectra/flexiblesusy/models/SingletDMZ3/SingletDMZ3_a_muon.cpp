@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:17
+// File generated at Tue 20 Feb 2018 16:02:41
 
 /**
  * @file SingletDMZ3_a_muon.cpp
  *
- * This file was generated at Mon 1 Jan 2018 12:22:17 with FlexibleSUSY
+ * This file was generated at Tue 20 Feb 2018 16:02:41 with FlexibleSUSY
  * 2.0.1 and SARAH 4.12.2 .
  */
 

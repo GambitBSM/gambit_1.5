@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:16
+// File generated at Tue 20 Feb 2018 16:02:39
 
 /**
  * @file SingletDMZ3_two_scale_model.hpp
@@ -24,7 +24,7 @@
  *        value problem using the two_scale solver by solving EWSB
  *        and determine the pole masses and mixings
  *
- * This file was generated at Mon 1 Jan 2018 12:22:16 with FlexibleSUSY
+ * This file was generated at Tue 20 Feb 2018 16:02:39 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 

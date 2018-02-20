@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:15
+// File generated at Tue 20 Feb 2018 16:02:39
 
 #include "SingletDMZ3_two_scale_susy_scale_constraint.hpp"
 #include "SingletDMZ3_two_scale_model.hpp"
@@ -70,6 +70,17 @@ void SingletDMZ3_susy_scale_constraint<Two_scale>::apply()
    update_scale();
 
    // apply user-defined susy scale constraints
+   const auto HiggsIN = INPUTPARAMETER(HiggsIN);
+   const auto LamSHInput = INPUTPARAMETER(LamSHInput);
+   const auto LamSInput = INPUTPARAMETER(LamSInput);
+   const auto muSInput = INPUTPARAMETER(muSInput);
+   const auto mu3Input = INPUTPARAMETER(mu3Input);
+
+   MODEL->set_muH(Re(HiggsIN));
+   MODEL->set_LamSH(Re(LamSHInput));
+   MODEL->set_LamS(Re(LamSInput));
+   MODEL->set_muS(Re(muSInput));
+   MODEL->set_mu3(Re(mu3Input));
    MODEL->solve_ewsb();
 
 }

@@ -16,48 +16,56 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:15
+// File generated at Tue 20 Feb 2018 16:02:39
 
-#ifndef SingletDMZ3_TWO_SCALE_INITIAL_GUESSER_H
-#define SingletDMZ3_TWO_SCALE_INITIAL_GUESSER_H
+#ifndef SingletDMZ3_STANDARD_MODEL_TWO_SCALE_INITIAL_GUESSER_H
+#define SingletDMZ3_STANDARD_MODEL_TWO_SCALE_INITIAL_GUESSER_H
 
 #include "SingletDMZ3_initial_guesser.hpp"
-#include "SingletDMZ3_two_scale_low_scale_constraint.hpp"
 #include "SingletDMZ3_two_scale_susy_scale_constraint.hpp"
 #include "SingletDMZ3_two_scale_high_scale_constraint.hpp"
+#include "standard_model_two_scale_low_scale_constraint.hpp"
 #include "initial_guesser.hpp"
+#include "lowe.h"
 
 #include <sstream>
 
 namespace flexiblesusy {
 
+class Two_scale;
+
 template <class T>
 class SingletDMZ3;
 
-class Two_scale;
+template <class T>
+class StandardModel;
+
+template <class T>
+class SingletDMZ3_standard_model_initial_guesser;
 
 /**
- * @class SingletDMZ3_initial_guesser<Two_scale>
- * @brief initial guesser for the SingletDMZ3
+ * @class SingletDMZ3_standard_model_initial_guesser<Two_scale>
+ * @brief initial guesser for the SingletDMZ3 tower
  */
 
 template<>
-class SingletDMZ3_initial_guesser<Two_scale> : public Initial_guesser {
+class SingletDMZ3_standard_model_initial_guesser<Two_scale> : public Initial_guesser {
 public:
-   SingletDMZ3_initial_guesser(SingletDMZ3<Two_scale>*,
+   SingletDMZ3_standard_model_initial_guesser(SingletDMZ3<Two_scale>*,
+                               standard_model::StandardModel<Two_scale>*,
                                const softsusy::QedQcd&,
-                               const SingletDMZ3_low_scale_constraint<Two_scale>&,
+                               const standard_model::Standard_model_low_scale_constraint<Two_scale>&,
                                const SingletDMZ3_susy_scale_constraint<Two_scale>&,
                                const SingletDMZ3_high_scale_constraint<Two_scale>&);
-   virtual ~SingletDMZ3_initial_guesser() = default;
-
-   virtual void guess() override; ///< initial guess
+   virtual ~SingletDMZ3_standard_model_initial_guesser();
+   virtual void guess(); ///< initial guess
 
    void set_running_precision(double p) { running_precision = p; }
 
 private:
    SingletDMZ3<Two_scale>* model{nullptr}; ///< pointer to model class
-   softsusy::QedQcd qedqcd{};       ///< Standard Model low-energy data
+   standard_model::StandardModel<Two_scale>* eft{nullptr}; ///< pointer to effective low energy model
+   softsusy::QedQcd qedqcd{}; ///< Standard Model low-energy data
    double mu_guess{0.}; ///< guessed DR-bar mass of up-quark
    double mc_guess{0.}; ///< guessed DR-bar mass of charm-quark
    double mt_guess{0.}; ///< guessed DR-bar mass of top-quark
@@ -68,12 +76,12 @@ private:
    double mm_guess{0.}; ///< guessed DR-bar mass of muon
    double mtau_guess{0.}; ///< guessed DR-bar mass of tau
    double running_precision{1.0e-3}; ///< Runge-Kutta RG running precision
-   SingletDMZ3_low_scale_constraint<Two_scale> low_constraint{};
+   standard_model::Standard_model_low_scale_constraint<Two_scale> low_constraint{};
    SingletDMZ3_susy_scale_constraint<Two_scale> susy_constraint{};
    SingletDMZ3_high_scale_constraint<Two_scale> high_constraint{};
 
-   void guess_susy_parameters();
-   void guess_soft_parameters();
+   void guess_eft_parameters();
+   void guess_model_parameters();
    void calculate_DRbar_yukawa_couplings();
    void calculate_Yu_DRbar();
    void calculate_Yd_DRbar();

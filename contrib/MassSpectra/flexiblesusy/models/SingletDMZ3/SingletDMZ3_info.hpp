@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:12
+// File generated at Tue 20 Feb 2018 16:02:36
 
 #ifndef SingletDMZ3_INFO_H
 #define SingletDMZ3_INFO_H
@@ -77,7 +77,7 @@ namespace SingletDMZ3_info {
    extern const std::string model_name;
    constexpr bool is_low_energy_model = false;
    constexpr bool is_supersymmetric_model = false;
-   constexpr bool is_FlexibleEFTHiggs = false;
+   constexpr bool is_FlexibleEFTHiggs = true;
 
    void print(std::ostream&);
 

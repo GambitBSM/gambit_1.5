@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 12:22:12
+// File generated at Tue 20 Feb 2018 16:02:36
 
 #ifndef SingletDMZ3_SPECTRUM_GENERATOR_INTERFACE_H
 #define SingletDMZ3_SPECTRUM_GENERATOR_INTERFACE_H
@@ -46,10 +46,10 @@ class SingletDMZ3_spectrum_generator_interface {
 public:
    virtual ~SingletDMZ3_spectrum_generator_interface() = default;
 
-   std::tuple<SingletDMZ3<T>> get_models() const
-   { return std::make_tuple(model); }
-   std::tuple<SingletDMZ3_slha<SingletDMZ3<T>>> get_models_slha() const
-   { return std::make_tuple(SingletDMZ3_slha<SingletDMZ3<T> >(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.)); }
+   std::tuple<SingletDMZ3<T>, standard_model::StandardModel<T>> get_models() const
+   { return std::make_tuple(model, eft); }
+   std::tuple<SingletDMZ3_slha<SingletDMZ3<T>>, standard_model::StandardModel<T>> get_models_slha() const
+   { return std::make_tuple(SingletDMZ3_slha<SingletDMZ3<T>>(model, settings.get(Spectrum_generator_settings::force_positive_masses) == 0.), eft); }
 
    SingletDMZ3<T> get_model() const
    { return model; }
@@ -69,6 +69,7 @@ public:
 
 protected:
    SingletDMZ3<T> model;
+   standard_model::StandardModel<T> eft{};
    Spectrum_generator_problems problems;
    Spectrum_generator_settings settings;
    double parameter_output_scale{0.}; ///< output scale for running parameters
@@ -92,6 +93,10 @@ void SingletDMZ3_spectrum_generator_interface<T>::set_settings(
    model.set_ewsb_loop_order(settings.get(Spectrum_generator_settings::ewsb_loop_order));
    model.set_loop_corrections(settings.get_loop_corrections());
    model.set_threshold_corrections(settings.get_threshold_corrections());
+   eft.set_pole_mass_loop_order(settings.get(Spectrum_generator_settings::pole_mass_loop_order));
+   eft.set_ewsb_loop_order(settings.get(Spectrum_generator_settings::ewsb_loop_order));
+   eft.set_loop_corrections(settings.get_loop_corrections());
+   eft.set_threshold_corrections(settings.get_threshold_corrections());
 }
 
 /**
@@ -116,7 +121,7 @@ void SingletDMZ3_spectrum_generator_interface<T>::run(
       this->translate_exception_to_problem(model);
    }
 
-   problems.set_model_problems({ model.get_problems() });
+   problems.set_model_problems({ model.get_problems(), eft.get_problems() });
 }
 
 /**
@@ -179,18 +184,24 @@ void SingletDMZ3_spectrum_generator_interface<T>::translate_exception_to_problem
       problems.flag_no_convergence();
    } catch (const NonPerturbativeRunningError& error) {
       model.get_problems().flag_no_perturbative();
+      eft.get_problems().flag_no_perturbative();
       model.get_problems().flag_non_perturbative_parameter(
          error.get_parameter_index(), error.get_parameter_value(),
          error.get_scale());
    } catch (const NonPerturbativeRunningQedQcdError& error) {
       model.get_problems().flag_no_perturbative();
       model.get_problems().flag_thrown(error.what());
+      eft.get_problems().flag_no_perturbative();
+      eft.get_problems().flag_thrown(error.what());
    } catch (const NoSinThetaWConvergenceError&) {
       model.get_problems().flag_no_sinThetaW_convergence();
+      eft.get_problems().flag_no_sinThetaW_convergence();
    } catch (const Error& error) {
       model.get_problems().flag_thrown(error.what());
+      eft.get_problems().flag_thrown(error.what());
    } catch (const std::exception& error) {
       model.get_problems().flag_thrown(error.what());
+      eft.get_problems().flag_thrown(error.what());
    }
 }
 

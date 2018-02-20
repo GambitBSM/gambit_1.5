@@ -19,7 +19,7 @@
 SingletDMZ3_INCLUDE_MK += $(DIR)/FlexibleEFTHiggs.mk
 
 LIBSingletDMZ3_SRC += \
-
+		models/SingletDMZ3/SingletDMZ3_standard_model_matching.cpp
 
 LIBSingletDMZ3_HDR += \
-
+		models/SingletDMZ3/SingletDMZ3_standard_model_matching.hpp

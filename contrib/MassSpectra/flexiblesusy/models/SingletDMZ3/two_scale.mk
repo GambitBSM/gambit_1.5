@@ -38,7 +38,7 @@ LIBSingletDMZ3_HDR += \
 		$(DIR)/SingletDMZ3_two_scale_susy_scale_constraint.hpp
 
 LIBSingletDMZ3_SRC += \
-
+		models/SingletDMZ3/SingletDMZ3_standard_model_two_scale_matching.cpp
 
 LIBSingletDMZ3_HDR += \
-
+		models/SingletDMZ3/SingletDMZ3_standard_model_two_scale_matching.hpp
