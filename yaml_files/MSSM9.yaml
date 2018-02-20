@@ -29,17 +29,18 @@ Parameters:
       fixed_value: -0.085
 
   # SUSY parameters.
-  MSSM9atQ:
+  MSSM9batQ_mA:
     Qin:
-      fixed_value: 1000.0
-    SignMu:
-      fixed_value: 1
-    Ad_3:
+      fixed_value: 10000.0
+    TanBeta:
+      range: [3.0, 70.0]
+      prior_type: flat
+    mA:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1e2, 1e2, 1e4]
-    Au_3:
+      ranges: [-1e4, -2e1, 2e1, 1e4]
+    mu:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -1e2, 1e2, 1e4]
+      ranges: [-1e4, -2e1, 2e1, 1e4]
     M1:
       prior_type: double_log_flat_join
       ranges: [-1e4, -1e2, 1e2, 1e4]
@@ -49,26 +50,25 @@ Parameters:
     M3:
       prior_type: double_log_flat_join
       ranges: [-1e4, -1e2, 1e2, 1e4]
-    TanBeta:
-      range: [3.0, 70.0]
-      prior_type: flat
-    mHd2:
-      prior_type: double_log_flat_join
-      ranges: [-1e8, -1e4, 1e4, 1e8]
-    mHu2:
-      prior_type: double_log_flat_join
-      ranges: [-1e8, -1e4, 1e4, 1e8]
-    mf2:
+    mq2_3:
       prior_type: double_log_flat_join
       ranges: [0, 0, 1e4, 1e8]
-
+    msf2:
+      prior_type: double_log_flat_join
+      ranges: [0, 0, 1e4, 1e8]
+    Au_3:
+      prior_type: double_log_flat_join
+      ranges: [-1e4, -1e2, 1e2, 1e4]
   # Dark matter halo parameters.
   Halo_gNFW_rho0:
     rho0:
       range: [.2, .8]
-    v0: 235.0
-    vesc: 550.0
-    vrot: 235.0
+    v0: 240.0
+    vesc: 533.0
+    vrot:
+      same_as: Halo_gNFW_rho0::v0
+      scale: 1.0
+      shift: 0.0
     rs: 20.0
     r_sun: 8.5
     alpha: 1
@@ -325,8 +325,16 @@ Rules:
   - capability: RD_oh2
     function: RD_oh2_MicrOmegas
     options:
-      fast: 1
+      fast: 0
       Beps: 1e-5
+
+  # Choose whether MicrOmegas calculates decays widths for the MSSM internally using CalcHEP (internal_decays=true) or uses
+  # values from the GAMBIT decay table (internal_decays=false).
+  - function: MicrOmegas_MSSM_3_6_9_2_init
+    options:
+       internal_decays: true
+       VZdecay: 2 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations
+       VWdecay: 2 # 0 - no 3 body final states, 1 - virtual W in annihilations, 2 - virtual W in coannihilations
 
   # Choose to use detailed Fermi Pass 8 dwarf likelihoood from gamlike
   - capability: lnL_FermiLATdwarfs
@@ -352,7 +360,7 @@ Rules:
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
   # Options set to match benchmark point specified in SpecBit/MSSM_benchmark_points/LesHouches.in.MSSM_1
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatQ_spectrum_FS
+    function: get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs
     options:
       precision_goal:        1.0e-4
       max_iterations:        0
@@ -366,8 +374,8 @@ Rules:
       use_higgs_2loop_at_at: true
       use_higgs_2loop_atau_atau: true
       invalid_point_fatal: false
-      # Only consider neutralino masses > 2.7 GeV, as anything less will be invalidated by the gamma-ray routines anyway.
-      mass_cut: [ ["|~chi0_1|", 2.7, 1e6] ]
+      # # Only consider neutralino masses > 2.7 GeV, as anything less will be invalidated by the gamma-ray routines anyway.
+      # mass_cut: [ ["|~chi0_1|", 2.7, 1e6] ]
 
   # Choose where to get the precision spectrum from
   - capability: MSSM_spectrum
@@ -446,7 +454,7 @@ Rules:
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
-      analyses: [ ["CMS_13TeV_0LEP_36invfb",
+      analyses: [ ["CMS_13TeV_0LEP_36invfb",      # TODO: Need to decide on covariance vs single-SR!
                    "CMS_13TeV_1LEPbb_36invfb",
                    "CMS_13TeV_2OSLEP_36invfb",
                    "CMS_13TeV_2LEPsoft_36invfb",
@@ -495,7 +503,7 @@ Rules:
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
     options:
-      covariance_samples: 100000
+      covariance_samples: 100000   # TODO: Need decision from ColliderBit people!
 
 
 Logger:
