@@ -451,7 +451,7 @@ Rules:
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
-      analyses: [ ["CMS_13TeV_0LEP_36invfb",      # TODO: Need to decide on covariance vs single-SR!
+      analyses: [ ["CMS_13TeV_0LEP_36invfb",
                    "CMS_13TeV_1LEPbb_36invfb",
                    "CMS_13TeV_2OSLEP_36invfb",
                    "CMS_13TeV_2LEPsoft_36invfb",
@@ -500,7 +500,7 @@ Rules:
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
     options:
-      covariance_samples: 100000   # TODO: Need decision from ColliderBit people!
+      covariance_samples: 100000
 
 
 Logger:
