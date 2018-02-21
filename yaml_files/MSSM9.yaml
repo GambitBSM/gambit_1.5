@@ -37,10 +37,10 @@ Parameters:
       prior_type: flat
     mA:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -2e1, 2e1, 1e4]
+      ranges: [-1e4, -1e2, 1e2, 1e4]
     mu:
       prior_type: double_log_flat_join
-      ranges: [-1e4, -2e1, 2e1, 1e4]
+      ranges: [-1e4, -1e2, 1e2, 1e4]
     M1:
       prior_type: double_log_flat_join
       ranges: [-1e4, -1e2, 1e2, 1e4]
