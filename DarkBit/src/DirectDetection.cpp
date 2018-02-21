@@ -263,6 +263,7 @@ namespace Gambit {
     void CAT_3(EXPERIMENT,_GetBin,NAME)(std::vector<double> &result)               \
     {                                                                              \
       using namespace Pipes::CAT_3(EXPERIMENT,_GetBin,NAME);                       \
+      result.clear();                                                              \
       int nbins;                                                                   \
       nbins = BEreq::DD_Bins(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));         \
       for (int ibin=1;ibin<=nbins;ibin++) {                                        \

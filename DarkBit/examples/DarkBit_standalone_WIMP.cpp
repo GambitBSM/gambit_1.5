@@ -481,10 +481,10 @@ int main(int argc, char* argv[])
     PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
 
     // Provide bin number in LZ
-    LZ_GetBinBackground.resolveDependency(&LZ_Calc);
-    LZ_GetBinBackground.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    LZ_GetBinBackground.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
-    LZ_GetBinBackground.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_BinBackground);
+    LZ_GetBinSignal.resolveDependency(&LZ_Calc);
+    LZ_GetBinSignal.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+    LZ_GetBinSignal.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Bins);
+    LZ_GetBinSignal.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_BinSignal);
 
     // Set generic WIMP mass object
     mwimp_generic.resolveDependency(&TH_ProcessCatalog_WIMP);
@@ -678,19 +678,6 @@ int main(int argc, char* argv[])
       // Calculate array of sigma_SI and lnL values for LZ, PandaX, XENON1T and PICO-60
       // assuming gps=gns
 
-      DDCalc_2_0_0_init.reset_and_calculate();
-      LZ_Calc.reset_and_calculate();
-      std::vector<double> events;
-      LZ_GetBinBackground.reset_and_calculate();
-      events = LZ_GetBinBackground(0);
-      nbins = events.size();
-      std::cout << "Number of LZ bins: " << nbins << std::endl;
-      std::cout << "Expected backgrounds: ";
-      for (int ibin=0;ibin<=nbins-1;ibin++) {
-        std::cout << events[ibin] << " ";
-      }
-      std::cout << std::endl;
-
       std::cout << "Calculating tables of SI likelihoods." << std::endl;
       for (size_t i = 0; i < m_list.size(); i++)
       {
@@ -746,6 +733,19 @@ int main(int argc, char* argv[])
           //std::cout << "PandaX_2017 SI lnL = " << lnL2 << std::endl;
           //std::cout << "XENON1T_2017 SI lnL = " << lnL3 << std::endl;
           //std::cout << "PICO_60_2017 SI lnL = " << lnL4 << std::endl;
+
+          DDCalc_2_0_0_init.reset_and_calculate();
+          LZ_Calc.reset_and_calculate();
+          std::vector<double> events;
+          LZ_GetBinSignal.reset_and_calculate();
+          events = LZ_GetBinSignal(0);
+          nbins = events.size();
+          std::cout << "Number of LZ bins: " << nbins << std::endl;
+          std::cout << "Predicted signal: ";
+          for (int ibin=0;ibin<=nbins-1;ibin++) {
+            std::cout << events[ibin] << " ";
+          }
+          std::cout << std::endl;
 
           lnL_array1[i][j] = lnL1;
           lnL_array2[i][j] = lnL2;
