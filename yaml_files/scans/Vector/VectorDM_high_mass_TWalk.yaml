@@ -36,7 +36,8 @@ Parameters:
       range: [216, 264]
     vesc:
       range: [437, 629]
-    vrot: 235.0
+    vrot: 
+      same_as: Halo_gNFW_rho0::v0
     rs: 20.0
     r_sun: 8.5
     alpha: 1
@@ -195,7 +196,7 @@ Printer:
 
   options:
     output_file: "VDM_test_diver.hdf5"
-    delete_file_on_restart: true
+    delete_file_on_restart: false
     group: "/VDM"    
 
 ##############################################################################################
@@ -214,14 +215,14 @@ Scanner:
     diver:
       plugin: diver
       like: LogLike
-      NP: 50000
+      NP: 20000
       verbosity: 1
       convthresh: 0.0001
 
     tw:
       plugin: twalk
-      sqrtR: 1.001
-      chain_number: 512
+      sqrtR: 1.005
+      chain_number: 256
 
 ##############################################################################################
 Logger:

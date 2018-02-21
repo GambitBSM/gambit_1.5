@@ -21,7 +21,7 @@ Parameters:
       prior_type: log
     cosXI:
       range: [-1., 1]
-      prior_type: cos
+      prior_type: arccos
 
   nuclear_params_sigmas_sigmal:
     sigmas:
@@ -39,7 +39,8 @@ Parameters:
       range: [216, 264]
     vesc:
       range: [437, 629]
-    vrot: 235.0
+    vrot: 
+      same_as: Halo_gNFW_rho0::v0
     rs: 20.0
     r_sun: 8.5
     alpha: 1
@@ -196,7 +197,7 @@ Printer:
 
   options:
     output_file: "DDM_test.hdf5"
-    delete_file_on_restart: true
+    delete_file_on_restart: false
     group: "/DDM"    
 
 ##############################################################################################
