@@ -3298,7 +3298,7 @@ theta13_lnL: |
 theta23: |
   Active neutrino mixing angle theta23
 
-sin2theta23_lnL: |
+theta23_lnL: |
   Log-likelihood of the sin of the active neutrino mixing angle theta23 with respect to NuFit data
 
 Unitarity: |
