@@ -412,7 +412,7 @@ namespace Gambit
       std::vector<double> M_temp, U_temp;
 
       std::vector<std::pair<double,double> > array;
-      std::ifstream f(file);
+      std::ifstream f(GAMBIT_DIR "/"+file);
       while(f.good())
       {
         std::string line;

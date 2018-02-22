@@ -36,22 +36,22 @@
 #define MODULE NeutrinoBit
 START_MODULE
 
+  #define CAPABILITY ordering
+  START_CAPABILITY
+    #define FUNCTION ordering
+    START_FUNCTION(bool)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   // Neutrino mass matrix
   #define CAPABILITY m_nu
   START_CAPABILITY
     // Neutrino masss matrix
     #define FUNCTION M_nu
     START_FUNCTION(Eigen::Matrix3cd)
+    DEPENDENCY(ordering, bool)
     ALLOW_MODELS(StandardModel_SLHA2)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY ordering
-  START_CAPABILITY
-    #define FUNCTION ordering
-    START_FUNCTION(bool)
-    DEPENDENCY(m_nu, Eigen::Matrix3cd)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -60,7 +60,6 @@ START_MODULE
     #define FUNCTION md21
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(ordering, bool)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -69,7 +68,6 @@ START_MODULE
     #define FUNCTION md31
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(ordering, bool)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -78,7 +76,6 @@ START_MODULE
     #define FUNCTION md32
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(ordering, bool)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -522,6 +519,93 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
+  // Active neutrino likelihoods
+  #define CAPABILITY theta12
+  START_CAPABILITY
+    #define FUNCTION theta12
+    START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY theta12_lnL
+  START_CAPABILITY
+    #define FUNCTION theta12_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(theta12, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY theta23
+  START_CAPABILITY
+    #define FUNCTION theta23
+    START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY theta23_lnL
+  START_CAPABILITY
+    #define FUNCTION theta23_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
+    DEPENDENCY(theta23, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY theta13
+  START_CAPABILITY
+    #define FUNCTION theta13
+    START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY theta13_lnL
+  START_CAPABILITY
+    #define FUNCTION theta13_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
+    DEPENDENCY(theta13, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+ 
+  #define CAPABILITY deltaCP
+  START_CAPABILITY
+    #define FUNCTION deltaCP
+    START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY deltaCP_lnL
+  START_CAPABILITY
+    #define FUNCTION deltaCP_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
+    DEPENDENCY(deltaCP, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY md21_lnL
+  START_CAPABILITY
+    #define FUNCTION md21_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(md21, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY md3l_lnL
+  START_CAPABILITY
+    #define FUNCTION md3l_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
+    DEPENDENCY(md31, double)
+    DEPENDENCY(md32, double)
     #undef FUNCTION
   #undef CAPABILITY
 

@@ -31,24 +31,29 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu1:
-      fixed_value: 2.300E-10
+#      fixed_value: 2.300E-10
+      range: [0.0 ,2.3E-10]
     mNu2:
-      fixed_value: 2.30163E-10
+#      fixed_value: 2.30163E-10
+#      range: [8.56154E-12, 2.35326E-10]
+      range: [0.0, 2.3E-10]
     mNu3:
-      fixed_value: 2.35281E-10
+      range: [0.0, 2.3E-10]
+#      range: [4.98397E-11, 2.35506E-10]
+#      fixed_value: 2.35281E-10
 
     alpha1:
       range: [0, 6.283]
     alpha2:
       range: [0, 6.283]
     delta13:
-      range: [0, 6.283]
+      range: [3.52557, 5.44543]
     theta12:
-      fixed_value: 0.5843
+      range: [0.572643, 0.599172]
     theta23:
-     fixed_value: 0.7382
+      range: [0.705113, 0.752237]
     theta13:
-      fixed_value: 0.1483
+      range: [0.145037, 0.150273]
 
   # Higgs bosom parameters
   StandardModel_Higgs:
@@ -111,7 +116,9 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 100
+      NP: 6000
+      conthresh: 1e-2
+      lambdajDE: false
 
     multinest:
       plugin: multinest
@@ -128,8 +135,8 @@ ObsLikes:
   - capability: lnL_W_mass
     purpose: LogLike
 
-#  - capability: lnL_sinW2
-#    purpose: LogLike
+  - capability: lnL_sinW2
+    purpose: LogLike
 
   - capability: lnL_Z_inv_width
     purpose: LogLike
@@ -148,8 +155,8 @@ ObsLikes:
   - capability: LUV_LL
     purpose: LogLike
 
-  - capability: lnL_0nubb
-    purpose: LogLike
+#  - capability: lnL_0nubb
+#    purpose: LogLike
 
   - capability: lnLckm
     purpose: LogLike
@@ -203,6 +210,26 @@ ObsLikes:
   - capability: perturbativity_lnL
     purpose: LogLike
 
+  # NuFit likelihoods
+  
+  - capability: theta12_lnL
+    purpose: LogLike
+
+  - capability: theta23_lnL
+    purpose: LogLike
+
+  - capability: theta13_lnL
+    purpose: LogLike
+
+  - capability: deltaCP_lnL
+    purpose: LogLike
+
+  - capability: md21_lnL
+    purpose: LogLike
+
+  - capability: md3l_lnL
+    purpose: LogLike
+
   # Observables
 
   - capability: ordering
@@ -218,6 +245,18 @@ ObsLikes:
     purpose: Observable
 
   - capability: min_mass
+    purpose: Observable
+
+  - capability: theta12
+    purpose: Observable
+
+  - capability: theta23
+    purpose: Observable
+
+  - capability: theta13
+    purpose: Observable
+
+  - capability: deltaCP
     purpose: Observable
 
   - capability: Ue1
@@ -249,8 +288,19 @@ ObsLikes:
 
 Rules:
 
+  - capability: RKstar_0045_11
+    function: RHN_RKstar_0045_11
+
+  - capability: RKstar_11_60
+    function: RHN_RKstar_11_60
+  
+  - capability: RK
+    function: RHN_RK
 
 KeyValues:
+
+  dependency_resolution:
+    prefer_model_specific_functions: true
 
   likelihood:
     model_invalid_for_lnlike_below: -1e10
