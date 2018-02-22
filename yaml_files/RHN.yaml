@@ -129,81 +129,81 @@ ObsLikes:
 
   # EWPO constraints
 
-#  - capability: lnL_Gmu
-#    purpose: LogLike
+  - capability: lnL_Gmu
+    purpose: LogLike
 
-#  - capability: lnL_W_mass
-#    purpose: LogLike
+  - capability: lnL_W_mass
+    purpose: LogLike
 
-#  - capability: lnL_sinW2
-#    purpose: LogLike
+  - capability: lnL_sinW2
+    purpose: LogLike
 
-#  - capability: lnL_Z_inv_width
-#    purpose: LogLike
+  - capability: lnL_Z_inv_width
+    purpose: LogLike
 
-#  - capability: lnL_W_decays
-#    purpose: LogLike
+  - capability: lnL_W_decays
+    purpose: LogLike
 
   # Indirecte searches
 
-#  - capability: lnLbbn
-#    purpose: LogLike
+  - capability: lnLbbn
+    purpose: LogLike
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
+  - capability: lnLlepuniv
+    purpose: LogLike
 
-#  - capability: LUV_LL
-#    purpose: LogLike
+  - capability: LUV_LL
+    purpose: LogLike
 
-#  - capability: lnL_0nubb
-#    purpose: LogLike
+  - capability: lnL_0nubb
+    purpose: LogLike
 
-#  - capability: lnLckm
-#    purpose: LogLike
+  - capability: lnLckm
+    purpose: LogLike
 
-#  - capability: l2lgamma_lnL
-#    purpose: LogLike
+  - capability: l2lgamma_lnL
+    purpose: LogLike
 
-#  - capability: l2lll_lnL
-#    purpose: LogLike
+  - capability: l2lll_lnL
+    purpose: LogLike
 
-#  - capability: mu2e_lnL
-#    purpose: LogLike
+  - capability: mu2e_lnL
+    purpose: LogLike
 
   # Direct searches
 
-#  - capability: lnLpienu
-#    purpose: LogLike
+  - capability: lnLpienu
+    purpose: LogLike
 
-#  - capability: lnLps191e
-#    purpose: LogLike
+  - capability: lnLps191e
+    purpose: LogLike
 
-#  - capability: lnLps191mu
-#    purpose: LogLike
+  - capability: lnLps191mu
+    purpose: LogLike
 
-#  - capability: lnLcharme
-#    purpose: LogLike
+  - capability: lnLcharme
+    purpose: LogLike
 
-#  - capability: lnLcharmmu
-#    purpose: LogLike
+  - capability: lnLcharmmu
+    purpose: LogLike
 
-#  - capability: lnLdelphi
-#    purpose: LogLike
+  - capability: lnLdelphi
+    purpose: LogLike
 
-#  - capability: lnLatlase
-#    purpose: LogLike
+  - capability: lnLatlase
+    purpose: LogLike
 
-#  - capability: lnLatlasmu
-#    purpose: LogLike
+  - capability: lnLatlasmu
+    purpose: LogLike
 
-#  - capability: lnLe949
-#    purpose: LogLike
+  - capability: lnLe949
+    purpose: LogLike
 
-#  - capability: lnLnutev
-#    purpose: LogLike
+  - capability: lnLnutev
+    purpose: LogLike
 
-#  - capability: lnLcharmtau
-#    purpose: LogLike
+  - capability: lnLcharmtau
+    purpose: LogLike
 
   # Theoretical constraints
 
