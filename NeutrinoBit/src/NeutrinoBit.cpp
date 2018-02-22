@@ -17,6 +17,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
 #include <unsupported/Eigen/MatrixFunctions>
+#include "gambit/Utils/statistics.hpp"
 
 namespace Gambit
 {
@@ -27,6 +28,16 @@ namespace Gambit
     using namespace LogTags;
 
     // Module functions
+    void ordering(bool &ord)
+    {
+      using namespace Pipes::ordering;
+
+      if(*Param["mNu3"] < *Param["mNu1"])
+        ord = 0; // Inverted ordering
+      else
+        ord = 1; // Normal ordering
+    }
+
 
     // Neutrino mass matrix from true SM neutrino model
     void M_nu(Eigen::Matrix3cd& m_nu)
@@ -45,7 +56,7 @@ namespace Gambit
       m_nu(2,1) = 0.0;
 
  
-      if(mnu2 - mnu1 < mnu3 - mnu2)
+      if(*Dep::ordering == 1)
       {
         // Normal ordering
         m_nu(0,0) = mnu1;
@@ -67,10 +78,7 @@ namespace Gambit
       using namespace Pipes::md21;
       Eigen::Matrix3cd mnu = *Dep::m_nu;
 
-      if(*Dep::ordering == 1) // Normal ordering
-        m21 = pow(mnu(1,1) - mnu(0,0), 2).real();
-      else  // Inverted ordering
-        m21 = pow(mnu(0,0) - mnu(2,2), 2).real();
+      m21 = pow(mnu(1,1).real(),2) - pow(mnu(0,0).real(), 2);
     }
 
     void md31(double &m31)
@@ -78,10 +86,7 @@ namespace Gambit
       using namespace Pipes::md31;
       Eigen::Matrix3cd mnu = *Dep::m_nu;
 
-      if(*Dep::ordering == 1) // Normal ordering
-        m31 = pow(mnu(2,2) - mnu(0,0), 2).real();
-      else // Inverted ordering
-        m31 = pow(mnu(1,1) - mnu(2,2), 2).real();
+      m31 = pow(mnu(2,2).real(),2) - pow(mnu(0,0).real(), 2);
     }
 
     void md32(double &m32)
@@ -89,23 +94,9 @@ namespace Gambit
       using namespace Pipes::md32;
       Eigen::Matrix3cd mnu = *Dep::m_nu;
 
-      if(*Dep::ordering == 1) // Normal ordering
-        m32 = pow(mnu(2,2) - mnu(1,1), 2).real();
-      else // Inverted ordering
-        m32 = pow(mnu(1,1) - mnu(0,0), 2).real();
+      m32 = pow(mnu(2,2).real(),2) - pow(mnu(1,1).real(), 2);
     }
 
-
-    void ordering(bool &ord)
-    {
-      using namespace Pipes::ordering;
-      Eigen::Matrix3cd mnu = *Dep::m_nu;
-
-      if(mnu(2,2).real() < mnu(0,0).real())
-        ord = 0; // Inverted ordering
-      else
-        ord = 1; // Normal ordering
-    }
 
     void min_mass(double &minmass)
     {
@@ -332,6 +323,150 @@ namespace Gambit
           Unit(i,i) += m_nu(j,j)*pow(Vnu(i,j),2) + MN(j,j) * pow(Theta(i,j),2);
         if(std::real(Unit(i,i)) > Epsilon(i,i))
           unitarity = false;
+      }
+    }
+
+    // Active neutrino likelihoods
+    void sin2theta12(double &result)
+    {
+      using namespace Pipes::sin2theta12;
+      result = pow(sin(*Param["theta12"]),2);
+    }
+
+    void sin2theta12_lnL(double &result)
+    {
+      using namespace Pipes::sin2theta12_lnL;
+
+      // NuFit data (1611.01514)
+      triplet<double> sin2theta12_NuFit(0.306, 0.012, 0.012);
+
+      // TODO: Assume all gaussian for now, change later
+      // Take the maximum of upper/lower errors
+      result = Stats::gaussian_loglikelihood(*Dep::sin2theta12, sin2theta12_NuFit.central, 0.0, sin2theta12_NuFit.upper, false);
+    } 
+
+    void sin2theta23(double &result)
+    {
+      using namespace Pipes::sin2theta23;
+      result = pow(sin(*Param["theta23"]),2);
+    }
+
+    void sin2theta23_lnL(double &result)
+    {
+      using namespace Pipes::sin2theta23_lnL;
+
+      if(*Dep::ordering == 1) // Normal odering
+      {
+        // NuFit data (1611.01514)
+        triplet<double> sin2theta23_NuFit(0.441, 0.027, 0.021);
+
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::sin2theta23, sin2theta23_NuFit.central, 0.0, sin2theta23_NuFit.upper, false);
+      }
+      else // Inverted ordering
+      {
+        triplet<double> sin2theta23_NuFit(0.587, 0.020, 0.024);
+ 
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::sin2theta23, sin2theta23_NuFit.central, 0.0, sin2theta23_NuFit.lower, false);
+      }
+ 
+    }
+
+    void sin2theta13(double &result)
+    {
+      using namespace Pipes::sin2theta13;
+      result = pow(sin(*Param["theta13"]),2);
+    }
+
+    void sin2theta13_lnL(double &result)
+    {
+      using namespace Pipes::sin2theta13_lnL;
+
+      if(*Dep::ordering == 1) // Normal odering
+      {
+        // NuFit data (1611.01514)
+        triplet<double> sin2theta13_NuFit(0.02166, 0.00075, 0.00075);
+
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::sin2theta13, sin2theta13_NuFit.central, 0.0, sin2theta13_NuFit.upper, false);
+      }
+      else // Inverted ordering
+      {
+        triplet<double> sin2theta13_NuFit(0.02179, 0.00076, 0.00076);
+ 
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::sin2theta13, sin2theta13_NuFit.central, 0.0, sin2theta13_NuFit.upper, false);
+      }
+    }
+
+    void deltaCP(double &result)
+    {
+      using namespace Pipes::deltaCP;
+      result = *Param["delta13"];
+    }
+
+    void deltaCP_lnL(double &result)
+    {
+      using namespace Pipes::deltaCP_lnL;
+
+      if(*Dep::ordering == 1) // Normal odering
+      {
+        // NuFit data (1611.01514)
+        triplet<double> deltaCP_NuFit(261, 51, 59);
+
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+      }
+      else // Inverted ordering
+      {
+        triplet<double> deltaCP_NuFit(277, 40, 46);
+ 
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+      }
+    }
+
+    void md21_lnL(double &result)
+    {
+      using namespace Pipes::md21_lnL;
+
+      // NuFit data (1611.01514)
+      triplet<double> md21_NuFit(7.50e-23, 0.19e-23, 0.17e-23);
+
+      // TODO: Assume all gaussian for now, change later
+      // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::md21, md21_NuFit.central, 0.0, md21_NuFit.upper, false);
+    }
+ 
+    void md3l_lnL(double &result)
+    {
+      using namespace Pipes::md3l_lnL;
+
+      if(*Dep::ordering == 1) // Normal odering
+      {
+        // NuFit data (1611.01514)
+        triplet<double> md31_NuFit(2.524e-21, 0.039e-21, 0.040e-21);
+
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::md31, md31_NuFit.central, 0.0, md31_NuFit.lower, false);
+
+      }
+      else // Inverted ordering
+      {
+        triplet<double> md32_NuFit(-2.514e-21, 0.038e-21, 0.041e-21);
+ 
+        // TODO: Assume all gaussian for now, change later
+        // Take the maximum of upper/lower errors
+        result = Stats::gaussian_loglikelihood(*Dep::md32, md32_NuFit.central, 0.0, md32_NuFit.lower, false);
+
       }
     }
 

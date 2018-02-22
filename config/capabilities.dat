@@ -3271,6 +3271,36 @@ min_mass: |
 ordering: |
   Ordering of the neutrino mass eigenstates: 1 = normal, 0 = inverted
 
+deltaCP: |
+  CP violating phase of the UPMNS matrix
+
+deltaCP_lnL: |
+  Log-likelihood of the CP violating phase with respect to NuFit data
+
+md21_lnL: |
+  Log-likelihood of the 1-2 mass splitting with respect to NuFit data
+
+md3l_lnL: |
+  Log-likelihood of the 3-l (l= 1 for NO, 2 for IO) mass splitting with respect to NuFit data
+
+sin2theta12: |
+  Sin of the active neutrino mixing angle theta12
+
+sin2theta12_lnL: |
+  Log-likelihood of the sin of the active neutrino mixing angle theta12 with respect to NuFit data
+
+sin2theta13: |
+  Sin of the active neutrino mixing angle theta13
+
+sin2theta13_lnL: |
+  Log-likelihood of the sin of the active neutrino mixing angle theta13 with respect to NuFit data
+
+sin2theta23: |
+  Sin of the active neutrino mixing angle theta23
+
+sin2theta23_lnL: |
+  Log-likelihood of the sin of the active neutrino mixing angle theta23 with respect to NuFit data
+
 Unitarity: |
   Test for unitarity of the full mixing matrix
 
