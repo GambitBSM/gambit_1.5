@@ -155,8 +155,8 @@ ObsLikes:
   - capability: LUV_LL
     purpose: LogLike
 
-  - capability: lnL_0nubb
-    purpose: LogLike
+#  - capability: lnL_0nubb
+#    purpose: LogLike
 
   - capability: lnLckm
     purpose: LogLike
@@ -245,6 +245,18 @@ ObsLikes:
     purpose: Observable
 
   - capability: min_mass
+    purpose: Observable
+
+  - capability: sin2theta12
+    purpose: Observable
+
+  - capability: sin2theta23
+    purpose: Observable
+
+  - capability: sin2theta13
+    purpose: Observable
+
+  - capability: deltaCP
     purpose: Observable
 
   - capability: Ue1
