@@ -524,53 +524,53 @@ START_MODULE
 
 
   // Active neutrino likelihoods
-  #define CAPABILITY sin2theta12
+  #define CAPABILITY theta12
   START_CAPABILITY
-    #define FUNCTION sin2theta12
+    #define FUNCTION theta12
     START_FUNCTION(double)
     ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY sin2theta12_lnL
+  #define CAPABILITY theta12_lnL
   START_CAPABILITY
-    #define FUNCTION sin2theta12_lnL
+    #define FUNCTION theta12_lnL
     START_FUNCTION(double)
-    DEPENDENCY(sin2theta12, double)
+    DEPENDENCY(theta12, double)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY sin2theta23
+  #define CAPABILITY theta23
   START_CAPABILITY
-    #define FUNCTION sin2theta23
+    #define FUNCTION theta23
     START_FUNCTION(double)
     ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY sin2theta23_lnL
+  #define CAPABILITY theta23_lnL
   START_CAPABILITY
-    #define FUNCTION sin2theta23_lnL
+    #define FUNCTION theta23_lnL
     START_FUNCTION(double)
     DEPENDENCY(ordering, bool)
-    DEPENDENCY(sin2theta23, double)
+    DEPENDENCY(theta23, double)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY sin2theta13
+  #define CAPABILITY theta13
   START_CAPABILITY
-    #define FUNCTION sin2theta13
+    #define FUNCTION theta13
     START_FUNCTION(double)
     ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY sin2theta13_lnL
+  #define CAPABILITY theta13_lnL
   START_CAPABILITY
-    #define FUNCTION sin2theta13_lnL
+    #define FUNCTION theta13_lnL
     START_FUNCTION(double)
     DEPENDENCY(ordering, bool)
-    DEPENDENCY(sin2theta13, double)
+    DEPENDENCY(theta13, double)
     #undef FUNCTION
   #undef CAPABILITY
  

@@ -116,7 +116,7 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 1000
+      NP: 6000
       conthresh: 1e-2
       lambdajDE: false
 
@@ -212,13 +212,13 @@ ObsLikes:
 
   # NuFit likelihoods
   
-  - capability: sin2theta12_lnL
+  - capability: theta12_lnL
     purpose: LogLike
 
-  - capability: sin2theta23_lnL
+  - capability: theta23_lnL
     purpose: LogLike
 
-  - capability: sin2theta13_lnL
+  - capability: theta13_lnL
     purpose: LogLike
 
   - capability: deltaCP_lnL
@@ -247,13 +247,13 @@ ObsLikes:
   - capability: min_mass
     purpose: Observable
 
-  - capability: sin2theta12
+  - capability: theta12
     purpose: Observable
 
-  - capability: sin2theta23
+  - capability: theta23
     purpose: Observable
 
-  - capability: sin2theta13
+  - capability: theta13
     purpose: Observable
 
   - capability: deltaCP
@@ -288,8 +288,19 @@ ObsLikes:
 
 Rules:
 
+  - capability: RKstar_0045_11
+    function: RHN_RKstar_0045_11
+
+  - capability: RKstar_11_60
+    function: RHN_RKstar_11_60
+  
+  - capability: RK
+    function: RHN_RK
 
 KeyValues:
+
+  dependency_resolution:
+    prefer_model_specific_functions: true
 
   likelihood:
     model_invalid_for_lnlike_below: -1e10
