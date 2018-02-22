@@ -238,6 +238,13 @@ namespace Gambit
             logger() << msg.str() << EOM;
             invalid_point().raise(msg.str());
           }
+          if(ThetaNorm(0,0) + ThetaNorm(1,1) > 1 or ThetaNorm(0,0) + ThetaNorm(2,2) > 1 or ThetaNorm(1,1) + ThetaNorm(2,2) > 1)
+          {
+            std::ostringstream msg;
+            msg << "Casas-Ibarra parametrization breaks down for parameter point";
+            logger() << msg.str() << EOM;
+            invalid_point().raise(msg.str());
+          }
         }
     }
 
