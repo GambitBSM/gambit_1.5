@@ -268,6 +268,7 @@ namespace Gambit
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
+      A_0nubb_Xe *= 1e-10;  // [1/yr]
       p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2.0);
       p2_0nubb_Xe *= 1e-3;  // MeV --> GeV
       mp = 0.938;  // [GeV] (PDG 2014)
@@ -276,7 +277,9 @@ namespace Gambit
       prefactor = A_0nubb_Xe*mp*mp/p2_0nubb_Xe/p2_0nubb_Xe;
         for (int i=0; i<3; i++)
         {
-          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
+//          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
+//          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Xe/(p2_0nubb_Xe+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i],2.0)));
+          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
         }
       result = prefactor * abs(sum) * abs(sum);
     }
@@ -304,6 +307,7 @@ namespace Gambit
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       A_0nubb_Ge = runOptions->getValueOrDef<double>(5.05, "A");
+      A_0nubb_Ge *= 1e-10;  // [1/yr]
       p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(163.0, "p"), 2.0);
       p2_0nubb_Ge *= 1e-3;  // MeV --> GeV
       mp = 0.938;  // [GeV] (PDG 2014)
@@ -312,7 +316,9 @@ namespace Gambit
       prefactor = A_0nubb_Ge*mp*mp/p2_0nubb_Ge/p2_0nubb_Ge;
         for (int i=0; i<3; i++)
         {
-          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
+//          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
+//          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Ge/(p2_0nubb_Ge+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i],2.0)));
+          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
         }
       result = prefactor * abs(sum) * abs(sum);
     }
@@ -321,7 +327,8 @@ namespace Gambit
     void lnL_0nubb_KamLAND_Zen(double& result)
     {
       using namespace Pipes::lnL_0nubb_KamLAND_Zen;
-      double tau_limit = 1.07e26*3.156e7;  // [s] 90% CL
+//      double tau_limit = 1.07e26*3.156e7;  // [s] 90% CL
+      double tau_limit = 1.07e26;  // [yr] 90% CL
 
       double Gamma = *Dep::Gamma_0nubb_Xe;
 
@@ -333,7 +340,8 @@ namespace Gambit
     void lnL_0nubb_GERDA(double& result)
     {
       using namespace Pipes::lnL_0nubb_GERDA;
-      double tau_limit = 2.1e25*3.156e7;  // [s] 90% CL
+//      double tau_limit = 2.1e25*3.156e7;  // [s] 90% CL
+      double tau_limit = 2.1e25;  // [yr] 90% CL
 
       double Gamma = *Dep::Gamma_0nubb_Ge;
 
