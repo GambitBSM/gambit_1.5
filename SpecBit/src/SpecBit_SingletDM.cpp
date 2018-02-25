@@ -527,19 +527,33 @@ namespace Gambit
       namespace myPipe = Pipes::find_non_perturb_scale_SingletDMZ3;
       using namespace Gambit;
       using namespace SpecBit;
+      
       const Spectrum& fullspectrum = *myPipe::Dep::SingletDMZ3_spectrum;
 			
 		  // bound x by (a,b)
 		  // do all this is log space please
-		  double a=2.0;
-		  double b=20.0;
-		  double x=10.0;
+		  
+		  double ms = *myPipe::Param.at("mS");
+		  
+		  double a = log10(ms);
+		  
+		  if (a > 20.0)
+		  {
+			  std::ostringstream msg;
+        msg << "Scalar mass larger than 10^20 GeV " << std::endl;
+        invalid_point().raise(msg.str());
+      }
+		  
+		  double b = 20.0;
+		  double x = 0.5 * ( b + ms );
+		  
 		  while (abs(a-b)>1e-10)
 		  {
 		    //cout<< "\r" << "(a,b) = " << a << "  " << b << endl;
 		    //std::cout << std::flush;
 		    
 		    x=0.5*(b-a)+a;
+		    
 		    
 		    if (!check_perturb(fullspectrum,pow(10,x),3))
 		    {
