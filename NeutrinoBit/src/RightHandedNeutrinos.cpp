@@ -40,18 +40,57 @@ namespace Gambit
   {
 
     // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
-    void RHN_bbn_lifetime(std::vector<double>& result_lifetime)
-    {
-      using namespace Pipes::RHN_bbn_lifetime;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
-      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
+//    void RHN_bbn_lifetime(std::vector<double>& result_lifetime)
+//    {
+//      using namespace Pipes::RHN_bbn_lifetime;
+//      SMInputs sminputs = *Dep::SMINPUTS;
+//      static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
+//      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
       // TODO (CW): Should come from SM input file
-      static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W_sq
-      static double g_R_sq = 0.0494;  // g_R = s_W^2
-      static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
+//      static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W^2
+//      static double g_R_sq = 0.0494;  // g_R = s_W^2
+//      static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
       //double temp_bbn;
-      std::vector<double> lifetime(3), M(3);
+//      std::vector<double> lifetime(3), M(3);
+//      M[0] = *Param["M_1"];
+//      M[1] = *Param["M_2"];
+//      M[2] = *Param["M_3"];
+//      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+//      for (int i=0; i<3; i++)
+//      {
+//        lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(Usq(1,i) + Usq(2,i))) + ((1 + g_L_sq + g_R_sq)*Usq(0,i)) );
+//      }
+//      result_lifetime = lifetime;
+//    }
+
+    // BBN constraint likelihood : lifetime must be less than 0.1s
+    // [arXiv:1202.2841] Since the limit is approximate, we simply implement it
+    // as a hard ~5 sigma cut.
+//    void lnL_bbn(double& result_bbn)
+//    {
+//      using namespace Pipes::lnL_bbn;
+//      std::vector<double> lifetime = *Dep::bbn_lifetime;
+//      result_bbn = 0.0;
+//      for(int i=0; i<3; i++)
+//      {
+//        if(lifetime[i]>0.1)
+//        {
+//          result_bbn = -12.5;
+//          break;
+//        }
+//      }
+//    }
+
+    // All formulae for Gamma come from [arXiv:0705:1729]
+    void Gamma_RHN2pi0nu(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2pi0nu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_pi_0 = meson_masses.pi0;
+      static double f_pi_sq = 0.0169;  // GeV^2
+      std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -59,9 +98,477 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(Usq(1,i) + Usq(2,i))) + ((1 + g_L_sq + g_R_sq)*Usq(0,i)) );
+        if (M[i]<m_pi_0)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*f_pi_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_pi_0,2.0)/pow(M[i],2.0)),2.0);
+          }
       }
-      result_lifetime = lifetime;
+      result = gamma;
+    }
+
+    void Gamma_RHN2piplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2piplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_pi_plus = meson_masses.pi_plus;
+      static double f_pi_sq = 0.0169;  // GeV^2
+      static double Vud = 0.97434; // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_pi_plus)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vud,2.0)*f_pi_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_pi_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_pi_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_pi_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2Kplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Kplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_K_plus = meson_masses.kaon_plus;
+      static double f_K_sq = 0.02553604;  // GeV^2
+      static double Vus = 0.22506;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_K_plus)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2.0)*f_K_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_K_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_K_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_K_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2Dplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Dplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_D_plus = 1.86962;  // GeV (not included in numerical_constants.hpp yet)
+      static double f_D_sq = 0.04955076;  // GeV^2
+      static double Vcd = 0.22492;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_D_plus)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcd,2.0)*f_D_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_D_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_D_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_D_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2Dsl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Dsl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_D_s = 1.96847;  // GeV (not included in numerical_constants.hpp yet)
+      static double f_Ds_sq = 0.07845601;  // GeV^2
+      static double Vcs = 0.97351;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_D_s)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcs,2.0)*f_Ds_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_D_s,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_D_s-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_D_s+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2Bplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Bplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_B_plus = 5.27929;  // GeV (not included in numerical_constants.hpp yet)
+      static double f_B_sq = 0.0361;  // GeV^2
+      static double Vub = 0.00357;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_B_plus)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vub,2.0)*f_B_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2Bsl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Bsl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_B_s = 5.36679;  // GeV (not included in numerical_constants.hpp yet)
+      static double f_Bs_sq = 0.0529;  // GeV^2
+      static double Vus = 0.22506;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_B_s)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2.0)*f_Bs_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_s,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_s-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_s+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2Bcl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Bcl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_B_c = 6.2751;  // GeV (not included in numerical_constants.hpp yet)
+      static double f_Bc_sq = 0.2304;  // GeV^2
+      static double Vcb = 0.0411;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_B_c)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcb,2.0)*f_Bc_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_c,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_c-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_c+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2etanu(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2etanu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_eta = meson_masses.eta;
+      static double f_eta_sq = 0.024336;  // GeV^2
+      std::vector<double> gamma(3), M(3);
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_eta)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*f_eta_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_eta,2.0)/pow(M[i],2.0)),2.0);
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2etaprimenu(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2etaprimenu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_eta_prime = 0.95778;  // GeV (not included in numerical_constants.hpp yet)
+      static double f_etaprime_sq = 0.00342225;  // GeV^2
+      std::vector<double> gamma(3), M(3);
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_eta_prime)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*G_F_sq*f_etaprime_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_eta_prime,2.0)/pow(M[i],2.0)),2.0);
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2rhoplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2rhoplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double g_rho_sq = 0.010404;  // GeV^4
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_rho_plus = meson_masses.rho_plus;
+      static double Vud = 0.97434;  // PDG
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_rho_plus)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(Vud,2.0)*pow(M[i],3.0))/(8*pi*pow(m_rho_plus,2.0)) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) + ( (pow(m_rho_plus,2.0)/pow(M[i],2.0))*(1 + (pow(m_lep[j],2.0)-(2*pow(m_rho_plus,2.0)))/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_rho_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_rho_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2rho0nu(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2rho0nu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double g_rho_sq = 0.010404;  // GeV^4
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double m_rho_0 = meson_masses.rho0;
+      std::vector<double> gamma(3), M(3);
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<m_rho_0)
+          gamma[i] = 0.0;
+        else
+          for (int j=0; j<3; j++)
+          {
+            gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(M[i],3.0))/(16*pi*pow(m_rho_0,2.0)) ) * (1 + (2*pow(m_rho_0,2.0))/pow(M[i],2.0)) * pow((1 - pow(m_rho_0,2.0)/pow(M[i],2.0)),2.0);
+          }
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN23nu(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN23nu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      std::vector<double> gamma(3), M(3);
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        gamma[i] = ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * (Usq(0,i)+Usq(1,i)+Usq(2,i));
+      }
+      result = gamma;
+    }
+
+    void Gamma_RHN2llnu(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2llnu;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        for (int j=0; j<3; j++)
+        {
+          switch(j)
+          {
+            case 0: for (int k=1; k<3; k++)
+                    {
+                      if (M[i]<m_lep[k])
+                        gamma[i] = 0.0;
+                      else
+                        gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(0,i) * (1 - (8*pow(m_lep[k]/M[i],2.0)) + (8*pow(m_lep[k]/M[i],6.0)) - pow(m_lep[k]/M[i],8.0) - (12*pow(m_lep[k]/M[i],4.0)*log(pow(m_lep[k]/M[i],2.0))) );
+                    }
+            case 1: if (M[i]<m_lep[1])
+                      gamma[i] = 0.0;
+                    else
+                      for (int k=1; k<3; k++)
+                      {
+                        if (M[i]<m_lep[k])
+                          gamma[i] = 0.0;
+                        else
+                          gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(1,i) * (1 - (8*pow(m_lep[k]/M[i],2.0)) + (8*pow(m_lep[k]/M[i],6.0)) - pow(m_lep[k]/M[i],8.0) - (12*pow(m_lep[k]/M[i],4.0)*log(pow(m_lep[k]/M[i],2.0))) );
+                      }
+            case 2: if (M[i]<m_lep[2])
+                      gamma[i] = 0.0;
+                    else
+                      gamma[i] += 2*( ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(2,i) * (1 - (8*pow(m_lep[2]/M[i],2.0)) + (8*pow(m_lep[2]/M[i],6.0)) - pow(m_lep[2]/M[i],8.0) - (12*pow(m_lep[2]/M[i],4.0)*log(pow(m_lep[2]/M[i],2.0))) ) );
+          }
+        }
+      }
+      result = gamma;
+    }
+
+    // Helper function; formula is in [arXiv:0705.1729]
+    double L(double x)
+    {
+      return log( (1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
+    }
+
+    void Gamma_RHN2null(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2null;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double s_W_sq = 0.22336;  // get from within GAMBIT in future
+      static double C1 = 0.25*(1 - (4*s_W_sq) + (8*pow(s_W_sq,2.0)));
+      static double C2 = 0.5*s_W_sq*((2*s_W_sq) - 1);
+      static double C3 = 0.25*(1 + (4*s_W_sq) + (8*pow(s_W_sq,2.0)));
+      static double C4 = 0.5*s_W_sq*((2*s_W_sq) + 1);
+      std::vector<double> m_lep(3), gamma(3), M(3);
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        for (int j=0; j<3; j++)
+        {
+          for (int k=0; k<3; k++)
+          {
+            if (M[i]<m_lep[k])
+              gamma[i] = 0.0;
+            else
+            {
+              double x_l = m_lep[k]/M[i];
+              if (j == k)
+              {
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C3*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*pow(x_l,4.0)*(pow(x_l,4.0)-1)*L(x_l)))) + (4*C4*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (6*pow(x_l,4.0)*(1-(2*pow(x_l,2.0))+(2*pow(x_l,4.0))*L(x_l))))) );
+              }
+              else
+              {
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C1*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*pow(x_l,4.0)*(pow(x_l,4.0)-1)*L(x_l)))) + (4*C2*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (6*pow(x_l,4.0)*(1-(2*pow(x_l,2.0))+(2*pow(x_l,4.0))*L(x_l))))) );
+              }
+            }
+          }
+        }
+      }
+      result = gamma;
+    }
+
+    // Calculates total decay width for each RHN
+    void Gamma_BBN(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_BBN;
+      std::vector<double> RHN2pi0nu = *Dep::Gamma_RHN2pi0nu;
+      std::vector<double> RHN2piplusl = *Dep::Gamma_RHN2piplusl;
+      std::vector<double> RHN2Kplusl = *Dep::Gamma_RHN2Kplusl;
+      std::vector<double> RHN2Dplusl = *Dep::Gamma_RHN2Dplusl;
+      std::vector<double> RHN2Dsl = *Dep::Gamma_RHN2Dsl;
+      std::vector<double> RHN2Bplusl = *Dep::Gamma_RHN2Bplusl;
+      std::vector<double> RHN2Bsl = *Dep::Gamma_RHN2Bsl;
+      std::vector<double> RHN2Bcl = *Dep::Gamma_RHN2Bcl;
+      std::vector<double> RHN2etanu = *Dep::Gamma_RHN2etanu;
+      std::vector<double> RHN2etaprimenu = *Dep::Gamma_RHN2etaprimenu;
+      std::vector<double> RHN2rhoplusl = *Dep::Gamma_RHN2rhoplusl;
+      std::vector<double> RHN2rho0nu = *Dep::Gamma_RHN2rho0nu;
+      std::vector<double> RHN23nu = *Dep::Gamma_RHN23nu;
+      std::vector<double> RHN2llnu = *Dep::Gamma_RHN2llnu;
+      std::vector<double> RHN2null = *Dep::Gamma_RHN2null;
+      std::vector<double> gamma_total(3);
+      
+      for (int i=0; i<3; i++)
+      {
+        gamma_total[i] = RHN2pi0nu[i]+RHN2piplusl[i]+RHN2Kplusl[i]+RHN2Dplusl[i]+RHN2Dsl[i]+RHN2Bplusl[i]+RHN2Bsl[i]+RHN2Bcl[i]+RHN2etanu[i]+RHN2etaprimenu[i]+RHN2rhoplusl[i]+RHN2rho0nu[i]+RHN23nu[i]+RHN2llnu[i]+RHN2null[i];
+      }
+      result = gamma_total;
     }
 
     // BBN constraint likelihood : lifetime must be less than 0.1s
@@ -70,18 +577,18 @@ namespace Gambit
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
-      std::vector<double> lifetime = *Dep::bbn_lifetime;
+      std::vector<double> gamma = *Dep::Gamma_BBN;
       result_bbn = 0.0;
       for(int i=0; i<3; i++)
       {
-        if(lifetime[i]>0.1)
+        if((1/gamma[i])>0.1)
         {
           result_bbn = -12.5;
           break;
         }
       }
     }
-   
+
     // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; R_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
     void RHN_R_pi(double& R_pi)
     {
