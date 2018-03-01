@@ -791,6 +791,7 @@ set(ver "2.0")
 set(lib "libclik")
 set(dl "https://pla.esac.esa.int/pla-sl/data-action?COSMOLOGY.COSMOLOGY_OID=1904")
 set(md5 "1d732465a5cc8833cec72a414676c655")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CFITSIOPATH "${PROJECT_SOURCE_DIR}/Backends/installed/cfitsio/3.390")
 set(PLC_SO "so")
@@ -799,6 +800,7 @@ if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
+    #PATCH_COMMAND patch -p1 < ${patch}/plc_test.diff
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} CFITSIOPATH=${PROJECT_SOURCE_DIR}/Backends/installed/cfitsio/3.390 GFORTRANLIBPATH=/usr/local/Cellar/gcc49/4.9.3/lib/gcc/4.9/ LAPACKLIBPATH=${LAPACK_LIBRARIES} SO=${PLC_SO}
@@ -815,8 +817,9 @@ endif()
 set(name "class")
 set(ver "2.6.1")
 set(lib "libclass")
-set(dl "http://lesgourg.github.io/class_public/class_public-2.6.1.tar.gz")
-set(md5 "5e4afdd0569f25e26032377885ed267d")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "http://lesgourg.github.io/class_public/class_public-2.6.3.tar.gz")
+set(md5 "dfb8652cd5af14d61e677e0f8b96f62f")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CLASS_TOOLS "growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o")
 set(CLASS_SOURCE "input.o background.o thermodynamics.o perturbations.o primordial.o nonlinear.o transfer.o spectra.o lensing.o")
@@ -831,6 +834,9 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}/primordial_header.dif
+          COMMAND patch -p1 < ${patch}/primordial_source.dif
+          COMMAND patch -p1 < ${patch}/input_source.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
@@ -852,19 +858,19 @@ set(md5 "03f99f02c572ea34383a0888fb0658d6")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(driver "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0")
-
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch < ${patch}/modpk.dif
-          COMMAND patch < ${patch}/modpk_modules.dif
-          #COMMAND patch < ${patch}/modpk_backgrnd.dif
-          COMMAND patch < ${patch}/modpk_potential.dif
-          COMMAND patch < ${patch}/multimodecode_driver.dif
+    PATCH_COMMAND patch -p1 < ${patch}/modpk.dif
+          COMMAND patch -p1 < ${patch}/modpk_modules.dif
+          COMMAND patch -p1 < ${patch}/modpk_backgrnd_2.dif
+          COMMAND patch -p1 < ${patch}/modpk_potential.dif
+          COMMAND patch -p1 < ${patch}/modpk_utils.dif
+          COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=≈ FFLAG=${CMAKE_Fortran_FLAGS}
 	COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh

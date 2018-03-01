@@ -1,6 +1,6 @@
---- ../../../installed/MultiModeCode/2.0.0/modpk.f90	2015-04-20 16:36:02.000000000 +0100
-+++ ../../../include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk.f90	2017-08-28 20:33:35.000000000 +0100
-@@ -18,15 +18,103 @@ MODULE access_modpk
+--- /Users/selimhotinli/Dropbox/gambit/Backends/installed/MultiModeCode/2.0.0/modpk.f90	2015-04-20 16:36:02.000000000 +0100
++++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk.f90	2017-11-25 00:44:33.000000000 +0000
+@@ -18,15 +18,105 @@
  
  CONTAINS
  
@@ -30,6 +30,8 @@
 +      xi = 10**vparams(1,1)
 +      beta = 10**vparams(2,1)
 +      lambda = 10**vparams(3,1)
++
++      print*,"phi_init0 =",phi_init0
 +
 +      do ii=1,builtpot
 +        rhoHarray(ii) = 5e0_dp*phi_init0(1) - dble(ii)*(1e-3_dp)*phi_init0(1)
@@ -65,25 +67,25 @@
 +      ii = locate(chiHarray,phi_init0(1))
 +      call polint(chiHarray(ii:ii+4), rhoHarray(ii:ii+4), phi_init0(1), rho_init, derr)
 +
-+      slowroll_efolds = (0.06250000000000001*beta)/xi - &
-+                        (0.0625*Sqrt(beta**2 + &
-+                        32.*beta*xi + &
-+						192.*xi**2))/xi + &
-+                        0.125*beta*rho_init**2 + &
-+						0.75*xi*rho_init**2 + &
-+                        0.75*Log(1. + (0.5000000000000001* &
-+                        (-1.*beta + Sqrt(beta**2 + &
-+						32.*beta*xi + &
-+                        192.*xi**2)))/ &
-+                        (beta + 6.*xi)) - &
-+                        0.75*Log(1. + xi*rho_init**2)
-+      if (slowroll_efolds < 30. .or. slowroll_efolds > 120.) then
-+        observs%is_ic_ok = .false.
-+		print*, "SMASH: Initial conditions: SR efolds =", slowroll_efolds
-+        RETURN
-+      else
-+        observs%is_ic_ok = .true.
-+	  end if
++      !slowroll_efolds = (0.06250000000000001*beta)/xi - &
++      !                  (0.0625*Sqrt(beta**2 + &
++      !                  32.*beta*xi + &
++	  !					192.*xi**2))/xi + &
++      !                  0.125*beta*rho_init**2 + &
++	  !					0.75*xi*rho_init**2 + &
++      !                  0.75*Log(1. + (0.5000000000000001* &
++      !                  (-1.*beta + Sqrt(beta**2 + &
++	  !					32.*beta*xi + &
++      !                  192.*xi**2)))/ &
++      !                  (beta + 6.*xi)) - &
++      !                  0.75*Log(1. + xi*rho_init**2)
++      ! if (slowroll_efolds < 30. .or. slowroll_efolds > 120.) then
++	  !  observs%is_ic_ok = .false.
++	  !  print*, "SMASH: Initial conditions: SR efolds =", slowroll_efolds
++      !  RETURN
++      !else
++      observs%is_ic_ok = .true.
++	  !end if
 +
 +      print*, "we are still inside!"
 +

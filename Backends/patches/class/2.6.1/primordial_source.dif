@@ -1,0 +1,26 @@
+--- /Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/source/primordial.c	2017-10-24 14:42:41.000000000 +0100
++++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/primordial.c	2018-01-08 23:23:29.000000000 +0000
+@@ -393,7 +393,22 @@
+                       ppm->error_message,
+                       primordial_free(ppm));
+   }
+-
++  else if (ppm->primordial_spec_type == gambit_Pk) {
++	  
++    class_test(ppt->has_scalars == _FALSE_,
++				 ppm->error_message,
++				 "external Pk module cannot work if you do not ask for scalar modes");
++	  
++    class_test(ppt->has_vectors == _TRUE_,
++				 ppm->error_message,
++				 "external Pk module cannot work if you ask for vector modes");
++
++	//if (ppm->primordial_verbose > 0)
++    printf(" (Pk calculated by GAMBIT)\n");
++	  
++	  
++	  
++  }
+   else {
+ 
+     class_test(0==0,

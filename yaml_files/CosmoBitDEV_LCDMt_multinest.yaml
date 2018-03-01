@@ -13,72 +13,60 @@ Parameters:
 
     omega_b:
       prior_type: flat
-      range: [0.020,0.024]
+      range: [0.020,0.023]
     omega_cdm:
       prior_type: flat
-      range: [0.010,0.13]
+      range: [0.10,0.13]
     H0:
       prior_type: flat
-      range: [66,74]
+      range: [64.00,74.00]
     ln10A_s:
       prior_type: flat
-      range: [2.9,3.2]
+      range: [2.80,3.30]
     n_s:
       prior_type: flat
-      range: [0.9,1.10]
+      range: [0.90,1.10]
     tau_reio:
       prior_type: flat
-      range: [0.05,0.10]
+      range: [0.0,0.20]
     r_tensor:
       prior_type: flat
-      range: [0.00,1.00]
+      range: [0.00,1.0]
 
   plik_dx11dr2_HM_v18_TT:
 
     A_cib_217:
-      prior_type: flat
-      range: [45.0,75]
+      fixed_value: 62.8103
     cib_index:
       fixed_value: -1.3
     xi_sz_cib:
-      prior_type: flat
-      range: [0.0,1.0]
+      fixed_value: 0.453823
     A_sz:
-      prior_type: flat
-      range: [3.0,11.0]
+      fixed_value: 7.31122
     ps_A_100_100:
-      prior_type: flat
-      range: [170.0,270.0]
+      fixed_value: 236.648
     ps_A_143_143:
-      prior_type: flat
-      range: [25.0,50.0]
+      fixed_value: 36.2412
     ps_A_143_217:
-      prior_type: flat
-      range: [25.0,45.0]
+      fixed_value: 38.0731
     ps_A_217_217:
-      prior_type: flat
-      range: [80.0,120.0]
+      fixed_value: 96.3397
     ksz_norm:
-      prior_type: flat
-      range: [8.0,11.0]
+      fixed_value: 6.02093
     gal545_A_100:
-      prior_type: flat
-      range: [7.0,11.0]
+      fixed_value: 7.27083
     gal545_A_143:
-      prior_type: flat
-      range: [7.0,11.0]
+      fixed_value: 8.96639
     gal545_A_143_217:
-      prior_type: flat
-      range: [15.0,26.0]
+      fixed_value: 18.3074
     gal545_A_217:
-      prior_type: flat
-      range: [70.0,90.0]
+      fixed_value: 82.8654
     calib_100T:
-      fixed_value: 0.999
+      fixed_value: 0.998023
     calib_217T:
-      fixed_value: 0.995
+      fixed_value: 0.995716
     A_planck:
-      fixed_value: 1.0
+      fixed_value: 1
 
 #======== Prior setup ========
 Priors:

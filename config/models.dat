@@ -503,6 +503,28 @@ LCDMtensor: |
    tau_reio            - reionization optical depth
    r                   - ratio of tensor primordial power to curvature power
 
+inf_SR1quad_LCDMt: |
+   Simplest 7 parameter cosmology+inflation model: m^2 phi^2 --- quadratic inflation with slow-roll approximation. A_s, n_s and r are given by inflationary model parameters (under slow-roll approximation): N_piv, m^2.
+
+inf_1quarInf_LCDMt: |
+   6 parameter cosmology+inflation model: 0.25 lambda phi^4
+   quartic inflation A_s, n_s and r are given by inflationary
+   model parameters: N_piv, lambda.
+
+inf_1mono32Inf_LCDMt: |
+   6 parameter cosmology+inflation model: 2/3
+   lambda phi^2/3 --- inflation, A_s, n_s and r are
+   given by inflationary model parameters: N_piv, lambda.
+
+inf_1linearInf_LCDMt: |
+   6 parameter cosmology+inflation model: m phi
+   linear inflation, A_s, n_s and r are given by
+   inflationary model parameters: N_piv, m^2.
+
+inf_smashInf_LCDMt: |
+   8 parameter cosmology smash inflation model --- smash inflation
+   A_s, n_s and r are given by inflationary model parameters: xi, m^2.
+
 
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap: |
 
@@ -530,4 +552,3 @@ plik_dx11dr2_HM_v18_TT: |
    calib_100T          - the relative calibration between the 100 and 143 spectra
    calib_217T          - the relative calibration between the 217 and 143 spectra
    A_planck            - the Planck absolute calibration.
-

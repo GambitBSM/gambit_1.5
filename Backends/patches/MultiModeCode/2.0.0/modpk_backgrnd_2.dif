@@ -1,0 +1,19 @@
+--- /Users/selimhotinli/Dropbox/gambit/Backends/installed/MultiModeCode/2.0.0/modpk_backgrnd.f90	2017-11-18 18:54:26.000000000 +0000
++++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk_backgrnd.f90	2017-11-19 00:44:50.000000000 +0000
+@@ -244,11 +244,11 @@
+ 
+           end if
+ 
+-          IF (a_end .GT. a_end_inst) THEN
+-             PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
+-             pk_bad = run_outcome%bad_reheat
+-             RETURN
+-          ENDIF
++          ! IF (a_end .GT. a_end_inst) THEN
++          !    PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
++          !    pk_bad = run_outcome%bad_reheat
++          !    RETURN
++          ! ENDIF
+        END IF
+ 
+        a_pivot = EXP(alpha_pivot)*a_init

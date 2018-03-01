@@ -32,10 +32,10 @@ BE_FUNCTION(clik_get_extra_parameter_names, int ,(clik_object*,parname**,clik_er
 BE_FUNCTION(clik_get_lmax, void , (clik_object*,int,clik_error**), "clik_get_lmax", "clik_get_lmax")
 BE_FUNCTION(clik_cleanup, void , (clik_object**) , "clik_cleanup", "clik_cleanup")
 BE_FUNCTION(clik_get_version, char*, (clik_object*,clik_error**), "clik_get_version" , "clik_get_version")
-BE_CONV_FUNCTION(return_clikid_plik_dx11dr2_HM_v18_TT, clik_object*, (), "return_high_TT", (LCDM,LCDMtensor))
-BE_CONV_FUNCTION(return_clikid_lowl_SMW_70_dx11d_2014, clik_object*, (), "return_lowp_TT", (LCDM,LCDMtensor))
-BE_CONV_FUNCTION(data_initialize,void,(),"data_initialize",(LCDM,LCDMtensor))
-BE_CONV_FUNCTION(data_cleanup,void,(),"data_cleanup",(LCDM,LCDMtensor))
+BE_CONV_FUNCTION(return_clikid_plik_dx11dr2_HM_v18_TT, clik_object*, (), "return_high_TT", (LCDM,LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_smashInf_LCDMt))
+BE_CONV_FUNCTION(return_clikid_lowl_SMW_70_dx11d_2014, clik_object*, (), "return_lowp_TT", (LCDM,LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_smashInf_LCDMt))
+BE_CONV_FUNCTION(data_initialize,void,(),"data_initialize",(LCDM,LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_smashInf_LCDMt))
+BE_CONV_FUNCTION(data_cleanup,void,(),"data_cleanup",(LCDM,LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_smashInf_LCDMt))
 
 BE_INI_FUNCTION
 {
@@ -58,8 +58,8 @@ BE_NAMESPACE
 	
 	void  data_initialize()
 	{
- 	  char clik_hpath[] = "/path/to/plik_dx11dr2_HM_v18_TT.clik";
- 	  char clik_lpath[] = "/path/to/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
+ 	  char clik_hpath[] = "/Users/selimhotinli/Dropbox/plik_dx11dr2_HM_v18_TT.clik";
+ 	  char clik_lpath[] = "/Users/selimhotinli/Dropbox/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
  
 	  _err = initError();
 	  clikid_plik_dx11dr2_HM_v18_TT = clik_init(*&clik_hpath,&_err);
