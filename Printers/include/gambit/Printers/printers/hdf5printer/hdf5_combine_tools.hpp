@@ -374,16 +374,17 @@ namespace Gambit
                 unsigned long long size_tot_l;
                 std::string root_file_name;
                 unsigned long long pt_min;
-                
+                bool do_cleanup; // If true, delete old temporary files after successful combination
+
             public:
-                hdf5_stuff(const std::string &file_name, const std::string &group_name, int num);
+                hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup);
                 ~hdf5_stuff(); // close files on destruction                
                 void Enter_Aux_Paramters(const std::string &file, bool resume = false);
             };
 
-            inline void combine_hdf5_files(const std::string file_output, const std::string &file, const std::string &group, int num, bool resume)
+            inline void combine_hdf5_files(const std::string file_output, const std::string &file, const std::string &group, int num, bool resume, bool cleanup)
             {
-                hdf5_stuff stuff(file, group, num);
+                hdf5_stuff stuff(file, group, num, cleanup);
                 
                 stuff.Enter_Aux_Paramters(file_output, resume);
             }
@@ -391,6 +392,9 @@ namespace Gambit
             // Helper function to compute target point hash for RA combination
             std::unordered_map<PPIDpair, unsigned long long, PPIDHash, PPIDEqual> get_RA_write_hash(hid_t, std::unordered_set<PPIDpair,PPIDHash,PPIDEqual>&);
 
+            /// Search for temporary files to be combined
+            std::pair<std::vector<std::string>,std::vector<int>> find_temporary_files(const std::string& finalfile);
+ 
         }
     }
 }

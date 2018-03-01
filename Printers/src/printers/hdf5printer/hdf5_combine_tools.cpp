@@ -195,12 +195,13 @@ namespace Gambit
                 return ret;
             }
                 
-            hdf5_stuff::hdf5_stuff(const std::string &file_name, const std::string &group_name, int num) 
+            hdf5_stuff::hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup) 
               : group_name(group_name)
               , cum_sizes(num, 0)
               , sizes(num, 0)
               , size_tot(0)
               , root_file_name(file_name)
+              , do_cleanup(cleanup)
             {
                 //std::vector<bool> temp;
                 //herr_t status;
@@ -725,17 +726,20 @@ namespace Gambit
                 H5Fflush(new_file, H5F_SCOPE_GLOBAL);
                 HDF5::closeGroup(new_group);
                 HDF5::closeFile(new_file);
-                
-                if (resume)
-                {
-                    std::system(("rm -f " + file + ".temp.bak").c_str());
-                }
-                
-                for (int i = 0, end = files.size(); i < end; i++)
-                {
-                    std::stringstream ss;
-                    ss << i;
-                    std::system(("rm -f " + root_file_name + "_temp_" + ss.str()).c_str());
+               
+                if (do_cleanup) // during manual combination we may well not want to delete the temporary files!
+                { 
+                    if (resume)
+                    {
+                        std::system(("rm -f " + file + ".temp.bak").c_str());
+                    }
+                    
+                    for (int i = 0, end = files.size(); i < end; i++)
+                    {
+                        std::stringstream ss;
+                        ss << i;
+                        std::system(("rm -f " + root_file_name + "_temp_" + ss.str()).c_str());
+                    }
                 }
             }
 
@@ -858,6 +862,50 @@ namespace Gambit
                return output_hash;
             }
 
+            /// Search for temporary files to be combined
+            std::pair<std::vector<std::string>,std::vector<int>> find_temporary_files(const std::string& finalfile)
+            {    
+              // Autodetect temporary files from previous run.
+              std::string output_dir = Utils::dir_name(finalfile);
+              std::vector<std::string> files = Utils::ls_dir(output_dir);
+              std::string tmp_base(Utils::base_name(finalfile) + "_temp_");
+              std::vector<int> ranks;
+              std::vector<std::string> result;
+
+              //std::cout << "Matching against: " <<tmp_base<<std::endl;
+              for(auto it=files.begin(); it!=files.end(); ++it)
+              {
+                //std::cout << (*it) << std::endl;
+                //std::cout << it->substr(0,tmp_base.length()) << std::endl;
+                if (it->compare(0, tmp_base.length(), tmp_base) == 0)
+                {
+                  // Matches format of temporary file! Extract the rank that produced it
+                  std::stringstream ss;
+                  ss << it->substr(tmp_base.length());
+                  if(Utils::isInteger(ss.str())) // Only do this for files where the remainder of the string is just an integer (i.e. not the combined files etc.)
+                  {
+                    int rank;
+                    ss >> rank;
+                    //std::cout << "Match! "<< ss.str() << " : " << rank << std::endl;
+                    // TODO: check for failed read
+                    ranks.push_back(rank);
+                    result.push_back(output_dir+"/"+*it);
+                  }
+                }
+              }
+
+              // Check if all temporary files found (i.e. if output from some rank is missing)
+              std::vector<int> missing;
+              for(size_t i=0; i<ranks.size(); ++i)
+              {
+                if(std::find(ranks.begin(), ranks.end(), i) == ranks.end())
+                { missing.push_back(i); }
+              }
+
+              // Return the list of missing tmp files, the caller can decide to throw an error if they like
+              return std::make_pair(result,missing);
+            } 
+            
         }
     }
 }
