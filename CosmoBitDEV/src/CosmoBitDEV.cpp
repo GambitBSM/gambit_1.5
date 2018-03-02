@@ -740,6 +740,7 @@ namespace Gambit
 			return cl;
 		}
 
+ 	    /* ----------------   SH ---------------- */
 		// testing feeding CLASS the full power spectrum
 		double** return_LCDMtensor_1quadInf_cls_fullPk(double omega_b,double omega_cdm,double H0, double tau_reio, double k_array[], double pks_array[], double pkt_array[], int k_array_size)
 		{
@@ -831,6 +832,7 @@ namespace Gambit
 
 			BEreq::class_primordial_initialize(&pr,&pt,&pm);
 			// similar to the lines 3392-3412 in primordial.c CLASS
+			
 			/** - Make room */
 			realloc(pm.lnk,
 					k_array_size*sizeof(double));
@@ -870,8 +872,6 @@ namespace Gambit
 
 			BEreq::class_primordial_initialize(&pr,&pt,&pm);
 
-			//BEreq::class_primordial_initialize(&pr,&pt,&pm);
-			
 			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
 			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
 			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
