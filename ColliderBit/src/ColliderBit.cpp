@@ -264,9 +264,9 @@ namespace Gambit
         piped_warnings.check(ColliderBit_warning());
         piped_errors.check(ColliderBit_error());
 
-        // 
+        //
         // OMP parallelized loop begins here
-        // 
+        //
         int currentEvent = 0;
         #pragma omp parallel
         {
@@ -279,7 +279,7 @@ namespace Gambit
         // Main event loop
         #pragma omp parallel
         {
-          while(currentEvent<nEvents[indexPythiaNames] and not *Loop::done and not piped_errors.inquire()) 
+          while(currentEvent<nEvents[indexPythiaNames] and not *Loop::done and not piped_errors.inquire())
           {
             if (!eventsGenerated)
               eventsGenerated = true;
@@ -306,9 +306,9 @@ namespace Gambit
         piped_warnings.check(ColliderBit_warning());
         piped_errors.check(ColliderBit_error());
 
-        // 
+        //
         // OMP parallelized loop ends here
-        // 
+        //
 
         Loop::executeIteration(COLLIDER_FINALIZE);
       }
@@ -355,7 +355,7 @@ namespace Gambit
         // SLHAea object constructed from dependencies on the spectrum and decays.
         slha.clear();
         spectrum.clear();
-        slha = Dep::decay_rates->getSLHAea();
+        slha = Dep::decay_rates->getSLHAea(2);
         if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
         {
           // MSSM-specific.  SLHAea in SLHA2 format, please.
@@ -2789,7 +2789,7 @@ namespace Gambit
       //  dumped=true;
       //}
       // #endif
-      
+
       result = 0;
       // Due to the nature of the analysis details of the model independent limit in
       // the paper, the best we can do is to try these two processes individually:
@@ -2916,7 +2916,7 @@ namespace Gambit
       const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit;
-      
+
       static const ALEPHStauLimitAt208GeV limitContainer;
       // #ifdef COLLIDERBIT_DEBUG
       //   static bool dumped=false;
@@ -4020,7 +4020,7 @@ namespace Gambit
       const double mZ = spec.get(Par::Pole_Mass,23, 0);
       triplet<double> xsecWithError;
       double xsecLimit, totalBR;
-      
+
       static const OPALNeutralinoHadronicLimitAt208GeV limitContainer;
       // #ifdef COLLIDERBIT_DEBUG
       //   static bool dumped=false;

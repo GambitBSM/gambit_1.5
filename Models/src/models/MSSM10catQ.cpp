@@ -39,7 +39,7 @@
      set_many_to_one(targetP, initVector<str>("ml2_12", "ml2_3", "me2_3"), myP["ml2"]);
 
      // 3rd gen up-type trilinear coupling.
-     targetP.setValue("At", myP["A0"]);
+     targetP.setValue("Au_3", myP["A0"]);
      
      // Done
      #ifdef MSSM15atQ_DBUG

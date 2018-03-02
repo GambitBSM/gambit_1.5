@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 16:35:26
+// File generated at Wed 25 Oct 2017 19:42:24
 
 /**
  * @file CMSSM_mass_eigenstates.cpp
@@ -26,8 +26,8 @@
  * which solve EWSB and calculate pole masses and mixings from DRbar
  * parameters.
  *
- * This file was generated at Sun 24 Sep 2017 16:35:26 with FlexibleSUSY
- * 2.0.0-dev (git commit: 4d4c39a2702e9a6604f84813ccb0b85d40987f3b) and SARAH 4.11.0 .
+ * This file was generated at Wed 25 Oct 2017 19:42:24 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.11.0 .
  */
 
 #include "CMSSM_mass_eigenstates.hpp"
@@ -750,7 +750,7 @@ void CLASSNAME::clear_DRbar_parameters()
 
 void CLASSNAME::clear_problems()
 {
-   problems.unflag_all_tachyons();
+   problems.clear();
 }
 
 void CLASSNAME::clear()
