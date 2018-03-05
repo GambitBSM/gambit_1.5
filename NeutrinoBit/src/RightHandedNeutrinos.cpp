@@ -72,6 +72,7 @@ namespace Gambit
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_pi_plus = meson_masses.pi_plus;
       static double f_pi_sq = 0.0169;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vud = 0.97434; // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -102,6 +103,7 @@ namespace Gambit
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_K_plus = meson_masses.kaon_plus;
       static double f_K_sq = 0.02553604;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vus = 0.22506;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -130,8 +132,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      //TODO: Include in meson_masses
       static double m_D_plus = 1.86962;  // GeV (not included in numerical_constants.hpp yet)
       static double f_D_sq = 0.04955076;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vcd = 0.22492;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -161,7 +165,9 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_D_s = 1.96847;  // GeV (not included in numerical_constants.hpp yet)
+      // TODO: Include in meson masses
       static double f_Ds_sq = 0.07845601;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vcs = 0.97351;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -190,8 +196,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      //TODO: include in meson masses
       static double m_B_plus = 5.27929;  // GeV (not included in numerical_constants.hpp yet)
       static double f_B_sq = 0.0361;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vub = 0.00357;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -220,8 +228,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bsl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      //TODO: include in meson masses
       static double m_B_s = 5.36679;  // GeV (not included in numerical_constants.hpp yet)
       static double f_Bs_sq = 0.0529;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vus = 0.22506;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -250,8 +260,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bcl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      //TODO: include in meson masses
       static double m_B_c = 6.2751;  // GeV (not included in numerical_constants.hpp yet)
       static double f_Bc_sq = 0.2304;  // GeV^2
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vcb = 0.0411;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -306,6 +318,7 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2etaprimenu;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      //TODO: include in meson masses
       static double m_eta_prime = 0.95778;  // GeV (not included in numerical_constants.hpp yet)
       static double f_etaprime_sq = 0.00342225;  // GeV^2
       std::vector<double> gamma(3), M(3);
@@ -331,9 +344,11 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2rhoplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
+      //TODO: maybe in numerical constants?
       static double g_rho_sq = 0.010404;  // GeV^4
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_rho_plus = meson_masses.rho_plus;
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
       static double Vud = 0.97434;  // PDG
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -458,6 +473,7 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2null;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C1 = 0.25*(1 - (4*s_W_sq) + (8*pow(s_W_sq,2.0)));
       static double C2 = 0.5*s_W_sq*((2*s_W_sq) - 1);
@@ -838,12 +854,9 @@ namespace Gambit
         err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
       }  
 
-      // Superallowed beta decays and more, from 1509.0474
-      // TODO: Wait for Marcin to check these out, only include pion beta decays for now
-      //static double V_ud_exp[] = {0.97417, 0.9754, 0.9734, 0.9718, 0.9749};
-      //static double err_V_ud_exp[] = {0.00021, 0.0014, 0.0027, 0.0017, 0.0026};
-      static double V_ud_exp = 0.9749;
-      static double err_V_ud_exp = 0.0026;
+      // Combined value from the PDG
+      static double V_ud_exp = 0.97417;
+      static double err_V_ud_exp = 0.00021;
 
       double f[8];
       Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
