@@ -17,7 +17,6 @@
 #include <algorithm>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/PrecisionBit/CosmoBit_rollcall.hpp"
 
 
 namespace Gambit
