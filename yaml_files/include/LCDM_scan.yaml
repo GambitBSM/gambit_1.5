@@ -10,10 +10,10 @@ omega_b:
   range: [0.020,0.024]
 omega_cdm:
   prior_type: flat
-  range: [0.010,0.13]
+  range: [0.10,0.13]
 H0:
   prior_type: flat
-  range: [66,74]
+  range: [62,74]
 ln10A_s:
   prior_type: flat
   range: [2.9,3.2]
@@ -22,4 +22,4 @@ n_s:
   range: [0.9,1.10]
 tau_reio:
   prior_type: flat
-  range: [0.05,0.10]
+  range: [0.04,0.20]
