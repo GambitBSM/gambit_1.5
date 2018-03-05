@@ -3333,7 +3333,58 @@ Ut2: |
 
 Ut3: |
   (3,3) entry on active-sterile mixing matrix
- 
+
+Gamma_RHN23nu: |
+  Decay rate of right-handed neutrinos to 3 left-handed neutrinos
+
+Gamma_RHN2Bcl: |
+  Decay rate of right-handed neutrinos to a charmed B meson and a lepton
+
+Gamma_RHN2Bplusl: |
+  Decay rate of right-handed neutrinos to a positively-charged B meson and a lepton
+
+Gamma_RHN2Bsl: |
+  Decay rate of right-handed neutrinos to a strange B meson and a lepton
+
+Gamma_RHN2Dplusl: |
+  Decay rate of right-handed neutrinos to a positively-charged D meson and a lepton
+
+Gamma_RHN2Dsl: |
+  Decay rate of right-handed neutrinos to a strange D meson and a lepton
+
+Gamma_RHN2Kplusl: |
+  Decay rate of right-handed neutrinos to a positively-charged kaon and a lepton
+
+Gamma_RHN2etanu: |
+  Decay rate of right-handed neutrinos to an eta meson and a left-handed neutrino
+
+Gamma_RHN2etaprimenu: |
+  Decay rate of right-handed neutrinos to an eta prime meson and a left-handed neutrino
+
+Gamma_RHN2llnu: |
+  Decay rate of right-handed neutrinos to two leptons of different flavor and a left-handed neutrino
+
+Gamma_RHN2null: |
+  Decay rate of right-handed neutrinos to a left-handed neutrino of one flavor and a pair of leptons of another flavor
+
+Gamma_RHN2pi0nu: |
+  Decay rate of right-handed neutrinos to a neutral pion and a left-handed neutrino
+
+Gamma_RHN2piplusl: |
+  Decay rate of right-handed neutrinos to a positively-charged pion and a lepton
+
+Gamma_RHN2rho0nu: |
+  Decay rate of right-handed neutrinos to a neutral rho meson and a left-handed neutrino
+
+Gamma_RHN2rhoplusl: |
+  Decay rate of right-handed neutrinos to a positively-charged rho meson and a lepton
+
+Gamma_BBN: |
+  Total decay rate for right-handed neutrinos, combining all decays listed
+
+lnL_bbn: |
+  Log-likelihood for the lifetime of right-handed neutrinos, based on BBN constraint
+
 R_K: |
   Lepton universality ratio of Kaon decays to leptons
 
@@ -3366,12 +3417,6 @@ lnL_0nubb_KamLAND_Zen: |
 
 lnL_0nubb: |
   Log-likelihood for all neutrinoless double beta decay experiments
-
-bbn_lifetime: |
-  Lifetime of the right handed-neutrinos in BBN
-
-lnLbbn: |
-  Log-likelihood for the lifetime of right-handed neutrinos in BBN
  
 lnLatlase: |
   Log-likelihood for direct searches of right-handed neutrinos in the ATLAS experiment in the electron sector

@@ -38,51 +38,7 @@ namespace Gambit
 {
   namespace NeutrinoBit
   {
-
-    // BBN constraint: lifetime must be less than 0.1s [arXiv:1202.2841] 
-//    void RHN_bbn_lifetime(std::vector<double>& result_lifetime)
-//    {
-//      using namespace Pipes::RHN_bbn_lifetime;
-//      SMInputs sminputs = *Dep::SMINPUTS;
-//      static double conv_fact = 6.58e-16;  // conversion factor from ev^-1 to s
-//      static double G_F_sq = pow(sminputs.GF, 2.0);  // GeV^-4
-      // TODO (CW): Should come from SM input file
-//      static double g_L_twid_sq = 0.0771;  // g_L_twid = -0.5 + s_W^2
-//      static double g_R_sq = 0.0494;  // g_R = s_W^2
-//      static double g_L_sq = 0.5217;  // g_L = 0.5 + s_W^2
-      //double temp_bbn;
-//      std::vector<double> lifetime(3), M(3);
-//      M[0] = *Param["M_1"];
-//      M[1] = *Param["M_2"];
-//      M[2] = *Param["M_3"];
-//      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-//      for (int i=0; i<3; i++)
-//      {
-//        lifetime[i] = (96*pow(pi,3.0)*1e-9*conv_fact) / (G_F_sq*pow(M[i],5.0))*( ((1 + g_L_twid_sq + g_R_sq)*(Usq(1,i) + Usq(2,i))) + ((1 + g_L_sq + g_R_sq)*Usq(0,i)) );
-//      }
-//      result_lifetime = lifetime;
-//    }
-
-    // BBN constraint likelihood : lifetime must be less than 0.1s
-    // [arXiv:1202.2841] Since the limit is approximate, we simply implement it
-    // as a hard ~5 sigma cut.
-//    void lnL_bbn(double& result_bbn)
-//    {
-//      using namespace Pipes::lnL_bbn;
-//      std::vector<double> lifetime = *Dep::bbn_lifetime;
-//      result_bbn = 0.0;
-//      for(int i=0; i<3; i++)
-//      {
-//        if(lifetime[i]>0.1)
-//        {
-//          result_bbn = -12.5;
-//          break;
-//        }
-//      }
-//    }
-
-    // All formulae for Gamma come from [arXiv:0705:1729]
+    // All formulae for Gamma come from [arXiv:0705:1729], except where mentioned.
     void Gamma_RHN2pi0nu(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2pi0nu;
@@ -445,11 +401,25 @@ namespace Gambit
       result = gamma;
     }
 
+    // Helper function; formula is in [arXiv:1208.4607v2]
+    double S(double xa, double xb)
+    {
+      return sqrt((1-pow((xa+xb),2.0))*(1-pow((xa-xb),2.0)));
+    }
+
+    // Also helper function; formula is in [arXiv:1208.4607v2]
+    double g(double xa, double xb)
+    {
+      return (1 - (7*pow(xa,2.0)) - (7*pow(xb,2.0)) - (7*pow(xa,4.0)) - (7*pow(xb,4.0)) + (12*pow(xa,2.0)*pow(xb,2.0)) - (7*pow(xa,2.0)*pow(xb,4.0)) - (7*pow(xa,4.0)*pow(xb,2.0)) + pow(xa,6.0) + pow(xb,6.0));
+    }
+
+    // Formula is from [arXiv:1208.4607v2]
     void Gamma_RHN2llnu(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2llnu;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
+      double x_a, x_b;
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -463,29 +433,14 @@ namespace Gambit
       {
         for (int j=0; j<3; j++)
         {
-          switch(j)
+          for (int k=0; k<3; k++)
           {
-            case 0: for (int k=1; k<3; k++)
-                    {
-                      if (M[i]<m_lep[k])
-                        gamma[i] = 0.0;
-                      else
-                        gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(0,i) * (1 - (8*pow(m_lep[k]/M[i],2.0)) + (8*pow(m_lep[k]/M[i],6.0)) - pow(m_lep[k]/M[i],8.0) - (12*pow(m_lep[k]/M[i],4.0)*log(pow(m_lep[k]/M[i],2.0))) );
-                    }
-            case 1: if (M[i]<m_lep[1])
-                      gamma[i] = 0.0;
-                    else
-                      for (int k=1; k<3; k++)
-                      {
-                        if (M[i]<m_lep[k])
-                          gamma[i] = 0.0;
-                        else
-                          gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(1,i) * (1 - (8*pow(m_lep[k]/M[i],2.0)) + (8*pow(m_lep[k]/M[i],6.0)) - pow(m_lep[k]/M[i],8.0) - (12*pow(m_lep[k]/M[i],4.0)*log(pow(m_lep[k]/M[i],2.0))) );
-                      }
-            case 2: if (M[i]<m_lep[2])
-                      gamma[i] = 0.0;
-                    else
-                      gamma[i] += 2*( ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(2,i) * (1 - (8*pow(m_lep[2]/M[i],2.0)) + (8*pow(m_lep[2]/M[i],6.0)) - pow(m_lep[2]/M[i],8.0) - (12*pow(m_lep[2]/M[i],4.0)*log(pow(m_lep[2]/M[i],2.0))) ) );
+            if (M[i]<m_lep[k])
+              gamma[i] += 0.0;
+            else
+              x_a = m_lep[j]/M[i];
+              x_b = m_lep[k]/M[i];
+              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(0,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*pow(x_a,4.0)*log((1 - (S(x_a,x_b)*(1+pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_b,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_a,2.0)))) - (12*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)+pow(x_b,2.0))) - (2*pow(x_a,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_b,2.0)))) + (12*pow(x_a,4.0)*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_a,2.0)) - (2*pow(x_b,2.0)) + pow(x_a,4.0) + pow(x_b,4.0)) / (2*pow(x_a,2.0)*pow(x_b,2.0)))));
           }
         }
       }
@@ -524,7 +479,7 @@ namespace Gambit
           for (int k=0; k<3; k++)
           {
             if (M[i]<m_lep[k])
-              gamma[i] = 0.0;
+              gamma[i] += 0.0;
             else
             {
               double x_l = m_lep[k]/M[i];

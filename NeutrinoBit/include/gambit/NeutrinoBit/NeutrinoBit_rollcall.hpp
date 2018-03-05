@@ -213,24 +213,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-//  #define CAPABILITY bbn_lifetime
-//  START_CAPABILITY
-//    #define FUNCTION RHN_bbn_lifetime
-//    START_FUNCTION(std::vector<double>)
-//    DEPENDENCY(SMINPUTS, SMInputs)
-//    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-//    ALLOW_MODEL(RightHandedNeutrinos)
-//    #undef FUNCTION
-//  #undef CAPABILITY
-
-//  #define CAPABILITY lnLbbn
-//  START_CAPABILITY
-//    #define FUNCTION lnL_bbn
-//    START_FUNCTION(double)
-//    DEPENDENCY(bbn_lifetime, std::vector<double>)
-//    #undef FUNCTION
-//  #undef CAPABILITY
-
   #define CAPABILITY Gamma_RHN2pi0nu
   START_CAPABILITY
     #define FUNCTION Gamma_RHN2pi0nu
