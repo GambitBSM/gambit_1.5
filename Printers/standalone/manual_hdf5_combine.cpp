@@ -28,6 +28,7 @@
 #include <utility>
 #include <string>
 #include <sys/stat.h>
+#include <chrono>
 
 // GAMBIT headers
 #include "gambit/Printers/printers/hdf5printer/hdf5_combine_tools.hpp"
@@ -116,12 +117,13 @@ int main(int argc, char* argv[])
          break;
      }
    }
+ 
+   // Begining timing of operation
+   std::chrono::time_point<std::chrono::system_clock> startT = std::chrono::system_clock::now();
 
    // Report what we are going to do
    std::cout <<"  Searching for temporary files to combine" <<std::endl;
    std::cout <<"     with base filename: "<<finalfile<<std::endl;
-
-
 
    // Search for the temporary files to be combined
    std::pair<std::vector<std::string>,std::vector<int>> out = HDF5::find_temporary_files(finalfile);
@@ -179,6 +181,14 @@ int main(int argc, char* argv[])
                    << "    "<<tmp_comb_file<<std::endl;
       }
    }
+
+   // End timing of operation
+   std::chrono::time_point<std::chrono::system_clock> endT = std::chrono::system_clock::now();
+   std::chrono::duration<double> interval = endT - startT;
+   long runtime = std::chrono::duration_cast<std::chrono::seconds>(interval).count(); 
+   long mins = runtime / 60;
+   long secs = runtime % 60;
+   std::cout<<"  Operation took "<<mins<<" minutes and "<<secs<<" seconds."<<std::endl;
 
    // Finished!
    exit(EXIT_SUCCESS);   

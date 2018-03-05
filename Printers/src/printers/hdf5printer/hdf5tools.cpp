@@ -33,7 +33,23 @@ namespace Gambit {
   namespace Printers {
 
     namespace HDF5 { 
- 
+
+      /// GAMBIT default file access property list
+      //  Sets some HDF5 properties to associate with open objects
+      //  Here we set objects to be 'evicted' from the metadata cache
+      //  when they are closed, which apparantly is not the default
+      //  which leads to massive RAM usage if we don't set this.
+      hid_t create_GAMBIT_fapl()
+      {
+         hid_t fapl(H5Pcreate(H5P_FILE_ACCESS)); // Copy defaults
+         hbool_t value = 1; // true?
+         herr_t err = H5Pset_evict_on_close(fapl, value); // Set evict_on_close = true
+         return fapl;  
+      }
+
+      /// Const global for the GAMBIT fapl
+      const hid_t H5P_GAMBIT(create_GAMBIT_fapl());
+
       /// Macro to define simple wrappers with error checking for basic HDF5 tasks
       #define SIMPLE_CALL(IDTYPE_OUT, FNAME, IDTYPE_IN, H5FUNCTION, VERB, OUTPUTNAME, INPUTNAME) \
       IDTYPE_OUT FNAME(IDTYPE_IN id) \
@@ -55,7 +71,7 @@ namespace Gambit {
       } \
  
       /// Create or open hdf5 file (ignoring feedback regarding whether file already existed)
-      hid_t openFile(const std::string& fname, bool overwrite)
+      hid_t openFile(const std::string& fname, bool overwrite, const char access_type)
       {
          bool tmp;
          return openFile(fname,overwrite,tmp);
@@ -63,9 +79,26 @@ namespace Gambit {
 
       /// Create or open hdf5 file
       /// third argument "oldfile" is used to report whether an existing file was opened (true if yes)
-      hid_t openFile(const std::string& fname, bool overwrite, bool& oldfile)
+      hid_t openFile(const std::string& fname, bool overwrite, bool& oldfile, const char access_type)
       {
           hid_t file_id;  // file handle
+
+          unsigned int atype;
+          switch(access_type)
+          {
+            case 'r':
+              atype = H5F_ACC_RDONLY;
+              break;
+            case 'w':
+              // We let 'w' mean read/write here
+              atype = H5F_ACC_RDWR;
+              break;
+            default:
+              std::ostringstream errmsg;
+              errmsg << "Unrecognised access mode requested while trying to open HDF5 file! Saw '"<<access_type<<"'; only 'r' (read-only) and 'w' (read/wrtie) are valid. File was ("<<fname<<")";
+              printer_error().raise(LOCAL_INFO, errmsg.str());
+              break;
+          }
 
           if(overwrite)
           {
@@ -82,25 +115,35 @@ namespace Gambit {
           }          
 
           errorsOff();
-          file_id = H5Fopen(fname.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+          file_id = H5Fopen(fname.c_str(), atype, H5P_GAMBIT);
           errorsOn();
           if(file_id < 0)
           {
-             /* Ok maybe file doesn't exist yet, try creating it */
-             errorsOff();
-             file_id = H5Fcreate(fname.c_str(), H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);             
-             errorsOn();
-             if(file_id < 0)
+             if(access_type=='w')
              {
-                /* Still no good; error */
-                std::ostringstream errmsg;
-                errmsg << "Failed to open existing HDF5 file, then failed to create new one! ("<<fname<<")";
-                printer_error().raise(LOCAL_INFO, errmsg.str());
+                /* Ok maybe file doesn't exist yet, try creating it */
+                errorsOff();
+                file_id = H5Fcreate(fname.c_str(), H5F_ACC_EXCL, H5P_DEFAULT, H5P_GAMBIT);             
+                errorsOn();
+                if(file_id < 0)
+                {
+                   /* Still no good; error */
+                   std::ostringstream errmsg;
+                   errmsg << "Failed to open existing HDF5 file, then failed to create new one! ("<<fname<<")";
+                   printer_error().raise(LOCAL_INFO, errmsg.str());
+                }
+                else
+                {
+                   /* successfully created new file */
+                   oldfile = false;
+                }
              }
              else
              {
-                /* successfully created new file */
-                oldfile = false;
+               // Doesn't make sense to create new file if we wanted read-only mode. Error.
+               std::ostringstream errmsg;
+               errmsg << "Failed to open existing HDF5 file, and did not create new one since read-only access was specified. ("<<fname<<")";
+               printer_error().raise(LOCAL_INFO, errmsg.str());
              }
           }
           else
@@ -119,7 +162,7 @@ namespace Gambit {
           bool readable(false);
 
           errorsOff();
-          hid_t file_id = H5Fopen(fname.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+          hid_t file_id = H5Fopen(fname.c_str(), H5F_ACC_RDWR, H5P_GAMBIT);
           errorsOn();
           if(file_id < 0)
           {
@@ -177,7 +220,7 @@ namespace Gambit {
       /// Create hdf5 file (always overwrite existing files)
       hid_t createFile(const std::string& fname)
       {
-          hid_t file_id = H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);             
+          hid_t file_id = H5Fcreate(fname.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_GAMBIT);             
           if(file_id < 0)
           {
              /* Still no good; error */

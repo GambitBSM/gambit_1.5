@@ -53,6 +53,44 @@ namespace Gambit
                 H5Tclose(dtype);
                 return ret;
             }
+
+            // Get name of ith temp file
+            std::string hdf5_stuff::get_fname(const long int i)
+            {
+                std::stringstream ss;
+                ss << root_file_name << "_temp_" << i;
+                return ss.str();
+            }
+
+            // Function to discover names of datasets within a HDF5 group
+            std::vector<std::string> get_dset_names(hid_t group_id)
+            {
+               std::vector<std::string> outnames; 
+               H5G_info_t group_info;
+               H5Gget_info(group_id, &group_info );
+               hsize_t nlinks = group_info.nlinks; // Number of objects in the group
+               for(hsize_t i=0; i<nlinks; i++)
+               {
+                  int otype = H5Gget_objtype_by_idx(group_id, i);
+                  switch (otype) 
+                  {
+                      case H5G_DATASET:
+                      {
+                          char name_buffer[1000];
+                          H5Gget_objname_by_idx(group_id, i, name_buffer, (size_t)1000);
+                          std::string strname(name_buffer);
+                          // std::cout << "Found "<<strname<<std::endl;
+                          if (strname.find("_isvalid") == std::string::npos && strname != "RA_pointID" && strname != "RA_MPIrank")
+                              outnames.push_back(strname);
+                          break;
+                      }
+                      default:
+                          break;
+                  }
+               }
+               return outnames;               
+            }
+
                 
             inline herr_t op_func (hid_t loc_id, const char *name_in, const H5L_info_t *,
                     void *operator_data)
@@ -134,7 +172,7 @@ namespace Gambit
                 return return_val;
             }
             
-            inline void setup_hdf5_points(hid_t new_group, hid_t type, hid_t type2, unsigned long long size_tot, hid_t &dataset_out, hid_t &dataset2_out, hid_t &dataspace, hid_t &dataspace2, const std::string &name)
+            inline void setup_hdf5_points(hid_t new_group, hid_t type, hid_t type2, unsigned long long size_tot, const std::string &name)
             {
                 #ifdef COMBINE_DEBUG
                 std::cerr << "  Creating dataset '"<<name<<"'" << std::endl;
@@ -142,28 +180,28 @@ namespace Gambit
 
                 hsize_t dimsf[1];
                 dimsf[0] = size_tot;
-                dataspace = H5Screate_simple(1, dimsf, NULL); 
+                hid_t dataspace = H5Screate_simple(1, dimsf, NULL); 
                 if(dataspace < 0)
                 {
                   std::ostringstream errmsg;
                   errmsg<<"Failed to set up HDF5 points for copying. H5Screate_simple failed for dataset ("<<name<<")."; 
                   printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
-                dataset_out = H5Dcreate2(new_group, name.c_str(), type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                hid_t dataset_out = H5Dcreate2(new_group, name.c_str(), type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                 if(dataset_out < 0)
                 {
                   std::ostringstream errmsg;
                   errmsg<<"Failed to set up HDF5 points for copying. H5Dcreate2 failed for dataset ("<<name<<").";
                   printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
-                dataspace2 = H5Screate_simple(1, dimsf, NULL);
+                hid_t dataspace2 = H5Screate_simple(1, dimsf, NULL);
                 if(dataspace2 < 0)
                 {
                   std::ostringstream errmsg;
                   errmsg<<"Failed to set up HDF5 points for copying. H5Screate_simple failed for dataset ("<<name<<"_isvalid).";
                   printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
-                dataset2_out = H5Dcreate2(new_group, (name + "_isvalid").c_str(), type2, dataspace2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                hid_t dataset2_out = H5Dcreate2(new_group, (name + "_isvalid").c_str(), type2, dataspace2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                 if(dataset2_out < 0)
                 {
                   std::ostringstream errmsg;
@@ -171,8 +209,9 @@ namespace Gambit
                   printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
        
-                // Update: We are just going to close the newly created datasets, and reopen them as needed. 
-                // Could therefore get rid of dataset_out arguments, but won't bother right now.
+                // We are just going to close the newly created datasets, and reopen them as needed. 
+                HDF5::closeSpace(dataspace);
+                HDF5::closeSpace(dataspace2);
                 HDF5::closeDataset(dataset_out);
                 HDF5::closeDataset(dataset2_out);
             }
@@ -201,7 +240,7 @@ namespace Gambit
               , sizes(num, 0)
               , size_tot(0)
               , root_file_name(file_name)
-              , do_cleanup(cleanup)
+              , do_cleanup(cleanup) 
             {
                 //std::vector<bool> temp;
                 //herr_t status;
@@ -209,11 +248,11 @@ namespace Gambit
                 // Loop over the temporary files from each rank and perform some setup computations.
                 for (int i = 0; i < num; i++)
                 {
-                    std::stringstream ss;
-                    ss << i;
-                    //H5::H5File file((file_name + "_" + ss.str()).c_str());
-                    std::string fname = file_name + "_temp_" + ss.str();
-                    hid_t file_id = H5Fopen(fname.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+                    // Simple Progress monitor
+                    std::cout << "  Scanning temp file "<<i<<" for datasets...             \r";
+
+                    std::string fname = get_fname(i);
+                    hid_t file_id = HDF5::openFile(fname);
                     if(file_id<0)
                     {
                         /* Still no good; error */
@@ -229,9 +268,12 @@ namespace Gambit
                     groups.push_back(group_id);
                     
                     // Extract dataset names from the group
-                    std::vector<std::string> names;
-                    H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *) &names);
-                   
+                    //std::vector<std::string> names;
+                    //H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *) &names);
+ 
+                    std::vector<std::string> names = get_dset_names(group_id);
+
+                  
                     if (i == 0)
                     {
                         param_names = names;
@@ -253,9 +295,11 @@ namespace Gambit
                     // Get RA dataset names
                     hid_t aux_group_id = HDF5::openGroup(file_id, group_name+"/RA", true);
                     aux_groups.push_back(aux_group_id);                     
-                    std::vector<std::string> aux_names;
-                    H5Literate (aux_group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func_aux, (void *) &aux_names);
+                    //std::vector<std::string> aux_names;
+                    //H5Literate (aux_group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func_aux, (void *) &aux_names);
                     
+                    std::vector<std::string> aux_names = get_dset_names(aux_group_id);
+
                     if (i == 0)
                     {
                         aux_param_names = aux_names;
@@ -333,8 +377,8 @@ namespace Gambit
                                --size;
                        }
 
-                       H5Sclose(dataspace);
-                       H5Sclose(dataspace2);
+                       HDF5::closeSpace(dataspace);
+                       HDF5::closeSpace(dataspace2); 
                        HDF5::closeDataset(dataset);
                        HDF5::closeDataset(dataset2);
                     }                   
@@ -345,15 +389,21 @@ namespace Gambit
                     }
                     sizes[i] = size;
                     size_tot += size;
+ 
+                    // Close groups and tmp file
+                    HDF5::closeGroup(group_id);
+                    if(aux_group_id>-1) HDF5::closeGroup(aux_group_id);
+                    HDF5::closeFile(file_id);
                 }
             }
  
             hdf5_stuff::~hdf5_stuff()
             {
-                for(std::vector<hid_t>::iterator it=files.begin(); it!=files.end(); ++it)
-                {
-                   HDF5::closeFile(*it);
-                }
+                // Close them sooner!
+                //for(std::vector<hid_t>::iterator it=files.begin(); it!=files.end(); ++it)
+                //{
+                //   HDF5::closeFile(*it);
+                //}
             } 
             
             void hdf5_stuff::Enter_Aux_Paramters(const std::string &file, bool resume)
@@ -401,8 +451,11 @@ namespace Gambit
 
                        // Check for parameters not found in the newer temporary files.
                        // (should not be any aux parameters in here, so don't check for them)
-                       std::vector<std::string> names;
-                       H5Literate (old_group, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *) &names);
+                       //std::vector<std::string> names;
+                       //H5Literate (old_group, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *) &names);
+
+                       std::vector<std::string> names = get_dset_names(old_group);
+
                        for (auto it = names.begin(), end = names.end(); it != end; ++it)
                        {
                            if (param_set.find(*it) == param_set.end())
@@ -445,13 +498,26 @@ namespace Gambit
                 hid_t new_file = H5Fcreate(file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
                 hid_t new_group = HDF5::openGroup(new_file, group_name); // Recursively creates required group structure
                 
-                if (aux_param_names.size() > 0) for (auto itg = aux_groups.begin(), endg = aux_groups.end(); itg != endg; ++itg)
+                if (aux_param_names.size() > 0) for (unsigned long i=0; i<aux_groups.size(); ++i)
                 {
-                    std::vector<unsigned long long> rank, ptid;
+                     std::vector<unsigned long long> rank, ptid;
 
-                    HDF5::errorsOff();
-                    hid_t dataset  = HDF5::openDataset(*itg, "RA_MPIrank", true);
-                    HDF5::errorsOn();
+                    // Reopen temp files and reaquire group IDs
+                    std::string fname = get_fname(i);
+                    hid_t file_id = HDF5::openFile(fname);
+                    hid_t aux_group_id = HDF5::openGroup(file_id, group_name+"/RA", true); // final argument prevents group from being created 
+                    hid_t dataset;
+                    if(aux_group_id < 0) 
+                    {
+                       dataset = -1; // If group doesn't exist, dataset doesn't either
+                    }
+                    else
+                    {
+                       HDF5::errorsOff();
+                       dataset = HDF5::openDataset(aux_group_id, "RA_MPIrank", true);
+                       HDF5::errorsOn();
+                    }
+
                     if(dataset < 0) // If key dataset doesn't exist, set aux size to zero for this rank
                     {
                        // Need to push back empty entries, because they need to remain synced with the datasets vectors
@@ -461,8 +527,8 @@ namespace Gambit
                     }
                     else
                     {
-                       hid_t dataset2 = HDF5::openDataset(*itg, "RA_pointID");
-                       hid_t dataset3 = HDF5::openDataset(*itg, "RA_pointID_isvalid");
+                       hid_t dataset2 = HDF5::openDataset(aux_group_id, "RA_pointID");
+                       hid_t dataset3 = HDF5::openDataset(aux_group_id, "RA_pointID_isvalid");
 
                        Enter_HDF5<read_hdf5>(dataset, rank);
                        Enter_HDF5<read_hdf5>(dataset2, ptid);
@@ -502,27 +568,45 @@ namespace Gambit
                        }
                        aux_sizes.push_back(size);
                        
-                       H5Sclose(dataspace);
+                       HDF5::closeSpace(dataspace);
+                       HDF5::closeSpace(dataspace2);
                        HDF5::closeDataset(dataset);
                        HDF5::closeDataset(dataset2);
                        HDF5::closeDataset(dataset3);
                     }
+                    // Close resources
+                    HDF5::closeGroup(aux_group_id);
+                    HDF5::closeFile(file_id);
                 }
   
                 int counter = 1;
                 for (auto it = param_names.begin(), end = param_names.end(); it != end; ++it, ++counter)
                 {
                     // Simple Progress monitor
-                    std::cout << " Combining primary datasets... "<<int(100*counter/param_names.size())<<"%         \r";
+                    std::cout << " Combining primary datasets... "<<int(100*counter/param_names.size())<<"%   ("<<counter<<" of "<<param_names.size()<<")        \r";
 
-                    std::vector<hid_t> datasets, datasets2;
+                    std::vector<hid_t> file_ids, group_ids, datasets, datasets2;
                     int valid_dset  = -1; // index of a validly opened dataset (-1 if none)
                     for (int i = 0, end = groups.size(); i < end; i++)
                     {
-                        HDF5::errorsOff();
-                        hid_t dataset  = HDF5::openDataset(groups[i], *it, true); // Allow fail; not all parameters must exist in all temp files
-                        hid_t dataset2 = HDF5::openDataset(groups[i], *it + "_isvalid", true);
-                        HDF5::errorsOn();
+                        // Reopen files
+                        // NOTE: RAM problems largely solved, but footprint could be lowered even more if we only open one file at a time.
+                        std::string fname = get_fname(i);
+                        hid_t file_id = HDF5::openFile(fname);
+                        hid_t group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created 
+                        file_ids.push_back(file_id);
+                        group_ids.push_back(group_id);
+                        hid_t dataset = -1;
+                        hid_t dataset2 = -1;
+
+                        if(group_id>=0) 
+                        {
+                           HDF5::errorsOff();
+                           dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
+                           dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
+                           HDF5::errorsOn();
+                        }
+
                         if(dataset>=0)  
                         {
                            if(dataset2>=0) valid_dset = i;
@@ -557,7 +641,7 @@ namespace Gambit
                        printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
                    
-                    hid_t dataset_out, dataset2_out, dataspace, dataspace2, type, type2;
+                    hid_t type, type2;
                     if(valid_dset<0)
                     {
                        // Parameter not in any of the new temp files, must only be in the old combined output, get type from there.
@@ -578,24 +662,25 @@ namespace Gambit
                     }
                     
                     // Create datasets
-                    setup_hdf5_points(new_group, type, type2, size_tot, dataset_out, dataset2_out, dataspace, dataspace2, *it);
-                    //std::cout<<"(theoretically) created dataset '"<<*it<<"' in file:group "<<file<<":"<<group_name<<std::endl;
- 
+                    //std::cout<<"Creating dataset '"<<*it<<"' in file:group "<<file<<":"<<group_name<<std::endl;
+                    setup_hdf5_points(new_group, type, type2, size_tot, *it);
+
                     // Reopen dataset for writing
-                    dataset_out   = HDF5::openDataset(new_group, *it);
-                    dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
-                    std::cout << "Copying parameter "<<*it<<std::endl; // debug
+                    hid_t dataset_out   = HDF5::openDataset(new_group, *it);
+                    hid_t dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
+                    //std::cout << "Copying parameter "<<*it<<std::endl; // debug
                     Enter_HDF5<copy_hdf5>(dataset_out, datasets, size_tot_l, sizes, old_dataset);
                     Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, size_tot_l, sizes, old_dataset2);
                     
+                    // Close resources
                     for (int i = 0, end = datasets.size(); i < end; i++)
                     {
                         if(datasets[i]>=0)  HDF5::closeDataset(datasets[i]);
-                        if(datasets2[i]>=0) HDF5::closeDataset(datasets2[i]);
+                        if(datasets2[i]>=0) HDF5::closeDataset(datasets2[i]);                      
+                        if(group_ids[i]>=0) HDF5::closeGroup(group_ids[i]);
+                        if(file_ids[i]>=0)  HDF5::closeFile(file_ids[i]);
                     }
 
-                    H5Sclose(dataspace);
-                    H5Sclose(dataspace2);
                     HDF5::closeDataset(dataset_out);
                     HDF5::closeDataset(dataset2_out);
                 }
@@ -630,7 +715,7 @@ namespace Gambit
                    for (auto it = aux_param_names.begin(), end = aux_param_names.end(); it != end; ++it)
                    {
                        std::cout << " Combining auxilliary datasets... "<<int(100*counter/aux_param_names.size())<<"%         \r";
-                       std::vector<hid_t> datasets, datasets2;
+                       std::vector<hid_t> file_ids, group_ids, datasets, datasets2;
                        int valid_dset  = -1; // index of a validly opened dataset (-1 if none)
                       
                        #ifdef COMBINE_DEBUG
@@ -639,12 +724,26 @@ namespace Gambit
 
                        for (int i = 0, end = aux_groups.size(); i < end; i++)
                        {
+                           // Reopen files
+                           std::string fname = get_fname(i);
+                           hid_t file_id = HDF5::openFile(fname);
+                           hid_t group_id = HDF5::openGroup(file_id, group_name+"/RA", true); // final argument prevents group from being created 
+                           file_ids.push_back(file_id);
+                           group_ids.push_back(group_id);
+
+                           hid_t dataset = -1;
+                           hid_t dataset2 = -1;
+   
                            // Dataset may not exist, and thus fail to open. We will check its status
                            // later on and ignore it where needed.
-                           HDF5::errorsOff();
-                           hid_t dataset  = HDF5::openDataset(aux_groups[i], *it, true);
-                           hid_t dataset2 = HDF5::openDataset(aux_groups[i], *it + "_isvalid", true);
-                           HDF5::errorsOn();
+                           if(group_id>=0) 
+                           {
+                              HDF5::errorsOff();
+                              dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
+                              dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
+                              HDF5::errorsOn();
+                           }
+   
                            if(dataset>=0)  
                            {
                               if(dataset2>=0) valid_dset = i;
@@ -672,7 +771,6 @@ namespace Gambit
                        //     HDF5::errorsOn();
                        // }
 
-                       hid_t dataset_out, dataset2_out, dataspace, dataspace2;
                        // If the aux parameter was not also copied as a primary parameter then we need to create a new
                        // dataset for it here. Otherwise one should already exist.
                        if(param_set.find(*it) == param_set.end())
@@ -702,18 +800,21 @@ namespace Gambit
                              }
                           }
                           // Create new dataset
-                          setup_hdf5_points(new_group, type, type2, size_tot, dataset_out, dataset2_out, dataspace, dataspace2, *it); 
+                          setup_hdf5_points(new_group, type, type2, size_tot, *it); 
                        }
                        // Reopen output datasets for copying
-                       dataset_out  = HDF5::openDataset(new_group, *it);
-                       dataset2_out = HDF5::openDataset(new_group, (*it)+"_isvalid");
+                       hid_t dataset_out  = HDF5::openDataset(new_group, *it);
+                       hid_t dataset2_out = HDF5::openDataset(new_group, (*it)+"_isvalid");
                        Enter_HDF5<ra_copy_hdf5>(dataset_out, dataset2_out, datasets, datasets2, size_tot, RA_write_hash, ptids, ranks, aux_sizes, old_dataset, old_dataset2);
-                      
+        
+                       // Close resources              
                        for (int i = 0, end = datasets.size(); i < end; i++)
                        {
                            // Some datasets may never have been opened, so check this before trying to close them.
                            if(datasets[i]>=0)  HDF5::closeDataset(datasets[i]);
                            if(datasets2[i]>=0) HDF5::closeDataset(datasets2[i]);
+                           if(group_ids[i]>=0) HDF5::closeGroup(group_ids[i]);
+                           if(file_ids[i]>=0)  HDF5::closeFile(file_ids[i]);
                        }
                    }
                    std::cout << " Combining auxilliary datasets... Done.                 "<<std::endl;
@@ -723,10 +824,11 @@ namespace Gambit
                    std::cout << " Combining auxilliary datasets... None found, skipping. "<<std::endl;
                 }
 
+                // Flush and close output file
                 H5Fflush(new_file, H5F_SCOPE_GLOBAL);
                 HDF5::closeGroup(new_group);
                 HDF5::closeFile(new_file);
-               
+                
                 if (do_cleanup) // during manual combination we may well not want to delete the temporary files!
                 { 
                     if (resume)
@@ -905,7 +1007,7 @@ namespace Gambit
               // Return the list of missing tmp files, the caller can decide to throw an error if they like
               return std::make_pair(result,missing);
             } 
-            
+ 
         }
     }
 }

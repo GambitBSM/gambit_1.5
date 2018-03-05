@@ -375,6 +375,7 @@ namespace Gambit
                 std::string root_file_name;
                 unsigned long long pt_min;
                 bool do_cleanup; // If true, delete old temporary files after successful combination
+                std::string get_fname(const long int); // get name of ith temp file
 
             public:
                 hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup);
