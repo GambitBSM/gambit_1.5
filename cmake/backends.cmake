@@ -883,6 +883,25 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+#MontePython
+set(name "MontePython")
+set(ver "2.2.2")
+set(dl "https://github.com/baudren/montepython_public/archive/2.2.2.zip")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(md5 "93a34a7d989c4754516f3745f872abeb")
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""	
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 #MultiModeCode
 set(name "MultiModeCode")
 set(ver "2.0.0")
