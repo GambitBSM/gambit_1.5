@@ -70,9 +70,9 @@ namespace Gambit
           "CoannMaxMass");
 
       // introduce pointers to DS mass spectrum and relevant particle info
-      DS_PACODES *DSpart = &(*BEreq::pacodes);
-      DS_MSPCTM *mymspctm= &(*BEreq::mspctm);
-      DS_INTDOF *myintdof= &(*BEreq::intdof);
+      DS_PACODES *DSpart = BEreq::pacodes.pointer();
+      DS_MSPCTM *mymspctm= BEreq::mspctm.pointer();
+      DS_INTDOF *myintdof= BEreq::intdof.pointer();
 
       // first add neutralino=WIMP=least massive 'coannihilating particle'
       result.coannihilatingParticles.push_back(
@@ -133,7 +133,6 @@ namespace Gambit
       // the last 2 resonances in the list can only appear for coannihilations
       if (result.coannihilatingParticles.size() == 1)
         resmax -= 2;
-
 
       // determine thresholds; lowest threshold = 2*WIMP rest mass  (unlike DS
       // convention!)
@@ -429,7 +428,7 @@ namespace Gambit
 
 
       // write mass and dof of DM & coannihilating particle to DS common blocks
-      DS_RDMGEV *myrdmgev = &(*BEreq::rdmgev);
+      DS_RDMGEV *myrdmgev = BEreq::rdmgev.pointer();
 
       myrdmgev->nco=myRDspec.coannihilatingParticles.size();
       for (std::size_t i=1; i<=((unsigned int)myrdmgev->nco); i++)
@@ -474,7 +473,7 @@ namespace Gambit
 
       // determine starting point for integration of Boltzmann eq and write
       // to DS common blocks
-      DS_RDDOF *myrddof = &(*BEreq::rddof);
+      DS_RDDOF *myrddof = BEreq::rddof.pointer();
       double xstart=std::max(myrdpars.xinit,1.0001*mwimp/myrddof->tgev(1));
       double tstart=mwimp/xstart;
       int k; myrddof->khi=myrddof->nf; myrddof->klo=1;
@@ -491,9 +490,9 @@ namespace Gambit
 
       // follow wide res treatment for heavy Higgs adopted in DS
       double widthheavyHiggs=
-             (*BEreq::widths).width(BEreq::particle_code("h0_2"));
+             BEreq::widths->width(BEreq::particle_code("h0_2"));
       if (widthheavyHiggs<0.1)
-        (*BEreq::widths).width(BEreq::particle_code("h0_2"))=0.1;
+        BEreq::widths->width(BEreq::particle_code("h0_2"))=0.1;
 
       // always check that invariant rate is OK at least at one point
       double peff = mwimp/100;
@@ -560,7 +559,7 @@ namespace Gambit
       // BEreq::dsrdeqn(byVal(*Dep::RD_eff_annrate),xstart,xend,yend,xf,nfcn);
 
       // change heavy Higgs width in DS back to standard value
-      (*BEreq::widths).width(BEreq::particle_code("h0_2"))
+      BEreq::widths->width(BEreq::particle_code("h0_2"))
          =widthheavyHiggs;
 
       //Check for NAN result.

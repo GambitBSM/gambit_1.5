@@ -116,7 +116,9 @@ namespace Gambit
       /// Reset-then-recalculate method
       virtual void reset_and_calculate();
 
-      /// Setter for status: -4 = required backend absent (backend ini functions)
+      /// Setter for status: -6 = required external tool absent (pybind11)
+      ///                    -5 = required external tool absent (Mathematica)
+      ///                    -4 = required backend absent (backend ini functions)
       ///                    -3 = required classes absent
       ///                    -2 = function absent
       ///                    -1 = origin absent
@@ -932,6 +934,9 @@ namespace Gambit
 
       /// Destructor
       virtual ~model_functor() {}
+
+      /// Function for setting the model name for a ModelParameters object. Mainly for better error messages.
+      void setModelName(str model_name);
 
       /// Function for adding a new parameter to the map inside the ModelParameters object
       void addParameter(str parname);

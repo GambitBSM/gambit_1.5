@@ -20,6 +20,7 @@
 #include "wrappers.hpp"
 
 namespace flexiblesusy {
+namespace split_threeloophiggs {
 
 /**
  * Split-SUSY Higgs self-energy 3-loop contribution from a gluino,
@@ -58,4 +59,5 @@ double self_energy_higgs_3loop_gluino_split(
    return - result * threeLoop;
 }
 
+} // namespace split_threeloophiggs
 } // namespace flexiblesusy

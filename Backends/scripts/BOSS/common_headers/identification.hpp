@@ -3,6 +3,7 @@
 #include "gambit/Utils/cats.hpp"
 
 #define BACKENDNAME __BACKEND_NAME__
+#define BACKENDLANG CXX
 #define VERSION __BACKEND_VERSION__
 #define SAFE_VERSION __BACKEND_SAFE_VERSION__
 

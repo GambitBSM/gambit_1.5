@@ -119,10 +119,13 @@ ObsLikes:
 Rules:
 
   - capability: unimproved_MSSM_spectrum
-    function: get_MSSMatQ_spectrum
+    function: get_MSSMatQ_spectrum_FS
 
   - capability: MSSM_spectrum
     function: make_MSSM_precision_spectrum_H_W
+
+  - capability: prec_mh
+    function: FH_HiggsMass
 
   - capability: muon_gm2_SM
     function: gm2_SM_ee

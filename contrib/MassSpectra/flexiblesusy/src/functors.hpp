@@ -34,17 +34,10 @@ template <typename RealScalar>
 struct Chop {
    Chop() : threshold(std::numeric_limits<RealScalar>::epsilon()) {}
    Chop(RealScalar threshold_) : threshold(Abs(threshold_)) {}
-   const RealScalar operator()(const RealScalar& x) const {
-      return Abs(x) < threshold ? static_cast<RealScalar>(0) : x;
+   const RealScalar operator()(const RealScalar& x) const noexcept {
+      return Abs(x) < threshold ? RealScalar{} : x;
    }
    RealScalar threshold;
-};
-
-struct Delete_object {
-   template <typename T>
-   void operator()(const T* ptr) {
-      delete ptr;
-   }
 };
 
 } // namespace flexiblesusy

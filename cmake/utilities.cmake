@@ -22,9 +22,14 @@
 #          (benjamin.farmer@fysik.su.se)
 #  \date 2016 Jan
 #
+#  \author Tomas Gonzalo
+#          (t.e.gonzalo@fys.uio.no)
+#  \date 2016 Sep
+#
 #************************************************
 
 include(CMakeParseArguments)
+include(ExternalProject)
 
 # Add precompiled header support
 ##include(cmake/PrecompiledHeader.cmake)
@@ -108,7 +113,7 @@ macro(add_external_clean package dir dl target)
   set(reset_file "${CMAKE_BINARY_DIR}/BOSS_reset_info/reset_info.${safe_package}.boss")
   add_custom_target(clean-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-BOSS ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
                                      COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && (${target})) || true
-                                     COMMAND [ -e ${reset_file} ] && python ${BOSS_dir}/boss.py -r ${reset_file} || true)
+                                     COMMAND [ -e ${reset_file} ] && ${PYTHON_EXECUTABLE} ${BOSS_dir}/boss.py -r ${reset_file} || true)
   add_custom_target(nuke-${package} DEPENDS clean-${package}
                                     COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-download ${rmstring}-download-failed ${rmstring}-mkdir ${rmstring}-patch ${rmstring}-update ${rmstring}-gitclone-lastrun.txt ${dl} || true
                                     COMMAND ${CMAKE_COMMAND} -E remove_directory ${dir} || true)
@@ -192,7 +197,7 @@ endmacro()
 # Function to add a GAMBIT custom command and target
 macro(add_gambit_custom target filename HARVESTER DEPS)
   add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/${filename}
-                     COMMAND python ${${HARVESTER}} -x __not_a_real_name__,${itch_with_commas}
+                     COMMAND ${PYTHON_EXECUTABLE} ${${HARVESTER}} -x __not_a_real_name__,${itch_with_commas}
                      COMMAND touch ${CMAKE_BINARY_DIR}/${filename}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      DEPENDS ${${HARVESTER}}
@@ -210,6 +215,16 @@ function(remove_build_files)
     endif()
   endforeach()
 endfunction()
+
+# Macro to set up internal variables for contrib version of pybind11
+macro(use_contributed_pybind11)
+  set(pybind11_FOUND TRUE)
+  set(pybind11_DIR "${pybind11_CONTRIB_DIR}")
+  set(pybind11_VERSION "${PREFERRED_pybind11_VERSION}")
+  add_subdirectory("${pybind11_DIR}")
+  add_custom_target(nuke-pybind11 COMMAND ${CMAKE_COMMAND} -E remove_directory "${pybind11_DIR}")
+  add_dependencies(nuke-contrib nuke-pybind11)
+endmacro()
 
 # Function to add GAMBIT executable
 function(add_gambit_executable executablename LIBRARIES)
@@ -258,8 +273,14 @@ function(add_gambit_executable executablename LIBRARIES)
     endif()
     set(LIBRARIES ${LIBRARIES} ${HDF5_LIBRARIES})
   endif()
+  if(Mathematica_FOUND AND Mathematica_WSTP_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${Mathematica_WSTP_LIBRARIES})
+  endif()
+  if(pybind11_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${PYTHON_LIBRARIES})
+  endif()
 
-  target_link_libraries(${executablename} ${LIBRARIES} yaml-cpp)
+  target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp)
   add_dependencies(${executablename} mkpath)
 
   #For checking if all the needed libs are present.  Never add them manually with -lsomelib!!
@@ -313,7 +334,7 @@ function(add_standalone executablename)
 
     # Set up the target to call the facilitator script to make the functors source file for this standalone.
     add_custom_command(OUTPUT ${STANDALONE_FUNCTORS}
-                       COMMAND python ${STANDALONE_FACILITATOR} ${executablename} -m __not_a_real_name__,${COMMA_SEPARATED_MODULES}
+                       COMMAND ${PYTHON_EXECUTABLE} ${STANDALONE_FACILITATOR} ${executablename} -m __not_a_real_name__,${COMMA_SEPARATED_MODULES}
                        COMMAND touch ${STANDALONE_FUNCTORS}
                        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                        DEPENDS modules_harvested
@@ -402,7 +423,7 @@ function(add_standalone_tarballs modules version)
 
   add_custom_target(standalone_tarballs)
 
-  file(WRITE "${CMAKE_BINARY_DIR}/tarball_info.cmake"
+  file(WRITE "${PROJECT_SOURCE_DIR}/cmake/tarball_info.cmake"
    "#*** GAMBIT ***********************\n"
    "# This file automatically generated \n"
    "# by utlities.cmake. Do not modify. \n"
@@ -426,7 +447,6 @@ function(add_standalone_tarballs modules version)
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Utils ${dirname}/Utils
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Printers ${dirname}/Printers
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/cmake ${dirname}/cmake
-                                      COMMAND ${CMAKE_COMMAND} -E copy tarball_info.cmake ${dirname}/cmake/
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/config ${dirname}/config
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/contrib ${dirname}/contrib
                                       COMMAND ${CMAKE_COMMAND} -E remove -f ${module}.tar
@@ -442,7 +462,6 @@ function(add_standalone_tarballs modules version)
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Elements ${dirname}/Elements
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Backends ${dirname}/Backends
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/cmake ${dirname}/cmake
-                                      COMMAND ${CMAKE_COMMAND} -E copy tarball_info.cmake ${dirname}/cmake/
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/config ${dirname}/config
                                       COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/contrib ${dirname}/contrib
                                       COMMAND ${CMAKE_COMMAND} -E remove -f ${module}.tar
@@ -468,7 +487,6 @@ function(add_standalone_tarballs modules version)
                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Elements ${dirname}/Elements
                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Backends ${dirname}/Backends
                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/cmake ${dirname}/cmake
-                             COMMAND ${CMAKE_COMMAND} -E copy tarball_info.cmake ${dirname}/cmake/
                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/config ${dirname}/config
                              COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/contrib ${dirname}/contrib
                              COMMAND ${CMAKE_COMMAND} -E remove -f 3Bit.tar
@@ -481,7 +499,7 @@ endfunction()
 
 # Simple function to find specific Python modules
 macro(find_python_module module)
-  execute_process(COMMAND python -c "import ${module}" RESULT_VARIABLE return_value ERROR_QUIET)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module}" RESULT_VARIABLE return_value ERROR_QUIET)
   if (NOT return_value)
     message(STATUS "Found Python module ${module}.")
     set(PY_${module}_FOUND TRUE)
@@ -530,10 +548,10 @@ macro(BOSS_backend name backend_version)
     endif()
     ExternalProject_Add_Step(${name}_${ver} BOSS
       # Run BOSS
-      COMMAND python ${BOSS_dir}/boss.py ${BOSS_castxml_cc} ${BOSS_includes} ${name}_${backend_version_safe}
+      COMMAND ${PYTHON_EXECUTABLE} ${BOSS_dir}/boss.py ${BOSS_castxml_cc} ${BOSS_includes} ${name}_${backend_version_safe}
       # Copy BOSS-generated files to correct folders within Backends/include
-      COMMAND cp -r BOSS_output/for_gambit/backend_types/${name_in_frontend}_${backend_version_safe} ${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/
-      COMMAND cp BOSS_output/frontends/${name_in_frontend}_${backend_version_safe}.hpp ${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/${name_in_frontend}_${backend_version_safe}.hpp
+      COMMAND cp -r BOSS_output/${name_in_frontend}_${backend_version_safe}/for_gambit/backend_types/${name_in_frontend}_${backend_version_safe} ${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/
+      COMMAND cp BOSS_output/${name_in_frontend}_${backend_version_safe}/frontends/${name_in_frontend}_${backend_version_safe}.hpp ${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/${name_in_frontend}_${backend_version_safe}.hpp
       DEPENDEES patch
       DEPENDERS configure
     )

@@ -19,12 +19,12 @@
 #include "sm_twoloophiggs.hpp"
 #include "wrappers.hpp"
 #include "pv.hpp"
+#include "logger.hpp"
 
 #include <cmath>
 
 namespace flexiblesusy {
-
-using namespace passarino_veltman;
+namespace sm_twoloophiggs {
 
 /**
  * Standard Model Higgs self-energy 1-loop (Landau gauge).
@@ -56,6 +56,8 @@ double self_energy_higgs_1loop_sm(
    double p, double scale, double mt, double yt,
    double v, double gY, double g2, double lambda)
 {
+   using namespace passarino_veltman;
+
    const double yt2 = Sqr(yt);
    const double mt2 = Sqr(mt);
    const double p2 = Sqr(p);
@@ -106,6 +108,8 @@ double self_energy_higgs_1loop_sm(
 double self_energy_higgs_1loop_at_sm(
    double p, double scale, double mt, double yt)
 {
+   using namespace passarino_veltman;
+
    const double yt2 = Sqr(yt);
    const double mt2 = Sqr(mt);
    const double p2 = Sqr(p);
@@ -119,16 +123,21 @@ double self_energy_higgs_1loop_at_sm(
 
 /**
  * Standard Model Higgs self-energy 2-loop, \f$O(\alpha_t
- * \alpha_s)\f$.  Taken from arxiv:1205.6497, Eq. (20).
+ * \alpha_s)\f$.  Taken from arxiv:1407.4336, Eq. (2.47), including
+ * momentum dependence.
  *
  * @note The result contains the 2-loop tadpole diagrams.  It is
  * therefore not 1-particle irreducible (1PI).
  *
- * @note The sign of the result is opposite to arxiv:1205.6497,
- * Eq. (20).
+ * @note The sign of the result is opposite to arxiv:1407.4336,
+ * Eq. (2.47).
+ *
+ * @note The momentum dependence is approximated up to the order
+ * \f$p^2/m_t^2\f$ using Eqs. (3.11)-(3.14) from arxiv:1407.4336.
  *
  * @warning The result is in Landau gauge (\f$\xi = 0\f$).
  *
+ * @param p2    squared momentum
  * @param scale renormalization scale
  * @param mt MS-bar top mass
  * @param yt MS-bar Yukawa coupling
@@ -137,31 +146,42 @@ double self_energy_higgs_1loop_at_sm(
  * @return real part of 2-loop self-energy \f$O(\alpha_t \alpha_s)\f$
  */
 double self_energy_higgs_2loop_at_as_sm(
-   double scale, double mt, double yt, double g3)
+   double p2, double scale, double mt, double yt, double g3)
 {
    const double yt2 = Sqr(yt);
-   const double mt2 = Sqr(mt);
    const double g32 = Sqr(g3);
-   const double Q2 = Sqr(scale);
-   const double LogT = FiniteLog(mt2 / Q2);
-   const double LogT2 = Sqr(LogT);
+   const double t = Sqr(mt);
+   const double s = p2;
+   const double q = Sqr(scale);
+   const double lnt = std::log(t/q);
+
+   const double A = t*(lnt - 1);
+   const double B = -lnt + s/(6*t);
+   const double T = 0.5*Sqr(lnt - 1) + s/(4*t);
+   const double Tbar = -0.5*(3 + 2*lnt + Sqr(lnt)) + s/(36*t)*(6*lnt + 1);
+   const double M = 1./t + 13.*s/(72*Sqr(t));
 
    const double result =
-      2*mt2 * 16*g32*yt2*(3*LogT2 + LogT);
+      g32*yt2*(
+         8*(4*t - s)*(s - 2*t)*M + (36*s - 168*t)*T
+         + 16*(s - 4*t)*Tbar + 14*s*Sqr(B) + (-176 + 36*s/t)*A*B
+         + (80*t - 36*s)*B - 28*Sqr(A)/t + 80*t - 17*s
+      );
 
    return - result * twoLoop;
 }
 
 /**
  * Standard Model Higgs self-energy 2-loop, \f$O(\alpha_t^2)\f$.
- * Taken from arxiv:1205.6497, Eq. (20).
+ * Taken from arxiv:1504.05200, Eq. (20).
  *
  * @note The result contains the 2-loop tadpole diagrams.  It is
  * therefore not 1-particle irreducible (1PI).
  *
- * @note The sign of the result is opposite to arxiv:1205.6497,
+ * @note The sign of the result is opposite to arxiv:1504.05200,
  * Eq. (20).
  *
+ * @param p2    squared momentum (not used so far)
  * @param scale renormalization scale
  * @param mt MS-bar top mass
  * @param yt MS-bar Yukawa coupling
@@ -169,16 +189,16 @@ double self_energy_higgs_2loop_at_as_sm(
  * @return real part of 2-loop self-energy \f$O(\alpha_t^2) \f$
  */
 double self_energy_higgs_2loop_at_at_sm(
-   double scale, double mt, double yt)
+   double /* p2 */, double scale, double mt, double yt)
 {
-   const double yt4 = Power(yt,4);
+   const double yt4 = Power4(yt);
    const double mt2 = Sqr(mt);
    const double Q2 = Sqr(scale);
    const double LogT = FiniteLog(mt2 / Q2);
    const double LogT2 = Sqr(LogT);
 
    const double result =
-      2*mt2*(-3*yt4*(9*LogT2 - 3*LogT + 2 + Sqr(Pi)/3.));
+      2*mt2*(-3*yt4*(3*LogT2 - 7*LogT + 2 + Sqr(Pi)/3.));
 
    return - result * twoLoop;
 }
@@ -195,7 +215,7 @@ double QB0(double p, double m1, double m2, double Q) {
    return ReB0(p*p, m1*m1, m2*m2, Q*Q);
 }
 
-}
+} // anonymous namespace
 
 /**
  * Standard Model Higgs 1-loop self-energy as used in SUSYHD 1.0.2.
@@ -274,4 +294,5 @@ double self_energy_higgs_2loop_sm_SUSYHD(
    return sigma;
 }
 
+} // namespace sm_twoloophiggs
 } // namespace flexiblesusy
