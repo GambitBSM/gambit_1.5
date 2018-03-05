@@ -22,6 +22,7 @@
 ///  *********************************************
 
 #define BACKENDNAME plc
+#define BACKENDLANG CC
 #define VERSION 2.0
 #define SAFE_VERSION 2_0
 

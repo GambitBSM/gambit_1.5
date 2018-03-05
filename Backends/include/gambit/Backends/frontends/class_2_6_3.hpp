@@ -21,6 +21,7 @@
 ///  *********************************************
 
 #define BACKENDNAME class
+#define BACKENDLANG CC
 #define VERSION 2.6.3
 #define SAFE_VERSION 2_6_3
 
