@@ -1,27 +1,27 @@
 #################################################################################################
 #
-#      DiracDM, low mass region, TWalk.
+#      MajoranaDM, high mass region, MultiNest, separate g_scalar and g_pseudoscalar. 
 #
 #################################################################################################
 
 Parameters:
 
-  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_defaults.yaml
+  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan.yaml
 
   StandardModel_Higgs:
     mH:
       range: [124.1, 127.3]
 
-  DiracDM:
-    mF: 
-      range: [45., 70.]
+  MajoranaDM_sps:
+    mX: 
+      range: [45., 10000.]
       prior_type: log
-    lF: 
+    lX_s: 
       range: [1e-6, 1]
       prior_type: log
-    cosXI:
-      range: [-1., 1]
-      prior_type: arccos
+    lX_ps:
+      range: [1e-6, 1]
+      prior_type: log
 
   nuclear_params_sigmas_sigmal:
     sigmas:
@@ -154,7 +154,7 @@ Rules:
     
   - capability: equilibration_time_Sun
     function: equilibration_time_Sun_FermionDMHiggsPortal
-     
+
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
     function: RD_fraction_leq_one
@@ -162,8 +162,6 @@ Rules:
   # Choose to use detailed Fermi Pass-8 dwarfs likelihoood from gamLike
   - capability: lnL_FermiLATdwarfs
     function:  lnL_FermiLATdwarfs_gamLike
-    options:
-      non_self_conjugate: true
 
   # Choose to use DarkSUSY's yield tables for indirect detection
   - capability: SimYieldTable
@@ -189,22 +187,22 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "Dirac_low_mass_TWalk.hdf5"
+    output_file: "Majorana_gs_gp_MN.hdf5"
     delete_file_on_restart: true
-    group: "/DDM"    
+    group: "/MDM"
 
 ##############################################################################################
 Scanner:
 
-  use_scanner: tw
+  use_scanner: mn
 
   scanners:
 
     mn:
       plugin: multinest
       like: LogLike
-      nlive: 1
-      tol: 0.7
+      nlive: 20000
+      tol: 1E-4
 
     diver:
       plugin: diver
@@ -215,8 +213,8 @@ Scanner:
 
     tw:
       plugin: twalk
-      sqrtR: 1.005
-      chain_number: 256
+      sqrtR: 1.001
+      chain_number: 512
 
 ##############################################################################################
 Logger:
@@ -243,4 +241,4 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e+5
     debug: false
 
-  default_output_path: "scans/Dirac/low_mass/TWalk"
+  default_output_path: "scans/Majorana_gs_gp/high_mass/MN"

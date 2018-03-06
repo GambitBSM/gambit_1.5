@@ -6,7 +6,7 @@
 
 Parameters:
 
-  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan.yaml
+  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_defaults.yaml
 
   StandardModel_Higgs:
     mH:
@@ -109,13 +109,6 @@ ObsLikes:
 
     - capability: lnL_vesc
       purpose: LogLike
-
-    # SM nuisance parameter likelihoods
-    - capability: lnL_t_mass
-      purpose:    LogLike
-      
-    - capability: lnL_alpha_s
-      purpose:    LogLike
       
     # Other observables
     - capability: RD_oh2
@@ -169,8 +162,6 @@ Rules:
   # Choose to use detailed Fermi Pass-8 dwarfs likelihoood from gamLike
   - capability: lnL_FermiLATdwarfs
     function:  lnL_FermiLATdwarfs_gamLike
-    options:
-      non_self_conjugate: true
 
   # Choose to use DarkSUSY's yield tables for indirect detection
   - capability: SimYieldTable
@@ -196,8 +187,8 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "MDM_test.hdf5"
-    delete_file_on_restart: false
+    output_file: "Majorana_low_mass_diver.hdf5"
+    delete_file_on_restart: true
     group: "/MDM"    
 
 ##############################################################################################
