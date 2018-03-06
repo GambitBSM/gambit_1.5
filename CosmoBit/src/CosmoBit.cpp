@@ -56,33 +56,33 @@ namespace Gambit
       double temp_value;
       if (runOptions->hasKey("k_pivot"))
       {
-	temp_value = runOptions->getValue<double>("k_pivot");
-	additional_args["k_pivot"] = temp_value;
-	len_of_input++;
+        temp_value = runOptions->getValue<double>("k_pivot");
+        additional_args["k_pivot"] = temp_value;
+        len_of_input++;
       }
       if (runOptions->hasKey("N_ur"))
       {
-	temp_value = runOptions->getValue<double>("N_ur");
-	additional_args["N_ur"] = temp_value;
-	len_of_input++;
+        temp_value = runOptions->getValue<double>("N_ur");
+        additional_args["N_ur"] = temp_value;
+        len_of_input++;
       }
       if (runOptions->hasKey("N_ncdm"))
       {
-	temp_value = runOptions->getValue<double>("N_ncdm");
-	additional_args["N_ncdm"] = temp_value;
-	len_of_input++;
+        temp_value = runOptions->getValue<double>("N_ncdm");
+        additional_args["N_ncdm"] = temp_value;
+        len_of_input++;
       }
       if (runOptions->hasKey("m_ncdm"))
       {
-	temp_value = runOptions->getValue<double>("m_ncdm");
-	additional_args["m_ncdm"] = temp_value;
-	len_of_input++;
+        temp_value = runOptions->getValue<double>("m_ncdm");
+        additional_args["m_ncdm"] = temp_value;
+        len_of_input++;
       }
       if (runOptions->hasKey("T_ncdm"))
       {
-	temp_value = runOptions->getValue<double>("T_ncdm");
-	additional_args["T_ncdm"] = temp_value;
-	len_of_input++;
+        temp_value = runOptions->getValue<double>("T_ncdm");
+        additional_args["T_ncdm"] = temp_value;
+        len_of_input++;
       }
 
       BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
@@ -93,14 +93,14 @@ namespace Gambit
       sprintf(cosmo.fc.value[7],"%d",l_max);
       strcpy(cosmo.fc.name[8],"lensing");
       strcpy(cosmo.fc.value[8],"yes");
-      
+
       int i = 9;
       std::map<char*,double>::iterator it;
       for (it = additional_args.begin(); it != additional_args.end(); it++)
       {
-	sprintf(cosmo.fc.name[i],"%s",it->first);
+        sprintf(cosmo.fc.name[i],"%s",it->first);
         sprintf(cosmo.fc.value[i],"%g",it->second);
-	i++;
+        i++;
       }
 
       strcpy(cosmo.fc.name[1],"omega_b");
@@ -1171,7 +1171,7 @@ namespace Gambit
       //--------------------------------------------------------------------------
       clik_object* high_clikid;
       clik_error *_err;
-      
+
       high_clikid = BEreq::return_high_TTTEEE_lite();
       _err = BEreq::clik_initialize_error();
 
