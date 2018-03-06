@@ -3379,6 +3379,15 @@ Gamma_RHN2rho0nu: |
 Gamma_RHN2rhoplusl: |
   Decay rate of right-handed neutrinos to a positively-charged rho meson and a lepton
 
+Gamma_RHN2nuuubar: |
+  Decay rate of right-handed neutrinos to a left-handed neutrino and a meson composed of up-type quarks
+
+Gamma_RHN2nuddbar: |
+  Decay rate of right-handed neutrinos to a left-handed neutrino and a meson composed of down-type quarks
+
+Gamma_RHN2nuudbar: |
+  Decay rate of right-handed neutrinos to a lepton, one up-type and one down-type quark
+
 Gamma_BBN: |
   Total decay rate for right-handed neutrinos, combining all decays listed
 

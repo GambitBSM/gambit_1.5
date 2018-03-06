@@ -455,7 +455,7 @@ namespace Gambit
             else
               x_a = m_lep[j]/M[i];
               x_b = m_lep[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(0,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*pow(x_a,4.0)*log((1 - (S(x_a,x_b)*(1+pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_b,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_a,2.0)))) - (12*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)+pow(x_b,2.0))) - (2*pow(x_a,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_b,2.0)))) + (12*pow(x_a,4.0)*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_a,2.0)) - (2*pow(x_b,2.0)) + pow(x_a,4.0) + pow(x_b,4.0)) / (2*pow(x_a,2.0)*pow(x_b,2.0)))));
+              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*pow(x_a,4.0)*log((1 - (S(x_a,x_b)*(1+pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_b,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_a,2.0)))) - (12*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)+pow(x_b,2.0))) - (2*pow(x_a,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_b,2.0)))) + (12*pow(x_a,4.0)*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_a,2.0)) - (2*pow(x_b,2.0)) + pow(x_a,4.0) + pow(x_b,4.0)) / (2*pow(x_a,2.0)*pow(x_b,2.0)))));
           }
         }
       }
@@ -514,6 +514,208 @@ namespace Gambit
       result = gamma;
     }
 
+    // Helper function; formula is in [arXiv:1208.4607v2]
+    double f_u(double x)
+    {
+      // TODO: get either from PrecisionBit or sminputs
+      static double s_W_sq = 0.22336;  // get from within GAMBIT in future
+      static double C1 = s_W_sq*(3 - (4*s_W_sq));
+      return (0.25 - ((2/9)*C1) - ((3.5-((20/9)*C1))*pow(x,2.0)) - ((0.5+(4*C1))*pow(x,4.0)) - ((3-(8*C1))*pow(x,6.0)));
+    }
+
+    // Formula is from [arXiv:1208.4607v2]
+    void Gamma_RHN2nuuubar(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2nuuubar;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      // TODO: get either from PrecisionBit or sminputs
+      static double s_W_sq = 0.22336;  // get from within GAMBIT in future
+      static double C1 = s_W_sq*(3 - (4*s_W_sq));
+      std::vector<double> m_uquark(3), gamma(3), M(3);
+      double x_q;
+      // Taking the quark masses from PDG; available within GAMBIT?
+      m_uquark[0] = 0.0022;  // up; GeV
+      m_uquark[1] = 1.28;  // charm; GeV
+      m_uquark[2] = 173.1; // top; GeV
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]>7.5)  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
+        {
+          gamma[i] = 0.0;
+          break;
+        }
+        else
+          for (int j=0; j<3; j++)
+          {
+            for (int k=0; k<3; k++)
+            {
+              if (M[i]<m_uquark[k])
+                gamma[i] += 0.0;
+              else
+                x_q = m_uquark[k]/M[i];
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_u(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((16/3)*C1*pow(x_q,2.0)) + ((3-(8*C1))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
+            }
+          }
+      }
+      result = gamma;
+    }
+
+    // Helper function; formula is in [arXiv:1208.4607v2]
+    double f_d(double x)
+    {
+      // TODO: get either from PrecisionBit or sminputs
+      static double s_W_sq = 0.22336;  // get from within GAMBIT in future
+      static double C2 = s_W_sq*(3 - (2*s_W_sq));
+      return (0.25 - ((1/9)*C2) - (((2/7)-((10/9)*C2))*pow(x,2.0)) - ((0.5+(2*C2))*pow(x,4.0)) - ((3-(4*C2))*pow(x,6.0)));
+    }
+
+    // Formula is from [arXiv:1208.4607v2]
+    void Gamma_RHN2nuddbar(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2nuddbar;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      // TODO: get either from PrecisionBit or sminputs
+      static double s_W_sq = 0.22336;  // get from within GAMBIT in future
+      static double C2 = s_W_sq*(3 - (2*s_W_sq));
+      std::vector<double> m_dquark(3), gamma(3), M(3);
+      double x_q;
+      // Taking the quark masses from PDG; available within GAMBIT?
+      m_dquark[0] = 0.0047;  // down; GeV
+      m_dquark[1] = 0.096;  // strange; GeV
+      m_dquark[2] = 4.18; // bottom; GeV
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]>7.5)  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
+        {
+          gamma[i] += 0.0;
+          break;
+        }
+        else
+          for (int j=0; j<3; j++)
+          {
+            for (int k=0; k<3; k++)
+            {
+              if (M[i]<m_dquark[k])
+                gamma[i] += 0.0;
+              else
+                x_q = m_dquark[k]/M[i];
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_d(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((8/3)*C2*pow(x_q,2.0)) + ((1-((4/3)*C2))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
+            }
+          }
+      }
+      result = gamma;
+    }
+
+    // Helper function to find two heavier decay products
+    std::vector<double> two_heaviest_sort(std::vector<double> decay_prod)
+    {
+      std::vector<double> result(2);
+      double temp;
+      result[0] = decay_prod[0];
+      result[1] = decay_prod[1];
+      if (result[0]<result[1])
+      {
+        temp = result[0];
+        result[0] = result[1];
+        result[1] = temp;
+      }
+      if (decay_prod[2]>result[0])
+      {
+        result[1] = result[0];
+        result[0] = decay_prod[2];
+      }
+      else if (decay_prod[2]>result[1])
+        result[1] = decay_prod[2];
+      return result;
+    }
+
+    // Formula is from [arXiv:1208.4607v2]
+    void Gamma_RHN2nuudbar(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2nuudbar;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      static double G_F_sq = pow(sminputs.GF, 2.0);
+      //TODO: Take from the model parameters (CKM_Lambda = Vus)
+      // Values taken from PDG
+      std::vector< std::vector<double> > V { {0.97434,0.22506,0.00357},
+                                             {0.22492,0.97351,0.0411},
+                                             {0.00875,0.0403,0.99915} };
+      double x, y;
+      std::vector<double> m_lep(3), m_uquark(3), m_dquark(3), gamma(3), M(3), decay_prod(3), two_heaviest(2);
+      // Taking the quark masses from PDG; available within GAMBIT?
+      m_lep[0] = sminputs.mE;
+      m_lep[1] = sminputs.mMu;
+      m_lep[2] = sminputs.mTau;
+      m_uquark[0] = 0.0022;  // up; GeV
+      m_uquark[1] = 1.28;  // charm; GeV
+      m_uquark[2] = 173.1; // top; GeV
+      m_dquark[0] = 0.0047;  // down; GeV
+      m_dquark[1] = 0.096;  // strange; GeV
+      m_dquark[2] = 4.18; // bottom; GeV
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        if (M[i]<7.5)  // For now, take 7.5 GeV to be the mass limit below which the RHN decay is to lepton+meson final state
+        {
+          gamma[i] += 0.0;
+          break;
+        }
+        else
+          for (int j=0; j<3; j++)
+          {
+            if (M[i]<m_lep[j])
+            {
+              gamma[i] += 0.0;
+              break;
+            }
+            else
+            {
+              for (int k=0; k<3; k++)
+              {
+                if (M[i]<m_uquark[k])
+                {
+                  gamma[i] += 0.0;
+                  break;
+                }
+                else
+                {
+                  for (int l=0; l<3; l++)
+                  {
+                    if (M[i]<m_dquark[l])
+                      gamma[i] += 0.0;
+                    else
+                      decay_prod[0] = m_lep[j];
+                      decay_prod[1] = m_uquark[k];
+                      decay_prod[2] = m_dquark[l];
+                      two_heaviest = two_heaviest_sort(decay_prod);
+                      x = two_heaviest[0];
+                      y = two_heaviest[1];
+                      gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * pow(V[k][l],2.0) * ((S(x,y)*g(x,y)) - (12*pow(x,4.0)*log((1 - (S(x,y)*(1+pow(x,2.0)-pow(y,2.0))) - (2*pow(y,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0)) / (2*pow(x,2.0)))) - (12*pow(y,4.0)*log((1 - (S(x,y)*(1-pow(x,2.0)+pow(y,2.0))) - (2*pow(x,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0)) / (2*pow(y,2.0)))) + (12*pow(x,4.0)*pow(y,4.0)*log((1 - (S(x,y)*(1-pow(x,2.0)-pow(y,2.0))) - (2*pow(x,2.0)) - (2*pow(y,2.0)) + pow(x,4.0) + pow(y,4.0)) / (2*pow(x,2.0)*pow(y,2.0)))));
+                  }
+                }
+              }
+            }
+          }
+      }
+      result = gamma;
+    }
+
     // Calculates total decay width for each RHN
     void Gamma_BBN(std::vector<double>& result)
     {
@@ -533,11 +735,14 @@ namespace Gambit
       std::vector<double> RHN23nu = *Dep::Gamma_RHN23nu;
       std::vector<double> RHN2llnu = *Dep::Gamma_RHN2llnu;
       std::vector<double> RHN2null = *Dep::Gamma_RHN2null;
+      std::vector<double> RHN2nuuubar = *Dep::Gamma_RHN2nuuubar;
+      std::vector<double> RHN2nuddbar = *Dep::Gamma_RHN2nuddbar;
+      std::vector<double> RHN2nuudbar = *Dep::Gamma_RHN2nuudbar;
       std::vector<double> gamma_total(3);
       
       for (int i=0; i<3; i++)
       {
-        gamma_total[i] = 2*(RHN2pi0nu[i]+RHN2piplusl[i]+RHN2Kplusl[i]+RHN2Dplusl[i]+RHN2Dsl[i]+RHN2Bplusl[i]+RHN2Bsl[i]+RHN2Bcl[i]+RHN2etanu[i]+RHN2etaprimenu[i]+RHN2rhoplusl[i]+RHN2rho0nu[i]+RHN23nu[i]+RHN2llnu[i]+RHN2null[i]);  // factor of 2 accounts for Majorana nature
+        gamma_total[i] = 2*(RHN2pi0nu[i]+RHN2piplusl[i]+RHN2Kplusl[i]+RHN2Dplusl[i]+RHN2Dsl[i]+RHN2Bplusl[i]+RHN2Bsl[i]+RHN2Bcl[i]+RHN2etanu[i]+RHN2etaprimenu[i]+RHN2rhoplusl[i]+RHN2rho0nu[i]+RHN23nu[i]+RHN2llnu[i]+RHN2null[i]+RHN2nuuubar[i]+RHN2nuddbar[i]+RHN2nuudbar[i]);  // factor of 2 accounts for Majorana nature
       }
       result = gamma_total;
     }
@@ -554,7 +759,11 @@ namespace Gambit
       {
         if((1/gamma[i])>0.1)
         {
-          result_bbn = -12.5;
+//          result_bbn = -12.5;
+          std::ostringstream msg;
+          msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
           break;
         }
       }
