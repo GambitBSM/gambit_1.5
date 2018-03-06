@@ -44,3 +44,20 @@ using namespace Gambit::Utils;
     }
 #undef PARENT
 #undef MODEL
+
+#define MODEL MajoranaDM_xi
+#define PARENT MajoranaDM
+    void MODEL_NAMESPACE::MajoranaDM_xi_to_MajoranaDM(const ModelParameters &myparams, ModelParameters &parentparams)
+    {
+        double mX = myparams["mX"];
+        double lX = myparams["lX"];
+        double xi = myparams["xi"];
+        double cosXI = std::cos(xi);
+        parentparams.setValue("mX", mX);
+        parentparams.setValue("lX", lX);
+        parentparams.setValue("cosXI", cosXI);
+    }
+#undef PARENT
+#undef MODEL
+    
+     

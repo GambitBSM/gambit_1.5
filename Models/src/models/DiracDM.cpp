@@ -48,3 +48,18 @@ using namespace Gambit::Utils;
     }
 #undef PARENT
 #undef MODEL
+
+#define MODEL DiracDM_xi
+#define PARENT DiracDM
+    void MODEL_NAMESPACE::DiracDM_xi_to_DiracDM(const ModelParameters &myparams, ModelParameters &parentparams)
+    {
+        double mF = myparams["mF"];
+        double lF = myparams["lF"];
+        double xi = myparams["xi"];
+        double cosXI = std::cos(xi);
+        parentparams.setValue("mF", mF);
+        parentparams.setValue("lF", lF);
+        parentparams.setValue("cosXI", cosXI);
+    }
+#undef PARENT
+#undef MODEL
