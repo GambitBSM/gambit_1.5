@@ -804,9 +804,9 @@ namespace Gambit
     std::vector<std::string> HDF5Printer::find_temporary_files(const bool error_if_inconsistent)
     {
       /// Already have a routine to do the work
-      std::pair<std::vector<std::string>,std::vector<int>> out = HDF5::find_temporary_files(finalfile);
+      std::pair<std::vector<std::string>,std::vector<size_t>> out = HDF5::find_temporary_files(finalfile);
       std::vector<std::string> result = out.first;
-      std::vector<int> missing = out.second;
+      std::vector<size_t> missing = out.second;
 
       // Check if all temporary files found (i.e. if output from some rank is missing)
       if(error_if_inconsistent)
@@ -1180,8 +1180,9 @@ namespace Gambit
       // exists, and it will crash if it doesn't. So we need to first check if such a file exists.
       bool combined_file_exists = Utils::file_exists(tmp_comb_file); // We already check this externally; pass in as flag?
       std::cout<<"combined_file_exists? "<<combined_file_exists<<std::endl;
-      // The last bool just tells the routine to delete the temporary files when it is done
-      HDF5::combine_hdf5_files(tmp_comb_file, finalfile, group, num, combined_file_exists, true);
+      // Second last bool just tells the routine to delete the temporary files when it is done
+      // Last flag, if false, tells routines to throw an error if any expected temporary file cannot be opened for any reason
+      HDF5::combine_hdf5_files(tmp_comb_file, finalfile, group, num, combined_file_exists, true, false);
 
       // This is just left the same as the combine_output_py version!
       if(finalcombine)

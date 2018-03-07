@@ -126,9 +126,10 @@ int main(int argc, char* argv[])
    std::cout <<"     with base filename: "<<finalfile<<std::endl;
 
    // Search for the temporary files to be combined
-   std::pair<std::vector<std::string>,std::vector<int>> out = HDF5::find_temporary_files(finalfile);
+   size_t max_i = 0;
+   std::pair<std::vector<std::string>,std::vector<size_t>> out = HDF5::find_temporary_files(finalfile, max_i);
    std::vector<std::string> tmp_files = out.first;
-   std::vector<int> missing = out.second;
+   std::vector<size_t> missing = out.second;
 
    std::cout <<"  Found "<<tmp_files.size()<<" temporary files to be combined"<<std::endl;
    // Check if all temporary files found (i.e. check if output from some rank is missing)
@@ -138,7 +139,7 @@ int main(int argc, char* argv[])
      if(error_if_inconsistent)
      {
        std::ostringstream errmsg;
-       errmsg << "  Could not locate all the expected temporary output files (found "<<tmp_files.size()<<" temporary files, but are missing the files from the following ranks: "<<missing<<")! If you want to attempt the combination anyway, please add the -f flag to the command line invocation.";
+       errmsg << "  Could not locate all the expected temporary output files (found "<<tmp_files.size()<<" temporary files, but are missing the files from the ranks reported above)! If you want to attempt the combination anyway, please add the -f flag to the command line invocation.";
        std::cerr << errmsg.str() << std::endl;
        exit(EXIT_FAILURE); 
      }
@@ -159,11 +160,14 @@ int main(int argc, char* argv[])
       std::cout<<"  No pre-existing (temporary) combined file found"<<std::endl;  
    }
 
-   int num = tmp_files.size(); // We don't actually use their names here, Greg's code assumes that they
-                               // follow a fixed format and they all exist. We check for this before
-                               // running this function, so this should be fine.
+   size_t num = tmp_files.size() + missing.size();
+   // We don't actually use their names here, Greg's code assumes that they
+   // follow a fixed format. Previous all files had to exist in increasing
+   // numerical order, however now, if you use the -f flag, it is allowed
+   // for some to just be missing. These will just be ignored if they fail
+   // to open.
 
-   HDF5::combine_hdf5_files(tmp_comb_file, finalfile, group, num, combined_file_exists, do_cleanup);
+   HDF5::combine_hdf5_files(tmp_comb_file, finalfile, group, num, combined_file_exists, do_cleanup, !error_if_inconsistent);
 
    std::cout<<"  Combination finished successfully!"<<std::endl;
    if(move_output)

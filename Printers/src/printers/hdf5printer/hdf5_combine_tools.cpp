@@ -234,13 +234,14 @@ namespace Gambit
                 return ret;
             }
                 
-            hdf5_stuff::hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup) 
+            hdf5_stuff::hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup, bool skip) 
               : group_name(group_name)
               , cum_sizes(num, 0)
               , sizes(num, 0)
               , size_tot(0)
               , root_file_name(file_name)
-              , do_cleanup(cleanup) 
+              , do_cleanup(cleanup)
+              , skip_unreadable(skip)
             {
                 //std::vector<bool> temp;
                 //herr_t status;
@@ -249,153 +250,175 @@ namespace Gambit
                 for (int i = 0; i < num; i++)
                 {
                     // Simple Progress monitor
-                    std::cout << "  Scanning temp file "<<i<<" for datasets...             \r";
+                    std::cout << "  Scanning temp file "<<i<<" for datasets...             \r"<<std::flush;
 
                     std::string fname = get_fname(i);
-                    hid_t file_id = HDF5::openFile(fname);
-                    if(file_id<0)
+                    hid_t file_id, group_id, aux_group_id;
+                    hssize_t size = 0; // Length of datasets in this file (to be measured)
+                    if(HDF5::checkFileReadable(fname))
                     {
-                        /* Still no good; error */
+                        file_id = HDF5::openFile(fname);
+                    }
+                    else
+                    {
+                        //std::cout << "  Could not open file "<<i<<"                 "<<std::endl; 
+                        file_id = -1;
+                        group_id = -1;
+                        aux_group_id = -1;
+                    }
+
+                    if(file_id<0 and not skip)
+                    {
+                        // Can't read file, it is missing or corrupted, and not allowed to skip it, so error
                         std::ostringstream errmsg;
                         errmsg << "Error combining temporary HDF5 output! Failed to open expected temporary file '"<<fname<<"'.";
                         printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
 
-                    files.push_back(file_id);
-                    
-                    //hid_t group_id = H5Gopen2(file_id, group_name.c_str(), H5P_DEFAULT);
-                    hid_t group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created
-                    groups.push_back(group_id);
-                    
-                    // Extract dataset names from the group
-                    //std::vector<std::string> names;
-                    //H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *) &names);
+                   
+                    if(file_id >= 0 )
+                    {
+                        group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created
+
+                        // Extract dataset names from the group
+                        //std::vector<std::string> names;
+                        //H5Literate (group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func, (void *) &names);
  
-                    std::vector<std::string> names = get_dset_names(group_id);
-
-                  
-                    if (i == 0)
-                    {
-                        param_names = names;
-                        param_set = std::unordered_set<std::string>(names.begin(), names.end());
-                    }
-                    else
-                    {
-                        for (auto it = names.begin(), end = names.end(); it != end; ++it)
-                        {
-                            if (param_set.find(*it) == param_set.end())
+                        std::vector<std::string> names = get_dset_names(group_id);
+                 
+                        // No special case needed 
+                        //if (i == 0)
+                        //{
+                        //    param_names = names;
+                        //    param_set = std::unordered_set<std::string>(names.begin(), names.end());
+                        //}
+                        //else
+                        //{
+                            for (auto it = names.begin(), end = names.end(); it != end; ++it)
                             {
-                                // New parameter name found; add it to the list to be processed.
-                                param_names.push_back(*it);
-                                param_set.insert(*it);
+                                if (param_set.find(*it) == param_set.end())
+                                {
+                                    // New parameter name found; add it to the list to be processed.
+                                    param_names.push_back(*it);
+                                    param_set.insert(*it);
+                                }
                             }
-                        }
-                    }
-                    
-                    // Get RA dataset names
-                    hid_t aux_group_id = HDF5::openGroup(file_id, group_name+"/RA", true);
-                    aux_groups.push_back(aux_group_id);                     
-                    //std::vector<std::string> aux_names;
-                    //H5Literate (aux_group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func_aux, (void *) &aux_names);
-                    
-                    std::vector<std::string> aux_names = get_dset_names(aux_group_id);
+                        //}
+                        
+                        // Get RA dataset names
+                        aux_group_id = HDF5::openGroup(file_id, group_name+"/RA", true);
+                        //std::vector<std::string> aux_names;
+                        //H5Literate (aux_group_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, op_func_aux, (void *) &aux_names);
+                        
+                        std::vector<std::string> aux_names = get_dset_names(aux_group_id);
 
-                    if (i == 0)
-                    {
-                        aux_param_names = aux_names;
-                        aux_param_set = std::unordered_set<std::string>(aux_names.begin(), aux_names.end());
-                    }
-                    else
-                    {
-                        for (auto it = aux_names.begin(), end = aux_names.end(); it != end; ++it)
-                        {
-                            if (aux_param_set.find(*it) == aux_param_set.end())
+                        // Don't need this special case I think
+                        //if (not found_valid_file) // These are the first of these names we have found
+                        //{
+                        //    aux_param_names = aux_names;
+                        //    aux_param_set = std::unordered_set<std::string>(aux_names.begin(), aux_names.end());
+                        //}
+                        //else
+                        //{
+                            for (auto it = aux_names.begin(), end = aux_names.end(); it != end; ++it)
                             {
-                                // New aux parameter name found; add it to the list to be processed.
-                                aux_param_names.push_back(*it);
-                                aux_param_set.insert(*it);
+                                if (aux_param_set.find(*it) == aux_param_set.end())
+                                {
+                                    // New aux parameter name found; add it to the list to be processed.
+                                    aux_param_names.push_back(*it);
+                                    aux_param_set.insert(*it);
+                                }
                             }
-                        }
-                    }
+                        //}
 
-                    HDF5::errorsOff();
-                    hid_t dataset  = HDF5::openDataset(group_id, "pointID", true); // Allow failure to open
-                    hid_t dataset2 = HDF5::openDataset(group_id, "pointID_isvalid", true);
-                    HDF5::errorsOn();
-                    hssize_t size; // To be measured
-                    if(dataset<0 and dataset2<0)
-                    {
-                       // Probably the sync group is empty for this file, just skip it
-                       size = 0;
-                       if (i == num - 1) // Do we need this here?
-                       {
-                           size_tot_l = size_tot + size; // Last?
-                       }
-                    } 
-                    else if(dataset<0 or dataset2<0)
-                    {
-                       // Either primary or isvalid dataset missing (but not both). Error!
-                       std::ostringstream errmsg;
-                       errmsg << "Error combining temporary HDF5 output! One of the temporary files is missing either the 'pointID' or 'pointID_isvalid' dataset in the primary group (but not both, so the group is not empty!)";
-                       printer_error().raise(LOCAL_INFO, errmsg.str());
-                    }
-                    else
-                    {
-                       // Everything fine, measure the dataset sizes
-                       hid_t dataspace = H5Dget_space(dataset);
-                       hid_t dataspace2 = H5Dget_space(dataset2);
-                       size           = H5Sget_simple_extent_npoints(dataspace); // Use variable declared outside the if block
-                       hssize_t size2 = H5Sget_simple_extent_npoints(dataspace2);
-                       
-                       std::vector<bool> valids;
-                       Enter_HDF5<read_hdf5>(dataset2, valids);
-                       
-                       if (i == 0)
-                       {
-                           std::vector<unsigned long long> pt_id;
-                           Enter_HDF5<read_hdf5>(dataset2, pt_id);
-                           pt_min = pt_id[0];
-                       }
-                       
-                       if (size != size2)
-                       {
+                        HDF5::errorsOff();
+                        hid_t dataset  = HDF5::openDataset(group_id, "pointID", true); // Allow failure to open
+                        hid_t dataset2 = HDF5::openDataset(group_id, "pointID_isvalid", true);
+                        HDF5::errorsOn();
+                        if(dataset<0 and dataset2<0)
+                        {
+                           // Probably the sync group is empty for this file, just skip it
+                           size = 0;
+                           // Just update? No reason to do only on last file I think
+                           //if (i == num - 1) // Do we need this here?
+                           //{
+                               size_tot_l = size_tot + size; // Last?
+                           //}
+                        } 
+                        else if(dataset<0 or dataset2<0)
+                        {
+                           // Either primary or isvalid dataset missing (but not both). Error!
                            std::ostringstream errmsg;
-                           errmsg << "pointID and pointID_isvalid are not the same size.";
+                           errmsg << "Error combining temporary HDF5 output! One of the temporary files is missing either the 'pointID' or 'pointID_isvalid' dataset in the primary group (but not both, so the group is not empty!)";
                            printer_error().raise(LOCAL_INFO, errmsg.str());
-                       }
-                       
-                       if (i == num - 1)
-                       {
-                           size_tot_l = size_tot + size; // Last?
-                       }
-                       
-                       for (auto it = valids.end()-1; size > 0; --it)
-                       {
-                           if (*it)
-                               break;
-                           else
-                               --size;
-                       }
+                        }
+                        else
+                        {
+                           // Everything fine, measure the dataset sizes
+                           hid_t dataspace = H5Dget_space(dataset);
+                           hid_t dataspace2 = H5Dget_space(dataset2);
+                           size           = H5Sget_simple_extent_npoints(dataspace); // Use variable declared outside the if block
+                           hssize_t size2 = H5Sget_simple_extent_npoints(dataspace2);
+                           
+                           std::vector<bool> valids;
+                           Enter_HDF5<read_hdf5>(dataset2, valids);
+                           
+                           if (i == 0)
+                           {
+                               std::vector<unsigned long long> pt_id;
+                               Enter_HDF5<read_hdf5>(dataset2, pt_id);
+                               pt_min = pt_id[0];
+                           }
+                           
+                           if (size != size2)
+                           {
+                               std::ostringstream errmsg;
+                               errmsg << "pointID and pointID_isvalid are not the same size.";
+                               printer_error().raise(LOCAL_INFO, errmsg.str());
+                           }
+                           
+                           // Just update? No reason to do only on last file I think
+                           //if (i == num - 1)
+                           //{
+                               size_tot_l = size_tot + size; // Last?
+                           //}
+                           
+                           for (auto it = valids.end()-1; size > 0; --it)
+                           {
+                               if (*it)
+                                   break;
+                               else
+                                   --size;
+                           }
 
-                       HDF5::closeSpace(dataspace);
-                       HDF5::closeSpace(dataspace2); 
-                       HDF5::closeDataset(dataset);
-                       HDF5::closeDataset(dataset2);
-                    }                   
- 
+                           HDF5::closeSpace(dataspace);
+                           HDF5::closeSpace(dataspace2); 
+                           HDF5::closeDataset(dataset);
+                           HDF5::closeDataset(dataset2);
+                        }                   
+                    }
+
                     for (int j = i+1, end = cum_sizes.size(); j < end; j++)
                     {
                         cum_sizes[j] += size;
                     }
                     sizes[i] = size;
                     size_tot += size;
- 
+
+                    //std::cout <<"size_tot="<<size_tot<<", (new contribution from file "<<i<<" is "<<size<<", file_id was "<<file_id<<")"<<std::endl;
+
+                    // Record whether files/groups could be opened
+                    files.push_back(file_id);
+                    groups.push_back(group_id);
+                    aux_groups.push_back(aux_group_id);                      
+  
                     // Close groups and tmp file
-                    HDF5::closeGroup(group_id);
+                    if(group_id>-1)     HDF5::closeGroup(group_id);
                     if(aux_group_id>-1) HDF5::closeGroup(aux_group_id);
-                    HDF5::closeFile(file_id);
+                    if(file_id>-1)      HDF5::closeFile(file_id);
                 }
-            }
+                std::cout << "  Finished scanning temp files               "<<std::endl;
+           }
  
             hdf5_stuff::~hdf5_stuff()
             {
@@ -412,7 +435,7 @@ namespace Gambit
                 std::vector<unsigned long long> aux_sizes;
                 
                 hid_t old_file, old_group;
-                std::cout << "resume? " << resume <<std::endl;
+                //std::cout << "resume? " << resume <<std::endl;
                 if (resume)
                 {
                     // Check if 'file' exists?
@@ -583,44 +606,50 @@ namespace Gambit
                 for (auto it = param_names.begin(), end = param_names.end(); it != end; ++it, ++counter)
                 {
                     // Simple Progress monitor
-                    std::cout << " Combining primary datasets... "<<int(100*counter/param_names.size())<<"%   ("<<counter<<" of "<<param_names.size()<<")        \r";
+                    std::cout << "  Combining primary datasets... "<<int(100*counter/param_names.size())<<"%   (copied "<<counter<<" parameters of "<<param_names.size()<<")        \r"<<std::flush;
 
                     std::vector<hid_t> file_ids, group_ids, datasets, datasets2;
                     int valid_dset  = -1; // index of a validly opened dataset (-1 if none)
                     for (int i = 0, end = groups.size(); i < end; i++)
                     {
-                        // Reopen files
-                        // NOTE: RAM problems largely solved, but footprint could be lowered even more if we only open one file at a time.
-                        std::string fname = get_fname(i);
-                        hid_t file_id = HDF5::openFile(fname);
-                        hid_t group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created 
-                        file_ids.push_back(file_id);
-                        group_ids.push_back(group_id);
+                        hid_t file_id  = -1;
+                        hid_t group_id = -1;
                         hid_t dataset = -1;
                         hid_t dataset2 = -1;
 
-                        if(group_id>=0) 
+                        // Skip this file if it wasn't successfully opened earlier
+                        if(files[i]>-1)
                         {
-                           HDF5::errorsOff();
-                           dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
-                           dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
-                           HDF5::errorsOn();
-                        }
+                            // Reopen files
+                            // NOTE: RAM problems largely solved, but footprint could be lowered even more if we only open one file at a time.
+                            std::string fname = get_fname(i);
+                            hid_t file_id = HDF5::openFile(fname);
+                            hid_t group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created 
+                            if(group_id>=0) 
+                            {
+                               HDF5::errorsOff();
+                               dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
+                               dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
+                               HDF5::errorsOn();
+                            }
 
-                        if(dataset>=0)  
-                        {
-                           if(dataset2>=0) valid_dset = i;
-                           else
-                           {
-                              std::ostringstream errmsg;
-                              errmsg << "Error opening dataset '"<<*it<<"_isvalid' from temp file "<<i<<"! Main dataset was opened, but 'isvalid' dataset failed to open! It may be corrupted.";
-                              printer_error().raise(LOCAL_INFO, errmsg.str());
-                           }
+                            if(dataset>=0)  
+                            {
+                               if(dataset2>=0) valid_dset = i;
+                               else
+                               {
+                                  std::ostringstream errmsg;
+                                  errmsg << "Error opening dataset '"<<*it<<"_isvalid' from temp file "<<i<<"! Main dataset was opened, but 'isvalid' dataset failed to open! It may be corrupted.";
+                                  printer_error().raise(LOCAL_INFO, errmsg.str());
+                               }
+                            }
                         }
 
                         datasets.push_back(dataset);
                         datasets2.push_back(dataset2);
-                    }
+                        file_ids.push_back(file_id);
+                        group_ids.push_back(group_id);
+                     }
                     
                     hid_t old_dataset = -1, old_dataset2 = -1;
                     if (resume)
@@ -684,7 +713,7 @@ namespace Gambit
                     HDF5::closeDataset(dataset_out);
                     HDF5::closeDataset(dataset2_out);
                 }
-                std::cout << " Combining primary datasets... Done.                 "<<std::endl;
+                std::cout << "  Combining primary datasets... Done.                                 "<<std::endl;
 
                 // Ben: NEW. Before copying RA points, we need to figure out a map between them
                 // and their targets in the output dataset. That means we need to read through
@@ -714,7 +743,7 @@ namespace Gambit
                    /// Now copy the RA datasets
                    for (auto it = aux_param_names.begin(), end = aux_param_names.end(); it != end; ++it)
                    {
-                       std::cout << " Combining auxilliary datasets... "<<int(100*counter/aux_param_names.size())<<"%         \r";
+                       std::cout << "  Combining auxilliary datasets... "<<int(100*counter/aux_param_names.size())<<"%    (merged "<<counter<<" parameters of "<<aux_param_names.size()<<")         \r"<<std::flush;
                        std::vector<hid_t> file_ids, group_ids, datasets, datasets2;
                        int valid_dset  = -1; // index of a validly opened dataset (-1 if none)
                       
@@ -724,38 +753,44 @@ namespace Gambit
 
                        for (int i = 0, end = aux_groups.size(); i < end; i++)
                        {
-                           // Reopen files
-                           std::string fname = get_fname(i);
-                           hid_t file_id = HDF5::openFile(fname);
-                           hid_t group_id = HDF5::openGroup(file_id, group_name+"/RA", true); // final argument prevents group from being created 
-                           file_ids.push_back(file_id);
-                           group_ids.push_back(group_id);
-
+                           hid_t file_id  = -1;
+                           hid_t group_id = -1;
                            hid_t dataset = -1;
                            hid_t dataset2 = -1;
-   
-                           // Dataset may not exist, and thus fail to open. We will check its status
-                           // later on and ignore it where needed.
-                           if(group_id>=0) 
+
+                           // Skip this file if it wasn't successfully opened earlier
+                           if(files[i]>-1)
                            {
-                              HDF5::errorsOff();
-                              dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
-                              dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
-                              HDF5::errorsOn();
-                           }
+                               // Reopen files
+                               std::string fname = get_fname(i);
+                               file_id = HDF5::openFile(fname);
+                               group_id = HDF5::openGroup(file_id, group_name+"/RA", true); // final argument prevents group from being created 
    
-                           if(dataset>=0)  
-                           {
-                              if(dataset2>=0) valid_dset = i;
-                              else
-                              {
-                                 std::ostringstream errmsg;
-                                 errmsg << "Error opening dataset '"<<*it<<"_isvalid' from temp file "<<i<<"! Main dataset was opened, but 'isvalid' dataset failed to open! It may be corrupted.";
-                                 printer_error().raise(LOCAL_INFO, errmsg.str());
-                              }
+                               // Dataset may not exist, and thus fail to open. We will check its status
+                               // later on and ignore it where needed.
+                               if(group_id>=0) 
+                               {
+                                  HDF5::errorsOff();
+                                  dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
+                                  dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
+                                  HDF5::errorsOn();
+                               }
+   
+                               if(dataset>=0)  
+                               {
+                                  if(dataset2>=0) valid_dset = i;
+                                  else
+                                  {
+                                     std::ostringstream errmsg;
+                                     errmsg << "Error opening dataset '"<<*it<<"_isvalid' from temp file "<<i<<"! Main dataset was opened, but 'isvalid' dataset failed to open! It may be corrupted.";
+                                     printer_error().raise(LOCAL_INFO, errmsg.str());
+                                  }
+                               }
                            }
                            datasets.push_back(dataset);
                            datasets2.push_back(dataset2);
+                           file_ids.push_back(file_id);
+                           group_ids.push_back(group_id); 
                        }
                        
                        hid_t old_dataset = -1, old_dataset2 = -1;
@@ -817,11 +852,11 @@ namespace Gambit
                            if(file_ids[i]>=0)  HDF5::closeFile(file_ids[i]);
                        }
                    }
-                   std::cout << " Combining auxilliary datasets... Done.                 "<<std::endl;
+                   std::cout << "  Combining auxilliary datasets... Done.                 "<<std::endl;
                 }
                 else
                 {
-                   std::cout << " Combining auxilliary datasets... None found, skipping. "<<std::endl;
+                   std::cout << "  Combining auxilliary datasets... None found, skipping. "<<std::endl;
                 }
 
                 // Flush and close output file
@@ -964,14 +999,20 @@ namespace Gambit
                return output_hash;
             }
 
+            std::pair<std::vector<std::string>,std::vector<size_t>> find_temporary_files(const std::string& finalfile)
+            {    
+              size_t max_i = 0;
+              return find_temporary_files(finalfile, max_i);
+            }
+
             /// Search for temporary files to be combined
-            std::pair<std::vector<std::string>,std::vector<int>> find_temporary_files(const std::string& finalfile)
+            std::pair<std::vector<std::string>,std::vector<size_t>> find_temporary_files(const std::string& finalfile, size_t& max_i)
             {    
               // Autodetect temporary files from previous run.
               std::string output_dir = Utils::dir_name(finalfile);
               std::vector<std::string> files = Utils::ls_dir(output_dir);
               std::string tmp_base(Utils::base_name(finalfile) + "_temp_");
-              std::vector<int> ranks;
+              std::vector<size_t> ranks;
               std::vector<std::string> result;
 
               //std::cout << "Matching against: " <<tmp_base<<std::endl;
@@ -986,8 +1027,9 @@ namespace Gambit
                   ss << it->substr(tmp_base.length());
                   if(Utils::isInteger(ss.str())) // Only do this for files where the remainder of the string is just an integer (i.e. not the combined files etc.)
                   {
-                    int rank;
+                    size_t rank;
                     ss >> rank;
+                    if(rank>max_i) max_i = rank; // Look for highest rank output
                     //std::cout << "Match! "<< ss.str() << " : " << rank << std::endl;
                     // TODO: check for failed read
                     ranks.push_back(rank);
@@ -997,8 +1039,8 @@ namespace Gambit
               }
 
               // Check if all temporary files found (i.e. if output from some rank is missing)
-              std::vector<int> missing;
-              for(size_t i=0; i<ranks.size(); ++i)
+              std::vector<size_t> missing;
+              for(size_t i=0; i<max_i; ++i)
               {
                 if(std::find(ranks.begin(), ranks.end(), i) == ranks.end())
                 { missing.push_back(i); }

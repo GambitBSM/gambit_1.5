@@ -42,9 +42,23 @@ namespace Gambit {
       hid_t create_GAMBIT_fapl()
       {
          hid_t fapl(H5Pcreate(H5P_FILE_ACCESS)); // Copy defaults
+         //std::cout<<"HDF5 version:"<<H5_VERS_MAJOR<<"."<<H5_VERS_MINOR<<"."<<H5_VERS_RELEASE<<std::endl;
+         #if (H5_VERS_MAJOR > 1) || \
+             (H5_VERS_MAJOR == 1) && H5_VERS_MINOR > 10 || \
+             (H5_VERS_MAJOR == 1) && H5_VERS_MINOR == 10 && H5_VERS_RELEASE >= 1
          hbool_t value = 1; // true?
-         herr_t err = H5Pset_evict_on_close(fapl, value); // Set evict_on_close = true
-         return fapl;  
+         // This function does not appear before v 1.10.1, however it is
+         // pretty crucial, at least in my version of HDF5, for keeping the
+         // metadata cache from consuming all my RAM. However, Anders commented
+         // it out with his older HDF5 version and still had no RAM problem.
+         // So it might be ok to just remove it for older versions.
+         // However, if you see RAM blowouts and your HDF5 version is old,
+         // then this is probably the reason.
+         H5Pset_evict_on_close(fapl, value); // Set evict_on_close = true
+         //std::cout <<"GAMBIT fapl used!"<<std::endl; // Check that this code is built...
+         #endif
+
+        return fapl;  
       }
 
       /// Const global for the GAMBIT fapl
@@ -74,7 +88,7 @@ namespace Gambit {
       hid_t openFile(const std::string& fname, bool overwrite, const char access_type)
       {
          bool tmp;
-         return openFile(fname,overwrite,tmp);
+         return openFile(fname,overwrite,tmp,access_type);
       }
 
       /// Create or open hdf5 file
@@ -156,13 +170,13 @@ namespace Gambit {
           return file_id;
       }
 
-      /// Check if hdf5 file exists and can be opened in read/write mode
+      /// Check if hdf5 file exists and can be opened in read mode
       bool checkFileReadable(const std::string& fname, std::string& msg)
       {
           bool readable(false);
 
           errorsOff();
-          hid_t file_id = H5Fopen(fname.c_str(), H5F_ACC_RDWR, H5P_GAMBIT);
+          hid_t file_id = H5Fopen(fname.c_str(), H5F_ACC_RDONLY, H5P_GAMBIT);
           errorsOn();
           if(file_id < 0)
           {

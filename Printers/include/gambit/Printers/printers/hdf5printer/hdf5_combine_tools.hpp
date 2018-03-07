@@ -376,16 +376,17 @@ namespace Gambit
                 unsigned long long pt_min;
                 bool do_cleanup; // If true, delete old temporary files after successful combination
                 std::string get_fname(const long int); // get name of ith temp file
+                bool skip_unreadable; // If true, ignores temp files that fail to open
 
             public:
-                hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup);
+                hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup, bool skip);
                 ~hdf5_stuff(); // close files on destruction                
                 void Enter_Aux_Paramters(const std::string &file, bool resume = false);
             };
 
-            inline void combine_hdf5_files(const std::string file_output, const std::string &file, const std::string &group, int num, bool resume, bool cleanup)
+            inline void combine_hdf5_files(const std::string file_output, const std::string &file, const std::string &group, int num, bool resume, bool cleanup, bool skip)
             {
-                hdf5_stuff stuff(file, group, num, cleanup);
+                hdf5_stuff stuff(file, group, num, cleanup, skip);
                 
                 stuff.Enter_Aux_Paramters(file_output, resume);
             }
@@ -394,8 +395,9 @@ namespace Gambit
             std::unordered_map<PPIDpair, unsigned long long, PPIDHash, PPIDEqual> get_RA_write_hash(hid_t, std::unordered_set<PPIDpair,PPIDHash,PPIDEqual>&);
 
             /// Search for temporary files to be combined
-            std::pair<std::vector<std::string>,std::vector<int>> find_temporary_files(const std::string& finalfile);
- 
+            std::pair<std::vector<std::string>,std::vector<size_t>> find_temporary_files(const std::string& finalfile);
+            std::pair<std::vector<std::string>,std::vector<size_t>> find_temporary_files(const std::string& finalfile, size_t& max_i);
+  
         }
     }
 }
