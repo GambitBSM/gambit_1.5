@@ -34,6 +34,99 @@ namespace Gambit
   {
     using namespace LogTags;
 
+    struct my_f_params { double a; double b; double c; double d; };
+
+    // Utility functions (not rolcalled)
+		double fn1 (double x, void * p)
+		{
+			struct my_f_params * params
+			= (struct my_f_params *)p;
+			double a = (params->a);
+			double b = (params->b);
+			double c = (params->c);
+			double d = (params->d);
+
+			return exp(4.0/3.0*(d-0.125*(pow(10.0,b)+6.0*pow(10.0,a))*(-c*c+x*x))
+					   )-(1.0+pow(10.0,a)*c*c)/(1.0+pow(10.0,a)*x*x);
+		}
+
+		// Returns SMASH potential value given parameters and field amplitude
+		double pot_SMASH(double lambda, double phi, double xi)
+		{
+			double Mpl = 1.0;
+			double pot;
+
+			pot = lambda/4.0*pow(phi,4.0)*pow(1.0+xi*(pow(phi,2.0))/Mpl,-2.0);
+
+			std::cout << "pot = " << pot << std::endl;
+
+			return pot;
+		}
+
+		double SRparameters_epsilon_SMASH(double phi, double b, double xi)
+		{
+			double Mpl = 1.0;
+			double eps = 0.0;
+
+			eps = 8.0*pow(Mpl,4.0)/(b*phi*phi*Mpl*Mpl+xi*(b+6.0*xi)*pow(phi,4.0));
+
+			std::cout << "eps = " << eps << std::endl;
+
+			return eps;
+		}
+
+		double SRparameters_eta_SMASH(double phi, double b, double xi)
+		{
+			double Mpl = 1.0;
+			double eta = 0.0;
+
+			eta = ((12.0*b*pow(Mpl,6.0)+4.0*pow(Mpl,4.0)*xi*phi*phi*(b+12.0*xi)
+				   -8.0*Mpl*Mpl*xi*xi*pow(phi,4.0)*(b+6.0*xi))
+				   /pow(b*Mpl*Mpl*phi+xi*pow(phi,3.0)*(b+6.0*xi),2.0));
+
+			std::cout << "eta = " << eta << std::endl;
+
+
+			return eta;
+		}
+
+
+		double ns_SR(double eps,double eta)
+		{
+			double ns = 0.0;
+
+			ns = 1.0 + 2.0*eta - 6.0*eps;
+
+
+			return ns;
+		}
+
+		double r_SR(double eps,double eta)
+		{
+			double r = 0.0;
+
+			r = 16.0*eps;
+
+			return r;
+		}
+
+		double As_SR(double eps,double pot)
+		{
+			const double pi = std::acos(-1);
+			double Mpl = 1.0;
+			double As = 0.0;
+
+			As = pot/24.0/pi/pi/eps/pow(Mpl,4.0);
+
+			return As;
+		}
+
+
+
+
+
+
+
     void class_set_parameter_LCDM(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
@@ -816,6 +909,847 @@ namespace Gambit
     }
 
 
+		double** return_LCDMtensor_1quadInf_cls(double omega_b,double omega_cdm,double H0,double A_s,double n_s,double tau_reio, double r_tensor)
+		{
+			using namespace Pipes::function_1quadInf_rLCDMtensor_lowp_TT_loglike;
+
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
+
+			int l,l_max;
+			int num_ct_max=7;
+
+			l_max=3000;
+
+			char *class_null;// defining an empty string for parser initialization.
+
+			/* allocate the array where calculated Cl's will be written (we
+			 could add another array with P(k), or extract other results from
+			 the code - here we assume that we are interested in the C_l's
+			 only */
+
+			double* cl[l_max];
+			for(int i = 0; i < l_max; ++i)
+				cl[i] = new double[num_ct_max];
+
+			struct file_content fc;
+
+			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
+
+			strcpy(fc.name[0],"output");
+			strcpy(fc.name[1],"omega_b");
+			strcpy(fc.name[2],"omega_cdm");
+			strcpy(fc.name[3],"H0");
+			strcpy(fc.name[4],"A_s");
+			strcpy(fc.name[5],"n_s");
+			strcpy(fc.name[6],"tau_reio");
+			strcpy(fc.name[7],"modes");
+			strcpy(fc.name[8],"l_scalar_max");
+			strcpy(fc.name[9],"r");
+
+			strcpy(fc.value[0],"tCl,pCl");
+			sprintf(fc.value[1],"%e",omega_b);
+			sprintf(fc.value[2],"%e",omega_cdm);
+			sprintf(fc.value[3],"%e",H0);
+			sprintf(fc.value[4],"%e",A_s);
+			sprintf(fc.value[5],"%e",n_s);
+			sprintf(fc.value[6],"%e",tau_reio);
+			sprintf(fc.value[7],"s,t");
+			sprintf(fc.value[8],"%d",3000);
+			sprintf(fc.value[9],"%e",r_tensor);
+
+			std::cout << "Here are the theory parameter values I generate the Cl's with" << std::endl;
+			std::cout << "omega_b = " << omega_b << std::endl;
+			std::cout << "omega_cdm = " << omega_cdm << std::endl;
+			std::cout << "H0 = " << H0 << std::endl;
+			std::cout << "A_s = " << A_s << std::endl;
+			std::cout << "n_s = " << n_s << std::endl;
+			std::cout << "tau_reio = " << tau_reio << std::endl;
+			std::cout << "r_tensor = " << r_tensor << std::endl;
+
+			BEreq::class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,class_errmsg);
+			BEreq::class_background_initialize(&pr,&ba);
+
+			/* for bbn */
+			sprintf(pr.sBBN_file,"");
+			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
+
+			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
+			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
+
+			/****** write the Cl values in the input array cl[l]  *******/
+
+			for (l=2; l < l_max; l++) {
+
+				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
+
+				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+
+				cout << " cl["<<l<<"]["<<sp.index_ct_tt<<"] ="<< cl[l][sp.index_ct_tt]<< endl;
+
+			}
+
+			cout << "we are outside the loop for multipoles " << endl;
+
+			BEreq::class_lensing_free(&le);
+			BEreq::class_spectra_free(&sp);
+			BEreq::class_transfer_free(&tr);
+			BEreq::class_nonlinear_free(&nl);
+			BEreq::class_primordial_free(&pm);
+			BEreq::class_perturb_free(&pt);
+			BEreq::class_thermodynamics_free(&th);
+			BEreq::class_background_free(&ba);
+
+			return cl;
+		}
+
+ 	    /* ----------------   SH ---------------- */
+		// testing feeding CLASS the full power spectrum
+		double** return_LCDMtensor_1quadInf_cls_fullPk(double omega_b,
+													   double omega_cdm,
+													   double H0,
+													   double tau_reio,
+													   double k_array[],
+													   double pks_array[],
+													   double pkt_array[],
+													   int k_array_size)
+		{
+			using namespace Pipes::function_1quadInf_rLCDMtensor_lowp_TT_loglike;
+
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
+
+			int l,l_max;
+			int num_ct_max=7;
+
+			l_max=3000;
+
+			char *class_null;// defining an empty string for parser initialization.
+
+			/* allocate the array where calculated Cl's will be written (we
+			 could add another array with P(k), or extract other results from
+			 the code - here we assume that we are interested in the C_l's
+			 only */
+			std::cout << "We are inside!" << std::endl;
+
+//			std::cout << "k_array = " << (*k_array)[0] << std::endl;
+//			std::cout << "pks_array = " << (*pks_array)[0] << std::endl;
+//			std::cout << "pkt_array = " << (*pkt_array)[0] << std::endl;
+
+			double* cl[l_max];
+			for(int i = 0; i < l_max; ++i)
+			cl[i] = new double[num_ct_max];
+
+			struct file_content fc;
+
+			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
+
+
+			strcpy(fc.name[0],"output");
+			strcpy(fc.name[1],"omega_b");
+			strcpy(fc.name[2],"omega_cdm");
+			strcpy(fc.name[3],"H0");
+
+			//strcpy(fc.name[4],"A_s");
+			//strcpy(fc.name[5],"n_s");
+			strcpy(fc.name[4], "P_k_ini type");
+			strcpy(fc.name[5], "primordial_verbose");
+
+			strcpy(fc.name[6],"tau_reio");
+			strcpy(fc.name[7],"modes");
+			strcpy(fc.name[8],"l_scalar_max");
+			//strcpy(fc.name[9],"r");
+
+			strcpy(fc.value[0],"tCl,pCl");
+			sprintf(fc.value[1],"%e",omega_b);
+			sprintf(fc.value[2],"%e",omega_cdm);
+			sprintf(fc.value[3],"%e",H0);
+
+			//sprintf(fc.value[4],"%e",A_s);
+			//sprintf(fc.value[5],"%e",n_s);
+			strcpy(fc.value[4],"gambit_Pk"); // patched CLASS to have gambit_Pk option.
+			sprintf(fc.value[5],"%d",1);
+
+			sprintf(fc.value[6],"%e",tau_reio);
+			sprintf(fc.value[7],"s,t");
+			sprintf(fc.value[8],"%d",3000);
+			//sprintf(fc.value[9],"%e",r_tensor);
+
+			std::cout << "Here are the theory parameter values I generate the Cl's with" << std::endl;
+			std::cout << "omega_b = " << omega_b << std::endl;
+			std::cout << "omega_cdm = " << omega_cdm << std::endl;
+			std::cout << "H0 = " << H0 << std::endl;
+			//std::cout << "A_s = " << A_s << std::endl;
+			//std::cout << "n_s = " << n_s << std::endl;
+			std::cout << "tau_reio = " << tau_reio << std::endl;
+			//std::cout << "r_tensor = " << r_tensor << std::endl;
+
+			BEreq::class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,class_errmsg);
+			BEreq::class_background_initialize(&pr,&ba);
+
+			/* for bbn */
+			sprintf(pr.sBBN_file,"");
+			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
+
+			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+
+			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
+
+			std::cout << "we are fine after initialized and upto perturb-init " << std::endl;
+
+			// BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			// similar to the lines 3392-3412 in primordial.c CLASS
+
+			/** - Make room */
+			pm.lnk_size = k_array_size;
+
+			pm.lnk = (double *)malloc(k_array_size*sizeof(double));
+
+			std::cout << "we pass pm.lnk\n" << std::endl;
+
+			pm.lnpk = (double **)malloc(pt.md_size*sizeof(double));
+
+			pm.ddlnpk = (double **)malloc(pt.md_size*sizeof(double));
+
+			pm.ic_size = (int *)malloc(pt.md_size*sizeof(int));
+
+			pm.ic_ic_size = (int *)malloc(pt.md_size*sizeof(int));
+
+			pm.is_non_zero = (short **)malloc(pt.md_size*sizeof(short));
+
+			int index_md;
+
+			for (index_md = 0; index_md < pt.md_size; index_md++) {
+
+		    	pm.ic_size[index_md] = pt.ic_size[index_md];
+
+			    pm.ic_ic_size[index_md] = (pm.ic_size[index_md]*(pm.ic_size[index_md]+1))/2;
+
+				std::cout << "pm.ic_size["<<index_md<<"] =  " << pt.ic_size[index_md] << std::endl;
+				std::cout << "pm.ic_ic_size["<<index_md<<"] = " << pm.ic_ic_size[index_md]<<std::endl;
+
+				pm.lnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+
+				pm.ddlnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+
+				pm.is_non_zero[index_md] = (short *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(short));
+
+			}
+
+
+//			pm.lnpk[pt.index_md_scalars] = (double *)malloc(k_array_size*sizeof(double));
+//			std::cout << "we pass pm.lnpk " << std::endl;
+//			pm.ddlnpk[pt.index_md_scalars] = (double *)malloc(k_array_size*sizeof(double));
+//			// SH: We shall assume we have tensors --> can correct this as it is post input-initialize.
+//			pm.lnpk[pt.index_md_tensors] = (double *)malloc(k_array_size*sizeof(double));
+//			pm.ddlnpk[pt.index_md_tensors] = (double *)malloc(k_array_size*sizeof(double));
+
+			std::cout << "we pass all " << std::endl;
+
+			std::cout << "we are fine pass -make room- " << std::endl;
+
+			/** - Store values */
+			for (int index_k=0; index_k<pm.lnk_size; index_k++)
+			{
+				std::cout << "k_array["<<index_k<<"]="<<k_array[index_k]<<std::endl;
+				std::cout << "pks_array["<<index_k<<"]="<<pks_array[index_k]<<std::endl;
+				std::cout << "pkt_array["<<index_k<<"]="<<pkt_array[index_k]<<std::endl;
+
+				pm.lnk[index_k] = std::log(k_array[index_k]);
+				pm.lnpk[pt.index_md_scalars][index_k] = std::log(pks_array[index_k]);
+				if (pt.has_tensors == _TRUE_)
+				pm.lnpk[pt.index_md_tensors][index_k] = std::log(pkt_array[index_k]);
+
+				std::cout << "pm.lnk["<<index_k<<"]="<<pm.lnk[index_k]<<std::endl;
+				std::cout << "pm.lnpk["<<pt.index_md_scalars<<"]["<<index_k<<"]="<<pm.lnpk[pt.index_md_scalars][index_k]<<std::endl;
+				std::cout << "pm.lnpk["<<pt.index_md_tensors<<"]["<<index_k<<"]="<<pm.lnpk[pt.index_md_tensors][index_k]<<std::endl;
+
+			}
+
+			std::cout << "we are fine pass -store values- " << std::endl;
+
+			/** - Tell CLASS that there are scalar (and tensor) modes */
+			pm.is_non_zero[pt.index_md_scalars][pt.index_ic_ad] = _TRUE_;
+			if (pt.has_tensors == _TRUE_)
+			  pm.is_non_zero[pt.index_md_tensors][pt.index_ic_ten] = _TRUE_;
+
+			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+
+			std::cout << "we are out of class_primordial_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << pm.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
+			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+
+			std::cout << "we are out of class_nonlinear_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << nl.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
+			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+
+			std::cout << "tr.l_size[0] = "<<tr.l_size[0]<<std::endl;
+			std::cout << "tr.l_size[1] = "<<tr.l_size[1]<<std::endl;
+
+			std::cout << "we are out of class_transfer_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << tr.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
+			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+
+			std::cout << "sp.l_size[0] = "<<sp.l_size[0]<<std::endl;
+			std::cout << "sp.l_size[1] = "<<sp.l_size[1]<<std::endl;
+
+			std::cout << "we are out of class_spectra_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << sp.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
+			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
+
+			std::cout << "we are out of class_lensing_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << le.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
+			/****** write the Cl values in the input array cl[l]  *******/
+
+			for (l=2; l < l_max; l++) {
+
+				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
+
+//				cout << "we are outside class_output_total_cl_at_l " << endl;
+
+
+				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_tt<<"] ="<< cl[l][sp.index_ct_tt] << std::endl;
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_te<<"] ="<< cl[l][sp.index_ct_te] << std::endl;
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_ee<<"] ="<< cl[l][sp.index_ct_ee] << std::endl;
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_bb<<"] ="<< cl[l][sp.index_ct_bb] << std::endl;
+
+
+			}
+
+			cout << "we are outside the loop for multipoles " << endl;
+
+			BEreq::class_lensing_free(&le);
+
+			std::cout << "we are out of class_lensing_free " << std::endl;
+
+			BEreq::class_spectra_free(&sp);
+
+			std::cout << "we are out of class_spectra_free " << std::endl;
+
+			BEreq::class_transfer_free(&tr);
+
+			std::cout << "we are out of class_transfer_free " << std::endl;
+
+			BEreq::class_nonlinear_free(&nl);
+
+			std::cout << "we are out of class_nonlinear_free " << std::endl;
+
+			BEreq::class_primordial_free(&pm);
+
+			std::cout << "we are out of class_primordial_free " << std::endl;
+
+			BEreq::class_perturb_free(&pt);
+
+			std::cout << "we are out of class_perturb_free " << std::endl;
+
+			BEreq::class_thermodynamics_free(&th);
+
+			std::cout << "we are out of class_thermodynamics_free " << std::endl;
+
+			BEreq::class_background_free(&ba);
+
+			std::cout << "we are out of class_background_free " << std::endl;
+
+			return cl;
+		}
+
+
+		double** return_LCDMtensor_1quarInf_cls(double omega_b,double omega_cdm,double H0,double A_s,double n_s,double tau_reio, double r_tensor)
+		{
+			using namespace Pipes::function_1quarInf_rLCDMtensor_lowp_TT_loglike;
+
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
+
+			int l,l_max;
+			int num_ct_max=7;
+
+			l_max=3000;
+
+			char *class_null;// defining an empty string for parser initialization.
+
+			/* allocate the array where calculated Cl's will be written (we
+			 could add another array with P(k), or extract other results from
+			 the code - here we assume that we are interested in the C_l's
+			 only */
+
+			double* cl[l_max];
+			for(int i = 0; i < l_max; ++i)
+				cl[i] = new double[num_ct_max];
+
+			struct file_content fc;
+
+			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
+
+
+			strcpy(fc.name[0],"output");
+			strcpy(fc.name[1],"omega_b");
+			strcpy(fc.name[2],"omega_cdm");
+			strcpy(fc.name[3],"H0");
+			strcpy(fc.name[4],"A_s");
+			strcpy(fc.name[5],"n_s");
+			strcpy(fc.name[6],"tau_reio");
+			strcpy(fc.name[7],"modes");
+			strcpy(fc.name[8],"l_scalar_max");
+			strcpy(fc.name[9],"r");
+
+			strcpy(fc.value[0],"tCl,pCl");
+			sprintf(fc.value[1],"%e",omega_b);
+			sprintf(fc.value[2],"%e",omega_cdm);
+			sprintf(fc.value[3],"%e",H0);
+			sprintf(fc.value[4],"%e",A_s);
+			sprintf(fc.value[5],"%e",n_s);
+			sprintf(fc.value[6],"%e",tau_reio);
+			sprintf(fc.value[7],"s,t");
+			sprintf(fc.value[8],"%d",3000);
+			sprintf(fc.value[9],"%e",r_tensor);
+
+			std::cout << "Here are the theory parameter values I generate the Cl's with" << std::endl;
+			std::cout << "omega_b = " << omega_b << std::endl;
+			std::cout << "omega_cdm = " << omega_cdm << std::endl;
+			std::cout << "H0 = " << H0 << std::endl;
+			std::cout << "A_s = " << A_s << std::endl;
+			std::cout << "n_s = " << n_s << std::endl;
+			std::cout << "tau_reio = " << tau_reio << std::endl;
+			std::cout << "r_tensor = " << r_tensor << std::endl;
+
+			BEreq::class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,class_errmsg);
+			BEreq::class_background_initialize(&pr,&ba);
+
+			/* for bbn */
+			sprintf(pr.sBBN_file,"");
+			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
+
+			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
+			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
+
+			/****** write the Cl values in the input array cl[l]  *******/
+
+			for (l=2; l < l_max; l++) {
+
+				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
+
+				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+
+			}
+
+			cout << "we are outside the loop for multipoles " << endl;
+
+			BEreq::class_lensing_free(&le);
+			BEreq::class_spectra_free(&sp);
+			BEreq::class_transfer_free(&tr);
+			BEreq::class_nonlinear_free(&nl);
+			BEreq::class_primordial_free(&pm);
+			BEreq::class_perturb_free(&pt);
+			BEreq::class_thermodynamics_free(&th);
+			BEreq::class_background_free(&ba);
+
+			return cl;
+		}
+
+
+		double** return_LCDMtensor_1mono32Inf_cls(double omega_b,double omega_cdm,double H0,double A_s,double n_s,double tau_reio, double r_tensor)
+		{
+			using namespace Pipes::function_1mono32Inf_rLCDMtensor_lowp_TT_loglike;
+
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
+
+			int l,l_max;
+			int num_ct_max=7;
+
+			l_max=3000;
+
+			char *class_null;// defining an empty string for parser initialization.
+
+			/* allocate the array where calculated Cl's will be written (we
+			 could add another array with P(k), or extract other results from
+			 the code - here we assume that we are interested in the C_l's
+			 only */
+
+			double* cl[l_max];
+			for(int i = 0; i < l_max; ++i)
+				cl[i] = new double[num_ct_max];
+
+			struct file_content fc;
+
+			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
+
+
+			strcpy(fc.name[0],"output");
+			strcpy(fc.name[1],"omega_b");
+			strcpy(fc.name[2],"omega_cdm");
+			strcpy(fc.name[3],"H0");
+			strcpy(fc.name[4],"A_s");
+			strcpy(fc.name[5],"n_s");
+			strcpy(fc.name[6],"tau_reio");
+			strcpy(fc.name[7],"modes");
+			strcpy(fc.name[8],"l_scalar_max");
+			strcpy(fc.name[9],"r");
+
+			strcpy(fc.value[0],"tCl,pCl");
+			sprintf(fc.value[1],"%e",omega_b);
+			sprintf(fc.value[2],"%e",omega_cdm);
+			sprintf(fc.value[3],"%e",H0);
+			sprintf(fc.value[4],"%e",A_s);
+			sprintf(fc.value[5],"%e",n_s);
+			sprintf(fc.value[6],"%e",tau_reio);
+			sprintf(fc.value[7],"s,t");
+			sprintf(fc.value[8],"%d",3000);
+			sprintf(fc.value[9],"%e",r_tensor);
+
+			std::cout << "Here are the theory parameter values I generate the Cl's with" << std::endl;
+			std::cout << "omega_b = " << omega_b << std::endl;
+			std::cout << "omega_cdm = " << omega_cdm << std::endl;
+			std::cout << "H0 = " << H0 << std::endl;
+			std::cout << "A_s = " << A_s << std::endl;
+			std::cout << "n_s = " << n_s << std::endl;
+			std::cout << "tau_reio = " << tau_reio << std::endl;
+			std::cout << "r_tensor = " << r_tensor << std::endl;
+
+			BEreq::class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,class_errmsg);
+			BEreq::class_background_initialize(&pr,&ba);
+
+			/* for bbn */
+			sprintf(pr.sBBN_file,"");
+			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
+
+			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
+			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
+
+			/****** write the Cl values in the input array cl[l]  *******/
+
+			for (l=2; l < l_max; l++) {
+
+				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
+
+				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+
+			}
+
+			cout << "we are outside the loop for multipoles " << endl;
+
+			BEreq::class_lensing_free(&le);
+			BEreq::class_spectra_free(&sp);
+			BEreq::class_transfer_free(&tr);
+			BEreq::class_nonlinear_free(&nl);
+			BEreq::class_primordial_free(&pm);
+			BEreq::class_perturb_free(&pt);
+			BEreq::class_thermodynamics_free(&th);
+			BEreq::class_background_free(&ba);
+
+			return cl;
+		}
+
+
+		double** return_LCDMtensor_1linearInf_cls(double omega_b,double omega_cdm,double H0,double A_s,double n_s,double tau_reio, double r_tensor)
+		{
+			using namespace Pipes::function_1linearInf_rLCDMtensor_lowp_TT_loglike;
+
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
+
+			int l,l_max;
+			int num_ct_max=7;
+
+			l_max=3000;
+
+			char *class_null;// defining an empty string for parser initialization.
+
+			/* allocate the array where calculated Cl's will be written (we
+			 could add another array with P(k), or extract other results from
+			 the code - here we assume that we are interested in the C_l's
+			 only */
+
+			double* cl[l_max];
+			for(int i = 0; i < l_max; ++i)
+				cl[i] = new double[num_ct_max];
+
+			struct file_content fc;
+
+			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
+
+
+			strcpy(fc.name[0],"output");
+			strcpy(fc.name[1],"omega_b");
+			strcpy(fc.name[2],"omega_cdm");
+			strcpy(fc.name[3],"H0");
+			strcpy(fc.name[4],"A_s");
+			strcpy(fc.name[5],"n_s");
+			strcpy(fc.name[6],"tau_reio");
+			strcpy(fc.name[7],"modes");
+			strcpy(fc.name[8],"l_scalar_max");
+			strcpy(fc.name[9],"r");
+
+			strcpy(fc.value[0],"tCl,pCl");
+			sprintf(fc.value[1],"%e",omega_b);
+			sprintf(fc.value[2],"%e",omega_cdm);
+			sprintf(fc.value[3],"%e",H0);
+			sprintf(fc.value[4],"%e",A_s);
+			sprintf(fc.value[5],"%e",n_s);
+			sprintf(fc.value[6],"%e",tau_reio);
+			sprintf(fc.value[7],"s,t");
+			sprintf(fc.value[8],"%d",3000);
+			sprintf(fc.value[9],"%e",r_tensor);
+
+			std::cout << "Here are the theory parameter values I generate the Cl's with" << std::endl;
+			std::cout << "omega_b = " << omega_b << std::endl;
+			std::cout << "omega_cdm = " << omega_cdm << std::endl;
+			std::cout << "H0 = " << H0 << std::endl;
+			std::cout << "A_s = " << A_s << std::endl;
+			std::cout << "n_s = " << n_s << std::endl;
+			std::cout << "tau_reio = " << tau_reio << std::endl;
+			std::cout << "r_tensor = " << r_tensor << std::endl;
+
+			BEreq::class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,class_errmsg);
+			BEreq::class_background_initialize(&pr,&ba);
+
+			/* for bbn */
+			sprintf(pr.sBBN_file,"");
+			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
+
+			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
+			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
+
+			/****** write the Cl values in the input array cl[l]  *******/
+
+			for (l=2; l < l_max; l++) {
+
+				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
+
+				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+
+			}
+
+			cout << "we are outside the loop for multipoles " << endl;
+
+			BEreq::class_lensing_free(&le);
+			BEreq::class_spectra_free(&sp);
+			BEreq::class_transfer_free(&tr);
+			BEreq::class_nonlinear_free(&nl);
+			BEreq::class_primordial_free(&pm);
+			BEreq::class_perturb_free(&pt);
+			BEreq::class_thermodynamics_free(&th);
+			BEreq::class_background_free(&ba);
+
+			return cl;
+		}
+
+
+		double** return_LCDMtensor_smashInf_cls(double omega_b,double omega_cdm,double H0,double A_s,double n_s,double tau_reio, double r_tensor)
+		{
+			using namespace Pipes::function_smashInf_rLCDMtensor_lowp_TT_loglike;
+
+			struct precision pr;        /* for precision parameters */
+			struct background ba;       /* for cosmological background */
+			struct thermo th;           /* for thermodynamics */
+			struct perturbs pt;         /* for source functions */
+			struct transfers tr;        /* for transfer functions */
+			struct primordial pm;       /* for primordial spectra */
+			struct spectra sp;          /* for output spectra */
+			struct nonlinear nl;        /* for non-linear spectra */
+			struct lensing le;          /* for lensed spectra */
+			struct output op;           /* for output files */
+			ErrorMsg class_errmsg;      /* for error messages */
+
+			int l,l_max;
+			int num_ct_max=7;
+
+			l_max=3000;
+
+			char *class_null;// defining an empty string for parser initialization.
+
+			/* allocate the array where calculated Cl's will be written (we
+			 could add another array with P(k), or extract other results from
+			 the code - here we assume that we are interested in the C_l's
+			 only */
+
+			double* cl[l_max];
+			for(int i = 0; i < l_max; ++i)
+				cl[i] = new double[num_ct_max];
+
+			struct file_content fc;
+
+			BEreq::class_parser_initialize(&fc,11,"",class_errmsg);
+
+			strcpy(fc.name[0],"output");
+			strcpy(fc.name[1],"omega_b");
+			strcpy(fc.name[2],"omega_cdm");
+			strcpy(fc.name[3],"H0");
+			strcpy(fc.name[4],"A_s");
+			strcpy(fc.name[5],"n_s");
+			strcpy(fc.name[6],"tau_reio");
+			strcpy(fc.name[7],"modes");
+			strcpy(fc.name[8],"l_scalar_max");
+			strcpy(fc.name[9],"r");
+
+			strcpy(fc.value[0],"tCl,pCl");
+			sprintf(fc.value[1],"%e",omega_b);
+			sprintf(fc.value[2],"%e",omega_cdm);
+			sprintf(fc.value[3],"%e",H0);
+			sprintf(fc.value[4],"%e",A_s);
+			sprintf(fc.value[5],"%e",n_s);
+			sprintf(fc.value[6],"%e",tau_reio);
+			sprintf(fc.value[7],"s,t");
+			sprintf(fc.value[8],"%d",3000);
+			sprintf(fc.value[9],"%e",r_tensor);
+
+			std::cout << "Here are the theory parameter values I generate the Cl's with" << std::endl;
+			std::cout << "omega_b = " << omega_b << std::endl;
+			std::cout << "omega_cdm = " << omega_cdm << std::endl;
+			std::cout << "H0 = " << H0 << std::endl;
+			std::cout << "A_s = " << A_s << std::endl;
+			std::cout << "n_s = " << n_s << std::endl;
+			std::cout << "tau_reio = " << tau_reio << std::endl;
+			std::cout << "r_tensor = " << r_tensor << std::endl;
+
+			BEreq::class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,class_errmsg);
+			BEreq::class_background_initialize(&pr,&ba);
+
+			/* for bbn */
+			sprintf(pr.sBBN_file,"");
+			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
+
+			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
+			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
+
+			/****** write the Cl values in the input array cl[l]  *******/
+
+			for (l=2; l < l_max; l++) {
+
+				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
+
+				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+
+			}
+
+
+
+			cout << "we are outside the loop for multipoles " << endl;
+
+			BEreq::class_lensing_free(&le);
+			BEreq::class_spectra_free(&sp);
+			BEreq::class_transfer_free(&tr);
+			BEreq::class_nonlinear_free(&nl);
+			BEreq::class_primordial_free(&pm);
+			BEreq::class_perturb_free(&pt);
+			BEreq::class_thermodynamics_free(&th);
+			BEreq::class_background_free(&ba);
+
+			return cl;
+		}
+
+
     void function_vanilla_lowp_TT_loglike(double& result)
     {
       using namespace Pipes::function_vanilla_lowp_TT_loglike;
@@ -932,6 +1866,7 @@ namespace Gambit
 
       std::cout << "Log likelihood is : " << result << std::endl;
     }
+
 
     void function_Planck_high_TT_loglike(double& result)
     {
