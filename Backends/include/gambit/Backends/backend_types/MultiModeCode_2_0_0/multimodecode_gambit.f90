@@ -44,6 +44,10 @@ MODULE multimodecode_gambit
     !Non-Gaussianity
     real(dp) :: f_NL
     real(dp) :: tau_NL
+    real(dp) , dimension(:) :: k_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(:) :: pks_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(:) :: pkt_array  !<- Added for the FULL POW SPEC
+    integer :: k_size
   end type gambit_inflation_observables
 
 
@@ -171,12 +175,13 @@ contains
 
 
     !Other sampling params
-    real(dp) :: N_pivot_prior_min, N_pivot_prior_max
+    real(dp) :: N_pivot_prior_min, N_pivot_prior_max, k_min
     integer :: num_inflaton_prior_min, num_inflaton_prior_max
     logical :: varying_N_pivot, varying_num_inflaton
     logical :: more_potential_params
     logical :: get_runningofrunning
     logical :: use_horiz_cross_approx
+    logical :: calc_full_pk
     integer :: pfile
 
     ! Gambit interface giving the values
@@ -190,6 +195,8 @@ contains
     evaluate_modes = ginput_evaluate_modes
     use_horiz_cross_approx = ginput_use_horiz_cross_approx
     get_runningofrunning = ginput_get_runningofrunning
+    k_min = ginput_kmin
+    calc_full_pk = ginput_calc_full_pk
 
     ! {1=reg_samp, 2=eqen_samp, 3=slowroll_samp, 6=isoN}
     ic_sampling = ginput_ic_sampling
@@ -204,7 +211,7 @@ contains
     print*,"potential_choice = ",potential_choice
     print*,"vparam_rows = ",vparam_rows
     print*,"slowroll_infl_end = ",slowroll_infl_end
-
+    print*,"param_sampling = ",param_sampling
 
     call deallocate_vars()
     !Make some arrays
@@ -286,6 +293,7 @@ contains
     call observs%set_zero()
     call observs_SR%set_zero()
 
+
 	!Set random seed
 	call init_random_seed()
 
@@ -295,7 +303,7 @@ contains
 
       call out_opt%open_files(SR=use_deltaN_SR)
 
-	  call calculate_pk_observables(observs,observs_SR,k_pivot,dlnk)
+	  call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk)
 
       call out_opt%close_files(SR=use_deltaN_SR)
 
@@ -318,7 +326,7 @@ contains
         if (out_opt%modpkoutput) write(*,*) &
           "---------------------------------------------"
 
-        call calculate_pk_observables(observs,observs_SR,k_pivot,dlnk)
+        call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk)
 
       end do
 
@@ -331,11 +339,24 @@ contains
         __FILE__, __LINE__)
 
     end if
-
-    if (.not. observs%is_ic_ok) then
-      print*, "SMASH: exiting pk_observables "
-      RETURN
-	else
+    ! it might make sense instead to put zero's etc. to the values here instead of just returning
+	if (potential_choice == 18) then
+      if (.not. observs%is_ic_ok) then
+        print*, "SMASH: exiting pk_observables "
+        RETURN
+	  else
+		! at the moment, smash potential is only calculated by solving the background dynamics
+		! and using slow roll approximation. going beyong would require solving first order 
+		! mode equations in perturbation theory.
+	    goutput_inflation_observables%As = observs_SR%As
+	    goutput_inflation_observables%ns = observs_SR%ns
+	    goutput_inflation_observables%nt = observs_SR%nt
+	    goutput_inflation_observables%r = observs_SR%r
+	    goutput_inflation_observables%f_NL = observs_SR%f_NL
+	    goutput_inflation_observables%tau_NL = observs_SR%tau_NL
+	    goutput_inflation_observables%alpha_s = observs_SR%alpha_s
+      end if
+    else
       !-------------setting up the observables--------------------
       goutput_inflation_observables%As = observs%As
       goutput_inflation_observables%A_iso = observs%A_iso
@@ -353,7 +374,12 @@ contains
       goutput_inflation_observables%f_NL = observs%f_NL
 	  goutput_inflation_observables%tau_NL = observs%tau_NL
       !-------------setting up the observables--------------------
+
+      print*,"calc_full_pk = ",calc_full_pk
+
     end if
+
+
   contains
 
     subroutine gambit_get_full_pk(pk_arr,calc_full_pk,ginput_steps,ginput_kmin,ginput_kmax)
@@ -365,7 +391,7 @@ contains
       real(dp), dimension(:,:), allocatable, intent(out) :: pk_arr
 
       real(dp) :: kmin, kmax, incr
-      logical, intent(inout) :: calc_full_pk
+      logical, intent(in) :: calc_full_pk
       real(dp) :: p_scalar, p_tensor, p_zeta, p_iso
       real(dp), dimension(:), allocatable :: k_input
       integer :: i, steps, u
@@ -376,37 +402,52 @@ contains
       kmax = ginput_kmax
       steps = ginput_steps
 
+      print*,"we are inside gambit_get_full_pk"
+
+      print*,"calc_full_pk = ",calc_full_pk
       !If don't want full spectrum, return
-      if (.not. calc_full_pk) return
+      if (calc_full_pk) then
 
-      !Make the output arrays
-      if (allocated(pk_arr)) deallocate(pk_arr)
+        print*,"we are pass the checkpoint"
 
-      allocate(pk_arr(steps, 9))
+        !Make the output arrays
+        if (allocated(pk_arr)) deallocate(pk_arr)
 
-      pk_arr=0e0_dp
+        print*,"steps (inside) = ",steps
 
-      !Make the arrays for k values to sample
-      allocate(k_input(steps))
-      incr=(kmax/kmin)**(1/real(steps-1,kind=dp))
-      do i=1,steps
-        k_input(i) = kmin*incr**(i-1)
-      end do
+        allocate(pk_arr(steps, 9))
 
-      do i=1,steps
-        call evolve(k_input(i), pk)
+        pk_arr=0e0_dp
 
-        pk_arr(i,:)=(/k_input(i),&
-          pk%adiab, &
-          pk%isocurv, &
-          pk%entropy, &
-          pk%pnad, &
-          pk%tensor, &
-          pk%pressure, &
-          pk%press_ad, &
-          pk%cross_ad_iso /)
+        !Make the arrays for k values to sample
+        allocate(k_input(steps))
+        incr=(kmax/kmin)**(1/real(steps-1,kind=dp))
+        do i=1,steps
+          k_input(i) = kmin*incr**(i-1)
+        end do
 
-	  end do
+        do i=1,steps
+          call evolve(k_input(i), pk)
+
+          pk_arr(i,:)=(/k_input(i),&
+            pk%adiab, &
+            pk%isocurv, &
+            pk%entropy, &
+            pk%pnad, &
+            pk%tensor, &
+            pk%pressure, &
+            pk%press_ad, &
+            pk%cross_ad_iso /)
+
+          print*,"k_input = ",k_input(i)
+          print*,"pk%adiab = ",pk%adiab
+          print*,"pk%isocurv = ",pk%isocurv
+          print*,"pk%entropy = ",pk%entropy
+          print*,"pk%pnad = ",pk%pnad
+          print*,"pk%tensor = ",pk%tensor
+
+	    end do
+      end if
 
 	end subroutine gambit_get_full_pk
 
@@ -645,19 +686,23 @@ contains
 
     !Calculate observables, optionally grab a new IC or a new set of parameters
     !each time this routine is called.
-    subroutine calculate_pk_observables(observs,observs_SR,k_pivot,dlnk)
+    subroutine calculate_pk_observables(observs_gambit,observs,observs_SR,k_pivot,dlnk,calc_full_pk)
 
       real(dp), intent(in) :: k_pivot,dlnk
-
+      logical, intent(in) :: calc_full_pk
+      real(dp) :: kmax,kmin
       type(observables), intent(inout) :: observs, observs_SR
+      type(gambit_inflation_observables), intent(inout) :: observs_gambit
 
       real(dp), dimension(:,:), allocatable :: pk_arr
-      logical :: calc_full_pk, leave
+      logical :: leave
 
       type(power_spectra) :: pk0, pk1, pk2, pk3, pk4
 
+      real(dp), dimension(:), allocatable :: k_a, pks_a, pkt_a
+
       character(1024) :: cname
-      integer :: ii
+      integer :: ii,steps
 
       call observs%set_zero()
       call observs_SR%set_zero()
@@ -700,13 +745,13 @@ contains
       !Initialize potential and calc background
       call potinit(observs)
 
-      print*,"outside of potinit"
-      if (potential_choice == 18) then
-        if (.not. observs%is_ic_ok) then
-          print*, "ICs for SMASH potential resulted in too long(or short) inflation."
-          RETURN
-        end if
-      end if
+      ! print*,"outside of potinit"
+      ! if (potential_choice == 18) then
+      !   if (.not. observs%is_ic_ok) then
+      !     print*, "ICs for SMASH potential resulted in too long(or short) inflation."
+      !     RETURN
+      !   end if
+      ! end if
 
 
       !For outputting field values at horiz crossing
@@ -775,13 +820,13 @@ contains
         call evolve(k_pivot*exp(-dlnk), pk1)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-		print*, "left second evolve"
-		print*, "third evolve"
-		print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
-        call evolve(k_pivot*exp(dlnk), pk2)
+		  print*, "left second evolve"
+		  print*, "third evolve"
+		  print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
+		  call evolve(k_pivot*exp(dlnk), pk2)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-		print*, "left third evolve"
+		  print*, "left third evolve"
 
         if (get_runningofrunning) then
 			print*, "get_runningofrunning = True"
@@ -791,31 +836,74 @@ contains
           print*, "fourth evolve"
             call test_bad(pk_bad, observs, leave)
             if (leave) return
-          call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
+		  call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
 		  print*, "fifth evolve"
             call test_bad(pk_bad, observs, leave)
             if (leave) return
         end if
 
+        print*, "pk0%adiab = ", pk0%adiab
+
           !Construct the observables
-          if (get_runningofrunning) then
-            call observs%set_finite_diff(dlnk, &
-              pk0,pk1,pk2,pk3,pk4, &
-              field_bundle%exp_scalar)
-            print*,"here we calculate the observables!"
-          else
-			print*,"here we calculate the observables!"
-            call observs%set_finite_diff(dlnk, &
-              pk0,pk1,pk2,&
-              bundle_width=field_bundle%exp_scalar)
-          end if
+        if (get_runningofrunning) then
+          call observs%set_finite_diff(dlnk, &
+            pk0,pk1,pk2,pk3,pk4, &
+            field_bundle%exp_scalar)
+          print*,"here we calculate the observables!"
+        else
+		  print*,"here we calculate the observables!"
+          call observs%set_finite_diff(dlnk, &
+            pk0,pk1,pk2,&
+            bundle_width=field_bundle%exp_scalar)
+        end if
 
 
-          !Get full spectrum for adiab and isocurv at equal intvs in lnk
-!		  print*,"will call gambit_get_full_pk"
-          ! call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
-!		  print*,"endof get_full_pk"
-!        end if
+        !Get full spectrum for adiab and isocurv at equal intvs in lnk
+!		print*,"will call gambit_get_full_pk"
+		steps = 10
+		kmax = 1e6
+        kmin = 1e-4
+
+        call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
+
+        print*,"endof get_full_pk"
+
+        if (calc_full_pk) then
+
+          !Make the output arrays
+          ! if (allocated(observs_gambit%k_array)) deallocate(observs_gambit%k_array)
+          ! allocate(observs_gambit%k_array(steps))
+
+          ! if (allocated(observs_gambit%pks_array)) deallocate(observs_gambit%pks_array)
+          ! allocate(observs_gambit%pks_array(steps))
+
+          ! if (allocated(observs_gambit%pkt_array)) deallocate(observs_gambit%pkt_array)
+          ! allocate(observs_gambit%pkt_array(steps))
+
+          print*,"this is fine 1!"
+          print*,"pk_arr(:,1) = ",pk_arr(:,1)
+          print*,"pk_arr(:,2) = ",pk_arr(:,2)
+          print*,"pk_arr(:,6) = ",pk_arr(:,6)
+
+!          print*,"observs_gambit%k_array =",observs_gambit%k_array
+
+!          allocate(observs_gambit%k_array(steps))
+!          allocate(observs_gambit%pks_array(steps))
+!          allocate(observs_gambit%pkt_array(steps))
+
+          observs_gambit%k_array   = pk_arr(:steps,1)
+          observs_gambit%pks_array = pk_arr(:steps,2)
+          observs_gambit%pkt_array = pk_arr(:steps,6)
+
+          print*,"observs_gambit%k_array =", observs_gambit%k_array
+          print*,"observs_gambit%pks_array =", observs_gambit%pks_array
+          print*,"observs_gambit%pkt_array =", observs_gambit%pkt_array
+
+          print*,"this is fine 2!"
+
+        end if
+
+
 
       end if
 

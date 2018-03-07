@@ -488,7 +488,6 @@ LCDM: |
    tau_reio            - reionization optical depth
 
 LCDMtensor: |
-
    Simplest extension of the Lambda-CDM model with the addition of a tensor degree of freedom. This parameter is set to zero in the LCDM model.
 
    omega_b             - baryon density parameter
@@ -500,7 +499,6 @@ LCDMtensor: |
    r                   - ratio of tensor primordial power to curvature power
 
 Planck_TTTEEE: |
-
    Planck likelihood for high-l TT,TE,EE-spectra with 34 nuissance parameter.
 
    A_cib_217           - the CIB contamination at ℓ=3000 in the 217-GHz Planck map
@@ -529,17 +527,16 @@ Planck_TTTEEE: |
    galf_TE_A_143       - the dust residual contamination at ℓ=500 in 143x143TE
    galf_TE_A_143_217   - the dust residual contamination at ℓ=500 in 143×217TE
    galf_TE_A_217       - the dust residual contamination at ℓ=500 in 217×217TE
-   galf_TE_index       - the dust EE template slope, which should be set to -2.4 
+   galf_TE_index       - the dust EE template slope, which should be set to -2.4
    calib_100T          - the relative calibration between 100 and 143 TT spectra
    calib_217T          - the relative calibration between 217 and 143 TT spectra
    calib_100P          - the calibration of the 100 EE spectra, which should be set to 1
    calib_143P          - the calibration of the 143 EE spectra, which should be set to 1
    calib_217P          - the calibration of the 217 EE spectra, which should be set to 1
    A_pol               - the calibration of the polarization relative to the temperature, which should be set to 1
-   A_planck            - the Planck absolute calibration. 
+   A_planck            - the Planck absolute calibration.
 
 Planck_TT: |
-
    Planck likelihood for high-l TT-spectrum with 16 nuissance parameter.
 
    A_cib_217           - the CIB contamination at l=3000 in the 217-GHz Planck map
@@ -559,12 +556,32 @@ Planck_TT: |
    calib_217T          - the relative calibration between the 217 and 143 spectra
    A_planck            - the Planck absolute calibration.
 
-
 Planck_lite: |
-
    Planck likelihood for high-l TT-spectrum (marginalized) with 1 nuissance parameter.
 
    A_planck            - the Planck absolute calibration.
+
+inf_SR1quad_LCDMt: |
+   Simplest 7 parameter cosmology+inflation model: m^2 phi^2 --- quadratic inflation with slow-roll approximation. A_s, n_s and r are given by inflationary model parameters (under slow-roll approximation): N_piv, m^2.
+
+inf_1quarInf_LCDMt: |
+   6 parameter cosmology+inflation model: 0.25 lambda phi^4
+   quartic inflation A_s, n_s and r are given by inflationary
+   model parameters: N_piv, lambda.
+
+inf_1mono32Inf_LCDMt: |
+   6 parameter cosmology+inflation model: 2/3
+   lambda phi^2/3 --- inflation, A_s, n_s and r are
+   given by inflationary model parameters: N_piv, lambda.
+
+inf_1linearInf_LCDMt: |
+   6 parameter cosmology+inflation model: m phi
+   linear inflation, A_s, n_s and r are given by
+   inflationary model parameters: N_piv, m^2.
+
+inf_smashInf_LCDMt: |
+   8 parameter cosmology smash inflation model --- smash inflation
+   A_s, n_s and r are given by inflationary model parameters: xi, m^2.
 
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap: |
 
@@ -592,4 +609,3 @@ plik_dx11dr2_HM_v18_TT: |
    calib_100T          - the relative calibration between the 100 and 143 spectra
    calib_217T          - the relative calibration between the 217 and 143 spectra
    A_planck            - the Planck absolute calibration.
-

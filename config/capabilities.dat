@@ -3153,6 +3153,22 @@ calculate_amu_2loop_non_tan_beta_resummed: |
 calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
+#------------------------------
+#  SUSYHD capabilities
+#------------------------------
+
+SUSYHD_1_0_2_init: |
+   Initialises SUSYHD, version 1.0.2
+
+SUSYHD_SetSMparameters: |
+   Sets the SM parameters to be used in SUSYHD
+
+SUSYHD_MHiggs: |
+   Calculates the Higgs mass using SUSYHD
+
+SUSYHD_DeltaMHiggs : |
+   Calculates the uncertainty on the Higgs mass using SUSYHD
+
 #----------------------------
 #  plc
 #----------------------------
@@ -3380,7 +3396,7 @@ class_transfer_initialize: |
    (in particular, computes table of transfer functions).
 
 class_get_spectra: |
-   Returns a pointer to the CMB-spectra C_xx[l], where 
+   Returns a pointer to the CMB-spectra C_xx[l], where
    xx = [TT, TE, EE, phiphi, ...].
 
 class_run: |
@@ -3425,6 +3441,7 @@ compute_LCDMtensor_inflation_lowp_TT_loglike: |
    for a given model paramteres and further solver specifiers via
    a yaml file. function then calls class and produces the Cl's
    (power spectrum) and goes on to calculate the planck likelihood.
+<<<<<<< HEAD
 
 compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given
@@ -3441,15 +3458,67 @@ compute_Planck_lensing_loglike: |
 #------------------------------
 #  SUSYHD capabilities
 #------------------------------
+=======
+>>>>>>> CosmoBit_earlyuniverse
 
-SUSYHD_1_0_2_init: |
-   Initialises SUSYHD, version 1.0.2
 
-SUSYHD_SetSMparameters: |
-   Sets the SM parameters to be used in SUSYHD
+compute_1quadInf_rLCDMtensor_lowp_TT_loglike: |
+   likelihood calculation for the simplest 7 parameter
+   cosmology+inflation model: m^2 phi^2 --- quadratic
+   inflation with slow-roll approximation. A_s, n_s and r
+   are given by inflationary model parameters (under
+   slow-roll approximation): N_piv, m^2.
 
+compute_1quarInf_rLCDMtensor_lowp_TT_loglike: |
+   6 parameter cosmology+inflation model: 0.25 lambda phi^4
+   quartic inflation A_s, n_s and r are given by inflationary
+   model parameters: N_piv, lambda.
+
+compute_1mono32Inf_rLCDMtensor_lowp_TT_loglike: |
+   6 parameter cosmology+inflation model: 2/3
+   lambda phi^2/3 --- inflation, A_s, n_s and r are
+   given by inflationary model parameters: N_piv, lambda.
+
+compute_1linearInf_rLCDMtensor_lowp_TT_loglike: |
+   6 parameter cosmology+inflation model: m phi
+   linear inflation, A_s, n_s and r are given by
+   inflationary model parameters: N_piv, m^2.
+
+compute_smashInf_rLCDMtensor_lowp_TT_loglike: |
+   8 parameter cosmology smash inflation model --- smash inflation
+   A_s, n_s and r are given by inflationary model parameters: xi, m^2.
+
+
+inf_SR1quad_LCDMt_parameters: |
+   omega_b, baryon density parameter.
+   omega_cdm, dark matter density parameter.
+   H0, Hubble constant.
+   tau_reio, reionization optical depth.
+   N_pivot, number of efolds before the end of inflation.
+   mass, inflaton mass.
+
+inf_1quarInf_LCDMt_parameters: |
+    6 parameter cosmology+inflation model: 0.25 lambda phi^4
+    quartic inflation A_s, n_s and r are given by inflationary
+    model parameters: N_piv, lambda.
+
+inf_1mono32Inf_LCDMt_parameters: |
+    6 parameter cosmology+inflation model: 2/3
+    lambda phi^2/3 --- inflation, A_s, n_s and r are
+    given by inflationary model parameters: N_piv, lambda.
+
+inf_1linearInf_LCDMt_parameters: |
+    6 parameter cosmology+inflation model: m phi
+    linear inflation, A_s, n_s and r are given by
+    inflationary model parameters: N_piv, m^2.
+
+inf_smashInf_LCDMt_parameters: |
+    8 parameter cosmology smash inflation model --- smash inflation
+    A_s, n_s and r are given by inflationary model parameters: xi, m^2.
+
+<<<<<<< HEAD
 SUSYHD_MHiggs: |
    Calculates the Higgs mass using SUSYHD
+=======
+>>>>>>> CosmoBit_earlyuniverse
 
-SUSYHD_DeltaMHiggs : |
-   Calculates the uncertainty on the Higgs mass using SUSYHD

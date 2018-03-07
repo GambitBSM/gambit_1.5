@@ -83,7 +83,7 @@ BE_NAMESPACE
 
   void initialize_high_TT()
   {
-    std::cout << "Loading the high-l TT likelihood" << std::endl; 
+    std::cout << "Loading the high-l TT likelihood" << std::endl;
     char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik/plik_dx11dr2_HM_v18_TT.clik";
     _err = initError();
     clikid_plik_dx11dr2_HM_v18_TT = clik_init(*&clik_path,&_err);
@@ -166,6 +166,7 @@ BE_NAMESPACE
   {
     return smica_g30_ftl_full_pp;
   }
+
 }
 END_BE_NAMESPACE
 
