@@ -69,7 +69,7 @@ Priors:
 Printer:
   printer: hdf5
   options:
-    output_file: "results.hdf5"
+    output_file: "results_test.hdf5"
     group: "/CosmoBitDEV_LCDMt_quad1Inf_multinest"
     delete_file_on_restart: true
 
@@ -81,8 +81,8 @@ Scanner:
     multinest:
       plugin: multinest
       like:  LogLike
-      nlive: 1000
-      tol: 0.1
+      nlive: 10
+      tol: 0.99
       aux_printer_txt_options:
       aux_printer_stats_options:
       aux_printer_live_options:
@@ -137,7 +137,7 @@ Rules:
       N_pivot_prior_min: 30
       N_pivot_prior_max: 70
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
-      calc_full_pk: 0
+      calc_full_pk: 1
       steps: 10
       kmin: 1e-4
       kmax: 1e6

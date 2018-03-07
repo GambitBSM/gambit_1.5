@@ -722,7 +722,7 @@ namespace Gambit
 				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
 				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
 				
-				cout << " cl["<<l<<"]["<<sp.index_ct_tt<<"]"<< cl[l][sp.index_ct_tt]<< endl;
+				cout << " cl["<<l<<"]["<<sp.index_ct_tt<<"] ="<< cl[l][sp.index_ct_tt]<< endl;
 
 			}
 			
@@ -742,7 +742,14 @@ namespace Gambit
 
  	    /* ----------------   SH ---------------- */
 		// testing feeding CLASS the full power spectrum
-		double** return_LCDMtensor_1quadInf_cls_fullPk(double omega_b,double omega_cdm,double H0, double tau_reio, double k_array[], double pks_array[], double pkt_array[], int k_array_size)
+		double** return_LCDMtensor_1quadInf_cls_fullPk(double omega_b,
+													   double omega_cdm,
+													   double H0,
+													   double tau_reio,
+													   double k_array[],
+													   double pks_array[],
+													   double pkt_array[],
+													   int k_array_size)
 		{
 			using namespace Pipes::function_1quadInf_rLCDMtensor_lowp_TT_loglike;
 			
@@ -769,7 +776,12 @@ namespace Gambit
 			 could add another array with P(k), or extract other results from
 			 the code - here we assume that we are interested in the C_l's
 			 only */
-			
+			std::cout << "We are inside!" << std::endl;
+
+//			std::cout << "k_array = " << (*k_array)[0] << std::endl;
+//			std::cout << "pks_array = " << (*pks_array)[0] << std::endl;
+//			std::cout << "pkt_array = " << (*pkt_array)[0] << std::endl;
+
 			double* cl[l_max];
 			for(int i = 0; i < l_max; ++i)
 			cl[i] = new double[num_ct_max];
@@ -826,30 +838,62 @@ namespace Gambit
 			strcat(pr.sBBN_file,"/Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/bbn/sBBN.dat");
 			
 			BEreq::class_thermodynamics_initialize(&pr,&ba,&th);
+			
 			BEreq::class_perturb_initialize(&pr,&ba,&th,&pt);
 			
 			std::cout << "we are fine after initialized and upto perturb-init " << std::endl;
 
-			BEreq::class_primordial_initialize(&pr,&pt,&pm);
+			// BEreq::class_primordial_initialize(&pr,&pt,&pm);
 			// similar to the lines 3392-3412 in primordial.c CLASS
 			
 			/** - Make room */
-			realloc(pm.lnk,
-					k_array_size*sizeof(double));
-			realloc(pm.lnpk[pt.index_md_scalars],
-					k_array_size*sizeof(double));
-			realloc(pm.ddlnpk[pt.index_md_scalars],
-					k_array_size*sizeof(double));
-			// SH: We shall assume we have tensors --> can correct this as it is post input-initialize.
-			realloc(pm.lnpk[pt.index_md_tensors],
-					k_array_size*sizeof(double));
-			realloc(pm.ddlnpk[pt.index_md_tensors],
-					k_array_size*sizeof(double));
-
 			pm.lnk_size = k_array_size;
 			
-			std::cout << "we are fine pass -make room- " << std::endl;
+			pm.lnk = (double *)malloc(k_array_size*sizeof(double));
+			
+			std::cout << "we pass pm.lnk\n" << std::endl;
+			
+			pm.lnpk = (double **)malloc(pt.md_size*sizeof(double));
 
+			pm.ddlnpk = (double **)malloc(pt.md_size*sizeof(double));
+
+			pm.ic_size = (int *)malloc(pt.md_size*sizeof(int));
+			
+			pm.ic_ic_size = (int *)malloc(pt.md_size*sizeof(int));
+			
+			pm.is_non_zero = (short **)malloc(pt.md_size*sizeof(short));
+			
+			int index_md;
+
+			for (index_md = 0; index_md < pt.md_size; index_md++) {
+				
+		    	pm.ic_size[index_md] = pt.ic_size[index_md];
+				
+			    pm.ic_ic_size[index_md] = (pm.ic_size[index_md]*(pm.ic_size[index_md]+1))/2;
+				
+				std::cout << "pm.ic_size["<<index_md<<"] =  " << pt.ic_size[index_md] << std::endl;
+				std::cout << "pm.ic_ic_size["<<index_md<<"] = " << pm.ic_ic_size[index_md]<<std::endl;
+				
+				pm.lnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+
+				pm.ddlnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+				
+				pm.is_non_zero[index_md] = (short *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(short));
+
+			}
+
+			
+//			pm.lnpk[pt.index_md_scalars] = (double *)malloc(k_array_size*sizeof(double));
+//			std::cout << "we pass pm.lnpk " << std::endl;
+//			pm.ddlnpk[pt.index_md_scalars] = (double *)malloc(k_array_size*sizeof(double));
+//			// SH: We shall assume we have tensors --> can correct this as it is post input-initialize.
+//			pm.lnpk[pt.index_md_tensors] = (double *)malloc(k_array_size*sizeof(double));
+//			pm.ddlnpk[pt.index_md_tensors] = (double *)malloc(k_array_size*sizeof(double));
+
+			std::cout << "we pass all " << std::endl;
+			
+			std::cout << "we are fine pass -make room- " << std::endl;
+			
 			/** - Store values */
 			for (int index_k=0; index_k<pm.lnk_size; index_k++)
 			{
@@ -857,10 +901,15 @@ namespace Gambit
 				std::cout << "pks_array["<<index_k<<"]="<<pks_array[index_k]<<std::endl;
 				std::cout << "pkt_array["<<index_k<<"]="<<pkt_array[index_k]<<std::endl;
 				
-				pm.lnk[index_k] = log(k_array[index_k]);
-				pm.lnpk[pt.index_md_scalars][index_k] = log(pks_array[index_k]);
+				pm.lnk[index_k] = std::log(k_array[index_k]);
+				pm.lnpk[pt.index_md_scalars][index_k] = std::log(pks_array[index_k]);
 				if (pt.has_tensors == _TRUE_)
-				pm.lnpk[pt.index_md_tensors][index_k] = log(pkt_array[index_k]);
+				pm.lnpk[pt.index_md_tensors][index_k] = std::log(pkt_array[index_k]);
+				
+				std::cout << "pm.lnk["<<index_k<<"]="<<pm.lnk[index_k]<<std::endl;
+				std::cout << "pm.lnpk["<<pt.index_md_scalars<<"]["<<index_k<<"]="<<pm.lnpk[pt.index_md_scalars][index_k]<<std::endl;
+				std::cout << "pm.lnpk["<<pt.index_md_tensors<<"]["<<index_k<<"]="<<pm.lnpk[pt.index_md_tensors][index_k]<<std::endl;
+
 			}
 
 			std::cout << "we are fine pass -store values- " << std::endl;
@@ -868,38 +917,109 @@ namespace Gambit
 			/** - Tell CLASS that there are scalar (and tensor) modes */
 			pm.is_non_zero[pt.index_md_scalars][pt.index_ic_ad] = _TRUE_;
 			if (pt.has_tensors == _TRUE_)
-			pm.is_non_zero[pt.index_md_tensors][pt.index_ic_ten] = _TRUE_;
+			  pm.is_non_zero[pt.index_md_tensors][pt.index_ic_ten] = _TRUE_;
 
 			BEreq::class_primordial_initialize(&pr,&pt,&pm);
 
+			std::cout << "we are out of class_primordial_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << pm.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
 			BEreq::class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl);
+			
+			std::cout << "we are out of class_nonlinear_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << nl.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
 			BEreq::class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr);
+			
+			std::cout << "tr.l_size[0] = "<<tr.l_size[0]<<std::endl;
+			std::cout << "tr.l_size[1] = "<<tr.l_size[1]<<std::endl;
+			
+			std::cout << "we are out of class_transfer_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << tr.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
 			BEreq::class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp);
+			
+			std::cout << "sp.l_size[0] = "<<sp.l_size[0]<<std::endl;
+			std::cout << "sp.l_size[1] = "<<sp.l_size[1]<<std::endl;
+
+			std::cout << "we are out of class_spectra_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << sp.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
 			BEreq::class_lensing_initialize(&pr,&pt,&sp,&nl,&le);
 			
+			std::cout << "we are out of class_lensing_initialize " << std::endl;
+
+			//DEBUGGING
+//			std::cout << le.error_message << std::endl;
+			//ENDOF DEBUGGING */
+
 			/****** write the Cl values in the input array cl[l]  *******/
 			
 			for (l=2; l < l_max; l++) {
 				
 				int errval = BEreq::class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cl[l]));
 				
+//				cout << "we are outside class_output_total_cl_at_l " << endl;
+
+				
 				cl[l][sp.index_ct_tt] = cl[l][sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
 				cl[l][sp.index_ct_te] = cl[l][sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
 				cl[l][sp.index_ct_ee] = cl[l][sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
 				cl[l][sp.index_ct_bb] = cl[l][sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+				
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_tt<<"] ="<< cl[l][sp.index_ct_tt] << std::endl;
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_te<<"] ="<< cl[l][sp.index_ct_te] << std::endl;
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_ee<<"] ="<< cl[l][sp.index_ct_ee] << std::endl;
+//				std::cout << "cl["<<l<<"]["<<sp.index_ct_bb<<"] ="<< cl[l][sp.index_ct_bb] << std::endl;
+
 				
 			}
 			
 			cout << "we are outside the loop for multipoles " << endl;
 			
 			BEreq::class_lensing_free(&le);
+			
+			std::cout << "we are out of class_lensing_free " << std::endl;
+
 			BEreq::class_spectra_free(&sp);
+			
+			std::cout << "we are out of class_spectra_free " << std::endl;
+			
 			BEreq::class_transfer_free(&tr);
+			
+			std::cout << "we are out of class_transfer_free " << std::endl;
+
 			BEreq::class_nonlinear_free(&nl);
+			
+			std::cout << "we are out of class_nonlinear_free " << std::endl;
+
 			BEreq::class_primordial_free(&pm);
+			
+			std::cout << "we are out of class_primordial_free " << std::endl;
+
 			BEreq::class_perturb_free(&pt);
+			
+			std::cout << "we are out of class_perturb_free " << std::endl;
+
 			BEreq::class_thermodynamics_free(&th);
+			
+			std::cout << "we are out of class_thermodynamics_free " << std::endl;
+
 			BEreq::class_background_free(&ba);
+			
+			std::cout << "we are out of class_background_free " << std::endl;
 			
 			return cl;
 		}
@@ -1917,6 +2037,17 @@ namespace Gambit
 		double kmax = runOptions->getValue<double> ("kmax");
 		
 		gambit_inflation_observables observs;
+
+		std::cout << "steps = " << steps << std::endl;
+
+//		if (calc_full_pk == 1){
+//			
+//			std::vector<double> vec1(steps,0.0);
+//			
+//			observs.k_array   = vec1;
+//			observs.pks_array = vec1;
+//			observs.pkt_array = vec1;
+//		}
 		
 		std::cout << "num_inflaton = " << num_inflaton << std::endl;
 		
@@ -1930,8 +2061,16 @@ namespace Gambit
 		
 		std::cout << "m2_inflaton = " << vparams[0] << std::endl;
 		
+		std::cout << "observs.k_array = " << observs.k_array << std::endl;
+		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+
 		double** cl;
 		
+		/** - Make room */
+//		observs.k_array   = (double *) malloc(steps*sizeof(double));
+//		observs.pks_array = (double *) malloc(steps*sizeof(double));
+//		observs.pkt_array = (double *) malloc(steps*sizeof(double));
 
 		// The function below calls the multimodecode backend for a given choice of inflationary model,
 		// which calculates the observables.
@@ -1972,7 +2111,14 @@ namespace Gambit
 										   N_pivot_prior_min,
 										   N_pivot_prior_max);
 		
+		std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
+
+		std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+		std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+//		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+//		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
 		
+
 		if (calc_full_pk == 0)
 		{
 		std::cout << "observs.As " << observs.As << std::endl;

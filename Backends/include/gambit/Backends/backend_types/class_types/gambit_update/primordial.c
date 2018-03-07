@@ -211,7 +211,7 @@ int primordial_init(
   }
   else {
     if (ppm->primordial_verbose > 0)
-      printf("Computing primordial spectra");
+      printf("Computing primordial spectra \n");
   }
 
   /** - get kmin and kmax from perturbation structure. Test that they make sense. */
@@ -241,21 +241,34 @@ int primordial_init(
              ppr->k_per_decade_primordial);
 
   /** - allocate and fill values of \f$ \ln{k}\f$'s */
+  // SH: skip if the power spectrum is filled by GAMBIT
+  if ( ppm->primordial_spec_type != gambit_Pk) {
+	printf("we are inside primordial_spec_type \n");
 
-  class_call(primordial_get_lnk_list(ppm,
-                                     k_min,
-                                     k_max,
-                                     ppr->k_per_decade_primordial
-                                     ),
+    class_call(primordial_get_lnk_list(ppm,
+                                       k_min,
+                                       k_max,
+                                       ppr->k_per_decade_primordial
+                                       ),
              ppm->error_message,
              ppm->error_message);
-
+  }
   /** - define indices and allocate tables in primordial structure */
+  // SH: skip if the power spectrum is filled by GAMBIT
+  if ( ppm->primordial_spec_type != gambit_Pk) {
+	printf("we are inside primordial_indices \n");
 
-  class_call(primordial_indices(ppt,
-                                ppm),
+	class_call(primordial_indices(ppt,
+								  ppm),
              ppm->error_message,
              ppm->error_message);
+  }
+  printf("ppt->md_size = %d \n",ppt->md_size);
+	
+  for (index_md = 0; index_md < ppt->md_size; index_md++) {
+    printf("ppm->ic_size[%d] = %d \n", index_md,ppm->ic_size[index_md]);
+	printf("ppm->ic_ic_size[%d] = %d \n", index_md,ppm->ic_ic_size[index_md]);
+  }
 
   /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
   if (ppm->primordial_spec_type == analytic_Pk) {
@@ -404,7 +417,14 @@ int primordial_init(
 				 ppm->error_message,
 				 "external Pk module cannot work if you ask for vector modes");
 
-	//if (ppm->primordial_verbose > 0)
+	printf("ppm->lnk_size = %d \n",ppm->lnk_size);
+	  
+	for (index_k=0; index_k<ppm->lnk_size; index_k++) {
+		  
+		  printf("ppm->lnk[%d] = %e \n",index_k,ppm->lnk[index_k]);
+		  printf("ppm->lnpk[%d][%d] = %e \n",ppt->index_md_scalars,index_k,ppm->lnpk[ppt->index_md_scalars][index_k]);
+	}
+		  //if (ppm->primordial_verbose > 0)
     printf(" (Pk calculated by GAMBIT)\n");
 	  
    /* ------------------------------------- */
@@ -510,9 +530,6 @@ int primordial_init(
       /* Simplification of the beta_s expression: */
 
       ppm->beta_s = (lnpk_plusplus-2.*lnpk_plus+2.*lnpk_minus-lnpk_minusminus)/pow(dlnk,3);
-
-      if (ppm->primordial_verbose > 0)
-        printf(" -> A_s=%g  n_s=%g  alpha_s=%g\n",ppm->A_s,ppm->n_s,ppm->alpha_s);
 
     }
 	if (ppm->primordial_verbose > 0)

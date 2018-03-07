@@ -840,8 +840,11 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/primordial_header.dif
           COMMAND patch -p1 < ${patch}/primordial_source.dif
           COMMAND patch -p1 < ${patch}/input_source.dif
+          COMMAND patch -p1 < ${patch}/output_source.dif
+          COMMAND patch -p1 < ${patch}/spectra_source.dif
+          COMMAND patch -p1 < ${patch}/transfer_source.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${CMAKE_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
@@ -873,7 +876,7 @@ if(NOT ditched_${name}_${ver})
           COMMAND patch -p1 < ${patch}/modpk_utils.dif
           COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=≈ FFLAG=${CMAKE_Fortran_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
 	COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh

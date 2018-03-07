@@ -41,9 +41,12 @@ namespace Gambit
 		double runofrun;
 		double f_NL;
 		double tau_NL;
-		double *k_array;  //<- Added for the FULL POW SPEC
-		double *pks_array;  //<- Added for the FULL POW SPEC
-		double *pkt_array;  //<- Added for the FULL POW SPEC
+//		std::vector<double> k_array;  //<- Added for the FULL POW SPEC
+//		std::vector<double> pks_array;  //<- Added for the FULL POW SPEC
+//		std::vector<double> pkt_array;  //<- Added for the FULL POW SPEC
+		double k_array[10];  //<- Added for the FULL POW SPEC
+		double pks_array[10];  //<- Added for the FULL POW SPEC
+		double pkt_array[10];  //<- Added for the FULL POW SPEC
 		int k_size;
 	} gambit_inflation_observables;
 
