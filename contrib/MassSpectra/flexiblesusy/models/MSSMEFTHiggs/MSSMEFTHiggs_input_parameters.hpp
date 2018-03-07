@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:54:01
+// File generated at Tue 9 Jan 2018 20:01:44
 
 #ifndef MSSMEFTHiggs_INPUT_PARAMETERS_H
 #define MSSMEFTHiggs_INPUT_PARAMETERS_H
@@ -27,12 +27,13 @@
 namespace flexiblesusy {
 
 struct MSSMEFTHiggs_input_parameters {
+   int SignMu{1};
    double MSUSY{};
    double M1Input{};
    double M2Input{};
    double M3Input{};
-   double MuInput{};
-   double mAInput{};
+   double mHd2IN{};
+   double mHu2IN{};
    double TanBeta{};
    Eigen::Matrix<double,3,3> mq2Input{Eigen::Matrix<double,3,3>::Zero()};
    Eigen::Matrix<double,3,3> mu2Input{Eigen::Matrix<double,3,3>::Zero()};

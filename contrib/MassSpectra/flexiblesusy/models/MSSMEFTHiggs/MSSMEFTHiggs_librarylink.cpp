@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:54:59
+// File generated at Tue 9 Jan 2018 20:02:36
 
 #include "config.h"
 
@@ -434,14 +434,15 @@ void Model_data::put_sm_input_parameters(MLINK link) const
 
 void Model_data::put_input_parameters(MLINK link) const
 {
-   MLPutFunction(link, "List", 15);
+   MLPutFunction(link, "List", 16);
 
+   MLPutRuleTo(link, INPUTPARAMETER(SignMu), "SignMu");
    MLPutRuleTo(link, INPUTPARAMETER(MSUSY), "MSUSY");
    MLPutRuleTo(link, INPUTPARAMETER(M1Input), "M1Input");
    MLPutRuleTo(link, INPUTPARAMETER(M2Input), "M2Input");
    MLPutRuleTo(link, INPUTPARAMETER(M3Input), "M3Input");
-   MLPutRuleTo(link, INPUTPARAMETER(MuInput), "MuInput");
-   MLPutRuleTo(link, INPUTPARAMETER(mAInput), "mAInput");
+   MLPutRuleTo(link, INPUTPARAMETER(mHd2IN), "mHd2IN");
+   MLPutRuleTo(link, INPUTPARAMETER(mHu2IN), "mHu2IN");
    MLPutRuleTo(link, INPUTPARAMETER(TanBeta), "TanBeta");
    MLPutRuleTo(link, INPUTPARAMETER(mq2Input), "mq2Input");
    MLPutRuleTo(link, INPUTPARAMETER(mu2Input), "mu2Input");
@@ -989,7 +990,7 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    const Index_t n_settings = Spectrum_generator_settings::NUMBER_OF_OPTIONS,
       n_sm_parameters = softsusy::NUMBER_OF_LOW_ENERGY_INPUT_PARAMETERS
                         + Physical_input::NUMBER_OF_INPUT_PARAMETERS,
-      n_input_pars = 79;
+      n_input_pars = 80;
    const Index_t n_total = n_settings + n_sm_parameters + n_input_pars;
 
    if (pars.size() != n_total)
@@ -1086,12 +1087,13 @@ Model_data make_data(const Dynamic_array_view<Element_t>& pars)
    physical_input.set(Physical_input::mh_pole, pars[c++]);
 
    MSSMEFTHiggs_input_parameters input;
+   INPUTPARAMETER(SignMu) = pars[c++];
    INPUTPARAMETER(MSUSY) = pars[c++];
    INPUTPARAMETER(M1Input) = pars[c++];
    INPUTPARAMETER(M2Input) = pars[c++];
    INPUTPARAMETER(M3Input) = pars[c++];
-   INPUTPARAMETER(MuInput) = pars[c++];
-   INPUTPARAMETER(mAInput) = pars[c++];
+   INPUTPARAMETER(mHd2IN) = pars[c++];
+   INPUTPARAMETER(mHu2IN) = pars[c++];
    INPUTPARAMETER(TanBeta) = pars[c++];
    INPUTPARAMETER(mq2Input(0,0)) = pars[c++];
    INPUTPARAMETER(mq2Input(0,1)) = pars[c++];
