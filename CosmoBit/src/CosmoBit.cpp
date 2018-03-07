@@ -28,6 +28,7 @@
 #include <functional>
 #include <omp.h>
 #include <stdlib.h>     /* malloc, free, rand */
+#include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
@@ -46,43 +47,18 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a kind of dirty way to read all the additional parameters
+      // What follows is a loop to read all generic additional parameters for CLASS
       // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options of the capability within the 'Rules' section of the input, and which
-      // will be added if there are present.
-      // In the future this should be made nicer !!
-      std::map<char*,double> additional_args;
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
       int len_of_input = 9;
-      double temp_value;
-      if (runOptions->hasKey("k_pivot"))
+      Options class_dict;
+      std::vector<str> names;
+      if (runOptions->hasKey("class_dict"))
       {
-        temp_value = runOptions->getValue<double>("k_pivot");
-        additional_args["k_pivot"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("N_ur"))
-      {
-        temp_value = runOptions->getValue<double>("N_ur");
-        additional_args["N_ur"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("N_ncdm"))
-      {
-        temp_value = runOptions->getValue<double>("N_ncdm");
-        additional_args["N_ncdm"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("m_ncdm"))
-      {
-        temp_value = runOptions->getValue<double>("m_ncdm");
-        additional_args["m_ncdm"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("T_ncdm"))
-      {
-        temp_value = runOptions->getValue<double>("T_ncdm");
-        additional_args["T_ncdm"] = temp_value;
-        len_of_input++;
+        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+        names = class_dict.getNames();
+        len_of_input += names.size();
       }
 
       BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
@@ -95,11 +71,15 @@ namespace Gambit
       strcpy(cosmo.fc.value[8],"yes");
 
       int i = 9;
-      std::map<char*,double>::iterator it;
-      for (it = additional_args.begin(); it != additional_args.end(); it++)
+
+      for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
       {
-        sprintf(cosmo.fc.name[i],"%s",it->first);
-        sprintf(cosmo.fc.value[i],"%g",it->second);
+        //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+        str key, value;
+        key = *name_it;
+        value = class_dict.getValue<str>(*name_it);
+        sprintf(cosmo.fc.name[i],"%s",key.c_str());
+        sprintf(cosmo.fc.value[i],"%s",value.c_str());
         i++;
       }
 
