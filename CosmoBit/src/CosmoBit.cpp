@@ -72,15 +72,18 @@ namespace Gambit
 
       int i = 9;
 
-      for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+      if (runOptions->hasKey("class_dict"))
       {
-        //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-        str key, value;
-        key = *name_it;
-        value = class_dict.getValue<str>(*name_it);
-        sprintf(cosmo.fc.name[i],"%s",key.c_str());
-        sprintf(cosmo.fc.value[i],"%s",value.c_str());
-        i++;
+        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+        {
+          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+          str key, value;
+          key = *name_it;
+          value = class_dict.getValue<str>(*name_it);
+          sprintf(cosmo.fc.name[i],"%s",key.c_str());
+          sprintf(cosmo.fc.value[i],"%s",value.c_str());
+          i++;
+        }
       }
 
       strcpy(cosmo.fc.name[1],"omega_b");
