@@ -27,7 +27,7 @@
 #ifndef __CosmoBit_types_hpp__
 #define __CosmoBit_types_hpp__
 
-#include "gambit/Backends/backend_types/class_types.hpp"
+#include "gambit/Backends/backend_types/class.hpp"
 
 namespace Gambit
 {

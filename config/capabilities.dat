@@ -3441,7 +3441,6 @@ compute_LCDMtensor_inflation_lowp_TT_loglike: |
    for a given model paramteres and further solver specifiers via
    a yaml file. function then calls class and produces the Cl's
    (power spectrum) and goes on to calculate the planck likelihood.
-<<<<<<< HEAD
 
 compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given
@@ -3454,13 +3453,6 @@ compute_Planck_high_TT_loglike: |
 compute_Planck_lensing_loglike: |
    function computes the planck lensing- log-likelihood for
    a  given set of  Cl's.
-
-#------------------------------
-#  SUSYHD capabilities
-#------------------------------
-=======
->>>>>>> CosmoBit_earlyuniverse
-
 
 compute_1quadInf_rLCDMtensor_lowp_TT_loglike: |
    likelihood calculation for the simplest 7 parameter
@@ -3515,10 +3507,3 @@ inf_1linearInf_LCDMt_parameters: |
 inf_smashInf_LCDMt_parameters: |
     8 parameter cosmology smash inflation model --- smash inflation
     A_s, n_s and r are given by inflationary model parameters: xi, m^2.
-
-<<<<<<< HEAD
-SUSYHD_MHiggs: |
-   Calculates the Higgs mass using SUSYHD
-=======
->>>>>>> CosmoBit_earlyuniverse
-
