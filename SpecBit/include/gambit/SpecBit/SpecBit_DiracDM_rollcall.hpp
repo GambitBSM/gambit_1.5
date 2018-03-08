@@ -31,7 +31,9 @@
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs, DiracDM)
     MODEL_GROUP(higgs,   (StandardModel_Higgs))
     MODEL_GROUP(dirac,   (DiracDM))
+    MODEL_GROUP(dirac_sps,   (DiracDM_sps))
     ALLOW_MODEL_COMBINATION(higgs, dirac)
+    ALLOW_MODEL_COMBINATION(higgs, dirac_sps)
     #undef FUNCTION
 
     // Convert spectrum into a standard map so that it can be printed

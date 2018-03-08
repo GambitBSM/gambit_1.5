@@ -1,6 +1,6 @@
 #################################################################################################
 #
-#      MajoranaDM, high mass region, MultiNest, separate g_scalar and g_pseudoscalar. 
+#      DiracDM, low mass region, TWalk.
 #
 #################################################################################################
 
@@ -12,16 +12,14 @@ Parameters:
     mH:
       range: [124.1, 127.3]
 
-  MajoranaDM_sps:
-    mX: 
-      range: [45., 10000.]
+  DiracDM_xi:
+    mF: 
+      range: [45., 70.]
       prior_type: log
-    lX_s: 
+    lF: 
       range: [1e-6, 1]
       prior_type: log
-    lX_ps:
-      range: [1e-6, 1]
-      prior_type: log
+    xi: 0
 
   nuclear_params_sigmas_sigmal:
     sigmas:
@@ -100,11 +98,18 @@ ObsLikes:
     - capability: lnL_SI_nuclear_parameters
       purpose:    LogLike
       
+    # SM nuisance parameter likelihoods     
+    - capability: lnL_alpha_s
+      purpose:    LogLike    
+              
     # DM Local Halo likelihoods
     - capability: lnL_rho0
       purpose: LogLike
       
     - capability: lnL_v0
+      purpose: LogLike
+      
+    - capability: lnL_vrot
       purpose: LogLike
 
     - capability: lnL_vesc
@@ -141,12 +146,19 @@ Rules:
       v0_obs: 240
       v0_obserr: 8
       
+  # Set vrot to 240 +/- 8 km/s based on Reid et al [arXiv:1401.5377]
+  - capability: lnL_vrot
+    function: lnL_vrot_gaussian
+    options:
+      vrot_obs: 240
+      vrot_obserr: 8
+      
   # Set vesc to 533 +/- 32 km/s based on RAVE survey [arXiv:1309.4293]
   - capability: lnL_vesc
     function: lnL_vesc_gaussian
     options:
-      v0_obs: 533
-      v0_obserr: 31.9
+      vesc_obs: 533
+      vesc_obserr: 31.9
 
   # Choose to use capgen for solar capture
   - capability: capture_rate_Sun
@@ -162,6 +174,8 @@ Rules:
   # Choose to use detailed Fermi Pass-8 dwarfs likelihoood from gamLike
   - capability: lnL_FermiLATdwarfs
     function:  lnL_FermiLATdwarfs_gamLike
+    options:
+      non_self_conjugate: true
 
   # Choose to use DarkSUSY's yield tables for indirect detection
   - capability: SimYieldTable
@@ -180,6 +194,8 @@ Rules:
   # Choose to obtain spectrum from the SpecBit module
   - capability: DiracDM_spectrum
     function: get_DiracDM_spectrum
+    options: 
+      impose_EFT_validity: true
 
 ##############################################################################################
 Printer:
@@ -187,22 +203,22 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "Majorana_gs_gp_MN.hdf5"
+    output_file: "Dirac_low_mass_TWalk.hdf5"
     delete_file_on_restart: true
-    group: "/MDM"
+    group: "/DDM"    
 
 ##############################################################################################
 Scanner:
 
-  use_scanner: mn
+  use_scanner: tw
 
   scanners:
 
     mn:
       plugin: multinest
       like: LogLike
-      nlive: 20000
-      tol: 1E-4
+      nlive: 1
+      tol: 0.7
 
     diver:
       plugin: diver
@@ -213,8 +229,8 @@ Scanner:
 
     tw:
       plugin: twalk
-      sqrtR: 1.001
-      chain_number: 512
+      sqrtR: 1.005
+      chain_number: 256
 
 ##############################################################################################
 Logger:
@@ -241,4 +257,4 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e+5
     debug: false
 
-  default_output_path: "scans/Majorana_gs_gp/high_mass/MN"
+  default_output_path: "production_scans/Dirac/low_mass/TWalk_xi0"

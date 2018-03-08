@@ -31,7 +31,9 @@
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs, MajoranaDM)
     MODEL_GROUP(higgs,   (StandardModel_Higgs))
     MODEL_GROUP(majorana, (MajoranaDM))
+    MODEL_GROUP(majorana_sps,   (MajoranaDM_sps))
     ALLOW_MODEL_COMBINATION(higgs, majorana)
+    ALLOW_MODEL_COMBINATION(higgs, majorana_sps)
     #undef FUNCTION
 
     // Convert spectrum into a standard map so that it can be printed

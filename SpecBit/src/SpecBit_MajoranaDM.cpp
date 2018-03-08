@@ -76,20 +76,49 @@ namespace Gambit
       majoranamodel.MajoranaPoleMass = *myPipe::Param.at("mX");
       majoranamodel.MajoranaLambda   = *myPipe::Param.at("lX");
       majoranamodel.MajoranacosXI    = *myPipe::Param.at("cosXI");
-
+      
+      // Invalidate point if the EFT validity constraint is not satisfied
+      // See https://arxiv.org/abs/1512.06458v4 for more details
       if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
       {
-        // Invalidate point if the EFT validity constraint is not satisfied
-        // See https://arxiv.org/abs/1512.06458v4 for more details
-        if (majoranamodel.MajoranaLambda >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+        // Different EFT validity constraints for different model parametrisations.
+        if (myPipe::ModelInUse("MajoranaDM_sps"))
         {
-          std::ostringstream msg;
-          msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
-              << majoranamodel.MajoranaLambda << "/GeV] does not satisfy the EFT validity constraint.";
-          invalid_point().raise(msg.str());
+          // Invadlidate point if the EFT validity constraint is not satisfied,
+          // for each coupling independently. 
+          double gs = majoranamodel.MajoranaLambda * majoranamodel.MajoranacosXI;
+          double gp = majoranamodel.MajoranaLambda * std::sqrt(1-std::pow(majoranamodel.MajoranacosXI, 2.));
+
+          if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
+          {
+            if (gs >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+            {
+              std::ostringstream msg;
+              msg << "Parameter point [mX, lX_s] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
+                  << gs << "/GeV] does not satisfy the EFT validity constraint.";
+              invalid_point().raise(msg.str());
+            }
+            if (gp >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+            {
+              std::ostringstream msg;
+              msg << "Parameter point [mX, lX_ps] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
+                  << gp << "/GeV] does not satisfy the EFT validity constraint.";
+              invalid_point().raise(msg.str());
+            }
+          }
+        }
+        else
+        {        
+          // Parametrisation with lambda/Lambda, xi
+          if (majoranamodel.MajoranaLambda >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+          {
+            std::ostringstream msg;
+            msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
+                << majoranamodel.MajoranaLambda << "/GeV] does not satisfy the EFT validity constraint.";
+            invalid_point().raise(msg.str());
+          }
         }
       }
-      else {}
 
       // Standard model
       majoranamodel.sinW2 = sinW2;

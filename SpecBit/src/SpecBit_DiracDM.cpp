@@ -76,21 +76,50 @@ namespace Gambit
       diracmodel.DiracPoleMass = *myPipe::Param.at("mF");
       diracmodel.DiracLambda   = *myPipe::Param.at("lF");
       diracmodel.DiraccosXI    = *myPipe::Param.at("cosXI");
-
+      
+      // Invalidate point if the EFT validity constraint is not satisfied
+      // See https://arxiv.org/abs/1512.06458v4 for more details
       if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
       {
-        // Invalidate point if the EFT validity constraint is not satisfied
-        // See https://arxiv.org/abs/1512.06458v4 for more details
-        if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
+        // Different EFT validity constraints for different model parametrisations.
+        if (myPipe::ModelInUse("DiracDM_sps"))
         {
-          std::ostringstream msg;
-          msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
-              << diracmodel.DiracLambda << "/GeV] does not satisfy the EFT validity constraint.";
-          invalid_point().raise(msg.str());
+          // Invadlidate point if the EFT validity constraint is not satisfied,
+          // for each coupling independently. 
+          double gs = diracmodel.DiracLambda * diracmodel.DiraccosXI;
+          double gp = diracmodel.DiracLambda * std::sqrt(1-std::pow(diracmodel.DiraccosXI, 2.));
+
+          if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
+          {
+            if (gs >= (4*Pi)/(2*diracmodel.DiracPoleMass))
+            {
+              std::ostringstream msg;
+              msg << "Parameter point [mF, lF_s] = [" << diracmodel.DiracPoleMass << " GeV, "
+                  << gs << "/GeV] does not satisfy the EFT validity constraint.";
+              invalid_point().raise(msg.str());
+            }
+            if (gp >= (4*Pi)/(2*diracmodel.DiracPoleMass))
+            {
+              std::ostringstream msg;
+              msg << "Parameter point [mF, lF_ps] = [" << diracmodel.DiracPoleMass << " GeV, "
+                  << gp << "/GeV] does not satisfy the EFT validity constraint.";
+              invalid_point().raise(msg.str());
+            }
+          }
+        }
+        else
+        {        
+          // Parametrisation with lambda/Lambda, xi
+          if (diracmodel.DiracLambda >= (4*Pi)/(2*diracmodel.DiracPoleMass))
+          {
+            std::ostringstream msg;
+            msg << "Parameter point [mF, lF] = [" << diracmodel.DiracPoleMass << " GeV, "
+                << diracmodel.DiracLambda << "/GeV] does not satisfy the EFT validity constraint.";
+            invalid_point().raise(msg.str());
+          }
         }
       }
-      else {}
-
+        
       // Standard model
       diracmodel.sinW2 = sinW2;
 

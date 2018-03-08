@@ -6,7 +6,7 @@
 
 Parameters:
 
-  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_defaults.yaml
+  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan.yaml
 
   StandardModel_Higgs:
     mH:
@@ -17,7 +17,7 @@ Parameters:
       range: [45., 10000.]
       prior_type: log      
     lambda_hV: 
-      range: [1e-4, 56.23]
+      range: [1e-4, 10.]
       prior_type: log
 
   nuclear_params_sigmas_sigmal:
@@ -97,11 +97,18 @@ ObsLikes:
     - capability: lnL_SI_nuclear_parameters
       purpose:    LogLike
       
+    # SM nuisance parameter likelihoods     
+    - capability: lnL_alpha_s
+      purpose:    LogLike    
+                    
     # DM Local Halo likelihoods
     - capability: lnL_rho0
       purpose: LogLike
       
     - capability: lnL_v0
+      purpose: LogLike
+      
+    - capability: lnL_vrot
       purpose: LogLike
 
     - capability: lnL_vesc
@@ -141,13 +148,20 @@ Rules:
     options:
       v0_obs: 240
       v0_obserr: 8
+
+  # Set vrot to 240 +/- 8 km/s based on Reid et al [arXiv:1401.5377]
+  - capability: lnL_vrot
+    function: lnL_vrot_gaussian
+    options:
+      vrot_obs: 240
+      vrot_obserr: 8
       
   # Set vesc to 533 +/- 32 km/s based on RAVE survey [arXiv:1309.4293]
   - capability: lnL_vesc
     function: lnL_vesc_gaussian
     options:
-      v0_obs: 533
-      v0_obserr: 31.9
+      vesc_obs: 533
+      vesc_obserr: 31.9
       
   # Choose to use capgen for solar capture rate
   - capability: capture_rate_Sun
@@ -155,7 +169,7 @@ Rules:
     
   - capability: equilibration_time_Sun
     function: equilibration_time_Sun
-
+    
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
     function: RD_fraction_leq_one
@@ -181,6 +195,8 @@ Rules:
   # Choose to obtain spectrum from the SpecBit module
   - capability: VectorDM_spectrum
     function: get_VectorDM_spectrum
+    options:
+      impose_pert_unitarity: false
 
 ##############################################################################################
 Printer:
@@ -242,4 +258,4 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e+5
     debug: false
 
-  default_output_path: "scans/Vector/high_mass/diver"
+  default_output_path: "production_scans/Vector/high_mass/diver"
