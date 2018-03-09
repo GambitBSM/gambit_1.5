@@ -12,7 +12,7 @@ Parameters:
     mH:
       range: [124.1, 127.3]
 
-  MajoranaDM:
+  MajoranaDM_xi:
     mX: 
       range: [45., 70.]
       prior_type: log
@@ -27,7 +27,7 @@ Parameters:
     sigmas:
       range: [19, 67]
     sigmal:
-      range: [31, 85]
+      range: [5, 95]
     deltau:  0.842
     deltad:  -0.427
     deltas:  -0.085
@@ -161,6 +161,15 @@ Rules:
     options:
       vesc_obs: 533
       vesc_obserr: 31.9
+      
+  # Set sigmal to 50+/- 15 MeV based on Bishara et al [arXiv:1707.06998]
+  - capability: lnL_SI_nuclear_parameters
+    function: lnL_sigmas_sigmal
+    options:
+      sigmas_central: 43.0
+      sigmas_error: 8.0
+      sigmal_central: 50.0
+      sigmal_error: 15.0
 
   # Choose to use capgen for solar capture
   - capability: capture_rate_Sun
