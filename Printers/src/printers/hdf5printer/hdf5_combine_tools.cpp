@@ -234,7 +234,7 @@ namespace Gambit
                 return ret;
             }
                 
-            hdf5_stuff::hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup, bool skip) 
+            hdf5_stuff::hdf5_stuff(const std::string &file_name, const std::string &output_file, const std::string &group_name, size_t num, bool cleanup, bool skip) 
               : group_name(group_name)
               , cum_sizes(num, 0)
               , sizes(num, 0)
@@ -242,12 +242,53 @@ namespace Gambit
               , root_file_name(file_name)
               , do_cleanup(cleanup)
               , skip_unreadable(skip)
+              , files(num,-1)
+              , groups(num,-1)
+              , aux_groups(num,-1)
             {
                 //std::vector<bool> temp;
                 //herr_t status;
 
+
+                // Check which files are readable (lets us tell the user all at once if there is a bad batch)
+                bool badfiles = false;
+                std::vector<std::size_t> unreadable;
+                std::cout << "  Checking readability of temp files...             "<<std::endl;
+                for (size_t i = 0; i < num; i++)
+                {
+                    // Simple Progress monitor
+                    std::string fname = get_fname(i);
+                    if(not HDF5::checkFileReadable(fname))
+                    {
+                       badfiles = true;
+                       unreadable.push_back(i);
+                    }
+                }
+                if(badfiles)
+                {
+                    std::cerr << "  WARNING: Unreadable temporary HDF5 files detected! Indices were "<<unreadable<<std::endl;
+                
+                    if(not skip_unreadable and badfiles)
+                    {
+                        std::ostringstream errmsg;
+                        errmsg << "  Unreadable temp files detected! Please set -f flag if you want to ignore them."<<std::endl;
+                        printer_error().raise(LOCAL_INFO, errmsg.str());
+                    }
+                }
+
+                // Check readability of old combined file, if one is present
+                if(Utils::file_exists(output_file))
+                {
+                   if(not HDF5::checkFileReadable(output_file))
+                   {
+                       std::ostringstream errmsg;
+                       errmsg << "Error combining HDF5 temporary data! A previous combined output file was found ("<<output_file<<"), but it could not be successfully opened. It may be corrupted due to a bad shutdown. You could try deleting/moving the old combined data file and attempting the combination again, though of course the old combined data will be lost." << std::endl;
+                       printer_error().raise(LOCAL_INFO, errmsg.str());
+                   }
+                }
+
                 // Loop over the temporary files from each rank and perform some setup computations.
-                for (int i = 0; i < num; i++)
+                for (size_t i = 0; i < num; i++)
                 {
                     // Simple Progress monitor
                     std::cout << "  Scanning temp file "<<i<<" for datasets...             \r"<<std::flush;
@@ -258,11 +299,13 @@ namespace Gambit
                     if(HDF5::checkFileReadable(fname))
                     {
                         file_id = HDF5::openFile(fname);
-                    }
+                        files[i] = file_id;
+                   }
                     else
                     {
                         //std::cout << "  Could not open file "<<i<<"                 "<<std::endl; 
                         file_id = -1;
+                        files[i] = file_id;
                         group_id = -1;
                         aux_group_id = -1;
                     }
@@ -408,9 +451,9 @@ namespace Gambit
                     //std::cout <<"size_tot="<<size_tot<<", (new contribution from file "<<i<<" is "<<size<<", file_id was "<<file_id<<")"<<std::endl;
 
                     // Record whether files/groups could be opened
-                    files.push_back(file_id);
-                    groups.push_back(group_id);
-                    aux_groups.push_back(aux_group_id);                      
+                    files[i] = file_id;
+                    groups[i] = group_id;
+                    aux_groups[i] = aux_group_id;                      
   
                     // Close groups and tmp file
                     if(group_id>-1)     HDF5::closeGroup(group_id);
@@ -418,14 +461,15 @@ namespace Gambit
                     if(file_id>-1)      HDF5::closeFile(file_id);
                 }
                 std::cout << "  Finished scanning temp files               "<<std::endl;
-           }
+            }
  
             hdf5_stuff::~hdf5_stuff()
             {
-                // Close them sooner!
+                // Just in case they somehow weren't closed earlier
+                // Hmm id doesn't change when they are closed so this doesn't work...
                 //for(std::vector<hid_t>::iterator it=files.begin(); it!=files.end(); ++it)
                 //{
-                //   HDF5::closeFile(*it);
+                //   if(*it>-1) HDF5::closeFile(*it);
                 //}
             } 
             
@@ -433,8 +477,9 @@ namespace Gambit
             {
                 std::vector<std::vector<unsigned long long>> ranks, ptids;
                 std::vector<unsigned long long> aux_sizes;
-                
-                hid_t old_file, old_group;
+               
+                hid_t old_file = -1;
+                hid_t old_group = -1;
                 //std::cout << "resume? " << resume <<std::endl;
                 if (resume)
                 {
@@ -528,6 +573,7 @@ namespace Gambit
                     // Reopen temp files and reaquire group IDs
                     std::string fname = get_fname(i);
                     hid_t file_id = HDF5::openFile(fname);
+                    files[i] = file_id; // keep file ID up to date
                     hid_t aux_group_id = HDF5::openGroup(file_id, group_name+"/RA", true); // final argument prevents group from being created 
                     hid_t dataset;
                     if(aux_group_id < 0) 
@@ -601,119 +647,177 @@ namespace Gambit
                     HDF5::closeGroup(aux_group_id);
                     HDF5::closeFile(file_id);
                 }
-  
+
+                // TODO: Ack, getting a "too many open files" error. I guess we need
+                // to do this in batches, but that's quite a pain to arrange.
+                const size_t BATCH_SIZE = 100;
+            
+                // Compute number of batches required
+                size_t N_BATCHES = files.size() / BATCH_SIZE;
+                size_t remainder = files.size() % BATCH_SIZE;
+                if(remainder > 0)
+                {
+                   N_BATCHES += 1;
+                }
+                  
                 int counter = 1;
                 for (auto it = param_names.begin(), end = param_names.end(); it != end; ++it, ++counter)
                 {
                     // Simple Progress monitor
                     std::cout << "  Combining primary datasets... "<<int(100*counter/param_names.size())<<"%   (copied "<<counter<<" parameters of "<<param_names.size()<<")        \r"<<std::flush;
 
-                    std::vector<hid_t> file_ids, group_ids, datasets, datasets2;
-                    int valid_dset  = -1; // index of a validly opened dataset (-1 if none)
-                    for (int i = 0, end = groups.size(); i < end; i++)
-                    {
-                        hid_t file_id  = -1;
-                        hid_t group_id = -1;
-                        hid_t dataset = -1;
-                        hid_t dataset2 = -1;
+                    //std::vector<hid_t> file_ids(files.size(),-1);
+                    //std::vector<hid_t> group_ids(files.size(),-1);
+                    //std::vector<hid_t> datasets(files.size(),-1);
+                    //std::vector<hid_t> datasets2(files.size(),-1);
 
-                        // Skip this file if it wasn't successfully opened earlier
-                        if(files[i]>-1)
+                   for(size_t batch_i = 0, end = N_BATCHES; batch_i < end; batch_i++)
+                   {
+                        long long valid_dset = -1; // index of a validly opened dataset (-1 if none)
+                        size_t THIS_BATCH_SIZE = BATCH_SIZE;
+                        size_t offset = batch_i * BATCH_SIZE; // where to begin writing this batch in output dataset
+                        std::vector<unsigned long long> batch_sizes(BATCH_SIZE,0);
+                         // IDs for this batch
+                        std::vector<hid_t> file_ids (THIS_BATCH_SIZE,-1);
+                        std::vector<hid_t> group_ids(THIS_BATCH_SIZE,-1);
+                        std::vector<hid_t> datasets (THIS_BATCH_SIZE,-1);
+                        std::vector<hid_t> datasets2(THIS_BATCH_SIZE,-1);
+ 
+                        // Collect all the HDF5 ids need to combine this parameter for this batch of files
+                        if(remainder>0 and batch_i==N_BATCHES-1) THIS_BATCH_SIZE = remainder; // Last batch is incomplete
+                        for (size_t file_i = 0, end = THIS_BATCH_SIZE; file_i < end; file_i++)
                         {
-                            // Reopen files
-                            // NOTE: RAM problems largely solved, but footprint could be lowered even more if we only open one file at a time.
-                            std::string fname = get_fname(i);
-                            hid_t file_id = HDF5::openFile(fname);
-                            hid_t group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created 
-                            if(group_id>=0) 
+                            size_t i = file_i + batch_i * BATCH_SIZE;
+
+                            hid_t file_id  = -1;
+                            hid_t group_id = -1;
+                            hid_t dataset = -1;
+                            hid_t dataset2 = -1;
+                            batch_sizes[file_i] = sizes[i]; // Collect pre-measured dataset sizes for this batch
+
+                            // Skip this file if it wasn't successfully opened earlier
+                            if(files[i]>=0)
                             {
-                               HDF5::errorsOff();
-                               dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
-                               dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
-                               HDF5::errorsOn();
+                                // Reopen files
+                                // NOTE: RAM problems largely solved, but footprint could be lowered even more if we only open one file at a time.
+                                std::string fname = get_fname(i);
+                                if(not HDF5::checkFileReadable(fname))
+                                {
+                                  std::cout <<"files["<<i<<"] = "<<files[i]<<std::endl;
+                                  std::cerr<<"WARNING! "<<fname<<" was not readable! This should have been caught earlier!"<<std::endl;
+                                }
+                                file_id = HDF5::openFile(fname);
+                                files[i] = file_id;
+                                group_id = HDF5::openGroup(file_id, group_name, true); // final argument prevents group from being created 
+                                if(group_id>=0) 
+                                {
+                                   HDF5::errorsOff();
+                                   dataset  = HDF5::openDataset(group_id, *it, true); // Allow fail; not all parameters must exist in all temp files
+                                   dataset2 = HDF5::openDataset(group_id, *it + "_isvalid", true);
+                                   HDF5::errorsOn();
+                                }
+
+                                if(dataset>=0)  
+                                {
+                                   if(dataset2>=0) valid_dset = file_i; // Use this one to determine dataset types for this batch (TODO: will be bad if it doesn't match other batches! could make this more robust)
+                                   else
+                                   {
+                                      std::ostringstream errmsg;
+                                      errmsg << "Error opening dataset '"<<*it<<"_isvalid' from temp file "<<i<<"! Main dataset was opened, but 'isvalid' dataset failed to open! It may be corrupted.";
+                                      printer_error().raise(LOCAL_INFO, errmsg.str());
+                                   }
+                                }
                             }
 
-                            if(dataset>=0)  
-                            {
-                               if(dataset2>=0) valid_dset = i;
-                               else
-                               {
-                                  std::ostringstream errmsg;
-                                  errmsg << "Error opening dataset '"<<*it<<"_isvalid' from temp file "<<i<<"! Main dataset was opened, but 'isvalid' dataset failed to open! It may be corrupted.";
-                                  printer_error().raise(LOCAL_INFO, errmsg.str());
-                               }
-                            }
+                            datasets [file_i] = dataset;
+                            datasets2[file_i] = dataset2;
+                            file_ids [file_i] = file_id;
+                            group_ids[file_i] = group_id;
                         }
 
-                        datasets.push_back(dataset);
-                        datasets2.push_back(dataset2);
-                        file_ids.push_back(file_id);
-                        group_ids.push_back(group_id);
-                     }
-                    
-                    hid_t old_dataset = -1, old_dataset2 = -1;
-                    if (resume)
-                    {
-                        HDF5::errorsOff();
-                        old_dataset  = HDF5::openDataset(old_group, *it, true); // Allow fail; may be no previous combined output
-                        old_dataset2 = HDF5::openDataset(old_group, *it + "_isvalid", true);
-                        HDF5::errorsOn();
-                    }
+                        // Get id for old combined output for this parameter 
+                        hid_t old_dataset = -1, old_dataset2 = -1;
+                        if (resume and batch_i==0) // Only copy old dataset once, during first batch of files
+                        {
+                            HDF5::errorsOff();
+                            old_dataset  = HDF5::openDataset(old_group, *it, true); // Allow fail; may be no previous combined output
+                            old_dataset2 = HDF5::openDataset(old_group, *it + "_isvalid", true);
+                            HDF5::errorsOn();
+                        }
 
-                    if(valid_dset<0 and old_dataset<0)
-                    {
-                       // Parameter must exist in either the old combined file or at least one of the newer temp files,
-                       // because those are what we read to get the parameter names. So if the datasets are now
-                       // failing to actually open then something bad must have happened.
-                       std::ostringstream errmsg;
-                       errmsg << "Error opening datasets for parameter '"<<*it<<"' in temp files! All datasets failed to open! They may be corrupted.";
-                       printer_error().raise(LOCAL_INFO, errmsg.str());
-                    }
+                        // TODO! With new batching system, could get a batch with no data for this parameter. Should just skip it; implement later.
+                        if(valid_dset<0 and old_dataset<0)
+                        {
+                           // Parameter must exist in either the old combined file or at least one of the newer temp files,
+                           // because those are what we read to get the parameter names. So if the datasets are now
+                           // failing to actually open then something bad must have happened.
+                           std::ostringstream errmsg;
+                           errmsg << "Error opening datasets for parameter '"<<*it<<"' in temp files! All datasets failed to open! They may be corrupted.";
+                           printer_error().raise(LOCAL_INFO, errmsg.str());
+                        }
                    
-                    hid_t type, type2;
-                    if(valid_dset<0)
-                    {
-                       // Parameter not in any of the new temp files, must only be in the old combined output, get type from there.
-                       type  = H5Dget_type(old_dataset);
-                       type2 = H5Dget_type(old_dataset2);
-                    }
-                    else
-                    { 
-                       // Get the type from a validly opened dataset in temp file
-                       type  = H5Dget_type(datasets[valid_dset]);
-                       type2 = H5Dget_type(datasets2[valid_dset]); 
-                    }
-                    if(type<0 or type2<0)
-                    {
-                       std::ostringstream errmsg;
-                       errmsg << "Failed to detect type for dataset '"<<*it<<"'! The dataset is supposedly valid, so this does not make sense. It must be a bug, please report it.";
-                       printer_error().raise(LOCAL_INFO, errmsg.str());
-                    }
-                    
-                    // Create datasets
-                    //std::cout<<"Creating dataset '"<<*it<<"' in file:group "<<file<<":"<<group_name<<std::endl;
-                    setup_hdf5_points(new_group, type, type2, size_tot, *it);
+                        hid_t type, type2;
+                        if(valid_dset<0)
+                        {
+                           // Parameter not in any of the new temp files, must only be in the old combined output, get type from there.
+                           type  = H5Dget_type(old_dataset);
+                           type2 = H5Dget_type(old_dataset2);
+                        }
+                        else
+                        { 
+                           // Get the type from a validly opened dataset in temp file
+                           type  = H5Dget_type(datasets[valid_dset]);
+                           type2 = H5Dget_type(datasets2[valid_dset]); 
+                        }
+                        if(type<0 or type2<0)
+                        {
+                           std::ostringstream errmsg;
+                           errmsg << "Failed to detect type for dataset '"<<*it<<"'! The dataset is supposedly valid, so this does not make sense. It must be a bug, please report it. (valid_dset="<<valid_dset<<")";
+                           printer_error().raise(LOCAL_INFO, errmsg.str());
+                        }
+                       
+                        if(batch_i==0) // Only want to create the output dataset once! 
+                        {
+                           // Create datasets
+                           //std::cout<<"Creating dataset '"<<*it<<"' in file:group "<<file<<":"<<group_name<<std::endl;
+                           setup_hdf5_points(new_group, type, type2, size_tot, *it);
+                        }
 
-                    // Reopen dataset for writing
-                    hid_t dataset_out   = HDF5::openDataset(new_group, *it);
-                    hid_t dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
-                    //std::cout << "Copying parameter "<<*it<<std::endl; // debug
-                    Enter_HDF5<copy_hdf5>(dataset_out, datasets, size_tot_l, sizes, old_dataset);
-                    Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, size_tot_l, sizes, old_dataset2);
-                    
-                    // Close resources
-                    for (int i = 0, end = datasets.size(); i < end; i++)
-                    {
-                        if(datasets[i]>=0)  HDF5::closeDataset(datasets[i]);
-                        if(datasets2[i]>=0) HDF5::closeDataset(datasets2[i]);                      
-                        if(group_ids[i]>=0) HDF5::closeGroup(group_ids[i]);
-                        if(file_ids[i]>=0)  HDF5::closeFile(file_ids[i]);
-                    }
+                        // Reopen dataset for writing
+                        hid_t dataset_out   = HDF5::openDataset(new_group, *it);
+                        hid_t dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
+                        //std::cout << "Copying parameter "<<*it<<std::endl; // debug
+                       
+                        // Measure total size of datasets for this batch of files 
+                        unsigned long long batch_size_tot = 0;
+                        for(auto it = batch_sizes.begin(); it != batch_sizes.end(); ++it)
+                        {
+                           batch_size_tot += *it;
+                        }
 
-                    HDF5::closeDataset(dataset_out);
-                    HDF5::closeDataset(dataset2_out);
+                        //Enter_HDF5<copy_hdf5>(dataset_out, datasets, size_tot_l, sizes, old_dataset);
+                        //Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, size_tot_l, sizes, old_dataset2);
+                      
+                        // Do the copy!!! 
+                        Enter_HDF5<copy_hdf5>(dataset_out, datasets, batch_size_tot, batch_sizes, old_dataset, offset);
+                        Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, batch_size_tot, batch_sizes, old_dataset2, offset);
+ 
+                        // Close resources
+                        for (size_t file_i = 0, end = file_ids.size(); file_i < end; file_i++)
+                        {
+                            if(datasets[file_i]>=0)  HDF5::closeDataset(datasets[file_i]);
+                            if(datasets2[file_i]>=0) HDF5::closeDataset(datasets2[file_i]);                      
+                            if(group_ids[file_i]>=0) HDF5::closeGroup(group_ids[file_i]);
+                            if(file_ids[file_i]>=0)  HDF5::closeFile(file_ids[file_i]);
+                        }
+
+                        HDF5::closeDataset(dataset_out);
+                        HDF5::closeDataset(dataset2_out);
+                    } // end batch, begin processing next batch of files.
                 }
                 std::cout << "  Combining primary datasets... Done.                                 "<<std::endl;
+
+                // TODO! I have not yet implemented batch copying for the RA datasets!
 
                 // Ben: NEW. Before copying RA points, we need to figure out a map between them
                 // and their targets in the output dataset. That means we need to read through
@@ -764,6 +868,7 @@ namespace Gambit
                                // Reopen files
                                std::string fname = get_fname(i);
                                file_id = HDF5::openFile(fname);
+                               files[i] = file_id;
                                group_id = HDF5::openGroup(file_id, group_name+"/RA", true); // final argument prevents group from being created 
    
                                // Dataset may not exist, and thus fail to open. We will check its status
@@ -858,7 +963,11 @@ namespace Gambit
                 {
                    std::cout << "  Combining auxilliary datasets... None found, skipping. "<<std::endl;
                 }
-
+ 
+                // Close the old combined file
+                if(old_group>=0) HDF5::closeGroup(old_group);
+                if(old_file>=0)  HDF5::closeFile(old_file);
+ 
                 // Flush and close output file
                 H5Fflush(new_file, H5F_SCOPE_GLOBAL);
                 HDF5::closeGroup(new_group);

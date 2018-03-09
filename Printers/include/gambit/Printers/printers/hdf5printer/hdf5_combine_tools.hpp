@@ -61,7 +61,7 @@ namespace Gambit
             struct copy_hdf5
             {
                 template <typename U>
-                static void run(U, hid_t &dataset_out, std::vector<hid_t> &datasets, unsigned long long &size_tot, std::vector<unsigned long long> &sizes, hid_t &old_dataset)
+                static void run(U, hid_t &dataset_out, std::vector<hid_t> &datasets, unsigned long long &size_tot, std::vector<unsigned long long> &sizes, hid_t &old_dataset, size_t offset)
                 {
                     std::vector<U> data(size_tot);
                     unsigned long long j = 0;
@@ -115,8 +115,22 @@ namespace Gambit
                             printer_error().raise(LOCAL_INFO, errmsg.str());
                         }
                     }
-                    
-                    H5Dwrite( dataset_out, get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[0]);
+                    // Select dataspace for writing in the output file. Partial write now possible, so we
+                    // have to select the hyperslab that we want to write into
+                    hid_t memspace_id, dspace_id; 
+                    std::pair<hid_t,hid_t> chunk_ids = HDF5::selectChunk(dataset_out, offset, data.size());
+                    memspace_id = chunk_ids.first;
+                    dspace_id = chunk_ids.second;
+                    herr_t err = H5Dwrite( dataset_out, get_hdf5_data_type<U>::type(), memspace_id, dspace_id, H5P_DEFAULT, (void *)&data[0]);
+                    if(err<0)
+                    {
+                        std::ostringstream errmsg;
+                        errmsg << "Error copying parameter. HD5write failed." <<std::endl;  
+                        printer_error().raise(LOCAL_INFO, errmsg.str());
+                    }
+
+                    // Was:
+                    //H5Dwrite( dataset_out, get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[0]);
                 }
             };
 
@@ -365,9 +379,6 @@ namespace Gambit
                 std::string group_name;
                 std::vector<std::string> param_names, aux_param_names;
                 std::unordered_set<std::string> param_set, aux_param_set; // for easier finding
-                std::vector<hid_t> files;
-                std::vector<hid_t> groups;
-                std::vector<hid_t> aux_groups;
                 std::vector<unsigned long long> cum_sizes;
                 std::vector<unsigned long long> sizes;
                 unsigned long long size_tot;
@@ -377,16 +388,19 @@ namespace Gambit
                 bool do_cleanup; // If true, delete old temporary files after successful combination
                 std::string get_fname(const long int); // get name of ith temp file
                 bool skip_unreadable; // If true, ignores temp files that fail to open
-
+                std::vector<hid_t> files;
+                std::vector<hid_t> groups;
+                std::vector<hid_t> aux_groups;
+ 
             public:
-                hdf5_stuff(const std::string &file_name, const std::string &group_name, int num, bool cleanup, bool skip);
+                hdf5_stuff(const std::string &file_name, const std::string &output_file, const std::string &group_name, size_t num, bool cleanup, bool skip);
                 ~hdf5_stuff(); // close files on destruction                
-                void Enter_Aux_Paramters(const std::string &file, bool resume = false);
+                void Enter_Aux_Paramters(const std::string &output_file, bool resume = false);
             };
 
             inline void combine_hdf5_files(const std::string file_output, const std::string &file, const std::string &group, int num, bool resume, bool cleanup, bool skip)
             {
-                hdf5_stuff stuff(file, group, num, cleanup, skip);
+                hdf5_stuff stuff(file, file_output, group, num, cleanup, skip);
                 
                 stuff.Enter_Aux_Paramters(file_output, resume);
             }

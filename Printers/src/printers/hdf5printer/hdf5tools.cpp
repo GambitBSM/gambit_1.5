@@ -474,6 +474,57 @@ namespace Gambit {
           return n;
       }
 
+      /// Select a simple hyperslab in a 1D dataset
+      std::pair<hid_t,hid_t> selectChunk(const hid_t dset_id, std::size_t offset, std::size_t length)
+      {
+          // Open dataspace
+          hid_t dspace_id = getSpace(dset_id);
+
+          // Make sure that the requested chunk lies within the dataset extents
+          size_t dset_length = getSimpleExtentNpoints(dspace_id);
+
+          if(offset + length > dset_length)
+          {
+             std::ostringstream errmsg;
+             errmsg << "Error selecting chunk from dataset in HDF5 file. Tried to select a hyperslab which extends beyond the dataset extents:" << std::endl;
+             errmsg << "  offset = " << offset << std::endl;
+             errmsg << "  offset+length = " << length << std::endl;
+             errmsg << "  dset_length  = "<< dset_length << std::endl;
+             printer_error().raise(LOCAL_INFO, errmsg.str());
+          }
+
+          // Select a hyperslab.
+          static const size_t DSETRANK(1); // assuming 1D dataset
+          hsize_t offsets[DSETRANK];
+          offsets[0] = offset;
+          hsize_t selection_dims[DSETRANK]; // Set same as output chunks, but may have a different length
+          selection_dims[0] = length; // Adjust chunk length to input specification
+
+          herr_t err_hs = H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offsets, NULL, selection_dims, NULL);        
+          if(err_hs<0) 
+          {
+             std::ostringstream errmsg;
+             errmsg << "Error selecting chunk from dataset (offset="<<offset<<", length="<<selection_dims[0]<<") in HDF5 file. H5Sselect_hyperslab failed." << std::endl;
+             printer_error().raise(LOCAL_INFO, errmsg.str());
+          }
+
+          // Define memory space
+          hid_t memspace_id = H5Screate_simple(DSETRANK, selection_dims, NULL);         
+
+          #ifdef HDF5_DEBUG 
+          std::cout << "Debug variables:" << std::endl
+                    << "  dsetdims()[0]      = " << this->dsetdims()[0] << std::endl
+                    << "  offsets[0]         = " << offsets[0] << std::endl
+                    << "  CHUNKLENGTH        = " << CHUNKLENGTH << std::endl
+                    << "  selection_dims[0] = " << selection_dims[0] << std::endl;
+          #endif
+
+          return std::make_pair(memspace_id, dspace_id); // Be sure to close these identifiers after using them!
+      }
+
+
+
+
       /// @}
     }
  

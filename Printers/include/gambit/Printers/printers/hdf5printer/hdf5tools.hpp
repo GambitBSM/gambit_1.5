@@ -160,6 +160,9 @@ namespace Gambit
          /// Get name of dataset
          std::string getName(hid_t dset_id);
 
+         /// Select a simple hyperslab in a 1D dataset
+         std::pair<hid_t,hid_t> selectChunk(const hid_t dset_id, std::size_t offset, std::size_t length);
+  
          /// @}
 
       }
