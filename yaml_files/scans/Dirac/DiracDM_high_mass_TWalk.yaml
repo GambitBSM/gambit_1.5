@@ -111,9 +111,6 @@ ObsLikes:
     - capability: lnL_v0
       purpose: LogLike
       
-    - capability: lnL_vrot
-      purpose: LogLike
-
     - capability: lnL_vesc
       purpose: LogLike
       
@@ -148,14 +145,7 @@ Rules:
     options:
       v0_obs: 240
       v0_obserr: 8
-      
-  # Set vrot to 240 +/- 8 km/s based on Reid et al [arXiv:1401.5377]
-  - capability: lnL_vrot
-    function: lnL_vrot_gaussian
-    options:
-      vrot_obs: 240
-      vrot_obserr: 8
-      
+            
   # Set vesc to 533 +/- 32 km/s based on RAVE survey [arXiv:1309.4293]
   - capability: lnL_vesc
     function: lnL_vesc_gaussian
