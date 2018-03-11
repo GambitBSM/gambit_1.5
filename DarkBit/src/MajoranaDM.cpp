@@ -12,6 +12,7 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date Oct 2016
 ///  \date Jun, Sep 2017
+///  \date Mar 2018
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
@@ -303,7 +304,7 @@ namespace Gambit
       // Higgs-sector masses
       double mX = spec.get(Par::Pole_Mass,"X");
       double mH = spec.get(Par::Pole_Mass,"h0_1");
-      addParticle("X",        mX, 0)  // Majorana DM
+      addParticle("X",        mX, 1)  // Majorana DM
       addParticle("h0_1",     mH, 0)  // SM-like Higgs
       addParticle("pi0",   meson_masses.pi0,       0)
       addParticle("pi+",   meson_masses.pi_plus,   0)

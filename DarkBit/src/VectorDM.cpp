@@ -10,7 +10,9 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date Oct 2016, Jun 2017
+///  \date Oct 2016
+///  \date Jun 2017
+///  \date Mar 2018
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
@@ -285,7 +287,7 @@ namespace Gambit
       // Higgs-sector masses
       double mV = spec.get(Par::Pole_Mass,"V");
       double mH = spec.get(Par::Pole_Mass,"h0_1");
-      addParticle("V",        mV, 0)  // Vector DM
+      addParticle("V",        mV, 2)  // Vector DM
       addParticle("h0_1",     mH, 0)  // SM-like Higgs
       addParticle("pi0",   meson_masses.pi0,       0)
       addParticle("pi+",   meson_masses.pi_plus,   0)
