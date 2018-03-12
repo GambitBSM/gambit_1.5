@@ -1697,7 +1697,6 @@ namespace Gambit
 
       // Yukawa coupling |F|^2 from eq 26 in 1502.00477
       Matrix3cd F2 = 1.0/pow(vev,2) * *Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint() * MN * MN;
-cout << "F2 = " << F2 << endl;
       
       lnL = 0;
       for(int i=0; i<3; i++)

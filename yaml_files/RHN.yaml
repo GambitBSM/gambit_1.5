@@ -117,7 +117,7 @@ Scanner:
       plugin: diver
       like: LogLike
       NP: 6000
-      conthresh: 1e-2
+      convthresh: 1e-2
       lambdajDE: false
 
     multinest:
@@ -146,7 +146,7 @@ ObsLikes:
 
   # Indirecte searches
 
-  - capability: lnLbbn
+  - capability: lnL_bbn
     purpose: LogLike
 
   - capability: lnLlepuniv
@@ -155,8 +155,8 @@ ObsLikes:
   - capability: LUV_LL
     purpose: LogLike
 
-#  - capability: lnL_0nubb
-#    purpose: LogLike
+  - capability: lnL_0nubb
+    purpose: LogLike
 
   - capability: lnLckm
     purpose: LogLike
