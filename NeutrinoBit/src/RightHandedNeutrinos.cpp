@@ -942,8 +942,8 @@ namespace Gambit
       std::complex<double> sum = {0.0,0.0};
 
       // Relevant model parameters
-      Matrix3cd m_light = *Dep::m_nu;
-      Matrix3cd U_light = *Dep::UPMNS;
+      //Matrix3cd m_light = *Dep::m_nu;
+      //Matrix3cd U_light = *Dep::UPMNS;
       Matrix3cd theta = *Dep::SeesawI_Theta;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -981,8 +981,8 @@ namespace Gambit
       std::complex<double> sum = {0.0,0.0};
 
       // Relevant model parameters
-      Matrix3cd m_light = *Dep::m_nu;
-      Matrix3cd U_light = *Dep::UPMNS;
+      //Matrix3cd m_light = *Dep::m_nu;
+      //Matrix3cd U_light = *Dep::UPMNS;
       Matrix3cd theta = *Dep::SeesawI_Theta;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -1686,15 +1686,30 @@ namespace Gambit
     void perturbativity_likelihood(double &lnL)
     {
       using namespace Pipes::perturbativity_likelihood;
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      Matrix3d MN;
+      MN << *Param["M_1"], 0, 0,
+            0, *Param["M_2"], 0,
+            0, 0, *Param["M_3"];
+
+      double vev= 1. / sqrt(sqrt(2.)*sminputs.GF);
+
+      // Yukawa coupling |F|^2 from eq 26 in 1502.00477
+      Matrix3cd F2 = 1.0/pow(vev,2) * *Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint() * MN * MN;
+cout << "F2 = " << F2 << endl;
       
-      if( *Param["M_1"] and 
-          Usq(0,0) < *Param["M_2"] / *Param["M_1"] * Usq(0,1) + *Param["M_3"] / *Param["M_1"] * Usq(0,2) and
-          Usq(1,0) < *Param["M_2"] / *Param["M_1"] * Usq(1,1) + *Param["M_3"] / *Param["M_1"] * Usq(1,2) and
-          Usq(2,0) < *Param["M_2"] / *Param["M_1"] * Usq(2,1) + *Param["M_3"] / *Param["M_1"] * Usq(2,2) )
-        lnL = 0;
-      else
-        lnL = -1E10;
+      lnL = 0;
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
+          if(F2(i,j).real() >= 4*pi) 
+          {
+            std::ostringstream msg;
+            msg << "Yukawas not perturbative; point invalidated.";
+            logger() << msg.str() << EOM;
+            invalid_point().raise(msg.str());
+            return ;
+          }
     }
 
   }

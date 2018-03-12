@@ -715,6 +715,7 @@ START_MODULE
     #define FUNCTION perturbativity_likelihood
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
