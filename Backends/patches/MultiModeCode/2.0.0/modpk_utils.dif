@@ -1,5 +1,5 @@
---- /Users/selimhotinli/Dropbox/gambit/Backends/installed/MultiModeCode/2.0.0/modpk_utils.f90	2015-04-20 16:36:02.000000000 +0100
-+++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk_utils.f90	2017-11-25 11:50:55.000000000 +0000
+--- ../../../installed/MultiModeCode/2.0.0/modpk_utils.f90	2015-04-20 16:36:02.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk_utils.f90	2017-11-25 11:50:55.000000000 +0000
 @@ -92,8 +92,8 @@
      real(dp), DIMENSION(:), INTENT(OUT) :: yprime
  

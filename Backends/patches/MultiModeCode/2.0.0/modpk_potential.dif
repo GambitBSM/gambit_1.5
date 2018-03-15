@@ -1,5 +1,5 @@
---- /Users/selimhotinli/Dropbox/gambit/Backends/installed/MultiModeCode/2.0.0/modpk_potential.f90	2015-04-20 16:36:02.000000000 +0100
-+++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk_potential.f90	2017-11-25 00:34:28.000000000 +0000
+--- ../../../installed/MultiModeCode/2.0.0/modpk_potential.f90	2015-04-20 16:36:02.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk_potential.f90	2017-11-25 00:34:28.000000000 +0000
 @@ -48,7 +48,7 @@
      integer :: phi_light_index
      real(dp) :: lambda4(size(phi)), alpha2(num_inflaton)

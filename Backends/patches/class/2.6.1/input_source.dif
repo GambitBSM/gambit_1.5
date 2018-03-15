@@ -1,5 +1,5 @@
---- /Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/source/input.c	2017-10-24 14:42:41.000000000 +0100
-+++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/input.c	2018-01-12 01:21:35.000000000 +0000
+--- ../../../installed/class/2.6.1/source/input.c	2017-10-24 14:42:41.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/class_types/gambit_update/input.c	2018-01-12 01:21:35.000000000 +0000
 @@ -1531,6 +1531,10 @@
        ppm->primordial_spec_type = external_Pk;
        flag2=_TRUE_;

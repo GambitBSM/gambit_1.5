@@ -1,5 +1,5 @@
---- /Users/selimhotinli/Dropbox/gambit/Backends/installed/MultiModeCode/2.0.0/modpk.f90	2015-04-20 16:36:02.000000000 +0100
-+++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk.f90	2017-11-25 00:44:33.000000000 +0000
+--- ../../../installed/MultiModeCode/2.0.0/modpk.f90	2015-04-20 16:36:02.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk.f90	2017-11-25 00:44:33.000000000 +0000
 @@ -18,15 +18,105 @@
  
  CONTAINS

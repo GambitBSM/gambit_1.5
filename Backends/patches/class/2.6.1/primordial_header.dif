@@ -1,5 +1,5 @@
---- /Users/selimhotinli/Dropbox/gambit/Backends/installed/class/2.6.1/include/primordial.h	2017-07-02 17:19:45.000000000 +0100
-+++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/primordial.h	2018-01-08 20:49:35.000000000 +0000
+--- ../../../installed/class/2.6.1/include/primordial.h	2017-07-02 17:19:45.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/class_types/gambit_update/primordial.h	2018-01-08 20:49:35.000000000 +0000
 @@ -13,7 +13,8 @@
    inflation_V,
    inflation_H,
