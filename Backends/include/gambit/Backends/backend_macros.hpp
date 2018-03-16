@@ -41,7 +41,6 @@
 
 #include <iostream>
 #include <string>
-#include <dlfcn.h>
 #include <map>
 #include <sstream>
 
