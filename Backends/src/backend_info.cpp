@@ -295,11 +295,13 @@ namespace Gambit
       // Initialize variable to avoid issues later
       needsMathematica[be+ver] = false;
       needsPython[be+ver] = false;
-
+      classloader[be+ver] = false;
+ 
      // Now switch according to the language of the backend
       if (lang == "MATHEMATICA"
        or lang == "Mathematica")
       {
+        needsMathematica[be+ver] = true;
         // And switch according to whether the language has its dependencies met or not
         #ifdef HAVE_MATHEMATICA
           loadLibrary_Mathematica(be, ver, sv);
@@ -315,6 +317,7 @@ namespace Gambit
       else if (lang == "PYTHON"
             or lang == "Python")
       {
+        needsPython[be+ver] = true;
         #ifdef HAVE_PYBIND11
          loadLibrary_Python(be, ver, sv);
         #else
