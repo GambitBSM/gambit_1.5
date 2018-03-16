@@ -30,6 +30,7 @@ namespace Gambit
 
   const double pi = 3.141592653589793238462643383279502884197;
   const double root2 = sqrt(2.0);
+  const double hbar = 6.582119514e-25;                          // GeV s  (http://pdg.lbl.gov/2017/reviews/rpp2017-rev-phys-constants.pdf)
   const double gev2cm2 = pow(197.327053e-16, 2.0);              // cm^2 per GeV^-2
   const double gev2pb = gev2cm2*1e36;                           // pb per GeV^-2
   const double s2cm = 2.99792458e10;                            // cm per s
@@ -49,7 +50,14 @@ namespace Gambit
     static constexpr double rho_plus = 0.775;     // charged rho meson mass (GeV/c^2)
     static constexpr double rho_minus = 0.775;    // charged rho meson mass (GeV/c^2)
     static constexpr double omega = 0.7827;       // omega meson mass (GeV/c^2)
+    static constexpr double rho1450 = 1.465;      // rho(1450) mass (GeV/c^2)
   } meson_masses;
+
+  static const struct Mesons_decay_constants
+  {
+    static constexpr double pi_plus = 0.13041;    // (GeV)
+  } meson_decay_constants;
+
 
   /// M_W (Breit-Wigner mass parameter ~ pole) = 80.385 +/- 0.015  GeV (1 sigma), Gaussian.
   /// Reference http://pdg.lbl.gov/2014/listings/rpp2014-list-w-boson.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
