@@ -1144,14 +1144,16 @@ namespace Gambit
 
       Eigen::Matrix3d VNorm = (V.adjoint() * V).real();
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+      std::vector<double> MN = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
 
       result = 0.0;
-      if(*Param["M_1"] < sminputs.mZ)
-        for(int i=0; i<3; i++)
+      for(int i=0; i<3; i++)
+        if(MN[i] < sminputs.mZ)
           for(int j=0; j<3; j++)
-            result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-      else
-        result = 3.0*Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI);
+            if(MN[j] < sminputs.mZ)
+              result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+        else
+          result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI);
     }
 
     void lnL_Z_inv_width_chi2(double &result)
@@ -1188,7 +1190,7 @@ namespace Gambit
       std::vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
 
       result.clear();
-      if(*Param["M_1"] < mw)
+      if(*Param["M_1"] < mw or *Param["M_2"] < mw or *Param["M_3"] < mw)
         for(int i=0; i<3; i++)
           result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
       else
