@@ -383,9 +383,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Gamma_RHN2nuudbar
+  #define CAPABILITY Gamma_RHN2ludbar
   START_CAPABILITY
-    #define FUNCTION Gamma_RHN2nuudbar
+    #define FUNCTION Gamma_RHN2ludbar
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
@@ -414,7 +414,7 @@ START_MODULE
     DEPENDENCY(Gamma_RHN2null, std::vector<double>)
     DEPENDENCY(Gamma_RHN2nuuubar, std::vector<double>)
     DEPENDENCY(Gamma_RHN2nuddbar, std::vector<double>)
-    DEPENDENCY(Gamma_RHN2nuudbar, std::vector<double>)
+    DEPENDENCY(Gamma_RHN2ludbar, std::vector<double>)
     ALLOW_MODELS(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY

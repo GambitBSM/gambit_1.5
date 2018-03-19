@@ -54,13 +54,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_pi_0)
-          gamma[i] = 0.0;
-        else
+        gamma[i] = 0.0;
+        if (M[i] > m_pi_0)
+        {
           for (int j=0; j<3; j++)
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*f_pi_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_pi_0,2.0)/pow(M[i],2.0)),2.0);
           }
+        }
       }
       result = gamma;
     }
@@ -85,13 +86,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_pi_plus)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_pi_plus+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vud,2.0)*f_pi_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_pi_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_pi_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_pi_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -116,13 +118,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_K_plus)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_K_plus+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2.0)*f_K_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_K_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_K_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_K_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -148,13 +151,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_D_plus)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_D_plus+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcd,2.0)*f_D_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_D_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_D_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_D_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -180,13 +184,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_D_s)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_D_s+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcs,2.0)*f_Ds_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_D_s,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_D_s-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_D_s+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -212,13 +217,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_B_plus)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_B_plus+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vub,2.0)*f_B_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -244,13 +250,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_B_s)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_B_s+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2.0)*f_Bs_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_s,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_s-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_s+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -276,13 +283,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_B_c)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_B_c+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcb,2.0)*f_Bc_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_c,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_c-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_c+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -302,13 +310,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_eta)
-          gamma[i] = 0.0;
-        else
+        gamma[i] = 0.0;
+        if (M[i] > m_eta)
+        {
           for (int j=0; j<3; j++)
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*f_eta_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_eta,2.0)/pow(M[i],2.0)),2.0);
           }
+        }
       }
       result = gamma;
     }
@@ -329,13 +338,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_eta_prime)
-          gamma[i] = 0.0;
-        else
+        gamma[i] = 0.0;
+        if (M[i] > m_eta_prime)
+        {
           for (int j=0; j<3; j++)
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*f_etaprime_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_eta_prime,2.0)/pow(M[i],2.0)),2.0);
           }
+        }
       }
       result = gamma;
     }
@@ -361,13 +371,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_rho_plus)
-          gamma[i] = 0.0;
-        else
-          for (int j=0; j<3; j++)
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_rho_plus+m_lep[j]))
           {
             gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(Vud,2.0)*pow(M[i],3.0))/(8*pi*pow(m_rho_plus,2.0)) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) + ( (pow(m_rho_plus,2.0)/pow(M[i],2.0))*(1 + (pow(m_lep[j],2.0)-(2*pow(m_rho_plus,2.0)))/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_rho_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_rho_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
           }
+        }
       }
       result = gamma;
     }
@@ -387,13 +398,14 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<m_rho_0)
-          gamma[i] = 0.0;
-        else
+        gamma[i] = 0.0;
+        if (M[i] > m_rho_0)
+        {
           for (int j=0; j<3; j++)
           {
             gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(M[i],3.0))/(16*pi*pow(m_rho_0,2.0)) ) * (1 + (2*pow(m_rho_0,2.0))/pow(M[i],2.0)) * pow((1 - pow(m_rho_0,2.0)/pow(M[i],2.0)),2.0);
           }
+        }
       }
       result = gamma;
     }
@@ -425,7 +437,7 @@ namespace Gambit
     // Also helper function; formula is in [arXiv:1208.4607v2]
     double g(double xa, double xb)
     {
-      return (1 - (7*pow(xa,2.0)) - (7*pow(xb,2.0)) - (7*pow(xa,4.0)) - (7*pow(xb,4.0)) + (12*pow(xa,2.0)*pow(xb,2.0)) - (7*pow(xa,2.0)*pow(xb,4.0)) - (7*pow(xa,4.0)*pow(xb,2.0)) + pow(xa,6.0) + pow(xb,6.0));
+     return (1 - (7*pow(xa,2.0)) - (7*pow(xb,2.0)) - (7*pow(xa,4.0)) - (7*pow(xb,4.0)) + (12*pow(xa,2.0)*pow(xb,2.0)) - (7*pow(xa,2.0)*pow(xb,4.0)) - (7*pow(xa,4.0)*pow(xb,2.0)) + pow(xa,6.0) + pow(xb,6.0));
     }
 
     // Formula is from [arXiv:1208.4607v2]
@@ -443,19 +455,19 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
       for (int i=0; i<3; i++)
       {
+        gamma[i] = 0.0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
           {
-            if (M[i]<m_lep[k])
-              gamma[i] += 0.0;
-            else
+            if ( (j != k) and (M[i] > (m_lep[j]+m_lep[k])) )
+            {
               x_a = m_lep[j]/M[i];
               x_b = m_lep[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*pow(x_a,4.0)*log((1 - (S(x_a,x_b)*(1+pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_b,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_a,2.0)))) - (12*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)+pow(x_b,2.0))) - (2*pow(x_a,2.0)) + pow((pow(x_a,2.0)-pow(x_b,2.0)),2.0)) / (2*pow(x_b,2.0)))) + (12*pow(x_a,4.0)*pow(x_b,4.0)*log((1 - (S(x_a,x_b)*(1-pow(x_a,2.0)-pow(x_b,2.0))) - (2*pow(x_a,2.0)) - (2*pow(x_b,2.0)) + pow(x_a,4.0) + pow(x_b,4.0)) / (2*pow(x_a,2.0)*pow(x_b,2.0)))));
+              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*pow(x_a,4)*log(abs((1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2))) / (2*pow(x_a,2)))) - (12*pow(x_b,4)*log(abs((1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2))) / (2*pow(x_b,2)))) + (12*pow(x_a,4)*pow(x_b,4)*log(abs((1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4))) / (2*pow(x_a,2)*pow(x_b,2)))));
+            }
           }
         }
       }
@@ -465,7 +477,15 @@ namespace Gambit
     // Helper function; formula is in [arXiv:0705.1729]
     double L(double x)
     {
-      return log( (1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
+      double r, s;
+      r = 1 - (3*pow(x,2.0));
+      s = (1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0)));
+      cout.precision(20);
+      cout << "1:" << std::fixed << r << endl;
+      cout << "2:" << std::fixed << s << endl;
+      cout << "num:" << std::fixed << r-s << endl;
+      return r;
+//      return log( (1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
     }
 
     void Gamma_RHN2null(std::vector<double>& result)
@@ -490,13 +510,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
+        gamma[i] = 0.0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
           {
-            if (M[i]<m_lep[k])
-              gamma[i] += 0.0;
-            else
+            if (M[i] > (2*m_lep[k]))
             {
               double x_l = m_lep[k]/M[i];
               if (j == k)
@@ -545,23 +564,18 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]>7.5)  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
         {
-          gamma[i] = 0.0;
-          break;
-        }
-        else
-          for (int j=0; j<3; j++)
+          for (int k=0; k<3; k++)
           {
-            for (int k=0; k<3; k++)
+            if ( (M[i] > (2*m_uquark[k])) and (M[i] > 7.5) )  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
             {
-              if (M[i]<m_uquark[k])
-                gamma[i] += 0.0;
-              else
-                x_q = m_uquark[k]/M[i];
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_u(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((16/3)*C1*pow(x_q,2.0)) + ((3-(8*C1))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
+              x_q = m_uquark[k]/M[i];
+              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_u(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((16/3)*C1*pow(x_q,2.0)) + ((3-(8*C1))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
             }
           }
+        }
       }
       result = gamma;
     }
@@ -597,23 +611,18 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]>7.5)  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
         {
-          gamma[i] += 0.0;
-          break;
-        }
-        else
-          for (int j=0; j<3; j++)
+          for (int k=0; k<3; k++)
           {
-            for (int k=0; k<3; k++)
+            if ( (M[i] > (2*m_dquark[k])) and (M[i] > 7.5) )  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
             {
-              if (M[i]<m_dquark[k])
-                gamma[i] += 0.0;
-              else
-                x_q = m_dquark[k]/M[i];
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_d(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((8/3)*C2*pow(x_q,2.0)) + ((1-((4/3)*C2))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
+              x_q = m_dquark[k]/M[i];
+              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_d(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((8/3)*C2*pow(x_q,2.0)) + ((1-((4/3)*C2))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
             }
           }
+        }
       }
       result = gamma;
     }
@@ -642,9 +651,9 @@ namespace Gambit
     }
 
     // Formula is from [arXiv:1208.4607v2]
-    void Gamma_RHN2nuudbar(std::vector<double>& result)
+    void Gamma_RHN2ludbar(std::vector<double>& result)
     {
-      using namespace Pipes::Gamma_RHN2nuudbar;
+      using namespace Pipes::Gamma_RHN2ludbar;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
       //TODO: Take from the model parameters (CKM_Lambda = Vus)
@@ -671,47 +680,26 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if (M[i]<7.5)  // For now, take 7.5 GeV to be the mass limit below which the RHN decay is to lepton+meson final state
+        gamma[i] = 0.0;
+        for (int j=0; j<3; j++)
         {
-          gamma[i] += 0.0;
-          break;
-        }
-        else
-          for (int j=0; j<3; j++)
+          for (int k=0; k<3; k++)
           {
-            if (M[i]<m_lep[j])
+            for (int l=0; l<3; l++)
             {
-              gamma[i] += 0.0;
-              break;
-            }
-            else
-            {
-              for (int k=0; k<3; k++)
+              if ( (M[i] > (m_lep[j]+m_uquark[k]+m_dquark[l])) and (M[i] < 7.5) )  // For now, take 7.5 GeV to be the mass limit below which the RHN decay is to lepton+meson final state
               {
-                if (M[i]<m_uquark[k])
-                {
-                  gamma[i] += 0.0;
-                  break;
-                }
-                else
-                {
-                  for (int l=0; l<3; l++)
-                  {
-                    if (M[i]<m_dquark[l])
-                      gamma[i] += 0.0;
-                    else
-                      decay_prod[0] = m_lep[j];
-                      decay_prod[1] = m_uquark[k];
-                      decay_prod[2] = m_dquark[l];
-                      two_heaviest = two_heaviest_sort(decay_prod);
-                      x = two_heaviest[0];
-                      y = two_heaviest[1];
-                      gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * pow(V[k][l],2.0) * ((S(x,y)*g(x,y)) - (12*pow(x,4.0)*log((1 - (S(x,y)*(1+pow(x,2.0)-pow(y,2.0))) - (2*pow(y,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0)) / (2*pow(x,2.0)))) - (12*pow(y,4.0)*log((1 - (S(x,y)*(1-pow(x,2.0)+pow(y,2.0))) - (2*pow(x,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0)) / (2*pow(y,2.0)))) + (12*pow(x,4.0)*pow(y,4.0)*log((1 - (S(x,y)*(1-pow(x,2.0)-pow(y,2.0))) - (2*pow(x,2.0)) - (2*pow(y,2.0)) + pow(x,4.0) + pow(y,4.0)) / (2*pow(x,2.0)*pow(y,2.0)))));
-                  }
-                }
+                decay_prod[0] = m_lep[j];
+                decay_prod[1] = m_uquark[k];
+                decay_prod[2] = m_dquark[l];
+                two_heaviest = two_heaviest_sort(decay_prod);
+                x = two_heaviest[0]/M[i];
+                y = two_heaviest[1]/M[i];
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * pow(V[k][l],2.0) * ((S(x,y)*g(x,y)) - (12*pow(x,4.0)*log(abs((1 - (S(x,y)*(1+pow(x,2.0)-pow(y,2.0))) - (2*pow(y,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0))) / (2*pow(x,2.0)))) - (12*pow(y,4.0)*log(abs((1 - (S(x,y)*(1-pow(x,2.0)+pow(y,2.0))) - (2*pow(x,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0))) / (2*pow(y,2.0)))) + (12*pow(x,4.0)*pow(y,4.0)*log(abs((1 - (S(x,y)*(1-pow(x,2.0)-pow(y,2.0))) - (2*pow(x,2.0)) - (2*pow(y,2.0)) + pow(x,4.0) + pow(y,4.0))) / (2*pow(x,2.0)*pow(y,2.0)))));
               }
             }
           }
+        }
       }
       result = gamma;
     }
@@ -737,19 +725,17 @@ namespace Gambit
       std::vector<double> RHN2null = *Dep::Gamma_RHN2null;
       std::vector<double> RHN2nuuubar = *Dep::Gamma_RHN2nuuubar;
       std::vector<double> RHN2nuddbar = *Dep::Gamma_RHN2nuddbar;
-      std::vector<double> RHN2nuudbar = *Dep::Gamma_RHN2nuudbar;
+      std::vector<double> RHN2ludbar = *Dep::Gamma_RHN2ludbar;
       std::vector<double> gamma_total(3);
       
       for (int i=0; i<3; i++)
       {
-        gamma_total[i] = 2*(RHN2pi0nu[i]+RHN2piplusl[i]+RHN2Kplusl[i]+RHN2Dplusl[i]+RHN2Dsl[i]+RHN2Bplusl[i]+RHN2Bsl[i]+RHN2Bcl[i]+RHN2etanu[i]+RHN2etaprimenu[i]+RHN2rhoplusl[i]+RHN2rho0nu[i]+RHN23nu[i]+RHN2llnu[i]+RHN2null[i]+RHN2nuuubar[i]+RHN2nuddbar[i]+RHN2nuudbar[i]);  // factor of 2 accounts for Majorana nature
+        gamma_total[i] = 2*(RHN2pi0nu[i]+RHN2piplusl[i]+RHN2Kplusl[i]+RHN2Dplusl[i]+RHN2Dsl[i]+RHN2Bplusl[i]+RHN2Bsl[i]+RHN2Bcl[i]+RHN2etanu[i]+RHN2etaprimenu[i]+RHN2rhoplusl[i]+RHN2rho0nu[i]+RHN23nu[i]+RHN2llnu[i]+RHN2null[i]+RHN2nuuubar[i]+RHN2nuddbar[i]+RHN2ludbar[i]);  // factor of 2 accounts for Majorana nature
       }
       result = gamma_total;
     }
 
-    // BBN constraint likelihood : lifetime must be less than 0.1s
-    // [arXiv:1202.2841] Since the limit is approximate, we simply implement it
-    // as a hard ~5 sigma cut.
+    // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841]
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
@@ -1014,7 +1000,6 @@ namespace Gambit
     void lnL_0nubb_KamLAND_Zen(double& result)
     {
       using namespace Pipes::lnL_0nubb_KamLAND_Zen;
-//      double tau_limit = 1.07e26*3.156e7;  // [s] 90% CL
       double tau_limit = 1.07e26;  // [yr] 90% CL
 
       double Gamma = *Dep::Gamma_0nubb_Xe;
@@ -1027,7 +1012,6 @@ namespace Gambit
     void lnL_0nubb_GERDA(double& result)
     {
       using namespace Pipes::lnL_0nubb_GERDA;
-//      double tau_limit = 2.1e25*3.156e7;  // [s] 90% CL
       double tau_limit = 2.1e25;  // [yr] 90% CL
 
       double Gamma = *Dep::Gamma_0nubb_Ge;

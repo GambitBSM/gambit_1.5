@@ -3385,7 +3385,7 @@ Gamma_RHN2nuuubar: |
 Gamma_RHN2nuddbar: |
   Decay rate of right-handed neutrinos to a left-handed neutrino and a meson composed of down-type quarks
 
-Gamma_RHN2nuudbar: |
+Gamma_RHN2ludbar: |
   Decay rate of right-handed neutrinos to a lepton, one up-type and one down-type quark
 
 Gamma_BBN: |
