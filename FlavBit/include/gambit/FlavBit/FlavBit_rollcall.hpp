@@ -434,7 +434,9 @@ START_MODULE
     // Function to calcualte RK* for RHN
     #define FUNCTION RHN_RKstar_0045_11
     START_FUNCTION(double)
-    ALLOW_MODEL(RightHandedNeutrinos)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(StandardModel_SLHA2,RightHandedNeutrinos)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -449,7 +451,9 @@ START_MODULE
     // Function to calculate RK* for RHN
     #define FUNCTION RHN_RKstar_11_60
     START_FUNCTION(double)
-    ALLOW_MODEL(RightHandedNeutrinos)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(StandardModel_SLHA2,RightHandedNeutrinos)
     #undef FUNCTION
 
   #undef CAPABILITY
