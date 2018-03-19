@@ -41,30 +41,18 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    void dummy_fun1(double& result)
+    void dummy_func(double& result)
     {
-      using namespace Pipes::dummy_fun1;
+      using namespace Pipes::dummy_func;
 
       std::vector<double> vec;
-      std::cout << "Now it will be interesting" << std::endl;
       BEreq::DA_awesomeness(vec);
-      std::cout << "It worked?! unbelievable" << std::endl;
       double sum = 0.0;
       for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
       {
         sum += *it;
       }
-
       result = sum;
-    }
-
-    void dummy_fun2(double& result)
-    {
-      using namespace Pipes::dummy_fun2;
-
-      std::cout << "Now it will be interesting" << std::endl;
-      BEreq::DA_greatness(result);
-      std::cout << "It worked?! unbelievable" << std::endl;
     }
 
     void lnL_A_planck_gaussian(double& result)

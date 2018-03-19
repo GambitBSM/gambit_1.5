@@ -56,15 +56,11 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-  - capability: dummy_cap
-    function: dummy_fun1
-    #function: dummy_fun2
-    module: CosmoBit
-
   - capability: DarkAges_1_0_init
     options:
-      arrayLen: 100
+      arrayLen: 10
       someFactor: 1.05
+
 #======== Logging setup ========
 Lxogger:
   redirection:

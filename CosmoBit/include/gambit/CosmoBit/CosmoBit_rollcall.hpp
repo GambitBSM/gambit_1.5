@@ -32,14 +32,9 @@ START_MODULE
 
   #define CAPABILITY dummy_cap
   START_CAPABILITY
-    #define FUNCTION dummy_fun1
+    #define FUNCTION dummy_func
     START_FUNCTION(double)
     BACKEND_REQ(DA_awesomeness, (DarkAges_tag), void, (std::vector<double>&))
-    #undef FUNCTION
-
-    #define FUNCTION dummy_fun2
-    START_FUNCTION(double)
-    BACKEND_REQ(DA_greatness, (DarkAges_tag), void, (double&))
     #undef FUNCTION
   #undef CAPABILITY
 

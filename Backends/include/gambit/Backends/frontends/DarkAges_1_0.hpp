@@ -38,8 +38,7 @@ LOAD_LIBRARY
 
 BE_FUNCTION(initialize, void, (int), "initialize", "DA_initialize")
 BE_FUNCTION(multiplyToArray, void, (double), "multiplyToArray", "DA_multiply")
-BE_FUNCTION(returnArray, pybind11::object, (), "returnArray","DA_returnArray")
-BE_FUNCTION(returnSumOfArray, double, (), "returnSumOfArray","DA_returnSumOfArray")
+BE_FUNCTION(returnArray, pybind11::list, (), "returnArray","DA_returnArray")
 
 /* Syntax for BE_VARIABLE:
  * BE_VARIABLE([name], [type], "[exact symbol name]", "[choose capability name]")
@@ -60,17 +59,14 @@ BE_NAMESPACE
   {
     logger().send("Message from 'awesomenessNeitherByAndersNorByPat' backend convenience function in DarkAges v1.0 wrapper",LogTags::info);
     multiplyToArray(*someFactor);
-    pybind11::object tmp_result;
-    tmp_result = returnArray();
+    pybind11::list tmp_result = returnArray();
     /* Mapping from numpy array onto std::vector goes here */
-    result.resize(10,2.5); // this is a dummy such that somethign happens.
-  }
-
-  void greatnessNeitherByAndersNorByPat(double& result)
-  {
-    logger().send("Message from 'greatnessNeitherByAndersNorByPat' backend convenience function in DarkAges v1.0 wrapper",LogTags::info);
-    multiplyToArray(*someFactor);
-    result = returnSumOfArray();
+    result.clear(); // Delete all entries of result !!
+    for (auto item : tmp_result)
+    {
+      double val = pybind11::cast<double>(item);
+      result.push_back(val);
+    }
   }
 }
 END_BE_NAMESPACE
@@ -92,7 +88,6 @@ END_BE_NAMESPACE
  * BE_CONV_FUNCTION([function name], type, (arguments), "[choose capability name]") */
 
 BE_CONV_FUNCTION(awesomenessNeitherByAndersNorByPat, void, (std::vector<double>&), "DA_awesomeness")
-BE_CONV_FUNCTION(greatnessNeitherByAndersNorByPat, void, (double&), "DA_greatness")
 
 BE_INI_FUNCTION
 {
@@ -100,10 +95,10 @@ BE_INI_FUNCTION
   if (scan_level)
   {
     *arrayLen = runOptions->getValueOrDef<int>(10, "arrayLen");
-    initialize(*arrayLen);
+    *someFactor = runOptions->getValueOrDef<double>(2.5, "someFactor");
   }
   scan_level = false;
-  *someFactor = runOptions->getValueOrDef<double>(2.5, "someFactor");
+  initialize(*arrayLen);
 }
 END_BE_INI_FUNCTION
 
