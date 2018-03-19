@@ -30,6 +30,27 @@
 #define MODULE CosmoBit
 START_MODULE
 
+  #define CAPABILITY dummy_cap
+  START_CAPABILITY
+    #define FUNCTION dummy_fun1
+    START_FUNCTION(double)
+    BACKEND_REQ(DA_awesomeness, (DarkAges_tag), void, (std::vector<double>&))
+    #undef FUNCTION
+
+    #define FUNCTION dummy_fun2
+    START_FUNCTION(double)
+    BACKEND_REQ(DA_greatness, (DarkAges_tag), void, (double&))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_A_planck
+  START_CAPABILITY
+    #define FUNCTION lnL_A_planck_gaussian
+    START_FUNCTION(double)
+    ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY compute_vanilla_lowp_TT_loglike
   START_CAPABILITY
     #define FUNCTION function_vanilla_lowp_TT_loglike

@@ -29,6 +29,7 @@
 #include <omp.h>
 #include <stdlib.h>     /* malloc, free, rand */
 #include "gambit/Utils/yaml_options.hpp"
+#include "gambit/Utils/statistics.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
@@ -39,6 +40,44 @@ namespace Gambit
   namespace CosmoBit
   {
     using namespace LogTags;
+
+    void dummy_fun1(double& result)
+    {
+      using namespace Pipes::dummy_fun1;
+
+      std::vector<double> vec;
+      std::cout << "Now it will be interesting" << std::endl;
+      BEreq::DA_awesomeness(vec);
+      std::cout << "It worked?! unbelievable" << std::endl;
+      double sum = 0.0;
+      for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
+      {
+        sum += *it;
+      }
+
+      result = sum;
+    }
+
+    void dummy_fun2(double& result)
+    {
+      using namespace Pipes::dummy_fun2;
+
+      std::cout << "Now it will be interesting" << std::endl;
+      BEreq::DA_greatness(result);
+      std::cout << "It worked?! unbelievable" << std::endl;
+    }
+
+    void lnL_A_planck_gaussian(double& result)
+    {
+      using namespace Pipes::lnL_A_planck_gaussian;
+
+      double obs_mean = 1.0;
+      double obs_err = 0.0025;
+      double pred_mean = *Param["A_planck"];
+      double pred_err = 0.0;
+
+      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
+    }
 
     void class_set_parameter_LCDM(Class_container& cosmo)
     {

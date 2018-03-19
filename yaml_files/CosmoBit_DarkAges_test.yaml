@@ -1,0 +1,83 @@
+##########################################################################
+## Minimal CosmoBit application  (in YAML)
+##   - Using the Planck-lite likelihood for high-l
+##     (Either TT or TTTEEE -> Specified in 'Rules')
+##   - Using Multinest as sampler
+##
+## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
+## 2016-17
+##
+## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
+## 2017 Nov
+## 2018 Jan,Feb
+##########################################################################
+
+
+#======== Input parameter declarations =======
+Parameters:
+
+  #LCDM: !import include/LCDM_scan.yaml
+
+  Planck_lite: !import include/Planck_lite_scan.yaml
+
+#======== Prior setup ========
+Priors:
+
+#======== Output setup ========
+Printer:
+  printer: ascii
+  options:
+    output_file: "gambit_output.data"
+    buffer_length: 100
+
+#======== Scanner setup ========
+Scanner:
+  use_scanner: random
+
+  scanners:
+
+    random:
+      plugin: random
+      point_number: 10
+      like:  LogLike
+
+#======== Observables of interest ========
+ObsLikes:
+  - purpose:      observable
+    capability:   dummy_cap
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   lnL_A_planck
+    module:       CosmoBit
+    type:         double
+
+#======== Rule entries ========
+Rules:
+
+  - capability: dummy_cap
+    function: dummy_fun1
+    #function: dummy_fun2
+    module: CosmoBit
+
+  - capability: DarkAges_1_0_init
+    options:
+      arrayLen: 100
+      someFactor: 1.05
+#======== Logging setup ========
+Lxogger:
+  redirection:
+    [Default]      : "default.log"
+    [CosmoBit]  : "CosmoBit.log"
+    [Scanner]      : "Scanner.log"
+
+#======== Generic Name/Value Section ========
+KeyValues:
+
+  default_output_path: "runs/CosmoBit_DarkAges_test"
+
+  rng: ranlux48
+
+  likelihood:
+    model_invalid_for_lnlike_below: -1e6
