@@ -459,7 +459,7 @@ namespace Gambit
             {
               x_a = m_lep[j]/M[i];
               x_b = m_lep[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*pow(x_a,4)*log(abs((1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2))) / (2*pow(x_a,2)))) - (12*pow(x_b,4)*log(abs((1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2))) / (2*pow(x_b,2)))) + (12*pow(x_a,4)*pow(x_b,4)*log(abs((1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4))) / (2*pow(x_a,2)*pow(x_b,2)))));
+              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*log(pow((1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_a,2)), pow(x_a,4)))) - (12*log(pow((1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_b,2)),pow(x_b,4)))) + (12*log(pow((1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4)) / (2*pow(x_a,2)*pow(x_b,2)),pow(x_a,4)*pow(x_b,4) ))));
             }
           }
         }
@@ -470,15 +470,7 @@ namespace Gambit
     // Helper function; formula is in [arXiv:0705.1729]
     double L(double x)
     {
-/*      double r, s;
-      r = 1 - (3*pow(x,2.0));
-      s = (1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0)));
-      cout.precision(20);
-      cout << "1:" << std::fixed << r << endl;
-      cout << "2:" << std::fixed << s << endl;
-      cout << "num:" << std::fixed << r-s << endl;
-      return r;
-*/      return log( (1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
+      return log(pow((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))),pow(x,4)) );
     }
 
     void Gamma_RHN2null(std::vector<double>& result)
@@ -513,11 +505,11 @@ namespace Gambit
               double x_l = m_lep[k]/M[i];
               if (j == k)
               {
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C3*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*pow(x_l,4.0)*(pow(x_l,4.0)-1)*L(x_l)))) + (4*C4*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (6*pow(x_l,4.0)*(1-(2*pow(x_l,2.0))+(2*pow(x_l,4.0))*L(x_l))))) );
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C3*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*(pow(x_l,4.0)-1)*L(x_l)))) + 4*C4*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + 6*(1.0-2*pow(x_l,2.0)+2*pow(x_l,4.0))*L(x_l)) );
               }
               else
               {
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C1*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*pow(x_l,4.0)*(pow(x_l,4.0)-1)*L(x_l)))) + (4*C2*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (6*pow(x_l,4.0)*(1-(2*pow(x_l,2.0))+(2*pow(x_l,4.0))*L(x_l))))) );
+                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C1*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*(pow(x_l,4.0)-1)*L(x_l)))) + (4*C2*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (6*(1.0-2*pow(x_l,2.0)+2*pow(x_l,4.0))*L(x_l)))) );
               }
             }
           }
