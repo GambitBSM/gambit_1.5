@@ -229,7 +229,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -239,7 +239,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -249,7 +249,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -259,7 +259,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -269,7 +269,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -279,7 +279,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -289,7 +289,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -319,7 +319,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -389,7 +389,7 @@ START_MODULE
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODELS(RightHandedNeutrinos)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
