@@ -18,10 +18,13 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2017 Mar
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Oct
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/FlavBit/FlavBit_rollcall.hpp"
 #include "gambit/FlavBit/FlavBit_rollcall.hpp"
 #include "gambit/FlavBit/Flav_reader.hpp"
 

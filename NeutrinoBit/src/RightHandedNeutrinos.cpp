@@ -73,8 +73,8 @@ namespace Gambit
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_pi_plus = meson_masses.pi_plus;
       static double f_pi_sq = 0.0169;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vud = 0.97434; // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.97434
+      static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -105,8 +105,8 @@ namespace Gambit
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_K_plus = meson_masses.kaon_plus;
       static double f_K_sq = 0.02553604;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vus = 0.22506;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.22506
+      static double Vus = *Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -135,11 +135,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      //TODO: Include in meson_masses
-      static double m_D_plus = 1.86962;  // GeV (not included in numerical_constants.hpp yet)
+      static double m_D_plus = meson_masses.D_plus;
       static double f_D_sq = 0.04955076;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vcd = 0.22492;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.22492
+      static double Vcd = -*Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -168,11 +167,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dsl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      static double m_D_s = 1.96847;  // GeV (not included in numerical_constants.hpp yet)
-      // TODO: Include in meson masses
+      static double m_D_s = meson_masses.D_s;
       static double f_Ds_sq = 0.07845601;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vcs = 0.97351;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.97351
+      static double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -201,11 +199,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      //TODO: include in meson masses
-      static double m_B_plus = 5.27929;  // GeV (not included in numerical_constants.hpp yet)
+      static double m_B_plus = meson_masses.B_plus;
       static double f_B_sq = 0.0361;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vub = 0.00357;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.00357 (absolute value)
+      static double Vub = *Param["CKM_A"]*pow(*Param["CKM_lambda"],3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -234,11 +231,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bsl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      //TODO: include in meson masses
-      static double m_B_s = 5.36679;  // GeV (not included in numerical_constants.hpp yet)
+      static double m_B_s = meson_masses.B_s;
       static double f_Bs_sq = 0.0529;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vus = 0.22506;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.22506
+      static double Vus = *Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -267,11 +263,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bcl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      //TODO: include in meson masses
-      static double m_B_c = 6.2751;  // GeV (not included in numerical_constants.hpp yet)
+      static double m_B_c = meson_masses.B_c;
       static double f_Bc_sq = 0.2304;  // GeV^2
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vcb = 0.0411;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.0411
+      static double Vcb = *Param["CKM_A"]*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -327,8 +322,7 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2etaprimenu;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      //TODO: include in meson masses
-      static double m_eta_prime = 0.95778;  // GeV (not included in numerical_constants.hpp yet)
+      static double m_eta_prime = meson_masses.eta_prime;
       static double f_etaprime_sq = 0.00342225;  // GeV^2
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
@@ -354,12 +348,11 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2rhoplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      //TODO: maybe in numerical constants?
       static double g_rho_sq = 0.010404;  // GeV^4
       static double G_F_sq = pow(sminputs.GF, 2.0);
       static double m_rho_plus = meson_masses.rho_plus;
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      static double Vud = 0.97434;  // PDG
+      // Take from the model parameters (Wolfenstein) PDG value: 0.97434
+      static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
       m_lep[1] = sminputs.mMu;
@@ -477,7 +470,7 @@ namespace Gambit
     // Helper function; formula is in [arXiv:0705.1729]
     double L(double x)
     {
-      double r, s;
+/*      double r, s;
       r = 1 - (3*pow(x,2.0));
       s = (1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0)));
       cout.precision(20);
@@ -485,7 +478,7 @@ namespace Gambit
       cout << "2:" << std::fixed << s << endl;
       cout << "num:" << std::fixed << r-s << endl;
       return r;
-//      return log( (1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
+*/      return log( (1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
     }
 
     void Gamma_RHN2null(std::vector<double>& result)
@@ -656,11 +649,21 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2ludbar;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2.0);
-      //TODO: Take from the model parameters (CKM_Lambda = Vus)
-      // Values taken from PDG
-      std::vector< std::vector<double> > V { {0.97434,0.22506,0.00357},
-                                             {0.22492,0.97351,0.0411},
-                                             {0.00875,0.0403,0.99915} };
+      // Take from the model parameters (Wolfenstein) (absolute values)
+      // Values from PDG: V =  { {0.97434,0.22506,0.00357},
+      //                         {0.22492,0.97351,0.0411},
+      //                         {0.00875,0.0403,0.99915} };
+      static double Vus = *Param["CKM_lambda"];
+      static double Vud = 1.0 - 0.5*pow(Vus,2);
+      static double Vub = *Param["CKM_A"]*pow(Vus,3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
+      static double Vcd = Vus;
+      static double Vcs = Vud;
+      static double Vcb = *Param["CKM_A"]*pow(Vus,2);
+      static double Vtd = Vcb*Vus*sqrt(pow(1.0 - *Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
+      static double Vts = Vcb;
+      static double Vtb = 1;
+      static std::vector<std::vector<double> > V = { {Vud, Vus, Vub}, {Vcd, Vcs, Vcb}, {Vtd, Vts, Vtb} };
+
       double x, y;
       std::vector<double> m_lep(3), m_uquark(3), m_dquark(3), gamma(3), M(3), decay_prod(3), two_heaviest(2);
       // Taking the quark masses from PDG; available within GAMBIT?
@@ -745,7 +748,6 @@ namespace Gambit
       {
         if((1/gamma[i])>0.1)
         {
-//          result_bbn = -12.5;
           std::ostringstream msg;
           msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
           logger() << msg.str() << EOM;
@@ -1105,7 +1107,7 @@ namespace Gambit
       return s;
     }
 
-    // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 at 90% in the mass range 60-129 MeV. [Phys. Rev. D, 84(5), 2011]
+    // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 at 90% in the mass range 60-129 MeV. [Phys. Rev. D, 84 (052002), 2011] (arXiv:1106.4055)
     void lnL_pienu(double& result)
     {
       using namespace Pipes::lnL_pienu;
@@ -1148,7 +1150,7 @@ namespace Gambit
         result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 at 90% in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27]
+    // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 at 90% in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27 (arXiv:1112.3319)]
     void lnL_ps191_e(double& result)
     {
       using namespace Pipes::lnL_ps191_e;
@@ -1391,7 +1393,7 @@ namespace Gambit
           pow(mixing_sq[6]/U[0], 2.0) + pow(mixing_sq[7]/U[1], 2.0) + pow(mixing_sq[8]/U[2], 2.0));
     }
 
-    // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 at 95% in the mass range 50-500 GeV. [JHEP, 07:162, 2015]
+    // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 at 95% in the mass range 50-500 GeV. [JHEP, 07:162, 2015 (arXiv:1506.06020)]
     void lnL_atlas_e(double& result)
     {
       using namespace Pipes::lnL_atlas_e;
@@ -1479,7 +1481,7 @@ namespace Gambit
         result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_digitized)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from E949; used the kaon decay: K(+) -> mu(+) + nu_r. Constrains |U_(mu,i)|^2 at 90% in the mass range 175-300 MeV. [Phys. Rev. D, 91, 2015]
+    // Likelihood contribution from E949; used the kaon decay: K(+) -> mu(+) + nu_r. Constrains |U_(mu,i)|^2 at 90% in the mass range 175-300 MeV. [Phys. Rev. D, 91, 052001 (2015) (arXiv:1411.3963v2)]
     void lnL_e949(double& result)
     {
       using namespace Pipes::lnL_e949;
@@ -1524,7 +1526,7 @@ namespace Gambit
         result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
     }
 
-    // Likelihood contribution from NuTeV; used RHN decays into muonic final states (mu + mu + nu / mu + e + nu / mu + pi / mu + rho). Constrains |U_(mu,i)|^2 at 90% CL in the mass range 0.25-2 GeV. [Phys. Rev. Lett., 83:4943-4946, 1999]
+    // Likelihood contribution from NuTeV; used RHN decays into muonic final states (mu + mu + nu / mu + e + nu / mu + pi / mu + rho). Constrains |U_(mu,i)|^2 at 90% CL in the mass range 0.25-2 GeV. [Phys. Rev. Lett., 83:4943-4946, 1999 (arXiv:hep-ex/9908011)]
     void lnL_nutev(double& result)
     {
       using namespace Pipes::lnL_nutev;
@@ -1568,7 +1570,7 @@ namespace Gambit
       result = -2.44*(pow(mixing_sq[0]/U[0], 2.0) + pow(mixing_sq[1]/U[1], 2.0) + pow(mixing_sq[2]/U[2], 2.0));
     }
 
-    // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 at 90% CL in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002]
+    // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 at 90% CL in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002 (arXiv:hep-ph/0208075)]
     void lnL_charm_tau(double& result)
     {
       using namespace Pipes::lnL_charm_tau;
