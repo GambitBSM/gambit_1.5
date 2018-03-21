@@ -149,6 +149,8 @@ namespace Gambit
     // Helper function for the heavy neutrino masses
     double l_M(double M, const double m_Z, const double m_H)
     {
+      if(!M)
+       return 0.0;
       return 1.0/pow(4.0*pi, 2.0) * ( (3.0*log(pow(M/m_Z, 2.0)))/((pow(M/m_Z, 2.0)) - 1.0) + (log(pow(M/m_H, 2.0)))/((pow(M/m_H, 2.0)) - 1.0));
     }
 
@@ -162,7 +164,7 @@ namespace Gambit
       std::complex<double> I(0.0, 1.0);
 
       Eigen::Matrix3d M_I;  // M_I not complex; circumvents type mismatch in l(M)
-      Eigen::Matrix3cd M_twid_temp, M_twid, R_23, R_13, R_12, R;
+      Eigen::Matrix3cd M_twid, R_23, R_13, R_12, R;
 
       double mZ = sminputs.mZ;
       double mH = *Param["mH"];
@@ -179,19 +181,24 @@ namespace Gambit
              0.0, *Param["M_2"], 0.0,
              0.0, 0.0, *Param["M_3"];
 
+      // Invalidate point if any M_I is zero
+      if(!*Param["M_1"] or !*Param["M_2"] or !*Param["M_3"])
+      {
+        std::ostringstream msg;
+        msg << "Casas-Ibarra parametrization is undefined for M_I = 0";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
 
-      M_twid_temp(0,0) = M_I(0,0)  * (1.0 - (pow(M_I(0,0),2.0)*l_M(M_I(0,0),mZ,mH)/pow(vev,2.0)));
-      M_twid_temp(0,1) = 0.0;
-      M_twid_temp(0,2) = 0.0;
-      M_twid_temp(1,0) = 0.0;
-      M_twid_temp(1,1) = M_I(1,1)  * (1.0 - (pow(M_I(1,1),2.0)*l_M(M_I(1,1),mZ,mH)/pow(vev,2.0)));
-      M_twid_temp(1,2) = 0.0;
-      M_twid_temp(2,0) = 0.0;
-      M_twid_temp(2,1) = 0.0;
-      M_twid_temp(2,2) = M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2),mZ,mH)/pow(vev,2.0)));
-      if(M_twid_temp != Eigen::Matrix3cd::Zero())
-        M_twid = M_twid_temp.sqrt();
-
+      M_twid(0,0) = sqrt(M_I(0,0)  * (1.0 - (pow(M_I(0,0),2.0)*l_M(M_I(0,0),mZ,mH)/pow(vev,2.0))));
+      M_twid(0,1) = 0.0;
+      M_twid(0,2) = 0.0;
+      M_twid(1,0) = 0.0;
+      M_twid(1,1) = sqrt(M_I(1,1)  * (1.0 - (pow(M_I(1,1),2.0)*l_M(M_I(1,1),mZ,mH)/pow(vev,2.0))));
+      M_twid(1,2) = 0.0;
+      M_twid(2,0) = 0.0;
+      M_twid(2,1) = 0.0;
+      M_twid(2,2) = sqrt(M_I(2,2)  * (1.0 - (pow(M_I(2,2),2.0)*l_M(M_I(2,2),mZ,mH)/pow(vev,2.0))));
 
       R_23(0,0) = 1.0;
       R_23(0,1) = 0.0;
