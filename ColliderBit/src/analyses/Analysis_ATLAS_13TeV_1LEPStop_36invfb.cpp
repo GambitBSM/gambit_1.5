@@ -367,13 +367,15 @@ namespace Gambit {
         vector<HEPUtils::Jet*> aoSelectedJets;
         for (const FJNS::PseudoJet& j : selectedJets) aoSelectedJets.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
 
-        std::sort(aoSelectedJets.begin(), aoSelectedJets.end(), sortByPT_1l);
-  
         //for (const auto jet : selectedJets)
         //  aoSelectedJets.push_back(
         //     AnalysisObject(jet.px(), jet.py(), jet.pz(), jet.E(), 0, 0, AnalysisObjectType::COMBINED, 0, 0));
 
+        std::sort(aoSelectedJets.begin(), aoSelectedJets.end(), sortByPT_1l);
         p = aoSelectedJets[0]->mom();
+  
+        // Deleting the new'd pointers stored in aoSelectedJets
+        for (HEPUtils::Jet* jptr : aoSelectedJets) delete jptr;
 
         return p;
       }
