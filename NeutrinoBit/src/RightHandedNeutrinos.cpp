@@ -43,7 +43,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2pi0nu;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_pi_0 = meson_masses.pi0;
       static double f_pi_sq = 0.0169;  // GeV^2
       std::vector<double> gamma(3), M(3);
@@ -54,12 +54,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         if (M[i] > m_pi_0)
         {
           for (int j=0; j<3; j++)
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*f_pi_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_pi_0,2.0)/pow(M[i],2.0)),2.0);
+            gamma[i] += ( (Usq(j,i)*G_F_sq*f_pi_sq*pow(M[i],3))/(32*pi) ) * pow((1 - pow(m_pi_0,2)/pow(M[i],2)),2);
           }
         }
       }
@@ -70,7 +70,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2piplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_pi_plus = meson_masses.pi_plus;
       static double f_pi_sq = 0.0169;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.97434
@@ -86,12 +86,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_pi_plus+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vud,2.0)*f_pi_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_pi_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_pi_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_pi_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vud,2)*f_pi_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_pi_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_pi_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_pi_plus+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -102,7 +102,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2Kplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_K_plus = meson_masses.kaon_plus;
       static double f_K_sq = 0.02553604;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.22506
@@ -118,12 +118,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_K_plus+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2.0)*f_K_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_K_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_K_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_K_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2)*f_K_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_K_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_K_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_K_plus+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -134,7 +134,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2Dplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_D_plus = meson_masses.D_plus;
       static double f_D_sq = 0.04955076;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.22492
@@ -150,12 +150,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_D_plus+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcd,2.0)*f_D_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_D_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_D_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_D_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcd,2)*f_D_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_D_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_D_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_D_plus+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -166,7 +166,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2Dsl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_D_s = meson_masses.D_s;
       static double f_Ds_sq = 0.07845601;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.97351
@@ -182,12 +182,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_D_s+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcs,2.0)*f_Ds_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_D_s,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_D_s-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_D_s+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcs,2)*f_Ds_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_D_s,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_D_s-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_D_s+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -198,7 +198,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2Bplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_B_plus = meson_masses.B_plus;
       static double f_B_sq = 0.0361;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.00357 (absolute value)
@@ -214,12 +214,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_B_plus+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vub,2.0)*f_B_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_plus,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vub,2)*f_B_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_B_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_B_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_B_plus+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -230,7 +230,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2Bsl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_B_s = meson_masses.B_s;
       static double f_Bs_sq = 0.0529;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.22506
@@ -246,12 +246,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_B_s+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2.0)*f_Bs_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_s,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_s-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_s+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2)*f_Bs_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_B_s,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_B_s-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_B_s+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -262,7 +262,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2Bcl;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_B_c = meson_masses.B_c;
       static double f_Bc_sq = 0.2304;  // GeV^2
       // Take from the model parameters (Wolfenstein) PDG value: 0.0411
@@ -278,12 +278,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_B_c+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcb,2.0)*f_Bc_sq*pow(M[i],3.0))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) - ( (pow(m_B_c,2.0)/pow(M[i],2.0))*(1 + pow(m_lep[j],2.0)/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_B_c-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_B_c+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcb,2)*f_Bc_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_B_c,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_B_c-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_B_c+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -294,7 +294,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2etanu;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_eta = meson_masses.eta;
       static double f_eta_sq = 0.024336;  // GeV^2
       std::vector<double> gamma(3), M(3);
@@ -305,12 +305,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         if (M[i] > m_eta)
         {
           for (int j=0; j<3; j++)
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*f_eta_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_eta,2.0)/pow(M[i],2.0)),2.0);
+            gamma[i] += ( (Usq(j,i)*G_F_sq*f_eta_sq*pow(M[i],3))/(32*pi) ) * pow((1 - pow(m_eta,2)/pow(M[i],2)),2);
           }
         }
       }
@@ -321,7 +321,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2etaprimenu;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_eta_prime = meson_masses.eta_prime;
       static double f_etaprime_sq = 0.00342225;  // GeV^2
       std::vector<double> gamma(3), M(3);
@@ -332,12 +332,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         if (M[i] > m_eta_prime)
         {
           for (int j=0; j<3; j++)
           {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*f_etaprime_sq*pow(M[i],3.0))/(32*pi) ) * pow((1 - pow(m_eta_prime,2.0)/pow(M[i],2.0)),2.0);
+            gamma[i] += ( (Usq(j,i)*G_F_sq*f_etaprime_sq*pow(M[i],3))/(32*pi) ) * pow((1 - pow(m_eta_prime,2)/pow(M[i],2)),2);
           }
         }
       }
@@ -349,7 +349,7 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2rhoplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double g_rho_sq = 0.010404;  // GeV^4
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_rho_plus = meson_masses.rho_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.97434
       static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
@@ -364,12 +364,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           if (M[i] > (m_rho_plus+m_lep[j]))
           {
-            gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(Vud,2.0)*pow(M[i],3.0))/(8*pi*pow(m_rho_plus,2.0)) ) * ( pow((1 - pow(m_lep[j],2.0)/pow(M[i],2.0)),2.0) + ( (pow(m_rho_plus,2.0)/pow(M[i],2.0))*(1 + (pow(m_lep[j],2.0)-(2*pow(m_rho_plus,2.0)))/pow(M[i],2.0)) ) ) * sqrt( (1 - pow(m_rho_plus-m_lep[j],2.0)/pow(M[i],2.0))*(1 - pow(m_rho_plus+m_lep[j],2.0)/pow(M[i],2.0)) );
+            gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(Vud,2)*pow(M[i],3))/(8*pi*pow(m_rho_plus,2)) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) + ( (pow(m_rho_plus,2)/pow(M[i],2))*(1 + (pow(m_lep[j],2)-(2*pow(m_rho_plus,2)))/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_rho_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_rho_plus+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -381,7 +381,7 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2rho0nu;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double g_rho_sq = 0.010404;  // GeV^4
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       static double m_rho_0 = meson_masses.rho0;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
@@ -391,12 +391,12 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         if (M[i] > m_rho_0)
         {
           for (int j=0; j<3; j++)
           {
-            gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(M[i],3.0))/(16*pi*pow(m_rho_0,2.0)) ) * (1 + (2*pow(m_rho_0,2.0))/pow(M[i],2.0)) * pow((1 - pow(m_rho_0,2.0)/pow(M[i],2.0)),2.0);
+            gamma[i] += ( (Usq(j,i)*g_rho_sq*G_F_sq*pow(M[i],3))/(16*pi*pow(m_rho_0,2)) ) * (1 + (2*pow(m_rho_0,2))/pow(M[i],2)) * pow((1 - pow(m_rho_0,2)/pow(M[i],2)),2);
           }
         }
       }
@@ -407,7 +407,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN23nu;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -416,7 +416,7 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * (Usq(0,i)+Usq(1,i)+Usq(2,i));
+        gamma[i] = ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * (Usq(0,i)+Usq(1,i)+Usq(2,i));
       }
       result = gamma;
     }
@@ -424,13 +424,13 @@ namespace Gambit
     // Helper function; formula is in [arXiv:1208.4607v2]
     double S(double xa, double xb)
     {
-      return sqrt((1-pow((xa+xb),2.0))*(1-pow((xa-xb),2.0)));
+      return sqrt((1-pow((xa+xb),2))*(1-pow((xa-xb),2)));
     }
 
     // Also helper function; formula is in [arXiv:1208.4607v2]
     double g(double xa, double xb)
     {
-     return (1 - (7*pow(xa,2.0)) - (7*pow(xb,2.0)) - (7*pow(xa,4.0)) - (7*pow(xb,4.0)) + (12*pow(xa,2.0)*pow(xb,2.0)) - (7*pow(xa,2.0)*pow(xb,4.0)) - (7*pow(xa,4.0)*pow(xb,2.0)) + pow(xa,6.0) + pow(xb,6.0));
+     return (1 - (7*pow(xa,2)) - (7*pow(xb,2)) - (7*pow(xa,4)) - (7*pow(xb,4)) + (12*pow(xa,2)*pow(xb,2)) - (7*pow(xa,2)*pow(xb,4)) - (7*pow(xa,4)*pow(xb,2)) + pow(xa,6) + pow(xb,6));
     }
 
     // Formula is from [arXiv:1208.4607v2]
@@ -438,7 +438,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2llnu;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       double x_a, x_b;
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -450,7 +450,7 @@ namespace Gambit
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
@@ -468,10 +468,10 @@ namespace Gambit
     }
 
     // Helper function; formula is in [arXiv:0705.1729]
-    // This function varies wrt the paper to include teh x^4 factor up front and a cutoff for small x
+    // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
     double L(double x)
     {
-      if(x < 1E-3)
+      if(x < 1E-2)
         return -pow(x,4);
       return pow(x,4)*log((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
     }
@@ -480,12 +480,12 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2null;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
-      static double C1 = 0.25*(1 - (4*s_W_sq) + (8*pow(s_W_sq,2.0)));
+      static double C1 = 0.25*(1 - (4*s_W_sq) + (8*pow(s_W_sq,2)));
       static double C2 = 0.5*s_W_sq*((2*s_W_sq) - 1);
-      static double C3 = 0.25*(1 + (4*s_W_sq) + (8*pow(s_W_sq,2.0)));
+      static double C3 = 0.25*(1 + (4*s_W_sq) + (8*pow(s_W_sq,2)));
       static double C4 = 0.5*s_W_sq*((2*s_W_sq) + 1);
       std::vector<double> m_lep(3), gamma(3), M(3);
       m_lep[0] = sminputs.mE;
@@ -498,7 +498,7 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
@@ -508,11 +508,11 @@ namespace Gambit
               double x_l = m_lep[k]/M[i];
               if (j == k)
               {
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C3*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*(pow(x_l,4.0)-1)*L(x_l)))) + 4*C4*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + 6*(1.0-2*pow(x_l,2.0)+2*pow(x_l,4.0))*L(x_l)) );
+                gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ( (C3*(((1 - (14*pow(x_l,2)) - (2*pow(x_l,4)) - (12*pow(x_l,6)))*sqrt(1 - (4*pow(x_l,2)))) + (12*(pow(x_l,4)-1)*L(x_l)))) + 4*C4*((pow(x_l,2)*(2 + (10*pow(x_l,2)) - (12*pow(x_l,4)))*sqrt(1 - (4*pow(x_l,2)))) + 6*(1.0-2*pow(x_l,2)+2*pow(x_l,4))*L(x_l)) );
               }
               else
               {
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (C1*(((1 - (14*pow(x_l,2.0)) - (2*pow(x_l,4.0)) - (12*pow(x_l,6.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (12*(pow(x_l,4.0)-1)*L(x_l)))) + (4*C2*((pow(x_l,2.0)*(2 + (10*pow(x_l,2.0)) - (12*pow(x_l,4.0)))*sqrt(1 - (4*pow(x_l,2.0)))) + (6*(1.0-2*pow(x_l,2.0)+2*pow(x_l,4.0))*L(x_l)))) );
+                gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ( (C1*(((1 - (14*pow(x_l,2)) - (2*pow(x_l,4)) - (12*pow(x_l,6)))*sqrt(1 - (4*pow(x_l,2)))) + (12*(pow(x_l,4)-1)*L(x_l)))) + (4*C2*((pow(x_l,2)*(2 + (10*pow(x_l,2)) - (12*pow(x_l,4)))*sqrt(1 - (4*pow(x_l,2)))) + (6*(1.0-2*pow(x_l,2)+2*pow(x_l,4))*L(x_l)))) );
               }
             }
           }
@@ -527,7 +527,7 @@ namespace Gambit
       // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C1 = s_W_sq*(3 - (4*s_W_sq));
-      return (0.25 - ((2/9)*C1) - ((3.5-((20/9)*C1))*pow(x,2.0)) - ((0.5+(4*C1))*pow(x,4.0)) - ((3-(8*C1))*pow(x,6.0)));
+      return (0.25 - ((2/9)*C1) - ((3.5-((20/9)*C1))*pow(x,2)) - ((0.5+(4*C1))*pow(x,4)) - ((3-(8*C1))*pow(x,6)));
     }
 
     // Formula is from [arXiv:1208.4607v2]
@@ -535,7 +535,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2nuuubar;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C1 = s_W_sq*(3 - (4*s_W_sq));
@@ -552,7 +552,7 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
@@ -560,7 +560,7 @@ namespace Gambit
             if ( (M[i] > (2*m_uquark[k])) and (M[i] > 7.5) )  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
             {
               x_q = m_uquark[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_u(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((16/3)*C1*pow(x_q,2.0)) + ((3-(8*C1))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
+              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ( (f_u(x_q)*S(x_q,x_q)) + ( pow(x_q,4) * (3 - ((16/3)*C1*pow(x_q,2)) + ((3-(8*C1))*pow(x_q,4))) * log( (1-(4*pow(x_q,2))+(2*pow(x_q,4))+(S(x_q,x_q)*(1-(2*pow(x_q,2))))) / (2*pow(x_q,4)))) );
             }
           }
         }
@@ -574,7 +574,7 @@ namespace Gambit
       // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C2 = s_W_sq*(3 - (2*s_W_sq));
-      return (0.25 - ((1/9)*C2) - (((2/7)-((10/9)*C2))*pow(x,2.0)) - ((0.5+(2*C2))*pow(x,4.0)) - ((3-(4*C2))*pow(x,6.0)));
+      return (0.25 - ((1/9)*C2) - (((2/7)-((10/9)*C2))*pow(x,2)) - ((0.5+(2*C2))*pow(x,4)) - ((3-(4*C2))*pow(x,6)));
     }
 
     // Formula is from [arXiv:1208.4607v2]
@@ -582,7 +582,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2nuddbar;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C2 = s_W_sq*(3 - (2*s_W_sq));
@@ -599,7 +599,7 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
@@ -607,7 +607,7 @@ namespace Gambit
             if ( (M[i] > (2*m_dquark[k])) and (M[i] > 7.5) )  // For now, take 7.5 GeV to be the mass limit beyond which the RHN decay is to lepton+quark final state
             {
               x_q = m_dquark[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * ( (f_d(x_q)*S(x_q,x_q)) + ( pow(x_q,4.0) * (3 - ((8/3)*C2*pow(x_q,2.0)) + ((1-((4/3)*C2))*pow(x_q,4.0))) * log( (1-(4*pow(x_q,2.0))+(2*pow(x_q,4.0))+(S(x_q,x_q)*(1-(2*pow(x_q,2.0))))) / (2*pow(x_q,4.0)))) );
+              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ( (f_d(x_q)*S(x_q,x_q)) + ( pow(x_q,4) * (3 - ((8/3)*C2*pow(x_q,2)) + ((1-((4/3)*C2))*pow(x_q,4))) * log( (1-(4*pow(x_q,2))+(2*pow(x_q,4))+(S(x_q,x_q)*(1-(2*pow(x_q,2))))) / (2*pow(x_q,4)))) );
             }
           }
         }
@@ -643,7 +643,7 @@ namespace Gambit
     {
       using namespace Pipes::Gamma_RHN2ludbar;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2.0);
+      static double G_F_sq = pow(sminputs.GF, 2);
       // Take from the model parameters (Wolfenstein) (absolute values)
       // Values from PDG: V =  { {0.97434,0.22506,0.00357},
       //                         {0.22492,0.97351,0.0411},
@@ -678,7 +678,7 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        gamma[i] = 0.0;
+        gamma[i] = 0;
         for (int j=0; j<3; j++)
         {
           for (int k=0; k<3; k++)
@@ -693,7 +693,7 @@ namespace Gambit
                 two_heaviest = two_heaviest_sort(decay_prod);
                 x = two_heaviest[0]/M[i];
                 y = two_heaviest[1]/M[i];
-                gamma[i] += ( (G_F_sq*pow(M[i],5.0)) / (192*pow(pi,3.0)) ) * Usq(j,i) * pow(V[k][l],2.0) * ((S(x,y)*g(x,y)) - (12*pow(x,4.0)*log(abs((1 - (S(x,y)*(1+pow(x,2.0)-pow(y,2.0))) - (2*pow(y,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0))) / (2*pow(x,2.0)))) - (12*pow(y,4.0)*log(abs((1 - (S(x,y)*(1-pow(x,2.0)+pow(y,2.0))) - (2*pow(x,2.0)) + pow((pow(x,2.0)-pow(y,2.0)),2.0))) / (2*pow(y,2.0)))) + (12*pow(x,4.0)*pow(y,4.0)*log(abs((1 - (S(x,y)*(1-pow(x,2.0)-pow(y,2.0))) - (2*pow(x,2.0)) - (2*pow(y,2.0)) + pow(x,4.0) + pow(y,4.0))) / (2*pow(x,2.0)*pow(y,2.0)))));
+                gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * pow(V[k][l],2) * ((S(x,y)*g(x,y)) - (x < 1E-2 ? -12*pow(x,4) : 12*pow(x,4)*log( (1 - (S(x,y)*(1+pow(x,2)-pow(y,2))) - (2*pow(y,2)) + pow((pow(x,2)-pow(y,2)),2)) / (2*pow(x,2)) ) ) - (y < 1E-2 ? -12*pow(y,4) : 12*pow(y,4)*log( (1 - (S(x,y)*(1-pow(x,2)+pow(y,2))) - (2*pow(x,2)) + pow((pow(x,2)-pow(y,2)),2)) / (2*pow(y,2)) ) ) + (x < 1E-2 or y < 1E-2 ? -12*pow(x,4)*pow(y,4) : 12*pow(x,4)*pow(y,4)*log( (1 - (S(x,y)*(1-pow(x,2)-pow(y,2))) - (2*pow(x,2)) - (2*pow(y,2)) + pow(x,4) + pow(y,4)) / (2*pow(x,2)*pow(y,2)) ) ) );
               }
             }
           }
@@ -765,8 +765,8 @@ namespace Gambit
       std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
-      e_f_pi = 0.0;
-      mu_f_pi = 0.0;
+      e_f_pi = 0;
+      mu_f_pi = 0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -775,16 +775,16 @@ namespace Gambit
       {
         e_fac_pi[i] = 0;
         mu_fac_pi[i] = 0;
-        r_I_pi[i] = pow(M[i], 2.0)/pow(m_pi, 2.0);
+        r_I_pi[i] = pow(M[i], 2)/pow(m_pi, 2);
  
         if(M[i] + sminputs.mMu < m_pi)
         {
-          G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2.0))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2.0));
+          G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
           mu_fac_pi[i] = Usq(1,i) * (G_mu_pi[i] - 1.0);
         } 
         if(M[i] + sminputs.mE < m_pi)
         {
-          G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2.0) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2.0))) / (r_e_pi * pow((1.0 - r_e_pi), 2.0));
+          G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2))) / (r_e_pi * pow((1.0 - r_e_pi), 2));
           e_fac_pi[i] = Usq(0,i) * (G_e_pi[i] - 1.0); 
         }
         e_f_pi += e_fac_pi[i];
@@ -808,8 +808,8 @@ namespace Gambit
       std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
-      e_f_K = 0.0;
-      mu_f_K = 0.0;
+      e_f_K = 0;
+      mu_f_K = 0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -818,16 +818,16 @@ namespace Gambit
       {
         e_fac_K[i] = 0;
         mu_fac_K[i] = 0;
-        r_I_K[i] = pow(M[i], 2.0)/pow(m_K,2.0);
+        r_I_K[i] = pow(M[i], 2)/pow(m_K,2);
 
         if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
         {
-          G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2.0))) / (r_mu_K * pow((1.0 - r_mu_K), 2.0));
+          G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2))) / (r_mu_K * pow((1.0 - r_mu_K), 2));
           mu_fac_K[i] = Usq(1,i) * (G_mu_K[i] - 1.0);
         } 
         if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
         {
-          G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2.0) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2.0))) / (r_e_K * pow((1.0 - r_e_K), 2.0));
+          G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2))) / (r_e_K * pow((1.0 - r_e_K), 2));
           e_fac_K[i] = Usq(0,i) * (G_e_K[i] - 1.0);
         }
           
@@ -848,8 +848,8 @@ namespace Gambit
       std::vector<double> M(3), e_fac_tau(3), mu_fac_tau(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
-      e_f_tau = 0.0;
-      mu_f_tau = 0.0;
+      e_f_tau = 0;
+      mu_f_tau = 0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -906,7 +906,7 @@ namespace Gambit
       std::vector<double> R_W_exp = {0.980, 1.063, 1.070};
       std::vector<double> R_W_err = {0.018, 0.027, 0.026};
 
-      result_lepuniv = 0.0;
+      result_lepuniv = 0;
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
@@ -939,7 +939,7 @@ namespace Gambit
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
       A_0nubb_Xe *= 1e-10;  // [1/yr]
-      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2.0);
+      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2);
       p2_0nubb_Xe *= 1e-3;  // MeV --> GeV
       mp = 0.938;  // [GeV] (PDG 2014)
 
@@ -949,7 +949,7 @@ namespace Gambit
         {
 //          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
 //          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Xe/(p2_0nubb_Xe+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i],2.0)));
-          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
+          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2));
         }
       result = prefactor * abs(sum) * abs(sum);
     }
@@ -978,7 +978,7 @@ namespace Gambit
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       A_0nubb_Ge = runOptions->getValueOrDef<double>(5.05, "A");
       A_0nubb_Ge *= 1e-10;  // [1/yr]
-      p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(163.0, "p"), 2.0);
+      p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(163.0, "p"), 2);
       p2_0nubb_Ge *= 1e-3;  // MeV --> GeV
       mp = 0.938;  // [GeV] (PDG 2014)
 
@@ -988,7 +988,7 @@ namespace Gambit
         {
 //          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
 //          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Ge/(p2_0nubb_Ge+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i],2.0)));
-          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
+          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2));
         }
       result = prefactor * abs(sum) * abs(sum);
     }
@@ -1062,10 +1062,10 @@ namespace Gambit
 
       double chi2 = 0.0;
       for (int i=0; i<7; i++)
-        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2.0);
+        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
 
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
-      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2.0);
+      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2);
 
       result_ckm = -0.5*chi2;
     }
@@ -1178,7 +1178,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+          result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
     }
@@ -1221,7 +1221,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+          result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
     }
@@ -1264,7 +1264,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+          result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
     }
@@ -1307,7 +1307,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+          result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
     }
@@ -1355,7 +1355,7 @@ namespace Gambit
           for (int j=i; j<9; j+=3)
           {
             U[i] = s(M[i]);
-            result += -3.09*(pow(mixing_sq[j]/U[i],2.0));
+            result += -3.09*(pow(mixing_sq[j]/U[i],2));
           }
         }
       }
@@ -1386,7 +1386,7 @@ namespace Gambit
       }
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
-      result = 0.0;
+      result = 0;
       for(int i=0; i<3; i++)
       {
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
@@ -1394,7 +1394,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1432,7 +1432,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1510,7 +1510,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += -2.44*(pow(mixing_sq[i]/U[i],2.0));
+          result += -2.44*(pow(mixing_sq[i]/U[i],2));
         }
       }
     }
@@ -1548,7 +1548,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i], 2.0), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i], 2), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
         }
       }
     }
