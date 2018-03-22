@@ -1108,38 +1108,33 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.0606;  // GeV
       static double upp_lim = 0.1293;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
       mixing_sq[1] = *Dep::Ue2;
       mixing_sq[2] = *Dep::Ue3;
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
         s = fill_spline("NeutrinoBit/data/pienu.csv");
         read_table = false;
       }
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result = 0;
       for(int i=0; i<3; i++)
-        result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i]);
+          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+        }
+      }
     }
 
     // Likelihood contribution from PS191, electron sector; looked for charged tracks originating from RHN decays: nu_r -> l(-) + l(+) + nu / l + pi / e + pi(+) + pi(0). Constrains |U_ei|^2 at 90% in the mass range 20-450 MeV. Function also incorporates a later re-interpretation of the data to account for neutral current interaction (ignored in original) as well as the RHNs' Majorana nature. [Original: Phys. Lett. B, 203(3):332-334, 1988][Re-interp.: JHEP, 2012(6):1-27 (arXiv:1112.3319)]
@@ -1151,8 +1146,7 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.0118;  // GeV
       static double upp_lim = 0.4492;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -1160,6 +1154,9 @@ namespace Gambit
       mixing_sq[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
       mixing_sq[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1167,27 +1164,20 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1)/sqrt(2);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2)/sqrt(2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3)/sqrt(2);
-
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
       // approximation to the true Poisson likelihood.
-      result = -2.44*((mixing_sq[0]/pow(U[0], 2.0)) + (mixing_sq[1]/pow(U[1], 2.0)) + (mixing_sq[2]/pow(U[2], 2.0)));
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+        }
+      }
     }
 
     // Likelihood contribution from PS191, muon sector. Constrains |U_(mu,i)|^2 at 90% in the mass range 20-450 MeV. Description & references above.
@@ -1199,8 +1189,7 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.0103;  // GeV
       static double upp_lim = 0.3611;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -1208,6 +1197,9 @@ namespace Gambit
       mixing_sq[0] = *Dep::Um1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
       mixing_sq[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1215,27 +1207,20 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1)/sqrt(2);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2)/sqrt(2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3)/sqrt(2);
-
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
       // approximation to the true Poisson likelihood.
-      result = -2.44*((mixing_sq[0]/pow(U[0], 2.0)) + (mixing_sq[1]/pow(U[1], 2.0)) + (mixing_sq[2]/pow(U[2], 2.0)));
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+        }
+      }
     }
 
     // Likelihood contribution from CHARM, electron sector; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2 at 90% in the mass range 0.5-2.8 GeV. [Phys. Lett. B, 166(4):473-478, 1986]
@@ -1247,8 +1232,7 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.1595;  // GeV
       static double upp_lim = 2.0815;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -1256,6 +1240,9 @@ namespace Gambit
       mixing_sq[0] = *Dep::Ue1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
       mixing_sq[1] = *Dep::Ue2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq[2] = *Dep::Ue3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1263,26 +1250,20 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
-
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
       // approximation to the true Poisson likelihood.
-      result = -2.44*((mixing_sq[0]/pow(U[0], 2.0)) + (mixing_sq[1]/pow(U[1], 2.0)) + (mixing_sq[2]/pow(U[2], 2.0)));
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i]);
+          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+        }
+      }
     }
 
     // Likelihood contribution from CHARM, muon sector. Constrains |U_(mu,i)|^2 at 90% in the mass range 0.5-2.8 GeV. Description & references above.
@@ -1294,8 +1275,7 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.4483;  // GeV
       static double upp_lim = 1.9232;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
       double c_tau = 0.1265;
@@ -1303,6 +1283,9 @@ namespace Gambit
       mixing_sq[0] = *Dep::Um1 * ((c_e * *Dep::Ue1) + (c_mu * *Dep::Um1) + (c_tau * *Dep::Ut1));
       mixing_sq[1] = *Dep::Um2 * ((c_e * *Dep::Ue2) + (c_mu * *Dep::Um2) + (c_tau * *Dep::Ut2));
       mixing_sq[2] = *Dep::Um3 * ((c_e * *Dep::Ue3) + (c_mu * *Dep::Um3) + (c_tau * *Dep::Ut3));
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1310,26 +1293,20 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
-
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
       // approximation to the true Poisson likelihood.
-      result = -2.44*((mixing_sq[0]/pow(U[0], 2.0)) + (mixing_sq[1]/pow(U[1], 2.0)) + (mixing_sq[2]/pow(U[2], 2.0)));
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i]);
+          result += -2.44*(mixing_sq[i]/pow(U[i],2.0));
+        }
+      }
     }
 
     // Likelihood contribution from DELPHI; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 at 95% in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
@@ -1341,8 +1318,7 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 1.8102;  // GeV
       static double upp_lim = 80.0;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(9);
+      std::vector<double> M(3), U(3), mixing_sq(9);
 
       mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
       mixing_sq[1] = *Dep::Ue2;
@@ -1353,6 +1329,9 @@ namespace Gambit
       mixing_sq[6] = *Dep::Ut1;
       mixing_sq[7] = *Dep::Ut2;
       mixing_sq[8] = *Dep::Ut3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1360,29 +1339,23 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
-
       // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
       // approximation to the true Poisson likelihood.
-      result = -3.09*
-         (pow(mixing_sq[0]/U[0], 2.0) + pow(mixing_sq[1]/U[1], 2.0) + pow(mixing_sq[2]/U[2], 2.0) +
-          pow(mixing_sq[3]/U[0], 2.0) + pow(mixing_sq[4]/U[1], 2.0) + pow(mixing_sq[5]/U[2], 2.0) + 
-          pow(mixing_sq[6]/U[0], 2.0) + pow(mixing_sq[7]/U[1], 2.0) + pow(mixing_sq[8]/U[2], 2.0));
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          for (int j=i; j<9; j+=3)
+          {
+            U[i] = s(M[i]);
+            result += -3.09*(pow(mixing_sq[j]/U[i],2.0));
+          }
+        }
+      }
     }
 
     // Likelihood contribution from ATLAS, electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 at 95% in the mass range 50-500 GeV. [JHEP, 07:162, 2015 (arXiv:1506.06020)]
@@ -1394,12 +1367,14 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 103.3352;  // GeV
       static double upp_lim = 473.2829;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
       mixing_sq[1] = *Dep::Ue2;
       mixing_sq[2] = *Dep::Ue3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1407,26 +1382,18 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
-
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
-      result = 0;
+      result = 0.0;
       for(int i=0; i<3; i++)
-        result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i]);
+          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+        }
+      }
     }
 
     // Likelihood contribution from ATLAS, muon sector. Constrains |U_(mu,i)|^2 at 95% in the mass range 50-500 GeV. Description & references above.
@@ -1438,12 +1405,14 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 101.8909;  // GeV
       static double upp_lim = 500.7691;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
       mixing_sq[1] = *Dep::Um2;
       mixing_sq[2] = *Dep::Um3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1451,26 +1420,18 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
-
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
       for(int i=0; i<3; i++)
-        result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_digitized)/1.64, exp_value = 0. 1.64: 95% CL limit for half-Gaussian.
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i]);
+          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+        }
+      }
     }
 
     // Likelihood contribution from E949; used the kaon decay: K(+) -> mu(+) + nu_r. Constrains |U_(mu,i)|^2 at 90% in the mass range 175-300 MeV. [Phys. Rev. D, 91, 052001 (2015) (arXiv:1411.3963v2)]
@@ -1482,12 +1443,14 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.1794;  // GeV
       static double upp_lim = 0.2996;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
       mixing_sq[1] = *Dep::Um2;
       mixing_sq[2] = *Dep::Um3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1495,27 +1458,18 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1)/sqrt(2);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2)/sqrt(2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3)/sqrt(2);
-
       // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result = 0;
       for(int i=0; i<3; i++)
-        result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+        }
+      }
     }
 
     // Likelihood contribution from NuTeV; used RHN decays into muonic final states (mu + mu + nu / mu + e + nu / mu + pi / mu + rho). Constrains |U_(mu,i)|^2 at 90% CL in the mass range 0.25-2 GeV. [Phys. Rev. Lett., 83:4943-4946, 1999 (arXiv:hep-ex/9908011)]
@@ -1527,12 +1481,14 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.2116;  // GeV
       static double upp_lim = 2.0162;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
       mixing_sq[1] = *Dep::Um2;
       mixing_sq[2] = *Dep::Um3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1540,26 +1496,20 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3);
-
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
       // approximation to the true Poisson likelihood.
-      result = -2.44*(pow(mixing_sq[0]/U[0], 2.0) + pow(mixing_sq[1]/U[1], 2.0) + pow(mixing_sq[2]/U[2], 2.0));
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i]);
+          result += -2.44*(pow(mixing_sq[i]/U[i],2.0));
+        }
+      }
     }
 
     // Likelihood contribution from a re-interpretation of CHARM data; assumes tau mixing is dominant. Constrains |U_(tau,i)|^2 at 90% CL in the mass range 10-290 MeV. [Phys. Lett. B, 550(1-2):8-15, 2002 (arXiv:hep-ph/0208075)]
@@ -1571,12 +1521,14 @@ namespace Gambit
       // Mass range of experiment
       static double low_lim = 0.0106;  // GeV
       static double upp_lim = 0.2888;  // GeV
-      double M_1, M_2, M_3;
-      std::vector<double> U(3), mixing_sq(3);
+      std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ut1;
       mixing_sq[1] = *Dep::Ut2;
       mixing_sq[2] = *Dep::Ut3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
       if (read_table)
       {
@@ -1584,27 +1536,18 @@ namespace Gambit
         read_table = false;
       }
 
-      M_1 = *Param["M_1"];
-      M_2 = *Param["M_2"];
-      M_3 = *Param["M_3"];
-      // Division by sqrt(2) to correct for Majorana nature of RHNs.
-      if ((M_1 < low_lim) || (M_1 > upp_lim))
-        U[0] = 1e10;
-      else
-        U[0] = s(M_1)/sqrt(2);
-      if ((M_2 < low_lim) || (M_2 > upp_lim))
-        U[1] = 1e10;
-      else
-        U[1] = s(M_2)/sqrt(2);
-      if ((M_3 < low_lim) || (M_3 > upp_lim))
-        U[2] = 1e10;
-      else
-        U[2] = s(M_3)/sqrt(2);
-
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
       for(int i=0; i<3; i++)
-        result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2.0), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value)/1.28, but exp_value = 0. 1.28: 90% CL limit for half-Gaussian.
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i], 2.0), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+        }
+      }
     }
 
     void Ue1(double& Ue1_sq)
