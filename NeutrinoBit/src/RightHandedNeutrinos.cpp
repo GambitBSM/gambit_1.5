@@ -459,7 +459,7 @@ namespace Gambit
             {
               x_a = m_lep[j]/M[i];
               x_b = m_lep[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ((S(x_a,x_b)*g(x_a,x_b)) - (12*log(pow((1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_a,2)), pow(x_a,4)))) - (12*log(pow((1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_b,2)),pow(x_b,4)))) + (12*log(pow((1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4)) / (2*pow(x_a,2)*pow(x_b,2)),pow(x_a,4)*pow(x_b,4) ))));
+              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * (S(x_a,x_b)*g(x_a,x_b) - (x_a < 1E-3 ? -12*pow(x_a,4) : 12*pow(x_a,4)*log( (1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_a,2)) ) ) - (x_b < 1E-3 ? -12*pow(x_b,4) : 12*pow(x_b,4)*log( (1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_b,2)) ) ) + (x_a < 1E-3 or x_b < 1E-3 ? -12*pow(x_a,4)*pow(x_b,4) : 12*pow(x_a,4)*pow(x_b,4)*log( (1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4)) / (2*pow(x_a,2)*pow(x_b,2)) ) ) );
             }
           }
         }
@@ -468,9 +468,12 @@ namespace Gambit
     }
 
     // Helper function; formula is in [arXiv:0705.1729]
+    // This function varies wrt the paper to include teh x^4 factor up front and a cutoff for small x
     double L(double x)
     {
-      return log(pow((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))),pow(x,4)) );
+      if(x < 1E-3)
+        return -pow(x,4);
+      return pow(x,4)*log((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
     }
 
     void Gamma_RHN2null(std::vector<double>& result)
