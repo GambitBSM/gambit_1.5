@@ -877,7 +877,7 @@ namespace Gambit
       using namespace Pipes::RHN_R_W;
       Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
 
-      if(*Param["M_1"] < Dep::mw->central)
+      if(*Param["M_1"] < Dep::mw->central or *Param["M_2"] < Dep::mw->central or *Param["M_3"] < Dep::mw->central)
       {
         R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
         R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
@@ -940,7 +940,7 @@ namespace Gambit
       A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
       A_0nubb_Xe *= 1e-10;  // [1/yr]
       p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2);
-      p2_0nubb_Xe *= 1e-3;  // MeV --> GeV
+      p2_0nubb_Xe *= 1e-6;  // MeV --> GeV
       mp = 0.938;  // [GeV] (PDG 2014)
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
@@ -979,7 +979,7 @@ namespace Gambit
       A_0nubb_Ge = runOptions->getValueOrDef<double>(5.05, "A");
       A_0nubb_Ge *= 1e-10;  // [1/yr]
       p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(163.0, "p"), 2);
-      p2_0nubb_Ge *= 1e-3;  // MeV --> GeV
+      p2_0nubb_Ge *= 1e-6;  // MeV --> GeV
       mp = 0.938;  // [GeV] (PDG 2014)
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
