@@ -67,7 +67,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: de
+  use_scanner: random
 
   scanners:
 
@@ -79,7 +79,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 100
+      point_number: 2
       output_file:  output
       like:  Likelihood
       files:
