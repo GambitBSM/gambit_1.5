@@ -34,8 +34,13 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
     
+    // Need two different functions here for use with std::sort
     bool sortByPT_1l(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
+    bool sortByPT_1l_sharedptr(std::shared_ptr<HEPUtils::Jet> jet1, std::shared_ptr<HEPUtils::Jet> jet2) { return sortByPT_1l(jet1.get(), jet2.get()); }
+
+    // Need two different functions here for use with std::sort
     bool sortByMass_1l(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->mass() > jet2->mass()); }
+    bool sortByMass_1l_sharedptr(std::shared_ptr<HEPUtils::Jet> jet1, std::shared_ptr<HEPUtils::Jet> jet2) { return sortByMass_1l(jet1.get(), jet2.get()); }
     
     double calcMT_1l(HEPUtils::P4 jetMom,HEPUtils::P4 metMom)
     {
@@ -364,19 +369,16 @@ namespace Gambit {
           return p;
         }
   
-        vector<HEPUtils::Jet*> aoSelectedJets;
-        for (const FJNS::PseudoJet& j : selectedJets) aoSelectedJets.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
+        vector<std::shared_ptr<HEPUtils::Jet>> aoSelectedJets;
+        for (const FJNS::PseudoJet& j : selectedJets) aoSelectedJets.push_back(std::make_shared<HEPUtils::Jet>(HEPUtils::mk_p4(j)));
 
         //for (const auto jet : selectedJets)
         //  aoSelectedJets.push_back(
         //     AnalysisObject(jet.px(), jet.py(), jet.pz(), jet.E(), 0, 0, AnalysisObjectType::COMBINED, 0, 0));
 
-        std::sort(aoSelectedJets.begin(), aoSelectedJets.end(), sortByPT_1l);
+        std::sort(aoSelectedJets.begin(), aoSelectedJets.end(), sortByPT_1l_sharedptr);
         p = aoSelectedJets[0]->mom();
   
-        // Deleting the new'd pointers stored in aoSelectedJets
-        for (HEPUtils::Jet* jptr : aoSelectedJets) delete jptr;
-
         return p;
       }
       

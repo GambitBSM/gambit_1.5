@@ -4,6 +4,7 @@
 #include "HEPUtils/Event.h"
 #include "HEPUtils/FastJet.h"
 #include <functional>
+#include <memory>
 
 namespace Gambit {
   namespace ColliderBit {
@@ -173,7 +174,11 @@ namespace Gambit {
 
     /// Run jet clustering from any P4-compatible momentum type
     template <typename MOM>
-    inline std::vector<HEPUtils::Jet*> get_jets(const std::vector<MOM*>& moms, double R,
+    // _Anders
+    // std::vector<std::shared_ptr<HEPUtils::Jet>> rtn;
+    // for (const FJNS::PseudoJet& j : jets) rtn.push_back(std::make_shared<HEPUtils::Jet>(HEPUtils::mk_p4(j)));
+    // return rtn;
+    inline std::vector<std::shared_ptr<HEPUtils::Jet>> get_jets(const std::vector<MOM*>& moms, double R,
                                                 double ptmin=0*GeV, FJNS::JetAlgorithm alg=FJNS::antikt_algorithm) {
       // Make PseudoJets
       std::vector<FJNS::PseudoJet> constituents;
@@ -181,8 +186,8 @@ namespace Gambit {
       // Run clustering
       std::vector<FJNS::PseudoJet> jets = HEPUtils::get_jets(constituents, R, ptmin, alg);
       // Make newly-allocated Jets
-      std::vector<HEPUtils::Jet*> rtn;
-      for (const FJNS::PseudoJet& j : jets) rtn.push_back(new HEPUtils::Jet(HEPUtils::mk_p4(j)));
+      std::vector<std::shared_ptr<HEPUtils::Jet>> rtn;
+      for (const FJNS::PseudoJet& j : jets) rtn.push_back(std::make_shared<HEPUtils::Jet>(HEPUtils::mk_p4(j)));
       return rtn;
     }
 
