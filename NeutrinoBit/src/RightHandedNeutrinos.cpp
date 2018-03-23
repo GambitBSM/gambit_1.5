@@ -741,7 +741,7 @@ namespace Gambit
       result_bbn = 0.0;
       for(int i=0; i<3; i++)
       {
-        if((1/gamma[i])>0.1)
+        if((hbar/gamma[i])>0.1)
         {
           std::ostringstream msg;
           msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
