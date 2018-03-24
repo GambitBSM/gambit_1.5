@@ -940,7 +940,7 @@ namespace Gambit
       A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
       A_0nubb_Xe *= 1e-10;  // [1/yr]
       p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(183.0, "p"), 2);
-      p2_0nubb_Xe *= 1e-6;  // MeV --> GeV
+      p2_0nubb_Xe *= 1e-6;  // MeV^2 --> GeV^2
       mp = 0.938;  // [GeV] (PDG 2014)
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
