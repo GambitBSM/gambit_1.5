@@ -45,8 +45,7 @@ namespace Gambit
     {
       using namespace Pipes::dummy_func;
 
-      std::vector<double> vec;
-      BEreq::DA_awesomeness(vec);
+      std::vector<double> vec = BEreq::DA_awesomeness();
       double sum = 0.0;
       for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
       {
@@ -60,9 +59,7 @@ namespace Gambit
       using namespace Pipes::danger_func;
 
       int len = runOptions->getValueOrDef<int>(10,"array_len");
-      std::cout << "Now we are doing dangerous stuff" << std::endl;
-      result = BEreq::DA_dangerous(len);
-      std::cout << "Wow. we survived !!! Well done." << std::endl;
+      result = BEreq::DA_dangerous(byVal(len));
     }
 
     void lnL_A_planck_gaussian(double& result)
@@ -98,7 +95,7 @@ namespace Gambit
         len_of_input += names.size();
       }
 
-      BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");

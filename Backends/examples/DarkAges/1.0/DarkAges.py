@@ -6,7 +6,6 @@ import numpy as np
 arrayLen = None
 someFactor = None
 someArray = None
-someExternalArray = None
 isInitialized = False
 prefix = "DarkAges 1.0: "
 
@@ -47,13 +46,9 @@ def returnArray():
 
 def readArray(someExternalArray):
   print "I'm readArray() from DarkAges.py, and I'm feeling well."
-  print "The type of the \'thing\' you passed is: ",type(someExternalArray)
   res = 0.
-  try:
-    for value in someExternalArray:
-      res += value
-  except:
-      print "Ooops. Obviously, I cannot iterate over \'someExternalArray\'. What is this for a strange thing?"
+  for value in someExternalArray:
+    res += value
   return res
 
 if __name__ == "__main__":

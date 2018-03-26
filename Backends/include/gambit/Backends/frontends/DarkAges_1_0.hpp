@@ -25,6 +25,11 @@
 
 LOAD_LIBRARY
 
+/* Include an extra header of pybind11.
+ * Needed for casting of python list into std::vector and vice versa
+ */
+#include <pybind11/stl.h> 
+
 /* Next we use macros BE_VARIABLE and BE_FUNCTION to extract pointers
  * to the variables and functions within the Python module.
  *
@@ -47,7 +52,6 @@ BE_FUNCTION(readArray, double, (pybind11::list), "readArray","DA_readArray")
 
 BE_VARIABLE(arrayLen, int, "arrayLen", "arrayLen")
 BE_VARIABLE(someFactor, double, "someFactor", "SomeFactor")
-//BE_VARIABLE(someExternalArray, pybind11::list, "someExternalArray","someExternalArray")
 
 /* At this point we have a minimal interface to the loaded library.
  * Any additional convenience functions could be constructed below
@@ -57,34 +61,28 @@ BE_VARIABLE(someFactor, double, "someFactor", "SomeFactor")
 BE_NAMESPACE
 {
   /* Convenience functions go here */
-  void awesomenessNeitherByAndersNorByPat(std::vector<double>& result)
+  std::vector<double> awesomenessNeitherByAndersNorByPat()
   {
     logger().send("Message from 'awesomenessNeitherByAndersNorByPat' backend convenience function in DarkAges v1.0 wrapper",LogTags::info);
     multiplyToArray(*someFactor);
     pybind11::list tmp_result = returnArray();
-    /* Mapping from numpy array onto std::vector goes here */
-    result.clear(); // Delete all entries of result !!
-    for (auto item : tmp_result)
-    {
-      double val = pybind11::cast<double>(item);
-      result.push_back(val);
-    }
+    /* Mapping from numpy-array (or list) onto std::vector goes here */
+    std::vector<double> result = pybind11::cast< std::vector<double> >(tmp_result); 
+    return result;
   }
 
-  double dangerousStuffbyPatrick(int& len)
+  double dangerousStuffbyPatrick(int len)
   {
     logger().send("Message from 'dangerousStuffbyPatrick' backend convenience function in DarkAges v1.0 wrapper",LogTags::info);
     std::vector<double> tmp_vec;
-    for (int i=1; i<=len; i++)
+    /* Populate the vector with some entries */
+    for (int i=0; i<len; i++)
     {
-      tmp_vec.push_back(1./pow((double)i,2.));
+      tmp_vec.push_back(1./pow(2.,i));
     }
-    std::cout << "Let's try to cast \'tmp_vec\' onto pybind11::list" << std::endl;
-    pybind11::object* someExternalArray;
-    *someExternalArray = pybind11::cast(tmp_vec);
-    std::cout << "That worked. Now let's run \'readArray\'" << std::endl;
-    double result = readArray(*someExternalArray);
-    std::cout << "I got a result and it is: " << result << std::endl;
+    /* Map std::vector onto a python-list*/
+    pybind11::list someExternalArray = pybind11::cast(tmp_vec);
+    double result = readArray(someExternalArray);
     return result;
   }
 }
@@ -106,8 +104,8 @@ END_BE_NAMESPACE
  * Syntax for BE_CONV_FUNCTION:
  * BE_CONV_FUNCTION([function name], type, (arguments), "[choose capability name]") */
 
-BE_CONV_FUNCTION(awesomenessNeitherByAndersNorByPat, void, (std::vector<double>&), "DA_awesomeness")
-BE_CONV_FUNCTION(dangerousStuffbyPatrick, double, (int&), "DA_dangerous")
+BE_CONV_FUNCTION(awesomenessNeitherByAndersNorByPat, std::vector<double>, (), "DA_awesomeness")
+BE_CONV_FUNCTION(dangerousStuffbyPatrick, double, (int), "DA_dangerous")
 
 BE_INI_FUNCTION
 {

@@ -34,7 +34,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION dummy_func
     START_FUNCTION(double)
-    BACKEND_REQ(DA_awesomeness, (DarkAges_tag), void, (std::vector<double>&))
+    BACKEND_REQ(DA_awesomeness, (DarkAges_tag), std::vector<double>, ())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -42,7 +42,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION danger_func
     START_FUNCTION(double)
-    BACKEND_REQ(DA_dangerous, (DarkAges_tag), double, (int&))
+    BACKEND_REQ(DA_dangerous, (DarkAges_tag), double, (int))
     #undef FUNCTION
   #undef CAPABILITY
 
