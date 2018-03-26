@@ -38,6 +38,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY danger_cap
+  START_CAPABILITY
+    #define FUNCTION danger_func
+    START_FUNCTION(double)
+    BACKEND_REQ(DA_dangerous, (DarkAges_tag), double, (int&))
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnL_A_planck
   START_CAPABILITY
     #define FUNCTION lnL_A_planck_gaussian

@@ -48,6 +48,11 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
+  - purpose:      observable
+    capability:   danger_cap
+    module:       CosmoBit
+    type:         double
+
   - purpose:      LogLike
     capability:   lnL_A_planck
     module:       CosmoBit
@@ -60,6 +65,10 @@ Rules:
     options:
       arrayLen: 10
       someFactor: 1.05
+
+  - capability: danger_cap
+    options:
+      array_len: 5
 
 #======== Logging setup ========
 Lxogger:

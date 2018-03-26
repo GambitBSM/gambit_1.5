@@ -6,6 +6,7 @@ import numpy as np
 arrayLen = None
 someFactor = None
 someArray = None
+someExternalArray = None
 isInitialized = False
 prefix = "DarkAges 1.0: "
 
@@ -39,11 +40,21 @@ def multiplyToArray(f):
   else:
     print prefix, "Not initialized. Cannot perform calculation."
 
-
 def returnArray():
   print "I'm returnArray() from DarkAges.py, and I'm feeling well."
-  #return someArray
-  return list(someArray)
+  return someArray
+  #return list(someArray)
+
+def readArray(someExternalArray):
+  print "I'm readArray() from DarkAges.py, and I'm feeling well."
+  print "The type of the \'thing\' you passed is: ",type(someExternalArray)
+  res = 0.
+  try:
+    for value in someExternalArray:
+      res += value
+  except:
+      print "Ooops. Obviously, I cannot iterate over \'someExternalArray\'. What is this for a strange thing?"
+  return res
 
 if __name__ == "__main__":
   initialize(10)

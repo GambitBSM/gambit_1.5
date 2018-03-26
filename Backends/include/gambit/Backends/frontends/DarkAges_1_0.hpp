@@ -39,6 +39,7 @@ LOAD_LIBRARY
 BE_FUNCTION(initialize, void, (int), "initialize", "DA_initialize")
 BE_FUNCTION(multiplyToArray, void, (double), "multiplyToArray", "DA_multiply")
 BE_FUNCTION(returnArray, pybind11::list, (), "returnArray","DA_returnArray")
+BE_FUNCTION(readArray, double, (pybind11::list), "readArray","DA_readArray")
 
 /* Syntax for BE_VARIABLE:
  * BE_VARIABLE([name], [type], "[exact symbol name]", "[choose capability name]")
@@ -46,6 +47,7 @@ BE_FUNCTION(returnArray, pybind11::list, (), "returnArray","DA_returnArray")
 
 BE_VARIABLE(arrayLen, int, "arrayLen", "arrayLen")
 BE_VARIABLE(someFactor, double, "someFactor", "SomeFactor")
+//BE_VARIABLE(someExternalArray, pybind11::list, "someExternalArray","someExternalArray")
 
 /* At this point we have a minimal interface to the loaded library.
  * Any additional convenience functions could be constructed below
@@ -68,6 +70,23 @@ BE_NAMESPACE
       result.push_back(val);
     }
   }
+
+  double dangerousStuffbyPatrick(int& len)
+  {
+    logger().send("Message from 'dangerousStuffbyPatrick' backend convenience function in DarkAges v1.0 wrapper",LogTags::info);
+    std::vector<double> tmp_vec;
+    for (int i=1; i<=len; i++)
+    {
+      tmp_vec.push_back(1./pow((double)i,2.));
+    }
+    std::cout << "Let's try to cast \'tmp_vec\' onto pybind11::list" << std::endl;
+    pybind11::object* someExternalArray;
+    *someExternalArray = pybind11::cast(tmp_vec);
+    std::cout << "That worked. Now let's run \'readArray\'" << std::endl;
+    double result = readArray(*someExternalArray);
+    std::cout << "I got a result and it is: " << result << std::endl;
+    return result;
+  }
 }
 END_BE_NAMESPACE
 
@@ -88,6 +107,7 @@ END_BE_NAMESPACE
  * BE_CONV_FUNCTION([function name], type, (arguments), "[choose capability name]") */
 
 BE_CONV_FUNCTION(awesomenessNeitherByAndersNorByPat, void, (std::vector<double>&), "DA_awesomeness")
+BE_CONV_FUNCTION(dangerousStuffbyPatrick, double, (int&), "DA_dangerous")
 
 BE_INI_FUNCTION
 {

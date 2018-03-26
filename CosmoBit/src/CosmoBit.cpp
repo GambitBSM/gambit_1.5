@@ -55,6 +55,16 @@ namespace Gambit
       result = sum;
     }
 
+    void danger_func(double& result)
+    {
+      using namespace Pipes::danger_func;
+
+      int len = runOptions->getValueOrDef<int>(10,"array_len");
+      std::cout << "Now we are doing dangerous stuff" << std::endl;
+      result = BEreq::DA_dangerous(len);
+      std::cout << "Wow. we survived !!! Well done." << std::endl;
+    }
+
     void lnL_A_planck_gaussian(double& result)
     {
       using namespace Pipes::lnL_A_planck_gaussian;
