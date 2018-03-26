@@ -32,11 +32,11 @@ namespace Gambit {
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
-      // vector<double> cutFlowVectorCMS_550_200;
-      // double xsecCMS_550_200;
+      vector<double> cutFlowVectorCMS_550_200;
+      double xsecCMS_550_200;
 
-      // ofstream cutflowFile;
-      // string analysisRunName;
+      ofstream cutflowFile;
+      string analysisRunName;
 
     public:
 
@@ -66,10 +66,10 @@ namespace Gambit {
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
-          // cutFlowVectorCMS_550_200.push_back(0);
+          cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        // analysisRunName = "CMS_13TeV_2OSLEPPaper_36invfb";
+        analysisRunName = "CMS_13TeV_2OSLEPPaper_36invfb";
       }
 
 
@@ -217,19 +217,19 @@ namespace Gambit {
         cutFlowVector_str[11] = "$E^{miss}_{T} > 250 GeV$";
         cutFlowVector_str[12] = "$E^{miss}_{T} > 350 GeV$";
 
-        // cutFlowVectorCMS_550_200[0] = 109.35;
-        // cutFlowVectorCMS_550_200[1] = 24.21;
-        // cutFlowVectorCMS_550_200[2] = 18.37;
-        // cutFlowVectorCMS_550_200[3] = 14.13;
-        // cutFlowVectorCMS_550_200[4] = 11.98;
-        // cutFlowVectorCMS_550_200[5] = 10.95;
-        // cutFlowVectorCMS_550_200[6] = 9.92;
-        // cutFlowVectorCMS_550_200[7] = 8.04;
-        // cutFlowVectorCMS_550_200[8] = 5.62;
-        // cutFlowVectorCMS_550_200[9] = 5.41;
-        // cutFlowVectorCMS_550_200[10] = 4.96;
-        // cutFlowVectorCMS_550_200[11] = 3.59;
-        // cutFlowVectorCMS_550_200[12] = 1.94;
+        cutFlowVectorCMS_550_200[0] = 109.35;
+        cutFlowVectorCMS_550_200[1] = 24.21;
+        cutFlowVectorCMS_550_200[2] = 18.37;
+        cutFlowVectorCMS_550_200[3] = 14.13;
+        cutFlowVectorCMS_550_200[4] = 11.98;
+        cutFlowVectorCMS_550_200[5] = 10.95;
+        cutFlowVectorCMS_550_200[6] = 9.92;
+        cutFlowVectorCMS_550_200[7] = 8.04;
+        cutFlowVectorCMS_550_200[8] = 5.62;
+        cutFlowVectorCMS_550_200[9] = 5.41;
+        cutFlowVectorCMS_550_200[10] = 4.96;
+        cutFlowVectorCMS_550_200[11] = 3.59;
+        cutFlowVectorCMS_550_200[12] = 1.94;
 
         for (size_t j=0;j<NCUTS;j++){
           if(
@@ -292,25 +292,25 @@ namespace Gambit {
 
       void collect_results() {
 
-        // string path = "ColliderBit/results/cutflow_";
-        // path.append(analysisRunName);
-        // path.append(".txt");
-        // cutflowFile.open(path.c_str());
-
-       //  cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [550,200] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-       //  cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-       //  cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_550_200<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<<xsec()/xsecCMS_550_200<<" & 1\\\\ \\hline"<<endl;
-       //  cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-       //  for (size_t i=0; i<NCUTS; i++) {
-       //    cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<(xsecCMS_550_200/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
-       //  }
-       //  cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-       //  for (size_t i=0; i<NCUTS; i++) {
-       //    cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
-       //  }
-       //  cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-       // cutflowFile.close();
-
+        string path = "ColliderBit/results/cutflow_";
+        path.append(analysisRunName);
+        path.append(".txt");
+        cutflowFile.open(path.c_str());
+	
+	cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [550,200] [GeV]$} \n\\makebox[\\linewidth]{ \n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+	cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+	cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_550_200<<" $fb$ &"<<setprecision(4)<<xsec()<<"$fb$ &"<<setprecision(4)<<xsec()/xsecCMS_550_200<<" & 1\\\\ \\hline"<<endl;
+	cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+	for (size_t i=0; i<NCUTS; i++) {
+	  cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<(xsecCMS_550_200/xsec())*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
+	}
+        cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+	for (size_t i=0; i<NCUTS; i++) {
+	  cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+	}
+	cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        cutflowFile.close();
+	
         static const string ANAME = "CMS_13TeV_2OSLEPPaper_36invfb";
 
         // Only 7 of the 9 signal regions are included in the covariance matrix
