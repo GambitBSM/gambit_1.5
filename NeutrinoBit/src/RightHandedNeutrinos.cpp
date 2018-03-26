@@ -459,7 +459,7 @@ namespace Gambit
             {
               x_a = m_lep[j]/M[i];
               x_b = m_lep[k]/M[i];
-              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * (S(x_a,x_b)*g(x_a,x_b) - (x_a < 1E-3 ? -12*pow(x_a,4) : 12*pow(x_a,4)*log( (1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_a,2)) ) ) - (x_b < 1E-3 ? -12*pow(x_b,4) : 12*pow(x_b,4)*log( (1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_b,2)) ) ) + (x_a < 1E-3 or x_b < 1E-3 ? -12*pow(x_a,4)*pow(x_b,4) : 12*pow(x_a,4)*pow(x_b,4)*log( (1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4)) / (2*pow(x_a,2)*pow(x_b,2)) ) ) );
+              gamma[i] += ( (G_F_sq*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * (S(x_a,x_b)*g(x_a,x_b) - (x_a < 1E-2 ? -12*pow(x_a,4) : 12*pow(x_a,4)*log( (1 - (S(x_a,x_b)*(1+pow(x_a,2)-pow(x_b,2))) - (2*pow(x_b,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_a,2)) ) ) - (x_b < 1E-2 ? -12*pow(x_b,4) : 12*pow(x_b,4)*log( (1 - (S(x_a,x_b)*(1-pow(x_a,2)+pow(x_b,2))) - (2*pow(x_a,2)) + pow((pow(x_a,2)-pow(x_b,2)),2)) / (2*pow(x_b,2)) ) ) + (x_a < 1E-2 or x_b < 1E-2 ? -12*pow(x_a,4)*pow(x_b,4) : 12*pow(x_a,4)*pow(x_b,4)*log( (1 - (S(x_a,x_b)*(1-pow(x_a,2)-pow(x_b,2))) - (2*pow(x_a,2)) - (2*pow(x_b,2)) + pow(x_a,4) + pow(x_b,4)) / (2*pow(x_a,2)*pow(x_b,2)) ) ) );
             }
           }
         }
@@ -979,7 +979,7 @@ namespace Gambit
       A_0nubb_Ge = runOptions->getValueOrDef<double>(5.05, "A");
       A_0nubb_Ge *= 1e-10;  // [1/yr]
       p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(163.0, "p"), 2);
-      p2_0nubb_Ge *= 1e-6;  // MeV --> GeV
+      p2_0nubb_Ge *= 1e-6;  // MeV^2 --> GeV^2
       mp = 0.938;  // [GeV] (PDG 2014)
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
