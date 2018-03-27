@@ -347,10 +347,10 @@ namespace Gambit {
 	    if (mT2>130 && mll>300)_numSR2_SF_tight++; 
 	  }
 	  if (SFOSpairs.size()==0) {
-	    if (mT2>100)_numSR2_DF_100++;
-	    if (mT2>150)_numSR2_DF_150++;
-	    if (mT2>200)_numSR2_DF_200++;
-	    if (mT2>300)_numSR2_DF_300++;
+	    if (mT2>100 && mll>111)_numSR2_DF_100++;
+	    if (mT2>150 && mll>111)_numSR2_DF_150++;
+	    if (mT2>200 && mll>111)_numSR2_DF_200++;
+	    if (mT2>300 && mll>111)_numSR2_DF_300++;
 	  }
 	}
 	
