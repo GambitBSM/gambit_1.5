@@ -19,7 +19,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
-///  \date 2018 Jan,Feb
+///  \date 2018 Jan,Feb, Mar
 ///
 ///  *********************************************
 #include <string>
@@ -41,11 +41,11 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    void dummy_func(double& result)
+    void PyTest_func_1(double& result)
     {
-      using namespace Pipes::dummy_func;
+      using namespace Pipes::PyTest_func_1;
 
-      std::vector<double> vec = BEreq::DA_awesomeness();
+      std::vector<double> vec = BEreq::PyArrayTest_Py_to_cpp();
       double sum = 0.0;
       for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
       {
@@ -54,12 +54,12 @@ namespace Gambit
       result = sum;
     }
 
-    void danger_func(double& result)
+    void PyTest_func_2(double& result)
     {
-      using namespace Pipes::danger_func;
+      using namespace Pipes::PyTest_func_2;
 
       int len = runOptions->getValueOrDef<int>(10,"array_len");
-      result = BEreq::DA_dangerous(byVal(len));
+      result = BEreq::PyArrayTest_cpp_to_Py(byVal(len));
     }
 
     void lnL_A_planck_gaussian(double& result)

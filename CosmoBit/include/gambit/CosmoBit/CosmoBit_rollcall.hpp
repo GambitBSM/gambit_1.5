@@ -19,6 +19,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
+///  \date 2018 Jan,Feb, Mar
 ///
 ///  *********************************************
 
@@ -30,19 +31,19 @@
 #define MODULE CosmoBit
 START_MODULE
 
-  #define CAPABILITY dummy_cap
+  #define CAPABILITY PyTest_cap_1
   START_CAPABILITY
-    #define FUNCTION dummy_func
+    #define FUNCTION PyTest_func_1
     START_FUNCTION(double)
-    BACKEND_REQ(DA_awesomeness, (DarkAges_tag), std::vector<double>, ())
+    BACKEND_REQ(PyArrayTest_Py_to_cpp, (DarkAges_tag), std::vector<double>, ())
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY danger_cap
+  #define CAPABILITY PyTest_cap_2
   START_CAPABILITY
-    #define FUNCTION danger_func
+    #define FUNCTION PyTest_func_2
     START_FUNCTION(double)
-    BACKEND_REQ(DA_dangerous, (DarkAges_tag), double, (int))
+    BACKEND_REQ(PyArrayTest_cpp_to_Py, (DarkAges_tag), double, (int))
     #undef FUNCTION
   #undef CAPABILITY
 

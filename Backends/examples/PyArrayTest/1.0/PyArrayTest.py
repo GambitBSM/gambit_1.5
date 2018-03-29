@@ -7,7 +7,7 @@ arrayLen = None
 someFactor = None
 someArray = None
 isInitialized = False
-prefix = "DarkAges 1.0: "
+prefix = "PyArrayTest 1.0: "
 
 #
 # Some functions:

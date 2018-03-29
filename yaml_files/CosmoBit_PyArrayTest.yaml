@@ -44,12 +44,12 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      observable
-    capability:   dummy_cap
+    capability:   PyTest_cap_1
     module:       CosmoBit
     type:         double
 
   - purpose:      observable
-    capability:   danger_cap
+    capability:   PyTest_cap_2
     module:       CosmoBit
     type:         double
 
@@ -61,12 +61,12 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-  - capability: DarkAges_1_0_init
+  - capability: PyArrayTest_1_0_init
     options:
       arrayLen: 10
       someFactor: 1.05
 
-  - capability: danger_cap
+  - capability: PyTest_cap_2
     options:
       array_len: 5
 
@@ -80,7 +80,7 @@ Lxogger:
 #======== Generic Name/Value Section ========
 KeyValues:
 
-  default_output_path: "runs/CosmoBit_DarkAges_test"
+  default_output_path: "runs/CosmoBit_PyArrayTest"
 
   rng: ranlux48
 
