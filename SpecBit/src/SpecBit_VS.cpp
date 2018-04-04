@@ -78,7 +78,8 @@ namespace Gambit
       }
     }
     
-    bool check_perturb_to_min_lambda(const Spectrum& spec,double scale,int pts)
+    bool check_perturb_to_min_lambda(const Spectrum& spec,double scale,int pts
+    ,const std::vector<SpectrumParameter> required_parameters)
     {
       using namespace flexiblesusy;
       using namespace Gambit;
@@ -94,11 +95,14 @@ namespace Gambit
         runto = pow(10,step*float(i+1.0)); // scale to run spectrum to
         if (runto<100){runto=200.0;}// avoid running to low scales
         
-        
-        SingletDM -> RunToScale(runto);
-        
-        static const SpectrumContents::SingletDM contents;
-        static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters_with_tag(Par::dimensionless);
+	      try
+	      {
+	        SingletDM -> RunToScale(runto);
+	      }
+	      catch (const Error& error)
+	      {
+	        return false;
+	      }
         
         for(std::vector<SpectrumParameter>::const_iterator it = required_parameters.begin();
             it != required_parameters.end(); ++it)
@@ -186,7 +190,7 @@ namespace Gambit
       
       
      void find_min_lambda_Helper( dbl_dbl_bool& vs_tuple, const Spectrum& fullspectrum,
-     double high_energy_limit, int check_perturb_pts)
+     double high_energy_limit, int check_perturb_pts,const std::vector<SpectrumParameter> required_parameters)
      {
 			 std::unique_ptr<SubSpectrum> speccloned = fullspectrum.clone_HE();
       
@@ -307,7 +311,7 @@ namespace Gambit
         // vacuum is stable
       }
       // now do a check on the perturbativity of the couplings up to this scale
-      bool perturbative=check_perturb_to_min_lambda(fullspectrum,LB,check_perturb_pts);
+      bool perturbative=check_perturb_to_min_lambda(fullspectrum,LB,check_perturb_pts,required_parameters);
       double perturb=float(!perturbative);
 #ifdef SPECBIT_DEBUG
       cout << "perturbativity checked up to " << LB << " result = " << perturbative << endl;
@@ -331,7 +335,11 @@ namespace Gambit
       
       const Spectrum& fullspectrum = *myPipe::Dep::SingletDM_spectrum;
       
-      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts);
+      static const SpectrumContents::SingletDM contents;
+      static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters_with_tag(Par::dimensionless);
+      
+      
+      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts, required_parameters);
      }
      
     void find_min_lambda_SingletDMZ3(dbl_dbl_bool& vs_tuple)
@@ -347,8 +355,32 @@ namespace Gambit
       
       const Spectrum& fullspectrum = *myPipe::Dep::SingletDMZ3_spectrum;
       
-      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts);
+      static const SpectrumContents::SingletDM contents;
+      static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters_with_tag(Par::dimensionless);
+      
+      
+      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts, required_parameters);
      }
+     
+
+    void find_min_lambda_MDM(dbl_dbl_bool& vs_tuple)
+    {
+      using namespace flexiblesusy;
+      using namespace softsusy;
+      namespace myPipe = Pipes::find_min_lambda_MDM;
+      const Options& runOptions=*myPipe::runOptions;
+      double high_energy_limit = runOptions.getValueOrDef<double>(1.22e19,"set_high_scale");
+      int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
+      using namespace Gambit;
+      using namespace SpecBit;
+      
+      const Spectrum& fullspectrum = *myPipe::Dep::MDM_spectrum;
+      
+      static const SpectrumContents::MDM contents;
+      static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters_with_tag(Par::dimensionless);
+      
+      find_min_lambda_Helper(vs_tuple,fullspectrum, high_energy_limit, check_perturb_pts, required_parameters);
+     }     
     
     
     // the functions below are used to extract the desired outputs from find_min_lambda

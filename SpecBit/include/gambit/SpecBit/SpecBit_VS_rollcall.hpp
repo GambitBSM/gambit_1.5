@@ -53,6 +53,16 @@
     MODEL_GROUP(singlet, (SingletDMZ3))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
+    
+	  #define FUNCTION find_min_lambda_MDM
+    START_FUNCTION(dbl_dbl_bool)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(MDM_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, MDM)
+    MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
+    MODEL_GROUP(mdm, (MDM))
+    ALLOW_MODEL_COMBINATION(higgs, mdm)
+    #undef FUNCTION    
 
   #undef CAPABILITY
 

@@ -13,7 +13,7 @@ Parameters:
 
     StandardModel_SLHA2:
       mT:
-         range: [120,200]
+         range: [120,220]
 
       alphainv:  1.27940010E+02 # alpha^{-1}(mZ)^MSbar *
       GF      :  1.16637870E-05 # G_Fermi **
@@ -50,10 +50,8 @@ Parameters:
         # prior_type: flat
       QEWSB: 173
 
-    SingletDM:
-      mS: 100
-      lambda_hS: 0.0
-
+    MDM:
+      mChi: 9600
 
 Printer:
 
@@ -75,7 +73,7 @@ Scanner:
       plugin: grid
       version: ">=1.0"
       like:  LogLike
-      grid_pts: [1,1]
+      grid_pts: [200,200]
 
 
 ObsLikes:
@@ -86,24 +84,26 @@ ObsLikes:
     - capability: expected_lifetime
       purpose: Observable
 
-    - capability: SingletDM_spectrum
+    - capability: MDM_spectrum
       purpose: Observable
-      function: get_SingletDM_spectrum_as_map
+      function: get_MDM_spectrum_as_map
       dependencies:
-         - capability: SingletDM_spectrum
+         - capability: MDM_spectrum
            type: Spectrum
 
 
 Rules:
 
     - capability: vacuum_stability
-      function: find_min_lambda_SingletDM
+      function: find_min_lambda_MDM
       module: SpecBit
+      options:
+        set_high_scale: 1e19
 
 
-    - capability: SingletDM_spectrum
+    - capability: MDM_spectrum
       type: Spectrum
-      function: get_SingletDM_spectrum_pole
+      function: get_MDM_spectrum
       options:
         check_perturb: true
         check_high_scale: 1e19

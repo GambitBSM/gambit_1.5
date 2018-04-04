@@ -175,4 +175,9 @@ MAKE_INTERFACE
 MAKE_INTERFACE
 #undef MODELNAME
 
+#define MODELNAME MDM
+#include "gambit/SpecBit/flexiblesusy_include_automater.hpp" // Automatically includes necessary MDM model headers etc.
+MAKE_INTERFACE
+#undef MODELNAME
+
 #endif
