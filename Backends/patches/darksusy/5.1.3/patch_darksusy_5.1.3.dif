@@ -1,3 +1,59 @@
+diff -rupN darksusy-5.1.3/src/dd/dsdddn1.f ../installed/darksusy/5.1.3/src/dd/dsdddn1.f
+--- darksusy-5.1.3/src/dd/dsdddn1.f     2011-11-05 00:48:05.000000000 +0100
++++ ../installed/darksusy/5.1.3/src/dd/dsdddn1.f        2018-02-28 15:19:17.000000000 +0100
+@@ -15,7 +15,8 @@ c
+       mx2=mx*mx/scale
+       delta=4.d0*mq2*ms2-(mq2+ms2-mx2)**2
+       mx4=mx2*mx2
+-      if (abs(delta).lt.epsilon*mx4) then
++c... made sure that arguemnt of srqt cannot become negative, TB 2018-02-28
++      if (abs(delta).lt.epsilon*mx4.and.delta.lt.4.d0*mq2*ms2) then
+          delta=epsilon*mx4
+          mx2=mq2+ms2-dsqrt(4.d0*mq2*ms2-delta)
+       endif
+
+diff -rupN darksusy-5.1.3/src/dd/dsdddn2.f ../installed/darksusy/5.1.3/src/dd/dsdddn2.f
+--- darksusy-5.1.3/src/dd/dsdddn2.f     2011-11-05 00:48:05.000000000 +0100
++++ ../installed/darksusy/5.1.3/src/dd/dsdddn2.f        2018-02-28 15:19:30.000000000 +0100
+@@ -15,7 +15,8 @@ c
+       mx2=mx*mx/scale
+       delta=4.d0*mq2*ms2-(mq2+ms2-mx2)**2
+       mx4=mx2*mx2
+-      if (abs(delta).lt.epsilon*mx4) then
++c... made sure that arguemnt of srqt cannot become negative, TB 2018-02-28
++      if (abs(delta).lt.epsilon*mx4.and.delta.lt.4.d0*mq2*ms2) then
+          delta=epsilon*mx4
+          mx2=mq2+ms2-dsqrt(4.d0*mq2*ms2-delta)
+       endif
+
+diff -rupN darksusy-5.1.3/src/dd/dsdddn3.f ../installed/darksusy/5.1.3/src/dd/dsdddn3.f
+--- darksusy-5.1.3/src/dd/dsdddn3.f     2011-11-05 00:48:05.000000000 +0100
++++ ../installed/darksusy/5.1.3/src/dd/dsdddn3.f        2018-02-28 15:19:38.000000000 +0100
+@@ -15,7 +15,8 @@ c
+       mx2=mx*mx/scale
+       delta=4.d0*mq2*ms2-(mq2+ms2-mx2)**2
+       mx4=mx2*mx2
+-      if (abs(delta).lt.epsilon*mx4) then
++c... made sure that arguemnt of srqt cannot become negative, TB 2018-02-28
++      if (abs(delta).lt.epsilon*mx4.and.delta.lt.4.d0*mq2*ms2) then
+          delta=epsilon*mx4
+          mx2=mq2+ms2-dsqrt(4.d0*mq2*ms2-delta)
+       endif
+
+diff -rupN darksusy-5.1.3/src/dd/dsdddn4.f ../installed/darksusy/5.1.3/src/dd/dsdddn4.f
+--- darksusy-5.1.3/src/dd/dsdddn4.f     2011-11-05 00:48:05.000000000 +0100
++++ ../installed/darksusy/5.1.3/src/dd/dsdddn4.f        2018-02-28 15:19:50.000000000 +0100
+@@ -15,7 +15,8 @@ c
+       mx2=mx*mx/scale
+       delta=4.d0*mq2*ms2-(mq2+ms2-mx2)**2
+       mx4=mx2*mx2
+-      if (abs(delta).lt.epsilon*mx4) then
++c... made sure that arguemnt of srqt cannot become negative, TB 2018-02-28
++      if (abs(delta).lt.epsilon*mx4.and.delta.lt.4.d0*mq2*ms2) then
+          delta=epsilon*mx4
+          mx2=mq2+ms2-dsqrt(4.d0*mq2*ms2-delta)
+       endif
+
 diff -rupN darksusy-5.1.3/src/dd/dsddgpgn.f ../installed/darksusy/5.1.3/src/dd/dsddgpgn.f
 --- darksusy-5.1.3/src/dd/dsddgpgn.f  2017-09-29 00:32:50.000000000 +0200
 +++ ../installed/darksusy/5.1.3/src/dd/dsddgpgn.f  2017-09-29 00:33:05.000000000 +0200
