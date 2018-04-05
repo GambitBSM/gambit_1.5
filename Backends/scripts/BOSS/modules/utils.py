@@ -8,9 +8,6 @@ import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from operator import itemgetter
 import os
-import sys
-import warnings
-import subprocess
 import copy
 
 import modules.active_cfg as active_cfg
@@ -2152,12 +2149,6 @@ def constrEnumDeclHeader(enum_el_list, file_output_path):
 
 def castxmlRunner(input_file_path, include_paths_list, xml_output_path, timeout_limit=300., poll_interval=0.5):
 
-    # Choose castxml executable according to platform (linux or darwin)
-    if sys.platform == 'darwin':
-        castxml_path = gb.boss_dir+'/castxml/darwin/bin/castxml'
-    else:
-        castxml_path = gb.boss_dir+'/castxml/linux/bin/castxml'
-
     # Avoid including intel headers when in "gnu mode" by
     # temporarily unsetting some environment variables
     if 'gnu' in cfg.castxml_cc_id:
@@ -2172,7 +2163,7 @@ def castxmlRunner(input_file_path, include_paths_list, xml_output_path, timeout_
 
 
     # Construct castxml command to run
-    castxml_cmd = castxml_path + ' --castxml-gccxml -x c++'
+    castxml_cmd = 'castxml --castxml-gccxml -x c++'
 
     # Add castxml settings from cfg file
     castxml_cmd += ' --castxml-cc-' + cfg.castxml_cc_id + ' "(" ' + cfg.castxml_cc

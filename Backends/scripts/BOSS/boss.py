@@ -18,12 +18,10 @@
 import xml.etree.ElementTree as ET
 import os
 import sys
-import warnings
 import shutil
 import glob
 import subprocess
 import pickle
-import copy
 from collections import OrderedDict
 from optparse import OptionParser
 
@@ -122,6 +120,19 @@ def main():
 
         print
         print 'Platform "%s" is not supported.' % (sys.platform)
+        print
+
+        sys.exit()
+
+
+    # Check that CastXML is found
+    try: 
+        subprocess.check_output(["which","castxml"])
+    except subprocess.CalledProcessError:
+        print
+        print "Cannot find 'castxml' executable."
+        print
+        print "CastXML can be installed with 'apt install castxml' (Linux) or 'brew install castxml' (OS X)."
         print
 
         sys.exit()
