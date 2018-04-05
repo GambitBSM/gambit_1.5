@@ -14,6 +14,7 @@
 ///  *********************************************
 
 #define BACKENDNAME MicrOmegas_DiracDM
+#define BACKENDLANG CC
 #define VERSION 3.6.9.2
 #define SAFE_VERSION 3_6_9_2
 
