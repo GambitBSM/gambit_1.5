@@ -47,6 +47,7 @@ namespace Gambit
       double mnu1 = *Param["mNu1"];
       double mnu2 = *Param["mNu2"];
       double mnu3 = *Param["mNu3"];
+
        
       m_nu(0,1) = 0.0;
       m_nu(0,2) = 0.0;
@@ -69,6 +70,23 @@ namespace Gambit
         m_nu(2,2) = mnu1;
         m_nu(0,0) = mnu2;
         m_nu(1,1) = mnu3;
+      }
+
+      // If there is an option to set a specific ordering, invalidate the other type
+      int ord = runOptions->getValueOrDef<int>(-1,"ordering");
+      if(ord == 1 and *Dep::ordering == 0)
+      {
+        std::ostringstream msg;
+        msg << "Wrong ordering";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+      else if(ord == 0 and *Dep::ordering == 1)
+      {
+        std::ostringstream msg;
+        msg << "Wrong ordering";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
       }
 
     }
