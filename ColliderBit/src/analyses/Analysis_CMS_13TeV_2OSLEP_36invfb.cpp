@@ -112,7 +112,7 @@ namespace Gambit {
        HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
        for (size_t iEl=0;iEl<baselineElectrons.size();iEl++) {
 	 bool isEl=has_tag(_eff2dEl, baselineElectrons.at(iEl)->eta(), baselineElectrons.at(iEl)->pT());
-	 if (isEl && baselineElectrons.at(iEl)->pT()>20. && (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta()))>1.6)signalElectrons.push_back(baselineElectrons.at(iEl));
+	 if (isEl && baselineElectrons.at(iEl)->pT()>20. && (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta())>1.6)) signalElectrons.push_back(baselineElectrons.at(iEl));
        }
 
        //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_034_ttbar.pdf
