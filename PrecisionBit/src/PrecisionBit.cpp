@@ -1070,25 +1070,6 @@ namespace Gambit
 
     // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
 
-    // Muon Fermi coupling, calculation from 1502.00477
-    void RHN_Gmu(double &result)
-    {
-      using namespace Pipes::RHN_Gmu;
-      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
-
-      result = sminputs.GF*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-    }
-
-    void lnL_Gmu_chi2(double &result)
-    {
-      using namespace Pipes::lnL_Gmu_chi2;
-      /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
-      bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(*Dep::Gmu, 1.1663787E-05, 0.0, 0.0000006E-05, profile);
-    }
-
     // Weak mixing angle sinW2, calculation from 1502.00477
     //TODO: values seem a bit off, check this
     void RHN_sinW2(triplet<double> &result)
@@ -1096,7 +1077,7 @@ namespace Gambit
       using namespace Pipes::RHN_sinW2;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
-      double Gmu = *Dep::Gmu;
+      double Gmu = sminputs.GF;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       // Radiative corrections, from Marco's paper
@@ -1121,8 +1102,8 @@ namespace Gambit
     {
       using namespace Pipes::RHN_mw;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double Gmu = *Dep::Gmu;
       SMInputs sminputs = *Dep::SMINPUTS;
+      double Gmu = sminputs.GF;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       // Radiative corrections, form Marco's paper
@@ -1140,7 +1121,7 @@ namespace Gambit
       Eigen::Matrix3cd V = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
-      double Gmu = *Dep::Gmu;
+      double Gmu = sminputs.GF;
 
       Eigen::Matrix3d VNorm = (V.adjoint() * V).real();
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
@@ -1183,7 +1164,7 @@ namespace Gambit
       using namespace Pipes::RHN_W_to_l_decays;
       SMInputs sminputs = *Dep::SMINPUTS;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double Gmu = *Dep::Gmu;
+      double Gmu = sminputs.GF;
       double mw = Dep::mw->central;
 
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();

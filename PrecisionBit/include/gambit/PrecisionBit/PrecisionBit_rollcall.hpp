@@ -228,31 +228,12 @@ START_MODULE
   #undef CAPABILITY
 
   // EWPO corrections from heavy neutrinos
-  #define CAPABILITY Gmu
-  START_CAPABILITY
-    #define FUNCTION RHN_Gmu
-    START_FUNCTION(double)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_MODEL(RightHandedNeutrinos)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY lnL_Gmu
-  START_CAPABILITY
-    #define FUNCTION lnL_Gmu_chi2
-    START_FUNCTION(double)
-    DEPENDENCY(Gmu, double)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY sinW2
   START_CAPABILITY
     #define FUNCTION RHN_sinW2
     START_FUNCTION(triplet<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(Gmu, double)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
@@ -270,7 +251,6 @@ START_MODULE
     START_FUNCTION(triplet<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(Gmu, double)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
@@ -280,7 +260,6 @@ START_MODULE
     #define FUNCTION RHN_Z_inv_width
     START_FUNCTION(double)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Gmu, double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -301,7 +280,6 @@ START_MODULE
     #define FUNCTION RHN_W_to_l_decays
     START_FUNCTION(std::vector<double>)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(Gmu, double)
     DEPENDENCY(mw, triplet<double>)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)

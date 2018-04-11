@@ -1618,15 +1618,16 @@ namespace Gambit
           U(i,j+3) = Theta(i,j);
         }
 
-      // TODO: Perhaps corrections on GF might be important
-      result = (48. * pow(M_PI,3))/(pow(sminputs.GF,2) * sminputs.alphainv);
+      result = pow(sminputs.mMu,5)/(4 * sminputs.alphainv);
 
       // Form factors
       int e = 0, mu = 1;
       complex<double> k2l = FormFactors::K2L(mu, e, sminputs, U, ml, mnu);
       complex<double> k2r = FormFactors::K2R(mu, e, sminputs, U, ml, mnu);
 
-      result *= (norm(k2l) + norm(k2r)) / (1. - 8.* pow(sminputs.mE/sminputs.mMu,2));
+      result *= (norm(k2l) + norm(k2r));
+
+      result /= Dep::mu_minus_decay_rates->width_in_GeV; 
 
     }
 
@@ -1650,21 +1651,18 @@ namespace Gambit
           U(i,j+3) = Theta(i,j);
         }
 
-      // TODO: Perhaps corrections on GF might be important
-      result = (48. * pow(M_PI,3))/(pow(sminputs.GF,2) * sminputs.alphainv);
+      result = pow(sminputs.mTau,5)/(4*sminputs.alphainv);
 
       // Form factors
       int e = 0, tau = 2;
       complex<double> k2l = FormFactors::K2L(tau, e, sminputs, U, ml, mnu);
       complex<double> k2r = FormFactors::K2R(tau, e, sminputs, U, ml, mnu);
 
-      // TODO: Add eta to the decay tables
-      double eta = 0.013;
-      result *= (norm(k2l) + norm(k2r)) / (1. + 4.*eta* sminputs.mE/sminputs.mTau);
+      result *= (norm(k2l) + norm(k2r));
 
-      // Multiply by the BR of tau -> e nu nu
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");
-    }
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;
+
+   }
 
     void RHN_taumugamma(double &result)
     {
@@ -1686,20 +1684,16 @@ namespace Gambit
           U(i,j+3) = Theta(i,j);
         }
 
-      // TODO: Perhaps corrections on GF might be important
-      result = (48. * pow(M_PI,3))/(pow(sminputs.GF,2) * sminputs.alphainv);
+      result = pow(sminputs.mTau,5)/(4 * sminputs.alphainv);
 
       // Form factors
       int mu = 1, tau = 2;
       complex<double> k2l = FormFactors::K2L(tau, mu, sminputs, U, ml, mnu);
       complex<double> k2r = FormFactors::K2R(tau, mu, sminputs, U, ml, mnu);
 
-      // TODO: Add eta to the decay tables
-      double eta = 0.013;
-      result *= (norm(k2l) + norm(k2r)) / (1. + 4.*eta*sminputs.mMu/sminputs.mTau);
+      result *= (norm(k2l) + norm(k2r));
 
-      // Multiply by the BR of tau -> e nu nu
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;
     }
 
     double RHN_l2lll(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix3cd Vnu, Eigen::Matrix3cd Theta, Eigen::Matrix3cd m_nu, double M1, double M2, double M3, double mH)
@@ -1731,17 +1725,17 @@ namespace Gambit
  
       complex<double> avhatll = avll;
       complex<double> avhatlr = avlr;
-      complex<double> avhatrl = avrl + 4. * M_PI / sminputs.alphainv * k1r;
-      complex<double> avhatrr = avrr + 4. * M_PI / sminputs.alphainv * k1r;
+      complex<double> avhatrl = avrl + 4. * pi / sminputs.alphainv * k1r;
+      complex<double> avhatrr = avrr + 4. * pi / sminputs.alphainv * k1r;
 
       double l2lll = 0;
       if(beta == gamma and gamma == delta) // l(alpha)- -> l(beta)- l(beta)- l(beta)+
       {
-        l2lll = real(16. * pow(M_PI,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[beta]) - 22./3.) + 1./24. * (norm(asll) + norm(asrr) + 2.*norm(aslr) + 2.*norm(asrl)) + 1./3. * (2.*norm(avhatll) + 2.*norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 4.*M_PI/(3.*sminputs.alphainv)*(k2l*conj(asrl - 2.*avhatrl - 4.*avhatrr) + conj(k2l)*(asrl - 2.*avhatrl - 4.*avhatrr) + k2r*conj(aslr - 2.*avhatlr - 4.*avhatll) + conj(k2r)*(aslr - 2.*avhatlr - 4.*avhatll)) - 1./6. * (aslr*conj(avhatlr) + asrl*conj(avhatrl) + conj(aslr)*avhatlr + conj(asrl)*avhatrl));
+        l2lll = real(16. * pow(pi,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[beta]) - 22./3.) + 1./24. * (norm(asll) + norm(asrr) + 2.*norm(aslr) + 2.*norm(asrl)) + 1./3. * (2.*norm(avhatll) + 2.*norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 4.*pi/(3.*sminputs.alphainv)*(k2l*conj(asrl - 2.*avhatrl - 4.*avhatrr) + conj(k2l)*(asrl - 2.*avhatrl - 4.*avhatrr) + k2r*conj(aslr - 2.*avhatlr - 4.*avhatll) + conj(k2r)*(aslr - 2.*avhatlr - 4.*avhatll)) - 1./6. * (aslr*conj(avhatlr) + asrl*conj(avhatrl) + conj(aslr)*avhatlr + conj(asrl)*avhatrl));
       }
       else if(gamma == delta) // l(alpha)- -> l(beta)- l(gamma)- l(gamma)+
       { 
-        l2lll = real(16. *pow(M_PI,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[gamma]) - 8.) + 1./12. *(norm(asll) + norm(asrr) + norm(aslr) + norm(asrl)) + 1./3. * (norm(avhatll) + norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 8.*M_PI/(3.*sminputs.alphainv) * (k2l*conj(avhatrl + avhatrr) + k2r*conj(avhatlr + avhatll) + conj(k2l)*(avhatrl + avhatrr) + conj(k2r)*(avhatlr + avhatll)));
+        l2lll = real(16. *pow(pi,2) / pow(sminputs.alphainv,2) * (norm(k2l) + norm(k2r)) * (16./3.*log(ml[alpha]/ml[gamma]) - 8.) + 1./12. *(norm(asll) + norm(asrr) + norm(aslr) + norm(asrl)) + 1./3. * (norm(avhatll) + norm(avhatrr) + norm(avhatlr) + norm(avhatrl)) + 8.*pi/(3.*sminputs.alphainv) * (k2l*conj(avhatrl + avhatrr) + k2r*conj(avhatlr + avhatll) + conj(k2l)*(avhatrl + avhatrr) + conj(k2r)*(avhatlr + avhatll)));
       }
       else if(beta == gamma) // l(alpha)- -> l(beta)- l(beta)- l(delta)+
       {
@@ -1760,12 +1754,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mMu,5)/(512*pow(pi,3));
 
       int e = 0, mu = 1;
       result *=  RHN_l2lll(mu, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      result /= (1. - 8.*pow(sminputs.mE/sminputs.mMu,2));
+      result /= Dep::mu_minus_decay_rates->width_in_GeV;
  
     }
 
@@ -1778,15 +1772,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mTau,5)/(512*pow(pi,3));
 
       int e = 0, tau = 2;
       result *=  RHN_l2lll(tau, e, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
-      double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;      
  
     }
 
@@ -1799,15 +1790,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mTau,5)/(512*pow(pi,3));
 
       int mu = 1, tau = 2;
       result *=  RHN_l2lll(tau, mu, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");      
-      double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;      
 
     }
 
@@ -1821,15 +1809,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mTau,5)/(512*pow(pi,3));
 
       int e = 0, mu = 1, tau = 2;
       result *=  RHN_l2lll(tau, mu, e, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
-      double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;      
     }
 
     void RHN_taueemu(double &result)
@@ -1841,15 +1826,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mTau,5)/(512*pow(pi,3));
 
       int e = 0, mu = 1, tau = 2;
       result *=  RHN_l2lll(tau, e, e, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      // Multiply by the BR of tau -> e nu nu and m_e/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("e-", "nubar_e", "nu_tau");      
-      double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mE/sminputs.mTau);
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;      
     }
 
     void RHN_tauemumu(double &result)
@@ -1861,15 +1843,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mTau,5)/(512*pow(pi,3));
 
       int e = 0, mu = 1, tau = 2;
       result *=  RHN_l2lll(tau, e, mu, mu, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
-      double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;      
     }
 
     void RHN_taumumue(double &result)
@@ -1881,15 +1860,12 @@ namespace Gambit
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3cd Vnu = *Dep::SeesawI_Vnu;
 
-      result = 3. / (8. * pow(sminputs.GF,2));
+      result = pow(sminputs.mTau,5)/(512*pow(pi,3));
 
       int e = 0, mu = 1, tau = 2;
       result *=  RHN_l2lll(tau, mu, mu, e, sminputs, Vnu, Theta, m_nu, *Param["M_1"], *Param["M_2"], *Param["M_3"], *Param["mH"]);
 
-      // Multiply by the BR of tau -> mu nu nu and m_mu/m_tau correction
-      result *= Dep::tau_minus_decay_rates->BF("mu-", "nubar_mu", "nu_tau");
-      double eta = 0.013;
-      result /= 1 + 4*eta*(sminputs.mMu/sminputs.mTau);
+      result /= Dep::tau_minus_decay_rates->width_in_GeV;      
     }
 
     void RHN_mueTi(double &result)
@@ -1945,21 +1921,21 @@ namespace Gambit
       complex<double> CSRRs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml ,mnu, *Param["mH"]);
 
       double Qu = 2./3.;
-      complex<double> gVLu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (0. - k2r) - 0.5*(CVLLu + CVLRu));
+      complex<double> gVLu = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qu * (0. - k2r) - 0.5*(CVLLu + CVLRu));
       complex<double> gSLu = -1./(sqrt(2)*sminputs.GF)*(CSLLu + CSLRu);
-      complex<double> gVRu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (k1r - k2l) - 0.5*(CVRRu + CVRLu));
+      complex<double> gVRu = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qu * (k1r - k2l) - 0.5*(CVRRu + CVRLu));
       complex<double> gSRu = -1./(sqrt(2)*sminputs.GF)*(CSRRu + CSRLu);
 
       double Qd = -1./3.;
-      complex<double> gVLd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (0. - k2r) - 0.5*(CVLLd + CVLRd));
+      complex<double> gVLd = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qd * (0. - k2r) - 0.5*(CVLLd + CVLRd));
       complex<double> gSLd = -1./(sqrt(2)*sminputs.GF)*(CSLLd + CSLRd);
-      complex<double> gVRd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (k1r - k2l) - 0.5*(CVRRd + CVRLd));
+      complex<double> gVRd = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qd * (k1r - k2l) - 0.5*(CVRRd + CVRLd));
       complex<double> gSRd = -1./(sqrt(2)*sminputs.GF)*(CSRRd + CSRLd);
 
       double Qs = -1./3.;
-      complex<double> gVLs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (0. - k2r) - 0.5*(CVLLs + CVLRs));
+      complex<double> gVLs = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qs * (0. - k2r) - 0.5*(CVLLs + CVLRs));
       complex<double> gSLs = -1./(sqrt(2)*sminputs.GF)*(CSLLs + CSLRs);
-      complex<double> gVRs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (k1r - k2l) - 0.5*(CVRRs + CVRLs));
+      complex<double> gVRs = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qs * (k1r - k2l) - 0.5*(CVRRs + CVRLs));
       complex<double> gSRs = -1./(sqrt(2)*sminputs.GF)*(CSRRs + CSRLs);
 
       double GVup = 2, GVdn = 2, GVdp = 1, GVun = 1, GVsp = 0, GVsn = 0;
@@ -1980,7 +1956,7 @@ namespace Gambit
       double hbar = 6.582119514e-25; // GeV * s
       double GammaCapt = 2.59e6 * hbar; 
 
-      result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
+      result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(pi,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
 
     }
 
@@ -2037,21 +2013,21 @@ namespace Gambit
       complex<double> CSRRs = FormFactors::BSLL(mu, e, s, s, sminputs, U, ml ,mnu, *Param["mH"]);
 
       double Qu = 2./3.;
-      complex<double> gVLu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (0. - k2r) - 0.5*(CVLLu + CVLRu));
+      complex<double> gVLu = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qu * (0. - k2r) - 0.5*(CVLLu + CVLRu));
       complex<double> gSLu = -1./(sqrt(2)*sminputs.GF)*(CSLLu + CSLRu);
-      complex<double> gVRu = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qu * (k1r - k2l) - 0.5*(CVRRu + CVRLu));
+      complex<double> gVRu = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qu * (k1r - k2l) - 0.5*(CVRRu + CVRLu));
       complex<double> gSRu = -1./(sqrt(2)*sminputs.GF)*(CSRRu + CSRLu);
 
       double Qd = -1./3.;
-      complex<double> gVLd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (0. - k2r) - 0.5*(CVLLd + CVLRd));
+      complex<double> gVLd = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qd * (0. - k2r) - 0.5*(CVLLd + CVLRd));
       complex<double> gSLd = -1./(sqrt(2)*sminputs.GF)*(CSLLd + CSLRd);
-      complex<double> gVRd = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qd * (k1r - k2l) - 0.5*(CVRRd + CVRLd));
+      complex<double> gVRd = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qd * (k1r - k2l) - 0.5*(CVRRd + CVRLd));
       complex<double> gSRd = -1./(sqrt(2)*sminputs.GF)*(CSRRd + CSRLd);
 
       double Qs = -1./3.;
-      complex<double> gVLs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (0. - k2r) - 0.5*(CVLLs + CVLRs));
+      complex<double> gVLs = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qs * (0. - k2r) - 0.5*(CVLLs + CVLRs));
       complex<double> gSLs = -1./(sqrt(2)*sminputs.GF)*(CSLLs + CSLRs);
-      complex<double> gVRs = sqrt(2)/sminputs.GF * (4.*M_PI / sminputs.alphainv * Qs * (k1r - k2l) - 0.5*(CVRRs + CVRLs));
+      complex<double> gVRs = sqrt(2)/sminputs.GF * (4.*pi / sminputs.alphainv * Qs * (k1r - k2l) - 0.5*(CVRRs + CVRLs));
       complex<double> gSRs = -1./(sqrt(2)*sminputs.GF)*(CSRRs + CSRLs);
 
       double GVup = 2, GVdn = 2, GVdp = 1, GVun = 1, GVsp = 0, GVsn = 0;
@@ -2072,7 +2048,7 @@ namespace Gambit
       double hbar = 6.582119514e-25; // GeV * s
       double GammaCapt = 13.45e6 * hbar; 
 
-      result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(M_PI,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
+      result = (pow(sminputs.GF,2)*pow(sminputs.mMu,5)*pow(Zeff,4)*pow(Fp,2)) / (8.*pow(pi,4)*pow(sminputs.alphainv,3)*Z*GammaCapt) * (norm((Z+N)*(g0VL + g0SL) + (Z-N)*(g1VL + g1SL)) + norm((Z+N)*(g0VR + g0SR) + (Z-N)*(g1VR + g1SR)));
 
     }
 

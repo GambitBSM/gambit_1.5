@@ -533,7 +533,6 @@ START_MODULE
     ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(Gmu, double)
     #undef FUNCTION
 
   #undef CAPABILITY

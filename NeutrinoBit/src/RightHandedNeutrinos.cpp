@@ -1030,7 +1030,7 @@ namespace Gambit
       using namespace Pipes::lnL_ckm;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double G_mu = *Dep::Gmu;
+      double G_mu = sminputs.GF;
       double V_us = *Param["CKM_lambda"];
  
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
