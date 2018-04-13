@@ -762,7 +762,7 @@ namespace Gambit
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi, mu_f_pi, d_r_pi;
-      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
+      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_pi = 0;
@@ -773,23 +773,26 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        e_fac_pi[i] = 0;
-        mu_fac_pi[i] = 0;
         r_I_pi[i] = pow(M[i], 2)/pow(m_pi, 2);
  
         if(M[i] + sminputs.mMu < m_pi)
         {
           G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
-          mu_fac_pi[i] = Usq(1,i) * (G_mu_pi[i] - 1.0);
         } 
+        else
+          G_mu_pi[i] = 0;
+
         if(M[i] + sminputs.mE < m_pi)
         {
           G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2))) / (r_e_pi * pow((1.0 - r_e_pi), 2));
-          e_fac_pi[i] = Usq(0,i) * (G_e_pi[i] - 1.0); 
         }
-        e_f_pi += e_fac_pi[i];
-        mu_f_pi += mu_fac_pi[i];
+        else
+          G_mu_pi[i] = 0;
+
+        e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
+        mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
       }
+
       d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi)) - 1.0;
       R_pi = R_pi_SM * (1.0 + d_r_pi);
  
@@ -799,13 +802,12 @@ namespace Gambit
     {
       using namespace Pipes::RHN_R_K;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double m_pi = meson_masses.pi_plus;
       static double m_K = meson_masses.kaon_plus; 
       static double R_K_SM = 2.477e-5;
       static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K, mu_f_K, d_r_K;
-      std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
+      std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_K = 0;
@@ -816,24 +818,28 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        e_fac_K[i] = 0;
-        mu_fac_K[i] = 0;
         r_I_K[i] = pow(M[i], 2)/pow(m_K,2);
 
-        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
+//        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
+        if(M[i] + sminputs.mMu < m_K)
         {
           G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2))) / (r_mu_K * pow((1.0 - r_mu_K), 2));
-          mu_fac_K[i] = Usq(1,i) * (G_mu_K[i] - 1.0);
         } 
-        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
+        else
+          G_mu_K[i] = 0;
+
+//        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
+        if(M[i] + sminputs.mE < m_K)
         {
           G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2))) / (r_e_K * pow((1.0 - r_e_K), 2));
-          e_fac_K[i] = Usq(0,i) * (G_e_K[i] - 1.0);
         }
+        else
+          G_e_K[i] = 0;
           
-        e_f_K += e_fac_K[i];
-        mu_f_K += mu_fac_K[i];
+        e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
+        mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
       }
+
       d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K)) - 1.0;
       R_K = R_K_SM * (1.0 + d_r_K);
     }
@@ -844,8 +850,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_tau = sminputs.mTau;  // GeV
       static double R_tau_SM = 0.973;
+      static double r_e_tau = pow(sminputs.mE,2)/pow(m_tau,2);
+      static double r_mu_tau = pow(sminputs.mMu,2)/pow(m_tau,2);
       double e_f_tau, mu_f_tau, d_r_tau;
-      std::vector<double> M(3), e_fac_tau(3), mu_fac_tau(3);
+      std::vector<double> M(3), r_I_tau(3), G_e_tau(3), G_mu_tau(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_tau = 0;
@@ -856,15 +864,28 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if(M[i] + sminputs.mE > m_tau)
-          e_fac_tau[i] = Usq(0,i);
-        if(M[i] + sminputs.mMu > m_tau)
-          mu_fac_tau[i] = Usq(1,i);
+        r_I_tau[i] = pow(M[i], 2)/pow(m_tau,2);
 
-        e_f_tau += e_fac_tau[i];
-        mu_f_tau += mu_fac_tau[i];
+        if(M[i] + sminputs.mMu < m_tau)
+        {
+          G_mu_tau[i] = (r_mu_tau + r_I_tau[i] - pow((r_mu_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_mu_tau + r_I_tau[i]) + pow(r_mu_tau - r_I_tau[i], 2))) / (r_mu_tau * pow((1.0 - r_mu_tau), 2));
+        } 
+        else
+          G_mu_tau[i] = 0;
+
+        if(M[i] + sminputs.mE < m_tau)
+        {
+          G_e_tau[i] = (r_e_tau + r_I_tau[i] - pow((r_e_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_e_tau + r_I_tau[i]) + pow((r_e_tau - r_I_tau[i]), 2))) / (r_e_tau * pow((1.0 - r_e_tau), 2));
+        }
+        else
+          G_e_tau[i] = 0;
+          
+        e_f_tau += Usq(0,i) * (G_e_tau[i] - 1.0);
+        mu_f_tau += Usq(1,i) * (G_mu_tau[i] - 1.0);
+ 
       }
-      d_r_tau = ((1.0 - mu_f_tau)/(1.0 - e_f_tau)) - 1.0;
+
+      d_r_tau = ((1.0 + mu_f_tau)/(1.0 + e_f_tau)) - 1.0;
       R_tau = R_tau_SM * (1.0 + d_r_tau);
     }
 
@@ -877,16 +898,9 @@ namespace Gambit
       using namespace Pipes::RHN_R_W;
       Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
 
-      if(*Param["M_1"] < Dep::mw->central or *Param["M_2"] < Dep::mw->central or *Param["M_3"] < Dep::mw->central)
-      {
-        R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
-        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
-        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
-      }
-      else
-      {
-        R_W = {1.0, 1.0, 1.0};
-      }
+      R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
+      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
+      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
     }
 
     void lnL_lepuniv(double& result_lepuniv)
@@ -945,12 +959,12 @@ namespace Gambit
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
       prefactor = A_0nubb_Xe*mp*mp/p2_0nubb_Xe/p2_0nubb_Xe;
-        for (int i=0; i<3; i++)
-        {
+      for (int i=0; i<3; i++)
+      {
 //          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
 //          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Xe/(p2_0nubb_Xe+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i],2.0)));
-          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2));
-        }
+        sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2));
+      }
       result = prefactor * abs(sum) * abs(sum);
     }
 

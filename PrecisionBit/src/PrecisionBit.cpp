@@ -1129,12 +1129,9 @@ namespace Gambit
 
       result = 0.0;
       for(int i=0; i<3; i++)
-        if(MN[i] < sminputs.mZ)
-          for(int j=0; j<3; j++)
-            if(MN[j] < sminputs.mZ)
-              result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-        else
-          result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI);
+        for(int j=0; j<3; j++)
+          result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+
     }
 
     void lnL_Z_inv_width_chi2(double &result)
@@ -1171,12 +1168,9 @@ namespace Gambit
       std::vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
 
       result.clear();
-      if(*Param["M_1"] < mw or *Param["M_2"] < mw or *Param["M_3"] < mw)
-        for(int i=0; i<3; i++)
-          result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
-      else
-        for(int i=0; i<3; i++)
-          result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2)));
+      for(int i=0; i<3; i++)
+        result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
+
      }
 
      void lnL_W_decays_chi2(double &result)
