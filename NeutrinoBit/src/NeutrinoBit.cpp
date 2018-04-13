@@ -246,6 +246,9 @@ namespace Gambit
       R_12(2,2) = 1.0;
       R = R_23 * R_13 * R_12;
 
+      //FIXME: temporary run option to set the sign of R, move to model parameter
+      R = runOptions->getValueOrDef<int>(1, "signR") * R;
+
      if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
       Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
 
