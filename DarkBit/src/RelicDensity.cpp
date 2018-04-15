@@ -425,7 +425,7 @@ namespace Gambit
           myrdpars.dpthr=2.5e-3;myrdpars.wdiffr=0.5;myrdpars.wdifft=0.1;
           break;
         default:
-          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1)");
+          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_general.  Please add relevant settings to this routine.");
       }
 
       myrdpars.hstep=0.01;myrdpars.hmin=1.0e-9;myrdpars.compeps=0.01;
@@ -567,7 +567,7 @@ namespace Gambit
       // Check whether DarkSUSY threw an error
       if (BEreq::rderrors->rderr != 0)
       {
-        if (BEreq::rderrors->rderr == 10) invalid_point().raise("DarkSUSY invariant rate tabulation timed out.");
+        if (BEreq::rderrors->rderr == 1024) invalid_point().raise("DarkSUSY invariant rate tabulation timed out.");
         else DarkBit_error().raise(LOCAL_INFO, "DarkSUSY invariant rate tabulation failed.");
       }
 
