@@ -164,7 +164,7 @@ START_MODULE
         DEPENDENCY(MSSM_spectrum, Spectrum)
       #endif
       BACKEND_REQ(dsrdthlim, (), void, ())
-      BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&))
+      BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&, int&))
       BACKEND_REQ(dsrdeqn, (), void, (double(*)(double&),double&,double&,double&,double&,int&))
       BACKEND_REQ(dsrdwintp, (), double, (double&))
       BACKEND_REQ(particle_code, (), int, (const str&))
@@ -177,6 +177,7 @@ START_MODULE
       BACKEND_REQ(rdpadd, (), DS_RDPADD)
       BACKEND_REQ(rddof, (), DS_RDDOF)
       BACKEND_REQ(rderrors, (), DS_RDERRORS)
+      BACKEND_REQ(rdtime, (), DS_RDTIME)
     #undef FUNCTION
 
     // Routine for cross checking RD density results

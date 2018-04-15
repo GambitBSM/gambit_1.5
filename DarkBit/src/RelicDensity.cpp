@@ -383,12 +383,34 @@ namespace Gambit
         bool tbtest=false;
       #endif
 
-      // What follows below is the standard accurate calculation of oh2 in DS
-      // either in fast = 0 (slower, accuracy <1%)  or fast = 1 (faster, default) mode
+      /// Option timeout<double>: Maximum core time to allow for relic density
+      /// calculation, in seconds (default: 30s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
 
-      // the following replaces dsrdcom -- which cannot be linked properly!?
+      // What follows below is the standard accurate calculation of oh2 in DS, in one of the
+      // following modes:
+      //   fast =   0 - standard accurate calculation (accuracy better than 1%)
+      //            1 - faster calculation: sets parameters for when to add
+      //                extra points less tough to avoid excessively
+      //                adding extra points, expected accurarcy: 1% or better
+      //            2 - faster calculation: compared to fast=1, this option
+      //                adds less points in Weff tabulation in general and
+      //                is more elaborate in deciding when to include points
+      //                close to thresholds and resonances
+      //                expected accuracy: around 1%
+      //            3 - even more aggressive on trying minimize the number
+      //                of tabulated points
+      //                expected accuracy: 5-10%
+      //            9 - superfast. This method still makes sure to include
+      //                resonances and threholds, but does not attempt to sample
+      //                them very well. Should give an order of magnitude estimate
+      //                expected accuracy: order of magnitude
+      //           10 - quick and dirty method, i.e. expand the annihilation
+      //                cross section in x (not recommended)
+      //                expected accuracy: can be orders of magnitude wrong
+      //                for models with strong resonances or thresholds
+
       DS_RDPARS myrdpars;
-
       /// Option fast<int>: Numerical performance of Boltzmann solver in DS
       /// (default: 1) [NB: accurate is fast = 0 !]
       int fast = runOptions->getValueOrDef<int>(1, "fast");
@@ -520,10 +542,8 @@ namespace Gambit
         std::cout << "Starting dsrdtab..." << std::endl;
       #endif
 
-
-
       // Tabulate the invariant rate
-      BEreq::dsrdtab(byVal(*Dep::RD_eff_annrate),xstart);
+      BEreq::dsrdtab(byVal(*Dep::RD_eff_annrate),xstart,fast);
 
       #ifdef DARKBIT_RD_DEBUG
         logger() << LogTags::repeat_to_cout << "...done!" << EOM;
@@ -544,8 +564,12 @@ namespace Gambit
         }
       #endif
 
-      // Check whether piped invalid point was thrown
-      piped_invalid_point.check();
+      // Check whether DarkSUSY threw an error
+      if (BEreq::rderrors->rderr != 0)
+      {
+        if (BEreq::rderrors->rderr == 10) invalid_point().raise("DarkSUSY invariant rate tabulation timed out.");
+        else DarkBit_error().raise(LOCAL_INFO, "DarkSUSY invariant rate tabulation failed.");
+      }
 
       // determine integration limit
       BEreq::dsrdthlim();
@@ -564,6 +588,9 @@ namespace Gambit
 
       //Check for NAN result.
       if ( Utils::isnan(yend) ) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY returned NaN for relic density!");
+
+      // Check whether DarkSUSY threw some other error
+      if (BEreq::rderrors->rderr != 0) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY Boltzmann solver failed.");
 
       result = 0.70365e8*myrddof->fh(myrddof->nf)*mwimp*yend;
 
