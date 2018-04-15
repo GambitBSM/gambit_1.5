@@ -651,6 +651,9 @@ namespace Gambit
       omtype = runOptions->getValueOrDef<int>(1, "omtype");
       /// Option fast<int>: 0 standard, 1 fast, 2 dirty (default 0)
       fast = runOptions->getValueOrDef<int>(0, "fast");
+      /// Option timeout<double>: Maximum core time to allow for relic density
+      /// calculation, in seconds (default: 30s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
 
       // Output
       double xf;  // freeze-out temperature
@@ -659,6 +662,14 @@ namespace Gambit
       int nfc;  // number of fnct calls to effective annihilation cross section
       logger() << LogTags::debug << "Starting DarkSUSY relic density calculation..." << EOM;
       double oh2 = BEreq::dsrdomega(omtype,fast,xf,ierr,iwar,nfc);
+
+      // Check whether DarkSUSY threw an error
+      if (BEreq::rderrors->rderr != 0)
+      {
+        if (BEreq::rderrors->rderr == 1024) invalid_point().raise("DarkSUSY invariant rate tabulation timed out.");
+        else DarkBit_error().raise(LOCAL_INFO, "DarkSUSY relic density calculation failed.");
+      }
+
       result = oh2;
       logger() << LogTags::debug << "RD_oh2_DarkSUSY: oh2 is " << oh2 << EOM;
     }
