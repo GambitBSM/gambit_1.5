@@ -244,7 +244,20 @@ namespace Gambit
       R_12(2,0) = 0.0;
       R_12(2,1) = 0.0;
       R_12(2,2) = 1.0;
-      R = R_23 * R_13 * R_12;
+
+      std::string order = runOptions->getValueOrDef<std::string>("321", "R_order");
+      if (order == "321")
+        R = R_23 * R_13 * R_12;
+      if (order == "213")
+        R = R_13 * R_12 * R_23;
+      if (order == "132")
+        R = R_12 * R_23 * R_13;
+      if (order == "231")
+        R = R_13 * R_23 * R_12;
+      if (order == "312")
+        R = R_23 * R_12 * R_13;
+      if (order == "123")
+        R = R_12 * R_13 * R_23;
 
       //FIXME: temporary run option to set the sign of R, move to model parameter
       R = runOptions->getValueOrDef<int>(1, "signR") * R;
