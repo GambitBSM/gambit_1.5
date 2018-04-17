@@ -16,13 +16,13 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sun 24 Sep 2017 15:54:59
+// File generated at Tue 9 Jan 2018 20:02:35
 
 /**
  * @file MSSMEFTHiggs_cxx_diagrams.hpp
  *
- * This file was generated at Sun 24 Sep 2017 15:54:59 with FlexibleSUSY
- * 2.0.0-dev and SARAH 4.11.0 .
+ * This file was generated at Tue 9 Jan 2018 20:02:35 with FlexibleSUSY
+ * 2.0.1 and SARAH 4.11.0 .
  */
 
 #ifndef MSSMEFTHiggs_CXXDIAGRAMS_H

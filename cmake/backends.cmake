@@ -47,7 +47,7 @@
 # DarkSUSY
 set(name "darksusy")
 set(ver "5.1.3")
-set(dl "http://www.fysik.su.se/~edsjo/darksusy/tars/${name}-${ver}.tar.gz")
+set(dl "staff.fysik.su.se/~edsjo/darksusy/tars/${name}-${ver}.tar.gz")
 set(md5 "ca95ffa083941a469469710fab2f3c97")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
@@ -769,7 +769,8 @@ set(ver "1.0.2")
 set(dl "http://users.ictp.it/~${name}/v${ver}/SUSYHD.tgz")
 set(md5 "e831c3fa977552ff944e0db44db38e87")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver} 1)
+set(ditch_if_absent "Mathematica")
+check_ditch_status(${name} ${ver} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}

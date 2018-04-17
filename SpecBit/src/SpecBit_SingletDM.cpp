@@ -407,6 +407,7 @@ namespace Gambit
 
     }
 
+    #if(FS_MODEL_SingletDM_IS_BUILT)   
     void get_SingletDM_spectrum_pole(Spectrum& result)
     {
       using namespace softsusy;
@@ -438,8 +439,10 @@ namespace Gambit
       
 
     }
+    #endif
 
-    void get_SingletDMZ3_spectrum_pole(Spectrum& result)
+    #if(FS_MODEL_SingletDMZ3_IS_BUILT)    
+    void get_SingletDMZ3_spectrum(Spectrum& result)
     {
       using namespace softsusy;
       namespace myPipe = Pipes::get_SingletDMZ3_spectrum_pole;
@@ -471,8 +474,9 @@ namespace Gambit
       }
 
     }
-    
+    #endif
 				
+		#if(FS_MODEL_SingletDM_IS_BUILT)  		
 		void find_non_perturb_scale_SingletDM(double &result)
 		{
 			using namespace flexiblesusy;
@@ -519,7 +523,9 @@ namespace Gambit
 		  }
 		  result = pow(10,0.5*(a+b));
 		}
+		#endif
 		
+		#if(FS_MODEL_SingletDMZ3_IS_BUILT)  
 		void find_non_perturb_scale_SingletDMZ3(double &result)
 		{
 			using namespace flexiblesusy;
@@ -566,7 +572,7 @@ namespace Gambit
 		  }
 		  result = pow(10,0.5*(a+b));
 		}
-    
+    #endif
 
     /// Put together the Higgs couplings for the SingletDM, from partial widths only
     void SingletDM_higgs_couplings_pwid(HiggsCouplingsTable &result)
