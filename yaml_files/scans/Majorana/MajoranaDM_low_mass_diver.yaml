@@ -193,8 +193,8 @@ Rules:
   # Choose to obtain spectrum from the SpecBit module
   - capability: MajoranaDM_spectrum
     function: get_MajoranaDM_spectrum
-    option:
-      impose_EFT_validity: false
+    options:
+      impose_EFT_validity: true
 
 ##############################################################################################
 Printer:
