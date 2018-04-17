@@ -747,7 +747,7 @@ namespace Gambit
         // Open requested file
         bool oldfile;
         Utils::ensure_path_exists(tmpfile);
-        file_id = HDF5::openFile(tmpfile,false,oldfile); // Don't overwrite existing file; we will check here if it exists (via oldfile) and throw an error if it does.
+        file_id = HDF5::openFile(tmpfile,false,oldfile,'w'); // Don't overwrite existing file; we will check here if it exists (via oldfile) and throw an error if it does.
         if(oldfile)
         {
           std::ostringstream errmsg;
