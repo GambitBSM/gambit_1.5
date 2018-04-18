@@ -31,6 +31,9 @@ BE_FUNCTION(nucleonAmplitudes, int, (double(*)(double,double,double,double), dou
 BE_FUNCTION(FeScLoop, double, (double, double, double, double), "FeScLoop", "FeScLoop", (SingletDMZ3))
 BE_FUNCTION(calcScalarQuarkFF, void, (double, double, double, double), "calcScalarQuarkFF", "calcScalarQuarkFF", (SingletDMZ3))
 
+BE_FUNCTION(calcSpectrum, double, (int, double*, double*, double*, double*, double*, double*, int*), "calcSpectrum", "calcSpectrum", (SingletDMZ3))
+
+
 BE_FUNCTION(printChannels, double, (double, double, double, int, FILE*), "printChannels", "momegas_print_channels", (SingletDMZ3))
 
 BE_FUNCTION(oneChannel, double, (double,double,char*,char*,char*,char*), "oneChannel", "get_oneChannel", (SingletDMZ3))
@@ -40,6 +43,8 @@ BE_FUNCTION(mInterp, int, (double,int,int,double*) , "mInterp", "mInterp")
 BE_FUNCTION(zInterp, double, (double,double*) , "zInterp", "zInterp")
 BE_FUNCTION(readSpectra, int, (), "readSpectra", "readSpectra")
 
+
+BE_VARIABLE(vSigmaCh_, MicrOmegas::aChannel, "_vSigmaCh", "vSigmaCh", (SingletDMZ3))
 BE_VARIABLE(mocommon_, MicrOmegas::MOcommonSTR, "mocommon_", "MOcommon", (SingletDMZ3))
 BE_VARIABLE(ForceUG, int, "ForceUG", "ForceUG", (SingletDMZ3))
 BE_VARIABLE(VZdecay, int, "VZdecay", "VZdecay", (SingletDMZ3))

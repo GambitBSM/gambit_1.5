@@ -435,8 +435,11 @@ START_MODULE
       DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
       DEPENDENCY(Xf_MicrOmegas, double)
-      BACKEND_REQ(get_oneChannel, () , double,  (double,double,char*,char*,char*,char*))
-      BACKEND_REQ(vSigma, () , double,  (double, double, int))
+      BACKEND_REQ(get_oneChannel, (gimmemicro) , double,  (double,double,char*,char*,char*,char*))
+      BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
+      BACKEND_REQ(vSigma, (gimmemicro) , double,  (double, double, int))
+      BACKEND_REQ(vSigmaCh, (gimmemicro), MicrOmegas::aChannel)
+      FORCE_SAME_BACKEND(gimmemicro)
       ALLOW_MODELS(SingletDMZ3)
     #undef FUNCTION
   #undef CAPABILITY

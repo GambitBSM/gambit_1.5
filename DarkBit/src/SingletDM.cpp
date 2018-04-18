@@ -600,6 +600,25 @@ namespace Gambit
       
       double sigmav_0 = BEreq::vSigma(byVal(1.0),byVal(Beps),byVal(fast));
       
+      int NZ = 250;
+      int err;
+			double SpA[NZ],SpE[NZ],SpP[NZ];
+			double * SpNe=NULL,*SpNm=NULL,*SpNl=NULL;
+  
+
+			double sigmaV=BEreq::calcSpectrum(byVal(4),byVal(SpA),byVal(SpE),byVal(SpP),byVal(SpNe),byVal(SpNm),byVal(SpNl) ,byVal(&err));
+			/* Returns sigma*v in cm^3/sec.     SpX - calculated spectra of annihilation.
+	       Use SpectdNdE(E, SpX) to calculate energy distribution in  1/GeV units.
+	       
+	       First parameter 1-includes W/Z polarization
+	                       2-includes gammas for 2->2+gamma
+	                       4-print cross sections             
+	    */
+      cout << "sigmav=%.2E[cm^3/s]\n" << sigmaV << endl;  
+      
+      
+      cout <<  "weight = " << BEreq::vSigmaCh->weight << endl;
+      
       ///////////////////////////////////////
       // Import particle masses and couplings
       ///////////////////////////////////////
