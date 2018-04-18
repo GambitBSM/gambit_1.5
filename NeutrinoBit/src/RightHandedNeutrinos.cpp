@@ -1087,7 +1087,7 @@ namespace Gambit
     }
     
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
-    void calc_Vus_tmp(double& result_Vus)
+    void calc_Vus(double& result_Vus)
     {
       using namespace Pipes::lnL_ckm;
       SMInputs sminputs = *Dep::SMINPUTS;
@@ -1142,6 +1142,49 @@ namespace Gambit
       
       result_Vus=est_Vus;
 
+    }
+    // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
+    void lnL_ckm_Vusmin(double& result_ckm)
+    {
+      using namespace Pipes::lnL_ckm_Vusmin;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Matrix3cd Theta = *Dep::SeesawI_Theta;
+      double G_mu = sminputs.GF;
+      double V_us = *Dep::calc_Vus;
+
+      // Experimental values determined for K and tau decays. From table 1 in 1502.00477
+      double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
+      double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
+      double f_plus = 0.959;
+      double err_f_plus = 0.005;
+      for(int i=0; i<5; i++)
+        {
+          V_us_exp[i] /= f_plus;
+          err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
+        }
+
+      // Combined value from the PDG
+      static double V_ud_exp = 0.97417;
+      static double err_V_ud_exp = 0.00021;
+
+      double f[8];
+      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
+      f[1] = f[0];
+      f[2] = f[0];
+      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
+      f[4] = f[3];
+      f[5] = 1 + ThetaNorm(1,1);
+      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
+      f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
+
+      double chi2 = 0.0;
+      for (int i=0; i<7; i++)
+        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
+      // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
+      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2);
+      result_ckm = -0.5*chi2;
     }
     
     
