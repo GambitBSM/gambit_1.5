@@ -702,7 +702,7 @@ namespace Gambit
       result = gamma;
     }
 
-    // Calculates total decay width for each RHN
+    // Calculates total decay width for each RHN [GeV]
     void Gamma_BBN(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_BBN;
@@ -734,6 +734,7 @@ namespace Gambit
     }
 
     // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841]
+    // This is here implemented as step function in the likelihood
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
@@ -743,11 +744,12 @@ namespace Gambit
       {
         if((hbar/gamma[i])>0.1)
         {
-          std::ostringstream msg;
-          msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
-          logger() << msg.str() << EOM;
-          invalid_point().raise(msg.str());
-          break;
+          //std::ostringstream msg;
+          //msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
+          //logger() << msg.str() << EOM;
+          result_bbn = -100;
+          //invalid_point().raise(msg.str());
+          //break;
         }
       }
     }
