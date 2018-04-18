@@ -535,6 +535,16 @@ START_MODULE
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
 
+  #define CAPABILITY calc_Vus_tmp
+  START_CAPABILITY
+    #define FUNCTION calc_Vus_tmp
+    START_FUNCTION(double)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  
+  
   #undef CAPABILITY
 
   #define CAPABILITY lnLpienu

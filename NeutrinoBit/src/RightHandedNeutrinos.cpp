@@ -1106,10 +1106,10 @@ namespace Gambit
       // Combined value from the PDG
       static double V_ud_exp = 0.97417;
       static double err_V_ud_exp = 0.00021;
-      // for the minimalization it's much better to transform the Vud experimental result to Vus:
+      // for the minimalization it's much better to transform the Vud experimental result to Vus the same as we do for theory and minalize onlu Vus
       static double V_us_from_Vud=sqrt(1.-V_ud_exp*V_ud_exp);
       static double err_V_us_from_Vud_exp= ( (V_ud_exp)/(sqrt(1-V_ud_exp*V_ud_exp))  ) * err_V_ud_exp;
-
+      
                                              
       double f[8];
       Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
@@ -1128,8 +1128,8 @@ namespace Gambit
       double sum_denominator=0;
       for (int i=0; i<7; i++)
         {
-          sum_nominator+= (V_us_exp/f[i]) / (err_V_ud_exp*err_V_ud_exp /( f[i]*f[i]));
-          sum_denominator+= 1./(err_V_ud_exp*err_V_ud_exp /( f[i]*f[i]));
+          sum_nominator+= (V_us_exp[i]/f[i]) / (err_V_us_exp[i]*err_V_us_exp[i] /( f[i]*f[i]));
+          sum_denominator+= 1./(err_V_us_exp[i]*err_V_us_exp[i] /( f[i]*f[i]));
 
         }
       // now vud
