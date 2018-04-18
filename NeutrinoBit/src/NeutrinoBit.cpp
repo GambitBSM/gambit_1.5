@@ -27,6 +27,12 @@ namespace Gambit
 
     using namespace LogTags;
 
+    // Aux function
+    double gauss_like(double x, double x0, double xerr)
+    {
+      return -0.5*pow(x-x0, 2)/xerr/xerr;
+    }
+
     // Module functions
     void ordering(bool &ord)
     {
@@ -408,7 +414,8 @@ namespace Gambit
 
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta23, theta23_NuFit.central, 0.0, theta23_NuFit.upper, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::theta23, theta23_NuFit.central, 0.0, theta23_NuFit.upper, false);
+        result = gauss_like(*Dep::theta23, theta23_NuFit.central, theta23_NuFit.upper);
       }
       else // Inverted ordering
       {
@@ -416,7 +423,8 @@ namespace Gambit
  
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta23, theta23_NuFit.central, 0.0, theta23_NuFit.lower, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::theta23, theta23_NuFit.central, 0.0, theta23_NuFit.lower, false);
+        result = gauss_like(*Dep::theta23, theta23_NuFit.central, theta23_NuFit.lower);
       }
  
     }
@@ -438,7 +446,8 @@ namespace Gambit
 
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta13, theta13_NuFit.central, 0.0, theta13_NuFit.upper, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::theta13, theta13_NuFit.central, 0.0, theta13_NuFit.upper, false);
+        result = gauss_like(*Dep::theta13, theta13_NuFit.central, theta13_NuFit.upper);
       }
       else // Inverted ordering
       {
@@ -446,7 +455,8 @@ namespace Gambit
  
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta13, theta13_NuFit.central, 0.0, theta13_NuFit.upper, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::theta13, theta13_NuFit.central, 0.0, theta13_NuFit.upper, false);
+        result = gauss_like(*Dep::theta13, theta13_NuFit.central, theta13_NuFit.upper);
       }
     }
 
@@ -467,7 +477,8 @@ namespace Gambit
 
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+        result = gauss_like(*Dep::deltaCP, deltaCP_NuFit.central, deltaCP_NuFit.lower);
       }
       else // Inverted ordering
       {
@@ -475,7 +486,8 @@ namespace Gambit
  
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+        result = gauss_like(*Dep::deltaCP, deltaCP_NuFit.central, deltaCP_NuFit.lower);
       }
     }
 
@@ -502,8 +514,8 @@ namespace Gambit
 
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::md31, md31_NuFit.central, 0.0, md31_NuFit.lower, false);
-
+        //result = Stats::gaussian_loglikelihood(*Dep::md31, md31_NuFit.central, 0.0, md31_NuFit.lower, false);
+        result = gauss_like(*Dep::md31, md31_NuFit.central, md31_NuFit.lower);
       }
       else // Inverted ordering
       {
@@ -511,8 +523,8 @@ namespace Gambit
  
         // TODO: Assume all gaussian for now, change later
         // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::md32, md32_NuFit.central, 0.0, md32_NuFit.lower, false);
-
+        //result = Stats::gaussian_loglikelihood(*Dep::md32, md32_NuFit.central, 0.0, md32_NuFit.lower, false);
+        result = gauss_like(*Dep::md32, md32_NuFit.central, md32_NuFit.lower);
       }
     }
 
