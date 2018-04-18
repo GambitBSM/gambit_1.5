@@ -434,6 +434,9 @@ START_MODULE
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+      DEPENDENCY(Xf_MicrOmegas, double)
+      BACKEND_REQ(get_oneChannel, () , double,  (double,double,char*,char*,char*,char*))
+      BACKEND_REQ(vSigma, () , double,  (double, double, int))
       ALLOW_MODELS(SingletDMZ3)
     #undef FUNCTION
   #undef CAPABILITY

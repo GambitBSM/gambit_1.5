@@ -24,7 +24,7 @@
 #include "gambit/Utils/ascii_table_reader.hpp"
 #include "gambit/DarkBit/DarkBit_utils.hpp"
 
-//#define DARKBIT_DEBUG
+#define DARKBIT_DEBUG
 
 namespace Gambit {
   namespace DarkBit {

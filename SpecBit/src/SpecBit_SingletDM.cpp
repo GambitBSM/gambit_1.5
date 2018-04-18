@@ -442,7 +442,7 @@ namespace Gambit
     #endif
 
     #if(FS_MODEL_SingletDMZ3_IS_BUILT)    
-    void get_SingletDMZ3_spectrum(Spectrum& result)
+    void get_SingletDMZ3_spectrum_pole(Spectrum& result)
     {
       using namespace softsusy;
       namespace myPipe = Pipes::get_SingletDMZ3_spectrum_pole;

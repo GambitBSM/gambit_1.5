@@ -20,7 +20,7 @@
 
   #define CAPABILITY MDM_spectrum
   START_CAPABILITY
-
+    #if(FS_MODEL_MDM_IS_BUILT)
     #define FUNCTION get_MDM_spectrum
     START_FUNCTION(Spectrum)
     DEPENDENCY(SMINPUTS, SMInputs)
@@ -29,6 +29,7 @@
     MODEL_GROUP(mdm, (MDM))
     ALLOW_MODEL_COMBINATION(higgs_running, mdm)
     #undef FUNCTION
+		#endif
 
     // Convert spectrum into a standard map so that it can be printed
     #define FUNCTION get_MDM_spectrum_as_map

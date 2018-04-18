@@ -237,6 +237,7 @@ namespace Gambit
 
     }
 
+    #if(FS_MODEL_MDM_IS_BUILT)
     void get_MDM_spectrum(Spectrum& result)
     {
       using namespace softsusy;
@@ -268,6 +269,7 @@ namespace Gambit
       
 
     }
+    #endif
 
 				
 		void find_non_perturb_scale_MDM(double &result)
