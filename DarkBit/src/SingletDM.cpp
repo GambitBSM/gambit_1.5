@@ -224,6 +224,7 @@ namespace Gambit
          */
         double sv(std::string channel, double lambda, double mass, double v)
         {
+					
           // Note: Valid for mass > 45 GeV
           double s = 4*mass*mass/(1-v*v/4);
           double sqrt_s = sqrt(s);
@@ -235,12 +236,14 @@ namespace Gambit
           }
           
           
-          if ( channel == "hS" )
+          if ( channel == "Sh" )
           {
 						if ( sqrt_s > (mh+mS))
 						{
-							return (alpha*sigmav_0) / (sigmav_0+2.0*alpha*sigmav_0);
-							// extra factor of two to get rid of the 1/2, check this
+							double GeV2tocm3s1 = gev2cm2*s2cm;
+							cout << "alpha = " << alpha << endl;
+							return gev2cm2*s2cm*(alpha*sigmav_0);
+							
 						}
 						else return 0;
 					}
