@@ -328,6 +328,10 @@ namespace Gambit
         /// Annihilation into hh
         double sv_hh(double lambda, double mass, double v)
         {
+					
+					
+					// just replace the following with sigmav_0 from micromegas, minus the semi-annihilation fraction?
+					
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
           double vh = sqrt(1-4*mh*mh/s);  // vh and vs are lab velocities
           // Hardcoded lower velocity avoids nan results
