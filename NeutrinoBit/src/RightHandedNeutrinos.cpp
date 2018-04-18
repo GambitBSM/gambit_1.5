@@ -929,8 +929,9 @@ namespace Gambit
       result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
     }
 
-    // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for right-handed
+    // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for right-handed
     // neutrino model
+    // TODO: Rename gamma --> Thalf, since this is what is really calculated
     void RHN_Gamma_0nubb_Xe(double& result)
     {
       using namespace Pipes::RHN_Gamma_0nubb_Xe;
@@ -968,8 +969,9 @@ namespace Gambit
       result = prefactor * abs(sum) * abs(sum);
     }
 
-    // Calculate 0nubb decay rate [1/s] for 76Ge 0nubb detector, for right-handed
+    // Calculate 0nubb half-life [1/yr] for 76Ge 0nubb detector, for right-handed
     // neutrino model
+    // TODO: Rename gamma --> Thalf, since this is what is really calculated
     void RHN_Gamma_0nubb_Ge(double& result)
     {
       using namespace Pipes::RHN_Gamma_0nubb_Ge;
