@@ -526,14 +526,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY lnLckm
-  START_CAPABILITY
-    #define FUNCTION lnL_ckm
-    START_FUNCTION(double)
-    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    #undef FUNCTION
+//  #define CAPABILITY lnLckm
+//  START_CAPABILITY
+//    #define FUNCTION lnL_ckm
+//    START_FUNCTION(double)
+//    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
+//    DEPENDENCY(SMINPUTS, SMInputs)
+//    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+//    #undef FUNCTION
 
   #define CAPABILITY calc_Vus
   START_CAPABILITY
@@ -543,6 +543,7 @@ START_MODULE
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY lnLckm_Vusmin
   START_CAPABILITY
@@ -553,10 +554,6 @@ START_MODULE
     DEPENDENCY(calc_Vus, double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
-  
-
-  
-  
   #undef CAPABILITY
 
   #define CAPABILITY lnLpienu

@@ -66,11 +66,11 @@ Parameters:
     M_1:
       range: [0.06, 500]
       prior_type: log
-    M_2:
-      range: [0.06, 500]
+    delta_M_2:
+      range: [1E-10, 1E2]
       prior_type: log
-    M_3:
-      range: [0.06, 500]
+    delta_M_3:
+      range: [1E-10, 1E2]
       prior_type: log
     ReOm23:
       range: [0, 6.283]
@@ -301,4 +301,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "runs/RHN/"
+  default_output_path: "runs/RHN_diff/"
