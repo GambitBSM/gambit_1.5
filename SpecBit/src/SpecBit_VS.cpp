@@ -303,7 +303,10 @@ namespace Gambit
         }
 #endif
         double pi2_8_over3 = 8.* pow ( pi , 2 ) / 3.;
+        double conversion = (6.5821195e-25)/(31536000);
+        // top factor is hbar in units of GeV.s and bottom factor is number of seconds in a year
         lifetime=1/(exp(3*140-pi2_8_over3/(abs(0.5*lambda_min)))*pow(1/(1.2e19),3)*pow(LB,4));
+        
       }
       else // quartic coupling always positive, set output to default values
       {
@@ -398,7 +401,7 @@ namespace Gambit
       
       if (vs_tuple.first<1e300)
       {
-        lifetime=vs_tuple.first*(6.5821195e-16)/(31536000);
+        lifetime=vs_tuple.first;
       }
       else
       {
@@ -424,7 +427,8 @@ namespace Gambit
 			}
 			else
 			{
-				result=((- ( 1 / ( vs_tuple.first ) ) * exp(140) * (1/ (1.2e19) ) )  );
+				double conversion = (6.5821195e-25)/(31536000);
+				result=((- ( 1 / ( vs_tuple.first/conversion ) ) * exp(140) * (1/ (1.2e19) ) )  );
 			}
 			
     }
