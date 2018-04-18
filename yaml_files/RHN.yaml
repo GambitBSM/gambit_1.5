@@ -25,7 +25,8 @@ Parameters:
     # Wolfenstein parameterisation (matches SLHA2 VCKMIN block)
     # from http://pdg.lbl.gov/2014/reviews/rpp2014-rev-ckm-matrix.pdf
 #    CKM_lambda  :  0.22537
-    CKM_lambda: [0.2151, 0.2275] 
+    CKM_lambda:
+      range: [0.2151, 0.2275] 
     CKM_A       :  0.814
     CKM_rhobar  :  0.117
     CKM_etabar  :  0.353
@@ -61,36 +62,28 @@ Parameters:
       range: [124.1, 127.3]
 
   # Right Handed Neutrino Parameters
-  RightHandedNeutrinos_diff:
+  RightHandedNeutrinos:
     M_1:
       range: [0.06, 500]
       prior_type: log
-#      fixed_value: 100
-    delta_M_2:
-      range: [1E-10, 1E2]
+    M_2:
+      range: [0.06, 500]
       prior_type: log
-    delta_M_3:
-      range: [1E-10, 1E2]
+    M_3:
+      range: [0.06, 500]
       prior_type: log
-#      same_as: SN_dev::M_2
     ReOm23:
       range: [0, 6.283]
-#      fixed_value: 0.0
     ImOm23:
       range: [-5, 5]
-#      fixed_value: 5
     ReOm13:
       range: [0, 6.283]
-#      fixed_value: 0.0
     ImOm13:
       range: [-5, 5]
-#      fixed_value: 0.0
     ReOm12:
       range: [0, 6.283]
-#      fixed_value: 0.0
     ImOm12:
       range: [-5, 5]
-#      fixed_value: 0.0
 
 Priors:
 
@@ -116,8 +109,8 @@ Scanner:
     de:
       plugin: diver
       like: LogLike
-      NP: 6000
-      convthresh: 1e-2
+      NP: 19200
+      convthresh: 1e-5
       lambdajDE: false
 
     multinest:
@@ -285,6 +278,10 @@ ObsLikes:
 
 Rules:
 
+  #  - capability: SeesawI_Theta 
+  #    options:
+  #      R_order: ${RORDER}
+  #
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
 
@@ -301,6 +298,6 @@ KeyValues:
 
   likelihood:
     model_invalid_for_lnlike_below: -1e10
-    debug: true
+    debug: false
 
   default_output_path: "runs/RHN/"
