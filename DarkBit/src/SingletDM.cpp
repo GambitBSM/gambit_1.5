@@ -33,7 +33,8 @@ namespace Gambit
 
   namespace DarkBit
   {
-
+		#define DARKBIT_DEBUG
+		
     class SingletDM
     {
       public:
@@ -193,11 +194,9 @@ namespace Gambit
             double gammaH,
             double vev,
             double alpha_strong,
-            double sigmav_0,
-            double alpha)
+            double vSigma_s)
         : Gamma_mh(gammaH), v0 (vev),
-          alpha_s (alpha_strong), sigmav_0 (sigmav_0),
-          alpha(alpha)
+          alpha_s (alpha_strong), vSigma_semi (vSigma_s)
         {
           mh   = catalog->getParticleProperty("h0_1").mass;
           mb   = catalog->getParticleProperty("d_3").mass;
@@ -240,9 +239,7 @@ namespace Gambit
           {
 						if ( sqrt_s > (mh+mS))
 						{
-							double GeV2tocm3s1 = gev2cm2*s2cm;
-							cout << "alpha = " << alpha << endl;
-							return gev2cm2*s2cm*(alpha*sigmav_0);
+							return vSigma_semi;
 							
 						}
 						else return 0;
@@ -254,6 +251,7 @@ namespace Gambit
             if ( sqrt_s > mh*2 )
             {
               double GeV2tocm3s1 = gev2cm2*s2cm;
+              
               return sv_hh(lambda, mass, v)*GeV2tocm3s1;
             }
             else return 0;
@@ -329,9 +327,6 @@ namespace Gambit
         double sv_hh(double lambda, double mass, double v)
         {
 					
-					
-					// just replace the following with sigmav_0 from micromegas, minus the semi-annihilation fraction?
-					
           double s = 4*mass*mass/(1-v*v/4);  // v is relative velocity
           double vh = sqrt(1-4*mh*mh/s);  // vh and vs are lab velocities
           // Hardcoded lower velocity avoids nan results
@@ -352,7 +347,7 @@ namespace Gambit
         }
 
       private:
-        double Gamma_mh, mh, v0, alpha_s,alpha,sigmav_0, mb, mc, mtau, mt, mZ0, mW, mS;
+        double Gamma_mh, mh, v0, alpha_s, mb, mc, mtau, mt, mZ0, mW, mS,vSigma_semi;
     };
 
     /// Direct detection couplings for Singlet DM.
@@ -587,41 +582,62 @@ namespace Gambit
       TH_ProcessCatalog catalog;
       TH_Process process_ann("S", "S");
 
-      // get semi-annihilation fraction from MicrOmegas 
-      // delete the following, this is the thermally averaged rate
-      double Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
-      int fast = runOptions->getValueOrDef<int>(1, "fast");
-      double Xf = *Dep::Xf_MicrOmegas;
-      char*n1 =  (char *)"~SS";
-      char*n2 = (char *)"~SS";
-      char*n3 = (char *)"h";
-      char*n4 = (char *)"~ss";
-      double alpha = BEreq::get_oneChannel(byVal(Xf),byVal(Beps),byVal(n1),byVal(n2),byVal(n3),byVal(n4));
+      // get semi-annihilation cross-section from MicrOmegas 
       
-      double sigmav_0 = BEreq::vSigma(byVal(1.0),byVal(Beps),byVal(fast));
-      // delete down to here
-      
-      int NZ = 250;
-      int err;
-			double SpA[NZ],SpE[NZ],SpP[NZ];
+			// set requested spectra to NULL since we don't need them
 			double * SpNe=NULL,*SpNm=NULL,*SpNl=NULL;
-  
-
-			double sigmaV=BEreq::calcSpectrum(byVal(4),byVal(SpA),byVal(SpE),byVal(SpP),byVal(SpNe),byVal(SpNm),byVal(SpNl) ,byVal(&err));
-			/* Returns sigma*v in cm^3/sec.     SpX - calculated spectra of annihilation.
-	       Use SpectdNdE(E, SpX) to calculate energy distribution in  1/GeV units.
-	       
-	       First parameter 1-includes W/Z polarization
-	                       2-includes gammas for 2->2+gamma
-	                       4-print cross sections             
-	    */
-      cout << "sigmav=%.2E[cm^3/s]\n" << sigmaV << endl;  
-      
-			MicrOmegas::aChannel *vSigma;
+			double * SpA=NULL,*SpE=NULL,*SpP=NULL;
+			int err;
 			
-			vSigma = BEreq::vSigmaCh;
+			double vSigma_total =BEreq::calcSpectrum(byVal(3),byVal(SpA),byVal(SpE),byVal(SpP),byVal(SpNe),byVal(SpNm),byVal(SpNl) ,byVal(&err));
+
+			if (err != 0 )
+			{
+			   DarkBit_error().raise(LOCAL_INFO, "MicrOmegas spectrum calculation returned error code = " + std::to_string(err));	
+			}
       
-      //cout <<  "weight = " << BEreq::vSigmaCh&->weight << endl;
+      // get BR for each channel as filled by calcSpectrum
+			MicrOmegas::aChannel* vSigmaCh;
+			vSigmaCh = *BEreq::vSigmaCh;
+      
+      int n_channels = sizeof(vSigmaCh);
+      double BR_semi = 0; // semi-annihilation BR
+      
+			#ifdef DARKBIT_DEBUG
+		  cout << "--- Semi-annihilation processes and BRs --- " << endl;
+			#endif
+      // find semi-annihilation channels
+      for (int i = 0 ; i < n_channels; i++)
+      {
+				// get final states
+				const char* p1 = vSigmaCh[i].prtcl[2];
+				const char* p2 = vSigmaCh[i].prtcl[3];
+				
+				// semi-annihilation final states are h + ~ss or h + ~SS
+
+				if ( (strcmp(p1,"h")==0) && ( (strcmp(p2,"~ss")==0) || (strcmp(p2,"~SS")==0) ) ) 
+				{
+					BR_semi = BR_semi + vSigmaCh[i].weight;
+					#ifdef DARKBIT_DEBUG
+					cout << "process: " << vSigmaCh[i].prtcl[0] << " + ";
+					cout << vSigmaCh[i].prtcl[1] << " -> " << p1 << " + " << p2;
+					cout << ",  BR = " << vSigmaCh[i].weight << endl;
+					#endif
+				}
+			}
+			
+      double vSigma_semi = BR_semi * vSigma_total;
+			
+			#ifdef DARKBIT_DEBUG 
+			cout << "---  --- " << endl;
+			cout << "Total sigma v from MicrOmegas = " << vSigma_total << " cm^3/s" << endl;
+			cout << "semi-annihilation BR = " << BR_semi << endl;
+			cout << "semi-annihilation sigma v from MicrOmegas = " << vSigma_semi << " cm^3/s" << endl;
+			cout << "Total sigma v from MicrOmegas excluding semi-annihilations  = " << vSigma_total - vSigma_semi << endl;
+			cout << "--------- " << endl;
+      #endif
+      
+
       
       ///////////////////////////////////////
       // Import particle masses and couplings
@@ -726,7 +742,7 @@ namespace Gambit
           daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
 
       // Instantiate new SingletDM object
-      auto singletDMZ3 = boost::make_shared<SingletDMZ3>(&catalog, gammaH, v, alpha_s, sigmav_0,alpha);
+      auto singletDMZ3 = boost::make_shared<SingletDMZ3>(&catalog, gammaH, v, alpha_s, vSigma_semi);
 
       // Populate annihilation channel list and add thresholds to threshold
       // list.
@@ -771,6 +787,26 @@ namespace Gambit
 
       // Validate
       catalog.validate();
+      
+      
+      #ifdef DARKBIT_DEBUG
+      // get DarkBit computed vSigma total
+      // so we can compare with that from MO
+      SingletDMZ3 test = *singletDMZ3;
+      int nc = 7;
+      double total = 0;
+      for (int i; i < nc ; i++)
+      {
+				total = total + test.sv(channel[i], lambda, mS, 0.0);
+			}
+			cout << " --- Testing process catalouge --- " << endl;
+			cout << "Total sigma V from process catalouge excluding semi-annihilations = " << total << endl;
+			total = total + test.sv("Sh", lambda, mS, 0.0);
+			cout << "Total including semi-annihilations = " << total << endl;
+			cout << " ---------- " << endl;
+			#endif
+
+
 
       result = catalog;
     } // function TH_ProcessCatalog_SingletDMZ3
