@@ -438,7 +438,7 @@ START_MODULE
       BACKEND_REQ(get_oneChannel, (gimmemicro) , double,  (double,double,char*,char*,char*,char*))
       BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
       BACKEND_REQ(vSigma, (gimmemicro) , double,  (double, double, int))
-      BACKEND_REQ(vSigmaCh, (gimmemicro), MicrOmegas::aChannel)
+      BACKEND_REQ(vSigmaCh, (gimmemicro), MicrOmegas::aChannel*)
       FORCE_SAME_BACKEND(gimmemicro)
       ALLOW_MODELS(SingletDMZ3)
     #undef FUNCTION

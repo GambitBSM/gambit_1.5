@@ -44,7 +44,7 @@ BE_FUNCTION(zInterp, double, (double,double*) , "zInterp", "zInterp")
 BE_FUNCTION(readSpectra, int, (), "readSpectra", "readSpectra")
 
 
-BE_VARIABLE(vSigmaCh_, MicrOmegas::aChannel, "_vSigmaCh", "vSigmaCh", (SingletDMZ3))
+BE_VARIABLE(vSigmaCh, MicrOmegas::aChannel*, "vSigmaCh", "vSigmaCh", (SingletDMZ3))
 BE_VARIABLE(mocommon_, MicrOmegas::MOcommonSTR, "mocommon_", "MOcommon", (SingletDMZ3))
 BE_VARIABLE(ForceUG, int, "ForceUG", "ForceUG", (SingletDMZ3))
 BE_VARIABLE(VZdecay, int, "VZdecay", "VZdecay", (SingletDMZ3))

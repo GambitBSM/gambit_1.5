@@ -588,7 +588,7 @@ namespace Gambit
       TH_Process process_ann("S", "S");
 
       // get semi-annihilation fraction from MicrOmegas 
-      
+      // delete the following, this is the thermally averaged rate
       double Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
       int fast = runOptions->getValueOrDef<int>(1, "fast");
       double Xf = *Dep::Xf_MicrOmegas;
@@ -599,6 +599,7 @@ namespace Gambit
       double alpha = BEreq::get_oneChannel(byVal(Xf),byVal(Beps),byVal(n1),byVal(n2),byVal(n3),byVal(n4));
       
       double sigmav_0 = BEreq::vSigma(byVal(1.0),byVal(Beps),byVal(fast));
+      // delete down to here
       
       int NZ = 250;
       int err;
@@ -616,8 +617,11 @@ namespace Gambit
 	    */
       cout << "sigmav=%.2E[cm^3/s]\n" << sigmaV << endl;  
       
+			MicrOmegas::aChannel *vSigma;
+			
+			vSigma = BEreq::vSigmaCh;
       
-      cout <<  "weight = " << BEreq::vSigmaCh->weight << endl;
+      //cout <<  "weight = " << BEreq::vSigmaCh&->weight << endl;
       
       ///////////////////////////////////////
       // Import particle masses and couplings
