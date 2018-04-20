@@ -31,6 +31,8 @@ BE_FUNCTION(nucleonAmplitudes, int, (double(*)(double,double,double,double), dou
 BE_FUNCTION(FeScLoop, double, (double, double, double, double), "FeScLoop", "FeScLoop", (SingletDM,SingletDM_running))
 BE_FUNCTION(calcScalarQuarkFF, void, (double, double, double, double), "calcScalarQuarkFF", "calcScalarQuarkFF", (SingletDM,SingletDM_running))
 
+BE_FUNCTION(calcSpectrum, double, (int, double*, double*, double*, double*, double*, double*, int*), "calcSpectrum", "calcSpectrum", (SingletDM,SingletDM_running))
+
 BE_FUNCTION(printChannels, double, (double, double, double, int, FILE*), "printChannels", "momegas_print_channels", (SingletDM,SingletDM_running))
 
 BE_FUNCTION(oneChannel, double, (double,double,char*,char*,char*,char*), "oneChannel", "get_oneChannel", (SingletDM,SingletDM_running))
@@ -40,6 +42,7 @@ BE_FUNCTION(mInterp, int, (double,int,int,double*) , "mInterp", "mInterp")
 BE_FUNCTION(zInterp, double, (double,double*) , "zInterp", "zInterp")
 BE_FUNCTION(readSpectra, int, (), "readSpectra", "readSpectra")
 
+BE_VARIABLE(vSigmaCh, MicrOmegas::aChannel*, "vSigmaCh", "vSigmaCh", (SingletDM,SingletDM_running))
 BE_VARIABLE(mocommon_, MicrOmegas::MOcommonSTR, "mocommon_", "MOcommon", (SingletDM,SingletDM_running))
 BE_VARIABLE(ForceUG, int, "ForceUG", "ForceUG", (SingletDM,SingletDM_running))
 BE_VARIABLE(VZdecay, int, "VZdecay", "VZdecay", (SingletDM,SingletDM_running))

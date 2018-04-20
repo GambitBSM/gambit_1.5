@@ -239,8 +239,8 @@ namespace Gambit
           {
 						if ( sqrt_s > (mh+mS))
 						{
-							return vSigma_semi;
-							
+							//return vSigma_semi;
+							return 0;
 						}
 						else return 0;
 					}
@@ -415,6 +415,27 @@ namespace Gambit
       // Initialize empty catalog and main annihilation process
       TH_ProcessCatalog catalog;
       TH_Process process_ann("S", "S");
+      
+// get semi-annihilation cross-section from MicrOmegas 
+      
+			// set requested spectra to NULL since we don't need them
+			double * SpNe=NULL,*SpNm=NULL,*SpNl=NULL;
+			double * SpA=NULL,*SpE=NULL,*SpP=NULL;
+			int err;
+			
+			double vSigma_total =BEreq::calcSpectrum(byVal(3),byVal(SpA),byVal(SpE),byVal(SpP),byVal(SpNe),byVal(SpNm),byVal(SpNl) ,byVal(&err));
+
+			if (err != 0 )
+			{
+			   DarkBit_error().raise(LOCAL_INFO, "MicrOmegas spectrum calculation returned error code = " + std::to_string(err));	
+			}
+			
+			#ifdef DARKBIT_DEBUG 
+			cout << "---  --- " << endl;
+			cout << "Total sigma v from MicrOmegas = " << vSigma_total << " cm^3/s" << endl;
+			cout << "--------- " << endl;
+      #endif      
+      
 
 
       ///////////////////////////////////////
@@ -566,6 +587,24 @@ namespace Gambit
       // Validate
       catalog.validate();
 
+
+      #ifdef DARKBIT_DEBUG
+      // get DarkBit computed vSigma total
+      // so we can compare with that from MO
+      SingletDM test = *singletDM;
+      int nc = 7;
+      double total = 0;
+      for (int ii=0; ii < nc ; ii++)
+      {
+				total = total + test.sv(channel[ii], lambda, mS, 0.0);
+			}
+			cout << " --- Testing process catalouge --- " << endl;
+			cout << "Total sigma V from process catalouge = " << total << endl;
+			cout << " ---------- " << endl;
+			#endif
+
+
+
       result = catalog;
     } // function TH_ProcessCatalog_SingletDM
     
@@ -602,17 +641,16 @@ namespace Gambit
       
       int n_channels = sizeof(vSigmaCh);
       double BR_semi = 0; // semi-annihilation BR
-      
 			#ifdef DARKBIT_DEBUG
 		  cout << "--- Semi-annihilation processes and BRs --- " << endl;
 			#endif
       // find semi-annihilation channels
-      for (int i = 0 ; i < n_channels; i++)
+      int i = 0;
+      while ((vSigmaCh[i].weight!=0) && (i < n_channels))
       {
 				// get final states
 				const char* p1 = vSigmaCh[i].prtcl[2];
 				const char* p2 = vSigmaCh[i].prtcl[3];
-				
 				// semi-annihilation final states are h + ~ss or h + ~SS
 
 				if ( (strcmp(p1,"h")==0) && ( (strcmp(p2,"~ss")==0) || (strcmp(p2,"~SS")==0) ) ) 
@@ -624,6 +662,7 @@ namespace Gambit
 					cout << ",  BR = " << vSigmaCh[i].weight << endl;
 					#endif
 				}
+				i++;
 			}
 			
       double vSigma_semi = BR_semi * vSigma_total;
@@ -795,9 +834,9 @@ namespace Gambit
       SingletDMZ3 test = *singletDMZ3;
       int nc = 7;
       double total = 0;
-      for (int i; i < nc ; i++)
+      for (int ii=0; ii < nc ; ii++)
       {
-				total = total + test.sv(channel[i], lambda, mS, 0.0);
+				total = total + test.sv(channel[ii], lambda, mS, 0.0);
 			}
 			cout << " --- Testing process catalouge --- " << endl;
 			cout << "Total sigma V from process catalouge excluding semi-annihilations = " << total << endl;

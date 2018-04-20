@@ -428,6 +428,9 @@ START_MODULE
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(SingletDM_spectrum, Spectrum)
+      BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
+      BACKEND_REQ(vSigmaCh, (gimmemicro), MicrOmegas::aChannel*)
+      FORCE_SAME_BACKEND(gimmemicro)      
       ALLOW_MODELS(SingletDM,SingletDM_running)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_SingletDMZ3
@@ -435,9 +438,7 @@ START_MODULE
       DEPENDENCY(decay_rates,DecayTable)
       DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
       DEPENDENCY(Xf_MicrOmegas, double)
-      BACKEND_REQ(get_oneChannel, (gimmemicro) , double,  (double,double,char*,char*,char*,char*))
       BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
-      BACKEND_REQ(vSigma, (gimmemicro) , double,  (double, double, int))
       BACKEND_REQ(vSigmaCh, (gimmemicro), MicrOmegas::aChannel*)
       FORCE_SAME_BACKEND(gimmemicro)
       ALLOW_MODELS(SingletDMZ3)
