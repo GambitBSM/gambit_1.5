@@ -3283,6 +3283,9 @@ md21_lnL: |
 md3l_lnL: |
   Log-likelihood of the 3-l (l= 1 for NO, 2 for IO) mass splitting with respect to NuFit data
 
+sum_mnu_lnL: |
+  Log-likelihood of the sum of light neutrino masses usign cosmological constraints
+
 theta12: |
   Active neutrino mixing angle theta12
 
@@ -3410,10 +3413,10 @@ lnLlepuniv: |
   Log-likelihood for lepton universality
 
 calc_Vus: |
-  Analytical calculation of V_us
- 
+  Calculate optimized value of Vus for Theta
+
 lnLckm_Vusmin: |
-  Log-likelihood for CKM unitarity
+  Log-likelihood for CKM unitarity profiling over Vus
  
 Gamma_0nubb_Ge: |
   Neutrinoless double beta decay rate for 76Ge detector
