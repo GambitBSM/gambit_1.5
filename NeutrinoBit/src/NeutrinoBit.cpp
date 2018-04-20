@@ -500,7 +500,8 @@ namespace Gambit
 
       // TODO: Assume all gaussian for now, change later
       // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::md21, md21_NuFit.central, 0.0, md21_NuFit.upper, false);
+        //result = Stats::gaussian_loglikelihood(*Dep::md21, md21_NuFit.central, 0.0, md21_NuFit.upper, false);
+       result = gauss_like(*Dep::md21, md21_NuFit.central, md21_NuFit.lower);
     }
  
     void md3l_lnL(double &result)
@@ -528,5 +529,22 @@ namespace Gambit
       }
     }
 
+    // Sum of neutrino likelihoods
+    void sum_mnu_lnL(double &result)
+    {
+      using namespace Pipes::sum_mnu_lnL;
+
+      double sum_mnu = *Param["mNu1"] + *Param["mNu2"] + *Param["mNu3"];
+
+      if(sum_mnu < 2.3E-10)
+        result = 0.0;
+      else
+      {
+        std::ostringstream msg;
+        msg << "Sum of neutrino masses over the cosmological limit";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+    }
   }
 }
