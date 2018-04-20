@@ -3408,8 +3408,11 @@ R_W: |
 
 lnLlepuniv: |
   Log-likelihood for lepton universality
+
+calc_Vus: |
+  Analytical calculation of V_us
  
-lnLckm: |
+lnLckm_Vusmin: |
   Log-likelihood for CKM unitarity
  
 Gamma_0nubb_Ge: |
