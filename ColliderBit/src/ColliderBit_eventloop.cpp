@@ -1830,75 +1830,91 @@ namespace Gambit
           ///////////////////
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
-          const size_t NSAMPLE = 10000; ///< @todo TWEAK!!!
+          const double CONVERGENCE_TOLERANCE = 1e-3;
           std::normal_distribution<> unitnormdbn{0,1};
-          Eigen::ArrayXd llrsums = Eigen::ArrayXd::Zero(adata.size());
 
-          /// @note How to correct negative rates? Discard (scales badly), set to
-          /// epsilon (= discontinuous & unphysical pdf), transform to log-space
-          /// (distorts the pdf quite badly), or something else (skew term)?
-          /// We're using the "set to epsilon" version for now.
-          ///
-          /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
-          const bool COVLOGNORMAL = false;
+          unsigned int NSAMPLE = 1000;
+          double convergence = 1;
+          double ana_dll = -1;
+          while (convergence > CONVERGENCE_TOLERANCE) {
+            Eigen::ArrayXd llrsums = Eigen::ArrayXd::Zero(adata.size());
 
-          if (!COVLOGNORMAL) {
+            /// @note How to correct negative rates? Discard (scales badly), set to
+            /// epsilon (= discontinuous & unphysical pdf), transform to log-space
+            /// (distorts the pdf quite badly), or something else (skew term)?
+            /// We're using the "set to epsilon" version for now.
+            ///
+            /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
+            const bool COVLOGNORMAL = false;
+            if (!COVLOGNORMAL) {
 
-            // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-            for (size_t i = 0; i < NSAMPLE; ++i) {
-              Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
-              for (size_t j = 0; j < adata.size(); ++j) {
-                norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
-                norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+              // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
+              for (size_t i = 0; i < NSAMPLE; ++i) {
+                Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
+                for (size_t j = 0; j < adata.size(); ++j) {
+                  norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
+                  norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+                }
+
+                // Rotate rate deltas into the SR basis and shift by SR mean rates
+                const Eigen::ArrayXd n_pred_b_sample = n_pred_b + (Vb*norm_sample_b).array();
+                const Eigen::ArrayXd n_pred_sb_sample = n_pred_sb + (Vsb*norm_sample_sb).array();
+
+                // Calculate Poisson LLR and add to aggregated LL calculation
+                for (size_t j = 0; j < adata.size(); ++j) {
+                  const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
+                  const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
+                  const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                  llrsums(j) += llr_j;
+                }
               }
 
-              // Rotate rate deltas into the SR basis and shift by SR mean rates
-              const Eigen::ArrayXd n_pred_b_sample = n_pred_b + (Vb*norm_sample_b).array();
-              const Eigen::ArrayXd n_pred_sb_sample = n_pred_sb + (Vsb*norm_sample_sb).array();
+            } else { // COVLOGNORMAL
 
-              // Calculate Poisson LLR and add to aggregated LL calculation
-              for (size_t j = 0; j < adata.size(); ++j) {
-                const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
-                const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
-                const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-                llrsums(j) += llr_j;
+              const Eigen::ArrayXd ln_n_pred_b = n_pred_b.log();
+              const Eigen::ArrayXd ln_n_pred_sb = n_pred_sb.log();
+              const Eigen::ArrayXd ln_sqrtEb = (n_pred_b + sqrtEb).log() - ln_n_pred_b;
+              const Eigen::ArrayXd ln_sqrtEsb = (n_pred_sb + sqrtEsb).log() - ln_n_pred_sb;
+
+              // Sample correlated SR rates from a rotated Gaussian in log(rate) space, then exponentiate
+              for (size_t i = 0; i < NSAMPLE; ++i) {
+                Eigen::VectorXd ln_norm_sample_b(adata.size()), ln_norm_sample_sb(adata.size());
+                for (size_t j = 0; j < adata.size(); ++j) {
+                  ln_norm_sample_b(j) = ln_sqrtEb(j) * unitnormdbn(Random::rng());
+                  ln_norm_sample_sb(j) = ln_sqrtEsb(j) * unitnormdbn(Random::rng());
+                }
+
+                // Rotate rate deltas into the SR basis and shift by SR mean rates
+                const Eigen::ArrayXd delta_ln_n_pred_b_sample = Vb*ln_norm_sample_b;
+                const Eigen::ArrayXd delta_ln_n_pred_sb_sample = Vsb*ln_norm_sample_sb;
+                const Eigen::ArrayXd n_pred_b_sample = (ln_n_pred_b + delta_ln_n_pred_b_sample).exp();
+                const Eigen::ArrayXd n_pred_sb_sample = (ln_n_pred_sb + delta_ln_n_pred_sb_sample).exp();
+
+                // Calculate Poisson LLR and add to aggregated LL calculation
+                for (size_t j = 0; j < adata.size(); ++j) {
+                  const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
+                  const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
+                  const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                  llrsums(j) += llr_j;
+                }
               }
+
             }
 
-          } else { // COVLOGNORMAL
-
-            const Eigen::ArrayXd ln_n_pred_b = n_pred_b.log();
-            const Eigen::ArrayXd ln_n_pred_sb = n_pred_sb.log();
-            const Eigen::ArrayXd ln_sqrtEb = (n_pred_b + sqrtEb).log() - ln_n_pred_b;
-            const Eigen::ArrayXd ln_sqrtEsb = (n_pred_sb + sqrtEsb).log() - ln_n_pred_sb;
-
-            // Sample correlated SR rates from a rotated Gaussian in log(rate) space, then exponentiate
-            for (size_t i = 0; i < NSAMPLE; ++i) {
-              Eigen::VectorXd ln_norm_sample_b(adata.size()), ln_norm_sample_sb(adata.size());
-              for (size_t j = 0; j < adata.size(); ++j) {
-                ln_norm_sample_b(j) = ln_sqrtEb(j) * unitnormdbn(Random::rng());
-                ln_norm_sample_sb(j) = ln_sqrtEsb(j) * unitnormdbn(Random::rng());
-              }
-
-              // Rotate rate deltas into the SR basis and shift by SR mean rates
-              const Eigen::ArrayXd delta_ln_n_pred_b_sample = Vb*ln_norm_sample_b;
-              const Eigen::ArrayXd delta_ln_n_pred_sb_sample = Vsb*ln_norm_sample_sb;
-              const Eigen::ArrayXd n_pred_b_sample = (ln_n_pred_b + delta_ln_n_pred_b_sample).exp();
-              const Eigen::ArrayXd n_pred_sb_sample = (ln_n_pred_sb + delta_ln_n_pred_sb_sample).exp();
-
-              // Calculate Poisson LLR and add to aggregated LL calculation
-              for (size_t j = 0; j < adata.size(); ++j) {
-                const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
-                const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
-                const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-                llrsums(j) += llr_j;
-              }
+            // Calculate sum of expected LLRs and compare to previous independent batch
+            const double ana_dll_tmp = llrsums.sum();
+            if (ana_dll < 0) { //< first round has to be generated twice
+              ana_dll = ana_dll_tmp;
+            } else {
+              convergence = fabs(ana_dll_tmp - ana_dll)/ana_dll;
+              ana_dll += ana_dll_tmp; //< aggregate result
+              NSAMPLE *= 2; //< note that current batch size is doubled by aggregation; next needs to be twice as big
             }
 
           }
 
-          // Calculate sum of expected LLRs
-          const double ana_dll = llrsums.sum() / (double)NSAMPLE;
+          // Scale sum of ana_dlls by the total number of samples (should be correct, since doubled just before loop exit)
+          ana_dll /= (double)NSAMPLE;
           result[adata.begin()->analysis_name + "_DeltaLogLike"] = ana_dll;
 
 
