@@ -22,13 +22,14 @@
 #ifndef __python_variable_hpp__
 #define __python_variable_hpp__
 
-#include "gambit/Elements/ini_catch.hpp"
-#include "gambit/Backends/backend_singleton.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
 #ifdef HAVE_PYBIND11
-  #include <pybind11/pybind11.h>
+    #include <pybind11/pybind11.h>
 #endif
+
+#include "gambit/Elements/ini_catch.hpp"
+#include "gambit/Backends/backend_singleton.hpp"
 
 namespace Gambit
 {
