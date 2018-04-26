@@ -2859,6 +2859,8 @@ namespace Gambit
       // Add the h->SS width to the total
       double massratio2 = pow(mass/mhpole,2);
       double gamma = (2.0*mass <= mhpole) ? pow(lambda*v0,2)/(32.0*pi*mhpole) * sqrt(1.0 - 4.0*massratio2) : 0.0;
+      // include factor of two to account for decay to S* and S
+      gamma = 2.0*gamma;
       result.width_in_GeV = result.width_in_GeV + gamma;
 
       // Rescale the SM decay branching fractions.

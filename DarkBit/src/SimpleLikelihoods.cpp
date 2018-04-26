@@ -272,8 +272,6 @@ namespace Gambit {
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
       result = Stats::gaussian_upper_limit(oh2_theory, oh2_obs, oh2_theoryerr, oh2_obserr, profile);
       logger() << LogTags::debug << "lnL_oh2_upperlimit yields " << result << EOM;
-      
-      cout << "oh2 = " << oh2_theory << endl;
     }
 
 
@@ -424,7 +422,7 @@ namespace Gambit {
       {
         for (int i = 0; i<=1200; i++)
         {
-          double energy = pow(10., i/200. - 2.);
+          double energy = pow(10., i/200. - 4.);
 
           myfile << energy << " " << spectrum->bind("E")->eval(energy) << "\n";
         }

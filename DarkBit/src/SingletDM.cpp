@@ -33,7 +33,7 @@ namespace Gambit
 
   namespace DarkBit
   {
-		#define DARKBIT_DEBUG
+		//#define DARKBIT_DEBUG
 		
     class SingletDM
     {
@@ -239,8 +239,7 @@ namespace Gambit
           {
 						if ( sqrt_s > (mh+mS))
 						{
-							//return vSigma_semi;
-							return 0;
+							return vSigma_semi;
 						}
 						else return 0;
 					}
@@ -251,8 +250,7 @@ namespace Gambit
             if ( sqrt_s > mh*2 )
             {
               double GeV2tocm3s1 = gev2cm2*s2cm;
-              
-              return sv_hh(lambda, mass, v)*GeV2tocm3s1;
+              return 0.5*sv_hh(lambda, mass, v)*GeV2tocm3s1;
             }
             else return 0;
           }
@@ -275,16 +273,16 @@ namespace Gambit
 
             double res = 2*lambda*lambda*v0*v0/
               sqrt_s*Dh2(s)*Gamma_s*GeV2tocm3s1*br;
-            return res;
+            return 0.5*res;
           }
           else
           {
-            if ( channel == "bb" ) return sv_ff(lambda, mass, v, mb, true);
-            if ( channel == "cc" ) return sv_ff(lambda, mass, v, mc, false);
-            if ( channel == "tautau" ) return sv_ff(lambda, mass, v, mtau, false);
-            if ( channel == "tt" ) return sv_ff(lambda, mass, v, mt, false);
-            if ( channel == "ZZ" ) return sv_ZZ(lambda, mass, v);
-            if ( channel == "WW" ) return sv_WW(lambda, mass, v);
+            if ( channel == "bb" ) return 0.5*sv_ff(lambda, mass, v, mb, true);
+            if ( channel == "cc" ) return 0.5*sv_ff(lambda, mass, v, mc, false);
+            if ( channel == "tautau" ) return 0.5*sv_ff(lambda, mass, v, mtau, false);
+            if ( channel == "tt" ) return 0.5*sv_ff(lambda, mass, v, mt, false);
+            if ( channel == "ZZ" ) return 0.5*sv_ZZ(lambda, mass, v);
+            if ( channel == "WW" ) return 0.5*sv_WW(lambda, mass, v);
           }
           return 0;
         }
@@ -415,28 +413,6 @@ namespace Gambit
       // Initialize empty catalog and main annihilation process
       TH_ProcessCatalog catalog;
       TH_Process process_ann("S", "S");
-      
-// get semi-annihilation cross-section from MicrOmegas 
-      
-			// set requested spectra to NULL since we don't need them
-			double * SpNe=NULL,*SpNm=NULL,*SpNl=NULL;
-			double * SpA=NULL,*SpE=NULL,*SpP=NULL;
-			int err;
-			
-			double vSigma_total =BEreq::calcSpectrum(byVal(3),byVal(SpA),byVal(SpE),byVal(SpP),byVal(SpNe),byVal(SpNm),byVal(SpNl) ,byVal(&err));
-
-			if (err != 0 )
-			{
-			   DarkBit_error().raise(LOCAL_INFO, "MicrOmegas spectrum calculation returned error code = " + std::to_string(err));	
-			}
-			
-			#ifdef DARKBIT_DEBUG 
-			cout << "---  --- " << endl;
-			cout << "Total sigma v from MicrOmegas = " << vSigma_total << " cm^3/s" << endl;
-			cout << "--------- " << endl;
-      #endif      
-      
-
 
       ///////////////////////////////////////
       // Import particle masses and couplings

@@ -10,9 +10,9 @@ Parameters:
       QEWSB: 173.0
       mH: 121.017120361
     SingletDMZ3:
-      lambda_S: 3
+      lambda_S: 0.5
       lambda_hS: 1.23250677584
-      mS: 300.234640076
+      mS: 3000.234640076
       mu3: 1.0
     StandardModel_SLHA2:
       CKM_A: 0.814
