@@ -34,12 +34,102 @@
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
+
 namespace Gambit
 {
 
   namespace CosmoBit
   {
     using namespace LogTags;
+
+    void injection_spectrum_ToyModel(DarkAges::injectionSpectrum& spectrum)
+    {
+      using namespace Pipes::injection_spectrum_ToyModel;
+      
+      double m = *Param["mass"];
+      double BR_el = *Param["BR"];
+      double BR_ph = 1.0 - BR_el;
+
+      spectrum.E.clear();
+      spectrum.spec_el.clear();
+      spectrum.spec_ph.clear();
+
+      spectrum.E.resize(1,m*0.5);
+      spectrum.spec_el.resize(1,BR_el*2e9);
+      spectrum.spec_ph.resize(1,BR_ph*2e9);
+    }
+
+    void DM_mass_ToyModel(double& result)
+    {
+      using namespace Pipes::DM_mass_ToyModel;
+      result = *Param["mass"];
+    }
+
+    void lifetime_ToyModel(double& result)
+    {
+      using namespace Pipes::lifetime_ToyModel;
+      result = *Param["lifetime"];
+    }
+
+    void DM_fraction_ToyModel(double& result)
+    {
+      using namespace Pipes::DM_fraction_ToyModel;
+      result = *Param["fraction"];
+    }
+
+    void f_effective_func(double& result)
+    {
+      using namespace Pipes::f_effective_func;
+
+      bool silent = runOptions->getValueOrDef<bool>(false,"silent_mode");
+      int last_steps = runOptions->getValueOrDef<int>(4,"show_last_steps");
+      double z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
+
+      DarkAges::fz_table fzt = BEreq::DA_efficiency_function();
+      std::vector<double> z = fzt.redshift;
+      std::vector<double> fh = fzt.f_heat;
+      std::vector<double> fly = fzt.f_lya;
+      std::vector<double> fhi = fzt.f_hion;
+      std::vector<double> fhei = fzt.f_heion;
+      std::vector<double> flo = fzt.f_lowe;
+      
+      int npts = z.size();
+      double ftot[npts];
+      double red[npts];
+      for (unsigned int i = 0; i < npts; i++)
+      {
+	ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+	red[i] = z.at(i);
+      }
+
+      gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
+      gsl_spline *spline_ptr = gsl_spline_alloc(gsl_interp_cspline, npts);
+      
+      gsl_spline_init(spline_ptr, red, ftot, npts);
+
+      result = gsl_spline_eval(spline_ptr, z_eff, gsl_accel_ptr);
+
+      gsl_spline_free(spline_ptr);
+      gsl_interp_accel_free(gsl_accel_ptr);
+
+      if (!silent)
+      {
+	std::cout << "################" << std::endl;
+	std::cout << "tau = " << *Param["lifetime"] << std::endl;
+	std::cout << "m = " << *Param["mass"] << std::endl;
+	std::cout << "BR (electrom) = " << *Param["BR"] << std::endl;
+	std::cout << "---------------" << std::endl;
+	std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
+	for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
+	{
+	  std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
+	}
+	std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
+	std::cout << "################\n" << std::endl;
+      }
+    }
 
     void PyTest_func_1(double& result)
     {

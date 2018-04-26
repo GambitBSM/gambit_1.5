@@ -31,11 +31,52 @@
 #define MODULE CosmoBit
 START_MODULE
 
+  #define CAPABILITY injection_spectrum
+  START_CAPABILITY
+    #define FUNCTION injection_spectrum_ToyModel
+    START_FUNCTION(DarkAges::injectionSpectrum)
+    ALLOW_MODELS(TestDecayingDM)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY DM_mass
+  START_CAPABILITY
+    #define FUNCTION DM_mass_ToyModel
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY DM_fraction
+  START_CAPABILITY
+    #define FUNCTION DM_fraction_ToyModel
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lifetime
+  START_CAPABILITY
+    #define FUNCTION lifetime_ToyModel
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY f_effective
+  START_CAPABILITY
+    #define FUNCTION f_effective_func
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    BACKEND_REQ(DA_efficiency_function, (DarkAges_tag),DarkAges::fz_table,())
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY PyTest_cap_1
   START_CAPABILITY
     #define FUNCTION PyTest_func_1
     START_FUNCTION(double)
-    BACKEND_REQ(PyArrayTest_Py_to_cpp, (DarkAges_tag), std::vector<double>, ())
+    BACKEND_REQ(PyArrayTest_Py_to_cpp, (PyArrayTest_tag), std::vector<double>, ())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -43,7 +84,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION PyTest_func_2
     START_FUNCTION(double)
-    BACKEND_REQ(PyArrayTest_cpp_to_Py, (DarkAges_tag), double, (int))
+    BACKEND_REQ(PyArrayTest_cpp_to_Py, (PyArrayTest_tag), double, (int))
     #undef FUNCTION
   #undef CAPABILITY
 

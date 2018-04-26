@@ -3497,8 +3497,70 @@ class_set_parameter: |
    This routine initializes the input of CLASS.
 
 #----------------------------
-#  CosmoBitDEV
+#  DarkAges
 #----------------------------
+
+DarkAges_1_0_0_init: |
+   Convenience function to initialize the instance of the DarkAges package.
+   Retrieve all input dependencies (DM-mass, injection spectra, ...) and
+   perform the convolution wit the transfer functions to get f(z).
+
+DA_efficiency_function: |
+   Convenience function to map the f(z)-table from python to c++ vectors.
+
+DA_initialize: | 
+   BE function loading all the DarkAges python module and setting
+   the redshift array to its glaobal default.
+
+DA_calc_f: |
+   BE function performing the convolution to get f(z).
+
+DA_get_result: |
+   BE function returning an array containing f(z) for a given channel.
+
+DA_reset: |
+   BE function to release the 'alreadyCalculated'-flag of the module.
+
+#----------------------------
+#  PyArrayTest
+#----------------------------
+
+PyArrayTest_1_0_init: |
+   Initializes the PyArrayTest-backend. (v1.0)
+
+PyArrayTest_Py_to_cpp: |
+   (Convenience function) Example of how to map a python array (list) onto std::vector.
+
+PyArrayTest_cpp_to_Py: |
+   (Convenience function) Example of how to map std::vector onto a python array (list).
+   
+PyArrayTest_initialize: |
+   (BE function) Prepares global variables of the backend.
+   
+PyArrayTest_multiply: |
+   (BE function) Multiplies the backend internal array with 'someFactor'
+
+readPythonArray: |
+   (BE function) Reads an array or list and returns the sum of its components
+
+returnPythonArray: |
+   (BE function) Returns the backend internal array to be used in GAMBIT.
+
+SomeFactor: |
+   (BE variable) Number which will multiplied to the backend internal array.
+
+arrayLen: |
+   (BE variable) Length of the backend internal array.
+
+#----------------------------
+#  CosmoBit
+#----------------------------
+
+TestDecayingDM_parameters: |
+   mass, mass of the dark matter candidate [in GeV]
+   lifetime, lifetime of said DM candidate [in s]
+   fraction, fraction of how much the decaying DM component contributes to all DM.
+   BR, the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
 
 LCDM_parameters: |
    omega_b, baryon density parameter.
@@ -3544,6 +3606,50 @@ compute_Planck_high_TT_loglike: |
 compute_Planck_lensing_loglike: |
    function computes the planck lensing- log-likelihood for
    a  given set of  Cl's.
+
+lnL_A_planck : |
+   "prior"-likelihood for A_planck. Applies the Gauss bell on 
+    A_planck if a flat prior is chosen. Should have the same
+    effect than using a gaussian prior on it in the first place.
+
+f_effective: |
+    returns f(z) at  z~600 summed over all channels.
+
+DM_mass: |
+    Dark matter mass (in GeV).
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+DM_fraction: |
+    fraction of the abundance of the dark matter candidate in question
+    (mostly a decaying component) contributing to the total DM abundance.
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+lifetime: |
+    lifetime of the decaying dark matter component (in s).
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+injection_spectrum: |
+    Spectrum of electrons/positrons and photons injected by
+    the decay of a DM particle with certain mass.
+    An dirac-like injection (at an energy of m/2) is assumed.
+    The relative contribution of the electron and photon channel is
+    given by the branching ratio (BR).
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+PyTest_cap_1: |
+    First test of the mapping of std::vector onto python lists
+    and vice versa.
+    Recieves an std::vector from the PyArrayTest and computes
+    the sum of its entries.
+
+PyTest_cap_2: |
+    As 'PyTest_cap_2', but the sum will be performed by the
+    PyArrayTest backend and the result is taken.
+
 
 #------------------------------
 #  SUSYHD capabilities

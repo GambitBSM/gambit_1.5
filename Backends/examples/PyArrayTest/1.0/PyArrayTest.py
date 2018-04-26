@@ -46,10 +46,8 @@ def returnArray():
 
 def readArray(someExternalArray):
   print "I'm readArray() from DarkAges.py, and I'm feeling well."
-  res = 0.
-  for value in someExternalArray:
-    res += value
-  return res
+  someExternalArray = np.asarray(someExternalArray)
+  return someExternalArray.sum()
 
 if __name__ == "__main__":
   initialize(10)
