@@ -8,9 +8,12 @@
 
 Parameters:
 
-  CMSSM:
+  NUHM1:
     A0: [10.0, -100.0, 1]
     M0:
+      prior_type: log
+      range: [0.001,1000]
+    mH:
       prior_type: log
       range: [0.001,1000]
     M12:
@@ -101,6 +104,9 @@ Rules:
     type: int
     dependencies:
     - {capability: particle_id, module: ExampleBit_B}
+    backends:
+    - {capability: awesomeness, backend: LibFirst, version: 1.1}
+    - {capability: someFunction, backend: LibFirst, version: 1.1}
 
   - capability:    xsection
     options:

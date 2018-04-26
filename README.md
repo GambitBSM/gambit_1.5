@@ -41,7 +41,7 @@ Please see the above list of GAMBIT papers for the main documentation on the des
 Supported Compilers and Library Dependencies
 --
 
-GAMBIT is built using the CMake system. The following libraries and packages must be installed prior to configuration:
+GAMBIT is built using the CMake system (version 2.8.5 or greater required). The following libraries and packages must be installed prior to configuration:
 
 COMPULSORY:
 
