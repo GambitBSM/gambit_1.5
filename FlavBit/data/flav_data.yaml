@@ -1616,10 +1616,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 3.3e-8
+  exp_90_CL: 5.4e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 0908.2381
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M 
   th_error_source: NONE
@@ -1630,10 +1630,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 4.4e-8
+  exp_90_CL: 5.0e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 0908.2381
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1658,10 +1658,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 2.7e-8
+  exp_90_CL: 1.4e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 1001.3221
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1672,10 +1672,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 2.1e-8
+  exp_90_CL: 1.2e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 1001.3221
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1686,10 +1686,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 1.8e-8
+  exp_90_CL: 1.1e-8
   exp_stat_error: 0. 
   exp_sys_error: 0.
-  exp_source: 1001.3221
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M
   th_error_source: NONE 
@@ -1700,10 +1700,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 1.5e-8
+  exp_90_CL: 0.84e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 1001.3221
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M
   th_error_source: NONE
@@ -1714,10 +1714,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 2.7e-8
+  exp_90_CL: 1.6e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 1001.3221
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M 
   th_error_source: NONE
@@ -1728,10 +1728,10 @@
   islimit: true
   one_sided: false
   exp_value: 0.
-  exp_90_CL: 1.7e-8
+  exp_90_CL: 0.98e-8
   exp_stat_error: 0.
   exp_sys_error: 0.
-  exp_source: 1001.3221
+  exp_source: HFAG
   th_error: 0.
   th_error_type: M
   th_error_source: NONE

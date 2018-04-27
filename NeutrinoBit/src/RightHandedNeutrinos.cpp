@@ -1209,6 +1209,7 @@ namespace Gambit
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1467,7 +1468,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1505,7 +1506,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1543,7 +1544,8 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+ 
         }
       }
     }
@@ -1621,7 +1623,7 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i], 2), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          result += - (pow(mixing_sq[i]/U[i],2)> 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
