@@ -47,7 +47,7 @@ namespace Gambit
     void injection_spectrum_ToyModel(DarkAges::injectionSpectrum& spectrum)
     {
       using namespace Pipes::injection_spectrum_ToyModel;
-      
+
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
       double BR_ph = 1.0 - BR_el;
@@ -94,19 +94,19 @@ namespace Gambit
       std::vector<double> fhi = fzt.f_hion;
       std::vector<double> fhei = fzt.f_heion;
       std::vector<double> flo = fzt.f_lowe;
-      
+
       int npts = z.size();
       double ftot[npts];
       double red[npts];
       for (unsigned int i = 0; i < npts; i++)
       {
-	ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
-	red[i] = z.at(i);
+        ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+        red[i] = z.at(i);
       }
 
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
       gsl_spline *spline_ptr = gsl_spline_alloc(gsl_interp_cspline, npts);
-      
+
       gsl_spline_init(spline_ptr, red, ftot, npts);
 
       result = gsl_spline_eval(spline_ptr, z_eff, gsl_accel_ptr);
@@ -116,18 +116,18 @@ namespace Gambit
 
       if (!silent)
       {
-	std::cout << "################" << std::endl;
-	std::cout << "tau = " << *Param["lifetime"] << std::endl;
-	std::cout << "m = " << *Param["mass"] << std::endl;
-	std::cout << "BR (electrom) = " << *Param["BR"] << std::endl;
-	std::cout << "---------------" << std::endl;
-	std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
-	for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
-	{
-	  std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
-	}
-	std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
-	std::cout << "################\n" << std::endl;
+        std::cout << "################" << std::endl;
+        std::cout << "tau = " << *Param["lifetime"] << std::endl;
+        std::cout << "m = " << *Param["mass"] << std::endl;
+        std::cout << "BR (electrom) = " << *Param["BR"] << std::endl;
+        std::cout << "---------------" << std::endl;
+        std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
+        for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
+        {
+          std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
+        }
+        std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
+        std::cout << "################\n" << std::endl;
       }
     }
 
