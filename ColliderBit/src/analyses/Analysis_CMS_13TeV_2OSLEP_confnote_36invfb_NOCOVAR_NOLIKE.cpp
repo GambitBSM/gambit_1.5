@@ -23,7 +23,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -47,7 +47,7 @@ namespace Gambit {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
 
-      Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE() {
+      Analysis_CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE() {
 
         _numSR1=0;
         _numSR2=0;
@@ -68,7 +68,7 @@ namespace Gambit {
           // cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        // analysisRunName = "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE";
+        // analysisRunName = "CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE";
       }
 
 
@@ -267,8 +267,8 @@ namespace Gambit {
         
         HEPUtilsAnalysis::add(other);
 
-        Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE*>(other);
+        Analysis_CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE* specificOther
+                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -309,7 +309,7 @@ namespace Gambit {
        //  cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
        // cutflowFile.close();
 
-        static const string ANAME = "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE";
+        static const string ANAME = "CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE";
 
         // Only 7 of the 9 signal regions are included in the covariance matrix
         // (SR1 and SR6 are left out)
@@ -423,7 +423,7 @@ namespace Gambit {
 
 
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE)
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE)
 
 
   }

@@ -23,7 +23,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_13TeV_2OSLEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2OSLEP_confnote_36invfb : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -47,7 +47,7 @@ namespace Gambit {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
 
-      Analysis_CMS_13TeV_2OSLEP_36invfb() {
+      Analysis_CMS_13TeV_2OSLEP_confnote_36invfb() {
 
         _numSR1=0;
         _numSR2=0;
@@ -68,7 +68,7 @@ namespace Gambit {
           // cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        // analysisRunName = "CMS_13TeV_2OSLEP_36invfb";
+        // analysisRunName = "CMS_13TeV_2OSLEP_confnote_36invfb";
       }
 
 
@@ -267,8 +267,8 @@ namespace Gambit {
         
         HEPUtilsAnalysis::add(other);
 
-        Analysis_CMS_13TeV_2OSLEP_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_36invfb*>(other);
+        Analysis_CMS_13TeV_2OSLEP_confnote_36invfb* specificOther
+                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_confnote_36invfb*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -309,7 +309,7 @@ namespace Gambit {
        //  cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
        // cutflowFile.close();
 
-        static const string ANAME = "CMS_13TeV_2OSLEP_36invfb";
+        static const string ANAME = "CMS_13TeV_2OSLEP_confnote_36invfb";
 
         // Only 7 of the 9 signal regions are included in the covariance matrix
         // (SR1 and SR6 are left out)
@@ -354,7 +354,7 @@ namespace Gambit {
 
         // //Now fill a results object with the results for each SR
         // SignalRegionData results_SR1;
-        // results_SR1.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR1.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR1.sr_label = "SR1";
         // results_SR1.n_observed = 793.;
         // results_SR1.n_background = 793.; 
@@ -364,7 +364,7 @@ namespace Gambit {
         // add_result(results_SR1);
 
         // SignalRegionData results_SR2;
-        // results_SR2.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR2.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR2.sr_label = "SR2";
         // results_SR2.n_observed = 57.;
         // results_SR2.n_background = 54.9;
@@ -374,7 +374,7 @@ namespace Gambit {
         // add_result(results_SR2);
 
         // SignalRegionData results_SR3;
-        // results_SR3.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR3.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR3.sr_label = "SR3";
         // results_SR3.n_observed = 29.;
         // results_SR3.n_background = 21.6;
@@ -384,7 +384,7 @@ namespace Gambit {
         // add_result(results_SR3);
 
         // SignalRegionData results_SR4;
-        // results_SR4.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR4.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR4.sr_label = "SR4";
         // results_SR4.n_observed = 2.;
         // results_SR4.n_background = 6.;
@@ -394,7 +394,7 @@ namespace Gambit {
         // add_result(results_SR4);
 
         // SignalRegionData results_SR5;
-        // results_SR5.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR5.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR5.sr_label = "SR5";
         // results_SR5.n_observed = 0.;
         // results_SR5.n_background = 2.5;
@@ -404,7 +404,7 @@ namespace Gambit {
         // add_result(results_SR5);
 
         // SignalRegionData results_SR6;
-        // results_SR6.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR6.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR6.sr_label = "SR6";
         // results_SR6.n_observed = 82;
         // results_SR6.n_background = 82.;
@@ -414,7 +414,7 @@ namespace Gambit {
         // add_result(results_SR6);
 
         // SignalRegionData results_SR7;
-        // results_SR7.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR7.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR7.sr_label = "SR7";
         // results_SR7.n_observed = 9.;
         // results_SR7.n_background = 7.6;
@@ -424,7 +424,7 @@ namespace Gambit {
         // add_result(results_SR7);
 
         // SignalRegionData results_SR8;
-        // results_SR8.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR8.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR8.sr_label = "SR8";
         // results_SR8.n_observed = 5.;
         // results_SR8.n_background = 5.6;
@@ -434,7 +434,7 @@ namespace Gambit {
         // add_result(results_SR8);
 
         // SignalRegionData results_SR9;
-        // results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
+        // results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
         // results_SR9.sr_label = "SR9";
         // results_SR9.n_observed = 1.;
         // results_SR9.n_background = 1.3;
@@ -529,7 +529,7 @@ namespace Gambit {
 
 
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb)
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_confnote_36invfb)
 
 
   }
