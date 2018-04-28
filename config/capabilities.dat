@@ -3319,6 +3319,11 @@ data_cleanup: |
    lowl_SMW_70_dx11d_2014 by means of calling
    backend function clik_cleanup
 
+set_planck_path: |
+   Set the absolute path to the location of the
+   Planck likelihoods.
+   (Path to the 'plc_2.0'-folder)
+
 data_initialize: |
    initalize objects plik_dx11dr2_HM_v18_TT and
    lowl_SMW_70_dx11d_2014 by means of calling
