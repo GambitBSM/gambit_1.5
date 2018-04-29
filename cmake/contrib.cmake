@@ -92,31 +92,6 @@ else()
   add_dependencies(distclean clean-delphes)
 endif()
 
-#contrib/RestFrames; include only if ColliderBit is in use and RestFrames is not intentionally ditched.
-set (RESTFRAMES_DIR "${PROJECT_SOURCE_DIR}/contrib/RestFrames")
-string(REGEX MATCH ";Res;|;Rest;|;RestF;|;RestFr;|;RestFra;|;RestFram;|;RestFrame;|;RestFrames" DITCH_RESTFRAMES ";${itch};")
-include_directories("${RESTFRAMES_DIR}" "${RESTFRAMES_DIR}/include")
-if(DITCH_RESTFRAMES OR NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
-  set (EXCLUDE_RESTFRAMES TRUE)
-  add_custom_target(clean-restframes COMMAND "")
-  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration.${ColourReset}")
-else()
-  set (EXCLUDE_RESTFRAMES FALSE)
-  set (RESTFRAMES_LDFLAGS "-L${RESTFRAMES_DIR}/lib -lRestFrames")
-  set (CMAKE_INSTALL_RPATH "${RESTFRAMES_DIR}")
-  ExternalProject_Add(restframes
-    SOURCE_DIR ${RESTFRAMES_DIR}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure -prefix=${RESTFRAMES_DIR}
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} 
-    INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
-    )
-  set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
-  add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-    COMMAND cd ${RESTFRAMES_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
-  add_dependencies(distclean clean-restframes)
-endif()
-
 #contrib/fjcore-3.2.0; compile only if Delphes is ditched and ColliderBit is not.
 set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
 include_directories("${fjcore_INCLUDE_DIR}")
