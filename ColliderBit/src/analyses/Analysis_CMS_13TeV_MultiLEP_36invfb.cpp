@@ -591,7 +591,6 @@ namespace Gambit {
 
         //Now fill a results object with the results for each SR
         SignalRegionData results_SR1;
-        results_SR1.analysis_name = analysis_name();
         results_SR1.sr_label = "SR1";
         results_SR1.n_observed = 13.;
         results_SR1.n_background = 12.; 
@@ -601,7 +600,6 @@ namespace Gambit {
         add_result(results_SR1);
 
         SignalRegionData results_SR2;
-        results_SR2.analysis_name = analysis_name();
         results_SR2.sr_label = "SR1";
         results_SR2.n_observed = 18.;
         results_SR2.n_background = 18.;
@@ -611,7 +609,6 @@ namespace Gambit {
         add_result(results_SR2);
 
         SignalRegionData results_SR3;
-        results_SR3.analysis_name = analysis_name();
         results_SR3.sr_label = "SR3";
         results_SR3.n_observed = 19.;
         results_SR3.n_background = 19.;
@@ -621,7 +618,6 @@ namespace Gambit {
         add_result(results_SR3);
 
         SignalRegionData results_SR4;
-        results_SR4.analysis_name = analysis_name();
         results_SR4.sr_label = "SR4";
         results_SR4.n_observed = 128.;
         results_SR4.n_background = 142.;
@@ -631,7 +627,6 @@ namespace Gambit {
         add_result(results_SR4);
 
         SignalRegionData results_SR5;
-        results_SR5.analysis_name = analysis_name();
         results_SR5.sr_label = "SR5";
         results_SR5.n_observed = 18.;
         results_SR5.n_background = 22.;
@@ -641,7 +636,6 @@ namespace Gambit {
         add_result(results_SR5);
 
         SignalRegionData results_SR6;
-        results_SR6.analysis_name = analysis_name();
         results_SR6.sr_label = "SR6";
         results_SR6.n_observed = 2;
         results_SR6.n_background = 1.2;
@@ -651,7 +645,6 @@ namespace Gambit {
         add_result(results_SR6);
 
         SignalRegionData results_SR7;
-        results_SR7.analysis_name = analysis_name();
         results_SR7.sr_label = "SR7";
         results_SR7.n_observed = 82.;
         results_SR7.n_background = 109.;
@@ -661,7 +654,6 @@ namespace Gambit {
         add_result(results_SR7);
 
         SignalRegionData results_SR8;
-        results_SR8.analysis_name = analysis_name();
         results_SR8.sr_label = "SR8";
         results_SR8.n_observed = 166.;
         results_SR8.n_background = 197.;

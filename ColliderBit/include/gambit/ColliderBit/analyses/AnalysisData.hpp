@@ -35,17 +35,17 @@ namespace Gambit {
     {
 
       /// Constructor with {n,nsys} pair args
-      SignalRegionData(const std::string& name, const std::string& sr,
+      SignalRegionData(const std::string& sr,
                        double nobs, const std::pair<double,double>& nsig, const std::pair<double,double>& nbkg,
                        double nsigatlumi=0)
-       : SignalRegionData(name, sr, nobs, nsig.first, nbkg.first, nsig.second, nbkg.second, nsigatlumi)
+       : SignalRegionData(sr, nobs, nsig.first, nbkg.first, nsig.second, nbkg.second, nsigatlumi)
       {}
 
       /// Constructor with separate n & nsys args
-      SignalRegionData(const std::string& name, const std::string& sr,
+      SignalRegionData(const std::string& sr,
                        double nobs, double nsig, double nbkg,
                        double syssig, double sysbkg, double nsigatlumi=0)
-       : analysis_name(name), sr_label(sr),
+       : sr_label(sr),
          n_observed(nobs), n_signal(nsig), n_signal_at_lumi(nsigatlumi), n_background(nbkg),
          signal_sys(syssig), background_sys(sysbkg)
       {}
@@ -60,9 +60,8 @@ namespace Gambit {
         return consistent;
       }
 
-      /// @name Analysis and signal region specification
+      /// @name Signal region specification
       //@{
-      std::string analysis_name; ///< The name of the analysis common to all signal regions
       std::string sr_label; ///< A label for the particular signal region of the analysis
       //@}
 
@@ -96,9 +95,20 @@ namespace Gambit {
         clear(); 
       }
 
+      /// Constructor with analysis name
+      AnalysisData(const std::string& name) :
+        analysis_name(name)
+      {
+        #ifdef ANALYSISDATA_DEBUG
+          std::cerr << "DEBUG: AnalysisData: " << this << " - Constructed (ctor with analysis name)" << std::endl;
+        #endif
+        clear(); 
+      }
+
       // A copy constructor only used for debugging
       #ifdef ANALYSISDATA_DEBUG
       AnalysisData(const AnalysisData& copy) : 
+        analysis_name(copy.analysis_name),
         srdata(copy.srdata),
         srdata_identifiers(copy.srdata_identifiers),
         srcov(copy.srcov)
@@ -165,7 +175,7 @@ namespace Gambit {
       /// @todo Allow naming the SRs?
       void add(const SignalRegionData& srd)
       {
-        std::string key = srd.analysis_name + srd.sr_label;
+        std::string key = analysis_name + srd.sr_label;
         auto loc = srdata_identifiers.find(key);
         if (loc == srdata_identifiers.end())
         {
@@ -196,6 +206,9 @@ namespace Gambit {
         return true;
       }
 
+
+      /// Analysis name
+      std::string analysis_name;
 
       /// Access the i'th signal region's data
       SignalRegionData& operator[] (size_t i) { return srdata[i]; }

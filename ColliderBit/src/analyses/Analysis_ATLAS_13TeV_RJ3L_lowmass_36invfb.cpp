@@ -2059,10 +2059,9 @@ namespace Gambit {
         int _numSRC1, _numSRC2, _numSRC3, _numSRC4, _numSRC5;
         int _numSRD_low, _numSRD_high, _numSRE;*/
   
-        add_result(SignalRegionData(analysis_name(), "3LLOW", 20, {_num3LLOW,  0.}, {10.31, 1.96}));     
+        add_result(SignalRegionData("3LLOW", 20, {_num3LLOW,  0.}, {10.31, 1.96}));     
   
         /*SignalRegionData results_SRA_TT;
-        results_SRA_TT.analysis_name = analysis_name();
         results_SRA_TT.sr_label = "SRA_TT";
         results_SRA_TT.n_observed = 11.;
         results_SRA_TT.n_background = 15.8;

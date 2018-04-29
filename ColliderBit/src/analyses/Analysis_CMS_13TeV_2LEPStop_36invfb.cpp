@@ -501,8 +501,8 @@ namespace Gambit {
                 stringstream ss_DF; ss_DF << "DF-SR-" << ibin;
                 // The ordering here is important -- first add SF then DF regions.
                 // (Must match the ordering in the covariance matrix.)
-                add_result(SignalRegionData(analysis_name(), ss_SF.str(), OBSNUM_SF[ibin], {_SRSF[ibin],  0.}, {BKGNUM_SF[ibin], BKGERR_SF[ibin]}));
-                add_result(SignalRegionData(analysis_name(), ss_DF.str(), OBSNUM_DF[ibin], {_SRDF[ibin],  0.}, {BKGNUM_DF[ibin], BKGERR_DF[ibin]}));
+                add_result(SignalRegionData(ss_SF.str(), OBSNUM_SF[ibin], {_SRSF[ibin],  0.}, {BKGNUM_SF[ibin], BKGERR_SF[ibin]}));
+                add_result(SignalRegionData(ss_DF.str(), OBSNUM_DF[ibin], {_SRDF[ibin],  0.}, {BKGNUM_DF[ibin], BKGERR_DF[ibin]}));
             }
 
             // Covariance
@@ -542,7 +542,6 @@ namespace Gambit {
 
             // Same flavour
             /*SignalRegionData results_SRSF0;
-            results_SRSF0.analysis_name = analysis_name();
             results_SRSF0.sr_label = "SRSF0";
             results_SRSF0.n_observed = 112.;
             results_SRSF0.n_background = 131.;
@@ -552,7 +551,6 @@ namespace Gambit {
             add_result(results_SRSF0);
 
             SignalRegionData results_SRSF1;
-            results_SRSF1.analysis_name = analysis_name();
             results_SRSF1.sr_label = "SRSF1";
             results_SRSF1.n_observed = 7.;
             results_SRSF1.n_background = 4.1;
@@ -562,7 +560,6 @@ namespace Gambit {
             add_result(results_SRSF1);
 
             SignalRegionData results_SRSF2;
-            results_SRSF2.analysis_name = analysis_name();
             results_SRSF2.sr_label = "SRSF2";
             results_SRSF2.n_observed = 69.;
             results_SRSF2.n_background = 60.;
@@ -572,7 +569,6 @@ namespace Gambit {
             add_result(results_SRSF2);
 
             SignalRegionData results_SRSF3;
-            results_SRSF3.analysis_name = analysis_name();
             results_SRSF3.sr_label = "SRSF3";
             results_SRSF3.n_observed = 1.;
             results_SRSF3.n_background = 4.8;
@@ -582,7 +578,6 @@ namespace Gambit {
             add_result(results_SRSF3);
 
             SignalRegionData results_SRSF4;
-            results_SRSF4.analysis_name = analysis_name();
             results_SRSF4.sr_label = "SRSF4";
             results_SRSF4.n_observed = 0.;
             results_SRSF4.n_background = 0.5;
@@ -592,7 +587,6 @@ namespace Gambit {
             add_result(results_SRSF4);
 
             SignalRegionData results_SRSF5;
-            results_SRSF5.analysis_name = analysis_name();
             results_SRSF5.sr_label = "SRSF5";
             results_SRSF5.n_observed = 2.;
             results_SRSF5.n_background = 1.9;
@@ -602,7 +596,6 @@ namespace Gambit {
             add_result(results_SRSF5);
 
             SignalRegionData results_SRSF6;
-            results_SRSF6.analysis_name = analysis_name();
             results_SRSF6.sr_label = "SRSF6";
             results_SRSF6.n_observed = 2.;
             results_SRSF6.n_background = 1.1;
@@ -612,7 +605,6 @@ namespace Gambit {
             add_result(results_SRSF6);
 
             SignalRegionData results_SRSF7;
-            results_SRSF7.analysis_name = analysis_name();
             results_SRSF7.sr_label = "SRSF7";
             results_SRSF7.n_observed = 2.;
             results_SRSF7.n_background = 0.6;
@@ -622,7 +614,6 @@ namespace Gambit {
             add_result(results_SRSF7);
 
             SignalRegionData results_SRSF8;
-            results_SRSF8.analysis_name = analysis_name();
             results_SRSF8.sr_label = "SRSF8";
             results_SRSF8.n_observed = 1.;
             results_SRSF8.n_background = 2.1;
@@ -632,7 +623,6 @@ namespace Gambit {
             add_result(results_SRSF8);
 
             SignalRegionData results_SRSF9;
-            results_SRSF9.analysis_name = analysis_name();
             results_SRSF9.sr_label = "SRSF9";
             results_SRSF9.n_observed = 1.;
             results_SRSF9.n_background = 1.6;
@@ -642,7 +632,6 @@ namespace Gambit {
             add_result(results_SRSF9);
 
             SignalRegionData results_SRSF10;
-            results_SRSF10.analysis_name = analysis_name();
             results_SRSF10.sr_label = "SRSF10";
             results_SRSF10.n_observed = 0.;
             results_SRSF10.n_background = 0.3;
@@ -652,7 +641,6 @@ namespace Gambit {
             add_result(results_SRSF10);
 
             SignalRegionData results_SRSF11;
-            results_SRSF11.analysis_name = analysis_name();
             results_SRSF11.sr_label = "SRSF11";
             results_SRSF11.n_observed = 2.;
             results_SRSF11.n_background = 1.7;
@@ -662,7 +650,6 @@ namespace Gambit {
             add_result(results_SRSF11);
 
             SignalRegionData results_SRSF12;
-            results_SRSF12.analysis_name = analysis_name();
             results_SRSF12.sr_label = "SRSF12";
             results_SRSF12.n_observed = 1.;
             results_SRSF12.n_background = 0.7;
@@ -673,7 +660,6 @@ namespace Gambit {
 
             // Different falvor
             SignalRegionData results_SRDF0;
-            results_SRDF0.analysis_name = analysis_name();
             results_SRDF0.sr_label = "SRDF0";
             results_SRDF0.n_observed = 141.;
             results_SRDF0.n_background = 139.;
@@ -683,7 +669,6 @@ namespace Gambit {
             add_result(results_SRDF0);
 
             SignalRegionData results_SRDF1;
-            results_SRDF1.analysis_name = analysis_name();
             results_SRDF1.sr_label = "SRDF1";
             results_SRDF1.n_observed = 6.;
             results_SRDF1.n_background = 4.0;
@@ -693,7 +678,6 @@ namespace Gambit {
             add_result(results_SRDF1);
 
             SignalRegionData results_SRDF2;
-            results_SRDF2.analysis_name = analysis_name();
             results_SRDF2.sr_label = "SRDF2";
             results_SRDF2.n_observed = 67.;
             results_SRDF2.n_background = 70.;
@@ -703,7 +687,6 @@ namespace Gambit {
             add_result(results_SRDF2);
 
             SignalRegionData results_SRDF3;
-            results_SRDF3.analysis_name = analysis_name();
             results_SRDF3.sr_label = "SRDF3";
             results_SRDF3.n_observed = 5.;
             results_SRDF3.n_background = 3.9;
@@ -713,7 +696,6 @@ namespace Gambit {
             add_result(results_SRDF3);
 
             SignalRegionData results_SRDF4;
-            results_SRDF4.analysis_name = analysis_name();
             results_SRDF4.sr_label = "SRDF4";
             results_SRDF4.n_observed = 1.;
             results_SRDF4.n_background = 0.7;
@@ -723,7 +705,6 @@ namespace Gambit {
             add_result(results_SRDF4);
 
             SignalRegionData results_SRDF5;
-            results_SRDF5.analysis_name = analysis_name();
             results_SRDF5.sr_label = "SRDF5";
             results_SRDF5.n_observed = 1.;
             results_SRDF5.n_background = 2.1;
@@ -733,7 +714,6 @@ namespace Gambit {
             add_result(results_SRDF5);
 
             SignalRegionData results_SRDF6;
-            results_SRDF6.analysis_name = analysis_name();
             results_SRDF6.sr_label = "SRDF6";
             results_SRDF6.n_observed = 1.;
             results_SRDF6.n_background = 0.5;
@@ -743,7 +723,6 @@ namespace Gambit {
             add_result(results_SRDF6);
 
             SignalRegionData results_SRDF7;
-            results_SRDF7.analysis_name = analysis_name();
             results_SRDF7.sr_label = "SRDF7";
             results_SRDF7.n_observed = 0.;
             results_SRDF7.n_background = 0.3;
@@ -753,7 +732,6 @@ namespace Gambit {
             add_result(results_SRDF7);
 
             SignalRegionData results_SRDF8;
-            results_SRDF8.analysis_name = analysis_name();
             results_SRDF8.sr_label = "SRDF8";
             results_SRDF8.n_observed = 1.;
             results_SRDF8.n_background = 0.8;
@@ -763,7 +741,6 @@ namespace Gambit {
             add_result(results_SRDF8);
 
             SignalRegionData results_SRDF9;
-            results_SRDF9.analysis_name = analysis_name();
             results_SRDF9.sr_label = "SRDF9";
             results_SRDF9.n_observed = 0.;
             results_SRDF9.n_background = 0.9;
@@ -773,7 +750,6 @@ namespace Gambit {
             add_result(results_SRDF9);
 
             SignalRegionData results_SRDF10;
-            results_SRDF10.analysis_name = analysis_name();
             results_SRDF10.sr_label = "SRDF10";
             results_SRDF10.n_observed = 0.;
             results_SRDF10.n_background = 0.1;
@@ -783,7 +759,6 @@ namespace Gambit {
             add_result(results_SRDF10);
 
             SignalRegionData results_SRDF11;
-            results_SRDF11.analysis_name = analysis_name();
             results_SRDF11.sr_label = "SRDF11";
             results_SRDF11.n_observed = 1.;
             results_SRDF11.n_background = 1.2;
@@ -793,7 +768,6 @@ namespace Gambit {
             add_result(results_SRDF11);
 
             SignalRegionData results_SRDF12;
-            results_SRDF12.analysis_name = analysis_name();
             results_SRDF12.sr_label = "SRDF12";
             results_SRDF12.n_observed = 0.;
             results_SRDF12.n_background = 0.5;
@@ -804,7 +778,6 @@ namespace Gambit {
 
             // DF+SF
             SignalRegionData results_SRALL0;
-            results_SRALL0.analysis_name = analysis_name();
             results_SRALL0.sr_label = "SRALL0";
             results_SRALL0.n_observed = 253.;
             results_SRALL0.n_background = 271.;
@@ -814,7 +787,6 @@ namespace Gambit {
             add_result(results_SRALL0);
 
             SignalRegionData results_SRALL1;
-            results_SRALL1.analysis_name = analysis_name();
             results_SRALL1.sr_label = "SRALL1";
             results_SRALL1.n_observed = 13.;
             results_SRALL1.n_background = 8.1;
@@ -824,7 +796,6 @@ namespace Gambit {
             add_result(results_SRALL1);
 
             SignalRegionData results_SRALL2;
-            results_SRALL2.analysis_name = analysis_name();
             results_SRALL2.sr_label = "SRALL2";
             results_SRALL2.n_observed = 136.;
             results_SRALL2.n_background = 130.;
@@ -834,7 +805,6 @@ namespace Gambit {
             add_result(results_SRALL2);
 
             SignalRegionData results_SRALL3;
-            results_SRALL3.analysis_name = analysis_name();
             results_SRALL3.sr_label = "SRALL3";
             results_SRALL3.n_observed = 6.;
             results_SRALL3.n_background = 8.7;
@@ -844,7 +814,6 @@ namespace Gambit {
             add_result(results_SRALL3);
 
             SignalRegionData results_SRALL4;
-            results_SRALL4.analysis_name = analysis_name();
             results_SRALL4.sr_label = "SRALL4";
             results_SRALL4.n_observed = 1.;
             results_SRALL4.n_background = 1.2;
@@ -854,7 +823,6 @@ namespace Gambit {
             add_result(results_SRALL4);
 
             SignalRegionData results_SRALL5;
-            results_SRALL5.analysis_name = analysis_name();
             results_SRALL5.sr_label = "SRALL5";
             results_SRALL5.n_observed = 3.;
             results_SRALL5.n_background = 4.0;
@@ -864,7 +832,6 @@ namespace Gambit {
             add_result(results_SRALL5);
 
             SignalRegionData results_SRALL6;
-            results_SRALL6.analysis_name = analysis_name();
             results_SRALL6.sr_label = "SRALL6";
             results_SRALL6.n_observed = 3.;
             results_SRALL6.n_background = 1.5;
@@ -874,7 +841,6 @@ namespace Gambit {
             add_result(results_SRALL6);
 
             SignalRegionData results_SRALL7;
-            results_SRALL7.analysis_name = analysis_name();
             results_SRALL7.sr_label = "SRALL7";
             results_SRALL7.n_observed = 2.;
             results_SRALL7.n_background = 0.8;
@@ -884,7 +850,6 @@ namespace Gambit {
             add_result(results_SRALL7);
 
             SignalRegionData results_SRALL8;
-            results_SRALL8.analysis_name = analysis_name();
             results_SRALL8.sr_label = "SRALL8";
             results_SRALL8.n_observed = 2.;
             results_SRALL8.n_background = 2.9;
@@ -894,7 +859,6 @@ namespace Gambit {
             add_result(results_SRALL8);
 
             SignalRegionData results_SRALL9;
-            results_SRALL9.analysis_name = analysis_name();
             results_SRALL9.sr_label = "SRALL9";
             results_SRALL9.n_observed = 1.;
             results_SRALL9.n_background = 2.5;
@@ -904,7 +868,6 @@ namespace Gambit {
             add_result(results_SRALL9);
 
             SignalRegionData results_SRALL10;
-            results_SRALL10.analysis_name = analysis_name();
             results_SRALL10.sr_label = "SRALL10";
             results_SRALL10.n_observed = 0.;
             results_SRALL10.n_background = 0.4;
@@ -914,7 +877,6 @@ namespace Gambit {
             add_result(results_SRALL10);
 
             SignalRegionData results_SRALL11;
-            results_SRALL11.analysis_name = analysis_name();
             results_SRALL11.sr_label = "SRALL11";
             results_SRALL11.n_observed = 3.;
             results_SRALL11.n_background = 2.9;
@@ -924,7 +886,6 @@ namespace Gambit {
             add_result(results_SRALL11);
 
             SignalRegionData results_SRALL12;
-            results_SRALL12.analysis_name = analysis_name();
             results_SRALL12.sr_label = "SRALL12";
             results_SRALL12.n_observed = 1.;
             results_SRALL12.n_background = 1.1;
@@ -935,7 +896,6 @@ namespace Gambit {
 
             /*//Signal region A
             SignalRegionData results_SRA0;
-            results_SRA0.analysis_name = analysis_name();
             results_SRA0.sr_label = "SRA0";
             results_SRA0.n_observed = 22.;
             results_SRA0.n_background = 20.8;
@@ -945,7 +905,6 @@ namespace Gambit {
             add_result(results_SRA0);
 
             SignalRegionData results_SRA1;
-            results_SRA1.analysis_name = analysis_name();
             results_SRA1.sr_label = "SRA1";
             results_SRA1.n_observed = 6.;
             results_SRA1.n_background = 6.2;
@@ -955,7 +914,6 @@ namespace Gambit {
             add_result(results_SRA1);
 
             SignalRegionData results_SRA2;
-            results_SRA2.analysis_name = analysis_name();
             results_SRA2.sr_label = "SRA2";
             results_SRA2.n_observed = 1.;
             results_SRA2.n_background = 1.1;

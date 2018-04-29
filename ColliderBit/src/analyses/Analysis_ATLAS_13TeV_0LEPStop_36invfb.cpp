@@ -1200,24 +1200,24 @@ namespace Gambit {
         int _numSRC1, _numSRC2, _numSRC3, _numSRC4, _numSRC5;
         int _numSRD_low, _numSRD_high, _numSRE;*/
         
-        add_result(SignalRegionData(analysis_name(), "SRA-TT", 11, {_numSRA_TT,  0.}, {8.6, 2.1}));
-        add_result(SignalRegionData(analysis_name(), "SRA-TW", 9, {_numSRA_TW,  0.}, {9.3, 2.2}));
-        add_result(SignalRegionData(analysis_name(), "SRA-T0",  18, {_numSRA_T0,  0.}, {18.7, 2.7}));
-        add_result(SignalRegionData(analysis_name(), "SRB-TT",  38, {_numSRB_TT,  0.}, { 39.3,  7.6}));
-        add_result(SignalRegionData(analysis_name(), "SRB-TW", 53, {_numSRB_TW,  0.}, {52.4, 7.4}));
-        add_result(SignalRegionData(analysis_name(), "SRB-T0", 206, {_numSRB_T0,  0.}, { 179.,  26.}));
+        add_result(SignalRegionData("SRA-TT", 11, {_numSRA_TT,  0.}, {8.6, 2.1}));
+        add_result(SignalRegionData("SRA-TW", 9, {_numSRA_TW,  0.}, {9.3, 2.2}));
+        add_result(SignalRegionData("SRA-T0",  18, {_numSRA_T0,  0.}, {18.7, 2.7}));
+        add_result(SignalRegionData("SRB-TT",  38, {_numSRB_TT,  0.}, { 39.3,  7.6}));
+        add_result(SignalRegionData("SRB-TW", 53, {_numSRB_TW,  0.}, {52.4, 7.4}));
+        add_result(SignalRegionData("SRB-T0", 206, {_numSRB_T0,  0.}, { 179.,  26.}));
 
         // MJW removes the recursive jigsaw signal regions for the Feb 2018 SUSY scans
         // The ISR modelling in Pythia does not give reliable answers
-        /* add_result(SignalRegionData(analysis_name(), "SRC1", 20, {_numSRC1,  0.}, { 20.6,  6.5}));
-        add_result(SignalRegionData(analysis_name(), "SRC2", 22, {_numSRC2,  0.}, { 27.6,  4.9}));
-        add_result(SignalRegionData(analysis_name(), "SRC3", 22, {_numSRC3,  0.}, {  18.9, 3.4}));
-        add_result(SignalRegionData(analysis_name(), "SRC4", 1, {_numSRC4,  0.}, {  7.7, 1.2}));
-        add_result(SignalRegionData(analysis_name(), "SRC5", 0, {_numSRC5, 0.}, { 0.91,  0.73}));*/
+        /* add_result(SignalRegionData("SRC1", 20, {_numSRC1,  0.}, { 20.6,  6.5}));
+        add_result(SignalRegionData("SRC2", 22, {_numSRC2,  0.}, { 27.6,  4.9}));
+        add_result(SignalRegionData("SRC3", 22, {_numSRC3,  0.}, {  18.9, 3.4}));
+        add_result(SignalRegionData("SRC4", 1, {_numSRC4,  0.}, {  7.7, 1.2}));
+        add_result(SignalRegionData("SRC5", 0, {_numSRC5, 0.}, { 0.91,  0.73}));*/
         
-        add_result(SignalRegionData(analysis_name(), "SRD-low", 27, {_numSRD_low, 0.}, {  25.1, 6.2}));
-        add_result(SignalRegionData(analysis_name(), "SRD-high", 11, {_numSRD_high, 0.}, {  8.5,1.5}));
-        add_result(SignalRegionData(analysis_name(), "SRE", 3, {_numSRE, 0.}, {  3.64,0.79}));
+        add_result(SignalRegionData("SRD-low", 27, {_numSRD_low, 0.}, {  25.1, 6.2}));
+        add_result(SignalRegionData("SRD-high", 11, {_numSRD_high, 0.}, {  8.5,1.5}));
+        add_result(SignalRegionData("SRE", 3, {_numSRE, 0.}, {  3.64,0.79}));
 
         return;
       }

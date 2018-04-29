@@ -761,7 +761,6 @@ namespace Gambit {
         //They need to be added (but will probably update to paper result)
 
         SignalRegionData results_BC1;
-        results_BC1.analysis_name = analysis_name();
         results_BC1.sr_label = "BC1";
         results_BC1.n_observed = 456.;
         results_BC1.n_background = 482.;
@@ -770,7 +769,6 @@ namespace Gambit {
         results_BC1.n_signal = _numBC1;
 
         SignalRegionData results_BC2;
-        results_BC2.analysis_name = analysis_name();
         results_BC2.sr_label = "BC2";
         results_BC2.n_observed = 25.;
         results_BC2.n_background = 18.;
@@ -779,7 +777,6 @@ namespace Gambit {
         results_BC2.n_signal = _numBC2;
 
         SignalRegionData results_BC3;
-        results_BC3.analysis_name = analysis_name();
         results_BC3.sr_label = "BC3";
         results_BC3.n_observed = 6.;
         results_BC3.n_background = 7.;
@@ -788,7 +785,6 @@ namespace Gambit {
         results_BC3.n_signal = _numBC3;
 
         SignalRegionData results_TN2;
-        results_TN2.analysis_name = analysis_name();
         results_TN2.sr_label = "TN2";
         results_TN2.n_observed = 14.;
         results_TN2.n_background = 13.;
@@ -797,7 +793,6 @@ namespace Gambit {
         results_TN2.n_signal = _numTN2;
 
         SignalRegionData results_TN3;
-        results_TN3.analysis_name = analysis_name();
         results_TN3.sr_label = "TN3";
         results_TN3.n_observed = 7.;
         results_TN3.n_background = 5.;

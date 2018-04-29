@@ -49,7 +49,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-// #define COLLIDERBIT_DEBUG
+#define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -1783,12 +1783,11 @@ namespace Gambit
         // Loop over all AnalysisData pointers
         for (auto& adp : result)
         {
-          // Check number of signal regions
-          // @todo The AnalysisData object really should hold the analysis name, so that we can output it here...
-          //       Currently, the analysis name is stored in the SignalRegionData class. 
           if (adp->size() == 0)
           {
-            ColliderBit_error().raise(LOCAL_INFO, "ColliderBit encountered an analysis with 0 signal regions.");
+            str errmsg;
+            errmsg = "The analysis " + adp->analysis_name + " has no signal regions.";
+            ColliderBit_error().raise(LOCAL_INFO, errmsg);
           }
         }
         first = false;
@@ -1835,7 +1834,7 @@ namespace Gambit
         {
           // Save SR numbers and absolute uncertainties
           const SignalRegionData srData = adata[SR];
-          const str key = srData.analysis_name + "_" + srData.sr_label + "_signal";
+          const str key = adata.analysis_name + "_" + srData.sr_label + "_signal";
           result[key] = srData.n_signal_at_lumi;
           const double abs_uncertainty_s_stat = (srData.n_signal == 0 ? 0 : sqrt(srData.n_signal) * (srData.n_signal_at_lumi/srData.n_signal));
           const double abs_uncertainty_s_sys = srData.signal_sys;
@@ -1859,18 +1858,15 @@ namespace Gambit
         // AnalysisData for this analysis
         const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
-        // Output map key
-        string analysis_name = adata.begin()->analysis_name;
-
         #ifdef COLLIDERBIT_DEBUG
         std::streamsize stream_precision = cout.precision();  // get current precision
         cout.precision(2);  // set precision
-        cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << "Will print content of " << analysis_name << " signal regions:" << endl;
+        cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << "Will print content of " << adata.analysis_name << " signal regions:" << endl;
         for (size_t SR = 0; SR < adata.size(); ++SR)
         {
           const SignalRegionData& srData = adata[SR];
           cout << std::fixed << debug_prefix() 
-                                 << "calc_LHC_LogLike_per_analysis: " << analysis_name 
+                                 << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name 
                                  << ", " << srData.sr_label 
                                  << ",  n_b = " << srData.n_background << " +/- " << srData.background_sys
                                  << ",  n_obs = " << srData.n_observed 
@@ -1889,7 +1885,7 @@ namespace Gambit
         ///       don't rely on event generation.
         if (!eventsGenerated || nFailedEvents > maxFailedEvents)
         {
-          result[analysis_name] = 0.0;
+          result[adata.analysis_name] = 0.0;
           continue;
         }
 
@@ -2018,7 +2014,7 @@ namespace Gambit
           if (Utils::isnan(ana_dll))
           {
             std::stringstream msg;
-            msg << "Computation of composite loglike for analysis " << analysis_name << " returned NaN. Will now print the signal region data for this analysis:" << endl;
+            msg << "Computation of composite loglike for analysis " << adata.analysis_name << " returned NaN. Will now print the signal region data for this analysis:" << endl;
             for (size_t SR = 0; SR < adata.size(); ++SR)
             {
               const SignalRegionData& srData = adata[SR];
@@ -2035,10 +2031,10 @@ namespace Gambit
           }
 
           // Store result
-          result[analysis_name] = ana_dll;
+          result[adata.analysis_name] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_DeltaLogLike : " << ana_dll << endl;
+          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name << "_DeltaLogLike : " << ana_dll << endl;
           #endif
 
 
@@ -2088,7 +2084,7 @@ namespace Gambit
           // }
 
           // // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
-          // result[analysis_name + "_DeltaLogLike"] = -ana_dll;
+          // result[adata.analysis_name + "_DeltaLogLike"] = -ana_dll;
 
         }
 
@@ -2143,7 +2139,7 @@ namespace Gambit
             // Calculate the expected dll and set the bestexp values for exp and obs dll if this one is the best so far
             const double dll_exp = llb_exp - llsb_exp; //< note positive dll convention -> more exclusion here
             #ifdef COLLIDERBIT_DEBUG
-            cout << debug_prefix() << analysis_name << ", " << srData.sr_label << ",  llsb_exp-llb_exp = " << llsb_exp-llb_exp << ",  llsb_obs-llb_obs= " << llsb_obs - llb_obs << endl;
+            cout << debug_prefix() << adata.analysis_name << ", " << srData.sr_label << ",  llsb_exp-llb_exp = " << llsb_exp-llb_exp << ",  llsb_obs-llb_obs= " << llsb_obs - llb_obs << endl;
             #endif
             if (dll_exp > bestexp_dll_exp || SR == 0)
             {
@@ -2158,7 +2154,7 @@ namespace Gambit
             // // For debugging: print some useful numbers to the log.
             // #ifdef COLLIDERBIT_DEBUG
             // cout << endl;
-            // cout << debug_prefix() << "COLLIDER_RESULT: " << srData.analysis_name << ", SR: " << srData.sr_label << endl;
+            // cout << debug_prefix() << "COLLIDER_RESULT: " << adata.analysis_name << ", SR: " << srData.sr_label << endl;
             // cout << debug_prefix() << "  LLikes: b_ex      sb_ex     b_obs     sb_obs    (sb_obs-b_obs)" << endl;
             // cout << debug_prefix() << "          " << llb_exp << "  " << llsb_exp << "  " << llb_obs << "  " << llsb_obs << "  " << llsb_obs-llb_obs << endl;
             // cout << debug_prefix() << "  NEvents, not scaled to luminosity: " << srData.n_signal << endl;
@@ -2175,7 +2171,7 @@ namespace Gambit
           if (Utils::isnan(bestexp_dll_obs))
           {
             std::stringstream msg;
-            msg << "Computation of single-SR loglike for analysis " << analysis_name << " returned NaN, from signal region: " << bestexp_sr_label << endl;
+            msg << "Computation of single-SR loglike for analysis " << adata.analysis_name << " returned NaN, from signal region: " << bestexp_sr_label << endl;
             msg << "Will now print the signal region data for this analysis:" << endl;
             for (size_t SR = 0; SR < adata.size(); ++SR)
             {
@@ -2193,10 +2189,10 @@ namespace Gambit
           }
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
-          result[analysis_name] = -bestexp_dll_obs;
+          result[adata.analysis_name] = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
+          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
           #endif
         }
 

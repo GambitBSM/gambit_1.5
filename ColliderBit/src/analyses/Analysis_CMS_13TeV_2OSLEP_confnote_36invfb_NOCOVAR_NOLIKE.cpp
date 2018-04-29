@@ -332,7 +332,7 @@ namespace Gambit {
 
         for (size_t ibin = 0; ibin < SR_size; ++ibin) {
           stringstream ss; ss << "SR-" << SR_labels[ibin];
-          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {SR_nums[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
       }

@@ -111,7 +111,7 @@ namespace Gambit {
         };
         for (size_t ibin = 0; ibin < NUMSR; ++ibin) {
           stringstream ss; ss << "sr-" << ibin;
-          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {_srnums[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {_srnums[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
         // Commented out covariance matrix for now, as it currently is a bit

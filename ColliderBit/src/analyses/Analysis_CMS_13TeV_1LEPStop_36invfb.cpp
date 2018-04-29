@@ -393,7 +393,7 @@ namespace Gambit {
 
 //            for (size_t ibin = 0; ibin < NUM_SR; ++ibin) {
 //                stringstream ss; ss << "sr-" << ibin;
-//                add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+//                add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
 //                //cout << ss.str() << ":  "<< _SR[ibin] << endl;
 //            }
             
@@ -403,7 +403,7 @@ namespace Gambit {
             static const double aggregateBKGERR[NUM_aggregateSR] = {0.9,    3.2,    1.8,    1.5,    0.5,    2.5};
             for (size_t ibin = 0; ibin < NUM_aggregateSR; ++ibin) {
                 stringstream ass; ass << "aggregate_sr-" << ibin;
-                add_result(SignalRegionData(analysis_name(), ass.str(), aggregateOBSNUM[ibin], {_aggregateSR[ibin],  0.}, {aggregateBKGNUM[ibin], aggregateBKGERR[ibin]}));
+                add_result(SignalRegionData(ass.str(), aggregateOBSNUM[ibin], {_aggregateSR[ibin],  0.}, {aggregateBKGNUM[ibin], aggregateBKGERR[ibin]}));
                 // cout << ass.str() << ":  "<< _aggregateSR[ibin] << endl;
             }
             

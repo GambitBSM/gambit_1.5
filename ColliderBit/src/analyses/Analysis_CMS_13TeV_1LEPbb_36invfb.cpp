@@ -385,7 +385,6 @@ namespace Gambit {
  //        cutflowFile.close();
 
         SignalRegionData results_SRA;
-        results_SRA.analysis_name = analysis_name();
         results_SRA.sr_label = "SRA";
         results_SRA.n_observed = 11.;
         results_SRA.n_background = 7.5; 
@@ -395,7 +394,6 @@ namespace Gambit {
         add_result(results_SRA);
 
         SignalRegionData results_SRB;
-        results_SRB.analysis_name = analysis_name();
         results_SRB.sr_label = "SRB";
         results_SRB.n_observed = 7.;
         results_SRB.n_background = 8.7; 

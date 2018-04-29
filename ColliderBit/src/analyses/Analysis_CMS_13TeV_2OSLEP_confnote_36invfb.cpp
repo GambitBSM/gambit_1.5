@@ -332,7 +332,7 @@ namespace Gambit {
 
         for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
           stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
-          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
         // Covariance matrix
@@ -352,7 +352,6 @@ namespace Gambit {
 
         // //Now fill a results object with the results for each SR
         // SignalRegionData results_SR1;
-        // results_SR1.analysis_name = analysis_name();
         // results_SR1.sr_label = "SR1";
         // results_SR1.n_observed = 793.;
         // results_SR1.n_background = 793.; 
@@ -362,7 +361,6 @@ namespace Gambit {
         // add_result(results_SR1);
 
         // SignalRegionData results_SR2;
-        // results_SR2.analysis_name = analysis_name();
         // results_SR2.sr_label = "SR2";
         // results_SR2.n_observed = 57.;
         // results_SR2.n_background = 54.9;
@@ -372,7 +370,6 @@ namespace Gambit {
         // add_result(results_SR2);
 
         // SignalRegionData results_SR3;
-        // results_SR3.analysis_name = analysis_name();
         // results_SR3.sr_label = "SR3";
         // results_SR3.n_observed = 29.;
         // results_SR3.n_background = 21.6;
@@ -382,7 +379,6 @@ namespace Gambit {
         // add_result(results_SR3);
 
         // SignalRegionData results_SR4;
-        // results_SR4.analysis_name = analysis_name();
         // results_SR4.sr_label = "SR4";
         // results_SR4.n_observed = 2.;
         // results_SR4.n_background = 6.;
@@ -392,7 +388,6 @@ namespace Gambit {
         // add_result(results_SR4);
 
         // SignalRegionData results_SR5;
-        // results_SR5.analysis_name = analysis_name();
         // results_SR5.sr_label = "SR5";
         // results_SR5.n_observed = 0.;
         // results_SR5.n_background = 2.5;
@@ -402,7 +397,6 @@ namespace Gambit {
         // add_result(results_SR5);
 
         // SignalRegionData results_SR6;
-        // results_SR6.analysis_name = analysis_name();
         // results_SR6.sr_label = "SR6";
         // results_SR6.n_observed = 82;
         // results_SR6.n_background = 82.;
@@ -412,7 +406,6 @@ namespace Gambit {
         // add_result(results_SR6);
 
         // SignalRegionData results_SR7;
-        // results_SR7.analysis_name = analysis_name();
         // results_SR7.sr_label = "SR7";
         // results_SR7.n_observed = 9.;
         // results_SR7.n_background = 7.6;
@@ -422,7 +415,6 @@ namespace Gambit {
         // add_result(results_SR7);
 
         // SignalRegionData results_SR8;
-        // results_SR8.analysis_name = analysis_name();
         // results_SR8.sr_label = "SR8";
         // results_SR8.n_observed = 5.;
         // results_SR8.n_background = 5.6;
@@ -432,7 +424,6 @@ namespace Gambit {
         // add_result(results_SR8);
 
         // SignalRegionData results_SR9;
-        // results_SR9.analysis_name = analysis_name();
         // results_SR9.sr_label = "SR9";
         // results_SR9.n_observed = 1.;
         // results_SR9.n_background = 1.3;

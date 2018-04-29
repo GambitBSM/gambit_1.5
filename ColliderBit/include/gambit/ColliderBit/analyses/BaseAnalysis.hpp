@@ -106,8 +106,12 @@ namespace Gambit {
       /// Set the cross-section and its error (in pb).
       void set_luminosity(double lumi) { _luminosity_is_set = true; _luminosity = lumi; }
       /// Set the analysis name
-      void set_analysis_name(std::string aname) { _analysis_name = aname; }
-      /// Set the analysis name
+      void set_analysis_name(std::string aname) 
+      {
+        _analysis_name = aname;
+        _results.analysis_name = _analysis_name;
+      }
+      /// Get the analysis name
       std::string analysis_name() { return _analysis_name; }
 
 

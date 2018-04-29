@@ -224,7 +224,6 @@ namespace Gambit {
 
       void collect_results() {
         SignalRegionData results_SR;
-        results_SR.analysis_name = analysis_name();
         results_SR.sr_label = "SR";
         results_SR.n_observed = 18.;
         results_SR.n_background = 16.4;

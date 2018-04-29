@@ -367,7 +367,6 @@ namespace Gambit {
 
 // cout<<"NUMSRA: "<<_numSRA<<" NUMSRB: "<<_numSRB<<endl;
         SignalRegionData results_SRA;
-        results_SRA.analysis_name = analysis_name();
         results_SRA.sr_label = "SRA";
         results_SRA.n_observed = 4.;
         results_SRA.n_background = 5.69; 
@@ -377,7 +376,6 @@ namespace Gambit {
         add_result(results_SRA);
 
         SignalRegionData results_SRB;
-        results_SRB.analysis_name = analysis_name();
         results_SRB.sr_label = "SRB";
         results_SRB.n_observed = 3.;
         results_SRB.n_background = 2.67; 

@@ -379,28 +379,28 @@ namespace Gambit {
 
       /// Register results objects with the results for each SR; obs & bkg numbers from the CONF note
       void collect_results() {
-        add_result(SignalRegionData(analysis_name(), "meff-2j-1200", 611, {num_2j_1200,  0.}, {526., 31.}));
-        add_result(SignalRegionData(analysis_name(), "meff-2j-1600",  216, {num_2j_1600,  0.}, {228., 19.}));
-        add_result(SignalRegionData(analysis_name(), "meff-2j-2000",  73, {num_2j_2000,  0.}, { 90.,  10.}));
-        add_result(SignalRegionData(analysis_name(), "meff-2j-2400",  34, {num_2j_2400,  0.}, { 42.,  4.}));
-        add_result(SignalRegionData(analysis_name(), "meff-2j-2800",  19, {num_2j_2800,  0.}, { 17.3,  2.0}));
-        add_result(SignalRegionData(analysis_name(), "meff-2j-3600",  5, {num_2j_3600,  0.}, { 3.6,  0.9}));
-        add_result(SignalRegionData(analysis_name(), "meff-2j-2100",  190, {num_2j_2100,  0.}, { 153.,  14.}));
-        add_result(SignalRegionData(analysis_name(), "meff-3j-1300",  429, {num_3j_1300,  0.}, { 390.,  29.}));
-        add_result(SignalRegionData(analysis_name(), "meff-4j-1000",  142, {num_4j_1000,  0.}, { 124.,  12.}));
-        add_result(SignalRegionData(analysis_name(), "meff-4j-1400",  199, {num_4j_1400,  0.}, { 182.,  16.}));
-        add_result(SignalRegionData(analysis_name(), "meff-4j-1800",  55, {num_4j_1800,  0.}, { 49.,  7.}));
-        add_result(SignalRegionData(analysis_name(), "meff-4j-2200",  24, {num_4j_2200,  0.}, { 16.5,  2.7}));
-        add_result(SignalRegionData(analysis_name(), "meff-4j-2600",  4, {num_4j_2600,  0.}, { 5.8,  2.}));
-        add_result(SignalRegionData(analysis_name(), "meff-4j-3000",  2, {num_4j_3000,  0.}, { 2.0,  0.6}));
-        add_result(SignalRegionData(analysis_name(), "meff-5j-1700",  49, {num_5j_1700,  0.}, { 43.,  5.}));
-        add_result(SignalRegionData(analysis_name(), "meff-5j-1600",  135, {num_5j_1600,  0.}, { 128.,  14.}));
-        add_result(SignalRegionData(analysis_name(), "meff-5j-2000",  59, {num_5j_2000,  0.}, { 65.,  7.}));
-        add_result(SignalRegionData(analysis_name(), "meff-5j-2600",  10, {num_5j_2600,  0.}, { 9.4,  2.1}));
-        add_result(SignalRegionData(analysis_name(), "meff-6j-1200",  276, {num_6j_1200,  0.}, { 274.,  32.}));
-        add_result(SignalRegionData(analysis_name(), "meff-6j-1800",  9, {num_6j_1800,  0.}, { 5.1,  1.8}));
-        add_result(SignalRegionData(analysis_name(), "meff-6j-2200",  3, {num_6j_2200,  0.}, { 3.1,  1.3}));
-        add_result(SignalRegionData(analysis_name(), "meff-6j-2600",  1, {num_6j_2600,  0.}, { 2.2,  1.4}));
+        add_result(SignalRegionData("meff-2j-1200", 611, {num_2j_1200,  0.}, {526., 31.}));
+        add_result(SignalRegionData("meff-2j-1600",  216, {num_2j_1600,  0.}, {228., 19.}));
+        add_result(SignalRegionData("meff-2j-2000",  73, {num_2j_2000,  0.}, { 90.,  10.}));
+        add_result(SignalRegionData("meff-2j-2400",  34, {num_2j_2400,  0.}, { 42.,  4.}));
+        add_result(SignalRegionData("meff-2j-2800",  19, {num_2j_2800,  0.}, { 17.3,  2.0}));
+        add_result(SignalRegionData("meff-2j-3600",  5, {num_2j_3600,  0.}, { 3.6,  0.9}));
+        add_result(SignalRegionData("meff-2j-2100",  190, {num_2j_2100,  0.}, { 153.,  14.}));
+        add_result(SignalRegionData("meff-3j-1300",  429, {num_3j_1300,  0.}, { 390.,  29.}));
+        add_result(SignalRegionData("meff-4j-1000",  142, {num_4j_1000,  0.}, { 124.,  12.}));
+        add_result(SignalRegionData("meff-4j-1400",  199, {num_4j_1400,  0.}, { 182.,  16.}));
+        add_result(SignalRegionData("meff-4j-1800",  55, {num_4j_1800,  0.}, { 49.,  7.}));
+        add_result(SignalRegionData("meff-4j-2200",  24, {num_4j_2200,  0.}, { 16.5,  2.7}));
+        add_result(SignalRegionData("meff-4j-2600",  4, {num_4j_2600,  0.}, { 5.8,  2.}));
+        add_result(SignalRegionData("meff-4j-3000",  2, {num_4j_3000,  0.}, { 2.0,  0.6}));
+        add_result(SignalRegionData("meff-5j-1700",  49, {num_5j_1700,  0.}, { 43.,  5.}));
+        add_result(SignalRegionData("meff-5j-1600",  135, {num_5j_1600,  0.}, { 128.,  14.}));
+        add_result(SignalRegionData("meff-5j-2000",  59, {num_5j_2000,  0.}, { 65.,  7.}));
+        add_result(SignalRegionData("meff-5j-2600",  10, {num_5j_2600,  0.}, { 9.4,  2.1}));
+        add_result(SignalRegionData("meff-6j-1200",  276, {num_6j_1200,  0.}, { 274.,  32.}));
+        add_result(SignalRegionData("meff-6j-1800",  9, {num_6j_1800,  0.}, { 5.1,  1.8}));
+        add_result(SignalRegionData("meff-6j-2200",  3, {num_6j_2200,  0.}, { 3.1,  1.3}));
+        add_result(SignalRegionData("meff-6j-2600",  1, {num_6j_2600,  0.}, { 2.2,  1.4}));
         
         // const double sf = 13.3*crossSection()/femtobarn/sumOfWeights();
         // _flows.scale(sf);

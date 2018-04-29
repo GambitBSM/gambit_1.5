@@ -411,7 +411,7 @@ namespace Gambit {
 
         for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
           stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
-          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
         // Covariance matrix

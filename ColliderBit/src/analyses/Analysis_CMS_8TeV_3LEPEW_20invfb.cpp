@@ -399,7 +399,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_highmt[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -435,7 +434,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_medmt[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -470,7 +468,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_lowmt[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -503,7 +500,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_highmt_osof[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -534,7 +530,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_medmt_osof[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -565,7 +560,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_lowmt_osof[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -597,7 +591,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_highmt_ss1tau[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -628,7 +621,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_medmt_ss1tau[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -660,7 +652,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_lowmt_ss1tau[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -693,7 +684,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_highmt_osof1tau[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -724,7 +714,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_medmt_osof1tau[region];
           results_tmp.sr_label = convert->str();
           delete convert;
@@ -756,7 +745,6 @@ namespace Gambit {
           SignalRegionData results_tmp;
           convert = new std::ostringstream();
 
-          results_tmp.analysis_name = analysis_name();
           (*convert) << regions_lowmt_osof1tau[region];
           results_tmp.sr_label = convert->str();
           delete convert;
