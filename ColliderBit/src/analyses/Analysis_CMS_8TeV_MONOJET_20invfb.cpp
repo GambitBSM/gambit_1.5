@@ -42,7 +42,9 @@ namespace Gambit {
         : _num250(0),_num300(0),_num350(0),_num400(0),_num450(0),_num500(0),_num550(0),
           NCUTS(12)
       {
+        set_analysis_name("CMS_8TeV_MONOJET_20invfb");
         set_luminosity(19.7);
+
         for (int i=0; i<NCUTS; i++) {
           cutFlowVector.push_back(0);
           cutFlowVector_str.push_back("");
@@ -214,7 +216,7 @@ namespace Gambit {
 
       void collect_results() {
         SignalRegionData results_250;
-        results_250.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_250.analysis_name = analysis_name();
         results_250.sr_label = "250";
         results_250.n_observed = 52200.;
         results_250.n_background = 51800.;
@@ -223,7 +225,7 @@ namespace Gambit {
         results_250.n_signal = _num250;
 
         SignalRegionData results_300;
-        results_300.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_300.analysis_name = analysis_name();
         results_300.sr_label = "300";
         results_300.n_observed = 19800.;
         results_300.n_background = 19600.;
@@ -232,7 +234,7 @@ namespace Gambit {
         results_300.n_signal = _num300;
 
         SignalRegionData results_350;
-        results_350.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_350.analysis_name = analysis_name();
         results_350.sr_label = "350";
         results_350.n_observed = 8320.;
         results_350.n_background = 8190.;
@@ -241,7 +243,7 @@ namespace Gambit {
         results_350.n_signal = _num350;
 
         SignalRegionData results_400;
-        results_400.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_400.analysis_name = analysis_name();
         results_400.sr_label = "400";
         results_400.n_observed = 3830.;
         results_400.n_background = 3930.;
@@ -250,7 +252,7 @@ namespace Gambit {
         results_400.n_signal = _num400;
 
         SignalRegionData results_450;
-        results_450.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_450.analysis_name = analysis_name();
         results_450.sr_label = "450";
         results_450.n_observed = 1830.;
         results_450.n_background = 2050.;
@@ -259,7 +261,7 @@ namespace Gambit {
         results_450.n_signal = _num450;
 
         SignalRegionData results_500;
-        results_500.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_500.analysis_name = analysis_name();
         results_500.sr_label = "500";
         results_500.n_observed = 934.;
         results_500.n_background = 1040.;
@@ -268,7 +270,7 @@ namespace Gambit {
         results_500.n_signal = _num500;
 
         SignalRegionData results_550;
-        results_550.analysis_name = "Analysis_CMS_8TeV_MONOJET_20invfb";
+        results_550.analysis_name = analysis_name();
         results_550.sr_label = "550";
         results_550.n_observed = 519.;
         results_550.n_background = 509.;

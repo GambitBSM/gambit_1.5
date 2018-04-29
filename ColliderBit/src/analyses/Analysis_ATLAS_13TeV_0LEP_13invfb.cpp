@@ -28,6 +28,8 @@ namespace Gambit {
       Cutflows _flows;
 
       Analysis_ATLAS_13TeV_0LEP_13invfb() {
+
+        set_analysis_name("ATLAS_13TeV_0LEP_13invfb");
         set_luminosity(13.3);
 
         // Book cut-flows
@@ -268,20 +270,19 @@ namespace Gambit {
 
       /// Register results objects with the results for each SR; obs & bkg numbers from the CONF note
       void collect_results() {
-        static const string ANAME = "Analysis_ATLAS_13TeV_0LEP_13invfb";
-        add_result(SignalRegionData(ANAME, "meff-2j-0800", 650, {_srnums[0],  0.}, {610., 50.}));
-        add_result(SignalRegionData(ANAME, "meff-2j-1200", 270, {_srnums[1],  0.}, {297., 29.}));
-        add_result(SignalRegionData(ANAME, "meff-2j-1600",  96, {_srnums[2],  0.}, {121., 13.}));
-        add_result(SignalRegionData(ANAME, "meff-2j-2000",  29, {_srnums[3],  0.}, { 42.,  6.}));
-        add_result(SignalRegionData(ANAME, "meff-3j-1200", 363, {_srnums[4],  0.}, {355., 33.}));
-        add_result(SignalRegionData(ANAME, "meff-4j-1000",  97, {_srnums[5],  0.}, { 84.,  7.}));
-        add_result(SignalRegionData(ANAME, "meff-4j-1400",  71, {_srnums[6],  0.}, { 66.,  8.}));
-        add_result(SignalRegionData(ANAME, "meff-4j-1800",  37, {_srnums[7],  0.}, { 27.,  3.2}));
-        add_result(SignalRegionData(ANAME, "meff-4j-2200",  10, {_srnums[8],  0.}, {  4.8, 1.1}));
-        add_result(SignalRegionData(ANAME, "meff-4j-2600",   3, {_srnums[9],  0.}, {  2.7, 0.6}));
-        add_result(SignalRegionData(ANAME, "meff-5j-1400",  64, {_srnums[10], 0.}, { 68.,  9.}));
-        add_result(SignalRegionData(ANAME, "meff-6j-1800",  10, {_srnums[11], 0.}, {  5.5, 1.0}));
-        add_result(SignalRegionData(ANAME, "meff-6j-2200",   1, {_srnums[12], 0.}, {  0.82,0.35}));
+        add_result(SignalRegionData(analysis_name(), "meff-2j-0800", 650, {_srnums[0],  0.}, {610., 50.}));
+        add_result(SignalRegionData(analysis_name(), "meff-2j-1200", 270, {_srnums[1],  0.}, {297., 29.}));
+        add_result(SignalRegionData(analysis_name(), "meff-2j-1600",  96, {_srnums[2],  0.}, {121., 13.}));
+        add_result(SignalRegionData(analysis_name(), "meff-2j-2000",  29, {_srnums[3],  0.}, { 42.,  6.}));
+        add_result(SignalRegionData(analysis_name(), "meff-3j-1200", 363, {_srnums[4],  0.}, {355., 33.}));
+        add_result(SignalRegionData(analysis_name(), "meff-4j-1000",  97, {_srnums[5],  0.}, { 84.,  7.}));
+        add_result(SignalRegionData(analysis_name(), "meff-4j-1400",  71, {_srnums[6],  0.}, { 66.,  8.}));
+        add_result(SignalRegionData(analysis_name(), "meff-4j-1800",  37, {_srnums[7],  0.}, { 27.,  3.2}));
+        add_result(SignalRegionData(analysis_name(), "meff-4j-2200",  10, {_srnums[8],  0.}, {  4.8, 1.1}));
+        add_result(SignalRegionData(analysis_name(), "meff-4j-2600",   3, {_srnums[9],  0.}, {  2.7, 0.6}));
+        add_result(SignalRegionData(analysis_name(), "meff-5j-1400",  64, {_srnums[10], 0.}, { 68.,  9.}));
+        add_result(SignalRegionData(analysis_name(), "meff-6j-1800",  10, {_srnums[11], 0.}, {  5.5, 1.0}));
+        add_result(SignalRegionData(analysis_name(), "meff-6j-2200",   1, {_srnums[12], 0.}, {  0.82,0.35}));
 
         // const double sf = 13.3*crossSection()/femtobarn/sumOfWeights();
         // _flows.scale(sf);

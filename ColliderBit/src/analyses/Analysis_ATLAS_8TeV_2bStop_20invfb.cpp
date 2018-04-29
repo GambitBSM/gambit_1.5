@@ -42,9 +42,11 @@ namespace Gambit {
 
       Analysis_ATLAS_8TeV_2bStop_20invfb() {
 
+        set_analysis_name("ATLAS_8TeV_2bStop_20invfb");
+        set_luminosity(20.1);
+
         _numSRA = 0 ; _numSRB = 0; _numSRA15 = 0; _numSRA20 = 0; _numSRA25 = 0; _numSRA30 = 0; _numSRA35 = 0;
         NCUTS=30;
-        set_luminosity(20.1);
 
         for(int i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
@@ -390,7 +392,7 @@ namespace Gambit {
 
       void collect_results() {
         SignalRegionData results_SRA15;
-        results_SRA15.analysis_name = "Analysis_ATLAS_8TeV_2bStop_20invfb";
+        results_SRA15.analysis_name = analysis_name();
         results_SRA15.sr_label = "SRA15";
         results_SRA15.n_observed = 102.;
         results_SRA15.n_background = 94.;
@@ -399,7 +401,7 @@ namespace Gambit {
         results_SRA15.n_signal = _numSRA15;
 
         SignalRegionData results_SRA20;
-        results_SRA20.analysis_name = "Analysis_ATLAS_8TeV_2bStop_20invfb";
+        results_SRA20.analysis_name = analysis_name();
         results_SRA20.sr_label = "SRA20";
         results_SRA20.n_observed = 48.;
         results_SRA20.n_background = 39.;
@@ -408,7 +410,7 @@ namespace Gambit {
         results_SRA20.n_signal = _numSRA20;
 
         SignalRegionData results_SRA25;
-        results_SRA25.analysis_name = "Analysis_ATLAS_8TeV_2bStop_20invfb";
+        results_SRA25.analysis_name = analysis_name();
         results_SRA25.sr_label = "SRA25";
         results_SRA25.n_observed = 14.;
         results_SRA25.n_background = 15.8;
@@ -417,7 +419,7 @@ namespace Gambit {
         results_SRA25.n_signal = _numSRA25;
 
         SignalRegionData results_SRA30;
-        results_SRA30.analysis_name = "Analysis_ATLAS_8TeV_2bStop_20invfb";
+        results_SRA30.analysis_name = analysis_name();
         results_SRA30.sr_label = "SRA30";
         results_SRA30.n_observed = 7.;
         results_SRA30.n_background = 5.9;
@@ -426,7 +428,7 @@ namespace Gambit {
         results_SRA30.n_signal = _numSRA30;
 
         SignalRegionData results_SRA35;
-        results_SRA35.analysis_name = "Analysis_ATLAS_8TeV_2bStop_20invfb";
+        results_SRA35.analysis_name = analysis_name();
         results_SRA35.sr_label = "SRA35";
         results_SRA35.n_observed = 3.;
         results_SRA35.n_background = 2.5;
@@ -435,7 +437,7 @@ namespace Gambit {
         results_SRA35.n_signal = _numSRA35;
 
         SignalRegionData results_SRB;
-        results_SRB.analysis_name = "Analysis_ATLAS_8TeV_2bStop_20invfb";
+        results_SRB.analysis_name = analysis_name();
         results_SRB.sr_label = "SRB";
         results_SRB.n_observed = 65.;
         results_SRB.n_background = 64.;

@@ -103,6 +103,9 @@ namespace Gambit {
 
         Analysis_ATLAS_13TeV_2LEPStop_36invfb() {
 
+            set_analysis_name("ATLAS_13TeV_2LEPStop_36invfb");
+            set_luminosity(36.1);
+
             _SRASF120=0; _SRADF120=0; _SRASF140=0; _SRADF140=0;
             _SRASF160=0; _SRADF160=0; _SRASF180=0; _SRADF180=0;
             _SRBSF120=0; _SRBDF120=0; _SRBSF140=0; _SRBDF140=0;
@@ -111,7 +114,6 @@ namespace Gambit {
             _SR4b=0;
           
             NCUTS= 66;  
-            set_luminosity(36.1);
 
             // //debug
             // Savelep1.open("lep1.txt");
@@ -587,7 +589,7 @@ namespace Gambit {
 
             // signal regin 2-body A 
             SignalRegionData results_SRASF120;
-            results_SRASF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF120.analysis_name = analysis_name();
             results_SRASF120.sr_label = "SRASF120";
             results_SRASF120.n_observed = 22.;
             results_SRASF120.n_background = 20.0;
@@ -597,7 +599,7 @@ namespace Gambit {
             add_result(results_SRASF120);
 
             SignalRegionData results_SRADF120;
-            results_SRADF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF120.analysis_name = analysis_name();
             results_SRADF120.sr_label = "SRADF120";
             results_SRADF120.n_observed = 27.;
             results_SRADF120.n_background = 23.8;
@@ -607,7 +609,7 @@ namespace Gambit {
             add_result(results_SRADF120);
 
             SignalRegionData results_SRASF140;
-            results_SRASF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF140.analysis_name = analysis_name();
             results_SRASF140.sr_label = "SRASF140";
             results_SRASF140.n_observed = 6.;
             results_SRASF140.n_background = 11.0;
@@ -617,7 +619,7 @@ namespace Gambit {
             add_result(results_SRASF140);
 
             SignalRegionData results_SRADF140;
-            results_SRADF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF140.analysis_name = analysis_name();
             results_SRADF140.sr_label = "SRADF140";
             results_SRADF140.n_observed = 6.;
             results_SRADF140.n_background = 10.8;
@@ -627,7 +629,7 @@ namespace Gambit {
             add_result(results_SRADF140);
             
             SignalRegionData results_SRASF160;
-            results_SRASF160.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF160.analysis_name = analysis_name();
             results_SRASF160.sr_label = "SRASF160";
             results_SRASF160.n_observed = 10.;
             results_SRASF160.n_background = 5.6;
@@ -637,7 +639,7 @@ namespace Gambit {
             add_result(results_SRASF160);
 
             SignalRegionData results_SRADF160;
-            results_SRADF160.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF160.analysis_name = analysis_name();
             results_SRADF160.sr_label = "SRADF160";
             results_SRADF160.n_observed = 7.;
             results_SRADF160.n_background = 6.4;
@@ -647,7 +649,7 @@ namespace Gambit {
             add_result(results_SRADF160);
 
             SignalRegionData results_SRASF180;
-            results_SRASF180.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRASF180.analysis_name = analysis_name();
             results_SRASF180.sr_label = "SRASF180";
             results_SRASF180.n_observed = 16.;
             results_SRASF180.n_background = 12.3;
@@ -657,7 +659,7 @@ namespace Gambit {
             add_result(results_SRASF180);
 
             SignalRegionData results_SRADF180;
-            results_SRADF180.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRADF180.analysis_name = analysis_name();
             results_SRADF180.sr_label = "SRADF180";
             results_SRADF180.n_observed = 8.;
             results_SRADF180.n_background = 5.4;
@@ -668,7 +670,7 @@ namespace Gambit {
 
             // signal regin 2-body B
             SignalRegionData results_SRBSF120;
-            results_SRBSF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBSF120.analysis_name = analysis_name();
             results_SRBSF120.sr_label = "SRBSF120";
             results_SRBSF120.n_observed = 17.;
             results_SRBSF120.n_background = 16.3;
@@ -678,7 +680,7 @@ namespace Gambit {
             add_result(results_SRBSF120);
 
             SignalRegionData results_SRBDF120;
-            results_SRBDF120.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBDF120.analysis_name = analysis_name();
             results_SRBDF120.sr_label = "SRBDF120";
             results_SRBDF120.n_observed = 13.;
             results_SRBDF120.n_background = 16.1;
@@ -688,7 +690,7 @@ namespace Gambit {
             add_result(results_SRBDF120);
 
             SignalRegionData results_SRBSF140;
-            results_SRBSF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBSF140.analysis_name = analysis_name();
             results_SRBSF140.sr_label = "SRBSF140";
             results_SRBSF140.n_observed = 9.;
             results_SRBSF140.n_background = 7.4;
@@ -698,7 +700,7 @@ namespace Gambit {
             add_result(results_SRBSF140);
 
             SignalRegionData results_SRBDF140;
-            results_SRBDF140.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRBDF140.analysis_name = analysis_name();
             results_SRBDF140.sr_label = "SRBDF140";
             results_SRBDF140.n_observed = 7.;
             results_SRBDF140.n_background = 4.8;
@@ -709,7 +711,7 @@ namespace Gambit {
 
             // signal regin 2-body C 
             SignalRegionData results_SRCSF110;
-            results_SRCSF110.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRCSF110.analysis_name = analysis_name();
             results_SRCSF110.sr_label = "SRCSF110";
             results_SRCSF110.n_observed = 11.;
             results_SRCSF110.n_background = 5.3;
@@ -719,7 +721,7 @@ namespace Gambit {
             add_result(results_SRCSF110);
 
             SignalRegionData results_SRCDF110;
-            results_SRCDF110.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SRCDF110.analysis_name = analysis_name();
             results_SRCDF110.sr_label = "SRCDF110";
             results_SRCDF110.n_observed = 7.;
             results_SRCDF110.n_background = 3.8;
@@ -731,7 +733,7 @@ namespace Gambit {
 
             // signal regin 4-body
             SignalRegionData results_SR4b;
-            results_SR4b.analysis_name = "Analysis_ATLAS_13TeV_2LEPStop_36invfb";
+            results_SR4b.analysis_name = analysis_name();
             results_SR4b.sr_label = "SR4b";
             results_SR4b.n_observed = 30.;
             results_SR4b.n_background = 28.;

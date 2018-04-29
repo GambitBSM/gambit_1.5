@@ -70,7 +70,7 @@ namespace Gambit {
     public:
 
         Analysis_CMS_13TeV_1LEPStop_36invfb():
-        _cutflow("CMS 0-lep stop 13 TeV", {
+            _cutflow("CMS 0-lep stop 13 TeV", {
             "Trigger",
             "M_{T}>150", 
             "N_b>=1", 
@@ -82,8 +82,9 @@ namespace Gambit {
             "**t_mod>10",
             "**Mlb<175", 
             "**Mlb>175"}) {
-            set_luminosity(35.9);
             
+            set_analysis_name("CMS_13TeV_1LEPStop_36invfb");
+            set_luminosity(35.9);
 //            for (size_t i = 0; i < NUM_SR; ++i) _SR[i] = 0;
             for (size_t i = 0; i < NUM_aggregateSR; ++i) _aggregateSR[i] = 0;
         }
@@ -375,7 +376,6 @@ namespace Gambit {
         void collect_results() {
 
             // cout << _cutflow << endl;
-            static const string ANAME = "Analysis_CMS_13TeV_0LEP_stop_36invfb";
             
 //            // binned signal region
 //            static const double OBSNUM[NUM_SR] = {72.,      24.,    6.,     2.,     6.,     3.,     2.,
@@ -393,7 +393,7 @@ namespace Gambit {
 
 //            for (size_t ibin = 0; ibin < NUM_SR; ++ibin) {
 //                stringstream ss; ss << "sr-" << ibin;
-//                add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+//                add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {_SR[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
 //                //cout << ss.str() << ":  "<< _SR[ibin] << endl;
 //            }
             
@@ -403,7 +403,7 @@ namespace Gambit {
             static const double aggregateBKGERR[NUM_aggregateSR] = {0.9,    3.2,    1.8,    1.5,    0.5,    2.5};
             for (size_t ibin = 0; ibin < NUM_aggregateSR; ++ibin) {
                 stringstream ass; ass << "aggregate_sr-" << ibin;
-                add_result(SignalRegionData(ANAME, ass.str(), aggregateOBSNUM[ibin], {_aggregateSR[ibin],  0.}, {aggregateBKGNUM[ibin], aggregateBKGERR[ibin]}));
+                add_result(SignalRegionData(analysis_name(), ass.str(), aggregateOBSNUM[ibin], {_aggregateSR[ibin],  0.}, {aggregateBKGNUM[ibin], aggregateBKGERR[ibin]}));
                 // cout << ass.str() << ":  "<< _aggregateSR[ibin] << endl;
             }
             

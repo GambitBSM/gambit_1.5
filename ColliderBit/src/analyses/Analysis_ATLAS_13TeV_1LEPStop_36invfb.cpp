@@ -173,6 +173,9 @@ namespace Gambit {
       Analysis_ATLAS_13TeV_1LEPStop_36invfb() 
       {
 
+        set_analysis_name("ATLAS_13TeV_1LEPStop_36invfb");
+        set_luminosity(36.);
+
         num_tN_med=0;
         num_tN_high=0;
         num_bWN=0;
@@ -189,7 +192,6 @@ namespace Gambit {
         num_bCsoft_high=0;
   
         NCUTS=150;
-        set_luminosity(36.);
 
         for(int i=0;i<NCUTS;i++)
         {
@@ -1393,10 +1395,8 @@ namespace Gambit {
 
         /// Register results objects with the results for each SR; obs & bkg numbers from the paper
 
-        static const string ANAME = "Analysis_ATLAS_13TeV_1LEPStop_36invfb";
-
         SignalRegionData results_tN_med;
-        results_tN_med.analysis_name = ANAME;
+        results_tN_med.analysis_name = analysis_name();
         results_tN_med.sr_label = "tN_med";
         results_tN_med.n_observed = 50;
         results_tN_med.n_background = 36.3;
@@ -1406,7 +1406,7 @@ namespace Gambit {
         add_result(results_tN_med);
 
         SignalRegionData results_tN_high;
-        results_tN_high.analysis_name = ANAME;
+        results_tN_high.analysis_name = analysis_name();
         results_tN_high.sr_label = "tN_med";
         results_tN_high.n_observed = 8;
         results_tN_high.n_background = 3.8;
@@ -1416,7 +1416,7 @@ namespace Gambit {
         add_result(results_tN_high);
         
         SignalRegionData results_bWN;
-        results_bWN.analysis_name = ANAME;
+        results_bWN.analysis_name = analysis_name();
         results_bWN.sr_label = "tN_med";
         results_bWN.n_observed = 68;
         results_bWN.n_background = 71;
@@ -1426,7 +1426,7 @@ namespace Gambit {
         add_result(results_bWN);
 
         SignalRegionData results_bC2x_diag;
-        results_bC2x_diag.analysis_name = ANAME;
+        results_bC2x_diag.analysis_name = analysis_name();
         results_bC2x_diag.sr_label = "bC2x_diag";
         results_bC2x_diag.n_observed = 22;
         results_bC2x_diag.n_background = 21.3;
@@ -1436,7 +1436,7 @@ namespace Gambit {
         add_result(results_bC2x_diag);
         
         SignalRegionData results_bC2x_med;
-        results_bC2x_med.analysis_name = ANAME;
+        results_bC2x_med.analysis_name = analysis_name();
         results_bC2x_med.sr_label = "bC2x_med";
         results_bC2x_med.n_observed = 4;
         results_bC2x_med.n_background = 5.8;
@@ -1446,7 +1446,7 @@ namespace Gambit {
         add_result(results_bC2x_med);
 
         SignalRegionData results_bCbv;
-        results_bCbv.analysis_name = ANAME;
+        results_bCbv.analysis_name = analysis_name();
         results_bCbv.sr_label = "bCbv";
         results_bCbv.n_observed = 25;
         results_bCbv.n_background = 25.1;
@@ -1456,7 +1456,7 @@ namespace Gambit {
         add_result(results_bCbv);
 
         SignalRegionData results_DM_low_loose;
-        results_DM_low_loose.analysis_name = ANAME;
+        results_DM_low_loose.analysis_name = analysis_name();
         results_DM_low_loose.sr_label = "DM_low_loose";
         results_DM_low_loose.n_observed = 65;
         results_DM_low_loose.n_background = 48.3;
@@ -1466,7 +1466,7 @@ namespace Gambit {
         add_result(results_DM_low_loose);
 
         SignalRegionData results_DM_low;
-        results_DM_low.analysis_name = ANAME;
+        results_DM_low.analysis_name = analysis_name();
         results_DM_low.sr_label = "DM_low";
         results_DM_low.n_observed = 13;
         results_DM_low.n_background = 13.8;
@@ -1476,7 +1476,7 @@ namespace Gambit {
         add_result(results_DM_low);
 
         SignalRegionData results_DM_high;
-        results_DM_high.analysis_name = ANAME;
+        results_DM_high.analysis_name = analysis_name();
         results_DM_high.sr_label = "DM_high";
         results_DM_high.n_observed = 5;
         results_DM_high.n_background = 7.4;
@@ -1486,7 +1486,7 @@ namespace Gambit {
         add_result(results_DM_high);
 
         SignalRegionData results_bffN;
-        results_bffN.analysis_name = ANAME;
+        results_bffN.analysis_name = analysis_name();
         results_bffN.sr_label = "bffN";
         results_bffN.n_observed = 70;
         results_bffN.n_background = 60.5;
@@ -1496,7 +1496,7 @@ namespace Gambit {
         add_result(results_bffN);
 
         SignalRegionData results_bCsoft_diag;
-        results_bCsoft_diag.analysis_name = ANAME;
+        results_bCsoft_diag.analysis_name = analysis_name();
         results_bCsoft_diag.sr_label = "bCsoft_diag";
         results_bCsoft_diag.n_observed = 33;
         results_bCsoft_diag.n_background = 24.7;
@@ -1506,7 +1506,7 @@ namespace Gambit {
         add_result(results_bCsoft_diag);
 
         SignalRegionData results_bCsoft_med;
-        results_bCsoft_med.analysis_name = ANAME;
+        results_bCsoft_med.analysis_name = analysis_name();
         results_bCsoft_med.sr_label = "bCsoft_med";
         results_bCsoft_med.n_observed = 19;
         results_bCsoft_med.n_background = 13.7;
@@ -1516,7 +1516,7 @@ namespace Gambit {
         add_result(results_bCsoft_med);
 
         SignalRegionData results_bCsoft_high;
-        results_bCsoft_high.analysis_name = ANAME;
+        results_bCsoft_high.analysis_name = analysis_name();
         results_bCsoft_high.sr_label = "bCsoft_high";
         results_bCsoft_high.n_observed = 2;
         results_bCsoft_high.n_background = 1.8;

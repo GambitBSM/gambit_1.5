@@ -29,6 +29,7 @@ namespace Gambit {
       {
         //for (double& n : _srnums) n = 0;
         clear();
+        set_analysis_name("CMS_13TeV_MONOJET_36invfb");
         set_luminosity(35.9);
       }
 
@@ -97,7 +98,6 @@ namespace Gambit {
         //cout << _cutflow << endl;
 
         // Register signal region data
-        static const string ANAME = "CMS_13TeV_MONOJET_36invfb";
         static const double OBSNUM[NUMSR] = {
           136865, 74340, 42540, 25316, 15653, 10092, 8298, 4906, 2987, 2032, 1514,
           926, 557, 316, 233, 172, 101, 65, 46, 26, 31, 29
@@ -111,7 +111,7 @@ namespace Gambit {
         };
         for (size_t ibin = 0; ibin < NUMSR; ++ibin) {
           stringstream ss; ss << "sr-" << ibin;
-          add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {_srnums[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {_srnums[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
         // Commented out covariance matrix for now, as it currently is a bit

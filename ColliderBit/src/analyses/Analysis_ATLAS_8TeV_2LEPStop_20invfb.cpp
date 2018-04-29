@@ -54,7 +54,10 @@ namespace Gambit {
           _numSRM90DF(0), _numSRM100DF(0), _numSRM110DF(0), _numSRM120DF(0),
           NCUTS(24)
       {
+
+        set_analysis_name("ATLAS_8TeV_2LEPStop_20invfb");
         set_luminosity(20.3);
+
         for (int i=0; i<NCUTS; i++) {
           cutFlowVector.push_back(0);
           cutFlowVector_str.push_back("");
@@ -373,7 +376,7 @@ namespace Gambit {
 
       void collect_results() {
         SignalRegionData results_SRM90;
-        results_SRM90.analysis_name = "Analysis_ATLAS_8TeV_2LEPStop_20invfb";
+        results_SRM90.analysis_name = analysis_name();
         results_SRM90.sr_label = "SRM90";
         results_SRM90.n_observed = 274.;
         results_SRM90.n_background = 300.;
@@ -382,7 +385,7 @@ namespace Gambit {
         results_SRM90.n_signal = _numSRM90SF+_numSRM90DF;
 
         SignalRegionData results_SRM100;
-        results_SRM100.analysis_name = "Analysis_ATLAS_8TeV_2LEPStop_20invfb";
+        results_SRM100.analysis_name = analysis_name();
         results_SRM100.sr_label = "SRM100";
         results_SRM100.n_observed = 3.;
         results_SRM100.n_background = 5.2;
@@ -391,7 +394,7 @@ namespace Gambit {
         results_SRM100.n_signal = _numSRM100SF+_numSRM100DF;
 
         SignalRegionData results_SRM110;
-        results_SRM110.analysis_name = "Analysis_ATLAS_8TeV_2LEPStop_20invfb";
+        results_SRM110.analysis_name = analysis_name();
         results_SRM110.sr_label = "SRM110";
         results_SRM110.n_observed = 8.;
         results_SRM110.n_background = 9.3;
@@ -400,7 +403,7 @@ namespace Gambit {
         results_SRM110.n_signal = _numSRM110SF+_numSRM110DF;
 
         SignalRegionData results_SRM120;
-        results_SRM120.analysis_name = "Analysis_ATLAS_8TeV_2LEPStop_20invfb";
+        results_SRM120.analysis_name = analysis_name();
         results_SRM120.sr_label = "SRM120";
         results_SRM120.n_observed = 18.;
         results_SRM120.n_background = 19.;

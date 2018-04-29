@@ -253,6 +253,9 @@ namespace Gambit {
 
       Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb() {
 
+        set_analysis_name("ATLAS_13TeV_RJ3L_lowmass_36invfb");
+        set_luminosity(36.);
+
         _num2L2JHIGH=0;
         _num2L2JINT=0;
         _num2L2JLOW=0;
@@ -263,7 +266,6 @@ namespace Gambit {
         _num3LCOMP=0;
     
         NCUTS=70;
-        set_luminosity(36.);
 
         for(int i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
@@ -2052,17 +2054,15 @@ namespace Gambit {
 
         /// Register results objects with the results for each SR; obs & bkg numbers from the paper
 
-        static const string ANAME = "Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb";
-
         /*int _numSRA_TT, _numSRA_TW, _numSRA_T0;
         int _numSRB_TT, _numSRB_TW, _numSRB_T0;
         int _numSRC1, _numSRC2, _numSRC3, _numSRC4, _numSRC5;
         int _numSRD_low, _numSRD_high, _numSRE;*/
   
-        add_result(SignalRegionData(ANAME, "3LLOW", 20, {_num3LLOW,  0.}, {10.31, 1.96}));     
+        add_result(SignalRegionData(analysis_name(), "3LLOW", 20, {_num3LLOW,  0.}, {10.31, 1.96}));     
   
         /*SignalRegionData results_SRA_TT;
-        results_SRA_TT.analysis_name = "Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb";
+        results_SRA_TT.analysis_name = analysis_name();
         results_SRA_TT.sr_label = "SRA_TT";
         results_SRA_TT.n_observed = 11.;
         results_SRA_TT.n_background = 15.8;

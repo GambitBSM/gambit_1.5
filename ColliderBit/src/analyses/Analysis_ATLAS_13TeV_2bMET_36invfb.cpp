@@ -52,17 +52,16 @@ namespace Gambit {
       
       Analysis_ATLAS_13TeV_2bMET_36invfb() {
 
-        // Set number of events passing cuts to zero upon initialisation
+        set_analysis_name("ATLAS_13TeV_2bMET_36invfb");
+        set_luminosity(36.1);
 
+        // Set number of events passing cuts to zero upon initialisation
         _numb0L_SRA350=0; _numb0L_SRA450=0; _numb0L_SRA550=0;
         _numb0L_SRB=0; _numb0L_SRC=0;
 
         _numb1L_SRA600=0; _numb1L_SRA750=0; _numb1L_SRA300_2j=0; _numb1L_SRB=0;
 
         NCUTS=70;
-
-        // Set the LHC luminosity
-        set_luminosity(36.1);
 
         for(int i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
@@ -881,7 +880,7 @@ namespace Gambit {
 
 
         SignalRegionData results_b0L_SRA350;
-        results_b0L_SRA350.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b0L_SRA350.analysis_name = analysis_name();
         results_b0L_SRA350.sr_label = "b0L-SRA350";    // label must be unique for each signal region
         results_b0L_SRA350.n_observed = 81.;           // set number of observed events (in LHC paper)
         results_b0L_SRA350.n_background = 70.;         // set number of predicted background events (in LHC paper)
@@ -891,7 +890,7 @@ namespace Gambit {
         add_result(results_b0L_SRA350);
 
         SignalRegionData results_b0L_SRA450;
-        results_b0L_SRA450.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b0L_SRA450.analysis_name = analysis_name();
         results_b0L_SRA450.sr_label = "b0L-SRA450";
         results_b0L_SRA450.n_observed = 24.;
         results_b0L_SRA450.n_background = 22.;
@@ -901,7 +900,7 @@ namespace Gambit {
         add_result(results_b0L_SRA450);
 
         SignalRegionData results_b0L_SRA550;
-        results_b0L_SRA550.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b0L_SRA550.analysis_name = analysis_name();
         results_b0L_SRA550.sr_label = "b0L-SRA550";
         results_b0L_SRA550.n_observed = 10.;
         results_b0L_SRA550.n_background = 7.2;
@@ -911,7 +910,7 @@ namespace Gambit {
         add_result(results_b0L_SRA550);
 
         SignalRegionData results_b0L_SRB;
-        results_b0L_SRB.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b0L_SRB.analysis_name = analysis_name();
         results_b0L_SRB.sr_label = "b0L-SRB";
         results_b0L_SRB.n_observed = 45.;
         results_b0L_SRB.n_background = 37.;
@@ -921,7 +920,7 @@ namespace Gambit {
         add_result(results_b0L_SRB);
 
         SignalRegionData results_b0L_SRC;
-        results_b0L_SRC.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b0L_SRC.analysis_name = analysis_name();
         results_b0L_SRC.sr_label = "b0L-SRC";
         results_b0L_SRC.n_observed = 7.;
         results_b0L_SRC.n_background = 5.5;
@@ -933,7 +932,7 @@ namespace Gambit {
 	// MJW removes these regions for the Feb 2018 MareNostrum scans, since the aMT2 variable is not well-described.
 	
         /*SignalRegionData results_b1L_SRA600;
-        results_b1L_SRA600.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b1L_SRA600.analysis_name = analysis_name();
         results_b1L_SRA600.sr_label = "b1L-SRA600";
         results_b1L_SRA600.n_observed = 21.;
         results_b1L_SRA600.n_background = 24.;
@@ -943,7 +942,7 @@ namespace Gambit {
         add_result(results_b1L_SRA600);
 
         SignalRegionData results_b1L_SR750;
-        results_b1L_SR750.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b1L_SR750.analysis_name = analysis_name();
         results_b1L_SR750.sr_label = "b1L-SR750";
         results_b1L_SR750.n_observed = 13.;
         results_b1L_SR750.n_background = 15.;
@@ -953,7 +952,7 @@ namespace Gambit {
         add_result(results_b1L_SR750);
 
         SignalRegionData results_b1L_SR300_2j;
-        results_b1L_SR300_2j.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b1L_SR300_2j.analysis_name = analysis_name();
         results_b1L_SR300_2j.sr_label = "b1L-SR300-2j";
         results_b1L_SR300_2j.n_observed = 12.;
         results_b1L_SR300_2j.n_background = 6.7;
@@ -963,7 +962,7 @@ namespace Gambit {
         add_result(results_b1L_SR300_2j);
 
         SignalRegionData results_b1L_SRB;
-        results_b1L_SRB.analysis_name = "Analysis_ATLAS_13TeV_2bMET_36invfb";
+        results_b1L_SRB.analysis_name = analysis_name();
         results_b1L_SRB.sr_label = "b1L-SRB";
         results_b1L_SRB.n_observed = 69.;
         results_b1L_SRB.n_background = 53.;

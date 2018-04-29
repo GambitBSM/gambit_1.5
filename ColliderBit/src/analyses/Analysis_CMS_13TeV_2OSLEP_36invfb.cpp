@@ -36,7 +36,6 @@ namespace Gambit {
       double xsecCMS_550_200;
 
       ofstream cutflowFile;
-      string analysisRunName;
 
     public:
 
@@ -50,6 +49,10 @@ namespace Gambit {
 
       Analysis_CMS_13TeV_2OSLEP_36invfb() 
       {
+        set_analysis_name("CMS_13TeV_2OSLEP_36invfb");
+        set_luminosity(35.9);
+        // xsecCMS_550_200=30.2;
+
         _numSR1=0;
         _numSR2=0;
         _numSR3=0;
@@ -61,15 +64,12 @@ namespace Gambit {
         _numSR9=0; 
 
         NCUTS=13;
-        set_luminosity(35.9);
-        // xsecCMS_550_200=30.2;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
           cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        analysisRunName = "CMS_13TeV_2OSLEP_36invfb";
       }
 
 
@@ -344,28 +344,28 @@ namespace Gambit {
       void collect_results() 
       {
 
-        string path = "cutflow_";
-        path.append(analysisRunName);
-        path.append(".txt");
-        cutflowFile.open(path.c_str());
+        // string path = "cutflow_";
+        // path.append(analysis_name());
+        // path.append(".txt");
+        // cutflowFile.open(path.c_str());
 
-        double xsec = 30.2;
+        // double xsec = 30.2;
         
-        cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [550,200] [GeV]$} \n\\makebox[\\linewidth]{\n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-        cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-        cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_550_200<<" $fb$ &"<<setprecision(4)<<xsec<<"$fb$ &"<<setprecision(4)<<xsec/xsecCMS_550_200<<" & 1\\\\ \\hline"<< endl;
-        cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-        for (size_t i=0; i<NCUTS; i++)
-        {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<(xsecCMS_550_200/xsec)*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
-        }
-        cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-        for (size_t i=0; i<NCUTS; i++)
-        {
-          cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
-        }
-        cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        cutflowFile.close();
+        // cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [550,200] [GeV]$} \n\\makebox[\\linewidth]{\n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
+        // cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
+        // cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_550_200<<" $fb$ &"<<setprecision(4)<<xsec<<"$fb$ &"<<setprecision(4)<<xsec/xsecCMS_550_200<<" & 1\\\\ \\hline"<< endl;
+        // cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
+        // for (size_t i=0; i<NCUTS; i++)
+        // {
+        //   cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<(xsecCMS_550_200/xsec)*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
+        // }
+        // cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
+        // for (size_t i=0; i<NCUTS; i++)
+        // {
+        //   cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
+        // }
+        // cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
+        // cutflowFile.close();
         
 
         // // DEBUG 
@@ -387,9 +387,6 @@ namespace Gambit {
         // cout << "DEBUG:" << endl;
         // cout << "DEBUG:" << endl;
 
-
-
-        static const string ANAME = "CMS_13TeV_2OSLEP_36invfb";
 
         // Only 7 of the 9 signal regions are included in the covariance matrix
         // (SR1 and SR6 are left out)
@@ -414,7 +411,7 @@ namespace Gambit {
 
         for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
           stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
-          add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
         // Covariance matrix
@@ -432,98 +429,6 @@ namespace Gambit {
 
       }
 
-        // //Now fill a results object with the results for each SR
-        // SignalRegionData results_SR1;
-        // results_SR1.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR1.sr_label = "SR1";
-        // results_SR1.n_observed = 793.;
-        // results_SR1.n_background = 793.; 
-        // results_SR1.background_sys = 32.2;
-        // results_SR1.signal_sys = 0.; 
-        // results_SR1.n_signal = _numSR1;
-        // add_result(results_SR1);
-
-        // SignalRegionData results_SR2;
-        // results_SR2.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR2.sr_label = "SR2";
-        // results_SR2.n_observed = 57.;
-        // results_SR2.n_background = 54.9;
-        // results_SR2.background_sys = 7.;
-        // results_SR2.signal_sys = 0.;
-        // results_SR2.n_signal = _numSR2;
-        // add_result(results_SR2);
-
-        // SignalRegionData results_SR3;
-        // results_SR3.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR3.sr_label = "SR3";
-        // results_SR3.n_observed = 29.;
-        // results_SR3.n_background = 21.6;
-        // results_SR3.background_sys = 5.6;
-        // results_SR3.signal_sys = 0.;
-        // results_SR3.n_signal = _numSR3;
-        // add_result(results_SR3);
-
-        // SignalRegionData results_SR4;
-        // results_SR4.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR4.sr_label = "SR4";
-        // results_SR4.n_observed = 2.;
-        // results_SR4.n_background = 6.;
-        // results_SR4.background_sys = 1.9;
-        // results_SR4.signal_sys = 0.;
-        // results_SR4.n_signal = _numSR4;
-        // add_result(results_SR4);
-
-        // SignalRegionData results_SR5;
-        // results_SR5.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR5.sr_label = "SR5";
-        // results_SR5.n_observed = 0.;
-        // results_SR5.n_background = 2.5;
-        // results_SR5.background_sys = 0.9;
-        // results_SR5.signal_sys = 0.;
-        // results_SR5.n_signal = _numSR5;
-        // add_result(results_SR5);
-
-        // SignalRegionData results_SR6;
-        // results_SR6.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR6.sr_label = "SR6";
-        // results_SR6.n_observed = 82;
-        // results_SR6.n_background = 82.;
-        // results_SR6.background_sys = 9.5;
-        // results_SR6.signal_sys = 0.;
-        // results_SR6.n_signal = _numSR6;
-        // add_result(results_SR6);
-
-        // SignalRegionData results_SR7;
-        // results_SR7.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR7.sr_label = "SR7";
-        // results_SR7.n_observed = 9.;
-        // results_SR7.n_background = 7.6;
-        // results_SR7.background_sys = 2.8;
-        // results_SR7.signal_sys = 0.;
-        // results_SR7.n_signal = _numSR7;
-        // add_result(results_SR7);
-
-        // SignalRegionData results_SR8;
-        // results_SR8.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR8.sr_label = "SR8";
-        // results_SR8.n_observed = 5.;
-        // results_SR8.n_background = 5.6;
-        // results_SR8.background_sys = 1.6;
-        // results_SR8.signal_sys = 0.;
-        // results_SR8.n_signal = _numSR8;
-        // add_result(results_SR8);
-
-        // SignalRegionData results_SR9;
-        // results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_36invfb";
-        // results_SR9.sr_label = "SR9";
-        // results_SR9.n_observed = 1.;
-        // results_SR9.n_background = 1.3;
-        // results_SR9.background_sys = 0.4;
-        // results_SR9.signal_sys = 0.;
-        // results_SR9.n_signal = _numSR9;
-        // add_result(results_SR9);
-
-      // }
 
 
       vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {

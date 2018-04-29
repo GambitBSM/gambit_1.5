@@ -57,10 +57,12 @@ namespace Gambit {
     public:
 
       Analysis_ATLAS_8TeV_1LEPStop_20invfb() {
+        set_analysis_name("ATLAS_8TeV_1LEPStop_20invfb");
+        set_luminosity(20.7);
+
         _numTN1Shape_bin1 = 0; _numTN1Shape_bin2 = 0; _numTN1Shape_bin3 = 0;
         _numTN2 = 0; _numTN3 = 0; _numBC1 = 0;
         _numBC2 = 0; _numBC3 = 0; NCUTS = 41;
-        set_luminosity(20.7);
 
         for(int i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
@@ -759,7 +761,7 @@ namespace Gambit {
         //They need to be added (but will probably update to paper result)
 
         SignalRegionData results_BC1;
-        results_BC1.analysis_name = "Analysis_ATLAS_8TeV_1LEPStop_20invfb";
+        results_BC1.analysis_name = analysis_name();
         results_BC1.sr_label = "BC1";
         results_BC1.n_observed = 456.;
         results_BC1.n_background = 482.;
@@ -768,7 +770,7 @@ namespace Gambit {
         results_BC1.n_signal = _numBC1;
 
         SignalRegionData results_BC2;
-        results_BC2.analysis_name = "Analysis_ATLAS_8TeV_1LEPStop_20invfb";
+        results_BC2.analysis_name = analysis_name();
         results_BC2.sr_label = "BC2";
         results_BC2.n_observed = 25.;
         results_BC2.n_background = 18.;
@@ -777,7 +779,7 @@ namespace Gambit {
         results_BC2.n_signal = _numBC2;
 
         SignalRegionData results_BC3;
-        results_BC3.analysis_name = "Analysis_ATLAS_8TeV_1LEPStop_20invfb";
+        results_BC3.analysis_name = analysis_name();
         results_BC3.sr_label = "BC3";
         results_BC3.n_observed = 6.;
         results_BC3.n_background = 7.;
@@ -786,7 +788,7 @@ namespace Gambit {
         results_BC3.n_signal = _numBC3;
 
         SignalRegionData results_TN2;
-        results_TN2.analysis_name = "Analysis_ATLAS_8TeV_1LEPStop_20invfb";
+        results_TN2.analysis_name = analysis_name();
         results_TN2.sr_label = "TN2";
         results_TN2.n_observed = 14.;
         results_TN2.n_background = 13.;
@@ -795,7 +797,7 @@ namespace Gambit {
         results_TN2.n_signal = _numTN2;
 
         SignalRegionData results_TN3;
-        results_TN3.analysis_name = "Analysis_ATLAS_8TeV_1LEPStop_20invfb";
+        results_TN3.analysis_name = analysis_name();
         results_TN3.sr_label = "TN3";
         results_TN3.n_observed = 7.;
         results_TN3.n_background = 5.;

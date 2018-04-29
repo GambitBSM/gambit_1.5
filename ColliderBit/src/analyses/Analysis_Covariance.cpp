@@ -17,6 +17,7 @@ namespace Gambit {
     public:
 
       Analysis_Covariance() {
+        set_analysis_name("Covariance");
         set_luminosity(30.); // fb
       }
 
@@ -32,7 +33,7 @@ namespace Gambit {
 
         // Now fill a results object with the result for two signal regions
         SignalRegionData results_SR1;
-        results_SR1.analysis_name = "Analysis_Covariance";
+        results_SR1.analysis_name = analysis_name();
         results_SR1.sr_label = "SR1"; // label must be unique for each signal region
         results_SR1.n_observed = 100; // set number of observed events (in LHC paper)
         results_SR1.n_background = 95; // set number of predicted background events (in LHC paper)
@@ -42,7 +43,7 @@ namespace Gambit {
         add_result(results_SR1);
 
         SignalRegionData results_SR2;
-        results_SR2.analysis_name = "Analysis_Covariance";
+        results_SR2.analysis_name = analysis_name();
         results_SR2.sr_label = "SR2"; // label must be unique for each signal region
         results_SR2.n_observed = 10; // set number of observed events (in LHC paper)
         results_SR2.n_background = 9; // set number of predicted background events (in LHC paper)

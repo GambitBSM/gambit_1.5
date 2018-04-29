@@ -26,7 +26,9 @@ namespace Gambit {
       Analysis_CMS_13TeV_0LEP_36invfb() :
         _cutflow("CMS 0-lep 13 TeV", {"Njet >= 3", "HT > 300", "HTmiss > 300", "Nmuon = 0", "Nelectron = 0", "Nhadron = 0 (no-op)", "Dphi_htmiss_j1", "Dphi_htmiss_j2", "Dphi_htmiss_j3", "Dphi_htmiss_j4"})
       {
+        set_analysis_name("CMS_13TeV_0LEP_36invfb");
         set_luminosity(35.9);
+
         for (size_t i = 0; i < NUMSR; ++i) _srnums[i] = 0;
       }
 
@@ -179,27 +181,27 @@ namespace Gambit {
 
 
         // Fill aggregate SR bins
-	const size_t njets = jets24.size();
+        const size_t njets = jets24.size();
 
         size_t nbjets = 0;
         for (const Jet* j : jets24) {
-	  // b-tag effs: b: 0.55, c: 0.12, l: 0.016
+          // b-tag effs: b: 0.55, c: 0.12, l: 0.016
           const bool btagged = rand01() < (j->btag() ? 0.55 : j->ctag() ? 0.12 : 0.016);
           if (btagged) nbjets += 1;
         }
 
-	if (njets >= 2 && nbjets == 0 && ht >=  500 && htmiss >= 500) _srnums[ 0] += 1;
-	if (njets >= 3 && nbjets == 0 && ht >= 1500 && htmiss >= 750) _srnums[ 1] += 1;
-	if (njets >= 5 && nbjets == 0 && ht >=  500 && htmiss >= 500) _srnums[ 2] += 1;
-	if (njets >= 5 && nbjets == 0 && ht >= 1500 && htmiss >= 750) _srnums[ 3] += 1;
-	if (njets >= 9 && nbjets == 0 && ht >= 1500 && htmiss >= 750) _srnums[ 4] += 1;
-	if (njets >= 2 && nbjets >= 2 && ht >=  500 && htmiss >= 500) _srnums[ 5] += 1;
-	if (njets >= 3 && nbjets >= 1 && ht >=  750 && htmiss >= 750) _srnums[ 6] += 1;
-	if (njets >= 5 && nbjets >= 3 && ht >=  500 && htmiss >= 500) _srnums[ 7] += 1;
-	if (njets >= 5 && nbjets >= 2 && ht >= 1500 && htmiss >= 750) _srnums[ 8] += 1;
-	if (njets >= 9 && nbjets >= 3 && ht >=  750 && htmiss >= 750) _srnums[ 9] += 1;
-	if (njets >= 7 && nbjets >= 1 && ht >=  300 && htmiss >= 300) _srnums[10] += 1;
-	if (njets >= 5 && nbjets >= 1 && ht >=  750 && htmiss >= 750) _srnums[11] += 1;
+        if (njets >= 2 && nbjets == 0 && ht >=  500 && htmiss >= 500) _srnums[ 0] += 1;
+        if (njets >= 3 && nbjets == 0 && ht >= 1500 && htmiss >= 750) _srnums[ 1] += 1;
+        if (njets >= 5 && nbjets == 0 && ht >=  500 && htmiss >= 500) _srnums[ 2] += 1;
+        if (njets >= 5 && nbjets == 0 && ht >= 1500 && htmiss >= 750) _srnums[ 3] += 1;
+        if (njets >= 9 && nbjets == 0 && ht >= 1500 && htmiss >= 750) _srnums[ 4] += 1;
+        if (njets >= 2 && nbjets >= 2 && ht >=  500 && htmiss >= 500) _srnums[ 5] += 1;
+        if (njets >= 3 && nbjets >= 1 && ht >=  750 && htmiss >= 750) _srnums[ 6] += 1;
+        if (njets >= 5 && nbjets >= 3 && ht >=  500 && htmiss >= 500) _srnums[ 7] += 1;
+        if (njets >= 5 && nbjets >= 2 && ht >= 1500 && htmiss >= 750) _srnums[ 8] += 1;
+        if (njets >= 9 && nbjets >= 3 && ht >=  750 && htmiss >= 750) _srnums[ 9] += 1;
+        if (njets >= 7 && nbjets >= 1 && ht >=  300 && htmiss >= 300) _srnums[10] += 1;
+        if (njets >= 5 && nbjets >= 1 && ht >=  750 && htmiss >= 750) _srnums[11] += 1;
 
       }
 
@@ -219,19 +221,18 @@ namespace Gambit {
       void collect_results() {
 //        cout << _cutflow << endl;
 
-        static const string ANAME = "Analysis_CMS_13TeV_0LEP_36invfb";
         static const double OBSNUM[NUMSR] = {
-	  7838, 71, 819, 25,   1,   216, 123, 17,    6,  0, 890, 48
+          7838, 71, 819, 25,   1,   216, 123, 17,    6,  0, 890, 48
         };
         static const double BKGNUM[NUMSR] = {
-	  7584, 55.2, 806, 23.0, 0.6, 196, 113, 19.5, 4.4, 0, 969, 42.2
+          7584, 55.2, 806, 23.0, 0.6, 196, 113, 19.5, 4.4, 0, 969, 42.2
         };
         static const double BKGERR[NUMSR] = { // these quadrature sums are partially guesstimated, to minimise pain!
-	  sqrt(63*63+370*370), sqrt(6.2*6.2+5.3*5.3), sqrt(19*19+38*38), sqrt(3.8*3.8+2.7*2.7), sqrt(1.1*1.1+0.2*0.2), sqrt(13*13+15*15), sqrt(8*8+10*10), sqrt(5.2*5.2+3.2*3.2), sqrt(2.8*2.8+0.6*0.6), 1.3, sqrt(23*23+57*57), sqrt(5.7*5.7+4.0*4.0) //< quad sums of upper limits
+          sqrt(63*63+370*370), sqrt(6.2*6.2+5.3*5.3), sqrt(19*19+38*38), sqrt(3.8*3.8+2.7*2.7), sqrt(1.1*1.1+0.2*0.2), sqrt(13*13+15*15), sqrt(8*8+10*10), sqrt(5.2*5.2+3.2*3.2), sqrt(2.8*2.8+0.6*0.6), 1.3, sqrt(23*23+57*57), sqrt(5.7*5.7+4.0*4.0) //< quad sums of upper limits
         };
         for (size_t ibin = 0; ibin < NUMSR; ++ibin) {
           stringstream ss; ss << "sr-" << ibin;
-          add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {_srnums[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {_srnums[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
       }
 

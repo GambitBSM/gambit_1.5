@@ -39,6 +39,7 @@ namespace Gambit {
       bool _needs_collection;
       AnalysisData _results;
       typedef EventT EventType;
+      std::string _analysis_name;
 
     public:
 
@@ -99,11 +100,16 @@ namespace Gambit {
       /// Return the cross-section per event seen (in pb).
       double xsec_per_event() const { return (xsec() >= 0 && num_events() > 0) ? xsec()/num_events() : 0; }
       /// Return the integrated luminosity (in inverse pb).
-      double luminosity() const { return _luminosity; }
-      /// Set the cross-section and its error (in pb).
       void set_xsec(double xs, double xserr) { _xsec_is_set = true; _xsec = xs; _xsecerr = xserr; }
       /// Set the integrated luminosity (in inverse pb).
+      double luminosity() const { return _luminosity; }
+      /// Set the cross-section and its error (in pb).
       void set_luminosity(double lumi) { _luminosity_is_set = true; _luminosity = lumi; }
+      /// Set the analysis name
+      void set_analysis_name(std::string aname) { _analysis_name = aname; }
+      /// Set the analysis name
+      std::string analysis_name() { return _analysis_name; }
+
 
       /// Get the collection of SignalRegionData for likelihood computation.
       const AnalysisData& get_results()
@@ -121,13 +127,13 @@ namespace Gambit {
       {
         warning = "";
         if (not _xsec_is_set)
-          warning += "Cross section has not been set. ";
+          warning += "Cross section has not been set for analysis " + _analysis_name + "." ;
         if (not _luminosity_is_set)
-          warning += "Luminosity has not been set. ";
+          warning += "Luminosity has not been set for analysis " + _analysis_name + ".";
         if (not _is_scaled)
-          warning += "Results have not been scaled. ";
+          warning += "Results have not been scaled for analsyis " + _analysis_name + ".";
         if (_ntot < 1)
-          warning += "No events have been analyzed. ";
+          warning += "No events have been analyzed for analysis " + _analysis_name + ".";
 
         /// @todo We need to shift the 'analysis_name' property from class SignalRegionData
         ///       to this class. Then we can add the class name to this error message.
@@ -184,12 +190,10 @@ namespace Gambit {
       virtual void scale(double factor=-1) {
         if (factor < 0) {
           factor = (num_events() == 0 ? 0 : (luminosity() * xsec()) / num_events());
-          // cout << "DEBUG: " << luminosity() << " * " << xsec() << " / " << num_events() << " = " << factor << endl;
         }
         assert(factor >= 0);
         for (SignalRegionData& sr : _results) {
           sr.n_signal_at_lumi = factor * sr.n_signal;
-          //cout << "DEBUG: " << factor << ", " << sr.n_signal << " -> " << sr.n_signal_at_lumi << endl;
         }
         _is_scaled = true;
       }

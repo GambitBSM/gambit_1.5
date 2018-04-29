@@ -35,7 +35,6 @@ namespace Gambit {
       // double xsecCMS_550_200;
 
       // ofstream cutflowFile;
-      // string analysisRunName;
 
     public:
 
@@ -49,6 +48,10 @@ namespace Gambit {
 
       Analysis_CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE() {
 
+        set_analysis_name("CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE");
+        set_luminosity(35.9);
+        // xsecCMS_550_200=30.2;        
+
         _numSR1=0;
         _numSR2=0;
         _numSR3=0;
@@ -60,15 +63,12 @@ namespace Gambit {
         _numSR9=0; 
 
         NCUTS=13;
-        set_luminosity(35.9);
-        // xsecCMS_550_200=30.2;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
           // cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        // analysisRunName = "CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE";
       }
 
 
@@ -309,8 +309,6 @@ namespace Gambit {
        //  cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
        // cutflowFile.close();
 
-        static const string ANAME = "CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE";
-
         // Only 7 of the 9 signal regions are included in the covariance matrix
         // (SR1 and SR6 are left out)
         static const size_t SR_size = 9;
@@ -334,7 +332,7 @@ namespace Gambit {
 
         for (size_t ibin = 0; ibin < SR_size; ++ibin) {
           stringstream ss; ss << "SR-" << SR_labels[ibin];
-          add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {SR_nums[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {SR_nums[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
       }

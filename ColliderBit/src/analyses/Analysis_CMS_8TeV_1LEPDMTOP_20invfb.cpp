@@ -45,7 +45,9 @@ namespace Gambit {
         : _numSR(0),
           NCUTS(6)
       {
+        set_analysis_name("CMS_8TeV_1LEPDMTOP_20invfb");
         set_luminosity(19.7);
+
         for (int i=0; i<NCUTS; i++) {
           cutFlowVector.push_back(0);
           cutFlowVector_str.push_back("");
@@ -222,7 +224,7 @@ namespace Gambit {
 
       void collect_results() {
         SignalRegionData results_SR;
-        results_SR.analysis_name = "Analysis_CMS_8TeV_1LEPDMTOP_20invfb";
+        results_SR.analysis_name = analysis_name();
         results_SR.sr_label = "SR";
         results_SR.n_observed = 18.;
         results_SR.n_background = 16.4;

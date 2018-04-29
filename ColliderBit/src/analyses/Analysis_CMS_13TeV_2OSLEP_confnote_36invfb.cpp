@@ -35,7 +35,6 @@ namespace Gambit {
       // double xsecCMS_550_200;
 
       // ofstream cutflowFile;
-      // string analysisRunName;
 
     public:
 
@@ -49,6 +48,9 @@ namespace Gambit {
 
       Analysis_CMS_13TeV_2OSLEP_confnote_36invfb() {
 
+        set_analysis_name("CMS_13TeV_2OSLEP_confnote_36invfb");
+        set_luminosity(35.9);
+
         _numSR1=0;
         _numSR2=0;
         _numSR3=0;
@@ -60,7 +62,6 @@ namespace Gambit {
         _numSR9=0; 
 
         NCUTS=13;
-        set_luminosity(35.9);
         // xsecCMS_550_200=30.2;
 
         for (size_t i=0;i<NCUTS;i++){
@@ -68,7 +69,6 @@ namespace Gambit {
           // cutFlowVectorCMS_550_200.push_back(0);
           cutFlowVector_str.push_back("");
         }
-        // analysisRunName = "CMS_13TeV_2OSLEP_confnote_36invfb";
       }
 
 
@@ -291,7 +291,7 @@ namespace Gambit {
       void collect_results() {
 
         // string path = "ColliderBit/results/cutflow_";
-        // path.append(analysisRunName);
+        // path.append(analysis_name());
         // path.append(".txt");
         // cutflowFile.open(path.c_str());
 
@@ -308,8 +308,6 @@ namespace Gambit {
        //  }
        //  cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
        // cutflowFile.close();
-
-        static const string ANAME = "CMS_13TeV_2OSLEP_confnote_36invfb";
 
         // Only 7 of the 9 signal regions are included in the covariance matrix
         // (SR1 and SR6 are left out)
@@ -334,7 +332,7 @@ namespace Gambit {
 
         for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
           stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
-          add_result(SignalRegionData(ANAME, ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+          add_result(SignalRegionData(analysis_name(), ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
         // Covariance matrix
@@ -354,7 +352,7 @@ namespace Gambit {
 
         // //Now fill a results object with the results for each SR
         // SignalRegionData results_SR1;
-        // results_SR1.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR1.analysis_name = analysis_name();
         // results_SR1.sr_label = "SR1";
         // results_SR1.n_observed = 793.;
         // results_SR1.n_background = 793.; 
@@ -364,7 +362,7 @@ namespace Gambit {
         // add_result(results_SR1);
 
         // SignalRegionData results_SR2;
-        // results_SR2.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR2.analysis_name = analysis_name();
         // results_SR2.sr_label = "SR2";
         // results_SR2.n_observed = 57.;
         // results_SR2.n_background = 54.9;
@@ -374,7 +372,7 @@ namespace Gambit {
         // add_result(results_SR2);
 
         // SignalRegionData results_SR3;
-        // results_SR3.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR3.analysis_name = analysis_name();
         // results_SR3.sr_label = "SR3";
         // results_SR3.n_observed = 29.;
         // results_SR3.n_background = 21.6;
@@ -384,7 +382,7 @@ namespace Gambit {
         // add_result(results_SR3);
 
         // SignalRegionData results_SR4;
-        // results_SR4.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR4.analysis_name = analysis_name();
         // results_SR4.sr_label = "SR4";
         // results_SR4.n_observed = 2.;
         // results_SR4.n_background = 6.;
@@ -394,7 +392,7 @@ namespace Gambit {
         // add_result(results_SR4);
 
         // SignalRegionData results_SR5;
-        // results_SR5.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR5.analysis_name = analysis_name();
         // results_SR5.sr_label = "SR5";
         // results_SR5.n_observed = 0.;
         // results_SR5.n_background = 2.5;
@@ -404,7 +402,7 @@ namespace Gambit {
         // add_result(results_SR5);
 
         // SignalRegionData results_SR6;
-        // results_SR6.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR6.analysis_name = analysis_name();
         // results_SR6.sr_label = "SR6";
         // results_SR6.n_observed = 82;
         // results_SR6.n_background = 82.;
@@ -414,7 +412,7 @@ namespace Gambit {
         // add_result(results_SR6);
 
         // SignalRegionData results_SR7;
-        // results_SR7.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR7.analysis_name = analysis_name();
         // results_SR7.sr_label = "SR7";
         // results_SR7.n_observed = 9.;
         // results_SR7.n_background = 7.6;
@@ -424,7 +422,7 @@ namespace Gambit {
         // add_result(results_SR7);
 
         // SignalRegionData results_SR8;
-        // results_SR8.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR8.analysis_name = analysis_name();
         // results_SR8.sr_label = "SR8";
         // results_SR8.n_observed = 5.;
         // results_SR8.n_background = 5.6;
@@ -434,7 +432,7 @@ namespace Gambit {
         // add_result(results_SR8);
 
         // SignalRegionData results_SR9;
-        // results_SR9.analysis_name = "Analysis_CMS_13TeV_2OSLEP_confnote_36invfb";
+        // results_SR9.analysis_name = analysis_name();
         // results_SR9.sr_label = "SR9";
         // results_SR9.n_observed = 1.;
         // results_SR9.n_background = 1.3;

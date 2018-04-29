@@ -17,11 +17,15 @@ namespace Gambit {
 
       Analysis_Minimum() {
 
-        // Set number of events passing cuts to zero upon initialisation
-        _numSR = 0;
+        // Set the analysis name
+        set_analysis_name("Minimum");
 
         // Set the LHC luminosity
         set_luminosity(20.3);
+
+        // Set number of events passing cuts to zero upon initialisation
+        _numSR = 0;
+
 
       }
 
@@ -85,7 +89,7 @@ namespace Gambit {
         // We have made up a number of observed events
         // We have also made up a number of predicted background events (with a made up uncertainty)
         SignalRegionData results_SR;
-        results_SR.analysis_name = "Analysis_Minimum";
+        results_SR.analysis_name = analysis_name();
         results_SR.sr_label = "SR"; // label must be unique for each signal region
         results_SR.n_observed = 100.; // set number of observed events (in LHC paper)
         results_SR.n_background = 95.; // set number of predicted background events (in LHC paper)
