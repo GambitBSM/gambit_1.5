@@ -84,6 +84,39 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("scanner" ${name} ${ver})
 endif()
 
+# PolyChord
+set(name "polychord")
+set(ver "1.14")
+set(lib "libchord")
+set(md5 "0f9be938fbbfe073cfc4de69f36e24cc")
+set(baseurl "https://ccpforge.cse.rl.ac.uk")
+set(endurl "/gf/download/frsrelease/617/9178/PolyChord_v${ver}.tar.gz")
+set(gateurl "/gf/account/?action=LoginAction")
+set(dl "${baseurl}${endurl}")
+set(dl2 "${baseurl}${gateurl}")
+set(login_data "password=${CCPForge_p1}${CCPForge_p2}${CCPForge_p3}&username=${CCPForge_user}&redirect=${endurl}")
+set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
+set(pcSO_LINK "${CMAKE_Fortran_COMPILER} -shared ${OpenMP_Fortran_FLAGS} ${CMAKE_Fortran_MPI_SO_LINK_FLAGS}")
+if(MPI_Fortran_FOUND)
+  set(pcFFLAGS "${GAMBIT_Fortran_FLAGS_PLUS_MPI}")
+else()
+  set(pcFFLAGS "${GAMBIT_Fortran_FLAGS}")
+endif()
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver} "null" ${login_data} ${dl2}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND sed ${dashi} -e "s#MPI=.*#MPI=1#g"
+                                   <SOURCE_DIR>/Makefile
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}  
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("scanner" ${name} ${ver})
+endif()
+
 # MultiNest
 set(name "multinest")
 set(ver "3.10")
