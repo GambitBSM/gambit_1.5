@@ -593,13 +593,13 @@ namespace Gambit
 
           BEreq::dshmnoclue->vobs = vrot;
 
-          logger() << "Updating DarkSUSY halo parameters:" << EOM;
-          logger() << "    rho0 [GeV/cm^3] = " << rho0 << EOM;
-          logger() << "    rho0_eff [GeV/cm^3] = " << rho0_eff << EOM;
-          logger() << "    v_sun [km/s]  = " << vrot<< EOM;
-          logger() << "    v_earth [km/s]  = " << v_earth << EOM;
-          logger() << "    v_obs [km/s]  = " << vrot << EOM;
-          logger() << "    vd_3d [km/s]  = " << vd_3d << EOM;
+          logger() << LogTags::debug << "Updating DarkSUSY halo parameters:" << endl;
+          logger() << "    rho0 [GeV/cm^3] = " << rho0 << endl;
+          logger() << "    rho0_eff [GeV/cm^3] = " << rho0_eff << endl;
+          logger() << "    v_sun [km/s]  = " << vrot<< endl;
+          logger() << "    v_earth [km/s]  = " << v_earth << endl;
+          logger() << "    v_obs [km/s]  = " << vrot << endl;
+          logger() << "    vd_3d [km/s]  = " << vd_3d << endl;
           logger() << "    v_esc [km/s]  = " << vesc << EOM;
 
           result = true;
