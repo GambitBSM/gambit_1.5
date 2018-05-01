@@ -85,6 +85,13 @@ Rules:
       T_ncdm: 0.71611
       k_pivot: 0.05
 
+#####
+##  If we are to use the inflationary solver,
+##  we must input here the relevant options,
+##  perhaps preferable via an additional file.
+## e.g.      !import include/inflation_rules.yaml
+####
+
 #======== Logging setup ========
 Lxogger:
   redirection:

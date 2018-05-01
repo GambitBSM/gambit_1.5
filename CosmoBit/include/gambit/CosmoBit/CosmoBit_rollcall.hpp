@@ -379,6 +379,41 @@ START_MODULE
     ALLOW_MODELS(LCDMtensor)
     BACKEND_REQ(class_parser_initialize,(class_tag),int,(Class::file_content*,int ,char*, char*))
     #undef FUNCTION
+
+    #define FUNCTION class_set_parameter_inf_SR1quad_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_SR1quad_LCDMt)
+    BACKEND_REQ(class_parser_initialize,(class_tag),int,(Class::file_content*,int ,char*, char*))
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+    #define FUNCTION class_set_parameter_inf_1quarInf_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_1quarInf_LCDMt)
+    BACKEND_REQ(class_parser_initialize,(class_tag),int,(Class::file_content*,int ,char*, char*))
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+    #define FUNCTION class_set_parameter_inf_1mono32Inf_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_1mono32Inf_LCDMt)
+    BACKEND_REQ(class_parser_initialize,(class_tag),int,(Class::file_content*,int ,char*, char*))
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+    #define FUNCTION class_set_parameter_inf_1linearInf_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_1linearInf_LCDMt)
+    BACKEND_REQ(class_parser_initialize,(class_tag),int,(Class::file_content*,int ,char*, char*))
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+    #define FUNCTION class_set_parameter_inf_smashInf_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_smashInf_LCDMt)
+    BACKEND_REQ(class_parser_initialize,(class_tag),int,(Class::file_content*,int ,char*, char*))
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY class_run
