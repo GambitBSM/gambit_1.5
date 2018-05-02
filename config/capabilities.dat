@@ -3546,7 +3546,7 @@ compute_1linearInf_rLCDMtensor_lowp_TT_loglike: |
 compute_smashInf_rLCDMtensor_lowp_TT_loglike: |
    8 parameter cosmology smash inflation model --- smash inflation
    A_s, n_s and r are given by inflationary model parameters: xi, m^2.
-
+
 inf_SR1quad_LCDMt_parameters: |
    omega_b, baryon density parameter.
    omega_cdm, dark matter density parameter.

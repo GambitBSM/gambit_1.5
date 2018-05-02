@@ -1445,7 +1445,7 @@ namespace Gambit
       double a = 0.0, b = 100.0; // Correct for.
       gsl_function F;
 		  
-      //struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot}; ***This is already defined in teh beginning, right?***
+      struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot};
 		  
       F.function = &fn1;
       F.params = &params;
