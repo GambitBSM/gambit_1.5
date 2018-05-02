@@ -94,9 +94,9 @@ scanner_plugin(polychord, version(1, 14))
       Settings settings;
       settings.nDims = ma;
       settings.nDerived = 2;
-      settings.nlive = get_inifile_value<int>("nlive", nDims*25);                  // number of live points
-      settings.num_repeats = get_inifile_value<int>("num_repeats", nDims*5);       // length of slice sampling chain
-      settings.nprior = get_inifile_value<int>("nprior", nlive*10);                // number of prior samples to begin algorithm with
+      settings.nlive = get_inifile_value<int>("nlive", settings.nDims*25);                  // number of live points
+      settings.num_repeats = get_inifile_value<int>("num_repeats", settings.nDims*5);       // length of slice sampling chain
+      settings.nprior = get_inifile_value<int>("nprior", settings.nlive*10);                // number of prior samples to begin algorithm with
       settings.do_clustering = get_inifile_value<bool>("do_clustering", true);     // Whether or not to perform clustering
       settings.feedback = get_inifile_value<int>("feedback", 1);                   // Feedback level
       settings.precision_criterion = get_inifile_value<double>("tol", 0.5);        // Stopping criterion (consistent with multinest)
@@ -120,7 +120,7 @@ scanner_plugin(polychord, version(1, 14))
       settings.seed = get_inifile_value<int>("seed",-1);
 
 
-      if(resume==1 and outfile==0)
+      if(resume_mode==1 and outfile==0)
       {
         // It is stupid to be in resume mode while not writing output files.
         // Means subsequent resumes will be impossible. Throw an error.
@@ -154,8 +154,8 @@ scanner_plugin(polychord, version(1, 14))
       Gambit::Scanner::assign_aux_numbers("Posterior","LastLive");
 
       // Create the object that interfaces to the MultiNest LogLike callback function
-      Gambit::MultiNest::LogLikeWrapper loglwrapper(LogLike, get_printer(), ndims);
-      Gambit::MultiNest::global_loglike_object = &loglwrapper;
+      Gambit::PolyChord::LogLikeWrapper loglwrapper(LogLike, get_printer());
+      Gambit::PolyChord::global_loglike_object = &loglwrapper;
 
       //Run MultiNest, passing callback functions for the loglike and dumper.
       if(myrank == 0) std::cout << "Starting MultiNest run..." << std::endl;
@@ -187,21 +187,19 @@ namespace Gambit {
          return global_loglike_object->LogLike(Cube, ndim, phi, nderived);
       }
 
-      void callback_dumper(int nSamples, int nlive, int nPar, double *physLive,
-                           double *posterior, double *paramConstr,
-                           double maxLogLike, double logZ, double logZerr,
-                           void*)
+      void callback_dumper(int ndead, int nlive, int npars, 
+                           double *live, double *dead, double* logweights,
+                           double logZ, double logZerr)
       {
          global_loglike_object->
-            dumper(nSamples, nlive, nPar, physLive, posterior, paramConstr,
-                   maxLogLike, logZ, logZerr);
+            dumper(ndead, nlive, npars, live, dead, logweights, logZ, logZerr);
       }
       ///@}
 
 
       /// LogLikeWrapper Constructor
-      LogLikeWrapper::LogLikeWrapper(scanPtr loglike, printer_interface& printer, int ndim)
-        : boundLogLike(loglike), boundPrinter(printer), my_ndim(ndim), dumper_runonce(false)
+      LogLikeWrapper::LogLikeWrapper(scanPtr loglike, printer_interface& printer)
+        : boundLogLike(loglike), boundPrinter(printer)
       { }
 
       /// Main interface function from PolyChord to ScannerBit-supplied loglikelihood function
@@ -209,21 +207,19 @@ namespace Gambit {
       /// loglike callback routine
       ///
       /// Input arguments
-      /// ndim    = dimensionality (total number of free parameters) of the problem
-      /// npars   = total number of free plus derived parameters
-      ///
-      /// Input/Output arguments
-      /// Cube[npars]  = on entry has the ndim parameters in unit-hypercube
-      ///                on exit, the physical parameters plus copy any derived parameters
-      ///                you want to store with the free parameters
+      /// ndim       = dimensionality (total number of free parameters) of the problem
+      /// nderived   = total number of derived parameters
+      /// Cube[ndim] = ndim parameters 
       ///
       /// Output arguments
-      /// lnew = loglikelihood
+      /// phi[ndim] = nderived devired parameters
+      /// lnew      = loglikelihood
       ///
-      double LogLikeWrapper::LogLike(double *Cube, int ndim, int)
+      double LogLikeWrapper::LogLike(double *Cube, int ndim, double* phi, int nderived)
       {
          //convert C style array to C++ vector class
          std::vector<double> unitpars(Cube, Cube + ndim);
+         std::vector<double> derived(phi, phi + nderived);
 
          double lnew = boundLogLike(unitpars);
 
@@ -232,73 +228,50 @@ namespace Gambit {
          // Get, set and ouptut the process rank and this point's ID
          int myrank  = boundLogLike->getRank(); // MPI rank of this process
          int pointID = boundLogLike->getPtID();   // point ID number
-         Cube[ndim+0] = myrank;
-         Cube[ndim+1] = pointID;
+         phi[0] = myrank;
+         phi[1] = pointID;
          return lnew;
       }
 
       /// Main interface to PolyChord dumper routine
-      /// The dumper routine will be called every updInt*10 iterations
-      /// PolyChord does not need to the user to do anything. User can use the arguments in whichever way he/she wants
+      /// The dumper routine will be called every time the live points compress by a factor compression_factor
+      /// PolyChord does not need to the user to do anything. User can use the arguments in whichever way they want
       ///
       /// Arguments:
       ///
-      /// nSamples                                             = total number of samples in posterior distribution
+      /// ndead                                                = total number of discarded points for posterior usage
       /// nlive                                                = total number of live points
-      /// nPar                                                 = total number of parameters (free + derived)
-      /// physLive[1][nlive * (nPar + 1)]                      = 2D array containing the last set of live points
-      ///                                                        (physical parameters plus derived parameters) along
-      ///                                                        with their loglikelihood values
-      /// TODO: Multinest uses the likelihood of the lowest live point as the "threshold" for iterating, i.e. it throws out the live point if it finds a better one. So we can use this number to update the GAMBIT 'cutoff' threshold when evaluating the likelihood function.
+      /// nPar                                                 = total number of parameters + 2 (free + derived + 2)
+      /// live[nlive*npars]                                    = 2D array containing the last set of live points
+      ///                                                        (physical parameters plus derived parameters + birth contour + death contour)
 
-      /// posterior[1][nSamples * (nPar + 2)]                  = posterior distribution containing nSamples points.
+      /// dead[ndead*npars]                                    = posterior distribution containing nSamples points.
       ///                                                        Each sample has nPar parameters (physical + derived)
       ///                                                        along with the their loglike value & posterior probability
-      /// paramConstr[0][0] to paramConstr[0][nPar - 1]        = mean values of the parameters
-      /// paramConstr[0][nPar] to paramConstr[0][2*nPar - 1]   = standard deviation of the parameters
-      /// paramConstr[0][nPar*2] to paramConstr[0][3*nPar - 1] = best-fit (maxlike) parameters
-      /// paramConstr[0][nPar*4] to paramConstr[0][4*nPar - 1] = MAP (maximum-a-posteriori) parameters
-      /// paramConstr[1][4*nPar]                               = ????
-      /// maxLogLike                                           = maximum loglikelihood value
+      /// logweights[ndead]                                    = log of volume weighting of dead points. Use this to turn them into posterior weighted samples
       /// logZ                                                 = log evidence value
       /// logZerr                                              = error on log evidence value
-      /// context                                              = void pointer, any additional information
-      void LogLikeWrapper::dumper(int nSamples, int nlive, int nPar, double *physLive, double *posterior, double* /*paramConstr*/,
-       double /*maxLogLike*/, double /*logZ*/, double /*logZerr*/)
+      void LogLikeWrapper::dumper(int ndead, int nlive, int npars,
+                                  double *live, double *dead, double* logweights, 
+                                  double /*logZ*/, double /*logZerr*/)
       {
           int thisrank = boundPrinter.get_stream()->getRank(); // MPI rank of this process
           if(thisrank!=0)
           {
-             scan_err <<"Error! ScannerBit MultiNest plugin attempted to run 'dumper' function on a worker process "
-                      <<"(thisrank=="<<thisrank<<")! MultiNest should only try to run this function on the master "
+             scan_err <<"Error! ScannerBit PolyChord plugin attempted to run 'dumper' function on a worker process "
+                      <<"(thisrank=="<<thisrank<<")! PolyChord should only try to run this function on the master "
                       <<"process. Most likely this means that your multinest installation is not running in MPI mode "
                       <<"correctly, and is actually running independent scans on each process. Alternatively, the "
-                      <<"version of MultiNest you are using may be too far ahead of what this plugin can handle, "
+                      <<"version of PolyChord you are using may be too far ahead of what this plugin can handle, "
                       <<"if e.g. the described behaviour has changed since this plugin was written."
                       << scan_end;
           }
 
-          // Send signal to other processes to switch to higher min_logL value.
-          // MultiNest was sometimes getting stuck looking for live point candidates;
-          // increasing this above the MultiNext zero_LogL value should avoid that
-          // issue.
-          // We do this here because initial live point generation should be finished
-          // once the dumper runs, and we want the original min_logL value while generating
-          // live points.
-          if (!dumper_runonce)
-          {
-             dumper_runonce = true;
-             boundLogLike->switch_to_alternate_min_LogL();
-             std::cerr << "Multinest dumper first ran on process "<<boundLogLike->getRank()<<" at iteration "<<boundLogLike->getPtID()<<std::endl;
-          }
-
           // Get printers for each auxiliary stream
-          //printer* stats_stream( boundPrinter.get_stream("stats") ); //FIXME see below
           printer* txt_stream(   boundPrinter.get_stream("txt")   );
           printer* live_stream(  boundPrinter.get_stream("live")  );
 
           // Reset the print streams. WARNING! This potentially deletes the old data (here we overwrite it on purpose)
-          //stats_stream->reset();  // FIXME
           txt_stream->reset();
           live_stream->reset();
 
@@ -308,47 +281,25 @@ namespace Gambit {
           // unique for a given quanity to do this.
           // Negative numbers not used by functors, so those are 'safe' to use here
 
-          // FIXME this is buggy atm
-          // Stats file
-          // For now, MPIrank set to 0 and pointID set to -1, as not needed. Might change how this works later.
-          //                  Quantity    Label         IDcode  MPIrank  pointID
-          //stats_stream->print(maxLogLike, "maxLogLike", -1,  0,  -1);
-          //stats_stream->print(logZ,       "logZ",       -2,  0,  -1);
-          //stats_stream->print(logZerr,    "logZerr",    -3,  0,  -1);
-
           // txt file stuff
           // Send info for each point to printer one command at a time
-          int pointID; // ID number for each point
-          int myrank;  // MPI rank which wrote each point
 
           // The discarded live points (and rejected candidate live points if IS = 1)
-          for( int i = 0; i < nSamples; i++ )
+          for( int i_dead = 0; i_dead < ndead; i_dead++ )
           {
-             myrank  = posterior[(nPar-2)*nSamples + i]; //MPI rank stored in second last entry of cube
-             pointID = posterior[(nPar-1)*nSamples + i]; //pointID stored in last entry of cube
-
-             txt_stream->print( posterior[(nPar+1)*nSamples + i], "Posterior", myrank, pointID);
-             // Put rest of parameters into a vector for printing all together // TODO: not needed, delete?
-             // std::vector<double> parameters;
-             // for( int j = 0; j < nPar-2; j++ )
-             // {
-             //     parameters.push_back( posterior[j*nSamples + i] );
-             // }
+             int myrank  = dead[npars*i_dead + npars-4]; //MPI rank stored in fourth last column
+             int pointID = dead[npars*i_dead + npars-3]; //pointID stored in third last column
+             double logl = dead[npars*i_dead + npars-1]; //loglikelihood stored in last column
+             double logw = logweights[i_dead];           //volume weight stored in logweights
+             txt_stream->print( std::exp(logl+logw), "Posterior", myrank, pointID);
           }
 
           // The last set of live points
-          for( int i = 0; i < nlive; i++ )
+          for( int i_live = 0; i_live < nlive; i_live++ )
           {
-             myrank  = physLive[(nPar-2)*nlive + i]; //MPI rank number stored in second last entry of cube
-             pointID = physLive[(nPar-1)*nlive + i]; //pointID stored in last entry of cube
+             int myrank  = live[npars*i_live + npars-4]; //MPI rank stored in fourth last column
+             int pointID = live[npars*i_live + npars-3]; //pointID stored in third last column
              live_stream->print( true, "LastLive", myrank, pointID); // Flag which points were the last live set
-             // // Put rest of parameters into a vector for printing all together // TODO: not needed, delete?
-             // std::vector<double> parameters;
-             // for( int j = 0; j < nPar-2; j++ )
-             // {
-             //     parameters.push_back( physLive[j*nlive + i] );
-             // }
-             // //live_stream->print(parameters, "Parameters", myrank, pointID);
           }
 
       }

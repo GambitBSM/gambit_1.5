@@ -33,6 +33,7 @@ struct Settings
     bool do_clustering;
     int feedback;
     double precision_criterion;
+    double logzero;
     int max_ndead;
     double boost_posterior;
     bool posteriors;
@@ -82,29 +83,20 @@ namespace Gambit
             /// Reference to a printer_interface object
             printer_interface& boundPrinter;
 
-            /// Number of free parameters
-            int my_ndim;
-
-            /// Variable to indicate whether the dumper function has been run at least once
-            bool dumper_runonce;
-
          public:
             /// Constructor
-            LogLikeWrapper(scanPtr, printer_interface&, int);
+            LogLikeWrapper(scanPtr, printer_interface&);
    
             /// Main interface function from PolyChord to ScannerBit-supplied loglikelihood function 
-            double LogLike(double*, int, int);
+            double LogLike(double*, int, double*, int);
 
             /// Main interface to PolyChord dumper routine   
-            void dumper(int, int, int, double*, double*, double*, double, double, double);
+            void dumper(int, int, int, double*, double*, double*, double, double);
       };
 
-      ///@{ Plain-vanilla C-functions to pass to Multinest for the callbacks
-      // Note: we are using the c interface from cwrapper.f90, so the function
-      // signature is a little different than in the multinest examples.
-      double callback_loglike(double*, int, int, void*);
-
-      void callback_dumper(int, int, int, double*, double*, double*, double, double, double, void*);
+      ///@{ C-functions to pass to PolyChord for the callbacks
+      double callback_loglike(double*, int, double*, int);
+      void callback_dumper(int, int, int, double*, double*, double*, double, double);
       ///@}      
 
    } // End PolyChord namespace
