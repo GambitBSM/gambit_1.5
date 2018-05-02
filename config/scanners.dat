@@ -94,11 +94,25 @@ polychord: |
   #remove_newlines
   PolyChord is an alternative nested sampler to MultiNest, specialised for
   working in higher dimensions. Instead of rejection sampling (MultiNest), it
-  uses slice sampling to navigate the constrained prior. This implementation
-  uses code developed by Handley et. al.: https://arxiv.org/abs/1506.00171
+  uses slice sampling to navigate the constrained prior. The scaling with
+  dimensionality is polynomial (rather than MultiNest's exponential scaling),
+  and tuning parameters are generally less opaque. In particular, slice
+  sampling is able to exploit a hierarchy of parameter speeds. This
+  implementation uses code developed by Handley et. al.:
+  https://arxiv.org/abs/1506.00171
 
   YAML options (defaults):
-      To be completed
+      nlive (25*nDims)              number of live points
+      num_repeats (5*nDims):        length of slice sampling chain
+      nprior (10*nlive):            rejection sample the prior by this amount
+      do_clustering (1):            perform clustering?
+      fb (1):                       Feedback level 
+      tol (0.5):                    defines the stopping criteria
+      logZero (-1E90):              points with loglike < logZero will be ignored by PolyChord
+      maxiter (0):                  Max no. of iterations, a non-positive value means infinity.
+      outfile (0):                  write output files?
+      compression_factor (exp(-1)): update/dump every time volume drops by this amount
+      seed (-1):                    seed for random number generator. Negative means seed from system time
 
   Auxillary output variables:
       Posterior:    Statistical weight of each point.

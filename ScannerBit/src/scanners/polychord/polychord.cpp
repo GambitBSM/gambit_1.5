@@ -51,7 +51,7 @@ typedef Gambit::Scanner::like_ptr scanPtr;
 
 scanner_plugin(polychord, version(1, 14))
 {
-   // An error is thrown if any of the following entries are not present in the inifile (none absolutely required for MultiNest).
+   // An error is thrown if any of the following entries are not present in the inifile (none absolutely required for PolyChord).
    reqd_inifile_entries();
 
    // Tell cmake system to search known paths for these libraries; any not found must be specified in config/scanner_locations.yaml.
@@ -98,11 +98,11 @@ scanner_plugin(polychord, version(1, 14))
       settings.num_repeats = get_inifile_value<int>("num_repeats", settings.nDims*5);       // length of slice sampling chain
       settings.nprior = get_inifile_value<int>("nprior", settings.nlive*10);                // number of prior samples to begin algorithm with
       settings.do_clustering = get_inifile_value<bool>("do_clustering", true);     // Whether or not to perform clustering
-      settings.feedback = get_inifile_value<int>("feedback", 1);                   // Feedback level
+      settings.feedback = get_inifile_value<int>("fb", 1);                         // Feedback level
       settings.precision_criterion = get_inifile_value<double>("tol", 0.5);        // Stopping criterion (consistent with multinest)
       settings.logzero = get_inifile_value<double>("logZero",gl0);
       settings.max_ndead = get_inifile_value<double>("maxiter", 0);                  // Max no. of iterations, a non-positive value means infinity (consistent with multinest).
-      settings.boost_posterior = get_inifile_value<double>("boost_posterior",0.); // Increase the number of posterior samples produced
+      settings.boost_posterior = 0; // Increase the number of posterior samples produced
       bool outfile (get_inifile_value<bool>("outfile", true));                // write output files?
       settings.posteriors = outfile;
       settings.equals = outfile;
@@ -156,11 +156,11 @@ scanner_plugin(polychord, version(1, 14))
       // Ensure that MPI processes have the same IDs for auxiliary print streams;
       Gambit::Scanner::assign_aux_numbers("Posterior","LastLive");
 
-      // Create the object that interfaces to the MultiNest LogLike callback function
+      // Create the object that interfaces to the PolyChord LogLike callback function
       Gambit::PolyChord::LogLikeWrapper loglwrapper(LogLike, get_printer());
       Gambit::PolyChord::global_loglike_object = &loglwrapper;
 
-      //Run MultiNest, passing callback functions for the loglike and dumper.
+      //Run PolyChord, passing callback functions for the loglike and dumper.
       if(myrank == 0) std::cout << "Starting PolyChord run..." << std::endl;
       run_polychord(Gambit::PolyChord::callback_loglike, Gambit::PolyChord::callback_dumper, settings);
       if(myrank == 0) std::cout << "PolyChord run finished!" << std::endl;
@@ -263,7 +263,7 @@ namespace Gambit {
           {
              scan_err <<"Error! ScannerBit PolyChord plugin attempted to run 'dumper' function on a worker process "
                       <<"(thisrank=="<<thisrank<<")! PolyChord should only try to run this function on the master "
-                      <<"process. Most likely this means that your multinest installation is not running in MPI mode "
+                      <<"process. Most likely this means that your PolyChord installation is not running in MPI mode "
                       <<"correctly, and is actually running independent scans on each process. Alternatively, the "
                       <<"version of PolyChord you are using may be too far ahead of what this plugin can handle, "
                       <<"if e.g. the described behaviour has changed since this plugin was written."
