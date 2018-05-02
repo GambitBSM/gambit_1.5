@@ -66,6 +66,11 @@ namespace Gambit
       std::vector<double> Cl_EE;
       std::vector<double> Cl_BB;
       std::vector<double> Cl_PhiPhi;
+		
+	  std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
+	  std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
+	  std::vector<double> k_ar; // Corresponding wavenumbers.
+
     };
 
     // Generic class for cosmological likelihoods

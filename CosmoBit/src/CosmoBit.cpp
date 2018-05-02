@@ -1159,7 +1159,7 @@ namespace Gambit
 											 calc_full_pk,
 											 steps,
 											 kmin,
-											 //											   kmax,
+											 //	kmax,
 											 byVal(&phi0_priors_min[0]),
 											 byVal(&phi0_priors_max[0]),
 											 byVal(&dphi0_priors_min[0]),
@@ -1494,6 +1494,139 @@ namespace Gambit
       cosmo.non_free_pointer = true;
     }
 
+	void class_run_func_full_pk_ugly(Class_container& cosmo)
+	{
+		  //std::cout << "Last seen alive in: class_run_func" << std::endl;
+		  using namespace Pipes::class_run_func_full_pk_ugly;
+		  
+		  char error_printout[1024];
+		  cosmo = *Dep::class_set_parameter;
+		  
+		  if (BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_background_initialize(&cosmo.pr,&cosmo.ba) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  /* If full pk is asked on the set parameter function; this sets ppm->primordial_spec_type
+		   to be equal to 'gambit_Pk'. Using this flag, we externally fill in the primordial power spectrum. 
+		   (note alterative -without patching class at all- is to use text files and 'cat' command which we 
+		   want to aviod. The existing CLASS on the branch is already patched to have necessary flags and 
+		   functions to allow for hacking and external setting the primordial power spectrum. */
+		  if(cosmo.pm.primordial_spec_type == 1) // is 1 when Gambit_pk is asked for.
+		  {
+			  /* The bin number of the primordial power spectrum.
+			   This is not to be set here (and also should be given by the user). 
+			   Will change it ASAP. 
+			   
+			   Furthermore, the arrays:
+			   cosmo.k_ar, cosmo.Pk_S, and cosmo.Pk_T are to be filled 
+			   in the early step of setting the parameters. */
+			  
+			  cosmo.pm.lnk_size = 100;
+
+			  /** - Make room */
+			  cosmo.pm.lnk = (double *)malloc(cosmo.pm.lnk_size*sizeof(double));
+			  
+			  std::cout << "we pass pm.lnk \n" << std::endl;
+			  
+			  cosmo.pm.lnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
+			  
+			  cosmo.pm.ddlnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
+			  
+			  cosmo.pm.ic_size = (int *)malloc(cosmo.pt.md_size*sizeof(int));
+			  
+			  cosmo.pm.ic_ic_size = (int *)malloc(cosmo.pt.md_size*sizeof(int));
+			  
+			  cosmo.pm.is_non_zero = (short **)malloc(cosmo.pt.md_size*sizeof(short));
+			  
+			  int index_md;
+			  
+			  for (index_md = 0; index_md < cosmo.pt.md_size; index_md++) {
+				  
+				  cosmo.pm.ic_size[index_md] = cosmo.pt.ic_size[index_md];
+				  
+				  cosmo.pm.ic_ic_size[index_md] = (cosmo.pm.ic_size[index_md]*(cosmo.pm.ic_size[index_md]+1))/2;
+				  
+				  std::cout << "pm.ic_size["<<index_md<<"] =  " << cosmo.pt.ic_size[index_md] << std::endl;
+				  
+				  std::cout << "pm.ic_ic_size["<<index_md<<"] = " << cosmo.pm.ic_ic_size[index_md]<<std::endl;
+				  
+				  cosmo.pm.lnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
+				  
+				  cosmo.pm.ddlnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
+				  
+				  cosmo.pm.is_non_zero[index_md] = (short *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(short));
+				  
+			  }
+			  
+			  /** - Store values */
+			  for (int index_k=0; index_k<cosmo.pm.lnk_size; index_k++)
+			  {
+				  std::cout << "k_array["<<index_k<<"]="<< cosmo.k_ar.at(index_k) <<std::endl;
+				  std::cout << "pks_array["<<index_k<<"]="<< cosmo.Pk_S.at(index_k)<<std::endl;
+				  std::cout << "pkt_array["<<index_k<<"]="<< cosmo.Pk_T.at(index_k)<<std::endl;
+				  
+				  cosmo.pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
+				  cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
+				  if (cosmo.pt.has_tensors == _TRUE_)
+					  cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
+				  
+				  std::cout << "pm.lnk["<<index_k<<"]="<<cosmo.pm.lnk[index_k]<<std::endl;
+				  std::cout << "pm.lnpk["<<cosmo.pt.index_md_scalars<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k]<<std::endl;
+				  std::cout << "pm.lnpk["<<cosmo.pt.index_md_tensors<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k]<<std::endl;
+				  
+			  }
+			  
+			  /** - Tell CLASS that there are scalar (and tensor) modes */
+			  cosmo.pm.is_non_zero[cosmo.pt.index_md_scalars][cosmo.pt.index_ic_ad] = _TRUE_;
+			  if (cosmo.pt.has_tensors == _TRUE_)
+				  cosmo.pm.is_non_zero[cosmo.pt.index_md_tensors][cosmo.pt.index_ic_ten] = _TRUE_;
+
+		  }
+		
+		  if (BEreq::class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  if (BEreq::class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le) == _FAILURE_)
+		  {
+			  sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
+			  invalid_point().raise(error_printout);
+		  }
+		  cosmo.non_free_pointer = true;
+	}
+
     void class_get_spectra_func(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
@@ -1564,6 +1697,7 @@ namespace Gambit
         cosmo.non_free_pointer = false;
       }
     }
+	  
 
     double** return_vanilla_cls(double omega_b,double omega_cdm,double H0,double ln10A_s,double n_s,double tau_reio)
     {

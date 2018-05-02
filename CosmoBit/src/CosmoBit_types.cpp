@@ -34,6 +34,10 @@ namespace Gambit
       Cl_BB.resize(lmax+1, 0.);
       Cl_PhiPhi.resize(lmax+1, 0.);
       //std::cout << "Hello it's me. I am a Class_container" << std::endl;
+		
+	  Pk_S.resize(lmax+1, 0.); // Primordial Scalar Power Spectrum
+	  Pk_T.resize(lmax+1, 0.); // Primordial Tensor Power Spectrum
+	  k_ar.resize(lmax+1, 0.); // Corresponding wavenumbers.
     }
 
     Class_container::~Class_container()

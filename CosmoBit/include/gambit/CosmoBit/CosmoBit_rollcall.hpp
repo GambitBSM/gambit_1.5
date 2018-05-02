@@ -433,6 +433,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY class_run_full_pk_ugly
+  START_CAPABILITY
+    #define FUNCTION class_run_func_full_pk_ugly
+    START_FUNCTION(CosmoBit::Class_container)
+    DEPENDENCY(class_set_parameter,CosmoBit::Class_container)
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    BACKEND_REQ(class_input_initialize,(class_tag),int,(Class::file_content*, Class::precision*, Class::background*, Class::thermo*, Class::perturbs*, Class::transfers*, Class::primordial*, Class::spectra*, Class::nonlinear*, Class::lensing*, Class::output*, char*))
+    BACKEND_REQ(class_background_initialize,(class_tag),int,(Class::precision*, Class::background*))
+    BACKEND_REQ(class_thermodynamics_initialize,(class_tag),int,(Class::precision*, Class::background*, Class::thermo*))
+    BACKEND_REQ(class_perturb_initialize,(class_tag),int,(Class::precision*, Class::background*, Class::thermo*, Class::perturbs*))
+    BACKEND_REQ(class_primordial_initialize,(class_tag),int,(Class::precision*, Class::perturbs*, Class::primordial*))
+    BACKEND_REQ(class_nonlinear_initialize,(class_tag),int,(Class::precision*, Class::background*, Class::thermo*, Class::perturbs*, Class::primordial*, Class::nonlinear*))
+    BACKEND_REQ(class_transfer_initialize,(class_tag),int,(Class::precision*, Class::background*, Class::thermo*, Class::perturbs*, Class::nonlinear*, Class::transfers*))
+    BACKEND_REQ(class_spectra_initialize,(class_tag),int,(Class::precision*, Class::background*, Class::perturbs*, Class::primordial*, Class::nonlinear*, Class::transfers*, Class::spectra*))
+    BACKEND_REQ(class_lensing_initialize,(class_tag),int,(Class::precision*, Class::perturbs*,Class::spectra*, Class::nonlinear*,Class::lensing*))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
   #define CAPABILITY class_get_spectra
   START_CAPABILITY
     #define FUNCTION class_get_spectra_func
