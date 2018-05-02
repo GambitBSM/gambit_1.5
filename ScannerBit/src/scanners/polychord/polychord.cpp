@@ -115,9 +115,12 @@ scanner_plugin(polychord, version(1, 14))
       settings.write_resume = resume_mode;
       settings.read_resume = resume_mode;
       settings.compression_factor = get_inifile_value<double>("compression_factor",0.36787944117144233);
-      settings.base_dir = Gambit::Utils::ensure_path_exists(get_inifile_value<std::string>("default_output_path")+"PolyChord");
+      settings.base_dir = get_inifile_value<std::string>("default_output_path")+"PolyChord";
       settings.file_root = get_inifile_value<std::string>("root", "native");
       settings.seed = get_inifile_value<int>("seed",-1);
+
+      Gambit::Utils::ensure_path_exists(settings.base_dir);
+      Gambit::Utils::ensure_path_exists(settings.base_dir + "/clusters/");
 
 
       if(resume_mode==1 and outfile==0)
@@ -248,7 +251,7 @@ namespace Gambit {
       /// dead[ndead*npars]                                    = posterior distribution containing nSamples points.
       ///                                                        Each sample has nPar parameters (physical + derived)
       ///                                                        along with the their loglike value & posterior probability
-      /// logweights[ndead]                                    = log of volume weighting of dead points. Use this to turn them into posterior weighted samples
+      /// logweights[ndead]                                    = log of posterior weighting of dead points. Use this to turn them into posterior weighted samples
       /// logZ                                                 = log evidence value
       /// logZerr                                              = error on log evidence value
       void LogLikeWrapper::dumper(int ndead, int nlive, int npars,
@@ -281,17 +284,13 @@ namespace Gambit {
           // unique for a given quanity to do this.
           // Negative numbers not used by functors, so those are 'safe' to use here
 
-          // txt file stuff
-          // Send info for each point to printer one command at a time
-
           // The discarded live points (and rejected candidate live points if IS = 1)
           for( int i_dead = 0; i_dead < ndead; i_dead++ )
           {
              int myrank  = dead[npars*i_dead + npars-4]; //MPI rank stored in fourth last column
              int pointID = dead[npars*i_dead + npars-3]; //pointID stored in third last column
-             double logl = dead[npars*i_dead + npars-1]; //loglikelihood stored in last column
-             double logw = logweights[i_dead];           //volume weight stored in logweights
-             txt_stream->print( std::exp(logl+logw), "Posterior", myrank, pointID);
+             double logw = logweights[i_dead];           //posterior weight stored in logweights
+             txt_stream->print( std::exp(logw), "Posterior", myrank, pointID);
           }
 
           // The last set of live points
