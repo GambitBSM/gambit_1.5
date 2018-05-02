@@ -49,7 +49,7 @@ typedef Gambit::Scanner::like_ptr scanPtr;
 /// Interface to ScannerBit
 /// =================================================
 
-scanner_plugin(polychord, version(3, 10))
+scanner_plugin(polychord, version(1, 14))
 {
    // An error is thrown if any of the following entries are not present in the inifile (none absolutely required for MultiNest).
    reqd_inifile_entries();
