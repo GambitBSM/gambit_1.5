@@ -16,34 +16,53 @@
 ///
 ///  *********************************************
 
-#ifndef __multinest_hpp__
-#define __multinest_hpp__
+#ifndef __polychord_hpp__
+#define __polychord_hpp__
 
 #include "gambit/ScannerBit/scanner_plugin.hpp"
 
-// Auxilliary classes and functions needed by multinest
-// (cloned largely from eggbox.cc, and modified to use cwrapper.f90 interface 
-//  instead of multinest.h)
+// Auxilliary classes and functions needed by polychord
 
-// C++ prototypes for the main run function for multinest, as well as the 
-// loglike and dumper functions
-extern "C"
+struct Settings
 {
-        void run(bool, bool, bool, int, double, double, int, int, int, int, int,
-                    double, char[], int, int[], bool, bool, bool, bool, double, int, 
-                    double (*)(double*,int,int,void*),    
-                    void (*)(int,int,int,double*,double*,double*,double,double,
-                      double,void*),
-                    void *);
-}
-//extern "C" double loglike(double*, int, int, void *);
-//extern "C" void dumper(int, int, int, double*, double*, double*,
-//                       double, double, double, void*);
+    int nDims;
+    int nDerived;
+    int nlive;
+    int num_repeats;
+    int nprior;
+    bool do_clustering;
+    int feedback;
+    double precision_criterion;
+    int max_ndead;
+    double boost_posterior;
+    bool posteriors;
+    bool equals;
+    bool cluster_posteriors;
+    bool write_resume;
+    bool write_paramnames;
+    bool read_resume;
+    bool write_stats;
+    bool write_live;
+    bool write_dead;
+    bool write_prior;
+    double compression_factor;
+    std::string base_dir;
+    std::string file_root;
+    int seed;
+
+    Settings(int _nDims=0,int _nDerived=0);
+};
+
+void run_polychord( 
+        double (*loglikelihood)(double*,int,double*,int),
+        void (*dumper)(int,int,int,double*,double*,double*,double,double), 
+        Settings);
+
 
 namespace Gambit
 {
 
-   namespace MultiNest
+   namespace PolyChord
    {
 
       /// Typedef for the ScannerBit pointer to the external loglikelihood function
@@ -53,7 +72,7 @@ namespace Gambit
       using Gambit::Scanner::printer_interface;
       using Gambit::Scanner::printer;
 
-      /// Class to connect multinest log-likelihood function and ScannerBit likelihood function
+      /// Class to connect PolyChord log-likelihood function and ScannerBit likelihood function
       class LogLikeWrapper
       {
          private:
@@ -73,10 +92,10 @@ namespace Gambit
             /// Constructor
             LogLikeWrapper(scanPtr, printer_interface&, int);
    
-            /// Main interface function from MultiNest to ScannerBit-supplied loglikelihood function 
+            /// Main interface function from PolyChord to ScannerBit-supplied loglikelihood function 
             double LogLike(double*, int, int);
 
-            /// Main interface to MultiNest dumper routine   
+            /// Main interface to PolyChord dumper routine   
             void dumper(int, int, int, double*, double*, double*, double, double, double);
       };
 
@@ -88,7 +107,7 @@ namespace Gambit
       void callback_dumper(int, int, int, double*, double*, double*, double, double, double, void*);
       ///@}      
 
-   } // End Multinest namespace
+   } // End PolyChord namespace
 
 } // End Gambit namespace
 
