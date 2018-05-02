@@ -26,6 +26,8 @@
 #define VERSION 2.0
 #define SAFE_VERSION 2_0
 
+#define PLC_PATH "EMPTY"
+
 // Load it
 LOAD_LIBRARY
 
@@ -53,12 +55,15 @@ BE_CONV_FUNCTION(initialize_high_TTTEEE_lite,void,(),"initialize_high_TTTEEE_lit
 BE_CONV_FUNCTION(initialize_lowp_TT,void,(),"initialize_lowp_TT",())
 BE_CONV_FUNCTION(initialize_lensing,void,(),"initialize_lensing",())
 BE_CONV_FUNCTION(data_cleanup,void,(),"data_cleanup",())
+BE_CONV_FUNCTION(set_planck_path,void,(std::string),"set_planck_path",())
 
 BE_INI_FUNCTION
 {
   static bool scan_level = true;
   if (scan_level)
   {
+    std::string planck_path = runOptions->getValueOrDef<std::string>(PLC_PATH,"planck_path");
+    set_planck_path(byVal(planck_path));
     if (*InUse::return_clikid_plik_dx11dr2_HM_v18_TTTEEE) initialize_high_TTTEEE();
     if (*InUse::return_clikid_plik_dx11dr2_HM_v18_TT) initialize_high_TT();
     if (*InUse::return_clikid_plik_lite_v18_TT) initialize_high_TT_lite();
@@ -72,6 +77,7 @@ END_BE_INI_FUNCTION
 
 BE_NAMESPACE
 {
+  std::string plc_location;
 
   clik_object * clikid_plik_dx11dr2_HM_v18_TT;
   clik_object * clikid_plik_dx11dr2_HM_v18_TTTEEE;
@@ -81,52 +87,71 @@ BE_NAMESPACE
   clik_lensing_object * smica_g30_ftl_full_pp;
   clik_error *_err;
 
+  void set_planck_path(std::string planck_path)
+  {
+    if (planck_path.compare("EMPTY") == 0) backend_error().raise(LOCAL_INFO,"The location of the planck data is not set properly!\n\nEither change the PLC_PATH macro in Backends/include/... .../plc_2_0.hpp or include\n\n  - capability:   plc_2_0_init\n    options:\n      planck_path: /YOUR/PATH/TO/plc_2.0/\n\nin the rules section of your input.");
+    if (planck_path.back() != '/') planck_path.push_back('/');
+    plc_location = planck_path;
+  }
+
   void initialize_high_TT()
   {
     std::cout << "Loading the high-l TT likelihood" << std::endl;
-    char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik/plik_dx11dr2_HM_v18_TT.clik";
+    std::string full_path = plc_location;
+    full_path += "hi_l/plik/plik_dx11dr2_HM_v18_TT.clik";
+    char* clik_path = (char*)full_path.c_str();
     _err = initError();
-    clikid_plik_dx11dr2_HM_v18_TT = clik_init(*&clik_path,&_err);
+    clikid_plik_dx11dr2_HM_v18_TT = clik_init(clik_path,&_err);
   }
 
   void initialize_high_TTTEEE()
   {
     std::cout << "Loading the high-l TTTEEE likelihood" << std::endl;
-    char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik";
+    std::string full_path = plc_location;
+    full_path += "hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik";
+    char* clik_path = (char*)full_path.c_str();
     _err = initError();
-    clikid_plik_dx11dr2_HM_v18_TTTEEE = clik_init(*&clik_path,&_err);
+    clikid_plik_dx11dr2_HM_v18_TTTEEE = clik_init(clik_path,&_err);
   }
 
   void initialize_high_TT_lite()
   {
     std::cout << "Loading the high-l TT-lite likelihood" << std::endl;
-    char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik_lite/plik_lite_v18_TT.clik";
+    std::string full_path = plc_location;
+    full_path += "hi_l/plik_lite/plik_lite_v18_TT.clik";
+    char* clik_path = (char*)full_path.c_str();
     _err = initError();
-    clikid_plik_lite_v18_TT = clik_init(*&clik_path,&_err);
+    clikid_plik_lite_v18_TT = clik_init(clik_path,&_err);
   }
 
   void initialize_high_TTTEEE_lite()
   {
     std::cout << "Loading the high-l TTTEEE-lite likelihood" << std::endl;
-    char clik_path[] = "/PATH/TO/plc_2.0/hi_l/plik_lite/plik_lite_v18_TTTEEE.clik";
+    std::string full_path = plc_location;
+    full_path += "hi_l/plik_lite/plik_lite_v18_TTTEEE.clik";
+    char* clik_path = (char*)full_path.c_str();
     _err = initError();
-    clikid_plik_lite_v18_TTTEEE = clik_init(*&clik_path,&_err);
+    clikid_plik_lite_v18_TTTEEE = clik_init(clik_path,&_err);
   }
 
   void initialize_lowp_TT()
   {
     std::cout << "Loading the low-l likelihood (This may take some time)" << std::endl;
-    char clik_path[] = "/PATH/TO/plc_2.0/low_l/bflike/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
+    std::string full_path = plc_location;
+    full_path += "low_l/bflike/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
+    char* clik_path = (char*)full_path.c_str();
     _err = initError();
-    clikid_lowl_SMW_70_dx11d_2014 = clik_init(*&clik_path,&_err);
+    clikid_lowl_SMW_70_dx11d_2014 = clik_init(clik_path,&_err);
   }
 
   void initialize_lensing()
   {
     std::cout << "Loading the lensing likelihood" << std::endl;
-    char clik_path[] = "/PATH/TO/plc_2.0/lensing/smica_g30_ftl_full_pp.clik_lensing";
+    std::string full_path = plc_location;
+    full_path += "lensing/smica_g30_ftl_full_pp.clik_lensing";
+    char* clik_path = (char*)full_path.c_str();
     _err = initError();
-    smica_g30_ftl_full_pp = clik_lensing_init(*&clik_path,&_err);
+    smica_g30_ftl_full_pp = clik_lensing_init(clik_path,&_err);
   }
 
   void  data_cleanup()
@@ -169,6 +194,8 @@ BE_NAMESPACE
 
 }
 END_BE_NAMESPACE
+
+#undef PLC_PATH
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
