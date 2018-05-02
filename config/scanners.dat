@@ -90,6 +90,20 @@ multinest: |
       Posterior:    Statistical weight of each point.
       live_points:  Boolean, true if the point is a live point.  False otherwise.
 
+polychord: |
+  #remove_newlines
+  PolyChord is an alternative nested sampler to MultiNest, specialised for
+  working in higher dimensions. Instead of rejection sampling (MultiNest), it
+  uses slice sampling to navigate the constrained prior. This implementation
+  uses code developed by Handley et. al.: https://arxiv.org/abs/1506.00171
+
+  YAML options (defaults):
+      To be completed
+
+  Auxillary output variables:
+      Posterior:    Statistical weight of each point.
+      live_points:  Boolean, true if the point is a live point.  False otherwise.
+
 raster: |
   #remove_newlines
   The raster scanner prints a user-defined set of points.  Any non-specified parameters will be randomly chosen and transformed by the priors.  Note that any specified point must use the "none"

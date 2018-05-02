@@ -103,6 +103,7 @@ namespace Gambit
                 "\n                                 gambit MSSM                               "
                 "\n                                 gambit IC79WL_loglike                     "
                 "\n                                 gambit MultiNest                          "
+                "\n                                 gambit PolyChord                          "
                 "\n                                                                           "
                 "\nBasic options:                                                             "
                 "\n   --version             Display GAMBIT version information                "

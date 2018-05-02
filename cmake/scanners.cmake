@@ -88,9 +88,9 @@ endif()
 set(name "polychord")
 set(ver "1.14")
 set(lib "libchord")
-set(md5 "0f9be938fbbfe073cfc4de69f36e24cc")
+set(md5 "0791651c0718386ea9aa42086beba4f3")
 set(baseurl "https://ccpforge.cse.rl.ac.uk")
-set(endurl "/gf/download/frsrelease/617/9178/PolyChord_v${ver}.tar.gz")
+set(endurl "/gf/download/frsrelease/617/9181/PolyChord_v${ver}.tar.gz")
 set(gateurl "/gf/account/?action=LoginAction")
 set(dl "${baseurl}${endurl}")
 set(dl2 "${baseurl}${gateurl}")
@@ -108,9 +108,8 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver} "null" ${login_data} ${dl2}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND sed ${dashi} -e "s#MPI=.*#MPI=1#g"
-                                   <SOURCE_DIR>/Makefile
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}  
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} LINKLIB=${pcSO_LINK} MPI=1
     INSTALL_COMMAND ""
   )
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
