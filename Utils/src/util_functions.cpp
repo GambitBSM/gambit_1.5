@@ -119,29 +119,6 @@ namespace Gambit
       #endif
     }
 
-    /// Strips backend variables back to their naked C++ types
-    void strip_backend_variable_wrappers(str &s)
-    {
-      const std::vector<str> backend_variables = initVector(str("mathematica_variable"), str("python_variable"));
-      for (std::vector<str>::const_iterator it = backend_variables.begin(); it != backend_variables.end(); ++it)
-      {
-        if (startsWith(s, *it))
-        {
-          if (s.substr(s.length()-2, 2) == ">*")
-          {
-            s.erase(s.end()-2);
-          }
-          else
-          {
-            std::ostringstream ss;
-            ss << "Unrecognised type containing " << *it << ": " << s << endl;
-            utils_error().raise(LOCAL_INFO, ss.str());
-          }
-          s.erase(0, it->length()+1);
-        }
-      }
-    }
-
     /// Strips leading and/or trailing parentheses from a string.
     void strip_parentheses(str &s)
     {
@@ -191,8 +168,11 @@ namespace Gambit
        // Split off potential filename
        // If only path is provided, it must end in a slash!!!
        size_t found = path.find_last_of("/\\");
-       std::string prefix = path.substr(0,found);
-       recursive_mkdir( prefix.c_str() );
+       if (found != std::string::npos)
+       {
+         std::string prefix = path.substr(0,found);
+         recursive_mkdir( prefix.c_str() );
+       }
        return path;
     }
 
