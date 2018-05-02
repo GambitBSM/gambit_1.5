@@ -333,9 +333,21 @@ ColliderOperator: |
    Controls the parallelization and execution of the entire
    event loop of the collider simulation.
 
+LHCEventLoopInfo: |
+   Info about the event loop.
+
+LHC_signals: |
+   Signal predictions and uncertainties in all LHC analyses.
+
+LHC_LogLikes: |
+   Computes analysis-specific log-likelihood values,
+   from AllAnalysisNumbers.
+
 LHC_Combined_LogLike: |
-   Combines the results from AnalysisNumbers together into
-   a single delta-log-likelihood value.
+   A final, single delta-log-likelihood value for LHC searches.
+
+MC_ConvergenceSettings : |
+   Convergence settings to be used for terminating Monte Carlo event generation.
 
 HardScatteringSim: |
    Provides a Pythia 8 instance within a container which is
@@ -403,6 +415,9 @@ IdentityAnalysisNumbers: |
    Uses the given IdentityAnalysisContainer
    to perform all its analyses upon the given
    CopiedEvent.
+
+AllAnalysisNumbers: |
+   Combined analysis numbers from all LHC analyses used in a scan.
 
 ALEPH_Selectron_LLike: |
    Compares the cross section times branching ratio
@@ -484,6 +499,12 @@ OPAL_Chargino_SemiLeptonic_LLike: |
    pair production (with one leptonic and one hadronic decaying W boson)
    to the model-independent limit according to the OPAL collaboration.
    Returns a log likelihood value.
+
+OPAL_Degenerate_Chargino_LLike: |
+   Compares the cross section times branching ratio for chargino
+   pair production to the limit on degenerate charginos and neutralinos
+   according to the OPAL collaboration.
+   Returns a likelihood value
 
 LEP_Higgs_LogLike: |
     Provides log-likelihood for combined model-independent LEP
@@ -1176,6 +1197,27 @@ PandaX_2016_SignalSD: |
 PandaX_2016_LogLikelihood: |
    Calculate the log-likelihood for the PandaX 2016 direct detection analysis.
 
+PandaX_2017_Calculate: |
+   Perform rate and likelihood calculations for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_Events: |
+   The number of observed events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_Background: |
+   The number of background events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_Signal: |
+   The number of signal events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_SignalSI: |
+   The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_SignalSD: |
+   The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
+
+PandaX_2017_LogLikelihood: |
+   Calculate the log-likelihood for the PandaX 2017 direct detection analysis.
+
 SuperCDMS_2014_Calculate: |
    Perform rate and likelihood calculations for the SuperCDMS 2014 direct detection analysis.
 
@@ -1521,6 +1563,9 @@ DDCalc_1_0_0_init: |
 DDCalc_1_1_0_init: |
    Initialises DDCalc 1.1.0.
 
+DDCalc_1_2_0_init: |
+   Initialises DDCalc 1.2.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -1574,6 +1619,9 @@ PICO_60_2017_Init: |
 
 PandaX_2016_Init: |
    Initialises a direct detection experiment with the properties of the 2016 analysis of PandaX.
+
+PandaX_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of PandaX.
 
 XENON100_2012_Init: |
    Initialises a direct detection experiment with the properties of the 2012 analysis of Xenon100.
@@ -1948,6 +1996,9 @@ rdlun: |
 rdpadd: |
    Parameters that effect the tabulation of the invariant annihilation rate in DarkSUSY.
 
+rdtime: |
+   Timing parameters for DarkSUSY relic density calculations.
+
 IBintvars: |
    Common block for DarkSUSY internal Bremsstrahlung routines.
 
@@ -2205,6 +2256,12 @@ Reference_SM_A0_decay_rates: |
 
 Reference_SM_other_Higgs_decay_rates: |
    Computation of decays of SM Higgs with mass equal to the mass of the least SM-like CP-even Higgs.
+
+Z_invisible_width: |
+   Invisible decay width of the Z boson
+
+lnL_Z_invisible_width: |
+   Log Likelihood for the inivislbe decay width of the Z boson
 
 #-------------------------------------
 #  PrecisionBit capabilities
@@ -3228,6 +3285,11 @@ data_cleanup: |
    lowl_SMW_70_dx11d_2014 by means of calling
    backend function clik_cleanup
 
+set_planck_path: |
+   Set the absolute path to the location of the
+   Planck likelihoods.
+   (Path to the 'plc_2.0'-folder)
+
 data_initialize: |
    initalize objects plik_dx11dr2_HM_v18_TT and
    lowl_SMW_70_dx11d_2014 by means of calling
@@ -3406,8 +3468,70 @@ class_set_parameter: |
    This routine initializes the input of CLASS.
 
 #----------------------------
-#  CosmoBitDEV
+#  DarkAges
 #----------------------------
+
+DarkAges_1_0_0_init: |
+   Convenience function to initialize the instance of the DarkAges package.
+   Retrieve all input dependencies (DM-mass, injection spectra, ...) and
+   perform the convolution wit the transfer functions to get f(z).
+
+DA_efficiency_function: |
+   Convenience function to map the f(z)-table from python to c++ vectors.
+
+DA_initialize: | 
+   BE function loading all the DarkAges python module and setting
+   the redshift array to its glaobal default.
+
+DA_calc_f: |
+   BE function performing the convolution to get f(z).
+
+DA_get_result: |
+   BE function returning an array containing f(z) for a given channel.
+
+DA_reset: |
+   BE function to release the 'alreadyCalculated'-flag of the module.
+
+#----------------------------
+#  PyArrayTest
+#----------------------------
+
+PyArrayTest_1_0_init: |
+   Initializes the PyArrayTest-backend. (v1.0)
+
+PyArrayTest_Py_to_cpp: |
+   (Convenience function) Example of how to map a python array (list) onto std::vector.
+
+PyArrayTest_cpp_to_Py: |
+   (Convenience function) Example of how to map std::vector onto a python array (list).
+   
+PyArrayTest_initialize: |
+   (BE function) Prepares global variables of the backend.
+   
+PyArrayTest_multiply: |
+   (BE function) Multiplies the backend internal array with 'someFactor'
+
+readPythonArray: |
+   (BE function) Reads an array or list and returns the sum of its components
+
+returnPythonArray: |
+   (BE function) Returns the backend internal array to be used in GAMBIT.
+
+SomeFactor: |
+   (BE variable) Number which will multiplied to the backend internal array.
+
+arrayLen: |
+   (BE variable) Length of the backend internal array.
+
+#----------------------------
+#  CosmoBit
+#----------------------------
+
+TestDecayingDM_parameters: |
+   mass, mass of the dark matter candidate [in GeV]
+   lifetime, lifetime of said DM candidate [in s]
+   fraction, fraction of how much the decaying DM component contributes to all DM.
+   BR, the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
 
 LCDM_parameters: |
    omega_b, baryon density parameter.
@@ -3480,7 +3604,6 @@ compute_smashInf_rLCDMtensor_lowp_TT_loglike: |
    8 parameter cosmology smash inflation model --- smash inflation
    A_s, n_s and r are given by inflationary model parameters: xi, m^2.
 
-
 inf_SR1quad_LCDMt_parameters: |
    omega_b, baryon density parameter.
    omega_cdm, dark matter density parameter.
@@ -3507,3 +3630,47 @@ inf_1linearInf_LCDMt_parameters: |
 inf_smashInf_LCDMt_parameters: |
     8 parameter cosmology smash inflation model --- smash inflation
     A_s, n_s and r are given by inflationary model parameters: xi, m^2.
+
+lnL_A_planck : |
+   "prior"-likelihood for A_planck. Applies the Gauss bell on 
+    A_planck if a flat prior is chosen. Should have the same
+    effect than using a gaussian prior on it in the first place.
+
+f_effective: |
+    returns f(z) at  z~600 summed over all channels.
+
+DM_mass: |
+    Dark matter mass (in GeV).
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+DM_fraction: |
+    fraction of the abundance of the dark matter candidate in question
+    (mostly a decaying component) contributing to the total DM abundance.
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+lifetime: |
+    lifetime of the decaying dark matter component (in s).
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+injection_spectrum: |
+    Spectrum of electrons/positrons and photons injected by
+    the decay of a DM particle with certain mass.
+    An dirac-like injection (at an energy of m/2) is assumed.
+    The relative contribution of the electron and photon channel is
+    given by the branching ratio (BR).
+
+    --> DUMMY for the use with TestDecayingDM <--
+
+PyTest_cap_1: |
+    First test of the mapping of std::vector onto python lists
+    and vice versa.
+    Recieves an std::vector from the PyArrayTest and computes
+    the sum of its entries.
+
+PyTest_cap_2: |
+    As 'PyTest_cap_2', but the sum will be performed by the
+    PyArrayTest backend and the result is taken.
+

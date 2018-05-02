@@ -10,6 +10,11 @@
 # absolute, those beginning with a period will
 # be interpreted as relative to the GAMBIT dir.
 
+PyArrayTest:
+  1.0:         ./Backends/examples/PyArrayTest/1.0/PyArrayTest.py
+
+DarkAges:
+  1.0.0:       ./Backends/installed/DarkAges/1.0.0/DarkAges_for_GAMBIT.py
 
 DarkSUSY:
   5.1.3:       ./Backends/installed/darksusy/5.1.3/lib/libdarksusy.so
@@ -20,6 +25,7 @@ SuperIso:
 DDCalc:
   1.0.0:       ./Backends/installed/ddcalc/1.0.0/lib/libDDCalc.so
   1.1.0:       ./Backends/installed/ddcalc/1.1.0/lib/libDDCalc.so
+  1.2.0:       ./Backends/installed/ddcalc/1.2.0/lib/libDDCalc.so
 
 HiggsBounds:
   4.2.1:       ./Backends/installed/higgsbounds/4.2.1/lib/libhiggsbounds.so

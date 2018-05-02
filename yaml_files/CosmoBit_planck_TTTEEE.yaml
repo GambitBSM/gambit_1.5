@@ -79,11 +79,16 @@ Rules:
 
   - capability: class_set_parameter
     options:
-      N_ur: 2.0328
-      N_ncdm: 1.
-      m_ncdm: 0.06
-      T_ncdm: 0.71611
-      k_pivot: 0.05
+      class_dict:
+        N_ur: 2.0328
+        N_ncdm: 1.
+        m_ncdm: 0.06
+        T_ncdm: 0.71611
+        k_pivot: 0.05
+
+  - capability: plc_2_0_init
+    options:
+      #planck_path: /YOUR/PATH/TO/plc_2.0
 
 #======== Logging setup ========
 Lxogger:

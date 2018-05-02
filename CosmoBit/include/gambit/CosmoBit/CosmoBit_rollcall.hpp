@@ -20,6 +20,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
+///  \date 2018 Jan,Feb, Mar
 ///
 ///  *********************************************
 
@@ -30,6 +31,71 @@
 
 #define MODULE CosmoBit
 START_MODULE
+
+  #define CAPABILITY injection_spectrum
+  START_CAPABILITY
+    #define FUNCTION injection_spectrum_ToyModel
+    START_FUNCTION(DarkAges::injectionSpectrum)
+    ALLOW_MODELS(TestDecayingDM)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY DM_mass
+  START_CAPABILITY
+    #define FUNCTION DM_mass_ToyModel
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY DM_fraction
+  START_CAPABILITY
+    #define FUNCTION DM_fraction_ToyModel
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lifetime
+  START_CAPABILITY
+    #define FUNCTION lifetime_ToyModel
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY f_effective
+  START_CAPABILITY
+    #define FUNCTION f_effective_func
+    START_FUNCTION(double)
+    ALLOW_MODELS(TestDecayingDM)    
+    BACKEND_REQ(DA_efficiency_function, (DarkAges_tag),DarkAges::fz_table,())
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY PyTest_cap_1
+  START_CAPABILITY
+    #define FUNCTION PyTest_func_1
+    START_FUNCTION(double)
+    BACKEND_REQ(PyArrayTest_Py_to_cpp, (PyArrayTest_tag), std::vector<double>, ())
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY PyTest_cap_2
+  START_CAPABILITY
+    #define FUNCTION PyTest_func_2
+    START_FUNCTION(double)
+    BACKEND_REQ(PyArrayTest_cpp_to_Py, (PyArrayTest_tag), double, (int))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_A_planck
+  START_CAPABILITY
+    #define FUNCTION lnL_A_planck_gaussian
+    START_FUNCTION(double)
+    ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY compute_vanilla_lowp_TT_loglike
   START_CAPABILITY

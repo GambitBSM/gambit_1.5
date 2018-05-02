@@ -15,7 +15,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
-///  \date 2018 Jan,Feb
+///  \date 2018 Jan,Feb, Mar
 ///
 ///  *********************************************
 #include <string>
@@ -30,10 +30,15 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_min.h>
+#include <gsl/gsl_spline.h>
 
+#include <stdlib.h>     /* malloc, free, rand */
+#include "gambit/Utils/yaml_options.hpp"
+#include "gambit/Utils/statistics.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
+
 
 namespace Gambit
 {
@@ -126,6 +131,126 @@ namespace Gambit
       return As;
     }
 
+    void injection_spectrum_ToyModel(DarkAges::injectionSpectrum& spectrum)
+    {
+      using namespace Pipes::injection_spectrum_ToyModel;
+
+      double m = *Param["mass"];
+      double BR_el = *Param["BR"];
+      double BR_ph = 1.0 - BR_el;
+
+      spectrum.E.clear();
+      spectrum.spec_el.clear();
+      spectrum.spec_ph.clear();
+
+      spectrum.E.resize(1,m*0.5);
+      spectrum.spec_el.resize(1,BR_el*2e9);
+      spectrum.spec_ph.resize(1,BR_ph*2e9);
+    }
+
+    void DM_mass_ToyModel(double& result)
+    {
+      using namespace Pipes::DM_mass_ToyModel;
+      result = *Param["mass"];
+    }
+
+    void lifetime_ToyModel(double& result)
+    {
+      using namespace Pipes::lifetime_ToyModel;
+      result = *Param["lifetime"];
+    }
+
+    void DM_fraction_ToyModel(double& result)
+    {
+      using namespace Pipes::DM_fraction_ToyModel;
+      result = *Param["fraction"];
+    }
+
+    void f_effective_func(double& result)
+    {
+      using namespace Pipes::f_effective_func;
+
+      bool silent = runOptions->getValueOrDef<bool>(false,"silent_mode");
+      int last_steps = runOptions->getValueOrDef<int>(4,"show_last_steps");
+      double z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
+
+      DarkAges::fz_table fzt = BEreq::DA_efficiency_function();
+      std::vector<double> z = fzt.redshift;
+      std::vector<double> fh = fzt.f_heat;
+      std::vector<double> fly = fzt.f_lya;
+      std::vector<double> fhi = fzt.f_hion;
+      std::vector<double> fhei = fzt.f_heion;
+      std::vector<double> flo = fzt.f_lowe;
+
+      int npts = z.size();
+      double ftot[npts];
+      double red[npts];
+      for (unsigned int i = 0; i < npts; i++)
+      {
+        ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+        red[i] = z.at(i);
+      }
+
+      gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
+      gsl_spline *spline_ptr = gsl_spline_alloc(gsl_interp_cspline, npts);
+
+      gsl_spline_init(spline_ptr, red, ftot, npts);
+
+      result = gsl_spline_eval(spline_ptr, z_eff, gsl_accel_ptr);
+
+      gsl_spline_free(spline_ptr);
+      gsl_interp_accel_free(gsl_accel_ptr);
+
+      if (!silent)
+      {
+        std::cout << "################" << std::endl;
+        std::cout << "tau = " << *Param["lifetime"] << std::endl;
+        std::cout << "m = " << *Param["mass"] << std::endl;
+        std::cout << "BR (electrom) = " << *Param["BR"] << std::endl;
+        std::cout << "---------------" << std::endl;
+        std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
+        for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
+        {
+          std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
+        }
+        std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
+        std::cout << "################\n" << std::endl;
+      }
+    }
+
+    void PyTest_func_1(double& result)
+    {
+      using namespace Pipes::PyTest_func_1;
+
+      std::vector<double> vec = BEreq::PyArrayTest_Py_to_cpp();
+      double sum = 0.0;
+      for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
+      {
+        sum += *it;
+      }
+      result = sum;
+    }
+
+    void PyTest_func_2(double& result)
+    {
+      using namespace Pipes::PyTest_func_2;
+
+      int len = runOptions->getValueOrDef<int>(10,"array_len");
+      result = BEreq::PyArrayTest_cpp_to_Py(byVal(len));
+    }
+
+    void lnL_A_planck_gaussian(double& result)
+    {
+      using namespace Pipes::lnL_A_planck_gaussian;
+
+      double obs_mean = 1.0;
+      double obs_err = 0.0025;
+      double pred_mean = *Param["A_planck"];
+      double pred_err = 0.0;
+
+      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
+    }
+
     void class_set_parameter_LCDM(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
@@ -133,46 +258,21 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a kind of dirty way to read all the additional parameters
+      // What follows is a loop to read all generic additional parameters for CLASS
       // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options of the capability within the 'Rules' section of the input, and which
-      // will be added if there are present.
-      // In the future this should be made nicer !!
-      std::map<char*,double> additional_args;
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
       int len_of_input = 9;
-      double temp_value;
-      if (runOptions->hasKey("k_pivot"))
+      Options class_dict;
+      std::vector<str> names;
+      if (runOptions->hasKey("class_dict"))
       {
-        temp_value = runOptions->getValue<double>("k_pivot");
-        additional_args["k_pivot"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("N_ur"))
-      {
-        temp_value = runOptions->getValue<double>("N_ur");
-        additional_args["N_ur"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("N_ncdm"))
-      {
-        temp_value = runOptions->getValue<double>("N_ncdm");
-        additional_args["N_ncdm"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("m_ncdm"))
-      {
-        temp_value = runOptions->getValue<double>("m_ncdm");
-        additional_args["m_ncdm"] = temp_value;
-        len_of_input++;
-      }
-      if (runOptions->hasKey("T_ncdm"))
-      {
-        temp_value = runOptions->getValue<double>("T_ncdm");
-        additional_args["T_ncdm"] = temp_value;
-        len_of_input++;
+        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+        names = class_dict.getNames();
+        len_of_input += names.size();
       }
 
-      BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");
@@ -182,12 +282,19 @@ namespace Gambit
       strcpy(cosmo.fc.value[8],"yes");
 
       int i = 9;
-      std::map<char*,double>::iterator it;
-      for (it = additional_args.begin(); it != additional_args.end(); it++)
+
+      if (runOptions->hasKey("class_dict"))
       {
-        sprintf(cosmo.fc.name[i],"%s",it->first);
-        sprintf(cosmo.fc.value[i],"%g",it->second);
-        i++;
+        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+        {
+          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+          str key, value;
+          key = *name_it;
+          value = class_dict.getValue<str>(*name_it);
+          sprintf(cosmo.fc.name[i],"%s",key.c_str());
+          sprintf(cosmo.fc.value[i],"%s",value.c_str());
+          i++;
+        }
       }
 
       strcpy(cosmo.fc.name[1],"omega_b");
@@ -224,7 +331,23 @@ namespace Gambit
       double feff = runOptions->getValueOrDef<double>(1.,"f_eff");
       double annihilation = (1.0/1.78e-21)*(sigmav/mass)*feff; // in m^3 s^-1 kg^-1
 
-      BEreq::class_parser_initialize(&cosmo.fc,10,"",cosmo.class_errmsg);
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
+
+      int len_of_input = 10;
+      Options class_dict;
+      std::vector<str> names;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");
@@ -232,6 +355,22 @@ namespace Gambit
       sprintf(cosmo.fc.value[8],"%d",l_max);
       strcpy(cosmo.fc.name[9],"lensing");
       strcpy(cosmo.fc.value[9],"yes");
+
+      int i = 10;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+	{
+	  //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	  str key, value;
+	  key = *name_it;
+	  value = class_dict.getValue<str>(*name_it);
+	  sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	  sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	  i++;
+	}
+      }
 
       strcpy(cosmo.fc.name[1],"omega_b");
       strcpy(cosmo.fc.name[2],"omega_cdm");
@@ -266,7 +405,23 @@ namespace Gambit
 
       int l_max=cosmo.lmax;;
 
-      BEreq::class_parser_initialize(&cosmo.fc,11,"",cosmo.class_errmsg);
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
+
+      int len_of_input = 11;
+      Options class_dict;
+      std::vector<str> names;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
 
       strcpy(cosmo.fc.name[0],"output");
       strcpy(cosmo.fc.value[0],"tCl pCl lCl");
@@ -276,6 +431,22 @@ namespace Gambit
       strcpy(cosmo.fc.value[9],"s,t");
       strcpy(cosmo.fc.name[10],"lensing");
       strcpy(cosmo.fc.value[10],"yes");
+
+      int i = 11;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+	{
+	  //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	  str key, value;
+	  key = *name_it;
+	  value = class_dict.getValue<str>(*name_it);
+	  sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	  sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	  i++;
+	}
+      }
 
       strcpy(cosmo.fc.name[1],"omega_b");
       strcpy(cosmo.fc.name[2],"omega_cdm");
@@ -303,1140 +474,1065 @@ namespace Gambit
       */
     }
 
-	void class_set_parameter_inf_SR1quad_LCDMt(Class_container& cosmo)
+    void class_set_parameter_inf_SR1quad_LCDMt(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
+      using namespace Pipes::class_set_parameter_inf_SR1quad_LCDMt;
+
+      int l_max=cosmo.lmax;
+
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
+
+      int len_of_input = 11;
+      Options class_dict;
+      std::vector<str> names;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
+
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"modes");
+      strcpy(cosmo.fc.value[9],"s,t");
+      strcpy(cosmo.fc.name[10],"lensing");
+      strcpy(cosmo.fc.value[10],"yes");
+
+      int i = 11;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+	  {
+	    //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	    str key, value;
+	    key = *name_it;
+	    value = class_dict.getValue<str>(*name_it);
+	    sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	    sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	    i++;
+	  }
+      }
+
+      // Initialization parameters controlling main characteristics.
+      int num_inflaton = runOptions->getValue<int> ("num_inflaton");
+      int potential_choice = runOptions->getValue<int> ("potential_choice");
+      int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
+      int instreheat = runOptions->getValue<int> ("instreheat");
+      int vparam_rows = runOptions->getValue<int> ("vparam_rows");
+
+      // Control the output of analytic approximations for comparison.
+      int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
+      int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
+      int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
+      int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
+
+      // Parameters to control how the ICs are sampled.
+      int ic_sampling = runOptions->getValue<int> ("ic_sampling");
+      double energy_scale = runOptions->getValue<double> ("energy_scale");
+      int numb_samples = runOptions->getValue<int> ("numb_samples");
+      int save_iso_N = runOptions->getValue<int> ("save_iso_N");
+
+      double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
+
+      // Parameters to control how the vparams are sampled.
+      int param_sampling = runOptions->getValue<int> ("param_sampling");
+		
+      std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
+      std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
+
+      int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
+      int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
+
+      std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
+      std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
+
+      // Parameters to be passed to the potential
+      std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+		
+      //-------------------------------------------------
+      //----------------- Sampling m^2 ------------------
+      //-------------------------------------------------
+      vparams[0] = *Param["m2_inflaton"];
+		
+      //-------------------------------------------------
+      //--------------- Sampling N_pivot ----------------
+      //-------------------------------------------------
+      double N_pivot = *Param["N_pivot"];
+		
+      double k_pivot = runOptions->getValue<double> ("k_pivot");
+      double dlnk = runOptions->getValue<double> ("dlnk");
+		
+      // Priors on the IC and N_pivot ranges
+      std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
+      std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
+      std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
+      std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
+		
+      double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
+      double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
+		
+      // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
+      int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
+      int steps = runOptions->getValue<int> ("steps");
+      double kmin = runOptions->getValue<double> ("kmin");
+      double kmax = runOptions->getValue<double> ("kmax");
+		
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+		
+      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
+		
+      std::cout << "steps = " << steps << std::endl;
+		
+      gambit_inflation_observables observs;
+		
+      std::cout << "num_inflaton = " << num_inflaton << std::endl;
+      std::cout << "save_iso_N = " << save_iso_N << std::endl;
+      std::cout << "N_pivot = " << N_pivot << std::endl;
+      std::cout << "kmin = " << kmin << std::endl;
+      std::cout << "dlnk = " << dlnk << std::endl;
+      std::cout << "lambda = " << vparams[0] << std::endl;
+		
+      // The function below calls the multimodecode backend for a given choice of inflationary model,
+      // which calculates the observables.
+      BEreq::multimodecode_gambit_driver(&observs,
+					 num_inflaton,
+					 potential_choice,
+					 slowroll_infl_end,
+					 instreheat,
+					 vparam_rows,
+					 use_deltaN_SR,
+					 evaluate_modes,
+					 use_horiz_cross_approx,
+					 get_runningofrunning,
+					 ic_sampling,
+					 energy_scale,
+					 numb_samples,
+					 save_iso_N,
+					 N_iso_ref,
+					 param_sampling,
+					 byVal(&vp_prior_min[0]),
+					 byVal(&vp_prior_max[0]),
+					 varying_N_pivot,
+					 use_first_priorval,
+					 byVal(&phi_init0[0]),
+					 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
+					 byVal(&vparams[0]),
+					 N_pivot,
+					 k_pivot,
+					 dlnk,
+					 calc_full_pk,
+					 steps,
+					 kmin,
+					 //kmax,
+					 byVal(&phi0_priors_min[0]),
+					 byVal(&phi0_priors_max[0]),
+					 byVal(&dphi0_priors_min[0]),
+					 byVal(&dphi0_priors_max[0]),
+					 N_pivot_prior_min,
+					 N_pivot_prior_max);
+		
+		
+      std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
+		
+      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      //		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      //		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+      
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+      if (calc_full_pk == 0)
+      {
+	std::cout << "observs.As " << observs.As << std::endl;
+	std::cout << "observs.A_iso " << observs.A_iso << std::endl;
+	std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
+	std::cout << "observs.A_ent " << observs.A_ent << std::endl;
+	std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
+	//std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
+	std::cout << "observs.ns " << observs.ns << std::endl;
+	std::cout << "observs.nt " << observs.nt << std::endl;
+	std::cout << "observs.n_iso " << observs.n_iso << std::endl;
+	std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
+	std::cout << "observs.n_ent " << observs.n_ent << std::endl;
+	std::cout << "observs.r " << observs.r << std::endl;
+	std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
+	std::cout << "observs.runofrun " << observs.runofrun << std::endl;
+	std::cout << "observs.f_NL " << observs.f_NL << std::endl;
+	std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
+					
+	strcpy(cosmo.fc.name[1],"omega_b");
+	strcpy(cosmo.fc.name[2],"omega_cdm");
+	strcpy(cosmo.fc.name[3],"H0");
+	strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+	strcpy(cosmo.fc.name[5],"n_s");
+	strcpy(cosmo.fc.name[6],"tau_reio");
+	strcpy(cosmo.fc.name[7],"r");
+			
+	sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+	sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+	sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+	sprintf(cosmo.fc.value[4],"%e",observs.As);
+	sprintf(cosmo.fc.value[5],"%e",observs.ns);
+	sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+	sprintf(cosmo.fc.value[7],"%e",observs.r);
+			
+      }
+    }
+
+    void class_set_parameter_inf_1quarInf_LCDMt(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_inf_1quarInf_LCDMt" << std::endl;
+      using namespace Pipes::class_set_parameter_inf_1quarInf_LCDMt;
+      
+      int l_max=cosmo.lmax;
+      
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
+
+      int len_of_input = 11;
+      Options class_dict;
+      std::vector<str> names;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
+		  
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"modes");
+      strcpy(cosmo.fc.value[9],"s,t");
+      strcpy(cosmo.fc.name[10],"lensing");
+      strcpy(cosmo.fc.value[10],"yes");
+		  
+      int i = 11;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
 	{
-		  //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-		  using namespace Pipes::class_set_parameter_inf_SR1quad_LCDMt;
-		  
-		  int l_max=cosmo.lmax;
-		  
-		  // In the future this should be made nicer !!
-		  std::map<char*,double> additional_args;
-		  int len_of_input = 11;
-		  double temp_value;
-		  if (runOptions->hasKey("k_pivot"))
-		  {
-			  temp_value = runOptions->getValue<double>("k_pivot");
-			  additional_args["k_pivot"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ur"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ur");
-			  additional_args["N_ur"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ncdm");
-			  additional_args["N_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("m_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("m_ncdm");
-			  additional_args["m_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("T_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("T_ncdm");
-			  additional_args["T_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		
-	 	  BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
-		
-		  strcpy(cosmo.fc.name[0],"output");
-		  strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-		  strcpy(cosmo.fc.name[8],"l_max_scalars");
-		  sprintf(cosmo.fc.value[8],"%d",l_max);
-		  strcpy(cosmo.fc.name[9],"modes");
-		  strcpy(cosmo.fc.value[9],"s,t");
-		  strcpy(cosmo.fc.name[10],"lensing");
-		  strcpy(cosmo.fc.value[10],"yes");
-		
-		  int i = 11;
-		  std::map<char*,double>::iterator it;
-		  for (it = additional_args.begin(); it != additional_args.end(); it++)
-		  {
-		    sprintf(cosmo.fc.name[i],"%s",it->first);
-			sprintf(cosmo.fc.value[i],"%g",it->second);
-			i++;
-		  }
-		
-		  // Initialization parameters controlling main characteristics.
-		  int num_inflaton = runOptions->getValue<int> ("num_inflaton");
-   	      int potential_choice = runOptions->getValue<int> ("potential_choice");
-		  int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-		  int instreheat = runOptions->getValue<int> ("instreheat");
-		  int vparam_rows = runOptions->getValue<int> ("vparam_rows");
-		
-		  // Control the output of analytic approximations for comparison.
-		  int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-		  int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-		  int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-		  int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-		
-		  // Parameters to control how the ICs are sampled.
-		  int ic_sampling = runOptions->getValue<int> ("ic_sampling");
-		  double energy_scale = runOptions->getValue<double> ("energy_scale");
-		  int numb_samples = runOptions->getValue<int> ("numb_samples");
-		  int save_iso_N = runOptions->getValue<int> ("save_iso_N");
-		
-		  double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
-		
-		  // Parameters to control how the vparams are sampled.
-		  int param_sampling = runOptions->getValue<int> ("param_sampling");
-		
-		  std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
-		  std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
-		
-		  int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
-		  int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
-		
-		  std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
-		  std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
-		
-		  // Parameters to be passed to the potential
-		  std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
-		
-		//-------------------------------------------------
-		//----------------- Sampling m^2 ------------------
-		//-------------------------------------------------
-		vparams[0] = *Param["m2_inflaton"];
-		
-		//-------------------------------------------------
-		//--------------- Sampling N_pivot ----------------
-		//-------------------------------------------------
-		double N_pivot = *Param["N_pivot"];
-		
-		double k_pivot = runOptions->getValue<double> ("k_pivot");
-		double dlnk = runOptions->getValue<double> ("dlnk");
-		
-		// Priors on the IC and N_pivot ranges
-		std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
-		std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
-		std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
-		std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
-		
-		double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
-		double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
-		
-		// For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
-		int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
-		int steps = runOptions->getValue<int> ("steps");
-		double kmin = runOptions->getValue<double> ("kmin");
-		double kmax = runOptions->getValue<double> ("kmax");
-		
-		std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		
-		calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
-		
-		std::cout << "steps = " << steps << std::endl;
-		
-		gambit_inflation_observables observs;
-		
-		std::cout << "num_inflaton = " << num_inflaton << std::endl;
-		std::cout << "save_iso_N = " << save_iso_N << std::endl;
-		std::cout << "N_pivot = " << N_pivot << std::endl;
-		std::cout << "kmin = " << kmin << std::endl;
-		std::cout << "dlnk = " << dlnk << std::endl;
-		std::cout << "lambda = " << vparams[0] << std::endl;
-		
-		// The function below calls the multimodecode backend for a given choice of inflationary model,
-		// which calculates the observables.
-		BEreq::multimodecode_gambit_driver(&observs,
-										     num_inflaton,
-										     potential_choice,
-										     slowroll_infl_end,
-										     instreheat,
-										     vparam_rows,
-										     use_deltaN_SR,
-										     evaluate_modes,
-										     use_horiz_cross_approx,
-										     get_runningofrunning,
-										     ic_sampling,
-										     energy_scale,
-										     numb_samples,
-										     save_iso_N,
-										     N_iso_ref,
-										     param_sampling,
-										     byVal(&vp_prior_min[0]),
-										     byVal(&vp_prior_max[0]),
-										     varying_N_pivot,
-										     use_first_priorval,
-										     byVal(&phi_init0[0]),
-										     byVal(&dphi_init0[0]), // dphi correct at the multimodecode
-										     byVal(&vparams[0]),
-										     N_pivot,
-										     k_pivot,
-										     dlnk,
-										     calc_full_pk,
-										     steps,
-										     kmin,
-										     //											   kmax,
-										     byVal(&phi0_priors_min[0]),
-										     byVal(&phi0_priors_max[0]),
-										     byVal(&dphi0_priors_min[0]),
-										     byVal(&dphi0_priors_max[0]),
-										     N_pivot_prior_min,
-										     N_pivot_prior_max);
-		
-		
-		std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
-		
-		std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-		std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-		//		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-		//		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
-		
-		std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		if (calc_full_pk == 0)
-		{
-			std::cout << "observs.As " << observs.As << std::endl;
-			std::cout << "observs.A_iso " << observs.A_iso << std::endl;
-			std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
-			std::cout << "observs.A_ent " << observs.A_ent << std::endl;
-			std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
-			//std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
-			std::cout << "observs.ns " << observs.ns << std::endl;
-			std::cout << "observs.nt " << observs.nt << std::endl;
-			std::cout << "observs.n_iso " << observs.n_iso << std::endl;
-			std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
-			std::cout << "observs.n_ent " << observs.n_ent << std::endl;
-			std::cout << "observs.r " << observs.r << std::endl;
-			std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
-			std::cout << "observs.runofrun " << observs.runofrun << std::endl;
-			std::cout << "observs.f_NL " << observs.f_NL << std::endl;
-			std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
-			
-			
-			strcpy(cosmo.fc.name[1],"omega_b");
-			strcpy(cosmo.fc.name[2],"omega_cdm");
-			strcpy(cosmo.fc.name[3],"H0");
-			strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-			strcpy(cosmo.fc.name[5],"n_s");
-			strcpy(cosmo.fc.name[6],"tau_reio");
-			strcpy(cosmo.fc.name[7],"r");
-			
-			sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-			sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-			sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-			sprintf(cosmo.fc.value[4],"%e",observs.As);
-			sprintf(cosmo.fc.value[5],"%e",observs.ns);
-			sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-			sprintf(cosmo.fc.value[7],"%e",observs.r);
-			
-		}
+	  //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	  str key, value;
+	  key = *name_it;
+	  value = class_dict.getValue<str>(*name_it);
+	  sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	  sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	  i++;
 	}
+      }
+		  
+      // Initialization parameters controlling main characteristics.
+      int num_inflaton = runOptions->getValue<int> ("num_inflaton");
+      int potential_choice = runOptions->getValue<int> ("potential_choice");
+      int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
+      int instreheat = runOptions->getValue<int> ("instreheat");
+      int vparam_rows = runOptions->getValue<int> ("vparam_rows");
+		  
+      // Control the output of analytic approximations for comparison.
+      int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
+      int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
+      int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
+      int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
+		  
+      // Parameters to control how the ICs are sampled.
+      int ic_sampling = runOptions->getValue<int> ("ic_sampling");
+      double energy_scale = runOptions->getValue<double> ("energy_scale");
+      int numb_samples = runOptions->getValue<int> ("numb_samples");
+      int save_iso_N = runOptions->getValue<int> ("save_iso_N");
 
-	  void class_set_parameter_inf_1quarInf_LCDMt(Class_container& cosmo)
-	  {
-		  //std::cout << "Last seen alive in: class_set_parameter_inf_1quarInf_LCDMt" << std::endl;
-		  using namespace Pipes::class_set_parameter_inf_1quarInf_LCDMt;
+      double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
 		  
-		  int l_max=cosmo.lmax;
+      // Parameters to control how the vparams are sampled.
+      int param_sampling = runOptions->getValue<int> ("param_sampling");
 		  
-		  // In the future this should be made nicer !!
-		  std::map<char*,double> additional_args;
-		  int len_of_input = 11;
-		  double temp_value;
-		  if (runOptions->hasKey("k_pivot"))
-		  {
-			  temp_value = runOptions->getValue<double>("k_pivot");
-			  additional_args["k_pivot"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ur"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ur");
-			  additional_args["N_ur"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ncdm");
-			  additional_args["N_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("m_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("m_ncdm");
-			  additional_args["m_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("T_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("T_ncdm");
-			  additional_args["T_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
+      std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
+      std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
 		  
-		  BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
+      int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
+      int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
 		  
-		  strcpy(cosmo.fc.name[0],"output");
-		  strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-		  strcpy(cosmo.fc.name[8],"l_max_scalars");
-		  sprintf(cosmo.fc.value[8],"%d",l_max);
-		  strcpy(cosmo.fc.name[9],"modes");
-		  strcpy(cosmo.fc.value[9],"s,t");
-		  strcpy(cosmo.fc.name[10],"lensing");
-		  strcpy(cosmo.fc.value[10],"yes");
+      std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
+      std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
 		  
-		  int i = 11;
-		  std::map<char*,double>::iterator it;
-		  for (it = additional_args.begin(); it != additional_args.end(); it++)
-		  {
-			  sprintf(cosmo.fc.name[i],"%s",it->first);
-			  sprintf(cosmo.fc.value[i],"%g",it->second);
-			  i++;
-		  }
+      // Parameters to be passed to the potential
+      std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
 		  
-		  // Initialization parameters controlling main characteristics.
-		  int num_inflaton = runOptions->getValue<int> ("num_inflaton");
-		  int potential_choice = runOptions->getValue<int> ("potential_choice");
-		  int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-		  int instreheat = runOptions->getValue<int> ("instreheat");
-		  int vparam_rows = runOptions->getValue<int> ("vparam_rows");
+      //-------------------------------------------------
+      //----------------- Sampling \lambda ------------------
+      //-------------------------------------------------
+      vparams[0] = *Param["lambda"];
 		  
-		  // Control the output of analytic approximations for comparison.
-		  int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-		  int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-		  int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-		  int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
+      //-------------------------------------------------
+      //--------------- Sampling N_pivot ----------------
+      //-------------------------------------------------
+      double N_pivot = *Param["N_pivot"];
+      
+      double k_pivot = runOptions->getValue<double> ("k_pivot");
+      double dlnk = runOptions->getValue<double> ("dlnk");
 		  
-		  // Parameters to control how the ICs are sampled.
-		  int ic_sampling = runOptions->getValue<int> ("ic_sampling");
-		  double energy_scale = runOptions->getValue<double> ("energy_scale");
-		  int numb_samples = runOptions->getValue<int> ("numb_samples");
-		  int save_iso_N = runOptions->getValue<int> ("save_iso_N");
+      // Priors on the IC and N_pivot ranges
+      std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
+      std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
+      std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
+      std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
 		  
-		  double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
+      double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
+      double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
 		  
-		  // Parameters to control how the vparams are sampled.
-		  int param_sampling = runOptions->getValue<int> ("param_sampling");
+      // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
+      int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
+      int steps = runOptions->getValue<int> ("steps");
+      double kmin = runOptions->getValue<double> ("kmin");
+      double kmax = runOptions->getValue<double> ("kmax");
 		  
-		  std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
-		  std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
 		  
-		  int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
-		  int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
+      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
 		  
-		  std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
-		  std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
+      std::cout << "steps = " << steps << std::endl;
 		  
-		  // Parameters to be passed to the potential
-		  std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+      gambit_inflation_observables observs;
 		  
-		  //-------------------------------------------------
-		  //----------------- Sampling \lambda ------------------
-		  //-------------------------------------------------
-		  vparams[0] = *Param["lambda"];
+      std::cout << "num_inflaton = " << num_inflaton << std::endl;
+      std::cout << "save_iso_N = " << save_iso_N << std::endl;
+      std::cout << "N_pivot = " << N_pivot << std::endl;
+      std::cout << "kmin = " << kmin << std::endl;
+      std::cout << "dlnk = " << dlnk << std::endl;
+      std::cout << "lambda = " << vparams[0] << std::endl;
 		  
-		  //-------------------------------------------------
-		  //--------------- Sampling N_pivot ----------------
-		  //-------------------------------------------------
-		  double N_pivot = *Param["N_pivot"];
+      // The function below calls the multimodecode backend for a given choice of inflationary model,
+      // which calculates the observables.
+      BEreq::multimodecode_gambit_driver(&observs,
+					 num_inflaton,
+					 potential_choice,
+					 slowroll_infl_end,
+					 instreheat,
+					 vparam_rows,
+					 use_deltaN_SR,
+					 evaluate_modes,
+					 use_horiz_cross_approx,
+					 get_runningofrunning,
+					 ic_sampling,
+					 energy_scale,
+					 numb_samples,
+					 save_iso_N,
+					 N_iso_ref,
+					 param_sampling,
+					 byVal(&vp_prior_min[0]),
+					 byVal(&vp_prior_max[0]),
+					 varying_N_pivot,
+					 use_first_priorval,
+					 byVal(&phi_init0[0]),
+					 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
+					 byVal(&vparams[0]),
+					 N_pivot,
+					 k_pivot,
+					 dlnk,
+					 calc_full_pk,
+					 steps,
+					 kmin,
+					 //kmax,
+					 byVal(&phi0_priors_min[0]),
+					 byVal(&phi0_priors_max[0]),
+					 byVal(&dphi0_priors_min[0]),
+					 byVal(&dphi0_priors_max[0]),
+					 N_pivot_prior_min,
+					 N_pivot_prior_max);
+      
+      std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
+      
+      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
 		  
-		  double k_pivot = runOptions->getValue<double> ("k_pivot");
-		  double dlnk = runOptions->getValue<double> ("dlnk");
-		  
-		  // Priors on the IC and N_pivot ranges
-		  std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
-		  std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
-		  std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
-		  std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
-		  
-		  double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
-		  double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
-		  
-		  // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
-		  int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
-		  int steps = runOptions->getValue<int> ("steps");
-		  double kmin = runOptions->getValue<double> ("kmin");
-		  double kmax = runOptions->getValue<double> ("kmax");
-		  
-		  std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		  
-		  calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
-		  
-		  std::cout << "steps = " << steps << std::endl;
-		  
-		  gambit_inflation_observables observs;
-		  
-		  std::cout << "num_inflaton = " << num_inflaton << std::endl;
-		  std::cout << "save_iso_N = " << save_iso_N << std::endl;
-		  std::cout << "N_pivot = " << N_pivot << std::endl;
-		  std::cout << "kmin = " << kmin << std::endl;
-		  std::cout << "dlnk = " << dlnk << std::endl;
-		  std::cout << "lambda = " << vparams[0] << std::endl;
-		  
-		  // The function below calls the multimodecode backend for a given choice of inflationary model,
-		  // which calculates the observables.
-		  BEreq::multimodecode_gambit_driver(&observs,
-											 num_inflaton,
-											 potential_choice,
-											 slowroll_infl_end,
-											 instreheat,
-											 vparam_rows,
-											 use_deltaN_SR,
-											 evaluate_modes,
-											 use_horiz_cross_approx,
-											 get_runningofrunning,
-											 ic_sampling,
-											 energy_scale,
-											 numb_samples,
-											 save_iso_N,
-											 N_iso_ref,
-											 param_sampling,
-											 byVal(&vp_prior_min[0]),
-											 byVal(&vp_prior_max[0]),
-											 varying_N_pivot,
-											 use_first_priorval,
-											 byVal(&phi_init0[0]),
-											 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
-											 byVal(&vparams[0]),
-											 N_pivot,
-											 k_pivot,
-											 dlnk,
-											 calc_full_pk,
-											 steps,
-											 kmin,
-											 //											   kmax,
-											 byVal(&phi0_priors_min[0]),
-											 byVal(&phi0_priors_max[0]),
-											 byVal(&dphi0_priors_min[0]),
-											 byVal(&dphi0_priors_max[0]),
-											 N_pivot_prior_min,
-											 N_pivot_prior_max);
-		  
-		  
-		  std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
-		  
-		  std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-		  std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-		  //		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-		  //		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
-		  
-		  std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		  if (calc_full_pk == 0)
-		  {
-			  std::cout << "observs.As " << observs.As << std::endl;
-			  std::cout << "observs.A_iso " << observs.A_iso << std::endl;
-			  std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
-			  std::cout << "observs.A_ent " << observs.A_ent << std::endl;
-			  std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
-			  //std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
-			  std::cout << "observs.ns " << observs.ns << std::endl;
-			  std::cout << "observs.nt " << observs.nt << std::endl;
-			  std::cout << "observs.n_iso " << observs.n_iso << std::endl;
-			  std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
-			  std::cout << "observs.n_ent " << observs.n_ent << std::endl;
-			  std::cout << "observs.r " << observs.r << std::endl;
-			  std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
-			  std::cout << "observs.runofrun " << observs.runofrun << std::endl;
-			  std::cout << "observs.f_NL " << observs.f_NL << std::endl;
-			  std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+      if (calc_full_pk == 0)
+      {
+	std::cout << "observs.As " << observs.As << std::endl;
+	std::cout << "observs.A_iso " << observs.A_iso << std::endl;
+	std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
+	std::cout << "observs.A_ent " << observs.A_ent << std::endl;
+	std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
+	//std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
+	std::cout << "observs.ns " << observs.ns << std::endl;
+	std::cout << "observs.nt " << observs.nt << std::endl;
+	std::cout << "observs.n_iso " << observs.n_iso << std::endl;
+	std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
+	std::cout << "observs.n_ent " << observs.n_ent << std::endl;
+	std::cout << "observs.r " << observs.r << std::endl;
+	std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
+	std::cout << "observs.runofrun " << observs.runofrun << std::endl;
+	std::cout << "observs.f_NL " << observs.f_NL << std::endl;
+	std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
 			  
+	strcpy(cosmo.fc.name[1],"omega_b");
+	strcpy(cosmo.fc.name[2],"omega_cdm");
+	strcpy(cosmo.fc.name[3],"H0");
+	strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+	strcpy(cosmo.fc.name[5],"n_s");
+	strcpy(cosmo.fc.name[6],"tau_reio");
+	strcpy(cosmo.fc.name[7],"r");
 			  
-			  strcpy(cosmo.fc.name[1],"omega_b");
-			  strcpy(cosmo.fc.name[2],"omega_cdm");
-			  strcpy(cosmo.fc.name[3],"H0");
-			  strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-			  strcpy(cosmo.fc.name[5],"n_s");
-			  strcpy(cosmo.fc.name[6],"tau_reio");
-			  strcpy(cosmo.fc.name[7],"r");
-			  
-			  sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-			  sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-			  sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-			  sprintf(cosmo.fc.value[4],"%e",observs.As);
-			  sprintf(cosmo.fc.value[5],"%e",observs.ns);
-			  sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-			  sprintf(cosmo.fc.value[7],"%e",observs.r);
-			  
-		  }
-	  }
+	sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+	sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+	sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+	sprintf(cosmo.fc.value[4],"%e",observs.As);
+	sprintf(cosmo.fc.value[5],"%e",observs.ns);
+	sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+	sprintf(cosmo.fc.value[7],"%e",observs.r);
+	
+      }
+    }
 	  
-	  void class_set_parameter_inf_1mono32Inf_LCDMt(Class_container& cosmo)
-	  {
-		  //std::cout << "Last seen alive in: class_set_parameter_inf_1mono32Inf_LCDMt" << std::endl;
-		  using namespace Pipes::class_set_parameter_inf_1mono32Inf_LCDMt;
+    void class_set_parameter_inf_1mono32Inf_LCDMt(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_inf_1mono32Inf_LCDMt" << std::endl;
+      using namespace Pipes::class_set_parameter_inf_1mono32Inf_LCDMt;
+      
+      int l_max=cosmo.lmax;
 		  
-		  int l_max=cosmo.lmax;
-		  
-		  // In the future this should be made nicer !!
-		  std::map<char*,double> additional_args;
-		  int len_of_input = 11;
-		  double temp_value;
-		  if (runOptions->hasKey("k_pivot"))
-		  {
-			  temp_value = runOptions->getValue<double>("k_pivot");
-			  additional_args["k_pivot"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ur"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ur");
-			  additional_args["N_ur"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ncdm");
-			  additional_args["N_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("m_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("m_ncdm");
-			  additional_args["m_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("T_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("T_ncdm");
-			  additional_args["T_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  
-		  BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
-		  
-		  strcpy(cosmo.fc.name[0],"output");
-		  strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-		  strcpy(cosmo.fc.name[8],"l_max_scalars");
-		  sprintf(cosmo.fc.value[8],"%d",l_max);
-		  strcpy(cosmo.fc.name[9],"modes");
-		  strcpy(cosmo.fc.value[9],"s,t");
-		  strcpy(cosmo.fc.name[10],"lensing");
-		  strcpy(cosmo.fc.value[10],"yes");
-		  
-		  int i = 11;
-		  std::map<char*,double>::iterator it;
-		  for (it = additional_args.begin(); it != additional_args.end(); it++)
-		  {
-			  sprintf(cosmo.fc.name[i],"%s",it->first);
-			  sprintf(cosmo.fc.value[i],"%g",it->second);
-			  i++;
-		  }
-		  
-		  // Initialization parameters controlling main characteristics.
-		  int num_inflaton = runOptions->getValue<int> ("num_inflaton");
-		  int potential_choice = runOptions->getValue<int> ("potential_choice");
-		  int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-		  int instreheat = runOptions->getValue<int> ("instreheat");
-		  int vparam_rows = runOptions->getValue<int> ("vparam_rows");
-		  
-		  // Control the output of analytic approximations for comparison.
-		  int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-		  int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-		  int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-		  int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-		  
-		  // Parameters to control how the ICs are sampled.
-		  int ic_sampling = runOptions->getValue<int> ("ic_sampling");
-		  double energy_scale = runOptions->getValue<double> ("energy_scale");
-		  int numb_samples = runOptions->getValue<int> ("numb_samples");
-		  int save_iso_N = runOptions->getValue<int> ("save_iso_N");
-		  
-		  double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
-		  
-		  // Parameters to control how the vparams are sampled.
-		  int param_sampling = runOptions->getValue<int> ("param_sampling");
-		  
-		  std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
-		  std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
-		  
-		  int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
-		  int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
-		  
-		  std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
-		  std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
-		  
-		  // Parameters to be passed to the potential
-		  std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
-		  
-		  //-------------------------------------------------
-		  //----------------- Sampling \lambda ------------------
-		  //-------------------------------------------------
-		  vparams[0] = *Param["lambda"];
-		  
-		  //-------------------------------------------------
-		  //--------------- Sampling N_pivot ----------------
-		  //-------------------------------------------------
-		  double N_pivot = *Param["N_pivot"];
-		  
-		  double k_pivot = runOptions->getValue<double> ("k_pivot");
-		  double dlnk = runOptions->getValue<double> ("dlnk");
-		  
-		  // Priors on the IC and N_pivot ranges
-		  std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
-		  std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
-		  std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
-		  std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
-		  
-		  double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
-		  double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
-		  
-		  // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
-		  int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
-		  int steps = runOptions->getValue<int> ("steps");
-		  double kmin = runOptions->getValue<double> ("kmin");
-		  double kmax = runOptions->getValue<double> ("kmax");
-		  
-		  std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		  
-		  calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
-		  
-		  std::cout << "steps = " << steps << std::endl;
-		  
-		  gambit_inflation_observables observs;
-		  
-		  std::cout << "num_inflaton = " << num_inflaton << std::endl;
-		  std::cout << "save_iso_N = " << save_iso_N << std::endl;
-		  std::cout << "N_pivot = " << N_pivot << std::endl;
-		  std::cout << "kmin = " << kmin << std::endl;
-		  std::cout << "dlnk = " << dlnk << std::endl;
-		  std::cout << "lambda = " << vparams[0] << std::endl;
-		  
-		  // The function below calls the multimodecode backend for a given choice of inflationary model,
-		  // which calculates the observables.
-		  BEreq::multimodecode_gambit_driver(&observs,
-											 num_inflaton,
-											 potential_choice,
-											 slowroll_infl_end,
-											 instreheat,
-											 vparam_rows,
-											 use_deltaN_SR,
-											 evaluate_modes,
-											 use_horiz_cross_approx,
-											 get_runningofrunning,
-											 ic_sampling,
-											 energy_scale,
-											 numb_samples,
-											 save_iso_N,
-											 N_iso_ref,
-											 param_sampling,
-											 byVal(&vp_prior_min[0]),
-											 byVal(&vp_prior_max[0]),
-											 varying_N_pivot,
-											 use_first_priorval,
-											 byVal(&phi_init0[0]),
-											 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
-											 byVal(&vparams[0]),
-											 N_pivot,
-											 k_pivot,
-											 dlnk,
-											 calc_full_pk,
-											 steps,
-											 kmin,
-											 //											   kmax,
-											 byVal(&phi0_priors_min[0]),
-											 byVal(&phi0_priors_max[0]),
-											 byVal(&dphi0_priors_min[0]),
-											 byVal(&dphi0_priors_max[0]),
-											 N_pivot_prior_min,
-											 N_pivot_prior_max);
-		  
-		  
-		  std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
-		  
-		  std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-		  std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-		  //		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-		  //		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
-		  
-		  std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		  if (calc_full_pk == 0)
-		  {
-			  std::cout << "observs.As " << observs.As << std::endl;
-			  std::cout << "observs.A_iso " << observs.A_iso << std::endl;
-			  std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
-			  std::cout << "observs.A_ent " << observs.A_ent << std::endl;
-			  std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
-			  //std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
-			  std::cout << "observs.ns " << observs.ns << std::endl;
-			  std::cout << "observs.nt " << observs.nt << std::endl;
-			  std::cout << "observs.n_iso " << observs.n_iso << std::endl;
-			  std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
-			  std::cout << "observs.n_ent " << observs.n_ent << std::endl;
-			  std::cout << "observs.r " << observs.r << std::endl;
-			  std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
-			  std::cout << "observs.runofrun " << observs.runofrun << std::endl;
-			  std::cout << "observs.f_NL " << observs.f_NL << std::endl;
-			  std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
-			  
-			  
-			  strcpy(cosmo.fc.name[1],"omega_b");
-			  strcpy(cosmo.fc.name[2],"omega_cdm");
-			  strcpy(cosmo.fc.name[3],"H0");
-			  strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-			  strcpy(cosmo.fc.name[5],"n_s");
-			  strcpy(cosmo.fc.name[6],"tau_reio");
-			  strcpy(cosmo.fc.name[7],"r");
-			  
-			  sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-			  sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-			  sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-			  sprintf(cosmo.fc.value[4],"%e",observs.As);
-			  sprintf(cosmo.fc.value[5],"%e",observs.ns);
-			  sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-			  sprintf(cosmo.fc.value[7],"%e",observs.r);
-			  
-		  }
-	  }
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
 
-	  void class_set_parameter_inf_1linearInf_LCDMt(Class_container& cosmo)
-	  {
-		  //std::cout << "Last seen alive in: class_set_parameter_inf_1linearInf_LCDMt" << std::endl;
-		  using namespace Pipes::class_set_parameter_inf_1linearInf_LCDMt;
-		  
-		  int l_max=cosmo.lmax;
-		  
-		  // In the future this should be made nicer !!
-		  std::map<char*,double> additional_args;
-		  int len_of_input = 11;
-		  double temp_value;
-		  if (runOptions->hasKey("k_pivot"))
-		  {
-			  temp_value = runOptions->getValue<double>("k_pivot");
-			  additional_args["k_pivot"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ur"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ur");
-			  additional_args["N_ur"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ncdm");
-			  additional_args["N_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("m_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("m_ncdm");
-			  additional_args["m_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("T_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("T_ncdm");
-			  additional_args["T_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  
-		  BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
-		  
-		  strcpy(cosmo.fc.name[0],"output");
-		  strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-		  strcpy(cosmo.fc.name[8],"l_max_scalars");
-		  sprintf(cosmo.fc.value[8],"%d",l_max);
-		  strcpy(cosmo.fc.name[9],"modes");
-		  strcpy(cosmo.fc.value[9],"s,t");
-		  strcpy(cosmo.fc.name[10],"lensing");
-		  strcpy(cosmo.fc.value[10],"yes");
-		  
-		  int i = 11;
-		  std::map<char*,double>::iterator it;
-		  for (it = additional_args.begin(); it != additional_args.end(); it++)
-		  {
-			  sprintf(cosmo.fc.name[i],"%s",it->first);
-			  sprintf(cosmo.fc.value[i],"%g",it->second);
-			  i++;
-		  }
-		  
-		  // Initialization parameters controlling main characteristics.
-		  int num_inflaton = runOptions->getValue<int> ("num_inflaton");
-		  int potential_choice = runOptions->getValue<int> ("potential_choice");
-		  int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-		  int instreheat = runOptions->getValue<int> ("instreheat");
-		  int vparam_rows = runOptions->getValue<int> ("vparam_rows");
-		  
-		  // Control the output of analytic approximations for comparison.
-		  int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-		  int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-		  int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-		  int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-		  
-		  // Parameters to control how the ICs are sampled.
-		  int ic_sampling = runOptions->getValue<int> ("ic_sampling");
-		  double energy_scale = runOptions->getValue<double> ("energy_scale");
-		  int numb_samples = runOptions->getValue<int> ("numb_samples");
-		  int save_iso_N = runOptions->getValue<int> ("save_iso_N");
-		  
-		  double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
-		  
-		  // Parameters to control how the vparams are sampled.
-		  int param_sampling = runOptions->getValue<int> ("param_sampling");
-		  
-		  std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
-		  std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
-		  
-		  int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
-		  int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
-		  
-		  std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
-		  std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
-		  
-		  // Parameters to be passed to the potential
-		  std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
-		  
-		  //-------------------------------------------------
-		  //----------------- Sampling \lambda ------------------
-		  //-------------------------------------------------
-		  vparams[0] = *Param["lambda"];
-		  
-		  //-------------------------------------------------
-		  //--------------- Sampling N_pivot ----------------
-		  //-------------------------------------------------
-		  double N_pivot = *Param["N_pivot"];
-		  
-		  double k_pivot = runOptions->getValue<double> ("k_pivot");
-		  double dlnk = runOptions->getValue<double> ("dlnk");
-		  
-		  // Priors on the IC and N_pivot ranges
-		  std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
-		  std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
-		  std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
-		  std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
-		  
-		  double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
-		  double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
-		  
-		  // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
-		  int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
-		  int steps = runOptions->getValue<int> ("steps");
-		  double kmin = runOptions->getValue<double> ("kmin");
-		  double kmax = runOptions->getValue<double> ("kmax");
-		  
-		  std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		  
-		  calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
-		  
-		  std::cout << "steps = " << steps << std::endl;
-		  
-		  gambit_inflation_observables observs;
-		  
-		  std::cout << "num_inflaton = " << num_inflaton << std::endl;
-		  std::cout << "save_iso_N = " << save_iso_N << std::endl;
-		  std::cout << "N_pivot = " << N_pivot << std::endl;
-		  std::cout << "kmin = " << kmin << std::endl;
-		  std::cout << "dlnk = " << dlnk << std::endl;
-		  std::cout << "lambda = " << vparams[0] << std::endl;
-		  
-		  // The function below calls the multimodecode backend for a given choice of inflationary model,
-		  // which calculates the observables.
-		  BEreq::multimodecode_gambit_driver(&observs,
-											 num_inflaton,
-											 potential_choice,
-											 slowroll_infl_end,
-											 instreheat,
-											 vparam_rows,
-											 use_deltaN_SR,
-											 evaluate_modes,
-											 use_horiz_cross_approx,
-											 get_runningofrunning,
-											 ic_sampling,
-											 energy_scale,
-											 numb_samples,
-											 save_iso_N,
-											 N_iso_ref,
-											 param_sampling,
-											 byVal(&vp_prior_min[0]),
-											 byVal(&vp_prior_max[0]),
-											 varying_N_pivot,
-											 use_first_priorval,
-											 byVal(&phi_init0[0]),
-											 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
-											 byVal(&vparams[0]),
-											 N_pivot,
-											 k_pivot,
-											 dlnk,
-											 calc_full_pk,
-											 steps,
-											 kmin,
-											 //	kmax,
-											 byVal(&phi0_priors_min[0]),
-											 byVal(&phi0_priors_max[0]),
-											 byVal(&dphi0_priors_min[0]),
-											 byVal(&dphi0_priors_max[0]),
-											 N_pivot_prior_min,
-											 N_pivot_prior_max);
-		  
-		  
-		  std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
-		  
-		  std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-		  std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-		  //		std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-		  //		std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
-		  
-		  std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
-		  if (calc_full_pk == 0)
-		  {
-			  std::cout << "observs.As " << observs.As << std::endl;
-			  std::cout << "observs.A_iso " << observs.A_iso << std::endl;
-			  std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
-			  std::cout << "observs.A_ent " << observs.A_ent << std::endl;
-			  std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
-			  //std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
-			  std::cout << "observs.ns " << observs.ns << std::endl;
-			  std::cout << "observs.nt " << observs.nt << std::endl;
-			  std::cout << "observs.n_iso " << observs.n_iso << std::endl;
-			  std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
-			  std::cout << "observs.n_ent " << observs.n_ent << std::endl;
-			  std::cout << "observs.r " << observs.r << std::endl;
-			  std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
-			  std::cout << "observs.runofrun " << observs.runofrun << std::endl;
-			  std::cout << "observs.f_NL " << observs.f_NL << std::endl;
-			  std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
-			  
-			  
-			  strcpy(cosmo.fc.name[1],"omega_b");
-			  strcpy(cosmo.fc.name[2],"omega_cdm");
-			  strcpy(cosmo.fc.name[3],"H0");
-			  strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-			  strcpy(cosmo.fc.name[5],"n_s");
-			  strcpy(cosmo.fc.name[6],"tau_reio");
-			  strcpy(cosmo.fc.name[7],"r");
-			  
-			  sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-			  sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-			  sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-			  sprintf(cosmo.fc.value[4],"%e",observs.As);
-			  sprintf(cosmo.fc.value[5],"%e",observs.ns);
-			  sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-			  sprintf(cosmo.fc.value[7],"%e",observs.r);
-			  
-		  }
-	  }
+      int len_of_input = 11;
+      Options class_dict;
+      std::vector<str> names;
 
-	  void class_set_parameter_inf_smashInf_LCDMt(Class_container& cosmo)
-	  {
-		  //std::cout << "Last seen alive in: class_set_parameter_inf_smashInf_LCDMt" << std::endl;
-		  using namespace Pipes::class_set_parameter_inf_smashInf_LCDMt;
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
 		  
-		  int l_max=cosmo.lmax;
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"modes");
+      strcpy(cosmo.fc.value[9],"s,t");
+      strcpy(cosmo.fc.name[10],"lensing");
+      strcpy(cosmo.fc.value[10],"yes");
 		  
-		  // In the future this should be made nicer !!
-		  std::map<char*,double> additional_args;
-		  int len_of_input = 11;
-		  double temp_value;
-		  if (runOptions->hasKey("k_pivot"))
-		  {
-			  temp_value = runOptions->getValue<double>("k_pivot");
-			  additional_args["k_pivot"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ur"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ur");
-			  additional_args["N_ur"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("N_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("N_ncdm");
-			  additional_args["N_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("m_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("m_ncdm");
-			  additional_args["m_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
-		  if (runOptions->hasKey("T_ncdm"))
-		  {
-			  temp_value = runOptions->getValue<double>("T_ncdm");
-			  additional_args["T_ncdm"] = temp_value;
-			  len_of_input++;
-		  }
+      int i = 11;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+	{
+	  //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	  str key, value;
+	  key = *name_it;
+	  value = class_dict.getValue<str>(*name_it);
+	  sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	  sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	  i++;
+	}
+      }
 		  
-		  BEreq::class_parser_initialize(&cosmo.fc,int(len_of_input),"",cosmo.class_errmsg);
+      // Initialization parameters controlling main characteristics.
+      int num_inflaton = runOptions->getValue<int> ("num_inflaton");
+      int potential_choice = runOptions->getValue<int> ("potential_choice");
+      int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
+      int instreheat = runOptions->getValue<int> ("instreheat");
+      int vparam_rows = runOptions->getValue<int> ("vparam_rows");
 		  
-		  strcpy(cosmo.fc.name[0],"output");
-		  strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-		  strcpy(cosmo.fc.name[8],"l_max_scalars");
-		  sprintf(cosmo.fc.value[8],"%d",l_max);
-		  strcpy(cosmo.fc.name[9],"modes");
-		  strcpy(cosmo.fc.value[9],"s,t");
-		  strcpy(cosmo.fc.name[10],"lensing");
-		  strcpy(cosmo.fc.value[10],"yes");
+      // Control the output of analytic approximations for comparison.
+      int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
+      int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
+      int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
+      int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
 		  
-		  int i = 11;
-		  std::map<char*,double>::iterator it;
-		  for (it = additional_args.begin(); it != additional_args.end(); it++)
-		  {
-			  sprintf(cosmo.fc.name[i],"%s",it->first);
-			  sprintf(cosmo.fc.value[i],"%g",it->second);
-			  i++;
-		  }
+      // Parameters to control how the ICs are sampled.
+      int ic_sampling = runOptions->getValue<int> ("ic_sampling");
+      double energy_scale = runOptions->getValue<double> ("energy_scale");
+      int numb_samples = runOptions->getValue<int> ("numb_samples");
+      int save_iso_N = runOptions->getValue<int> ("save_iso_N");
 		  
-		  /*
-		   This part needs cleaning up and commenting - will get on to in asap.
-		   */
-		  // Parameters to be passed to the potential
-		  std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+      double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
+
+      // Parameters to control how the vparams are sampled.
+      int param_sampling = runOptions->getValue<int> ("param_sampling");
 		  
-		  //-------------------------------------------------
-		  //----------- at the moment I override-------------
-		  //-------------------------------------------------
-		  vparams[0] = *Param["log10_xi"];
-		  vparams[1] = *Param["log10_beta"];
-		  vparams[2] = *Param["log10_lambda"];
+      std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
+      std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
 		  
-		  std::cout << "log10[xi] = " << vparams[0] << std::endl;
-		  std::cout << "log10[beta] = " << vparams[1] << std::endl;
-		  std::cout << "log10[lambda] = " << vparams[2] << std::endl;
+      int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
+      int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
 		  
-		  /* coefficients of P(x) =  -8 + b*\[Phi]**2  */
-		  /*                            + b*\[Xi]*\[Phi]**4 
-		                                + 6*\[Xi]**2*\[Phi]**4 */
-		  double smashp1[5] = { -8.0, 0, pow(10.0,vparams[1]), 0, (pow(10.0,vparams[1])*
-																   pow(10.0,vparams[0])+
-																   6.0*pow(10.0,vparams[0])*
-																   pow(10.0,vparams[0]))};
+      std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
+      std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
 		  
-		  double smashd1[8];
+      // Parameters to be passed to the potential
+      std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
 		  
-		  gsl_poly_complex_workspace * wsmash
-				= gsl_poly_complex_workspace_alloc (5);
-				
-		  gsl_poly_complex_solve (smashp1, 5, wsmash, smashd1);
-				
-		  gsl_poly_complex_workspace_free (wsmash);
-				
-		  for (i = 0; i < 4; i++)
-		  {
-			  printf ("z%d = %+.18f %+.18f\n",
-					  i, smashd1[2*i], smashd1[2*i+1]);
-		  }
+      //-------------------------------------------------
+      //----------------- Sampling \lambda ------------------
+      //-------------------------------------------------
+      vparams[0] = *Param["lambda"];
 		  
-		  double badway[4] = {smashd1[0],smashd1[2],smashd1[4],smashd1[6]};
-		  double tempbw = 0;
+      //-------------------------------------------------
+      //--------------- Sampling N_pivot ----------------
+      //-------------------------------------------------
+      double N_pivot = *Param["N_pivot"];
 		  
-		  for(int i=0;i<4;i++)
-		  {
-			  if(badway[i]>tempbw)
-				  tempbw=badway[i];
-		  }
-		  //gsl_sf_log((1.0+pow(10.0,vparams[0])*smashp1[4]*smashp1[4])/
-		  //		   (1.0+pow(10.0,vparams[0])*)
+      double k_pivot = runOptions->getValue<double> ("k_pivot");
+      double dlnk = runOptions->getValue<double> ("dlnk");
 		  
-		  vparams[3] = tempbw;
+      // Priors on the IC and N_pivot ranges
+      std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
+      std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
+      std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
+      std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
 		  
-		  std::cout << "phi_end = " << tempbw << std::endl;
+      double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
+      double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
 		  
-		  //-------------------------------------------------
-		  //--------------- Sampling N_pivot ----------------
-		  //-------------------------------------------------
-		  double N_pivot = *Param["N_pivot"];
+      // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
+      int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
+      int steps = runOptions->getValue<int> ("steps");
+      double kmin = runOptions->getValue<double> ("kmin");
+      double kmax = runOptions->getValue<double> ("kmax");
 		  
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+
+      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
 		  
-		  ///////////// solving the equality to calculate the
-		  ////////////  slow roll field amplitute at N_pivot.
-		  int status;
-		  int iter = 0, max_iter = 100000;
-		  const gsl_min_fminimizer_type *T;
-		  gsl_min_fminimizer *s;
-		  double m = tempbw*10.0, m_expected = M_PI; // Correct for.
-		  double a = 0.0, b = 100.0; // Correct for.
-		  gsl_function F;
+      std::cout << "steps = " << steps << std::endl;
 		  
-		  struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot};
+      gambit_inflation_observables observs;
 		  
-		  F.function = &fn1;
-		  F.params = &params;
+      std::cout << "num_inflaton = " << num_inflaton << std::endl;
+      std::cout << "save_iso_N = " << save_iso_N << std::endl;
+      std::cout << "N_pivot = " << N_pivot << std::endl;
+      std::cout << "kmin = " << kmin << std::endl;
+      std::cout << "dlnk = " << dlnk << std::endl;
+      std::cout << "lambda = " << vparams[0] << std::endl;
 		  
-		  T = gsl_min_fminimizer_brent;
-		  s = gsl_min_fminimizer_alloc (T);
-		  gsl_min_fminimizer_set (s, &F, m, a, b);
-				
-		  printf ("using %s method\n",
-				  gsl_min_fminimizer_name (s));
-				
-		  printf ("%5s [%9s, %9s] %9s %10s %9s\n",
-				  "iter", "lower", "upper", "min",
-				  "err", "err(est)");
-				
-		  printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",
-				  iter, a, b,
-				  m, m - m_expected, b - a);
-				
-		  do
-		  {
-			  iter++;
-			  status = gsl_min_fminimizer_iterate (s);
+      // The function below calls the multimodecode backend for a given choice of inflationary model,
+      // which calculates the observables.
+      BEreq::multimodecode_gambit_driver(&observs,
+					 num_inflaton,
+					 potential_choice,
+					 slowroll_infl_end,
+					 instreheat,
+					 vparam_rows,
+					 use_deltaN_SR,
+					 evaluate_modes,
+					 use_horiz_cross_approx,
+					 get_runningofrunning,
+					 ic_sampling,
+					 energy_scale,
+					 numb_samples,
+					 save_iso_N,
+					 N_iso_ref,
+					 param_sampling,
+					 byVal(&vp_prior_min[0]),
+					 byVal(&vp_prior_max[0]),
+					 varying_N_pivot,
+					 use_first_priorval,
+					 byVal(&phi_init0[0]),
+					 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
+					 byVal(&vparams[0]),
+					 N_pivot,
+					 k_pivot,
+					 dlnk,
+					 calc_full_pk,
+					 steps,
+					 kmin,
+					 //kmax,
+					 byVal(&phi0_priors_min[0]),
+					 byVal(&phi0_priors_max[0]),
+					 byVal(&dphi0_priors_min[0]),
+					 byVal(&dphi0_priors_max[0]),
+					 N_pivot_prior_min,
+					 N_pivot_prior_max);
+		  
+      
+      std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
+
+      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+		  
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+      if (calc_full_pk == 0)
+      {
+	std::cout << "observs.As " << observs.As << std::endl;
+	std::cout << "observs.A_iso " << observs.A_iso << std::endl;
+	std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
+	std::cout << "observs.A_ent " << observs.A_ent << std::endl;
+	std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
+	//std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
+	std::cout << "observs.ns " << observs.ns << std::endl;
+	std::cout << "observs.nt " << observs.nt << std::endl;
+	std::cout << "observs.n_iso " << observs.n_iso << std::endl;
+	std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
+	std::cout << "observs.n_ent " << observs.n_ent << std::endl;
+	std::cout << "observs.r " << observs.r << std::endl;
+	std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
+	std::cout << "observs.runofrun " << observs.runofrun << std::endl;
+	std::cout << "observs.f_NL " << observs.f_NL << std::endl;
+	std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
+			  		  
+	strcpy(cosmo.fc.name[1],"omega_b");
+	strcpy(cosmo.fc.name[2],"omega_cdm");
+	strcpy(cosmo.fc.name[3],"H0");
+	strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+	strcpy(cosmo.fc.name[5],"n_s");
+	strcpy(cosmo.fc.name[6],"tau_reio");
+	strcpy(cosmo.fc.name[7],"r");
 			  
-			  m = gsl_min_fminimizer_x_minimum (s);
-			  a = gsl_min_fminimizer_x_lower (s);
-			  b = gsl_min_fminimizer_x_upper (s);
+	sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+	sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+	sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+	sprintf(cosmo.fc.value[4],"%e",observs.As);
+	sprintf(cosmo.fc.value[5],"%e",observs.ns);
+	sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+	sprintf(cosmo.fc.value[7],"%e",observs.r);
 			  
-			  status = gsl_min_test_interval (a, b, 0.01, 0.0);
+      }
+    }
+
+    void class_set_parameter_inf_1linearInf_LCDMt(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_inf_1linearInf_LCDMt" << std::endl;
+      using namespace Pipes::class_set_parameter_inf_1linearInf_LCDMt;
+		  
+      int l_max=cosmo.lmax;
+      
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
+
+      int len_of_input = 11;
+      Options class_dict;
+      std::vector<str> names;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
+		  
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"modes");
+      strcpy(cosmo.fc.value[9],"s,t");
+      strcpy(cosmo.fc.name[10],"lensing");
+      strcpy(cosmo.fc.value[10],"yes");
+		  
+      int i = 11;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+	{
+	  //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	  str key, value;
+	  key = *name_it;
+	  value = class_dict.getValue<str>(*name_it);
+	  sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	  sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	  i++;
+	}
+      }
+		  
+      // Initialization parameters controlling main characteristics.
+      int num_inflaton = runOptions->getValue<int> ("num_inflaton");
+      int potential_choice = runOptions->getValue<int> ("potential_choice");
+      int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
+      int instreheat = runOptions->getValue<int> ("instreheat");
+      int vparam_rows = runOptions->getValue<int> ("vparam_rows");
+		  
+      // Control the output of analytic approximations for comparison.
+      int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
+      int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
+      int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
+      int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
+		  
+      // Parameters to control how the ICs are sampled.
+      int ic_sampling = runOptions->getValue<int> ("ic_sampling");
+      double energy_scale = runOptions->getValue<double> ("energy_scale");
+      int numb_samples = runOptions->getValue<int> ("numb_samples");
+      int save_iso_N = runOptions->getValue<int> ("save_iso_N");
+		  
+      double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
+		  
+      // Parameters to control how the vparams are sampled.
+      int param_sampling = runOptions->getValue<int> ("param_sampling");
+
+      std::vector<double> vp_prior_min = runOptions->getValue<std::vector<double> >("vp_prior_min");
+      std::vector<double> vp_prior_max = runOptions->getValue<std::vector<double> > ("vp_prior_max");
+		  
+      int varying_N_pivot = runOptions->getValue<int> ("varying_N_pivot");
+      int use_first_priorval = runOptions->getValue<int> ("use_first_priorval");
+		  
+      std::vector<double> phi_init0 = runOptions->getValue<std::vector<double> >("phi_init0");
+      std::vector<double> dphi_init0 = runOptions->getValue<std::vector<double> >("dphi_init0");
+		  
+      // Parameters to be passed to the potential
+      std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+		  
+      //-------------------------------------------------
+      //----------------- Sampling \lambda ------------------
+      //-------------------------------------------------
+      vparams[0] = *Param["lambda"];
+		  
+      //-------------------------------------------------
+      //--------------- Sampling N_pivot ----------------
+      //-------------------------------------------------
+      double N_pivot = *Param["N_pivot"];
+		  
+      double k_pivot = runOptions->getValue<double> ("k_pivot");
+      double dlnk = runOptions->getValue<double> ("dlnk");
+		  
+      // Priors on the IC and N_pivot ranges
+      std::vector<double> phi0_priors_min = runOptions->getValue<std::vector<double> > ("phi0_priors_min");
+      std::vector<double> phi0_priors_max = runOptions->getValue<std::vector<double> > ("phi0_priors_max");
+      std::vector<double> dphi0_priors_min = runOptions->getValue<std::vector<double> > ("dphi0_priors_min");
+      std::vector<double> dphi0_priors_max = runOptions->getValue<std::vector<double> > ("dphi0_priors_max");
+		  
+      double N_pivot_prior_min = runOptions->getValue<double> ("N_pivot_prior_min");
+      double N_pivot_prior_max = runOptions->getValue<double> ("N_pivot_prior_max");
+		  
+      // For calculating the full power spectrum P(k). Samples in uniform increments in log(k).
+      int calc_full_pk = runOptions->getValue<int> ("calc_full_pk");
+      int steps = runOptions->getValue<int> ("steps");
+      double kmin = runOptions->getValue<double> ("kmin");
+      double kmax = runOptions->getValue<double> ("kmax");
+
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+		  
+      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
+		  
+      std::cout << "steps = " << steps << std::endl;
+		  
+      gambit_inflation_observables observs;
+		  
+      std::cout << "num_inflaton = " << num_inflaton << std::endl;
+      std::cout << "save_iso_N = " << save_iso_N << std::endl;
+      std::cout << "N_pivot = " << N_pivot << std::endl;
+      std::cout << "kmin = " << kmin << std::endl;
+      std::cout << "dlnk = " << dlnk << std::endl;
+      std::cout << "lambda = " << vparams[0] << std::endl;
+		  
+      // The function below calls the multimodecode backend for a given choice of inflationary model,
+      // which calculates the observables.
+      BEreq::multimodecode_gambit_driver(&observs,
+					 num_inflaton,
+					 potential_choice,
+					 slowroll_infl_end,
+					 instreheat,
+					 vparam_rows,
+					 use_deltaN_SR,
+					 evaluate_modes,
+					 use_horiz_cross_approx,
+					 get_runningofrunning,
+					 ic_sampling,
+					 energy_scale,
+					 numb_samples,
+					 save_iso_N,
+					 N_iso_ref,
+					 param_sampling,
+					 byVal(&vp_prior_min[0]),
+					 byVal(&vp_prior_max[0]),
+					 varying_N_pivot,
+					 use_first_priorval,
+					 byVal(&phi_init0[0]),
+					 byVal(&dphi_init0[0]), // dphi correct at the multimodecode
+					 byVal(&vparams[0]),
+					 N_pivot,
+					 k_pivot,
+					 dlnk,
+					 calc_full_pk,
+					 steps,
+					 kmin,
+					 //kmax,
+					 byVal(&phi0_priors_min[0]),
+					 byVal(&phi0_priors_max[0]),
+					 byVal(&dphi0_priors_min[0]),
+					 byVal(&dphi0_priors_max[0]),
+					 N_pivot_prior_min,
+					 N_pivot_prior_max);
+		  
+		  
+      std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
+		  
+      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+		  
+      std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
+      if (calc_full_pk == 0)
+      {
+	std::cout << "observs.As " << observs.As << std::endl;
+	std::cout << "observs.A_iso " << observs.A_iso << std::endl;
+	std::cout << "observs.A_pnad " << observs.A_pnad << std::endl;
+	std::cout << "observs.A_ent " << observs.A_ent << std::endl;
+	std::cout << "observs.A_cross_ad_iso " << observs.A_cross_ad_iso << std::endl;
+	//std::cout << "observs.A_bundle " << observs.A_bundle << std::endl;
+	std::cout << "observs.ns " << observs.ns << std::endl;
+	std::cout << "observs.nt " << observs.nt << std::endl;
+	std::cout << "observs.n_iso " << observs.n_iso << std::endl;
+	std::cout << "observs.n_pnad " << observs.n_pnad << std::endl;
+	std::cout << "observs.n_ent " << observs.n_ent << std::endl;
+	std::cout << "observs.r " << observs.r << std::endl;
+	std::cout << "observs.alpha_s " << observs.alpha_s << std::endl;
+	std::cout << "observs.runofrun " << observs.runofrun << std::endl;
+	std::cout << "observs.f_NL " << observs.f_NL << std::endl;
+	std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
 			  
-			  if (status == GSL_SUCCESS) printf ("Converged:\n");
+	
+	strcpy(cosmo.fc.name[1],"omega_b");
+	strcpy(cosmo.fc.name[2],"omega_cdm");
+	strcpy(cosmo.fc.name[3],"H0");
+	strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+	strcpy(cosmo.fc.name[5],"n_s");
+	strcpy(cosmo.fc.name[6],"tau_reio");
+	strcpy(cosmo.fc.name[7],"r");
 			  
-			  printf ("%5d [%.7f, %.7f] "
-					  "%.7f %+.7f %.7f\n",
+	sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+	sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+	sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+	sprintf(cosmo.fc.value[4],"%e",observs.As);
+	sprintf(cosmo.fc.value[5],"%e",observs.ns);
+	sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+	sprintf(cosmo.fc.value[7],"%e",observs.r);
+			  
+      }
+    }
+
+    void class_set_parameter_inf_smashInf_LCDMt(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_inf_smashInf_LCDMt" << std::endl;
+      using namespace Pipes::class_set_parameter_inf_smashInf_LCDMt;
+      
+      int l_max=cosmo.lmax;
+		  
+      // What follows is a loop to read all generic additional parameters for CLASS
+      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
+      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
+      // and which will be added if there are present.
+
+      int len_of_input = 11;
+      Options class_dict;
+      std::vector<str> names;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
+	names = class_dict.getNames();
+	len_of_input += names.size();
+      }
+
+      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
+		  
+      strcpy(cosmo.fc.name[0],"output");
+      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
+      strcpy(cosmo.fc.name[8],"l_max_scalars");
+      sprintf(cosmo.fc.value[8],"%d",l_max);
+      strcpy(cosmo.fc.name[9],"modes");
+      strcpy(cosmo.fc.value[9],"s,t");
+      strcpy(cosmo.fc.name[10],"lensing");
+      strcpy(cosmo.fc.value[10],"yes");
+		  
+      int i = 11;
+
+      if (runOptions->hasKey("class_dict"))
+      {
+	for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+	{
+	  //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
+	  str key, value;
+	  key = *name_it;
+	  value = class_dict.getValue<str>(*name_it);
+	  sprintf(cosmo.fc.name[i],"%s",key.c_str());
+	  sprintf(cosmo.fc.value[i],"%s",value.c_str());
+	  i++;
+	}
+      }
+		  
+      /*
+	This part needs cleaning up and commenting - will get on to in asap.
+      */
+      // Parameters to be passed to the potential
+      std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+      
+      //-------------------------------------------------
+      //----------- at the moment I override-------------
+      //-------------------------------------------------
+      vparams[0] = *Param["log10_xi"];
+      vparams[1] = *Param["log10_beta"];
+      vparams[2] = *Param["log10_lambda"];
+		  
+      std::cout << "log10[xi] = " << vparams[0] << std::endl;
+      std::cout << "log10[beta] = " << vparams[1] << std::endl;
+      std::cout << "log10[lambda] = " << vparams[2] << std::endl;
+		  
+      /* coefficients of P(x) =  -8 + b*\[Phi]**2  */
+      /*                            + b*\[Xi]*\[Phi]**4 
+				    + 6*\[Xi]**2*\[Phi]**4 */
+      double smashp1[5] = { -8.0, 0, pow(10.0,vparams[1]), 0, (pow(10.0,vparams[1])*
+							       pow(10.0,vparams[0])+
+							       6.0*pow(10.0,vparams[0])*
+							       pow(10.0,vparams[0]))};
+      
+      double smashd1[8];
+		  
+      gsl_poly_complex_workspace * wsmash = gsl_poly_complex_workspace_alloc (5);
+      gsl_poly_complex_solve (smashp1, 5, wsmash, smashd1);      
+      gsl_poly_complex_workspace_free (wsmash);
+				
+      for (i = 0; i < 4; i++)
+      {
+	printf ("z%d = %+.18f %+.18f\n", i, smashd1[2*i], smashd1[2*i+1]);
+      }
+
+      double badway[4] = {smashd1[0],smashd1[2],smashd1[4],smashd1[6]};
+      double tempbw = 0;
+		  
+      for(int i=0;i<4;i++)
+      {
+	if(badway[i]>tempbw) tempbw=badway[i];
+      }
+      //gsl_sf_log((1.0+pow(10.0,vparams[0])*smashp1[4]*smashp1[4])/
+      //		   (1.0+pow(10.0,vparams[0])*)
+		  
+      vparams[3] = tempbw;
+      
+      std::cout << "phi_end = " << tempbw << std::endl;
+		  
+      //-------------------------------------------------
+      //--------------- Sampling N_pivot ----------------
+      //-------------------------------------------------
+      double N_pivot = *Param["N_pivot"];
+		  		  
+      ///////////// solving the equality to calculate the
+      ////////////  slow roll field amplitute at N_pivot.
+      int status;
+      int iter = 0, max_iter = 100000;
+      const gsl_min_fminimizer_type *T;
+      gsl_min_fminimizer *s;
+      double m = tempbw*10.0, m_expected = M_PI; // Correct for.
+      double a = 0.0, b = 100.0; // Correct for.
+      gsl_function F;
+		  
+      struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot};
+		  
+      F.function = &fn1;
+      F.params = &params;
+		  
+      T = gsl_min_fminimizer_brent;
+      s = gsl_min_fminimizer_alloc (T);
+      gsl_min_fminimizer_set (s, &F, m, a, b);
+				
+      printf ("using %s method\n",gsl_min_fminimizer_name (s));
+				
+      printf ("%5s [%9s, %9s] %9s %10s %9s\n","iter", "lower", "upper", "min","err", "err(est)");
+				
+      printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",
+	      iter, a, b,
+	      m, m - m_expected, b - a);
+				
+      do
+      {
+	iter++;
+	status = gsl_min_fminimizer_iterate (s);
+			  
+	m = gsl_min_fminimizer_x_minimum (s);
+	a = gsl_min_fminimizer_x_lower (s);
+	b = gsl_min_fminimizer_x_upper (s);
+	
+	status = gsl_min_test_interval (a, b, 0.01, 0.0);
+	
+	if (status == GSL_SUCCESS) printf ("Converged:\n");
+			  
+	printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",
 					  iter, a, b,
 					  m, m - m_expected, b - a);
-		  }
-		  while (status == GSL_CONTINUE && iter < max_iter);
+      }
+      while (status == GSL_CONTINUE && iter < max_iter);
 				
-		  gsl_min_fminimizer_free (s);
+      gsl_min_fminimizer_free (s);
 		  
-		  //phi_init0[0] = a*1.01;
+      //phi_init0[0] = a*1.01;
 		  
-		  double smash_pot = 0.0;
-		  double smash_eps = 0.0;
-		  double smash_eta = 0.0;
+      double smash_pot = 0.0;
+      double smash_eps = 0.0;
+      double smash_eta = 0.0;
 		  
-		  smash_pot = pot_SMASH(pow(10.0,*Param["log10_lambda"]),
-								a,
-								pow(10.0,*Param["log10_xi"]));
-		  smash_eps = SRparameters_epsilon_SMASH(a,
-												 pow(10.0,*Param["log10_beta"]),
-												 pow(10.0,*Param["log10_xi"]));
-		  smash_eta = SRparameters_eta_SMASH(a,
-											 pow(10.0,*Param["log10_beta"]),
-											 pow(10.0,*Param["log10_xi"]));
+      smash_pot = pot_SMASH(pow(10.0,*Param["log10_lambda"]),
+			    a,
+			    pow(10.0,*Param["log10_xi"]));
+      smash_eps = SRparameters_epsilon_SMASH(a,
+					     pow(10.0,*Param["log10_beta"]),
+					     pow(10.0,*Param["log10_xi"]));
+      smash_eta = SRparameters_eta_SMASH(a,
+					 pow(10.0,*Param["log10_beta"]),
+					 pow(10.0,*Param["log10_xi"]));
+      
+      double As_self = 0.0;
+      double ns_self = 0.0;
+      double r_self = 0.0;
 		  
-		  double As_self = 0.0;
-		  double ns_self = 0.0;
-		  double r_self = 0.0;
-		  
-		  
-		  As_self = As_SR(smash_eps,smash_pot);
-		  ns_self = ns_SR(smash_eps,smash_eta);
-		  r_self = r_SR(smash_eps,smash_eta);
+      As_self = As_SR(smash_eps,smash_pot);
+      ns_self = ns_SR(smash_eps,smash_eta);
+      r_self = r_SR(smash_eps,smash_eta);
 
-		  /* Have calculated the field value at N_pivot
-			 predicted by slow-roll approximation.
-		     Choosing a very close slightly higher
-			 value will be satisfactory for initial conditions.
-		   */
+      /* Have calculated the field value at N_pivot
+	 predicted by slow-roll approximation.
+	 Choosing a very close slightly higher
+	 value will be satisfactory for initial conditions.
+      */
 			  
-		  strcpy(cosmo.fc.name[1],"omega_b");
-		  strcpy(cosmo.fc.name[2],"omega_cdm");
-		  strcpy(cosmo.fc.name[3],"H0");
-		  strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-		  strcpy(cosmo.fc.name[5],"n_s");
-		  strcpy(cosmo.fc.name[6],"tau_reio");
-		  strcpy(cosmo.fc.name[7],"r");
-			  
-		  sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-		  sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-		  sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-		  sprintf(cosmo.fc.value[4],"%e",As_self);
-		  sprintf(cosmo.fc.value[5],"%e",ns_self);
-		  sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-		  sprintf(cosmo.fc.value[7],"%e",r_self);
-	}
+      strcpy(cosmo.fc.name[1],"omega_b");
+      strcpy(cosmo.fc.name[2],"omega_cdm");
+      strcpy(cosmo.fc.name[3],"H0");
+      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
+      strcpy(cosmo.fc.name[5],"n_s");
+      strcpy(cosmo.fc.name[6],"tau_reio");
+      strcpy(cosmo.fc.name[7],"r");
+      
+      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
+      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
+      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
+      sprintf(cosmo.fc.value[4],"%e",As_self);
+      sprintf(cosmo.fc.value[5],"%e",ns_self);
+      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
+      sprintf(cosmo.fc.value[7],"%e",r_self);
+    }
 
     void class_run_func(Class_container& cosmo)
     {

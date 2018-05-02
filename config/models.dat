@@ -609,3 +609,12 @@ plik_dx11dr2_HM_v18_TT: |
    calib_100T          - the relative calibration between the 100 and 143 spectra
    calib_217T          - the relative calibration between the 217 and 143 spectra
    A_planck            - the Planck absolute calibration.
+
+TestDecayingDM: |
+
+  Toy model of decaying dark matter.
+
+  mass     - mass of the dark matter candidate [in GeV]
+  lifetime - lifetime of said DM candidate [in s]
+  fraction - fraction of how much the decaying DM component contributes to all DM.
+  BR       - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
