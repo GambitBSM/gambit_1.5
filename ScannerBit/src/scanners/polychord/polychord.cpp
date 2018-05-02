@@ -158,7 +158,7 @@ scanner_plugin(polychord, version(1, 14))
       Gambit::PolyChord::global_loglike_object = &loglwrapper;
 
       //Run MultiNest, passing callback functions for the loglike and dumper.
-      if(myrank == 0) std::cout << "Starting MultiNest run..." << std::endl;
+      if(myrank == 0) std::cout << "Starting PolyChord run..." << std::endl;
       run_polychord(Gambit::PolyChord::callback_loglike, Gambit::PolyChord::callback_dumper, settings);
       if(myrank == 0) std::cout << "PolyChord run finished!" << std::endl;
       return 0;

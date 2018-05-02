@@ -109,7 +109,7 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} LINKLIB=${pcSO_LINK} MPI=1
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} LINKLIB=${pcSO_LINK} MPI=1 COMPILER_TYPE=gnu
     INSTALL_COMMAND ""
   )
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
