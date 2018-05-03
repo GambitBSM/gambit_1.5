@@ -1,0 +1,11 @@
+--- ../../../installed/class/2.6.1/source/transfer.c	2017-10-24 14:42:41.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/class_types/gambit_update/transfer.c	2018-03-05 14:53:16.000000000 +0000
+@@ -960,6 +960,8 @@
+         ptr->l_size_tt[index_md][index_tt]++;
+ 
+       ptr->l_size[index_md] = MAX(ptr->l_size[index_md],ptr->l_size_tt[index_md][index_tt]);
++		
++	  printf("ptr->l_size[%d] = %d\n",index_md,ptr->l_size[index_md]);
+ 
+     }
+   }

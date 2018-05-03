@@ -789,6 +789,142 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+# cfitsio
+set(name "cfitsio")
+set(ver "3.390")
+set(lib "libcfitsio")
+set(dl "http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio3390.tar.gz")
+set(md5 "e92dd2a4282a1c50d46167041a29fc67")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(CFITSIO_SO ".so")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${CMAKE_Fortran_FLAGS} FFLAGS=${CMAKE_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} shared SHLIB_SUFFIX=${CFITSIO_SO}
+    INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install SHLIB_SUFFIX=${CFITSIO_SO}
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
+# plc
+set(name "plc")
+set(ver "2.0")
+set(lib "libclik")
+set(dl "https://pla.esac.esa.int/pla-sl/data-action?COSMOLOGY.COSMOLOGY_OID=1904")
+set(md5 "1d732465a5cc8833cec72a414676c655")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(CFITSIOPATH "${PROJECT_SOURCE_DIR}/Backends/installed/cfitsio/3.390")
+set(PLC_SO "so")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    #PATCH_COMMAND patch -p1 < ${patch}/plc_test.diff
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND python ${dir}/waf configure --install_all_deps
+    BUILD_COMMAND ""
+    INSTALL_COMMAND python ${dir}/waf install
+    #CONFIGURE_COMMAND ""
+    #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} CFITSIOPATH=${CFITSIO_DIR} GFORTRANLIBPATH=${FORTRAN_LIBRARIES} LAPACKLIBPATH=${LAPACK_DIR} SO=${PLC_SO}
+    #INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} install CFITSIOPATH=${CFITSIO_DIR} GFORTRANLIBPATH=${FORTRAN_LIBRARIES} LAPACKLIBPATH=${LAPACK_DIR} SO=${PLC_SO}
+    #COMMAND ${CMAKE_COMMAND} -E echo "source ${dir}/bin/clik_profile.sh" > msource.sh
+    #COMMAND chmod u+x msource.sh
+    #COMMAND ./msource.sh
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
+# class
+set(name "class")
+set(ver "2.6.3")
+set(lib "libclass")
+#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "http://lesgourg.github.io/class_public/class_public-2.6.3.tar.gz")
+set(md5 "dfb8652cd5af14d61e677e0f8b96f62f")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(CLASS_DLL_DIR "build")
+set(CLASS_IFLAG "-I")
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} class
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} class
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${CMAKE_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
+    COMMAND chmod u+x make_so.sh
+    COMMAND ./make_so.sh
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
+#MontePython
+set(name "MontePython")
+set(ver "2.2.2")
+set(dl "https://github.com/baudren/montepython_public/archive/2.2.2.zip")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(md5 "93a34a7d989c4754516f3745f872abeb")
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
+#MultiModeCode
+set(name "MultiModeCode")
+set(ver "2.0.0")
+set(lib "libmodecode")
+set(dl "http://modecode.org/wp-content/uploads/2014/09/MultiModeCode.2.0.0.tar.gz")
+set(md5 "03f99f02c572ea34383a0888fb0658d6")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(driver "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0")
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}/modpk.dif
+          COMMAND patch -p1 < ${patch}/modpk_modules.dif
+          COMMAND patch -p1 < ${patch}/modpk_backgrnd_2.dif
+          COMMAND patch -p1 < ${patch}/modpk_potential.dif
+          COMMAND patch -p1 < ${patch}/modpk_utils.dif
+          COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
+    COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
+    COMMAND chmod u+x make_so1.sh
+    COMMAND ./make_so1.sh
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared ${CMAKE_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
+    COMMAND chmod u+x make_so2.sh
+    COMMAND ./make_so2.sh
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 # Alternative download command for getting unreleased things from the gambit_internal repository.
 # If you don't know what that is, you don't need to tinker with these.
 #    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold ${private_code_warning1}

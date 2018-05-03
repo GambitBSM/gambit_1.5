@@ -1,0 +1,31 @@
+--- ../../../installed/MultiModeCode/2.0.0/modpk_modules.f90	2015-04-20 16:36:02.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/MultiModeCode_2_0_0/modpk_modules.f90	2017-08-28 20:39:21.000000000 +0100
+@@ -28,7 +28,8 @@ MODULE modpkparams
+   INTEGER :: potential_choice
+ 
+   INTEGER*4 :: nactual_bg, nactual_mode
+-  INTEGER, PARAMETER :: nsteps=1e5
++  INTEGER, PARAMETER :: nsteps=1e6
++  INTEGER, PARAMETER :: builtpot=1e4
+   real(dp), PARAMETER :: M_Pl=1.0e0_dp
+   real(dp), PARAMETER :: Mpc2Mpl=2.6245e-57_dp
+   real(dp) :: k_pivot, N_pivot, N_tot, H_pivot
+@@ -39,7 +40,9 @@ MODULE modpkparams
+   real(dp), ALLOCATABLE :: phidot_sign(:)
+   real(dp) :: Nefold_max=100000.e0_dp
+   real(dp) :: lna(nsteps)
+-  real(dp) :: hubarr(nsteps), log_aharr(nsteps), epsarr(nsteps), dtheta_dN(nsteps)
++  real(dp) :: hubarr(nsteps), log_aharr(nsteps), epsarr(nsteps), dtheta_dN(nsteps), &
++				chiHarray(builtpot), rhoHarray(builtpot), potHarray(builtpot), &
++                dpotHarray(builtpot), d2potHarray(builtpot), d3potHarray(builtpot)
+   LOGICAL :: slowroll_infl_end
+   LOGICAL :: slowroll_start=.false.
+ 
+@@ -167,6 +170,7 @@ module modpk_observables
+   !Type to save the ICs and observs. Add new observables here
+   type :: observables
+     real(dp), dimension(:), allocatable :: ic
++    logical :: is_ic_ok !parameter range check for SMASH
+     !Spectra amplitudes
+     real(dp) :: As
+     real(dp) :: A_iso

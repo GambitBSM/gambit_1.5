@@ -1,0 +1,47 @@
+--- ../../../installed/class/2.6.1/source/spectra.c	2017-10-24 14:42:41.000000000 +0100
++++ ../../../include/gambit/Backends/backend_types/class_types/gambit_update/spectra.c	2018-03-05 23:46:02.000000000 +0000
+@@ -1448,13 +1448,35 @@
+         free(psp->l_max_ct[index_md]);
+         free(psp->cl[index_md]);
+         free(psp->ddcl[index_md]);
++		  
++		printf("free(psp->l_max_ct[index_md])");
++		printf("free(psp->cl[index_md])");
++		printf("free(psp->ddcl[index_md])");
+       }
+       free(psp->l);
++		
++	  printf("free(psp->l)");
++
+       free(psp->l_size);
++		
++      printf("free(psp->l_size)");
++		
+       free(psp->l_max_ct);
++		
++	  printf("free(psp->l_max_ct)");
++
+       free(psp->l_max);
++		
++	  printf("free(psp->l_max)");
++
+       free(psp->cl);
++		
++	  printf("free(psp->cl)");
++
+       free(psp->ddcl);
++		
++	  printf("free(psp->ddcl)");
++		
+     }
+ 
+     if (psp->ln_k_size > 0) {
+@@ -1896,6 +1918,8 @@
+   /** - loop over modes (scalar, tensors, etc). For each mode: */
+ 
+   for (index_md = 0; index_md < psp->md_size; index_md++) {
++	  
++	printf("<><><><>< index_md = %d ><><><><>\n",index_md);
+ 
+     /** - --> (a) store number of l values for this mode */
+ 

@@ -1,0 +1,48 @@
+---  ../../../installed/class/2.6.1/source/output.c	2017-10-24 14:42:41.000000000 +0100
++++  ../../../include/gambit/Backends/backend_types/class_types/gambit_update/output.c	2018-03-04 18:19:39.000000000 +0000
+@@ -31,12 +31,21 @@
+ 
+   int index_md;
+ 
++  printf(" we are inside output_total_cl_at_l \n");
++	
++  printf("psp->md_size = %d\n",psp->md_size);
++	
++  printf("psp->ic_size[0] = %d\n ",psp->ic_size[0]);
++  printf("psp->ic_size[0] = %d\n ",psp->ic_size[1]);
++	
+   if (ple->has_lensed_cls == _TRUE_) {
+     class_call(lensing_cl_at_l(ple,
+                                l,
+                                cl),
+                ple->error_message,
+                pop->error_message);
++	  
++  printf(" we did class_call(lensing_cl_at_l))\n");
+   }
+   else {
+ 
+@@ -50,6 +59,9 @@
+ 
+     for (index_md = 0; index_md < psp->md_size; index_md++) {
+ 
++		
++	  printf(" we are in for loop index_md = %d\n",index_md);
++
+       if (psp->md_size > 1)
+ 
+         class_alloc(cl_md[index_md],
+@@ -71,8 +83,13 @@
+                psp->error_message,
+                pop->error_message);
+ 
++	printf(" we are out of spectra_cl_at_l\n");
++
+     for (index_md = 0; index_md < psp->md_size; index_md++) {
+ 
++	  printf(" we are in the 2nd for loop index_md = %d\n",index_md);
++
++		
+       if (psp->md_size > 1)
+         free(cl_md[index_md]);
+ 
