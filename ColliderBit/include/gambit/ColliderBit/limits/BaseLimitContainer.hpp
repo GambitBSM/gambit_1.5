@@ -98,7 +98,7 @@ namespace Gambit
 
         /// @brief Dump limit average data into a file for average debugging
         void dumpPlotData(double xlow, double xhigh, double ylow, double yhigh,
-                          double mZ, std::string filename, int ngrid=1000) const;
+                          double mZ, std::string filename, int ngrid=100) const;
 
         /// @brief Dump input limit contour data into a file for limit debugging
         void dumpLightPlotData(std::string filename, int nperLine=20) const;

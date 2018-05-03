@@ -23,15 +23,15 @@ namespace flexiblesusy {
 
 class Two_scale_running_precision {
 public:
-   virtual ~Two_scale_running_precision() {}
-   virtual double get_precision(unsigned) = 0;
+   virtual ~Two_scale_running_precision() = default;
+   virtual double get_precision(int) = 0;
 };
 
 class Two_scale_constant_precision : public Two_scale_running_precision {
 public:
    explicit Two_scale_constant_precision(double);
    virtual ~Two_scale_constant_precision();
-   virtual double get_precision(unsigned);
+   virtual double get_precision(int);
 private:
    double precision;
 };
@@ -40,12 +40,12 @@ class Two_scale_increasing_precision : public Two_scale_running_precision {
 public:
    Two_scale_increasing_precision(double, double);
    virtual ~Two_scale_increasing_precision();
-   virtual double get_precision(unsigned);
+   virtual double get_precision(int);
 private:
    double decreasing_factor;
    double minimum_precision;
 };
 
-}
+} // namespace flexiblesusy
 
 #endif

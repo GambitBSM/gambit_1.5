@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:03
+// File generated at Wed 25 Oct 2017 18:11:11
 
 #ifndef SingletDM_SUSY_SCALE_CONSTRAINT_H
 #define SingletDM_SUSY_SCALE_CONSTRAINT_H

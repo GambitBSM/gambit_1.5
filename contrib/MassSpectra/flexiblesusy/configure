@@ -4,13 +4,14 @@
 # Author: Alexander Voigt
 
 PROGRAM_NAME=FlexibleSUSY
-FLEXIBLESUSY_MAJOR=1
-FLEXIBLESUSY_MINOR=5
+FLEXIBLESUSY_MAJOR=2
+FLEXIBLESUSY_MINOR=0
 FLEXIBLESUSY_PATCH=1
 FLEXIBLESUSY_EXTRA=""
 FLEXIBLESUSY_VERSION="${FLEXIBLESUSY_MAJOR}.${FLEXIBLESUSY_MINOR}.${FLEXIBLESUSY_PATCH}${FLEXIBLESUSY_EXTRA}"
 GIT_COMMIT=$(git rev-parse HEAD 2> /dev/null || echo unknown)
-GM2CALC_VERSION="1.2.0"
+GM2CALC_VERSION="1.3.3"
+HIMALAYA_VERSION="unknown"
 
 # directory of this script
 BASEDIR=$(dirname $0)
@@ -27,10 +28,9 @@ DATE=$(date 2>/dev/null || echo unknown)
 # platform information
 debmultiarch=""
 
-# default library directories
-ld_library_path=$(echo "${LD_LIBRARY_PATH}" | tr ':' ' ')
-default_lib_paths="${ld_library_path} /usr/lib /usr/local/lib"
-default_inc_paths="/usr/include /usr/local/include"
+# default library and include directories
+default_lib_paths="$LD_LIBRARY_PATH:/usr/lib:/usr/local/lib"
+default_inc_paths="$CPATH:$CPLUS_INCLUDE_PATH:/usr/include:/usr/local/include"
 
 # configure log file
 logfile="$BASEDIR/config.log"
@@ -63,10 +63,6 @@ SARAH_DEP_GEN_TMPL=${CONFIGDIR}/list_sarah_model_files.sh.in
 CONFIGHDR=${CONFIGDIR}/config.h
 CONFIGHDR_TMPL=${CONFIGDIR}/config.h.in
 
-# target tex file with package version
-TEXVERSION=$BASEDIR/doc/version.tex
-TEXVERSION_TMPL=$BASEDIR/doc/version.tex.in
-
 # target dox file with Doxygen \mainpage
 DOC_MAINPAGE=$BASEDIR/doc/mainpage.dox
 DOC_MAINPAGE_TMPL=$BASEDIR/doc/mainpage.dox.in
@@ -94,12 +90,16 @@ options="                    \
    enable_compile            \
    enable_compiler_warnings  \
    enable_debug              \
-   enable_mass_error_check   \
    enable_fflite             \
+   enable_himalaya           \
+   enable_lapack             \
+   enable_librarylink        \
    enable_looptools          \
+   enable_mass_error_check   \
+   enable_shared_libs        \
    enable_silent             \
-   enable_static_libs        \
    enable_sqlite             \
+   enable_static             \
    enable_threads            \
    enable_tsil               \
    enable_verbose            \
@@ -112,27 +112,40 @@ enable_colors="no"
 enable_debug=""
 enable_mass_error_check="no"
 enable_fflite="no"
+enable_himalaya="automatic"
+enable_lapack="automatic"
+enable_librarylink="automatic"
+enable_ilp64mkl_workaround="automatic"
 enable_looptools="no"
 enable_meta="no"
 enable_silent="no"
 enable_sqlite="automatic"
-enable_static_libs="yes"
-enable_threads="yes"
+enable_shared_libs="no"
+enable_static="no"
+enable_threads="automatic"
 enable_tsil="automatic"
 enable_verbose="no"
 
 # corresponding preprocessor define statements
-DEFINE_ENABLE_COLOR_PRINTOUT="#undef ENABLE_COLOR_PRINTOUT"
+DEFINE_ENABLE_COLORS="#undef ENABLE_COLORS"
 DEFINE_ENABLE_DEBUG="#undef ENABLE_DEBUG"
 DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR="#undef CHECK_EIGENVALUE_ERROR"
 DEFINE_ENABLE_FFLITE="#undef ENABLE_FFLITE"
+DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
+DEFINE_ENABLE_LAPACK="#undef ENABLE_LAPACK"
+DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
+DEFINE_ENABLE_ILP64MKL_WORKAROUND="#undef ENABLE_ILP64MKL_WORKAROUND"
 DEFINE_ENABLE_LOOPTOOLS="#undef ENABLE_LOOPTOOLS"
+DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
 DEFINE_ENABLE_RANDOM="#undef ENABLE_RANDOM"
 DEFINE_ENABLE_SILENT="#undef ENABLE_SILENT"
 DEFINE_ENABLE_SQLITE="#undef ENABLE_SQLITE"
 DEFINE_ENABLE_THREADS="#define ENABLE_THREADS 1"
 DEFINE_ENABLE_TSIL="#undef ENABLE_TSIL"
 DEFINE_ENABLE_VERBOSE="#undef ENABLE_VERBOSE"
+DEFINE_ENABLE_TWO_SCALE_SOLVER="#undef ENABLE_TWO_SCALE_SOLVER"
+DEFINE_ENABLE_LATTICE_SOLVER="#undef ENABLE_LATTICE_SOLVER"
+DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#undef ENABLE_SEMI_ANALYTIC_SOLVER"
 DEFINE_ENABLE_ADDONS=""
 
 boost_lib_dir=""
@@ -146,37 +159,49 @@ looptools_lib_dir=""
 looptools_inc_dir=""
 GSLFLAGS=""
 CPPFLAGS=""
-CXXFLAGS="-std=c++11 -O2"
-CFLAGS="-O2"
-FFLAGS="-O2"
+CXXFLAGS="-std=c++11 -O2 -fPIC"
+FFLAGS="-O2 -fPIC"
 FLIBS=""
 BOOSTTESTLIBS=""
 BOOSTTHREADLIBS=""
 THREADLIBS=""
-LDFLAGS=""
-LDLIBS=""
-LIBEXT=".a"
 CXX="g++"
-CC="gcc"
 EIGENFLAGS=""
 FC="gfortran"
 GSLLIBS=""
 INSTALL_DIR=""
 BLASLIBS=""
 LAPACKLIBS=""
-MAKELIB="ar cru"
 MATH="math"
 OPTIONAL_MODULES=""
 pthread_lib_dir=""
+STATIC_LIB_EXT=".a"
+STATIC_LIB_CMD="ar cru"
+STATIC_LDFLAGS="-static"
+STATIC_LDLIBS="-lquadmath -ldl"
+SHARED_LIB_EXT=".so"
+SHARED_LIB_CMD="$CXX -shared -o"
+SHARED_LDFLAGS=""
+SHARED_LDLIBS=""
+MODULE_LIBEXT="$STATIC_LIB_EXT"
+MODULE_MAKE_LIB_CMD="$STATIC_LIB_CMD"
+LIBLNK_LIBEXT="$SHARED_LIB_EXT"
+LIBLNK_MAKE_LIB_CMD="$SHARED_LIB_CMD"
+LOOPFUNCFLAGS=""
+LOOPFUNCLIBS=""
+LDFLAGS="$SHARED_LDFLAGS"
+LDLIBS="$SHARED_LDLIBS"
+himalaya_lib_dir=""
+himalaya_inc_dir=""
 sqlite_lib_dir=""
 sqlite_inc_dir=""
 tsil_lib_dir=""
 tsil_inc_dir=""
-# available RG algorithms
-ALGORITHMS="two_scale"
-available_algorithms="two_scale lattice"
+# available RG solvers
+SOLVERS="two_scale semi_analytic"
+available_solvers="two_scale lattice semi_analytic"
 # models that will be compiled
-MODELS=""
+MODELS="all"
 # addons that will be compiled
 ADDONS=""
 
@@ -186,9 +211,9 @@ cxx_compiler_version="unknown"
 
 # required C++ compiler versions
 required_cxx_compiler_version="unknown"
-required_gpp_compiler_version="4.4.7"
-required_clang_compiler_version="3.1.0"
-required_icpc_compiler_version="12.1.0"
+required_gpp_compiler_version="4.8.4"
+required_clang_compiler_version="3.8.1"
+required_icpc_compiler_version="15.0.0"
 
 # C++ compiler versions accepting `-std=c++11'
 std_cxx11_compiler_version="unknown"
@@ -204,8 +229,8 @@ required_mathematica_version="7"
 
 # required SARAH version
 required_sarah_major="4"
-required_sarah_minor="0"
-required_sarah_patch="4"
+required_sarah_minor="11"
+required_sarah_patch="0"
 required_sarah_version="${required_sarah_major}.${required_sarah_minor}.${required_sarah_patch}"
 SARAH_VERSION="unknown"
 SARAH_MAJOR="0"
@@ -214,6 +239,12 @@ SARAH_PATCH="0"
 
 # Mathematica version (0 = unknown)
 MATH_VERSION="0"
+
+# Mathematica system ID
+MATH_SYSTEMID=""
+
+# Mathematica installation directory
+MATH_INSTDIR=""
 
 # string to eval when script terminates, normally or not
 actions_at_exit=""
@@ -316,7 +347,7 @@ contains_not() {
 #_____________________________________________________________________
 check_library() {
     # This function will try to locate a library [$1] in the directory
-    # given in $2 or in a default path [$*].
+    # given in $2 or in a default path [$3].
     #
     # The result of the search is stored in found_lib and found_dir,
     # which should be immediately copied, since the variables value will
@@ -326,12 +357,15 @@ check_library() {
     if test $# -lt 3 ; then
         echo "check_library: Too few arguments"
         return 1
+    elif test $# -gt 3 ; then
+        echo "check_library: Too many arguments.  Default path should be colon-separated."
+        return 1
     fi
 
     # Save arguments in local names
-    lib=$1       ; shift
-    libdirl=$1
-    libdirs="$*"
+    lib="$1"
+    libdirl="$2"
+    libdirs="$3"
     # check if we got a specific argument as to where the library
     # is to be found
     if test ! "x$libdirl" = "x" ; then
@@ -352,26 +386,37 @@ check_library() {
     found_lib=""
 
     if test "x$machine_word_size" = "x64"; then
-	for p in ${libdirs}; do
+        IFS=":"
+        for p in $libdirs; do
+            unset IFS
             libdir64=$(echo "$p" | grep lib | sed -e 's|lib$|lib64|g' -e 's|lib/|lib64/|g')
-            libdirs="$libdirs $libdir64"
-	done
+            libdirs="$libdirs:$libdir64"
+        done
+        unset IFS
     fi
     if test "x$machine_word_size" = "x32"; then
-	for p in ${libdirs}; do
+        IFS=":"
+        for p in $libdirs; do
+            unset IFS
             libdir32=$(echo "$p" | grep lib | sed -e 's|lib$|lib32|g' -e 's|lib/|lib32/|g')
-            libdirs="$libdirs $libdir32"
-	done
+            libdirs="$libdirs:$libdir32"
+        done
+        unset IFS
     fi
     # look first in the DEB_HOST_MULTIARCH directories
     if test "x$debmultiarch" != "x" ; then
-	for p in ${libdirs}; do
+        IFS=":"
+        for p in $libdirs; do
+            unset IFS
             multiarch_libdir=$(echo "$p" | sed "s|lib$|lib/$debmultiarch|")
-            libdirs="$multiarch_libdir $libdirs"
-	done
+            libdirs="$multiarch_libdir:$libdirs"
+        done
+        unset IFS
     fi
 
-    for p in ${libdirs}; do
+    IFS=":"
+    for p in $libdirs; do
+        unset IFS
         for l in ${libs}; do
             liblist=$(echo $p/$l) # expands wildcard
             for n in ${liblist} ; do
@@ -383,6 +428,7 @@ check_library() {
             done
         done
     done
+    unset IFS
 
     if test "x$found_dir" = "x" || test "x$found_lib" = "x" ; then
         result "not found in $libdirs"
@@ -397,7 +443,7 @@ check_library() {
 #_____________________________________________________________________
 check_header() {
     # This function will try to locate a header file [$1] in the
-    # directory given in $2 or in a default path [$*].
+    # directory given in $2 or in a default path [$3].
     #
     # The result of the search is stored in found_hdr and found_dir,
     # which should be immediately copied, since the variables value
@@ -407,11 +453,14 @@ check_header() {
     if test $# -lt 2 ; then
         echo "check_header: Too few arguments"
         return 1
+    elif test $# -gt 3 ; then
+        echo "check_header: Too many arguments.  The default paths should be colon-separated."
+        return 1
     fi
 
     # Save arguments in local names
-    hdr=$1       ; shift
-    hdrdirl=$1
+    hdr="$1"       ; shift
+    hdrdirl="$1"
     hdrdirs="$*"
     # check if we got a specific argument as to where the library
     # is to be found
@@ -432,7 +481,9 @@ check_header() {
     found_dir=""
     found_hdr=""
 
-    for p in ${hdrdirs}; do
+    IFS=":"
+    for p in $hdrdirs; do
+        unset IFS
         for h in ${hdrs}; do
             hdrlist=$(echo $p/$h) # expands wildcard
             for n in ${hdrlist} ; do
@@ -444,6 +495,7 @@ check_header() {
             done
         done
     done
+    unset IFS
 
     if test "x$found_dir" = "x" || test "x$found_hdr" = "x" ; then
         result "not found in $hdrdirs"
@@ -739,17 +791,17 @@ try_compile_run_cpp_program() {
 }
 
 #_____________________________________________________________________
-use_algorithm() {
-    # This function tests if a certain algorithm [$1] is used.
+use_solver() {
+    # This function tests if a certain solver [$1] is used.
 
     # Assert that we got enough arguments
     if test $# -ne 1 ; then
-        echo "use_algorithm: Exactly one argument required"
+        echo "use_solver: Exactly one argument required"
         return 1
     fi
 
-    # check if the argument is in the list of used algorithms
-    contains "$ALGORITHMS" "$1"
+    # check if the argument is in the list of used solvers
+    contains "$SOLVERS" "$1"
 }
 
 #_____________________________________________________________________
@@ -833,40 +885,41 @@ check_install_dir() {
 }
 
 #_____________________________________________________________________
-check_algorithms() {
-    if test -z "${ALGORITHMS}"; then
-        logmsg "No RGE solver algorithms specified"
+check_solvers() {
+    if test -z "${SOLVERS}"; then
+        logmsg "No RGE solvers specified"
         return 0
     fi
 
-    checking_msg "RGE solver algorithms"
-    local algs="$(echo $ALGORITHMS | tr ',' ' ')"
-    ALGORITHMS=""
+    checking_msg "RGE solvers"
+    local algs="$(echo $SOLVERS | tr ',' ' ')"
+    SOLVERS=""
     for a in ${algs}; do
         case "$a" in
             all)
-                ALGORITHMS="$available_algorithms"; break ;;
-            two_scale|lattice)
-                ALGORITHMS="$ALGORITHMS $a"
+                SOLVERS="$available_solvers"; break ;;
+            two_scale|lattice|semi_analytic)
+                SOLVERS="$SOLVERS $a"
                 continue ;;
             *)
-                message "Error: unknown algorithm: $a";
-                message "Available algorithms: $available_algorithms";
+                message "Error: unknown solver: $a";
+                message "Available solvers: $available_solvers";
                 exit 1 ;;
         esac
     done
 
     # strip whitespace
-    ALGORITHMS="$(echo ${ALGORITHMS} | sed -e 's/^ *//' -e 's/ *$//')"
+    SOLVERS="$(echo ${SOLVERS} | sed -e 's/^ *//' -e 's/ *$//')"
 
-    result "ok (${ALGORITHMS})"
-    logmsg "   Algorithms: ${ALGORITHMS}"
+    result "ok (${SOLVERS})"
+    logmsg "   Solvers: ${SOLVERS}"
 }
 
 #_____________________________________________________________________
 check_models() {
-    if test -z "${MODELS}"; then
+    if test -z "${MODELS}" -o ! -d "$BASEDIR"/models ; then
         logmsg "No models specified"
+        MODELS=""
         return 0
     fi
 
@@ -975,6 +1028,59 @@ check_addons() {
 }
 
 #_____________________________________________________________________
+check_optional_modules() {
+    if test -z "${OPTIONAL_MODULES}"; then
+        logmsg "No optional modules specified"
+        return 0
+    fi
+
+    checking_msg "optional modules"
+    local optional_modules="$(echo $OPTIONAL_MODULES | tr ',' ' ')"
+    OPTIONAL_MODULES=""
+    for a in ${optional_modules}; do
+        if test -d "$BASEDIR/$a" ; then
+            OPTIONAL_MODULES="$OPTIONAL_MODULES $a"
+            continue
+        else
+            result "not ok"
+            message "Error: module directory \"$BASEDIR/$a\" does not exist!"
+            message "Please create the directory and put a module.mk file in it."
+            exit 1
+        fi
+    done
+
+    # check for Makefile module
+    for m in ${OPTIONAL_MODULES}; do
+        if ! test -r ${m}/module.mk; then
+            result "not ok"
+            message "Error: No Makefile module found in ${m}"
+            message "   Please create ${m}/module.mk !"
+            exit 1
+        fi
+    done
+
+    local module_names="$(echo ${OPTIONAL_MODULES} | sed -e 's|addons/||g' -e 's/^ *//' -e 's/ *$//')"
+
+    result "ok (${module_names})"
+    logmsg "   Optional modules: ${OPTIONAL_MODULES}"
+}
+
+#_____________________________________________________________________
+check_librarylink() {
+    if [ "x$enable_librarylink" = "xautomatic" ] ; then
+        checking_msg "LibraryLink"
+        # building LibraryLink needs Mathematica headers
+        if [ -n "$MATH" ] ; then
+            result "yes"
+            enable_librarylink=yes
+        else
+            result "no"
+            enable_librarylink=no
+        fi
+    fi
+}
+
+#_____________________________________________________________________
 check_platform() {
     # checks which platform we have
 
@@ -989,14 +1095,20 @@ check_platform() {
     logmsg "Machine word size: ${machine_word_size}"
     logmsg ""
 
-    for p in $(echo "$PATH" | tr ':' ' '); do
+    IFS=":"
+    for p in $PATH; do
+        unset IFS
         logmsg "PATH: ${p}"
     done
+    unset IFS
     logmsg ""
 
-    for p in ${ld_library_path}; do
+    IFS=":"
+    for p in $LD_LIBRARY_PATH; do
+        unset IFS
         logmsg "LD_LIBRARY_PATH: ${p}"
     done
+    unset IFS
     logmsg ""
 
     operating_system=$( (uname -s) 2>/dev/null || echo unknown)
@@ -1116,7 +1228,7 @@ check_boost_thread_libs() {
     if [ -z "$found_lib" ]; then
         message "Error: libboost_thread or libboost_thread-mt must be installed"
         message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-algorithms= flag."
+        message "  You can disable the lattice method with the --with-solvers= flag."
         exit 1
     fi
     local BOOSTTHREADLIBS_=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
@@ -1126,7 +1238,7 @@ check_boost_thread_libs() {
     if [ -z "$found_lib" ]; then
         message "Error: libboost_system or libboost_system-mt must be installed"
         message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-algorithms= flag."
+        message "  You can disable the lattice method with the --with-solvers= flag."
         exit 1
     fi
     BOOSTTHREADLIBS_="$BOOSTTHREADLIBS_ "-l$(
@@ -1147,7 +1259,7 @@ check_boost_thread_incl() {
     if test "x$found_hdr" = "x" ; then
         message "Error: boost/thread/thread.hpp must be installed"
         message "  to enable multithreading in the lattice method, see http://www.boost.org"
-        message "  You can disable the lattice method with the --with-algorithms= flag."
+        message "  You can disable the lattice method with the --with-solvers= flag."
         exit 1
     else
         if contains_not "${BOOSTFLAGS}" "-I$found_dir"; then
@@ -1159,19 +1271,24 @@ check_boost_thread_incl() {
 #_____________________________________________________________________
 check_std_threads() {
     # check for C++ std::thread and std::mutex
-    if test "x${enable_threads}" = "xyes" ; then
+    if test "x${enable_threads}" = "xyes" -o  "x${enable_threads}" = "xautomatic" ; then
         checking_msg "std::thread"
         if try_compile_cpp_program "#include <thread>
 #include <mutex>" "std::mutex mtx; std::thread thr;";
         then
+            enable_threads="yes"
             result "ok"
         else
             result "not available"
-            message "Error: C++ std::thread and std::mutex is not available."
-            message "   Either reconfigure with \`--disable-threads' or use a"
-            message "   C++ compiler which supports C++ std::thread and std::mutex."
+
+            if test "x${enable_threads}" = "xyes" ; then
+                message "Error: C++ std::thread and std::mutex is not available."
+                message "   Either reconfigure with \`--disable-threads' or use a"
+                message "   C++ compiler which supports C++ std::thread and std::mutex."
+                exit 1
+            fi
+
             enable_threads="no"
-            exit 1
         fi
     fi
 }
@@ -1187,6 +1304,10 @@ check_thread_libs() {
             exit 1
         fi
         THREADLIBS=-l$(echo "$found_lib" | sed 's/^lib\(.*\)\..*$/\1/')
+        # need to link whole libpthread.a for static linking
+        if [ "x$enable_static" = xyes ] ; then
+            THREADLIBS="-Wl,--push-state,-z,muldefs,--whole-archive ${THREADLIBS} -Wl,--pop-state"
+        fi
         if [ -n "$pthread_lib_dir" ]; then
             THREADLIBS="-L$pthread_lib_dir $THREADLIBS"
         fi
@@ -1252,7 +1373,7 @@ check_icpc_features() {
 
     # disable multi-threading for versions < 14.0.0
     if ! major_minor_patch_at_least $major $minor $patch "14" "0" "0" &&
-       [ "$enable_threads" = "yes" ]; then
+       [ "$enable_threads" = "yes" -o "$enable_threads" = "automatic" ]; then
 	message ""
 	message "   Warning: multi-threading support requires $compiler 14.0.0 or newer."
 	enable_threads="no"
@@ -1377,20 +1498,6 @@ get_clang_version() {
 }
 
 #_____________________________________________________________________
-check_cc() {
-    checking_msg "C compiler $CC"
-    exists_in_path "$CC"
-    if [ -z "$cmd" ] ; then
-        result "not found"
-        message "Error: A C compiler must be installed to compile FlexibleSUSY!"
-        message "   Use --with-cc= to specify the C compiler to be used."
-        exit 1
-    else
-        result "found $cmd"
-    fi
-}
-
-#_____________________________________________________________________
 check_cxx() {
     checking_msg "C++ compiler $CXX"
     exists_in_path "$CXX"
@@ -1426,7 +1533,7 @@ check_cxxflags() {
         fi
     fi
 
-    if test "x$enable_static_libs" = "xno" ; then
+    if [ "x$enable_shared_libs" = "xyes" -o "x$enable_librarylink" = "xyes" ] ; then
         # check if -fPIC is in CXXFLAGS
         case "${CXX}" in
             g++*|clang++*|icpc*)
@@ -1450,8 +1557,14 @@ check_cxxflags() {
 
 #_____________________________________________________________________
 check_eigen_incl() {
-    eigen_inc_paths="$default_inc_paths /usr/include/eigen3 \
-                     /usr/local/include/eigen3"
+    # Eigen headers are usually in the `eigen3` subdirectory of the include paths.
+    eigen_inc_paths=""
+    IFS=":"
+    for inc_path in $default_inc_paths; do
+        unset IFS
+        eigen_inc_paths="$eigen_inc_paths:$inc_path/eigen3:$inc_path"
+    done
+    unset IFS
     check_header "Eigen/Core" "$eigen_inc_dir" "$eigen_inc_paths"
     if test "x$found_hdr" = "x" ; then
         message "Error: Eigen 3 must be installed, see http://eigen.tuxfamily.org"
@@ -1483,6 +1596,12 @@ int main() {
 
     result "ok (version ${eigen_version})"
     logmsg "   Eigen version found: ${eigen_version}"
+
+    version_at_least "$eigen_version" "3.3.0" || {
+        message "Warning: You are using Eigen ${eigen_version}."
+        message "   Compilation errors can occur with this Eigen version in models with"
+        message "   complex parameters. We recommend to upgrade to Eigen 3.3.0 at least."
+    }
 }
 
 #_____________________________________________________________________
@@ -1534,8 +1653,8 @@ check_fflags() {
             ;;
     esac
 
-    if test "x$enable_static_libs" = "xno" ; then
-        # check if -fPIC is in FFLAGS
+    # check if -fPIC is in FFLAGS
+    if [ "x$enable_shared_libs" = "xyes" -o "x$enable_librarylink" = "xyes" ] ; then
         case "${FC}" in
             gfortran*|ifort*)
                 if contains_not "${FFLAGS}" "-fPIC" ; then
@@ -1554,7 +1673,7 @@ check_fortran_libs() {
 
     case "$FC" in
         gfortran*)
-            gfortran_lib_search_paths=$(${FC} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p' | tr ':' ' ')
+            gfortran_lib_search_paths=$(${FC} -print-search-dirs | sed -n -e '/libraries:/s/libraries: *=//p')
             check_library "libgfortran" "$gfortran_lib_search_paths" "$default_lib_paths"
             if test "x$found_lib" = "x" ; then
                 message "Error: libgfortran not found in $gfortran_lib_search_paths $default_lib_paths"
@@ -1570,13 +1689,40 @@ check_fortran_libs() {
 }
 
 #_____________________________________________________________________
+check_linking() {
+    if [ "x$enable_static" = xyes ] ; then
+        # static linking requires static libraries
+        [ "x$enable_shared_libs" = xyes ] && \
+            message "Note: Static libraries will be created, because they are needed for static linking (--enable-static)."
+        enable_shared_libs=no
+        LDFLAGS="$STATIC_LDFLAGS"
+        LDLIBS="$STATIC_LDLIBS"
+    else
+        LDFLAGS="$SHARED_LDFLAGS"
+        LDLIBS="$SHARED_LDLIBS"
+    fi
+
+    if [ "x$enable_shared_libs" = xyes ] ; then
+        MODULE_LIBEXT="$SHARED_LIB_EXT"
+        MODULE_MAKE_LIB_CMD="$SHARED_LIB_CMD"
+    else
+        MODULE_LIBEXT="$STATIC_LIB_EXT"
+        MODULE_MAKE_LIB_CMD="$STATIC_LIB_CMD"
+    fi
+
+    # LibraryLink lib must always be shared
+    LIBLNK_LIBEXT="$SHARED_LIB_EXT"
+    LIBLNK_MAKE_LIB_CMD="$SHARED_LIB_CMD"
+}
+
+#_____________________________________________________________________
 check_blas_libs_using_options() {
     check_library "libblas" "$blas_lib_dir" \
 	"$default_lib_paths"
     if test "x$found_lib" = "x" ; then
-        message "Error: libblas must be installed!"
+        message "Warning: could not find libblas, proceeding without it."
         message "  It can be downloaded from http://www.netlib.org/blas"
-        exit 1
+	enable_lapack="no"
     else
         local BLASLIBS_=-lblas
         if [ -z "$blas_lib_dir" ]; then
@@ -1590,13 +1736,134 @@ check_blas_libs_using_options() {
 }
 
 #_____________________________________________________________________
+check_himalaya_version() {
+    checking_msg "Himalaya version"
+
+    try_compile_run_cpp_program "#include <iostream>
+#include \"version.hpp\"
+int main() {
+   std::cout << Himalaya_VERSION_MAJOR << '.' << Himalaya_VERSION_MINOR << '.' << Himalaya_VERSION_RELEASE << '\n';
+   return 0;
+}" "$CXX" "${HIMALAYAFLAGS}" && [ $cpp_exit = 0 ] || {
+        result "unknown"
+        message "Warning: could not determine Himalaya version because"
+        message "   compilation or execution of the Himalaya test program failed."
+	return 1
+    }
+
+    local HIMALAYA_VERSION="$cpp_output"
+
+    result "ok (version ${HIMALAYA_VERSION})"
+    logmsg "   Himalaya version found: ${HIMALAYA_VERSION}"
+}
+
+#_____________________________________________________________________
+check_himalaya_incl() {
+    check_header "version.hpp" "$himalaya_inc_dir"
+    if test "x$found_hdr" = "x" ; then
+        if test "x$enable_himalaya" = "xyes" ; then
+            message "Error: Himalaya's version.hpp must be installed if you want"
+            message "   to use Himalaya, see https://github.com/jklappert/Himalaya"
+            message "   You can use the --with-himalaya-incdir= option to specify the"
+            message "   location of version.hpp and the other headers."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        # assume that the compiler will look in the default paths
+        if [ -n "$himalaya_inc_dir" ]; then
+            HIMALAYAFLAGS="-I$himalaya_inc_dir"
+        fi
+
+        check_himalaya_version
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_himalaya_libs() {
+    check_library "libHimalaya" "$himalaya_lib_dir" \
+	"$default_lib_paths"
+    if test "x$found_lib" = "x" ; then
+        if test "x$enable_himalaya" = "xyes" ; then
+            message "Error: The Himalaya library must be installed if you want"
+            message "   to use Himalaya, see https://github.com/jklappert/Himalaya"
+            message "   You can use the --with-himalaya-libdir= option to specify the"
+            message "   location of the Himalaya library."
+            exit 1
+        else
+            return 1
+        fi
+    else
+        local HIMALAYALIBS_="-lHimalaya"
+        if [ -z "$himalaya_lib_dir" ]; then
+            # assume that the linker will look in the default paths
+            HIMALAYALIBS="$HIMALAYALIBS_"
+        else
+            HIMALAYALIBS="-L$himalaya_lib_dir $HIMALAYALIBS_"
+        fi
+    fi
+    return 0
+}
+
+#_____________________________________________________________________
+check_himalaya() {
+    if test "x$enable_himalaya" != "xno" ; then
+        if check_himalaya_incl && check_himalaya_libs ; then
+            enable_himalaya=yes
+        else
+            enable_himalaya=no
+        fi
+    fi
+}
+
+#_____________________________________________________________________
+# Mathematica 9.0 or newer is shipped with Intel MKL with the ILP64
+# interface whereas LP64 is the standard 64 bit programming model
+# which external LAPACK/BLAS would also follow:
+# http://www.unix.org/version2/whatsnew/lp64_wp.html.  When
+# Mathematica loads a LibraryLink library, calls to LAPACK/BLAS
+# subroutines are bound to the MKL ILP64.  This means that an FS
+# object cannot call an external LAPACK/BLAS subroutine if LibraryLink
+# is enabled.  In this case, FS attempts to circumvent the conflict by
+# calling the LAPACK subroutines from the MKL installed with
+# Mathematica.  This workaround is however possible only when FS
+# executables are dynamically linked since Mathematica does not come
+# with a static MKL.
+check_ilp64mkl_in_math() {
+    [ "$enable_librarylink" = "no" ] && return 0
+    [ "$enable_lapack" = "no" ] && return 0
+
+    local math_lib_dir="$MATH_INSTDIR/SystemFiles/Libraries/$MATH_SYSTEMID"
+
+    check_library "libmkl_intel_ilp64" "$math_lib_dir" "$default_lib_paths"
+    [ -z "$found_lib" ] && return 0
+
+    enable_ilp64mkl_workaround="yes"
+
+    if [ "$enable_static" = "yes" ]; then
+	if [ "$enable_lapack" = "yes" ]; then
+	    message "Error: --enable-{static,lapack,librarylink} together conflict with the Intel MKL ILP64 linked to this version of Mathematica"
+	    exit 1
+	else
+	    enable_lapack="no"
+	fi
+    else
+	LAPACKLIBS="-L$math_lib_dir -Wl,-rpath,$math_lib_dir -lmkl_intel_ilp64 -lmkl_intel_thread -lmkl_core -liomp5"
+	check_symbol ztpsv_ "$found_lib" "$found_dir"
+	check_symbol dgbsv_ "$found_lib" "$found_dir"
+    fi
+}
+
+#_____________________________________________________________________
 check_lapack_libs_using_options() {
     check_library "liblapack" "$lapack_lib_dir" \
 	"$default_lib_paths"
     if test "x$found_lib" = "x" ; then
-        message "Error: liblapack must be installed!"
+        message "Warning: could not find liblapack, proceeding without it."
         message "  It can be downloaded from http://www.netlib.org/lapack"
-        exit 1
+	enable_lapack="no"
     else
         local LAPACKLIBS_=-llapack
         if [ -z "$lapack_lib_dir" ]; then
@@ -1649,6 +1916,24 @@ check_looptools_incl() {
 }
 
 #_____________________________________________________________________
+check_loop_functions() {
+    if test "$enable_fflite" = "yes" -a "$enable_looptools" = "yes"; then
+	message "Error: do not \`--enable-fflite' and \`--enable-looptools' at the same time"
+	exit 1
+    fi
+
+    if test "$enable_looptools" = "yes" ; then
+        LOOPFUNCFLAGS="$LOOPTOOLSFLAGS"
+        LOOPFUNCLIBS="$LOOPTOOLSLIBS"
+    fi
+
+    if test "$enable_fflite" = "yes" ; then
+        LOOPFUNCFLAGS=""
+        LOOPFUNCLIBS="fflite/libfflite${MODULE_LIBEXT}"
+    fi
+}
+
+#_____________________________________________________________________
 check_sqlite_libs() {
     check_library "libsqlite3" "$sqlite_lib_dir" \
        "$default_lib_paths"
@@ -1666,6 +1951,34 @@ check_sqlite_libs() {
         fi
     fi
     return 0
+}
+
+#_____________________________________________________________________
+check_odeint() {
+    check_header "boost/numeric/odeint.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/algebra/algebra_dispatcher.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/algebra/vector_space_algebra.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/external/eigen/eigen_algebra_dispatcher.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/external/eigen/eigen_resize.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/integrate/integrate_adaptive.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/stepper/generation.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths" && \
+    check_header "boost/numeric/odeint/stepper/runge_kutta_fehlberg78.hpp" "$boost_inc_dir" \
+                 "$default_inc_paths"
+
+    if test "x$found_hdr" = "x" ; then
+        DEFINE_ENABLE_ODEINT="#undef ENABLE_ODEINT"
+        logmsg "Disabling usage of odeint: ${DEFINE_ENABLE_ODEINT}"
+    else
+        DEFINE_ENABLE_ODEINT="#define ENABLE_ODEINT 1"
+        logmsg "Enabling usage of odeint: ${DEFINE_ENABLE_ODEINT}"
+    fi
 }
 
 #_____________________________________________________________________
@@ -1701,8 +2014,6 @@ check_tsil_libs() {
     check_library "libtsil" "$tsil_lib_dir" \
        "$default_lib_paths"
     if test "x$found_lib" = "x" ; then
-        message "Warning: libtsil not found."
-        message "   Support for TSIL will be is disabled."
         return 1
     else
         local TSILLIBS_="-ltsil"
@@ -1721,8 +2032,6 @@ check_tsil_incl() {
     check_header "tsil.h" "$tsil_inc_dir" \
 	"$default_inc_paths"
     if test "x$found_hdr" = "x" ; then
-        message "Warning: tsil.h not found in $tsil_inc_dir $default_inc_paths."
-        message "   Support for TSIL will be is disabled."
         return 1
     else
         # assume that the compiler will look in the default paths
@@ -1739,6 +2048,10 @@ check_tsil() {
         if check_tsil_incl && check_tsil_libs ; then
             enable_tsil=yes
         else
+            if [ "x$enable_tsil" = xyes ] ; then
+                message "Error: TSIL not found."
+                exit 1
+            fi
             enable_tsil=no
         fi
     fi
@@ -1750,6 +2063,7 @@ find_symbol_using_pkgconfig() {
     local pkg
     local ldpaths
     local libnames
+    local pkg_flags=$([ "x$enable_static" = xyes ] && echo "--static")
     pkg="$1"
     linker_flags=""
     type pkg-config > /dev/null 2>&1 || {
@@ -1760,15 +2074,15 @@ find_symbol_using_pkgconfig() {
 	logmsg "pkg-config does not manage $pkg"
 	return 1
     }
-    ldpaths=$(pkg-config --libs-only-L "$pkg")
-    libnames=$(pkg-config --libs-only-l "$pkg")
+    ldpaths=$(pkg-config ${pkg_flags} --libs-only-L "$pkg")
+    libnames=$(pkg-config ${pkg_flags} --libs-only-l "$pkg")
     shift
     for symbol; do
 	for dopt in $default_lib_paths $ldpaths; do
 	    for lopt in $libnames; do
 		if check_symbol "$symbol" "$lopt" "$dopt"; then
 		    logmsg "found $symbol in $dopt $lopt"
-		    linker_flags=$(pkg-config --libs "$pkg")
+		    linker_flags=$(pkg-config ${pkg_flags} --libs "$pkg")
 		    continue 3
 		fi
 	    done
@@ -1780,6 +2094,9 @@ find_symbol_using_pkgconfig() {
 
 #_____________________________________________________________________
 check_blas_libs() {
+    [ "$enable_lapack" = "no" ] && return 0
+    [ "$enable_ilp64mkl_workaround" = "yes" ] && return 0
+
     # user has set BLASLIBS explicitly, no need to search
     test -n "$BLASLIBS" && return 0
 
@@ -1792,6 +2109,9 @@ check_blas_libs() {
 
 #_____________________________________________________________________
 check_lapack_libs() {
+    [ "$enable_lapack" = "no" ] && return 0
+    [ "$enable_ilp64mkl_workaround" = "yes" ] && return 0
+
     # user has set LAPACKLIBS explicitly, no need to search
     test -n "$LAPACKLIBS" && return 0
 
@@ -1803,26 +2123,33 @@ check_lapack_libs() {
 }
 
 #_____________________________________________________________________
-check_makelib() {
-    checking_msg "build library command $MAKELIB"
+check_static_lib_cmd() {
+    checking_msg "build static library command $STATIC_LIB_CMD"
     # strip arguments from the actual command
-    makelib_cmd=$(echo "$MAKELIB" | awk '{ print $1; }')
-
-    # check if $makelib_cmd can create shared libraries
-    if test "x$enable_static_libs" = "xno" ; then
-        if test "x$makelib_cmd" = "xar" ; then
-            message ""
-            message "   Error: $makelib_cmd cannot be used to create shared libraries!"
-            message "   Please use --with-make-lib-cmd=\"gcc -shared -o\" or something similar."
-            exit 1
-        fi
-    fi
+    makelib_cmd=$(echo "$STATIC_LIB_CMD" | awk '{ print $1; }')
 
     exists_in_path "$makelib_cmd"
     if [ -z "$cmd" ] ; then
         result "not found"
-        message "Error: A program which builds libraries must be installed!"
-        message "   Use --with-make-lib-cmd= to specify the library creator program to be used."
+        message "Error: A program which builds static libraries must be installed!"
+        message "   Use --with-static-lib-cmd= to specify the program to be used."
+        exit 1
+    else
+        result "found $cmd"
+    fi
+}
+
+#_____________________________________________________________________
+check_shared_lib_cmd() {
+    checking_msg "build shared library command $SHARED_LIB_CMD"
+    # strip arguments from the actual command
+    makelib_cmd=$(echo "$SHARED_LIB_CMD" | awk '{ print $1; }')
+
+    exists_in_path "$makelib_cmd"
+    if [ -z "$cmd" ] ; then
+        result "not found"
+        message "Error: A program which builds shared libraries must be installed!"
+        message "   Use --with-shared-lib-cmd= to specify the program to be used."
         exit 1
     else
         result "found $cmd"
@@ -1835,14 +2162,18 @@ check_math_cmd() {
     exists_in_path "$MATH"
     if [ -z "$cmd" ] ; then
         result "not found"
-        message "Error: Mathematica needs to be installed to run the meta code!"
+	MATH=""
+	[ "${enable_meta}" = "yes" -o "$enable_librarylink" = "yes" ] || return
+
+        message "Error: Mathematica needs to be installed to run the meta code or to enable LibraryLink!"
         message "   You can use the --with-math-cmd= option to specify the location of"
-        message "   the math kernel."
+        message "   the math kernel.  It is usually installed in "
         case "$operating_system" in
-            Linux)  message "   It is usually installed in /usr/local/Wolfram/Mathematica/" ;;
-            Darwin) message "   It is usually installed in /Applications/Mathematica.app/"  ;;
-            CYGWIN_NT*) message "   It is usually installed in /cygdrive/c/Program Files/Wolfram Research/Mathematica/" ;;
+            Linux)  message "   /usr/local/Wolfram/Mathematica/" ;;
+            Darwin) message "   /Applications/Mathematica.app/"  ;;
+            CYGWIN_NT*) message "   /cygdrive/c/Program Files/Wolfram Research/Mathematica/" ;;
         esac
+        message "   Alternatively, you can disable the meta code by using --disable-meta ."
         exit 1
     else
         result "found $cmd"
@@ -1850,34 +2181,52 @@ check_math_cmd() {
 }
 
 #_____________________________________________________________________
-check_mathematica_version() {
-    local _math_version_check_progr="${BASEDIR}/check_math_version.m"
-    rm -f ${mathconfig} ${_math_version_check_progr}
-    cat <<EOF > ${_math_version_check_progr}
+check_mathematica_info() {
+    [ -z "$MATH" ] && return 0
+
+    local _math_info_check_progr="${BASEDIR}/check_math_info.m"
+    local _ok=false
+
+    at_exit "rm -f \"${_math_info_check_progr}\""
+
+    cat <<EOF > ${_math_info_check_progr}
 error = 0;
-Put[\$VersionNumber, "${mathconfig}"];
+Put[\$VersionNumber,
+    OutputForm[\$SystemID],
+    OutputForm[\$InstallationDirectory],
+    "${mathconfig}"];
 If[\$VersionNumber < ${required_mathematica_version},
-   error = 1;
+   error = 2;
   ];
 Quit[error];
 EOF
 
     checking_msg "Mathematica version >= ${required_mathematica_version}"
-    if "$MATH" -run "Get[\"${_math_version_check_progr}\"]" > /dev/null 2>&1;
-    then
-        if test -r "${mathconfig}" ; then
-            MATH_VERSION=$(cat "${mathconfig}")
-            result "ok (version ${MATH_VERSION})"
-        else
-            result "ok"
-        fi
+    echo "Get[\"${_math_info_check_progr}\"]" | "$MATH" > /dev/null 2>&1 &&
+	_ok=true
+    local _exit_status="$?"
+    if test -r "${mathconfig}"; then
+        MATH_VERSION=$(sed -n '1p' "${mathconfig}")
+	MATH_SYSTEMID=$(sed -n '2p' "${mathconfig}")
+        MATH_INSTDIR=$(sed -n '3p' "${mathconfig}")
     else
-        result "not ok"
+	_ok=false
+    fi
+
+    if $_ok; then
+        result "ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
+    else
+	if [ "$_exit_status" = 2 ]; then
+	    result "not ok (version ${MATH_VERSION} for ${MATH_SYSTEMID} in ${MATH_INSTDIR})"
+	else
+	    result "not ok"
+	fi
+	MATH=""
+	[ "${enable_meta}" = "yes" -o "$enable_librarylink" = "yes" ] || return
+
         message "Error: Mathematica ${required_mathematica_version} or higher needs to be installed!"
-        rm -f ${_math_version_check_progr}
         exit 1
     fi
-    rm -f ${_math_version_check_progr}
 }
 
 #_____________________________________________________________________
@@ -1950,13 +2299,13 @@ check_cygpath() {
 #_____________________________________________________________________
 enable_defines() {
     if test "x$enable_colors" = "xyes" ; then
-        DEFINE_ENABLE_COLOR_PRINTOUT="#define ENABLE_COLOR_PRINTOUT 1"
+        DEFINE_ENABLE_COLORS="#define ENABLE_COLORS 1"
         message "Enabling colored output"
-        logmsg "   ${DEFINE_ENABLE_COLOR_PRINTOUT}"
+        logmsg "   ${DEFINE_ENABLE_COLORS}"
     else
-        DEFINE_ENABLE_COLOR_PRINTOUT="#undef ENABLE_COLOR"
+        DEFINE_ENABLE_COLORS="#undef ENABLE_COLORS"
         logmsg "Disabling colored output"
-        logmsg "   ${DEFINE_ENABLE_COLOR_PRINTOUT}"
+        logmsg "   ${DEFINE_ENABLE_COLORS}"
     fi
 
     if test "x$enable_debug" = "xyes" ; then
@@ -1989,11 +2338,6 @@ enable_defines() {
         logmsg "   ${DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR}"
     fi
 
-    if test "$enable_fflite" = "yes" -a "$enable_looptools" = "yes"; then
-	message "Error: do not \`--enable-fflite' and \`--enable-looptools' at the same time"
-	exit 1
-    fi
-
     if test "x$enable_fflite" = "xyes" ; then
         DEFINE_ENABLE_FFLITE="#define ENABLE_FFLITE 1"
         message "Enabling usage of fflite"
@@ -2002,6 +2346,48 @@ enable_defines() {
         logmsg "Disabling usage of fflite"
     fi
     logmsg "   ${DEFINE_ENABLE_FFLITE}"
+
+    if test "x$enable_himalaya" = "xyes" ; then
+        DEFINE_ENABLE_HIMALAYA="#define ENABLE_HIMALAYA 1"
+        message "Enabling Himalaya"
+    else
+        DEFINE_ENABLE_HIMALAYA="#undef ENABLE_HIMALAYA"
+        message "Disabling Himalaya"
+    fi
+    logmsg "   ${DEFINE_ENABLE_HIMALAYA}"
+
+    if test "x$enable_lapack" = "xno" ; then
+        DEFINE_ENABLE_LAPACK="#undef ENABLE_LAPACK"
+        message "Disabling LAPACK"
+        logmsg "   ${DEFINE_ENABLE_LAPACK}"
+    else
+        enable_lapack=yes
+        DEFINE_ENABLE_LAPACK="#define ENABLE_LAPACK 1"
+        logmsg "Enabling LAPACK"
+        logmsg "   ${DEFINE_ENABLE_LAPACK}"
+    fi
+
+    if test "x$enable_librarylink" = "xyes" ; then
+        DEFINE_ENABLE_LIBRARYLINK="#define ENABLE_LIBRARYLINK 1"
+        logmsg "Enabling LibraryLink"
+        logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
+    else
+        enable_librarylink=no
+        DEFINE_ENABLE_LIBRARYLINK="#undef ENABLE_LIBRARYLINK"
+        message "Disabling LibraryLink"
+        logmsg "   ${DEFINE_ENABLE_LIBRARYLINK}"
+    fi
+
+    if test "x$enable_ilp64mkl_workaround" = "xyes" ; then
+        DEFINE_ENABLE_ILP64MKL_WORKAROUND="#define ENABLE_ILP64MKL_WORKAROUND 1"
+        message "Enabling MKL ILP64 workaround"
+        logmsg "   ${DEFINE_ENABLE_ILP64MKL_WORKAROUND}"
+    else
+        enable_ilp64mkl_workaround=no
+        DEFINE_ENABLE_ILP64MKL_WORKAROUND="#undef ENABLE_ILP64MKL_WORKAROUND"
+        logmsg "Disabling usage of ILP64 MKL"
+        logmsg "   ${DEFINE_ENABLE_ILP64MKL_WORKAROUND}"
+    fi
 
     if test "x$enable_looptools" = "xyes" ; then
         DEFINE_ENABLE_LOOPTOOLS="#define ENABLE_LOOPTOOLS 1"
@@ -2019,22 +2405,12 @@ enable_defines() {
 
     if test "x$enable_silent" = "xyes" ; then
         DEFINE_ENABLE_SILENT="#define ENABLE_SILENT 1"
-        CPPFLAGS="$CPPFLAGS"
         message "Enabling silent mode"
         logmsg "   ${DEFINE_ENABLE_SILENT}"
     else
         DEFINE_ENABLE_SILENT="#undef ENABLE_SILENT"
         logmsg "Disabling silent mode"
         logmsg "   ${DEFINE_ENABLE_SILENT}"
-    fi
-
-    if test "x$enable_static_libs" = "xno" ; then
-        # check the library extension
-        if test "x$LIBEXT" = "x.a" ; then
-            message "  Warning: library extension $LIBEXT is reserved for static libraries."
-            message "    Please consider using .so as library extension, or similar, e.g."
-            message "    --with-lib-ext=\".so\""
-        fi
     fi
 
     if test "x$enable_verbose" = "xyes" ; then
@@ -2055,6 +2431,7 @@ enable_defines() {
         logmsg "Enabling sqlite"
         logmsg "   ${DEFINE_ENABLE_SQLITE}"
     else
+        enable_sqlite=no
         DEFINE_ENABLE_SQLITE="#undef ENABLE_SQLITE"
         message "Disabling sqlite"
         logmsg "   ${DEFINE_ENABLE_SQLITE}"
@@ -2065,6 +2442,7 @@ enable_defines() {
         logmsg "Enabling multi-threading"
         logmsg "   ${DEFINE_ENABLE_THREADS}"
     else
+        enable_threads=no
         DEFINE_ENABLE_THREADS="#undef ENABLE_THREADS"
         message "Disabling multi-threading"
         logmsg "   ${DEFINE_ENABLE_THREADS}"
@@ -2075,10 +2453,40 @@ enable_defines() {
         message "Enabling TSIL"
         logmsg "   ${DEFINE_ENABLE_TSIL}"
     else
+        enable_tsil=no
         DEFINE_ENABLE_TSIL="#undef ENABLE_TSIL"
         message "Disabling TSIL"
         logmsg "   ${DEFINE_ENABLE_TSIL}"
     fi
+
+    for s in ${SOLVERS}; do
+	case "$s" in
+	    all)
+		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1"
+		DEFINE_ENABLE_LATTICE_SOLVER="#define ENABLE_LATTICE_SOLVER 1"
+                DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1"
+		logmsg "   ${DEFINE_ENABLE_TWO_SCALE_SOLVER}"
+		logmsg "   ${DEFINE_ENABLE_LATTICE_SOLVER}"
+                logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+		break ;;
+	    two_scale)
+		DEFINE_ENABLE_TWO_SCALE_SOLVER="#define ENABLE_TWO_SCALE_SOLVER 1";
+		logmsg "   ${DEFINE_ENABLE_TWO_SCALE_SOLVER}"
+		continue ;;
+	    lattice)
+		DEFINE_ENABLE_LATTICE_SOLVER="#define ENABLE_LATTICE_SOLVER 1";
+		logmsg "   ${DEFINE_ENABLE_LATTICE_SOLVER}"
+		continue ;;
+            semi_analytic)
+                DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER="#define ENABLE_SEMI_ANALYTIC_SOLVER 1";
+                logmsg "   ${DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER}"
+                continue ;;
+	    *)
+		message "Error: unknown solver: $a";
+                message "Available solvers: $available_solvers";
+                exit 1 ;;
+	esac
+    done
 
     for a in ${ADDONS}; do
         local addon_name="$(basename ${a})"
@@ -2098,7 +2506,7 @@ replace_markers() {
 	-e "s|@ABSBASEDIR@|$ABSBASEDIR|"   \
 	-e "s|@ADDONS@|$ADDONS|"           \
 	-e "s|@INSTALL_DIR@|$INSTALL_DIR|" \
-	-e "s|@ALGORITHMS@|$ALGORITHMS|"   \
+	-e "s|@SOLVERS@|$SOLVERS|"   \
 	-e "s|@BLASLIBS@|$BLASLIBS|"       \
 	-e "s|@BOOSTTESTLIBS@|$BOOSTTESTLIBS|"     \
 	-e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"     \
@@ -2107,8 +2515,6 @@ replace_markers() {
 	-e "s|@CPPFLAGS@|$CPPFLAGS|"       \
 	-e "s|@CXXFLAGS@|$CXXFLAGS|"       \
 	-e "s|@CXX@|$CXX|"                 \
-	-e "s|@CFLAGS@|$CFLAGS|"           \
-	-e "s|@CC@|$CC|"                   \
 	-e "s|@FC@|$FC|"                   \
 	-e "s|@FFLAGS@|$FFLAGS|"           \
 	-e "s|@FLIBS@|$FLIBS|"             \
@@ -2120,30 +2526,44 @@ replace_markers() {
         -e "s|@LDFLAGS@|$LDFLAGS|"         \
         -e "s|@LDLIBS@|$LDLIBS|"           \
 	-e "s|@SARAH_DEP_GEN@|$SARAH_DEP_GEN|"   \
+	-e "s|@ENABLE_COLORS@|$enable_colors|" \
 	-e "s|@ENABLE_COMPILE@|$enable_compile|" \
+	-e "s|@ENABLE_COMPILER_WARNINGS@|$enable_compiler_warnings|" \
+	-e "s|@ENABLE_CHECK_EIGENVALUE_ERROR@|$enable_mass_error_check|" \
+	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
 	-e "s|@ENABLE_FFLITE@|$enable_fflite|" \
+	-e "s|@ENABLE_HIMALAYA@|$enable_himalaya|" \
+	-e "s|@ENABLE_ILP64MKL_WORKAROUND@|$enable_ilp64mkl_workaround|" \
+	-e "s|@ENABLE_LAPACK@|$enable_lapack|" \
+	-e "s|@ENABLE_LIBRARYLINK@|$enable_librarylink|" \
 	-e "s|@ENABLE_LOOPTOOLS@|$enable_looptools|" \
 	-e "s|@ENABLE_META@|$enable_meta|" \
-	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
-	-e "s|@ENABLE_COLOR_PRINTOUT@|$enable_colors|" \
-	-e "s|@ENABLE_DEBUG@|$enable_debug|"      \
-	-e "s|@ENABLE_CHECK_EIGENVALUE_ERROR@|$enable_mass_error_check|" \
 	-e "s|@ENABLE_SILENT@|$enable_silent|"    \
 	-e "s|@ENABLE_SQLITE@|$enable_sqlite|"    \
+	-e "s|@ENABLE_THREADS@|$enable_threads|"  \
 	-e "s|@ENABLE_TSIL@|$enable_tsil|"        \
 	-e "s|@ENABLE_VERBOSE@|$enable_verbose|"  \
+        -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"      \
+        -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"    \
+	-e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"      \
+	-e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"    \
 	-e "s|@LOOPTOOLSLIBS@|$LOOPTOOLSLIBS|"    \
 	-e "s|@LOOPTOOLSFLAGS@|$LOOPTOOLSFLAGS|"  \
 	-e "s|@OPTIONAL_MODULES@|$OPTIONAL_MODULES|" \
+        -e "s|@SHARED_LIB_CMD@|$SHARED_LIB_CMD|"  \
+        -e "s|@STATIC_LIB_CMD@|$STATIC_LIB_CMD|"  \
 	-e "s|@SQLITELIBS@|$SQLITELIBS|"          \
 	-e "s|@SQLITEFLAGS@|$SQLITEFLAGS|"        \
 	-e "s|@TSILLIBS@|$TSILLIBS|"              \
 	-e "s|@TSILFLAGS@|$TSILFLAGS|"            \
 	-e "s|@MODELS@|$MODELS|"           \
-	-e "s|@MAKELIB@|$MAKELIB|"         \
-	-e "s|@ENABLE_STATIC_LIBS@|$enable_static_libs|" \
+	-e "s|@ENABLE_SHARED_LIBS@|$enable_shared_libs|" \
+	-e "s|@ENABLE_STATIC@|$enable_static|"           \
 	-e "s|@MATH@|$MATH|"               \
-	-e "s|@LIBEXT@|$LIBEXT|"
+	-e "s|@MODULE_LIBEXT@|$MODULE_LIBEXT|"  \
+	-e "s|@MODULE_MAKE_LIB_CMD@|$MODULE_MAKE_LIB_CMD|" \
+	-e "s|@LIBLNK_LIBEXT@|$LIBLNK_LIBEXT|"  \
+	-e "s|@LIBLNK_MAKE_LIB_CMD@|$LIBLNK_MAKE_LIB_CMD|"
 }
 
 #_____________________________________________________________________
@@ -2161,14 +2581,18 @@ enable/disable options, prefix with either --enable- or --disable-
   compile           Compile the source code (default: $enable_compile)
   compiler-warnings Enable compiler warnings (default: $enable_compiler_warnings)
   debug             Debug messages and assertions (no default)
-  mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
   fflite            Use fflite to compute the loop functions (default: $enable_fflite)
+  himalaya          Enable Himalaya (default: $enable_himalaya)
+  lapack            Enable LAPACK (default: $enable_lapack)
+  librarylink       Build LibraryLink library for Mathematica interface (default: $enable_librarylink)
   looptools         Use LoopTools to compute the loop functions (default: $enable_looptools)
+  mass-error-check  Check mass eigenvalue precision (default: $enable_mass_error_check)
 EOF
 cat <<EOF
+  shared-libs       Create shared libraries (default: $enable_shared_libs)
   silent            Suppress all command line output (default: $enable_silent)
   sqlite            Enable SQLite (default: $enable_sqlite)
-  static-libs       Create static libraries (default: $enable_static_libs)
+  static            Create statically linked executables (default: $enable_static)
   threads           Enable multi-threading (default: $enable_threads)
   tsil              Enable TSIL (default: $enable_tsil)
   verbose           Verbose messages (default: $enable_verbose)
@@ -2177,13 +2601,11 @@ Package directories, compilation settings and model selection
 
   --with-addons=            Comma separated list of addons to be build
                             (default: $ADDONS)
-  --with-algorithms=        Comma separated list of RG solver algorithms
-                            (default: $ALGORITHMS)
-                            possible values: all $available_algorithms
   --with-blas-libdir=       Path to search for BLAS library
   --with-blas-libs=         BLAS libraries to be linked
   --with-boost-libdir=      Path to search for BOOST libraries
   --with-boost-incdir=      Path to search for BOOST headers
+  --with-cppflags           C preprocessor flags (default: $CPPFLAGS)
   --with-cxx=               C++ compiler (default: $CXX)
   --with-cxxflags=          C++ compiler flags (default: $CXXFLAGS)
   --with-eigen-incdir=      Path to search for Eigen headers
@@ -2192,15 +2614,13 @@ Package directories, compilation settings and model selection
   --with-flibs=             Fortran libraries (default: $FLIBS)
                             If empty, FLIBS will be determined automatically.
   --with-gsl-config=        Path to gsl-config (default: $gsl_config)
+  --with-himalaya-libdir=   Path to search for Himalaya library
+  --with-himalaya-incdir=   Path to search for Himalaya header
   --with-install-dir=       Path to source code installation directory
   --with-lapack-libdir=     Path to search for LAPACK library
   --with-lapack-libs=       LAPACK libraries to be linked
-  --with-ldflags=           Linker flags (default: $LDFLAGS)
-  --with-ldlibs=            Additional libraries to be linked (default: $LDLIBS)
-  --with-lib-ext=           Library extension (default: $LIBEXT)
   --with-looptools-libdir=  Path to search for LoopTools libraries
   --with-looptools-incdir=  Path to search for LoopTools headers
-  --with-make-lib-cmd=      Command to make library (default: $MAKELIB)
 EOF
 cat <<EOF
   --with-models=            Comma separated list of models to be build
@@ -2209,8 +2629,19 @@ cat <<EOF
   --with-optional-modules=  Load optional FlexibleSUSY modules
                             (for example the \`test' or \`examples' module)
   --with-pthread-libdir=    Path to search for pthread library
+  --with-shared-ldflags=    Linker flags for shared library linking (default: $SHARED_LDFLAGS)
+  --with-shared-ldlibs=     Additional libraries to be linked during shared library linking (default: $SHARED_LDLIBS)
+  --with-shared-lib-cmd=    Command to make shared library (default: $SHARED_LIB_CMD)
+  --with-shared-lib-ext=    File extension for shared library (default: $SHARED_LIB_EXT)
+  --with-solvers=           Comma separated list of RG solver algorithms
+                            (default: $SOLVERS)
+                            possible values: all $available_solvers
   --with-sqlite-libdir=     Path to search for SQLite library
   --with-sqlite-incdir=     Path to search for SQLite header
+  --with-static-ldflags=    Linker flags for static linking (default: $STATIC_LDFLAGS)
+  --with-static-ldlibs=     Additional libraries to be linked during static linking (default: $STATIC_LDLIBS)
+  --with-static-lib-cmd=    Command to make static library (default: $STATIC_LIB_CMD)
+  --with-static-lib-ext=    File extension for static library (default: $STATIC_LIB_EXT)
   --with-tsil-libdir=       Path to search for TSIL library
   --with-tsil-incdir=       Path to search for TSIL header
 EOF
@@ -2282,13 +2713,12 @@ if test $# -gt 0 ; then
                 fi
                 ;;
             --with-addons=*)         ADDONS=$optarg ;;
-            --with-algorithms=*)     ALGORITHMS=$optarg ;;
+            --with-solvers=*)        SOLVERS=$optarg ;;
             --with-blas-libdir=*)    blas_lib_dir=$optarg ;;
             --with-blas-libs=*)      BLASLIBS=$optarg ;;
             --with-boost-libdir=*)   boost_lib_dir=$optarg ;;
             --with-boost-incdir=*)   boost_inc_dir=$optarg ;;
-            --with-cc=*)             CC=$optarg ;;
-            --with-cflags=*)         CFLAGS=$optarg ;;
+            --with-cppflags=*)       CPPFLAGS=$optarg ;;
             --with-cxx=*)            CXX=$optarg ;;
             --with-cxxflags=*)       CXXFLAGS=$optarg ;;
             --with-eigen-incdir=*)   eigen_inc_dir=$optarg ;;
@@ -2296,21 +2726,27 @@ if test $# -gt 0 ; then
             --with-fflags=*)         FFLAGS=$optarg ;;
             --with-flibs=*)          FLIBS=$optarg ;;
             --with-gsl-config=*)     gsl_config=$optarg ;;
+            --with-himalaya-incdir=*) himalaya_inc_dir=$optarg ;;
+            --with-himalaya-libdir=*) himalaya_lib_dir=$optarg ;;
             --with-install-dir=*)    INSTALL_DIR=$optarg ;;
             --with-lapack-libdir=*)  lapack_lib_dir=$optarg ;;
             --with-lapack-libs=*)    LAPACKLIBS=$optarg ;;
-            --with-ldflags=*)        LDFLAGS=$optarg ;;
-            --with-ldlibs=*)         LDLIBS=$optarg ;;
-            --with-lib-ext=*)        LIBEXT=$optarg ;;
             --with-looptools-libdir=*) looptools_lib_dir=$optarg ;;
             --with-looptools-incdir=*) looptools_inc_dir=$optarg ;;
-            --with-make-lib-cmd=*)   MAKELIB=$optarg ;;
             --with-math-cmd=*)       MATH=$optarg ;;
             --with-models=*)         MODELS=$optarg ;;
             --with-optional-modules=*) OPTIONAL_MODULES="$(echo $optarg | tr ',' ' ')" ;;
             --with-pthread-libdir=*) pthread_lib_dir=$optarg ;;
+            --with-shared-ldflags=*) SHARED_LDFLAGS=$optarg ;;
+            --with-shared-ldlibs=*)  SHARED_LDLIBS=$optarg ;;
+            --with-shared-lib-cmd=*) SHARED_LIB_CMD=$optarg ;;
+            --with-shared-lib-ext=*) SHARED_LIB_EXT=$optarg ;;
             --with-sqlite-libdir=*)  sqlite_lib_dir=$optarg ;;
             --with-sqlite-incdir=*)  sqlite_inc_dir=$optarg ;;
+            --with-static-ldflags=*) STATIC_LDFLAGS=$optarg ;;
+            --with-static-ldlibs=*)  STATIC_LDLIBS=$optarg ;;
+            --with-static-lib-cmd=*) STATIC_LIB_CMD=$optarg ;;
+            --with-static-lib-ext=*) STATIC_LIB_EXT=$optarg ;;
             --with-tsil-libdir=*)    tsil_lib_dir=$optarg ;;
             --with-tsil-incdir=*)    tsil_inc_dir=$optarg ;;
             --help|-h)               help; exit 0 ;;
@@ -2324,20 +2760,35 @@ fi
 log_package_information
 guess_machine_word_size
 check_platform
-check_algorithms
+check_solvers
 check_install
 check_install_dir
 
+if [ "$enable_meta" = yes -o "$enable_librarylink" != no ]; then
+    check_math_cmd
+    check_mathematica_info
+else
+    MATH=""
+fi
+
+if test "x${enable_meta}" = "xyes"; then
+    check_sarah
+    case "$operating_system" in
+	CYGWIN_NT*) check_cygpath ;;
+    esac
+fi
+
 if test "x${enable_compile}" = "xyes"; then
     check_multiarch
+    check_librarylink
     check_cxx
     check_cxx_compiler_type
     check_cxx_compiler_version
     check_cxx_compiler_features
     check_cxxflags
-    check_cc
     check_fc
     check_fflags
+    check_linking
     check_boost
     check_boost_version
     check_boost_test_incl
@@ -2346,9 +2797,11 @@ if test "x${enable_compile}" = "xyes"; then
     check_eigen_version
     check_fortran_libs
     check_gsl_config
+    check_himalaya
+    check_ilp64mkl_in_math
     check_blas_libs
     check_lapack_libs
-    if use_algorithm "lattice"; then
+    if use_solver "lattice"; then
         check_boost_thread_incl
         check_boost_thread_libs
     fi
@@ -2356,25 +2809,20 @@ if test "x${enable_compile}" = "xyes"; then
         check_looptools_incl
         check_looptools_libs
     fi
+    check_loop_functions
+    check_odeint
     check_sqlite
     check_tsil
-    check_makelib
+    check_static_lib_cmd
+    check_shared_lib_cmd
     check_random_number_generator
     check_std_threads
     check_thread_libs
 fi
 
-if test "x${enable_meta}" = "xyes"; then
-    check_math_cmd
-    check_mathematica_version
-    check_sarah
-    case "$operating_system" in
-	CYGWIN_NT*) check_cygpath ;;
-    esac
-fi
-
 check_models
 check_addons
+check_optional_modules
 
 enable_defines
 
@@ -2382,37 +2830,7 @@ replace_markers \
     < $MAKEFILE_TMPL > $MAKEFILE
 
 
-sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
-    -e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
-    -e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
-    -e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \
-    -e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
-    -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
-    -e "s|@PKGNAME@|$PROGRAM_NAME|"    \
-    -e "s|@ADDONS@|$ADDONS|"           \
-    -e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"   \
-    -e "s|@CPPFLAGS@|$CPPFLAGS|"       \
-    -e "s|@CXXFLAGS@|$CXXFLAGS|"       \
-    -e "s|@CXX@|$CXX|"                 \
-    -e "s|@CFLAGS@|$CFLAGS|"           \
-    -e "s|@CC@|$CC|"                   \
-    -e "s|@EIGENFLAGS@|$EIGENFLAGS|"   \
-    -e "s|@FC@|$FC|"                   \
-    -e "s|@FFLAGS@|$FFLAGS|"           \
-    -e "s|@FLIBS@|$FLIBS|"             \
-    -e "s|@GSLFLAGS@|$GSLFLAGS|"       \
-    -e "s|@GSLLIBS@|$GSLLIBS|"         \
-    -e "s|@LDFLAGS@|$LDFLAGS|"         \
-    -e "s|@LDLIBS@|$LDLIBS|"           \
-    -e "s|@LOOPFUNCFLAGS@|$LOOPTOOLSFLAGS|" \
-    -e "s|@SQLITELIBS@|$SQLITELIBS|"   \
-    -e "s|@SQLITEFLAGS@|$SQLITEFLAGS|" \
-    -e "s|@TSILLIBS@|$TSILLIBS|"       \
-    -e "s|@TSILFLAGS@|$TSILFLAGS|"     \
-    -e "s|@MAKELIB@|$MAKELIB|"         \
-    -e "s|@MATH@|$MATH|"               \
-    -e "s|@MODELS@|$MODELS|"           \
-    -e "s|@THREADLIBS@|$THREADLIBS|"   \
+replace_markers \
     < $FSCONFIG_TMPL > $FSCONFIG
 
 sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
@@ -2422,53 +2840,64 @@ sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
     -e "s|@GIT_COMMIT@|$GIT_COMMIT|"                 \
     -e "s|@GM2CALC_VERSION@|$GM2CALC_VERSION|"       \
+    -e "s|@HIMALAYA_VERSION@|$HIMALAYA_VERSION|"     \
     -e "s|@PKGNAME@|$PROGRAM_NAME|"                  \
     -e "s|@BLASLIBS@|$BLASLIBS|"                     \
     -e "s|@BOOSTTESTLIBS@|$BOOSTTESTLIBS|"           \
     -e "s|@BOOSTTHREADLIBS@|$BOOSTTHREADLIBS|"       \
     -e "s|@BOOSTFLAGS@|$BOOSTFLAGS|"                 \
     -e "s|@THREADLIBS@|$THREADLIBS|"                 \
+    -e "s|@CPPFLAGS@|$CPPFLAGS|"                     \
     -e "s|@CXX@|$CXX|"                               \
     -e "s|@CXXFLAGS@|$CXXFLAGS|"                     \
-    -e "s|@CC@|$CC|"                                 \
-    -e "s|@CFLAGS@|$CFLAGS|"                         \
     -e "s|@EIGENFLAGS@|$EIGENFLAGS|"                 \
     -e "s|@FC@|$FC|"                                 \
     -e "s|@FFLAGS@|$FFLAGS|"                         \
     -e "s|@FLIBS@|$FLIBS|"                           \
     -e "s|@GSLLIBS@|$GSLLIBS|"                       \
     -e "s|@GSLFLAGS@|$GSLFLAGS|"                     \
+    -e "s|@HIMALAYALIBS@|$HIMALAYALIBS|"             \
+    -e "s|@HIMALAYAFLAGS@|$HIMALAYAFLAGS|"           \
     -e "s|@LAPACKLIBS@|$LAPACKLIBS|"                 \
+    -e "s|@LDFLAGS@|$LDFLAGS|"                       \
+    -e "s|@LDLIBS@|$LDLIBS|"                         \
+    -e "s|@LOOPFUNCLIBS@|$LOOPFUNCLIBS|"             \
+    -e "s|@LOOPFUNCFLAGS@|$LOOPFUNCFLAGS|"           \
     -e "s|@MATH_VERSION@|$MATH_VERSION|"             \
+    -e "s|@MATH_INSTDIR@|$MATH_INSTDIR|"             \
+    -e "s|@MATH_SYSTEMID@|$MATH_SYSTEMID|"           \
     -e "s|@SARAH_VERSION@|$SARAH_VERSION|"           \
     -e "s|@SARAH_MAJOR@|$SARAH_MAJOR|"               \
     -e "s|@SARAH_MINOR@|$SARAH_MINOR|"               \
     -e "s|@SARAH_PATCH@|$SARAH_PATCH|"               \
+    -e "s|@SQLITELIBS@|$SQLITELIBS|"                 \
+    -e "s|@SQLITEFLAGS@|$SQLITEFLAGS|"               \
+    -e "s|@TSILLIBS@|$TSILLIBS|"                     \
+    -e "s|@TSILFLAGS@|$TSILFLAGS|"                   \
     -e "s|@OPERATING_SYSTEM@|$operating_system|"     \
     -e "s|@KERNEL_VERSION@|$kernel_version|"         \
     -e "s|@DATE@|$DATE|"                             \
-    -e "s|@DEFINE_ENABLE_COLOR_PRINTOUT@|$DEFINE_ENABLE_COLOR_PRINTOUT|" \
+    -e "s|@DEFINE_ENABLE_COLORS@|$DEFINE_ENABLE_COLORS|" \
     -e "s|@DEFINE_ENABLE_DEBUG@|$DEFINE_ENABLE_DEBUG|"         \
     -e "s|@DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR@|$DEFINE_ENABLE_CHECK_EIGENVALUE_ERROR|" \
     -e "s|@DEFINE_ENABLE_FFLITE@|$DEFINE_ENABLE_FFLITE|" \
+    -e "s|@DEFINE_ENABLE_HIMALAYA@|$DEFINE_ENABLE_HIMALAYA|" \
+    -e "s|@DEFINE_ENABLE_LAPACK@|$DEFINE_ENABLE_LAPACK|" \
+    -e "s|@DEFINE_ENABLE_LIBRARYLINK@|$DEFINE_ENABLE_LIBRARYLINK|" \
+    -e "s|@DEFINE_ENABLE_ILP64MKL_WORKAROUND@|$DEFINE_ENABLE_ILP64MKL_WORKAROUND|" \
     -e "s|@DEFINE_ENABLE_LOOPTOOLS@|$DEFINE_ENABLE_LOOPTOOLS|" \
     -e "s|@DEFINE_ENABLE_RANDOM@|$DEFINE_ENABLE_RANDOM|"       \
     -e "s|@DEFINE_ENABLE_SILENT@|$DEFINE_ENABLE_SILENT|"       \
+    -e "s|@DEFINE_ENABLE_ODEINT@|$DEFINE_ENABLE_ODEINT|"       \
     -e "s|@DEFINE_ENABLE_SQLITE@|$DEFINE_ENABLE_SQLITE|"       \
     -e "s|@DEFINE_ENABLE_THREADS@|$DEFINE_ENABLE_THREADS|"     \
     -e "s|@DEFINE_ENABLE_TSIL@|$DEFINE_ENABLE_TSIL|"           \
     -e "s|@DEFINE_ENABLE_VERBOSE@|$DEFINE_ENABLE_VERBOSE|"     \
+    -e "s|@DEFINE_ENABLE_TWO_SCALE_SOLVER@|$DEFINE_ENABLE_TWO_SCALE_SOLVER|" \
+    -e "s|@DEFINE_ENABLE_LATTICE_SOLVER@|$DEFINE_ENABLE_LATTICE_SOLVER|" \
+    -e "s|@DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER@|$DEFINE_ENABLE_SEMI_ANALYTIC_SOLVER|" \
     -e "s|@DEFINE_ENABLE_ADDONS@|$DEFINE_ENABLE_ADDONS|"       \
     < $CONFIGHDR_TMPL > $CONFIGHDR
-
-sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
-    -e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \
-    -e "s|@FLEXIBLESUSY_MINOR@|$FLEXIBLESUSY_MINOR|" \
-    -e "s|@FLEXIBLESUSY_PATCH@|$FLEXIBLESUSY_PATCH|" \
-    -e "s|@FLEXIBLESUSY_EXTRA@|$FLEXIBLESUSY_EXTRA|" \
-    -e "s|@GIT_COMMIT@|$GIT_COMMIT|"   \
-    -e "s|@PKGNAME@|$PROGRAM_NAME|"    \
-    < $TEXVERSION_TMPL > $TEXVERSION
 
 sed -e "s|@FLEXIBLESUSY_VERSION@|$FLEXIBLESUSY_VERSION|" \
     -e "s|@FLEXIBLESUSY_MAJOR@|$FLEXIBLESUSY_MAJOR|" \

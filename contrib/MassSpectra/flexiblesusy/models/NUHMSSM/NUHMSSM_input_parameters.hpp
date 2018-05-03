@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:47:50
+// File generated at Wed 25 Oct 2017 18:39:03
 
 #ifndef NUHMSSM_INPUT_PARAMETERS_H
 #define NUHMSSM_INPUT_PARAMETERS_H
@@ -27,18 +27,14 @@
 namespace flexiblesusy {
 
 struct NUHMSSM_input_parameters {
-   double m0;
-   double m12;
-   double TanBeta;
-   int SignMu;
-   double Azero;
-   double mHd2In;
-   double mHu2In;
+   double m0{};
+   double m12{};
+   double TanBeta{};
+   int SignMu{1};
+   double Azero{};
+   double mHd2In{};
+   double mHu2In{};
 
-   NUHMSSM_input_parameters()
-      : m0(0), m12(0), TanBeta(0), SignMu(1), Azero(0), mHd2In(0), mHu2In(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

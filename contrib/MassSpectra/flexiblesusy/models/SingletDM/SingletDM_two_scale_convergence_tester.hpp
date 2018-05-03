@@ -16,14 +16,15 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:00
+// File generated at Wed 25 Oct 2017 18:11:12
 
 #ifndef SingletDM_TWO_SCALE_CONVERGENCE_TESTER_H
 #define SingletDM_TWO_SCALE_CONVERGENCE_TESTER_H
 
 #include "SingletDM_convergence_tester.hpp"
 #include "SingletDM_two_scale_model.hpp"
-#include "two_scale_convergence_tester_drbar.hpp"
+
+#include "convergence_tester_drbar.hpp"
 
 namespace flexiblesusy {
 
@@ -32,8 +33,10 @@ class Two_scale;
 template<>
 class SingletDM_convergence_tester<Two_scale> : public Convergence_tester_DRbar<SingletDM<Two_scale> > {
 public:
-   SingletDM_convergence_tester(SingletDM<Two_scale>*, double);
-   virtual ~SingletDM_convergence_tester();
+   using Scale_getter = Convergence_tester_DRbar<SingletDM<Two_scale>>::Scale_getter;
+
+   SingletDM_convergence_tester(SingletDM<Two_scale>*, double, const Scale_getter& sg = Scale_getter());
+   virtual ~SingletDM_convergence_tester() = default;
 
 protected:
    virtual double max_rel_diff() const;

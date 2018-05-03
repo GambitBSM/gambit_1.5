@@ -1,0 +1,71 @@
+diff -rupN Diver-1.0.0/makefile ../installed/diver/1.0.0/makefile
+--- Diver-1.0.0/makefile	2017-04-17 16:08:40.000000000 +0200
++++ ../installed/diver/1.0.0/makefile	2017-06-12 11:52:49.137034450 +0200
+@@ -70,28 +70,55 @@ DIVER_SO_LINK_FLAGS=$(SO_LINK_FLAGS) -sh
+ export DIVER_FF DIVER_FOPT DIVER_CC DIVER_COPT DIVER_CPPOPT DIVER_MIXOPT_C DIVER_MIXOPT_CPP LIBNAME PREFIX LIB INC
+ 
+ # Identify source files
+-TYPESOURCE = detypes
+-TYPEOBJ = $(TYPESOURCE:%=$(BUILD)/%.o)
+-TYPEF90 = $(TYPESOURCE:%=$(SOURCE)/%.f90)
+-SOURCEFILES = deutils mutation crossover selection init converge posterior evidence io de cwrapper
++SOURCEFILES = detypes deutils mutation crossover selection init converge posterior evidence io de cwrapper
+ OBJ = $(SOURCEFILES:%=$(BUILD)/%.o)
+ 
+ all: libdiver.a $(EXAMPLENAMES)
+ 
+-libdiver.a: makefile $(TYPEOBJ) $(OBJ)
+-	$(AR) $(LIB)/$@ $(TYPEOBJ) $(OBJ)
++libdiver.a: makefile $(OBJ)
++	$(AR) $(LIB)/$@ $(OBJ)
+ 
+-libdiver.so: makefile $(TYPEOBJ) $(OBJ) 
+-	$(DIVER_FF) $(DIVER_SO_LINK_FLAGS) -o $(LIB)/$@ $(TYPEOBJ) $(OBJ)  
+- 
+-$(BUILD)/%.o: $(SOURCE)/%.f90 $(TYPEF90)
++libdiver.so: makefile $(OBJ)
++	$(DIVER_FF) $(DIVER_SO_LINK_FLAGS) -o $(LIB)/$@ $(TYPEOBJ) $(OBJ)
++
++$(BUILD)/converge.o: $(SOURCE)/converge.f90 $(BUILD)/detypes.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/crossover.o: $(SOURCE)/crossover.f90 $(BUILD)/detypes.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/cwrapper.o: $(SOURCE)/cwrapper.f90 $(BUILD)/detypes.o $(BUILD)/de.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/de.o: $(SOURCE)/de.f90 $(BUILD)/detypes.o $(BUILD)/deutils.o $(BUILD)/init.o $(BUILD)/io.o $(BUILD)/converge.o $(BUILD)/selection.o $(BUILD)/mutation.o $(BUILD)/crossover.o $(BUILD)/posterior.o $(BUILD)/evidence.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/detypes.o: $(SOURCE)/detypes.f90
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/deutils.o: $(SOURCE)/deutils.f90 $(BUILD)/detypes.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/evidence.o: $(SOURCE)/evidence.f90 $(BUILD)/detypes.o $(BUILD)/deutils.o $(BUILD)/posterior.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/init.o: $(SOURCE)/init.f90 $(BUILD)/detypes.o $(BUILD)/deutils.o $(BUILD)/mutation.o $(BUILD)/crossover.o $(BUILD)/selection.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/io.o: $(SOURCE)/io.f90 $(BUILD)/detypes.o $(BUILD)/deutils.o $(BUILD)/evidence.o $(BUILD)/converge.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/mutation.o: $(SOURCE)/mutation.f90 $(BUILD)/detypes.o $(BUILD)/deutils.o
++	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
++
++$(BUILD)/posterior.o: $(SOURCE)/posterior.f90 $(BUILD)/detypes.o
+ 	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
+ 
+-$(BUILD)/%.o: $(SOURCE)/%.F90 $(TYPEF90)
++$(BUILD)/selection.o: $(SOURCE)/selection.f90 $(BUILD)/detypes.o $(BUILD)/deutils.o $(BUILD)/mutation.o $(BUILD)/crossover.o
+ 	$(DIVER_FF) $(DIVER_FOPT) -c $< -o $@
+ 
+ $(EXAMPLENAMES): libdiver.a
+-	make EXAMPLENAME=$@ -C $@
++	$(MAKE) EXAMPLENAME=$@ -C $@
+ 
+ clean:
+ 	rm -f $(LIB)/*.a $(LIB)/*.so; \

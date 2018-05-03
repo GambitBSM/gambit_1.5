@@ -18,6 +18,9 @@
 ///  \author Pat Scott
 ///  \date 2016 Nov
 ///
+///  \author Jonathan Cornell
+///  \date 2016-2017
+///
 ///  *********************************************
 
 #include "gambit/Elements/standalone_module.hpp"
@@ -33,6 +36,7 @@ using namespace BackendIniBit::Functown;    // Functors wrapping the backend ini
 
 QUICK_FUNCTION(DarkBit, decay_rates, NEW_CAPABILITY, createDecays, DecayTable, ())
 QUICK_FUNCTION(DarkBit, MSSM_spectrum, OLD_CAPABILITY, createSpectrum, Spectrum, ())
+QUICK_FUNCTION(DarkBit, SLHA_pseudonyms, NEW_CAPABILITY, createSLHA1Names, mass_es_pseudonyms, (), (MSSM_spectrum, Spectrum))
 QUICK_FUNCTION(DarkBit, cascadeMC_gammaSpectra, OLD_CAPABILITY, CMC_dummy, DarkBit::stringFunkMap, ())
 
 
@@ -66,6 +70,16 @@ namespace Gambit
       std::cout << "Loading decays from: " << inputFileName << std::endl;
       outDecays = DecayTable(inputFileName, 0, true);
     }
+
+    // Create SLHA1 pseudonyms from Spectrum object
+    void createSLHA1Names(mass_es_pseudonyms& names)
+    {
+      const double gauge_mixing_tol = 0.5;
+      const bool tol_invalidates_pt = true;
+      const bool debug = false;
+      names.refill(Pipes::createSLHA1Names::Dep::MSSM_spectrum->get_HE(), gauge_mixing_tol, tol_invalidates_pt, debug);
+    }
+
   }
 }
 
@@ -114,8 +128,8 @@ int main(int argc, char* argv[])
     if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.0"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.0 is missing!");
-    if (not Backends::backendInfo().works["DDCalc1.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 1.0.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.4"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.4 is missing!");
+    if (not Backends::backendInfo().works["DDCalc1.1.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 1.1.0 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.6"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.6 is missing!");
 
 
     // ---- Initialize models ----
@@ -153,9 +167,10 @@ int main(int argc, char* argv[])
     nuclear_params_fnq->setValue("deltas", -0.12);
 
     // ---- Initialize spectrum and decays from SLHA file ----
-
     createSpectrum.setOption<std::string>("filename", filename);
     createSpectrum.reset_and_calculate();
+    createSLHA1Names.resolveDependency(&createSpectrum);
+    createSLHA1Names.reset_and_calculate();
     createDecays.setOption<std::string>("filename", filename);
     createDecays.reset_and_calculate();
 
@@ -173,16 +188,17 @@ int main(int argc, char* argv[])
     // ---- Initialize backends ----
 
     // Initialize nulike backend
-    Backends::nulike_1_0_4::Functown::nulike_bounds.setStatus(2);
-    nulike_1_0_4_init.reset_and_calculate();
+    Backends::nulike_1_0_6::Functown::nulike_bounds.setStatus(2);
+    nulike_1_0_6_init.reset_and_calculate();
 
     // Initialize gamLike backend
     gamLike_1_0_0_init.reset_and_calculate();
 
     // Initialize MicrOmegas backend
+    MicrOmegas_MSSM_3_6_9_2_init.notifyOfModel("MSSM30atQ");
     MicrOmegas_MSSM_3_6_9_2_init.resolveDependency(&createSpectrum);
     MicrOmegas_MSSM_3_6_9_2_init.resolveDependency(&createDecays);
-    MicrOmegas_MSSM_3_6_9_2_init.notifyOfModel("MSSM30atQ");
+    MicrOmegas_MSSM_3_6_9_2_init.resolveDependency(&createSLHA1Names);
     // Use decay table if it is present:
     if (decays) MicrOmegas_MSSM_3_6_9_2_init.setOption<bool>("internal_decays", false);
     else MicrOmegas_MSSM_3_6_9_2_init.setOption<bool>("internal_decays", true);
@@ -204,7 +220,6 @@ int main(int argc, char* argv[])
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dssusy_isasugra);
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsSLHAread);
     DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsprep);
-    //if (decays && slha_version == 2) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
     if (decays) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
     else DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_PointInit_MSSM.reset_and_calculate();
@@ -228,6 +243,7 @@ int main(int argc, char* argv[])
     // Relic density calculation with MicrOmegas
     RD_oh2_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::darkOmega);
     RD_oh2_MicrOmegas.setOption<int>("fast", 1);  // 0: accurate; 1: fast
+    RD_oh2_MicrOmegas.setOption<double>("beps", 1e-5); // Beps=1e-5 recommended, Beps=1 switches coannihilation off
     RD_oh2_MicrOmegas.reset_and_calculate();
 
     // Calculate relic density using RD_oh2_DarkSUSY (for checks only)
@@ -327,6 +343,8 @@ int main(int argc, char* argv[])
     DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::nucleonAmplitudes);
     DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::FeScLoop);
     DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::mocommon_);
+    // The below includes neutralino-gluon scattering via a box diagram
+    DD_couplings_MicrOmegas.setOption<bool>("box", true);
     DD_couplings_MicrOmegas.reset_and_calculate();
 
     // Calculate DD couplings with DarkSUSY
@@ -336,29 +354,35 @@ int main(int argc, char* argv[])
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsddgpgn);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::ddcom);
+    // The below calculates the DD couplings using the full 1 loop calculation of
+    // Drees Nojiri Phys.Rev. D48 (1993) 3483
+    DD_couplings_DarkSUSY.setOption<bool>("loop", true);
+    // When the calculation is done at tree level (loop = false), setting the below to false
+    // approximates the squark propagator as 1/m_sq^2 to avoid poles.
+    // DD_couplings_DarkSUSY.setOption<bool>("pole", false);
     DD_couplings_DarkSUSY.reset_and_calculate();
 
     // Initialize DDCalc backend
-    Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
-    Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment.setStatus(2);
-    Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood.setStatus(2);
-    DDCalc_1_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
-    DDCalc_1_0_0_init.resolveDependency(&RD_fraction_one);
-    DDCalc_1_0_0_init.resolveDependency(&mwimp_generic);
+    Backends::DDCalc_1_1_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
+    Backends::DDCalc_1_1_0::Functown::DDCalc_Experiment.setStatus(2);
+    Backends::DDCalc_1_1_0::Functown::DDCalc_LogLikelihood.setStatus(2);
+    DDCalc_1_1_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
+    DDCalc_1_1_0_init.resolveDependency(&RD_fraction_one);
+    DDCalc_1_1_0_init.resolveDependency(&mwimp_generic);
     //Choose between the two backends
     //DDCalc_1_0_0_init.resolveDependency(&DD_couplings_MicrOmegas);
-    DDCalc_1_0_0_init.resolveDependency(&DD_couplings_DarkSUSY);
-    DDCalc_1_0_0_init.reset_and_calculate();
+    DDCalc_1_1_0_init.resolveDependency(&DD_couplings_DarkSUSY);
+    DDCalc_1_1_0_init.reset_and_calculate();
 
     // Calculate direct detection rates for LUX 2016
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
+    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_1_0::Functown::DDCalc_Experiment);
+    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_1_0::Functown::DDCalc_CalcRates_simple);
     LUX_2016_Calc.reset_and_calculate();
 
     // Calculate direct detection likelihood for LUX 2016
     LUX_2016_GetLogLikelihood.resolveDependency(&LUX_2016_Calc);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
+    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_1_0::Functown::DDCalc_Experiment);
+    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_1_0::Functown::DDCalc_LogLikelihood);
     LUX_2016_GetLogLikelihood.reset_and_calculate();
 
     // Set generic scattering cross-section for later use
@@ -506,17 +530,17 @@ int main(int argc, char* argv[])
     IC79WH_full.resolveDependency(&mwimp_generic);
     IC79WH_full.resolveDependency(&annihilation_rate_Sun);
     IC79WH_full.resolveDependency(&nuyield_from_DS);
-    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_4::Functown::nulike_bounds);
+    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_6::Functown::nulike_bounds);
     IC79WH_full.reset_and_calculate();
     IC79WL_full.resolveDependency(&mwimp_generic);
     IC79WL_full.resolveDependency(&annihilation_rate_Sun);
     IC79WL_full.resolveDependency(&nuyield_from_DS);
-    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_4::Functown::nulike_bounds);
+    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_6::Functown::nulike_bounds);
     IC79WL_full.reset_and_calculate();
     IC79SL_full.resolveDependency(&mwimp_generic);
     IC79SL_full.resolveDependency(&annihilation_rate_Sun);
     IC79SL_full.resolveDependency(&nuyield_from_DS);
-    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_4::Functown::nulike_bounds);
+    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_6::Functown::nulike_bounds);
     IC79SL_full.reset_and_calculate();
 
     // Calculate IceCube likelihood
@@ -576,7 +600,7 @@ int main(int argc, char* argv[])
     cout << "IceCube 79 lnL: " << IC79_loglike(0) << endl;
     cout << endl;
 
-    cout << "<sigma v> [cm^2/s]: " << sigmav_late_universe(0) << endl;
+    cout << "<sigma v> [cm^3/s]: " << sigmav_late_universe(0) << endl;
     cout << "Fermi LAT dwarf spheroidal lnL: " << lnL_FermiLATdwarfs_gamLike(0) << endl;
 
 
@@ -603,7 +627,7 @@ int main(int argc, char* argv[])
     file << "IceCube 79 lnL: " << IC79_loglike(0) << endl;
     file << endl;
 
-    file << "<sigma v> [cm^2/s]: " << sigmav_late_universe(0) << endl;
+    file << "<sigma v> [cm^3/s]: " << sigmav_late_universe(0) << endl;
     file << "Fermi LAT dwarf spheroidal lnL: " << lnL_FermiLATdwarfs_gamLike(0) << endl;
 
     file.close();

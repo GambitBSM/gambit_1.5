@@ -12,6 +12,10 @@
 ///  \date 2013 Aug
 ///  \date 2014 Mar, Aug, Dec
 ///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2017 Jun
+///
 ///  *********************************************
 
 #include <map>
@@ -67,6 +71,7 @@ namespace Gambit
      , resume(true)
      , verbose_flag(false)
      , found_inifile(false)
+     , developer_mode(false)
     {}
 
     /// Getter for precision to use for cout
@@ -101,6 +106,7 @@ namespace Gambit
                 "\n                                                                           "
                 "\nBasic options:                                                             "
                 "\n   --version             Display GAMBIT version information                "
+                "\n   --developer           Run in developer mode (suppress database errors)  "
                 "\n   -h/--help             Display this usage information                    "
                 "\n   -f <inifile>          Start scan using <inifile>                        "
                 "\n   -v/--verbose          Turn on verbose mode                              "
@@ -123,6 +129,7 @@ namespace Gambit
       int index;
       int iarg=0;
       str filename;
+
       /// Gambit 'standard mode' command line option definitions (needed by getopt)
       // Basically this is a clone of the example in the getopt_long documentation
       // (http://www.gnu.org/savannah-checkouts/gnu/libc/manual/html_node/Getopt-Long-Option-Example.html#Getopt-Long-Option-Example)
@@ -130,7 +137,8 @@ namespace Gambit
       // Note that specialised versions of this structure exist for some of the special run modes.
       const struct option primary_options[] =
       {
-        {"version", no_argument, 0, 10}, /*10 is just a unique integer key to identify this argument*/
+        {"version", no_argument, 0, 1}, /*1 is just a unique integer key to identify this argument*/
+        {"developer", no_argument, 0, 2},
         {"verbose", no_argument, 0, 'v'},
         {"help",    no_argument, 0, 'h'},
         {"dryrun",  no_argument, 0, 'd'},
@@ -144,10 +152,9 @@ namespace Gambit
       while(iarg != -1)
       {
         iarg = getopt_long(argc, argv, "vhdrf:", primary_options, &index);
-
         switch (iarg)
         {
-          case 10:
+          case 1:
           {
             // Display version number and shutdown.
             if (GET_RANK == 0) cout << "\nThis is GAMBIT v" + gambit_version() << endl;
@@ -157,6 +164,10 @@ namespace Gambit
           case 'v':
             // Turn on verbose mode
             verbose_flag = true;
+            break;
+          case 2:
+          // Turn on developer mode
+            developer_mode = true;
             break;
           case 'h':
           case '?':
@@ -278,6 +289,8 @@ namespace Gambit
       }
     }
 
+
+
     /// Check the capability and model databases for conflicts and missing descriptions
     void gambit_core::check_databases()
     {
@@ -356,20 +369,12 @@ namespace Gambit
         capability_dbase.push_back(capinfo);
       }
 
+      missing_capability_description = false;
+
       if(missing_flag)
       {
         // Warn user of missing descriptions
-        std::ostringstream msg;
-        msg << "Descriptions are missing for the following capabilities:" <<endl;
-        for (std::vector<capability_info>::const_iterator it = capability_dbase.begin(); it != capability_dbase.end(); ++it)
-        {
-          if(not it->has_description)
-          {
-            msg << "   " << it->name << endl;
-          }
-        }
-        msg << "Please add descriptions of these to "<< input_capability_descriptions << endl;
-        core_error().raise(LOCAL_INFO,msg.str());
+        missing_capability_description = true;
       }
 
       // Write out the centralised database file containing all this information
@@ -458,17 +463,15 @@ namespace Gambit
       if(missing_flag)
       {
         // Warn user of missing descriptions
-        std::ostringstream msg;
-        msg << "Descriptions are missing for the following models:" <<endl;
+        cout << "Descriptions are missing for the following models:" << endl;
         for (std::vector<model_info>::const_iterator it = model_dbase.begin(); it != model_dbase.end(); ++it)
         {
           if(not it->has_description)
           {
-            msg << "   " << it->name << endl;
+            cout << "   " << it->name << endl;
           }
         }
-        msg << "Please add descriptions of these to "<< input_model_descriptions << endl;
-        core_error().raise(LOCAL_INFO,msg.str());
+        cout << "Please add descriptions of these to "<< input_model_descriptions << endl;
       }
 
       // Write out the centralised database file containing all this information
@@ -489,6 +492,24 @@ namespace Gambit
       outfile2 << "# Auto-generated model description library. Edits will be erased." << endl;;
       outfile2 << "# Edit \"" << input_model_descriptions << "\" instead." << endl << endl << out2.c_str();
 
+    }
+
+
+    void gambit_core::check_capability_descriptions()
+    {
+
+      if (missing_capability_description)
+      {
+        cout << "Descriptions are missing for the following capabilities:" << endl;
+        for (std::vector<capability_info>::const_iterator it = capability_dbase.begin(); it != capability_dbase.end(); ++it)
+        {
+          if(not it->has_description)
+          {
+            cout << "   " << it->name << endl;
+          }
+        }
+        cout << "Please add descriptions of these to "<< input_capability_descriptions << endl;
+      }
     }
 
     /// Get the description of the named capability from the description database
@@ -537,6 +558,7 @@ namespace Gambit
       const str OK = "OK";
       const str bad = "absent/broken";
       const str badclass = "bad types";
+      const str missingMath = "Mathematica absent";
       str status;
       if (backendData->works.at(be+version))
       {
@@ -545,6 +567,14 @@ namespace Gambit
           status = (backendData->classes_OK.at(be+version) ? OK : badclass);
         }
         else { status = OK; }
+      }
+      else if (backendData->needsMathematica.at(be+version))
+      {
+        #ifdef HAVE_MATHEMATICA
+          status = bad;
+        #else
+          status = missingMath;
+        #endif
       }
       else { status = bad; }
       if (status == bad or status == badclass) no_failures = false;
@@ -613,6 +643,7 @@ namespace Gambit
           if (not processed_options)
           {
             filename = process_primary_options(argc,argv);
+            check_capability_descriptions();
             // Check if we indeed received a valid filename (needs the -f option)
             if (found_inifile) return filename;
             // Ok then, report an unrecognised command and bail
@@ -655,6 +686,8 @@ namespace Gambit
           }
         }
       }
+
+
 
       // Guaranteed from this point that no scans (nor scanners) will be invoked.
 

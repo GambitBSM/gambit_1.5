@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
 
     if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.0"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.0 is missing!");
-    if (not Backends::backendInfo().works["DDCalc1.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 1.0.0 is missing!");
+    if (not Backends::backendInfo().works["DDCalc1.2.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 1.2.0 is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
 
     // ---- Initialize models ----
@@ -304,15 +304,15 @@ int main(int argc, char* argv[])
     RD_fraction_one.reset_and_calculate();
 
     // Set up DDCalc backend initialization
-    Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
-    Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment.setStatus(2);
-    Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood.setStatus(2);
-    DDCalc_1_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
+    Backends::DDCalc_1_2_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
+    Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment.setStatus(2);
+    Backends::DDCalc_1_2_0::Functown::DDCalc_LogLikelihood.setStatus(2);
+    DDCalc_1_2_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
     // Assume for direct and indirect detection likelihoods that dark matter
     // density is always the measured one (despite relic density results)
-    DDCalc_1_0_0_init.resolveDependency(&RD_fraction_one);
-    DDCalc_1_0_0_init.resolveDependency(&mwimp_generic);
-    DDCalc_1_0_0_init.resolveDependency(&DD_couplings_WIMP);
+    DDCalc_1_2_0_init.resolveDependency(&RD_fraction_one);
+    DDCalc_1_2_0_init.resolveDependency(&mwimp_generic);
+    DDCalc_1_2_0_init.resolveDependency(&DD_couplings_WIMP);
 
 
     // Initialize gamLike backend
@@ -456,54 +456,29 @@ int main(int argc, char* argv[])
 
     // ---- Calculate direct detection constraints ----
 
-    // Calculate direct detection rates for LUX 2016, PandaX 2016, LUX 2013, XENON100 2012, SIMPLE and PICO
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    PandaX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PandaX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    LUX_2013_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    LUX_2013_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    XENON100_2012_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    XENON100_2012_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    PICO_60_F_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PICO_60_F_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    PICO_60_I_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PICO_60_I_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    SIMPLE_2014_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    SIMPLE_2014_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    PICO_2L_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PICO_2L_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
-    SuperCDMS_2014_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    SuperCDMS_2014_Calc.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_CalcRates_simple);
+    // Calculate direct detection rates for LUX 2016, PandaX 2017, Xenon 1T and PICO-60
+    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_CalcRates_simple);
+    PandaX_2017_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    PandaX_2017_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_CalcRates_simple);
+    PICO_60_2017_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    PICO_60_2017_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_CalcRates_simple);
+    XENON1T_2017_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    XENON1T_2017_Calc.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_CalcRates_simple);
 
-    // Calculate direct detection likelihood for LUX 2016, PandaX 2016, LUX 2013, XENON100 2012, SIMPLE and PICO
+    // Calculate direct detection likelihood for LUX 2016, PandaX 2017, Xenon 1T and PICO-60
     LUX_2016_GetLogLikelihood.resolveDependency(&LUX_2016_Calc);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    PandaX_2016_GetLogLikelihood.resolveDependency(&PandaX_2016_Calc);
-    PandaX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PandaX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    LUX_2013_GetLogLikelihood.resolveDependency(&LUX_2013_Calc);
-    LUX_2013_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    LUX_2013_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    XENON100_2012_GetLogLikelihood.resolveDependency(&XENON100_2012_Calc);
-    XENON100_2012_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    XENON100_2012_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    PICO_60_F_GetLogLikelihood.resolveDependency(&PICO_60_F_Calc);
-    PICO_60_F_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PICO_60_F_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    PICO_60_I_GetLogLikelihood.resolveDependency(&PICO_60_I_Calc);
-    PICO_60_I_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PICO_60_I_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    SIMPLE_2014_GetLogLikelihood.resolveDependency(&SIMPLE_2014_Calc);
-    SIMPLE_2014_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    SIMPLE_2014_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    PICO_2L_GetLogLikelihood.resolveDependency(&PICO_2L_Calc);
-    PICO_2L_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    PICO_2L_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
-    SuperCDMS_2014_GetLogLikelihood.resolveDependency(&SuperCDMS_2014_Calc);
-    SuperCDMS_2014_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_Experiment);
-    SuperCDMS_2014_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_0_0::Functown::DDCalc_LogLikelihood);
+    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_LogLikelihood);
+    PandaX_2017_GetLogLikelihood.resolveDependency(&PandaX_2017_Calc);
+    PandaX_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    PandaX_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_LogLikelihood);
+    XENON1T_2017_GetLogLikelihood.resolveDependency(&XENON1T_2017_Calc);
+    XENON1T_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    XENON1T_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_LogLikelihood);
+    PICO_60_2017_GetLogLikelihood.resolveDependency(&PICO_60_2017_Calc);
+    PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_Experiment);
+    PICO_60_2017_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_1_2_0::Functown::DDCalc_LogLikelihood);
 
     // Set generic WIMP mass object
     mwimp_generic.resolveDependency(&TH_ProcessCatalog_WIMP);
@@ -557,7 +532,7 @@ int main(int argc, char* argv[])
       GalacticHalo_Einasto.reset_and_calculate();
       set_gamLike_GC_halo.reset_and_calculate();
 
-      boost::multi_array<double, 2> 
+      boost::multi_array<double, 2>
         lnL_b_array{boost::extents[mBins][svBins]},
         lnL_b_array2{boost::extents[mBins][svBins]},
         lnL_b_array3{boost::extents[mBins][svBins]},
@@ -677,7 +652,7 @@ int main(int argc, char* argv[])
     if (mode==7)
     {
       std::cout << "Producing direct detection test maps." << std::endl;
-      double lnL1, lnL2, lnL3, lnL4, lnL5;
+      double lnL1, lnL2, lnL3, lnL4;
       double g, reduced_mass;
       //int mBins = 300;
       //int sBins = 200;
@@ -688,19 +663,19 @@ int main(int argc, char* argv[])
       std::vector<double> s_list;
       boost::multi_array<double, 2> lnL_array1{boost::extents[mBins][sBins]},
           lnL_array2{boost::extents[mBins][sBins]}, lnL_array3{boost::extents[mBins][sBins]},
-          lnL_array4{boost::extents[mBins][sBins]}, lnL_array5{boost::extents[mBins][sBins]};
+          lnL_array4{boost::extents[mBins][sBins]};
       TH_ProcessCatalog_WIMP.setOption<double>("sv", 0.);
       TH_ProcessCatalog_WIMP.setOption<std::vector<double>>("brList", daFunk::vec<double>(1., 0., 0., 0., 0., 0., 0., 0.));
 
-      s_list = daFunk::logspace(-46., -39., sBins);
-      // Calculate array of sigma_SI and lnL values for LUX 2016 and 2013, Xenon100,
-      // and PandaX, assuming gps=gns
+      s_list = daFunk::logspace(-47., -40., sBins);
+      // Calculate array of sigma_SI and lnL values for LUX 2016, PandaX, XENON1T and PICO-60
+      // assuming gps=gns
       std::cout << "Calculating tables of SI likelihoods." << std::endl;
       for (size_t i = 0; i < m_list.size(); i++)
       {
         for (size_t j = 0; j < s_list.size(); j++)
         {
-          // Re-initialize DDCalc with LUX 2013/2016 and PandaX-I halo parameters
+          // Re-initialize DDCalc with LUX/Xenon/PandaX halo parameters
           Halo_primary_parameters->setValue("rho0", 0.3);
           Halo_primary_parameters->setValue("vrot", 232.7); // v_Earth = 245 km/s
           Halo_primary_parameters->setValue("v0", 220.);
@@ -722,74 +697,59 @@ int main(int argc, char* argv[])
           DD_couplings_WIMP.setOption<double>("gna", 0.);
           DD_couplings_WIMP.reset_and_calculate();
           mwimp_generic.reset_and_calculate();
-          DDCalc_1_0_0_init.reset_and_calculate();
 
-          DDCalc_1_0_0_init.reset_and_calculate();
+          DDCalc_1_2_0_init.reset_and_calculate();
           LUX_2016_Calc.reset_and_calculate();
           LUX_2016_GetLogLikelihood.reset_and_calculate();
-          LUX_2013_Calc.reset_and_calculate();
-          LUX_2013_GetLogLikelihood.reset_and_calculate();
-          PandaX_2016_Calc.reset_and_calculate();
-          PandaX_2016_GetLogLikelihood.reset_and_calculate();
+          XENON1T_2017_Calc.reset_and_calculate();
+          XENON1T_2017_GetLogLikelihood.reset_and_calculate();
+          PandaX_2017_Calc.reset_and_calculate();
+          PandaX_2017_GetLogLikelihood.reset_and_calculate();
           lnL1 = LUX_2016_GetLogLikelihood(0);
-          lnL2 = PandaX_2016_GetLogLikelihood(0);
-          lnL3 = LUX_2013_GetLogLikelihood(0);
+          lnL2 = PandaX_2017_GetLogLikelihood(0);
+          lnL3 = XENON1T_2017_GetLogLikelihood(0);
 
-          // Re-initialize DDCalc with Xenon100 2012 halo parameters
+          // Set LocalHalo Model parameters to PICO-60 values
           Halo_primary_parameters->setValue("rho0", 0.3);
           Halo_primary_parameters->setValue("vrot", 220.);
           Halo_primary_parameters->setValue("v0", 220.);
           Halo_primary_parameters->setValue("vesc", 544.);
           ExtractLocalMaxwellianHalo.reset_and_calculate();
 
-          DDCalc_1_0_0_init.reset_and_calculate();
-          XENON100_2012_Calc.reset_and_calculate();
-          XENON100_2012_GetLogLikelihood.reset_and_calculate();
-          lnL4 = XENON100_2012_GetLogLikelihood(0);
+          DDCalc_1_2_0_init.reset_and_calculate();
+          PICO_60_2017_Calc.reset_and_calculate();
+          PICO_60_2017_GetLogLikelihood.reset_and_calculate();
+          lnL4 = PICO_60_2017_GetLogLikelihood(0);
 
-          // Re-initialize DDCalc with SUPER-CDMS halo parameters
-          Halo_primary_parameters->setValue("rho0", 0.3);
-          Halo_primary_parameters->setValue("vrot", 231.7); // v_Earth = 244 km/s
-          Halo_primary_parameters->setValue("v0", 220.);
-          Halo_primary_parameters->setValue("vesc", 544.);
-          ExtractLocalMaxwellianHalo.reset_and_calculate();
-
-          DDCalc_1_0_0_init.reset_and_calculate();
-          SuperCDMS_2014_Calc.reset_and_calculate();
-          SuperCDMS_2014_GetLogLikelihood.reset_and_calculate();
-          lnL5 = SuperCDMS_2014_GetLogLikelihood(0);
-
-          //std::cout << "LUX2016 SI lnL = " << lnL1 << std::endl;
-          //std::cout << "PandaX lnL = " << lnL2 << std::endl;
-          //std::cout << "LUX2013 lnL = " << lnL3 << std::endl;
-          //std::cout << "XENON100_2012 lnL = " << lnL4 << std::endl;
-          //std::cout << "SuperCDMS_2014 lnL = " << lnL5 << std::endl;
+          //std::cout << "LUX_2016 SI lnL = " << lnL1 << std::endl;
+          //std::cout << "PandaX_2017 SI lnL = " << lnL2 << std::endl;
+          //std::cout << "XENON1T_2017 SI lnL = " << lnL3 << std::endl;
+          //std::cout << "PICO_60_2017 SI lnL = " << lnL4 << std::endl;
 
           lnL_array1[i][j] = lnL1;
           lnL_array2[i][j] = lnL2;
           lnL_array3[i][j] = lnL3;
           lnL_array4[i][j] = lnL4;
-          lnL_array5[i][j] = lnL5;
         }
       }
 
-      dump_array_to_file("LUX_2016_table.dat", lnL_array1, m_list, s_list);
-      dump_array_to_file("PandaX_2016_table.dat", lnL_array2, m_list, s_list);
-      dump_array_to_file("LUX_2013_SI_table.dat", lnL_array3, m_list, s_list);
-      dump_array_to_file("XENON100_2012_table.dat", lnL_array4, m_list, s_list);
-      dump_array_to_file("SuperCDMS_2014_table.dat", lnL_array5, m_list, s_list);
+      dump_array_to_file("LUX_2016_SI_table.dat", lnL_array1, m_list, s_list);
+      dump_array_to_file("PandaX_2017_SI_table.dat", lnL_array2, m_list, s_list);
+      dump_array_to_file("XENON1T_2017_SI_table.dat", lnL_array3, m_list, s_list);
+      dump_array_to_file("PICO_60_2017_SI_table.dat", lnL_array4, m_list, s_list);
 
-      s_list = daFunk::logspace(-41., -35., sBins);
-      // Calculate array of sigma_SD,p and lnL values for PICO-60, LUX 2013,
-      // SIMPLE 2014, and PandaX assuming gna=0
+      s_list = daFunk::logspace(-42., -35., sBins);
+      // Calculate array of sigma_SI and lnL values for LUX 2016, PandaX, XENON1T and PICO-60
+      // assuming gna=0 (proton-only)
+
       std::cout << "Calculating tables of SD likelihoods." << std::endl;
       for (size_t i = 0; i < m_list.size(); i++)
       {
         for (size_t j = 0; j < s_list.size(); j++)
         {
-          // Set LocalHalo Model parameters to PICO-60 values
+          // Re-initialize DDCalc with LUX/Xenon/PandaX halo parameters
           Halo_primary_parameters->setValue("rho0", 0.3);
-          Halo_primary_parameters->setValue("vrot", 220.);
+          Halo_primary_parameters->setValue("vrot", 232.7); // v_Earth = 245 km/s
           Halo_primary_parameters->setValue("v0", 220.);
           Halo_primary_parameters->setValue("vesc", 544.);
           ExtractLocalMaxwellianHalo.reset_and_calculate();
@@ -808,59 +768,45 @@ int main(int argc, char* argv[])
           DD_couplings_WIMP.reset_and_calculate();
           mwimp_generic.reset_and_calculate();
 
-          DDCalc_1_0_0_init.reset_and_calculate();
-          PICO_60_F_Calc.reset_and_calculate();
-          PICO_60_F_GetLogLikelihood.reset_and_calculate();
-          PICO_60_I_Calc.reset_and_calculate();
-          PICO_60_I_GetLogLikelihood.reset_and_calculate();
-          lnL1 = PICO_60_F_GetLogLikelihood(0) + PICO_60_I_GetLogLikelihood(0);
-          PICO_2L_Calc.reset_and_calculate();
-          PICO_2L_GetLogLikelihood.reset_and_calculate();
-          lnL2 = PICO_2L_GetLogLikelihood(0);
+          DDCalc_1_2_0_init.reset_and_calculate();
+          LUX_2016_Calc.reset_and_calculate();
+          LUX_2016_GetLogLikelihood.reset_and_calculate();
+          XENON1T_2017_Calc.reset_and_calculate();
+          XENON1T_2017_GetLogLikelihood.reset_and_calculate();
+          PandaX_2017_Calc.reset_and_calculate();
+          PandaX_2017_GetLogLikelihood.reset_and_calculate();
+          lnL1 = LUX_2016_GetLogLikelihood(0);
+          lnL2 = PandaX_2017_GetLogLikelihood(0);
+          lnL3 = XENON1T_2017_GetLogLikelihood(0);
 
-          // Set LocalHalo Model parameters to SIMPLE 2014 values
+          // Set LocalHalo Model parameters to PICO-60 values
           Halo_primary_parameters->setValue("rho0", 0.3);
-          Halo_primary_parameters->setValue("vrot", 231.7); // v_Earth = 244 km/s
-          Halo_primary_parameters->setValue("v0", 230.);
-          Halo_primary_parameters->setValue("vesc", 600.);
-          ExtractLocalMaxwellianHalo.reset_and_calculate();
-
-          DDCalc_1_0_0_init.reset_and_calculate();
-          SIMPLE_2014_Calc.reset_and_calculate();
-          SIMPLE_2014_GetLogLikelihood.reset_and_calculate();
-          lnL3 = SIMPLE_2014_GetLogLikelihood(0);
-          SIMPLE_2014_Calc.reset_and_calculate();
-          SIMPLE_2014_GetLogLikelihood.reset_and_calculate();
-          lnL3 = SIMPLE_2014_GetLogLikelihood(0);
-
-          // Re-initialize DDCalc with LUX 2013 halo parameters (and PandaX?)
-          Halo_primary_parameters->setValue("rho0", 0.3);
-          Halo_primary_parameters->setValue("vrot", 232.7); // v_Earth = 245 km/s
+          Halo_primary_parameters->setValue("vrot", 220.);
           Halo_primary_parameters->setValue("v0", 220.);
           Halo_primary_parameters->setValue("vesc", 544.);
           ExtractLocalMaxwellianHalo.reset_and_calculate();
 
-          DDCalc_1_0_0_init.reset_and_calculate();
-          LUX_2013_Calc.reset_and_calculate();
-          LUX_2013_GetLogLikelihood.reset_and_calculate();
-          lnL4 = LUX_2013_GetLogLikelihood(0);
-          PandaX_2016_Calc.reset_and_calculate();
-          PandaX_2016_GetLogLikelihood.reset_and_calculate();
-          lnL5 = PandaX_2016_GetLogLikelihood(0);
+          DDCalc_1_2_0_init.reset_and_calculate();
+          PICO_60_2017_Calc.reset_and_calculate();
+          PICO_60_2017_GetLogLikelihood.reset_and_calculate();
+          lnL4 = PICO_60_2017_GetLogLikelihood(0);
+
+          //std::cout << "LUX_2016 SD lnL = " << lnL1 << std::endl;
+          //std::cout << "PandaX_2017 SD lnL = " << lnL2 << std::endl;
+          //std::cout << "XENON1T_2017 SD lnL = " << lnL3 << std::endl;
+          //std::cout << "PICO_60_2017 SD lnL = " << lnL4 << std::endl;
 
           lnL_array1[i][j] = lnL1;
           lnL_array2[i][j] = lnL2;
           lnL_array3[i][j] = lnL3;
           lnL_array4[i][j] = lnL4;
-          lnL_array5[i][j] = lnL5;
-
-          //std::cout << "PICO_60 lnL = " << lnL1 << std::endl;
-          //std::cout << "PICO_2L lnL = " << lnL2 << std::endl;
-          //std::cout << "SIMPLE_2014 lnL = " << lnL3 << std::endl;
-          //std::cout << "LUX_2013 SD,p lnL = " << lnL4 << std::endl;
-          //std::cout << "PandaX_2016_SD,p lnL = " << lnL5 << std::endl;
         }
       }
+
+      dump_array_to_file("LUX_2016_SD_table.dat", lnL_array1, m_list, s_list);
+      dump_array_to_file("PandaX_2017_SD_table.dat", lnL_array2, m_list, s_list);
+      dump_array_to_file("XENON1T_2017_SD_table.dat", lnL_array3, m_list, s_list);
+      dump_array_to_file("PICO_60_2017_SD_table.dat", lnL_array4, m_list, s_list);
 
       // Reset halo parameters to DarkBit defaults.
       Halo_primary_parameters->setValue("rho0", 0.4);
@@ -870,11 +816,6 @@ int main(int argc, char* argv[])
       ExtractLocalMaxwellianHalo.reset_and_calculate();
       GalacticHalo_Einasto.reset_and_calculate();
 
-      dump_array_to_file("PICO_60_table.dat", lnL_array1, m_list, s_list);
-      dump_array_to_file("PICO_2L_table.dat", lnL_array2, m_list, s_list);
-      dump_array_to_file("SIMPLE_2014_table.dat", lnL_array3, m_list, s_list);
-      dump_array_to_file("LUX_2013_SDp_table.dat", lnL_array4, m_list, s_list);
-      dump_array_to_file("PandaX_2016_SDp_table.dat", lnL_array5, m_list, s_list);
     }
   }
 

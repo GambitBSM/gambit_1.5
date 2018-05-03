@@ -13,6 +13,7 @@
 ///  *********************************************
 
 #define BACKENDNAME SUSYPOPE
+#define BACKENDLANG FORTRAN
 #define VERSION 0.2
 #define SAFE_VERSION 0_2
 

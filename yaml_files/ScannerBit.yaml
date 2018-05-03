@@ -14,9 +14,7 @@ Parameters:
 
 Priors:
 
-  # Specify the priors, the parameters they work with, and any options as needed for that prior.
-  # A prior object is built for every entry here (along with any coming from 'ranges' keywords above),
-  # and then they are combined into a "composite" prior.
+  # None -- we're using ScannerBit's built-in objective functions in this example
 
 
 Printer:
@@ -49,7 +47,7 @@ Scanner:
   # This tag specifies which plugin to use as the scanner.
   # Here the multinest scanner is choosen, but you could
   # choose any scanner defined under the scanners section
-  use_scanner: multinest #twalk
+  use_scanner: twalk
 
   scanners:
 
@@ -95,7 +93,8 @@ Scanner:
       plugin: grid
       version: ">=1.0"
       like: LogLike
-      grid_pts: [5, 5]
+      grid_pts: [5, 3]
+      parameters: ["EggBox::param_1", "EggBox::param_0"]
 
     multinest:
       plugin: multinest
