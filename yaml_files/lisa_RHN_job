@@ -1,0 +1,16 @@
+#PBS -lwalltime=00:05:00
+#PBS -lnodes=3:ppn=3
+#PBS -S /bin/bash
+
+n=`wc -l < $PBS_NODEFILE`
+echo Start of job in directory $PBS_O_WORKDIR
+echo Number of nodes is $n
+
+#echo "Job $PBS_JOBID started at `date`" | mail $USER -s "Job $PBS_JOBID"
+
+cd /home/surajk/gambit/
+#envsubst < yaml_files/RHN_diff_NH.yaml > RHN_diff_NH_${RORDER}_log_log.yaml
+mpiexec ./gambit -f yaml_files/RHN_diff_NH_${RORDER}_log_log.yaml
+#mpiexec ./gambit -f yaml_files/RHN.yaml
+
+#echo "Job $PBS_JOBID completed at `date`" | mail $USER -s "Job $PBS_JOBID"
