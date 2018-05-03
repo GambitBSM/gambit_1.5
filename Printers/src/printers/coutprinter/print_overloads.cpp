@@ -28,6 +28,7 @@ namespace Gambit
 
     /// @{ PRINT FUNCTIONS
     /// Need to define one of these for every type we want to print!
+    typedef unsigned short int ushort;
 
     /// Templatable print functions
     #define PRINT(TYPE) _print(TYPE const& value, const std::string& label, const int vID, const uint rank, const ulong pID) \
