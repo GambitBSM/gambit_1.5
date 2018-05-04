@@ -1445,8 +1445,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 103.3352;  // GeV
-      static double upp_lim = 473.2829;  // GeV
+      static double low_lim = 100.1041;  // GeV
+      static double upp_lim = 476.1459;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
