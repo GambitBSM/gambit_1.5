@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 20 Feb 2018 16:02:21
+// File generated at Sat 5 May 2018 00:23:50
 
 #include "SingletDMZ3_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -37,7 +37,7 @@ double SingletDMZ3_susy_parameters::calc_beta_LamS_1_loop(const Susy_traces& sus
 
    double beta_LamS;
 
-   beta_LamS = Re(oneOver16PiSqr*(5*Sqr(LamS) + 2*Sqr(LamSH)));
+   beta_LamS = Re(2*oneOver16PiSqr*(10*Sqr(LamS) + Sqr(LamSH)));
 
 
    return beta_LamS;
@@ -57,9 +57,9 @@ double SingletDMZ3_susy_parameters::calc_beta_LamS_2_loop(const Susy_traces& sus
 
    double beta_LamS;
 
-   beta_LamS = Re(twoLoop*(-15*Cube(LamS) - 5*LamS*Sqr(LamSH) - 0.8*(-3*
-      Sqr(g1) + 5*(LamSH + 3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu - 3*
-      Sqr(g2)))*Sqr(LamSH)));
+   beta_LamS = Re(-0.8*twoLoop*(300*Cube(LamS) + 25*LamS*Sqr(LamSH) + (-3
+      *Sqr(g1) + 5*(2*LamSH + 3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu -
+      3*Sqr(g2)))*Sqr(LamSH)));
 
 
    return beta_LamS;

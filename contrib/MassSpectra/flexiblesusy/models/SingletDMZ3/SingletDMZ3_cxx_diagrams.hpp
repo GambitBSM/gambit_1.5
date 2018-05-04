@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 20 Feb 2018 16:02:45
+// File generated at Sat 5 May 2018 00:25:13
 
 /**
  * @file SingletDMZ3_cxx_diagrams.hpp
  *
- * This file was generated at Tue 20 Feb 2018 16:02:45 with FlexibleSUSY
+ * This file was generated at Sat 5 May 2018 00:25:13 with FlexibleSUSY
  * 2.0.1 and SARAH 4.12.2 .
  */
 

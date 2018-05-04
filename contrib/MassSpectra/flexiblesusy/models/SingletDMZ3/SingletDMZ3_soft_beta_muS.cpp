@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 20 Feb 2018 16:02:24
+// File generated at Sat 5 May 2018 00:23:54
 
 #include "SingletDMZ3_soft_parameters.hpp"
 #include "wrappers.hpp"
@@ -73,7 +73,7 @@ double SingletDMZ3_soft_parameters::calc_beta_muS_1_loop(const Soft_traces& soft
 
    double beta_muS;
 
-   beta_muS = Re(2*oneOver16PiSqr*(2*LamSH*muH + LamS*muS + 9*Sqr(mu3)));
+   beta_muS = Re(oneOver16PiSqr*(4*LamSH*muH + 8*LamS*muS + 9*Sqr(mu3)));
 
 
    return beta_muS;
@@ -93,9 +93,9 @@ double SingletDMZ3_soft_parameters::calc_beta_muS_2_loop(const Soft_traces& soft
 
    double beta_muS;
 
-   beta_muS = Re(twoLoop*(-0.1*LamSH*(-48*muH*Sqr(g1) + 5*(LamSH*(8*muH +
-      muS) + 16*muH*(3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu) - 48*muH*
-      Sqr(g2))) - 2.5*muS*Sqr(LamS) - 54*LamS*Sqr(mu3)));
+   beta_muS = Re(twoLoop*(-0.4*LamSH*(-12*muH*Sqr(g1) + 5*(4*LamSH*muH +
+      LamSH*muS + 12*muH*traceYdAdjYd + 4*muH*traceYeAdjYe + 12*muH*
+      traceYuAdjYu - 12*muH*Sqr(g2))) - 40*muS*Sqr(LamS) - 108*LamS*Sqr(mu3)));
 
 
    return beta_muS;

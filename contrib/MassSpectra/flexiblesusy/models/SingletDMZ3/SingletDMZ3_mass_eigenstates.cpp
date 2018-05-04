@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 20 Feb 2018 16:02:34
+// File generated at Sat 5 May 2018 00:25:02
 
 /**
  * @file SingletDMZ3_mass_eigenstates.cpp
@@ -26,7 +26,7 @@
  * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Tue 20 Feb 2018 16:02:34 with FlexibleSUSY
+ * This file was generated at Sat 5 May 2018 00:25:02 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 
@@ -976,7 +976,7 @@ void CLASSNAME::calculate_MHp()
 
 double CLASSNAME::get_mass_matrix_ss() const
 {
-   const double mass_matrix_ss = Re(0.25*(2*muS + LamSH*Sqr(v)));
+   const double mass_matrix_ss = Re(muS + 0.5*LamSH*Sqr(v));
 
    return mass_matrix_ss;
 }
@@ -1293,7 +1293,7 @@ double CLASSNAME::CpHpHpconjHpconjHp() const
 
 double CLASSNAME::CpHpssconjHpconjss() const
 {
-   const double result = -0.5*LamSH;
+   const double result = -LamSH;
 
    return result;
 }
@@ -1377,7 +1377,7 @@ std::complex<double> CLASSNAME::CpbarFeFvconjHpPL(int gI1, int gI2) const
 
 double CLASSNAME::Cphhssconjss() const
 {
-   const double result = -0.5*LamSH*v;
+   const double result = -(LamSH*v);
 
    return result;
 }
@@ -1391,21 +1391,21 @@ double CLASSNAME::Cpconjssconjssconjss() const
 
 double CLASSNAME::CpAhAhssconjss() const
 {
-   const double result = -0.5*LamSH;
+   const double result = -LamSH;
 
    return result;
 }
 
 double CLASSNAME::Cphhhhssconjss() const
 {
-   const double result = -0.5*LamSH;
+   const double result = -LamSH;
 
    return result;
 }
 
 double CLASSNAME::Cpssssconjssconjss() const
 {
-   const double result = -LamS;
+   const double result = -4*LamS;
 
    return result;
 }

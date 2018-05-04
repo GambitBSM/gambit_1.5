@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Tue 20 Feb 2018 16:02:22
+// File generated at Sat 5 May 2018 00:23:51
 
 #include "SingletDMZ3_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -43,11 +43,11 @@ double SingletDMZ3_susy_parameters::calc_beta_LamH_1_loop(const Susy_traces& sus
 
    double beta_LamH;
 
-   beta_LamH = Re(oneOver16PiSqr*(12*LamH*traceYdAdjYd - 12*
-      traceYdAdjYdYdAdjYd + 4*LamH*traceYeAdjYe - 4*traceYeAdjYeYeAdjYe + 12*
-      LamH*traceYuAdjYu - 12*traceYuAdjYuYuAdjYu + 0.27*Quad(g1) + 2.25*Quad(g2
-      ) - 9*LamH*Sqr(g2) + 0.9*Sqr(g1)*(-2*LamH + Sqr(g2)) + 12*Sqr(LamH) + 0.5
-      *Sqr(LamSH)));
+   beta_LamH = Re(oneOver16PiSqr*(0.27*Quad(g1) + 2.25*Quad(g2) - 9*LamH*
+      Sqr(g2) + 0.9*Sqr(g1)*(-2*LamH + Sqr(g2)) + 2*(2*LamH*(3*traceYdAdjYd +
+      traceYeAdjYe + 3*traceYuAdjYu) - 2*(3*traceYdAdjYdYdAdjYd +
+      traceYeAdjYeYeAdjYe + 3*traceYuAdjYuYuAdjYu) + 6*Sqr(LamH) + Sqr(LamSH)))
+      );
 
 
    return beta_LamH;
@@ -88,8 +88,8 @@ double SingletDMZ3_susy_parameters::calc_beta_LamH_2_loop(const Susy_traces& sus
       traceYdAdjYuYuAdjYd + 12*traceYdAdjYuYuAdjYdYdAdjYd - 12*
       traceYdAdjYuYuAdjYuYuAdjYd - LamH*traceYeAdjYeYeAdjYe + 20*
       traceYeAdjYeYeAdjYeYeAdjYe - 3*LamH*traceYuAdjYuYuAdjYu + 60*
-      traceYuAdjYuYuAdjYuYuAdjYu - 78*Cube(LamH) - Cube(LamSH) - 3.411*Power6(
-      g1) + 38.125*Power6(g2) - 0.125*(73*LamH + 12*(3*traceYdAdjYd +
+      traceYuAdjYuYuAdjYuYuAdjYu - 78*Cube(LamH) - 8*Cube(LamSH) - 3.411*Power6
+      (g1) + 38.125*Power6(g2) - 0.125*(73*LamH + 12*(3*traceYdAdjYd +
       traceYeAdjYe + 3*traceYuAdjYu))*Quad(g2) + 1.5*LamH*(36*LamH + 5*(3*
       traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu))*Sqr(g2) - 0.015*Quad(g1)*(
       -629*LamH - 60*traceYdAdjYd + 300*traceYeAdjYe + 228*traceYuAdjYu + 559*
@@ -99,8 +99,8 @@ double SingletDMZ3_susy_parameters::calc_beta_LamH_2_loop(const Susy_traces& sus
       LamH) - 0.025*Sqr(g1)*(289*Quad(g2) - 6*(39*LamH + 36*traceYdAdjYd + 44*
       traceYeAdjYe + 84*traceYuAdjYu)*Sqr(g2) - 4*(5*LamH*(5*traceYdAdjYd + 15*
       traceYeAdjYe + 17*traceYuAdjYu) + 16*(traceYdAdjYdYdAdjYd - 3*
-      traceYeAdjYeYeAdjYe - 2*traceYuAdjYuYuAdjYu) + 108*Sqr(LamH))) - 2.5*LamH
-      *Sqr(LamSH)));
+      traceYeAdjYeYeAdjYe - 2*traceYuAdjYuYuAdjYu) + 108*Sqr(LamH))) - 10*LamH*
+      Sqr(LamSH)));
 
 
    return beta_LamH;

@@ -1,3 +1,4 @@
+
 Parameters:
 
     nuclear_params_sigmas_sigmal:
@@ -8,12 +9,12 @@ Parameters:
       sigmas: 43.0
     StandardModel_Higgs_running:
       QEWSB: 173.0
-      mH: 121.017120361
+      mH: 124.482490286
     SingletDMZ3:
-      lambda_S: 3
-      lambda_hS: 1.23250677584
-      mS: 300.234640076
-      mu3: 150.0
+      lambda_S: 3.47660253356
+      lambda_hS: 0.00174564011165
+      mS: 113.817128079
+      mu3: 217.168850595
     StandardModel_SLHA2:
       CKM_A: 0.814
       CKM_etabar: 0.353
@@ -22,7 +23,7 @@ Parameters:
       GF: 1.1663787e-05
       alpha1: 0.0
       alpha2: 0.0
-      alphaS: 0.118097636581
+      alphaS: 0.118103326875
       alphainv: 127.94001
       delta13: 0.0
       mBmB: 4.18
@@ -34,7 +35,7 @@ Parameters:
       mNu2: 0.0
       mNu3: 0.0
       mS: 0.095
-      mT: 173.338981158
+      mT: 173.344937861
       mTau: 1.77682
       mU: 0.00224078624079
       mZ: 91.1876
@@ -46,11 +47,12 @@ Parameters:
       beta: 3.0
       gamma: 1.0
       r_sun: 8.5
-      rho0: 0.2000089866
+      rho0: 0.206705794972
       rs: 20.0
       v0: 235.0
       vesc: 550.0
       vrot: 235.0
+
 
 
 Printer:
