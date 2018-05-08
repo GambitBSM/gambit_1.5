@@ -662,6 +662,7 @@ set(lib "libhiggsbounds")
 set(dl "https://www.hepforge.org/archive/higgsbounds/HiggsBounds-${ver}.tar.gz")
 set(md5 "c1667613f814a9f0297d1f11a8b3ef34")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(hb_tab_name "higgsbounds_tables")
 set(hb_tab_ver "0.0")
 set(hb_tab_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${hb_tab_name}/${hb_tab_ver}")
@@ -671,6 +672,7 @@ if(NOT ditched_${name}_${ver})
     DEPENDS ${hb_tab_name}_${hb_tab_ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
+    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy configure-with-chisq my_configure
               COMMAND sed ${dashi} -e "s|clsbtablesdir=.*|clsbtablesdir=\"${hb_tab_dir}/\"|" my_configure

@@ -347,7 +347,14 @@ namespace Gambit {
     void CAT_3(EXPERIMENT,_Get,NAME)(TYPE &result)                                 \
     {                                                                              \
       using namespace Pipes::CAT_3(EXPERIMENT,_Get,NAME);                          \
-      result = BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));  \
+      TYPE temp_result = BEreq::CAT(DD_,NAME)(BEreq::DD_Experiment(STRINGIFY(EXPERIMENT)));  \
+      if (Utils::isnan(temp_result))                                               \
+      {                                                                            \
+        /* DarkBit_error().raise(LOCAL_INFO, "Got NaN value from DDCalc."); */     \
+        /* TODO: Raise a proper error here -- NaNs should be fixed. */             \
+        invalid_point().raise("Got NaN value from DDCalc! This need fixing!");     \
+      }                                                                            \
+      result = temp_result;                                                        \
     }
 
     #define DDCALC_BIN(EXPERIMENT, TYPE, NAME)                                     \

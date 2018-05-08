@@ -354,9 +354,21 @@ ColliderOperator: |
    Controls the parallelization and execution of the entire
    event loop of the collider simulation.
 
+LHCEventLoopInfo: |
+   Info about the event loop.
+
+LHC_signals: |
+   Signal predictions and uncertainties in all LHC analyses.
+
+LHC_LogLikes: |
+   Computes analysis-specific log-likelihood values,
+   from AllAnalysisNumbers.
+
 LHC_Combined_LogLike: |
-   Combines the results from AnalysisNumbers together into
-   a single delta-log-likelihood value.
+   A final, single delta-log-likelihood value for LHC searches.
+
+MC_ConvergenceSettings : |
+   Convergence settings to be used for terminating Monte Carlo event generation.
 
 HardScatteringSim: |
    Provides a Pythia 8 instance within a container which is
@@ -424,6 +436,9 @@ IdentityAnalysisNumbers: |
    Uses the given IdentityAnalysisContainer
    to perform all its analyses upon the given
    CopiedEvent.
+
+AllAnalysisNumbers: |
+   Combined analysis numbers from all LHC analyses used in a scan.
 
 ALEPH_Selectron_LLike: |
    Compares the cross section times branching ratio
@@ -505,6 +520,12 @@ OPAL_Chargino_SemiLeptonic_LLike: |
    pair production (with one leptonic and one hadronic decaying W boson)
    to the model-independent limit according to the OPAL collaboration.
    Returns a log likelihood value.
+
+OPAL_Degenerate_Chargino_LLike: |
+   Compares the cross section times branching ratio for chargino
+   pair production to the limit on degenerate charginos and neutralinos
+   according to the OPAL collaboration.
+   Returns a likelihood value
 
 LEP_Higgs_LogLike: |
     Provides log-likelihood for combined model-independent LEP
@@ -2010,6 +2031,9 @@ rdlun: |
 rdpadd: |
    Parameters that effect the tabulation of the invariant annihilation rate in DarkSUSY.
 
+rdtime: |
+   Timing parameters for DarkSUSY relic density calculations.
+
 IBintvars: |
    Common block for DarkSUSY internal Bremsstrahlung routines.
 
@@ -2283,6 +2307,12 @@ Reference_SM_A0_decay_rates: |
 
 Reference_SM_other_Higgs_decay_rates: |
    Computation of decays of SM Higgs with mass equal to the mass of the least SM-like CP-even Higgs.
+
+Z_invisible_width: |
+   Invisible decay width of the Z boson
+
+lnL_Z_invisible_width: |
+   Log Likelihood for the inivislbe decay width of the Z boson
 
 #-------------------------------------
 #  PrecisionBit capabilities
