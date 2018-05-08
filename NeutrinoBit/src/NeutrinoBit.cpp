@@ -63,20 +63,20 @@ namespace Gambit
       m_nu(2,1) = 0.0;
 
  
-      if(*Dep::ordering == 1)
-      {
+      //if(*Dep::ordering == 1)
+      //{
         // Normal ordering
         m_nu(0,0) = mnu1;
         m_nu(1,1) = mnu2;
         m_nu(2,2) = mnu3;
-      }
-      else
-      {
+      //}
+      //else
+      //{
         // Inverted ordering
-        m_nu(2,2) = mnu1;
-        m_nu(0,0) = mnu2;
-        m_nu(1,1) = mnu3;
-      }
+        //m_nu(2,2) = mnu1;
+        //m_nu(0,0) = mnu2;
+        //m_nu(1,1) = mnu3;
+      //}
 
       // If there is an option to set a specific ordering, invalidate the other type
       int ord = runOptions->getValueOrDef<int>(-1,"ordering");
