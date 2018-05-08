@@ -20,10 +20,6 @@
 ///  \date 2014 Jan
 ///  \date 2017 Mar
 ///
-///  \author Sanjay Bloor
-///          (sanjay.bloor12@imperial.ac.uk)
-///  \date 2018 Jan
-///
 ///  *********************************************
 
 #include "gambit/Printers/printers/asciiprinter.hpp"
@@ -134,7 +130,7 @@ namespace Gambit
       }
       addtobuffer(vdvalue,channels,IDcode,thread,pointID);
     }
-    
+
     #ifndef SCANNER_STANDALONE // All the types inside ASCII_MODULE_BACKEND_TYPES need to go inside this def guard.
 
       void asciiPrinter::_print(DM_nucleon_couplings const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)

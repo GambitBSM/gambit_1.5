@@ -19,10 +19,6 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2017 March
 ///
-///  \author Sanjay Bloor
-///          (sanjay.bloor12@imperial.ac.uk)
-///  \date 2018 Jan
-///
 ///  *********************************************
 
 
@@ -149,7 +145,7 @@ namespace Gambit
     {
       // Retrieve the buffer manager for buffers with this type
       auto& buffer_manager = get_mybuffermanager<double>(pointID,mpirank);
-
+  
       unsigned int i=0; // index for each buffer
       for (std::map<std::pair<int,int>, double>::const_iterator it = map.begin(); it != map.end(); it++)
       {
@@ -186,12 +182,6 @@ namespace Gambit
         m["Gp_SD"] = value.gpa;
         m["Gn_SD"] = value.gna;
         _print(m, label, vID, mpirank, pointID);
-      }
-
-      void HDF5Printer::_print(DD_bin_counts const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned 
-long pointID)
-      {
-        _print(value.bincounts, label, vID, mpirank, pointID);
       }
 
       void HDF5Printer::_print(Flav_KstarMuMu_obs const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)

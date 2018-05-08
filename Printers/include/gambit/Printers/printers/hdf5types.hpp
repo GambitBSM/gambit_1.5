@@ -13,10 +13,6 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2017 Mar
 ///
-///  \author Sanjay Bloor
-///          (sanjay.bloor12@imperial.ac.uk)
-///  \date 2018 Jan
-///
 ///  *********************************************
 
 #ifndef __HDF5TYPES__
@@ -38,9 +34,9 @@
   (triplet<double>)         \
   (map_intpair_dbl)         \
 
+
 #define HDF5_MODULE_BACKEND_TYPES \
   (DM_nucleon_couplings)    \
   (Flav_KstarMuMu_obs)      \
-  (DD_bin_counts)           \
 
 #endif
