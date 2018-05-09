@@ -1340,7 +1340,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1383,7 +1383,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
