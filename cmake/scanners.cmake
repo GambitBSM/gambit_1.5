@@ -25,6 +25,9 @@
 #  \author Antje Putze (putze@lapth.cnrs.fr)
 #  \date 2016 Jan
 #
+#  \author Will Handley (wh260@cam.ac.uk)
+#  \date 2018 May
+#
 #************************************************
 
 
@@ -102,6 +105,16 @@ if(MPI_Fortran_FOUND)
 else()
   set(pcFFLAGS "${GAMBIT_Fortran_FLAGS}")
 endif()
+if(MPI_CXX_FOUND)
+  set(pcCXXFLAGS "${GAMBIT_CXX_FLAGS_PLUS_MPI}")
+else()
+  set(pcCXXFLAGS "${GAMBIT_CXX_FLAGS}")
+endif()
+if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
+  set(pcFFLAGS "${pcFFLAGS} -heap-arrays -assume noold_maxminloc ")
+else()
+  set(pcFFLAGS "${pcFFLAGS} -fno-stack-arrays")
+endif()
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
@@ -109,7 +122,7 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} LINKLIB=${pcSO_LINK} MPI=1 COMPILER_TYPE=gnu
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${pcCXXFLAGS} LINKLIB=${pcSO_LINK}
     INSTALL_COMMAND ""
   )
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
