@@ -71,15 +71,15 @@ Parameters:
     ReOm23:
       range: [0, 6.283]
     ImOm23:
-      range: [-5, 5]
+      range: [-7, 7]
     ReOm13:
       range: [0, 6.283]
     ImOm13:
-      range: [-5, 5]
+      range: [-7, 7]
     ReOm12:
       range: [0, 6.283]
     ImOm12:
-      range: [-5, 5]
+      range: [-7, 7]
 
 Priors:
 
