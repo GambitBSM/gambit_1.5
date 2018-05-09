@@ -1,7 +1,7 @@
 ##########################################################################
-## GAMBIT configuration for an ultra-minimal MultiNest scan of a toy model.
+## GAMBIT configuration for an ultra-minimal PolyChord scan of a toy model.
 ##
-## Only needs ExampleBit_A and a scanner (Diver, MultiNest, GreAT or TWalk).
+## Only needs ExampleBit_A and a scanner (Diver, MultiNest, PolyChord, GreAT or TWalk).
 ##########################################################################
 
 

@@ -16,6 +16,10 @@
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 Jun
 ///
+///  \author Will Handley
+///          (wh260@cam.ac.uk)
+///  \date 2018 May
+///
 ///  *********************************************
 
 #include <map>

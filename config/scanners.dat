@@ -93,7 +93,7 @@ multinest: |
 polychord: |
   #remove_newlines
   PolyChord is an alternative nested sampler to MultiNest, specialised for
-  working in higher dimensions. Instead of rejection sampling (MultiNest), it
+  working in higher dimensions. Instead of rejection sampling, PolyChord
   uses slice sampling to navigate the constrained prior. The scaling with
   dimensionality is polynomial (rather than MultiNest's exponential scaling),
   and tuning parameters are generally less opaque. In particular, slice

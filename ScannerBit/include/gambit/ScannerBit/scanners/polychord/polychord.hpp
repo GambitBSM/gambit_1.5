@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to Multinest 3.10
+///  ScannerBit interface to PolyChord 1.14
 ///
 ///  Header file
 ///
@@ -13,6 +13,10 @@
 ///  \author Ben Farmer
 ///          (ben.farmer@gmail.com)
 ///  \date 2015 January
+///
+///  \author Will Handley
+///          (wh260@cam.ac.uk)
+///  \date 2018 May
 ///
 ///  *********************************************
 

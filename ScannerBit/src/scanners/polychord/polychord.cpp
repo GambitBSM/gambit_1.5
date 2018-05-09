@@ -11,6 +11,7 @@
 ///  \author Ben Farmer
 ///          (ben.farmer@gmail.com)
 ///  \date October 2013 - Aug 2016
+///
 ///  \author Will Handley
 ///          (wh260@cam.ac.uk)
 ///  \date May 2018
