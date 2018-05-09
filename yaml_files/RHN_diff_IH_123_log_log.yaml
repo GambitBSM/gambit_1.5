@@ -48,9 +48,9 @@ Parameters:
     theta12:
       range: [0.547684, 0.628144] # 3-sigma range from NuFit
     theta23:
-      range: [0.670206, 0.921534] # 3-sigma range from NuFit
+      range: [0.670206, 0.925025] # 3-sigma range from NuFit
     theta13:
-      range: [0.139452, 0.155334] # 3-sigma range from NuFit
+      range: [0.139452, 0.155509] # 3-sigma range from NuFit
 
   # Higgs boson parameters
   StandardModel_Higgs:
