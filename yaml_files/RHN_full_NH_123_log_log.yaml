@@ -30,13 +30,13 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu1:
-      range: [1E-12, 2.3E-10]
+      range: [1E-13, 2.3E-10]
       prior_type: log
     mNu2:
       range: [1E-12, 2.3E-10]
       prior_type: log
     mNu3:
-      range: [1E-12, 2.3E-10]
+      range: [1E-11, 2.3E-10]
       prior_type: log
 
     alpha1:
