@@ -81,12 +81,47 @@ namespace Gambit
                         hsize_t dim_t;
                         if(datasets[i] >= 0)
                         {
-                           // Read the dataset in to buffer
-                           H5Dread(datasets[i], get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[j]);
-                           
+                           // Check that we allocated enough space for this dataset!
                            hid_t space = H5Dget_space(datasets[i]);
                            dim_t = H5Sget_simple_extent_npoints(space);
                            H5Sclose(space);
+                           if(j+dim_t > data.size())
+                           {
+                              if( (data.size() - j) != sizes[i])
+                              {
+                                 // This is how much space we expect to have left in the buffer
+                                 // at the end. If not, something bad has happened!
+                                 std::ostringstream errmsg;
+                                 errmsg << "Error copying parameter.  Dataset in input file " << i 
+                                     << " was larger than previously measured and doesn't fit in the allocated buffer! " 
+                                     << "This is a bug in the combination tools, please report it." <<std::endl;
+                                 errmsg << "(j="<<j<<", dim_t="<<dim_t<<", data.size()="<<data.size()<<", sizes["<<i<<"]="<<sizes[i]<<")"<<std::endl;
+                                 printer_error().raise(LOCAL_INFO, errmsg.str()); 
+                              }
+                              // Just some junk buffer points at the end of the last data set.
+                              // Need to do a more careful dataset selection to chop these out so
+                              // that the data fits in our buffer (and in the space already allocated
+                              // in the output file)
+                              hid_t memspace_id, dspace_id; 
+                              std::pair<hid_t,hid_t> chunk_ids = HDF5::selectChunk(datasets[i], 0, sizes[i]);
+                              memspace_id = chunk_ids.first;
+                              dspace_id = chunk_ids.second;
+   
+                              H5Dread(datasets[i], get_hdf5_data_type<U>::type(), memspace_id, dspace_id, H5P_DEFAULT, (void *)&data[j]);                           
+                              H5Sclose(memspace_id);
+                              H5Sclose(dspace_id);
+                              //std::ostringstream errmsg;
+                              //errmsg << "Error copying parameter.  Dataset in input file " << i 
+                              //    << " was larger than previously measured and doesn't fit in the allocated buffer! " 
+                              //    << "This is a bug in the combination tools, please report it." <<std::endl;
+                              //errmsg << "(j="<<j<<", dim_t="<<dim_t<<", data.size()="<<data.size()<<")"<<std::endl;
+                              //printer_error().raise(LOCAL_INFO, errmsg.str()); 
+                           }
+                           else
+                           { 
+                              // Read the whole dataset in to buffer (faster than selecting, I should think)
+                              H5Dread(datasets[i], get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[j]);                           
+                           }
                         }
                         else
                         {
@@ -128,7 +163,9 @@ namespace Gambit
                         errmsg << "Error copying parameter. HD5write failed." <<std::endl;  
                         printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
-
+                    H5Sclose(memspace_id);
+                    H5Sclose(dspace_id);
+ 
                     // Was:
                     //H5Dwrite( dataset_out, get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[0]);
                 }
@@ -384,25 +421,26 @@ namespace Gambit
                 unsigned long long size_tot;
                 unsigned long long size_tot_l;
                 std::string root_file_name;
-                unsigned long long pt_min;
                 bool do_cleanup; // If true, delete old temporary files after successful combination
-                std::string get_fname(const long int); // get name of ith temp file
+                std::string get_fname(const size_t); // get name of ith temp file
                 bool skip_unreadable; // If true, ignores temp files that fail to open
                 std::vector<hid_t> files;
                 std::vector<hid_t> groups;
                 std::vector<hid_t> aux_groups;
- 
+                std::vector<std::string> file_names; // Names of temp files to combine
+                bool custom_mode; // Running in mode which allows 'custom' filenames (for combining output from multiple runs)
+
             public:
-                hdf5_stuff(const std::string &file_name, const std::string &output_file, const std::string &group_name, size_t num, bool cleanup, bool skip);
+                hdf5_stuff(const std::string &base_file_name, const std::string &output_file, const std::string &group_name, const size_t num, const bool cleanup, const bool skip, const std::vector<std::string>& input_files);
                 ~hdf5_stuff(); // close files on destruction                
-                void Enter_Aux_Paramters(const std::string &output_file, bool resume = false);
+                void Enter_Aux_Parameters(const std::string &output_file, bool resume = false);
             };
 
-            inline void combine_hdf5_files(const std::string file_output, const std::string &file, const std::string &group, int num, bool resume, bool cleanup, bool skip)
+            inline void combine_hdf5_files(const std::string output_file, const std::string &base_file_name, const std::string &group, const size_t num, const bool resume, const bool cleanup, const bool skip, const std::vector<std::string> input_files = std::vector<std::string>())
             {
-                hdf5_stuff stuff(file, file_output, group, num, cleanup, skip);
+                hdf5_stuff stuff(base_file_name, output_file, group, num, cleanup, skip, input_files);
                 
-                stuff.Enter_Aux_Paramters(file_output, resume);
+                stuff.Enter_Aux_Parameters(output_file, resume);
             }
   
             // Helper function to compute target point hash for RA combination
