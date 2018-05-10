@@ -1,6 +1,5 @@
 Block MODSEL                 # Select model
-    6   0                    # flavour violation
-#asdh   12    1000                # DRbar parameter output scale (GeV)
+#   12    1000                # DRbar parameter output scale (GeV)
 Block FlexibleSUSY
     0   1.000000000e-04      # precision goal
     1   0                    # max. iterations (0 = automatic)
@@ -8,7 +7,7 @@ Block FlexibleSUSY
     3   0                    # calculate SM pole masses
     4   2                    # pole mass loop order
     5   2                    # EWSB loop order
-    6   2                    # beta-functions loop order
+    6   3                    # beta-functions loop order
     7   2                    # threshold corrections loop order
     8   1                    # Higgs 2-loop corrections O(alpha_t alpha_s)
     9   1                    # Higgs 2-loop corrections O(alpha_b alpha_s)
@@ -33,105 +32,92 @@ Block FlexibleSUSY
    28   1                    # Higgs 3-loop corrections O(alpha_t^2 alpha_s)
    29   1                    # Higgs 3-loop corrections O(alpha_t^3)
 Block SMINPUTS               # Standard Model inputs
-    1   1.27940010E+02       # alpha^(-1) SM MSbar(MZ)
-    2   1.16637870E-05       # G_Fermi
-    3   1.18500000E-01       # alpha_s(MZ) SM MSbar
-    4   9.11876000E+01       # MZ(pole)
-    5   4.180000000e+00      # mb(mb) SM MSbar
-    6   1.733400000e+02      # mtop(pole)
-    7   1.77682000E+00       # mtau(pole)
+    1   1.279340000e+02      # alpha^(-1) SM MSbar(MZ)
+    2   1.166378700e-05      # G_Fermi
+    3   1.176000000e-01      # alpha_s(MZ) SM MSbar
+    4   9.118760000e+01      # MZ(pole)
+    5   4.200000000e+00      # mb(mb) SM MSbar
+    6   1.733000000e+02      # mtop(pole)
+    7   1.777000000e+00      # mtau(pole)
     8   0.000000000e+00      # mnu3(pole)
     9   80.404               # MW pole
-   11    5.10998928E-04      # melectron(pole)
+   11   5.109989020e-04      # melectron(pole)
    12   0.000000000e+00      # mnu1(pole)
-   13   1.05658372E-01       # mmuon(pole)
+   13   1.056583570e-01      # mmuon(pole)
    14   0.000000000e+00      # mnu2(pole)
-   21   4.80000000E-03       # md(2 GeV) MS-bar
-   22   2.300000000e-03      # mu(2 GeV) MS-bar
-   23   9.50000000E-02       # ms(2 GeV) MS-bar
-   24   1.27500000E+00       # mc(mc) MS-bar
-# Block VCKMIN               # CKM matrix input (Wolfenstein parameters)
-#     1   2.272000000e-01    # lambda(MZ) SM DR-bar
-#     2   8.180000000e-01    # A(MZ) SM DR-bar
-#     3   2.210000000e-01    # rhobar(MZ) SM DR-bar
-#     4   3.400000000e-01    # etabar(MZ) SM DR-bar
-# Block UPMNSIN              # PMNS matrix input
-#     1   5.837630000e-01    # theta_12
-#     2   7.695840000e-01    # theta_23
-#     3   1.549480000e-01    # theta_13
-#     4   0.000000000e+00    # delta
-#     5   0.000000000e+00    # alpha_1
-#     6   0.000000000e+00    # alpha_2
+   21   4.750000000e-03      # md(2 GeV) MS-bar
+   22   2.400000000e-03      # mu(2 GeV) MS-bar
+   23   1.040000000e-01      # ms(2 GeV) MS-bar
+   24   1.270000000e+00      # mc(mc) MS-bar
 Block MINPAR                 # Input parameters
     3   10.                  # TanBeta
+    4   1                    # SignMu
 Block EXTPAR
-   0    10000                # Qin
-   23   1000                 # Mu at SUSY scale
-#   24   5000                 # mADRbar
-    24  2.50000e+07
+   23   1000               # MuInput
+   24   1e6                # mA2Input
 Block AEIN
-    1   1   0.0
-    2   2   0.0
-    3   3   0.0
+    1   1   -1000
+    2   2   -1000
+    3   3   -1000
 Block ADIN
-    1   1   0.0
-    2   2   0.0
-    3   3   0.0
+    1   1   -1000
+    2   2   -1000
+    3   3   -1000
 Block AUIN
-    1   1   0.0
-    2   2   0.0
-    3   3   0.0
+    1   1   -1000
+    2   2   -1000
+    3   3   -1000
 Block MSQ2IN
-  1  1     9000000          # mq2(1,1)
+  1  1     1.29059458E+06   # mq2(1,1)
   1  2     0.00000000E+00   # mq2(1,2)
   1  3     0.00000000E+00   # mq2(1,3)
   2  1     0.00000000E+00   # mq2(2,1)
-  2  2     9000000          # mq2(2,2)
+  2  2     1.29056775E+06   # mq2(2,2)
   2  3     0.00000000E+00   # mq2(2,3)
   3  1     0.00000000E+00   # mq2(3,1)
   3  2     0.00000000E+00   # mq2(3,2)
-  3  3     9000000          # mq2(3,3)
+  3  3     1.08191301E+06   # mq2(3,3)
 Block MSE2IN
-  1  1     1000000          # me2(1,1)
+  1  1     4.97846223E+04   # me2(1,1)
   1  2     0.00000000E+00   # me2(1,2)
   1  3     0.00000000E+00   # me2(1,3)
   2  1     0.00000000E+00   # me2(2,1)
-  2  2     1000000          # me2(2,2)
+  2  2     4.97790607E+04   # me2(2,2)
   2  3     0.00000000E+00   # me2(2,3)
   3  1     0.00000000E+00   # me2(3,1)
   3  2     0.00000000E+00   # me2(3,2)
-  3  3     1000000          # me2(3,3)
+  3  3     4.81130118E+04   # me2(3,3)
 Block MSL2IN
-  1  1     1000000          # ml2(1,1)
+  1  1     1.29705183E+05   # ml2(1,1)
   1  2     0.00000000E+00   # ml2(1,2)
   1  3     0.00000000E+00   # ml2(1,3)
   2  1     0.00000000E+00   # ml2(2,1)
-  2  2     1000000          # ml2(2,2)
+  2  2     1.29702455E+05   # ml2(2,2)
   2  3     0.00000000E+00   # ml2(2,3)
   3  1     0.00000000E+00   # ml2(3,1)
   3  2     0.00000000E+00   # ml2(3,2)
-  3  3     1000000          # ml2(3,3)
+  3  3     1.28885261E+05   # ml2(3,3)
 Block MSU2IN
-  1  1     9000000          # mu2(1,1)
+  1  1     1.21304977E+06   # mu2(1,1)
   1  2     0.00000000E+00   # mu2(1,2)
   1  3     0.00000000E+00   # mu2(1,3)
   2  1     0.00000000E+00   # mu2(2,1)
-  2  2     9000000          # mu2(2,2)
+  2  2     1.21301937E+06   # mu2(2,2)
   2  3     0.00000000E+00   # mu2(2,3)
   3  1     0.00000000E+00   # mu2(3,1)
   3  2     0.00000000E+00   # mu2(3,2)
-  3  3     9000000          # mu2(3,3)
+  3  3     8.15783420E+05   # mu2(3,3)
 Block MSD2IN
-  1  1     9000000          # md2(1,1)
+  1  1     1.20425905E+06   # md2(1,1)
   1  2     0.00000000E+00   # md2(1,2)
   1  3     0.00000000E+00   # md2(1,3)
   2  1     0.00000000E+00   # md2(2,1)
-  2  2     9000000          # md2(2,2)
+  2  2     1.20423519E+06   # md2(2,2)
   2  3     0.00000000E+00   # md2(2,3)
   3  1     0.00000000E+00   # md2(3,1)
   3  2     0.00000000E+00   # md2(3,2)
-  3  3     9000000          # md2(3,3)
+  3  3     1.17488833E+06   # md2(3,3)
 Block MSOFTIN
-     1     500.0    # MassB
-     2     1000.0   # MassWB
-     3     2000.0   # MassG
+     1     2.00895827E+02   # MassB
+     2     3.81186848E+02   # MassWB
+     3     1.22669740E+03   # MassG
