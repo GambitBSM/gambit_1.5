@@ -16,6 +16,10 @@
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 Jun
 ///
+///  \author Will Handley
+///          (wh260@cam.ac.uk)
+///  \date 2018 May
+///
 ///  *********************************************
 
 #include <map>
@@ -103,6 +107,7 @@ namespace Gambit
                 "\n                                 gambit MSSM                               "
                 "\n                                 gambit IC79WL_loglike                     "
                 "\n                                 gambit MultiNest                          "
+                "\n                                 gambit PolyChord                          "
                 "\n                                                                           "
                 "\nBasic options:                                                             "
                 "\n   --version             Display GAMBIT version information                "
