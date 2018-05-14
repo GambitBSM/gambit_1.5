@@ -3310,7 +3310,7 @@ namespace Gambit
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
-    void lnL_Z_inv_2l(double& lnL)
+    void lnL_Z_inv_SM_2l_MSSM_tree(double& lnL)
     {
       /**
          @brief Log-likelihood from LEP measurements of \f$Z\f$-boson invisible
@@ -3326,7 +3326,7 @@ namespace Gambit
          
          @param lnL Log-likelihood
       */
-      using namespace Pipes::lnL_Z_inv_2l;
+      using namespace Pipes::lnL_Z_inv_SM_2l_MSSM_tree;
 
       const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
       const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
@@ -3354,7 +3354,7 @@ namespace Gambit
          
          @param Gamma \f$\Gamma(Z\to\nu\nu)\f$.
       */
-      using namespace Pipes::lnL_Z_inv_2l;
+      using namespace Pipes::Z_gamma_nu_SM_2l;
 
       const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
       const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");

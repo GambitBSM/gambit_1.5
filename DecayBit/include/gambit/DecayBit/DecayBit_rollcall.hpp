@@ -811,7 +811,7 @@ START_MODULE
 
   #define CAPABILITY lnL_Z_inv
   START_CAPABILITY
-    #define FUNCTION lnL_Z_inv_2l
+    #define FUNCTION lnL_Z_inv_SM_2l_MSSM_tree
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     #undef FUNCTION
