@@ -23,6 +23,10 @@
 ///  \date 2014 Aug
 ///  \author Csaba Balazs
 ///  \date 2015 Jan-May
+///  \author Andrew Fowlie
+///  \date 2018 May
+///  \author Peter Athron
+///  \date 2018 May
 ///
 ///  *********************************************
 
@@ -776,6 +780,21 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY lnL_Z_inv
+  START_CAPABILITY
+    #define FUNCTION lnL_Z_inv_2l
+    START_FUNCTION(double)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY Z_inv
+  START_CAPABILITY
+    #define FUNCTION Z_inv_2l
+    START_FUNCTION(double)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    #undef FUNCTION
+  #undef CAPABILITY
 
 #undef MODULE
 
