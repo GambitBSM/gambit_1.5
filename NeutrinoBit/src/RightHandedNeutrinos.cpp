@@ -15,6 +15,9 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 Oct
+///  \author Marcin Chrzaszcz
+///          (mchrzasz@cern.ch)
+///  \date 2018
 ///
 ///  *********************************************
 

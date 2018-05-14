@@ -15,6 +15,9 @@
 ///  \author Chris Rogan
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
+///  \author Marcin Chrzaszcz
+///          (mchrzasz@cern.ch)
+///  \date 2018
 ///
 ///  *********************************************
 
@@ -1083,9 +1086,10 @@ namespace Gambit
       // Radiative corrections, from Marco's paper
       double deltar = -0.03244;
 
-      result.central = 0.5*(1.0 - sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1.0+deltar))/(Gmu*sminputs.alphainv*sminputs.mZ*sminputs.mZ) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))));
-      result.upper = 0.0;
-      result.lower = 0.0;
+      //result.central = 0.5*(1.0 - sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1.0+deltar))/(Gmu*sminputs.alphainv*sminputs.mZ*sminputs.mZ) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))));
+      result.central = 0.23152*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)); // taken from 1211.1864
+      result.upper = 0.00010;
+      result.lower = 0.00010;
     }
 
     void lnL_sinW2_chi2(double &result)
@@ -1094,7 +1098,7 @@ namespace Gambit
       double theory_uncert = std::max(Dep::sinW2->upper, Dep::sinW2->lower);
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::sinW2->central, 0.23129, theory_uncert, 0.00005, profile);
+      result = Stats::gaussian_loglikelihood(Dep::sinW2->central, 0.23155, theory_uncert, 0.00005, profile);
     }
 
     // Mass of W boson, calculation from 1502.00477
