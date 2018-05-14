@@ -24,14 +24,13 @@
 ///
 ///  \author Csaba Balazs
 ///  \date 2015 Jan-May
+///   \author Tomas Gonzalo
+///           (t.e.gonzalo@fys.uio.no)
+///  \date 2018 Feb
 ///  \author Andrew Fowlie
 ///  \date 2018 May
 ///  \author Peter Athron
 ///  \date 2018 May
-///
-///   \author Tomas Gonzalo
-///           (t.e.gonzalo@fys.uio.no)
-///   \date 2018 Feb
 ///
 ///  *********************************************
 
