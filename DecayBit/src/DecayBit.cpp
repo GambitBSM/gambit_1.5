@@ -37,7 +37,9 @@
 #include "gambit/Elements/smlike_higgs.hpp"
 #include "gambit/DecayBit/DecayBit_rollcall.hpp"
 #include "gambit/DecayBit/decay_utils.hpp"
+#include "gambit/DecayBit/SM_Z.hpp"
 #include "gambit/Utils/version.hpp"
+#include "gambit/Utils/statistics.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
 
 #include <string>
@@ -3071,6 +3073,24 @@ namespace Gambit
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
-  }
+    void lnL_Z_invWidth(double& lnL)
+    {
+      /**
+         @brief Log-likelihood from LEP measurements of \f$Z\f$-boson invisible
+         width
+         @param lnL Log-likelihood
+      */
 
-}
+      // SM prediction for invisible width at two-loop in MeV.
+      // TODO(afowlie): the arguments should be taken from the model somehow
+      auto Z = SM_Z::TwoLoop(125., 172., 90., 0.1184);
+      const double predicted = Z.gamma_invisible();
+      const double tau = Z.error_gamma_invisible();
+
+      lnL = Stats::gaussian_loglikelihood(predicted, SM_Z::gamma_invisible.mu,
+        tau, SM_Z::gamma_invisible.sigma, false);
+    }
+
+  }  // namespace DecayBit
+
+}  // namespace Gambit
