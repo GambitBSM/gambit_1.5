@@ -3310,22 +3310,61 @@ namespace Gambit
       result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
-    void lnL_Z_invWidth(double& lnL)
+    void lnL_Z_inv_2l(double& lnL)
     {
       /**
          @brief Log-likelihood from LEP measurements of \f$Z\f$-boson invisible
          width
+         
+         We use a two-loop prediction for the SM invisible width, 
+         \f$\Gamma(Z\to\nu\nu)\f$.
+         
+         @warning Tree-level prediction for \f$\Gamma(Z\to\chi\chi)\f$.
+         
+         @warning This uses input \f$\alpha(M_Z)\f$ - does not include input 
+         light-quark thresholds.
+         
          @param lnL Log-likelihood
       */
+      using namespace Pipes::lnL_Z_inv_2l;
 
-      // SM prediction for invisible width at two-loop in MeV.
-      // TODO(afowlie): the arguments should be taken from the model somehow
-      auto Z = SM_Z::TwoLoop(125., 172., 90., 0.1184);
-      const double predicted = Z.gamma_invisible();
-      const double tau = Z.error_gamma_invisible();
+      const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
+      const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
+      const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
+      const double alpha_thompson = runOptions->getValueOrDef
+        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
+      const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
+
+      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, SM.mZ, SM.alphaS, delta_alpha);
+      const double predicted = Z.gamma_invisible();  // TODO add Z -> chi chi here
+      const double theory_error = Z.error_gamma_invisible();
 
       lnL = Stats::gaussian_loglikelihood(predicted, SM_Z::gamma_invisible.mu,
-        tau, SM_Z::gamma_invisible.sigma, false);
+        theory_error, SM_Z::gamma_invisible.sigma, false);
+    }
+    
+    void Z_inv_2l(double& Gamma)
+    {
+      /**
+         @brief  Two-loop prediction for the SM invisible width, 
+         \f$\Gamma(Z\to\nu\nu)\f$.
+        
+         @warning This uses input \f$\alpha(M_Z)\f$ - does not include input 
+         light-quark thresholds.
+         
+         @param Gamma \f$\Gamma(Z\to\nu\nu)\f$.
+      */
+      using namespace Pipes::lnL_Z_inv_2l;
+
+      const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
+      const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
+      const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
+      const double alpha_thompson = runOptions->getValueOrDef
+        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
+      const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
+    
+      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, SM.mZ, SM.alphaS, delta_alpha);
+      Gamma = Z.gamma_invisible();
     }
 
   }  // namespace DecayBit
