@@ -271,8 +271,8 @@ namespace Gambit
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
       Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();
       Eigen::Matrix3d ThetaNorm2 = (Theta * Theta.adjoint()).real();
-      for(int i=1; i<3; i++)
-        for(int j=1; j<3; j++)
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
         {
           if(ThetaNorm(i,j) > 1 or ThetaNorm2(i,j) > 1 or abs(Theta(i,j)) > 1)
           {
