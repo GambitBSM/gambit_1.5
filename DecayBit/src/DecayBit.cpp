@@ -3106,14 +3106,12 @@ namespace Gambit
         theory_error, SM_Z::gamma_invisible.sigma, false);
     }
     
-    void Z_inv_2l(double& Gamma)
+    void Z_gamma_nu_SM_2l(double& Gamma)
     {
       /**
          @brief  Two-loop prediction for the SM invisible width, 
          \f$\Gamma(Z\to\nu\nu)\f$.
-        
-         @warning Tree-level prediction for \f$\Gamma(Z\to\chi\chi)\f$.
-         
+                 
          @warning This uses input \f$\alpha(M_Z)\f$ - does not include input 
          light-quark thresholds.
          

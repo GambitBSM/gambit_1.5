@@ -788,9 +788,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
   
-  #define CAPABILITY Z_inv
+  #define CAPABILITY Z_gamma_nu
   START_CAPABILITY
-    #define FUNCTION Z_inv_2l
+    #define FUNCTION Z_gamma_nu_SM_2l
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     #undef FUNCTION
