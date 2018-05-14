@@ -3349,6 +3349,8 @@ namespace Gambit
          @brief  Two-loop prediction for the SM invisible width, 
          \f$\Gamma(Z\to\nu\nu)\f$.
         
+         @warning Tree-level prediction for \f$\Gamma(Z\to\chi\chi)\f$.
+         
          @warning This uses input \f$\alpha(M_Z)\f$ - does not include input 
          light-quark thresholds.
          
