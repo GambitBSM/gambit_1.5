@@ -24,6 +24,9 @@
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 July
 ///
+///  \author Julia Harz
+///          (jharz@lpthe.jussieu.fr)
+///  \date 2018 April
 ///  *********************************************
 
 
@@ -729,14 +732,15 @@ START_MODULE
     ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
-
+    
   #define CAPABILITY theta12_lnL
   START_CAPABILITY
     #define FUNCTION theta12_lnL
     START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
     DEPENDENCY(theta12, double)
     #undef FUNCTION
-  #undef CAPABILITY
+  #undef CAPABILITY  
 
   #define CAPABILITY theta23
   START_CAPABILITY
@@ -762,7 +766,7 @@ START_MODULE
     ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
-
+    
   #define CAPABILITY theta13_lnL
   START_CAPABILITY
     #define FUNCTION theta13_lnL
@@ -787,16 +791,17 @@ START_MODULE
     DEPENDENCY(ordering, bool)
     DEPENDENCY(deltaCP, double)
     #undef FUNCTION
-  #undef CAPABILITY
-
+  #undef CAPABILITY  
+    
   #define CAPABILITY md21_lnL
   START_CAPABILITY
     #define FUNCTION md21_lnL
     START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
     DEPENDENCY(md21, double)
     #undef FUNCTION
-  #undef CAPABILITY
-
+  #undef CAPABILITY  
+  
   #define CAPABILITY md3l_lnL
   START_CAPABILITY
     #define FUNCTION md3l_lnL
@@ -805,7 +810,7 @@ START_MODULE
     DEPENDENCY(md31, double)
     DEPENDENCY(md32, double)
     #undef FUNCTION
-  #undef CAPABILITY
+  #undef CAPABILITY 
 
 #undef MODULE
 

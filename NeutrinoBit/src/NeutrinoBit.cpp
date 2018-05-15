@@ -12,11 +12,20 @@
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 July
 ///
+///  \author Julia Harz
+///          (jharz@lpthe.jussieu.fr)
+///  \date 2018 April
+///
 ///  *********************************************
-
+#define _USE_MATH_DEFINES
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
 #include <unsupported/Eigen/MatrixFunctions>
+#include <iomanip>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include "gambit/NeutrinoBit/spline.h"
 #include "gambit/Utils/statistics.hpp"
 
 namespace Gambit
@@ -339,6 +348,40 @@ namespace Gambit
       }
     }
 
+
+// Function to fill a spline object from a file
+    tk::spline filling_spline(std::string file)
+    {
+      tk::spline s;
+      std::vector<double> M_temp, U_temp;
+
+      std::vector<std::pair<double,double> > array;
+      std::ifstream f(GAMBIT_DIR "/"+file);
+      while(f.good())
+      {
+        std::string line;
+        getline(f, line);
+        if (!f.good())
+          break;
+        std::stringstream iss(line);
+        std::pair<double,double> point;
+        iss >> point.first;
+        iss.ignore();
+        iss >> point.second;
+        array.push_back(point);
+      }
+
+      for (unsigned int i=0; i<array.size(); i++)
+      {
+        M_temp.push_back(array[i].first);
+        U_temp.push_back(array[i].second);
+      }
+      s.set_points(M_temp, U_temp);
+
+      return s;
+    }
+    
+    
     // Active neutrino likelihoods
     void theta12(double &result)
     {
@@ -346,16 +389,54 @@ namespace Gambit
       result = *Param["theta12"];
     }
 
+    
     void theta12_lnL(double &result)
     {
       using namespace Pipes::theta12_lnL;
 
-      // NuFit data (1611.01514)
-      triplet<double> theta12_NuFit(0.585732, 0.013439, 0.01309);
+      static bool read_table_n = true;
+      static bool read_table_i = true;
+      static tk::spline spline_t12_n;
+      static tk::spline spline_t12_i;
+      static double low_lim = 0.170;  
+      static double upp_lim = 0.830;  
+      
 
-      // TODO: Assume all gaussian for now, change later
-      result = Stats::gaussian_loglikelihood(*Dep::theta12, theta12_NuFit.central, 0.0, theta12_NuFit.upper, false);
-    } 
+      if (read_table_n and (*Dep::ordering == 1)) // Normal odering
+      {
+        spline_t12_n = filling_spline("NeutrinoBit/data/T12n.csv");
+        read_table_n = false;
+      }
+      else if (read_table_i and (*Dep::ordering == 0)) // inverted odering
+      {
+        spline_t12_i = filling_spline("NeutrinoBit/data/T12i.csv");
+        read_table_i = false;
+      }
+      
+      
+      
+      if ((pow(sin(*Dep::theta12),2) < low_lim) or (pow(sin(*Dep::theta12),2) > upp_lim))
+      {
+        std::ostringstream msg;
+        msg << "theta12 outside NuFit range; point is invalidated by active neutrino constraint.";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+        return;
+      }
+      else
+      {
+         if   (*Dep::ordering == 1)
+         {    
+           result = -0.5*spline_t12_n(pow(sin(*Dep::theta12),2));
+         }
+         else if (*Dep::ordering == 0)
+         {
+           result = -0.5*spline_t12_i(pow(sin(*Dep::theta12),2));
+         }
+      }
+    }
+    
+    
 
     void theta23(double &result)
     {
@@ -363,58 +444,103 @@ namespace Gambit
       result = *Param["theta23"];
     }
 
+
     void theta23_lnL(double &result)
     {
       using namespace Pipes::theta23_lnL;
 
-      if(*Dep::ordering == 1) // Normal odering
+      static bool read_table_n = true;
+      static bool read_table_i = true;
+      static tk::spline spline_t23_n;
+      static tk::spline spline_t23_i;
+      static double low_lim = 0.250;  
+      static double upp_lim = 0.750;  
+      
+      if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
-        // NuFit data (1611.01514)
-        triplet<double> theta23_NuFit(0.726057, 0.0261799, 0.020944);
-
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta23, theta23_NuFit.central, 0.0, theta23_NuFit.upper, false);
+        spline_t23_n = filling_spline("NeutrinoBit/data/T23n.csv");
+        read_table_n = false;
       }
-      else // Inverted ordering
+      else if (read_table_i and *Dep::ordering == 0) // inverted odering
       {
-        triplet<double> theta23_NuFit(0.872665,0.0191986,0.0244346);
- 
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta23, theta23_NuFit.central, 0.0, theta23_NuFit.lower, false);
+        spline_t23_i = filling_spline("NeutrinoBit/data/T23i.csv");
+        read_table_i = false;
       }
- 
+      
+      
+      if  ((pow(sin(*Dep::theta23),2) < low_lim)  or (pow(sin(*Dep::theta23),2) > upp_lim)) 
+      {
+        std::ostringstream msg;
+        msg << "theta23 outside NuFit range; point is invalidated by active neutrino constraint.";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+        return;
+      }     
+      else
+      {
+        if (*Dep::ordering == 1)
+        {    
+          result = -0.5*spline_t23_n(pow(sin(*Dep::theta23),2));
+        }
+        else if (*Dep::ordering == 0)
+        {
+          result = -0.5*spline_t23_i(pow(sin(*Dep::theta23),2));
+        }
+      }
     }
-
+    
+    
     void theta13(double &result)
     {
       using namespace Pipes::theta13;
       result = *Param["theta13"];
     }
 
+    
     void theta13_lnL(double &result)
     {
       using namespace Pipes::theta13_lnL;
 
-      if(*Dep::ordering == 1) // Normal odering
+      static bool read_table_n = true;
+      static bool read_table_i = true;
+      static tk::spline spline_t13_n;
+      static tk::spline spline_t13_i;
+      static double low_lim = 0.00;  
+      static double upp_lim = 0.07;  
+      
+      if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
-        // NuFit data (1611.01514)
-        triplet<double> theta13_NuFit(0.147655,0.00261799,0.00261799);
+        spline_t13_n = filling_spline("NeutrinoBit/data/T13n.csv");
+        read_table_n = false;
+      }
+      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      {
+        spline_t13_i = filling_spline("NeutrinoBit/data/T13i.csv");
+        read_table_i = false;
+      }
 
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta13, theta13_NuFit.central, 0.0, theta13_NuFit.upper, false);
-      }
-      else // Inverted ordering
+      
+      if  ((pow(sin(*Dep::theta13),2) < low_lim) or (pow(sin(*Dep::theta13),2) > upp_lim))
       {
-        triplet<double> theta13_NuFit(0.148178,0.00261799,0.00261799);
- 
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::theta13, theta13_NuFit.central, 0.0, theta13_NuFit.upper, false);
+          std::ostringstream msg;
+          msg << "theta13 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
       }
-    }
+      else
+      {
+        if (*Dep::ordering == 1)
+        {    
+          result = -0.5*spline_t13_n(pow(sin(*Dep::theta13),2));
+        }
+        else if (*Dep::ordering == 0)
+        {
+          result = -0.5*spline_t13_i(pow(sin(*Dep::theta13),2));
+        }
+      }
+    }    
+    
 
     void deltaCP(double &result)
     {
@@ -422,65 +548,148 @@ namespace Gambit
       result = *Param["delta13"];
     }
 
+    
     void deltaCP_lnL(double &result)
     {
       using namespace Pipes::deltaCP_lnL;
 
-      if(*Dep::ordering == 1) // Normal odering
+      static bool read_table_n = true;
+      static bool read_table_i = true;
+      static tk::spline spline_CP_i;
+      static tk::spline spline_CP_n;
+      static double low_lim = -180;  
+      static double upp_lim = 360;  
+      
+      if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
-        // NuFit data (1611.01514)
-        triplet<double> deltaCP_NuFit(4.55531,0.890118,1.02974);
-
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+        spline_CP_n = filling_spline("NeutrinoBit/data/CPn.csv");
+        read_table_n = false;
       }
-      else // Inverted ordering
+      else if (read_table_i and *Dep::ordering == 0) // inverted odering
       {
-        triplet<double> deltaCP_NuFit(4.83456,0.698132,0.802851);
- 
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::deltaCP, deltaCP_NuFit.central, 0.0, deltaCP_NuFit.lower, false);
+        spline_CP_i = filling_spline("NeutrinoBit/data/CPi.csv");
+        read_table_i = false;
+      }
+
+      
+      if  (((*Dep::deltaCP*360.0)/(2.0*M_PI) < low_lim) or ((*Dep::deltaCP*360.0)/(2.0*M_PI) > upp_lim))
+      {
+        std::ostringstream msg;
+        msg << "deltaCP outside NuFit range; point is invalidated by active neutrino constraint.";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+        return;
+      }
+      else
+      {
+        if (*Dep::ordering == 1)
+        {    
+          result = -0.5*spline_CP_n((*Dep::deltaCP*360.0)/(2.0*M_PI));
+        }
+        else if (*Dep::ordering == 0)
+        {
+          result = -0.5*spline_CP_i((*Dep::deltaCP*360.0)/(2.0*M_PI));
+        }
       }
     }
+    
 
+    
     void md21_lnL(double &result)
     {
       using namespace Pipes::md21_lnL;
 
-      // NuFit data (1611.01514)
-      triplet<double> md21_NuFit(7.50e-23, 0.19e-23, 0.17e-23);
+      static bool read_table_n = true;
+      static bool read_table_i = true;
+      static tk::spline spline_md21_n;
+      static tk::spline spline_md21_i;
+      static double low_lim = -6.0;  
+      static double upp_lim = -3.0;  
+      
 
-      // TODO: Assume all gaussian for now, change later
-      // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::md21, md21_NuFit.central, 0.0, md21_NuFit.upper, false);
-    }
+      if (read_table_n and *Dep::ordering == 1) // Normal odering
+      {
+        spline_md21_n = filling_spline("NeutrinoBit/data/DMSn.csv");
+        read_table_n = false;
+      }
+      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      {
+        spline_md21_i = filling_spline("NeutrinoBit/data/DMSi.csv");
+        read_table_i = false;
+      }
+
+      
+      if  ((log10(*Dep::md21 * pow(10,18)) < low_lim) or (log10(*Dep::md21 * pow(10,18)) > upp_lim) or (*Dep::md21 * pow(10,18)<0))
+       {
+          std::ostringstream msg;
+          msg << "md12 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
+      }   
+      else
+      {
+        if (*Dep::ordering == 1)
+        {    
+          result = -0.5*spline_md21_n(log10(*Dep::md21 * pow(10,18)));
+        }
+        else if (*Dep::ordering == 0)
+        {
+          result = -0.5*spline_md21_i(log10(*Dep::md21 * pow(10,18)));
+        }
+      }
+    }  
  
+    
     void md3l_lnL(double &result)
     {
       using namespace Pipes::md3l_lnL;
 
-      if(*Dep::ordering == 1) // Normal odering
+      static bool read_table_n = true;
+      static bool read_table_i = true;
+      static tk::spline spline_md31_n;
+      static tk::spline spline_md32_i;
+      static double low_lim_n = 0.2;  
+      static double upp_lim_n = 7.0; 
+      static double low_lim_i = -7.0;  
+      static double upp_lim_i = -0.2; 
+          
+
+      if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
-        // NuFit data (1611.01514)
-        triplet<double> md31_NuFit(2.524e-21, 0.039e-21, 0.040e-21);
-
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::md31, md31_NuFit.central, 0.0, md31_NuFit.lower, false);
-
-      }
-      else // Inverted ordering
+        spline_md31_n = filling_spline("NeutrinoBit/data/DMAn.csv");
+        read_table_n = false;
+      }  
+      else if (read_table_i and *Dep::ordering == 0) // inverted odering
       {
-        triplet<double> md32_NuFit(-2.514e-21, 0.038e-21, 0.041e-21);
- 
-        // TODO: Assume all gaussian for now, change later
-        // Take the maximum of upper/lower errors
-        result = Stats::gaussian_loglikelihood(*Dep::md32, md32_NuFit.central, 0.0, md32_NuFit.lower, false);
-
+        spline_md32_i = filling_spline("NeutrinoBit/data/DMAi.csv");
+        read_table_i = false;
       }
+      
+      if (*Dep::ordering == 1)
+      {
+        if ((*Dep::md31 * pow(10,21) < low_lim_n) or (*Dep::md31 * pow(10,21) > upp_lim_n))
+        {
+          std::ostringstream msg;
+          msg << "md31 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
+        }
+        else result = -0.5*spline_md31_n(*Dep::md31 * pow(10,21));
+      }
+      else if (*Dep::ordering == 0)
+      {
+        if ((*Dep::md32 * pow(10,21) < low_lim_i) or (*Dep::md32 * pow(10,21) > upp_lim_i))
+        {
+          std::ostringstream msg;
+          msg << "md32 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
+        }
+        else result = -0.5*spline_md32_i(*Dep::md32 * pow(10,21));
+      }     
     }
-
   }
 }
