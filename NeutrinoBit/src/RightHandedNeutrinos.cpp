@@ -1655,10 +1655,10 @@ namespace Gambit
       using namespace Pipes::Ue1;
       Ue1_sq = ((*Dep::SeesawI_Theta).cwiseAbs2())(0,0);
 
-      double upper_limit = runOptions->getValueOrDef<double>(0, "upper_limit");
-      double lower_limit = runOptions->getValueOrDef<double>(1E-20, "lower_limit");
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
 
-      if(Ue1_sq > upper_limit or Ue1_sq < lower_limit)
+      if( (upper_limit != -1 and Ue1_sq > upper_limit) or (lower_limit != -1 and Ue1_sq < lower_limit) )
       {
         std::ostringstream msg;
         msg << "Coupling outside of given limits";
