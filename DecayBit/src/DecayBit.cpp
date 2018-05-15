@@ -3150,26 +3150,35 @@ namespace Gambit
     {
       /**
          @brief Log-likelihood for Higgs invisible width
-         
+
          We use log-likelihoods extracted from e.g.,
          <a href="http://cms-results.web.cern.ch/cms-results/public-results/
          preliminary-results/HIG-17-023/CMS-PAS-HIG-17-023_Figure_007-b.png">
          CMS-PAS-HIG-17-023</a>
-         
+
          @warning This typically assumes that the Higgs is otherwise SM-like,
          i.e., no changes to production cross sections or any other decays.
-         
-         @param lnL Log-likelihood for Higgs invisible width
+
+         @param BF Higgs branching fraction to invisibles
       */
       using namespace Pipes::lnL_Higgs_invWidth_SMlike;
-      double BF = Dep::Higgs_decay_rates->BF("S","S");
-      const std::string default_name = GAMBIT_DIR + "/DecayBit/data/arXiv_1306.2941_Figure_8.dat";
-      const auto name = runOptions->getValueOrDef
-        <std::string>(default_name, "BR_h_inv_chi2_data_file");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2();
+
+      double BF;
+
+      if (ModelInUse("SingletDM") || ModelInUse("SingletDMZ3")) {
+        BF = Dep::Higgs_decay_rates->BF("S","S");
+      } else if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT")) {
+        BF = 1.;
+      } else {
+        throw std::runtime_error("cannot calculate lnL_Higgs_invWidth_SMlike in this model");
+      }
+      const std::string default_name = GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat";
+      const auto name = runOptions->getValueOrDef<std::string>
+        (default_name, "BR_h_inv_chi2_data_file");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(name);
       lnL = (BF > 0.) ? -0.5 * chi2->bind("BR")->eval(BF) : 0.;
     }
-
+    
     void lnL_Z_inv_SM_2l_MSSM_tree(double& lnL)
     {
       /**
