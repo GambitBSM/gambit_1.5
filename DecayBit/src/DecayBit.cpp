@@ -3145,6 +3145,101 @@ namespace Gambit
       table.setcolnames(colnames);
       return daFunk::interp("BR", table["BR"], table["Delta_chi2"]);
     }
+    
+    double lambda(double x, double y, double z)
+    {
+      /**
+         @brief Phase-space function (Kallen function)
+
+         \f[
+         \lambda(x, y; z) = (1 - x / z - y / z)^2 - 4 x y / z^2
+         \f]
+      */
+      return pow(1. - x / z - y / z, 2) - 4. * x * y / pow(z, 2);
+    }
+
+    void h_gamma_chi0_MSSM_tree(double& gamma)
+    {
+      /**
+         @brief Width in GeV for Higgs decays to neutralinos
+
+         We use eq. 2.56 of 
+         <a href="https://arxiv.org/pdf/hep-ph/0503173.pdf">0503173</a>
+
+         @warning Tree-level formulas
+         @param gamma \f$BR(h\to\chi\chi)\f$
+
+      */
+      using namespace Pipes::h_gamma_chi0_MSSM_tree;
+
+      const Spectrum& spec = *Dep::MSSM_spectrum;
+      const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
+      const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
+
+      // Neutralino masses with phases
+      std::array<double, 4> m;
+      for (int i = 0; i <= 3; i += 1) {
+        m[i] = spec.get(Par::Pole_Mass, "~chi0_" + std::to_string(i + 1));
+      }
+
+      // Neutralino mixing matrix
+      std::array<std::array<double, 4>, 4> Z;
+      for (int i = 0; i <= 3; i += 1) {
+        for (int j = i; j <= 3; j += 1) {
+          Z[i][j] = MSSM.get(Par::Pole_Mixing, "~chi0", i + 1, j + 1);
+        }
+      }
+
+      // SM parameters
+      const double mh = MSSM.get(Par::Pole_Mass, "h0_1");
+      const double mw = SM.mW;
+      const double GF = *Param["GF"];
+
+      // Weinberg angle
+      const double sw = MSSM.safeget(Par::dimensionless, "sinW2");
+      const double cw = sqrt(1. - pow(sw, 2));
+      const double tw = sw / cw;
+
+      // Higgs mixing angle
+      const double beta = atan(MSSM.safeget(Par::dimensionless, "tanbeta"));
+      const double alpha = beta - 0.5 * pi;
+      const double ca = cos(alpha);
+      const double sa = sin(alpha);
+
+      // Eq. (1.113)
+      const double e2 = -sa;
+      const double d2 = -ca;
+
+      double gamma_no_prefactor = 0.;
+
+      // Sum over all neutralinos
+
+      for (int i = 0; i <= 3; i += 1) {
+        for (int j = i; j <= 3; j += 1) {
+          // Phase-space
+          double l = lambda(m[i], m[j], mh);
+          if (l <= 0.) {
+            continue;
+          }
+
+          // Eq. (1.112)
+          const double gL = 0.5 / sw *(
+            (Z[j][1] - tw * Z[j][0]) * (e2 * Z[i][2] + d2 * Z[i][3]) +
+            (Z[i][1] - tw * Z[i][0]) * (e2 * Z[j][2] + d2 * Z[j][3]));
+
+          const double gR = e2 * gL;
+          const double delta = (i == j) ? 1. : 0.;
+          const double epsilon = m[i] * m[j] > 0. ? 1. : -1.;
+
+          // Eq. (2.56) without common factor
+          gamma_no_prefactor += sqrt(l) / (1. + delta) * (
+            (pow(gL, 2) + pow(gR, 2)) * (1. - (pow(m[i], 2) + pow(m[j], 2)) / pow(mh, 2))
+            -4. * epsilon * gL * gR * m[i] * m[j] / pow(mh, 2));
+        }
+      }
+      // Eq. (2.56) with common factor
+      gamma = GF * pow(sw * mw, 2) / (2. * sqrt(2.) * pi) * mh * gamma_no_prefactor;
+    }
 
     void lnL_Higgs_invWidth_SMlike(double& lnL)
     {
@@ -3166,11 +3261,14 @@ namespace Gambit
       double BF;
 
       if (ModelInUse("SingletDM") || ModelInUse("SingletDMZ3")) {
-        BF = Dep::Higgs_decay_rates->BF("S","S");
-      } else if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT")) {
-        BF = 1.;
+        BF = Dep::Higgs_decay_rates->BF("S", "S");
+      } else if (ModelInUse("MSSM63atQ") || ModelInUse("MSSM63atMGUT")) {
+        const double gamma_inv = *Dep::h_gamma_chi0_MSSM_tree;
+        const double gamma_SM = Dep::compute_SM_higgs_decays->width_in_GeV;
+        BF = gamma_inv / (gamma_inv + gamma_SM);
       } else {
-        throw std::runtime_error("cannot calculate lnL_Higgs_invWidth_SMlike in this model");
+        DecayBit_error().raise(LOCAL_INFO,
+          "cannot calculate lnL_Higgs_invWidth_SMlike in this model");
       }
       const std::string default_name = GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat";
       const auto name = runOptions->getValueOrDef<std::string>
@@ -3178,7 +3276,7 @@ namespace Gambit
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(name);
       lnL = (BF > 0.) ? -0.5 * chi2->bind("BR")->eval(BF) : 0.;
     }
-    
+
     void lnL_Z_inv_SM_2l_MSSM_tree(double& lnL)
     {
       /**
@@ -3220,7 +3318,7 @@ namespace Gambit
           tau_squared += pow(tau, 2);
         }
       }
-      
+
       const double tau = sqrt(tau_squared);
       lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_invisible.mu,
         tau, SM_Z::gamma_invisible.sigma, false);
