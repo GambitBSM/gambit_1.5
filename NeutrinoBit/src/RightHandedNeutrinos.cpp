@@ -15,6 +15,9 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 Oct
+///  \author Marcin Chrzaszcz
+///          (mchrzasz@cern.ch)
+///  \date 2018
 ///
 ///  *********************************************
 
@@ -702,7 +705,7 @@ namespace Gambit
       result = gamma;
     }
 
-    // Calculates total decay width for each RHN
+    // Calculates total decay width for each RHN [GeV]
     void Gamma_BBN(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_BBN;
@@ -734,6 +737,7 @@ namespace Gambit
     }
 
     // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841]
+    // This is here implemented as step function in the likelihood
     void lnL_bbn(double& result_bbn)
     {
       using namespace Pipes::lnL_bbn;
@@ -743,11 +747,12 @@ namespace Gambit
       {
         if((hbar/gamma[i])>0.1)
         {
-          std::ostringstream msg;
-          msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
-          logger() << msg.str() << EOM;
-          invalid_point().raise(msg.str());
-          break;
+          //std::ostringstream msg;
+          //msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
+          //logger() << msg.str() << EOM;
+          result_bbn = -100;
+          //invalid_point().raise(msg.str());
+          //break;
         }
       }
     }
@@ -762,7 +767,7 @@ namespace Gambit
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi, mu_f_pi, d_r_pi;
-      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3), e_fac_pi(3), mu_fac_pi(3);
+      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_pi = 0;
@@ -773,23 +778,26 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        e_fac_pi[i] = 0;
-        mu_fac_pi[i] = 0;
         r_I_pi[i] = pow(M[i], 2)/pow(m_pi, 2);
  
         if(M[i] + sminputs.mMu < m_pi)
         {
           G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
-          mu_fac_pi[i] = Usq(1,i) * (G_mu_pi[i] - 1.0);
         } 
+        else
+          G_mu_pi[i] = 0;
+
         if(M[i] + sminputs.mE < m_pi)
         {
           G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2))) / (r_e_pi * pow((1.0 - r_e_pi), 2));
-          e_fac_pi[i] = Usq(0,i) * (G_e_pi[i] - 1.0); 
         }
-        e_f_pi += e_fac_pi[i];
-        mu_f_pi += mu_fac_pi[i];
+        else
+          G_mu_pi[i] = 0;
+
+        e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
+        mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
       }
+
       d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi)) - 1.0;
       R_pi = R_pi_SM * (1.0 + d_r_pi);
  
@@ -799,13 +807,12 @@ namespace Gambit
     {
       using namespace Pipes::RHN_R_K;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double m_pi = meson_masses.pi_plus;
       static double m_K = meson_masses.kaon_plus; 
       static double R_K_SM = 2.477e-5;
       static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K, mu_f_K, d_r_K;
-      std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3), e_fac_K(3), mu_fac_K(3);
+      std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_K = 0;
@@ -816,24 +823,28 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        e_fac_K[i] = 0;
-        mu_fac_K[i] = 0;
         r_I_K[i] = pow(M[i], 2)/pow(m_K,2);
 
-        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
+//        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
+        if(M[i] + sminputs.mMu < m_K)
         {
           G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2))) / (r_mu_K * pow((1.0 - r_mu_K), 2));
-          mu_fac_K[i] = Usq(1,i) * (G_mu_K[i] - 1.0);
         } 
-        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
+        else
+          G_mu_K[i] = 0;
+
+//        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
+        if(M[i] + sminputs.mE < m_K)
         {
           G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2))) / (r_e_K * pow((1.0 - r_e_K), 2));
-          e_fac_K[i] = Usq(0,i) * (G_e_K[i] - 1.0);
         }
+        else
+          G_e_K[i] = 0;
           
-        e_f_K += e_fac_K[i];
-        mu_f_K += mu_fac_K[i];
+        e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
+        mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
       }
+
       d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K)) - 1.0;
       R_K = R_K_SM * (1.0 + d_r_K);
     }
@@ -844,8 +855,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_tau = sminputs.mTau;  // GeV
       static double R_tau_SM = 0.973;
+      static double r_e_tau = pow(sminputs.mE,2)/pow(m_tau,2);
+      static double r_mu_tau = pow(sminputs.mMu,2)/pow(m_tau,2);
       double e_f_tau, mu_f_tau, d_r_tau;
-      std::vector<double> M(3), e_fac_tau(3), mu_fac_tau(3);
+      std::vector<double> M(3), r_I_tau(3), G_e_tau(3), G_mu_tau(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       e_f_tau = 0;
@@ -856,15 +869,28 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        if(M[i] + sminputs.mE > m_tau)
-          e_fac_tau[i] = Usq(0,i);
-        if(M[i] + sminputs.mMu > m_tau)
-          mu_fac_tau[i] = Usq(1,i);
+        r_I_tau[i] = pow(M[i], 2)/pow(m_tau,2);
 
-        e_f_tau += e_fac_tau[i];
-        mu_f_tau += mu_fac_tau[i];
+        if(M[i] + sminputs.mMu < m_tau)
+        {
+          G_mu_tau[i] = (r_mu_tau + r_I_tau[i] - pow((r_mu_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_mu_tau + r_I_tau[i]) + pow(r_mu_tau - r_I_tau[i], 2))) / (r_mu_tau * pow((1.0 - r_mu_tau), 2));
+        } 
+        else
+          G_mu_tau[i] = 0;
+
+        if(M[i] + sminputs.mE < m_tau)
+        {
+          G_e_tau[i] = (r_e_tau + r_I_tau[i] - pow((r_e_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_e_tau + r_I_tau[i]) + pow((r_e_tau - r_I_tau[i]), 2))) / (r_e_tau * pow((1.0 - r_e_tau), 2));
+        }
+        else
+          G_e_tau[i] = 0;
+          
+        e_f_tau += Usq(0,i) * (G_e_tau[i] - 1.0);
+        mu_f_tau += Usq(1,i) * (G_mu_tau[i] - 1.0);
+ 
       }
-      d_r_tau = ((1.0 - mu_f_tau)/(1.0 - e_f_tau)) - 1.0;
+
+      d_r_tau = ((1.0 + mu_f_tau)/(1.0 + e_f_tau)) - 1.0;
       R_tau = R_tau_SM * (1.0 + d_r_tau);
     }
 
@@ -877,16 +903,9 @@ namespace Gambit
       using namespace Pipes::RHN_R_W;
       Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
 
-      if(*Param["M_1"] < Dep::mw->central or *Param["M_2"] < Dep::mw->central or *Param["M_3"] < Dep::mw->central)
-      {
-        R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
-        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
-        R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
-      }
-      else
-      {
-        R_W = {1.0, 1.0, 1.0};
-      }
+      R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
+      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
+      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
     }
 
     void lnL_lepuniv(double& result_lepuniv)
@@ -915,8 +934,9 @@ namespace Gambit
       result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
     }
 
-    // Calculate 0nubb decay rate [1/s] for 136Xe 0nubb detector, for right-handed
+    // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for right-handed
     // neutrino model
+    // TODO: Rename gamma --> Thalf, since this is what is really calculated
     void RHN_Gamma_0nubb_Xe(double& result)
     {
       using namespace Pipes::RHN_Gamma_0nubb_Xe;
@@ -945,17 +965,18 @@ namespace Gambit
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
       prefactor = A_0nubb_Xe*mp*mp/p2_0nubb_Xe/p2_0nubb_Xe;
-        for (int i=0; i<3; i++)
-        {
+      for (int i=0; i<3; i++)
+      {
 //          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
 //          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Xe/(p2_0nubb_Xe+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i],2.0)));
-          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2));
-        }
+        sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2));
+      }
       result = prefactor * abs(sum) * abs(sum);
     }
 
-    // Calculate 0nubb decay rate [1/s] for 76Ge 0nubb detector, for right-handed
+    // Calculate 0nubb half-life [1/yr] for 76Ge 0nubb detector, for right-handed
     // neutrino model
+    // TODO: Rename gamma --> Thalf, since this is what is really calculated
     void RHN_Gamma_0nubb_Ge(double& result)
     {
       using namespace Pipes::RHN_Gamma_0nubb_Ge;
@@ -1024,25 +1045,82 @@ namespace Gambit
       result = *Dep::lnL_0nubb_KamLAND_Zen + *Dep::lnL_0nubb_GERDA;
     }
 
-    // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
-    void lnL_ckm(double& result_ckm)
+    // CKM unitarity constraint: optimize on Vus from Theta [PDG 2016]
+    void calc_Vus(double& result_Vus)
     {
-      using namespace Pipes::lnL_ckm;
+      using namespace Pipes::calc_Vus;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double G_mu = *Dep::Gmu;
-      double V_us = *Param["CKM_lambda"];
- 
+      double G_mu = sminputs.GF;
+      
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
       double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
       double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
       double f_plus = 0.959;
       double err_f_plus = 0.005;
       for(int i=0; i<5; i++)
-      {
-        V_us_exp[i] /= f_plus;
-        err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
-      }  
+        {
+          V_us_exp[i] /= f_plus;
+          err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
+        }
+
+      // Combined value from the PDG
+      static double V_ud_exp = 0.97417;
+      static double err_V_ud_exp = 0.00021;
+      // for the minimalization it's much better to transform the Vud experimental result to Vus the same as we do for theory and minalize onlu Vus
+      static double V_us_from_Vud=sqrt(1.-V_ud_exp*V_ud_exp);
+      static double err_V_us_from_Vud_exp= ( (V_ud_exp)/(sqrt(1-V_ud_exp*V_ud_exp))  ) * err_V_ud_exp;
+      
+                                             
+      double f[8];
+      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
+      f[1] = f[0];
+      f[2] = f[0];
+      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
+      f[4] = f[3];
+      f[5] = 1 + ThetaNorm(1,1);
+      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
+      f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
+
+      double est_Vus = 0.;
+      double sum_nominator = 0;
+      double sum_denominator = 0;
+      for (int i=0; i<7; i++)
+        {
+          sum_nominator += (V_us_exp[i]/f[i]) / (err_V_us_exp[i]*err_V_us_exp[i] /( f[i]*f[i]));
+          sum_denominator += 1./(err_V_us_exp[i]*err_V_us_exp[i] /( f[i]*f[i]));
+
+        }
+      // now vud
+      sum_nominator += (V_us_from_Vud /f[0]) / ( (err_V_us_from_Vud_exp*err_V_us_from_Vud_exp)/( f[0]*f[0]));
+      sum_denominator +=  1./( (err_V_us_from_Vud_exp*err_V_us_from_Vud_exp) /( f[0]*f[0]) );
+
+      est_Vus = sum_nominator/sum_denominator;
+      
+      result_Vus = est_Vus;
+    }
+
+    // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
+    void lnL_ckm_Vusmin(double& result_ckm)
+    {
+      using namespace Pipes::lnL_ckm_Vusmin;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Matrix3cd Theta = *Dep::SeesawI_Theta;
+      double G_mu = sminputs.GF;
+      double V_us = *Dep::calc_Vus;
+
+      // Experimental values determined for K and tau decays. From table 1 in 1502.00477
+      double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
+      double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
+      double f_plus = 0.959;
+      double err_f_plus = 0.005;
+      for(int i=0; i<5; i++)
+        {
+          V_us_exp[i] /= f_plus;
+          err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
+        }
 
       // Combined value from the PDG
       static double V_ud_exp = 0.97417;
@@ -1063,10 +1141,8 @@ namespace Gambit
       double chi2 = 0.0;
       for (int i=0; i<7; i++)
         chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
-
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
       chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2);
-
       result_ckm = -0.5*chi2;
     }
 
@@ -1131,11 +1207,15 @@ namespace Gambit
       for(int i=0; i<3; i++)
       {
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
-          result += 0;
+        {
+          result += -0.5*log(2.0*pi/1.28/1.28);
+          //result += 0;
+        }
         else
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1263,7 +1343,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1306,7 +1386,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1368,8 +1448,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 103.3352;  // GeV
-      static double upp_lim = 473.2829;  // GeV
+      static double low_lim = 100.1041;  // GeV
+      static double upp_lim = 476.1459;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
@@ -1390,11 +1470,15 @@ namespace Gambit
       for(int i=0; i<3; i++)
       {
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
-          result += 0;
+        {
+          result += -0.5*log(2.0*pi/1.64/1.64);
+          //result += 0;
+        }
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1428,11 +1512,15 @@ namespace Gambit
       for(int i=0; i<3; i++)
       {
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
-          result += 0;
+        {
+          result += -0.5*log(2.0*pi/1.64/1.64);
+          //result += 0;
+        }
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow((mixing_sq[i]/U[i]), 2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1466,11 +1554,16 @@ namespace Gambit
       for(int i=0; i<3; i++)
       {
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
-          result += 0;
+        {
+          result += -0.5*log(2.0*pi/1.28/1.28);
+          //result += 0;
+        }
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0,  1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+ 
         }
       }
     }
@@ -1544,11 +1637,15 @@ namespace Gambit
       for(int i=0; i<3; i++)
       {
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+        {
+          result += -0.5*log(2*pi/1.28/1.28);
           result += 0;
+        }
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i], 2), 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2)> 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
         }
       }
     }
@@ -1557,6 +1654,18 @@ namespace Gambit
     {
       using namespace Pipes::Ue1;
       Ue1_sq = ((*Dep::SeesawI_Theta).cwiseAbs2())(0,0);
+
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Ue1_sq > upper_limit) or (lower_limit != -1 and Ue1_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+
     }
 
     void Um1(double& Um1_sq)

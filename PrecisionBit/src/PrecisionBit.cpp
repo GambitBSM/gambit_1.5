@@ -15,6 +15,9 @@
 ///  \author Chris Rogan
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
+///  \author Marcin Chrzaszcz
+///          (mchrzasz@cern.ch)
+///  \date 2018
 ///
 ///  *********************************************
 
@@ -1070,25 +1073,6 @@ namespace Gambit
 
     // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
 
-    // Muon Fermi coupling, calculation from 1502.00477
-    void RHN_Gmu(double &result)
-    {
-      using namespace Pipes::RHN_Gmu;
-      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
-
-      result = sminputs.GF*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-    }
-
-    void lnL_Gmu_chi2(double &result)
-    {
-      using namespace Pipes::lnL_Gmu_chi2;
-      /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
-      bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(*Dep::Gmu, 1.1663787E-05, 0.0, 0.0000006E-05, profile);
-    }
-
     // Weak mixing angle sinW2, calculation from 1502.00477
     //TODO: values seem a bit off, check this
     void RHN_sinW2(triplet<double> &result)
@@ -1096,15 +1080,16 @@ namespace Gambit
       using namespace Pipes::RHN_sinW2;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
-      double Gmu = *Dep::Gmu;
+      double Gmu = sminputs.GF;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       // Radiative corrections, from Marco's paper
       double deltar = -0.03244;
 
-      result.central = 0.5*(1.0 - sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1.0+deltar))/(Gmu*sminputs.alphainv*sminputs.mZ*sminputs.mZ) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))));
-      result.upper = 0.0;
-      result.lower = 0.0;
+      //result.central = 0.5*(1.0 - sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1.0+deltar))/(Gmu*sminputs.alphainv*sminputs.mZ*sminputs.mZ) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))));
+      result.central = 0.23152*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)); // taken from 1211.1864
+      result.upper = 0.00010;
+      result.lower = 0.00010;
     }
 
     void lnL_sinW2_chi2(double &result)
@@ -1113,7 +1098,7 @@ namespace Gambit
       double theory_uncert = std::max(Dep::sinW2->upper, Dep::sinW2->lower);
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::sinW2->central, 0.23129, theory_uncert, 0.00005, profile);
+      result = Stats::gaussian_loglikelihood(Dep::sinW2->central, 0.23155, theory_uncert, 0.00005, profile);
     }
 
     // Mass of W boson, calculation from 1502.00477
@@ -1121,8 +1106,8 @@ namespace Gambit
     {
       using namespace Pipes::RHN_mw;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double Gmu = *Dep::Gmu;
       SMInputs sminputs = *Dep::SMINPUTS;
+      double Gmu = sminputs.GF;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       // Radiative corrections, form Marco's paper
@@ -1140,7 +1125,7 @@ namespace Gambit
       Eigen::Matrix3cd V = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
-      double Gmu = *Dep::Gmu;
+      double Gmu = sminputs.GF;
 
       Eigen::Matrix3d VNorm = (V.adjoint() * V).real();
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
@@ -1148,12 +1133,9 @@ namespace Gambit
 
       result = 0.0;
       for(int i=0; i<3; i++)
-        if(MN[i] < sminputs.mZ)
-          for(int j=0; j<3; j++)
-            if(MN[j] < sminputs.mZ)
-              result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-        else
-          result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI);
+        for(int j=0; j<3; j++)
+          result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+
     }
 
     void lnL_Z_inv_width_chi2(double &result)
@@ -1183,19 +1165,16 @@ namespace Gambit
       using namespace Pipes::RHN_W_to_l_decays;
       SMInputs sminputs = *Dep::SMINPUTS;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double Gmu = *Dep::Gmu;
+      double Gmu = sminputs.GF;
       double mw = Dep::mw->central;
 
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
       std::vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
 
       result.clear();
-      if(*Param["M_1"] < mw or *Param["M_2"] < mw or *Param["M_3"] < mw)
-        for(int i=0; i<3; i++)
-          result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
-      else
-        for(int i=0; i<3; i++)
-          result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2)));
+      for(int i=0; i<3; i++)
+        result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
+
      }
 
      void lnL_W_decays_chi2(double &result)

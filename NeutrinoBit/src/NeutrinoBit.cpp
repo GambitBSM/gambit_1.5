@@ -36,6 +36,12 @@ namespace Gambit
 
     using namespace LogTags;
 
+    // Aux function
+    double gauss_like(double x, double x0, double xerr)
+    {
+      return -0.5*pow(x-x0, 2)/xerr/xerr;
+    }
+
     // Module functions
     void ordering(bool &ord)
     {
@@ -56,6 +62,7 @@ namespace Gambit
       double mnu1 = *Param["mNu1"];
       double mnu2 = *Param["mNu2"];
       double mnu3 = *Param["mNu3"];
+
        
       m_nu(0,1) = 0.0;
       m_nu(0,2) = 0.0;
@@ -65,19 +72,36 @@ namespace Gambit
       m_nu(2,1) = 0.0;
 
  
-      if(*Dep::ordering == 1)
-      {
+      //if(*Dep::ordering == 1)
+      //{
         // Normal ordering
         m_nu(0,0) = mnu1;
         m_nu(1,1) = mnu2;
         m_nu(2,2) = mnu3;
-      }
-      else
-      {
+      //}
+      //else
+      //{
         // Inverted ordering
-        m_nu(2,2) = mnu1;
-        m_nu(0,0) = mnu2;
-        m_nu(1,1) = mnu3;
+        //m_nu(2,2) = mnu1;
+        //m_nu(0,0) = mnu2;
+        //m_nu(1,1) = mnu3;
+      //}
+
+      // If there is an option to set a specific ordering, invalidate the other type
+      int ord = runOptions->getValueOrDef<int>(-1,"ordering");
+      if(ord == 1 and *Dep::ordering == 0)
+      {
+        std::ostringstream msg;
+        msg << "Wrong ordering";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+      else if(ord == 0 and *Dep::ordering == 1)
+      {
+        std::ostringstream msg;
+        msg << "Wrong ordering";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
       }
 
     }
@@ -235,7 +259,20 @@ namespace Gambit
       R_12(2,0) = 0.0;
       R_12(2,1) = 0.0;
       R_12(2,2) = 1.0;
-      R = R_23 * R_13 * R_12;
+
+      std::string order = runOptions->getValueOrDef<std::string>("321", "R_order");
+      if (order == "321")
+        R = R_23 * R_13 * R_12;
+      if (order == "213")
+        R = R_13 * R_12 * R_23;
+      if (order == "132")
+        R = R_12 * R_23 * R_13;
+      if (order == "231")
+        R = R_13 * R_23 * R_12;
+      if (order == "312")
+        R = R_23 * R_12 * R_13;
+      if (order == "123")
+        R = R_12 * R_13 * R_23;
 
      if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
       Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
@@ -243,8 +280,8 @@ namespace Gambit
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
       Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();
       Eigen::Matrix3d ThetaNorm2 = (Theta * Theta.adjoint()).real();
-      for(int i=1; i<3; i++)
-        for(int j=1; j<3; j++)
+      for(int i=0; i<3; i++)
+        for(int j=0; j<3; j++)
         {
           if(ThetaNorm(i,j) > 1 or ThetaNorm2(i,j) > 1 or abs(Theta(i,j)) > 1)
           {
@@ -517,9 +554,7 @@ namespace Gambit
       {
         spline_t13_i = filling_spline("NeutrinoBit/data/T13i.csv");
         read_table_i = false;
-      }
-
-      
+      }      
       if  ((pow(sin(*Dep::theta13),2) < low_lim) or (pow(sin(*Dep::theta13),2) > upp_lim))
       {
           std::ostringstream msg;
@@ -690,6 +725,24 @@ namespace Gambit
         }
         else result = -0.5*spline_md32_i(*Dep::md32 * pow(10,21));
       }     
+    }
+
+    // Sum of neutrino likelihoods
+    void sum_mnu_lnL(double &result)
+    {
+      using namespace Pipes::sum_mnu_lnL;
+
+      double sum_mnu = *Param["mNu1"] + *Param["mNu2"] + *Param["mNu3"];
+
+      if(sum_mnu < 2.3E-10)
+        result = 0.0;
+      else
+      {
+        std::ostringstream msg;
+        msg << "Sum of neutrino masses over the cosmological limit";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
     }
   }
 }
