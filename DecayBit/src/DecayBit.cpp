@@ -3229,12 +3229,11 @@ namespace Gambit
 
           const double gR = e2 * gL;
           const double delta = (i == j) ? 1. : 0.;
-          const double epsilon = m[i] * m[j] > 0. ? 1. : -1.;
 
           // Eq. (2.56) without common factor
           gamma_no_prefactor += sqrt(l) / (1. + delta) * (
             (pow(gL, 2) + pow(gR, 2)) * (1. - (pow(m[i], 2) + pow(m[j], 2)) / pow(mh, 2))
-            -4. * epsilon * gL * gR * m[i] * m[j] / pow(mh, 2));
+            -4. * gL * gR * m[i] * m[j] / pow(mh, 2));
         }
       }
       // Eq. (2.56) with common factor
