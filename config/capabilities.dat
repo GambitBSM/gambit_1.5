@@ -2257,11 +2257,14 @@ Reference_SM_A0_decay_rates: |
 Reference_SM_other_Higgs_decay_rates: |
    Computation of decays of SM Higgs with mass equal to the mass of the least SM-like CP-even Higgs.
 
-Z_invisible_width: |
-   Invisible decay width of the Z boson
+Z_gamma_inv: |
+   Invisible decay width of the Z boson in MeV.
 
-lnL_Z_invisible_width: |
-   Log Likelihood for the inivislbe decay width of the Z boson
+lnL_Z_inv: |
+   Log Likelihood for the inivislbe decay width of the Z boson.
+
+h_gamma_chi0: |
+   Decay width to neutralinos of the Higgs boson in GeV.
 
 #-------------------------------------
 #  PrecisionBit capabilities
