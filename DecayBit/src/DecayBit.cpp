@@ -3163,12 +3163,11 @@ namespace Gambit
       /**
          @brief Width in GeV for Higgs decays to neutralinos
 
-         We use eq. 2.56 of 
+         We use Eq. (2.56) of 
          <a href="https://arxiv.org/pdf/hep-ph/0503173.pdf">0503173</a>
 
          @warning Tree-level formulas
-         @param gamma \f$BR(h\to\chi\chi)\f$
-
+         @param gamma \f$\textrm{BR}(h\to\chi^0\chi^0)\f$
       */
       using namespace Pipes::h_gamma_chi0_MSSM_tree;
 
@@ -3249,6 +3248,9 @@ namespace Gambit
          <a href="http://cms-results.web.cern.ch/cms-results/public-results/
          preliminary-results/HIG-17-023/CMS-PAS-HIG-17-023_Figure_007-b.png">
          CMS-PAS-HIG-17-023</a>
+         
+         The data file is specified in the YAML by the
+         `BR_h_inv_chi2_data_file` option.
 
          @warning This typically assumes that the Higgs is otherwise SM-like,
          i.e., no changes to production cross sections or any other decays.
@@ -3349,7 +3351,7 @@ namespace Gambit
          @warning This uses input \f$\alpha(M_Z)\f$ - does not include input
          light-quark thresholds.
          
-         @warning The gammaing decay table contains widths in MeV, not
+         @warning The resulting decay table contains widths in MeV, not
          branching ratios
 
          @param gamma Table containing widths in MeV
