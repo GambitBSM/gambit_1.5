@@ -3223,7 +3223,7 @@ namespace Gambit
           }
 
           // Eq. (1.112)
-          const double gL = 0.5 / sw *(
+          const double gL = 0.5 / sw * (
             (Z[j][1] - tw * Z[j][0]) * (e2 * Z[i][2] + d2 * Z[i][3]) +
             (Z[i][1] - tw * Z[i][0]) * (e2 * Z[j][2] + d2 * Z[j][3]));
 
@@ -3269,11 +3269,16 @@ namespace Gambit
         DecayBit_error().raise(LOCAL_INFO,
           "cannot calculate lnL_Higgs_invWidth_SMlike in this model");
       }
+
+      if (BF < 0.) {
+        DecayBit_error().raise(LOCAL_INFO, "negative BF");
+      }
+
       const std::string default_name = GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat";
       const auto name = runOptions->getValueOrDef<std::string>
         (default_name, "BR_h_inv_chi2_data_file");
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(name);
-      lnL = (BF > 0.) ? -0.5 * chi2->bind("BR")->eval(BF) : 0.;
+      lnL = -0.5 * chi2->bind("BR")->eval(BF);
     }
 
     void lnL_Z_inv_SM_2l_MSSM_tree(double& lnL)
