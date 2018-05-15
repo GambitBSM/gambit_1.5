@@ -676,31 +676,6 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY Z_invisible_width
-  START_CAPABILITY
-
-    #define FUNCTION Z_invisible_width_MSSM
-    START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(Z_decay_rates, DecayTable::Entry)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY lnL_Z_invisible_width
-  START_CAPABILITY
-
-    #define FUNCTION lnL_Z_invisible_width
-    START_FUNCTION(double)
-    DEPENDENCY(Z_decay_rates, DecayTable::Entry)
-    DEPENDENCY(Z_invisible_width, DecayTable::Entry)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-
   #define CAPABILITY decay_rates
   START_CAPABILITY
 
@@ -808,22 +783,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Z_gamma_inv
+  START_CAPABILITY
+    #define FUNCTION Z_gamma_inv_SM_2l_MSSM_tree
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnL_Z_inv
   START_CAPABILITY
     #define FUNCTION lnL_Z_inv_SM_2l_MSSM_tree
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
+    DEPENDENCY(Z_gamma_inv_SM_2l_MSSM_tree, DecayTable::Entry)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
   
-  #define CAPABILITY Z_gamma_nu
-  START_CAPABILITY
-    #define FUNCTION Z_gamma_nu_SM_2l
-    START_FUNCTION(double)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
-    #undef FUNCTION
-  #undef CAPABILITY
-
 #undef MODULE
 
 

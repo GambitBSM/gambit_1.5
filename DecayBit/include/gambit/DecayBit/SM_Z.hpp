@@ -33,7 +33,7 @@ namespace SM_Z {
 /** 
    @brief <ahref="
    http://pdglive.lbl.gov/BranchingRatio.action?desig=9&parCode=S044
-   ">PDG</a> measurement of invisible width of \f$Z\f$ boson
+   ">PDG</a> measurement of invisible width of \f$Z\f$ boson in MeV
 */
 constexpr struct {
   const double mu = 499.0;

@@ -2837,161 +2837,6 @@ namespace Gambit
     void chargino_minus_2_decays (DecayTable::Entry& result) { result = CP_conjugate(*Pipes::chargino_minus_2_decays::Dep::chargino_plus_2_decay_rates); }
     /// @}
 
-
-    //////////// Z decay table for the MSSM ///////////////////////
-    void Z_invisible_width_MSSM (DecayTable::Entry& result)
-    {
-      using namespace Pipes::Z_invisible_width_MSSM;
-
-      // Setup decay table info from the Standard Model
-      //Z_decays(result);
-      
-
-      // Get spectrum objects
-      const Spectrum& spec = *Dep::MSSM_spectrum;
-      const SubSpectrum& mssm = spec.get_HE();
-
-      // Get sneutrino mass
-      const double m_sNu1 = spec.get(Par::Pole_Mass,"~nu_1");
-      const double m_sNu2 = spec.get(Par::Pole_Mass,"~nu_2");
-      const double m_sNu3 = spec.get(Par::Pole_Mass,"~nu_3");
-      const std::vector<double> m_sNu = {m_sNu1, m_sNu2, m_sNu3};
-
-      // Get neutralino mass and mixing
-      const double m_N1 = abs(spec.get(Par::Pole_Mass,"~chi0_1"));
-      const double m_N2 = abs(spec.get(Par::Pole_Mass,"~chi0_2"));
-      const double m_N3 = abs(spec.get(Par::Pole_Mass,"~chi0_3"));
-      const double m_N4 = abs(spec.get(Par::Pole_Mass,"~chi0_4"));
-      const std::vector<double> m_N = {m_N1, m_N2, m_N3, m_N4};
-
-      const double N11 = mssm.get(Par::Pole_Mixing,"~chi0",1,1);  // ~B component
-      const double N12 = mssm.get(Par::Pole_Mixing,"~chi0",1,2);  // ~W3 component
-      const double N13 = mssm.get(Par::Pole_Mixing,"~chi0",1,3);  // ~Hd component
-      const double N14 = mssm.get(Par::Pole_Mixing,"~chi0",1,4);  // ~Hu component
-      const double N21 = mssm.get(Par::Pole_Mixing,"~chi0",2,1);
-      const double N22 = mssm.get(Par::Pole_Mixing,"~chi0",2,2);
-      const double N23 = mssm.get(Par::Pole_Mixing,"~chi0",2,3);
-      const double N24 = mssm.get(Par::Pole_Mixing,"~chi0",2,4);
-      const double N31 = mssm.get(Par::Pole_Mixing,"~chi0",3,1);
-      const double N32 = mssm.get(Par::Pole_Mixing,"~chi0",3,2);
-      const double N33 = mssm.get(Par::Pole_Mixing,"~chi0",3,3);
-      const double N34 = mssm.get(Par::Pole_Mixing,"~chi0",3,4);
-      const double N41 = mssm.get(Par::Pole_Mixing,"~chi0",4,1);
-      const double N42 = mssm.get(Par::Pole_Mixing,"~chi0",4,2);
-      const double N43 = mssm.get(Par::Pole_Mixing,"~chi0",4,3);
-      const double N44 = mssm.get(Par::Pole_Mixing,"~chi0",4,4);
-
-      Eigen::Matrix4d NN;
-      NN << N11, N12, N13, N14,
-            N21, N22, N23, N24,
-            N31, N32, N33, N34,
-            N41, N42, N43, N44;
-
-
-      //double Z_decay_width = result.width_in_GeV;
-      //double Z_decay_error = result.positive_error; // Error is symmetric
-      double Z_decay_width = Dep::Z_decay_rates->width_in_GeV;
-      double Z_decay_error = Dep::Z_decay_rates->positive_error;
-
-      // Useful quantities
-      const double g2 = mssm.safeget(Par::dimensionless,"g2");
-      const double sinW2 = mssm.safeget(Par::dimensionless,"sinW2");
-      const double cosW = sqrt(1.0 - sinW2);
-      const double mZ = spec.get(Par::Pole_Mass,"Z0");
- 
-      // Tree level code stolen from DarkSUSY
-
-      // Neutrinos, redo cause sinW2 and g2 may have changed
-      double Z_to_neutrinos = pow(g2/(2.0*cosW),2) * mZ/(24.0*pi);
-      result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_e", "nubar_e");
-      result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_mu", "nubar_mu");
-      result.set_BF(Z_to_neutrinos/Z_decay_width, Z_to_neutrinos/pow(Z_decay_width,2)*Z_decay_error, "nu_tau", "nubar_tau");
- 
-      // Sneutrinos
-      for(int i=0; i<3; i++)
-      {
-        double temp = 1.0 - 4.0*pow(m_sNu[i]/mZ,2);
-        if (temp > 0.0)
-        {
-          double Z_to_sneutrinos = pow(temp, 1.5) * pow(g2/(2*cosW),2) * mZ/(48.0*pi);
-          result.set_BF(Z_to_sneutrinos/Z_decay_width, Z_to_sneutrinos/pow(Z_decay_width,2)*Z_decay_error, "~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
-        }
-        else
-          result.set_BF(0.0, 0.0, "~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
- 
-      }
-
-      // Neutralinos
-      for(int i=0; i<4; i++)
-        for(int j=i; j<4; j++)
-        {
-           double p2 = (pow(mZ,2) - pow(m_N[i] + m_N[j],2)) * (pow(mZ,2) - pow(m_N[i] - m_N[j],2)) / (4.0*pow(mZ,2));
-           double ei = (pow(mZ,2) - pow(m_N[j],2) + pow(m_N[i],2)) / (2*mZ);
-           double ej = (pow(mZ,2) - pow(m_N[i],2) + pow(m_N[j],2)) / (2*mZ);
-
-           if (p2 > 0.0 and ei > 0.0 and ej > 0.0)
-           {
-             // Notation 3-1 and 4-1 is just to remind ourselves that these are the higgsino components
-             double gzij = g2/(2.0*cosW) * (NN(i,3-1)*NN(j,3-1) - NN(i,4-1)*NN(j,4-1));
-             double Z_to_neutralinos = sqrt(p2)/(2.0*pi*pow(mZ,2)) *  pow(gzij,2)*(ei*ej + p2/3.0 - m_N[i]*m_N[j]);
-
-             if (i == j) Z_to_neutralinos = 0.5*Z_to_neutralinos;
-             result.set_BF(Z_to_neutralinos/Z_decay_width, Z_to_neutralinos/pow(Z_decay_width,2)*Z_decay_error, "~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
-           }
-           else
-             result.set_BF(0.0, 0.0, "~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
-
-        }
-
-    }
-
-    void lnL_Z_invisible_width(double &result)
-    {
-      using namespace Pipes::lnL_Z_invisible_width;
-
-      // Inivisible Z width, PDG 2017
-      double Z_inv_BF_exp = 0.2000;
-      double Z_inv_BF_exp_error = 0.0006;
-
-      double Z_total_width = Dep::Z_decay_rates->width_in_GeV;
-      double Z_width_error = Dep::Z_decay_rates->positive_error; // Error is symmetric 
-      DecayTable::Entry Z_inv = *Dep::Z_invisible_width;
-
-      double Z_inv_BF = 0.0;
-      double Z_inv_BF_err2 = 0.0;
-
-      // MSSM-specific
-      if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
-      {
-        Z_inv_BF += Z_inv.BF("nu_e", "nubar_e");
-        Z_inv_BF += Z_inv.BF("nu_mu", "nubar_mu");
-        Z_inv_BF += Z_inv.BF("nu_tau", "nubar_tau");
-        Z_inv_BF_err2 += 3.0 * pow(Z_inv.BF_error("nu_e", "nubar_e"),2);
-
-        for(int i=0; i<3; i++)
-        {
-          Z_inv_BF += Z_inv.BF("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1));
-          Z_inv_BF_err2 += pow(Z_inv.BF_error("~nu_"+std::to_string(i+1), "~nubar_"+std::to_string(i+1)),2);
-        }
-
-        for(int i=0; i<4; i++)
-          for(int j=i; j<4; j++)
-          {
-            Z_inv_BF += Z_inv.BF("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1));
-            Z_inv_BF_err2 += pow(Z_inv.BF_error("~chi0_"+std::to_string(i+1), "~chi0_"+std::to_string(j+1)),2);
-          }
-      }
-
-      result = Stats::gaussian_loglikelihood(Z_inv_BF, Z_inv_BF_exp, sqrt(Z_inv_BF_err2), Z_inv_BF_exp_error, false);
-
-      #ifdef DECAYBIT_DEBUG
-        cout << "Z invisible width = " << Z_inv_BF << " +- " <<sqrt(Z_inv_BF_err2) << endl;
-        cout << "LogLike = " << result << endl;
-      #endif
-
-
-    }
-
     //////////// Singlet DM /////////////////////
 
     /// Add the decay of Higgs to singlets for the SingletDM model
@@ -3315,56 +3160,162 @@ namespace Gambit
       /**
          @brief Log-likelihood from LEP measurements of \f$Z\f$-boson invisible
          width
-         
-         We use a two-loop prediction for the SM invisible width, 
-         \f$\Gamma(Z\to\nu\nu)\f$.
-         
-         @warning Tree-level prediction for \f$\Gamma(Z\to\chi\chi)\f$.
-         
-         @warning This uses input \f$\alpha(M_Z)\f$ - does not include input 
-         light-quark thresholds.
+
+         @warning \f$\Gamma(Z\to\chi\chi)\f$ and
+         \f$\Gamma(Z\to\tilde\nu\tilde\nu)\f$ are tree-level formulas, whereas
+         \f$\Gamma(Z\to\nu\nu)\f$ is two-loop in the SM.
          
          @param lnL Log-likelihood
       */
       using namespace Pipes::lnL_Z_inv_SM_2l_MSSM_tree;
+      DecayTable::Entry gamma = *Dep::Z_gamma_inv_SM_2l_MSSM_tree;
 
-      const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
-      const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
-      const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
-      const double alpha_thompson = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
-      const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
+      double gamma_inv = gamma.BF("nu_e", "nubar_e");
+      gamma_inv += gamma.BF("nu_mu", "nubar_mu");
+      gamma_inv += gamma.BF("nu_tau", "nubar_tau");
+      double tau_squared = pow(gamma.BF_error("nu_e", "nubar_e"), 2);
+      tau_squared += pow(gamma.BF_error("nu_mu", "nubar_mu"), 2);
+      tau_squared += pow(gamma.BF_error("nu_tau", "nubar_tau"), 2);
 
-      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, SM.mZ, SM.alphaS, delta_alpha);
-      const double predicted = Z.gamma_invisible();  // TODO add Z -> chi chi here
-      const double theory_error = Z.error_gamma_invisible();
+      for (int i = 1; i <= 3; i++)
+      {
+        const auto gen = std::to_string(i);
+        gamma_inv += gamma.BF("~nu_" + gen, "~nubar_" + gen);
+        const double tau = gamma.BF_error("~nu_" + gen, "~nubar_" + gen);
+        tau_squared += pow(tau, 2);
+      }
 
-      lnL = Stats::gaussian_loglikelihood(predicted, SM_Z::gamma_invisible.mu,
-        theory_error, SM_Z::gamma_invisible.sigma, false);
+      for (int i = 1; i <= 4; i++)
+      {
+        for (int j = i; j <= 4; j++)
+        {
+          const auto ci = std::to_string(i);
+          const auto cj = std::to_string(j);
+          gamma_inv += gamma.BF("~chi0_" + ci, "~chi0_" + cj);
+          const double tau = gamma.BF_error("~chi0_" + ci, "~chi0_" + cj);
+          tau_squared += pow(tau, 2);
+        }
+      }
+      
+      const double tau = sqrt(tau_squared);
+      lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_invisible.mu,
+        tau, SM_Z::gamma_invisible.sigma, false);
+
+      #ifdef DECAYBIT_DEBUG
+        cout << "Z invisible width = " << gamma_inv
+             << " +- " << tau << endl;
+        cout << "lnL Z invisible width = " << lnL << endl;
+      #endif
     }
-    
-    void Z_gamma_nu_SM_2l(double& Gamma)
+
+    void Z_gamma_inv_SM_2l_MSSM_tree(DecayTable::Entry& gamma)
     {
       /**
-         @brief  Two-loop prediction for the SM invisible width, 
+         @brief Calculate width of \f$Z\f$ decays to invisible particles,
+         i.e., neutrinos, neutralinos and sneutrinos, in MeV.
+
+         We use a two-loop prediction for the SM invisible width,
          \f$\Gamma(Z\to\nu\nu)\f$.
-                 
-         @warning This uses input \f$\alpha(M_Z)\f$ - does not include input 
+
+         @warning Tree-level prediction for \f$\Gamma(Z\to\chi\chi)\f$ and
+         \f$\Gamma(Z\to\tilde\nu\tilde\nu)\f$.
+
+         @warning This uses input \f$\alpha(M_Z)\f$ - does not include input
          light-quark thresholds.
          
-         @param Gamma \f$\Gamma(Z\to\nu\nu)\f$.
-      */
-      using namespace Pipes::Z_gamma_nu_SM_2l;
+         @warning The gammaing decay table contains widths in MeV, not
+         branching ratios
 
+         @param gamma Table containing widths in MeV
+      */
+      using namespace Pipes::Z_gamma_inv_SM_2l_MSSM_tree;
+
+      const Spectrum& spec = *Dep::MSSM_spectrum;
       const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
+
+      // Construct SM Z two-loop object
       const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
       const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
+      const double MZ = SM.mZ;
       const double alpha_thompson = runOptions->getValueOrDef
         <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
       const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
-    
-      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, SM.mZ, SM.alphaS, delta_alpha);
-      Gamma = Z.gamma_invisible();
+      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha);
+
+      // Neutrinos
+      gamma.set_BF(Z.gamma_nu_e(), Z.error_gamma_nu_e(), "nu_e", "nubar_e");
+      gamma.set_BF(Z.gamma_nu_mu(), Z.error_gamma_nu_mu(), "nu_mu", "nubar_mu");
+      gamma.set_BF(Z.gamma_nu_tau(), Z.error_gamma_nu_tau(), "nu_tau", "nubar_tau");
+
+      // Get sneutrino masses
+      const double m_sNu1 = spec.get(Par::Pole_Mass, "~nu_1");
+      const double m_sNu2 = spec.get(Par::Pole_Mass, "~nu_2");
+      const double m_sNu3 = spec.get(Par::Pole_Mass, "~nu_3");
+      const std::vector<double> m_sNu = {m_sNu1, m_sNu2, m_sNu3};
+
+      // Get neutralino masses
+      const double m_N1 = abs(spec.get(Par::Pole_Mass, "~chi0_1"));
+      const double m_N2 = abs(spec.get(Par::Pole_Mass, "~chi0_2"));
+      const double m_N3 = abs(spec.get(Par::Pole_Mass, "~chi0_3"));
+      const double m_N4 = abs(spec.get(Par::Pole_Mass, "~chi0_4"));
+      const std::vector<double> m_N{m_N1, m_N2, m_N3, m_N4};
+
+      // Get neutralino mixing matrix
+      const double N11 = MSSM.get(Par::Pole_Mixing, "~chi0", 1, 1);  // ~B component
+      const double N12 = MSSM.get(Par::Pole_Mixing, "~chi0", 1, 2);  // ~W3 component
+      const double N13 = MSSM.get(Par::Pole_Mixing, "~chi0", 1, 3);  // ~Hd component
+      const double N14 = MSSM.get(Par::Pole_Mixing, "~chi0", 1, 4);  // ~Hu component
+      const double N21 = MSSM.get(Par::Pole_Mixing, "~chi0", 2, 1);
+      const double N22 = MSSM.get(Par::Pole_Mixing, "~chi0", 2, 2);
+      const double N23 = MSSM.get(Par::Pole_Mixing, "~chi0", 2, 3);
+      const double N24 = MSSM.get(Par::Pole_Mixing, "~chi0", 2, 4);
+      const double N31 = MSSM.get(Par::Pole_Mixing, "~chi0", 3, 1);
+      const double N32 = MSSM.get(Par::Pole_Mixing, "~chi0", 3, 2);
+      const double N33 = MSSM.get(Par::Pole_Mixing, "~chi0", 3, 3);
+      const double N34 = MSSM.get(Par::Pole_Mixing, "~chi0", 3, 4);
+      const double N41 = MSSM.get(Par::Pole_Mixing, "~chi0", 4, 1);
+      const double N42 = MSSM.get(Par::Pole_Mixing, "~chi0", 4, 2);
+      const double N43 = MSSM.get(Par::Pole_Mixing, "~chi0", 4, 3);
+      const double N44 = MSSM.get(Par::Pole_Mixing, "~chi0", 4, 4);
+
+      Eigen::Matrix4d NN;
+      NN << N11, N12, N13, N14,
+            N21, N22, N23, N24,
+            N31, N32, N33, N34,
+            N41, N42, N43, N44;
+
+      // Useful quantities
+      const double g2 = MSSM.safeget(Par::dimensionless, "g2");
+      const double sinW2 = MSSM.safeget(Par::dimensionless, "sinW2");
+      const double cosW = sqrt(1. - sinW2);
+      const double gev_to_mev = 1.e3;
+
+      // Sneutrinos
+      for (int i = 1; i <= 3; i++)
+      {
+        const double phase_space = 1. - 4. * pow(m_sNu[i] / MZ, 2);
+        const double gamma_snu = phase_space > 0. ?
+          pow(phase_space, 1.5) * pow(g2 / (2. * cosW), 2) * MZ / (48. * pi) : 0.;
+        const auto gen = std::to_string(i);
+        gamma.set_BF(gamma_snu * gev_to_mev, 0., "~nu_" + gen, "~nubar_" + gen);
+      }
+
+      // Neutralinos
+      for (int i = 0; i < 4; i++)
+        for (int j = i; j < 4; j++)
+        {
+           const double p2 = (pow(MZ, 2) - pow(m_N[i] + m_N[j], 2)) * (pow(MZ, 2) - pow(m_N[i] - m_N[j], 2)) / (4. * pow(MZ, 2));
+           const double ei = (pow(MZ, 2) - pow(m_N[j], 2) + pow(m_N[i], 2)) / (2. * MZ);
+           const double ej = (pow(MZ, 2) - pow(m_N[i], 2) + pow(m_N[j], 2)) / (2. * MZ);
+
+           const double gz = g2 / (2. * cosW) * (NN(i, 3 - 1) * NN(j, 3 - 1) - NN(i, 4 - 1) * NN(j, 4 - 1));
+           const double gamma_chi = (p2 > 0. && ei > 0. && ej > 0.) ?
+             sqrt(p2) / (2. * pi * pow(MZ, 2)) * pow(gz, 2) * (ei * ej + p2 / 3. - m_N[i] * m_N[j]) : 0.;
+
+           const auto ci = std::to_string(i + 1);
+           const auto cj = std::to_string(j + 1);
+           gamma.set_BF(gamma_chi * gev_to_mev, 0., "~chi0_" + ci, "~chi0_" + cj);
+        }
     }
 
   }  // namespace DecayBit
