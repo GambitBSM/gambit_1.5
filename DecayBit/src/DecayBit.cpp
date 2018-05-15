@@ -3217,7 +3217,7 @@ namespace Gambit
       for (int i = 0; i <= 3; i += 1) {
         for (int j = i; j <= 3; j += 1) {
           // Phase-space
-          double l = lambda(m[i], m[j], mh);
+          double l = lambda(pow(m[i], 2), pow(m[j], 2), pow(mh, 2));
           if (l <= 0.) {
             continue;
           }
