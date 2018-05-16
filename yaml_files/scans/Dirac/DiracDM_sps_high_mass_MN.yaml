@@ -6,7 +6,7 @@
 
 Parameters:
 
-  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan.yaml
+  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan_HP.yaml
 
   StandardModel_Higgs:
     mH:

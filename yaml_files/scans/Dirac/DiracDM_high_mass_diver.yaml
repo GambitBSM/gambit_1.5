@@ -6,7 +6,7 @@
 
 Parameters:
 
-  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan.yaml
+  StandardModel_SLHA2: !import ../../include/StandardModel_SLHA2_scan_HP.yaml
 
   StandardModel_Higgs:
     mH:
@@ -224,9 +224,11 @@ Scanner:
     diver:
       plugin: diver
       like: LogLike
-      NP: 20000
+      NP: 50000
       verbosity: 1
-      convthresh: 0.0001
+      convthresh: 1E-5
+      jDE: true
+      lambdajDE: true
 
     tw:
       plugin: twalk
