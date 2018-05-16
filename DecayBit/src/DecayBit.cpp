@@ -3208,8 +3208,12 @@ namespace Gambit
           i.e., no changes to production cross sections or any other decays.
        */
        using namespace Pipes::MSSM_inv_Higgs_BF;
-       const double gamma_inv = *Dep::h_gamma_chi0_MSSM_tree;
-       const double gamma_SM = Dep::compute_SM_higgs_decays->width_in_GeV;
+       const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
+       const double mh = MSSM.get(Par::Pole_Mass, "h0_1");
+       const double gamma_inv = *Dep::h_gamma_chi0;
+       DecayTable::Entry SM_h;
+       compute_SM_higgs_decays(SM_h, mh);
+       const double gamma_SM = SM_h.width_in_GeV;
        BF = gamma_inv / (gamma_inv + gamma_SM);
     }
 
@@ -3260,7 +3264,7 @@ namespace Gambit
          @param lnL Log-likelihood
       */
       using namespace Pipes::lnL_Z_inv_SM_2l_MSSM_tree;
-      DecayTable::Entry gamma = *Dep::Z_gamma_inv_SM_2l_MSSM_tree;
+      DecayTable::Entry gamma = *Dep::Z_gamma_inv;
 
       double gamma_inv = gamma.BF("nu_e", "nubar_e");
       gamma_inv += gamma.BF("nu_mu", "nubar_mu");

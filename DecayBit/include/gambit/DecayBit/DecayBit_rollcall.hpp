@@ -806,7 +806,7 @@ START_MODULE
     #define FUNCTION lnL_Z_inv_SM_2l_MSSM_tree
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
-    DEPENDENCY(Z_gamma_inv_SM_2l_MSSM_tree, DecayTable::Entry)
+    DEPENDENCY(Z_gamma_inv, DecayTable::Entry)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
@@ -831,8 +831,8 @@ START_MODULE
 
     #define FUNCTION MSSM_inv_Higgs_BF
     START_FUNCTION(double)
-    DEPENDENCY(h_gamma_chi0_MSSM_tree, double)
-    DEPENDENCY(compute_SM_higgs_decays, DecayTable::Entry)
+    DEPENDENCY(h_gamma_chi0, double)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
