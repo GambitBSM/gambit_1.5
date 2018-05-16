@@ -815,12 +815,27 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_Higgs_invWidth_SMlike
     START_FUNCTION(double)
-    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
-    DEPENDENCY(h_gamma_chi0_MSSM_tree, double)
-    DEPENDENCY(compute_SM_higgs_decays, DecayTable::Entry)
-    DEPENDENCY(Z_gamma_inv_SM_2l_MSSM_tree, DecayTable::Entry)
+    DEPENDENCY(inv_Higgs_BF, double)
     ALLOW_MODELS(SingletDM, SingletDMZ3, MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY inv_Higgs_BF
+  START_CAPABILITY
+
+    #define FUNCTION SingletDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SingletDM, SingletDMZ3)
+    #undef FUNCTION
+
+    #define FUNCTION MSSM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(h_gamma_chi0_MSSM_tree, double)
+    DEPENDENCY(compute_SM_higgs_decays, DecayTable::Entry)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
 #undef MODULE

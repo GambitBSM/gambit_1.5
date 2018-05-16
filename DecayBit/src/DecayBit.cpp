@@ -3239,6 +3239,32 @@ namespace Gambit
       gamma = GF * pow(sw * mw, 2) / (2. * sqrt(2.) * pi) * mh * gamma_no_prefactor;
     }
 
+
+    void SingletDM_inv_Higgs_BF ( double & BF)
+    {
+       /**
+          @brief SingletDM invisible Higgs  BF
+       */
+
+       using namespace Pipes::SingletDM_inv_Higgs_BF;
+       BF = Dep::Higgs_decay_rates->BF("S", "S");
+    }
+
+    void MSSM_inv_Higgs_BF ( double & BF)
+    {
+       /**
+          @brief MSSM invisible Higgs  BF
+
+          @warning This assumes that the Higgs is otherwise SM-like,
+          i.e., no changes to production cross sections or any other decays.
+       */
+
+       using namespace Pipes::MSSM_inv_Higgs_BF;
+       const double gamma_inv = *Dep::h_gamma_chi0_MSSM_tree;
+       const double gamma_SM = Dep::compute_SM_higgs_decays->width_in_GeV;
+       BF = gamma_inv / (gamma_inv + gamma_SM);
+    }
+
     void lnL_Higgs_invWidth_SMlike(double& lnL)
     {
       /**
@@ -3255,22 +3281,12 @@ namespace Gambit
          @warning This typically assumes that the Higgs is otherwise SM-like,
          i.e., no changes to production cross sections or any other decays.
 
+
          @param BF Higgs branching fraction to invisibles
       */
       using namespace Pipes::lnL_Higgs_invWidth_SMlike;
 
-      double BF;
-
-      if (ModelInUse("SingletDM") || ModelInUse("SingletDMZ3")) {
-        BF = Dep::Higgs_decay_rates->BF("S", "S");
-      } else if (ModelInUse("MSSM63atQ") || ModelInUse("MSSM63atMGUT")) {
-        const double gamma_inv = *Dep::h_gamma_chi0_MSSM_tree;
-        const double gamma_SM = Dep::compute_SM_higgs_decays->width_in_GeV;
-        BF = gamma_inv / (gamma_inv + gamma_SM);
-      } else {
-        DecayBit_error().raise(LOCAL_INFO,
-          "cannot calculate lnL_Higgs_invWidth_SMlike in this model");
-      }
+      const double BF = *Dep::inv_Higgs_BF;
 
       if (BF < 0.) {
         DecayBit_error().raise(LOCAL_INFO, "negative BF");
