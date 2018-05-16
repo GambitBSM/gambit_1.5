@@ -125,6 +125,9 @@ ObsLikes:
   - capability: lnL_W_mass
     purpose: LogLike
 
+  - capability: lnL_sinW2
+    purpose: LogLike
+
   - capability: lnL_Z_inv_width
     purpose: LogLike
 

@@ -106,7 +106,7 @@ Scanner:
       plugin: diver
       like: LogLike
       NP: 19200
-      convthresh: 1e-8
+      convthresh: 1e-5
       lambdajDE: false
 
     multinest:
@@ -122,7 +122,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnL_sinW2
-    purpose: Observable
+    purpose: LogLike
 
   - capability: lnL_Z_inv_width
     purpose: LogLike
@@ -275,6 +275,34 @@ ObsLikes:
   - capability: Ut3
     purpose: Observable
 
+  - capability: Ue1_phase
+    purpose: Observable
+
+  - capability: Um1_phase
+    purpose: Observable
+
+  - capability: Ut1_phase
+    purpose: Observable
+
+  - capability: Ue2_phase
+    purpose: Observable
+
+  - capability: Um2_phase
+    purpose: Observable
+
+  - capability: Ut2_phase
+    purpose: Observable
+
+  - capability: Ue3_phase
+    purpose: Observable
+
+  - capability: Um3_phase
+    purpose: Observable
+
+  - capability: Ut3_phase
+    purpose: Observable
+
+
 Rules:
 
   - capability: m_nu
@@ -300,7 +328,7 @@ KeyValues:
     prefer_model_specific_functions: true
 
   likelihood:
-    model_invalid_for_lnlike_below: -5e5
+    model_invalid_for_lnlike_below: -1e10
     debug: false
 
   default_output_path: "./"
