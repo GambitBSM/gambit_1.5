@@ -42,6 +42,7 @@
 #include "gambit/DecayBit/DecayBit_rollcall.hpp"
 #include "gambit/DecayBit/decay_utils.hpp"
 #include "gambit/DecayBit/SM_Z.hpp"
+#include "gambit/DecayBit/MSSM_H.hpp"
 #include "gambit/Utils/version.hpp"
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
@@ -3146,27 +3147,14 @@ namespace Gambit
       return daFunk::interp("BR", table["BR"], table["Delta_chi2"]);
     }
     
-    double lambda(double x, double y, double z)
-    {
-      /**
-         @brief Phase-space function (Kallen function)
-
-         \f[
-         \lambda(x, y; z) = (1 - x / z - y / z)^2 - 4 x y / z^2
-         \f]
-      */
-      return pow(1. - x / z - y / z, 2) - 4. * x * y / pow(z, 2);
-    }
-
     void h_gamma_chi0_MSSM_tree(double& gamma)
     {
       /**
          @brief Width in GeV for Higgs decays to neutralinos
 
-         We use Eq. (2.56) of 
-         <a href="https://arxiv.org/pdf/hep-ph/0503173.pdf">0503173</a>
-
          @warning Tree-level formulas
+         @warning Assumes decoupling limit for Higgs mixing
+
          @param gamma \f$\textrm{BR}(h\to\chi^0\chi^0)\f$
       */
       using namespace Pipes::h_gamma_chi0_MSSM_tree;
@@ -3193,50 +3181,13 @@ namespace Gambit
       const double mh = MSSM.get(Par::Pole_Mass, "h0_1");
       const double mw = SM.mW;
       const double GF = *Param["GF"];
-
-      // Weinberg angle
-      const double sw = MSSM.safeget(Par::dimensionless, "sinW2");
-      const double cw = sqrt(1. - pow(sw, 2));
-      const double tw = sw / cw;
+      const double sw2 = MSSM.safeget(Par::dimensionless, "sinW2");
 
       // Higgs mixing angle
       const double beta = atan(MSSM.safeget(Par::dimensionless, "tanbeta"));
       const double alpha = beta - 0.5 * pi;
-      const double ca = cos(alpha);
-      const double sa = sin(alpha);
-
-      // Eq. (1.113)
-      const double e2 = -sa;
-      const double d2 = -ca;
-
-      double gamma_no_prefactor = 0.;
-
-      // Sum over all neutralinos
-
-      for (int i = 0; i <= 3; i += 1) {
-        for (int j = i; j <= 3; j += 1) {
-          // Phase-space
-          double l = lambda(pow(m[i], 2), pow(m[j], 2), pow(mh, 2));
-          if (l <= 0.) {
-            continue;
-          }
-
-          // Eq. (1.112)
-          const double gL = 0.5 / sw * (
-            (Z[j][1] - tw * Z[j][0]) * (e2 * Z[i][2] + d2 * Z[i][3]) +
-            (Z[i][1] - tw * Z[i][0]) * (e2 * Z[j][2] + d2 * Z[j][3]));
-
-          const double gR = e2 * gL;
-          const double delta = (i == j) ? 1. : 0.;
-
-          // Eq. (2.56) without common factor
-          gamma_no_prefactor += sqrt(l) / (1. + delta) * (
-            (pow(gL, 2) + pow(gR, 2)) * (1. - (pow(m[i], 2) + pow(m[j], 2)) / pow(mh, 2))
-            -4. * gL * gR * m[i] * m[j] / pow(mh, 2));
-        }
-      }
-      // Eq. (2.56) with common factor
-      gamma = GF * pow(sw * mw, 2) / (2. * sqrt(2.) * pi) * mh * gamma_no_prefactor;
+      
+      gamma = MSSM_H::gamma_h_chi_0(0, 0, m, Z, alpha, mh, mw, GF, sw2);
     }
 
     void lnL_Higgs_invWidth_SMlike(double& lnL)
