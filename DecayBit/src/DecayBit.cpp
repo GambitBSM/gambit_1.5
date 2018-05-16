@@ -3166,7 +3166,7 @@ namespace Gambit
       // Neutralino masses with phases
       std::array<double, 4> m;
       for (int i = 0; i <= 3; i += 1) {
-        m[i] = spec.get(Par::Pole_Mass, "~chi0_" + std::to_string(i + 1));
+        m[i] = spec.get(Par::Pole_Mass, "~chi0", i + 1);
       }
 
       // Neutralino mixing matrix

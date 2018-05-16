@@ -11,6 +11,8 @@
 ///
 ///  I refer to equations in v2 (https://arxiv.org/abs/hep-ph/0503173v2).
 ///
+///  \example MSSM_H.cpp
+///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
