@@ -109,6 +109,8 @@ Scanner:
       NP: 19200
       convthresh: 1e-5
       lambdajDE: false
+      init_population_strategy: 1
+      max_initialisation_attempts: 5000
 
     multinest:
       plugin: multinest
