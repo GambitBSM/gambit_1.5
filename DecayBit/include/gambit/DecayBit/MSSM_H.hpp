@@ -25,6 +25,7 @@
 #define DECAYBIT_INCLUDE_GAMBIT_DECAYBIT_MSSM_H_HPP_
 
 #include <cmath>
+#include <array>
 
 namespace MSSM_H {
 
@@ -72,8 +73,6 @@ double gamma_h_chi_0(int i,
   const double e2 = -std::sin(alpha);
   const double d2 = -std::cos(alpha);
 
-  double gamma_no_prefactor = 0.;
-
   // Phase-space
   double l = lambda(pow(m[i], 2), pow(m[j], 2), pow(mh, 2));
   if (l <= 0.) {
@@ -86,15 +85,14 @@ double gamma_h_chi_0(int i,
     (Z[i][1] - tw * Z[i][0]) * (e2 * Z[j][2] + d2 * Z[j][3]));
   const double gR = e2 * gL;
 
-  const double delta = (i == j) ? 1. : 0.;
-
   // Eq. 2.56 without common factor
-  gamma_no_prefactor += std::sqrt(l) / (1. + delta) * ((
+  const double delta = (i == j) ? 1. : 0.;
+  const double gamma_no_prefactor = std::sqrt(l) / (1. + delta) * ((
     pow(gL, 2) + pow(gR, 2)) * (1. - (pow(m[i], 2) + pow(m[j], 2)) / pow(mh, 2))
     -4. * gL * gR * m[i] * m[j] / pow(mh, 2));
 
   // Eq. 2.56 with common factor
-  return GF * pow(sw * mw, 2) / (2. * sqrt(2.) * M_PI) * mh * gamma_no_prefactor;
+  return GF * sw2 * pow(mw, 2) / (2. * M_SQRT2 * M_PI) * mh * gamma_no_prefactor;
 }
 }  // namespace MSSM_H
 
