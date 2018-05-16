@@ -792,7 +792,7 @@ namespace Gambit
           G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2))) / (r_e_pi * pow((1.0 - r_e_pi), 2));
         }
         else
-          G_mu_pi[i] = 0;
+          G_e_pi[i] = 0;
 
         e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
         mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
