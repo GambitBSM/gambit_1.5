@@ -49,7 +49,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-// #define COLLIDERBIT_DEBUG
+#define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -1916,7 +1916,7 @@ namespace Gambit
           #endif
 
           // Construct vectors of SR numbers
-          Eigen::VectorXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
+          Eigen::ArrayXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
             const SignalRegionData srData = adata[SR];
@@ -1941,11 +1941,9 @@ namespace Gambit
           const Eigen::ArrayXd sqrtEb = Eb.sqrt();
           const Eigen::MatrixXd Vb = eig_b.eigenvectors();
           const Eigen::MatrixXd Vbinv = Vb.inverse();
-          // #ifdef COLLIDERBIT_DEBUG
-          // cout << debug_prefix() << "b covariance eigenvectors = " << endl << Vb << endl << "and eigenvalues = " << endl << Eb << endl;
-          // #endif
 
           // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
+          /// @todo Is this the best way, or should we just sample the s numbers independently and then be able to completely cache the cov matrix diagonalisation?
           const Eigen::MatrixXd srcov_s = abs_unc_s.array().square().matrix().asDiagonal();
           const Eigen::MatrixXd srcov_sb = adata.srcov + srcov_s;
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_sb(srcov_sb);
@@ -1953,62 +1951,117 @@ namespace Gambit
           const Eigen::ArrayXd sqrtEsb = Esb.sqrt();
           const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
           const Eigen::MatrixXd Vsbinv = Vsb.inverse();
-          // #ifdef COLLIDERBIT_DEBUG
-          // cout << debug_prefix() << "s+b covariance eigenvectors = " << endl << Vsb << endl << "and eigenvalues = " << endl << Esb << endl;
-          // #endif
 
 
           ///////////////////
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          static const size_t NSAMPLE = runOptions->getValueOrDef<int>(100000, "covariance_samples");  ///< @todo Tweak default value!
+          static const double CONVERGENCE_TOLERANCE = runOptions->getValueOrDef<double>(2e-3, "covariance_marg_convthres");
+          // The default choice for the first batch size is such that 1/sqrt(NSAMPLE) <= CONVERGENCE_TOLERANCE is satisfied right away 
+          static const size_t nsample_input = runOptions->getValueOrDef<size_t>((size_t) ceil(1./pow(CONVERGENCE_TOLERANCE,2)), "covariance_nsamples_start");
+          size_t NSAMPLE = nsample_input;
 
-          // std::normal_distribution<> unitnormdbn{0,1};
-          Eigen::VectorXd llrsums = Eigen::VectorXd::Zero(adata.size());
+          double rel_diff = 1;
+          double ana_dll_prev = 0;
+          double ana_dll = 0;
+          double llrsum_prev = 0;
+          double llrsum = 0;
+          bool first_iteration = true;
 
-          #pragma omp parallel
+          // Check relative difference between independent estimates
+          // and protect against premature convergence due to statistical fluctuations.
+          while (rel_diff > CONVERGENCE_TOLERANCE || 1.0/sqrt(NSAMPLE) > CONVERGENCE_TOLERANCE) 
           {
-            std::normal_distribution<> unitnormdbn{0,1};
-            Eigen::VectorXd llrsums_private = Eigen::VectorXd::Zero(adata.size());
+            Eigen::ArrayXd llrsums = Eigen::ArrayXd::Zero(adata.size());
 
-            #pragma omp for nowait
-            for (size_t i = 0; i < NSAMPLE; ++i) {
+            /// @note How to correct negative rates? Discard (scales badly), set to
+            /// epsilon (= discontinuous & unphysical pdf), transform to log-space
+            /// (distorts the pdf quite badly), or something else (skew term)?
+            /// We're using the "set to epsilon" version for now.
+            ///
+            /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
 
-              Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
-              for (size_t j = 0; j < adata.size(); ++j) {
-                norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
-                norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
-              }
-
-              // Rotate rate deltas into the SR basis and shift by SR mean rates
-              const Eigen::VectorXd n_pred_b_sample = n_pred_b + Vb*norm_sample_b;
-              const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + Vsb*norm_sample_sb;
-
-              // Calculate Poisson LLR and add to aggregated LL calculation
-              for (size_t j = 0; j < adata.size(); ++j) {
-                /// @note How to correct negative rates? Discard (scales badly), set to
-                /// epsilon (= discontinuous & unphysical pdf), transform to log-space
-                /// (distorts the pdf quite badly), or something else (skew term)?
-                /// We're using the "set to epsilon" version for now.
-                ///
-                /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
-                const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
-                const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
-                const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-                llrsums_private(j) += llr_j;
-              }
-
-            }
-
-            #pragma omp critical
+            const bool COVLOGNORMAL = false;
+            if (!COVLOGNORMAL) 
             {
-              for (size_t j = 0; j < adata.size(); ++j) { llrsums(j) += llrsums_private(j); }
-            }
-          } // End: omp parallel
 
-          // Calculate sum of expected LLRs
-          const double ana_dll = llrsums.sum() / (double)NSAMPLE;
+              #pragma omp parallel
+              {
+                std::normal_distribution<> unitnormdbn{0,1};
+                Eigen::ArrayXd llrsums_private = Eigen::ArrayXd::Zero(adata.size());
+
+                #pragma omp for nowait
+
+                // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
+                for (size_t i = 0; i < NSAMPLE; ++i) {
+
+                  Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
+                  for (size_t j = 0; j < adata.size(); ++j) {
+                    norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
+                    norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
+                  }
+
+                  // Rotate rate deltas into the SR basis and shift by SR mean rates
+                  const Eigen::VectorXd n_pred_b_sample = n_pred_b + (Vb*norm_sample_b).array();
+                  const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + (Vsb*norm_sample_sb).array();
+
+                  // Calculate Poisson LLR and add to aggregated LL calculation
+                  for (size_t j = 0; j < adata.size(); ++j) {
+                    const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
+                    const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
+                    const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                    llrsums_private(j) += llr_j;
+                  }
+                }
+
+                #pragma omp critical
+                {
+                  for (size_t j = 0; j < adata.size(); ++j) { llrsums(j) += llrsums_private(j); }
+                }
+
+              } // End omp parallel
+
+            }  // End if !COVLOGNORMAL
+
+
+            // 
+            // *** Insert COVLOGNORMAL case here ***
+            // 
+
+
+            // Calculate sum of expected LLRs and compare to previous independent batch
+            llrsum = llrsums.sum();
+            if (first_iteration)  // The first round must be generated twice
+            {
+              llrsum_prev = llrsum;
+              first_iteration = false;
+            } 
+            else 
+            {
+              ana_dll_prev = llrsum_prev / (double)NSAMPLE;
+              ana_dll = llrsum / (double)NSAMPLE;
+              rel_diff = fabs((ana_dll_prev - ana_dll)/ana_dll);  // Relative convergence check
+
+              // Update variables 
+              llrsum_prev += llrsum;  // Aggregate result. This doubles the effective batch size for llrsum_prev.
+              NSAMPLE *=2;  // This ensures that the  next batch for llrsum is as big as the current batch size for llrsum_prev.
+            }
+
+            #ifdef COLLIDERBIT_DEBUG
+              cout << debug_prefix() << "At the end of current iteration: " << endl;
+              cout << debug_prefix() << "rel_diff: " << rel_diff << "   ana_dll_prev: " << ana_dll_prev << "   ana_dll: " << ana_dll << endl;
+              cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
+              cout << debug_prefix() << endl;
+            #endif
+          }  // End while loop
+
+          // Combine the independent estimates ana_dll and ana_dll_prev. 
+          // Use equal weights since the estimates are based on equal batch sizes.
+          ana_dll = 0.5*(ana_dll + ana_dll_prev);
+          #ifdef COLLIDERBIT_DEBUG
+            cout << debug_prefix() << "Combined estimate: ana_dll: " << ana_dll << "   (based on 2*NSAMPLE=" << 2*NSAMPLE << " samples)" << endl;
+          #endif
 
           // Check for problem
           if (Utils::isnan(ana_dll))
@@ -2036,55 +2089,6 @@ namespace Gambit
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name << "_DeltaLogLike : " << ana_dll << endl;
           #endif
-
-
-          ////////////////////
-
-
-          // const double n_pred_exact = 0;
-
-          // // Rotate the number vectors into the diagonal bases (in 2-element arrays, for the two bases)
-          // const Eigen::VectorXd n_obs_prime[2] = { Vb*n_obs, Vsb*n_obs };
-          // const Eigen::VectorXd n_pred_prime[2] = { Vb*n_pred_b, Vsb*n_pred_sb };
-          // const Eigen::VectorXd abs_unc2_prime[2] = { eig_b.eigenvalues(), eig_sb.eigenvalues() };
-
-          // // Sum the LLs over the b and sb transformed SRs, to compute the total analysis dLL
-          // /// @note There is no 1-to-1 mapping between b and sb SRs, but sum dLL = sum(LLb-LLsb) = sum(LLb)-sum(LLsb) over all SR indices
-          // for (size_t i = 0; i < 2; ++i) // basis: i=0 -> b-only basis, i=1 -> s+b basis
-          // {
-          //   for (size_t j = 0; j < adata.size(); ++j) // dimension/SRindex
-          //   {
-
-          //     // Observed number as a rounded integer, for use in Poisson functions
-          //     /// @todo More conservative to always round the observed downward, i.e. floor()?
-          //     const int n_obs_int = (int) round(n_obs_prime[i](j));
-
-          //     // Inexact predicted rate
-          //     const double n_pred_inexact = n_pred_prime[i](j);
-
-          //     // Relative error, for nulike marginaliser interface
-          //     const double frac_unc = sqrt(abs_unc2_prime[i](j)) / (n_pred_exact + n_pred_inexact);
-
-          //     // We need the positive direction of this rotation
-          //     /// @todo Guaranteed all +ve or all -ve? Hope so...
-          //     assert((n_obs_int >= 0 && n_pred_inexact >= 0 && frac_unc >= 0) ||
-          //            (n_obs_int <= 0 && n_pred_inexact <= 0 && frac_unc <= 0));
-
-          //     // Marginalise over systematic uncertainties on mean rates
-          //     // Use a log-normal or Gaussian distribution for the nuisance parameter, as requested
-          //     auto marginaliser = (*BEgroup::lnlike_marg_poisson == "lnlike_marg_poisson_lognormal_error")
-          //       ? BEreq::lnlike_marg_poisson_lognormal_error : BEreq::lnlike_marg_poisson_gaussian_error;
-          //     // cout << "### " << n_obs_int << ", " << n_pred_exact << ", " << n_pred_inexact << ", " << frac_unc << endl;
-          //     const double ll_obs = marginaliser(abs(n_obs_int), fabs(n_pred_exact), fabs(n_pred_inexact), fabs(frac_unc));
-
-          //     // Compute dLL contribution (-1*LL  for s+b) and add it to the total analysis dLL
-          //     ana_dll += (i == 0 ? 1 : -1) * ll_obs;
-
-          //   }
-          // }
-
-          // // Set this analysis' total dLL (with conversion to more negative dll = more exclusion convention)
-          // result[adata.analysis_name + "_DeltaLogLike"] = -ana_dll;
 
         }
 
