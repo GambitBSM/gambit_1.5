@@ -180,11 +180,11 @@ class TwoLoop {
     delta_alpha_OS{delta_alpha_OS}
     {
     /**
-       @param mh_OS - Higgs mass in OS scheme
-       @param mt_OS - Top quark mass in OS scheme
-       @param MZ_OS - \f$Z\f$-mass in OS scheme
-       @param alpha_s_MSbar_MZ - Strong coupling in MS-bar scheme at \f$Q = M_Z\f$
-       @param delta_alpha_OS - \f$\Delta\alpha\f$ parameter in OS scheme. Defined on p9
+       @param mh_OS Higgs mass in OS scheme
+       @param mt_OS Top quark mass in OS scheme
+       @param MZ_OS \f$Z\f$-mass in OS scheme
+       @param alpha_s_MSbar_MZ Strong coupling in MS-bar scheme at \f$Q = M_Z\f$
+       @param delta_alpha_OS \f$\Delta\alpha\f$ parameter in OS scheme. Defined on p9
     */
     L_H = std::log(mh_OS / hat.mh_OS);
     delta_H = mh_OS / hat.mh_OS - 1.;
