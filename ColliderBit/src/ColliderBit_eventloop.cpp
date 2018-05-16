@@ -2022,8 +2022,7 @@ namespace Gambit
               } // End omp parallel
             }  // End if !COVLOGNORMAL
 
-            // _Anders
-
+            /// @todo Check that this log-normal sampling works as expected.
             else // COVLOGNORMAL
             { 
 
