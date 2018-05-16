@@ -74,6 +74,7 @@ double gamma_h_chi_0(int i,
   // Eq. 1.113
   const double e2 = -std::sin(alpha);
   const double d2 = -std::cos(alpha);
+  const double eps_2 = 1.;
 
   // Phase-space
   double l = lambda(pow(m[i], 2), pow(m[j], 2), pow(mh, 2));
@@ -81,20 +82,20 @@ double gamma_h_chi_0(int i,
     return 0.;
   }
 
-  // Eq. 1.112
-  const double gL = 0.5 / sw * (
+  // Eq. 1.112 (without \f$\sin\theta_W\f$ which cancels)
+  const double gL = 0.5 * (
     (Z[j][1] - tw * Z[j][0]) * (e2 * Z[i][2] + d2 * Z[i][3]) +
     (Z[i][1] - tw * Z[i][0]) * (e2 * Z[j][2] + d2 * Z[j][3]));
-  const double gR = e2 * gL;
+  const double gR = eps_2 * gL;
 
-  // Eq. 2.56 without common factor
+  // Eq. 2.56 without common factor (without f$\sin\theta_W\f$ which cancels)
   const double delta = (i == j) ? 1. : 0.;
   const double gamma_no_prefactor = std::sqrt(l) / (1. + delta) * ((
     pow(gL, 2) + pow(gR, 2)) * (1. - (pow(m[i], 2) + pow(m[j], 2)) / pow(mh, 2))
     -4. * gL * gR * m[i] * m[j] / pow(mh, 2));
 
   // Eq. 2.56 with common factor
-  return GF * sw2 * pow(mw, 2) / (2. * M_SQRT2 * M_PI) * mh * gamma_no_prefactor;
+  return GF * pow(mw, 2) / (2. * M_SQRT2 * M_PI) * mh * gamma_no_prefactor;
 }
 }  // namespace MSSM_H
 
