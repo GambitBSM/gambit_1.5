@@ -107,7 +107,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-8
+      convthresh: 1e-5
       lambdajDE: false
 
     multinest:
@@ -249,28 +249,55 @@ ObsLikes:
   - capability: Ue1
     purpose: Observable
 
+  - capability: Ue1_phase
+    purpose: Observable
+
   - capability: Um1
+    purpose: Observable
+
+  - capability: Um1_phase
     purpose: Observable
 
   - capability: Ut1
     purpose: Observable
 
+  - capability: Ut1_phase
+    purpose: Observable
+
   - capability: Ue2
+    purpose: Observable
+
+  - capability: Ue2_phase
     purpose: Observable
 
   - capability: Um2
     purpose: Observable
 
+  - capability: Um2_phase
+    purpose: Observable
+
   - capability: Ut2
+    purpose: Observable
+
+  - capability: Ut2_phase
     purpose: Observable
 
   - capability: Ue3
     purpose: Observable
 
+  - capability: Ue3_phase
+    purpose: Observable
+
   - capability: Um3
     purpose: Observable
 
+  - capability: Um3_phase
+    purpose: Observable
+
   - capability: Ut3
+    purpose: Observable
+
+  - capability: Ut3_phase
     purpose: Observable
 
 Rules:

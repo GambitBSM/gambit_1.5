@@ -152,9 +152,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Ue1_phase
+  START_CAPABILITY
+    #define FUNCTION Ue1_phase
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY Um1
   START_CAPABILITY
     #define FUNCTION Um1
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Um1_phase
+  START_CAPABILITY
+    #define FUNCTION Um1_phase
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
@@ -168,9 +184,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Ut1_phase
+  START_CAPABILITY
+    #define FUNCTION Ut1_phase
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY Ue2
   START_CAPABILITY
     #define FUNCTION Ue2
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Ue2_phase
+  START_CAPABILITY
+    #define FUNCTION Ue2_phase
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
@@ -184,9 +216,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Um2_phase
+  START_CAPABILITY
+    #define FUNCTION Um2_phase
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY Ut2
   START_CAPABILITY
     #define FUNCTION Ut2
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Ut2_phase
+  START_CAPABILITY
+    #define FUNCTION Ut2_phase
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION
@@ -200,6 +248,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Ue3_phase
+  START_CAPABILITY
+    #define FUNCTION Ue3_phase
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY Um3
   START_CAPABILITY
     #define FUNCTION Um3
@@ -208,9 +264,25 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Um3_phase
+  START_CAPABILITY
+    #define FUNCTION Um3_phase
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY Ut3
   START_CAPABILITY
     #define FUNCTION Ut3
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Ut3_phase
+  START_CAPABILITY
+    #define FUNCTION Ut3_phase
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     #undef FUNCTION

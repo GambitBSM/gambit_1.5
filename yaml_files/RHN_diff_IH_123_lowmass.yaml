@@ -252,28 +252,55 @@ ObsLikes:
   - capability: Ue1
     purpose: Observable
 
+  - capability: Ue1_phase
+    purpose: Observable
+
   - capability: Um1
+    purpose: Observable
+
+  - capability: Um1_phase
     purpose: Observable
 
   - capability: Ut1
     purpose: Observable
 
+  - capability: Ut1_phase
+    purpose: Observable
+
   - capability: Ue2
+    purpose: Observable
+
+  - capability: Ue2_phase
     purpose: Observable
 
   - capability: Um2
     purpose: Observable
 
+  - capability: Um2_phase
+    purpose: Observable
+
   - capability: Ut2
+    purpose: Observable
+
+  - capability: Ut2_phase
     purpose: Observable
 
   - capability: Ue3
     purpose: Observable
 
+  - capability: Ue3_phase
+    purpose: Observable
+
   - capability: Um3
     purpose: Observable
 
+  - capability: Um3_phase
+    purpose: Observable
+
   - capability: Ut3
+    purpose: Observable
+
+  - capability: Ut3_phase
     purpose: Observable
 
 Rules:
@@ -301,7 +328,7 @@ KeyValues:
     prefer_model_specific_functions: true
 
   likelihood:
-    model_invalid_for_lnlike_below: -5e5
+    model_invalid_for_lnlike_below: -1e10
     debug: false
 
   default_output_path: "."

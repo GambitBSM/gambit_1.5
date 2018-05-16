@@ -1665,7 +1665,12 @@ namespace Gambit
         logger() << msg.str() << EOM;
         invalid_point().raise(msg.str());
       }
+    }
 
+    void Ue1_phase(double& Ue1_p)
+    {
+      using namespace Pipes::Ue1_phase;
+      Ue1_p = std::arg((*Dep::SeesawI_Theta)(0,0));
     }
 
     void Um1(double& Um1_sq)
@@ -1674,10 +1679,22 @@ namespace Gambit
       Um1_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,0);
     }
 
+    void Um1_phase(double& Um1_p)
+    {
+      using namespace Pipes::Um1_phase;
+      Um1_p = std::arg((*Dep::SeesawI_Theta)(1,0));
+    }
+
     void Ut1(double& Ut1_sq)
     {
       using namespace Pipes::Ut1;
       Ut1_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,0);
+    }
+
+    void Ut1_phase(double& Ut1_p)
+    {
+      using namespace Pipes::Ut1_phase;
+      Ut1_p = std::arg((*Dep::SeesawI_Theta)(2,0));
     }
 
     void Ue2(double& Ue2_sq)
@@ -1686,10 +1703,22 @@ namespace Gambit
       Ue2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(0,1);
     }
 
+    void Ue2_phase(double& Ue2_p)
+    {
+      using namespace Pipes::Ue2_phase;
+      Ue2_p = std::arg((*Dep::SeesawI_Theta)(0,1));
+    }
+
     void Um2(double& Um2_sq)
     {
       using namespace Pipes::Um2;
       Um2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,1);
+    }
+
+    void Um2_phase(double& Um2_p)
+    {
+      using namespace Pipes::Um2_phase;
+      Um2_p = std::arg((*Dep::SeesawI_Theta)(1,1));
     }
 
     void Ut2(double& Ut2_sq)
@@ -1698,10 +1727,22 @@ namespace Gambit
       Ut2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,1);
     }
 
+    void Ut2_phase(double& Ut2_p)
+    {
+      using namespace Pipes::Ut2_phase;
+      Ut2_p = std::arg((*Dep::SeesawI_Theta)(2,1));
+    }
+
     void Ue3(double& Ue3_sq)
     {
       using namespace Pipes::Ue3;
       Ue3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(0,2);
+    }
+
+    void Ue3_phase(double& Ue3_p)
+    {
+      using namespace Pipes::Ue3_phase;
+      Ue3_p = std::arg((*Dep::SeesawI_Theta)(0,2));
     }
 
     void Um3(double& Um3_sq)
@@ -1710,10 +1751,22 @@ namespace Gambit
       Um3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,2);
     }
 
+    void Um3_phase(double& Um3_p)
+    {
+      using namespace Pipes::Um3_phase;
+      Um3_p = std::arg((*Dep::SeesawI_Theta)(1,2));
+    }
+
     void Ut3(double& Ut3_sq)
     {
       using namespace Pipes::Ut3;
       Ut3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,2);
+    }
+
+    void Ut3_phase(double& Ut3_p)
+    {
+      using namespace Pipes::Ut3_phase;
+      Ut3_p = std::arg((*Dep::SeesawI_Theta)(2,2));
     }
 
     void perturbativity_likelihood(double &lnL)
