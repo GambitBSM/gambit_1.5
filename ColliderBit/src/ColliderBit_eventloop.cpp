@@ -2019,15 +2019,55 @@ namespace Gambit
                 {
                   for (size_t j = 0; j < adata.size(); ++j) { llrsums(j) += llrsums_private(j); }
                 }
-
               } // End omp parallel
-
             }  // End if !COVLOGNORMAL
 
+            // _Anders
 
-            // 
-            // *** Insert COVLOGNORMAL case here ***
-            // 
+            else // COVLOGNORMAL
+            { 
+
+              const Eigen::ArrayXd ln_n_pred_b = n_pred_b.log();
+              const Eigen::ArrayXd ln_n_pred_sb = n_pred_sb.log();
+              const Eigen::ArrayXd ln_sqrtEb = (n_pred_b + sqrtEb).log() - ln_n_pred_b;
+              const Eigen::ArrayXd ln_sqrtEsb = (n_pred_sb + sqrtEsb).log() - ln_n_pred_sb;
+
+              #pragma omp parallel
+              {
+                std::normal_distribution<> unitnormdbn{0,1};
+                Eigen::ArrayXd llrsums_private = Eigen::ArrayXd::Zero(adata.size());
+
+                #pragma omp for nowait
+
+                // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
+                for (size_t i = 0; i < NSAMPLE; ++i) {
+                  Eigen::VectorXd ln_norm_sample_b(adata.size()), ln_norm_sample_sb(adata.size());
+                  for (size_t j = 0; j < adata.size(); ++j) {
+                    ln_norm_sample_b(j) = ln_sqrtEb(j) * unitnormdbn(Random::rng());
+                    ln_norm_sample_sb(j) = ln_sqrtEsb(j) * unitnormdbn(Random::rng());
+                  }
+
+                  // Rotate rate deltas into the SR basis and shift by SR mean rates
+                  const Eigen::ArrayXd delta_ln_n_pred_b_sample = Vb*ln_norm_sample_b;
+                  const Eigen::ArrayXd delta_ln_n_pred_sb_sample = Vsb*ln_norm_sample_sb;
+                  const Eigen::ArrayXd n_pred_b_sample = (ln_n_pred_b + delta_ln_n_pred_b_sample).exp();
+                  const Eigen::ArrayXd n_pred_sb_sample = (ln_n_pred_sb + delta_ln_n_pred_sb_sample).exp();
+
+                  // Calculate Poisson LLR and add to aggregated LL calculation
+                  for (size_t j = 0; j < adata.size(); ++j) {
+                    const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
+                    const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< shouldn't be needed in log-space sampling
+                    const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
+                    llrsums_private(j) += llr_j;
+                  }
+                }
+
+                #pragma omp critical
+                {
+                  for (size_t j = 0; j < adata.size(); ++j) { llrsums(j) += llrsums_private(j); }
+                }
+              } // End omp parallel
+            }
 
 
             // Calculate sum of expected LLRs and compare to previous independent batch
@@ -2049,7 +2089,6 @@ namespace Gambit
             }
 
             #ifdef COLLIDERBIT_DEBUG
-              cout << debug_prefix() << "At the end of current iteration: " << endl;
               cout << debug_prefix() << "rel_diff: " << rel_diff << "   ana_dll_prev: " << ana_dll_prev << "   ana_dll: " << ana_dll << endl;
               cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
               cout << debug_prefix() << endl;
