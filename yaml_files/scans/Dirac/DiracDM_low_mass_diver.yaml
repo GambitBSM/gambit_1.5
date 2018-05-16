@@ -196,7 +196,7 @@ Rules:
   - capability: DiracDM_spectrum
     function: get_DiracDM_spectrum
     options: 
-      impose_EFT_validity: false
+      impose_EFT_validity: true
 
 ##############################################################################################
 Printer:

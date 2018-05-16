@@ -194,7 +194,7 @@ Rules:
   - capability: MajoranaDM_spectrum
     function: get_MajoranaDM_spectrum
     options:
-      impose_EFT_validity: false
+      impose_EFT_validity: true
 
 ##############################################################################################
 Printer:

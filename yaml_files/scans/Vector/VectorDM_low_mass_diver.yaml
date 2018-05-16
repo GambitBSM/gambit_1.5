@@ -195,7 +195,7 @@ Rules:
   - capability: VectorDM_spectrum
     function: get_VectorDM_spectrum
     options:
-      impose_pert_unitarity: false
+      impose_pert_unitarity: true
 
 ##############################################################################################
 Printer:
