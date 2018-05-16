@@ -3186,30 +3186,27 @@ namespace Gambit
       // Higgs mixing angle
       const double beta = atan(MSSM.safeget(Par::dimensionless, "tanbeta"));
       const double alpha = beta - 0.5 * pi;
-      
+
       gamma = MSSM_H::gamma_h_chi_0(0, 0, m, Z, alpha, mh, mw, GF, sw2);
     }
 
-
-    void SingletDM_inv_Higgs_BF ( double & BF)
+    void SingletDM_inv_Higgs_BF(double & BF)
     {
        /**
-          @brief SingletDM invisible Higgs  BF
+          @brief SingletDM invisible Higgs BF
        */
-
        using namespace Pipes::SingletDM_inv_Higgs_BF;
        BF = Dep::Higgs_decay_rates->BF("S", "S");
     }
 
-    void MSSM_inv_Higgs_BF ( double & BF)
+    void MSSM_inv_Higgs_BF(double & BF)
     {
        /**
-          @brief MSSM invisible Higgs  BF
+          @brief MSSM invisible Higgs BF
 
           @warning This assumes that the Higgs is otherwise SM-like,
           i.e., no changes to production cross sections or any other decays.
        */
-
        using namespace Pipes::MSSM_inv_Higgs_BF;
        const double gamma_inv = *Dep::h_gamma_chi0_MSSM_tree;
        const double gamma_SM = Dep::compute_SM_higgs_decays->width_in_GeV;
