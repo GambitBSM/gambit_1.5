@@ -3159,14 +3159,14 @@ namespace Gambit
     void MSSM_inv_Higgs_BF(double & BF)
     {
       /**
-         @brief Branching fraction for Higgs decays to neutralinos
+         @brief Branching fraction for Higgs decays to the lightest neutralinos
 
          @warning Tree-level formulas
          @warning Assumes decoupling limit for Higgs mixing
          @warning Only includes neutralinos, charginos and SM-like width in
          total width
 
-         @param gamma \f$\textrm{BR}(h\to\chi^0\chi^0)\f$
+         @param gamma \f$\textrm{BR}(h\to\chi^0_1\chi^0_1)\f$
       */
       using namespace Pipes::MSSM_inv_Higgs_BF;
       const Spectrum& spec = *Dep::MSSM_spectrum;
