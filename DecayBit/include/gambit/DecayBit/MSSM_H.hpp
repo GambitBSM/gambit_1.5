@@ -61,7 +61,7 @@ double gamma_h_chi(std::array<double, 2> m,
 
   // Phase-space
 
-  if (std::fabs(m[0]) + std::fabs(m[1]) < mh) {
+  if (std::fabs(m[0]) + std::fabs(m[1]) >= mh) {
     return 0.;
   }
 
