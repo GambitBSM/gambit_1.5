@@ -792,15 +792,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
   
-  #define CAPABILITY h_gamma_chi0
-  START_CAPABILITY
-    #define FUNCTION h_gamma_chi0_MSSM_tree
-    START_FUNCTION(double)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY lnL_Z_inv
   START_CAPABILITY
     #define FUNCTION lnL_Z_inv_SM_2l_MSSM_tree
@@ -831,7 +822,6 @@ START_MODULE
 
     #define FUNCTION MSSM_inv_Higgs_BF
     START_FUNCTION(double)
-    DEPENDENCY(h_gamma_chi0, double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION

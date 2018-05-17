@@ -3147,33 +3147,58 @@ namespace Gambit
       return daFunk::interp("BR", table["BR"], table["Delta_chi2"]);
     }
     
-    void h_gamma_chi0_MSSM_tree(double& gamma)
+    void SingletDM_inv_Higgs_BF(double & BF)
+    {
+       /**
+          @brief SingletDM invisible Higgs BF
+       */
+       using namespace Pipes::SingletDM_inv_Higgs_BF;
+       BF = Dep::Higgs_decay_rates->BF("S", "S");
+    }
+
+    void MSSM_inv_Higgs_BF(double & BF)
     {
       /**
-         @brief Width in GeV for Higgs decays to neutralinos
+         @brief Branching fraction for Higgs decays to neutralinos
 
          @warning Tree-level formulas
          @warning Assumes decoupling limit for Higgs mixing
+         @warning Only includes neutralinos, charginos and SM-like width in
+         total width
 
          @param gamma \f$\textrm{BR}(h\to\chi^0\chi^0)\f$
       */
-      using namespace Pipes::h_gamma_chi0_MSSM_tree;
-
+      using namespace Pipes::MSSM_inv_Higgs_BF;
       const Spectrum& spec = *Dep::MSSM_spectrum;
       const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
       const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
 
       // Neutralino masses with phases
-      std::array<double, 4> m;
+      std::array<double, 4> m_0;
       for (int i = 0; i <= 3; i += 1) {
-        m[i] = spec.get(Par::Pole_Mass, "~chi0", i + 1);
+        m_0[i] = spec.get(Par::Pole_Mass, "~chi0", i + 1);
       }
 
       // Neutralino mixing matrix
       std::array<std::array<double, 4>, 4> Z;
       for (int i = 0; i <= 3; i += 1) {
-        for (int j = i; j <= 3; j += 1) {
+        for (int j = 0; j <= 3; j += 1) {
           Z[i][j] = MSSM.get(Par::Pole_Mixing, "~chi0", i + 1, j + 1);
+        }
+      }
+
+      // Chargino masses
+      std::array<double, 2> m_pm;
+      for (int i = 0; i <= 1; i += 1) {
+        m_pm[i] = spec.get(Par::Pole_Mass, "~chi+", i + 1);
+      }      
+
+      // Chargino mixing matrices
+      std::array<std::array<double, 2>, 2> U, V;
+      for (int i = 0; i <= 1; i += 1) {
+        for (int j = 0; j <= 1; j += 1) {
+          U[i][j] = MSSM.get(Par::Pole_Mixing, "~chi-", i + 1, j + 1);
+          V[i][j] = MSSM.get(Par::Pole_Mixing, "~chi+", i + 1, j + 1);
         }
       }
 
@@ -3187,34 +3212,30 @@ namespace Gambit
       const double beta = atan(MSSM.safeget(Par::dimensionless, "tanbeta"));
       const double alpha = beta - 0.5 * pi;
 
-      gamma = MSSM_H::gamma_h_chi_0(0, 0, m, Z, alpha, mh, mw, GF, sw2);
-    }
+      // Higgs invisible width
+      const double gamma_inv = MSSM_H::gamma_h_chi_0(0, 0, m_0, Z, alpha, mh, mw, GF, sw2);
+      
+      // SM-like Higgs width
+      DecayTable::Entry SM_h;
+      compute_SM_higgs_decays(SM_h, mh);
+      const double gamma_SM = SM_h.width_in_GeV;
+      
+      // Total Higgs width
+      double gamma_tot = gamma_SM;
 
-    void SingletDM_inv_Higgs_BF(double & BF)
-    {
-       /**
-          @brief SingletDM invisible Higgs BF
-       */
-       using namespace Pipes::SingletDM_inv_Higgs_BF;
-       BF = Dep::Higgs_decay_rates->BF("S", "S");
-    }
+      for (int i = 0; i <= 3; i += 1) {
+        for (int j = i; j <= 3; j += 1) {  // Do not double count 12 and 21
+          gamma_tot += MSSM_H::gamma_h_chi_0(i, j, m_0, Z, alpha, mh, mw, GF, sw2);
+        }
+      }
 
-    void MSSM_inv_Higgs_BF(double & BF)
-    {
-       /**
-          @brief MSSM invisible Higgs BF
+      for (int i = 0; i <= 1; i += 1) {
+        for (int j = 0; j <= 1; j += 1) { // Do count 12 and 21 - they are distinct
+          gamma_tot += MSSM_H::gamma_h_chi_pm(i, j, m_pm, U, V, alpha, mh, mw, GF);
+        }
+      }
 
-          @warning This assumes that the Higgs is otherwise SM-like,
-          i.e., no changes to production cross sections or any other decays.
-       */
-       using namespace Pipes::MSSM_inv_Higgs_BF;
-       const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
-       const double mh = MSSM.get(Par::Pole_Mass, "h0_1");
-       const double gamma_inv = *Dep::h_gamma_chi0;
-       DecayTable::Entry SM_h;
-       compute_SM_higgs_decays(SM_h, mh);
-       const double gamma_SM = SM_h.width_in_GeV;
-       BF = gamma_inv / (gamma_inv + gamma_SM);
+      BF = gamma_inv / gamma_tot;
     }
 
     void lnL_Higgs_invWidth_SMlike(double& lnL)

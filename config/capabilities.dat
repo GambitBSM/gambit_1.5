@@ -2263,9 +2263,6 @@ Z_gamma_inv: |
 lnL_Z_inv: |
    Log Likelihood for the inivislbe decay width of the Z boson.
 
-h_gamma_chi0: |
-   Decay width to neutralinos of the MSSM SM-like Higgs boson in GeV.
-
 inv_Higgs_BF: |
    Invisible decay branching fraction of the SM-like Higgs boson.
 
