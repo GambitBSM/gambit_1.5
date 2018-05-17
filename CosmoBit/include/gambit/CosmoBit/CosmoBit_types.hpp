@@ -20,6 +20,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
+///  \date 2018 May
 ///
 ///  *********************************************
 
@@ -39,49 +40,67 @@ namespace Gambit
     error& CosmoBit_error();
     warning& CosmoBit_warning();
 
-    // Container for the structs of Class
-    struct Class_container
+    // map (dictionary) for name and value of the inputs for Class
+    class ClassInput
     {
-      Class_container();
-      ~Class_container();
+      public:
+        //classInput();
+        //~classInput();
+        void addEntry(std::string key,std::string val);
+        void addEntry(std::string key,double val);
+        void addEntry(std::string key,int val);
+        void clear();
+        std::map<std::string,std::string> get_map();
 
-      Class::file_content fc;     /* for input parameters */
-      Class::precision pr;        /* for precision parameters */
-      Class::background ba;       /* for cosmological background */
-      Class::thermo th;           /* for thermodynamics */
-      Class::perturbs pt;         /* for source functions */
-      Class::transfers tr;        /* for transfer functions */
-      Class::primordial pm;       /* for primordial spectra */
-      Class::spectra sp;          /* for output spectra */
-      Class::nonlinear nl;        /* for non-linear spectra */
-      Class::lensing le;          /* for lensed spectra */
-      Class::output op;           /* for output files */
-      Class::ErrorMsg class_errmsg;      /* for error messages */
+      private:
+        std::map<std::string,std::string> input_list;
+    };
 
-      bool non_free_pointer;
+    // Container for the structs of Class
+    class Class_container
+    {
+      public:
+        Class_container();
+        //~Class_container();
 
-      int lmax;
-      std::vector<double> Cl_TT;
-      std::vector<double> Cl_TE;
-      std::vector<double> Cl_EE;
-      std::vector<double> Cl_BB;
-      std::vector<double> Cl_PhiPhi;
-		
-	  std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
-	  std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
-	  std::vector<double> k_ar; // Corresponding wavenumbers.
+        Class::file_content fc;     /* for input parameters */
+        Class::precision pr;        /* for precision parameters */
+        Class::background ba;       /* for cosmological background */
+        Class::thermo th;           /* for thermodynamics */
+        Class::perturbs pt;         /* for source functions */
+        Class::transfers tr;        /* for transfer functions */
+        Class::primordial pm;       /* for primordial spectra */
+        Class::spectra sp;          /* for output spectra */
+        Class::nonlinear nl;        /* for non-linear spectra */
+        Class::lensing le;          /* for lensed spectra */
+        Class::output op;           /* for output files */
+        Class::ErrorMsg class_errmsg;      /* for error messages */
 
+        ClassInput input;
+
+        int lmax;
+        std::vector<double> Cl_TT;
+        std::vector<double> Cl_TE;
+        std::vector<double> Cl_EE;
+        std::vector<double> Cl_BB;
+        std::vector<double> Cl_PhiPhi;
+
+        std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
+        std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
+        std::vector<double> k_ar; // Corresponding wavenumbers.
     };
 
     // Generic class for cosmological likelihoods
-/*    class CosmoLike
+/*
+    class CosmoLike
     {
       public:
         double get_l_max() const;
         bool needs_TT() const;
         bool needs_Polarization() const;
         bool needs_lensing() const;
-    }; */
+    };
+*/
   }
 }
 

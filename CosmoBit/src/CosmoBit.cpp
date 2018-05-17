@@ -15,7 +15,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
-///  \date 2018 Jan,Feb, Mar
+///  \date 2018 Jan - May
 ///
 ///  *********************************************
 #include <string>
@@ -258,66 +258,30 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
-      int len_of_input = 9;
-      Options class_dict;
-      std::vector<str> names;
+      cosmo.input.clear();
+
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("lensing","yes");
+
+      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+      cosmo.input.addEntry("H0",*Param["H0"]);
+      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
+      cosmo.input.addEntry("n_s",*Param["n_s"]);
+      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+
+      YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
       {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[7],"l_max_scalars");
-      sprintf(cosmo.fc.value[7],"%d",l_max);
-      strcpy(cosmo.fc.name[8],"lensing");
-      strcpy(cosmo.fc.value[8],"yes");
-
-      int i = 9;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
         {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
         }
       }
-
-      strcpy(cosmo.fc.name[1],"omega_b");
-      strcpy(cosmo.fc.name[2],"omega_cdm");
-      strcpy(cosmo.fc.name[3],"H0");
-      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-      strcpy(cosmo.fc.name[5],"n_s");
-      strcpy(cosmo.fc.name[6],"tau_reio");
-
-      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-      sprintf(cosmo.fc.value[4],"%e",*Param["ln10A_s"]);
-      sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
-      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-      /*
-      std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
-      std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
-      std::cout << "H0 = " << *Param["H0"] << std::endl;
-      std::cout << "ln10A_s = " << *Param["ln10A_s"] << std::endl;
-      std::cout << "n_s = " << *Param["n_s"] << std::endl;
-      std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
-      */
     }
 
     void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
@@ -325,69 +289,39 @@ namespace Gambit
       //std::cout << "Last seen alive in: class_set_parameter_LCDM_SingletDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM_SingletDM;
 
-      int l_max=cosmo.lmax;
+      int l_max = cosmo.lmax;
+
       double sigmav = *Dep::sigmav; // in cm^3 s^-1
       double mass = *Dep::mwimp; // in GeV
       double feff = runOptions->getValueOrDef<double>(1.,"f_eff");
       double annihilation = (1.0/1.78e-21)*(sigmav/mass)*feff; // in m^3 s^-1 kg^-1
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 10;
-      Options class_dict;
-      std::vector<str> names;
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+      cosmo.input.addEntry("H0",*Param["H0"]);
+      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
+      cosmo.input.addEntry("n_s",*Param["n_s"]);
+      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+      cosmo.input.addEntry("annihilation",annihilation);
+
+      YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
       {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"lensing");
-      strcpy(cosmo.fc.value[9],"yes");
-
-      int i = 10;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
         {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
         }
       }
-
-      strcpy(cosmo.fc.name[1],"omega_b");
-      strcpy(cosmo.fc.name[2],"omega_cdm");
-      strcpy(cosmo.fc.name[3],"H0");
-      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-      strcpy(cosmo.fc.name[5],"n_s");
-      strcpy(cosmo.fc.name[6],"tau_reio");
-      strcpy(cosmo.fc.name[7],"annihilation");
-
-      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-      sprintf(cosmo.fc.value[4],"%e",*Param["ln10A_s"]);
-      sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
-      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-      sprintf(cosmo.fc.value[7],"%e",annihilation);
-      /*
+/*
       std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
       std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
       std::cout << "H0 = " << *Param["H0"] << std::endl;
@@ -395,7 +329,7 @@ namespace Gambit
       std::cout << "n_s = " << *Param["n_s"] << std::endl;
       std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
       std::cout << "annihilation = " << annihilation << "(Resulting from m = " << *Param["mS"] << " and lambda = "<< *Param["lambda_hS"] << ")" << std::endl;
-      */
+*/
     }
 
     void class_set_parameter_LCDMtensor(Class_container& cosmo)
@@ -403,67 +337,35 @@ namespace Gambit
       //std::cout << "Last seen alive in: class_set_parameter_LCDMtensor" << std::endl;
       using namespace Pipes::class_set_parameter_LCDMtensor;
 
-      int l_max=cosmo.lmax;;
+      int l_max = cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 11;
-      Options class_dict;
-      std::vector<str> names;
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("lensing","yes");
+      cosmo.input.addEntry("modes","s,t");
 
+      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+      cosmo.input.addEntry("H0",*Param["H0"]);
+      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
+      cosmo.input.addEntry("n_s",*Param["n_s"]);
+      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+      cosmo.input.addEntry("r",*Param["r_tensor"]);
+
+      YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
       {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"modes");
-      strcpy(cosmo.fc.value[9],"s,t");
-      strcpy(cosmo.fc.name[10],"lensing");
-      strcpy(cosmo.fc.value[10],"yes");
-
-      int i = 11;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
         {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
         }
       }
-
-      strcpy(cosmo.fc.name[1],"omega_b");
-      strcpy(cosmo.fc.name[2],"omega_cdm");
-      strcpy(cosmo.fc.name[3],"H0");
-      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-      strcpy(cosmo.fc.name[5],"n_s");
-      strcpy(cosmo.fc.name[6],"tau_reio");
-      strcpy(cosmo.fc.name[7],"r");
-
-      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-      sprintf(cosmo.fc.value[4],"%e",*Param["ln10A_s"]);
-      sprintf(cosmo.fc.value[5],"%e",*Param["n_s"]);
-      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-      sprintf(cosmo.fc.value[7],"%e",*Param["r_tensor"]);
-      /*
+/*
       std::cout << "omega_b = " << *Param["omega_b"] << std::endl;
       std::cout << "omega_cdm = " << *Param["omega_cdm"] << std::endl;
       std::cout << "H0 = " << *Param["H0"] << std::endl;
@@ -471,7 +373,7 @@ namespace Gambit
       std::cout << "n_s = " << *Param["n_s"] << std::endl;
       std::cout << "tau_reio = " << *Param["tau_reio"] << std::endl;
       std::cout << "r_tensor = " << *Param["r_tensor"] << std::endl;
-      */
+*/
     }
 
     void class_set_parameter_inf_SR1quad_LCDMt(Class_container& cosmo)
@@ -481,48 +383,12 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 11;
-      Options class_dict;
-      std::vector<str> names;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"modes");
-      strcpy(cosmo.fc.value[9],"s,t");
-      strcpy(cosmo.fc.name[10],"lensing");
-      strcpy(cosmo.fc.value[10],"yes");
-
-      int i = 11;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
-        {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
-        }
-      }
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("modes","s,t");
+      cosmo.input.addEntry("lensing","yes");
 
       // Initialization parameters controlling main characteristics.
       int num_inflaton = runOptions->getValue<int> ("num_inflaton");
@@ -669,21 +535,25 @@ namespace Gambit
         std::cout << "observs.f_NL " << observs.f_NL << std::endl;
         std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
 
-        strcpy(cosmo.fc.name[1],"omega_b");
-        strcpy(cosmo.fc.name[2],"omega_cdm");
-        strcpy(cosmo.fc.name[3],"H0");
-        strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-        strcpy(cosmo.fc.name[5],"n_s");
-        strcpy(cosmo.fc.name[6],"tau_reio");
-        strcpy(cosmo.fc.name[7],"r");
+        cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+        cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+        cosmo.input.addEntry("H0",*Param["H0"]);
+        cosmo.input.addEntry("ln10^{10}A_s",observs.As);
+        cosmo.input.addEntry("n_s",observs.ns);
+        cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+        cosmo.input.addEntry("r",observs.r);
+      }
 
-        sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-        sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-        sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-        sprintf(cosmo.fc.value[4],"%e",observs.As);
-        sprintf(cosmo.fc.value[5],"%e",observs.ns);
-        sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-        sprintf(cosmo.fc.value[7],"%e",observs.r);
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
       }
     }
 
@@ -694,48 +564,12 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 11;
-      Options class_dict;
-      std::vector<str> names;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-  class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-  names = class_dict.getNames();
-  len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"modes");
-      strcpy(cosmo.fc.value[9],"s,t");
-      strcpy(cosmo.fc.name[10],"lensing");
-      strcpy(cosmo.fc.value[10],"yes");
-
-      int i = 11;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
-        {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
-        }
-      }
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("modes","s,t");
+      cosmo.input.addEntry("lensing","yes");
 
       // Initialization parameters controlling main characteristics.
       int num_inflaton = runOptions->getValue<int> ("num_inflaton");
@@ -882,21 +716,25 @@ namespace Gambit
         std::cout << "observs.f_NL " << observs.f_NL << std::endl;
         std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
 
-        strcpy(cosmo.fc.name[1],"omega_b");
-        strcpy(cosmo.fc.name[2],"omega_cdm");
-        strcpy(cosmo.fc.name[3],"H0");
-        strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-        strcpy(cosmo.fc.name[5],"n_s");
-        strcpy(cosmo.fc.name[6],"tau_reio");
-        strcpy(cosmo.fc.name[7],"r");
+        cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+        cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+        cosmo.input.addEntry("H0",*Param["H0"]);
+        cosmo.input.addEntry("ln10^{10}A_s",observs.As);
+        cosmo.input.addEntry("n_s",observs.ns);
+        cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+        cosmo.input.addEntry("r",observs.r);
+      }
 
-        sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-        sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-        sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-        sprintf(cosmo.fc.value[4],"%e",observs.As);
-        sprintf(cosmo.fc.value[5],"%e",observs.ns);
-        sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-        sprintf(cosmo.fc.value[7],"%e",observs.r);
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
       }
     }
 
@@ -907,48 +745,12 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 11;
-      Options class_dict;
-      std::vector<str> names;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"modes");
-      strcpy(cosmo.fc.value[9],"s,t");
-      strcpy(cosmo.fc.name[10],"lensing");
-      strcpy(cosmo.fc.value[10],"yes");
-
-      int i = 11;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
-        {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
-        }
-      }
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("modes","s,t");
+      cosmo.input.addEntry("lensing","yes");
 
       // Initialization parameters controlling main characteristics.
       int num_inflaton = runOptions->getValue<int> ("num_inflaton");
@@ -1096,21 +898,25 @@ namespace Gambit
         std::cout << "observs.f_NL " << observs.f_NL << std::endl;
         std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
 
-        strcpy(cosmo.fc.name[1],"omega_b");
-        strcpy(cosmo.fc.name[2],"omega_cdm");
-        strcpy(cosmo.fc.name[3],"H0");
-        strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-        strcpy(cosmo.fc.name[5],"n_s");
-        strcpy(cosmo.fc.name[6],"tau_reio");
-        strcpy(cosmo.fc.name[7],"r");
+        cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+        cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+        cosmo.input.addEntry("H0",*Param["H0"]);
+        cosmo.input.addEntry("ln10^{10}A_s",observs.As);
+        cosmo.input.addEntry("n_s",observs.ns);
+        cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+        cosmo.input.addEntry("r",observs.r);
+      }
 
-        sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-        sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-        sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-        sprintf(cosmo.fc.value[4],"%e",observs.As);
-        sprintf(cosmo.fc.value[5],"%e",observs.ns);
-        sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-        sprintf(cosmo.fc.value[7],"%e",observs.r);
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
       }
     }
 
@@ -1121,48 +927,12 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 11;
-      Options class_dict;
-      std::vector<str> names;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"modes");
-      strcpy(cosmo.fc.value[9],"s,t");
-      strcpy(cosmo.fc.name[10],"lensing");
-      strcpy(cosmo.fc.value[10],"yes");
-
-      int i = 11;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
-        {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
-        }
-      }
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("modes","s,t");
+      cosmo.input.addEntry("lensing","yes");
 
       // Initialization parameters controlling main characteristics.
       int num_inflaton = runOptions->getValue<int> ("num_inflaton");
@@ -1309,22 +1079,25 @@ namespace Gambit
         std::cout << "observs.f_NL " << observs.f_NL << std::endl;
         std::cout << "observs.tau_NL " << observs.tau_NL << std::endl;
 
+        cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+        cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+        cosmo.input.addEntry("H0",*Param["H0"]);
+        cosmo.input.addEntry("ln10^{10}A_s",observs.As);
+        cosmo.input.addEntry("n_s",observs.ns);
+        cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+        cosmo.input.addEntry("r",observs.r);
+      }
 
-        strcpy(cosmo.fc.name[1],"omega_b");
-        strcpy(cosmo.fc.name[2],"omega_cdm");
-        strcpy(cosmo.fc.name[3],"H0");
-        strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-        strcpy(cosmo.fc.name[5],"n_s");
-        strcpy(cosmo.fc.name[6],"tau_reio");
-        strcpy(cosmo.fc.name[7],"r");
-
-        sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-        sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-        sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-        sprintf(cosmo.fc.value[4],"%e",observs.As);
-        sprintf(cosmo.fc.value[5],"%e",observs.ns);
-        sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-        sprintf(cosmo.fc.value[7],"%e",observs.r);
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
       }
     }
 
@@ -1335,49 +1108,12 @@ namespace Gambit
 
       int l_max=cosmo.lmax;
 
-      // What follows is a loop to read all generic additional parameters for CLASS
-      // needed to (hopefully) reproduce the LCDM values of Planck, which we pass
-      // as options a YAML-node named "class_dict" within the 'Rules' section of the input,
-      // and which will be added if there are present.
+      cosmo.input.clear();
 
-      int len_of_input = 11;
-      Options class_dict;
-      std::vector<str> names;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = Options(runOptions->getValue<YAML::Node>("class_dict"));
-        names = class_dict.getNames();
-        len_of_input += names.size();
-      }
-
-      BEreq::class_parser_initialize(&cosmo.fc,byVal(len_of_input),"",cosmo.class_errmsg);
-
-      strcpy(cosmo.fc.name[0],"output");
-      strcpy(cosmo.fc.value[0],"tCl pCl lCl");
-      strcpy(cosmo.fc.name[8],"l_max_scalars");
-      sprintf(cosmo.fc.value[8],"%d",l_max);
-      strcpy(cosmo.fc.name[9],"modes");
-      strcpy(cosmo.fc.value[9],"s,t");
-      strcpy(cosmo.fc.name[10],"lensing");
-      strcpy(cosmo.fc.value[10],"yes");
-
-      int i = 11;
-
-      if (runOptions->hasKey("class_dict"))
-      {
-        for (std::vector<str>::iterator name_it = names.begin(); name_it != names.end(); name_it++)
-        {
-          //std::cout << "Key = " << *name_it << " and Value = " << class_dict.getValue<str>(*name_it) << std::endl;
-          str key, value;
-          key = *name_it;
-          value = class_dict.getValue<str>(*name_it);
-          sprintf(cosmo.fc.name[i],"%s",key.c_str());
-          sprintf(cosmo.fc.value[i],"%s",value.c_str());
-          i++;
-        }
-      }
-
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("modes","s,t");
+      cosmo.input.addEntry("lensing","yes");
       /*
         This part needs cleaning up and commenting - will get on to in asap.
       */
@@ -1409,7 +1145,7 @@ namespace Gambit
       gsl_poly_complex_solve (smashp1, 5, wsmash, smashd1);
       gsl_poly_complex_workspace_free (wsmash);
 
-      for (i = 0; i < 4; i++)
+      for (int i = 0; i < 4; i++)
       {
         printf ("z%d = %+.18f %+.18f\n", i, smashd1[2*i], smashd1[2*i+1]);
       }
@@ -1509,218 +1245,33 @@ namespace Gambit
         value will be satisfactory for initial conditions.
       */
 
-      strcpy(cosmo.fc.name[1],"omega_b");
-      strcpy(cosmo.fc.name[2],"omega_cdm");
-      strcpy(cosmo.fc.name[3],"H0");
-      strcpy(cosmo.fc.name[4],"ln10^{10}A_s");
-      strcpy(cosmo.fc.name[5],"n_s");
-      strcpy(cosmo.fc.name[6],"tau_reio");
-      strcpy(cosmo.fc.name[7],"r");
+      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+      cosmo.input.addEntry("H0",*Param["H0"]);
+      cosmo.input.addEntry("ln10^{10}A_s",As_self);
+      cosmo.input.addEntry("n_s",ns_self);
+      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+      cosmo.input.addEntry("r",r_self);
 
-      sprintf(cosmo.fc.value[1],"%e",*Param["omega_b"]);
-      sprintf(cosmo.fc.value[2],"%e",*Param["omega_cdm"]);
-      sprintf(cosmo.fc.value[3],"%e",*Param["H0"]);
-      sprintf(cosmo.fc.value[4],"%e",As_self);
-      sprintf(cosmo.fc.value[5],"%e",ns_self);
-      sprintf(cosmo.fc.value[6],"%e",*Param["tau_reio"]);
-      sprintf(cosmo.fc.value[7],"%e",r_self);
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
+      }
     }
-
-    void class_run_func(Class_container& cosmo)
-    {
-      //std::cout << "Last seen alive in: class_run_func" << std::endl;
-      using namespace Pipes::class_run_func;
-
-      char error_printout[1024];
-      cosmo = *Dep::class_set_parameter;
-
-      if (BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_background_initialize(&cosmo.pr,&cosmo.ba) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
-        invalid_point().raise(error_printout);
-      }
-      if (BEreq::class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le) == _FAILURE_)
-      {
-        sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
-        invalid_point().raise(error_printout);
-      }
-      cosmo.non_free_pointer = true;
-    }
-
-	void class_run_func_full_pk_ugly(Class_container& cosmo)
-	{
-		  //std::cout << "Last seen alive in: class_run_func" << std::endl;
-		  using namespace Pipes::class_run_func_full_pk_ugly;
-		  
-		  char error_printout[1024];
-		  cosmo = *Dep::class_set_parameter;
-		  
-		  if (BEreq::class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_background_initialize(&cosmo.pr,&cosmo.ba) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  /* If full pk is asked on the set parameter function; this sets ppm->primordial_spec_type
-		   to be equal to 'gambit_Pk'. Using this flag, we externally fill in the primordial power spectrum. 
-		   (note alterative -without patching class at all- is to use text files and 'cat' command which we 
-		   want to aviod. The existing CLASS on the branch is already patched to have necessary flags and 
-		   functions to allow for hacking and external setting the primordial power spectrum. */
-		  if(cosmo.pm.primordial_spec_type == 1) // is 1 when Gambit_pk is asked for.
-		  {
-			  /* The bin number of the primordial power spectrum.
-			   This is not to be set here (and also should be given by the user). 
-			   Will change it ASAP. 
-			   
-			   Furthermore, the arrays:
-			   cosmo.k_ar, cosmo.Pk_S, and cosmo.Pk_T are to be filled 
-			   in the early step of setting the parameters. */
-			  
-			  cosmo.pm.lnk_size = 100;
-
-			  /** - Make room */
-			  cosmo.pm.lnk = (double *)malloc(cosmo.pm.lnk_size*sizeof(double));
-			  
-			  std::cout << "we pass pm.lnk \n" << std::endl;
-			  
-			  cosmo.pm.lnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
-			  
-			  cosmo.pm.ddlnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
-			  
-			  cosmo.pm.ic_size = (int *)malloc(cosmo.pt.md_size*sizeof(int));
-			  
-			  cosmo.pm.ic_ic_size = (int *)malloc(cosmo.pt.md_size*sizeof(int));
-			  
-			  cosmo.pm.is_non_zero = (short **)malloc(cosmo.pt.md_size*sizeof(short));
-			  
-			  int index_md;
-			  
-			  for (index_md = 0; index_md < cosmo.pt.md_size; index_md++) {
-				  
-				  cosmo.pm.ic_size[index_md] = cosmo.pt.ic_size[index_md];
-				  
-				  cosmo.pm.ic_ic_size[index_md] = (cosmo.pm.ic_size[index_md]*(cosmo.pm.ic_size[index_md]+1))/2;
-				  
-				  std::cout << "pm.ic_size["<<index_md<<"] =  " << cosmo.pt.ic_size[index_md] << std::endl;
-				  
-				  std::cout << "pm.ic_ic_size["<<index_md<<"] = " << cosmo.pm.ic_ic_size[index_md]<<std::endl;
-				  
-				  cosmo.pm.lnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
-				  
-				  cosmo.pm.ddlnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
-				  
-				  cosmo.pm.is_non_zero[index_md] = (short *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(short));
-				  
-			  }
-			  
-			  /** - Store values */
-			  for (int index_k=0; index_k<cosmo.pm.lnk_size; index_k++)
-			  {
-				  std::cout << "k_array["<<index_k<<"]="<< cosmo.k_ar.at(index_k) <<std::endl;
-				  std::cout << "pks_array["<<index_k<<"]="<< cosmo.Pk_S.at(index_k)<<std::endl;
-				  std::cout << "pkt_array["<<index_k<<"]="<< cosmo.Pk_T.at(index_k)<<std::endl;
-				  
-				  cosmo.pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
-				  cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
-				  if (cosmo.pt.has_tensors == _TRUE_)
-					  cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
-				  
-				  std::cout << "pm.lnk["<<index_k<<"]="<<cosmo.pm.lnk[index_k]<<std::endl;
-				  std::cout << "pm.lnpk["<<cosmo.pt.index_md_scalars<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k]<<std::endl;
-				  std::cout << "pm.lnpk["<<cosmo.pt.index_md_tensors<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k]<<std::endl;
-				  
-			  }
-			  
-			  /** - Tell CLASS that there are scalar (and tensor) modes */
-			  cosmo.pm.is_non_zero[cosmo.pt.index_md_scalars][cosmo.pt.index_ic_ad] = _TRUE_;
-			  if (cosmo.pt.has_tensors == _TRUE_)
-				  cosmo.pm.is_non_zero[cosmo.pt.index_md_tensors][cosmo.pt.index_ic_ten] = _TRUE_;
-
-		  }
-		
-		  if (BEreq::class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  if (BEreq::class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le) == _FAILURE_)
-		  {
-			  sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
-			  invalid_point().raise(error_printout);
-		  }
-		  cosmo.non_free_pointer = true;
-	}
 
     void class_get_spectra_func(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
       using namespace Pipes::class_get_spectra_func;
 
-      cosmo = *Dep::class_run;
+      cosmo = BEreq::get_ptr_to_class();
 
       // Maximal value of l.
       int l_max = cosmo.lmax;
@@ -1770,22 +1321,9 @@ namespace Gambit
 
       // We do not need "cl" anymore
       delete cl;
-
-      // Now that all calculations with CLASS are done, free the pointers which were allocated in the meantime.
-      if (cosmo.non_free_pointer)
-      {
-        BEreq::class_lensing_free(&cosmo.le);
-        BEreq::class_spectra_free(&cosmo.sp);
-        BEreq::class_transfer_free(&cosmo.tr);
-        BEreq::class_nonlinear_free(&cosmo.nl);
-        BEreq::class_primordial_free(&cosmo.pm);
-        BEreq::class_perturb_free(&cosmo.pt);
-        BEreq::class_thermodynamics_free(&cosmo.th);
-        BEreq::class_background_free(&cosmo.ba);
-        cosmo.non_free_pointer = false;
-      }
     }
-	  
+
+/* Begin of outdated functions (might be removed) */
 
     double** return_vanilla_cls(double omega_b,double omega_cdm,double H0,double ln10A_s,double n_s,double tau_reio)
     {
@@ -3186,6 +2724,7 @@ namespace Gambit
       std::cout << "Log likelihood is : " << result << std::endl;
     }
 
+/* end of outdated functions */
 
     void function_Planck_high_TT_loglike(double& result)
     {
@@ -3657,6 +3196,8 @@ namespace Gambit
 
       std::cout << "Log likelihood is : " << result << std::endl;
     }
+
+/* Begin of outdated (probably) functions */
 
     // declare an array and size from the yaml. doesn't have to be const. reading it from an array and make it static - static int - first time created -
     // instead of std vectors .
@@ -5396,7 +4937,7 @@ namespace Gambit
 
 
     }
-
+/* end of outdated functions */
   }
 
 }

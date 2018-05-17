@@ -3461,11 +3461,17 @@ class_get_spectra: |
    Returns a pointer to the CMB-spectra C_xx[l], where
    xx = [TT, TE, EE, phiphi, ...].
 
-class_run: |
+class_run_internal: |
    This routine runs CLASS (invokes all xxx_init() in the right order.
 
-class_set_parameter: |
+class_set_parameter_internal: |
    This routine initializes the input of CLASS.
+
+class_free_internal: |
+   This routine runs through all xxx_free() of all successfully computated levels of the previuos run of Class.
+
+get_ptr_to_class: |
+   Returns a pointer to the Backend internal instance of CosmoBit::Class_container
 
 #----------------------------
 #  DarkAges
@@ -3544,6 +3550,9 @@ LCDM_parameters: |
 LCDMtensor_parameters: |
    in addition to the above, r_tensor, amplitute of
    tensor power spectrum over scalar power spectrum.
+
+class_set_parameter: |
+   Gathers all input parameter for running Class.
 
 compute_LCDMtensor_lowp_TT_loglike: |
    function computes the planck log-likelihood for a given

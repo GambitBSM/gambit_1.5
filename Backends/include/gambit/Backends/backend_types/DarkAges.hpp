@@ -10,7 +10,7 @@
 ///  Authors (add name and date if you modify):
 ///
 ///  \author Patrick Stoecker
-///          (stpecker@physik.rwth-aachen.de)
+///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2018 Mar
 ///
 ///  *********************************************
