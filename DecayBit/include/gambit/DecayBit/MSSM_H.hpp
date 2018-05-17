@@ -60,7 +60,12 @@ double gamma_h_chi(std::array<double, 2> m,
   const double gR = gL * eps_2;
 
   // Phase-space
-  double l = lambda(pow(m[0], 2), pow(m[1], 2), pow(mh, 2));
+
+  if (std::fabs(m[0]) + std::fabs(m[1]) < mh) {
+    return 0.;
+  }
+
+  const double l = lambda(pow(m[0], 2), pow(m[1], 2), pow(mh, 2));
   if (l <= 0.) {
     return 0.;
   }
