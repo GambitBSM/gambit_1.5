@@ -1957,8 +1957,8 @@ namespace Gambit
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          static const double CONVERGENCE_TOLERANCE_ABS = runOptions->getValueOrDef<double>(0.01, "covariance_marg_convthres_abs");
-          static const double CONVERGENCE_TOLERANCE_REL = runOptions->getValueOrDef<double>(0.01, "covariance_marg_convthres_rel");
+          static const double CONVERGENCE_TOLERANCE_ABS = runOptions->getValueOrDef<double>(0.05, "covariance_marg_convthres_abs");
+          static const double CONVERGENCE_TOLERANCE_REL = runOptions->getValueOrDef<double>(0.05, "covariance_marg_convthres_rel");
           static const size_t nsample_input = runOptions->getValueOrDef<size_t>(100000, "covariance_nsamples_start");
           size_t NSAMPLE = nsample_input;
 
