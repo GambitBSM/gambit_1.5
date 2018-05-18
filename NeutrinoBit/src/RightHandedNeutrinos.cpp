@@ -766,12 +766,10 @@ namespace Gambit
       static double R_pi_SM = 1.2354e-4;
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
-      double e_f_pi, mu_f_pi, d_r_pi;
-      std::vector<double> M(3), r_I_pi(3), G_e_pi(3), G_mu_pi(3);
+      double e_f_pi = 0.0, mu_f_pi = 0.0, d_r_pi = 1.0;
+      std::vector<double> M(3), r_I_pi(3), G_e_pi = {0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
-      e_f_pi = 0;
-      mu_f_pi = 0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -785,21 +783,21 @@ namespace Gambit
           G_mu_pi[i] = (r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2))) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
         } 
         else
-          G_mu_pi[i] = 0;
+          G_mu_pi[i] = 0.0;
 
         if(M[i] + sminputs.mE < m_pi)
         {
           G_e_pi[i] = (r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2))) / (r_e_pi * pow((1.0 - r_e_pi), 2));
         }
         else
-          G_e_pi[i] = 0;
+          G_e_pi[i] = 0.0;
 
         e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
         mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
       }
 
-      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi)) - 1.0;
-      R_pi = R_pi_SM * (1.0 + d_r_pi);
+      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
+      R_pi = R_pi_SM * d_r_pi;
  
     }
 
@@ -811,12 +809,10 @@ namespace Gambit
       static double R_K_SM = 2.477e-5;
       static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
-      double e_f_K, mu_f_K, d_r_K;
-      std::vector<double> M(3), r_I_K(3), G_e_K(3), G_mu_K(3);
+      double e_f_K = 0.0, mu_f_K = 0.0, d_r_K = 1.0;
+      std::vector<double> M(3), r_I_K(3), G_e_K = {0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
-      e_f_K = 0;
-      mu_f_K = 0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -831,7 +827,7 @@ namespace Gambit
           G_mu_K[i] = (r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2))) / (r_mu_K * pow((1.0 - r_mu_K), 2));
         } 
         else
-          G_mu_K[i] = 0;
+          G_mu_K[i] = 0.0;
 
 //        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
         if(M[i] + sminputs.mE < m_K)
@@ -839,14 +835,14 @@ namespace Gambit
           G_e_K[i] = (r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2))) / (r_e_K * pow((1.0 - r_e_K), 2));
         }
         else
-          G_e_K[i] = 0;
+          G_e_K[i] = 0.0;
           
         e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
         mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
       }
 
-      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K)) - 1.0;
-      R_K = R_K_SM * (1.0 + d_r_K);
+      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
+      R_K = R_K_SM * d_r_K;
     }
 
     void RHN_R_tau(double& R_tau)
@@ -857,12 +853,10 @@ namespace Gambit
       static double R_tau_SM = 0.973;
       static double r_e_tau = pow(sminputs.mE,2)/pow(m_tau,2);
       static double r_mu_tau = pow(sminputs.mMu,2)/pow(m_tau,2);
-      double e_f_tau, mu_f_tau, d_r_tau;
-      std::vector<double> M(3), r_I_tau(3), G_e_tau(3), G_mu_tau(3);
+      double e_f_tau = 0.0, mu_f_tau = 0.0, d_r_tau = 1.0;
+      std::vector<double> M(3), r_I_tau(3), G_e_tau = {0.0,0.0,0.0}, G_mu_tau = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
-      e_f_tau = 0;
-      mu_f_tau = 0;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -876,22 +870,22 @@ namespace Gambit
           G_mu_tau[i] = (r_mu_tau + r_I_tau[i] - pow((r_mu_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_mu_tau + r_I_tau[i]) + pow(r_mu_tau - r_I_tau[i], 2))) / (r_mu_tau * pow((1.0 - r_mu_tau), 2));
         } 
         else
-          G_mu_tau[i] = 0;
+          G_mu_tau[i] = 0.0;
 
         if(M[i] + sminputs.mE < m_tau)
         {
           G_e_tau[i] = (r_e_tau + r_I_tau[i] - pow((r_e_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_e_tau + r_I_tau[i]) + pow((r_e_tau - r_I_tau[i]), 2))) / (r_e_tau * pow((1.0 - r_e_tau), 2));
         }
         else
-          G_e_tau[i] = 0;
+          G_e_tau[i] = 0.0;
           
         e_f_tau += Usq(0,i) * (G_e_tau[i] - 1.0);
         mu_f_tau += Usq(1,i) * (G_mu_tau[i] - 1.0);
  
       }
 
-      d_r_tau = ((1.0 + mu_f_tau)/(1.0 + e_f_tau)) - 1.0;
-      R_tau = R_tau_SM * (1.0 + d_r_tau);
+      d_r_tau = ((1.0 + mu_f_tau)/(1.0 + e_f_tau));
+      R_tau = R_tau_SM * d_r_tau;
     }
 
     // Lepton universality from W decays
