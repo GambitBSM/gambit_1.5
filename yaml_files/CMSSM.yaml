@@ -587,7 +587,8 @@ Rules:
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
     options:
-      covariance_samples: 100000
+      covariance_marg_convthres: 0.01
+      covariance_nsamples_start: 100000
 
 
 Logger:

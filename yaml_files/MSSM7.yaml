@@ -555,6 +555,14 @@ Rules:
                              "TimeShower:pTmin = 20"]
       xsec_vetos: [0.048]  # 0.048 fb correspond to ~1 expected event at L = 20.7 fb^-1.
 
+  # Choose which type of marginalised Poisson likelihood to use for LHC likelihoods
+  - capability: LHC_LogLikes
+    backends:
+    - {capability: lnlike_marg_poisson_lognormal_error}
+    options:
+      covariance_marg_convthres: 0.01
+      covariance_nsamples_start: 100000
+
 
 Logger:
 

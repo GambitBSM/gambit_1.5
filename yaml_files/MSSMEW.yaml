@@ -338,7 +338,9 @@ Rules:
   - capability: LHC_LogLikes
     backends:
     - {capability: lnlike_marg_poisson_lognormal_error}
-
+    options:
+      covariance_marg_convthres: 0.01
+      covariance_nsamples_start: 100000
 
 
 # Set the names of key log files
