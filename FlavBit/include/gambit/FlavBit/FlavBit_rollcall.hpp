@@ -655,7 +655,6 @@ START_MODULE
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(RightHandedNeutrinos, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY
@@ -669,7 +668,6 @@ START_MODULE
     DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
-    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
     ALLOW_MODELS(RightHandedNeutrinos, StandardModel_Higgs)
     #undef FUNCTION
   #undef CAPABILITY
