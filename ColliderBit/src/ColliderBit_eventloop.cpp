@@ -1957,11 +1957,13 @@ namespace Gambit
           /// @todo Split this whole chunk off into a lnlike-style utility function?
 
           // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
-          static const double CONVERGENCE_TOLERANCE = runOptions->getValueOrDef<double>(0.01, "covariance_marg_convthres");
+          static const double CONVERGENCE_TOLERANCE_ABS = runOptions->getValueOrDef<double>(0.01, "covariance_marg_convthres_abs");
+          static const double CONVERGENCE_TOLERANCE_REL = runOptions->getValueOrDef<double>(0.01, "covariance_marg_convthres_rel");
           static const size_t nsample_input = runOptions->getValueOrDef<size_t>(100000, "covariance_nsamples_start");
           size_t NSAMPLE = nsample_input;
 
-          double diff = 1;
+          double diff_abs = 9999;
+          double diff_rel = 1;
           double ana_dll_prev = 0;
           double ana_dll = 0;
           double llrsum_prev = 0;
@@ -1970,7 +1972,7 @@ namespace Gambit
 
           // Check absolute difference between independent estimates
           /// @todo Should also implement a check of relative difference
-          while (diff > CONVERGENCE_TOLERANCE || 1.0/sqrt(NSAMPLE) > CONVERGENCE_TOLERANCE) 
+          while ((diff_abs > CONVERGENCE_TOLERANCE_ABS && diff_rel > CONVERGENCE_TOLERANCE_REL) || 1.0/sqrt(NSAMPLE) > CONVERGENCE_TOLERANCE_ABS) 
           {
             Eigen::ArrayXd llrsums = Eigen::ArrayXd::Zero(adata.size());
 
@@ -2079,8 +2081,8 @@ namespace Gambit
             {
               ana_dll_prev = llrsum_prev / (double)NSAMPLE;
               ana_dll = llrsum / (double)NSAMPLE;
-              // diff = fabs((ana_dll_prev - ana_dll)/ana_dll);  // Relative convergence check
-              diff = fabs(ana_dll_prev - ana_dll);  // Absolute convergence check
+              diff_rel = fabs((ana_dll_prev - ana_dll)/ana_dll);  // Relative convergence check
+              diff_abs = fabs(ana_dll_prev - ana_dll);  // Absolute convergence check
 
               // Update variables 
               llrsum_prev += llrsum;  // Aggregate result. This doubles the effective batch size for llrsum_prev.
@@ -2088,7 +2090,7 @@ namespace Gambit
             }
 
             #ifdef COLLIDERBIT_DEBUG
-              cout << debug_prefix() << "diff: " << diff << "   ana_dll_prev: " << ana_dll_prev << "   ana_dll: " << ana_dll << endl;
+              cout << debug_prefix() << "diff_rel: " << diff_rel <<  "   diff_abs: " << diff_abs << "   ana_dll_prev: " << ana_dll_prev << "   ana_dll: " << ana_dll << endl;
               cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
               cout << debug_prefix() << endl;
             #endif
