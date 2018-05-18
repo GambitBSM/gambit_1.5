@@ -232,7 +232,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RHN_sinW2
     START_FUNCTION(triplet<double>)
-    DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
@@ -249,7 +248,7 @@ START_MODULE
   #define CAPABILITY mw
     #define FUNCTION RHN_mw
     START_FUNCTION(triplet<double>)
-    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(sinW2, triplet<double>)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION

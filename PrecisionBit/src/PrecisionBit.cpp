@@ -1073,17 +1073,19 @@ namespace Gambit
 
     // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
 
-    // Weak mixing angle sinW2, calculation from 1502.00477
-    //TODO: values seem a bit off, check this
+    // Weak mixing angle sinW2, calculation from 1211.1864
     void RHN_sinW2(triplet<double> &result)
     {
       using namespace Pipes::RHN_sinW2;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
-      result.central = 0.23152*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)); // taken from 1211.1864
-      result.upper = 0.00010;
-      result.lower = 0.00010;
+      double sinW2_SM = 0.23152; // taken from 1211.1864
+      double sinW2_SM_err = 0.00010;
+
+      result.central = 0.5 - 0.5*sqrt(1.0 - 4*sinW2_SM*(1.0 - sinW2_SM)*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)) ); 
+      result.upper = (1.0 - 2*sinW2_SM) / (1.0 - 2*result.central) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)) * sinW2_SM_err;
+      result.lower = result.upper;
     }
 
     void lnL_sinW2_chi2(double &result)
@@ -1100,16 +1102,19 @@ namespace Gambit
     {
       using namespace Pipes::RHN_mw;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      double Gmu = sminputs.GF;
+      triplet<double> sinW2 = *Dep::sinW2;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
-      // Radiative corrections, form Marco's paper
-      double deltar = -0.03244;
+      // SM precision calculation, from 1211.1864
+      double sinW2_SM = 0.23152;
+      double sinW2_SM_err = 0.00010;
+      double mW_SM = 80.361;
+      double mW_SM_err = 0.010;
 
-      result.central = sqrt(pow(sminputs.mZ, 2)/2.0 * (1.0 + sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1+deltar))/(sminputs.alphainv*Gmu*pow(sminputs.mZ,2))*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))))); 
-      result.upper = 0.0;
-      result.lower = 0.0;
+      // Radiative corrections, form Marco's paper
+      result.central = sqrt( pow(mW_SM,2) * sinW2_SM / sinW2.central * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))  );
+      result.upper = 0.5*result.central*sqrt( pow(2*mW_SM_err/mW_SM,2) + pow(sinW2_SM_err/sinW2_SM,2) + pow(sinW2.upper/sinW2.central,2)  );
+      result.lower = result.upper;
     }
 
     // Z invisible width, calculation from 1407.6607
