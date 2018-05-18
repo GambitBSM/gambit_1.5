@@ -3311,31 +3311,58 @@ perturbativity_lnL: |
   Test for perturbativity of the Yukawa couplings
 
 Ue1: |
-  (1,1) entry on active-sterile mixing matrix
+  (1,1) entry of the active-sterile mixing matrix
+
+Ue1_phase: |
+  (1,1) phase of the active-sterile mixing matrix
 
 Ue2: |
-  (1,2) entry on active-sterile mixing matrix
+  (1,2) entry of the active-sterile mixing matrix
+
+Ue2_phase: |
+  (1,2) phase of the active-sterile mixing matrix
 
 Ue3: |
-  (1,3) entry on active-sterile mixing matrix
+  (1,3) entry of the active-sterile mixing matrix
+
+Ue3_phase: |
+  (1,3) phase of the active-sterile mixing matrix
 
 Um1: |
-  (2,1) entry on active-sterile mixing matrix
+  (2,1) entry of the active-sterile mixing matrix
+
+Um1_phase: |
+  (2,1) phase of the active-sterile mixing matrix
 
 Um2: |
-  (2,2) entry on active-sterile mixing matrix
+  (2,2) entry of the active-sterile mixing matrix
+
+Um2_phase: |
+  (2,2) phase of the active-sterile mixing matrix
 
 Um3: |
-  (2,3) entry on active-sterile mixing matrix
+  (2,3) entry of the active-sterile mixing matrix
+
+Um3_phase: |
+  (2,3) phase of the active-sterile mixing matrix
 
 Ut1: |
-  (3,1) entry on active-sterile mixing matrix
+  (3,1) entry of the active-sterile mixing matrix
+
+Ut1_phase: |
+  (3,1) phase of the active-sterile mixing matrix
 
 Ut2: |
-  (3,2) entry on active-sterile mixing matrix
+  (3,2) entry of the active-sterile mixing matrix
+
+Ut2_phase: |
+  (3,2) phase of the active-sterile mixing matrix
 
 Ut3: |
-  (3,3) entry on active-sterile mixing matrix
+  (3,3) entry of the active-sterile mixing matrix
+
+Ut3_phase: |
+  (3,3) phase of the active-sterile mixing matrix
 
 Gamma_RHN23nu: |
   Decay rate of right-handed neutrinos to 3 left-handed neutrinos

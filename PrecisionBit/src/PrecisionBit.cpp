@@ -1079,14 +1079,8 @@ namespace Gambit
     {
       using namespace Pipes::RHN_sinW2;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      double Gmu = sminputs.GF;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
-      // Radiative corrections, from Marco's paper
-      double deltar = -0.03244;
-
-      //result.central = 0.5*(1.0 - sqrt(1.0 - (2.0*sqrt(2)*M_PI*(1.0+deltar))/(Gmu*sminputs.alphainv*sminputs.mZ*sminputs.mZ) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))));
       result.central = 0.23152*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)); // taken from 1211.1864
       result.upper = 0.00010;
       result.lower = 0.00010;

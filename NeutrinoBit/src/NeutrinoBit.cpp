@@ -274,8 +274,8 @@ namespace Gambit
       if (order == "123")
         R = R_12 * R_13 * R_23;
 
-     if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
-      Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
+      if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
+        Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
 
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
       Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();
@@ -290,14 +290,16 @@ namespace Gambit
             logger() << msg.str() << EOM;
             invalid_point().raise(msg.str());
           }
-          if(ThetaNorm(0,0) + ThetaNorm(1,1) > 1 or ThetaNorm(0,0) + ThetaNorm(2,2) > 1 or ThetaNorm(1,1) + ThetaNorm(2,2) > 1)
-          {
-            std::ostringstream msg;
-            msg << "Casas-Ibarra parametrization breaks down for parameter point";
-            logger() << msg.str() << EOM;
-            invalid_point().raise(msg.str());
-          }
         }
+
+      if(ThetaNorm(0,0)  + ThetaNorm(1,1)  > 1 or ThetaNorm(0,0)  + ThetaNorm(2,2)  > 1 or ThetaNorm(1,1)  + ThetaNorm(2,2)  > 1 or
+         ThetaNorm2(0,0) + ThetaNorm2(1,1) > 1 or ThetaNorm2(0,0) + ThetaNorm2(2,2) > 1 or ThetaNorm2(1,1) + ThetaNorm2(2,2) > 1)
+      {
+        std::ostringstream msg;
+        msg << "Casas-Ibarra parametrization breaks down for parameter point";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
     }
 
 
