@@ -104,7 +104,7 @@ namespace Gambit {
         // Baseline objects
         // @note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_039_multi_ttbar.pdf
         const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
-        const vector<double> bEl={15.,20.,25.,30.,40.,50.,200.};
+        const vector<double> bEl={0.,20.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above pT = 200 GeV, where the CMS map stops.
         const vector<double> cEl={0.507,0.619,0.682,0.742,0.798,0.863,0.429,0.546,0.619,0.710,0.734,0.833,0.256,0.221,0.315,0.351,0.373,0.437,0.249,0.404,0.423,0.561,0.642,0.749,0.195,0.245,0.380,0.441,0.533,0.644};
         HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
@@ -115,7 +115,7 @@ namespace Gambit {
 
         // @note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_039_multi_ttbar.pdf
         const vector<double> aMu={0,0.9,1.2,2.1,2.4};
-        const vector<double> bMu={10.,15.,20.,25.,30.,40.,50.,200.};
+        const vector<double> bMu={0.,15.,20.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above pT = 200 GeV, where the CMS map stops.
         const vector<double> cMu={0.704,0.797,0.855,0.88,0.906,0.927,0.931,0.639,0.776,0.836,0.875,0.898,0.94,0.93,0.569,0.715,0.84,0.862,0.891,0.906,0.925,0.0522,0.720,0.764,0.803,0.807,0.885,0.877};
         HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         vector<HEPUtils::Particle*> baselineMuons;
@@ -126,7 +126,7 @@ namespace Gambit {
 
         // @note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/TauIDEfficiency_pT_DP2016_066.pdf
         const vector<double> aTau={0.,2.3};
-        const vector<double> bTau={20.,25.,30.,35.,40.,45.,50.,60.,70.,80.,100.};
+        const vector<double> bTau={0.,25.,30.,35.,40.,45.,50.,60.,70.,80.,10000.};  // Assuming flat efficiency above pT = 100 GeV, where the CMS map stops.
         const vector<double> cTau={0.38,0.48,0.5,0.49,0.51,0.49,0.47,0.45,0.48,0.5};
         HEPUtils::BinnedFn2D<double> _eff2dTau(aTau,bTau,cTau);
         vector<HEPUtils::Particle*> baselineTaus;

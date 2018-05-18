@@ -114,7 +114,7 @@ namespace Gambit {
 
         //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_034_ttbar.pdf
         const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
-        const vector<double> bEl={20.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above 200, where the CMS map stops.
+        const vector<double> bEl={0.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above 200, where the CMS map stops.
         const vector<double> cEl={0.619,0.669,0.7,0.737,0.79,0.625,0.658,0.72,0.712,0.793,0.338,0.372,0.36,0.365,0.416,0.576,0.531,0.614,0.644,0.712,0.440,0.527,0.585,0.606,0.648};
         HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
         for (size_t iEl=0;iEl<baselineElectrons.size();iEl++)
@@ -126,7 +126,7 @@ namespace Gambit {
 
         //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_034_ttbar.pdf
         const vector<double> aMu={0,0.9,1.2,2.1,2.4};
-        const vector<double> bMu={20.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above 200, where the CMS map stops.
+        const vector<double> bMu={0.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above 200, where the CMS map stops.
         const vector<double> cMu={0.869,0.889,0.91,0.929,0.93,0.857,0.88,0.893,0.937,0.93,0.891,0.894,0.901,0.912,0.927,0.803,0.818,0.817,0.855,0.869};
         HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         for (size_t iMu=0;iMu<baselineMuons.size();iMu++) 

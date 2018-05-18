@@ -86,7 +86,7 @@ namespace Gambit {
 
         //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_048_ttbar.pdf
         const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
-        const vector<double> bEl={5.,10.,15.,20.,25.,30.};
+        const vector<double> bEl={5.,10.,15.,20.,25.,10000.};  // Assuming flat efficiency above pT = 30 GeV, where the CMS map stops.
         const vector<double> cEl={0.336,0.412,0.465,0.496,0.503,0.344,0.402,0.448,0.476,0.482,0.233,0.299,0.25,0.261,0.255,0.309,0.359,0.394,0.408,0.418,0.243,0.287,0.327,0.341,0.352};
         HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
         for (HEPUtils::Particle* electron : event->electrons()) {
@@ -96,7 +96,7 @@ namespace Gambit {
 
         //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_048_ttbar.pdf
         const vector<double> aMu={0.,0.9,1.2,2.1,2.4};
-        const vector<double> bMu={3.5,10.,15.,20.,25.,30.};
+        const vector<double> bMu={3.5,10.,15.,20.,25.,10000.};  // Assuming flat efficiency above pT = 30 GeV, where the CMS map stops.
         const vector<double> cMu={0.647,0.718,0.739,0.76,0.763,0.627,0.662,0.694,0.725,0.733,0.61,0.66,0.678,0.685,0.723,0.566,0.629,0.655,0.67,0.696};
         HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         for (HEPUtils::Particle* muon : event->muons()) {
