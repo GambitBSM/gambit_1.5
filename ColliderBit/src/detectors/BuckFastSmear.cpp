@@ -69,6 +69,37 @@ namespace Gambit {
     }
 
 
+    /// BuckFastSmearATLASnoeff definitions
+    void BuckFastSmearATLASnoeff::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
+      if (partonOnly)
+        convertPythia8PartonEvent(eventIn, eventOut);
+      else
+        convertPythia8ParticleEvent(eventIn, eventOut);
+
+      // Electron smearing
+      /// @todo Run-dependence?
+      //ATLAS::applyElectronTrackingEff(eventOut.electrons());
+      ATLAS::smearElectronEnergy(eventOut.electrons());
+
+      // Muon smearing
+      /// @todo Run-dependence?
+      //ATLAS::applyMuonTrackEff(eventOut.muons());
+      ATLAS::smearMuonMomentum(eventOut.muons());
+
+      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
+      //Smear taus
+      ATLAS::smearTaus(eventOut.taus());
+
+      // Smear jet momenta
+      ATLAS::smearJets(eventOut.jets());
+
+      // Unset b-tags outside |eta|=2.5
+      for (HEPUtils::Jet* j : eventOut.jets()) {
+        if (j->abseta() > 2.5) j->set_btag(false);
+      }
+    }
+
+
     /// BuckFastSmearCMS definition
     void BuckFastSmearCMS::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
       if (partonOnly)

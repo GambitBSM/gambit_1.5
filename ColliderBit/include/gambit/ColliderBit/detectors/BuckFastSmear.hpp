@@ -55,6 +55,22 @@ namespace Gambit {
     };
 
 
+    /// Simple ATLAS detector pseudo-simulation,
+    /// applying only event smearing.
+    struct BuckFastSmearATLASnoeff : BuckFastBase {
+      /// @name Event detection simulation.
+      //@{
+        void processEvent(const EventInType&, EventOutType&) const;
+      //@}
+
+      /// @name Construction, Destruction, and Recycling
+      //@{
+        BuckFastSmearATLASnoeff() { }
+        ~BuckFastSmearATLASnoeff() { }
+      //@}
+    };
+
+
     /// Simple CMS detector pseudo-simulation,
     /// applying event smearing and efficiencies.
     struct BuckFastSmearCMS : BuckFastBase {

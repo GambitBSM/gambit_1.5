@@ -49,7 +49,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-#define COLLIDERBIT_DEBUG
+// #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -101,6 +101,9 @@ namespace Gambit
     /// Analysis stuff
     bool useBuckFastATLASDetector;
     bool haveUsedBuckFastATLASDetector;
+
+    bool useBuckFastATLASnoeffDetector;
+    bool haveUsedBuckFastATLASnoeffDetector;
 
     bool useBuckFastCMSDetector;
     bool haveUsedBuckFastCMSDetector;
@@ -182,6 +185,7 @@ namespace Gambit
       nFailedEvents = 0;
 
       useBuckFastATLASDetector = false;
+      useBuckFastATLASnoeffDetector = false;
       useBuckFastCMSDetector = false;
       useBuckFastCMSnoeffDetector = false;
       useBuckFastIdentityDetector = false;
@@ -190,6 +194,7 @@ namespace Gambit
       #endif
 
       haveUsedBuckFastATLASDetector = false;
+      haveUsedBuckFastATLASnoeffDetector = false;
       haveUsedBuckFastCMSDetector = false;
       haveUsedBuckFastCMSnoeffDetector = false;
       haveUsedBuckFastIdentityDetector = false;
@@ -819,6 +824,53 @@ namespace Gambit
     }
 
 
+    void getBuckFastATLASnoeff(BuckFastSmearATLASnoeff &result)
+    {
+      using namespace Pipes::getBuckFastATLASnoeff;
+      static std::vector<bool> useDetector;
+      static std::vector<bool> partonOnly;
+      static std::vector<double> antiktR;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // BuckFastATLASnoeff is switched off by default
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+
+        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+
+        return;
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        // Get useDetector setting for the current collider
+        useBuckFastATLASnoeffDetector = useDetector[indexPythiaNames];
+        if (useBuckFastATLASnoeffDetector)
+          haveUsedBuckFastATLASnoeffDetector = true;
+
+        return;
+      }
+
+      if (*Loop::iteration == START_SUBPROCESS and useBuckFastATLASnoeffDetector)
+      {
+        // Each thread gets its own BuckFastSmearATLASnoeff.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+
+        return;
+      }
+
+    }
+
+
     void getBuckFastCMS(BuckFastSmearCMS &result)
     {
       using namespace Pipes::getBuckFastCMS;
@@ -873,7 +925,7 @@ namespace Gambit
       if (*Loop::iteration == BASE_INIT)
       {
         // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), true);  // BuckFastCMSnoeff is switched on by default
+        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // BuckFastCMSnoeff is switched off by default
         useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
         CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
 
@@ -1099,6 +1151,103 @@ namespace Gambit
         // #endif
 
         // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
+        return;
+      }
+
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      {
+        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
+        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
+        return;
+      }
+
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();        
+        return;
+      }
+
+    }
+
+
+
+    void getATLASnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getATLASnoeffAnalysisContainer;
+      static std::vector<std::vector<str> > analyses;
+      static bool first = true;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+          first = false;
+        }
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        if (!useBuckFastATLASnoeffDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useBuckFastATLASnoeffDetector)
+        {
+          str errmsg = "The option 'useDetector' for function 'getBuckFastATLASnoeff' is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'getATLASnoeffAnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
+        return;
+      }
+
+      if (!useBuckFastATLASnoeffDetector) return;
+
+      if (*Loop::iteration == START_SUBPROCESS)
+      {
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
+
+        // Register analysis container
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Will run result.register_thread " << endl;
+        result.register_thread("ATLASnoeffAnalysisContainer");
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: ...done" << endl;
+
+        // Set current collider
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Will run result.set_current_collider " << endl;
+        result.set_current_collider(*iterPythiaNames);
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: ...done" << endl;
+
+        // Initialize analysis container or reset all the contained analyses
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Will run get_current_analyses_map" << endl;
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: ...done " << endl;
+
+        // #ifdef COLLIDERBIT_DEBUG
+        // if (my_thread == 0)
+        // {
+        //   for (auto& apair : result.get_current_analyses_map())
+        //   {
+        //     cout << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
+        //   }
+        // }
+        // #endif
+
+        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: End START_SUBPROCESS "  << endl;
         return;
       }
 
@@ -1469,6 +1618,38 @@ namespace Gambit
     }
 
 
+    void smearEventATLASnoeff(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventATLASnoeff;
+      if (*Loop::iteration <= BASE_INIT or !useBuckFastATLASnoeffDetector) return;
+      result.clear();
+
+      // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
+      try
+      {
+        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
+      }
+      catch (Gambit::exception& e)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventATLASnoeff. Check the ColliderBit log for details." << endl;
+        #endif
+        #pragma omp critical (event_conversion_error)
+        {
+          // Store Pythia event record in the logs
+          std::stringstream ss;
+          Dep::HardScatteringEvent->list(ss, 1);
+          logger() << LogTags::debug << "Gambit::exception error caught in smearEventATLASnoeff. Pythia record for event that failed:\n" << ss.str() << EOM;
+        }
+        str errmsg = "Bad point: smearEventATLASnoeff caught the following runtime error: ";
+        errmsg    += e.what();
+        piped_invalid_point.request(errmsg);
+        Loop::wrapup();
+        return;
+      }
+    }
+
+
     void smearEventCMS(HEPUtils::Event& result)
     {
       using namespace Pipes::smearEventCMS;
@@ -1736,6 +1917,88 @@ namespace Gambit
     }
 
 
+    void runATLASnoeffAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runATLASnoeffAnalyses;
+      static MC_convergence_checker convergence;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        result.clear();
+        return;
+      }
+
+      if (!useBuckFastATLASnoeffDetector) return;
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
+        return;
+      }
+
+      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
+      {
+        // Update the convergence tracker with the new results
+        convergence.update(*Dep::ATLASnoeffAnalysisContainer);
+        return;
+      }
+
+      if (*Loop::iteration == CHECK_CONVERGENCE)
+      {
+        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
+        if (convergence.achieved(*Dep::ATLASnoeffAnalysisContainer)) Loop::wrapup();
+        return;
+      }
+
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (*Loop::iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : Dep::ATLASnoeffAnalysisContainer->get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       cout << debug_prefix() << "runATLASnoeffAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
+
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        // The final iteration for this collider: collect results
+        for (auto& analysis_pointer_pair : Dep::ATLASnoeffAnalysisContainer->get_current_analyses_map())
+        {
+          #ifdef COLLIDERBIT_DEBUG
+          cout << debug_prefix() << "runATLASnoeffAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          #endif
+
+          str warning;
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
+        }
+        return;
+      }
+
+      if (*Loop::iteration == BASE_FINALIZE)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "runATLASnoeffAnalyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
+        return;
+      }
+
+      if (*Loop::iteration <= BASE_INIT) return;
+
+      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
+      Dep::ATLASnoeffAnalysisContainer->analyze(*Dep::ATLASnoeffSmearedEvent);
+
+    }
+
+
     void runCMSAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runCMSAnalyses;
@@ -1994,6 +2257,8 @@ namespace Gambit
       #ifdef COLLIDERBIT_DEBUG
       if (haveUsedBuckFastATLASDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
+      if (haveUsedBuckFastATLASnoeffDetector)
+        cout << debug_prefix() << "CollectAnalyses: Dep::ATLASnoeffAnalysisNumbers->size()    = " << Dep::ATLASnoeffAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastCMSDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastCMSnoeffDetector)
@@ -2009,6 +2274,8 @@ namespace Gambit
       // Add results 
       if (haveUsedBuckFastATLASDetector)
         result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
+      if (haveUsedBuckFastATLASnoeffDetector)
+        result.insert(result.end(), Dep::ATLASnoeffAnalysisNumbers->begin(), Dep::ATLASnoeffAnalysisNumbers->end());
       if (haveUsedBuckFastCMSDetector)
         result.insert(result.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
       if (haveUsedBuckFastCMSnoeffDetector)

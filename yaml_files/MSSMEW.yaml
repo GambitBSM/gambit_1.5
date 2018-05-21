@@ -286,6 +286,17 @@ Rules:
       xsec_vetos: [0.028]  # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
 
 
+  # Rules and options for BuckFast ATLAS simulation witout efficiencies
+  - capability: SimpleSmearingSim
+    type: "ColliderBit::BuckFastSmearATLASnoeff"
+    function: getBuckFastATLASnoeff
+    options:
+      # useDetector defaults to true for getBuckFastATLAS. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
+      useDetector: [false]
+      # Choose which type of event to use: for parton level, change partonOnly to true
+      partonOnly: [false]
+      antiktR: [0.4]
+
   # Rules and options for BuckFast ATLAS simulation
   - capability: SimpleSmearingSim
     type: "ColliderBit::BuckFastSmearATLAS"
@@ -327,6 +338,14 @@ Rules:
     function: getATLASAnalysisContainer
     options:
       analyses: [ ["ATLAS_13TeV_MultiLEP_36invfb"] ]
+
+  # ATLASnoeff analysis setup.
+  # NOTE: Don't blindly copy this analysis list without also checking the
+  #       "skip_analyses" list for "LHC_Combined_LogLike" below.
+  - capability: ATLASnoeffAnalysisContainer
+    function: getATLASnoeffAnalysisContainer
+    options:
+      analyses: [ [ ] ]
 
   # CMS analysis setup
   # NOTE: Don't blindly copy this analysis list without also checking the
