@@ -1133,7 +1133,12 @@ namespace Gambit
       result = 0.0;
       for(int i=0; i<3; i++)
         for(int j=0; j<3; j++)
-          result+= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*M_PI)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+        {
+          if(MN[i] + MN[j] < sminputs.mZ)
+            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi) / sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+          else
+            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+        }
 
     }
 
