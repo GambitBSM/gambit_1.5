@@ -102,6 +102,36 @@ namespace Gambit {
     }
 
 
+    /// BuckFastSmearCMSnoeff definition
+    void BuckFastSmearCMSnoeff::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
+      if (partonOnly)
+        convertPythia8PartonEvent(eventIn, eventOut);
+      else
+        convertPythia8ParticleEvent(eventIn, eventOut);
+
+      //MJW debug- make this the same as ATLAS temporarily
+      // Electron smearing
+      //CMS::applyElectronTrackingEff(eventOut.electrons());
+      CMS::smearElectronEnergy(eventOut.electrons());
+
+      // Muon smearing
+      //CMS::applyMuonTrackEff(eventOut.muons());
+      CMS::smearMuonMomentum(eventOut.muons());
+
+      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
+      //Smear taus
+      CMS::smearTaus(eventOut.taus());
+
+      // Smear jet momenta
+      CMS::smearJets(eventOut.jets());
+
+      // Unset b-tags outside |eta|=2.5
+      for (HEPUtils::Jet* j : eventOut.jets()) {
+        if (j->abseta() > 2.5) j->set_btag(false);
+      }
+    }
+
+
     /// Convert a hadron-level Pythia8::Event into an unsmeared HEPUtils::Event
     /// @todo Overlap between jets and prompt containers: need some isolation in MET calculation
     void BuckFastBase::convertPythia8ParticleEvent(const Pythia8::Event& pevt, HEPUtils::Event& result) const {

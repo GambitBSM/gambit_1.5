@@ -286,7 +286,7 @@ Rules:
       xsec_vetos: [0.028]  # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
 
 
-  # BuckFast for ATLAS rules and options
+  # Rules and options for BuckFast ATLAS simulation
   - capability: SimpleSmearingSim
     type: "ColliderBit::BuckFastSmearATLAS"
     function: getBuckFastATLAS
@@ -297,7 +297,7 @@ Rules:
       partonOnly: [false]
       antiktR: [0.4]
 
-  # BuckFast for CMS rules and options
+  # Rules and options for BuckFast CMS simulation
   - capability: SimpleSmearingSim
     type: "ColliderBit::BuckFastSmearCMS"
     function: getBuckFastCMS
@@ -308,7 +308,21 @@ Rules:
       partonOnly: [false]
       antiktR: [0.4]
 
+  # Rules and options for BuckFast CMS simulation witout efficiencies
+  - capability: SimpleSmearingSim
+    type: "ColliderBit::BuckFastSmearCMSnoeff"
+    function: getBuckFastCMSnoeff
+    options:
+      # useDetector defaults to true for getBuckFastCMS. Set it to false to ignore all CMS analyses and disable the BuckFast CMS simulator
+      useDetector: [true]
+      # Choose which type of event to use: for parton level, change partonOnly to true
+      partonOnly: [false]
+      antiktR: [0.4]
+
+
   # ATLAS analysis setup.
+  # NOTE: Don't blindly copy this analysis list without also checking the
+  #       "skip_analyses" list for "LHC_Combined_LogLike" below.
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:
@@ -323,9 +337,17 @@ Rules:
       analyses: [ ["CMS_13TeV_1LEPbb_36invfb",
                    "CMS_13TeV_2LEPsoft_36invfb",
                    "CMS_13TeV_MultiLEP_36invfb",
-                   "CMS_13TeV_MONOJET_36invfb", 
-                   "CMS_13TeV_2OSLEP_36invfb",
+                   "CMS_13TeV_MONOJET_36invfb" ] ]
+
+  # CMSnoeff analysis setup
+  # NOTE: Don't blindly copy this analysis list without also checking the
+  #       "skip_analyses" list for "LHC_Combined_LogLike" below.
+  - capability: CMSnoeffAnalysisContainer
+    function: getCMSnoeffAnalysisContainer
+    options:
+      analyses: [ ["CMS_13TeV_2OSLEP_36invfb",
                    "CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE"] ]
+
 
   # List any analyses that should *NOT* be included in the total log-likelihood!
   - capability: LHC_Combined_LogLike

@@ -49,7 +49,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-// #define COLLIDERBIT_DEBUG
+#define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -104,6 +104,9 @@ namespace Gambit
 
     bool useBuckFastCMSDetector;
     bool haveUsedBuckFastCMSDetector;
+
+    bool useBuckFastCMSnoeffDetector;
+    bool haveUsedBuckFastCMSnoeffDetector;
 
     #ifndef EXCLUDE_DELPHES
     bool useDelphesDetector;
@@ -180,6 +183,7 @@ namespace Gambit
 
       useBuckFastATLASDetector = false;
       useBuckFastCMSDetector = false;
+      useBuckFastCMSnoeffDetector = false;
       useBuckFastIdentityDetector = false;
       #ifndef EXCLUDE_DELPHES
       useDelphesDetector = false;
@@ -187,6 +191,7 @@ namespace Gambit
 
       haveUsedBuckFastATLASDetector = false;
       haveUsedBuckFastCMSDetector = false;
+      haveUsedBuckFastCMSnoeffDetector = false;
       haveUsedBuckFastIdentityDetector = false;
       #ifndef EXCLUDE_DELPHES
       haveUsedDelphesDetector = false;
@@ -858,6 +863,49 @@ namespace Gambit
     }
 
 
+    void getBuckFastCMSnoeff(BuckFastSmearCMSnoeff &result)
+    {
+      using namespace Pipes::getBuckFastCMSnoeff;
+      static std::vector<bool> useDetector;
+      static std::vector<bool> partonOnly;
+      static std::vector<double> antiktR;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<bool> default_useDetector(pythiaNames.size(), true);  // BuckFastCMSnoeff is switched on by default
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+
+        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+
+        return;
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        // Get useDetector setting for the current collider
+        useBuckFastCMSnoeffDetector = useDetector[indexPythiaNames];
+        if (useBuckFastCMSnoeffDetector) haveUsedBuckFastCMSnoeffDetector = true;
+        return;
+      }
+
+      if (*Loop::iteration == START_SUBPROCESS and useBuckFastCMSnoeffDetector)
+      {
+        // Each thread gets its own BuckFastSmearCMSnoeff.
+        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
+        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+        return;
+      }
+
+    }
+
 
     void getBuckFastIdentity(Gambit::ColliderBit::BuckFastIdentity &result)
     {
@@ -1155,6 +1203,83 @@ namespace Gambit
     }
 
 
+    void getCMSnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getCMSnoeffAnalysisContainer;
+      static std::vector<std::vector<str> > analyses;
+      static bool first = true;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+          first = false;
+        }
+      }
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        if (!useBuckFastCMSnoeffDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useBuckFastCMSnoeffDetector)
+        {
+          str errmsg = "The option 'useDetector' for function 'getBuckFastCMSnoeff' is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'getCMSnoeffAnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
+        return;
+      }
+
+      if (!useBuckFastCMSnoeffDetector) return;
+
+      if (*Loop::iteration == START_SUBPROCESS)
+      {
+        // Register analysis container
+        result.register_thread("CMSnoeffAnalysisContainer");
+
+        // Set current collider
+        result.set_current_collider(*iterPythiaNames);
+
+        // Initialize analysis container or reset all the contained analyses
+        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        else result.reset();
+
+        return;
+      }
+
+      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      {
+        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
+        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
+        return;
+      }
+
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();        
+        return;
+      }
+
+    }
+
+
     void getIdentityAnalysisContainer(HEPUtilsAnalysisContainer& result)
     {
       using namespace Pipes::getIdentityAnalysisContainer;
@@ -1368,6 +1493,38 @@ namespace Gambit
           logger() << LogTags::debug << "Gambit::exception error caught in smearEventCMS. Pythia record for event that failed:\n" << ss.str() << EOM;
         }
         str errmsg = "Bad point: smearEventCMS caught the following runtime error: ";
+        errmsg    += e.what();
+        piped_invalid_point.request(errmsg);
+        Loop::wrapup();
+        return;
+      }
+    }
+
+
+    void smearEventCMSnoeff(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventCMSnoeff;
+      if (*Loop::iteration <= BASE_INIT or !useBuckFastCMSnoeffDetector) return;
+      result.clear();
+
+      // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
+      try
+      {
+        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
+      }
+      catch (Gambit::exception& e)
+      {
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventCMSnoeff. Check the ColliderBit log for details." << endl;
+        #endif
+        #pragma omp critical (event_conversion_error)
+        {
+          // Store Pythia event record in the logs
+          std::stringstream ss;
+          Dep::HardScatteringEvent->list(ss, 1);
+          logger() << LogTags::debug << "Gambit::exception error caught in smearEventCMSnoeff. Pythia record for event that failed:\n" << ss.str() << EOM;
+        }
+        str errmsg = "Bad point: smearEventCMSnoeff caught the following runtime error: ";
         errmsg    += e.what();
         piped_invalid_point.request(errmsg);
         Loop::wrapup();
@@ -1661,6 +1818,88 @@ namespace Gambit
     }
 
 
+    void runCMSnoeffAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runCMSnoeffAnalyses;
+      static MC_convergence_checker convergence;
+
+      if (*Loop::iteration == BASE_INIT)
+      {
+        result.clear();
+        return;
+      }
+
+      if (!useBuckFastCMSnoeffDetector) return;
+
+      if (*Loop::iteration == COLLIDER_INIT)
+      {
+        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
+        return;
+      }
+
+      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
+      {
+        // Update the convergence tracker with the new results
+        convergence.update(*Dep::CMSnoeffAnalysisContainer);
+        return;
+      }
+
+      if (*Loop::iteration == CHECK_CONVERGENCE)
+      {
+        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
+        if (convergence.achieved(*Dep::CMSnoeffAnalysisContainer)) Loop::wrapup();
+        return;
+      }
+
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (*Loop::iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : Dep::CMSnoeffAnalysisContainer->get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       cout << debug_prefix() << "runCMSnoeffAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
+
+      if (*Loop::iteration == COLLIDER_FINALIZE)
+      {
+        // The final iteration for this collider: collect results
+        for (auto& analysis_pointer_pair : Dep::CMSnoeffAnalysisContainer->get_current_analyses_map())
+        {
+          #ifdef COLLIDERBIT_DEBUG
+          cout << debug_prefix() << "runCMSnoeffAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          #endif
+
+          str warning;
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
+        }
+        return;
+      }
+
+      if (*Loop::iteration == BASE_FINALIZE)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "runCMSnoeffAnalyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
+        return;
+      }
+
+      if (*Loop::iteration <= BASE_INIT) return;
+
+      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
+      Dep::CMSnoeffAnalysisContainer->analyze(*Dep::CMSnoeffSmearedEvent);
+
+    }
+
+
     void runIdentityAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runIdentityAnalyses;
@@ -1757,6 +1996,8 @@ namespace Gambit
         cout << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastCMSDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
+      if (haveUsedBuckFastCMSnoeffDetector)
+        cout << debug_prefix() << "CollectAnalyses: Dep::CMSnoeffAnalysisNumbers->size() = " << Dep::CMSnoeffAnalysisNumbers->size() << endl;
       if (haveUsedBuckFastIdentityDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
       #ifndef EXCLUDE_DELPHES
@@ -1770,6 +2011,8 @@ namespace Gambit
         result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
       if (haveUsedBuckFastCMSDetector)
         result.insert(result.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
+      if (haveUsedBuckFastCMSnoeffDetector)
+        result.insert(result.end(), Dep::CMSnoeffAnalysisNumbers->begin(), Dep::CMSnoeffAnalysisNumbers->end());
       if (haveUsedBuckFastIdentityDetector)
         result.insert(result.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
       #ifndef EXCLUDE_DELPHES
