@@ -75,35 +75,70 @@ namespace Gambit {
 
       void analyze(const HEPUtils::Event* event) 
       {
+        // Baseline objects
         HEPUtilsAnalysis::analyze(event);
         double met = event->met();
 
-        // Baseline objects
+        // Apply electron efficiency and collect baseline electrons
+        //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_034_ttbar.pdf.
+        //@note The efficiency map has been extended to cover the low-pT region, using the efficiencies from BuckFast (CMSEfficiencies.hpp)
+        const vector<double> aEl={0., 0.8, 1.442, 1.556, 2., 2.5, DBL_MAX};   // Bin edges in eta
+        const vector<double> bEl={0., 10., 20., 25., 30., 40., 50., DBL_MAX}; // Bin edges in pT. Assume flat efficiency above 200, where the CMS map stops.
+        const vector<double> cEl={                 
+                          // pT: (0,10),  (10,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)     
+                                    0.0,    0.95,    0.619,     0.669,    0.7,     0.737,    0.79,  // eta: (0, 0.8)
+                                    0.0,    0.95,    0.625,     0.658,    0.72,    0.712,    0.793, // eta: (0.8, 1.4429
+                                    0.0,    0.95,    0.338,     0.372,    0.36,    0.365,    0.416, // eta: (1.442, 1.556)
+                                    0.0,    0.85,    0.576,     0.531,    0.614,   0.644,    0.712, // eta: (1.556, 2)
+                                    0.0,    0.85,    0.440,     0.527,    0.585,   0.606,    0.648, // eta: (2, 2.5) 
+                                    0.0,    0.0,     0.0,       0.0,      0.0,     0.0,      0.0,   // eta > 2.5
+                                  };
+        HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) 
         {
-          if (electron->pT()>12. && fabs(electron->eta())<2.5)baselineElectrons.push_back(electron);
+          bool isEl=has_tag(_eff2dEl, electron->eta(), electron->pT());
+          if (isEl && electron->pT()>12. && fabs(electron->eta())<2.5) baselineElectrons.push_back(electron);
         }
 
+
+        // Apply muon efficiency and collect baseline muons
+        //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_034_ttbar.pdf
+        //@note The efficiency map has been extended to cover the low-pT region, using the efficiencies from BuckFast (CMSEfficiencies.hpp)
+        const vector<double> aMu={0., 0.9, 1.2, 2.1, 2.4, DBL_MAX};   // Bin edges in eta
+        const vector<double> bMu={0., 10., 20., 25., 30., 40., 50., DBL_MAX};  // Bin edges in pT. Assume flat efficiency above 200, where the CMS map stops.
+        const vector<double> cMu={
+                           // pT:   (0,10),  (10,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)     
+                                     0.0,    0.950,    0.869,    0.889,    0.910,    0.929,    0.930,  // eta: (0, 0.9)
+                                     0.0,    0.950,    0.857,    0.880,    0.893,    0.937,    0.930,  // eta: (0.9, 1.2)
+                                     0.0,    0.950,    0.891,    0.894,    0.901,    0.912,    0.927,  // eta: (1.2, 2.1)
+                                     0.0,    0.950,    0.803,    0.818,    0.817,    0.855,    0.869,  // eta: (2.1, 2.4)
+                                     0.0,    0.0,      0.0,      0.0,      0.0,      0.0,      0.0,    // eta > 2.4
+                                 };
+        HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) 
         {
-          if (muon->pT()>8. &&fabs(muon->eta())<2.4)baselineMuons.push_back(muon);
+          bool isMu=has_tag(_eff2dMu, muon->eta(), muon->pT());
+          if (isMu && muon->pT()>8. && fabs(muon->eta())<2.4) baselineMuons.push_back(muon);
         }
 
+        // Baseline photons
         vector<HEPUtils::Particle*> baselinePhotons;
         for (HEPUtils::Particle* photon : event->photons()) 
         {
           if (photon->pT()>25. && fabs(photon->eta())<2.4 && (fabs(photon->eta())<1.4 || fabs(photon->eta())>1.6) && fabs(photon->phi()-event->missingmom().phi())>0.4)baselinePhotons.push_back(photon);
         }
 
+        // Baseline jets
         vector<HEPUtils::Jet*> baselineJets;
         for (HEPUtils::Jet* jet : event->jets()) 
         {
           // We use 25 GeV rather than 35 GeV
-          // if (jet->pT()>35. &&fabs(jet->eta())<2.4)baselineJets.push_back(jet);
-          if (jet->pT()>25. &&fabs(jet->eta())<2.4)baselineJets.push_back(jet);
+          // if (jet->pT()>35. &&fabs(jet->eta())<2.4) baselineJets.push_back(jet);
+          if (jet->pT()>25. &&fabs(jet->eta())<2.4) baselineJets.push_back(jet);
         }
+
 
         // Signal objects
         vector<HEPUtils::Particle*> signalLeptons;
@@ -112,29 +147,19 @@ namespace Gambit {
         vector<HEPUtils::Jet*> signalJets;   
         vector<HEPUtils::Jet*> signalBJets;   
 
-        //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_034_ttbar.pdf
-        const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
-        const vector<double> bEl={0.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above 200, where the CMS map stops.
-        const vector<double> cEl={0.619,0.669,0.7,0.737,0.79,0.625,0.658,0.72,0.712,0.793,0.338,0.372,0.36,0.365,0.416,0.576,0.531,0.614,0.644,0.712,0.440,0.527,0.585,0.606,0.648};
-        HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
+        // Signal electrons
         for (size_t iEl=0;iEl<baselineElectrons.size();iEl++)
         {
-          bool isEl=has_tag(_eff2dEl, baselineElectrons.at(iEl)->eta(), baselineElectrons.at(iEl)->pT());
-          if (isEl && baselineElectrons.at(iEl)->pT()>20. && (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta())>1.6)) signalElectrons.push_back(baselineElectrons.at(iEl));
+          if (baselineElectrons.at(iEl)->pT()>20. && (fabs(baselineElectrons.at(iEl)->eta())<1.4 || fabs(baselineElectrons.at(iEl)->eta())>1.6)) signalElectrons.push_back(baselineElectrons.at(iEl));
         }
 
-
-        //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_mu_034_ttbar.pdf
-        const vector<double> aMu={0,0.9,1.2,2.1,2.4};
-        const vector<double> bMu={0.,25.,30.,40.,50.,10000.};  // Assuming flat efficiency above 200, where the CMS map stops.
-        const vector<double> cMu={0.869,0.889,0.91,0.929,0.93,0.857,0.88,0.893,0.937,0.93,0.891,0.894,0.901,0.912,0.927,0.803,0.818,0.817,0.855,0.869};
-        HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
+        // Signal muons
         for (size_t iMu=0;iMu<baselineMuons.size();iMu++) 
         {
-          bool isMu=has_tag(_eff2dMu, baselineMuons.at(iMu)->eta(), baselineMuons.at(iMu)->pT());
-          if (isMu && baselineMuons.at(iMu)->pT()>20. && (fabs(baselineMuons.at(iMu)->eta())<1.4 || fabs(baselineMuons.at(iMu)->eta())>1.6))signalMuons.push_back(baselineMuons.at(iMu));
+          if (baselineMuons.at(iMu)->pT()>20. && (fabs(baselineMuons.at(iMu)->eta())<1.4 || fabs(baselineMuons.at(iMu)->eta())>1.6))signalMuons.push_back(baselineMuons.at(iMu));
         }
 
+        // Signal jets and b-jets
         sort(baselinePhotons.begin(),baselinePhotons.end(),comparePt);
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) 
         {
@@ -162,7 +187,7 @@ namespace Gambit {
         }
         CMS::applyCSVv2MediumBtagEff(signalBJets);
 
-
+        // Signal leptons = electrons + muons
         signalLeptons=signalElectrons;
         signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
         int nSignalLeptons = signalLeptons.size();
@@ -171,7 +196,6 @@ namespace Gambit {
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
         sort(signalJets.begin(),signalJets.end(),compareJetPt);       
         sort(signalBJets.begin(),signalBJets.end(),compareJetPt); 
-
 
         // Variables + Preselection
         bool preselection=false;
