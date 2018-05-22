@@ -27,6 +27,7 @@
 #define DECAYBIT_INCLUDE_GAMBIT_DECAYBIT_SM_Z_HPP_
 
 #include <cmath>
+#include <stdexcept>
 
 namespace SM_Z {
 
@@ -38,7 +39,7 @@ namespace SM_Z {
 constexpr struct {
   const double mu = 499.0;
   const double sigma = 1.5;
-} gamma_invisible;
+} gamma_inv;
 
 
 /** @brief The central values of nuisances from eq. 13 */
@@ -81,6 +82,8 @@ constexpr double table_6[kRows] =
 class TwoLoop {
   /**
      @brief \f$Z\f$-boson observables at two-loop and the residual theory errors
+     
+     @warning Do not apply any corrections outside the range of validity in p5
   */
  public:
   // Partial widths in MeV
@@ -89,7 +92,7 @@ class TwoLoop {
   double gamma_tau() const {return observable(1);}
   double gamma_nu_e() const {return observable(2);}
   double gamma_nu_mu() const {return gamma_nu_e();}
-  double gamma_invisible() const {return 3. * gamma_nu_e();}
+  double gamma_inv() const {return 3. * gamma_nu_e();}
   double gamma_nu_tau() const {return observable(2);}
   double gamma_u() const {return observable(3);}
   double gamma_c() const {return observable(4);}
@@ -105,7 +108,7 @@ class TwoLoop {
   double error_gamma_tau() const {return error(1);}
   double error_gamma_nu_e() const {return error(2);}
   double error_gamma_nu_mu() const {return error_gamma_nu_e();}
-  double error_gamma_invisible() const {return 3. * error_gamma_nu_e();}
+  double error_gamma_inv() const {return 3. * error_gamma_nu_e();}
   double error_gamma_nu_tau() const {return error(2);}
   double error_gamma_u() const {return error(3);}
   double error_gamma_c() const {return error(4);}
@@ -121,7 +124,7 @@ class TwoLoop {
   double BR_tau() const {return BR(1);}
   double BR_nu_e() const {return BR(2);}
   double BR_nu_mu() const {return BR_nu_e();}
-  double BR_invisible() const {return 3. * BR_nu_e();}
+  double BR_inv() const {return 3. * BR_nu_e();}
   double BR_nu_tau() const {return BR(2);}
   double BR_u() const {return BR(3);}
   double BR_c() const {return BR(4);}
@@ -136,7 +139,7 @@ class TwoLoop {
   double error_BR_tau() const {return error_BR(1);}
   double error_BR_nu_e() const {return error_BR(2);}
   double error_BR_nu_mu() const {return error_BR_nu_e();}
-  double error_BR_invisible() const {return 3. * error_BR_nu_e();}
+  double error_BR_inv() const {return 3. * error_BR_nu_e();}
   double error_BR_nu_tau() const {return error_BR(2);}
   double error_BR_u() const {return error_BR(3);}
   double error_BR_c() const {return error_BR(4);}
@@ -186,12 +189,27 @@ class TwoLoop {
        @param alpha_s_MSbar_MZ Strong coupling in MS-bar scheme at \f$Q = M_Z\f$
        @param delta_alpha_OS \f$\Delta\alpha\f$ parameter in OS scheme. Defined on p9
     */
-    L_H = std::log(mh_OS / hat.mh_OS);
-    delta_H = mh_OS / hat.mh_OS - 1.;
-    delta_t = pow(mt_OS / hat.mt_OS, 2) - 1.;
-    delta_z = MZ_OS / hat.MZ_OS - 1.;
-    delta_alpha_s = alpha_s_MSbar_MZ / hat.alpha_s_MSbar_MZ - 1.;
-    delta_delta_alpha = delta_alpha_OS / hat.delta_alpha_OS - 1.;
+    
+    // Range of validity in p5
+    if (!((std::fabs(mh_OS - 125.1) < 5.) &&
+          (std::fabs(mt_OS - 173.2) < 4.) &&
+          (std::fabs(alpha_s_MSbar_MZ - 0.1184) < 0.005) &&
+          (std::fabs(delta_alpha_OS - 0.059) < 0.0005) &&
+          (std::fabs(MZ_OS - 91.1876) < 0.0042))) {
+      L_H = 0.;
+      delta_H =  0.;
+      delta_t =  0.;
+      delta_z =  0.;
+      delta_alpha_s =  0.;
+      delta_delta_alpha =  0.;
+    } else {
+      L_H = std::log(mh_OS / hat.mh_OS);
+      delta_H = mh_OS / hat.mh_OS - 1.;
+      delta_t = pow(mt_OS / hat.mt_OS, 2) - 1.;
+      delta_z = MZ_OS / hat.MZ_OS - 1.;
+      delta_alpha_s = alpha_s_MSbar_MZ / hat.alpha_s_MSbar_MZ - 1.;
+      delta_delta_alpha = delta_alpha_OS / hat.delta_alpha_OS - 1.;
+    }
   }
 
  private:
@@ -212,7 +230,7 @@ class TwoLoop {
        @param row Row number of Table 5 corresponding to quantity
        @returns Error in quantity
     */
-    return std::sqrt(pow(table_5[row][9], 2) + pow(table_6[row], 2));
+    return std::sqrt(pow(table_5[row][8], 2) + pow(table_6[row], 2));
   }
 
   double observable(int row) const {
