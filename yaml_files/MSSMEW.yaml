@@ -353,10 +353,8 @@ Rules:
   - capability: CMSAnalysisContainer
     function: getCMSAnalysisContainer
     options:
-      analyses: [ ["CMS_13TeV_1LEPbb_36invfb",
-                   "CMS_13TeV_2LEPsoft_36invfb",
-                   "CMS_13TeV_MultiLEP_36invfb",
-                   "CMS_13TeV_MONOJET_36invfb" ] ]
+      analyses: [ [ "CMS_13TeV_1LEPbb_36invfb",
+                    "CMS_13TeV_MONOJET_36invfb" ] ]
 
   # CMSnoeff analysis setup
   # NOTE: Don't blindly copy this analysis list without also checking the
@@ -364,15 +362,18 @@ Rules:
   - capability: CMSnoeffAnalysisContainer
     function: getCMSnoeffAnalysisContainer
     options:
-      analyses: [ ["CMS_13TeV_2OSLEP_36invfb",
-                   "CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE"] ]
+      analyses: [ [ "CMS_13TeV_2LEPsoft_36invfb",
+                    "CMS_13TeV_MultiLEP_36invfb",
+                    "CMS_13TeV_2OSLEP_36invfb" ] ]
 
 
   # List any analyses that should *NOT* be included in the total log-likelihood!
+  # These will still be computed if listed in the analysis setup above, 
+  # but their likelihood will not added to the combined likelihood.
   - capability: LHC_Combined_LogLike
     function: calc_LHC_LogLike
     options:
-      skip_analyses: ["CMS_13TeV_2OSLEP_confnote_36invfb_NOCOVAR_NOLIKE"]
+      skip_analyses: []
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
   # Can change "_lognormal_" to "_gaussian_" if you prefer
