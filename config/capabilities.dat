@@ -2257,8 +2257,11 @@ Reference_SM_A0_decay_rates: |
 Reference_SM_other_Higgs_decay_rates: |
    Computation of decays of SM Higgs with mass equal to the mass of the least SM-like CP-even Higgs.
 
-Z_gamma_inv: |
-   Invisible decay width of the Z boson in MeV.
+Z_gamma_nu: |
+   Decay width of the Z boson to neutrinos in MeV.
+   
+Z_gamma_chi_0: |
+   Decay width of the Z boson to neutralinos in MeV.
 
 lnL_Z_inv: |
    Log Likelihood for the inivislbe decay width of the Z boson.

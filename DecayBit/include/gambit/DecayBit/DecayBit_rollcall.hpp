@@ -783,10 +783,19 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Z_gamma_inv
+  #define CAPABILITY Z_gamma_nu
   START_CAPABILITY
-    #define FUNCTION Z_gamma_inv_SM_2l_MSSM_tree
-    START_FUNCTION(DecayTable::Entry)
+    #define FUNCTION Z_gamma_nu_SM_2l
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY Z_gamma_chi_0
+  START_CAPABILITY
+    #define FUNCTION Z_gamma_chi_0_MSSM_tree
+    START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
@@ -794,10 +803,11 @@ START_MODULE
   
   #define CAPABILITY lnL_Z_inv
   START_CAPABILITY
-    #define FUNCTION lnL_Z_inv_SM_2l_MSSM_tree
+    #define FUNCTION lnL_Z_inv_MSSM
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
-    DEPENDENCY(Z_gamma_inv, DecayTable::Entry)
+    DEPENDENCY(Z_gamma_nu, triplet<double>)
+    DEPENDENCY(Z_gamma_chi_0, double)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
