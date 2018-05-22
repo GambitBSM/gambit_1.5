@@ -141,7 +141,7 @@ double gamma_h_chi_pm(int i,
      @warning Tree-level formula
 
      @returns \f$\Gamma(h \to \chi^-_i \chi^+_j)\f$ in GeV
-     @param i Negativ chargino \f$\chi^-_i\f$ in final state
+     @param i Negative chargino \f$\chi^-_i\f$ in final state
      @param j Positive chargino \f$\chi^+_j\f$ in final state
      @param m Chargino masses
      @param U Real chargino mixing matrix
@@ -162,6 +162,53 @@ double gamma_h_chi_pm(int i,
   std::array<double, 2> mf{{m[i], m[j]}};
   return gamma_h_chi(mf, gL, mh, mw, GF);
 }
+
+double gamma_h_chi(std::array<double, 2> m_pm,
+  std::array<double, 4> m_0,
+  std::array<std::array<double, 2>, 2> U,
+  std::array<std::array<double, 2>, 2> V,
+  std::array<std::array<double, 4>, 4> Z,
+  double alpha,
+  double mh = 125.,
+  double mw = 80.385,
+  double GF = 1.1663787e-5,
+  double sw2 = 0.22) {
+  /**
+     @brief Lightest Higgs boson decay to neutralinos and charginos at
+     tree-level in GeV
+
+     @warning Tree-level formula
+
+     @returns \f$\Gamma(h \to \chi\chi)\f$ in GeV
+     @param m_pm Chargino masses
+     @param m_0 Neutralino mases with phases
+     @param U Real chargino mixing matrix
+     @param V Real chargino mixing matrix
+     @param Z Real neutralino mixing matrix
+     @param alpha \f$\alpha\f$, Higgs mixing angle
+     @param mh Lightest Higgs mass, \f$m_h\f$
+     @param mw W-boson mass, \f$M_W\f$
+     @param GF Fermi constant, \f$G_F\f$
+     @param sw2 Weinberg angle, \f$\sin^2\theta_W\f$
+  */
+    double gamma = 0.;
+
+    for (int i = 0; i <= 3; i += 1) {
+      // Do not double count e.g. 12 and 21 - they are not distinct
+      for (int j = i; j <= 3; j += 1) {
+        gamma += MSSM_H::gamma_h_chi_0(i, j, m_0, Z, alpha, mh, mw, GF, sw2);
+      }
+    }
+
+    for (int i = 0; i <= 1; i += 1) {
+      // Do count e.g. 12 and 21 - they are distinct
+      for (int j = 0; j <= 1; j += 1) {
+        gamma += MSSM_H::gamma_h_chi_pm(i, j, m_pm, U, V, alpha, mh, mw, GF);
+      }
+    }
+
+    return gamma;
+  }
 
 }  // namespace MSSM_H
 
