@@ -196,14 +196,12 @@ class TwoLoop {
           (std::fabs(delta_alpha_OS - 0.059) < 0.0005) &&
           (std::fabs(MZ_OS - 91.1876) < 0.0042))) {
       L_H = 0.;
-      delta_H =  0.;
       delta_t =  0.;
       delta_z =  0.;
       delta_alpha_s =  0.;
       delta_delta_alpha =  0.;
     } else {
       L_H = std::log(mh_OS / hat.mh_OS);
-      delta_H = mh_OS / hat.mh_OS - 1.;
       delta_t = pow(mt_OS / hat.mt_OS, 2) - 1.;
       delta_z = MZ_OS / hat.MZ_OS - 1.;
       delta_alpha_s = alpha_s_MSbar_MZ / hat.alpha_s_MSbar_MZ - 1.;
@@ -213,7 +211,6 @@ class TwoLoop {
 
  private:
   double L_H;
-  double delta_H;
   double delta_t;
   double delta_z;
   double delta_alpha_s;
@@ -240,12 +237,11 @@ class TwoLoop {
     return table_5[row][0] +
            table_5[row][1] * L_H +
            table_5[row][2] * delta_t +
-           table_5[row][3] * delta_H +
-           table_5[row][4] * delta_alpha_s +
-           table_5[row][5] * pow(delta_alpha_s, 2) +
-           table_5[row][6] * delta_alpha_s * delta_t +
-           table_5[row][7] * delta_delta_alpha +
-           table_5[row][8] * delta_z;
+           table_5[row][3] * delta_alpha_s +
+           table_5[row][4] * pow(delta_alpha_s, 2) +
+           table_5[row][5] * delta_alpha_s * delta_t +
+           table_5[row][6] * delta_delta_alpha +
+           table_5[row][7] * delta_z;
   }
 
   double BR(int row) const {

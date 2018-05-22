@@ -14,5 +14,5 @@
 
 int main() {
   auto Z = SM_Z::TwoLoop();
-  std::cout << std::setprecision(20) << Z.gamma_invisible() << std::endl;
+  std::cout << std::setprecision(20) << Z.gamma_inv() << std::endl;
 }
