@@ -3279,10 +3279,13 @@ namespace Gambit
       */
       using namespace Pipes::lnL_Z_inv_MSSM;
       const auto gamma_nu = *Dep::Z_gamma_nu;
-      const double gamma_chi_0 = *Dep::Z_gamma_chi_0;
-      const double gamma_inv = gamma_chi_0 + gamma_nu.central;
+      const auto gamma_chi_0 = *Dep::Z_gamma_chi_0;
+      const double gamma_inv = gamma_chi_0.central + gamma_nu.central;
       // Average + and - errors
-      const double tau = 0.5 * (gamma_nu.upper + gamma_nu.lower);
+      const double tau_nu = 0.5 * (gamma_nu.upper + gamma_nu.lower);
+      const double tau_chi_0 = 0.5 * (gamma_chi_0.upper + gamma_chi_0.lower);
+      // Add theory errors in quadrature
+      const double tau = std::sqrt(pow(tau_nu, 2) + pow(tau_chi_0, 2));
       lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_inv.mu,
         tau, SM_Z::gamma_inv.sigma, false);
     }
@@ -3317,13 +3320,13 @@ namespace Gambit
       gamma.upper = gamma.lower;  // Error is symmetric
     }
 
-    void Z_gamma_chi_0_MSSM_tree(double& gamma)
+    void Z_gamma_chi_0_MSSM_tree(triplet<double>& gamma)
     {
       /**
          @brief Calculate width of \f$Z\f$ decays to the lightest neutralinos,
          \f$\Gamma(Z\to\chi^0_1\chi^0_1)\f$
          
-         @warning Tree-level formula
+         @warning Tree-level formula with 10% error
          
          @param gamma \f$\Gamma(Z\to\chi^0_1\chi^0_1)\f$
       */
@@ -3352,7 +3355,10 @@ namespace Gambit
       const double sw2 = MSSM.safeget(Par::dimensionless, "sinW2");
       const double MZ = SM.mZ;
 
-      gamma = MSSM_Z::gamma_chi_0(0, 0, m_0, Z, g2, MZ, sw2);
+      // Set elements of triplet to the width and its error
+      gamma.central = MSSM_Z::gamma_chi_0(0, 0, m_0, Z, g2, MZ, sw2);
+      gamma.lower = gamma.central * 0.1;
+      gamma.upper = gamma.lower;  // Error is symmetric
   }
   }  // namespace DecayBit
 

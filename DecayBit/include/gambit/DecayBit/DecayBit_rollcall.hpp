@@ -795,7 +795,7 @@ START_MODULE
   #define CAPABILITY Z_gamma_chi_0
   START_CAPABILITY
     #define FUNCTION Z_gamma_chi_0_MSSM_tree
-    START_FUNCTION(double)
+    START_FUNCTION(triplet<double>)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
@@ -807,7 +807,7 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     DEPENDENCY(Z_gamma_nu, triplet<double>)
-    DEPENDENCY(Z_gamma_chi_0, double)
+    DEPENDENCY(Z_gamma_chi_0, triplet<double>)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
