@@ -27,7 +27,6 @@
 #define DECAYBIT_INCLUDE_GAMBIT_DECAYBIT_SM_Z_HPP_
 
 #include <cmath>
-#include <stdexcept>
 
 namespace SM_Z {
 
