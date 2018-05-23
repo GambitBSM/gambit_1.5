@@ -303,6 +303,12 @@ ObsLikes:
   - capability: Ut3_phase
     purpose: Observable
 
+  - capability: Gamma_0nubb_Xe
+    purpose: Observable
+
+  - capability: Gamma_0nubb_Ge  
+    purpose: Observable
+
 Rules:
 
   - capability: m_nu
@@ -331,5 +337,5 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-#  default_output_path: "../../../scratch/RHN_diff_NH_123_log_log/"
-  default_output_path: "runs/RHN_diff_NH_123_log_log/"
+    #  default_output_path: "../../../scratch/RHN_diff_NH_123_BL/"
+  default_output_path: "runs/RHN_diff_NH_123_BL/"

@@ -30,13 +30,13 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu1:
-      range: [1E-16, 1E-13]
+      range: [1E-11, 2.3E-10]
       prior_type: log
     mNu2:
-      range: [1E-12, 2.3E-10]
+      range: [1E-11, 2.3E-10]
       prior_type: log
     mNu3:
-      range: [1E-11, 2.3E-10]
+      range: [1E-13, 2.3E-10]
       prior_type: log
 
     alpha1:
@@ -58,15 +58,15 @@ Parameters:
       range: [124.1, 127.3]
 
   # Right Handed Neutrino Parameters
-  RightHandedNeutrinos_diff:
+  RightHandedNeutrinos:
     M_1:
       range: [0.06, 500]
       prior_type: log
-    delta_M_2:
-      range: [1E-4, 500]
+    M_2:
+      range: [0.06, 500]
       prior_type: log
-    delta_M_3:
-      range: [1E-4, 500]
+    M_3:
+      range: [0.06, 500]
       prior_type: log
     ReOm23:
       range: [0, 6.283]
@@ -104,7 +104,6 @@ Scanner:
 
     de:
       plugin: diver
-      version: 1.0.4
       like: LogLike
       NP: 19200
       convthresh: 1e-5
@@ -252,52 +251,52 @@ ObsLikes:
   - capability: Ue1
     purpose: Observable
 
-  - capability: Ue1_phase
-    purpose: Observable
-
   - capability: Um1
-    purpose: Observable
-
-  - capability: Um1_phase
     purpose: Observable
 
   - capability: Ut1
     purpose: Observable
 
-  - capability: Ut1_phase
-    purpose: Observable
-
   - capability: Ue2
-    purpose: Observable
-
-  - capability: Ue2_phase
     purpose: Observable
 
   - capability: Um2
     purpose: Observable
 
-  - capability: Um2_phase
-    purpose: Observable
-
   - capability: Ut2
-    purpose: Observable
-
-  - capability: Ut2_phase
     purpose: Observable
 
   - capability: Ue3
     purpose: Observable
 
-  - capability: Ue3_phase
-    purpose: Observable
-
   - capability: Um3
     purpose: Observable
 
-  - capability: Um3_phase
+  - capability: Ut3
     purpose: Observable
 
-  - capability: Ut3
+  - capability: Ue1_phase
+    purpose: Observable
+
+  - capability: Um1_phase
+    purpose: Observable
+
+  - capability: Ut1_phase
+    purpose: Observable
+
+  - capability: Ue2_phase
+    purpose: Observable
+
+  - capability: Um2_phase
+    purpose: Observable
+
+  - capability: Ut2_phase
+    purpose: Observable
+
+  - capability: Ue3_phase
+    purpose: Observable
+
+  - capability: Um3_phase
     purpose: Observable
 
   - capability: Ut3_phase
@@ -313,9 +312,9 @@ Rules:
 
   - capability: m_nu
     options:
-      ordering: 1
+      ordering: 0
 
-  - capability: SeesawI_Theta 
+  - capability: SeesawI_Theta
     options:
       R_order: 123
 
@@ -337,5 +336,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-    #  default_output_path: "../../../scratch/RHN_diff_NH_123_lightnu/"
-  default_output_path: "runs/RHN_diff_NH_123_lightnu/"
+  default_output_path: "runs/RHN_full_IH_123/"
