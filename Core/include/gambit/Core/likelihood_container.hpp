@@ -72,6 +72,9 @@ namespace Gambit
       /// Active value for the minimum log likelihood (one of the above two values, whichever is currently in-use)
       double active_min_valid_lnlike;
 
+      /// Switch to print or not print invalid points to the output file
+      bool print_invalid_points;
+
       /// Map of return types of target functors
       std::map<DRes::VertexID,str> return_types;
 

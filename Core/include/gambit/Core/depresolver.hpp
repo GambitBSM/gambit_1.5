@@ -128,7 +128,10 @@ namespace Gambit
         std::vector<VertexID> getObsLikeOrder();
 
         /// Calculate a single target vertex.
-        void calcObsLike(VertexID, const int);
+        void calcObsLike(VertexID/*, const int*/);
+
+        /// Print a single target vertex
+        void printObsLike(VertexID, const int);
 
         /// Getter for print_timing flag (used by LikelihoodContainer)
         bool printTiming();

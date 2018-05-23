@@ -621,8 +621,8 @@ namespace Gambit
       return sorted;
     }
 
-    // Evaluates ObsLike vertex, and everything it depends on, and prints results
-    void DependencyResolver::calcObsLike(VertexID vertex, const int pointID)
+    // Evaluates ObsLike vertex, and everything it depends on
+    void DependencyResolver::calcObsLike(VertexID vertex/*, const int pointID*/)
     {
       // pointID is supplied by the scanner, and is used to tell the printer which model
       // point the results should be associated with.
@@ -646,6 +646,34 @@ namespace Gambit
         }
         invalid_point_exception* e = masterGraph[*it]->retrieve_invalid_point_exception();
         if (e != NULL) throw(*e);
+//        if (not typeComp(masterGraph[*it]->type(),  "void", *boundTEs, false))
+//        {
+          // Note that this prints from thread index 0 only, i.e. results created by
+          // threads other than the main one need to be accessed with
+          //   masterGraph[*it]->print(boundPrinter,pointID,index);
+          // where index is some integer s.t. 0 <= index <= number of hardware threads.
+          // At the moment GAMBIT only prints results of thread 0, under the expectation
+          // that nested module functions are all designed to gather their results into
+          // thread 0.
+//          masterGraph[*it]->print(boundPrinter,pointID);
+//        }
+      }
+      // Reset the cout output precision, in case any backends have messed with it during the ObsLike evaluation.
+      cout << std::setprecision(boundCore->get_outprec());
+    }
+
+    // Prints ObsLike vertex
+    void DependencyResolver::printObsLike(VertexID vertex, const int pointID)
+    {
+      // pointID is supplied by the scanner, and is used to tell the printer which model
+      // point the results should be associated with.
+
+      if (SortedParentVertices.find(vertex) == SortedParentVertices.end())
+        core_error().raise(LOCAL_INFO, "Tried to print a function not in or not at top of dependency graph.");
+      std::vector<VertexID> order = SortedParentVertices.at(vertex);
+
+      for (std::vector<VertexID>::iterator it = order.begin(); it != order.end(); ++it)
+      {
         if (not typeComp(masterGraph[*it]->type(),  "void", *boundTEs, false))
         {
           // Note that this prints from thread index 0 only, i.e. results created by
@@ -658,10 +686,9 @@ namespace Gambit
           masterGraph[*it]->print(boundPrinter,pointID);
         }
       }
+      }
       // Reset the cout output precision, in case any backends have messed with it during the ObsLike evaluation.
-      cout << std::setprecision(boundCore->get_outprec());
-    }
-
+ 
     /// Getter for print_timing flag (used by LikelihoodContainer)
     bool DependencyResolver::printTiming() { return print_timing; }
 
