@@ -6,6 +6,7 @@
 ##########################################################################
 
 # Initialization parameters controlling main characteristics.
+  potential_choice:         1
   num_inflaton:             1
   vparam_rows:              4
   slowroll_infl_end:        1
@@ -29,7 +30,7 @@
   varying_N_pivot:          0
 # Parameters to be passed to the potential
   N_pivot:                  70.0
-##  k_pivot:                0.05
+  k_pivot:                  0.05
   dlnk:                     0.4
   phi_init0:    [10.0]
   dphi_init0:   [0.0]
