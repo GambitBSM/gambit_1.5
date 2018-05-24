@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 11:36:48
+// File generated at Thu 10 May 2018 14:43:04
 
 /**
  * @file SingletDM_two_scale_model.cpp
@@ -26,7 +26,7 @@
  * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Mon 1 Jan 2018 11:36:48 with FlexibleSUSY
+ * This file was generated at Thu 10 May 2018 14:43:04 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 

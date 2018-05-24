@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 5 May 2018 00:25:03
+// File generated at Thu 10 May 2018 14:42:37
 
 #include "SingletDMZ3_slha_io.hpp"
 #include "SingletDMZ3_input_parameters.hpp"
@@ -276,7 +276,7 @@ void SingletDMZ3_slha_io::set_mass(const SingletDMZ3_physical& physical,
 void SingletDMZ3_slha_io::set_mixing_matrices(const SingletDMZ3_physical& physical,
                                               bool write_sm_mixing_matrics)
 {
-   
+
    if (write_sm_mixing_matrics) {
       slha_io.set_block("UULMIX", LOCALPHYSICAL(Vu), "Vu");
       slha_io.set_block("UDLMIX", LOCALPHYSICAL(Vd), "Vd");

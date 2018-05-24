@@ -144,6 +144,26 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "ddcalc")
+set(ver "1.2.0")
+set(lib "libDDCalc")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "93b894b80b360159264f0d634cd7387e")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
@@ -575,6 +595,7 @@ set(lib "libhiggsbounds")
 set(dl "https://www.hepforge.org/archive/higgsbounds/HiggsBounds-${ver}.tar.gz")
 set(md5 "c1667613f814a9f0297d1f11a8b3ef34")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(hb_tab_name "higgsbounds_tables")
 set(hb_tab_ver "0.0")
 set(hb_tab_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${hb_tab_name}/${hb_tab_ver}")
@@ -584,6 +605,7 @@ if(NOT ditched_${name}_${ver})
     DEPENDS ${hb_tab_name}_${hb_tab_ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
+    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy configure-with-chisq my_configure
               COMMAND sed ${dashi} -e "s|clsbtablesdir=.*|clsbtablesdir=\"${hb_tab_dir}/\"|" my_configure

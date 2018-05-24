@@ -80,9 +80,6 @@ namespace Gambit
     /// in which case the whitespace is replaced by a single space.
     void strip_whitespace_except_after_const(str&);
 
-    /// Strips backend variables back to their naked C++ types
-    void strip_backend_variable_wrappers(str&);
-
     /// Strips leading and/or trailing parentheses from a string.
     void strip_parentheses(str&);
 

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 5 May 2018 00:23:52
+// File generated at Thu 10 May 2018 14:42:27
 
 #include "SingletDMZ3_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -67,6 +67,7 @@ Eigen::Matrix<double,3,3> SingletDMZ3_susy_parameters::calc_beta_Ye_2_loop(const
    Eigen::Matrix<double,3,3> beta_Ye;
 
    beta_Ye = (twoLoop*(0.005*Ye*(1371*Quad(g1) + 5*Sqr(g1)*(25*
+<<<<<<< HEAD
       traceYdAdjYd + 75*traceYeAdjYe + 85*traceYuAdjYu + 54*Sqr(g2)) - 25*(46*
       Quad(g2) - 15*(3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu)*Sqr(g2) -
       2*(-27*traceYdAdjYdYdAdjYd + 6*traceYdAdjYuYuAdjYd - 9*
@@ -75,6 +76,16 @@ Eigen::Matrix<double,3,3> SingletDMZ3_susy_parameters::calc_beta_Ye_2_loop(const
       (g1) + 5*(-4*(8*LamH + 9*traceYdAdjYd + 3*traceYeAdjYe + 9*traceYuAdjYu)
       + 45*Sqr(g2)))*(Ye*Ye.adjoint()*Ye) + 1.5*(Ye*Ye.adjoint()*Ye*Ye.adjoint(
       )*Ye))).real();
+=======
+      traceYdAdjYd + 75*traceYeAdjYe + 85*traceYuAdjYu + 54*Sqr(g2)) - 25*(54*
+      traceYdAdjYdYdAdjYd - 12*traceYdAdjYuYuAdjYd + 18*traceYeAdjYeYeAdjYe +
+      54*traceYuAdjYuYuAdjYu + 46*Quad(g2) - 15*(3*traceYdAdjYd + traceYeAdjYe
+      + 3*traceYuAdjYu)*Sqr(g2) - 160*traceYdAdjYd*Sqr(g3) - 160*traceYuAdjYu*
+      Sqr(g3) - 12*Sqr(LamH) - Sqr(LamSH))) + 0.0375*(-20*(8*LamH + 9*
+      traceYdAdjYd + 3*traceYeAdjYe + 9*traceYuAdjYu) + 129*Sqr(g1) + 225*Sqr(
+      g2))*(Ye*Ye.adjoint()*Ye) + 1.5*(Ye*Ye.adjoint()*Ye*Ye.adjoint()*Ye)))
+      .real();
+>>>>>>> master
 
 
    return beta_Ye;

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 11:36:49
+// File generated at Thu 10 May 2018 14:43:04
 
 #ifndef SingletDM_STANDARD_MODEL_TWO_SCALE_SPECTRUM_GENERATOR_H
 #define SingletDM_STANDARD_MODEL_TWO_SCALE_SPECTRUM_GENERATOR_H

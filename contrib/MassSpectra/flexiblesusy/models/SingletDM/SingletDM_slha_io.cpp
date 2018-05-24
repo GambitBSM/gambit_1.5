@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 11:36:44
+// File generated at Thu 10 May 2018 14:43:01
 
 #include "SingletDM_slha_io.hpp"
 #include "SingletDM_input_parameters.hpp"
@@ -275,7 +275,7 @@ void SingletDM_slha_io::set_mass(const SingletDM_physical& physical,
 void SingletDM_slha_io::set_mixing_matrices(const SingletDM_physical& physical,
                                               bool write_sm_mixing_matrics)
 {
-   
+
    if (write_sm_mixing_matrics) {
       slha_io.set_block("UULMIX", LOCALPHYSICAL(Vu), "Vu");
       slha_io.set_block("UDLMIX", LOCALPHYSICAL(Vd), "Vd");

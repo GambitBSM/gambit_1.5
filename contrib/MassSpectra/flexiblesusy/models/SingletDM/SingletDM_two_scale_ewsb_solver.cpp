@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Mon 1 Jan 2018 11:36:48
+// File generated at Thu 10 May 2018 14:43:03
 
 /**
  * @file SingletDM_two_scale_ewsb_solver.cpp
  *
  * @brief implementation of EWSB solver for two-scale iteration
  *
- * This file was generated at Mon 1 Jan 2018 11:36:48 with FlexibleSUSY
+ * This file was generated at Thu 10 May 2018 14:43:03 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 

@@ -99,12 +99,9 @@ include(cmake/utilities.cmake)
 
 # Check for Python interpreter
 find_package(PythonInterp 2 REQUIRED)
-if (PYTHON_VERSION_MAJOR GREATER 2)
-  message(FATAL_ERROR "\nGAMBIT requires Python 2.  \nIf you need to set the path to the Python interpreter manually, "
+if (PYTHON_VERSION_MAJOR GREATER 2 OR PYTHON_VERSION_MINOR LESS 7)
+  message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
                       "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
-endif()
-if (PYTHON_VERSION_MINOR LESS 6)
-  message("${Red}   Python version < 2.6.  GAMBIT has not been tested with this version; upgrade Python if you experience problems.${ColourReset}")
 endif()
 
 # Check for pybind11
@@ -128,10 +125,16 @@ else()
 endif()
 if(NOT pybind11_FOUND AND NOT EXISTS "${pybind11_CONTRIB_DIR}")
   message("${BoldRed}   CMake will now download and install pybind11 v${PREFERRED_pybind11_VERSION}.${ColourReset}")
-  execute_process(COMMAND git clone https://github.com/pybind/pybind11.git ${pybind11_CONTRIB_DIR})
-  execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${pybind11_CONTRIB_DIR} git checkout -q v${PREFERRED_pybind11_VERSION})
-  use_contributed_pybind11()
+  execute_process(RESULT_VARIABLE result COMMAND git clone https://github.com/pybind/pybind11.git ${pybind11_CONTRIB_DIR})
+  if(${result} STREQUAL "0")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${pybind11_CONTRIB_DIR} git checkout -q v${PREFERRED_pybind11_VERSION})
+    use_contributed_pybind11()
     include_directories("${PYTHON_INCLUDE_DIRS};${PYBIND11_INCLUDE_DIR}")
+  else()
+    message("${BoldRed}   Attempt to clone git repository for pybind11 failed.  This may be because you are disconnected from the internet.\n   "
+            "Otherwise, your git installation may be faulty. Errors about missing .so files are usually due to\n   "
+            "your git installation being linked to a buggy version of libcurl.  In that case, try reinstalling libcurl.${ColourReset}")
+  endif()
 endif()
 set(HAVE_PYBIND11 "${pybind11_FOUND}")
 

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 5 May 2018 00:25:13
+// File generated at Thu 10 May 2018 14:42:43
 
 #include "config.h"
 
@@ -87,7 +87,7 @@ void set_command_line_parameters(const Dynamic_array_view<char*>& args,
       if(Command_line_options::get_parameter_value(option, "--Qin=", input.Qin))
          continue;
 
-      
+
       if (Command_line_options::get_parameter_value(
              option, "--solver-type=", solver_type))
          continue;

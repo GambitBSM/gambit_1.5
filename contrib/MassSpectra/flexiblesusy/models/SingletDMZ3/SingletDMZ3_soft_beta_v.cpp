@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 5 May 2018 00:23:55
+// File generated at Thu 10 May 2018 14:42:28
 
 #include "SingletDMZ3_soft_parameters.hpp"
 #include "wrappers.hpp"
@@ -102,11 +102,19 @@ double SingletDMZ3_soft_parameters::calc_beta_v_2_loop(const Soft_traces& soft_t
    double beta_v;
 
    beta_v = Re(-0.00125*twoLoop*v*(1221*Quad(g1) + 10*Sqr(g1)*(122*
+<<<<<<< HEAD
       traceYdAdjYd + 174*traceYeAdjYe + 242*traceYuAdjYu - 45*Sqr(g2)) - 25*(
       379*Quad(g2) - 108*(3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu)*Sqr(
       g2) - 8*(-27*traceYdAdjYdYdAdjYd + 6*traceYdAdjYuYuAdjYd - 9*
       traceYeAdjYeYeAdjYe - 27*traceYuAdjYuYuAdjYu + 80*traceYdAdjYd*Sqr(g3) +
       80*traceYuAdjYu*Sqr(g3) + 6*Sqr(LamH) + 2*Sqr(LamSH)))));
+=======
+      traceYdAdjYd + 174*traceYeAdjYe + 242*traceYuAdjYu - 45*Sqr(g2)) + 25*(
+      -379*Quad(g2) + 108*(3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu)*Sqr(
+      g2) + 4*(-6*(9*traceYdAdjYdYdAdjYd - 2*traceYdAdjYuYuAdjYd + 3*
+      traceYeAdjYeYeAdjYe + 9*traceYuAdjYuYuAdjYu) + 160*(traceYdAdjYd +
+      traceYuAdjYu)*Sqr(g3) + 12*Sqr(LamH) + Sqr(LamSH)))));
+>>>>>>> master
 
 
    return beta_v;
