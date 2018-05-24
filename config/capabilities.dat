@@ -1213,7 +1213,7 @@ PandaX_2017_SignalSI: |
    The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
 
 PandaX_2017_SignalSD: |
-   The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
+   The number of spin-dependent signal events for the PandaX 2017 direct detection analysis.
 
 PandaX_2017_LogLikelihood: |
    Calculate the log-likelihood for the PandaX 2017 direct detection analysis.
@@ -1563,9 +1563,15 @@ DDCalc_1_0_0_init: |
 DDCalc_1_1_0_init: |
    Initialises DDCalc 1.1.0.
 
+<<<<<<< HEAD
 DDCalc_1_2_0_init: |
    Initialises DDCalc 1.2.0.
 
+=======
+DDCalc_1_2_0_init: |
+   Initialises DDCalc 1.2.0.
+
+>>>>>>> master
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -1620,9 +1626,15 @@ PICO_60_2017_Init: |
 PandaX_2016_Init: |
    Initialises a direct detection experiment with the properties of the 2016 analysis of PandaX.
 
+<<<<<<< HEAD
 PandaX_2017_Init: |
    Initialises a direct detection experiment with the properties of the 2017 analysis of PandaX.
 
+=======
+PandaX_2017_Init: |
+   Initialises a direct detection experiment with the properties of the 2017 analysis of PandaX.
+
+>>>>>>> master
 XENON100_2012_Init: |
    Initialises a direct detection experiment with the properties of the 2012 analysis of Xenon100.
 
