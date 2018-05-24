@@ -119,13 +119,14 @@ namespace Gambit
 
       for (unsigned i=0; i<doc.size(); ++i)
       {
-       Measurement mes_tmp;
+        Measurement mes_tmp;
         doc[i] >> mes_tmp;
         if(mes_tmp.name!=measurement_name.c_str()) continue;
         measurements.push_back(mes_tmp);
         number_measurements++;
         if (debug) cout << "Read in " << measurement_name << " " << mes_tmp.name << " " << mes_tmp.exp_value << endl;
       }
+      if(debug) cout << "Number of measurements: " << number_measurements << endl;
     }
 
     /// Print a measurement previously read in from the database
@@ -152,14 +153,12 @@ namespace Gambit
       M_cor_cov = boost::numeric::ublas::identity_matrix<double>(number_measurements);
       for(int i=0; i<number_measurements; ++i)
       {
-        #ifdef FLAVBIT_DEBUG
-          cout<<"Correlation size: "<< measurements[i].corr.size()<<endl;
-        #endif
+        if(debug)
+         cout<<"Correlation size: "<< measurements[i].corr.size()<<endl;
         for ( unsigned icorr=0; icorr< measurements[i].corr.size(); ++icorr)
         {
-          #ifdef FLAVBIT_DEBUG
+          if(debug)
             cout<<"Searching for correlation: "<< measurements[i].corr[icorr].corr_name <<endl;
-          #endif
           int i_corr_index=get_measurement_for_corr(measurements[i].corr[icorr].corr_name  );
           M_cor_cov(i_corr_index,i)=measurements[i].corr[icorr].corr_val;
         }
@@ -216,9 +215,10 @@ namespace Gambit
     void Flav_reader::print_matrix(boost::numeric::ublas::matrix<double>& M, str name)
     {
       cout<<name<<endl;
-      for(int i=0; i < number_measurements; ++i)
+      for(unsigned int i=0; i < M.size1(); ++i)
       {
-        for(int j=0 ; j< number_measurements; ++j) cout<<M(i,j)<<"\t";
+        for(unsigned int j=0; j < M.size2(); ++j)
+          cout << M(i,j) << "\t";
         cout<<endl;
       }
     }
@@ -227,9 +227,10 @@ namespace Gambit
     void Flav_reader::print_matrix(boost::numeric::ublas::matrix< std::pair<double, bool> >& M, str name)
     {
       cout<<name<<endl;
-      for(int i=0; i < number_measurements; ++i)
+      for(unsigned int i=0; i < M.size1(); ++i)
       {
-        for(int j=0 ; j< number_measurements; ++j) cout<<M(i,j).first<<":"<<M(i,j).second<<"\t";
+        for(unsigned int j=0; j < M.size2(); ++j) 
+          cout << M(i,j).first << ":" << M(i,j).second << "\t";
         cout<<endl;
       }
     }
