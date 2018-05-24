@@ -178,6 +178,19 @@ namespace Gambit
       mssmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
       mssmspec.set_override(Par::mass1,spectrum_generator.get_low_scale(), "low_scale", true);
 
+
+      // Has the user chosen to override any pole mass values?
+      // This will typically break consistency, but may be useful in some special cases
+      if (runOptions.hasKey("override_FS_pole_masses"))
+      {
+        std::vector<str> particle_names = runOptions.getNames("override_FS_pole_masses");
+        for (auto& name : particle_names)
+        {
+          double mass = runOptions.getValue<double>("override_FS_pole_masses", name);
+          mssmspec.set_override(Par::Pole_Mass, mass, name);
+        }
+      }
+
       // Add theory errors
       static const MSSM_strs ms;
 
@@ -695,6 +708,7 @@ namespace Gambit
   // scale boundary conditions, ie accepts MSSM parameters at MSUSY,
   // and has DRbar mA and mu as an input and mHu2 and mHd2 as EWSB
   // outputs, so it is for the MSSMatMSUSY_mA model.
+  #if(FS_MODEL_MSSMatMSUSYEFTHiggs_mAmu_IS_BUILT)
   void get_MSSMatMSUSY_mA_spectrum_FlexibleEFTHiggs (Spectrum& result)
   {
      // Access the pipes for this function to get model and parameter information
@@ -718,10 +732,12 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
   }
+  #endif
 
   // Runs FlexibleSUSY MSSMEFTHiggs model spectrum generator
-   // and has m3^2 and mu as EWSB outputs, so it is for the
-   // MSSMatQ_model.
+  // and has m3^2 and mu as EWSB outputs, so it is for the
+  // MSSMatQ_model.
+  #if(FS_MODEL_MSSMEFTHiggs_IS_BUILT)
   void get_MSSMatQ_spectrum_FlexibleEFTHiggs (Spectrum& result)
   {
      // Access the pipes for this function to get model and parameter information
@@ -746,13 +762,14 @@ namespace Gambit
       // Drop SLHA files if requested
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
-  }
-
+   }
+   #endif
 
    // Runs FlexibleSUSY MSSMEFTHiggs_mAmu spectrum generator with
    // boundary conditions at a user specified scale, ie accepts MSSM
    // parameters at Q, and has DRbar mA and mu as an input and mHu2
    // and mHd2 as EWSB outputs, so it is for the MSSMatMSUSY_mA model.
+   #if(FS_MODEL_MSSMEFTHiggs_mAmu_IS_BUILT)
    void get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs (Spectrum& result)
    {
      // Access the pipes for this function to get model and parameter information
@@ -779,12 +796,13 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
    }
-  
+   #endif  
 
     // Runs FlexibleSUSY MSSM spectrum generator with CMSSM (GUT scale) boundary conditions
     // In principle an identical spectrum can be obtained from the function
     // get_MSSMatGUT_spectrum_FS
     // by setting the input parameters to match the CMSSM assumptions
+    #if(FS_MODEL_CMSSM_IS_BUILT) 
     void get_CMSSM_spectrum_FS (Spectrum& result)
     {
 
@@ -827,8 +845,10 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
     }
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with EWSB scale input (boundary conditions)
+    #if(FS_MODEL_MSSM_IS_BUILT)
     void get_MSSMatQ_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -850,9 +870,11 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with EWSB scale input (boundary conditions)
     // but with mA and mu as parameters instead of mHu2 and mHd2
+    #if(FS_MODEL_MSSM_mAmu_IS_BUILT)
     void get_MSSMatQ_mA_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -871,9 +893,10 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
-
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
+    #if(FS_MODEL_MSSMatMGUT_IS_BUILT)
     void get_MSSMatMGUT_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -894,9 +917,11 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
     // but with mA and mu as parameters instead of mHu2 and mHd2
+    #if(FS_MODEL_MSSMatMGUT_mAmu_IS_BUILT)
     void get_MSSMatMGUT_mA_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -914,9 +939,11 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with SUSY scale input (boundary conditions)
     // but with mA and mu as parameters instead of mHu2 and mHd2
+    #if(FS_MODEL_MSSMatMSUSY_mAmu_IS_BUILT)
     void get_MSSMatMSUSY_mA_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -934,6 +961,7 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
 
     void get_GUTMSSMB_spectrum (Spectrum &/*result*/)
     {
@@ -1014,6 +1042,13 @@ namespace Gambit
 
       // Create Spectrum object from the slhaea object
       result = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(input_slha, input_slha, mass_cut, mass_ratio_cut);
+
+      // Add getter for susy scale if option set for this
+      bool add_susy_scale = myPipe::runOptions->getValueOrDef<bool>(false,"assume_Q_is_MSUSY");
+      if(add_susy_scale)
+      {
+         result.get_HE().set_override(Par::mass1,result.get_HE().GetScale(),"susy_scale",true); 
+      }
 
       // No sneaking in charged LSPs via SLHA, jävlar.
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
