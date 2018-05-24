@@ -3475,11 +3475,20 @@ lnLcharmmu: |
 lnLcharmtau: |
   Log-likelihood for direct searches of right-handed neutrinos in the CHARM experiment in the tau sector
 
-lnLdelphi: |
-  Log-likelihood for direct searches of right-handed neutrinos in the Delphi experiment
+lnLdelphi_shortlived: |
+  Log-likelihood for direct searches of short-lived right-handed neutrinos in the Delphi experiment
+
+lnLdelphi_longlived: |
+  Log-likelihood for direct searches of long-lived right-handed neutrinos in the Delphi experiment
 
 lnLe949: |
   Log-likelihood for direct searches of right-handed neutrinos in the E949 experiment
+
+lnLlhce: |
+  Log-likelihood for direct searches of right-handed neutrinos in the LHC experiment in the electron sector
+
+lnLlhcmu: |
+  Log-likelihood for direct searches of right-handed neutrinos in the LHC experiment in the muon sector
 
 lnLnutev: |
   Log-likelihood for direct searches of right-handed neutrinos in the NuTeV experiment
@@ -3492,6 +3501,3 @@ lnLps191e: |
 
 lnLps191mu: |
   Log-likelihood for direct searches of right-handed neutrinos in the PS191 experiment in the muon sector
-
-
-

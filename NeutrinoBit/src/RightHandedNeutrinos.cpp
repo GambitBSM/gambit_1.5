@@ -1211,7 +1211,7 @@ namespace Gambit
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
-          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0);
         }
       }
     }
@@ -1388,10 +1388,10 @@ namespace Gambit
       }
     }
 
-    // Likelihood contribution from DELPHI; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 at 95% in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
-    void lnL_delphi(double& result)
+    // Likelihood contribution from DELPHI's short-lived RHN analysis; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 at 95% in the mass range 3.5-50 GeV. [Z. Phys. C, 74(1):57-71, 1997]
+    void lnL_delphi_short_lived(double& result)
     {
-      using namespace Pipes::lnL_delphi;
+      using namespace Pipes::lnL_delphi_short_lived;
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
@@ -1414,7 +1414,56 @@ namespace Gambit
 
       if (read_table)
       {
-        s = fill_spline("NeutrinoBit/data/delphi.csv");
+        s = fill_spline("NeutrinoBit/data/delphi_short_lived.csv");
+        read_table = false;
+      }
+
+      // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
+      // reverse engineered.  We assume that lnL = mu_sig is a faithful
+      // approximation to the true Poisson likelihood.
+      result = 0;
+      for (int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+          result += 0;
+        else
+        {
+          for (int j=i; j<9; j+=3)
+          {
+            U[i] = s(M[i]);
+            result += -3.09*(pow(mixing_sq[j]/U[i],2));
+          }
+        }
+      }
+    }
+
+    // Likelihood contribution from DELPHI's long-lived RHN analysis; searched for charged and neutral current decays of RHNs. Constrains |U_ei|^2, |U_(mu,i)|^2 as well as |U_(tau,i)|^2 at 95% in the mass range 0.5-4.2 GeV. [Z. Phys. C, 74(1):57-71, 1997]
+    void lnL_delphi_long_lived(double& result)
+    {
+      using namespace Pipes::lnL_delphi_long_lived;
+      static bool read_table = true;
+      static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 0.4383;  // GeV
+      static double upp_lim = 4.1955;  // GeV
+      std::vector<double> M(3), U(3), mixing_sq(9);
+
+      mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
+      mixing_sq[1] = *Dep::Ue2;
+      mixing_sq[2] = *Dep::Ue3;
+      mixing_sq[3] = *Dep::Um1;
+      mixing_sq[4] = *Dep::Um2;
+      mixing_sq[5] = *Dep::Um3;
+      mixing_sq[6] = *Dep::Ut1;
+      mixing_sq[7] = *Dep::Ut2;
+      mixing_sq[8] = *Dep::Ut3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      if (read_table)
+      {
+        s = fill_spline("NeutrinoBit/data/delphi_long_lived.csv");
         read_table = false;
       }
 
@@ -1473,8 +1522,8 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }
@@ -1515,8 +1564,8 @@ namespace Gambit
         else
         {
           U[i] = s(M[i]);
-          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }
@@ -1557,9 +1606,8 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0,  1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
-          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
- 
+          result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0,  1/1.28, false); // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0);
         }
       }
     }
@@ -1640,8 +1688,92 @@ namespace Gambit
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
-          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2)> 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.28,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 90% CL limit for half-Gaussian.
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2)> 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.28,2) : 0.0);
+        }
+      }
+    }
+
+    // Likelihood contribution from LHC (CMS), electron sector; looked at the production and decay chain: pp -> W*(+-) -> l(+-) + nu_r. nu_r then decays into an on-shell W and a lepton; the W decays primarily into a qq pair. Constrains |U_ei|^2 at 95% in the mass range 1-1.2e3 GeV. [arXiv:1802.02965v1]
+    void lnL_lhc_e(double& result)
+    {
+      using namespace Pipes::lnL_lhc_e;
+      static bool read_table = true;
+      static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 1.0293;  // GeV
+      static double upp_lim = 1e3;  // GeV
+      std::vector<double> M(3), U(3), mixing_sq(3);
+
+      mixing_sq[0] = *Dep::Ue1;
+      mixing_sq[1] = *Dep::Ue2;
+      mixing_sq[2] = *Dep::Ue3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      if (read_table)
+      {
+        s = fill_spline("NeutrinoBit/data/lhc_e.csv");
+        read_table = false;
+      }
+
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
+      result = 0;
+      for(int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+        {
+          result += -0.5*log(2.0*pi/1.64/1.64);
+          //result += 0;
+        }
+        else
+        {
+          U[i] = s(M[i]);
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
+        }
+      }
+    }
+
+    // Likelihood contribution from LHC (CMS), muon sector. Constrains |U_(mu,i)|^2 at 95% in the mass range 1-1.2e3 GeV. Description and references above.
+    void lnL_lhc_mu(double& result)
+    {
+      using namespace Pipes::lnL_lhc_mu;
+      static bool read_table = true;
+      static tk::spline s;
+      // Mass range of experiment
+      static double low_lim = 1.0145;  // GeV
+      static double upp_lim = 9.857e2;  // GeV
+      std::vector<double> M(3), U(3), mixing_sq(3);
+
+      mixing_sq[0] = *Dep::Um1;
+      mixing_sq[1] = *Dep::Um2;
+      mixing_sq[2] = *Dep::Um3;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      if (read_table)
+      {
+        s = fill_spline("NeutrinoBit/data/lhc_mu.csv");
+        read_table = false;
+      }
+
+      // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
+      result = 0;
+      for(int i=0; i<3; i++)
+      {
+        if ( (M[i] < low_lim) or (M[i] > upp_lim) )
+        {
+          result += -0.5*log(2.0*pi/1.64/1.64);
+          //result += 0;
+        }
+        else
+        {
+          U[i] = s(M[i]);
+          result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
+          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }

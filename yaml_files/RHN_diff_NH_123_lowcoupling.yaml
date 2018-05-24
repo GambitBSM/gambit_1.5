@@ -176,7 +176,10 @@ ObsLikes:
   - capability: lnLcharmmu
     purpose: LogLike
 
-  - capability: lnLdelphi
+  - capability: lnLdelphi_shortlived
+    purpose: LogLike
+
+  - capability: lnLdelphi_longlived
     purpose: LogLike
 
   - capability: lnLatlase
@@ -192,6 +195,12 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnLcharmtau
+    purpose: LogLike
+
+  - capability: lnLlhce
+    purpose: LogLike
+
+  - capability: lnLlhcmu
     purpose: LogLike
 
   # Theoretical constraints
