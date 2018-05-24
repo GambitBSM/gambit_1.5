@@ -299,7 +299,7 @@ namespace Gambit {
       DDCALC_BIN(EXPERIMENT, int,    Events)                                       \
       DDCALC_BIN(EXPERIMENT, double, Background)                                   \
       DDCALC_BIN(EXPERIMENT, double, Signal)                                       \
-  
+
     // Experiments
     DD_EX(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
     DD_EX(LUX_2013)             // Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
@@ -321,7 +321,7 @@ namespace Gambit {
     DD_EX(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
     DD_EX(LZ)                   // LZ TDR, [arXiv:1509.02910]
     DD_EX(PICO_500)             // S. Fallows, talk at TAUP 2017
-    DD_EX(DarkSide)             // C.E. Aalseth et al., [arXiv:1707.08145]
+    DD_EX(DarkSide_50)          // P. Agnes et al., [arXiv:1802.07198]
     DD_EX(DARWIN)               // M. Schumann et al., [arXiv:1506.08309]
 
     // Just in case, to make sure we don't mess with other things elsewhere.
