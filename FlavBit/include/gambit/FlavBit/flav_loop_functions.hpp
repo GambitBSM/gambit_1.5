@@ -303,7 +303,7 @@ namespace Gambit
       {
         if(i != j)  return 0; 
 
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
         double cw = sminputs.mW / sminputs.mZ;
@@ -316,7 +316,7 @@ namespace Gambit
       {
         if(i != j) return 0;
  
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double cw = sminputs.mW / sminputs.mZ;
         double sw = sqrt(1. - cw*cw);
@@ -325,7 +325,7 @@ namespace Gambit
 
       complex<double> VL(int i, int j, SMInputs sminputs)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
         double cw = sminputs.mW / sminputs.mZ;
@@ -339,7 +339,7 @@ namespace Gambit
 
       complex<double> VR(int i, int j, SMInputs sminputs)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
         double cw = sminputs.mW / sminputs.mZ;
@@ -353,7 +353,7 @@ namespace Gambit
 
       complex<double> DL(int i, int j, SMInputs sminputs)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
         double cw = sminputs.mW / sminputs.mZ;
@@ -367,7 +367,7 @@ namespace Gambit
 
       complex<double> DR(int i, int j, SMInputs sminputs)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double cw = sminputs.mW / sminputs.mZ;
         double sw = sqrt(1. - cw*cw);
@@ -380,7 +380,7 @@ namespace Gambit
 
       complex<double> UL(int i, int j, SMInputs sminputs)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double g2 = sminputs.mW * sqrt( 8. * sminputs.GF / sqrt(2));
         double cw = sminputs.mW / sminputs.mZ;
@@ -394,7 +394,7 @@ namespace Gambit
 
       complex<double> UR(int i, int j, SMInputs sminputs)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
         double g1 = e * sminputs.mZ / sminputs.mW;
         double cw = sminputs.mW / sminputs.mZ;
         double sw = sqrt(1. - cw*cw);
@@ -427,7 +427,7 @@ namespace Gambit
       // Vector vertices
       double Fw(SMInputs sminputs)
       {
-        return sqrt(4.* M_PI/ sminputs.alphainv);
+        return sqrt(4.* pi/ sminputs.alphainv);
       }
 
       double Zww(SMInputs sminputs)
@@ -622,22 +622,22 @@ namespace Gambit
       // Sum over Z penguins
       complex<double> VZsumLL(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-       return 1. / (16.*pow(M_PI,2)) * (VZw2w4LL(alpha, beta, sminputs, U, ml, mnu) + VZw8LL(alpha, beta, sminputs, U, mnu) + VZw10LL(alpha, beta, sminputs, U, mnu));
+       return 1. / (16.*pow(pi,2)) * (VZw2w4LL(alpha, beta, sminputs, U, ml, mnu) + VZw8LL(alpha, beta, sminputs, U, mnu) + VZw10LL(alpha, beta, sminputs, U, mnu));
       }
 
       complex<double> VZsumLR(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * (VZw2w4LR(alpha, beta, sminputs, U, ml, mnu) + VZw8LR(alpha, beta, sminputs, U, mnu) + VZw10LR(alpha, beta, sminputs, U, mnu));
+        return 1. / (16.*pow(pi,2)) * (VZw2w4LR(alpha, beta, sminputs, U, ml, mnu) + VZw8LR(alpha, beta, sminputs, U, mnu) + VZw10LR(alpha, beta, sminputs, U, mnu));
       }
 
       complex<double> VZsumRL(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * (VZw2w4RL(alpha, beta, sminputs, U, ml, mnu));
+        return 1. / (16.*pow(pi,2)) * (VZw2w4RL(alpha, beta, sminputs, U, ml, mnu));
       }
 
       complex<double> VZsumRR(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * (VZw2w4RR(alpha, beta, sminputs, U, ml, mnu));
+        return 1. / (16.*pow(pi,2)) * (VZw2w4RR(alpha, beta, sminputs, U, ml, mnu));
       }
 
       // Scalar penguins
@@ -646,7 +646,7 @@ namespace Gambit
         complex<double> shll = {0,0};
         double mW = sminputs.mW;
 
-        // Use mZ for the renomralisation scale Q
+        // Use mZ for the renormalisation scale Q
         for(int a=0; a<6; a++)
           for(int c=0; c<3; c++)
           {
@@ -669,7 +669,7 @@ namespace Gambit
         complex<double> shrr = {0,0};
         double mW = sminputs.mW;
 
-        // Use mZ for the renomralisation scale Q
+        // Use mZ for the renormalisation scale Q
         for(int a=0; a<6; a++)
           for(int c=0; c<3; c++)
           {
@@ -690,22 +690,22 @@ namespace Gambit
       // Sum over scalar penguins
       complex<double> ShsumLL(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * Shw2w4LL(alpha, beta, sminputs, U, ml, mnu);
+        return 1. / (16.*pow(pi,2)) * Shw2w4LL(alpha, beta, sminputs, U, ml, mnu);
       }    
 
       complex<double> ShsumLR(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * Shw2w4LR(alpha, beta, sminputs, U, ml, mnu);
+        return 1. / (16.*pow(pi,2)) * Shw2w4LR(alpha, beta, sminputs, U, ml, mnu);
       }    
 
       complex<double> ShsumRL(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * Shw2w4RL(alpha, beta, sminputs, U, ml, mnu);
+        return 1. / (16.*pow(pi,2)) * Shw2w4RL(alpha, beta, sminputs, U, ml, mnu);
       }    
 
       complex<double> ShsumRR(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) * Shw2w4RR(alpha, beta, sminputs, U, ml, mnu);
+        return 1. / (16.*pow(pi,2)) * Shw2w4RR(alpha, beta, sminputs, U, ml, mnu);
       }    
 
     }
@@ -776,17 +776,17 @@ namespace Gambit
       // Sum over boxes
       complex<double> VsumlLL(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> mnu)
       {
-        return 1. / (16.*pow(M_PI,2)) *( Vw4lLL(alpha, beta, gamma, delta, sminputs, U, mnu) + Vw8lLL(alpha, beta, gamma, delta, sminputs, U, mnu) + Vw4lpLL(alpha, beta, gamma, delta, sminputs, U, mnu) + Vw8lpLL(alpha, beta, gamma, delta, sminputs, U, mnu));
+        return 1. / (16.*pow(pi,2)) *( Vw4lLL(alpha, beta, gamma, delta, sminputs, U, mnu) + Vw8lLL(alpha, beta, gamma, delta, sminputs, U, mnu) + Vw4lpLL(alpha, beta, gamma, delta, sminputs, U, mnu) + Vw8lpLL(alpha, beta, gamma, delta, sminputs, U, mnu));
       }
 
       complex<double> VsumdLL(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> mnu)
       {
-        return 1./(16.*pow(M_PI,2)) *Vw4dLL(alpha, beta, gamma, delta, sminputs, U, mnu);
+        return 1./(16.*pow(pi,2)) *Vw4dLL(alpha, beta, gamma, delta, sminputs, U, mnu);
       }
 
       complex<double> VsumuLL(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> mnu)
       {
-        return 1./(16.*pow(M_PI,2)) *Vw4uLL(alpha, beta, gamma, delta, sminputs, U, mnu);
+        return 1./(16.*pow(pi,2)) *Vw4uLL(alpha, beta, gamma, delta, sminputs, U, mnu);
       }
 
     } // Diagrams
@@ -798,28 +798,28 @@ namespace Gambit
 
       complex<double> K1R(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> mnu)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
  
-        return 1. / (16*pow(M_PI,2)*e) * Penguins::A1R(alpha, beta, sminputs, U, mnu);
+        return 1. / (16*pow(pi,2)*e) * Penguins::A1R(alpha, beta, sminputs, U, mnu);
       }
 
       complex<double> K2L(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
 
-        return 1. / (2. * 16.*pow(M_PI,2) * e * ml[alpha] ) * Penguins::A2L(alpha, beta, sminputs, U, ml, mnu);
+        return 1. / (2. * 16.*pow(pi,2) * e * ml[alpha] ) * Penguins::A2L(alpha, beta, sminputs, U, ml, mnu);
       }
 
       complex<double> K2R(int alpha, int beta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-        double e = sqrt(4. * M_PI / sminputs.alphainv);
+        double e = sqrt(4. * pi / sminputs.alphainv);
 
-        return 1. / (2. * 16.*pow(M_PI,2)*  e * ml[alpha] ) * Penguins::A2R(alpha, beta, sminputs, U, ml, mnu);
+        return 1. / (2. * 16.*pow(pi,2)*  e * ml[alpha] ) * Penguins::A2R(alpha, beta, sminputs, U, ml, mnu);
       }
 
       complex<double> AVLL(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
       {
-      return Penguins::VZsumLL(alpha,beta,sminputs,U,ml,mnu)*Vertices::EL(gamma,delta,sminputs) / pow(sminputs.mZ,2) + Boxes::VsumlLL(alpha,beta,gamma,delta,sminputs,U,mnu);
+        return Penguins::VZsumLL(alpha,beta,sminputs,U,ml,mnu)*Vertices::EL(gamma,delta,sminputs) / pow(sminputs.mZ,2) + Boxes::VsumlLL(alpha,beta,gamma,delta,sminputs,U,mnu);
       }
 
       complex<double> AVLR(int alpha, int beta, int gamma, int delta, SMInputs sminputs, Eigen::Matrix<complex<double>,3,6> U, vector<double> ml, vector<double> mnu)
