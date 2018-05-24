@@ -93,15 +93,15 @@ double SingletDMZ3_soft_parameters::calc_beta_muS_2_loop(const Soft_traces& soft
 
    double beta_muS;
 
-<<<<<<< HEAD
+/*<<<<<<< HEAD*/
    beta_muS = Re(twoLoop*(-0.4*LamSH*(-12*muH*Sqr(g1) + 5*(4*LamSH*muH +
       LamSH*muS + 12*muH*traceYdAdjYd + 4*muH*traceYeAdjYe + 12*muH*
       traceYuAdjYu - 12*muH*Sqr(g2))) - 40*muS*Sqr(LamS) - 108*LamS*Sqr(mu3)));
-=======
+/*=======
    beta_muS = Re(twoLoop*(4.8*LamSH*muH*Sqr(g1) - 0.5*LamSH*(LamSH*(8*muH
       + muS) + 16*muH*(3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu) - 48*
       muH*Sqr(g2)) - 2.5*muS*Sqr(LamS) - 54*LamS*Sqr(mu3)));
->>>>>>> master
+>>>>>>> master*/
 
 
    return beta_muS;

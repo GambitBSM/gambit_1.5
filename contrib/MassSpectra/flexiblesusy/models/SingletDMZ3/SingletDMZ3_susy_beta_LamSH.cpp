@@ -40,15 +40,15 @@ double SingletDMZ3_susy_parameters::calc_beta_LamSH_1_loop(const Susy_traces& su
 
    double beta_LamSH;
 
-<<<<<<< HEAD
+/*<<<<<<< HEAD*/
    beta_LamSH = Re(0.1*LamSH*oneOver16PiSqr*(-9*Sqr(g1) + 5*(4*(3*LamH +
       4*LamS + 2*LamSH + 3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu) - 9*
       Sqr(g2))));
-=======
+/*=======
    beta_LamSH = Re(0.1*LamSH*oneOver16PiSqr*(20*(3*LamH + LamS + LamSH +
       3*traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu) - 9*Sqr(g1) - 45*Sqr(g2))
       );
->>>>>>> master
+>>>>>>> master*/
 
 
    return beta_LamSH;
@@ -72,7 +72,7 @@ double SingletDMZ3_susy_parameters::calc_beta_LamSH_2_loop(const Susy_traces& su
 
    double beta_LamSH;
 
-<<<<<<< HEAD
+/*<<<<<<< HEAD*/
    beta_LamSH = Re(0.0025*LamSH*twoLoop*(1671*Quad(g1) + 10*Sqr(g1)*(288*
       LamH + 24*LamSH + 50*traceYdAdjYd + 150*traceYeAdjYe + 170*traceYuAdjYu +
       45*Sqr(g2)) - 25*(145*Quad(g2) - 12*(48*LamH + 4*LamSH + 5*(3*
@@ -82,7 +82,7 @@ double SingletDMZ3_susy_parameters::calc_beta_LamSH_2_loop(const Susy_traces& su
       LamSH*traceYuAdjYu + 24*LamH*(3*LamSH + 3*traceYdAdjYd + traceYeAdjYe + 3
       *traceYuAdjYu) + 27*traceYuAdjYuYuAdjYu - 80*traceYdAdjYd*Sqr(g3) - 80*
       traceYuAdjYu*Sqr(g3) + 30*Sqr(LamH) + 80*Sqr(LamS) + 22*Sqr(LamSH)))));
-=======
+/*=======
    beta_LamSH = Re(0.0025*LamSH*twoLoop*(1671*Quad(g1) + 10*Sqr(g1)*(2*(
       144*LamH + 6*LamSH + 25*traceYdAdjYd + 75*traceYeAdjYe + 85*traceYuAdjYu)
       + 45*Sqr(g2)) - 25*(145*Quad(g2) - 12*(48*LamH + 2*LamSH + 5*(3*
@@ -93,7 +93,7 @@ double SingletDMZ3_susy_parameters::calc_beta_LamSH_2_loop(const Susy_traces& su
       6*traceYuAdjYu) + 54*traceYuAdjYuYuAdjYu - 160*traceYdAdjYd*Sqr(g3) -
       160*traceYuAdjYu*Sqr(g3) + 60*Sqr(LamH) + 10*Sqr(LamS) + 11*Sqr(LamSH))))
       );
->>>>>>> master
+>>>>>>> master*/
 
 
    return beta_LamSH;
