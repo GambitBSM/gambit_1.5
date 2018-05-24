@@ -70,6 +70,7 @@ namespace Gambit
       v.th_error_type=node["th_error_type"].as<std::string>();
       v.th_error_source = node["th_error_source"].as<std::string>();
       const YAML::Node& correlations = node["correlation"];
+      v.corr.clear();
       for (unsigned i=0; i<correlations.size(); ++i)
       {
         Correlation corr_tmp;
