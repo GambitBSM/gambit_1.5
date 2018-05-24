@@ -1323,11 +1323,6 @@ namespace Gambit
       delete cl;
     }
 
-/* Begin of outdated functions (might be removed) */
-
-
-/* end of outdated functions */
-
     void function_Planck_high_TT_loglike(double& result)
     {
       //std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
@@ -1681,9 +1676,6 @@ namespace Gambit
       //std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
 
-/* Begin of outdated (probably) functions */
-
-/* end of outdated functions */
   }
 
 }

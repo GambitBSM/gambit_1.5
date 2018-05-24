@@ -3551,68 +3551,6 @@ LCDMtensor_parameters: |
    in addition to the above, r_tensor, amplitute of
    tensor power spectrum over scalar power spectrum.
 
-class_set_parameter: |
-   Gathers all input parameter for running Class.
-
-compute_LCDMtensor_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a given
-   set of 7 LCDMtensor input parameteres and nuisance parameters.
-   function first calls class and produces the Cl's
-   (power spectrum) and goes on to calculate the planck likelihood.
-
-compute_vanilla_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a given
-   set of 6 LCDM input parameteres and nuisance parameters.
-   function first calls class and produces the Cl's
-   (power spectrum) and goes on to calculate the planck likelihood.
-
-compute_LCDMtensor_inflation_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a given
-   set of 4+2 LCDM input parameteres and nuisance parameters.
-   the two parameters, spectral index n_s and tensor to scalar
-   ratio r is calculated separately with a call to multimodecode
-   for a given model paramteres and further solver specifiers via
-   a yaml file. function then calls class and produces the Cl's
-   (power spectrum) and goes on to calculate the planck likelihood.
-
-compute_Planck_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a  given
-   set of  Cl's for low values of l (below 30).
-
-compute_Planck_high_TT_loglike: |
-   function computes the planck log-likelihood for a  given
-   set of  Cl's for high values of l (above 30).
-
-compute_Planck_lensing_loglike: |
-   function computes the planck lensing- log-likelihood for
-   a  given set of  Cl's.
-
-compute_1quadInf_rLCDMtensor_lowp_TT_loglike: |
-   likelihood calculation for the simplest 7 parameter
-   cosmology+inflation model: m^2 phi^2 --- quadratic
-   inflation with slow-roll approximation. A_s, n_s and r
-   are given by inflationary model parameters (under
-   slow-roll approximation): N_piv, m^2.
-
-compute_1quarInf_rLCDMtensor_lowp_TT_loglike: |
-   6 parameter cosmology+inflation model: 0.25 lambda phi^4
-   quartic inflation A_s, n_s and r are given by inflationary
-   model parameters: N_piv, lambda.
-
-compute_1mono32Inf_rLCDMtensor_lowp_TT_loglike: |
-   6 parameter cosmology+inflation model: 2/3
-   lambda phi^2/3 --- inflation, A_s, n_s and r are
-   given by inflationary model parameters: N_piv, lambda.
-
-compute_1linearInf_rLCDMtensor_lowp_TT_loglike: |
-   6 parameter cosmology+inflation model: m phi
-   linear inflation, A_s, n_s and r are given by
-   inflationary model parameters: N_piv, m^2.
-
-compute_smashInf_rLCDMtensor_lowp_TT_loglike: |
-   8 parameter cosmology smash inflation model --- smash inflation
-   A_s, n_s and r are given by inflationary model parameters: xi, m^2.
-
 inf_SR1quad_LCDMt_parameters: |
    omega_b, baryon density parameter.
    omega_cdm, dark matter density parameter.
@@ -3639,6 +3577,21 @@ inf_1linearInf_LCDMt_parameters: |
 inf_smashInf_LCDMt_parameters: |
     8 parameter cosmology smash inflation model --- smash inflation
     A_s, n_s and r are given by inflationary model parameters: xi, m^2.
+
+class_set_parameter: |
+   Gathers all input parameters to  run Class.
+
+compute_Planck_lowp_TT_loglike: |
+   function computes the planck log-likelihood for a  given
+   set of  Cl's for low values of l (below 30).
+
+compute_Planck_high_TT_loglike: |
+   function computes the planck log-likelihood for a  given
+   set of  Cl's for high values of l (above 30).
+
+compute_Planck_lensing_loglike: |
+   function computes the planck lensing- log-likelihood for
+   a  given set of  Cl's.
 
 lnL_A_planck : |
    "prior"-likelihood for A_planck. Applies the Gauss bell on 

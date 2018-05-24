@@ -97,10 +97,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-/* Begin of outdated functions (might be removed) */
-
-/* end of outdated functions */
-
   #define CAPABILITY class_set_parameter
   START_CAPABILITY
     #define FUNCTION class_set_parameter_LCDM
