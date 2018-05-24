@@ -91,7 +91,7 @@ BE_INI_FUNCTION
       ex_map["CRESST_II"] = CRESST_II_Init();
       ex_map["LZ"] = LZ_Init();
       ex_map["PICO_500"] = PICO_500_Init();
-      ex_map["DarkSide"] = DarkSide_Init();
+      ex_map["DarkSide_50"] = DarkSide_50_Init();
       ex_map["DARWIN"] = DARWIN_Init();
       //ex_map["DARWIN_Ar"] = DARWIN_Ar_Init();
       //ex_map["DARWIN_Xe"] = DARWIN_Xe_Init();
