@@ -160,7 +160,7 @@ double gamma_h_chi_pm(int i,
   const double e2 = -std::sin(alpha);
   const double d2 = -std::cos(alpha);
 
-  // Eq. 1.112 (without \f$\sin\theta_W\f$ which cancels)
+  // Eq. 1.111 (without \f$\sin\theta_W\f$ which cancels)
   const double gL = M_SQRT1_2 *
     (e2 * V[j][0] * U[i][1] - d2 * V[j][1] * U[i][0]);
 
