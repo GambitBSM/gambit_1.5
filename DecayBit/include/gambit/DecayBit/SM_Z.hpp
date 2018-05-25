@@ -27,6 +27,7 @@
 #define DECAYBIT_INCLUDE_GAMBIT_DECAYBIT_SM_Z_HPP_
 
 #include <cmath>
+#include <iostream>
 
 namespace SM_Z {
 
@@ -195,11 +196,13 @@ class TwoLoop {
           (std::fabs(alpha_s_MSbar_MZ - 0.1184) < 0.005) &&
           (std::fabs(delta_alpha_OS - 0.059) < 0.0005) &&
           (std::fabs(MZ_OS - 91.1876) < 0.0042))) {
+      std::cerr << "SM nuisance parameters outside range of validity for "
+                   "two-loop Z formulas. Using tree-level" << std::endl;
       L_H = 0.;
-      delta_t =  0.;
-      delta_z =  0.;
-      delta_alpha_s =  0.;
-      delta_delta_alpha =  0.;
+      delta_t = 0.;
+      delta_z = 0.;
+      delta_alpha_s = 0.;
+      delta_delta_alpha = 0.;
     } else {
       L_H = std::log(mh_OS / hat.mh_OS);
       delta_t = pow(mt_OS / hat.mt_OS, 2) - 1.;
