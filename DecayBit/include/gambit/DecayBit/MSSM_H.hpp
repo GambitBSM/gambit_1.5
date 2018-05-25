@@ -47,7 +47,7 @@ double lambda(double x, double y, double z) {
   return pow(1. - x / z - y / z, 2) - 4. * x * y / pow(z, 2);
 }
 
-double gamma_h_chi(std::array<double, 2> m,
+double gamma_h_chi_gL(std::array<double, 2> m,
   double gL,
   double mh = 125.,
   double mw = 80.385,
@@ -123,7 +123,7 @@ double gamma_h_chi_0(int i,
     (Z[i][1] - tw * Z[i][0]) * (e2 * Z[j][2] + d2 * Z[j][3]));
 
   std::array<double, 2> mf{{m[i], m[j]}};
-  double gamma = gamma_h_chi(mf, gL, mh, mw, GF);
+  double gamma = gamma_h_chi_gL(mf, gL, mh, mw, GF);
   if (i == j) {
     gamma *= 0.5;
   }
@@ -165,7 +165,7 @@ double gamma_h_chi_pm(int i,
     (e2 * V[j][0] * U[i][1] - d2 * V[j][1] * U[i][0]);
 
   std::array<double, 2> mf{{m[i], m[j]}};
-  return gamma_h_chi(mf, gL, mh, mw, GF);
+  return gamma_h_chi_gL(mf, gL, mh, mw, GF);
 }
 
 double gamma_h_chi(std::array<double, 2> m_pm,
