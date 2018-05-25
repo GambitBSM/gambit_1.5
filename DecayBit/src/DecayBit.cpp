@@ -3209,7 +3209,7 @@ namespace Gambit
       // SM parameters
       const double mh = MSSM.get(Par::Pole_Mass, "h0_1");
       const double mw = SM.mW;
-      const double GF = *Param["GF"];
+      const double GF = SM.GF;
       const double sw2 = MSSM.safeget(Par::dimensionless, "sinW2");
 
       // Higgs mixing angle
