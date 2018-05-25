@@ -3260,7 +3260,7 @@ namespace Gambit
       }
 
       const std::string default_name = GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat";
-      const auto name = runOptions->getValueOrDef<std::string>
+      const std::string name = runOptions->getValueOrDef<std::string>
         (default_name, "BR_h_inv_chi2_data_file");
       static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(name);
       lnL = -0.5 * chi2->bind("BR")->eval(BF);
