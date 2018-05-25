@@ -33,11 +33,11 @@ namespace SM_Z {
 /** 
    @brief <ahref="
    http://pdglive.lbl.gov/BranchingRatio.action?desig=9&parCode=S044
-   ">PDG</a> measurement of invisible width of \f$Z\f$ boson in MeV
+   ">PDG</a> measurement of invisible width of \f$Z\f$ boson in GeV
 */
 constexpr struct {
-  const double mu = 499.0;
-  const double sigma = 1.5;
+  const double mu = 499.0e-3;
+  const double sigma = 1.5e-3;
 } gamma_inv;
 
 
@@ -52,31 +52,32 @@ constexpr struct {
 
 constexpr int kRows = 12;
 constexpr int kCols = 9;
-/** @brief Coefficient data in Table 5 */
+/** @brief Coefficient data in Table 5 with MeV converted to GeV */
 constexpr double table_5[kRows][kCols] = {
-  {83.983, -0.061, 0.810, -0.096, -0.01, 0.25, -1.1, 286, 0.001},
-  {83.793, -0.060, 0.810, -0.095, -0.01, 0.25, -1.1, 285., 0.001},
-  {167.176, -0.071, 1.26, -0.19 , -0.02, 0.36, -0.1, 504., 0.001},
-  {299.993, -0.38, 4.08, 14.27, 1.6, 1.8 , -11.1, 1253, 0.002},
-  {299.916, -0.38, 4.08, 14.27, 1.6, 1.8 , -11.1, 1253., 0.002},
-  {382.828, -0.39 , 3.83, 10.20, -2.4 , 0.67, -10.1, 1470., 0.002},
-  {375.889, -0.36, -2.14, 10.53, -2.4 , 1.2 , -10.1, 1459., 0.006},
-  {2494.74, -2.3 , 19.9, 58.61, -4.0 , 8.0 , -56.0, 9273., 0.012},
-  {20751.6, -7.8 , -37., 732.3 , -44 , 5.5 , -358, 11696., 0.1 },
-  {172.22, -0.031 , 1.0 , 2.3 , 1.3 , 0.38, -1.2, 37., 0.01},
-  {215.85, 0.029, -2.92, -1.32, -0.84, 0.032, 0.72 , -18., 0.01},
-  {41489.6, 1.6 , 60.0, -579.6, 38., 7.3 , 85., 0.1},
+  {83.983e-3, -0.061e-3, 0.810e-3, -0.096e-3, -0.01e-3, 0.25e-3, -1.1e-3, 286e-3, 0.001e-3},
+  {83.793e-3, -0.060e-3, 0.810e-3, -0.095e-3, -0.01e-3, 0.25e-3, -1.1e-3, 285.e-3, 0.001e-3},
+  {167.176e-3, -0.071e-3, 1.26e-3, -0.19e-3, -0.02e-3, 0.36e-3, -0.1e-3, 504.e-3, 0.001e-3},
+  {299.993e-3, -0.38e-3, 4.08e-3, 14.27e-3, 1.6e-3, 1.8e-3, -11.1e-3, 1253.e-3, 0.002e-3},
+  {299.916e-3, -0.38e-3, 4.08e-3, 14.27e-3, 1.6e-3, 1.8e-3, -11.1e-3, 1253.e-3, 0.002e-3},
+  {382.828e-3, -0.39e-3, 3.83e-3, 10.20e-3, -2.4e-3, 0.67e-3, -10.1e-3, 1470.e-3, 0.002e-3},
+  {375.889e-3, -0.36e-3, -2.14e-3, 10.53e-3, -2.4e-3, 1.2e-3, -10.1e-3, 1459.e-3, 0.006e-3},
+  {2494.74e-3, -2.3e-3, 19.9e-3, 58.61e-3, -4.0e-3, 8.0e-3, -56.0e-3, 9273.e-3, 0.012e-3},
+  {20751.6, -7.8, -37., 732.3, -44, 5.5, -358, 11696., 0.1 },
+  {172.22, -0.031, 1.0, 2.3, 1.3, 0.38, -1.2, 37., 0.01},
+  {215.85, 0.029, -2.92, -1.32, -0.84, 0.032, 0.72, -18., 0.01},
+  {41489.6, 1.6, 60.0, -579.6, 38., 7.3, 85., 0.1},
 };
-
 
 /**
    @brief  Data in Table 6, though re-arranged to match columns in Table 5
+   with MeV converted to GeV
    
    The final entry isn't in the table and instead comes from the text below
    eq. 13.
 */
 constexpr double table_6[kRows] =
-  {0.018, 0.018, 0.016, 0.11, 0.11, 0.08, 0.18, 0.4, 6.e-3, 5.e-5, 1.e-4, 6.};
+  {0.018e-3, 0.018e-3, 0.016e-3, 0.11e-3, 0.11e-3, 0.08e-3, 0.18e-3, 0.4e-3, 6.e-3, 5.e-5, 1.e-4, 6.};
+
 
 class TwoLoop {
   /**
@@ -85,7 +86,7 @@ class TwoLoop {
      @warning Do not apply any corrections outside the range of validity in p5
   */
  public:
-  // Partial widths in MeV
+  // Partial widths in GeV
   double gamma_e() const {return observable(0);}
   double gamma_mu() const {return gamma_e();}
   double gamma_tau() const {return observable(1);}
@@ -101,7 +102,7 @@ class TwoLoop {
   double gamma_b() const {return observable(6);}
   double gamma_total() const {return observable(7);}
 
-  // Residual theory error in partial widths in MeV
+  // Residual theory error in partial widths in GeV
   double error_gamma_e() const {return error(0);}
   double error_gamma_mu() const {return error_gamma_e();}
   double error_gamma_tau() const {return error(1);}
@@ -188,7 +189,6 @@ class TwoLoop {
        @param alpha_s_MSbar_MZ Strong coupling in MS-bar scheme at \f$Q = M_Z\f$
        @param delta_alpha_OS \f$\Delta\alpha\f$ parameter in OS scheme. Defined on p9
     */
-    
     // Range of validity in p5
     if (!((std::fabs(mh_OS - 125.1) < 5.) &&
           (std::fabs(mt_OS - 173.2) < 4.) &&

@@ -3294,7 +3294,7 @@ namespace Gambit
     {
       /**
          @brief Calculate width of \f$Z\f$ decays to neutrinos,
-         \f$\Gamma(Z\to\nu\nu)\f$ at two-loop
+         \f$\Gamma(Z\to\nu\nu)\f$ at two-loop in GeV
 
          @warning This uses input \f$\alpha(M_Z)\f$ - does not include input
          light-quark thresholds.
@@ -3324,7 +3324,7 @@ namespace Gambit
     {
       /**
          @brief Calculate width of \f$Z\f$ decays to the lightest neutralinos,
-         \f$\Gamma(Z\to\chi^0_1\chi^0_1)\f$
+         \f$\Gamma(Z\to\chi^0_1\chi^0_1)\f$ in GeV
          
          @warning Tree-level formula with 10% error
          

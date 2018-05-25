@@ -24,8 +24,6 @@
 
 namespace MSSM_Z {
 
-const double gev_to_mev = 1.e3;
-
 double gamma_chi_0(int i,
   int j,
   std::array<double, 4> m,
@@ -34,11 +32,11 @@ double gamma_chi_0(int i,
   double MZ = 91.,
   double sw2 = 0.22) {
   /**
-     @brief \f$\Gamma(Z \to \chi_i \chi_j)\f$ in MeV
+     @brief \f$\Gamma(Z \to \chi_i \chi_j)\f$ in GeV
 
      @warning Tree-level formula
 
-     @returns \f$\Gamma(h \to \chi_i \chi_j)\f$ in MeV
+     @returns \f$\Gamma(h \to \chi_i \chi_j)\f$ in GeV
      @param m Neutralino masses, \f$m_{\chi_i}\f$, without phases
      @param Z Real neutralino mixing matrix
      @param g2 \f$g_2\f$
@@ -58,16 +56,14 @@ double gamma_chi_0(int i,
   const double cw = std::sqrt(1. - sw2);
 
   const double gz = g2 / (2. * cw) * (Z[i][2] * Z[j][2] - Z[i][3] * Z[j][3]);
-  double gamma_gev = sqrt(p2) / (2. * M_PI * pow(MZ, 2)) * pow(gz, 2) *
+  double gamma = sqrt(p2) / (2. * M_PI * pow(MZ, 2)) * pow(gz, 2) *
     (ei * ej + p2 / 3. - m[i] * m[j]);
 
   if (i == j) {
-    gamma_gev *= 0.5;
+    gamma *= 0.5;
   }
 
-  const double gamma_mev = gamma_gev * gev_to_mev;
-
-  return gamma_mev;
+  return gamma;
 }
 }  // namespace MSSM_Z
 
