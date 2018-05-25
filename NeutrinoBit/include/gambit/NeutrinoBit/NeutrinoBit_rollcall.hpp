@@ -709,10 +709,29 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY lnLdelphi
+  #define CAPABILITY lnLdelphi_shortlived
   START_CAPABILITY
 
-    #define FUNCTION lnL_delphi
+    #define FUNCTION lnL_delphi_short_lived
+    START_FUNCTION(double)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLdelphi_longlived
+  START_CAPABILITY
+
+    #define FUNCTION lnL_delphi_long_lived
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
     DEPENDENCY(Ue1, double)
@@ -789,6 +808,32 @@ START_MODULE
     DEPENDENCY(Ut1, double)
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLlhce
+  START_CAPABILITY
+
+    #define FUNCTION lnL_lhc_e
+    START_FUNCTION(double)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    DEPENDENCY(Ue1, double)
+    DEPENDENCY(Ue2, double)
+    DEPENDENCY(Ue3, double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY lnLlhcmu
+  START_CAPABILITY
+
+    #define FUNCTION lnL_lhc_mu
+    START_FUNCTION(double)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    DEPENDENCY(Um1, double)
+    DEPENDENCY(Um2, double)
+    DEPENDENCY(Um3, double)
     #undef FUNCTION
 
   #undef CAPABILITY
