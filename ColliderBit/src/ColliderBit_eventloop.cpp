@@ -1021,6 +1021,20 @@ namespace Gambit
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }            
+          }
+
           first = false;
         }
       }
@@ -1051,7 +1065,18 @@ namespace Gambit
         result.register_thread("DetAnalysisContainer");
         result.set_current_collider(*iterPythiaNames);
 
-        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        // Initialize analysis container or reset all the contained analyses
+        if (!result.has_analyses()) 
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);             
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
         else result.reset();
 
         return;
@@ -1095,6 +1120,20 @@ namespace Gambit
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }            
+          }
+
           first = false;
         }
       }
@@ -1122,35 +1161,26 @@ namespace Gambit
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
-
         // Register analysis container
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.register_thread " << endl;
         result.register_thread("ATLASAnalysisContainer");
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
 
         // Set current collider
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run result.set_current_collider " << endl;
         result.set_current_collider(*iterPythiaNames);
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done" << endl;
 
         // Initialize analysis container or reset all the contained analyses
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: Will run get_current_analyses_map" << endl;
-        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        if (!result.has_analyses()) 
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);             
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
         else result.reset();
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: ...done " << endl;
 
-        // #ifdef COLLIDERBIT_DEBUG
-        // if (my_thread == 0)
-        // {
-        //   for (auto& apair : result.get_current_analyses_map())
-        //   {
-        //     cout << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
-        //   }
-        // }
-        // #endif
-
-        // cout << "DEBUG: thread " << my_thread << ": getATLASAnalysisContainer: End START_SUBPROCESS "  << endl;
         return;
       }
 
@@ -1192,6 +1222,20 @@ namespace Gambit
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }            
+          }
+
           first = false;
         }
       }
@@ -1219,35 +1263,26 @@ namespace Gambit
 
       if (*Loop::iteration == START_SUBPROCESS)
       {
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Begin START_SUBPROCESS, indexPythiaNames = " << indexPythiaNames  << endl;
-
         // Register analysis container
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Will run result.register_thread " << endl;
         result.register_thread("ATLASnoeffAnalysisContainer");
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: ...done" << endl;
 
         // Set current collider
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Will run result.set_current_collider " << endl;
         result.set_current_collider(*iterPythiaNames);
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: ...done" << endl;
 
         // Initialize analysis container or reset all the contained analyses
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: Will run get_current_analyses_map" << endl;
-        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        if (!result.has_analyses()) 
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);             
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
         else result.reset();
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: ...done " << endl;
 
-        // #ifdef COLLIDERBIT_DEBUG
-        // if (my_thread == 0)
-        // {
-        //   for (auto& apair : result.get_current_analyses_map())
-        //   {
-        //     cout << debug_prefix() << "The run with " << *iterPythiaNames << " will include the analysis " << apair.first << endl;
-        //   }
-        // }
-        // #endif
-
-        // cout << "DEBUG: thread " << my_thread << ": getATLASnoeffAnalysisContainer: End START_SUBPROCESS "  << endl;
         return;
       }
 
@@ -1289,6 +1324,20 @@ namespace Gambit
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }            
+          }
+
           first = false;
         }
       }
@@ -1323,7 +1372,17 @@ namespace Gambit
         result.set_current_collider(*iterPythiaNames);
 
         // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        if (!result.has_analyses()) 
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);             
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
         else result.reset();
 
         return;
@@ -1366,6 +1425,20 @@ namespace Gambit
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }            
+          }
+
           first = false;
         }
       }
@@ -1400,7 +1473,17 @@ namespace Gambit
         result.set_current_collider(*iterPythiaNames);
 
         // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        if (!result.has_analyses()) 
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);             
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
         else result.reset();
 
         return;
@@ -1443,6 +1526,20 @@ namespace Gambit
           // Read analysis names from the yaml file
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }            
+          }
+
           first = false;
         }
       }
@@ -1478,7 +1575,17 @@ namespace Gambit
         result.set_current_collider(*iterPythiaNames);
 
         // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses()) result.init(analyses[indexPythiaNames]); 
+        if (!result.has_analyses()) 
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);             
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
         else result.reset();
 
         return;

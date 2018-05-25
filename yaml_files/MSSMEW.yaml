@@ -286,17 +286,6 @@ Rules:
       xsec_vetos: [0.028]  # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
 
 
-  # Rules and options for BuckFast ATLAS simulation witout efficiencies
-  - capability: SimpleSmearingSim
-    type: "ColliderBit::BuckFastSmearATLASnoeff"
-    function: getBuckFastATLASnoeff
-    options:
-      # useDetector defaults to true for getBuckFastATLAS. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
-      useDetector: [false]
-      # Choose which type of event to use: for parton level, change partonOnly to true
-      partonOnly: [false]
-      antiktR: [0.4]
-
   # Rules and options for BuckFast ATLAS simulation
   - capability: SimpleSmearingSim
     type: "ColliderBit::BuckFastSmearATLAS"
@@ -304,6 +293,17 @@ Rules:
     options:
       # useDetector defaults to true for getBuckFastATLAS. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
       useDetector: [true]
+      # Choose which type of event to use: for parton level, change partonOnly to true
+      partonOnly: [false]
+      antiktR: [0.4]
+
+  # Rules and options for BuckFast ATLAS simulation witout efficiencies
+  - capability: SimpleSmearingSim
+    type: "ColliderBit::BuckFastSmearATLASnoeff"
+    function: getBuckFastATLASnoeff
+    options:
+      # useDetector defaults to true for getBuckFastATLAS. Set it to false to ignore all ATLAS analyses and disable the BuckFast ATLAS simulator
+      useDetector: [false]
       # Choose which type of event to use: for parton level, change partonOnly to true
       partonOnly: [false]
       antiktR: [0.4]
@@ -363,8 +363,10 @@ Rules:
     function: getCMSnoeffAnalysisContainer
     options:
       analyses: [ [ "CMS_13TeV_2LEPsoft_36invfb",
+                    "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE",
                     "CMS_13TeV_MultiLEP_36invfb",
-                    "CMS_13TeV_2OSLEP_36invfb" ] ]
+                    "CMS_13TeV_2OSLEP_36invfb",
+                    "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE" ] ]
 
 
   # List any analyses that should *NOT* be included in the total log-likelihood!
@@ -373,7 +375,8 @@ Rules:
   - capability: LHC_Combined_LogLike
     function: calc_LHC_LogLike
     options:
-      skip_analyses: []
+      skip_analyses: [ "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE", 
+                       "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE" ]
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
   # Can change "_lognormal_" to "_gaussian_" if you prefer
@@ -419,9 +422,9 @@ KeyValues:
   # to avoid crashing the entire scan due to a rare problem point.
   # This means we should pay close attention to the log files...
   exceptions:
-    ColliderBit_error: non-fatal
-    DarkBit_error: non-fatal
-    DecayBit_error: non-fatal
-    FlavBit_error: non-fatal
-    PrecisionBit_error: non-fatal
-    SpecBit_error: non-fatal
+    ColliderBit_error: fatal
+    DarkBit_error: fatal
+    DecayBit_error: fatal
+    FlavBit_error: fatal
+    PrecisionBit_error: fatal
+    SpecBit_error: fatal
