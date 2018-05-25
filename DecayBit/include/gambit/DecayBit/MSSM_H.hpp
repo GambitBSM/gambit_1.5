@@ -28,6 +28,7 @@
 
 #include <cmath>
 #include <array>
+#include <stdexcept>
 
 namespace MSSM_H {
 
@@ -39,6 +40,10 @@ double lambda(double x, double y, double z) {
      \lambda(x, y; z) = (1 - x / z - y / z)^2 - 4 x y / z^2
      \f]
   */
+  if (z == 0.) {
+    throw std::invalid_argument("z must be greater than zero");
+  }
+
   return pow(1. - x / z - y / z, 2) - 4. * x * y / pow(z, 2);
 }
 
