@@ -2059,8 +2059,8 @@ namespace Gambit
       
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double theory[3], th_err[3];
-
+      static double th_err[3];
+      double theory[3];
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
       if (first)
@@ -2107,7 +2107,8 @@ namespace Gambit
        
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double theory[7], th_err[7];
+      static double th_err[7];
+      double theory[7];
 
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.
@@ -2171,7 +2172,8 @@ namespace Gambit
         
       static bool first = true;
       static boost::numeric::ublas::matrix<double> cov_exp, value_exp;
-      static double theory[2], th_err[2];
+      static double th_err[2];
+      double theory[2];
 
 
       // Read and calculate things based on the observed data only the first time through, as none of it depends on the model parameters.

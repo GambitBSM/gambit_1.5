@@ -35,6 +35,8 @@
 #include "gambit/NeutrinoBit/spline.h"
 #include "gambit/Utils/statistics.hpp"
 
+//#define NEUTRINOBIT_DEBUG
+
 using namespace Eigen;
 
 namespace Gambit
@@ -1651,6 +1653,10 @@ namespace Gambit
       using namespace Pipes::Ue1;
       Ue1_sq = ((*Dep::SeesawI_Theta).cwiseAbs2())(0,0);
 
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Ue1 = " << Ue1_sq << endl;
+      #endif
+
       double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
       double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
 
@@ -1673,6 +1679,11 @@ namespace Gambit
     {
       using namespace Pipes::Um1;
       Um1_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,0);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Um1 = " << Um1_sq << endl;
+      #endif
+
     }
 
     void Um1_phase(double& Um1_p)
@@ -1685,6 +1696,11 @@ namespace Gambit
     {
       using namespace Pipes::Ut1;
       Ut1_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,0);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Ut1 = " << Ut1_sq << endl;
+      #endif
+
     }
 
     void Ut1_phase(double& Ut1_p)
@@ -1697,6 +1713,11 @@ namespace Gambit
     {
       using namespace Pipes::Ue2;
       Ue2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(0,1);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Ue2 = " << Ue2_sq << endl;
+      #endif
+
     }
 
     void Ue2_phase(double& Ue2_p)
@@ -1709,6 +1730,11 @@ namespace Gambit
     {
       using namespace Pipes::Um2;
       Um2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,1);
+ 
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Um2 = " << Um2_sq << endl;
+      #endif
+
     }
 
     void Um2_phase(double& Um2_p)
@@ -1721,6 +1747,11 @@ namespace Gambit
     {
       using namespace Pipes::Ut2;
       Ut2_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,1);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Ut2 = " << Ut2_sq << endl;
+      #endif
+
     }
 
     void Ut2_phase(double& Ut2_p)
@@ -1733,6 +1764,11 @@ namespace Gambit
     {
       using namespace Pipes::Ue3;
       Ue3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(0,2);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Ue3 = " << Ue3_sq << endl;
+      #endif
+
     }
 
     void Ue3_phase(double& Ue3_p)
@@ -1745,6 +1781,11 @@ namespace Gambit
     {
       using namespace Pipes::Um3;
       Um3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(1,2);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Um3 = " << Um3_sq << endl;
+      #endif
+
     }
 
     void Um3_phase(double& Um3_p)
@@ -1757,6 +1798,11 @@ namespace Gambit
     {
       using namespace Pipes::Ut3;
       Ut3_sq = (Dep::SeesawI_Theta->cwiseAbs2())(2,2);
+
+      #ifdef NEUTRINOBIT_DEBUG
+        cout << "Ut3 = " << Ut3_sq << endl;
+      #endif
+
     }
 
     void Ut3_phase(double& Ut3_p)
