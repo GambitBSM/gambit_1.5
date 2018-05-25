@@ -303,6 +303,7 @@ namespace Gambit {
 
       void collect_results() {
 
+
         // string path = "ColliderBit/results/cutflow_";
         // path.append(analysis_name());
         // path.append(".txt");
@@ -341,114 +342,165 @@ namespace Gambit {
  //        cutflowFile.close();
 
 
-        //Now fill a results object with the results for each SR
-        SignalRegionData results_SR1;
-        results_SR1.sr_label = "SR1";
-        results_SR1.n_observed = 2.;
-        results_SR1.n_background = 3.5; 
-        results_SR1.background_sys = 1.;
-        results_SR1.signal_sys = 0.; 
-        results_SR1.n_signal = _numSR1;
-        add_result(results_SR1);
 
-        SignalRegionData results_SR2;
-        results_SR2.sr_label = "SR1";
-        results_SR2.n_observed = 15.;
-        results_SR2.n_background = 12.;
-        results_SR2.background_sys = 2.3;
-        results_SR2.signal_sys = 0.;
-        results_SR2.n_signal = _numSR2;
-        add_result(results_SR2);
+        // Signal region info for the covariance matrix
+        static const size_t SR_size_cov = 12;
+        const int SR_labels_cov[SR_size_cov] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+        const double SR_nums_cov[SR_size_cov] = {
+          _numSR1, _numSR2, _numSR3, _numSR4, _numSR5,  _numSR6, 
+          _numSR7, _numSR8, _numSR9, _numSR10, _numSR11, _numSR12,
+        };
 
-        SignalRegionData results_SR3;
-        results_SR3.sr_label = "SR3";
-        results_SR3.n_observed = 19.;
-        results_SR3.n_background = 17.;
-        results_SR3.background_sys = 2.4;
-        results_SR3.signal_sys = 0.;
-        results_SR3.n_signal = _numSR3;
-        add_result(results_SR3);
+        // Observed event counts
+        static const double OBSNUM[SR_size_cov] = {
+          2., 15., 19., 18., 1., 0., 3., 1., 2., 1., 2., 0., 
+        };
 
-        SignalRegionData results_SR4;
-        results_SR4.sr_label = "SR4";
-        results_SR4.n_observed = 18.;
-        results_SR4.n_background = 11.;
-        results_SR4.background_sys = 2.;
-        results_SR4.signal_sys = 0.;
-        results_SR4.n_signal = _numSR4;
-        add_result(results_SR4);
+        // Background estimates
+        static const double BKGNUM[SR_size_cov] = {
+          3.5, 12., 17., 11., 1.6, 3.5, 2., 0.51, 1.4, 1.5, 1.5, 1.2,
+        };
+        
+        // Background uncertainties, same-flavor signal regions
+        static const double BKGERR[SR_size_cov] = {
+          1., 2.3, 2.4, 2., 0.7, 0.9, 0.7, 0.52, 0.7, 0.6, 0.8, 0.6, 
+        };
 
-        SignalRegionData results_SR5;
-        results_SR5.sr_label = "SR5";
-        results_SR5.n_observed = 1.;
-        results_SR5.n_background = 1.6;
-        results_SR5.background_sys = 0.7;
-        results_SR5.signal_sys = 0.;
-        results_SR5.n_signal = _numSR5;
-        add_result(results_SR5);
+        for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) 
+        {
+          stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
+          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
+        }
 
-        SignalRegionData results_SR6;
-        results_SR6.sr_label = "SR6";
-        results_SR6.n_observed = 0.;
-        results_SR6.n_background = 3.5;
-        results_SR6.background_sys = 0.9;
-        results_SR6.signal_sys = 0.;
-        results_SR6.n_signal = _numSR6;
-        add_result(results_SR6);
+        // Covariance matrix
+        static const vector< vector<double> > BKGCOV = {
+          { 1.29, 0.33, 0.45, 0.49, 0.06, 0.09, 0.12, 0.08, 0.12, 0.09, 0.07, 0.12 },
+          { 0.33, 5.09, 1.01, 0.62, 0.12, 0.13, 0.20, 0.12, 0.12, 0.11, 0.15, 0.13 },
+          { 0.45, 1.01, 6.44, 0.78, 0.21, 0.19, 0.18, 0.10, 0.18, 0.18, 0.15, 0.19 },
+          { 0.49, 0.62, 0.78, 3.60, 0.09, 0.07, 0.12, 0.19, 0.19, 0.13, 0.17, 0.32 },
+          { 0.06, 0.12, 0.21, 0.09, 0.59, 0.03, 0.06, 0.03, 0.02, 0.03, 0.03, 0.03 },
+          { 0.09, 0.13, 0.19, 0.07, 0.03, 0.72, 0.03, 0.03, 0.03, 0.04, 0.03, 0.01 },
+          { 0.12, 0.20, 0.18, 0.12, 0.06, 0.03, 0.60, 0.05, 0.04, 0.05, 0.04, 0.05 },
+          { 0.08, 0.12, 0.10, 0.19, 0.03, 0.03, 0.05, 0.17, 0.05, 0.03, 0.04, 0.06 },
+          { 0.12, 0.12, 0.18, 0.19, 0.02, 0.03, 0.04, 0.05, 0.26, 0.05, 0.07, 0.07 },
+          { 0.09, 0.11, 0.18, 0.13, 0.03, 0.04, 0.05, 0.03, 0.05, 0.32, 0.05, 0.04 },
+          { 0.07, 0.15, 0.15, 0.17, 0.03, 0.03, 0.04, 0.04, 0.07, 0.05, 0.20, 0.06 },
+          { 0.12, 0.13, 0.19, 0.32, 0.03, 0.01, 0.05, 0.06, 0.07, 0.04, 0.06, 0.28 },
+        };
 
-        SignalRegionData results_SR7;
-        results_SR7.sr_label = "SR7";
-        results_SR7.n_observed = 3.;
-        results_SR7.n_background = 2.;
-        results_SR7.background_sys = 0.7;
-        results_SR7.signal_sys = 0.;
-        results_SR7.n_signal = _numSR7;
-        add_result(results_SR7);
+        set_covariance(BKGCOV);
 
-        SignalRegionData results_SR8;
-        results_SR8.sr_label = "SR8";
-        results_SR8.n_observed = 1.;
-        results_SR8.n_background = 0.51;
-        results_SR8.background_sys = 0.52;
-        results_SR8.signal_sys = 0.;
-        results_SR8.n_signal = _numSR8;
-        add_result(results_SR8);
 
-        SignalRegionData results_SR9;
-        results_SR9.sr_label = "SR9";
-        results_SR9.n_observed = 2.;
-        results_SR9.n_background = 1.4;
-        results_SR9.background_sys = 0.7;
-        results_SR9.signal_sys = 0.;
-        results_SR9.n_signal = _numSR9;
-        add_result(results_SR9);
 
-        SignalRegionData results_SR10;
-        results_SR10.sr_label = "SR10";
-        results_SR10.n_observed = 1.;
-        results_SR10.n_background = 1.5;
-        results_SR10.background_sys = 0.6;
-        results_SR10.signal_sys = 0.;
-        results_SR10.n_signal = _numSR10;
-        add_result(results_SR10);
+        // //Now fill a results object with the results for each SR
+        // SignalRegionData results_SR1;
+        // results_SR1.sr_label = "SR1";
+        // results_SR1.n_observed = 2.;
+        // results_SR1.n_background = 3.5; 
+        // results_SR1.background_sys = 1.;
+        // results_SR1.signal_sys = 0.; 
+        // results_SR1.n_signal = _numSR1;
+        // add_result(results_SR1);
 
-        SignalRegionData results_SR11;
-        results_SR11.sr_label = "SR11";
-        results_SR11.n_observed = 2.;
-        results_SR11.n_background = 1.5;
-        results_SR11.background_sys = 0.8;
-        results_SR11.signal_sys = 0.;
-        results_SR11.n_signal = _numSR11;
-        add_result(results_SR11);
+        // SignalRegionData results_SR2;
+        // results_SR2.sr_label = "SR1";
+        // results_SR2.n_observed = 15.;
+        // results_SR2.n_background = 12.;
+        // results_SR2.background_sys = 2.3;
+        // results_SR2.signal_sys = 0.;
+        // results_SR2.n_signal = _numSR2;
+        // add_result(results_SR2);
 
-        SignalRegionData results_SR12;
-        results_SR12.sr_label = "SR12";
-        results_SR12.n_observed = 0.;
-        results_SR12.n_background = 1.2;
-        results_SR12.background_sys = 0.6;
-        results_SR12.signal_sys = 0.;
-        results_SR12.n_signal = _numSR12;
-        add_result(results_SR12);
+        // SignalRegionData results_SR3;
+        // results_SR3.sr_label = "SR3";
+        // results_SR3.n_observed = 19.;
+        // results_SR3.n_background = 17.;
+        // results_SR3.background_sys = 2.4;
+        // results_SR3.signal_sys = 0.;
+        // results_SR3.n_signal = _numSR3;
+        // add_result(results_SR3);
+
+        // SignalRegionData results_SR4;
+        // results_SR4.sr_label = "SR4";
+        // results_SR4.n_observed = 18.;
+        // results_SR4.n_background = 11.;
+        // results_SR4.background_sys = 2.;
+        // results_SR4.signal_sys = 0.;
+        // results_SR4.n_signal = _numSR4;
+        // add_result(results_SR4);
+
+        // SignalRegionData results_SR5;
+        // results_SR5.sr_label = "SR5";
+        // results_SR5.n_observed = 1.;
+        // results_SR5.n_background = 1.6;
+        // results_SR5.background_sys = 0.7;
+        // results_SR5.signal_sys = 0.;
+        // results_SR5.n_signal = _numSR5;
+        // add_result(results_SR5);
+
+        // SignalRegionData results_SR6;
+        // results_SR6.sr_label = "SR6";
+        // results_SR6.n_observed = 0.;
+        // results_SR6.n_background = 3.5;
+        // results_SR6.background_sys = 0.9;
+        // results_SR6.signal_sys = 0.;
+        // results_SR6.n_signal = _numSR6;
+        // add_result(results_SR6);
+
+        // SignalRegionData results_SR7;
+        // results_SR7.sr_label = "SR7";
+        // results_SR7.n_observed = 3.;
+        // results_SR7.n_background = 2.;
+        // results_SR7.background_sys = 0.7;
+        // results_SR7.signal_sys = 0.;
+        // results_SR7.n_signal = _numSR7;
+        // add_result(results_SR7);
+
+        // SignalRegionData results_SR8;
+        // results_SR8.sr_label = "SR8";
+        // results_SR8.n_observed = 1.;
+        // results_SR8.n_background = 0.51;
+        // results_SR8.background_sys = 0.52;
+        // results_SR8.signal_sys = 0.;
+        // results_SR8.n_signal = _numSR8;
+        // add_result(results_SR8);
+
+        // SignalRegionData results_SR9;
+        // results_SR9.sr_label = "SR9";
+        // results_SR9.n_observed = 2.;
+        // results_SR9.n_background = 1.4;
+        // results_SR9.background_sys = 0.7;
+        // results_SR9.signal_sys = 0.;
+        // results_SR9.n_signal = _numSR9;
+        // add_result(results_SR9);
+
+        // SignalRegionData results_SR10;
+        // results_SR10.sr_label = "SR10";
+        // results_SR10.n_observed = 1.;
+        // results_SR10.n_background = 1.5;
+        // results_SR10.background_sys = 0.6;
+        // results_SR10.signal_sys = 0.;
+        // results_SR10.n_signal = _numSR10;
+        // add_result(results_SR10);
+
+        // SignalRegionData results_SR11;
+        // results_SR11.sr_label = "SR11";
+        // results_SR11.n_observed = 2.;
+        // results_SR11.n_background = 1.5;
+        // results_SR11.background_sys = 0.8;
+        // results_SR11.signal_sys = 0.;
+        // results_SR11.n_signal = _numSR11;
+        // add_result(results_SR11);
+
+        // SignalRegionData results_SR12;
+        // results_SR12.sr_label = "SR12";
+        // results_SR12.n_observed = 0.;
+        // results_SR12.n_background = 1.2;
+        // results_SR12.background_sys = 0.6;
+        // results_SR12.signal_sys = 0.;
+        // results_SR12.n_signal = _numSR12;
+        // add_result(results_SR12);
+
       }
 
 
