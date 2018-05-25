@@ -197,7 +197,8 @@ class TwoLoop {
           (std::fabs(delta_alpha_OS - 0.059) < 0.0005) &&
           (std::fabs(MZ_OS - 91.1876) < 0.0042))) {
       std::cerr << "SM nuisance parameters outside range of validity for "
-                   "two-loop Z formulas. Using tree-level" << std::endl;
+                   "two-loop Z formulas. Not accounting for variation in "
+                   "SM nuisance parameters" << std::endl;
       L_H = 0.;
       delta_t = 0.;
       delta_z = 0.;
