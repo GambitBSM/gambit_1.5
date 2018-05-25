@@ -73,7 +73,7 @@ constexpr double table_5[kRows][kCols] = {
    with MeV converted to GeV
    
    The final entry isn't in the table and instead comes from the text below
-   eq. 13.
+   eq. 16.
 */
 constexpr double table_6[kRows] =
   {0.018e-3, 0.018e-3, 0.016e-3, 0.11e-3, 0.11e-3, 0.08e-3, 0.18e-3, 0.4e-3, 6.e-3, 5.e-5, 1.e-4, 6.};
@@ -98,7 +98,7 @@ class TwoLoop {
   double gamma_c() const {return observable(4);}
   double gamma_t() const {return 0.;}
   double gamma_d() const {return observable(5);}
-  double gamma_s() const {return gamma_s();}
+  double gamma_s() const {return gamma_d();}
   double gamma_b() const {return observable(6);}
   double gamma_total() const {return observable(7);}
 
