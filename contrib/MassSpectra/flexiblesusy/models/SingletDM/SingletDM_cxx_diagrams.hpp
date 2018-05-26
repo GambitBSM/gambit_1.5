@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:43:07
+// File generated at Sat 26 May 2018 14:35:29
 
 /**
  * @file SingletDM_cxx_diagrams.hpp
  *
- * This file was generated at Thu 10 May 2018 14:43:07 with FlexibleSUSY
+ * This file was generated at Sat 26 May 2018 14:35:29 with FlexibleSUSY
  * 2.0.1 and SARAH 4.12.2 .
  */
 

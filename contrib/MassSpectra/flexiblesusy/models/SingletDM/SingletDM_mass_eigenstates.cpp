@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:42:59
+// File generated at Sat 26 May 2018 14:35:23
 
 /**
  * @file SingletDM_mass_eigenstates.cpp
@@ -26,7 +26,7 @@
  * which solve EWSB and calculate pole masses and mixings from MSbar
  * parameters.
  *
- * This file was generated at Thu 10 May 2018 14:42:59 with FlexibleSUSY
+ * This file was generated at Sat 26 May 2018 14:35:23 with FlexibleSUSY
  * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 

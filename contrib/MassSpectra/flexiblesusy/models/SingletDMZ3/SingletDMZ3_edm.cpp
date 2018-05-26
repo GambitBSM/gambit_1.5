@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:42:40
+// File generated at Sat 26 May 2018 14:35:47
 
 /**
  * @file SingletDMZ3_edm.cpp
  *
- * This file was generated at Thu 10 May 2018 14:42:40 with FlexibleSUSY
+ * This file was generated at Sat 26 May 2018 14:35:47 with FlexibleSUSY
  * 2.0.1 and SARAH 4.12.2 .
  */
 

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:42:38
+// File generated at Sat 26 May 2018 14:35:46
 
 #include "SingletDMZ3_mass_eigenstates.hpp"
 #include "SingletDMZ3_weinberg_angle.hpp"
@@ -59,7 +59,7 @@ const double ROOT2 = Sqrt(2.0);
 /**
  * Sets the maximum number of iterations to 20, the number of loops to 2,
  * the precision goal to 1.0e-8, and the model pointer as well as the
- * SM parameter struct to the ones which are handed over as parameters.
+ * SM parameter struct to the ones which are handed over as parameters. 
  *
  * @param model_ pointer to the model for which the calculation shall be done
  * @param sm_parameters_ struct containing the required SM parameters
@@ -239,7 +239,7 @@ double CLASSNAME::calculate_rho_hat_tree() const
 
 /**
  * Calculates the \f$\Delta\hat{\rho}\f$ corrections as defined in
- * Eqs. (C.4), (C.6) from hep-ph/9606211 but with the dependency on
+ * Eqs. (C.4), (C.6) from hep-ph/9606211 but with the dependency on 
  * rhohat eliminated.
  *
  * @param sinThetaW sin(theta_W)

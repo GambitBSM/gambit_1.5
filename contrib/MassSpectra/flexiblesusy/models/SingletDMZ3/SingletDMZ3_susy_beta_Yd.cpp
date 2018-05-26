@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:42:27
+// File generated at Sat 26 May 2018 14:35:37
 
 #include "SingletDMZ3_susy_parameters.hpp"
 #include "wrappers.hpp"
@@ -68,21 +68,12 @@ Eigen::Matrix<double,3,3> SingletDMZ3_susy_parameters::calc_beta_Yd_2_loop(const
 
    beta_Yd = (twoLoop*(-0.0016666666666666668*Yd*(127*Quad(g1) + 5*Sqr(g1
       )*(-15*(5*traceYdAdjYd + 15*traceYeAdjYe + 17*traceYuAdjYu) + 162*Sqr(g2)
-/*<<<<<<< HEAD*/
       - 248*Sqr(g3)) + 75*(46*Quad(g2) - 3*Sqr(g2)*(5*(3*traceYdAdjYd +
       traceYeAdjYe + 3*traceYuAdjYu) + 24*Sqr(g3)) + 2*(27*traceYdAdjYdYdAdjYd
       - 6*traceYdAdjYuYuAdjYd + 9*traceYeAdjYeYeAdjYe + 27*traceYuAdjYuYuAdjYu
       + 432*Quad(g3) - 80*(traceYdAdjYd + traceYuAdjYu)*Sqr(g3) - 6*Sqr(LamH) -
-      2*Sqr(LamSH)))) + 0.0125*(187*Sqr(g1) + 675*Sqr(g2) + 20*(-3*(8*LamH + 9
-      *traceYdAdjYd + 3*traceYeAdjYe + 9*traceYuAdjYu) + 64*Sqr(g3)))*(Yd*
-/*=======
-      - 248*Sqr(g3)) + 75*(54*traceYdAdjYdYdAdjYd - 12*traceYdAdjYuYuAdjYd +
-      18*traceYeAdjYeYeAdjYe + 54*traceYuAdjYuYuAdjYu + 46*Quad(g2) + 864*Quad(
-      g3) - 160*(traceYdAdjYd + traceYuAdjYu)*Sqr(g3) - 3*Sqr(g2)*(5*(3*
-      traceYdAdjYd + traceYeAdjYe + 3*traceYuAdjYu) + 24*Sqr(g3)) - 12*Sqr(LamH
-      ) - Sqr(LamSH))) + (-0.75*(8*LamH + 9*traceYdAdjYd + 3*traceYeAdjYe + 9*
+      2*Sqr(LamSH)))) + (-0.75*(8*LamH + 9*traceYdAdjYd + 3*traceYeAdjYe + 9*
       traceYuAdjYu) + 2.3375*Sqr(g1) + 8.4375*Sqr(g2) + 16*Sqr(g3))*(Yd*
->>>>>>> master*/
       Yd.adjoint()*Yd) + 0.0125*(-79*Sqr(g1) + 5*(20*(3*traceYdAdjYd +
       traceYeAdjYe + 3*traceYuAdjYu) + 9*Sqr(g2) - 256*Sqr(g3)))*(Yd*Yu.adjoint
       ()*Yu) + 1.5*(Yd*Yd.adjoint()*Yd*Yd.adjoint()*Yd) - Yd*Yd.adjoint()*Yd*
