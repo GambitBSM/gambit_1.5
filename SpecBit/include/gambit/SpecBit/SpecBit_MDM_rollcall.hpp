@@ -41,11 +41,11 @@
 
   // Find scale at which spectrum becomes non-perturbative
   #define CAPABILITY find_non_perturb_scale
-    
+
     #define FUNCTION find_non_perturb_scale_MDM
     START_FUNCTION(double)
     DEPENDENCY(MDM_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(MDM)
+    ALLOW_MODELS(MDM)
     #undef FUNCTION
 
   #undef CAPABILITY
