@@ -40,7 +40,7 @@
     DEPENDENCY(SingletDM_spectrum, Spectrum)
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDM_running)
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
-    MODEL_GROUP(singlet, (SingletDM_running,SingletDMZ3))
+    MODEL_GROUP(singlet, (SingletDM_running))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
 
@@ -53,7 +53,7 @@
     MODEL_GROUP(singlet, (SingletDMZ3))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
-    
+
 	  #define FUNCTION find_min_lambda_MDM
     START_FUNCTION(dbl_dbl_bool)
     DEPENDENCY(SMINPUTS, SMInputs)
@@ -62,7 +62,7 @@
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
     MODEL_GROUP(mdm, (MDM))
     ALLOW_MODEL_COMBINATION(higgs, mdm)
-    #undef FUNCTION    
+    #undef FUNCTION
 
   #undef CAPABILITY
 
