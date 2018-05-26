@@ -16,12 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:43:04
+// File generated at Sat 26 May 2018 14:35:27
 
 /**
  * @file SingletDM_a_muon.hpp
  *
- * This file was generated at Thu 10 May 2018 14:43:04 with FlexibleSUSY
+ * This file was generated at Sat 26 May 2018 14:35:27 with FlexibleSUSY
  * 2.0.1 and SARAH 4.12.2 .
  */
 

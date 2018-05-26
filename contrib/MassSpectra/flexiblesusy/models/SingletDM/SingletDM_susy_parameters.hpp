@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Thu 10 May 2018 14:42:50
+// File generated at Sat 26 May 2018 14:35:15
 
 #ifndef SingletDM_susy_parameters_H
 #define SingletDM_susy_parameters_H
