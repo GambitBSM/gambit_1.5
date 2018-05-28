@@ -172,6 +172,18 @@ class TwoLoop {
   double alpha_s_MSbar_MZ;
   double delta_alpha_OS;
 
+  bool nuisances_outside_ranges() {
+    /**
+       @returns Whether nuisance parameters are outside the ranges of validity
+       in p5
+    */
+    return !((std::fabs(mh_OS - 125.1) < 5.) &&
+             (std::fabs(mt_OS - 173.2) < 4.) &&
+             (std::fabs(alpha_s_MSbar_MZ - 0.1184) < 0.005) &&
+             (std::fabs(delta_alpha_OS - 0.059) < 0.0005) &&
+             (std::fabs(MZ_OS - 91.1876) < 0.0042));
+  }
+
   TwoLoop(double mh_OS = hat.mh_OS,
           double mt_OS = hat.mt_OS,
           double MZ_OS = hat.MZ_OS,
@@ -190,12 +202,7 @@ class TwoLoop {
        @param alpha_s_MSbar_MZ Strong coupling in MS-bar scheme at \f$Q = M_Z\f$
        @param delta_alpha_OS \f$\Delta\alpha\f$ parameter in OS scheme. Defined on p9
     */
-    // Range of validity in p5
-    if (!((std::fabs(mh_OS - 125.1) < 5.) &&
-          (std::fabs(mt_OS - 173.2) < 4.) &&
-          (std::fabs(alpha_s_MSbar_MZ - 0.1184) < 0.005) &&
-          (std::fabs(delta_alpha_OS - 0.059) < 0.0005) &&
-          (std::fabs(MZ_OS - 91.1876) < 0.0042))) {
+    if (nuisances_outside_ranges()) {
       std::cerr << "SM nuisance parameters outside range of validity for "
                    "two-loop Z formulas. Not accounting for variation in "
                    "SM nuisance parameters" << std::endl;

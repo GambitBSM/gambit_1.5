@@ -3314,6 +3314,12 @@ namespace Gambit
       const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
       auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha);
 
+      if (Z.nuisances_outside_ranges()) {
+        DecayBit_warning().raise(LOCAL_INFO, "SM nuisance parameters outside "
+          "range of validity for two-loop Z formulas. Not accounting for "
+          "variation in SM nuisance parameters");
+      }
+
       // Set elements of triplet to the width and its error
       gamma.central = Z.gamma_inv();
       gamma.lower = Z.error_gamma_inv();
