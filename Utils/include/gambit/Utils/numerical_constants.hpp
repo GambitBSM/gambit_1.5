@@ -41,7 +41,7 @@ namespace Gambit
   const double m_neutron = m_neutron_amu * atomic_mass_unit;    // neutron mass (GeV/c^2)
   
   /* @brief Thomson limit of \f$\alpha_e\f$*/
-const double alpha_e_thomson_limit = 0.0072973525664; // http://pdg.lbl.gov/2017/reviews/rpp2017-rev-phys-constants.pdf 
+  const double alpha_e_thomson_limit = 0.0072973525664; // http://pdg.lbl.gov/2017/reviews/rpp2017-rev-phys-constants.pdf
 
   static const struct Mesons_masses
   {
