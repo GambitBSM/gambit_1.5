@@ -57,7 +57,7 @@
 
 #define pow2(a) ((a)*(a))          // Get speedy
 #define pow3(a) ((a)*(a)*(a))
-#define pow4(a) (pow2(a)*pow2(a)) 
+#define pow4(a) (pow2(a)*pow2(a))
 
 //#define DECAYBIT_DEBUG
 
@@ -81,10 +81,10 @@ namespace Gambit
     }
 
     /// Integrate a std::function using GSL cquad
-    double integrate_cquad(std::function<double(double)> ftor, double a, double b, double abseps, double releps) 
+    double integrate_cquad(std::function<double(double)> ftor, double a, double b, double abseps, double releps)
     {
       double result = 0.0;
-      gsl_integration_cquad_workspace * gsl_ws = gsl_integration_cquad_workspace_alloc(100);      
+      gsl_integration_cquad_workspace * gsl_ws = gsl_integration_cquad_workspace_alloc(100);
 
       gsl_function F;
       F.function = unwrap;
@@ -106,8 +106,8 @@ namespace Gambit
     double sqrt_lambda(double a, double b, double c) { return sqrt(pow2(a+b-c) - 4*a*b); }
 
     /// Breit-Wigner pole (complex)
-    std::complex<double> BW(double q2, double m2, double imag_term) 
-    { 
+    std::complex<double> BW(double q2, double m2, double imag_term)
+    {
       static const std::complex<double> i(0.0,1.0);
       return m2 / (m2 - q2 -i*imag_term);
     }
@@ -329,7 +329,7 @@ namespace Gambit
       const double sinW2 = 1 - cosW*cosW;
       const double g2 = sqrt(4*pi/sminputs.alphainv/sinW2);
       const double mZ = sminputs.mZ;
- 
+
       double Z_to_neutrinos = pow(g2/(2.0*cosW),2) * mZ/(24.0*pi);
       result.set_BF(Z_to_neutrinos/result.width_in_GeV, Z_to_neutrinos/pow(result.width_in_GeV,2)*result.positive_error, "nu_e", "nubar_e");
       result.set_BF(Z_to_neutrinos/result.width_in_GeV, Z_to_neutrinos/pow(result.width_in_GeV,2)*result.positive_error, "nu_mu", "nubar_mu");
@@ -2269,7 +2269,7 @@ namespace Gambit
     }
 
 
-    /// MSSM decays: chargino decays for small chargino--neutralino mass splitting. 
+    /// MSSM decays: chargino decays for small chargino--neutralino mass splitting.
     /// Using results from hep-ph/9607421.
     void chargino_plus_1_decays_smallsplit(DecayTable::Entry& result)
     {
@@ -2288,7 +2288,7 @@ namespace Gambit
 
       const double delta_m = m_C - m_N;
 
-      // If the chargino--neutralino mass difference is large, 
+      // If the chargino--neutralino mass difference is large,
       // the calculations in this module function should not be used.
       // Return empty result.
       if (delta_m > 1.5)
@@ -2305,23 +2305,23 @@ namespace Gambit
 
       const double Up11 = mssm.get(Par::Pole_Mixing,"~chi+",1,1); // (~W1 - i*~W2) component
       const double Up12 = mssm.get(Par::Pole_Mixing,"~chi+",1,2); // ~Hu+ component
-      const double Um11 = mssm.get(Par::Pole_Mixing,"~chi-",1,1); // (~W1 + i*~W2) component 
+      const double Um11 = mssm.get(Par::Pole_Mixing,"~chi-",1,1); // (~W1 + i*~W2) component
       const double Um12 = mssm.get(Par::Pole_Mixing,"~chi-",1,2); // ~Hu- component
 
-      // Connection to chargino matrix notation in S. Martin's "A SUSY Primer": 
+      // Connection to chargino matrix notation in S. Martin's "A SUSY Primer":
       // Our 'Up' matrix corresponds to his 'V' matrix, and
       // our 'Um' matrix corresponds to his 'U' matrix.
 
       // We use the convention that keeps the mixing matrices real.
-      // This means that the neutralino mass can be negative. 
-      // In that case, we have to deal with relative phase factors 
+      // This means that the neutralino mass can be negative.
+      // In that case, we have to deal with relative phase factors
       // when implementing the calculations from hep-ph/9607421.
       // @todo Double check these conventions.
       double O11L  = -1./root2*N14*Up12 + N12*Up11;
-      double O11R  =  1./root2*N13*Um12 + N12*Um11;  
-      if (m_C_signed < 0.) 
+      double O11R  =  1./root2*N13*Um12 + N12*Um11;
+      if (m_C_signed < 0.)
         O11L = -O11L;
-      if (m_N_signed < 0.) 
+      if (m_N_signed < 0.)
         O11R = -O11R;
 
 
@@ -2359,21 +2359,21 @@ namespace Gambit
       // Map to store partial width results
       std::map<str,double> partial_widths;
 
-      // 
+      //
       // Channel: ~chi+_1 --> ~chi0_1 e+ nu_e
-      // 
+      //
       partial_widths["N_el+_nu"] = 0.0;
       if (delta_m > m_el)
       {
         // Integrand 1
         std::function<double(double)> N_el_nu_integrand_1 = [&m_N2,&m_C2,&m_el2](double q2)
-        { 
+        {
           return (1. - (m_N2+m_el2)/q2) * pow2(1. - q2/m_C2) * sqrt_lambda(q2,m_N2,m_el2);
         };
 
         // Integrand 2
         std::function<double(double)> N_el_nu_integrand_2 = [&m_N2,&m_C2,&m_el2](double q2)
-        { 
+        {
           return (q2/m_C2) * pow2(1. - m_el2/q2) * sqrt_lambda(m_C2,m_N2,q2);
         };
 
@@ -2385,21 +2385,21 @@ namespace Gambit
         partial_widths["N_el+_nu"] = (1.*G_F2/pow3(2*pi)) * ( m_C*(O11L2 + O11R2)*N_el_nu_I1 - 2.*m_N*O11L*O11R*N_el_nu_I2 );
       }
 
-      // 
+      //
       // Channel: ~chi+_1 --> ~chi0_1 mu+ nu_mu
-      // 
+      //
       partial_widths["N_mu+_nu"] = 0.0;
       if (delta_m > m_mu)
       {
         // Integrand 1
         std::function<double(double)> N_mu_nu_integrand_1 = [&m_N2,&m_C2,&m_mu2](double q2)
-        { 
+        {
           return (1. - (m_N2+m_mu2)/q2) * pow2(1. - q2/m_C2) * sqrt_lambda(q2,m_N2,m_mu2);
         };
 
         // Integrand 2
         std::function<double(double)> N_mu_nu_integrand_2 = [&m_N2,&m_C2,&m_mu2](double q2)
-        { 
+        {
           return (q2/m_C2) * pow2(1. - m_mu2/q2) * sqrt_lambda(m_C2,m_N2,q2);
         };
 
@@ -2419,7 +2419,7 @@ namespace Gambit
       {
         double k_pi = sqrt_lambda(m_C2,m_N2,m_pi2) / (2*m_C);
         partial_widths["N_pi+"] = ( (f_pi2 * G_F2 * k_pi / (4. * pi * m_C2)) *
-                          (  pow2(O11L+O11R) * ( pow2(m_C2-m_N2) - m_pi2*pow2(m_C-m_N) ) 
+                          (  pow2(O11L+O11R) * ( pow2(m_C2-m_N2) - m_pi2*pow2(m_C-m_N) )
                            + pow2(O11L-O11R) * ( pow2(m_C2-m_N2) - m_pi2*pow2(m_C+m_N) ) ) );
       }
 
@@ -2431,13 +2431,13 @@ namespace Gambit
       {
         // Define a helper function
         std::function<std::complex<double>(double)> F = [&beta,&m_rho_02,&gamma_rho_0,&m_rho_prime2,&gamma_rho_prime](double q2)
-        { 
+        {
           return (BW(q2, m_rho_02, sqrt(q2)*gamma_rho_0) + beta*BW(q2, m_rho_prime2, sqrt(q2)*gamma_rho_prime)) / (1. + beta);
         };
 
         // Integrand
         std::function<double(double)> N_2pi_integrand = [&F,&m_N,&m_C,&m_N2,&m_C2,&m_pi2,&O11L,&O11R,&O11L2,&O11R2](double q2)
-        { 
+        {
           return pow2(std::abs(F(q2))) * pow(1. - 4*m_pi2/q2,1.5) * sqrt_lambda(m_C2,m_N2,q2)
                       * ( (O11L2+O11R2)*( q2*(m_C2+m_N2-2*q2) + pow2(m_C2-m_N2) ) - (12*O11L*O11R*q2*m_C*m_N) );
         };
@@ -2450,14 +2450,14 @@ namespace Gambit
       }
 
       //
-      // Channel: ~chi+_1 --> ~chi0_1 pi+ pi0 pi0  
+      // Channel: ~chi+_1 --> ~chi0_1 pi+ pi0 pi0
       //
       partial_widths["N_pi+_pi0_pi0"] = 0.0;
       if (delta_m > 3*m_pi)
       {
         // Define a helper function
         std::function<double(double)> g = [&m_pi,&m_pi2,&m_rho_0](double q2)
-        { 
+        {
           double res = 0.0;
           if (q2 < pow2(m_rho_0 + m_pi))
             res = 4.1 * pow3(q2-9*m_pi2) * (1. - 3.3*(q2-9*m_pi2) + 5.8*pow2(q2-9*m_pi2));
@@ -2472,12 +2472,12 @@ namespace Gambit
 
         // Integrand
         std::function<double(double)> N_3pi_integrand = [&g,&m_N,&m_C,&m_N2,&m_C2,&O11L,&O11R,&O11L2,&O11R2,&f_pi2,&m_a,&gamma_a](double q2)
-        { 
+        {
           double BW_imag_term = m_a * gamma_a * g(q2)/g(pow2(m_a));
 
-          return sqrt_lambda(m_C2,m_N2,q2) * pow2(std::abs(BW(q2,pow2(m_a),BW_imag_term))) * g(q2) 
+          return sqrt_lambda(m_C2,m_N2,q2) * pow2(std::abs(BW(q2,pow2(m_a),BW_imag_term))) * g(q2)
                    * ( (O11L2 + O11R2)*(m_C2 + m_N2 - 2*q2 + pow2(m_C2-m_N2)/q2 )
-                       - 12*O11L*O11R*m_C*m_N ); 
+                       - 12*O11L*O11R*m_C*m_N );
         };
 
         // Perform integration
@@ -2495,9 +2495,9 @@ namespace Gambit
       partial_widths["N_pi+_pi+_pi-"] = partial_widths["N_pi+_pi0_pi0"];
 
 
-      // 
+      //
       // Store results
-      // 
+      //
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
 
@@ -2586,7 +2586,7 @@ namespace Gambit
     }
 
 
-    /// MSSM decays: stau decays for small stau--neutralino mass splitting. 
+    /// MSSM decays: stau decays for small stau--neutralino mass splitting.
     /// Using results from T. Jittoh, J. Sato, T. Shimomura, M. Yamanaka, Phys. Rev. D73 (2006), hep-ph/0512197
     void stau_1_decays_smallsplit(DecayTable::Entry& result)
     {
@@ -2620,7 +2620,7 @@ namespace Gambit
       // Stau--neutralino mass difference
       double delta_m = m_stau - m_N;
 
-      // If the stau--neutralino mass difference is large, 
+      // If the stau--neutralino mass difference is large,
       // the calculations in this module function should not be used.
       // Return empty result.
       if (delta_m > 2.5)
@@ -2629,9 +2629,9 @@ namespace Gambit
         return;
       }
 
-      // 
+      //
       // Get constants and parameters
-      // 
+      //
 
       // SM parameters
       const double G_F = *Param["GF"];
@@ -2646,7 +2646,7 @@ namespace Gambit
       const double m_pi = meson_masses.pi_plus;
       const double f_pi = meson_decay_constants.pi_plus;
       const double CKM_lambda = *Param["CKM_lambda"];
-      const double costc = 1. - 0.5*pow2(CKM_lambda); // cos(theta_Cabibbo) 
+      const double costc = 1. - 0.5*pow2(CKM_lambda); // cos(theta_Cabibbo)
 
       // MSSM parameters
       const double tanb = mssm.safeget(Par::dimensionless,"tanbeta");
@@ -2666,11 +2666,11 @@ namespace Gambit
       // Map to store partial width results
       std::map<str,double> partial_widths;
 
-      // 
+      //
       // Channel: ~tau_1- --> ~chi0_1 tau-
-      // 
+      //
       std::function<double()> width_N_tau = [&m_stau,&m_N,&m_tau,&gL,&gR]()
-      { 
+      {
         double width = 0.0;
         if (m_stau > m_N + m_tau)
         {
@@ -2684,11 +2684,11 @@ namespace Gambit
       partial_widths["N_tau-"] = width_N_tau();
 
 
-      // 
+      //
       // Channel: ~tau_1- --> ~chi0_1 pi- nutau
-      // 
+      //
       std::function<double()> width_N_pi_nu = [&m_stau,&m_N,&m_tau,&m_pi,&gL,&gR,&w_tau,&G_F,&f_pi,&costc]()
-      { 
+      {
         double width = 0.0;
 
         if (m_stau > m_N + m_pi)
@@ -2709,7 +2709,7 @@ namespace Gambit
 
           // Split integration by hand to avoid pole
           double I;
-          if(dm < m_tau) 
+          if(dm < m_tau)
             I = integrate_cquad(integ_3b, 0, 1, 0, 1e-2);
           else
           {
@@ -2728,11 +2728,11 @@ namespace Gambit
       partial_widths["N_pi-_nutau"] = width_N_pi_nu();
 
 
-      // 
+      //
       // Channel: ~tau_1- --> ~chi0_1 l- nubarl nutau
-      // 
+      //
       std::function<double(double)> width_N_l_nubar_nu = [&m_stau,&m_N,&m_tau,&gL,&gR,&w_tau,&G_F](double m_l)
-      { 
+      {
         double width = 0.0;
 
         if (m_stau > m_N + m_l)
@@ -2753,7 +2753,7 @@ namespace Gambit
 
           // Split integration by hand to avoid pole
           double I;
-          if(dm < m_tau) 
+          if(dm < m_tau)
             I = integrate_cquad(integ_4b, 0, 1, 0, 1e-2);
           else
           {
@@ -2773,9 +2773,9 @@ namespace Gambit
       partial_widths["N_mu-_nubarmu_nutau"] = width_N_l_nubar_nu(m_mu);
 
 
-      // 
+      //
       // Store results
-      // 
+      //
       result.calculator = "GAMBIT::DecayBit";
       result.calculator_version = gambit_version();
 
@@ -3011,14 +3011,14 @@ namespace Gambit
 
           // Create vector with names of all charged partices
           static const std::vector<str> charged_particle_names = {
-            "H+", "~chi+_1", "~chi+_2", 
-            psn.ist1, psn.ist2, 
-            psn.isb1, psn.isb2, 
-            psn.isul, psn.isur, 
-            psn.isdl, psn.isdr, 
-            psn.iscl, psn.iscr, 
-            psn.issl, psn.issr, 
-            psn.isell, psn.iselr, 
+            "H+", "~chi+_1", "~chi+_2",
+            psn.ist1, psn.ist2,
+            psn.isb1, psn.isb2,
+            psn.isul, psn.isur,
+            psn.isdl, psn.isdr,
+            psn.iscl, psn.iscr,
+            psn.issl, psn.issr,
+            psn.isell, psn.iselr,
             psn.ismul, psn.ismur,
             psn.istau1, psn.istau2
           };
@@ -3163,7 +3163,7 @@ namespace Gambit
          @brief Branching fraction for Higgs into pair of lightest neutralinos
 
          @warning Tree-level formulas
-         @warning Assumes decoupling limit for Higgs mixing angle 
+         @warning Assumes decoupling limit for Higgs mixing angle
          \f[
          \alpha = \beta - \frac12 \pi
          \f]
@@ -3199,7 +3199,7 @@ namespace Gambit
       for (int i = 0; i <= 1; i += 1)
       {
         m_pm[i] = spec.get(Par::Pole_Mass, "~chi+", i + 1);
-      }      
+      }
 
       // Chargino mixing matrices
       std::array<std::array<double, 2>, 2> U, V;
@@ -3232,12 +3232,12 @@ namespace Gambit
       {
         DecayBit_error().raise(LOCAL_INFO, e.what());
       }
-      
+
       // SM-like Higgs width
       DecayTable::Entry SM_h;
       compute_SM_higgs_decays(SM_h, mh);
       const double gamma_SM = SM_h.width_in_GeV;
-      
+
       // Width to neutralinos and charginos
       double gamma_chi = 0.;
       try
@@ -3248,7 +3248,7 @@ namespace Gambit
       {
         DecayBit_error().raise(LOCAL_INFO, e.what());
       }
-      
+
       // Total Higgs width
       double gamma_tot = gamma_SM + gamma_chi;
 
@@ -3302,7 +3302,7 @@ namespace Gambit
       lnL = -0.5 * chi2->bind("BR")->eval(BF);
     }
 
-    void lnL_Z_inv_MSSM(double& lnL)
+    void lnL_Z_inv_MSSMlike(double& lnL)
     {
       /**
          @brief Log-likelihood from LEP measurements of \f$Z\f$-boson invisible
@@ -3313,7 +3313,7 @@ namespace Gambit
 
          @param lnL Log-likelihood
       */
-      using namespace Pipes::lnL_Z_inv_MSSM;
+      using namespace Pipes::lnL_Z_inv_MSSMlike;
       const triplet<double> gamma_nu = *Dep::Z_gamma_nu;
       const triplet<double> gamma_chi_0 = *Dep::Z_gamma_chi_0;
       const double gamma_inv = gamma_chi_0.central + gamma_nu.central;
@@ -3339,12 +3339,11 @@ namespace Gambit
       */
       using namespace Pipes::Z_gamma_nu_SM_2l;
 
-      const SubSpectrum& MSSM = Dep::MSSM_spectrum->get_HE();
-      const SMInputs& SM = Dep::MSSM_spectrum->get_SMInputs();
+      const SMInputs& SM = Dep::SM_spectrum->get_SMInputs();
 
       // Construct SM Z two-loop object
-      const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
-      const double MZ = SM.mZ;
+      const double mh_OS = Dep::SM_spectrum->get(Par::Pole_Mass, "h0_1");
+      const double MZ = Dep::SM_spectrum->get(Par::Pole_Mass, "Z0");
       const double delta_alpha = 1. - alpha_e_thomson_limit * SM.alphainv;
       auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha);
 
@@ -3366,9 +3365,9 @@ namespace Gambit
       /**
          @brief Calculate width of \f$Z\f$ decays to the lightest neutralinos,
          \f$\Gamma(Z\to\chi^0_1\chi^0_1)\f$ in GeV
-         
+
          @warning Tree-level formula with 10% error
-         
+
          @param gamma \f$\Gamma(Z\to\chi^0_1\chi^0_1)\f$
       */
       using namespace Pipes::Z_gamma_chi_0_MSSM_tree;
