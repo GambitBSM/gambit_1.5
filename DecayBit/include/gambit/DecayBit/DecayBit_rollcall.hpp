@@ -787,11 +787,10 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION Z_gamma_nu_SM_2l
     START_FUNCTION(triplet<double>)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    DEPENDENCY(SM_spectrum, Spectrum)
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY Z_gamma_chi_0
   START_CAPABILITY
     #define FUNCTION Z_gamma_chi_0_MSSM_tree
@@ -800,18 +799,16 @@ START_MODULE
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY lnL_Z_inv
   START_CAPABILITY
-    #define FUNCTION lnL_Z_inv_MSSM
+    #define FUNCTION lnL_Z_inv_MSSMlike
     START_FUNCTION(double)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
     DEPENDENCY(Z_gamma_nu, triplet<double>)
     DEPENDENCY(Z_gamma_chi_0, triplet<double>)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
- 
+
   #define CAPABILITY lnL_Higgs_invWidth
   START_CAPABILITY
     #define FUNCTION lnL_Higgs_invWidth_SMlike
