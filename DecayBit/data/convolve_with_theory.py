@@ -37,17 +37,17 @@ if __name__ == "__main__":
     FILE_NAME = sys.argv[1]
 
     try:
-        FRAC_ERROR = sys.argv[2]
+        FRAC_ERROR = float(sys.argv[2])
     except IndexError:
         FRAC_ERROR = 0.1
 
     try:
-        MIN = sys.argv[3]
+        MIN = float(sys.argv[3])
     except IndexError:
         MIN = 0.
 
     try:
-        MAX = sys.argv[4]
+        MAX = float(sys.argv[4])
     except IndexError:
         MAX = 1.
 
