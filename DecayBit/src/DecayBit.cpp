@@ -3217,7 +3217,12 @@ namespace Gambit
       const double alpha = beta - 0.5 * pi;
 
       // Higgs invisible width
-      const double gamma_inv = MSSM_H::gamma_h_chi_0(0, 0, m_0, Z, alpha, mh, mw, GF, sw2);
+      double gamma_inv = 0.;
+      try {
+        gamma_inv = MSSM_H::gamma_h_chi_0(0, 0, m_0, Z, alpha, mh, mw, GF, sw2);
+      } catch (const std::invalid_argument& e) {
+        DecayBit_error().raise(LOCAL_INFO, e.what());
+      }
       
       // SM-like Higgs width
       DecayTable::Entry SM_h;
@@ -3225,7 +3230,12 @@ namespace Gambit
       const double gamma_SM = SM_h.width_in_GeV;
       
       // Width to neutralinos and charginos
-      const double gamma_chi = MSSM_H::gamma_h_chi(m_pm, m_0, U, V, Z, alpha, mh, mw, GF, sw2);
+      double gamma_chi = 0.;
+      try {
+        gamma_chi = MSSM_H::gamma_h_chi(m_pm, m_0, U, V, Z, alpha, mh, mw, GF, sw2);
+      } catch (const std::invalid_argument& e) {
+        DecayBit_error().raise(LOCAL_INFO, e.what());
+      }
       
       // Total Higgs width
       double gamma_tot = gamma_SM + gamma_chi;
