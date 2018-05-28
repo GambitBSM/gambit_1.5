@@ -3314,8 +3314,8 @@ namespace Gambit
          @param lnL Log-likelihood
       */
       using namespace Pipes::lnL_Z_inv_MSSM;
-      const auto gamma_nu = *Dep::Z_gamma_nu;
-      const auto gamma_chi_0 = *Dep::Z_gamma_chi_0;
+      const triplet<double> gamma_nu = *Dep::Z_gamma_nu;
+      const triplet<double> gamma_chi_0 = *Dep::Z_gamma_chi_0;
       const double gamma_inv = gamma_chi_0.central + gamma_nu.central;
       // Average + and - errors
       const double tau_nu = 0.5 * (gamma_nu.upper + gamma_nu.lower);
