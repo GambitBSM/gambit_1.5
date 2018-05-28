@@ -950,9 +950,9 @@ namespace Gambit
         /// Use hardcoded values as reccommended by GM2Calc authours
         /// unless the user really wants to change these
         double alpha_MZ = runOptions->getValueOrDef
-        <double>(0.00729735, "GM2Calc_extra_alpha_e_MZ");
+        <double>(0.00775531, "GM2Calc_extra_alpha_e_MZ");
         double alpha_thompson = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
+        <double>(0.00729735, "GM2Calc_extra_alpha_e_thomson_limit");
 
         if (alpha_MZ > std::numeric_limits<double>::epsilon())
           model.set_alpha_MZ(alpha_MZ);
