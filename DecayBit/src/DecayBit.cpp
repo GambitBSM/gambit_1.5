@@ -3179,28 +3179,34 @@ namespace Gambit
 
       // Neutralino masses with phases
       std::array<double, 4> m_0;
-      for (int i = 0; i <= 3; i += 1) {
+      for (int i = 0; i <= 3; i += 1)
+      {
         m_0[i] = spec.get(Par::Pole_Mass, "~chi0", i + 1);
       }
 
       // Neutralino mixing matrix
       std::array<std::array<double, 4>, 4> Z;
-      for (int i = 0; i <= 3; i += 1) {
-        for (int j = 0; j <= 3; j += 1) {
+      for (int i = 0; i <= 3; i += 1)
+      {
+        for (int j = 0; j <= 3; j += 1)
+        {
           Z[i][j] = MSSM.get(Par::Pole_Mixing, "~chi0", i + 1, j + 1);
         }
       }
 
       // Chargino masses
       std::array<double, 2> m_pm;
-      for (int i = 0; i <= 1; i += 1) {
+      for (int i = 0; i <= 1; i += 1)
+      {
         m_pm[i] = spec.get(Par::Pole_Mass, "~chi+", i + 1);
       }      
 
       // Chargino mixing matrices
       std::array<std::array<double, 2>, 2> U, V;
-      for (int i = 0; i <= 1; i += 1) {
-        for (int j = 0; j <= 1; j += 1) {
+      for (int i = 0; i <= 1; i += 1)
+      {
+        for (int j = 0; j <= 1; j += 1)
+        {
           U[i][j] = MSSM.get(Par::Pole_Mixing, "~chi-", i + 1, j + 1);
           V[i][j] = MSSM.get(Par::Pole_Mixing, "~chi+", i + 1, j + 1);
         }
@@ -3218,9 +3224,12 @@ namespace Gambit
 
       // Higgs invisible width
       double gamma_inv = 0.;
-      try {
+      try
+      {
         gamma_inv = MSSM_H::gamma_h_chi_0(0, 0, m_0, Z, alpha, mh, mw, GF, sw2);
-      } catch (const std::invalid_argument& e) {
+      }
+      catch (const std::invalid_argument& e)
+      {
         DecayBit_error().raise(LOCAL_INFO, e.what());
       }
       
@@ -3231,9 +3240,12 @@ namespace Gambit
       
       // Width to neutralinos and charginos
       double gamma_chi = 0.;
-      try {
+      try
+      {
         gamma_chi = MSSM_H::gamma_h_chi(m_pm, m_0, U, V, Z, alpha, mh, mw, GF, sw2);
-      } catch (const std::invalid_argument& e) {
+      }
+      catch (const std::invalid_argument& e)
+      {
         DecayBit_error().raise(LOCAL_INFO, e.what());
       }
       
@@ -3278,7 +3290,8 @@ namespace Gambit
 
       const double BF = *Dep::inv_Higgs_BF;
 
-      if (BF < 0.) {
+      if (BF < 0.)
+      {
         DecayBit_error().raise(LOCAL_INFO, "negative BF");
       }
 
@@ -3337,7 +3350,8 @@ namespace Gambit
       const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
       auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha);
 
-      if (Z.nuisances_outside_ranges()) {
+      if (Z.nuisances_outside_ranges())
+      {
         DecayBit_warning().raise(LOCAL_INFO, "SM nuisance parameters outside "
           "range of validity for two-loop Z formulas. Not accounting for "
           "variation in SM nuisance parameters");
@@ -3367,14 +3381,17 @@ namespace Gambit
 
       // Neutralino masses without phases
       std::array<double, 4> m_0;
-      for (int i = 0; i <= 3; i += 1) {
+      for (int i = 0; i <= 3; i += 1)
+      {
         m_0[i] = std::fabs(spec.get(Par::Pole_Mass, "~chi0", i + 1));
       }
 
       // Neutralino mixing matrix
       std::array<std::array<double, 4>, 4> Z;
-      for (int i = 0; i <= 3; i += 1) {
-        for (int j = 0; j <= 3; j += 1) {
+      for (int i = 0; i <= 3; i += 1)
+      {
+        for (int j = 0; j <= 3; j += 1)
+        {
           Z[i][j] = MSSM.get(Par::Pole_Mixing, "~chi0", i + 1, j + 1);
         }
       }
