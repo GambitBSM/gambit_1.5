@@ -3214,7 +3214,7 @@ namespace Gambit
 
       // SM parameters
       const double mh = MSSM.get(Par::Pole_Mass, "h0_1");
-      const double mw = MSSM.get(Par::Pole_Mass, "W");
+      const double mw = MSSM.get(Par::Pole_Mass, "W+");
       const double GF = SM.GF;
       const double sw2 = MSSM.safeget(Par::dimensionless, "sinW2");
 
