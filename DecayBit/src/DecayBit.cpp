@@ -3252,9 +3252,22 @@ namespace Gambit
          <a href="http://cms-results.web.cern.ch/cms-results/public-results/
          preliminary-results/HIG-17-023/CMS-PAS-HIG-17-023_Figure_007-b.png">
          CMS-PAS-HIG-17-023</a>
-         
-         The data file is specified in the YAML by the
-         `BR_h_inv_chi2_data_file` option.
+
+         There is a a script
+         @code
+         python ./DecayBit/data/convolve_with_theory.py <file> <frac_error> <min> <max>
+         @endcode
+         for convoling a data file with a fractional theory error.
+
+         There are a few data files, e.g.,
+         @code
+         ./DecayBit/data/arXiv_1306.2941_Figure_8.dat
+         ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b.dat
+         ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_theory.dat
+         @endcode
+         The first one is the default. The last one contains a 10% theory
+         uncertainity in the branching fraction. The data file is specified in
+         the YAML by the `BR_h_inv_chi2_data_file` option.
 
          @warning This typically assumes that the Higgs is otherwise SM-like,
          i.e., no changes to production cross sections or any other decays.
