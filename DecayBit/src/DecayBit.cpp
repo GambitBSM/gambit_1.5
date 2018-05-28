@@ -3345,9 +3345,7 @@ namespace Gambit
       // Construct SM Z two-loop object
       const double mh_OS = MSSM.get(Par::Pole_Mass, "h0_1");
       const double MZ = SM.mZ;
-      const double alpha_thompson = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
-      const double delta_alpha = 1. - alpha_thompson * SM.alphainv;
+      const double delta_alpha = 1. - alpha_e_thomson_limit * SM.alphainv;
       auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha);
 
       if (Z.nuisances_outside_ranges())
