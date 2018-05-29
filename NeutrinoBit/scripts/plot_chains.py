@@ -13,10 +13,10 @@ OUTPATH = '/home/ubuntu/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
-        lnL = rhn.lnL[rhn.valid]*0
+        lnL = rhn.lnL*0
         for key in rhn.lnL_partial:
             if not any([tag in key for tag in exclude]):
-                lnL += rhn.lnL_partial[key][rhn.valid]
+                lnL += rhn.lnL_partial[key]
         lnLmax = lnL.max()
         surv = lnLmax-lnL < 0.5*sigma**2
         print "All - excluded:", surv.sum()/len(lnL)
@@ -24,12 +24,12 @@ def show_survival_fraction(rhn, sigma = 2, exclude = []):
         return
 
     for name in rhn.lnL_partial:
-        lnL = rhn.lnL_partial[name][rhn.valid]
+        lnL = rhn.lnL_partial[name]
         lnLmax = lnL.max()
         surv = lnLmax-lnL < 0.5*sigma**2
         print name, surv.sum()/len(lnL)
 
-    lnL = rhn.lnL[rhn.valid]
+    lnL = rhn.lnL
     lnLmax = lnL.max()
     surv = lnLmax-lnL < 0.5*sigma**2
     print "Total (LogLike):", surv.sum()/len(lnL)
@@ -39,9 +39,9 @@ def show_lnL_hist(rhn):
     def f(rhn, name):
         print name
         if name == 'total':
-            lnL = rhn.lnL[rhn.valid]
+            lnL = rhn.lnL
         else:
-            lnL = rhn.lnL_partial[name][rhn.valid]
+            lnL = rhn.lnL_partial[name]
         lnL -= lnL.max()
         plt.clf()
 
@@ -63,8 +63,8 @@ def show_lnL_hist(rhn):
     f(rhn, 'total')
 
 def show_md21(rhn):
-    y = rhn.lnL_partial['lnL_md21'][rhn.valid]
-    x = rhn.md21[rhn.valid]*1e18
+    y = rhn.lnL_partial['lnL_md21']
+    x = rhn.md21*1e18
     plt.clf()
     plt.scatter(x, y, marker = '.')
     plt.xlabel('md21 [eV^2]')
@@ -73,11 +73,11 @@ def show_md21(rhn):
     plt.savefig(OUTPATH + 'lnL_md21.png')
 
 def show_lnL_inv_Z_width(rhn):
-    lnL = rhn.lnL_partial['lnL_Z_inv_width'][rhn.valid]
-    U = rhn.U[rhn.valid]
-    M1 = rhn.M1[rhn.valid]
-    M2 = rhn.M2[rhn.valid]
-    M3 = rhn.M3[rhn.valid]
+    lnL = rhn.lnL_partial['lnL_Z_inv_width']
+    U = rhn.U
+    M1 = rhn.M1
+    M2 = rhn.M2
+    M3 = rhn.M3
 
     plt.subplot(221)
     plt.scatter(np.log10(U), lnL)
@@ -102,21 +102,51 @@ def show_lnL_inv_Z_width(rhn):
     plt.savefig(OUTPATH+"lnL_Z_inv_width.png")
 
 def check_sum(rhn, exclude = []):
-    lnL1 = rhn.lnL[rhn.valid]
+    lnL1 = rhn.lnL
     lnL2 = lnL1*0
     for key in rhn.lnL_partial:
         if not any([tag in key for tag in exclude]):
-            lnL2 += rhn.lnL_partial[key][rhn.valid]
+            lnL2 += rhn.lnL_partial[key]
     print lnL1
     print lnL2
 
+def show_neutrino_masses(rhn):
+    mNu1 = rhn.mNu1*1e9
+    mNu2 = rhn.mNu2*1e9
+    mNu3 = rhn.mNu3*1e9
+    md21 = rhn.md21*1e18
+    md32 = rhn.md32*1e18
+    md31 = rhn.md31*1e18
+
+    plt.clf()
+    plt.subplot(221)
+    plt.scatter(np.log10(mNu1), np.log10(mNu2), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu1), np.log10(mNu3), marker='.', alpha = 0.01, rasterized = True)
+
+    plt.subplot(222)
+    plt.hist(np.log10(mNu1), bins = 200, log=True)
+    plt.hist(np.log10(mNu2), bins = 200, log=True)
+    plt.hist(np.log10(mNu3), bins = 200, log=True)
+
+    plt.subplot(223)
+    plt.scatter(np.log10(mNu1), np.log10(md21), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu1), np.log10(md32), marker='.', alpha = 0.01, rasterized = True)
+
+    plt.subplot(224)
+    plt.hist(np.log10(md21), bins = 200, log=True)
+    plt.hist(np.log10(md32), bins = 200, log=True)
+
+    plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
+
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/chains/RHN_NH_diff_123.hdf5', 'diff', print_keys = False)
+    #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
+    rhn = RHN_Chain('/home/ubuntu/RHN_diff_NH_123_md1e-6.hdf5', print_keys = False)
+    show_neutrino_masses(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)
-    show_survival_fraction(rhn)
-    show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
-    show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
-        'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
+    #show_survival_fraction(rhn)
+    #show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
+    #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
+    #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)
