@@ -109,7 +109,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-7
+      convthresh: 1e-8
       lambdajDE: false
 
     multinest:
