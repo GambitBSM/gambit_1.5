@@ -352,4 +352,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "runs/RHN_full_IH_123/"
+  default_output_path: "runs/RHN_full_IH/"
