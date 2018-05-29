@@ -11,16 +11,29 @@ from read_RHN_chains import *
 
 OUTPATH = '/home/ubuntu/'
 
-def show_survival_fraction(rhn, sigma = 2):
+def show_survival_fraction(rhn, sigma = 2, exclude = []):
+    if len(exclude) > 0:
+        lnL = rhn.lnL[rhn.valid]*0
+        for key in rhn.lnL_partial:
+            if not any([tag in key for tag in exclude]):
+                lnL += rhn.lnL_partial[key][rhn.valid]
+        lnLmax = lnL.max()
+        surv = lnLmax-lnL < 0.5*sigma**2
+        print "All - excluded:", surv.sum()/len(lnL)
+        print "(excluding:", exclude, ")"
+        return
+
     for name in rhn.lnL_partial:
         lnL = rhn.lnL_partial[name][rhn.valid]
         lnLmax = lnL.max()
         surv = lnLmax-lnL < 0.5*sigma**2
         print name, surv.sum()/len(lnL)
+
     lnL = rhn.lnL[rhn.valid]
     lnLmax = lnL.max()
     surv = lnLmax-lnL < 0.5*sigma**2
-    print "Total:", surv.sum()/len(lnL)
+    print "Total (LogLike):", surv.sum()/len(lnL)
+
 
 def show_lnL_hist(rhn):
     def f(rhn, name):
@@ -98,10 +111,12 @@ def check_sum(rhn, exclude = []):
     print lnL2
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/chains/RHN_NH_woZ.hdf5', 'diff', print_keys =
-            False)
+    rhn = RHN_Chain('/home/ubuntu/data/chains/RHN_NH_diff_123.hdf5', 'diff', print_keys = False)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)
-    #show_survival_fraction(rhn)
-    show_lnL_hist(rhn)
+    show_survival_fraction(rhn)
+    show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
+    show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
+        'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
+    #show_lnL_hist(rhn)
