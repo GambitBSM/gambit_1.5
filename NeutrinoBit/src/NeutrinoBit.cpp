@@ -635,12 +635,14 @@ namespace Gambit
 
       if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
-        spline_md21_n = filling_spline("NeutrinoBit/data/DMSn.csv");
+        // Removed highly disfavoured local minima to avoid confusing scans
+        spline_md21_n = filling_spline("NeutrinoBit/data/DMS1n.csv");
         read_table_n = false;
       }
       else if (read_table_i and *Dep::ordering == 0) // inverted odering
       {
-        spline_md21_i = filling_spline("NeutrinoBit/data/DMSi.csv");
+        // Removed highly disfavoured local minima to avoid confusing scans
+        spline_md21_i = filling_spline("NeutrinoBit/data/DMS1i.csv");
         read_table_i = false;
       }
 
