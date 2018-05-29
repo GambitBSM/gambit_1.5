@@ -114,16 +114,27 @@ def show_neutrino_masses(rhn):
     mNu1 = rhn.mNu1*1e9
     mNu2 = rhn.mNu2*1e9
     mNu3 = rhn.mNu3*1e9
+    md21 = rhn.md21*1e18
+    md32 = rhn.md32*1e18
+    md31 = rhn.md31*1e18
 
     plt.clf()
     plt.subplot(221)
-    plt.scatter(mNu1, mNu2, marker='.', alpha = 0.01, rasterized = True)
-    plt.scatter(mNu1, mNu3, marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu1), np.log10(mNu2), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu1), np.log10(mNu3), marker='.', alpha = 0.01, rasterized = True)
 
     plt.subplot(222)
     plt.hist(np.log10(mNu1), bins = 200, log=True)
     plt.hist(np.log10(mNu2), bins = 200, log=True)
     plt.hist(np.log10(mNu3), bins = 200, log=True)
+
+    plt.subplot(223)
+    plt.scatter(np.log10(mNu1), np.log10(md21), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu1), np.log10(md32), marker='.', alpha = 0.01, rasterized = True)
+
+    plt.subplot(224)
+    plt.hist(np.log10(md21), bins = 200, log=True)
+    plt.hist(np.log10(md32), bins = 200, log=True)
 
     plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
 
