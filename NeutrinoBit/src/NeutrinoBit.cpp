@@ -249,18 +249,26 @@ namespace Gambit
       R_12(2,1) = 0.0;
       R_12(2,2) = 1.0;
 
-      std::string order = runOptions->getValueOrDef<std::string>("321", "R_order");
-      if (order == "321")
+      //std::string order = runOptions->getValueOrDef<std::string>("321", "R_order");
+      float Rorder = *Param["Rorder"];
+
+      //if (order == "321")
+      if ((0. <= Rorder) && (Rorder < 1.))
         R = R_23 * R_13 * R_12;
-      if (order == "213")
+      //if (order == "213")
+      if ((1. <= Rorder) && (Rorder < 2.))
         R = R_13 * R_12 * R_23;
-      if (order == "132")
+      //if (order == "132")
+      if ((2. <= Rorder) && (Rorder < 3.))
         R = R_12 * R_23 * R_13;
-      if (order == "231")
+      //if (order == "231")
+      if ((3. <= Rorder) && (Rorder < 4.))
         R = R_13 * R_23 * R_12;
-      if (order == "312")
+      //if (order == "312")
+      if ((4. <= Rorder) && (Rorder < 5.))
         R = R_23 * R_12 * R_13;
-      if (order == "123")
+      //if (order == "123")
+      if ((5. <= Rorder) && (Rorder <= 6.))
         R = R_12 * R_13 * R_23;
 
       if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())

@@ -25,7 +25,7 @@
 #define MODEL RightHandedNeutrinos_diff
 #define PARENT RightHandedNeutrinos
   START_MODEL
-  DEFINEPARS(M_1, delta_M_2, delta_M_3, ReOm23, ImOm23, ReOm13, ImOm13, ReOm12, ImOm12)
+  DEFINEPARS(M_1, delta_M_2, delta_M_3, ReOm23, ImOm23, ReOm13, ImOm13, ReOm12, ImOm12, Rorder)
   INTERPRET_AS_PARENT_FUNCTION(RightHandedNeutrinos_diff_to_RightHandedNeutrinos)
 #undef PARENT
 #undef MODEL
