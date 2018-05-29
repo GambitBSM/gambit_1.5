@@ -3265,7 +3265,7 @@ namespace Gambit
          preliminary-results/HIG-17-023/CMS-PAS-HIG-17-023_Figure_007-b.png">
          CMS-PAS-HIG-17-023</a>
 
-         There is a a script
+         There are scripts
          @code
          python ./DecayBit/data/convolve_with_theory.py <file> <frac_error> <min> <max>
          @endcode
@@ -3279,10 +3279,12 @@ namespace Gambit
          @code
          ./DecayBit/data/arXiv_1306.2941_Figure_8.dat
          ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b.dat
-         ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_theory.dat
+         ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_convolved.dat
+         ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_profiled.dat
          @endcode
-         The first one is the default. The last one is convolved by a 10% theory
-         uncertainty in the branching fraction. The data file is specified in
+         The first one is the default. The third and fourth ones include a 10%
+         theory uncertainty in the branching fraction by convolving it and
+         profiling it, respectively. The data file is specified in
          the YAML by the `BR_h_inv_chi2_data_file` option. The path is
          relative to the GAMBIT directory, `GAMBIT_DIR`.
 
