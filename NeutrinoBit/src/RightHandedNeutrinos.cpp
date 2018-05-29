@@ -19,6 +19,10 @@
 ///          (mchrzasz@cern.ch)
 ///  \date 2018
 ///
+///  \author Julia Harz
+///          (jharz@lpthe.jussieu.fr)
+///  \date 2018 May
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -971,6 +975,8 @@ namespace Gambit
       }
       result = prefactor * abs(sum) * abs(sum);
     }
+    
+    
 
     // Calculate 0nubb half-life [1/yr] for 76Ge 0nubb detector, for right-handed
     // neutrino model
@@ -1025,10 +1031,12 @@ namespace Gambit
     }
 
     // GERDA: Phys. Rev. Lett. 111 (2013) 122503
+    //        Update: Nature 544 (2017) 47
     void lnL_0nubb_GERDA(double& result)
     {
       using namespace Pipes::lnL_0nubb_GERDA;
-      double tau_limit = 2.1e25;  // [yr] 90% CL
+//       double tau_limit = 2.1e25;  // [yr] 90% CL
+      double tau_limit = 5.3e25;  // [yr] 90% CL
 
       double Gamma = *Dep::Gamma_0nubb_Ge;
 
@@ -1043,6 +1051,115 @@ namespace Gambit
       result = *Dep::lnL_0nubb_KamLAND_Zen + *Dep::lnL_0nubb_GERDA;
     }
 
+    // Calculate mbb for 136Xe 0nubb detector, for right-handed
+    // neutrino model
+    // 
+    void RHN_mbb_0nubb_Xe(double& result)
+    {
+      using namespace Pipes::RHN_mbb_0nubb_Xe;
+      double p2_0nubb_Xe;
+      std::vector<double> M(3);
+      std::complex<double> sum = {0.0,0.0};
+
+      // Relevant model parameters
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
+      // A_0nubb_Xe = *Param["A_0nubb_Xe"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
+      // p2_0nubb_Xe = pow(*Param["p_0nubb_Xe"], 2.0);  // Range: 178.0 - 211.0 [MeV]
+
+      // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
+      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(159.0, "p"), 2);
+      p2_0nubb_Xe *= 1e-6;  // MeV^2 --> GeV^2
+      
+      // mbb equation is adopted from Drewes, Eijima 2017, Eq. (14) and following
+      for (int i=0; i<3; i++)
+      {
+        sum+=pow(U_light(0,i),2)*m_light(i,i);
+      }
+      for (int i=0; i<3; i++)
+      {
+        sum+=sum + pow(theta(0,i),2)*M[i]*(p2_0nubb_Xe/(p2_0nubb_Xe + M[i]));
+      }
+      result = abs(sum);
+    } 
+    
+    // Calculate mbb for 136Xe 0nubb detector, for right-handed
+    // neutrino model
+    // 
+    void RHN_mbb_0nubb_Ge(double& result)
+    {
+      using namespace Pipes::RHN_mbb_0nubb_Ge;
+      double p2_0nubb_Ge;
+      std::vector<double> M(3);
+      std::complex<double> sum = {0.0,0.0};
+
+      // Relevant model parameters
+      Matrix3cd m_light = *Dep::m_nu;
+      Matrix3cd U_light = *Dep::UPMNS;
+      Matrix3cd theta = *Dep::SeesawI_Theta;
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+
+      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
+      // A_0nubb_Xe = *Param["A_0nubb_Ge"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
+      // p2_0nubb_Xe = pow(*Param["p_0nubb_Ge"], 2.0);  // Range: 178.0 - 211.0 [MeV]
+
+      // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
+      p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(178.0, "p"), 2);
+      p2_0nubb_Ge *= 1e-6;  // MeV^2 --> GeV^2
+      
+      // mbb equation is adopted from Drewes, Eijima 2017, Eq. (14) and following
+      for (int i=0; i<3; i++)
+      {
+        sum+=pow(U_light(0,i),2)*m_light(i,i);
+      }
+      for (int i=0; i<3; i++)
+      {
+        sum+=sum + pow(theta(0,i),2)*M[i]*(p2_0nubb_Ge/(p2_0nubb_Ge + M[i]));
+      }
+      result = abs(sum);
+    } 
+    
+        // KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503
+    void lnL_mbb_0nubb_KamLAND_Zen(double& result)
+    {
+      using namespace Pipes::lnL_mbb_0nubb_KamLAND_Zen;
+      double mbb_limit = 0.165*1e-9;  // [GeV] mbb < (0.61-0.165)eV at 90% C
+
+      double mbb = *Dep::mbb_0nubb_Xe;
+
+      // Factor 1.28155 corresponds to one-sided UL at 90% CL
+      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
+    }
+
+    // GERDA: Phys. Rev. Lett. 111 (2013) 122503
+    //        Update: Nature 544 (2017) 47
+    void lnL_mbb_0nubb_GERDA(double& result)
+    {
+      using namespace Pipes::lnL_mbb_0nubb_GERDA;
+      double mbb_limit = 0.33*1e-9;  // [GeV] mbb < (0.15-0.33)eV at 90% CL
+
+      double mbb = *Dep::mbb_0nubb_Ge;
+
+      // Factor 1.28155 corresponds to one-sided UL at 90% CL
+      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
+    }
+
+    // Unified 0nubb likelihood
+    void lnL_mbb_0nubb(double &result)
+    {
+      using namespace Pipes::lnL_mbb_0nubb;
+      result = *Dep::lnL_mbb_0nubb_KamLAND_Zen + *Dep::lnL_mbb_0nubb_GERDA;
+    }
+    
+    
     // CKM unitarity constraint: optimize on Vus from Theta [PDG 2016]
     void calc_Vus(double& result_Vus)
     {
