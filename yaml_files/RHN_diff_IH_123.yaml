@@ -3,7 +3,7 @@
 Parameters:
 
   # SM parameters.
-  StandardModel_SLHA2:
+  StandardModel_mNudiff:
     # SLHA1
     alphainv:  1.27940010E+02 # alpha^{-1}(mZ)^MSbar *
     GF      :  1.16637870E-05 # G_Fermi **
@@ -29,15 +29,15 @@ Parameters:
     CKM_rhobar  :  0.117
     CKM_etabar  :  0.353
 
-    mNu1:
-      range: [1E-11, 2.3E-10]
+    mNu_light:
+      range: [1E-6, 1.]
       prior_type: log
-    mNu2:
-      range: [1E-11, 2.3E-10]
-      prior_type: log
-    mNu3:
-      range: [1E-13, 2.3E-10]
-      prior_type: log
+    dmNu21:
+      range: [6e-5, 9e-5]
+      prior_type: flat
+    dmNu3l:
+      range: [-3e-3, -2e-3]
+      prior_type: flat
 
     alpha1:
       range: [0, 6.283]
@@ -107,7 +107,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-5
+      convthresh: 1e-7
       lambdajDE: false
 
     multinest:
@@ -126,7 +126,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnL_Z_inv_width
-    purpose: LogLike
+    purpose: Observable
 
   - capability: lnL_W_decays
     purpose: LogLike
@@ -143,6 +143,18 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnL_0nubb
+    purpose: Observable
+
+  - capability: mbb_0nubb_Xe
+    purpose: Observable
+
+  - capability: mbb_0nubb_Ge
+    purpose: Observable
+
+  - capability: lnL_mbb_0nubb_KamLAND_Zen
+    purpose: LogLike
+
+  - capability: lnL_mbb_0nubb_GERDA
     purpose: LogLike
 
   - capability: lnLckm_Vusmin
@@ -324,7 +336,7 @@ Rules:
     options:
       ordering: 0
 
-  - capability: SeesawI_Theta 
+  - capability: SeesawI_Theta
     options:
       R_order: 123
 
