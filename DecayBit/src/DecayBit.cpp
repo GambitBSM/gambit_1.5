@@ -3279,7 +3279,8 @@ namespace Gambit
          @endcode
          The first one is the default. The last one contains a 10% theory
          uncertainity in the branching fraction. The data file is specified in
-         the YAML by the `BR_h_inv_chi2_data_file` option.
+         the YAML by the `BR_h_inv_chi2_data_file` option. The path is
+         relative to the GAMBIT directory, `GAMBIT_DIR`.
 
          @warning This typically assumes that the Higgs is otherwise SM-like,
          i.e., no changes to production cross sections or any other decays.
@@ -3295,10 +3296,10 @@ namespace Gambit
         DecayBit_error().raise(LOCAL_INFO, "negative BF");
       }
 
-      const std::string default_name = GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat";
+      const std::string default_name = "./DecayBit/data/arXiv_1306.2941_Figure_8.dat";
       const std::string name = runOptions->getValueOrDef<std::string>
         (default_name, "BR_h_inv_chi2_data_file");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(name);
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/" + name);
       lnL = -0.5 * chi2->bind("BR")->eval(BF);
     }
 
