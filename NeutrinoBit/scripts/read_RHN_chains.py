@@ -55,64 +55,59 @@ class RHN_Chain(object):
         self.Ut2 = np.array(group['#Ut2 @NeutrinoBit::Ut2'])
         self.Ut3 = np.array(group['#Ut3 @NeutrinoBit::Ut3'])
 
-        lnL_deltaCP = np.array(group['#deltaCP_lnL @NeutrinoBit::deltaCP_lnL'])
-        lnL_l2lgamma = np.array(group['#l2lgamma_lnL @FlavBit::l2lgamma_likelihood'])
-        lnL_l2lll = np.array(group['#l2lll_lnL @FlavBit::l2lll_likelihood'])
-        lnL_0nubb = np.array(group['#lnL_0nubb @NeutrinoBit::lnL_0nubb'])
-        lnL_W_decays = np.array(group['#lnL_W_decays @PrecisionBit::lnL_W_decays_chi2'])
-        lnL_W_mass = np.array(group['#lnL_W_mass @PrecisionBit::lnL_W_mass_chi2'])
-        lnL_Z_inv_width = np.array(group['#lnL_Z_inv_width @PrecisionBit::lnL_Z_inv_width_chi2'])
-        lnL_bbn = np.array(group['#lnL_bbn @NeutrinoBit::lnL_bbn'])
-        lnL_atlas_e = np.array(group['#lnLatlase @NeutrinoBit::lnL_atlas_e'])
-        lnL_atlas_mu = np.array(group['#lnLatlasmu @NeutrinoBit::lnL_atlas_mu'])
-        lnL_charm_e = np.array(group['#lnLcharme @NeutrinoBit::lnL_charm_e'])
-        lnL_charm_mu = np.array(group['#lnLcharmmu @NeutrinoBit::lnL_charm_mu'])
-        lnL_charm_tau = np.array(group['#lnLcharmtau @NeutrinoBit::lnL_charm_tau'])
-        lnL_ckm = np.array(group['#lnLckm_Vusmin @NeutrinoBit::lnL_ckm_Vusmin'])
-        lnL_delphi_short = np.array(group['#lnLdelphi_shortlived @NeutrinoBit::lnL_delphi_short_lived'])
-        lnL_delphi_long = np.array(group['#lnLdelphi_longlived @NeutrinoBit::lnL_delphi_long_lived'])
-        lnL_e949 = np.array(group['#lnLe949 @NeutrinoBit::lnL_e949'])
-        lnL_lepuniv = np.array(group['#lnLlepuniv @NeutrinoBit::lnL_lepuniv'])
-        lnL_nutev = np.array(group['#lnLnutev @NeutrinoBit::lnL_nutev'])
-        lnL_pienu = np.array(group['#lnLpienu @NeutrinoBit::lnL_pienu'])
-        lnL_ps191_e = np.array(group['#lnLps191e @NeutrinoBit::lnL_ps191_e'])
-        lnL_ps191_mu = np.array(group['#lnLps191mu @NeutrinoBit::lnL_ps191_mu'])
-        lnL_md21 = np.array(group['#md21_lnL @NeutrinoBit::md21_lnL'])
-        lnL_md3l = np.array(group['#md3l_lnL @NeutrinoBit::md3l_lnL'])
-        lnL_mu2e = np.array(group['#mu2e_lnL @FlavBit::mu2e_likelihood'])
-        lnL_pert = np.array(group['#perturbativity_lnL @NeutrinoBit::perturbativity_likelihood'])
-        lnL_sum_mnu = np.array(group['#sum_mnu_lnL @NeutrinoBit::sum_mnu_lnL'])
-        lnL_theta12 = np.array(group['#theta12_lnL @NeutrinoBit::theta12_lnL'])
-        lnL_theta13 = np.array(group['#theta13_lnL @NeutrinoBit::theta13_lnL'])
-        lnL_theta23 = np.array(group['#theta23_lnL @NeutrinoBit::theta23_lnL'])
-        lnL_LUV_LL = np.array(group['#LUV_LL @FlavBit::LUV_likelihood'])
-        lnL_sinW2 = np.array(group['#lnL_sinW2 @PrecisionBit::lnL_sinW2_chi2'])
-        lnL_lhce = np.array(group['#lnLlhce @NeutrinoBit::lnL_lhc_e'])
-        lnL_lhcmu = np.array(group['#lnLlhcmu @NeutrinoBit::lnL_lhc_mu'])
-
-        #LHC
-
-        lnL_list = [lnL_deltaCP, lnL_l2lgamma, lnL_l2lll, lnL_0nubb,
-                lnL_W_decays, lnL_W_mass, lnL_Z_inv_width, lnL_bbn,
-                lnL_atlas_e, lnL_atlas_mu, lnL_charm_e, lnL_charm_mu,
-                lnL_charm_tau, lnL_ckm, lnL_delphi_short, lnL_delphi_long, lnL_e949, lnL_lepuniv,
-                lnL_nutev, lnL_pienu, lnL_ps191_e, lnL_ps191_mu, lnL_md21,
-                lnL_md3l, lnL_mu2e, lnL_pert, lnL_sum_mnu, lnL_theta12,
-                lnL_theta13, lnL_theta23, lnL_LUV_LL, lnL_sinW2, lnL_lhce,
-                lnL_lhcmu]
+        lnL_tags = [
+            '#deltaCP_lnL @NeutrinoBit::deltaCP_lnL',
+            '#l2lgamma_lnL @FlavBit::l2lgamma_likelihood',
+            '#l2lll_lnL @FlavBit::l2lll_likelihood',
+            '#lnL_0nubb @NeutrinoBit::lnL_0nubb',
+            '#lnL_W_decays @PrecisionBit::lnL_W_decays_chi2',
+            '#lnL_W_mass @PrecisionBit::lnL_W_mass_chi2',
+            '#lnL_Z_inv_width @PrecisionBit::lnL_Z_inv_width_chi2',
+            '#lnL_bbn @NeutrinoBit::lnL_bbn',
+            '#lnLatlase @NeutrinoBit::lnL_atlas_e',
+            '#lnLatlasmu @NeutrinoBit::lnL_atlas_mu',
+            '#lnLcharme @NeutrinoBit::lnL_charm_e',
+            '#lnLcharmmu @NeutrinoBit::lnL_charm_mu',
+            '#lnLcharmtau @NeutrinoBit::lnL_charm_tau',
+            '#lnLckm_Vusmin @NeutrinoBit::lnL_ckm_Vusmin',
+            '#lnLdelphi @NeutrinoBit::lnL_delphi',
+            '#lnLdelphi_shortlived @NeutrinoBit::lnL_delphi_short_lived',
+            '#lnLdelphi_longlived @NeutrinoBit::lnL_delphi_long_lived',
+            '#lnLe949 @NeutrinoBit::lnL_e949',
+            '#lnLlepuniv @NeutrinoBit::lnL_lepuniv',
+            '#lnLnutev @NeutrinoBit::lnL_nutev',
+            '#lnLpienu @NeutrinoBit::lnL_pienu',
+            '#lnLps191e @NeutrinoBit::lnL_ps191_e',
+            '#lnLps191mu @NeutrinoBit::lnL_ps191_mu',
+            '#md21_lnL @NeutrinoBit::md21_lnL',
+            '#md3l_lnL @NeutrinoBit::md3l_lnL',
+            '#mu2e_lnL @FlavBit::mu2e_likelihood',
+            '#perturbativity_lnL @NeutrinoBit::perturbativity_likelihood',
+            '#sum_mnu_lnL @NeutrinoBit::sum_mnu_lnL',
+            '#theta12_lnL @NeutrinoBit::theta12_lnL',
+            '#theta13_lnL @NeutrinoBit::theta13_lnL',
+            '#theta23_lnL @NeutrinoBit::theta23_lnL',
+            '#LUV_LL @FlavBit::LUV_likelihood',
+            '#lnL_sinW2 @PrecisionBit::lnL_sinW2_chi2',
+            '#lnLlhce @NeutrinoBit::lnL_lhc_e',
+            '#lnLlhcmu @NeutrinoBit::lnL_lhc_mu']
 
         lnL_names = ["lnL_deltaCP", "lnL_l2lgamma", "lnL_l2lll", "lnL_0nubb",
                "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv_width", "lnL_bbn",
                "lnL_atlas_e", "lnL_atlas_mu", "lnL_charm_e", "lnL_charm_mu",
-               "lnL_charm_tau", "lnL_ckm", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",
+               "lnL_charm_tau", "lnL_ckm", "lnL_delphi", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",
                "lnL_lepuniv", "lnL_nutev", "lnL_pienu", "lnL_ps191_e",
                "lnL_ps191_mu", "lnL_md21", "lnL_md3l", "lnL_mu2e", "lnL_pert",
                "lnL_sum_mnu", "lnL_theta12", "lnL_theta13", "lnL_theta23",
                "lnL_LUV_LL", "lnL_sinW2", "lnL_lhce", "lnL_lhcmu"]
 
         self.lnL_partial = {}
-        for n, l in zip(lnL_names, lnL_list):
-            self.lnL_partial[n] = l
+        for tag, name in zip(lnL_tags, lnL_names):
+            try:
+                self.lnL_partial[name] = np.array(group[tag])
+            except KeyError:
+                print "WARNING: Did not find", name
+                pass
 
         self.lnL = np.array(group['LogLike'])
 
