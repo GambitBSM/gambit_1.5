@@ -7,17 +7,16 @@ import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
 
-OUTPATH = '/home/cweniger/'
-
 class RHN_Chain(object):
-    def __init__(self, INFILE, MODEL):
+    def __init__(self, INFILE, MODEL, print_keys = False):
         print "Reading %s..."%INFILE
         root = h5py.File(INFILE)
         group = root["RHN"]
 
-        #for key in group.keys():
-        #    print key
-        #quit()
+        if print_keys:
+            for key in group.keys():
+                print key
+            quit()
 
         if MODEL == 'diff':
             self.M1 = np.array(group['#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::M_1'])
@@ -70,7 +69,8 @@ class RHN_Chain(object):
         lnL_charm_mu = np.array(group['#lnLcharmmu @NeutrinoBit::lnL_charm_mu'])
         lnL_charm_tau = np.array(group['#lnLcharmtau @NeutrinoBit::lnL_charm_tau'])
         lnL_ckm = np.array(group['#lnLckm_Vusmin @NeutrinoBit::lnL_ckm_Vusmin'])
-        lnL_delphi = np.array(group['#lnLdelphi @NeutrinoBit::lnL_delphi'])
+        lnL_delphi_short = np.array(group['#lnLdelphi_shortlived @NeutrinoBit::lnL_delphi_short_lived'])
+        lnL_delphi_long = np.array(group['#lnLdelphi_longlived @NeutrinoBit::lnL_delphi_long_lived'])
         lnL_e949 = np.array(group['#lnLe949 @NeutrinoBit::lnL_e949'])
         lnL_lepuniv = np.array(group['#lnLlepuniv @NeutrinoBit::lnL_lepuniv'])
         lnL_nutev = np.array(group['#lnLnutev @NeutrinoBit::lnL_nutev'])
@@ -87,30 +87,34 @@ class RHN_Chain(object):
         lnL_theta23 = np.array(group['#theta23_lnL @NeutrinoBit::theta23_lnL'])
         lnL_LUV_LL = np.array(group['#LUV_LL @FlavBit::LUV_likelihood'])
         lnL_sinW2 = np.array(group['#lnL_sinW2 @PrecisionBit::lnL_sinW2_chi2'])
+        lnL_lhce = np.array(group['#lnLlhce @NeutrinoBit::lnL_lhc_e'])
+        lnL_lhcmu = np.array(group['#lnLlhcmu @NeutrinoBit::lnL_lhc_mu'])
+
+        #LHC
 
         lnL_list = [lnL_deltaCP, lnL_l2lgamma, lnL_l2lll, lnL_0nubb,
                 lnL_W_decays, lnL_W_mass, lnL_Z_inv_width, lnL_bbn,
                 lnL_atlas_e, lnL_atlas_mu, lnL_charm_e, lnL_charm_mu,
-                lnL_charm_tau, lnL_ckm, lnL_delphi, lnL_e949, lnL_lepuniv,
+                lnL_charm_tau, lnL_ckm, lnL_delphi_short, lnL_delphi_long, lnL_e949, lnL_lepuniv,
                 lnL_nutev, lnL_pienu, lnL_ps191_e, lnL_ps191_mu, lnL_md21,
                 lnL_md3l, lnL_mu2e, lnL_pert, lnL_sum_mnu, lnL_theta12,
-                lnL_theta13, lnL_theta23, lnL_LUV_LL, lnL_sinW2]
+                lnL_theta13, lnL_theta23, lnL_LUV_LL, lnL_sinW2, lnL_lhce,
+                lnL_lhcmu]
 
         lnL_names = ["lnL_deltaCP", "lnL_l2lgamma", "lnL_l2lll", "lnL_0nubb",
                "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv_width", "lnL_bbn",
                "lnL_atlas_e", "lnL_atlas_mu", "lnL_charm_e", "lnL_charm_mu",
-               "lnL_charm_tau", "lnL_ckm", "lnL_delphi", "lnL_e949",
+               "lnL_charm_tau", "lnL_ckm", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",
                "lnL_lepuniv", "lnL_nutev", "lnL_pienu", "lnL_ps191_e",
                "lnL_ps191_mu", "lnL_md21", "lnL_md3l", "lnL_mu2e", "lnL_pert",
                "lnL_sum_mnu", "lnL_theta12", "lnL_theta13", "lnL_theta23",
-               "lnL_LUV_LL", "lnL_sinW2"]
+               "lnL_LUV_LL", "lnL_sinW2", "lnL_lhce", "lnL_lhcmu"]
 
         self.lnL_partial = {}
         for n, l in zip(lnL_names, lnL_list):
             self.lnL_partial[n] = l
 
         self.lnL = np.array(group['LogLike'])
-        self.lnL_sum = sum(lnL_list)
 
         self.valid = np.array(group['LogLike_isvalid'], dtype = 'bool')
 
@@ -137,25 +141,3 @@ class RHN_Chain(object):
         print "Number of valid points within 2 sigma: %i"%self.mask2sigma.sum()
         print "Number of valid points within 2 sigma (fraction): %.1e"%(self.mask2sigma.sum()/len(self.valid))
 
-def show_survival_fraction(rhn, sigma = 2):
-    for name in rhn.lnL_partial:
-        lnL = rhn.lnL_partial[name][rhn.valid]
-        lnLmax = lnL.max()
-        surv = lnLmax-lnL < 0.5*sigma**2
-        print name, surv.sum()/len(lnL)
-
-def show_lnL_hist(rhn, name):
-    lnL = rhn.lnL_partial[name][rhn.valid]
-    lnL -= lnL.max()
-    plt.clf()
-    plt.xlabel("renormalized lnL")
-    plt.title(name)
-    plt.hist(lnL, log=True, bins = 100)
-    plt.savefig(OUTPATH + 'hist_'+name+'.pdf')
-
-if __name__ == "__main__":
-    rhn = RHN_Chain('/home/cweniger/hdf5/chains/NH_diff.hdf5', 'diff')
-    #show_survival_fraction(rhn)
-    for name in rhn.lnL_partial:
-        print name
-        show_lnL_hist(rhn, name)
