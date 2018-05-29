@@ -3459,6 +3459,21 @@ lnL_0nubb_KamLAND_Zen: |
 
 lnL_0nubb: |
   Log-likelihood for all neutrinoless double beta decay experiments
+  
+mbb_0nubb_Ge: |
+  effective neutrino mass (mbetabeta) from neutrinoless double beta for 76Ge detector
+
+mbb_0nubb_Xe: |
+  effective neutrino mass (mbetabeta) from neutrinoless double beta for 136Xe detector
+
+lnL_mbb_0nubb_GERDA: |
+  Log-likelihood for the effective neutrino mass (mbetabeta) for the 76Ge detector
+
+lnL_mbb_0nubb_KamLAND_Zen: |
+  Log-likelihood for the effective neutrino mass (mbetabeta) for the 136Xe detector
+
+lnL_mbb_0nubb: |
+  Log-likelihood for the effective neutrino mass (mbetabeta) for the 136Xe detector and 76Ge detector
  
 lnLatlase: |
   Log-likelihood for direct searches of right-handed neutrinos in the ATLAS experiment in the electron sector
