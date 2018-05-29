@@ -600,6 +600,53 @@ START_MODULE
     DEPENDENCY(lnL_0nubb_GERDA, double)
     #undef FUNCTION
   #undef CAPABILITY
+    
+  #define CAPABILITY mbb_0nubb_Xe
+  START_CAPABILITY
+    #define FUNCTION RHN_mbb_0nubb_Xe
+    START_FUNCTION(double)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_mbb_0nubb_KamLAND_Zen
+  START_CAPABILITY
+    #define FUNCTION lnL_mbb_0nubb_KamLAND_Zen
+    START_FUNCTION(double)
+    DEPENDENCY(mbb_0nubb_Xe, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY mbb_0nubb_Ge
+  START_CAPABILITY
+    #define FUNCTION RHN_mbb_0nubb_Ge
+    START_FUNCTION(double)
+    DEPENDENCY(m_nu, Eigen::Matrix3cd)
+    DEPENDENCY(UPMNS, Eigen::Matrix3cd)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_mbb_0nubb_GERDA
+  START_CAPABILITY
+    #define FUNCTION lnL_mbb_0nubb_GERDA
+    START_FUNCTION(double)
+    DEPENDENCY(mbb_0nubb_Ge, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_mbb_0nubb
+  START_CAPABILITY
+    #define FUNCTION lnL_mbb_0nubb
+    START_FUNCTION(double) 
+    DEPENDENCY(lnL_mbb_0nubb_KamLAND_Zen, double)
+    DEPENDENCY(lnL_mbb_0nubb_GERDA, double)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY calc_Vus
   START_CAPABILITY
