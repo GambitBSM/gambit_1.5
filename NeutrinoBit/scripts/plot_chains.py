@@ -149,10 +149,15 @@ def show_neutrino_masses(rhn):
 
     plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
 
+def show_Rorder(rhn):
+    plt.scatter(rhn.Rorder, np.log10(rhn.Ue1), marker='.', rasterized = True)
+    plt.savefig(OUTPATH+"Rorder.pdf", dpi = 200)
+
 if __name__ == "__main__":
     #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
-    rhn = RHN_Chain('/home/ubuntu/RHN_diff_IH_123_md1e-5.hdf5', print_keys = False)
-    show_neutrino_masses(rhn)
+    rhn = RHN_Chain('/home/ubuntu/RHN_diff_NH.hdf5', print_keys = False)
+    #show_neutrino_masses(rhn)
+    show_Rorder(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)
