@@ -25,6 +25,10 @@ class RHN_Chain(object):
                 print key
             quit()
 
+        SM_mode = 'mNudiff' if any(['mNudiff' in key for key in group.keys()]) else 'SLHA2'
+        print SM_mode
+        quit()
+
         if MODEL == 'diff':
             self.M1 = np.array(group['#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::M_1'])
             self.dM2 = np.array(group['#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::delta_M_2'])
