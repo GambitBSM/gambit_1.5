@@ -3269,7 +3269,7 @@ namespace Gambit
          @code
          python ./DecayBit/data/convolve_with_theory.py <file> <frac_error> <min> <max>
          @endcode
-         for convoling a data file with a fractional theory error, and
+         for convolving a data file with a fractional theory error, and
          @code
          python ./DecayBit/data/profile_theory.py <file> <frac_error> <min> <max>
          @endcode
@@ -3282,7 +3282,7 @@ namespace Gambit
          ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_theory.dat
          @endcode
          The first one is the default. The last one is convolved by a 10% theory
-         uncertainity in the branching fraction. The data file is specified in
+         uncertainty in the branching fraction. The data file is specified in
          the YAML by the `BR_h_inv_chi2_data_file` option. The path is
          relative to the GAMBIT directory, `GAMBIT_DIR`.
 
