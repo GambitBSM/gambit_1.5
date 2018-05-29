@@ -117,11 +117,22 @@ def show_neutrino_masses(rhn):
     md21 = rhn.md21*1e18
     md32 = rhn.md32*1e18
     md31 = rhn.md31*1e18
+    md3l = np.where(md32 > 0, md32, md31)
+    mNu_1st = np.minimum(mNu1, mNu3)
+    mNu_2nd = np.where(mNu1 < mNu3, mNu2, mNu1)
+    mNu_3rd = np.where(mNu1 < mNu3, mNu3, mNu2)
+
+    #print (mNu2**2-mNu1**2).min()
+    #print (mNu2**2-mNu1**2).max()
+    #print (mNu3**2-mNu1**2).min()
+    #print (mNu3**2-mNu1**2).max()
+    #print (mNu3**2-mNu2**2).min()
+    #print (mNu3**2-mNu2**2).max()
 
     plt.clf()
     plt.subplot(221)
-    plt.scatter(np.log10(mNu1), np.log10(mNu2), marker='.', alpha = 0.01, rasterized = True)
-    plt.scatter(np.log10(mNu1), np.log10(mNu3), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu_1st), np.log10(mNu_2nd), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu_1st), np.log10(mNu_3rd), marker='.', alpha = 0.01, rasterized = True)
 
     plt.subplot(222)
     plt.hist(np.log10(mNu1), bins = 200, log=True)
@@ -129,18 +140,18 @@ def show_neutrino_masses(rhn):
     plt.hist(np.log10(mNu3), bins = 200, log=True)
 
     plt.subplot(223)
-    plt.scatter(np.log10(mNu1), np.log10(md21), marker='.', alpha = 0.01, rasterized = True)
-    plt.scatter(np.log10(mNu1), np.log10(md32), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu_1st), np.log10(md21), marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(np.log10(mNu_1st), np.log10(abs(md3l)), marker='.', alpha = 0.01, rasterized = True)
 
     plt.subplot(224)
     plt.hist(np.log10(md21), bins = 200, log=True)
-    plt.hist(np.log10(md32), bins = 200, log=True)
+    plt.hist(np.log10(abs(md3l)), bins = 200, log=True)
 
     plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
 
 if __name__ == "__main__":
     #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
-    rhn = RHN_Chain('/home/ubuntu/RHN_diff_NH_123_md1e-6.hdf5', print_keys = False)
+    rhn = RHN_Chain('/home/ubuntu/RHN_diff_IH_123_md1e-5.hdf5', print_keys = False)
     show_neutrino_masses(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)

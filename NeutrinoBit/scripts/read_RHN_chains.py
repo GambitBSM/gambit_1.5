@@ -141,7 +141,7 @@ class RHN_Chain(object):
             dmNu3l = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::dmNu3l')
             self.mNu1 = np.where(dmNu3l > 0, mNu_light, (mNu_light**2 + abs(dmNu3l))**0.5)*1e-9
             self.mNu2 = np.where(dmNu3l > 0, (mNu_light**2 + dmNu21)**0.5, (mNu_light**2 + abs(dmNu3l) + dmNu21)**0.5)*1e-9
-            self.mNu3 = np.where(dmNu3l > 0, (mNu_light**2 + dmNu21 + dmNu3l)**0.5, mNu_light)*1e-9
+            self.mNu3 = np.where(dmNu3l > 0, (mNu_light**2 + dmNu21 + abs(dmNu3l))**0.5, mNu_light)*1e-9
         else:
             raise KeyError()
             
