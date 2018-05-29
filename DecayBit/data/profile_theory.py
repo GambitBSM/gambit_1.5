@@ -1,5 +1,12 @@
+#!/usr/bin/env python
 """
 Profile a chi-squared in a data file with a fractional theory error
+===================================================================
+
+python profile_theory.py <file> <frac-error> <min> <max>
+
+prints (parameter, profiled chi-squared) from a file containing
+(parameter, chi-squared).
 """
 
 import sys
@@ -11,6 +18,15 @@ from scipy.optimize import minimize_scalar
 def profile(file_name, frac_error=0.1, min_=0., max_=1.):
     """
     Profile a chi-squared in a data file with a fractional theory error
+
+    Args:
+        file_name (str): Data file with columns (parameter, chi-squared).
+        frac_error (float, optional): Fractional theory error on the parameter.
+        min_ (float, optional): Minimum value of parameter.
+        max_ (float, optional): Maximum value of parameter.
+
+    Returns:
+        list(tuples): List of (parameter, profiled chi-squared)
     """
     # Unpack data
     param, chi_squared_ = np.loadtxt(file_name, unpack=True)
@@ -32,22 +48,12 @@ def profile(file_name, frac_error=0.1, min_=0., max_=1.):
 
 if __name__ == "__main__":
 
-    FILE_NAME = sys.argv[1]
-
     try:
-        FRAC_ERROR = float(sys.argv[2])
+        FILE_NAME = sys.argv[1]
     except IndexError:
-        FRAC_ERROR = 0.1
+        raise RuntimeError(__doc__)
 
-    try:
-        MIN = float(sys.argv[3])
-    except IndexError:
-        MIN = 0.
+    ARGS = map(float, sys.argv[2:])
 
-    try:
-        MAX = float(sys.argv[4])
-    except IndexError:
-        MAX = 1.
-
-    for p, c in profile(FILE_NAME, FRAC_ERROR, MIN, MAX):
+    for p, c in profile(FILE_NAME, *ARGS):
         print p, c
