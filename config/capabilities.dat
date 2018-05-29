@@ -374,25 +374,46 @@ ATLASSmearedEvent: |
    Uses the given SimpleSmearingSim to apply smearing and
    reconstruction efficiencies upon the given HardScatteringEvent.
 
+ATLASnoeffSmearedEvent: |
+   Uses the given SimpleSmearingSim to apply smearing upon the 
+   given HardScatteringEvent. No efficiencies are applied.
+
 CMSSmearedEvent: |
    Uses the given SimpleSmearingSim to apply smearing and
    reconstruction efficiencies upon the given HardScatteringEvent.
+
+CMSnoeffSmearedEvent: |
+   Uses the given SimpleSmearingSim to apply smearing upon the 
+   given HardScatteringEvent. No efficiencies are applied.
 
 CopiedEvent: |
    Uses the given SimpleSmearingSim to do absolutely nothing to
    the given HardScatteringEvent.
 
 ATLASAnalysisContainer: |
-   Provides a list of ATLAS analyses within a container which is ready
-   to apply each analysis to an event.
+   Provides a container of ATLAS analyses to be used with the detector simulation
+   capability ATLASSmearedEvent. The container is ready to apply each analysis to 
+   each event.
+
+ATLASnoeffAnalysisContainer: |
+   Provides a container of ATLAS analyses to be used with the detector simulation
+   capability ATLASnoeffSmearedEvent. The container is ready to apply each analysis to 
+   each event.
 
 CMSAnalysisContainer: |
-   Provides a list of CMS analyses within a container which is ready
-   to apply each analysis to an event.
+   Provides a container of CMS analyses to be used with the detector simulation
+   capability CMSSmearedEvent. The container is ready to apply each analysis to 
+   each event.
+
+CMSnoeffAnalysisContainer: |
+   Provides a container of CMS analyses to be used with the detector simulation
+   capability CMSnoeffSmearedEvent. The container is ready to apply each analysis to 
+   each event.
 
 DetAnalysisContainer: |
-   Provides a list of Delphes analyses within a container which is ready
-   to apply each analysis to an event.
+   Provides a container of analyses to be used with the detector simulation
+   capability DetectorSim (Delphes). The container is ready to apply each 
+   analysis to each event.
 
 IdentityAnalysisContainer: |
    Provides a list of “identity” analyses (no detector
@@ -403,8 +424,16 @@ ATLASAnalysisNumbers: |
    Uses the given ATLASAnalysisContainer to perform all its
    analyses upon the given ATLASSmearedEvent.
 
+ATLASnoeffAnalysisNumbers: |
+   Uses the given ATLASnoeffAnalysisContainer to perform all its
+   analyses upon the given ATLASSmearedEvent.
+
 CMSAnalysisNumbers: |
    Uses the given CMSAnalysisContainer to perform all its analyses
+   upon the given CMSSmearedEvent.
+
+CMSnoeffAnalysisNumbers: |
+   Uses the given CMSnoeffAnalysisContainer to perform all its analyses
    upon the given CMSSmearedEvent.
 
 DetAnalysisNumbers: |
