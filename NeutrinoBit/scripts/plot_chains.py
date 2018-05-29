@@ -9,7 +9,7 @@ import pylab as plt
 
 from read_RHN_chains import *
 
-OUTPATH = '/home/cweniger/'
+OUTPATH = '/home/ubuntu/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
@@ -117,19 +117,19 @@ def show_neutrino_masses(rhn):
 
     plt.clf()
     plt.subplot(221)
-    plt.scatter(mNu1, mNu2, marker='.')
-    plt.scatter(mNu1, mNu3, marker='.')
+    plt.scatter(mNu1, mNu2, marker='.', alpha = 0.01, rasterized = True)
+    plt.scatter(mNu1, mNu3, marker='.', alpha = 0.01, rasterized = True)
 
     plt.subplot(222)
     plt.hist(np.log10(mNu1), bins = 200, log=True)
     plt.hist(np.log10(mNu2), bins = 200, log=True)
     plt.hist(np.log10(mNu3), bins = 200, log=True)
 
-    plt.savefig(OUTPATH+"mNu.png")
+    plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5',
-            print_keys = False)
+    #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
+    rhn = RHN_Chain('/home/ubuntu/RHN_diff_NH_123_md1e-6.hdf5', print_keys = False)
     show_neutrino_masses(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)

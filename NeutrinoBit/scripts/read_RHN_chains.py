@@ -26,8 +26,6 @@ class RHN_Chain(object):
             quit()
 
         SM_mode = 'mNudiff' if any(['mNudiff' in key for key in group.keys()]) else 'SLHA2'
-        print SM_mode
-        quit()
 
         valid = np.array(group['LogLike_isvalid'], dtype = 'bool')
         def get_data(tag):
@@ -133,11 +131,22 @@ class RHN_Chain(object):
         self.U3 = self.Ue3 + self.Um3 + self.Ut3
         self.U = self.U1 + self.U2 + self.U3
 
-        self.mNu1 = get_data('#StandardModel_SLHA2_parameters @StandardModel_SLHA2::primary_parameters::mNu1')
-        self.mNu2 = get_data('#StandardModel_SLHA2_parameters @StandardModel_SLHA2::primary_parameters::mNu2')
-        self.mNu3 = get_data('#StandardModel_SLHA2_parameters @StandardModel_SLHA2::primary_parameters::mNu3')
-        self.mMin = np.minimum(np.minimum(self.mNu1, self.mNu2), self.mNu3)
+        if SM_mode == 'SLHA2':
+            self.mNu1 = get_data('#StandardModel_SLHA2_parameters @StandardModel_SLHA2::primary_parameters::mNu1')
+            self.mNu2 = get_data('#StandardModel_SLHA2_parameters @StandardModel_SLHA2::primary_parameters::mNu2')
+            self.mNu3 = get_data('#StandardModel_SLHA2_parameters @StandardModel_SLHA2::primary_parameters::mNu3')
+        elif SM_mode == 'mNudiff':
+            mNu_light = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::mNu_light')
+            dmNu21 = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::dmNu21')
+            dmNu3l = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::dmNu3l')
+            self.mNu1 = np.where(dmNu3l > 0, mNu_light, (mNu_light**2 + abs(dmNu3l))**0.5)
+            self.mNu2 = np.where(dmNu3l > 0, (mNu_light**2 + dmNu21)**0.5, (mNu_light**2 + abs(dmNu3l) + dmNu21)**0.5)
+            self.mNu3 = np.where(dmNu3l > 0, (mNu_light**2 + dmNu21 + dmNu3l)**0.5, mNu_light)
+        else:
+            raise KeyError()
+            
 
+        self.mMin = np.minimum(np.minimum(self.mNu1, self.mNu2), self.mNu3)
         self.md21 = get_data('#md21 @NeutrinoBit::md21')
         self.md31 = get_data('#md31 @NeutrinoBit::md31')
         self.md32 = get_data('#md32 @NeutrinoBit::md32')
