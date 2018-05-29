@@ -8,8 +8,15 @@ matplotlib.use('Agg')
 import pylab as plt
 
 class RHN_Chain(object):
-    def __init__(self, INFILE, MODEL, print_keys = False):
+    def __init__(self, INFILE, MODEL = 'auto', print_keys = False):
         print "Reading %s..."%INFILE
+        if MODEL == 'auto':
+            if 'diff' in INFILE:
+                MODEL = 'diff'
+            elif 'full' in INFILE:
+                MODEL = 'full'
+            else:
+                raise KeyError("Model not known.")
         root = h5py.File(INFILE)
         group = root["RHN"]
 
