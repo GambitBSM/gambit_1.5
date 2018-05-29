@@ -50,8 +50,11 @@
 #ifndef __StandardModel_mNudiff_hpp__
 #define __StandardModel_mNudiff_hpp__
 
+#include "gambit/Models/models/StandardModel_SLHA2.hpp"
+
 // Standard Model parameterisation in SLHA2 conventions
 #define MODEL StandardModel_mNudiff
+#define PARENT StandardModel_SLHA2
   START_MODEL
 
   DEFINEPARS(alphainv, GF, alphaS) // 1,2,3
@@ -71,10 +74,8 @@
   DEFINEPARS(theta12, theta23, theta13)
   DEFINEPARS(delta13, alpha1, alpha2)
 
- #undef MODEL
+  INTERPRET_AS_PARENT_FUNCTION(StandardModel_mNudiff_to_StandardModel_SLHA2)
+
+#undef PARENT
+#undef MODEL
 #endif 
-
-
-
-
-

@@ -20,9 +20,8 @@
 
 #include "gambit/Models/models/StandardModel_mNudiff.hpp"
 
-
 #define MODEL StandardModel_mNudiff
-  void MODEL_NAMESPACE::StandardModel_SLHA2_to_StandardModel_mNudiff (const ModelParameters &myP, ModelParameters &targetP)
+  void MODEL_NAMESPACE::StandardModel_mNudiff_to_StandardModel_SLHA2 (const ModelParameters &myP, ModelParameters &targetP)
   {
 
      logger()<<"Running interpret_as_parent calculations for StandardModel_mNudiff --> StandardModel_SLHA2."<<LogTags::info<<EOM;
@@ -31,23 +30,21 @@
      // Ignore that some parameters don't exist in the parent, as these are set below.
      targetP.setValues(myP,false);
 
-     // M2
-
      if (myP["dmNu3l"] > 0.)  // normal hierarchy, l = 2
      {
-       targetP.setValue("mNu1", myP["mNu_light"]);
+       targetP.setValue("mNu1", myP["mNu_light"]*1e-9);
        targetP.setValue("mNu2",
-           pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu21"], 0.5));
+           pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu21"], 0.5)*1e-9);
        targetP.setValue("mNu3",
-           pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu3l"]+myP["dmNu21"], 0.5));
+           pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu3l"]+myP["dmNu21"], 0.5)*1e-9);
      }
      else // inverted hierarchy, l = 1
      {
-       targetP.setValue("mNu3", myP["mNu_light"]);
+       targetP.setValue("mNu3", myP["mNu_light"]*1e-9);
        targetP.setValue("mNu1",
-           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"], 0.5));
+           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"], 0.5)*1e-9);
        targetP.setValue("mNu2",
-           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"]+myP["dmNu21"], 0.5));
+           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"]+myP["dmNu21"], 0.5)*1e-9);
      }
   }
 
