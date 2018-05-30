@@ -236,14 +236,73 @@ def show_0nubb_impact(rhn):
 
     plt.savefig(OUTPATH+"U_vs_M_0nubb.pdf")
 
+def show_phases(rhn):
+    plt.scatter(np.angle(rhn.ue1), np.angle(rhn.um1), rasterized = True, marker='.')
+    plt.savefig(OUTPATH+"angles.pdf")
+
+def show_mbb(rhn):
+    lnL = rhn.lnL
+    U = rhn.U
+    mask = (lnL.max() - lnL < 2) & (U < 1e-10)
+    print mask.sum()
+    mbb = rhn.mbb*1e9
+    mMin = rhn.mMin*1e9
+    plt.scatter(np.log10(mMin), np.log10(mbb), rasterized = True, marker='.',
+            color='0.5')
+    plt.scatter(np.log10(mMin)[mask], np.log10(mbb)[mask], rasterized = True,
+            marker='.', color='g')
+    plt.ylim([-4, 0])
+    plt.xlim([-6, -1])
+    plt.xlabel("log10(m_light [eV])")
+    plt.ylabel("log10(mbb [eV])")
+    plt.savefig(OUTPATH+"mbb.pdf")
+
+def finetuning(rhn):
+    lnL = rhn.lnL
+    U = rhn.U
+    mask = (lnL.max() - lnL < 4)
+    M = [rhn.M1, rhn.M2, rhn.M3]
+    ue = [rhn.ue1, rhn.ue2, rhn.ue3]
+    def get_protected(I, J, epsilon, eta):
+        dM = abs(M[I] - M[J])
+        deta = abs(ue[I]**2 + ue[J]**2)/(abs(ue[I])**2+abs(ue[J])**2)
+        m1 = dM < epsilon*(M[I]+M[J])/2
+        m2 = deta < eta
+        m3 = m1 & m2 & mask
+        print U[m3].max()
+        return m3
+
+    print get_protected(0, 1, 1e-2, 1e-2).sum()
+    print get_protected(0, 2, 1e-2, 1e-2).sum()
+    print get_protected(1, 2, 1e-2, 1e-2).sum()
+
+def triangle(rhn):
+    x = rhn.Ue1/rhn.U1
+    y = rhn.Um1/rhn.U1
+    mMin = rhn.mMin * 1e9
+    lnL = rhn.lnL
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.01)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.001)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.0001)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.00001)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
+    plt.savefig(OUTPATH+"triangle.pdf")
 
 if __name__ == "__main__":
     #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
-    rhn = RHN_Chain('/home/ubuntu/0nubb_test.hdf5', MODEL = 'diff', print_keys = False)
+    rhn = RHN_Chain('/home/ubuntu/data2/RHN_NH.hdf5', MODEL = 'full',
+            print_keys = False)
+    finetuning(rhn)
+    #triangle(rhn)
+    #show_phases(rhn)
+    #show_mbb(rhn)
     #show_Rorder(rhn)
     #show_neutrino_masses(rhn)
     #show_lnL_mbb(rhn)
-    show_0nubb_impact(rhn)
+    #show_0nubb_impact(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)

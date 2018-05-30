@@ -69,6 +69,28 @@ class RHN_Chain(object):
         self.Ut2 = get_data('#Ut2 @NeutrinoBit::Ut2')
         self.Ut3 = get_data('#Ut3 @NeutrinoBit::Ut3')
 
+        self.Ue1_phase = get_data('#Ue1_phase @NeutrinoBit::Ue1_phase')
+        self.Ue2_phase = get_data('#Ue2_phase @NeutrinoBit::Ue2_phase')
+        self.Ue3_phase = get_data('#Ue3_phase @NeutrinoBit::Ue3_phase')
+        self.Um1_phase = get_data('#Um1_phase @NeutrinoBit::Um1_phase')
+        self.Um2_phase = get_data('#Um2_phase @NeutrinoBit::Um2_phase')
+        self.Um3_phase = get_data('#Um3_phase @NeutrinoBit::Um3_phase')
+        self.Ut1_phase = get_data('#Ut1_phase @NeutrinoBit::Ut1_phase')
+        self.Ut2_phase = get_data('#Ut2_phase @NeutrinoBit::Ut2_phase')
+        self.Ut3_phase = get_data('#Ut3_phase @NeutrinoBit::Ut3_phase')
+
+        self.ue1 = self.Ue1**0.5 * np.exp(1j*self.Ue1_phase)
+        self.ue2 = self.Ue2**0.5 * np.exp(1j*self.Ue2_phase)
+        self.ue3 = self.Ue3**0.5 * np.exp(1j*self.Ue3_phase)
+        self.um1 = self.Um1**0.5 * np.exp(1j*self.Um1_phase)
+        self.um2 = self.Um2**0.5 * np.exp(1j*self.Um2_phase)
+        self.um3 = self.Um3**0.5 * np.exp(1j*self.Um3_phase)
+        self.ut1 = self.Ut1**0.5 * np.exp(1j*self.Ut1_phase)
+        self.ut2 = self.Ut2**0.5 * np.exp(1j*self.Ut2_phase)
+        self.ut3 = self.Ut3**0.5 * np.exp(1j*self.Ut3_phase)
+
+        self.mbb = get_data('#mbb_0nubb_Xe @NeutrinoBit::RHN_mbb_0nubb_Xe')
+
         lnL_tags = [
             '#deltaCP_lnL @NeutrinoBit::deltaCP_lnL',
             '#l2lgamma_lnL @FlavBit::l2lgamma_likelihood',
