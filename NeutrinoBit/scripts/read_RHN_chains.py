@@ -33,8 +33,8 @@ class RHN_Chain(object):
 
         if MODEL == 'diff':
             self.M1 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::M_1')
-            self.dM2 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::delta_M_2')
-            self.dM3 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::delta_M_3')
+            self.dM21 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::delta_M21')
+            self.M3 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::M_3')
             self.ReOmega12 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::ReOm12')
             self.ReOmega13 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::ReOm13')
             self.ReOmega23 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::ReOm23')
@@ -42,8 +42,7 @@ class RHN_Chain(object):
             self.ImOmega13 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::ImOm13')
             self.ImOmega23 = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::ImOm23')
             self.Rorder = get_data('#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::Rorder')
-            self.M2 = self.M1 + self.dM2
-            self.M3 = self.M1 + self.dM3
+            self.M2 = self.M1 + self.dM21
         elif MODEL == 'full':
             self.M1 = get_data('#RightHandedNeutrinos_parameters @RightHandedNeutrinos::primary_parameters::M_1')
             self.M2 = get_data('#RightHandedNeutrinos_parameters @RightHandedNeutrinos::primary_parameters::M_2')
