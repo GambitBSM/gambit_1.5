@@ -168,6 +168,16 @@ ObsLikes:
       capability: MSSM_spectrum
       type:       map_str_dbl
 
+    # Observables for invisible decays of Z and Higgs bosons
+    - purpose: Observable
+      capability: Z_gamma_nu
+
+    - purpose: Observable
+      capability: Z_gamma_chi_0
+
+    - purpose: Observable
+      capability: inv_Higgs_BF
+
 Rules:
 
   # Set any pole masses by hand?
@@ -397,6 +407,12 @@ Rules:
       covariance_marg_convthres_rel: 0.05
       covariance_nsamples_start: 100000
 
+  # Invisible Higgs branching ratio from CMS-PAS-HIG-17-023 with 10% theory error
+  # Path relative to GAMBIT build
+  - capability: lnL_Higgs_invWidth
+    function: lnL_Higgs_invWidth_SMlike
+    options:
+      BR_h_inv_chi2_data_file: ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_profiled.dat
 
 # Set the names of key log files
 Logger:

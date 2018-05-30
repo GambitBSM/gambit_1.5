@@ -952,9 +952,9 @@ namespace Gambit
         // on-shell renormalized photon vacuum polarization
         // default value recommended by GM2calc from arxiv:1105.3149  
         const double alpha_MZ = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_MZ");
+        <double>(alpha_e_OS_MZ, "GM2Calc_extra_alpha_e_MZ");
         const double alpha_thomson = runOptions->getValueOrDef
-        <double>(alpha_e_thomson_limit, "GM2Calc_extra_alpha_e_thomson_limit");
+        <double>(alpha_e_OS_thomson_limit, "GM2Calc_extra_alpha_e_thomson_limit");
 
         if (alpha_MZ > std::numeric_limits<double>::epsilon())
           model.set_alpha_MZ(alpha_MZ);
