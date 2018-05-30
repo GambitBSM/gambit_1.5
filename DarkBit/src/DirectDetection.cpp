@@ -302,27 +302,27 @@ namespace Gambit {
 
     // Experiments
     DD_EX(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
-    DD_EX(LUX_2013)             // Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
-    DD_EX(SIMPLE_2014)          // Felizardo et al., PRD 89, 072013 (2014) [arxiv:1404.4309]
-    DD_EX(SuperCDMS_2014)       // Agnese et al., PRL 112, 241302 (2014) [arxiv:1402.7137]
-    DD_EX(CDMSlite)             // Agnese et al., PRL 116, 071301 (2015) [arxiv:1509.02448]
+    DD_EX(XENON1T_2018)         // Aprile et al., May 28 talk at Gran Sasso.
     DD_EX(DARWIN_Ar)
     DD_EX(DARWIN_Xe)
+    DD_EX(DARWIN)               // M. Schumann et al., [arXiv:1506.08309]
+    DD_EX(LUX_2013)             // Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
+    DD_EX(LUX_2015)             // D.S. Akerib et al., PRL 116, 161301 (2016) [arXiv:1512.03506]
     DD_EX(LUX_2016)             // D.S. Akerib et al., PRL 118, 021303 (2017) [arxiv:1608.07648]
+    DD_EX(LZ)                   // LZ TDR, [arXiv:1509.02910]
     DD_EX(PandaX_2016)          // A. Tan et al., PRL 117, 121303 (2016) [arxiv:1607.07400]
     DD_EX(PandaX_2017)          // X. Cui et al., PRL 119, 181302 (2017) [arxiv:1708.06917]
-    DD_EX(LUX_2015)             // D.S. Akerib et al., PRL 116, 161301 (2016) [arXiv:1512.03506]
+    DD_EX(DarkSide_50)          // P. Agnes et al., [arXiv:1802.07198]
+    DD_EX(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
+    DD_EX(SuperCDMS_2014)       // Agnese et al., PRL 112, 241302 (2014) [arxiv:1402.7137]
+    DD_EX(CDMSlite)             // Agnese et al., PRL 116, 071301 (2015) [arxiv:1509.02448]
+    DD_EX(SIMPLE_2014)          // Felizardo et al., PRD 89, 072013 (2014) [arxiv:1404.4309]
     DD_EX(PICO_2L)              // C. Amole et al., PRD 93, 061101 (2016) [arXiv:1601.03729]
     DD_EX(PICO_60_F)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
     DD_EX(PICO_60_I)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
     DD_EX(PICO_60)              // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
     DD_EX(PICO_60_2017)         // C. Amole et al., arXiv:1702.07666
-    DD_EX(XENON1T_2017)         // E. Aprile et al., [arxiv:1705.06655]
-    DD_EX(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
-    DD_EX(LZ)                   // LZ TDR, [arXiv:1509.02910]
     DD_EX(PICO_500)             // S. Fallows, talk at TAUP 2017
-    DD_EX(DarkSide_50)          // P. Agnes et al., [arXiv:1802.07198]
-    DD_EX(DARWIN)               // M. Schumann et al., [arXiv:1506.08309]
 
     // Just in case, to make sure we don't mess with other things elsewhere.
     #undef DD_EX
