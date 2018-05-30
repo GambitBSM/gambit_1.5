@@ -129,6 +129,13 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Degenerate_Chargino_LLike
 
+    # Likelihoods for invisible decays of Z and Higgs bosons
+    - purpose: LogLike
+      capability: lnL_Z_inv
+
+    - purpose: LogLike
+      capability: lnL_Higgs_invWidth
+
     # Observables (not included in likelihood)
     - purpose:    likelihood_details
       capability: LHC_LogLikes
