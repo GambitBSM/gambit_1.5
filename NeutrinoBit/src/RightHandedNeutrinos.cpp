@@ -1080,11 +1080,11 @@ namespace Gambit
       // mbb equation is adopted from Drewes, Eijima 2017, Eq. (14) and following
       for (int i=0; i<3; i++)
       {
-        sum+=pow(U_light(0,i),2)*m_light(i,i);
+        sum += pow(U_light(0,i),2)*m_light(i,i);
       }
       for (int i=0; i<3; i++)
       {
-        sum+=sum + pow(theta(0,i),2)*M[i]*(p2_0nubb_Xe/(p2_0nubb_Xe + M[i]));
+        sum += pow(theta(0,i),2)*M[i]*(p2_0nubb_Xe/(p2_0nubb_Xe + pow(M[i],2)));
       }
       result = abs(sum);
     } 
@@ -1118,11 +1118,11 @@ namespace Gambit
       // mbb equation is adopted from Drewes, Eijima 2017, Eq. (14) and following
       for (int i=0; i<3; i++)
       {
-        sum+=pow(U_light(0,i),2)*m_light(i,i);
+        sum += pow(U_light(0,i),2)*m_light(i,i);
       }
       for (int i=0; i<3; i++)
       {
-        sum+=sum + pow(theta(0,i),2)*M[i]*(p2_0nubb_Ge/(p2_0nubb_Ge + M[i]));
+        sum += pow(theta(0,i),2)*M[i]*(p2_0nubb_Ge/(p2_0nubb_Ge + pow(M[i],2)));
       }
       result = abs(sum);
     } 
@@ -1131,7 +1131,7 @@ namespace Gambit
     void lnL_mbb_0nubb_KamLAND_Zen(double& result)
     {
       using namespace Pipes::lnL_mbb_0nubb_KamLAND_Zen;
-      double mbb_limit = 0.165*1e-9;  // [GeV] mbb < (0.61-0.165)eV at 90% C
+      double mbb_limit = 0.165*1e-9;  // [GeV] mbb < (0.061-0.165)eV at 90% C
 
       double mbb = *Dep::mbb_0nubb_Xe;
 
