@@ -77,6 +77,7 @@ BE_INI_FUNCTION
     {
       ex_map["XENON100_2012"] = XENON100_2012_Init();
       ex_map["XENON1T_2017"] = XENON1T_2017_Init();
+      ex_map["XENON1T_2018"] = XENON1T_2018_Init();
       ex_map["LUX_2013"] = LUX_2013_Init();
       ex_map["SuperCDMS_2014"] = SuperCDMS_2014_Init();
       ex_map["CDMSlite"] = CDMSlite_Init();
@@ -91,7 +92,7 @@ BE_INI_FUNCTION
       ex_map["CRESST_II"] = CRESST_II_Init();
       ex_map["LZ"] = LZ_Init();
       ex_map["PICO_500"] = PICO_500_Init();
-      ex_map["DarkSide"] = DarkSide_Init();
+      ex_map["DarkSide_50"] = DarkSide_50_Init();
       ex_map["DARWIN"] = DARWIN_Init();
       //ex_map["DARWIN_Ar"] = DARWIN_Ar_Init();
       //ex_map["DARWIN_Xe"] = DARWIN_Xe_Init();

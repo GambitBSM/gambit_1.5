@@ -36,7 +36,7 @@
 
 // Identify backend
 #define BACKENDNAME DDCalc
-#define BACKENDLANG FORTRAN
+#define BACKENDLANG Fortran
 #define VERSION 2.0.0
 #define SAFE_VERSION 2_0_0
 
@@ -78,6 +78,7 @@ BE_FUNCTION(DDCalc_InitDetector, int, (const bool&), "C_DDExperiments_ddcalc_ini
 // Initialization (specific experimental factory functions).
 BE_FUNCTION(XENON100_2012_Init,  int, (), "C_DDCalc_xenon100_2012_init",  "XENON100_2012_Init")
 BE_FUNCTION(XENON1T_2017_Init,   int, (), "C_DDCalc_xenon1t_2017_init",   "XENON1T_2017_Init")
+BE_FUNCTION(XENON1T_2018_Init,   int, (), "C_DDCalc_xenon1t_2018_init",   "XENON1T_2018_Init")
 BE_FUNCTION(LUX_2013_Init,       int, (), "C_DDCalc_lux_2013_init",       "LUX_2013_Init")
 BE_FUNCTION(LUX_2016_Init,       int, (), "C_DDCalc_lux_2016_init",       "LUX_2016_Init")
 BE_FUNCTION(PandaX_2016_Init,    int, (), "C_DDCalc_pandax_2016_init",    "PandaX_2016_Init")
@@ -92,7 +93,7 @@ BE_FUNCTION(SIMPLE_2014_Init,    int, (), "C_DDCalc_simple_2014_init",    "SIMPL
 BE_FUNCTION(CRESST_II_Init,      int, (), "C_DDCalc_cresst_ii_init",      "CRESST_II_Init")
 BE_FUNCTION(LZ_Init,             int, (), "C_DDCalc_lz_init",             "LZ_Init")
 BE_FUNCTION(PICO_500_Init,       int, (), "C_DDCalc_pico_500_init",       "PICO_500_Init")
-BE_FUNCTION(DarkSide_Init,       int, (), "C_DDCalc_darkside_init",       "DarkSide_Init")
+BE_FUNCTION(DarkSide_50_Init,    int, (), "C_DDCalc_darkside_50_init",    "DarkSide_50_Init")
 BE_FUNCTION(DARWIN_Init,         int, (), "C_DDCalc_darwin_init",         "DARWIN_Init")
 //BE_FUNCTION(DARWIN_Ar_Init,      int, (), "C_DDCalc_darwin_ar_init", "DARWIN_Ar_Init")
 //BE_FUNCTION(DARWIN_Xe_Init,      int, (), "C_DDCalc_darwin_xe_init", "DARWIN_Xe_Init")
@@ -111,6 +112,49 @@ BE_FUNCTION(DDCalc_SetWIMP_higgsportal, void, (const int&, const double&, const 
 
 // Get the WIMP mass and couplings for the Higgs portal DM models.
 BE_FUNCTION(DDCalc_GetWIMP_higgsportal, void, (const int&, double&, double&, double&, double&, double&), "C_DDCalc_ddcalc_getwimp_higgsportal", "GetWIMP_higgsportal")
+
+// Set the WIMP mass and couplings/cross-sections for standard SI/SD scattering.
+// There are three versions, depending on how the couplings are specified:
+//   * mfa:    mass, fp, fn, ap, an
+//   * mG:     mass, Gp_SI, Gn_SI, Gp_SD, Gn_SD
+//   * msigma: mass, sigmapSI, sigmanSI, sigmapSD, sigmanSD
+//  Units: mass [GeV]; f, G [GeV^-2]; a [unitless]; sigma [pb]
+// Here, f & a are the typical WIMP-nucleon couplings for spin-independent (SI) and spin-dependent (SD) interactions.
+// The G's are the effective 4 fermion vertex couplings, related to f & a by a normalization factor.  The sigmas are WIMP-
+// nucleon scattering cross-sections; a negative value can be used to indicated the corresponding coupling should be taken
+// to be negative.
+BE_FUNCTION(DDCalc_SetWIMP_mfa,    void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_mfa",    "SetWIMP_mfa")
+BE_FUNCTION(DDCalc_SetWIMP_mG,     void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_mg",     "SetWIMP_mG")
+BE_FUNCTION(DDCalc_SetWIMP_msigma, void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_msigma", "SetWIMP_msigma")
+
+// Get the WIMP mass and couplings/cross-sections. Same signature and units as above for setters.  The only difference is
+// that the WIMP-nucleon cross-sections are always positive (physical) values.
+BE_FUNCTION(DDCalc_GetWIMP_mfa,    void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_mfa",    "GetWIMP_mfa")
+BE_FUNCTION(DDCalc_GetWIMP_mG,     void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_mg",     "GetWIMP_mG")
+BE_FUNCTION(DDCalc_GetWIMP_msigma, void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_msigma", "GetWIMP_msigma")
+
+// Set the WIMP mass, spin, and coupling structure within the non-relativistic effective theory of DM-nucleon interactions.
+//  - SetWIMP_NREffectiveTheory initializes a WIMP within the non-relativistic effective theory setup, setting all coefficients to zero.
+//    Arguments are the WIMP index, the mass of the WIMP in GeV, and the spin of the WIMP.
+//  - SetNRCoefficient sets the coefficient of a single operator to a given value.
+//    Arguments are:
+//  (1) the WIMP index
+//  (2) The operator index, i.e. an integer specifying the non-relativistic operator, e.g. 6 for O_6.
+//      For the specific cases of O_1 and O_4 one can also use the operators (q^2/mp^2) * O_1 and (q^2/mp^2) * O_4,
+//      by passing -1 and -4, respectively.
+//  (3) The isospin index: 0 for the isoscalar and 1 for the isovector component of the operator.
+//  (4) The desired value of the operator coefficient in units GeV^(-2).
+BE_FUNCTION(DDCalc_SetWIMP_NREffectiveTheory, void, (const int&,const double&,const double&), "C_DDCalc_ddcalc_setwimp_nreffectivetheory", "SetWIMP_NREffectiveTheory")
+BE_FUNCTION(DDCalc_SetNRCoefficient, void, (const int&,const int&,const int&,const double&), "C_DDCalc_ddcalc_setnrcoefficient", "SetNRCoefficient")
+
+// Get the values of the isoscalar and isovector part of a given non-relativistic operator.
+// Arguments are:
+//   (1) the WIMP index
+//   (2) the operator index (see description fir SetNRCoefficient above)
+//   (3) gives the value of the isoscalar component of the operator, in units GeV^(-2)
+//   (4) gives the value of the isovector component of the operator, in units GeV^(-2)
+BE_FUNCTION(DDCalc_GetNRCoefficient, void, (const int&,const int&,double&,double&), "C_DDCalc_ddcalc_getnrcoefficient", "GetNRCoefficient")
+
 
 // Specify the minimum recoil energy to be included in the rate calculations [keV].  Note the efficiency curves already account for
 // detector and analysis thresholds regardless of this setting, so setting this to 0 keV (the default behavior when initialization is

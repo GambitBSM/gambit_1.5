@@ -102,8 +102,18 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     #undef FUNCTION
 
+    #define FUNCTION getBuckFastATLASnoeff
+    START_FUNCTION(Gambit::ColliderBit::BuckFastSmearATLASnoeff)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    #undef FUNCTION
+
     #define FUNCTION getBuckFastCMS
     START_FUNCTION(Gambit::ColliderBit::BuckFastSmearCMS)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    #undef FUNCTION
+
+    #define FUNCTION getBuckFastCMSnoeff
+    START_FUNCTION(Gambit::ColliderBit::BuckFastSmearCMSnoeff)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     #undef FUNCTION
 
@@ -125,9 +135,27 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY ATLASnoeffAnalysisContainer
+  START_CAPABILITY
+    #define FUNCTION getATLASnoeffAnalysisContainer
+    START_FUNCTION(HEPUtilsAnalysisContainer)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY CMSAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getCMSAnalysisContainer
+    START_FUNCTION(HEPUtilsAnalysisContainer)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSnoeffAnalysisContainer
+  START_CAPABILITY
+    #define FUNCTION getCMSnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
@@ -191,6 +219,16 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY ATLASnoeffSmearedEvent
+  START_CAPABILITY
+    #define FUNCTION smearEventATLASnoeff
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLASnoeff)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY CMSSmearedEvent
   START_CAPABILITY
     #define FUNCTION smearEventCMS
@@ -198,6 +236,16 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringEvent, Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMS)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSnoeffSmearedEvent
+  START_CAPABILITY
+    #define FUNCTION smearEventCMSnoeff
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMSnoeff)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -239,6 +287,18 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY ATLASnoeffAnalysisNumbers
+  START_CAPABILITY
+    #define FUNCTION runATLASnoeffAnalyses
+    START_FUNCTION(AnalysisDataPointers)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
+    DEPENDENCY(ATLASnoeffSmearedEvent, HEPUtils::Event)
+    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
+    DEPENDENCY(ATLASnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY CMSAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runCMSAnalyses
@@ -248,6 +308,18 @@ START_MODULE
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
     DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSnoeffAnalysisNumbers
+  START_CAPABILITY
+    #define FUNCTION runCMSnoeffAnalyses
+    START_FUNCTION(AnalysisDataPointers)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
+    DEPENDENCY(CMSnoeffSmearedEvent, HEPUtils::Event)
+    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
+    DEPENDENCY(CMSnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -269,7 +341,9 @@ START_MODULE
     #define FUNCTION CollectAnalyses
     START_FUNCTION(AnalysisDataPointers)
     DEPENDENCY(ATLASAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(ATLASnoeffAnalysisNumbers, AnalysisDataPointers)
     DEPENDENCY(CMSAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(CMSnoeffAnalysisNumbers, AnalysisDataPointers)
     DEPENDENCY(IdentityAnalysisNumbers, AnalysisDataPointers)
     #ifndef EXCLUDE_DELPHES
       DEPENDENCY(DetAnalysisNumbers, AnalysisDataPointers)
