@@ -1074,7 +1074,7 @@ namespace Gambit
       // p2_0nubb_Xe = pow(*Param["p_0nubb_Xe"], 2.0);  // Range: 178.0 - 211.0 [MeV]
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
-      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(159.0, "p"), 2);
+      p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(178.0, "p"), 2);
       p2_0nubb_Xe *= 1e-6;  // MeV^2 --> GeV^2
       
       // mbb equation is adopted from Drewes, Eijima 2017, Eq. (14) and following
@@ -1089,7 +1089,7 @@ namespace Gambit
       result = abs(sum);
     } 
     
-    // Calculate mbb for 136Xe 0nubb detector, for right-handed
+    // Calculate mbb for 76Ge 0nubb detector, for right-handed
     // neutrino model
     // 
     void RHN_mbb_0nubb_Ge(double& result)
@@ -1108,11 +1108,11 @@ namespace Gambit
       M[2] = *Param["M_3"];
 
       // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
-      // A_0nubb_Xe = *Param["A_0nubb_Ge"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
-      // p2_0nubb_Xe = pow(*Param["p_0nubb_Ge"], 2.0);  // Range: 178.0 - 211.0 [MeV]
+      // A_0nubb_Ge = *Param["A_0nubb_Ge"];  // Range: 2.55 - 5.05 [1e-10 1/yr]
+      // p2_0nubb_Ge = pow(*Param["p_0nubb_Ge"], 2.0);  // Range: 159.0 - 163.0 [MeV]
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
-      p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(178.0, "p"), 2);
+      p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(159.0, "p"), 2);
       p2_0nubb_Ge *= 1e-6;  // MeV^2 --> GeV^2
       
       // mbb equation is adopted from Drewes, Eijima 2017, Eq. (14) and following
@@ -1152,7 +1152,7 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
     }
 
-    // Unified 0nubb likelihood
+    // Unified 0nubb likelihood based on mbb
     void lnL_mbb_0nubb(double &result)
     {
       using namespace Pipes::lnL_mbb_0nubb;
