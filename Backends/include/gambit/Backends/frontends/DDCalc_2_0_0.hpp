@@ -78,6 +78,7 @@ BE_FUNCTION(DDCalc_InitDetector, int, (const bool&), "C_DDExperiments_ddcalc_ini
 // Initialization (specific experimental factory functions).
 BE_FUNCTION(XENON100_2012_Init,  int, (), "C_DDCalc_xenon100_2012_init",  "XENON100_2012_Init")
 BE_FUNCTION(XENON1T_2017_Init,   int, (), "C_DDCalc_xenon1t_2017_init",   "XENON1T_2017_Init")
+BE_FUNCTION(XENON1T_2018_Init,   int, (), "C_DDCalc_xenon1t_2018_init",   "XENON1T_2018_Init")
 BE_FUNCTION(LUX_2013_Init,       int, (), "C_DDCalc_lux_2013_init",       "LUX_2013_Init")
 BE_FUNCTION(LUX_2016_Init,       int, (), "C_DDCalc_lux_2016_init",       "LUX_2016_Init")
 BE_FUNCTION(PandaX_2016_Init,    int, (), "C_DDCalc_pandax_2016_init",    "PandaX_2016_Init")
