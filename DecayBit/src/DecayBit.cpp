@@ -3351,8 +3351,7 @@ namespace Gambit
       // Construct SM Z two-loop object
       const double mh_OS = Dep::SM_spectrum->get(Par::Pole_Mass, "h0_1");
       const double MZ = Dep::SM_spectrum->get(Par::Pole_Mass, "Z0");
-      const double delta_alpha = 1. - alpha_e_thomson_limit * SM.alphainv;
-      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha);
+      auto Z = SM_Z::TwoLoop(mh_OS, SM.mT, MZ, SM.alphaS, delta_alpha_OS);
 
       if (Z.nuisances_outside_ranges())
       {
