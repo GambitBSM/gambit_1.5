@@ -9,7 +9,7 @@ import pylab as plt
 
 from read_RHN_chains import *
 
-OUTPATH = '/home/cweniger/'
+OUTPATH = '/home/ubuntu/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
@@ -199,26 +199,51 @@ def show_U_vs_M(rhn):
         plt.savefig(OUTPATH+"U_vs_M%i.pdf"%I)
 
 def show_lnL_mbb(rhn):
-    lnL0 = rhn.lnL_partial['lnL_0nubb']
-    lnL1 = rhn.lnL_partial['lnL_mbb_0nubb_KamLAND_Zen']
-    lnL2 = rhn.lnL_partial['lnL_mbb_0nubb_GERDA']
-    lnL0 -= lnL0.max()
-    lnL1 -= lnL1.max()
-    lnL2 -= lnL2.max()
-
-    plt.scatter(-lnL0, -lnL1, marker='.', label="KamLAND_Zen", rasterized = True)
-    plt.scatter(-lnL0, -lnL2, marker='.', label="GERDA", rasterized = True)
-    plt.xlim([0, 100])
-    plt.ylim([0, 100])
+    lnL0 = -rhn.lnL_partial['lnL_0nubb']*2
+    lnL1 = -rhn.lnL_partial['lnL_mbb_0nubb_KamLAND_Zen']*2
+    lnL2 = -rhn.lnL_partial['lnL_mbb_0nubb_GERDA']*2
+    lnL0 -= lnL0.min()
+    lnL1 -= lnL1.min()
+    lnL2 -= lnL2.min()
+    plt.scatter(np.log10(lnL0), np.log10(lnL1+lnL2), marker='.', color='r',
+            label="KamLAND_Zen", rasterized = True)
+    plt.scatter(np.log10(lnL0), np.log10(lnL2), marker='.', color='g',
+            label="GERDA", rasterized = True)
+    plt.xlim([-3, 3])
+    plt.ylim([-3, 3])
+    plt.xlabel("log10(chi2_old)")
+    plt.ylabel("log10(chi2_new)")
+    plt.axhline(0)
+    plt.axvline(0)
     plt.legend()
     plt.savefig(OUTPATH+"lnL_0nubb.pdf")
 
+def show_0nubb_impact(rhn):
+    lnL0 = -rhn.lnL_partial['lnL_0nubb']*2
+    lnL1 = -rhn.lnL_partial['lnL_mbb_0nubb_KamLAND_Zen']*2
+    lnL2 = -rhn.lnL_partial['lnL_mbb_0nubb_GERDA']*2
+    lnL0 -= lnL0.min()
+    lnL1 -= lnL1.min()
+    lnL2 -= lnL2.min()
+
+    plt.scatter(np.log10(rhn.U), np.log10(lnL0), rasterized = True, marker='.',
+            color='r')
+    plt.scatter(np.log10(rhn.U), np.log10(lnL1), rasterized = True, marker='.',
+            color='g')
+    plt.axhline(0)
+    plt.axvline(-9)
+    plt.axvline(-8)
+
+    plt.savefig(OUTPATH+"U_vs_M_0nubb.pdf")
+
+
 if __name__ == "__main__":
     #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
-    rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_1e-9_old0nubb.hdf5', print_keys = False)
+    rhn = RHN_Chain('/home/ubuntu/0nubb_test.hdf5', MODEL = 'diff', print_keys = False)
     #show_Rorder(rhn)
     #show_neutrino_masses(rhn)
-    show_lnL_mbb(rhn)
+    #show_lnL_mbb(rhn)
+    show_0nubb_impact(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)
