@@ -75,6 +75,8 @@ class RHN_Chain(object):
             '#l2lgamma_lnL @FlavBit::l2lgamma_likelihood',
             '#l2lll_lnL @FlavBit::l2lll_likelihood',
             '#lnL_0nubb @NeutrinoBit::lnL_0nubb',
+            '#lnL_mbb_0nubb_KamLAND_Zen @NeutrinoBit::lnL_mbb_0nubb_KamLAND_Zen',
+            '#lnL_mbb_0nubb_GERDA @NeutrinoBit::lnL_mbb_0nubb_GERDA',
             '#lnL_W_decays @PrecisionBit::lnL_W_decays_chi2',
             '#lnL_W_mass @PrecisionBit::lnL_W_mass_chi2',
             '#lnL_Z_inv_width @PrecisionBit::lnL_Z_inv_width_chi2',
@@ -107,7 +109,8 @@ class RHN_Chain(object):
             '#lnLlhce @NeutrinoBit::lnL_lhc_e',
             '#lnLlhcmu @NeutrinoBit::lnL_lhc_mu']
 
-        lnL_names = ["lnL_deltaCP", "lnL_l2lgamma", "lnL_l2lll", "lnL_0nubb",
+        lnL_names = ["lnL_deltaCP", "lnL_l2lgamma", "lnL_l2lll", 
+                "lnL_0nubb", "lnL_mbb_0nubb_KamLAND_Zen", "lnL_mbb_0nubb_GERDA",
                "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv_width", "lnL_bbn",
                "lnL_atlas_e", "lnL_atlas_mu", "lnL_charm_e", "lnL_charm_mu",
                "lnL_charm_tau", "lnL_ckm", "lnL_delphi", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",

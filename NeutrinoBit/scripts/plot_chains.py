@@ -9,7 +9,7 @@ import pylab as plt
 
 from read_RHN_chains import *
 
-OUTPATH = '/home/ubuntu/'
+OUTPATH = '/home/cweniger/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
@@ -150,17 +150,79 @@ def show_neutrino_masses(rhn):
     plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
 
 def show_Rorder(rhn):
+    plt.clf()
+    plt.subplot(211)
     plt.scatter(rhn.Rorder, np.log10(rhn.Ue1), marker='.', rasterized = True)
+    plt.subplot(212)
+    plt.hist(rhn.Rorder, range = [0, 6], bins = 6)
     plt.savefig(OUTPATH+"Rorder.pdf", dpi = 200)
+
+def show_U_vs_M(rhn):
+    lnL = rhn.lnL
+    mask = lnL.max()-lnL < 2
+
+    M = [rhn.M1, rhn.M2, rhn.M3]
+    U = [
+            [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
+            [rhn.U2, rhn.Ue2, rhn.Um2, rhn.Ut2],
+            [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
+            ]
+
+    for I in [1, 2, 3]:
+        print "Generating U_vs_M%i"%I
+        plt.clf()
+        plt.subplot(221)
+        plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][0])[mask], marker = '.',
+                rasterized = True)
+        plt.xlim([-1, 3.0])
+        plt.ylim([-17, -3])
+        plt.ylabel("U%i"%I)
+        plt.subplot(222)
+        plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][1])[mask], marker = '.',
+                rasterized = True)
+        plt.xlim([-1, 3.0])
+        plt.ylim([-17, -3])
+        plt.ylabel("Ue%i"%I)
+        plt.subplot(223)
+        plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][2])[mask], marker = '.',
+                rasterized = True)
+        plt.xlim([-1, 3.0])
+        plt.ylim([-17, -3])
+        plt.ylabel("Um%i"%I)
+        plt.subplot(224)
+        plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][3])[mask], marker = '.',
+                rasterized = True)
+        plt.ylabel("Ut%i"%I)
+        plt.xlim([-1, 3.0])
+        plt.ylim([-17, -3])
+        plt.tight_layout(pad=0.3)
+        plt.savefig(OUTPATH+"U_vs_M%i.pdf"%I)
+
+def show_lnL_mbb(rhn):
+    lnL0 = rhn.lnL_partial['lnL_0nubb']
+    lnL1 = rhn.lnL_partial['lnL_mbb_0nubb_KamLAND_Zen']
+    lnL2 = rhn.lnL_partial['lnL_mbb_0nubb_GERDA']
+    lnL0 -= lnL0.max()
+    lnL1 -= lnL1.max()
+    lnL2 -= lnL2.max()
+
+    plt.scatter(-lnL0, -lnL1, marker='.', label="KamLAND_Zen", rasterized = True)
+    plt.scatter(-lnL0, -lnL2, marker='.', label="GERDA", rasterized = True)
+    plt.xlim([0, 100])
+    plt.ylim([0, 100])
+    plt.legend()
+    plt.savefig(OUTPATH+"lnL_0nubb.pdf")
 
 if __name__ == "__main__":
     #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
-    rhn = RHN_Chain('/home/ubuntu/RHN_diff_NH.hdf5', print_keys = False)
+    rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_1e-9_old0nubb.hdf5', print_keys = False)
+    #show_Rorder(rhn)
     #show_neutrino_masses(rhn)
-    show_Rorder(rhn)
+    show_lnL_mbb(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)
+    #show_U_vs_M(rhn)
     #show_survival_fraction(rhn)
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
