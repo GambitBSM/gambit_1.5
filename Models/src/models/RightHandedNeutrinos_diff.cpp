@@ -32,11 +32,7 @@
      targetP.setValues(myP,false);
 
      // M2
-     targetP.setValue("M_2", myP["M_1"]+myP["delta_M_2"]);
-
-     // M3
-     targetP.setValue("M_3", myP["M_1"]+myP["delta_M_3"]);
-
+     targetP.setValue("M_2", myP["M_1"]+myP["delta_M21"]);
   }
 
 #undef MODEL

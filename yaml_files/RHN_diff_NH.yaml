@@ -62,11 +62,11 @@ Parameters:
     M_1:
       range: [0.06, 500]
       prior_type: log
-    delta_M_2:
+    delta_M21:
       range: [1E-4, 500]
       prior_type: log
-    delta_M_3:
-      range: [1E-4, 500]
+    M_3:
+      range: [0.06, 500]
       prior_type: log
     ReOm23:
       range: [0, 6.283]
