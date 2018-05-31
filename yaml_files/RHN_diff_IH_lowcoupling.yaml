@@ -147,9 +147,6 @@ ObsLikes:
   - capability: LUV_LL
     purpose: LogLike
 
-  - capability: lnL_0nubb
-    purpose: Observable
-
   - capability: mbb_0nubb_Xe
     purpose: Observable
 
@@ -160,7 +157,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnL_mbb_0nubb_GERDA
-    purpose: Observable
+    purpose: LogLike
 
   - capability: lnLckm_Vusmin
     purpose: LogLike
