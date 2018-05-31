@@ -909,7 +909,6 @@ QUICK_FUNCTION(DecayBit, chargino_minus_1_decay_rates, NEW_CAPABILITY, chargino_
 QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_minus_2_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_2_decay_rates,DecayTable::Entry))
 
 // Likelihoods
-//QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, NEW_CAPABILITY, lnL_Higgs_invWidth_SMlike, double, (SingletDM, SingletDMZ3), (Higgs_decay_rates, DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_VDM, double, (VectorDM), (Higgs_decay_rates, DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_MDM, double, (MajoranaDM), (Higgs_decay_rates, DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_DDM, double, (DiracDM), (Higgs_decay_rates, DecayTable::Entry))

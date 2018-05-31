@@ -78,7 +78,7 @@ ObsLikes:
     - capability: LUX_2016_LogLikelihood
       purpose:    LogLike
 
-    - capability: XENON1T_2017_LogLikelihood
+    - capability: XENON1T_2018_LogLikelihood
       purpose:    LogLike
       
     - capability: PandaX_2016_LogLikelihood
@@ -94,6 +94,9 @@ ObsLikes:
       purpose:    LogLike
       
     - capability: CDMSlite_LogLikelihood
+      purpose:    LogLike
+      
+    - capability: DarkSide_50_LogLikelihood
       purpose:    LogLike
       
     # SI nuclear nuisance parameter likelihood

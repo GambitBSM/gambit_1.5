@@ -1,6 +1,6 @@
 #################################################################################################
 #
-#      VectorDM, high mass region, TWalk.
+#      MajoranaDM, high mass region, MultiNest, xi=0.
 #
 #################################################################################################
 
@@ -12,13 +12,14 @@ Parameters:
     mH:
       range: [124.1, 127.3]
 
-  VectorDM:
-    mV: 
+  MajoranaDM_xi:
+    mX: 
       range: [45., 10000.]
-      prior_type: log      
-    lambda_hV: 
-      range: [1e-4, 10.]
       prior_type: log
+    lX: 
+      range: [1e-6, 1]
+      prior_type: log
+    xi: 0
 
   nuclear_params_sigmas_sigmal:
     sigmas:
@@ -103,7 +104,7 @@ ObsLikes:
     # SM nuisance parameter likelihoods     
     - capability: lnL_alpha_s
       purpose:    LogLike    
-                    
+              
     # DM Local Halo likelihoods
     - capability: lnL_rho0
       purpose: LogLike
@@ -126,11 +127,7 @@ ObsLikes:
       
     - capability: sigma_SI_p
       purpose:    Observable
-      function:   sigma_SI_p_simple
-
-    - capability: sigma_SI_n
-      purpose:    Observable
-      function:   sigma_SI_n_simple
+      function:   sigma_SI_vnqn_FermionDMHiggsPortal
 
 ##############################################################################################
 Rules:
@@ -141,20 +138,21 @@ Rules:
     options:
       oh2_obs: 0.1199
       oh2_obserr: 0.0027
-
+      
   # Set v0 to 240 +/- 8 km/s based on Reid et al [arXiv:1401.5377]
   - capability: lnL_v0
     function: lnL_v0_gaussian
     options:
       v0_obs: 240
       v0_obserr: 8
- 
+      
   # Set vesc to 533 +/- 32 km/s based on RAVE survey [arXiv:1309.4293]
   - capability: lnL_vesc
     function: lnL_vesc_gaussian
     options:
       vesc_obs: 533
       vesc_obserr: 31.9
+      
       
   # Set sigmal to 50+/- 15 MeV based on Bishara et al [arXiv:1707.06998]
   - capability: lnL_SI_nuclear_parameters
@@ -164,14 +162,15 @@ Rules:
       sigmas_error: 8.0
       sigmal_central: 50.0
       sigmal_error: 15.0
-      
-  # Choose to use capgen for solar capture rate
+
+
+  # Choose to use capgen for solar capture
   - capability: capture_rate_Sun
-    function: capture_rate_Sun_const_xsec_capgen
+    function: capture_rate_Sun_vnqn
     
   - capability: equilibration_time_Sun
-    function: equilibration_time_Sun
-    
+    function: equilibration_time_Sun_FermionDMHiggsPortal
+
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
     function: RD_fraction_leq_one
@@ -188,17 +187,17 @@ Rules:
 
   # Use DarkBit's own calculations of the direct detection couplings
   - capability: DD_couplings
-    function: DD_couplings_VectorDM
+    function: DD_couplings_MajoranaDM
 
   # Choose to compute decay rates from the DecayBit module
   - capability: decay_rates
     function: all_decays
 
   # Choose to obtain spectrum from the SpecBit module
-  - capability: VectorDM_spectrum
-    function: get_VectorDM_spectrum
-    options:
-      impose_pert_unitarity: true
+  - capability: MajoranaDM_spectrum
+    function: get_MajoranaDM_spectrum
+    options: 
+      impose_EFT_validity: true
 
 ##############################################################################################
 Printer:
@@ -206,33 +205,34 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "Vector_high_mass_TWalk.hdf5"
+    output_file: "Majorana_MN_xi_0.hdf5"
     delete_file_on_restart: true
-    group: "/VDM"    
+    group: "/MDM"    
 
 ##############################################################################################
 Scanner:
 
-  use_scanner: tw
+  use_scanner: mn
 
   scanners:
 
     mn:
       plugin: multinest
       like: LogLike
-      nlive: 1
-      tol: 0.7
+      nlive: 20000
+      tol: 1E-4
 
     diver:
       plugin: diver
       like: LogLike
-      NP: 20000
+      NP: 50000
       verbosity: 1
       convthresh: 0.0001
 
     tw:
       plugin: twalk
-      sqrtR: 1.01
+      sqrtR: 1.001
+      chain_number: 512
 
 ##############################################################################################
 Logger:
@@ -259,4 +259,4 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e+5
     debug: false
 
-  default_output_path: "production_scans/Vector/high_mass/TWalk"
+  default_output_path: "production_scans/Majorana/MN/xi_fixed"
