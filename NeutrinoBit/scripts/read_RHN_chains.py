@@ -8,7 +8,8 @@ matplotlib.use('Agg')
 import pylab as plt
 
 class RHN_Chain(object):
-    def __init__(self, INFILE, MODEL = 'auto', print_keys = False):
+    def __init__(self, INFILE, MODEL = 'auto', print_keys = False, renormalize
+            = True):
         print "Reading %s..."%INFILE
         if MODEL == 'auto':
             if 'diff' in INFILE:
@@ -176,6 +177,10 @@ class RHN_Chain(object):
         self.md21 = get_data('#md21 @NeutrinoBit::md21')
         self.md31 = get_data('#md31 @NeutrinoBit::md31')
         self.md32 = get_data('#md32 @NeutrinoBit::md32')
+
+        if renormalize:
+            self.lnL[self.md31>0] -= self.lnL[self.md31>0].max()
+            self.lnL[self.md31<0] -= self.lnL[self.md31<0].max()
 
         mask2sigma = self.lnL > self.lnL.max() - 0.5*4
 

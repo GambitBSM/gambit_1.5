@@ -160,13 +160,15 @@ def show_Rorder(rhn):
 def show_U_vs_M(rhn):
     lnL = rhn.lnL
     mask = lnL.max()-lnL < 2
+    mask_ft = get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.01)
+    mask2 = mask & mask_ft
 
     M = [rhn.M1, rhn.M2, rhn.M3]
     U = [
-            [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
-            [rhn.U2, rhn.Ue2, rhn.Um2, rhn.Ut2],
-            [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
-            ]
+        [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
+        [rhn.U2, rhn.Ue2, rhn.Um2, rhn.Ut2],
+        [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
+        ]
 
     for I in [1, 2, 3]:
         print "Generating U_vs_M%i"%I
@@ -174,24 +176,32 @@ def show_U_vs_M(rhn):
         plt.subplot(221)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][0])[mask], marker = '.',
                 rasterized = True)
+        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][0])[mask2], marker = '.',
+                rasterized = True, color='g')
         plt.xlim([-1, 3.0])
         plt.ylim([-17, -3])
         plt.ylabel("U%i"%I)
         plt.subplot(222)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][1])[mask], marker = '.',
                 rasterized = True)
+        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][1])[mask2], marker = '.',
+                rasterized = True, color='g')
         plt.xlim([-1, 3.0])
         plt.ylim([-17, -3])
         plt.ylabel("Ue%i"%I)
         plt.subplot(223)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][2])[mask], marker = '.',
                 rasterized = True)
+        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][2])[mask2], marker = '.',
+                rasterized = True, color='g')
         plt.xlim([-1, 3.0])
         plt.ylim([-17, -3])
         plt.ylabel("Um%i"%I)
         plt.subplot(224)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][3])[mask], marker = '.',
                 rasterized = True)
+        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][3])[mask2], marker = '.',
+                rasterized = True, color='g')
         plt.ylabel("Ut%i"%I)
         plt.xlim([-1, 3.0])
         plt.ylim([-17, -3])
@@ -243,38 +253,68 @@ def show_phases(rhn):
 def show_mbb(rhn):
     lnL = rhn.lnL
     U = rhn.U
-    mask = (lnL.max() - lnL < 2) & (U < 1e-10)
-    print mask.sum()
+    md31 = rhn.md31
+    mask = (lnL.max() - lnL < 2) & mask_ft
+
+    # Exclude non-protected points
+    mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 0.001)
+    mask &= mask_ft
+
+    mask1 = mask & (md31 > 0)
+    mask2 = mask & (md31 < 0)
     mbb = rhn.mbb*1e9
     mMin = rhn.mMin*1e9
-    plt.scatter(np.log10(mMin), np.log10(mbb), rasterized = True, marker='.',
-            color='0.5')
-    plt.scatter(np.log10(mMin)[mask], np.log10(mbb)[mask], rasterized = True,
-            marker='.', color='g')
+    plt.scatter(np.log10(mMin), np.log10(mbb), rasterized = True, marker='.', color='0.5')
+    plt.scatter(np.log10(mMin)[mask1], np.log10(mbb)[mask1], rasterized = True, marker='.', color='g')
+    plt.scatter(np.log10(mMin)[mask2], np.log10(mbb)[mask2], rasterized = True, marker='.', color='r')
     plt.ylim([-4, 0])
     plt.xlim([-6, -1])
     plt.xlabel("log10(m_light [eV])")
     plt.ylabel("log10(mbb [eV])")
     plt.savefig(OUTPATH+"mbb.pdf")
 
-def finetuning(rhn):
-    lnL = rhn.lnL
-    U = rhn.U
-    mask = (lnL.max() - lnL < 4)
+def get_protected(rhn, IJK = None, epsilon = np.inf, eta = np.inf, mbbK = np.inf):
     M = [rhn.M1, rhn.M2, rhn.M3]
     ue = [rhn.ue1, rhn.ue2, rhn.ue3]
-    def get_protected(I, J, epsilon, eta):
-        dM = abs(M[I] - M[J])
-        deta = abs(ue[I]**2 + ue[J]**2)/(abs(ue[I])**2+abs(ue[J])**2)
-        m1 = dM < epsilon*(M[I]+M[J])/2
-        m2 = deta < eta
-        m3 = m1 & m2 & mask
-        print U[m3].max()
-        return m3
 
-    print get_protected(0, 1, 1e-2, 1e-2).sum()
-    print get_protected(0, 2, 1e-2, 1e-2).sum()
-    print get_protected(1, 2, 1e-2, 1e-2).sum()
+    def f(I, J, K):
+        dM = abs(M[I] - M[J])
+        m1 = dM < epsilon*(M[I]+M[J])/2
+        deta = abs(ue[I]**2 + ue[J]**2)/(abs(ue[I])**2+abs(ue[J])**2)
+        m2 = deta < eta
+        p2 = 0.1**2  # 100 MeV  (ad hoc)
+        mbb = p2*abs(ue[K])**2/M[K]*1e9  # eV
+        m3 = mbb < mbbK  # eV
+        mtot = m1 & m2 & m3
+        return mtot
+
+    if IJK is None:
+        m123 = f(0, 1, 2)
+        m231 = f(1, 2, 0)
+        m312 = f(2, 0, 1)
+        mtot = m123 | m231 | m312
+    else:
+        if IJK not in [123, 231, 312, 321, 213, 132]:
+            raise KeyError("IJK invalid.")
+        IJK = str(IJK)
+        I, J, K = int(IJK[0])-1, int(IJK[1])-1, int(IJK[2])-1
+        mtot = f(I, J, K)
+
+    return mtot
+
+def print_finetuning_counts(rhn):
+    print get_protected(rhn, IJK = 123, epsilon = 1e-2).sum()
+    print get_protected(rhn, IJK = 231, epsilon = 1e-2).sum()
+    print get_protected(rhn, IJK = 312, epsilon = 1e-2).sum()
+    print get_protected(rhn, epsilon = 1e-2).sum()
+    print get_protected(rhn, IJK = 123, epsilon = 1e-2, eta = 1e-2).sum()
+    print get_protected(rhn, IJK = 231, epsilon = 1e-2, eta = 1e-2).sum()
+    print get_protected(rhn, IJK = 312, epsilon = 1e-2, eta = 1e-2).sum()
+    print get_protected(rhn, epsilon = 1e-2, eta = 1e-2).sum()
+    print get_protected(rhn, IJK = 123, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
+    print get_protected(rhn, IJK = 231, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
+    print get_protected(rhn, IJK = 312, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
+    print get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
 
 def triangle(rhn):
     x = rhn.Ue1/rhn.U1
@@ -293,10 +333,10 @@ def triangle(rhn):
 
 if __name__ == "__main__":
     #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
-    rhn = RHN_Chain('/home/ubuntu/data2/RHN_NH.hdf5', MODEL = 'full',
+    rhn = RHN_Chain('/home/ubuntu/data2/RHN_1e-10.hdf5', MODEL = 'full',
             print_keys = False)
-    finetuning(rhn)
-    #triangle(rhn)
+    #print_finetuning_counts(rhn)
+    triangle(rhn)
     #show_phases(rhn)
     #show_mbb(rhn)
     #show_Rorder(rhn)
