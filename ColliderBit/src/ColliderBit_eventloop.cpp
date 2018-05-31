@@ -29,6 +29,7 @@
 ///          (anders.kvellestad@fys.uio.no)
 ///  \date   2017 March
 ///  \date   2018 Jan
+///  \date   2018 May
 ///
 ///  *********************************************
 
@@ -139,7 +140,8 @@ namespace Gambit
         result.max_nEvents = runOptions->getValue<std::vector<int> >("max_nEvents");
         result.target_stat = runOptions->getValue<std::vector<double> >("target_fractional_uncert");
         result.stop_at_sys = runOptions->getValueOrDef<bool>(true, "halt_when_systematic_dominated");
-        result.all_SR_must_converge = runOptions->getValueOrDef<bool>(true, "all_SR_must_converge");
+        result.all_analyses_must_converge = runOptions->getValueOrDef<bool>(false, "all_analyses_must_converge");
+        result.all_SR_must_converge = runOptions->getValueOrDef<bool>(false, "all_SR_must_converge");
         result.stoppingres = runOptions->getValueOrDef<std::vector<int> >(std::vector<int>(result.target_stat.size(), 200), "events_between_convergence_checks");
         if (result.min_nEvents.size() != result.max_nEvents.size() or result.min_nEvents.size() != result.target_stat.size())
         {
@@ -1861,7 +1863,6 @@ namespace Gambit
     void runDetAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runDetAnalyses;
-      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1871,6 +1872,7 @@ namespace Gambit
 
       if (!useDelphesDetector) return;
 
+      static MC_convergence_checker convergence;
       if (*Loop::iteration == COLLIDER_INIT)
       {
         convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
@@ -1945,7 +1947,6 @@ namespace Gambit
     void runATLASAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runATLASAnalyses;
-      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -1955,6 +1956,7 @@ namespace Gambit
 
       if (!useBuckFastATLASDetector) return;
 
+      static MC_convergence_checker convergence;
       if (*Loop::iteration == COLLIDER_INIT)
       {
         convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
@@ -2027,7 +2029,6 @@ namespace Gambit
     void runATLASnoeffAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runATLASnoeffAnalyses;
-      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -2037,6 +2038,7 @@ namespace Gambit
 
       if (!useBuckFastATLASnoeffDetector) return;
 
+      static MC_convergence_checker convergence;
       if (*Loop::iteration == COLLIDER_INIT)
       {
         convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
@@ -2109,7 +2111,6 @@ namespace Gambit
     void runCMSAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runCMSAnalyses;
-      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -2119,6 +2120,7 @@ namespace Gambit
 
       if (!useBuckFastCMSDetector) return;
 
+      static MC_convergence_checker convergence;
       if (*Loop::iteration == COLLIDER_INIT)
       {
         convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
@@ -2191,7 +2193,6 @@ namespace Gambit
     void runCMSnoeffAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runCMSnoeffAnalyses;
-      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -2201,6 +2202,7 @@ namespace Gambit
 
       if (!useBuckFastCMSnoeffDetector) return;
 
+      static MC_convergence_checker convergence;
       if (*Loop::iteration == COLLIDER_INIT)
       {
         convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
@@ -2273,7 +2275,6 @@ namespace Gambit
     void runIdentityAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::runIdentityAnalyses;
-      static MC_convergence_checker convergence;
 
       if (*Loop::iteration == BASE_INIT)
       {
@@ -2283,6 +2284,7 @@ namespace Gambit
 
       if (!useBuckFastIdentityDetector) return;
 
+      static MC_convergence_checker convergence;
       if (*Loop::iteration == COLLIDER_INIT)
       {
         convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);

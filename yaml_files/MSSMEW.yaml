@@ -262,6 +262,7 @@ Rules:
       events_between_convergence_checks: [20000]
       target_fractional_uncert: [0.3]
       halt_when_systematic_dominated: true
+      all_analyses_must_converge: false
       all_SR_must_converge: false
 
   # Define Monte Carlo event simulator and associated options.
