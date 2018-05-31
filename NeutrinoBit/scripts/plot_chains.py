@@ -111,6 +111,7 @@ def check_sum(rhn, exclude = []):
     print lnL2
 
 def show_neutrino_masses(rhn):
+    print "mNu..."
     mNu1 = rhn.mNu1*1e9
     mNu2 = rhn.mNu2*1e9
     mNu3 = rhn.mNu3*1e9
@@ -121,43 +122,49 @@ def show_neutrino_masses(rhn):
     mNu_1st = np.minimum(mNu1, mNu3)
     mNu_2nd = np.where(mNu1 < mNu3, mNu2, mNu1)
     mNu_3rd = np.where(mNu1 < mNu3, mNu3, mNu2)
+    lnL = rhn.lnL
 
-    #print (mNu2**2-mNu1**2).min()
-    #print (mNu2**2-mNu1**2).max()
-    #print (mNu3**2-mNu1**2).min()
-    #print (mNu3**2-mNu1**2).max()
-    #print (mNu3**2-mNu2**2).min()
-    #print (mNu3**2-mNu2**2).max()
+    def plot(mask, filename):
+        #print (mNu2**2-mNu1**2).min()
+        #print (mNu2**2-mNu1**2).max()
+        #print (mNu3**2-mNu1**2).min()
+        #print (mNu3**2-mNu1**2).max()
+        #print (mNu3**2-mNu2**2).min()
+        #print (mNu3**2-mNu2**2).max()
 
-    plt.clf()
-    plt.subplot(221)
-    plt.scatter(np.log10(mNu_1st), np.log10(mNu_2nd), marker='.', alpha = 0.01, rasterized = True)
-    plt.scatter(np.log10(mNu_1st), np.log10(mNu_3rd), marker='.', alpha = 0.01, rasterized = True)
+        plt.clf()
+        plt.subplot(221)
+        plt.scatter(np.log10(mNu_1st)[mask], np.log10(mNu_2nd)[mask], marker='.', alpha = 0.01, rasterized = True)
+        plt.scatter(np.log10(mNu_1st)[mask], np.log10(mNu_3rd)[mask], marker='.', alpha = 0.01, rasterized = True)
 
-    plt.subplot(222)
-    plt.hist(np.log10(mNu1), bins = 200, log=True)
-    plt.hist(np.log10(mNu2), bins = 200, log=True)
-    plt.hist(np.log10(mNu3), bins = 200, log=True)
+        plt.subplot(222)
+        plt.hist(np.log10(mNu1)[mask], bins = 200, log=True)
+        plt.hist(np.log10(mNu2)[mask], bins = 200, log=True)
+        plt.hist(np.log10(mNu3)[mask], bins = 200, log=True)
 
-    plt.subplot(223)
-    plt.scatter(np.log10(mNu_1st), np.log10(md21), marker='.', alpha = 0.01, rasterized = True)
-    plt.scatter(np.log10(mNu_1st), np.log10(abs(md3l)), marker='.', alpha = 0.01, rasterized = True)
+        plt.subplot(223)
+        plt.scatter(np.log10(mNu_1st)[mask], np.log10(md21)[mask], marker='.', alpha = 0.01, rasterized = True)
+        plt.scatter(np.log10(mNu_1st)[mask], np.log10(abs(md3l))[mask], marker='.', alpha = 0.01, rasterized = True)
 
-    plt.subplot(224)
-    plt.hist(np.log10(md21), bins = 200, log=True)
-    plt.hist(np.log10(abs(md3l)), bins = 200, log=True)
+        plt.subplot(224)
+        plt.hist(np.log10(md21)[mask], bins = 200, log=True)
+        plt.hist(np.log10(abs(md3l))[mask], bins = 200, log=True)
 
-    plt.savefig(OUTPATH+"mNu.pdf", dpi = 200)
+        plt.savefig(OUTPATH+filename, dpi = 200)
+
+    mask = (lnL.max() - lnL > 2) & (md31 > 0)
+    plot(mask, 'mNu_NH.pdf')
+    mask = (lnL.max() - lnL > 2) & (md31 < 0)
+    plot(mask, 'mNu_IH.pdf')
 
 def show_Rorder(rhn):
+    print "Rorder..."
     plt.clf()
-    plt.subplot(211)
-    plt.scatter(rhn.Rorder, np.log10(rhn.Ue1), marker='.', rasterized = True)
-    plt.subplot(212)
     plt.hist(rhn.Rorder, range = [0, 6], bins = 6)
     plt.savefig(OUTPATH+"Rorder.pdf", dpi = 200)
 
 def show_U_vs_M(rhn):
+    print "U_vs_M..."
     lnL = rhn.lnL
     mask = lnL.max()-lnL < 2
     mask_ft = get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.01)
@@ -251,10 +258,12 @@ def show_phases(rhn):
     plt.savefig(OUTPATH+"angles.pdf")
 
 def show_mbb(rhn):
+    print "mbb..."
+    plt.clf()
     lnL = rhn.lnL
     U = rhn.U
     md31 = rhn.md31
-    mask = (lnL.max() - lnL < 2) & mask_ft
+    mask = (lnL.max() - lnL < 2)
 
     # Exclude non-protected points
     mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 0.001)
@@ -317,37 +326,56 @@ def print_finetuning_counts(rhn):
     print get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
 
 def triangle(rhn):
+    print "triangle..."
     x = rhn.Ue1/rhn.U1
     y = rhn.Um1/rhn.U1
     mMin = rhn.mMin * 1e9
     lnL = rhn.lnL
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.01)
+    md31 = rhn.md31
+
+    plt.subplot(121)
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 > 0)
     plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.001)
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 > 0)
     plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.0001)
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 > 0)
     plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.00001)
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 > 0)
     plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
+    plt.xlabel("Ue1/U1")
+    plt.ylabel("Um1/U1")
+
+    plt.subplot(122)
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 < 0)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 < 0)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 < 0)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
+    mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 < 0)
+    plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
+    plt.xlabel("Ue1/U1")
+    plt.ylabel("Um1/U1")
+
     plt.savefig(OUTPATH+"triangle.pdf")
 
 if __name__ == "__main__":
-    #rhn = RHN_Chain('/home/cweniger/hdf5_29_05_2018/RHN_diff_NH_123_1e-5.hdf5', print_keys = False)
     rhn = RHN_Chain('/home/ubuntu/data2/RHN_1e-10.hdf5', MODEL = 'full',
             print_keys = False)
-    #print_finetuning_counts(rhn)
-    triangle(rhn)
-    #show_phases(rhn)
+    #triangle(rhn)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    #show_neutrino_masses(rhn)
+    show_neutrino_masses(rhn)
+    #show_U_vs_M(rhn)
+    #show_survival_fraction(rhn)
+
+    #print_finetuning_counts(rhn)
+    #show_phases(rhn)
     #show_lnL_mbb(rhn)
     #show_0nubb_impact(rhn)
     #check_sum(rhn, exclude = ['inv'])
     #show_lnL_inv_Z_width(rhn)
     #show_md21(rhn)
-    #show_U_vs_M(rhn)
-    #show_survival_fraction(rhn)
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
