@@ -30,13 +30,13 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 1.]
+      range: [1E-7, 0.23]
       prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
       prior_type: flat
     dmNu3l:
-      range: [2e-3, 3e-3]
+      range: [-3e-3, -2e-3]
       prior_type: flat
 
     alpha1:
@@ -58,12 +58,12 @@ Parameters:
       range: [124.1, 127.3]
 
   # Right Handed Neutrino Parameters
-  RightHandedNeutrinos_diff:
+  RightHandedNeutrinos:
     M_1:
       range: [0.06, 500]
       prior_type: log
-    delta_M21:
-      range: [1E-4, 500]
+    M_2:
+      range: [0.06, 500]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -347,7 +347,6 @@ Rules:
     options:
       upper_limit: 1e-10
 
-
 KeyValues:
 
   dependency_resolution:
@@ -357,4 +356,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "/home/ubuntu/data/RHN_diff_NH/"
+  default_output_path: "/home/ubuntu/data/RHN_diff_IH/"

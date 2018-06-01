@@ -30,7 +30,7 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 1.]
+      range: [1E-7, 0.23]
       prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
