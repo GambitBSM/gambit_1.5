@@ -50,7 +50,7 @@ Scanner:
       plugin: multinest
       like:  LogLike
       nlive: 1000
-      tol: 0.1
+      tol: 0.01
 
     mcmc:
       plugin: great
@@ -88,6 +88,8 @@ KeyValues:
   default_output_path: "runs/spartan"
 
   rng: ranlux48
+
+  print_timing_data: true 
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6

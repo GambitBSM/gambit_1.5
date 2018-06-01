@@ -747,7 +747,7 @@ namespace Gambit
         // Open requested file
         bool oldfile;
         Utils::ensure_path_exists(tmpfile);
-        file_id = HDF5::openFile(tmpfile,false,oldfile); // Don't overwrite existing file; we will check here if it exists (via oldfile) and throw an error if it does.
+        file_id = HDF5::openFile(tmpfile,false,oldfile,'w'); // Don't overwrite existing file; we will check here if it exists (via oldfile) and throw an error if it does.
         if(oldfile)
         {
           std::ostringstream errmsg;
@@ -803,47 +803,18 @@ namespace Gambit
     /// Search the output directory for temporary files (pre-combination)
     std::vector<std::string> HDF5Printer::find_temporary_files(const bool error_if_inconsistent)
     {
-      // Autodetect temporary files from previous run.
-      std::string output_dir = Utils::dir_name(finalfile);
-      std::vector<std::string> files = Utils::ls_dir(output_dir);
-      std::string tmp_base(Utils::base_name(finalfile) + "_temp_");
-      std::vector<int> ranks;
-      std::vector<std::string> result;
+      /// Already have a routine to do the work
+      std::pair<std::vector<std::string>,std::vector<size_t>> out = HDF5::find_temporary_files(finalfile);
+      std::vector<std::string> result = out.first;
+      std::vector<size_t> missing = out.second;
 
-      //std::cout << "Matching against: " <<tmp_base<<std::endl;
-      for(auto it=files.begin(); it!=files.end(); ++it)
-      {
-        //std::cout << (*it) << std::endl;
-        //std::cout << it->substr(0,tmp_base.length()) << std::endl;
-        if (it->compare(0, tmp_base.length(), tmp_base) == 0)
-        {
-          // Matches format of temporary file! Extract the rank that produced it
-          std::stringstream ss;
-          ss << it->substr(tmp_base.length());
-          if(Utils::isInteger(ss.str())) // Only do this for files where the remainder of the string is just an integer (i.e. not the combined files etc.)
-          {
-            int rank;
-            ss >> rank;
-            //std::cout << "Match! "<< ss.str() << " : " << rank << std::endl;
-            // TODO: check for failed read
-            ranks.push_back(rank);
-            result.push_back(output_dir+"/"+*it);
-          }
-        }
-      }
       // Check if all temporary files found (i.e. if output from some rank is missing)
       if(error_if_inconsistent)
       {
-        std::vector<int> missing;
-        for(size_t i=0; i<ranks.size(); ++i)
-        {
-          if(std::find(ranks.begin(), ranks.end(), i) == ranks.end())
-          { missing.push_back(i); }
-        }
         if( missing.size()>0 )
         {
           std::ostringstream errmsg;
-          errmsg << "HDF5Printer is attempting to resume from a previous run, but could not locate all the expected temporary output files (found "<<ranks.size()<<" temporary files, but are missing the files from the following ranks: "<<missing<<")! Resuming is therefore not possible; aborting run...";
+          errmsg << "HDF5Printer is attempting to resume from a previous run, but could not locate all the expected temporary output files (found "<<result.size()<<" temporary files, but are missing the files from the following ranks: "<<missing<<")! Resuming is therefore not possible; aborting run...";
           printer_error().raise(LOCAL_INFO, errmsg.str());
         }
       }
@@ -1205,11 +1176,13 @@ namespace Gambit
                                   // follow a fixed format and they all exist. We check for this before
                                   // running this function, so this should be fine.
 
-      // If we set the final flag 'true' then Greg's code will assume that a '_temp_combined' output file
+      // If we set the second last flag 'true' then Greg's code will assume that a '_temp_combined' output file
       // exists, and it will crash if it doesn't. So we need to first check if such a file exists.
       bool combined_file_exists = Utils::file_exists(tmp_comb_file); // We already check this externally; pass in as flag?
       std::cout<<"combined_file_exists? "<<combined_file_exists<<std::endl;
-      HDF5::combine_hdf5_files(tmp_comb_file, finalfile, group, num, combined_file_exists);
+      // Second last bool just tells the routine to delete the temporary files when it is done
+      // Last flag, if false, tells routines to throw an error if any expected temporary file cannot be opened for any reason
+      HDF5::combine_hdf5_files(tmp_comb_file, finalfile, group, num, combined_file_exists, true, false);
 
       // This is just left the same as the combine_output_py version!
       if(finalcombine)
