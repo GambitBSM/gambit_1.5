@@ -15,7 +15,7 @@ Parameters:
   DiracDM_xi:
     mF: 
       range: [45., 70.]
-      prior_type: log
+      prior_type: flat
     lF: 
       range: [1e-6, 1]
       prior_type: log

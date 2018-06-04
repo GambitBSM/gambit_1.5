@@ -14,8 +14,8 @@ Parameters:
 
   DiracDM_xi:
     mF: 
-      range: [45., 70.]
-      prior_type: flat
+      range: [60., 500.]
+      prior_type: log
     lF: 
       range: [1e-6, 1]
       prior_type: log
@@ -207,7 +207,7 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "Dirac_low_mass_diver.hdf5"
+    output_file: "Dirac_extra_diver.hdf5"
     delete_file_on_restart: true
     group: "/DDM"    
 
@@ -263,4 +263,4 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e+5
     debug: false
 
-  default_output_path: "/marconi_scratch/userexternal/sbloor00/production_scans/Dirac/low_mass/diver"
+  default_output_path: "/marconi_scratch/userexternal/sbloor00/production_scans/Dirac/extra/diver"
