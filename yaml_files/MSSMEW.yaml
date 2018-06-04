@@ -54,6 +54,8 @@ Printer:
   # Can switch to the ascii printer by commenting out and
   # using the ascii lines below
 
+  # printer: cout
+
   printer: hdf5
   options:
     output_file: "MSSMEW.hdf5"
@@ -351,7 +353,8 @@ Rules:
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:
-      analyses: [ ["ATLAS_13TeV_MultiLEP_36invfb"] ]
+      analyses: [ ["ATLAS_13TeV_MultiLEP_36invfb",
+                   "ATLAS_13TeV_RJ3L_lowmass_36invfb"] ]
 
   # ATLASnoeff analysis setup.
   # NOTE: Don't blindly copy this analysis list without also checking the
@@ -404,10 +407,10 @@ Rules:
 
   # Invisible Higgs branching ratio from CMS-PAS-HIG-17-023 with 10% theory error
   # Path relative to GAMBIT build
-    - capability: lnL_Higgs_invWidth
-      function: lnL_Higgs_invWidth_SMlike
-      options:
-        BR_h_inv_chi2_data_file: ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_profiled.dat
+  - capability: lnL_Higgs_invWidth
+    function: lnL_Higgs_invWidth_SMlike
+    options:
+      BR_h_inv_chi2_data_file: ./DecayBit/data/CMS-PAS-HIG-17-023_Figure_7-b_10_profiled.dat
 
 # Set the names of key log files
 Logger:
