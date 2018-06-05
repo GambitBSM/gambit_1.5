@@ -9,8 +9,12 @@
 ///  Authors (add name and date if you modify):
 ///
 ///  \author Gregory Martinez
-///           (gregory.david.martinez@gmail.com)
-///  \date 2014 MAY
+///          (gregory.david.martinez@gmail.com)
+///  \date 2014 May
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2018 June
 ///
 ///  *********************************************
 
@@ -30,17 +34,17 @@ scanner_plugin(twalk, version(1, 0, 0))
         int dim = get_dimension();
 
         int numtasks;
-#ifdef WITH_MPI
-        MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-#else
-        numtasks = 1;
-#endif
+        #ifdef WITH_MPI
+            MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+        #else
+            numtasks = 1;
+        #endif
 
         Gambit::Options txt_options;
         txt_options.setValue("synchronised",false);
         get_printer().new_stream("txt", txt_options);
         set_resume_params.set_resume_mode(get_printer().resume_mode());
-        
+
         int pdim = get_inifile_value<int>("projection_dimension", 4);
         TWalk(LogLike, get_printer(),
                         set_resume_params,
@@ -62,65 +66,66 @@ scanner_plugin(twalk, version(1, 0, 0))
     }
 }
 
-void TWalk(Gambit::Scanner::like_ptr LogLike, 
-           Gambit::Scanner::printer_interface &printer, 
-           Gambit::Scanner::resume_params_func set_resume_params, 
-           const int &ma, 
-           const double &div, 
-           const int &proj, 
-           const double &din, 
-           const double &alim, 
-           const double &alimt, 
-           const long long &rand, 
-           const double &sqrtR, 
-           const int &NThreads, 
-           const bool &hyper_grid, 
-           const int &burn_in, 
+void TWalk(Gambit::Scanner::like_ptr LogLike,
+           Gambit::Scanner::printer_interface &printer,
+           Gambit::Scanner::resume_params_func set_resume_params,
+           const int &dimension,
+           const double &div,
+           const int &proj,
+           const double &din,
+           const double &alim,
+           const double &alimt,
+           const long long &rand,
+           const double &sqrtR,
+           const int &NChains,
+           const bool &hyper_grid,
+           const int &burn_in,
            const int &/*save_freq*/)
 {
-    std::vector<double> chisq(NThreads);
-    std::vector<double> aNext(ma);
-    std::vector<std::vector<double>> a0(NThreads, std::vector<double>(ma));
+    std::vector<double> chisq(NChains);
+    std::vector<double> aNext(dimension);
+    std::vector<std::vector<double>> a0(NChains, std::vector<double>(dimension));
     double ans, chisqnext;
-    std::vector<int> mult(NThreads, 1);
-    std::vector<int> totN(NThreads, 0);
-    std::vector<int> count(NThreads, 1);
+    std::vector<int> mult(NChains, 1);
+    std::vector<int> totN(NChains, 0);
+    std::vector<int> count(NChains, 1);
     int t, tt;
     int total = 1, ttotal = 0, Nlength = 1;
 
-    std::vector<std::vector<double>> covT(NThreads, std::vector<double>(ma, 0.0));
-    std::vector<std::vector<double>> avgT(NThreads, std::vector<double>(ma, 0.0));
-    std::vector<double> W(ma, 0.0);
-    std::vector<double> avgTot(ma, 0.0);
-    bool cont;
-    std::vector<unsigned long long int> ids(NThreads);
-    std::vector<int> ranks(NThreads);
+    std::vector<std::vector<double>> covT(NChains, std::vector<double>(dimension, 0.0));
+    std::vector<std::vector<double>> avgT(NChains, std::vector<double>(dimension, 0.0));
+    std::vector<double> W(dimension, 0.0);
+    std::vector<double> avgTot(dimension, 0.0);
+    bool converged = false;
+    std::vector<unsigned long long int> ids(NChains);
+    std::vector<int> ranks(NChains);
     unsigned long long int next_id;
-    double Ravg = 0.0;
+    double Rsum, Rmax;
 
     set_resume_params(chisq, a0, mult, totN, count, total, ttotal, Nlength, covT, avgT, W, avgTot, ids, ranks);
-    
+
     Gambit::Scanner::assign_aux_numbers("mult", "chain");
 
-#ifdef WITH_MPI
     int rank;
     int numtasks;
-    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Barrier(MPI_COMM_WORLD);
+    #ifdef WITH_MPI
+        MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        MPI_Barrier(MPI_COMM_WORLD);
 
-    std::vector<int> tints(NThreads);
-    for (int i = 0; i < NThreads; i++) tints[i] = i;
-    std::vector<int> talls(2*numtasks);
-    set_resume_params(tints, talls);
-#else
-    int numtasks = 1;
-    int rank = 0;
-#endif
+        std::vector<int> tints(NChains);
+        for (int i = 0; i < NChains; i++) tints[i] = i;
+        std::vector<int> talls(2*numtasks);
+        set_resume_params(tints, talls);
+    #else
+        numtasks = 1;
+        rank = 0;
+    #endif
+
     std::vector<RanNumGen *> gDev;
-    for (int i = 0; i < NThreads; i++)
+    for (int i = 0; i < NChains; i++)
     {
-        gDev.push_back(new RanNumGen(proj, ma, din, alim, alimt, div, rand));
+        gDev.push_back(new RanNumGen(proj, dimension, din, alim, alimt, div, rand));
     }
 
     Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
@@ -128,82 +133,81 @@ void TWalk(Gambit::Scanner::like_ptr LogLike,
 
     if (set_resume_params.resume_mode())
     {
-#ifdef WITH_MPI
-        for (int i = 0; i < numtasks; i++)
-        {
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast (c_ptr(a0[talls[i]]), a0[talls[i]].size(), MPI_DOUBLE, i, MPI_COMM_WORLD);
-            MPI_Bcast (&chisq[talls[i]], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
-            MPI_Bcast (&mult[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
-            MPI_Bcast (&count[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
-            MPI_Bcast (&ranks[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
-            MPI_Bcast (&ids[talls[i]], 1, MPI_UNSIGNED_LONG_LONG, i, MPI_COMM_WORLD);
-        }
-#endif
+        #ifdef WITH_MPI
+            for (int i = 0; i < numtasks; i++)
+            {
+                MPI_Barrier(MPI_COMM_WORLD);
+                MPI_Bcast (c_ptr(a0[talls[i]]), a0[talls[i]].size(), MPI_DOUBLE, i, MPI_COMM_WORLD);
+                MPI_Bcast (&chisq[talls[i]], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
+                MPI_Bcast (&mult[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
+                MPI_Bcast (&count[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
+                MPI_Bcast (&ranks[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
+                MPI_Bcast (&ids[talls[i]], 1, MPI_UNSIGNED_LONG_LONG, i, MPI_COMM_WORLD);
+            }
+        #endif
     }
     else
     {
-        for (t = 0; t < NThreads; t++)
+        for (t = 0; t < NChains; t++)
         {
-#ifdef WITH_MPI
             if (rank == 0)
             {
-#endif
-                for (int j = 0; j < ma; j++)
+                for (int j = 0; j < dimension; j++)
                     a0[t][j] = (gDev[t]->Doub());
                 chisq[t] = -LogLike(a0[t]);
                 ids[t] = LogLike->getPtID();
                 ranks[t] = rank;
-#ifdef WITH_MPI
             }
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast (c_ptr(a0[t]), a0[t].size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-#endif
+            #ifdef WITH_MPI
+                MPI_Barrier(MPI_COMM_WORLD);
+                MPI_Bcast (c_ptr(a0[t]), a0[t].size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            #endif
         }
     }
 
-#ifdef WITH_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Bcast (c_ptr(chisq), chisq.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast (c_ptr(ids), ids.size(), MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
-    MPI_Bcast (c_ptr(ranks), ranks.size(), MPI_INT, 0, MPI_COMM_WORLD);
-#endif
+    #ifdef WITH_MPI
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast (c_ptr(chisq), chisq.size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        MPI_Bcast (c_ptr(ids), ids.size(), MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
+        MPI_Bcast (c_ptr(ranks), ranks.size(), MPI_INT, 0, MPI_COMM_WORLD);
+    #endif
 
     std::cout << "Metropolis Hastings/TWalk Algorithm Started"  << std::endl;
 
-    do
+    while (not converged)
     {
-#ifdef WITH_MPI
-        if (rank == 0)
-        {
-            int j = NThreads;
-            for(int i = 0; i < numtasks; i++)
+        #ifdef WITH_MPI
+            if (rank == 0)
             {
-                int temp = int((j--)*gDev[0]->Doub());
-                talls[i] = tints[temp];
-                tints[temp] = tints[j];
-                tints[j] = talls[i];
+                int j = NChains;
+                for(int i = 0; i < numtasks; i++)
+                {
+                    int temp = int((j--)*gDev[0]->Doub());
+                    talls[i] = tints[temp];
+                    tints[temp] = tints[j];
+                    tints[j] = talls[i];
+                }
+
+                for(int i = numtasks, end = talls.size(); i < end; i++)
+                {
+                    talls[i] = tints[int(j*gDev[0]->Doub())];
+                }
             }
 
-            for(int i = numtasks, end = talls.size(); i < end; i++)
-            {
-                talls[i] = tints[int(j*gDev[0]->Doub())];
-            }
-        }
+            MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Bcast (c_ptr(talls), talls.size(), MPI_INT, 0, MPI_COMM_WORLD);
+            MPI_Bcast (c_ptr(tints), tints.size(), MPI_INT, 0, MPI_COMM_WORLD);
 
-        MPI_Barrier(MPI_COMM_WORLD);
-        MPI_Bcast (c_ptr(talls), talls.size(), MPI_INT, 0, MPI_COMM_WORLD);
-        MPI_Bcast (c_ptr(tints), tints.size(), MPI_INT, 0, MPI_COMM_WORLD);
+            t = talls[rank];
+            tt = talls[rank + numtasks];
+            double logZ = gDev[t]->Dev(aNext, a0, t, tt, NChains - numtasks, tints);
+        #else
+            t = int(NChains*gDev[0]->Doub());
+            tt = int((NChains - 1)*gDev[0]->Doub());
+            if (tt >= t) tt++;
+            double logZ = gDev[t]->Dev(aNext, a0, t, tt);
+        #endif
 
-        t = talls[rank];
-        tt = talls[rank + numtasks];
-        double logZ = gDev[t]->Dev(aNext, a0, t, tt, NThreads - numtasks, tints);
-#else
-        t = int(NThreads*gDev[0]->Doub());
-        tt = int((NThreads - 1)*gDev[0]->Doub());
-        if (tt >= t) tt++;
-        double logZ = gDev[t]->Dev(aNext, a0, t, tt);
-#endif
         if(!(hyper_grid && notUnit(aNext)))
         {
             chisqnext = -LogLike(aNext);
@@ -227,80 +231,81 @@ void TWalk(Gambit::Scanner::like_ptr LogLike,
             }
         }
 
-#ifdef WITH_MPI
-        for (int i = 0; i < numtasks; i++)
-        {
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast (c_ptr(a0[talls[i]]), a0[talls[i]].size(), MPI_DOUBLE, i, MPI_COMM_WORLD);
-            MPI_Bcast (&chisq[talls[i]], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
-            MPI_Bcast (&mult[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
-            MPI_Bcast (&count[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
-            MPI_Bcast (&ranks[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
-            MPI_Bcast (&ids[talls[i]], 1, MPI_UNSIGNED_LONG_LONG, i, MPI_COMM_WORLD);
-        }
-#endif
-        for (int l = 0; l < NThreads; l++)
-            mult[l]++;
+        #ifdef WITH_MPI
+          for (int i = 0; i < numtasks; i++)
+          {
+              MPI_Barrier(MPI_COMM_WORLD);
+              MPI_Bcast (c_ptr(a0[talls[i]]), a0[talls[i]].size(), MPI_DOUBLE, i, MPI_COMM_WORLD);
+              MPI_Bcast (&chisq[talls[i]], 1, MPI_DOUBLE, i, MPI_COMM_WORLD);
+              MPI_Bcast (&mult[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
+              MPI_Bcast (&count[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
+              MPI_Bcast (&ranks[talls[i]], 1, MPI_INT, i, MPI_COMM_WORLD);
+              MPI_Bcast (&ids[talls[i]], 1, MPI_UNSIGNED_LONG_LONG, i, MPI_COMM_WORLD);
+          }
+        #endif
+
+        for (int l = 0; l < NChains; l++) mult[l]++;
 
         total++;
-        
-//         if (total%save_freq == 0) 
-//         {
-//              set_resume_params.dump();
-//              //out_stream->reset();
-//         }
-            
-        
-#ifdef WITH_MPI
+
+        //if (total%save_freq == 0)
+        //{
+        //    set_resume_params.dump();
+        //    //out_stream->reset();
+        //}
+
+
         if (rank == 0)
         {
-#endif
-            cont = 0;
+            converged = true;
             int cnt = 0;
             for (auto it = count.begin(); it != count.end(); ++it)
             {
                 cnt += *it;
             }
 
-            if (total%NThreads == 0 && cnt >= burn_in*NThreads)
+            if (total%NChains == 0 && cnt >= burn_in*NChains)
             {
-                for (int ttt = 0; ttt < NThreads; ttt++) for (int i = 0; i < ma; i++)
+                for (int ttt = 0; ttt < NChains; ttt++) for (int i = 0; i < dimension; i++)
                 {
                     double davg = (a0[ttt][i]-avgT[ttt][i])/(ttotal+1.0);
                     double dcov = ttotal*davg*davg - covT[ttt][i]/(ttotal+1.0);
-                    avgTot[i] += davg/NThreads;
+                    avgTot[i] += davg/NChains;
                     covT[ttt][i] += dcov;
                     avgT[ttt][i] += davg;
-                    W[i] += dcov/NThreads;
+                    W[i] += dcov/NChains;
                 }
 
                 ttotal++;
 
-                Ravg = 0.0;
-                for (int i = 0; i < ma; i++)
+                // Loop over each dimension in the parameter space, and compute R for each.
+                // Trigger convergence only if R is below the requested threshold in every dimension.
+                Rsum = Rmax = 0.0;
+                for (int i = 0; i < dimension; i++)
                 {
+
                     double Bn = 0;
-                    for (int ts = 0; ts < NThreads; ts++)
+                    for (int ts = 0; ts < NChains; ts++)
                     {
                         Bn += (avgT[ts][i] - avgTot[i])*(avgT[ts][i] - avgTot[i]);
                     }
-                    Bn /= double(NThreads - 1);
+                    Bn /= double(NChains - 1);
 
-                    double R = 1.0 + double(NThreads + 1)*Bn/W[i]/double(NThreads);
+                    double R = 1.0 + double(NChains + 1)*Bn/W[i]/double(NChains);
 
                     if(W[i] <= 0.0 || R >= sqrtR*sqrtR || R <= 0.0)
                     {
                         if (Nlength == 0)
                         {
-                            cont = true;
+                            converged = false;
                         }
                         else
                         {
-                            cont = false;
+                            converged = true;
                             Nlength--;
-                            for (int i = 0; i < NThreads; i++)
+                            for (int i = 0; i < NChains; i++)
                             {
-                                for (int j = 0; j < ma; j++)
+                                for (int j = 0; j < dimension; j++)
                                 {
                                     covT[i][j] = avgT[i][j] = avgTot[j] = W[j] = 0.0;
                                 }
@@ -309,25 +314,34 @@ void TWalk(Gambit::Scanner::like_ptr LogLike,
                         }
                     }
 
-                    Ravg += R;
+                    Rsum += R;
+                    Rmax = std::max(Rmax, R);
                 }
             }
-            else
-                    cont = true;
-            if (cnt % 100 == 0)
-            std::cout << "points = " << cnt  << "( " << cnt/double(NThreads) << ")" << "\n\taccept ratio = " << (double)cnt/(double)total/(double)numtasks << "\n\tR = " << Ravg/ma << std::endl;
-#ifdef WITH_MPI
+            else converged = false;
+
+            // Print out progress to stdout
+            if (converged or cnt % 100 == 0)
+            {
+                std::cout << "Points = " << cnt  << " (" << cnt/double(NChains) << " per chain)" << std::endl;
+                std::cout << "\tAcceptance ratio = " << (double)cnt/(double)total/(double)numtasks << std::endl;
+                std::cout << "\tsqrt(R) (averaged over all dimensions) = " << sqrt(Rsum/dimension) << std::endl;
+                std::cout << "\tsqrt(R) (largest in any dimension) =     " << sqrt(Rmax) << std::endl;
+            }
+
         }
-        MPI_Barrier(MPI_COMM_WORLD);
-        MPI_Bcast (&cont, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
-#endif
+
+        #ifdef WITH_MPI
+            MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Bcast (&converged, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+        #endif
+
     }
-    while((cont));
 
-    for (auto &&gd : gDev)
-        delete gd;
 
-    std::cout << "twalk for rank " << rank << " has finished." << std::endl;
+    for (auto &&gd : gDev) delete gd;
+
+    std::cout << "TWalk has finised in process " << rank << "." << std::endl;
 
     return;
 }
