@@ -267,8 +267,39 @@ namespace Gambit {
       inline void applyCSVv2LooseBtagEff(std::vector<HEPUtils::Jet*>& bjets) {
         applyCSVv2LooseBtagEff(reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(bjets));
       }
-      //@}
 
+
+      //Apply b-tag misidentification rate for CSVv2 loose WP
+      //@note Numbers from Table 2 in https://arxiv.org/pdf/1712.07158.pdf
+      inline void applyCSVv2LooseBtagMisId(std::vector<const HEPUtils::Jet*>& jets, std::vector<const HEPUtils::Jet*>& bjets) {
+        if (jets.empty()) return;
+        // For now we apply the (pT-averaged) light-flavour misidentification rate to all jets. Realistically, the rate should be higher for c-jets.
+        const static double mis_id_prob = 0.089;
+        for (const HEPUtils::Jet* jet : jets) {
+          // Only apply misidentification rate for non-b-jets
+          if (!jet->btag() && random_bool(mis_id_prob)) bjets.push_back(jet);
+        }
+      }
+
+      inline void applyCSVv2LooseBtagMisId(std::vector<HEPUtils::Jet*>& jets, std::vector<HEPUtils::Jet*>& bjets) {
+        applyCSVv2LooseBtagMisId(reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(jets), reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(bjets));
+      }
+
+
+      //Apply both b-tag efficiency and misidentification rate for CSVv2 loose WP
+      inline void applyCSVv2LooseBtagEffAndMisId(std::vector<const HEPUtils::Jet*>& jets, std::vector<const HEPUtils::Jet*>& bjets) {
+        if (jets.empty() && bjets.empty()) return;
+        // Apply b-tag efficiency
+        applyCSVv2LooseBtagEff(bjets);
+        // Apply misidentification rate to the non-b-jets in the jets vector
+        applyCSVv2LooseBtagMisId(jets, bjets);
+      }
+
+      inline void applyCSVv2LooseBtagEffAndMisId(std::vector<HEPUtils::Jet*>& jets, std::vector<HEPUtils::Jet*>& bjets) {
+        applyCSVv2LooseBtagEffAndMisId(reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(jets), reinterpret_cast<std::vector<const HEPUtils::Jet*>&>(bjets));
+      }
+
+      //@}
 
     }
   }
