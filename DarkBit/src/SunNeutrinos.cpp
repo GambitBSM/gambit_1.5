@@ -141,7 +141,7 @@ namespace Gambit
         result = maxcap;
       }
 
-      cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
 
     }
 
@@ -183,10 +183,8 @@ namespace Gambit
       double ca = sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
 
-      /***** START OF DEBUGGING CODE ***/
-      std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_FermionDMHiggsPortal = " << sigmav << std::endl;
-      std::cout << "capture_rate_Sun inside equilibration_time_Sun_FermionDMHiggsPortal = " << *Dep::capture_rate_Sun << std::endl;
-      /***** END OF DEBUGGING CODE ***/
+      //std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_FermionDMHiggsPortal = " << sigmav << std::endl;
+      //std::cout << "capture_rate_Sun inside equilibration_time_Sun_FermionDMHiggsPortal = " << *Dep::capture_rate_Sun << std::endl;
     }
 
     /// Annihilation rate of dark matter in the Sun (s^-1)
