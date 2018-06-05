@@ -40,8 +40,12 @@ def profile(file_name, frac_error=0.1, min_=0., max_=1.):
 
     # Make functions for profile
     objective = lambda x, mu: chi_squared(x) + penalty(x, mu)
-    profiled = lambda mu: minimize_scalar(objective, bracket=[min_, mu, max_],
-      tol=1E-10, args=(mu)).fun
+    def profiled(mu):
+        if mu == 0.:
+            return chi_squared(0.)
+        else:
+            return minimize_scalar(objective, bounds=[min_, max_],
+                method="Bounded", options={'xatol': 1E-20, 'maxiter': 1000}, args=(mu)).fun
 
     # Profile
     return [(p, profiled(p)) for p in param]
