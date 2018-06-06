@@ -24,7 +24,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_13TeV_2OSLEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE : public HEPUtilsAnalysis {
     private:
 
       // Numbers passing cuts
@@ -47,9 +47,9 @@ namespace Gambit {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
 
-      Analysis_CMS_13TeV_2OSLEP_36invfb() 
+      Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE() 
       {
-        set_analysis_name("CMS_13TeV_2OSLEP_36invfb");
+        set_analysis_name("CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE");
         set_luminosity(35.9);
         // xsecCMS_550_200=30.2;
 
@@ -343,8 +343,8 @@ namespace Gambit {
         
         HEPUtilsAnalysis::add(other);
 
-        Analysis_CMS_13TeV_2OSLEP_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_36invfb*>(other);
+        Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE* specificOther
+                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE*>(other);
 
         // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -438,18 +438,19 @@ namespace Gambit {
           add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
 
-        // Covariance matrix
-        static const vector< vector<double> > BKGCOV = {
-          { 52.8, 12.7,  3.0,  1.2,  4.5,  5.1,  1.2 },
-          { 12.7, 41.4,  3.6,  2.0,  2.5,  2.0,  0.7 },
-          {  3.0,  3.6,  1.6,  0.6,  0.4,  0.3,  0.1},
-          {  1.2,  2.0,  0.6,  1.1,  0.3,  0.1,  0.1},
-          {  4.5,  2.5,  0.4,  0.3,  6.5,  1.8,  0.4},
-          {  5.1,  2.0,  0.3,  0.1,  1.8,  2.4,  0.4},
-          {  1.2,  0.7,  0.1,  0.1,  0.4,  0.4,  0.2},
-        };        
+        // NOTE: In this version of the analysis we do not include the covariance info.
+        // // Covariance matrix
+        // static const vector< vector<double> > BKGCOV = {
+        //   { 52.8, 12.7,  3.0,  1.2,  4.5,  5.1,  1.2 },
+        //   { 12.7, 41.4,  3.6,  2.0,  2.5,  2.0,  0.7 },
+        //   {  3.0,  3.6,  1.6,  0.6,  0.4,  0.3,  0.1},
+        //   {  1.2,  2.0,  0.6,  1.1,  0.3,  0.1,  0.1},
+        //   {  4.5,  2.5,  0.4,  0.3,  6.5,  1.8,  0.4},
+        //   {  5.1,  2.0,  0.3,  0.1,  1.8,  2.4,  0.4},
+        //   {  1.2,  0.7,  0.1,  0.1,  0.4,  0.4,  0.2},
+        // };        
 
-        set_covariance(BKGCOV);
+        // set_covariance(BKGCOV);
 
       }
 
@@ -538,7 +539,7 @@ namespace Gambit {
 
 
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb)
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE)
 
 
   }

@@ -13,7 +13,7 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///  
+///
 ///  \author Gregory Martinez
 ///          (gregory.david.martinez@gmail.com)
 ///  \date ???
@@ -31,13 +31,13 @@
 
 // flag to trigger debug output
 //#define COMBINE_DEBUG
-  
-namespace Gambit 
+
+namespace Gambit
 {
-    namespace Printers 
+    namespace Printers
     {
-        namespace HDF5 
-        { 
+        namespace HDF5
+        {
 
             inline hsize_t getGroupNum(hid_t group_id)
             {
@@ -45,7 +45,7 @@ namespace Gambit
                 H5Gget_info(group_id, &group_info);
                 return group_info.nlinks;
             }
-            
+
             inline hid_t getType(hid_t dataset)
             {
                 hid_t dtype = H5Dget_type(dataset);
@@ -110,15 +110,15 @@ namespace Gambit
 
                 //status = H5Oget_info_by_name (loc_id, name.c_str(), &infobuf, H5P_DEFAULT);
                 H5Oget_info_by_name (loc_id, name.c_str(), &infobuf, H5P_DEFAULT);
-                
-                switch (infobuf.type) 
+
+                switch (infobuf.type)
                 {
                     case H5O_TYPE_GROUP:
                     {
                         //printf ("Group: %s {\n", name);
                         //od.push_back(name);
                         break;
-                        
+
                     }
                     case H5O_TYPE_DATASET:
                     {
@@ -138,7 +138,7 @@ namespace Gambit
 
                 return return_val;
             }
-            
+
             inline herr_t op_func_aux (hid_t loc_id, const char *name_in, const H5L_info_t *,
                     void *operator_data)
             {
@@ -150,15 +150,15 @@ namespace Gambit
 
                 //status = H5Oget_info_by_name (loc_id, name.c_str(), &infobuf, H5P_DEFAULT);
                 H5Oget_info_by_name (loc_id, name.c_str(), &infobuf, H5P_DEFAULT);
-                
-                switch (infobuf.type) 
+
+                switch (infobuf.type)
                 {
                     case H5O_TYPE_GROUP:
                     {
                         //printf ("Group: %s {\n", name);
                         //od.push_back(name);
                         break;
-                        
+
                     }
                     case H5O_TYPE_DATASET:
                     {
@@ -191,7 +191,7 @@ namespace Gambit
                 if(dataspace < 0)
                 {
                   std::ostringstream errmsg;
-                  errmsg<<"Failed to set up HDF5 points for copying. H5Screate_simple failed for dataset ("<<name<<")."; 
+                  errmsg<<"Failed to set up HDF5 points for copying. H5Screate_simple failed for dataset ("<<name<<").";
                   printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
                 hid_t dataset_out = H5Dcreate2(new_group, name.c_str(), type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -222,7 +222,7 @@ namespace Gambit
                 HDF5::closeDataset(dataset_out);
                 HDF5::closeDataset(dataset2_out);
             }
-                
+
             inline std::vector<std::string> getGroups(std::string groups)
             {
                 std::string::size_type pos = groups.find_first_of("/");
@@ -231,13 +231,13 @@ namespace Gambit
                         groups[pos] = ' ';
                         pos = groups.find_first_of("/", pos + 1);
                 }
-                
+
                 std::stringstream ss;
                 ss << groups;
                 std::vector<std::string> ret;
                 std::string temp;
                 while (ss >> temp) ret.push_back(temp);
-                
+
                 return ret;
             }
                 
@@ -491,7 +491,7 @@ namespace Gambit
                 }
                 std::cout << "  Finished scanning temp files               "<<std::endl;
             }
- 
+
             hdf5_stuff::~hdf5_stuff()
             {
                 // Just in case they somehow weren't closed earlier
@@ -533,7 +533,7 @@ namespace Gambit
                            errmsg << "Error combining HDF5 temporary data! A previous combined output file was found (now moved to "<<filebak<<"), but the expected dataset location "<<group_name<<" could not be successfully opened. It may be missing or corrupted due to a bad shutdown. You could try deleting/moving the old combined data file and resuming again, though of course the old combined data will be lost." << std::endl;
                            printer_error().raise(LOCAL_INFO, errmsg.str());
                        }
-                       
+
                        hid_t old_dataset = HDF5::openDataset(old_group, "pointID", true); // Allow fail, we will throw a customised error message
                        if(old_dataset<0)
                        {
@@ -544,7 +544,7 @@ namespace Gambit
                        hid_t space = HDF5::getSpace(old_dataset);
                        hsize_t extra = HDF5::getSimpleExtentNpoints(space);
                        HDF5::closeSpace(space);
-                       HDF5::closeDataset(old_dataset); 
+                       HDF5::closeDataset(old_dataset);
                        size_tot += extra;
 
                        // Check for parameters not found in the newer temporary files.
@@ -566,7 +566,7 @@ namespace Gambit
                     }
                     else
                     {
-                       // This is ok; on first resume no previous combined output exists. 
+                       // This is ok; on first resume no previous combined output exists.
                        old_file = -1;
                        old_group = -1;
                     }
@@ -591,8 +591,8 @@ namespace Gambit
                     errmsg << "Error combining HDF5 temporary data! No model points in primary (synchronised) datasets were found in the existing temporary files, however auxilliary datasets WERE found. Currently auxilliary datasets cannot be 'combined' with nothing, i.e. they must have a corresponding model point in a 'primary' dataset to which they should be associated. It is possible to loosen this requirement, so if you have written a scanner or likelihood container which writes only to auxillary datasets then please report this error and request the print system be upgraded. Otherwise this error indicates a bug, please report it." << std::endl;
                     printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
-                // else everything is cool               
- 
+                // else everything is cool
+
                 hid_t new_file = H5Fcreate(file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
                 if(new_file<0)
                 {
@@ -653,18 +653,18 @@ namespace Gambit
                        hid_t dataspace2 = H5Dget_space(dataset3);
                        hssize_t size = H5Sget_simple_extent_npoints(dataspace);
                        hssize_t size2 = H5Sget_simple_extent_npoints(dataspace2);
-                       
-                       
+
+
                        std::vector<bool> valids;
                        Enter_HDF5<read_hdf5>(dataset3, valids);
-                       
+
                        if (size != size2)
                        {
                            std::ostringstream errmsg;
                            errmsg << "RA_pointID and RA_pointID_isvalid are not the same size.";
                            printer_error().raise(LOCAL_INFO, errmsg.str());
                        }
-                       
+
                        for (auto it = valids.end()-1; size > 0; --it)
                        {
                            if (*it)
@@ -1044,15 +1044,15 @@ namespace Gambit
 
                // Chunking variables
                static const std::size_t CHUNKLENGTH = 1000; // Should be a reasonable value
-               
+
                // Interfaces for the datasets
                // Make sure the types used here don't get out of sync with the types used to write the original datasets
                // We open the datasets in "resume" mode to access existing dataset, and make "const" to disable writing of new data. i.e. "Read-only" mode.
                // TODO: this can probably be streamlined once I write the HDF5 reader, can consolidate some reading routines.
-               const DataSetInterfaceScalar<unsigned long, CHUNKLENGTH> pointIDs(group_id, "pointID", true,'r');        
+               const DataSetInterfaceScalar<unsigned long, CHUNKLENGTH> pointIDs(group_id, "pointID", true,'r');
                const DataSetInterfaceScalar<int, CHUNKLENGTH> pointIDs_isvalid  (group_id, "pointID_isvalid", true,'r');
-               const DataSetInterfaceScalar<int, CHUNKLENGTH> mpiranks          (group_id, "MPIrank", true,'r'); 
-               const DataSetInterfaceScalar<int, CHUNKLENGTH> mpiranks_isvalid  (group_id, "MPIrank_isvalid", true,'r'); 
+               const DataSetInterfaceScalar<int, CHUNKLENGTH> mpiranks          (group_id, "MPIrank", true,'r');
+               const DataSetInterfaceScalar<int, CHUNKLENGTH> mpiranks_isvalid  (group_id, "MPIrank_isvalid", true,'r');
 
                // Error check lengths. This should already have been done for all datasets in the group, but
                // we will double-check these four here.
@@ -1073,7 +1073,7 @@ namespace Gambit
                  errmsg << "This indicates either a bug in the HDF5 combine code, please report it.";
                  printer_error().raise(LOCAL_INFO, errmsg.str());
                }
- 
+
                // Compute number of chunks
                const std::size_t NCHUNKS = dset_length / CHUNKLENGTH; // Number of FULL chunks
                const std::size_t REMAINDER = dset_length - (NCHUNKS*CHUNKLENGTH); // leftover after last full chunk
@@ -1085,7 +1085,7 @@ namespace Gambit
                // Iterate through dataset in chunks
                for(std::size_t i=0; i<NCHUNKIT; ++i)
                {
-                  std::size_t offset = i*CHUNKLENGTH; 
+                  std::size_t offset = i*CHUNKLENGTH;
                   std::size_t length;
 
                   if(i==NCHUNKS){ length = REMAINDER; }
@@ -1095,7 +1095,7 @@ namespace Gambit
                   const std::vector<int> pIDvalid_chunk  = pointIDs_isvalid.get_chunk(offset,length);
                   const std::vector<int> rank_chunk      =         mpiranks.get_chunk(offset,length);
                   const std::vector<int> rankvalid_chunk = mpiranks_isvalid.get_chunk(offset,length);
-                 
+
                   // Check that retrieved lengths make sense
                   if (pID_chunk.size() != CHUNKLENGTH)
                   {
@@ -1105,7 +1105,7 @@ namespace Gambit
                       errmsg << "Error scanning combined pointID and MPIrank datasets! Size of chunk vector retrieved from pointID dataset ("<<pID_chunk.size()<<") does not match CHUNKLENGTH ("<<CHUNKLENGTH<<"), nor the expected remainder for the last chunk ("<<REMAINDER<<"). This probably indicates a bug in the DataSetInterfaceScalar.get_chunk routine, please report it. Error occurred while reading chunk i="<<i<<std::endl;
                       printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
-                  }   
+                  }
                   if( (pID_chunk.size() != pIDvalid_chunk.size())
                    or (rank_chunk.size() != rankvalid_chunk.size())
                    or (pID_chunk.size() != rank_chunk.size()) )
@@ -1123,7 +1123,7 @@ namespace Gambit
 
                   // Iterate within the chunk
                   for(std::size_t j=0; j<length; ++j)
-                  { 
+                  {
                     //Check validity flags agree
                     if(pIDvalid_chunk[j] != rankvalid_chunk[j])
                     {
@@ -1134,7 +1134,7 @@ namespace Gambit
                       errmsg << "This most likely indicates a bug in the HDF5 combine code, please report it.";
                       printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
- 
+
                     // Check for hash match if entry is marked as "valid"
                     if(rankvalid_chunk[j])
                     {
@@ -1144,11 +1144,11 @@ namespace Gambit
                       if(match != left_to_match.end())
                       {
                          // Found a match! Add its index to the hash.
-                         output_hash[*match] = offset + j;                     
+                         output_hash[*match] = offset + j;
                          // Delete it from the list of points that need to be matched (note, multiple entries in output file not allowed)
                          left_to_match.erase(match);
                       }
-                    } 
+                    }
                     // else continue iteration
                   }
                }
