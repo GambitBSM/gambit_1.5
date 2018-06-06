@@ -22,6 +22,11 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
+    // This analysis class is a base class for three SR-specific analysis classes
+    // defined further down:
+    // - Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb
+    // - Analysis_ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb
+    // - Analysis_ATLAS_13TeV_MultiLEP_3Lep_36invfb
     class Analysis_ATLAS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
 
     protected:
@@ -921,7 +926,7 @@ namespace Gambit {
     class Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
 
     private:
-      const vector<string> included_SRs = {"SR2_SF_loose", "SR2_SF_tight", "SR2_DF_100", "SR2_DF_150", "SR2_DF_200", "SR2_DF_300"};
+      const vector<string> _included_SRs = {"SR2_SF_loose", "SR2_SF_tight", "SR2_DF_100", "SR2_DF_150", "SR2_DF_200", "SR2_DF_300"};
 
     public:
       Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb() {
@@ -929,7 +934,8 @@ namespace Gambit {
       }
 
       void increment_SR(string SR_label) {
-        if (std::find(included_SRs.begin(), included_SRs.end(), SR_label) != included_SRs.end()) _numSR[SR_label]++;
+        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
+        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       void collect_results() {
@@ -999,7 +1005,7 @@ namespace Gambit {
     class Analysis_ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
 
     private:
-      const vector<string> included_SRs = {"SR2_int", "SR2_high", "SR2_low"};
+      const vector<string> _included_SRs = {"SR2_int", "SR2_high", "SR2_low"};
 
     public:
       Analysis_ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb() {
@@ -1007,7 +1013,8 @@ namespace Gambit {
       }
 
       void increment_SR(string SR_label) {
-        if (std::find(included_SRs.begin(), included_SRs.end(), SR_label) != included_SRs.end()) _numSR[SR_label]++;
+        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
+        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       void collect_results() {
@@ -1049,9 +1056,9 @@ namespace Gambit {
     class Analysis_ATLAS_13TeV_MultiLEP_3Lep_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
 
     private:
-      const vector<string> included_SRs = {"SR3_slep_a", "SR3_slep_b", "SR3_slep_c", "SR3_slep_d", 
-                                           "SR3_slep_e", "SR3_WZ_0Ja", "SR3_WZ_0Jb", "SR3_WZ_0Jc", 
-                                           "SR3_WZ_1Ja", "SR3_WZ_1Jb", "SR3_WZ_1Jc"};
+      const vector<string> _included_SRs = {"SR3_slep_a", "SR3_slep_b", "SR3_slep_c", "SR3_slep_d", 
+                                            "SR3_slep_e", "SR3_WZ_0Ja", "SR3_WZ_0Jb", "SR3_WZ_0Jc", 
+                                            "SR3_WZ_1Ja", "SR3_WZ_1Jb", "SR3_WZ_1Jc"};
 
     public:
       Analysis_ATLAS_13TeV_MultiLEP_3Lep_36invfb() {
@@ -1059,7 +1066,8 @@ namespace Gambit {
       }
 
       void increment_SR(string SR_label) {
-        if (std::find(included_SRs.begin(), included_SRs.end(), SR_label) != included_SRs.end()) _numSR[SR_label]++;
+        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
+        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       void collect_results() {
