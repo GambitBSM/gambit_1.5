@@ -11,13 +11,15 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Nov
-///
 ///  \author Chris Rogan
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
 ///  \author Marcin Chrzaszcz
 ///          (mchrzasz@cern.ch)
 ///  \date 2018
+///  \author Chrisotph Weniger
+///          (c.weniger@uva.nl)
+///  \date 2018 Jun
 ///
 ///  *********************************************
 
@@ -1126,20 +1128,46 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double Gmu = sminputs.GF;
 
-      Eigen::Matrix3d VNorm = (V.adjoint() * V).real();
-      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+      Eigen::Matrix3d VNorm = (V.adjoint() * V).cwiseAbs2();
+      Eigen::Matrix3d ThetaNorm = (Theta.adjoint()*Theta).cwiseAbs2();
+      Eigen::Matrix3d VTNorm = (V.adjoint() * Theta).cwiseAbs2();
       std::vector<double> MN = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
 
       result = 0.0;
-      for(int i=0; i<3; i++)
-        for(int j=0; j<3; j++)
+
+      // nu nu final states
+      for (int i = 0; i<3; i++)
+        for (int j = 0; j<3; j++)
+        {
+          result += VNorm(i, j);
+        }
+      // N N final states
+      for (int i = 0; i<3; i++)
+        for (int j = 0; j<3; j++)
         {
           if(MN[i] + MN[j] < sminputs.mZ)
-            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi) / sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-          else
-            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+            result += ThetaNorm(i, j);
+        }
+      // N nu final states
+      for (int i = 0; i<3; i++)
+        for (int j = 0; j<3; j++)
+        {
+          if(MN[j] < sminputs.mZ)
+            result += 2*VTNorm(i, j);
         }
 
+//      std::cout << "Mass of RHN: " << MN[0] << " " << MN[1] << " " << MN[2] << std::endl;
+//      std::cout << "Z_inv_width effective number of neutrinos: " << result << std::endl;
+//      result = 0.0;
+//      for(int i=0; i<3; i++)
+//        for(int j=0; j<3; j++)
+//        {
+//          if(MN[i] + MN[j] < sminputs.mZ)
+//            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi) / sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+//          else
+//            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
+//        }
+      result *= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi)/sqrt(1.0-ThetaNorm(0,0)-ThetaNorm(1,1));
     }
 
     void lnL_Z_inv_width_chi2(double &result)
