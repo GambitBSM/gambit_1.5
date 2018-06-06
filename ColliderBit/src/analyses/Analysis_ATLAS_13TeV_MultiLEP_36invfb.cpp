@@ -67,9 +67,12 @@ namespace Gambit {
 
     public:
 
+      // To be implemented in SR-specific analysis classes derived from this class
+      virtual int get_SR() =0;
+
       Analysis_ATLAS_13TeV_MultiLEP_36invfb() {
 
-        set_analysis_name("ATLAS_13TeV_MultiLEP_36invfb");
+        // set_analysis_name("ATLAS_13TeV_MultiLEP_36invfb");
         set_luminosity(36.1);
 
         _numSR2_SF_loose=0;
@@ -338,56 +341,60 @@ namespace Gambit {
         bool preselection=false; 
         if ((nSignalLeptons==2 || nSignalLeptons==3) && nBaselineLeptons==nSignalLeptons && pT_l0>25 && pT_l1>20)preselection=true;
 
-        //Signal Regions
-        //2lep+0jet
-        if (preselection && nSignalLeptons==2 && OSpairs.size()==1 && mll>40 && central_jet_veto && bjet_veto) {
-          if (SFOSpairs.size()==1) {
-            if (mT2>100 && mll>111)_numSR2_SF_loose++;
-            if (mT2>130 && mll>300)_numSR2_SF_tight++; 
-          }
-          if (SFOSpairs.size()==0) {
-            if (mT2>100 && mll>111)_numSR2_DF_100++;
-            if (mT2>150 && mll>111)_numSR2_DF_150++;
-            if (mT2>200 && mll>111)_numSR2_DF_200++;
-            if (mT2>300 && mll>111)_numSR2_DF_300++;
-          }
-        }
+
+        // _Anders
+        // Signal Regions
+        if (get_SR()==1) _numSR2_SF_loose++;
+
+        // //2lep+0jet
+        // if (preselection && nSignalLeptons==2 && OSpairs.size()==1 && mll>40 && central_jet_veto && bjet_veto) {
+        //   if (SFOSpairs.size()==1) {
+        //     if (mT2>100 && mll>111)_numSR2_SF_loose++;
+        //     if (mT2>130 && mll>300)_numSR2_SF_tight++; 
+        //   }
+        //   if (SFOSpairs.size()==0) {
+        //     if (mT2>100 && mll>111)_numSR2_DF_100++;
+        //     if (mT2>150 && mll>111)_numSR2_DF_150++;
+        //     if (mT2>200 && mll>111)_numSR2_DF_200++;
+        //     if (mT2>300 && mll>111)_numSR2_DF_300++;
+        //   }
+        // }
         
-        //2lep+jets
-        if (preselection && nSignalLeptons==2 && SFOSpairs.size()==1 && bjet_veto && nSignalJets>1 && pT_j0>30 && pT_j1>30 && pT_l1>25) {
-          //SR2_int + SR2_high
-          if (mll>81. && mll<101. && mjj>70. && mjj<100. && Z.pT()>80. && W.pT()>100. && mT2>100. && deltaR_jj<1.5 && deltaR_ll<1.8 && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) {
-            if (met>150)_numSR2_int++;
-            if (met>250)_numSR2_high++;
-          }
-          //SR2_low_2J
-          if (nSignalJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
-          //SR2_low_3J
-          if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && Z.abseta()<1.6 && pT_j2>30.)_numSR2_low++;
-        }
+        // //2lep+jets
+        // if (preselection && nSignalLeptons==2 && SFOSpairs.size()==1 && bjet_veto && nSignalJets>1 && pT_j0>30 && pT_j1>30 && pT_l1>25) {
+        //   //SR2_int + SR2_high
+        //   if (mll>81. && mll<101. && mjj>70. && mjj<100. && Z.pT()>80. && W.pT()>100. && mT2>100. && deltaR_jj<1.5 && deltaR_ll<1.8 && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) {
+        //     if (met>150)_numSR2_int++;
+        //     if (met>250)_numSR2_high++;
+        //   }
+        //   //SR2_low_2J
+        //   if (nSignalJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8)_numSR2_low++;
+        //   //SR2_low_3J
+        //   if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && Z.abseta()<1.6 && pT_j2>30.)_numSR2_low++;
+        // }
         
-        //3lep
-        if (preselection && nSignalLeptons==3 && bjet_veto && SFOSpairs.size()) {
-          if (mSFOS<81.2 && met>130. && mTmin>110.) {
-            if (pT_l2>20. && pT_l2<30.)_numSR3_slep_a++;
-            if (pT_l2>30.)_numSR3_slep_b++;
-          }
-          if (mSFOS>101.2 && met>130. && mTmin>110.) {
-            if (pT_l2>20. && pT_l2<50.)_numSR3_slep_c++;
-            if (pT_l2>50. && pT_l2<80.)_numSR3_slep_d++;
-            if (pT_l2>80.)_numSR3_slep_e++;
-          }
-          if (mSFOS>81.2 && mSFOS<101.2 && nSignalJets==0 && mTmin>110.) {
-            if (met>60. && met<120.)_numSR3_WZ_0Ja++;
-            if (met>120. && met<170.)_numSR3_WZ_0Jb++;
-            if (met>170.)_numSR3_WZ_0Jc++;
-          }
-          if (mSFOS>81.2 && mSFOS<101.2 && nSignalJets>0) {
-            if (met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j1>70.)_numSR3_WZ_1Ja++;
-            if (met>200. && mTmin>110. && mTmin<160.)_numSR3_WZ_1Jb++;
-            if (met>200. && pT_l2>35. && mTmin>160.)_numSR3_WZ_1Jc++;
-          }
-        }
+        // //3lep
+        // if (preselection && nSignalLeptons==3 && bjet_veto && SFOSpairs.size()) {
+        //   if (mSFOS<81.2 && met>130. && mTmin>110.) {
+        //     if (pT_l2>20. && pT_l2<30.)_numSR3_slep_a++;
+        //     if (pT_l2>30.)_numSR3_slep_b++;
+        //   }
+        //   if (mSFOS>101.2 && met>130. && mTmin>110.) {
+        //     if (pT_l2>20. && pT_l2<50.)_numSR3_slep_c++;
+        //     if (pT_l2>50. && pT_l2<80.)_numSR3_slep_d++;
+        //     if (pT_l2>80.)_numSR3_slep_e++;
+        //   }
+        //   if (mSFOS>81.2 && mSFOS<101.2 && nSignalJets==0 && mTmin>110.) {
+        //     if (met>60. && met<120.)_numSR3_WZ_0Ja++;
+        //     if (met>120. && met<170.)_numSR3_WZ_0Jb++;
+        //     if (met>170.)_numSR3_WZ_0Jc++;
+        //   }
+        //   if (mSFOS>81.2 && mSFOS<101.2 && nSignalJets>0) {
+        //     if (met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j1>70.)_numSR3_WZ_1Ja++;
+        //     if (met>200. && mTmin>110. && mTmin<160.)_numSR3_WZ_1Jb++;
+        //     if (met>200. && pT_l2>35. && mTmin>160.)_numSR3_WZ_1Jc++;
+        //   }
+        // }
 
         // if (analysis_name().find("200_100") != string::npos) {
 
@@ -1258,8 +1265,22 @@ namespace Gambit {
     };
 
 
+
+    // _Anders
+    // Derived analysis class for the 2Lep0Jets SRs
+    class Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
+
+      Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb() {
+        set_analysis_name("ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb");
+      }
+
+      int get_SR() {
+        return 1;        
+      }
+    };
+
     // Factory fn
-    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_MultiLEP_36invfb)
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb)
 
 
   }
