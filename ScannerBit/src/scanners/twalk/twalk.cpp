@@ -111,7 +111,7 @@ namespace Gambit
             std::vector<unsigned long long int> ids(NChains);
             std::vector<int> ranks(NChains);
             unsigned long long int next_id;
-            double Rsum, Rmax;
+            double Rsum = massiveR, Rmax = massiveR;
 
             std::chrono::time_point<std::chrono::system_clock> startTWalk;
 
