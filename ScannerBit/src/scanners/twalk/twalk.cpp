@@ -59,7 +59,8 @@ scanner_plugin(twalk, version(1, 0, 0))
                         get_inifile_value<int>("chain_number", 1 + pdim + numtasks),
                         get_inifile_value<bool>("hyper_grid", true),
                         get_inifile_value<int>("burn_in", 0),
-                        get_inifile_value<int>("save_freq", 1000)
+                        get_inifile_value<int>("save_freq", 1000),
+                        get_inifile_value<double>("timeout_mins", -1)
                 );
 
         return 0;
@@ -86,7 +87,8 @@ namespace Gambit
                    const int &NChains,
                    const bool &hyper_grid,
                    const int &burn_in,
-                   const int &/*save_freq*/)
+                   const int &/*save_freq*/,
+                   const double &mins_max)
         {
 
             const double massiveR = 1e100;
@@ -111,6 +113,8 @@ namespace Gambit
             unsigned long long int next_id;
             double Rsum, Rmax;
 
+            std::chrono::time_point<std::chrono::system_clock> startTWalk;
+
             set_resume_params(chisq, a0, mult, totN, count, total, ttotal, covT, avgT, W, avgTot, ids, ranks);
 
             Gambit::Scanner::assign_aux_numbers("mult", "chain");
@@ -130,6 +134,12 @@ namespace Gambit
                 numtasks = 1;
                 rank = 0;
             #endif
+
+            if (mins_max > 0 and rank == 0)
+            {
+                // Begin timing of TWalk run
+                startTWalk = std::chrono::system_clock::now();
+            }
 
             std::vector<RanNumGen *> gDev;
             for (int i = 0; i < NChains; i++)
@@ -311,6 +321,18 @@ namespace Gambit
 
                             if (R < 1.0) scan_error().raise(LOCAL_INFO, "R < 1 in TWalk!");
                             if (R >= sqrtR*sqrtR) converged = false;
+                        }
+                    }
+
+                    // Check if the requested maximum runtime has been reached.
+                    if (mins_max > 0)
+                    {
+                        std::chrono::duration<double> runtime = std::chrono::system_clock::now() - startTWalk;
+                        double runtime_ms = std::chrono::duration_cast<std::chrono::milliseconds>(runtime).count();
+                        if (runtime_ms / 60e3 >= mins_max)
+                        {
+                           std::cout << "TWalk reached requested time limit of " << mins_max << " minutes.  Finalising run now." << std::endl;
+                           converged = true;
                         }
                     }
 
