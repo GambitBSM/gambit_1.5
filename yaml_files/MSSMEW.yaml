@@ -407,7 +407,7 @@ Rules:
   - capability: lnL_Higgs_invWidth
     function: lnL_Higgs_invWidth_SMlike
     options:
-      BR_h_inv_chi2_data_file: ./DecayBit/data/arXiv_1306.2941_Figure_8_50_profiled.dat
+      BR_h_inv_chi2_data_file: ./DecayBit/data/arXiv_1306.2941_Figure_8_log_normal_50_profiled.dat
 
 # Set the names of key log files
 Logger:
