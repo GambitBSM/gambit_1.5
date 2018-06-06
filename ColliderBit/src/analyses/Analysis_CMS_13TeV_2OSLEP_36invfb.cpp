@@ -185,7 +185,7 @@ namespace Gambit {
             if (baselineJets.at(iJet)->btag())signalBJets.push_back(baselineJets.at(iJet));
           }
         }
-        CMS::applyCSVv2MediumBtagEff(signalBJets);
+        CMS::applyCSVv2MediumBtagEffAndMisId(signalJets,signalBJets);
 
         // Signal leptons = electrons + muons
         signalLeptons=signalElectrons;
