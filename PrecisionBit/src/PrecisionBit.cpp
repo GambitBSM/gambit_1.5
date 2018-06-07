@@ -1121,20 +1121,18 @@ namespace Gambit
       result.lower = result.upper;
     }
 
-    // Z invisible width, calculation from 1407.6607
+    // Z invisible width, calculation from 1612.04737 (see also 1407.6607)
     void RHN_Z_inv_width(double &result)
     {
       using namespace Pipes::RHN_Z_inv_width;
       using namespace std;
+      std::cout << "WARNING: Z inv width routines not complet." << std::endl;
       Eigen::Matrix3cd V = *Dep::SeesawI_Vnu;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       SMInputs sminputs = *Dep::SMINPUTS;
       double Gmu = sminputs.GF;
       double mZ = sminputs.mZ;
 
-//      Eigen::Matrix3d VNorm = (V.adjoint() * V).cwiseAbs2();
-//      Eigen::Matrix3d ThetaNorm = (Theta.adjoint()*Theta).cwiseAbs2();
-//      Eigen::Matrix3d VTNorm = (V.adjoint() * Theta).cwiseAbs2();
       std::vector<double> mNu = {*Param["mNu1"], *Param["mNu2"], *Param["mNu3"], *Param["M_1"], *Param["M_2"], *Param["M_3"]};
       Eigen::Matrix<complex<double>,3,6> U;     
       for(int i=0; i<3; i++)
@@ -1144,62 +1142,26 @@ namespace Gambit
           U(i,j+3) = Theta(i,j);
         }
 
+      Eigen::Matrix<complex<double>,6,6> C;
+      C = U.adjoint() * U;
 
       result = 0.0;
+      double c = 0.0;
       for (int i = 0; i < 6; i++)
-        for (int j = 0; j < 6; j++)
+        for (int j = i; j < 6; j++)
         {
           if(mNu[i] + mNu[j] < mZ)
           {
-            // Couplings
-            complex<double> bL = {0.0,0.0};
-            complex<double> bR = {0.0,0.0};
-            for (int a = 1; a < 3; a++)
-              bL += pow(2,0.25)*mZ*sqrt(Gmu)*conj(U(a,i))*U(a,j);
-            bR = - conj(bL);
-
             // Majorana factor
             double Maj = (i == j ? 0.5 : 1);
- 
-            result += Maj*sqrt( pow(mZ*mZ - mNu[i]*mNu[i] - mNu[j]*mNu[j],2) - pow(2.0*mNu[i]*mNu[j],2) ) / (48.0 * pi * pow(mZ,3)) * ( (norm(bL) + norm(bR)) * (- pow(mNu[i]*mNu[i] - mNu[j]*mNu[j],2)/pow(mZ,2) - pow(mNu[i],2) - pow(mNu[j],2) + 2.0*pow(mZ,2) ) + 12.0*mNu[i]*mNu[j]*abs(bL*conj(bR)) ); 
 
+            result += Maj*sqrt( pow(mZ*mZ - mNu[i]*mNu[i] - mNu[j]*mNu[j],2) - pow(2.0*mNu[i]*mNu[j],2) ) 
+              * (norm(C(i,j)) * (-pow(mNu[i]*mNu[i] - mNu[j]*mNu[j],2)/pow(mZ,4) - (pow(mNu[i],2) + pow(mNu[j],2))/pow(mZ,2) + 2) 
+                  - (C(i,j)*C(i,j)).real()*6*mNu[i]*mNu[j]/mZ/mZ);
+            c += 2*Maj*norm(C(i,j));
          }
-            
         }
-
-      // nu nu final states
-//      for (int i = 0; i<3; i++)
-//        for (int j = 0; j<3; j++)
-//        {
-//          result += VNorm(i, j);
-//        }
-      // N N final states
- //     for (int i = 0; i<3; i++)
-//        for (int j = 0; j<3; j++)
-//        {
-//          if(MN[i] + MN[j] < sminputs.mZ)
-//            result += ThetaNorm(i, j);
-//        }
-      // N nu final states
-//      for (int i = 0; i<3; i++)
-//        for (int j = 0; j<3; j++)
-//        {
-//          if(MN[j] < sminputs.mZ)
-//            result += 2*VTNorm(i, j);
-//        }
-
-//      std::cout << "Mass of RHN: " << MN[0] << " " << MN[1] << " " << MN[2] << std::endl;
-//      std::cout << "Z_inv_width effective number of neutrinos: " << result << std::endl;
-//      result = 0.0;
-//      for(int i=0; i<3; i++)
-//        for(int j=0; j<3; j++)
-//        {
-//          if(MN[i] + MN[j] < sminputs.mZ)
-//            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi) / sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-//          else
-//            result += Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi)*std::norm(VNorm(i,j))/ sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1));
-//        }
-//      result *= Gmu*pow(sminputs.mZ,3)/(12.0*sqrt(2)*pi)/sqrt(1.0-ThetaNorm(0,0)-ThetaNorm(1,1));
+      result *= sqrt(2)*Gmu/24/pi*mZ;
     }
 
     void lnL_Z_inv_width_chi2(double &result)
