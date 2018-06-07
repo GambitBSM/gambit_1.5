@@ -98,13 +98,13 @@ namespace Gambit
       YAML::Node doc = YAML::Load(fin);
       number_measurements=0;
       for(unsigned i=0;i<doc.size();++i)
-        {
-          Measurement mes_tmp;
-          doc[i] >> mes_tmp;
-          if(debug) print(mes_tmp);
-          measurements.push_back(mes_tmp);
-          number_measurements++;
-        }
+      {
+        Measurement mes_tmp;
+        doc[i] >> mes_tmp;
+        if(debug) print(mes_tmp);
+        measurements.push_back(mes_tmp);
+        number_measurements++;
+      }
       if (debug) cout<<"Number of measurements: "<<number_measurements<<endl;
     }
 
@@ -185,7 +185,7 @@ namespace Gambit
       {
         M_measurements(i,0)=measurements[i].exp_value;
       }
-      if (debug) print_matrix(M_measurements, "Measurements:");
+      if (debug) print_matrix(M_measurements, "Measurements:", false);
 
       // Construct the theory error vector
       M_th_err = boost::numeric::ublas::matrix< std::pair<double,bool> > (number_measurements,1);
@@ -197,7 +197,7 @@ namespace Gambit
         else if (err_type == "M") M_th_err(i,0).second = false;
         else FlavBit_error().raise(LOCAL_INFO, "Unrecognised theory error type in database: "+err_type);
       }
-      if (debug) print_matrix(M_th_err, "Theory errors:");
+      if (debug) print_matrix(M_th_err, "Theory errors:", false);
 
     }
 
@@ -213,8 +213,9 @@ namespace Gambit
     }
 
     /// Print a boost ublas matrix
-    void Flav_reader::print_matrix(boost::numeric::ublas::matrix<double>& M, str name)
+    void Flav_reader::print_matrix(boost::numeric::ublas::matrix<double>& M, str name, bool is_true_matrix)
     {
+      int jmax = is_true_matrix ? number_measurements : 1;
       cout<<name<<endl;
       for(unsigned int i=0; i < M.size1(); ++i)
       {
@@ -225,8 +226,9 @@ namespace Gambit
     }
 
     /// Print a boost ublas matrix with a pair type
-    void Flav_reader::print_matrix(boost::numeric::ublas::matrix< std::pair<double, bool> >& M, str name)
+    void Flav_reader::print_matrix(boost::numeric::ublas::matrix< std::pair<double, bool> >& M, str name, bool is_true_matrix)
     {
+      int jmax = is_true_matrix ? number_measurements : 1;
       cout<<name<<endl;
       for(unsigned int i=0; i < M.size1(); ++i)
       {
