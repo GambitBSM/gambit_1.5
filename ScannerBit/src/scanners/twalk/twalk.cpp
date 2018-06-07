@@ -155,7 +155,7 @@ namespace Gambit
             }
 
             Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
-            out_stream->reset();
+            //out_stream->reset(); // Hmm no reason to do that I think...
 
             if (set_resume_params.resume_mode())
             {

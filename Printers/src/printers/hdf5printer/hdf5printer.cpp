@@ -678,10 +678,12 @@ namespace Gambit
 #endif
         }
 
+        //std::cout <<"Rank "<<myRank<<" resume flag? "<<resume<<std::endl; 
         if(resume)
         {
           long highest = 0;
           /// Check if combined output file exists
+          //std::cout <<"Rank "<<myRank<<": tmp_comb_file readable? "<<HDF5::checkFileReadable(tmp_comb_file)<<"(filename: "<<tmp_comb_file<<")"<<std::endl;
           if( HDF5::checkFileReadable(tmp_comb_file) )
           {
             logger() << LogTags::info << "Scanning existing temporary combined output file, to prepare for adding new data" << EOM;
