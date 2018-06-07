@@ -31,8 +31,13 @@ scanner_plugin(twalk, version(1, 0, 0))
     int plugin_main ()
     {
         like_ptr LogLike = get_purpose(get_inifile_value<std::string>("like", "LogLike"));
-        int dim = get_dimension();
 
+        // Do not allow GAMBIT's own likelihood calculator to directly shut down the scan.
+        // Twalk will assume responsibility for this process, triggered externally by
+        // the 'plugin_info.early_shutdown_in_progress()' function.
+        LogLike->disable_external_shutdown();
+
+        int dim = get_dimension();
         int numtasks;
         #ifdef WITH_MPI
             MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -113,6 +118,8 @@ namespace Gambit
             unsigned long long int next_id;
             double Rsum = massiveR, Rmax = massiveR;
 
+            unsigned int quit = 0; // signal for early shutdown
+
             std::chrono::time_point<std::chrono::system_clock> startTWalk;
 
             set_resume_params(chisq, a0, mult, totN, count, total, ttotal, covT, avgT, W, avgTot, ids, ranks);
@@ -174,13 +181,24 @@ namespace Gambit
                         for (int j = 0; j < dimension; j++)
                             a0[t][j] = (gDev[t]->Doub());
                         chisq[t] = -LogLike(a0[t]);
+                        quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
                         ids[t] = LogLike->getPtID();
                         ranks[t] = rank;
                     }
                     #ifdef WITH_MPI
                         MPI_Barrier(MPI_COMM_WORLD);
                         MPI_Bcast (c_ptr(a0[t]), a0[t].size(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+                        MPI_Bcast (&quit, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD); 
                     #endif
+                    if(quit)
+                    {
+                       std::cout
+                       #ifdef WITH_MPI
+                         <<"Rank "<<rank<<": "
+                       #endif
+                       <<"Quit signal received during TWalk chain initialisation, aborting run" << std::endl; 
+                       break;
+                    }
                 }
             }
 
@@ -193,7 +211,7 @@ namespace Gambit
 
             std::cout << "Metropolis Hastings/TWalk Algorithm Started"  << std::endl;
 
-            while (not converged)
+            while (not converged and not quit)
             {
                 #ifdef WITH_MPI
                     if (rank == 0)
@@ -347,17 +365,49 @@ namespace Gambit
 
                 }
 
+                quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
                 #ifdef WITH_MPI
                     MPI_Barrier(MPI_COMM_WORLD);
                     MPI_Bcast (&converged, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+                    MPI_Bcast (&quit, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD); 
                 #endif
-
+                if(quit)
+                {
+                   std::cout
+                   #ifdef WITH_MPI
+                     <<"Rank "<<rank<<": "
+                   #endif
+                   <<"TWalk received quit signal! Terminating run." << std::endl; 
+                }
             }
-
+            
+            if(quit)
+            {
+                std::cout
+                #ifdef WITH_MPI
+                  <<"Rank "<<rank<<": "
+                #endif
+                  << "Writing resume data for TWalk" << std::endl;
+                // This is a bit awkward, but if we just call .dump() with no argument then
+                // ScannerBit will write resume data for ALL active plugins (which seems a
+                // weird thing for TWalk to trigger) and also try to finalise the printer
+                // (which will cause a crash when ScannerBit automatically tries to
+                // finalise the printer later).
+                // I would just add this dump stuff to scan.cpp, where the printer finalise
+                // is called, but I think that is AFTER the plugins are destructed, so
+                // I don't think that can work.
+                // Doing this will dump JUST the TWalk resume data, though I had to
+                // add this hacky get_name to the set_resume_params object in order to
+                // get the name by which ScannerBit identifies the TWalk plugin. 
+                Gambit::Scanner::Plugins::plugin_info.dump(set_resume_params.get_name());
+                // This works I think, but it still has problems. In particular,
+                // it looks like you must resume with the same number of processes
+                // that you started the run with, which is kind of crap.
+            }
 
             for (auto &&gd : gDev) delete gd;
 
-            std::cout << "TWalk has finised in process " << rank << "." << std::endl;
+            std::cout << "TWalk has finished in process " << rank << "." << std::endl;
 
             return;
         }

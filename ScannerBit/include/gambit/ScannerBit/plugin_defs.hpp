@@ -67,6 +67,8 @@ namespace Gambit
                 name = name_in + "_" + ss.str();
             }
             
+            std::string get_name() const { return name; }
+
             void set_resume_mode(const bool &mode)
             {
                 resume = (mode && access( name.c_str(), F_OK )) ? false : mode;
