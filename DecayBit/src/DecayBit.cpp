@@ -3309,31 +3309,38 @@ namespace Gambit
       lnL = -0.5 * chi2->bind("BR")->eval(BF);
     }
 
-    void lnL_Z_inv_MSSMlike(double& lnL)
+    void lnL_Z_inv(double& lnL)
     {
       /**
          @brief Log-likelihood from LEP measurements of \f$Z\f$-boson invisible
          width
 
-         @warning This is for MSSM-like models with Z-boson invisible decays
+         @warning This is valid for SM, RHN models and for MSSM-like models with Z-boson invisible decays
          to neutralinos and neutrinos
 
          @param lnL Log-likelihood
       */
-      using namespace Pipes::lnL_Z_inv_MSSMlike;
+      using namespace Pipes::lnL_Z_inv;
       const triplet<double> gamma_nu = *Dep::Z_gamma_nu;
-      const triplet<double> gamma_chi_0 = *Dep::Z_gamma_chi_0;
-      const double gamma_inv = gamma_chi_0.central + gamma_nu.central;
-      // Average + and - errors
+      double gamma_inv = gamma_nu.central;
       const double tau_nu = 0.5 * (gamma_nu.upper + gamma_nu.lower);
-      const double tau_chi_0 = 0.5 * (gamma_chi_0.upper + gamma_chi_0.lower);
-      // Add theory errors in quadrature
-      const double tau = std::sqrt(pow(tau_nu, 2) + pow(tau_chi_0, 2));
-      lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_inv.mu,
-        tau, SM_Z::gamma_inv.sigma, false);
+      double tau = tau_nu;
+ 
+      if(ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
+      {
+        const triplet<double> gamma_chi_0 = *Dep::Z_gamma_chi_0;
+        gamma_inv = gamma_chi_0.central;
+        // Average + and - errors
+        const double tau_chi_0 = 0.5 * (gamma_chi_0.upper + gamma_chi_0.lower);
+        // Add theory errors in quadrature
+        tau = std::sqrt(pow(tau_nu, 2) + pow(tau_chi_0, 2));
+      }
+
+      lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_inv.mu, tau, SM_Z::gamma_inv.sigma, false);
+   
     }
 
-    void Z_gamma_nu_SM_2l(triplet<double>& gamma)
+    void Z_gamma_nu_2l(triplet<double>& gamma)
     {
       /**
          @brief Calculate width of \f$Z\f$ decays to neutrinos,
@@ -3344,7 +3351,7 @@ namespace Gambit
 
          @param gamma \f$\Gamma(Z\to\chi\chi)\f$
       */
-      using namespace Pipes::Z_gamma_nu_SM_2l;
+      using namespace Pipes::Z_gamma_nu_2l;
 
       const SMInputs& SM = Dep::SM_spectrum->get_SMInputs();
 
@@ -3360,10 +3367,36 @@ namespace Gambit
           "variation in SM nuisance parameters");
       }
 
+      double Z_inv_width = Z.gamma_inv();
+
+      // Apply RHN correction, from 1311.2830 in the limit m_nu / m_Z-> 0
+      if(ModelInUse("RightHandedNeutrinos"))
+      {
+        double Z_to_nu = Z_inv_width/3;
+        std::vector<double> mN = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
+        Eigen::Matrix3cd VnuNorm = Dep::SeesawI_Vnu->adjoint() * *Dep::SeesawI_Vnu;
+        Eigen::Matrix3cd ThetaVnuNorm = Dep::SeesawI_Vnu->adjoint() * *Dep::SeesawI_Theta;
+
+        // Z -> nu nu with RHN mixing
+        Z_inv_width = Z_to_nu*( std::norm(VnuNorm(0,0)) + std::norm(VnuNorm(0,1)) + std::norm(VnuNorm(0,2)) 
+                              + std::norm(VnuNorm(1,0)) + std::norm(VnuNorm(1,1)) + std::norm(VnuNorm(1,2))
+                              + std::norm(VnuNorm(2,0)) + std::norm(VnuNorm(2,1)) + std::norm(VnuNorm(2,2)) );
+
+        // Z -> nu N with RHN mixing
+        for(int i = 0; i < 3; i++)
+          if(mN[i] < MZ)
+            Z_inv_width += Z_to_nu*(std::norm(ThetaVnuNorm(0,i)) + std::norm(ThetaVnuNorm(1,i)) + std::norm(ThetaVnuNorm(2,i)))*pow(1.0 - pow(mN[i]/MZ,2),2)*(1 + 0.5*pow(mN[i]/MZ,2));
+
+        // Z -> NN with RHN mixing. Contribution neglected because is of order Theta^4
+
+      }
+
       // Set elements of triplet to the width and its error
-      gamma.central = Z.gamma_inv();
+      gamma.central = Z_inv_width;
+      cout << "2- loop Z Inv = " << gamma.central << endl;
       gamma.lower = Z.error_gamma_inv();
       gamma.upper = gamma.lower;  // Error is symmetric
+
     }
 
     void Z_gamma_chi_0_MSSM_tree(triplet<double>& gamma)

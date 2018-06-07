@@ -785,9 +785,12 @@ START_MODULE
 
   #define CAPABILITY Z_gamma_nu
   START_CAPABILITY
-    #define FUNCTION Z_gamma_nu_SM_2l
+    #define FUNCTION Z_gamma_nu_2l
     START_FUNCTION(triplet<double>)
     DEPENDENCY(SM_spectrum, Spectrum)
+    MODEL_CONDITIONAL_DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd, RightHandedNeutrinos)
+    MODEL_CONDITIONAL_DEPENDENCY(SeesawI_Vnu, Eigen::Matrix3cd, RightHandedNeutrinos)
+    ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -802,10 +805,10 @@ START_MODULE
 
   #define CAPABILITY lnL_Z_inv
   START_CAPABILITY
-    #define FUNCTION lnL_Z_inv_MSSMlike
+    #define FUNCTION lnL_Z_inv
     START_FUNCTION(double)
     DEPENDENCY(Z_gamma_nu, triplet<double>)
-    DEPENDENCY(Z_gamma_chi_0, triplet<double>)
+    MODEL_CONDITIONAL_DEPENDENCY(Z_gamma_chi_0, triplet<double>, MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
   #undef CAPABILITY
 

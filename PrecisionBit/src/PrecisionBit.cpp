@@ -1122,7 +1122,7 @@ namespace Gambit
     }
 
     // Z invisible width, calculation from 1612.04737 (see also 1407.6607)
-    void RHN_Z_inv_width(double &result)
+/*    void RHN_Z_inv_width(double &result)
     {
       using namespace Pipes::RHN_Z_inv_width;
       using namespace std;
@@ -1162,6 +1162,7 @@ namespace Gambit
          }
         }
       result *= sqrt(2)*Gmu/24/pi*mZ;
+      cout << "Z inv width = " << result << endl;
     }
 
     void lnL_Z_inv_width_chi2(double &result)
@@ -1184,7 +1185,7 @@ namespace Gambit
 
       result = Stats::gaussian_loglikelihood(Zinvwidth, Zinvwidth_exp, 0.0, Zinvwidth_error, false);
     }
-
+*/
     // W decays, calculation from 1407.6607
     void RHN_W_to_l_decays(std::vector<double> &result)
     {
