@@ -626,78 +626,16 @@ namespace Gambit {
         // cutflowFile.close();
 
         //Now fill a results object with the results for each SR
-        SignalRegionData results_SR1;
-        results_SR1.sr_label = "SR1";
-        results_SR1.n_observed = 13.;
-        results_SR1.n_background = 12.; 
-        results_SR1.background_sys = 3.;
-        results_SR1.signal_sys = 0.; 
-        results_SR1.n_signal = _numSR["SR1"];
-        add_result(results_SR1);
 
-        SignalRegionData results_SR2;
-        results_SR2.sr_label = "SR2";
-        results_SR2.n_observed = 18.;
-        results_SR2.n_background = 18.;
-        results_SR2.background_sys = 4.;
-        results_SR2.signal_sys = 0.;
-        results_SR2.n_signal = _numSR["SR2"];
-        add_result(results_SR2);
-
-        SignalRegionData results_SR3;
-        results_SR3.sr_label = "SR3";
-        results_SR3.n_observed = 19.;
-        results_SR3.n_background = 19.;
-        results_SR3.background_sys = 4.;
-        results_SR3.signal_sys = 0.;
-        results_SR3.n_signal = _numSR["SR3"];
-        add_result(results_SR3);
-
-        SignalRegionData results_SR4;
-        results_SR4.sr_label = "SR4";
-        results_SR4.n_observed = 128.;
-        results_SR4.n_background = 142.;
-        results_SR4.background_sys = 34.;
-        results_SR4.signal_sys = 0.;
-        results_SR4.n_signal = _numSR["SR4"];
-        add_result(results_SR4);
-
-        SignalRegionData results_SR5;
-        results_SR5.sr_label = "SR5";
-        results_SR5.n_observed = 18.;
-        results_SR5.n_background = 22.;
-        results_SR5.background_sys = 5.;
-        results_SR5.signal_sys = 0.;
-        results_SR5.n_signal = _numSR["SR5"];
-        add_result(results_SR5);
-
-        SignalRegionData results_SR6;
-        results_SR6.sr_label = "SR6";
-        results_SR6.n_observed = 2;
-        results_SR6.n_background = 1.2;
-        results_SR6.background_sys = 0.6;
-        results_SR6.signal_sys = 0.;
-        results_SR6.n_signal = _numSR["SR6"];
-        add_result(results_SR6);
-
-        SignalRegionData results_SR7;
-        results_SR7.sr_label = "SR7";
-        results_SR7.n_observed = 82.;
-        results_SR7.n_background = 109.;
-        results_SR7.background_sys = 28.;
-        results_SR7.signal_sys = 0.;
-        results_SR7.n_signal = _numSR["SR7"];
-        add_result(results_SR7);
-
-        SignalRegionData results_SR8;
-        results_SR8.sr_label = "SR8";
-        results_SR8.n_observed = 166.;
-        results_SR8.n_background = 197.;
-        results_SR8.background_sys = 42.;
-        results_SR8.signal_sys = 0.;
-        results_SR8.n_signal = _numSR["SR8"];
-        add_result(results_SR8);
-
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR1", 13., {_numSR["SR1"], 0.}, {12., 3.}));
+        add_result(SignalRegionData("SR2", 18., {_numSR["SR2"], 0.}, {18., 4.}));
+        add_result(SignalRegionData("SR3", 19., {_numSR["SR3"], 0.}, {19., 4.}));
+        add_result(SignalRegionData("SR4", 128., {_numSR["SR4"], 0.}, {142, 34.}));
+        add_result(SignalRegionData("SR5", 18., {_numSR["SR5"], 0.}, {22, 5.}));
+        add_result(SignalRegionData("SR6", 2., {_numSR["SR6"], 0.}, {1, 0.6}));
+        add_result(SignalRegionData("SR7", 82., {_numSR["SR7"], 0.}, {109, 28.}));
+        add_result(SignalRegionData("SR8", 166., {_numSR["SR8"], 0.}, {197, 42.}));
       }
 
       vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
@@ -809,23 +747,9 @@ namespace Gambit {
       }
 
       virtual void collect_results() {
-        SignalRegionData results_SR1;
-        results_SR1.sr_label = "SR1";
-        results_SR1.n_observed = 13.;
-        results_SR1.n_background = 12.; 
-        results_SR1.background_sys = 3.;
-        results_SR1.signal_sys = 0.; 
-        results_SR1.n_signal = _numSR["SR1"];
-        add_result(results_SR1);
-
-        SignalRegionData results_SR2;
-        results_SR2.sr_label = "SR2";
-        results_SR2.n_observed = 18.;
-        results_SR2.n_background = 18.;
-        results_SR2.background_sys = 4.;
-        results_SR2.signal_sys = 0.;
-        results_SR2.n_signal = _numSR["SR2"];
-        add_result(results_SR2);
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR1", 13., {_numSR["SR1"], 0.}, {12., 3.}));
+        add_result(SignalRegionData("SR2", 18., {_numSR["SR2"], 0.}, {18., 4.}));
       }
 
     };
@@ -854,59 +778,13 @@ namespace Gambit {
       }
 
       virtual void collect_results() {
-        SignalRegionData results_SR3;
-        results_SR3.sr_label = "SR3";
-        results_SR3.n_observed = 19.;
-        results_SR3.n_background = 19.;
-        results_SR3.background_sys = 4.;
-        results_SR3.signal_sys = 0.;
-        results_SR3.n_signal = _numSR["SR3"];
-        add_result(results_SR3);
-
-        SignalRegionData results_SR4;
-        results_SR4.sr_label = "SR4";
-        results_SR4.n_observed = 128.;
-        results_SR4.n_background = 142.;
-        results_SR4.background_sys = 34.;
-        results_SR4.signal_sys = 0.;
-        results_SR4.n_signal = _numSR["SR4"];
-        add_result(results_SR4);
-
-        SignalRegionData results_SR5;
-        results_SR5.sr_label = "SR5";
-        results_SR5.n_observed = 18.;
-        results_SR5.n_background = 22.;
-        results_SR5.background_sys = 5.;
-        results_SR5.signal_sys = 0.;
-        results_SR5.n_signal = _numSR["SR5"];
-        add_result(results_SR5);
-
-        SignalRegionData results_SR6;
-        results_SR6.sr_label = "SR6";
-        results_SR6.n_observed = 2;
-        results_SR6.n_background = 1.2;
-        results_SR6.background_sys = 0.6;
-        results_SR6.signal_sys = 0.;
-        results_SR6.n_signal = _numSR["SR6"];
-        add_result(results_SR6);
-
-        SignalRegionData results_SR7;
-        results_SR7.sr_label = "SR7";
-        results_SR7.n_observed = 82.;
-        results_SR7.n_background = 109.;
-        results_SR7.background_sys = 28.;
-        results_SR7.signal_sys = 0.;
-        results_SR7.n_signal = _numSR["SR7"];
-        add_result(results_SR7);
-
-        SignalRegionData results_SR8;
-        results_SR8.sr_label = "SR8";
-        results_SR8.n_observed = 166.;
-        results_SR8.n_background = 197.;
-        results_SR8.background_sys = 42.;
-        results_SR8.signal_sys = 0.;
-        results_SR8.n_signal = _numSR["SR8"];
-        add_result(results_SR8);
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR3", 19., {_numSR["SR3"], 0.}, {19., 4.}));
+        add_result(SignalRegionData("SR4", 128., {_numSR["SR4"], 0.}, {142, 34.}));
+        add_result(SignalRegionData("SR5", 18., {_numSR["SR5"], 0.}, {22, 5.}));
+        add_result(SignalRegionData("SR6", 2., {_numSR["SR6"], 0.}, {1, 0.6}));
+        add_result(SignalRegionData("SR7", 82., {_numSR["SR7"], 0.}, {109, 28.}));
+        add_result(SignalRegionData("SR8", 166., {_numSR["SR8"], 0.}, {197, 42.}));
       }
 
     };
