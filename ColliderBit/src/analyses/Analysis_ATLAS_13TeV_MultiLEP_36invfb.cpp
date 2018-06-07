@@ -2,6 +2,8 @@
 ///  \author Rose Kudzman-Blais
 ///  \date 2017 May
 ///
+///  \author Anders Kvellestad
+///  \date 2018 June
 ///  *********************************************
 
 // Based on https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/PAPERS/SUSY-2016-24/
@@ -55,6 +57,14 @@ namespace Gambit {
       };
 
     private:
+
+      const vector<string> _included_SRs = {"SR2_SF_loose", "SR2_SF_tight", "SR2_DF_100", "SR2_DF_150",
+                                            "SR2_DF_200", "SR2_DF_300",
+                                            "SR2_int", "SR2_high", "SR2_low",
+                                            "SR3_slep_a", "SR3_slep_b", "SR3_slep_c", "SR3_slep_d", 
+                                            "SR3_slep_e", "SR3_WZ_0Ja", "SR3_WZ_0Jb", "SR3_WZ_0Jc", 
+                                            "SR3_WZ_1Ja", "SR3_WZ_1Jb", "SR3_WZ_1Jc"};
+
       vector<int> cutFlowVector1;
       vector<string> cutFlowVector1_str;
       size_t NCUTS1;
@@ -94,18 +104,15 @@ namespace Gambit {
 
     public:
 
-      // To be implemented in SR-specific analysis classes derived from this class
-      virtual void increment_SR(string) =0;
-      virtual void collect_results() =0;
-
-
+      // This function can be overridden by the derived SR-specific classes
+      virtual void increment_SR(string SR_label) {
+        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
+        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
+      }
 
       Analysis_ATLAS_13TeV_MultiLEP_36invfb() {
 
-        // Commented out the set_analysis_name call as this will be 
-        // done individually in each of the derived classes below.
-        // set_analysis_name("ATLAS_13TeV_MultiLEP_36invfb");
-        
+        set_analysis_name("ATLAS_13TeV_MultiLEP_36invfb");
         set_luminosity(36.1);
 
         NCUTS1=22;
@@ -355,6 +362,12 @@ namespace Gambit {
 
 
         // Signal Regions
+
+        // DEBUG
+        increment_SR("SR2_SF_loose");
+        increment_SR("SR2_int");
+        increment_SR("SR3_slep_a");
+
 
         //2lep+0jet
         if (preselection && nSignalLeptons==2 && OSpairs.size()==1 && mll>40 && central_jet_veto && bjet_veto) {
@@ -839,6 +852,191 @@ namespace Gambit {
 
       }
 
+      // This function can be overridden by the derived SR-specific classes
+      virtual void collect_results() {
+        SignalRegionData results_SR2_SF_loose;
+        results_SR2_SF_loose.sr_label = "SR2_SF_loose";
+        results_SR2_SF_loose.n_observed = 153.;
+        results_SR2_SF_loose.n_background = 133.; 
+        results_SR2_SF_loose.background_sys = 22.;
+        results_SR2_SF_loose.signal_sys = 0.; 
+        results_SR2_SF_loose.n_signal = _numSR["SR2_SF_loose"];
+        add_result(results_SR2_SF_loose);
+
+        SignalRegionData results_SR2_SF_tight;
+        results_SR2_SF_tight.sr_label = "SR2_SF_tight";
+        results_SR2_SF_tight.n_observed = 9.;
+        results_SR2_SF_tight.n_background = 9.8; 
+        results_SR2_SF_tight.background_sys = 2.9;
+        results_SR2_SF_tight.signal_sys = 0.; 
+        results_SR2_SF_tight.n_signal = _numSR["SR2_SF_tight"];
+        add_result(results_SR2_SF_tight);
+
+        SignalRegionData results_SR2_DF_100;
+        results_SR2_DF_100.sr_label = "SR2_DF_100";
+        results_SR2_DF_100.n_observed = 78.;
+        results_SR2_DF_100.n_background = 68.; 
+        results_SR2_DF_100.background_sys = 7.;
+        results_SR2_DF_100.signal_sys = 0.; 
+        results_SR2_DF_100.n_signal = _numSR["SR2_DF_100"];
+        add_result(results_SR2_DF_100);
+
+        SignalRegionData results_SR2_DF_150;
+        results_SR2_DF_150.sr_label = "SR2_DF_150";
+        results_SR2_DF_150.n_observed = 11;
+        results_SR2_DF_150.n_background = 11.5; 
+        results_SR2_DF_150.background_sys = 3.1;
+        results_SR2_DF_150.signal_sys = 0.; 
+        results_SR2_DF_150.n_signal = _numSR["SR2_DF_150"];
+        add_result(results_SR2_DF_150);
+
+        SignalRegionData results_SR2_DF_200;
+        results_SR2_DF_200.sr_label = "SR2_DF_200";
+        results_SR2_DF_200.n_observed = 6.;
+        results_SR2_DF_200.n_background = 2.1; 
+        results_SR2_DF_200.background_sys = 1.9;
+        results_SR2_DF_200.signal_sys = 0.; 
+        results_SR2_DF_200.n_signal = _numSR["SR2_DF_200"];
+        add_result(results_SR2_DF_200);
+
+        SignalRegionData results_SR2_DF_300;
+        results_SR2_DF_300.sr_label = "SR2_DF_300";
+        results_SR2_DF_300.n_observed = 2.;
+        results_SR2_DF_300.n_background = 0.6; 
+        results_SR2_DF_300.background_sys = 0.6;
+        results_SR2_DF_300.signal_sys = 0.; 
+        results_SR2_DF_300.n_signal = _numSR["SR2_DF_300"];
+        add_result(results_SR2_DF_300);
+
+
+        SignalRegionData results_SR2_int;
+        results_SR2_int.sr_label = "SR2_int";
+        results_SR2_int.n_observed = 2.;
+        results_SR2_int.n_background = 4.1; 
+        results_SR2_int.background_sys = 2.6;
+        results_SR2_int.signal_sys = 0.; 
+        results_SR2_int.n_signal = _numSR["SR2_int"];
+        add_result(results_SR2_int);
+
+        SignalRegionData results_SR2_high;
+        results_SR2_high.sr_label = "SR2_high";
+        results_SR2_high.n_observed = 0.;
+        results_SR2_high.n_background = 1.6; 
+        results_SR2_high.background_sys = 1.6;
+        results_SR2_high.signal_sys = 0.; 
+        results_SR2_high.n_signal = _numSR["SR2_high"];
+        add_result(results_SR2_high);
+
+        SignalRegionData results_SR2_low;
+        results_SR2_low.sr_label = "SR2_low";
+        results_SR2_low.n_observed = 11.;
+        results_SR2_low.n_background = 4.2; 
+        results_SR2_low.background_sys = 3.4;
+        results_SR2_low.signal_sys = 0.; 
+        results_SR2_low.n_signal = _numSR["SR2_low"];
+        add_result(results_SR2_low);
+
+
+        SignalRegionData results_SR3_slep_a;
+        results_SR3_slep_a.sr_label = "SR3_slep_a";
+        results_SR3_slep_a.n_observed = 4.;
+        results_SR3_slep_a.n_background = 2.2; 
+        results_SR3_slep_a.background_sys = 0.8;
+        results_SR3_slep_a.signal_sys = 0.; 
+        results_SR3_slep_a.n_signal = _numSR["SR3_slep_a"];
+        add_result(results_SR3_slep_a);
+
+        SignalRegionData results_SR3_slep_b;
+        results_SR3_slep_b.sr_label = "SR3_slep_b";
+        results_SR3_slep_b.n_observed = 3.;
+        results_SR3_slep_b.n_background = 2.8; 
+        results_SR3_slep_b.background_sys = 0.4;
+        results_SR3_slep_b.signal_sys = 0.; 
+        results_SR3_slep_b.n_signal = _numSR["SR3_slep_b"];
+        add_result(results_SR3_slep_b);
+
+        SignalRegionData results_SR3_slep_c;
+        results_SR3_slep_c.sr_label = "SR3_slep_c";
+        results_SR3_slep_c.n_observed = 9.;
+        results_SR3_slep_c.n_background = 5.4; 
+        results_SR3_slep_c.background_sys = 0.9;
+        results_SR3_slep_c.signal_sys = 0.; 
+        results_SR3_slep_c.n_signal = _numSR["SR3_slep_c"];
+        add_result(results_SR3_slep_c);
+
+        SignalRegionData results_SR3_slep_d;
+        results_SR3_slep_d.sr_label = "SR3_slep_d";
+        results_SR3_slep_d.n_observed = 0.;
+        results_SR3_slep_d.n_background = 1.4; 
+        results_SR3_slep_d.background_sys = 0.4;
+        results_SR3_slep_d.signal_sys = 0.; 
+        results_SR3_slep_d.n_signal = _numSR["SR3_slep_d"];
+        add_result(results_SR3_slep_d);
+
+        SignalRegionData results_SR3_slep_e;
+        results_SR3_slep_e.sr_label = "SR3_slep_e";
+        results_SR3_slep_e.n_observed = 0.;
+        results_SR3_slep_e.n_background = 1.1; 
+        results_SR3_slep_e.background_sys = 0.2;
+        results_SR3_slep_e.signal_sys = 0.; 
+        results_SR3_slep_e.n_signal = _numSR["SR3_slep_e"];
+        add_result(results_SR3_slep_e);
+
+        SignalRegionData results_SR3_WZ_0Ja;
+        results_SR3_WZ_0Ja.sr_label = "SR3_WZ_0Ja";
+        results_SR3_WZ_0Ja.n_observed = 21.;
+        results_SR3_WZ_0Ja.n_background = 21.7; 
+        results_SR3_WZ_0Ja.background_sys = 2.9;
+        results_SR3_WZ_0Ja.signal_sys = 0.; 
+        results_SR3_WZ_0Ja.n_signal = _numSR["SR3_WZ_0Ja"];
+        add_result(results_SR3_WZ_0Ja);
+
+        SignalRegionData results_SR3_WZ_0Jb;
+        results_SR3_WZ_0Jb.sr_label = "SR3_WZ_0Jb";
+        results_SR3_WZ_0Jb.n_observed = 1.;
+        results_SR3_WZ_0Jb.n_background = 2.7; 
+        results_SR3_WZ_0Jb.background_sys = 0.5;
+        results_SR3_WZ_0Jb.signal_sys = 0.; 
+        results_SR3_WZ_0Jb.n_signal = _numSR["SR3_WZ_0Jb"];
+        add_result(results_SR3_WZ_0Jb);
+
+        SignalRegionData results_SR3_WZ_0Jc;
+        results_SR3_WZ_0Jc.sr_label = "SR3_WZ_0Jc";
+        results_SR3_WZ_0Jc.n_observed = 2.;
+        results_SR3_WZ_0Jc.n_background = 1.6; 
+        results_SR3_WZ_0Jc.background_sys = 0.3;
+        results_SR3_WZ_0Jc.signal_sys = 0.; 
+        results_SR3_WZ_0Jc.n_signal = _numSR["SR3_WZ_0Jc"];
+        add_result(results_SR3_WZ_0Jc);
+
+        SignalRegionData results_SR3_WZ_1Ja;
+        results_SR3_WZ_1Ja.sr_label = "SR3_WZ_1Ja";
+        results_SR3_WZ_1Ja.n_observed = 1.;
+        results_SR3_WZ_1Ja.n_background = 2.2; 
+        results_SR3_WZ_1Ja.background_sys = 0.5;
+        results_SR3_WZ_1Ja.signal_sys = 0.; 
+        results_SR3_WZ_1Ja.n_signal = _numSR["SR3_WZ_1Ja"];
+        add_result(results_SR3_WZ_1Ja);
+
+        SignalRegionData results_SR3_WZ_1Jb;
+        results_SR3_WZ_1Jb.sr_label = "SR3_WZ_1Jb";
+        results_SR3_WZ_1Jb.n_observed = 3.;
+        results_SR3_WZ_1Jb.n_background = 1.8; 
+        results_SR3_WZ_1Jb.background_sys = 0.3;
+        results_SR3_WZ_1Jb.signal_sys = 0.; 
+        results_SR3_WZ_1Jb.n_signal = _numSR["SR3_WZ_1Jb"];
+        add_result(results_SR3_WZ_1Jb);
+
+        SignalRegionData results_SR3_WZ_1Jc;
+        results_SR3_WZ_1Jc.sr_label = "SR3_WZ_1Jc";
+        results_SR3_WZ_1Jc.n_observed = 4.;
+        results_SR3_WZ_1Jc.n_background = 1.3; 
+        results_SR3_WZ_1Jc.background_sys = 0.3;
+        results_SR3_WZ_1Jc.signal_sys = 0.; 
+        results_SR3_WZ_1Jc.n_signal = _numSR["SR3_WZ_1Jc"];
+        add_result(results_SR3_WZ_1Jc);
+      }
+
 
       vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
         vector<vector<HEPUtils::Particle*>> SFOSpair_container;
@@ -918,6 +1116,9 @@ namespace Gambit {
 
     };
 
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_MultiLEP_36invfb)
+
 
 
     // 
@@ -933,12 +1134,12 @@ namespace Gambit {
         set_analysis_name("ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb");
       }
 
-      void increment_SR(string SR_label) {
+      virtual void increment_SR(string SR_label) {
         // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
         if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
-      void collect_results() {
+      virtual void collect_results() {
         SignalRegionData results_SR2_SF_loose;
         results_SR2_SF_loose.sr_label = "SR2_SF_loose";
         results_SR2_SF_loose.n_observed = 153.;
@@ -1012,12 +1213,12 @@ namespace Gambit {
         set_analysis_name("ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb");
       }
 
-      void increment_SR(string SR_label) {
+      virtual void increment_SR(string SR_label) {
         // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
         if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
-      void collect_results() {
+      virtual void collect_results() {
         SignalRegionData results_SR2_int;
         results_SR2_int.sr_label = "SR2_int";
         results_SR2_int.n_observed = 2.;
@@ -1065,12 +1266,12 @@ namespace Gambit {
         set_analysis_name("ATLAS_13TeV_MultiLEP_3Lep_36invfb");
       }
 
-      void increment_SR(string SR_label) {
+      virtual void increment_SR(string SR_label) {
         // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
         if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
-      void collect_results() {
+      virtual void collect_results() {
         SignalRegionData results_SR3_slep_a;
         results_SR3_slep_a.sr_label = "SR3_slep_a";
         results_SR3_slep_a.n_observed = 4.;

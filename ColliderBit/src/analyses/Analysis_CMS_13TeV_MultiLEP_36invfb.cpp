@@ -2,6 +2,8 @@
 ///  \author Rose Kudzman-Blais
 ///  \date 2017 May
 ///
+///  \author Anders Kvellestad
+///  \date 2018 June
 ///  *********************************************
 
 
@@ -26,8 +28,6 @@ namespace Gambit {
     // defined further down:
     // - Analysis_CMS_13TeV_MultiLEP_2SSLep_36invfb
     // - Analysis_CMS_13TeV_MultiLEP_3Lep_36invfb
-
-
     class Analysis_CMS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
 
     protected:
@@ -44,6 +44,9 @@ namespace Gambit {
       };
 
     private:
+
+      const vector<string> _included_SRs = {"SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8"};
+
       vector<int> cutFlowVector1, cutFlowVector2, cutFlowVector3, cutFlowVector4;
       vector<string> cutFlowVector_str1, cutFlowVector_str2, cutFlowVector_str3, cutFlowVector_str4;
       // double xsec2CMS_200_100, xsec2CMS_500_150, xsec3CMS_250_150, xsec3CMS_600_1, xsec1CMS_500_350_05,xsec1CMS_500_350_5, xsec4CMS_100_1, xsec4CMS_800_1;
@@ -54,20 +57,19 @@ namespace Gambit {
 
     public:
 
-      // To be implemented in SR-specific analysis classes derived from this class
-      virtual void increment_SR(string) =0;
-      virtual void collect_results() =0;
-
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
 
+      // This function can be overridden by the derived SR-specific classes
+      virtual void increment_SR(string SR_label) {
+        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
+        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
+      }
+
       Analysis_CMS_13TeV_MultiLEP_36invfb() {
 
-        // Commented out the set_analysis_name call as this will be 
-        // done individually in each of the derived classes below.
-        // set_analysis_name("CMS_13TeV_MultiLEP_36invfb");
-
+        set_analysis_name("CMS_13TeV_MultiLEP_36invfb");
         set_luminosity(35.9);
         
         NCUTS1=10;
@@ -267,7 +269,6 @@ namespace Gambit {
         if (bjet_veto && low_mass_veto)preselection=true;
 
         //Signal regions
-
         //2 same-sign leptons
         if (preselection && nSignalLeptons==2 && nSignalTaus==0 && met>60 && conversion_veto) {
           if (signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()>0) {
@@ -530,7 +531,8 @@ namespace Gambit {
       }
 
 
-      // void collect_results() {
+      // This function can be overridden by the derived SR-specific classes
+      virtual void collect_results() {
 
         // string path = "ColliderBit/results/cutflow_";
         // path.append(analysis_name());
@@ -629,80 +631,80 @@ namespace Gambit {
 
         // cutflowFile.close();
 
-        // //Now fill a results object with the results for each SR
-        // SignalRegionData results_SR1;
-        // results_SR1.sr_label = "SR1";
-        // results_SR1.n_observed = 13.;
-        // results_SR1.n_background = 12.; 
-        // results_SR1.background_sys = 3.;
-        // results_SR1.signal_sys = 0.; 
-        // results_SR1.n_signal = _numSR["SR1"];
-        // add_result(results_SR1);
+        //Now fill a results object with the results for each SR
+        SignalRegionData results_SR1;
+        results_SR1.sr_label = "SR1";
+        results_SR1.n_observed = 13.;
+        results_SR1.n_background = 12.; 
+        results_SR1.background_sys = 3.;
+        results_SR1.signal_sys = 0.; 
+        results_SR1.n_signal = _numSR["SR1"];
+        add_result(results_SR1);
 
-        // SignalRegionData results_SR2;
-        // results_SR2.sr_label = "SR2";
-        // results_SR2.n_observed = 18.;
-        // results_SR2.n_background = 18.;
-        // results_SR2.background_sys = 4.;
-        // results_SR2.signal_sys = 0.;
-        // results_SR2.n_signal = _numSR["SR2"];
-        // add_result(results_SR2);
+        SignalRegionData results_SR2;
+        results_SR2.sr_label = "SR2";
+        results_SR2.n_observed = 18.;
+        results_SR2.n_background = 18.;
+        results_SR2.background_sys = 4.;
+        results_SR2.signal_sys = 0.;
+        results_SR2.n_signal = _numSR["SR2"];
+        add_result(results_SR2);
 
-        // SignalRegionData results_SR3;
-        // results_SR3.sr_label = "SR3";
-        // results_SR3.n_observed = 19.;
-        // results_SR3.n_background = 19.;
-        // results_SR3.background_sys = 4.;
-        // results_SR3.signal_sys = 0.;
-        // results_SR3.n_signal = _numSR["SR3"];
-        // add_result(results_SR3);
+        SignalRegionData results_SR3;
+        results_SR3.sr_label = "SR3";
+        results_SR3.n_observed = 19.;
+        results_SR3.n_background = 19.;
+        results_SR3.background_sys = 4.;
+        results_SR3.signal_sys = 0.;
+        results_SR3.n_signal = _numSR["SR3"];
+        add_result(results_SR3);
 
-        // SignalRegionData results_SR4;
-        // results_SR4.sr_label = "SR4";
-        // results_SR4.n_observed = 128.;
-        // results_SR4.n_background = 142.;
-        // results_SR4.background_sys = 34.;
-        // results_SR4.signal_sys = 0.;
-        // results_SR4.n_signal = _numSR["SR4"];
-        // add_result(results_SR4);
+        SignalRegionData results_SR4;
+        results_SR4.sr_label = "SR4";
+        results_SR4.n_observed = 128.;
+        results_SR4.n_background = 142.;
+        results_SR4.background_sys = 34.;
+        results_SR4.signal_sys = 0.;
+        results_SR4.n_signal = _numSR["SR4"];
+        add_result(results_SR4);
 
-        // SignalRegionData results_SR5;
-        // results_SR5.sr_label = "SR5";
-        // results_SR5.n_observed = 18.;
-        // results_SR5.n_background = 22.;
-        // results_SR5.background_sys = 5.;
-        // results_SR5.signal_sys = 0.;
-        // results_SR5.n_signal = _numSR["SR5"];
-        // add_result(results_SR5);
+        SignalRegionData results_SR5;
+        results_SR5.sr_label = "SR5";
+        results_SR5.n_observed = 18.;
+        results_SR5.n_background = 22.;
+        results_SR5.background_sys = 5.;
+        results_SR5.signal_sys = 0.;
+        results_SR5.n_signal = _numSR["SR5"];
+        add_result(results_SR5);
 
-        // SignalRegionData results_SR6;
-        // results_SR6.sr_label = "SR6";
-        // results_SR6.n_observed = 2;
-        // results_SR6.n_background = 1.2;
-        // results_SR6.background_sys = 0.6;
-        // results_SR6.signal_sys = 0.;
-        // results_SR6.n_signal = _numSR["SR6"];
-        // add_result(results_SR6);
+        SignalRegionData results_SR6;
+        results_SR6.sr_label = "SR6";
+        results_SR6.n_observed = 2;
+        results_SR6.n_background = 1.2;
+        results_SR6.background_sys = 0.6;
+        results_SR6.signal_sys = 0.;
+        results_SR6.n_signal = _numSR["SR6"];
+        add_result(results_SR6);
 
-        // SignalRegionData results_SR7;
-        // results_SR7.sr_label = "SR7";
-        // results_SR7.n_observed = 82.;
-        // results_SR7.n_background = 109.;
-        // results_SR7.background_sys = 28.;
-        // results_SR7.signal_sys = 0.;
-        // results_SR7.n_signal = _numSR["SR7"];
-        // add_result(results_SR7);
+        SignalRegionData results_SR7;
+        results_SR7.sr_label = "SR7";
+        results_SR7.n_observed = 82.;
+        results_SR7.n_background = 109.;
+        results_SR7.background_sys = 28.;
+        results_SR7.signal_sys = 0.;
+        results_SR7.n_signal = _numSR["SR7"];
+        add_result(results_SR7);
 
-        // SignalRegionData results_SR8;
-        // results_SR8.sr_label = "SR8";
-        // results_SR8.n_observed = 166.;
-        // results_SR8.n_background = 197.;
-        // results_SR8.background_sys = 42.;
-        // results_SR8.signal_sys = 0.;
-        // results_SR8.n_signal = _numSR["SR8"];
-        // add_result(results_SR8);
+        SignalRegionData results_SR8;
+        results_SR8.sr_label = "SR8";
+        results_SR8.n_observed = 166.;
+        results_SR8.n_background = 197.;
+        results_SR8.background_sys = 42.;
+        results_SR8.signal_sys = 0.;
+        results_SR8.n_signal = _numSR["SR8"];
+        add_result(results_SR8);
 
-      // }
+      }
 
       vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
         vector<vector<HEPUtils::Particle*>> SFOSpair_container;
@@ -788,6 +790,10 @@ namespace Gambit {
 
     };
 
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_MultiLEP_36invfb)
+
+
 
 
     // 
@@ -803,12 +809,12 @@ namespace Gambit {
         set_analysis_name("CMS_13TeV_MultiLEP_2SSLep_36invfb");
       }
 
-      void increment_SR(string SR_label) {
+      virtual void increment_SR(string SR_label) {
         // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
         if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
-      void collect_results() {
+      virtual void collect_results() {
         SignalRegionData results_SR1;
         results_SR1.sr_label = "SR1";
         results_SR1.n_observed = 13.;
@@ -848,12 +854,12 @@ namespace Gambit {
         set_analysis_name("CMS_13TeV_MultiLEP_3Lep_36invfb");
       }
 
-      void increment_SR(string SR_label) {
+      virtual void increment_SR(string SR_label) {
         // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
         if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
-      void collect_results() {
+      virtual void collect_results() {
         SignalRegionData results_SR3;
         results_SR3.sr_label = "SR3";
         results_SR3.n_observed = 19.;
