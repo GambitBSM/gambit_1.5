@@ -12,11 +12,11 @@ prints (parameter, convolved chi-squared) from a file containing
 import sys
 import numpy as np
 from scipy.interpolate import interp1d
-from scipy.stats import norm
+from scipy.stats import norm, lognorm
 from scipy.integrate import quad
 
 
-def convolve(file_name, frac_error=0.1, min_=0., max_=1.):
+def convolve(file_name, frac_error=0.1, min_=0., max_=1., log_normal=True):
     """
     Convolve chi-squared in a data file with a fractional theory error
 
@@ -25,6 +25,7 @@ def convolve(file_name, frac_error=0.1, min_=0., max_=1.):
         frac_error (float, optional): Fractional theory error on the parameter.
         min_ (float, optional): Minimum value of parameter.
         max_ (float, optional): Maximum value of parameter.
+        log_normal (bool, optional): Whether to use log-normal or normal error.
 
     Returns:
         list(tuples): List of (parameter, convolved chi-squared)
@@ -37,13 +38,20 @@ def convolve(file_name, frac_error=0.1, min_=0., max_=1.):
         kind='linear', bounds_error=False, fill_value="extrapolate")
 
     # Make prior for true prediction
-    gaussian = lambda x, mu: norm.pdf(x, mu, frac_error * mu)
+    def prior(x, mu):
+        if log_normal:
+            sigma = np.log(1. + frac_error)
+            dist = lognorm(sigma, scale=mu)
+        else:
+            sigma = frac_error * mu
+            dist = norm(mu, sigma)
+        return dist.pdf(x)
 
     # Make functions for convolution
-    integrand = lambda x, mu: like(x) * gaussian(x, mu)
+    integrand = lambda x, mu: like(x) * prior(x, mu)
     convolved = lambda mu: -2. * np.log(
         quad(integrand, min_, max_, args=(mu))[0]
-        / quad(gaussian, min_, max_, args=(mu))[0])
+        / quad(prior, min_, max_, args=(mu))[0])
 
     # Perform convolution
     return [(p, convolved(p)) for p in param]
