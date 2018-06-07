@@ -178,6 +178,19 @@ namespace Gambit
       mssmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
       mssmspec.set_override(Par::mass1,spectrum_generator.get_low_scale(), "low_scale", true);
 
+
+      // Has the user chosen to override any pole mass values?
+      // This will typically break consistency, but may be useful in some special cases
+      if (runOptions.hasKey("override_FS_pole_masses"))
+      {
+        std::vector<str> particle_names = runOptions.getNames("override_FS_pole_masses");
+        for (auto& name : particle_names)
+        {
+          double mass = runOptions.getValue<double>("override_FS_pole_masses", name);
+          mssmspec.set_override(Par::Pole_Mass, mass, name);
+        }
+      }
+
       // Add theory errors
       static const MSSM_strs ms;
 
@@ -1030,6 +1043,13 @@ namespace Gambit
       // Create Spectrum object from the slhaea object
       result = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(input_slha, input_slha, mass_cut, mass_ratio_cut);
 
+      // Add getter for susy scale if option set for this
+      bool add_susy_scale = myPipe::runOptions->getValueOrDef<bool>(false,"assume_Q_is_MSUSY");
+      if(add_susy_scale)
+      {
+         result.get_HE().set_override(Par::mass1,result.get_HE().GetScale(),"susy_scale",true); 
+      }
+
       // No sneaking in charged LSPs via SLHA, jävlar.
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
     }
@@ -1561,28 +1581,81 @@ namespace Gambit
     void add_extra_MSSM_parameter_combinations(std::map<std::string,double>& specmap, const SubSpectrum& mssm)
     {
       double At = 0;
-      double Yt = mssm.get(Par::dimensionless, "Yu", 3, 3);
+      double Ab = 0;
+      const double Yt = mssm.get(Par::dimensionless, "Yu", 3, 3);
+      const double Yb = mssm.get(Par::dimensionless, "Yd", 3, 3);
       if(std::abs(Yt) > 1e-12)
       {
         At = mssm.get(Par::mass1, "TYu", 3, 3) / Yt;
       }
-      double MuSUSY = mssm.get(Par::mass1, "Mu");
-      double tb = mssm.get(Par::dimensionless, "tanbeta");
+      if(std::abs(Yb) > 1e-12)
+      {
+        Ab = mssm.get(Par::mass1, "TYd", 3, 3) / Yb;
+      }
+
+      const double MuSUSY = mssm.get(Par::mass1, "Mu");
+      const double tb = mssm.get(Par::dimensionless, "tanbeta");
+
       specmap["Xt"] = At - MuSUSY / tb;
+      specmap["Xb"] = Ab - MuSUSY * tb;
       /// Determine which states are the third gens then add them for printing
       str msf1, msf2;
-      /// Since this is for printing we only want to invalidate the point if this is completely wrong.  We can also plot the mixing if we are suspicious.
+      /// Since this is for printing we only want to invalidate the point
+      /// if this is completely wrong.
+      /// We can also plot the mixing if we are suspicious.
       const static double tol = 0.5;
       const static bool pt_error = true;
-      slhahelp::family_state_mix_matrix("~u", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      slhahelp::family_state_mix_matrix("~u", 3, msf1, msf2, mssm, tol,
+                                        LOCAL_INFO, pt_error);
       specmap["mstop1"] =  mssm.get(Par::Pole_Mass, msf1);
       specmap["mstop2"] =  mssm.get(Par::Pole_Mass, msf2);
-      slhahelp::family_state_mix_matrix("~d", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      slhahelp::family_state_mix_matrix("~d", 3, msf1, msf2, mssm, tol,
+                                        LOCAL_INFO, pt_error);
       specmap["msbottom1"] =  mssm.get(Par::Pole_Mass, msf1);
       specmap["msbottom2"] =  mssm.get(Par::Pole_Mass, msf2);
-      slhahelp::family_state_mix_matrix("~e-", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      slhahelp::family_state_mix_matrix("~e-", 3, msf1, msf2, mssm, tol,
+                                        LOCAL_INFO, pt_error);
       specmap["mstau1"] =  mssm.get(Par::Pole_Mass, msf1);
       specmap["mstau2"] =  mssm.get(Par::Pole_Mass, msf2);
+      /// return mass eigenstate strings that best represent required gauge
+      /// eigenstate
+      const str gs_suL = slhahelp::mass_es_from_gauge_es("~u_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msupL"] = mssm.get(Par::Pole_Mass,gs_suL);
+      const str gs_scL = slhahelp::mass_es_from_gauge_es("~c_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mscharmL"] = mssm.get(Par::Pole_Mass,gs_scL);
+      const str gs_sdL = slhahelp::mass_es_from_gauge_es("~d_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msdownL"] = mssm.get(Par::Pole_Mass,gs_sdL);
+      const str gs_ssL = slhahelp::mass_es_from_gauge_es("~s_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msstrangeL"] = mssm.get(Par::Pole_Mass,gs_ssL);
+      const str gs_suR = slhahelp::mass_es_from_gauge_es("~u_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msupR"] = mssm.get(Par::Pole_Mass,gs_suR);
+      const str gs_scR = slhahelp::mass_es_from_gauge_es("~c_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mscharmR"] = mssm.get(Par::Pole_Mass,gs_scR);
+      const str gs_sdR = slhahelp::mass_es_from_gauge_es("~d_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msdownR"] = mssm.get(Par::Pole_Mass,gs_sdR);
+      const str gs_ssR = slhahelp::mass_es_from_gauge_es("~s_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msstrangeR"] = mssm.get(Par::Pole_Mass,gs_ssR);
+      const str gs_seL = slhahelp::mass_es_from_gauge_es("~e_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mselectronL"] = mssm.get(Par::Pole_Mass,gs_seL);
+      const str gs_sMuL = slhahelp::mass_es_from_gauge_es("~mu_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msmuonL"] = mssm.get(Par::Pole_Mass,gs_sMuL);
+      const str gs_seR = slhahelp::mass_es_from_gauge_es("~e_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mselectronR"] = mssm.get(Par::Pole_Mass,gs_seR);
+      const str gs_sMuR = slhahelp::mass_es_from_gauge_es("~mu_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msmuonR"] = mssm.get(Par::Pole_Mass,gs_sMuR);
+
     }
 
     void get_MSSM_spectrum_as_map (std::map<std::string,double>& specmap)

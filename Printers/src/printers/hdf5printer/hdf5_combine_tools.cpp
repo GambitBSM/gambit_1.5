@@ -593,7 +593,8 @@ namespace Gambit
                 }
                 // else everything is cool               
  
-                hid_t new_file = H5Fcreate(file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+                //hid_t new_file = H5Fcreate(file.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+                hid_t new_file = HDF5::openFile(file,false,'w'); // No overwrite allowed, this file shouldn't exist
                 if(new_file<0)
                 {
                     std::ostringstream errmsg;
