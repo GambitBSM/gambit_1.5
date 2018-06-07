@@ -32,29 +32,9 @@ namespace Gambit {
     class Analysis_ATLAS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
 
     protected:
-      // Numbers passing cuts
-      std::map<string,double> _numSR = {
-        {"SR2_SF_loose",0.},
-        {"SR2_SF_tight",0.},
-        {"SR2_DF_100",0.},
-        {"SR2_DF_150",0.},
-        {"SR2_DF_200",0.},
-        {"SR2_DF_300",0.},
-        {"SR2_int",0.},
-        {"SR2_high",0.},
-        {"SR2_low",0.},
-        {"SR3_slep_a",0.},
-        {"SR3_slep_b",0.},
-        {"SR3_slep_c",0.},
-        {"SR3_slep_d",0.},
-        {"SR3_slep_e",0.},
-        {"SR3_WZ_0Ja",0.},
-        {"SR3_WZ_0Jb",0.},
-        {"SR3_WZ_0Jc",0.},
-        {"SR3_WZ_1Ja",0.},
-        {"SR3_WZ_1Jb",0.},
-        {"SR3_WZ_1Jc",0.},
-      };
+
+      // Counters for the number of accepted events for each signal region
+      std::map<string,double> _numSR; 
 
     private:
 
@@ -110,12 +90,18 @@ namespace Gambit {
         if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
+
       Analysis_ATLAS_13TeV_MultiLEP_36invfb() {
 
         set_analysis_name("ATLAS_13TeV_MultiLEP_36invfb");
         set_luminosity(36.1);
 
+        // Create SR counters in the _numSR map and initialize them to zero
+        for (string SR_label : _included_SRs) { _numSR[SR_label] = 0.;}
+
         NCUTS1=22;
+
+
         // xsec1ATLAS_200_100=1807.4;
         for (size_t i=0;i<NCUTS1;i++){
           cutFlowVector1.push_back(0);
@@ -362,12 +348,6 @@ namespace Gambit {
 
 
         // Signal Regions
-
-        // DEBUG
-        increment_SR("SR2_SF_loose");
-        increment_SR("SR2_int");
-        increment_SR("SR3_slep_a");
-
 
         //2lep+0jet
         if (preselection && nSignalLeptons==2 && OSpairs.size()==1 && mll>40 && central_jet_veto && bjet_veto) {

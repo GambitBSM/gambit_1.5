@@ -31,17 +31,8 @@ namespace Gambit {
     class Analysis_CMS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
 
     protected:
-      // Numbers passing cuts
-      std::map<string,double> _numSR = {
-        {"SR1",0.},
-        {"SR2",0.},
-        {"SR3",0.},
-        {"SR4",0.},
-        {"SR5",0.},
-        {"SR6",0.},
-        {"SR7",0.},
-        {"SR8",0.},
-      };
+      // Counters for the number of accepted events for each signal region
+      std::map<string,double> _numSR; 
 
     private:
 
@@ -72,6 +63,9 @@ namespace Gambit {
         set_analysis_name("CMS_13TeV_MultiLEP_36invfb");
         set_luminosity(35.9);
         
+        // Create SR counters in the _numSR map and initialize them to zero
+        for (string SR_label : _included_SRs) { _numSR[SR_label] = 0.;}
+
         NCUTS1=10;
         NCUTS2=7;
         NCUTS3=7;
