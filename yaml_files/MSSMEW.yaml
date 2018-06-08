@@ -270,7 +270,7 @@ Rules:
   - capability: MC_ConvergenceSettings
     options:
       min_nEvents: [20000]
-      max_nEvents: [100000]
+      max_nEvents: [1000000]
       events_between_convergence_checks: [20000]
       target_fractional_uncert: [0.3]
       halt_when_systematic_dominated: true
@@ -353,8 +353,10 @@ Rules:
   - capability: ATLASAnalysisContainer
     function: getATLASAnalysisContainer
     options:
-      analyses: [ ["ATLAS_13TeV_MultiLEP_36invfb",
-                   "ATLAS_13TeV_RJ3L_lowmass_36invfb"] ]
+      analyses: [ [ "ATLAS_13TeV_RJ3L_lowmass_36invfb",
+                    "ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb",
+                    "ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb",
+                    "ATLAS_13TeV_MultiLEP_3Lep_36invfb" ] ]
 
   # ATLASnoeff analysis setup.
   # NOTE: Don't blindly copy this analysis list without also checking the
@@ -381,7 +383,8 @@ Rules:
     options:
       analyses: [ [ "CMS_13TeV_2LEPsoft_36invfb",
                     "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE",
-                    "CMS_13TeV_MultiLEP_36invfb",
+                    "CMS_13TeV_MultiLEP_2SSLep_36invfb",
+                    "CMS_13TeV_MultiLEP_3Lep_36invfb",
                     "CMS_13TeV_2OSLEP_36invfb",
                     "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE" ] ]
 
@@ -410,7 +413,7 @@ Rules:
   - capability: lnL_Higgs_invWidth
     function: lnL_Higgs_invWidth_SMlike
     options:
-      BR_h_inv_chi2_data_file: ./DecayBit/data/arXiv_1306.2941_Figure_8_50_profiled.dat
+      BR_h_inv_chi2_data_file: ./DecayBit/data/arXiv_1306.2941_Figure_8_log_normal_50_profiled.dat
 
 # Set the names of key log files
 Logger:

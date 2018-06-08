@@ -3,7 +3,7 @@
 Profile a chi-squared in a data file with a fractional theory error
 ===================================================================
 
-python profile_theory.py <file> <frac-error> <min> <max>
+python profile_theory.py <file> <frac-error> <min> <max> <log-normal>
 
 prints (parameter, profiled chi-squared) from a file containing
 (parameter, chi-squared).
@@ -13,9 +13,10 @@ import sys
 import numpy as np
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
+from scipy.stats import norm, lognorm
 
 
-def profile(file_name, frac_error=0.1, min_=0., max_=1.):
+def profile(file_name, frac_error=0.1, min_=0., max_=1., log_normal=True):
     """
     Profile a chi-squared in a data file with a fractional theory error
 
@@ -24,6 +25,7 @@ def profile(file_name, frac_error=0.1, min_=0., max_=1.):
         frac_error (float, optional): Fractional theory error on the parameter.
         min_ (float, optional): Minimum value of parameter.
         max_ (float, optional): Maximum value of parameter.
+        log_normal (bool, optional): Whether to use log-normal or normal error.
 
     Returns:
         list(tuples): List of (parameter, profiled chi-squared)
@@ -36,7 +38,16 @@ def profile(file_name, frac_error=0.1, min_=0., max_=1.):
         kind='linear', bounds_error=False, fill_value="extrapolate")
 
     # Make penalty for true prediction
-    penalty = lambda x, mu: (x - mu)**2 / (frac_error * mu)**2
+    def penalty(x, mu):
+        if log_normal:
+            sigma = np.log(1. + frac_error)
+            mode = np.exp(np.log(mu) - sigma**2)
+            dist = lognorm(sigma, scale=mu)
+        else:
+            sigma = frac_error * mu
+            mode = mu
+            dist = norm(mu, sigma)
+        return -2. * (dist.logpdf(x) - dist.logpdf(mode))
 
     # Make functions for profile
     objective = lambda x, mu: chi_squared(x) + penalty(x, mu)
