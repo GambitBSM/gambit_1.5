@@ -2,6 +2,12 @@
 ///  \author Rose Kudzman-Blais
 ///  \date 2017 May
 ///
+///  \author Are Raklev
+///  \date 2018 June
+///
+///  \author Anders Kvellestad
+///  \date 2018 June
+///
 ///  *********************************************
 
 // Based on http://cms-results.web.cern.ch/cms-results/public-results/preliminary-results/SUS-16-048/index.html
@@ -29,8 +35,7 @@ namespace Gambit {
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
-      // vector<double> cutFlowVectorCMS_150_143;
-      // vector<double> cutFlowVectorCMS_150_130;
+      vector<double> cutFlowVectorCMS_150_130;
       // double xsecCMS_150_143;
       // double xsecCMS_150_130;
 
@@ -60,14 +65,13 @@ namespace Gambit {
         _numSR11=0;
         _numSR12=0; 
 
-        NCUTS=12;
+        NCUTS=14;
         // xsecCMS_150_143=5180.;
         // xsecCMS_150_130=5180.;
 
         for (size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
-          // cutFlowVectorCMS_150_143.push_back(0);
-          // cutFlowVectorCMS_150_130.push_back(0);
+          cutFlowVectorCMS_150_130.push_back(0);
           cutFlowVector_str.push_back("");
         }
       }
@@ -124,19 +128,19 @@ namespace Gambit {
         HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         for (HEPUtils::Particle* muon : event->muons()) {
           bool isMu=has_tag(_eff2dMu,muon->eta(),muon->pT());
-          if (muon->pT()>5. && muon->pT()<30. && fabs(muon->eta())<2.4 && isMu)signalMuons.push_back(muon);
+          if (muon->pT()>5. && muon->pT()<30. && fabs(muon->eta())<2.4 && isMu) signalMuons.push_back(muon);
         }
 
         for (HEPUtils::Jet* jet : event->jets()) {
           if (jet->pT()>25. && fabs(jet->eta())<2.4) {
-           signalJets.push_back(jet); 
+           signalJets.push_back(jet);
            if (jet->btag())signalBJets.push_back(jet);
           }
         }
         // Apply b-tag efficiencies and b-tag misidentification rate
-        // for the CSVv2Loose working point 
+        // for the CSVv2Loose working point
         CMS::applyCSVv2LooseBtagEffAndMisId(signalJets,signalBJets);
-
+        
         signalLeptons=signalElectrons;
         signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
@@ -145,24 +149,38 @@ namespace Gambit {
         size_t nSignalJets=signalJets.size();
         size_t nSignalBJets=signalBJets.size();
 
-        //Variable
+        // Cut variables
         double m_ll=0;
         double pT_ll=0;
         double hT=0;
         double mTauTau=0;
+        double metcorr=0;
         vector<double> mT;
 
         bool preselection=false; 
         bool OS=false;
         
-        if (nSignalLeptons>1) {
+        // Muon corrected ETmiss
+        double metcorrx = event->missingmom().px();
+        double metcorry = event->missingmom().py();
+        for (size_t iLep=0;iLep<nSignalMuons;iLep++){
+          metcorrx += signalMuons.at(iLep)->mom().px();
+          metcorry += signalMuons.at(iLep)->mom().py();
+        }
+        metcorr = sqrt(metcorrx*metcorrx+metcorry*metcorry);
+
+        
+        if (nSignalLeptons == 2) {
           m_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).m();
           pT_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).pT();
-
+          
+          // Calculation of $M_{\tau\tau}$ variable
           double determinant = signalLeptons.at(0)->mom().px()*signalLeptons.at(1)->mom().py()-signalLeptons.at(0)->mom().py()*signalLeptons.at(1)->mom().px();
-          float xi_1 = (event->missingmom().px()*signalLeptons.at(1)->mom().py()-signalLeptons.at(1)->mom().px()*event->missingmom().py())/determinant;
-          float xi_2 = (event->missingmom().py()*signalLeptons.at(0)->mom().px()-signalLeptons.at(0)->mom().py()*event->missingmom().px())/determinant;
+          double xi_1 = (event->missingmom().px()*signalLeptons.at(1)->mom().py()-signalLeptons.at(1)->mom().px()*event->missingmom().py())/determinant;
+          double xi_2 = (event->missingmom().py()*signalLeptons.at(0)->mom().px()-signalLeptons.at(0)->mom().py()*event->missingmom().px())/determinant;
           mTauTau = (1.+xi_1)*(1.+xi_2)*2*signalLeptons.at(0)->mom().dot(signalLeptons.at(1)->mom());
+          if(mTauTau > 0) mTauTau = sqrt(mTauTau);
+          if(mTauTau < 0) mTauTau = -sqrt(-mTauTau);
         }
 
         for (size_t iJet=0;iJet<nSignalJets;iJet++)hT+=signalJets.at(iJet)->pT();
@@ -174,22 +192,24 @@ namespace Gambit {
         }
         if (nSignalLeptons==1)mT.push_back(999);
         
-        if (nSignalLeptons==2)OS=signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()<0.;
+        if (nSignalLeptons==2) OS=signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()<0.;
 
         if (nSignalLeptons==2 && nSignalBJets==0 && nSignalJets>0) {
           if (OS && signalLeptons.at(0)->abspid()==signalLeptons.at(1)->abspid()) {
-            if (m_ll<50. && pT_ll>3. && met>125. && met/hT<1.4 && met/hT>0.6 && hT>100. && m_ll>4. && (m_ll<9. || m_ll>10.5) && (mTauTau<0. || mTauTau>160.) && mT.at(0)<70. && mT.at(1)<70.) {
+            if (m_ll<50. && pT_ll>3. && met>125. && metcorr > 125. && met/hT<1.4 && met/hT>0.6 && hT>100. && m_ll>4. && (m_ll<9. || m_ll>10.5) && (mTauTau<0. || mTauTau>160.) && mT.at(0)<70. && mT.at(1)<70.) {
               preselection=true;
             }
           }
-        }       
+        }
+        
 
-        //Signal Regions
-        if (preselection && met>125. && met<200. && nSignalMuons>0) {
-          if (m_ll>4. && m_ll<10.)_numSR1++;
-          if (m_ll>10. && m_ll<20.)_numSR2++;
-          if (m_ll>20. && m_ll<30.)_numSR3++;
-          if (m_ll>30. && m_ll<50.)_numSR4++;
+        // Signal Regions
+        // In the low ETmiss region, for each passing event we add 0.65 due to trigger efficiency
+        if (preselection && met>125. && met<200. && nSignalMuons == 2) {
+          if (m_ll>4. && m_ll<10.)_numSR1 += 0.65;
+          if (m_ll>10. && m_ll<20.)_numSR2 += 0.65;
+          if (m_ll>20. && m_ll<30.)_numSR3 += 0.65;
+          if (m_ll>30. && m_ll<50.)_numSR4 += 0.65;
         }
         if (preselection && met>200. && met<250.) {
           if (m_ll>4. && m_ll<10.)_numSR5++;
@@ -205,43 +225,36 @@ namespace Gambit {
         }
 
         cutFlowVector_str[0] = "All events";
-        cutFlowVector_str[1] = "2 $\\mu$ in acceptance";
-        cutFlowVector_str[2] = "Opposite-sign";
-        cutFlowVector_str[3] = "$p_{T}(\\mu\\mu) > 3 GeV$";
-        cutFlowVector_str[4] = "$M(\\mu\\mu) > 4 GeV$";
+        cutFlowVector_str[1] = "2 reconstructed $\\mu$'s with $5 < p_{T} < 30$ GeV";
+        cutFlowVector_str[2] = "$\\mu$'s oppositely charged";
+        cutFlowVector_str[3] = "$p_{T}(\\mu\\mu) > 3$ GeV";
+        cutFlowVector_str[4] = "$M(\\mu\\mu) \\in [4,50]$ GeV";
         cutFlowVector_str[5] = "$M(\\mu\\mu)$ veto [9,10.5] $GeV$";
-        cutFlowVector_str[6] = "ISR jet";
-        cutFlowVector_str[7] = "$ 125 < E^{miss}_{T} < 200 GeV$";
-        cutFlowVector_str[8] = "$ 0.6 < E^{miss}_{T}/H_{T} < 1.4$ and $H_{T} > 100 GeV$";
-        cutFlowVector_str[9] = "B-tag veto";
-        cutFlowVector_str[10] = "$M(\\tau\\tau)$";
-        cutFlowVector_str[11] = "$M_{T}(\\mu_{x},E^{miss}_{T}), x = 1,2 < 70 GeV$";
+        cutFlowVector_str[6] = "$125 < p^{miss}_{T} < 200$ GeV";
+        cutFlowVector_str[7] = "Trigger. Implemented as efficiency.";
+        cutFlowVector_str[8] = "ISR jet";
+        cutFlowVector_str[9] = "$H_{T} > 100$ GeV";
+        cutFlowVector_str[10] = "$0.6 < p^{miss}_{T}/H_{T} < 1.4$";
+        cutFlowVector_str[11] = "b-tag veto";
+        cutFlowVector_str[12] = "$M(\\tau\\tau)$ veto";
+        cutFlowVector_str[13] = "$M_{T}(\\mu_{x},p^{miss}_{T}), x = 1,2 < 70$ GeV";
 
-        // cutFlowVectorCMS_150_143[0] = 220.3;
-        // cutFlowVectorCMS_150_143[1] = 53.3;
-        // cutFlowVectorCMS_150_143[2] = 49.4;
-        // cutFlowVectorCMS_150_143[3] = 48.9;
-        // cutFlowVectorCMS_150_143[4] = 23.5;
-        // cutFlowVectorCMS_150_143[5] = 23.3;
-        // cutFlowVectorCMS_150_143[6] = 21.5;
-        // cutFlowVectorCMS_150_143[7] = 5.8;
-        // cutFlowVectorCMS_150_143[8] = 3.8;
-        // cutFlowVectorCMS_150_143[9] = 3.2;
-        // cutFlowVectorCMS_150_143[10] = 2.8;
-        // cutFlowVectorCMS_150_143[11] = 2.4;
-
-        // cutFlowVectorCMS_150_130[0] = 645.9;
-        // cutFlowVectorCMS_150_130[1] = 171.8;
-        // cutFlowVectorCMS_150_130[2] = 163.5;
-        // cutFlowVectorCMS_150_130[3] = 161.4;
-        // cutFlowVectorCMS_150_130[4] = 150.1;
-        // cutFlowVectorCMS_150_130[5] = 134.7;
-        // cutFlowVectorCMS_150_130[6] = 112.4;
-        // cutFlowVectorCMS_150_130[7] = 32.2;
-        // cutFlowVectorCMS_150_130[8] = 30.9;
-        // cutFlowVectorCMS_150_130[9] = 17.6;
-        // cutFlowVectorCMS_150_130[10] = 14.8;
-        // cutFlowVectorCMS_150_130[11] = 11.4;
+        
+        // Cut flow from CMS email
+        cutFlowVectorCMS_150_130[0] = 172004.;
+        cutFlowVectorCMS_150_130[1] = 1250.4;
+        cutFlowVectorCMS_150_130[2] = 1199.6;
+        cutFlowVectorCMS_150_130[3] = 1176.0;
+        cutFlowVectorCMS_150_130[4] = 1095.2;
+        cutFlowVectorCMS_150_130[5] = 988.6;
+        cutFlowVectorCMS_150_130[6] = 46.8;
+        cutFlowVectorCMS_150_130[7] = 30.7;
+        cutFlowVectorCMS_150_130[8] = 27.9;
+        cutFlowVectorCMS_150_130[9] = 23.6;
+        cutFlowVectorCMS_150_130[10] = 17.2;
+        cutFlowVectorCMS_150_130[11] = 14.0;
+        cutFlowVectorCMS_150_130[12] = 12.3;
+        cutFlowVectorCMS_150_130[13] = 9.3;
 
         for (size_t j=0;j<NCUTS;j++){
           if(
@@ -253,22 +266,25 @@ namespace Gambit {
 
              (j==3 && nSignalMuons==2 && OS && pT_ll>3.) ||
 
-             (j==4 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4.) ||
+             (j==4 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.)) ||
 
-             (j==5 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5)) ||
+             (j==5 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5)) ||
 
-             (j==6 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0) ||
+             (j==6 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.)) ||
 
-             (j==7 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200.) ||
+             (j==7 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.)) ||
 
-             (j==8 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100.) ||
+             (j==8 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.) && nSignalJets>0) ||
 
-             (j==9 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0) ||
+             (j==9 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.) && nSignalJets>0 && hT>100.) ||
 
-             (j==10 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.)) ||
+             (j==10 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.) && nSignalJets>0 && hT>100. && (met/hT<1.4 && met/hT>0.6)) ||
 
-             (j==11 && nSignalMuons==2 && OS && pT_ll>3. && m_ll>4. && (m_ll<9. || m_ll>10.5) && nSignalJets>0 && met>125. && met<200. && met/hT<1.4 && met/hT>0.6 && hT>100. && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.) &&mT.at(0)<70. && mT.at(1)<70.) )
+             (j==11 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.) && nSignalJets>0 && hT>100. && (met/hT<1.4 && met/hT>0.6) && nSignalBJets==0) ||
 
+             (j==12 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.) && nSignalJets>0 && hT>100. && (met/hT<1.4 && met/hT>0.6) && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.)) ||
+            
+             (j==13 && nSignalMuons==2 && OS && pT_ll>3. && (m_ll>4. && m_ll<50.) && (m_ll<9. || m_ll>10.5) && (met>125. && metcorr > 125. && met<200.) && nSignalJets>0 && hT>100. && (met/hT<1.4 && met/hT>0.6) && nSignalBJets==0  && (mTauTau<0. || mTauTau>160.) && (mT.at(0)<70. && mT.at(1)<70.)))
           cutFlowVector[j]++;
         }
       }
@@ -343,7 +359,27 @@ namespace Gambit {
 
  //        cutflowFile.close();
 
-
+        // DEBUG
+//        double L = 33.2;
+//        double xsec = 5180.;
+//        cout << "DEBUG:" << endl;
+//        for (size_t i=0; i<NCUTS; i++)
+//        {
+//          double CMS_abs = cutFlowVectorCMS_150_130[i];
+//          //double CMS_abs = cutFlowVectorCMS_150_143[i];
+//          double GAMBIT_abs = cutFlowVector[i];
+//          
+//          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
+//          if(i>6) eff *= 0.65;
+//          // double eff = (double)cutFlowVector[i] / 100000.;
+//
+//          double GAMBIT_scaled = eff * xsec * L;
+//
+//          double ratio = GAMBIT_scaled/CMS_abs;
+//          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << CMS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
+//        }
+//        cout << "DEBUG:" << endl;
+        
 
         // Signal region info for the covariance matrix
         static const size_t SR_size_cov = 12;
