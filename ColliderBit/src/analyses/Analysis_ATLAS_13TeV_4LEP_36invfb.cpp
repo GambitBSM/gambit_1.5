@@ -229,8 +229,8 @@ namespace Gambit
         size_t nSignalJets = signalJets.size();
 
         // Get OS and SFOS pairs
-        vector<vector<HEPUtils::Particle*>> SFOSpairs = getSFOSpair(signalLeptons);
-        vector<vector<HEPUtils::Particle*>> OSpairs = getOSpair(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> SFOSpairs = getSFOSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> OSpairs = getOSpairs(signalLeptons);
 
 
         // Z requirements
@@ -379,38 +379,6 @@ namespace Gambit
         add_result(SignalRegionData("SR0B",  2., {_numSR["SR0B"], 0.}, {1.31, 0.24}));
         add_result(SignalRegionData("SR0C", 47., {_numSR["SR0C"], 0.}, {37., 9.}));
         add_result(SignalRegionData("SR0D", 10., {_numSR["SR0D"], 0.}, {4.1, 0.7}));
-      }
-
-      // Construct collection of SFOS pairs
-      vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> SFOSpair_container;
-        for (size_t iLe1=0; iLe1<leptons.size(); iLe1++) {
-          for (size_t iLe2=iLe1+1; iLe2<leptons.size(); iLe2++) {
-            if (leptons.at(iLe1)->abspid()==leptons.at(iLe2)->abspid() && leptons.at(iLe1)->pid()!=leptons.at(iLe2)->pid()) {
-              vector<HEPUtils::Particle*> SFOSpair;
-              SFOSpair.push_back(leptons.at(iLe1));
-              SFOSpair.push_back(leptons.at(iLe2));
-              SFOSpair_container.push_back(SFOSpair);
-            }
-          }
-        }
-        return SFOSpair_container;
-      }
-
-      // Construct collection of OS pairs
-      vector<vector<HEPUtils::Particle*>> getOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> OSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {
-          for (size_t iLe2=iLe1+1; iLe2<leptons.size(); iLe2++) {
-            if (leptons.at(iLe1)->pid()*leptons.at(iLe2)->pid()<0.) {
-              vector<HEPUtils::Particle*> OSpair;
-              OSpair.push_back(leptons.at(iLe1));
-              OSpair.push_back(leptons.at(iLe2));
-              OSpair_container.push_back(OSpair);
-            }
-          }
-        }
-        return OSpair_container;
       }
 
 
