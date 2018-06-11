@@ -208,10 +208,10 @@ namespace Gambit {
         double deltaPhi_met_j0=0;
         double deltaPhi_met_j1=0;       
 
-        // When picking out the OSSF lepton pair, should we loop through all leptons (use function getSFOSpair)
+        // When picking out the SFOS lepton pair, should we loop through all leptons (use function getSFOSpairs)
         // or only check the two leptons with highest PT, as we currently do below?
 
-        // vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpair(signalLeptons);
+        // vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpairs(signalLeptons);
         vector<vector<HEPUtils::Particle*>> SFOSpair_cont;
         if (signalLeptons.size() >= 2)
         {
@@ -455,19 +455,6 @@ namespace Gambit {
       }
 
 
-
-      vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> SFOSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {        
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->abspid()==leptons.at(iLe2)->abspid() && leptons.at(iLe1)->pid()!=leptons.at(iLe2)->pid()) {
-              vector<HEPUtils::Particle*> SFOSpair;
-              SFOSpair.push_back(leptons.at(iLe1));
-              SFOSpair.push_back(leptons.at(iLe2));
-              SFOSpair_container.push_back(SFOSpair);
-            } } }
-        return SFOSpair_container;
-      }
 
       double get_mjj(vector<HEPUtils::Jet*> jets) {
         double mjj=0;
