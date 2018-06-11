@@ -275,76 +275,76 @@ namespace Gambit
 
         // SR0A
         // Missing: check for zero taus
-        // if (nSignalLeptons >= 4 && !Zlike && meff > 600.) _numSR["SR0A"]++;
-        if (nSignalLeptons >= 4 && !Zlike && meff > 600.)
-        {
-          cout << "DEBUG: " << "--- Got event for SR0A ---" << endl;
-          cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
-          cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
-          cout << "DEBUG: " << "  meff = " << meff << endl;
-          cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
-          for (double mass : SFOSpair_masses)
-          {
-            cout << "DEBUG: " << "  pair mass: " << mass << endl;
-          }
+        if (nSignalLeptons >= 4 && !Zlike && meff > 600.) _numSR["SR0A"]++;
+        // if (nSignalLeptons >= 4 && !Zlike && meff > 600.)
+        // {
+        //   cout << "DEBUG: " << "--- Got event for SR0A ---" << endl;
+        //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
+        //   cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
+        //   cout << "DEBUG: " << "  meff = " << meff << endl;
+        //   cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
+        //   for (double mass : SFOSpair_masses)
+        //   {
+        //     cout << "DEBUG: " << "  pair mass: " << mass << endl;
+        //   }
 
-          _numSR["SR0A"]++;
-        }
+        //   _numSR["SR0A"]++;
+        // }
 
         // SR0B
         // Missing: check for zero taus
-        // if (nSignalLeptons >= 4 && !Zlike && meff > 1100.) _numSR["SR0B"]++;
-        if (nSignalLeptons >= 4 && !Zlike && meff > 1100.)
-        {
-          cout << "DEBUG: " << "--- Got event for SR0B ---" << endl;
-          cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
-          cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
-          cout << "DEBUG: " << "  meff = " << meff << endl;
-          cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
-          for (double mass : SFOSpair_masses)
-          {
-            cout << "DEBUG: " << "  pair mass: " << mass << endl;
-          }
+        if (nSignalLeptons >= 4 && !Zlike && meff > 1100.) _numSR["SR0B"]++;
+        // if (nSignalLeptons >= 4 && !Zlike && meff > 1100.)
+        // {
+        //   cout << "DEBUG: " << "--- Got event for SR0B ---" << endl;
+        //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
+        //   cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
+        //   cout << "DEBUG: " << "  meff = " << meff << endl;
+        //   cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
+        //   for (double mass : SFOSpair_masses)
+        //   {
+        //     cout << "DEBUG: " << "  pair mass: " << mass << endl;
+        //   }
 
-          _numSR["SR0B"]++;
-        }
+        //   _numSR["SR0B"]++;
+        // }
 
 
         // SR0C
         // Missing: check for zero taus
-        // if (nSignalLeptons >= 4 && Z1 && Z2 && met > 50.) _numSR["SR0C"]++;
-        if (nSignalLeptons >= 4 && Z1 && Z2 && met > 50.)
-        {
-          cout << "DEBUG: " << "--- Got event for SR0C ---" << endl;
-          cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
-          cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
-          cout << "DEBUG: " << "  met = " << met << endl;
-          cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
-          for (double mass : SFOSpair_masses)
-          {
-            cout << "DEBUG: " << "  pair mass: " << mass << endl;
-          }
+        if (nSignalLeptons >= 4 && Z1 && Z2 && met > 50.) _numSR["SR0C"]++;
+        // if (nSignalLeptons >= 4 && Z1 && Z2 && met > 50.)
+        // {
+        //   cout << "DEBUG: " << "--- Got event for SR0C ---" << endl;
+        //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
+        //   cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
+        //   cout << "DEBUG: " << "  met = " << met << endl;
+        //   cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
+        //   for (double mass : SFOSpair_masses)
+        //   {
+        //     cout << "DEBUG: " << "  pair mass: " << mass << endl;
+        //   }
 
-          _numSR["SR0C"]++;
-        }
+        //   _numSR["SR0C"]++;
+        // }
 
         // SR0D
         // Missing: check for zero taus
-        // if (nSignalLeptons >= 4 && Z1 && Z2 && met > 100.) _numSR["SR0D"]++;
-        if (nSignalLeptons >= 4 && Z1 && Z2 && met > 100.)
-        {
-          cout << "DEBUG: " << "--- Got event for SR0D ---" << endl;
-          cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
-          cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
-          cout << "DEBUG: " << "  met = " << met << endl;
-          cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
-          for (double mass : SFOSpair_masses)
-          {
-            cout << "DEBUG: " << "  pair mass: " << mass << endl;
-          }
+        if (nSignalLeptons >= 4 && Z1 && Z2 && met > 100.) _numSR["SR0D"]++;
+        // if (nSignalLeptons >= 4 && Z1 && Z2 && met > 100.)
+        // {
+        //   cout << "DEBUG: " << "--- Got event for SR0D ---" << endl;
+        //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
+        //   cout << "DEBUG: " << "  jets: " << nSignalJets << endl;
+        //   cout << "DEBUG: " << "  met = " << met << endl;
+        //   cout << "DEBUG: " << "  nSFOSpairs = " << SFOSpairs.size() << endl;
+        //   for (double mass : SFOSpair_masses)
+        //   {
+        //     cout << "DEBUG: " << "  pair mass: " << mass << endl;
+        //   }
 
-          _numSR["SR0D"]++;
-        }
+        //   _numSR["SR0D"]++;
+        // }
 
         // Missing: signal regions SR1 (3L1T) and SR2 (2L2T)
       }
