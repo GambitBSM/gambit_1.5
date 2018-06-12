@@ -3207,6 +3207,9 @@ StandardModel_Higgs_running_parameters: |
 StandardModel_SLHA2_parameters: |
    Parameters for the model StandardModel_SLHA2 (see ./gambit StandardModel_SLHA2)
 
+StandardModel_mNudiff_parameters: |
+   Parameters for the model StandardModel_mNudiff (see ./gambit StandardModel_mNudiff)
+
 TestModel1D_parameters: |
    Parameters for the model TestModel1D (see ./gambit TestModel1D)
 
@@ -3226,10 +3229,10 @@ nuclear_params_sigmas_sigmal_parameters: |
    Parameters for the model nuclear_params_sigmas_sigmal (see ./gambit nuclear_params_sigmas_sigmal)
 
 RightHandedNeutrinos_parameters: |
-   Parameters for the model RightHandedNeutrinos
+   Parameters for the model RightHandedNeutrinos (see ./gambit RightHandedNeutrios)
 
 RightHandedNeutrinos_diff_parameters: |
-   Parameters for the model RightHandedNeutrinos_diff
+   Parameters for the model RightHandedNeutrinos_diff (see ./gambit RightHandedNeutrinos_diff)
  
 
 #-------------------------------------
