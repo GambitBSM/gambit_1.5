@@ -15,7 +15,7 @@ def tickform(x, pos):
     return '$%1.1f' % (x/10)
     
 
-ifile = open("RHN_81_84_like2D.ct2", 'r')
+ifile = open("/home/julia/projects/GAMBIT/plots/pippi_scripts/triangle10E-12_0/parse/RHN_81_84_like2D.ct2", 'r')
 ifile_lines=ifile.readlines()
 
 Ue1=[]; Um1=[]; Ut1=[]; Loglike=[];
@@ -34,6 +34,10 @@ Um1grid = np.linspace(0,100,101)
 
 Loglikegrid = griddata((Ue1, Um1), Loglike, (Ue1grid[None,:], Um1grid[:,None]), method='cubic')
 
+#xi_coords = {value: index for index, value in enumerate(Ue1grid)}
+#yi_coords = {value: index for index, value in enumerate(Um1grid)}
+
+#print(Loglikegrid[xi_coords[1], yi_coords[2]])
 
 def generate_random_heatmap_data(scale=100):
     from ternary.helpers import simplex_iterator
@@ -48,11 +52,29 @@ scale =100
 
 data = generate_random_heatmap_data(scale)
 
+#def data:
+
+#xic = 0.5
+#yic = 0.5
+#print(Loglikegrid[xi_coords[xic], yi_coords[yic]])
+
+#scale = 1
+
+#combined = np.vstack((Ue1,Um1,Loglike)).T
+
+#data = {}
+#data[(i,j)]= dict(zip(Ue1,Um1,Loglike))
+
 fig, ax = plt.subplots()
 ax.axis("off")
 figure, tax = ternary.figure(ax=ax, scale=scale)
+
+#tax.heatmapf(Loglikegrid, boundary=False,
+             #style="hexagonal", cmap=plt.cm.get_cmap('Blues'),
+             #cbarlabel='Component 0 uptake',
+             #vmax=1.0, vmin=0.0)
              
-tax.heatmap(data, cmap=None)
+tax.heatmap(data, vmin=0, vmax=1, cmap=None)
 
 tax.boundary(linewidth=2.0)
 
@@ -74,9 +96,10 @@ tax.ticks(axis='lbr', linewidth=1, multiple=10, offset=0.01)
 #tax.bottom_axis.set_major_formatter(formater)
 
 
+
 tax.clear_matplotlib_ticks()
 tax._redraw_labels()
 plt.tight_layout()
 # and save it to a file
-plt.savefig('triangle_mixing_heatmap.pdf',bbox_inches='tight')
+plt.savefig('triangle_mixing_heatmap_mlightest_0_10E-12.pdf',bbox_inches='tight')
 tax.show()
