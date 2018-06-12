@@ -71,7 +71,7 @@ namespace Gambit
 
             void set_resume_mode(const bool &mode)
             {
-                resume = (mode && access( name.c_str(), F_OK )) ? false : mode;
+                resume = mode; // (mode && access( name.c_str(), F_OK )) ? false : mode;
             }
             
             bool resume_mode() const {return resume;}
