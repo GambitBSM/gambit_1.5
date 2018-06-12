@@ -3376,6 +3376,7 @@ namespace Gambit
         std::vector<double> mN = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
         Eigen::Matrix3cd VnuNorm = Dep::SeesawI_Vnu->adjoint() * *Dep::SeesawI_Vnu;
         Eigen::Matrix3cd ThetaVnuNorm = Dep::SeesawI_Vnu->adjoint() * *Dep::SeesawI_Theta;
+        Eigen::Matrix3cd ThetaNorm = *Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint();
 
         // Z -> nu nu with RHN mixing
         Z_inv_width = Z_to_nu*( std::norm(VnuNorm(0,0)) + std::norm(VnuNorm(0,1)) + std::norm(VnuNorm(0,2)) 
@@ -3388,6 +3389,9 @@ namespace Gambit
             Z_inv_width += Z_to_nu*(std::norm(ThetaVnuNorm(0,i)) + std::norm(ThetaVnuNorm(1,i)) + std::norm(ThetaVnuNorm(2,i)))*pow(1.0 - pow(mN[i]/MZ,2),2)*(1 + 0.5*pow(mN[i]/MZ,2));
 
         // Z -> NN with RHN mixing. Contribution neglected because is of order Theta^4
+
+        // Add Gmu correction
+        Z_inv_width /= sqrt(1 - std::abs(ThetaNorm(0,0)) - std::abs(ThetaNorm(1,1)));
 
       }
 
