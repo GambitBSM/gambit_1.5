@@ -379,7 +379,7 @@ Rules:
     function: getCMSnoeffAnalysisContainer
     options:
       analyses: [ [ "CMS_13TeV_2LEPsoft_36invfb",
-                    "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE",
+                    "CMS_13TeV_2LEPsoft_36invfb_nocovar",
                     "CMS_13TeV_MultiLEP_2SSLep_36invfb",
                     "CMS_13TeV_MultiLEP_3Lep_36invfb",
                     "CMS_13TeV_2OSLEP_36invfb",
@@ -392,7 +392,7 @@ Rules:
   - capability: LHC_Combined_LogLike
     function: calc_LHC_LogLike
     options:
-      skip_analyses: [ "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE", 
+      skip_analyses: [ "CMS_13TeV_2LEPsoft_36invfb_nocovar", 
                        "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE" ]
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
