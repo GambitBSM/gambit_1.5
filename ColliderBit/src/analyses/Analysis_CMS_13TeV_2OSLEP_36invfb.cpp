@@ -24,11 +24,27 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
+    // This analysis class is also a base class for the class
+    // Analysis_CMS_13TeV_2OSLEP_36invfb_nocovar defined further down.
+    // This is the same analysis, but it does not make use of the 
+    // SR covariance information. 
     class Analysis_CMS_13TeV_2OSLEP_36invfb : public HEPUtilsAnalysis {
+
+    protected:
+
+      // Counters for the number of accepted events for each signal region
+      std::map<string,double> _numSR = {
+        {"SR1", 0},
+        {"SR2", 0},
+        {"SR3", 0},
+        {"SR4", 0},
+        {"SR5", 0},
+        {"SR6", 0},
+        {"SR7", 0},
+      }; 
+
     private:
 
-      // Numbers passing cuts
-      double _numSR1, _numSR2, _numSR3, _numSR4, _numSR5, _numSR6, _numSR7, _numSR8, _numSR9;
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       size_t NCUTS;
@@ -52,16 +68,6 @@ namespace Gambit {
         set_analysis_name("CMS_13TeV_2OSLEP_36invfb");
         set_luminosity(35.9);
         // xsecCMS_550_200=30.2;
-
-        _numSR1=0;
-        _numSR2=0;
-        _numSR3=0;
-        _numSR4=0;
-        _numSR5=0; 
-        _numSR6=0;
-        _numSR7=0; 
-        _numSR8=0; 
-        _numSR9=0; 
 
         NCUTS=13;
 
@@ -256,19 +262,17 @@ namespace Gambit {
           //VZ
           if (nSignalBJets==0 && mT2>80. && mjj<110.)
           {
-            if (met>50. && met<100.)_numSR1++;
-            if (met>100. && met<150.)_numSR2++;
-            if (met>150. && met<250.)_numSR3++;
-            if (met>250. && met<350.)_numSR4++;
-            if (met>350.)_numSR5++;
+            if (met>100. && met<150.) _numSR["SR1"]++;
+            if (met>150. && met<250.) _numSR["SR2"]++;
+            if (met>250. && met<350.) _numSR["SR3"]++;
+            if (met>350.) _numSR["SR4"]++;
           }
           //HZ
           if (nSignalBJets==2 && mbb<150. && mT2>200.)
           {
-            if (met>50. && met<100.)_numSR6++;
-            if (met>100. && met<150.)_numSR7++;
-            if (met>150. && met<250.)_numSR8++;
-            if (met>250.)_numSR9++;
+            if (met>100. && met<150.) _numSR["SR5"]++;
+            if (met>150. && met<250.) _numSR["SR6"]++;
+            if (met>250.) _numSR["SR7"]++;
           }
         }
 
@@ -353,71 +357,24 @@ namespace Gambit {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
           cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
-        _numSR1 += specificOther->_numSR1;
-        _numSR2 += specificOther->_numSR2;
-        _numSR3 += specificOther->_numSR3;
-        _numSR4 += specificOther->_numSR4;
-        _numSR5 += specificOther->_numSR5;
-        _numSR6 += specificOther->_numSR6;
-        _numSR7 += specificOther->_numSR7;
-        _numSR8 += specificOther->_numSR8;
-        _numSR9 += specificOther->_numSR9;
+
+        for (auto& el : _numSR) { 
+          el.second += specificOther->_numSR[el.first];
+        }
+
       }
 
 
-      void collect_results() 
+      virtual void collect_results() 
       {
-
-        // string path = "cutflow_";
-        // path.append(analysis_name());
-        // path.append(".txt");
-        // cutflowFile.open(path.c_str());
-
-        // double xsec = 30.2;
-        
-        // cutflowFile<<"\\begin{table}[H] \n\\caption{$\\tilde{\\chi}_{1}^{\\pm}\\tilde{\\chi}_{2}^{0}$ decay via $W/Z, [\\tilde{\\chi}_{2}^{0}\\tilde{\\chi}_{1}^{\\pm},\\tilde{\\chi}_{1}^{0}]: [550,200] [GeV]$} \n\\makebox[\\linewidth]{\n\\renewcommand{\\arraystretch}{0.4} \n\\begin{tabular}{c c c c c} \n\\hline"<<endl;
-        // cutflowFile<<"& CMS & GAMBIT & GAMBIT/CMS & $\\sigma$-corrected GAMBIT/CMS \\\\ \\hline"<<endl;
-        // cutflowFile<<"$\\sigma (pp\\to \\tilde{\\chi}_{1}^{\\pm}, \\tilde{\\chi}_{2}^{0})$ &"<<setprecision(4)<<xsecCMS_550_200<<" $fb$ &"<<setprecision(4)<<xsec<<"$fb$ &"<<setprecision(4)<<xsec/xsecCMS_550_200<<" & 1\\\\ \\hline"<< endl;
-        // cutflowFile<<"\\multicolumn{5}{c}{Expected events at 35.9 $fb^{-1}$} \\\\ \\hline"<<endl;
-        // for (size_t i=0; i<NCUTS; i++)
-        // {
-        //   cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec*luminosity()<<"&"<<setprecision(4)<<cutFlowVector[i]*xsec*luminosity()/cutFlowVectorCMS_550_200[i]<<"&"<<setprecision(4)<<(xsecCMS_550_200/xsec)*cutFlowVector[i]*xsec_per_event()*luminosity()/cutFlowVectorCMS_550_200[i]<<"\\\\"<< endl;
-        // }
-        // cutflowFile<<"\\hline \\multicolumn{5}{c}{Percentage (\\%)} \\\\ \\hline"<<endl;
-        // for (size_t i=0; i<NCUTS; i++)
-        // {
-        //   cutflowFile<<cutFlowVector_str[i]<<"&"<<setprecision(4)<<cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1]<<"&"<<setprecision(4)<<cutFlowVector[i]*100./cutFlowVector[1]<<"& - & -\\\\"<< endl;
-        // }
-        // cutflowFile<<"\\end{tabular} \n} \n\\end{table}"<<endl;
-        // cutflowFile.close();
-        
-
-        // DEBUG 
-        // cout << "DEBUG:" << endl;
-        // cout << "DEBUG:" << endl;
-        // for (size_t i=0; i<NCUTS; i++) 
-        // { 
-        //   // double CMS_percentage = cutFlowVectorCMS_550_200[i]*100./cutFlowVectorCMS_550_200[1];
-        //   // double GAMBIT_percentage = cutFlowVector[i]*100./cutFlowVector[1];
-        //   // double ratio = GAMBIT_percentage/CMS_percentage;
-        //   // cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << CMS_percentage << "\t" << GAMBIT_percentage << "\t" << ratio << "\t" << cutFlowVector_str[i] << endl;
-        //   double CMS_abs = cutFlowVectorCMS_550_200[i];
-        //   double GAMBIT_abs = cutFlowVector[i];  
-        //   // double GAMBIT_scaled = GAMBIT_abs * (109.35/cutFlowVector[0]);  // Scale to number of CMS events
-        //   double GAMBIT_scaled = GAMBIT_abs * (109.35/cutFlowVector[0]);  // Scale to number of CMS events
-        //   double ratio = GAMBIT_scaled/CMS_abs;
-        //   cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << CMS_abs << "\t" << GAMBIT_scaled << "\t" << GAMBIT_abs <<  "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
-        // }
-        // cout << "DEBUG:" << endl;
-        // cout << "DEBUG:" << endl;
-
 
         // Only 7 of the 9 signal regions are included in the covariance matrix
         // (SR1 and SR6 are left out)
         static const size_t SR_size_cov = 7;
-        const int SR_labels_cov[SR_size_cov] = {2, 3, 4, 5, 7, 8, 9};
+        const int SR_labels_cov[SR_size_cov] = {1, 2, 3, 4, 5, 6, 7};
         const double SR_nums_cov[SR_size_cov] = {
-          _numSR2, _numSR3, _numSR4, _numSR5, _numSR7, _numSR8, _numSR9,
+          _numSR["SR1"], _numSR["SR2"], _numSR["SR3"], _numSR["SR4"], 
+          _numSR["SR5"], _numSR["SR6"], _numSR["SR7"]
         };
 
         // Observed event counts
@@ -508,24 +465,46 @@ namespace Gambit {
 
     protected:
       void clear() {
-        _numSR1=0;
-        _numSR2=0;
-        _numSR3=0;
-        _numSR4=0;
-        _numSR5=0; 
-        _numSR6=0;
-        _numSR7=0; 
-        _numSR8=0; 
-        _numSR9=0;
+
+        for (auto& el : _numSR) { el.second = 0.;}
         
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 
     };
 
-
     // Factory fn
     DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb)
+
+
+
+    // 
+    // Derived analysis class that does not make use of the SR covariance matrix
+    // 
+    class Analysis_CMS_13TeV_2OSLEP_36invfb_nocovar : public Analysis_CMS_13TeV_2OSLEP_36invfb {
+
+    public:
+      Analysis_CMS_13TeV_2OSLEP_36invfb_nocovar() {
+        set_analysis_name("CMS_13TeV_2OSLEP_36invfb_nocovar");
+      }
+
+      virtual void collect_results() {
+
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR1", 57., {_numSR["SR1"], 0.}, {54.9, 7.}));
+        add_result(SignalRegionData("SR2", 29., {_numSR["SR2"], 0.}, {21.6, 5.6}));
+        add_result(SignalRegionData("SR3", 2.,  {_numSR["SR3"], 0.}, {6., 1.9}));
+        add_result(SignalRegionData("SR4", 0.,  {_numSR["SR4"], 0.}, {2.5, 0.9}));
+        add_result(SignalRegionData("SR5", 9.,  {_numSR["SR5"], 0.}, {7.6, 2.8}));
+        add_result(SignalRegionData("SR6", 5.,  {_numSR["SR6"], 0.}, {5.6, 1.6}));
+        add_result(SignalRegionData("SR7", 1.,  {_numSR["SR7"], 0.}, {1.3, 0.4}));
+
+      }
+
+    };
+
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(CMS_13TeV_2OSLEP_36invfb_nocovar)
 
 
   }

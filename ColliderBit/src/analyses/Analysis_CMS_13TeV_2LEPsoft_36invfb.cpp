@@ -320,7 +320,7 @@ namespace Gambit {
       }
 
 
-      void collect_results() {        
+      virtual void collect_results() {        
 
         // Signal region info for the covariance matrix
         static const size_t SR_size_cov = 12;
