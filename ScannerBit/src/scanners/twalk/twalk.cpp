@@ -399,7 +399,8 @@ namespace Gambit
                 // Doing this will dump JUST the TWalk resume data, though I had to
                 // add this hacky get_name to the set_resume_params object in order to
                 // get the name by which ScannerBit identifies the TWalk plugin. 
-                set_resume_params.dump();
+                //Gambit::Scanner::Plugins::plugin_info.dump(set_resume_params.get_name());
+                set_resume_params.dump(); // Better way
                 // This works I think, but it still has problems. In particular,
                 // it looks like you must resume with the same number of processes
                 // that you started the run with, which is kind of crap.
