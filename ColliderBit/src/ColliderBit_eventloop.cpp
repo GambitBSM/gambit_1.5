@@ -50,7 +50,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-// #define COLLIDERBIT_DEBUG
+#define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -2463,10 +2463,11 @@ namespace Gambit
     }
 
 
-    // Loop over all analyses (and SRs within one analysis) and fill a map of per-analysis likelihoods
-    void calc_LHC_LogLike_per_analysis(map_str_dbl& result)
+    // Loop over all analyses and SRs within each analysis and fill a map of maps of likelihood values:
+    //   result[analysis][SR] = DeltaLogLike
+    void calc_LHC_LogLikes(map_str_map_str_dbl& result)
     {
-      using namespace Pipes::calc_LHC_LogLike_per_analysis;
+      using namespace Pipes::calc_LHC_LogLikes;
 
       // Clear the result map
       result.clear();
@@ -2477,15 +2478,44 @@ namespace Gambit
         // AnalysisData for this analysis
         const AnalysisData& adata = *(Dep::AllAnalysisNumbers->at(analysis));
 
+        /// If no events have been generated (xsec veto) or too many events have failed, 
+        /// short-circut the loop and return delta log-likelihood = 0 for every SR in 
+        /// each analysis.
+        /// @todo This must be made more sophisticated once we add analyses that
+        ///       don't rely on event generation.
+        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
+        {
+          // If this is an anlysis with covariance info, only add a single 0-entry in the map
+          if (adata.srcov.rows() > 0)
+          {
+            result[adata.analysis_name]["__combined__"] = 0.0;
+            continue;
+          }
+          // If this is an anlysis without covariance info, add 0-entries for all SRs plus
+          // one for the combined LogLike
+          else 
+          {
+            for (size_t SR = 0; SR < adata.size(); ++SR)
+            {
+              result[adata.analysis_name][adata[SR].sr_label] = 0.0;
+              continue;
+            }
+            result[adata.analysis_name]["__combined__"] = 0.0;
+            continue;
+          }
+
+        }
+
+
         #ifdef COLLIDERBIT_DEBUG
         std::streamsize stream_precision = cout.precision();  // get current precision
         cout.precision(2);  // set precision
-        cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << "Will print content of " << adata.analysis_name << " signal regions:" << endl;
+        cout << debug_prefix() << "calc_LHC_DeltaLogLike_per_analysis: " << "Will print content of " << adata.analysis_name << " signal regions:" << endl;
         for (size_t SR = 0; SR < adata.size(); ++SR)
         {
           const SignalRegionData& srData = adata[SR];
           cout << std::fixed << debug_prefix() 
-                                 << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name 
+                                 << "calc_LHC_DeltaLogLike_per_analysis: " << adata.analysis_name 
                                  << ", " << srData.sr_label 
                                  << ",  n_b = " << srData.n_background << " +/- " << srData.background_sys
                                  << ",  n_obs = " << srData.n_observed 
@@ -2497,16 +2527,6 @@ namespace Gambit
         cout.precision(stream_precision); // restore previous precision
         #endif
 
-
-        /// If no events have been generated (xsec veto) or too many events have failed, 
-        /// short-circut the loop and return delta log-likelihood = 0 for each analysis.
-        /// @todo This must be made more sophisticated once we add analyses that
-        ///       don't rely on event generation.
-        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
-        {
-          result[adata.analysis_name] = 0.0;
-          continue;
-        }
 
         // Loop over the signal regions inside the analysis, and work out the total (delta) log likelihood for this analysis
         /// @todo Unify the treatment of best-only and correlated SR treatments as far as possible
@@ -2531,7 +2551,7 @@ namespace Gambit
           /// @todo Support skewness correction to the pdf.
 
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite loglike." << endl;
+          cout << debug_prefix() << "calc_LHC_DeltaLogLike_per_analysis: Analysis " << analysis << " has a covariance matrix: computing composite loglike." << endl;
           #endif
 
           // Construct vectors of SR numbers
@@ -2743,10 +2763,10 @@ namespace Gambit
           }
 
           // Store result
-          result[adata.analysis_name] = ana_dll;
+          result[adata.analysis_name]["__combined__"] = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name << "_DeltaLogLike : " << ana_dll << endl;
+          cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_DeltaLogLike : " << ana_dll << endl;
           #endif
 
         }
@@ -2755,7 +2775,7 @@ namespace Gambit
         {
           // No SR-correlation info, so just take the result from the SR *expected* to be most constraining, i.e. with highest expected dLL
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
+          cout << debug_prefix() << "calc_LHC_LogLikes: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
           #endif
 
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
@@ -2828,6 +2848,8 @@ namespace Gambit
             //      << n_predicted_uncertain_sb << " [" << 100*frac_uncertainty_sb << "%]" << endl;
             // #endif
 
+            // Store "observed LogLike" result for this SR
+            result[adata.analysis_name][srData.sr_label] = llsb_obs - llb_obs;
           }
 
           // Check for problem
@@ -2852,10 +2874,11 @@ namespace Gambit
           }
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
-          result[adata.analysis_name] = -bestexp_dll_obs;
+          // result[adata.analysis_name] = -bestexp_dll_obs;
+          result[adata.analysis_name]["__combined__"] = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "calc_LHC_LogLike_per_analysis: " << adata.analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
+          cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
           #endif
         }
 
@@ -2863,11 +2886,48 @@ namespace Gambit
 
     }
 
-
-    // Compute the total likelihood for all analyses
-    void calc_LHC_LogLike(double& result)
+    // Extract the combined log likelihood for each analysis
+    void get_LHC_LogLike_per_analysis(map_str_dbl& result)
     {
-      using namespace Pipes::calc_LHC_LogLike;
+      using namespace Pipes::get_LHC_LogLike_per_analysis;
+      for (auto& analysis_map_pair : *Dep::LHC_LogLikes)
+      {
+        const string& analysis_name = analysis_map_pair.first;
+        const map_str_dbl& analysis_loglike_map = analysis_map_pair.second;
+
+        result[analysis_name] = analysis_loglike_map.at("__combined__");
+      }
+    }
+
+
+    // Extract the log likelihood for each SR
+    void get_LHC_LogLike_per_SR(map_str_dbl& result)
+    {
+      using namespace Pipes::get_LHC_LogLike_per_SR;
+      for (auto& analysis_map_pair : *Dep::LHC_LogLikes)
+      {
+        const string& analysis_name = analysis_map_pair.first;
+        const map_str_dbl& analysis_loglike_map = analysis_map_pair.second;
+
+        for (auto& SR_loglike_pair : analysis_loglike_map)
+        {
+          if (SR_loglike_pair.first == "__combined__")
+          {
+            result[analysis_name + "__combined__"] = SR_loglike_pair.second;            
+          }
+          else
+          {
+            result[analysis_name + "__" + SR_loglike_pair.first] = SR_loglike_pair.second;
+          }
+        }
+      }
+    }
+
+
+    // Compute the total likelihood combining all analyses
+    void calc_combined_LHC_LogLike(double& result)
+    {
+      using namespace Pipes::calc_combined_LHC_LogLike;
       result = 0.0;
 
       // Read analysis names from the yaml file
@@ -2884,7 +2944,7 @@ namespace Gambit
       }
 
       // Loop over analyses and calculate the total observed dLL
-      for (auto const& analysis_loglike_pair : *Dep::LHC_LogLikes)
+      for (auto const& analysis_loglike_pair : *Dep::LHC_LogLike_per_analysis)
       {
         const string& analysis_name = analysis_loglike_pair.first;
         const double& analysis_loglike = analysis_loglike_pair.second;

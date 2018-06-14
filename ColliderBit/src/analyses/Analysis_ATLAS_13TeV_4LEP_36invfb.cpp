@@ -254,11 +254,11 @@ namespace Gambit
         sort(signalLeptons.begin(), signalLeptons.end(), comparePt);
 
         // Count signal leptons and jets
-        size_t nSignalElectrons = signalElectrons.size();
-        size_t nSignalMuons = signalMuons.size();
+        // size_t nSignalElectrons = signalElectrons.size();
+        // size_t nSignalMuons = signalMuons.size();
         size_t nSignalTaus = signalTaus.size();
         size_t nSignalLeptons = signalLeptons.size();
-        size_t nSignalJets = signalJets.size();
+        // size_t nSignalJets = signalJets.size();
 
         // Get OS and SFOS pairs
         vector<vector<HEPUtils::Particle*>> SFOSpairs = getSFOSpairs(signalLeptons);
