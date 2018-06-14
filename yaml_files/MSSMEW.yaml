@@ -390,7 +390,6 @@ Rules:
   # These will still be computed if listed in the analysis setup above, 
   # but their likelihood will not added to the combined likelihood.
   - capability: LHC_Combined_LogLike
-    function: calc_LHC_LogLike
     options:
       skip_analyses: [ "CMS_13TeV_2LEPsoft_36invfb_nocovar", 
                        "CMS_13TeV_2OSLEP_36invfb_nocovar" ]
