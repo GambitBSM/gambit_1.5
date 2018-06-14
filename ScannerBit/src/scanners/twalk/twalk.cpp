@@ -117,12 +117,13 @@ namespace Gambit
             std::vector<int> ranks(NChains);
             unsigned long long int next_id;
             double Rsum = massiveR, Rmax = massiveR;
+            bool resumed = false;
 
             unsigned int quit = 0; // signal for early shutdown
 
             std::chrono::time_point<std::chrono::system_clock> startTWalk;
 
-            set_resume_params(chisq, a0, mult, totN, count, total, ttotal, covT, avgT, W, avgTot, ids, ranks);
+            set_resume_params(chisq, a0, mult, totN, count, total, ttotal, covT, avgT, W, avgTot, ids, ranks, resumed);
 
             Gambit::Scanner::assign_aux_numbers("mult", "chain");
 
@@ -156,8 +157,9 @@ namespace Gambit
 
             Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
             //out_stream->reset(); // Hmm no reason to do that I think...
-
-            if (set_resume_params.resume_mode())
+            
+            //if (set_resume_params.resume_mode())
+            if (resumed)
             {
                 #ifdef WITH_MPI
                     for (int i = 0; i < numtasks; i++)
@@ -174,6 +176,7 @@ namespace Gambit
             }
             else
             {
+                resumed = true;
                 for (t = 0; t < NChains; t++)
                 {
                     if (rank == 0)
