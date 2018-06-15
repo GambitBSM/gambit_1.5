@@ -2,9 +2,11 @@
 ///  \author Are Raklev
 ///  \date 2018 June
 ///
+///  Based on the search presented in 1806.04030.
+///  Only the low mass analysis is implemented here.
+///  This analysis has overlapping exclusion and discovery signal regions,
+///  the discovery regions are separated into a derived class.
 ///  *********************************************
-
-// Based on 1806.04030
 
 #include <vector>
 #include <cmath>
@@ -13,8 +15,6 @@
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
-//#include "gambit/ColliderBit/mt2_bisect.h"
-//#include "gambit/ColliderBit/lester_mt2_bisect.h"
 
 using namespace std;
 
@@ -25,34 +25,80 @@ namespace Gambit {
 
     
     class Analysis_ATLAS_13TeV_3b_24invfb : public HEPUtilsAnalysis {
+
+    protected:
+      // Signal region map
+      std::map<string,double> _numSR = {
+        {"meff160_ETmiss0", 0.},        // Exclusion regions
+        {"meff160_ETmiss20", 0.},
+        {"meff200_ETmiss0", 0.},
+        {"meff200_ETmiss20", 0.},
+        {"meff200_ETmiss45", 0.},
+        {"meff200_ETmiss70", 0.},
+        {"meff260_ETmiss0", 0.},
+        {"meff260_ETmiss20", 0.},
+        {"meff260_ETmiss45", 0.},
+        {"meff260_ETmiss70", 0.},
+        {"meff260_ETmiss100", 0.},
+        {"meff340_ETmiss0", 0.},
+        {"meff340_ETmiss20", 0.},
+        {"meff340_ETmiss45", 0.},
+        {"meff340_ETmiss70", 0.},
+        {"meff340_ETmiss100", 0.},
+        {"meff340_ETmiss150", 0.},
+        {"meff340_ETmiss200", 0.},
+        {"meff440_ETmiss0", 0.},
+        {"meff440_ETmiss20", 0.},
+        {"meff440_ETmiss45", 0.},
+        {"meff440_ETmiss70", 0.},
+        {"meff440_ETmiss100", 0.},
+        {"meff440_ETmiss150", 0.},
+        {"meff440_ETmiss200", 0.},
+        {"meff560_ETmiss0", 0.},
+        {"meff560_ETmiss20", 0.},
+        {"meff560_ETmiss45", 0.},
+        {"meff560_ETmiss70", 0.},
+        {"meff560_ETmiss100", 0.},
+        {"meff560_ETmiss150", 0.},
+        {"meff560_ETmiss200", 0.},
+        {"meff700_ETmiss0", 0.},
+        {"meff700_ETmiss20", 0.},
+        {"meff700_ETmiss45", 0.},
+        {"meff700_ETmiss70", 0.},
+        {"meff700_ETmiss100", 0.},
+        {"meff700_ETmiss150", 0.},
+        {"meff700_ETmiss200", 0.},
+        {"meff860_ETmiss0", 0.},
+        {"meff860_ETmiss20", 0.},
+        {"meff860_ETmiss45", 0.},
+        {"meff860_ETmiss70", 0.},
+        {"meff860_ETmiss100", 0.},
+        {"meff860_ETmiss150", 0.},
+        {"meff860_ETmiss200", 0.},
+        {"low-SR-MET0meff440", 0.},       // Discovery regions
+        {"low-SR-MET150meff440", 0.}
+      };
+      
     private:
 
-      // Variables that hold the number of events passing signal region cuts
-
-      double _meff160_ETmiss0, _meff160_ETmiss20;
-
+      // Cut-flow variable
+      size_t NCUTS;
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
-      size_t NCUTS;
-      vector<double> cutFlowVectorATLAS_130;
+      vector<double> cutFlowVectorATLAS;
 
     public:
 
-      static bool sortByPT(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
-      
       Analysis_ATLAS_13TeV_3b_24invfb() {
 
         set_analysis_name("ATLAS_13TeV_3b_24invfb");
         set_luminosity(24.3);
-
-        // Set number of events passing cuts to zero upon initialisation
-        _meff160_ETmiss0=0; _meff160_ETmiss20=0;
         
         NCUTS=9;
 
         for(size_t i=0;i<NCUTS;i++){
           cutFlowVector.push_back(0);
-          cutFlowVectorATLAS_130.push_back(0);
+          cutFlowVectorATLAS.push_back(0);
           cutFlowVector_str.push_back("");
         }
 
@@ -96,32 +142,7 @@ namespace Gambit {
           for(unsigned int itjet= 0; itjet < jetvec.size(); itjet++) {
             HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
             double dR;
-            double DeltaRMax = std::max(0.1,std::min(0.4, 0.04 + 10 / lepmom.pT()));
-            dR=jetmom.deltaR_eta(lepmom);
-
-            if(fabs(dR) <= DeltaRMax) overlap=true;
-          }
-          if(overlap) continue;
-          Survivors.push_back(lepvec.at(itlep));
-        }
-        lepvec=Survivors;
-
-        return;
-      }
-
-      void SpecialLeptonJetOverlapRemoval(vector<HEPUtils::Particle*> &lepvec, vector<HEPUtils::Jet*> &jetvec) {
-        //Routine to do lepton-jet check
-        //Discards leptons if they are within dR of a jet as defined in analysis paper
-
-        vector<HEPUtils::Particle*> Survivors;
-
-        for(unsigned int itlep = 0; itlep < lepvec.size(); itlep++) {
-          bool overlap = false;
-          HEPUtils::P4 lepmom=lepvec.at(itlep)->mom();
-          for(unsigned int itjet= 0; itjet < jetvec.size(); itjet++) {
-            HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
-            double dR;
-            double DeltaRMax = std::min(0.4, 0.04 + 10/lepvec[itlep]->pT());
+            double DeltaRMax = std::min(0.4, 0.04 + 10 / lepmom.pT());
             dR=jetmom.deltaR_eta(lepmom);
 
             if(fabs(dR) <= DeltaRMax) overlap=true;
@@ -138,8 +159,7 @@ namespace Gambit {
       void analyze(const HEPUtils::Event* event) {
         HEPUtilsAnalysis::analyze(event);
 
-        // Get the missing energy and momentum in the event
-        HEPUtils::P4 metVec = event->missingmom();
+        // Get the missing energy in the event
         double met = event->met();
 
         // Now define vectors of baseline objects, including:
@@ -147,13 +167,13 @@ namespace Gambit {
         // - application of basic pT and eta cuts
         vector<HEPUtils::Particle*> electrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
-          if (electron->pT() > 10.
+          if (electron->pT() > 5.
               && fabs(electron->eta()) < 2.47)
             electrons.push_back(electron);
         }
         vector<HEPUtils::Particle*> muons;
         for (HEPUtils::Particle* muon : event->muons()) {
-          if (muon->pT() > 10.
+          if (muon->pT() > 5.
               && fabs(muon->eta()) < 2.5)
             muons.push_back(muon);
         }
@@ -164,50 +184,121 @@ namespace Gambit {
             candJets.push_back(jet);
         }
 
+        // Overlap removal
+        JetLeptonOverlapRemoval(candJets,electrons,0.2);
+        LeptonJetOverlapRemoval(electrons,candJets);
+        JetLeptonOverlapRemoval(candJets,muons,0.2);
+        LeptonJetOverlapRemoval(muons,candJets);
+        
    	    // Jets
         vector<HEPUtils::Jet*> bJets;
-        vector<HEPUtils::Jet*> nonBJets;
+        vector<HEPUtils::Jet*> nonbJets;
 
         // Find b-jets
-        // TODO: implement misstag
-        const std::vector<double>  a = {0,10.};
-        const std::vector<double>  b = {0,10000.};
-        const std::vector<double> c = {0.70}; // set b-tag efficiency to 70%, light jet mistag 1/381
-        HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
+        double btag = 0.70; double cmisstag = 1/12.; double misstag = 1./381.;
         for (HEPUtils::Jet* jet : candJets) {
-          bool hasTag=has_tag(_eff2d, jet->eta(), jet->pT());
-          if(jet->btag() && hasTag){
-            bJets.push_back(jet);
-          } else {
-            nonBJets.push_back(jet);
-          }
+          // Tag
+          if( jet->btag() && random_bool(btag) ) bJets.push_back(jet);
+          // Misstag c-jet
+          else if( jet->ctag() && random_bool(cmisstag) ) bJets.push_back(jet);
+          // Misstag light jet
+          else if( random_bool(misstag) ) bJets.push_back(jet);
+          // Non b-jet
+          else nonbJets.push_back(jet);
         }
 
-        // TODO: Check overlap removal
-//        JetLeptonOverlapRemoval(nonBJets,electrons,0.2);
-//        LeptonJetOverlapRemoval(electrons,nonBJets);
-//        LeptonJetOverlapRemoval(electrons,bJets);
-//        JetLeptonOverlapRemoval(nonBJets,muons,0.2);
-//        SpecialLeptonJetOverlapRemoval(muons,nonBJets);
-//        SpecialLeptonJetOverlapRemoval(muons,bJets);
+        
+        // Find veto leptons with pT > 20 GeV
+        vector<HEPUtils::Particle*> vetoElectrons;
+        for (HEPUtils::Particle* electron : electrons) {
+          if (electron->pT() > 20.) vetoElectrons.push_back(electron);
+        }
+        vector<HEPUtils::Particle*> vetoMuons;
+        for (HEPUtils::Particle* muon : muons) {
+          if (muon->pT() > 20.) vetoMuons.push_back(muon);
+        }
 
-        size_t nbJets = bJets.size();
-        size_t nMuons=muons.size();
-        size_t nElectrons=electrons.size();
+        // Restrict jets to pT > 40 GeV after overlap removal
+        vector<HEPUtils::Jet*> bJets_survivors;
+        for (HEPUtils::Jet* jet : bJets) {
+          if(jet->pT() > 40.) bJets_survivors.push_back(jet);
+        }
+        vector<HEPUtils::Jet*> nonbJets_survivors;
+        for (HEPUtils::Jet* jet : nonbJets) {
+          if(jet->pT() > 40.) nonbJets_survivors.push_back(jet);
+        }
+
+        // Number of objects
+        size_t nbJets = bJets_survivors.size();
+        size_t nnonbJets = nonbJets_survivors.size();
+        size_t nJets = nbJets+nnonbJets;
+        size_t nMuons=vetoMuons.size();
+        size_t nElectrons=vetoElectrons.size();
         size_t nLeptons = nElectrons+nMuons;
 
-        // Effective mass
+        // Effective mass (using the four jets used in Higgses)
         double meff = met;
-        for(HEPUtils::Jet* jet : candJets){
-          meff += jet->pT();
+        for(int i = 0; i < min(4,(int)nbJets); i++){
+          meff += bJets_survivors.at(i)->pT();
         }
         
-	// Now order the jet collections by pT
-	//std::sort(signalJets35.begin(), signalJets35.end(), sortByPT);
-	//std::sort(signalBJets35.begin(), signalBJets35.end(), sortByPT);
-	//std::sort(signalJets20.begin(), signalJets20.end(), sortByPT);
-	//std::sort(signalBJets20.begin(), signalBJets20.end(), sortByPT);
-		    
+        // Find top candidates
+        bool notop = true;
+        // Outer loop over b-jets candidates for top
+        for(size_t i = 0; i < nbJets; i++){
+          // Central loop over b-tagged jets which may go into W
+          for(size_t j = 0; j < nbJets && j != i; j++){
+            // Inner loop over non b-jets for W
+            for(size_t k = 0; k < nnonbJets; k++){
+              double mW = (bJets_survivors.at(j)->mom()+nonbJets_survivors.at(k)->mom()).m();
+              double mt = (bJets_survivors.at(i)->mom()+bJets_survivors.at(j)->mom()+nonbJets_survivors.at(k)->mom()).m();
+              double XWt = sqrt( pow((mW-80.4)/(0.1*mW),2)+pow((mt-172.5)/(0.1*mt),2) );
+              if(XWt < 1.8) notop = false;
+            }
+          }
+          // Central loop over jets non b-tagged jets that may go into W
+          for(size_t j = 0; j < nnonbJets; j++){
+            // Inner loop over non b-jets for W
+            for(size_t k = 0; k < nnonbJets && k != j; k++){
+              double mW = (nonbJets_survivors.at(j)->mom()+nonbJets_survivors.at(k)->mom()).m();
+              double mt = (bJets_survivors.at(i)->mom()+nonbJets_survivors.at(j)->mom()+nonbJets_survivors.at(k)->mom()).m();
+              double XWt = sqrt( pow((mW-80.4)/(0.1*mW),2)+pow((mt-172.5)/(0.1*mt),2) );
+              if(XWt < 1.8) notop = false;
+           }
+          }
+        }
+        
+        // Find Higgs candidates (test all three possible combinations)
+        double mlead = 0;
+        double msubl = 0;
+        double Xhh = 10;
+        if(nbJets > 3){
+          double m11 = (bJets_survivors.at(0)->mom()+bJets_survivors.at(1)->mom()).m();
+          double m12 = (bJets_survivors.at(2)->mom()+bJets_survivors.at(3)->mom()).m();
+          double Dhh1 = abs(max(m11,m12)-12./11.*min(m11,m12));
+          //cout << Dhh1 << " " << m11 << " " << m12 << endl;
+          double m21 = (bJets_survivors.at(0)->mom()+bJets_survivors.at(2)->mom()).m();
+          double m22 = (bJets_survivors.at(1)->mom()+bJets_survivors.at(3)->mom()).m();
+          double Dhh2 = abs(max(m21,m22)-12./11.*min(m21,m22));
+          //cout << Dhh2 << " " << m21 << " " << m22 << endl;
+          double m31 = (bJets_survivors.at(0)->mom()+bJets_survivors.at(3)->mom()).m();
+          double m32 = (bJets_survivors.at(1)->mom()+bJets_survivors.at(2)->mom()).m();
+          double Dhh3 = abs(max(m31,m32)-12./11.*min(m31,m32));
+          //cout << Dhh3 << " " << m31 << " " << m32 << endl;
+          //cout << endl;
+          if( Dhh1 < Dhh2 && Dhh1 < Dhh3 ){
+            mlead = max(m11,m12); msubl = min(m11,m12);
+          }
+          else if( Dhh2 < Dhh1 && Dhh2 < Dhh3 ){
+            mlead = max(m21,m22); msubl = min(m21,m22);
+          }
+          else{
+            mlead = max(m31,m32); msubl = min(m31,m32);
+          }
+          Xhh = sqrt( pow((mlead-120.)/(0.1*mlead),2)+pow((msubl-110.)/(0.1*msubl),2) );
+        }
+        
+        
         // Increment cutFlowVector elements
         cutFlowVector_str[0]  = "No cuts ";
         cutFlowVector_str[1]  = "Trigger, 4 jets ($p_T > 40$ GeV, 2 b-tags)";
@@ -220,22 +311,43 @@ namespace Gambit {
         cutFlowVector_str[8]  = "low-SR-MET150meff440";
 
         // Cut flow from paper
-        cutFlowVectorATLAS_130[0] = 169015.8;
-        cutFlowVectorATLAS_130[1] =  11206.7;
-        cutFlowVectorATLAS_130[2] =   1250.8;
-        cutFlowVectorATLAS_130[3] =   1015.9;
-        cutFlowVectorATLAS_130[4] =   1015.9;
-        cutFlowVectorATLAS_130[5] =    961.9;
-        cutFlowVectorATLAS_130[6] =    559.8;
-        cutFlowVectorATLAS_130[7] =    217.4;
-        cutFlowVectorATLAS_130[8] =      0.0;
- 
-        // Apply cuts to each signal region
+        // Higgsino 130 GeV
+        cutFlowVectorATLAS[0] = 169015.8;
+        cutFlowVectorATLAS[1] =  11206.7;
+        cutFlowVectorATLAS[2] =   1250.8;
+        cutFlowVectorATLAS[3] =   1015.9;
+        cutFlowVectorATLAS[4] =   1015.9;
+        cutFlowVectorATLAS[5] =    961.9;
+        cutFlowVectorATLAS[6] =    559.8;
+        cutFlowVectorATLAS[7] =    217.4;
+        cutFlowVectorATLAS[8] =      0.0;
+        // Higgsino 150 GeV
+//        cutFlowVectorATLAS[0] = 93125.1;
+//        cutFlowVectorATLAS[1] =  6630.9;
+//        cutFlowVectorATLAS[2] =   687.8;
+//        cutFlowVectorATLAS[3] =   558.6;
+//        cutFlowVectorATLAS[4] =   558.6;
+//        cutFlowVectorATLAS[5] =   489.4;
+//        cutFlowVectorATLAS[6] =   266.5;
+//        cutFlowVectorATLAS[7] =   112.5;
+//        cutFlowVectorATLAS[8] =     1.8;
+        // Higgsino 180 GeV
+//        cutFlowVectorATLAS[0] =  84.1;
+//        cutFlowVectorATLAS[1] =  22.4;
+//        cutFlowVectorATLAS[2] =   2.2;
+//        cutFlowVectorATLAS[3] =   1.6;
+//        cutFlowVectorATLAS[4] =   1.6;
+//        cutFlowVectorATLAS[5] =   1.5;
+//        cutFlowVectorATLAS[6] =   0.8;
+//        cutFlowVectorATLAS[7] =   0.8;
+//        cutFlowVectorATLAS[8] =   0.7;
+
+        // Apply cutflow
         for(size_t j=0;j<NCUTS;j++){
           if(
              (j==0) ||
 
-             (j==1 && nbJets > 1) ||
+             (j==1 && nJets > 3 && nbJets > 1) ||
 
              (j==2 && nbJets > 3) ||
 
@@ -243,20 +355,76 @@ namespace Gambit {
 	     
              (j==4 && nbJets > 3 && nLeptons == 0) ||
 
-             (j==5 && nbJets > 3 && nLeptons == 0) ||
+             (j==5 && nbJets > 3 && nLeptons == 0 && notop) ||
 
-             (j==6 && nbJets > 3 && nLeptons == 0) ||
+             (j==6 && nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6) ||
 
-             (j==7 && nbJets > 3 && nLeptons == 0 && meff > 440.) ||
+             (j==7 && nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) ||
 
-             (j==8 && nbJets > 3 && nLeptons == 0 && meff > 440. && met > 150.)
+             (j==8 && nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.)
 	     
              ) cutFlowVector[j]++;
         }
 
         // Now increment signal region variables
-        if(meff > 160. ) _meff160_ETmiss0++;
-        if(met > 20. && meff > 160.) _meff160_ETmiss20++;
+        // First exclusion regions
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 160. && meff < 200. && met < 20.) _numSR["meff160_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 160. && meff < 200. && met > 20. && met < 45.) _numSR["meff160_ETmiss20"]++;
+        
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met < 20.) _numSR["meff200_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met > 20. && met < 45.) _numSR["meff200_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met > 45. && met < 70.) _numSR["meff200_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met > 70. && met < 100.) _numSR["meff200_ETmiss70"]++;
+
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met < 20.) _numSR["meff260_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 20. && met < 45.) _numSR["meff260_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 45. && met < 70.) _numSR["meff260_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 70. && met < 100.) _numSR["meff260_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 100. && met < 150.) _numSR["meff260_ETmiss100"]++;
+
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met < 20.) _numSR["meff340_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 20. && met < 45.) _numSR["meff340_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 45. && met < 70.) _numSR["meff340_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 70. && met < 100.) _numSR["meff340_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 100. && met < 150.) _numSR["meff340_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 150. && met < 200.) _numSR["meff340_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 200.) _numSR["meff340_ETmiss200"]++;
+
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met < 20.) _numSR["meff440_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 20. && met < 45.) _numSR["meff440_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 45. && met < 70.) _numSR["meff440_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 70. && met < 100.) _numSR["meff440_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 100. && met < 150.) _numSR["meff440_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 150. && met < 200.) _numSR["meff440_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 200.) _numSR["meff440_ETmiss200"]++;
+
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met < 20.) _numSR["meff560_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 20. && met < 45.) _numSR["meff560_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 45. && met < 70.) _numSR["meff560_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 70. && met < 100.) _numSR["meff560_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 100. && met < 150.) _numSR["meff560_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 150. && met < 200.) _numSR["meff560_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 200.) _numSR["meff560_ETmiss200"]++;
+
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met < 20.) _numSR["meff700_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 20. && met < 45.) _numSR["meff700_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 45. && met < 70.) _numSR["meff700_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 70. && met < 100.) _numSR["meff700_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 100. && met < 150.) _numSR["meff700_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 150. && met < 200.) _numSR["meff700_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 200.) _numSR["meff700_ETmiss200"]++;
+
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met < 20.) _numSR["meff860_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 20. && met < 45.) _numSR["meff860_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 45. && met < 70.) _numSR["meff860_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 70. && met < 100.) _numSR["meff860_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 100. && met < 150.) _numSR["meff860_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 150. && met < 200.) _numSR["meff860_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 200.) _numSR["meff860_ETmiss200"]++;
+        
+        // Discovery regions
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) _numSR["low-SR-MET0meff440"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.) _numSR["low-SR-MET150meff440"]++;
 
         return;
         
@@ -276,23 +444,28 @@ namespace Gambit {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
           cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
-        _meff160_ETmiss0   += specificOther->_meff160_ETmiss0;
-        _meff160_ETmiss20  += specificOther->_meff160_ETmiss20;
-
+        
+        for (auto& el : _numSR) {
+          el.second += specificOther->_numSR[el.first];
+        }
+ 
       }
 
 
-      void collect_results() {
+      virtual void collect_results() {
 
         // DEBUG
         double L = 24.3;
-        double xsec = 6955.;
+        double xsec = 6955.; // 130 GeV
+//        double xsec = 3830.; // 150 GeV
+//        double xsec = 3.461; // 800 GeV
         cout << "DEBUG:" << endl;
         for (size_t i=0; i<NCUTS; i++)
         {
-          double ATLAS_abs = cutFlowVectorATLAS_130[i];
+          double ATLAS_abs = cutFlowVectorATLAS[i];
         
           double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
+          if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
         
           double GAMBIT_scaled = eff * xsec * L;
         
@@ -302,31 +475,70 @@ namespace Gambit {
         cout << "DEBUG:" << endl;
         
         // Now fill a results object with the results for each SR
-        SignalRegionData results_meff160_ETmiss0;
-        results_meff160_ETmiss0.sr_label = "meff160_ETmiss0"; // label must be unique for each signal region
-        results_meff160_ETmiss0.n_observed = 20.;             // set number of observed events (in LHC paper)
-        results_meff160_ETmiss0.n_background = 16.21;         // set number of predicted background events (in LHC paper)
-        results_meff160_ETmiss0.background_sys = 0.11;        // set background uncertainty (in LHC paper)
-        results_meff160_ETmiss0.signal_sys = 0.;              // set signal uncertainty
-        results_meff160_ETmiss0.n_signal = _meff160_ETmiss0;  // set this to number of signal events incremented in the analysis above
-        add_result(results_meff160_ETmiss0);
+        // Only exclusion regions here
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("meff160_ETmiss0",    20., {_numSR["meff160_ETmiss0"], 0.}, {16.21, 0.11}));
+        add_result(SignalRegionData("meff160_ETmiss20",    3., {_numSR["meff160_ETmiss20"], 0.}, {0.6503, 0.0747}));
 
-        SignalRegionData results_meff160_ETmiss20;
-        results_meff160_ETmiss20.sr_label = "meff160_ETmiss20";
-        results_meff160_ETmiss20.n_observed = 3.;
-        results_meff160_ETmiss20.n_background = 0.6503;
-        results_meff160_ETmiss20.background_sys = 0.0747;
-        results_meff160_ETmiss20.signal_sys = 0.;
-        results_meff160_ETmiss20.n_signal = _meff160_ETmiss20;
-        add_result(results_meff160_ETmiss20);
+        add_result(SignalRegionData("meff200_ETmiss0",  1503., {_numSR["meff200_ETmiss0"], 0.},  {1480., 26.}));
+        add_result(SignalRegionData("meff200_ETmiss20", 1137., {_numSR["meff200_ETmiss20"], 0.}, {1088.,  7.}));
+        add_result(SignalRegionData("meff200_ETmiss45",   65., {_numSR["meff200_ETmiss45"], 0.}, {58.05, 0.39}));
+        add_result(SignalRegionData("meff200_ETmiss70",    0., {_numSR["meff200_ETmiss70"], 0.}, {0.2691, 0.0547}));
 
+        add_result(SignalRegionData("meff260_ETmiss0",  1329., {_numSR["meff260_ETmiss0"], 0.},  {1297.,  8.}));
+        add_result(SignalRegionData("meff260_ETmiss20", 2877., {_numSR["meff260_ETmiss20"], 0.}, {2860., 36.}));
+        add_result(SignalRegionData("meff260_ETmiss45",  951., {_numSR["meff260_ETmiss45"], 0.}, { 991., 6.5}));
+        add_result(SignalRegionData("meff260_ETmiss70",  150., {_numSR["meff260_ETmiss70"], 0.}, {149.4, 1.0}));
+        add_result(SignalRegionData("meff260_ETmiss100",   2., {_numSR["meff260_ETmiss100"], 0.}, {2.024, 1.426}));
+
+        add_result(SignalRegionData("meff340_ETmiss0",   373., {_numSR["meff340_ETmiss0"], 0.},  {390.1,  2.6}));
+        add_result(SignalRegionData("meff340_ETmiss20",  873., {_numSR["meff340_ETmiss20"], 0.}, {884.6, 13.1}));
+        add_result(SignalRegionData("meff340_ETmiss45",  444., {_numSR["meff340_ETmiss45"], 0.}, {472.6,  3.0}));
+        add_result(SignalRegionData("meff340_ETmiss70",  164., {_numSR["meff340_ETmiss70"], 0.}, {171.1,  1.1}));
+        add_result(SignalRegionData("meff340_ETmiss100",  40., {_numSR["meff340_ETmiss100"], 0.}, {36.24, 0.24}));
+        add_result(SignalRegionData("meff340_ETmiss150",   3., {_numSR["meff340_ETmiss150"], 0.}, {1.457, 0.111}));
+        add_result(SignalRegionData("meff340_ETmiss200",   0., {_numSR["meff340_ETmiss200"], 0.}, {0.006531, 0.004409}));
+
+        add_result(SignalRegionData("meff440_ETmiss0",   121., {_numSR["meff440_ETmiss0"], 0.},  {130.3,  0.8}));
+        add_result(SignalRegionData("meff440_ETmiss20",  304., {_numSR["meff440_ETmiss20"], 0.}, {310.8,  9.5}));
+        add_result(SignalRegionData("meff440_ETmiss45",  170., {_numSR["meff440_ETmiss45"], 0.}, {176.6,  1.2}));
+        add_result(SignalRegionData("meff440_ETmiss70",   62., {_numSR["meff440_ETmiss70"], 0.}, { 65.1,  1.1}));
+        add_result(SignalRegionData("meff440_ETmiss100",  31., {_numSR["meff440_ETmiss100"], 0.}, {22.16, 6.03}));
+        add_result(SignalRegionData("meff440_ETmiss150",   3., {_numSR["meff440_ETmiss150"], 0.}, {3.895, 0.14}));
+        add_result(SignalRegionData("meff440_ETmiss200",   1., {_numSR["meff440_ETmiss200"], 0.}, {0.4816, 0.0551}));
+
+        add_result(SignalRegionData("meff560_ETmiss0",    40., {_numSR["meff560_ETmiss0"], 0.},  { 43.46,   0.29}));
+        add_result(SignalRegionData("meff560_ETmiss20",   95., {_numSR["meff560_ETmiss20"], 0.}, {102.6,    6.6}));
+        add_result(SignalRegionData("meff560_ETmiss45",   75., {_numSR["meff560_ETmiss45"], 0.}, { 68.03,   0.45}));
+        add_result(SignalRegionData("meff560_ETmiss70",   20., {_numSR["meff560_ETmiss70"], 0.}, { 30.72,   0.2}));
+        add_result(SignalRegionData("meff560_ETmiss100",  15., {_numSR["meff560_ETmiss100"], 0.},{ 14.13,   3.19}));
+        add_result(SignalRegionData("meff560_ETmiss150",   2., {_numSR["meff560_ETmiss150"], 0.},{  2.358,  1.02}));
+        add_result(SignalRegionData("meff560_ETmiss200",   2., {_numSR["meff560_ETmiss200"], 0.},{  1.08,   0.23}));
+
+        add_result(SignalRegionData("meff700_ETmiss0",    17., {_numSR["meff700_ETmiss0"], 0.},  { 13.56,   0.09}));
+        add_result(SignalRegionData("meff700_ETmiss20",   30., {_numSR["meff700_ETmiss20"], 0.}, { 32.67,   3.39}));
+        add_result(SignalRegionData("meff700_ETmiss45",   22., {_numSR["meff700_ETmiss45"], 0.}, { 23.78,   0.15}));
+        add_result(SignalRegionData("meff700_ETmiss70",   12., {_numSR["meff700_ETmiss70"], 0.}, { 12.47,   0.08}));
+        add_result(SignalRegionData("meff700_ETmiss100",   6., {_numSR["meff700_ETmiss100"], 0.},{  5.549,  0.873}));
+        add_result(SignalRegionData("meff700_ETmiss150",   2., {_numSR["meff700_ETmiss150"], 0.},{  1.728,  0.879}));
+        add_result(SignalRegionData("meff700_ETmiss200",   2., {_numSR["meff700_ETmiss200"], 0.},{  0.8551, 0.1211}));
+        
+        add_result(SignalRegionData("meff860_ETmiss0",     2., {_numSR["meff860_ETmiss0"], 0.},  {  2.816,   0.246}));
+        add_result(SignalRegionData("meff860_ETmiss20",    7., {_numSR["meff860_ETmiss20"], 0.}, {  7.766,   2.114}));
+        add_result(SignalRegionData("meff860_ETmiss45",   10., {_numSR["meff860_ETmiss45"], 0.}, {  8.968,   2.332}));
+        add_result(SignalRegionData("meff860_ETmiss70",    5., {_numSR["meff860_ETmiss70"], 0.}, {  4.297,   0.335}));
+        add_result(SignalRegionData("meff860_ETmiss100",   2., {_numSR["meff860_ETmiss100"], 0.},{  2.785,   0.29}));
+        add_result(SignalRegionData("meff860_ETmiss150",   4., {_numSR["meff860_ETmiss150"], 0.},{  0.9345,  0.2345}));
+        add_result(SignalRegionData("meff860_ETmiss200",   1., {_numSR["meff860_ETmiss200"], 0.},{  0.4297,  0.0719}));
+        
         return;
       }
 
       void clear() {
+        // Clear signal regions
+        for (auto& el : _numSR) { el.second = 0.;}
 
-        _meff160_ETmiss20 = 0; _meff160_ETmiss20 = 0;
-	
+        // Clear cut flow vector
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 
@@ -335,6 +547,29 @@ namespace Gambit {
     };
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_3b_24invfb)
-
+    
+    
+    //
+    // Class for collecting results for discovery regions as a derived class
+    //
+    
+    class Analysis_ATLAS_13TeV_3b_discoverySR_24invfb : public Analysis_ATLAS_13TeV_3b_24invfb {
+      
+    public:
+      Analysis_ATLAS_13TeV_3b_discoverySR_24invfb() {
+        set_analysis_name("ATLAS_13TeV_3b_discoverySR_24invfb");
+      }
+      
+      virtual void collect_results() {
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("low-SR-MET0meff440", 1063., {_numSR["low-SR-MET0meff440"], 0.}, {1100., 25.}));
+        add_result(SignalRegionData("low-SR-MET150meff440", 17., {_numSR["low-SR-MET150meff440"], 0.}, {12., 8.}));
+      }
+      
+    };
+    
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_3b_discoverySR_24invfb)
+    
   }
 }
