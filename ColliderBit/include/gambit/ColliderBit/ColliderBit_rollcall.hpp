@@ -364,7 +364,7 @@ START_MODULE
   #define CAPABILITY LHC_LogLikes
   START_CAPABILITY
     #define FUNCTION calc_LHC_LogLikes
-    START_FUNCTION(map_str_map_str_dbl)
+    START_FUNCTION(map_str_AnalysisLogLikes)
     DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers)
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_lognormal_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_gaussian_error, (), double, (const int&, const double&, const double&, const double&) )
@@ -377,7 +377,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_per_SR
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(LHC_LogLikes, map_str_map_str_dbl)
+    DEPENDENCY(LHC_LogLikes, map_str_AnalysisLogLikes)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -386,7 +386,16 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_per_analysis
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(LHC_LogLikes, map_str_map_str_dbl)
+    DEPENDENCY(LHC_LogLikes, map_str_AnalysisLogLikes)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // Extract the label for the SR used in the analysis loglikes
+  #define CAPABILITY LHC_LogLike_SR_labels
+  START_CAPABILITY
+    #define FUNCTION get_LHC_LogLike_SR_labels
+    START_FUNCTION(map_str_str)
+    DEPENDENCY(LHC_LogLikes, map_str_AnalysisLogLikes)
     #undef FUNCTION
   #undef CAPABILITY
 

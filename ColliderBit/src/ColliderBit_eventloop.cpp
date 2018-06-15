@@ -2465,7 +2465,7 @@ namespace Gambit
 
     // Loop over all analyses and SRs within each analysis and fill a map of maps of likelihood values:
     //   result[analysis][SR] = DeltaLogLike
-    void calc_LHC_LogLikes(map_str_map_str_dbl& result)
+    void calc_LHC_LogLikes(map_str_AnalysisLogLikes& result)
     {
       using namespace Pipes::calc_LHC_LogLikes;
 
@@ -2488,7 +2488,8 @@ namespace Gambit
           // If this is an anlysis with covariance info, only add a single 0-entry in the map
           if (adata.srcov.rows() > 0)
           {
-            result[adata.analysis_name]["__combined__"] = 0.0;
+            result[adata.analysis_name].combinationSR = "none";
+            result[adata.analysis_name].combinationLogLike = 0.0;
             continue;
           }
           // If this is an anlysis without covariance info, add 0-entries for all SRs plus
@@ -2497,10 +2498,11 @@ namespace Gambit
           {
             for (size_t SR = 0; SR < adata.size(); ++SR)
             {
-              result[adata.analysis_name][adata[SR].sr_label] = 0.0;
+              result[adata.analysis_name].SRLogLikes[adata[SR].sr_label] = 0.0;
               continue;
             }
-            result[adata.analysis_name]["__combined__"] = 0.0;
+            result[adata.analysis_name].combinationSR = "none";
+            result[adata.analysis_name].combinationLogLike = 0.0;
             continue;
           }
 
@@ -2763,7 +2765,8 @@ namespace Gambit
           }
 
           // Store result
-          result[adata.analysis_name]["__combined__"] = ana_dll;
+          result[adata.analysis_name].combinationSR = "all";
+          result[adata.analysis_name].combinationLogLike = ana_dll;
 
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_DeltaLogLike : " << ana_dll << endl;
@@ -2849,7 +2852,7 @@ namespace Gambit
             // #endif
 
             // Store "observed LogLike" result for this SR
-            result[adata.analysis_name][srData.sr_label] = llsb_obs - llb_obs;
+            result[adata.analysis_name].SRLogLikes[srData.sr_label] = llsb_obs - llb_obs;
           }
 
           // Check for problem
@@ -2875,7 +2878,8 @@ namespace Gambit
 
           // Set this analysis' total obs dLL to that from the best-expected SR (with conversion to more negative dll = more exclusion convention)
           // result[adata.analysis_name] = -bestexp_dll_obs;
-          result[adata.analysis_name]["__combined__"] = -bestexp_dll_obs;
+          result[adata.analysis_name].combinationSR = bestexp_sr_label;
+          result[adata.analysis_name].combinationLogLike = -bestexp_dll_obs;
 
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_" << bestexp_sr_label << "_DeltaLogLike : " << -bestexp_dll_obs << endl;
@@ -2890,12 +2894,12 @@ namespace Gambit
     void get_LHC_LogLike_per_analysis(map_str_dbl& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_analysis;
-      for (auto& analysis_map_pair : *Dep::LHC_LogLikes)
+      for (const std::pair<string,AnalysisLogLikes>& pair : *Dep::LHC_LogLikes)
       {
-        const string& analysis_name = analysis_map_pair.first;
-        const map_str_dbl& analysis_loglike_map = analysis_map_pair.second;
+        const string& analysis_name = pair.first;
+        const AnalysisLogLikes& analysis_loglikes = pair.second;
 
-        result[analysis_name] = analysis_loglike_map.at("__combined__");
+        result[analysis_name] = analysis_loglikes.combinationLogLike;
       }
     }
 
@@ -2904,22 +2908,33 @@ namespace Gambit
     void get_LHC_LogLike_per_SR(map_str_dbl& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_SR;
-      for (auto& analysis_map_pair : *Dep::LHC_LogLikes)
+      for (const std::pair<string,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
       {
-        const string& analysis_name = analysis_map_pair.first;
-        const map_str_dbl& analysis_loglike_map = analysis_map_pair.second;
+        const string& analysis_name = pair_i.first;
+        const AnalysisLogLikes& analysis_loglikes = pair_i.second;
 
-        for (auto& SR_loglike_pair : analysis_loglike_map)
+        for (const std::pair<string,double>& pair_j : analysis_loglikes.SRLogLikes)
         {
-          if (SR_loglike_pair.first == "__combined__")
-          {
-            result[analysis_name + "__combined__"] = SR_loglike_pair.second;            
-          }
-          else
-          {
-            result[analysis_name + "__" + SR_loglike_pair.first] = SR_loglike_pair.second;
-          }
+          const string& sr_label = pair_j.first;
+          const double& sr_loglike = pair_j.second;
+          result[analysis_name + "__" + sr_label] = sr_loglike;          
         }
+
+        result[analysis_name + "__combined__"] = analysis_loglikes.combinationLogLike;          
+      }
+    }
+
+
+    // Extract the label for the SR used in the analysis loglikes
+    void get_LHC_LogLike_SR_labels(map_str_str& result)
+    {
+      using namespace Pipes::get_LHC_LogLike_per_SR;
+      for (const std::pair<string,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
+      {
+        const string& analysis_name = pair_i.first;
+        const AnalysisLogLikes& analysis_loglikes = pair_i.second;
+
+        result[analysis_name] = analysis_loglikes.combinationSR;
       }
     }
 

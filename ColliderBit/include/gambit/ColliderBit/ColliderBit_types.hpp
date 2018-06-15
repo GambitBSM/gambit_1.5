@@ -67,7 +67,23 @@ namespace Gambit
     typedef std::vector<AnalysisData> AnalysisNumbers;
     typedef std::vector<const AnalysisData*> AnalysisDataPointers;
 
-    /// Container for multiple analysis containers
+    /// @brief Container for loglike information for an analysis
+    struct AnalysisLogLikes
+    {
+      std::map<std::string,double> SRLogLikes;
+      std::string combinationSR;
+      double combinationLogLike;
+
+      AnalysisLogLikes() : 
+        combinationSR("undefined"),
+        combinationLogLike(0.0)
+        { }
+    };
+
+    /// @brief Typedef for a string-to-AnalysisLogLikes map
+    typedef std::map<std::string,AnalysisLogLikes> map_str_AnalysisLogLikes;
+
+    /// @brief Container for multiple analysis containers
     typedef std::vector<HEPUtilsAnalysisContainer> HEPUtilsAnalysisContainers;
 
     // typedefs specifically for timing (see ColliderBit_macros.hpp)
