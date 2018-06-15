@@ -97,6 +97,24 @@ namespace Gambit
         return;
       }
 
+      // Particle overlap removal
+      // Discards particle (from "particles1") if it is within DeltaRMax of another particle
+      void ParticleOverlapRemoval(vector<HEPUtils::Particle*>& particles1, vector<HEPUtils::Particle*>& particles2, double DeltaRMax) 
+      {
+        vector<HEPUtils::Particle*> survivors;
+        for(HEPUtils::Particle* p1 : particles1)
+        {
+          bool overlap = false;
+          for(HEPUtils::Particle* p2 : particles2) 
+          {
+            double dR = p1->mom().deltaR_eta(p2->mom());
+            if(fabs(dR) <= DeltaRMax) overlap = true;
+          }
+          if(!overlap) survivors.push_back(p1);
+        }
+        particles1 = survivors;
+        return;
+      }
 
       // Removes a lepton from the leptons1 vector if it forms an OS pair with a
       // lepton in leptons2 and the pair has a mass in the range (m_low, m_high).
@@ -153,6 +171,7 @@ namespace Gambit
         // Baseline objects
         vector<HEPUtils::Particle*> baselineElectrons;
         vector<HEPUtils::Particle*> baselineMuons;
+        vector<HEPUtils::Particle*> baselineTaus;
         vector<HEPUtils::Jet*> baselineJets;
         double met = event->met();
 
@@ -169,6 +188,13 @@ namespace Gambit
         }
         // Missing: Apply "medium" ID criteria 
 
+        for (HEPUtils::Particle* tau : event->taus()) 
+        {
+          if (tau->pT()>20. && tau->abseta()<2.47) baselineTaus.push_back(tau);
+        }
+        // Since tau efficiencies are not applied as part of the BuckFast ATLAS sim we apply it here
+        ATLAS::applyTauEfficiencyR2(baselineTaus);  
+
         for (HEPUtils::Jet* jet : event->jets()) 
         {
           if (jet->pT()>20. && jet->abseta()<2.8) baselineJets.push_back(jet);
@@ -176,10 +202,13 @@ namespace Gambit
         // Missing: Some additional requirements for jets with pT < 60 and abseta < 2.4 (see paper)
 
 
+
         // Overlap removal
         // 1) Remove taus within DeltaR = 0.2 of an electron or muon
+        ParticleOverlapRemoval(baselineTaus, baselineElectrons, 0.2);
+        ParticleOverlapRemoval(baselineTaus, baselineMuons, 0.2);
 
-        // 2) Remove electron sharing an ID track with a muon
+        // 2) Missing: Remove electron sharing an ID track with a muon
 
         // 3) Remove jets within DeltaR = 0.2 of electron
         JetLeptonOverlapRemoval(baselineJets, baselineElectrons, 0.2);
@@ -187,13 +216,14 @@ namespace Gambit
         // 4) Remove electrons within DeltaR = 0.4 of a jet
         LeptonJetOverlapRemoval(baselineElectrons, baselineJets, 0.4);
 
-        // 5) Remove jets with < 3 assocated tracks if a muon is within DeltaR = 0.2 
-        //    *or* the muon is a track in the jet.
+        // 5) Missing: Remove jets with < 3 assocated tracks if a muon is 
+        //    within DeltaR = 0.2 *or* if the muon is a track in the jet.
 
         // 6) Remove muons within DeltaR = 0.4 of jet
         LeptonJetOverlapRemoval(baselineMuons, baselineJets, 0.4);
 
-        // 7) Remove jets within DetlaR = 0.4 of a "medium" tau
+        // 7) Remove jets within DeltaR = 0.4 of a "medium" tau
+        JetLeptonOverlapRemoval(baselineJets, baselineTaus, 0.4);
 
 
         // Suppress low-mass particle decays
@@ -212,6 +242,7 @@ namespace Gambit
         vector<HEPUtils::Jet*> signalJets = baselineJets;
         vector<HEPUtils::Particle*> signalElectrons = baselineElectrons;
         vector<HEPUtils::Particle*> signalMuons = baselineMuons;
+        vector<HEPUtils::Particle*> signalTaus = baselineTaus;
         vector<HEPUtils::Particle*> signalLeptons;
         signalLeptons = signalElectrons;
         signalLeptons.insert(signalLeptons.end(), signalMuons.begin(), signalMuons.end());
@@ -223,15 +254,15 @@ namespace Gambit
         sort(signalLeptons.begin(), signalLeptons.end(), comparePt);
 
         // Count signal leptons and jets
-        size_t nSignalElectrons = signalElectrons.size();
-        size_t nSignalMuons = signalMuons.size();
+        // size_t nSignalElectrons = signalElectrons.size();
+        // size_t nSignalMuons = signalMuons.size();
+        size_t nSignalTaus = signalTaus.size();
         size_t nSignalLeptons = signalLeptons.size();
-        size_t nSignalJets = signalJets.size();
+        // size_t nSignalJets = signalJets.size();
 
         // Get OS and SFOS pairs
         vector<vector<HEPUtils::Particle*>> SFOSpairs = getSFOSpairs(signalLeptons);
         vector<vector<HEPUtils::Particle*>> OSpairs = getOSpairs(signalLeptons);
-
 
         // Z requirements
         vector<double> SFOSpair_masses;
@@ -273,10 +304,11 @@ namespace Gambit
 
         // Signal Regions
 
+        // --- 4L0T ---
+
         // SR0A
-        // Missing: check for zero taus
-        if (nSignalLeptons >= 4 && !Zlike && meff > 600.) _numSR["SR0A"]++;
-        // if (nSignalLeptons >= 4 && !Zlike && meff > 600.)
+        if (nSignalTaus == 0 && nSignalLeptons >= 4 && !Zlike && meff > 600.) _numSR["SR0A"]++;
+        // if (nSignalTaus == 0 && nSignalLeptons >= 4 && !Zlike && meff > 600.)
         // {
         //   cout << "DEBUG: " << "--- Got event for SR0A ---" << endl;
         //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
@@ -292,9 +324,8 @@ namespace Gambit
         // }
 
         // SR0B
-        // Missing: check for zero taus
-        if (nSignalLeptons >= 4 && !Zlike && meff > 1100.) _numSR["SR0B"]++;
-        // if (nSignalLeptons >= 4 && !Zlike && meff > 1100.)
+        if (nSignalTaus == 0 && nSignalLeptons >= 4 && !Zlike && meff > 1100.) _numSR["SR0B"]++;
+        // if (nSignalTaus == 0 && nSignalLeptons >= 4 && !Zlike && meff > 1100.)
         // {
         //   cout << "DEBUG: " << "--- Got event for SR0B ---" << endl;
         //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
@@ -309,11 +340,9 @@ namespace Gambit
         //   _numSR["SR0B"]++;
         // }
 
-
         // SR0C
-        // Missing: check for zero taus
-        if (nSignalLeptons >= 4 && Z1 && Z2 && met > 50.) _numSR["SR0C"]++;
-        // if (nSignalLeptons >= 4 && Z1 && Z2 && met > 50.)
+        if (nSignalTaus == 0 && nSignalLeptons >= 4 && Z1 && Z2 && met > 50.) _numSR["SR0C"]++;
+        // if (nSignalTaus == 0 && nSignalLeptons >= 4 && Z1 && Z2 && met > 50.)
         // {
         //   cout << "DEBUG: " << "--- Got event for SR0C ---" << endl;
         //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
@@ -329,9 +358,8 @@ namespace Gambit
         // }
 
         // SR0D
-        // Missing: check for zero taus
-        if (nSignalLeptons >= 4 && Z1 && Z2 && met > 100.) _numSR["SR0D"]++;
-        // if (nSignalLeptons >= 4 && Z1 && Z2 && met > 100.)
+        if (nSignalTaus == 0 && nSignalLeptons >= 4 && Z1 && Z2 && met > 100.) _numSR["SR0D"]++;
+        // if (nSignalTaus == 0 && nSignalLeptons >= 4 && Z1 && Z2 && met > 100.)
         // {
         //   cout << "DEBUG: " << "--- Got event for SR0D ---" << endl;
         //   cout << "DEBUG: " << "  leptons: " << nSignalLeptons << ", electrons: " << nSignalElectrons << ", muons: " << nSignalMuons << endl;
