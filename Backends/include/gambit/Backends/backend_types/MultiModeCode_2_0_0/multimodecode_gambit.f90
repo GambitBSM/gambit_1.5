@@ -44,9 +44,9 @@ MODULE multimodecode_gambit
     !Non-Gaussianity
     real(dp) :: f_NL
     real(dp) :: tau_NL
-    real(dp) , dimension(:) :: k_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(:) :: pks_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(:) :: pkt_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(10) :: k_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(10) :: pks_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(10) :: pkt_array  !<- Added for the FULL POW SPEC
     integer :: k_size
   end type gambit_inflation_observables
 

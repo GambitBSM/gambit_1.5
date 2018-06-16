@@ -1435,6 +1435,8 @@ int input_read_parameters(
                  errmsg,
                  "You wrote: modes=%s. Could not identify any of the modes ('s', 'v', 't') in such input",string1);
     }
+	  
+    printf("ppt->has_tensors = %d\n",ppt->has_tensors);
 
     if (ppt->has_scalars == _TRUE_) {
 
@@ -3194,8 +3196,11 @@ int input_default_precision ( struct precision * ppr ) {
    */
 
   /* for bbn */
-  sprintf(ppr->sBBN_file,__CLASSDIR__);
-  strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
+//  sprintf(ppr->sBBN_file,__CLASSDIR__);
+//  strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
+
+  sprintf(ppr->sBBN_file,"");
+  strcat(ppr->sBBN_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/bbn/sBBN_2017.dat");
 
   /* for recombination */
 
@@ -3232,12 +3237,19 @@ int input_default_precision ( struct precision * ppr ) {
 
   ppr->recfast_H_frac=1.e-3;               /* from recfast 1.4 */
 
-  sprintf(ppr->hyrec_Alpha_inf_file,__CLASSDIR__);
-  strcat(ppr->hyrec_Alpha_inf_file,"/hyrec/Alpha_inf.dat");
-  sprintf(ppr->hyrec_R_inf_file,__CLASSDIR__);
-  strcat(ppr->hyrec_R_inf_file,"/hyrec/R_inf.dat");
-  sprintf(ppr->hyrec_two_photon_tables_file,__CLASSDIR__);
-  strcat(ppr->hyrec_two_photon_tables_file,"/hyrec/two_photon_tables.dat");
+//  sprintf(ppr->hyrec_Alpha_inf_file,__CLASSDIR__);
+//  strcat(ppr->hyrec_Alpha_inf_file,"/hyrec/Alpha_inf.dat");
+//  sprintf(ppr->hyrec_R_inf_file,__CLASSDIR__);
+//  strcat(ppr->hyrec_R_inf_file,"/hyrec/R_inf.dat");
+//  sprintf(ppr->hyrec_two_photon_tables_file,__CLASSDIR__);
+//  strcat(ppr->hyrec_two_photon_tables_file,"/hyrec/two_photon_tables.dat");
+
+  sprintf(ppr->hyrec_Alpha_inf_file,"");
+  strcat(ppr->hyrec_Alpha_inf_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/hyrec/Alpha_inf.dat");
+  sprintf(ppr->hyrec_R_inf_file,"");
+  strcat(ppr->hyrec_R_inf_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/hyrec/R_inf.dat");
+  sprintf(ppr->hyrec_two_photon_tables_file,"");
+  strcat(ppr->hyrec_two_photon_tables_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/hyrec/two_photon_tables.dat");
 
   /* for reionization */
 

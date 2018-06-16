@@ -456,7 +456,7 @@ namespace Gambit
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
 
-      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
+      // calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
 
       std::cout << "steps = " << steps << std::endl;
 
@@ -543,6 +543,17 @@ namespace Gambit
         cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
         cosmo.input.addEntry("r",observs.r);
       }
+	  else
+	  {
+		/* gambit_Pk type is set if full_spectra is asked. */
+		cosmo.input.addEntry("P_k_ini type","gambit_Pk");
+		  
+		cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+		cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+		cosmo.input.addEntry("H0",*Param["H0"]);
+		cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+
+	  }
 
       YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
@@ -637,7 +648,7 @@ namespace Gambit
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
 
-      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
+      // calc_full_pk = 1; // lets hack for now as I decide how to implement full spectra to Patrick's version.
 
       std::cout << "steps = " << steps << std::endl;
 
@@ -1330,7 +1341,7 @@ namespace Gambit
 
     void function_Planck_high_TT_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
+      std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
       using namespace Pipes::function_Planck_high_TT_loglike;
 
       double  cl_and_pars[2525];
@@ -1385,7 +1396,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      //std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
+      std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
     }
 
     void function_Planck_high_TTTEEE_loglike(double& result)

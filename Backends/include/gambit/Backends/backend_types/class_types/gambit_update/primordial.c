@@ -66,11 +66,13 @@ int primordial_spectrum_at_k(
   int last_index;
 
   /** - infer ln(k) from input. In linear mode, reject negative value of input k value. */
+//  printf("DEBUG: (primordial.c) we are in primordial_spectrum_at_k\n");
 
   if (mode == linear) {
     class_test(input<=0.,
                ppm->error_message,
                "k = %e",input);
+//    printf("DEBUG: mode is linear!\n");
     lnk=log(input);
   }
   else {
@@ -79,8 +81,13 @@ int primordial_spectrum_at_k(
 
   /** - if ln(k) is not in the interpolation range, return an error, unless
       we are in the case of a analytic spectrum, for which a direct computation is possible */
-
+//  printf("DEBUG: (primordial.c) lnk = %e \n",lnk);
+//  printf("DEBUG: (primodrial.c) ppm->lnk[ppm->lnk_size-1] = %e ",ppm->lnk[ppm->lnk_size-1]);
+//  printf("DEBUG: (primodrial.c) ppm->lnk[0]) = %e ",ppm->lnk[0]);
+								 
   if ((lnk > ppm->lnk[ppm->lnk_size-1]) || (lnk < ppm->lnk[0])) {
+	  
+//	printf("DEBUG: (primordial.c) ln(k) is not in the interpolation range\n");
 
     class_test(ppm->primordial_spec_type != analytic_Pk,
                ppm->error_message,
@@ -128,10 +135,10 @@ int primordial_spectrum_at_k(
       }
     }
   }
-
   /** - otherwise, interpolate in the pre-computed table */
 
   else {
+//    printf("DEBUG: (primordial.c) otherwise, interpolate in the pre-computed table\n");
 
     class_call(array_interpolate_spline(
                                         ppm->lnk,
