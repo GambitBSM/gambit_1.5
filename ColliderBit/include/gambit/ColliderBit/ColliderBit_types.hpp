@@ -70,13 +70,17 @@ namespace Gambit
     /// @brief Container for loglike information for an analysis
     struct AnalysisLogLikes
     {
-      std::map<std::string,double> SRLogLikes;
-      std::string combinationSR;
-      double combinationLogLike;
+      std::map<std::string,int> sr_indices;  // Signed indices so that we can use negative values for special cases
+      std::map<std::string,double> sr_loglikes;
+
+      std::string combination_sr_label;
+      int combination_sr_index;
+      double combination_loglike;
 
       AnalysisLogLikes() : 
-        combinationSR("undefined"),
-        combinationLogLike(0.0)
+        combination_sr_label("undefined"),
+        combination_sr_index(-2),
+        combination_loglike(0.0)
         { }
     };
 

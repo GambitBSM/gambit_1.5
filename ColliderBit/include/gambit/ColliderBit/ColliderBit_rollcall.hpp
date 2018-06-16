@@ -390,11 +390,20 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Extract the label for the SR used in the analysis loglikes
+  // Extract the labels for the SRs used in the analysis loglikes
   #define CAPABILITY LHC_LogLike_SR_labels
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_SR_labels
     START_FUNCTION(map_str_str)
+    DEPENDENCY(LHC_LogLikes, map_str_AnalysisLogLikes)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // Extract the indices for the SRs used in the analysis loglikes (alphabetical SR ordering)
+  #define CAPABILITY LHC_LogLike_SR_indices
+  START_CAPABILITY
+    #define FUNCTION get_LHC_LogLike_SR_indices
+    START_FUNCTION(map_str_dbl)
     DEPENDENCY(LHC_LogLikes, map_str_AnalysisLogLikes)
     #undef FUNCTION
   #undef CAPABILITY
