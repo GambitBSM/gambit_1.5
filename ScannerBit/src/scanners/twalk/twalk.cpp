@@ -27,7 +27,7 @@
 #include "twalk.hpp"
 
 scanner_plugin(twalk, version(1, 0, 1))
-{
+{    
     int plugin_main ()
     {
         like_ptr LogLike = get_purpose(get_inifile_value<std::string>("like", "LogLike"));
@@ -77,7 +77,14 @@ namespace Gambit
 {
     namespace Scanner
     {
-
+        struct point_info
+        {
+            int mult;
+            int chain;
+            int rank;
+            unsigned long long int id;
+        };
+        
         void TWalk(Gambit::Scanner::like_ptr LogLike,
                    Gambit::Scanner::printer_interface &printer,
                    Gambit::Scanner::resume_params_func set_resume_params,
@@ -92,7 +99,7 @@ namespace Gambit
                    const int &NChains,
                    const bool &hyper_grid,
                    const int &burn_in,
-                   const int &/*save_freq*/,
+                   const int &save_freq,
                    const double &mins_max)
         {
 
@@ -127,21 +134,17 @@ namespace Gambit
 
             Gambit::Scanner::assign_aux_numbers("mult", "chain");
 
-            int rank;
-            int numtasks;
+            int rank = set_resume_params.Rank();
+            int numtasks = set_resume_params.NumTasks();
+            
             #ifdef WITH_MPI
-                MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
-                MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-                MPI_Barrier(MPI_COMM_WORLD);
-
                 std::vector<int> tints(NChains);
                 for (int i = 0; i < NChains; i++) tints[i] = i;
                 std::vector<int> talls(2*numtasks);
                 set_resume_params(tints, talls);
-            #else
-                numtasks = 1;
-                rank = 0;
             #endif
+                
+            std::ofstream temp_file_out;
 
             if (mins_max > 0 and rank == 0)
             {
@@ -155,12 +158,14 @@ namespace Gambit
                 gDev.push_back(new RanNumGen(proj, dimension, din, alim, alimt, div, rand));
             }
 
-            Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
+            //Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
             //out_stream->reset(); // Hmm no reason to do that I think...
-            
+            std::cout << "file = " << set_resume_params.get_temp_file_name("temp") << std::endl;
             //if (set_resume_params.resume_mode())
             if (resumed)
             {
+                std::cout << "file = " << set_resume_params.get_temp_file_name("temp") << std::endl;
+                temp_file_out.open(set_resume_params.get_temp_file_name("temp"), std::ofstream::binary | std::ofstream::app);
                 #ifdef WITH_MPI
                     for (int i = 0; i < numtasks; i++)
                     {
@@ -176,6 +181,7 @@ namespace Gambit
             }
             else
             {
+                temp_file_out.open(set_resume_params.get_temp_file_name("temp"), std::ofstream::binary);
                 resumed = true;
                 for (t = 0; t < NChains; t++)
                 {
@@ -255,8 +261,11 @@ namespace Gambit
                     next_id = LogLike->getPtID();
                     if ((ans <= 0.0)||(gDev[0]->ExpDev() >= ans))
                     {
-                        out_stream->print(mult[t], "mult", ranks[t], ids[t]);
-                        out_stream->print(t, "chain", ranks[t], ids[t]);
+                        //out_stream->print(mult[t], "mult", ranks[t], ids[t]);
+                        //out_stream->print(t, "chain", ranks[t], ids[t]);
+                        point_info info = {mult[t], t, ranks[t], ids[t]};
+                        temp_file_out.write((char *)&info, sizeof(point_info));
+                        
                         ids[t] = next_id;
                         a0[t] = aNext;
                         chisq[t] = chisqnext;
@@ -266,8 +275,10 @@ namespace Gambit
                     }
                     else
                     {
-                        out_stream->print(0, "mult", rank, next_id);
-                        out_stream->print(-1, "chain", rank, next_id);
+                        //out_stream->print(0, "mult", rank, next_id);
+                        //out_stream->print(-1, "chain", rank, next_id);
+                        point_info info = {0, -1, rank, next_id};
+                        temp_file_out.write((char *)&info, sizeof(point_info));
                     }
                 }
 
@@ -288,11 +299,11 @@ namespace Gambit
 
                 total++;
 
-                //if (total%save_freq == 0)
-                //{
-                //    set_resume_params.dump();
-                //    //out_stream->reset();
-                //}
+                if (total%save_freq == 0)
+                {
+                    set_resume_params.dump();
+                    //out_stream->reset();
+                }
 
                 if (rank == 0)
                 {
@@ -410,7 +421,18 @@ namespace Gambit
             }
 
             for (auto &&gd : gDev) delete gd;
-
+            
+            temp_file_out.close();
+            Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
+            std::ifstream temp_file_in(set_resume_params.get_temp_file_name("temp").c_str(), std::ifstream::binary);
+            point_info info;
+            int i = 0;
+            while (temp_file_in.read((char *)&info, sizeof(point_info)))
+            {i++;
+                out_stream->print(info.mult, "mult", info.rank, info.id);
+                out_stream->print(info.chain, "chain", info.rank, info.id);
+            }
+            std::cout << "i = " << i << std::endl;
             std::cout << "TWalk has finished in process " << rank << "." << std::endl;
 
             return;
