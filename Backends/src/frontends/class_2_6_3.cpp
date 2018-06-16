@@ -108,7 +108,7 @@ BE_NAMESPACE
        (note alterative -without patching class at all- is to use text files and 'cat' command which we
        want to aviod. The existing CLASS on the branch is already patched to have necessary flags and
        functions to allow for hacking and external setting the primordial power spectrum. */
-    if(cosmo.pm.primordial_spec_type == 1) // is 1 when Gambit_pk is asked for.
+    if(cosmo.pm.primordial_spec_type == 6) // is 6 when Gambit_pk is asked for.
     {
       /* The bin number of the primordial power spectrum.
        This is not to be set here (and also should be given by the user).
@@ -123,7 +123,7 @@ BE_NAMESPACE
       /** - Make room */
       cosmo.pm.lnk = (double *)malloc(cosmo.pm.lnk_size*sizeof(double));
 
-      std::cout << "we pass pm.lnk \n" << std::endl;
+      std::cout << "DEBUG: we pass pm.lnk \n" << std::endl;
 
       cosmo.pm.lnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
       cosmo.pm.ddlnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
@@ -137,8 +137,10 @@ BE_NAMESPACE
         cosmo.pm.ic_size[index_md] = cosmo.pt.ic_size[index_md];
         cosmo.pm.ic_ic_size[index_md] = (cosmo.pm.ic_size[index_md]*(cosmo.pm.ic_size[index_md]+1))/2;
 
-        std::cout << "pm.ic_size["<<index_md<<"] =  " << cosmo.pt.ic_size[index_md] << std::endl;
-        std::cout << "pm.ic_ic_size["<<index_md<<"] = " << cosmo.pm.ic_ic_size[index_md]<<std::endl;
+        std::cout << "DEBUG: pm.ic_size["<<index_md<<"] =  " << cosmo.pt.ic_size[index_md] << std::endl;
+        std::cout << "DEBUG: pm.ic_ic_size["<<index_md<<"] = " << cosmo.pm.ic_ic_size[index_md]<<std::endl;
+
+		std::cout << "DEBUG: cosmo.pm.lnk_size["<<index_md<<"] =  " << cosmo.pm.lnk_size << std::endl;
 
         cosmo.pm.lnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
         cosmo.pm.ddlnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
@@ -148,18 +150,18 @@ BE_NAMESPACE
       /** - Store values */
       for (int index_k=0; index_k<cosmo.pm.lnk_size; index_k++)
       {
-        std::cout << "k_array["<<index_k<<"]="<< cosmo.k_ar.at(index_k) <<std::endl;
-        std::cout << "pks_array["<<index_k<<"]="<< cosmo.Pk_S.at(index_k)<<std::endl;
-        std::cout << "pkt_array["<<index_k<<"]="<< cosmo.Pk_T.at(index_k)<<std::endl;
+        std::cout << "DEBUG: k_array["<<index_k<<"]="<< cosmo.k_ar.at(index_k) <<std::endl;
+        std::cout << "DEBUG: pks_array["<<index_k<<"]="<< cosmo.Pk_S.at(index_k)<<std::endl;
+        std::cout << "DEBUG: pkt_array["<<index_k<<"]="<< cosmo.Pk_T.at(index_k)<<std::endl;
 
         cosmo.pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
         cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
         if (cosmo.pt.has_tensors == _TRUE_)
           cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
 
-        std::cout << "pm.lnk["<<index_k<<"]="<<cosmo.pm.lnk[index_k]<<std::endl;
-        std::cout << "pm.lnpk["<<cosmo.pt.index_md_scalars<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k]<<std::endl;
-        std::cout << "pm.lnpk["<<cosmo.pt.index_md_tensors<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k]<<std::endl;
+        std::cout << "DEBUG: pm.lnk["<<index_k<<"]="<<cosmo.pm.lnk[index_k]<<std::endl;
+        std::cout << "DEBUG: pm.lnpk["<<cosmo.pt.index_md_scalars<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k]<<std::endl;
+        std::cout << "DEBUG: pm.lnpk["<<cosmo.pt.index_md_tensors<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k]<<std::endl;
       }
 
       /** - Tell CLASS that there are scalar (and tensor) modes */

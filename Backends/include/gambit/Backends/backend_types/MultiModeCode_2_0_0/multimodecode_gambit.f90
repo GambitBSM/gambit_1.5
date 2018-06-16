@@ -44,9 +44,9 @@ MODULE multimodecode_gambit
     !Non-Gaussianity
     real(dp) :: f_NL
     real(dp) :: tau_NL
-    real(dp) , dimension(10) :: k_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(10) :: pks_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(10) :: pkt_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(100) :: k_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(100) :: pks_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(100) :: pkt_array  !<- Added for the FULL POW SPEC
     integer :: k_size
   end type gambit_inflation_observables
 
@@ -168,7 +168,7 @@ contains
     real(dp) :: dlnk
 
     !Sampling parameters for ICs
-    integer :: numb_samples
+    integer :: numb_samples,steps
     integer :: out_adiab
     real(dp) :: energy_scale
     real(dp), dimension(:,:), allocatable :: icpriors_min, icpriors_max
@@ -252,6 +252,8 @@ contains
     out_opt%spectra = .false.
     out_opt%modes = .false.
 
+	steps = ginput_steps
+
     !---------------------------------------------------------------
 
 
@@ -303,7 +305,7 @@ contains
 
       call out_opt%open_files(SR=use_deltaN_SR)
 
-	  call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk)
+	  call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min)
 
       call out_opt%close_files(SR=use_deltaN_SR)
 
@@ -326,7 +328,7 @@ contains
         if (out_opt%modpkoutput) write(*,*) &
           "---------------------------------------------"
 
-        call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk)
+        call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min)
 
       end do
 
@@ -686,13 +688,15 @@ contains
 
     !Calculate observables, optionally grab a new IC or a new set of parameters
     !each time this routine is called.
-    subroutine calculate_pk_observables(observs_gambit,observs,observs_SR,k_pivot,dlnk,calc_full_pk)
+    subroutine calculate_pk_observables(observs_gambit,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,kmin)
 
       real(dp), intent(in) :: k_pivot,dlnk
       logical, intent(in) :: calc_full_pk
-      real(dp) :: kmax,kmin
+      real(dp) :: kmax
       type(observables), intent(inout) :: observs, observs_SR
       type(gambit_inflation_observables), intent(inout) :: observs_gambit
+	  integer, intent(in) :: steps
+      real(dp), intent(in) :: kmin
 
       real(dp), dimension(:,:), allocatable :: pk_arr
       logical :: leave
@@ -702,7 +706,7 @@ contains
       real(dp), dimension(:), allocatable :: k_a, pks_a, pkt_a
 
       character(1024) :: cname
-      integer :: ii,steps
+      integer :: ii
 
       call observs%set_zero()
       call observs_SR%set_zero()
@@ -860,9 +864,9 @@ contains
 
         !Get full spectrum for adiab and isocurv at equal intvs in lnk
 !		print*,"will call gambit_get_full_pk"
-		steps = 10
+		!steps = 100
 		kmax = 1e6
-        kmin = 1e-4
+        !kmin = 1e-7
 
         call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
 

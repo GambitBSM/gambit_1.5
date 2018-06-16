@@ -270,7 +270,7 @@ int primordial_init(
              ppm->error_message,
              ppm->error_message);
   }
-  printf("ppt->md_size = %d \n",ppt->md_size);
+  printf("DEBUG: (ppm) ppt->md_size = %d \n",ppt->md_size);
 	
   for (index_md = 0; index_md < ppt->md_size; index_md++) {
     printf("ppm->ic_size[%d] = %d \n", index_md,ppm->ic_size[index_md]);
@@ -424,14 +424,13 @@ int primordial_init(
 				 ppm->error_message,
 				 "external Pk module cannot work if you ask for vector modes");
 
-	printf("ppm->lnk_size = %d \n",ppm->lnk_size);
+	printf("DEBUG: ppm->lnk_size = %d \n",ppm->lnk_size);
 	  
 	for (index_k=0; index_k<ppm->lnk_size; index_k++) {
 		  
-		  printf("ppm->lnk[%d] = %e \n",index_k,ppm->lnk[index_k]);
-		  printf("ppm->lnpk[%d][%d] = %e \n",ppt->index_md_scalars,index_k,ppm->lnpk[ppt->index_md_scalars][index_k]);
+		  printf("DEBUG: ppm->lnk[%d] = %e \n",index_k,ppm->lnk[index_k]);
+		  printf("DEBUG: ppm->lnpk[%d][%d] = %e \n",ppt->index_md_scalars,index_k,ppm->lnpk[ppt->index_md_scalars][index_k]);
 	}
-		  //if (ppm->primordial_verbose > 0)
     printf(" (Pk calculated by GAMBIT)\n");
 	  
    /* ------------------------------------- */

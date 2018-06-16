@@ -512,8 +512,9 @@ namespace Gambit
 
       std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
       std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+	  std::cout << "observs.k_array = " << observs.k_array << std::endl;
+	  std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
       if (calc_full_pk == 0)
@@ -545,8 +546,23 @@ namespace Gambit
       }
 	  else
 	  {
+		printf("we are inside P_k_ini type = gambit_Pk \n");
 		/* gambit_Pk type is set if full_spectra is asked. */
 		cosmo.input.addEntry("P_k_ini type","gambit_Pk");
+		  
+		cosmo.Pk_S.resize(steps+1, 0.);
+		cosmo.Pk_T.resize(steps+1, 0.);
+		cosmo.k_ar.resize(steps+1, 0.);
+		  
+		for (int ii=0; ii < steps; ii++)
+		{
+			printf("DEBUG: observs.k_array[%d] = %e\n",ii,observs.k_array[ii+1]);
+			printf("DEBUG: observs.pks_array[%d] = %e\n",ii,observs.pks_array[ii+1]);
+			printf("DEBUG: observs.pkt_array[%d] = %e\n",ii,observs.pkt_array[ii+1]);
+			cosmo.k_ar.at(ii) = observs.k_array[ii+1];
+			cosmo.Pk_S.at(ii) = observs.pks_array[ii+1];
+			cosmo.Pk_T.at(ii) = observs.pkt_array[ii+1];
+		}
 		  
 		cosmo.input.addEntry("omega_b",*Param["omega_b"]);
 		cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);

@@ -1535,6 +1535,7 @@ int input_read_parameters(
     }
 	/* ------------------- SH -------------------- */
 	if (strcmp(string1,"gambit_Pk") == 0) {
+		  printf("we have set gambit_Pk!\n");
 		  ppm->primordial_spec_type = gambit_Pk;
 		  flag2=_TRUE_;
 	}
