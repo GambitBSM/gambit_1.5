@@ -50,7 +50,7 @@
 #include "Eigen/Eigenvalues"
 #include "HEPUtils/FastJet.h"
 
-#define COLLIDERBIT_DEBUG
+// #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -2524,6 +2524,7 @@ namespace Gambit
                                  << ",  excess = " << srData.n_observed - srData.n_background << " +/- " << srData.background_sys
                                  << ",  n_s = " << srData.n_signal_at_lumi
                                  << ",  (excess-n_s) = " << (srData.n_observed-srData.n_background) - srData.n_signal_at_lumi << " +/- " << srData.background_sys
+                                 << ",  n_s_MC = " << srData.n_signal
                                  << endl; 
         }
         cout.precision(stream_precision); // restore previous precision
