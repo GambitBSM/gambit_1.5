@@ -1029,7 +1029,7 @@ namespace Gambit {
           //Creating the Lab Frame
           LAB_2L2J->ClearEvent();
       
-          if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
+//          if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
       
           //Setting the Standard Variables
           //Di-Lepton System:
@@ -1903,21 +1903,21 @@ namespace Gambit {
           cutFlowVector_str[34] = "2L2JCOMP: p_IT ";
           cutFlowVector_str[35] = "2L2JCOMP: pT_CM ";*/
 
-          (j==28 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3) ||
+          (j==28 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0) ||
 
-          (j==29 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100.) ||
+          (j==29 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100.) ||
 
-          (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110.) ||
+          (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110.) ||
 
-          (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8) ||
+          (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8) ||
 
-          (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
+          (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
 
-          (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
+          (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
 
-          (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
+          (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
 
-          (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
+          (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
 
 
           /* cutFlowVector_str[36] = "3LHIGH: Preselection ";
@@ -2002,7 +2002,7 @@ namespace Gambit {
 
         if(m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05 && m_minDphi>2.4 && m_H5PP>400.)_num2L2JLOW++;
 
-        if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. &&  m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
+        if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. &&  m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
 
         if(m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_HT4PP/m_H4PP > 0.75 && m_R_minH2P_minH3P>0.8 && m_H4PP > 550. && m_RPT_HT4PP < 0.2)_num3LHIGH++;
 
@@ -2038,19 +2038,19 @@ namespace Gambit {
 
       void collect_results() {
 
-        // double scale_by=1.;
-        // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        // cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
-        // cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-        // cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
-        //      << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-        // for (int j=0; j<NCUTS; j++) {
-        //   cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
-        //        << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
-        //        << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
-        //        << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
-        // }
-        // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+         // double scale_by=1.;
+         // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+         // cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
+         // cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+         // cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
+         //      << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+         // for (int j=0; j<NCUTS; j++) {
+         //   cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
+         //        << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
+         //        << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
+         //        << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+         // }
+         // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
         /// Register results objects with the results for each SR; obs & bkg numbers from the paper
 
