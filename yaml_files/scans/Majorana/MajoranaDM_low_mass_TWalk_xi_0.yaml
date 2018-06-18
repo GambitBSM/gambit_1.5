@@ -157,10 +157,10 @@ Rules:
   - capability: lnL_SI_nuclear_parameters
     function: lnL_sigmas_sigmal
     options:
-      sigmas_central: 43.0
-      sigmas_error: 8.0
-      sigmal_central: 50.0
-      sigmal_error: 15.0
+      sigmas_obs: 43.0
+      sigmas_obserr: 8.0
+      sigmal_obs: 50.0
+      sigmal_obserr: 15.0
 
   # Choose to use capgen for solar capture
   - capability: capture_rate_Sun
