@@ -165,9 +165,9 @@ Rules:
     function: lnL_sigmas_sigmal
     options:
       sigmas_obs: 43.0
-      sigmas_obserror: 8.0
+      sigmas_obserr: 8.0
       sigmal_obs: 50.0
-      sigmal_obserror: 15.0
+      sigmal_obserr: 15.0
       
   # Choose to use capgen for solar capture rate
   - capability: capture_rate_Sun
