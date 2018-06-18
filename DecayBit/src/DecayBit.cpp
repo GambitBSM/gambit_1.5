@@ -3397,7 +3397,6 @@ namespace Gambit
 
       // Set elements of triplet to the width and its error
       gamma.central = Z_inv_width;
-      cout << "2- loop Z Inv = " << gamma.central << endl;
       gamma.lower = Z.error_gamma_inv();
       gamma.upper = gamma.lower;  // Error is symmetric
 
