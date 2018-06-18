@@ -223,8 +223,8 @@ namespace Gambit {
         double mT=0;
         double mT2=0;
         // double mll=0;
-        vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpair(signalLeptons);
-        vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpair(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpairs(signalLeptons);
 
         if (nSignalLeptons>1)pT_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).pT();
         if (nSignalLightLeptons>0 && nSignalTaus>0) {
@@ -636,31 +636,7 @@ namespace Gambit {
         add_result(SignalRegionData("SR8", 166., {_numSR["SR8"], 0.}, {197, 42.}));
       }
 
-      vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> SFOSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {        
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->abspid()==leptons.at(iLe2)->abspid() && leptons.at(iLe1)->pid()!=leptons.at(iLe2)->pid()) {
-              vector<HEPUtils::Particle*> SFOSpair;
-              SFOSpair.push_back(leptons.at(iLe1));
-              SFOSpair.push_back(leptons.at(iLe2));
-              SFOSpair_container.push_back(SFOSpair);
-            } } }
-        return SFOSpair_container;
-      }
 
-      vector<vector<HEPUtils::Particle*>> getOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> OSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {        
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->pid()*leptons.at(iLe2)->pid()<0.) {
-              vector<HEPUtils::Particle*> OSpair;
-              OSpair.push_back(leptons.at(iLe1));
-              OSpair.push_back(leptons.at(iLe2));
-              OSpair_container.push_back(OSpair);
-            } } }
-        return OSpair_container;
-      }
 
       vector<double> get_mll_mT(vector<vector<HEPUtils::Particle*>> pair_cont, vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met, int type) { 
         vector<double> mll_mT;
