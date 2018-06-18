@@ -145,6 +145,12 @@ ObsLikes:
     - purpose:    Observable
       capability: LHC_signals
 
+    - purpose:    likelihood_details
+      capability: LHC_LogLike_per_SR
+
+    - purpose:    likelihood_details
+      capability: LHC_LogLike_SR_indices
+
     - purpose:    Observable
       capability: LHCEventLoopInfo
 
