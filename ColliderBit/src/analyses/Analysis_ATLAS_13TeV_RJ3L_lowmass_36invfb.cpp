@@ -21,7 +21,7 @@ using namespace std;
 
    Note that use of ROOT is compulsory for the RestFrames package
 
-   Based on: arXiv link N/A at present
+   Based on: https://arxiv.org/pdf/1806.02293.pdf
   
    Code adapted by Martin White
 
@@ -65,8 +65,8 @@ namespace Gambit {
     
     
     class Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb : public HEPUtilsAnalysis {
-    private:
-
+    
+    protected:
       // Numbers passing cuts
       int _num2L2JHIGH;
       int _num2L2JINT;
@@ -76,7 +76,9 @@ namespace Gambit {
       int _num3LINT;
       int _num3LLOW;
       int _num3LCOMP;
-
+    
+    private:
+    
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       int NCUTS; //=16;
@@ -2036,7 +2038,7 @@ namespace Gambit {
       }
 
 
-      void collect_results() {
+      virtual void collect_results() {
 
          // double scale_by=1.;
          // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
@@ -2052,25 +2054,16 @@ namespace Gambit {
          // }
          // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
-        /// Register results objects with the results for each SR; obs & bkg numbers from the paper
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("2L2JHIGH", 0,  {_num2L2JHIGH,  0.}, {1.9, 0.8}));     
+        add_result(SignalRegionData("2L2JINT",  1,  {_num2L2JINT,   0.}, {2.4, 0.9})); 
+        add_result(SignalRegionData("2L2JLOW",  19, {_num2L2JLOW,   0.}, {8.4, 5.8})); 
+        add_result(SignalRegionData("2L2JCOMP", 11, {_num2L2JCOMP,  0.}, {2.7, 2.7}));     
+        add_result(SignalRegionData("3LHIGH",   2,  {_num3LHIGH,    0.}, {1.1, 0.5})); 
+        add_result(SignalRegionData("3LINT",    1,  {_num3LINT,     0.}, {2.3, 0.5})); 
+        add_result(SignalRegionData("3LLOW",    20, {_num3LLOW,     0.}, {10., 2.0})); 
+        add_result(SignalRegionData("3LCOMP",   12, {_num3LCOMP,    0.}, {3.9, 1.0})); 
 
-        /*int _numSRA_TT, _numSRA_TW, _numSRA_T0;
-        int _numSRB_TT, _numSRB_TW, _numSRB_T0;
-        int _numSRC1, _numSRC2, _numSRC3, _numSRC4, _numSRC5;
-        int _numSRD_low, _numSRD_high, _numSRE;*/
-  
-        add_result(SignalRegionData("3LLOW", 20, {_num3LLOW,  0.}, {10.31, 1.96}));     
-  
-        /*SignalRegionData results_SRA_TT;
-        results_SRA_TT.sr_label = "SRA_TT";
-        results_SRA_TT.n_observed = 11.;
-        results_SRA_TT.n_background = 15.8;
-        results_SRA_TT.background_sys = 1.9;
-        results_SRA_TT.signal_sys = 0.;
-        results_SRA_TT.n_signal = _numSRA1;
-
-        add_result(results_SRA_TT);*/
-   
         return;
       }
 
@@ -2092,6 +2085,43 @@ namespace Gambit {
     }; // end class Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_lowmass_36invfb)
+
+
+    // 
+    // Derived analysis class for the RJ3L_lowmass SRs
+    // 
+    class Analysis_ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb : public Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb {
+    public:
+      Analysis_ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb() {
+        set_analysis_name("ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb");
+      }
+      virtual void collect_results() {
+        add_result(SignalRegionData("2L2JHIGH", 0,  {_num2L2JHIGH,  0.}, {1.9, 0.8}));     
+        add_result(SignalRegionData("2L2JINT",  1,  {_num2L2JINT,   0.}, {2.4, 0.9})); 
+        add_result(SignalRegionData("2L2JLOW",  19, {_num2L2JLOW,   0.}, {8.4, 5.8})); 
+        add_result(SignalRegionData("2L2JCOMP", 11, {_num2L2JCOMP,  0.}, {2.7, 2.7}));    
+      }
+
+    };
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb)
+    
+    class Analysis_ATLAS_13TeV_RJ3L_3Lep_36invfb : public Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb {
+    public:
+      Analysis_ATLAS_13TeV_RJ3L_3Lep_36invfb() {
+        set_analysis_name("ATLAS_13TeV_RJ3L_3Lep_36invfb");
+      }
+      virtual void collect_results() {
+        add_result(SignalRegionData("3LHIGH",   2,  {_num3LHIGH,    0.}, {1.1, 0.5})); 
+        add_result(SignalRegionData("3LINT",    1,  {_num3LINT,     0.}, {2.3, 0.5})); 
+        add_result(SignalRegionData("3LLOW",    20, {_num3LLOW,     0.}, {10., 2.0})); 
+        add_result(SignalRegionData("3LCOMP",   12, {_num3LCOMP,    0.}, {3.9, 1.0}));   
+      }
+
+    };
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_3Lep_36invfb)
+
 
   } // end namespace ColliderBit
 } // end namespace Gambit
