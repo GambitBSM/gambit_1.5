@@ -18,7 +18,7 @@
 
 using namespace std;
 
-// Known issues:
+// TODO: See if we can get some further improvement by joining muons to b-jets
 
 namespace Gambit {
   namespace ColliderBit {
@@ -268,36 +268,55 @@ namespace Gambit {
           }
         }
         
-        // Find Higgs candidates (test all three possible combinations)
-        double mlead = 0;
-        double msubl = 0;
+        // Find best Higgs (if any) candidates and calculate value of Xhh used in cuts
+        bool higgs = false;
+        double Dhhmin = 1000;
         double Xhh = 10;
-        if(nbJets > 3){
-          double m11 = (bJets_survivors.at(0)->mom()+bJets_survivors.at(1)->mom()).m();
-          double m12 = (bJets_survivors.at(2)->mom()+bJets_survivors.at(3)->mom()).m();
-          double Dhh1 = abs(max(m11,m12)-12./11.*min(m11,m12));
-          //cout << Dhh1 << " " << m11 << " " << m12 << endl;
-          double m21 = (bJets_survivors.at(0)->mom()+bJets_survivors.at(2)->mom()).m();
-          double m22 = (bJets_survivors.at(1)->mom()+bJets_survivors.at(3)->mom()).m();
-          double Dhh2 = abs(max(m21,m22)-12./11.*min(m21,m22));
-          //cout << Dhh2 << " " << m21 << " " << m22 << endl;
-          double m31 = (bJets_survivors.at(0)->mom()+bJets_survivors.at(3)->mom()).m();
-          double m32 = (bJets_survivors.at(1)->mom()+bJets_survivors.at(2)->mom()).m();
-          double Dhh3 = abs(max(m31,m32)-12./11.*min(m31,m32));
-          //cout << Dhh3 << " " << m31 << " " << m32 << endl;
-          //cout << endl;
-          if( Dhh1 < Dhh2 && Dhh1 < Dhh3 ){
-            mlead = max(m11,m12); msubl = min(m11,m12);
+        if(nbJets >= 4){
+          // First find \Delta R criteria
+          double h1DRjjMin = 0.;
+          double h1DRjjMax = 1.00;
+          double h2DRjjMin = 0.;
+          double h2DRjjMax = 1.05;
+          double mhh = (bJets_survivors.at(0)->mom()+bJets_survivors.at(1)->mom()+bJets_survivors.at(2)->mom()+bJets_survivors.at(3)->mom()).m();
+          if(mhh < 1250.){
+            h1DRjjMin = 360/mhh-0.50;
+            h1DRjjMax = 655/mhh+0.50;
+            h2DRjjMin = 235/mhh;
+            h2DRjjMax = 875/mhh + 0.35;
           }
-          else if( Dhh2 < Dhh1 && Dhh2 < Dhh3 ){
-            mlead = max(m21,m22); msubl = min(m21,m22);
+          // Loop over all b-jet combinations
+          for(int i = 0; i < 3; i++){
+            double DRlead = 10; double DRsubl = 10;
+            double mlead = 0; double msubl = 0;
+            int i1 = i; int i2=(i+1)%3; int i3=(i+2)%3; int i4=3;
+            // Find leading and subleading higgs candidate
+            double pT1 = bJets_survivors.at(i1)->mom().pT()+bJets_survivors.at(i2)->mom().pT();
+            double pT2 = bJets_survivors.at(i3)->mom().pT()+bJets_survivors.at(i4)->mom().pT();
+            // Find inter-jet distance and di-jet mass for leading and subleading candidate combinations
+            if(pT1 > pT2){
+              DRlead = bJets_survivors.at(i1)->mom().deltaR_eta(bJets_survivors.at(i2)->mom());
+              DRsubl = bJets_survivors.at(i3)->mom().deltaR_eta(bJets_survivors.at(i4)->mom());
+              mlead = (bJets_survivors.at(i1)->mom()+bJets_survivors.at(i2)->mom()).m();
+              msubl = (bJets_survivors.at(i3)->mom()+bJets_survivors.at(i4)->mom()).m();
+            }
+            else{
+              DRsubl = bJets_survivors.at(i1)->mom().deltaR_eta(bJets_survivors.at(i2)->mom());
+              DRlead = bJets_survivors.at(i3)->mom().deltaR_eta(bJets_survivors.at(i4)->mom());
+              mlead = (bJets_survivors.at(i3)->mom()+bJets_survivors.at(i4)->mom()).m();
+              msubl = (bJets_survivors.at(i1)->mom()+bJets_survivors.at(i2)->mom()).m();
+            }
+            // Check if Higgs candidates are acceptable
+            if(DRlead < h1DRjjMax && DRlead > h1DRjjMin && DRsubl < h2DRjjMax && DRsubl > h2DRjjMin ){
+              higgs = true;
+              double Dhh = abs(mlead-12./11.*msubl);
+              if(Dhh < Dhhmin){
+                Dhhmin = Dhh;
+                Xhh = sqrt( pow((mlead-120.)/(0.1*mlead),2)+pow((msubl-110.)/(0.1*msubl),2) );
+              }
+            }
           }
-          else{
-            mlead = max(m31,m32); msubl = min(m31,m32);
-          }
-          Xhh = sqrt( pow((mlead-120.)/(0.1*mlead),2)+pow((msubl-110.)/(0.1*msubl),2) );
         }
-        
         
         // Increment cutFlowVector elements
         cutFlowVector_str[0]  = "No cuts ";
@@ -312,15 +331,15 @@ namespace Gambit {
 
         // Cut flow from paper
         // Higgsino 130 GeV
-        cutFlowVectorATLAS[0] = 169015.8;
-        cutFlowVectorATLAS[1] =  11206.7;
-        cutFlowVectorATLAS[2] =   1250.8;
-        cutFlowVectorATLAS[3] =   1015.9;
-        cutFlowVectorATLAS[4] =   1015.9;
-        cutFlowVectorATLAS[5] =    961.9;
-        cutFlowVectorATLAS[6] =    559.8;
-        cutFlowVectorATLAS[7] =    217.4;
-        cutFlowVectorATLAS[8] =      0.0;
+//        cutFlowVectorATLAS[0] = 169015.8;
+//        cutFlowVectorATLAS[1] =  11206.7;
+//        cutFlowVectorATLAS[2] =   1250.8;
+//        cutFlowVectorATLAS[3] =   1015.9;
+//        cutFlowVectorATLAS[4] =   1015.9;
+//        cutFlowVectorATLAS[5] =    961.9;
+//        cutFlowVectorATLAS[6] =    559.8;
+//        cutFlowVectorATLAS[7] =    217.4;
+//        cutFlowVectorATLAS[8] =      0.0;
         // Higgsino 150 GeV
 //        cutFlowVectorATLAS[0] = 93125.1;
 //        cutFlowVectorATLAS[1] =  6630.9;
@@ -331,16 +350,66 @@ namespace Gambit {
 //        cutFlowVectorATLAS[6] =   266.5;
 //        cutFlowVectorATLAS[7] =   112.5;
 //        cutFlowVectorATLAS[8] =     1.8;
-        // Higgsino 180 GeV
-//        cutFlowVectorATLAS[0] =  84.1;
-//        cutFlowVectorATLAS[1] =  22.4;
-//        cutFlowVectorATLAS[2] =   2.2;
-//        cutFlowVectorATLAS[3] =   1.6;
-//        cutFlowVectorATLAS[4] =   1.6;
-//        cutFlowVectorATLAS[5] =   1.5;
-//        cutFlowVectorATLAS[6] =   0.8;
-//        cutFlowVectorATLAS[7] =   0.8;
-//        cutFlowVectorATLAS[8] =   0.7;
+//         Higgsino 200 GeV
+        cutFlowVectorATLAS[0] = 32455.5;
+        cutFlowVectorATLAS[1] =  2895.6;
+        cutFlowVectorATLAS[2] =   300.4;
+        cutFlowVectorATLAS[3] =   240.9;
+        cutFlowVectorATLAS[4] =   240.9;
+        cutFlowVectorATLAS[5] =   212.6;
+        cutFlowVectorATLAS[6] =   116.9;
+        cutFlowVectorATLAS[7] =    62.5;
+        cutFlowVectorATLAS[8] =     8.7;
+        // Higgsino 250 GeV
+//        cutFlowVectorATLAS[0] = 14028.7;
+//        cutFlowVectorATLAS[1] =  1454.7;
+//        cutFlowVectorATLAS[2] =   163.0;
+//        cutFlowVectorATLAS[3] =   126.4;
+//        cutFlowVectorATLAS[4] =   126.1;
+//        cutFlowVectorATLAS[5] =   108.4;
+//        cutFlowVectorATLAS[6] =    53.4;
+//        cutFlowVectorATLAS[7] =    37.0;
+//        cutFlowVectorATLAS[8] =    14.2;
+        // Higgsino 300 GeV
+//        cutFlowVectorATLAS[0] = 6922.0;
+//        cutFlowVectorATLAS[1] =  877.3;
+//        cutFlowVectorATLAS[2] =   90.6;
+//        cutFlowVectorATLAS[3] =   70.1;
+//        cutFlowVectorATLAS[4] =   70.0;
+//        cutFlowVectorATLAS[5] =   63.3;
+//        cutFlowVectorATLAS[6] =   34.0;
+//        cutFlowVectorATLAS[7] =   26.7;
+//        cutFlowVectorATLAS[8] =   14.6;
+        // Higgsino 400 GeV
+//        cutFlowVectorATLAS[0] = 2156.2;
+//        cutFlowVectorATLAS[1] =  366.2;
+//        cutFlowVectorATLAS[2] =   41.7;
+//        cutFlowVectorATLAS[3] =   32.3;
+//        cutFlowVectorATLAS[4] =   31.9;
+//        cutFlowVectorATLAS[5] =   28.1;
+//        cutFlowVectorATLAS[6] =   14.4;
+//        cutFlowVectorATLAS[7] =   13.6;
+//        cutFlowVectorATLAS[8] =    9.6;
+        // Higgsino 600 GeV
+//        cutFlowVectorATLAS[0] = 356.4;
+//        cutFlowVectorATLAS[1] =  82.2;
+//        cutFlowVectorATLAS[2] =   9.0;
+//        cutFlowVectorATLAS[3] =   6.5;
+//        cutFlowVectorATLAS[4] =   6.4;
+//        cutFlowVectorATLAS[5] =   5.9;
+//        cutFlowVectorATLAS[6] =   3.2;
+//        cutFlowVectorATLAS[7] =   3.2;
+//        cutFlowVectorATLAS[8] =   2.6;
+        // Higgsino 800 GeV
+//          cutFlowVectorATLAS[0] =  84.1;
+//          cutFlowVectorATLAS[1] =  22.4;
+//          cutFlowVectorATLAS[2] =   2.2;
+//          cutFlowVectorATLAS[3] =   1.6;
+//          cutFlowVectorATLAS[4] =   1.6;
+//          cutFlowVectorATLAS[5] =   1.5;
+//          cutFlowVectorATLAS[6] =   0.8;
+//          cutFlowVectorATLAS[7] =   0.8;
+//          cutFlowVectorATLAS[8] =   0.7;
 
         // Apply cutflow
         for(size_t j=0;j<NCUTS;j++){
@@ -351,80 +420,80 @@ namespace Gambit {
 
              (j==2 && nbJets > 3) ||
 
-             (j==3 && nbJets > 3) ||
+             (j==3 && nbJets > 3 && higgs) ||
 	     
-             (j==4 && nbJets > 3 && nLeptons == 0) ||
+             (j==4 && nbJets > 3 && higgs && nLeptons == 0) ||
 
-             (j==5 && nbJets > 3 && nLeptons == 0 && notop) ||
+             (j==5 && nbJets > 3 && higgs && nLeptons == 0 && notop) ||
 
-             (j==6 && nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6) ||
+             (j==6 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6) ||
 
-             (j==7 && nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) ||
+             (j==7 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) ||
 
-             (j==8 && nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.)
+             (j==8 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.)
 	     
              ) cutFlowVector[j]++;
         }
 
         // Now increment signal region variables
         // First exclusion regions
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 160. && meff < 200. && met < 20.) _numSR["meff160_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 160. && meff < 200. && met > 20. && met < 45.) _numSR["meff160_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 160. && meff < 200. && met < 20.) _numSR["meff160_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 160. && meff < 200. && met > 20. && met < 45.) _numSR["meff160_ETmiss20"]++;
         
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met < 20.) _numSR["meff200_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met > 20. && met < 45.) _numSR["meff200_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met > 45. && met < 70.) _numSR["meff200_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 200. && meff < 260. && met > 70. && met < 100.) _numSR["meff200_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met < 20.) _numSR["meff200_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met > 20. && met < 45.) _numSR["meff200_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met > 45. && met < 70.) _numSR["meff200_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met > 70. && met < 100.) _numSR["meff200_ETmiss70"]++;
 
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met < 20.) _numSR["meff260_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 20. && met < 45.) _numSR["meff260_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 45. && met < 70.) _numSR["meff260_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 70. && met < 100.) _numSR["meff260_ETmiss70"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 260. && meff < 340. && met > 100. && met < 150.) _numSR["meff260_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 260. && meff < 340. && met < 20.) _numSR["meff260_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 260. && meff < 340. && met > 20. && met < 45.) _numSR["meff260_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 260. && meff < 340. && met > 45. && met < 70.) _numSR["meff260_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 260. && meff < 340. && met > 70. && met < 100.) _numSR["meff260_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 260. && meff < 340. && met > 100. && met < 150.) _numSR["meff260_ETmiss100"]++;
 
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met < 20.) _numSR["meff340_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 20. && met < 45.) _numSR["meff340_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 45. && met < 70.) _numSR["meff340_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 70. && met < 100.) _numSR["meff340_ETmiss70"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 100. && met < 150.) _numSR["meff340_ETmiss100"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 150. && met < 200.) _numSR["meff340_ETmiss150"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 340. && meff < 440. && met > 200.) _numSR["meff340_ETmiss200"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met < 20.) _numSR["meff340_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met > 20. && met < 45.) _numSR["meff340_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met > 45. && met < 70.) _numSR["meff340_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met > 70. && met < 100.) _numSR["meff340_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met > 100. && met < 150.) _numSR["meff340_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met > 150. && met < 200.) _numSR["meff340_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 340. && meff < 440. && met > 200.) _numSR["meff340_ETmiss200"]++;
 
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met < 20.) _numSR["meff440_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 20. && met < 45.) _numSR["meff440_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 45. && met < 70.) _numSR["meff440_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 70. && met < 100.) _numSR["meff440_ETmiss70"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 100. && met < 150.) _numSR["meff440_ETmiss100"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 150. && met < 200.) _numSR["meff440_ETmiss150"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && meff < 560. && met > 200.) _numSR["meff440_ETmiss200"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met < 20.) _numSR["meff440_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met > 20. && met < 45.) _numSR["meff440_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met > 45. && met < 70.) _numSR["meff440_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met > 70. && met < 100.) _numSR["meff440_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met > 100. && met < 150.) _numSR["meff440_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met > 150. && met < 200.) _numSR["meff440_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && meff < 560. && met > 200.) _numSR["meff440_ETmiss200"]++;
 
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met < 20.) _numSR["meff560_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 20. && met < 45.) _numSR["meff560_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 45. && met < 70.) _numSR["meff560_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 70. && met < 100.) _numSR["meff560_ETmiss70"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 100. && met < 150.) _numSR["meff560_ETmiss100"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 150. && met < 200.) _numSR["meff560_ETmiss150"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 560. && meff < 700. && met > 200.) _numSR["meff560_ETmiss200"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met < 20.) _numSR["meff560_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met > 20. && met < 45.) _numSR["meff560_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met > 45. && met < 70.) _numSR["meff560_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met > 70. && met < 100.) _numSR["meff560_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met > 100. && met < 150.) _numSR["meff560_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met > 150. && met < 200.) _numSR["meff560_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 560. && meff < 700. && met > 200.) _numSR["meff560_ETmiss200"]++;
 
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met < 20.) _numSR["meff700_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 20. && met < 45.) _numSR["meff700_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 45. && met < 70.) _numSR["meff700_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 70. && met < 100.) _numSR["meff700_ETmiss70"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 100. && met < 150.) _numSR["meff700_ETmiss100"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 150. && met < 200.) _numSR["meff700_ETmiss150"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 700. && meff < 860. && met > 200.) _numSR["meff700_ETmiss200"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met < 20.) _numSR["meff700_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met > 20. && met < 45.) _numSR["meff700_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met > 45. && met < 70.) _numSR["meff700_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met > 70. && met < 100.) _numSR["meff700_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met > 100. && met < 150.) _numSR["meff700_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met > 150. && met < 200.) _numSR["meff700_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 700. && meff < 860. && met > 200.) _numSR["meff700_ETmiss200"]++;
 
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met < 20.) _numSR["meff860_ETmiss0"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 20. && met < 45.) _numSR["meff860_ETmiss20"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 45. && met < 70.) _numSR["meff860_ETmiss45"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 70. && met < 100.) _numSR["meff860_ETmiss70"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 100. && met < 150.) _numSR["meff860_ETmiss100"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 150. && met < 200.) _numSR["meff860_ETmiss150"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 860. && met > 200.) _numSR["meff860_ETmiss200"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met < 20.) _numSR["meff860_ETmiss0"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 20. && met < 45.) _numSR["meff860_ETmiss20"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 45. && met < 70.) _numSR["meff860_ETmiss45"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 70. && met < 100.) _numSR["meff860_ETmiss70"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 100. && met < 150.) _numSR["meff860_ETmiss100"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 150. && met < 200.) _numSR["meff860_ETmiss150"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 200.) _numSR["meff860_ETmiss200"]++;
         
         // Discovery regions
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) _numSR["low-SR-MET0meff440"]++;
-        if(nbJets > 3 && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.) _numSR["low-SR-MET150meff440"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440.) _numSR["low-SR-MET0meff440"]++;
+        if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && met > 150.) _numSR["low-SR-MET150meff440"]++;
 
         return;
         
@@ -455,9 +524,14 @@ namespace Gambit {
       virtual void collect_results() {
 
         // DEBUG
-        double L = 24.3;
-        double xsec = 6955.; // 130 GeV
+       double L = 24.3;
+//        double xsec = 6955.; // 130 GeV
 //        double xsec = 3830.; // 150 GeV
+        double xsec = 1336.; // 200 GeV
+//        double xsec =  577.3; // 250 GeV
+//        double xsec =  284.9; // 300 GeV
+//        double xsec =   88.73; // 400 GeV
+//      double xsec = 14.67; // 600 GeV
 //        double xsec = 3.461; // 800 GeV
         cout << "DEBUG:" << endl;
         for (size_t i=0; i<NCUTS; i++)
@@ -465,7 +539,7 @@ namespace Gambit {
           double ATLAS_abs = cutFlowVectorATLAS[i];
         
           double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
-          if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
+          //if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
         
           double GAMBIT_scaled = eff * xsec * L;
         
