@@ -8,8 +8,6 @@
 // - So far only the signal regions with zero taus have been implemented
 // - Some cuts have not yet been implemented
 
-
-
 #include <vector>
 #include <cmath>
 #include <memory>
@@ -20,6 +18,8 @@
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
+
+// #define CHECK_CUTFLOW
 
 using namespace std;
 
@@ -43,11 +43,12 @@ namespace Gambit
 
     private:
 
-      vector<int> cutFlowVector1;
-      vector<string> cutFlowVector1_str;
-      size_t NCUTS1;
-      // vector<double> cutFlowVector1ATLAS_200_100;
-      // double xsec1ATLAS_200_100; 
+      #ifdef CHECK_CUTFLOW
+        vector<int> cutFlowVector;
+        vector<string> cutFlowVector_str;
+        size_t NCUTS;
+        vector<double> cutFlowVectorATLAS_400_0;
+      #endif
 
       struct ptComparison 
       {
@@ -152,15 +153,15 @@ namespace Gambit
         set_analysis_name("ATLAS_13TeV_4LEP_36invfb");
         set_luminosity(36.1);
 
-        NCUTS1=22;
-
-        // xsec1ATLAS_200_100=1807.4;
-        for (size_t i=0;i<NCUTS1;i++)
-        {
-          cutFlowVector1.push_back(0);
-          // cutFlowVector1ATLAS_200_100.push_back(0);
-          cutFlowVector1_str.push_back("");
-        }
+        #ifdef CHECK_CUTFLOW
+          NCUTS = 11;
+          for (size_t i=0;i<NCUTS;i++)
+          {
+            cutFlowVector.push_back(0);
+            cutFlowVectorATLAS_400_0.push_back(0);
+            cutFlowVector_str.push_back("");
+          }
+        #endif
 
       }
 
@@ -174,6 +175,23 @@ namespace Gambit
         vector<HEPUtils::Particle*> baselineTaus;
         vector<HEPUtils::Jet*> baselineJets;
         double met = event->met();
+
+        #ifdef  CHECK_CUTFLOW
+          bool generator_filter = false;
+          bool trigger = true;
+          bool event_cleaning = true;
+
+          vector<HEPUtils::Particle*> baselineLeptons_cutflow;
+          for (HEPUtils::Particle* electron : event->electrons()) 
+          {
+            if (electron->pT()>4. && electron->abseta()<2.8) baselineLeptons_cutflow.push_back(electron);
+          }
+          for (HEPUtils::Particle* muons : event->muons()) 
+          {
+            if (muons->pT()>4. && muons->abseta()<2.8) baselineLeptons_cutflow.push_back(muons);
+          }
+          if (baselineLeptons_cutflow.size() >= 4) generator_filter = true;
+        #endif
 
 
         for (HEPUtils::Particle* electron : event->electrons()) 
@@ -375,6 +393,62 @@ namespace Gambit
         // }
 
         // Missing: signal regions SR1 (3L1T) and SR2 (2L2T)
+
+        #ifdef CHECK_CUTFLOW
+          cutFlowVector_str[0] = "Initial";
+          cutFlowVector_str[1] = "Generator filter";
+          cutFlowVector_str[2] = "Trigger";
+          cutFlowVector_str[3] = "Event cleaning";
+          cutFlowVector_str[4] = "N_e_mu >= 1";
+          cutFlowVector_str[5] = "N_e_mu >= 2";
+          cutFlowVector_str[6] = "N_e_mu >= 3";
+          cutFlowVector_str[7] = "N_e_mu >= 4";
+          cutFlowVector_str[8] = "ZZ selection";
+          cutFlowVector_str[9] = "ETmiss > 50 (SRC)";
+          cutFlowVector_str[10] = "ETmiss > 100 (SRD)";
+
+          cutFlowVectorATLAS_400_0[0] = 3203.45;
+          cutFlowVectorATLAS_400_0[1] = 36.34; 
+          cutFlowVectorATLAS_400_0[2] = 28.77;
+          cutFlowVectorATLAS_400_0[3] = 27.64; 
+          cutFlowVectorATLAS_400_0[4] = 26.14; 
+          cutFlowVectorATLAS_400_0[5] = 23.34; 
+          cutFlowVectorATLAS_400_0[6] = 14.19; 
+          cutFlowVectorATLAS_400_0[7] = 7.59; 
+          cutFlowVectorATLAS_400_0[8] = 5.71; 
+          cutFlowVectorATLAS_400_0[9] = 5.44; 
+          cutFlowVectorATLAS_400_0[10] = 4.84; 
+
+          for (size_t j=0;j<NCUTS;j++)
+          {
+            if(
+              (j==0) ||
+
+              (j==1 && generator_filter) ||
+
+              (j==2 && generator_filter && trigger) ||
+
+              (j==3 && generator_filter && trigger && event_cleaning) ||
+
+              (j==4 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 1) ||
+
+              (j==5 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 2) ||
+
+              (j==6 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 3) ||
+
+              (j==7 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 4) ||
+
+              (j==8 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 4 && Z1 && Z2) ||
+
+              (j==9 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 4 && Z1 && Z2 && met > 50.) ||
+
+              (j==10 && generator_filter && trigger && event_cleaning && nSignalLeptons >= 4 && Z1 && Z2 && met > 100.)
+
+              )
+
+            cutFlowVector[j]++;
+          }
+        #endif
       }
 
 
@@ -387,11 +461,14 @@ namespace Gambit
                 = dynamic_cast<Analysis_ATLAS_13TeV_4LEP_36invfb*>(other);
 
         // Here we will add the subclass member variables:
-        if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
-        for (size_t j = 0; j < NCUTS1; j++) {
-          cutFlowVector1[j] += specificOther->cutFlowVector1[j];
-          cutFlowVector1_str[j] = specificOther->cutFlowVector1_str[j];
-        }
+
+        #ifdef CHECK_CUTFLOW
+          // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
+          for (size_t j = 0; j < NCUTS; j++) {
+            cutFlowVector[j] += specificOther->cutFlowVector[j];
+            cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
+          }
+        #endif
 
         for (auto& el : _numSR) { 
           el.second += specificOther->_numSR[el.first];
@@ -407,13 +484,35 @@ namespace Gambit
         add_result(SignalRegionData("SR0B",  2., {_numSR["SR0B"], 0.}, {1.31, 0.24}));
         add_result(SignalRegionData("SR0C", 47., {_numSR["SR0C"], 0.}, {37., 9.}));
         add_result(SignalRegionData("SR0D", 10., {_numSR["SR0D"], 0.}, {4.1, 0.7}));
+
+
+        #ifdef CHECK_CUTFLOW
+          vector<double> cutFlowVector_scaled;
+          for (size_t i=0 ; i < cutFlowVector.size() ; i++) 
+          {
+            double scale_factor = cutFlowVectorATLAS_400_0[0]/cutFlowVector[0];
+            cutFlowVector_scaled.push_back(cutFlowVector[i] * scale_factor);
+          }
+          cout << "DEBUG CUTFLOW:   ATLAS    GAMBIT(raw)    GAMBIT(scaled) " << endl;
+          cout << "DEBUG CUTFLOW:   -------------------------------------" << endl;
+
+          for (size_t j = 0; j < NCUTS; j++) {
+            cout << setprecision(4) << "DEBUG CUTFLOW:   " << cutFlowVectorATLAS_400_0[j] << "\t\t" 
+                                        << cutFlowVector[j] << "\t\t" 
+                                        << cutFlowVector_scaled[j] << "\t\t" 
+                                        << cutFlowVector_str[j] 
+                                        << endl;
+          }
+        #endif
       }
 
 
     protected:
       void clear() {
         for (auto& el : _numSR) { el.second = 0.;}
-        std::fill(cutFlowVector1.begin(), cutFlowVector1.end(), 0);
+        #ifdef CHECK_CUTFLOW
+          std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+        #endif
       }
 
     };
