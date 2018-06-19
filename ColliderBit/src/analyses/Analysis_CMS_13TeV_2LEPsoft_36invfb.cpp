@@ -322,34 +322,19 @@ namespace Gambit {
 
       virtual void collect_results() {        
 
-        // Signal region info for the covariance matrix
-        static const size_t SR_size_cov = 12;
-        const int SR_labels_cov[SR_size_cov] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-        const double SR_nums_cov[SR_size_cov] = {
-          _numSR["SR1"], _numSR["SR2"], _numSR["SR3"], _numSR["SR4"], _numSR["SR5"],  _numSR["SR6"], 
-          _numSR["SR7"], _numSR["SR8"], _numSR["SR9"], _numSR["SR10"], _numSR["SR11"], _numSR["SR12"],
-        };
-
-        // Observed event counts
-        static const double OBSNUM[SR_size_cov] = {
-          2., 15., 19., 18., 1., 0., 3., 1., 2., 1., 2., 0., 
-        };
-
-        // Background estimates
-        static const double BKGNUM[SR_size_cov] = {
-          3.5, 12., 17., 11., 1.6, 3.5, 2., 0.51, 1.4, 1.5, 1.5, 1.2,
-        };
-        
-        // Background uncertainties, same-flavor signal regions
-        static const double BKGERR[SR_size_cov] = {
-          1., 2.3, 2.4, 2., 0.7, 0.9, 0.7, 0.52, 0.7, 0.6, 0.8, 0.6, 
-        };
-
-        for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) 
-        {
-          stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
-          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
-        }
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR1",  2.,  {_numSR["SR1"],  0.}, {3.5, 1.}));
+        add_result(SignalRegionData("SR2",  15., {_numSR["SR2"],  0.}, {12, 2.3}));
+        add_result(SignalRegionData("SR3",  19., {_numSR["SR3"],  0.}, {17, 2.4}));
+        add_result(SignalRegionData("SR4",  18., {_numSR["SR4"],  0.}, {11, 2.}));
+        add_result(SignalRegionData("SR5",  1.,  {_numSR["SR5"],  0.}, {1.6, 0.7}));
+        add_result(SignalRegionData("SR6",  0.,  {_numSR["SR6"],  0.}, {3.5, 0.9}));
+        add_result(SignalRegionData("SR7",  3.,  {_numSR["SR7"],  0.}, {2., 0.7}));
+        add_result(SignalRegionData("SR8",  1.,  {_numSR["SR8"],  0.}, {0.51, 0.52}));
+        add_result(SignalRegionData("SR9",  2.,  {_numSR["SR9"],  0.}, {1.4, 0.7}));
+        add_result(SignalRegionData("SR10", 1.,  {_numSR["SR10"], 0.}, {1.5, 0.6}));
+        add_result(SignalRegionData("SR11", 2.,  {_numSR["SR11"], 0.}, {1.5, 0.8}));
+        add_result(SignalRegionData("SR12", 0.,  {_numSR["SR12"], 0.}, {1.2, 0.6}));
 
         // Covariance matrix
         static const vector< vector<double> > BKGCOV = {
@@ -368,7 +353,6 @@ namespace Gambit {
         };
 
         set_covariance(BKGCOV);
-
       }
 
 

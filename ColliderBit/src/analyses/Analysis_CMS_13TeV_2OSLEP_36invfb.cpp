@@ -367,38 +367,19 @@ namespace Gambit {
 
       virtual void collect_results() 
       {
-
-        // Only 7 of the 9 signal regions are included in the covariance matrix
-        // (SR1 and SR6 are left out)
-        static const size_t SR_size_cov = 7;
-        const int SR_labels_cov[SR_size_cov] = {1, 2, 3, 4, 5, 6, 7};
-        const double SR_nums_cov[SR_size_cov] = {
-          _numSR["SR1"], _numSR["SR2"], _numSR["SR3"], _numSR["SR4"], 
-          _numSR["SR5"], _numSR["SR6"], _numSR["SR7"]
-        };
-
-        // Observed event counts
-        static const double OBSNUM[SR_size_cov] = {
-          57., 29., 2., 0., 9., 5., 1.
-        };
-        // Background estimates
-        static const double BKGNUM[SR_size_cov] = {
-          54.9, 21.6, 6., 2.5, 7.6, 5.6, 1.3
-        };
-        // Background uncertainties, same-flavor signal regions
-        static const double BKGERR[SR_size_cov] = {
-          7., 5.6, 1.9, 0.9, 2.8, 1.6, 0.4,
-        };
-
-        for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
-          stringstream ss; ss << "SR-" << SR_labels_cov[ibin];
-          add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {SR_nums_cov[ibin], 0.}, {BKGNUM[ibin], BKGERR[ibin]}));
-        }
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR1", 57., {_numSR["SR1"], 0.}, {54.9, 7.}));
+        add_result(SignalRegionData("SR2", 29., {_numSR["SR2"], 0.}, {21.6, 5.6}));
+        add_result(SignalRegionData("SR3", 2.,  {_numSR["SR3"], 0.}, {6., 1.9}));
+        add_result(SignalRegionData("SR4", 0.,  {_numSR["SR4"], 0.}, {2.5, 0.9}));
+        add_result(SignalRegionData("SR5", 9.,  {_numSR["SR5"], 0.}, {7.6, 2.8}));
+        add_result(SignalRegionData("SR6", 5.,  {_numSR["SR6"], 0.}, {5.6, 1.6}));
+        add_result(SignalRegionData("SR7", 1.,  {_numSR["SR7"], 0.}, {1.3, 0.4}));
 
         // Covariance matrix
         static const vector< vector<double> > BKGCOV = {
-          { 52.8, 12.7,  3.0,  1.2,  4.5,  5.1,  1.2 },
-          { 12.7, 41.4,  3.6,  2.0,  2.5,  2.0,  0.7 },
+          { 52.8, 12.7,  3.0,  1.2,  4.5,  5.1,  1.2},
+          { 12.7, 41.4,  3.6,  2.0,  2.5,  2.0,  0.7},
           {  3.0,  3.6,  1.6,  0.6,  0.4,  0.3,  0.1},
           {  1.2,  2.0,  0.6,  1.1,  0.3,  0.1,  0.1},
           {  4.5,  2.5,  0.4,  0.3,  6.5,  1.8,  0.4},
@@ -407,7 +388,6 @@ namespace Gambit {
         };        
 
         set_covariance(BKGCOV);
-
       }
 
 
