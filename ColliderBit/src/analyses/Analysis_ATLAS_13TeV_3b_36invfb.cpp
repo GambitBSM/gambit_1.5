@@ -339,35 +339,35 @@ namespace Gambit {
         
         // Cut flow from paper
         // Higgsino 300 GeV
-        cutFlowVectorATLAS[0] = 10276.0;
-        cutFlowVectorATLAS[1] =  1959.1;
-        cutFlowVectorATLAS[2] =  1533.0;
-        cutFlowVectorATLAS[3] =  1319.3;
-        cutFlowVectorATLAS[4] =   664.9;
-        cutFlowVectorATLAS[5] =   249.3;
-        cutFlowVectorATLAS[6] =   123.0;
-        cutFlowVectorATLAS[7] =    74.3;
-        cutFlowVectorATLAS[8] =     4.0;
-        cutFlowVectorATLAS[9] =     1.5;
-        cutFlowVectorATLAS[10] =    1.4;
-        cutFlowVectorATLAS[11] =   90.2;
-        cutFlowVectorATLAS[12] =   15.6;
-        cutFlowVectorATLAS[13] =    6.8;
+//        cutFlowVectorATLAS[0] = 10276.0;
+//        cutFlowVectorATLAS[1] =  1959.1;
+//        cutFlowVectorATLAS[2] =  1533.0;
+//        cutFlowVectorATLAS[3] =  1319.3;
+//        cutFlowVectorATLAS[4] =   664.9;
+//        cutFlowVectorATLAS[5] =   249.3;
+//        cutFlowVectorATLAS[6] =   123.0;
+//        cutFlowVectorATLAS[7] =    74.3;
+//        cutFlowVectorATLAS[8] =     4.0;
+//        cutFlowVectorATLAS[9] =     1.5;
+//        cutFlowVectorATLAS[10] =    1.4;
+//        cutFlowVectorATLAS[11] =   90.2;
+//        cutFlowVectorATLAS[12] =   15.6;
+//        cutFlowVectorATLAS[13] =    6.8;
         // Higgsino 500 GeV
-//        cutFlowVectorATLAS[0] = 1220.7;
-//        cutFlowVectorATLAS[1] =  739.0;
-//        cutFlowVectorATLAS[2] =  647.1;
-//        cutFlowVectorATLAS[3] =  548.2;
-//        cutFlowVectorATLAS[4] =  291.9;
-//        cutFlowVectorATLAS[5] =  133.5;
-//        cutFlowVectorATLAS[6] =   78.0;
-//        cutFlowVectorATLAS[7] =   64.1;
-//        cutFlowVectorATLAS[8] =   12.0;
-//        cutFlowVectorATLAS[9] =    5.7;
-//        cutFlowVectorATLAS[10] =   4.8;
-//        cutFlowVectorATLAS[11] =  74.3;
-//        cutFlowVectorATLAS[12] =  15.0;
-//        cutFlowVectorATLAS[13] =   9.7;
+        cutFlowVectorATLAS[0] = 1220.7;
+        cutFlowVectorATLAS[1] =  739.0;
+        cutFlowVectorATLAS[2] =  647.1;
+        cutFlowVectorATLAS[3] =  548.2;
+        cutFlowVectorATLAS[4] =  291.9;
+        cutFlowVectorATLAS[5] =  133.5;
+        cutFlowVectorATLAS[6] =   78.0;
+        cutFlowVectorATLAS[7] =   64.1;
+        cutFlowVectorATLAS[8] =   12.0;
+        cutFlowVectorATLAS[9] =    5.7;
+        cutFlowVectorATLAS[10] =   4.8;
+        cutFlowVectorATLAS[11] =  74.3;
+        cutFlowVectorATLAS[12] =  15.0;
+        cutFlowVectorATLAS[13] =   9.7;
         // Higgsino 800 GeV
 //        cutFlowVectorATLAS[0] = 124.9;
 //        cutFlowVectorATLAS[1] = 101.9;
@@ -460,22 +460,22 @@ namespace Gambit {
 
         // DEBUG
         double L = 36.1;
-        double xsec = 284.65; // 300 GeV
-        //double xsec = 33.81; // 500 GeV
-        //double xsec = 3.460; // 800 GeV
-//        cout << "DEBUG:" << endl;
-//        for (size_t i=0; i<NCUTS; i++)
-//        {
-//          double ATLAS_abs = cutFlowVectorATLAS[i];
-//        
-//          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
-//        
-//          double GAMBIT_scaled = eff * xsec * L;
-//        
-//          double ratio = GAMBIT_scaled/ATLAS_abs;
-//          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << ATLAS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
-//        }
-//        cout << "DEBUG:" << endl;
+//        double xsec = 284.65; // 300 GeV
+        double xsec = 33.81; // 500 GeV
+//        double xsec = 3.460; // 800 GeV
+        cout << "DEBUG:" << endl;
+        for (size_t i=0; i<NCUTS; i++)
+        {
+          double ATLAS_abs = cutFlowVectorATLAS[i];
+
+          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
+
+          double GAMBIT_scaled = eff * xsec * L;
+
+          double ratio = GAMBIT_scaled/ATLAS_abs;
+          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << ATLAS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
+        }
+        cout << "DEBUG:" << endl;
         
         // Now fill a results object with the results for each SR
         // Only exclusion regions here

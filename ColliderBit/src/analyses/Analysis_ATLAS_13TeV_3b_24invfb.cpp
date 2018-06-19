@@ -319,15 +319,15 @@ namespace Gambit {
         }
         
         // Increment cutFlowVector elements
-        cutFlowVector_str[0]  = "No cuts ";
-        cutFlowVector_str[1]  = "Trigger, 4 jets ($p_T > 40$ GeV, 2 b-tags)";
-	    cutFlowVector_str[2]  = "$\\ge 4$ b-tags";
-        cutFlowVector_str[3]  = "$\\ge 2$ Higgses ";
-        cutFlowVector_str[4]  = "Lepton veto";
-        cutFlowVector_str[5]  = "$X_{Wt} > 1.8$";
-        cutFlowVector_str[6]  = "$X_{hh}^{SR} < 1.6$";
-        cutFlowVector_str[7]  = "low-SR-MET0meff440";
-        cutFlowVector_str[8]  = "low-SR-MET150meff440";
+//        cutFlowVector_str[0]  = "No cuts ";
+//        cutFlowVector_str[1]  = "Trigger, 4 jets ($p_T > 40$ GeV, 2 b-tags)";
+//      cutFlowVector_str[2]  = "$\\ge 4$ b-tags";
+//        cutFlowVector_str[3]  = "$\\ge 2$ Higgses ";
+//        cutFlowVector_str[4]  = "Lepton veto";
+//        cutFlowVector_str[5]  = "$X_{Wt} > 1.8$";
+//        cutFlowVector_str[6]  = "$X_{hh}^{SR} < 1.6$";
+//        cutFlowVector_str[7]  = "low-SR-MET0meff440";
+//        cutFlowVector_str[8]  = "low-SR-MET150meff440";
 
         // Cut flow from paper
         // Higgsino 130 GeV
@@ -351,15 +351,15 @@ namespace Gambit {
 //        cutFlowVectorATLAS[7] =   112.5;
 //        cutFlowVectorATLAS[8] =     1.8;
 //         Higgsino 200 GeV
-        cutFlowVectorATLAS[0] = 32455.5;
-        cutFlowVectorATLAS[1] =  2895.6;
-        cutFlowVectorATLAS[2] =   300.4;
-        cutFlowVectorATLAS[3] =   240.9;
-        cutFlowVectorATLAS[4] =   240.9;
-        cutFlowVectorATLAS[5] =   212.6;
-        cutFlowVectorATLAS[6] =   116.9;
-        cutFlowVectorATLAS[7] =    62.5;
-        cutFlowVectorATLAS[8] =     8.7;
+//        cutFlowVectorATLAS[0] = 32455.5;
+//        cutFlowVectorATLAS[1] =  2895.6;
+//        cutFlowVectorATLAS[2] =   300.4;
+//        cutFlowVectorATLAS[3] =   240.9;
+//        cutFlowVectorATLAS[4] =   240.9;
+//        cutFlowVectorATLAS[5] =   212.6;
+//        cutFlowVectorATLAS[6] =   116.9;
+//        cutFlowVectorATLAS[7] =    62.5;
+//        cutFlowVectorATLAS[8] =     8.7;
         // Higgsino 250 GeV
 //        cutFlowVectorATLAS[0] = 14028.7;
 //        cutFlowVectorATLAS[1] =  1454.7;
@@ -380,7 +380,7 @@ namespace Gambit {
 //        cutFlowVectorATLAS[6] =   34.0;
 //        cutFlowVectorATLAS[7] =   26.7;
 //        cutFlowVectorATLAS[8] =   14.6;
-        // Higgsino 400 GeV
+//        // Higgsino 400 GeV
 //        cutFlowVectorATLAS[0] = 2156.2;
 //        cutFlowVectorATLAS[1] =  366.2;
 //        cutFlowVectorATLAS[2] =   41.7;
@@ -410,30 +410,30 @@ namespace Gambit {
 //          cutFlowVectorATLAS[6] =   0.8;
 //          cutFlowVectorATLAS[7] =   0.8;
 //          cutFlowVectorATLAS[8] =   0.7;
-
-        // Apply cutflow
-        for(size_t j=0;j<NCUTS;j++){
-          if(
-             (j==0) ||
-
-             (j==1 && nJets > 3 && nbJets > 1) ||
-
-             (j==2 && nbJets > 3) ||
-
-             (j==3 && nbJets > 3 && higgs) ||
-	     
-             (j==4 && nbJets > 3 && higgs && nLeptons == 0) ||
-
-             (j==5 && nbJets > 3 && higgs && nLeptons == 0 && notop) ||
-
-             (j==6 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6) ||
-
-             (j==7 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) ||
-
-             (j==8 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.)
-	     
-             ) cutFlowVector[j]++;
-        }
+//
+//        // Apply cutflow
+//        for(size_t j=0;j<NCUTS;j++){
+//          if(
+//             (j==0) ||
+//
+//             (j==1 && nJets > 3 && nbJets > 1) ||
+//
+//             (j==2 && nbJets > 3) ||
+//
+//             (j==3 && nbJets > 3 && higgs) ||
+//
+//             (j==4 && nbJets > 3 && higgs && nLeptons == 0) ||
+//
+//             (j==5 && nbJets > 3 && higgs && nLeptons == 0 && notop) ||
+//
+//             (j==6 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6) ||
+//
+//             (j==7 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440.) ||
+//
+//             (j==8 && nbJets > 3 && higgs && nLeptons == 0 && notop && Xhh < 1.6 && meff > 440. && met > 150.)
+//
+//             ) cutFlowVector[j]++;
+//        }
 
         // Now increment signal region variables
         // First exclusion regions
@@ -524,29 +524,30 @@ namespace Gambit {
       virtual void collect_results() {
 
         // DEBUG
-       double L = 24.3;
+//       double L = 24.3;
 //        double xsec = 6955.; // 130 GeV
 //        double xsec = 3830.; // 150 GeV
-        double xsec = 1336.; // 200 GeV
+//        double xsec = 1336.; // 200 GeV
 //        double xsec =  577.3; // 250 GeV
 //        double xsec =  284.9; // 300 GeV
 //        double xsec =   88.73; // 400 GeV
 //      double xsec = 14.67; // 600 GeV
 //        double xsec = 3.461; // 800 GeV
-        cout << "DEBUG:" << endl;
-        for (size_t i=0; i<NCUTS; i++)
-        {
-          double ATLAS_abs = cutFlowVectorATLAS[i];
         
-          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
-          //if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
-        
-          double GAMBIT_scaled = eff * xsec * L;
-        
-          double ratio = GAMBIT_scaled/ATLAS_abs;
-          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << ATLAS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
-        }
-        cout << "DEBUG:" << endl;
+//        cout << "DEBUG:" << endl;
+//        for (size_t i=0; i<NCUTS; i++)
+//        {
+//          double ATLAS_abs = cutFlowVectorATLAS[i];
+//
+//          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
+//          //if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
+//
+//          double GAMBIT_scaled = eff * xsec * L;
+//
+//          double ratio = GAMBIT_scaled/ATLAS_abs;
+//          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << ATLAS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
+//        }
+//        cout << "DEBUG:" << endl;
         
         // Now fill a results object with the results for each SR
         // Only exclusion regions here
