@@ -377,7 +377,7 @@ contains
 	  goutput_inflation_observables%tau_NL = observs%tau_NL
       !-------------setting up the observables--------------------
 
-      print*,"calc_full_pk = ",calc_full_pk
+      ! print*,"ModeCode DEBUG: calc_full_pk = ",calc_full_pk
 
     end if
 
@@ -404,18 +404,18 @@ contains
       kmax = ginput_kmax
       steps = ginput_steps
 
-      print*,"we are inside gambit_get_full_pk"
+      ! print*,"ModeCode DEBUG: we are inside gambit_get_full_pk"
 
-      print*,"calc_full_pk = ",calc_full_pk
+      ! print*,"calc_full_pk = ",calc_full_pk
       !If don't want full spectrum, return
       if (calc_full_pk) then
 
-        print*,"we are pass the checkpoint"
+        ! print*,"ModeCode DEBUG: we are pass the checkpoint"
 
         !Make the output arrays
         if (allocated(pk_arr)) deallocate(pk_arr)
 
-        print*,"steps (inside) = ",steps
+       !  print*,"ModeCode DEBUG: steps (inside) = ",steps
 
         allocate(pk_arr(steps, 9))
 
@@ -441,12 +441,12 @@ contains
             pk%press_ad, &
             pk%cross_ad_iso /)
 
-          print*,"k_input = ",k_input(i)
-          print*,"pk%adiab = ",pk%adiab
-          print*,"pk%isocurv = ",pk%isocurv
-          print*,"pk%entropy = ",pk%entropy
-          print*,"pk%pnad = ",pk%pnad
-          print*,"pk%tensor = ",pk%tensor
+          ! print*,"k_input = ",k_input(i)
+          ! print*,"pk%adiab = ",pk%adiab
+          ! print*,"pk%isocurv = ",pk%isocurv
+          ! print*,"pk%entropy = ",pk%entropy
+          ! print*,"pk%pnad = ",pk%pnad
+          ! print*,"pk%tensor = ",pk%tensor
 
 	    end do
       end if
@@ -870,7 +870,7 @@ contains
 
         call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
 
-        print*,"endof get_full_pk"
+        ! print*,"endof get_full_pk"
 
         if (calc_full_pk) then
 
@@ -884,10 +884,10 @@ contains
           ! if (allocated(observs_gambit%pkt_array)) deallocate(observs_gambit%pkt_array)
           ! allocate(observs_gambit%pkt_array(steps))
 
-          print*,"this is fine 1!"
-          print*,"pk_arr(:,1) = ",pk_arr(:,1)
-          print*,"pk_arr(:,2) = ",pk_arr(:,2)
-          print*,"pk_arr(:,6) = ",pk_arr(:,6)
+          ! print*,"this is fine 1!"
+          ! print*,"pk_arr(:,1) = ",pk_arr(:,1)
+          ! print*,"pk_arr(:,2) = ",pk_arr(:,2)
+          ! print*,"pk_arr(:,6) = ",pk_arr(:,6)
 
 !          print*,"observs_gambit%k_array =",observs_gambit%k_array
 
@@ -899,11 +899,11 @@ contains
           observs_gambit%pks_array = pk_arr(:steps,2)
           observs_gambit%pkt_array = pk_arr(:steps,6)
 
-          print*,"observs_gambit%k_array =", observs_gambit%k_array
-          print*,"observs_gambit%pks_array =", observs_gambit%pks_array
-          print*,"observs_gambit%pkt_array =", observs_gambit%pkt_array
+          ! print*,"observs_gambit%k_array =", observs_gambit%k_array
+          ! print*,"observs_gambit%pks_array =", observs_gambit%pks_array
+          ! print*,"observs_gambit%pkt_array =", observs_gambit%pkt_array
 
-          print*,"this is fine 2!"
+          ! print*,"this is fine 2!"
 
         end if
 

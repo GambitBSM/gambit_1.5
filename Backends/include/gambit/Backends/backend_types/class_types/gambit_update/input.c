@@ -3197,11 +3197,11 @@ int input_default_precision ( struct precision * ppr ) {
    */
 
   /* for bbn */
-//  sprintf(ppr->sBBN_file,__CLASSDIR__);
-//  strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
+  sprintf(ppr->sBBN_file,__CLASSDIR__);
+  strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
 
-  sprintf(ppr->sBBN_file,"");
-  strcat(ppr->sBBN_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/bbn/sBBN_2017.dat");
+//  sprintf(ppr->sBBN_file,"");
+//  strcat(ppr->sBBN_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/bbn/sBBN_2017.dat");
 
   /* for recombination */
 

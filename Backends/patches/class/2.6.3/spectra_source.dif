@@ -1,0 +1,238 @@
+*** /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/installed/class/2.6.3/source/spectra.c	2017-10-24 09:42:41.000000000 -0400
+--- /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/spectra.c	2018-06-18 17:44:05.000000000 -0400
+***************
+*** 1242,1248 ****
+                   ) {
+  
+    /** Summary: */
+! 
+    double TT_II,TT_RI,TT_RR;
+    int l1,l2;
+  
+--- 1242,1248 ----
+                   ) {
+  
+    /** Summary: */
+!   printf("DEBUG: last seen in spectra_init \n");
+    double TT_II,TT_RI,TT_RR;
+    int l1,l2;
+  
+***************
+*** 1420,1426 ****
+          /(1.+ppm->f_niv*ppm->f_niv*exp((ppm->n_niv-ppm->n_s)*log(0.1/ppm->k_pivot)));
+      }
+    }
+! 
+    return _SUCCESS_;
+  }
+  
+--- 1420,1426 ----
+          /(1.+ppm->f_niv*ppm->f_niv*exp((ppm->n_niv-ppm->n_s)*log(0.1/ppm->k_pivot)));
+      }
+    }
+!   printf("DEBUG: We are successfully out of the spectra_init.\n");
+    return _SUCCESS_;
+  }
+  
+***************
+*** 1448,1460 ****
+--- 1448,1467 ----
+          free(psp->l_max_ct[index_md]);
+          free(psp->cl[index_md]);
+          free(psp->ddcl[index_md]);
++ 		  
+        }
+        free(psp->l);
++ 		
+        free(psp->l_size);
++ 		
+        free(psp->l_max_ct);
++ 		
+        free(psp->l_max);
++ 
+        free(psp->cl);
++ 		
+        free(psp->ddcl);
++ 		
+      }
+  
+      if (psp->ln_k_size > 0) {
+***************
+*** 1504,1509 ****
+--- 1511,1517 ----
+    free(psp->ic_size);
+    free(psp->ic_ic_size);
+  
++   printf("DEBUG: returned from spectra_init successfully \n");
+    return _SUCCESS_;
+  
+  }
+***************
+*** 1853,1858 ****
+--- 1861,1867 ----
+                  ) {
+  
+    /** Summary: */
++   printf("DEBUG: Last seen alive in spectra_cls \n");
+  
+    /** - define local variables */
+  
+***************
+*** 1896,1902 ****
+    /** - loop over modes (scalar, tensors, etc). For each mode: */
+  
+    for (index_md = 0; index_md < psp->md_size; index_md++) {
+! 
+      /** - --> (a) store number of l values for this mode */
+  
+      psp->l_size[index_md] = ptr->l_size[index_md];
+--- 1905,1911 ----
+    /** - loop over modes (scalar, tensors, etc). For each mode: */
+  
+    for (index_md = 0; index_md < psp->md_size; index_md++) {
+! 	  
+      /** - --> (a) store number of l values for this mode */
+  
+      psp->l_size[index_md] = ptr->l_size[index_md];
+***************
+*** 1955,1961 ****
+                  This elementary task is assigned to spectra_compute_cl() */
+  
+              for (index_l=0; index_l < ptr->l_size[index_md]; index_l++) {
+! 
+  #pragma omp flush(abort)
+  
+                class_call_parallel(spectra_compute_cl(pba,
+--- 1964,1971 ----
+                  This elementary task is assigned to spectra_compute_cl() */
+  
+              for (index_l=0; index_l < ptr->l_size[index_md]; index_l++) {
+! 				
+! 	
+  #pragma omp flush(abort)
+  
+                class_call_parallel(spectra_compute_cl(pba,
+***************
+*** 1974,1980 ****
+                                                       transfer_ic2),
+                                    psp->error_message,
+                                    psp->error_message);
+! 
+              } /* end of loop over l */
+  
+  #ifdef _OPENMP
+--- 1984,1990 ----
+                                                       transfer_ic2),
+                                    psp->error_message,
+                                    psp->error_message);
+! 				
+              } /* end of loop over l */
+  
+  #ifdef _OPENMP
+***************
+*** 1993,1999 ****
+  
+            } /* end of parallel region */
+  
+!           if (abort == _TRUE_) return _FAILURE_;
+  
+          }
+          else {
+--- 2003,2012 ----
+  
+            } /* end of parallel region */
+  
+! 		  if (abort == _TRUE_) {
+! 			printf("DEBUG: abort == _TRUE_, we are returning _FAILURE_\n");
+! 			return _FAILURE_;
+! 		  }
+  
+          }
+          else {
+***************
+*** 2025,2031 ****
+                 psp->error_message,
+                 psp->error_message);
+    }
+! 
+    return _SUCCESS_;
+  
+  }
+--- 2038,2044 ----
+                 psp->error_message,
+                 psp->error_message);
+    }
+!   printf("DEBUG: we return success for spectra_cls!(?)\n");
+    return _SUCCESS_;
+  
+  }
+***************
+*** 2082,2088 ****
+    double * transfer_ic2_nc=NULL;
+    double factor;
+    int index_q_spline=0;
+! 
+    index_ic1_ic2 = index_symmetric_matrix(index_ic1,index_ic2,psp->ic_size[index_md]);
+  
+    if (ppt->has_cl_number_count == _TRUE_) {
+--- 2095,2101 ----
+    double * transfer_ic2_nc=NULL;
+    double factor;
+    int index_q_spline=0;
+! 	
+    index_ic1_ic2 = index_symmetric_matrix(index_ic1,index_ic2,psp->ic_size[index_md]);
+  
+    if (ppt->has_cl_number_count == _TRUE_) {
+***************
+*** 2092,2106 ****
+  
+    for (index_q=0; index_q < ptr->q_size; index_q++) {
+  
+-     //q = ptr->q[index_q];
+      k = ptr->k[index_md][index_q];
+  
+      cl_integrand[index_q*cl_integrand_num_columns+0] = k;
+! 
+      class_call(primordial_spectrum_at_k(ppm,index_md,linear,k,primordial_pk),
+                 ppm->error_message,
+                 psp->error_message);
+  
+      /* above routine checks that k>0: no possible division by zero below */
+  
+      for (index_tt=0; index_tt < ptr->tt_size[index_md]; index_tt++) {
+--- 2105,2122 ----
+  
+    for (index_q=0; index_q < ptr->q_size; index_q++) {
+  
+      k = ptr->k[index_md][index_q];
+  
+      cl_integrand[index_q*cl_integrand_num_columns+0] = k;
+! 	  
+      class_call(primordial_spectrum_at_k(ppm,index_md,linear,k,primordial_pk),
+                 ppm->error_message,
+                 psp->error_message);
+  
++ 	if(k <= 0.5 && k >= 0.49) {
++ 	  printf("at k = %e -> primordial_pk[0] = %e  and ",k,primordial_pk[0]);
++ 	  printf(" primordial_pk[1] = %e\n",primordial_pk[1]);
++ 	}
+      /* above routine checks that k>0: no possible division by zero below */
+  
+      for (index_tt=0; index_tt < ptr->tt_size[index_md]; index_tt++) {
+***************
+*** 2195,2201 ****
+  
+        }
+      }
+! 
+      /* integrand of Cl's */
+  
+      /* note: we must integrate
+--- 2211,2217 ----
+  
+        }
+      }
+! 	  
+      /* integrand of Cl's */
+  
+      /* note: we must integrate
