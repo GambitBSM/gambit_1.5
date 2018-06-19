@@ -341,25 +341,25 @@ namespace Gambit {
 //        cutFlowVectorATLAS[7] =    217.4;
 //        cutFlowVectorATLAS[8] =      0.0;
         // Higgsino 150 GeV
-        cutFlowVectorATLAS[0] = 93125.1;
-        cutFlowVectorATLAS[1] =  6630.9;
-        cutFlowVectorATLAS[2] =   687.8;
-        cutFlowVectorATLAS[3] =   558.6;
-        cutFlowVectorATLAS[4] =   558.6;
-        cutFlowVectorATLAS[5] =   489.4;
-        cutFlowVectorATLAS[6] =   266.5;
-        cutFlowVectorATLAS[7] =   112.5;
-        cutFlowVectorATLAS[8] =     1.8;
+//        cutFlowVectorATLAS[0] = 93125.1;
+//        cutFlowVectorATLAS[1] =  6630.9;
+//        cutFlowVectorATLAS[2] =   687.8;
+//        cutFlowVectorATLAS[3] =   558.6;
+//        cutFlowVectorATLAS[4] =   558.6;
+//        cutFlowVectorATLAS[5] =   489.4;
+//        cutFlowVectorATLAS[6] =   266.5;
+//        cutFlowVectorATLAS[7] =   112.5;
+//        cutFlowVectorATLAS[8] =     1.8;
 //         Higgsino 200 GeV
-//        cutFlowVectorATLAS[0] = 32455.5;
-//        cutFlowVectorATLAS[1] =  2895.6;
-//        cutFlowVectorATLAS[2] =   300.4;
-//        cutFlowVectorATLAS[3] =   240.9;
-//        cutFlowVectorATLAS[4] =   240.9;
-//        cutFlowVectorATLAS[5] =   212.6;
-//        cutFlowVectorATLAS[6] =   116.9;
-//        cutFlowVectorATLAS[7] =    62.5;
-//        cutFlowVectorATLAS[8] =     8.7;
+        cutFlowVectorATLAS[0] = 32455.5;
+        cutFlowVectorATLAS[1] =  2895.6;
+        cutFlowVectorATLAS[2] =   300.4;
+        cutFlowVectorATLAS[3] =   240.9;
+        cutFlowVectorATLAS[4] =   240.9;
+        cutFlowVectorATLAS[5] =   212.6;
+        cutFlowVectorATLAS[6] =   116.9;
+        cutFlowVectorATLAS[7] =    62.5;
+        cutFlowVectorATLAS[8] =     8.7;
         // Higgsino 250 GeV
 //        cutFlowVectorATLAS[0] = 14028.7;
 //        cutFlowVectorATLAS[1] =  1454.7;
@@ -526,8 +526,8 @@ namespace Gambit {
         // DEBUG
        double L = 24.3;
 //        double xsec = 6955.; // 130 GeV
-        double xsec = 3830.; // 150 GeV
-//        double xsec = 1336.; // 200 GeV
+//        double xsec = 3830.; // 150 GeV
+        double xsec = 1336.; // 200 GeV
 //        double xsec =  577.3; // 250 GeV
 //        double xsec =  284.9; // 300 GeV
 //        double xsec =   88.73; // 400 GeV
@@ -539,7 +539,7 @@ namespace Gambit {
           double ATLAS_abs = cutFlowVectorATLAS[i];
         
           double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
-          if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
+          //if(i > 0) eff *= 0.90; // Lower trigger efficiency for 130 GeV
         
           double GAMBIT_scaled = eff * xsec * L;
         
