@@ -85,6 +85,14 @@ BE_INI_FUNCTION
     int tmp5 = 0;
     dshayield(tmp1,tmp2,tmp3,tmp4,tmp5);
 
+    // Initialise direct detection cross-sections.
+    // The default in DS5 is for both options to be zero (tree level cross-section with pole removed).
+    // The default in DS6 is to use Drees-Nojiri (1 loop) with the pole removed, which isn't an
+    // option in the official DS5.1.3.  The version in GAMBIT is patched to implement this option though,
+    // so we it as the default here.
+    ddcom->ddpole = runOptions->getValueOrDef<int>(0,"ddpole");
+    ddcom->dddn = runOptions->getValueOrDef<int>(1,"dddn");
+
     scan_level = false;
 
   }
