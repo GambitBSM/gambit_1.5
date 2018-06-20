@@ -158,13 +158,8 @@ namespace Gambit
                 gDev.push_back(new RanNumGen(proj, dimension, din, alim, alimt, div, rand));
             }
 
-            //Gambit::Scanner::printer *out_stream = printer.get_stream("txt");
-            //out_stream->reset(); // Hmm no reason to do that I think...
-            std::cout << "file = " << set_resume_params.get_temp_file_name("temp") << std::endl;
-            //if (set_resume_params.resume_mode())
             if (resumed)
             {
-                std::cout << "file = " << set_resume_params.get_temp_file_name("temp") << std::endl;
                 temp_file_out.open(set_resume_params.get_temp_file_name("temp"), std::ofstream::binary | std::ofstream::app);
                 #ifdef WITH_MPI
                     for (int i = 0; i < numtasks; i++)
