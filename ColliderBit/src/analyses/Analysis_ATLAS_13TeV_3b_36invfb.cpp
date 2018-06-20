@@ -18,7 +18,7 @@
 
 using namespace std;
 
-// Known issues:
+// TODO: See if adding muons to jets gives some improvement.
 
 namespace Gambit {
   namespace ColliderBit {
@@ -205,7 +205,8 @@ namespace Gambit {
         // Number of objects
         size_t nbJets = bJets_survivors.size();
         size_t nnonbJets = nonbJets_survivors.size();
-        size_t nJets = jet_survivors.size();
+        size_t nJets = nbJets + nnonbJets;
+        //size_t nJets = jet_survivors.size();
         size_t nMuons=vetoMuons.size();
         size_t nElectrons=vetoElectrons.size();
         size_t nLeptons = nElectrons+nMuons;
@@ -219,15 +220,11 @@ namespace Gambit {
 
         // Collect the four signal jets.
         vector<HEPUtils::Jet*> signalJets;
-        if(nbJets == 3 && nnonbJets > 0){
-          signalJets = bJets_survivors;
-          signalJets.push_back(nonbJets_survivors.at(0));
+        for(HEPUtils::Jet* jet : bJets_survivors){
+          if(signalJets.size() < 4) signalJets.push_back(jet);
         }
-        if(nbJets == 4) signalJets = bJets_survivors;
-        if(nbJets > 4){
-          for(HEPUtils::Jet* jet : bJets_survivors){
-            if(signalJets.size() < 5) signalJets.push_back(jet);
-          }
+        for(HEPUtils::Jet* jet : nonbJets_survivors){
+          if(signalJets.size() < 4) signalJets.push_back(jet);
         }
         
         // Effective mass (using the four jets used in Higgses)
@@ -235,82 +232,44 @@ namespace Gambit {
         for(HEPUtils::Jet* jet : signalJets){
           meff += jet->pT();
         }
-
+        
         // Find Higgs candidates
         double mlead = 0;  double msubl = 0;
         double m1 = 0;  double m2 = 0;
         double Rbbmax = 10;
-        if(jet_survivors.size() > 3){
-          double R11 = jet_survivors.at(0)->mom().deltaR_eta(jet_survivors.at(1)->mom());
-          double R12 = jet_survivors.at(2)->mom().deltaR_eta(jet_survivors.at(3)->mom());
+        if(signalJets.size() == 4){
+          double R11 = signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom());
+          double R12 = signalJets.at(2)->mom().deltaR_eta(signalJets.at(3)->mom());
           double DR1 = max(R11,R12);
           //cout << DR1 << " " << R11 << " " << R12 << endl;
-          double R21 = jet_survivors.at(0)->mom().deltaR_eta(jet_survivors.at(2)->mom());
-          double R22 = jet_survivors.at(1)->mom().deltaR_eta(jet_survivors.at(3)->mom());
+          double R21 = signalJets.at(0)->mom().deltaR_eta(signalJets.at(2)->mom());
+          double R22 = signalJets.at(1)->mom().deltaR_eta(signalJets.at(3)->mom());
           double DR2 = max(R21,R22);
           //cout << DR2 << " " << R21 << " " << R22 << endl;
-          double R31 = jet_survivors.at(0)->mom().deltaR_eta(jet_survivors.at(3)->mom());
-          double R32 = jet_survivors.at(1)->mom().deltaR_eta(jet_survivors.at(2)->mom());
+          double R31 = signalJets.at(0)->mom().deltaR_eta(signalJets.at(3)->mom());
+          double R32 = signalJets.at(1)->mom().deltaR_eta(signalJets.at(2)->mom());
           double DR3 = max(R31,R32);
           //cout << DR3 << " " << R31 << " " << R32 << endl;
-
+          //cout << endl;
           if( DR1 < DR2 && DR1 < DR3 ){
-            m1 = (jet_survivors.at(0)->mom()+jet_survivors.at(1)->mom()).m();
-            m2 = (jet_survivors.at(2)->mom()+jet_survivors.at(3)->mom()).m();
+            m1 = (signalJets.at(0)->mom()+signalJets.at(1)->mom()).m();
+            m2 = (signalJets.at(2)->mom()+signalJets.at(3)->mom()).m();
             Rbbmax = DR1;
           }
           else if( DR2 < DR1 && DR2 < DR3 ){
-            m1 = (jet_survivors.at(0)->mom()+jet_survivors.at(2)->mom()).m();
-            m2 = (jet_survivors.at(1)->mom()+jet_survivors.at(3)->mom()).m();
+            m1 = (signalJets.at(0)->mom()+signalJets.at(2)->mom()).m();
+            m2 = (signalJets.at(1)->mom()+signalJets.at(3)->mom()).m();
             Rbbmax = DR2;
           }
           else{
-            m1 = (jet_survivors.at(0)->mom()+jet_survivors.at(3)->mom()).m();
-            m2 = (jet_survivors.at(1)->mom()+jet_survivors.at(2)->mom()).m();
+            m1 = (signalJets.at(0)->mom()+signalJets.at(3)->mom()).m();
+            m2 = (signalJets.at(1)->mom()+signalJets.at(2)->mom()).m();
             Rbbmax = DR3;
           }
           mlead = max(m1,m2); msubl = min(m1,m2);
           //cout << mlead << " " << msubl << endl;
-          //cout << endl;
         }
-        
-//        // Find Higgs candidates
-//        double mlead = 0;  double msubl = 0;
-//        double m1 = 0;  double m2 = 0;
-//        double Rbbmax = 10;
-//        if(signalJets.size() == 4){
-//          double R11 = signalJets.at(0)->mom().deltaR_eta(signalJets.at(1)->mom());
-//          double R12 = signalJets.at(2)->mom().deltaR_eta(signalJets.at(3)->mom());
-//          double DR1 = max(R11,R12);
-//          //cout << DR1 << " " << R11 << " " << R12 << endl;
-//          double R21 = signalJets.at(0)->mom().deltaR_eta(signalJets.at(2)->mom());
-//          double R22 = signalJets.at(1)->mom().deltaR_eta(signalJets.at(3)->mom());
-//          double DR2 = max(R21,R22);
-//          //cout << DR2 << " " << R21 << " " << R22 << endl;
-//          double R31 = signalJets.at(0)->mom().deltaR_eta(signalJets.at(3)->mom());
-//          double R32 = signalJets.at(1)->mom().deltaR_eta(signalJets.at(2)->mom());
-//          double DR3 = max(R31,R32);
-//          //cout << DR3 << " " << R31 << " " << R32 << endl;
-//          //cout << endl;
-//          if( DR1 < DR2 && DR1 < DR3 ){
-//            m1 = (signalJets.at(0)->mom()+signalJets.at(1)->mom()).m();
-//            m2 = (signalJets.at(2)->mom()+signalJets.at(3)->mom()).m();
-//            Rbbmax = DR1;
-//          }
-//          else if( DR2 < DR1 && DR2 < DR3 ){
-//            m1 = (signalJets.at(0)->mom()+signalJets.at(2)->mom()).m();
-//            m2 = (signalJets.at(1)->mom()+signalJets.at(3)->mom()).m();
-//            Rbbmax = DR2;
-//          }
-//          else{
-//            m1 = (signalJets.at(0)->mom()+signalJets.at(3)->mom()).m();
-//            m2 = (signalJets.at(1)->mom()+signalJets.at(2)->mom()).m();
-//            Rbbmax = DR3;
-//          }
-//          mlead = max(m1,m2); msubl = min(m1,m2);
-//          //cout << mlead << " " << msubl << endl;
-//        }
-//
+
         
         // Transverse mass for leading b-jets
         double mTmin = 10E6;
@@ -322,20 +281,20 @@ namespace Gambit {
         
         // Increment cutFlowVector elements
         // Cut flow strings
-        cutFlowVector_str[0]  = "No cuts ";
-        cutFlowVector_str[1]  = "Trigger, $E_T^{miss} > 200$ GeV";
-        cutFlowVector_str[2]  = "$\\Delta\\phi_{min}^{4j} > 0.4$";
-        cutFlowVector_str[3]  = "$N_{lep} = 0$";
-        cutFlowVector_str[4]  = "$N_{jet} \\ge 4$, $N_{jet} \\le 5$";
-        cutFlowVector_str[5]  = "$110 < m(h_1)< 150$ GeV";
-        cutFlowVector_str[6]  = "$90 < m(h_2)< 140$ GeV$";
-        cutFlowVector_str[7]  = "$m_{T,min}^{b-jets}> 130$ GeV";
-        cutFlowVector_str[8]  = "$m_{eff} > 1100$ GeV";
-        cutFlowVector_str[9]  = "$N_{b-jets} \\ge 3$";
-        cutFlowVector_str[10]  = "$0.4 \\le \\Delta R_{max}^{bb} \\le 1.4$";
-        cutFlowVector_str[11]  = "m_{eff} > 600 GeV";
-        cutFlowVector_str[12]  = "$N_{b-jet} \\ge 4$";
-        cutFlowVector_str[13]  = "$0.4 \\le \\Delta R_{max}^{bb} \\le 1.4$";
+//        cutFlowVector_str[0]  = "No cuts ";
+//        cutFlowVector_str[1]  = "Trigger, $E_T^{miss} > 200$ GeV";
+//        cutFlowVector_str[2]  = "$\\Delta\\phi_{min}^{4j} > 0.4$";
+//        cutFlowVector_str[3]  = "$N_{lep} = 0$";
+//        cutFlowVector_str[4]  = "$N_{jet} \\ge 4$, $N_{jet} \\le 5$";
+//        cutFlowVector_str[5]  = "$110 < m(h_1)< 150$ GeV";
+//        cutFlowVector_str[6]  = "$90 < m(h_2)< 140$ GeV$";
+//        cutFlowVector_str[7]  = "$m_{T,min}^{b-jets}> 130$ GeV";
+//        cutFlowVector_str[8]  = "$m_{eff} > 1100$ GeV";
+//        cutFlowVector_str[9]  = "$N_{b-jets} \\ge 3$";
+//        cutFlowVector_str[10]  = "$0.4 \\le \\Delta R_{max}^{bb} \\le 1.4$";
+//        cutFlowVector_str[11]  = "m_{eff} > 600 GeV";
+//        cutFlowVector_str[12]  = "$N_{b-jet} \\ge 4$";
+//        cutFlowVector_str[13]  = "$0.4 \\le \\Delta R_{max}^{bb} \\le 1.4$";
         
         // Cut flow from paper
         // Higgsino 300 GeV
@@ -354,20 +313,20 @@ namespace Gambit {
 //        cutFlowVectorATLAS[12] =   15.6;
 //        cutFlowVectorATLAS[13] =    6.8;
         // Higgsino 500 GeV
-        cutFlowVectorATLAS[0] = 1220.7;
-        cutFlowVectorATLAS[1] =  739.0;
-        cutFlowVectorATLAS[2] =  647.1;
-        cutFlowVectorATLAS[3] =  548.2;
-        cutFlowVectorATLAS[4] =  291.9;
-        cutFlowVectorATLAS[5] =  133.5;
-        cutFlowVectorATLAS[6] =   78.0;
-        cutFlowVectorATLAS[7] =   64.1;
-        cutFlowVectorATLAS[8] =   12.0;
-        cutFlowVectorATLAS[9] =    5.7;
-        cutFlowVectorATLAS[10] =   4.8;
-        cutFlowVectorATLAS[11] =  74.3;
-        cutFlowVectorATLAS[12] =  15.0;
-        cutFlowVectorATLAS[13] =   9.7;
+//        cutFlowVectorATLAS[0] = 1220.7;
+//        cutFlowVectorATLAS[1] =  739.0;
+//        cutFlowVectorATLAS[2] =  647.1;
+//        cutFlowVectorATLAS[3] =  548.2;
+//        cutFlowVectorATLAS[4] =  291.9;
+//        cutFlowVectorATLAS[5] =  133.5;
+//        cutFlowVectorATLAS[6] =   78.0;
+//        cutFlowVectorATLAS[7] =   64.1;
+//        cutFlowVectorATLAS[8] =   12.0;
+//        cutFlowVectorATLAS[9] =    5.7;
+//        cutFlowVectorATLAS[10] =   4.8;
+//        cutFlowVectorATLAS[11] =  74.3;
+//        cutFlowVectorATLAS[12] =  15.0;
+//        cutFlowVectorATLAS[13] =   9.7;
         // Higgsino 800 GeV
 //        cutFlowVectorATLAS[0] = 124.9;
 //        cutFlowVectorATLAS[1] = 101.9;
@@ -385,50 +344,50 @@ namespace Gambit {
 //        cutFlowVectorATLAS[13] =  2.0;
 
         // Apply cutflow
-        for(size_t j=0;j<NCUTS;j++){
-          if(
-             (j==0) ||
-
-             (j==1 && met > 200.) ||
-
-             (j==2 && met > 200 && phi4min > 0.4) ||
-
-             (j==3 && met > 200 && phi4min > 0.4 && nLeptons == 0) ||
-	     
-             (j==4 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)) ||
-
-             (j==5 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150.) ||
-
-             (j==6 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140.) ||
-
-             (j==7 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130.) ||
-
-             (j==8 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)  && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130. && meff > 1100.) ||
-
-             (j==9 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)  && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130. && meff > 1100. && nbJets >= 3) ||
-
-             (j==10 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)  && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130. && meff > 1100. && nbJets >= 3 && Rbbmax > 0.4 && Rbbmax < 1.4) ||
-
-             (j==11 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && meff > 600.) ||
-
-             (j==12 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && meff > 600. && nbJets >= 4) ||
-
-             (j==13 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && meff > 600. && nbJets >= 4 && Rbbmax > 0.4 && Rbbmax < 1.4)
-             
-             ) cutFlowVector[j]++;
-        }
+//        for(size_t j=0;j<NCUTS;j++){
+//          if(
+//             (j==0) ||
+//
+//             (j==1 && met > 200.) ||
+//
+//             (j==2 && met > 200 && phi4min > 0.4) ||
+//
+//             (j==3 && met > 200 && phi4min > 0.4 && nLeptons == 0) ||
+//
+//             (j==4 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)) ||
+//
+//             (j==5 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150.) ||
+//
+//             (j==6 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140.) ||
+//
+//             (j==7 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130.) ||
+//
+//             (j==8 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)  && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130. && meff > 1100.) ||
+//
+//             (j==9 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)  && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130. && meff > 1100. && nbJets >= 3) ||
+//
+//             (j==10 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5)  && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && mTmin > 130. && meff > 1100. && nbJets >= 3 && Rbbmax > 0.4 && Rbbmax < 1.4) ||
+//
+//             (j==11 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && meff > 600.) ||
+//
+//             (j==12 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && meff > 600. && nbJets >= 4) ||
+//
+//             (j==13 && met > 200 && phi4min > 0.4 && nLeptons == 0 && (nJets == 4 || nJets == 5) && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && meff > 600. && nbJets >= 4 && Rbbmax > 0.4 && Rbbmax < 1.4)
+//
+//             ) cutFlowVector[j]++;
+//        }
 
         // Now increment signal region variables
         // First exclusion regions
-        if(nbJets == 3 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mTmin > 150. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 600. && meff < 850.) _numSR["SR-3b-meff1-A"]++;
-        if(nbJets == 3 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mTmin > 150. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 850. && meff < 1100.) _numSR["SR-3b-meff2-A"]++;
-        if(nbJets >= 3 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mTmin > 130. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 1100.) _numSR["SR-3b-meff3-A"]++;
-        if(nbJets >= 4 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && meff > 600. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff < 850.) _numSR["SR-4b-meff1-A"]++;
-        if(nbJets >= 4 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && meff > 600. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 1.4 && Rbbmax < 2.4 && meff < 850.) _numSR["SR-4b-meff1-B"]++;
-        if(nbJets >= 4 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 6 && meff > 850. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff < 1100.) _numSR["SR-4b-meff2-A"]++;
-        if(nbJets >= 4 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 6 && meff > 850. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 1.4 && Rbbmax < 2.4 && meff < 1100.) _numSR["SR-4b-meff2-B"]++;
+        if(nbJets == 3 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mTmin > 150. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 600. && meff < 850.) _numSR["SR-3b-meff1-A"]++;
+        if(nbJets == 3 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mTmin > 150. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 850. && meff < 1100.) _numSR["SR-3b-meff2-A"]++;
+        if(nbJets >= 3 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mTmin > 130. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 1100.) _numSR["SR-3b-meff3-A"]++;
+        if(nbJets >= 4 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && meff > 600. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff < 850.) _numSR["SR-4b-meff1-A"]++;
+        if(nbJets >= 4 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && meff > 600. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 1.4 && Rbbmax < 2.4 && meff < 850.) _numSR["SR-4b-meff1-B"]++;
+        if(nbJets >= 4 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 6 && meff > 850. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff < 1100.) _numSR["SR-4b-meff2-A"]++;
+        if(nbJets >= 4 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 6 && meff > 850. && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 1.4 && Rbbmax < 2.4 && meff < 1100.) _numSR["SR-4b-meff2-B"]++;
         // Discovery regions
-        if(nbJets >= 4 && met > 200 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 600.) _numSR["SR-4b-meff1-A-disc"]++;
+        if(nbJets >= 4 && met > 200 && nLeptons == 0 && phi4min > 0.4 && nJets >= 4 && nJets <= 5 && mlead > 110. && mlead < 150. && msubl > 90. && msubl < 140. && Rbbmax > 0.4 && Rbbmax < 1.4 && meff > 600.) _numSR["SR-4b-meff1-A-disc"]++;
 
         return;
         
@@ -458,24 +417,24 @@ namespace Gambit {
 
       virtual void collect_results() {
 
-        // DEBUG
-        double L = 36.1;
-//        double xsec = 284.65; // 300 GeV
-        double xsec = 33.81; // 500 GeV
+//        // DEBUG
+//        double L = 36.1;
+////        double xsec = 284.65; // 300 GeV
+////        double xsec = 33.81; // 500 GeV
 //        double xsec = 3.460; // 800 GeV
-        cout << "DEBUG:" << endl;
-        for (size_t i=0; i<NCUTS; i++)
-        {
-          double ATLAS_abs = cutFlowVectorATLAS[i];
-
-          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
-
-          double GAMBIT_scaled = eff * xsec * L;
-
-          double ratio = GAMBIT_scaled/ATLAS_abs;
-          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << ATLAS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
-        }
-        cout << "DEBUG:" << endl;
+//        cout << "DEBUG:" << endl;
+//        for (size_t i=0; i<NCUTS; i++)
+//        {
+//          double ATLAS_abs = cutFlowVectorATLAS[i];
+//
+//          double eff = (double)cutFlowVector[i] / (double)cutFlowVector[0];
+//
+//          double GAMBIT_scaled = eff * xsec * L;
+//
+//          double ratio = GAMBIT_scaled/ATLAS_abs;
+//          cout << "DEBUG 1: i: " << i << ":   " << setprecision(4) << ATLAS_abs << "\t" << GAMBIT_scaled << "\t" << "\t" << ratio << "\t\t" << cutFlowVector_str[i] << endl;
+//        }
+//        cout << "DEBUG:" << endl;
         
         // Now fill a results object with the results for each SR
         // Only exclusion regions here
