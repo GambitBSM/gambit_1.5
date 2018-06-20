@@ -74,6 +74,15 @@ namespace Gambit
                         data.resize(dim_t + size_tot);
                         H5Dread(old_dataset, get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[0]);
                         j = dim_t;
+                        //std::cout <<"Read "<<dim_t<<" points from old dataset (into position 0)!"<<std::endl;
+                        //for(unsigned long long i=0; i<dim_t; i++) // debug
+                        //{
+                        //   std::cout<<"  "<<data[i]<<std::endl;
+                        //}
+                    }
+                    else
+                    {
+                        //std::cout << "No old dataset found!" << std::endl;
                     }
                     
                     for (int i = 0, end = datasets.size(); i < end; i++)
@@ -110,6 +119,7 @@ namespace Gambit
                               H5Dread(datasets[i], get_hdf5_data_type<U>::type(), memspace_id, dspace_id, H5P_DEFAULT, (void *)&data[j]);                           
                               H5Sclose(memspace_id);
                               H5Sclose(dspace_id);
+                              //std::cout <<"Read "<<sizes[i]<<" points from dataset "<<i<<" into position "<<j<<std::endl;
                               //std::ostringstream errmsg;
                               //errmsg << "Error copying parameter.  Dataset in input file " << i 
                               //    << " was larger than previously measured and doesn't fit in the allocated buffer! " 
@@ -121,7 +131,12 @@ namespace Gambit
                            { 
                               // Read the whole dataset in to buffer (faster than selecting, I should think)
                               H5Dread(datasets[i], get_hdf5_data_type<U>::type(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)&data[j]);                           
-                           }
+                              //std::cout <<"Read "<<dim_t<<" points from dataset "<<i<<" into position "<<j<<std::endl;
+                              //for(unsigned long long k=j; k<j+dim_t; k++) // debug
+                              //{
+                              //   std::cout<<"  "<<data[k]<<std::endl;
+                              //}
+                            }
                         }
                         else
                         {
@@ -163,6 +178,7 @@ namespace Gambit
                         errmsg << "Error copying parameter. HD5write failed." <<std::endl;  
                         printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
+                    //std::cout<<"Wrote "<<data.size()<<" points into output dataset at position "<<offset<<std::endl;
                     H5Sclose(memspace_id);
                     H5Sclose(dspace_id);
  

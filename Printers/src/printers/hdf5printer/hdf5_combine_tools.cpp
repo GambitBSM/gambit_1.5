@@ -647,15 +647,11 @@ namespace Gambit
                            printer_error().raise(LOCAL_INFO, errmsg.str());
                        }
 
-                       ranks.push_back(rank);
-                       ptids.push_back(ptid);
-
                        hid_t dataspace = H5Dget_space(dataset2);
                        hid_t dataspace2 = H5Dget_space(dataset3);
                        hssize_t size = H5Sget_simple_extent_npoints(dataspace);
                        hssize_t size2 = H5Sget_simple_extent_npoints(dataspace2);
-                       
-                       
+                                              
                        std::vector<bool> valids;
                        Enter_HDF5<read_hdf5>(dataset3, valids);
                        
@@ -665,7 +661,21 @@ namespace Gambit
                            errmsg << "RA_pointID and RA_pointID_isvalid are not the same size.";
                            printer_error().raise(LOCAL_INFO, errmsg.str());
                        }
-                       
+ 
+                       // Make sure to only add the isvalid points!
+                       std::vector<unsigned long long> valid_rank;
+                       std::vector<unsigned long long> valid_ptid;
+                       for(size_t vi=0; vi<valids.size(); vi++)
+                       {
+                          if(valids[vi])
+                          {
+                             valid_rank.push_back(rank[vi]);
+                             valid_ptid.push_back(ptid[vi]);
+                          }
+                       }
+                       ranks.push_back(valid_rank);
+                       ptids.push_back(valid_ptid); 
+
                        for (auto it = valids.end()-1; size > 0; --it)
                        {
                            if (*it)
@@ -688,7 +698,7 @@ namespace Gambit
 
                 // TODO: Ack, getting a "too many open files" error. I guess we need
                 // to do this in batches, but that's quite a pain to arrange.
-                const size_t BATCH_SIZE = 100;
+                const size_t BATCH_SIZE = 50;
             
                 // Compute number of batches required
                 size_t N_BATCHES = files.size() / BATCH_SIZE;
@@ -709,12 +719,12 @@ namespace Gambit
                     //std::vector<hid_t> datasets(files.size(),-1);
                     //std::vector<hid_t> datasets2(files.size(),-1);
 
-                   size_t offset = 0; // where to begin writing the next batch in output datasets
-                   for(size_t batch_i = 0, end = N_BATCHES; batch_i < end; batch_i++)
-                   {
+                    size_t offset = 0; // where to begin writing the next batch in output datasets
+                    for(size_t batch_i = 0, end = N_BATCHES; batch_i < end; batch_i++)
+                    {
+                        size_t pc_offset = 0; // possible extra offset due to previous combined datasets. Only batch 0 will use this.
                         long long valid_dset = -1; // index of a validly opened dataset (-1 if none)
                         size_t THIS_BATCH_SIZE = BATCH_SIZE;
-                        //size_t offset; // where to begin writing this batch in output dataset
                         std::vector<unsigned long long> batch_sizes(BATCH_SIZE,0);
                          // IDs for this batch
                         std::vector<hid_t> file_ids (THIS_BATCH_SIZE,-1);
@@ -724,6 +734,7 @@ namespace Gambit
  
                         // Collect all the HDF5 ids need to combine this parameter for this batch of files
                         if(remainder>0 and batch_i==N_BATCHES-1) THIS_BATCH_SIZE = remainder; // Last batch is incomplete
+                        //std::cout << "   Processing temp files "<<batch_i*BATCH_SIZE<<" to "<<batch_i*BATCH_SIZE+THIS_BATCH_SIZE<<std::endl;
                         //std::cout << "BATCH "<< batch_i << std::endl;
                         for (size_t file_i = 0, end = THIS_BATCH_SIZE; file_i < end; file_i++)
                         {
@@ -781,10 +792,19 @@ namespace Gambit
                         hid_t old_dataset = -1, old_dataset2 = -1;
                         if (resume and batch_i==0) // Only copy old dataset once, during first batch of files
                         {
+                            //std::cout << "Opening previous combined dataset for parameter "<<*it<<std::endl;
                             HDF5::errorsOff();
                             old_dataset  = HDF5::openDataset(old_group, *it, true); // Allow fail; may be no previous combined output
                             old_dataset2 = HDF5::openDataset(old_group, *it + "_isvalid", true);
                             HDF5::errorsOn();
+                            if(old_dataset<0) std::cout << "Failed to open previous combined dataset for parameter "<<*it<<std::endl; // debugging
+                            if(old_dataset>0)
+                            {
+                                hid_t space = H5Dget_space(old_dataset);
+                                hsize_t dim_t = H5Sget_simple_extent_npoints(space);
+                                H5Sclose(space);
+                                pc_offset = dim_t; // Record size of old combined dataset, needed to get correct offset for next batch
+                            }
                         }
 
                         // TODO! With new batching system, could get a batch with no data for this parameter. Should just skip it; implement later.
@@ -830,7 +850,8 @@ namespace Gambit
                         hid_t dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
                         //std::cout << "Copying parameter "<<*it<<std::endl; // debug
                        
-                        // Measure total size of datasets for this batch of files 
+                        // Measure total size of datasets for this batch of files
+                        // (not counting previous combined output, which will be copied in batch 0) 
                         unsigned long long batch_size_tot = 0;
                         for(auto it = batch_sizes.begin(); it != batch_sizes.end(); ++it)
                         {
@@ -857,10 +878,17 @@ namespace Gambit
                         HDF5::closeDataset(dataset2_out);
 
                         // Move offset so that next batch is written to correct place in output file
-                        offset += batch_size_tot; 
+                        offset += batch_size_tot + pc_offset; 
                     } // end batch, begin processing next batch of files.
                 }
                 std::cout << "  Combining primary datasets... Done.                                 "<<std::endl;
+
+                // Debug: early exit to check what primary combined output looks like
+                // Flush and close output file
+                // H5Fflush(new_file, H5F_SCOPE_GLOBAL);
+                // HDF5::closeGroup(new_group);
+                // HDF5::closeFile(new_file);
+                // exit(0);
 
                 // TODO! I have not yet implemented batch copying for the RA datasets!
 
@@ -883,6 +911,10 @@ namespace Gambit
                    {
                       for(std::size_t j=0; j<ranks[i].size(); ++j)
                       {
+                         //if(ranks[i][j]==0 and ptids[i][j]==0)
+                         //{
+                         //   std::cout<<"Added r="<<ranks[i][j]<<", p="<<ptids[i][j]<<" to hash search requests"<<std::endl;
+                         //}
                          left_to_match.insert(PPIDpair(ptids[i][j],ranks[i][j]));
                       }
                    }
@@ -892,7 +924,8 @@ namespace Gambit
                       std::unordered_map<PPIDpair, unsigned long long, PPIDHash,PPIDEqual> RA_write_hash(get_RA_write_hash(new_group, left_to_match));
  
                       /// Now copy the RA datasets
-                      for (auto it = aux_param_names.begin(), end = aux_param_names.end(); it != end; ++it)
+                      counter = 1; //reset counter
+                      for (auto it = aux_param_names.begin(), end = aux_param_names.end(); it != end; ++it, ++counter)
                       {
                           std::cout << "  Combining auxilliary datasets... "<<int(100*counter/aux_param_names.size())<<"%    (merged "<<counter<<" parameters of "<<aux_param_names.size()<<")         \r"<<std::flush;
                           std::vector<hid_t> file_ids, group_ids, datasets, datasets2;
@@ -1044,7 +1077,7 @@ namespace Gambit
                std::unordered_map<PPIDpair, unsigned long long, PPIDHash,PPIDEqual> output_hash;
 
                // Chunking variables
-               static const std::size_t CHUNKLENGTH = 1000; // Should be a reasonable value
+               static const std::size_t CHUNKLENGTH = 10000; // Should be a reasonable value
                
                // Interfaces for the datasets
                // Make sure the types used here don't get out of sync with the types used to write the original datasets
@@ -1074,7 +1107,9 @@ namespace Gambit
                  errmsg << "This indicates either a bug in the HDF5 combine code, please report it.";
                  printer_error().raise(LOCAL_INFO, errmsg.str());
                }
- 
+
+               //std::cout<<"New combined output dataset length: "<<dset_length<<std::endl;
+
                // Compute number of chunks
                const std::size_t NCHUNKS = dset_length / CHUNKLENGTH; // Number of FULL chunks
                const std::size_t REMAINDER = dset_length - (NCHUNKS*CHUNKLENGTH); // leftover after last full chunk
@@ -1083,14 +1118,17 @@ namespace Gambit
                if(REMAINDER==0) { NCHUNKIT = NCHUNKS; }
                else             { NCHUNKIT = NCHUNKS+1; } // Need an extra iteration to deal with incomplete chunk
 
+               //std::cout<<"Will parse this output in "<<NCHUNKIT<<" chunks of size "<<CHUNKLENGTH<<std::endl;
+
                // Iterate through dataset in chunks
                for(std::size_t i=0; i<NCHUNKIT; ++i)
                {
                   std::size_t offset = i*CHUNKLENGTH; 
                   std::size_t length;
-
                   if(i==NCHUNKS){ length = REMAINDER; }
                   else          { length = CHUNKLENGTH; }
+
+                  //std::cout<<"  Offset for chunk "<<i<<" is "<<offset<<". Length is "<<length<<std::endl;
 
                   const std::vector<unsigned long> pID_chunk = pointIDs.get_chunk(offset,length);
                   const std::vector<int> pIDvalid_chunk  = pointIDs_isvalid.get_chunk(offset,length);
@@ -1135,7 +1173,13 @@ namespace Gambit
                       errmsg << "This most likely indicates a bug in the HDF5 combine code, please report it.";
                       printer_error().raise(LOCAL_INFO, errmsg.str());
                     }
- 
+                    // @{ Debugging: see what points exist in the output dataset (for rank 127)
+                    //if(rank_chunk[j]==127)
+                    //{
+                    //    std::cout << "  Scanned point "<<pID_chunk[j]<<" (rank "<<rank_chunk[j]<<", valid="<<pIDvalid_chunk[j]<<") in combined output file"<<std::endl;
+                    //}
+                    // @}
+
                     // Check for hash match if entry is marked as "valid"
                     if(rankvalid_chunk[j])
                     {
@@ -1152,6 +1196,18 @@ namespace Gambit
                     } 
                     // else continue iteration
                   }
+               }
+
+               // Check that all the matches were found!
+               if( left_to_match.size() > 0 )
+               {
+                   std::ostringstream errmsg;
+                   errmsg << "Error generating hash map for Auxilliary parameter copy! Failed to find matches in primary datasets for all auxilliary data! There were "<<left_to_match.size()<<" unmatched auxilliary points. Unmatched points follow:" << std::endl;
+                   for(auto it=left_to_match.begin(); it!=left_to_match.end(); ++it)
+                   {
+                      errmsg << "  rank: "<<it->rank<<", pointID: "<<it->pointID<< std::endl;
+                   } 
+                   printer_error().raise(LOCAL_INFO, errmsg.str());
                }
                return output_hash;
             }

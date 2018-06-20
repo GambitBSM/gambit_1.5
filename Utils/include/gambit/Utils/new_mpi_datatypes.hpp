@@ -84,7 +84,7 @@ namespace Gambit
       unsigned long long int pointID;
       unsigned int rank;
       PPIDpair() 
-        : pointID(-1)
+        : pointID(0)
         , rank(0)
       {}
       PPIDpair(const unsigned long long int p, const int r)
