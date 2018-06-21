@@ -807,65 +807,73 @@ namespace Gambit
                             }
                         }
 
-                        // TODO! With new batching system, could get a batch with no data for this parameter. Should just skip it; implement later.
-                        if(valid_dset<0 and old_dataset<0)
+                        // With new batching system, could get a batch with no data for this parameter. This is ok,
+                        // so we just skip it. 
+                        // TODO: Could put in a check to make sure that SOME batch copies data.
+                        // This should happen though, since the parameter name must have been retrieved from *some*
+                        // file or other, so it would just be double-checking that this worked correctly.
+                        if(valid_dset>=0 or old_dataset>=0)
                         {
-                           // Parameter must exist in either the old combined file or at least one of the newer temp files,
-                           // because those are what we read to get the parameter names. So if the datasets are now
-                           // failing to actually open then something bad must have happened.
-                           std::ostringstream errmsg;
-                           errmsg << "Error opening datasets for parameter '"<<*it<<"' in temp files! All datasets failed to open! They may be corrupted.";
-                           printer_error().raise(LOCAL_INFO, errmsg.str());
-                        }
-                   
-                        hid_t type, type2;
-                        if(valid_dset<0)
-                        {
-                           // Parameter not in any of the new temp files, must only be in the old combined output, get type from there.
-                           type  = H5Dget_type(old_dataset);
-                           type2 = H5Dget_type(old_dataset2);
+                            hid_t type, type2;
+                            if(valid_dset<0)
+                            {
+                               // Parameter not in any of the new temp files, must only be in the old combined output, get type from there.
+                               type  = H5Dget_type(old_dataset);
+                               type2 = H5Dget_type(old_dataset2);
+                            }
+                            else
+                            { 
+                               // Get the type from a validly opened dataset in temp file
+                               type  = H5Dget_type(datasets[valid_dset]);
+                               type2 = H5Dget_type(datasets2[valid_dset]); 
+                            }
+                            if(type<0 or type2<0)
+                            {
+                               std::ostringstream errmsg;
+                               errmsg << "Failed to detect type for dataset '"<<*it<<"'! The dataset is supposedly valid, so this does not make sense. It must be a bug, please report it. (valid_dset="<<valid_dset<<")";
+                               printer_error().raise(LOCAL_INFO, errmsg.str());
+                            }
+                       
+                            if(batch_i==0) // Only want to create the output dataset once! 
+                            {
+                               // Create datasets
+                               //std::cout<<"Creating dataset '"<<*it<<"' in file:group "<<file<<":"<<group_name<<std::endl;
+                               setup_hdf5_points(new_group, type, type2, size_tot, *it);
+                            }
+
+                            // Reopen dataset for writing
+                            hid_t dataset_out   = HDF5::openDataset(new_group, *it);
+                            hid_t dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
+                            //std::cout << "Copying parameter "<<*it<<std::endl; // debug
+                       
+                            // Measure total size of datasets for this batch of files
+                            // (not counting previous combined output, which will be copied in batch 0) 
+                            unsigned long long batch_size_tot = 0;
+                            for(auto it = batch_sizes.begin(); it != batch_sizes.end(); ++it)
+                            {
+                               batch_size_tot += *it;
+                            }
+
+                            //Enter_HDF5<copy_hdf5>(dataset_out, datasets, size_tot_l, sizes, old_dataset);
+                            //Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, size_tot_l, sizes, old_dataset2);
+                      
+                            // Do the copy!!! 
+                            Enter_HDF5<copy_hdf5>(dataset_out, datasets, batch_size_tot, batch_sizes, old_dataset, offset);
+                            Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, batch_size_tot, batch_sizes, old_dataset2, offset);
+ 
+                            // Close resources
+                            HDF5::closeDataset(dataset_out);
+                            HDF5::closeDataset(dataset2_out);
+
+                            // Move offset so that next batch is written to correct place in output file
+                            offset += batch_size_tot + pc_offset;
                         }
                         else
-                        { 
-                           // Get the type from a validly opened dataset in temp file
-                           type  = H5Dget_type(datasets[valid_dset]);
-                           type2 = H5Dget_type(datasets2[valid_dset]); 
-                        }
-                        if(type<0 or type2<0)
                         {
-                           std::ostringstream errmsg;
-                           errmsg << "Failed to detect type for dataset '"<<*it<<"'! The dataset is supposedly valid, so this does not make sense. It must be a bug, please report it. (valid_dset="<<valid_dset<<")";
-                           printer_error().raise(LOCAL_INFO, errmsg.str());
+                            std::cout << "No datasets found for parameter "<<*it<<" in file batch "<<batch_i<<". Moving on to next batch since there seems to be nothing to copy in this one." << std::endl;
                         }
-                       
-                        if(batch_i==0) // Only want to create the output dataset once! 
-                        {
-                           // Create datasets
-                           //std::cout<<"Creating dataset '"<<*it<<"' in file:group "<<file<<":"<<group_name<<std::endl;
-                           setup_hdf5_points(new_group, type, type2, size_tot, *it);
-                        }
-
-                        // Reopen dataset for writing
-                        hid_t dataset_out   = HDF5::openDataset(new_group, *it);
-                        hid_t dataset2_out  = HDF5::openDataset(new_group, (*it)+"_isvalid");
-                        //std::cout << "Copying parameter "<<*it<<std::endl; // debug
-                       
-                        // Measure total size of datasets for this batch of files
-                        // (not counting previous combined output, which will be copied in batch 0) 
-                        unsigned long long batch_size_tot = 0;
-                        for(auto it = batch_sizes.begin(); it != batch_sizes.end(); ++it)
-                        {
-                           batch_size_tot += *it;
-                        }
-
-                        //Enter_HDF5<copy_hdf5>(dataset_out, datasets, size_tot_l, sizes, old_dataset);
-                        //Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, size_tot_l, sizes, old_dataset2);
-                      
-                        // Do the copy!!! 
-                        Enter_HDF5<copy_hdf5>(dataset_out, datasets, batch_size_tot, batch_sizes, old_dataset, offset);
-                        Enter_HDF5<copy_hdf5>(dataset2_out, datasets2, batch_size_tot, batch_sizes, old_dataset2, offset);
- 
-                        // Close resources
+                        
+                        // Close files etc. associated with this batch 
                         for (size_t file_i = 0, end = file_ids.size(); file_i < end; file_i++)
                         {
                             if(datasets[file_i]>=0)  HDF5::closeDataset(datasets[file_i]);
@@ -873,12 +881,6 @@ namespace Gambit
                             if(group_ids[file_i]>=0) HDF5::closeGroup(group_ids[file_i]);
                             if(file_ids[file_i]>=0)  HDF5::closeFile(file_ids[file_i]);
                         }
-
-                        HDF5::closeDataset(dataset_out);
-                        HDF5::closeDataset(dataset2_out);
-
-                        // Move offset so that next batch is written to correct place in output file
-                        offset += batch_size_tot + pc_offset; 
                     } // end batch, begin processing next batch of files.
                 }
                 std::cout << "  Combining primary datasets... Done.                                 "<<std::endl;
