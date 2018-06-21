@@ -993,7 +993,15 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-#undef MODULE
+  #define CAPABILITY RHN_coupling_slide
+  START_CAPABILITY
+    #define FUNCTION coupling_slide
+    START_FUNCTION(double)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODELS(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
 
+#undef MODULE
 
 #endif /* defined(__NeutrinoBit_rollcall_hpp__) */
