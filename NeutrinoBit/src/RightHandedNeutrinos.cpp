@@ -2088,6 +2088,20 @@ namespace Gambit
           }
     }
 
+    void coupling_slide(double &lnL)
+    {
+      using namespace Pipes::coupling_slide;
+      int I = runOptions->getValueOrDef<int>(1, "I");
+      int flavour = runOptions->getValueOrDef<int>(1, "i");
+      double threshold = runOptions->getValueOrDef<double>(1e0, "threshold");
+      double slope = runOptions->getValueOrDef<double>(1, "slope");
+      double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
+      if (slope > 0)
+        lnL = slope*log10(std::min(U/threshold, 1.));
+      else
+        lnL = slope*log10(std::max(U/threshold, 1.));
+    }
+
   }
 
 }
