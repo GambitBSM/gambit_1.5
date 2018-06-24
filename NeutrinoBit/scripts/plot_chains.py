@@ -34,6 +34,55 @@ def show_survival_fraction(rhn, sigma = 2, exclude = []):
     surv = lnLmax-lnL < 0.5*sigma**2
     print "Total (LogLike):", surv.sum()/len(lnL)
 
+def show_high_couplings(rhn):
+    mask = rhn.lnL > rhn.lnL.max()-2
+    M = [rhn.M1, rhn.M2, rhn.M3]
+    U = [
+        [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
+        [rhn.U2, rhn.Ue2, rhn.Um2, rhn.Ut2],
+        [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
+        ]
+    quit()
+
+def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
+    M = [rhn.M1, rhn.M2, rhn.M3]
+    U = [
+        [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
+        [rhn.U2, rhn.Ue2, rhn.Um2, rhn.Ut2],
+        [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
+        ]
+
+    mask = rhn.lnL > rhn.lnL.max()-2
+
+    def f(rhn, name):
+        print name
+        plt.clf()
+        lnL = rhn.lnL[mask]
+
+        if name == 'total':
+            w = lnL
+            indices = np.argsort(w)
+        else:
+            lnL_partial = rhn.lnL_partial[name][mask]
+            imax = lnL.argmax()
+            x = lnL[imax] - lnL
+            y = lnL_partial[imax] - lnL_partial
+            w = y/(x+0.1)
+            indices = np.argsort(-w)
+        plt.scatter(np.log10(M[I-1])[mask][indices],
+                np.log10(U[I-1][i])[mask][indices], c = w[indices],
+                rasterized=True, marker='.', edgecolors = None, linewidths = 0)
+        plt.colorbar()
+        plt.xlabel("log10(M%i/GeV)"%I)
+        plt.ylabel("log10(U%i%i)"%(i,I))
+
+        print 'save...'
+        plt.savefig(OUTPATH + 'hist_NH_scatter_U%i%i'%(i,I)+"_"+name+'_'+tag+'.pdf')
+        print '...done'
+
+    for name in rhn.lnL_partial:
+        f(rhn, name)
+    #f(rhn, 'total')
 
 def show_lnL_hist(rhn):
     def f(rhn, name):
@@ -163,11 +212,11 @@ def show_Rorder(rhn):
     plt.hist(rhn.Rorder, range = [0, 6], bins = 6)
     plt.savefig(OUTPATH+"Rorder.pdf", dpi = 200)
 
-def show_U_vs_M(rhn):
+def show_U_vs_M(rhn, tag = "TAG"):
     print "U_vs_M..."
     lnL = rhn.lnL
     mask = lnL.max()-lnL < 2
-    mask_ft = get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.01)
+    mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 1e-3)
     mask2 = mask & mask_ft
 
     M = [rhn.M1, rhn.M2, rhn.M3]
@@ -186,7 +235,7 @@ def show_U_vs_M(rhn):
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][0])[mask2], marker = '.',
                 rasterized = True, color='g')
         plt.xlim([-1, 3.0])
-        plt.ylim([-17, -3])
+        plt.ylim([-10, -1])
         plt.ylabel("U%i"%I)
         plt.subplot(222)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][1])[mask], marker = '.',
@@ -194,7 +243,7 @@ def show_U_vs_M(rhn):
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][1])[mask2], marker = '.',
                 rasterized = True, color='g')
         plt.xlim([-1, 3.0])
-        plt.ylim([-17, -3])
+        plt.ylim([-10, -1])
         plt.ylabel("Ue%i"%I)
         plt.subplot(223)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][2])[mask], marker = '.',
@@ -202,7 +251,7 @@ def show_U_vs_M(rhn):
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][2])[mask2], marker = '.',
                 rasterized = True, color='g')
         plt.xlim([-1, 3.0])
-        plt.ylim([-17, -3])
+        plt.ylim([-10, -1])
         plt.ylabel("Um%i"%I)
         plt.subplot(224)
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][3])[mask], marker = '.',
@@ -211,9 +260,9 @@ def show_U_vs_M(rhn):
                 rasterized = True, color='g')
         plt.ylabel("Ut%i"%I)
         plt.xlim([-1, 3.0])
-        plt.ylim([-17, -3])
+        plt.ylim([-10, -1])
         plt.tight_layout(pad=0.3)
-        plt.savefig(OUTPATH+"U_vs_M%i.pdf"%I)
+        plt.savefig(OUTPATH+"U_vs_M%i_%s.pdf"%(I,tag))
 
 def show_lnL_mbb(rhn):
     lnL0 = -rhn.lnL_partial['lnL_0nubb']*2
@@ -266,11 +315,13 @@ def show_mbb(rhn):
     mask = (lnL.max() - lnL < 2)
 
     # Exclude non-protected points
-    mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 0.001)
+    mask_ft = get_protected(rhn, epsilon = 1e-2, eta = 1e-0, mbbK = 1e-4)
     mask &= mask_ft
 
     mask1 = mask & (md31 > 0)
+    print "Number of points NH:", mask1.sum()
     mask2 = mask & (md31 < 0)
+    print "Number of points IH:", mask2.sum()
     mbb = rhn.mbb*1e9
     mMin = rhn.mMin*1e9
     plt.scatter(np.log10(mMin), np.log10(mbb), rasterized = True, marker='.', color='0.5')
@@ -289,11 +340,25 @@ def get_protected(rhn, IJK = None, epsilon = np.inf, eta = np.inf, mbbK = np.inf
     def f(I, J, K):
         dM = abs(M[I] - M[J])
         m1 = dM < epsilon*(M[I]+M[J])/2
+        m1 &= M[I] > 10.
         deta = abs(ue[I]**2 + ue[J]**2)/(abs(ue[I])**2+abs(ue[J])**2)
         m2 = deta < eta
         p2 = 0.1**2  # 100 MeV  (ad hoc)
-        mbb = p2*abs(ue[K])**2/M[K]*1e9  # eV
-        m3 = mbb < mbbK  # eV
+        mbb_I = p2*abs(ue[I])**2/M[I]*1e9  # eV
+        mbb_J = p2*abs(ue[J])**2/M[J]*1e9  # eV
+        mbb_K = p2*abs(ue[K])**2/M[K]*1e9  # eV
+    #    mbb += p2*abs(ue[I])**2/M[I]*1e9  # eV
+    #    mbb += p2*abs(ue[J])**2/M[J]*1e9  # eV
+        #m3 = (mbb_K < mbbK) & (mbb_I > 0.01)
+        m3 = mbb_K < mbbK  # eV
+    #    print mbb[m1 & m2].min()
+    #    print mbb[m1 & m2].max()
+    #    print len(mbb[m1 & m2])
+    #    print (mbb[m1 & m2] > mbbK).sum()
+    #    quit()
+        print "First cut:", m1.sum()/len(m1)
+        print "Second cut:", (m1&m2).sum()/m1.sum()
+        print "Third cut:", (m1&m2&m3).sum()/(m1&m2).sum()
         mtot = m1 & m2 & m3
         return mtot
 
@@ -360,14 +425,15 @@ def triangle(rhn):
     plt.savefig(OUTPATH+"triangle.pdf")
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data2/RHN_1e-10.hdf5', MODEL = 'full',
-            print_keys = False)
+    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs8.hdf5', MODEL = 'diff',
+            print_keys = False, renormalize = False)
     #triangle(rhn)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    show_neutrino_masses(rhn)
-    #show_U_vs_M(rhn)
+    #show_U_vs_M(rhn, tag = 'cs11')
     #show_survival_fraction(rhn)
+    #show_neutrino_masses(rhn)
+    #show_high_couplings(rhn)
 
     #print_finetuning_counts(rhn)
     #show_phases(rhn)
@@ -379,4 +445,5 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
-    #show_lnL_hist(rhn)
+    #show_lnL_hist(rhn)c
+    show_lnL_relevance(rhn, i = 3, I = 1, tag = 'cs8')
