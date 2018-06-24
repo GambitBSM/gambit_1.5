@@ -148,8 +148,15 @@ class RHN_Chain(object):
             except KeyError:
                 print "WARNING: Did not find", name
                 pass
+        
+        try:
+            self.lnL_slide = get_data("#RHN_coupling_slide @NeutrinoBit::coupling_slide")
+        except KeyError:
+            self.lnL_slide = None
 
         self.lnL = get_data('LogLike')
+        if self.lnL_slide is not None:
+            self.lnL -= self.lnL_slide
 
         self.ordering = get_data('#ordering @NeutrinoBit::ordering')
 
