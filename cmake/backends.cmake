@@ -41,7 +41,42 @@
 #          (j.mckay14@imperial.ac.uk)
 #  \date 2016 Aug
 #
+# \author Janina Renk
+#          (janina.renk@fysik.su.se)
+# \data 2018 Jun
+#
 #************************************************
+
+
+# AlterBBN
+set(name "AlterBBN")
+set(ver "2.0.1")
+set(lib "libbbn")
+set(dl "https://alterbbn.hepforge.org/downloads/alterbbn_v2.0beta1.tgz")
+set(md5 "edaa32b164be7297b18392e1533ad6ed")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
+    BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
+          COMMAND sed ${dashi} -e "s#rcsU#rcs#g" src/Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= -fPIC ${GAMBIT_C_FLAGS}/g" Makefile
+          COMMAND ${CMAKE_MAKE_PROGRAM}
+          COMMAND ar x src/libbbn.a
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared -o ${lib}.so *.o" > make_so.sh
+          COMMAND chmod u+x make_so.sh
+          COMMAND ./make_so.sh
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 
 
 # DarkSUSY
