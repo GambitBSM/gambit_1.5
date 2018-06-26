@@ -425,12 +425,12 @@ def triangle(rhn):
     plt.savefig(OUTPATH+"triangle.pdf")
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs8.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs18.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
     #triangle(rhn)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    #show_U_vs_M(rhn, tag = 'cs11')
+    show_U_vs_M(rhn, tag = 'cs18')
     #show_survival_fraction(rhn)
     #show_neutrino_masses(rhn)
     #show_high_couplings(rhn)
@@ -446,4 +446,4 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)c
-    show_lnL_relevance(rhn, i = 3, I = 1, tag = 'cs8')
+    #show_lnL_relevance(rhn, i = 3, I = 1, tag = 'cs15')
