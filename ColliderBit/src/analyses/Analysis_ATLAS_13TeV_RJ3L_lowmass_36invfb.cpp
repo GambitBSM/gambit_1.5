@@ -599,7 +599,7 @@ namespace Gambit {
         HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
         for (HEPUtils::Jet* jet : event->jets()) {
           bool hasTag=has_tag(_eff2d, jet->eta(), jet->pT());
-          if (jet->pT() > 20. && fabs(jet->eta()) < 4.5) {
+          if (jet->pT() > 20. && fabs(jet->eta()) < 2.4) {
             if(jet->btag() && hasTag && fabs(jet->eta()) < 2.4 && jet->pT() > 20.){
               bJets.push_back(jet);
             } else {
@@ -980,7 +980,7 @@ namespace Gambit {
         //else return;
   
         if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true; 
-        if(m_is2Lep && m_nJets>2 ) m_is2L2JInt = true;
+        if(m_is2Lep && m_nJets>2 && m_nJets<5) m_is2L2JInt = true;
         if(m_is3Lep && m_nJets>0 ) m_is3LInt = true;
         // if(m_is3Lep && m_nJets>1)  m_is3Lep2Jet = true; //
         // if(m_is3Lep && m_nJets>2)  m_is3Lep3Jet = true; //
@@ -1954,21 +1954,21 @@ namespace Gambit {
           cutFlowVector_str[49] = "3LCOMP: p_IT ";
           cutFlowVector_str[50] = "3LCOMP: pT_CM ";*/
 
-          (j==43 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3) ||
+          (j==43 && m_is3LInt && ((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4) ||
 
-          (j==44 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105.) ||
+          (j==44 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105.) ||
 
-          (j==45 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100.) ||
+          (j==45 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100.) ||
 
-          (j==46 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0) ||
+          (j==46 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0) ||
 
-          (j==47 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0) ||
+          (j==47 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0) ||
 
-          (j==48 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100.) ||
+          (j==48 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100.) ||
 
-          (j==49 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80.) ||
+          (j==49 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80.) ||
 
-          (j==50 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80. && m_PTCM<25.) ||
+          (j==50 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80. && m_PTCM<25.) ||
 
           /* cutFlowVector_str[51] = "3LINT: Preselection ";
           cutFlowVector_str[52] = "3LINT: mll ";
@@ -2040,19 +2040,19 @@ namespace Gambit {
 
       virtual void collect_results() {
 
-         // double scale_by=1.;
-         // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-         // cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
-         // cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-         // cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
-         //      << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-         // for (int j=0; j<NCUTS; j++) {
-         //   cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
-         //        << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
-         //        << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
-         //        << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
-         // }
-         // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+          double scale_by=1.;
+          cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+          cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
+          cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+          cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
+               << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+          for (int j=0; j<NCUTS; j++) {
+            cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
+                 << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
+                 << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
+                 << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+          }
+          cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
         // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
         add_result(SignalRegionData("2L2JHIGH", 0,  {_num2L2JHIGH,  0.}, {1.9, 0.8}));     
