@@ -895,10 +895,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_tau = sminputs.mTau;  // GeV
       static double R_tau_SM = 0.973;
-      static double r_e_tau = pow(sminputs.mE,2)/pow(m_tau,2);
-      static double r_mu_tau = pow(sminputs.mMu,2)/pow(m_tau,2);
+      //static double r_e_tau = pow(sminputs.mE,2)/pow(m_tau,2);
+      //static double r_mu_tau = pow(sminputs.mMu,2)/pow(m_tau,2);
       double e_f_tau = 0.0, mu_f_tau = 0.0, d_r_tau = 1.0;
-      std::vector<double> M(3), r_I_tau(3), G_e_tau = {0.0,0.0,0.0}, G_mu_tau = {0.0,0.0,0.0};
+      std::vector<double> M(3)/*, r_I_tau(3), G_e_tau = {0.0,0.0,0.0}, G_mu_tau = {0.0,0.0,0.0}*/;
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       M[0] = *Param["M_1"];
@@ -907,7 +907,7 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        r_I_tau[i] = pow(M[i], 2)/pow(m_tau,2);
+        /*r_I_tau[i] = pow(M[i], 2)/pow(m_tau,2);
 
         if(M[i] + sminputs.mMu < m_tau)
         {
@@ -922,10 +922,20 @@ namespace Gambit
         }
         else
           G_e_tau[i] = 0.0;
-          
-        e_f_tau += Usq(0,i) * (G_e_tau[i] - 1.0);
-        mu_f_tau += Usq(1,i) * (G_mu_tau[i] - 1.0);
- 
+        */  
+        //e_f_tau += Usq(0,i) * (G_e_tau[i] - 1.0);
+        //mu_f_tau += Usq(1,i) * (G_mu_tau[i] - 1.0);
+
+        if(M[i] > m_tau)
+        {
+          e_f_tau  -= Usq(0,i);
+          mu_f_tau -= Usq(1,i);
+        }
+        else
+        {
+          e_f_tau += 0.0;
+          mu_f_tau += 0.0;
+        }
       }
 
       d_r_tau = ((1.0 + mu_f_tau)/(1.0 + e_f_tau));
@@ -968,7 +978,7 @@ namespace Gambit
       result_lepuniv = 0;
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
-      //result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
+      result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
