@@ -44,7 +44,7 @@ def show_high_couplings(rhn):
         ]
     quit()
 
-def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
+def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG', partial = False):
     M = [rhn.M1, rhn.M2, rhn.M3]
     U = [
         [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
@@ -57,11 +57,23 @@ def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
     def f(rhn, name):
         print name
         plt.clf()
+        plt.title(name)
         lnL = rhn.lnL[mask]
 
         if name == 'total':
             w = lnL
             indices = np.argsort(w)
+            vmax = 0
+            vmin = -2
+            cmap = 'viridis'
+        elif partial:
+            lnL_partial = rhn.lnL_partial[name][mask]
+            imax = lnL.argmax()
+            w = -lnL_partial[imax] + lnL_partial
+            indices = np.argsort(w)
+            vmax = 2
+            vmin = -2
+            cmap =  'terrain'
         else:
             lnL_partial = rhn.lnL_partial[name][mask]
             imax = lnL.argmax()
@@ -69,14 +81,19 @@ def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
             y = lnL_partial[imax] - lnL_partial
             w = y/(x+0.1)
             indices = np.argsort(-w)
+            vmin = None
+            vmax = None
+            cmap = 'viridis'
         plt.scatter(np.log10(M[I-1])[mask][indices],
                 np.log10(U[I-1][i])[mask][indices], c = w[indices],
-                rasterized=True, marker='.', edgecolors = None, linewidths = 0)
+                rasterized=True, marker='.', edgecolors = None, linewidths = 0,
+                vmin = vmin, vmax = vmax, cmap = cmap)
         plt.colorbar()
         plt.xlabel("log10(M%i/GeV)"%I)
         plt.ylabel("log10(U%i%i)"%(i,I))
 
         print 'save...'
+        plt.tight_layout(pad=0.3)
         plt.savefig(OUTPATH + 'hist_NH_scatter_U%i%i'%(i,I)+"_"+name+'_'+tag+'.pdf')
         print '...done'
 
@@ -390,7 +407,7 @@ def print_finetuning_counts(rhn):
     print get_protected(rhn, IJK = 312, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
     print get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
 
-def triangle(rhn):
+def triangle(rhn, tag = "TAG", Ue1th = 0., M1th = 0.):
     print "triangle..."
     x = rhn.Ue1/rhn.U1
     y = rhn.Um1/rhn.U1
@@ -398,39 +415,57 @@ def triangle(rhn):
     lnL = rhn.lnL
     md31 = rhn.md31
 
+    maskth = (rhn.Ue1 > Ue1th) & (rhn.M1 > M1th)
+
     plt.subplot(121)
+    plt.plot([0, 1], [1,0], "k:")
+    mask = (lnL.max() - lnL < 2) & (mMin < 1.01) & (md31 > 0)
+    mask &= maskth
+    plt.scatter(x[mask], y[mask], rasterized = True, color='0.5', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
     plt.xlabel("Ue1/U1")
     plt.ylabel("Um1/U1")
 
     plt.subplot(122)
+    plt.plot([0, 1], [1,0], 'k:')
+    mask = (lnL.max() - lnL < 2) & (mMin < 1.01) & (md31 < 0)
+    mask &= maskth
+    plt.scatter(x[mask], y[mask], rasterized = True, color='0.5', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
     plt.xlabel("Ue1/U1")
     plt.ylabel("Um1/U1")
 
-    plt.savefig(OUTPATH+"triangle.pdf")
+    plt.savefig(OUTPATH+"triangle_%s.pdf"%tag)
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs18.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_cs23.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
-    #triangle(rhn)
+    #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    show_U_vs_M(rhn, tag = 'cs18')
+    #show_U_vs_M(rhn, tag = 'cs22')
     #show_survival_fraction(rhn)
     #show_neutrino_masses(rhn)
     #show_high_couplings(rhn)
@@ -446,4 +481,4 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)c
-    #show_lnL_relevance(rhn, i = 3, I = 1, tag = 'cs15')
+    show_lnL_relevance(rhn, i = 3, I = 1, tag = 'p_cs23', partial = True)
