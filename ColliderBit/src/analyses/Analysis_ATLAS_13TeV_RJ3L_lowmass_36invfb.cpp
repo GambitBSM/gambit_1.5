@@ -2039,7 +2039,7 @@ namespace Gambit {
 
 
       virtual void collect_results() {
-
+/*
           double scale_by=1.;
           cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
           cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
@@ -2053,7 +2053,7 @@ namespace Gambit {
                  << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
           }
           cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-
+*/
         // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
         add_result(SignalRegionData("2L2JHIGH", 0,  {_num2L2JHIGH,  0.}, {1.9, 0.8}));     
         add_result(SignalRegionData("2L2JINT",  1,  {_num2L2JINT,   0.}, {2.4, 0.9})); 
