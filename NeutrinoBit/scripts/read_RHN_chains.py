@@ -168,7 +168,7 @@ class RHN_Chain(object):
         if self.lnL_slide is not None:
             self.lnL -= self.lnL_slide
 
-        self.ordering = get_data('#ordering @NeutrinoBit::ordering')
+        #self.ordering = get_data('#ordering @NeutrinoBit::ordering')
 
         self.U1 = self.Ue1 + self.Um1 + self.Ut1
         self.U2 = self.Ue2 + self.Um2 + self.Ut2
