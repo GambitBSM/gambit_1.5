@@ -44,7 +44,7 @@ def show_high_couplings(rhn):
         ]
     quit()
 
-def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
+def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG', partial = False):
     M = [rhn.M1, rhn.M2, rhn.M3]
     U = [
         [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
@@ -57,11 +57,23 @@ def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
     def f(rhn, name):
         print name
         plt.clf()
+        plt.title(name)
         lnL = rhn.lnL[mask]
 
         if name == 'total':
             w = lnL
             indices = np.argsort(w)
+            vmax = 0
+            vmin = -2
+            cmap = 'viridis'
+        elif partial:
+            lnL_partial = rhn.lnL_partial[name][mask]
+            imax = lnL.argmax()
+            w = -lnL_partial[imax] + lnL_partial
+            indices = np.argsort(w)
+            vmax = 2
+            vmin = -2
+            cmap =  'terrain'
         else:
             lnL_partial = rhn.lnL_partial[name][mask]
             imax = lnL.argmax()
@@ -69,14 +81,19 @@ def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG'):
             y = lnL_partial[imax] - lnL_partial
             w = y/(x+0.1)
             indices = np.argsort(-w)
+            vmin = None
+            vmax = None
+            cmap = 'viridis'
         plt.scatter(np.log10(M[I-1])[mask][indices],
                 np.log10(U[I-1][i])[mask][indices], c = w[indices],
-                rasterized=True, marker='.', edgecolors = None, linewidths = 0)
+                rasterized=True, marker='.', edgecolors = None, linewidths = 0,
+                vmin = vmin, vmax = vmax, cmap = cmap)
         plt.colorbar()
         plt.xlabel("log10(M%i/GeV)"%I)
         plt.ylabel("log10(U%i%i)"%(i,I))
 
         print 'save...'
+        plt.tight_layout(pad=0.3)
         plt.savefig(OUTPATH + 'hist_NH_scatter_U%i%i'%(i,I)+"_"+name+'_'+tag+'.pdf')
         print '...done'
 
@@ -159,8 +176,9 @@ def check_sum(rhn, exclude = []):
     print lnL1
     print lnL2
 
-def show_neutrino_masses(rhn):
+def show_neutrino_masses(rhn, tag = 'TAG', Ut1th = 0):
     print "mNu..."
+    Ut1 = rhn.Ut1
     mNu1 = rhn.mNu1*1e9
     mNu2 = rhn.mNu2*1e9
     mNu3 = rhn.mNu3*1e9
@@ -187,7 +205,7 @@ def show_neutrino_masses(rhn):
         plt.scatter(np.log10(mNu_1st)[mask], np.log10(mNu_3rd)[mask], marker='.', alpha = 0.01, rasterized = True)
 
         plt.subplot(222)
-        plt.hist(np.log10(mNu1)[mask], bins = 200, log=True)
+        plt.hist(np.log10(mNu1)[mask], bins = 200, log=True, color='r')
         plt.hist(np.log10(mNu2)[mask], bins = 200, log=True)
         plt.hist(np.log10(mNu3)[mask], bins = 200, log=True)
 
@@ -201,10 +219,12 @@ def show_neutrino_masses(rhn):
 
         plt.savefig(OUTPATH+filename, dpi = 200)
 
-    mask = (lnL.max() - lnL > 2) & (md31 > 0)
-    plot(mask, 'mNu_NH.pdf')
-    mask = (lnL.max() - lnL > 2) & (md31 < 0)
-    plot(mask, 'mNu_IH.pdf')
+    mask = (lnL.max() - lnL < 2) & (md31 > 0) & (Ut1 > Ut1th)
+    if mask.sum() > 0:
+        plot(mask, 'mNu_NH_%s.pdf'%tag)
+    mask = (lnL.max() - lnL < 2) & (md31 < 0) & (Ut1 > Ut1th)
+    if mask.sum() > 0:
+        plot(mask, 'mNu_IH_%s.pdf'%tag)
 
 def show_Rorder(rhn):
     print "Rorder..."
@@ -390,7 +410,7 @@ def print_finetuning_counts(rhn):
     print get_protected(rhn, IJK = 312, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
     print get_protected(rhn, epsilon = 1e-2, eta = 1e-2, mbbK = 0.1).sum()
 
-def triangle(rhn):
+def triangle(rhn, tag = "TAG", Ue1th = 0., M1th = 0.):
     print "triangle..."
     x = rhn.Ue1/rhn.U1
     y = rhn.Um1/rhn.U1
@@ -398,42 +418,150 @@ def triangle(rhn):
     lnL = rhn.lnL
     md31 = rhn.md31
 
+    maskth = (rhn.Ue1 > Ue1th) & (rhn.M1 > M1th)
+
     plt.subplot(121)
+    plt.plot([0, 1], [1,0], "k:")
+    mask = (lnL.max() - lnL < 2) & (mMin < 1.01) & (md31 > 0)
+    mask &= maskth
+    plt.scatter(x[mask], y[mask], rasterized = True, color='0.5', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 > 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
     plt.xlabel("Ue1/U1")
     plt.ylabel("Um1/U1")
 
     plt.subplot(122)
+    plt.plot([0, 1], [1,0], 'k:')
+    mask = (lnL.max() - lnL < 2) & (mMin < 1.01) & (md31 < 0)
+    mask &= maskth
+    plt.scatter(x[mask], y[mask], rasterized = True, color='0.5', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
     mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 < 0)
+    mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
     plt.xlabel("Ue1/U1")
     plt.ylabel("Um1/U1")
 
-    plt.savefig(OUTPATH+"triangle.pdf")
+    plt.savefig(OUTPATH+"triangle_%s.pdf"%tag)
+
+def show_RHN_masses(rhn, tag = "TAG", Ut1th = 0.):
+    print "RHN masses"
+    M1 = np.log10(rhn.M1)
+    M2 = np.log10(rhn.M2)
+    M3 = np.log10(rhn.M3)
+    dM2 = np.log10((rhn.M2-rhn.M1)/rhn.M1)
+    lnL = rhn.lnL
+    Ut1 = rhn.Ut1
+
+    mask1 = (lnL.max() - lnL < 2)
+    mask2 = mask1 & (Ut1 > Ut1th) 
+
+    plt.subplot(121)
+    plt.scatter(M1, dM2, marker='.', color = '0.5', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(M1[mask1], dM2[mask1], marker='.', color = 'y', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(M1[mask2], dM2[mask2], marker='.', color = 'r', rasterized =
+            True, linewidths = 0.)
+    plt.xlabel("log10 M1")
+    plt.ylabel("log10 (M2-M1)/M1")
+
+    plt.subplot(122)
+    plt.scatter(M1, M3, marker='.', color = '0.5', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(M1[mask1], M3[mask1], marker='.', color = 'y', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(M1[mask2], M3[mask2], marker='.', color = 'r', rasterized =
+            True, linewidths = 0.)
+    plt.xlabel("log10 M1")
+    plt.ylabel("log10 M3")
+
+    plt.title("RHN masses for run %s"%tag)
+    plt.tight_layout(pad = 0.3)
+    plt.savefig(OUTPATH+"RHN_masses_%s.pdf"%tag)
+
+def show_ImOmega(rhn, tag = "TAG", Ut1th = 0., real = False):
+    print "ImOmega"
+    ImOmega12 = rhn.ImOmega12
+    ImOmega23 = rhn.ImOmega23
+    ImOmega13 = rhn.ImOmega13
+    if real:
+        ImOmega12 = rhn.ReOmega12
+        ImOmega23 = rhn.ReOmega23
+        ImOmega13 = rhn.ReOmega13
+    lnL = rhn.lnL
+
+    mask1 = (lnL.max() - lnL < 2)
+    mask2 = mask1 & (rhn.Ut1 > Ut1th) 
+
+    plt.subplot(121)
+    plt.scatter(ImOmega12, ImOmega13, marker='.', color = '0.5', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(ImOmega12[mask1], ImOmega13[mask1], marker='.', color = 'y', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(ImOmega12[mask2], ImOmega13[mask2], marker='.', color = 'r', rasterized =
+            True, linewidths = 0.)
+    plt.xlabel("ImOmega12")
+    plt.ylabel("ImOmega13")
+    if real:
+        plt.xlabel("ReOmega12")
+        plt.ylabel("ReOmega13")
+
+    plt.subplot(122)
+    plt.scatter(ImOmega12, ImOmega23, marker='.', color = '0.5', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(ImOmega12[mask1], ImOmega23[mask1], marker='.', color = 'y', rasterized =
+            True, linewidths = 0.)
+    plt.scatter(ImOmega12[mask2], ImOmega23[mask2], marker='.', color = 'r', rasterized =
+            True, linewidths = 0.)
+    plt.xlabel("ImOmega12")
+    plt.ylabel("ImOmega23")
+    if real:
+        plt.xlabel("ReOmega12")
+        plt.ylabel("ReOmega13")
+
+    plt.title("ImOmega plots for run %s"%tag)
+    if real:
+        plt.title("ReOmega plots for run %s"%tag)
+    plt.tight_layout(pad = 0.3)
+    if real:
+        plt.savefig(OUTPATH+"ReOmega_%s.pdf"%tag)
+    else:
+        plt.savefig(OUTPATH+"ImOmega_%s.pdf"%tag)
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs18.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs27.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
-    #triangle(rhn)
+    #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    show_U_vs_M(rhn, tag = 'cs18')
+    #show_U_vs_M(rhn, tag = 'cs27')
     #show_survival_fraction(rhn)
-    #show_neutrino_masses(rhn)
     #show_high_couplings(rhn)
+
+    #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
+    #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
+    #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
+
+    show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
     #show_phases(rhn)
@@ -446,4 +574,4 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)c
-    #show_lnL_relevance(rhn, i = 3, I = 1, tag = 'cs15')
+    #show_lnL_relevance(rhn, i = 3, I = 1, tag = 'p_cs27', partial = True)
