@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
+from scipy.linalg import inv
 
 from read_RHN_chains import *
 
@@ -549,9 +550,9 @@ def show_ImOmega(rhn, tag = "TAG", Ut1th = 0., real = False):
 
 def get_couplings(rhn):
     N = len(rhn.Ue1)
-    R12 = np.zeros((N, 3, 3))
-    R13 = np.zeros((N, 3, 3))
-    R23 = np.zeros((N, 3, 3))
+    R12 = np.zeros((N, 3, 3), dtype='complex')
+    R13 = np.zeros((N, 3, 3), dtype='complex')
+    R23 = np.zeros((N, 3, 3), dtype='complex')
     R12[:, 0, 0] = np.cos(rhn.ReOmega12 + 1j*rhn.ImOmega12)
     R12[:, 1, 1] = np.cos(rhn.ReOmega12 + 1j*rhn.ImOmega12)
     R12[:, 0, 1] = np.sin(rhn.ReOmega12 + 1j*rhn.ImOmega12)
@@ -567,25 +568,22 @@ def get_couplings(rhn):
     R23[:, 1, 2] = np.sin(rhn.ReOmega23 + 1j*rhn.ImOmega23)
     R23[:, 2, 1] = -np.sin(rhn.ReOmega23 + 1j*rhn.ImOmega23)
     R23[:, 0, 0] = 1.
-    if rhn.ordering < 1:
-        R = np.array([r23.dot(r13).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
-        # TODO: Correct rest
-    elif rhn.ordering < 2:
-        R = R13.dot(R12).dot(R23)
-    elif rhn.ordering < 3:
-        R = R12.dot(R23).dot(R13)
-    elif rhn.ordering < 4:
-        R = R13.dot(R23).dot(R12)
-    elif rhn.ordering < 5:
-        R = R23.dot(R12).dot(R13)
-    else:
-        R = R12.dot(R13).dot(R23)
-    M = np.array([np.diag((M1, M2, M3)) for zip(rhn.M1, rhn.M2, rhn.M3)])
-    m = np.array([np.diag((m1, m2, m3)) for zip(rhn.mNu1, rhn.mNu2, rhn.mNu3)])
-    Ud = np.array([np.diag((np.exp(-1j*d/2), 1, np.exp(1j*d/2))) for d in rhn.deta])
-    Umd = np.array([np.diag((np.exp(1j*d/2), 1, np.exp(-1j*d/2))) for d in rhn.deta])
+    Ra = np.array([r23.dot(r13).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rb = np.array([r13.dot(r12).dot(r23) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rc = np.array([r12.dot(r23).dot(r13) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rd = np.array([r13.dot(r23).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+    Re = np.array([r23.dot(r12).dot(r13) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rf = np.array([r12.dot(r13).dot(r23) for r12, r13, r23 in zip(R12, R13, R23)])
+    R = np.where(rhn.Rorder < 1, Ra.T, np.where(rhn.Rorder < 2, Rb.T,
+        np.where(rhn.Rorder < 3, Rc.T, np.where(rhn.Rorder< 4, Rd.T,
+            np.where(rhn.Rorder < 5, Re.T, Rf.T))))).T
+    M = np.array([np.diag((M1, M2, M3)) for M1, M2, M3 in zip(rhn.M1, rhn.M2, rhn.M3)])
+    invM = np.array([np.diag((M1**-1, M2**-1, M3**-1)) for M1, M2, M3 in zip(rhn.M1, rhn.M2, rhn.M3)])
+    m = np.array([np.diag((m1, m2, m3)) for m1, m2, m3 in zip(rhn.mNu1, rhn.mNu2, rhn.mNu3)])
+    Ud = np.array([np.diag((np.exp(-1j*d/2), 1, np.exp(1j*d/2))) for d in rhn.deltaCP])
+    Umd = np.array([np.diag((np.exp(1j*d/2), 1, np.exp(-1j*d/2))) for d in rhn.deltaCP])
     A = np.array([np.diag((np.exp(1j*alpha1/2), np.exp(1j*alpha2/2), 1)) for
-        alpha1, alpha2 in zip(np.alpha1, np.alpha2)])
+        alpha1, alpha2 in zip(rhn.alpha1, rhn.alpha2)])
     V12 = np.zeros((N, 3, 3))
     V13 = np.zeros((N, 3, 3))
     V23 = np.zeros((N, 3, 3))
@@ -608,14 +606,36 @@ def get_couplings(rhn):
             for v23, ud, v13, umd, v12, a in 
             zip(V23, Ud, V13, Umd, V12, A)
             ])
-    Theta = 1j*np.array([unu.dot(mi**0.5).dot(Ri).dot(Mi**-0.5)
-        for unu, mi, Ri, Mi in zip(uNu, m, R, M)])
+    Theta = 1j*np.array([unu.dot(mi**0.5).dot(Ri).dot(invMi**0.5)
+        for unu, mi, Ri, invMi in zip(Unu, m, R, invM)])
 
-    print rhn.Ue1
-    print Theta[:, 0,0]
+    i = 0
+    #print R[i, 0, 0]
+    #print R[i, 1, 2]
+    #print R23[i, 0, 0]
+    #print R23[i, 1, 2]
+    #print Unu[i, 0, 0]
+    #print Unu[i, 1, 2]
+    #print m[i, 0, 0]
+    #print m[i, 1, 2]
+    #print M[i, 0, 0]
+    #print M[i, 1, 2]
+    #print Theta[i, 0, 0]
+    #print Theta[i, 1, 2]
+    #print M[i, 0, 0]
+    #print M[i, 1, 1]
+    #print M[i, 2, 2]
+    #print
+
+    a = rhn.Ue1
+    b = np.abs(Theta[:, 0,0])**2
+    print a
+    print b
+    plt.loglog(a, b, marker='x')
+    plt.savefig(OUTPATH+'test.pdf')
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs27.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data/test.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
