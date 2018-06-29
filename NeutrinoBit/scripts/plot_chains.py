@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
+from scipy.linalg import inv
 
 from read_RHN_chains import *
 
@@ -547,8 +548,77 @@ def show_ImOmega(rhn, tag = "TAG", Ut1th = 0., real = False):
     else:
         plt.savefig(OUTPATH+"ImOmega_%s.pdf"%tag)
 
+def get_couplings(rhn, Ut1th = 0):
+    m = rhn.Ut1 > Ut1th
+    N = m.sum()
+    R12 = np.zeros((N, 3, 3), dtype='complex')
+    R13 = np.zeros((N, 3, 3), dtype='complex')
+    R23 = np.zeros((N, 3, 3), dtype='complex')
+    R12[:, 0, 0] = np.cos(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 1, 1] = np.cos(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 0, 1] = np.sin(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 1, 0] = -np.sin(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 2, 2] = 1.
+    R13[:, 0, 0] = np.cos(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 2, 2] = np.cos(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 0, 2] = np.sin(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 2, 0] = -np.sin(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 1, 1] = 1.
+    R23[:, 1, 1] = np.cos(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 2, 2] = np.cos(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 1, 2] = np.sin(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 2, 1] = -np.sin(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 0, 0] = 1.
+    Ra = np.array([r23.dot(r13).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rb = np.array([r13.dot(r12).dot(r23) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rc = np.array([r12.dot(r23).dot(r13) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rd = np.array([r13.dot(r23).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+    Re = np.array([r23.dot(r12).dot(r13) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rf = np.array([r12.dot(r13).dot(r23) for r12, r13, r23 in zip(R12, R13, R23)])
+    R = np.where(rhn.Rorder[m] < 1, Ra.T, np.where(rhn.Rorder[m] < 2, Rb.T,
+        np.where(rhn.Rorder[m] < 3, Rc.T, np.where(rhn.Rorder[m]< 4, Rd.T,
+            np.where(rhn.Rorder[m] < 5, Re.T, Rf.T))))).T
+    M = np.array([np.diag((M1, M2, M3)) for M1, M2, M3 in zip(rhn.M1[m], rhn.M2[m], rhn.M3[m])])
+    invM = np.array([np.diag((M1**-1, M2**-1, M3**-1)) for M1, M2, M3 in zip(rhn.M1[m], rhn.M2[m], rhn.M3[m])])
+    mNu = np.array([np.diag((m1, m2, m3)) for m1, m2, m3 in zip(rhn.mNu1[m], rhn.mNu2[m], rhn.mNu3[m])])
+    Ud = np.array([np.diag((np.exp(-1j*d/2), 1, np.exp(1j*d/2))) for d in rhn.deltaCP[m]])
+    Umd = np.array([np.diag((np.exp(1j*d/2), 1, np.exp(-1j*d/2))) for d in rhn.deltaCP[m]])
+    A = np.array([np.diag((np.exp(1j*alpha1/2), np.exp(1j*alpha2/2), 1)) for
+        alpha1, alpha2 in zip(rhn.alpha1[m], rhn.alpha2[m])])
+    V12 = np.zeros((N, 3, 3))
+    V13 = np.zeros((N, 3, 3))
+    V23 = np.zeros((N, 3, 3))
+    V12[:, 0, 0] = np.cos(rhn.theta12[m])
+    V12[:, 1, 1] = np.cos(rhn.theta12[m])
+    V12[:, 0, 1] = np.sin(rhn.theta12[m])
+    V12[:, 1, 0] = -np.sin(rhn.theta12[m])
+    V12[:, 2, 2] = 1.
+    V13[:, 0, 0] = np.cos(rhn.theta13[m])
+    V13[:, 2, 2] = np.cos(rhn.theta13[m])
+    V13[:, 0, 2] = np.sin(rhn.theta13[m])
+    V13[:, 2, 0] = -np.sin(rhn.theta13[m])
+    V13[:, 1, 1] = 1.
+    V23[:, 1, 1] = np.cos(rhn.theta23[m])
+    V23[:, 2, 2] = np.cos(rhn.theta23[m])
+    V23[:, 1, 2] = np.sin(rhn.theta23[m])
+    V23[:, 2, 1] = -np.sin(rhn.theta23[m])
+    V23[:, 0, 0] = 1.
+    Unu = np.array([v23.dot(ud).dot(v13).dot(umd).dot(v12).dot(a)
+            for v23, ud, v13, umd, v12, a in 
+            zip(V23, Ud, V13, Umd, V12, A)
+            ])
+    Theta = 1j*np.array([unu.dot(mNui**0.5).dot(Ri).dot(invMi**0.5)
+        for unu, mNui, Ri, invMi in zip(Unu, mNu, R, invM)])
+
+    a = rhn.Ue1[m]
+    b = np.abs(Theta[:, 0,0])**2
+    print a
+    print b
+    plt.loglog(a, b, marker='x')
+    plt.savefig(OUTPATH+'test.pdf')
+
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs27.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_cs25.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
@@ -561,7 +631,8 @@ if __name__ == "__main__":
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
 
-    show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
+    get_couplings(rhn, Ut1th = 1e-6)
+    #show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
     #show_phases(rhn)

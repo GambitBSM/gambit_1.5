@@ -820,8 +820,8 @@ namespace Gambit
       }
 
       //d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
-      d_r_pi = e_f_pi / mu_f_pi;
-      R_pi = R_pi_SM * d_r_pi;
+      //R_pi = R_pi_SM * d_r_pi;
+      R_pi = e_f_pi / mu_f_pi;
  
     }
 
@@ -885,8 +885,8 @@ namespace Gambit
       }
 
 //      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
-      d_r_K = e_f_K/mu_f_K;
-      R_K = R_K_SM * d_r_K;
+//      R_K = R_K_SM * d_r_K;
+        R_K = e_f_K/mu_f_K;
     }
 
     void RHN_R_tau(double& R_tau)
