@@ -274,6 +274,23 @@ namespace Gambit
       if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
         Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
 
+      // std::cout << R(0, 0) << std::endl;
+      // std::cout << R(1, 2) << std::endl;
+      // std::cout << R_23(0, 0) << std::endl;
+      // std::cout << R_23(1, 2) << std::endl;
+      // std::cout << (*Dep::UPMNS)(0, 0) << std::endl;
+      // std::cout << (*Dep::UPMNS)(1, 2) << std::endl;
+      // std::cout << mnu(0, 0) << std::endl;
+      // std::cout << mnu(1, 2) << std::endl;
+      // std::cout << M_twid(0, 0) << std::endl;
+      // std::cout << M_twid(1, 2) << std::endl;
+      // std::cout << Theta(0, 0) << std::endl;
+      // std::cout << Theta(1, 2) << std::endl;
+      // std::cout << M_I(0, 0) << std::endl;
+      // std::cout << M_I(1, 1) << std::endl;
+      // std::cout << M_I(2, 2) << std::endl;
+      // std::cout << std::endl;
+
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
       Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();
       Eigen::Matrix3d ThetaNorm2 = (Theta * Theta.adjoint()).real();
