@@ -547,6 +547,73 @@ def show_ImOmega(rhn, tag = "TAG", Ut1th = 0., real = False):
     else:
         plt.savefig(OUTPATH+"ImOmega_%s.pdf"%tag)
 
+def get_couplings(rhn):
+    N = len(rhn.Ue1)
+    R12 = np.zeros((N, 3, 3))
+    R13 = np.zeros((N, 3, 3))
+    R23 = np.zeros((N, 3, 3))
+    R12[:, 0, 0] = np.cos(rhn.ReOmega12 + 1j*rhn.ImOmega12)
+    R12[:, 1, 1] = np.cos(rhn.ReOmega12 + 1j*rhn.ImOmega12)
+    R12[:, 0, 1] = np.sin(rhn.ReOmega12 + 1j*rhn.ImOmega12)
+    R12[:, 1, 0] = -np.sin(rhn.ReOmega12 + 1j*rhn.ImOmega12)
+    R12[:, 2, 2] = 1.
+    R13[:, 0, 0] = np.cos(rhn.ReOmega13 + 1j*rhn.ImOmega13)
+    R13[:, 2, 2] = np.cos(rhn.ReOmega13 + 1j*rhn.ImOmega13)
+    R13[:, 0, 2] = np.sin(rhn.ReOmega13 + 1j*rhn.ImOmega13)
+    R13[:, 2, 0] = -np.sin(rhn.ReOmega13 + 1j*rhn.ImOmega13)
+    R13[:, 1, 1] = 1.
+    R23[:, 1, 1] = np.cos(rhn.ReOmega23 + 1j*rhn.ImOmega23)
+    R23[:, 2, 2] = np.cos(rhn.ReOmega23 + 1j*rhn.ImOmega23)
+    R23[:, 1, 2] = np.sin(rhn.ReOmega23 + 1j*rhn.ImOmega23)
+    R23[:, 2, 1] = -np.sin(rhn.ReOmega23 + 1j*rhn.ImOmega23)
+    R23[:, 0, 0] = 1.
+    if rhn.ordering < 1:
+        R = np.array([r23.dot(r13).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+        # TODO: Correct rest
+    elif rhn.ordering < 2:
+        R = R13.dot(R12).dot(R23)
+    elif rhn.ordering < 3:
+        R = R12.dot(R23).dot(R13)
+    elif rhn.ordering < 4:
+        R = R13.dot(R23).dot(R12)
+    elif rhn.ordering < 5:
+        R = R23.dot(R12).dot(R13)
+    else:
+        R = R12.dot(R13).dot(R23)
+    M = np.array([np.diag((M1, M2, M3)) for zip(rhn.M1, rhn.M2, rhn.M3)])
+    m = np.array([np.diag((m1, m2, m3)) for zip(rhn.mNu1, rhn.mNu2, rhn.mNu3)])
+    Ud = np.array([np.diag((np.exp(-1j*d/2), 1, np.exp(1j*d/2))) for d in rhn.deta])
+    Umd = np.array([np.diag((np.exp(1j*d/2), 1, np.exp(-1j*d/2))) for d in rhn.deta])
+    A = np.array([np.diag((np.exp(1j*alpha1/2), np.exp(1j*alpha2/2), 1)) for
+        alpha1, alpha2 in zip(np.alpha1, np.alpha2)])
+    V12 = np.zeros((N, 3, 3))
+    V13 = np.zeros((N, 3, 3))
+    V23 = np.zeros((N, 3, 3))
+    V12[:, 0, 0] = np.cos(rhn.theta12)
+    V12[:, 1, 1] = np.cos(rhn.theta12)
+    V12[:, 0, 1] = np.sin(rhn.theta12)
+    V12[:, 1, 0] = -np.sin(rhn.theta12)
+    V12[:, 2, 2] = 1.
+    V13[:, 0, 0] = np.cos(rhn.theta13)
+    V13[:, 2, 2] = np.cos(rhn.theta13)
+    V13[:, 0, 2] = np.sin(rhn.theta13)
+    V13[:, 2, 0] = -np.sin(rhn.theta13)
+    V13[:, 1, 1] = 1.
+    V23[:, 1, 1] = np.cos(rhn.theta23)
+    V23[:, 2, 2] = np.cos(rhn.theta23)
+    V23[:, 1, 2] = np.sin(rhn.theta23)
+    V23[:, 2, 1] = -np.sin(rhn.theta23)
+    V23[:, 0, 0] = 1.
+    Unu = np.array([v23.dot(ud).dot(v13).dot(umd).dot(v12).dot(a)
+            for v23, ud, v13, umd, v12, a in 
+            zip(V23, Ud, V13, Umd, V12, A)
+            ])
+    Theta = 1j*np.array([unu.dot(mi**0.5).dot(Ri).dot(Mi**-0.5)
+        for unu, mi, Ri, Mi in zip(uNu, m, R, M)])
+
+    print rhn.Ue1
+    print Theta[:, 0,0]
+
 if __name__ == "__main__":
     rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs27.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
@@ -561,7 +628,8 @@ if __name__ == "__main__":
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
 
-    show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
+    get_couplings(rhn)
+    #show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
     #show_phases(rhn)
