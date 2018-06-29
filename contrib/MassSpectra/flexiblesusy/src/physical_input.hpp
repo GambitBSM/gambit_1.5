@@ -19,8 +19,8 @@
 #ifndef PHYSICAL_INPUT_H
 #define PHYSICAL_INPUT_H
 
+#include <array>
 #include <string>
-#include <vector>
 #include <Eigen/Core>
 
 namespace flexiblesusy {
@@ -35,24 +35,23 @@ namespace flexiblesusy {
 class Physical_input {
 public:
    /// available physical input parameters
-   enum Input : unsigned {
+   enum Input : int {
       alpha_em_0,                ///< [0] alpha_em(0), thompson limit
       mh_pole,                   ///< [1] SM Higgs pole mass
       NUMBER_OF_INPUT_PARAMETERS ///< number of possible input parameters
    };
 
    Physical_input();
-   ~Physical_input() {}
 
    double get(Input) const;    ///< get value of input parameter
    Eigen::ArrayXd get() const; ///< get all input parameter values
-   static std::vector<std::string> get_names(); ///< get names of input parameters
+   static const std::array<std::string, NUMBER_OF_INPUT_PARAMETERS>& get_names(); ///< get names of input parameters
    void set(Input, double);   ///< set value of input parameter
    void set(const Eigen::ArrayXd&); ///< set all input parameter values
    void reset();              ///< resets all input parameters to their defaults
 
 private:
-   double values[NUMBER_OF_INPUT_PARAMETERS]; ///< input parameter values
+   std::array<double, NUMBER_OF_INPUT_PARAMETERS> values; ///< input parameter values
 };
 
 } // namespace flexiblesusy

@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:48:09
+// File generated at Thu 10 May 2018 15:09:39
 
 #ifndef MSSMatMGUT_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 #define MSSMatMGUT_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 
 #include "MSSMatMGUT_high_scale_constraint.hpp"
 #include "MSSMatMGUT_input_parameters.hpp"
-#include "two_scale_constraint.hpp"
+#include "single_scale_constraint.hpp"
 
 namespace flexiblesusy {
 
@@ -33,14 +33,15 @@ class MSSMatMGUT;
 class Two_scale;
 
 template<>
-class MSSMatMGUT_high_scale_constraint<Two_scale> : public Constraint<Two_scale> {
+class MSSMatMGUT_high_scale_constraint<Two_scale> : public Single_scale_constraint {
 public:
-   MSSMatMGUT_high_scale_constraint();
+   MSSMatMGUT_high_scale_constraint() = default;
    MSSMatMGUT_high_scale_constraint(MSSMatMGUT<Two_scale>*);
-   virtual ~MSSMatMGUT_high_scale_constraint();
-   virtual void apply();
-   virtual double get_scale() const;
-   virtual void set_model(Two_scale_model*);
+   virtual ~MSSMatMGUT_high_scale_constraint() = default;
+   virtual void apply() override;
+   virtual double get_scale() const override;
+   virtual std::string name() const override { return "MSSMatMGUT high-scale constraint"; }
+   virtual void set_model(Model*) override;
 
    void clear();
    double get_initial_scale_guess() const;
@@ -54,9 +55,11 @@ protected:
    bool check_non_perturbative();
 
 private:
-   double scale;
-   double initial_scale_guess;
-   MSSMatMGUT<Two_scale>* model;
+   double scale{0.};
+   double initial_scale_guess{0.};
+   MSSMatMGUT<Two_scale>* model{nullptr};
+
+   void check_model_ptr() const;
 };
 
 } // namespace flexiblesusy

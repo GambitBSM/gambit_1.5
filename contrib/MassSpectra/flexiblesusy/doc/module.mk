@@ -6,59 +6,54 @@ DOC_MK       := \
 
 DOC_TMPL     := \
 		$(DIR)/mainpage.dox.in \
+		$(DIR)/addons.dox \
+		$(DIR)/building.dox \
+		$(DIR)/documentation.dox \
+		$(DIR)/FlexibleEFTHiggs.dox \
+		$(DIR)/hssusy.dox \
+		$(DIR)/install.dox \
+		$(DIR)/librarylink.dox \
+		$(DIR)/meta_code.dox \
 		$(DIR)/model_file.dox \
+		$(DIR)/package.dox \
 		$(DIR)/slha_input.dox \
-		$(DIR)/version.tex.in
+		$(DIR)/utilities.dox
 
 DOC_INSTALL_DIR := $(INSTALL_DIR)/$(DIR)
-
-DOC_VERSION_TEX := \
-		$(DIR)/version.tex
 
 HTML_OUTPUT_DIR := $(DIR)/html
 MAN_OUTPUT_DIR  := $(DIR)/man
 PDF_OUTPUT_DIR  := $(DIR)
+IMAGE_DIR       := $(DIR)/images
+IMAGES          := $(IMAGE_DIR)/Mh_Xt.png
 INDEX_PAGE      := $(HTML_OUTPUT_DIR)/index.html
 MAN_PAGE        := $(MAN_OUTPUT_DIR)/index.html
 DOXYFILE        := $(DIR)/Doxyfile
 DOXYGEN_MAINPAGE:= $(DIR)/mainpage.dox
-MANUAL_PDF      := $(PDF_OUTPUT_DIR)/flexiblesusy.pdf
-MANUAL_BIB      := \
-		$(DIR)/bibliography.bib
-MANUAL_STY      := \
-		$(DIR)/tikz-uml.sty \
-		$(DIR)/xstring.sty \
-		$(DIR)/xstring.tex
-MANUAL_SRC_MAIN := \
-		$(DIR)/flexiblesusy.tex
-MANUAL_SRC_CHAP := \
-		$(DIR)/chapters/overview.tex \
-		$(DIR)/chapters/quick_start.tex \
-		$(DIR)/chapters/usage.tex \
-		$(DIR)/chapters/output.tex
-MANUAL_SRC      := \
-		$(MANUAL_SRC_MAIN) \
-		$(MANUAL_SRC_CHAP) \
-		$(DOC_VERSION_TEX)
 
-PAPER_PDF       := $(PDF_OUTPUT_DIR)/flexiblesusy-paper.pdf
-PAPER_SRC       := $(DIR)/flexiblesusy-paper.tex
-PAPER_STY       := $(DIR)/tikz-uml.sty
+PAPER_PDF_1     := $(PDF_OUTPUT_DIR)/flexiblesusy-1.0.pdf
+PAPER_PDF_2     := $(PDF_OUTPUT_DIR)/flexiblesusy-2.0.pdf
+PAPER_PDF       := $(PAPER_PDF_1) $(PAPER_PDF_2)
+PAPER_SRC_1     := $(DIR)/flexiblesusy-1.0.tex
+PAPER_SRC_2     := $(DIR)/flexiblesusy-2.0.tex
+PAPER_SRC       := $(PAPER_SRC_1) $(PAPER_SRC_2)
+PAPER_STY       := $(DIR)/JHEP.bst $(DIR)/tikz-uml.sty
 
 LATEX_TMP       := \
-		$(patsubst %.pdf, %.aux, $(MANUAL_PDF) $(PAPER_PDF)) \
-		$(patsubst %.pdf, %.log, $(MANUAL_PDF) $(PAPER_PDF)) \
-		$(patsubst %.pdf, %.toc, $(MANUAL_PDF) $(PAPER_PDF)) \
-		$(patsubst %.pdf, %.out, $(MANUAL_PDF) $(PAPER_PDF)) \
-		$(patsubst %.pdf, %.spl, $(MANUAL_PDF) $(PAPER_PDF))
+		$(patsubst %.pdf, %.aux, $(PAPER_PDF)) \
+		$(patsubst %.pdf, %.bbl, $(PAPER_PDF)) \
+		$(patsubst %.pdf, %.blg, $(PAPER_PDF)) \
+		$(patsubst %.pdf, %.log, $(PAPER_PDF)) \
+		$(patsubst %.pdf, %.toc, $(PAPER_PDF)) \
+		$(patsubst %.pdf, %.out, $(PAPER_PDF)) \
+		$(patsubst %.pdf, %.spl, $(PAPER_PDF))
 
 .PHONY:         all-$(MODNAME) clean-$(MODNAME) distclean-$(MODNAME) \
-		$(INDEX_PAGE) $(MAN_PAGE) doc doc-html doc-man doc-pdf \
-		release-paper
+		$(INDEX_PAGE) $(MAN_PAGE) doc doc-html doc-man doc-pdf
 
 doc: all-$(MODNAME)
 
-doc-pdf: $(MANUAL_PDF) $(PAPER_PDF)
+doc-pdf: $(PAPER_PDF)
 
 doc-html: $(INDEX_PAGE)
 
@@ -74,11 +69,9 @@ install-src::
 		install -m u=rw,g=r,o=r $(DOC_MK) $(DOC_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(DOXYFILE) $(DOC_INSTALL_DIR)
 		install -m u=rw,g=r,o=r $(PAPER_SRC) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(MANUAL_SRC_MAIN) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(MANUAL_BIB) $(DOC_INSTALL_DIR)
-		install -m u=rw,g=r,o=r $(MANUAL_STY) $(DOC_INSTALL_DIR)
-		install -d $(DOC_INSTALL_DIR)/chapters
-		install -m u=rw,g=r,o=r $(MANUAL_SRC_CHAP) $(DOC_INSTALL_DIR)/chapters
+		install -m u=rw,g=r,o=r $(PAPER_STY) $(DOC_INSTALL_DIR)
+		install -d $(INSTALL_DIR)/$(IMAGE_DIR)
+		install -m u=rw,g=r,o=r $(IMAGES) $(INSTALL_DIR)/$(IMAGE_DIR)
 endif
 
 clean-$(MODNAME):
@@ -87,8 +80,7 @@ clean-$(MODNAME):
 distclean-$(MODNAME): clean-$(MODNAME)
 		-rm -rf $(HTML_OUTPUT_DIR)
 		-rm -f $(DOXYGEN_MAINPAGE)
-		-rm -f $(MANUAL_PDF) $(PAPER_PDF)
-		-rm -f $(DOC_VERSION_TEX)
+		-rm -f $(PAPER_PDF)
 
 clean::         clean-$(MODNAME)
 
@@ -100,7 +92,8 @@ $(INDEX_PAGE):
 		  echo "OUTPUT_DIRECTORY = $(HTML_OUTPUT_DIR)" ; \
 		  echo "EXCLUDE = $(ALLDEP) $(META_SRC) $(TEMPLATES) \
 		        $(TEST_SRC) $(TEST_META)"; \
-		  echo "EXCLUDE_PATTERNS = */test/*"; \
+		  echo "EXCLUDE_PATTERNS = */meta/* */test/*"; \
+		  echo "IMAGE_PATH = $(IMAGE_DIR)"; \
 		) | doxygen -
 
 $(MAN_PAGE):
@@ -109,20 +102,19 @@ $(MAN_PAGE):
 		  echo "OUTPUT_DIRECTORY = $(MAN_OUTPUT_DIR)" ; \
 		  echo "EXCLUDE = $(ALLDEP) $(META_SRC) $(TEMPLATES) \
 		        $(TEST_SRC) $(TEST_META)"; \
-		  echo "EXCLUDE_PATTERNS = */test/*"; \
+		  echo "EXCLUDE_PATTERNS = */meta/* */test/*"; \
+		  echo "IMAGE_PATH = $(IMAGE_DIR)"; \
 		  echo "GENERATE_MAN = YES"; \
 		  echo "GENERATE_HTML = NO"; \
 		) | doxygen -
 
-$(MANUAL_PDF): $(MANUAL_SRC)
+$(PAPER_PDF_1): $(PAPER_SRC_1) $(PAPER_STY)
 		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<
-		bibtex $(shell echo $< | rev | cut -d. -f2 | rev)
-		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<
-
-$(PAPER_PDF): $(PAPER_SRC) $(PAPER_STY)
 		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<
 		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<
 
-release-paper: $(PAPER_SRC) $(PAPER_STY)
-		git archive --worktree-attributes --prefix=$(PKGNAME)-paper/ \
-			--output=$(PKGNAME)-paper.tar.gz HEAD:doc $(notdir $^)
+$(PAPER_PDF_2): $(PAPER_SRC_2) $(PAPER_STY)
+		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<
+		bibtex $(PAPER_SRC_2:.tex=)
+		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<
+		pdflatex -output-directory $(PDF_OUTPUT_DIR) $<

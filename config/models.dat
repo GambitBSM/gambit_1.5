@@ -39,8 +39,23 @@ MSSM63atQ: |
    mq2_11, mq2_12, mq2_13, mq2_22, mq2_23, mq2_33                 - elements of the m_Q^2 mass (squared) mixing matrix
    mu2_11, mu2_12, mu2_13, mu2_22, mu2_23, mu2_33                 - elements of the m_u^2 mass (squared) mixing matrix
 
+MSSM63atQ_mA: |
+   As per the MSSM63atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+   Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the values of mHu2 and mHd2).
+
 MSSM63atMGUT: |
    As per the MSSM63atQ, but with Q=MGUT. Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM63atMGUT_mA: |
+   As per the MSSM63atMGUT, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+   Note that translation to MSSM63atMGUT requires the RGEs to already have been solved (in order to determine the values of mHu2 and mHd2).
+
+MSSM63atMSUSY: |
+   As per the MSSM63atQ, but with Q=MSUSY. Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the value of the SUSY scale).
+
+MSSM63atMSUSY_mA: |
+   As per the MSSM63atMSUSY, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+   Note that translation to MSSM63atMSUSY requires the RGEs to already have been solved (in order to determine the values of mHu2 and mHd2).
 
 MSSM30atQ: |
    As per the MSSM63atQ, but with all off-diagonal elements in the mass squared matrices and the trilinear coupling matrices set to zero. This leaves:
@@ -59,8 +74,20 @@ MSSM30atQ: |
    mq2_1, mq2_2, mq2_3 - diagonal elements of the m_q^2 mass (squared) mixing matrix
    mu2_1, mu2_2, mu2_3 - diagonal elements of the m_u^2 mass (squared) mixing matrix
 
+MSSM30atQ_mA: |
+   As per the MSSM30atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear). Note that the translation to MSSM30atQ requires the RGEs to already have been solved (in order to determine the values of mHd2 and mHu2).
+
 MSSM30atMGUT: |
-   As per the MSSM30atQ, but with Q=MGUT. Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+   As per the MSSM30atQ, but with Q=MGUT. Note that translation to MSSM30atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM30atMGUT_mA: |
+   As per the MSSM30atMGUT, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear). Note that the translation to MSSM30atMGUT requires the RGEs to already have been solved (in order to determine the values of mHd2 and mHu2).
+
+MSSM30atMSUSY: |
+   As per the MSSM30atQ, but with Q=MSUSY. Note that translation to MSSM30atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM30atMSUSY_mA: |
+   As per the MSSM30atMSUSY, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear). Note that the translation to MSSM30atMSUSY requires the RGEs to already have been solved (in order to determine the values of mHd2 and mHu2).
 
 MSSM25atQ: |
 
@@ -80,8 +107,20 @@ MSSM25atQ: |
    mq2_1, mq2_2, mq2_3 - diagonal elements of the m_q^2 mass (squared) mixing matrix
    mu2_1, mu2_2, mu2_3 - diagonal elements of the m_u^2 mass (squared) mixing matrix
 
+MSSM25atQ_mA: |
+   As per the MSSM25atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
 MSSM25atMGUT: |
-   As per the MSSM25atQ, but with Q=MGUT. Note that translation to MSSM63atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+   As per the MSSM25atQ, but with Q=MGUT. Note that translation to MSSM25atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM25atMGUT_mA: |
+   As per the MSSM25atMGUT, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
+MSSM25atMSUSY: |
+   As per the MSSM25atQ, but with Q=MSUSY. Note that translation to MSSM25atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM25atMSUSY_mA: |
+   As per the MSSM25atMSUSY, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 MSSM24atQ: |
 
@@ -101,6 +140,9 @@ MSSM24atQ: |
    mq2_1, mq2_2, mq2_3 - diagonal elements of the m_q^2 mass (squared) mixing matrix
    mu2_1, mu2_2, mu2_3 - diagonal elements of the m_u^2 mass (squared) mixing matrix
 
+MSSM24atQ_mA: |
+   As per the MSSM24atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
 MSSM20atQ: |
 
    As per the MSSM25atQ, but with degenerate first and second-generation sfermion mass parameters. This leaves:
@@ -118,6 +160,21 @@ MSSM20atQ: |
    ml2_12, ml2_3       - diagonal elements of the m_l^2 mass (squared) mixing matrix (same for first and second generations = ml2_12)
    mq2_12, mq2_3       - diagonal elements of the m_q^2 mass (squared) mixing matrix (same for first and second generations = mq2_12)
    mu2_12, mu2_3       - diagonal elements of the m_u^2 mass (squared) mixing matrix (same for first and second generations = mu2_12)
+
+MSSM20atQ_mA: |
+   As per the MSSM20atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
+MSSM20atMGUT: |
+   As per the MSSM20atQ, but with Q=MGUT. Note that translation to MSSM20atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM20atMGUT_mA: |
+   As per the MSSM20atMGUT, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
+MSSM20atMSUSY: |
+   As per the MSSM20atQ, but with Q=MSUSY. Note that translation to MSSM20atQ requires the RGEs to already have been solved (in order to determine the value of the GUT scale).
+
+MSSM20atMSUSY_mA: |
+   As per the MSSM20atMSUSY, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 MSSM19atQ: |
 
@@ -137,6 +194,9 @@ MSSM19atQ: |
    mq2_12, mq2_3       - diagonal elements of the m_q^2 mass (squared) mixing matrix (same for first and second generations = mq2_12)
    mu2_12, mu2_3       - diagonal elements of the m_u^2 mass (squared) mixing matrix (same for first and second generations = mu2_12)
 
+MSSM19atQ_mA: |
+   As per the MSSM19atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
 MSSM16atQ: |
 
    As per the MSSM19atQ, but with all first and second generation squark mass parameters degenerate and all first and second generation slepton mass parameters degenerate. This leaves:
@@ -149,22 +209,28 @@ MSSM16atQ: |
    SignMu                     - the sign of the mu parameter
    TanBeta                    - the ratio of the up-type to down-type Higgs vevs
    mHd2, mHu2                 - Higgs mass parameters
-   me2_3, ml2_3, mu2_3, md2_3 - third generation diagonal elements of the squark and slepton mass (squared) matrices
-   ml2_12, mq2_12             - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{e,l,q,u,d}2_3            - third generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{l,q}2_12,                - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
+
+MSSM16atQ_mA: |
+   As per the MSSM16atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 MSSM15atQ: |
 
    As per the MSSM16atQ, but with down-type and sleptonic trilinear couplings degenerate. This leaves:
 
    A0                         - Ad_33 = Ae_33 = A0 (diagonal element of trilinear coupling matrices for the down-type squarks and sleptons)
-   At                         - only non-zero element of the A_u trilinear coupling matrix
+   Au_3                       - only non-zero element of the A_u trilinear coupling matrix
    M1, M2, M3                 - gaugino masses
    Qin                        - the scale at which the parameters are defined
    SignMu                     - the sign of the mu parameter
    TanBeta                    - the ratio of the up-type to down-type Higgs vevs
    mHd2, mHu2                 - Higgs mass parameters
-   me2_3, ml2_3, mu2_3, md2_3 - third generation diagonal elements of the squark and slepton mass (squared) matrices
-   ml2_12, mq2_12             - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{e,l,q,u,d}2_3            - third generation diagonal elements of the squark and slepton mass (squared) matrices
+   m{l,q}2_12,                - first and second generation diagonal elements of the squark and slepton mass (squared) matrices
+
+MSSM15atQ_mA: |
+   As per the MSSM15atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 MSSM11atQ: |
 
@@ -181,6 +247,9 @@ MSSM11atQ: |
    mq2                        - all diagonal elements of squark mass (squared) matrices
    ml2                        - all diagonal elements of slepton mass (squared) matrices
 
+MSSM11atQ_mA: |
+   As per the MSSM11atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
 MSSM10atQ: |
 
    As per the MSSM11atQ, but with no sleptonic trilinear coupings. This leaves:
@@ -194,6 +263,9 @@ MSSM10atQ: |
    mHd2, mHu2                 - Higgs mass parameters
    mq2                        - all diagonal elements of squark mass (squared) matrices
    ml2                        - all diagonal elements of slepton mass (squared) matrices
+
+MSSM10atQ_mA: |
+   As per the MSSM10atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 MSSM10batQ: |
 
@@ -209,6 +281,9 @@ MSSM10batQ: |
    mHd2, mHu2                 - Higgs mass parameters
    mf2                        - all diagonal elements of squark and slepton mass (squared) matrices
 
+MSSM10batQ_mA: |
+   As per the MSSM10batQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
 MSSM10catQ: |
 
    As per the MSSM15atQ, but with a universal trilinear coupling A0, 3rd generation squark mass mq2_3 and slepton mass ml2 parameters. This leaves:
@@ -221,6 +296,9 @@ MSSM10catQ: |
    mHd2, mHu2                 - Higgs mass parameters
    mq2_12, mq_3               - non-zero elements of the squark mass (squared) matrices, unified for first and second generations
    ml2                        - all diagonal elements of the slepton mass (squared) matrices
+
+MSSM10catQ_mA: |
+   As per the MSSM10catQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 MSSM9atQ: |
 
@@ -235,6 +313,25 @@ MSSM9atQ: |
    mHd2, mHu2                 - Higgs mass parameters
    mf2                        - all diagonal elements of squark and slepton mass (squared) matrices
 
+MSSM9atQ_mA: |
+   As per the MSSM9atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
+MSSM9batQ: |
+
+   As per the MSSM15atQ, but with universal sfermion masses except for left-handed 3rd-generation squarks, and only a top-type trilinear coupling. This leaves:
+
+   Au_3                       - only non-zero element of the A_u trilinear coupling matrix
+   M1, M2, M3                 - gaugino masses
+   Qin                        - the scale at which the parameters are defined
+   SignMu                     - the sign of the mu parameter
+   TanBeta                    - the ratio of the up-type to down-type Higgs vevs
+   mHd2, mHu2                 - Higgs mass parameters
+   mq2_3                      - third-generation diagonal element of mq^2 matrix (left-handed squarks)
+   mf2                        - all other diagonal elements of squark and slepton mass (squared) matrices
+
+MSSM9batQ_mA: |
+   As per the MSSM9batQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
+
 MSSM7atQ: |
 
    As per the MSSM9atQ, but assuming a Grand Unified Theory (GUT)-inspired relationship between the gaugino masses. See the GAMBIT core paper for details. This leaves:
@@ -247,6 +344,9 @@ MSSM7atQ: |
    TanBeta                    - the ratio of the up-type to down-type Higgs vevs
    mHd2, mHu2                 - Higgs mass parameters
    mf2                        - all diagonal elements of squark and slepton mass (squared) matrices
+
+MSSM7atQ_mA: |
+   As per the MSSM7atQ, but with parameters SignMu, mHd2 and mHu2 replaced by mA (the DRbar mass of the A boson) and mu (the SUSY Higgs bilinear).
 
 NUHM2: |
 
@@ -279,10 +379,6 @@ CMSSM: |
    M12          - universal gaugino mass
    SignMu       - the sign of the mu parameter
    TanBeta      - the ratio of the up-type to down-type Higgs vevs
-
-MSSM25atQ: |
-
-   As per the MSSM30atQ, but with first and second generation trilinear couplings degenerate in the slepton sector, and set to zero for squarks. This leaves:
 
 StandardModel_SLHA2: |
    Contains all SM parameters except the Higgs mass, which is separated out since this is often a prediction of BSM physics models. Models without their own Higgs sector can be scanned in tandem with an extra model that contains the Higgs mass as a parameter. The StandardModel_SLHA2 model contains the SM parameters that are defined in the SMINPUTS, VCKMIN and UPMNSIN blocks of the second SUSY Les Houches Accord (SLHA2):

@@ -16,14 +16,14 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:48:18
+// File generated at Thu 10 May 2018 14:56:06
 
 #ifndef CMSSMNoFV_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 #define CMSSMNoFV_TWO_SCALE_HIGH_SCALE_CONSTRAINT_H
 
 #include "CMSSMNoFV_high_scale_constraint.hpp"
 #include "CMSSMNoFV_input_parameters.hpp"
-#include "two_scale_constraint.hpp"
+#include "single_scale_constraint.hpp"
 
 namespace flexiblesusy {
 
@@ -33,14 +33,15 @@ class CMSSMNoFV;
 class Two_scale;
 
 template<>
-class CMSSMNoFV_high_scale_constraint<Two_scale> : public Constraint<Two_scale> {
+class CMSSMNoFV_high_scale_constraint<Two_scale> : public Single_scale_constraint {
 public:
-   CMSSMNoFV_high_scale_constraint();
+   CMSSMNoFV_high_scale_constraint() = default;
    CMSSMNoFV_high_scale_constraint(CMSSMNoFV<Two_scale>*);
-   virtual ~CMSSMNoFV_high_scale_constraint();
-   virtual void apply();
-   virtual double get_scale() const;
-   virtual void set_model(Two_scale_model*);
+   virtual ~CMSSMNoFV_high_scale_constraint() = default;
+   virtual void apply() override;
+   virtual double get_scale() const override;
+   virtual std::string name() const override { return "CMSSMNoFV high-scale constraint"; }
+   virtual void set_model(Model*) override;
 
    void clear();
    double get_initial_scale_guess() const;
@@ -54,9 +55,11 @@ protected:
    bool check_non_perturbative();
 
 private:
-   double scale;
-   double initial_scale_guess;
-   CMSSMNoFV<Two_scale>* model;
+   double scale{0.};
+   double initial_scale_guess{0.};
+   CMSSMNoFV<Two_scale>* model{nullptr};
+
+   void check_model_ptr() const;
 };
 
 } // namespace flexiblesusy

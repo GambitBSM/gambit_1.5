@@ -16,12 +16,18 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:51:01
+// File generated at Thu 10 May 2018 15:12:55
+
+#include "config.h"
 
 #include "CMSSM_input_parameters.hpp"
 #include "CMSSM_observables.hpp"
-#include "CMSSM_spectrum_generator.hpp"
 #include "CMSSM_slha_io.hpp"
+#include "CMSSM_spectrum_generator.hpp"
+
+#ifdef ENABLE_TWO_SCALE_SOLVER
+#include "CMSSM_two_scale_spectrum_generator.hpp"
+#endif
 
 #include "command_line_options.hpp"
 #include "lowe.h"
@@ -44,15 +50,18 @@ void print_usage()
       "  --SignMu=<value>\n"
       "  --Azero=<value>\n"
 
+      "  --solver-type=<value>             an integer corresponding\n"
+      "                                    to the solver type to use\n"
       "  --help,-h                         print this help message"
              << std::endl;
 }
 
-void set_command_line_parameters(int argc, char* argv[],
-                                 CMSSM_input_parameters& input)
+void set_command_line_parameters(const Dynamic_array_view<char*>& args,
+                                 CMSSM_input_parameters& input,
+                                 int& solver_type)
 {
-   for (int i = 1; i < argc; ++i) {
-      const char* option = argv[i];
+   for (int i = 1; i < args.size(); ++i) {
+      const auto option = args[i];
 
       if(Command_line_options::get_parameter_value(option, "--m0=", input.m0))
          continue;
@@ -70,6 +79,10 @@ void set_command_line_parameters(int argc, char* argv[],
          continue;
 
       
+      if (Command_line_options::get_parameter_value(
+             option, "--solver-type=", solver_type))
+         continue;
+
       if (strcmp(option,"--help") == 0 || strcmp(option,"-h") == 0) {
          print_usage();
          exit(EXIT_SUCCESS);
@@ -80,54 +93,75 @@ void set_command_line_parameters(int argc, char* argv[],
    }
 }
 
+template<class solver_type>
+int run_solver(const CMSSM_input_parameters& input)
+{
+   Physical_input physical_input;
+   softsusy::QedQcd qedqcd;
+
+   Spectrum_generator_settings settings;
+   settings.set(Spectrum_generator_settings::precision, 1.0e-4);
+
+   CMSSM_spectrum_generator<solver_type> spectrum_generator;
+   spectrum_generator.set_settings(settings);
+   spectrum_generator.run(qedqcd, input);
+
+   const auto model = std::get<0>(spectrum_generator.get_models_slha());
+
+   CMSSM_scales scales;
+   scales.HighScale = spectrum_generator.get_high_scale();
+   scales.SUSYScale = spectrum_generator.get_susy_scale();
+   scales.LowScale  = spectrum_generator.get_low_scale();
+   scales.pole_mass_scale = spectrum_generator.get_pole_mass_scale();
+
+   const auto observables = calculate_observables(
+      model, qedqcd, physical_input, scales.pole_mass_scale);
+
+   // SLHA output
+   SLHAea::Coll slhaea(CMSSM_slha_io::fill_slhaea(
+                          model, qedqcd, scales, observables));
+
+   std::cout << slhaea;
+
+   return spectrum_generator.get_exit_code();
+}
+
+int run(int solver_type, const CMSSM_input_parameters& input)
+{
+   int exit_code = 0;
+
+   switch (solver_type) {
+   case 0:
+#ifdef ENABLE_TWO_SCALE_SOLVER
+   case 1:
+      exit_code = run_solver<Two_scale>(input);
+      if (!exit_code || solver_type != 0) break;
+#endif
+
+   default:
+      if (solver_type != 0) {
+         ERROR("unknown solver type: " << solver_type);
+         exit_code = -1;
+      }
+      break;
+   }
+
+   return exit_code;
+}
+
 } // namespace flexiblesusy
 
 
 int main(int argc, char* argv[])
 {
    using namespace flexiblesusy;
-   typedef Two_scale algorithm_type;
 
    CMSSM_input_parameters input;
-   set_command_line_parameters(argc, argv, input);
+   int solver_type = 0;
+   set_command_line_parameters(make_dynamic_array_view(&argv[0], argc), input,
+                               solver_type);
 
-   Physical_input physical_input;
-   softsusy::QedQcd qedqcd;
-
-   try {
-      qedqcd.to(qedqcd.displayPoleMZ()); // run SM fermion masses to MZ
-   } catch (const std::string& s) {
-      ERROR(s);
-      return EXIT_FAILURE;
-   }
-
-   CMSSM_spectrum_generator<algorithm_type> spectrum_generator;
-   spectrum_generator.set_precision_goal(1.0e-4);
-   spectrum_generator.set_beta_zero_threshold(1e-11);
-   spectrum_generator.set_max_iterations(0);         // 0 == automatic
-   spectrum_generator.set_calculate_sm_masses(0);    // 0 == no
-   spectrum_generator.set_parameter_output_scale(0); // 0 == susy scale
-   spectrum_generator.set_pole_mass_loop_order(2);   // 2-loop
-   spectrum_generator.set_ewsb_loop_order(2);        // 2-loop
-   spectrum_generator.set_beta_loop_order(2);        // 2-loop
-   spectrum_generator.set_threshold_corrections_loop_order(1); // 1-loop
-
-   spectrum_generator.run(qedqcd, input);
-
-   const int exit_code = spectrum_generator.get_exit_code();
-   const CMSSM_slha<algorithm_type> model(spectrum_generator.get_model());
-
-   CMSSM_scales scales;
-   scales.HighScale = spectrum_generator.get_high_scale();
-   scales.SUSYScale = spectrum_generator.get_susy_scale();
-   scales.LowScale  = spectrum_generator.get_low_scale();
-
-   const CMSSM_observables observables(calculate_observables(model, qedqcd, physical_input));
-
-   // SLHA output
-   SLHAea::Coll slhaea(CMSSM_slha_io::fill_slhaea(model, qedqcd, scales, observables));
-
-   std::cout << slhaea;
+   const int exit_code = run(solver_type, input);
 
    return exit_code;
 }

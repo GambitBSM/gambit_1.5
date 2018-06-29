@@ -97,19 +97,57 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # Include cmake utility scripts, including colour definitions.
 include(cmake/utilities.cmake)
 
-# Check for Python and required libs
+# Check for Python interpreter
 find_package(PythonInterp 2 REQUIRED)
-if (PYTHON_VERSION_MAJOR GREATER 2)
-  message(FATAL_ERROR "\nGAMBIT requires Python 2.  \nIf you need to set the path to the Python interpreter manually, "
+if (PYTHON_VERSION_MAJOR GREATER 2 OR PYTHON_VERSION_MINOR LESS 7)
+  message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
                       "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
 endif()
-if (PYTHON_VERSION_MINOR LESS 6)
-  message("${Red}   Python version < 2.6.  GAMBIT has not been tested with this version; upgrade Python if you experience problems.${ColourReset}")
+
+# Check for pybind11
+set(MIN_pybind11_VERSION "2.2.0")
+set(PREFERRED_pybind11_VERSION "2.2.1")
+set(pybind11_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/pybind11")
+find_package(pybind11 QUIET)
+if(NOT pybind11_FOUND AND EXISTS "${pybind11_CONTRIB_DIR}")
+  use_contributed_pybind11()
 endif()
-find_package(PythonLibs)
+if(pybind11_FOUND)
+  if(pybind11_VERSION VERSION_LESS MIN_pybind11_VERSION)
+    message("${BoldRed}   Found pybind11 ${pybind11_VERSION}. GAMBIT requires at least v${MIN_pybind11_VERSION}.${ColourReset}")
+    set(pybind11_FOUND FALSE)
+  else()
+    message("${BoldYellow}   Found pybind11 ${pybind11_VERSION} at ${pybind11_DIR}.${ColourReset}")
+    include_directories("${PYTHON_INCLUDE_DIRS};${PYBIND11_INCLUDE_DIR}")
+  endif()
+else()
+  message("${BoldRed}   The pybind11 library is not properly installed.${ColourReset}")
+endif()
+if(NOT pybind11_FOUND AND NOT EXISTS "${pybind11_CONTRIB_DIR}")
+  message("${BoldRed}   CMake will now download and install pybind11 v${PREFERRED_pybind11_VERSION}.${ColourReset}")
+  execute_process(RESULT_VARIABLE result COMMAND git clone https://github.com/pybind/pybind11.git ${pybind11_CONTRIB_DIR})
+  if(${result} STREQUAL "0")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${pybind11_CONTRIB_DIR} git checkout -q v${PREFERRED_pybind11_VERSION})
+    use_contributed_pybind11()
+    include_directories("${PYTHON_INCLUDE_DIRS};${PYBIND11_INCLUDE_DIR}")
+  else()
+    message("${BoldRed}   Attempt to clone git repository for pybind11 failed.  This may be because you are disconnected from the internet.\n   "
+            "Otherwise, your git installation may be faulty. Errors about missing .so files are usually due to\n   "
+            "your git installation being linked to a buggy version of libcurl.  In that case, try reinstalling libcurl.${ColourReset}")
+  endif()
+endif()
+set(HAVE_PYBIND11 "${pybind11_FOUND}")
+
+# Check for required Python libraries
+if(pybind11_FOUND)
+  find_package(PythonLibs REQUIRED)
+else()
+  find_package(PythonLibs)
+endif()
 foreach(module yaml os re datetime sys getopt shutil itertools)
   find_python_module(${module} REQUIRED)
 endforeach()
+
 
 # Check for axel
 find_program(axel_FOUND axel)
@@ -239,6 +277,9 @@ else()
       message("${BoldRed}   Mathematica not found. Backends using Mathematica will be disabled.${ColourReset}")
       set(HAVE_MATHEMATICA 0)
     endif()
+  elseif(DEFINED Mathematica_Invalid_License)
+    message("${BoldRed}   Mathematica found but with an invalid license. Backends using Mathematica will be disabled.${ColourReset}")
+    set(HAVE_MATHEMATICA 0)
   else()
     message("${BoldRed}   Missing library libuuid required for WSTP. Mathematica will be disabled.${ColourReset}")
     set(HAVE_MATHEMATICA 0)
@@ -335,6 +376,13 @@ endif()
 # Generate the cmake_variables.hpp file
 include(cmake/preprocessor.cmake)
 
+# Generate particle_database.cpp from particle_database.yaml.
+if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
+  set(particle_harvester ${PROJECT_SOURCE_DIR}/Models/scripts/particle_harvester.py ${PROJECT_BINARY_DIR} -x __not_a_real_name__,${itch_with_commas})
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${particle_harvester} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+  message("${Yellow}-- Generated particle_database.cpp from particle_database.yaml.${ColourReset}")
+endif()
+
 # Identify the different harvester scripts
 set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
 set(BACKEND_HARVESTER ${PROJECT_SOURCE_DIR}/Backends/scripts/backend_harvester.py)
@@ -343,19 +391,19 @@ set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.p
 set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
 # Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
-# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp.
-file(GLOB MODEL_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
-                                  "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
-file(GLOB BACKEND_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
-                                  "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
-file(GLOB PRINTER_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"
-                                  "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
-file(GLOB MODULE_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
-                                  "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
-string (REPLACE "//" "/" MODEL_HARVESTER_FILES   "${MODEL_HARVESTER_FILES}")    # (GLOB creates erroneous double slashes)
-string (REPLACE "//" "/" BACKEND_HARVESTER_FILES "${BACKEND_HARVESTER_FILES}")
-string (REPLACE "//" "/" PRINTER_HARVESTER_FILES "${PRINTER_HARVESTER_FILES}")
-string (REPLACE "//" "/" MODULE_HARVESTER_FILES  "${MODULE_HARVESTER_FILES}")
+# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
+file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
+file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
+file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
+file(GLOB MODULE_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
+                                   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
+string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")   # (GLOB creates erroneous double slashes)
+string (REPLACE "//" "/" BACKEND_HARVESTER_FILES  "${BACKEND_HARVESTER_FILES}")
+string (REPLACE "//" "/" PRINTER_HARVESTER_FILES  "${PRINTER_HARVESTER_FILES}")
+string (REPLACE "//" "/" MODULE_HARVESTER_FILES   "${MODULE_HARVESTER_FILES}")
 list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//priors_rollcall.hpp"
                                         "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//test_function_rollcall.hpp")
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")

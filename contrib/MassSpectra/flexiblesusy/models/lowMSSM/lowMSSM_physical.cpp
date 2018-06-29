@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:49:06
+// File generated at Thu 10 May 2018 15:06:28
 
 #include "lowMSSM_physical.hpp"
 #include "slha_io.hpp"
@@ -26,32 +26,6 @@
 #define LOCALPHYSICAL(p) p
 
 namespace flexiblesusy {
-
-lowMSSM_physical::lowMSSM_physical()
-   :
-    MVG(0), MGlu(0), MFv(Eigen::Array<double,3,1>::Zero()), MSd(Eigen::Array<
-       double,6,1>::Zero()), MSv(Eigen::Array<double,3,1>::Zero()), MSu(
-       Eigen::Array<double,6,1>::Zero()), MSe(Eigen::Array<double,6,1>::Zero()),
-       Mhh(Eigen::Array<double,2,1>::Zero()), MAh(Eigen::Array<double,2,1>::Zero()
-       ), MHpm(Eigen::Array<double,2,1>::Zero()), MChi(Eigen::Array<double,4,1>
-       ::Zero()), MCha(Eigen::Array<double,2,1>::Zero()), MFe(Eigen::Array<double,
-       3,1>::Zero()), MFd(Eigen::Array<double,3,1>::Zero()), MFu(Eigen::Array<
-       double,3,1>::Zero()), MVWm(0), MVP(0), MVZ(0)
-
-   , ZD(Eigen::Matrix<double,6,6>::Zero()), ZV(Eigen::Matrix<double,3,3>::Zero(
-      )), ZU(Eigen::Matrix<double,6,6>::Zero()), ZE(Eigen::Matrix<double,6,6>
-      ::Zero()), ZH(Eigen::Matrix<double,2,2>::Zero()), ZA(Eigen::Matrix<double,2,
-      2>::Zero()), ZP(Eigen::Matrix<double,2,2>::Zero()), ZN(Eigen::Matrix<
-      std::complex<double>,4,4>::Zero()), UM(Eigen::Matrix<std::complex<double>,2,
-      2>::Zero()), UP(Eigen::Matrix<std::complex<double>,2,2>::Zero()), ZEL(
-      Eigen::Matrix<std::complex<double>,3,3>::Zero()), ZER(Eigen::Matrix<
-      std::complex<double>,3,3>::Zero()), ZDL(Eigen::Matrix<std::complex<double>,3
-      ,3>::Zero()), ZDR(Eigen::Matrix<std::complex<double>,3,3>::Zero()), ZUL(
-      Eigen::Matrix<std::complex<double>,3,3>::Zero()), ZUR(Eigen::Matrix<
-      std::complex<double>,3,3>::Zero()), ZZ(Eigen::Matrix<double,2,2>::Zero())
-
-{
-}
 
 void lowMSSM_physical::clear()
 {
@@ -766,6 +740,8 @@ void lowMSSM_physical::print(std::ostream& ostr) const
    ostr << "MFd = " << MFd.transpose() << '\n';
    ostr << "MFu = " << MFu.transpose() << '\n';
    ostr << "MVWm = " << MVWm << '\n';
+   ostr << "MVP = " << MVP << '\n';
+   ostr << "MVZ = " << MVZ << '\n';
 
    ostr << "----------------------------------------\n"
            "pole mass mixing matrices:\n"

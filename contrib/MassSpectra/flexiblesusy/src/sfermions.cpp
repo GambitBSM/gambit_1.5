@@ -32,15 +32,15 @@ namespace sfermions {
 
 static const double oneOverRoot2 = 1./sqrt(2.); // 0.7071067811865475
 
-const double Isospin[NUMBER_OF_MSSM_SPARTICLES] = {
+const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Isospin = {
    0.5, -0.5, 0.5, -0.5
 };
 
-const double Hypercharge_left[NUMBER_OF_MSSM_SPARTICLES] = {
+const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_left = {
    1./3., 1./3., -1., -1.
 };
 
-const double Hypercharge_right[NUMBER_OF_MSSM_SPARTICLES] = {
+const std::array<double, NUMBER_OF_MSSM_SPARTICLES> Hypercharge_right = {
    -4./3., 2./3., 0., 2.
 };
 

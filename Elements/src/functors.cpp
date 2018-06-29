@@ -367,9 +367,17 @@ namespace Gambit
     /// Test whether the functor is allowed (either explicitly or implicitly) to be used with a given model
     bool functor::modelAllowed(str model)
     {
-      if (allowedModels.empty() and allowedGroupCombos.empty()) return true;
-      if (allowed_parent_or_friend_exists(model)) return true;
-      return false;
+      bool allowed = false;
+      /// DEBUG! See what models are allowed for this functor
+      // std::cout << "Checking allowedModels set for functor "<<myLabel<<std::endl;
+      // for(std::set<str>::iterator it = allowedModels.begin(); it != allowedModels.end(); ++it)
+      // {
+      //    std::cout << "  "<< *it << std::endl;
+      // }
+      if (allowedModels.empty() and allowedGroupCombos.empty()) allowed=true;
+      if (allowed_parent_or_friend_exists(model)) allowed=true;
+      //std::cout << "  Allowed to be used with model "<<model<<"? "<<allowed<<std::endl;
+      return allowed;
     }
 
     /// Test whether the functor has been explictly allowed to be used with a given model
@@ -1106,6 +1114,9 @@ namespace Gambit
       // Remove the entry from the resolvable backend reqs list...
       myResolvableBackendReqs.erase(key);
 
+      // Remove the entry from the grouped backend reqs list...
+      myGroupedBackendReqs.at(backendreq_groups.at(key)).erase(key);
+
       // Check that the model is not already in the conditional backend reqs list, then add it
       if (myModelConditionalBackendReqs.find(model) == myModelConditionalBackendReqs.end())
       {
@@ -1475,12 +1486,11 @@ namespace Gambit
       }
       // If this model fits any conditional backend requirements (or descended from one that can be interpreted as one that fits any), then activate them.
       std::set<sspair> backend_reqs_to_activate = model_conditional_backend_reqs(model);
-      if (verbose) cout << "model: " << model << endl;
       for (std::set<sspair>::iterator it = backend_reqs_to_activate.begin() ; it != backend_reqs_to_activate.end(); ++it)
       {
         if (verbose) cout << "req: " << it->first << " " << it->second << endl;
         myResolvableBackendReqs.insert(*it);
-        myGroupedBackendReqs[backendreq_groups[*it]].insert(*it);
+        myGroupedBackendReqs.at(backendreq_groups.at(*it)).insert(*it);
       }
     }
 
@@ -1648,6 +1658,12 @@ namespace Gambit
       myValue->_definePar(parname);
     }
 
+    /// Function for setting the model name for a ModelParameters object. Mainly for better error messages.
+    void model_functor::setModelName(str model_name)
+    {
+      myValue->setModelName(model_name);
+    }
+
     /// Function for handing over parameter identities to another model_functor
     void model_functor::donateParameters(model_functor &receiver)
     {
@@ -1657,6 +1673,8 @@ namespace Gambit
       {
         receiver.addParameter(it->first);
       }
+      /// Copy the model name as well
+      receiver.setModelName(myValue->getModelName());
     }
 
     /// @}

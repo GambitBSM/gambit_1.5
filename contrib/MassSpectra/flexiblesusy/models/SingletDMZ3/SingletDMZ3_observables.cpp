@@ -16,10 +16,12 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:45:01
+// File generated at Thu 10 May 2018 14:42:40
 
 #include "SingletDMZ3_observables.hpp"
 #include "SingletDMZ3_mass_eigenstates.hpp"
+#include "SingletDMZ3_a_muon.hpp"
+#include "SingletDMZ3_edm.hpp"
 #include "SingletDMZ3_effective_couplings.hpp"
 #include "gm2calc_interface.hpp"
 #include "eigen_utils.hpp"
@@ -29,8 +31,12 @@
 #include "physical_input.hpp"
 
 #define MODEL model
+#define AMU a_muon
+#define AMUUNCERTAINTY a_muon_uncertainty
 #define AMUGM2CALC a_muon_gm2calc
 #define AMUGM2CALCUNCERTAINTY a_muon_gm2calc_uncertainty
+#define EDM0(p) edm_ ## p
+#define EDM1(p,idx) edm_ ## p ## _ ## idx
 #define EFFCPHIGGSPHOTONPHOTON eff_cp_higgs_photon_photon
 #define EFFCPHIGGSGLUONGLUON eff_cp_higgs_gluon_gluon
 #define EFFCPPSEUDOSCALARPHOTONPHOTON eff_cp_pseudoscalar_photon_photon
@@ -46,39 +52,71 @@
 
 namespace flexiblesusy {
 
-const unsigned SingletDMZ3_observables::NUMBER_OF_OBSERVABLES;
+const int SingletDMZ3_observables::NUMBER_OF_OBSERVABLES;
 
 SingletDMZ3_observables::SingletDMZ3_observables()
+   : a_muon(0)
+   , eff_cp_higgs_photon_photon(0)
+   , eff_cp_higgs_gluon_gluon(0)
 
 {
 }
 
 Eigen::ArrayXd SingletDMZ3_observables::get() const
 {
-   Eigen::ArrayXd vec(1);
+   Eigen::ArrayXd vec(SingletDMZ3_observables::NUMBER_OF_OBSERVABLES);
 
-   vec(0) = 0.;
+   vec(0) = a_muon;
+   vec(1) = Re(eff_cp_higgs_photon_photon);
+   vec(2) = Im(eff_cp_higgs_photon_photon);
+   vec(3) = Re(eff_cp_higgs_gluon_gluon);
+   vec(4) = Im(eff_cp_higgs_gluon_gluon);
 
    return vec;
 }
 
 std::vector<std::string> SingletDMZ3_observables::get_names()
 {
-   std::vector<std::string> names(1);
+   std::vector<std::string> names(SingletDMZ3_observables::NUMBER_OF_OBSERVABLES);
 
-   names[0] = "no observables defined";
+   names[0] = "a_muon";
+   names[1] = "Re(eff_cp_higgs_photon_photon)";
+   names[2] = "Im(eff_cp_higgs_photon_photon)";
+   names[3] = "Re(eff_cp_higgs_gluon_gluon)";
+   names[4] = "Im(eff_cp_higgs_gluon_gluon)";
 
    return names;
 }
 
 void SingletDMZ3_observables::clear()
 {
+   a_muon = 0.;
+   eff_cp_higgs_photon_photon = std::complex<double>(0.,0.);
+   eff_cp_higgs_gluon_gluon = std::complex<double>(0.,0.);
 
 }
 
 void SingletDMZ3_observables::set(const Eigen::ArrayXd& vec)
 {
+   assert(vec.rows() == SingletDMZ3_observables::NUMBER_OF_OBSERVABLES);
 
+   a_muon = vec(0);
+   eff_cp_higgs_photon_photon = std::complex<double>(vec(1), vec(2));
+   eff_cp_higgs_gluon_gluon = std::complex<double>(vec(3), vec(4));
+
+}
+
+SingletDMZ3_observables calculate_observables(const SingletDMZ3_mass_eigenstates& model,
+                                              const softsusy::QedQcd& qedqcd,
+                                              const Physical_input& physical_input,
+                                              double scale)
+{
+   auto model_at_scale = model;
+
+   if (scale > 0.)
+      model_at_scale.run_to(scale);
+
+   return calculate_observables(model_at_scale, qedqcd, physical_input);
 }
 
 SingletDMZ3_observables calculate_observables(const SingletDMZ3_mass_eigenstates& model,
@@ -87,8 +125,12 @@ SingletDMZ3_observables calculate_observables(const SingletDMZ3_mass_eigenstates
 {
    SingletDMZ3_observables observables;
 
-   
+   SingletDMZ3_effective_couplings effective_couplings(model, qedqcd, physical_input);
+   effective_couplings.calculate_effective_couplings();
 
+   observables.AMU = SingletDMZ3_a_muon::calculate_a_muon(MODEL);
+   observables.EFFCPHIGGSPHOTONPHOTON = effective_couplings.get_eff_CphhVPVP();
+   observables.EFFCPHIGGSGLUONGLUON = effective_couplings.get_eff_CphhVGVG();
 
    return observables;
 }

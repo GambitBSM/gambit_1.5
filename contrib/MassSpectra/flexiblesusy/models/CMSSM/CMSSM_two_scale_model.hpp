@@ -16,16 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:58
+// File generated at Thu 10 May 2018 15:12:44
 
 /**
  * @file CMSSM_two_scale_model.hpp
  * @brief contains class for model with routines needed to solve boundary
- *        value problem using the two_scale solver by solvingt EWSB
+ *        value problem using the two_scale solver by solving EWSB
  *        and determine the pole masses and mixings
  *
- * This file was generated at Sat 27 Aug 2016 12:50:58 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Thu 10 May 2018 15:12:44 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 
 #ifndef CMSSM_TWO_SCALE_H
@@ -33,28 +33,33 @@
 
 #include "CMSSM_model.hpp"
 #include "CMSSM_mass_eigenstates.hpp"
-#include "two_scale_model.hpp"
+
+#include "model.hpp"
 
 namespace flexiblesusy {
 
 class Two_scale;
 /**
  * @class CMSSM<Two_scale>
- * @brief model class with routines for determing masses and mixinga and EWSB
+ * @brief model class with routines for determining masses and mixings and EWSB
  */
 template<>
-class CMSSM<Two_scale> : public Two_scale_model, public CMSSM_mass_eigenstates {
+class CMSSM<Two_scale> : public Model, public CMSSM_mass_eigenstates {
 public:
    explicit CMSSM(const CMSSM_input_parameters& input_ = CMSSM_input_parameters());
-   virtual ~CMSSM();
+   CMSSM(const CMSSM&) = default;
+   CMSSM(CMSSM&&) = default;
+   virtual ~CMSSM() = default;
+   CMSSM& operator=(const CMSSM&) = default;
+   CMSSM& operator=(CMSSM&&) = default;
 
    // interface functions
-   virtual void calculate_spectrum();
-   virtual void clear_problems();
-   virtual std::string name() const;
-   virtual void run_to(double scale, double eps = -1.0);
-   virtual void print(std::ostream& out = std::cout) const;
-   virtual void set_precision(double);
+   virtual void calculate_spectrum() override;
+   virtual void clear_problems() override;
+   virtual std::string name() const override;
+   virtual void run_to(double scale, double eps = -1.0) override;
+   virtual void print(std::ostream& out = std::cerr) const override;
+   virtual void set_precision(double) override;
 };
 
 std::ostream& operator<<(std::ostream&, const CMSSM<Two_scale>&);
