@@ -618,20 +618,20 @@ def get_couplings(rhn, Ut1th = 0):
     plt.savefig(OUTPATH+'test.pdf')
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_cs25.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_cs29.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    #show_U_vs_M(rhn, tag = 'cs27')
     #show_survival_fraction(rhn)
     #show_high_couplings(rhn)
 
+    show_U_vs_M(rhn, tag = 'cs29')
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
 
-    get_couplings(rhn, Ut1th = 1e-6)
+    #get_couplings(rhn, Ut1th = 1e-6)
     #show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
