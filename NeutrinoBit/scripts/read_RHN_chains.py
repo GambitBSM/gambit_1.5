@@ -80,6 +80,13 @@ class RHN_Chain(object):
         self.Ut2_phase = get_data('#Ut2_phase @NeutrinoBit::Ut2_phase')
         self.Ut3_phase = get_data('#Ut3_phase @NeutrinoBit::Ut3_phase')
 
+        self.theta13 = get_data('#theta13 @NeutrinoBit::theta13')
+        self.theta12 = get_data('#theta12 @NeutrinoBit::theta12')
+        self.theta23 = get_data('#theta23 @NeutrinoBit::theta23')
+        self.deltaCP = get_data('#deltaCP @NeutrinoBit::deltaCP')
+        self.alpha1 = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::alpha1')
+        self.alpha2 = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::alpha2')
+
         self.ue1 = self.Ue1**0.5 * np.exp(1j*self.Ue1_phase)
         self.ue2 = self.Ue2**0.5 * np.exp(1j*self.Ue2_phase)
         self.ue3 = self.Ue3**0.5 * np.exp(1j*self.Ue3_phase)
