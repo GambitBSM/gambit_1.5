@@ -549,8 +549,9 @@ def show_ImOmega(rhn, tag = "TAG", Ut1th = 0., real = False):
         plt.savefig(OUTPATH+"ImOmega_%s.pdf"%tag)
 
 def get_couplings(rhn, Ut1th = 0):
-    m = rhn.Ut1 > Ut1th
+    m = (rhn.Ut1 > Ut1th) & (rhn.lnL.max() - rhn.lnL < 2)
     N = m.sum()
+    print "Number of points:", N
     R12 = np.zeros((N, 3, 3), dtype='complex')
     R13 = np.zeros((N, 3, 3), dtype='complex')
     R23 = np.zeros((N, 3, 3), dtype='complex')
@@ -610,15 +611,26 @@ def get_couplings(rhn, Ut1th = 0):
     Theta = 1j*np.array([unu.dot(mNui**0.5).dot(Ri).dot(invMi**0.5)
         for unu, mNui, Ri, invMi in zip(Unu, mNu, R, invM)])
 
-    a = rhn.Ue1[m]
-    b = np.abs(Theta[:, 0,0])**2
-    print a
-    print b
-    plt.loglog(a, b, marker='x')
-    plt.savefig(OUTPATH+'test.pdf')
+#    print "R", R[0]
+#    print R12[0]
+#    print R13[0]
+#    print R23[0]
+#    print "Theta", Theta[0]
+#    print "Unu", Unu[0]
+#    print "mNu", mNu[0]
+#    print "M", M[0]
+
+    #a = rhn.Ue1[m]
+    print np.abs(Theta[0, 0,0])**2
+    print np.abs(Theta[0, 1,0])**2
+    print np.abs(Theta[0, 2,0])**2
+    print M[0, 0, 0], M[0, 1, 1], M[0, 2, 2]
+    #b = np.abs(Theta[:, 0,0])**2
+    #plt.loglog(a, b, marker='x')
+    #plt.savefig(OUTPATH+'test.pdf')
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_cs25.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs28.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
@@ -631,7 +643,7 @@ if __name__ == "__main__":
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
 
-    get_couplings(rhn, Ut1th = 1e-6)
+    get_couplings(rhn, Ut1th = 2.9e-5)
     #show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
