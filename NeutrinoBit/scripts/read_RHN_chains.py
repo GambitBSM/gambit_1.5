@@ -90,7 +90,10 @@ class RHN_Chain(object):
         self.ut2 = self.Ut2**0.5 * np.exp(1j*self.Ut2_phase)
         self.ut3 = self.Ut3**0.5 * np.exp(1j*self.Ut3_phase)
 
-        self.mbb = get_data('#mbb_0nubb_Xe @NeutrinoBit::RHN_mbb_0nubb_Xe')
+        try:
+            self.mbb = get_data('#mbb_0nubb_Xe @NeutrinoBit::RHN_mbb_0nubb_Xe')
+        except KeyError:
+            pass
 
         lnL_tags = [
             '#deltaCP_lnL @NeutrinoBit::deltaCP_lnL',
