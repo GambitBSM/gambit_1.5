@@ -50,10 +50,10 @@
 
 # AlterBBN
 set(name "AlterBBN")
-set(ver "2.0.1")
+set(ver "2.0")
 set(lib "libbbn")
-set(dl "https://alterbbn.hepforge.org/downloads/alterbbn_v2.0beta1.tgz")
-set(md5 "edaa32b164be7297b18392e1533ad6ed")
+set(dl "https://alterbbn.hepforge.org/downloads/alterbbn_v2.0.tgz")
+set(md5 "cca5fb50440f25dc61fbfb6dbf61b32b")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})

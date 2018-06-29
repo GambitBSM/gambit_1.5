@@ -9,6 +9,7 @@
 ///  Authors (add name and date if you modify):
 ///
 ///  \author Janina Renk
+///				(janina.renk@fysik.su.se)
 ///  \date   2018 Jun
 ///
 ///  *********************************************
@@ -17,8 +18,8 @@
 
 #define BACKENDNAME AlterBBN
 #define BACKENDLANG CC
-#define VERSION 2.0.1
-#define SAFE_VERSION 2_0_1
+#define VERSION 2.0
+#define SAFE_VERSION 2_0
 
 LOAD_LIBRARY
 

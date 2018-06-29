@@ -16,7 +16,7 @@
 
 #include <sstream>
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/AlterBBN_2_0_1.hpp"
+#include "gambit/Backends/frontends/AlterBBN_2_0.hpp"
 #include "gambit/Backends/backend_types/AlterBBN.hpp"
 
 /// Number of observables the SuperIso returns for B0 -> K(*) mu mu

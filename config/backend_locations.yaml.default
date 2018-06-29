@@ -11,7 +11,7 @@
 # be interpreted as relative to the GAMBIT dir.
 
 AlterBBN:
-  2.0.1:       ./Backends/installed/AlterBBN/2.0.1/libbbn.so
+  2.0:       ./Backends/installed/AlterBBN/2.0/libbbn.so
 
 PyArrayTest:
   1.0:         ./Backends/examples/PyArrayTest/1.0/PyArrayTest.py
