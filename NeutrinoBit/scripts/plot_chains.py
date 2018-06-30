@@ -236,7 +236,7 @@ def show_Rorder(rhn):
 def show_U_vs_M(rhn, tag = "TAG"):
     print "U_vs_M..."
     lnL = rhn.lnL
-    mask = lnL.max()-lnL < 2
+    mask = lnL.max()-lnL < 25/2
     mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 1e-3)
     mask2 = mask & mask_ft
 
@@ -251,6 +251,8 @@ def show_U_vs_M(rhn, tag = "TAG"):
         print "Generating U_vs_M%i"%I
         plt.clf()
         plt.subplot(221)
+        plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][0]), marker = '.',
+                rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][0])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][0])[mask2], marker = '.',
@@ -259,6 +261,8 @@ def show_U_vs_M(rhn, tag = "TAG"):
         plt.ylim([-10, -1])
         plt.ylabel("U%i"%I)
         plt.subplot(222)
+        plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][1]), marker = '.',
+                rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][1])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][1])[mask2], marker = '.',
@@ -267,6 +271,8 @@ def show_U_vs_M(rhn, tag = "TAG"):
         plt.ylim([-10, -1])
         plt.ylabel("Ue%i"%I)
         plt.subplot(223)
+        plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][2]), marker = '.',
+                rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][2])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][2])[mask2], marker = '.',
@@ -275,6 +281,8 @@ def show_U_vs_M(rhn, tag = "TAG"):
         plt.ylim([-10, -1])
         plt.ylabel("Um%i"%I)
         plt.subplot(224)
+        plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][3]), marker = '.',
+                rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][3])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][3])[mask2], marker = '.',
@@ -630,7 +638,7 @@ def get_couplings(rhn, Ut1th = 0):
     #plt.savefig(OUTPATH+'test.pdf')
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs28.hdf5', MODEL = 'diff',
+    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_CS0_pre.hdf5', MODEL = 'diff',
             print_keys = False, renormalize = False)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
@@ -638,12 +646,12 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn)
     #show_high_couplings(rhn)
 
-    show_U_vs_M(rhn, tag = 'cs29')
+    show_U_vs_M(rhn, tag = 'CS0_pre')
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
 
-    get_couplings(rhn, Ut1th = 2.9e-5)
+    #get_couplings(rhn, Ut1th = 2.9e-5)
     #show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
@@ -657,4 +665,4 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)c
-    #show_lnL_relevance(rhn, i = 3, I = 1, tag = 'p_cs27', partial = True)
+    #show_lnL_relevance(rhn, i = 1, I = 1, tag = 'p_CS0_pre', partial = True)
