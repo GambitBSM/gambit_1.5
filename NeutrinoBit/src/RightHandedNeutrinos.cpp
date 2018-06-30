@@ -2144,6 +2144,11 @@ namespace Gambit
       double threshold = runOptions->getValueOrDef<double>(1e0, "threshold");
       double slope = runOptions->getValueOrDef<double>(1, "slope");
       double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
+//      std::cout << U << std::endl;
+//      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(0, 0) << std::endl;
+//      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(1, 0) << std::endl;
+//      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(2, 0) << std::endl;
+//      std::cout << std::endl;
       if (slope > 0)
         lnL = slope*log10(std::min(U/threshold, 1.));
       else

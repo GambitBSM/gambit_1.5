@@ -63,7 +63,7 @@ Parameters:
       range: [100, 500]
       prior_type: log
     delta_M21:
-      range: [1E-12, 1.]
+      range: [1E-15, 1E-10]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -109,7 +109,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-10
+      convthresh: 1e-11
       lambdajDE: true
 
     multinest:
@@ -334,7 +334,7 @@ Rules:
     options:
       I: 1
       i: 1
-      slope: 2.0
+      slope: 1.0
       threshold: 1e0
 
   - capability: RKstar_0045_11
