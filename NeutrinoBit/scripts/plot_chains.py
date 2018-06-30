@@ -236,7 +236,7 @@ def show_Rorder(rhn):
 def show_U_vs_M(rhn, tag = "TAG"):
     print "U_vs_M..."
     lnL = rhn.lnL
-    mask = lnL.max()-lnL < 25/2
+    mask = lnL.max()-lnL < 2
     mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 1e-3)
     mask2 = mask & mask_ft
 
@@ -638,15 +638,15 @@ def get_couplings(rhn, Ut1th = 0):
     #plt.savefig(OUTPATH+'test.pdf')
 
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_CS0_pre.hdf5', MODEL = 'diff',
-            print_keys = False, renormalize = False)
+    rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_CS2_pre.hdf5', MODEL = 'diff',
+            print_keys = False, renormalize = False, sub_slide = False)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
     #show_survival_fraction(rhn)
     #show_high_couplings(rhn)
 
-    show_U_vs_M(rhn, tag = 'CS0_pre')
+    show_U_vs_M(rhn, tag = 'CS2_pre_slideon')
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
