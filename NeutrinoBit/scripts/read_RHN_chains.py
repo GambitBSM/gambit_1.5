@@ -9,7 +9,7 @@ import pylab as plt
 
 class RHN_Chain(object):
     def __init__(self, INFILE, MODEL = 'auto', print_keys = False, renormalize
-            = True):
+            = True, sub_slide = True):
         print "Reading %s..."%INFILE
         if MODEL == 'auto':
             if 'diff' in INFILE:
@@ -165,7 +165,7 @@ class RHN_Chain(object):
             self.lnL_slide = None
 
         self.lnL = get_data('LogLike')
-        if self.lnL_slide is not None:
+        if self.lnL_slide is not None and sub_slide:
             self.lnL -= self.lnL_slide
 
         #self.ordering = get_data('#ordering @NeutrinoBit::ordering')
