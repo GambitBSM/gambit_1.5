@@ -63,7 +63,7 @@ Parameters:
       range: [100, 500]
       prior_type: log
     delta_M21:
-      range: [1E-15, 1E-10]
+      range: [1E-20, 1E-10]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -138,8 +138,8 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-  - capability: lnLlepuniv
-    purpose: LogLike
+#  - capability: lnLlepuniv
+#    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
