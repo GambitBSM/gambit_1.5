@@ -2143,18 +2143,27 @@ namespace Gambit
       int flavour = runOptions->getValueOrDef<int>(1, "i");
       double threshold = runOptions->getValueOrDef<double>(1e0, "threshold");
       double slope = runOptions->getValueOrDef<double>(1, "slope");
-      double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
 //      std::cout << U << std::endl;
 //      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(0, 0) << std::endl;
 //      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(1, 0) << std::endl;
 //      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(2, 0) << std::endl;
 //      std::cout << std::endl;
-      if (slope > 0)
+      if (flavour > 0)
+      {
+        double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
         lnL = slope*log10(std::min(U/threshold, 1.));
-      else
         lnL = slope*log10(std::max(U/threshold, 1.));
+      }
+      else
+      {
+        double U1 = (Dep::SeesawI_Theta->cwiseAbs2())(0, I-1);
+        double U2 = (Dep::SeesawI_Theta->cwiseAbs2())(1, I-1);
+        double U3 = (Dep::SeesawI_Theta->cwiseAbs2())(2, I-1);
+        lnL = 0;
+        lnL += slope*log10(std::min(U1/threshold, 1.));
+        lnL += slope*log10(std::min(U2/threshold, 1.));
+        lnL += slope*log10(std::min(U3/threshold, 1.));
+      }
     }
-
   }
-
 }
