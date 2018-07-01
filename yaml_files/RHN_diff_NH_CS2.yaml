@@ -138,8 +138,8 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-  - capability: lnLlepuniv
-    purpose: LogLike
+#  - capability: lnLlepuniv
+#    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
@@ -325,16 +325,17 @@ ObsLikes:
 
   - capability: RHN_coupling_slide
     purpose: LogLike
-    options:
-      i: 2
-      I: 1
-      slope: 6.
-      threshold: 1e0
 
   - capability: calc_Vus
     purpose: Observable
 
 Rules:
+  - function: coupling_slide
+    options:
+      I: 1
+      i: 2
+      slope: 1.0
+      threshold: 1e0
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -354,4 +355,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "/home/ubuntu/data2/RHN_diff_NH_cs25/"
+  default_output_path: "/home/ubuntu/data2/RHN_diff_NH_CS2/"

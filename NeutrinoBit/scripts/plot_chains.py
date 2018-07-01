@@ -6,10 +6,11 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
+from scipy.linalg import inv
 
 from read_RHN_chains import *
 
-OUTPATH = '/home/ubuntu/'
+OUTPATH = '/home/cweniger/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
@@ -232,8 +233,9 @@ def show_Rorder(rhn):
     plt.hist(rhn.Rorder, range = [0, 6], bins = 6)
     plt.savefig(OUTPATH+"Rorder.pdf", dpi = 200)
 
-def show_U_vs_M(rhn, tag = "TAG"):
+def show_U_vs_M(rhn, tag = "TAG", plot_all = True):
     print "U_vs_M..."
+    g = plot_all
     lnL = rhn.lnL
     mask = lnL.max()-lnL < 2
     mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 1e-3)
@@ -250,6 +252,9 @@ def show_U_vs_M(rhn, tag = "TAG"):
         print "Generating U_vs_M%i"%I
         plt.clf()
         plt.subplot(221)
+        if g:
+            plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][0]), marker = '.',
+                    rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][0])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][0])[mask2], marker = '.',
@@ -258,6 +263,9 @@ def show_U_vs_M(rhn, tag = "TAG"):
         plt.ylim([-10, -1])
         plt.ylabel("U%i"%I)
         plt.subplot(222)
+        if g:
+            plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][1]), marker = '.',
+                    rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][1])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][1])[mask2], marker = '.',
@@ -266,6 +274,9 @@ def show_U_vs_M(rhn, tag = "TAG"):
         plt.ylim([-10, -1])
         plt.ylabel("Ue%i"%I)
         plt.subplot(223)
+        if g:
+            plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][2]), marker = '.',
+                    rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][2])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][2])[mask2], marker = '.',
@@ -274,6 +285,9 @@ def show_U_vs_M(rhn, tag = "TAG"):
         plt.ylim([-10, -1])
         plt.ylabel("Um%i"%I)
         plt.subplot(224)
+        if g:
+            plt.scatter(np.log10(M[I-1]), np.log10(U[I-1][3]), marker = '.',
+                    rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][3])[mask], marker = '.',
                 rasterized = True)
         plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][3])[mask2], marker = '.',
@@ -547,21 +561,103 @@ def show_ImOmega(rhn, tag = "TAG", Ut1th = 0., real = False):
     else:
         plt.savefig(OUTPATH+"ImOmega_%s.pdf"%tag)
 
+def get_couplings(rhn, Ut1th = 0):
+    m = (rhn.Ut1 > Ut1th) & (rhn.lnL.max() - rhn.lnL < 2)
+    N = m.sum()
+    print "Number of points:", N
+    R12 = np.zeros((N, 3, 3), dtype='complex')
+    R13 = np.zeros((N, 3, 3), dtype='complex')
+    R23 = np.zeros((N, 3, 3), dtype='complex')
+    R12[:, 0, 0] = np.cos(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 1, 1] = np.cos(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 0, 1] = np.sin(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 1, 0] = -np.sin(rhn.ReOmega12[m] + 1j*rhn.ImOmega12[m])
+    R12[:, 2, 2] = 1.
+    R13[:, 0, 0] = np.cos(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 2, 2] = np.cos(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 0, 2] = np.sin(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 2, 0] = -np.sin(rhn.ReOmega13[m] + 1j*rhn.ImOmega13[m])
+    R13[:, 1, 1] = 1.
+    R23[:, 1, 1] = np.cos(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 2, 2] = np.cos(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 1, 2] = np.sin(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 2, 1] = -np.sin(rhn.ReOmega23[m] + 1j*rhn.ImOmega23[m])
+    R23[:, 0, 0] = 1.
+    Ra = np.array([r23.dot(r13).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rb = np.array([r13.dot(r12).dot(r23) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rc = np.array([r12.dot(r23).dot(r13) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rd = np.array([r13.dot(r23).dot(r12) for r12, r13, r23 in zip(R12, R13, R23)])
+    Re = np.array([r23.dot(r12).dot(r13) for r12, r13, r23 in zip(R12, R13, R23)])
+    Rf = np.array([r12.dot(r13).dot(r23) for r12, r13, r23 in zip(R12, R13, R23)])
+    R = np.where(rhn.Rorder[m] < 1, Ra.T, np.where(rhn.Rorder[m] < 2, Rb.T,
+        np.where(rhn.Rorder[m] < 3, Rc.T, np.where(rhn.Rorder[m]< 4, Rd.T,
+            np.where(rhn.Rorder[m] < 5, Re.T, Rf.T))))).T
+    M = np.array([np.diag((M1, M2, M3)) for M1, M2, M3 in zip(rhn.M1[m], rhn.M2[m], rhn.M3[m])])
+    invM = np.array([np.diag((M1**-1, M2**-1, M3**-1)) for M1, M2, M3 in zip(rhn.M1[m], rhn.M2[m], rhn.M3[m])])
+    mNu = np.array([np.diag((m1, m2, m3)) for m1, m2, m3 in zip(rhn.mNu1[m], rhn.mNu2[m], rhn.mNu3[m])])
+    Ud = np.array([np.diag((np.exp(-1j*d/2), 1, np.exp(1j*d/2))) for d in rhn.deltaCP[m]])
+    Umd = np.array([np.diag((np.exp(1j*d/2), 1, np.exp(-1j*d/2))) for d in rhn.deltaCP[m]])
+    A = np.array([np.diag((np.exp(1j*alpha1/2), np.exp(1j*alpha2/2), 1)) for
+        alpha1, alpha2 in zip(rhn.alpha1[m], rhn.alpha2[m])])
+    V12 = np.zeros((N, 3, 3))
+    V13 = np.zeros((N, 3, 3))
+    V23 = np.zeros((N, 3, 3))
+    V12[:, 0, 0] = np.cos(rhn.theta12[m])
+    V12[:, 1, 1] = np.cos(rhn.theta12[m])
+    V12[:, 0, 1] = np.sin(rhn.theta12[m])
+    V12[:, 1, 0] = -np.sin(rhn.theta12[m])
+    V12[:, 2, 2] = 1.
+    V13[:, 0, 0] = np.cos(rhn.theta13[m])
+    V13[:, 2, 2] = np.cos(rhn.theta13[m])
+    V13[:, 0, 2] = np.sin(rhn.theta13[m])
+    V13[:, 2, 0] = -np.sin(rhn.theta13[m])
+    V13[:, 1, 1] = 1.
+    V23[:, 1, 1] = np.cos(rhn.theta23[m])
+    V23[:, 2, 2] = np.cos(rhn.theta23[m])
+    V23[:, 1, 2] = np.sin(rhn.theta23[m])
+    V23[:, 2, 1] = -np.sin(rhn.theta23[m])
+    V23[:, 0, 0] = 1.
+    Unu = np.array([v23.dot(ud).dot(v13).dot(umd).dot(v12).dot(a)
+            for v23, ud, v13, umd, v12, a in 
+            zip(V23, Ud, V13, Umd, V12, A)
+            ])
+    Theta = 1j*np.array([unu.dot(mNui**0.5).dot(Ri).dot(invMi**0.5)
+        for unu, mNui, Ri, invMi in zip(Unu, mNu, R, invM)])
+
+#    print "R", R[0]
+#    print R12[0]
+#    print R13[0]
+#    print R23[0]
+#    print "Theta", Theta[0]
+#    print "Unu", Unu[0]
+#    print "mNu", mNu[0]
+#    print "M", M[0]
+
+    #a = rhn.Ue1[m]
+    print np.abs(Theta[0, 0,0])**2
+    print np.abs(Theta[0, 1,0])**2
+    print np.abs(Theta[0, 2,0])**2
+    print M[0, 0, 0], M[0, 1, 1], M[0, 2, 2]
+    #b = np.abs(Theta[:, 0,0])**2
+    #plt.loglog(a, b, marker='x')
+    #plt.savefig(OUTPATH+'test.pdf')
+
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/ubuntu/data/RHN_diff_NH_cs27.hdf5', MODEL = 'diff',
-            print_keys = False, renormalize = False)
+    rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_CS3b.hdf5', MODEL = 'diff',
+            print_keys = False, renormalize = False, sub_slide = True)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
-    #show_U_vs_M(rhn, tag = 'cs27')
     #show_survival_fraction(rhn)
     #show_high_couplings(rhn)
 
+    show_U_vs_M(rhn, tag = 'CS3b', plot_all = False)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
 
-    show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
+    #get_couplings(rhn, Ut1th = 2.9e-5)
+    #show_RHN_masses(rhn, tag = 'cs27', Ut1th = 1e-6)
 
     #print_finetuning_counts(rhn)
     #show_phases(rhn)
@@ -574,4 +670,4 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)c
-    #show_lnL_relevance(rhn, i = 3, I = 1, tag = 'p_cs27', partial = True)
+    #show_lnL_relevance(rhn, i = 1, I = 1, tag = 'p_CS0_pre', partial = True)

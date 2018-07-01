@@ -30,8 +30,8 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
+      range: [1E-7, 0.23]
+      prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
       prior_type: flat
@@ -60,10 +60,10 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [100, 500]
+      range: [0.06, 1.5]
       prior_type: log
     delta_M21:
-      range: [1E-20, 1E-10]
+      range: [1E-10, .1]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -71,15 +71,15 @@ Parameters:
     ReOm23:
       range: [0, 6.283]
     ImOm23:
-      range: [-15, 15]
+      range: [-7, 7]
     ReOm13:
       range: [0, 6.283]
     ImOm13:
-      range: [-15, 15]
+      range: [-7, 7]
     ReOm12:
       range: [0, 6.283]
     ImOm12:
-      range: [-15, 15]
+      range: [-7, 7]
     Rorder:
       range: [0, 6]
 
@@ -109,7 +109,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-11
+      convthresh: 1e-12
       lambdajDE: true
 
     multinest:
@@ -160,7 +160,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: l2lgamma_lnL
-    purpose: LogLike 
+    purpose: LogLike
 
   - capability: l2lll_lnL
     purpose: LogLike
@@ -326,13 +326,10 @@ ObsLikes:
   - capability: RHN_coupling_slide
     purpose: LogLike
     options:
-      i: 2
+      i: 3
       I: 1
-      slope: 6.
+      slope: .5
       threshold: 1e0
-
-  - capability: calc_Vus
-    purpose: Observable
 
 Rules:
 
@@ -354,4 +351,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "/home/ubuntu/data2/RHN_diff_NH_cs25/"
+  default_output_path: "/home/ubuntu/data/RHN_diff_NH_cs30/"

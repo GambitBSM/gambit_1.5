@@ -9,7 +9,7 @@ import pylab as plt
 
 class RHN_Chain(object):
     def __init__(self, INFILE, MODEL = 'auto', print_keys = False, renormalize
-            = True):
+            = True, sub_slide = True):
         print "Reading %s..."%INFILE
         if MODEL == 'auto':
             if 'diff' in INFILE:
@@ -80,6 +80,13 @@ class RHN_Chain(object):
         self.Ut2_phase = get_data('#Ut2_phase @NeutrinoBit::Ut2_phase')
         self.Ut3_phase = get_data('#Ut3_phase @NeutrinoBit::Ut3_phase')
 
+        self.theta13 = get_data('#theta13 @NeutrinoBit::theta13')
+        self.theta12 = get_data('#theta12 @NeutrinoBit::theta12')
+        self.theta23 = get_data('#theta23 @NeutrinoBit::theta23')
+        self.deltaCP = get_data('#deltaCP @NeutrinoBit::deltaCP')
+        self.alpha1 = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::alpha1')
+        self.alpha2 = get_data('#StandardModel_mNudiff_parameters @StandardModel_mNudiff::primary_parameters::alpha2')
+
         self.ue1 = self.Ue1**0.5 * np.exp(1j*self.Ue1_phase)
         self.ue2 = self.Ue2**0.5 * np.exp(1j*self.Ue2_phase)
         self.ue3 = self.Ue3**0.5 * np.exp(1j*self.Ue3_phase)
@@ -90,7 +97,10 @@ class RHN_Chain(object):
         self.ut2 = self.Ut2**0.5 * np.exp(1j*self.Ut2_phase)
         self.ut3 = self.Ut3**0.5 * np.exp(1j*self.Ut3_phase)
 
-        self.mbb = get_data('#mbb_0nubb_Xe @NeutrinoBit::RHN_mbb_0nubb_Xe')
+        try:
+            self.mbb = get_data('#mbb_0nubb_Xe @NeutrinoBit::RHN_mbb_0nubb_Xe')
+        except KeyError:
+            pass
 
         lnL_tags = [
             '#deltaCP_lnL @NeutrinoBit::deltaCP_lnL',
@@ -155,10 +165,10 @@ class RHN_Chain(object):
             self.lnL_slide = None
 
         self.lnL = get_data('LogLike')
-        if self.lnL_slide is not None:
+        if self.lnL_slide is not None and sub_slide:
             self.lnL -= self.lnL_slide
 
-        self.ordering = get_data('#ordering @NeutrinoBit::ordering')
+        #self.ordering = get_data('#ordering @NeutrinoBit::ordering')
 
         self.U1 = self.Ue1 + self.Um1 + self.Ut1
         self.U2 = self.Ue2 + self.Um2 + self.Ut2
