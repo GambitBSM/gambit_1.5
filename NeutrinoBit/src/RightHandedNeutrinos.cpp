@@ -961,9 +961,7 @@ namespace Gambit
     {
       using namespace Pipes::lnL_lepuniv;
       double R_pi = *Dep::R_pi;
-      cout << "R_pi = " << R_pi << endl;
       double R_K = *Dep::R_K;
-      cout <<"R_K = " << R_K << endl;
       double R_tau = *Dep::R_tau;
       std::vector<double> R_W = *Dep::R_W;
 
