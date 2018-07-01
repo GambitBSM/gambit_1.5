@@ -161,6 +161,11 @@ class RHN_Chain(object):
         
         try:
             self.lnL_slide = get_data("#RHN_coupling_slide @NeutrinoBit::coupling_slide")
+            print "Found coupling slide!"
+            print self.lnL_slide/np.log10(self.Ue1)
+            print self.lnL_slide/np.log10(self.Um1)
+            print self.lnL_slide/np.log10(self.Ut1)
+            print self.lnL_slide/np.log10(self.Ue1*self.Um1*self.Ut1)
         except KeyError:
             self.lnL_slide = None
 
