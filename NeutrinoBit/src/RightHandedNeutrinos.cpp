@@ -2151,7 +2151,6 @@ namespace Gambit
       {
         double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
         lnL = slope*log10(std::min(U/threshold, 1.));
-        lnL = slope*log10(std::max(U/threshold, 1.));
       }
       else
       {
