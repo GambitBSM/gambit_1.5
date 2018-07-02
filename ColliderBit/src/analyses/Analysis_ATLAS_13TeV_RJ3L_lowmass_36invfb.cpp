@@ -309,11 +309,13 @@ namespace Gambit {
         Zb_2L2J->AddChildFrame(*L2_2L2J);
 
 
-        if(LAB_2L2J->InitializeTree())
-          std::cout << "...2L2J Successfully initialized reconstruction trees" << std::endl;
-        else
-          std::cout << "...2L2J Failed initializing reconstruction trees" << std::endl;
-  
+        if(!LAB_2L2J->InitializeTree())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
   
         //////////////////////////////
         //Setting the invisible
@@ -339,8 +341,14 @@ namespace Gambit {
         X1X1_contra_2L2J->AddInvisibleFrame(*X1a_2L2J, 0);
         X1X1_contra_2L2J->AddInvisibleFrame(*X1b_2L2J, 1);
           
-        LAB_2L2J->InitializeAnalysis(); 
-          
+        if(!LAB_2L2J->InitializeAnalysis())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
+
         LAB_3L.reset(new RestFrames::LabRecoFrame("LAB_3L","lab"));
         C1N2_3L.reset(new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
         C1a_3L.reset(new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}"));
@@ -367,11 +375,14 @@ namespace Gambit {
         N2b_3L->AddChildFrame(*X1b_3L);
   
   
-        if(LAB_3L->InitializeTree())
-          std::cout << "...Contructor::3L Successfully initialized reconstruction trees" << std::endl;
-        else
-          std::cout << "...Constructor::3L Failed initializing reconstruction trees" << std::endl;
-        
+        if(!LAB_3L->InitializeTree())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_3L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
+       
         //setting the invisible components
         INV_3L.reset(new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw"));
         INV_3L->AddFrame(*X1a_3L); 
@@ -395,7 +406,13 @@ namespace Gambit {
         X1X1_contra_3L->AddInvisibleFrames(C1a_3L->GetListInvisibleFrames(),0);
         X1X1_contra_3L->AddInvisibleFrames(N2b_3L->GetListInvisibleFrames(),1);
         
-        LAB_3L->InitializeAnalysis();
+        if(!LAB_3L->InitializeAnalysis())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_3L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
   
         /////////////////////////// INTERMEDIATE ///////////////////////////////////
         // RestFrames stuff
@@ -409,16 +426,21 @@ namespace Gambit {
         J_comb.reset(new RestFrames::VisibleRecoFrame("J_comb","Jets"));
         L_comb.reset(new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s"));
         I_comb.reset(new RestFrames::InvisibleRecoFrame("I_comb","Inv"));
-        //cout << "test 5" << endl;
+
         LAB_comb->SetChildFrame(*CM_comb);
         CM_comb->AddChildFrame(*ISR_comb);
         CM_comb->AddChildFrame(*S_comb);
         S_comb->AddChildFrame(*L_comb);
         S_comb->AddChildFrame(*J_comb);
         S_comb->AddChildFrame(*I_comb);
-        // cout << "test 6" << endl;
-        LAB_comb->InitializeTree();
-        // cout << "test 7" << endl;
+
+        if(!LAB_comb->InitializeTree())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_comb->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
         // 2L+NJ tree (Z->ll + W/Z->qq)
         LAB_2LNJ.reset(new RestFrames::LabRecoFrame("LAB_2LNJ","LAB"));
         CM_2LNJ.reset(new RestFrames::DecayRecoFrame("CM_2LNJ","CM"));
@@ -447,8 +469,13 @@ namespace Gambit {
         Z_2LNJ->AddChildFrame(*L2_2LNJ);
         JSA_2LNJ->AddChildFrame(*J_2LNJ);
         
-        LAB_2LNJ->InitializeTree();
-  
+        if(!LAB_2LNJ->InitializeTree())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
   
         // 2L+1L tree (Z->ll + Z/W->l)
         LAB_2L1L.reset(new RestFrames::LabRecoFrame("LAB_2L1L","LAB"));
@@ -476,7 +503,13 @@ namespace Gambit {
         Cb_2L1L->AddChildFrame(*Lb_2L1L);
         Cb_2L1L->AddChildFrame(*Ib_2L1L);
         
-        LAB_2L1L->InitializeTree();
+        if(!LAB_2L1L->InitializeTree())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
+        }
+
 
         ////////////// Jigsaw rules set-up /////////////////
         
@@ -501,8 +534,11 @@ namespace Gambit {
         SplitJETS_comb->AddObjectFrame(*ISR_comb,0);
         SplitJETS_comb->AddObjectFrame(*S_comb,1);
         
-        if(!LAB_comb->InitializeAnalysis()){
-          cout << "Problem initializing \"comb\" analysis" << endl;
+        if(!LAB_comb->InitializeAnalysis())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_comb->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
         }
         
         // 2L+NJ tree (Z->ll + W/Z->qq)
@@ -526,9 +562,13 @@ namespace Gambit {
         JETS_2LNJ->AddFrame(*J_2LNJ);
         JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
         
-        if(!LAB_2LNJ->InitializeAnalysis()){
-          cout << "Problem initializing \"2LNJ\" analysis" << endl;
+        if(!LAB_2LNJ->InitializeAnalysis())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
         }
+
         // 2L+1L tree (Z->ll + Z/W->l)
         INV_2L1L.reset(new RestFrames::InvisibleGroup("INV_2L1L","Invisible System"));
         INV_2L1L->AddFrame(*Ia_2L1L);
@@ -546,14 +586,25 @@ namespace Gambit {
         SplitINV_2L1L->AddInvisibleFrame(*Ia_2L1L, 0);
         SplitINV_2L1L->AddInvisibleFrame(*Ib_2L1L, 1);
         
-        if(!LAB_2L1L->InitializeAnalysis()){
-          cout << "Problem initializing \"2L1L\" analysis" << endl;
+        if(!LAB_2L1L->InitializeAnalysis())
+        {
+          str errmsg;
+          errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+          piped_errors.request(LOCAL_INFO, errmsg);
         }
-  
+ 
       }
       
 
       void analyze(const HEPUtils::Event* event) {
+
+        // Clear 
+        LAB_2L2J->ClearEvent();
+        LAB_comb->ClearEvent();
+        LAB_2LNJ->ClearEvent();
+        LAB_2L1L->ClearEvent();
+        LAB_3L->ClearEvent();
+
 
         HEPUtilsAnalysis::analyze(event);
 
@@ -1028,10 +1079,8 @@ namespace Gambit {
 
         if(m_is2Lep2Jet)
         {
-          //Creating the Lab Frame
-          LAB_2L2J->ClearEvent();
       
-//          if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
+          // if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
       
           //Setting the Standard Variables
           //Di-Lepton System:
@@ -1164,7 +1213,17 @@ namespace Gambit {
           //////////////////////////////////////////////////
           //Lotentz vectors have been set, now do the boosts
           //////////////////////////////////////////////////
-          LAB_2L2J->AnalyzeEvent();                               //analyze the event
+
+          // Analyze the event
+          if(!LAB_2L2J->AnalyzeEvent())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L2J->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_warnings.request(LOCAL_INFO, errmsg);
+            return;
+          }
+
+
           //cout << L1_2L2J->GetFourVector(*LAB_2L2J).Pt() << endl;
           if (L1_2L2J->GetFourVector(*LAB_2L2J).Pt() > L2_2L2J->GetFourVector(*LAB_2L2J).Pt()){
             // m_Zlep1Pt = L1_2L2J->GetFourVector(*LAB_2L2J).Pt();
@@ -1407,7 +1466,14 @@ namespace Gambit {
             L1b_3L->SetLabFrameFourVector(Leptons[1]); // Set lepton1 from Z
             L2b_3L->SetLabFrameFourVector(Leptons[2]); // Set lepton2 from Z
 
-            if(!LAB_3L->AnalyzeEvent()) cout << "FillEvent:: Something went wrong..." << endl;
+            if(!LAB_3L->AnalyzeEvent())
+            {
+              str errmsg;
+              errmsg  = "Some problem occurred when calling LAB_3L->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+              piped_warnings.request(LOCAL_INFO, errmsg);
+              return;
+            }
+
             
             TLorentzVector l1;
             TLorentzVector l2;
@@ -1533,7 +1599,6 @@ namespace Gambit {
           m_minDphi = mindphi;//cleaning variable for missmeasured jets;
           //if( fabs(mindphi)<0.4) return;
           
-          LAB_comb->ClearEvent();
 
       
           vector<RestFrames::RFKey> jetID;
@@ -1556,8 +1621,14 @@ namespace Gambit {
           L_comb->SetLabFrameFourVector(lepSys);
     
           INV_comb->SetLabFrameThreeVector(ETMiss);
+
           if(!LAB_comb->AnalyzeEvent())
-            cout << "Something went wrong with \"INTERMEDIATE\" tree event analysis" << endl;
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_comb->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_warnings.request(LOCAL_INFO, errmsg);
+            return;
+          }
 
           for(int i = 0; i < int(signalJets.size()); i++){
             if(JETS_comb->GetFrame(jetID[i]) == *J_comb){
@@ -1571,7 +1642,6 @@ namespace Gambit {
 
           // 2LNJ analysis
           if(m_is2L2JInt){
-            LAB_2LNJ->ClearEvent();
       
             // put jets in their place
             int NJ = jetID.size();
@@ -1593,12 +1663,17 @@ namespace Gambit {
             INV_2LNJ->SetLabFrameThreeVector(ETMiss);
       
             if(!LAB_2LNJ->AnalyzeEvent())
-              cout << "Something went wrong with \"2LNJ\" tree event analysis" << endl;
+            {
+              str errmsg;
+              errmsg  = "Some problem occurred when calling LAB_2LNJ->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+              piped_warnings.request(LOCAL_INFO, errmsg);
+              return;
+            }
+
           }
 
           // 2L1L analysis
           if(m_is3LInt){
-            LAB_2L1L->ClearEvent();
       
             // put jets in their place
             int NJ = jetID.size();
@@ -1644,7 +1719,13 @@ namespace Gambit {
             INV_2L1L->SetLabFrameThreeVector(ETMiss);
       
             if(!LAB_2L1L->AnalyzeEvent())
-              cout << "Something went wrong with \"2L1L\" tree event analysis" << endl;
+            {
+              str errmsg;
+              errmsg  = "Some problem occurred when calling LAB_2L1L->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+              piped_warnings.request(LOCAL_INFO, errmsg);
+              return;
+            }
+
           }
     
           TLorentzVector vP_CM;
