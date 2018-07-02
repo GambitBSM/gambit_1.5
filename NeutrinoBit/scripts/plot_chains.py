@@ -45,7 +45,8 @@ def show_high_couplings(rhn):
         ]
     quit()
 
-def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG', partial = False):
+def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
+        True):
     M = [rhn.M1, rhn.M2, rhn.M3]
     U = [
         [rhn.U1, rhn.Ue1, rhn.Um1, rhn.Ut1],
@@ -62,12 +63,12 @@ def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG', partial = False):
         lnL = rhn.lnL[mask]
 
         if name == 'total':
-            w = lnL
+            w = lnL - lnL.max()
             indices = np.argsort(w)
             vmax = 0
             vmin = -2
             cmap = 'viridis'
-        elif partial:
+        else:
             lnL_partial = rhn.lnL_partial[name][mask]
             imax = lnL.argmax()
             w = -lnL_partial[imax] + lnL_partial
@@ -75,32 +76,36 @@ def show_lnL_relevance(rhn, i = 1, I = 1, tag = 'TAG', partial = False):
             vmax = 2
             vmin = -2
             cmap =  'terrain'
-        else:
-            lnL_partial = rhn.lnL_partial[name][mask]
-            imax = lnL.argmax()
-            x = lnL[imax] - lnL
-            y = lnL_partial[imax] - lnL_partial
-            w = y/(x+0.1)
-            indices = np.argsort(-w)
-            vmin = None
-            vmax = None
-            cmap = 'viridis'
+#        else:
+#            lnL_partial = rhn.lnL_partial[name][mask]
+#            imax = lnL.argmax()
+#            x = lnL[imax] - lnL
+#            y = lnL_partial[imax] - lnL_partial
+#            w = y/(x+0.1)
+#            indices = np.argsort(-w)
+#            vmin = None
+#            vmax = None
+#            cmap = 'viridis'
         plt.scatter(np.log10(M[I-1])[mask][indices],
                 np.log10(U[I-1][i])[mask][indices], c = w[indices],
                 rasterized=True, marker='.', edgecolors = None, linewidths = 0,
                 vmin = vmin, vmax = vmax, cmap = cmap)
+        plt.xlim([-1, 3.0])
+        plt.ylim([-10, -1])
         plt.colorbar()
         plt.xlabel("log10(M%i/GeV)"%I)
         plt.ylabel("log10(U%i%i)"%(i,I))
 
         print 'save...'
         plt.tight_layout(pad=0.3)
-        plt.savefig(OUTPATH + 'hist_NH_scatter_U%i%i'%(i,I)+"_"+name+'_'+tag+'.pdf')
+        plt.savefig(OUTPATH + 'lnL_U%i%i'%(i,I)+"_"+name+'_'+tag+'.pdf')
         print '...done'
 
-    for name in rhn.lnL_partial:
-        f(rhn, name)
-    #f(rhn, 'total')
+    if partial:
+        for name in rhn.lnL_partial:
+            f(rhn, name)
+    if total:
+        f(rhn, 'total')
 
 def show_lnL_hist(rhn):
     def f(rhn, name):
@@ -642,16 +647,35 @@ def get_couplings(rhn, Ut1th = 0):
     #plt.loglog(a, b, marker='x')
     #plt.savefig(OUTPATH+'test.pdf')
 
+def all9():
+    l = [
+            [1, 'e1'],
+            [2, 'm1'],
+            [3, 't1'],
+            [1, 'e2'],
+            [2, 'm2'],
+            [3, 't2'],
+            [1, 'e3'],
+            [2, 'm3'],
+            [3, 't3'],
+            ]
+    for i, TAG in l:
+        rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+                print_keys = False, renormalize = False, sub_slide = True)
+        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = False, total = True)
+
 if __name__ == "__main__":
-    rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_CS3b.hdf5', MODEL = 'diff',
-            print_keys = False, renormalize = False, sub_slide = True)
+    all9()
+#    TAG = 'm2'
+#    rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+#            print_keys = False, renormalize = False, sub_slide = True)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
     #show_survival_fraction(rhn)
     #show_high_couplings(rhn)
 
-    show_U_vs_M(rhn, tag = 'CS3b', plot_all = False)
+    #show_U_vs_M(rhn, tag = TAG, plot_all = False)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
@@ -669,5 +693,5 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV'])
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
-    #show_lnL_hist(rhn)c
-    #show_lnL_relevance(rhn, i = 1, I = 1, tag = 'p_CS0_pre', partial = True)
+    #show_lnL_hist(rhn)
+    #show_lnL(rhn, i = 2, I = 1, tag = TAG, partial = True, total = True)
