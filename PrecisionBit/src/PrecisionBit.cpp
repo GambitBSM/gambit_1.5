@@ -14,6 +14,7 @@
 ///  \author Chris Rogan
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
+///  \date 2018 June
 ///  \author Marcin Chrzaszcz
 ///          (mchrzasz@cern.ch)
 ///  \date 2018
