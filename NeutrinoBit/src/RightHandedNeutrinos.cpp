@@ -1316,9 +1316,9 @@ namespace Gambit
     }
   
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
-    void lnL_ckm_Vu(double& result_ckm)
+    void lnL_ckm_Vus(double& result_ckm)
     {
-      using namespace Pipes::lnL_ckm_Vusmin;
+      using namespace Pipes::lnL_ckm_Vus;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
       double G_mu = sminputs.GF;
