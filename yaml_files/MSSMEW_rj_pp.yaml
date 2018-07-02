@@ -163,7 +163,7 @@ ObsLikes:
     - capability: XENON100_2012_LogLikelihood
       purpose:    LogLike
 
-    - capability: XENON1T_2017_LogLikelihood
+    - capability: XENON1T_2018_LogLikelihood
       purpose:    LogLike
 
     - capability: LUX_2016_LogLikelihood
