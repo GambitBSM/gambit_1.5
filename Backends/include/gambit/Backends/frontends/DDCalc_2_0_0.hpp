@@ -37,8 +37,8 @@
 // Identify backend
 #define BACKENDNAME DDCalc
 #define BACKENDLANG Fortran
-#define VERSION 1.0.0
-#define SAFE_VERSION 1_0_0
+#define VERSION 2.0.0
+#define SAFE_VERSION 2_0_0
 
 // Load it
 LOAD_LIBRARY
@@ -75,20 +75,28 @@ BE_FUNCTION(DDCalc_InitWIMP,     int, (),            "C_DDWIMP_ddcalc_initwimp",
 BE_FUNCTION(DDCalc_InitHalo,     int, (),            "C_DDHalo_ddcalc_inithalo", "InitHalo")
 BE_FUNCTION(DDCalc_InitDetector, int, (const bool&), "C_DDExperiments_ddcalc_initdetector", "InitDetector")
 
-// Initialization (specific experimental factory functions). Single boolean argument indicates if extra calculations
-// should be performed for some no-background-subtraction limits (not necessary for likelihoods).
-BE_FUNCTION(XENON100_2012_Init,  int, (const bool&), "C_DDCalc_xenon100_2012_init",  "XENON100_2012_Init")
-BE_FUNCTION(LUX_2013_Init,       int, (const bool&), "C_DDCalc_lux_2013_init",       "LUX_2013_Init")
-BE_FUNCTION(LUX_2016_Init,       int, (const bool&), "C_DDCalc_lux_2016_init",       "LUX_2016_Init")
-BE_FUNCTION(PandaX_2016_Init,    int, (const bool&), "C_DDCalc_pandax_2016_init",    "PandaX_2016_Init")
-BE_FUNCTION(LUX_2015_Init,       int, (const bool&), "C_DDCalc_lux_2015_init",       "LUX_2015_Init")
-BE_FUNCTION(PICO_2L_Init,        int, (const bool&), "C_DDCalc_pico_2l_init",        "PICO_2L_Init")
-BE_FUNCTION(PICO_60_F_Init,      int, (const bool&), "C_DDCalc_pico_60_f_init",      "PICO_60_F_Init")
-BE_FUNCTION(PICO_60_I_Init,      int, (const bool&), "C_DDCalc_pico_60_i_init",      "PICO_60_I_Init")
-BE_FUNCTION(SuperCDMS_2014_Init, int, (const bool&), "C_DDCalc_supercdms_2014_init", "SuperCDMS_2014_Init")
-BE_FUNCTION(SIMPLE_2014_Init,    int, (const bool&), "C_DDCalc_simple_2014_init",    "SIMPLE_2014_Init")
-//BE_FUNCTION(DARWIN_Ar_Init,      int, (const bool&), "C_DDCalc_darwin_ar_init", "DARWIN_Ar_Init")
-//BE_FUNCTION(DARWIN_Xe_Init,      int, (const bool&), "C_DDCalc_darwin_xe_init", "DARWIN_Xe_Init")
+// Initialization (specific experimental factory functions).
+BE_FUNCTION(XENON100_2012_Init,  int, (), "C_DDCalc_xenon100_2012_init",  "XENON100_2012_Init")
+BE_FUNCTION(XENON1T_2017_Init,   int, (), "C_DDCalc_xenon1t_2017_init",   "XENON1T_2017_Init")
+BE_FUNCTION(XENON1T_2018_Init,   int, (), "C_DDCalc_xenon1t_2018_init",   "XENON1T_2018_Init")
+BE_FUNCTION(LUX_2013_Init,       int, (), "C_DDCalc_lux_2013_init",       "LUX_2013_Init")
+BE_FUNCTION(LUX_2016_Init,       int, (), "C_DDCalc_lux_2016_init",       "LUX_2016_Init")
+BE_FUNCTION(PandaX_2016_Init,    int, (), "C_DDCalc_pandax_2016_init",    "PandaX_2016_Init")
+BE_FUNCTION(PandaX_2017_Init,    int, (), "C_DDCalc_pandax_2017_init",    "PandaX_2017_Init")
+BE_FUNCTION(LUX_2015_Init,       int, (), "C_DDCalc_lux_2015_init",       "LUX_2015_Init")
+BE_FUNCTION(PICO_2L_Init,        int, (), "C_DDCalc_pico_2l_init",        "PICO_2L_Init")
+BE_FUNCTION(PICO_60_Init,        int, (), "C_DDCalc_pico_60_init",        "PICO_60_Init")
+BE_FUNCTION(PICO_60_2017_Init,   int, (), "C_DDCalc_pico_60_2017_init",   "PICO_60_2017_Init")
+BE_FUNCTION(SuperCDMS_2014_Init, int, (), "C_DDCalc_supercdms_2014_init", "SuperCDMS_2014_Init")
+BE_FUNCTION(CDMSlite_Init,       int, (), "C_DDCalc_cdmslite_init",       "CDMSlite_Init")
+BE_FUNCTION(SIMPLE_2014_Init,    int, (), "C_DDCalc_simple_2014_init",    "SIMPLE_2014_Init")
+BE_FUNCTION(CRESST_II_Init,      int, (), "C_DDCalc_cresst_ii_init",      "CRESST_II_Init")
+BE_FUNCTION(LZ_Init,             int, (), "C_DDCalc_lz_init",             "LZ_Init")
+BE_FUNCTION(PICO_500_Init,       int, (), "C_DDCalc_pico_500_init",       "PICO_500_Init")
+BE_FUNCTION(DarkSide_50_Init,    int, (), "C_DDCalc_darkside_50_init",    "DarkSide_50_Init")
+BE_FUNCTION(DARWIN_Init,         int, (), "C_DDCalc_darwin_init",         "DARWIN_Init")
+//BE_FUNCTION(DARWIN_Ar_Init,      int, (), "C_DDCalc_darwin_ar_init", "DARWIN_Ar_Init")
+//BE_FUNCTION(DARWIN_Xe_Init,      int, (), "C_DDCalc_darwin_xe_init", "DARWIN_Xe_Init")
 
 // Set halo parameters (Standard Halo Model):
 //   rho [GeV/cm^3], vrot [km/s], v0 [km/s], vesc [km/s]
@@ -96,7 +104,8 @@ BE_FUNCTION(SIMPLE_2014_Init,    int, (const bool&), "C_DDCalc_simple_2014_init"
 // values are already set via DDCalc_InitHalo routine, so it need not be called at all if the default values are to be used.
 BE_FUNCTION(DDCalc_SetSHM, void, (const int&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setshm", "SetSHM")
 
-// Set the WIMP mass and couplings/cross-sections. There are three versions, depending on how the couplings are specified:
+// Set the WIMP mass and couplings/cross-sections for standard SI/SD scattering.
+// There are three versions, depending on how the couplings are specified:
 //   * mfa:    mass, fp, fn, ap, an
 //   * mG:     mass, Gp_SI, Gn_SI, Gp_SD, Gn_SD
 //   * msigma: mass, sigmapSI, sigmanSI, sigmapSD, sigmanSD
@@ -115,6 +124,29 @@ BE_FUNCTION(DDCalc_GetWIMP_mfa,    void, (const int&,double&,double&,double&,dou
 BE_FUNCTION(DDCalc_GetWIMP_mG,     void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_mg",     "GetWIMP_mG")
 BE_FUNCTION(DDCalc_GetWIMP_msigma, void, (const int&,double&,double&,double&,double&,double&), "C_DDCalc_ddcalc_getwimp_msigma", "GetWIMP_msigma")
 
+// Set the WIMP mass, spin, and coupling structure within the non-relativistic effective theory of DM-nucleon interactions.
+//  - SetWIMP_NREffectiveTheory initializes a WIMP within the non-relativistic effective theory setup, setting all coefficients to zero.
+//    Arguments are the WIMP index, the mass of the WIMP in GeV, and the spin of the WIMP.
+//  - SetNRCoefficient sets the coefficient of a single operator to a given value.
+//    Arguments are:
+//	(1) the WIMP index
+//	(2) The operator index, i.e. an integer specifying the non-relativistic operator, e.g. 6 for O_6.
+//	    For the specific cases of O_1 and O_4 one can also use the operators (q^2/mp^2) * O_1 and (q^2/mp^2) * O_4,
+//	    by passing -1 and -4, respectively.
+//	(3) The isospin index: 0 for the isoscalar and 1 for the isovector component of the operator.
+//	(4) The desired value of the operator coefficient in units GeV^(-2).
+BE_FUNCTION(DDCalc_SetWIMP_NREffectiveTheory, void, (const int&,const double&,const double&), "C_DDCalc_ddcalc_setwimp_nreffectivetheory", "SetWIMP_NREffectiveTheory")
+BE_FUNCTION(DDCalc_SetNRCoefficient, void, (const int&,const int&,const int&,const double&), "C_DDCalc_ddcalc_setnrcoefficient", "SetNRCoefficient")
+
+// Get the values of the isoscalar and isovector part of a given non-relativistic operator.
+// Arguments are:
+//   (1) the WIMP index
+//   (2) the operator index (see description fir SetNRCoefficient above)
+//   (3) gives the value of the isoscalar component of the operator, in units GeV^(-2)
+//   (4) gives the value of the isovector component of the operator, in units GeV^(-2)
+BE_FUNCTION(DDCalc_GetNRCoefficient, void, (const int&,const int&,double&,double&), "C_DDCalc_ddcalc_getnrcoefficient", "GetNRCoefficient")
+
+
 // Specify the minimum recoil energy to be included in the rate calculations [keV].  Note the efficiency curves already account for
 // detector and analysis thresholds regardless of this setting, so setting this to 0 keV (the default behavior when initialization is
 // performed) does not imply that very low energy recoils actually contribute to the signal.
@@ -127,19 +159,17 @@ BE_FUNCTION(DDCalc_CalcRates,  void, (const int&, const int&, const int&), "C_DD
 //   Events:        observed events
 //   Background:    average background expectation
 //   Signal:        average signal expectation
-//   SignalSI:      average signal expectation (spin-independent only)
-//   SignalSD:      average signal expectation (spin-dependent only)
 //   LogLikelihood: log of the likelihood (not -2lnL)
 //   LogPValue:     log of the p value
 //   Factor x by which sigma -> x*sigma would yield given p-value (given as log(p))
 BE_FUNCTION(DDCalc_Events,        int,    (const int&),                "C_DDRates_ddcalc_events",        "DD_Events")
 BE_FUNCTION(DDCalc_Background,    double, (const int&),                "C_DDRates_ddcalc_background",    "DD_Background")
 BE_FUNCTION(DDCalc_Signal,        double, (const int&),                "C_DDRates_ddcalc_signal",        "DD_Signal")
-BE_FUNCTION(DDCalc_SignalSI,      double, (const int&),                "C_DDRates_ddcalc_signalsi",      "DD_SignalSI")
-BE_FUNCTION(DDCalc_SignalSD,      double, (const int&),                "C_DDRates_ddcalc_signalsd",      "DD_SignalSD")
+BE_FUNCTION(DDCalc_Bins,          int,    (const int&),                "C_DDRates_ddcalc_bins",          "DD_Bins")
+BE_FUNCTION(DDCalc_BinEvents,     int,    (const int&, const int&),    "C_DDRates_ddcalc_binevents",     "DD_BinEvents")
+BE_FUNCTION(DDCalc_BinBackground, double, (const int&, const int&),    "C_DDRates_ddcalc_binbackground", "DD_BinBackground")
+BE_FUNCTION(DDCalc_BinSignal,     double, (const int&, const int&),    "C_DDRates_ddcalc_binsignal",     "DD_BinSignal")
 BE_FUNCTION(DDCalc_LogLikelihood, double, (const int&),                "C_DDStats_ddcalc_loglikelihood", "DD_LogLikelihood")
-BE_FUNCTION(DDCalc_LogPValue,     double, (const int&),                "C_DDStats_ddcalc_logpvalue",     "DD_LogPValue")
-BE_FUNCTION(DDCalc_ScaleToPValue, double, (const int&, const double&), "C_DDStats_ddcalc_scaletopvalue", "DD_SignalSD")
 
 // Do memory cleanup (nowhere to actually use these in GAMBIT proper, but they could be useful in standalones that hammer DDCalc).
 BE_FUNCTION(DDCalc_FreeWIMPs,     void, (), "C_DDUtils_ddcalc_freewimps",     "FreeWIMPs")

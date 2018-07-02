@@ -1256,7 +1256,7 @@ PandaX_2017_SignalSI: |
    The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
 
 PandaX_2017_SignalSD: |
-   The number of spin-independent signal events for the PandaX 2017 direct detection analysis.
+   The number of spin-dependent signal events for the PandaX 2017 direct detection analysis.
 
 PandaX_2017_LogLikelihood: |
    Calculate the log-likelihood for the PandaX 2017 direct detection analysis.
