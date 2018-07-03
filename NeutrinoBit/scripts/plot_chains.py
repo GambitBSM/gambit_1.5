@@ -10,7 +10,7 @@ from scipy.linalg import inv
 
 from read_RHN_chains import *
 
-OUTPATH = '/home/cweniger/'
+OUTPATH = '/home/ubuntu/plots/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
@@ -647,25 +647,32 @@ def get_couplings(rhn, Ut1th = 0):
     #plt.loglog(a, b, marker='x')
     #plt.savefig(OUTPATH+'test.pdf')
 
-def all9():
-    l = [
+def all9(mode = None):
+    if mode == 'e':
+        l = [
             [1, 'e1'],
-            [2, 'm1'],
-            [3, 't1'],
             [1, 'e2'],
-            [2, 'm2'],
-            [3, 't2'],
             [1, 'e3'],
+            ]
+    if mode == 'm':
+        l = [
+            [2, 'm1'],
+            [2, 'm2'],
             [2, 'm3'],
+            ]
+    if mode == 't':
+        l = [
+            [3, 't1'],
+            [3, 't2'],
             [3, 't3'],
             ]
     for i, TAG in l:
-        rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+        rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
                 print_keys = False, renormalize = False, sub_slide = True)
-        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = False, total = True)
+        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = False)
 
 if __name__ == "__main__":
-    all9()
+    all9(mode = 't')
 #    TAG = 'm2'
 #    rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
 #            print_keys = False, renormalize = False, sub_slide = True)
