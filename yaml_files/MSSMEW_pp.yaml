@@ -135,14 +135,16 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Degenerate_Chargino_LLike
 
-    # Other likelihoods
-    # TODO: Update to the new Z/H --> invisible likelihoods
-    - purpose:    LogLike
-      capability: lnL_Z_invisible_width
+    # Likelihoods for invisible decays of Z and Higgs bosons
+    - purpose: LogLike
+      capability: lnL_Z_inv
+
+    - purpose: LogLike
+      capability: lnL_Higgs_invWidth
 
     # Observables (not included in likelihood)
     - purpose:    likelihood_details
-      capability: LHC_LogLikes
+      capability: LHC_LogLike_per_analysis
 
     - purpose:    Observable
       capability: LHC_signals
@@ -165,6 +167,16 @@ ObsLikes:
     - purpose:    Observable
       capability: MSSM_spectrum
       type:       map_str_dbl
+
+    # Observables for invisible decays of Z and Higgs bosons
+    - purpose: Observable
+      capability: Z_gamma_nu
+
+    - purpose: Observable
+      capability: Z_gamma_chi_0
+
+    - purpose: Observable
+      capability: inv_Higgs_BF
 
 Rules:
 
@@ -370,20 +382,19 @@ Rules:
     function: getCMSnoeffAnalysisContainer
     options:
       analyses: [ [ "CMS_13TeV_2LEPsoft_36invfb",
-                    "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE",
+                    "CMS_13TeV_2LEPsoft_36invfb_nocovar",
                     "CMS_13TeV_MultiLEP_36invfb",
                     "CMS_13TeV_2OSLEP_36invfb",
-                    "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE" ] ]
+                    "CMS_13TeV_2OSLEP_36invfb_nocovar" ] ]
 
 
   # List any analyses that should *NOT* be included in the total log-likelihood!
   # These will still be computed if listed in the analysis setup above, 
   # but their likelihood will not added to the combined likelihood.
   - capability: LHC_Combined_LogLike
-    function: calc_LHC_LogLike
     options:
-      skip_analyses: [ "CMS_13TeV_2LEPsoft_36invfb_NOCOVAR_NOLIKE", 
-                       "CMS_13TeV_2OSLEP_36invfb_NOCOVAR_NOLIKE" ]
+      skip_analyses: [ "CMS_13TeV_2LEPsoft_36invfb_nocovar", 
+                       "CMS_13TeV_2OSLEP_36invfb_nocovar" ]
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties
   # Can change "_lognormal_" to "_gaussian_" if you prefer
@@ -395,6 +406,12 @@ Rules:
       covariance_marg_convthres_rel: 0.05
       covariance_nsamples_start: 100000
 
+  # Invisible Higgs branching ratio from CMS-PAS-HIG-17-023 with 10% theory error
+  # Path relative to GAMBIT build
+  - capability: lnL_Higgs_invWidth
+    function: lnL_Higgs_invWidth_SMlike
+    options:
+      BR_h_inv_chi2_data_file: ./DecayBit/data/arXiv_1306.2941_Figure_8_log_normal_50_profiled.dat
 
 # Set the names of key log files
 Logger:

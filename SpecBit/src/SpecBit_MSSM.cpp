@@ -143,7 +143,7 @@ namespace Gambit
       settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_down"));
       settings.set(Spectrum_generator_settings::threshold_corrections, runOptions.getValueOrDef<int>(123111321,"threshold_corrections"));
 
-      
+
       spectrum_generator.set_settings(settings);
 
       // Generate spectrum
@@ -670,13 +670,10 @@ namespace Gambit
     //  These are wrapped up in Gambit functor objects according to the
     //  instructions in the rollcall header
 
-    // Functions to changes the capability associated with a Spectrum object to
-    // "SM_spectrum"
-    //TODO: "temporarily" removed
-    //void convert_MSSM_to_SM   (/*TAG*/ Spectrum &result) {result = *Pipes::convert_MSSM_to_SM::Dep::unimproved_MSSM_spectrum;}
-
-    //void convert_NMSSM_to_SM  (Spectrum* &result) {result = *Pipes::convert_NMSSM_to_SM::Dep::NMSSM_spectrum;}
-    //void convert_E6MSSM_to_SM (Spectrum* &result) {result = *Pipes::convert_E6MSSM_to_SM::Dep::E6MSSM_spectrum;}
+    // Functions to change the capability associated with a Spectrum object to "SM_spectrum"
+    void convert_MSSM_to_SM   (Spectrum &result) {result = *Pipes::convert_MSSM_to_SM::Dep::MSSM_spectrum;}
+    void convert_NMSSM_to_SM  (Spectrum &result) {result = *Pipes::convert_NMSSM_to_SM::Dep::NMSSM_spectrum;}
+    void convert_E6MSSM_to_SM (Spectrum &result) {result = *Pipes::convert_E6MSSM_to_SM::Dep::E6MSSM_spectrum;}
 
     void get_MSSM_spectrum_SPheno (Spectrum& spectrum)
     {
@@ -749,7 +746,7 @@ namespace Gambit
      // Get input parameters (from flexiblesusy namespace)
      MSSMEFTHiggs_input_parameters input;
      // MSSMatQ also requires input scale to be supplied with name MSUSY
-     input.MSUSY  = *myPipe::Param.at("Qin"); 
+     input.MSUSY  = *myPipe::Param.at("Qin");
      input.mHu2IN = *myPipe::Param.at("mHu2");
      input.mHd2IN = *myPipe::Param.at("mHd2");
      input.SignMu = *myPipe::Param.at("SignMu");
@@ -796,13 +793,13 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
    }
-   #endif  
+   #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with CMSSM (GUT scale) boundary conditions
     // In principle an identical spectrum can be obtained from the function
     // get_MSSMatGUT_spectrum_FS
     // by setting the input parameters to match the CMSSM assumptions
-    #if(FS_MODEL_CMSSM_IS_BUILT) 
+    #if(FS_MODEL_CMSSM_IS_BUILT)
     void get_CMSSM_spectrum_FS (Spectrum& result)
     {
 
@@ -1047,7 +1044,7 @@ namespace Gambit
       bool add_susy_scale = myPipe::runOptions->getValueOrDef<bool>(false,"assume_Q_is_MSUSY");
       if(add_susy_scale)
       {
-         result.get_HE().set_override(Par::mass1,result.get_HE().GetScale(),"susy_scale",true); 
+         result.get_HE().set_override(Par::mass1,result.get_HE().GetScale(),"susy_scale",true);
       }
 
       // No sneaking in charged LSPs via SLHA, jävlar.
