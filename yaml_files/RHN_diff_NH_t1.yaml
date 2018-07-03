@@ -138,8 +138,8 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
+  - capability: lnLlepuniv
+    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
@@ -334,8 +334,8 @@ Rules:
     options:
       I: 1
       i: 3
-      slope: 1.0
-      threshold: 1e0
+      slope: 0.5
+      mslope: 0.5
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
