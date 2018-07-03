@@ -2184,17 +2184,16 @@ namespace Gambit
       using namespace Pipes::coupling_slide;
       int I = runOptions->getValueOrDef<int>(1, "I");
       int flavour = runOptions->getValueOrDef<int>(1, "i");
-      double threshold = runOptions->getValueOrDef<double>(1e0, "threshold");
       double slope = runOptions->getValueOrDef<double>(1, "slope");
-//      std::cout << U << std::endl;
-//      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(0, 0) << std::endl;
-//      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(1, 0) << std::endl;
-//      std::cout << (Dep::SeesawI_Theta->cwiseAbs2())(2, 0) << std::endl;
-//      std::cout << std::endl;
+      double mslope = runOptions->getValueOrDef<double>(0, "mslope");
+      std::vector<double> M(3);
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
       if (flavour > 0)
       {
         double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
-        lnL = slope*log10(std::min(U/threshold, 1.));
+        lnL = slope*log10(std::min(U, 1.)) + mslope*log10(M[I-1]);
       }
       else
       {
@@ -2202,9 +2201,9 @@ namespace Gambit
         double U2 = (Dep::SeesawI_Theta->cwiseAbs2())(1, I-1);
         double U3 = (Dep::SeesawI_Theta->cwiseAbs2())(2, I-1);
         lnL = 0;
-        lnL += slope*log10(std::min(U1/threshold, 1.));
-        lnL += slope*log10(std::min(U2/threshold, 1.));
-        lnL += slope*log10(std::min(U3/threshold, 1.));
+        lnL += slope*log10(std::min(U1, 1.)) + mslope*log10(M[I-1]);
+        lnL += slope*log10(std::min(U2, 1.)) + mslope*log10(M[I-1]);
+        lnL += slope*log10(std::min(U3, 1.)) + mslope*log10(M[I-1]);
       }
     }
   }
