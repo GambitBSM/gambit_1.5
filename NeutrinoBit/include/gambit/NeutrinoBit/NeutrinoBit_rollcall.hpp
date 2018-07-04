@@ -660,6 +660,15 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY get_Vus
+  START_CAPABILITY
+    #define FUNCTION  get_Vus
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
   #define CAPABILITY lnLckm_Vusmin
   START_CAPABILITY
     #define FUNCTION lnL_ckm_Vusmin
@@ -678,6 +687,7 @@ START_MODULE
     ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(get_Vus, double)
     #undef FUNCTION
   #undef CAPABILITY
 
