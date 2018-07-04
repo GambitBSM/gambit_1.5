@@ -1273,6 +1273,7 @@ namespace Gambit
     void get_Vus(double result_Vus)
     {
       using namespace Pipes::get_Vus; 
+      SMInputs sminputs = *Dep::SMINPUTS;   
       result_Vus =  *Param["CKM_lambda"];
     }
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
