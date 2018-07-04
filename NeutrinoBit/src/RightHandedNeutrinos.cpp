@@ -1270,7 +1270,7 @@ namespace Gambit
       
       result_Vus = est_Vus;
     }
-    void get_Vus(double result_Vus)
+    void get_Vus(double& result_Vus)
     {
       using namespace Pipes::get_Vus; 
       SMInputs sminputs = *Dep::SMINPUTS;   
