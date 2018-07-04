@@ -30,8 +30,8 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
+      range: [1E-7, 0.23]
+      prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
       prior_type: flat
@@ -60,10 +60,10 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [100, 500]
+      range: [0.1, 2.0]
       prior_type: log
     delta_M21:
-      range: [1E-20, 1E-10]
+      range: [1E-10, .1]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -109,7 +109,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-11
+      convthresh: 1e-10
       lambdajDE: true
 
     multinest:
@@ -138,8 +138,8 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
+  - capability: lnLlepuniv
+    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
@@ -160,7 +160,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: l2lgamma_lnL
-    purpose: LogLike 
+    purpose: LogLike
 
   - capability: l2lll_lnL
     purpose: LogLike
@@ -333,9 +333,9 @@ Rules:
   - function: coupling_slide
     options:
       I: 1
-      i: 3
-      slope: 1.0
-      threshold: 1e0
+      i: 2
+      slope: 0.5
+      mslope: 0.5
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -355,4 +355,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "runs/RHN_diff_NH_CS3/"
+  default_output_path: "runs/RHN_diff_NH_m1/"

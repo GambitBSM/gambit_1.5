@@ -60,7 +60,7 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [100, 500]
+      range: [60, 500]
       prior_type: log
     delta_M21:
       range: [1E-20, 1E-10]
@@ -109,7 +109,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-11
+      convthresh: 1e-10
       lambdajDE: true
 
     multinest:
@@ -138,8 +138,8 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
+  - capability: lnLlepuniv
+    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
@@ -333,9 +333,9 @@ Rules:
   - function: coupling_slide
     options:
       I: 1
-      i: 3
-      slope: 1.0
-      threshold: 1e0
+      i: 2
+      slope: 0.5
+      mslope: 0.5
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -355,4 +355,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "runs/RHN_diff_NH_CS3/"
+  default_output_path: "runs/RHN_diff_NH_m3/"
