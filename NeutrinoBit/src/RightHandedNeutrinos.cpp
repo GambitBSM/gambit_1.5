@@ -955,13 +955,17 @@ namespace Gambit
     void RHN_R_W(std::vector<double> &R_W)
     {
       using namespace Pipes::RHN_R_W;
-      Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
+      //Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
+      std::vector<double> Wdecays = *Dep::W_to_l_decays;
 
       R_W.clear();
 
-      R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
-      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
-      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
+      R_W.push_back(Wdecays[1]/Wdecays[0]);
+      R_W.push_back(Wdecays[2]/Wdecays[0]);
+      R_W.push_back(Wdecays[2]/Wdecays[1]);
+      //R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
+      //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
+      //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
     }
 
     void lnL_lepuniv(double& result_lepuniv)
@@ -978,8 +982,8 @@ namespace Gambit
       double R_K_err = 0.010e-5;
       double R_tau_exp = 0.9762; // 1612.07233 
       double R_tau_err = 0.0028;
-      std::vector<double> R_W_exp = {0.980, 1.063, 1.070};
-      std::vector<double> R_W_err = {0.018, 0.027, 0.026};
+      std::vector<double> R_W_exp = {0.986, 1.043, 1.070}; // PDG 18
+      std::vector<double> R_W_err = {0.013, 0.024, 0.026}; // PDG 18
 
       result_lepuniv = 0;
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);

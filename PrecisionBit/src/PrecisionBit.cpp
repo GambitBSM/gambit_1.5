@@ -1198,33 +1198,38 @@ namespace Gambit
 
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
       std::vector<double> ml = {sminputs.mE, sminputs.mMu, sminputs.mTau};
+      std::vector<double> M = {*Param["M_1"], *Param["M_2"], *Param["M_3"]};
 
       result.clear();
       for(int i=0; i<3; i++)
-        result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-0.5*ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
+      {
+        if(M[i] < mw)
+          result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
+        else
+          result.push_back(Gmu*pow(mw,3)/(6*sqrt(2)*M_PI)*(1.0-ThetaNorm(i,i))*pow(1.0 - pow(ml[i]/mw,2),2)*(1.0 + pow(ml[i]/mw,2))/sqrt(1.0 - ThetaNorm(0,0) -ThetaNorm(1,1)));
+      }
+    }
 
-     }
+    void lnL_W_decays_chi2(double &result)
+    {
+      using namespace Pipes::lnL_W_decays_chi2;
+      std::vector<double> Wtoldecays = *Dep::W_to_l_decays;
+      DecayTable::Entry decays = *Dep::W_plus_decay_rates;
 
-     void lnL_W_decays_chi2(double &result)
-     {
-       using namespace Pipes::lnL_W_decays_chi2;
-       std::vector<double> Wtoldecays = *Dep::W_to_l_decays;
-       DecayTable::Entry decays = *Dep::W_plus_decay_rates;
+      std::vector<double> Wwidth;
+      std::vector<double> Wwidth_error;
 
-       std::vector<double> Wwidth;
-       std::vector<double> Wwidth_error;
+      Wwidth.push_back(decays.width_in_GeV * decays.BF("e+","nu_e"));
+      Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("e+","nu_e"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("e+","nu_e"),2)));
+      Wwidth.push_back(decays.width_in_GeV * decays.BF("mu+","nu_mu"));
+      Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("mu+","nu_mu"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("mu+","nu_mu"),2)));
+      Wwidth.push_back(decays.width_in_GeV * decays.BF("tau+","nu_tau"));
+      Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("tau+","nu_tau"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("tau+","nu_tau"),2)));
 
-       Wwidth.push_back(decays.width_in_GeV * decays.BF("e+","nu_e"));
-       Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("e+","nu_e"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("e+","nu_e"),2)));
-       Wwidth.push_back(decays.width_in_GeV * decays.BF("mu+","nu_mu"));
-       Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("mu+","nu_mu"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("mu+","nu_mu"),2)));
-       Wwidth.push_back(decays.width_in_GeV * decays.BF("tau+","nu_tau"));
-       Wwidth_error.push_back(sqrt(pow(decays.width_in_GeV*decays.BF_error("tau+","nu_tau"),2) + pow(std::max(decays.positive_error, decays.negative_error)*decays.BF("tau+","nu_tau"),2)));
-
-       result = Stats::gaussian_loglikelihood(Wtoldecays[0], Wwidth[0], 0.0, Wwidth_error[0], false);
-       result += Stats::gaussian_loglikelihood(Wtoldecays[1], Wwidth[1], 0.0, Wwidth_error[1], false);
-       result += Stats::gaussian_loglikelihood(Wtoldecays[2], Wwidth[2], 0.0, Wwidth_error[2], false);
-     }
+      result = Stats::gaussian_loglikelihood(Wtoldecays[0], Wwidth[0], 0.0, Wwidth_error[0], false);
+      result += Stats::gaussian_loglikelihood(Wtoldecays[1], Wwidth[1], 0.0, Wwidth_error[1], false);
+      result += Stats::gaussian_loglikelihood(Wtoldecays[2], Wwidth[2], 0.0, Wwidth_error[2], false);
+    }
 
   }
 }
