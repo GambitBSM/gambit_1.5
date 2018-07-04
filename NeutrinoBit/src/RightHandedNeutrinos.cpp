@@ -773,41 +773,45 @@ namespace Gambit
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi = 0.0, mu_f_pi = 0.0, d_r_pi = 1.0;
-      std::vector<double> M(6), r_I_pi(6), G_e_pi = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0,0.0,0.0,0.0};
+//      std::vector<double> M(6), r_I_pi(6), G_e_pi = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0,0.0,0.0,0.0};
+      std::vector<double> M(3), r_I_pi(3), G_e_pi = {0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
-      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
+      //Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
 
-      M[0] = *Param["mNu1"];
+      /*M[0] = *Param["mNu1"];
       M[1] = *Param["mNu2"];
       M[2] = *Param["mNu3"];
       M[3] = *Param["M_1"];
       M[4] = *Param["M_2"];
-      M[5] = *Param["M_3"];
+      M[5] = *Param["M_3"];*/
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
-      for (int i=0; i<6; i++)
+      for (int i=0; i<3; i++)
       {
         r_I_pi[i] = pow(M[i], 2)/pow(m_pi, 2);
  
         if(M[i] + sminputs.mMu < m_pi)
         {
-          //G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2)) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
-          G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2));
+          G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2)) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
+          //G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2));
         } 
         else
           G_mu_pi[i] = 0.0;
 
         if(M[i] + sminputs.mE < m_pi)
         {
-          //G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow(r_e_pi - r_I_pi[i], 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2)) / (r_e_pi * pow((1.0 - r_e_pi), 2));
-          G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2));
+          G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow(r_e_pi - r_I_pi[i], 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2)) / (r_e_pi * pow((1.0 - r_e_pi), 2));
+          //G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2));
         }
         else
           G_e_pi[i] = 0.0;
 
-        //e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
-        //mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
+        e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
+        mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
   
-        if(i<3)
+        /*if(i<3)
         {
           e_f_pi  += Vsq(0,i) * G_e_pi[i];
           mu_f_pi += Vsq(1,i) * G_mu_pi[i];
@@ -816,12 +820,12 @@ namespace Gambit
         {
           e_f_pi  +=  Usq(0,i-3) * G_e_pi[i];
           mu_f_pi +=  Usq(1,i-3) * G_mu_pi[i];
-        }
+        }*/
       }
 
-      //d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
-      //R_pi = R_pi_SM * d_r_pi;
-      R_pi = e_f_pi / mu_f_pi;
+      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
+      R_pi = R_pi_SM * d_r_pi;
+      //R_pi = e_f_pi / mu_f_pi;
  
     }
 
@@ -834,27 +838,30 @@ namespace Gambit
       static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K = 0.0, mu_f_K = 0.0, d_r_K = 1.0;
-      std::vector<double> M(6), r_I_K(6), G_e_K = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0,0.0,0.0,0.0};
+//      std::vector<double> M(6), r_I_K(6), G_e_K = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0,0.0,0.0,0.0};
+      std::vector<double> M(3), r_I_K(3), G_e_K = {0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
-      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
+//      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
 
-      M[0] = *Param["mNu1"];
+      /*M[0] = *Param["mNu1"];
       M[1] = *Param["mNu2"];
       M[2] = *Param["mNu3"];
       M[3] = *Param["M_1"];
       M[4] = *Param["M_2"];
-      M[5] = *Param["M_3"];
+      M[5] = *Param["M_3"];*/
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
-
-      for (int i=0; i<6; i++)
+      for (int i=0; i<3; i++)
       {
         r_I_K[i] = pow(M[i], 2)/pow(m_K,2);
 
 //        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
         if(M[i] + sminputs.mMu < m_K)
         {
-          //G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2)) / (r_mu_K * pow((1.0 - r_mu_K), 2));
-          G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2));
+          G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2)) / (r_mu_K * pow((1.0 - r_mu_K), 2));
+          //G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2));
         } 
         else
           G_mu_K[i] = 0.0;
@@ -862,16 +869,16 @@ namespace Gambit
 //        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
         if(M[i] + sminputs.mE < m_K)
         {
-          //G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2)) / (r_e_K * pow((1.0 - r_e_K), 2));
-          G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2));
+          G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2)) / (r_e_K * pow((1.0 - r_e_K), 2));
+          //G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2));
         }
         else
           G_e_K[i] = 0.0;
 
-        //e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
-        //mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
+        e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
+        mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
           
-        if(i<3)
+        /*if(i<3)
         {
          e_f_K  += Vsq(0,i) * G_e_K[i];
          mu_f_K += Vsq(1,i) * G_mu_K[i];
@@ -880,12 +887,12 @@ namespace Gambit
         {
           e_f_K  +=  Usq(0,i-3) * G_e_K[i];
           mu_f_K += Usq(1,i-3) * G_mu_K[i];
-        }
+        }*/
       }
 
-//      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
-//      R_K = R_K_SM * d_r_K;
-        R_K = e_f_K/mu_f_K;
+      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
+      R_K = R_K_SM * d_r_K;
+//        R_K = e_f_K/mu_f_K;
     }
 
     void RHN_R_tau(double& R_tau)
