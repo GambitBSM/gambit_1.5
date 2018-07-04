@@ -1326,7 +1326,8 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
       double G_mu = sminputs.GF;
-      double V_us =  *Param["CKM_lambda"]; 
+      double V_us = *Dep::get_Vus;
+      
 
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
       double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
