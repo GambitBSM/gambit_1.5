@@ -539,8 +539,9 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RHN_R_W
     START_FUNCTION(std::vector<double>)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(mw, triplet<double>)
+    //DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    //DEPENDENCY(mw, triplet<double>)
+    DEPENDENCY(W_to_l_decays, std::vector<double>)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
@@ -660,6 +661,16 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY get_Vus
+  START_CAPABILITY
+    #define FUNCTION  get_Vus
+    START_FUNCTION(double)
+    ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
   #define CAPABILITY lnLckm_Vusmin
   START_CAPABILITY
     #define FUNCTION lnL_ckm_Vusmin
@@ -678,6 +689,7 @@ START_MODULE
     ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(get_Vus, double)
     #undef FUNCTION
   #undef CAPABILITY
 
