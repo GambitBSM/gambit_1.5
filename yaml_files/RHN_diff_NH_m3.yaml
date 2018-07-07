@@ -334,7 +334,7 @@ Rules:
     options:
       I: 1
       i: 2
-      slope: 0.5
+      slope: 0.33
       mslope: 0.5
 
   - capability: RKstar_0045_11
