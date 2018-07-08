@@ -157,7 +157,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnLckm_Vusmin
-    purpose: Observable
+    purpose: LogLike
 
   - capability: l2lgamma_lnL
     purpose: LogLike
