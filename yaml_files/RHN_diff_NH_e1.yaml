@@ -109,7 +109,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 5e-11
+      convthresh: 1e-10
       lambdajDE: true
 
     multinest:
@@ -336,6 +336,10 @@ Rules:
       i: 1
       slope: 0.5
       mslope: 0.5
+
+  - function: lnL_lepuniv
+    options:
+      include_R_W: true
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
