@@ -101,11 +101,11 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
         plt.savefig(OUTPATH + 'lnL_U%i%i'%(i,I)+"_"+name+'_'+tag+'.pdf')
         print '...done'
 
+    if total:
+        f(rhn, 'total')
     if partial:
         for name in rhn.lnL_partial:
             f(rhn, name)
-    if total:
-        f(rhn, 'total')
 
 def show_lnL_hist(rhn):
     def f(rhn, name):
@@ -658,29 +658,44 @@ def all9(mode = None):
         l = [
             [2, 'm1'],
             [2, 'm2'],
-            [2, 'm3'],
+#            [2, 'm3'],
             ]
     if mode == 't':
         l = [
             [3, 't1'],
-            [3, 't2'],
-            [3, 't3'],
+            #[3, 't2'],
+            #[3, 't3'],
             ]
     for i, TAG in l:
-        rhn = RHN_Chain('/home/ubuntu/data2/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+        rhn = RHN_Chain('/home/ubuntu/data2/runs_04-07-18/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
                 print_keys = False, renormalize = False, sub_slide = True)
-        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = False)
+        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = True)
+
+def show_Vus(rhn, tag = "TAG"):
+    Vus = rhn.Vus
+    lnL = rhn.lnL
+    mask = lnL.max()-lnL < 2
+    Vus_min = Vus[mask].min()
+    Vus_max = Vus[mask].max()
+
+    plt.hist(Vus[mask], bins = 200, log = True)
+    plt.title("Vus, 2-sigma range is %.5e - %.5e"%(Vus_min, Vus_max))
+    plt.xlabel("Vus")
+    plt.tight_layout(pad = 0.3)
+    plt.savefig(OUTPATH+"Vus_hist_%s.pdf"%tag)
 
 if __name__ == "__main__":
     all9(mode = 't')
-#    TAG = 'm2'
-#    rhn = RHN_Chain('/home/cweniger/work/gambit_RHN/runs/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
-#            print_keys = False, renormalize = False, sub_slide = True)
+    #TAG = 'm2'
+    #rhn = RHN_Chain('/home/ubuntu//data2/runs_03-07-18//RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+    #        print_keys = False, renormalize = False, sub_slide = True)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
     #show_survival_fraction(rhn)
     #show_high_couplings(rhn)
+
+    #show_Vus(rhn, tag = TAG)
 
     #show_U_vs_M(rhn, tag = TAG, plot_all = False)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)

@@ -173,6 +173,11 @@ class RHN_Chain(object):
         if self.lnL_slide is not None and sub_slide:
             self.lnL -= self.lnL_slide
 
+        try:
+            self.Vus = get_data('#calc_Vus @NeutrinoBit::calc_Vus')
+        except KeyError:
+            pass
+
         #self.ordering = get_data('#ordering @NeutrinoBit::ordering')
 
         self.U1 = self.Ue1 + self.Um1 + self.Ut1

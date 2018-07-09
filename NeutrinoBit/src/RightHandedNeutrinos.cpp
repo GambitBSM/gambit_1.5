@@ -773,41 +773,45 @@ namespace Gambit
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi = 0.0, mu_f_pi = 0.0, d_r_pi = 1.0;
-      std::vector<double> M(6), r_I_pi(6), G_e_pi = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0,0.0,0.0,0.0};
+//      std::vector<double> M(6), r_I_pi(6), G_e_pi = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0,0.0,0.0,0.0};
+      std::vector<double> M(3), r_I_pi(3), G_e_pi = {0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
-      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
+      //Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
 
-      M[0] = *Param["mNu1"];
+      /*M[0] = *Param["mNu1"];
       M[1] = *Param["mNu2"];
       M[2] = *Param["mNu3"];
       M[3] = *Param["M_1"];
       M[4] = *Param["M_2"];
-      M[5] = *Param["M_3"];
+      M[5] = *Param["M_3"];*/
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
-      for (int i=0; i<6; i++)
+      for (int i=0; i<3; i++)
       {
         r_I_pi[i] = pow(M[i], 2)/pow(m_pi, 2);
  
         if(M[i] + sminputs.mMu < m_pi)
         {
-          //G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2)) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
-          G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2));
+          G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2)) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
+          //G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2));
         } 
         else
           G_mu_pi[i] = 0.0;
 
         if(M[i] + sminputs.mE < m_pi)
         {
-          //G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow(r_e_pi - r_I_pi[i], 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2)) / (r_e_pi * pow((1.0 - r_e_pi), 2));
-          G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2));
+          G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow(r_e_pi - r_I_pi[i], 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2)) / (r_e_pi * pow((1.0 - r_e_pi), 2));
+          //G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2));
         }
         else
           G_e_pi[i] = 0.0;
 
-        //e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
-        //mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
+        e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
+        mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
   
-        if(i<3)
+        /*if(i<3)
         {
           e_f_pi  += Vsq(0,i) * G_e_pi[i];
           mu_f_pi += Vsq(1,i) * G_mu_pi[i];
@@ -816,12 +820,12 @@ namespace Gambit
         {
           e_f_pi  +=  Usq(0,i-3) * G_e_pi[i];
           mu_f_pi +=  Usq(1,i-3) * G_mu_pi[i];
-        }
+        }*/
       }
 
-      //d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
-      //R_pi = R_pi_SM * d_r_pi;
-      R_pi = e_f_pi / mu_f_pi;
+      d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
+      R_pi = R_pi_SM * d_r_pi;
+      //R_pi = e_f_pi / mu_f_pi;
  
     }
 
@@ -834,27 +838,30 @@ namespace Gambit
       static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K = 0.0, mu_f_K = 0.0, d_r_K = 1.0;
-      std::vector<double> M(6), r_I_K(6), G_e_K = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0,0.0,0.0,0.0};
+//      std::vector<double> M(6), r_I_K(6), G_e_K = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0,0.0,0.0,0.0};
+      std::vector<double> M(3), r_I_K(3), G_e_K = {0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
-      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
+//      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
 
-      M[0] = *Param["mNu1"];
+      /*M[0] = *Param["mNu1"];
       M[1] = *Param["mNu2"];
       M[2] = *Param["mNu3"];
       M[3] = *Param["M_1"];
       M[4] = *Param["M_2"];
-      M[5] = *Param["M_3"];
+      M[5] = *Param["M_3"];*/
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
 
-
-      for (int i=0; i<6; i++)
+      for (int i=0; i<3; i++)
       {
         r_I_K[i] = pow(M[i], 2)/pow(m_K,2);
 
 //        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
         if(M[i] + sminputs.mMu < m_K)
         {
-          //G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2)) / (r_mu_K * pow((1.0 - r_mu_K), 2));
-          G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2));
+          G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2)) / (r_mu_K * pow((1.0 - r_mu_K), 2));
+          //G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2));
         } 
         else
           G_mu_K[i] = 0.0;
@@ -862,16 +869,16 @@ namespace Gambit
 //        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
         if(M[i] + sminputs.mE < m_K)
         {
-          //G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2)) / (r_e_K * pow((1.0 - r_e_K), 2));
-          G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2));
+          G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2)) / (r_e_K * pow((1.0 - r_e_K), 2));
+          //G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2));
         }
         else
           G_e_K[i] = 0.0;
 
-        //e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
-        //mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
+        e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
+        mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
           
-        if(i<3)
+        /*if(i<3)
         {
          e_f_K  += Vsq(0,i) * G_e_K[i];
          mu_f_K += Vsq(1,i) * G_mu_K[i];
@@ -880,12 +887,12 @@ namespace Gambit
         {
           e_f_K  +=  Usq(0,i-3) * G_e_K[i];
           mu_f_K += Usq(1,i-3) * G_mu_K[i];
-        }
+        }*/
       }
 
-//      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
-//      R_K = R_K_SM * d_r_K;
-        R_K = e_f_K/mu_f_K;
+      d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
+      R_K = R_K_SM * d_r_K;
+//        R_K = e_f_K/mu_f_K;
     }
 
     void RHN_R_tau(double& R_tau)
@@ -948,13 +955,17 @@ namespace Gambit
     void RHN_R_W(std::vector<double> &R_W)
     {
       using namespace Pipes::RHN_R_W;
-      Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
+      //Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
+      std::vector<double> Wdecays = *Dep::W_to_l_decays;
 
       R_W.clear();
 
-      R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
-      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
-      R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
+      R_W.push_back(Wdecays[1]/Wdecays[0]);
+      R_W.push_back(Wdecays[2]/Wdecays[0]);
+      R_W.push_back(Wdecays[2]/Wdecays[1]);
+      //R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
+      //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
+      //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
     }
 
     void lnL_lepuniv(double& result_lepuniv)
@@ -971,8 +982,8 @@ namespace Gambit
       double R_K_err = 0.010e-5;
       double R_tau_exp = 0.9762; // 1612.07233 
       double R_tau_err = 0.0028;
-      std::vector<double> R_W_exp = {0.980, 1.063, 1.070};
-      std::vector<double> R_W_err = {0.018, 0.027, 0.026};
+      std::vector<double> R_W_exp = {0.986, 1.043, 1.070}; // PDG 18
+      std::vector<double> R_W_err = {0.013, 0.024, 0.026}; // PDG 18
 
       result_lepuniv = 0;
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
@@ -1266,7 +1277,12 @@ namespace Gambit
       
       result_Vus = est_Vus;
     }
-
+    void get_Vus(double& result_Vus)
+    {
+      using namespace Pipes::get_Vus; 
+      SMInputs sminputs = *Dep::SMINPUTS;   
+      result_Vus = *Param["CKM_lambda"];
+    }
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
     void lnL_ckm_Vusmin(double& result_ckm)
     {
@@ -1319,7 +1335,8 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
       double G_mu = sminputs.GF;
-      double V_us =  *Param["CKM_lambda"]; 
+      double V_us = *Dep::get_Vus;
+      
 
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
       double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
