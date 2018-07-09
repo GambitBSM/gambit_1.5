@@ -989,9 +989,12 @@ namespace Gambit
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
+      if (runOptions->getValueOrDef<bool>(true, "include_R_W"))
+      {
+        result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
+        result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
+        result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
+      }
     }
 
     // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for right-handed
@@ -1320,7 +1323,8 @@ namespace Gambit
       for (int i=0; i<7; i++)
         chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
-      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2);
+      double V_ub = 3.94e-3;
+      chi2 += pow( (sqrt((1 - pow(V_us,2) - pow(V_ub,2))*f[0]) - V_ud_exp)/ err_V_ud_exp/1.20, 2);
       result_ckm = -0.5*chi2;
     }
   
