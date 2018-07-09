@@ -1304,8 +1304,8 @@ namespace Gambit
       for (int i=0; i<7; i++)
         chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
-      double V_ub = 4.1e-3;
-      chi2 += pow( (sqrt((1 - pow(V_us,2) - pow(V_ub,2))*f[0]) - V_ud_exp)/ err_V_ud_exp/1.19, 2);
+      double V_ub = 3.94e-3;
+      chi2 += pow( (sqrt((1 - pow(V_us,2) - pow(V_ub,2))*f[0]) - V_ud_exp)/ err_V_ud_exp/1.20, 2);
       result_ckm = -0.5*chi2;
     }
   
