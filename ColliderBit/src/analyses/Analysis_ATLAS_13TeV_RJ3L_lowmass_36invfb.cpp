@@ -274,325 +274,334 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
   
+
         // Recursive jigsaw stuff
-        LAB_2L2J.reset(new RestFrames::LabRecoFrame("LAB_2L2J","lab2L2J"));
-        C1N2_2L2J.reset(new RestFrames::DecayRecoFrame("C1N2_2L2J","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
-        C1a_2L2J.reset(new RestFrames::DecayRecoFrame("C1a_2L2J","#tilde{#chi}^{ #pm}_{1}"));
-        N2b_2L2J.reset(new RestFrames::DecayRecoFrame("N2b_2L2J","#tilde{#chi}^{ 0}_{2}"));
-        
-        Wa_2L2J.reset(new RestFrames::DecayRecoFrame("Wa_2L2J","W_{a}"));
-        Zb_2L2J.reset(new RestFrames::DecayRecoFrame("Zb_2L2J","Z_{b}"));
-        
-        J1_2L2J.reset(new RestFrames::VisibleRecoFrame("J1_2L2J","#it{j}_{1}"));
-        J2_2L2J.reset(new RestFrames::VisibleRecoFrame("J2_2L2J","#it{j}_{2}"));
-        L1_2L2J.reset(new RestFrames::VisibleRecoFrame("L1_2L2J","#it{l}_{1}"));
-        L2_2L2J.reset(new RestFrames::VisibleRecoFrame("L2_2L2J","#it{l}_{2}"));
-        
-        X1a_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1a_2L2J","#tilde{#chi}^{ 0}_{1 a}"));
-        X1b_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1b_2L2J","#tilde{#chi}^{ 0}_{1 b}"));
-  
-        LAB_2L2J->SetChildFrame(*C1N2_2L2J);
-
-        C1N2_2L2J->AddChildFrame(*C1a_2L2J);
-        C1N2_2L2J->AddChildFrame(*N2b_2L2J);
-
-        C1a_2L2J->AddChildFrame(*Wa_2L2J);
-        C1a_2L2J->AddChildFrame(*X1a_2L2J);
-
-        N2b_2L2J->AddChildFrame(*Zb_2L2J);
-        N2b_2L2J->AddChildFrame(*X1b_2L2J);
-
-        Wa_2L2J->AddChildFrame(*J1_2L2J);
-        Wa_2L2J->AddChildFrame(*J2_2L2J);
-
-        Zb_2L2J->AddChildFrame(*L1_2L2J);
-        Zb_2L2J->AddChildFrame(*L2_2L2J);
-
-
-        if(!LAB_2L2J->InitializeTree())
+        #pragma omp critical (init_ATLAS_13TeV_RJ3L_lowmass_36invfb)
         {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
 
-  
-        //////////////////////////////
-        //Setting the invisible
-        //////////////////////////////
-        INV_2L2J.reset(new RestFrames::InvisibleGroup("INV_2L2J","#tilde{#chi}_{1}^{ 0} Jigsaws"));
-        INV_2L2J->AddFrame(*X1a_2L2J); 
-        INV_2L2J->AddFrame(*X1b_2L2J);
+          // // DEBUG:
+          // RestFrames::SetLogPrint(RestFrames::LogDebug, true);
+          // RestFrames::SetLogPrint(RestFrames::LogVerbose, true);
 
-        // Set di-LSP mass to minimum Lorentz-invariant expression
-        X1_mass_2L2J.reset(new RestFrames::SetMassInvJigsaw("X1_mass_2L2J", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
-        INV_2L2J->AddJigsaw(*X1_mass_2L2J);
-
-        // Set di-LSP rapidity to that of visible particles
-        X1_eta_2L2J.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_2L2J", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{2jet+2#it{l}}"));
-        INV_2L2J->AddJigsaw(*X1_eta_2L2J);
-        X1_eta_2L2J->AddVisibleFrames(C1N2_2L2J->GetListVisibleFrames());
-
-
-        X1X1_contra_2L2J.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_2L2J","Contraboost invariant Jigsaw"));
-        INV_2L2J->AddJigsaw(*X1X1_contra_2L2J);
-        X1X1_contra_2L2J->AddVisibleFrames(C1a_2L2J->GetListVisibleFrames(), 0);
-        X1X1_contra_2L2J->AddVisibleFrames(N2b_2L2J->GetListVisibleFrames(), 1);
-        X1X1_contra_2L2J->AddInvisibleFrame(*X1a_2L2J, 0);
-        X1X1_contra_2L2J->AddInvisibleFrame(*X1b_2L2J, 1);
+          LAB_2L2J.reset(new RestFrames::LabRecoFrame("LAB_2L2J","lab2L2J"));
+          C1N2_2L2J.reset(new RestFrames::DecayRecoFrame("C1N2_2L2J","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
+          C1a_2L2J.reset(new RestFrames::DecayRecoFrame("C1a_2L2J","#tilde{#chi}^{ #pm}_{1}"));
+          N2b_2L2J.reset(new RestFrames::DecayRecoFrame("N2b_2L2J","#tilde{#chi}^{ 0}_{2}"));
           
-        if(!LAB_2L2J->InitializeAnalysis())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
+          Wa_2L2J.reset(new RestFrames::DecayRecoFrame("Wa_2L2J","W_{a}"));
+          Zb_2L2J.reset(new RestFrames::DecayRecoFrame("Zb_2L2J","Z_{b}"));
+          
+          J1_2L2J.reset(new RestFrames::VisibleRecoFrame("J1_2L2J","#it{j}_{1}"));
+          J2_2L2J.reset(new RestFrames::VisibleRecoFrame("J2_2L2J","#it{j}_{2}"));
+          L1_2L2J.reset(new RestFrames::VisibleRecoFrame("L1_2L2J","#it{l}_{1}"));
+          L2_2L2J.reset(new RestFrames::VisibleRecoFrame("L2_2L2J","#it{l}_{2}"));
+          
+          X1a_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1a_2L2J","#tilde{#chi}^{ 0}_{1 a}"));
+          X1b_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1b_2L2J","#tilde{#chi}^{ 0}_{1 b}"));
+    
+          LAB_2L2J->SetChildFrame(*C1N2_2L2J);
+
+          C1N2_2L2J->AddChildFrame(*C1a_2L2J);
+          C1N2_2L2J->AddChildFrame(*N2b_2L2J);
+
+          C1a_2L2J->AddChildFrame(*Wa_2L2J);
+          C1a_2L2J->AddChildFrame(*X1a_2L2J);
+
+          N2b_2L2J->AddChildFrame(*Zb_2L2J);
+          N2b_2L2J->AddChildFrame(*X1b_2L2J);
+
+          Wa_2L2J->AddChildFrame(*J1_2L2J);
+          Wa_2L2J->AddChildFrame(*J2_2L2J);
+
+          Zb_2L2J->AddChildFrame(*L1_2L2J);
+          Zb_2L2J->AddChildFrame(*L2_2L2J);
 
 
-        LAB_3L.reset(new RestFrames::LabRecoFrame("LAB_3L","lab"));
-        C1N2_3L.reset(new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
-        C1a_3L.reset(new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}"));
-        N2b_3L.reset(new RestFrames::DecayRecoFrame("N2b_3L","#tilde{#chi}^{ 0}_{2}"));
+          if(!LAB_2L2J->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
 
-        L1a_3L.reset(new RestFrames::VisibleRecoFrame("L1a_3L","#it{l}_{1a}"));
-        L1b_3L.reset(new RestFrames::VisibleRecoFrame("L1b_3L","#it{l}_{1b}"));
-        L2b_3L.reset(new RestFrames::VisibleRecoFrame("L2b_3L","#it{l}_{2b}"));
+    
+          //////////////////////////////
+          //Setting the invisible
+          //////////////////////////////
+          INV_2L2J.reset(new RestFrames::InvisibleGroup("INV_2L2J","#tilde{#chi}_{1}^{ 0} Jigsaws"));
+          INV_2L2J->AddFrame(*X1a_2L2J); 
+          INV_2L2J->AddFrame(*X1b_2L2J);
 
-        X1a_3L.reset(new RestFrames::InvisibleRecoFrame("X1a_3L","#tilde{#chi}^{ 0}_{1 a} + #nu_{a}"));
-        X1b_3L.reset(new RestFrames::InvisibleRecoFrame("X1b_3L","#tilde{#chi}^{ 0}_{1 b}"));
+          // Set di-LSP mass to minimum Lorentz-invariant expression
+          X1_mass_2L2J.reset(new RestFrames::SetMassInvJigsaw("X1_mass_2L2J", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
+          INV_2L2J->AddJigsaw(*X1_mass_2L2J);
 
-
-        LAB_3L->SetChildFrame(*C1N2_3L);
-
-        C1N2_3L->AddChildFrame(*C1a_3L);
-        C1N2_3L->AddChildFrame(*N2b_3L);
-
-        C1a_3L->AddChildFrame(*L1a_3L);
-        C1a_3L->AddChildFrame(*X1a_3L);
-
-        N2b_3L->AddChildFrame(*L1b_3L);
-        N2b_3L->AddChildFrame(*L2b_3L);
-        N2b_3L->AddChildFrame(*X1b_3L);
-  
-  
-        if(!LAB_3L->InitializeTree())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_3L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
-
-       
-        //setting the invisible components
-        INV_3L.reset(new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw"));
-        INV_3L->AddFrame(*X1a_3L); 
-        INV_3L->AddFrame(*X1b_3L);
-        
-        
-        // Set di-LSP mass to minimum Lorentz-invariant expression
-        X1_mass_3L.reset(new RestFrames::SetMassInvJigsaw("X1_mass_3L", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
-        INV_3L->AddJigsaw(*X1_mass_3L);
-        
-        // Set di-LSP rapidity to that of visible particles and neutrino
-        X1_eta_3L.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_3L", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{3#it{l}}"));
-        INV_3L->AddJigsaw(*X1_eta_3L);
-        X1_eta_3L->AddVisibleFrames(C1N2_3L->GetListVisibleFrames());
-  
-
-        X1X1_contra_3L.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_3L","Contraboost invariant Jigsaw"));
-        INV_3L->AddJigsaw(*X1X1_contra_3L);
-        X1X1_contra_3L->AddVisibleFrames(C1a_3L->GetListVisibleFrames(),0);
-        X1X1_contra_3L->AddVisibleFrames(N2b_3L->GetListVisibleFrames(),1);
-        X1X1_contra_3L->AddInvisibleFrames(C1a_3L->GetListInvisibleFrames(),0);
-        X1X1_contra_3L->AddInvisibleFrames(N2b_3L->GetListInvisibleFrames(),1);
-        
-        if(!LAB_3L->InitializeAnalysis())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_3L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
-
-  
-        /////////////////////////// INTERMEDIATE ///////////////////////////////////
-        // RestFrames stuff
-        
-        // combinatoric (transverse) tree
-        // for jet assignment
-        LAB_comb.reset(new RestFrames::LabRecoFrame("LAB_comb","LAB"));
-        CM_comb.reset(new RestFrames::DecayRecoFrame("CM_comb","CM"));
-        S_comb.reset(new RestFrames::DecayRecoFrame("S_comb","S"));
-        ISR_comb.reset(new RestFrames::VisibleRecoFrame("ISR_comb","ISR"));
-        J_comb.reset(new RestFrames::VisibleRecoFrame("J_comb","Jets"));
-        L_comb.reset(new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s"));
-        I_comb.reset(new RestFrames::InvisibleRecoFrame("I_comb","Inv"));
-
-        LAB_comb->SetChildFrame(*CM_comb);
-        CM_comb->AddChildFrame(*ISR_comb);
-        CM_comb->AddChildFrame(*S_comb);
-        S_comb->AddChildFrame(*L_comb);
-        S_comb->AddChildFrame(*J_comb);
-        S_comb->AddChildFrame(*I_comb);
-
-        if(!LAB_comb->InitializeTree())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_comb->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
-
-        // 2L+NJ tree (Z->ll + W/Z->qq)
-        LAB_2LNJ.reset(new RestFrames::LabRecoFrame("LAB_2LNJ","LAB"));
-        CM_2LNJ.reset(new RestFrames::DecayRecoFrame("CM_2LNJ","CM"));
-        S_2LNJ.reset(new RestFrames::DecayRecoFrame("S_2LNJ","S"));
-        ISR_2LNJ.reset(new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR"));
-        Ca_2LNJ.reset(new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}"));
-        Z_2LNJ.reset(new RestFrames::DecayRecoFrame("Z_2LNJ","Z"));
-        L1_2LNJ.reset(new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}"));
-        L2_2LNJ.reset(new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}"));
-        Cb_2LNJ.reset(new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}"));
-        JSA_2LNJ.reset(new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J"));
-        J_2LNJ.reset(new RestFrames::VisibleRecoFrame("J_2LNJ","Jets"));
-        Ia_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}"));
-        Ib_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}"));
-  
-        LAB_2LNJ->SetChildFrame(*CM_2LNJ);
-        CM_2LNJ->AddChildFrame(*ISR_2LNJ);
-        CM_2LNJ->AddChildFrame(*S_2LNJ);
-        S_2LNJ->AddChildFrame(*Ca_2LNJ);
-        S_2LNJ->AddChildFrame(*Cb_2LNJ);
-        Ca_2LNJ->AddChildFrame(*Z_2LNJ);
-        Ca_2LNJ->AddChildFrame(*Ia_2LNJ);
-        Cb_2LNJ->AddChildFrame(*JSA_2LNJ);
-        Cb_2LNJ->AddChildFrame(*Ib_2LNJ);
-        Z_2LNJ->AddChildFrame(*L1_2LNJ);
-        Z_2LNJ->AddChildFrame(*L2_2LNJ);
-        JSA_2LNJ->AddChildFrame(*J_2LNJ);
-        
-        if(!LAB_2LNJ->InitializeTree())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
-
-  
-        // 2L+1L tree (Z->ll + Z/W->l)
-        LAB_2L1L.reset(new RestFrames::LabRecoFrame("LAB_2L1L","LAB"));
-        CM_2L1L.reset(new RestFrames::DecayRecoFrame("CM_2L1L","CM"));
-        S_2L1L.reset(new RestFrames::DecayRecoFrame("S_2L1L","S"));
-        ISR_2L1L.reset(new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR"));
-        Ca_2L1L.reset(new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}"));
-        Z_2L1L.reset(new RestFrames::DecayRecoFrame("Z_2L1L","Z"));
-        L1_2L1L.reset(new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}"));
-        L2_2L1L.reset(new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}"));
-        Cb_2L1L.reset(new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}"));
-        Lb_2L1L.reset(new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}"));
-        Ia_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}"));
-        Ib_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}"));
-        
-        LAB_2L1L->SetChildFrame(*CM_2L1L);
-        CM_2L1L->AddChildFrame(*ISR_2L1L);
-        CM_2L1L->AddChildFrame(*S_2L1L);
-        S_2L1L->AddChildFrame(*Ca_2L1L);
-        S_2L1L->AddChildFrame(*Cb_2L1L);
-        Ca_2L1L->AddChildFrame(*Z_2L1L);
-        Ca_2L1L->AddChildFrame(*Ia_2L1L);
-        Z_2L1L->AddChildFrame(*L1_2L1L);
-        Z_2L1L->AddChildFrame(*L2_2L1L);
-        Cb_2L1L->AddChildFrame(*Lb_2L1L);
-        Cb_2L1L->AddChildFrame(*Ib_2L1L);
-        
-        if(!LAB_2L1L->InitializeTree())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
+          // Set di-LSP rapidity to that of visible particles
+          X1_eta_2L2J.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_2L2J", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{2jet+2#it{l}}"));
+          INV_2L2J->AddJigsaw(*X1_eta_2L2J);
+          X1_eta_2L2J->AddVisibleFrames(C1N2_2L2J->GetListVisibleFrames());
 
 
-        ////////////// Jigsaw rules set-up /////////////////
-        
-        // combinatoric (transverse) tree
-        // for jet assignment
-        INV_comb.reset(new RestFrames::InvisibleGroup("INV_comb","Invisible System"));
-        INV_comb->AddFrame(*I_comb);
-        
-        InvMass_comb.reset(new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw"));
-        INV_comb->AddJigsaw(*InvMass_comb);
-        
-        JETS_comb.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
-        JETS_comb->AddFrame(*ISR_comb);
-        JETS_comb->SetNElementsForFrame(*ISR_comb, 1);
-        JETS_comb->AddFrame(*J_comb);
-        JETS_comb->SetNElementsForFrame(*J_comb, 0);
-        
-        SplitJETS_comb.reset(new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw"));
-        JETS_comb->AddJigsaw(*SplitJETS_comb);
-        SplitJETS_comb->AddCombFrame(*ISR_comb, 0);
-        SplitJETS_comb->AddCombFrame(*J_comb, 1);
-        SplitJETS_comb->AddObjectFrame(*ISR_comb,0);
-        SplitJETS_comb->AddObjectFrame(*S_comb,1);
-        
-        if(!LAB_comb->InitializeAnalysis())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_comb->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
-        
-        // 2L+NJ tree (Z->ll + W/Z->qq)
-        INV_2LNJ.reset(new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System"));
-        INV_2LNJ->AddFrame(*Ia_2LNJ);
-        INV_2LNJ->AddFrame(*Ib_2LNJ);
-        
-        InvMass_2LNJ.reset(new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw"));
-        INV_2LNJ->AddJigsaw(*InvMass_2LNJ);
-        InvRapidity_2LNJ.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity"));
-        INV_2LNJ->AddJigsaw(*InvRapidity_2LNJ);
-        InvRapidity_2LNJ->AddVisibleFrames(S_2LNJ->GetListVisibleFrames());
-        SplitINV_2LNJ.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw"));
-        INV_2LNJ->AddJigsaw(*SplitINV_2LNJ);
-        SplitINV_2LNJ->AddVisibleFrames(Ca_2LNJ->GetListVisibleFrames(), 0);
-        SplitINV_2LNJ->AddVisibleFrames(Cb_2LNJ->GetListVisibleFrames(), 1);
-        SplitINV_2LNJ->AddInvisibleFrame(*Ia_2LNJ, 0);
-        SplitINV_2LNJ->AddInvisibleFrame(*Ib_2LNJ, 1);
-        
-        JETS_2LNJ.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
-        JETS_2LNJ->AddFrame(*J_2LNJ);
-        JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
-        
-        if(!LAB_2LNJ->InitializeAnalysis())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
+          X1X1_contra_2L2J.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_2L2J","Contraboost invariant Jigsaw"));
+          INV_2L2J->AddJigsaw(*X1X1_contra_2L2J);
+          X1X1_contra_2L2J->AddVisibleFrames(C1a_2L2J->GetListVisibleFrames(), 0);
+          X1X1_contra_2L2J->AddVisibleFrames(N2b_2L2J->GetListVisibleFrames(), 1);
+          X1X1_contra_2L2J->AddInvisibleFrame(*X1a_2L2J, 0);
+          X1X1_contra_2L2J->AddInvisibleFrame(*X1b_2L2J, 1);
+            
+          if(!LAB_2L2J->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
 
-        // 2L+1L tree (Z->ll + Z/W->l)
-        INV_2L1L.reset(new RestFrames::InvisibleGroup("INV_2L1L","Invisible System"));
-        INV_2L1L->AddFrame(*Ia_2L1L);
-        INV_2L1L->AddFrame(*Ib_2L1L);
-        
-        InvMass_2L1L.reset(new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw"));
-        INV_2L1L->AddJigsaw(*InvMass_2L1L);
-        InvRapidity_2L1L.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity"));
-        INV_2L1L->AddJigsaw(*InvRapidity_2L1L);
-        InvRapidity_2L1L->AddVisibleFrames(S_2L1L->GetListVisibleFrames());
-        SplitINV_2L1L.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw"));
-        INV_2L1L->AddJigsaw(*SplitINV_2L1L);
-        SplitINV_2L1L->AddVisibleFrames(Ca_2L1L->GetListVisibleFrames(), 0);
-        SplitINV_2L1L->AddVisibleFrames(Cb_2L1L->GetListVisibleFrames(), 1);
-        SplitINV_2L1L->AddInvisibleFrame(*Ia_2L1L, 0);
-        SplitINV_2L1L->AddInvisibleFrame(*Ib_2L1L, 1);
-        
-        if(!LAB_2L1L->InitializeAnalysis())
-        {
-          str errmsg;
-          errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
-          piped_errors.request(LOCAL_INFO, errmsg);
-        }
+
+          LAB_3L.reset(new RestFrames::LabRecoFrame("LAB_3L","lab"));
+          C1N2_3L.reset(new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
+          C1a_3L.reset(new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}"));
+          N2b_3L.reset(new RestFrames::DecayRecoFrame("N2b_3L","#tilde{#chi}^{ 0}_{2}"));
+
+          L1a_3L.reset(new RestFrames::VisibleRecoFrame("L1a_3L","#it{l}_{1a}"));
+          L1b_3L.reset(new RestFrames::VisibleRecoFrame("L1b_3L","#it{l}_{1b}"));
+          L2b_3L.reset(new RestFrames::VisibleRecoFrame("L2b_3L","#it{l}_{2b}"));
+
+          X1a_3L.reset(new RestFrames::InvisibleRecoFrame("X1a_3L","#tilde{#chi}^{ 0}_{1 a} + #nu_{a}"));
+          X1b_3L.reset(new RestFrames::InvisibleRecoFrame("X1b_3L","#tilde{#chi}^{ 0}_{1 b}"));
+
+
+          LAB_3L->SetChildFrame(*C1N2_3L);
+
+          C1N2_3L->AddChildFrame(*C1a_3L);
+          C1N2_3L->AddChildFrame(*N2b_3L);
+
+          C1a_3L->AddChildFrame(*L1a_3L);
+          C1a_3L->AddChildFrame(*X1a_3L);
+
+          N2b_3L->AddChildFrame(*L1b_3L);
+          N2b_3L->AddChildFrame(*L2b_3L);
+          N2b_3L->AddChildFrame(*X1b_3L);
+    
+    
+          if(!LAB_3L->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_3L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+         
+          //setting the invisible components
+          INV_3L.reset(new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw"));
+          INV_3L->AddFrame(*X1a_3L); 
+          INV_3L->AddFrame(*X1b_3L);
+          
+          
+          // Set di-LSP mass to minimum Lorentz-invariant expression
+          X1_mass_3L.reset(new RestFrames::SetMassInvJigsaw("X1_mass_3L", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
+          INV_3L->AddJigsaw(*X1_mass_3L);
+          
+          // Set di-LSP rapidity to that of visible particles and neutrino
+          X1_eta_3L.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_3L", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{3#it{l}}"));
+          INV_3L->AddJigsaw(*X1_eta_3L);
+          X1_eta_3L->AddVisibleFrames(C1N2_3L->GetListVisibleFrames());
+    
+
+          X1X1_contra_3L.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_3L","Contraboost invariant Jigsaw"));
+          INV_3L->AddJigsaw(*X1X1_contra_3L);
+          X1X1_contra_3L->AddVisibleFrames(C1a_3L->GetListVisibleFrames(),0);
+          X1X1_contra_3L->AddVisibleFrames(N2b_3L->GetListVisibleFrames(),1);
+          X1X1_contra_3L->AddInvisibleFrames(C1a_3L->GetListInvisibleFrames(),0);
+          X1X1_contra_3L->AddInvisibleFrames(N2b_3L->GetListInvisibleFrames(),1);
+          
+          if(!LAB_3L->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_3L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+    
+          /////////////////////////// INTERMEDIATE ///////////////////////////////////
+          // RestFrames stuff
+          
+          // combinatoric (transverse) tree
+          // for jet assignment
+          LAB_comb.reset(new RestFrames::LabRecoFrame("LAB_comb","LAB"));
+          CM_comb.reset(new RestFrames::DecayRecoFrame("CM_comb","CM"));
+          S_comb.reset(new RestFrames::DecayRecoFrame("S_comb","S"));
+          ISR_comb.reset(new RestFrames::VisibleRecoFrame("ISR_comb","ISR"));
+          J_comb.reset(new RestFrames::VisibleRecoFrame("J_comb","Jets"));
+          L_comb.reset(new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s"));
+          I_comb.reset(new RestFrames::InvisibleRecoFrame("I_comb","Inv"));
+
+          LAB_comb->SetChildFrame(*CM_comb);
+          CM_comb->AddChildFrame(*ISR_comb);
+          CM_comb->AddChildFrame(*S_comb);
+          S_comb->AddChildFrame(*L_comb);
+          S_comb->AddChildFrame(*J_comb);
+          S_comb->AddChildFrame(*I_comb);
+
+          if(!LAB_comb->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_comb->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+          // 2L+NJ tree (Z->ll + W/Z->qq)
+          LAB_2LNJ.reset(new RestFrames::LabRecoFrame("LAB_2LNJ","LAB"));
+          CM_2LNJ.reset(new RestFrames::DecayRecoFrame("CM_2LNJ","CM"));
+          S_2LNJ.reset(new RestFrames::DecayRecoFrame("S_2LNJ","S"));
+          ISR_2LNJ.reset(new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR"));
+          Ca_2LNJ.reset(new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}"));
+          Z_2LNJ.reset(new RestFrames::DecayRecoFrame("Z_2LNJ","Z"));
+          L1_2LNJ.reset(new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}"));
+          L2_2LNJ.reset(new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}"));
+          Cb_2LNJ.reset(new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}"));
+          JSA_2LNJ.reset(new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J"));
+          J_2LNJ.reset(new RestFrames::VisibleRecoFrame("J_2LNJ","Jets"));
+          Ia_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}"));
+          Ib_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}"));
+    
+          LAB_2LNJ->SetChildFrame(*CM_2LNJ);
+          CM_2LNJ->AddChildFrame(*ISR_2LNJ);
+          CM_2LNJ->AddChildFrame(*S_2LNJ);
+          S_2LNJ->AddChildFrame(*Ca_2LNJ);
+          S_2LNJ->AddChildFrame(*Cb_2LNJ);
+          Ca_2LNJ->AddChildFrame(*Z_2LNJ);
+          Ca_2LNJ->AddChildFrame(*Ia_2LNJ);
+          Cb_2LNJ->AddChildFrame(*JSA_2LNJ);
+          Cb_2LNJ->AddChildFrame(*Ib_2LNJ);
+          Z_2LNJ->AddChildFrame(*L1_2LNJ);
+          Z_2LNJ->AddChildFrame(*L2_2LNJ);
+          JSA_2LNJ->AddChildFrame(*J_2LNJ);
+          
+          if(!LAB_2LNJ->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+    
+          // 2L+1L tree (Z->ll + Z/W->l)
+          LAB_2L1L.reset(new RestFrames::LabRecoFrame("LAB_2L1L","LAB"));
+          CM_2L1L.reset(new RestFrames::DecayRecoFrame("CM_2L1L","CM"));
+          S_2L1L.reset(new RestFrames::DecayRecoFrame("S_2L1L","S"));
+          ISR_2L1L.reset(new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR"));
+          Ca_2L1L.reset(new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}"));
+          Z_2L1L.reset(new RestFrames::DecayRecoFrame("Z_2L1L","Z"));
+          L1_2L1L.reset(new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}"));
+          L2_2L1L.reset(new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}"));
+          Cb_2L1L.reset(new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}"));
+          Lb_2L1L.reset(new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}"));
+          Ia_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}"));
+          Ib_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}"));
+          
+          LAB_2L1L->SetChildFrame(*CM_2L1L);
+          CM_2L1L->AddChildFrame(*ISR_2L1L);
+          CM_2L1L->AddChildFrame(*S_2L1L);
+          S_2L1L->AddChildFrame(*Ca_2L1L);
+          S_2L1L->AddChildFrame(*Cb_2L1L);
+          Ca_2L1L->AddChildFrame(*Z_2L1L);
+          Ca_2L1L->AddChildFrame(*Ia_2L1L);
+          Z_2L1L->AddChildFrame(*L1_2L1L);
+          Z_2L1L->AddChildFrame(*L2_2L1L);
+          Cb_2L1L->AddChildFrame(*Lb_2L1L);
+          Cb_2L1L->AddChildFrame(*Ib_2L1L);
+          
+          if(!LAB_2L1L->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+
+          ////////////// Jigsaw rules set-up /////////////////
+          
+          // combinatoric (transverse) tree
+          // for jet assignment
+          INV_comb.reset(new RestFrames::InvisibleGroup("INV_comb","Invisible System"));
+          INV_comb->AddFrame(*I_comb);
+          
+          InvMass_comb.reset(new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw"));
+          INV_comb->AddJigsaw(*InvMass_comb);
+          
+          JETS_comb.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
+          JETS_comb->AddFrame(*ISR_comb);
+          JETS_comb->SetNElementsForFrame(*ISR_comb, 1);
+          JETS_comb->AddFrame(*J_comb);
+          JETS_comb->SetNElementsForFrame(*J_comb, 0);
+          
+          SplitJETS_comb.reset(new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw"));
+          JETS_comb->AddJigsaw(*SplitJETS_comb);
+          SplitJETS_comb->AddCombFrame(*ISR_comb, 0);
+          SplitJETS_comb->AddCombFrame(*J_comb, 1);
+          SplitJETS_comb->AddObjectFrame(*ISR_comb,0);
+          SplitJETS_comb->AddObjectFrame(*S_comb,1);
+          
+          if(!LAB_comb->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_comb->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+          
+          // 2L+NJ tree (Z->ll + W/Z->qq)
+          INV_2LNJ.reset(new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System"));
+          INV_2LNJ->AddFrame(*Ia_2LNJ);
+          INV_2LNJ->AddFrame(*Ib_2LNJ);
+          
+          InvMass_2LNJ.reset(new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw"));
+          INV_2LNJ->AddJigsaw(*InvMass_2LNJ);
+          InvRapidity_2LNJ.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity"));
+          INV_2LNJ->AddJigsaw(*InvRapidity_2LNJ);
+          InvRapidity_2LNJ->AddVisibleFrames(S_2LNJ->GetListVisibleFrames());
+          SplitINV_2LNJ.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw"));
+          INV_2LNJ->AddJigsaw(*SplitINV_2LNJ);
+          SplitINV_2LNJ->AddVisibleFrames(Ca_2LNJ->GetListVisibleFrames(), 0);
+          SplitINV_2LNJ->AddVisibleFrames(Cb_2LNJ->GetListVisibleFrames(), 1);
+          SplitINV_2LNJ->AddInvisibleFrame(*Ia_2LNJ, 0);
+          SplitINV_2LNJ->AddInvisibleFrame(*Ib_2LNJ, 1);
+          
+          JETS_2LNJ.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
+          JETS_2LNJ->AddFrame(*J_2LNJ);
+          JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
+          
+          if(!LAB_2LNJ->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+          // 2L+1L tree (Z->ll + Z/W->l)
+          INV_2L1L.reset(new RestFrames::InvisibleGroup("INV_2L1L","Invisible System"));
+          INV_2L1L->AddFrame(*Ia_2L1L);
+          INV_2L1L->AddFrame(*Ib_2L1L);
+          
+          InvMass_2L1L.reset(new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw"));
+          INV_2L1L->AddJigsaw(*InvMass_2L1L);
+          InvRapidity_2L1L.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity"));
+          INV_2L1L->AddJigsaw(*InvRapidity_2L1L);
+          InvRapidity_2L1L->AddVisibleFrames(S_2L1L->GetListVisibleFrames());
+          SplitINV_2L1L.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw"));
+          INV_2L1L->AddJigsaw(*SplitINV_2L1L);
+          SplitINV_2L1L->AddVisibleFrames(Ca_2L1L->GetListVisibleFrames(), 0);
+          SplitINV_2L1L->AddVisibleFrames(Cb_2L1L->GetListVisibleFrames(), 1);
+          SplitINV_2L1L->AddInvisibleFrame(*Ia_2L1L, 0);
+          SplitINV_2L1L->AddInvisibleFrame(*Ib_2L1L, 1);
+          
+          if(!LAB_2L1L->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
  
+        }
       }
       
 
