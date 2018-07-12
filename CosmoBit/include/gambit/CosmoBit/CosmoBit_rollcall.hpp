@@ -227,6 +227,20 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY compute_BBN_abundances
+  START_CAPABILITY
+    #define FUNCTION function_BBN_abundances
+    START_FUNCTION(double)
+    //DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    ALLOW_MODELS(LCDM)
+    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+    BACKEND_REQ(Init_cosmomodel, (), void, (relicparam*))
+    BACKEND_REQ(Init_cosmomodel_param, (), void, (double, double, double, double, double, double, double, double, relicparam*))
+    BACKEND_REQ(nucl, (), int, (relicparam*, double*))
+    #undef FUNCTION
+  #undef CAPABILITY
+
 #undef MODULE
 
 #endif /* defined __CosmoBit_rollcall_hpp__ */
+

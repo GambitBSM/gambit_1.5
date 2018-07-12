@@ -1716,6 +1716,39 @@ namespace Gambit
 /* Begin of outdated (probably) functions */
 
 /* end of outdated functions */
+   /// Fill AlterBBN model info structure
+    void function_BBN_abundances(double & result)
+    {
+      using namespace Pipes::function_BBN_abundances;
+      using namespace std;
+      //using namespace std;
+      int NNUC = 26;
+      double N_eff = runOptions->getValueOrDef<double>(3.046,"N_eff");
+      double eta10 = runOptions->getValueOrDef<double>(6.,"eta");
+      double eta = eta10*pow(10,-10);
+
+
+
+
+      //struct relicparam paramrelic;
+      struct relicparam paramrelic;
+      double ratioH[NNUC+1],cov_ratioH[NNUC+1][NNUC+1];
+      double H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
+      double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
+
+      BEreq::Init_cosmomodel(&paramrelic);
+      BEreq::Init_cosmomodel_param(byVal(eta),byVal(N_eff),0.,880.2,1.0,0.,0.,0.,&paramrelic);
+
+      paramrelic.err=0;
+      BEreq::nucl(&paramrelic,ratioH);
+      H2_H=ratioH[3];Yp=ratioH[6];Li7_H=ratioH[8];Be7_H=ratioH[9];He3_H=ratioH[5];Li6_H=ratioH[7];
+      //printf(" cent:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
+      std::cout << "DEBUG: eta = "<< eta<<" H2_H="<<H2_H<<", Yp=  " << Yp << std::endl;
+      std::cout << "DEBUG: eta = "<< eta<< " N_eff = " << N_eff << std::endl;
+      result = H2_H;
+    }
+
+
   }
 
 }
