@@ -138,7 +138,19 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-  - capability: lnLlepuniv
+#  - capability: lnLlepuniv
+#    purpose: LogLike
+
+  - capability: lnL_R_K
+    purpose: Observable
+
+  - capability: lnL_R_pi
+    purpose: LogLike
+
+  - capability: lnL_R_tau
+    purpose: LogLike
+
+  - capability: lnL_R_W
     purpose: LogLike
 
   - capability: LUV_LL
@@ -350,6 +362,18 @@ Rules:
   - capability: RK
     function: RHN_RK
 
+  - function: Ut1
+    options:
+      upper_limit: 1e-4
+
+  - function: Ut2
+    options:
+      upper_limit: 1e-4
+
+  - function: Ut3
+    options:
+      upper_limit: 1e-4
+
 KeyValues:
 
   dependency_resolution:
@@ -359,4 +383,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "runs/RHN_diff_NH_m2/"
+  default_output_path: "./"

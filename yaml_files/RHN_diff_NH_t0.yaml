@@ -30,8 +30,8 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
+      range: [1E-7, 0.23]
+      prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
       prior_type: flat
@@ -60,10 +60,10 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [2, 60]
+      range: [0.1, 0.49421099892]
       prior_type: log
     delta_M21:
-      range: [1E-20, 1E-10]
+      range: [1E-10, .1]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -172,7 +172,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: l2lgamma_lnL
-    purpose: LogLike 
+    purpose: LogLike
 
   - capability: l2lll_lnL
     purpose: LogLike
@@ -347,7 +347,7 @@ Rules:
       I: 1
       i: 3
       slope: 0.5
-      mslope: 0.0
+      mslope: -0.5
 
   - function: lnL_lepuniv
     options:

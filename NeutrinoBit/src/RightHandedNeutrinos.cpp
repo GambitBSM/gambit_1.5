@@ -968,7 +968,50 @@ namespace Gambit
       //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
     }
 
-    void lnL_lepuniv(double& result_lepuniv)
+    void lnL_R_K(double& result)
+    {
+      using namespace Pipes::lnL_R_K;
+      double R_K = *Dep::R_K;
+      double R_K_exp = 2.488e-5; // 1212.4012
+      double R_K_err = 0.010e-5;
+
+      result = Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
+    }
+
+    void lnL_R_pi(double& result)
+    {
+      using namespace Pipes::lnL_R_pi;
+      double R_pi = *Dep::R_pi;
+      double R_pi_exp = 1.23e-4; // Phys.Rev.Lett. 70 (1993) 17-20  
+      double R_pi_err = 0.005e-4;
+
+      result = Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
+    }
+
+    void lnL_R_tau(double& result)
+    {
+      using namespace Pipes::lnL_R_tau;
+      double R_tau = *Dep::R_tau;
+      double R_tau_exp = 0.9762; // 1612.07233 
+      double R_tau_err = 0.0028;
+
+      result = Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
+    }
+    
+    void lnL_R_W(double& result)
+    {
+      using namespace Pipes::lnL_R_W;
+      std::vector<double> R_W = *Dep::R_W;
+
+      std::vector<double> R_W_exp = {0.986, 1.043, 1.070}; // PDG 18
+      std::vector<double> R_W_err = {0.013, 0.024, 0.026}; // PDG 18
+
+      result = Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
+      result += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
+      result += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
+    }
+
+/*    void lnL_lepuniv(double& result_lepuniv)
     {
       using namespace Pipes::lnL_lepuniv;
       double R_pi = *Dep::R_pi;
@@ -976,7 +1019,7 @@ namespace Gambit
       double R_tau = *Dep::R_tau;
       std::vector<double> R_W = *Dep::R_W;
 
-      double R_pi_exp = 1.23e-4; // Phys.Rev.Lett. 70 (1993) 17-20  
+      double R_pi_exp = 1.235e-4; // Phys.Rev.Lett. 70 (1993) 17-20  
       double R_pi_err = 0.005e-4;
       double R_K_exp = 2.488e-5; // 1212.4012
       double R_K_err = 0.010e-5;
@@ -996,7 +1039,7 @@ namespace Gambit
         result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
       }
     }
-
+*/
     // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for right-handed
     // neutrino model
     // TODO: Rename gamma --> Thalf, since this is what is really calculated
