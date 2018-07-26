@@ -546,16 +546,49 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY lnLlepuniv
+  #define CAPABILITY lnL_R_K
   START_CAPABILITY
-    #define FUNCTION lnL_lepuniv
+    #define FUNCTION lnL_R_K
+    START_FUNCTION(double)
+    DEPENDENCY(R_K, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_R_pi
+  START_CAPABILITY
+    #define FUNCTION lnL_R_pi
     START_FUNCTION(double)
     DEPENDENCY(R_pi, double)
-    DEPENDENCY(R_K, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_R_tau
+  START_CAPABILITY
+    #define FUNCTION lnL_R_tau
+    START_FUNCTION(double)
     DEPENDENCY(R_tau, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_R_W
+  START_CAPABILITY
+    #define FUNCTION lnL_R_W
+    START_FUNCTION(double)
     DEPENDENCY(R_W, std::vector<double>)
     #undef FUNCTION
   #undef CAPABILITY
+
+
+//  #define CAPABILITY lnLlepuniv
+//  START_CAPABILITY
+//    #define FUNCTION lnL_lepuniv
+//    START_FUNCTION(double)
+//    DEPENDENCY(R_pi, double)
+//    DEPENDENCY(R_K, double)
+//    DEPENDENCY(R_tau, double)
+//    DEPENDENCY(R_W, std::vector<double>)
+//    #undef FUNCTION
+//  #undef CAPABILITY
 
   #define CAPABILITY Gamma_0nubb_Xe
   START_CAPABILITY

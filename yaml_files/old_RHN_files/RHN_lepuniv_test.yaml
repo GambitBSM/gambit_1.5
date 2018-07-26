@@ -2,86 +2,47 @@
 
 Parameters:
 
-  # SM parameters.
-  StandardModel_mNudiff:
-    # SLHA1
-    alphainv:  1.27940010E+02 # alpha^{-1}(mZ)^MSbar *
-    GF      :  1.16637870E-05 # G_Fermi **
-    alphaS  :  1.18500000E-01 # alpha_s(mZ)^MSbar ^
-    mZ      :  9.11876000E+01 # mZ(pole) !
-    mBmB    :  4.18000000E+00 # mb(mb)^MSbar &
-    mT      :  1.73340000E+02 # mtop(pole) $
-    mTau    :  1.77682000E+00 # mtau(pole) §
-
-    # SLHA2
-    mE      :  5.10998928E-04 # melectron(pole) § **
-    mMu     :  1.05658372E-01 # mmuon(pole) §
-    mD      :  4.80000000E-03 # md(2 GeV)^MSbar @
-    mU      :  2.30000000E-03 # mu(2 GeV)^MSbar @
-    mS      :  9.50000000E-02 # ms(2 GeV)^MSbar @
-    mCmC    :  1.27500000E+00 # mc(mc)^MSbar %
-
-    # CKM
-    # Wolfenstein parameterisation (matches SLHA2 VCKMIN block)
-    # from http://pdg.lbl.gov/2014/reviews/rpp2014-rev-ckm-matrix.pdf
-    CKM_lambda  :  0.22537
-    CKM_A       :  0.814
-    CKM_rhobar  :  0.117
-    CKM_etabar  :  0.353
-
-    mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
-    dmNu21:
-      range: [6e-5, 9e-5]
-      prior_type: flat
-    dmNu3l:
-      range: [2e-3, 3e-3]
-      prior_type: flat
-
-    alpha1:
-      range: [0, 6.283]
-    alpha2:
-      range: [0, 6.283]
-    delta13:
-      range: [0, 6.283] # 3-sigma range from NuFit
-    theta12:
-      range: [0.547684, 0.628144] # 3-sigma range from NuFit
-    theta23:
-      range: [0.670206, 0.925025] # 3-sigma range from NuFit
-    theta13:
-      range: [0.139452, 0.155509] # 3-sigma range from NuFit
-
-  # Higgs boson parameters
+  RightHandedNeutrinos:
+    M_1:  100
+    M_2: 100
+    M_3: 100
+    ImOm12:  -0.702755882772
+    ImOm13:  1.21494300527
+    ImOm23:  -2.29360878449
+    ReOm12:  1.15268259229
+    ReOm13:  4.16499415355
+    ReOm23:  4.52584402087
+    Rorder: 123
   StandardModel_Higgs:
-    mH:
-      range: [124.1, 127.3]
+    mH:  126.766693671
+  StandardModel_SLHA2:
+    CKM_A:  0.814
+    CKM_etabar:  0.353
+    CKM_lambda:  0.22537
+    CKM_rhobar:  0.117
+    GF:  1.1663787e-05
+    alpha1:  4.25187729923
+    alpha2:  2.25021292507
+    alphaS:  0.1185
+    alphainv:  127.94001
+    delta13:  4.84382293139
+    mBmB:  4.18
+    mCmC:  1.275
+    mD:  0.0048
+    mE:  0.000510998928
+    mMu:  0.105658372
+    mNu1:  4.8897110143e-11
+    mNu2:  4.96501877212e-11
+    mNu3:  6.02560175665e-13
+    mS:  0.095
+    mT:  173.34
+    mTau:  1.77682
+    mU:  0.0023
+    mZ:  91.1876
+    theta12:  0.586794056853
+    theta13:  0.149833459997
+    theta23:  0.840455336131
 
-  # Right Handed Neutrino Parameters
-  RightHandedNeutrinos_diff:
-    M_1:
-      range: [100, 500]
-      prior_type: log
-    delta_M21:
-      range: [1E-20, 1E-10]
-      prior_type: log
-    M_3:
-      range: [0.06, 500]
-      prior_type: log
-    ReOm23:
-      range: [0, 6.283]
-    ImOm23:
-      range: [-15, 15]
-    ReOm13:
-      range: [0, 6.283]
-    ImOm13:
-      range: [-15, 15]
-    ReOm12:
-      range: [0, 6.283]
-    ImOm12:
-      range: [-15, 15]
-    Rorder:
-      range: [0, 6]
 
 Priors:
 
@@ -95,21 +56,20 @@ Printer:
 
 Scanner:
 
-  use_scanner: de
+  use_scanner: random
 
   scanners:
 
     random:
       plugin: random
-      point_number: 1
+      point_number: 1 
       like: LogLike
 
     de:
       plugin: diver
-      version: 1.0.4
       like: LogLike
-      NP: 19200
-      convthresh: 1e-11
+      NP: 100
+      convthresh: 1e-2
       lambdajDE: true
 
     multinest:
@@ -125,7 +85,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: lnL_sinW2
-    purpose: LogLike
+    purpose: Observable
 
   - capability: lnL_Z_inv
     purpose: LogLike
@@ -138,29 +98,20 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
+  - capability: lnLlepuniv
+    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
 
-  - capability: mbb_0nubb_Xe
-    purpose: Observable
-
-  - capability: mbb_0nubb_Ge
-    purpose: Observable
-
-  - capability: lnL_mbb_0nubb_KamLAND_Zen
-    purpose: LogLike
-
-  - capability: lnL_mbb_0nubb_GERDA
+  - capability: lnL_0nubb
     purpose: LogLike
 
   - capability: lnLckm_Vusmin
     purpose: LogLike
 
   - capability: l2lgamma_lnL
-    purpose: LogLike 
+    purpose: LogLike
 
   - capability: l2lll_lnL
     purpose: LogLike
@@ -212,7 +163,7 @@ ObsLikes:
   - capability: lnLlhcmu
     purpose: LogLike
 
-  # Theoretical constraints
+   # Theoretical constraints
 
   - capability: perturbativity_lnL
     purpose: LogLike
@@ -272,70 +223,35 @@ ObsLikes:
   - capability: Ue1
     purpose: Observable
 
-  - capability: Ue1_phase
-    purpose: Observable
-
   - capability: Um1
-    purpose: Observable
-
-  - capability: Um1_phase
     purpose: Observable
 
   - capability: Ut1
     purpose: Observable
 
-  - capability: Ut1_phase
-    purpose: Observable
-
   - capability: Ue2
-    purpose: Observable
-
-  - capability: Ue2_phase
     purpose: Observable
 
   - capability: Um2
     purpose: Observable
 
-  - capability: Um2_phase
-    purpose: Observable
-
   - capability: Ut2
-    purpose: Observable
-
-  - capability: Ut2_phase
     purpose: Observable
 
   - capability: Ue3
     purpose: Observable
 
-  - capability: Ue3_phase
-    purpose: Observable
-
   - capability: Um3
-    purpose: Observable
-
-  - capability: Um3_phase
     purpose: Observable
 
   - capability: Ut3
     purpose: Observable
 
-  - capability: Ut3_phase
-    purpose: Observable
-
-  - capability: RHN_coupling_slide
-    purpose: LogLike
-
-  - capability: calc_Vus
-    purpose: Observable
-
 Rules:
-  - function: coupling_slide
+
+  - capability: m_nu
     options:
-      I: 1
-      i: 0
-      slope: 1.0
-      threshold: 1e0
+      ordering: 0
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -353,6 +269,6 @@ KeyValues:
 
   likelihood:
     model_invalid_for_lnlike_below: -1e10
-    debug: false
+    debug: true
 
-  default_output_path: "runs/RHN_diff_NH_CS5/"
+  default_output_path: "./runs/RHN_test"

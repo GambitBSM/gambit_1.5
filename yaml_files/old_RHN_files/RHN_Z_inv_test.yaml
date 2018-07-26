@@ -30,8 +30,8 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
+      range: [1E-7, 0.23]
+      prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
       prior_type: flat
@@ -58,12 +58,12 @@ Parameters:
       range: [124.1, 127.3]
 
   # Right Handed Neutrino Parameters
-  RightHandedNeutrinos_diff:
+  RightHandedNeutrinos:
     M_1:
-      range: [2, 60]
+      range: [0.06, 500]
       prior_type: log
-    delta_M21:
-      range: [1E-20, 1E-10]
+    M_2:
+      range: [0.06, 500]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -71,15 +71,15 @@ Parameters:
     ReOm23:
       range: [0, 6.283]
     ImOm23:
-      range: [-15, 15]
+      range: [-7, 7]
     ReOm13:
       range: [0, 6.283]
     ImOm13:
-      range: [-15, 15]
+      range: [-7, 7]
     ReOm12:
       range: [0, 6.283]
     ImOm12:
-      range: [-15, 15]
+      range: [-7, 7]
     Rorder:
       range: [0, 6]
 
@@ -108,9 +108,9 @@ Scanner:
       plugin: diver
       version: 1.0.4
       like: LogLike
-      NP: 19200
-      convthresh: 1e-10
-      lambdajDE: true
+      NP: 1200
+      convthresh: 1e-5
+      lambdajDE: false
 
     multinest:
       plugin: multinest
@@ -121,113 +121,101 @@ ObsLikes:
 
   # EWPO constraints
 
-  - capability: lnL_W_mass
-    purpose: LogLike
+#  - capability: lnL_W_mass
+#    purpose: LogLike
 
-  - capability: lnL_sinW2
-    purpose: LogLike
+#  - capability: lnL_sinW2
+#    purpose: LogLike
 
   - capability: lnL_Z_inv
     purpose: LogLike
 
-  - capability: lnL_W_decays
-    purpose: LogLike
+#  - capability: lnL_W_decays
+#    purpose: LogLike
 
   # Indirect searches
 
-  - capability: lnL_bbn
-    purpose: LogLike
+#  - capability: lnL_bbn
+#    purpose: LogLike
 
 #  - capability: lnLlepuniv
 #    purpose: LogLike
 
-  - capability: lnL_R_K
-    purpose: Observable
+#  - capability: LUV_LL
+#    purpose: LogLike
 
-  - capability: lnL_R_pi
-    purpose: LogLike
+#  - capability: mbb_0nubb_Xe
+#    purpose: Observable
 
-  - capability: lnL_R_tau
-    purpose: LogLike
+#  - capability: mbb_0nubb_Ge
+#    purpose: Observable
 
-  - capability: lnL_R_W
-    purpose: LogLike
+#  - capability: lnL_mbb_0nubb_KamLAND_Zen
+#    purpose: LogLike
 
-  - capability: LUV_LL
-    purpose: LogLike
+#  - capability: lnL_mbb_0nubb_GERDA
+#    purpose: LogLike
 
-  - capability: mbb_0nubb_Xe
-    purpose: Observable
+#  - capability: lnLckm_Vusmin
+#    purpose: LogLike
 
-  - capability: mbb_0nubb_Ge
-    purpose: Observable
+#  - capability: l2lgamma_lnL
+#    purpose: LogLike
 
-  - capability: lnL_mbb_0nubb_KamLAND_Zen
-    purpose: LogLike
+#  - capability: l2lll_lnL
+#    purpose: LogLike
 
-  - capability: lnL_mbb_0nubb_GERDA
-    purpose: LogLike
-
-  - capability: lnLckm_Vusmin
-    purpose: LogLike
-
-  - capability: l2lgamma_lnL
-    purpose: LogLike 
-
-  - capability: l2lll_lnL
-    purpose: LogLike
-
-  - capability: mu2e_lnL
-    purpose: LogLike
+#  - capability: mu2e_lnL
+#    purpose: LogLike
 
   # Direct searches
 
-  - capability: lnLpienu
-    purpose: LogLike
+#  - capability: lnLpienu
+#    purpose: LogLike
 
-  - capability: lnLps191e
-    purpose: LogLike
+#  - capability: lnLps191e
+#    purpose: LogLike
 
-  - capability: lnLps191mu
-    purpose: LogLike
+#  - capability: lnLps191mu
+#    purpose: LogLike
 
-  - capability: lnLcharme
-    purpose: LogLike
+#  - capability: lnLcharme
+#    purpose: LogLike
 
-  - capability: lnLcharmmu
-    purpose: LogLike
+#  - capability: lnLcharmmu
+#    purpose: LogLike
 
-  - capability: lnLdelphi_shortlived
-    purpose: LogLike
+#  - capability: lnLdelphi_shortlived
+#    purpose: LogLike
 
-  - capability: lnLdelphi_longlived
-    purpose: LogLike
+#  - capability: lnLdelphi_longlived
+#    purpose: LogLike
 
-  - capability: lnLatlase
-    purpose: LogLike
+#  - capability: lnLatlase
+#    purpose: LogLike
 
-  - capability: lnLatlasmu
-    purpose: LogLike
+#  - capability: lnLatlasmu
+#    purpose: LogLike
 
-  - capability: lnLe949
-    purpose: LogLike
+#  - capability: lnLe949
+#    purpose: LogLike
 
-  - capability: lnLnutev
-    purpose: LogLike
+#  - capability: lnLnutev
+#    purpose: LogLike
 
-  - capability: lnLcharmtau
-    purpose: LogLike
+#  - capability: lnLcharmtau
+#    purpose: LogLike
 
-  - capability: lnLlhce
-    purpose: LogLike
+#  - capability: lnLlhce
+#    purpose: LogLike
 
-  - capability: lnLlhcmu
-    purpose: LogLike
+#  - capability: lnLlhcmu
+#    purpose: LogLike
 
   # Theoretical constraints
 
-  - capability: perturbativity_lnL
-    purpose: LogLike
+#  - capability: perturbativity_lnL
+#    purpose: LogLike
 
   # NuFit likelihoods
   
@@ -335,23 +323,7 @@ ObsLikes:
   - capability: Ut3_phase
     purpose: Observable
 
-  - capability: RHN_coupling_slide
-    purpose: LogLike
-
-  - capability: calc_Vus
-    purpose: Observable
-
 Rules:
-  - function: coupling_slide
-    options:
-      I: 1
-      i: 3
-      slope: 0.5
-      mslope: 0.0
-
-  - function: lnL_lepuniv
-    options:
-      include_R_W: true
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -369,6 +341,6 @@ KeyValues:
 
   likelihood:
     model_invalid_for_lnlike_below: -1e10
-    debug: false
+    debug: true
 
-  default_output_path: "./"
+  default_output_path: "./runs/RHN_Z_inv_test"

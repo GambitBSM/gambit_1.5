@@ -30,13 +30,14 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
+#      range: [1E-6, 0.23]
+#      prior_type: flat
+       fixed_value: 1E-5
     dmNu21:
-      range: [6e-5, 9e-5]
+      range: [7e-5, 8e-5]
       prior_type: flat
     dmNu3l:
-      range: [2e-3, 3e-3]
+      range: [2.4e-3, 2.5e-3]
       prior_type: flat
 
     alpha1:
@@ -60,7 +61,7 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [2, 60]
+      range: [100, 500]
       prior_type: log
     delta_M21:
       range: [1E-20, 1E-10]
@@ -108,9 +109,9 @@ Scanner:
       plugin: diver
       version: 1.0.4
       like: LogLike
-      NP: 19200
-      convthresh: 1e-10
-      lambdajDE: true
+      NP: 6000
+      convthresh: 1e-3
+      lambdajDE: false
 
     multinest:
       plugin: multinest
@@ -140,18 +141,6 @@ ObsLikes:
 
 #  - capability: lnLlepuniv
 #    purpose: LogLike
-
-  - capability: lnL_R_K
-    purpose: Observable
-
-  - capability: lnL_R_pi
-    purpose: LogLike
-
-  - capability: lnL_R_tau
-    purpose: LogLike
-
-  - capability: lnL_R_W
-    purpose: LogLike
 
   - capability: LUV_LL
     purpose: LogLike
@@ -345,13 +334,9 @@ Rules:
   - function: coupling_slide
     options:
       I: 1
-      i: 3
-      slope: 0.5
-      mslope: 0.0
-
-  - function: lnL_lepuniv
-    options:
-      include_R_W: true
+      i: 0
+      slope: 1.0
+      threshold: 1e0
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -371,4 +356,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "./"
+  default_output_path: "runs/RHN_diff_NH_CS5/"

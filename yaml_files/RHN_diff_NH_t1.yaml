@@ -60,7 +60,7 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [0.1, 2.0]
+      range: [0.49421099892, 2.0]
       prior_type: log
     delta_M21:
       range: [1E-10, .1]
@@ -138,7 +138,19 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-  - capability: lnLlepuniv
+#  - capability: lnLlepuniv
+#    purpose: LogLike
+
+  - capability: lnL_R_K
+    purpose: Observable
+
+  - capability: lnL_R_pi
+    purpose: LogLike
+
+  - capability: lnL_R_tau
+    purpose: LogLike
+
+  - capability: lnL_R_W
     purpose: LogLike
 
   - capability: LUV_LL
@@ -337,6 +349,10 @@ Rules:
       slope: 0.5
       mslope: 0.5
 
+  - function: lnL_lepuniv
+    options:
+      include_R_W: true
+
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
 
@@ -355,4 +371,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -1e10
     debug: false
 
-  default_output_path: "runs/RHN_diff_NH_t1/"
+  default_output_path: "./"
