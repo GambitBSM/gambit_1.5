@@ -112,6 +112,7 @@ class RHN_Chain(object):
             '#lnL_W_decays @PrecisionBit::lnL_W_decays_chi2',
             '#lnL_W_mass @PrecisionBit::lnL_W_mass_chi2',
             '#lnL_Z_inv_width @PrecisionBit::lnL_Z_inv_width_chi2',
+            '#lnL_Z_inv @DecayBit::lnL_Z_inv',
             '#lnL_bbn @NeutrinoBit::lnL_bbn',
             '#lnLatlase @NeutrinoBit::lnL_atlas_e',
             '#lnLatlasmu @NeutrinoBit::lnL_atlas_mu',
@@ -143,7 +144,7 @@ class RHN_Chain(object):
 
         lnL_names = ["lnL_deltaCP", "lnL_l2lgamma", "lnL_l2lll", 
                 "lnL_0nubb", "lnL_mbb_0nubb_KamLAND_Zen", "lnL_mbb_0nubb_GERDA",
-               "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv_width", "lnL_bbn",
+               "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv_width", "lnL_Z_inv", "lnL_bbn",
                "lnL_atlas_e", "lnL_atlas_mu", "lnL_charm_e", "lnL_charm_mu",
                "lnL_charm_tau", "lnL_ckm", "lnL_delphi", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",
                "lnL_lepuniv", "lnL_nutev", "lnL_pienu", "lnL_ps191_e",

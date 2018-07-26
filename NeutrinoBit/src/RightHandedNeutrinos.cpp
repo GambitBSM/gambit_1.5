@@ -1032,9 +1032,12 @@ namespace Gambit
       result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
       result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
+      if (runOptions->getValueOrDef<bool>(true, "include_R_W"))
+      {
+        result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
+        result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
+        result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
+      }
     }
 */
     // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for right-handed
@@ -1363,7 +1366,8 @@ namespace Gambit
       for (int i=0; i<7; i++)
         chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
-      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2);
+      double V_ub = 3.94e-3;
+      chi2 += pow( (sqrt((1 - pow(V_us,2) - pow(V_ub,2))*f[0]) - V_ud_exp)/ err_V_ud_exp/1.20, 2);
       result_ckm = -0.5*chi2;
     }
   
@@ -2084,6 +2088,17 @@ namespace Gambit
         cout << "Um1 = " << Um1_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Um1_sq > upper_limit) or (lower_limit != -1 and Um1_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Um1_phase(double& Um1_p)
@@ -2101,6 +2116,17 @@ namespace Gambit
         cout << "Ut1 = " << Ut1_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Ut1_sq > upper_limit) or (lower_limit != -1 and Ut1_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Ut1_phase(double& Ut1_p)
@@ -2118,6 +2144,17 @@ namespace Gambit
         cout << "Ue2 = " << Ue2_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Ue2_sq > upper_limit) or (lower_limit != -1 and Ue2_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Ue2_phase(double& Ue2_p)
@@ -2135,6 +2172,17 @@ namespace Gambit
         cout << "Um2 = " << Um2_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Um2_sq > upper_limit) or (lower_limit != -1 and Um2_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Um2_phase(double& Um2_p)
@@ -2152,6 +2200,17 @@ namespace Gambit
         cout << "Ut2 = " << Ut2_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Ut2_sq > upper_limit) or (lower_limit != -1 and Ut2_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Ut2_phase(double& Ut2_p)
@@ -2169,6 +2228,17 @@ namespace Gambit
         cout << "Ue3 = " << Ue3_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Ue3_sq > upper_limit) or (lower_limit != -1 and Ue3_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Ue3_phase(double& Ue3_p)
@@ -2186,6 +2256,17 @@ namespace Gambit
         cout << "Um3 = " << Um3_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Um3_sq > upper_limit) or (lower_limit != -1 and Um3_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Um3_phase(double& Um3_p)
@@ -2203,6 +2284,17 @@ namespace Gambit
         cout << "Ut3 = " << Ut3_sq << endl;
       #endif
 
+      double upper_limit = runOptions->getValueOrDef<double>(-1, "upper_limit");
+      double lower_limit = runOptions->getValueOrDef<double>(-1, "lower_limit");
+
+      if( (upper_limit != -1 and Ut3_sq > upper_limit) or (lower_limit != -1 and Ut3_sq < lower_limit) )
+      {
+        std::ostringstream msg;
+        msg << "Coupling outside of given limits";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
+ 
     }
 
     void Ut3_phase(double& Ut3_p)

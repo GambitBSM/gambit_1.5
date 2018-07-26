@@ -54,7 +54,8 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
         [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
         ]
 
-    mask = rhn.lnL > rhn.lnL.max()-2
+    mask = rhn.lnL > rhn.lnL.max()-5**2*0.5
+    mask0 = rhn.lnL > rhn.lnL.max()-5**2*0.5
 
     def f(rhn, name):
         print name
@@ -63,10 +64,10 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
         lnL = rhn.lnL[mask]
 
         if name == 'total':
-            w = lnL - lnL.max()
+            w = -(-lnL + lnL.max())**0.5
             indices = np.argsort(w)
             vmax = 0
-            vmin = -2
+            vmin = -5
             cmap = 'viridis'
         else:
             lnL_partial = rhn.lnL_partial[name][mask]
@@ -86,6 +87,9 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
 #            vmin = None
 #            vmax = None
 #            cmap = 'viridis'
+        plt.scatter(np.log10(M[I-1])[mask0],
+                np.log10(U[I-1][i])[mask0], color = '0.5',
+                rasterized=True, marker='.', edgecolors = None, linewidths = 0)
         plt.scatter(np.log10(M[I-1])[mask][indices],
                 np.log10(U[I-1][i])[mask][indices], c = w[indices],
                 rasterized=True, marker='.', edgecolors = None, linewidths = 0,
@@ -104,8 +108,10 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
     if total:
         f(rhn, 'total')
     if partial:
+        xlist = ['ckm', 'lepuniv', 'sin']
         for name in rhn.lnL_partial:
-            f(rhn, name)
+            #if any([x in name for x in xlist]):
+                f(rhn, name)
 
 def show_lnL_hist(rhn):
     def f(rhn, name):
@@ -685,10 +691,11 @@ def show_Vus(rhn, tag = "TAG"):
     plt.savefig(OUTPATH+"Vus_hist_%s.pdf"%tag)
 
 if __name__ == "__main__":
-    all9(mode = 't')
-    #TAG = 'm2'
-    #rhn = RHN_Chain('/home/ubuntu//data2/runs_03-07-18//RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
-    #        print_keys = False, renormalize = False, sub_slide = True)
+    #all9(mode = 't')
+    TAG = 't3'
+    rhn = RHN_Chain('/home/ubuntu/data2/mslope_0/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+            print_keys = False, renormalize = False, sub_slide = True)
+    show_lnL(rhn, i = 3, I = 1, tag = TAG+"_m0", partial = True, total = True)
     #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
     #show_mbb(rhn)
     #show_Rorder(rhn)
@@ -716,4 +723,3 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)
-    #show_lnL(rhn, i = 2, I = 1, tag = TAG, partial = True, total = True)
