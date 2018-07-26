@@ -348,6 +348,7 @@ Rules:
       i: 3
       slope: 0.5
       mslope: 0.5
+      Ut_lim: true
 
   - function: lnL_lepuniv
     options:
