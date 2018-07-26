@@ -349,14 +349,6 @@ Rules:
       slope: 0.7
       mslope: 0.25
 
-  - function: lnL_lepuniv
-    options:
-      include_R_W: true
-
-  - function: lnL_lepuniv
-    options:
-      include_R_W: true
-
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
 
