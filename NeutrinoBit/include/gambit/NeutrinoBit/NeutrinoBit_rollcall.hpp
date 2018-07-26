@@ -1024,6 +1024,9 @@ START_MODULE
     #define FUNCTION coupling_slide
     START_FUNCTION(double)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    DEPENDENCY(Ut1, double)
+    DEPENDENCY(Ut2, double)
+    DEPENDENCY(Ut3, double)	
     ALLOW_MODELS(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY

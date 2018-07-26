@@ -2299,8 +2299,30 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
+      double Ut1 = *Dep::Ut1;
+      double Ut2 = *Dep::Ut2;
+      double Ut3 = *Dep::Ut3;
       if (flavour > 0)
       {
+	if (flavour == 3)
+	{
+          if( ((M[1] > 60) and (Ut2 > 1e-4)) or ((M[2] > 60) and (Ut3 > 1e-4)) )
+          {
+            std::ostringstream msg;
+            msg << "Tau coupling restricted; point invalidated.";
+            logger() << msg.str() << EOM;
+            invalid_point().raise(msg.str());
+            return ;
+          }
+        }
+        if( ((M[0] > 60) and (Ut1 > 1e-4)) or ((M[1] > 60) and (Ut2 > 1e-4)) or ((M[2] > 60) and (Ut3 > 1e-4)) )
+        {
+          std::ostringstream msg;
+          msg << "Tau coupling restricted; point invalidated.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return ;
+        }
         double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
         lnL = slope*log10(std::min(U, 1.)) + mslope*log10(M[I-1]);
       }
