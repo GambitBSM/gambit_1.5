@@ -349,7 +349,6 @@ Rules:
       slope: 0.7
       mslope: 0.25
       Ut_lim: true
-      all_Ut: true
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11

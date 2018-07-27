@@ -349,11 +349,6 @@ Rules:
       slope: 0.5
       mslope: 0.0
       Ut_lim: true
-      all_Ut: true
-
-  - function: lnL_lepuniv
-    options:
-      include_R_W: true
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
@@ -363,18 +358,6 @@ Rules:
   
   - capability: RK
     function: RHN_RK
-
-#  - function: Ut1
-#    options:
-#      upper_limit: 1e-4
-
-#  - function: Ut2
-#    options:
-#      upper_limit: 1e-4
-
-#  - function: Ut3
-#    options:
-#      upper_limit: 1e-4
 
 KeyValues:
 
