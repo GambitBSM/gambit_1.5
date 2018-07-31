@@ -21,21 +21,21 @@ Parameters:
     Au_3:
       fixed_value: 0
     M1:
-      fixed_value: -51.7
+      fixed_value: -54.2001736776
     M2:
-      fixed_value: 136.5
+      fixed_value: 142.915815872
     M3:
       fixed_value: 5000
     Qin:
       fixed_value: 3000  # 3000 = sqrt(mQL3*mUR3) = mSUSY, since we have mQL3 = mUR3 = mq2 = (3000)^2
     TanBeta:
-      fixed_value: 12.2
+      fixed_value: 30.842473818
     ml2:
       fixed_value: 9000000
     mq2:
       fixed_value: 9000000
     mu: 
-      fixed_value: -296.8
+      fixed_value: -279.355471629
     mA:
       fixed_value: 5000
 
@@ -127,7 +127,7 @@ ObsLikes:
     - purpose:    LogLike
       capability: OPAL_Degenerate_Chargino_LLike
 
-     Likelihoods for invisible decays of Z and Higgs bosons
+    # Likelihoods for invisible decays of Z and Higgs bosons
     - purpose: LogLike
       capability: lnL_Z_inv
 
@@ -180,6 +180,9 @@ Rules:
   - options:
       override_FS_pole_masses:
         h0_1: 125.09
+
+  - options:
+      drop_SLHA_file: true
 
   # Choose to get decays from DecayBit proper, not from an SLHA file.
   - capability: decay_rates
@@ -261,15 +264,15 @@ Rules:
     function: operateLHCLoop
     options:
       pythiaNames: ["Pythia_SUSY_LHC_13TeV_EWonly"]
-      silenceLoop: true
+      silenceLoop: false
       maxFailedEvents: 1000
       pythiaSeedBase: -1    # If -1, a new seed is generated for every Pythia configuration and parameter point 
 
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
-      min_nEvents: [100000]
-      max_nEvents: [100000]
+      min_nEvents: [100]
+      max_nEvents: [100]
       events_between_convergence_checks: [200000]
       target_fractional_uncert: [0.1]
       halt_when_systematic_dominated: true

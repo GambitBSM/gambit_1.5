@@ -56,6 +56,9 @@ namespace Gambit
       F(CMS_13TeV_MultiLEP_36invfb)                  \
       F(CMS_13TeV_MultiLEP_2SSLep_36invfb)           \
       F(CMS_13TeV_MultiLEP_3Lep_36invfb)             \
+      F(CMS_13TeV_MultiLEP_Full_36invfb)             \
+      F(CMS_13TeV_MultiLEP_Full_2SSLep_36invfb)      \
+      F(CMS_13TeV_MultiLEP_Full_3Lep_36invfb)        \
       F(CMS_13TeV_MONOJET_36invfb)                   \
       F(CMS_8TeV_1LEPDMTOP_20invfb)                  \
       F(CMS_8TeV_2LEPDMTOP_20invfb)                  \
