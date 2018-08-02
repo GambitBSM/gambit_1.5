@@ -686,8 +686,7 @@ def all9(mode = None):
     for i, TAG in l:
         rhn = RHN_Chain('./samples/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
                 print_keys = False, renormalize = False, sub_slide = False)
-        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = True
-
+        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = True)
 
 def show_Vus(rhn, tag = "TAG"):
     Vus = rhn.Vus
