@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import division
+import sys
 import h5py
 import numpy as np
 import matplotlib
@@ -10,7 +11,7 @@ from scipy.linalg import inv
 
 from read_RHN_chains import *
 
-OUTPATH = '/home/ubuntu/plots/'
+OUTPATH = './plots/'
 
 def show_survival_fraction(rhn, sigma = 2, exclude = []):
     if len(exclude) > 0:
@@ -54,8 +55,11 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
         [rhn.U3, rhn.Ue3, rhn.Um3, rhn.Ut3],
         ]
 
-    mask = rhn.lnL > rhn.lnL.max()-5**2*0.5
-    mask0 = rhn.lnL > rhn.lnL.max()-5**2*0.5
+    nsigmas = 5
+
+    mask = rhn.lnL > rhn.lnL.max() - nsigmas**2*0.5
+    mask0 = rhn.lnL > rhn.lnL.max() - nsigmas**2*0.5
+
 
     def f(rhn, name):
         print name
@@ -67,7 +71,7 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
             w = -(-lnL + lnL.max())**0.5
             indices = np.argsort(w)
             vmax = 0
-            vmin = -5
+            vmin = -nsigmas**2*0.5
             cmap = 'viridis'
         else:
             lnL_partial = rhn.lnL_partial[name][mask]
@@ -108,7 +112,7 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
     if total:
         f(rhn, 'total')
     if partial:
-        xlist = ['ckm', 'lepuniv', 'sin']
+        xlist = ['ckm', 'R_K', 'R_pi', 'R_tau', 'sin']
         for name in rhn.lnL_partial:
             #if any([x in name for x in xlist]):
                 f(rhn, name)
@@ -248,9 +252,10 @@ def show_U_vs_M(rhn, tag = "TAG", plot_all = True):
     print "U_vs_M..."
     g = plot_all
     lnL = rhn.lnL
-    mask = lnL.max()-lnL < 2
-    mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 1e-3)
-    mask2 = mask & mask_ft
+    nsigmas = 5
+    mask = lnL.max()-lnL < nsigmas**2*0.5
+#    mask_ft = get_protected(rhn, epsilon = 1e-3, eta = 1e-3, mbbK = 1e-3)
+#    mask2 = mask & mask_ft
 
     M = [rhn.M1, rhn.M2, rhn.M3]
     U = [
@@ -268,8 +273,8 @@ def show_U_vs_M(rhn, tag = "TAG", plot_all = True):
                     rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][0])[mask], marker = '.',
                 rasterized = True)
-        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][0])[mask2], marker = '.',
-                rasterized = True, color='g')
+#        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][0])[mask2], marker = '.',
+#                rasterized = True, color='g')
         plt.xlim([-1, 3.0])
         plt.ylim([-10, -1])
         plt.ylabel("U%i"%I)
@@ -279,8 +284,8 @@ def show_U_vs_M(rhn, tag = "TAG", plot_all = True):
                     rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][1])[mask], marker = '.',
                 rasterized = True)
-        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][1])[mask2], marker = '.',
-                rasterized = True, color='g')
+#        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][1])[mask2], marker = '.',
+#                rasterized = True, color='g')
         plt.xlim([-1, 3.0])
         plt.ylim([-10, -1])
         plt.ylabel("Ue%i"%I)
@@ -290,8 +295,8 @@ def show_U_vs_M(rhn, tag = "TAG", plot_all = True):
                     rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][2])[mask], marker = '.',
                 rasterized = True)
-        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][2])[mask2], marker = '.',
-                rasterized = True, color='g')
+#        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][2])[mask2], marker = '.',
+#                rasterized = True, color='g')
         plt.xlim([-1, 3.0])
         plt.ylim([-10, -1])
         plt.ylabel("Um%i"%I)
@@ -301,8 +306,8 @@ def show_U_vs_M(rhn, tag = "TAG", plot_all = True):
                     rasterized = True, color = '0.5')
         plt.scatter(np.log10(M[I-1])[mask], np.log10(U[I-1][3])[mask], marker = '.',
                 rasterized = True)
-        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][3])[mask2], marker = '.',
-                rasterized = True, color='g')
+#        plt.scatter(np.log10(M[I-1])[mask2], np.log10(U[I-1][3])[mask2], marker = '.',
+#                rasterized = True, color='g')
         plt.ylabel("Ut%i"%I)
         plt.xlim([-1, 3.0])
         plt.ylim([-10, -1])
@@ -439,27 +444,30 @@ def triangle(rhn, tag = "TAG", Ue1th = 0., M1th = 0.):
     print "triangle..."
     x = rhn.Ue1/rhn.U1
     y = rhn.Um1/rhn.U1
+    z = rhn.Ut1/rhn.U1
     mMin = rhn.mMin * 1e9
     lnL = rhn.lnL
     md31 = rhn.md31
 
     maskth = (rhn.Ue1 > Ue1th) & (rhn.M1 > M1th)
 
+    nsigmas = 5
+
     plt.subplot(121)
     plt.plot([0, 1], [1,0], "k:")
-    mask = (lnL.max() - lnL < 2) & (mMin < 1.01) & (md31 > 0)
+    mask = (lnL.max() - lnL < nsigmas**2*0.5) & (mMin < 1.01) & (md31 > 0)
     mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='0.5', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 > 0)
+    mask = (lnL.max() - lnL < nsigmas**2*0.5) & (mMin < 0.01) & (md31 > 0)
     mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 > 0)
+    mask = (lnL.max() - lnL < nsigmas**2*0.5) & (mMin < 0.001) & (md31 > 0)
     mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 > 0)
+    mask = (lnL.max() - lnL < nsigmas**2*0.5) & (mMin < 0.0001) & (md31 > 0)
     mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 > 0)
+    mask = (lnL.max() - lnL < nsigmas**2*0.5) & (mMin < 0.00001) & (md31 > 0)
     mask &= maskth
     plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
     plt.xlabel("Ue1/U1")
@@ -467,23 +475,23 @@ def triangle(rhn, tag = "TAG", Ue1th = 0., M1th = 0.):
 
     plt.subplot(122)
     plt.plot([0, 1], [1,0], 'k:')
-    mask = (lnL.max() - lnL < 2) & (mMin < 1.01) & (md31 < 0)
+    mask = (lnL.max() - lnL < 5) & (mMin < 1.01) & (md31 > 0)
     mask &= maskth
-    plt.scatter(x[mask], y[mask], rasterized = True, color='0.5', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.01) & (md31 < 0)
+    plt.scatter(x[mask], z[mask], rasterized = True, color='0.5', marker='.')
+    mask = (lnL.max() - lnL < 5) & (mMin < 0.01) & (md31 > 0)
     mask &= maskth
-    plt.scatter(x[mask], y[mask], rasterized = True, color='k', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.001) & (md31 < 0)
+    plt.scatter(x[mask], z[mask], rasterized = True, color='k', marker='.')
+    mask = (lnL.max() - lnL < 5) & (mMin < 0.001) & (md31 > 0)
     mask &= maskth
-    plt.scatter(x[mask], y[mask], rasterized = True, color='r', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.0001) & (md31 < 0)
+    plt.scatter(x[mask], z[mask], rasterized = True, color='r', marker='.')
+    mask = (lnL.max() - lnL < 5) & (mMin < 0.0001) & (md31 > 0)
     mask &= maskth
-    plt.scatter(x[mask], y[mask], rasterized = True, color='g', marker='.')
-    mask = (lnL.max() - lnL < 2) & (mMin < 0.00001) & (md31 < 0)
+    plt.scatter(x[mask], z[mask], rasterized = True, color='g', marker='.')
+    mask = (lnL.max() - lnL < 5) & (mMin < 0.00001) & (md31 > 0)
     mask &= maskth
-    plt.scatter(x[mask], y[mask], rasterized = True, color='y', marker='.')
+    plt.scatter(x[mask], z[mask], rasterized = True, color='y', marker='.')
     plt.xlabel("Ue1/U1")
-    plt.ylabel("Um1/U1")
+    plt.ylabel("Ut1/U1")
 
     plt.savefig(OUTPATH+"triangle_%s.pdf"%tag)
 
@@ -656,26 +664,30 @@ def get_couplings(rhn, Ut1th = 0):
 def all9(mode = None):
     if mode == 'e':
         l = [
+            [1, 'e0'],
             [1, 'e1'],
             [1, 'e2'],
             [1, 'e3'],
             ]
     if mode == 'm':
         l = [
+            [2, 'm0'],
             [2, 'm1'],
             [2, 'm2'],
-#            [2, 'm3'],
+            [2, 'm3'],
             ]
     if mode == 't':
         l = [
+            [3, 't0'],
             [3, 't1'],
-            #[3, 't2'],
-            #[3, 't3'],
+            [3, 't2'],
+            [3, 't3'],
             ]
     for i, TAG in l:
-        rhn = RHN_Chain('/home/ubuntu/data2/runs_04-07-18/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
-                print_keys = False, renormalize = False, sub_slide = True)
-        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = True)
+        rhn = RHN_Chain('./samples/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
+                print_keys = False, renormalize = False, sub_slide = False)
+        show_lnL(rhn, i = i, I = 1, tag = TAG, partial = True, total = True
+
 
 def show_Vus(rhn, tag = "TAG"):
     Vus = rhn.Vus
@@ -691,12 +703,11 @@ def show_Vus(rhn, tag = "TAG"):
     plt.savefig(OUTPATH+"Vus_hist_%s.pdf"%tag)
 
 if __name__ == "__main__":
-    #all9(mode = 't')
-    TAG = 't3'
-    rhn = RHN_Chain('/home/ubuntu/data2/mslope_0/RHN_diff_NH_%s.hdf5'%TAG, MODEL = 'diff',
-            print_keys = False, renormalize = False, sub_slide = True)
-    show_lnL(rhn, i = 3, I = 1, tag = TAG+"_m0", partial = True, total = True)
-    #triangle(rhn, tag = 'cs23', Ue1th = 1e-4, M1th = 100.)
+#    all9(mode = 't')
+    TAG = sys.argv[2]
+    rhn = RHN_Chain(sys.argv[1], MODEL = 'diff',
+            print_keys = False, renormalize = False, sub_slide = False)
+    #triangle(rhn, tag = 'combo2', Ue1th = 0.0, M1th = 0.0)
     #show_mbb(rhn)
     #show_Rorder(rhn)
     #show_survival_fraction(rhn)
@@ -704,7 +715,7 @@ if __name__ == "__main__":
 
     #show_Vus(rhn, tag = TAG)
 
-    #show_U_vs_M(rhn, tag = TAG, plot_all = False)
+    #show_U_vs_M(rhn, tag = TAG, plot_all = True)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-6)
     #show_ImOmega(rhn, tag = 'cs27', Ut1th = 1e-5, real = False)
     #show_neutrino_masses(rhn, tag = 'cs27', Ut1th = 3e-6)
@@ -723,3 +734,9 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)
+    if len(sys.argv) < 5 or sys.argv[4] == "Ue1" :
+      show_lnL(rhn, i = 1, I = 1, tag = TAG, partial = False, total = True)
+    if len(sys.argv) < 5 or sys.argv[4] == "Um1" :
+      show_lnL(rhn, i = 2, I = 1, tag = TAG, partial = False, total = True)
+    if len(sys.argv) < 5 or sys.argv[4] == "Ut1" :
+      show_lnL(rhn, i = 3, I = 1, tag = TAG, partial = False, total = True)

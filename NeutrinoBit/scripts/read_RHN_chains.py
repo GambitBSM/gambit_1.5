@@ -111,7 +111,6 @@ class RHN_Chain(object):
             '#lnL_mbb_0nubb_GERDA @NeutrinoBit::lnL_mbb_0nubb_GERDA',
             '#lnL_W_decays @PrecisionBit::lnL_W_decays_chi2',
             '#lnL_W_mass @PrecisionBit::lnL_W_mass_chi2',
-            '#lnL_Z_inv_width @PrecisionBit::lnL_Z_inv_width_chi2',
             '#lnL_Z_inv @DecayBit::lnL_Z_inv',
             '#lnL_bbn @NeutrinoBit::lnL_bbn',
             '#lnLatlase @NeutrinoBit::lnL_atlas_e',
@@ -120,11 +119,13 @@ class RHN_Chain(object):
             '#lnLcharmmu @NeutrinoBit::lnL_charm_mu',
             '#lnLcharmtau @NeutrinoBit::lnL_charm_tau',
             '#lnLckm_Vusmin @NeutrinoBit::lnL_ckm_Vusmin',
-            '#lnLdelphi @NeutrinoBit::lnL_delphi',
             '#lnLdelphi_shortlived @NeutrinoBit::lnL_delphi_short_lived',
             '#lnLdelphi_longlived @NeutrinoBit::lnL_delphi_long_lived',
             '#lnLe949 @NeutrinoBit::lnL_e949',
-            '#lnLlepuniv @NeutrinoBit::lnL_lepuniv',
+            '#lnL_R_pi @NeutrinoBit::lnL_R_pi',
+            '#lnL_R_K @NeutrinoBit::lnL_R_K',
+            '#lnL_R_tau @NeutrinoBit::lnL_R_tau',
+            '#lnL_R_W @NeutrinoBit::lnL_R_W',
             '#lnLnutev @NeutrinoBit::lnL_nutev',
             '#lnLpienu @NeutrinoBit::lnL_pienu',
             '#lnLps191e @NeutrinoBit::lnL_ps191_e',
@@ -143,11 +144,11 @@ class RHN_Chain(object):
             '#lnLlhcmu @NeutrinoBit::lnL_lhc_mu']
 
         lnL_names = ["lnL_deltaCP", "lnL_l2lgamma", "lnL_l2lll", 
-                "lnL_0nubb", "lnL_mbb_0nubb_KamLAND_Zen", "lnL_mbb_0nubb_GERDA",
-               "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv_width", "lnL_Z_inv", "lnL_bbn",
+               "lnL_0nubb", "lnL_mbb_0nubb_KamLAND_Zen", "lnL_mbb_0nubb_GERDA",
+               "lnL_W_decays", "lnL_W_mass", "lnL_Z_inv", "lnL_bbn",
                "lnL_atlas_e", "lnL_atlas_mu", "lnL_charm_e", "lnL_charm_mu",
-               "lnL_charm_tau", "lnL_ckm", "lnL_delphi", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",
-               "lnL_lepuniv", "lnL_nutev", "lnL_pienu", "lnL_ps191_e",
+               "lnL_charm_tau", "lnL_ckm", "lnL_delphi_short", "lnL_delphi_long", "lnL_e949",
+               "lnL_R_pi", "lnL_R_K", "lnL_R_tau", "lnL_R_W", "lnL_nutev", "lnL_pienu", "lnL_ps191_e",
                "lnL_ps191_mu", "lnL_md21", "lnL_md3l", "lnL_mu2e", "lnL_pert",
                "lnL_sum_mnu", "lnL_theta12", "lnL_theta13", "lnL_theta23",
                "lnL_LUV_LL", "lnL_sinW2", "lnL_lhce", "lnL_lhcmu"]
@@ -173,11 +174,6 @@ class RHN_Chain(object):
         self.lnL = get_data('LogLike')
         if self.lnL_slide is not None and sub_slide:
             self.lnL -= self.lnL_slide
-
-        try:
-            self.Vus = get_data('#calc_Vus @NeutrinoBit::calc_Vus')
-        except KeyError:
-            pass
 
         #self.ordering = get_data('#ordering @NeutrinoBit::ordering')
 
@@ -210,7 +206,7 @@ class RHN_Chain(object):
             self.lnL[self.md31>0] -= self.lnL[self.md31>0].max()
             self.lnL[self.md31<0] -= self.lnL[self.md31<0].max()
 
-        mask2sigma = self.lnL > self.lnL.max() - 0.5*4
+        mask2sigma = self.lnL > self.lnL.max() - 0.5*25
 
         print "Number of points: %i"%len(valid)
         print "Number of valid points: %i"%valid.sum()
