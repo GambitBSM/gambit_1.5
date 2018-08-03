@@ -17,6 +17,10 @@
 ///  \date 2017 Jun, Sep
 ///  \date 2018 Feb
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #include <string>
@@ -33,9 +37,6 @@
 #include "gambit/SpecBit/QedQcdWrapper.hpp"
 #include "gambit/Models/SimpleSpectra/SMHiggsSimpleSpec.hpp"
 #include "gambit/Models/SimpleSpectra/MajoranaDMSimpleSpec.hpp"
-#include "gambit/SpecBit/model_files_and_boxes.hpp"
-
-#include "gambit/SpecBit/MajoranaDMSpec.hpp"
 
 // Switch for debug mode
 //#define SPECBIT_DEBUG
@@ -46,7 +47,6 @@ namespace Gambit
   namespace SpecBit
   {
     using namespace LogTags;
-    using namespace flexiblesusy;
 
     /// Get a (simple) Spectrum object wrapper for the MajoranaDM model
     void get_MajoranaDM_spectrum(Spectrum& result)
@@ -59,10 +59,10 @@ namespace Gambit
 
       // quantities needed to fill container spectrum, intermediate calculations
       double alpha_em = 1.0 / sminputs.alphainv;
-      double C = alpha_em * Pi / (sminputs.GF * pow(2,0.5));
+      double C = alpha_em * pi / (sminputs.GF * pow(2,0.5));
       double sinW2 = 0.5 - pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
       double cosW2 = 0.5 + pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
-      double e = pow( 4*Pi*( alpha_em ),0.5) ;
+      double e = pow( 4*pi*( alpha_em ),0.5) ;
 
       // Higgs sector
       double mh   = *myPipe::Param.at("mH");
@@ -75,7 +75,7 @@ namespace Gambit
       // MajoranaDM sector
       majoranamodel.MajoranaPoleMass = *myPipe::Param.at("mX");
       majoranamodel.MajoranaLambda   = *myPipe::Param.at("lX");
-      majoranamodel.MajoranacosXI    = *myPipe::Param.at("cosXI");
+      majoranamodel.MajoranaXi       = *myPipe::Param.at("xi");
       
       // Invalidate point if the EFT validity constraint is not satisfied
       // See https://arxiv.org/abs/1512.06458v4 for more details
@@ -86,19 +86,19 @@ namespace Gambit
         {
           // Invadlidate point if the EFT validity constraint is not satisfied,
           // for each coupling independently. 
-          double gs = majoranamodel.MajoranaLambda * majoranamodel.MajoranacosXI;
-          double gp = majoranamodel.MajoranaLambda * std::sqrt(1-std::pow(majoranamodel.MajoranacosXI, 2.));
+          double gs = majoranamodel.MajoranaLambda * std::cos(majoranamodel.MajoranaXi);
+          double gp = majoranamodel.MajoranaLambda * std::sin(majoranamodel.MajoranaXi);
 
           if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
           {
-            if (gs >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+            if (gs >= (4*pi)/(2*majoranamodel.MajoranaPoleMass))
             {
               std::ostringstream msg;
               msg << "Parameter point [mX, lX_s] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
                   << gs << "/GeV] does not satisfy the EFT validity constraint.";
               invalid_point().raise(msg.str());
             }
-            if (gp >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+            if (gp >= (4*pi)/(2*majoranamodel.MajoranaPoleMass))
             {
               std::ostringstream msg;
               msg << "Parameter point [mX, lX_ps] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
@@ -110,7 +110,7 @@ namespace Gambit
         else
         {        
           // Parametrisation with lambda/Lambda, xi
-          if (majoranamodel.MajoranaLambda >= (4*Pi)/(2*majoranamodel.MajoranaPoleMass))
+          if (majoranamodel.MajoranaLambda >= (4*pi)/(2*majoranamodel.MajoranaPoleMass))
           {
             std::ostringstream msg;
             msg << "Parameter point [mX, lX] = [" << majoranamodel.MajoranaPoleMass << " GeV, "
@@ -126,7 +126,7 @@ namespace Gambit
       // gauge couplings
       majoranamodel.g1 = e / sqrt(sinW2);
       majoranamodel.g2 = e / sqrt(cosW2);
-      majoranamodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
+      majoranamodel.g3   = pow( 4*pi*( sminputs.alphaS ),0.5) ;
 
       // Yukawas
       double sqrt2v = pow(2.0,0.5)/vev;

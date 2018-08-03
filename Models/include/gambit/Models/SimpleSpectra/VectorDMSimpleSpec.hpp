@@ -14,6 +14,10 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Sep, 2017 Jun
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #ifndef __VectorDMSimpleSpec_hpp__
@@ -38,7 +42,7 @@ namespace Gambit
          double VectorPoleMass;
          double VectorLambda;
          double HiggsPoleMass_1srd_low,HiggsPoleMass_1srd_high;
-		 
+     
          double LambdaH;
          double VectorLambdaS;
          double g1, g2, g3, sinW2;

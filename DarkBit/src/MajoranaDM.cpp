@@ -16,7 +16,7 @@
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
-///  \date Nov 2017
+///  \date Nov 2017, Aug 2018
 ///
 ///  *********************************************
 
@@ -208,8 +208,8 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       //double mass = spec.get(Par::Pole_Mass,"X");
       double lambda = he.get(Par::dimensionless,"lX");
-      double cosXI = he.get(Par::dimensionless,"cosXI");
-      double sinXI = sqrt(1-pow(cosXI,2));
+      double cosXI = std::cos(he.get(Par::dimensionless,"xi"));
+      double sinXI = std::sin(he.get(Par::dimensionless,"xi"));
       double mh = spec.get(Par::Pole_Mass,"h0_1");
 
       // Expressions taken from Cline et al. (2013, PRD 88:055025, arXiv:1306.4710)
@@ -263,7 +263,7 @@ namespace Gambit
       double lambda = he.get(Par::dimensionless,"lX");
       double v = he.get(Par::mass1,"vev");
       double alpha_s = SMI.alphaS;      // alpha_s(mZ)^MSbar
-      double cosXi = he.get(Par::dimensionless, "cosXI");
+      double cosXi = std::cos(he.get(Par::dimensionless, "xi"));
 
       // Get SM pole masses
       getSMmass("e-_1",     1)

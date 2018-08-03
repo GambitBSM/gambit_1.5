@@ -14,6 +14,10 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Aug, 2017 Jun
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #ifndef __dirac_DM_contents_hpp__
@@ -39,7 +43,7 @@ namespace Gambit {
      addParameter(Par::mass1, "vev"      );
      addParameter(Par::dimensionless, "lF");     
      addParameter(Par::dimensionless, "lambda_h");
-     addParameter(Par::dimensionless, "cosXI");
+     addParameter(Par::dimensionless, "xi");
 
      addParameter(Par::Pole_Mass, "h0_1");
      addParameter(Par::Pole_Mass, "F" );

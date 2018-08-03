@@ -2935,7 +2935,7 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"X");
       double lambda = he.get(Par::dimensionless,"lX");
-      double cxi = he.get(Par::dimensionless,"cosXI");
+      double cxi = std::cos(he.get(Par::dimensionless,"xi"));
       double v0 = he.get(Par::mass1,"vev");
       double mhpole = spec.get(Par::Pole_Mass,"h0_1");
 
@@ -2978,7 +2978,7 @@ namespace Gambit
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"F");
       double lambda = he.get(Par::dimensionless,"lF");
-      double cxi = he.get(Par::dimensionless,"cosXI");
+      double cxi = std::cos(he.get(Par::dimensionless,"xi"));
       double v0 = he.get(Par::mass1,"vev");
       double mhpole = spec.get(Par::Pole_Mass,"h0_1");
 

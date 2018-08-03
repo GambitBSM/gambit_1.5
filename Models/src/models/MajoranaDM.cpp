@@ -14,6 +14,14 @@
 ///          (ankit.beniwal@adelaide.edu.com)
 ///  \date 2016 Aug, 2017 Jun
 ///
+///  \author Sebastian Wild
+///          (sebastian.wild@desy.de)
+///  \date 2018, Feb
+///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #include <string>
@@ -37,27 +45,10 @@ using namespace Gambit::Utils;
         double lX_s = myparams["lX_s"];
         double lX_ps = myparams["lX_ps"];
         double lX = sqrt(lX_s*lX_s + lX_ps*lX_ps);
-        double cosXI = lX_s/lX;
+        double xi = std::acos(lX_s/lX);
         parentparams.setValue("mX", mX);
         parentparams.setValue("lX", lX);
-        parentparams.setValue("cosXI", cosXI);
+        parentparams.setValue("xi", xi);
     }
 #undef PARENT
 #undef MODEL
-
-#define MODEL MajoranaDM_xi
-#define PARENT MajoranaDM
-    void MODEL_NAMESPACE::MajoranaDM_xi_to_MajoranaDM(const ModelParameters &myparams, ModelParameters &parentparams)
-    {
-        double mX = myparams["mX"];
-        double lX = myparams["lX"];
-        double xi = myparams["xi"];
-        double cosXI = std::cos(xi);
-        parentparams.setValue("mX", mX);
-        parentparams.setValue("lX", lX);
-        parentparams.setValue("cosXI", cosXI);
-    }
-#undef PARENT
-#undef MODEL
-    
-     

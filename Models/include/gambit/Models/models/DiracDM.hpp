@@ -12,9 +12,12 @@
 //
 //  Ankit Beniwal
 //  2016 August, 2017 June
-
+//
 //  Sebastian Wild
 //  2018 January
+//
+//  Sanjay Bloor
+//  2018 August
 //
 //  *********************************************
 
@@ -23,7 +26,7 @@
 
 #define MODEL DiracDM
   START_MODEL
-  DEFINEPARS(mF, lF, cosXI)
+  DEFINEPARS(mF, lF, xi)
 #undef MODEL
 
 #define MODEL DiracDM_sps
@@ -34,12 +37,4 @@
 #undef PARENT
 #undef MODEL
 
-#define MODEL DiracDM_xi
-#define PARENT DiracDM
-  START_MODEL
-  DEFINEPARS(mF, lF, xi)
-  INTERPRET_AS_PARENT_FUNCTION(DiracDM_xi_to_DiracDM)
-#undef PARENT
-#undef MODEL
-  
 #endif

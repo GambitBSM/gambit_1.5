@@ -138,9 +138,6 @@ Rules:
   # Choose to implement the relic density likelihood as an upper bound, not a detection
   - capability: lnL_oh2
     function: lnL_oh2_upperlimit
-    options:
-      oh2_obs: 0.1199
-      oh2_obserr: 0.0027
 
   # Set v0 to 240 +/- 8 km/s based on Reid et al [arXiv:1401.5377]
   - capability: lnL_v0
@@ -220,19 +217,21 @@ Scanner:
     mn:
       plugin: multinest
       like: LogLike
-      nlive: 1
-      tol: 0.7
+      nlive: 20000
+      tol: 1E-4
 
     diver:
       plugin: diver
       like: LogLike
-      NP: 20000
+      NP: 50000
       verbosity: 1
-      convthresh: 0.0001
+      convthresh: 1E-5
+      lambdajDE: true
 
     tw:
       plugin: twalk
-      sqrtR: 1.01
+      sqrtR: 1.001
+      timeout_mins: 1380
 
 ##############################################################################################
 Logger:
@@ -259,4 +258,4 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e+5
     debug: false
 
-  default_output_path: "production_scans/Vector/high_mass/TWalk"
+  default_output_path: "runs/Vector/high_mass/TWalk"

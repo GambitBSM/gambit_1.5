@@ -14,6 +14,10 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Aug, 2017 Jun
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #ifndef __DiracDMSimpleSpec_hpp__
@@ -37,7 +41,7 @@ namespace Gambit
          double HiggsVEV;
          double DiracPoleMass;
          double DiracLambda;
-         double DiraccosXI;
+         double DiracXi;
          double HiggsPoleMass_1srd_low,HiggsPoleMass_1srd_high;
 
          double LambdaH;
@@ -87,7 +91,7 @@ namespace Gambit
             double get_HiggsVEV()        const { return params.HiggsVEV;      } 
             double get_DiracPoleMass() const { return params.DiracPoleMass; } 
             double get_lambda_F()       const { return params.DiracLambda; }
-            double get_cos_XI()         const { return params.DiraccosXI; }
+            double get_xi()         const { return params.DiracXi; }
             double get_lambda_h()       const { return params.LambdaH; }
             double get_g1()       const { return params.g1; }
             double get_g2()       const { return params.g2; }
@@ -105,7 +109,7 @@ namespace Gambit
             void set_HiggsVEV(double in)        { params.HiggsVEV=in;      } 
             void set_DiracPoleMass(double in) { params.DiracPoleMass=in; } 
             void set_lambda_F(double in)       { params.DiracLambda=in; }
-            void set_cos_XI(double in)         { params.DiraccosXI=in; }
+            void set_xi(double in)         { params.DiracXi=in; }
             void set_lambda_h(double in)       { params.LambdaH=in; }
             void set_g1(double in)        { params.g1=in; }
             void set_g2(double in)        { params.g2=in; }
@@ -128,7 +132,7 @@ namespace Gambit
 
                getters[mass1]        .map0W["vev"]       = &Self::get_HiggsVEV;
                getters[dimensionless].map0W["lF"] = &Self::get_lambda_F;
-               getters[dimensionless].map0W["cosXI"] = &Self::get_cos_XI;
+               getters[dimensionless].map0W["xi"] = &Self::get_xi;
 
                getters[Pole_Mass].map0W["h0_1"]    = &Self::get_HiggsPoleMass;
                getters[Pole_Mass_1srd_high].map0W["h0_1"]    = &Self::get_HiggsPoleMass_1srd_high;
@@ -161,7 +165,7 @@ namespace Gambit
 
                setters[mass1].map0W["vev"]       = &Self::set_HiggsVEV;
                setters[dimensionless].map0W["lF"] = &Self::set_lambda_F;
-               setters[dimensionless].map0W["cosXI"] = &Self::set_cos_XI;
+               setters[dimensionless].map0W["xi"] = &Self::set_xi;
                setters[dimensionless].map0W["lambda_h"] = &Self::set_lambda_h;
 
                setters[dimensionless].map0W["g1"] = &Self::set_g1;

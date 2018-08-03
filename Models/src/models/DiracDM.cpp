@@ -18,6 +18,10 @@
 ///          (sebastian.wild@desy.de)
 ///  \date 2018, Feb
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #include <string>
@@ -41,25 +45,10 @@ using namespace Gambit::Utils;
         double lF_s = myparams["lF_s"];
         double lF_ps = myparams["lF_ps"];
         double lF = sqrt(lF_s*lF_s + lF_ps*lF_ps);
-        double cosXI = lF_s/lF;
+        double xi = std::acos(lF_s/lF);
         parentparams.setValue("mF", mF);
         parentparams.setValue("lF", lF);
-        parentparams.setValue("cosXI", cosXI);
-    }
-#undef PARENT
-#undef MODEL
-
-#define MODEL DiracDM_xi
-#define PARENT DiracDM
-    void MODEL_NAMESPACE::DiracDM_xi_to_DiracDM(const ModelParameters &myparams, ModelParameters &parentparams)
-    {
-        double mF = myparams["mF"];
-        double lF = myparams["lF"];
-        double xi = myparams["xi"];
-        double cosXI = std::cos(xi);
-        parentparams.setValue("mF", mF);
-        parentparams.setValue("lF", lF);
-        parentparams.setValue("cosXI", cosXI);
+        parentparams.setValue("xi", xi);
     }
 #undef PARENT
 #undef MODEL

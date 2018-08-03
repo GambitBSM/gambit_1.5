@@ -17,6 +17,10 @@
 ///  \date 2017 Jun, Sep
 ///  \date 2018 Feb
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2018 Aug
+///
 ///  *********************************************
 
 #include <string>
@@ -33,9 +37,6 @@
 #include "gambit/SpecBit/QedQcdWrapper.hpp"
 #include "gambit/Models/SimpleSpectra/SMHiggsSimpleSpec.hpp"
 #include "gambit/Models/SimpleSpectra/VectorDMSimpleSpec.hpp"
-#include "gambit/SpecBit/model_files_and_boxes.hpp"
-
-#include "gambit/SpecBit/VectorDMSpec.hpp"
 
 // Switch for debug mode
 //#define SPECBIT_DEBUG
@@ -59,10 +60,10 @@ namespace Gambit
 
       // quantities needed to fill container spectrum, intermediate calculations
       double alpha_em = 1.0 / sminputs.alphainv;
-      double C = alpha_em * Pi / (sminputs.GF * pow(2,0.5));
+      double C = alpha_em * pi / (sminputs.GF * pow(2,0.5));
       double sinW2 = 0.5 - pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
       double cosW2 = 0.5 + pow( 0.25 - C/pow(sminputs.mZ,2) , 0.5);
-      double e = pow( 4*Pi*( alpha_em ),0.5) ;
+      double e = pow( 4*pi*( alpha_em ),0.5) ;
 
       // Higgs sector
       double mh   = *myPipe::Param.at("mH");
@@ -95,7 +96,7 @@ namespace Gambit
       // gauge couplings
       vectormodel.g1 = e / sqrt(sinW2);
       vectormodel.g2 = e / sqrt(cosW2);
-      vectormodel.g3   = pow( 4*Pi*( sminputs.alphaS ),0.5) ;
+      vectormodel.g3   = pow( 4*pi*( sminputs.alphaS ),0.5) ;
 
       // Yukawas
       double sqrt2v = pow(2.0,0.5)/vev;
