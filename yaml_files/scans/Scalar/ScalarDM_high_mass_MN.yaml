@@ -135,7 +135,7 @@ ObsLikes:
 ##############################################################################################
 Rules:
 
-  # Don't pick micromegas for the model comparison.
+  # Use the DarkBit native calculator for the relic density
   - capability: RD_oh2
     function: RD_oh2_general
 
