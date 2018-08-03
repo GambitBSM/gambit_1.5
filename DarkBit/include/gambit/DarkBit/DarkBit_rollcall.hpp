@@ -53,7 +53,7 @@
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2016 Oct
-///  \date 2018 Jan
+///  \date 2018 Jan, Aug
 ///
 /// \author Aaron Vincent
 ///         (aaron.vincent@cparc.ca)
@@ -206,8 +206,8 @@ START_MODULE
     // Routine for cross checking relic density results
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
-      BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM), double, (double*,int,double))
-      ALLOW_MODELS(MSSM63atQ, SingletDM)
+      BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM, MicrOmegas_VectorDM, MicrOmegas_MajoranaDM, MicrOmegas_DiracDM), double, (double*,int,double))
+      ALLOW_MODELS(MSSM63atQ, SingletDM, VectorDM, MajoranaDM, DiracDM)
     #undef FUNCTION
   #undef CAPABILITY
 

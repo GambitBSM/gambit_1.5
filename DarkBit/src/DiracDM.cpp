@@ -8,7 +8,7 @@
 ///
 ///  Authors (add name and date if you modify):
 ///
-///  \author Ankit Beniwalcos
+///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date Oct 2016
 ///  \date Jun, Sep 2017

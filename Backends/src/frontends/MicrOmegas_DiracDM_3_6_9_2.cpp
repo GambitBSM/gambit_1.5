@@ -10,6 +10,7 @@
 ///
 /// \author Ankit Beniwal
 /// \date Jun, Aug, Sep 2017
+/// \date Aug 2018
 ///
 ///  *********************************************
 
@@ -65,7 +66,7 @@ BE_INI_FUNCTION
      double mH = spec.get(Par::Pole_Mass,"h0_1");
      double mW = le.get(Par::Pole_Mass, "W+");
      double lF = he.get(Par::dimensionless,"lF");
-     double cxi = he.get(Par::dimensionless,"cosXI");
+     double cxi = std::cos(he.get(Par::dimensionless,"xi"));
 
      error = assignVal((char*)"mF", mF);
      if (error != 0) backend_error().raise(LOCAL_INFO, "Unable to set mF in"
