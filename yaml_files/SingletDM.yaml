@@ -205,6 +205,10 @@ Rules:
   - capability: DD_couplings
     function: DD_couplings_SingletDM
 
+  # Choose to use DarkSUSY for solar capture rate
+  - capability: capture_rate_Sun
+    function: capture_rate_Sun_const_xsec
+
   # Choose to get decays from DecayBit proper, not from an SLHA file.
   - capability: decay_rates
     function: all_decays

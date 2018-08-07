@@ -126,11 +126,9 @@ ObsLikes:
       
     - capability: sigma_SI_p
       purpose:    Observable
-      function:   sigma_SI_p_simple
 
     - capability: sigma_SI_n
       purpose:    Observable
-      function:   sigma_SI_n_simple
 
 ##############################################################################################
 Rules:
@@ -169,10 +167,7 @@ Rules:
   # Choose to use capgen for solar capture rate
   - capability: capture_rate_Sun
     function: capture_rate_Sun_const_xsec_capgen
-    
-  - capability: equilibration_time_Sun
-    function: equilibration_time_Sun
-    
+        
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
     function: RD_fraction_leq_one
