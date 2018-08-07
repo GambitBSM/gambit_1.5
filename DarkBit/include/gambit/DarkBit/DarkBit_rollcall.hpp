@@ -597,24 +597,24 @@ START_MODULE
   QUICK_FUNCTION(DarkBit, sigma_SI_n, NEW_CAPABILITY, sigma_SI_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
   QUICK_FUNCTION(DarkBit, sigma_SD_p, NEW_CAPABILITY, sigma_SD_p_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
   QUICK_FUNCTION(DarkBit, sigma_SD_n, NEW_CAPABILITY, sigma_SD_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
-  QUICK_FUNCTION(DarkBit, sigma_SIq2_p, NEW_CAPABILITY, sigma_SIq2_p_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
-  QUICK_FUNCTION(DarkBit, sigma_SIq2_n, NEW_CAPABILITY, sigma_SIq2_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
 
   // Generalized v^2n, q^2n DM-nucleon cross sections
   #define CAPABILITY sigma_SI_p
-      #define FUNCTION sigma_SI_vnqn_FermionDMHiggsPortal
+      #define FUNCTION sigma_SI_vnqn
       START_FUNCTION(map_intpair_dbl)
       DEPENDENCY(mwimp,double)
       DEPENDENCY(DD_couplings,DM_nucleon_couplings)
+      ALLOW_MODELS(DiracDM, MajoranaDM)
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY sigma_SD_p
   //Spin-dependent general v^2n q^2n cross section
-      #define FUNCTION sigma_SD_vnqn_FermionDMHiggsPortal
+      #define FUNCTION sigma_SD_vnqn
       START_FUNCTION(map_intpair_dbl)
       DEPENDENCY(mwimp,double)
       DEPENDENCY(DD_couplings,DM_nucleon_couplings)
+      ALLOW_MODELS(DiracDM, MajoranaDM)
     #undef FUNCTION
   #undef CAPABILITY
 

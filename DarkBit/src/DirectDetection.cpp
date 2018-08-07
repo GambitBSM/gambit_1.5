@@ -26,6 +26,10 @@
 ///          (sebastian.wild@desy.de)
 ///  \date 2017 October, November
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2018 August
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -248,67 +252,11 @@ namespace Gambit {
       result = 3.0*gev2cm2/pi*pow(reduced_mass*gna,2.0);
     }
 
-
-    /// Simple calculator of the scalar-pseudoscalar WIMP-proton cross-section,
-    /// evaluated at a typical momentum transfer q0.
-    /// (for Higgs-portal model)
-    void sigma_SIq2_p_simple(double &result)
-    {
-      using namespace Pipes::sigma_SIq2_p_simple;
-      double gpa = Dep::DD_couplings->gpa;
-      double reduced_mass = *Dep::mwimp * m_proton / (*Dep::mwimp + m_proton);
-      double q0 = 0.04; // reference momentum transfer: 40 MeV
-      result = gev2cm2/pi*pow(reduced_mass*gpa,2.0)*pow(q0/(*Dep::mwimp)/2.0,2.0);
-    }
-
-    /// Simple calculator of the scalar-pseudoscalar WIMP-neutron cross-section,
-    /// evaluated at a typical momentum transfer q0.
-    /// (for Higgs-portal model)
-    void sigma_SIq2_n_simple(double &result)
-    {
-      using namespace Pipes::sigma_SIq2_n_simple;
-      double gna = Dep::DD_couplings->gna;
-      double reduced_mass = *Dep::mwimp * m_neutron / (*Dep::mwimp + m_neutron);
-      double q0 = 0.04; // reference momentum transfer: 40 MeV
-      result = gev2cm2/pi*pow(reduced_mass*gna,2.0)*pow(q0/(*Dep::mwimp)/2.0,2.0);
-    }
-
-
-    /// Spin-independent generalized DM-nucleon cross section
-    /*
+    /// Calculation of SI and SD cross sections at a reference momentum q0
+    /// for the fermionic Higgs portal models
     void sigma_SI_vnqn(map_intpair_dbl &result)
     {
       using namespace Pipes::sigma_SI_vnqn;
-      //This is where you would stick in your functions
-      result[std::make_pair(0,0)] =   0e-35;
-      result[std::make_pair(-2,0)] =  1e-35;
-      result[std::make_pair(2,0)] =   0e-35;
-      result[std::make_pair(4,0)] =   0e-35;
-      result[std::make_pair(0,-2)] =  1e-35;
-      result[std::make_pair(0,2)] =   0e-35;
-      result[std::make_pair(0,4)] =   0e-35;
-    }
-    /// Spin-dependent generalized DM-nucleon cross section
-    void sigma_SD_vnqn(map_intpair_dbl &result)
-    {
-      using namespace Pipes::sigma_SD_vnqn;
-      //This is where you would stick in your functions
-      result[std::make_pair(0,0)] =   1e-40;
-      result[std::make_pair(-2,0)] =  0e-35;
-      result[std::make_pair(2,0)] =   0e-35;
-      result[std::make_pair(4,0)] =   0e-35;
-      result[std::make_pair(0,-2)] =  0e-35;
-      result[std::make_pair(0,2)] =   0e-35;
-      result[std::make_pair(0,4)] =   0e-35;
-    }
-    */
-
-
-    /// Calculation of SI and SD cross sections at a reference momentum q0
-    /// for the fermionic Higgs portal models
-    void sigma_SI_vnqn_FermionDMHiggsPortal(map_intpair_dbl &result)
-    {
-      using namespace Pipes::sigma_SI_vnqn_FermionDMHiggsPortal;
 
       double q0 = 0.04; // reference momentum transfer: 40 MeV
       double gps = Dep::DD_couplings->gps;
@@ -323,9 +271,11 @@ namespace Gambit {
       result[std::make_pair(0,2)] =   0.0;
       result[std::make_pair(0,4)] =   0.0;
     }
-    void sigma_SD_vnqn_FermionDMHiggsPortal(map_intpair_dbl &result)
+
+    void sigma_SD_vnqn(map_intpair_dbl &result)
     {
-      using namespace Pipes::sigma_SD_vnqn_FermionDMHiggsPortal;
+      using namespace Pipes::sigma_SD_vnqn;
+
       result[std::make_pair(0,0)] =   0.0;
       result[std::make_pair(-2,0)] =  0.0;
       result[std::make_pair(2,0)] =   0.0;
